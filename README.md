@@ -7,7 +7,7 @@ shutdown on 15/12/2011.
 The Open Source Version of ProjectSWG is restricted to 30 minutes uptime and upto 5 connections to ensure that the community
 is not split between several small servers. This restriction will not be lifted, it is also not legal to remove this restriction for anyone(see the engine's license for more legal information).
 
-The Engine(NGEngine) is a closed source library and is only licensed for use with this project. The Core(NGECore2) is licensed under the GPL License.
+The Engine(NGEngine) is a closed source library and is only licensed for use with this project. The Core(NGECore2) is licensed under the L-GPL License.
 
 Requirements for Building the Core:
 ======== 
