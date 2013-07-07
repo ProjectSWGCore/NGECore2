@@ -1,0 +1,24 @@
+import sys
+from resources.objects import SWGObject
+from main import NGECore
+
+def setup():
+	return
+	
+def run(core, actor, target, commandString):
+	
+	if not commandString.startswith('object/tangible') and not commandString.startswith('object/weapon'):
+		return
+		
+	object = core.objectService.createObject(commandString, actor.getPlanet())
+
+	if not object:
+		return
+		
+	inventory = actor.getSlottedObject('inventory')
+	
+	if inventory:
+		inventory.add(object)
+		
+	return
+	
