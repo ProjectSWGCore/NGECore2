@@ -1,11 +1,10 @@
 import sys
-from resources.objects import SWGObject
-from main import NGECore
 
 def CreateStartingCharacter(core, object):
 	
 	testObject = core.objectService.createObject('object/weapon/ranged/rifle/shared_rifle_t21.iff', object.getPlanet())
 	testObject.setCustomName('This is a Jython Rifle')
+	testObject.setStringAttribute('crafter', 'Light')
 	inventory = object.getSlottedObject('inventory')
 	inventory.add(testObject)
 	

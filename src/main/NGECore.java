@@ -30,6 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 
 import resources.objects.creature.CreatureObject;
+import services.AttributeService;
 import services.CharacterService;
 import services.ConnectionService;
 import services.LoginService;
@@ -91,7 +92,8 @@ public class NGECore {
 	public SimulationService simulationService;
 	public ScriptService scriptService;
 	public ChatService chatService;
-	
+	public AttributeService attributeService;
+
 	
 	// Login Server
 	public NetworkDispatch loginDispatch;
@@ -138,6 +140,7 @@ public class NGECore {
 		scriptService = new ScriptService(this);
 		commandService = new CommandService(this);
 		chatService = new ChatService(this);
+		attributeService = new AttributeService(this);
 
 		// Ping Server
 		try {

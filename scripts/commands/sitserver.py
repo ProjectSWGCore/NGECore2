@@ -1,6 +1,4 @@
 import sys
-from resources.objects import SWGObject
-from main import NGECore
 from protocol.swg.objectControllerObjects import SitOnObject
 from protocol.swg import ObjControllerMessage
 

@@ -21,6 +21,51 @@
  ******************************************************************************/
 package services;
 
-public class AttributeService {
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.mina.core.buffer.SimpleBufferAllocator;
+
+import main.NGECore;
+
+import protocol.swg.AttributeListMessage;
+
+import engine.resources.objects.SWGObject;
+import engine.resources.service.INetworkDispatch;
+import engine.resources.service.INetworkRemoteEvent;
+
+public class AttributeService implements INetworkDispatch {
+
+	private NGECore core;
+	public SimpleBufferAllocator bufferPool = new SimpleBufferAllocator();
+
+	public AttributeService(NGECore core) {
+		this.core = core;
+	}
+
+	@Override
+	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> arg0,
+			Map<Integer, INetworkRemoteEvent> arg1) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void shutdown() {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	public void handleGetAttributes(SWGObject target, SWGObject requester) {
+		
+		if(target.getAttributes().size() == 0)
+			return;
+		
+		if(requester.getClient() == null || requester.getClient().getSession() == null)
+			return;
+		
+		AttributeListMessage message = new AttributeListMessage(new HashMap<String, String>(target.getAttributes()), target.getObjectID(), bufferPool);
+		requester.getClient().getSession().write(message.serialize());
+	}
 
 }

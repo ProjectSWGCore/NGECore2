@@ -114,7 +114,8 @@ public class SimulationService implements INetworkDispatch {
 		core.commandService.registerCommand("serverdestroyobject");
 		core.commandService.registerCommand("giveitem");
 		core.commandService.registerCommand("object");
-
+		core.commandService.registerCommand("getattributesbatch");
+		
 	}
 	
 	public void add(SWGObject object, int x, int y) {
