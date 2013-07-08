@@ -77,6 +77,14 @@ public class ScriptService {
 		func.__call__(Py.java2py(arg1), Py.java2py(arg2), Py.java2py(arg3), Py.java2py(arg4));
 		interpreter.cleanup();
 	}
+	
+	public PyObject getMethod(String path, String module, String method) {
+		PythonInterpreter interpreter = new PythonInterpreter();
+		interpreter.exec("import sys\nsys.path.append('" + path + "')\nfrom " + module + " import " + method);	
+		PyObject func = interpreter.get(method);
+		interpreter.cleanup();
+		return func;
+	}
 
 
 }

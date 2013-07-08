@@ -48,6 +48,7 @@ public class ObjControllerMessage extends SWGMessage {
 	public static final int COMBAT_SPAM = 0x0134;
 	public static final int POSTURE = 0x0131;
 	public static final int SIT_ON_OBJECT = 0x013B;
+	public static final int OBJECT_MENU_RESPONSE = 0x0147;
 
 	public ObjControllerMessage() { 
 		
