@@ -135,7 +135,7 @@ public class LoginService implements INetworkDispatch{
 				LoginClientToken clientToken = new LoginClientToken(client.getSessionKey(), id, user);
 				CharacterCreationDisabled charCreationDisabled = new CharacterCreationDisabled(0);
 				StationIdHasJediSlot jediSlot = new StationIdHasJediSlot(false);
-				ServerNowEpochTime time = new ServerNowEpochTime(0);
+				ServerNowEpochTime time = new ServerNowEpochTime((int) (System.currentTimeMillis() / 1000));
 				
 				session.write(time.serialize());
 				session.write(clientToken.serialize());

@@ -21,6 +21,59 @@
  ******************************************************************************/
 package services;
 
-public class PlayerService {
+import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.mina.core.buffer.IoBuffer;
+
+import protocol.swg.ServerTimeMessage;
+
+import main.NGECore;
+
+import engine.clients.Client;
+import engine.resources.service.INetworkDispatch;
+import engine.resources.service.INetworkRemoteEvent;
+
+public class PlayerService implements INetworkDispatch {
+	
+	private NGECore core;
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
+	public PlayerService(final NGECore core) {
+		this.core = core;
+		scheduler.scheduleAtFixedRate(new Runnable() {
+
+			@Override
+			public void run() {
+				ServerTimeMessage time = new ServerTimeMessage(System.currentTimeMillis() / 1000);
+				IoBuffer packet = time.serialize();
+				synchronized(core.getActiveConnectionsMap()) {
+					for(Client c : core.getActiveConnectionsMap().values()) {
+						if(c.getParent() != null) {
+							c.getSession().write(packet);
+						}
+					}
+				}
+			}
+			
+		}, 1, 1, TimeUnit.MINUTES);
+	}
+
+	@Override
+	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> arg0,
+			Map<Integer, INetworkRemoteEvent> arg1) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void shutdown() {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	
 
 }
