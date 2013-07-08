@@ -434,6 +434,7 @@ public class SimulationService implements INetworkDispatch {
 			parent._add(object);
 		}
 
+		
 		Point3D pos = object.getWorldPosition();
 		
 		Collection<SWGObject> newAwareObjects = get(object.getPlanet(), pos.x, pos.z, 200);

@@ -282,7 +282,7 @@ public class LoginService implements INetworkDispatch{
 						100,
 						resultSet.getInt("statusId"),
 						1,
-						core.getActiveClients());
+						core.getActiveZoneClients());
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

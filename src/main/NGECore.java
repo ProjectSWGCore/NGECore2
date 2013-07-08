@@ -264,6 +264,19 @@ public class NGECore {
 		return connections;
 	}
 	
+	public int getActiveZoneClients() {
+		int connections = 0;
+		for (Map.Entry<Integer, Client> c : clients.entrySet()) {
+			if(c.getValue().getSession() != null) {
+				if (c.getValue().getSession().isConnected() && c.getValue().getParent() != null) {
+					connections++;
+				}
+			}
+		}
+		return connections;
+	}
+
+	
 	public Client getClient(int connectionID) {
 		return clients.get(connectionID);
 	}
