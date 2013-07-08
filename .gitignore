@@ -32,7 +32,6 @@ pt_sword_glint
 *.flr
 *.apt
 *.prt
-*.cfg
 *.spr
 *.swh
 *.jdb
