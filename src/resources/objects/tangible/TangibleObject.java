@@ -127,8 +127,10 @@ public class TangibleObject extends SWGObject {
 	public void sendBaselines(Client destination) {
 
 
-		if(destination == null || destination.getSession() == null)
+		if(destination == null || destination.getSession() == null) {
+			System.out.println("NULL destination");
 			return;
+		}
 		
 		destination.getSession().write(messageBuilder.buildBaseline3());
 		destination.getSession().write(messageBuilder.buildBaseline6());

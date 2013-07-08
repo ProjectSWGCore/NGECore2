@@ -30,6 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 
 import resources.objects.creature.CreatureObject;
+import services.AttributeService;
 import services.CharacterService;
 import services.ConnectionService;
 import services.LoginService;
@@ -91,7 +92,8 @@ public class NGECore {
 	public SimulationService simulationService;
 	public ScriptService scriptService;
 	public ChatService chatService;
-	
+	public AttributeService attributeService;
+
 	
 	// Login Server
 	public NetworkDispatch loginDispatch;
@@ -138,6 +140,7 @@ public class NGECore {
 		scriptService = new ScriptService(this);
 		commandService = new CommandService(this);
 		chatService = new ChatService(this);
+		attributeService = new AttributeService(this);
 
 		// Ping Server
 		try {
@@ -260,6 +263,19 @@ public class NGECore {
 		}
 		return connections;
 	}
+	
+	public int getActiveZoneClients() {
+		int connections = 0;
+		for (Map.Entry<Integer, Client> c : clients.entrySet()) {
+			if(c.getValue().getSession() != null) {
+				if (c.getValue().getSession().isConnected() && c.getValue().getParent() != null) {
+					connections++;
+				}
+			}
+		}
+		return connections;
+	}
+
 	
 	public Client getClient(int connectionID) {
 		return clients.get(connectionID);

@@ -26,7 +26,7 @@ import java.nio.ByteOrder;
 import org.apache.mina.core.buffer.IoBuffer;
 
 import engine.resources.common.CRC;
-import engine.resources.objects.ObjectMessageBuilder;
+import resources.objects.ObjectMessageBuilder;
 import engine.resources.objects.SWGObject;
 import engine.resources.objects.SkillMod;
 
@@ -75,6 +75,8 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		
 		CreatureObject creature = (CreatureObject) object;
 		IoBuffer buffer = bufferPool.allocate(300, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.setAutoExpand(true);
+
 		buffer.putShort((short) 19);	// Object Count
 		buffer.putFloat(1);
 		buffer.put(getAsciiString(creature.getStfFilename()));
@@ -121,6 +123,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer.putInt(0); // battle fatigue
 		buffer.putLong(creature.getStateBitmask());
 		int size = buffer.position();
+		buffer = bufferPool.allocate(size, false).put(buffer.array(), 0, size);
 
 		buffer.flip();
 		buffer = createBaseline("CREO", (byte) 3, buffer, size);

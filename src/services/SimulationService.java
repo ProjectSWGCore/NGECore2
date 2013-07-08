@@ -114,7 +114,8 @@ public class SimulationService implements INetworkDispatch {
 		core.commandService.registerCommand("serverdestroyobject");
 		core.commandService.registerCommand("giveitem");
 		core.commandService.registerCommand("object");
-
+		core.commandService.registerCommand("getattributesbatch");
+		
 	}
 	
 	public void add(SWGObject object, int x, int y) {
@@ -433,6 +434,7 @@ public class SimulationService implements INetworkDispatch {
 			parent._add(object);
 		}
 
+		
 		Point3D pos = object.getWorldPosition();
 		
 		Collection<SWGObject> newAwareObjects = get(object.getPlanet(), pos.x, pos.z, 200);

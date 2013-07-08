@@ -362,7 +362,7 @@ public class ObjectService implements INetworkDispatch {
 
 				core.chatService.loadMailHeaders(client);
 				
-				CmdStartScene startScene = new CmdStartScene((byte) 0, objectId, creature.getPlanet().getPath(), creature.getTemplate(), position.x, position.y, position.z, System.currentTimeMillis() / 1000, creature.getRadians());
+				CmdStartScene startScene = new CmdStartScene((byte) 0, objectId, creature.getPlanet().getPath(), creature.getTemplate(), position.x, 0, position.z, System.currentTimeMillis() / 1000, creature.getRadians());
 				session.write(startScene.serialize());
 				
 				creature.makeAware(creature);

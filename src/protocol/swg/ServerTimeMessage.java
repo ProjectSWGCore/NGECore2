@@ -39,12 +39,12 @@ public class ServerTimeMessage extends SWGMessage {
 	}
 	
 	public IoBuffer serialize() {
-		IoBuffer result = IoBuffer.allocate(20).order(ByteOrder.LITTLE_ENDIAN);;
+		IoBuffer result = IoBuffer.allocate(14).order(ByteOrder.LITTLE_ENDIAN);;
 		
 		result.putShort((short)2);
 		result.putInt(0x2EBC3BD9);
 		result.putLong(time); 		//time in milliseconds
 		
-		return result;
+		return result.flip();
 	}
 }
