@@ -24,14 +24,16 @@ package resources.objects.guild;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sleepycat.persist.model.NotPersistent;
-
-import clients.Client;
 import resources.objects.CurrentServerGCWZoneInfo;
 import resources.objects.CurrentServerGCWZonePercent;
 import resources.objects.Guild;
 import resources.objects.OtherServerGCWZonePercent;
-import resources.objects.SWGObject;
+
+import com.sleepycat.persist.model.NotPersistent;
+
+import engine.clients.Client;
+import engine.resources.objects.SWGObject;
+
 
 public class GuildObject extends SWGObject {
 	
@@ -309,5 +311,6 @@ public class GuildObject extends SWGObject {
 		destination.getSession().write(messageBuilder.buildBaseline3());
 		destination.getSession().write(messageBuilder.buildBaseline6());
 	}
+
 	
 }

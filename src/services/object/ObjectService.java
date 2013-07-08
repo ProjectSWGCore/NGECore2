@@ -22,6 +22,10 @@
 package services.object;
 
 import java.io.Console;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.LineNumberReader;
 import java.nio.ByteOrder;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -32,6 +36,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
@@ -40,6 +45,8 @@ import resources.common.*;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
+import org.python.core.Py;
+import org.python.core.PyObject;
 
 import com.sleepycat.persist.EntityCursor;
 
@@ -88,6 +95,8 @@ public class ObjectService implements INetworkDispatch {
 	private AtomicLong highestId = new AtomicLong();
 	
 	private Random random = new Random();
+	
+	private Map<String, PyObject> serverTemplates = new ConcurrentHashMap<String, PyObject>();
 	
 	public ObjectService(final NGECore core) {
 		this.core = core;
@@ -157,7 +166,28 @@ public class ObjectService implements INetworkDispatch {
 			return null;
 			
 		}
+
+		String serverTemplate = Template.replace(".iff", "");
+		// check if template is empty(4 default lines) to reduce RAM usage(saves about 500 MB of RAM)
+		try {
+			int numberOfLines = FileUtilities.getNumberOfLines("scripts/" + serverTemplate.split("shared_" , 2)[0].replace("shared_", "") + serverTemplate.split("shared_" , 2)[1] + ".py");
+			
+			if(numberOfLines > 4) {
+				if(serverTemplates.containsKey(Template)) {
+					PyObject func = serverTemplates.get(Template);
+					func.__call__(Py.java2py(core), Py.java2py(object));
+				} else {
+					PyObject func = core.scriptService.getMethod("scripts/" + serverTemplate.split("shared_" , 2)[0].replace("shared_", ""), serverTemplate.split("shared_" , 2)[1], "setup");
+					func.__call__(Py.java2py(core), Py.java2py(object));
+					serverTemplates.put(Template, func);
+				}
+			}
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		
+		//core.scriptService.callScript("scripts/" + serverTemplate.split("shared_" , 2)[0].replace("shared_", ""), "setup", serverTemplate.split("shared_" , 2)[1], core, object);
 		
 		object.setPlanetId(planet.getID());
 		objectList.add(object);
@@ -322,6 +352,7 @@ public class ObjectService implements INetworkDispatch {
 					creature = (CreatureObject) getObject(objectId);
 
 				}
+
 				creature.setClient(client);
 				Point3D position = creature.getPosition();
 				Planet planet = core.terrainService.getPlanetByID(creature.getPlanetId());

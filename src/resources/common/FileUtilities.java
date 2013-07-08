@@ -19,8 +19,24 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package services;
+package resources.common;
 
-public class SUIService {
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.LineNumberReader;
+
+public class FileUtilities {
+	
+	public static int getNumberOfLines(String fileName) throws IOException {
+		
+		LineNumberReader lnr;
+		lnr = new LineNumberReader(new FileReader(fileName));
+		lnr.skip(Long.MAX_VALUE);
+		int numberOfLines = lnr.getLineNumber() + 1;
+		lnr.close();
+		return numberOfLines;
+		
+		
+	}
 
 }

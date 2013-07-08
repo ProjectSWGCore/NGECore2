@@ -32,7 +32,7 @@ import engine.resources.scene.Quaternion;
 
 import protocol.swg.ObjControllerMessage;
 
-public class DataTransform extends ObjControllerObject{
+public class DataTransform extends ObjControllerObject {
 	
 	private long objectId;
 	private int movementIndex;

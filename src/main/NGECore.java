@@ -28,7 +28,7 @@ import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
 
-
+import resources.common.RadialOptions;
 import resources.objects.creature.CreatureObject;
 import services.AttributeService;
 import services.CharacterService;
@@ -42,6 +42,7 @@ import services.chat.ChatService;
 import services.command.CommandService;
 import services.object.ObjectService;
 import services.object.UpdateService;
+import services.sui.SUIService;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.CrcStringTableVisitor;
 import engine.clientdata.visitors.DatatableVisitor;
@@ -93,6 +94,7 @@ public class NGECore {
 	public ScriptService scriptService;
 	public ChatService chatService;
 	public AttributeService attributeService;
+	public SUIService suiService;
 
 	
 	// Login Server
@@ -141,7 +143,7 @@ public class NGECore {
 		commandService = new CommandService(this);
 		chatService = new ChatService(this);
 		attributeService = new AttributeService(this);
-
+		suiService = new SUIService(this);
 		// Ping Server
 		try {
 			PingServer pingServer = new PingServer(config.getInt("PING.PORT"));
@@ -162,6 +164,7 @@ public class NGECore {
 		zoneDispatch.addService(objectService);
 		zoneDispatch.addService(commandService);
 		zoneDispatch.addService(chatService);
+		zoneDispatch.addService(suiService);
 
 		zoneServer = new MINAServer(zoneDispatch, config.getInt("ZONE.PORT"));
 		zoneServer.start();

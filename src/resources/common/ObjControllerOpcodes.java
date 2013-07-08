@@ -27,5 +27,6 @@ public class ObjControllerOpcodes {
 	public static final int DATA_TRANSFORM_WITH_PARENT = 0xF1000000;
 	public static final int COMMAND_QUEUE_ENQUEUE = 0x16010000;
 	public static final int TARGET_UPDATE = 0x26010000;
+	public static final int OBJECT_MENU_REQUEST = 0x46010000;
 
 }
