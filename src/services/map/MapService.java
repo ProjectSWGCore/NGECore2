@@ -19,14 +19,25 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package services;
+package services.map;
 
+import java.nio.ByteOrder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.atomic.AtomicLong;
 
+import org.apache.mina.core.session.IoSession;
+import org.apache.mina.core.buffer.IoBuffer;
+
+import protocol.swg.GetMapLocationsMessage;
+import protocol.swg.GetMapLocationsResponseMessage;
+import resources.common.Opcodes;
+
+import engine.clients.Client;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Grid2D;
 import engine.resources.scene.Planet;
@@ -41,7 +52,8 @@ import main.NGECore;
 public class MapService implements INetworkDispatch {
 		
 	private NGECore core;
-	
+	private Map<Planet, Vector<MapLocation>> locationMap = new ConcurrentHashMap<Planet, Vector<MapLocation>>();
+	private AtomicLong nextId = new AtomicLong(0);
 	
 	public MapService(NGECore core) {
 		this.core = core;
@@ -49,10 +61,54 @@ public class MapService implements INetworkDispatch {
 	
 	public void insertOpcodes(Map<Integer,INetworkRemoteEvent> swgOpcodes, Map<Integer,INetworkRemoteEvent> objControllerOpcodes) {
 		
+		swgOpcodes.put(Opcodes.GetMapLocationsMessage, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
+				
+				data.order(ByteOrder.LITTLE_ENDIAN);
+				data.position(0);
+
+				GetMapLocationsMessage getMapLocations = new GetMapLocationsMessage();
+				getMapLocations.deserialize(data);
+
+				/*Planet planet = core.terrainService.getPlanetByName(getMapLocations.getPlanet());
+				
+				if(planet == null)
+					return;*/
+				
+				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+
+				if(client == null || client.getSession() == null)
+					return;
+
+				SWGObject object = client.getParent();
+
+				if(object == null)
+					return;
+
+
+				GetMapLocationsResponseMessage response = new GetMapLocationsResponseMessage(getMapLocations.getPlanet(), locationMap.get(object.getPlanet()));
+				session.write(response.serialize());
+				
+			}
+			
+		});
+		
 	}
 
 	public void shutdown() {
 		
 	}
-
+	
+	public void addPlanet(Planet planet) {
+		locationMap.put(planet, new Vector<MapLocation>());
+	}
+	
+	public void addLocation(Planet planet, String name, float x, float y, byte category, byte subcategory, byte active) {
+		
+		MapLocation location = new MapLocation(planet, nextId.incrementAndGet(), name, x, y, category, subcategory, active);
+		locationMap.get(planet).add(location);
+	}
+	
 }

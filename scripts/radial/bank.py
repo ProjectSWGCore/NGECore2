@@ -20,12 +20,12 @@ def createRadial(core, owner, target, radials):
 	return
 	
 def handleSelection(core, owner, target, option):
-	
+		
 	if option == RadialOptions.bankitems:
 		bank = owner.getSlottedObject('bank')
 		if bank:
 			core.simulationService.openContainer(owner, bank)
-	if option == RadialOptions.bankTransfer:
+	if option == RadialOptions.bankTransfer or option == 21:
 		suiSvc = core.suiService
 		suiWindow = suiSvc.createSUIWindow('Script.transfer', owner, target, 10)
 		suiWindow.setProperty('transaction.txtInputFrom:Text', 'From')

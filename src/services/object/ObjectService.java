@@ -166,6 +166,7 @@ public class ObjectService implements INetworkDispatch {
 			return null;
 			
 		}
+		object.setPlanetId(planet.getID());
 
 		String serverTemplate = Template.replace(".iff", "");
 		// check if template is empty(4 default lines) to reduce RAM usage(saves about 500 MB of RAM)
@@ -189,7 +190,6 @@ public class ObjectService implements INetworkDispatch {
 		
 		//core.scriptService.callScript("scripts/" + serverTemplate.split("shared_" , 2)[0].replace("shared_", ""), "setup", serverTemplate.split("shared_" , 2)[1], core, object);
 		
-		object.setPlanetId(planet.getID());
 		objectList.add(object);
 
 		return object;
@@ -396,8 +396,8 @@ public class ObjectService implements INetworkDispatch {
 				CmdStartScene startScene = new CmdStartScene((byte) 0, objectId, creature.getPlanet().getPath(), creature.getTemplate(), position.x, 0, position.z, System.currentTimeMillis() / 1000, creature.getRadians());
 				session.write(startScene.serialize());
 				
-				creature.makeAware(creature);
 				core.simulationService.handleZoneIn(client);
+				creature.makeAware(creature);
 
 			}
 			

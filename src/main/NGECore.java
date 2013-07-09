@@ -34,12 +34,12 @@ import services.AttributeService;
 import services.CharacterService;
 import services.ConnectionService;
 import services.LoginService;
-import services.MapService;
 import services.ScriptService;
 import services.SimulationService;
 import services.TerrainService;
 import services.chat.ChatService;
 import services.command.CommandService;
+import services.map.MapService;
 import services.object.ObjectService;
 import services.object.UpdateService;
 import services.sui.SUIService;
@@ -134,11 +134,11 @@ public class NGECore {
 		loginService = new LoginService(this);
 		connectionService = new ConnectionService(this);
 		characterService = new CharacterService(this);
-		
+		mapService = new MapService(this);
+
 		objectService = new ObjectService(this);
 		terrainService = new TerrainService(this);
 		updateService = new UpdateService(this);
-		mapService = new MapService(this);
 		scriptService = new ScriptService(this);
 		commandService = new CommandService(this);
 		chatService = new ChatService(this);
@@ -165,6 +165,7 @@ public class NGECore {
 		zoneDispatch.addService(commandService);
 		zoneDispatch.addService(chatService);
 		zoneDispatch.addService(suiService);
+		zoneDispatch.addService(mapService);
 
 		zoneServer = new MINAServer(zoneDispatch, config.getInt("ZONE.PORT"));
 		zoneServer.start();

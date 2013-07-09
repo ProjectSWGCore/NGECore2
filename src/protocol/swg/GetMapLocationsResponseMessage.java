@@ -23,38 +23,23 @@ package protocol.swg;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Vector;
 
 import org.apache.mina.core.buffer.IoBuffer;
+
+import services.map.MapLocation;
 
 
 public class GetMapLocationsResponseMessage extends SWGMessage {
 	
-	public GetMapLocationsResponseMessage(String planet, String name) {
-		ByteBuffer result = ByteBuffer.allocate(496).order(ByteOrder.LITTLE_ENDIAN);
-		
-		result.putShort((short) 8);
-		result.putInt(0x9F80464C);
-		result.put(getAsciiString(planet));
-		
-		// List
-		for (int i = 0; i < 3; i++) {
-			// blank list 1 + 2, no idea why they are needed
-			result.putInt(23 + name.length() * 2);
+	private String planet;
+	private Vector<MapLocation> locations;
 
-			result.putLong(100);  // ID
-			result.put(getUnicodeString(name));
-			result.putFloat(0);	  // x
-			result.putFloat(0);   // y
-			result.put((byte) 2); // category
-			result.put((byte) 0); // sub category
-			result.put((byte) 0); // is active
-		}
+	public GetMapLocationsResponseMessage(String planet, Vector<MapLocation> locations) {
 		
-		result.putInt(0);
-		result.putInt(0);	// 3 unks
-		result.putInt(0);
+		this.planet = planet;
+		this.locations = locations;
 		
-		data = result.array();
 	}
 	
 	public void deserialize(IoBuffer data) {
@@ -62,6 +47,41 @@ public class GetMapLocationsResponseMessage extends SWGMessage {
 	}
 	
 	public IoBuffer serialize() {
-		return IoBuffer.wrap(data);
+		
+		IoBuffer result = IoBuffer.allocate(100).order(ByteOrder.LITTLE_ENDIAN);
+		result.setAutoExpand(true);
+
+		result.putShort((short) 8);
+		result.putInt(0x9F80464C);
+		result.put(getAsciiString(planet));
+
+		result.putInt(locations.size());
+		
+		for(MapLocation location : locations) {
+			
+			result.putLong(location.getLocationId()); 
+			result.put(getUnicodeString(location.getName()));
+			result.putFloat(location.getX()); 
+			result.putFloat(location.getY()); 
+			result.put(location.getCategory()); 
+			result.put(location.getSubcategory()); 
+			result.put(location.getActive()); 
+
+		}
+		
+		// blank list 1 + 2, no idea why they are needed
+		result.putInt(0);
+				
+		result.putInt(0);
+		
+		result.putInt(0x480);
+		result.putInt(0x48D); // 3 unks
+		result.putInt(1);
+
+		int size = result.position();
+		result = IoBuffer.allocate(size).put(result.array(), 0, size);
+
+		return result.flip();	
+
 	}
 }

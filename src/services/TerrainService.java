@@ -89,7 +89,7 @@ public class TerrainService {
 	
 	public Planet getPlanetByName(String name) {
 		for (int i = 0; i < planets.size(); i++) {
-			if (planets.get(i).getName() == name) {
+			if (planets.get(i).getName().equals(name)) {
 				return planets.get(i);
 			}
 		}
@@ -99,7 +99,7 @@ public class TerrainService {
 	
 	public Planet getPlanetByPath(String path) {
 		for (int i = 0; i < planets.size(); i++) {
-			if (planets.get(i).getPath() == path) {
+			if (planets.get(i).getPath().equals(path)) {
 				return planets.get(i);
 			}
 		}
@@ -110,6 +110,7 @@ public class TerrainService {
 	public void addPlanet(int ID, String name, String path, boolean loadSnapshot) {
 		Planet planet = new Planet(ID, name, path, loadSnapshot);
 		planets.add(planet);
+		core.mapService.addPlanet(planet);
 	}
 
 	

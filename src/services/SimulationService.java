@@ -94,13 +94,13 @@ public class SimulationService implements INetworkDispatch {
 		}
 		
 		List<SWGObject> objectList = core.objectService.getObjectList();
-		
-		for(SWGObject obj : objectList) {
-			if(obj.getParentId() == 0) {
-				add(obj, obj.getPosition().x, obj.getPosition().z);
+		synchronized(objectList) {
+			for(SWGObject obj : objectList) {
+				if(obj.getParentId() == 0) {
+					add(obj, obj.getPosition().x, obj.getPosition().z);
+				}
 			}
 		}
-		
 		core.commandService.registerCommand("opencontainer");
 		core.commandService.registerCommand("transferitem");
 		core.commandService.registerCommand("transferitemarmor");
