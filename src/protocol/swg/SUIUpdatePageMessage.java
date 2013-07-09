@@ -21,19 +21,15 @@
  ******************************************************************************/
 package protocol.swg;
 
-import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Vector;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import engine.resources.common.Utilities;
-
 import services.sui.SUIWindowComponent;
 
+public class SUIUpdatePageMessage extends SWGMessage {
 
-public class SUICreatePageMessage extends SWGMessage{
-	
 	private String script;
 	private int windowId;
 	private Vector<SUIWindowComponent> components;
@@ -41,7 +37,7 @@ public class SUICreatePageMessage extends SWGMessage{
 	private float range;
 	
 	
-	public SUICreatePageMessage(String script, int windowId, Vector<SUIWindowComponent> components, long rangeObjectId, float range) {
+	public SUIUpdatePageMessage(String script, int windowId, Vector<SUIWindowComponent> components, long rangeObjectId, float range) {
 		
 		this.script = script;
 		this.windowId = windowId;
@@ -51,10 +47,6 @@ public class SUICreatePageMessage extends SWGMessage{
 
 	}
 		
-	
-
-	
-	
 	public void deserialize(IoBuffer data) {
 		
 	}
@@ -65,7 +57,7 @@ public class SUICreatePageMessage extends SWGMessage{
 		result.setAutoExpand(true);
 		
 		result.putShort((short) 2);
-		result.putInt(0xD44B7259);
+		result.putInt(0x5F3342F6);
 		
 		result.putInt(windowId);
 		result.put(getAsciiString(script));
@@ -98,4 +90,5 @@ public class SUICreatePageMessage extends SWGMessage{
 
 		return result.flip();	
 	}
+
 }

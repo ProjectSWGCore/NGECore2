@@ -402,6 +402,31 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 
 	}
 	
+	public IoBuffer buildCashCreditsDelta(int credits) {
+		
+		IoBuffer buffer = bufferPool.allocate(4, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putInt(credits);
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 1, (short) 1, (short) 1, buffer, size + 4);
+		
+		return buffer;
+
+	}
+
+	public IoBuffer buildBankCreditsDelta(int credits) {
+		
+		IoBuffer buffer = bufferPool.allocate(4, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putInt(credits);
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 1, (short) 1, (short) 0, buffer, size + 4);
+		
+		return buffer;
+
+	}
+
+	
 	public IoBuffer buildPostureDelta(byte posture) {
 		
 		IoBuffer buffer = bufferPool.allocate(1, false).order(ByteOrder.LITTLE_ENDIAN);

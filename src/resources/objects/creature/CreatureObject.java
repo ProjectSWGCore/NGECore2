@@ -159,6 +159,9 @@ public class CreatureObject extends SWGObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.bankCredits = bankCredits;
 		}
+		if(getClient() != null && getClient().getSession() != null) {
+			getClient().getSession().write(messageBuilder.buildBankCreditsDelta(bankCredits));
+		}
 	}
 
 	public int getCashCredits() {
@@ -170,6 +173,9 @@ public class CreatureObject extends SWGObject implements IPersistent {
 	public void setCashCredits(int cashCredits) {
 		synchronized(objectMutex) {
 			this.cashCredits = cashCredits;
+		}
+		if(getClient() != null && getClient().getSession() != null) {
+			getClient().getSession().write(messageBuilder.buildCashCreditsDelta(cashCredits));
 		}
 	}
 

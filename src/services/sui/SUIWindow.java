@@ -21,40 +21,171 @@
  ******************************************************************************/
 package services.sui;
 
+import java.util.Map;
+import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.python.core.PyObject;
+
+import engine.clients.Client;
 import engine.clients.GameClient;
+import engine.resources.objects.SWGObject;
 
 public class SUIWindow {
 	
-	@SuppressWarnings("unused")
 	private String script;
-	private GameClient client;
+	private SWGObject owner;
 	private int windowId;
-	@SuppressWarnings("unused")
-	private int type;		// this should link to a constant which describes which type of window we have i.e. Bank Deposit Window
+	private SWGObject rangeObject;
+	private float maxDistance = 0;
+	private Vector<SUIWindowComponent> components = new Vector<SUIWindowComponent>();
+	private Map<Integer, PyObject> callbacks = new ConcurrentHashMap<Integer, PyObject>();
 	
 	
-
-	public SUIWindow(String script, GameClient client, int windowId, int type) {
+	public SUIWindow(String script, SWGObject owner, int windowId, SWGObject rangeObject, float maxDistance) {
 		
-		this.script = script;
-		this.client = client;
+		this.setScript(script);
+		this.setOwner(owner);
 		this.windowId = windowId;
-		this.type = type;
+		this.setRangeObject(rangeObject);
+		this.setMaxDistance(maxDistance);
+		
+	}
+	
+	public void clearDataSource(String name) {
+		
+		SUIWindowComponent component = new SUIWindowComponent();
+		component.setType((byte) 1);
+		
+		component.getNarrowParams().add(name);
+		
+		components.add(component);
+		
+	}
+	
+	public void setProperty(String name, String value) {
+		
+		SUIWindowComponent component = new SUIWindowComponent();
+		component.setType((byte) 3);
+		
+		for(String str : name.split(":")) {
+			component.getNarrowParams().add(str);
+		}
+		
+		component.getWideParams().add(value);
+		
+		components.add(component);
+		
+	}
 
+	public void addDataItem(String name, String value) {
+		
+		SUIWindowComponent component = new SUIWindowComponent();
+		component.setType((byte) 4);
+		
+		for(String str : name.split(":")) {
+			component.getNarrowParams().add(str);
+		}
+		
+		component.getWideParams().add(value);
+		
+		components.add(component);
+		
+	}
+	
+	public void addHandler(int eventId, String source, byte trigger, Vector<String> returnParams, PyObject handleFunc) {
+		
+		SUIWindowComponent component = new SUIWindowComponent();
+		component.setType((byte) 5);
+		
+		component.getNarrowParams().add(source);
+		
+		component.getNarrowParams().add(new String(new byte[] { trigger }));
+		component.getNarrowParams().add("handleSUI");
+		
+		for(String returnParam : returnParams) {
+			
+			for(String str : returnParam.split(":")) {
+				component.getNarrowParams().add(str);
+			}
+			
+		}
+
+		components.add(component);
+		callbacks.put(eventId, handleFunc);
+
+	}
+	
+	public void addDataSource(String name, String value) {
+		
+		SUIWindowComponent component = new SUIWindowComponent();
+		component.setType((byte) 6);
+		
+		for(String str : name.split(":")) {
+			component.getNarrowParams().add(str);
+		}
+		
+		component.getWideParams().add(value);
+		
+		components.add(component);
 		
 	}
 
 
-
-	public GameClient getClient() {
-
-		return client;
-	}
-
-
-
-	public int getwindowId() {
+	public int getWindowId() {
 		return windowId;
 	}
+	
+	public String getScript() {
+		return script;
+	}
+
+	public void setScript(String script) {
+		this.script = script;
+	}
+
+	public SWGObject getOwner() {
+		return owner;
+	}
+
+	public void setOwner(SWGObject owner) {
+		this.owner = owner;
+	}
+
+	public SWGObject getRangeObject() {
+		return rangeObject;
+	}
+
+	public void setRangeObject(SWGObject rangeObject) {
+		this.rangeObject = rangeObject;
+	}
+
+	public float getMaxDistance() {
+		return maxDistance;
+	}
+
+	public void setMaxDistance(float maxDistance) {
+		this.maxDistance = maxDistance;
+	}
+	
+	public Vector<SUIWindowComponent> getComponents() {
+		return components;
+	}
+
+	public void setComponents(Vector<SUIWindowComponent> components) {
+		this.components = components;
+	}
+
+	public PyObject getFunctionByEventId(int eventId) {
+		return callbacks.get(eventId);
+	}
+	
+	public enum Trigger {;
+		public static byte TRIGGER_UPDATE = 4;
+		public static byte TRIGGER_OK = 9;
+		public static byte TRIGGER_CANCEL = 10;
+
+	}
+
 
 }

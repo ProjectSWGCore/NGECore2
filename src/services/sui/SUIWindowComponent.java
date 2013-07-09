@@ -19,31 +19,34 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package protocol.swg;
+package services.sui;
 
-import java.nio.ByteOrder;
+import java.util.Vector;
 
-import org.apache.mina.core.buffer.IoBuffer;
+public class SUIWindowComponent {
+	
+	private byte type; 
+	private Vector<String> narrowParams = new Vector<String>();
+	private Vector<String> wideParams = new Vector<String>();
+	
+	public byte getType() {
+		return type;
+	}
+	public void setType(byte type) {
+		this.type = type;
+	}
+	public Vector<String> getNarrowParams() {
+		return narrowParams;
+	}
+	public void setNarrowParams(Vector<String> narrowParams) {
+		this.narrowParams = narrowParams;
+	}
+	public Vector<String> getWideParams() {
+		return wideParams;
+	}
+	public void setWideParams(Vector<String> wideParams) {
+		this.wideParams = wideParams;
+	}
 
-public class SUIForceClosePageMessage extends SWGMessage {
-	
-	private int windowId;
-	
-	public SUIForceClosePageMessage(int windowId) {
-		this.windowId = windowId;
-	}
-	
-	public void deserialize(IoBuffer data) {
-		
-	}
-	
-	public IoBuffer serialize() {
-		IoBuffer result = IoBuffer.allocate(10).order(ByteOrder.LITTLE_ENDIAN);
-		
-		result.putShort((short) 2);
-		result.putInt(0x990B5DE0);
-		result.putInt(windowId);
-		
-		return result.flip();
-	}
+
 }
