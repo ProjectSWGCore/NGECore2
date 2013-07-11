@@ -37,7 +37,7 @@ public class UnkByteFlag extends SWGMessage {
 	@Override
 	public IoBuffer serialize() {
 		IoBuffer result = IoBuffer.allocate(7).order(ByteOrder.LITTLE_ENDIAN);
-		
+		System.out.println("test");
 		result.putShort((short) 2);
 		result.putInt(0x7102B15F);
 		result.put((byte) 1);

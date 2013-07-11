@@ -115,11 +115,8 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer.put((byte) 1);
 
 		buffer.putLong(creature.getOwnerId());
-		float height = creature.getHeight();
-		if (height < 0.7 || height > 1.5) { 
-			height = 1;
-		}
-		buffer.putFloat(height);
+
+		buffer.putFloat(creature.getHeight());
 		buffer.putInt(0); // battle fatigue
 		buffer.putLong(creature.getStateBitmask());
 		int size = buffer.position();
@@ -439,6 +436,54 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 
 	}
 	
+	public IoBuffer buildFactionDelta(String faction) {
+		
+		IoBuffer buffer = bufferPool.allocate(4, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putInt(CRC.StringtoCRC(faction));
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 3, (short) 1, (short) 0x04, buffer, size + 4);
+		
+		return buffer;
+
+	}
+	
+	public IoBuffer buildFactionStatusDelta(int factionStatus) {
+		
+		IoBuffer buffer = bufferPool.allocate(4, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putInt(factionStatus);
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 3, (short) 1, (short) 0x05, buffer, size + 4);
+		
+		return buffer;
+
+	}
+	
+	public IoBuffer buildOptionMaskDelta(int optionMask) {
+		
+		IoBuffer buffer = bufferPool.allocate(4, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putInt(optionMask);
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 3, (short) 1, (short) 0x08, buffer, size + 4);
+		
+		return buffer;
+
+	}
+	
+	public IoBuffer buildHeightDelta(float height) {
+		
+		IoBuffer buffer = bufferPool.allocate(4, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putFloat(height);
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 3, (short) 1, (short) 0x10, buffer, size + 4);
+		
+		return buffer;
+
+	}
+	
 	public IoBuffer buildStateDelta(long state) {
 		
 		IoBuffer buffer = bufferPool.allocate(8, false).order(ByteOrder.LITTLE_ENDIAN);
@@ -470,6 +515,68 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		int size = buffer.position();
 		buffer.flip();
 		buffer = createDelta("CREO", (byte) 4, (short) 1, (short) 0x0A, buffer, size + 4);
+		
+		return buffer;
+
+	}
+	
+	public IoBuffer buildCombatFlagDelta(byte combatFlag) {
+		
+		IoBuffer buffer = bufferPool.allocate(1, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.put(combatFlag);
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x02, buffer, size + 4);
+		
+		return buffer;
+
+	}
+	
+	public IoBuffer buildLevelDelta(short level) {
+		
+		IoBuffer buffer = bufferPool.allocate(2, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putShort(level);
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x08, buffer, size + 4);
+		
+		return buffer;
+
+	}
+	
+	public IoBuffer buildWeaponIdDelta(long weaponId) {
+		
+		IoBuffer buffer = bufferPool.allocate(8, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putLong(weaponId);
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x0C, buffer, size + 4);
+		
+		return buffer;
+
+	}
+	
+	public IoBuffer buildGroupIdDelta(long groupId) {
+		
+		IoBuffer buffer = bufferPool.allocate(8, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putLong(groupId);
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x0D, buffer, size + 4);
+		
+		return buffer;
+
+	}
+	
+	public IoBuffer buildGroupInviteDelta(long inviteSenderId, String inviteSenderName, long inviteCounter) {
+		
+		IoBuffer buffer = bufferPool.allocate(18 + inviteSenderName.length(), false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putLong(inviteSenderId);
+		buffer.put(getAsciiString(inviteSenderName)); 	
+		buffer.putLong(inviteCounter);
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x0E, buffer, size + 4);
 		
 		return buffer;
 

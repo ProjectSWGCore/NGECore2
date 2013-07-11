@@ -21,6 +21,8 @@
  ******************************************************************************/
 package protocol.swg;
 
+import java.nio.ByteOrder;
+
 import org.apache.mina.core.buffer.IoBuffer;
 
 
@@ -35,6 +37,6 @@ public class CmdSceneReady extends SWGMessage {
 	}
 	
 	public IoBuffer serialize() {
-		return IoBuffer.wrap(data);
+		return IoBuffer.allocate(6).order(ByteOrder.LITTLE_ENDIAN).put(data).flip();
 	}
 }

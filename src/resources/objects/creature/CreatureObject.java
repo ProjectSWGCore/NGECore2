@@ -217,6 +217,11 @@ public class CreatureObject extends SWGObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.optionBitmask = optionBitmask;
 		}
+		
+		IoBuffer optionDelta = messageBuilder.buildOptionMaskDelta(optionBitmask);
+		
+		notifyObservers(optionDelta, true);
+
 	}
 
 	public int getIncapTimer() {
@@ -259,6 +264,11 @@ public class CreatureObject extends SWGObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.faction = faction;
 		}
+		
+		IoBuffer factionDelta = messageBuilder.buildFactionDelta(faction);
+		
+		notifyObservers(factionDelta, true);
+
 	}
 
 	public int getFactionStatus() {
@@ -271,6 +281,11 @@ public class CreatureObject extends SWGObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.factionStatus = factionStatus;
 		}
+		
+		IoBuffer factionStatusDelta = messageBuilder.buildFactionStatusDelta(factionStatus);
+		
+		notifyObservers(factionStatusDelta, true);
+
 	}
 
 	public float getHeight() {
@@ -283,6 +298,11 @@ public class CreatureObject extends SWGObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.height = height;
 		}
+		
+		IoBuffer heightDelta = messageBuilder.buildHeightDelta(height);
+		
+		notifyObservers(heightDelta, true);
+
 	}
 
 	public int getBattleFatigue() {
@@ -529,6 +549,11 @@ public class CreatureObject extends SWGObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.level = level;
 		}
+		
+		IoBuffer levelDelta = messageBuilder.buildLevelDelta(level);
+		
+		notifyObservers(levelDelta, true);
+
 	}
 
 	public String getCurrentAnimation() {
@@ -565,6 +590,11 @@ public class CreatureObject extends SWGObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.weaponId = weaponId;
 		}
+		
+		IoBuffer weaponIdDelta = messageBuilder.buildWeaponIdDelta(weaponId);
+		
+		notifyObservers(weaponIdDelta, true);
+
 	}
 
 	public long getGroupId() {
@@ -577,6 +607,11 @@ public class CreatureObject extends SWGObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.groupId = groupId;
 		}
+		
+		IoBuffer groupIdDelta = messageBuilder.buildGroupIdDelta(groupId);
+		
+		notifyObservers(groupIdDelta, true);
+
 	}
 
 	public long getInviteSenderId() {
@@ -732,10 +767,10 @@ public class CreatureObject extends SWGObject implements IPersistent {
 			destination.getSession().write(messageBuilder.buildBaseline1());
 			destination.getSession().write(messageBuilder.buildBaseline4());
 		}
-		//destination.getSession().write(messageBuilder.buildBaseline8());
-		//destination.getSession().write(messageBuilder.buildBaseline9());
+		destination.getSession().write(messageBuilder.buildBaseline8());
+		destination.getSession().write(messageBuilder.buildBaseline9());
 
-		UpdatePostureMessage upm = new UpdatePostureMessage(getObjectID(), getPosture());
+		UpdatePostureMessage upm = new UpdatePostureMessage(getObjectID(), (byte) 0);
 		destination.getSession().write(upm.serialize());
 		if(destination != getClient()) {
 			UpdatePVPStatusMessage upvpm = new UpdatePVPStatusMessage(getObjectID(), 55);

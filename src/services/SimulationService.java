@@ -429,10 +429,6 @@ public class SimulationService implements INetworkDispatch {
 		Quaternion orientation = object.getOrientation();
 		Point3D position = object.getPosition();
 
-		if(object.getParentId() != 0) {
-			SWGObject parent = core.objectService.getObject(object.getParentId());
-			parent._add(object);
-		}
 
 		
 		Point3D pos = object.getWorldPosition();
@@ -447,11 +443,7 @@ public class SimulationService implements INetworkDispatch {
 		
 		if(object.getParentId() == 0)
 			add(object, pos.x, pos.z);
-		
-		//teleport(object, position, orientation);
-
-		//core.chatService.loadMailHeaders(client); // moved to beginning of zone-in like live
-
+	
 	}
 	
 	public void openContainer(SWGObject requester, SWGObject container) {
@@ -468,19 +460,14 @@ public class SimulationService implements INetworkDispatch {
 		
 		if(position.x >= -8192 && position.x <= 8192 && position.z >= -8192 && position.z <= 8192) {
 			
-			if(obj.getParentId() == 0) {
-				DataTransform dataTransform = new DataTransform(new Point3D(position.x, 0, position.z), orientation, obj.getMovementCounter(), obj.getObjectID());
-				ObjControllerMessage objController = new ObjControllerMessage(0x1B, dataTransform);
-				obj.notifyObservers(objController, true);
-			} else {
-				DataTransformWithParent dataTransform = new DataTransformWithParent(new Point3D(position.x, 0, position.z), orientation, obj.getMovementCounter(), obj.getObjectID(), obj.getParentId());
-				ObjControllerMessage objController = new ObjControllerMessage(0x1B, dataTransform);
-				obj.notifyObservers(objController, true);
-			}
+			DataTransform dataTransform = new DataTransform(new Point3D(position.x, position.y, position.z), orientation, obj.getMovementCounter(), obj.getObjectID());
+			ObjControllerMessage objController = new ObjControllerMessage(0x1B, dataTransform);
+			obj.notifyObservers(objController, true);
 			
 		}
-		
+			
 	}
+	
 	// not fully working yet(rotation of meshes wrong)
 	public boolean checkLineOfSight(SWGObject obj1, SWGObject obj2) {
 		
