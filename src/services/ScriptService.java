@@ -22,12 +22,12 @@
 package services;
 
 import org.python.core.Py;
-import org.python.core.PyCode;
 import org.python.core.PyObject;
-import org.python.core.PySystemState;
 import org.python.util.PythonInterpreter;
 
 import main.NGECore;
+
+@SuppressWarnings("unused")
 
 public class ScriptService {
 
@@ -85,6 +85,5 @@ public class ScriptService {
 		interpreter.cleanup();
 		return func;
 	}
-
 
 }

@@ -27,6 +27,8 @@ import org.apache.mina.core.buffer.IoBuffer;
 
 import protocol.swg.ObjControllerMessage;
 
+@SuppressWarnings("unused")
+
 public class SpatialChat extends ObjControllerObject {
 	
 	private long audienceId;
@@ -88,4 +90,5 @@ public class SpatialChat extends ObjControllerObject {
 		
 		return result.flip();
 	}
+	
 }

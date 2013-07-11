@@ -27,8 +27,6 @@ import java.util.Vector;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import engine.resources.common.Utilities;
-
 import resources.common.RadialOptions;
 
 public class ObjectMenuRequest extends ObjControllerObject {

@@ -27,8 +27,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.python.core.PyObject;
 
-import engine.clients.Client;
-import engine.clients.GameClient;
 import engine.resources.objects.SWGObject;
 
 public class SUIWindow {

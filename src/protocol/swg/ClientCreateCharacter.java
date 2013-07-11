@@ -26,9 +26,6 @@ import java.nio.ByteBuffer;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import engine.resources.common.Utilities;
-
-
 public class ClientCreateCharacter extends SWGMessage {
 	
 	private String raceTemplate;

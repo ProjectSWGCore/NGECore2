@@ -21,15 +21,8 @@
  ******************************************************************************/
 package services.object;
 
-import java.io.Console;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.LineNumberReader;
 import java.nio.ByteOrder;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -39,8 +32,6 @@ import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import resources.common.*;
 
 import org.apache.mina.core.buffer.IoBuffer;
@@ -52,7 +43,6 @@ import com.sleepycat.persist.EntityCursor;
 
 import protocol.swg.CmdSceneReady;
 import protocol.swg.CmdStartScene;
-import protocol.swg.CreateCharacterFailed;
 import protocol.swg.HeartBeatMessage;
 import protocol.swg.ParametersMessage;
 import protocol.swg.SelectCharacter;
@@ -82,8 +72,8 @@ import resources.objects.player.PlayerObject;
 import resources.objects.staticobject.StaticObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
-import wblut.geom.WB_Ray;
 
+@SuppressWarnings("unused")
 
 public class ObjectService implements INetworkDispatch {
 

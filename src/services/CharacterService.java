@@ -26,9 +26,7 @@ import java.nio.ByteOrder;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ScheduledExecutorService;
 
 import main.NGECore;
 
@@ -37,10 +35,7 @@ import org.apache.mina.core.session.IoSession;
 
 import engine.clients.Client;
 import engine.resources.common.CRC;
-import engine.resources.common.Utilities;
-import engine.resources.container.NullPermissions;
 import engine.resources.database.DatabaseConnection;
-import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 import engine.resources.service.INetworkDispatch;
@@ -53,23 +48,18 @@ import protocol.swg.ClientRandomNameResponse;
 import protocol.swg.ClientVerifyAndLockNameRequest;
 import protocol.swg.ClientVerifyAndLockNameResponse;
 import protocol.swg.CreateCharacterSuccess;
-import protocol.swg.HeartBeatMessage;
-import protocol.swg.LoginClusterStatus;
-import protocol.swg.LoginEnumCluster;
-
 
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 
+@SuppressWarnings("unused")
+
 public class CharacterService implements INetworkDispatch {
 
-	@SuppressWarnings("unused")
 	private NGECore core;
-	@SuppressWarnings("unused")
 	private DatabaseConnection databaseConnection;
-	@SuppressWarnings("unused")
 	private DatabaseConnection databaseConnection2;
 	private engine.resources.common.NameGen nameGenerator;
 	private static final String allowedCharsRegex = "['-]?[A-Za-z]('[a-zA-Z]|-[a-zA-Z]|[a-zA-Z])*['-]?$";
@@ -92,19 +82,34 @@ public class CharacterService implements INetworkDispatch {
 		swgOpcodes.put(Opcodes.ClientRandomNameRequest, new INetworkRemoteEvent() {
 			
 			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
-				data = data.order(ByteOrder.LITTLE_ENDIAN);
 				ClientRandomNameRequest randomNameRequest = new ClientRandomNameRequest();
+				ClientRandomNameResponse response;
+				String name = null;
+				
+				data = data.order(ByteOrder.LITTLE_ENDIAN);
 				data.position(0);
 				randomNameRequest.deserialize(data);
-				String name;
-				if(randomNameRequest.getSharedRaceTemplate().contains("wookie")) {
-					name = nameGenerator.compose(4);
-				} else {
-					name = nameGenerator.compose(2) + " " + nameGenerator.compose(3);
+				
+				while (name == null) {
+					if (randomNameRequest.getSharedRaceTemplate().contains("wookie")) {
+						name = nameGenerator.compose(4);
+					} else {
+						name = nameGenerator.compose(2) + " " + nameGenerator.compose(3);
+					}
+					
+					try {
+						if (checkForDuplicateName(getfirstName(name, randomNameRequest.getSharedRaceTemplate()))) {
+							name = null;
+						}
+					} catch (SQLException e2) {
+						e2.printStackTrace();
+					}
 				}
-				ClientRandomNameResponse response = new ClientRandomNameResponse(randomNameRequest.getSharedRaceTemplate(), name);
+				
+				response = new ClientRandomNameResponse(randomNameRequest.getSharedRaceTemplate(), name);
 				session.write(response.serialize());
 			}
+			
 		});
 
 		swgOpcodes.put(Opcodes.ClientVerifyAndLockNameRequest, new INetworkRemoteEvent() {
@@ -184,14 +189,14 @@ public class CharacterService implements INetworkDispatch {
 				
 				int galaxyId = config.getInt("GALAXY_ID");
 				
-				// FIXME: this is just a hack for issue where something goes tits up
-				// between verify and create and client resends
-				/*try {
-					//if (checkForDuplicateName(getfirstName(clientCreateCharacter.getName(), clientCreateCharacter.getRaceTemplate()))) return;
-				}
-				catch (SQLException e2) {
+				try {
+					if (checkForDuplicateName(getfirstName(clientCreateCharacter.getName(), clientCreateCharacter.getRaceTemplate()))) {
+						return;
+					}
+				} catch (SQLException e2) {
 					e2.printStackTrace();
-				}*/
+				}
+				
 				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
 				
 				// TODO: Add starting location and items in a script

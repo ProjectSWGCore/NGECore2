@@ -21,16 +21,12 @@
  ******************************************************************************/
 package protocol.swg;
 
-import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Vector;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import engine.resources.common.Utilities;
-
 import services.sui.SUIWindowComponent;
-
 
 public class SUICreatePageMessage extends SWGMessage{
 	

@@ -36,6 +36,8 @@ import engine.clients.Client;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
+@SuppressWarnings("unused")
+
 public class PlayerService implements INetworkDispatch {
 	
 	private NGECore core;
@@ -74,6 +76,4 @@ public class PlayerService implements INetworkDispatch {
 		
 	}
 	
-	
-
 }
