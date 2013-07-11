@@ -26,6 +26,7 @@ import java.nio.ByteBuffer;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
+@SuppressWarnings("unused")
 
 public class ChatInstantMessageToCharacter extends SWGMessage {
 
@@ -86,4 +87,5 @@ public class ChatInstantMessageToCharacter extends SWGMessage {
 	public String getMessage()   { return message; }
 	public String getRecipient() { return recipient; }
 	public int    getSequence()  { return sequence; }
+	
 }

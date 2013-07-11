@@ -26,9 +26,7 @@ import java.nio.ByteOrder;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ScheduledExecutorService;
 
 import main.NGECore;
 
@@ -37,10 +35,7 @@ import org.apache.mina.core.session.IoSession;
 
 import engine.clients.Client;
 import engine.resources.common.CRC;
-import engine.resources.common.Utilities;
-import engine.resources.container.NullPermissions;
 import engine.resources.database.DatabaseConnection;
-import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 import engine.resources.service.INetworkDispatch;
@@ -53,23 +48,18 @@ import protocol.swg.ClientRandomNameResponse;
 import protocol.swg.ClientVerifyAndLockNameRequest;
 import protocol.swg.ClientVerifyAndLockNameResponse;
 import protocol.swg.CreateCharacterSuccess;
-import protocol.swg.HeartBeatMessage;
-import protocol.swg.LoginClusterStatus;
-import protocol.swg.LoginEnumCluster;
-
 
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 
+@SuppressWarnings("unused")
+
 public class CharacterService implements INetworkDispatch {
 
-	@SuppressWarnings("unused")
 	private NGECore core;
-	@SuppressWarnings("unused")
 	private DatabaseConnection databaseConnection;
-	@SuppressWarnings("unused")
 	private DatabaseConnection databaseConnection2;
 	private engine.resources.common.NameGen nameGenerator;
 	private static final String allowedCharsRegex = "['-]?[A-Za-z]('[a-zA-Z]|-[a-zA-Z]|[a-zA-Z])*['-]?$";

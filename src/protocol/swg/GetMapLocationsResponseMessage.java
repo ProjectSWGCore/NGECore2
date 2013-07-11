@@ -21,14 +21,12 @@
  ******************************************************************************/
 package protocol.swg;
 
-import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Vector;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
 import services.map.MapLocation;
-
 
 public class GetMapLocationsResponseMessage extends SWGMessage {
 	

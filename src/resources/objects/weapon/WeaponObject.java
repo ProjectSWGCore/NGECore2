@@ -32,7 +32,6 @@ import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
-import resources.objects.tangible.TangibleMessageBuilder;
 
 @Persistent
 public class WeaponObject extends SWGObject {

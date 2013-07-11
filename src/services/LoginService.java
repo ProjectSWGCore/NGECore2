@@ -36,8 +36,6 @@ import org.apache.mina.core.session.IoSession;
 
 import engine.clients.Client;
 import engine.protocol.soe.Disconnect;
-import engine.resources.common.PHPBB3Auth;
-import engine.resources.common.Utilities;
 import engine.resources.database.DatabaseConnection;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
@@ -56,6 +54,8 @@ import protocol.swg.StationIdHasJediSlot;
 import resources.common.*;
 
 import resources.objects.creature.CreatureObject;
+
+@SuppressWarnings("unused")
 
 public class LoginService implements INetworkDispatch{
 	
@@ -76,7 +76,6 @@ public class LoginService implements INetworkDispatch{
 	public void insertTimedEventBindings(ScheduledExecutorService executor) {
 
 	}
-	
 	
 	public void insertOpcodes(Map<Integer,INetworkRemoteEvent> swgOpcodes, Map<Integer,INetworkRemoteEvent> objControllerOpcodes) {
 
@@ -181,10 +180,10 @@ public class LoginService implements INetworkDispatch{
 
 	}
 	
-	
 	public void shutdown() {
 		
 	}
+	
 	/**
 	 * Saves session data to DB so Zone Server can link sessions to accounts.
 	 * @param client Client that needs a session save.
@@ -306,6 +305,7 @@ public class LoginService implements INetworkDispatch{
 		}
 		return false;
 	}
+	
 	/**
 	 * Saves forum account to game DB if the account does not exist in the game DB already.
 	 * @param id Account ID.
@@ -326,6 +326,7 @@ public class LoginService implements INetworkDispatch{
 			e.printStackTrace();
 		}
 	}
+	
 	/**
 	 * Checks if user is allowed to login.
 	 * @param id Account ID.
@@ -392,8 +393,6 @@ public class LoginService implements INetworkDispatch{
 		return false;
 	}
 	
-	
-	@SuppressWarnings("unused")
 	/**
 	 * Checks if User has correct client version.
 	 * @param version Client Version String

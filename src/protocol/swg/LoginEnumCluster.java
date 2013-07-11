@@ -21,12 +21,10 @@
  ******************************************************************************/
 package protocol.swg;
 
-import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.TimeZone;
 
 import org.apache.mina.core.buffer.IoBuffer;
-
 
 public class LoginEnumCluster extends SWGMessage {
 

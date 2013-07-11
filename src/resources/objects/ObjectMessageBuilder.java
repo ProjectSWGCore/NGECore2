@@ -25,14 +25,10 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import org.apache.mina.core.buffer.CachedBufferAllocator;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.buffer.SimpleBufferAllocator;
 
-import engine.resources.common.Utilities;
 import engine.resources.objects.SWGObject;
-
-import protocol.swg.SceneEndBaselines;
 
 public abstract class ObjectMessageBuilder {
 	

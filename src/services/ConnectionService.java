@@ -26,7 +26,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
-import java.util.concurrent.ScheduledExecutorService;
 
 import main.NGECore;
 
@@ -39,22 +38,19 @@ import protocol.swg.ClientPermissionsMessage;
 import protocol.swg.ConnectionServerLagResponse;
 import protocol.swg.GalaxyLoopTimesResponse;
 import protocol.swg.GameServerLagResponse;
-import protocol.swg.LoginClientId;
 
 import engine.clients.Client;
-import engine.resources.common.Utilities;
 import engine.resources.database.DatabaseConnection;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import resources.common.*;
 
-
+@SuppressWarnings("unused")
 
 public class ConnectionService implements INetworkDispatch {
 
 	private NGECore core;
 	private DatabaseConnection databaseConnection;
-	@SuppressWarnings("unused")
 	private DatabaseConnection databaseConnection2;
 
 	public ConnectionService(NGECore core) {

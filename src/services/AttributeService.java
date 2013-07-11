@@ -34,6 +34,8 @@ import engine.resources.objects.SWGObject;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
+@SuppressWarnings("unused")
+
 public class AttributeService implements INetworkDispatch {
 
 	private NGECore core;

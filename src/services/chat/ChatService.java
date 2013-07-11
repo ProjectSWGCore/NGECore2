@@ -22,15 +22,11 @@
 package services.chat;
 
 import java.nio.ByteOrder;
-import java.sql.Timestamp;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
@@ -60,7 +56,6 @@ import protocol.swg.ObjControllerMessage;
 import protocol.swg.objectControllerObjects.PlayerEmote;
 import protocol.swg.objectControllerObjects.SpatialChat;
 import main.NGECore;
-
 
 public class ChatService implements INetworkDispatch {
 	

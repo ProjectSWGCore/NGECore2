@@ -26,6 +26,7 @@ import java.nio.ByteBuffer;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
+@SuppressWarnings("unused")
 
 public class CommandEnqueue extends ObjControllerObject {
 	
@@ -85,4 +86,5 @@ public class CommandEnqueue extends ObjControllerObject {
 	
 	public ObjControllerObject getCommandObject() { return commandObject; }
 	public String getCommandArguments() { return commandArguments; }
+	
 }
