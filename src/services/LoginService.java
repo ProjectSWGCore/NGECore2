@@ -344,7 +344,7 @@ public class LoginService implements INetworkDispatch{
 		} else {
 			return "Invalid Password";
 		}*/
-
+		
 		try {
 			PreparedStatement ps = databaseConnection.preparedStatement("SELECT * FROM accounts WHERE id=" + id + " AND \"pass\"='" + pass + "'");
 			ResultSet resultSet = ps.executeQuery();

@@ -92,19 +92,34 @@ public class CharacterService implements INetworkDispatch {
 		swgOpcodes.put(Opcodes.ClientRandomNameRequest, new INetworkRemoteEvent() {
 			
 			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
-				data = data.order(ByteOrder.LITTLE_ENDIAN);
 				ClientRandomNameRequest randomNameRequest = new ClientRandomNameRequest();
+				ClientRandomNameResponse response;
+				String name = null;
+				
+				data = data.order(ByteOrder.LITTLE_ENDIAN);
 				data.position(0);
 				randomNameRequest.deserialize(data);
-				String name;
-				if(randomNameRequest.getSharedRaceTemplate().contains("wookie")) {
-					name = nameGenerator.compose(4);
-				} else {
-					name = nameGenerator.compose(2) + " " + nameGenerator.compose(3);
+				
+				while (name == null) {
+					if (randomNameRequest.getSharedRaceTemplate().contains("wookie")) {
+						name = nameGenerator.compose(4);
+					} else {
+						name = nameGenerator.compose(2) + " " + nameGenerator.compose(3);
+					}
+					
+					try {
+						if (checkForDuplicateName(getfirstName(name, randomNameRequest.getSharedRaceTemplate()))) {
+							name = null;
+						}
+					} catch (SQLException e2) {
+						e2.printStackTrace();
+					}
 				}
-				ClientRandomNameResponse response = new ClientRandomNameResponse(randomNameRequest.getSharedRaceTemplate(), name);
+				
+				response = new ClientRandomNameResponse(randomNameRequest.getSharedRaceTemplate(), name);
 				session.write(response.serialize());
 			}
+			
 		});
 
 		swgOpcodes.put(Opcodes.ClientVerifyAndLockNameRequest, new INetworkRemoteEvent() {
@@ -184,14 +199,14 @@ public class CharacterService implements INetworkDispatch {
 				
 				int galaxyId = config.getInt("GALAXY_ID");
 				
-				// FIXME: this is just a hack for issue where something goes tits up
-				// between verify and create and client resends
-				/*try {
-					//if (checkForDuplicateName(getfirstName(clientCreateCharacter.getName(), clientCreateCharacter.getRaceTemplate()))) return;
-				}
-				catch (SQLException e2) {
+				try {
+					if (checkForDuplicateName(getfirstName(clientCreateCharacter.getName(), clientCreateCharacter.getRaceTemplate()))) {
+						return;
+					}
+				} catch (SQLException e2) {
 					e2.printStackTrace();
-				}*/
+				}
+				
 				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
 				
 				// TODO: Add starting location and items in a script
