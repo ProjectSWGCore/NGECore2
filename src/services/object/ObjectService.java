@@ -67,6 +67,7 @@ import main.NGECore;
 import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
+import resources.objects.guild.GuildObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.staticobject.StaticObject;
 import resources.objects.tangible.TangibleObject;
@@ -151,6 +152,10 @@ public class ObjectService implements INetworkDispatch {
 			
 			object = new StaticObject(objectID, planet, position, orientation, Template);
 			
+		} else if(Template.startsWith("object/guild")) {
+			
+			object = new GuildObject(objectID, planet, position, orientation, Template);
+			
 		} else {
 			
 			return null;
@@ -186,11 +191,11 @@ public class ObjectService implements INetworkDispatch {
 	}
 	
 	public SWGObject createObject(String Template, Planet planet) {
-		return createObject(Template, 0, planet, new Point3D(0, 0, 0), new Quaternion(0, 0, 0, 0));
+		return createObject(Template, 0, planet, new Point3D(0, 0, 0), new Quaternion(0, 0, 0, 1));
 	}
 	
 	public SWGObject createObject(String Template, Planet planet, float x, float z, float y) {
-		return createObject(Template, 0, planet, new Point3D(x, y, z), new Quaternion(0, 0, 0, 0));
+		return createObject(Template, 0, planet, new Point3D(x, y, z), new Quaternion(0, 0, 0, 1));
 	}
 	
 	public void addObjectToScene(SWGObject object) {

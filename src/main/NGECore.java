@@ -39,6 +39,8 @@ import services.SimulationService;
 import services.TerrainService;
 import services.chat.ChatService;
 import services.command.CommandService;
+import services.gcw.GCWService;
+import services.guild.GuildService;
 import services.map.MapService;
 import services.object.ObjectService;
 import services.object.UpdateService;
@@ -95,7 +97,8 @@ public class NGECore {
 	public ChatService chatService;
 	public AttributeService attributeService;
 	public SUIService suiService;
-
+	public GuildService guildService;
+	public GCWService gcwService;
 	
 	// Login Server
 	public NetworkDispatch loginDispatch;
@@ -106,9 +109,7 @@ public class NGECore {
 	private MINAServer zoneServer;
 
 	private ObjectDatabase creatureODB;
-
 	private ObjectDatabase mailODB;
-
 	
 	public NGECore() {
 
@@ -144,6 +145,7 @@ public class NGECore {
 		chatService = new ChatService(this);
 		attributeService = new AttributeService(this);
 		suiService = new SUIService(this);
+		
 		// Ping Server
 		try {
 			PingServer pingServer = new PingServer(config.getInt("PING.PORT"));
@@ -151,12 +153,14 @@ public class NGECore {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
 		// Login Server
 		loginDispatch = new NetworkDispatch(this, false);
 		loginDispatch.addService(loginService);
 		
 		loginServer = new MINAServer(loginDispatch, config.getInt("LOGIN.PORT"));
 		loginServer.start();
+		
 		// Zone Server
 		zoneDispatch = new NetworkDispatch(this, true);
 		zoneDispatch.addService(connectionService);
@@ -173,10 +177,17 @@ public class NGECore {
 		// Planets
 		terrainService.addPlanet(1, "tatooine", "terrain/tatooine.trn", true);
 		
-		
 		terrainService.loadSnapShotObjects();
+		
+		// Zone services that need to be loaded after the above
 		simulationService = new SimulationService(this);
 		zoneDispatch.addService(simulationService);
+		
+		guildService = new GuildService(this);
+		zoneDispatch.addService(guildService);
+		
+		gcwService = new GCWService(this);
+		zoneDispatch.addService(gcwService);
 
 		didServerCrash = false;
 		System.out.println("Started Server.");
