@@ -41,6 +41,7 @@ import org.python.core.PyObject;
 
 import com.sleepycat.persist.EntityCursor;
 
+import protocol.swg.CmdSceneReady;
 import protocol.swg.CmdStartScene;
 import protocol.swg.HeartBeatMessage;
 import protocol.swg.ParametersMessage;
@@ -191,11 +192,11 @@ public class ObjectService implements INetworkDispatch {
 	}
 	
 	public SWGObject createObject(String Template, Planet planet) {
-		return createObject(Template, 0, planet, new Point3D(0, 0, 0), new Quaternion(0, 0, 0, 1));
+		return createObject(Template, 0, planet, new Point3D(0, 0, 0), new Quaternion(1, 0, 0, 0));
 	}
 	
 	public SWGObject createObject(String Template, Planet planet, float x, float z, float y) {
-		return createObject(Template, 0, planet, new Point3D(x, y, z), new Quaternion(0, 0, 0, 1));
+		return createObject(Template, 0, planet, new Point3D(x, y, z), new Quaternion(1, 0, 0, 0));
 	}
 	
 	public void addObjectToScene(SWGObject object) {
@@ -349,7 +350,6 @@ public class ObjectService implements INetworkDispatch {
 				}
 
 				creature.setClient(client);
-				Point3D position = creature.getPosition();
 				Planet planet = core.terrainService.getPlanetByID(creature.getPlanetId());
 				creature.setPlanet(planet);
 				client.setParent(creature);
@@ -375,25 +375,34 @@ public class ObjectService implements INetworkDispatch {
 					}
 					
 				});
+				if(creature.getParentId() != 0) {
+					SWGObject parent = getObject(creature.getParentId());
+					parent._add(creature);
+				}
+
+				Point3D position = creature.getWorldPosition();
+		
 				
+				//UnkByteFlag unkByteFlag = new UnkByteFlag();
+				//session.write(unkByteFlag.serialize());
 				
-				HeartBeatMessage heartBeat = new HeartBeatMessage();
-				session.write(heartBeat.serialize());
-				
-				UnkByteFlag unkByteFlag = new UnkByteFlag();
-				session.write(unkByteFlag.serialize());
-				
-				ParametersMessage parameters = new ParametersMessage();
-				session.write(parameters.serialize());
+				//ParametersMessage parameters = new ParametersMessage();
+				//session.write(parameters.serialize());
 
 				core.chatService.loadMailHeaders(client);
 				
-				CmdStartScene startScene = new CmdStartScene((byte) 0, objectId, creature.getPlanet().getPath(), creature.getTemplate(), position.x, 0, position.z, System.currentTimeMillis() / 1000, creature.getRadians());
+				HeartBeatMessage heartBeat = new HeartBeatMessage();
+				session.write(heartBeat.serialize());
+
+				CmdStartScene startScene = new CmdStartScene((byte) 0, objectId, creature.getPlanet().getPath(), creature.getTemplate(), position.x, position.y, position.z, System.currentTimeMillis() / 1000, creature.getRadians());
 				session.write(startScene.serialize());
 				
 				core.simulationService.handleZoneIn(client);
 				creature.makeAware(creature);
+				//CmdSceneReady cmdSceneReady = new CmdSceneReady();
+				//session.write(cmdSceneReady.serialize());
 
+				//core.simulationService.teleport(creature, new Point3D(position.x, core.terrainService.getHeight(creature.getPlanetId(), position.x, position.z), position.z), creature.getOrientation());
 			}
 			
 		});

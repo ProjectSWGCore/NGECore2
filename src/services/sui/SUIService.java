@@ -267,23 +267,23 @@ public class SUIService implements INetworkDispatch {
 
 		switch(type) {
 		
-		case MessageBoxType.MESSAGE_BOX_OK:
-			window.setProperty("btnOk:visible", "True");
-			window.setProperty("btnOk:Text", "@ok");
-			window.setProperty("btnCancel:visible", "False");
-			break;
-		case MessageBoxType.MESSAGE_BOX_OK_CANCEL:
-			window.setProperty("btnOk:visible", "True");
-			window.setProperty("btnCancel:visible", "True");
-			window.setProperty("btnOk:Text", "@ok");
-			window.setProperty("btnCancel:Text", "@cancel");
-			break;
-		case MessageBoxType.MESSAGE_BOX_YES_NO:
-			window.setProperty("btnOk:visible", "True");
-			window.setProperty("btnCancel:visible", "True");
-			window.setProperty("btnOk:Text", "@yes");
-			window.setProperty("btnCancel:Text", "@no");
-			break;
+			case MessageBoxType.MESSAGE_BOX_OK:
+				window.setProperty("btnOk:visible", "True");
+				window.setProperty("btnOk:Text", "@ok");
+				window.setProperty("btnCancel:visible", "False");
+				break;
+			case MessageBoxType.MESSAGE_BOX_OK_CANCEL:
+				window.setProperty("btnOk:visible", "True");
+				window.setProperty("btnCancel:visible", "True");
+				window.setProperty("btnOk:Text", "@ok");
+				window.setProperty("btnCancel:Text", "@cancel");
+				break;
+			case MessageBoxType.MESSAGE_BOX_YES_NO:
+				window.setProperty("btnOk:visible", "True");
+				window.setProperty("btnCancel:visible", "True");
+				window.setProperty("btnOk:Text", "@yes");
+				window.setProperty("btnCancel:Text", "@no");
+				break;
 
 		}
 

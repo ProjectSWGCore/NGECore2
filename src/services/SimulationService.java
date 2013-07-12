@@ -50,6 +50,8 @@ import engine.resources.scene.quadtree.QuadTree;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
+import protocol.swg.CmdStartScene;
+import protocol.swg.HeartBeatMessage;
 import protocol.swg.ObjControllerMessage;
 import protocol.swg.OpenedContainerMessage;
 import protocol.swg.UpdateTransformMessage;
@@ -401,6 +403,7 @@ public class SimulationService implements INetworkDispatch {
 				observerClient.getParent().makeUnaware(object);
 			}
 		}
+		
 
 		object.createTransaction(core.getCreatureODB().getEnvironment());
 		core.getCreatureODB().put(object, Long.class, CreatureObject.class, object.getTransaction());
@@ -421,10 +424,6 @@ public class SimulationService implements INetworkDispatch {
 		Quaternion orientation = object.getOrientation();
 		Point3D position = object.getPosition();
 
-		if(object.getParentId() != 0) {
-			SWGObject parent = core.objectService.getObject(object.getParentId());
-			parent._add(object);
-		}
 
 		
 		Point3D pos = object.getWorldPosition();
@@ -439,11 +438,63 @@ public class SimulationService implements INetworkDispatch {
 		
 		if(object.getParentId() == 0)
 			add(object, pos.x, pos.z);
+	
+	}
+	
+	public void transferToPlanet(SWGObject object, Planet planet, Point3D newPos, Quaternion newOrientation) {
 		
-		//teleport(object, position, orientation);
+		Client client = object.getClient();
+		
+		if(client == null)
+			return;
+		
+		IoSession session = client.getSession();
+		
+		if(session == null)
+			return;
+		
+		Point3D position = object.getPosition();
+		
+		if(object.getParentId() == 0 && object.getContainer() == null) {
+			remove(object, position.x, position.z);
+		} else {
+			object.getContainer().remove(object);
+		}
 
-		//core.chatService.loadMailHeaders(client); // moved to beginning of zone-in like live
+		HashSet<Client> oldObservers = new HashSet<Client>(object.getObservers());
 
+		for(Client observerClient : oldObservers) {
+			if(observerClient.getParent() != null) {
+				observerClient.getParent().makeUnaware(object);
+			}
+		}
+		
+		
+		synchronized(object.getMutex()) {
+			
+			Iterator<SWGObject> it = object.getAwareObjects().iterator();
+			
+			while(it.hasNext()) {
+				it.remove();
+			}
+
+		}
+		
+		object.setPlanet(planet);
+		object.setPlanetId(planet.getID());
+		object.setPosition(newPos);
+		object.setOrientation(newOrientation);
+		
+		HeartBeatMessage heartBeat = new HeartBeatMessage();
+		session.write(heartBeat.serialize());
+
+		CmdStartScene startScene = new CmdStartScene((byte) 0, object.getObjectID(), object.getPlanet().getPath(), object.getTemplate(), newPos.x, newPos.y, newPos.z, System.currentTimeMillis() / 1000, object.getRadians());
+		session.write(startScene.serialize());
+		
+		core.simulationService.handleZoneIn(client);
+		object.makeAware(object);
+
+		
 	}
 	
 	public void openContainer(SWGObject requester, SWGObject container) {
@@ -460,19 +511,14 @@ public class SimulationService implements INetworkDispatch {
 		
 		if(position.x >= -8192 && position.x <= 8192 && position.z >= -8192 && position.z <= 8192) {
 			
-			if(obj.getParentId() == 0) {
-				DataTransform dataTransform = new DataTransform(new Point3D(position.x, 0, position.z), orientation, obj.getMovementCounter(), obj.getObjectID());
-				ObjControllerMessage objController = new ObjControllerMessage(0x1B, dataTransform);
-				obj.notifyObservers(objController, true);
-			} else {
-				DataTransformWithParent dataTransform = new DataTransformWithParent(new Point3D(position.x, 0, position.z), orientation, obj.getMovementCounter(), obj.getObjectID(), obj.getParentId());
-				ObjControllerMessage objController = new ObjControllerMessage(0x1B, dataTransform);
-				obj.notifyObservers(objController, true);
-			}
+			DataTransform dataTransform = new DataTransform(new Point3D(position.x, position.y, position.z), orientation, obj.getMovementCounter(), obj.getObjectID());
+			ObjControllerMessage objController = new ObjControllerMessage(0x1B, dataTransform);
+			obj.notifyObservers(objController, true);
 			
 		}
-		
+			
 	}
+	
 	// not fully working yet(rotation of meshes wrong)
 	public boolean checkLineOfSight(SWGObject obj1, SWGObject obj2) {
 		

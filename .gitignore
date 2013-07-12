@@ -41,6 +41,7 @@ pt_sword_glint
 *.0
 cachedir/
 appearance/
+clientdata/
 *.class
 
 # SWG Client Folders
