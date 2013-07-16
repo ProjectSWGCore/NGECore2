@@ -132,13 +132,17 @@ public class WeaponMessageBuilder extends ObjectMessageBuilder {
 		
 		return buffer;
 	}
-
 	
-
+	@Override
+	public void sendListDelta(short updateType, IoBuffer buffer) {
+		// TODO Auto-generated method stub
+		
+	}
+	
 	@Override
 	public void sendBaselines() {
 		// TODO Auto-generated method stub
 		
 	}
-
+	
 }

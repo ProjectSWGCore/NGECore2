@@ -24,10 +24,8 @@ package resources.objects.guild;
 import java.util.ArrayList;
 import java.util.List;
 
-import resources.objects.CurrentServerGCWZoneInfo;
-import resources.objects.CurrentServerGCWZonePercent;
+import resources.objects.GCWZone;
 import resources.objects.Guild;
-import resources.objects.OtherServerGCWZonePercent;
 
 import com.sleepycat.persist.model.NotPersistent;
 
@@ -56,27 +54,27 @@ public class GuildObject extends SWGObject {
 	private int unknown1 = 0;
 	private short unknown2 = 0;
 
-	private List<CurrentServerGCWZonePercent> currentServerGCWZonePercentList = new ArrayList<CurrentServerGCWZonePercent>();
+	private List<GCWZone> currentServerGCWZonePercentList = new ArrayList<GCWZone>();
 	@NotPersistent
 	private int currentServerGCWZonePercentListUpdateCounter = 0;
 
-	private List<CurrentServerGCWZonePercent> currentServerGCWTotalPercentList = new ArrayList<CurrentServerGCWZonePercent>();
+	private List<GCWZone> currentServerGCWTotalPercentList = new ArrayList<GCWZone>();
 	@NotPersistent
 	private int currentServerGCWTotalPercentListUpdateCounter = 0;
 
-	private List<CurrentServerGCWZoneInfo> currentServerGCWZoneInfoList = new ArrayList<CurrentServerGCWZoneInfo>();
+	private List<GCWZone> currentServerGCWZoneHistoryList = new ArrayList<GCWZone>();
 	@NotPersistent
-	private int currentServerGCWZoneInfoListUpdateCounter = 0;
+	private int currentServerGCWZoneHistoryListUpdateCounter = 0;
 	
-	private List<CurrentServerGCWZoneInfo> currentServerGCWTotalInfoList = new ArrayList<CurrentServerGCWZoneInfo>();
+	private List<GCWZone> currentServerGCWTotalHistoryList = new ArrayList<GCWZone>();
 	@NotPersistent
-	private int currentServerGCWTotalInfoListUpdateCounter = 0;
+	private int currentServerGCWTotalHistoryListUpdateCounter = 0;
 
-	private List<OtherServerGCWZonePercent> otherServerGCWZonePercentList = new ArrayList<OtherServerGCWZonePercent>();
+	private List<GCWZone> otherServerGCWZonePercentList = new ArrayList<GCWZone>();
 	@NotPersistent
 	private int otherServerGCWZonePercentListUpdateCounter = 0;
 
-	private List<OtherServerGCWZonePercent> otherServerGCWTotalPercentList = new ArrayList<OtherServerGCWZonePercent>();
+	private List<GCWZone> otherServerGCWTotalPercentList = new ArrayList<GCWZone>();
 	@NotPersistent
 	private int otherServerGCWTotalPercentListUpdateCounter = 0;
 	
@@ -212,7 +210,7 @@ public class GuildObject extends SWGObject {
 		}
 	}
 	
-	public List<CurrentServerGCWZonePercent> getCurrentServerGCWZonePercentList() {
+	public List<GCWZone> getCurrentServerGCWZonePercentList() {
 		return currentServerGCWZonePercentList;
 	}
 	
@@ -228,7 +226,7 @@ public class GuildObject extends SWGObject {
 		}
 	}
 	
-	public List<CurrentServerGCWZonePercent> getCurrentServerGCWTotalPercentList() {
+	public List<GCWZone> getCurrentServerGCWTotalPercentList() {
 		return currentServerGCWTotalPercentList;
 	}
 	
@@ -244,39 +242,39 @@ public class GuildObject extends SWGObject {
 		}
 	}
 	
-	public List<CurrentServerGCWZoneInfo> getCurrentServerGCWZoneInfoList() {
-		return currentServerGCWZoneInfoList;
+	public List<GCWZone> getCurrentServerGCWZoneHistoryList() {
+		return currentServerGCWZoneHistoryList;
 	}
 	
-	public int getCurrentServerGCWZoneInfoListUpdateCounter() {
+	public int getCurrentServerGCWZoneHistoryListUpdateCounter() {
 		synchronized(objectMutex) {
-			return currentServerGCWZoneInfoListUpdateCounter;
+			return currentServerGCWZoneHistoryListUpdateCounter;
 		}
 	}
 	
-	public void setCurrentServerGCWZoneInfoListUpdateCounter(int currentServerGCWZoneInfoListUpdateCounter) {
+	public void setCurrentServerGCWZoneHistoryListUpdateCounter(int currentServerGCWZoneHistoryListUpdateCounter) {
 		synchronized(objectMutex) {
-			this.currentServerGCWZoneInfoListUpdateCounter = currentServerGCWZoneInfoListUpdateCounter;
+			this.currentServerGCWZoneHistoryListUpdateCounter = currentServerGCWZoneHistoryListUpdateCounter;
 		}
 	}
 	
-	public List<CurrentServerGCWZoneInfo> getCurrentServerGCWTotalInfoList() {
-		return currentServerGCWTotalInfoList;
+	public List<GCWZone> getCurrentServerGCWTotalHistoryList() {
+		return currentServerGCWTotalHistoryList;
 	}
 	
-	public int getCurrentServerGCWTotalInfoListUpdateCounter() {
+	public int getCurrentServerGCWTotalHistoryListUpdateCounter() {
 		synchronized(objectMutex) {
-			return currentServerGCWTotalInfoListUpdateCounter;
+			return currentServerGCWTotalHistoryListUpdateCounter;
 		}
 	}
 	
-	public void setCurrentServerGCWTotalInfoListUpdateCounter(int currentServerGCWTotalInfoListUpdateCounter) {
+	public void setCurrentServerGCWTotalHistoryListUpdateCounter(int currentServerGCWTotalHistoryListUpdateCounter) {
 		synchronized(objectMutex) {
-			this.currentServerGCWTotalInfoListUpdateCounter = currentServerGCWTotalInfoListUpdateCounter;
+			this.currentServerGCWTotalHistoryListUpdateCounter = currentServerGCWTotalHistoryListUpdateCounter;
 		}
 	}
 	
-	public List<OtherServerGCWZonePercent> getOtherServerGCWZonePercentList() {
+	public List<GCWZone> getOtherServerGCWZonePercentList() {
 		return otherServerGCWZonePercentList;
 	}
 	
@@ -292,7 +290,7 @@ public class GuildObject extends SWGObject {
 		}
 	}
 	
-	public List<OtherServerGCWZonePercent> getOtherServerGCWTotalPercentList() {
+	public List<GCWZone> getOtherServerGCWTotalPercentList() {
 		return otherServerGCWTotalPercentList;
 	}
 	

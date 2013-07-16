@@ -21,36 +21,46 @@
  ******************************************************************************/
 package resources.objects;
 
-public class CurrentServerGCWZonePercent {
+public class GCWZone implements ListObject {
 	
-	private byte unknown = 0;
+	private byte unknown1 = 0;
+	private String server = "current";
 	private String zone = "";
+	private int lastUpdateTime = ((int) System.currentTimeMillis());
 	private int percent = 50;
-	
-	public CurrentServerGCWZonePercent(byte unknown, String zone, int percent) {
-		this.unknown = unknown;
-		this.zone = zone;
-		this.percent = percent;
-	}
-	
-	public CurrentServerGCWZonePercent(String zone) {
+	private int gcwPoints = 0;
+
+	public GCWZone(String server, String zone) {
+		this.server = server;
 		this.zone = zone;
 	}
 	
-	public byte getUnknown() {
-		return unknown;
+	public GCWZone(String zone) {
+		this.zone = zone;
 	}
 	
-	public void setUnknown(byte unknown) {
-		this.unknown = unknown;
+	public GCWZone() {
+		
+	}
+	
+	public byte getUnknown1() {
+		return unknown1;
+	}
+	
+	public void setUnknown1(byte unknown1) {
+		this.unknown1 = unknown1;
+	}
+	
+	public String getServer() {
+		return server;
 	}
 	
 	public String getZone() {
 		return zone;
 	}
 	
-	public void setZone(String zone) {
-		this.zone = zone;
+	public int getLastUpdateTime() {
+		return lastUpdateTime;
 	}
 	
 	public int getPercent() {
@@ -59,6 +69,25 @@ public class CurrentServerGCWZonePercent {
 	
 	public void setPercent(int percent) {
 		this.percent = percent;
+		this.lastUpdateTime = ((int) System.currentTimeMillis());
+	}
+	
+	public int getGCWPoints() {
+		return gcwPoints;
+	}
+	
+	public void addGCWPoints(int gcwPoints) {
+		this.gcwPoints += gcwPoints;
+	}
+	
+	public void removeGCWPoints(int gcwPoints) {
+		this.gcwPoints = (((this.gcwPoints - gcwPoints) < 0) ? 0 : this.gcwPoints - gcwPoints);
+	}
+
+	@Override
+	public byte[] getBytes() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }

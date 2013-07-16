@@ -391,7 +391,11 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 		}
 	}
 
-
+	@Override
+	public void sendListDelta(short updateType, IoBuffer buffer) {
+		// TODO Auto-generated method stub
+		
+	}
 
 	@Override
 	public void sendBaselines() {

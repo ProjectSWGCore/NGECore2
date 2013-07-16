@@ -25,11 +25,9 @@ import java.nio.ByteOrder;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import resources.objects.CurrentServerGCWZoneInfo;
-import resources.objects.CurrentServerGCWZonePercent;
+import resources.objects.GCWZone;
 import resources.objects.Guild;
 import resources.objects.ObjectMessageBuilder;
-import resources.objects.OtherServerGCWZonePercent;
 
 public class GuildMessageBuilder extends ObjectMessageBuilder {
 
@@ -66,11 +64,10 @@ public class GuildMessageBuilder extends ObjectMessageBuilder {
 		GuildObject guilds = (GuildObject) object;
 		
 		int capacity = 82;
-		//int capacity = 77;
 		capacity += (guilds.getCurrentServerGCWZonePercentList().size() * 30);
 		capacity += (guilds.getCurrentServerGCWTotalPercentList().size() * 14);
-		capacity += (guilds.getCurrentServerGCWZoneInfoList().size() * 34);
-		capacity += (guilds.getCurrentServerGCWTotalInfoList().size() * 18);
+		capacity += (guilds.getCurrentServerGCWZoneHistoryList().size() * 34);
+		capacity += (guilds.getCurrentServerGCWTotalHistoryList().size() * 18);
 		capacity += (guilds.getOtherServerGCWZonePercentList().size() * 45);
 		capacity += (guilds.getOtherServerGCWTotalPercentList().size() * 29);
 		
@@ -82,46 +79,46 @@ public class GuildMessageBuilder extends ObjectMessageBuilder {
 		buffer.putShort(guilds.getUnknown2());
 		buffer.putInt(guilds.getCurrentServerGCWZonePercentList().size());
 		buffer.putInt(guilds.getCurrentServerGCWZonePercentListUpdateCounter());
-		for (CurrentServerGCWZonePercent object : guilds.getCurrentServerGCWZonePercentList()) {
-			buffer.put(object.getUnknown());
+		for (GCWZone object : guilds.getCurrentServerGCWZonePercentList()) {
+			buffer.put(object.getUnknown1());
 			buffer.put(getAsciiString(object.getZone()));
 			buffer.putInt(object.getPercent());
 		}
 		buffer.putInt(guilds.getCurrentServerGCWTotalPercentList().size());
 		buffer.putInt(guilds.getCurrentServerGCWTotalPercentListUpdateCounter());
-		for (CurrentServerGCWZonePercent object : guilds.getCurrentServerGCWTotalPercentList()) {
-			buffer.put(object.getUnknown());
+		for (GCWZone object : guilds.getCurrentServerGCWTotalPercentList()) {
+			buffer.put(object.getUnknown1());
 			buffer.put(getAsciiString(object.getZone()));
 			buffer.putInt(object.getPercent());
 		}
-		buffer.putInt(guilds.getCurrentServerGCWZoneInfoList().size());
-		buffer.putInt(guilds.getCurrentServerGCWZoneInfoListUpdateCounter());
-		for (CurrentServerGCWZoneInfo object : guilds.getCurrentServerGCWZoneInfoList()) {
+		buffer.putInt(guilds.getCurrentServerGCWZoneHistoryList().size());
+		buffer.putInt(guilds.getCurrentServerGCWZoneHistoryListUpdateCounter());
+		for (GCWZone object : guilds.getCurrentServerGCWZoneHistoryList()) {
 			buffer.put(object.getUnknown1());
 			buffer.put(getAsciiString(object.getZone()));
-			buffer.putInt(object.getUnknown2());
+			buffer.putInt(object.getLastUpdateTime());
 			buffer.putInt(object.getPercent());
 		}
-		buffer.putInt(guilds.getCurrentServerGCWTotalInfoList().size());
-		buffer.putInt(guilds.getCurrentServerGCWTotalInfoListUpdateCounter());
-		for (CurrentServerGCWZoneInfo object : guilds.getCurrentServerGCWTotalInfoList()) {
+		buffer.putInt(guilds.getCurrentServerGCWTotalHistoryList().size());
+		buffer.putInt(guilds.getCurrentServerGCWTotalHistoryListUpdateCounter());
+		for (GCWZone object : guilds.getCurrentServerGCWTotalHistoryList()) {
 			buffer.put(object.getUnknown1());
 			buffer.put(getAsciiString(object.getZone()));
-			buffer.putInt(object.getUnknown2());
+			buffer.putInt(object.getLastUpdateTime());
 			buffer.putInt(object.getPercent());
 		}
 		buffer.putInt(guilds.getOtherServerGCWZonePercentList().size());
 		buffer.putInt(guilds.getOtherServerGCWZonePercentListUpdateCounter());
-		for (OtherServerGCWZonePercent object : guilds.getOtherServerGCWZonePercentList()) {
-			buffer.put(object.getUnknown());
+		for (GCWZone object : guilds.getOtherServerGCWZonePercentList()) {
+			buffer.put(object.getUnknown1());
 			buffer.put(getAsciiString(object.getServer()));
 			buffer.put(getAsciiString(object.getZone()));
 			buffer.putInt(object.getPercent());
 		}
 		buffer.putInt(guilds.getOtherServerGCWTotalPercentList().size());
 		buffer.putInt(guilds.getOtherServerGCWTotalPercentListUpdateCounter());
-		for (OtherServerGCWZonePercent object : guilds.getOtherServerGCWTotalPercentList()) {
-			buffer.put(object.getUnknown());
+		for (GCWZone object : guilds.getOtherServerGCWTotalPercentList()) {
+			buffer.put(object.getUnknown1());
 			buffer.put(getAsciiString(object.getServer()));
 			buffer.put(getAsciiString(object.getZone()));
 			buffer.putInt(object.getPercent());
@@ -137,9 +134,17 @@ public class GuildMessageBuilder extends ObjectMessageBuilder {
 	}
 	
 	@Override
+	public void sendListDelta(short updateType, IoBuffer buffer) {
+		switch (updateType) {
+			default:
+				return;
+		}
+	}
+	
+	@Override
 	public void sendBaselines() {
 		// TODO Auto-generated method stub
 		
 	}
-
+	
 }

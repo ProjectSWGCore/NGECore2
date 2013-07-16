@@ -79,6 +79,8 @@ public abstract class ObjectMessageBuilder {
 	public SWGObject getObject() { return object; }
 	public void setObject(SWGObject object) { this.object = object; }
 	
+	public abstract void sendListDelta(short updateType, IoBuffer buffer);
+	
 	public abstract void sendBaselines();
 	
 	private String reverse(String reverseString) {
@@ -112,6 +114,7 @@ public abstract class ObjectMessageBuilder {
 		
 		return result;
 	}
+	
 	private byte[] getString(String string, String charFormat) {
 		ByteBuffer result;
 		int length = 2 + string.length();
@@ -131,6 +134,5 @@ public abstract class ObjectMessageBuilder {
 		}
 		return result.array();		
 	}
-
 
 }
