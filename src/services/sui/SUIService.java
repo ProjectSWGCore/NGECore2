@@ -79,12 +79,12 @@ public class SUIService implements INetworkDispatch {
 	
 				if(target == null || owner == null)
 					return;
-				
+						
 				
 				core.scriptService.callScript("scripts/radial/", getRadialFilename(target), "createRadial", core, owner, target, request.getRadialOptions());
 				if(getRadialFilename(target).equals("default"))
 					return;
-	
+				
 				sendRadial(owner, target, request.getRadialOptions(), request.getRadialCount());
 				
 			}
@@ -290,7 +290,30 @@ public class SUIService implements INetworkDispatch {
 		return window;
 		
 	}
+	
+	public SUIWindow createInputBox(int type, String title, String promptText, SWGObject owner, SWGObject rangeObject, float maxDistance) {
+		SUIWindow window = createSUIWindow("Script.inputBox", owner, rangeObject, maxDistance);
 		
+		window.setProperty("bg.caption.lblTitle:Text", title);
+		window.setProperty("Prompt.lblPrompt:Text", promptText);
+		
+		switch(type) {
+		case InputBoxType.INPUT_BOX_OK:
+			window.setProperty("btnOk:visible", "True");
+			window.setProperty("btnOk:Text", "@ok");
+			window.setProperty("btnCancel:visible", "False");
+			window.setProperty("cmbInput:visible", "False");
+			break;
+		case InputBoxType.INPUT_BOX_OK_CANCEL:
+			window.setProperty("btnOk:visible", "True");
+			window.setProperty("btnCancel:visible", "True");
+			window.setProperty("btnCancel:Text", "@cancel");
+			window.setProperty("btnOk:Text", "@ok");
+			window.setProperty("cmbInput:visible", "False");
+		}
+		return window;
+	}
+	
 	public void closeSUIWindow(SWGObject owner, int id) {
 		
 		if(owner.getClient() == null || owner.getClient().getSession() == null)
