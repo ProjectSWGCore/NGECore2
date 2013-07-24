@@ -21,7 +21,6 @@
  ******************************************************************************/
 package services.guild;
 
-import java.util.List;
 import java.util.Map;
 
 import org.apache.mina.core.buffer.IoBuffer;
@@ -29,11 +28,13 @@ import org.apache.mina.core.session.IoSession;
 
 import resources.common.Opcodes;
 import resources.objects.Guild;
+import resources.objects.SWGList;
 import resources.objects.guild.GuildObject;
 
 import main.NGECore;
 
 import engine.clients.Client;
+import engine.resources.objects.SWGObject;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
@@ -48,24 +49,20 @@ public class GuildService implements INetworkDispatch {
 		object = (GuildObject) this.core.objectService.createObject("object/guild/shared_guild_object.iff", core.terrainService.getPlanetList().get(0));
 	}
 	
-	public Guild createGuild(String abbreviation, String name) {
+	public Guild createGuild(String abbreviation, String name, SWGObject leader) {
 		int id = ((object.getGuildList().get(object.getGuildList().size()).getId()) + 1);
-		Guild guild = new Guild(id, abbreviation, name);
+		Guild guild = new Guild(id, abbreviation, name, leader);
 		
 		object.getGuildList().add(guild);
 		
 		return guild;
 	}
 	
-	public void addGuild(Guild guild) {
-		object.getGuildList().add(guild);
-	}
-	
 	public GuildObject getGuildObject() {
 		return object;
 	}
 	
-	public List<Guild> getGuildList() {
+	public SWGList<Guild> getGuildList() {
 		return object.getGuildList();
 	}
 	
