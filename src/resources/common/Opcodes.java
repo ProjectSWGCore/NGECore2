@@ -43,5 +43,6 @@ public class Opcodes {
 	public static int RequestGalaxyLoopTimes = 0x7D842D68;
 	public static int SelectCharacter = 0xB5098D76;
 	public static int SuiEventNotification = 0x092D3564;
+	public static int DeltasMessage = 0x12862153;
 
 }

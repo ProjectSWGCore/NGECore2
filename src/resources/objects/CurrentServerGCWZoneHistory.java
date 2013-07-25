@@ -21,73 +21,71 @@
  ******************************************************************************/
 package resources.objects;
 
-public class GCWZone implements ListObject {
+import java.nio.ByteOrder;
+
+import org.apache.mina.core.buffer.IoBuffer;
+
+public class CurrentServerGCWZoneHistory extends ListObject {
 	
 	private byte unknown1 = 0;
-	private String server = "current";
 	private String zone = "";
 	private int lastUpdateTime = ((int) System.currentTimeMillis());
 	private int percent = 50;
-	private int gcwPoints = 0;
-
-	public GCWZone(String server, String zone) {
-		this.server = server;
+	
+	public CurrentServerGCWZoneHistory(String zone, int percent) {
 		this.zone = zone;
+		this.percent = percent;
 	}
 	
-	public GCWZone(String zone) {
+	public CurrentServerGCWZoneHistory(String zone) {
 		this.zone = zone;
-	}
-	
-	public GCWZone() {
-		
 	}
 	
 	public byte getUnknown1() {
-		return unknown1;
+		synchronized(objectMutex) {
+			return unknown1;
+		}
 	}
 	
 	public void setUnknown1(byte unknown1) {
-		this.unknown1 = unknown1;
-	}
-	
-	public String getServer() {
-		return server;
+		synchronized(objectMutex) {
+			this.unknown1 = unknown1;
+		}
 	}
 	
 	public String getZone() {
-		return zone;
+		synchronized(objectMutex) {
+			return zone;
+		}
 	}
 	
 	public int getLastUpdateTime() {
-		return lastUpdateTime;
+		synchronized(objectMutex) {
+			return lastUpdateTime;
+		}
 	}
 	
 	public int getPercent() {
-		return percent;
+		synchronized(objectMutex) {
+			return percent;
+		}
 	}
 	
 	public void setPercent(int percent) {
-		this.percent = percent;
-		this.lastUpdateTime = ((int) System.currentTimeMillis());
+		synchronized(objectMutex) {
+			this.percent = percent;
+			this.lastUpdateTime = ((int) System.currentTimeMillis());
+		}
 	}
 	
-	public int getGCWPoints() {
-		return gcwPoints;
-	}
-	
-	public void addGCWPoints(int gcwPoints) {
-		this.gcwPoints += gcwPoints;
-	}
-	
-	public void removeGCWPoints(int gcwPoints) {
-		this.gcwPoints = (((this.gcwPoints - gcwPoints) < 0) ? 0 : this.gcwPoints - gcwPoints);
-	}
-
-	@Override
 	public byte[] getBytes() {
-		// TODO Auto-generated method stub
-		return null;
+		synchronized(objectMutex) {
+			IoBuffer buffer = bufferPool.allocate((8 + zone.length() + 2), false).order(ByteOrder.LITTLE_ENDIAN);
+			buffer.put(getAsciiString(zone));
+			buffer.putInt(lastUpdateTime);
+			buffer.putInt(percent);
+			return buffer.array();
+		}
 	}
 	
 }

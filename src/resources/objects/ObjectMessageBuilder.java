@@ -28,6 +28,8 @@ import java.nio.ByteOrder;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.buffer.SimpleBufferAllocator;
 
+import resources.common.Opcodes;
+
 import engine.resources.objects.SWGObject;
 
 public abstract class ObjectMessageBuilder {
@@ -36,50 +38,78 @@ public abstract class ObjectMessageBuilder {
 	public SimpleBufferAllocator bufferPool = new SimpleBufferAllocator();
 	
 	public IoBuffer createBaseline(String objectType, byte viewType, IoBuffer data, int size) {
+		IoBuffer buffer = bufferPool.allocate(23 + size, false).order(ByteOrder.LITTLE_ENDIAN);
 		
-		IoBuffer buf = bufferPool.allocate(23 + size, false).order(ByteOrder.LITTLE_ENDIAN);
-		buf.putShort((short) 5);
-		buf.putInt(0x68A75F0C);
-		buf.putLong(object.getObjectID());
+		buffer.putShort((short) 5);
+		buffer.putInt(0x68A75F0C);
+		buffer.putLong(object.getObjectID());
 		try {
-			buf.put(reverse(objectType).getBytes("US-ASCII"));
+			buffer.put(reverse(objectType).getBytes("US-ASCII"));
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
-		buf.put(viewType);
-		buf.putInt(size);	// size
-		buf.put(data);
-		buf.flip();
-		return buf;
+		buffer.put(viewType);
+		buffer.putInt(size);
+		buffer.put(data);
+		buffer.flip();
+		
+		return buffer;
 	}
 	
 	public IoBuffer createDelta(String objectType, byte viewType, short updateCount, short updateType, IoBuffer data, int size) {
+		IoBuffer buffer = bufferPool.allocate(27 + size, false).order(ByteOrder.LITTLE_ENDIAN);
 		
-		IoBuffer buf = bufferPool.allocate(27 + size, false).order(ByteOrder.LITTLE_ENDIAN);
-		buf.putShort((short) 5);
-		buf.putInt(0x12862153);
-		buf.putLong(object.getObjectID());
+		buffer.putShort((short) 5);
+		buffer.putInt(Opcodes.DeltasMessage);
+		buffer.putLong(object.getObjectID());
 		try {
-			buf.put(reverse(objectType).getBytes("US-ASCII"));
+			buffer.put(reverse(objectType).getBytes("US-ASCII"));
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
-		buf.put(viewType);
-		buf.putInt(size);	// size
-		buf.putShort(updateCount);
-		buf.putShort(updateType);
-		buf.put(data);
-
-		buf.flip();
-		return buf;
-
+		buffer.put(viewType);
+		buffer.putInt(size);
+		buffer.putShort(updateCount);
+		buffer.putShort(updateType);
+		buffer.put(data);
+		buffer.flip();
 		
+		return buffer;
+	}
+	
+	public IoBuffer createDelta(String objectType, byte viewType, short updateCount, IoBuffer data, int size) {
+		IoBuffer buffer = bufferPool.allocate(25 + size, false).order(ByteOrder.LITTLE_ENDIAN);
+		
+		buffer.putShort((short) 5);
+		buffer.putInt(Opcodes.DeltasMessage);
+		buffer.putLong(object.getObjectID());
+		try {
+			buffer.put(reverse(objectType).getBytes("US-ASCII"));
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		buffer.put(viewType);
+		buffer.putInt(size);
+		buffer.putShort(updateCount);
+		buffer.put(data);
+		buffer.flip();
+		
+		return buffer;
+	}
+	
+	public IoBuffer createDeltaObject(short updateType, IoBuffer data, int size) {
+		IoBuffer buffer = bufferPool.allocate(2 + size, false).order(ByteOrder.LITTLE_ENDIAN);
+		
+		buffer.putShort(updateType);
+		buffer.put(data.array());
+		
+		return buffer;
 	}
 	
 	public SWGObject getObject() { return object; }
 	public void setObject(SWGObject object) { this.object = object; }
 	
-	public abstract void sendListDelta(short updateType, IoBuffer buffer);
+	public abstract void sendListDelta(byte viewType, short updateType, IoBuffer buffer);
 	
 	public abstract void sendBaselines();
 	

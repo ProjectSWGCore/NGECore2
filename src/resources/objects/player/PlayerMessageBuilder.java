@@ -400,9 +400,21 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 				
 		}
 	}
+	
+	public IoBuffer buildTitleDelta(String title) {
+		
+		IoBuffer buffer = bufferPool.allocate(4, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.put(getAsciiString(title));
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("PLAY", (byte) 3, (short) 1, (short) 1, buffer, size + 4);
+		
+		return buffer;
+
+	}
 
 	@Override
-	public void sendListDelta(short updateType, IoBuffer buffer) {
+	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
 		// TODO Auto-generated method stub
 		
 	}
