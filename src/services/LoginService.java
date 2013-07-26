@@ -136,6 +136,12 @@ public class LoginService implements INetworkDispatch{
 				StationIdHasJediSlot jediSlot = new StationIdHasJediSlot(false);
 				ServerNowEpochTime time = new ServerNowEpochTime((int) (System.currentTimeMillis() / 1000));
 				
+				if (client.getSession().containsAttribute("tradeSession") == true) {
+					System.out.println("Has attribute: " + session.getAttribute("tradeSession").toString());
+					client.getSession().removeAttribute("tradeSession");
+					System.out.println("Removed tradeSession Attribute @ LoginService.java");
+				}
+				
 				session.write(time.serialize());
 				session.write(clientToken.serialize());
 				session.write(servers.serialize());
