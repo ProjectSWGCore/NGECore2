@@ -45,6 +45,7 @@ import services.map.MapService;
 import services.object.ObjectService;
 import services.object.UpdateService;
 import services.sui.SUIService;
+import services.trade.TradeService;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.CrcStringTableVisitor;
 import engine.clientdata.visitors.DatatableVisitor;
@@ -99,6 +100,7 @@ public class NGECore {
 	public SUIService suiService;
 	public GuildService guildService;
 	public GCWService gcwService;
+	public TradeService tradeService;
 	
 	// Login Server
 	public NetworkDispatch loginDispatch;
@@ -178,7 +180,7 @@ public class NGECore {
 		terrainService.addPlanet(1, "tatooine", "terrain/tatooine.trn", true);
 		
 		terrainService.loadSnapShotObjects();
-		
+
 		// Zone services that need to be loaded after the above
 		simulationService = new SimulationService(this);
 		zoneDispatch.addService(simulationService);
@@ -189,6 +191,9 @@ public class NGECore {
 		gcwService = new GCWService(this);
 		zoneDispatch.addService(gcwService);
 
+		tradeService = new TradeService(this);
+		zoneDispatch.addService(tradeService);
+		
 		didServerCrash = false;
 		System.out.println("Started Server.");
 	}
