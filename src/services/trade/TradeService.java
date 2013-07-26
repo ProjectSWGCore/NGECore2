@@ -1,6 +1,8 @@
 package services.trade;
 
 import java.nio.ByteOrder;
+import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -14,13 +16,15 @@ import protocol.swg.clientSecureTradeManager.AbortTradeMessage;
 import protocol.swg.clientSecureTradeManager.AcceptTransactionMessage;
 import protocol.swg.clientSecureTradeManager.AddItemMessage;
 import protocol.swg.clientSecureTradeManager.BeginTradeMessage;
+import protocol.swg.clientSecureTradeManager.BeginVerificationMessage;
+import protocol.swg.clientSecureTradeManager.DenyTradeMessage;
 import protocol.swg.clientSecureTradeManager.GiveMoneyMessage;
 import protocol.swg.clientSecureTradeManager.RemoveItemMessage;
 import protocol.swg.clientSecureTradeManager.TradeCompleteMessage;
+import protocol.swg.clientSecureTradeManager.TradeOpcodes;
 import protocol.swg.clientSecureTradeManager.UnAcceptTransactionMessage;
 import protocol.swg.objectControllerObjects.SecureTrade;
 import resources.common.ObjControllerOpcodes;
-import resources.common.Opcodes;
 import resources.objects.creature.CreatureObject;
 import engine.clients.Client;
 import engine.resources.objects.SWGObject;
@@ -33,6 +37,14 @@ public class TradeService implements INetworkDispatch{
 	
 	private long recieverID;
 	private long senderID;
+	
+	
+	private Hashtable<SWGObject, Long> tradingObjectsTable = new Hashtable<SWGObject, Long>();
+	// key = objectToGive,       value = giver's ID
+	
+	// need to be sure that no giver ID exists in table before adding value
+	private Hashtable<Long, Integer> tradingCreditsTable = new Hashtable<Long, Integer>();
+	// key = ID of giver     value = amnt recieving
 	
 	public TradeService(NGECore core) {
 		this.core = core;
@@ -67,7 +79,7 @@ public class TradeService implements INetworkDispatch{
 				//System.out.println("Reciever isConnected: " + recieverObject.getClient().getSession().isConnected());
 				
 				if (recieverClient.getSession().containsAttribute("tradeSession") == true) {
-
+					
 					if(senderClient.getSession().containsAttribute("tradeSession") == false) {
 						{
 							senderClient.getSession().setAttribute("tradeSession", recieverID);
@@ -87,7 +99,6 @@ public class TradeService implements INetworkDispatch{
 					// creates a new trade session for the user who sent the request. It's given the objectID 
 					// that the player wants to trade with.
 					senderClient.getSession().setAttribute("tradeSession", recieverID);
-					//System.out.println("Added trade session to " + senderClient.getParent().getCustomName() + " with the key of: " + senderClient.getSession().getAttribute("tradeSession").toString());
 					
 					recieverObject.sendSystemMessage(senderObject.getCustomName() + " wants to trade with you.", (byte) 0);		
 
@@ -96,7 +107,7 @@ public class TradeService implements INetworkDispatch{
 			
 		});
 		
-		swgOpcodes.put(Opcodes.AbortTradeMessage, new INetworkRemoteEvent() {
+		swgOpcodes.put(TradeOpcodes.AbortTradeMessage, new INetworkRemoteEvent() {
 
 			@Override
 			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
@@ -105,13 +116,24 @@ public class TradeService implements INetworkDispatch{
 				
 				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
 				
+				if (client == null)
+					return;
+				
+				if (client.getSession().getAttribute("tradeSession") == null)
+				{
+					TradeCompleteMessage completeTrade = new TradeCompleteMessage();
+					AbortTradeMessage nullResponse = new AbortTradeMessage();
+					client.getSession().write(completeTrade.serialize());
+					client.getSession().write(nullResponse.serialize());
+				}
+				
 				long tradingWithClient = (long) client.getSession().getAttribute("tradeSession");
 				
 				CreatureObject tradee = (CreatureObject) core.objectService.getObject(tradingWithClient);
 				Client tradeeClient = tradee.getClient();
 				
 				
-				if(client == null || client.getSession() == null)
+				if(client.getSession() == null)
 					return;
 
 				SWGObject object = client.getParent();
@@ -119,17 +141,31 @@ public class TradeService implements INetworkDispatch{
 				if(object == null)
 					return;
 				
+				SWGObject tradeObject = null;
+				
+				Iterator<Map.Entry<SWGObject, Long>> itr = tradingObjectsTable.entrySet().iterator();
+				
+				while (itr.hasNext()) {
+					Map.Entry<SWGObject, Long> entry = itr.next();
+					
+					if(tradingWithClient == entry.getValue()) {
+						tradeObject = entry.getKey();
+						itr.remove();
+					}
+				}
+				
+				client.getSession().removeAttribute("tradeSession");
+				tradeeClient.getSession().removeAttribute("tradeSession");
+				
+				// make sure that tradeSession got removed.
+				if (tradeeClient.getSession().containsAttribute("tradeSession") && client.getSession().containsAttribute("tradeSession"))
+					return;
+				
 				TradeCompleteMessage completeTrade = new TradeCompleteMessage();
 				AbortTradeMessage response = new AbortTradeMessage();
 
 				tradeeClient.getSession().write(response.serialize());
 				client.getSession().write(response.serialize());
-				
-				client.getSession().removeAttribute("tradeSession");
-				tradeeClient.getSession().removeAttribute("tradeSession");
-				
-				if (tradeeClient.getSession().containsAttribute("tradeSession") && client.getSession().containsAttribute("tradeSession"))
-					return;
 				
 				client.getSession().write(completeTrade.serialize());
 				tradeeClient.getSession().write(completeTrade.serialize());
@@ -139,7 +175,7 @@ public class TradeService implements INetworkDispatch{
 			
 		});
 		
-		swgOpcodes.put(Opcodes.AddItemMessage, new INetworkRemoteEvent() {
+		swgOpcodes.put(TradeOpcodes.AddItemMessage, new INetworkRemoteEvent() {
 
 			@Override
 			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
@@ -150,6 +186,9 @@ public class TradeService implements INetworkDispatch{
 				addItem.deserialize(data);
 				
 				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				
+				if (client == null)
+					return;
 				
 				long tradeItemID = addItem.getTradeObjectID();
 				long tradingWithClient = (long) client.getSession().getAttribute("tradeSession");
@@ -162,19 +201,23 @@ public class TradeService implements INetworkDispatch{
 					return;
 				}
 				
-				System.out.println("Trading item: " + objectToTrade.getCustomName() + " detail: " + objectToTrade.getDetailFilename());
-				
-				AddItemMessage tradeeResponse = new AddItemMessage();
-				tradeeResponse.setTradeObjectID(tradeItemID);
-				tradee.getClient().getSession().write(tradeeResponse.serialize());
-				
-				//System.out.println("AddItemMessage in TradeService: " + data.getHexDump());
-				
+				else {
+					
+					addItemForTrade(objectToTrade, tradingWithClient);
+					System.out.println("Trading item: " + objectToTrade.getCustomName() + " detail: " + objectToTrade.getDetailFilename());
+					
+					System.out.println("tradingObjectTable: " + tradingObjectsTable.toString());
+					AddItemMessage tradeeResponse = new AddItemMessage();
+					tradeeResponse.setTradeObjectID(tradeItemID);
+					tradee.getClient().getSession().write(tradeeResponse.serialize());
+					
+					//System.out.println("AddItemMessage in TradeService: " + data.getHexDump());			
+				}	
 			}
 			
 		});
 		
-		swgOpcodes.put(Opcodes.GiveMoneyMessage, new INetworkRemoteEvent() {
+		swgOpcodes.put(TradeOpcodes.GiveMoneyMessage, new INetworkRemoteEvent() {
 
 			@Override
 			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
@@ -195,6 +238,8 @@ public class TradeService implements INetworkDispatch{
 				
 				if (givingCredits <= sender.getCashCredits()) {
 					
+					addMoneyForTrade(tradingWithClient, givingCredits);
+					
 					GiveMoneyMessage toTradingPartner = new GiveMoneyMessage();
 					toTradingPartner.setTradingCredits(givingCredits);
 					
@@ -205,7 +250,7 @@ public class TradeService implements INetworkDispatch{
 			
 		});
 		
-		swgOpcodes.put(Opcodes.RemoveItemMessage, new INetworkRemoteEvent() {
+		swgOpcodes.put(TradeOpcodes.RemoveItemMessage, new INetworkRemoteEvent() {
 
 			@Override
 			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
@@ -215,7 +260,7 @@ public class TradeService implements INetworkDispatch{
 				
 				RemoveItemMessage request = new RemoveItemMessage();
 				
-				long tradingObjectID = request.getObjectID();
+				long objectToKeepID = request.getObjectID();
 				
 				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
 				long tradingWithClient = (long) client.getSession().getAttribute("tradeSession");
@@ -223,14 +268,15 @@ public class TradeService implements INetworkDispatch{
 				CreatureObject tradePartner = (CreatureObject) core.objectService.getObject(tradingWithClient);
 				
 				RemoveItemMessage response = new RemoveItemMessage();
-				response.setObjectID(tradingObjectID);
+				response.setObjectID(objectToKeepID);
 				tradePartner.getClient().getSession().write(response.serialize());
 				
+				removeItemForTrade(core.objectService.getObject(objectToKeepID));
 			}
 			
 		});
 		
-		swgOpcodes.put(Opcodes.AcceptTransactionMessage, new INetworkRemoteEvent() {
+		swgOpcodes.put(TradeOpcodes.AcceptTransactionMessage, new INetworkRemoteEvent() {
 
 			@Override
 			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
@@ -249,7 +295,7 @@ public class TradeService implements INetworkDispatch{
 			
 		});
 		
-		swgOpcodes.put(Opcodes.UnAcceptTransactionMessage, new INetworkRemoteEvent() {
+		swgOpcodes.put(TradeOpcodes.UnAcceptTransactionMessage, new INetworkRemoteEvent() {
 
 			@Override
 			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
@@ -264,11 +310,149 @@ public class TradeService implements INetworkDispatch{
 			}
 			
 		});
+		// not used, but just in case.... VerifyTradeMessage is sent instead when a user
+		// hits the Accept button. Can use this as an additional check if need to.
+		swgOpcodes.put(TradeOpcodes.BeginVerificationMessage, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
+				System.out.println("Got BeginVerificationMessage");
+				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				client.getSession().setAttribute("tradeSessionIsVerified");
+				System.out.println("Verified client");
+
+			}
+			
+		});
 		
-		// TODO: Add verification system and item lists
+		swgOpcodes.put(TradeOpcodes.VerifyTradeMessage, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
+
+				// Sent first!
+
+				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				long tradingWithClient = (long) getTradeAttribute(client);
+				
+				CreatureObject tradePartner = (CreatureObject) core.objectService.getObject(tradingWithClient);
+				CreatureObject actingTrader = (CreatureObject) client.getParent();
+				CreatureObject tradePartnerContainer = (CreatureObject) tradePartner.getContainer();
+				
+				SWGObject tradePartnerInventory = tradePartner.getSlottedObject("inventory");
+				SWGObject actingTraderInventory = actingTrader.getSlottedObject("inventory");
+				SWGObject tradeObject = null;
+				
+				//if (tradePartner == null || actingTrader == null)
+					//return;
+				
+				//BeginVerificationMessage verifyMessage = new BeginVerificationMessage();
+				//client.getSession().write(verifyMessage.serialize());
+				//client.getSession().setAttribute("tradeSessionIsVerified");
+				//tradePartner.getClient().getSession().write(verifyMessage.serialize());
+				//tradePartner.getClient().getSession().setAttribute("tradeSessionIsVerified");
+				
+				client.getSession().setAttribute("tradeSessionIsVerified");
+				
+				if (tradePartner.getClient().getSession().getAttribute("tradeSessionIsVerified") == null)
+					return;
+				
+				else if (tradePartner.getClient().getSession().containsAttribute("tradeSessionIsVerified"))
+				{
+					
+					Iterator<Map.Entry<SWGObject, Long>> itr = tradingObjectsTable.entrySet().iterator();
+					
+					while (itr.hasNext()) {
+						Map.Entry<SWGObject, Long> entry = itr.next();
+						
+						if(tradingWithClient == entry.getValue()) {
+							tradeObject = entry.getKey();
+							if (actingTrader == null || tradePartnerContainer == null || tradePartner == null)
+							{
+								cleanTradeSession(client, tradePartner.getClient());
+							}
+							actingTraderInventory.transferTo(tradePartner, tradePartnerInventory, tradeObject);
+							itr.remove();
+						}
+						
+					}
+					
+					int moneyToGive = 0;
+					
+					for(Map.Entry<Long, Integer> entry : tradingCreditsTable.entrySet()) {
+						if(tradingWithClient == entry.getKey()) {
+							moneyToGive = entry.getValue();
+							tradingCreditsTable.remove(tradingWithClient);
+						}
+					}
+					
+					int tradePartnerCredits = tradePartner.getCashCredits();
+					
+					if (moneyToGive != 0) {
+						actingTrader.setCashCredits(tradePartnerCredits - moneyToGive);
+						tradePartner.setCashCredits(tradePartnerCredits + moneyToGive);
+					}
+					
+					
+					System.out.println("Finished trading items/credits");
+					
+					cleanTradeSession(client, tradePartner.getClient());
+					
+				}
+				
+			}
+			
+		});
 		
 	}
 	
+	public long getTradeAttribute(Client client) {
+		long tradeSessionValue;
+		tradeSessionValue = (long) client.getSession().getAttribute("tradeSession");
+		return tradeSessionValue;
+	}
+	
+	public Hashtable<SWGObject, Long> getTradingObjectMap() {
+		return tradingObjectsTable;
+	}
+	
+	public void addItemForTrade(SWGObject swgObject, long tradePartnerID) {
+		if (tradingObjectsTable.containsKey(swgObject)) {
+			removeItemForTrade(swgObject);
+		}
+		tradingObjectsTable.put(swgObject, tradePartnerID);
+	}
+	
+	public void removeItemForTrade(SWGObject swgObject) {
+		tradingObjectsTable.remove(swgObject);
+	}
+	
+	public void addMoneyForTrade(long tradePartnerID, int creditsAmount) {
+		if (tradingCreditsTable.containsKey(tradePartnerID))
+		{
+			removeMoneyForTrade(tradePartnerID);
+		}
+		tradingCreditsTable.put(tradePartnerID, creditsAmount);
+	}
+	
+	public void removeMoneyForTrade(long tradePartnerID) {
+		tradingCreditsTable.remove(tradePartnerID);
+	}
+	
+	public void cleanTradeSession(Client actorClient, Client targetTradeClient) {
+		
+		TradeCompleteMessage partnerCompleteTrade = new TradeCompleteMessage();
+		targetTradeClient.getSession().write(partnerCompleteTrade.serialize());
+		
+		TradeCompleteMessage clientCompleteTrade = new TradeCompleteMessage();
+		actorClient.getSession().write(clientCompleteTrade.serialize());
+		
+		actorClient.getSession().removeAttribute("tradeSession");
+		actorClient.getSession().removeAttribute("tradeSessionIsVerified");
+		targetTradeClient.getSession().removeAttribute("tradeSession");
+		targetTradeClient.getSession().removeAttribute("tradeSessionIsVerified");
+		
+	}
 	
 	@Override
 	public void shutdown() {

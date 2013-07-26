@@ -20,9 +20,7 @@ public class SecureTrade extends ObjControllerObject{
 	@Override
 	public void deserialize(IoBuffer data) {
 		
-		//setUnknown(data.getShort());
-		System.out.println("SecureTrade deserialize Dump: " + data.getHexDump());
-		setSenderID(data.getLong()); // FINE AT SPOT GOT RIGHT SENDER ID. DUMPING DUMPS IT HERE.
+		setSenderID(data.getLong());
 		data.getLong(); // skip through 0's
 		data.getLong(); // skip through 0's
 		setRecieverID(data.getLong());
