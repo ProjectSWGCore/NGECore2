@@ -38,6 +38,7 @@ import services.ScriptService;
 import services.SimulationService;
 import services.TerrainService;
 import services.chat.ChatService;
+import services.command.CombatCommand;
 import services.command.CommandService;
 import services.gcw.GCWService;
 import services.guild.GuildService;
