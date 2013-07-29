@@ -4,20 +4,16 @@ import java.nio.ByteOrder;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import main.NGECore;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 
-import protocol.swg.ObjControllerMessage;
 import protocol.swg.clientSecureTradeManager.AbortTradeMessage;
 import protocol.swg.clientSecureTradeManager.AcceptTransactionMessage;
 import protocol.swg.clientSecureTradeManager.AddItemMessage;
 import protocol.swg.clientSecureTradeManager.BeginTradeMessage;
-import protocol.swg.clientSecureTradeManager.BeginVerificationMessage;
-import protocol.swg.clientSecureTradeManager.DenyTradeMessage;
 import protocol.swg.clientSecureTradeManager.GiveMoneyMessage;
 import protocol.swg.clientSecureTradeManager.RemoveItemMessage;
 import protocol.swg.clientSecureTradeManager.TradeCompleteMessage;
@@ -30,6 +26,8 @@ import engine.clients.Client;
 import engine.resources.objects.SWGObject;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
+
+@SuppressWarnings("unused")
 
 public class TradeService implements INetworkDispatch{
 
