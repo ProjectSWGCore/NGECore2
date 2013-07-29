@@ -136,3 +136,4 @@ def lokLocations(core, planet):
 	mapService.addLocation(planet, 'Nym\'s Stronghold', 440, 5029, 17, 0, 0)
 	mapService.addLocation(planet, 'an Imperial outpost', -1920, -3084, 17, 0, 0)
 	
+	
