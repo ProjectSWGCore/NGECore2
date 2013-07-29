@@ -21,44 +21,89 @@
  ******************************************************************************/
 package resources.objects;
 
-public class Guild {
+import java.nio.ByteOrder;
+import java.util.List;
+
+import org.apache.mina.core.buffer.IoBuffer;
+
+import engine.resources.objects.SWGObject;
+
+public class Guild extends ListObject {
 	
 	private int id;
 	private String abbreviation;
 	private String name;
+	private SWGObject leader;
+	private List<SWGObject> members;
 	
-	public Guild(int id, String abbreviation, String name) {
+	public Guild(int id, String abbreviation, String name, SWGObject leader) {
 		this.id = id;
 		this.abbreviation = abbreviation;
 		this.name = name;
+		this.leader = leader;
+		this.members.add(leader);
 	}
 	
 	public int getId() {
-		return id;
+		synchronized(objectMutex) {
+			return id;
+		}
 	}
 	
 	public void setId(int id) {
-		this.id = id;
+		synchronized(objectMutex) {
+			this.id = id;
+		}
 	}
 	
 	public String getAbbreviation() {
-		return abbreviation;
+		synchronized(objectMutex) {
+			return abbreviation;
+		}
 	}
 	
 	public void setAbbreviation(String abbreviation) {
-		this.abbreviation = abbreviation;
+		synchronized(objectMutex) {
+			this.abbreviation = abbreviation;
+		}
 	}
 	
 	public String getName() {
-		return name;
+		synchronized(objectMutex) {
+			return name;
+		}
 	}
 	
 	public void setName(String name) {
-		this.name = name;
+		synchronized(objectMutex) {
+			this.name = name;
+		}
 	}
 	
 	public String getString() {
-		return (Integer.toString(id) + ":" + abbreviation);
+		synchronized(objectMutex) {
+			return (Integer.toString(id) + ":" + abbreviation);
+		}
+	}
+	
+	public SWGObject getLeader() {
+		return leader;
+	}
+	
+	public void setLeader(SWGObject leader) {
+		this.leader = leader;
+	}
+	
+	public List<SWGObject> getMembers() {
+		return members;
+	}
+
+	public byte[] getBytes() {
+		synchronized(objectMutex) {
+			IoBuffer buffer = bufferPool.allocate((getString().length() + 2), false).order(ByteOrder.LITTLE_ENDIAN);
+			buffer.put(getAsciiString(getString()));
+			return buffer.array();
+		}
 	}
 
 }

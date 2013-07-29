@@ -19,57 +19,59 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package protocol.swg;
+package protocol.swg.clientSecureTradeManager;
 
 import java.nio.ByteOrder;
-import java.util.Map.Entry;
+
+import main.NGECore;
 
 import org.apache.mina.core.buffer.IoBuffer;
-import org.apache.mina.core.buffer.SimpleBufferAllocator;
 
 import engine.resources.objects.SWGObject;
+import protocol.swg.SWGMessage;
 
-public class AttributeListMessage extends SWGMessage {
+@SuppressWarnings("unused")
+
+public class AddItemMessage extends SWGMessage {
+
+	private NGECore core;
+	private SWGObject tradeObject;
+	private long tradeObjectID;
 	
-	private SimpleBufferAllocator bufferPool;
-	private SWGObject target;
-
-	public AttributeListMessage(SWGObject target, SimpleBufferAllocator bufferPool) {
-		this.target = target;
-		this.bufferPool = bufferPool;
-	}
-
-
 	@Override
 	public void deserialize(IoBuffer data) {
-		
+		data.getShort();
+		data.getInt();
+		setTradeObjectID(data.getLong());
 	}
 
 	@Override
 	public IoBuffer serialize() {
-		IoBuffer result = bufferPool.allocate(100, false).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer result = IoBuffer.allocate(200).order(ByteOrder.LITTLE_ENDIAN);
 		result.setAutoExpand(true);
 		
-		result.putShort((short) 5);
-		result.putInt(0xF3F12F2A);
-		
-		result.putLong(target.getObjectID());
-		result.putShort((short) 0);
-
-		synchronized(target.getMutex()) {
-			result.putInt(target.getAttributes().size());
-	
-			for(Entry<String, String> e : target.getAttributes().entrySet()) {
-				result.put(getAsciiString(e.getKey()));
-				result.put(getUnicodeString(e.getValue()));
-			}
-		}
-		result.putInt(0);
-		int size = result.position();
-		result = bufferPool.allocate(size, false).put(result.array(), 0, size);
-
+		result.putShort((short) 2);
+		result.putInt(0x1E8D1356);
+		result.putLong(tradeObjectID);
 		return result.flip();
+	}
+	
+	public long getTradeObjectID() {
+		return this.tradeObjectID;
 		
+	}
+	
+	public SWGObject getTradeObject() {
+		return this.tradeObject;
+	}
+	
+	public void setTradeObject(SWGObject object) {
+		this.tradeObject = object;
+		this.tradeObjectID = object.getObjectID();
+	}
+	
+	public void setTradeObjectID(long objectID) {
+		this.tradeObjectID = objectID;
 	}
 
 }

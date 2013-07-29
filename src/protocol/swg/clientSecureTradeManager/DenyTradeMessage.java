@@ -19,15 +19,27 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package resources.common;
+package protocol.swg.clientSecureTradeManager;
 
-public class ObjControllerOpcodes {
-	
-	public static final int DATA_TRANSFORM = 0x71000000;
-	public static final int DATA_TRANSFORM_WITH_PARENT = 0xF1000000;
-	public static final int COMMAND_QUEUE_ENQUEUE = 0x16010000;
-	public static final int TARGET_UPDATE = 0x26010000;
-	public static final int OBJECT_MENU_REQUEST = 0x46010000;
-	public static final int SECURE_TRADE = 0x15010000;
+import java.nio.ByteOrder;
+
+import org.apache.mina.core.buffer.IoBuffer;
+
+import protocol.swg.SWGMessage;
+
+public class DenyTradeMessage extends SWGMessage {
+
+	@Override
+	public void deserialize(IoBuffer data) {
+		
+	}
+
+	@Override
+	public IoBuffer serialize() {
+		IoBuffer result = IoBuffer.allocate(20).order(ByteOrder.LITTLE_ENDIAN);
+		result.putShort((short) 1);
+		result.putInt(0x6EC28670);
+		return result.flip();
+	}
 
 }

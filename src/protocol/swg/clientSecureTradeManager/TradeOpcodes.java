@@ -19,15 +19,18 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package resources.common;
+package protocol.swg.clientSecureTradeManager;
 
-public class ObjControllerOpcodes {
+public class TradeOpcodes {
 	
-	public static final int DATA_TRANSFORM = 0x71000000;
-	public static final int DATA_TRANSFORM_WITH_PARENT = 0xF1000000;
-	public static final int COMMAND_QUEUE_ENQUEUE = 0x16010000;
-	public static final int TARGET_UPDATE = 0x26010000;
-	public static final int OBJECT_MENU_REQUEST = 0x46010000;
-	public static final int SECURE_TRADE = 0x15010000;
-
+	public static int AbortTradeMessage = 0x9CA80F98;
+	public static int TradeCompleteMessage = 0xC542038B;
+	public static int AddItemMessage = 0x1E8D1356;
+	public static int RemoveItemMessage = 0x4417AF8B;
+	public static int GiveMoneyMessage = 0xD1527EE8;
+	public static int AcceptTransactionMessage = 0xB131CA17;
+	public static int UnAcceptTransactionMessage = 0xE81E4382;
+	public static int VerifyTradeMessage = 0x9AE247EE;
+	public static int AddItemFailedMessage = 0x69D3E1D2;
+	public static int BeginVerificationMessage = 0xE7491DF5;
 }

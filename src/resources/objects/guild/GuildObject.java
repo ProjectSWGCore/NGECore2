@@ -21,13 +21,15 @@
  ******************************************************************************/
 package resources.objects.guild;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.apache.mina.core.buffer.IoBuffer;
 
-import resources.objects.CurrentServerGCWZoneInfo;
+import main.NGECore;
+
+import resources.objects.CurrentServerGCWZoneHistory;
 import resources.objects.CurrentServerGCWZonePercent;
 import resources.objects.Guild;
 import resources.objects.OtherServerGCWZonePercent;
+import resources.objects.SWGList;
 
 import com.sleepycat.persist.model.NotPersistent;
 
@@ -39,6 +41,10 @@ import engine.resources.scene.Quaternion;
 
 public class GuildObject extends SWGObject {
 	
+	protected NGECore core;
+	@NotPersistent
+	private GuildMessageBuilder messageBuilder = new GuildMessageBuilder(this);
+	
 	// GILD 3
 	private float complexity = 0x803F0F00;
 	private String STFFile = "string_id_table";
@@ -46,46 +52,24 @@ public class GuildObject extends SWGObject {
 	private String STFName = "";
 	private String customName = "";
 	private int volume = 0;
-	private List<Guild> guildList = new ArrayList<Guild>();
-	@NotPersistent
-	private int guildListUpdateCounter = 0;
+	private SWGList<Guild> guildList = new SWGList<Guild>(messageBuilder, 3, 4);
 	
 	// GILD 6
 	private int serverId = 0x00000041;
 	//private String STFName = "string_id_table";
 	private int unknown1 = 0;
 	private short unknown2 = 0;
-
-	private List<CurrentServerGCWZonePercent> currentServerGCWZonePercentList = new ArrayList<CurrentServerGCWZonePercent>();
-	@NotPersistent
-	private int currentServerGCWZonePercentListUpdateCounter = 0;
-
-	private List<CurrentServerGCWZonePercent> currentServerGCWTotalPercentList = new ArrayList<CurrentServerGCWZonePercent>();
-	@NotPersistent
-	private int currentServerGCWTotalPercentListUpdateCounter = 0;
-
-	private List<CurrentServerGCWZoneInfo> currentServerGCWZoneInfoList = new ArrayList<CurrentServerGCWZoneInfo>();
-	@NotPersistent
-	private int currentServerGCWZoneInfoListUpdateCounter = 0;
+	private SWGList<CurrentServerGCWZonePercent> currentServerGCWZonePercentList = new SWGList<CurrentServerGCWZonePercent>(messageBuilder, 6, 2);
+	private SWGList<CurrentServerGCWZonePercent> currentServerGCWTotalPercentList = new SWGList<CurrentServerGCWZonePercent>(messageBuilder, 6, 3);
+	private SWGList<CurrentServerGCWZoneHistory> currentServerGCWZoneHistoryList = new SWGList<CurrentServerGCWZoneHistory>(messageBuilder, 6, 4);
+	private SWGList<CurrentServerGCWZoneHistory> currentServerGCWTotalHistoryList = new SWGList<CurrentServerGCWZoneHistory>(messageBuilder, 6, 5);
+	private SWGList<OtherServerGCWZonePercent> otherServerGCWZonePercentList = new SWGList<OtherServerGCWZonePercent>(messageBuilder, 6, 6);
+	private SWGList<OtherServerGCWZonePercent> otherServerGCWTotalPercentList = new SWGList<OtherServerGCWZonePercent>(messageBuilder, 6, 7);
+	private int unknown3 = 5;
 	
-	private List<CurrentServerGCWZoneInfo> currentServerGCWTotalInfoList = new ArrayList<CurrentServerGCWZoneInfo>();
-	@NotPersistent
-	private int currentServerGCWTotalInfoListUpdateCounter = 0;
-
-	private List<OtherServerGCWZonePercent> otherServerGCWZonePercentList = new ArrayList<OtherServerGCWZonePercent>();
-	@NotPersistent
-	private int otherServerGCWZonePercentListUpdateCounter = 0;
-
-	private List<OtherServerGCWZonePercent> otherServerGCWTotalPercentList = new ArrayList<OtherServerGCWZonePercent>();
-	@NotPersistent
-	private int otherServerGCWTotalPercentListUpdateCounter = 0;
-	
-	@NotPersistent
-	private GuildMessageBuilder messageBuilder;
-	
-	public GuildObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
+	public GuildObject(NGECore core, long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
 		super(objectID, planet, position, orientation, Template);
-		messageBuilder = new GuildMessageBuilder(this);
+		this.core = core;
 	}
 	
 	public float getComplexity() {
@@ -98,6 +82,8 @@ public class GuildObject extends SWGObject {
 		synchronized(objectMutex) {
 			this.complexity = complexity;
 		}
+		
+		notifyAll(messageBuilder.buildComplexity(complexity));
 	}
 	
 	public String getSTFFile() {
@@ -110,6 +96,8 @@ public class GuildObject extends SWGObject {
 		synchronized(objectMutex) {
 			this.STFFile = STFFile;
 		}
+		
+		notifyAll(messageBuilder.buildSTF(STFFile, STFSpacer, STFName));
 	}
 	
 	public int getSTFSpacer() {
@@ -122,6 +110,8 @@ public class GuildObject extends SWGObject {
 		synchronized(objectMutex) {
 			this.STFSpacer = STFSpacer;
 		}
+		
+		notifyAll(messageBuilder.buildSTF(STFFile, STFSpacer, STFName));
 	}
 	
 	public String getSTFName() {
@@ -134,6 +124,8 @@ public class GuildObject extends SWGObject {
 		synchronized(objectMutex) {
 			this.STFName = STFName;
 		}
+		
+		notifyAll(messageBuilder.buildSTF(STFFile, STFSpacer, STFName));
 	}
 	
 	public String getCustomName() {
@@ -146,6 +138,8 @@ public class GuildObject extends SWGObject {
 		synchronized(objectMutex) {
 			this.customName = customName;
 		}
+		
+		notifyAll(messageBuilder.buildCustomName(customName));
 	}
 	
 	public int getVolume() {
@@ -158,22 +152,12 @@ public class GuildObject extends SWGObject {
 		synchronized(objectMutex) {
 			this.volume = volume;
 		}
+		
+		notifyAll(messageBuilder.buildVolume(volume));
 	}
 	
-	public List<Guild> getGuildList() {
+	public SWGList<Guild> getGuildList() {
 		return guildList;
-	}
-	
-	public int getGuildListUpdateCounter() {
-		synchronized(objectMutex) {
-			return guildListUpdateCounter;
-		}
-	}
-	
-	public void setGuildListUpdateCounter(int guildListUpdateCounter) {
-		synchronized(objectMutex) {
-			this.guildListUpdateCounter = guildListUpdateCounter;
-		}
 	}
 	
 	public int getServerId() {
@@ -186,6 +170,8 @@ public class GuildObject extends SWGObject {
 		synchronized(objectMutex) {
 			this.serverId = serverId;
 		}
+		
+		notifyAll(messageBuilder.buildServerId(serverId));
 	}
 	
 	public int getUnknown1() {
@@ -198,6 +184,8 @@ public class GuildObject extends SWGObject {
 		synchronized(objectMutex) {
 			this.unknown1 = unknown1;
 		}
+		
+		notifyAll(messageBuilder.buildUnknowns(unknown1, unknown2));
 	}
 	
 	public short getUnknown2() {
@@ -210,101 +198,53 @@ public class GuildObject extends SWGObject {
 		synchronized(objectMutex) {
 			this.unknown2 = unknown2;
 		}
+		
+		notifyAll(messageBuilder.buildUnknowns(unknown1, unknown2));
 	}
 	
-	public List<CurrentServerGCWZonePercent> getCurrentServerGCWZonePercentList() {
+	public SWGList<CurrentServerGCWZonePercent> getCurrentServerGCWZonePercentList() {
 		return currentServerGCWZonePercentList;
 	}
 	
-	public int getCurrentServerGCWZonePercentListUpdateCounter() {
-		synchronized(objectMutex) {
-			return currentServerGCWZonePercentListUpdateCounter;
-		}
-	}
-	
-	public void setCurrentServerGCWZonePercentListUpdateCounter(int currentServerGCWZonePercentListUpdateCounter) {
-		synchronized(objectMutex) {
-			this.currentServerGCWZonePercentListUpdateCounter = currentServerGCWZonePercentListUpdateCounter;
-		}
-	}
-	
-	public List<CurrentServerGCWZonePercent> getCurrentServerGCWTotalPercentList() {
+	public SWGList<CurrentServerGCWZonePercent> getCurrentServerGCWTotalPercentList() {
 		return currentServerGCWTotalPercentList;
 	}
 	
-	public int getCurrentServerGCWTotalPercentListUpdateCounter() {
-		synchronized(objectMutex) {
-			return currentServerGCWTotalPercentListUpdateCounter;
-		}
+	public SWGList<CurrentServerGCWZoneHistory> getCurrentServerGCWZoneHistoryList() {
+		return currentServerGCWZoneHistoryList;
 	}
 	
-	public void setCurrentServerGCWTotalPercentListUpdateCounter(int currentServerGCWTotalPercentListUpdateCounter) {
-		synchronized(objectMutex) {
-			this.currentServerGCWTotalPercentListUpdateCounter = currentServerGCWTotalPercentListUpdateCounter;
-		}
+	public SWGList<CurrentServerGCWZoneHistory> getCurrentServerGCWTotalHistoryList() {
+		return currentServerGCWTotalHistoryList;
 	}
 	
-	public List<CurrentServerGCWZoneInfo> getCurrentServerGCWZoneInfoList() {
-		return currentServerGCWZoneInfoList;
-	}
-	
-	public int getCurrentServerGCWZoneInfoListUpdateCounter() {
-		synchronized(objectMutex) {
-			return currentServerGCWZoneInfoListUpdateCounter;
-		}
-	}
-	
-	public void setCurrentServerGCWZoneInfoListUpdateCounter(int currentServerGCWZoneInfoListUpdateCounter) {
-		synchronized(objectMutex) {
-			this.currentServerGCWZoneInfoListUpdateCounter = currentServerGCWZoneInfoListUpdateCounter;
-		}
-	}
-	
-	public List<CurrentServerGCWZoneInfo> getCurrentServerGCWTotalInfoList() {
-		return currentServerGCWTotalInfoList;
-	}
-	
-	public int getCurrentServerGCWTotalInfoListUpdateCounter() {
-		synchronized(objectMutex) {
-			return currentServerGCWTotalInfoListUpdateCounter;
-		}
-	}
-	
-	public void setCurrentServerGCWTotalInfoListUpdateCounter(int currentServerGCWTotalInfoListUpdateCounter) {
-		synchronized(objectMutex) {
-			this.currentServerGCWTotalInfoListUpdateCounter = currentServerGCWTotalInfoListUpdateCounter;
-		}
-	}
-	
-	public List<OtherServerGCWZonePercent> getOtherServerGCWZonePercentList() {
+	public SWGList<OtherServerGCWZonePercent> getOtherServerGCWZonePercentList() {
 		return otherServerGCWZonePercentList;
 	}
 	
-	public int getOtherServerGCWZonePercentListUpdateCounter() {
-		synchronized(objectMutex) {
-			return otherServerGCWZonePercentListUpdateCounter;
-		}
-	}
-	
-	public void setOtherServerGCWZonePercentListUpdateCounter(int otherServerGCWZonePercentListUpdateCounter) {
-		synchronized(objectMutex) {
-			this.otherServerGCWZonePercentListUpdateCounter = otherServerGCWZonePercentListUpdateCounter;
-		}
-	}
-	
-	public List<OtherServerGCWZonePercent> getOtherServerGCWTotalPercentList() {
+	public SWGList<OtherServerGCWZonePercent> getOtherServerGCWTotalPercentList() {
 		return otherServerGCWTotalPercentList;
 	}
 	
-	public int getOtherServerGCWTotalPercentListUpdateCounter() {
+	public int getUnknown3() {
 		synchronized(objectMutex) {
-			return otherServerGCWTotalPercentListUpdateCounter;
+			return unknown3;
 		}
 	}
 	
-	public void setOtherServerGCWTotalPercentListUpdateCounter(int otherServerGCWTotalPercentListUpdateCounter) {
+	public void setUnknown3(int unknown3) {
 		synchronized(objectMutex) {
-			this.otherServerGCWTotalPercentListUpdateCounter = otherServerGCWTotalPercentListUpdateCounter;
+			this.unknown3 = unknown3;
+		}
+		
+		notifyAll(messageBuilder.buildUnknown3(unknown3));
+	}
+	
+	public void sendGCWUpdate() {
+		IoBuffer buffer = messageBuilder.buildGCWDelta();
+		
+		if (buffer != null) {
+			notifyAll(buffer);
 		}
 	}
 	
@@ -313,6 +253,20 @@ public class GuildObject extends SWGObject {
 		destination.getSession().write(messageBuilder.buildBaseline3());
 		destination.getSession().write(messageBuilder.buildBaseline6());
 	}
-
+	
+	private void notifyAll(IoBuffer buffer) {
+		//for (int i = 0; i < core.getActiveConnectionsMap().size(); i++) {
+		//	core.getActiveConnectionsMap().get(i).getSession().write(buffer);
+		//}
+		System.out.println("Notifying all...");
+		synchronized(core.getActiveConnectionsMap()) {
+			for (Client client : core.getActiveConnectionsMap().values()) {
+				System.out.println("Notifying..." + client.getParent().getCustomName());
+				client.getSession().write(buffer);
+				System.out.println("Notified them.");
+				System.out.println("Packet: " + buffer.getHexDump());
+			}
+		}
+	}
 	
 }

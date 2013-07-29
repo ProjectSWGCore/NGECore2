@@ -134,6 +134,8 @@ public class PlayerObject extends SWGObject {
 		synchronized(objectMutex) {
 			this.title = title;
 		}
+		
+		notifyObservers(messageBuilder.buildTitleDelta(title), true);
 	}
 
 	public String getProfession() {

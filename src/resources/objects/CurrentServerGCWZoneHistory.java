@@ -25,26 +25,20 @@ import java.nio.ByteOrder;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-public class OtherServerGCWZonePercent extends ListObject {
+public class CurrentServerGCWZoneHistory extends ListObject {
 	
 	private byte unknown1 = 0;
-	private String server = "SWG";
 	private String zone = "";
 	private int lastUpdateTime = ((int) System.currentTimeMillis());
 	private int percent = 50;
-	private int gcwPoints = 0;
-
-	public OtherServerGCWZonePercent(String server, String zone) {
-		this.server = server;
+	
+	public CurrentServerGCWZoneHistory(String zone, int percent) {
 		this.zone = zone;
+		this.percent = percent;
 	}
 	
-	public OtherServerGCWZonePercent(String zone) {
+	public CurrentServerGCWZoneHistory(String zone) {
 		this.zone = zone;
-	}
-	
-	public OtherServerGCWZonePercent() {
-		
 	}
 	
 	public byte getUnknown1() {
@@ -56,12 +50,6 @@ public class OtherServerGCWZonePercent extends ListObject {
 	public void setUnknown1(byte unknown1) {
 		synchronized(objectMutex) {
 			this.unknown1 = unknown1;
-		}
-	}
-	
-	public String getServer() {
-		synchronized(objectMutex) {
-			return server;
 		}
 	}
 	
@@ -90,29 +78,11 @@ public class OtherServerGCWZonePercent extends ListObject {
 		}
 	}
 	
-	public int getGCWPoints() {
-		synchronized(objectMutex) {
-			return gcwPoints;
-		}
-	}
-	
-	public void addGCWPoints(int gcwPoints) {
-		synchronized(objectMutex) {
-			this.gcwPoints += gcwPoints;
-		}
-	}
-	
-	public void removeGCWPoints(int gcwPoints) {
-		synchronized(objectMutex) {
-			this.gcwPoints = (((this.gcwPoints - gcwPoints) < 0) ? 0 : this.gcwPoints - gcwPoints);
-		}
-	}
-	
 	public byte[] getBytes() {
 		synchronized(objectMutex) {
-			IoBuffer buffer = bufferPool.allocate((4 + server.length() + zone.length() + 4), false).order(ByteOrder.LITTLE_ENDIAN);
-			buffer.put(getAsciiString(server));
+			IoBuffer buffer = bufferPool.allocate((8 + zone.length() + 2), false).order(ByteOrder.LITTLE_ENDIAN);
 			buffer.put(getAsciiString(zone));
+			buffer.putInt(lastUpdateTime);
 			buffer.putInt(percent);
 			return buffer.array();
 		}

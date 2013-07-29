@@ -120,6 +120,9 @@ public class SimulationService implements INetworkDispatch {
 		core.commandService.registerCommand("giveitem");
 		core.commandService.registerCommand("object");
 		core.commandService.registerCommand("getattributesbatch");
+		core.commandService.registerCommand("pvp");
+		core.commandService.registerCommand("setcurrentskilltitle");
+		core.commandService.registerCommand("tip");
 		
 	}
 	

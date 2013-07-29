@@ -19,8 +19,25 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package resources.objects.group;
+package protocol.swg.clientSecureTradeManager;
 
-public class GroupMessageBuilder {
+import org.apache.mina.core.buffer.IoBuffer;
+
+import protocol.swg.SWGMessage;
+
+public class BeginVerificationMessage extends SWGMessage {
+
+	@Override
+	public void deserialize(IoBuffer data) {
+		
+	}
+
+	@Override
+	public IoBuffer serialize() {
+		IoBuffer result = IoBuffer.allocate(20);
+		result.putShort((short) 1);
+		result.putInt(0xE7491DF5);
+		return result.flip();
+	}
 
 }
