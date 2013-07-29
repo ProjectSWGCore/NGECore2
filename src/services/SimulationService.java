@@ -42,6 +42,8 @@ import engine.clientdata.visitors.MeshVisitor;
 import engine.clientdata.visitors.PortalVisitor;
 import engine.clientdata.visitors.PortalVisitor.Cell;
 import engine.clients.Client;
+import engine.resources.common.Mesh3DTriangle;
+import engine.resources.common.Ray;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -63,13 +65,21 @@ import protocol.swg.objectControllerObjects.TargetUpdate;
 import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
 import resources.common.*;
+import toxi.geom.Ray3D;
+import toxi.geom.Vec3D;
+import toxi.geom.mesh.TriangleMesh;
 import wblut.geom.WB_AABBNode;
 import wblut.geom.WB_AABBTree;
+import wblut.geom.WB_Distance;
 import wblut.geom.WB_Intersection;
 import wblut.geom.WB_Point3d;
 import wblut.geom.WB_Ray;
 import wblut.geom.WB_Transform;
+import wblut.geom.WB_Vector3d;
 import wblut.hemesh.HE_Mesh;
+import wblut.hemesh.HE_Vertex;
+import wblut.math.WB_Epsilon;
+import wblut.math.WB_M44;
 
 @SuppressWarnings("unused")
 
@@ -77,7 +87,8 @@ public class SimulationService implements INetworkDispatch {
 	
 	Map<String, QuadTree<SWGObject>> quadTrees;
 	private NGECore core;
-
+	private Map<String, MeshVisitor> cellMeshes = new ConcurrentHashMap<String, MeshVisitor>(); 
+	
 	public SimulationService(NGECore core) {
 		this.core = core;
 		TerrainService terrainService = core.terrainService;
@@ -339,7 +350,7 @@ public class SimulationService implements INetworkDispatch {
 		
 	}
 	
-	public WB_AABBTree getAABBTree(SWGObject object, int collisionBlockFlag) {
+	/*public WB_AABBTree getAABBTree(SWGObject object, int collisionBlockFlag) {
 		
 		if(object.getMeshVisitor() == null || object.getTemplateData() == null) {
 			System.out.println("NULL Mesh Visitor for: " + object.getTemplate());
@@ -348,9 +359,8 @@ public class SimulationService implements INetworkDispatch {
 		
 		if(object.getTemplateData().getAttribute("collisionActionBlockFlags") != null) {
 			int bit = (Integer) object.getTemplateData().getAttribute("collisionActionBlockFlags") & collisionBlockFlag;
-		
-			if(bit == (Integer) object.getTemplateData().getAttribute("collisionActionBlockFlags"))
-				return null;
+			//if(bit == (Integer) object.getTemplateData().getAttribute("collisionActionBlockFlags"))
+			//	return null;
 		}
 		
 		Point3D position = object.getPosition();
@@ -358,28 +368,56 @@ public class SimulationService implements INetworkDispatch {
 				
 		if(mesh == null)
 			return null;
-		System.out.println(object.getHeading());
+
 		float angle = (float) (object.getRadians() * (180 / Math.PI));
 		System.out.println("Angle: " + angle);
 
 		Quaternion quat = object.getOrientation();
 		
-		WB_Transform transform = new WB_Transform().addRotateZ(object.getRadians());
-		mesh = mesh.move(position.x, position.z, position.y).transform(transform);
-		mesh.clean();
-		mesh.cleanUnusedElementsByFace();
+		//WB_Transform transform = new WB_Transform();
+		//transform.addRotateZ(object.getRadians());
+		
+		//mesh = mesh.transform(transform);
+	
+		//mesh = mesh.move(position.x, position.z, position.y);
+
+		
 		WB_AABBTree aabbTree = new WB_AABBTree(mesh, mesh.numberOfFaces());
 		return aabbTree;
+	}*/
+			
+	public Ray convertRayToModelSpace(Point3D origin, Point3D end, SWGObject object) {
+		
+		Point3D position = object.getPosition();
+
+		WB_M44 translateMatrix = new WB_M44(1, 0, 0, position.x, 0, 1, 0, position.y, 0, 0, 1, position.z, 0, 0, 0, 1);
+		
+		float radians = object.getRadians();
+		float sin = (float) Math.sin(radians);
+		float cos = (float) Math.cos(radians);
+
+        WB_M44 rotationMatrix = new WB_M44(cos, 0, sin, 0, 0, 1, 0, 0, -sin, 0, cos, 0, 0, 0, 0, 1);
+
+        WB_M44 modelSpace = translateMatrix.mult(rotationMatrix).inverse();
+        
+        float originX = (float) (modelSpace.m11 * origin.x + modelSpace.m12 * origin.y + modelSpace.m13 * origin.z + modelSpace.m14);
+        float originY = (float) (modelSpace.m21 * origin.x + modelSpace.m22 * origin.y + modelSpace.m23 * origin.z + modelSpace.m24);
+        float originZ = (float) (modelSpace.m31 * origin.x + modelSpace.m32 * origin.y + modelSpace.m33 * origin.z + modelSpace.m34);
+        
+        origin = new Point3D(originX, originY, originZ);
+        
+        float endX = (float) (modelSpace.m11 * end.x + modelSpace.m12 * end.y + modelSpace.m13 * end.z + modelSpace.m14);
+        float endY = (float) (modelSpace.m21 * end.x + modelSpace.m22 * end.y + modelSpace.m23 * end.z + modelSpace.m24);
+        float endZ = (float) (modelSpace.m31 * end.x + modelSpace.m32 * end.y + modelSpace.m33 * end.z + modelSpace.m34);
+        
+        end = new Point3D(endX, endY, endZ);
+ 
+		Vector3D direction = new Vector3D(end.x - origin.x, end.y - origin.y, end.z - origin.z).normalize();
+		
+		return new Ray(origin, direction);
+		
 	}
-		
-	public WB_Ray convertRayToModelSpace(WB_Ray ray, SWGObject object) {
-		
-		WB_Transform transform = new WB_Transform().addTranslate(new WB_Point3d(-object.getPosition().x, -object.getPosition().z , -object.getPosition().y)).addRotateZ(object.getRadians());
-		ray = transform.apply(ray);
-		
-		return ray;
-		
-	}
+
 
 	public void handleDisconnect(IoSession session) {
 
@@ -413,6 +451,7 @@ public class SimulationService implements INetworkDispatch {
 		session.suspendWrite();
 		core.objectService.destroyObject(object);
 		core.getActiveConnectionsMap().remove((Integer) session.getAttribute("connectionId"));
+		
 	}
 
 	public void handleZoneIn(Client client) {
@@ -519,21 +558,18 @@ public class SimulationService implements INetworkDispatch {
 			
 	}
 	
-	// not fully working yet(rotation of meshes wrong)
 	public boolean checkLineOfSight(SWGObject obj1, SWGObject obj2) {
 		
 		if(obj1.getPlanet() != obj2.getPlanet())
 			return false;
 		
-		if((obj1.getContainer() != null && obj2.getContainer() != null) && (obj1.getContainer() == obj2.getContainer()))	// if both are in same cell they should always be in sight of each other
-			return true;
-		
-		if(obj1.getGrandparent() != null && obj2.getGrandparent() != null) {
+		if(obj1.getGrandparent() != null || obj2.getGrandparent() != null) {
 			
 			if(obj1.getGrandparent() == obj2.getGrandparent())
 				return checkLineOfSightInBuilding(obj1, obj2, obj1.getGrandparent());
-			else
+			else if(obj1.getGrandparent() != null && obj2.getGrandparent() != null)
 				return false; 
+			
 		}
 		
 		float heightOrigin = 1.f;
@@ -548,46 +584,49 @@ public class SimulationService implements INetworkDispatch {
 		Point3D position1 = obj1.getWorldPosition();
 		Point3D position2 = obj2.getWorldPosition();
 
-		Vector3D origin = new Vector3D(position1.x, position1.z, position1.y + heightOrigin);
-		Vector3D end = new Vector3D(position2.x, position2.z, position2.y + heightDirection);
-
+		Point3D origin = new Point3D(position1.x, position1.y + heightOrigin, position1.z);
+		Point3D end = new Point3D(position2.x, position2.y + heightDirection, position2.z);
 		float distance = position1.getDistance2D(position2);
 		
-		List<SWGObject> inRangeObjects = get(obj1.getPlanet(), position1.x, position1.z, (int) distance + 1);
+		List<SWGObject> inRangeObjects = get(obj1.getPlanet(), position1.x, position1.z, 150);
 
-		
-		WB_Ray ray = new WB_Ray(origin.getX(), origin.getY() , origin.getZ(), end.getX(), end.getY(), end.getZ());
 		
 		for(SWGObject object : inRangeObjects) {
 			
 			if(object == obj1 || object == obj2)
 				continue;
 			
-			Point3D position = object.getWorldPosition();
-			float otherDistance = position.getDistance2D(position1);
-			System.out.println("Distance from origin to target: " + distance + " Distance from origin to current obj: " + otherDistance);
-			if(!obj1.inRange(position, distance))
-				continue;
-			
-			WB_AABBTree aabbTree = getAABBTree(object, 255);
-			
-			if(aabbTree == null)
-				continue;
-			
-			//System.out.println(object.getTemplate());
-
-			//ray = convertRayToModelSpace(ray, object);
-
-			ArrayList<WB_AABBNode> collisions = WB_Intersection.getIntersection(ray, aabbTree);
-			if(!collisions.isEmpty()) {
-				System.out.println("Collided with " + object.getTemplate() + " X: " + object.getPosition().x + " Y: " + object.getPosition().y + " Z: " + object.getPosition().z);
-				return false;
+			if(object.getTemplateData().getAttribute("collisionActionBlockFlags") != null) {
+				int bit = (Integer) object.getTemplateData().getAttribute("collisionActionBlockFlags") & 255;
+				if(bit == (Integer) object.getTemplateData().getAttribute("collisionActionBlockFlags"))
+					continue;
 			}
+
+			Ray ray = convertRayToModelSpace(origin, end, object);
+						
+			MeshVisitor visitor = object.getMeshVisitor();
 			
+			if(visitor == null)
+				continue;
+			
+			List<Mesh3DTriangle> tris = visitor.getTriangles();
+			
+			if(tris.isEmpty())
+				continue;
+			
+			for(Mesh3DTriangle tri : tris) {
+				
+				if(ray.intersectsTriangle(tri, distance) != null) {
+					System.out.println("Collided with " + object.getTemplate() + " X: " + object.getPosition().x + " Y: " + object.getPosition().y + " Z: " + object.getPosition().z);	
+					return false;
+				}
+				
+			}
+						
 		}
 		
 
-		/*if(obj1.getContainer() != null || obj2.getContainer() != null) {
+		if(obj1.getContainer() != null || obj2.getContainer() != null) {
 			
 			CellObject cell = null;
 			
@@ -598,13 +637,12 @@ public class SimulationService implements INetworkDispatch {
 
 			if(cell != null) 
 				return checkLineOfSightWorldToCell(obj1, obj2, cell);
-		}*/
-		
+		}
+	
 		return true;
 
 	}
 	
-	// not fully working yet(rotation of meshes wrong)
 	public boolean checkLineOfSightInBuilding(SWGObject obj1, SWGObject obj2, SWGObject building) {
 		
 		PortalVisitor portalVisitor = building.getPortalVisitor();
@@ -614,33 +652,44 @@ public class SimulationService implements INetworkDispatch {
 		
 		Point3D position1 = obj1.getPosition();
 		Point3D position2 = obj2.getPosition();
-
 		
-		Vector3D origin = new Vector3D(position1.x, position1.z, position1.y + 1);
-		Vector3D end = new Vector3D(position2.x, position2.z, position2.y + 1);
+		Point3D origin = new Point3D(position1.x, position1.y + 1, position1.z);
+		Point3D end = new Point3D(position2.x, position2.y + 1, position2.z);
 		
-		//Vector3D direction = end.subtract(origin).normalize();
-		
-		WB_Ray ray = new WB_Ray(origin.getX(), origin.getY(), origin.getZ(), end.getX(), end.getY(), end.getZ());
+		Vector3D direction = new Vector3D(end.x - origin.x, end.y - origin.y, end.z - origin.z).normalize();
+		float distance = position1.getDistance2D(position2);
+		Ray ray = new Ray(origin, direction);
 		
 		for(int i = 1; i < portalVisitor.cells.size(); i++) {
 			
 			Cell cell = portalVisitor.cells.get(i);
-			System.out.println(cell.name);
 			try {
-				System.out.println(cell.mesh);
-				MeshVisitor meshVisitor = ClientFileManager.loadFile(cell.mesh, MeshVisitor.class);
-				WB_AABBTree aabbTree = meshVisitor.getAABBTree(meshVisitor.createMesh());
 				
-				if(aabbTree == null)
+				MeshVisitor meshVisitor;
+				if(!cellMeshes.containsKey(cell.mesh)) {
+					meshVisitor = ClientFileManager.loadFile(cell.mesh, MeshVisitor.class);
+					cellMeshes.put(cell.mesh, meshVisitor);
+				} else {
+					meshVisitor = cellMeshes.get(cell.mesh);
+				}
+				
+				if(meshVisitor == null)
 					continue;
 				
-				ArrayList<WB_AABBNode> collisions = WB_Intersection.getIntersection(ray, aabbTree);
+				List<Mesh3DTriangle> tris = meshVisitor.getTriangles();
+				
+				if(tris.isEmpty())
+					continue;
 
-				if(!collisions.isEmpty()) {
-					System.out.println("Collision with: " + cell.name);
-					return false;
+				for(Mesh3DTriangle tri : tris) {
+					
+					if(ray.intersectsTriangle(tri, distance) != null) {
+						System.out.println("Collision with: " + cell.name);
+						return false;
+					}
+					
 				}
+
 
 			} catch (InstantiationException | IllegalAccessException e) {
 				e.printStackTrace();
@@ -652,7 +701,6 @@ public class SimulationService implements INetworkDispatch {
 
 	}
 	
-	// not fully working yet(rotation of meshes wrong)
 	public boolean checkLineOfSightWorldToCell(SWGObject obj1, SWGObject obj2, CellObject cell) {
 		
 		SWGObject building = cell.getContainer();
@@ -677,22 +725,33 @@ public class SimulationService implements INetworkDispatch {
 		Point3D position1 = obj1.getWorldPosition();
 		Point3D position2 = obj2.getWorldPosition();
 
-		Point3D origin = new Point3D(position1.x, position1.z, position1.y + heightOrigin);
-		Point3D direction = new Point3D(position2.x, position2.z, position2.y + heightDirection);
+		Point3D origin = new Point3D(position1.x, position1.y + heightOrigin, position1.z);
+		Point3D end = new Point3D(position2.x, position2.y + heightDirection, position2.z);
 
-		WB_Ray ray = new WB_Ray(origin.x, origin.y , origin.z, direction.x, direction.y, direction.z);
-		ray = convertRayToModelSpace(ray, building);
+		Ray ray = convertRayToModelSpace(origin, end, building);
 		
 		if(cell.getCellNumber() >= portalVisitor.cellCount)
 			return true;
 		
 		try {
+			
 			MeshVisitor meshVisitor = ClientFileManager.loadFile(portalVisitor.cells.get(cell.getCellNumber()).mesh, MeshVisitor.class);
-			WB_AABBTree aabbTree = meshVisitor.getAABBTree(meshVisitor.createMesh());
-			ArrayList<WB_AABBNode> collisions = WB_Intersection.getIntersection(ray, aabbTree);
+			
+			if(meshVisitor == null)
+				return true;
+			
+			List<Mesh3DTriangle> tris = meshVisitor.getTriangles();
+			
+			if(tris.isEmpty())
+				return true;
 
-			if(!collisions.isEmpty())
-				return false;
+			for(Mesh3DTriangle tri : tris) {
+				
+				if(ray.intersectsTriangle(tri) != null) {
+					return false;
+				}
+				
+			}
 
 		} catch (InstantiationException | IllegalAccessException e) {
 			e.printStackTrace();

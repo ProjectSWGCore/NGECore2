@@ -423,13 +423,15 @@ public class ObjectService implements INetworkDispatch {
 			if(obj != null) {
 				obj.setisInSnapshot(true);
 				obj.setParentId(chunk.parentId);
+				if(obj instanceof CellObject) {
+					((CellObject) obj).setCellNumber(chunk.cellNumber);
+				}
 			}
 			//System.out.print("\rLoading Object [" + counter + "/" +  visitor.getChunks().size() + "] : " + visitor.getName(chunk.nameId));
         }
 		visitor.dispose();
 		synchronized(objectList) {
 			for(SWGObject obj : objectList) {
-				obj.getTemplateData().dispose();
 				if(obj.getParentId() != 0 && getObject(obj.getParentId()) != null) {
 					SWGObject parent = getObject(obj.getParentId());
 					parent.add(obj);
