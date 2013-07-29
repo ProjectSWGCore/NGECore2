@@ -21,6 +21,7 @@
  ******************************************************************************/
 package services.gcw;
 
+import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,16 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.mina.core.buffer.IoBuffer;
+import org.apache.mina.core.session.IoSession;
+
+import protocol.swg.GcwGroupsRsp;
+import protocol.swg.GcwRegionsReq;
+import protocol.swg.GcwRegionsRsp;
+import protocol.swg.GetMapLocationsMessage;
+import protocol.swg.GetMapLocationsResponseMessage;
+
+import resources.common.Opcodes;
 import resources.objects.CurrentServerGCWZoneHistory;
 import resources.objects.CurrentServerGCWZonePercent;
 import resources.objects.OtherServerGCWZonePercent;
@@ -36,8 +47,11 @@ import resources.objects.guild.GuildObject;
 import main.NGECore;
 
 import engine.clients.Client;
+import engine.resources.objects.SWGObject;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
+
+@SuppressWarnings("unused")
 
 public class GCWService implements INetworkDispatch {
 	
@@ -140,14 +154,43 @@ public class GCWService implements INetworkDispatch {
 		}
 	}
 
-	@Override
-	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> arg0, Map<Integer, INetworkRemoteEvent> arg1) {
+	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> swgOpcodes, Map<Integer, INetworkRemoteEvent> objControllerOpcodes) {
+		
+		swgOpcodes.put(Opcodes.GcwRegionsReq, new INetworkRemoteEvent() {
+			
+			@Override
+			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
+				
+				data.order(ByteOrder.LITTLE_ENDIAN);
+				data.position(0);
+				
+				GcwRegionsReq gcwRegionsReq = new GcwRegionsReq();
+				gcwRegionsReq.deserialize(data);
+				
+				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				
+				if (client == null || client.getSession() == null) {
+					return;
+				}
+				
+				SWGObject object = client.getParent();
+				
+				if (object == null) {
+					return;
+				}
+				
+				session.write((new GcwRegionsRsp()).serialize());
+				session.write((new GcwGroupsRsp()).serialize());
+				
+			}
+			
+		});
 		
 	}
-
+	
 	@Override
 	public void shutdown() {
 		
 	}
-
+	
 }
