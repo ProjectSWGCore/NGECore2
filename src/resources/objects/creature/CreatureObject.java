@@ -737,12 +737,37 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 
 		UpdatePostureMessage upm = new UpdatePostureMessage(getObjectID(), (byte) 0);
 		destination.getSession().write(upm.serialize());
+		
 		if(destination != getClient()) {
-			UpdatePVPStatusMessage upvpm = new UpdatePVPStatusMessage(getObjectID(), 55);
+			UpdatePVPStatusMessage upvpm = new UpdatePVPStatusMessage(getObjectID());
+			if (factionStatus == 1 && faction == "imperial") {
+				upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Imperial);
+				upvpm.setStatus(16);
+			}
+			
+			if (factionStatus == 1 && faction == "rebel") {
+				upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Rebel);
+				upvpm.setStatus(16);
+			}
+			
+			if (factionStatus == 2 && faction == "imperial") {
+				upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Imperial);
+				upvpm.setStatus(55);
+			}
+			if (factionStatus == 2 && faction == "rebel") {
+				upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Rebel);
+				upvpm.setStatus(55);
+			} 
+			if(factionStatus == 0 && faction == "neutral") {
+				upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Neutral);
+				upvpm.setStatus(16);
+			}
+			else {
+				upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Neutral);
+				upvpm.setStatus(16);
+			}
 			destination.getSession().write(upvpm.serialize());
 		}
-		
-
 	}
 
 	public void sendSystemMessage(String message, byte displayType) {
