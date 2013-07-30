@@ -65,6 +65,7 @@ import protocol.swg.objectControllerObjects.TargetUpdate;
 import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
 import resources.common.*;
+import toxi.geom.Line3D;
 import toxi.geom.Ray3D;
 import toxi.geom.Vec3D;
 import toxi.geom.mesh.TriangleMesh;
@@ -593,7 +594,6 @@ public class SimulationService implements INetworkDispatch {
 		
 		List<SWGObject> inRangeObjects = get(obj1.getPlanet(), position1.x, position1.z, 150);
 
-		
 		for(SWGObject object : inRangeObjects) {
 			
 			if(object == obj1 || object == obj2)
@@ -640,6 +640,20 @@ public class SimulationService implements INetworkDispatch {
 
 			if(cell != null) 
 				return checkLineOfSightWorldToCell(obj1, obj2, cell);
+		}
+		
+		List<Vec3D> segments = new ArrayList<Vec3D>();
+		Line3D.splitIntoSegments(new Vec3D(position1.x, position1.y + 1, position1.z), new Vec3D(position2.x, position2.y + 1, position2.z), (float) 0.5, segments, true);
+		
+		for(Vec3D segment : segments) {
+			float y = segment.y;
+			
+			int height = (int) core.terrainService.getHeight(obj1.getPlanetId(), segment.x, segment.z); // round down to int
+			
+			if(height > y) {
+				System.out.println("Collision with terrain");
+				return false;
+			}
 		}
 	
 		return true;

@@ -94,7 +94,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		
 		buffer.putInt(creature.getFactionStatus());
 		
-		byte[] customizationData = creature.getCustomizationData();
+		byte[] customizationData = creature.getCustomization();
 		
 		if(customizationData.length <= 0)
 			buffer.putShort((short) 0);
@@ -265,6 +265,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer.putInt(0);
 		buffer.putInt(0x2C01);
 		buffer.putInt(0);
+
 		
 		if(creature.getEquipmentList().isEmpty()) {
 			buffer.putInt(0);
@@ -593,6 +594,79 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		return buffer;
 
 	}
+	
+	public IoBuffer buildHealthDelta(int health) {
+		
+		CreatureObject creature = (CreatureObject) object;
+		
+		IoBuffer buffer = bufferPool.allocate(15, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putInt(1);
+		buffer.putInt(creature.getHamListCounter());
+		buffer.put((byte) 2);
+		buffer.putShort((short) 0);
+		buffer.putInt(health);
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x15, buffer, size + 4);
+		
+		return buffer;
+		
+	}
+	
+	public IoBuffer buildActionDelta(int action) {
+		
+		CreatureObject creature = (CreatureObject) object;
+		
+		IoBuffer buffer = bufferPool.allocate(15, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putInt(1);
+		buffer.putInt(creature.getHamListCounter());
+		buffer.put((byte) 2);
+		buffer.putShort((short) 2);
+		buffer.putInt(action);
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x15, buffer, size + 4);
+		
+		return buffer;
+		
+	}
+	
+	public IoBuffer buildMaxHealthDelta(int health) {
+		
+		CreatureObject creature = (CreatureObject) object;
+		
+		IoBuffer buffer = bufferPool.allocate(15, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putInt(1);
+		buffer.putInt(creature.getHamListCounter());
+		buffer.put((byte) 2);
+		buffer.putShort((short) 0);
+		buffer.putInt(health);
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x16, buffer, size + 4);
+		
+		return buffer;
+		
+	}
+	
+	public IoBuffer buildMaxActionDelta(int action) {
+		
+		CreatureObject creature = (CreatureObject) object;
+		
+		IoBuffer buffer = bufferPool.allocate(15, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putInt(1);
+		buffer.putInt(creature.getHamListCounter());
+		buffer.put((byte) 2);
+		buffer.putShort((short) 2);
+		buffer.putInt(action);
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x16, buffer, size + 4);
+		
+		return buffer;
+		
+	}
+
 	
 	@Override
 	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {

@@ -205,7 +205,7 @@ public class CharacterService implements INetworkDispatch {
 				String sharedRaceTemplate = raceTemplate.replace("player/", "player/shared_");
 				
 				CreatureObject object = (CreatureObject) core.objectService.createObject(sharedRaceTemplate, core.terrainService.getPlanetList().get(0));
-				object.setCustomizationData(clientCreateCharacter.getCustomizationData());
+				object.setCustomization(clientCreateCharacter.getCustomizationData());
 				object.setCustomName(clientCreateCharacter.getName());
 				object.setHeight(clientCreateCharacter.getScale());
 				object.setPersistent(true);

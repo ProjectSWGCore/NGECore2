@@ -68,7 +68,6 @@ public class TerrainService {
 			return Float.NaN;
 		Planet planet = getPlanetByID(planetId);
 		float height = planet.getTerrainVisitor().getHeight(x, z);
-		System.out.println("Height: " + height);
 		return height; 
 	}
 	

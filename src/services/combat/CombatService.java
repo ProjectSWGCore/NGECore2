@@ -21,6 +21,90 @@
  ******************************************************************************/
 package services.combat;
 
-public class CombatService {
+import java.util.Map;
+
+import resources.objects.creature.CreatureObject;
+import resources.objects.tangible.TangibleObject;
+import resources.objects.weapon.WeaponObject;
+import services.command.CombatCommand;
+
+import main.NGECore;
+
+import engine.resources.objects.SWGObject;
+import engine.resources.service.INetworkDispatch;
+import engine.resources.service.INetworkRemoteEvent;
+
+public class CombatService implements INetworkDispatch {
+	
+	private NGECore core;
+
+	public CombatService(NGECore core) {
+		this.core = core;
+	}
+
+	@Override
+	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> arg0, Map<Integer, INetworkRemoteEvent> arg1) {
+		
+	}
+
+	@Override
+	public void shutdown() {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	public void doCombat(CreatureObject attacker, TangibleObject target, WeaponObject weapon, CombatCommand command) {
+		
+		if(!attemptCombat(attacker, target))
+			return;
+		
+		if(!applySpecialCost(attacker, weapon, command))
+			return;
+		
+	}
+
+	private boolean attemptCombat(CreatureObject attacker, TangibleObject target) {
+		
+		if(target.getDefendersList().contains(attacker) && attacker.getDefendersList().contains(target))
+			return true;
+		
+		if(attacker.getStateBitmask() == 0x8000000)
+			return false;
+		
+		if(!target.isAttackableBy(attacker))
+			return false;
+		
+		target.addDefender(attacker);
+		attacker.addDefender(target);
+		
+		return true;
+		
+	}
+	
+	private boolean applySpecialCost(CreatureObject attacker, WeaponObject weapon, CombatCommand command) {
+		
+		float actionCost = command.getActionCost();
+		float healthCost = command.getHealthCost();
+		
+		if(actionCost == 0 && healthCost == 0)
+			return true;
+		
+		float newAction = attacker.getAction() - actionCost;
+		if(newAction <= 0)
+			return false;
+		
+		float newHealth = attacker.getHealth() - healthCost;
+		if(newHealth <= 0)
+			return false;
+		
+		if(newAction != attacker.getAction())
+			attacker.setAction((int) newAction);
+		
+		if(newHealth != attacker.getHealth())
+			attacker.setHealth((int) newHealth);
+
+		return true;
+		
+	}
 
 }

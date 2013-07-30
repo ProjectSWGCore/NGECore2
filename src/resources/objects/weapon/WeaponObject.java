@@ -50,23 +50,50 @@ public class WeaponObject extends SWGObject {
 	private WeaponMessageBuilder messageBuilder;
 	
 	private float attackSpeed = 1;
+	private float maxRange;
 	
 	public WeaponObject(long objectID, Planet planet, String template) {
 		super(objectID, planet, new Point3D(0, 0, 0), new Quaternion(1, 0, 1, 0), template);
 		messageBuilder = new WeaponMessageBuilder(this);
+		calculateRange();
 	}
 	
+
 	public WeaponObject(long objectID, Planet planet, String template, Point3D position, Quaternion orientation) {
 		super(objectID, planet, position, orientation, template);
 		messageBuilder = new WeaponMessageBuilder(this);
+		calculateRange();
 	}
 
 	
 	public WeaponObject() {
 		super();
 		messageBuilder = new WeaponMessageBuilder(this);
+		//calculateRange();
 	}
-	
+	private void calculateRange() {
+
+		int weaponType = getWeaponType();
+		
+		switch(weaponType) {
+			
+			case 0: maxRange = 64; break;
+			case 1: maxRange = 50; break;
+			case 2: maxRange = 35; break;
+			case 3: maxRange = 64; break;
+			case 4: maxRange = 5; break;
+			case 5: maxRange = 5; break;
+			case 6: maxRange = 5; break;
+			case 7: maxRange = 5; break;
+			case 8: maxRange = 64; break;
+			case 9: maxRange = 5; break;
+			case 10: maxRange = 5; break;
+			case 11: maxRange = 5; break;
+		
+		}
+		
+	}
+
 	public int getIncapTimer() {
 		return incapTimer;
 	}
@@ -129,6 +156,9 @@ public class WeaponObject extends SWGObject {
 		
 		String template = getTemplate();
 		
+		if(template == null)
+			return weaponType;
+		
 		if(template.contains("rifle")) weaponType = 0;
 		if(template.contains("carbine")) weaponType = 1;
 		if(template.contains("pistol")) weaponType = 2;
@@ -172,6 +202,14 @@ public class WeaponObject extends SWGObject {
 	
 	public WeaponMessageBuilder getMessageBuilder() {
 		return messageBuilder;
+	}
+
+	public float getMaxRange() {
+		return maxRange;
+	}
+
+	public void setMaxRange(float maxRange) {
+		this.maxRange = maxRange;
 	}
 
 }

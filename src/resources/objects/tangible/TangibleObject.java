@@ -23,6 +23,11 @@ package resources.objects.tangible;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
+
+import org.apache.mina.core.buffer.IoBuffer;
+
+import resources.objects.creature.CreatureObject;
 
 
 import com.sleepycat.persist.model.NotPersistent;
@@ -41,14 +46,17 @@ public class TangibleObject extends SWGObject {
 	
 	// TODO: Thread safety
 	
-	private int incapTimer = 10;
+	protected int incapTimer = 10;
 	private int conditionDamage = 0;
-
-	private byte[] customization;
+	protected int pvpBitmask = 0;
+	protected byte[] customization;
 	private List<Integer> componentCustomizations = new ArrayList<Integer>();
-	private int optionsBitmask = 0;
+	protected int optionsBitmask = 0;
 	private int maxDamage = 0;
 	private boolean staticObject = false;
+	protected String faction;
+	@NotPersistent
+	private Vector<TangibleObject> defendersList = new Vector<TangibleObject>();	// unused in packets but useful for the server
 	@NotPersistent
 	private TangibleMessageBuilder messageBuilder;
 	
@@ -122,6 +130,100 @@ public class TangibleObject extends SWGObject {
 	public void setStaticObject(boolean staticObject) {
 		this.staticObject = staticObject;
 	}
+	
+	public int getPvPBitmask() {
+		synchronized(objectMutex) {
+			return optionsBitmask;
+		}
+	}
+
+	public void setPvPBitmask(int pvpBitmask) {
+		synchronized(objectMutex) {
+			this.pvpBitmask = pvpBitmask;
+		}
+	}
+	
+	public String getFaction() {
+		synchronized(objectMutex) {
+			return faction;
+		}
+	}
+	
+	public void setFaction(String faction) {
+		synchronized(objectMutex) {
+			this.faction = faction;
+		}
+	}
+
+	public Vector<TangibleObject> getDefendersList() {
+		return defendersList;
+	}
+	
+	public void addDefender(TangibleObject defender) {
+		
+		defendersList.add(defender);
+		
+		if(this instanceof CreatureObject) {
+			CreatureObject creature = (CreatureObject) this;
+			
+			if(creature.getCombatFlag() == 0)
+				creature.setCombatFlag((byte) 1);
+		}
+		
+	}
+	
+	public void removeDefender(TangibleObject defender) {
+		
+		defendersList.remove(defender);
+		
+		if(this instanceof CreatureObject) {
+			CreatureObject creature = (CreatureObject) this;
+			
+			if(creature.getCombatFlag() == 1 && defendersList.isEmpty())
+				creature.setCombatFlag((byte) 0);
+		}
+		
+	}
+	
+	public boolean isAttackableBy(CreatureObject attacker) {
+		
+		CreatureObject creature;
+		
+		if(this instanceof CreatureObject) {
+			creature = (CreatureObject) this;
+			if(creature.getDuelList().contains(attacker) && attacker.getDuelList().contains(this))
+				return true;
+		}
+		
+		if(faction.equals("rebel") && attacker.getFaction().equals("rebel"))
+			return false;
+		else if(faction.equals("imperial") && attacker.getFaction().equals("imperial"))
+			return false;
+		else if(attacker.getSlottedObject("ghost") != null) {
+			
+			if(this instanceof CreatureObject && getSlottedObject("ghost") != null) {
+				
+				creature = (CreatureObject) this;
+				
+				if(creature.getFactionStatus() == 2 && attacker.getFactionStatus() == 2)
+					return true;
+				else
+					return false;
+				
+			}
+
+			if((faction.equals("rebel") || faction.equals("imperial")) && attacker.getFactionStatus() >= 1)
+				return true;
+			else if((faction.equals("rebel") || faction.equals("imperial")) && attacker.getFactionStatus() == 0)
+				return false;
+			
+			return getPvPBitmask() == 1 || getPvPBitmask() == 2;
+			
+		}
+
+		return getPvPBitmask() == 1 || getPvPBitmask() == 2;
+	}
+
 
 	@Override
 	public void sendBaselines(Client destination) {

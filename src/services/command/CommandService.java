@@ -32,6 +32,7 @@ import org.apache.mina.core.session.IoSession;
 
 import engine.clients.Client;
 import engine.resources.objects.SWGObject;
+import engine.resources.scene.Point3D;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import resources.common.*;
@@ -39,6 +40,8 @@ import resources.common.*;
 import protocol.swg.objectControllerObjects.CommandEnqueue;
 
 import resources.objects.creature.CreatureObject;
+import resources.objects.tangible.TangibleObject;
+import resources.objects.weapon.WeaponObject;
 
 public class CommandService implements INetworkDispatch  {
 	
@@ -69,16 +72,11 @@ public class CommandService implements INetworkDispatch  {
 				CommandEnqueue commandEnqueue = new CommandEnqueue();
 				commandEnqueue.deserialize(data);
 				
-				//System.out.println(commandEnqueue.getCommandArguments());
-
 				
 				BaseSWGCommand command = getCommandByCRC(commandEnqueue.getCommandCRC());
 				
 				if(command == null)
 					return;
-				
-				//if(command.getCommandCRC() == CRC.StringtoCRC("transferitemmisc"))
-					//System.out.println(commandEnqueue.getCommandArguments());
 				
 				// TODO: command filters for state, posture etc.
 				
@@ -91,23 +89,37 @@ public class CommandService implements INetworkDispatch  {
 
 				SWGObject target = core.objectService.getObject(commandEnqueue.getTargetID());
 				
-				//if(target == null)
-					//System.out.println("NULL Target");
-				
+				if(command instanceof CombatCommand) {
+					processCombatCommand(actor, target, (CombatCommand) command);
+					return;
+				}
+					
+								
 				core.scriptService.callScript("scripts/commands/", command.getCommandName(), "run", core, actor, target, commandEnqueue.getCommandArguments());
 				
 			}
-			
-			
+
 		});
 			
 		
 	}
 	
-	public void registerCommand(String name) {
+	public BaseSWGCommand registerCommand(String name) {
 		
 		BaseSWGCommand command = new BaseSWGCommand(name);
 		commandLookup.add(command);
+		
+		return command;
+		
+	}
+
+	public CombatCommand registerCombatCommand(String name) {
+		
+		CombatCommand command = new CombatCommand(name);
+		commandLookup.add(command);
+		
+		return command;
+		
 	}
 
 	public BaseSWGCommand getCommandByCRC(int CRC) {
@@ -121,6 +133,51 @@ public class CommandService implements INetworkDispatch  {
 		return null;
 
 	}
+	
+	private void processCombatCommand(CreatureObject attacker, SWGObject target, CombatCommand command) {
+		
+		if(target == null || !(target instanceof TangibleObject) || target == attacker)
+			return;
+		
+		if(attacker.getPosture() == 13 || attacker.getPosture() == 14)
+			return;
+		
+		if(target instanceof CreatureObject) {
+			if(((CreatureObject) target).getPosture() == 13 || ((CreatureObject) target).getPosture() == 14)
+				return;
+		}
+		
+		WeaponObject weapon;
+		
+		if(attacker.getWeaponId() == 0)
+			weapon = (WeaponObject) attacker.getSlottedObject("default_weapon");	// use unarmed/default weapon if no weapon is equipped
+		else
+			weapon = (WeaponObject) core.objectService.getObject(attacker.getWeaponId());
+		
+		float maxRange = 0;
+		
+		if(command.getMaxRange() == 0)
+			maxRange = weapon.getMaxRange();
+		else
+			maxRange = command.getMaxRange();
+		
+		Point3D attackerPos = attacker.getWorldPosition();
+		Point3D defenderPos = attacker.getWorldPosition();
+		
+		if(attackerPos.getDistance(defenderPos) > maxRange && maxRange != 0)
+			return;
+		
+		if(command.getMinRange() > 0) {
+			if(attackerPos.getDistance(defenderPos) < command.getMinRange())
+				return;
+		}
+		
+		if(!core.simulationService.checkLineOfSight(attacker, target))
+			return;
+		
+		
+	}
+
 	
 	@Override
 	public void shutdown() {
