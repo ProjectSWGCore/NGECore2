@@ -35,6 +35,8 @@ import org.apache.mina.core.session.IoSession;
 
 import engine.clients.Client;
 import engine.resources.common.CRC;
+import engine.resources.container.CreatureContainerPermissions;
+import engine.resources.container.CreaturePermissions;
 import engine.resources.database.DatabaseConnection;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
@@ -205,6 +207,7 @@ public class CharacterService implements INetworkDispatch {
 				String sharedRaceTemplate = raceTemplate.replace("player/", "player/shared_");
 				
 				CreatureObject object = (CreatureObject) core.objectService.createObject(sharedRaceTemplate, core.terrainService.getPlanetList().get(0));
+				object.setContainerPermissions(CreaturePermissions.CREATURE_PERMISSIONS);
 				object.setCustomization(clientCreateCharacter.getCustomizationData());
 				object.setCustomName(clientCreateCharacter.getName());
 				object.setHeight(clientCreateCharacter.getScale());
@@ -227,10 +230,16 @@ public class CharacterService implements INetworkDispatch {
 				}
 				
 				TangibleObject inventory = (TangibleObject) core.objectService.createObject("object/tangible/inventory/shared_character_inventory.iff", object.getPlanet());
+				inventory.setContainerPermissions(CreatureContainerPermissions.CREATURE_CONTAINER_PERMISSIONS);
 				TangibleObject appInventory = (TangibleObject) core.objectService.createObject("object/tangible/inventory/shared_appearance_inventory.iff", object.getPlanet());
+				appInventory.setContainerPermissions(CreaturePermissions.CREATURE_PERMISSIONS);
 				TangibleObject datapad = (TangibleObject) core.objectService.createObject("object/tangible/datapad/shared_character_datapad.iff", object.getPlanet());
+				datapad.setContainerPermissions(CreatureContainerPermissions.CREATURE_CONTAINER_PERMISSIONS);
 				TangibleObject bank = (TangibleObject) core.objectService.createObject("object/tangible/bank/shared_character_bank.iff", object.getPlanet());
+				bank.setContainerPermissions(CreatureContainerPermissions.CREATURE_CONTAINER_PERMISSIONS);
 				TangibleObject missionBag = (TangibleObject) core.objectService.createObject("object/tangible/mission_bag/shared_mission_bag.iff", object.getPlanet());
+				missionBag.setContainerPermissions(CreatureContainerPermissions.CREATURE_CONTAINER_PERMISSIONS);
+				
 				object.add(inventory);
 				object.add(appInventory);
 				object.add(datapad);

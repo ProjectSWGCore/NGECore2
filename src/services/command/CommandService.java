@@ -37,7 +37,10 @@ import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import resources.common.*;
 
+import protocol.swg.ObjControllerMessage;
 import protocol.swg.objectControllerObjects.CommandEnqueue;
+import protocol.swg.objectControllerObjects.CommandEnqueueRemove;
+import protocol.swg.objectControllerObjects.ShowFlyText;
 
 import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
@@ -90,7 +93,7 @@ public class CommandService implements INetworkDispatch  {
 				SWGObject target = core.objectService.getObject(commandEnqueue.getTargetID());
 				
 				if(command instanceof CombatCommand) {
-					processCombatCommand(actor, target, (CombatCommand) command);
+					processCombatCommand(actor, target, (CombatCommand) command, commandEnqueue.getActionCounter());
 					return;
 				}
 					
@@ -134,17 +137,19 @@ public class CommandService implements INetworkDispatch  {
 
 	}
 	
-	private void processCombatCommand(CreatureObject attacker, SWGObject target, CombatCommand command) {
+	private void processCombatCommand(CreatureObject attacker, SWGObject target, CombatCommand command, int actionCounter) {
+		
+		boolean success = true;
 		
 		if(target == null || !(target instanceof TangibleObject) || target == attacker)
-			return;
+			success = false;
 		
 		if(attacker.getPosture() == 13 || attacker.getPosture() == 14)
-			return;
+			success = false;
 		
 		if(target instanceof CreatureObject) {
 			if(((CreatureObject) target).getPosture() == 13 || ((CreatureObject) target).getPosture() == 14)
-				return;
+				success = false;
 		}
 		
 		WeaponObject weapon;
@@ -165,16 +170,29 @@ public class CommandService implements INetworkDispatch  {
 		Point3D defenderPos = attacker.getWorldPosition();
 		
 		if(attackerPos.getDistance(defenderPos) > maxRange && maxRange != 0)
-			return;
+			success = false;
 		
 		if(command.getMinRange() > 0) {
 			if(attackerPos.getDistance(defenderPos) < command.getMinRange())
-				return;
+				success = false;
 		}
 		
-		if(!core.simulationService.checkLineOfSight(attacker, target))
-			return;
+		if(!core.simulationService.checkLineOfSight(attacker, target)) {
+			
+			ShowFlyText los = new ShowFlyText(attacker.getObjectID(), attacker.getObjectID(), "combat_effects", "cant_see", (float) 1.5, (float) 429664.031250);
+			ObjControllerMessage objController = new ObjControllerMessage(0x1B, los);
+			attacker.getClient().getSession().write(objController.serialize());
+			success = false;
+			
+		}
 		
+		if(!success) {
+			CommandEnqueueRemove commandRemove = new CommandEnqueueRemove(attacker.getObjectId(), actionCounter);
+			ObjControllerMessage objController = new ObjControllerMessage(0x0B, commandRemove);
+			attacker.getClient().getSession().write(objController.serialize());
+		} else {
+			core.combatService.doCombat(attacker, (TangibleObject) target, weapon, command, actionCounter);
+		}
 		
 	}
 

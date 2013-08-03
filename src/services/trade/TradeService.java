@@ -205,6 +205,7 @@ public class TradeService implements INetworkDispatch{
 					System.out.println("Trading item: " + objectToTrade.getCustomName() + " detail: " + objectToTrade.getDetailFilename());
 					
 					System.out.println("tradingObjectTable: " + tradingObjectsTable.toString());
+					tradee.makeAware(objectToTrade);
 					AddItemMessage tradeeResponse = new AddItemMessage();
 					tradeeResponse.setTradeObjectID(tradeItemID);
 					tradee.getClient().getSession().write(tradeeResponse.serialize());

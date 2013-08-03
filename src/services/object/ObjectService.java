@@ -355,15 +355,6 @@ public class ObjectService implements INetworkDispatch {
 				client.setParent(creature);
 				
 				objectList.add(creature);
-				creature.viewChildren(creature, true, true, new Traverser() {
-
-					@Override
-					public void process(SWGObject object) {
-						//System.out.println(object.getTemplate());
-						objectList.add(object);
-					}
-					
-				});
 				
 				creature.viewChildren(creature, true, true, new Traverser() {
 
@@ -374,7 +365,17 @@ public class ObjectService implements INetworkDispatch {
 						object.getContainerInfo(object.getTemplate());
 					}
 					
+				});				
+				creature.viewChildren(creature, true, true, new Traverser() {
+
+					@Override
+					public void process(SWGObject object) {
+						//System.out.println(object.getTemplate());
+						objectList.add(object);
+					}
+					
 				});
+
 				if(creature.getParentId() != 0) {
 					SWGObject parent = getObject(creature.getParentId());
 					parent._add(creature);

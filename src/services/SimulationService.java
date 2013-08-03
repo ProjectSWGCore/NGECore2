@@ -125,6 +125,7 @@ public class SimulationService implements INetworkDispatch {
 		core.commandService.registerCommand("setcurrentskilltitle");
 		core.commandService.registerCommand("tip");
 		core.commandService.registerCommand("faction");
+		core.commandService.registerCommand("setspeed");
 	}
 	
 	public void add(SWGObject object, int x, int y) {

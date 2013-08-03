@@ -342,6 +342,16 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	public List<SkillMod> getSkillMods() {
 		return skillMods;
 	}
+	
+	public SkillMod getSkillMod(String name) {
+		synchronized(objectMutex) {
+			for(SkillMod skillMod : skillMods) {
+				if(skillMod.getSkillModString().equals(name))
+					return skillMod;
+			}
+		}
+		return null;
+	}
 
 	public short getSkillModsUpdateCounter() {
 		synchronized(objectMutex) {

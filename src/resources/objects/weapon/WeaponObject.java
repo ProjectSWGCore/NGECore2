@@ -212,4 +212,26 @@ public class WeaponObject extends SWGObject {
 		this.maxRange = maxRange;
 	}
 
+	public boolean isMelee() {
+		
+		int weaponType = getWeaponType();
+		
+		if(weaponType == 4 || weaponType == 5 || weaponType == 6 || weaponType == 7 || weaponType == 9 || weaponType == 10 || weaponType == 11)
+			return true;
+		
+		return false;
+		
+	}
+	
+	public boolean isRanged() {
+		
+		int weaponType = getWeaponType();
+		
+		if(weaponType == 0 || weaponType == 1 || weaponType == 2 || weaponType == 3)
+			return true;
+		
+		return false;
+		
+	}
+
 }
