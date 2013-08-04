@@ -375,6 +375,112 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 		
 	}
 	
+	public IoBuffer buildWaypointAddDelta(WaypointObject waypoint) {
+		PlayerObject player = (PlayerObject) object;
+		IoBuffer buffer = bufferPool.allocate(200 + player.getWaypoints().size(), false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.setAutoExpand(true);
+		
+		buffer.putInt(1);
+		buffer.putInt(1);
+		
+		buffer.put((byte) 0); // updateType (SubType)
+		
+		buffer.putLong(waypoint.getObjectID());
+		buffer.putInt(waypoint.getCellId());
+		
+		buffer.putFloat(waypoint.getPosition().x);
+		buffer.putFloat(waypoint.getPosition().y);
+		buffer.putFloat(waypoint.getPosition().z);
+		
+		buffer.putLong(0); // networklocationId
+		buffer.putInt(waypoint.getPlanetCRC());
+		
+		buffer.put(getUnicodeString(waypoint.getName()));
+		buffer.putLong(waypoint.getObjectID());
+		
+		buffer.put((byte) waypoint.getColor());
+		
+		if (waypoint.isActive()) { buffer.put((byte) 1); } 
+		else { buffer.put((byte) 0); }
+		
+		int size = buffer.position();
+		buffer.flip();
+		
+		buffer = createDelta("PLAY", (byte) 8, (short) player.getWaypointListUpdateCounter(), (short) 1, buffer, size + 4);
+		//System.out.println("WaypointAdd: " + buffer.getHexDump());
+		return buffer;
+	}
+	
+	public IoBuffer buildWaypointRemoveDelta(WaypointObject waypoint) {
+		IoBuffer buffer = bufferPool.allocate(200, false).order(ByteOrder.LITTLE_ENDIAN);
+		PlayerObject player = (PlayerObject) object;
+		
+		buffer.putInt(1);
+		buffer.putInt(1);
+		
+		buffer.put((byte) 1); // updateType (SubType)
+		
+		buffer.putLong(waypoint.getObjectID());
+		buffer.putInt(waypoint.getCellId());
+		
+		buffer.putFloat(waypoint.getPosition().x);
+		buffer.putFloat(waypoint.getPosition().y);
+		buffer.putFloat(waypoint.getPosition().z);
+		
+		buffer.putLong(0); // networklocationId
+		buffer.putInt(waypoint.getPlanetCRC());
+		
+		buffer.put(getUnicodeString(waypoint.getName()));
+		buffer.putLong(waypoint.getObjectID());
+		
+		buffer.put((byte) waypoint.getColor());
+		
+		if (waypoint.isActive()) { buffer.put((byte) 1); }
+		else { buffer.put((byte) 0); }
+		
+		int size = buffer.position();
+		buffer.flip();
+		
+		buffer = createDelta("PLAY", (byte) 8, (short) player.getWaypointListUpdateCounter(), (short) 1, buffer, size + 4);
+		
+		return buffer;
+	}
+	
+	public IoBuffer buildWaypointUpdateDelta(WaypointObject waypoint) {
+		IoBuffer buffer = bufferPool.allocate(200, false).order(ByteOrder.LITTLE_ENDIAN);
+		PlayerObject player = (PlayerObject) object;
+		
+		buffer.putInt(1);
+		buffer.putInt(1);
+		
+		buffer.put((byte) 2); // updateType (SubType)
+		
+		buffer.putLong(waypoint.getObjectID());
+		buffer.putInt(waypoint.getCellId());
+		
+		buffer.putFloat(waypoint.getPosition().x);
+		buffer.putFloat(waypoint.getPosition().y);
+		buffer.putFloat(waypoint.getPosition().z);
+		
+		buffer.putLong(0); // networklocationId << cluster system I guess?
+		buffer.putInt(waypoint.getPlanetCRC());
+		
+		buffer.put(getUnicodeString(waypoint.getName()));
+		buffer.putLong(waypoint.getObjectID());
+		
+		buffer.put((byte) waypoint.getColor());
+		
+		if (waypoint.isActive()) { buffer.put((byte) 1); }
+		else { buffer.put((byte) 0); } // isActive. Activates automatically when created.
+		
+		int size = buffer.position();
+		buffer.flip();
+		
+		buffer = createDelta("PLAY", (byte) 8, (short) player.getWaypointListUpdateCounter(), (short) 1, buffer, size + 4);
+		
+		return buffer;
+	}
+	
 	public int getProfData(String profession) {
 		
 		switch (profession) {
