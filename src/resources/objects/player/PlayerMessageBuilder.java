@@ -376,12 +376,15 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 	}
 	
 	public IoBuffer buildWaypointAddDelta(WaypointObject waypoint) {
+		
 		PlayerObject player = (PlayerObject) object;
-		IoBuffer buffer = bufferPool.allocate(200 + player.getWaypoints().size(), false).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer buffer = bufferPool.allocate(59 + waypoint.getName().length() * 2, false).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.setAutoExpand(true);
 		
+		int nextCounter = player.getWaypointListUpdateCounter() + 1;
+		player.setWaypointListUpdateCounter(nextCounter);
 		buffer.putInt(1);
-		buffer.putInt(1);
+		buffer.putInt(player.getWaypointListUpdateCounter());
 		
 		buffer.put((byte) 0); // updateType (SubType)
 		
@@ -406,17 +409,22 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 		int size = buffer.position();
 		buffer.flip();
 		
-		buffer = createDelta("PLAY", (byte) 8, (short) player.getWaypointListUpdateCounter(), (short) 1, buffer, size + 4);
+		buffer = createDelta("PLAY", (byte) 8, (short) 1, (short) 1, buffer, size + 4);
 		//System.out.println("WaypointAdd: " + buffer.getHexDump());
 		return buffer;
+		
 	}
 	
 	public IoBuffer buildWaypointRemoveDelta(WaypointObject waypoint) {
-		IoBuffer buffer = bufferPool.allocate(200, false).order(ByteOrder.LITTLE_ENDIAN);
+		
+		IoBuffer buffer = bufferPool.allocate(59 + waypoint.getName().length() * 2, false).order(ByteOrder.LITTLE_ENDIAN);
 		PlayerObject player = (PlayerObject) object;
 		
+		int nextCounter = player.getWaypointListUpdateCounter() + 1;
+		player.setWaypointListUpdateCounter(nextCounter);
+
 		buffer.putInt(1);
-		buffer.putInt(1);
+		buffer.putInt(player.getWaypointListUpdateCounter());
 		
 		buffer.put((byte) 1); // updateType (SubType)
 		
@@ -441,17 +449,22 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 		int size = buffer.position();
 		buffer.flip();
 		
-		buffer = createDelta("PLAY", (byte) 8, (short) player.getWaypointListUpdateCounter(), (short) 1, buffer, size + 4);
+		buffer = createDelta("PLAY", (byte) 8, (short) 1, (short) 1, buffer, size + 4);
 		
 		return buffer;
+		
 	}
 	
 	public IoBuffer buildWaypointUpdateDelta(WaypointObject waypoint) {
-		IoBuffer buffer = bufferPool.allocate(200, false).order(ByteOrder.LITTLE_ENDIAN);
+		
+		IoBuffer buffer = bufferPool.allocate(59 + waypoint.getName().length() * 2, false).order(ByteOrder.LITTLE_ENDIAN);
 		PlayerObject player = (PlayerObject) object;
 		
+		int nextCounter = player.getWaypointListUpdateCounter() + 1;
+		player.setWaypointListUpdateCounter(nextCounter);
+
 		buffer.putInt(1);
-		buffer.putInt(1);
+		buffer.putInt(player.getWaypointListUpdateCounter());
 		
 		buffer.put((byte) 2); // updateType (SubType)
 		
@@ -476,9 +489,10 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 		int size = buffer.position();
 		buffer.flip();
 		
-		buffer = createDelta("PLAY", (byte) 8, (short) player.getWaypointListUpdateCounter(), (short) 1, buffer, size + 4);
+		buffer = createDelta("PLAY", (byte) 8, (short) 1, (short) 1, buffer, size + 4);
 		
 		return buffer;
+		
 	}
 	
 	public int getProfData(String profession) {
