@@ -10,7 +10,7 @@ def run(core, actor, target, commandString):
     crc = CRC
     commandArgs = commandString.split(" ")
     actorPlayer = actor.getSlottedObject("ghost")
-
+    
     #/wp PLANET X Z Y COLOR NAME
     if commandArgs[0] in validPlanets and commandArgs[4] in validColors:
         try:
