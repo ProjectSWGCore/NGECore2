@@ -202,6 +202,46 @@ public class PlayerObject extends SWGObject {
 		return waypoints;
 	}
 
+	public int getWaypointListUpdateCounter() {
+		synchronized(objectMutex) {
+			return waypointListUpdateCounter;
+		}
+	}
+	
+	public void setWaypointListUpdateCounter(int count) {
+		synchronized(objectMutex){
+			this.waypointListUpdateCounter = count;
+		}
+	}
+	
+	public void waypointUpdate(WaypointObject waypoint) {
+		synchronized(objectMutex) {
+			getContainer().getClient().getSession().write(messageBuilder.buildWaypointUpdateDelta(waypoint));
+		}
+	}
+	
+	public void waypointRemove(WaypointObject waypoint) {
+		synchronized(objectMutex) {
+			getContainer().getClient().getSession().write(messageBuilder.buildWaypointRemoveDelta(waypoint));
+		}
+	}
+	
+	public void waypointAdd(WaypointObject waypoint) {
+		synchronized(objectMutex) {
+			getContainer().getClient().getSession().write(messageBuilder.buildWaypointAddDelta(waypoint));
+		}
+	}
+	
+	public WaypointObject getWaypointFromList(WaypointObject waypoint) {
+		synchronized(objectMutex) {
+			for(WaypointObject wp : waypoints) {
+				if(wp.getObjectID() == waypoint.getObjectID())
+					return wp;
+			}
+		}
+		return null;
+	}
+	
 	public int getCurrentForcePower() {
 		synchronized(objectMutex) {
 			return currentForcePower;

@@ -32,6 +32,7 @@ import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
+
 import resources.common.*;
 
 import org.apache.mina.core.buffer.IoBuffer;
@@ -47,7 +48,6 @@ import protocol.swg.HeartBeatMessage;
 import protocol.swg.ParametersMessage;
 import protocol.swg.SelectCharacter;
 import protocol.swg.UnkByteFlag;
-
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.CrcStringTableVisitor;
 import engine.clientdata.visitors.WorldSnapshotVisitor;
@@ -62,9 +62,7 @@ import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
-
 import main.NGECore;
-
 import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
@@ -72,6 +70,7 @@ import resources.objects.guild.GuildObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.staticobject.StaticObject;
 import resources.objects.tangible.TangibleObject;
+import resources.objects.waypoint.WaypointObject;
 import resources.objects.weapon.WeaponObject;
 
 @SuppressWarnings("unused")
@@ -157,6 +156,8 @@ public class ObjectService implements INetworkDispatch {
 			
 			object = new GuildObject(core, objectID, planet, position, orientation, Template);
 			
+		} else if(Template.startsWith("object/waypoint")) {
+			object = new WaypointObject(objectID, planet, position);
 		} else {
 			
 			return null;
