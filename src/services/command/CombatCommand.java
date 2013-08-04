@@ -21,6 +21,9 @@
  ******************************************************************************/
 package services.command;
 
+import java.util.Random;
+
+import resources.objects.weapon.WeaponObject;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
 
@@ -72,7 +75,7 @@ public class CombatCommand extends BaseSWGCommand {
 			
 			for(int i = 0; i < visitor.getRowCount(); i++) {
 				if(visitor.getObject(i, 0) != null)
-					if(((String) visitor.getObject(i, 0)).equals(commandName)) {
+					if(((String) visitor.getObject(i, 0)).equalsIgnoreCase(commandName)) {
 						
 						validTargetType = ((Integer) visitor.getObject(i, 5)).byteValue();
 						hitType = ((Integer) visitor.getObject(i, 6)).byteValue();
@@ -110,7 +113,7 @@ public class CombatCommand extends BaseSWGCommand {
 						coneWidth = (Float) visitor.getObject(i, 42);
 						minRange = (Float) visitor.getObject(i, 43);
 						maxRange = (Float) visitor.getObject(i, 44);
-						addedDamage = (Integer) visitor.getObject(i, 45);
+						addedDamage = (Integer) visitor.getObject(i, 45);		
 						flatActionDamage = (Integer) visitor.getObject(i, 46);
 						percentFromWeapon = (Float) visitor.getObject(i, 47);
 						bypassArmor = (Float) visitor.getObject(i, 48);
@@ -526,6 +529,60 @@ public class CombatCommand extends BaseSWGCommand {
 
 	public void setHitSpam(byte hitSpam) {
 		this.hitSpam = hitSpam;
+	}
+
+	public String getRandomAnimation(WeaponObject weapon) {
+		
+		int weaponType = weapon.getWeaponType();
+		String[] animations;
+		
+		switch(weaponType) {
+			
+			case 0:
+				animations = rifleAnimations;
+				break;
+			case 1:
+				animations = carbineAnimations;
+				break;
+			case 2:
+				animations = pistolAnimations;
+				break;
+			case 3:
+				animations = heavyWpnAnimations;
+				break;
+			case 4:
+				animations = oneHandedAnimations;
+				break;
+			case 5:
+				animations = twoHandedAnimations;
+				break;
+			case 6:
+				animations = unarmedAnimations;
+				break;
+			case 7:
+				animations = polearmAnimations;
+				break;
+			case 8:
+				animations = thrownAnimations;
+				break;
+			case 9:
+				animations = oneHandedLSAnimations;				
+				break;
+			case 10:
+				animations = twoHandedLSAnimations;
+				break;
+			case 11:
+				animations = polearmLSAnimations;
+				break;
+
+			default:
+				animations = unarmedAnimations;
+				break;
+
+		}
+		
+		return animations[new Random().nextInt(animations.length)];
+		
 	}
 	
 	

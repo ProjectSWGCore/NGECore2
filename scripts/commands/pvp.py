@@ -22,12 +22,18 @@ def run(core, actor, target, commandString):
         actor.setFaction('neutral')
         return
     
-    #if actorStatus == 0 and actorFaction == "imperial" or "rebel":
-        #actor.setFactionStatus(1)
+    if actorStatus == 0 and actorFaction == "imperial":
+        actor.setFactionStatus(1)
         #print ("FactionStatus: " + str(actor.getFactionStatus()))
-        #actor.sendSystemMessage('You are no longer On Leave.', 0)
-        #return
-
+        actor.sendSystemMessage('You are no longer On Leave.', 0)
+        return
+	
+    if actorStatus == 0 and actorFaction == "rebel":
+        actor.setFactionStatus(1)
+        #print ("FactionStatus: " + str(actor.getFactionStatus()))
+        actor.sendSystemMessage('You are no longer On Leave.', 0)
+        return
+	
     if actorStatus == 1 and actorFaction == "imperial":
         actor.setFactionStatus(2)
         pvpStatus.setFaction(UpdatePVPStatusMessage.factionCRC.Imperial)

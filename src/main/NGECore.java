@@ -36,6 +36,7 @@ import services.AttributeService;
 import services.CharacterService;
 import services.ConnectionService;
 import services.LoginService;
+import services.PlayerService;
 import services.ScriptService;
 import services.SimulationService;
 import services.TerrainService;
@@ -106,6 +107,7 @@ public class NGECore {
 	public GCWService gcwService;
 	public TradeService tradeService;
 	public CombatService combatService;
+	public PlayerService playerService;
 	
 	// Login Server
 	public NetworkDispatch loginDispatch;
@@ -153,6 +155,7 @@ public class NGECore {
 		attributeService = new AttributeService(this);
 		suiService = new SUIService(this);
 		combatService = new CombatService(this);
+		playerService = new PlayerService(this);
 		// Ping Server
 		try {
 			PingServer pingServer = new PingServer(config.getInt("PING.PORT"));

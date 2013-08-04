@@ -247,11 +247,11 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer.putInt(0);
 		
 		buffer.putInt(6);	// Current HAM
-		buffer.putInt(0);
+		buffer.putInt(creature.getHamListCounter());
 
-		buffer.putInt(20000);
+		buffer.putInt(creature.getHealth());
 		buffer.putInt(0);
-		buffer.putInt(12500);
+		buffer.putInt(creature.getAction());
 		buffer.putInt(0);
 		buffer.putInt(0x2C01);
 		buffer.putInt(0);

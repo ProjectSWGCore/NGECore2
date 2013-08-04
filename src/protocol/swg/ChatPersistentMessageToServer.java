@@ -23,8 +23,15 @@ package protocol.swg;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Vector;
 
 import org.apache.mina.core.buffer.IoBuffer;
+
+import services.chat.WaypointAttachment;
+
+import com.sleepycat.persist.model.Persistent;
 
 
 public class ChatPersistentMessageToServer extends SWGMessage {
@@ -33,6 +40,7 @@ public class ChatPersistentMessageToServer extends SWGMessage {
 	private int counter;
 	private String subject;
 	private String recipient;
+	private List<WaypointAttachment> waypointAttachments = new ArrayList<WaypointAttachment>();
 
 	@Override
 	public void deserialize(IoBuffer buffer) {
@@ -47,11 +55,52 @@ public class ChatPersistentMessageToServer extends SWGMessage {
 			setMessage(new String(ByteBuffer.allocate(size * 2).put(buffer.array(), buffer.position(), size * 2).array(), "UTF-16LE"));
 			buffer.position(buffer.position() + size * 2);
 			
-			int attachmentsSize = buffer.getInt(); 	// TODO: Implement when waypoints are done
+			int attachmentsSize = buffer.getInt() * 2; 	
 			
-			while(attachmentsSize > 0) {
+			/*while(attachmentsSize > 0) {
 				buffer.get();
 				--attachmentsSize;
+			}*/
+			
+			if(attachmentsSize > 0) {
+				
+				int position = buffer.position();
+				
+				while(buffer.position() < position + attachmentsSize) {
+					
+					short appendByte = buffer.getShort();
+					buffer.get();
+					int type = buffer.getInt();
+					
+					if(type == 0xFFFFFFFD) {
+						
+						WaypointAttachment waypoint = new WaypointAttachment();
+						
+						buffer.getInt(); // unk 0
+						waypoint.positionX = buffer.getFloat();
+						waypoint.positionY = buffer.getFloat();
+						waypoint.positionZ = buffer.getFloat();
+						buffer.getLong(); // unk
+						waypoint.planetCRC = buffer.getInt();
+						size = buffer.getInt();
+						waypoint.name = new String(ByteBuffer.allocate(size * 2).put(buffer.array(), buffer.position(), size * 2).array(), "UTF-16LE");
+						buffer.position(buffer.position() + size * 2);
+						waypoint.cellID = buffer.getLong();
+						waypoint.color = buffer.get();
+						byte active = buffer.get();
+						if(active == 1)
+							waypoint.active = true;
+						else
+							waypoint.active = false;
+
+						waypointAttachments.add(waypoint);
+						
+						if(appendByte > 0)
+							buffer.get();
+						
+					}
+				}
+				
 			}
 
 			setCounter(buffer.getInt());
@@ -110,5 +159,15 @@ public class ChatPersistentMessageToServer extends SWGMessage {
 	public void setCounter(int counter) {
 		this.counter = counter;
 	}
+	
+	public List<WaypointAttachment> getWaypointAttachments() {
+		return waypointAttachments;
+	}
+
+	public void setWaypointAttachments(List<WaypointAttachment> waypointAttachments) {
+		this.waypointAttachments = waypointAttachments;
+	}
+
+
 
 }

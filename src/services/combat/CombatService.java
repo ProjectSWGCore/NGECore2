@@ -24,6 +24,13 @@ package services.combat;
 import java.util.Map;
 import java.util.Random;
 
+import org.python.modules.math;
+
+import protocol.swg.ObjControllerMessage;
+import protocol.swg.objectControllerObjects.CombatAction;
+import protocol.swg.objectControllerObjects.CommandEnqueueRemove;
+import protocol.swg.objectControllerObjects.StartTask;
+
 import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
@@ -31,6 +38,7 @@ import services.command.CombatCommand;
 
 import main.NGECore;
 
+import engine.resources.common.CRC;
 import engine.resources.objects.SWGObject;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
@@ -41,6 +49,16 @@ public class CombatService implements INetworkDispatch {
 
 	public CombatService(NGECore core) {
 		this.core = core;
+		core.commandService.registerCombatCommand("rangedshotrifle");
+		core.commandService.registerCombatCommand("rangedshotpistol");
+		core.commandService.registerCombatCommand("rangedshotlightrifle");
+		core.commandService.registerCombatCommand("rangedshot");
+		core.commandService.registerCombatCommand("meleehit");
+		core.commandService.registerCombatCommand("saberhit");
+		core.commandService.registerCombatCommand("fs_sweep_7");
+		core.commandService.registerCombatCommand("fs_dm_7");
+		core.commandService.registerCombatCommand("fs_dm_cc_6");
+		core.commandService.registerCombatCommand("fs_ae_dm_cc_6");
 	}
 
 	@Override
@@ -136,12 +154,30 @@ public class CombatService implements INetworkDispatch {
 			damage -= blockValue;
 			
 		}
+
+		if(damage > 0)
+			applyDamage(attacker, target, (int) damage);
 		
-		applyDamage(attacker, target, (int) damage);
+		sendCombatPackets(attacker, target, weapon, command, actionCounter);
 
 	}
 	
 
+
+	private void sendCombatPackets(CreatureObject attacker, CreatureObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {
+		
+		String animationStr = command.getRandomAnimation(weapon);
+		CombatAction combatAction = new CombatAction(CRC.StringtoCRC(animationStr), attacker.getObjectID(), weapon.getObjectID(), target.getObjectID(), command.getCommandCRC());
+		ObjControllerMessage objController = new ObjControllerMessage(0x1B, combatAction);
+		attacker.notifyObserversInRange(objController, true, 125);
+		StartTask startTask = new StartTask(actionCounter, attacker.getObjectID(), command.getCommandCRC());
+		ObjControllerMessage objController2 = new ObjControllerMessage(0x0B, startTask);
+		attacker.getClient().getSession().write(objController2.serialize());
+		CommandEnqueueRemove commandRemove = new CommandEnqueueRemove(attacker.getObjectID(), actionCounter);
+		ObjControllerMessage objController3 = new ObjControllerMessage(0x0B, commandRemove);
+		attacker.getClient().getSession().write(objController3.serialize());
+
+	}
 
 	private float getArmorReduction(CreatureObject attacker, CreatureObject target, WeaponObject weapon, CombatCommand command, byte hitType) {
 		
@@ -439,6 +475,26 @@ public class CombatService implements INetworkDispatch {
 		}
 		target.setHealth(target.getHealth() - damage);
 		
+	}
+	
+	private boolean isInConeAngle(CreatureObject attacker, CreatureObject target, int coneLength, int coneWidth, float directionX, float directionZ) {
+		
+		float radius = coneWidth / 2;
+		float angle = (float) (2 * Math.atan(coneLength / radius));
+		
+		float targetX = target.getWorldPosition().x - attacker.getWorldPosition().x;
+		float targetZ = target.getWorldPosition().z - attacker.getWorldPosition().z;
+		
+		float targetAngle = (float) (Math.atan2(targetZ, targetX) -  Math.atan2(directionZ, directionX));
+		
+		float degrees = (float) (targetAngle * 180 / Math.PI);
+		float coneAngle = angle / 2;
+		
+		if(degrees > coneAngle || degrees < -coneAngle)
+			return false;
+		
+		return true;
+				
 	}
 	
 	

@@ -54,7 +54,7 @@ public class TangibleObject extends SWGObject {
 	protected int optionsBitmask = 0;
 	private int maxDamage = 0;
 	private boolean staticObject = false;
-	protected String faction;
+	protected String faction = "";
 	@NotPersistent
 	private Vector<TangibleObject> defendersList = new Vector<TangibleObject>();	// unused in packets but useful for the server
 	@NotPersistent

@@ -51,6 +51,7 @@ public class ObjControllerMessage extends SWGMessage {
 	public static final int SIT_ON_OBJECT = 0x013B;
 	public static final int OBJECT_MENU_RESPONSE = 0x0147;
 	public static final int SHOW_FLY_TEXT = 0x01BD;
+	public static final int START_TASK = 0x448;
 
 	public ObjControllerMessage() { 
 		

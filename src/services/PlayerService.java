@@ -29,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.mina.core.buffer.IoBuffer;
 
 import protocol.swg.ServerTimeMessage;
+import resources.objects.creature.CreatureObject;
 
 import main.NGECore;
 
@@ -41,7 +42,7 @@ import engine.resources.service.INetworkRemoteEvent;
 public class PlayerService implements INetworkDispatch {
 	
 	private NGECore core;
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
 
 	public PlayerService(final NGECore core) {
 		this.core = core;
@@ -61,6 +62,34 @@ public class PlayerService implements INetworkDispatch {
 			}
 			
 		}, 1, 1, TimeUnit.MINUTES);
+	}
+	
+	public void postZoneIn(final CreatureObject creature) {
+		
+		scheduler.scheduleAtFixedRate(new Runnable() {
+
+			@Override
+			public void run() {
+				
+				if(creature.getAction() < creature.getMaxAction())
+					creature.setAction(creature.getAction() + 200);
+				
+			}
+			
+		}, 0, 1, TimeUnit.SECONDS);
+
+		scheduler.scheduleAtFixedRate(new Runnable() {
+
+			@Override
+			public void run() {
+				
+				if(creature.getHealth() < creature.getMaxHealth() && creature.getCombatFlag() == 0)
+					creature.setHealth(creature.getHealth() + 300);
+				
+			}
+			
+		}, 0, 1, TimeUnit.SECONDS);
+
 	}
 
 	@Override

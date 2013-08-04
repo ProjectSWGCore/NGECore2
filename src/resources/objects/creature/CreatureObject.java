@@ -27,6 +27,7 @@ import java.util.List;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
+import protocol.Message;
 import protocol.swg.ChatSystemMessage;
 import protocol.swg.ObjControllerMessage;
 import protocol.swg.UpdatePVPStatusMessage;
@@ -112,12 +113,12 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private byte moodId = 0;
 	private int performanceCounter = 0;
 	private int performanceId = 0;
-	private int health;
-	private int action;
+	private int health = 20000;
+	private int action = 12500;
 	@NotPersistent
 	private int HAMListCounter = 0;
-	private int maxHealth;
-	private int maxAction;
+	private int maxHealth = 20000;
+	private int maxAction = 12500;
 	@NotPersistent
 	private int maxHAMListCounter = 0;
 
@@ -352,6 +353,16 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 		return null;
 	}
+	
+	public void addSkillMod(String name, int base) {
+		synchronized(objectMutex) {
+			SkillMod skillMod = new SkillMod();
+			skillMod.setBase(base);
+			skillMod.setSkillModString(name);
+			skillMod.setModifier(0);
+			skillMods.add(skillMod);
+		}
+	}
 
 	public short getSkillModsUpdateCounter() {
 		synchronized(objectMutex) {
@@ -497,6 +508,12 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			this.abilitiesUpdateCounter = abilitiesUpdateCounter;
 		}
 	}
+	
+	public void addAbility(String abilityName) {
+		synchronized(objectMutex) {
+			abilities.add(abilityName);
+		}
+	}
 
 	public List<MissionCriticalObject> getMissionCriticalObjects() {
 		return missionCriticalObjects;
@@ -512,6 +529,9 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.combatFlag = combatFlag;
 		}
+		IoBuffer combatDelta = messageBuilder.buildCombatFlagDelta(combatFlag);
+		
+		notifyObservers(combatDelta, true);
 	}
 
 	public short getLevel() {
@@ -796,11 +816,15 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 
 	public void setHealth(int health) {
+		IoBuffer delta;
 		synchronized(objectMutex) {
+			if(health > maxHealth)
+				health = maxHealth;
 			this.health = health;
-			setMaxHAMListCounter(getHamListCounter() + 1);
+			setHamListCounter(getHamListCounter() + 1);
+			delta = messageBuilder.buildHealthDelta(health);
 		}
-		notifyObservers(messageBuilder.buildHealthDelta(health), true);
+		notifyObservers(delta, true);
 	}
 
 	public int getAction() {
@@ -810,11 +834,15 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 
 	public void setAction(int action) {
+		IoBuffer delta;
 		synchronized(objectMutex) {
+			if(action > maxAction)
+				action = maxAction;
 			this.action = action;
-			setMaxHAMListCounter(getHamListCounter() + 1);
+			setHamListCounter(getHamListCounter() + 1);
+			delta = messageBuilder.buildActionDelta(action);
 		}
-		notifyObservers(messageBuilder.buildActionDelta(action), true);
+		notifyObservers(delta, true);
 	}
 
 	public int getHamListCounter() {

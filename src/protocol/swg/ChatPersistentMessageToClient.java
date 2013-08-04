@@ -22,8 +22,12 @@
 package protocol.swg;
 
 import java.nio.ByteOrder;
+import java.util.List;
+import java.util.Vector;
 
 import org.apache.mina.core.buffer.IoBuffer;
+
+import services.chat.WaypointAttachment;
 
 
 public class ChatPersistentMessageToClient extends SWGMessage {
@@ -36,8 +40,9 @@ public class ChatPersistentMessageToClient extends SWGMessage {
 	private String subject;
 	private byte status;
 	private int timestamp;
+	private List<WaypointAttachment> attachments;
 
-	public ChatPersistentMessageToClient(String sender, String galaxyName, int mailId, byte requestTypeFlag, String message, String subject, byte status, int timestamp) {
+	public ChatPersistentMessageToClient(String sender, String galaxyName, int mailId, byte requestTypeFlag, String message, String subject, byte status, int timestamp, List<WaypointAttachment> attachments) {
 		
 		this.sender = sender;
 		this.galaxyName = galaxyName;
@@ -47,6 +52,7 @@ public class ChatPersistentMessageToClient extends SWGMessage {
 		this.subject = subject;
 		this.status = status;
 		this.timestamp = timestamp;
+		this.attachments = attachments;
 
 	}
 
@@ -60,7 +66,7 @@ public class ChatPersistentMessageToClient extends SWGMessage {
 	public IoBuffer serialize() {
 				
 		IoBuffer result = IoBuffer.allocate(41 + sender.length() + galaxyName.length() + message.length() * 2 + subject.length() * 2).order(ByteOrder.LITTLE_ENDIAN);
-
+		result.setAutoExpand(true);
 		result.putShort((short) 2);
 		result.putInt(0x08485E17);
 		result.put(getAsciiString(sender));
@@ -75,12 +81,40 @@ public class ChatPersistentMessageToClient extends SWGMessage {
 			result.put(getUnicodeString(message));
 		
 		result.put(getUnicodeString(subject));
-		result.putInt(0);	// attachements doing later when waypoints work
+		
+		if(requestTypeFlag == 1 || attachments.size() == 0)
+			result.putInt(0);	
+		else if(requestTypeFlag == 0 && attachments.size() > 0){
+			
+			int position = result.position();
+			result.putInt(0);
+			
+			for(WaypointAttachment attachment : attachments) {
+				
+				result.putInt(0);
+				result.putFloat(attachment.positionX);
+				result.putFloat(attachment.positionY);
+				result.putFloat(attachment.positionZ);
+				result.putLong(0);
+				result.putInt(attachment.planetCRC);
+				result.put(getUnicodeString(attachment.name));
+				result.putLong(attachment.cellID);
+				result.put(attachment.color);
+				result.put((byte) (attachment.active ? 1 : 0));
+				
+			}
+			
+			result.putInt(position, (result.position() - position - 4) / 2);
+			
+		}
 		
 		result.put(status);
 		result.putInt(timestamp);
 		result.putInt(0);
 		
+		int size = result.position();
+		result = IoBuffer.allocate(size).put(result.array(), 0, size);
+
 		return result.flip();
 	}
 

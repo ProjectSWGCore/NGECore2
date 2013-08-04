@@ -360,21 +360,23 @@ public class ObjectService implements INetworkDispatch {
 
 					@Override
 					public void process(SWGObject object) {
-						if(object.getParentId() != 0 && object.getContainer() == null)
-							object.setParent(getObject(object.getParentId()));
-						object.getContainerInfo(object.getTemplate());
-					}
-					
-				});				
-				creature.viewChildren(creature, true, true, new Traverser() {
-
-					@Override
-					public void process(SWGObject object) {
-						//System.out.println(object.getTemplate());
 						objectList.add(object);
 					}
 					
 				});
+				
+				creature.viewChildren(creature, true, true, new Traverser() {
+
+					@Override
+					public void process(SWGObject object) {
+						if(object.getParentId() != 0 && object.getContainer() == null)
+							object.setParent(getObject(object.getParentId()));
+						object.getContainerInfo(object.getTemplate());
+						if(getObject(object.getObjectID()) == null)
+							objectList.add(object);
+					}
+					
+				});				
 
 				if(creature.getParentId() != 0) {
 					SWGObject parent = getObject(creature.getParentId());
@@ -400,6 +402,8 @@ public class ObjectService implements INetworkDispatch {
 				
 				core.simulationService.handleZoneIn(client);
 				creature.makeAware(creature);
+				
+				core.playerService.postZoneIn(creature);
 				//CmdSceneReady cmdSceneReady = new CmdSceneReady();
 				//session.write(cmdSceneReady.serialize());
 

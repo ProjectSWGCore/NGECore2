@@ -226,7 +226,7 @@ public class SimulationService implements INetworkDispatch {
 				//object.setParent(null);
 			//	System.out.println("Parsed Height: " + core.terrainService.getHeight(object.getPlanetId(), dataTransform.getXPosition(), dataTransform.getZPosition())
 				//		 + " should be: " + dataTransform.getYPosition());
-				UpdateTransformMessage utm = new UpdateTransformMessage(object.getObjectID(), dataTransform.getTransformedX(), dataTransform.getTransformedY(), dataTransform.getTransformedZ(), dataTransform.getMovementCounter(), (byte) dataTransform.getMovementAngle(), dataTransform.getSpeed(), object.getCombatFlag());
+				UpdateTransformMessage utm = new UpdateTransformMessage(object.getObjectID(), dataTransform.getTransformedX(), dataTransform.getTransformedY(), dataTransform.getTransformedZ(), dataTransform.getMovementCounter(), (byte) dataTransform.getMovementAngle(), dataTransform.getSpeed());
 	
 				List<SWGObject> newAwareObjects = get(object.getPlanet(), newPos.x, newPos.z, 200);
 				ArrayList<SWGObject> oldAwareObjects = new ArrayList<SWGObject>(object.getAwareObjects());
@@ -289,7 +289,7 @@ public class SimulationService implements INetworkDispatch {
 				Point3D oldPos = object.getPosition();
 				Quaternion newOrientation = new Quaternion(dataTransform.getWOrientation(), dataTransform.getXOrientation(), dataTransform.getYOrientation(), dataTransform.getZOrientation());
 
-				UpdateTransformWithParentMessage utm = new UpdateTransformWithParentMessage(object.getObjectID(), dataTransform.getCellId(), dataTransform.getTransformedX(), dataTransform.getTransformedY(), dataTransform.getTransformedZ(), dataTransform.getMovementCounter(), (byte) dataTransform.getMovementAngle(), dataTransform.getSpeed(), object.getCombatFlag());
+				UpdateTransformWithParentMessage utm = new UpdateTransformWithParentMessage(object.getObjectID(), dataTransform.getCellId(), dataTransform.getTransformedX(), dataTransform.getTransformedY(), dataTransform.getTransformedZ(), dataTransform.getMovementCounter(), (byte) dataTransform.getMovementAngle(), dataTransform.getSpeed());
 
 				
 				if(object.getContainer() != parent) {
@@ -417,7 +417,9 @@ public class SimulationService implements INetworkDispatch {
         
         end = new Point3D(endX, endY, endZ);
  
-		Vector3D direction = new Vector3D(end.x - origin.x, end.y - origin.y, end.z - origin.z).normalize();
+		Vector3D direction = new Vector3D(end.x - origin.x, end.y - origin.y, end.z - origin.z);
+		if(direction.getX() > 0 && direction.getY() > 0 && direction.getZ() > 0)
+			direction.normalize();
 		
 		return new Ray(origin, direction);
 		
