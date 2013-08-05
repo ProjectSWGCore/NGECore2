@@ -31,41 +31,39 @@ import java.util.ListIterator;
 import org.apache.mina.core.buffer.IoBuffer;
 
 import com.sleepycat.persist.model.NotPersistent;
+import com.sleepycat.persist.model.Persistent;
 
 /* A SWGList element MUST implement IListObject, or it will refuse to work with it */
-
+@Persistent
 public class SWGList<E> implements List<E> {
 	
 	private List<E> list = new ArrayList<E>();
 	@NotPersistent
-	private int updateCounter;
-	
+	private int updateCounter = 1;
 	private ObjectMessageBuilder messageBuilder;
 	private byte viewType;
 	private short updateType;
-	
+	@NotPersistent
 	protected final Object objectMutex = new Object();
+	
+	public SWGList() { }
 	
 	public SWGList(ObjectMessageBuilder messageBuilder, int viewType, int updateType) {
 		this.messageBuilder = messageBuilder;
 		this.viewType = (byte) viewType;
 		this.updateType = (short) updateType;
 	}
-	
+	@Override
 	public boolean add(E e) {
-		synchronized(objectMutex) {
-			if (e instanceof IListObject) {
-				if (list.add(e)) {
-					queue(item(1, list.lastIndexOf(e), ((IListObject) e).getBytes(), true, true));
-					
-					return true;
-				}
-			}
-			
+		synchronized(objectMutex) {				
+			if (list.add(e) && e instanceof IListObject) {
+				queue(item(1, list.lastIndexOf(e), ((IListObject) e).getBytes(), true, true));
+				return true;
+			}			
 			return false;
 		}
 	}
-	
+	@Override
 	public void add(int index, E element) {
 		synchronized(objectMutex) {
 			if (element instanceof IListObject) {
@@ -74,7 +72,7 @@ public class SWGList<E> implements List<E> {
 			}
 		}
 	}
-	
+	@Override
 	public boolean addAll(Collection<? extends E> c) {
 		synchronized(objectMutex) {
 			if (!c.isEmpty()) {
@@ -102,7 +100,7 @@ public class SWGList<E> implements List<E> {
 			return false;
 		}
 	}
-	
+	@Override
 	public boolean addAll(int index, Collection<? extends E> c) {
 		synchronized(objectMutex) {
 			if (!c.isEmpty()) {
@@ -126,26 +124,26 @@ public class SWGList<E> implements List<E> {
 			return false;
 		}
 	}
-	
+	@Override
 	public void clear() {
 		synchronized(objectMutex) {
 			list.clear();
 			queue(item(4, 0, null, false, false));
 		}
 	}
-	
+	@Override
 	public boolean contains(Object o) {
 		synchronized(objectMutex) {
 			return list.contains(o);
 		}
 	}
-	
+	@Override
 	public boolean containsAll(Collection<?> c) {
 		synchronized(objectMutex) {
 			return list.containsAll(c);
 		}
 	}
-	
+	@Override
 	public E get(int index) {
 		synchronized(objectMutex) {
 			return list.get(index);
@@ -157,43 +155,43 @@ public class SWGList<E> implements List<E> {
 			return list;
 		}
 	}
-	
+	@Override
 	public int indexOf(Object o) {
 		synchronized(objectMutex) {
 			return list.indexOf(o);
 		}
 	}
-	
+	@Override
 	public boolean isEmpty() {
 		synchronized(objectMutex) {
 			return list.isEmpty();
 		}
 	}
-	
+	@Override
 	public Iterator<E> iterator() {
 		synchronized(objectMutex) {
 			return list.iterator();
 		}
 	}
-	
+	@Override
 	public int lastIndexOf(Object o) {
 		synchronized(objectMutex) {
 			return list.lastIndexOf(o);
 		}
 	}
-	
+	@Override
 	public ListIterator<E> listIterator() {
 		synchronized(objectMutex) {
 			return list.listIterator();
 		}
 	}
-	
+	@Override
 	public ListIterator<E> listIterator(int index) {
 		synchronized(objectMutex) {
 			return listIterator(index);
 		}
 	}
-	
+	@Override
 	public boolean remove(Object o) {
 		synchronized(objectMutex) {
 			int index = list.indexOf(o);
@@ -206,7 +204,7 @@ public class SWGList<E> implements List<E> {
 			}
 		}
 	}
-	
+	@Override
 	public E remove(int index) {
 		synchronized(objectMutex) {
 			E element = list.remove(index);
@@ -216,7 +214,7 @@ public class SWGList<E> implements List<E> {
 			return (E) element;
 		}
 	}
-
+	@Override
 	public boolean removeAll(Collection<?> c) {
 		synchronized(objectMutex) {
 			if (!c.isEmpty()) {
@@ -243,13 +241,13 @@ public class SWGList<E> implements List<E> {
 			return false;
 		}
 	}
-	
+	@Override
 	public boolean retainAll(Collection<?> c) {
 		synchronized(objectMutex) {
 			return list.retainAll(c);
 		}
 	}
-	
+	@Override
 	public E set(int index, E element) {
 		synchronized(objectMutex) {
 			if (element instanceof IListObject) {
@@ -291,25 +289,25 @@ public class SWGList<E> implements List<E> {
 			return false;
 		}
 	}
-	
+	@Override
 	public int size() {
 		synchronized(objectMutex) {
 			return list.size();
 		}
 	}
-	
+	@Override
 	public List<E> subList(int fromIndex, int toIndex) {
 		synchronized(objectMutex) {
 			return list.subList(fromIndex, toIndex);
 		}
 	}
-	
+	@Override
 	public Object[] toArray() {
 		synchronized(objectMutex) {
 			return list.toArray();
 		}
 	}
-	
+	@Override
 	public <T> T[] toArray(T[] a) {
 		synchronized(objectMutex) {
 			return list.toArray(a);
@@ -355,5 +353,7 @@ public class SWGList<E> implements List<E> {
 		
 		messageBuilder.sendListDelta(viewType, updateType, buffer);
 	}
+	
+	public Object getMutex() { return objectMutex; }
 
 }

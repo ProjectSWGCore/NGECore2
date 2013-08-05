@@ -27,7 +27,6 @@ import java.util.List;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import protocol.Message;
 import protocol.swg.ChatSystemMessage;
 import protocol.swg.ObjControllerMessage;
 import protocol.swg.UpdatePVPStatusMessage;
@@ -42,7 +41,8 @@ import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.NotPersistent;
 
 import engine.clients.Client;
-import engine.resources.objects.Buff;
+import resources.objects.Buff;
+import resources.objects.SWGList;
 import engine.resources.objects.IPersistent;
 import engine.resources.objects.MissionCriticalObject;
 import engine.resources.objects.SWGObject;
@@ -63,7 +63,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	// CREO 1
 	private int bankCredits = 0;
 	private int cashCredits = 0;
-	private List<String> skills = new ArrayList<String>();
+	private SWGList<String> skills;
 	@NotPersistent
 	private int skillsUpdateCounter = 0;
 
@@ -78,7 +78,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	// CREO 4
 	private float accelerationMultiplierBase = 1;
 	private float accelerationMultiplierMod = 1;
-	private List<SkillMod> skillMods = new ArrayList<SkillMod>();
+	private SWGList<SkillMod> skillMods;
 	@NotPersistent
 	private int skillModsUpdateCounter = 0;
 	private float speedMultiplierBase = 1;
@@ -90,10 +90,10 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private float turnRadius = 1;
 	private float walkSpeed = (float) 2.75;
 	private float waterModPercent = 1;
-	private List<String> abilities = new ArrayList<String>();
+	private SWGList<String> abilities;
 	private int abilitiesUpdateCounter = 0;
 
-	private List<MissionCriticalObject> missionCriticalObjects = new ArrayList<MissionCriticalObject>();
+	private SWGList<MissionCriticalObject> missionCriticalObjects;
 	@NotPersistent
 	private int missionCriticalObjectsUpdateCounter = 0;
 
@@ -122,13 +122,13 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	@NotPersistent
 	private int maxHAMListCounter = 0;
 
-	private List<SWGObject> equipmentList  = new ArrayList<SWGObject>();
+	private SWGList<SWGObject> equipmentList;
 	@NotPersistent
 	private int equipmentListUpdateCounter = 0;
-	private List<Buff> buffList  = new ArrayList<Buff>();
+	private SWGList<Buff> buffList  = new SWGList<Buff>();
 	@NotPersistent
 	private int buffListUpdateCounter = 0;
-	private List<SWGObject> appearanceEquipmentList  = new ArrayList<SWGObject>();
+	private SWGList<SWGObject> appearanceEquipmentList;
 	@NotPersistent
 	private int appearanceEquipmentListUpdateCounter = 0;
 
@@ -142,6 +142,13 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	public CreatureObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
 		super(objectID, planet, Template, position, orientation);
 		messageBuilder = new CreatureMessageBuilder(this);
+		skills = new SWGList<String>(messageBuilder, 1, 3);
+		skillMods = new SWGList<SkillMod>(messageBuilder, 4, 3);
+		abilities = new SWGList<String>(messageBuilder, 4, 14);
+		missionCriticalObjects = new SWGList<MissionCriticalObject>(messageBuilder, 4, 13);
+		equipmentList = new SWGList<SWGObject>(messageBuilder, 6, 0x17);
+		buffList = new SWGList<Buff>(messageBuilder, 6, 0x1A);
+		appearanceEquipmentList = new SWGList<SWGObject>(messageBuilder, 6, 0x1F);
 	}
 	
 	public CreatureObject() {
@@ -183,7 +190,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 	}
 
-	public List<String> getSkills() {
+	public SWGList<String> getSkills() {
 		return skills;
 	}
 	
@@ -340,13 +347,13 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 	}
 
-	public List<SkillMod> getSkillMods() {
+	public SWGList<SkillMod> getSkillMods() {
 		return skillMods;
 	}
 	
 	public SkillMod getSkillMod(String name) {
-		synchronized(objectMutex) {
-			for(SkillMod skillMod : skillMods) {
+		synchronized(skillMods.getMutex()) {
+			for(SkillMod skillMod : skillMods.get()) {
 				if(skillMod.getSkillModString().equals(name))
 					return skillMod;
 			}
@@ -355,13 +362,11 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void addSkillMod(String name, int base) {
-		synchronized(objectMutex) {
-			SkillMod skillMod = new SkillMod();
-			skillMod.setBase(base);
-			skillMod.setSkillModString(name);
-			skillMod.setModifier(0);
-			skillMods.add(skillMod);
-		}
+		SkillMod skillMod = new SkillMod();
+		skillMod.setBase(base);
+		skillMod.setSkillModString(name);
+		skillMod.setModifier(0);
+		skillMods.add(skillMod);
 	}
 
 	public short getSkillModsUpdateCounter() {
@@ -493,7 +498,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 	}
 
-	public List<String> getAbilities() {
+	public SWGList<String> getAbilities() {
 		return abilities;
 	}
 
@@ -510,12 +515,10 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void addAbility(String abilityName) {
-		synchronized(objectMutex) {
-			abilities.add(abilityName);
-		}
+		abilities.add(abilityName);
 	}
 
-	public List<MissionCriticalObject> getMissionCriticalObjects() {
+	public SWGList<MissionCriticalObject> getMissionCriticalObjects() {
 		return missionCriticalObjects;
 	}
 
@@ -709,15 +712,15 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 	}
 
-	public List<SWGObject> getEquipmentList() {
+	public SWGList<SWGObject> getEquipmentList() {
 		return equipmentList;
 	}
 
-	public List<Buff> getBuffList() {
+	public SWGList<Buff> getBuffList() {
 		return buffList;
 	}
 
-	public List<SWGObject> getAppearanceEquipmentList() {
+	public SWGList<SWGObject> getAppearanceEquipmentList() {
 		return appearanceEquipmentList;
 	}
 
@@ -733,17 +736,13 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	public void addObjectToEquipList(SWGObject object) {
 		if(object instanceof TangibleObject || object instanceof WeaponObject) {
-			synchronized(objectMutex) {
-				equipmentList.add(object);
-			}
+			equipmentList.add(object);
 		}
 	}
 	
 	public void removeObjectFromEquipList(SWGObject object) {
 		if(object instanceof TangibleObject || object instanceof WeaponObject) {
-			synchronized(objectMutex) {
-				equipmentList.remove(object);
-			}
+			equipmentList.remove(object);
 		}
 	}
 

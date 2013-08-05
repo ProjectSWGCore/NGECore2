@@ -33,7 +33,7 @@ def run(core, actor, target, commandString):
     
     #/wp X Z Y NAME
     if isFloat(commandArgs[0]) and isFloat(commandArgs[1]) and isFloat(commandArgs[2]):
-        waypoint = core.objectService.createObject('object/waypoint/shared_waypoint.iff', actor.getPlanet(), actor.getPosition().x, actor.getPosition().z, actor.getPosition().y)
+        waypoint = core.objectService.createObject('object/waypoint/shared_waypoint.iff', actor.getPlanet(), actor.getWorldPosition().x, actor.getWorldPosition().z, actor.getWorldPosition().y)
         waypoint.setActive(True)
         waypoint.setColor(WaypointObject.BLUE)
         name = commandString.split(" ", 3)
@@ -46,7 +46,7 @@ def run(core, actor, target, commandString):
     
     #/wp NAME
     else:
-        waypoint = core.objectService.createObject('object/waypoint/shared_waypoint.iff', actor.getPlanet(), actor.getPosition().x, actor.getPosition().z, actor.getPosition().y)
+        waypoint = core.objectService.createObject('object/waypoint/shared_waypoint.iff', actor.getPlanet(), actor.getWorldPosition().x, actor.getWorldPosition().z, actor.getWorldPosition().y)
         waypoint.setActive(True)
         waypoint.setColor(WaypointObject.BLUE)
         waypoint.setName(commandString)

@@ -23,7 +23,10 @@ package resources.objects.creature;
 
 import java.nio.ByteOrder;
 
+
 import org.apache.mina.core.buffer.IoBuffer;
+
+import com.sleepycat.persist.model.Persistent;
 
 import engine.resources.common.CRC;
 import resources.objects.ObjectMessageBuilder;
@@ -33,8 +36,10 @@ import engine.resources.objects.SkillMod;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 
+@Persistent
 public class CreatureMessageBuilder extends ObjectMessageBuilder {
 
+	public CreatureMessageBuilder() { }
 	
 	public CreatureMessageBuilder(CreatureObject creatureObject) {
 
@@ -59,7 +64,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		} else {
 			buffer.putInt(creature.getSkills().size());	
 			buffer.putInt(creature.getSkillsUpdateCounter());
-			for(String skill : creature.getSkills())
+			for(String skill : creature.getSkills().get())
 				buffer.put(getAsciiString(skill));
 		}
 		int size = buffer.position();
@@ -147,7 +152,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 			buffer.putInt(creature.getSkillMods().size());
 			buffer.putInt(creature.getSkillModsUpdateCounter());
 			
-			for(SkillMod skillMod : creature.getSkillMods()) {
+			for(SkillMod skillMod : creature.getSkillMods().get()) {
 				buffer.put((byte) 0);
 				buffer.put(getAsciiString(skillMod.getSkillModString()));
 				buffer.putInt(skillMod.getBase());
@@ -177,7 +182,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 			buffer.putInt(creature.getAbilities().size());	
 			buffer.putInt(creature.getAbilitiesUpdateCounter());
 
-			for(String ability : creature.getAbilities()) {
+			for(String ability : creature.getAbilities().get()) {
 				buffer.put((byte) 0);
 				buffer.put(getAsciiString(ability));
 				buffer.putInt(1);
@@ -274,7 +279,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 			buffer.putInt(creature.getEquipmentList().size());
 			buffer.putInt(0);
 			
-			for(SWGObject obj : creature.getEquipmentList()) {
+			for(SWGObject obj : creature.getEquipmentList().get()) {
 				
 				if(obj instanceof TangibleObject) {
 					TangibleObject tangible = (TangibleObject) obj;
@@ -328,7 +333,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 			buffer.putInt(creature.getAppearanceEquipmentList().size());
 			buffer.putInt(0);
 			
-			for(SWGObject obj : creature.getAppearanceEquipmentList()) {
+			for(SWGObject obj : creature.getAppearanceEquipmentList().get()) {
 				
 				if(obj instanceof TangibleObject) {
 					TangibleObject tangible = (TangibleObject) obj;

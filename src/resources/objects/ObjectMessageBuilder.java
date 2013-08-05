@@ -28,15 +28,21 @@ import java.nio.ByteOrder;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.buffer.SimpleBufferAllocator;
 
+import com.sleepycat.persist.model.NotPersistent;
+import com.sleepycat.persist.model.Persistent;
+
 import resources.common.Opcodes;
 
 import engine.resources.objects.SWGObject;
 
+@Persistent
 public abstract class ObjectMessageBuilder {
 	
-	public SWGObject object;
-	public SimpleBufferAllocator bufferPool = new SimpleBufferAllocator();
 	
+	public SWGObject object;
+	@NotPersistent
+	public SimpleBufferAllocator bufferPool = new SimpleBufferAllocator();
+		
 	public IoBuffer createBaseline(String objectType, byte viewType, IoBuffer data, int size) {
 		IoBuffer buffer = bufferPool.allocate(23 + size, false).order(ByteOrder.LITTLE_ENDIAN);
 		
