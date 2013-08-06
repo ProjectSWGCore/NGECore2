@@ -94,5 +94,13 @@ def addProfessionAbilities(core, object, profession):
 		object.addAbility('bh_fumble_6')
 		object.addAbility('bh_intimidate_6')
 		object.addAbility('bh_flawless_strike')
+	elif profession == 'officer_1a':
+		object.addAbility('of_focus_fire_2')
+		object.addAbility('of_del_ae_dm_dot_2')
+		object.addAbility('of_charge_1')
+		object.addAbility('of_tactical_sup_6')
+		object.addAbility('of_stimulator_1')
+		object.addAbility('of_inspiration_2')
+		object.addAbility('of_deb_def_2')
 		
 	return
