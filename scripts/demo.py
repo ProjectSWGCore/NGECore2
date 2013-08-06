@@ -94,5 +94,32 @@ def addProfessionAbilities(core, object, profession):
 		object.addAbility('bh_fumble_6')
 		object.addAbility('bh_intimidate_6')
 		object.addAbility('bh_flawless_strike')
+	if profession == 'officer_1a':
+		object.addAbility('of_focus_fire_2')
+		object.addAbility('of_del_ae_dm_dot_2')
+		object.addAbility('of_charge_1')
+		object.addAbility('of_tactical_sup_6')
+		object.addAbility('of_stimulator_1')
+		object.addAbility('of_inspiration_2')
+		object.addAbility('of_deb_def_2')
+	if profession == 'commando_1a':
+		testObject = core.objectService.createObject('object/weapon/ranged/heavy/shared_heavy_acid_beam.iff', object.getPlanet())
+		testObject.setCustomName('heavy weapon')
+		testObject.setStringAttribute('crafter', 'xbang')
+		testObject.setStringAttribute('cat_wpn_damage.wpn_elemental_type', '@obj_attr_n:elemental_acid')
+		testObject.setIntAttribute('cat_wpn_damage.wpn_damage_min', 800)
+		testObject.setIntAttribute('cat_wpn_damage.wpn_damage_max', 1000)
+		testObject.setIntAttribute('dps', 900)
+		inventory = object.getSlottedObject('inventory')
+		inventory.add(testObject)
+	
+		object.addAbility('co_shock_grenade_1')
+		object.addAbility('co_stim_armor')
+		object.addAbility('co_remote_detonator_3')
+		object.addAbility('co_hw_dm_5')
+		object.addAbility('co_fld_dm_1')
+		object.addAbility('co_del_ae_dm_3')
+		object.addAbility('co_del_ae_cc_1_2')
+		object.addAbility('co_hw_dm_crit_5')
 		
 	return
