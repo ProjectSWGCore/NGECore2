@@ -23,23 +23,16 @@ package services.combat;
 
 import java.util.Map;
 import java.util.Random;
-
-import org.python.modules.math;
-
 import protocol.swg.ObjControllerMessage;
 import protocol.swg.objectControllerObjects.CombatAction;
 import protocol.swg.objectControllerObjects.CommandEnqueueRemove;
 import protocol.swg.objectControllerObjects.StartTask;
-
 import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 import services.command.CombatCommand;
-
 import main.NGECore;
-
 import engine.resources.common.CRC;
-import engine.resources.objects.SWGObject;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 

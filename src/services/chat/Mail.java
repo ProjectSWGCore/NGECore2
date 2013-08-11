@@ -22,9 +22,6 @@
 package services.chat;
 
 import java.util.List;
-import java.util.Vector;
-
-
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 

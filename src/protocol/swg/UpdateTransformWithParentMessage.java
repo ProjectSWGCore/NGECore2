@@ -37,7 +37,6 @@ public class UpdateTransformWithParentMessage extends SWGMessage {
 	private int movementCounter;
 	private byte direction;
 	private float speed;
-	private byte combatFlag;
 	
 	public UpdateTransformWithParentMessage(long objectId, long cellId, short x, short y, short z, int movementCounter, byte direction, float speed) {
 		this.objectId = objectId;

@@ -21,6 +21,62 @@
  ******************************************************************************/
 package services;
 
-public class StaticService {
+import java.util.Map;
+
+import main.NGECore;
+
+import engine.resources.objects.SWGObject;
+import engine.resources.scene.Planet;
+import engine.resources.scene.Point3D;
+import engine.resources.scene.Quaternion;
+import engine.resources.service.INetworkDispatch;
+import engine.resources.service.INetworkRemoteEvent;
+
+public class StaticService implements INetworkDispatch {
+	
+	private NGECore core;
+
+	public StaticService(NGECore core) {
+		this.core = core;
+	}
+
+	@Override
+	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> arg0, Map<Integer, INetworkRemoteEvent> arg1) {
+		
+	}
+
+	@Override
+	public void shutdown() {
+		
+	}
+	
+	public void spawnObject(String template, String planetName, long cellId, float x, float y, float z, float qY, float qW) {
+		
+		Planet planet = core.terrainService.getPlanetByName(planetName);
+		
+		if(planet == null) {
+			System.out.println("Cant spawn static object because planet is null");
+			return;
+		}
+		
+		SWGObject object = core.objectService.createObject(template, 0, planet, new Point3D(x, y, z), new Quaternion(qW, 0, qY, 0));
+		
+		if(object == null) {
+			System.out.println("Static object is null");
+			return;
+		}
+		
+		if(cellId == 0)
+			core.simulationService.add(object, x, z);
+		else {
+			SWGObject parent = core.objectService.getObject(cellId);
+			if(parent == null) {
+				System.out.println("Cell not found");
+				return;
+			}
+			parent.add(object);
+		}
+		
+	}
 
 }

@@ -149,11 +149,8 @@ public class SWGList<E> implements List<E> {
 			return list.get(index);
 		}
 	}
-	
 	public List<E> get() {
-		synchronized(objectMutex) {
-			return list;
-		}
+		return list;
 	}
 	@Override
 	public int indexOf(Object o) {

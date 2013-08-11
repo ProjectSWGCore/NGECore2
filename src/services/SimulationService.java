@@ -439,17 +439,23 @@ public class SimulationService implements INetworkDispatch {
 		if(client.getParent() == null)
 			return;
 
+		session.suspendWrite();
+		
 		CreatureObject object = (CreatureObject) client.getParent();
 		boolean remove = remove(object, object.getPosition().x, object.getPosition().z);
 		if(remove)
 			System.out.println("Successful quadtree remove");
 
-		HashSet<Client> oldObservers = new HashSet<Client>(object.getObservers());
-		for(Iterator<Client> it = oldObservers.iterator(); it.hasNext();) {
-			Client observerClient = it.next();
-			if(observerClient.getParent() != null) {
-				observerClient.getParent().makeUnaware(object);
+		if(object.getContainer() == null) {
+			HashSet<Client> oldObservers = new HashSet<Client>(object.getObservers());
+			for(Iterator<Client> it = oldObservers.iterator(); it.hasNext();) {
+				Client observerClient = it.next();
+				if(observerClient.getParent() != null && !(observerClient.getSession() == session)) {
+					observerClient.getParent().makeUnaware(object);
+				}
 			}
+		} else {
+			object.getContainer().remove(object);
 		}
 		
 
@@ -457,8 +463,6 @@ public class SimulationService implements INetworkDispatch {
 		core.getCreatureODB().put(object, Long.class, CreatureObject.class, object.getTransaction());
 		object.getTransaction().commitSync();
 		
-		session.suspendRead();
-		session.suspendWrite();
 		core.objectService.destroyObject(object);
 		core.getActiveConnectionsMap().remove((Integer) session.getAttribute("connectionId"));
 		
@@ -540,7 +544,7 @@ public class SimulationService implements INetworkDispatch {
 		CmdStartScene startScene = new CmdStartScene((byte) 0, object.getObjectID(), object.getPlanet().getPath(), object.getTemplate(), newPos.x, newPos.y, newPos.z, System.currentTimeMillis() / 1000, object.getRadians());
 		session.write(startScene.serialize());
 		
-		core.simulationService.handleZoneIn(client);
+		handleZoneIn(client);
 		object.makeAware(object);
 
 		
@@ -560,7 +564,7 @@ public class SimulationService implements INetworkDispatch {
 		
 		if(position.x >= -8192 && position.x <= 8192 && position.z >= -8192 && position.z <= 8192) {
 			
-			DataTransform dataTransform = new DataTransform(new Point3D(position.x, position.y, position.z), orientation, obj.getMovementCounter(), obj.getObjectID());
+			DataTransform dataTransform = new DataTransform(new Point3D(position.x, position.y, position.z), orientation, 1, obj.getObjectID());
 			ObjControllerMessage objController = new ObjControllerMessage(0x1B, dataTransform);
 			obj.notifyObservers(objController, true);
 			

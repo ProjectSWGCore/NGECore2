@@ -761,11 +761,11 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			destination.getSession().write(messageBuilder.buildBaseline1());
 			destination.getSession().write(messageBuilder.buildBaseline4());
 		}
-		destination.getSession().write(messageBuilder.buildBaseline8());
-		destination.getSession().write(messageBuilder.buildBaseline9());
-
+		//destination.getSession().write(messageBuilder.buildBaseline8());
+		//destination.getSession().write(messageBuilder.buildBaseline9());
+		 
 		UpdatePostureMessage upm = new UpdatePostureMessage(getObjectID(), (byte) 0);
-		destination.getSession().write(upm.serialize());
+		//destination.getSession().write(upm.serialize());
 		
 		if(destination != getClient()) {
 			UpdatePVPStatusMessage upvpm = new UpdatePVPStatusMessage(getObjectID());
@@ -795,7 +795,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 				upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Neutral);
 				upvpm.setStatus(16);
 			}
-			destination.getSession().write(upvpm.serialize());
+			//destination.getSession().write(upvpm.serialize());
 		}
 	}
 
@@ -895,5 +895,46 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			this.maxHAMListCounter = maxHAMListCounter;
 		}
 	}
+	
+	public void addBuff(Buff buff) {
+		synchronized(objectMutex) {
+			buffList.get().add(buff);
+			setBuffListCounter(getBuffListCounter() + 1);
+			
+		}
+		buff.setStartTime();
+		notifyObservers(messageBuilder.buildAddBuffDelta(buff), true);
+	}
+	
+	public void removeBuff(Buff buff) {
+		synchronized(objectMutex) {
+			buffList.get().remove(buff);
+			setBuffListCounter(getBuffListCounter() + 1);
+		}
+		notifyObservers(messageBuilder.buildRemoveBuffDelta(buff), true);
+	}
+
+	public int getBuffListCounter() {
+		synchronized(objectMutex) {
+			return buffListUpdateCounter;
+		}
+	}
+	
+	public void setBuffListCounter(int buffListCounter) {
+		synchronized(objectMutex) {
+			this.buffListUpdateCounter = buffListCounter;
+		}
+	}
+	
+	public Buff getBuffByName(String buffName) {
+		synchronized(objectMutex) {
+			for(Buff buff : buffList.get()) {
+				if(buff.getBuffName().equals(buffName))
+					return buff;
+			}
+		}
+		return null;
+	}
+
 
 }

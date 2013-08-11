@@ -118,7 +118,7 @@ public class DataTransform extends ObjControllerObject {
 		result.putInt(0);
 		
 		result.putInt(0);
-		result.putInt(movementIndex+1);
+		result.putInt(movementIndex);
 		
 		result.putFloat(0);
 		result.putFloat(yOrientation); 	//xRot
@@ -131,7 +131,7 @@ public class DataTransform extends ObjControllerObject {
 		
 		result.putFloat(speed); 			//unk
 		result.putFloat(0); 			//unk
-		result.put((byte)0x01);	
+		result.put((byte)0x00);	
 		
 		return result.flip();
 	}

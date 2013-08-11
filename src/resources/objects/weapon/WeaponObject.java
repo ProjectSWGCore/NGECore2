@@ -181,6 +181,7 @@ public class WeaponObject extends SWGObject {
 
 	@Override
 	public void sendBaselines(Client destination) {
+		
 		if(destination == null || destination.getSession() == null)
 			return;
 		

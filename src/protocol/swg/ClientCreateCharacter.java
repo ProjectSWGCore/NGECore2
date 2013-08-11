@@ -79,7 +79,6 @@ public class ClientCreateCharacter extends SWGMessage {
 			hairObject = new String(ByteBuffer.allocate(size).put(buffer.array(), buffer.position(), size).array(), "US-ASCII");
 			buffer.position(buffer.position() + size);
 			length = buffer.getShort();
-			System.out.println("Position: " + buffer.position());
 			hairCustomization = new byte[length];
 			buffer.get(hairCustomization);
 			size = buffer.getShort();

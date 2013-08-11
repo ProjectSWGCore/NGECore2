@@ -384,31 +384,35 @@ public class ObjectService implements INetworkDispatch {
 					parent._add(creature);
 				}
 
-				Point3D position = creature.getWorldPosition();
+				Point3D position = creature.getPosition();
 		
 				
-				//UnkByteFlag unkByteFlag = new UnkByteFlag();
+				UnkByteFlag unkByteFlag = new UnkByteFlag();
 				//session.write(unkByteFlag.serialize());
 				
-				//ParametersMessage parameters = new ParametersMessage();
+				ParametersMessage parameters = new ParametersMessage();
 				//session.write(parameters.serialize());
-
+				
+				core.buffService.clearBuffs(creature);
+				
 				core.chatService.loadMailHeaders(client);
 				
 				HeartBeatMessage heartBeat = new HeartBeatMessage();
 				session.write(heartBeat.serialize());
 
-				CmdStartScene startScene = new CmdStartScene((byte) 0, objectId, creature.getPlanet().getPath(), creature.getTemplate(), position.x, position.y, position.z, System.currentTimeMillis() / 1000, creature.getRadians());
+				CmdStartScene startScene = new CmdStartScene((byte) 0, objectId, creature.getPlanet().getPath(), creature.getTemplate(), position.x, position.y, position.z, System.currentTimeMillis() / 1000, 0);
 				session.write(startScene.serialize());
-				
-				core.simulationService.handleZoneIn(client);
 				creature.makeAware(creature);
 				
-				core.playerService.postZoneIn(creature);
-				//CmdSceneReady cmdSceneReady = new CmdSceneReady();
-				//session.write(cmdSceneReady.serialize());
+				creature.makeAware(core.guildService.getGuildObject());
 
-				//core.simulationService.teleport(creature, new Point3D(position.x, core.terrainService.getHeight(creature.getPlanetId(), position.x, position.z), position.z), creature.getOrientation());
+				core.simulationService.handleZoneIn(client);
+				
+				CmdSceneReady sceneReady = new CmdSceneReady();
+				client.getSession().write(sceneReady.serialize());
+				
+				core.playerService.postZoneIn(creature);
+
 			}
 			
 		});

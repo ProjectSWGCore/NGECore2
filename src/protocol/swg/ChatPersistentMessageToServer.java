@@ -25,13 +25,8 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
-
 import org.apache.mina.core.buffer.IoBuffer;
-
 import services.chat.WaypointAttachment;
-
-import com.sleepycat.persist.model.Persistent;
 
 
 public class ChatPersistentMessageToServer extends SWGMessage {

@@ -27,9 +27,12 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.mina.core.buffer.IoBuffer;
+import org.apache.mina.core.session.IoSession;
 
 import protocol.swg.ServerTimeMessage;
+import resources.common.Opcodes;
 import resources.objects.creature.CreatureObject;
+import resources.objects.player.PlayerObject;
 
 import main.NGECore;
 
@@ -61,10 +64,23 @@ public class PlayerService implements INetworkDispatch {
 				}
 			}
 			
-		}, 1, 1, TimeUnit.MINUTES);
+		}, 1, 1, TimeUnit.SECONDS);
 	}
 	
 	public void postZoneIn(final CreatureObject creature) {
+		
+		scheduler.scheduleAtFixedRate(new Runnable() {
+
+			@Override
+			public void run() {
+				
+				PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
+				player.setTotalPlayTime(player.getTotalPlayTime() + 30);
+				player.setLastPlayTimeUpdate(System.currentTimeMillis());
+				
+			}
+			
+		}, 30, 30, TimeUnit.SECONDS);
 		
 		scheduler.scheduleAtFixedRate(new Runnable() {
 
@@ -93,9 +109,17 @@ public class PlayerService implements INetworkDispatch {
 	}
 
 	@Override
-	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> arg0,
-			Map<Integer, INetworkRemoteEvent> arg1) {
-		// TODO Auto-generated method stub
+	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> swgOpcodes, Map<Integer, INetworkRemoteEvent> objControllerOpcodes) {
+		
+		swgOpcodes.put(Opcodes.CmdSceneReady, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
+				
+				
+			}
+			
+		});
 		
 	}
 

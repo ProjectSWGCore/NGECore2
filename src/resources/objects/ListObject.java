@@ -25,7 +25,6 @@ import java.nio.ByteBuffer;
 
 import org.apache.mina.core.buffer.SimpleBufferAllocator;
 
-import com.sleepycat.persist.model.Persistent;
 
 import resources.common.StringUtilities;
 

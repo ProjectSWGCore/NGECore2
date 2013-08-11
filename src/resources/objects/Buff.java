@@ -34,12 +34,12 @@ import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.resources.common.CRC;
 
-@Persistent
+@Persistent(version=3)
 public class Buff implements IListObject {
 	
 	@NotPersistent
 	private SimpleBufferAllocator bufferPool = new SimpleBufferAllocator();
-	private int duration;
+	private float duration;
 	private String buffName;
 	private long ownerId;
 	private String effect1Name, effect2Name, effect3Name, effect4Name, effect5Name;
@@ -53,6 +53,8 @@ public class Buff implements IListObject {
 	private boolean removeOnRespec;
 	private boolean aiRemoveOnEndCombat;
 	private boolean decayOnPvPDeath;
+	private long startTime;
+	private int totalPlayTime;
 	
 	public Buff(String buffName, long ownerId) {
 		
@@ -69,7 +71,7 @@ public class Buff implements IListObject {
 			if(visitor.getObject(i, 0) != null)
 				if(((String) visitor.getObject(i, 0)).equalsIgnoreCase(buffName)) {
 					
-					duration = (Integer) visitor.getObject(i, 6);
+					duration = (Float) visitor.getObject(i, 6);
 					effect1Name = (String) visitor.getObject(i, 7);
 					effect1Value = (Float) visitor.getObject(i, 8);
 					effect2Name = (String) visitor.getObject(i, 9);
@@ -81,14 +83,14 @@ public class Buff implements IListObject {
 					effect5Name = (String) visitor.getObject(i, 15);
 					effect5Value = (Float) visitor.getObject(i, 16);
 					particleEffect = (String) visitor.getObject(i, 19);
-					isDebuff = (Boolean) visitor.getObject(i, 21);
-					removeOnDeath = (Integer) visitor.getObject(i, 24) != 0;
-					isRemovableByPlayer = (Integer) visitor.getObject(i, 25) != 0;
-					maxStacks = (Integer) visitor.getObject(i, 27);
-					isPersistent = (Integer) visitor.getObject(i, 28) != 0;
-					removeOnRespec = (Integer) visitor.getObject(i, 30) != 0;
-					aiRemoveOnEndCombat = (Integer) visitor.getObject(i, 31) != 0;
-					decayOnPvPDeath = (Integer) visitor.getObject(i, 32) != 0;
+					isDebuff = (Boolean) visitor.getObject(i, 22);
+					removeOnDeath = (Integer) visitor.getObject(i, 25) != 0;
+					isRemovableByPlayer = (Integer) visitor.getObject(i, 26) != 0;
+					maxStacks = (Integer) visitor.getObject(i, 28);
+					isPersistent = (Integer) visitor.getObject(i, 29) != 0;
+					removeOnRespec = (Integer) visitor.getObject(i, 31) != 0;
+					aiRemoveOnEndCombat = (Integer) visitor.getObject(i, 32) != 0;
+					decayOnPvPDeath = (Integer) visitor.getObject(i, 33) != 0;
 					
 				}
 			
@@ -111,11 +113,15 @@ public class Buff implements IListObject {
 		IoBuffer buffer = bufferPool.allocate(28, false).order(ByteOrder.LITTLE_ENDIAN);
 		
 		buffer.putInt(CRC.StringtoCRC(buffName));
-		
-		buffer.putInt(duration);
-		buffer.putInt(0);
-		buffer.putInt(0); // remaining duration ???
-		
+		if(duration > 0) {
+			buffer.putInt((int) (totalPlayTime + getRemainingDuration()));		
+			buffer.putInt(0);
+			buffer.putInt((int) duration);
+		} else {
+			buffer.putInt(-1);
+			buffer.putInt(0);
+			buffer.putInt(-1);
+		}
 		buffer.putLong(ownerId);
 		buffer.putInt(1);	// unk
 		
@@ -125,11 +131,11 @@ public class Buff implements IListObject {
 		
 	}
 
-	public int getDuration() {
+	public float getDuration() {
 		return duration;
 	}
 
-	public void setDuration(int duration) {
+	public void setDuration(float duration) {
 		this.duration = duration;
 	}
 
@@ -299,6 +305,28 @@ public class Buff implements IListObject {
 
 	public void setDecayOnPvPDeath(boolean decayOnPvPDeath) {
 		this.decayOnPvPDeath = decayOnPvPDeath;
+	}
+
+	public void setStartTime() {
+		this.startTime = System.currentTimeMillis();
+	}
+	
+	public int getRemainingDuration() {
+		
+		long currentTime = System.currentTimeMillis();
+		long timeDiff = (currentTime - startTime) / 1000;
+		int remaining = (int) (duration - timeDiff);
+		System.out.println("Buff remaining: " + remaining);
+		return remaining;
+		
+	}
+
+	public int getTotalPlayTime() {
+		return totalPlayTime;
+	}
+
+	public void setTotalPlayTime(int totalPlayTime) {
+		this.totalPlayTime = totalPlayTime;
 	}
 
 }

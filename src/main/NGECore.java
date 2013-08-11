@@ -33,6 +33,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import resources.common.RadialOptions;
 import resources.objects.creature.CreatureObject;
 import services.AttributeService;
+import services.BuffService;
 import services.CharacterService;
 import services.ConnectionService;
 import services.LoginService;
@@ -108,6 +109,7 @@ public class NGECore {
 	public TradeService tradeService;
 	public CombatService combatService;
 	public PlayerService playerService;
+	public BuffService buffService;
 	
 	// Login Server
 	public NetworkDispatch loginDispatch;
@@ -156,6 +158,7 @@ public class NGECore {
 		suiService = new SUIService(this);
 		combatService = new CombatService(this);
 		playerService = new PlayerService(this);
+		buffService = new BuffService(this);
 		// Ping Server
 		try {
 			PingServer pingServer = new PingServer(config.getInt("PING.PORT"));
@@ -180,6 +183,7 @@ public class NGECore {
 		zoneDispatch.addService(chatService);
 		zoneDispatch.addService(suiService);
 		zoneDispatch.addService(mapService);
+		zoneDispatch.addService(playerService);
 
 		zoneServer = new MINAServer(zoneDispatch, config.getInt("ZONE.PORT"));
 		zoneServer.start();

@@ -31,6 +31,8 @@ def CreateStartingCharacter(core, object):
 	object.addSkillMod('combat_block_value' , 0)
 
 	inventory = object.getSlottedObject('inventory')
+	if not inventory:
+		return
 	inventory.add(testObject)
 	
 	testClothing = core.objectService.createObject('object/tangible/wearables/cape/shared_cape_rebel_01.iff', object.getPlanet())

@@ -71,7 +71,7 @@ public class CmdStartScene extends SWGMessage {
 		result.put(getAsciiString(sharedRaceTemplate));
 		
 		result.putLong(time);
-		result.put(new byte[] { (byte)0x8B, (byte)0xC0, (byte)0xEA, (byte)0x4E });
+		result.put(new byte[] { (byte)0x8E, (byte)0xB5, (byte)0xEA, (byte)0x4E });
 		return result.flip();
 		
 	}

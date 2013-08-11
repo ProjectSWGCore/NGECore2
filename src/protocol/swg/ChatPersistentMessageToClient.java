@@ -23,10 +23,7 @@ package protocol.swg;
 
 import java.nio.ByteOrder;
 import java.util.List;
-import java.util.Vector;
-
 import org.apache.mina.core.buffer.IoBuffer;
-
 import services.chat.WaypointAttachment;
 
 

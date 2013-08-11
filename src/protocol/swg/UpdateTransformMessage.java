@@ -36,7 +36,6 @@ public class UpdateTransformMessage extends SWGMessage {
 	private int movementCounter;
 	private byte direction;
 	private float speed;
-	private byte combatFlag;
 	
 	public UpdateTransformMessage(long objectId, short x, short y, short z, int movementCounter, byte direction, float speed) {
 		this.objectId = objectId;

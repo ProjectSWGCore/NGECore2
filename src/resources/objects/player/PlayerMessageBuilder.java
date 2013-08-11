@@ -80,7 +80,7 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 		
 		buffer.putInt(0); // born date?
 		
-		buffer.putInt(0); // total play time?
+		buffer.putInt(player.getTotalPlayTime()); // total play time?
 		
 		buffer.putInt(getProfData(player.getProfession())); // prof icon
 		
@@ -172,6 +172,7 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 
 		int size = buffer.position();
 
+		buffer = bufferPool.allocate(size, false).put(buffer.array(), 0, size);
 
 		
 		buffer.flip();
@@ -490,6 +491,18 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 		buffer.flip();
 		
 		buffer = createDelta("PLAY", (byte) 8, (short) 1, (short) 1, buffer, size + 4);
+		
+		return buffer;
+		
+	}
+	
+	public IoBuffer buildTotalPlayTimeDelta(int totalPlayTime) {
+		
+		IoBuffer buffer = bufferPool.allocate(4, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putInt(totalPlayTime);
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("PLAY", (byte) 3, (short) 1, (short) 0x09, buffer, size + 4);
 		
 		return buffer;
 		
