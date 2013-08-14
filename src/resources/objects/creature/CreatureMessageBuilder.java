@@ -741,7 +741,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 
 	
 	@Override
-	public void sendListDelta(byte viewType, short updateType, IoBuffer data) {
+	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
 		// TODO Auto-generated method stub
 		
 	}

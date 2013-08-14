@@ -412,3 +412,5 @@ def addZones(core):
 	gcwService.addZone('yavin4', 'yavin4_pve', 0, 0, 0, 0x07F88304, 0)
 	gcwService.addZone('yavin4', 'yavin4_pvp', 0, 0, 0, 0x07F88304, 0)
 	gcwService.addZone('yavin4', 'yavin4_pvp_battlefield', 0, 0, 0, 0x3663CE01, 0)
+	
+	

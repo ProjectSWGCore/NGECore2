@@ -80,7 +80,14 @@ public class GCWService implements INetworkDispatch {
 		this.core = core;
 		this.object = this.core.guildService.getGuildObject();
 		
-		core.scriptService.callScript("scripts/", "gcwzones", "addZones", core);
+		scheduler.schedule(new Runnable() {
+			@Override public void run() { afterInitialisation(); }
+			
+			private void afterInitialisation() {
+				core.scriptService.callScript("scripts/", "gcwzones", "addZones");
+			}
+			
+		}, 1, TimeUnit.SECONDS);
 		
 		scheduler.scheduleAtFixedRate(new Runnable() {
 			@Override public void run() { checkFactionalPresence(); }
@@ -106,7 +113,7 @@ public class GCWService implements INetworkDispatch {
 					}
 				}
 			}
-		}, 0, 3, TimeUnit.SECONDS);
+		}, 3, 3, TimeUnit.SECONDS);
 		
 		scheduler.scheduleAtFixedRate(new Runnable() {
 			@Override public void run() { updateGCWZones(); }
@@ -164,7 +171,7 @@ public class GCWService implements INetworkDispatch {
 					}
 				}
 			}
-		}, 0, 1, TimeUnit.MINUTES);
+		}, 1, 1, TimeUnit.MINUTES);
 		
 		scheduler.scheduleAtFixedRate(new Runnable() {
 			@Override public void run() { updateOtherGalaxiesGCWZones(); }
@@ -191,7 +198,7 @@ public class GCWService implements INetworkDispatch {
 					object.getOtherServerGCWZonePercentMap().replaceValues("SWG", galaxyWideZones);
 				}
 			}
-		}, 0, 15, TimeUnit.MINUTES);
+		}, 15, 15, TimeUnit.MINUTES);
 		
 		scheduler.scheduleAtFixedRate(new Runnable() {
 			@Override public void run() { decrementZoneStrength(); }
@@ -206,7 +213,7 @@ public class GCWService implements INetworkDispatch {
 					}
 				}
 			}
-		}, 0, 1, TimeUnit.MINUTES);
+		}, 1, 1, TimeUnit.MINUTES);
 		
 		scheduler.scheduleAtFixedRate(new Runnable() {
 			@Override public void run() { resetWeakGCWZones(); }

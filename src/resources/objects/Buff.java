@@ -21,7 +21,6 @@
  ******************************************************************************/
 package resources.objects;
 
-import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 import org.apache.mina.core.buffer.IoBuffer;
