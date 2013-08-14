@@ -402,7 +402,7 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 	}
 
 	@Override
-	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
+	public void sendListDelta(byte viewType, short updateType, IoBuffer data) {
 		// TODO Auto-generated method stub
 		
 	}

@@ -109,7 +109,7 @@ public abstract class ObjectMessageBuilder {
 	public SWGObject getObject() { return object; }
 	public void setObject(SWGObject object) { this.object = object; }
 	
-	public abstract void sendListDelta(byte viewType, short updateType, IoBuffer buffer);
+	public abstract void sendListDelta(byte viewType, short updateType, IoBuffer data);
 	
 	public abstract void sendBaselines();
 	
