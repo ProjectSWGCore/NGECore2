@@ -120,8 +120,9 @@ public class GuildService implements INetworkDispatch {
 
 	@Override
 	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> swgOpcodes, Map<Integer, INetworkRemoteEvent> objControllerOpcodes) {
-
-		swgOpcodes.put(Opcodes.ClientIdMsg, new INetworkRemoteEvent() {
+		
+		/*
+		swgOpcodes.put(Opcodes.CmdSceneReady, new INetworkRemoteEvent() {
 
 			@Override
 			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
@@ -137,14 +138,13 @@ public class GuildService implements INetworkDispatch {
 					return;
 				}
 				
-				/*
 				object.sendCreate(client);
 				object.sendBaselines(client);
 				object.sendDestroy(client);
-				*/
 			}
 			
 		});
+		*/
 		
 	}
 
