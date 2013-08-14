@@ -19,103 +19,93 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package resources.objects;
+package resources.guild;
 
 import java.nio.ByteOrder;
+import java.util.List;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-public class OtherServerGCWZonePercent extends ListObject {
-	
-	private byte unknown1 = 0;
-	private String server = "SWG";
-	private String zone = "";
-	private int lastUpdateTime = ((int) System.currentTimeMillis());
-	private int percent = 50;
-	private int gcwPoints = 0;
+import resources.objects.ListObject;
 
-	public OtherServerGCWZonePercent(String server, String zone) {
-		this.server = server;
-		this.zone = zone;
+import engine.resources.objects.SWGObject;
+
+public class Guild extends ListObject {
+	
+	private int id;
+	private String abbreviation;
+	private String name;
+	private SWGObject leader;
+	private List<SWGObject> members;
+	
+	public Guild(int id, String abbreviation, String name, SWGObject leader) {
+		this.id = id;
+		this.abbreviation = abbreviation;
+		this.name = name;
+		this.leader = leader;
+		this.members.add(leader);
 	}
 	
-	public OtherServerGCWZonePercent(String zone) {
-		this.zone = zone;
-	}
-	
-	public OtherServerGCWZonePercent() {
-		
-	}
-	
-	public byte getUnknown1() {
+	public int getId() {
 		synchronized(objectMutex) {
-			return unknown1;
+			return id;
 		}
 	}
 	
-	public void setUnknown1(byte unknown1) {
+	public void setId(int id) {
 		synchronized(objectMutex) {
-			this.unknown1 = unknown1;
+			this.id = id;
 		}
 	}
 	
-	public String getServer() {
+	public String getAbbreviation() {
 		synchronized(objectMutex) {
-			return server;
+			return abbreviation;
 		}
 	}
 	
-	public String getZone() {
+	public void setAbbreviation(String abbreviation) {
 		synchronized(objectMutex) {
-			return zone;
+			this.abbreviation = abbreviation;
 		}
 	}
 	
-	public int getLastUpdateTime() {
+	public String getName() {
 		synchronized(objectMutex) {
-			return lastUpdateTime;
+			return name;
 		}
 	}
 	
-	public int getPercent() {
+	public void setName(String name) {
 		synchronized(objectMutex) {
-			return percent;
+			this.name = name;
 		}
 	}
 	
-	public void setPercent(int percent) {
+	public String getString() {
 		synchronized(objectMutex) {
-			this.percent = percent;
-			this.lastUpdateTime = ((int) System.currentTimeMillis());
+			return (Integer.toString(id) + ":" + abbreviation);
 		}
 	}
 	
-	public int getGCWPoints() {
-		synchronized(objectMutex) {
-			return gcwPoints;
-		}
+	public SWGObject getLeader() {
+		return leader;
 	}
 	
-	public void addGCWPoints(int gcwPoints) {
-		synchronized(objectMutex) {
-			this.gcwPoints += gcwPoints;
-		}
+	public void setLeader(SWGObject leader) {
+		this.leader = leader;
 	}
 	
-	public void removeGCWPoints(int gcwPoints) {
-		synchronized(objectMutex) {
-			this.gcwPoints = (((this.gcwPoints - gcwPoints) < 0) ? 0 : this.gcwPoints - gcwPoints);
-		}
+	public List<SWGObject> getMembers() {
+		return members;
 	}
-	
+
 	public byte[] getBytes() {
 		synchronized(objectMutex) {
-			IoBuffer buffer = bufferPool.allocate((4 + server.length() + zone.length() + 4), false).order(ByteOrder.LITTLE_ENDIAN);
-			buffer.put(getAsciiString(server));
-			buffer.put(getAsciiString(zone));
-			buffer.putInt(percent);
+			IoBuffer buffer = bufferPool.allocate((getString().length() + 2), false).order(ByteOrder.LITTLE_ENDIAN);
+			buffer.put(getAsciiString(getString()));
 			return buffer.array();
 		}
 	}
-	
+
 }

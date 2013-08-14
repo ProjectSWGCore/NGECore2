@@ -19,49 +19,26 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package resources.objects;
+package resources.gcw;
 
 import java.nio.ByteOrder;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-public class CurrentServerGCWZoneHistory extends ListObject {
+import resources.objects.ListObject;
+
+public class OtherServerGCWZonePercent extends ListObject {
 	
-	private byte unknown1 = 0;
 	private String zone = "";
-	private int lastUpdateTime = ((int) System.currentTimeMillis());
 	private int percent = 50;
-	
-	public CurrentServerGCWZoneHistory(String zone, int percent) {
+
+	public OtherServerGCWZonePercent(String zone) {
 		this.zone = zone;
-		this.percent = percent;
-	}
-	
-	public CurrentServerGCWZoneHistory(String zone) {
-		this.zone = zone;
-	}
-	
-	public byte getUnknown1() {
-		synchronized(objectMutex) {
-			return unknown1;
-		}
-	}
-	
-	public void setUnknown1(byte unknown1) {
-		synchronized(objectMutex) {
-			this.unknown1 = unknown1;
-		}
 	}
 	
 	public String getZone() {
 		synchronized(objectMutex) {
 			return zone;
-		}
-	}
-	
-	public int getLastUpdateTime() {
-		synchronized(objectMutex) {
-			return lastUpdateTime;
 		}
 	}
 	
@@ -71,18 +48,17 @@ public class CurrentServerGCWZoneHistory extends ListObject {
 		}
 	}
 	
-	public void setPercent(int percent) {
+	public OtherServerGCWZonePercent setPercent(int percent) {
 		synchronized(objectMutex) {
 			this.percent = percent;
-			this.lastUpdateTime = ((int) System.currentTimeMillis());
+			return this;
 		}
 	}
 	
 	public byte[] getBytes() {
 		synchronized(objectMutex) {
-			IoBuffer buffer = bufferPool.allocate((8 + zone.length() + 2), false).order(ByteOrder.LITTLE_ENDIAN);
+			IoBuffer buffer = bufferPool.allocate((2 + zone.length() + 4), false).order(ByteOrder.LITTLE_ENDIAN);
 			buffer.put(getAsciiString(zone));
-			buffer.putInt(lastUpdateTime);
 			buffer.putInt(percent);
 			return buffer.array();
 		}

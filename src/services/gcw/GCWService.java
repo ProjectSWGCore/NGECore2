@@ -22,15 +22,23 @@
 package services.gcw;
 
 import java.nio.ByteOrder;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.TreeMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.mina.core.buffer.IoBuffer;
+import org.apache.mina.core.buffer.SimpleBufferAllocator;
 import org.apache.mina.core.session.IoSession;
+import org.python.google.common.collect.ArrayListMultimap;
+import org.python.google.common.collect.Multimap;
 
 import protocol.swg.GcwGroupsRsp;
 import protocol.swg.GcwRegionsReq;
@@ -38,16 +46,21 @@ import protocol.swg.GcwRegionsRsp;
 import protocol.swg.GetMapLocationsMessage;
 import protocol.swg.GetMapLocationsResponseMessage;
 
+import resources.common.Factions;
 import resources.common.Opcodes;
-import resources.objects.CurrentServerGCWZoneHistory;
-import resources.objects.CurrentServerGCWZonePercent;
-import resources.objects.OtherServerGCWZonePercent;
+import resources.common.PvpStatus;
+import resources.gcw.CurrentServerGCWZoneHistory;
+import resources.gcw.CurrentServerGCWZonePercent;
+import resources.gcw.OtherServerGCWZonePercent;
+import resources.objects.creature.CreatureObject;
 import resources.objects.guild.GuildObject;
 
 import main.NGECore;
 
 import engine.clients.Client;
 import engine.resources.objects.SWGObject;
+import engine.resources.scene.Point2D;
+import engine.resources.scene.Point3D;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
@@ -57,103 +70,208 @@ public class GCWService implements INetworkDispatch {
 	
 	private NGECore core;
 	private GuildObject object;
+	private Map<String, Map<String, CurrentServerGCWZonePercent>> zoneMap = new TreeMap<String, Map<String, CurrentServerGCWZonePercent>>();
 	
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	
-	private List<String> zoneList = Arrays.asList(new String[] { "corellia_airspace", "corellia_pve", "corellia_pvp", "dantooine_airspace", "dantooine_pve", "dantooine_pvp", "dathomir_airspace", "dathomir_pve", "dathomir_pvp", "endor_airspace", "endor_pve", "endor_pvp", "endor_pvp_battlefield", "gcw_region_corellia_1", "gcw_region_corellia_10", "gcw_region_corellia_11", "gcw_region_corellia_12", "gcw_region_corellia_13", "gcw_region_corellia_14", "gcw_region_corellia_2", "gcw_region_corellia_3", "gcw_region_corellia_4", "gcw_region_corellia_5", "gcw_region_corellia_6", "gcw_region_corellia_7", "gcw_region_corellia_8", "gcw_region_corellia_9", "gcw_region_dantooine_1", "gcw_region_dantooine_10", "gcw_region_dantooine_11", "gcw_region_dantooine_12", "gcw_region_dantooine_13", "gcw_region_dantooine_14", "gcw_region_dantooine_15", "gcw_region_dantooine_16", "gcw_region_dantooine_17", "gcw_region_dantooine_2", "gcw_region_dantooine_3", "gcw_region_dantooine_4", "gcw_region_dantooine_5", "gcw_region_dantooine_6", "gcw_region_dantooine_7", "gcw_region_dantooine_8", "gcw_region_dantooine_9", "gcw_region_dathomir_1", "gcw_region_dathomir_10", "gcw_region_dathomir_11", "gcw_region_dathomir_12", "gcw_region_dathomir_13", "gcw_region_dathomir_2", "gcw_region_dathomir_3", "gcw_region_dathomir_4", "gcw_region_dathomir_5", "gcw_region_dathomir_6", "gcw_region_dathomir_7", "gcw_region_dathomir_8", "gcw_region_dathomir_9", "gcw_region_endor_1", "gcw_region_endor_10", "gcw_region_endor_11", "gcw_region_endor_12", "gcw_region_endor_13", "gcw_region_endor_14", "gcw_region_endor_15", "gcw_region_endor_16", "gcw_region_endor_2", "gcw_region_endor_3", "gcw_region_endor_4", "gcw_region_endor_5", "gcw_region_endor_6", "gcw_region_endor_7", "gcw_region_endor_8", "gcw_region_endor_9", "gcw_region_lok_1", "gcw_region_lok_10", "gcw_region_lok_11", "gcw_region_lok_12", "gcw_region_lok_13", 	"gcw_region_lok_14", "gcw_region_lok_2", "gcw_region_lok_3", "gcw_region_lok_4", "gcw_region_lok_5", "gcw_region_lok_6", "gcw_region_lok_7", "gcw_region_lok_8", "gcw_region_lok_9", "gcw_region_naboo_1", "gcw_region_naboo_10", "gcw_region_naboo_11", "gcw_region_naboo_12", "gcw_region_naboo_13", "gcw_region_naboo_14", "gcw_region_naboo_2", "gcw_region_naboo_3", "gcw_region_naboo_4", "gcw_region_naboo_5", "gcw_region_naboo_6", "gcw_region_naboo_7", "gcw_region_naboo_8", "gcw_region_naboo_9", "gcw_region_rori_1", "gcw_region_rori_10", "gcw_region_rori_11", "gcw_region_rori_12", "gcw_region_rori_13", "gcw_region_rori_2", "gcw_region_rori_3", "gcw_region_rori_4", "gcw_region_rori_5", "gcw_region_rori_6", "gcw_region_rori_7", "gcw_region_rori_8", "gcw_region_rori_9", "gcw_region_talus_1", "gcw_region_talus_10", "gcw_region_talus_11", "gcw_region_talus_12", "gcw_region_talus_13", "gcw_region_talus_14", "gcw_region_talus_15", "gcw_region_talus_16", "gcw_region_talus_2", "gcw_region_talus_3", "gcw_region_talus_4", "gcw_region_talus_5", "gcw_region_talus_6", "gcw_region_talus_7", "gcw_region_talus_8", "gcw_region_talus_9", "gcw_region_tatooine_1", "gcw_region_tatooine_10", "gcw_region_tatooine_11", "gcw_region_tatooine_12", "gcw_region_tatooine_13", "gcw_region_tatooine_2", "gcw_region_tatooine_3", "gcw_region_tatooine_4", "gcw_region_tatooine_5", "gcw_region_tatooine_6", "gcw_region_tatooine_7", "gcw_region_tatooine_8", "gcw_region_tatooine_9", "gcw_region_yavin4_1", "gcw_region_yavin4_10", "gcw_region_yavin4_11", "gcw_region_yavin4_12", "gcw_region_yavin4_13", "gcw_region_yavin4_14", "gcw_region_yavin4_15", "gcw_region_yavin4_16", "gcw_region_yavin4_17", "gcw_region_yavin4_18", "gcw_region_yavin4_2", "gcw_region_yavin4_3", "gcw_region_yavin4_4", "gcw_region_yavin4_5", "gcw_region_yavin4_6", "gcw_region_yavin4_7", "gcw_region_yavin4_8", "gcw_region_yavin4_9", "lok_airspace", "lok_pve", "lok_pvp", "naboo_airspace", "naboo_pve", "naboo_pvp", "rori_airspace", "rori_pve", "rori_pvp", "space_corellia_space_pve", "space_corellia_space_pvp", "space_dantooine_space_pve", "space_dantooine_space_pvp", "space_dathomir_space_pve", "space_dathomir_space_pvp", "space_endor_space_pve", "space_endor_space_pvp", "space_lok_space_pve", "space_lok_space_pvp", "space_naboo_space_pve", "space_naboo_space_pvp", "space_tatooine_space_pve", "space_tatooine_space_pvp", "space_yavin4_space_pve", "space_yavin4_space_pvp", "talus_airspace", "talus_pve", "talus_pvp", "tatooine_airspace", "tatooine_pve", "tatooine_pvp", "yavin4_airspace", "yavin4_pve", "yavin4_pvp", "yavin4_pvp_battlefield" });
-	private List<String> totalList = Arrays.asList(new String[] { "corellia", "dantooine", "dathomir", "endor", "galaxy", "lok", "naboo", "rori", "talus", "tatooine", "yavin4" });
+	protected final Object objectMutex = new Object();
 	
 	public GCWService(final NGECore core) {
 		this.core = core;
 		this.object = this.core.guildService.getGuildObject();
 		
-		for (int i = 0; i < zoneList.size(); i++) {
-			object.getCurrentServerGCWZonePercentList().add(new CurrentServerGCWZonePercent(zoneList.get(i)));
-			object.getCurrentServerGCWZoneHistoryList().add(new CurrentServerGCWZoneHistory(zoneList.get(i)));
-			object.getOtherServerGCWZonePercentList().add(new OtherServerGCWZonePercent(zoneList.get(i)));
-		}
+		core.scriptService.callScript("scripts/", "gcwzones", "addZones", core);
 		
-		for (int i = 0; i < totalList.size(); i++) {
-			object.getCurrentServerGCWTotalPercentList().add(new CurrentServerGCWZonePercent(totalList.get(i)));
-			object.getCurrentServerGCWTotalHistoryList().add(new CurrentServerGCWZoneHistory(totalList.get(i)));
-			object.getOtherServerGCWTotalPercentList().add(new OtherServerGCWZonePercent(totalList.get(i)));
-		}
-		
-		// Update the GCW Zones every minute as in live
 		scheduler.scheduleAtFixedRate(new Runnable() {
-
-			@Override
-			public void run() {
-				//object.sendGCWUpdate();
-				//addGCWPointsToZonesWithFactionalPresence(new Client());
-				//removeGCWPointFromZonesWithNoFactionalPresence(new Client());
-			}
+			@Override public void run() { checkFactionalPresence(); }
 			
-		}, 1, 1, TimeUnit.MINUTES);
-		
-		// Update other server GCW Zones every 15 minutes (roughly like live I think)
-		scheduler.scheduleAtFixedRate(new Runnable() {
-
-			@Override
-			public void run() {
-				/*
-				for (int i = 0; i < object.getOtherServerGCWZonePercentList().size(); i++) {
-					object.getOtherServerGCWZonePercentList().get(i).setPercent(object.getCurrentServerGCWZonePercentList().get(i).getPercent());
-					object.getOtherServerGCWZonePercentList().set(i, object.getOtherServerGCWZonePercentList().get(i));
+			private void checkFactionalPresence() {
+				for (String planet : zoneMap.keySet()) {
+					for (String zoneName : zoneMap.get(planet).keySet()) {
+						CurrentServerGCWZonePercent zone = zoneMap.get(planet).get(zoneName);
+						
+						if (zone.getRadius() > 0) {
+							List<SWGObject> players = core.simulationService.get(core.terrainService.getPlanetByName(planet), zone.getPosition().x, zone.getPosition().z, (int) zone.getRadius());
+							
+							for (SWGObject player : players) {
+								if (!core.terrainService.isWater(player.getPlanetId(), player.getPosition().x, player.getPosition().z)) {
+									if ((player instanceof CreatureObject)) {
+										if ((((CreatureObject) player).getFactionStatus() & PvpStatus.Overt) != 0) {
+											adjustZone(planet, zoneName, ((CreatureObject) player).getFaction(), 1);
+										}
+									}
+								}
+							}
+						}
+					}
 				}
+			}
+		}, 0, 3, TimeUnit.SECONDS);
+		
+		scheduler.scheduleAtFixedRate(new Runnable() {
+			@Override public void run() { updateGCWZones(); }
+			
+			private void updateGCWZones() {
+				Map<String, CurrentServerGCWZonePercent> zoneUpdates = new TreeMap<String, CurrentServerGCWZonePercent>();
+				Map<String, CurrentServerGCWZonePercent> totalUpdates = new TreeMap<String, CurrentServerGCWZonePercent>();
+				Multimap<String, CurrentServerGCWZoneHistory> zoneHistoryUpdates = ArrayListMultimap.create();
+				Multimap<String, CurrentServerGCWZoneHistory> totalHistoryUpdates = ArrayListMultimap.create();
+				
+				int galaxyPercent = 0;
+				
+				for (String planet : zoneMap.keySet()) {
+					if (!planet.equals("galaxy")) {
+						int planetPercent = 0;
+						
+						for (String zone : zoneMap.get(planet).keySet()) {
+							planetPercent += zoneMap.get(planet).get(zone).getPercent();
+							
+							if (zoneMap.get(planet).get(zone).getPercent() != object.getCurrentServerGCWZonePercentMap().get(zone).getPercent()) {
+								zoneUpdates.put(zone, zoneMap.get(planet).get(zone));
+								zoneHistoryUpdates.put(zone, new CurrentServerGCWZoneHistory(object.getCurrentServerGCWZonePercentMap().get(zone)));
+							}
+						}
+						
+						planetPercent = ((planetPercent / (zoneMap.get(planet).size() * 100)) * 100);
+						
+						if (planetPercent != object.getCurrentServerGCWTotalPercentMap().get(planet).getPercent()) {
+							CurrentServerGCWZonePercent planetObject = object.getCurrentServerGCWTotalPercentMap().get(planet);
+							planetObject.setPercent(planetPercent);
+							totalUpdates.put(planet, planetObject);
+							totalHistoryUpdates.put(planet, new CurrentServerGCWZoneHistory(object.getCurrentServerGCWTotalPercentMap().get(planet)));
+						}
+						
+						galaxyPercent += planetPercent;
+					}
+				}
+				
+				galaxyPercent = ((galaxyPercent / ((object.getCurrentServerGCWTotalPercentMap().size() - 1) * 100)) * 100);
+				
+				if (galaxyPercent != object.getCurrentServerGCWTotalPercentMap().get("galaxy").getPercent()) {
+					CurrentServerGCWZonePercent galaxyObject = object.getCurrentServerGCWTotalPercentMap().get("galaxy");
+					galaxyObject.setPercent(galaxyPercent);
+					totalUpdates.put("galaxy", galaxyObject);
+					totalHistoryUpdates.put("galaxy", new CurrentServerGCWZoneHistory(object.getCurrentServerGCWTotalPercentMap().get("galaxy")));
+				}
+				
+				if (zoneUpdates.size() > 0) {
+					object.getCurrentServerGCWZonePercentMap().putAll(zoneUpdates);
+					object.getCurrentServerGCWZoneHistoryMap().putAll(zoneHistoryUpdates);
 					
-				for (int i = 0; i < object.getOtherServerGCWTotalPercentList().size(); i++) {
-					object.getOtherServerGCWTotalPercentList().get(i).setPercent(object.getCurrentServerGCWTotalPercentList().get(i).getPercent());
-					object.getOtherServerGCWZonePercentList().set(i, object.getOtherServerGCWZonePercentList().get(i));
+					if (totalUpdates.size() > 0) {
+						object.getCurrentServerGCWTotalPercentMap().putAll(totalUpdates);
+						object.getCurrentServerGCWTotalHistoryMap().putAll(totalHistoryUpdates);
+					}
 				}
-				*/
 			}
-			
-		//}, 15, 15, TimeUnit.MINUTES);
-		}, 2, 5, TimeUnit.MINUTES);
+		}, 0, 1, TimeUnit.MINUTES);
 		
-		// Reset weak GCW Zones every 2 days as in live
 		scheduler.scheduleAtFixedRate(new Runnable() {
-
-			@Override
-			public void run() {
-				/*
-				resetWeakGCWZones();
-				*/
+			@Override public void run() { updateOtherGalaxiesGCWZones(); }
+			
+			private void updateOtherGalaxiesGCWZones() {
+				updateGalaxiesWideGCWZones();
 			}
 			
-		//}, 2, 2, TimeUnit.DAYS);
-		}, 2, 5, TimeUnit.MINUTES);
-	}
-	
-	private void addGCWPointsToZonesWithFactionalPresence(Client client) {
-
-	}
-	
-	private void removeGCWPointFromZonesWithNoFactionalPresence(Client client) {
-
-	}
-	
-	private void resetWeakGCWZones() {
-		for (int i = 0; i < object.getCurrentServerGCWZonePercentList().size(); i++) {
-			CurrentServerGCWZonePercent zone = object.getCurrentServerGCWZonePercentList().get(i);
-			
-			if (zone.getGCWPoints() == 0 && zone.getPercent() != 50) {
-				zone.setPercent(50, object.getCurrentServerGCWZoneHistoryList());
-				object.getCurrentServerGCWZonePercentList().set(i, zone);
+			private void updateGalaxiesWideGCWZones() {
+				List<OtherServerGCWZonePercent> galaxyWideZones = new ArrayList<OtherServerGCWZonePercent>();
+				galaxyWideZones.addAll(object.getOtherServerGCWZonePercentMap().get("SWG"));
+				
+				for (int i = 0; i < galaxyWideZones.size(); i++) {
+					OtherServerGCWZonePercent zone = galaxyWideZones.get(i);
+					int percent = object.getCurrentServerGCWZonePercentMap().get(zone.getZone()).getPercent();
+					
+					if (zone.getPercent() != percent) {
+						zone.setPercent(percent);
+						galaxyWideZones.set(i, zone);
+					}
+				}
+				
+				if (!galaxyWideZones.equals(object.getOtherServerGCWZonePercentMap().get("SWG"))) {
+					object.getOtherServerGCWZonePercentMap().replaceValues("SWG", galaxyWideZones);
+				}
 			}
+		}, 0, 15, TimeUnit.MINUTES);
+		
+		scheduler.scheduleAtFixedRate(new Runnable() {
+			@Override public void run() { decrementZoneStrength(); }
+			
+			private void decrementZoneStrength() {
+				for (String planet : zoneMap.keySet()) {
+					if (!planet.equals("galaxy")) {
+						for (String zone : zoneMap.get(planet).keySet()) {
+							zoneMap.get(planet).get(zone).removeGCWPoints(1);
+							object.getCurrentServerGCWZonePercentMap().get(zone).removeGCWPoints(1);
+						}
+					}
+				}
+			}
+		}, 0, 1, TimeUnit.MINUTES);
+		
+		scheduler.scheduleAtFixedRate(new Runnable() {
+			@Override public void run() { resetWeakGCWZones(); }
+			
+			private void resetWeakGCWZones() {
+				for (String planet : zoneMap.keySet()) {
+					for (String zoneName : zoneMap.get(planet).keySet()) {
+						CurrentServerGCWZonePercent zone = zoneMap.get(planet).get(zoneName);
+						
+						if (zone.getGCWPoints() == 0 && zone.getPercent() != 50) {
+							zone.setPercent(50);
+							zoneMap.get(planet).put(zoneName, zone);
+						}
+					}
+				}
+			}
+		}, 2, 2, TimeUnit.DAYS);
+	}
+	
+	public void addZone(String planet, String zone, float x, float y, float radius, int group, float weight) {
+		if (!zoneMap.containsKey(planet)) {
+			zoneMap.put(planet, new TreeMap<String, CurrentServerGCWZonePercent>());
 		}
 		
-		for (int i = 0; i < object.getCurrentServerGCWTotalPercentList().size(); i++) {
-			CurrentServerGCWZonePercent zone = object.getCurrentServerGCWTotalPercentList().get(i);
-
-			if (zone.getGCWPoints() == 0 && zone.getPercent() != 50) {
-				zone.setPercent(50, object.getCurrentServerGCWTotalHistoryList());
-				object.getCurrentServerGCWTotalPercentList().set(i, zone);
+		zoneMap.get(planet).put(zone, new CurrentServerGCWZonePercent(new Point2D(x, y), radius, ((new SimpleBufferAllocator()).allocate(4, false).order(ByteOrder.BIG_ENDIAN).putInt(group).flip().getInt()), weight));
+		
+		if (planet != "galaxy") {
+			object.getCurrentServerGCWZonePercentMap().put(zone, zoneMap.get(planet).get(zone));
+			object.getOtherServerGCWZonePercentMap().put("SWG", new OtherServerGCWZonePercent(zone));
+		}
+		
+		if (!object.getCurrentServerGCWTotalPercentMap().containsKey(planet)) {
+			object.getCurrentServerGCWTotalPercentMap().put(planet, new CurrentServerGCWZonePercent(new Point2D(0, 0), 0, 0, 0));
+			object.getOtherServerGCWTotalPercentMap().put("SWG", new OtherServerGCWZonePercent(planet));
+		}
+	}
+	
+	public void adjustZone(String planet, String zone, String faction, int amount) {
+		synchronized(objectMutex) {
+			CurrentServerGCWZonePercent zoneObject = zoneMap.get(planet).get(zone);
+			int newPercent = ((amount / zoneObject.getGCWPoints()) * 100);
+			
+			switch (faction) {
+				case "rebel": {
+					zoneMap.get(planet).get(zone).setPercent(((zoneObject.getPercent() - newPercent) < 0) ? 0 : (zoneObject.getPercent() - newPercent));
+					zoneMap.get(planet).get(zone).addGCWPoints(amount);
+				}
+				case "imperial": {
+					zoneMap.get(planet).get(zone).setPercent(((zoneObject.getPercent() + newPercent) > 100) ? 0 : (zoneObject.getPercent() + newPercent));
+					zoneMap.get(planet).get(zone).addGCWPoints(amount);
+				}
 			}
 		}
 	}
-
+	
+	public void adjustZone(String zone, String faction, int amount) {
+		for (String planet : zoneMap.keySet()) {
+			if (!planet.equals("galaxy")) {
+				if (zoneMap.get(planet).containsKey(zone)) {
+					adjustZone(planet, zone, faction, amount);
+				}
+			}
+		}
+	}
+	
 	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> swgOpcodes, Map<Integer, INetworkRemoteEvent> objControllerOpcodes) {
 		
 		swgOpcodes.put(Opcodes.GcwRegionsReq, new INetworkRemoteEvent() {
@@ -179,8 +297,8 @@ public class GCWService implements INetworkDispatch {
 					return;
 				}
 				
-				session.write((new GcwRegionsRsp()).serialize());
-				session.write((new GcwGroupsRsp()).serialize());
+				session.write((new GcwRegionsRsp(zoneMap)).serialize());
+				session.write((new GcwGroupsRsp(zoneMap)).serialize());
 				
 			}
 			

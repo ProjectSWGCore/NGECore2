@@ -47,8 +47,8 @@ public class Opcodes {
 	public static int SuiEventNotification = 0x092D3564;
 	public static int DeltasMessage = 0x12862153;
 	public static int ChatAddFriend = 0x6FE7BD90;
-	public static int GcwRegionsReq = 0x7C8C8E0E; //CRC.StringtoCRC("GcwRegionsReq");
-	public static int GcwRegionsRsp = 0x8DCAB70C; //CRC.StringtoCRC("GcwRegionsRsp");
+	public static int GcwRegionsReq = CRC.StringtoCRC("GcwRegionsReq");
+	public static int GcwRegionsRsp = CRC.StringtoCRC("GcwRegionsRsp");
 	public static int GcwGroupsRsp = CRC.StringtoCRC("GcwGroupsRsp");
 	
 }

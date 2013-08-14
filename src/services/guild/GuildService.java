@@ -27,7 +27,7 @@ import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 
 import resources.common.Opcodes;
-import resources.objects.Guild;
+import resources.guild.Guild;
 import resources.objects.SWGList;
 import resources.objects.guild.GuildObject;
 
