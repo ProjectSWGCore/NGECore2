@@ -27,8 +27,12 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.mina.core.buffer.IoBuffer;
+import org.apache.mina.core.session.IoSession;
 
 import protocol.swg.ServerTimeMessage;
+import resources.common.Opcodes;
+import resources.objects.creature.CreatureObject;
+import resources.objects.player.PlayerObject;
 
 import main.NGECore;
 
@@ -41,7 +45,7 @@ import engine.resources.service.INetworkRemoteEvent;
 public class PlayerService implements INetworkDispatch {
 	
 	private NGECore core;
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
 
 	public PlayerService(final NGECore core) {
 		this.core = core;
@@ -60,13 +64,62 @@ public class PlayerService implements INetworkDispatch {
 				}
 			}
 			
-		}, 1, 1, TimeUnit.MINUTES);
+		}, 1, 1, TimeUnit.SECONDS);
+	}
+	
+	public void postZoneIn(final CreatureObject creature) {
+		
+		scheduler.scheduleAtFixedRate(new Runnable() {
+
+			@Override
+			public void run() {
+				
+				PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
+				player.setTotalPlayTime(player.getTotalPlayTime() + 30);
+				player.setLastPlayTimeUpdate(System.currentTimeMillis());
+				
+			}
+			
+		}, 30, 30, TimeUnit.SECONDS);
+		
+		scheduler.scheduleAtFixedRate(new Runnable() {
+
+			@Override
+			public void run() {
+				
+				if(creature.getAction() < creature.getMaxAction())
+					creature.setAction(creature.getAction() + 200);
+				
+			}
+			
+		}, 0, 1, TimeUnit.SECONDS);
+
+		scheduler.scheduleAtFixedRate(new Runnable() {
+
+			@Override
+			public void run() {
+				
+				if(creature.getHealth() < creature.getMaxHealth() && creature.getCombatFlag() == 0)
+					creature.setHealth(creature.getHealth() + 300);
+				
+			}
+			
+		}, 0, 1, TimeUnit.SECONDS);
+
 	}
 
 	@Override
-	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> arg0,
-			Map<Integer, INetworkRemoteEvent> arg1) {
-		// TODO Auto-generated method stub
+	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> swgOpcodes, Map<Integer, INetworkRemoteEvent> objControllerOpcodes) {
+		
+		swgOpcodes.put(Opcodes.CmdSceneReady, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
+				
+				
+			}
+			
+		});
 		
 	}
 

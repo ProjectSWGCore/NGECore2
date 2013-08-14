@@ -229,7 +229,7 @@ public class ChatService implements INetworkDispatch {
 					mail.setStatus(Mail.NEW);
 					mail.setSubject(packet.getSubject());
 					mail.setTimeStamp((int) (date.getTime() / 1000));
-					
+					mail.setAttachments(packet.getWaypointAttachments());
 					storePersistentMessage(mail);
 					
 					if(recipient.getClient() != null) {
@@ -324,7 +324,7 @@ public class ChatService implements INetworkDispatch {
 		//System.out.println(config.getString("GALAXY_NAME"));
 		
 		ChatPersistentMessageToClient msg = new ChatPersistentMessageToClient(mail.getSenderName(), config.getString("GALAXY_NAME"), mail.getMailId()
-				,(byte) 1, "", mail.getSubject(), mail.getStatus(), mail.getTimeStamp());
+				,(byte) 1, "", mail.getSubject(), mail.getStatus(), mail.getTimeStamp(), mail.getAttachments());
 		
 		client.getSession().write(msg.serialize());
 	}
@@ -343,7 +343,7 @@ public class ChatService implements INetworkDispatch {
 		//System.out.println(config.getString("GALAXY_NAME"));
 		
 		ChatPersistentMessageToClient msg = new ChatPersistentMessageToClient(mail.getSenderName(), config.getString("GALAXY_NAME"), mail.getMailId()
-				,(byte) 0, mail.getMessage(), mail.getSubject(), mail.getStatus(), mail.getTimeStamp());
+				,(byte) 0, mail.getMessage(), mail.getSubject(), mail.getStatus(), mail.getTimeStamp(), mail.getAttachments());
 		
 		client.getSession().write(msg.serialize());
 	}

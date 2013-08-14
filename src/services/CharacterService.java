@@ -35,6 +35,8 @@ import org.apache.mina.core.session.IoSession;
 
 import engine.clients.Client;
 import engine.resources.common.CRC;
+import engine.resources.container.CreatureContainerPermissions;
+import engine.resources.container.CreaturePermissions;
 import engine.resources.database.DatabaseConnection;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
@@ -48,6 +50,7 @@ import protocol.swg.ClientRandomNameResponse;
 import protocol.swg.ClientVerifyAndLockNameRequest;
 import protocol.swg.ClientVerifyAndLockNameResponse;
 import protocol.swg.CreateCharacterSuccess;
+import protocol.swg.HeartBeatMessage;
 
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
@@ -205,17 +208,20 @@ public class CharacterService implements INetworkDispatch {
 				String sharedRaceTemplate = raceTemplate.replace("player/", "player/shared_");
 				
 				CreatureObject object = (CreatureObject) core.objectService.createObject(sharedRaceTemplate, core.terrainService.getPlanetList().get(0));
-				object.setCustomizationData(clientCreateCharacter.getCustomizationData());
+				object.setContainerPermissions(CreaturePermissions.CREATURE_PERMISSIONS);
+				object.setCustomization(clientCreateCharacter.getCustomizationData());
 				object.setCustomName(clientCreateCharacter.getName());
 				object.setHeight(clientCreateCharacter.getScale());
 				object.setPersistent(true);
-				object.setPosition(new Point3D(3608, 5, -4753));
+				object.setPosition(new Point3D(-1294, 12, -3590));
+				object.setCashCredits(100);
+				object.setBankCredits(1000);
 				//object.setPosition(new Point3D(0, 0, 0));
-				object.setOrientation(new Quaternion(1, 0, 1, 0));
+				object.setOrientation(new Quaternion(1, 0, 0, 0));
 				object.createTransaction(core.getCreatureODB().getEnvironment());
 				
 				PlayerObject player = (PlayerObject) core.objectService.createObject("object/player/shared_player.iff", object.getPlanet());
-				object.add(player);
+				object._add(player);
 				player.setProfession(clientCreateCharacter.getProfession());
 				player.setProfessionWheelPosition(clientCreateCharacter.getProfessionWheelPosition());
 				if(clientCreateCharacter.getHairObject().length() > 0) {
@@ -223,33 +229,39 @@ public class CharacterService implements INetworkDispatch {
 					TangibleObject hair = (TangibleObject) core.objectService.createObject(sharedHairTemplate, object.getPlanet());
 					if(clientCreateCharacter.getHairCustomization().length > 0)
 						hair.setCustomization(clientCreateCharacter.getHairCustomization());
-					object.add(hair);
+					object._add(hair);
 				}
 				
 				TangibleObject inventory = (TangibleObject) core.objectService.createObject("object/tangible/inventory/shared_character_inventory.iff", object.getPlanet());
+				inventory.setContainerPermissions(CreatureContainerPermissions.CREATURE_CONTAINER_PERMISSIONS);
 				TangibleObject appInventory = (TangibleObject) core.objectService.createObject("object/tangible/inventory/shared_appearance_inventory.iff", object.getPlanet());
+				appInventory.setContainerPermissions(CreaturePermissions.CREATURE_PERMISSIONS);
 				TangibleObject datapad = (TangibleObject) core.objectService.createObject("object/tangible/datapad/shared_character_datapad.iff", object.getPlanet());
+				datapad.setContainerPermissions(CreatureContainerPermissions.CREATURE_CONTAINER_PERMISSIONS);
 				TangibleObject bank = (TangibleObject) core.objectService.createObject("object/tangible/bank/shared_character_bank.iff", object.getPlanet());
+				bank.setContainerPermissions(CreatureContainerPermissions.CREATURE_CONTAINER_PERMISSIONS);
 				TangibleObject missionBag = (TangibleObject) core.objectService.createObject("object/tangible/mission_bag/shared_mission_bag.iff", object.getPlanet());
-				object.add(inventory);
-				object.add(appInventory);
-				object.add(datapad);
-				object.add(bank);
-				object.add(missionBag);
+				missionBag.setContainerPermissions(CreatureContainerPermissions.CREATURE_CONTAINER_PERMISSIONS);
+				
+				object._add(inventory);
+				object._add(appInventory);
+				object._add(datapad);
+				object._add(bank);
+				object._add(missionBag);
 				TangibleObject backpack = (TangibleObject) core.objectService.createObject("object/tangible/wearables/backpack/shared_backpack_galactic_marine.iff", object.getPlanet());
-				inventory.add(backpack);
-				object.addObjectToEquipList(datapad);
-				object.addObjectToEquipList(inventory);
+				inventory._add(backpack);
+				//object.addObjectToEquipList(datapad);
+				//object.addObjectToEquipList(inventory);
 				WeaponObject weapon = (WeaponObject) core.objectService.createObject("object/weapon/ranged/rifle/shared_rifle_a280.iff", object.getPlanet());
 				WeaponObject defaultWeapon = (WeaponObject) core.objectService.createObject("object/weapon/creature/shared_creature_default_weapon.iff", object.getPlanet());
 
-				object.addObjectToEquipList(defaultWeapon);
+				//object.addObjectToEquipList(defaultWeapon);
 
-				object.add(defaultWeapon);
+				object._add(defaultWeapon);
 
-				object.addObjectToEquipList(weapon);
+				//object.addObjectToEquipList(weapon);
 
-				object.add(weapon);
+				object._add(weapon);
 				object.setWeaponId(weapon.getObjectID());
 
 				core.scriptService.callScript("scripts/", "demo", "CreateStartingCharacter", object);
@@ -272,7 +284,7 @@ public class CharacterService implements INetworkDispatch {
 				ps.executeUpdate();
 				ps.close();
 				CreateCharacterSuccess success = new CreateCharacterSuccess(object.getObjectID());
-				
+				session.write(new HeartBeatMessage().serialize());
 				session.write(core.loginService.getLoginCluster().serialize());
 				session.write(core.loginService.getLoginClusterStatus().serialize());
 				

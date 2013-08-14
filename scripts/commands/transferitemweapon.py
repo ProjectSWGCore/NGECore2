@@ -12,6 +12,6 @@ def run(core, actor, target, commandString):
 		print 'Weapon Test'
 		oldContainer = target.getContainer()
 		oldContainer.transferTo(actor, container, target)
-	
+		actor.setWeaponId(target.getObjectID())
 	return
 	

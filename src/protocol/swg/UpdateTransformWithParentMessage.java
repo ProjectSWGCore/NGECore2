@@ -37,9 +37,8 @@ public class UpdateTransformWithParentMessage extends SWGMessage {
 	private int movementCounter;
 	private byte direction;
 	private float speed;
-	private byte combatFlag;
 	
-	public UpdateTransformWithParentMessage(long objectId, long cellId, short x, short y, short z, int movementCounter, byte direction, float speed, byte combatFlag) {
+	public UpdateTransformWithParentMessage(long objectId, long cellId, short x, short y, short z, int movementCounter, byte direction, float speed) {
 		this.objectId = objectId;
 		this.cellId = cellId;
 		this.x = x;
@@ -48,7 +47,6 @@ public class UpdateTransformWithParentMessage extends SWGMessage {
 		this.movementCounter = movementCounter;
 		this.direction = direction;
 		this.speed = speed;
-		this.combatFlag = combatFlag;
 	}
 	
 	public void deserialize(IoBuffer data) {
@@ -68,7 +66,8 @@ public class UpdateTransformWithParentMessage extends SWGMessage {
 		result.putInt(movementCounter+1);
 		result.put((byte) speed);
 		result.put(direction);
-		result.put(combatFlag);
+		result.put((byte) 1);
+		result.put((byte) 0);
 		result.flip();
 		return result;
 	}

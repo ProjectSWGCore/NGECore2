@@ -112,6 +112,9 @@ public class PlayerObject extends SWGObject {
 	@NotPersistent
 	private PlayerMessageBuilder messageBuilder;
 	
+	@NotPersistent
+	private long lastPlayTimeUpdate = System.currentTimeMillis();
+	
 	
 	
 	public PlayerObject() {
@@ -120,7 +123,7 @@ public class PlayerObject extends SWGObject {
 	}
 	
 	public PlayerObject(long objectID, Planet planet) {
-		super(objectID, planet, new Point3D(0, 0, 0), new Quaternion(1, 0, 1, 0), "object/player/shared_player.iff");
+		super(objectID, planet, new Point3D(0, 0, 0), new Quaternion(1, 0, 0, 0), "object/player/shared_player.iff");
 		messageBuilder = new PlayerMessageBuilder(this);
 	}
 
@@ -180,6 +183,7 @@ public class PlayerObject extends SWGObject {
 		synchronized(objectMutex) {
 			this.totalPlayTime = totalPlayTime;
 		}
+		getContainer().notifyObservers(messageBuilder.buildTotalPlayTimeDelta(totalPlayTime), true);
 	}
 
 	public String getHome() {
@@ -202,6 +206,46 @@ public class PlayerObject extends SWGObject {
 		return waypoints;
 	}
 
+	public int getWaypointListUpdateCounter() {
+		synchronized(objectMutex) {
+			return waypointListUpdateCounter;
+		}
+	}
+	
+	public void setWaypointListUpdateCounter(int count) {
+		synchronized(objectMutex){
+			this.waypointListUpdateCounter = count;
+		}
+	}
+	
+	public void waypointUpdate(WaypointObject waypoint) {
+		synchronized(objectMutex) {
+			getContainer().getClient().getSession().write(messageBuilder.buildWaypointUpdateDelta(waypoint));
+		}
+	}
+	
+	public void waypointRemove(WaypointObject waypoint) {
+		synchronized(objectMutex) {
+			getContainer().getClient().getSession().write(messageBuilder.buildWaypointRemoveDelta(waypoint));
+		}
+	}
+	
+	public void waypointAdd(WaypointObject waypoint) {
+		synchronized(objectMutex) {
+			getContainer().getClient().getSession().write(messageBuilder.buildWaypointAddDelta(waypoint));
+		}
+	}
+	
+	public WaypointObject getWaypointFromList(WaypointObject waypoint) {
+		synchronized(objectMutex) {
+			for(WaypointObject wp : waypoints) {
+				if(wp.getObjectID() == waypoint.getObjectID())
+					return wp;
+			}
+		}
+		return null;
+	}
+	
 	public int getCurrentForcePower() {
 		synchronized(objectMutex) {
 			return currentForcePower;
@@ -449,14 +493,26 @@ public class PlayerObject extends SWGObject {
 		if(destination == null || destination.getSession() == null)
 			return;
 		
-		if(destination.getParent().getObjectID() == getParentId()) {				// only send to self
+		//if(destination.getParent().getObjectID() == getParentId()) {				// only send to self
 			destination.getSession().write(messageBuilder.buildBaseline3());
 			destination.getSession().write(messageBuilder.buildBaseline6());
 			destination.getSession().write(messageBuilder.buildBaseline8());
 			destination.getSession().write(messageBuilder.buildBaseline9());
+		//}
+
+
+	}
+
+	public long getLastPlayTimeUpdate() {
+		synchronized(objectMutex) {
+			return lastPlayTimeUpdate;
 		}
+	}
 
-
+	public void setLastPlayTimeUpdate(long lastPlayTimeUpdate) {
+		synchronized(objectMutex) {
+			this.lastPlayTimeUpdate = lastPlayTimeUpdate;
+		}
 	}
 	
 }

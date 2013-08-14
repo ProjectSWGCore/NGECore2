@@ -22,6 +22,8 @@
 package main;
 
 import java.io.IOException;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
@@ -31,13 +33,17 @@ import java.util.concurrent.ConcurrentHashMap;
 import resources.common.RadialOptions;
 import resources.objects.creature.CreatureObject;
 import services.AttributeService;
+import services.BuffService;
 import services.CharacterService;
 import services.ConnectionService;
 import services.LoginService;
+import services.PlayerService;
 import services.ScriptService;
 import services.SimulationService;
 import services.TerrainService;
 import services.chat.ChatService;
+import services.combat.CombatService;
+import services.command.CombatCommand;
 import services.command.CommandService;
 import services.gcw.GCWService;
 import services.guild.GuildService;
@@ -101,6 +107,9 @@ public class NGECore {
 	public GuildService guildService;
 	public GCWService gcwService;
 	public TradeService tradeService;
+	public CombatService combatService;
+	public PlayerService playerService;
+	public BuffService buffService;
 	
 	// Login Server
 	public NetworkDispatch loginDispatch;
@@ -129,7 +138,7 @@ public class NGECore {
 		databaseConnection.connect(config.getString("DB.URL"), config.getString("DB.NAME"), config.getString("DB.USER"), config.getString("DB.PASS"), "postgresql");
 		
 		databaseConnection2 = new DatabaseConnection();
-
+		setGalaxyStatus(1);
 		creatureODB = new ObjectDatabase("creature", true, false, true);
 		mailODB = new ObjectDatabase("mails", true, false, true);
 
@@ -147,7 +156,9 @@ public class NGECore {
 		chatService = new ChatService(this);
 		attributeService = new AttributeService(this);
 		suiService = new SUIService(this);
-		
+		combatService = new CombatService(this);
+		playerService = new PlayerService(this);
+		buffService = new BuffService(this);
 		// Ping Server
 		try {
 			PingServer pingServer = new PingServer(config.getInt("PING.PORT"));
@@ -172,6 +183,7 @@ public class NGECore {
 		zoneDispatch.addService(chatService);
 		zoneDispatch.addService(suiService);
 		zoneDispatch.addService(mapService);
+		zoneDispatch.addService(playerService);
 
 		zoneServer = new MINAServer(zoneDispatch, config.getInt("ZONE.PORT"));
 		zoneServer.start();
@@ -196,6 +208,8 @@ public class NGECore {
 		
 		didServerCrash = false;
 		System.out.println("Started Server.");
+		setGalaxyStatus(2);
+
 	}
 	
 
@@ -245,6 +259,21 @@ public class NGECore {
 				
 			}
 		} while (true);
+		
+	}
+	
+	public void setGalaxyStatus(int statusId) {
+		
+		int galaxyId = config.getInt("GALAXY_ID");
+		
+		try {
+			PreparedStatement ps = databaseConnection.preparedStatement("UPDATE \"connectionServers\" SET \"statusId\"=? WHERE \"galaxyId\"=?");
+			ps.setInt(1, statusId);
+			ps.setInt(2, galaxyId);
+			ps.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		
 	}
 	

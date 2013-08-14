@@ -36,9 +36,8 @@ public class UpdateTransformMessage extends SWGMessage {
 	private int movementCounter;
 	private byte direction;
 	private float speed;
-	private byte combatFlag;
 	
-	public UpdateTransformMessage(long objectId, short x, short y, short z, int movementCounter, byte direction, float speed, byte combatFlag) {
+	public UpdateTransformMessage(long objectId, short x, short y, short z, int movementCounter, byte direction, float speed) {
 		this.objectId = objectId;
 		this.x = x;
 		this.y = y;
@@ -46,7 +45,6 @@ public class UpdateTransformMessage extends SWGMessage {
 		this.movementCounter = movementCounter;
 		this.direction = direction;
 		this.speed = speed;
-		this.combatFlag = combatFlag;
 	}
 	
 	public void deserialize(IoBuffer data) {
@@ -65,8 +63,8 @@ public class UpdateTransformMessage extends SWGMessage {
 		result.putInt(movementCounter+1);
 		result.put((byte) speed);
 		result.put((byte) direction);
+		result.put((byte) 1);
 		result.put((byte) 0);
-		result.put(combatFlag);
 		result.flip();
 		return result;
 	}

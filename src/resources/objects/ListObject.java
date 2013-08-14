@@ -25,9 +25,13 @@ import java.nio.ByteBuffer;
 
 import org.apache.mina.core.buffer.SimpleBufferAllocator;
 
+
 import resources.common.StringUtilities;
 
+
 public abstract class ListObject implements IListObject {
+	
+	public ListObject() { }
 	
 	protected final Object objectMutex = new Object();
 	public SimpleBufferAllocator bufferPool = new SimpleBufferAllocator();

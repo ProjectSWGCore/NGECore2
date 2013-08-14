@@ -32,6 +32,7 @@ import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
+
 import resources.common.*;
 
 import org.apache.mina.core.buffer.IoBuffer;
@@ -47,7 +48,6 @@ import protocol.swg.HeartBeatMessage;
 import protocol.swg.ParametersMessage;
 import protocol.swg.SelectCharacter;
 import protocol.swg.UnkByteFlag;
-
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.CrcStringTableVisitor;
 import engine.clientdata.visitors.WorldSnapshotVisitor;
@@ -62,9 +62,7 @@ import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
-
 import main.NGECore;
-
 import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
@@ -72,6 +70,7 @@ import resources.objects.guild.GuildObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.staticobject.StaticObject;
 import resources.objects.tangible.TangibleObject;
+import resources.objects.waypoint.WaypointObject;
 import resources.objects.weapon.WeaponObject;
 
 @SuppressWarnings("unused")
@@ -157,6 +156,8 @@ public class ObjectService implements INetworkDispatch {
 			
 			object = new GuildObject(core, objectID, planet, position, orientation, Template);
 			
+		} else if(Template.startsWith("object/waypoint")) {
+			object = new WaypointObject(objectID, planet, position);
 		} else {
 			
 			return null;
@@ -355,11 +356,11 @@ public class ObjectService implements INetworkDispatch {
 				client.setParent(creature);
 				
 				objectList.add(creature);
+				
 				creature.viewChildren(creature, true, true, new Traverser() {
 
 					@Override
 					public void process(SWGObject object) {
-						//System.out.println(object.getTemplate());
 						objectList.add(object);
 					}
 					
@@ -372,37 +373,46 @@ public class ObjectService implements INetworkDispatch {
 						if(object.getParentId() != 0 && object.getContainer() == null)
 							object.setParent(getObject(object.getParentId()));
 						object.getContainerInfo(object.getTemplate());
+						if(getObject(object.getObjectID()) == null)
+							objectList.add(object);
 					}
 					
-				});
+				});				
+
 				if(creature.getParentId() != 0) {
 					SWGObject parent = getObject(creature.getParentId());
 					parent._add(creature);
 				}
 
-				Point3D position = creature.getWorldPosition();
+				Point3D position = creature.getPosition();
 		
 				
-				//UnkByteFlag unkByteFlag = new UnkByteFlag();
+				UnkByteFlag unkByteFlag = new UnkByteFlag();
 				//session.write(unkByteFlag.serialize());
 				
-				//ParametersMessage parameters = new ParametersMessage();
+				ParametersMessage parameters = new ParametersMessage();
 				//session.write(parameters.serialize());
-
+				
+				core.buffService.clearBuffs(creature);
+				
 				core.chatService.loadMailHeaders(client);
 				
 				HeartBeatMessage heartBeat = new HeartBeatMessage();
 				session.write(heartBeat.serialize());
 
-				CmdStartScene startScene = new CmdStartScene((byte) 0, objectId, creature.getPlanet().getPath(), creature.getTemplate(), position.x, position.y, position.z, System.currentTimeMillis() / 1000, creature.getRadians());
+				CmdStartScene startScene = new CmdStartScene((byte) 0, objectId, creature.getPlanet().getPath(), creature.getTemplate(), position.x, position.y, position.z, System.currentTimeMillis() / 1000, 0);
 				session.write(startScene.serialize());
-				
-				core.simulationService.handleZoneIn(client);
 				creature.makeAware(creature);
-				//CmdSceneReady cmdSceneReady = new CmdSceneReady();
-				//session.write(cmdSceneReady.serialize());
+				
+				creature.makeAware(core.guildService.getGuildObject());
 
-				//core.simulationService.teleport(creature, new Point3D(position.x, core.terrainService.getHeight(creature.getPlanetId(), position.x, position.z), position.z), creature.getOrientation());
+				core.simulationService.handleZoneIn(client);
+				
+				CmdSceneReady sceneReady = new CmdSceneReady();
+				client.getSession().write(sceneReady.serialize());
+				
+				core.playerService.postZoneIn(creature);
+
 			}
 			
 		});
@@ -423,13 +433,15 @@ public class ObjectService implements INetworkDispatch {
 			if(obj != null) {
 				obj.setisInSnapshot(true);
 				obj.setParentId(chunk.parentId);
+				if(obj instanceof CellObject) {
+					((CellObject) obj).setCellNumber(chunk.cellNumber);
+				}
 			}
 			//System.out.print("\rLoading Object [" + counter + "/" +  visitor.getChunks().size() + "] : " + visitor.getName(chunk.nameId));
         }
 		visitor.dispose();
 		synchronized(objectList) {
 			for(SWGObject obj : objectList) {
-				obj.getTemplateData().dispose();
 				if(obj.getParentId() != 0 && getObject(obj.getParentId()) != null) {
 					SWGObject parent = getObject(obj.getParentId());
 					parent.add(obj);

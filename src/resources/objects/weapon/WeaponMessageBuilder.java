@@ -66,9 +66,8 @@ public class WeaponMessageBuilder extends ObjectMessageBuilder {
 		buffer.putFloat(weapon.getAttackSpeed());
 		buffer.putInt(0);
 		buffer.putInt(0);
-		buffer.putShort((short) 0);
-		buffer.putInt(0x014280);	// range 64m no idea how this converts to 64
-		buffer.putShort((short) 0);
+		buffer.putFloat(weapon.getMaxRange());
+		buffer.putInt(0);
 
 		buffer.putInt(0);
 		buffer.putInt(0);	// those 2 ints have something to do with particle color

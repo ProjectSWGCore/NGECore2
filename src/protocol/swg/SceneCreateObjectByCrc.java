@@ -74,7 +74,6 @@ public class SceneCreateObjectByCrc extends SWGMessage {
 		result.putFloat(pZ);
 		result.putInt(crc);
 		result.put(flags);
-		result.flip();
-		return result;
+		return result.flip();
 	}
 }

@@ -41,7 +41,8 @@ import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.NotPersistent;
 
 import engine.clients.Client;
-import engine.resources.objects.Buff;
+import resources.objects.Buff;
+import resources.objects.SWGList;
 import engine.resources.objects.IPersistent;
 import engine.resources.objects.MissionCriticalObject;
 import engine.resources.objects.SWGObject;
@@ -54,7 +55,7 @@ import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 
 @Entity
-public class CreatureObject extends SWGObject implements IPersistent {
+public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	@NotPersistent
 	private Transaction txn;
@@ -62,16 +63,12 @@ public class CreatureObject extends SWGObject implements IPersistent {
 	// CREO 1
 	private int bankCredits = 0;
 	private int cashCredits = 0;
-	private List<String> skills = new ArrayList<String>();
+	private SWGList<String> skills;
 	@NotPersistent
 	private int skillsUpdateCounter = 0;
 
 	// CREO 3
-	private byte[] customizationData;
-	private int optionBitmask = 0;
-	private int incapTimer = 10;
 	private byte posture = 0;
-	private String faction;
 	private int factionStatus = 0;
 	private float height;
 	private int battleFatigue = 0;
@@ -81,7 +78,7 @@ public class CreatureObject extends SWGObject implements IPersistent {
 	// CREO 4
 	private float accelerationMultiplierBase = 1;
 	private float accelerationMultiplierMod = 1;
-	private List<SkillMod> skillMods = new ArrayList<SkillMod>();
+	private SWGList<SkillMod> skillMods;
 	@NotPersistent
 	private int skillModsUpdateCounter = 0;
 	private float speedMultiplierBase = 1;
@@ -93,17 +90,15 @@ public class CreatureObject extends SWGObject implements IPersistent {
 	private float turnRadius = 1;
 	private float walkSpeed = (float) 2.75;
 	private float waterModPercent = 1;
-	private List<String> abilities = new ArrayList<String>();
+	private SWGList<String> abilities;
 	private int abilitiesUpdateCounter = 0;
 
-	private List<MissionCriticalObject> missionCriticalObjects = new ArrayList<MissionCriticalObject>();
+	private SWGList<MissionCriticalObject> missionCriticalObjects;
 	@NotPersistent
 	private int missionCriticalObjectsUpdateCounter = 0;
 
 
 	// CREO6
-	@NotPersistent
-	private List<Long> defendersList = new ArrayList<Long>();	// unused in packets but useful for the server
 	private byte combatFlag = 0;
 	private short level = 0;
 	private String currentAnimation;
@@ -118,13 +113,22 @@ public class CreatureObject extends SWGObject implements IPersistent {
 	private byte moodId = 0;
 	private int performanceCounter = 0;
 	private int performanceId = 0;
-	private List<SWGObject> equipmentList  = new ArrayList<SWGObject>();
+	private int health = 20000;
+	private int action = 12500;
+	@NotPersistent
+	private int HAMListCounter = 0;
+	private int maxHealth = 20000;
+	private int maxAction = 12500;
+	@NotPersistent
+	private int maxHAMListCounter = 0;
+
+	private SWGList<SWGObject> equipmentList;
 	@NotPersistent
 	private int equipmentListUpdateCounter = 0;
-	private List<Buff> buffList  = new ArrayList<Buff>();
+	private SWGList<Buff> buffList  = new SWGList<Buff>();
 	@NotPersistent
 	private int buffListUpdateCounter = 0;
-	private List<SWGObject> appearanceEquipmentList  = new ArrayList<SWGObject>();
+	private SWGList<SWGObject> appearanceEquipmentList;
 	@NotPersistent
 	private int appearanceEquipmentListUpdateCounter = 0;
 
@@ -136,8 +140,15 @@ public class CreatureObject extends SWGObject implements IPersistent {
 	
 	
 	public CreatureObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
-		super(objectID, planet, position, orientation, Template);
+		super(objectID, planet, Template, position, orientation);
 		messageBuilder = new CreatureMessageBuilder(this);
+		skills = new SWGList<String>(messageBuilder, 1, 3);
+		skillMods = new SWGList<SkillMod>(messageBuilder, 4, 3);
+		abilities = new SWGList<String>(messageBuilder, 4, 14);
+		missionCriticalObjects = new SWGList<MissionCriticalObject>(messageBuilder, 4, 13);
+		equipmentList = new SWGList<SWGObject>(messageBuilder, 6, 0x17);
+		buffList = new SWGList<Buff>(messageBuilder, 6, 0x1A);
+		appearanceEquipmentList = new SWGList<SWGObject>(messageBuilder, 6, 0x1F);
 	}
 	
 	public CreatureObject() {
@@ -179,7 +190,7 @@ public class CreatureObject extends SWGObject implements IPersistent {
 		}
 	}
 
-	public List<String> getSkills() {
+	public SWGList<String> getSkills() {
 		return skills;
 	}
 	
@@ -195,45 +206,16 @@ public class CreatureObject extends SWGObject implements IPersistent {
 		}
 	}
 
-	public byte[] getCustomizationData() {
+	@Override
+	public void setOptionsBitmask(int optionBitmask) {
 		synchronized(objectMutex) {
-			return customizationData;
-		}
-	}
-
-	public void setCustomizationData(byte[] customizationData) {
-		synchronized(objectMutex) {
-			this.customizationData = customizationData;
-		}
-	}
-
-	public int getOptionBitmask() {
-		synchronized(objectMutex) {
-			return optionBitmask;
-		}
-	}
-
-	public void setOptionBitmask(int optionBitmask) {
-		synchronized(objectMutex) {
-			this.optionBitmask = optionBitmask;
+			this.optionsBitmask = optionBitmask;
 		}
 		
 		IoBuffer optionDelta = messageBuilder.buildOptionMaskDelta(optionBitmask);
 		
 		notifyObservers(optionDelta, true);
 
-	}
-
-	public int getIncapTimer() {
-		synchronized(objectMutex) {
-			return incapTimer;
-		}
-	}
-
-	public void setIncapTimer(int incapTimer) {
-		synchronized(objectMutex) {
-			this.incapTimer = incapTimer;
-		}
 	}
 
 	public byte getPosture() {
@@ -254,12 +236,7 @@ public class CreatureObject extends SWGObject implements IPersistent {
 		notifyObservers(objController, true);
 	}
 
-	public String getFaction() {
-		synchronized(objectMutex) {
-			return faction;
-		}
-	}
-
+	@Override
 	public void setFaction(String faction) {
 		synchronized(objectMutex) {
 			this.faction = faction;
@@ -370,8 +347,26 @@ public class CreatureObject extends SWGObject implements IPersistent {
 		}
 	}
 
-	public List<SkillMod> getSkillMods() {
+	public SWGList<SkillMod> getSkillMods() {
 		return skillMods;
+	}
+	
+	public SkillMod getSkillMod(String name) {
+		synchronized(skillMods.getMutex()) {
+			for(SkillMod skillMod : skillMods.get()) {
+				if(skillMod.getSkillModString().equals(name))
+					return skillMod;
+			}
+		}
+		return null;
+	}
+	
+	public void addSkillMod(String name, int base) {
+		SkillMod skillMod = new SkillMod();
+		skillMod.setBase(base);
+		skillMod.setSkillModString(name);
+		skillMod.setModifier(0);
+		skillMods.add(skillMod);
 	}
 
 	public short getSkillModsUpdateCounter() {
@@ -503,7 +498,7 @@ public class CreatureObject extends SWGObject implements IPersistent {
 		}
 	}
 
-	public List<String> getAbilities() {
+	public SWGList<String> getAbilities() {
 		return abilities;
 	}
 
@@ -518,13 +513,13 @@ public class CreatureObject extends SWGObject implements IPersistent {
 			this.abilitiesUpdateCounter = abilitiesUpdateCounter;
 		}
 	}
-
-	public List<MissionCriticalObject> getMissionCriticalObjects() {
-		return missionCriticalObjects;
+	
+	public void addAbility(String abilityName) {
+		abilities.add(abilityName);
 	}
 
-	public List<Long> getDefendersList() {
-		return defendersList;
+	public SWGList<MissionCriticalObject> getMissionCriticalObjects() {
+		return missionCriticalObjects;
 	}
 
 	public byte getCombatFlag() {
@@ -537,6 +532,9 @@ public class CreatureObject extends SWGObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.combatFlag = combatFlag;
 		}
+		IoBuffer combatDelta = messageBuilder.buildCombatFlagDelta(combatFlag);
+		
+		notifyObservers(combatDelta, true);
 	}
 
 	public short getLevel() {
@@ -714,15 +712,15 @@ public class CreatureObject extends SWGObject implements IPersistent {
 		}
 	}
 
-	public List<SWGObject> getEquipmentList() {
+	public SWGList<SWGObject> getEquipmentList() {
 		return equipmentList;
 	}
 
-	public List<Buff> getBuffList() {
+	public SWGList<Buff> getBuffList() {
 		return buffList;
 	}
 
-	public List<SWGObject> getAppearanceEquipmentList() {
+	public SWGList<SWGObject> getAppearanceEquipmentList() {
 		return appearanceEquipmentList;
 	}
 
@@ -738,17 +736,13 @@ public class CreatureObject extends SWGObject implements IPersistent {
 	
 	public void addObjectToEquipList(SWGObject object) {
 		if(object instanceof TangibleObject || object instanceof WeaponObject) {
-			synchronized(objectMutex) {
-				equipmentList.add(object);
-			}
+			equipmentList.add(object);
 		}
 	}
 	
 	public void removeObjectFromEquipList(SWGObject object) {
 		if(object instanceof TangibleObject || object instanceof WeaponObject) {
-			synchronized(objectMutex) {
-				equipmentList.remove(object);
-			}
+			equipmentList.remove(object);
 		}
 	}
 
@@ -767,17 +761,42 @@ public class CreatureObject extends SWGObject implements IPersistent {
 			destination.getSession().write(messageBuilder.buildBaseline1());
 			destination.getSession().write(messageBuilder.buildBaseline4());
 		}
-		destination.getSession().write(messageBuilder.buildBaseline8());
-		destination.getSession().write(messageBuilder.buildBaseline9());
-
+		//destination.getSession().write(messageBuilder.buildBaseline8());
+		//destination.getSession().write(messageBuilder.buildBaseline9());
+		 
 		UpdatePostureMessage upm = new UpdatePostureMessage(getObjectID(), (byte) 0);
-		destination.getSession().write(upm.serialize());
-		if(destination != getClient()) {
-			UpdatePVPStatusMessage upvpm = new UpdatePVPStatusMessage(getObjectID(), 55);
-			destination.getSession().write(upvpm.serialize());
-		}
+		//destination.getSession().write(upm.serialize());
 		
-
+		if(destination != getClient()) {
+			UpdatePVPStatusMessage upvpm = new UpdatePVPStatusMessage(getObjectID());
+			if (factionStatus == 1 && faction == "imperial") {
+				upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Imperial);
+				upvpm.setStatus(16);
+			}
+			
+			if (factionStatus == 1 && faction == "rebel") {
+				upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Rebel);
+				upvpm.setStatus(16);
+			}
+			
+			if (factionStatus == 2 && faction == "imperial") {
+				upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Imperial);
+				upvpm.setStatus(55);
+			}
+			if (factionStatus == 2 && faction == "rebel") {
+				upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Rebel);
+				upvpm.setStatus(55);
+			} 
+			if(factionStatus == 0 && faction == "neutral") {
+				upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Neutral);
+				upvpm.setStatus(16);
+			}
+			else {
+				upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Neutral);
+				upvpm.setStatus(16);
+			}
+			//destination.getSession().write(upvpm.serialize());
+		}
 	}
 
 	public void sendSystemMessage(String message, byte displayType) {
@@ -788,5 +807,134 @@ public class CreatureObject extends SWGObject implements IPersistent {
 		}
 		
 	}
+
+	public int getHealth() {
+		synchronized(objectMutex) {
+			return health;
+		}
+	}
+
+	public void setHealth(int health) {
+		IoBuffer delta;
+		synchronized(objectMutex) {
+			if(health > maxHealth)
+				health = maxHealth;
+			this.health = health;
+			setHamListCounter(getHamListCounter() + 1);
+			delta = messageBuilder.buildHealthDelta(health);
+		}
+		notifyObservers(delta, true);
+	}
+
+	public int getAction() {
+		synchronized(objectMutex) {
+			return action;
+		}
+	}
+
+	public void setAction(int action) {
+		IoBuffer delta;
+		synchronized(objectMutex) {
+			if(action > maxAction)
+				action = maxAction;
+			this.action = action;
+			setHamListCounter(getHamListCounter() + 1);
+			delta = messageBuilder.buildActionDelta(action);
+		}
+		notifyObservers(delta, true);
+	}
+
+	public int getHamListCounter() {
+		synchronized(objectMutex) {
+			return HAMListCounter;
+		}
+	}
+
+	public void setHamListCounter(int hamListCounter) {
+		synchronized(objectMutex) {
+			this.HAMListCounter = hamListCounter;
+		}
+	}
+
+	public int getMaxHealth() {
+		synchronized(objectMutex) {
+			return maxHealth;
+		}
+	}
+
+	public void setMaxHealth(int maxHealth) {
+		synchronized(objectMutex) {
+			this.maxHealth = maxHealth;
+			setMaxHAMListCounter(getMaxHAMListCounter() + 1);
+		}
+		notifyObservers(messageBuilder.buildMaxHealthDelta(maxHealth), true);
+	}
+
+	public int getMaxAction() {
+		synchronized(objectMutex) {
+			return maxAction;
+		}
+	}
+
+	public void setMaxAction(int maxAction) {
+		synchronized(objectMutex) {
+			this.maxAction = maxAction;
+			setMaxHAMListCounter(getMaxHAMListCounter() + 1);
+		}
+		notifyObservers(messageBuilder.buildMaxActionDelta(maxAction), true);
+	}
+
+	public int getMaxHAMListCounter() {
+		synchronized(objectMutex) {
+			return maxHAMListCounter;
+		}
+	}
+
+	public void setMaxHAMListCounter(int maxHAMListCounter) {
+		synchronized(objectMutex) {
+			this.maxHAMListCounter = maxHAMListCounter;
+		}
+	}
+	
+	public void addBuff(Buff buff) {
+		synchronized(objectMutex) {
+			buffList.get().add(buff);
+			setBuffListCounter(getBuffListCounter() + 1);
+			
+		}
+		buff.setStartTime();
+		notifyObservers(messageBuilder.buildAddBuffDelta(buff), true);
+	}
+	
+	public void removeBuff(Buff buff) {
+		synchronized(objectMutex) {
+			buffList.get().remove(buff);
+			setBuffListCounter(getBuffListCounter() + 1);
+		}
+		notifyObservers(messageBuilder.buildRemoveBuffDelta(buff), true);
+	}
+
+	public int getBuffListCounter() {
+		synchronized(objectMutex) {
+			return buffListUpdateCounter;
+		}
+	}
+	
+	public void setBuffListCounter(int buffListCounter) {
+		synchronized(objectMutex) {
+			this.buffListUpdateCounter = buffListCounter;
+		}
+	}
+	
+	public Buff getBuffByName(String buffName) {
+		synchronized(objectMutex) {
+			for(Buff buff : buffList.get()) {
+				if(buff.getBuffName().equals(buffName))
+					return buff;
+			}
+		}
+		return null;
+	}
+
 
 }

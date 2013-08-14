@@ -21,8 +21,6 @@
  ******************************************************************************/
 package resources.objects.waypoint;
 
-
-
 import com.sleepycat.persist.model.Persistent;
 
 import engine.clients.Client;

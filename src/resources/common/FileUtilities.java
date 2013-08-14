@@ -21,6 +21,7 @@
  ******************************************************************************/
 package resources.common;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.LineNumberReader;
@@ -36,6 +37,13 @@ public class FileUtilities {
 		lnr.close();
 		return numberOfLines;
 		
+	}
+	
+	public static boolean doesFileExist(String filePath) {
+		
+		File file = new File(filePath);
+		
+		return file.exists();
 		
 	}
 

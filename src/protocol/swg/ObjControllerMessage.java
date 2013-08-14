@@ -41,6 +41,7 @@ public class ObjControllerMessage extends SWGMessage {
 	public static final int DATA_TRANSFORM 	= 0x0071;
 	public static final int SPACIAL_CHAT	= 0x00F4;
 	public static final int COMMAND_ENQUEUE	= 0x0116;
+	public static final int COMMAND_ENQUEUE_REMOVE	= 0x0117;
 	public static final int USE_OBJECT 		= 0x0126;
 	public static final int PLAYER_EMOTE	= 0x012E;
 	public static final int DATA_TRANSFORM_WITH_PARENT = 0x00F1;
@@ -49,6 +50,8 @@ public class ObjControllerMessage extends SWGMessage {
 	public static final int POSTURE = 0x0131;
 	public static final int SIT_ON_OBJECT = 0x013B;
 	public static final int OBJECT_MENU_RESPONSE = 0x0147;
+	public static final int SHOW_FLY_TEXT = 0x01BD;
+	public static final int START_TASK = 0x448;
 
 	public ObjControllerMessage() { 
 		

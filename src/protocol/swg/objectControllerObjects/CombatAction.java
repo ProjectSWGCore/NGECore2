@@ -33,12 +33,14 @@ public class CombatAction extends ObjControllerObject{
 	private long attackerId;
 	private long weaponId;
 	private long defenderId;
+	private int commandCRC;
 	
-	public CombatAction(int actionCRC, long attackerId, long weaponId, long defenderId) {
+	public CombatAction(int actionCRC, long attackerId, long weaponId, long defenderId, int commandCRC) {
 		this.actionCRC = actionCRC;
 		this.attackerId = attackerId;
 		this.weaponId = weaponId;
 		this.defenderId = defenderId;
+		this.commandCRC = commandCRC;
 	}
 	
 	public void deserialize(IoBuffer data) {
@@ -46,7 +48,8 @@ public class CombatAction extends ObjControllerObject{
 	}
 	
 	public IoBuffer serialize() {
-		IoBuffer result = IoBuffer.allocate(100).order(ByteOrder.LITTLE_ENDIAN);
+		
+		IoBuffer result = IoBuffer.allocate(60).order(ByteOrder.LITTLE_ENDIAN);
 		
 		result.putInt(ObjControllerMessage.COMBAT_ACTION);
 		
@@ -56,17 +59,23 @@ public class CombatAction extends ObjControllerObject{
 		result.putLong(attackerId);
 		result.putLong(weaponId);
 		result.put((byte) 0);
+		result.put((byte) 0x10);
+		result.put((byte) 0);
+		result.putInt(commandCRC);
+		result.put((byte) 0);
+		result.putShort((short) 1);
+		result.putLong(defenderId);
+		result.put((byte) 0);
 		result.put((byte) 1);
 		result.put((byte) 0);
-		byte[] unkdata = new byte[] {
-				0x2B, (byte) 0x87, 0x64, (byte) 0xA1, 0x01, 0x15, 0x02, (byte) 0x97, (byte) 0xC5, 0x00, 0x00, (byte) 0xD0, 0x40, 0x6F, 0x16, (byte) 0x80, 0x45, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-		};
-		result.put(unkdata);
+		byte[] unkdata2 = new byte[] { (byte) 0, 0, 0 };
+		result.put(unkdata2);
+
+		return result.flip();
 		
-		return result;
 	}
 	
 	public CombatAction clone() {
-		return new CombatAction(actionCRC, attackerId, weaponId, defenderId);
+		return new CombatAction(actionCRC, attackerId, weaponId, defenderId, actionCRC);
 	}
 }

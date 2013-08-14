@@ -21,6 +21,503 @@
  ******************************************************************************/
 package services.combat;
 
-public class CombatService {
+import java.util.Map;
+import java.util.Random;
+import protocol.swg.ObjControllerMessage;
+import protocol.swg.objectControllerObjects.CombatAction;
+import protocol.swg.objectControllerObjects.CommandEnqueueRemove;
+import protocol.swg.objectControllerObjects.StartTask;
+import resources.objects.creature.CreatureObject;
+import resources.objects.tangible.TangibleObject;
+import resources.objects.weapon.WeaponObject;
+import services.command.CombatCommand;
+import main.NGECore;
+import engine.resources.common.CRC;
+import engine.resources.service.INetworkDispatch;
+import engine.resources.service.INetworkRemoteEvent;
+
+public class CombatService implements INetworkDispatch {
+	
+	private NGECore core;
+
+	public CombatService(NGECore core) {
+		this.core = core;
+		core.commandService.registerCombatCommand("rangedshotrifle");
+		core.commandService.registerCombatCommand("rangedshotpistol");
+		core.commandService.registerCombatCommand("rangedshotlightrifle");
+		core.commandService.registerCombatCommand("rangedshot");
+		core.commandService.registerCombatCommand("meleehit");
+		core.commandService.registerCombatCommand("saberhit");
+		core.commandService.registerCombatCommand("fs_sweep_7");
+		core.commandService.registerCombatCommand("fs_dm_7");
+		core.commandService.registerCombatCommand("fs_dm_cc_6");
+		core.commandService.registerCombatCommand("fs_ae_dm_cc_6");
+	}
+
+	@Override
+	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> arg0, Map<Integer, INetworkRemoteEvent> arg1) {
+		
+	}
+
+	@Override
+	public void shutdown() {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	public void doCombat(CreatureObject attacker, TangibleObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {
+		
+		
+		if(!applySpecialCost(attacker, weapon, command))
+			return;
+		
+		if(!attemptCombat(attacker, target))
+			return;
+
+		if(command.getAttackType() == 1)
+			doSingleTargetCombat(attacker, target, weapon, command, actionCounter);
+		else if(command.getAttackType() == 0 || command.getAttackType() == 2 || command.getAttackType() == 3)
+			doAreaCombat(attacker, target, weapon, command, actionCounter);
+		
+	}
+
+	private void doAreaCombat(CreatureObject attacker, TangibleObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {
+		if(target instanceof CreatureObject) {
+			doAreaCombat(attacker, (CreatureObject) target, weapon, command, actionCounter);
+			return;
+		}
+	}
+
+	private void doSingleTargetCombat(CreatureObject attacker, TangibleObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {	
+		if(target instanceof CreatureObject) {
+			doSingleTargetCombat(attacker, (CreatureObject) target, weapon, command, actionCounter);
+			return;
+		}
+		
+		float damage = calculateDamage(attacker, target, weapon, command);
+	}
+	
+	private void doAreaCombat(CreatureObject attacker, CreatureObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {
+		
+	}
+
+	private void doSingleTargetCombat(CreatureObject attacker, CreatureObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {	
+				
+		float damage = calculateDamage(attacker, target, weapon, command);
+		
+		byte hitType = getHitType(attacker, target, weapon, command);
+		
+		switch(hitType) {
+		
+			case HitType.MISS:
+				damage = 0;
+				break;
+				
+			case HitType.DODGE:
+				damage = 0;
+				break;
+
+			case HitType.PARRY:
+				damage = 0;
+				break;
+				
+			case HitType.CRITICAL:
+				damage *= 1.5f;
+				break;
+
+		}
+		byte mitigationType = -1;
+		if(hitType == HitType.CRITICAL || hitType == HitType.HIT || hitType == HitType.STRIKETHROUGH) {
+			mitigationType = doMitigationRolls(attacker, target, weapon, command, hitType);
+			
+			if(mitigationType == HitType.GLANCE) {
+				damage *= 0.4f;
+			} else if(mitigationType == HitType.EVASION) {
+				float evasionValue = (attacker.getSkillMod("combat_evasion_value").getBase() / 4) / 100;
+				
+				damage *= (1 - evasionValue);
+				
+			}
+			
+		}
+		damage *= (1 - getArmorReduction(attacker, target, weapon, command, hitType));
+		if(mitigationType == HitType.BLOCK) {
+				
+			float blockValue = (attacker.getSkillMod("strength_modified").getBase() * attacker.getSkillMod("combat_block_value").getBase()) / 2 + 25;
+			damage -= blockValue;
+			
+		}
+
+		if(damage > 0)
+			applyDamage(attacker, target, (int) damage);
+		
+		sendCombatPackets(attacker, target, weapon, command, actionCounter);
+
+	}
+	
+
+
+	private void sendCombatPackets(CreatureObject attacker, CreatureObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {
+		
+		String animationStr = command.getRandomAnimation(weapon);
+		CombatAction combatAction = new CombatAction(CRC.StringtoCRC(animationStr), attacker.getObjectID(), weapon.getObjectID(), target.getObjectID(), command.getCommandCRC());
+		ObjControllerMessage objController = new ObjControllerMessage(0x1B, combatAction);
+		attacker.notifyObserversInRange(objController, true, 125);
+		StartTask startTask = new StartTask(actionCounter, attacker.getObjectID(), command.getCommandCRC());
+		ObjControllerMessage objController2 = new ObjControllerMessage(0x0B, startTask);
+		attacker.getClient().getSession().write(objController2.serialize());
+		CommandEnqueueRemove commandRemove = new CommandEnqueueRemove(attacker.getObjectID(), actionCounter);
+		ObjControllerMessage objController3 = new ObjControllerMessage(0x0B, commandRemove);
+		attacker.getClient().getSession().write(objController3.serialize());
+
+	}
+
+	private float getArmorReduction(CreatureObject attacker, CreatureObject target, WeaponObject weapon, CombatCommand command, byte hitType) {
+		
+		int elementalType = 1;
+		
+		if(command.getPercentFromWeapon() > 0) {
+			
+			// TODO: elemental mitigation and damage
+			
+			if(weapon.getStringAttribute("cat_wpn_damage.wpn_damage_type").equals("@obj_attr_n:armor_eff_kinetic"))
+				elementalType = ElementalType.KINETIC;
+			else if(weapon.getStringAttribute("cat_wpn_damage.wpn_damage_type").equals("@obj_attr_n:armor_eff_energy"))
+				elementalType = ElementalType.ENERGY;
+
+		} else {
+			
+			elementalType = command.getElementalType();
+			
+		}
+		
+		int baseArmor = 0;
+		
+		switch(elementalType) {
+		
+			case ElementalType.KINETIC:
+				baseArmor = target.getSkillMod("kinetic").getBase();
+			case ElementalType.ENERGY:
+				baseArmor = target.getSkillMod("energy").getBase();
+			case ElementalType.HEAT:
+				baseArmor = target.getSkillMod("heat").getBase();
+			case ElementalType.COLD:
+				baseArmor = target.getSkillMod("cold").getBase();
+			case ElementalType.ACID:
+				baseArmor = target.getSkillMod("acid").getBase();
+			case ElementalType.ELECTRICITY:
+				baseArmor = target.getSkillMod("electricity").getBase();
+
+		}
+			
+		float mitigation = (float) (90 * (1 - Math.exp(-0.000125 * baseArmor)) + baseArmor / 9000);
+		
+		if(hitType == HitType.STRIKETHROUGH) {
+			
+			float stMaxValue = attacker.getSkillMod("combat_strikethrough_value").getBase() / 2;
+			float stMinValue = stMaxValue / 2;
+
+			float stValue = new Random().nextInt((int) (stMaxValue - stMinValue + 1)) + stMinValue;
+			stValue /= 100;
+			mitigation *= stValue;
+		}
+		
+		return mitigation / 100;
+		
+	}
+
+	private boolean attemptCombat(CreatureObject attacker, TangibleObject target) {
+		
+		if(target.getDefendersList().contains(attacker) && attacker.getDefendersList().contains(target))
+			return true;
+		
+		if(attacker.getStateBitmask() == 0x8000000)
+			return false;
+		
+		if(!target.isAttackableBy(attacker))
+			return false;
+		
+		target.addDefender(attacker);
+		attacker.addDefender(target);
+		
+		return true;
+		
+	}
+	
+	private boolean applySpecialCost(CreatureObject attacker, WeaponObject weapon, CombatCommand command) {
+		
+		float actionCost = command.getActionCost();
+		float healthCost = command.getHealthCost();
+		
+		if(actionCost == 0 && healthCost == 0)
+			return true;
+		
+		float newAction = attacker.getAction() - actionCost;
+		if(newAction <= 0)
+			return false;
+		
+		float newHealth = attacker.getHealth() - healthCost;
+		if(newHealth <= 0)
+			return false;
+		
+		if(newAction != attacker.getAction())
+			attacker.setAction((int) newAction);
+		
+		if(newHealth != attacker.getHealth())
+			attacker.setHealth((int) newHealth);
+
+		return true;
+		
+	}
+	
+	private float calculateDamage(CreatureObject attacker, CreatureObject target, WeaponObject weapon, CombatCommand command) {
+		
+		float rawDamage = command.getAddedDamage();
+		
+		if(command.getPercentFromWeapon() > 0 && weapon != attacker.getSlottedObject("default_weapon")) {
+			
+			float weaponMinDmg = weapon.getIntAttribute("cat_wpn_damage.wpn_damage_min");
+			float weaponMaxDmg = weapon.getIntAttribute("cat_wpn_damage.wpn_damage_max");
+			
+			float weaponDmg = new Random().nextInt((int) (weaponMaxDmg - weaponMinDmg + 1)) + weaponMinDmg;
+			weaponDmg *= command.getPercentFromWeapon();
+			rawDamage += weaponDmg;
+			
+			if(weapon.isMelee() && attacker.getSkillMod("strength_modified") != null) {
+				
+				if(attacker.getSkillMod("strength_modified").getBase() > 0) {
+					rawDamage += ((attacker.getSkillMod("strength_modified").getBase() / 100) * 33);
+				}
+				
+			}
+			
+		} else if(command.getPercentFromWeapon() > 0) {
+			
+			float weaponMinDmg = 50;
+			float weaponMaxDmg = 100;
+			
+			float weaponDmg = new Random().nextInt((int) (weaponMaxDmg - weaponMinDmg + 1)) + weaponMinDmg;
+			weaponDmg *= command.getPercentFromWeapon();
+			rawDamage += weaponDmg;
+			
+			if(weapon.isMelee() && attacker.getSkillMod("strength_modified") != null) {
+				
+				if(attacker.getSkillMod("strength_modified").getBase() > 0) {
+					rawDamage += ((attacker.getSkillMod("strength_modified").getBase() / 100) * 33);
+				}
+				
+			}
+			
+		}
+		
+		if(target.getSkillMod("damage_decrease_percentage") != null) {
+			rawDamage *= (target.getSkillMod("damage_decrease_percentage").getBase() / 100);
+		}
+		
+		return rawDamage;
+		
+	}
+
+	
+	private float calculateDamage(CreatureObject attacker, TangibleObject target, WeaponObject weapon, CombatCommand command) {
+		
+		float rawDamage = command.getAddedDamage();
+		
+		if(command.getPercentFromWeapon() > 0 && weapon != attacker.getSlottedObject("default_weapon")) {
+			
+			float weaponMinDmg = weapon.getIntAttribute("cat_wpn_damage.wpn_damage_min");
+			float weaponMaxDmg = weapon.getIntAttribute("cat_wpn_damage.wpn_damage_max");
+			
+			float weaponDmg = new Random().nextInt((int) (weaponMaxDmg - weaponMinDmg + 1)) + weaponMinDmg;
+			weaponDmg *= command.getPercentFromWeapon();
+			rawDamage += weaponDmg;
+			
+			if(weapon.isMelee() && attacker.getSkillMod("strength_modified") != null) {
+				
+				if(attacker.getSkillMod("strength_modified").getBase() > 0) {
+					rawDamage += ((attacker.getSkillMod("strength_modified").getBase() / 100) * 33);
+				}
+				
+			}
+			
+		} else if(command.getPercentFromWeapon() > 0) {
+			
+			float weaponMinDmg = 50;
+			float weaponMaxDmg = 100;
+			
+			float weaponDmg = new Random().nextInt((int) (weaponMaxDmg - weaponMinDmg + 1)) + weaponMinDmg;
+			weaponDmg *= command.getPercentFromWeapon();
+			rawDamage += weaponDmg;
+			
+			if(weapon.isMelee() && attacker.getSkillMod("strength_modified") != null) {
+				
+				if(attacker.getSkillMod("strength_modified").getBase() > 0) {
+					rawDamage += ((attacker.getSkillMod("strength_modified").getBase() / 100) * 33);
+				}
+				
+			}
+			
+		}
+		
+		return rawDamage;
+		
+	}
+	
+	public byte getHitType(CreatureObject attacker, CreatureObject target, WeaponObject weapon, CombatCommand command) {
+		
+		Random rand = new Random();
+		float r;
+
+		// negation rolls(parry, miss and dodge) can only roll on single target attacks, strikethrough also only rolls on single target attacks
+		if(command.getAttackType() == 1) {
+		
+			if(weapon.isRanged()) {
+				float missChance = 0.5f;
+				if(attacker.getSkillMod("strength_modified").getBase() > 0) {
+					float missNegation = (float) ((attacker.getSkillMod("strength_modified").getBase() / 100) * 0.1);
+					if(missNegation > 0.4f)
+						missNegation = 0.4f;
+					missChance -= missNegation;
+				}
+				r = rand.nextFloat();
+				if(r <= missChance)
+					return HitType.MISS;
+			}
+			float dodgeChance = target.getSkillMod("display_only_dodge").getBase() / 10000;
+	
+			r = rand.nextFloat();
+			if(r <= dodgeChance)
+				return HitType.DODGE;
+			
+				
+			WeaponObject weapon2 = (WeaponObject) core.objectService.getObject(((CreatureObject) target).getWeaponId());
+			if(weapon2 != null && weapon2.isMelee()) {
+				
+				float parryChance = target.getSkillMod("display_only_parry").getBase() / 10000;
+	
+				r = rand.nextFloat();
+				if(r <= parryChance)
+					return HitType.PARRY;
+					
+			}
+			
+			float stChance = attacker.getSkillMod("display_only_strikethrough").getBase() / 10000;
+			
+			r = rand.nextFloat();
+			if(r <= stChance)
+				return HitType.STRIKETHROUGH;
+
+		}
+
+		float critChance = attacker.getSkillMod("display_only_critical").getBase() / 10000;
+		
+		r = rand.nextFloat();
+		if(r <= critChance)
+			return HitType.CRITICAL;
+		
+		// TODO: Punishing blow once AI is implemented
+		
+		return HitType.HIT;
+		
+	}
+	
+	public byte doMitigationRolls(CreatureObject attacker, CreatureObject target, WeaponObject weapon, CombatCommand command, byte hitType) {
+		
+		Random rand = new Random();
+		float r;
+					
+		float blockChance = target.getSkillMod("display_only_block").getBase() / 10000;
+			
+		r = rand.nextFloat();
+		if(r <= blockChance)
+			return HitType.BLOCK;
+			
+		if(command.getAttackType() == 0 || command.getAttackType() == 2 || command.getAttackType() == 3) {
+				
+			float evasionChance = target.getSkillMod("display_only_evasion").getBase() / 10000;
+				
+			r = rand.nextFloat();
+			if(r <= evasionChance)
+				return HitType.EVASION;
+
+		}
+		
+		if(hitType == HitType.HIT) {
+			
+			float glanceChance = target.getSkillMod("display_only_glancing_blow").getBase() / 10000;
+			
+			r = rand.nextFloat();
+			if(r <= glanceChance)
+				return HitType.GLANCE;
+
+		}
+			
+
+		return -1;
+		
+	}
+	
+	public void applyDamage(CreatureObject attacker, CreatureObject target, int damage) {
+		
+		if(target.getHealth() - damage <= 0) {
+			target.setHealth(1);
+			target.setPosture((byte) 13);
+			if(target.getSlottedObject("ghost") != null)
+				attacker.sendSystemMessage("You incapacitate " + target.getCustomName() + ".", (byte) 0);
+			return;
+		}
+		target.setHealth(target.getHealth() - damage);
+		
+	}
+	
+	private boolean isInConeAngle(CreatureObject attacker, CreatureObject target, int coneLength, int coneWidth, float directionX, float directionZ) {
+		
+		float radius = coneWidth / 2;
+		float angle = (float) (2 * Math.atan(coneLength / radius));
+		
+		float targetX = target.getWorldPosition().x - attacker.getWorldPosition().x;
+		float targetZ = target.getWorldPosition().z - attacker.getWorldPosition().z;
+		
+		float targetAngle = (float) (Math.atan2(targetZ, targetX) -  Math.atan2(directionZ, directionX));
+		
+		float degrees = (float) (targetAngle * 180 / Math.PI);
+		float coneAngle = angle / 2;
+		
+		if(degrees > coneAngle || degrees < -coneAngle)
+			return false;
+		
+		return true;
+				
+	}
+	
+	
+
+	public enum HitType{; 
+	
+		public static final byte MISS = 0;
+		public static final byte DODGE = 1;
+		public static final byte PARRY = 2;
+		public static final byte STRIKETHROUGH = 3;
+		public static final byte CRITICAL = 4;
+		public static final byte PUNISHING = 5;
+		public static final byte HIT = 6;
+		public static final byte BLOCK = 7;
+		public static final byte EVASION = 8;
+		public static final byte GLANCE = 9;
+	
+	}
+	
+	public enum ElementalType {;
+	
+		public static final int KINETIC = 1;
+		public static final int ENERGY = 2;
+		public static final int BLAST = 4;
+		public static final int STUN = 8;
+		public static final int HEAT = 32;
+		public static final int COLD = 64;
+		public static final int ACID = 128;
+		public static final int ELECTRICITY = 256;
+
+	}
 
 }

@@ -21,10 +21,11 @@
  ******************************************************************************/
 package services.chat;
 
+import java.util.List;
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 
-@Entity
+@Entity(version=1)
 public class Mail {
 	
 	@PrimaryKey
@@ -35,6 +36,7 @@ public class Mail {
 	private String message;
 	private byte status;
 	private int timeStamp;
+	private List<WaypointAttachment> attachments;
 	
 	public static final byte NEW = 0x4E;
 	public static final byte READ = 0x52;
@@ -113,6 +115,16 @@ public class Mail {
 
 	public void setTimeStamp(int timeStamp) {
 		this.timeStamp = timeStamp;
+	}
+
+
+	public List<WaypointAttachment> getAttachments() {
+		return attachments;
+	}
+
+
+	public void setAttachments(List<WaypointAttachment> attachments) {
+		this.attachments = attachments;
 	}
 	
 }

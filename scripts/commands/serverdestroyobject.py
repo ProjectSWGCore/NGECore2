@@ -7,8 +7,11 @@ def run(core, actor, target, commandString):
 
 	if not target:
 		return
-		
-	print 'Destroy Test'
+	
+	if target.getTemplate() == 'object/waypoint/shared_waypoint.iff':
+		actor.getSlottedObject('ghost').waypointRemove(target)
+		core.objectService.destroyObject(target)
+		return
 	
 	parent = target.getContainer()
 	

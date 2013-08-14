@@ -277,11 +277,11 @@ public class RadialOptions {
     public static int StopManufacture	= 252;
     
 	private byte parentId;
-	private byte optionId;
+	private short optionId;
 	private byte optionType;
 	private String description;
     
-    public RadialOptions(byte parentId, byte optionId, byte optionType, String description) {
+    public RadialOptions(byte parentId, short optionId, byte optionType, String description) {
     	this.setParentId(parentId);
     	this.setOptionId(optionId);
     	this.setOptionType(optionType);
@@ -300,11 +300,11 @@ public class RadialOptions {
 		this.parentId = parentId;
 	}
 
-	public byte getOptionId() {
+	public short getOptionId() {
 		return optionId;
 	}
 
-	public void setOptionId(byte optionId) {
+	public void setOptionId(short optionId) {
 		this.optionId = optionId;
 	}
 
