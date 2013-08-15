@@ -190,7 +190,15 @@ public class NGECore {
 		
 		// Planets
 		terrainService.addPlanet(1, "tatooine", "terrain/tatooine.trn", true);
-		
+		terrainService.addPlanet(2, "naboo", "terrain/naboo.trn", true);
+		terrainService.addPlanet(3, "corellia", "terrain/corellia.trn", true);
+		terrainService.addPlanet(4, "rori", "terrain/rori.trn", true);
+		terrainService.addPlanet(5, "lok", "terrain/lok.trn", true);
+		terrainService.addPlanet(6, "dantooine", "terrain/dantooine.trn", true);
+		terrainService.addPlanet(7, "talus", "terrain/talus.trn", true);
+		terrainService.addPlanet(8, "yavin4", "terrain/yavin4.trn", true);
+		terrainService.addPlanet(9, "endor", "terrain/endor.trn", true);
+		terrainService.addPlanet(10, "dathomir", "terrain/dathomir.trn", true);
 		terrainService.loadSnapShotObjects();
 
 		// Zone services that need to be loaded after the above

@@ -23,6 +23,9 @@ package services.object;
 
 import java.io.IOException;
 import java.nio.ByteOrder;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -107,6 +110,19 @@ public class ObjectService implements INetworkDispatch {
 		    	}
 		    }
 		});
+		long highestId;
+		
+
+		try {
+			PreparedStatement ps = databaseConnection.preparedStatement("SELECT id FROM highestid WHERE id=(SELECT max(id) FROM highestid)");
+			ResultSet result = ps.executeQuery();
+			result.next();
+			highestId = result.getInt("id");
+			this.highestId.set(highestId);
+			ps.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public SWGObject createObject(String Template, long objectID, Planet planet, Point3D position, Quaternion orientation) {
@@ -286,9 +302,9 @@ public class ObjectService implements INetworkDispatch {
 	}
 	
 	private long generateObjectID() {
-		Random random = new Random();
+		/*Random random = new Random();
 		
-		long objectID = random.nextLong();
+		long objectID = random.nextInt();
 		
 		if(getObject(objectID) != null)
 			return generateObjectID();
@@ -296,23 +312,22 @@ public class ObjectService implements INetworkDispatch {
 		if(core.getCreatureODB().contains(new Long(objectID), Long.class, CreatureObject.class))
 			return generateObjectID();
 
-		return objectID;
+		return objectID;*/
 		
-		/*long newId = highestId.incrementAndGet();
+		long newId = highestId.incrementAndGet();
 		PreparedStatement ps2;
 
 		try {
-			ps2 = databaseConnection.preparedStatement("UPDATE highestid SET id=" + newId + " WHERE id=" + highestId.get());
+			ps2 = databaseConnection.preparedStatement("UPDATE highestid SET id=" + newId + " WHERE id=" + (newId-1));
 			ps2.executeUpdate();
-			highestId.set(newId);
 			ps2.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		if(getObject(highestId.longValue()) == null)
-			return highestId.longValue();
+		if(getObject(newId) == null)
+			return newId;
 		else
-			return generateObjectID();*/
+			return generateObjectID();
 		
 
 	}
@@ -327,22 +342,25 @@ public class ObjectService implements INetworkDispatch {
 
 			@Override
 			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
+				
 				data = data.order(ByteOrder.LITTLE_ENDIAN);
 				data.position(0);
 				SelectCharacter selectCharacter = new SelectCharacter();
 				selectCharacter.deserialize(data);
-				
+
 				long objectId = selectCharacter.getCharacterId();
 				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
-				if(client == null)
+				if(client == null) {
+					System.out.println("NULL Client");
 					return;
+				}
 				CreatureObject creature = null;
 				if(getObject(objectId) == null) {
-					
-					if(getCreatureFromDB(objectId) == null)
-						return;
-					
+										
 					creature = getCreatureFromDB(objectId);
+					if(creature == null) {
+						System.out.println("Cant get creature from db");
+					}
 					
 				} else {
 					
@@ -388,10 +406,10 @@ public class ObjectService implements INetworkDispatch {
 		
 				
 				UnkByteFlag unkByteFlag = new UnkByteFlag();
-				//session.write(unkByteFlag.serialize());
+				session.write(unkByteFlag.serialize());
 				
 				ParametersMessage parameters = new ParametersMessage();
-				//session.write(parameters.serialize());
+				session.write(parameters.serialize());
 				
 				core.buffService.clearBuffs(creature);
 				
@@ -425,6 +443,7 @@ public class ObjectService implements INetworkDispatch {
 
 	public void loadSnapshotObjects(Planet planet) {
 		
+		System.out.println("Loading client objects for: " + planet.getName());
 		WorldSnapshotVisitor visitor = planet.getSnapshotVisitor();
 		int counter = 0;
 		for(SnapshotChunk chunk : visitor.getChunks()) {
@@ -448,6 +467,8 @@ public class ObjectService implements INetworkDispatch {
 				}
 			}
 		}
+		
+		System.out.println("Finished loading client objects for: " + planet.getName());
 		
 	}
 	

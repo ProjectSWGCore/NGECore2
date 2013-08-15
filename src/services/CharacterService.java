@@ -270,7 +270,7 @@ public class CharacterService implements INetworkDispatch {
 				
 				core.getCreatureODB().put(object, Long.class, CreatureObject.class, object.getTransaction());
 				// might not need to commit transaction but better safe than sorry
-				object.getTransaction().commit();
+				object.getTransaction().commitSync();
 
 				PreparedStatement ps = databaseConnection.preparedStatement("INSERT INTO characters (id, \"firstName\", \"lastName\", \"accountId\", \"galaxyId\", \"statusId\", appearance, gmflag) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 				ps.setLong(1, object.getObjectID());

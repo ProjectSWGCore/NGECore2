@@ -43,8 +43,7 @@ public class LoginServerString extends SWGMessage {
 		
 		result.putShort((short)2);
 		result.putInt(0x0E20D7E9);
-		result.putShort((short)loginServerString.length());
-		result.put(loginServerString.getBytes());
+		result.put(getAsciiString(loginServerString));
 		result.flip();
 		
 		return result;

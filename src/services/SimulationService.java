@@ -269,7 +269,6 @@ public class SimulationService implements INetworkDispatch {
 				
 				DataTransformWithParent dataTransform = new DataTransformWithParent();
 				dataTransform.deserialize(data);
-				//System.out.println("Movement Counter: " + dataTransform.getMovementCounter());
 				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
 
 				if(core.objectService.getObject(dataTransform.getCellId()) == null)
@@ -438,15 +437,13 @@ public class SimulationService implements INetworkDispatch {
 		
 		if(client.getParent() == null)
 			return;
-
-		session.suspendWrite();
 		
 		CreatureObject object = (CreatureObject) client.getParent();
 		boolean remove = remove(object, object.getPosition().x, object.getPosition().z);
 		if(remove)
 			System.out.println("Successful quadtree remove");
 
-		if(object.getContainer() == null) {
+		//if(object.getContainer() == null) {
 			HashSet<Client> oldObservers = new HashSet<Client>(object.getObservers());
 			for(Iterator<Client> it = oldObservers.iterator(); it.hasNext();) {
 				Client observerClient = it.next();
@@ -454,9 +451,9 @@ public class SimulationService implements INetworkDispatch {
 					observerClient.getParent().makeUnaware(object);
 				}
 			}
-		} else {
-			object.getContainer().remove(object);
-		}
+		//} else {
+		//	object.getContainer().remove(object);
+		//}
 		
 
 		object.createTransaction(core.getCreatureODB().getEnvironment());
