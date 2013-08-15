@@ -64,7 +64,7 @@ public class PlayerService implements INetworkDispatch {
 				}
 			}
 			
-		}, 1, 1, TimeUnit.SECONDS);
+		}, 0, 30, TimeUnit.SECONDS);
 	}
 	
 	public void postZoneIn(final CreatureObject creature) {

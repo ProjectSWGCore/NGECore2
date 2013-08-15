@@ -796,7 +796,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 				upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Neutral);
 				upvpm.setStatus(16);
 			}
-			//destination.getSession().write(upvpm.serialize());
+			destination.getSession().write(upvpm.serialize());
 		}
 	}
 

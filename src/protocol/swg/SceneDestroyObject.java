@@ -39,7 +39,7 @@ public class SceneDestroyObject extends SWGMessage {
 	}
 	
 	public IoBuffer serialize() {
-		IoBuffer result = IoBuffer.allocate(14).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer result = IoBuffer.allocate(15).order(ByteOrder.LITTLE_ENDIAN);
 		
 		result.putShort((short)3);
 		result.putInt(0x4D45D504);

@@ -38,6 +38,7 @@ import protocol.swg.ClientPermissionsMessage;
 import protocol.swg.ConnectionServerLagResponse;
 import protocol.swg.GalaxyLoopTimesResponse;
 import protocol.swg.GameServerLagResponse;
+import protocol.swg.HeartBeatMessage;
 
 import engine.clients.Client;
 import engine.resources.database.DatabaseConnection;
@@ -74,11 +75,13 @@ public class ConnectionService implements INetworkDispatch {
 				clientIdMsg.deserialize(data);
 				
 				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
-				if(client == null) System.out.println("NULL Client");
+				if(client == null) {
+					System.out.println("NULL Client");
+					return;
+				}
 				client.setSession(session);
                 ResultSet resultSet;
 	            PreparedStatement preparedStatement;
-				System.out.println(clientIdMsg.getSessionKey().length);
 
 	            try {
 	
@@ -90,10 +93,12 @@ public class ConnectionService implements INetworkDispatch {
 		            	client.setAccountId(resultSet.getInt("accountId"));
 		            	AccountFeatureBits accountFeatureBits = new AccountFeatureBits();
 		            	ClientPermissionsMessage clientPermissionsMessage = new ClientPermissionsMessage();
+		            	session.write(new HeartBeatMessage().serialize());
 		            	session.write(accountFeatureBits.serialize());
 		            	session.write(clientPermissionsMessage.serialize());
 		                preparedStatement.close();
-		                
+		            } else {
+		            	System.out.println("Cant get login session");
 		            }
 	                
 	            } catch (SQLException e) {

@@ -23,7 +23,10 @@ package services;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import engine.resources.scene.Planet;
 
@@ -115,14 +118,32 @@ public class TerrainService {
 	
 	public void loadSnapShotObjects() {
 		
-		for(Planet planet : planets) {
+		Map<Planet, Thread> threadMap = new HashMap<Planet, Thread>();
+		
+		for(final Planet planet : planets) {
 			
 			if(planet.getSnapshotVisitor() != null) {
-				
-				core.objectService.loadSnapshotObjects(planet);
-				
+				Thread thread = new Thread(new Runnable() {
+
+					@Override
+					public void run() {
+						core.objectService.loadSnapshotObjects(planet);
+					}
+					
+				});
+				thread.start();
+				threadMap.put(planet, thread);
 			}
 			
+		}
+		
+		// wait for threads to finish loading
+		for(Planet planet : planets) {
+			try {
+				threadMap.get(planet).join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 		
 	}
