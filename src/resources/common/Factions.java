@@ -19,46 +19,14 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package protocol.swg;
+package resources.common;
 
-import java.nio.ByteOrder;
-import java.util.Map;
+import engine.resources.common.CRC;
 
-import org.apache.mina.core.buffer.IoBuffer;
-
-import resources.common.Opcodes;
-import resources.gcw.CurrentServerGCWZonePercent;
-
-public class GcwGroupsRsp extends SWGMessage {
+public class Factions {
 	
-	private Map<String, Map<String, CurrentServerGCWZonePercent>> zoneMap;
-	
-	public GcwGroupsRsp(Map<String, Map<String, CurrentServerGCWZonePercent>> zoneMap) {
-		this.zoneMap = zoneMap;
-	}
-	
-	public void deserialize(IoBuffer data) {
-		
-	}
-	
-	public IoBuffer serialize() {
-		IoBuffer result = IoBuffer.allocate(9948).order(ByteOrder.LITTLE_ENDIAN);
-		
-		result.putShort((short) 2);
-		result.putInt(Opcodes.GcwGroupsRsp);
-		result.putInt(zoneMap.size());
-		
-		for (String planet : zoneMap.keySet()) {
-			result.put(getAsciiString(planet));
-			result.putInt(zoneMap.get(planet).size());
-			
-			for (String zone : zoneMap.get(planet).keySet()) {
-				result.put(getAsciiString(zone));
-				result.putInt(zoneMap.get(planet).get(zone).getGroup());
-			}
-		}
-		
-		return result.flip();
-	}
+	public static int Neutral = 0;
+	public static int Rebel = CRC.StringtoCRC("rebel");
+	public static int Imperial = CRC.StringtoCRC("imperial");
 	
 }

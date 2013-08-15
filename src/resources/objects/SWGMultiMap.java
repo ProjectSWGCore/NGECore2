@@ -24,13 +24,19 @@ package resources.objects;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 
 import org.apache.mina.core.buffer.IoBuffer;
+import org.python.google.common.collect.ArrayListMultimap;
+import org.python.google.common.collect.Multimap;
+import org.python.google.common.collect.Multiset;
+import org.python.google.common.collect.Ordering;
+import org.python.google.common.collect.TreeMultimap;
 
 import resources.common.StringUtilities;
 
@@ -38,9 +44,9 @@ import com.sleepycat.persist.model.NotPersistent;
 
 @SuppressWarnings("unused")
 
-public class SWGMap<K, V> implements Map<K, V> {
+public class SWGMultiMap<K, V> implements Multimap<K, V> {
 	
-	private Map<K, V> map = new TreeMap<K, V>();
+	private Multimap<K, V> map = ArrayListMultimap.create();
 	@NotPersistent
 	private int updateCounter;
 	
@@ -50,27 +56,39 @@ public class SWGMap<K, V> implements Map<K, V> {
 	
 	protected final Object objectMutex = new Object();
 	
-	public SWGMap(ObjectMessageBuilder messageBuilder, int viewType, int updateType) {
+	public SWGMultiMap(ObjectMessageBuilder messageBuilder, int viewType, int updateType) {
 		this.messageBuilder = messageBuilder;
 		this.viewType = (byte) viewType;
 		this.updateType = (short) updateType;
 	}
 	
-	public SWGMap(Map<K, V> m) {
-		if (m instanceof SWGMap) {
-			this.messageBuilder = ((SWGMap<K, V>) m).messageBuilder;
-			this.viewType = ((SWGMap<K, V>) m).viewType;
-			this.updateType = ((SWGMap<K, V>) m).updateType;
+	public SWGMultiMap(Multimap<K, V> m) {
+		if (m instanceof SWGMultiMap) {
+			this.messageBuilder = ((SWGMultiMap<K, V>) m).messageBuilder;
+			this.viewType = ((SWGMultiMap<K, V>) m).viewType;
+			this.updateType = ((SWGMultiMap<K, V>) m).updateType;
 			map.putAll(m);
 		}
 	}
 	
-	public SWGMap() {
+	public SWGMultiMap() {
 		
+	}
+	
+	public Map<K, Collection<V>> asMap() {
+		synchronized(objectMutex) {
+			return map.asMap();
+		}
 	}
 	
 	public void clear() {
 		throw new UnsupportedOperationException();
+	}
+	
+	public boolean containsEntry(Object key, Object value) {
+		synchronized(objectMutex) {
+			return map.containsEntry(key, value);
+		}
 	}
 	
 	public boolean containsKey(Object key) {
@@ -85,13 +103,13 @@ public class SWGMap<K, V> implements Map<K, V> {
 		}
 	}
 	
-	public Set<java.util.Map.Entry<K, V>> entrySet() {
+	public Collection<Entry<K, V>> entries() {
 		synchronized(objectMutex) {
-			return map.entrySet();
+			return map.entries();
 		}
 	}
 	
-	public V get(Object key) {
+	public Collection<V> get(K key) {
 		synchronized(objectMutex) {
 			return map.get(key);
 		}
@@ -103,29 +121,116 @@ public class SWGMap<K, V> implements Map<K, V> {
 		}
 	}
 	
+	public Multiset<K> keys() {
+		synchronized(objectMutex) {
+			return map.keys();
+		}
+	}
+	
 	public Set<K> keySet() {
 		synchronized(objectMutex) {
 			return map.keySet();
 		}
 	}
 	
-	public V put(K key, V value) {
+	public boolean put(K key, V value) {
 		synchronized(objectMutex) {
-			if ((key instanceof String || key instanceof Byte || key instanceof Short ||
-				key instanceof Integer || key instanceof Float ||key instanceof Long) &&
+			if (key instanceof String || key instanceof Byte || key instanceof Short ||
+				key instanceof Integer || key instanceof Float || key instanceof Long ||
 				value instanceof IListObject) {
-				if (map.containsKey(key)) {
-					V oldValue = map.put(key, value);
-					
-					queue(item(2, (String) key, ((IListObject) value).getBytes(), true, true));
-					
-					return oldValue;
-				} else {
-					V oldValue = map.put(key, value);
-					
+				if (map.put(key, value)) {
 					queue(item(0, (String) key, ((IListObject) value).getBytes(), true, true));
+					return true;
+				}
+			}
+			
+			return false;
+		}
+	}
+	
+	public boolean putAll(K key, Iterable<? extends V> values) {
+		synchronized(objectMutex) {
+			if (key instanceof String || key instanceof Byte || key instanceof Short ||
+				key instanceof Integer || key instanceof Float || key instanceof Long) {
+				List<byte[]> buffer = new ArrayList<byte[]>();
+				
+				for (V value : values) {
+					if (value instanceof IListObject) {
+						if (map.put(key, value)) {
+							buffer.add(item(0, (String) key, ((IListObject) value).getBytes(), true, true));
+						}
+					}
+				}
+				
+				if (buffer.size() > 0) {
+					queue(buffer);
+					return true;
+				}
+			}
+			
+			return false;
+		}
+	}
+	
+	public boolean putAll(Multimap<? extends K, ? extends V> map) {
+		synchronized(objectMutex) {
+			List<byte[]> buffer = new ArrayList<byte[]>();
+			
+			for (Entry<? extends K, ? extends V> entry : map.entries()) {
+				K key = entry.getKey();
+				V value = entry.getValue();
+				
+				if (key instanceof String || key instanceof Byte || key instanceof Short ||
+					key instanceof Integer || key instanceof Float || key instanceof Long ||
+					value instanceof IListObject) {
+					if (this.map.put(key, value)) {
+						buffer.add(item(0, (String) key, ((IListObject) value).getBytes(), true, true));
+					}
+				}
+			}
+			
+			if (buffer.size() > 0) {
+				queue(buffer);
+				return true;
+			}
+			
+			return false;
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	public boolean remove(Object key, Object value) {
+		synchronized(objectMutex) {
+			if (key instanceof String || key instanceof Byte || key instanceof Short ||
+				key instanceof Integer || key instanceof Float || key instanceof Long) {
+				if (map.remove(key, value)) {
+					queue(item(1, (String) key, ((IListObject) map.get((K) key)).getBytes(), true, true));
 					
-					return oldValue;
+					return true;
+				}
+			}
+			
+			return false;
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Collection<V> removeAll(Object key) {
+		synchronized(objectMutex) {
+			if (key instanceof String || key instanceof Byte || key instanceof Short ||
+				key instanceof Integer || key instanceof Float || key instanceof Long) {
+				Collection<V> collection = map.get((K) key);
+				List<byte[]> buffer = new ArrayList<byte[]>();
+				
+				for (V value : map.get((K) key)) {
+					if (map.remove(key, value)) {
+						buffer.add(item(1, (String) key, ((IListObject) map.get((K) key)).getBytes(), true, true));
+					}
+				}
+				
+				if (buffer.size() > 0) {
+					queue(buffer);
+					return collection;
 				}
 			}
 			
@@ -133,44 +238,28 @@ public class SWGMap<K, V> implements Map<K, V> {
 		}
 	}
 	
-	public void putAll(Map<? extends K, ? extends V> m) {
-		synchronized(objectMutex) {
-			List<byte[]> buffer = new ArrayList<byte[]>();
-			
-			for (Entry<? extends K, ? extends V> entry : m.entrySet()) {
-				K key = entry.getKey();
-				V value = entry.getValue();
-				
-				if (key instanceof String || key instanceof Byte || key instanceof Short ||
-					key instanceof Integer || key instanceof Float || key instanceof Long ||
-					value instanceof IListObject) {
-					if (map.containsKey(key)) {
-						if (map.put(key, value) != null) {
-							buffer.add(item(2, (String) key, ((IListObject) value).getBytes(), true, true));
-						}
-					} else {
-						if (map.put(key, value) != null) {
-							buffer.add(item(0, (String) key, ((IListObject) value).getBytes(), true, true));
-						}
-					}
-				}
-			}
-			
-			if (buffer.size() > 0) {
-				queue(buffer);
-			}
-		}
-	}
-	
-	public V remove(Object key) {
+	public Collection<V> replaceValues(K key, Iterable<? extends V> values) {
 		synchronized(objectMutex) {
 			if (key instanceof String || key instanceof Byte || key instanceof Short ||
 				key instanceof Integer || key instanceof Float || key instanceof Long) {
-				V value = map.remove(key);
-				
-				queue(item(1, key, ((IListObject) map.get(key)).getBytes(), true, true));
-				
-				return value;
+				if (map.containsKey(key)) {
+					List<byte[]> buffer = new ArrayList<byte[]>();
+					
+					for (V value : values) {
+						if (value instanceof IListObject) {
+							if (!map.get(key).contains(value)) {
+								buffer.add(item(2, (String) key, ((IListObject) value).getBytes(), true, true));
+							}
+						} else {
+							return null;
+						}
+					}
+					
+					if (buffer.size() > 0) {
+						queue(buffer);
+						return map.replaceValues(key, values);
+					}
+				}
 			}
 			
 			return null;
@@ -203,33 +292,33 @@ public class SWGMap<K, V> implements Map<K, V> {
 		}
 		
 		int size = 1 + ((useIndex) ? (2 + index.toString().getBytes().length) : 0) + ((useData) ? data.length : 0);
-
+		
 		IoBuffer buffer = messageBuilder.bufferPool.allocate((size), false).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.put((byte) type);
-			if (useIndex) {
-				if (index instanceof String) {
-					buffer.put(StringUtilities.getAsciiString((String) index));
-				} else if (index instanceof Byte) {
-					buffer.put(((Byte) index).byteValue());
-				} else if (index instanceof Short) {
-					buffer.putShort(((Short) index).shortValue());
-				} else if (index instanceof Integer) {
-					buffer.putInt(((Integer) index).intValue());
-				} else if (index instanceof Float) {
-					buffer.putFloat(((Float) index).floatValue());
-				} else if (index instanceof Long) {
-					buffer.putLong(((Long) index).longValue());
-				} else {
-					throw new IllegalArgumentException();
-				}
+		if (useIndex) {
+			if (index instanceof String) {
+				buffer.put(StringUtilities.getAsciiString((String) index));
+			} else if (index instanceof Byte) {
+				buffer.put(((Byte) index).byteValue());
+			} else if (index instanceof Short) {
+				buffer.putShort(((Short) index).shortValue());
+			} else if (index instanceof Integer) {
+				buffer.putInt(((Integer) index).intValue());
+			} else if (index instanceof Float) {
+				buffer.putFloat(((Float) index).floatValue());
+			} else if (index instanceof Long) {
+				buffer.putLong(((Long) index).longValue());
+			} else {
+				throw new IllegalArgumentException();
 			}
-			if (useData) buffer.put(data);
-				
-			updateCounter++;
-			
-			return buffer.array();
+		}
+		if (useData) buffer.put(data);
+		
+		updateCounter++;
+		
+		return buffer.array();
 	}
-
+	
 	private void queue(byte[] data) {
 		IoBuffer buffer = messageBuilder.bufferPool.allocate((data.length + 8), false).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.putInt(1);

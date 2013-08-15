@@ -747,6 +747,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 
 
+	@SuppressWarnings("unused")
 	@Override
 	public void sendBaselines(Client destination) {
 				

@@ -19,46 +19,43 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package protocol.swg;
+package resources.gcw;
 
 import java.nio.ByteOrder;
-import java.util.Map;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import resources.common.Opcodes;
-import resources.gcw.CurrentServerGCWZonePercent;
+import resources.objects.ListObject;
 
-public class GcwGroupsRsp extends SWGMessage {
+public class CurrentServerGCWZoneHistory extends ListObject {
 	
-	private Map<String, Map<String, CurrentServerGCWZonePercent>> zoneMap;
+	private int lastUpdateTime;
+	private int percent;
 	
-	public GcwGroupsRsp(Map<String, Map<String, CurrentServerGCWZonePercent>> zoneMap) {
-		this.zoneMap = zoneMap;
+	public CurrentServerGCWZoneHistory(CurrentServerGCWZonePercent zone) {
+		this.percent = zone.getPercent();
+		this.lastUpdateTime = zone.getLastUpdateTime();
 	}
 	
-	public void deserialize(IoBuffer data) {
-		
-	}
-	
-	public IoBuffer serialize() {
-		IoBuffer result = IoBuffer.allocate(9948).order(ByteOrder.LITTLE_ENDIAN);
-		
-		result.putShort((short) 2);
-		result.putInt(Opcodes.GcwGroupsRsp);
-		result.putInt(zoneMap.size());
-		
-		for (String planet : zoneMap.keySet()) {
-			result.put(getAsciiString(planet));
-			result.putInt(zoneMap.get(planet).size());
-			
-			for (String zone : zoneMap.get(planet).keySet()) {
-				result.put(getAsciiString(zone));
-				result.putInt(zoneMap.get(planet).get(zone).getGroup());
-			}
+	public int getLastUpdateTime() {
+		synchronized(objectMutex) {
+			return lastUpdateTime;
 		}
-		
-		return result.flip();
+	}
+	
+	public int getPercent() {
+		synchronized(objectMutex) {
+			return percent;
+		}
+	}
+	
+	public byte[] getBytes() {
+		synchronized(objectMutex) {
+			IoBuffer buffer = bufferPool.allocate((8), false).order(ByteOrder.LITTLE_ENDIAN);
+			buffer.putInt(lastUpdateTime);
+			buffer.putInt(percent);
+			return buffer.array();
+		}
 	}
 	
 }

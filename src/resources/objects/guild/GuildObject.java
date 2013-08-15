@@ -25,11 +25,13 @@ import org.apache.mina.core.buffer.IoBuffer;
 
 import main.NGECore;
 
-import resources.objects.CurrentServerGCWZoneHistory;
-import resources.objects.CurrentServerGCWZonePercent;
-import resources.objects.Guild;
-import resources.objects.OtherServerGCWZonePercent;
+import resources.gcw.CurrentServerGCWZoneHistory;
+import resources.gcw.CurrentServerGCWZonePercent;
+import resources.gcw.OtherServerGCWZonePercent;
+import resources.guild.Guild;
 import resources.objects.SWGList;
+import resources.objects.SWGMap;
+import resources.objects.SWGMultiMap;
 
 import com.sleepycat.persist.model.NotPersistent;
 
@@ -59,12 +61,12 @@ public class GuildObject extends SWGObject {
 	//private String STFName = "string_id_table";
 	private int unknown1 = 0;
 	private short unknown2 = 0;
-	private SWGList<CurrentServerGCWZonePercent> currentServerGCWZonePercentList = new SWGList<CurrentServerGCWZonePercent>(messageBuilder, 6, 2);
-	private SWGList<CurrentServerGCWZonePercent> currentServerGCWTotalPercentList = new SWGList<CurrentServerGCWZonePercent>(messageBuilder, 6, 3);
-	private SWGList<CurrentServerGCWZoneHistory> currentServerGCWZoneHistoryList = new SWGList<CurrentServerGCWZoneHistory>(messageBuilder, 6, 4);
-	private SWGList<CurrentServerGCWZoneHistory> currentServerGCWTotalHistoryList = new SWGList<CurrentServerGCWZoneHistory>(messageBuilder, 6, 5);
-	private SWGList<OtherServerGCWZonePercent> otherServerGCWZonePercentList = new SWGList<OtherServerGCWZonePercent>(messageBuilder, 6, 6);
-	private SWGList<OtherServerGCWZonePercent> otherServerGCWTotalPercentList = new SWGList<OtherServerGCWZonePercent>(messageBuilder, 6, 7);
+	private SWGMap<String, CurrentServerGCWZonePercent> currentServerGCWZonePercentMap = new SWGMap<String, CurrentServerGCWZonePercent>(messageBuilder, 6, 2);
+	private SWGMap<String, CurrentServerGCWZonePercent> currentServerGCWTotalPercentMap = new SWGMap<String, CurrentServerGCWZonePercent>(messageBuilder, 6, 3);
+	private SWGMultiMap<String, CurrentServerGCWZoneHistory> currentServerGCWZoneHistoryMap = new SWGMultiMap<String, CurrentServerGCWZoneHistory>(messageBuilder, 6, 4);
+	private SWGMultiMap<String, CurrentServerGCWZoneHistory> currentServerGCWTotalHistoryMap = new SWGMultiMap<String, CurrentServerGCWZoneHistory>(messageBuilder, 6, 5);
+	private SWGMultiMap<String, OtherServerGCWZonePercent> otherServerGCWZonePercentMap = new SWGMultiMap<String, OtherServerGCWZonePercent>(messageBuilder, 6, 6);
+	private SWGMultiMap<String, OtherServerGCWZonePercent> otherServerGCWTotalPercentMap = new SWGMultiMap<String, OtherServerGCWZonePercent>(messageBuilder, 6, 7);
 	private int unknown3 = 5;
 	
 	public GuildObject(NGECore core, long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
@@ -202,28 +204,28 @@ public class GuildObject extends SWGObject {
 		notifyAll(messageBuilder.buildUnknowns(unknown1, unknown2));
 	}
 	
-	public SWGList<CurrentServerGCWZonePercent> getCurrentServerGCWZonePercentList() {
-		return currentServerGCWZonePercentList;
+	public SWGMap<String, CurrentServerGCWZonePercent> getCurrentServerGCWZonePercentMap() {
+		return currentServerGCWZonePercentMap;
 	}
 	
-	public SWGList<CurrentServerGCWZonePercent> getCurrentServerGCWTotalPercentList() {
-		return currentServerGCWTotalPercentList;
+	public SWGMap<String, CurrentServerGCWZonePercent> getCurrentServerGCWTotalPercentMap() {
+		return currentServerGCWTotalPercentMap;
 	}
 	
-	public SWGList<CurrentServerGCWZoneHistory> getCurrentServerGCWZoneHistoryList() {
-		return currentServerGCWZoneHistoryList;
+	public SWGMultiMap<String, CurrentServerGCWZoneHistory> getCurrentServerGCWZoneHistoryMap() {
+		return currentServerGCWZoneHistoryMap;
 	}
 	
-	public SWGList<CurrentServerGCWZoneHistory> getCurrentServerGCWTotalHistoryList() {
-		return currentServerGCWTotalHistoryList;
+	public SWGMultiMap<String, CurrentServerGCWZoneHistory> getCurrentServerGCWTotalHistoryMap() {
+		return currentServerGCWTotalHistoryMap;
 	}
 	
-	public SWGList<OtherServerGCWZonePercent> getOtherServerGCWZonePercentList() {
-		return otherServerGCWZonePercentList;
+	public SWGMultiMap<String, OtherServerGCWZonePercent> getOtherServerGCWZonePercentMap() {
+		return otherServerGCWZonePercentMap;
 	}
 	
-	public SWGList<OtherServerGCWZonePercent> getOtherServerGCWTotalPercentList() {
-		return otherServerGCWTotalPercentList;
+	public SWGMultiMap<String, OtherServerGCWZonePercent> getOtherServerGCWTotalPercentMap() {
+		return otherServerGCWTotalPercentMap;
 	}
 	
 	public int getUnknown3() {
@@ -240,14 +242,6 @@ public class GuildObject extends SWGObject {
 		notifyAll(messageBuilder.buildUnknown3(unknown3));
 	}
 	
-	public void sendGCWUpdate() {
-		IoBuffer buffer = messageBuilder.buildGCWDelta();
-		
-		if (buffer != null) {
-			notifyAll(buffer);
-		}
-	}
-	
 	@Override
 	public void sendBaselines(Client destination) {
 		destination.getSession().write(messageBuilder.buildBaseline3());
@@ -255,16 +249,9 @@ public class GuildObject extends SWGObject {
 	}
 	
 	private void notifyAll(IoBuffer buffer) {
-		//for (int i = 0; i < core.getActiveConnectionsMap().size(); i++) {
-		//	core.getActiveConnectionsMap().get(i).getSession().write(buffer);
-		//}
-		System.out.println("Notifying all...");
 		synchronized(core.getActiveConnectionsMap()) {
 			for (Client client : core.getActiveConnectionsMap().values()) {
-				System.out.println("Notifying..." + client.getParent().getCustomName());
 				client.getSession().write(buffer);
-				System.out.println("Notified them.");
-				System.out.println("Packet: " + buffer.getHexDump());
 			}
 		}
 	}

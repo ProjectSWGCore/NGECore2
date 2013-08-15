@@ -22,20 +22,17 @@
 package resources.objects.guild;
 
 import java.nio.ByteOrder;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import resources.objects.CurrentServerGCWZoneHistory;
-import resources.objects.CurrentServerGCWZonePercent;
-import resources.objects.Guild;
+import engine.clients.Client;
+
+import resources.gcw.CurrentServerGCWZoneHistory;
+import resources.gcw.OtherServerGCWZonePercent;
+import resources.guild.Guild;
 import resources.objects.ObjectMessageBuilder;
-import resources.objects.OtherServerGCWZonePercent;
 
 public class GuildMessageBuilder extends ObjectMessageBuilder {
-	
-	private List<IoBuffer> zoneUpdates = new ArrayList<IoBuffer>();
 	
 	public GuildMessageBuilder(GuildObject guildObject) {
 		setObject(guildObject);
@@ -70,12 +67,12 @@ public class GuildMessageBuilder extends ObjectMessageBuilder {
 		GuildObject guilds = (GuildObject) object;
 		
 		int capacity = 82;
-		capacity += (guilds.getCurrentServerGCWZonePercentList().size() * 30);
-		capacity += (guilds.getCurrentServerGCWTotalPercentList().size() * 14);
-		capacity += (guilds.getCurrentServerGCWZoneHistoryList().size() * 34);
-		capacity += (guilds.getCurrentServerGCWTotalHistoryList().size() * 18);
-		capacity += (guilds.getOtherServerGCWZonePercentList().size() * 45);
-		capacity += (guilds.getOtherServerGCWTotalPercentList().size() * 29);
+		capacity += (guilds.getCurrentServerGCWZonePercentMap().size() * 30);
+		capacity += (guilds.getCurrentServerGCWTotalPercentMap().size() * 14);
+		capacity += (guilds.getCurrentServerGCWZoneHistoryMap().size() * 34);
+		capacity += (guilds.getCurrentServerGCWTotalHistoryMap().size() * 18);
+		capacity += (guilds.getOtherServerGCWZonePercentMap().size() * 45);
+		capacity += (guilds.getOtherServerGCWTotalPercentMap().size() * 29);
 		
 		IoBuffer buffer = bufferPool.allocate(capacity, false).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.putShort((short) 9);	// Object Count
@@ -83,51 +80,59 @@ public class GuildMessageBuilder extends ObjectMessageBuilder {
 		buffer.put(getAsciiString(guilds.getSTFFile()));
 		buffer.putInt(guilds.getUnknown1());
 		buffer.putShort(guilds.getUnknown2());
-		buffer.putInt(guilds.getCurrentServerGCWZonePercentList().size());
-		buffer.putInt(guilds.getCurrentServerGCWZonePercentList().getUpdateCounter());
-		for (CurrentServerGCWZonePercent object : guilds.getCurrentServerGCWZonePercentList().get()) {
-			buffer.put(object.getUnknown1());
-			buffer.put(getAsciiString(object.getZone()));
-			buffer.putInt(object.getPercent());
+		buffer.putInt(guilds.getCurrentServerGCWZonePercentMap().size());
+		buffer.putInt(guilds.getCurrentServerGCWZonePercentMap().getUpdateCounter());
+		for (String key : guilds.getCurrentServerGCWZonePercentMap().keySet()) {
+			buffer.put((byte) 0);
+			buffer.put(getAsciiString(key));
+			buffer.put(guilds.getCurrentServerGCWZonePercentMap().get(key).getBytes());
 		}
-		buffer.putInt(guilds.getCurrentServerGCWTotalPercentList().size());
-		buffer.putInt(guilds.getCurrentServerGCWTotalPercentList().getUpdateCounter());
-		for (CurrentServerGCWZonePercent object : guilds.getCurrentServerGCWTotalPercentList().get()) {
-			buffer.put(object.getUnknown1());
-			buffer.put(getAsciiString(object.getZone()));
-			buffer.putInt(object.getPercent());
+		buffer.putInt(guilds.getCurrentServerGCWTotalPercentMap().size());
+		buffer.putInt(guilds.getCurrentServerGCWTotalPercentMap().getUpdateCounter());
+		for (String key : guilds.getCurrentServerGCWTotalPercentMap().keySet()) {
+			buffer.put((byte) 0);
+			buffer.put(getAsciiString(key));
+			buffer.put(guilds.getCurrentServerGCWTotalPercentMap().get(key).getBytes());
 		}
-		buffer.putInt(guilds.getCurrentServerGCWZoneHistoryList().size());
-		buffer.putInt(guilds.getCurrentServerGCWZoneHistoryList().getUpdateCounter());
-		for (CurrentServerGCWZoneHistory object : guilds.getCurrentServerGCWZoneHistoryList().get()) {
-			buffer.put(object.getUnknown1());
-			buffer.put(getAsciiString(object.getZone()));
-			buffer.putInt(object.getLastUpdateTime());
-			buffer.putInt(object.getPercent());
+		buffer.putInt(guilds.getCurrentServerGCWZoneHistoryMap().size());
+		buffer.putInt(guilds.getCurrentServerGCWZoneHistoryMap().getUpdateCounter());
+		for (String key : guilds.getCurrentServerGCWZoneHistoryMap().keySet()) {
+			for (CurrentServerGCWZoneHistory historicZone : guilds.getCurrentServerGCWZoneHistoryMap().get(key)) {
+				buffer.put((byte) 0);
+				buffer.put(getAsciiString(key));
+				buffer.putInt(historicZone.getLastUpdateTime());
+				buffer.putInt(historicZone.getPercent());
+			}
 		}
-		buffer.putInt(guilds.getCurrentServerGCWTotalHistoryList().size());
-		buffer.putInt(guilds.getCurrentServerGCWTotalHistoryList().getUpdateCounter());
-		for (CurrentServerGCWZoneHistory object : guilds.getCurrentServerGCWTotalHistoryList().get()) {
-			buffer.put(object.getUnknown1());
-			buffer.put(getAsciiString(object.getZone()));
-			buffer.putInt(object.getLastUpdateTime());
-			buffer.putInt(object.getPercent());
+		buffer.putInt(guilds.getCurrentServerGCWTotalHistoryMap().size());
+		buffer.putInt(guilds.getCurrentServerGCWTotalHistoryMap().getUpdateCounter());
+		for (String key : guilds.getCurrentServerGCWTotalHistoryMap().keySet()) {
+			for (CurrentServerGCWZoneHistory historicTotal : guilds.getCurrentServerGCWZoneHistoryMap().get(key)) {
+				buffer.put((byte) 0);
+				buffer.put(getAsciiString(key));
+				buffer.putInt(historicTotal.getLastUpdateTime());
+				buffer.putInt(historicTotal.getPercent());
+			}
 		}
-		buffer.putInt(guilds.getOtherServerGCWZonePercentList().size());
-		buffer.putInt(guilds.getOtherServerGCWZonePercentList().getUpdateCounter());
-		for (OtherServerGCWZonePercent object : guilds.getOtherServerGCWZonePercentList().get()) {
-			buffer.put(object.getUnknown1());
-			buffer.put(getAsciiString(object.getServer()));
-			buffer.put(getAsciiString(object.getZone()));
-			buffer.putInt(object.getPercent());
+		buffer.putInt(guilds.getOtherServerGCWZonePercentMap().size());
+		buffer.putInt(guilds.getOtherServerGCWZonePercentMap().getUpdateCounter());
+		for (String key : guilds.getOtherServerGCWZonePercentMap().keySet()) {
+			for (OtherServerGCWZonePercent server : guilds.getOtherServerGCWZonePercentMap().get(key)) {
+				buffer.put((byte) 0);
+				buffer.put(getAsciiString(key));
+				buffer.put(getAsciiString(server.getZone()));
+				buffer.putInt(server.getPercent());
+			}
 		}
-		buffer.putInt(guilds.getOtherServerGCWTotalPercentList().size());
-		buffer.putInt(guilds.getOtherServerGCWTotalPercentList().getUpdateCounter());
-		for (OtherServerGCWZonePercent object : guilds.getOtherServerGCWTotalPercentList().get()) {
-			buffer.put(object.getUnknown1());
-			buffer.put(getAsciiString(object.getServer()));
-			buffer.put(getAsciiString(object.getZone()));
-			buffer.putInt(object.getPercent());
+		buffer.putInt(guilds.getOtherServerGCWTotalPercentMap().size());
+		buffer.putInt(guilds.getOtherServerGCWTotalPercentMap().getUpdateCounter());
+		for (String key : guilds.getOtherServerGCWTotalPercentMap().keySet()) {
+			for (OtherServerGCWZonePercent server : guilds.getOtherServerGCWZonePercentMap().get(key)) {
+				buffer.put((byte) 0);
+				buffer.put(getAsciiString(key));
+				buffer.put(getAsciiString(server.getZone()));
+				buffer.putInt(server.getPercent());
+			}
 		}
 		buffer.putInt(guilds.getUnknown3());
 
@@ -208,33 +213,6 @@ public class GuildMessageBuilder extends ObjectMessageBuilder {
 		return buffer;
 	}
 	
-	public IoBuffer buildGCWDelta() {
-		synchronized(zoneUpdates) {
-			if (zoneUpdates.size() > 0) {
-				int updates = zoneUpdates.size();
-				int size = 4;
-				
-				for (int i = 0; i < zoneUpdates.size(); i++) {
-					size += zoneUpdates.get(i).position();
-				}
-				
-				IoBuffer buffer = bufferPool.allocate(size, false).order(ByteOrder.LITTLE_ENDIAN);
-				
-				for (int i = 0; i < zoneUpdates.size(); i++) {
-					buffer.put(zoneUpdates.get(i).array());
-				}
-				
-				zoneUpdates.clear();
-				
-				buffer.flip();
-				
-				return createDelta("GILD", (byte) 6, (short) updates, buffer, size);
-			} else {
-				return null;
-			}
-		}
-	}
-	
 	public IoBuffer buildUnknown3(int unknown3) {
 		IoBuffer buffer = bufferPool.allocate(4, false).order(ByteOrder.LITTLE_ENDIAN);
 		
@@ -246,57 +224,46 @@ public class GuildMessageBuilder extends ObjectMessageBuilder {
 		return buffer;
 	}
 	
-	final protected static char[] hexArray = {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
-	public static String bytesToHex(byte[] bytes) {
-	    char[] hexChars = new char[bytes.length * 2];
-	    int v;
-	    for ( int j = 0; j < bytes.length; j++ ) {
-	        v = bytes[j] & 0xFF;
-	        hexChars[j * 2] = hexArray[v >>> 4];
-	        hexChars[j * 2 + 1] = hexArray[v & 0x0F];
-	    }
-	    return new String(hexChars);
-	}
-	
 	@Override
 	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
-		synchronized(zoneUpdates) {
-			switch (viewType) {
-				case 3:
-				{
-					switch (updateType) {
-						case 4:
-						{
-							buffer.flip();
-							buffer = createDelta("GILD", (byte) 3, (short) 1, (short) 4, buffer, buffer.position() + 4);
+		
+		switch (viewType) {
+			case 3:
+			{
+				switch (updateType) {
+					case 4:
+					{
+						buffer = createDelta("GILD", (byte) 3, (short) 1, (short) 4, buffer.flip(), buffer.array().length + 4);
 			
-							for (int i = 0; i < ((GuildObject) object).core.getActiveConnectionsMap().size(); i++) {
-								((GuildObject) object).core.getActiveConnectionsMap().get(i).getSession().write(buffer);
-							}
-							
-							break;
+						for (Client client : ((GuildObject) object).core.getActiveConnectionsMap().values()) {
+							client.getSession().write(buffer);
 						}
+							
+						break;
 					}
 				}
-				case 6:
-				{
-					switch (updateType) {
-						case 2:
-						case 3:
-						case 4:
-						case 5:
-						case 6:
-						case 7:
-						{
-							buffer = createDeltaObject(updateType, buffer, buffer.position());
-							//System.out.println("Packet: " + bytesToHex(buffer.array()));
-							zoneUpdates.add(buffer);
-							break;
+			}
+			case 6:
+			{
+				switch (updateType) {
+					case 2:
+					case 3:
+					case 4:
+					case 5:
+					case 6:
+					case 7:
+					{
+						buffer = createDelta("GILD", (byte) 6, (short) 1, (short) updateType, buffer.flip(), buffer.array().length + 4);
+
+						for (Client client : ((GuildObject) object).core.getActiveConnectionsMap().values()) {
+							client.getSession().write(buffer);
 						}
-						default:
-						{
-							return;
-						}
+						
+						break;
+					}
+					default:
+					{
+						return;
 					}
 				}
 			}

@@ -25,8 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
-import org.apache.mina.core.buffer.IoBuffer;
-
 import resources.objects.creature.CreatureObject;
 
 
