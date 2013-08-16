@@ -26,10 +26,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
+import engine.resources.config.Config;
 import engine.resources.scene.Planet;
-
 
 import main.NGECore;
 
@@ -127,7 +126,12 @@ public class TerrainService {
 
 					@Override
 					public void run() {
-						core.objectService.loadSnapshotObjects(planet);
+						Config config = new Config();
+						config.setFilePath("options.cfg");
+						
+						if (config.loadConfigFile() && config.getInt("LOAD.SNAPSHOT_OBJECTS") > 0) {
+							core.objectService.loadSnapshotObjects(planet);
+						}
 					}
 					
 				});
