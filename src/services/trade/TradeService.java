@@ -370,7 +370,12 @@ public class TradeService implements INetworkDispatch{
 							{
 								cleanTradeSession(client, tradePartner.getClient());
 							}
-							actingTraderInventory.transferTo(tradePartner, tradePartnerInventory, tradeObject);
+							//actingTraderInventory.transferTo(tradePartner, tradePartnerInventory, tradeObject);
+							
+							actingTraderInventory._remove(tradeObject);
+							actingTrader.makeUnaware(tradeObject);
+							tradePartnerInventory.add(tradeObject);
+							
 							itr.remove();
 						}
 						
