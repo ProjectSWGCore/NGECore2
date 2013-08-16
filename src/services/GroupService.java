@@ -24,9 +24,11 @@ package services;
 import java.util.Map;
 
 import resources.objects.creature.CreatureObject;
+import resources.objects.group.GroupObject;
 
 import main.NGECore;
 
+import engine.clients.Client;
 import engine.resources.objects.SWGObject;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
@@ -40,6 +42,7 @@ public class GroupService implements INetworkDispatch {
 		core.commandService.registerCommand("invite");
 		core.commandService.registerCommand("join");
 		core.commandService.registerCommand("disband");
+		core.commandService.registerCommand("decline");
 	}
 
 	@Override
@@ -52,9 +55,78 @@ public class GroupService implements INetworkDispatch {
 		
 	}
 	
-	public void handleGroupInvite(CreatureObject inviter, CreatureObject invited) {
+	public void handleGroupInvite(CreatureObject leader, CreatureObject member) {
+		
+		Client leaderClient = leader.getClient();
+		Client memberClient = member.getClient();
+		
+		if(leaderClient == null || memberClient == null)
+			return;
+		
+		long leaderGroupId = leader.getGroupId();
+		long memberGroupId = member.getGroupId();
+		
+		if(leader == member) {
+			leader.sendSystemMessage("@group:invite_no_target_self", (byte) 0);
+			return;
+		}
+		
+		if(memberGroupId != 0) {
+			leader.sendSystemMessage(member.getCustomName() + " is already in a group.", (byte) 0);
+			return;
+		}
+		
+		
+		if(leaderGroupId != 0) {
+			
+			GroupObject group = (GroupObject) core.objectService.getObject(leaderGroupId);
+			
+			if(group.getGroupLeader() != leader) {
+				leader.sendSystemMessage("@group:must_be_leader", (byte) 0);
+				return;
+			}
+			
+			if(group.getMemberList().size() >= 8) {
+				leader.sendSystemMessage("@group:full", (byte) 0);
+				return;
+			}
+			
+		}
+		
+		if(member.getInviteSenderId() != 0 && member.getInviteSenderId() != leader.getObjectID()) {
+			leader.sendSystemMessage(member.getCustomName() + " is considering joining another group.", (byte) 0);
+			return;
+		}
+		
+		if(member.getInviteSenderId() != 0 && member.getInviteSenderId() == leader.getObjectID()) {
+			leader.sendSystemMessage(member.getCustomName() + " has already been invited to join your group.", (byte) 0);
+			return;
+		}
+
+		leader.sendSystemMessage("You invite " + member.getCustomName() + " to join the group.", (byte) 0);
+		member.setInviteCounter(member.getInviteCounter() + 1);
+		member.setInviteSenderId(member.getObjectId());
+		member.setInviteSenderName(leader.getCustomName());
+		
+		member.updateGroupInviteInfo();
 		
 	}
+	
+	public void handleGroupDecline(CreatureObject invited) {
+		
+		CreatureObject leader = (CreatureObject) core.objectService.getObject(invited.getInviteSenderId());
+		
+		invited.setInviteCounter(invited.getInviteCounter() + 1);
+		invited.setInviteSenderId(0);
+		invited.setInviteSenderName("");
+		
+		invited.sendSystemMessage("You decline to join " + leader.getCustomName() + "'s group.", (byte) 0);
+		invited.updateGroupInviteInfo();
+		
+		leader.sendSystemMessage(invited.getCustomName() + " declines to join your group.", (byte) 0);
+		
+	}
+
 	
 	
 

@@ -117,12 +117,7 @@ public class GroupObject extends SWGObject {
 		memberList.add(member);
 		
 		setMemberListUpdateCounter(getMemberListUpdateCounter() + 1);
-		IoBuffer packet = messageBuilder.buildAddMemberDelta(member);
-		synchronized(memberList.getMutex()) {
-			for(SWGObject obj : memberList.get()) {
-				obj.getClient().getSession().write(packet);
-			}
-		}
+		notifyObservers(messageBuilder.buildAddMemberDelta(member), false);
 		
 	}
 	
@@ -132,13 +127,8 @@ public class GroupObject extends SWGObject {
 			return;
 		
 		setMemberListUpdateCounter(getMemberListUpdateCounter() + 1);
-		IoBuffer packet = messageBuilder.buildRemoveMemberDelta(member);
-		synchronized(memberList.getMutex()) {
-			for(SWGObject obj : memberList.get()) {
-				obj.getClient().getSession().write(packet);
-			}
-		}
-		
+		notifyObservers(messageBuilder.buildRemoveMemberDelta(member), false);
+				
 		memberList.remove(member);
 		
 	}
