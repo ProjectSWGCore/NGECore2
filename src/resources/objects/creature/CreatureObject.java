@@ -936,6 +936,15 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 		return null;
 	}
+	
+	public void updateGroupInviteInfo() {
+		
+		if(getClient() == null || getClient().getSession() == null)
+			return;
+		
+		getClient().getSession().write(messageBuilder.buildGroupInviteDelta(getInviteSenderId(), getInviteCounter(), getInviteSenderName()));
+		
+	}
 
 
 }

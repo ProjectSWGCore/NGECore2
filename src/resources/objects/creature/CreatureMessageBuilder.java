@@ -737,6 +737,22 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		return buffer;
 
 	}
+	
+	public IoBuffer buildGroupInviteDelta(long inviteSenderId, long inviteCounter, String leaderName) {
+		
+		IoBuffer buffer = bufferPool.allocate(18 + leaderName.length(), false).order(ByteOrder.LITTLE_ENDIAN);
+		
+		buffer.putLong(inviteSenderId);
+		buffer.put(getAsciiString(leaderName));
+		buffer.putLong(inviteCounter);
+		
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x0E, buffer, size + 4);
+		
+		return buffer;
+
+	}
 
 
 	

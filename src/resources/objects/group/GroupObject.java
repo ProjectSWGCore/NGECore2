@@ -21,8 +21,9 @@
  ******************************************************************************/
 package resources.objects.group;
 
-import java.util.Vector;
+import org.apache.mina.core.buffer.IoBuffer;
 
+import resources.objects.SWGList;
 import engine.clients.Client;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
@@ -31,18 +32,20 @@ import engine.resources.scene.Quaternion;
 
 public class GroupObject extends SWGObject {
 	
-	private Vector<SWGObject> memberList = new Vector<SWGObject>();
+	private SWGList<SWGObject> memberList = new SWGList<SWGObject>();
 	private int memberListUpdateCounter;
 	private SWGObject groupLeader;
 	private SWGObject lootMaster;
 	private short groupLevel;
 	private int lootMode;
+	private GroupMessageBuilder messageBuilder;
 	
 	public GroupObject(long objectId) {
 		super(objectId, null, new Point3D(0, 0, 0), new Quaternion(0, 0, 0, 1), "object/group/shared_group_object.iff");
+		messageBuilder = new GroupMessageBuilder(this);
 	}
 
-	public Vector<SWGObject> getMemberList() {
+	public SWGList<SWGObject> getMemberList() {
 		return memberList;
 	}
 
@@ -105,10 +108,42 @@ public class GroupObject extends SWGObject {
 			this.lootMode = lootMode;
 		}
 	}
+	
+	public void addMember(SWGObject member) {
+		
+		if(memberList.size() >= 8 || member.getClient() == null)
+			return;
+		
+		memberList.add(member);
+		
+		setMemberListUpdateCounter(getMemberListUpdateCounter() + 1);
+		notifyObservers(messageBuilder.buildAddMemberDelta(member), false);
+		
+	}
+	
+	public void removeMember(SWGObject member) {
+		
+		if(memberList.size() <= 0 || member.getClient() == null)
+			return;
+		
+		setMemberListUpdateCounter(getMemberListUpdateCounter() + 1);
+		notifyObservers(messageBuilder.buildRemoveMemberDelta(member), false);
+				
+		memberList.remove(member);
+		
+	}
+
 
 	@Override
-	public void sendBaselines(Client client) {
-		// TODO Auto-generated method stub
+	public void sendBaselines(Client destination) {
+		
+		if(destination == null || destination.getSession() == null) {
+			System.out.println("NULL session");
+			return;
+		}
+		
+		destination.getSession().write(messageBuilder.buildBaseline3());
+		destination.getSession().write(messageBuilder.buildBaseline6());
 		
 	}
 
