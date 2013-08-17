@@ -45,6 +45,7 @@ import org.python.core.PyObject;
 
 import com.sleepycat.persist.EntityCursor;
 
+import protocol.swg.ChatOnGetFriendsList;
 import protocol.swg.CmdSceneReady;
 import protocol.swg.CmdStartScene;
 import protocol.swg.HeartBeatMessage;
@@ -428,6 +429,11 @@ public class ObjectService implements INetworkDispatch {
 				
 				CmdSceneReady sceneReady = new CmdSceneReady();
 				client.getSession().write(sceneReady.serialize());
+				
+				PlayerObject ghost = (PlayerObject) creature.getSlottedObject("ghost");
+				
+				ChatOnGetFriendsList friendsListMessage = new ChatOnGetFriendsList(ghost);
+				client.getSession().write(friendsListMessage.serialize());
 				
 				core.playerService.postZoneIn(creature);
 
