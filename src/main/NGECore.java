@@ -206,7 +206,7 @@ public class NGECore {
 		terrainService.loadSnapShotObjects();
 
 		// Static Spawns
-		staticService.spawnPlanetStaticObjs("rori");
+		//staticService.spawnPlanetStaticObjs("rori");
 		
 		// Zone services that need to be loaded after the above
 		simulationService = new SimulationService(this);
