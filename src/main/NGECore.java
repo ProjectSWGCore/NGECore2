@@ -30,6 +30,7 @@ import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
 
+
 import resources.common.RadialOptions;
 import resources.objects.creature.CreatureObject;
 import services.AttributeService;
@@ -40,6 +41,7 @@ import services.LoginService;
 import services.PlayerService;
 import services.ScriptService;
 import services.SimulationService;
+import services.StaticService;
 import services.TerrainService;
 import services.chat.ChatService;
 import services.combat.CombatService;
@@ -110,6 +112,7 @@ public class NGECore {
 	public CombatService combatService;
 	public PlayerService playerService;
 	public BuffService buffService;
+	public StaticService staticService;
 	
 	// Login Server
 	public NetworkDispatch loginDispatch;
@@ -159,6 +162,7 @@ public class NGECore {
 		combatService = new CombatService(this);
 		playerService = new PlayerService(this);
 		buffService = new BuffService(this);
+		staticService = new StaticService(this);
 		// Ping Server
 		try {
 			PingServer pingServer = new PingServer(config.getInt("PING.PORT"));
@@ -201,6 +205,9 @@ public class NGECore {
 		terrainService.addPlanet(10, "dathomir", "terrain/dathomir.trn", true);
 		terrainService.loadSnapShotObjects();
 
+		// Static Spawns
+		staticService.spawnPlanetStaticObjs("rori");
+		
 		// Zone services that need to be loaded after the above
 		simulationService = new SimulationService(this);
 		zoneDispatch.addService(simulationService);
