@@ -34,6 +34,7 @@ import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
 
 /* A SWGList element MUST implement IListObject, or it will refuse to work with it */
+
 @Persistent
 public class SWGList<E> implements List<E> {
 	
@@ -315,6 +316,10 @@ public class SWGList<E> implements List<E> {
 		return updateCounter;
 	}
 	
+	public Object getMutex() {
+		return objectMutex;
+	}
+	
 	private byte[] item(int type, int index, byte[] data, boolean useIndex, boolean useData) {
 		int size = 1 + ((useIndex) ? 2 : 0) + ((useData) ? data.length : 0);
 			
@@ -350,7 +355,5 @@ public class SWGList<E> implements List<E> {
 		
 		messageBuilder.sendListDelta(viewType, updateType, buffer);
 	}
-	
-	public Object getMutex() { return objectMutex; }
 
 }

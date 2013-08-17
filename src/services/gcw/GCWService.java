@@ -84,7 +84,11 @@ public class GCWService implements INetworkDispatch {
 			@Override public void run() { afterInitialisation(); }
 			
 			private void afterInitialisation() {
-				core.scriptService.callScript("scripts/", "gcwzones", "addZones");
+				try {
+					core.scriptService.callScript("scripts/", "gcwzones", "addZones");
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 			
 		}, 1, TimeUnit.SECONDS);
@@ -93,24 +97,30 @@ public class GCWService implements INetworkDispatch {
 			@Override public void run() { checkFactionalPresence(); }
 			
 			private void checkFactionalPresence() {
-				for (String planet : zoneMap.keySet()) {
-					for (String zoneName : zoneMap.get(planet).keySet()) {
-						CurrentServerGCWZonePercent zone = zoneMap.get(planet).get(zoneName);
-						
-						if (zone.getRadius() > 0) {
-							List<SWGObject> players = core.simulationService.get(core.terrainService.getPlanetByName(planet), zone.getPosition().x, zone.getPosition().z, (int) zone.getRadius());
+				try {
+					for (String planet : zoneMap.keySet()) {
+						for (String zoneName : zoneMap.get(planet).keySet()) {
+							CurrentServerGCWZonePercent zone = zoneMap.get(planet).get(zoneName);
 							
-							for (SWGObject player : players) {
-								if (!core.terrainService.isWater(player.getPlanetId(), player.getPosition().x, player.getPosition().z)) {
-									if ((player instanceof CreatureObject)) {
-										if ((((CreatureObject) player).getFactionStatus() & PvpStatus.Overt) != 0) {
-											adjustZone(planet, zoneName, ((CreatureObject) player).getFaction(), 1);
+							if (zone.getRadius() > 0) {
+								List<SWGObject> players = core.simulationService.get(core.terrainService.getPlanetByName(planet), zone.getPosition().x, zone.getPosition().z, (int) zone.getRadius());
+								
+								for (SWGObject player : players) {
+									if (!core.terrainService.isWater(player.getPlanetId(), player.getPosition().x, player.getPosition().z)) {
+										if ((player instanceof CreatureObject)) {
+											if (((CreatureObject) player).getParentId() > 0) {
+												if (((CreatureObject) player).getFactionStatus() == 2) {
+													adjustZone(planet, zoneName, ((CreatureObject) player).getFaction(), 1);
+												}
+											}
 										}
 									}
 								}
 							}
 						}
 					}
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
 		}, 3, 3, TimeUnit.SECONDS);
@@ -119,56 +129,60 @@ public class GCWService implements INetworkDispatch {
 			@Override public void run() { updateGCWZones(); }
 			
 			private void updateGCWZones() {
-				Map<String, CurrentServerGCWZonePercent> zoneUpdates = new TreeMap<String, CurrentServerGCWZonePercent>();
-				Map<String, CurrentServerGCWZonePercent> totalUpdates = new TreeMap<String, CurrentServerGCWZonePercent>();
-				Multimap<String, CurrentServerGCWZoneHistory> zoneHistoryUpdates = ArrayListMultimap.create();
-				Multimap<String, CurrentServerGCWZoneHistory> totalHistoryUpdates = ArrayListMultimap.create();
-				
-				int galaxyPercent = 0;
-				
-				for (String planet : zoneMap.keySet()) {
-					if (!planet.equals("galaxy")) {
-						int planetPercent = 0;
-						
-						for (String zone : zoneMap.get(planet).keySet()) {
-							planetPercent += zoneMap.get(planet).get(zone).getPercent();
-							
-							if (zoneMap.get(planet).get(zone).getPercent() != object.getCurrentServerGCWZonePercentMap().get(zone).getPercent()) {
-								zoneUpdates.put(zone, zoneMap.get(planet).get(zone));
-								zoneHistoryUpdates.put(zone, new CurrentServerGCWZoneHistory(object.getCurrentServerGCWZonePercentMap().get(zone)));
-							}
-						}
-						
-						planetPercent = ((planetPercent / (zoneMap.get(planet).size() * 100)) * 100);
-						
-						if (planetPercent != object.getCurrentServerGCWTotalPercentMap().get(planet).getPercent()) {
-							CurrentServerGCWZonePercent planetObject = object.getCurrentServerGCWTotalPercentMap().get(planet);
-							planetObject.setPercent(planetPercent);
-							totalUpdates.put(planet, planetObject);
-							totalHistoryUpdates.put(planet, new CurrentServerGCWZoneHistory(object.getCurrentServerGCWTotalPercentMap().get(planet)));
-						}
-						
-						galaxyPercent += planetPercent;
-					}
-				}
-				
-				galaxyPercent = ((galaxyPercent / ((object.getCurrentServerGCWTotalPercentMap().size() - 1) * 100)) * 100);
-				
-				if (galaxyPercent != object.getCurrentServerGCWTotalPercentMap().get("galaxy").getPercent()) {
-					CurrentServerGCWZonePercent galaxyObject = object.getCurrentServerGCWTotalPercentMap().get("galaxy");
-					galaxyObject.setPercent(galaxyPercent);
-					totalUpdates.put("galaxy", galaxyObject);
-					totalHistoryUpdates.put("galaxy", new CurrentServerGCWZoneHistory(object.getCurrentServerGCWTotalPercentMap().get("galaxy")));
-				}
-				
-				if (zoneUpdates.size() > 0) {
-					object.getCurrentServerGCWZonePercentMap().putAll(zoneUpdates);
-					object.getCurrentServerGCWZoneHistoryMap().putAll(zoneHistoryUpdates);
+				try {
+					Map<String, CurrentServerGCWZonePercent> zoneUpdates = new TreeMap<String, CurrentServerGCWZonePercent>();
+					Map<String, CurrentServerGCWZonePercent> totalUpdates = new TreeMap<String, CurrentServerGCWZonePercent>();
+					Multimap<String, CurrentServerGCWZoneHistory> zoneHistoryUpdates = ArrayListMultimap.create();
+					Multimap<String, CurrentServerGCWZoneHistory> totalHistoryUpdates = ArrayListMultimap.create();
 					
-					if (totalUpdates.size() > 0) {
-						object.getCurrentServerGCWTotalPercentMap().putAll(totalUpdates);
-						object.getCurrentServerGCWTotalHistoryMap().putAll(totalHistoryUpdates);
+					int galaxyPercent = 0;
+					
+					for (String planet : zoneMap.keySet()) {
+						if (!planet.equals("galaxy")) {
+							int planetPercent = 0;
+							
+							for (String zone : zoneMap.get(planet).keySet()) {
+								planetPercent += zoneMap.get(planet).get(zone).getPercent();
+								
+								if (zoneMap.get(planet).get(zone).getPercent() != object.getCurrentServerGCWZonePercentMap().get(zone).getPercent()) {
+									zoneUpdates.put(zone, zoneMap.get(planet).get(zone));
+									zoneHistoryUpdates.put(zone, new CurrentServerGCWZoneHistory(object.getCurrentServerGCWZonePercentMap().get(zone)));
+								}
+							}
+							
+							planetPercent = ((planetPercent / (zoneMap.get(planet).size() * 100)) * 100);
+							
+							if (planetPercent != object.getCurrentServerGCWTotalPercentMap().get(planet).getPercent()) {
+								CurrentServerGCWZonePercent planetObject = object.getCurrentServerGCWTotalPercentMap().get(planet);
+								planetObject.setPercent(planetPercent);
+								totalUpdates.put(planet, planetObject);
+								totalHistoryUpdates.put(planet, new CurrentServerGCWZoneHistory(object.getCurrentServerGCWTotalPercentMap().get(planet)));
+							}
+							
+							galaxyPercent += planetPercent;
+						}
 					}
+					
+					galaxyPercent = ((galaxyPercent / ((object.getCurrentServerGCWTotalPercentMap().size() - 1) * 100)) * 100);
+					
+					if (galaxyPercent != object.getCurrentServerGCWTotalPercentMap().get("galaxy").getPercent()) {
+						CurrentServerGCWZonePercent galaxyObject = object.getCurrentServerGCWTotalPercentMap().get("galaxy");
+						galaxyObject.setPercent(galaxyPercent);
+						totalUpdates.put("galaxy", galaxyObject);
+						totalHistoryUpdates.put("galaxy", new CurrentServerGCWZoneHistory(object.getCurrentServerGCWTotalPercentMap().get("galaxy")));
+					}
+					
+					if (zoneUpdates.size() > 0) {
+						object.getCurrentServerGCWZonePercentMap().putAll(zoneUpdates);
+						object.getCurrentServerGCWZoneHistoryMap().putAll(zoneHistoryUpdates);
+						
+						if (totalUpdates.size() > 0) {
+							object.getCurrentServerGCWTotalPercentMap().putAll(totalUpdates);
+							object.getCurrentServerGCWTotalHistoryMap().putAll(totalHistoryUpdates);
+						}
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
 		}, 1, 1, TimeUnit.MINUTES);
@@ -181,21 +195,25 @@ public class GCWService implements INetworkDispatch {
 			}
 			
 			private void updateGalaxiesWideGCWZones() {
-				List<OtherServerGCWZonePercent> galaxyWideZones = new ArrayList<OtherServerGCWZonePercent>();
-				galaxyWideZones.addAll(object.getOtherServerGCWZonePercentMap().get("SWG"));
-				
-				for (int i = 0; i < galaxyWideZones.size(); i++) {
-					OtherServerGCWZonePercent zone = galaxyWideZones.get(i);
-					int percent = object.getCurrentServerGCWZonePercentMap().get(zone.getZone()).getPercent();
+				try {
+					List<OtherServerGCWZonePercent> galaxyWideZones = new ArrayList<OtherServerGCWZonePercent>();
+					galaxyWideZones.addAll(object.getOtherServerGCWZonePercentMap().get("SWG"));
 					
-					if (zone.getPercent() != percent) {
-						zone.setPercent(percent);
-						galaxyWideZones.set(i, zone);
+					for (int i = 0; i < galaxyWideZones.size(); i++) {
+						OtherServerGCWZonePercent zone = galaxyWideZones.get(i);
+						int percent = object.getCurrentServerGCWZonePercentMap().get(zone.getZone()).getPercent();
+						
+						if (zone.getPercent() != percent) {
+							zone.setPercent(percent);
+							galaxyWideZones.set(i, zone);
+						}
 					}
-				}
-				
-				if (!galaxyWideZones.equals(object.getOtherServerGCWZonePercentMap().get("SWG"))) {
-					object.getOtherServerGCWZonePercentMap().replaceValues("SWG", galaxyWideZones);
+					
+					if (!galaxyWideZones.equals(object.getOtherServerGCWZonePercentMap().get("SWG"))) {
+						object.getOtherServerGCWZonePercentMap().replaceValues("SWG", galaxyWideZones);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
 		}, 15, 15, TimeUnit.MINUTES);
@@ -204,13 +222,17 @@ public class GCWService implements INetworkDispatch {
 			@Override public void run() { decrementZoneStrength(); }
 			
 			private void decrementZoneStrength() {
-				for (String planet : zoneMap.keySet()) {
-					if (!planet.equals("galaxy")) {
-						for (String zone : zoneMap.get(planet).keySet()) {
-							zoneMap.get(planet).get(zone).removeGCWPoints(1);
-							object.getCurrentServerGCWZonePercentMap().get(zone).removeGCWPoints(1);
+				try {
+					for (String planet : zoneMap.keySet()) {
+						if (!planet.equals("galaxy")) {
+							for (String zone : zoneMap.get(planet).keySet()) {
+								zoneMap.get(planet).get(zone).removeGCWPoints(1);
+								object.getCurrentServerGCWZonePercentMap().get(zone).removeGCWPoints(1);
+							}
 						}
 					}
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
 		}, 1, 1, TimeUnit.MINUTES);
@@ -219,15 +241,19 @@ public class GCWService implements INetworkDispatch {
 			@Override public void run() { resetWeakGCWZones(); }
 			
 			private void resetWeakGCWZones() {
-				for (String planet : zoneMap.keySet()) {
-					for (String zoneName : zoneMap.get(planet).keySet()) {
-						CurrentServerGCWZonePercent zone = zoneMap.get(planet).get(zoneName);
-						
-						if (zone.getGCWPoints() == 0 && zone.getPercent() != 50) {
-							zone.setPercent(50);
-							zoneMap.get(planet).put(zoneName, zone);
+				try {
+					for (String planet : zoneMap.keySet()) {
+						for (String zoneName : zoneMap.get(planet).keySet()) {
+							CurrentServerGCWZonePercent zone = zoneMap.get(planet).get(zoneName);
+							
+							if (zone.getGCWPoints() == 0 && zone.getPercent() != 50) {
+								zone.setPercent(50);
+								zoneMap.get(planet).put(zoneName, zone);
+							}
 						}
 					}
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
 		}, 2, 2, TimeUnit.DAYS);
@@ -238,7 +264,7 @@ public class GCWService implements INetworkDispatch {
 			zoneMap.put(planet, new TreeMap<String, CurrentServerGCWZonePercent>());
 		}
 		
-		zoneMap.get(planet).put(zone, new CurrentServerGCWZonePercent(new Point2D(x, y), radius, ((new SimpleBufferAllocator()).allocate(4, false).order(ByteOrder.BIG_ENDIAN).putInt(group).flip().getInt()), weight));
+		zoneMap.get(planet).put(zone, new CurrentServerGCWZonePercent(new Point2D(x, y), radius, group, weight));
 		
 		if (planet != "galaxy") {
 			object.getCurrentServerGCWZonePercentMap().put(zone, zoneMap.get(planet).get(zone));

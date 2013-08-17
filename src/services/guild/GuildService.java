@@ -23,17 +23,12 @@ package services.guild;
 
 import java.util.Map;
 
-import org.apache.mina.core.buffer.IoBuffer;
-import org.apache.mina.core.session.IoSession;
-
-import resources.common.Opcodes;
 import resources.guild.Guild;
 import resources.objects.SWGList;
 import resources.objects.guild.GuildObject;
 
 import main.NGECore;
 
-import engine.clients.Client;
 import engine.resources.objects.SWGObject;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
@@ -120,31 +115,6 @@ public class GuildService implements INetworkDispatch {
 
 	@Override
 	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> swgOpcodes, Map<Integer, INetworkRemoteEvent> objControllerOpcodes) {
-		
-		/*
-		swgOpcodes.put(Opcodes.CmdSceneReady, new INetworkRemoteEvent() {
-
-			@Override
-			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
-				
-				if (client == null || client.getSession() == null) {
-					return;
-				}
-				
-				SWGObject object = client.getParent();
-				
-				if (object == null) {
-					return;
-				}
-				
-				object.sendCreate(client);
-				object.sendBaselines(client);
-				object.sendDestroy(client);
-			}
-			
-		});
-		*/
 		
 	}
 
