@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import resources.objects.SWGList;
 import resources.objects.waypoint.WaypointObject;
 
 import com.sleepycat.persist.model.NotPersistent;

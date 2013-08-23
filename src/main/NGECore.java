@@ -123,7 +123,7 @@ public class NGECore {
 	private ObjectDatabase mailODB;
 	
 	public NGECore() {
-
+		
 	}
 	
 	public void start() {

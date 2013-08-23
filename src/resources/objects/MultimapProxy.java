@@ -19,62 +19,50 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package resources.gcw;
+package resources.objects;
 
-import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map.Entry;
 
-import org.apache.mina.core.buffer.IoBuffer;
+import org.python.google.common.collect.ArrayListMultimap;
+import org.python.google.common.collect.Multimap;
 
 import com.sleepycat.persist.model.Persistent;
+import com.sleepycat.persist.model.PersistentProxy;
 
-import resources.objects.ListObject;
-
-@Persistent
-public class OtherServerGCWZonePercent extends ListObject implements Cloneable {
+@Persistent(proxyFor=Multimap.class)
+public class MultimapProxy<K, V> implements PersistentProxy<Multimap<K, V>> {
 	
-	private String zone = "";
-	private int percent = 50;
-
-	public OtherServerGCWZonePercent(String zone) {
-		this.zone = zone;
+	private int size = 0;
+	private K[] keys;
+	private V[] values;
+	
+	private MultimapProxy() { }
+	
+	public void initializeProxy(Multimap<K, V> object) {
+		List<K> keyList = new ArrayList<K>();
+		List<V> valueList = new ArrayList<V>();
+		
+		for (Entry<K, V> entry : object.entries()) {
+			keyList.add(entry.getKey());
+			valueList.add(entry.getValue());
+		}
+		
+		size = object.entries().size();
+		
+		keys = keyList.toArray(keys);
+		values = valueList.toArray(values);
 	}
 	
-	public String getZone() {
-		synchronized(objectMutex) {
-			return zone;
+	public Multimap<K, V> convertProxy() {
+		Multimap<K, V> map = ArrayListMultimap.create();
+		
+		for (int i = 0; i < size; i++) {
+			map.put(keys[i], values[i]);
 		}
-	}
-	
-	public int getPercent() {
-		synchronized(objectMutex) {
-			return percent;
-		}
-	}
-	
-	public OtherServerGCWZonePercent setPercent(double percent) {
-		synchronized(objectMutex) {
-			this.percent = (int) percent;
-			return this;
-		}
-	}
-	
-	public byte[] getBytes() {
-		synchronized(objectMutex) {
-			IoBuffer buffer = bufferPool.allocate((2 + zone.length() + 4), false).order(ByteOrder.LITTLE_ENDIAN);
-			buffer.put(getAsciiString(zone));
-			buffer.putInt(percent);
-			return buffer.array();
-		}
-	}
-	
-	@Override
-	public OtherServerGCWZonePercent clone() {
-		try {
-			return (OtherServerGCWZonePercent) super.clone();
-		} catch (CloneNotSupportedException e) {
-			e.printStackTrace();
-			return null;
-		}
+		
+		return map;
 	}
 	
 }

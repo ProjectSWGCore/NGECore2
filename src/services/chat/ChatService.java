@@ -22,11 +22,8 @@
 package services.chat;
 
 import java.nio.ByteOrder;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -55,14 +52,12 @@ import protocol.swg.ChatFriendsListUpdate;
 import protocol.swg.ChatInstantMessageToCharacter;
 import protocol.swg.ChatInstantMessagetoClient;
 import protocol.swg.ChatOnAddFriend;
-import protocol.swg.ChatOnGetFriendsList;
 import protocol.swg.ChatOnSendInstantMessage;
 import protocol.swg.ChatOnSendPersistentMessage;
 import protocol.swg.ChatPersistentMessageToClient;
 import protocol.swg.ChatPersistentMessageToServer;
 import protocol.swg.ChatRequestPersistentMessage;
 import protocol.swg.ObjControllerMessage;
-import protocol.swg.clientSecureTradeManager.AddItemMessage;
 import protocol.swg.objectControllerObjects.PlayerEmote;
 import protocol.swg.objectControllerObjects.SpatialChat;
 import main.NGECore;
