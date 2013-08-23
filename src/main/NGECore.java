@@ -162,7 +162,6 @@ public class NGECore {
 		combatService = new CombatService(this);
 		playerService = new PlayerService(this);
 		buffService = new BuffService(this);
-		staticService = new StaticService(this);
 		// Ping Server
 		try {
 			PingServer pingServer = new PingServer(config.getInt("PING.PORT"));
@@ -205,12 +204,15 @@ public class NGECore {
 		terrainService.addPlanet(10, "dathomir", "terrain/dathomir.trn", true);
 		terrainService.loadSnapShotObjects();
 
-		// Static Spawns
-		//staticService.spawnPlanetStaticObjs("rori");
+
 		
 		// Zone services that need to be loaded after the above
 		simulationService = new SimulationService(this);
 		zoneDispatch.addService(simulationService);
+		
+		// Static Spawns
+		//staticService = new StaticService(this);
+		//staticService.spawnPlanetStaticObjs("rori");
 		
 		guildService = new GuildService(this);
 		zoneDispatch.addService(guildService);
