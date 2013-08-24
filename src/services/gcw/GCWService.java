@@ -25,6 +25,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -375,9 +376,12 @@ public class GCWService implements INetworkDispatch {
 			}
 		}
 		
-		for(SWGObject obj : flagged) {
+		Iterator<SWGObject> it = flagged.iterator();
+		
+		while(it.hasNext()) {
+			SWGObject obj = it.next();
 			if (((CreatureObject) obj).getFactionStatus() != 2) {
-				flagged.remove(obj);
+				it.remove();
 			}
 		}
 
