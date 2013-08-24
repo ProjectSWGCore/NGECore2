@@ -369,16 +369,18 @@ public class GCWService implements INetworkDispatch {
 		
 		synchronized(core.getActiveConnectionsMap()) {
 			for (Client client : core.getActiveConnectionsMap().values()) {
-				if (client.getParent() != null) {
-					if (client.getParent() instanceof CreatureObject) {
-						if (((CreatureObject) client.getParent()).getFactionStatus() == 2) {
-							flagged.add(client.getParent());
-						}
-					}
+				if (client.getParent() != null && client.getParent() instanceof CreatureObject) {
+					flagged.add(client.getParent());
 				}
 			}
 		}
 		
+		for(SWGObject obj : flagged) {
+			if (((CreatureObject) obj).getFactionStatus() != 2) {
+				flagged.remove(obj);
+			}
+		}
+
 		return flagged;
 	}
 	
