@@ -24,6 +24,7 @@ package services.chat;
 import java.nio.ByteOrder;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,10 +44,14 @@ import engine.resources.scene.Point3D;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import resources.common.*;
-
+import resources.objects.creature.CreatureObject;
+import resources.objects.player.PlayerObject;
+import protocol.swg.ChatOnChangeFriendStatus;
 import protocol.swg.ChatDeletePersistentMessage;
+import protocol.swg.ChatFriendsListUpdate;
 import protocol.swg.ChatInstantMessageToCharacter;
 import protocol.swg.ChatInstantMessagetoClient;
+import protocol.swg.ChatOnAddFriend;
 import protocol.swg.ChatOnSendInstantMessage;
 import protocol.swg.ChatOnSendPersistentMessage;
 import protocol.swg.ChatPersistentMessageToClient;
@@ -307,7 +312,113 @@ public class ChatService implements INetworkDispatch {
 			}
 
 		});
+	}
+	
+	public void playerStatusChange(String name, byte status) {
+		
+		String shortName = name.toLowerCase();
+		ConcurrentHashMap<Integer, Client> clients = core.getActiveConnectionsMap();
+		
+		for(Client client : clients.values()) {
+			
+			
+			if(client.getParent() == null)
+				continue;
+			
+			PlayerObject clientGhost = (PlayerObject) client.getParent().getSlottedObject("ghost");
+			
+			if(clientGhost == null)
+				continue;
+			
+			if (clientGhost.getFriendList().contains(shortName)) {
+				// online/offline message
+				ChatFriendsListUpdate updateNotifyStatus = new ChatFriendsListUpdate(name, (byte) status);
+				client.getSession().write(updateNotifyStatus.serialize());
+				
+			}
+			
+		}
+	}
+	
+	public void removeFriend(PlayerObject actor, String friendName, boolean notify) {
+		
+		friendName = friendName.toLowerCase();
+		
+		SWGObject friendObject = getObjectByFirstName(friendName);
+		
+		if (actor == null || actor.getContainer() == null)
+			return;
+		
+		List<String> friendList = actor.getFriendList();
+		
+		if (notify) {
 
+			ChatOnChangeFriendStatus removeMessage = new ChatOnChangeFriendStatus(actor.getContainer().getObjectID(), friendName, 0);
+			actor.getContainer().getClient().getSession().write(removeMessage.serialize());
+			
+			if(friendList.contains(friendName)) {
+				actor.friendRemove(friendName);
+				//friendList.remove(friendName);
+			}
+		}
+	}
+	
+	public void addFriend(PlayerObject actor, String friendName, boolean notify) {
+		// ChatOnAddFriend, ChatOnChangeFriendStatus, ChatFriendsListUpdate, ChatSystemMessage, ChatOnGetFriendsList
+		SWGObject friendObject = getObjectByFirstName(friendName);
+		
+		PlayerObject friend = (PlayerObject) friendObject.getSlottedObject("ghost");
+		CreatureObject friendCreature = (CreatureObject) friend.getContainer();
+		List<String> friendList = actor.getFriendList();
+		
+		if (actor == null || friendObject.getSlottedObject("ghost") == null)
+			return;
+		
+		CreatureObject actorCreature = (CreatureObject) actor.getContainer();
+		if (actorCreature == null)
+			return;
+		
+		boolean friendIsOnline = friendObject.isInQuadtree();
+		
+		String friendShortName = friendCreature.getCustomName().toLowerCase();
+		
+		if (friendCreature.getCustomName().contains(" ")) {
+			String[] splitName = friendCreature.getCustomName().toLowerCase().split(" ");
+			friendShortName = splitName[0];
+		}
+		
+		if (friendList.contains(friendShortName)) {
+			actorCreature.sendSystemMessage(friendShortName + " is already on your friends list.", (byte) 0);
+			return;
+		}
+		
+		
+		
+		if (notify) {
+			ChatOnAddFriend init = new ChatOnAddFriend();
+			actorCreature.getClient().getSession().write(init.serialize());
+			
+			ChatOnChangeFriendStatus addMessage = new ChatOnChangeFriendStatus(actorCreature.getObjectID(), friendShortName, 1);
+			actorCreature.getClient().getSession().write(addMessage.serialize());
+			
+			if(friendIsOnline) {
+				ChatFriendsListUpdate updateStatus = new ChatFriendsListUpdate(friendShortName, (byte)1);
+				actorCreature.getClient().getSession().write(updateStatus.serialize());
+			}
+		}
+		
+		friendList.add(friendShortName);
+		
+		//actor.friendAdd(friendShortName);
+		//actor.friendAdd(friendShortName);
+		//if (actor.getFriendList().size() != 0) {
+			//ChatOnGetFriendsList sendFriendsList = new ChatOnGetFriendsList(actor);
+			//actorCreature.getClient().getSession().write(sendFriendsList.serialize());
+		//}
+		
+		actorCreature.sendSystemMessage(friendShortName + " has been added to your friends list.", (byte) 0);
+		
+		//actor.friendAdd(friendShortName);
 	}
 	
 	public void sendPersistentMessageHeader(Client client, Mail mail) {

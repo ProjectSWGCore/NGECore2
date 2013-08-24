@@ -34,6 +34,7 @@ import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
 
 /* A SWGList element MUST implement IListObject, or it will refuse to work with it */
+
 @Persistent
 public class SWGList<E> implements List<E> {
 	
@@ -53,6 +54,7 @@ public class SWGList<E> implements List<E> {
 		this.viewType = (byte) viewType;
 		this.updateType = (short) updateType;
 	}
+	
 	@Override
 	public boolean add(E e) {
 		synchronized(objectMutex) {				
@@ -63,6 +65,7 @@ public class SWGList<E> implements List<E> {
 			return false;
 		}
 	}
+	
 	@Override
 	public void add(int index, E element) {
 		synchronized(objectMutex) {
@@ -72,6 +75,7 @@ public class SWGList<E> implements List<E> {
 			}
 		}
 	}
+	
 	@Override
 	public boolean addAll(Collection<? extends E> c) {
 		synchronized(objectMutex) {
@@ -100,6 +104,7 @@ public class SWGList<E> implements List<E> {
 			return false;
 		}
 	}
+	
 	@Override
 	public boolean addAll(int index, Collection<? extends E> c) {
 		synchronized(objectMutex) {
@@ -124,6 +129,7 @@ public class SWGList<E> implements List<E> {
 			return false;
 		}
 	}
+	
 	@Override
 	public void clear() {
 		synchronized(objectMutex) {
@@ -131,63 +137,74 @@ public class SWGList<E> implements List<E> {
 			queue(item(4, 0, null, false, false));
 		}
 	}
+	
 	@Override
 	public boolean contains(Object o) {
 		synchronized(objectMutex) {
 			return list.contains(o);
 		}
 	}
+	
 	@Override
 	public boolean containsAll(Collection<?> c) {
 		synchronized(objectMutex) {
 			return list.containsAll(c);
 		}
 	}
+	
 	@Override
 	public E get(int index) {
 		synchronized(objectMutex) {
 			return list.get(index);
 		}
 	}
+	
 	public List<E> get() {
 		return list;
 	}
+	
 	@Override
 	public int indexOf(Object o) {
 		synchronized(objectMutex) {
 			return list.indexOf(o);
 		}
 	}
+	
 	@Override
 	public boolean isEmpty() {
 		synchronized(objectMutex) {
 			return list.isEmpty();
 		}
 	}
+	
 	@Override
 	public Iterator<E> iterator() {
 		synchronized(objectMutex) {
 			return list.iterator();
 		}
 	}
+	
 	@Override
 	public int lastIndexOf(Object o) {
 		synchronized(objectMutex) {
 			return list.lastIndexOf(o);
 		}
 	}
+	
 	@Override
 	public ListIterator<E> listIterator() {
 		synchronized(objectMutex) {
 			return list.listIterator();
 		}
 	}
+	
 	@Override
 	public ListIterator<E> listIterator(int index) {
 		synchronized(objectMutex) {
 			return listIterator(index);
 		}
 	}
+	
 	@Override
 	public boolean remove(Object o) {
 		synchronized(objectMutex) {
@@ -201,6 +218,7 @@ public class SWGList<E> implements List<E> {
 			}
 		}
 	}
+	
 	@Override
 	public E remove(int index) {
 		synchronized(objectMutex) {
@@ -211,6 +229,7 @@ public class SWGList<E> implements List<E> {
 			return (E) element;
 		}
 	}
+	
 	@Override
 	public boolean removeAll(Collection<?> c) {
 		synchronized(objectMutex) {
@@ -238,12 +257,14 @@ public class SWGList<E> implements List<E> {
 			return false;
 		}
 	}
+	
 	@Override
 	public boolean retainAll(Collection<?> c) {
 		synchronized(objectMutex) {
 			return list.retainAll(c);
 		}
 	}
+	
 	@Override
 	public E set(int index, E element) {
 		synchronized(objectMutex) {
@@ -286,24 +307,28 @@ public class SWGList<E> implements List<E> {
 			return false;
 		}
 	}
+	
 	@Override
 	public int size() {
 		synchronized(objectMutex) {
 			return list.size();
 		}
 	}
+	
 	@Override
 	public List<E> subList(int fromIndex, int toIndex) {
 		synchronized(objectMutex) {
 			return list.subList(fromIndex, toIndex);
 		}
 	}
+	
 	@Override
 	public Object[] toArray() {
 		synchronized(objectMutex) {
 			return list.toArray();
 		}
 	}
+	
 	@Override
 	public <T> T[] toArray(T[] a) {
 		synchronized(objectMutex) {
@@ -313,6 +338,10 @@ public class SWGList<E> implements List<E> {
 	
 	public int getUpdateCounter() {
 		return updateCounter;
+	}
+	
+	public Object getMutex() {
+		return objectMutex;
 	}
 	
 	private byte[] item(int type, int index, byte[] data, boolean useIndex, boolean useData) {
@@ -327,7 +356,7 @@ public class SWGList<E> implements List<E> {
 			
 		return buffer.array();
 	}
-
+	
 	private void queue(byte[] data) {
 		IoBuffer buffer = messageBuilder.bufferPool.allocate((data.length + 8), false).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.putInt(1);
@@ -351,6 +380,4 @@ public class SWGList<E> implements List<E> {
 		messageBuilder.sendListDelta(viewType, updateType, buffer);
 	}
 	
-	public Object getMutex() { return objectMutex; }
-
 }

@@ -19,37 +19,12 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package resources.objects;
+package resources.common;
 
-import java.nio.ByteBuffer;
-
-import org.apache.mina.core.buffer.SimpleBufferAllocator;
-
-
-import resources.common.StringUtilities;
-
-
-public abstract class ListObject implements IListObject {
+public class FactionStatus {
 	
-	public ListObject() { }
-	
-	protected final Object objectMutex = new Object();
-	public SimpleBufferAllocator bufferPool = new SimpleBufferAllocator();
-	
-	protected String getAsciiString(ByteBuffer buffer) {
-		return StringUtilities.getAsciiString(buffer);
-	}
-	
-	protected String getUnicodeString(ByteBuffer buffer) {
-		return StringUtilities.getUnicodeString(buffer);
-	}
-	
-	protected byte[] getAsciiString(String string) {
-		return StringUtilities.getAsciiString(string);
-	}
-	
-	protected byte[] getUnicodeString(String string) {
-		return StringUtilities.getUnicodeString(string);
-	}
+	public static int OnLeave = 0;
+	public static int Combatant = 1;
+	public static int SpecialForces = 2;
 	
 }

@@ -35,20 +35,23 @@ import org.apache.mina.core.buffer.IoBuffer;
 import resources.common.StringUtilities;
 
 import com.sleepycat.persist.model.NotPersistent;
+import com.sleepycat.persist.model.Persistent;
 
 @SuppressWarnings("unused")
 
+@Persistent
 public class SWGMap<K, V> implements Map<K, V> {
 	
 	private Map<K, V> map = new TreeMap<K, V>();
 	@NotPersistent
-	private int updateCounter;
-	
+	private int updateCounter = 0;
 	private ObjectMessageBuilder messageBuilder;
 	private byte viewType;
 	private short updateType;
-	
+	@NotPersistent
 	protected final Object objectMutex = new Object();
+	
+	public SWGMap() { }
 	
 	public SWGMap(ObjectMessageBuilder messageBuilder, int viewType, int updateType) {
 		this.messageBuilder = messageBuilder;
@@ -63,10 +66,6 @@ public class SWGMap<K, V> implements Map<K, V> {
 			this.updateType = ((SWGMap<K, V>) m).updateType;
 			map.putAll(m);
 		}
-	}
-	
-	public SWGMap() {
-		
 	}
 	
 	public void clear() {
@@ -193,6 +192,10 @@ public class SWGMap<K, V> implements Map<K, V> {
 		synchronized(objectMutex) {
 			return updateCounter;
 		}
+	}
+	
+	public Object getMutex() {
+		return objectMutex;
 	}
 	
 	private byte[] item(int type, Object index, byte[] data, boolean useIndex, boolean useData) {

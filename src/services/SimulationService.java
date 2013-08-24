@@ -52,6 +52,9 @@ import engine.resources.scene.quadtree.QuadTree;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
+import protocol.swg.ChatFriendsListUpdate;
+import protocol.swg.ChatOnChangeFriendStatus;
+import protocol.swg.ChatOnGetFriendsList;
 import protocol.swg.CmdStartScene;
 import protocol.swg.HeartBeatMessage;
 import protocol.swg.ObjControllerMessage;
@@ -64,6 +67,7 @@ import protocol.swg.objectControllerObjects.TargetUpdate;
 
 import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
+import resources.objects.player.PlayerObject;
 import resources.common.*;
 import toxi.geom.Line3D;
 import toxi.geom.Ray3D;
@@ -129,6 +133,9 @@ public class SimulationService implements INetworkDispatch {
 		core.commandService.registerCommand("waypoint");
 		core.commandService.registerCommand("setwaypointactivestatus");
 		core.commandService.registerCommand("setwaypointname");
+		core.commandService.registerCommand("addfriend");
+		core.commandService.registerCommand("removefriend");
+		core.commandService.registerCommand("getfriendlist");
 	}
 	
 	public void add(SWGObject object, int x, int y) {
@@ -437,8 +444,23 @@ public class SimulationService implements INetworkDispatch {
 		
 		if(client.getParent() == null)
 			return;
-		
+
 		CreatureObject object = (CreatureObject) client.getParent();
+		PlayerObject ghost = (PlayerObject) object.getSlottedObject("ghost");
+		
+		if (ghost != null) {
+			String objectShortName = object.getCustomName();
+			
+			if (object.getCustomName().contains(" ")) {
+				String[] splitName = object.getCustomName().toLowerCase().split(" ");
+				objectShortName = splitName[0];
+			}
+			
+			core.chatService.playerStatusChange(objectShortName, (byte) 0);
+		}
+		
+		session.suspendWrite();
+
 		boolean remove = remove(object, object.getPosition().x, object.getPosition().z);
 		if(remove)
 			System.out.println("Successful quadtree remove");
@@ -467,6 +489,7 @@ public class SimulationService implements INetworkDispatch {
 
 	public void handleZoneIn(Client client) {
 
+		
 		if(client.getParent() == null)
 			return;
 		
@@ -488,7 +511,36 @@ public class SimulationService implements INetworkDispatch {
 		
 		if(object.getParentId() == 0)
 			add(object, pos.x, pos.z);
-	
+		
+		PlayerObject ghost = (PlayerObject) object.getSlottedObject("ghost");
+		if (ghost != null) {
+			
+			String objectShortName = object.getCustomName().toLowerCase();
+			
+			if (object.getCustomName().contains(" ")) {
+				String[] splitName = object.getCustomName().toLowerCase().split(" ");
+				objectShortName = splitName[0].toLowerCase();
+			}
+			
+			core.chatService.playerStatusChange(objectShortName, (byte) 1);
+			
+			if (ghost.getFriendList().isEmpty() == false) {
+				// Find out what friends are online/offline
+				for (String friend : ghost.getFriendList()) {
+					SWGObject friendObject = (SWGObject) core.chatService.getObjectByFirstName(friend);
+					if (friendObject == null)
+						continue;
+					if(friendObject.isInQuadtree() == true) {
+						ChatFriendsListUpdate onlineNotifyStatus = new ChatFriendsListUpdate(friend, (byte) 1);
+						client.getSession().write(onlineNotifyStatus.serialize());
+
+					} else {
+						ChatOnChangeFriendStatus changeStatus = new ChatOnChangeFriendStatus(object.getObjectID(), friend, 0);
+						client.getSession().write(changeStatus.serialize());
+					}
+				}
+			}
+		}
 	}
 	
 	public void transferToPlanet(SWGObject object, Planet planet, Point3D newPos, Quaternion newOrientation) {

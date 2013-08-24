@@ -27,7 +27,6 @@ import java.util.Map.Entry;
 import org.apache.mina.core.buffer.IoBuffer;
 
 import resources.objects.ObjectMessageBuilder;
-
 import resources.objects.waypoint.WaypointObject;
 
 public class PlayerMessageBuilder extends ObjectMessageBuilder {
@@ -503,6 +502,43 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 		int size = buffer.position();
 		buffer.flip();
 		buffer = createDelta("PLAY", (byte) 3, (short) 1, (short) 0x09, buffer, size + 4);
+		
+		return buffer;
+		
+	}
+	
+	public IoBuffer buildFriendAddDelta(String friend) {
+		
+		IoBuffer buffer = bufferPool.allocate(100, false).order(ByteOrder.LITTLE_ENDIAN);
+		PlayerObject player = (PlayerObject) object;
+		
+		buffer.put((byte) 1); // updateType (SubType)
+		
+		buffer.putShort((short) player.getFriendList().indexOf(friend));
+		buffer.put(getAsciiString(friend));
+		
+		int size = buffer.position();
+		buffer.flip();
+		
+		buffer = createDelta("PLAY", (byte) 9, (short) 1, (short) 7, buffer, size + 4);
+		
+		return buffer;
+		
+	}
+	
+	public IoBuffer buildFriendRemoveDelta(String friend) {
+		
+		IoBuffer buffer = bufferPool.allocate(100, false).order(ByteOrder.LITTLE_ENDIAN);
+		PlayerObject player = (PlayerObject) object;
+		
+		buffer.put((byte) 0); // updateType (SubType)
+		
+		buffer.putShort((short) player.getFriendList().indexOf(friend));
+		
+		int size = buffer.position();
+		buffer.flip();
+		
+		buffer = createDelta("PLAY", (byte) 9, (short) 1, (short) 7, buffer, size + 4);
 		
 		return buffer;
 		
