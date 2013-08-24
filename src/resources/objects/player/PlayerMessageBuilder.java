@@ -509,8 +509,11 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 	
 	public IoBuffer buildFriendAddDelta(String friend) {
 		
-		IoBuffer buffer = bufferPool.allocate(100, false).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer buffer = bufferPool.allocate(13 + friend.length(), false).order(ByteOrder.LITTLE_ENDIAN);
 		PlayerObject player = (PlayerObject) object;
+		
+		buffer.putInt(1);
+		buffer.putInt(player.getFriendListUpdateCounter());
 		
 		buffer.put((byte) 1); // updateType (SubType)
 		
@@ -528,9 +531,12 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 	
 	public IoBuffer buildFriendRemoveDelta(String friend) {
 		
-		IoBuffer buffer = bufferPool.allocate(100, false).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer buffer = bufferPool.allocate(11, false).order(ByteOrder.LITTLE_ENDIAN);
 		PlayerObject player = (PlayerObject) object;
 		
+		buffer.putInt(1);
+		buffer.putInt(player.getFriendListUpdateCounter());
+
 		buffer.put((byte) 0); // updateType (SubType)
 		
 		buffer.putShort((short) player.getFriendList().indexOf(friend));

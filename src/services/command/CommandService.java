@@ -78,8 +78,9 @@ public class CommandService implements INetworkDispatch  {
 				
 				BaseSWGCommand command = getCommandByCRC(commandEnqueue.getCommandCRC());
 				
-				if(command == null)
+				if(command == null) {
 					return;
+				}
 				
 				// TODO: command filters for state, posture etc.
 				
