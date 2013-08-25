@@ -232,11 +232,14 @@ public class CombatService implements INetworkDispatch {
 		
 		if(hitType == HitType.STRIKETHROUGH) {
 			
-			float stMaxValue = attacker.getSkillMod("combat_strikethrough_value").getBase() / 2;
+			float stMaxValue = attacker.getSkillMod("combat_strikethrough_value").getBase() / 2 + attacker.getSkillMod("luck_modified").getBase() / 10;
+			if(stMaxValue > 99)
+				stMaxValue = 99;
 			float stMinValue = stMaxValue / 2;
 
 			float stValue = new Random().nextInt((int) (stMaxValue - stMinValue + 1)) + stMinValue;
 			stValue /= 100;
+			stValue = 1 - stValue;
 			mitigation *= stValue;
 		}
 		

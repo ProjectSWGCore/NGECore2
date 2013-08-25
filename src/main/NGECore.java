@@ -42,6 +42,7 @@ import services.LoginService;
 import services.PlayerService;
 import services.ScriptService;
 import services.SimulationService;
+import services.SkillModService;
 import services.StaticService;
 import services.TerrainService;
 import services.chat.ChatService;
@@ -116,6 +117,7 @@ public class NGECore {
 	public BuffService buffService;
 	public StaticService staticService;
 	public GroupService groupService;
+	public SkillModService skillModService;
 	
 	// Login Server
 	public NetworkDispatch loginDispatch;
@@ -166,6 +168,8 @@ public class NGECore {
 		playerService = new PlayerService(this);
 		buffService = new BuffService(this);
 		groupService = new GroupService(this);
+		skillModService = new SkillModService(this);
+		
 		// Ping Server
 		try {
 			PingServer pingServer = new PingServer(config.getInt("PING.PORT"));
