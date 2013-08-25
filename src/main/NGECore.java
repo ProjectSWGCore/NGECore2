@@ -37,6 +37,7 @@ import services.AttributeService;
 import services.BuffService;
 import services.CharacterService;
 import services.ConnectionService;
+import services.GroupService;
 import services.LoginService;
 import services.PlayerService;
 import services.ScriptService;
@@ -64,6 +65,7 @@ import engine.clientdata.visitors.TerrainVisitor;
 import engine.clientdata.visitors.WorldSnapshotVisitor;
 import engine.clientdata.visitors.WorldSnapshotVisitor.SnapshotChunk;
 import engine.clients.Client;
+import engine.resources.common.CRC;
 import engine.resources.common.PHPBB3Auth;
 import engine.resources.config.Config;
 import engine.resources.config.DefaultConfig;
@@ -113,6 +115,7 @@ public class NGECore {
 	public PlayerService playerService;
 	public BuffService buffService;
 	public StaticService staticService;
+	public GroupService groupService;
 	
 	// Login Server
 	public NetworkDispatch loginDispatch;
@@ -162,6 +165,7 @@ public class NGECore {
 		combatService = new CombatService(this);
 		playerService = new PlayerService(this);
 		buffService = new BuffService(this);
+		groupService = new GroupService(this);
 		// Ping Server
 		try {
 			PingServer pingServer = new PingServer(config.getInt("PING.PORT"));

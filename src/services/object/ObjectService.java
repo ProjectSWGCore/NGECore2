@@ -70,6 +70,7 @@ import main.NGECore;
 import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
+import resources.objects.group.GroupObject;
 import resources.objects.guild.GuildObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.staticobject.StaticObject;
@@ -173,8 +174,14 @@ public class ObjectService implements INetworkDispatch {
 			
 			object = new GuildObject(core, objectID, planet, position, orientation, Template);
 			
+		} else if(Template.startsWith("object/group")) {
+			
+			object = new GroupObject(objectID);
+			
 		} else if(Template.startsWith("object/waypoint")) {
+			
 			object = new WaypointObject(objectID, planet, position);
+			
 		} else {
 			
 			return null;

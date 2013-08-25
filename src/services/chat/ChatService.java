@@ -358,7 +358,7 @@ public class ChatService implements INetworkDispatch {
 			
 			if(friendList.contains(friendName)) {
 				actor.friendRemove(friendName);
-				//friendList.remove(friendName);
+				friendList.remove(friendName);
 			}
 		}
 	}
