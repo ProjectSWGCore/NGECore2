@@ -21,34 +21,47 @@
  ******************************************************************************/
 package resources.gcw;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.nio.ByteOrder;
 
 import org.apache.mina.core.buffer.IoBuffer;
+
+import com.sleepycat.persist.model.Persistent;
 
 import engine.resources.scene.Point2D;
 
 import resources.objects.ListObject;
 
-public class CurrentServerGCWZonePercent extends ListObject {
+@Persistent
+public class CurrentServerGCWZonePercent extends ListObject implements Cloneable {
 	
 	private Point2D position;
-	private float radius;
-	private int group;
-	private float weight;
-	private int percent = 50;
-	private int gcwPoints = 0;
-	private long lastUpdateTime = System.currentTimeMillis();
+	private float radius = 0;
+	private BigDecimal weight;
+	private int type = 0;
+	private BigDecimal percent;
+	private int gcwPoints = 1;
+	private long lastUpdateTime = (System.currentTimeMillis() / ((long) 1000));
 	
-	public CurrentServerGCWZonePercent(Point2D position, float radius, int group, float weight) {
+	public CurrentServerGCWZonePercent(Point2D position, float radius, int weight, int type) {
 		this.position = position;
 		this.radius = radius;
-		this.group = group;
-		this.weight = weight;
+		this.weight = new BigDecimal(weight, MathContext.DECIMAL128);
+		this.weight = this.weight.divide(new BigDecimal("10000000.0", MathContext.DECIMAL128), MathContext.DECIMAL128);
+		this.type = type;
+		this.percent = new BigDecimal("50.0", MathContext.DECIMAL128);
 	}
 	
 	public Point2D getPosition() {
 		synchronized(objectMutex) {
-			return position;
+			return position.clone();
+		}
+	}
+	
+	public void setPosition(Point2D position) {
+		synchronized(objectMutex) {
+			this.position = position;
 		}
 	}
 	
@@ -58,27 +71,53 @@ public class CurrentServerGCWZonePercent extends ListObject {
 		}
 	}
 	
-	public int getGroup() {
+	public void setRadius(float radius) {
 		synchronized(objectMutex) {
-			return group;
+			this.radius = radius;
 		}
 	}
 	
-	public float getWeight() {
+	public int getGroup() {
+		synchronized(objectMutex) {
+			return weight.unscaledValue().intValue();
+		}
+	}
+	
+	public BigDecimal getWeight() {
 		synchronized(objectMutex) {
 			return weight;
 		}
 	}
 	
-	public int getPercent() {
+	public void setWeight(int weight) {
+		synchronized(objectMutex) {
+			this.weight = new BigDecimal(weight, MathContext.DECIMAL128);
+			this.weight = this.weight.divide(new BigDecimal("10000000.0", MathContext.DECIMAL128), MathContext.DECIMAL128);
+		}
+	}
+	
+	public int getType() {
+		synchronized(objectMutex) {
+			return type;
+		}
+	}
+	
+	public void setType(int type) {
+		synchronized(objectMutex) {
+			this.type = type;
+		}
+	}
+	
+	public BigDecimal getPercent() {
 		synchronized(objectMutex) {
 			return percent;
 		}
 	}
 	
-	public CurrentServerGCWZonePercent setPercent(int percent) {
+	public CurrentServerGCWZonePercent setPercent(BigDecimal percent) {
 		synchronized(objectMutex) {
 			this.percent = percent;
+			this.lastUpdateTime = (System.currentTimeMillis() / ((long) 1000));
 			return this;
 		}
 	}
@@ -97,21 +136,33 @@ public class CurrentServerGCWZonePercent extends ListObject {
 	
 	public void removeGCWPoints(int gcwPoints) {
 		synchronized(objectMutex) {
-			this.gcwPoints = (((this.gcwPoints - gcwPoints) < 0) ? 0 : this.gcwPoints - gcwPoints);
+			this.gcwPoints = (((this.gcwPoints - gcwPoints) < 1) ? 1 : this.gcwPoints - gcwPoints);
 		}
 	}
 	
 	public int getLastUpdateTime() {
 		synchronized(objectMutex) {
-			return (int) lastUpdateTime;
+			return ((int) lastUpdateTime);
 		}
 	}
 
 	public byte[] getBytes() {
 		synchronized(objectMutex) {
 			IoBuffer buffer = bufferPool.allocate(4, false).order(ByteOrder.LITTLE_ENDIAN);
-			buffer.putInt(percent);
+			buffer.putInt(percent.intValue());
 			return buffer.array();
+		}
+	}
+	
+	@Override
+	public CurrentServerGCWZonePercent clone() {
+		try {
+			CurrentServerGCWZonePercent object = (CurrentServerGCWZonePercent) super.clone();
+			object.setPosition(getPosition());
+			return object;
+		} catch (CloneNotSupportedException e) {
+			e.printStackTrace();
+			return null;
 		}
 	}
 	

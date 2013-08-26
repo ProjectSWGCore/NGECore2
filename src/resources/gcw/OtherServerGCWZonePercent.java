@@ -25,9 +25,12 @@ import java.nio.ByteOrder;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
+import com.sleepycat.persist.model.Persistent;
+
 import resources.objects.ListObject;
 
-public class OtherServerGCWZonePercent extends ListObject {
+@Persistent
+public class OtherServerGCWZonePercent extends ListObject implements Cloneable {
 	
 	private String zone = "";
 	private int percent = 50;
@@ -48,9 +51,9 @@ public class OtherServerGCWZonePercent extends ListObject {
 		}
 	}
 	
-	public OtherServerGCWZonePercent setPercent(int percent) {
+	public OtherServerGCWZonePercent setPercent(double percent) {
 		synchronized(objectMutex) {
-			this.percent = percent;
+			this.percent = (int) percent;
 			return this;
 		}
 	}
@@ -61,6 +64,16 @@ public class OtherServerGCWZonePercent extends ListObject {
 			buffer.put(getAsciiString(zone));
 			buffer.putInt(percent);
 			return buffer.array();
+		}
+	}
+	
+	@Override
+	public OtherServerGCWZonePercent clone() {
+		try {
+			return (OtherServerGCWZonePercent) super.clone();
+		} catch (CloneNotSupportedException e) {
+			e.printStackTrace();
+			return null;
 		}
 	}
 	

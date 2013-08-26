@@ -51,5 +51,5 @@ public abstract class ListObject implements IListObject {
 	protected byte[] getUnicodeString(String string) {
 		return StringUtilities.getUnicodeString(string);
 	}
-
+	
 }

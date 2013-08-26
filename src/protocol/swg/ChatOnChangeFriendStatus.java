@@ -8,8 +8,6 @@ import org.apache.mina.core.buffer.IoBuffer;
 
 import engine.resources.config.Config;
 import engine.resources.config.DefaultConfig;
-import resources.objects.player.PlayerObject;
-
 
 public class ChatOnChangeFriendStatus extends SWGMessage {
 

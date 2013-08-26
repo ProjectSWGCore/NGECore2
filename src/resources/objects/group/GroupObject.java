@@ -21,6 +21,8 @@
  ******************************************************************************/
 package resources.objects.group;
 
+import java.util.Vector;
+
 import org.apache.mina.core.buffer.IoBuffer;
 
 import resources.objects.SWGList;
@@ -32,7 +34,7 @@ import engine.resources.scene.Quaternion;
 
 public class GroupObject extends SWGObject {
 	
-	private SWGList<SWGObject> memberList = new SWGList<SWGObject>();
+	private Vector<SWGObject> memberList = new Vector<SWGObject>();
 	private int memberListUpdateCounter;
 	private SWGObject groupLeader;
 	private SWGObject lootMaster;
@@ -45,7 +47,7 @@ public class GroupObject extends SWGObject {
 		messageBuilder = new GroupMessageBuilder(this);
 	}
 
-	public SWGList<SWGObject> getMemberList() {
+	public Vector<SWGObject> getMemberList() {
 		return memberList;
 	}
 
@@ -126,9 +128,10 @@ public class GroupObject extends SWGObject {
 		if(memberList.size() <= 0 || member.getClient() == null)
 			return;
 		
+		
 		setMemberListUpdateCounter(getMemberListUpdateCounter() + 1);
 		notifyObservers(messageBuilder.buildRemoveMemberDelta(member), false);
-				
+		
 		memberList.remove(member);
 		
 	}

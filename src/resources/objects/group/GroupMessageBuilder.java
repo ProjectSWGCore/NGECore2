@@ -93,8 +93,8 @@ public class GroupMessageBuilder extends ObjectMessageBuilder {
 		buffer.putInt(group.getMemberList().size());
 		buffer.putInt(group.getMemberListUpdateCounter());
 		
-		synchronized(group.getMemberList().getMutex()) {
-			for(SWGObject obj : group.getMemberList().get()) {
+		synchronized(group.getMemberList()) {
+			for(SWGObject obj : group.getMemberList()) {
 				buffer.putLong(obj.getObjectID());
 				buffer.put(getAsciiString(obj.getCustomName()));
 			}

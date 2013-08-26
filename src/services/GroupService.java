@@ -21,6 +21,8 @@
  ******************************************************************************/
 package services;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import resources.objects.creature.CreatureObject;
@@ -105,7 +107,7 @@ public class GroupService implements INetworkDispatch {
 
 		leader.sendSystemMessage("You invite " + member.getCustomName() + " to join the group.", (byte) 0);
 		member.setInviteCounter(member.getInviteCounter() + 1);
-		member.setInviteSenderId(member.getObjectId());
+		member.setInviteSenderId(leader.getObjectId());
 		member.setInviteSenderName(leader.getCustomName());
 		
 		member.updateGroupInviteInfo();
@@ -127,7 +129,111 @@ public class GroupService implements INetworkDispatch {
 		
 	}
 
+	public void handleGroupJoin(CreatureObject invited) {
+		
+		
+		if(invited.getInviteSenderId() == 0 || invited.getGroupId() != 0)
+			return;
+		
+		CreatureObject leader = (CreatureObject) core.objectService.getObject(invited.getInviteSenderId());
+		
+		if(leader == null)
+			return;
+
+		if(leader.getGroupId() == 0) {
+			
+			GroupObject group = (GroupObject) core.objectService.createObject("object/group/shared_group_object.iff", leader.getPlanet());
+			group.setGroupLeader(leader);
+			group.getMemberList().add(leader);
+			group.getMemberList().add(invited);
+			leader.makeAware(group);
+			leader.setGroupId(group.getObjectID());
+			invited.makeAware(group);
+			invited.setGroupId(group.getObjectID());
+			return;
+			
+		}
+		
+		GroupObject group = (GroupObject) core.objectService.getObject(leader.getGroupId());
+		
+		if(group != null && group.getMemberList().size() < 8) {
+			
+			group.addMember(invited);
+			invited.makeAware(group);
+			invited.setGroupId(group.getObjectID());	
+			invited.sendSystemMessage("@group:joined_self", (byte) 0);
+			
+		} else if(group.getMemberList().size() >= 8) {
+			
+			invited.sendSystemMessage("@group:full", (byte) 0);
+			invited.setInviteCounter(invited.getInviteCounter() + 1);
+			invited.setInviteSenderId(0);
+			invited.setInviteSenderName("");
+			invited.updateGroupInviteInfo();
+			
+			return;
+			
+		}
+		
+		
+		
+	}
 	
+	public void handleGroupDisband(CreatureObject creature) {
+		
+		if(creature.getGroupId() == 0)
+			return;
+		
+		GroupObject group = (GroupObject) core.objectService.getObject(creature.getGroupId());
+
+		if(group == null)
+			return;
+		
+		List<SWGObject> memberList = new ArrayList<SWGObject>(group.getMemberList());
+		
+		if(group.getGroupLeader() != creature && group.getMemberList().size() > 2) {
+			
+			group.removeMember(creature);
+			creature.setInviteCounter(creature.getInviteCounter() + 1);
+			creature.setInviteSenderId(0);
+			creature.setInviteSenderName("");
+			creature.updateGroupInviteInfo();
+			creature.setGroupId(0);
+			creature.makeUnaware(group);
+			creature.sendSystemMessage("You have left the group.", (byte) 0);
+			
+			for(SWGObject member : memberList) {
+				
+				CreatureObject creature2 = (CreatureObject) member;
+				creature2.sendSystemMessage(creature.getCustomName() + " has left the group.", (byte) 0);
+				
+			}
+			
+		} else {
+			
+			for(SWGObject member : memberList) {
+				
+				CreatureObject creature2 = (CreatureObject) member;
+				
+				creature2.setInviteCounter(creature2.getInviteCounter() + 1);
+				creature2.setInviteSenderId(0);
+				creature2.setInviteSenderName("");
+				creature2.updateGroupInviteInfo();
+				creature2.setGroupId(0);
+				
+				creature2.makeUnaware(group);
+				
+				creature2.sendSystemMessage("The group has been disbanded.", (byte) 0);
+
+			}
+			
+			core.objectService.destroyObject(group.getObjectID());
+			
+		}
+		
+	}
+
+
 	
 
 }

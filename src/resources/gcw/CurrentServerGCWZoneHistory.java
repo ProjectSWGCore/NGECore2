@@ -25,15 +25,18 @@ import java.nio.ByteOrder;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
+import com.sleepycat.persist.model.Persistent;
+
 import resources.objects.ListObject;
 
-public class CurrentServerGCWZoneHistory extends ListObject {
+@Persistent
+public class CurrentServerGCWZoneHistory extends ListObject implements Cloneable {
 	
 	private int lastUpdateTime;
 	private int percent;
 	
 	public CurrentServerGCWZoneHistory(CurrentServerGCWZonePercent zone) {
-		this.percent = zone.getPercent();
+		this.percent = zone.getPercent().intValue();
 		this.lastUpdateTime = zone.getLastUpdateTime();
 	}
 	
@@ -42,7 +45,7 @@ public class CurrentServerGCWZoneHistory extends ListObject {
 			return lastUpdateTime;
 		}
 	}
-	
+
 	public int getPercent() {
 		synchronized(objectMutex) {
 			return percent;
@@ -55,6 +58,15 @@ public class CurrentServerGCWZoneHistory extends ListObject {
 			buffer.putInt(lastUpdateTime);
 			buffer.putInt(percent);
 			return buffer.array();
+		}
+	}
+	
+	public CurrentServerGCWZoneHistory clone() {
+		try {
+			return (CurrentServerGCWZoneHistory) super.clone();
+		} catch (CloneNotSupportedException e) {
+			e.printStackTrace();
+			return null;
 		}
 	}
 	

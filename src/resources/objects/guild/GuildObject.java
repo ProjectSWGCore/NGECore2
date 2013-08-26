@@ -21,6 +21,9 @@
  ******************************************************************************/
 package resources.objects.guild;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 import org.apache.mina.core.buffer.IoBuffer;
 
 import main.NGECore;
@@ -33,19 +36,28 @@ import resources.objects.SWGList;
 import resources.objects.SWGMap;
 import resources.objects.SWGMultiMap;
 
+import com.sleepycat.je.Environment;
+import com.sleepycat.je.Transaction;
+import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.NotPersistent;
 
 import engine.clients.Client;
+import engine.resources.objects.IPersistent;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-public class GuildObject extends SWGObject {
+@Entity
+public class GuildObject extends SWGObject implements IPersistent {
 	
 	protected NGECore core;
 	@NotPersistent
 	private GuildMessageBuilder messageBuilder = new GuildMessageBuilder(this);
+
+	private Map<String, Map<String, CurrentServerGCWZonePercent>> zoneMap = new TreeMap<String, Map<String, CurrentServerGCWZonePercent>>();
+	@NotPersistent
+	private Transaction txn;
 	
 	// GILD 3
 	private float complexity = 0x803F0F00;
@@ -242,6 +254,12 @@ public class GuildObject extends SWGObject {
 		notifyAll(messageBuilder.buildUnknown3(unknown3));
 	}
 	
+	public Map<String, Map<String, CurrentServerGCWZonePercent>> getZoneMap() {
+		synchronized(objectMutex) {
+			return zoneMap;
+		}
+	}
+	
 	@Override
 	public void sendBaselines(Client destination) {
 		destination.getSession().write(messageBuilder.buildBaseline3());
@@ -254,6 +272,14 @@ public class GuildObject extends SWGObject {
 				client.getSession().write(buffer);
 			}
 		}
+	}
+	
+	public Transaction getTransaction() {
+		return txn;
+	}
+	
+	public void createTransaction(Environment env) {
+		txn = env.beginTransaction(null, null);
 	}
 	
 }

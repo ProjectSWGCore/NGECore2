@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import resources.objects.SWGList;
 import resources.objects.waypoint.WaypointObject;
 
 import com.sleepycat.persist.model.NotPersistent;
@@ -377,12 +376,14 @@ public class PlayerObject extends SWGObject {
 
 	public void friendAdd(String friend) {
 		synchronized(objectMutex) {
+			setFriendListUpdateCounter(getFriendListUpdateCounter() + 1);
 			getContainer().getClient().getSession().write(messageBuilder.buildFriendAddDelta(friend));
 		}
 	}
 	
 	public void friendRemove(String friend) {
 		synchronized(objectMutex) {
+			setFriendListUpdateCounter(getFriendListUpdateCounter() + 1);
 			getContainer().getClient().getSession().write(messageBuilder.buildFriendRemoveDelta(friend));
 		}
 	}

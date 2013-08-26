@@ -8,3 +8,4 @@ def run(core, actor, target, commandString):
     chatSvc = core.chatService
     chatSvc.removeFriend(ghost, commandString, 1)
     return
+    

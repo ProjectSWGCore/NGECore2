@@ -26,6 +26,7 @@ import java.nio.ByteOrder;
 import org.apache.mina.core.buffer.IoBuffer;
 
 import protocol.swg.ObjControllerMessage;
+import services.combat.CombatService.HitType;
 
 public class CombatSpam extends ObjControllerObject{
 
@@ -35,17 +36,32 @@ public class CombatSpam extends ObjControllerObject{
 	private String file;
 	private String text;
 	private byte colorFlag;
-	private long objectId;
+	private boolean hit = true;
+	private boolean critical = false;
+	private boolean dodge = false;
+	private boolean parry = false;
+	private boolean glance = false;
+	private long weaponId;
+	private int armorAbsorbed;
 
 
-	public CombatSpam(long attackerId, long defenderId, int damage, String file, String text, byte colorFlag, long objectId) {
+	public CombatSpam(long attackerId, long defenderId, long weaponId, int damage, int armorAbsorbed, int hitType) {
 		this.attackerId = attackerId;
 		this.defenderId = defenderId;
+		this.weaponId = weaponId;
 		this.damage = damage;
-		this.file = file;
-		this.text = text;
-		this.colorFlag = colorFlag;
-		this.objectId = objectId;
+		this.armorAbsorbed = armorAbsorbed;
+		
+		switch(hitType) {
+		
+			case HitType.CRITICAL: critical = true; break;
+			case HitType.DODGE: dodge = true; hit = false; break;
+			case HitType.GLANCE: glance = true; break;
+			case HitType.PARRY: parry = true; hit = false; break;
+			case HitType.MISS: hit = false; break;			
+		
+		}
+		
 	}
 	
 	public void deserialize(IoBuffer data) {
@@ -53,28 +69,55 @@ public class CombatSpam extends ObjControllerObject{
 	}
 	
 	public IoBuffer serialize() {
+		
 		IoBuffer result = IoBuffer.allocate(100).order(ByteOrder.LITTLE_ENDIAN);
+		result.setAutoExpand(true);
 		
 		result.putInt(ObjControllerMessage.COMBAT_SPAM);
-		
-		result.putLong(objectId);
-		result.putInt(0);
-		//result.put((byte) 2);	//unk
 		result.putLong(attackerId);
-		result.putLong(defenderId);
-		result.putLong(0);
-		result.putInt(damage);
-		result.putShort((short) file.length());
-		result.put(getAsciiString(file));
 		result.putInt(0);
-		result.putShort((short) text.length());
-		result.put(getAsciiString(text));
-		result.put(colorFlag);
+		result.put((byte) 0); //unk
+		result.putLong(attackerId);
+		result.putInt(0);
+		result.putInt(0); 
+		result.putInt(0);
+		result.putLong(defenderId);
+		result.putInt(0);
+		result.putInt(0); 
+		result.putInt(0);
+		result.putLong(weaponId);
+		result.putShort((short) 0); // unk
+		result.putInt(0xFFFFFFFF); // color?
+		result.putShort((short) 0); // unk
+		result.put((byte) ((boolean) hit ? 1 : 0)); // 0 = miss
+		result.put((byte) ((boolean) dodge ? 1 : 0)); // 1 = dodge
+		result.put((byte) ((boolean) parry ? 1 : 0)); // 1 = parry
+		result.put((byte) 0); // unk
+		result.putInt(0); // unk
+		result.put((byte) 0); //unk
+		result.putInt(2000); // unk
+		result.putInt(0); // type of elemental 1 = heat 2 = cold
+		result.putInt(0); // elemental damage
+		result.putInt(0x20); // unk
+		result.putInt(0); // unk
+		result.putInt(0); // unk
+		result.putInt(armorAbsorbed); // damage absorbed by armor
+		result.putInt(damage); // total damage done after armor without elemental
+		result.putInt(0); // punishing blow for all values
+		result.putInt(0); // unk
+		result.putInt(0); // unk
+		result.putInt(0); // unk
+		result.putInt(0); // unk
+		result.put((byte) ((boolean) critical ? 1 : 0)); //unk
+		result.put((byte) ((boolean) glance ? 1 : 0)); //unk
+		result.put((byte) 0); //unk
+		result.putInt(1); // unk
+
+		int packetSize = result.position();
+		result = IoBuffer.allocate(packetSize).put(result.array(), 0, packetSize);
+				
+		return result.flip();
 		
-		return result;
 	}
 	
-	public CombatSpam clone() {
-		return new CombatSpam(attackerId, defenderId, damage, file, text, colorFlag, objectId);
-	}
 }

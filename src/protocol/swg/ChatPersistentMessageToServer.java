@@ -89,7 +89,7 @@ public class ChatPersistentMessageToServer extends SWGMessage {
 							waypoint.active = false;
 
 						waypointAttachments.add(waypoint);
-						
+						System.out.println(waypoint.name);
 						if(appendByte > 0)
 							buffer.get();
 						

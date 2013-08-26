@@ -448,6 +448,10 @@ public class SimulationService implements INetworkDispatch {
 		CreatureObject object = (CreatureObject) client.getParent();
 		PlayerObject ghost = (PlayerObject) object.getSlottedObject("ghost");
 		
+		if(object.getGroupId() != 0)
+			core.groupService.handleGroupDisband(object);
+		
+		
 		if (ghost != null) {
 			String objectShortName = object.getCustomName();
 			

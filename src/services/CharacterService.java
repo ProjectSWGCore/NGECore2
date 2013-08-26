@@ -207,13 +207,13 @@ public class CharacterService implements INetworkDispatch {
 				// should set to some planet and starting location
 				String sharedRaceTemplate = raceTemplate.replace("player/", "player/shared_");
 				
-				CreatureObject object = (CreatureObject) core.objectService.createObject(sharedRaceTemplate, core.terrainService.getPlanetList().get(0));
+				CreatureObject object = (CreatureObject) core.objectService.createObject(sharedRaceTemplate, core.terrainService.getPlanetByName("naboo"));
 				object.setContainerPermissions(CreaturePermissions.CREATURE_PERMISSIONS);
 				object.setCustomization(clientCreateCharacter.getCustomizationData());
 				object.setCustomName(clientCreateCharacter.getName());
 				object.setHeight(clientCreateCharacter.getScale());
 				object.setPersistent(true);
-				object.setPosition(new Point3D(-1294, 12, -3590));
+				object.setPosition(new Point3D(-5567, 0, -32));
 				object.setCashCredits(100);
 				object.setBankCredits(1000);
 				//object.setPosition(new Point3D(0, 0, 0));

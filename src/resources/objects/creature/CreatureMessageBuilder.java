@@ -753,6 +753,47 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		return buffer;
 
 	}
+	
+	public IoBuffer buildAddSkillModDelta(String name, int base) {
+		
+		CreatureObject creature = (CreatureObject) object;
+		
+		IoBuffer buffer = bufferPool.allocate(19 + name.length(), false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putInt(1);
+		buffer.putInt(creature.getSkillModsUpdateCounter());
+		buffer.put((byte) 0);
+		buffer.put(getAsciiString(name));
+		buffer.putInt(base);
+		buffer.putInt(0);
+		
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 4, (short) 1, (short) 3, buffer, size + 4);
+		
+		return buffer;
+
+	}
+	
+	public IoBuffer buildRemoveSkillModDelta(String name, int base) {
+		
+		CreatureObject creature = (CreatureObject) object;
+		
+		IoBuffer buffer = bufferPool.allocate(19 + name.length(), false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putInt(1);
+		buffer.putInt(creature.getSkillModsUpdateCounter());
+		buffer.put((byte) 1);
+		buffer.put(getAsciiString(name));
+		buffer.putInt(base);
+		buffer.putInt(0);
+		
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 4, (short) 1, (short) 3, buffer, size + 4);
+		
+		return buffer;
+
+	}
+
 
 
 	

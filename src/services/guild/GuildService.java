@@ -41,7 +41,15 @@ public class GuildService implements INetworkDispatch {
 	public GuildService(NGECore core) {
 		this.core = core;
 		
-		object = (GuildObject) this.core.objectService.createObject("object/guild/shared_guild_object.iff", core.terrainService.getPlanetList().get(0));
+		for (SWGObject swgObject : core.objectService.getObjectList()) {
+			if (swgObject.getTemplate().equals("object/guild/shared_guild_object.iff") && swgObject instanceof GuildObject) {
+				object = (GuildObject) swgObject;
+			}
+		}
+		
+		if (object == null) {
+			object = (GuildObject) this.core.objectService.createObject("object/guild/shared_guild_object.iff", core.terrainService.getPlanetList().get(0));
+		}
 	}
 	
 	public Guild createGuild(String abbreviation, String name, SWGObject leader) {

@@ -41,20 +41,23 @@ import org.python.google.common.collect.TreeMultimap;
 import resources.common.StringUtilities;
 
 import com.sleepycat.persist.model.NotPersistent;
+import com.sleepycat.persist.model.Persistent;
 
 @SuppressWarnings("unused")
 
+@Persistent
 public class SWGMultiMap<K, V> implements Multimap<K, V> {
 	
 	private Multimap<K, V> map = ArrayListMultimap.create();
 	@NotPersistent
-	private int updateCounter;
-	
+	private int updateCounter = 0;
 	private ObjectMessageBuilder messageBuilder;
 	private byte viewType;
 	private short updateType;
-	
+	@NotPersistent
 	protected final Object objectMutex = new Object();
+	
+	public SWGMultiMap() { }
 	
 	public SWGMultiMap(ObjectMessageBuilder messageBuilder, int viewType, int updateType) {
 		this.messageBuilder = messageBuilder;
@@ -69,10 +72,6 @@ public class SWGMultiMap<K, V> implements Multimap<K, V> {
 			this.updateType = ((SWGMultiMap<K, V>) m).updateType;
 			map.putAll(m);
 		}
-	}
-	
-	public SWGMultiMap() {
-		
 	}
 	
 	public Map<K, Collection<V>> asMap() {
@@ -282,6 +281,10 @@ public class SWGMultiMap<K, V> implements Multimap<K, V> {
 		synchronized(objectMutex) {
 			return updateCounter;
 		}
+	}
+	
+	public Object getMutex() {
+		return objectMutex;
 	}
 	
 	private byte[] item(int type, Object index, byte[] data, boolean useIndex, boolean useData) {
