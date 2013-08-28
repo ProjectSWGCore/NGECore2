@@ -140,7 +140,7 @@ public class NGECore {
 		if (!(config.loadConfigFile())) {
 			config = DefaultConfig.getConfig();
 		}
-		
+
 		// Database
 		databaseConnection = new DatabaseConnection();
 		databaseConnection.connect(config.getString("DB.URL"), config.getString("DB.NAME"), config.getString("DB.USER"), config.getString("DB.PASS"), "postgresql");
@@ -234,7 +234,7 @@ public class NGECore {
 		didServerCrash = false;
 		System.out.println("Started Server.");
 		setGalaxyStatus(2);
-
+		
 	}
 	
 
@@ -369,6 +369,10 @@ public class NGECore {
 		clients.remove(connectionID);
 	}
 	
+	// for python scripts
+	public Thread getCurrentThread() {
+		return Thread.currentThread();
+	}
 	
 }
 

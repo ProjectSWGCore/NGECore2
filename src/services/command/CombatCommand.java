@@ -67,6 +67,7 @@ public class CombatCommand extends BaseSWGCommand {
 	private int damageType, elementalType, elementalValue;
 	private String performanceSpam;
 	private byte hitSpam;
+	private float cooldown;
 	
 	public CombatCommand(String commandName) {
 		super(commandName);
@@ -583,6 +584,14 @@ public class CombatCommand extends BaseSWGCommand {
 		
 		return animations[new Random().nextInt(animations.length)];
 		
+	}
+
+	public float getCooldown() {
+		return cooldown;
+	}
+
+	public void setCooldown(float cooldown) {
+		this.cooldown = cooldown;
 	}
 	
 	

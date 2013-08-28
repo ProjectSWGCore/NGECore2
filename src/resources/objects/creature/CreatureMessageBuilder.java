@@ -793,9 +793,80 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		return buffer;
 
 	}
+	
+	public IoBuffer buildAddSkillDelta(String name) {
+		
+		CreatureObject creature = (CreatureObject) object;
+		
+		IoBuffer buffer = bufferPool.allocate(11 + name.length(), false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putInt(1);
+		buffer.putInt(creature.getSkillsUpdateCounter());
+		buffer.put((byte) 1);
+		buffer.put(getAsciiString(name));
+		
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 1, (short) 1, (short) 3, buffer, size + 4);
+		
+		return buffer;
 
+	}
+	
+	public IoBuffer buildRemoveSkillDelta(String name) {
+		
+		CreatureObject creature = (CreatureObject) object;
+		
+		IoBuffer buffer = bufferPool.allocate(11 + name.length(), false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putInt(1);
+		buffer.putInt(creature.getSkillsUpdateCounter());
+		buffer.put((byte) 0);
+		buffer.put(getAsciiString(name));
+		
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 1, (short) 1, (short) 3, buffer, size + 4);
+		
+		return buffer;
 
+	}
+	
+	public IoBuffer buildAddAbilityDelta(String name) {
+		
+		CreatureObject creature = (CreatureObject) object;
+		
+		IoBuffer buffer = bufferPool.allocate(15 + name.length(), false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putInt(1);
+		buffer.putInt(creature.getAbilitiesUpdateCounter());
+		buffer.put((byte) 0);
+		buffer.put(getAsciiString(name));
+		buffer.putInt(1);
+		
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 4, (short) 1, (short) 0x0E, buffer, size + 4);
+		
+		return buffer;
 
+	}
+	
+	public IoBuffer buildRemoveAbilityDelta(String name) {
+		
+		CreatureObject creature = (CreatureObject) object;
+		
+		IoBuffer buffer = bufferPool.allocate(15 + name.length(), false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putInt(1);
+		buffer.putInt(creature.getAbilitiesUpdateCounter());
+		buffer.put((byte) 1);
+		buffer.put(getAsciiString(name));
+		buffer.putInt(1);
+		
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 4, (short) 1, (short) 0x0E, buffer, size + 4);
+		
+		return buffer;
+
+	}
 	
 	@Override
 	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {

@@ -23,7 +23,7 @@ package services.command;
 
 import engine.resources.common.CRC;
 
-public class BaseSWGCommand {
+public class BaseSWGCommand implements Cloneable {
 	
 	private String commandName;
 	private String clientEffectSelf;
@@ -75,5 +75,9 @@ public class BaseSWGCommand {
 	public void setCommandCRC(int commandCRC) {
 		this.commandCRC = commandCRC;
 	}
+	
+    protected Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
 
 }

@@ -21,6 +21,7 @@
  ******************************************************************************/
 package services;
 
+import java.nio.ByteOrder;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -29,7 +30,10 @@ import java.util.concurrent.TimeUnit;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 
+import protocol.swg.ClientIdMsg;
+import protocol.swg.ExpertiseRequestMessage;
 import protocol.swg.ServerTimeMessage;
+import resources.common.FileUtilities;
 import resources.common.Opcodes;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
@@ -120,6 +124,47 @@ public class PlayerService implements INetworkDispatch {
 			}
 			
 		});
+		
+		swgOpcodes.put(Opcodes.ExpertiseRequestMessage, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
+				
+				buffer = buffer.order(ByteOrder.LITTLE_ENDIAN);
+				buffer.position(0);
+				
+				ExpertiseRequestMessage expertise = new ExpertiseRequestMessage();
+				expertise.deserialize(buffer);
+
+				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				if(client == null) {
+					System.out.println("NULL Client");
+					return;
+				}
+
+				if(client.getParent() == null)
+					return;
+				
+				CreatureObject creature = (CreatureObject) client.getParent();
+				
+				for(String expertiseName : expertise.getExpertiseSkills()) {
+					handleExpertiseSkillBox(creature, expertiseName);
+				}
+				
+				
+			}
+			
+		});
+
+		
+	}
+	
+	public void handleExpertiseSkillBox(CreatureObject creature, String expertiseBox) {
+		
+		if(!FileUtilities.doesFileExist("scripts/expertise/" + expertiseBox + ".py"))
+			return;
+		
+		core.scriptService.callScript("scripts/expertise", "addExpertisePoint", expertiseBox, core, creature);
 		
 	}
 

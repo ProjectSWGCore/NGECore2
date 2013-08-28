@@ -205,6 +205,34 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			this.skillsUpdateCounter = skillsUpdateCounter;
 		}
 	}
+	
+	public void addSkill(String skill) {
+		
+		if(skills.contains(skill))
+			return;
+		
+		skills.add(skill);
+		
+		if(getClient() != null) {
+			setSkillsUpdateCounter((short) (getSkillsUpdateCounter() + 1));
+			getClient().getSession().write(messageBuilder.buildAddSkillDelta(skill));
+		}
+
+	}
+	
+	public void removeSkill(String skill) {
+		
+		if(!skills.contains(skill))
+			return;
+		
+		skills.remove(skill);
+		
+		if(getClient() != null) {
+			setSkillsUpdateCounter((short) (getSkillsUpdateCounter() + 1));
+			getClient().getSession().write(messageBuilder.buildRemoveSkillDelta(skill));
+		}
+		
+	}
 
 	@Override
 	public void setOptionsBitmask(int optionBitmask) {
@@ -391,8 +419,10 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		if(mod.getBase() <= 0) {
 			removeSkillMod(mod);
 		} else {
-			setSkillModsUpdateCounter((short) (getSkillModsUpdateCounter() + 1));
-			getClient().getSession().write(messageBuilder.buildAddSkillModDelta(name, mod.getBase()));
+			if(getClient() != null) {
+				setSkillModsUpdateCounter((short) (getSkillModsUpdateCounter() + 1));
+				getClient().getSession().write(messageBuilder.buildAddSkillModDelta(name, mod.getBase()));
+			}
 		}
 		
 	}
@@ -554,9 +584,35 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 	}
 	
+	
 	public void addAbility(String abilityName) {
+		
+		if(abilities.contains(abilityName))
+			return;
+		
 		abilities.add(abilityName);
+		
+		if(getClient() != null) {
+			setAbilitiesUpdateCounter((short) (getAbilitiesUpdateCounter() + 1));
+			getClient().getSession().write(messageBuilder.buildAddAbilityDelta(abilityName));
+		}
+
 	}
+	
+	public void removeAbility(String abilityName) {
+		
+		if(!abilities.contains(abilityName))
+			return;
+		
+		abilities.remove(abilityName);
+		
+		if(getClient() != null) {
+			setAbilitiesUpdateCounter((short) (getAbilitiesUpdateCounter() + 1));
+			getClient().getSession().write(messageBuilder.buildRemoveAbilityDelta(abilityName));
+		}
+		
+	}
+
 
 	public SWGList<MissionCriticalObject> getMissionCriticalObjects() {
 		return missionCriticalObjects;

@@ -21,6 +21,7 @@
  ******************************************************************************/
 package services.combat;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -31,12 +32,14 @@ import protocol.swg.objectControllerObjects.CombatAction;
 import protocol.swg.objectControllerObjects.CombatSpam;
 import protocol.swg.objectControllerObjects.CommandEnqueueRemove;
 import protocol.swg.objectControllerObjects.StartTask;
+import resources.common.FileUtilities;
 import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 import services.command.CombatCommand;
 import main.NGECore;
 import engine.resources.common.CRC;
+import engine.resources.objects.SWGObject;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
@@ -75,9 +78,13 @@ public class CombatService implements INetworkDispatch {
 		if(!applySpecialCost(attacker, weapon, command))
 			return;
 		
-		if(!attemptCombat(attacker, target))
+		if((command.getAttackType() == 0 || command.getAttackType() == 1 || command.getAttackType() == 3) && !attemptCombat(attacker, target))
 			return;
 
+		// use preRun for delayed effects like officer orbital strike, grenades etc.
+		if(FileUtilities.doesFileExist("scripts/commands/combat" + command.getCommandName() + ".py"))
+			core.scriptService.callScript("scripts/commands/combat", command.getCommandName(), "preRun", core, attacker, target, command);
+		
 		if(command.getAttackType() == 1)
 			doSingleTargetCombat(attacker, target, weapon, command, actionCounter);
 		else if(command.getAttackType() == 0 || command.getAttackType() == 2 || command.getAttackType() == 3)
@@ -102,6 +109,38 @@ public class CombatService implements INetworkDispatch {
 	}
 	
 	private void doAreaCombat(CreatureObject attacker, CreatureObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {
+		
+		float x = attacker.getWorldPosition().x;
+		float z = attacker.getWorldPosition().z;
+		
+		float dirX = target.getWorldPosition().x - x;
+		float dirZ = target.getWorldPosition().z - z;
+		
+		float range = command.getConeLength();
+		
+		
+		List<SWGObject> inRangeObjects = core.simulationService.get(attacker.getPlanet(), target.getWorldPosition().x, target.getWorldPosition().z, (int) range);
+		
+		for(SWGObject obj : inRangeObjects) {
+			
+			if(!(obj instanceof TangibleObject) || obj == attacker)
+				continue;
+			
+			if(obj instanceof CreatureObject && (((CreatureObject) obj).getPosture() == 13 || ((CreatureObject) obj).getPosture() == 14))
+				continue;
+
+			if(command.getAttackType() == 0 && !isInConeAngle(attacker, obj, (int) command.getConeLength(), (int) command.getConeWidth(), dirX, dirZ))
+				continue;
+			
+			if(!core.simulationService.checkLineOfSight(target, obj))
+				continue;
+			
+			if(!attemptCombat(attacker, (TangibleObject) obj))
+				continue;
+			
+			doSingleTargetCombat(attacker, (TangibleObject) obj, weapon, command, actionCounter);
+			
+		}
 		
 	}
 
@@ -158,6 +197,9 @@ public class CombatService implements INetworkDispatch {
 			applyDamage(attacker, target, (int) damage);
 		
 		sendCombatPackets(attacker, target, weapon, command, actionCounter, damage, armorAbsorbed, hitType);
+
+		if(FileUtilities.doesFileExist("scripts/commands/combat" + command.getCommandName() + ".py"))
+			core.scriptService.callScript("scripts/commands/combat", command.getCommandName(), "run", core, attacker, target, null);
 
 	}
 	
@@ -491,7 +533,7 @@ public class CombatService implements INetworkDispatch {
 		
 	}
 	
-	private boolean isInConeAngle(CreatureObject attacker, CreatureObject target, int coneLength, int coneWidth, float directionX, float directionZ) {
+	private boolean isInConeAngle(CreatureObject attacker, SWGObject target, int coneLength, int coneWidth, float directionX, float directionZ) {
 		
 		float radius = coneWidth / 2;
 		float angle = (float) (2 * Math.atan(coneLength / radius));
