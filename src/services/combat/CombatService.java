@@ -49,16 +49,7 @@ public class CombatService implements INetworkDispatch {
 
 	public CombatService(NGECore core) {
 		this.core = core;
-		core.commandService.registerCombatCommand("rangedshotrifle");
-		core.commandService.registerCombatCommand("rangedshotpistol");
-		core.commandService.registerCombatCommand("rangedshotlightrifle");
-		core.commandService.registerCombatCommand("rangedshot");
-		core.commandService.registerCombatCommand("meleehit");
-		core.commandService.registerCombatCommand("saberhit");
-		core.commandService.registerCombatCommand("fs_sweep_7");
-		core.commandService.registerCombatCommand("fs_dm_7");
-		core.commandService.registerCombatCommand("fs_dm_cc_6");
-		core.commandService.registerCombatCommand("fs_ae_dm_cc_6");
+		CombatCommands.registerCommands(core);
 	}
 
 	@Override
@@ -188,7 +179,7 @@ public class CombatService implements INetworkDispatch {
 		int armorAbsorbed = (int) (damageBeforeArmor - damage);
 		if(mitigationType == HitType.BLOCK) {
 				
-			float blockValue = (attacker.getSkillMod("strength_modified").getBase() * attacker.getSkillMod("combat_block_value").getBase()) / 2 + 25;
+			float blockValue = (attacker.getSkillMod("strength_modified").getBase() + attacker.getSkillMod("combat_block_value").getBase()) / 2 + 25;
 			damage -= blockValue;
 			
 		}

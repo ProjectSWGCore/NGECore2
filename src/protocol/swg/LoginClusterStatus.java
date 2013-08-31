@@ -55,17 +55,12 @@ public class LoginClusterStatus extends SWGMessage {
 		result.putShort((short)serverPort);
 		result.putShort((short)pingPort);
 		result.putInt(population); // ServerPopulation, if not 0xFFFFFFFF then it will show the population in brackets 
-		if(population >= 300 && population < 600)
-			populationStatus = 1;
-		else if(population < 900)
-			populationStatus = 2;
-		else if(population < 1200)
-			populationStatus = 3;
-		else if(population < 1500)
-			populationStatus = 4;
-		else if(population < 3000)
-			populationStatus = 5;
-		else if(population == 3000) {
+		if (population >= 300 && population < 600) populationStatus = 1;
+		else if (population >= 600 && population < 900) populationStatus = 2;
+		else if (population >= 900 && population < 1200) populationStatus = 3;
+		else if (population >= 1200 && population < 1500) populationStatus = 4;
+		else if (population >= 1500 && population < 3000) populationStatus = 5;
+		else if (population == 3000) {
 			populationStatus = 6;
 			status = 3;
 		}

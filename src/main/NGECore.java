@@ -219,8 +219,9 @@ public class NGECore {
 		zoneDispatch.addService(simulationService);
 		
 		// Static Spawns
-		//staticService = new StaticService(this);
-		//staticService.spawnPlanetStaticObjs("rori");
+		staticService = new StaticService(this);
+		staticService.spawnStatics();
+		
 		
 		guildService = new GuildService(this);
 		zoneDispatch.addService(guildService);

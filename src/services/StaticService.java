@@ -40,6 +40,12 @@ public class StaticService implements INetworkDispatch {
 		this.core = core;
 	}
 
+	public void spawnStatics() {
+		spawnPlanetStaticObjs("rori");
+		spawnPlanetStaticObjs("naboo");
+		spawnPlanetStaticObjs("tatooine");
+	}
+	
 	@Override
 	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> arg0, Map<Integer, INetworkRemoteEvent> arg1) {
 		
@@ -54,14 +60,13 @@ public class StaticService implements INetworkDispatch {
 		Planet planetObj = (Planet) core.terrainService.getPlanetByName(planet);
 		core.scriptService.callScript("scripts/static_spawns", "addPlanetSpawns", planetObj.getName(), core, planetObj);
 		System.out.println("Loaded static objs for " + planetObj.getName());
-		//spawnObject("object/static/worldbuilding/structures/shared_mun_nboo_bank_destroyed.iff", "rori", (long) 0, (float) 5180.96, (float) 80, (float) 5583.95, (float) 0, (float) 1);
 	}
 	
 	public void spawnObject(String template, String planetName, long cellId, float x, float y, float z, float qY, float qW) {
 		
 		Planet planet = core.terrainService.getPlanetByName(planetName);
 		
-		System.out.println("template: " + template + " x: " + x + " y: " + y + " z: " + z);
+		//System.out.println("template: " + template + " x: " + x + " y: " + y + " z: " + z);
 		
 		if(planet == null) {
 			System.out.println("Cant spawn static object because planet is null");
@@ -75,8 +80,11 @@ public class StaticService implements INetworkDispatch {
 			return;
 		}
 		
-		if(cellId == 0)
-			core.simulationService.add(object, (float) x, (float) y);
+		if(cellId == 0) {
+			boolean add = core.simulationService.add(object, (float) x, (float) z);
+			if(!add)
+				System.out.println("Quadtree insert failed for: " + template);
+		}
 		else {
 			SWGObject parent = core.objectService.getObject(cellId);
 			if(parent == null) {

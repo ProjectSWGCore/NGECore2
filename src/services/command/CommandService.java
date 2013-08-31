@@ -112,16 +112,15 @@ public class CommandService implements INetworkDispatch  {
 	
 	public BaseSWGCommand registerCommand(String name) {
 		
-		BaseSWGCommand command = new BaseSWGCommand(name);
+		BaseSWGCommand command = new BaseSWGCommand(name.toLowerCase());
 		commandLookup.add(command);
-		
 		return command;
 		
 	}
 
 	public CombatCommand registerCombatCommand(String name) {
 		
-		CombatCommand command = new CombatCommand(name);
+		CombatCommand command = new CombatCommand(name.toLowerCase());
 		commandLookup.add(command);
 		return command;
 		

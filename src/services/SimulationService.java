@@ -106,7 +106,7 @@ public class SimulationService implements INetworkDispatch {
 		List<SWGObject> objectList = core.objectService.getObjectList();
 		synchronized(objectList) {
 			for(SWGObject obj : objectList) {
-				if(obj.getParentId() == 0) {
+				if(obj.getParentId() == 0 && obj.isInSnapshot()) {
 					add(obj, obj.getPosition().x, obj.getPosition().z);
 				}
 			}
@@ -143,9 +143,9 @@ public class SimulationService implements INetworkDispatch {
 		quadTrees.get(object.getPlanet().getName()).put(x, y, object);
 	}
 	
-	public void add(SWGObject object, float x, float y) {
+	public boolean add(SWGObject object, float x, float y) {
 		object.setIsInQuadtree(true);
-		quadTrees.get(object.getPlanet().getName()).put(x, y, object);
+		return quadTrees.get(object.getPlanet().getName()).put(x, y, object);
 	}
 	
 	public boolean move(SWGObject object, int oldX, int oldY, int newX, int newY) {
@@ -254,6 +254,7 @@ public class SimulationService implements INetworkDispatch {
 				for(int i = 0; i < newAwareObjects.size(); i++) {
 					SWGObject obj = newAwareObjects.get(i);
 					if(!updateAwareObjects.contains(obj) && obj != object && !object.getAwareObjects().contains(obj) && obj.getWorldPosition().getDistance2D(newPos) <= 200 && obj.getContainer() != object && obj.isInQuadtree()) {						
+						System.out.println(obj.getTemplate());						
 						object.makeAware(obj);
 						if(obj.getClient() != null)
 							obj.makeAware(object);
