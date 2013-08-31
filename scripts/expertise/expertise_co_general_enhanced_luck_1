@@ -44,3 +44,4 @@ def addAbilities(core, actor, player):
 def removeAbilities(core, actor, player):
 
 	return
+	
