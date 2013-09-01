@@ -1,0 +1,2 @@
+expertise_co_improved_explosives_1
+expertise_damage_line_co_remote_detonator=75
