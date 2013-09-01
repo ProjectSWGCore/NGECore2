@@ -306,6 +306,9 @@ public class CombatService implements INetworkDispatch {
 		if(actionCost == 0 && healthCost == 0)
 			return true;
 		
+		if(attacker.getSkillMod("expertise_action_all") != null)
+			actionCost *= attacker.getSkillMod("expertise_action_all").getBase();
+		
 		float newAction = attacker.getAction() - actionCost;
 		if(newAction <= 0)
 			return false;
@@ -544,6 +547,95 @@ public class CombatService implements INetworkDispatch {
 				
 	}
 	
+	public boolean attemptHeal(CreatureObject healer, CreatureObject target) {
+		
+		if(healer == target)
+			return true;
+		
+		if(healer.getFaction().equals(target.getFaction())) {
+			
+			if(healer.getFactionStatus() < target.getFactionStatus())
+				return false;
+			
+			return true;
+			
+		} else {
+			
+			if(target.getFactionStatus() == 0)
+				return true;
+			
+			return false;
+			
+		}
+		
+	}
+	
+	public void doHeal(CreatureObject healer, CreatureObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {
+		
+		if(!applySpecialCost(healer, weapon, command))
+			return;
+		
+		if((command.getAttackType() == 0 || command.getAttackType() == 1 || command.getAttackType() == 3) && !attemptHeal(healer, target))	
+			return;
+		
+		if(command.getAttackType() == 1)
+			doSingleTargetHeal(healer, target, weapon, command, actionCounter);
+		else if(command.getAttackType() == 0 || command.getAttackType() == 2 || command.getAttackType() == 3)
+			doAreaHeal(healer, target, weapon, command, actionCounter);
+		
+	}
+	
+	private void doSingleTargetHeal(CreatureObject healer, CreatureObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {
+		
+		int healAmount = command.getAddedDamage();
+		
+		if(healer.getSkillMod("expertise_healing_all") != null) {
+			int healPotency = healer.getSkillMod("expertise_healing_all").getBase();
+			if(healer.getSkillMod("expertise_healing_line_me_heal") != null)
+				healPotency += healer.getSkillMod("expertise_healing_line_me_heal").getBase();
+			if(healer.getSkillMod("expertise_healing_line_of_heal") != null)
+				healPotency += healer.getSkillMod("expertise_healing_line_of_heal").getBase();
+			if(healer.getSkillMod("expertise_healing_line_sm_heal") != null)
+				healPotency += healer.getSkillMod("expertise_healing_line_sm_heal").getBase();
+			if(healer.getSkillMod("expertise_healing_line_sp_heal") != null)
+				healPotency += healer.getSkillMod("expertise_healing_line_sp_heal").getBase();
+			healAmount += (healAmount * (healPotency / 100));
+		}
+		
+		target.setHealth(target.getHealth() + healAmount);
+		
+		if(FileUtilities.doesFileExist("scripts/commands/combat" + command.getCommandName() + ".py"))
+			core.scriptService.callScript("scripts/commands/combat", command.getCommandName(), "run", core, healer, target, null);
+		
+	}
+	
+	private void doAreaHeal(CreatureObject healer, CreatureObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {
+		
+		float range = command.getConeLength();
+		
+		List<SWGObject> inRangeObjects = core.simulationService.get(healer.getPlanet(), target.getWorldPosition().x, target.getWorldPosition().z, (int) range);
+		
+		for(SWGObject obj : inRangeObjects) {
+			
+			if(!(obj instanceof CreatureObject))
+				continue;
+			
+			if(obj instanceof CreatureObject && (((CreatureObject) obj).getPosture() == 14))
+				continue;
+			
+			if(!core.simulationService.checkLineOfSight(target, obj))
+				continue;
+			
+			if(!attemptHeal(healer, (CreatureObject) obj))
+				continue;
+			
+			doSingleTargetHeal(healer, (CreatureObject) obj, weapon, command, actionCounter);
+			
+		}
+
+		
+	}
+
 	
 
 	public enum HitType{; 

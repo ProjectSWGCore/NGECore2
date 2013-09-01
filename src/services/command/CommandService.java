@@ -142,7 +142,10 @@ public class CommandService implements INetworkDispatch  {
 		
 		boolean success = true;
 		
-		if(!(command.getAttackType() == 0) && !(command.getAttackType() == 2) && !(command.getAttackType() == 3)) {
+		if((command.getHitType() == 5 || command.getHitType() == 7) && !(target instanceof CreatureObject))
+			success = false;
+		
+		if(!(command.getAttackType() == 2) && !(command.getHitType() == 5)) {
 			if(target == null || !(target instanceof TangibleObject) || target == attacker)
 				success = false;
 		} else {
@@ -153,11 +156,15 @@ public class CommandService implements INetworkDispatch  {
 		}
 		
 		if(attacker.getPosture() == 13 || attacker.getPosture() == 14)
-			success = false;
+				success = false;
 		
 		if(target instanceof CreatureObject) {
-			if(((CreatureObject) target).getPosture() == 13 || ((CreatureObject) target).getPosture() == 14)
-				success = false;
+			if(!(command.getHitType() == 5))
+				if(((CreatureObject) target).getPosture() == 13)
+					success = false;
+			if(!(command.getHitType() == 7))
+				if(((CreatureObject) target).getPosture() == 14)
+					success = false;
 		}
 		
 		WeaponObject weapon;
@@ -200,6 +207,12 @@ public class CommandService implements INetworkDispatch  {
 			ObjControllerMessage objController = new ObjControllerMessage(0x0B, commandRemove);
 			attacker.getClient().getSession().write(objController.serialize());
 		} else {
+			
+			if(command.getHitType() == 5) {
+				core.combatService.doHeal(attacker, (CreatureObject) target, weapon, command, actionCounter);
+				return;
+			}
+				
 			core.combatService.doCombat(attacker, (TangibleObject) target, weapon, command, actionCounter);
 		}
 		
