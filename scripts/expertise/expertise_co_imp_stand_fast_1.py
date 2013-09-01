@@ -12,8 +12,8 @@ def addExpertisePoint(core, actor):
 		
 	actor.addSkill('expertise_co_imp_stand_fast_1')
 	
-	actor.addSkillMod('expertise_cooldown_line_co_stand_fast', 120)
-	actor.addSkillMod('expertise_buff_duration_line_co_stand_fast', 2)
+	actor.addSkillMod('expertise_cooldown_line_co_stand_fast', 1.2)
+	actor.addSkillMod('expertise_buff_duration_line_co_stand_fast', 0.2)
 	
 	addAbilities(core, actor, player)
 
@@ -31,8 +31,8 @@ def removeExpertisePoint(core, actor):
 		
 	actor.removeSkill('expertise_co_imp_stand_fast_1')
 	
-	actor.removeSkillMod('expertise_cooldown_line_co_stand_fast', 120)
-	actor.removeSkillMod('expertise_buff_duration_line_co_stand_fast', 2)
+	actor.removeSkillMod('expertise_cooldown_line_co_stand_fast', 1.2)
+	actor.removeSkillMod('expertise_buff_duration_line_co_stand_fast', 0.2)
 		
 	removeAbilities(core, actor, player)
 
