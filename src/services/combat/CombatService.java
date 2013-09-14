@@ -24,10 +24,14 @@ package services.combat;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
 import protocol.swg.ObjControllerMessage;
+import protocol.swg.UpdatePVPStatusMessage;
 import protocol.swg.objectControllerObjects.CombatAction;
 import protocol.swg.objectControllerObjects.CombatSpam;
 import protocol.swg.objectControllerObjects.CommandEnqueueRemove;
@@ -46,6 +50,7 @@ import engine.resources.service.INetworkRemoteEvent;
 public class CombatService implements INetworkDispatch {
 	
 	private NGECore core;
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
 	public CombatService(NGECore core) {
 		this.core = core;
@@ -281,7 +286,7 @@ public class CombatService implements INetworkDispatch {
 	}
 
 	private boolean attemptCombat(CreatureObject attacker, TangibleObject target) {
-		
+				
 		if(target.getDefendersList().contains(attacker) && attacker.getDefendersList().contains(target))
 			return true;
 		
@@ -422,7 +427,6 @@ public class CombatService implements INetworkDispatch {
 	
 	public byte getHitType(CreatureObject attacker, CreatureObject target, WeaponObject weapon, CombatCommand command) {
 		
-		Random rand = new Random();
 		float r;
 
 		// negation rolls(parry, miss and dodge) can only roll on single target attacks, strikethrough also only rolls on single target attacks
@@ -436,13 +440,13 @@ public class CombatService implements INetworkDispatch {
 						missNegation = 0.4f;
 					missChance -= missNegation;
 				}
-				r = rand.nextFloat();
+				r = new Random().nextFloat();
 				if(r <= missChance)
 					return HitType.MISS;
 			}
 			float dodgeChance = target.getSkillMod("display_only_dodge").getBase() / 10000;
 	
-			r = rand.nextFloat();
+			r = new Random().nextFloat();
 			if(r <= dodgeChance)
 				return HitType.DODGE;
 			
@@ -452,7 +456,7 @@ public class CombatService implements INetworkDispatch {
 				
 				float parryChance = target.getSkillMod("display_only_parry").getBase() / 10000;
 	
-				r = rand.nextFloat();
+				r = new Random().nextFloat();
 				if(r <= parryChance)
 					return HitType.PARRY;
 					
@@ -460,7 +464,7 @@ public class CombatService implements INetworkDispatch {
 			
 			float stChance = attacker.getSkillMod("display_only_strikethrough").getBase() / 10000;
 			
-			r = rand.nextFloat();
+			r = new Random().nextFloat();
 			if(r <= stChance)
 				return HitType.STRIKETHROUGH;
 
@@ -468,7 +472,7 @@ public class CombatService implements INetworkDispatch {
 
 		float critChance = attacker.getSkillMod("display_only_critical").getBase() / 10000;
 		
-		r = rand.nextFloat();
+		r = new Random().nextFloat();
 		if(r <= critChance)
 			return HitType.CRITICAL;
 		
@@ -480,12 +484,11 @@ public class CombatService implements INetworkDispatch {
 	
 	public byte doMitigationRolls(CreatureObject attacker, CreatureObject target, WeaponObject weapon, CombatCommand command, byte hitType) {
 		
-		Random rand = new Random();
 		float r;
 					
 		float blockChance = target.getSkillMod("display_only_block").getBase() / 10000;
 			
-		r = rand.nextFloat();
+		r = new Random().nextFloat();
 		if(r <= blockChance)
 			return HitType.BLOCK;
 			
@@ -493,7 +496,7 @@ public class CombatService implements INetworkDispatch {
 				
 			float evasionChance = target.getSkillMod("display_only_evasion").getBase() / 10000;
 				
-			r = rand.nextFloat();
+			r = new Random().nextFloat();
 			if(r <= evasionChance)
 				return HitType.EVASION;
 
@@ -503,7 +506,7 @@ public class CombatService implements INetworkDispatch {
 			
 			float glanceChance = target.getSkillMod("display_only_glancing_blow").getBase() / 10000;
 			
-			r = rand.nextFloat();
+			r = new Random().nextFloat();
 			if(r <= glanceChance)
 				return HitType.GLANCE;
 
@@ -514,16 +517,45 @@ public class CombatService implements INetworkDispatch {
 		
 	}
 	
-	public void applyDamage(CreatureObject attacker, CreatureObject target, int damage) {
+	public void applyDamage(CreatureObject attacker, final CreatureObject target, int damage) {
 		
 		if(target.getHealth() - damage <= 0) {
-			target.setHealth(1);
-			target.setPosture((byte) 13);
+			synchronized(target.getMutex()) {
+				target.setHealth(1);
+				target.setPosture((byte) 13);
+				target.setTurnRadius(0);
+				target.setSpeedMultiplierBase(0);
+				target.resetHAMList();
+			}
+			attacker.resetHAMList();
+			scheduler.schedule(new Runnable() {
+
+				@Override
+				public void run() {
+					
+					synchronized(target.getMutex()) {
+
+						if(target.getPosture() != 13)
+							return;
+						
+						//target.resetHAMList();
+						target.setPosture((byte) 0);
+						target.setTurnRadius(1);
+						target.setSpeedMultiplierBase(1);
+					
+					}
+
+				}
+				
+			}, target.getIncapTimer(), TimeUnit.SECONDS);
+			core.buffService.addBuffToCreature(target, "incapWeaken");
 			if(target.getSlottedObject("ghost") != null)
 				attacker.sendSystemMessage("You incapacitate " + target.getCustomName() + ".", (byte) 0);
 			return;
 		}
-		target.setHealth(target.getHealth() - damage);
+		synchronized(target.getMutex()) {
+			target.setHealth(target.getHealth() - damage);
+		}
 		
 	}
 	
@@ -602,7 +634,9 @@ public class CombatService implements INetworkDispatch {
 			healAmount += (healAmount * (healPotency / 100));
 		}
 		
-		target.setHealth(target.getHealth() + healAmount);
+		synchronized(target.getMutex()) {
+			target.setHealth(target.getHealth() + healAmount);
+		}
 		
 		if(FileUtilities.doesFileExist("scripts/commands/combat" + command.getCommandName() + ".py"))
 			core.scriptService.callScript("scripts/commands/combat", command.getCommandName(), "run", core, healer, target, null);
@@ -633,9 +667,65 @@ public class CombatService implements INetworkDispatch {
 			
 		}
 
-		
 	}
 
+	public void deathblowPlayer(CreatureObject attacker, CreatureObject target) {
+		
+		target.setPosture((byte) 14);
+		attacker.sendSystemMessage("You have killed " + target.getCustomName() + ".", (byte) 0);
+		attacker.removeDefender(target);
+		target.removeDefender(attacker);
+		
+		// TODO: Create Clone SUI Window
+		
+	}
+	
+	public boolean areInDuel(CreatureObject creature1, CreatureObject creature2) {
+		
+		if(creature1.getDuelList().contains(creature2) && creature2.getDuelList().contains(creature1))
+			return true;
+		
+		return false;
+		
+	}
+	
+	public void handleDuel(CreatureObject requester, CreatureObject target) {
+		
+		if(!target.getDuelList().contains(requester)) {
+			
+			requester.getDuelList().add(target);
+			requester.sendSystemMessage("You challenge " + target.getCustomName() + " to a duel.", (byte) 0);
+			target.sendSystemMessage(requester.getCustomName() + " challenges you to a duel.", (byte) 0);
+			return;
+			
+		} else {
+			
+			requester.getDuelList().add(target);
+			requester.sendSystemMessage("You accept " + target.getCustomName() + "'s challenge.", (byte) 0);
+			target.sendSystemMessage(requester.getCustomName() + " accepts your challenge.", (byte) 0);
+			target.getClient().getSession().write(new UpdatePVPStatusMessage(requester.getObjectID(), 55, requester.getFaction()).serialize());
+			requester.getClient().getSession().write(new UpdatePVPStatusMessage(target.getObjectID(), 55, target.getFaction()).serialize());
+			
+		}
+		
+		
+	}
+	
+	public void handleEndDuel(CreatureObject requester, CreatureObject target) {
+		
+		requester.getDuelList().remove(target);
+		target.getDuelList().remove(requester);
+		
+		target.removeDefender(requester);
+		requester.removeDefender(target);
+		
+		target.getClient().getSession().write(new UpdatePVPStatusMessage(requester.getObjectID(), 0x16, requester.getFaction()).serialize());
+		requester.getClient().getSession().write(new UpdatePVPStatusMessage(target.getObjectID(), 0x16, target.getFaction()).serialize());
+		
+		requester.sendSystemMessage("You end your duel with " + target.getCustomName() + ".", (byte) 0);
+		target.sendSystemMessage(requester.getCustomName() + " ends your duel.", (byte) 0);
+
+	}
 	
 
 	public enum HitType{; 

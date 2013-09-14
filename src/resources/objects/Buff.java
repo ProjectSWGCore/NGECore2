@@ -111,7 +111,7 @@ public class Buff implements IListObject {
 		
 		IoBuffer buffer = bufferPool.allocate(28, false).order(ByteOrder.LITTLE_ENDIAN);
 		
-		buffer.putInt(CRC.StringtoCRC(buffName));
+		buffer.putInt(CRC.StringtoCRC(buffName.toLowerCase()));
 		if(duration > 0) {
 			buffer.putInt((int) (totalPlayTime + getRemainingDuration()));		
 			buffer.putInt(0);
@@ -119,7 +119,7 @@ public class Buff implements IListObject {
 		} else {
 			buffer.putInt(-1);
 			buffer.putInt(0);
-			buffer.putInt(-1);
+			buffer.putInt(0);
 		}
 		buffer.putLong(ownerId);
 		buffer.putInt(1);	// unk

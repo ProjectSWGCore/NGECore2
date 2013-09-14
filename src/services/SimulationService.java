@@ -136,6 +136,10 @@ public class SimulationService implements INetworkDispatch {
 		core.commandService.registerCommand("addfriend");
 		core.commandService.registerCommand("removefriend");
 		core.commandService.registerCommand("getfriendlist");
+		core.commandService.registerCommand("deathblow");
+		core.commandService.registerCommand("endduel");
+		core.commandService.registerCommand("duel");
+
 	}
 	
 	public void add(SWGObject object, int x, int y) {
@@ -663,7 +667,7 @@ public class SimulationService implements INetworkDispatch {
 			if(object == obj1 || object == obj2)
 				continue;
 			
-			if(object.getTemplateData().getAttribute("collisionActionBlockFlags") != null) {
+			if(object.getTemplateData() != null && object.getTemplateData().getAttribute("collisionActionBlockFlags") != null) {
 				int bit = (Integer) object.getTemplateData().getAttribute("collisionActionBlockFlags") & 255;
 				if(bit == (Integer) object.getTemplateData().getAttribute("collisionActionBlockFlags"))
 					continue;

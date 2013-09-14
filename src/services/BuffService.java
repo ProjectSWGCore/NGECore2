@@ -79,16 +79,19 @@ public class BuffService implements INetworkDispatch {
 		core.scriptService.callScript("scripts/buffs", "setup", buffName, core, creature, buff);
 		
 		creature.addBuff(buff);
-		scheduler.schedule(new Runnable() {
-
-			@Override
-			public void run() {
+		
+		if(buff.getDuration() > 0) {
+			scheduler.schedule(new Runnable() {
+	
+				@Override
+				public void run() {
+					
+					removeBuffFromCreature(creature, buff);
+					
+				}
 				
-				removeBuffFromCreature(creature, buff);
-				
-			}
-			
-		}, (long) buff.getDuration(), TimeUnit.SECONDS);
+			}, (long) buff.getDuration(), TimeUnit.SECONDS);
+		}
 		
 	}
 	

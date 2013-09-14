@@ -25,6 +25,8 @@ import java.nio.ByteOrder;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
+import engine.resources.common.CRC;
+
 import protocol.swg.SWGMessage;
 
 public class UpdatePVPStatusMessage extends SWGMessage {
@@ -36,6 +38,13 @@ public class UpdatePVPStatusMessage extends SWGMessage {
 	public UpdatePVPStatusMessage(long objectId) {
 		this.objectId = objectId;
 	}
+	
+	public UpdatePVPStatusMessage(long objectId, int pvpStatus, String faction) {
+		this.objectId = objectId;
+		this.pvpStatus = pvpStatus;
+		this.faction = CRC.StringtoCRC(faction);
+	}
+
 	
 	public void deserialize(IoBuffer data) {
 		

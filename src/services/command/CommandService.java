@@ -95,7 +95,8 @@ public class CommandService implements INetworkDispatch  {
 				
 				if(command instanceof CombatCommand) {
 					CombatCommand command2 = (CombatCommand) command.clone();
-					core.scriptService.callScript("scripts/commands/combat", command.getCommandName(), "setup", core, actor, target, command2);
+					if(FileUtilities.doesFileExist("scripts/commands/combat/" + command.getCommandName() + ".py"))
+						core.scriptService.callScript("scripts/commands/combat", command.getCommandName(), "setup", core, actor, target, command2);
 					processCombatCommand(actor, target, command2, commandEnqueue.getActionCounter(), commandEnqueue.getCommandArguments());
 					return;
 				}

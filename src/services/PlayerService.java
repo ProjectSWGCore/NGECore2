@@ -91,24 +91,37 @@ public class PlayerService implements INetworkDispatch {
 			@Override
 			public void run() {
 				
-				if(creature.getAction() < creature.getMaxAction())
+				if(creature.getAction() < creature.getMaxAction() && creature.getPosture() != 14)
 					creature.setAction(creature.getAction() + 200);
 				
 			}
 			
-		}, 0, 1, TimeUnit.SECONDS);
+		}, 0, 1000, TimeUnit.MILLISECONDS);
 
 		scheduler.scheduleAtFixedRate(new Runnable() {
 
 			@Override
 			public void run() {
 				
-				if(creature.getHealth() < creature.getMaxHealth() && creature.getCombatFlag() == 0)
+				if(creature.getHealth() < creature.getMaxHealth() && creature.getCombatFlag() == 0 && creature.getPosture() != 13 && creature.getPosture() != 14)
 					creature.setHealth(creature.getHealth() + 300);
 				
 			}
 			
-		}, 0, 1, TimeUnit.SECONDS);
+		}, 0, 1100, TimeUnit.MILLISECONDS);
+		
+		/*scheduler.scheduleAtFixedRate(new Runnable() {
+
+			@Override
+			public void run() {
+				
+				if(creature.getCombatFlag() == 1)
+					creature.resetHAMList();
+				
+			}
+			
+		}, 0, 10, TimeUnit.SECONDS);*/
+
 
 	}
 

@@ -5,6 +5,9 @@ def setup():
 	
 def run(core, actor, target, commandString):
 
+	if actor.getPosture() == 13 or actor.getPosture() == 14:
+		return
+
 	if actor.getStateBitmask() == 32768:
 		actor.setStateBitmask(0)
 		
