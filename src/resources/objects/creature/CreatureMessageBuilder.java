@@ -320,8 +320,9 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 			}
 
 		}
-		//buffer.putShort((short) 0);
-		buffer.put(getAsciiString("appearance/gungan_m.sat"));
+		
+		buffer.putShort((short) 0);
+		//buffer.put(getAsciiString("appearance/gungan_m.sat"));
 		buffer.put((byte) 1);
 
 		if(creature.getBuffList().isEmpty()) {
