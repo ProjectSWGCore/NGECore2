@@ -11,10 +11,6 @@ def addPlanetSpawns(core, planet):
 	stcSvc.spawnObject('object/tangible/travel/ticket_collector/shared_ticket_collector.iff', 'rori', long(0), float(-5257.2), float(81.3), float(-2150.3), float(-0.924076), float(0.382209)) # narmle shuttleport
 	
 	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'rori', long(0), float(-5243), float(81.3), float(-2163.5), float(-0.924076), float(0.382209)) # narmle shuttleport
-	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'rori', long(4635437), float(11.5), float(0.6), float(51.3), float(0.195405), float(-0.980722)) # narmle starport
-	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'rori', long(4635437), float(3.1), float(0.6), float(49), float(0), float(1)) # narmle starport
-	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'rori', long(4635437), float(-2.7), float(0.6), float(49), float(0), float(1)) # narmle starport
-	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'rori', long(4635437), float(-13.2), float(0.6), float(51.3), float(-0.195405), float(-0.980722)) # narmle starport
 	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'rori', long(4505530), float(-3.5), float(0.1), float(-17.5), float(-0.69182), float(0.72207)) # rebel outpost
 	
 	

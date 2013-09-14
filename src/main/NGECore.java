@@ -198,6 +198,7 @@ public class NGECore {
 
 		zoneServer = new MINAServer(zoneDispatch, config.getInt("ZONE.PORT"));
 		zoneServer.start();
+		staticService = new StaticService(this);
 		
 		// Planets
 		terrainService.addPlanet(1, "tatooine", "terrain/tatooine.trn", true);
@@ -219,7 +220,6 @@ public class NGECore {
 		zoneDispatch.addService(simulationService);
 		
 		// Static Spawns
-		staticService = new StaticService(this);
 		staticService.spawnStatics();
 		
 		

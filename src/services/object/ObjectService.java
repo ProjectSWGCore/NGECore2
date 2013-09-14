@@ -187,33 +187,39 @@ public class ObjectService implements INetworkDispatch {
 			return null;
 			
 		}
+		
 		object.setPlanetId(planet.getID());
+		
+		loadServerTemplate(object);		
+		
+		objectList.add(object);
 
-		String serverTemplate = Template.replace(".iff", "");
+		return object;
+	}
+	
+	public void loadServerTemplate(SWGObject object) {
+		
+		String template = object.getTemplate();
+		String serverTemplate = template.replace(".iff", "");
 		// check if template is empty(4 default lines) to reduce RAM usage(saves about 500 MB of RAM)
 		try {
 			int numberOfLines = FileUtilities.getNumberOfLines("scripts/" + serverTemplate.split("shared_" , 2)[0].replace("shared_", "") + serverTemplate.split("shared_" , 2)[1] + ".py");
 			
 			if(numberOfLines > 4) {
-				if(serverTemplates.containsKey(Template)) {
-					PyObject func = serverTemplates.get(Template);
+				if(serverTemplates.containsKey(template)) {
+					PyObject func = serverTemplates.get(template);
 					func.__call__(Py.java2py(core), Py.java2py(object));
 				} else {
 					PyObject func = core.scriptService.getMethod("scripts/" + serverTemplate.split("shared_" , 2)[0].replace("shared_", ""), serverTemplate.split("shared_" , 2)[1], "setup");
 					func.__call__(Py.java2py(core), Py.java2py(object));
-					serverTemplates.put(Template, func);
+					serverTemplates.put(template, func);
 				}
 			}
 
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		//core.scriptService.callScript("scripts/" + serverTemplate.split("shared_" , 2)[0].replace("shared_", ""), "setup", serverTemplate.split("shared_" , 2)[1], core, object);
-		
-		objectList.add(object);
 
-		return object;
 	}
 	
 	public SWGObject createObject(String Template, Planet planet) {

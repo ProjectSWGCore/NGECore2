@@ -33,7 +33,7 @@ import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.resources.common.CRC;
 
-@Persistent(version=3)
+@Persistent(version=4)
 public class Buff implements IListObject {
 	
 	@NotPersistent

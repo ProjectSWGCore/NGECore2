@@ -30,24 +30,5 @@ def addPlanetSpawns(core, planet):
 	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'tatooine', long(0), float(1739), float(7.6), float(3192.1), float(1), float(0)) # mos entha shuttleport b
 	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'tatooine', long(0), float(3418.4), float(5.6), float(-4659.3), float(-0.485545), float(0.874212)) # mos eisley shuttleport
 
-	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'tatooine', long(1106372), float(11.5), float(0.6), float(51.3), float(0.195405), float(-0.980722)) # mos eisley starport
-	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'tatooine', long(1106372), float(3.1), float(0.6), float(49), float(0), float(1)) # mos eisley starport
-	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'tatooine', long(1106372), float(-2.7), float(0.6), float(49), float(0), float(1)) # mos eisley starport
-	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'tatooine', long(1106372), float(-13.2), float(0.6), float(51.3), float(-0.195405), float(-0.980722)) # mos eisley starport
-	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'tatooine', long(1026828), float(11.5), float(0.6), float(51.3), float(0.195405), float(-0.980722)) # bestine starport
-	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'tatooine', long(1026828), float(3.1), float(0.6), float(49), float(0), float(1)) # bestine starport
-	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'tatooine', long(1026828), float(-2.7), float(0.6), float(49), float(0), float(1)) # bestine starport
-	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'tatooine', long(1026828), float(-13.2), float(0.6), float(51.3), float(-0.195405), float(-0.980722)) # bestine starport
-	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'tatooine', long(1261655), float(11.5), float(0.6), float(51.3), float(0.195405), float(-0.980722)) # mos espa starport
-	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'tatooine', long(1261655), float(3.1), float(0.6), float(49), float(0), float(1)) # mos espa starport
-	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'tatooine', long(1261655), float(-2.7), float(0.6), float(49), float(0), float(1)) # mos espa starport
-	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'tatooine', long(1261655), float(-13.2), float(0.6), float(51.3), float(-0.195405), float(-0.980722)) # mos espa starport
-	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'tatooine', long(4005520), float(11.5), float(0.6), float(51.3), float(0.195405), float(-0.980722)) # mos entha starport
-	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'tatooine', long(4005520), float(3.1), float(0.6), float(49), float(0), float(1)) # mos entha starport
-	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'tatooine', long(4005520), float(-2.7), float(0.6), float(49), float(0), float(1)) # mos entha starport
-	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'tatooine', long(4005520), float(-13.2), float(0.6), float(51.3), float(-0.195405), float(-0.980722)) # mos entha starport
-
-	
-	
-
 	return
+	
