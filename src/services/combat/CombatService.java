@@ -173,7 +173,6 @@ public class CombatService implements INetworkDispatch {
 				damage *= 0.4f;
 			} else if(mitigationType == HitType.EVASION) {
 				float evasionValue = (attacker.getSkillMod("combat_evasion_value").getBase() / 4) / 100;
-				
 				damage *= (1 - evasionValue);
 				
 			}
@@ -433,18 +432,18 @@ public class CombatService implements INetworkDispatch {
 		if(command.getAttackType() == 1) {
 		
 			if(weapon.isRanged()) {
-				float missChance = 0.5f;
+				float missChance = 0.05f;
 				if(attacker.getSkillMod("strength_modified").getBase() > 0) {
 					float missNegation = (float) ((attacker.getSkillMod("strength_modified").getBase() / 100) * 0.1);
-					if(missNegation > 0.4f)
-						missNegation = 0.4f;
+					if(missNegation > 0.04f)
+						missNegation = 0.04f;
 					missChance -= missNegation;
 				}
 				r = new Random().nextFloat();
 				if(r <= missChance)
 					return HitType.MISS;
 			}
-			float dodgeChance = target.getSkillMod("display_only_dodge").getBase() / 10000;
+			float dodgeChance = (float) target.getSkillMod("display_only_dodge").getBase() / 10000;
 	
 			r = new Random().nextFloat();
 			if(r <= dodgeChance)
@@ -454,7 +453,7 @@ public class CombatService implements INetworkDispatch {
 			WeaponObject weapon2 = (WeaponObject) core.objectService.getObject(((CreatureObject) target).getWeaponId());
 			if(weapon2 != null && weapon2.isMelee()) {
 				
-				float parryChance = target.getSkillMod("display_only_parry").getBase() / 10000;
+				float parryChance = (float) target.getSkillMod("display_only_parry").getBase() / 10000;
 	
 				r = new Random().nextFloat();
 				if(r <= parryChance)
@@ -462,7 +461,7 @@ public class CombatService implements INetworkDispatch {
 					
 			}
 			
-			float stChance = attacker.getSkillMod("display_only_strikethrough").getBase() / 10000;
+			float stChance = (float) attacker.getSkillMod("display_only_strikethrough").getBase() / 10000;
 			
 			r = new Random().nextFloat();
 			if(r <= stChance)
@@ -470,8 +469,7 @@ public class CombatService implements INetworkDispatch {
 
 		}
 
-		float critChance = attacker.getSkillMod("display_only_critical").getBase() / 10000;
-		
+		float critChance = (float) attacker.getSkillMod("display_only_critical").getBase() / 10000;
 		r = new Random().nextFloat();
 		if(r <= critChance)
 			return HitType.CRITICAL;
@@ -486,7 +484,7 @@ public class CombatService implements INetworkDispatch {
 		
 		float r;
 					
-		float blockChance = target.getSkillMod("display_only_block").getBase() / 10000;
+		float blockChance = (float) target.getSkillMod("display_only_block").getBase() / 10000;
 			
 		r = new Random().nextFloat();
 		if(r <= blockChance)
@@ -494,7 +492,7 @@ public class CombatService implements INetworkDispatch {
 			
 		if(command.getAttackType() == 0 || command.getAttackType() == 2 || command.getAttackType() == 3) {
 				
-			float evasionChance = target.getSkillMod("display_only_evasion").getBase() / 10000;
+			float evasionChance = (float) target.getSkillMod("display_only_evasion").getBase() / 10000;
 				
 			r = new Random().nextFloat();
 			if(r <= evasionChance)
@@ -504,7 +502,7 @@ public class CombatService implements INetworkDispatch {
 		
 		if(hitType == HitType.HIT) {
 			
-			float glanceChance = target.getSkillMod("display_only_glancing_blow").getBase() / 10000;
+			float glanceChance = (float) target.getSkillMod("display_only_glancing_blow").getBase() / 10000;
 			
 			r = new Random().nextFloat();
 			if(r <= glanceChance)
@@ -525,9 +523,9 @@ public class CombatService implements INetworkDispatch {
 				target.setPosture((byte) 13);
 				target.setTurnRadius(0);
 				target.setSpeedMultiplierBase(0);
-				target.resetHAMList();
+				//target.resetHAMList();
 			}
-			attacker.resetHAMList();
+			//attacker.resetHAMList();
 			scheduler.schedule(new Runnable() {
 
 				@Override
