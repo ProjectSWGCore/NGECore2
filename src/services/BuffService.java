@@ -122,7 +122,7 @@ public class BuffService implements INetworkDispatch {
 					
 		for(final Buff buff : creature.getBuffList().get().toArray(new Buff[] { })) {
 				
-			if(buff.getRemainingDuration() > 0) {
+			if(buff.getRemainingDuration() > 0 && buff.getDuration() > 0) {
 				scheduler.schedule(new Runnable() {
 
 					@Override
