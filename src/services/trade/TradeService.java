@@ -23,6 +23,8 @@ import protocol.swg.objectControllerObjects.SecureTrade;
 import resources.common.ObjControllerOpcodes;
 import resources.objects.creature.CreatureObject;
 import engine.clients.Client;
+import engine.resources.container.AllPermissions;
+import engine.resources.container.CreatureContainerPermissions;
 import engine.resources.objects.SWGObject;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
@@ -370,11 +372,15 @@ public class TradeService implements INetworkDispatch{
 							{
 								cleanTradeSession(client, tradePartner.getClient());
 							}
-							//actingTraderInventory.transferTo(tradePartner, tradePartnerInventory, tradeObject);
+							actingTraderInventory.setContainerPermissions(AllPermissions.ALL_PERMISSIONS);
+							tradePartnerInventory.setContainerPermissions(AllPermissions.ALL_PERMISSIONS);
+							actingTraderInventory.transferTo(tradePartner, tradePartnerInventory, tradeObject);
+							actingTraderInventory.setContainerPermissions(CreatureContainerPermissions.CREATURE_CONTAINER_PERMISSIONS);
+							tradePartnerInventory.setContainerPermissions(CreatureContainerPermissions.CREATURE_CONTAINER_PERMISSIONS);
 							
-							actingTraderInventory._remove(tradeObject);
-							actingTrader.makeUnaware(tradeObject);
-							tradePartnerInventory.add(tradeObject);
+							//actingTraderInventory._remove(tradeObject);
+							//actingTrader.makeUnaware(tradeObject);
+							//tradePartnerInventory.add(tradeObject);
 							
 							itr.remove();
 						}
