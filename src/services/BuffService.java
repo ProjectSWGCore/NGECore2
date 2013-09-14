@@ -34,6 +34,7 @@ import resources.objects.player.PlayerObject;
 
 import main.NGECore;
 
+import engine.resources.common.CRC;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
@@ -65,17 +66,27 @@ public class BuffService implements INetworkDispatch {
 		
 		final Buff buff = new Buff(buffName, creature.getObjectID());
 		buff.setTotalPlayTime(((PlayerObject) creature.getSlottedObject("ghost")).getTotalPlayTime());
-		if(creature.getBuffByName(buffName) != null) {
+		
+	
+            for (Buff otherBuff : creature.getBuffList()) {
+                if (buff.getGroup1().equals(otherBuff.getGroup1()))  
+                	if (buff.getPriority() >= otherBuff.getPriority()) {
+                        if (buff.getBuffName().equals(otherBuff.getBuffName())) {
+                                if (otherBuff.getRemainingDuration() > buff.getDuration()) {
+                                        return;
+                                }
+                        }
+                       
+                        removeBuffFromCreature(creature, otherBuff); System.out.println("buff removed " + buffName);
+                        break;
+                }else{
+                	System.out.println("buff not added:" + buffName);
+                	return;
+                }
+        }	
 			
-			Buff otherBuff = creature.getBuffByName(buffName);
-			if(otherBuff.getRemainingDuration() > buff.getDuration()) {
-				return;
-			} else {
-				removeBuffFromCreature(creature, otherBuff);
-			}
-			
-		}
-
+		
+		if (FileUtilities.doesFileExist("scripts/commands/" + buffName + ".py")) buffName = "buff_" + buffName;
 		core.scriptService.callScript("scripts/buffs", "setup", buffName, core, creature, buff);
 		
 		creature.addBuff(buff);
@@ -88,20 +99,23 @@ public class BuffService implements INetworkDispatch {
 					
 					removeBuffFromCreature(creature, buff);
 					
+				
 				}
 				
 			}, (long) buff.getDuration(), TimeUnit.SECONDS);
 		}
 		
-	}
+	} }
 	
 	public void removeBuffFromCreature(CreatureObject creature, Buff buff) {
 		
-		if(!creature.getBuffList().contains(buff))
-			return;
-		
-		core.scriptService.callScript("scripts/buffs", "removeBuff", buff.getBuffName(), core, creature, buff);
-		creature.removeBuff(buff);
+		 if(!creature.getBuffList().contains(buff))
+             return;
+            
+             String buffName = buff.getBuffName();
+             if (FileUtilities.doesFileExist("scripts/commands/" + buffName + ".py")) buffName = "buff_" + buffName;
+             core.scriptService.callScript("scripts/buffs", "removeBuff", buffName, core, creature, buff);
+             creature.removeBuff(buff);
 		
 	}
 	
