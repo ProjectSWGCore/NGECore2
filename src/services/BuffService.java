@@ -86,7 +86,6 @@ public class BuffService implements INetworkDispatch {
         }	
 			
 		
-		if (FileUtilities.doesFileExist("scripts/commands/" + buffName + ".py")) buffName = "buff_" + buffName;
 		core.scriptService.callScript("scripts/buffs", "setup", buffName, core, creature, buff);
 		
 		creature.addBuff(buff);
@@ -105,17 +104,15 @@ public class BuffService implements INetworkDispatch {
 			}, (long) buff.getDuration(), TimeUnit.SECONDS);
 		}
 		
-	} }
+	} 
 	
 	public void removeBuffFromCreature(CreatureObject creature, Buff buff) {
 		
 		 if(!creature.getBuffList().contains(buff))
              return;
             
-             String buffName = buff.getBuffName();
-             if (FileUtilities.doesFileExist("scripts/commands/" + buffName + ".py")) buffName = "buff_" + buffName;
-             core.scriptService.callScript("scripts/buffs", "removeBuff", buffName, core, creature, buff);
-             creature.removeBuff(buff);
+         core.scriptService.callScript("scripts/buffs", "removeBuff", buff.getBuffName(), core, creature, buff);
+         creature.removeBuff(buff);
 		
 	}
 	
