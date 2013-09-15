@@ -26,24 +26,30 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
 import protocol.swg.ObjControllerMessage;
+import protocol.swg.PlayClientEffectLocMessage;
 import protocol.swg.UpdatePVPStatusMessage;
 import protocol.swg.objectControllerObjects.CombatAction;
 import protocol.swg.objectControllerObjects.CombatSpam;
 import protocol.swg.objectControllerObjects.CommandEnqueueRemove;
 import protocol.swg.objectControllerObjects.StartTask;
 import resources.common.FileUtilities;
+import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
+import resources.objects.waypoint.WaypointObject;
 import resources.objects.weapon.WeaponObject;
 import services.command.CombatCommand;
 import main.NGECore;
 import engine.resources.common.CRC;
 import engine.resources.objects.SWGObject;
+import engine.resources.scene.Point3D;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
@@ -68,7 +74,7 @@ public class CombatService implements INetworkDispatch {
 		
 	}
 	
-	public void doCombat(CreatureObject attacker, TangibleObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {
+	public void doCombat(final CreatureObject attacker, final TangibleObject target, final WeaponObject weapon, final CombatCommand command, final int actionCounter) {
 		
 		
 		if(!applySpecialCost(attacker, weapon, command))
@@ -77,14 +83,82 @@ public class CombatService implements INetworkDispatch {
 		if((command.getAttackType() == 0 || command.getAttackType() == 1 || command.getAttackType() == 3) && !attemptCombat(attacker, target))
 			return;
 
-		// use preRun for delayed effects like officer orbital strike, grenades etc.
+	/*	// use preRun for delayed effects like officer orbital strike, grenades etc.
 		if(FileUtilities.doesFileExist("scripts/commands/combat" + command.getCommandName() + ".py"))
-			core.scriptService.callScript("scripts/commands/combat", command.getCommandName(), "preRun", core, attacker, target, command);
+			core.scriptService.callScript("scripts/commands/combat", command.getCommandName(), "preRun", core, attacker, target, command);*/
+		final Point3D targetPos = target.getPosition();
+		final SWGObject targetParent = target.getContainer();
 		
-		if(command.getAttackType() == 1)
-			doSingleTargetCombat(attacker, target, weapon, command, actionCounter);
-		else if(command.getAttackType() == 0 || command.getAttackType() == 2 || command.getAttackType() == 3)
-			doAreaCombat(attacker, target, weapon, command, actionCounter);
+		if(command.getDelayAttackParticle().length() > 0 || command.getInitialAttackDelay() > -1) {
+			
+			if(command.getInitialAttackDelay() > 0) {
+				
+				if(command.getDelayAttackParticle().length() > 0)
+					target.notifyObservers(new PlayClientEffectLocMessage(command.getDelayAttackParticle(), target.getPlanet().getName(), target.getWorldPosition()), true);
+				
+				try {
+					Thread.sleep((long) command.getInitialAttackDelay());
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				
+			} else if(command.getInitialAttackDelay() <= 0 && command.getDelayAttackInterval() > 0 && command.getDelayAttackLoops() <= 1) {
+				
+				try {
+					Thread.sleep((long) command.getDelayAttackInterval());
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				
+				if(command.getDelayAttackParticle().length() > 0)
+					target.notifyObservers(new PlayClientEffectLocMessage(command.getDelayAttackParticle(), target.getPlanet().getName(), target.getWorldPosition()), true);
+				
+			}
+			
+			if(command.getDelayAttackLoops() > 1) {
+				final ScheduledFuture<?> task = scheduler.scheduleAtFixedRate(new Runnable() {
+
+					@Override
+					public void run() {
+						
+						if(command.getDelayAttackParticle().length() > 0)
+							target.notifyObservers(new PlayClientEffectLocMessage(command.getDelayAttackParticle(), target.getPlanet().getName(), target.getWorldPosition()), true);
+
+						if(command.getAttackType() == 1)
+							doSingleTargetCombat(attacker, target, weapon, command, actionCounter);
+						else if(command.getAttackType() == 0 || command.getAttackType() == 2 || command.getAttackType() == 3)
+							doAreaCombat(attacker, targetPos, weapon, command, actionCounter, targetParent);
+						
+					}
+					
+				}, 0, (long) (command.getDelayAttackInterval() * 1000), TimeUnit.MILLISECONDS);
+				
+				scheduler.schedule(new Runnable() {
+
+					@Override
+					public void run() {
+						task.cancel(true);
+					}
+					
+				}, (long) ((command.getDelayAttackInterval() * 1000) * command.getDelayAttackLoops()), TimeUnit.MILLISECONDS);
+				
+				return;
+				
+			} else {
+				if(command.getAttackType() == 1)
+					doSingleTargetCombat(attacker, target, weapon, command, actionCounter);
+				else if(command.getAttackType() == 0 || command.getAttackType() == 2 || command.getAttackType() == 3)
+					doAreaCombat(attacker, targetPos, weapon, command, actionCounter, targetParent);
+			}
+			
+		} else {
+		
+			if(command.getAttackType() == 1)
+				doSingleTargetCombat(attacker, target, weapon, command, actionCounter);
+			else if(command.getAttackType() == 0 || command.getAttackType() == 2 || command.getAttackType() == 3)
+				doAreaCombat(attacker, target, weapon, command, actionCounter);
+		
+		}
 		
 	}
 
@@ -94,6 +168,53 @@ public class CombatService implements INetworkDispatch {
 			return;
 		}
 	}
+	
+	private void doAreaCombat(CreatureObject attacker, Point3D targetPos, WeaponObject weapon, CombatCommand command, int actionCounter, SWGObject targetCell) {
+		
+		float x = attacker.getWorldPosition().x;
+		float z = attacker.getWorldPosition().z;
+		
+		SWGObject fakeTargetObject = new WaypointObject(0, attacker.getPlanet(), targetPos);
+		
+		if(targetCell != null)
+			targetCell._add(fakeTargetObject);
+		
+		float dirX = fakeTargetObject.getWorldPosition().x - x;
+		float dirZ = fakeTargetObject.getWorldPosition().z - z;
+		
+		float range = command.getConeLength();
+		
+		List<SWGObject> inRangeObjects = core.simulationService.get(attacker.getPlanet(), fakeTargetObject.getWorldPosition().x, fakeTargetObject.getWorldPosition().z, (int) range);
+		
+		
+		for(SWGObject obj : inRangeObjects) {
+			
+			if(!(obj instanceof TangibleObject) || obj == attacker)
+				continue;
+			
+			if(obj instanceof CreatureObject && (((CreatureObject) obj).getPosture() == 13 || ((CreatureObject) obj).getPosture() == 14))
+				continue;
+
+			if(command.getAttackType() == 0 && !isInConeAngle(attacker, obj, (int) command.getConeLength(), (int) command.getConeWidth(), dirX, dirZ))
+				continue;
+			
+			if(!core.simulationService.checkLineOfSight(fakeTargetObject, obj))
+				continue;
+			
+			if(!attemptCombat(attacker, (TangibleObject) obj))
+				continue;
+			
+			doSingleTargetCombat(attacker, (TangibleObject) obj, weapon, command, actionCounter);
+			
+		}
+
+		if(targetCell != null)
+			targetCell._remove(fakeTargetObject);
+		
+		core.objectService.destroyObject(fakeTargetObject);
+		
+	}
+
 
 	private void doSingleTargetCombat(CreatureObject attacker, TangibleObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {	
 		if(target instanceof CreatureObject) {

@@ -742,6 +742,26 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 
 	}
 	
+	public IoBuffer buildUpdateBuffDelta(Buff buff) {
+		
+		CreatureObject creature = (CreatureObject) object;
+		PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
+		
+		IoBuffer buffer = bufferPool.allocate(37, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putInt(1);
+		buffer.putInt(creature.getBuffListCounter());
+		buff.setTotalPlayTime((int) (player.getTotalPlayTime() + (System.currentTimeMillis() - player.getLastPlayTimeUpdate()) / 1000));
+		buffer.put((byte) 2);
+		buffer.put(buff.getBytes());
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x1A, buffer, size + 4);
+		
+		return buffer;
+
+	}
+
+	
 	public IoBuffer buildGroupInviteDelta(long inviteSenderId, long inviteCounter, String leaderName) {
 		
 		IoBuffer buffer = bufferPool.allocate(18 + leaderName.length(), false).order(ByteOrder.LITTLE_ENDIAN);
