@@ -208,6 +208,10 @@ public class CombatService implements INetworkDispatch {
 			
 		}
 
+		if(targetCell != null)
+			targetCell._remove(fakeTargetObject);
+		
+		core.objectService.destroyObject(fakeTargetObject);
 		
 	}
 
