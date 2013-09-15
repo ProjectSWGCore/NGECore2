@@ -33,7 +33,7 @@ import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.resources.common.CRC;
 
-@Persistent(version=4)
+@Persistent(version=5)
 public class Buff implements IListObject {
 	
 	@NotPersistent
@@ -56,6 +56,7 @@ public class Buff implements IListObject {
 	private boolean decayOnPvPDeath;
 	private long startTime;
 	private int totalPlayTime;
+	private byte decayCounter;
 	
 	public Buff(String buffName, long ownerId) {
 		
@@ -335,7 +336,9 @@ public class Buff implements IListObject {
 		long currentTime = System.currentTimeMillis();
 		long timeDiff = (currentTime - startTime) / 1000;
 		int remaining = (int) (duration - timeDiff);
-		System.out.println("Buff remaining: " + remaining);
+		for(int i = 0; i < decayCounter; i++) {
+			remaining /= 2;
+		}
 		return remaining;
 		
 	}
@@ -346,6 +349,14 @@ public class Buff implements IListObject {
 
 	public void setTotalPlayTime(int totalPlayTime) {
 		this.totalPlayTime = totalPlayTime;
+	}
+
+	public byte getDecayCounter() {
+		return decayCounter;
+	}
+
+	public void incDecayCounter(byte decayCounter) {
+		this.decayCounter++;
 	}
 
 }
