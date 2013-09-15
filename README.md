@@ -57,3 +57,5 @@ To contribute, simply commit your changes to your fork of the project and then s
 Now your changes will be reviewed by other developers and once the changes are approved your code will be merged into the main repository.
 
 For more information please visit the wiki: https://github.com/ProjectSWGCore/NGECore2/wiki
+
+Documentation can be found here: http://projectswgcore.github.io/NGECore2/doc/
