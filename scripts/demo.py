@@ -104,6 +104,7 @@ def addProfessionAbilities(core, object, profession):
 		object.addAbility('fs_dm_cc_6')
 		object.addAbility('fs_dm_7')
 		object.addAbility('fs_buff_def_1_1')
+		object.addAbility('fs_buff_ca_1')
 	elif profession == 'medic_1a':
 		object.addAbility('me_bacta_bomb_5')
 		object.addAbility('me_bacta_grenade_5')
