@@ -79,18 +79,19 @@ public class BuffService implements INetworkDispatch {
                        
                         removeBuffFromCreature(creature, otherBuff); System.out.println("buff removed " + buffName);
                         break;
-                }else{
+                } else {
                 	System.out.println("buff not added:" + buffName);
                 	return;
                 }
         }	
 			
 		
-		core.scriptService.callScript("scripts/buffs", "setup", buffName, core, creature, buff);
+		core.scriptService.callScript("scripts/buffs/", "setup", buffName, core, creature, buff);
 		
 		creature.addBuff(buff);
 		
 		if(buff.getDuration() > 0) {
+			
 			scheduler.schedule(new Runnable() {
 	
 				@Override
@@ -111,7 +112,7 @@ public class BuffService implements INetworkDispatch {
 		 if(!creature.getBuffList().contains(buff))
              return;
             
-         core.scriptService.callScript("scripts/buffs", "removeBuff", buff.getBuffName(), core, creature, buff);
+         core.scriptService.callScript("scripts/buffs/", "removeBuff", buff.getBuffName(), core, creature, buff);
          creature.removeBuff(buff);
 		
 	}

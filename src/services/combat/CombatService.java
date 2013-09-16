@@ -314,8 +314,8 @@ public class CombatService implements INetworkDispatch {
 		
 		sendCombatPackets(attacker, target, weapon, command, actionCounter, damage, armorAbsorbed, hitType);
 
-		if(FileUtilities.doesFileExist("scripts/commands/combat" + command.getCommandName() + ".py"))
-			core.scriptService.callScript("scripts/commands/combat", command.getCommandName(), "run", core, attacker, target, null);
+		if(FileUtilities.doesFileExist("scripts/commands/combat/" + command.getCommandName() + ".py"))
+			core.scriptService.callScript("scripts/commands/combat/", command.getCommandName(), "run", core, attacker, target, null);
 
 	}
 	

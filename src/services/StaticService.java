@@ -58,7 +58,7 @@ public class StaticService implements INetworkDispatch {
 	
 	public void spawnPlanetStaticObjs(String planet) {
 		Planet planetObj = (Planet) core.terrainService.getPlanetByName(planet);
-		core.scriptService.callScript("scripts/static_spawns", "addPlanetSpawns", planetObj.getName(), core, planetObj);
+		core.scriptService.callScript("scripts/static_spawns/", "addPlanetSpawns", planetObj.getName(), core, planetObj);
 		System.out.println("Loaded static objs for " + planetObj.getName());
 	}
 	

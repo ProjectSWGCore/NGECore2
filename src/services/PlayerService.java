@@ -177,7 +177,7 @@ public class PlayerService implements INetworkDispatch {
 		if(!FileUtilities.doesFileExist("scripts/expertise/" + expertiseBox + ".py"))
 			return;
 		
-		core.scriptService.callScript("scripts/expertise", "addExpertisePoint", expertiseBox, core, creature);
+		core.scriptService.callScript("scripts/expertise/", "addExpertisePoint", expertiseBox, core, creature);
 		
 	}
 
