@@ -21,25 +21,43 @@
  ******************************************************************************/
 package resources.objects.staticobject;
 
+import com.sleepycat.persist.model.NotPersistent;
+import com.sleepycat.persist.model.Persistent;
+
 import engine.clients.Client;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
+@Persistent
 public class StaticObject extends SWGObject {
 	
+	@NotPersistent
+	private StaticMessageBuilder messageBuilder;
+
 	public StaticObject() {
 		super();
+		messageBuilder = new StaticMessageBuilder(this);
 	}
 
 	public StaticObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
 		super(objectID, planet, position, orientation, Template);
+		messageBuilder = new StaticMessageBuilder(this);
 	}
 
 	@Override
-	public void sendBaselines(Client client) {
-		// TODO Auto-generated method stub
+	public void sendBaselines(Client destination) {
+
+
+		if(destination == null || destination.getSession() == null) {
+			System.out.println("NULL destination");
+			return;
+		}
 		
+		destination.getSession().write(messageBuilder.buildBaseline3());
+		destination.getSession().write(messageBuilder.buildBaseline6());
+
+
 	}
 }

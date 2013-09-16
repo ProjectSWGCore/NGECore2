@@ -101,7 +101,6 @@ public class CommandService implements INetworkDispatch  {
 					return;
 				}
 					
-				System.out.println(command.getCommandName());				
 				core.scriptService.callScript("scripts/commands/", command.getCommandName(), "run", core, actor, target, commandEnqueue.getCommandArguments());
 				
 			}

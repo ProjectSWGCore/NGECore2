@@ -21,6 +21,73 @@
  ******************************************************************************/
 package resources.objects.staticobject;
 
-public class StaticMessageBuilder {
+import java.nio.ByteOrder;
+
+import org.apache.mina.core.buffer.IoBuffer;
+
+import resources.objects.ObjectMessageBuilder;
+import resources.objects.tangible.TangibleObject;
+
+public class StaticMessageBuilder extends ObjectMessageBuilder {
+	
+	public StaticMessageBuilder(StaticObject staticObject) {
+		setObject(staticObject);
+	}
+
+	
+	public IoBuffer buildBaseline3() {
+
+		IoBuffer buffer = bufferPool.allocate(100, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.setAutoExpand(true);
+		
+		buffer.putShort((short) 4);
+		buffer.putInt(0);
+
+		buffer.put(getAsciiString(object.getStfFilename()));
+		buffer.putInt(0);
+		buffer.put(getAsciiString(object.getStfName()));
+		buffer.putInt(0);
+		buffer.putInt(0xFF);
+				
+		int size = buffer.position();
+		buffer = bufferPool.allocate(size, false).put(buffer.array(), 0, size);
+
+		buffer.flip();
+		buffer = createBaseline("STAO", (byte) 3, buffer, size);
+		
+		return buffer;
+	}
+	
+	public IoBuffer buildBaseline6() {
+
+		IoBuffer buffer = bufferPool.allocate(100, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.setAutoExpand(true);
+		buffer.putShort((short) 2);
+		buffer.putInt(0x92);
+		buffer.put(getAsciiString(object.getDetailFilename()));
+		buffer.putInt(0);
+		buffer.put(getAsciiString(object.getDetailName()));
+		
+		int size = buffer.position();
+		buffer = bufferPool.allocate(size, false).put(buffer.array(), 0, size);
+
+		buffer.flip();
+		buffer = createBaseline("STAO", (byte) 6, buffer, size);
+		
+		return buffer;
+	}
+
+	@Override
+	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void sendBaselines() {
+		// TODO Auto-generated method stub
+		
+	}
+
 
 }
