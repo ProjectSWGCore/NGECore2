@@ -39,7 +39,7 @@ public class SUIWindow {
 	private Vector<SUIWindowComponent> components = new Vector<SUIWindowComponent>();
 	private Map<Integer, PyObject> callbacks = new ConcurrentHashMap<Integer, PyObject>();
 	private Map<Integer, SUICallback> javaCallbacks = new ConcurrentHashMap<Integer, SUICallback>();
-	
+	private Vector<SUIListBoxItem> menuItems = new Vector<SUIListBoxItem>();
 	
 	public SUIWindow(String script, SWGObject owner, int windowId, SWGObject rangeObject, float maxDistance) {
 		
@@ -153,6 +153,17 @@ public class SUIWindow {
 		components.add(component);
 		
 	}
+	
+	public void addListBoxMenuItem(String itemName, long objectId) {
+		SUIListBoxItem menuItem = new SUIListBoxItem(itemName, objectId);
+		
+		int index = menuItems.size();
+		
+		addDataItem("List.dataList:Name", String.valueOf(index));
+		setProperty("List.dataList." + index + ":Text", itemName);
+		
+		menuItems.add(menuItem);
+	}
 
 
 	public int getWindowId() {
@@ -211,6 +222,18 @@ public class SUIWindow {
 		return javaCallbacks.get(eventId);
 	}
 
+	public Vector<SUIListBoxItem> getMenuItems() {
+		return menuItems;
+	}
+	
+	public long getObjectIdByIndex(int index) {
+		SUIListBoxItem item = getMenuItems().get(index);
+
+		if(item != null)
+			return item.getObjectId();
+		
+		return 0;
+	}
 
 	public enum Trigger {;
 		public static byte TRIGGER_UPDATE = 4;

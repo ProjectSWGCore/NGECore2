@@ -132,7 +132,7 @@ public class MapService implements INetworkDispatch {
 			}
 			
 		}
-		
+
 		return closestName;
 		
 	}

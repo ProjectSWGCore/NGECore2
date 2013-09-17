@@ -21,32 +21,30 @@
  ******************************************************************************/
 package services.sui;
 
-import java.util.Vector;
-
-public class SUIWindowComponent {
+public class SUIListBoxItem {
 	
-	private byte type; 
-	private Vector<String> narrowParams = new Vector<String>();
-	private Vector<String> wideParams = new Vector<String>();
+	private String name;
+	private long objectId;
 	
-	public byte getType() {
-		return type;
-	}
-	public void setType(byte type) {
-		this.type = type;
-	}
-	public Vector<String> getNarrowParams() {
-		return narrowParams;
-	}
-	public void setNarrowParams(Vector<String> narrowParams) {
-		this.narrowParams = narrowParams;
-	}
-	public Vector<String> getWideParams() {
-		return wideParams;
-	}
-	public void setWideParams(Vector<String> wideParams) {
-		this.wideParams = wideParams;
+	public SUIListBoxItem(String name, long objectId) {
+		this.name = name;
+		this.objectId = objectId;			
 	}
 
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public long getObjectId() {
+		return objectId;
+	}
+
+	public void setObjectId(long objectId) {
+		this.objectId = objectId;
+	}
 
 }

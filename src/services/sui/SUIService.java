@@ -23,6 +23,7 @@ package services.sui;
 
 import java.nio.ByteOrder;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
@@ -148,13 +149,13 @@ public class SUIService implements INetworkDispatch {
 
 				PyObject func = window.getFunctionByEventId(suiEvent.getEventType());
 				
-				if(func == null)
-					return;
-				
-				func.__call__(Py.java2py(core), Py.java2py(owner), Py.java2py(suiEvent.getEventType()), Py.java2py(suiEvent.getReturnList()));
+				if(func != null)
+					func.__call__(Py.java2py(core), Py.java2py(owner), Py.java2py(suiEvent.getEventType()), Py.java2py(suiEvent.getReturnList()));
 				
 				SUICallback callback = window.getCallbackByEventId(suiEvent.getEventType());
-				callback.process(owner, suiEvent.getEventType(), suiEvent.getReturnList());
+				
+				if(callback != null)
+					callback.process(owner, suiEvent.getEventType(), suiEvent.getReturnList());
 				
 				windowMap.remove(window.getWindowId());
 				
@@ -219,7 +220,7 @@ public class SUIService implements INetworkDispatch {
 		
 	}
 	
-	public SUIWindow createListBox(int type, String title, String promptText, Vector<String> data, SWGObject owner, SWGObject rangeObject, float maxDistance) {
+	public SUIWindow createListBox(int type, String title, String promptText, Map<Long, String> cloneData, SWGObject owner, SWGObject rangeObject, float maxDistance) {
 		
 		SUIWindow window = createSUIWindow("Script.listBox", owner, rangeObject, maxDistance);
 		
@@ -244,15 +245,17 @@ public class SUIService implements INetworkDispatch {
 		
 		window.clearDataSource("List.dataList");
 		
-		int index = 0;
+		//int index = 0;
 		
-		for(String string : data) {
+		for(Entry<Long, String> e : cloneData.entrySet()) {
 			
-			window.addDataItem("List.dataList:Name", String.valueOf(index));
+			/*window.addDataItem("List.dataList:Name", String.valueOf(index));
 			
-			window.setProperty("List.dataList" + index + ":Text", string);
+			window.setProperty("List.dataList." + index + ":Text", string);
 
-			++index;
+			++index;*/
+			
+			window.addListBoxMenuItem(e.getValue(), e.getKey());
 			
 		}
 		

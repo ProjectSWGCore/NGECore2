@@ -106,10 +106,11 @@ public class StaticService implements INetworkDispatch {
 		List<SWGObject> cloners = new ArrayList<SWGObject>();
 		
 		for(SWGObject obj : objects) {
-			if(obj instanceof BuildingObject && (obj.getTemplate().contains("cloning_facility") || obj.getTemplate().contains("cloning_tatooine") || obj.getTemplate().contains("cloning_naboo") || obj.getTemplate().contains("cloning_corellia")))
-				cloners.add(obj);
+			if(obj instanceof BuildingObject && (obj.getTemplate().contains("cloning_facility") || obj.getTemplate().contains("cloning_tatooine") || obj.getTemplate().contains("cloning_naboo") || obj.getTemplate().contains("cloning_corellia"))) {
+				if(!obj.getTemplate().equals("object/building/general/shared_cloning_facility_general.iff"))
+					cloners.add(obj);
+			}
 		}
-		
 		return cloners;
 		
 	}

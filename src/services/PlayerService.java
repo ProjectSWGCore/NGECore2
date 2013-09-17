@@ -22,8 +22,10 @@
 package services;
 
 import java.nio.ByteOrder;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -37,10 +39,14 @@ import protocol.swg.ExpertiseRequestMessage;
 import protocol.swg.ServerTimeMessage;
 import resources.common.FileUtilities;
 import resources.common.Opcodes;
+import resources.common.SpawnPoint;
+import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import services.sui.SUIService.ListBoxType;
 import services.sui.SUIWindow;
+import services.sui.SUIWindow.Trigger;
+import services.sui.SUIWindow.SUICallback;
 
 import main.NGECore;
 
@@ -193,19 +199,55 @@ public class PlayerService implements INetworkDispatch {
 		//	return;
 		
 		List<SWGObject> cloners = core.staticService.getCloningFacilitiesByPlanet(creature.getPlanet());
-		Vector<String> cloneData = new Vector<String>();
+		Map<Long, String> cloneData = new HashMap<Long, String>();
 		Point3D position = creature.getWorldPosition();
 		
 		for(SWGObject cloner : cloners) {
 			
-			cloneData.add(core.mapService.getClosestCityName(cloner) + " (" + String.valueOf(position.getDistance2D(cloner.getPosition())) + "m)");
+			cloneData.put(cloner.getObjectID(), core.mapService.getClosestCityName(cloner) /*+ " (" + String.valueOf(position.getDistance2D(cloner.getPosition())) + "m)"*/);
 			
 		}
 		
-		SUIWindow window = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "@base_player:revive_title", "@base_player:revive_closest : " + "\n" + "@base_player:revive_bind : " + "\n" + "Cash Balance : " + creature.getCashCredits() + "\n" + "Select the desired option and click OK.", 
+		final SUIWindow window = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "@base_player:revive_title", "Select the desired option and click OK.", 
 				cloneData, creature, null, 0);
+		Vector<String> returnList = new Vector<String>();
+		returnList.add("List.lstList:SelectedRow");
+		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, new SUICallback() {
+
+			@SuppressWarnings("unchecked")
+			@Override
+			public void process(SWGObject owner, int eventType, Vector<String> returnList) {
+				
+			//	if(((CreatureObject)owner).getPosture() != 14)
+			//		return;
+								
+				int index = Integer.parseInt(returnList.get(0));
+				
+				if(window.getObjectIdByIndex(index) == 0 || core.objectService.getObject(window.getObjectIdByIndex(index)) == null)
+					return;
+					
+					
+				SWGObject cloner = core.objectService.getObject(window.getObjectIdByIndex(index));
+					
+				if(cloner.getAttachment("spawnPoints") == null)
+					return;
+				
+				Vector<SpawnPoint> spawnPoints = (Vector<SpawnPoint>) cloner.getAttachment("spawnPoints");
+				
+				SpawnPoint spawnPoint = spawnPoints.get(new Random().nextInt(spawnPoints.size()));
+
+				handleCloneRequest((CreatureObject) owner, (BuildingObject) cloner, spawnPoint);
+				
+			}
+			
+		});
 		
 		core.suiService.openSUIWindow(window);
+		
+	}
+	
+	public void handleCloneRequest(CreatureObject creature, BuildingObject cloner, SpawnPoint spawnPoint) {
+		
 		
 	}
 
