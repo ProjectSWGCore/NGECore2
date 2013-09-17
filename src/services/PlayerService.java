@@ -22,7 +22,9 @@
 package services;
 
 import java.nio.ByteOrder;
+import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -37,10 +39,14 @@ import resources.common.FileUtilities;
 import resources.common.Opcodes;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
+import services.sui.SUIService.ListBoxType;
+import services.sui.SUIWindow;
 
 import main.NGECore;
 
 import engine.clients.Client;
+import engine.resources.objects.SWGObject;
+import engine.resources.scene.Point3D;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
@@ -178,6 +184,28 @@ public class PlayerService implements INetworkDispatch {
 			return;
 		
 		core.scriptService.callScript("scripts/expertise/", "addExpertisePoint", expertiseBox, core, creature);
+		
+	}
+	
+	public void sendCloningWindow(CreatureObject creature) {
+		
+		//if(creature.getPosture() != 14)
+		//	return;
+		
+		List<SWGObject> cloners = core.staticService.getCloningFacilitiesByPlanet(creature.getPlanet());
+		Vector<String> cloneData = new Vector<String>();
+		Point3D position = creature.getWorldPosition();
+		
+		for(SWGObject cloner : cloners) {
+			
+			cloneData.add(core.mapService.getClosestCityName(cloner) + " (" + String.valueOf(position.getDistance2D(cloner.getPosition())) + "m)");
+			
+		}
+		
+		SUIWindow window = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "@base_player:revive_title", "@base_player:revive_closest : " + "\n" + "@base_player:revive_bind : " + "\n" + "Cash Balance : " + creature.getCashCredits() + "\n" + "Select the desired option and click OK.", 
+				cloneData, creature, null, 0);
+		
+		core.suiService.openSUIWindow(window);
 		
 	}
 

@@ -38,6 +38,7 @@ public class SUIWindow {
 	private float maxDistance = 0;
 	private Vector<SUIWindowComponent> components = new Vector<SUIWindowComponent>();
 	private Map<Integer, PyObject> callbacks = new ConcurrentHashMap<Integer, PyObject>();
+	private Map<Integer, SUICallback> javaCallbacks = new ConcurrentHashMap<Integer, SUICallback>();
 	
 	
 	public SUIWindow(String script, SWGObject owner, int windowId, SWGObject rangeObject, float maxDistance) {
@@ -114,6 +115,30 @@ public class SUIWindow {
 
 	}
 	
+	public void addHandler(int eventId, String source, byte trigger, Vector<String> returnParams, SUICallback handleFunc) {
+		
+		SUIWindowComponent component = new SUIWindowComponent();
+		component.setType((byte) 5);
+		
+		component.getNarrowParams().add(source);
+		
+		component.getNarrowParams().add(new String(new byte[] { trigger }));
+		component.getNarrowParams().add("handleSUI");
+		
+		for(String returnParam : returnParams) {
+			
+			for(String str : returnParam.split(":")) {
+				component.getNarrowParams().add(str);
+			}
+			
+		}
+
+		components.add(component);
+		javaCallbacks.put(eventId, handleFunc);
+
+	}
+
+	
 	public void addDataSource(String name, String value) {
 		
 		SUIWindowComponent component = new SUIWindowComponent();
@@ -178,11 +203,26 @@ public class SUIWindow {
 		return callbacks.get(eventId);
 	}
 	
+	public Map<Integer, SUICallback> getJavaCallbacks() {
+		return javaCallbacks;
+	}
+
+	public SUICallback getCallbackByEventId(int eventId) {
+		return javaCallbacks.get(eventId);
+	}
+
+
 	public enum Trigger {;
 		public static byte TRIGGER_UPDATE = 4;
 		public static byte TRIGGER_OK = 9;
 		public static byte TRIGGER_CANCEL = 10;
 
+	}
+	
+	public interface SUICallback {
+		
+		public void process(SWGObject owner, int eventType, Vector<String> returnList);
+		
 	}
 
 

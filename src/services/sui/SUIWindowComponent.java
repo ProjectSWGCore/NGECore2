@@ -28,6 +28,7 @@ public class SUIWindowComponent {
 	private byte type; 
 	private Vector<String> narrowParams = new Vector<String>();
 	private Vector<String> wideParams = new Vector<String>();
+	private long objectId;
 	
 	public byte getType() {
 		return type;
@@ -46,6 +47,12 @@ public class SUIWindowComponent {
 	}
 	public void setWideParams(Vector<String> wideParams) {
 		this.wideParams = wideParams;
+	}
+	public long getObjectId() {
+		return objectId;
+	}
+	public void setObjectId(long objectId) {
+		this.objectId = objectId;
 	}
 
 

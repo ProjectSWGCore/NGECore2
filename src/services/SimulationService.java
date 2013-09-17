@@ -548,6 +548,7 @@ public class SimulationService implements INetworkDispatch {
 				}
 			}
 		}
+				
 	}
 	
 	public void transferToPlanet(SWGObject object, Planet planet, Point3D newPos, Quaternion newOrientation) {

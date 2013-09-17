@@ -46,6 +46,7 @@ import protocol.swg.objectControllerObjects.ObjectMenuResponse;
 import resources.common.ObjControllerOpcodes;
 import resources.common.Opcodes;
 import resources.common.RadialOptions;
+import services.sui.SUIWindow.SUICallback;
 
 import engine.clients.Client;
 import engine.resources.objects.SWGObject;
@@ -151,6 +152,9 @@ public class SUIService implements INetworkDispatch {
 					return;
 				
 				func.__call__(Py.java2py(core), Py.java2py(owner), Py.java2py(suiEvent.getEventType()), Py.java2py(suiEvent.getReturnList()));
+				
+				SUICallback callback = window.getCallbackByEventId(suiEvent.getEventType());
+				callback.process(owner, suiEvent.getEventType(), suiEvent.getReturnList());
 				
 				windowMap.remove(window.getWindowId());
 				
