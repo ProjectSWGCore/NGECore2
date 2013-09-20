@@ -78,7 +78,7 @@ public class GCWService implements INetworkDispatch {
 			
 			private void afterInitialisation() {
 				try {
-					core.scriptService.callScript("scripts/", "gcwzones", "addZones");
+					core.scriptService.callScript("scripts/", "gcwzones", "addZones", core);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

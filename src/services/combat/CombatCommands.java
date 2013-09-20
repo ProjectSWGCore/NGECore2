@@ -187,6 +187,8 @@ public class CombatCommands {
 		core.commandService.registerCombatCommand("fs_sh_1");
 		core.commandService.registerCombatCommand("fs_sh_2");
 		core.commandService.registerCombatCommand("fs_sh_3");
+		core.commandService.registerCommand("fs_buff_def_1_1");
+		core.commandService.registerCommand("fs_buff_ca_1");
 
 		
 		// Commando

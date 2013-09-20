@@ -103,12 +103,11 @@ public class SimulationService implements INetworkDispatch {
 			quadTrees.put(terrainService.getPlanetList().get(i).getName(), new QuadTree<SWGObject>(-8192, -8192, 8192, 8192));
 		}
 		
-		List<SWGObject> objectList = core.objectService.getObjectList();
-		synchronized(objectList) {
-			for(SWGObject obj : objectList) {
-				if(obj.getParentId() == 0 && obj.isInSnapshot()) {
-					add(obj, obj.getPosition().x, obj.getPosition().z);
-				}
+		List<SWGObject> objectList = new ArrayList<SWGObject>(core.objectService.getObjectList());
+		for(SWGObject obj : objectList) {
+			if(obj.getParentId() == 0 && obj.isInSnapshot()) {
+				core.objectService.loadServerTemplate(obj);
+				add(obj, obj.getPosition().x, obj.getPosition().z);
 			}
 		}
 		core.commandService.registerCommand("opencontainer");
@@ -136,6 +135,10 @@ public class SimulationService implements INetworkDispatch {
 		core.commandService.registerCommand("addfriend");
 		core.commandService.registerCommand("removefriend");
 		core.commandService.registerCommand("getfriendlist");
+		core.commandService.registerCommand("deathblow");
+		core.commandService.registerCommand("endduel");
+		core.commandService.registerCommand("duel");
+
 	}
 	
 	public void add(SWGObject object, int x, int y) {
@@ -254,7 +257,6 @@ public class SimulationService implements INetworkDispatch {
 				for(int i = 0; i < newAwareObjects.size(); i++) {
 					SWGObject obj = newAwareObjects.get(i);
 					if(!updateAwareObjects.contains(obj) && obj != object && !object.getAwareObjects().contains(obj) && obj.getWorldPosition().getDistance2D(newPos) <= 200 && obj.getContainer() != object && obj.isInQuadtree()) {						
-						System.out.println(obj.getTemplate());						
 						object.makeAware(obj);
 						if(obj.getClient() != null)
 							obj.makeAware(object);
@@ -546,6 +548,7 @@ public class SimulationService implements INetworkDispatch {
 				}
 			}
 		}
+				
 	}
 	
 	public void transferToPlanet(SWGObject object, Planet planet, Point3D newPos, Quaternion newOrientation) {
@@ -663,7 +666,7 @@ public class SimulationService implements INetworkDispatch {
 			if(object == obj1 || object == obj2)
 				continue;
 			
-			if(object.getTemplateData().getAttribute("collisionActionBlockFlags") != null) {
+			if(object.getTemplateData() != null && object.getTemplateData().getAttribute("collisionActionBlockFlags") != null) {
 				int bit = (Integer) object.getTemplateData().getAttribute("collisionActionBlockFlags") & 255;
 				if(bit == (Integer) object.getTemplateData().getAttribute("collisionActionBlockFlags"))
 					continue;

@@ -23,9 +23,14 @@ package resources.objects.building;
 
 
 
+import java.util.concurrent.atomic.AtomicReference;
+
+import resources.objects.cell.CellObject;
+
 import com.sleepycat.persist.model.Entity;
 
 import engine.clients.Client;
+import engine.resources.container.Traverser;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -45,6 +50,26 @@ public class BuildingObject extends SWGObject {
 	@Override
 	public void sendBaselines(Client client) {
 		// TODO Auto-generated method stub
+		
+	}
+	
+	public CellObject getCellByCellNumber(final int cellNumber) {
+		
+		final AtomicReference<CellObject> ref = new AtomicReference<CellObject>();
+		
+		this.viewChildren(this, true, false, new Traverser() {
+
+			@Override
+			public void process(SWGObject obj) {
+				
+				if(obj instanceof CellObject && ((CellObject) obj).getCellNumber() == cellNumber) 
+					ref.set((CellObject) obj);
+				
+			}
+			
+		});
+		
+		return ref.get();
 		
 	}
 

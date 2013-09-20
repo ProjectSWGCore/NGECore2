@@ -66,8 +66,8 @@ def nabooLocations(core, planet):
 	
 	mapService.addLocation(planet, 'Theed', -5488, 4380, 17, 0, 0)
 	mapService.addLocation(planet, 'Keren', 1888, 2700, 17, 0, 0)
-	mapService.addLocation(planet, 'Moeina', 4836, -4830.5, 17, 0, 0)
-	mapService.addLocation(planet, 'Deeja Park', -4686, -1375, 17, 0, 0)
+	mapService.addLocation(planet, 'Moenia', 4836, -4830.5, 17, 0, 0)
+	mapService.addLocation(planet, 'Deeja Peek', -4686, -1375, 17, 0, 0)
 	mapService.addLocation(planet, 'Kaadara', 5288, 6687, 17, 0, 0)
 
 def roriLocations(core, planet):
@@ -78,7 +78,7 @@ def roriLocations(core, planet):
 	
 	mapService.addLocation(planet, 'Narmle', -5140, -2368, 17, 0, 0)
 	mapService.addLocation(planet, 'Restuss', 5318, 5680, 17, 0, 0)
-	mapService.addLocation(planet, 'a Rebel outpost', 3677, -6447, 17, 0, 0)
+	mapService.addLocation(planet, 'Rebel outpost', 3677, -6447, 17, 0, 0)
 	
 def endorLocations(core, planet):
 
@@ -96,7 +96,7 @@ def talusLocations(core, planet):
 	
 	mapService.addLocation(planet, 'Dearic', 422, -3004, 17, 0, 0)
 	mapService.addLocation(planet, 'Nashal', 4163, 5220, 17, 0, 0)
-	mapService.addLocation(planet, 'an Imperial outpost', -2178, 2300, 17, 0, 0)
+	mapService.addLocation(planet, 'Imperial outpost', -2178, 2300, 17, 0, 0)
 	
 def yavin4Locations(core, planet):
 
@@ -113,9 +113,9 @@ def dantooineLocations(core, planet):
 	
 	# Cities
 	
-	mapService.addLocation(planet, 'a mining outpost', -640, 2486, 17, 0, 0)
-	mapService.addLocation(planet, 'a pirate outpost', 1588, -6399, 17, 0, 0)
-	mapService.addLocation(planet, 'an Imperial outpost', -4224, -2400, 17, 0, 0)
+	mapService.addLocation(planet, 'Mining outpost', -640, 2486, 17, 0, 0)
+	mapService.addLocation(planet, 'Pirate outpost', 1588, -6399, 17, 0, 0)
+	mapService.addLocation(planet, 'Imperial outpost', -4224, -2400, 17, 0, 0)
 	
 def dathomirLocations(core, planet):
 
@@ -134,6 +134,6 @@ def lokLocations(core, planet):
 	# Cities
 	
 	mapService.addLocation(planet, 'Nym\'s Stronghold', 440, 5029, 17, 0, 0)
-	mapService.addLocation(planet, 'an Imperial outpost', -1920, -3084, 17, 0, 0)
+	mapService.addLocation(planet, 'Imperial outpost', -1920, -3084, 17, 0, 0)
 	
 	

@@ -24,18 +24,6 @@ def addPlanetSpawns(core, planet):
 	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'naboo', long(0), float(2028.5), float(19.6), float(2515.6), float(-0.710457), float(0.703739)) # keren shuttleport b
 	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'naboo', long(0), float(5339.3), float(327.6), float(-1586.7), float(-0.710457), float(0.703739)) # deeja peek shuttleport
 	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'naboo', long(0), float(4969.4), float(4.4), float(-4902.6), float(-0.710457), float(0.703739)) # moenia shuttleport
-	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'naboo', long(1741539), float(11.5), float(0.6), float(51.3), float(0.195405), float(-0.980722)) # kaadara starport
-	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'naboo', long(1741539), float(3.1), float(0.6), float(49), float(0), float(1)) # kaadara starport
-	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'naboo', long(1741539), float(-2.7), float(0.6), float(49), float(0), float(1)) # kaadara starport
-	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'naboo', long(1741539), float(-13.2), float(0.6), float(51.3), float(-0.195405), float(-0.980722)) # kaadara starport
-	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'naboo', long(2125382), float(11.5), float(0.6), float(51.3), float(0.195405), float(-0.980722)) # keren starport
-	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'naboo', long(2125382), float(3.1), float(0.6), float(49), float(0), float(1)) # keren starport
-	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'naboo', long(2125382), float(-2.7), float(0.6), float(49), float(0), float(1)) # keren starport
-	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'naboo', long(2125382), float(-13.2), float(0.6), float(51.3), float(-0.195405), float(-0.980722)) # keren starport
-	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'naboo', long(4215410), float(11.5), float(0.6), float(51.3), float(0.195405), float(-0.980722)) # moenia starport
-	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'naboo', long(4215410), float(3.1), float(0.6), float(49), float(0), float(1)) # moenia starport
-	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'naboo', long(4215410), float(-2.7), float(0.6), float(49), float(0), float(1)) # moenia starport
-	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'naboo', long(4215410), float(-13.2), float(0.6), float(51.3), float(-0.195405), float(-0.980722)) # moenia starport
 
 	
 	

@@ -269,9 +269,9 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer.putInt(6);	// Max HAM
 		buffer.putInt(0);
 
-		buffer.putInt(20000);
+		buffer.putInt(creature.getMaxHealth());
 		buffer.putInt(0);
-		buffer.putInt(12500);
+		buffer.putInt(creature.getMaxAction());
 		buffer.putInt(0);
 		buffer.putInt(0x2C01);
 		buffer.putInt(0);
@@ -320,7 +320,9 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 			}
 
 		}
+		
 		buffer.putShort((short) 0);
+		//buffer.put(getAsciiString("appearance/gungan_m.sat"));
 		buffer.put((byte) 1);
 
 		if(creature.getBuffList().isEmpty()) {
@@ -637,6 +639,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		IoBuffer buffer = bufferPool.allocate(15, false).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.putInt(1);
 		buffer.putInt(creature.getHamListCounter());
+		System.out.println("HAM list counter: " + creature.getHamListCounter());
 		buffer.put((byte) 2);
 		buffer.putShort((short) 0);
 		buffer.putInt(health);
@@ -655,6 +658,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		IoBuffer buffer = bufferPool.allocate(15, false).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.putInt(1);
 		buffer.putInt(creature.getHamListCounter());
+		System.out.println("HAM list counter: " + creature.getHamListCounter());
 		buffer.put((byte) 2);
 		buffer.putShort((short) 2);
 		buffer.putInt(action);
@@ -737,6 +741,26 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		return buffer;
 
 	}
+	
+	public IoBuffer buildUpdateBuffDelta(Buff buff) {
+		
+		CreatureObject creature = (CreatureObject) object;
+		PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
+		
+		IoBuffer buffer = bufferPool.allocate(37, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putInt(1);
+		buffer.putInt(creature.getBuffListCounter());
+		buff.setTotalPlayTime((int) (player.getTotalPlayTime() + (System.currentTimeMillis() - player.getLastPlayTimeUpdate()) / 1000));
+		buffer.put((byte) 2);
+		buffer.put(buff.getBytes());
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x1A, buffer, size + 4);
+		
+		return buffer;
+
+	}
+
 	
 	public IoBuffer buildGroupInviteDelta(long inviteSenderId, long inviteCounter, String leaderName) {
 		
@@ -864,6 +888,54 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer.flip();
 		buffer = createDelta("CREO", (byte) 4, (short) 1, (short) 0x0E, buffer, size + 4);
 		
+		return buffer;
+
+	}
+	
+	public IoBuffer buildResetHAMListDelta() {
+		
+		CreatureObject creature = (CreatureObject) object;
+		
+		IoBuffer buffer = bufferPool.allocate(35, false).order(ByteOrder.LITTLE_ENDIAN);
+		
+		buffer.putInt(1);
+		buffer.putInt(creature.getHamListCounter());
+		buffer.put((byte) 3);
+		buffer.putShort((short) 6);
+		buffer.putInt(creature.getHealth());
+		buffer.putInt(0);
+		buffer.putInt(creature.getAction());
+		buffer.putInt(0);
+		buffer.putInt(0x2C01);
+		buffer.putInt(0);
+		
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x15, buffer, size + 4);
+
+		return buffer;
+
+	}
+	
+	public IoBuffer buildUpdateHAMListDelta() {
+		
+		CreatureObject creature = (CreatureObject) object;
+		
+		IoBuffer buffer = bufferPool.allocate(22, false).order(ByteOrder.LITTLE_ENDIAN);
+		
+		buffer.putInt(2);
+		buffer.putInt(creature.getHamListCounter());
+		buffer.put((byte) 2);
+		buffer.putShort((short) 0);
+		buffer.putInt(creature.getHealth());
+		buffer.put((byte) 2);
+		buffer.putShort((short) 2);
+		buffer.putInt(creature.getAction());
+		
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x15, buffer, size + 4);
+
 		return buffer;
 
 	}

@@ -101,7 +101,8 @@ public class CombatSpam extends ObjControllerObject{
 		result.putInt(0x20); // unk
 		result.putInt(0); // unk
 		result.putInt(0); // unk
-		result.putInt(armorAbsorbed); // damage absorbed by armor
+		//result.putInt(armorAbsorbed); // damage absorbed by armor
+		result.putInt(damage);
 		result.putInt(damage); // total damage done after armor without elemental
 		result.putInt(0); // punishing blow for all values
 		result.putInt(0); // unk

@@ -68,6 +68,13 @@ public class CombatCommand extends BaseSWGCommand {
 	private String performanceSpam;
 	private byte hitSpam;
 	private float cooldown;
+	private String delayAttackEggTemplate;
+	private String delayAttackParticle;
+	private float initialAttackDelay;
+	private float delayAttackInterval;
+	private int delayAttackLoops;
+	private int delayAttackEggPosition;
+	
 	
 	public CombatCommand(String commandName) {
 		super(commandName);
@@ -81,6 +88,12 @@ public class CombatCommand extends BaseSWGCommand {
 						validTargetType = ((Integer) visitor.getObject(i, 5)).byteValue();
 						hitType = ((Integer) visitor.getObject(i, 6)).byteValue();
 						healType = ((Integer) visitor.getObject(i, 7)).byteValue();
+						delayAttackEggTemplate = (String) visitor.getObject(i, 12);
+						delayAttackParticle = (String) visitor.getObject(i, 13);
+						initialAttackDelay = (Float) visitor.getObject(i, 14);
+						delayAttackInterval = (Float) visitor.getObject(i, 15);
+						delayAttackLoops = (Integer) visitor.getObject(i, 16);
+						delayAttackEggPosition = (Integer) visitor.getObject(i, 17);
 						String defaultAnims = (String) visitor.getObject(i, 21);
 						setDefaultAnimations(defaultAnims.split(","));
 						String unarmedAnims = (String) visitor.getObject(i, 22);
@@ -592,6 +605,54 @@ public class CombatCommand extends BaseSWGCommand {
 
 	public void setCooldown(float cooldown) {
 		this.cooldown = cooldown;
+	}
+
+	public String getDelayAttackEggTemplate() {
+		return delayAttackEggTemplate;
+	}
+
+	public void setDelayAttackEggTemplate(String delayAttackEggTemplate) {
+		this.delayAttackEggTemplate = delayAttackEggTemplate;
+	}
+
+	public String getDelayAttackParticle() {
+		return delayAttackParticle;
+	}
+
+	public void setDelayAttackParticle(String delayAttackParticle) {
+		this.delayAttackParticle = delayAttackParticle;
+	}
+
+	public float getInitialAttackDelay() {
+		return initialAttackDelay;
+	}
+
+	public void setInitialAttackDelay(float initialAttackDelay) {
+		this.initialAttackDelay = initialAttackDelay;
+	}
+
+	public float getDelayAttackInterval() {
+		return delayAttackInterval;
+	}
+
+	public void setDelayAttackInterval(float delayAttackInterval) {
+		this.delayAttackInterval = delayAttackInterval;
+	}
+
+	public int getDelayAttackEggPosition() {
+		return delayAttackEggPosition;
+	}
+
+	public void setDelayAttackEggPosition(int delayAttackEggPosition) {
+		this.delayAttackEggPosition = delayAttackEggPosition;
+	}
+
+	public int getDelayAttackLoops() {
+		return delayAttackLoops;
+	}
+
+	public void setDelayAttackLoops(int delayAttackLoops) {
+		this.delayAttackLoops = delayAttackLoops;
 	}
 	
 	

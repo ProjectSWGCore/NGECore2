@@ -44,6 +44,42 @@ def CreateStartingCharacter(core, object):
 	inventory.add(testCloak)
 	profession = object.getSlottedObject('ghost').getProfession()
 	addProfessionAbilities(core, object, profession)
+	
+	heroism1 = core.objectService.createObject('object/tangible/wearables/necklace/shared_necklace_s10.iff', object.getPlanet())
+	heroism1.setStfFilename('static_item_n')
+	heroism1.setStfName('item_necklace_set_hero_01_01')
+	heroism1.setDetailFilename('static_item_d')
+	heroism1.setDetailName('item_necklace_set_hero_01_01')
+	heroism1.setStringAttribute('@set_bonus:piece_bonus_count_2', '@set_bonus:set_bonus_hero_1')
+	heroism1.setStringAttribute('@set_bonus:piece_bonus_count_3', '@set_bonus:set_bonus_hero_2')
+	heroism1.setStringAttribute('@set_bonus:piece_bonus_count_5', '@set_bonus:set_bonus_hero_3')
+	heroism1.setIntAttribute('cat_stat_mod_bonus.food_luck_modified' , 30)
+	heroism1.setIntAttribute('cat_stat_mod_bonus.food_precision_modified' , 30)
+	heroism1.setIntAttribute('cat_stat_mod_bonus.food_strength_modified' , 30)
+	
+
+	inventory = object.getSlottedObject('inventory')
+	if not inventory:
+		return
+	inventory.add(heroism1)
+	
+	heroism2 = core.objectService.createObject('object/tangible/wearables/bracelet/shared_bracelet_s03_r.iff', object.getPlanet())
+	heroism2.setStfFilename('static_item_n')
+	heroism2.setStfName('item_bracelet_r_set_hero_01_01')
+	heroism2.setDetailFilename('static_item_d')
+	heroism2.setDetailName('item_bracelet_r_set_hero_01_01')
+	heroism2.setStringAttribute('@set_bonus:piece_bonus_count_2', '@set_bonus:set_bonus_hero_1')
+	heroism2.setStringAttribute('@set_bonus:piece_bonus_count_3', '@set_bonus:set_bonus_hero_2')
+	heroism2.setStringAttribute('@set_bonus:piece_bonus_count_5', '@set_bonus:set_bonus_hero_3')
+	heroism2.setIntAttribute('cat_stat_mod_bonus.food_luck_modified' , 30)
+	heroism2.setIntAttribute('cat_stat_mod_bonus.food_precision_modified' , 30)
+	heroism2.setIntAttribute('cat_stat_mod_bonus.food_strength_modified' , 30)
+	
+
+	inventory = object.getSlottedObject('inventory')
+	if not inventory:
+		return
+	inventory.add(heroism2)
 	return
 	
 def addProfessionAbilities(core, object, profession):
@@ -67,6 +103,8 @@ def addProfessionAbilities(core, object, profession):
 		object.addAbility('fs_sh_3')
 		object.addAbility('fs_dm_cc_6')
 		object.addAbility('fs_dm_7')
+		object.addAbility('fs_buff_def_1_1')
+		object.addAbility('fs_buff_ca_1')
 	elif profession == 'medic_1a':
 		object.addAbility('me_bacta_bomb_5')
 		object.addAbility('me_bacta_grenade_5')

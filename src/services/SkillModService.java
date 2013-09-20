@@ -40,13 +40,13 @@ public class SkillModService implements INetworkDispatch {
 	
 	public void addSkillMod(CreatureObject creature, String skillMod, int value) {
 		
-		core.scriptService.callScript("scripts/skillMods", skillMod, "add", core, creature, skillMod, value);
+		core.scriptService.callScript("scripts/skillMods/", skillMod, "add", core, creature, skillMod, value);
 		
 	}
 	
 	public void deductSkillMod(CreatureObject creature, String skillMod, int value) {
 		
-		core.scriptService.callScript("scripts/skillMods", skillMod, "deduct", core, creature, skillMod, value);
+		core.scriptService.callScript("scripts/skillMods/", skillMod, "deduct", core, creature, skillMod, value);
 
 	}
 

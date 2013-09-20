@@ -41,6 +41,7 @@ import engine.clients.Client;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Grid2D;
 import engine.resources.scene.Planet;
+import engine.resources.scene.Point3D;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
@@ -111,6 +112,29 @@ public class MapService implements INetworkDispatch {
 		
 		MapLocation location = new MapLocation(planet, nextId.incrementAndGet(), name, x, y, category, subcategory, active);
 		locationMap.get(planet).add(location);
+	}
+	
+	public String getClosestCityName(SWGObject object) {
+		
+		Vector<MapLocation> locations = locationMap.get(object.getPlanet());
+		float closestDistance = Float.MAX_VALUE;
+		String closestName = "";
+		Point3D objPos = object.getWorldPosition();
+		
+		for(MapLocation location : locations) {
+			
+			if(location.getCategory() == 17) {
+				Point3D position = new Point3D(location.getX(), 0, location.getY());
+				if(position.getDistance2D(objPos) < closestDistance) {
+					closestDistance = position.getDistance2D(objPos);
+					closestName = location.getName();
+				}
+			}
+			
+		}
+
+		return closestName;
+		
 	}
 	
 }

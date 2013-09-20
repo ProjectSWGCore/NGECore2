@@ -21,7 +21,11 @@
  ******************************************************************************/
 package services;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+
+import resources.objects.building.BuildingObject;
 
 import main.NGECore;
 
@@ -58,7 +62,7 @@ public class StaticService implements INetworkDispatch {
 	
 	public void spawnPlanetStaticObjs(String planet) {
 		Planet planetObj = (Planet) core.terrainService.getPlanetByName(planet);
-		core.scriptService.callScript("scripts/static_spawns", "addPlanetSpawns", planetObj.getName(), core, planetObj);
+		core.scriptService.callScript("scripts/static_spawns/", "addPlanetSpawns", planetObj.getName(), core, planetObj);
 		System.out.println("Loaded static objs for " + planetObj.getName());
 	}
 	
@@ -93,6 +97,21 @@ public class StaticService implements INetworkDispatch {
 			}
 			parent.add(object);
 		}
+		
+	}
+	
+	public List<SWGObject> getCloningFacilitiesByPlanet(Planet planet) {
+		
+		List<SWGObject> objects = core.simulationService.get(planet, 0, 0, 8300);
+		List<SWGObject> cloners = new ArrayList<SWGObject>();
+		
+		for(SWGObject obj : objects) {
+			if(obj instanceof BuildingObject && (obj.getTemplate().contains("cloning_facility") || obj.getTemplate().contains("cloning_tatooine") || obj.getTemplate().contains("cloning_naboo") || obj.getTemplate().contains("cloning_corellia"))) {
+				if(!obj.getTemplate().equals("object/building/general/shared_cloning_facility_general.iff"))
+					cloners.add(obj);
+			}
+		}
+		return cloners;
 		
 	}
 

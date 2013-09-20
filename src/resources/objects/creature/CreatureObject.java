@@ -134,7 +134,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 
 	// non-baseline vars
 	@NotPersistent
-	private List<Long> duelList = Collections.synchronizedList(new ArrayList<Long>());
+	private List<CreatureObject> duelList = Collections.synchronizedList(new ArrayList<CreatureObject>());
 	@NotPersistent
 	private CreatureMessageBuilder messageBuilder;
 	
@@ -820,7 +820,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		return appearanceEquipmentList;
 	}
 
-	public List<Long> getDuelList() {
+	public List<CreatureObject> getDuelList() {
 		return duelList;
 	}
 
@@ -912,15 +912,43 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 
 	public void setHealth(int health) {
+		
+		synchronized(objectMutex) {
+			if(getPosture() == 13) {
+					if(health > maxHealth)
+						health = maxHealth;
+					this.health = health;
+					notifyObservers(messageBuilder.buildUpdateHAMListDelta(), true);
+					setPosture((byte) 0);
+					setTurnRadius(1);
+					setSpeedMultiplierBase(1);
+					return;
+			}
+		}
+
 		IoBuffer delta;
+	//	IoBuffer delta2;
+		int counter;
 		synchronized(objectMutex) {
 			if(health > maxHealth)
 				health = maxHealth;
 			this.health = health;
+			counter = getHamListCounter() + 1;
 			setHamListCounter(getHamListCounter() + 1);
-			delta = messageBuilder.buildHealthDelta(health);
+			delta = messageBuilder.buildUpdateHAMListDelta();
+			/*if(health == 1)
+				delta2 = messageBuilder.buildHealthDelta(0);
+			else
+				delta2 = delta;*/
+			
+			notifyObservers(delta, true);
+			
+			/*if(getClient() != null)
+				getClient().getSession().write(delta2);*/
 		}
-		notifyObservers(delta, true);
+		if(counter != getHamListCounter())
+			System.out.println("test");
+
 	}
 
 	public int getAction() {
@@ -931,14 +959,18 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 
 	public void setAction(int action) {
 		IoBuffer delta;
+		int counter;
 		synchronized(objectMutex) {
 			if(action > maxAction)
 				action = maxAction;
 			this.action = action;
+			counter = getHamListCounter() + 1;
 			setHamListCounter(getHamListCounter() + 1);
-			delta = messageBuilder.buildActionDelta(action);
+			delta = messageBuilder.buildUpdateHAMListDelta();
+			notifyObservers(delta, true);
 		}
-		notifyObservers(delta, true);
+		if(counter != getHamListCounter())
+			System.out.println("test");
 	}
 
 	public int getHamListCounter() {
@@ -1040,6 +1072,13 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		
 		getClient().getSession().write(messageBuilder.buildGroupInviteDelta(getInviteSenderId(), getInviteCounter(), getInviteSenderName()));
 		
+	}
+	
+	public void resetHAMList() {
+		synchronized(objectMutex) {
+			setHamListCounter(getHamListCounter() + 1);
+			notifyObservers(messageBuilder.buildResetHAMListDelta(), true);
+		}
 	}
 
 

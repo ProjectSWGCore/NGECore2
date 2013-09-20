@@ -33,11 +33,13 @@ import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.resources.common.CRC;
 
-@Persistent(version=3)
+@Persistent(version=5)
 public class Buff implements IListObject {
 	
 	@NotPersistent
 	private SimpleBufferAllocator bufferPool = new SimpleBufferAllocator();
+	private String group1;
+	private int priority;
 	private float duration;
 	private String buffName;
 	private long ownerId;
@@ -54,6 +56,7 @@ public class Buff implements IListObject {
 	private boolean decayOnPvPDeath;
 	private long startTime;
 	private int totalPlayTime;
+	private byte decayCounter;
 	
 	public Buff(String buffName, long ownerId) {
 		
@@ -70,6 +73,8 @@ public class Buff implements IListObject {
 			if(visitor.getObject(i, 0) != null)
 				if(((String) visitor.getObject(i, 0)).equalsIgnoreCase(buffName)) {
 					
+					group1 = (String) visitor.getObject(i, 1);
+					priority = (int) visitor.getObject(i, 4);
 					duration = (Float) visitor.getObject(i, 6);
 					effect1Name = (String) visitor.getObject(i, 7);
 					effect1Value = (Float) visitor.getObject(i, 8);
@@ -111,15 +116,15 @@ public class Buff implements IListObject {
 		
 		IoBuffer buffer = bufferPool.allocate(28, false).order(ByteOrder.LITTLE_ENDIAN);
 		
-		buffer.putInt(CRC.StringtoCRC(buffName));
+		buffer.putInt(CRC.StringtoCRC(buffName.toLowerCase()));
 		if(duration > 0) {
 			buffer.putInt((int) (totalPlayTime + getRemainingDuration()));		
 			buffer.putInt(0);
 			buffer.putInt((int) duration);
 		} else {
 			buffer.putInt(-1);
+           	buffer.putInt(0);
 			buffer.putInt(0);
-			buffer.putInt(-1);
 		}
 		buffer.putLong(ownerId);
 		buffer.putInt(1);	// unk
@@ -130,6 +135,22 @@ public class Buff implements IListObject {
 		
 	}
 
+	public String getGroup1() {
+		return group1;
+	}
+	
+	public void setGroup1(String group1) {
+		this.group1 = group1;
+	}
+ 
+	public float getPriority() {
+		return priority;
+	}
+	
+	public void setPriority(int priority) {
+		this.priority = priority;
+	}
+	
 	public float getDuration() {
 		return duration;
 	}
@@ -315,7 +336,9 @@ public class Buff implements IListObject {
 		long currentTime = System.currentTimeMillis();
 		long timeDiff = (currentTime - startTime) / 1000;
 		int remaining = (int) (duration - timeDiff);
-		System.out.println("Buff remaining: " + remaining);
+		for(int i = 0; i < decayCounter; i++) {
+			remaining /= 2;
+		}
 		return remaining;
 		
 	}
@@ -326,6 +349,14 @@ public class Buff implements IListObject {
 
 	public void setTotalPlayTime(int totalPlayTime) {
 		this.totalPlayTime = totalPlayTime;
+	}
+
+	public byte getDecayCounter() {
+		return decayCounter;
+	}
+
+	public void incDecayCounter(byte decayCounter) {
+		this.decayCounter++;
 	}
 
 }
