@@ -264,7 +264,8 @@ public class CharacterService implements INetworkDispatch {
 				object._add(weapon);
 				object.setWeaponId(weapon.getObjectID());
 
-				core.scriptService.callScript("scripts/", "demo", "CreateStartingCharacter", core, object);
+				core.scriptService.callScript("scripts/", "starterclothing", "CreateStarterClothing", core, object, clientCreateCharacter.getStarterProfession(), clientCreateCharacter.getRaceTemplate());
+				core.scriptService.callScript("scripts/", "CreateStartingCharacter", "demo", core, object);
 
 
 				
