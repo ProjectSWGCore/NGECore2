@@ -16,7 +16,7 @@ def equip(core, actor, target):
 	if actor:
 		core.buffService.addBuffToCreature(actor, 'proc_old_dark_jedi_gift')
 		return
-		
+	return
 	
 def unequip(core, actor, target):
 	core.skillModService.deductSkillMod(actor, 'constitution_modified', 250)
