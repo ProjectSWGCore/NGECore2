@@ -82,7 +82,7 @@ import resources.objects.weapon.WeaponObject;
 
 public class ObjectService implements INetworkDispatch {
 
-	private List<SWGObject> objectList = Collections.synchronizedList(new ArrayList<SWGObject>());
+	private Map<Long, SWGObject> objectList = new ConcurrentHashMap<Long, SWGObject>();
 	
 	private NGECore core;
 	
@@ -101,7 +101,7 @@ public class ObjectService implements INetworkDispatch {
 			@Override
 		    public void run() {
 		    	synchronized(objectList) {
-		    		for(SWGObject obj : objectList) {
+		    		for(SWGObject obj : objectList.values()) {
 		    			
 		    			if(obj.getSlottedObject("ghost") != null) {
 		    				((CreatureObject) obj).createTransaction(core.getCreatureODB().getEnvironment());
@@ -192,7 +192,7 @@ public class ObjectService implements INetworkDispatch {
 		
 		loadServerTemplate(object);		
 		
-		objectList.add(object);
+		objectList.put(objectID, object);
 
 		return object;
 	}
@@ -238,38 +238,20 @@ public class ObjectService implements INetworkDispatch {
 	}
 	
 	public SWGObject getObject(long objectID) {
-				
-		SWGObject object = null;
-		
-		synchronized(objectList) {
-			
-			Iterator<SWGObject> it = objectList.iterator();
-					
-			while(it.hasNext()) {
-						
-				SWGObject swgObject = it.next();
-				if(swgObject.getObjectID() == objectID) {
-						object = swgObject;
-						break;
-				}
-			}
-		}
-			
-		return object;
-		
+		return objectList.get(objectID);
 	}
 	
-	public List<SWGObject> getObjectList() { return objectList; }
+	public Map<Long, SWGObject> getObjectList() { return objectList; }
 	
 	public void destroyObject(SWGObject object) {
 		
 		object.viewChildren(object, true, true, new Traverser() {
 			@Override
 			public void process(SWGObject obj) {
-				objectList.remove(obj);
+				objectList.remove(obj.getObjectID());
 			}
 		});
-		objectList.remove(object);
+		objectList.remove(object.getObjectID());
 		//core.simulationService.remove(object, object.getPosition().x, object.getPosition().y);
 		
 	}
@@ -280,20 +262,18 @@ public class ObjectService implements INetworkDispatch {
 		if(object != null) {
 			destroyObject(object);
 		}
+		
 	}
 	
 	public SWGObject getObjectByCustomName(String customName) {
 		
 		synchronized(objectList) {
 			
-			Iterator<SWGObject> it = objectList.iterator();
-					
-			while(it.hasNext()) {
-				SWGObject obj = it.next();
+			for(SWGObject obj : objectList.values()) {
 				if(obj.getCustomName() == null)
 					continue;
 				if(obj.getCustomName().equals(customName))
-					return it.next();
+					return obj;
 			}
 			
 		}
@@ -387,13 +367,13 @@ public class ObjectService implements INetworkDispatch {
 				creature.setPlanet(planet);
 				client.setParent(creature);
 				
-				objectList.add(creature);
+				objectList.put(creature.getObjectID(), creature);
 				
 				creature.viewChildren(creature, true, true, new Traverser() {
 
 					@Override
 					public void process(SWGObject object) {
-						objectList.add(object);
+						objectList.put(object.getObjectID(), object);
 					}
 					
 				});
@@ -406,7 +386,7 @@ public class ObjectService implements INetworkDispatch {
 							object.setParent(getObject(object.getParentId()));
 						object.getContainerInfo(object.getTemplate());
 						if(getObject(object.getObjectID()) == null)
-							objectList.add(object);
+							objectList.put(object.getObjectID(), object);
 					}
 					
 				});				
@@ -479,7 +459,7 @@ public class ObjectService implements INetworkDispatch {
         }
 		visitor.dispose();
 		synchronized(objectList) {
-			for(SWGObject obj : objectList) {
+			for(SWGObject obj : objectList.values()) {
 				if(obj.getParentId() != 0 && getObject(obj.getParentId()) != null) {
 					SWGObject parent = getObject(obj.getParentId());
 					parent.add(obj);

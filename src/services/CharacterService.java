@@ -264,10 +264,8 @@ public class CharacterService implements INetworkDispatch {
 				object._add(weapon);
 				object.setWeaponId(weapon.getObjectID());
 
-				core.scriptService.callScript("scripts/", "demo", "CreateStartingCharacter", core, object);
+				core.scriptService.callScript("scripts/", "CreateStartingCharacter", "demo", core, object);
 
-
-				
 				core.getCreatureODB().put(object, Long.class, CreatureObject.class, object.getTransaction());
 				// might not need to commit transaction but better safe than sorry
 				object.getTransaction().commitSync();

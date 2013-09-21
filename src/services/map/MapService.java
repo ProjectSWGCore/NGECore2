@@ -112,6 +112,7 @@ public class MapService implements INetworkDispatch {
 		
 		MapLocation location = new MapLocation(planet, nextId.incrementAndGet(), name, x, y, category, subcategory, active);
 		locationMap.get(planet).add(location);
+		
 	}
 	
 	public String getClosestCityName(SWGObject object) {

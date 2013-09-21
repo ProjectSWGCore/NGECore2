@@ -22,9 +22,16 @@
 package resources.objects;
 
 import java.nio.ByteOrder;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+
+import main.NGECore;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.buffer.SimpleBufferAllocator;
+
+import resources.objects.creature.CreatureObject;
 
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
@@ -56,7 +63,9 @@ public class Buff implements IListObject {
 	private boolean decayOnPvPDeath;
 	private long startTime;
 	private int totalPlayTime;
-	private byte decayCounter;
+	private byte decayCounter = 0;
+	@NotPersistent
+	private ScheduledFuture<?> removalTask;
 	
 	public Buff(String buffName, long ownerId) {
 		
@@ -355,8 +364,44 @@ public class Buff implements IListObject {
 		return decayCounter;
 	}
 
-	public void incDecayCounter(byte decayCounter) {
+	public void incDecayCounter() {
 		this.decayCounter++;
+	}
+
+	public ScheduledFuture<?> getRemovalTask() {
+		return removalTask;
+	}
+
+	public void setRemovalTask(ScheduledFuture<?> removalTask) {
+		this.removalTask = removalTask;
+	}
+	
+	public void updateRemovalTask() {
+		
+		if(removalTask == null)
+			return;
+		
+		removalTask.cancel(true);
+		
+		final NGECore core = NGECore.getInstance();
+		final CreatureObject owner = (CreatureObject) core.objectService.getObject(getOwnerId());
+		
+		if(owner == null)
+			return;
+		
+		ScheduledFuture<?> task = Executors.newScheduledThreadPool(1).schedule(new Runnable() {
+			
+			@Override
+			public void run() {
+				
+				core.buffService.removeBuffFromCreature(owner, Buff.this);
+			
+			}
+			
+		}, (long) getRemainingDuration(), TimeUnit.SECONDS);
+		
+		setRemovalTask(task);
+		
 	}
 
 }
