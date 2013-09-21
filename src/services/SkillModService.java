@@ -51,15 +51,12 @@ public class SkillModService implements INetworkDispatch {
 	}
 
 	@Override
-	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> arg0,
-			Map<Integer, INetworkRemoteEvent> arg1) {
-		// TODO Auto-generated method stub
+	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> arg0, Map<Integer, INetworkRemoteEvent> arg1) {
 		
 	}
 
 	@Override
 	public void shutdown() {
-		// TODO Auto-generated method stub
 		
 	}
 

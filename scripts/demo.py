@@ -80,6 +80,60 @@ def CreateStartingCharacter(core, object):
 	if not inventory:
 		return
 	inventory.add(heroism2)
+	
+	heroism3 = core.objectService.createObject('object/tangible/wearables/bracelet/shared_bracelet_s03_l.iff', object.getPlanet())
+	heroism3.setStfFilename('static_item_n')
+	heroism3.setStfName('item_bracelet_l_set_hero_01_01')
+	heroism3.setDetailFilename('static_item_d')
+	heroism3.setDetailName('item_bracelet_l_set_hero_01_01')
+	heroism3.setStringAttribute('@set_bonus:piece_bonus_count_2', '@set_bonus:set_bonus_hero_1')
+	heroism3.setStringAttribute('@set_bonus:piece_bonus_count_3', '@set_bonus:set_bonus_hero_2')
+	heroism3.setStringAttribute('@set_bonus:piece_bonus_count_5', '@set_bonus:set_bonus_hero_3')
+	heroism3.setIntAttribute('cat_stat_mod_bonus.food_luck_modified' , 30)
+	heroism3.setIntAttribute('cat_stat_mod_bonus.food_precision_modified' , 30)
+	heroism3.setIntAttribute('cat_stat_mod_bonus.food_strength_modified' , 30)
+	
+
+	inventory = object.getSlottedObject('inventory')
+	if not inventory:
+		return
+	inventory.add(heroism3)
+	
+	heroism4 = core.objectService.createObject('object/tangible/wearables/ring/shared_ring_s04.iff', object.getPlanet())
+	heroism4.setStfFilename('static_item_n')
+	heroism4.setStfName('item_ring_set_hero_01_01')
+	heroism4.setDetailFilename('static_item_d')
+	heroism4.setDetailName('item_ring_set_hero_01_01')
+	heroism4.setStringAttribute('@set_bonus:piece_bonus_count_2', '@set_bonus:set_bonus_hero_1')
+	heroism4.setStringAttribute('@set_bonus:piece_bonus_count_3', '@set_bonus:set_bonus_hero_2')
+	heroism4.setStringAttribute('@set_bonus:piece_bonus_count_5', '@set_bonus:set_bonus_hero_3')
+	heroism4.setIntAttribute('cat_stat_mod_bonus.food_luck_modified' , 30)
+	heroism4.setIntAttribute('cat_stat_mod_bonus.food_precision_modified' , 30)
+	heroism4.setIntAttribute('cat_stat_mod_bonus.food_strength_modified' , 30)
+	
+
+	inventory = object.getSlottedObject('inventory')
+	if not inventory:
+		return
+	inventory.add(heroism4)
+	
+	heroism5 = core.objectService.createObject('object/tangible/wearables/ring/shared_ring_s02.iff', object.getPlanet())
+	heroism5.setStfFilename('static_item_n')
+	heroism5.setStfName('item_ring_a_set_hero')
+	heroism5.setDetailFilename('static_item_d')
+	heroism5.setDetailName('item_ring_a_set_hero')
+	heroism5.setStringAttribute('@set_bonus:piece_bonus_count_2', '@set_bonus:set_bonus_hero_1')
+	heroism5.setStringAttribute('@set_bonus:piece_bonus_count_3', '@set_bonus:set_bonus_hero_2')
+	heroism5.setStringAttribute('@set_bonus:piece_bonus_count_5', '@set_bonus:set_bonus_hero_3')
+	heroism5.setIntAttribute('cat_stat_mod_bonus.food_luck_modified' , 30)
+	heroism5.setIntAttribute('cat_stat_mod_bonus.food_precision_modified' , 30)
+	heroism5.setIntAttribute('cat_stat_mod_bonus.food_strength_modified' , 30)
+	
+
+	inventory = object.getSlottedObject('inventory')
+	if not inventory:
+		return
+	inventory.add(heroism5)
 	return
 	
 def addProfessionAbilities(core, object, profession):

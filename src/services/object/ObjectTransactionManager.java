@@ -21,6 +21,7 @@
  ******************************************************************************/
 package services.object;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -60,7 +61,7 @@ public class ObjectTransactionManager implements Runnable {
 			
 			Thread.sleep(cycleTime);
 							
-			List<SWGObject> swgObjects = objService.getObjectList();
+			Collection<SWGObject> swgObjects = objService.getObjectList().values();
 			
 			synchronized(swgObjects) {
 				

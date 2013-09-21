@@ -24,6 +24,7 @@ package services;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 
@@ -92,7 +93,7 @@ public class BuffService implements INetworkDispatch {
 		
 		if(buff.getDuration() > 0) {
 			
-			scheduler.schedule(new Runnable() {
+			ScheduledFuture<?> task = scheduler.schedule(new Runnable() {
 	
 				@Override
 				public void run() {
@@ -103,6 +104,9 @@ public class BuffService implements INetworkDispatch {
 				}
 				
 			}, (long) buff.getDuration(), TimeUnit.SECONDS);
+			
+			buff.setRemovalTask(task);
+			
 		}
 		
 	} 
@@ -124,7 +128,7 @@ public class BuffService implements INetworkDispatch {
 		for(final Buff buff : creature.getBuffList().get().toArray(new Buff[] { })) {
 				
 			if(buff.getRemainingDuration() > 0 && buff.getDuration() > 0) {
-				scheduler.schedule(new Runnable() {
+				ScheduledFuture<?> task = scheduler.schedule(new Runnable() {
 
 					@Override
 					public void run() {
@@ -134,6 +138,7 @@ public class BuffService implements INetworkDispatch {
 					}
 					
 				}, (long) buff.getRemainingDuration(), TimeUnit.SECONDS);
+				buff.setRemovalTask(task);
 				continue;
 			} else {
 				removeBuffFromCreature(creature, buff);

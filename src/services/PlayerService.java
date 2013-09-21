@@ -22,6 +22,7 @@
 package services;
 
 import java.nio.ByteOrder;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +41,9 @@ import protocol.swg.ServerTimeMessage;
 import resources.common.FileUtilities;
 import resources.common.Opcodes;
 import resources.common.SpawnPoint;
+import resources.objects.Buff;
 import resources.objects.building.BuildingObject;
+import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import services.sui.SUIService.ListBoxType;
@@ -193,7 +196,7 @@ public class PlayerService implements INetworkDispatch {
 		
 	}
 	
-	public void sendCloningWindow(CreatureObject creature) {
+	public void sendCloningWindow(CreatureObject creature, final boolean pvpDeath) {
 		
 		//if(creature.getPosture() != 14)
 		//	return;
@@ -236,7 +239,7 @@ public class PlayerService implements INetworkDispatch {
 				
 				SpawnPoint spawnPoint = spawnPoints.get(new Random().nextInt(spawnPoints.size()));
 
-				handleCloneRequest((CreatureObject) owner, (BuildingObject) cloner, spawnPoint);
+				handleCloneRequest((CreatureObject) owner, (BuildingObject) cloner, spawnPoint, pvpDeath);
 				
 			}
 			
@@ -246,8 +249,35 @@ public class PlayerService implements INetworkDispatch {
 		
 	}
 	
-	public void handleCloneRequest(CreatureObject creature, BuildingObject cloner, SpawnPoint spawnPoint) {
+	public void handleCloneRequest(CreatureObject creature, BuildingObject cloner, SpawnPoint spawnPoint, boolean pvpDeath) {
 		
+		CellObject cell = cloner.getCellByCellNumber(spawnPoint.getCellNumber());
+		
+		if(cell == null)
+			return;
+		
+		core.simulationService.transferToPlanet(creature, cloner.getPlanet(), spawnPoint.getPosition(), spawnPoint.getOrientation(), cell);
+		
+		creature.setHealth(creature.getMaxHealth());
+		creature.setAction(creature.getMaxAction());
+		
+		creature.setPosture((byte) 0);
+		creature.setSpeedMultiplierBase(1);
+		creature.setTurnRadius(1);
+		
+		if(pvpDeath) {
+			List<Buff> buffs = new ArrayList<Buff>(creature.getBuffList().get());
+			
+			for(Buff buff : buffs) {
+				if(buff.isDecayOnPvPDeath())
+					buff.incDecayCounter();
+			}
+			
+			creature.updateAllBuffs();
+		}
+		
+		creature.setFactionStatus(0);
+		core.buffService.addBuffToCreature(creature, "cloning_sickness");
 		
 	}
 

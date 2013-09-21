@@ -103,7 +103,7 @@ public class SimulationService implements INetworkDispatch {
 			quadTrees.put(terrainService.getPlanetList().get(i).getName(), new QuadTree<SWGObject>(-8192, -8192, 8192, 8192));
 		}
 		
-		List<SWGObject> objectList = new ArrayList<SWGObject>(core.objectService.getObjectList());
+		List<SWGObject> objectList = new ArrayList<SWGObject>(core.objectService.getObjectList().values());
 		for(SWGObject obj : objectList) {
 			if(obj.getParentId() == 0 && obj.isInSnapshot()) {
 				core.objectService.loadServerTemplate(obj);
@@ -550,8 +550,8 @@ public class SimulationService implements INetworkDispatch {
 		}
 				
 	}
-	
-	public void transferToPlanet(SWGObject object, Planet planet, Point3D newPos, Quaternion newOrientation) {
+		
+	public void transferToPlanet(SWGObject object, Planet planet, Point3D newPos, Quaternion newOrientation, SWGObject newParent) {
 		
 		Client client = object.getClient();
 		
@@ -582,18 +582,17 @@ public class SimulationService implements INetworkDispatch {
 		
 		synchronized(object.getMutex()) {
 			
-			Iterator<SWGObject> it = object.getAwareObjects().iterator();
+			object.getAwareObjects().removeAll(object.getAwareObjects());
 			
-			while(it.hasNext()) {
-				it.remove();
-			}
-
 		}
 		
 		object.setPlanet(planet);
 		object.setPlanetId(planet.getID());
 		object.setPosition(newPos);
 		object.setOrientation(newOrientation);
+		
+		if(newParent != null && newParent instanceof CellObject)
+			newParent._add(object);
 		
 		HeartBeatMessage heartBeat = new HeartBeatMessage();
 		session.write(heartBeat.serialize());
@@ -604,8 +603,8 @@ public class SimulationService implements INetworkDispatch {
 		handleZoneIn(client);
 		object.makeAware(object);
 
-		
 	}
+
 	
 	public void openContainer(SWGObject requester, SWGObject container) {
 		
