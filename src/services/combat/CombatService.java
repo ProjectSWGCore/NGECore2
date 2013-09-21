@@ -795,7 +795,7 @@ public class CombatService implements INetworkDispatch {
 		attacker.removeDefender(target);
 		target.removeDefender(attacker);
 		
-		// TODO: Create Clone SUI Window
+		core.playerService.sendCloningWindow(target, attacker.getSlottedObject("ghost") != null);
 		
 	}
 	

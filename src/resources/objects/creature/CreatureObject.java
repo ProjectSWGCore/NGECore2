@@ -1042,7 +1042,23 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 		notifyObservers(messageBuilder.buildRemoveBuffDelta(buff), true);
 	}
+	
+	public void updateBuff(Buff buff) {
+		buff.updateRemovalTask();
+		synchronized(objectMutex) {
+			setBuffListCounter(getBuffListCounter() + 1);
+			notifyObservers(messageBuilder.buildUpdateBuffDelta(buff), true);
+		}
+	}	
 
+	public void updateAllBuffs() {
+		synchronized(objectMutex) {
+			for(Buff buff : buffList.get()) {
+				updateBuff(buff);
+			}
+		}
+	}
+	
 	public int getBuffListCounter() {
 		synchronized(objectMutex) {
 			return buffListUpdateCounter;

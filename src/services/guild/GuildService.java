@@ -41,7 +41,7 @@ public class GuildService implements INetworkDispatch {
 	public GuildService(NGECore core) {
 		this.core = core;
 		
-		for (SWGObject swgObject : core.objectService.getObjectList()) {
+		for (SWGObject swgObject : core.objectService.getObjectList().values()) {
 			if (swgObject.getTemplate().equals("object/guild/shared_guild_object.iff") && swgObject instanceof GuildObject) {
 				object = (GuildObject) swgObject;
 			}

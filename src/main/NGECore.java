@@ -84,6 +84,8 @@ import engine.servers.PingServer;
 public class NGECore {
 	
 	public static boolean didServerCrash = false;
+
+	private static NGECore instance;
 	
 	private Config config = null;
 
@@ -135,6 +137,8 @@ public class NGECore {
 	}
 	
 	public void start() {
+		
+		instance = this;
 		config = new Config();
 		config.setFilePath("nge.cfg");
 		if (!(config.loadConfigFile())) {
@@ -375,5 +379,8 @@ public class NGECore {
 		return Thread.currentThread();
 	}
 	
+	public static NGECore getInstance() {
+		return instance;
+	}
 }
 

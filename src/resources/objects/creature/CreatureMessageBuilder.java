@@ -676,7 +676,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		
 		IoBuffer buffer = bufferPool.allocate(15, false).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.putInt(1);
-		buffer.putInt(creature.getHamListCounter());
+		buffer.putInt(creature.getMaxHAMListCounter());
 		buffer.put((byte) 2);
 		buffer.putShort((short) 0);
 		buffer.putInt(health);
@@ -694,7 +694,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		
 		IoBuffer buffer = bufferPool.allocate(15, false).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.putInt(1);
-		buffer.putInt(creature.getHamListCounter());
+		buffer.putInt(creature.getMaxHAMListCounter());
 		buffer.put((byte) 2);
 		buffer.putShort((short) 2);
 		buffer.putInt(action);
