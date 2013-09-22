@@ -48,10 +48,9 @@ public class StartTask extends ObjControllerObject {
 	@Override
 	public IoBuffer serialize() {
 		
-		IoBuffer result = IoBuffer.allocate(37).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer result = IoBuffer.allocate(45).order(ByteOrder.LITTLE_ENDIAN);
 
 		result.putInt(ObjControllerMessage.START_TASK);
-		
 		result.putLong(objectId);
 		result.putInt(0);
 		result.put((byte) 4); // 0 for no cooldown, 0x26 adds execute time (usually 0.25)

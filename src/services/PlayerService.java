@@ -205,9 +205,18 @@ public class PlayerService implements INetworkDispatch {
 		Map<Long, String> cloneData = new HashMap<Long, String>();
 		Point3D position = creature.getWorldPosition();
 		
+		SWGObject preDesignatedCloner = null;
+		
+		if(creature.getAttachment("preDesignatedCloner") != null) {
+			preDesignatedCloner = core.objectService.getObject((long) creature.getAttachment("preDesignatedCloner"));
+			if(preDesignatedCloner != null) 
+				cloneData.put(preDesignatedCloner.getObjectID(), core.mapService.getClosestCityName(preDesignatedCloner) /*+ " (" + String.valueOf(position.getDistance2D(cloner.getPosition())) + "m)"*/);
+		}
+		
 		for(SWGObject cloner : cloners) {
 			
-			cloneData.put(cloner.getObjectID(), core.mapService.getClosestCityName(cloner) /*+ " (" + String.valueOf(position.getDistance2D(cloner.getPosition())) + "m)"*/);
+			if(cloner != preDesignatedCloner)
+				cloneData.put(cloner.getObjectID(), core.mapService.getClosestCityName(cloner) /*+ " (" + String.valueOf(position.getDistance2D(cloner.getPosition())) + "m)"*/);
 			
 		}
 		
@@ -215,6 +224,7 @@ public class PlayerService implements INetworkDispatch {
 				cloneData, creature, null, 0);
 		Vector<String> returnList = new Vector<String>();
 		returnList.add("List.lstList:SelectedRow");
+		
 		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, new SUICallback() {
 
 			@SuppressWarnings("unchecked")
