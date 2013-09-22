@@ -160,6 +160,8 @@ public class CombatService implements INetworkDispatch {
 		
 		}
 		
+		core.buffService.addBuffToCreature(attacker, command.getBuffNameSelf());
+		
 	}
 
 	private void doAreaCombat(CreatureObject attacker, TangibleObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {
@@ -292,7 +294,7 @@ public class CombatService implements INetworkDispatch {
 			
 			if(mitigationType == HitType.GLANCE) {
 				damage *= 0.4f;
-			} else if(mitigationType == HitType.EVASION) {
+			} else if(mitigationType == HitType.EVASION && attacker.getSkillMod("combat_evasion_value") != null) {
 				float evasionValue = (attacker.getSkillMod("combat_evasion_value").getBase() / 4) / 100;
 				damage *= (1 - evasionValue);
 				
@@ -313,6 +315,9 @@ public class CombatService implements INetworkDispatch {
 			applyDamage(attacker, target, (int) damage);
 		
 		sendCombatPackets(attacker, target, weapon, command, actionCounter, damage, armorAbsorbed, hitType);
+		
+		if(hitType != HitType.MISS && hitType != HitType.DODGE && hitType != HitType.PARRY)
+			core.buffService.addBuffToCreature(target, command.getBuffNameTarget());
 
 		if(FileUtilities.doesFileExist("scripts/commands/combat/" + command.getCommandName() + ".py"))
 			core.scriptService.callScript("scripts/commands/combat/", command.getCommandName(), "run", core, attacker, target, null);
@@ -647,7 +652,6 @@ public class CombatService implements INetworkDispatch {
 				return HitType.GLANCE;
 
 		}
-			
 
 		return -1;
 		
