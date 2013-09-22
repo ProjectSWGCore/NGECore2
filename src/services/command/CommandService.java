@@ -30,6 +30,7 @@ import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 
 import engine.clients.Client;
+import engine.resources.common.CRC;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
 import engine.resources.service.INetworkDispatch;
@@ -40,6 +41,7 @@ import protocol.swg.ObjControllerMessage;
 import protocol.swg.objectControllerObjects.CommandEnqueue;
 import protocol.swg.objectControllerObjects.CommandEnqueueRemove;
 import protocol.swg.objectControllerObjects.ShowFlyText;
+import protocol.swg.objectControllerObjects.StartTask;
 
 import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
@@ -206,6 +208,9 @@ public class CommandService implements INetworkDispatch  {
 			CommandEnqueueRemove commandRemove = new CommandEnqueueRemove(attacker.getObjectId(), actionCounter);
 			ObjControllerMessage objController = new ObjControllerMessage(0x0B, commandRemove);
 			attacker.getClient().getSession().write(objController.serialize());
+			StartTask startTask = new StartTask(actionCounter, attacker.getObjectID(), command.getCommandCRC(), CRC.StringtoCRC(command.getCooldownGroup()), -1);
+			ObjControllerMessage objController2 = new ObjControllerMessage(0x0B, startTask);
+			attacker.getClient().getSession().write(objController2.serialize());
 		} else {
 			
 			if(command.getHitType() == 5) {

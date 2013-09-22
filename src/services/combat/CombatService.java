@@ -334,7 +334,7 @@ public class CombatService implements INetworkDispatch {
 		ObjControllerMessage objController = new ObjControllerMessage(0x1B, combatAction);
 		attacker.notifyObserversInRange(objController, true, 125);
 		
-		StartTask startTask = new StartTask(actionCounter, attacker.getObjectID(), command.getCommandCRC());
+		StartTask startTask = new StartTask(actionCounter, attacker.getObjectID(), command.getCommandCRC(), CRC.StringtoCRC(command.getCooldownGroup()), command.getCooldown());
 		ObjControllerMessage objController2 = new ObjControllerMessage(0x0B, startTask);
 		attacker.getClient().getSession().write(objController2.serialize());
 		
@@ -359,7 +359,7 @@ public class CombatService implements INetworkDispatch {
 		ObjControllerMessage objController = new ObjControllerMessage(0x1B, combatAction);
 		attacker.notifyObserversInRange(objController, true, 125);
 		
-		StartTask startTask = new StartTask(actionCounter, attacker.getObjectID(), command.getCommandCRC());
+		StartTask startTask = new StartTask(actionCounter, attacker.getObjectID(), command.getCommandCRC(), CRC.StringtoCRC(command.getCooldownGroup()), command.getCooldown());
 		ObjControllerMessage objController2 = new ObjControllerMessage(0x0B, startTask);
 		attacker.getClient().getSession().write(objController2.serialize());
 		

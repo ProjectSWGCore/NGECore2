@@ -74,7 +74,9 @@ public class CombatCommand extends BaseSWGCommand {
 	private float delayAttackInterval;
 	private int delayAttackLoops;
 	private int delayAttackEggPosition;
-	
+	private String cooldownGroup;
+	private float executeTime;
+	private float warmupTime;
 	
 	public CombatCommand(String commandName) {
 		super(commandName);
@@ -154,6 +156,21 @@ public class CombatCommand extends BaseSWGCommand {
 						hitSpam = ((Integer) visitor.getObject(i, 90)).byteValue();
 						
 					}
+			}
+			
+			DatatableVisitor visitor2 = ClientFileManager.loadFile("datatables/command/command_table.iff", DatatableVisitor.class);
+
+			for(int i = 0; i < visitor2.getRowCount(); i++) {
+				if(visitor2.getObject(i, 0) != null) {
+					if(((String) visitor2.getObject(i, 0)).equalsIgnoreCase(commandName)) {
+						
+						cooldownGroup = (String) visitor2.getObject(i, 85);
+						warmupTime = (Float) visitor2.getObject(i, 86);
+						executeTime = (Float) visitor2.getObject(i, 87);
+						cooldown = (Float) visitor2.getObject(i, 88);
+						
+					}
+				} 
 			}
 			
 		} catch (InstantiationException | IllegalAccessException e) {
@@ -653,6 +670,30 @@ public class CombatCommand extends BaseSWGCommand {
 
 	public void setDelayAttackLoops(int delayAttackLoops) {
 		this.delayAttackLoops = delayAttackLoops;
+	}
+
+	public String getCooldownGroup() {
+		return cooldownGroup;
+	}
+
+	public void setCooldownGroup(String cooldownGroup) {
+		this.cooldownGroup = cooldownGroup;
+	}
+
+	public float getExecuteTime() {
+		return executeTime;
+	}
+
+	public void setExecuteTime(float executeTime) {
+		this.executeTime = executeTime;
+	}
+
+	public float getWarmupTime() {
+		return warmupTime;
+	}
+
+	public void setWarmupTime(float warmupTime) {
+		this.warmupTime = warmupTime;
 	}
 	
 	
