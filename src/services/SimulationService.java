@@ -708,7 +708,7 @@ public class SimulationService implements INetworkDispatch {
 				return checkLineOfSightWorldToCell(obj1, obj2, cell);
 		}
 		
-		List<Vec3D> segments = new ArrayList<Vec3D>();
+		/*List<Vec3D> segments = new ArrayList<Vec3D>();
 		Line3D.splitIntoSegments(new Vec3D(position1.x, position1.y + 1, position1.z), new Vec3D(position2.x, position2.y + 1, position2.z), (float) 0.5, segments, true);
 		
 		for(Vec3D segment : segments) {
@@ -720,7 +720,7 @@ public class SimulationService implements INetworkDispatch {
 				System.out.println("Collision with terrain");
 				return false;
 			}
-		}
+		}*/
 	
 		return true;
 

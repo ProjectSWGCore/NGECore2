@@ -347,6 +347,22 @@ public class CombatService implements INetworkDispatch {
 
 
 	}
+	
+	private void sendHealPackets(CreatureObject attacker, CreatureObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {
+		
+		CombatAction combatAction = new CombatAction(CRC.StringtoCRC(command.getDefaultAnimations()[0]), attacker.getObjectID(), weapon.getObjectID(), target.getObjectID(), command.getCommandCRC());
+		ObjControllerMessage objController = new ObjControllerMessage(0x1B, combatAction);
+		attacker.notifyObserversInRange(objController, true, 125);
+		
+		StartTask startTask = new StartTask(actionCounter, attacker.getObjectID(), command.getCommandCRC());
+		ObjControllerMessage objController2 = new ObjControllerMessage(0x0B, startTask);
+		attacker.getClient().getSession().write(objController2.serialize());
+		
+		CommandEnqueueRemove commandRemove = new CommandEnqueueRemove(attacker.getObjectID(), actionCounter);
+		ObjControllerMessage objController3 = new ObjControllerMessage(0x0B, commandRemove);
+		attacker.getClient().getSession().write(objController3.serialize());
+
+	}
 
 	private float getArmorReduction(CreatureObject attacker, CreatureObject target, WeaponObject weapon, CombatCommand command, byte hitType) {
 		
@@ -548,7 +564,7 @@ public class CombatService implements INetworkDispatch {
 	public byte getHitType(CreatureObject attacker, CreatureObject target, WeaponObject weapon, CombatCommand command) {
 		
 		float r;
-
+		Random random = new Random();
 		// negation rolls(parry, miss and dodge) can only roll on single target attacks, strikethrough also only rolls on single target attacks
 		if(command.getAttackType() == 1) {
 		
@@ -560,13 +576,13 @@ public class CombatService implements INetworkDispatch {
 						missNegation = 0.04f;
 					missChance -= missNegation;
 				}
-				r = new Random().nextFloat();
+				r = random.nextFloat();
 				if(r <= missChance)
 					return HitType.MISS;
 			}
 			float dodgeChance = (float) target.getSkillMod("display_only_dodge").getBase() / 10000;
 	
-			r = new Random().nextFloat();
+			r = random.nextFloat();
 			if(r <= dodgeChance)
 				return HitType.DODGE;
 			
@@ -576,7 +592,7 @@ public class CombatService implements INetworkDispatch {
 				
 				float parryChance = (float) target.getSkillMod("display_only_parry").getBase() / 10000;
 	
-				r = new Random().nextFloat();
+				r = random.nextFloat();
 				if(r <= parryChance)
 					return HitType.PARRY;
 					
@@ -584,14 +600,14 @@ public class CombatService implements INetworkDispatch {
 			
 			float stChance = (float) attacker.getSkillMod("display_only_strikethrough").getBase() / 10000;
 			
-			r = new Random().nextFloat();
+			r = random.nextFloat();
 			if(r <= stChance)
 				return HitType.STRIKETHROUGH;
 
 		}
 
 		float critChance = (float) attacker.getSkillMod("display_only_critical").getBase() / 10000;
-		r = new Random().nextFloat();
+		r = random.nextFloat();
 		if(r <= critChance)
 			return HitType.CRITICAL;
 		
@@ -604,10 +620,11 @@ public class CombatService implements INetworkDispatch {
 	public byte doMitigationRolls(CreatureObject attacker, CreatureObject target, WeaponObject weapon, CombatCommand command, byte hitType) {
 		
 		float r;
+		Random random = new Random();
 					
 		float blockChance = (float) target.getSkillMod("display_only_block").getBase() / 10000;
 			
-		r = new Random().nextFloat();
+		r = random.nextFloat();
 		if(r <= blockChance)
 			return HitType.BLOCK;
 			
@@ -615,7 +632,7 @@ public class CombatService implements INetworkDispatch {
 				
 			float evasionChance = (float) target.getSkillMod("display_only_evasion").getBase() / 10000;
 				
-			r = new Random().nextFloat();
+			r = random.nextFloat();
 			if(r <= evasionChance)
 				return HitType.EVASION;
 
@@ -625,7 +642,7 @@ public class CombatService implements INetworkDispatch {
 			
 			float glanceChance = (float) target.getSkillMod("display_only_glancing_blow").getBase() / 10000;
 			
-			r = new Random().nextFloat();
+			r = random.nextFloat();
 			if(r <= glanceChance)
 				return HitType.GLANCE;
 
@@ -734,24 +751,27 @@ public class CombatService implements INetworkDispatch {
 		else if(command.getAttackType() == 0 || command.getAttackType() == 2 || command.getAttackType() == 3)
 			doAreaHeal(healer, target, weapon, command, actionCounter);
 		
+		sendHealPackets(healer, target, weapon, command, actionCounter);
+		
 	}
 	
 	private void doSingleTargetHeal(CreatureObject healer, CreatureObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {
 		
 		int healAmount = command.getAddedDamage();
+		int healPotency = 0;
 		
-		if(healer.getSkillMod("expertise_healing_all") != null) {
-			int healPotency = healer.getSkillMod("expertise_healing_all").getBase();
-			if(healer.getSkillMod("expertise_healing_line_me_heal") != null)
-				healPotency += healer.getSkillMod("expertise_healing_line_me_heal").getBase();
-			if(healer.getSkillMod("expertise_healing_line_of_heal") != null)
-				healPotency += healer.getSkillMod("expertise_healing_line_of_heal").getBase();
-			if(healer.getSkillMod("expertise_healing_line_sm_heal") != null)
-				healPotency += healer.getSkillMod("expertise_healing_line_sm_heal").getBase();
-			if(healer.getSkillMod("expertise_healing_line_sp_heal") != null)
-				healPotency += healer.getSkillMod("expertise_healing_line_sp_heal").getBase();
+		if(healer.getSkillMod("expertise_healing_all") != null)
+			healPotency += healer.getSkillMod("expertise_healing_all").getBase();
+		if(healer.getSkillMod("expertise_healing_line_me_heal") != null)
+			healPotency += healer.getSkillMod("expertise_healing_line_me_heal").getBase();
+		if(healer.getSkillMod("expertise_healing_line_of_heal") != null)
+			healPotency += healer.getSkillMod("expertise_healing_line_of_heal").getBase();
+		if(healer.getSkillMod("expertise_healing_line_sm_heal") != null)
+			healPotency += healer.getSkillMod("expertise_healing_line_sm_heal").getBase();
+		if(healer.getSkillMod("expertise_healing_line_sp_heal") != null)
+			healPotency += healer.getSkillMod("expertise_healing_line_sp_heal").getBase();
+		if(healPotency > 0)
 			healAmount += (healAmount * (healPotency / 100));
-		}
 		
 		synchronized(target.getMutex()) {
 			target.setHealth(target.getHealth() + healAmount);

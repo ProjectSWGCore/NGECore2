@@ -142,8 +142,8 @@ public class CommandService implements INetworkDispatch  {
 		
 		boolean success = true;
 		
-		if((command.getHitType() == 5 || command.getHitType() == 7) && !(target instanceof CreatureObject))
-			success = false;
+		//if((command.getHitType() == 5 || command.getHitType() == 7) && !(target instanceof CreatureObject))
+		//	success = false;
 		
 		if(!(command.getAttackType() == 2) && !(command.getHitType() == 5)) {
 			if(target == null || !(target instanceof TangibleObject) || target == attacker)
