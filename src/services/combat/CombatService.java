@@ -31,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.mina.core.buffer.IoBuffer;
+import org.apache.mina.core.session.IoSession;
 
 import protocol.swg.ObjControllerMessage;
 import protocol.swg.PlayClientEffectLocMessage;
@@ -76,12 +77,21 @@ public class CombatService implements INetworkDispatch {
 	
 	public void doCombat(final CreatureObject attacker, final TangibleObject target, final WeaponObject weapon, final CombatCommand command, final int actionCounter) {
 		
+		boolean success = true;
 		
 		if(!applySpecialCost(attacker, weapon, command))
-			return;
+			success = false;
 		
 		if((command.getAttackType() == 0 || command.getAttackType() == 1 || command.getAttackType() == 3) && !attemptCombat(attacker, target))
-			return;
+			success = false;
+		
+		if(!success) {
+			IoSession session = attacker.getClient().getSession();
+			CommandEnqueueRemove commandRemove = new CommandEnqueueRemove(attacker.getObjectId(), actionCounter);
+			session.write(new ObjControllerMessage(0x0B, commandRemove).serialize());
+			StartTask startTask = new StartTask(actionCounter, attacker.getObjectID(), command.getCommandCRC(), CRC.StringtoCRC(command.getCooldownGroup()), -1);
+			session.write(new ObjControllerMessage(0x0B, startTask).serialize());
+		}
 
 	/*	// use preRun for delayed effects like officer orbital strike, grenades etc.
 		if(FileUtilities.doesFileExist("scripts/commands/combat" + command.getCommandName() + ".py"))
@@ -744,11 +754,24 @@ public class CombatService implements INetworkDispatch {
 	
 	public void doHeal(CreatureObject healer, CreatureObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {
 		
+		boolean success = true;
+		
 		if(!applySpecialCost(healer, weapon, command))
-			return;
+			success = false;
 		
 		if((command.getAttackType() == 0 || command.getAttackType() == 1 || command.getAttackType() == 3) && !attemptHeal(healer, target))	
-			return;
+			success = false;
+		
+		if(command.getAttackType() == 1 && target.getMaxHealth() == target.getHealth())
+			success = false;
+		
+		if(!success) {
+			IoSession session = healer.getClient().getSession();
+			CommandEnqueueRemove commandRemove = new CommandEnqueueRemove(healer.getObjectId(), actionCounter);
+			session.write(new ObjControllerMessage(0x0B, commandRemove).serialize());
+			StartTask startTask = new StartTask(actionCounter, healer.getObjectID(), command.getCommandCRC(), CRC.StringtoCRC(command.getCooldownGroup()), -1);
+			session.write(new ObjControllerMessage(0x0B, startTask).serialize());
+		}
 		
 		if(command.getAttackType() == 1)
 			doSingleTargetHeal(healer, target, weapon, command, actionCounter);

@@ -686,7 +686,7 @@ public class SimulationService implements INetworkDispatch {
 			for(Mesh3DTriangle tri : tris) {
 				
 				if(ray.intersectsTriangle(tri, distance) != null) {
-					System.out.println("Collided with " + object.getTemplate() + " X: " + object.getPosition().x + " Y: " + object.getPosition().y + " Z: " + object.getPosition().z);	
+				//	System.out.println("Collided with " + object.getTemplate() + " X: " + object.getPosition().x + " Y: " + object.getPosition().y + " Z: " + object.getPosition().z);	
 					return false;
 				}
 				
@@ -767,7 +767,7 @@ public class SimulationService implements INetworkDispatch {
 				for(Mesh3DTriangle tri : tris) {
 					
 					if(ray.intersectsTriangle(tri, distance) != null) {
-						System.out.println("Collision with: " + cell.name);
+					//	System.out.println("Collision with: " + cell.name);
 						return false;
 					}
 					

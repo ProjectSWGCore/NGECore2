@@ -205,12 +205,11 @@ public class CommandService implements INetworkDispatch  {
 		}
 		
 		if(!success) {
+			IoSession session = attacker.getClient().getSession();
 			CommandEnqueueRemove commandRemove = new CommandEnqueueRemove(attacker.getObjectId(), actionCounter);
-			ObjControllerMessage objController = new ObjControllerMessage(0x0B, commandRemove);
-			attacker.getClient().getSession().write(objController.serialize());
+			session.write(new ObjControllerMessage(0x0B, commandRemove).serialize());
 			StartTask startTask = new StartTask(actionCounter, attacker.getObjectID(), command.getCommandCRC(), CRC.StringtoCRC(command.getCooldownGroup()), -1);
-			ObjControllerMessage objController2 = new ObjControllerMessage(0x0B, startTask);
-			attacker.getClient().getSession().write(objController2.serialize());
+			session.write(new ObjControllerMessage(0x0B, startTask).serialize());
 		} else {
 			
 			if(command.getHitType() == 5) {
