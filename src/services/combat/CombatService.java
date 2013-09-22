@@ -91,6 +91,7 @@ public class CombatService implements INetworkDispatch {
 			session.write(new ObjControllerMessage(0x0B, commandRemove).serialize());
 			StartTask startTask = new StartTask(actionCounter, attacker.getObjectID(), command.getCommandCRC(), CRC.StringtoCRC(command.getCooldownGroup()), -1);
 			session.write(new ObjControllerMessage(0x0B, startTask).serialize());
+			return;
 		}
 
 	/*	// use preRun for delayed effects like officer orbital strike, grenades etc.
@@ -762,15 +763,16 @@ public class CombatService implements INetworkDispatch {
 		if((command.getAttackType() == 0 || command.getAttackType() == 1 || command.getAttackType() == 3) && !attemptHeal(healer, target))	
 			success = false;
 		
-		if(command.getAttackType() == 1 && target.getMaxHealth() == target.getHealth())
-			success = false;
-		
+		if(target.getMaxHealth() == target.getHealth())
+			success = command.getAttackType() != 1;
+
 		if(!success) {
 			IoSession session = healer.getClient().getSession();
 			CommandEnqueueRemove commandRemove = new CommandEnqueueRemove(healer.getObjectId(), actionCounter);
 			session.write(new ObjControllerMessage(0x0B, commandRemove).serialize());
 			StartTask startTask = new StartTask(actionCounter, healer.getObjectID(), command.getCommandCRC(), CRC.StringtoCRC(command.getCooldownGroup()), -1);
 			session.write(new ObjControllerMessage(0x0B, startTask).serialize());
+			return;
 		}
 		
 		if(command.getAttackType() == 1)
