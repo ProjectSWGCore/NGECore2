@@ -757,14 +757,14 @@ public class CombatService implements INetworkDispatch {
 		
 		boolean success = true;
 		
+		if(target.getMaxHealth() == target.getHealth())
+			success = command.getAttackType() != 1;
+		
 		if(!applySpecialCost(healer, weapon, command))
 			success = false;
 		
 		if((command.getAttackType() == 0 || command.getAttackType() == 1 || command.getAttackType() == 3) && !attemptHeal(healer, target))	
 			success = false;
-		
-		if(target.getMaxHealth() == target.getHealth())
-			success = command.getAttackType() != 1;
 
 		if(!success) {
 			IoSession session = healer.getClient().getSession();
