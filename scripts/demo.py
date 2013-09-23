@@ -177,6 +177,10 @@ def addProfessionAbilities(core, object, profession):
 		object.addAbility('me_thyroid_rupture_1')
 		object.addAbility('me_traumatize_5')
 		object.addAbility('me_induce_insanity_1')
+	elif profession == 'commando_1a':
+		object.addAbility('co_del_ae_cc_2_2')
+		object.addAbility('co_del_ae_dm_3')
+		object.addAbility('co_del_ae_cc_1_3')
 	elif profession == 'bounty_hunter_1a':
 		object.addAbility('bh_shields_1')
 		object.addAbility('bh_dm_8')

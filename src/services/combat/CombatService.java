@@ -108,15 +108,16 @@ public class CombatService implements INetworkDispatch {
 					target.notifyObservers(new PlayClientEffectLocMessage(command.getDelayAttackParticle(), target.getPlanet().getName(), target.getWorldPosition()), true);
 				
 				try {
-					Thread.sleep((long) command.getInitialAttackDelay());
+					Thread.sleep((long) command.getInitialAttackDelay() * 1000);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 				
+	
 			} else if(command.getInitialAttackDelay() <= 0 && command.getDelayAttackInterval() > 0 && command.getDelayAttackLoops() <= 1) {
 				
 				try {
-					Thread.sleep((long) command.getDelayAttackInterval());
+					Thread.sleep((long) command.getDelayAttackInterval() * 1000);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -525,7 +526,7 @@ public class CombatService implements INetworkDispatch {
 		}
 		
 		if(target.getSkillMod("damage_decrease_percentage") != null) {
-			rawDamage *= (target.getSkillMod("damage_decrease_percentage").getBase() / 100);
+			rawDamage *= (1 - (target.getSkillMod("damage_decrease_percentage").getBase() / 100));
 		}
 		
 		return rawDamage;
