@@ -77,6 +77,7 @@ public class CombatCommand extends BaseSWGCommand {
 	private String cooldownGroup;
 	private float executeTime;
 	private float warmupTime;
+	private float vigorCost; // for commando kill meter and bm specials
 	
 	public CombatCommand(String commandName) {
 		super(commandName);
@@ -135,6 +136,7 @@ public class CombatCommand extends BaseSWGCommand {
 						bypassArmor = (Float) visitor.getObject(i, 48);
 						healthCost = (Float) visitor.getObject(i, 54);
 						actionCost = (Float) visitor.getObject(i, 55);
+						setVigorCost((Float) visitor.getObject(i, 56));
 						dotType = (String) visitor.getObject(i, 60);
 						dotIntensity = (Integer) visitor.getObject(i, 61);
 						dotDuration = (Integer) visitor.getObject(i, 62);
@@ -694,6 +696,14 @@ public class CombatCommand extends BaseSWGCommand {
 
 	public void setWarmupTime(float warmupTime) {
 		this.warmupTime = warmupTime;
+	}
+
+	public float getVigorCost() {
+		return vigorCost;
+	}
+
+	public void setVigorCost(float vigorCost) {
+		this.vigorCost = vigorCost;
 	}
 	
 	

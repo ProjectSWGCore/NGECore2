@@ -79,10 +79,10 @@ public class CombatService implements INetworkDispatch {
 		
 		boolean success = true;
 		
-		if(!applySpecialCost(attacker, weapon, command))
+		if((command.getAttackType() == 0 || command.getAttackType() == 1 || command.getAttackType() == 3) && !attemptCombat(attacker, target))
 			success = false;
 		
-		if((command.getAttackType() == 0 || command.getAttackType() == 1 || command.getAttackType() == 3) && !attemptCombat(attacker, target))
+		if(!applySpecialCost(attacker, weapon, command))
 			success = false;
 		
 		if(!success) {
@@ -328,7 +328,7 @@ public class CombatService implements INetworkDispatch {
 		
 		sendCombatPackets(attacker, target, weapon, command, actionCounter, damage, armorAbsorbed, hitType);
 		
-		if(hitType != HitType.MISS && hitType != HitType.DODGE && hitType != HitType.PARRY)
+		if((hitType != HitType.MISS && hitType != HitType.DODGE && hitType != HitType.PARRY) || (command.getAddedDamage() == 0 && command.getPercentFromWeapon() == 0))
 			core.buffService.addBuffToCreature(target, command.getBuffNameTarget());
 
 		if(FileUtilities.doesFileExist("scripts/commands/combat/" + command.getCommandName() + ".py"))
@@ -456,7 +456,7 @@ public class CombatService implements INetworkDispatch {
 		
 	}
 	
-	private boolean applySpecialCost(CreatureObject attacker, WeaponObject weapon, CombatCommand command) {
+	public boolean applySpecialCost(CreatureObject attacker, WeaponObject weapon, CombatCommand command) {
 		
 		float actionCost = command.getActionCost();
 		float healthCost = command.getHealthCost();
@@ -765,7 +765,7 @@ public class CombatService implements INetworkDispatch {
 			success = false;
 		
 		if((command.getAttackType() == 0 || command.getAttackType() == 1 || command.getAttackType() == 3) && !attemptHeal(healer, target))	
-			success = false;
+			target = healer;
 
 		if(!success) {
 			IoSession session = healer.getClient().getSession();

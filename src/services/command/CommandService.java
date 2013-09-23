@@ -140,6 +140,18 @@ public class CommandService implements INetworkDispatch  {
 
 	}
 	
+	public BaseSWGCommand getCommandByName(String name) {
+		
+		Vector<BaseSWGCommand> commands = new Vector<BaseSWGCommand>(commandLookup); 	// copy for thread safety
+		
+		for(BaseSWGCommand command : commands) {
+			if(command.getCommandName().equalsIgnoreCase(name))
+				return command;
+		}
+		return null;
+
+	}
+	
 	private void processCombatCommand(CreatureObject attacker, SWGObject target, CombatCommand command, int actionCounter, String commandArgs) {
 		
 		boolean success = true;

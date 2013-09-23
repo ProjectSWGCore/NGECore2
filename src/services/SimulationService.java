@@ -616,14 +616,20 @@ public class SimulationService implements INetworkDispatch {
 		
 	}
 	
-	public void teleport(SWGObject obj, Point3D position, Quaternion orientation) {
+	public void teleport(SWGObject obj, Point3D position, Quaternion orientation, long cellId) {
 		
-		if(position.x >= -8192 && position.x <= 8192 && position.z >= -8192 && position.z <= 8192) {
-			
-			DataTransform dataTransform = new DataTransform(new Point3D(position.x, position.y, position.z), orientation, 1, obj.getObjectID());
+		if(cellId == 0) {
+			if(position.x >= -8192 && position.x <= 8192 && position.z >= -8192 && position.z <= 8192) {
+				obj.setMovementCounter(obj.getMovementCounter() + 1);
+				DataTransform dataTransform = new DataTransform(new Point3D(position.x, position.y, position.z), orientation, obj.getMovementCounter(), obj.getObjectID());
+				ObjControllerMessage objController = new ObjControllerMessage(0x1B, dataTransform);
+				obj.notifyObservers(objController, true);
+			}
+		} else {
+			obj.setMovementCounter(obj.getMovementCounter() + 1);
+			DataTransformWithParent dataTransform = new DataTransformWithParent(new Point3D(position.x, position.y, position.z), orientation, obj.getMovementCounter(), obj.getObjectID(), cellId);
 			ObjControllerMessage objController = new ObjControllerMessage(0x1B, dataTransform);
 			obj.notifyObservers(objController, true);
-			
 		}
 			
 	}
