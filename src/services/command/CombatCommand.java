@@ -74,7 +74,10 @@ public class CombatCommand extends BaseSWGCommand {
 	private float delayAttackInterval;
 	private int delayAttackLoops;
 	private int delayAttackEggPosition;
-	
+	private String cooldownGroup;
+	private float executeTime;
+	private float warmupTime;
+	private float vigorCost; // for commando kill meter and bm specials
 	
 	public CombatCommand(String commandName) {
 		super(commandName);
@@ -133,6 +136,7 @@ public class CombatCommand extends BaseSWGCommand {
 						bypassArmor = (Float) visitor.getObject(i, 48);
 						healthCost = (Float) visitor.getObject(i, 54);
 						actionCost = (Float) visitor.getObject(i, 55);
+						setVigorCost((Float) visitor.getObject(i, 56));
 						dotType = (String) visitor.getObject(i, 60);
 						dotIntensity = (Integer) visitor.getObject(i, 61);
 						dotDuration = (Integer) visitor.getObject(i, 62);
@@ -154,6 +158,21 @@ public class CombatCommand extends BaseSWGCommand {
 						hitSpam = ((Integer) visitor.getObject(i, 90)).byteValue();
 						
 					}
+			}
+			
+			DatatableVisitor visitor2 = ClientFileManager.loadFile("datatables/command/command_table.iff", DatatableVisitor.class);
+
+			for(int i = 0; i < visitor2.getRowCount(); i++) {
+				if(visitor2.getObject(i, 0) != null) {
+					if(((String) visitor2.getObject(i, 0)).equalsIgnoreCase(commandName)) {
+						
+						cooldownGroup = (String) visitor2.getObject(i, 85);
+						warmupTime = (Float) visitor2.getObject(i, 86);
+						executeTime = (Float) visitor2.getObject(i, 87);
+						cooldown = (Float) visitor2.getObject(i, 88);
+						
+					}
+				} 
 			}
 			
 		} catch (InstantiationException | IllegalAccessException e) {
@@ -653,6 +672,38 @@ public class CombatCommand extends BaseSWGCommand {
 
 	public void setDelayAttackLoops(int delayAttackLoops) {
 		this.delayAttackLoops = delayAttackLoops;
+	}
+
+	public String getCooldownGroup() {
+		return cooldownGroup;
+	}
+
+	public void setCooldownGroup(String cooldownGroup) {
+		this.cooldownGroup = cooldownGroup;
+	}
+
+	public float getExecuteTime() {
+		return executeTime;
+	}
+
+	public void setExecuteTime(float executeTime) {
+		this.executeTime = executeTime;
+	}
+
+	public float getWarmupTime() {
+		return warmupTime;
+	}
+
+	public void setWarmupTime(float warmupTime) {
+		this.warmupTime = warmupTime;
+	}
+
+	public float getVigorCost() {
+		return vigorCost;
+	}
+
+	public void setVigorCost(float vigorCost) {
+		this.vigorCost = vigorCost;
 	}
 	
 	

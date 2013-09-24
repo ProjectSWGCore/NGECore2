@@ -64,7 +64,7 @@ import engine.resources.service.INetworkRemoteEvent;
 public class PlayerService implements INetworkDispatch {
 	
 	private NGECore core;
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
 	public PlayerService(final NGECore core) {
 		this.core = core;
@@ -106,9 +106,10 @@ public class PlayerService implements INetworkDispatch {
 			@Override
 			public void run() {
 				
-				if(creature.getAction() < creature.getMaxAction() && creature.getPosture() != 14)
-					creature.setAction(creature.getAction() + 200);
-				
+				synchronized(creature.getMutex()) {
+					if(creature.getAction() < creature.getMaxAction() && creature.getPosture() != 14)
+						creature.setAction(creature.getAction() + 200);
+				}
 			}
 			
 		}, 0, 1000, TimeUnit.MILLISECONDS);
@@ -118,12 +119,14 @@ public class PlayerService implements INetworkDispatch {
 			@Override
 			public void run() {
 				
-				if(creature.getHealth() < creature.getMaxHealth() && creature.getCombatFlag() == 0 && creature.getPosture() != 13 && creature.getPosture() != 14)
-					creature.setHealth(creature.getHealth() + 300);
+				synchronized(creature.getMutex()) {
+					if(creature.getHealth() < creature.getMaxHealth() && creature.getCombatFlag() == 0 && creature.getPosture() != 13 && creature.getPosture() != 14)
+						creature.setHealth(creature.getHealth() + 300);
+				}
 				
 			}
 			
-		}, 0, 1100, TimeUnit.MILLISECONDS);
+		}, 0, 1000, TimeUnit.MILLISECONDS);
 		
 		/*scheduler.scheduleAtFixedRate(new Runnable() {
 
@@ -205,9 +208,18 @@ public class PlayerService implements INetworkDispatch {
 		Map<Long, String> cloneData = new HashMap<Long, String>();
 		Point3D position = creature.getWorldPosition();
 		
+		SWGObject preDesignatedCloner = null;
+		
+		if(creature.getAttachment("preDesignatedCloner") != null) {
+			preDesignatedCloner = core.objectService.getObject((long) creature.getAttachment("preDesignatedCloner"));
+			if(preDesignatedCloner != null) 
+				cloneData.put(preDesignatedCloner.getObjectID(), core.mapService.getClosestCityName(preDesignatedCloner) /*+ " (" + String.valueOf(position.getDistance2D(cloner.getPosition())) + "m)"*/);
+		}
+		
 		for(SWGObject cloner : cloners) {
 			
-			cloneData.put(cloner.getObjectID(), core.mapService.getClosestCityName(cloner) /*+ " (" + String.valueOf(position.getDistance2D(cloner.getPosition())) + "m)"*/);
+			if(cloner != preDesignatedCloner)
+				cloneData.put(cloner.getObjectID(), core.mapService.getClosestCityName(cloner) /*+ " (" + String.valueOf(position.getDistance2D(cloner.getPosition())) + "m)"*/);
 			
 		}
 		
@@ -215,6 +227,7 @@ public class PlayerService implements INetworkDispatch {
 				cloneData, creature, null, 0);
 		Vector<String> returnList = new Vector<String>();
 		returnList.add("List.lstList:SelectedRow");
+		
 		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, new SUICallback() {
 
 			@SuppressWarnings("unchecked")

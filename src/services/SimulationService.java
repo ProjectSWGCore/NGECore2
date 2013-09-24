@@ -616,14 +616,20 @@ public class SimulationService implements INetworkDispatch {
 		
 	}
 	
-	public void teleport(SWGObject obj, Point3D position, Quaternion orientation) {
+	public void teleport(SWGObject obj, Point3D position, Quaternion orientation, long cellId) {
 		
-		if(position.x >= -8192 && position.x <= 8192 && position.z >= -8192 && position.z <= 8192) {
-			
-			DataTransform dataTransform = new DataTransform(new Point3D(position.x, position.y, position.z), orientation, 1, obj.getObjectID());
+		if(cellId == 0) {
+			if(position.x >= -8192 && position.x <= 8192 && position.z >= -8192 && position.z <= 8192) {
+				obj.setMovementCounter(obj.getMovementCounter() + 1);
+				DataTransform dataTransform = new DataTransform(new Point3D(position.x, position.y, position.z), orientation, obj.getMovementCounter(), obj.getObjectID());
+				ObjControllerMessage objController = new ObjControllerMessage(0x1B, dataTransform);
+				obj.notifyObservers(objController, true);
+			}
+		} else {
+			obj.setMovementCounter(obj.getMovementCounter() + 1);
+			DataTransformWithParent dataTransform = new DataTransformWithParent(new Point3D(position.x, position.y, position.z), orientation, obj.getMovementCounter(), obj.getObjectID(), cellId);
 			ObjControllerMessage objController = new ObjControllerMessage(0x1B, dataTransform);
 			obj.notifyObservers(objController, true);
-			
 		}
 			
 	}
@@ -686,7 +692,7 @@ public class SimulationService implements INetworkDispatch {
 			for(Mesh3DTriangle tri : tris) {
 				
 				if(ray.intersectsTriangle(tri, distance) != null) {
-					System.out.println("Collided with " + object.getTemplate() + " X: " + object.getPosition().x + " Y: " + object.getPosition().y + " Z: " + object.getPosition().z);	
+				//	System.out.println("Collided with " + object.getTemplate() + " X: " + object.getPosition().x + " Y: " + object.getPosition().y + " Z: " + object.getPosition().z);	
 					return false;
 				}
 				
@@ -708,7 +714,7 @@ public class SimulationService implements INetworkDispatch {
 				return checkLineOfSightWorldToCell(obj1, obj2, cell);
 		}
 		
-		List<Vec3D> segments = new ArrayList<Vec3D>();
+		/*List<Vec3D> segments = new ArrayList<Vec3D>();
 		Line3D.splitIntoSegments(new Vec3D(position1.x, position1.y + 1, position1.z), new Vec3D(position2.x, position2.y + 1, position2.z), (float) 0.5, segments, true);
 		
 		for(Vec3D segment : segments) {
@@ -720,7 +726,7 @@ public class SimulationService implements INetworkDispatch {
 				System.out.println("Collision with terrain");
 				return false;
 			}
-		}
+		}*/
 	
 		return true;
 
@@ -767,7 +773,7 @@ public class SimulationService implements INetworkDispatch {
 				for(Mesh3DTriangle tri : tris) {
 					
 					if(ray.intersectsTriangle(tri, distance) != null) {
-						System.out.println("Collision with: " + cell.name);
+					//	System.out.println("Collision with: " + cell.name);
 						return false;
 					}
 					
