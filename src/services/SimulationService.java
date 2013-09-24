@@ -138,7 +138,11 @@ public class SimulationService implements INetworkDispatch {
 		core.commandService.registerCommand("deathblow");
 		core.commandService.registerCommand("endduel");
 		core.commandService.registerCommand("duel");
-
+		core.commandService.registerCommand("forceRun");
+		core.commandService.registerCommand("sm_narrow_escape_1");
+		core.commandService.registerCommand("sm_narrow_escape_2");
+		core.commandService.registerCommand("sm_narrow_escape_3");
+		core.commandService.registerCommand("sm_narrow_escape_4");
 	}
 	
 	public void add(SWGObject object, int x, int y) {

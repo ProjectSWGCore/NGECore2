@@ -192,6 +192,8 @@ def addProfessionAbilities(core, object, profession):
 		object.addAbility('bh_fumble_6')
 		object.addAbility('bh_intimidate_6')
 		object.addAbility('bh_flawless_strike')
+	elif profession == 'smuggler_1a':
+		object.addAbility('sm_narrow_escape_4')
 		
 		direfate1 = core.objectService.createObject('object/tangible/wearables/necklace/shared_necklace_s03.iff', object.getPlanet())
 		direfate1.setStfFilename('static_item_n')
