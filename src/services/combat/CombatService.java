@@ -31,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.mina.core.buffer.IoBuffer;
+import org.apache.mina.core.session.IoSession;
 
 import protocol.swg.ObjControllerMessage;
 import protocol.swg.PlayClientEffectLocMessage;
@@ -76,12 +77,22 @@ public class CombatService implements INetworkDispatch {
 	
 	public void doCombat(final CreatureObject attacker, final TangibleObject target, final WeaponObject weapon, final CombatCommand command, final int actionCounter) {
 		
-		
-		if(!applySpecialCost(attacker, weapon, command))
-			return;
+		boolean success = true;
 		
 		if((command.getAttackType() == 0 || command.getAttackType() == 1 || command.getAttackType() == 3) && !attemptCombat(attacker, target))
+			success = false;
+		
+		if(!applySpecialCost(attacker, weapon, command))
+			success = false;
+		
+		if(!success) {
+			IoSession session = attacker.getClient().getSession();
+			CommandEnqueueRemove commandRemove = new CommandEnqueueRemove(attacker.getObjectId(), actionCounter);
+			session.write(new ObjControllerMessage(0x0B, commandRemove).serialize());
+			StartTask startTask = new StartTask(actionCounter, attacker.getObjectID(), command.getCommandCRC(), CRC.StringtoCRC(command.getCooldownGroup()), -1);
+			session.write(new ObjControllerMessage(0x0B, startTask).serialize());
 			return;
+		}
 
 	/*	// use preRun for delayed effects like officer orbital strike, grenades etc.
 		if(FileUtilities.doesFileExist("scripts/commands/combat" + command.getCommandName() + ".py"))
@@ -97,15 +108,16 @@ public class CombatService implements INetworkDispatch {
 					target.notifyObservers(new PlayClientEffectLocMessage(command.getDelayAttackParticle(), target.getPlanet().getName(), target.getWorldPosition()), true);
 				
 				try {
-					Thread.sleep((long) command.getInitialAttackDelay());
+					Thread.sleep((long) command.getInitialAttackDelay() * 1000);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 				
+	
 			} else if(command.getInitialAttackDelay() <= 0 && command.getDelayAttackInterval() > 0 && command.getDelayAttackLoops() <= 1) {
 				
 				try {
-					Thread.sleep((long) command.getDelayAttackInterval());
+					Thread.sleep((long) command.getDelayAttackInterval() * 1000);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -159,6 +171,8 @@ public class CombatService implements INetworkDispatch {
 				doAreaCombat(attacker, target, weapon, command, actionCounter);
 		
 		}
+		
+		core.buffService.addBuffToCreature(attacker, command.getBuffNameSelf());
 		
 	}
 
@@ -292,7 +306,7 @@ public class CombatService implements INetworkDispatch {
 			
 			if(mitigationType == HitType.GLANCE) {
 				damage *= 0.4f;
-			} else if(mitigationType == HitType.EVASION) {
+			} else if(mitigationType == HitType.EVASION && attacker.getSkillMod("combat_evasion_value") != null) {
 				float evasionValue = (attacker.getSkillMod("combat_evasion_value").getBase() / 4) / 100;
 				damage *= (1 - evasionValue);
 				
@@ -313,6 +327,9 @@ public class CombatService implements INetworkDispatch {
 			applyDamage(attacker, target, (int) damage);
 		
 		sendCombatPackets(attacker, target, weapon, command, actionCounter, damage, armorAbsorbed, hitType);
+		
+		if((hitType != HitType.MISS && hitType != HitType.DODGE && hitType != HitType.PARRY) || (command.getAddedDamage() == 0 && command.getPercentFromWeapon() == 0))
+			core.buffService.addBuffToCreature(target, command.getBuffNameTarget());
 
 		if(FileUtilities.doesFileExist("scripts/commands/combat/" + command.getCommandName() + ".py"))
 			core.scriptService.callScript("scripts/commands/combat/", command.getCommandName(), "run", core, attacker, target, null);
@@ -329,7 +346,7 @@ public class CombatService implements INetworkDispatch {
 		ObjControllerMessage objController = new ObjControllerMessage(0x1B, combatAction);
 		attacker.notifyObserversInRange(objController, true, 125);
 		
-		StartTask startTask = new StartTask(actionCounter, attacker.getObjectID(), command.getCommandCRC());
+		StartTask startTask = new StartTask(actionCounter, attacker.getObjectID(), command.getCommandCRC(), CRC.StringtoCRC(command.getCooldownGroup()), command.getCooldown());
 		ObjControllerMessage objController2 = new ObjControllerMessage(0x0B, startTask);
 		attacker.getClient().getSession().write(objController2.serialize());
 		
@@ -345,6 +362,22 @@ public class CombatService implements INetworkDispatch {
 		if(target.getClient() != null)
 			target.getClient().getSession().write(spam);
 
+
+	}
+	
+	private void sendHealPackets(CreatureObject attacker, CreatureObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {
+		
+		CombatAction combatAction = new CombatAction(CRC.StringtoCRC(command.getDefaultAnimations()[0]), attacker.getObjectID(), weapon.getObjectID(), target.getObjectID(), command.getCommandCRC());
+		ObjControllerMessage objController = new ObjControllerMessage(0x1B, combatAction);
+		attacker.notifyObserversInRange(objController, true, 125);
+		
+		StartTask startTask = new StartTask(actionCounter, attacker.getObjectID(), command.getCommandCRC(), CRC.StringtoCRC(command.getCooldownGroup()), command.getCooldown());
+		ObjControllerMessage objController2 = new ObjControllerMessage(0x0B, startTask);
+		attacker.getClient().getSession().write(objController2.serialize());
+		
+		CommandEnqueueRemove commandRemove = new CommandEnqueueRemove(attacker.getObjectID(), actionCounter);
+		ObjControllerMessage objController3 = new ObjControllerMessage(0x0B, commandRemove);
+		attacker.getClient().getSession().write(objController3.serialize());
 
 	}
 
@@ -423,7 +456,7 @@ public class CombatService implements INetworkDispatch {
 		
 	}
 	
-	private boolean applySpecialCost(CreatureObject attacker, WeaponObject weapon, CombatCommand command) {
+	public boolean applySpecialCost(CreatureObject attacker, WeaponObject weapon, CombatCommand command) {
 		
 		float actionCost = command.getActionCost();
 		float healthCost = command.getHealthCost();
@@ -493,7 +526,7 @@ public class CombatService implements INetworkDispatch {
 		}
 		
 		if(target.getSkillMod("damage_decrease_percentage") != null) {
-			rawDamage *= (target.getSkillMod("damage_decrease_percentage").getBase() / 100);
+			rawDamage *= (1 - (target.getSkillMod("damage_decrease_percentage").getBase() / 100));
 		}
 		
 		return rawDamage;
@@ -548,7 +581,7 @@ public class CombatService implements INetworkDispatch {
 	public byte getHitType(CreatureObject attacker, CreatureObject target, WeaponObject weapon, CombatCommand command) {
 		
 		float r;
-
+		Random random = new Random();
 		// negation rolls(parry, miss and dodge) can only roll on single target attacks, strikethrough also only rolls on single target attacks
 		if(command.getAttackType() == 1) {
 		
@@ -560,13 +593,13 @@ public class CombatService implements INetworkDispatch {
 						missNegation = 0.04f;
 					missChance -= missNegation;
 				}
-				r = new Random().nextFloat();
+				r = random.nextFloat();
 				if(r <= missChance)
 					return HitType.MISS;
 			}
 			float dodgeChance = (float) target.getSkillMod("display_only_dodge").getBase() / 10000;
 	
-			r = new Random().nextFloat();
+			r = random.nextFloat();
 			if(r <= dodgeChance)
 				return HitType.DODGE;
 			
@@ -576,7 +609,7 @@ public class CombatService implements INetworkDispatch {
 				
 				float parryChance = (float) target.getSkillMod("display_only_parry").getBase() / 10000;
 	
-				r = new Random().nextFloat();
+				r = random.nextFloat();
 				if(r <= parryChance)
 					return HitType.PARRY;
 					
@@ -584,14 +617,14 @@ public class CombatService implements INetworkDispatch {
 			
 			float stChance = (float) attacker.getSkillMod("display_only_strikethrough").getBase() / 10000;
 			
-			r = new Random().nextFloat();
+			r = random.nextFloat();
 			if(r <= stChance)
 				return HitType.STRIKETHROUGH;
 
 		}
 
 		float critChance = (float) attacker.getSkillMod("display_only_critical").getBase() / 10000;
-		r = new Random().nextFloat();
+		r = random.nextFloat();
 		if(r <= critChance)
 			return HitType.CRITICAL;
 		
@@ -604,10 +637,11 @@ public class CombatService implements INetworkDispatch {
 	public byte doMitigationRolls(CreatureObject attacker, CreatureObject target, WeaponObject weapon, CombatCommand command, byte hitType) {
 		
 		float r;
+		Random random = new Random();
 					
 		float blockChance = (float) target.getSkillMod("display_only_block").getBase() / 10000;
 			
-		r = new Random().nextFloat();
+		r = random.nextFloat();
 		if(r <= blockChance)
 			return HitType.BLOCK;
 			
@@ -615,7 +649,7 @@ public class CombatService implements INetworkDispatch {
 				
 			float evasionChance = (float) target.getSkillMod("display_only_evasion").getBase() / 10000;
 				
-			r = new Random().nextFloat();
+			r = random.nextFloat();
 			if(r <= evasionChance)
 				return HitType.EVASION;
 
@@ -625,12 +659,11 @@ public class CombatService implements INetworkDispatch {
 			
 			float glanceChance = (float) target.getSkillMod("display_only_glancing_blow").getBase() / 10000;
 			
-			r = new Random().nextFloat();
+			r = random.nextFloat();
 			if(r <= glanceChance)
 				return HitType.GLANCE;
 
 		}
-			
 
 		return -1;
 		
@@ -723,35 +756,52 @@ public class CombatService implements INetworkDispatch {
 	
 	public void doHeal(CreatureObject healer, CreatureObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {
 		
+		boolean success = true;
+		
+		if(target.getMaxHealth() == target.getHealth())
+			success = command.getAttackType() != 1;
+		
 		if(!applySpecialCost(healer, weapon, command))
-			return;
+			success = false;
 		
 		if((command.getAttackType() == 0 || command.getAttackType() == 1 || command.getAttackType() == 3) && !attemptHeal(healer, target))	
+			target = healer;
+
+		if(!success) {
+			IoSession session = healer.getClient().getSession();
+			CommandEnqueueRemove commandRemove = new CommandEnqueueRemove(healer.getObjectId(), actionCounter);
+			session.write(new ObjControllerMessage(0x0B, commandRemove).serialize());
+			StartTask startTask = new StartTask(actionCounter, healer.getObjectID(), command.getCommandCRC(), CRC.StringtoCRC(command.getCooldownGroup()), -1);
+			session.write(new ObjControllerMessage(0x0B, startTask).serialize());
 			return;
+		}
 		
 		if(command.getAttackType() == 1)
 			doSingleTargetHeal(healer, target, weapon, command, actionCounter);
 		else if(command.getAttackType() == 0 || command.getAttackType() == 2 || command.getAttackType() == 3)
 			doAreaHeal(healer, target, weapon, command, actionCounter);
 		
+		sendHealPackets(healer, target, weapon, command, actionCounter);
+		
 	}
 	
 	private void doSingleTargetHeal(CreatureObject healer, CreatureObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {
 		
 		int healAmount = command.getAddedDamage();
+		int healPotency = 0;
 		
-		if(healer.getSkillMod("expertise_healing_all") != null) {
-			int healPotency = healer.getSkillMod("expertise_healing_all").getBase();
-			if(healer.getSkillMod("expertise_healing_line_me_heal") != null)
-				healPotency += healer.getSkillMod("expertise_healing_line_me_heal").getBase();
-			if(healer.getSkillMod("expertise_healing_line_of_heal") != null)
-				healPotency += healer.getSkillMod("expertise_healing_line_of_heal").getBase();
-			if(healer.getSkillMod("expertise_healing_line_sm_heal") != null)
-				healPotency += healer.getSkillMod("expertise_healing_line_sm_heal").getBase();
-			if(healer.getSkillMod("expertise_healing_line_sp_heal") != null)
-				healPotency += healer.getSkillMod("expertise_healing_line_sp_heal").getBase();
+		if(healer.getSkillMod("expertise_healing_all") != null)
+			healPotency += healer.getSkillMod("expertise_healing_all").getBase();
+		if(healer.getSkillMod("expertise_healing_line_me_heal") != null)
+			healPotency += healer.getSkillMod("expertise_healing_line_me_heal").getBase();
+		if(healer.getSkillMod("expertise_healing_line_of_heal") != null)
+			healPotency += healer.getSkillMod("expertise_healing_line_of_heal").getBase();
+		if(healer.getSkillMod("expertise_healing_line_sm_heal") != null)
+			healPotency += healer.getSkillMod("expertise_healing_line_sm_heal").getBase();
+		if(healer.getSkillMod("expertise_healing_line_sp_heal") != null)
+			healPotency += healer.getSkillMod("expertise_healing_line_sp_heal").getBase();
+		if(healPotency > 0)
 			healAmount += (healAmount * (healPotency / 100));
-		}
 		
 		synchronized(target.getMutex()) {
 			target.setHealth(target.getHealth() + healAmount);

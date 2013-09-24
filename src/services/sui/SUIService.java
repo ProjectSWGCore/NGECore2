@@ -150,7 +150,7 @@ public class SUIService implements INetworkDispatch {
 				PyObject func = window.getFunctionByEventId(suiEvent.getEventType());
 				
 				if(func != null)
-					func.__call__(Py.java2py(core), Py.java2py(owner), Py.java2py(suiEvent.getEventType()), Py.java2py(suiEvent.getReturnList()));
+					func.__call__(Py.java2py(owner), Py.java2py(window), Py.java2py(suiEvent.getEventType()), Py.java2py(suiEvent.getReturnList()));
 				
 				SUICallback callback = window.getCallbackByEventId(suiEvent.getEventType());
 				

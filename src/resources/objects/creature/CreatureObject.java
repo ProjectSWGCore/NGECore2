@@ -29,6 +29,7 @@ import org.apache.mina.core.buffer.IoBuffer;
 
 import protocol.swg.ChatSystemMessage;
 import protocol.swg.ObjControllerMessage;
+import protocol.swg.PlayClientEffectObjectMessage;
 import protocol.swg.UpdatePVPStatusMessage;
 import protocol.swg.UpdatePostureMessage;
 import protocol.swg.objectControllerObjects.Posture;
@@ -927,27 +928,15 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 
 		IoBuffer delta;
-	//	IoBuffer delta2;
-		int counter;
 		synchronized(objectMutex) {
 			if(health > maxHealth)
 				health = maxHealth;
-			this.health = health;
-			counter = getHamListCounter() + 1;
 			setHamListCounter(getHamListCounter() + 1);
-			delta = messageBuilder.buildUpdateHAMListDelta();
-			/*if(health == 1)
-				delta2 = messageBuilder.buildHealthDelta(0);
-			else
-				delta2 = delta;*/
+			delta = messageBuilder.buildHealthDelta(health);
 			
 			notifyObservers(delta, true);
-			
-			/*if(getClient() != null)
-				getClient().getSession().write(delta2);*/
+			this.health = health;
 		}
-		if(counter != getHamListCounter())
-			System.out.println("test");
 
 	}
 
@@ -959,18 +948,14 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 
 	public void setAction(int action) {
 		IoBuffer delta;
-		int counter;
 		synchronized(objectMutex) {
 			if(action > maxAction)
 				action = maxAction;
-			this.action = action;
-			counter = getHamListCounter() + 1;
 			setHamListCounter(getHamListCounter() + 1);
-			delta = messageBuilder.buildUpdateHAMListDelta();
+			delta = messageBuilder.buildActionDelta(action);
 			notifyObservers(delta, true);
+			this.action = action;
 		}
-		if(counter != getHamListCounter())
-			System.out.println("test");
 	}
 
 	public int getHamListCounter() {
@@ -1095,6 +1080,10 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			setHamListCounter(getHamListCounter() + 1);
 			notifyObservers(messageBuilder.buildResetHAMListDelta(), true);
 		}
+	}
+	
+	public void playEffectObject(String effectFile, String commandString) {
+		notifyObservers(new PlayClientEffectObjectMessage(effectFile, getObjectID(), commandString), true);
 	}
 
 

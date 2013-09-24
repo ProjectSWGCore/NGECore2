@@ -25,6 +25,8 @@ import java.nio.ByteOrder;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
+import engine.resources.common.CRC;
+
 import protocol.swg.ObjControllerMessage;
 
 public class StartTask extends ObjControllerObject {
@@ -32,11 +34,15 @@ public class StartTask extends ObjControllerObject {
 	private int actionCounter;
 	private long objectId;
 	private int commandCRC;
+	private int cooldownGroupCRC;
+	private float cooldown;
 
-	public StartTask(int actionCounter, long objectId, int commandCRC) {
+	public StartTask(int actionCounter, long objectId, int commandCRC, int cooldownGroupCRC, float cooldown) {
 		this.actionCounter = actionCounter;
 		this.objectId = objectId;
 		this.commandCRC = commandCRC;
+		this.cooldownGroupCRC = cooldownGroupCRC;
+		this.cooldown = cooldown;
 	}
 
 	@Override
@@ -48,10 +54,9 @@ public class StartTask extends ObjControllerObject {
 	@Override
 	public IoBuffer serialize() {
 		
-		IoBuffer result = IoBuffer.allocate(37).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer result = IoBuffer.allocate(45).order(ByteOrder.LITTLE_ENDIAN);
 
 		result.putInt(ObjControllerMessage.START_TASK);
-		
 		result.putLong(objectId);
 		result.putInt(0);
 		result.put((byte) 4); // 0 for no cooldown, 0x26 adds execute time (usually 0.25)
@@ -59,9 +64,9 @@ public class StartTask extends ObjControllerObject {
 		result.putInt(0);
 		result.putInt(0);
 		result.putInt(commandCRC);
-		result.putInt(0); // second unknown crc
+		result.putInt(cooldownGroupCRC); // second unknown crc
 		result.putInt(0); // unk
-		result.putFloat(0); // cooldown
+		result.putFloat(cooldown); // cooldown
 		
 		return result.flip();
 		

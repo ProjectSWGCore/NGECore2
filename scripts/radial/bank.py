@@ -61,7 +61,7 @@ def handleSelection(core, owner, target, option):
 
 	return
 	
-def handleTransfer(core, owner, eventType, returnList):
+def handleTransfer(owner, window, eventType, returnList):
 
 	if eventType == 0 and len(returnList) == 2:
 		cashCredits = int(returnList.get(0))
