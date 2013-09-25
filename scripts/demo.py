@@ -181,6 +181,263 @@ def addProfessionAbilities(core, object, profession):
 		object.addAbility('co_del_ae_cc_2_2')
 		object.addAbility('co_del_ae_dm_3')
 		object.addAbility('co_del_ae_cc_1_3')
+		object.addAbility('co_enrage_1')
+		
+		frontman1 = core.objectService.createObject('object/tangible/wearables/necklace/shared_necklace_s11.iff', object.getPlanet())
+		frontman1.setStfFilename('static_item_n')
+		frontman1.setStfName('item_necklace_set_commando_utility_a_01_01')
+		frontman1.setDetailFilename('static_item_d')
+		frontman1.setDetailName('item_necklace_set_commando_utility_a_01_01')
+		frontman1.setStringAttribute('@set_bonus:piece_bonus_count_2', '@set_bonus:set_bonus_commando_utility_a_1')
+		frontman1.setStringAttribute('@set_bonus:piece_bonus_count_3', '@set_bonus:set_bonus_commando_utility_a_2')
+		frontman1.setStringAttribute('@set_bonus:piece_bonus_count_5', '@set_bonus:set_bonus_commando_utility_a_3')
+		frontman1.setIntAttribute('cat_stat_mod_bonus.food_constitution_modified' , 20)
+		frontman1.setIntAttribute('cat_skill_mod_bonus.@stat_n:combat_block_chance' , 2)
+		frontman1.setIntAttribute('cat_skill_mod_bonus.@stat_n:combat_block_value' , 50)
+	
+		inventory = object.getSlottedObject('inventory')
+		if not inventory:
+			return
+		inventory.add(frontman1)
+		
+		frontman2 = core.objectService.createObject('object/tangible/wearables/bracelet/shared_bracelet_s02_r.iff', object.getPlanet())
+		frontman2.setStfFilename('static_item_n')
+		frontman2.setStfName('item_bracelet_r_set_commando_utility_a_01_01')
+		frontman2.setDetailFilename('static_item_d')
+		frontman2.setDetailName('item_bracelet_r_set_commando_utility_a_01_01')
+		frontman2.setStringAttribute('@set_bonus:piece_bonus_count_2', '@set_bonus:set_bonus_commando_utility_a_1')
+		frontman2.setStringAttribute('@set_bonus:piece_bonus_count_3', '@set_bonus:set_bonus_commando_utility_a_2')
+		frontman2.setStringAttribute('@set_bonus:piece_bonus_count_5', '@set_bonus:set_bonus_commando_utility_a_3')
+		frontman2.setIntAttribute('cat_stat_mod_bonus.food_constitution_modified' , 20)
+		frontman2.setIntAttribute('cat_skill_mod_bonus.@stat_n:combat_block_chance' , 2)
+		frontman2.setIntAttribute('cat_skill_mod_bonus.@stat_n:combat_block_value' , 50)
+	
+		inventory = object.getSlottedObject('inventory')
+		if not inventory:
+			return
+		inventory.add(frontman2)
+		
+		frontman3 = core.objectService.createObject('object/tangible/wearables/bracelet/shared_bracelet_s02_l.iff', object.getPlanet())
+		frontman3.setStfFilename('static_item_n')
+		frontman3.setStfName('item_bracelet_l_set_commando_utility_a_01_01')
+		frontman3.setDetailFilename('static_item_d')
+		frontman3.setDetailName('item_bracelet_l_set_commando_utility_a_01_01')
+		frontman3.setStringAttribute('@set_bonus:piece_bonus_count_2', '@set_bonus:set_bonus_commando_utility_a_1')
+		frontman3.setStringAttribute('@set_bonus:piece_bonus_count_3', '@set_bonus:set_bonus_commando_utility_a_2')
+		frontman3.setStringAttribute('@set_bonus:piece_bonus_count_5', '@set_bonus:set_bonus_commando_utility_a_3')
+		frontman3.setIntAttribute('cat_stat_mod_bonus.food_constitution_modified' , 20)
+		frontman3.setIntAttribute('cat_skill_mod_bonus.@stat_n:combat_block_chance' , 2)
+		frontman3.setIntAttribute('cat_skill_mod_bonus.@stat_n:combat_block_value' , 50)
+	
+		inventory = object.getSlottedObject('inventory')
+		if not inventory:
+			return
+		inventory.add(frontman3)
+		
+		frontman4 = core.objectService.createObject('object/tangible/wearables/ring/shared_ring_s01.iff', object.getPlanet())
+		frontman4.setStfFilename('static_item_n')
+		frontman4.setStfName('item_ring_set_commando_utility_a_01_01')
+		frontman4.setDetailFilename('static_item_d')
+		frontman4.setDetailName('item_ring_set_commando_utility_a_01_01')
+		frontman4.setStringAttribute('@set_bonus:piece_bonus_count_2', '@set_bonus:set_bonus_commando_utility_a_1')
+		frontman4.setStringAttribute('@set_bonus:piece_bonus_count_3', '@set_bonus:set_bonus_commando_utility_a_2')
+		frontman4.setStringAttribute('@set_bonus:piece_bonus_count_5', '@set_bonus:set_bonus_commando_utility_a_3')
+		frontman4.setIntAttribute('cat_stat_mod_bonus.food_constitution_modified' , 20)
+		frontman4.setIntAttribute('cat_skill_mod_bonus.@stat_n:combat_block_chance' , 2)
+		frontman4.setIntAttribute('cat_skill_mod_bonus.@stat_n:combat_block_value' , 50)
+	
+		inventory = object.getSlottedObject('inventory')
+		if not inventory:
+			return
+		inventory.add(frontman4)
+		
+		frontman5 = core.objectService.createObject('object/tangible/wearables/ring/shared_ring_s03.iff', object.getPlanet())
+		frontman5.setStfFilename('static_item_n')
+		frontman5.setStfName('item_ring_a_set_commando_utility_a')
+		frontman5.setDetailFilename('static_item_d')
+		frontman5.setDetailName('item_ring_a_set_commando_utility_a')
+		frontman5.setStringAttribute('@set_bonus:piece_bonus_count_2', '@set_bonus:set_bonus_commando_utility_a_1')
+		frontman5.setStringAttribute('@set_bonus:piece_bonus_count_3', '@set_bonus:set_bonus_commando_utility_a_2')
+		frontman5.setStringAttribute('@set_bonus:piece_bonus_count_5', '@set_bonus:set_bonus_commando_utility_a_3')
+		frontman5.setIntAttribute('cat_stat_mod_bonus.food_constitution_modified' , 20)
+		frontman5.setIntAttribute('cat_skill_mod_bonus.@stat_n:combat_block_chance' , 2)
+		frontman5.setIntAttribute('cat_skill_mod_bonus.@stat_n:combat_block_value' , 50)
+	
+		inventory = object.getSlottedObject('inventory')
+		if not inventory:
+			return
+		inventory.add(frontman5)
+		
+		grenadier1 = core.objectService.createObject('object/tangible/wearables/necklace/shared_necklace_s10.iff', object.getPlanet())
+		grenadier1.setStfFilename('static_item_n')
+		grenadier1.setStfName('item_necklace_set_commando_dps_01_01')
+		grenadier1.setDetailFilename('static_item_d')
+		grenadier1.setDetailName('item_necklace_set_commando_dps_01_01')
+		grenadier1.setStringAttribute('@set_bonus:piece_bonus_count_2', '@set_bonus:set_bonus_commando_dps_1')
+		grenadier1.setStringAttribute('@set_bonus:piece_bonus_count_3', '@set_bonus:set_bonus_commando_dps_2')
+		grenadier1.setStringAttribute('@set_bonus:piece_bonus_count_5', '@set_bonus:set_bonus_commando_dps_3')
+		grenadier1.setIntAttribute('cat_skill_mod_bonus.@stat_n:fast_attack_line_co_grenade' , 3)
+		grenadier1.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_action_line_co_grenade' , 2)
+		grenadier1.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_freeshot_co_grenade' , 2)
+	
+		inventory = object.getSlottedObject('inventory')
+		if not inventory:
+			return
+		inventory.add(grenadier1)
+		
+		grenadier2 = core.objectService.createObject('object/tangible/wearables/bracelet/shared_bracelet_s06_r.iff', object.getPlanet())
+		grenadier2.setStfFilename('static_item_n')
+		grenadier2.setStfName('item_bracelet_r_set_commando_dps_01_01')
+		grenadier2.setDetailFilename('static_item_d')
+		grenadier2.setDetailName('item_bracelet_r_set_commando_dps_01_01')
+		grenadier2.setStringAttribute('@set_bonus:piece_bonus_count_2', '@set_bonus:set_bonus_commando_dps_1')
+		grenadier2.setStringAttribute('@set_bonus:piece_bonus_count_3', '@set_bonus:set_bonus_commando_dps_2')
+		grenadier2.setStringAttribute('@set_bonus:piece_bonus_count_5', '@set_bonus:set_bonus_commando_dps_3')
+		grenadier2.setIntAttribute('cat_skill_mod_bonus.@stat_n:fast_attack_line_co_grenade' , 3)
+		grenadier2.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_action_line_co_grenade' , 2)
+		grenadier2.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_freeshot_co_grenade' , 2)
+	
+		inventory = object.getSlottedObject('inventory')
+		if not inventory:
+			return
+		inventory.add(grenadier2)
+		
+		grenadier3 = core.objectService.createObject('object/tangible/wearables/bracelet/shared_bracelet_s06_l.iff', object.getPlanet())
+		grenadier3.setStfFilename('static_item_n')
+		grenadier3.setStfName('item_bracelet_l_set_commando_dps_01_01')
+		grenadier3.setDetailFilename('static_item_d')
+		grenadier3.setDetailName('item_bracelet_l_set_commando_dps_01_01')
+		grenadier3.setStringAttribute('@set_bonus:piece_bonus_count_2', '@set_bonus:set_bonus_commando_dps_1')
+		grenadier3.setStringAttribute('@set_bonus:piece_bonus_count_3', '@set_bonus:set_bonus_commando_dps_2')
+		grenadier3.setStringAttribute('@set_bonus:piece_bonus_count_5', '@set_bonus:set_bonus_commando_dps_3')
+		grenadier3.setIntAttribute('cat_skill_mod_bonus.@stat_n:fast_attack_line_co_grenade' , 3)
+		grenadier3.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_action_line_co_grenade' , 2)
+		grenadier3.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_freeshot_co_grenade' , 2)
+	
+		inventory = object.getSlottedObject('inventory')
+		if not inventory:
+			return
+		inventory.add(grenadier3)
+		
+		grenadier4 = core.objectService.createObject('object/tangible/wearables/ring/shared_ring_s02.iff', object.getPlanet())
+		grenadier4.setStfFilename('static_item_n')
+		grenadier4.setStfName('item_ring_set_commando_dps_01_01')
+		grenadier4.setDetailFilename('static_item_d')
+		grenadier4.setDetailName('item_ring_set_commando_dps_01_01')
+		grenadier4.setStringAttribute('@set_bonus:piece_bonus_count_2', '@set_bonus:set_bonus_commando_dps_1')
+		grenadier4.setStringAttribute('@set_bonus:piece_bonus_count_3', '@set_bonus:set_bonus_commando_dps_2')
+		grenadier4.setStringAttribute('@set_bonus:piece_bonus_count_5', '@set_bonus:set_bonus_commando_dps_3')
+		grenadier4.setIntAttribute('cat_skill_mod_bonus.@stat_n:fast_attack_line_co_grenade' , 3)
+		grenadier4.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_action_line_co_grenade' , 2)
+		grenadier4.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_freeshot_co_grenade' , 2)
+	
+		inventory = object.getSlottedObject('inventory')
+		if not inventory:
+			return
+		inventory.add(grenadier4)
+		
+		grenadier5 = core.objectService.createObject('object/tangible/wearables/ring/shared_ring_s04.iff', object.getPlanet())
+		grenadier5.setStfFilename('static_item_n')
+		grenadier5.setStfName('item_ring_a_set_commando_dps')
+		grenadier5.setDetailFilename('static_item_d')
+		grenadier5.setDetailName('item_ring_a_set_commando_dps')
+		grenadier5.setStringAttribute('@set_bonus:piece_bonus_count_2', '@set_bonus:set_bonus_commando_dps_1')
+		grenadier5.setStringAttribute('@set_bonus:piece_bonus_count_3', '@set_bonus:set_bonus_commando_dps_2')
+		grenadier5.setStringAttribute('@set_bonus:piece_bonus_count_5', '@set_bonus:set_bonus_commando_dps_3')
+		grenadier5.setIntAttribute('cat_skill_mod_bonus.@stat_n:fast_attack_line_co_grenade' , 3)
+		grenadier5.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_action_line_co_grenade' , 2)
+		grenadier5.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_freeshot_co_grenade' , 2)
+	
+		inventory = object.getSlottedObject('inventory')
+		if not inventory:
+			return
+		inventory.add(grenadier5)	
+		
+		juggernaut1 = core.objectService.createObject('object/tangible/wearables/necklace/shared_necklace_s12.iff', object.getPlanet())
+		juggernaut1.setStfFilename('static_item_n')
+		juggernaut1.setStfName('item_necklace_set_commando_utility_b_01_01')
+		juggernaut1.setDetailFilename('static_item_d')
+		juggernaut1.setDetailName('item_necklace_set_commando_utility_b_01_01')
+		juggernaut1.setStringAttribute('@set_bonus:piece_bonus_count_2', '@set_bonus:set_bonus_commando_utility_b_1')
+		juggernaut1.setStringAttribute('@set_bonus:piece_bonus_count_3', '@set_bonus:set_bonus_commando_utility_b_2')
+		juggernaut1.setStringAttribute('@set_bonus:piece_bonus_count_5', '@set_bonus:set_bonus_commando_utility_b_3')
+		juggernaut1.setIntAttribute('cat_stat_mod_bonus.food_strength_modified' , 15)
+		juggernaut1.setIntAttribute('cat_stat_mod_bonus.food_constitution_modified' , 10)
+		juggernaut1.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_devastation_bonus' , 5)
+	
+		inventory = object.getSlottedObject('inventory')
+		if not inventory:
+			return
+		inventory.add(juggernaut1)
+		
+		juggernaut2 = core.objectService.createObject('object/tangible/wearables/bracelet/shared_bracelet_s03_r.iff', object.getPlanet())
+		juggernaut2.setStfFilename('static_item_n')
+		juggernaut2.setStfName('item_bracelet_r_set_commando_utility_b_01_01')
+		juggernaut2.setDetailFilename('static_item_d')
+		juggernaut2.setDetailName('item__bracelet_r_set_commando_utility_b_01_01')
+		juggernaut2.setStringAttribute('@set_bonus:piece_bonus_count_2', '@set_bonus:set_bonus_commando_utility_b_1')
+		juggernaut2.setStringAttribute('@set_bonus:piece_bonus_count_3', '@set_bonus:set_bonus_commando_utility_b_2')
+		juggernaut2.setStringAttribute('@set_bonus:piece_bonus_count_5', '@set_bonus:set_bonus_commando_utility_b_3')
+		juggernaut2.setIntAttribute('cat_stat_mod_bonus.food_strength_modified' , 15)
+		juggernaut2.setIntAttribute('cat_stat_mod_bonus.food_constitution_modified' , 10)
+		juggernaut2.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_devastation_bonus' , 5)
+	
+		inventory = object.getSlottedObject('inventory')
+		if not inventory:
+			return
+		inventory.add(juggernaut2)
+		
+		juggernaut3 = core.objectService.createObject('object/tangible/wearables/bracelet/shared_bracelet_s03_l.iff', object.getPlanet())
+		juggernaut3.setStfFilename('static_item_n')
+		juggernaut3.setStfName('item_bracelet_l_set_commando_utility_b_01_01')
+		juggernaut3.setDetailFilename('static_item_d')
+		juggernaut3.setDetailName('item__bracelet_l_set_commando_utility_b_01_01')
+		juggernaut3.setStringAttribute('@set_bonus:piece_bonus_count_2', '@set_bonus:set_bonus_commando_utility_b_1')
+		juggernaut3.setStringAttribute('@set_bonus:piece_bonus_count_3', '@set_bonus:set_bonus_commando_utility_b_2')
+		juggernaut3.setStringAttribute('@set_bonus:piece_bonus_count_5', '@set_bonus:set_bonus_commando_utility_b_3')
+		juggernaut3.setIntAttribute('cat_stat_mod_bonus.food_strength_modified' , 15)
+		juggernaut3.setIntAttribute('cat_stat_mod_bonus.food_constitution_modified' , 10)
+		juggernaut3.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_devastation_bonus' , 5)
+	
+		inventory = object.getSlottedObject('inventory')
+		if not inventory:
+			return
+		inventory.add(juggernaut3)
+		
+		juggernaut4 = core.objectService.createObject('object/tangible/wearables/ring/shared_ring_s02.iff', object.getPlanet())
+		juggernaut4.setStfFilename('static_item_n')
+		juggernaut4.setStfName('item_ring_set_commando_utility_b_01_01')
+		juggernaut4.setDetailFilename('static_item_d')
+		juggernaut4.setDetailName('item__ring_set_commando_utility_b_01_01')
+		juggernaut4.setStringAttribute('@set_bonus:piece_bonus_count_2', '@set_bonus:set_bonus_commando_utility_b_1')
+		juggernaut4.setStringAttribute('@set_bonus:piece_bonus_count_3', '@set_bonus:set_bonus_commando_utility_b_2')
+		juggernaut4.setStringAttribute('@set_bonus:piece_bonus_count_5', '@set_bonus:set_bonus_commando_utility_b_3')
+		juggernaut4.setIntAttribute('cat_stat_mod_bonus.food_strength_modified' , 15)
+		juggernaut4.setIntAttribute('cat_stat_mod_bonus.food_constitution_modified' , 10)
+		juggernaut4.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_devastation_bonus' , 5)
+	
+		inventory = object.getSlottedObject('inventory')
+		if not inventory:
+			return
+		inventory.add(juggernaut4)
+		
+		juggernaut5 = core.objectService.createObject('object/tangible/wearables/ring/shared_ring_s04.iff', object.getPlanet())
+		juggernaut5.setStfFilename('static_item_n')
+		juggernaut5.setStfName('item_ring_a_set_commando_utility_b')
+		juggernaut5.setDetailFilename('static_item_d')
+		juggernaut5.setDetailName('item__ring_a_set_commando_utility_b')
+		juggernaut5.setStringAttribute('@set_bonus:piece_bonus_count_2', '@set_bonus:set_bonus_commando_utility_b_1')
+		juggernaut5.setStringAttribute('@set_bonus:piece_bonus_count_3', '@set_bonus:set_bonus_commando_utility_b_2')
+		juggernaut5.setStringAttribute('@set_bonus:piece_bonus_count_5', '@set_bonus:set_bonus_commando_utility_b_3')
+		juggernaut5.setIntAttribute('cat_stat_mod_bonus.food_strength_modified' , 15)
+		juggernaut5.setIntAttribute('cat_stat_mod_bonus.food_constitution_modified' , 10)
+		juggernaut5.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_devastation_bonus' , 5)
+	
+		inventory = object.getSlottedObject('inventory')
+		if not inventory:
+			return
+		inventory.add(juggernaut5)
+		return
 	elif profession == 'bounty_hunter_1a':
 		object.addAbility('bh_shields_1')
 		object.addAbility('bh_dm_8')
