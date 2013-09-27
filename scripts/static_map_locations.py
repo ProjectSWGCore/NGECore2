@@ -67,7 +67,7 @@ def nabooLocations(core, planet):
 	mapService.addLocation(planet, 'Theed', -5488, 4380, 17, 0, 0)
 	mapService.addLocation(planet, 'Keren', 1888, 2700, 17, 0, 0)
 	mapService.addLocation(planet, 'Moenia', 4836, -4830.5, 17, 0, 0)
-	mapService.addLocation(planet, 'Deeja Peek', -4686, -1375, 17, 0, 0)
+	mapService.addLocation(planet, 'Deeja Peek', 4686, -1375, 17, 0, 0)
 	mapService.addLocation(planet, 'Kaadara', 5288, 6687, 17, 0, 0)
 
 def roriLocations(core, planet):

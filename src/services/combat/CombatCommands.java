@@ -187,8 +187,12 @@ public class CombatCommands {
 		core.commandService.registerCombatCommand("fs_sh_1");
 		core.commandService.registerCombatCommand("fs_sh_2");
 		core.commandService.registerCombatCommand("fs_sh_3");
-		core.commandService.registerCommand("fs_buff_def_1_1");
-		core.commandService.registerCommand("fs_buff_ca_1");
+		core.commandService.registerCommand("fs_buff_def_1_1"); // Stance
+		core.commandService.registerCommand("fs_buff_ca_1"); // Focus
+		core.commandService.registerCommand("fs_saber_reflect_buff"); // Saber Reflect
+		core.commandService.registerCommand("saberBlock"); // Saber Block
+		core.commandService.registerCommand("forcerun"); // Force Run
+		core.commandService.registerCommand("fs_buff_invis_1"); // Force Cloak
 
 		
 		// Commando
