@@ -59,7 +59,7 @@ public class WeaponMessageBuilder extends ObjectMessageBuilder {
 		buffer.putInt(weapon.getOptionsBitmask());
 		buffer.putInt(weapon.getIncapTimer());
 		buffer.putInt(weapon.getConditionDamage());
-		buffer.putInt(weapon.getMaxDamage());
+		buffer.putInt(0);
 		buffer.putInt(0);
 		buffer.putInt(0x64);
 		buffer.put((byte) (weapon.isStaticObject() ? 1 : 0));

@@ -540,8 +540,8 @@ public class CombatService implements INetworkDispatch {
 		
 		if(command.getPercentFromWeapon() > 0 && weapon != attacker.getSlottedObject("default_weapon")) {
 			
-			float weaponMinDmg = weapon.getIntAttribute("cat_wpn_damage.wpn_damage_min");
-			float weaponMaxDmg = weapon.getIntAttribute("cat_wpn_damage.wpn_damage_max");
+			float weaponMinDmg = weapon.getMinDamage();
+			float weaponMaxDmg = weapon.getMaxDamage();
 			
 			float weaponDmg = new Random().nextInt((int) (weaponMaxDmg - weaponMinDmg + 1)) + weaponMinDmg;
 			weaponDmg *= command.getPercentFromWeapon();

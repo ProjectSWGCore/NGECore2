@@ -33,7 +33,7 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent
+@Persistent(version=1)
 public class WeaponObject extends SWGObject {
 	
 	// TODO: Thread safety
@@ -44,7 +44,6 @@ public class WeaponObject extends SWGObject {
 	private byte[] customization;
 	private List<Integer> componentCustomizations = new ArrayList<Integer>();
 	private int optionsBitmask = 0;
-	private int maxDamage = 0;
 	private boolean staticObject = true;
 	@NotPersistent
 	private WeaponMessageBuilder messageBuilder;
@@ -135,11 +134,47 @@ public class WeaponObject extends SWGObject {
 	}
 
 	public int getMaxDamage() {
-		return maxDamage;
+		return Integer.parseInt(getStringAttribute("cat_wpn_damage.damage").split("-")[1]);
 	}
 
 	public void setMaxDamage(int maxDamage) {
-		this.maxDamage = maxDamage;
+		setStringAttribute("cat_wpn_damage.damage", String.valueOf(getMinDamage()) + "-" + String.valueOf(maxDamage));
+	}
+	
+	public int getMinDamage() {
+		return Integer.parseInt(getStringAttribute("cat_wpn_damage.damage").split("-")[0]);
+	}
+
+	public void setMinDamage(int minDamage) {
+		setStringAttribute("cat_wpn_damage.damage", String.valueOf(minDamage) + "-" + String.valueOf(getMaxDamage()));
+	}
+	
+	public int getElementalDamage() {
+		return getIntAttribute("cat_wpn_damage.wpn_elemental_value");
+	}
+
+	public void setElementalDamage(int elementalDamage) {
+		setIntAttribute("cat_wpn_damage.wpn_elemental_value", elementalDamage);
+	}
+
+	public String getElementalType() {
+		return getStringAttribute("cat_wpn_damage.wpn_elemental_type");
+	}
+	
+	public void setElementalType(String elementalType) {
+		setStringAttribute("cat_wpn_damage.wpn_elemental_type", elementalType);
+	}
+	
+	public String getDamageType() {
+		return getStringAttribute("cat_wpn_damage.wpn_damage_type");
+	}
+	
+	public void setDamageType(String damageType) {
+		setStringAttribute("cat_wpn_damage.wpn_damage_type", damageType);
+	}
+	
+	public int getDamagePerSecond() {
+		return (int) (((getMaxDamage() + getElementalDamage()  + getMinDamage() + getElementalDamage()) / 2 + getElementalDamage()) * (1 / getAttackSpeed()));
 	}
 
 	public boolean isStaticObject() {
