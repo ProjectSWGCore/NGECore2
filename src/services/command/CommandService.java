@@ -181,6 +181,9 @@ public class CommandService implements INetworkDispatch  {
 					success = false;
 		}
 		
+		if(command.getHitType() == 7 && target.getClient() == null)
+			success = false;
+		
 		WeaponObject weapon;
 		
 		if(attacker.getWeaponId() == 0)
@@ -226,6 +229,11 @@ public class CommandService implements INetworkDispatch  {
 			
 			if(command.getHitType() == 5) {
 				core.combatService.doHeal(attacker, (CreatureObject) target, weapon, command, actionCounter);
+				return;
+			}
+			
+			if(command.getHitType() == 7) {
+				core.combatService.doRevive(attacker, (CreatureObject) target, weapon, command, actionCounter);
 				return;
 			}
 				

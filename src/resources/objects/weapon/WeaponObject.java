@@ -71,6 +71,7 @@ public class WeaponObject extends SWGObject {
 		messageBuilder = new WeaponMessageBuilder(this);
 		//calculateRange();
 	}
+	
 	private void calculateRange() {
 
 		int weaponType = getWeaponType();

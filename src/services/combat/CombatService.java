@@ -24,6 +24,7 @@ package services.combat;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Vector;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -47,6 +48,10 @@ import resources.objects.tangible.TangibleObject;
 import resources.objects.waypoint.WaypointObject;
 import resources.objects.weapon.WeaponObject;
 import services.command.CombatCommand;
+import services.sui.SUIService.MessageBoxType;
+import services.sui.SUIWindow;
+import services.sui.SUIWindow.SUICallback;
+import services.sui.SUIWindow.Trigger;
 import main.NGECore;
 import engine.resources.common.CRC;
 import engine.resources.objects.SWGObject;
@@ -842,6 +847,7 @@ public class CombatService implements INetworkDispatch {
 		
 		target.setPosture((byte) 14);
 		attacker.sendSystemMessage("You have killed " + target.getCustomName() + ".", (byte) 0);
+		target.sendSystemMessage("@base_player:victim_dead", (byte) 0);
 		attacker.removeDefender(target);
 		target.removeDefender(attacker);
 		
@@ -895,7 +901,92 @@ public class CombatService implements INetworkDispatch {
 		target.sendSystemMessage(requester.getCustomName() + " ends your duel.", (byte) 0);
 
 	}
+
+	public void doRevive(CreatureObject medic, CreatureObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {
+
+		boolean success = true;
+				
+		if(!applySpecialCost(medic, weapon, command))
+			success = false;
+		
+		if((command.getAttackType() == 0 || command.getAttackType() == 1 || command.getAttackType() == 3) && !attemptHeal(medic, target))	
+			target = medic;
+
+		if(!success) {
+			IoSession session = medic.getClient().getSession();
+			CommandEnqueueRemove commandRemove = new CommandEnqueueRemove(medic.getObjectId(), actionCounter);
+			session.write(new ObjControllerMessage(0x0B, commandRemove).serialize());
+			StartTask startTask = new StartTask(actionCounter, medic.getObjectID(), command.getCommandCRC(), CRC.StringtoCRC(command.getCooldownGroup()), -1);
+			session.write(new ObjControllerMessage(0x0B, startTask).serialize());
+			return;
+		}
+
+		if(command.getAttackType() == 1)
+			doSingleTargetRevive(medic, target, weapon, command, actionCounter);
+		else if(command.getAttackType() == 0 || command.getAttackType() == 2 || command.getAttackType() == 3)
+			doAreaRevive(medic, target, weapon, command, actionCounter);
+		
+		sendHealPackets(medic, target, weapon, command, actionCounter);
+		
+	}
 	
+	private void doSingleTargetRevive(CreatureObject medic, CreatureObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {
+		
+		SUIWindow rezWindow = core.suiService.createMessageBox(MessageBoxType.MESSAGE_BOX_YES_NO, "@spam:revive_sui_title", medic.getCustomName() + " has offered to Revive you. Click YES to revive immediately at this location without cloning.", target, null, 0);
+		Vector<String> returnParams = new Vector<String>();
+		returnParams.add("btnOk:Text");		
+		rezWindow.addHandler(0, "", Trigger.TRIGGER_OK, returnParams, new SUICallback() {
+
+			@Override
+			public void process(SWGObject owner, int eventType, Vector<String> returnList) {
+				
+				CreatureObject creature = (CreatureObject) owner;
+				
+				if(eventType != 0 || creature.getPosture() != 14)
+					return;
+				
+				synchronized(creature.getMutex()) {
+					creature.setPosture((byte) 0);
+					creature.setTurnRadius(1);
+					creature.setSpeedMultiplierBase(1);
+					creature.setHealth(creature.getHealth() + 4000);
+				}
+				
+			}
+			
+		});
+		
+		core.suiService.openSUIWindow(rezWindow);
+		
+	}
+
+	private void doAreaRevive(CreatureObject medic, CreatureObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {
+		
+		float range = command.getConeLength();
+		
+		List<SWGObject> inRangeObjects = core.simulationService.get(medic.getPlanet(), target.getWorldPosition().x, target.getWorldPosition().z, (int) range);
+		
+		for(SWGObject obj : inRangeObjects) {
+			
+			if(!(obj instanceof CreatureObject))
+				continue;
+			
+			if(obj instanceof CreatureObject && (((CreatureObject) obj).getPosture() != 14))
+				continue;
+			
+			if(!attemptHeal(medic, (CreatureObject) obj))
+				continue;
+			
+			if(!core.simulationService.checkLineOfSight(target, obj))
+				continue;
+			
+			doSingleTargetRevive(medic, (CreatureObject) obj, weapon, command, actionCounter);
+			
+		}
+
+		
+	}
+
 
 	public enum HitType{; 
 	
