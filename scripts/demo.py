@@ -156,6 +156,7 @@ def addProfessionAbilities(core, object, profession):
 		inventory = object.getSlottedObject('inventory')
 		inventory.add(testObject)
 
+		##Case Sensitive
 		object.addAbility('fs_sweep_7')
 		object.addAbility('fs_drain_7')
 		object.addAbility('forceRun')
@@ -167,6 +168,7 @@ def addProfessionAbilities(core, object, profession):
 		object.addAbility('fs_dm_7')
 		object.addAbility('fs_buff_def_1_1')
 		object.addAbility('fs_buff_ca_1')
+		object.addAbility('saberBlock')
 	elif profession == 'medic_1a':
 		object.addAbility('me_bacta_bomb_5')
 		object.addAbility('me_bacta_grenade_5')
