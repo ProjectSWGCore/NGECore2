@@ -1,6 +1,7 @@
 import sys
 
 def setup(core, actor, buff):
+	actor.playEffectObject('appearance/pt_sokan_focus.prt', 'fs_buff_ca_1')
 	core.skillModService.addSkillMod(actor, 'expertise_stance', 1)
 	
 	return
