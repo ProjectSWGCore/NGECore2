@@ -62,6 +62,7 @@ public class WeaponObject extends SWGObject {
 		super(objectID, planet, position, orientation, template);
 		messageBuilder = new WeaponMessageBuilder(this);
 		calculateRange();
+		calculateAttackSpeed();
 	}
 
 	
@@ -271,6 +272,7 @@ public class WeaponObject extends SWGObject {
 	}
 	
 	private void calculateAttackSpeed() {
+		
 		int weaponType = getWeaponType();
 		
 		switch(weaponType) {
