@@ -55,8 +55,8 @@ public class WeaponObject extends SWGObject {
 		super(objectID, planet, new Point3D(0, 0, 0), new Quaternion(1, 0, 1, 0), template);
 		messageBuilder = new WeaponMessageBuilder(this);
 		calculateRange();
+		calculateAttackSpeed();
 	}
-	
 
 	public WeaponObject(long objectID, Planet planet, String template, Point3D position, Quaternion orientation) {
 		super(objectID, planet, position, orientation, template);
@@ -269,5 +269,28 @@ public class WeaponObject extends SWGObject {
 		return false;
 		
 	}
+	
+	private void calculateAttackSpeed() {
+		int weaponType = getWeaponType();
+		
+		switch(weaponType) {
+			
+			case 0: attackSpeed = 0.8f; break;
+			case 1: attackSpeed = 0.6f; break;
+			case 2: attackSpeed = 0.4f; break;
+			case 3: attackSpeed = 1; break;
+			case 4: attackSpeed = 1; break;
+			case 5: attackSpeed = 1; break;
+			case 6: attackSpeed = 1; break;
+			case 7: attackSpeed = 1; break;
+			case 8: attackSpeed = 1; break;
+			case 9: attackSpeed = 1; break;
+			case 10: attackSpeed = 1; break;
+			case 11: attackSpeed = 1; break;
+		
+		}
+		
+	}
+
 
 }
