@@ -47,20 +47,20 @@ public class CombatCommands {
 		core.commandService.registerCombatCommand("fireHeavyWeapon");
 		core.commandService.registerCombatCommand("fireIceGun");
 		core.commandService.registerCombatCommand("fireLavaCannon");
-		core.commandService.registerCombatCommand("fireLavaCannonGeneric");
+		//core.commandService.registerCombatCommand("fireLavaCannonGeneric");
 		core.commandService.registerCombatCommand("fireLightningBeam");
 		core.commandService.registerCombatCommand("fireParticleBeam");
 		core.commandService.registerCombatCommand("firePistolLauncher");
-		core.commandService.registerCombatCommand("firePistolLauncherGeneric");
+		//core.commandService.registerCombatCommand("firePistolLauncherGeneric");
 		core.commandService.registerCombatCommand("firePistolLauncherMedium");
 		core.commandService.registerCombatCommand("firePistolLauncherTargeting");
 		core.commandService.registerCombatCommand("firePlasmaFlameThrower");
 		core.commandService.registerCombatCommand("firePulseCannon");
 		core.commandService.registerCombatCommand("firePvpHeavy");
 		core.commandService.registerCombatCommand("fireRepublicFlameThrower");
-		core.commandService.registerCombatCommand("fireRepublicFlameThrowerGeneric");
+		//core.commandService.registerCombatCommand("fireRepublicFlameThrowerGeneric");
 		core.commandService.registerCombatCommand("fireRocketLauncher");
-		core.commandService.registerCombatCommand("fireRocketLauncherGeneric");
+		//core.commandService.registerCombatCommand("fireRocketLauncherGeneric");
 		core.commandService.registerCombatCommand("fireStunCannon");
 		core.commandService.registerCombatCommand("fireVoidRocketLauncher");
 		
@@ -305,6 +305,9 @@ public class CombatCommands {
 		core.commandService.registerCombatCommand("co_sh_1");
 		core.commandService.registerCombatCommand("co_sh_2");
 		core.commandService.registerCombatCommand("co_sh_3");
+		core.commandService.registerCommand("co_hw_dot");
+		core.commandService.registerCommand("co_ae_hw_dot");
+		
 
 		// Entertainer
 		

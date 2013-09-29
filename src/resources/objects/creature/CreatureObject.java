@@ -24,12 +24,14 @@ package resources.objects.creature;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ScheduledFuture;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
 import protocol.swg.ChatSystemMessage;
 import protocol.swg.ObjControllerMessage;
 import protocol.swg.PlayClientEffectObjectMessage;
+import protocol.swg.StopClientEffectObjectByLabel;
 import protocol.swg.UpdatePVPStatusMessage;
 import protocol.swg.UpdatePostureMessage;
 import protocol.swg.objectControllerObjects.Posture;
@@ -43,6 +45,7 @@ import com.sleepycat.persist.model.NotPersistent;
 
 import engine.clients.Client;
 import resources.objects.Buff;
+import resources.objects.DamageOverTime;
 import resources.objects.SWGList;
 import engine.resources.objects.IPersistent;
 import engine.resources.objects.MissionCriticalObject;
@@ -55,7 +58,7 @@ import engine.resources.scene.Quaternion;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 
-@Entity
+@Entity(version=2)
 public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	@NotPersistent
@@ -101,7 +104,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 
 	// CREO6
 	private byte combatFlag = 0;
-	private short level = 0;
+	private short level = 90;
 	private String currentAnimation;
 	private String moodAnimation;
 	private long weaponId = 0;
@@ -138,6 +141,10 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private List<CreatureObject> duelList = Collections.synchronizedList(new ArrayList<CreatureObject>());
 	@NotPersistent
 	private CreatureMessageBuilder messageBuilder;
+	private SWGList<DamageOverTime> dotList = new SWGList<DamageOverTime>();
+	@NotPersistent
+	private ScheduledFuture<?> incapTask;
+
 	
 	
 	public CreatureObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
@@ -918,6 +925,8 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			if(getPosture() == 13) {
 					if(health > maxHealth)
 						health = maxHealth;
+					stopIncapTask();
+					setIncapTask(null);
 					this.health = health;
 					notifyObservers(messageBuilder.buildUpdateHAMListDelta(), true);
 					setPosture((byte) 0);
@@ -980,8 +989,10 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.maxHealth = maxHealth;
 			setMaxHAMListCounter(getMaxHAMListCounter() + 1);
+			if(maxHealth < getHealth())
+				setHealth(maxHealth);
+			notifyObservers(messageBuilder.buildMaxHealthDelta(maxHealth), true);
 		}
-		notifyObservers(messageBuilder.buildMaxHealthDelta(maxHealth), true);
 	}
 
 	public int getMaxAction() {
@@ -994,8 +1005,10 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.maxAction = maxAction;
 			setMaxHAMListCounter(getMaxHAMListCounter() + 1);
+			if(maxAction < getAction())
+				setAction(maxAction);
+			notifyObservers(messageBuilder.buildMaxActionDelta(maxAction), true);
 		}
-		notifyObservers(messageBuilder.buildMaxActionDelta(maxAction), true);
 	}
 
 	public int getMaxHAMListCounter() {
@@ -1043,6 +1056,10 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			}
 		}
 	}
+
+	public boolean hasBuff(String buffName) {
+		return getBuffByName(buffName) != null;
+	}
 	
 	public int getBuffListCounter() {
 		synchronized(objectMutex) {
@@ -1085,6 +1102,64 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	public void playEffectObject(String effectFile, String commandString) {
 		notifyObservers(new PlayClientEffectObjectMessage(effectFile, getObjectID(), commandString), true);
 	}
+	
+	public void stopEffectObject(String commandString) {
+		notifyObservers(new StopClientEffectObjectByLabel(getObjectID(), commandString), true);
+	}
+
+	public SWGList<DamageOverTime> getDotList() {
+		return dotList;
+	}
+
+	public void setDotList(SWGList<DamageOverTime> dotList) {
+		this.dotList = dotList;
+	}
+
+	public void addDot(DamageOverTime dot) {
+		dotList.get().add(dot);
+	}
+	
+	public void removeDot(DamageOverTime dot) {
+		dotList.get().remove(dot);
+	}
+	
+	public DamageOverTime getDotByBuff(Buff buff) {
+		
+		List<DamageOverTime> dots = new ArrayList<DamageOverTime>(dotList.get());
+		
+		for(DamageOverTime dot : dots) {
+			if(dot.getBuff() == buff)
+				return dot;
+		}
+		
+		return null;
+		
+	}
+	
+	public DamageOverTime getDotByName(String dotName) {
+		
+		List<DamageOverTime> dots = new ArrayList<DamageOverTime>(dotList.get());
+		
+		for(DamageOverTime dot : dots) {
+			if(dot.getCommandName().equalsIgnoreCase(dotName))
+				return dot;
+		}
+		
+		return null;
+		
+	}
 
 
+	public ScheduledFuture<?> getIncapTask() {
+		return incapTask;
+	}
+
+	public void setIncapTask(ScheduledFuture<?> incapTask) {
+		this.incapTask = incapTask;
+	}
+
+	public void stopIncapTask() {
+		if(incapTask != null)
+			incapTask.cancel(true);
+	}
 }

@@ -30,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 
 import resources.common.FileUtilities;
 import resources.objects.Buff;
+import resources.objects.DamageOverTime;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 
@@ -60,25 +61,34 @@ public class BuffService implements INetworkDispatch {
 	
 	public void addBuffToCreature(final CreatureObject creature, String buffName) {		
 
-		if(!FileUtilities.doesFileExist("scripts/buffs/" + buffName + ".py")) {
+		/*if(!FileUtilities.doesFileExist("scripts/buffs/" + buffName + ".py")) {
 			//System.out.println("Buff script doesnt exist for: " + buffName);
 			return;
-		}
+		}*/
 		
 		final Buff buff = new Buff(buffName, creature.getObjectID());
 		buff.setTotalPlayTime(((PlayerObject) creature.getSlottedObject("ghost")).getTotalPlayTime());
 		
 	
-            for (Buff otherBuff : creature.getBuffList()) {
+            for (final Buff otherBuff : creature.getBuffList()) {
                 if (buff.getGroup1().equals(otherBuff.getGroup1()))  
                 	if (buff.getPriority() >= otherBuff.getPriority()) {
                         if (buff.getBuffName().equals(otherBuff.getBuffName())) {
-                                if (otherBuff.getRemainingDuration() > buff.getDuration()) {
+                        	
+                        		if(otherBuff.getStacks() < otherBuff.getMaxStacks()) {
+                        			
+                        			buff.setStacks(otherBuff.getStacks() + 1);
+                        			if(creature.getDotByBuff(otherBuff) != null)	// reset duration when theres a dot stack
+                        				creature.getDotByBuff(otherBuff).setStartTime(buff.getStartTime());
+                        			
+                        		}
+                        	
+                                if (otherBuff.getRemainingDuration() > buff.getDuration() && otherBuff.getStacks() >= otherBuff.getMaxStacks()) {
                                         return;
                                 }
                         }
                        
-                        removeBuffFromCreature(creature, otherBuff); System.out.println("buff removed " + buffName);
+                        removeBuffFromCreature(creature, otherBuff);
                         break;
                 } else {
                 	System.out.println("buff not added:" + buffName);
@@ -86,8 +96,8 @@ public class BuffService implements INetworkDispatch {
                 }
         }	
 			
-		
-		core.scriptService.callScript("scripts/buffs/", "setup", buffName, core, creature, buff);
+        if(FileUtilities.doesFileExist("scripts/buffs/" + buffName + ".py"))
+        	core.scriptService.callScript("scripts/buffs/", "setup", buffName, core, creature, buff);
 		
 		creature.addBuff(buff);
 		
@@ -115,9 +125,15 @@ public class BuffService implements INetworkDispatch {
 		
 		 if(!creature.getBuffList().contains(buff))
              return;
-            
-         core.scriptService.callScript("scripts/buffs/", "removeBuff", buff.getBuffName(), core, creature, buff);
+		 DamageOverTime dot = creature.getDotByBuff(buff);
+         if(dot != null) {
+        	 dot.getTask().cancel(true);
+        	 creature.removeDot(dot);
+         }
+         if(FileUtilities.doesFileExist("scripts/buffs/" + buff.getBuffName() + ".py"))
+        	 core.scriptService.callScript("scripts/buffs/", "removeBuff", buff.getBuffName(), core, creature, buff);
          creature.removeBuff(buff);
+         
 		
 	}
 	

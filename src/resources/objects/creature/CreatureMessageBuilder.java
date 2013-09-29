@@ -223,8 +223,8 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer.putLong(0);
 		buffer.putInt(0);
 		
-		//buffer.putShort(creature.getLevel());
-		buffer.putShort((short) 90);
+		buffer.putShort(creature.getLevel());
+		//buffer.putShort((short) 90);
 		buffer.putInt(0xD007); // unk
 		
 		if(creature.getCurrentAnimation() == null || creature.getCurrentAnimation().length() == 0) 
@@ -639,7 +639,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		IoBuffer buffer = bufferPool.allocate(15, false).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.putInt(1);
 		buffer.putInt(creature.getHamListCounter());
-		System.out.println("HAM list counter: " + creature.getHamListCounter());
+		//System.out.println("HAM list counter: " + creature.getHamListCounter());
 		buffer.put((byte) 2);
 		buffer.putShort((short) 0);
 		buffer.putInt(health);
@@ -658,7 +658,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		IoBuffer buffer = bufferPool.allocate(15, false).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.putInt(1);
 		buffer.putInt(creature.getHamListCounter());
-		System.out.println("HAM list counter: " + creature.getHamListCounter());
+		//System.out.println("HAM list counter: " + creature.getHamListCounter());
 		buffer.put((byte) 2);
 		buffer.putShort((short) 2);
 		buffer.putInt(action);

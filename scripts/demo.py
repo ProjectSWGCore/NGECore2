@@ -47,6 +47,20 @@ def CreateStartingCharacter(core, object):
 	inventory.add(testClothing)
 	inventory.add(testCloak)
 	profession = object.getSlottedObject('ghost').getProfession()
+	if profession == 'commando_1a':
+		object.addSkillMod('expertise_devastation_bonus' , 20)
+		testObject2 = core.objectService.createObject('object/weapon/ranged/heavy/shared_heavy_rocket_launcher.iff', object.getPlanet())
+		testObject2.setCustomName('Test Heavy Weapon')
+		testObject2.setStringAttribute('crafter', 'Light')
+		testObject2.setDamageType('@obj_attr_n:armor_eff_kinetic')
+		testObject2.setElementalType('@obj_attr_n:elemental_heat')
+		testObject2.setStringAttribute('cat_wpn_damage.damage', '0-0')	
+		testObject2.setMinDamage(550)
+		testObject2.setMaxDamage(1315)
+		testObject2.setElementalDamage(216)
+		testObject2.setIntAttribute('cat_wpn_damage.weapon_dps', testObject2.getDamagePerSecond())
+		inventory.add(testObject2)
+
 	addProfessionAbilities(core, object, profession)
 	
 	heroism1 = core.objectService.createObject('object/tangible/wearables/necklace/shared_necklace_s10.iff', object.getPlanet())
@@ -191,6 +205,8 @@ def addProfessionAbilities(core, object, profession):
 		object.addAbility('co_del_ae_cc_2_2')
 		object.addAbility('co_del_ae_dm_3')
 		object.addAbility('co_del_ae_cc_1_3')
+		object.addAbility('co_hw_dot')
+		object.addAbility('co_ae_hw_dot')
 	elif profession == 'bounty_hunter_1a':
 		object.addAbility('bh_shields_1')
 		object.addAbility('bh_dm_8')

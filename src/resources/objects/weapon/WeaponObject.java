@@ -81,7 +81,7 @@ public class WeaponObject extends SWGObject {
 			case 0: maxRange = 64; break;
 			case 1: maxRange = 50; break;
 			case 2: maxRange = 35; break;
-			case 3: maxRange = 64; break;
+			case 12: maxRange = 64; break;
 			case 4: maxRange = 5; break;
 			case 5: maxRange = 5; break;
 			case 6: maxRange = 5; break;
@@ -199,7 +199,7 @@ public class WeaponObject extends SWGObject {
 		if(template.contains("rifle")) weaponType = 0;
 		if(template.contains("carbine")) weaponType = 1;
 		if(template.contains("pistol")) weaponType = 2;
-		if(template.contains("heavy")) weaponType = 3;
+		if(template.contains("heavy")) weaponType = 12;
 		if(template.contains("sword") || template.contains("baton")) weaponType = 4;
 		if(template.contains("2h_sword") || template.contains("axe")) weaponType = 5;
 		if(template.contains("unarmed")) weaponType = 6;
@@ -281,7 +281,7 @@ public class WeaponObject extends SWGObject {
 			case 0: attackSpeed = 0.8f; break;
 			case 1: attackSpeed = 0.6f; break;
 			case 2: attackSpeed = 0.4f; break;
-			case 3: attackSpeed = 1; break;
+			case 12: attackSpeed = 1; break;
 			case 4: attackSpeed = 1; break;
 			case 5: attackSpeed = 1; break;
 			case 6: attackSpeed = 1; break;

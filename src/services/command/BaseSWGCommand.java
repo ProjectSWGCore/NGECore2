@@ -76,7 +76,7 @@ public class BaseSWGCommand implements Cloneable {
 		this.commandCRC = commandCRC;
 	}
 	
-    protected Object clone() throws CloneNotSupportedException {
+    public Object clone() throws CloneNotSupportedException {
         return super.clone();
     }
 

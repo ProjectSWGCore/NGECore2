@@ -40,7 +40,7 @@ import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.resources.common.CRC;
 
-@Persistent(version=5)
+@Persistent(version=6)
 public class Buff implements IListObject {
 	
 	@NotPersistent
@@ -66,6 +66,7 @@ public class Buff implements IListObject {
 	private byte decayCounter = 0;
 	@NotPersistent
 	private ScheduledFuture<?> removalTask;
+	private int stacks = 1;
 	
 	public Buff(String buffName, long ownerId) {
 		
@@ -136,7 +137,7 @@ public class Buff implements IListObject {
 			buffer.putInt(0);
 		}
 		buffer.putLong(ownerId);
-		buffer.putInt(1);	// unk
+		buffer.putInt(stacks);	// stacks
 		
 		buffer.flip();
 
@@ -340,6 +341,10 @@ public class Buff implements IListObject {
 		this.startTime = System.currentTimeMillis();
 	}
 	
+	public long getStartTime() {
+		return startTime;
+	}
+	
 	public int getRemainingDuration() {
 		
 		long currentTime = System.currentTimeMillis();
@@ -402,6 +407,14 @@ public class Buff implements IListObject {
 		
 		setRemovalTask(task);
 		
+	}
+
+	public int getStacks() {
+		return stacks;
+	}
+
+	public void setStacks(int stacks) {
+		this.stacks = stacks;
 	}
 
 }
