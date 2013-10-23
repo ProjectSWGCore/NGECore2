@@ -11,5 +11,6 @@ def setup(core, object):
 		stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', object.getPlanet().getName(), cell.getObjectID(), float(-13.2), float(0.6), float(51.3), float(-0.195405), float(-0.980722))
 		
 	core.mapService.addLocation(object.getPlanet(), 'Starport', object.getPosition().x, object.getPosition().z, 15, 0, 0)
+	#core.travelService.addTravelPoint(object.getPlanet(), )
 	return
 	
