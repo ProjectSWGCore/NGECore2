@@ -74,15 +74,16 @@ public class TravelService implements INetworkDispatch {
 				if(object == null)
 					return;
 				
-				//System.out.println("Planet: " + request.getPlanet());
-				
 				List<Planet> planetList = core.terrainService.getPlanetList();
 				
 				for (Planet planet : planetList) {
-					if (planet.getName() == request.getPlanet()) {
+					String planetString = planet.getName();
+					
+					if (request.getPlanet().equals(planetString)) {
 						
-						PlanetTravelPointListResponse response = new PlanetTravelPointListResponse(planet, travelMap.get(planet));
+						PlanetTravelPointListResponse response = new PlanetTravelPointListResponse(planetString, travelMap.get(planet), planetList);
 						client.getSession().write(response.serialize());
+						//System.out.println("Sent the list for the planet " + planet.getName());
 						
 					}
 				}

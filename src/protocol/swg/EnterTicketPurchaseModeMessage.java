@@ -40,8 +40,8 @@ public class EnterTicketPurchaseModeMessage extends SWGMessage {
 		result.putShort((short) 3);
 		result.putInt(0x904DAE1A);
 		
-		result.put(getAsciiString("Tatooine"));
-		result.put(getAsciiString("Mos Eisley Starport"));
+		result.put(getAsciiString("tatooine")); // lowercase
+		result.put(getAsciiString("Mos Eisley")); // city
 		
 		return result.flip();
 	}
