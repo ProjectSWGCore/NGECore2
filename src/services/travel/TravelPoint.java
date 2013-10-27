@@ -23,6 +23,7 @@ package services.travel;
 
 public class TravelPoint {
 	
+	private String planetName;
 	private String name;
 	private float posX;
 	private float posY;
@@ -68,5 +69,13 @@ public class TravelPoint {
 	}
 	public void setTicketPrice(int ticketPrice) {
 		this.ticketPrice = ticketPrice;
+	}
+
+	public String getPlanetName() {
+		return planetName;
+	}
+
+	public void setPlanetName(String planetName) {
+		this.planetName = planetName;
 	}
 }

@@ -66,8 +66,8 @@ public class PlanetTravelPointListResponse extends SWGMessage {
 		for (TravelPoint point : travelPoints) {
 			
 			result.putFloat(point.getPosX());
-			result.putFloat(point.getPosZ()); // Z and Y may be switched
-			result.putFloat(point.getPosY());
+			result.putFloat(point.getPosY()); // Z and Y may be switched
+			result.putFloat(point.getPosZ());
 
 		}
 		

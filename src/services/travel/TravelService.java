@@ -22,10 +22,12 @@
 package services.travel;
 
 import java.nio.ByteOrder;
+import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.lang3.text.WordUtils;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 
@@ -72,9 +74,20 @@ public class TravelService implements INetworkDispatch {
 				if(object == null)
 					return;
 				
-				PlanetTravelPointListResponse response = new PlanetTravelPointListResponse(request.getPlanet(), travelMap.get(request.getPlanet()));
-				client.getSession().write(response.serialize());
+				//System.out.println("Planet: " + request.getPlanet());
 				
+				List<Planet> planetList = core.terrainService.getPlanetList();
+				
+				for (Planet planet : planetList) {
+					if (planet.getName() == request.getPlanet()) {
+						
+						PlanetTravelPointListResponse response = new PlanetTravelPointListResponse(planet, travelMap.get(planet));
+						client.getSession().write(response.serialize());
+						
+					}
+				}
+				//PlanetTravelPointListResponse response = new PlanetTravelPointListResponse(request.getPlanet(), travelMap.get(request.getPlanet()));
+				//client.getSession().write(response.serialize());
 			}
 			
 		});
@@ -84,13 +97,16 @@ public class TravelService implements INetworkDispatch {
 	public void addPlanet(Planet planet) {
 		Vector<TravelPoint> travelPointVector = new Vector<TravelPoint>();
 		travelMap.put(planet, travelPointVector);
+		core.scriptService.callScript("scripts/", "addPoints", "static_travel_points", core, planet);
 	}
 
 
 	public void addTravelPoint(Planet planet, String name, float x, float y, float z) {
 		TravelPoint travelPoint = new TravelPoint(name, x, y, z, 100);
 		
-		if (travelMap.get(planet) != null) {
+		travelPoint.setPlanetName(WordUtils.capitalize(planet.getName()));
+		
+		if (travelMap.containsKey(planet)) {
 			
 			travelMap.get(planet).add(travelPoint);
 			System.out.println("Added travel point " + travelPoint.getName());
@@ -99,10 +115,36 @@ public class TravelService implements INetworkDispatch {
 			Vector<TravelPoint> travelPointVector = new Vector<TravelPoint>();
 			travelMap.put(planet, travelPointVector);
 			travelMap.get(planet).add(travelPoint);
-			System.out.println("Added planet " + planet.getName() + " with travel point: " + travelPoint.getName());
+			System.out.println("Added planet " + planet.getName() + " to TravelMap.");
+			System.out.println("Added travel point " + travelPoint.getName());
 		}
 		
 		
+	}
+	
+	public void loadTravelPoints() {
+		List<Planet> planetList = core.terrainService.getPlanetList();
+		for (Planet planet : planetList) {
+			addPlanet(planet);
+		}
+	}
+	
+	public SWGObject createTravelTicket(TravelPoint departurePoint, TravelPoint arrivalPoint, Planet planet) {
+		
+		SWGObject travelTicket = core.objectService.createObject("object/tangible/travel/travel_ticket/base/shared_base_travel_ticket.iff", planet);
+
+		travelTicket.setStringAttribute("@obj_attr_n:travel_departure_planet", departurePoint.getPlanetName());
+		travelTicket.setStringAttribute("@obj_attr_n:travel_departure_point", departurePoint.getName());
+		
+		travelTicket.setStringAttribute("@obj_attr_n:travel_arrival_planet", arrivalPoint.getPlanetName());
+		travelTicket.setStringAttribute("@obj_attr_n:travel_arrival_point", arrivalPoint.getName());
+		
+		return travelTicket;
+	}
+	
+	public void addTicketToPlayer(SWGObject player, SWGObject travelTicket) {
+		SWGObject playerInventory = player.getSlottedObject("inventory");
+		playerInventory._add(travelTicket);
 	}
 	
 	@Override

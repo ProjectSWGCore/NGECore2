@@ -31,6 +31,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 
 
+
+
 import resources.common.RadialOptions;
 import resources.objects.creature.CreatureObject;
 import services.AttributeService;
@@ -56,6 +58,7 @@ import services.object.ObjectService;
 import services.object.UpdateService;
 import services.sui.SUIService;
 import services.trade.TradeService;
+import services.travel.TravelService;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.CrcStringTableVisitor;
 import engine.clientdata.visitors.DatatableVisitor;
@@ -120,6 +123,7 @@ public class NGECore {
 	public StaticService staticService;
 	public GroupService groupService;
 	public SkillModService skillModService;
+	public TravelService travelService;
 	
 	// Login Server
 	public NetworkDispatch loginDispatch;
@@ -173,6 +177,7 @@ public class NGECore {
 		buffService = new BuffService(this);
 		groupService = new GroupService(this);
 		skillModService = new SkillModService(this);
+		travelService = new TravelService(this);
 		
 		// Ping Server
 		try {
@@ -198,6 +203,7 @@ public class NGECore {
 		zoneDispatch.addService(chatService);
 		zoneDispatch.addService(suiService);
 		zoneDispatch.addService(mapService);
+		zoneDispatch.addService(travelService);
 		zoneDispatch.addService(playerService);
 
 		zoneServer = new MINAServer(zoneDispatch, config.getInt("ZONE.PORT"));
@@ -216,8 +222,6 @@ public class NGECore {
 		terrainService.addPlanet(9, "endor", "terrain/endor.trn", true);
 		terrainService.addPlanet(10, "dathomir", "terrain/dathomir.trn", true);
 		terrainService.loadSnapShotObjects();
-
-
 		
 		// Zone services that need to be loaded after the above
 		simulationService = new SimulationService(this);
@@ -226,6 +230,8 @@ public class NGECore {
 		// Static Spawns
 		staticService.spawnStatics();
 		
+		// Travel Points
+		travelService.loadTravelPoints();
 		
 		guildService = new GuildService(this);
 		zoneDispatch.addService(guildService);

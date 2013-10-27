@@ -21,51 +21,29 @@
  ******************************************************************************/
 package protocol.swg;
 
-import java.util.List;
-
-import main.NGECore;
+import java.nio.ByteOrder;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import engine.resources.scene.Planet;
+public class EnterTicketPurchaseModeMessage extends SWGMessage {
 
-public class PlanetTravelPointListRequest extends SWGMessage{
-
-	private NGECore core;
-	private long objectId;
-	private String planet;
-	
 	@Override
-	public void deserialize(IoBuffer buffer) {
-		
-		//buffer.getShort();
-		//buffer.getInt();
-		
-		setObjectId(buffer.getLong());
-		setPlanet(getAsciiString(buffer));
-		
-		//System.out.println("String: " + getAsciiString(buffer));
-		
+	public void deserialize(IoBuffer data) {
+		// TODO Auto-generated method stub
+
 	}
 
 	@Override
 	public IoBuffer serialize() {
-		return null;
+		IoBuffer result = IoBuffer.allocate(100).order(ByteOrder.LITTLE_ENDIAN);
+		
+		result.putShort((short) 3);
+		result.putInt(0x904DAE1A);
+		
+		result.put(getAsciiString("Tatooine"));
+		result.put(getAsciiString("Mos Eisley Starport"));
+		
+		return result.flip();
 	}
 
-	public long getObjectId() {
-		return objectId;
-	}
-
-	public void setObjectId(long objectId) {
-		this.objectId = objectId;
-	}
-
-	public String getPlanet() {
-		return planet;
-	}
-
-	public void setPlanet(String asciiString) {
-		this.planet = asciiString;
-	}
 }
