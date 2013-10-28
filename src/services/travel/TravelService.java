@@ -102,8 +102,8 @@ public class TravelService implements INetworkDispatch {
 	}
 
 
-	public void addTravelPoint(Planet planet, String name, float x, float y, float z) {
-		TravelPoint travelPoint = new TravelPoint(name, x, y, z, 100);
+	public void addTravelPoint(Planet planet, String name, float x, float y) {
+		TravelPoint travelPoint = new TravelPoint(name, x, y, 0, 100);
 		
 		travelPoint.setPlanetName(WordUtils.capitalize(planet.getName()));
 		
