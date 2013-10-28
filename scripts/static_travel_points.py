@@ -21,7 +21,11 @@ def addPoints(core, planet):
     if planet.getName() == 'tatooine':
         tatooinePoints(core, planet)
     if planet.getName() == 'yavin4':
-        yavin4Points(core, planet)                
+        yavin4Points(core, planet)
+    if planet.getName() == 'mustafar':
+        mustafarPoints(core,planet)
+    if planet.getName() == 'kashyyyk_main':
+        kashyyykPoints(core, planet)          
     return
 
 def corelliaPoints(core, planet):
@@ -100,4 +104,15 @@ def yavin4Points(core, planet):
     trvSvc.addTravelPoint(planet, "Imperial Base", 4033, -6234)
     trvSvc.addTravelPoint(planet, "Labor Outpost", -6939, -5706)
     trvSvc.addTravelPoint(planet, "Mining Outpost", -277, 4879)
+    return
+
+def mustafarPoints(core, planet):
+    trvSvc = core.travelService
+    
+    trvSvc.addTravelPoint(planet, "Mensix Mining Facility", 4033, -6234)
+    return
+
+def kashyyykPoints(core, planet):
+    trvSvc = core.travelService
+    trvSvc.addTravelPoint(planet, "Kachiro Starport", 4033, -6234)
     return

@@ -8,9 +8,13 @@ def createRadial(core, owner, target, radials):
 def handleSelection(core, owner, target, option):
 
     if option == 21 and target:
-        tpm = EnterTicketPurchaseModeMessage()
+        tpm = EnterTicketPurchaseModeMessage(owner.getPlanet().getName(), core.mapService.getClosestCityName(owner))
         owner.getClient().getSession().write(tpm.serialize())
-        #print ('Sent EnterTicketPurchaseModeMessage!')
+        #print ('Planet name: ' + owner.getPlanet().getName())
+        #print ('City name: ' + core.mapService.getClosestCityName(owner))
+        
+        
+
     return
     
 def handleSUI(owner, window, eventType, returnList):

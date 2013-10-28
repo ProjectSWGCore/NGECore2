@@ -27,6 +27,14 @@ import org.apache.mina.core.buffer.IoBuffer;
 
 public class EnterTicketPurchaseModeMessage extends SWGMessage {
 
+	public String planetName;
+	public String cityName;
+	
+	public EnterTicketPurchaseModeMessage(String planetName, String cityName) {
+		this.planetName = planetName;
+		this.cityName = cityName;
+	}
+	
 	@Override
 	public void deserialize(IoBuffer data) {
 		// TODO Auto-generated method stub
@@ -40,8 +48,8 @@ public class EnterTicketPurchaseModeMessage extends SWGMessage {
 		result.putShort((short) 3);
 		result.putInt(0x904DAE1A);
 		
-		result.put(getAsciiString("tatooine")); // lowercase
-		result.put(getAsciiString("Mos Eisley")); // city
+		result.put(getAsciiString(planetName));
+		result.put(getAsciiString(cityName + " Starport"));
 		
 		return result.flip();
 	}
