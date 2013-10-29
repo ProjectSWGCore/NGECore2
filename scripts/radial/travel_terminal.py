@@ -12,9 +12,6 @@ def handleSelection(core, owner, target, option):
         owner.getClient().getSession().write(tpm.serialize())
         #print ('Planet name: ' + owner.getPlanet().getName())
         #print ('City name: ' + core.mapService.getClosestCityName(owner))
-        
-        
-
     return
     
 def handleSUI(owner, window, eventType, returnList):

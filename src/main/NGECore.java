@@ -164,6 +164,7 @@ public class NGECore {
 		connectionService = new ConnectionService(this);
 		characterService = new CharacterService(this);
 		mapService = new MapService(this);
+		travelService = new TravelService(this);
 
 		objectService = new ObjectService(this);
 		terrainService = new TerrainService(this);
@@ -179,7 +180,7 @@ public class NGECore {
 		groupService = new GroupService(this);
 		skillModService = new SkillModService(this);
 		equipmentService = new EquipmentService(this);
-		travelService = new TravelService(this);
+		
 		
 		// Ping Server
 		try {

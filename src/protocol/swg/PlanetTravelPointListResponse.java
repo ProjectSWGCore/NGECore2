@@ -58,7 +58,6 @@ public class PlanetTravelPointListResponse extends SWGMessage {
 		result.putInt(0x4D32541F);
 		
 		result.put(getAsciiString(planetString));
-		//result.putInt(planetList.size());
 		
 		result.putInt(travelPoints.size()); // shuttles/sp count
 		for (TravelPoint point : travelPoints) {
@@ -68,21 +67,19 @@ public class PlanetTravelPointListResponse extends SWGMessage {
 		result.putInt(travelPoints.size()); // shuttles/sp count
 		for (TravelPoint point : travelPoints) {
 			
-			result.putFloat(point.getPosX());
-			result.putFloat(point.getPosZ()); // Z and Y may be switched
-			result.putFloat(point.getPosY());
+			result.putFloat(point.getLocation().x);
+			result.putFloat(0);
+			result.putFloat(point.getLocation().z);
 
 		}
 		
 		result.putInt(travelPoints.size()); // shuttes/sp count
 		for (TravelPoint point : travelPoints) {
-			// TODO: Change ticket price based on planet/distance
 			result.putInt(point.getTicketPrice());
 		}
 		
 		result.putInt(travelPoints.size());
 		for (TravelPoint point : travelPoints) {
-			// TODO: Change based on planet/distance
 			result.put((byte) 1); // isReachable
 		}
 		result.flip();
