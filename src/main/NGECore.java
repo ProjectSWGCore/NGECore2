@@ -37,6 +37,7 @@ import services.AttributeService;
 import services.BuffService;
 import services.CharacterService;
 import services.ConnectionService;
+import services.EquipmentService;
 import services.GroupService;
 import services.LoginService;
 import services.PlayerService;
@@ -120,6 +121,7 @@ public class NGECore {
 	public StaticService staticService;
 	public GroupService groupService;
 	public SkillModService skillModService;
+	public EquipmentService equipmentService;
 	
 	// Login Server
 	public NetworkDispatch loginDispatch;
@@ -144,7 +146,6 @@ public class NGECore {
 		if (!(config.loadConfigFile())) {
 			config = DefaultConfig.getConfig();
 		}
-
 		// Database
 		databaseConnection = new DatabaseConnection();
 		databaseConnection.connect(config.getString("DB.URL"), config.getString("DB.NAME"), config.getString("DB.USER"), config.getString("DB.PASS"), "postgresql");
@@ -173,6 +174,7 @@ public class NGECore {
 		buffService = new BuffService(this);
 		groupService = new GroupService(this);
 		skillModService = new SkillModService(this);
+		equipmentService = new EquipmentService(this);
 		
 		// Ping Server
 		try {
