@@ -7,5 +7,5 @@ def setup(core, actor, buff):
 	
 def removeBuff(core, actor, buff):
 	core.skillModService.deductSkillMod(actor, 'expertise_action_all', 870)
-	core.skillModService.deductSkillMod(actor, 'healing_action', 870
+	core.skillModService.deductSkillMod(actor, 'healing_action', 870)
 	return
