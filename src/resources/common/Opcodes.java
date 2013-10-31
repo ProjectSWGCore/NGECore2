@@ -51,5 +51,6 @@ public class Opcodes {
 	public static int GcwRegionsRsp = CRC.StringtoCRC("GcwRegionsRsp");
 	public static int GcwGroupsRsp = CRC.StringtoCRC("GcwGroupsRsp");
 	public static int ExpertiseRequestMessage = 0xC19085D5;
+	public static int PlanetTravelPointListRequest = 0x96405D4D;
 	
 }

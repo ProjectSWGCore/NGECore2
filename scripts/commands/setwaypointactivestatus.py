@@ -5,6 +5,8 @@ def setup():
     
 def run(core, actor, target, commandString):
     playerObject = actor.getSlottedObject('ghost')
+    if target is None:
+        return
     waypointTarget = core.objectService.getObject(target.getObjectID())
     wp = playerObject.getWaypointFromList(target)
     if wp.isActive() == True:

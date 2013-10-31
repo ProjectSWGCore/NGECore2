@@ -23,10 +23,10 @@ package services;
 
 import java.util.Map;
 
+import resources.objects.SWGList;
 import resources.objects.creature.CreatureObject;
-
 import main.NGECore;
-
+import engine.resources.objects.SkillMod;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
@@ -48,6 +48,22 @@ public class SkillModService implements INetworkDispatch {
 		
 		core.scriptService.callScript("scripts/skillMods/", skillMod, "deduct", core, creature, skillMod, value);
 
+	}
+	
+	public boolean hasSkillMod(CreatureObject creature, String skillMod) {
+		
+		SWGList<SkillMod> skillMods = creature.getSkillMods();
+		
+		if (skillMods.isEmpty()) { return false; }
+		
+		for (SkillMod skill : skillMods) {
+			if (skill.getSkillModString() == skillMod) {
+				return true;
+			}
+			else { return false; }
+		}
+		
+		return false;
 	}
 
 	@Override

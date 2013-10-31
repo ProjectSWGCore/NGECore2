@@ -344,7 +344,7 @@ public class ChatService implements INetworkDispatch {
 		
 		friendName = friendName.toLowerCase();
 		
-		SWGObject friendObject = getObjectByFirstName(friendName);
+		//SWGObject friendObject = getObjectByFirstName(friendName);
 		
 		if (actor == null || actor.getContainer() == null)
 			return;

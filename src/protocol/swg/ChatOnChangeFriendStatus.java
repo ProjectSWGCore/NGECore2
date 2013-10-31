@@ -11,7 +11,6 @@ import engine.resources.config.DefaultConfig;
 
 public class ChatOnChangeFriendStatus extends SWGMessage {
 
-	private NGECore core;
 	private String name;
 	private int type;
 	private long playerID;

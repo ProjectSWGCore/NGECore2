@@ -11,8 +11,6 @@ import engine.resources.config.DefaultConfig;
 
 public class ChatFriendsListUpdate extends SWGMessage {
 
-	
-	private NGECore core;
 	private String friendName;
 	private byte onlineFlag;
 
