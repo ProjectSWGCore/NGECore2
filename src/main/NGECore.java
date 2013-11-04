@@ -34,6 +34,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 
 import resources.common.RadialOptions;
+import resources.common.ThreadMonitor;
 import resources.objects.creature.CreatureObject;
 import services.AttributeService;
 import services.BuffService;
@@ -145,6 +146,20 @@ public class NGECore {
 	public void start() {
 		
 		instance = this;
+		
+		final ThreadMonitor deadlockDetector = new ThreadMonitor();
+		Thread deadlockMonitor = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					deadlockDetector.findDeadlock();
+					Thread.sleep(60000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		});
+		deadlockMonitor.start();
 		config = new Config();
 		config.setFilePath("nge.cfg");
 		if (!(config.loadConfigFile())) {
