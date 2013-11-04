@@ -36,10 +36,14 @@ import protocol.swg.PlanetTravelPointListResponse;
 import engine.clients.Client;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
+import engine.resources.scene.quadtree.QuadTree;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import main.NGECore;
 import resources.common.Opcodes;
+import resources.objects.creature.CreatureObject;
+import resources.objects.player.PlayerObject;
+import resources.objects.tangible.TangibleObject;
 import services.map.*;
 
 public class TravelService implements INetworkDispatch {
@@ -83,6 +87,7 @@ public class TravelService implements INetworkDispatch {
 						
 						PlanetTravelPointListResponse response = new PlanetTravelPointListResponse(planetString, travelMap.get(planet), planetList);
 						client.getSession().write(response.serialize());
+						break;
 						//System.out.println("Sent the list for the planet " + planet.getName());
 						
 					}
@@ -102,10 +107,17 @@ public class TravelService implements INetworkDispatch {
 	}
 
 
-	public void addTravelPoint(Planet planet, String name, float x, float y) {
-		TravelPoint travelPoint = new TravelPoint(name, x, y, 0, 100);
-		
+	public void addTravelPoint(Planet planet, String name, float x, float y, float z) {
+		// z should be y for 2d map
+		TravelPoint travelPoint = new TravelPoint(name, x, y, z, 100);
+
 		travelPoint.setPlanetName(WordUtils.capitalize(planet.getName()));
+		
+		//CreatureObject shuttleObj = (CreatureObject) core.objectService.createObject("object/creature/npc/theme_park/player_transport.iff", planet, x, z, y);
+		// 																										x   z    y
+		//core.objectService.createObject("object/creature/npc/theme_park/shared_player_transport.iff", planet, 3622, 5, -4792);
+		//TangibleObject collector = (TangibleObject) core.objectService.createObject("object/tangible/travel/ticket_collector/shared_ticket_collector.iff", planet, 3622, 5, -4792);
+		//core.simulationService.add(collector, collector.getPosition().x, collector.getPosition().y);
 		
 		if (travelMap.containsKey(planet)) {
 			
@@ -123,6 +135,19 @@ public class TravelService implements INetworkDispatch {
 		
 	}
 	
+	public void removeTravelPointByName(Planet planet, String name){
+		if (travelMap.containsKey(planet)) {
+			Vector<TravelPoint> travelVector = travelMap.get(planet);
+
+			for(TravelPoint point : travelVector) {
+				if (point.getName() == name) {
+					travelMap.get(planet).removeElement(point);
+					break;
+				}
+			}
+		}
+	}
+	
 	public void loadTravelPoints() {
 		List<Planet> planetList = core.terrainService.getPlanetList();
 		for (Planet planet : planetList) {
@@ -130,22 +155,68 @@ public class TravelService implements INetworkDispatch {
 		}
 	}
 	
-	public SWGObject createTravelTicket(TravelPoint departurePoint, TravelPoint arrivalPoint, Planet planet) {
+	public void setTravelAttachment(SWGObject obj) {
+		Vector<TravelPoint> planetTravelPoints = travelMap.get(obj.getPlanet());
 		
+		TravelPoint travelPoint = null;
+		
+		for (TravelPoint point : planetTravelPoints) {
+			if (obj.getPosition().x == point.getLocation().x && obj.getPosition().y == point.getLocation().y && obj.getPosition().z == point.getLocation().z) {
+				
+				point = travelPoint;
+				
+				if (travelPoint == null)
+					return;
+				
+				obj.setAttachment("transport", travelPoint);
+				System.out.println("Set the objects travel point.");
+				
+				break;
+			}
+			
+			else {
+				System.out.println("Could not set a travel attachment for obj!");
+				break;
+			}
+		}
+	}
+	
+	public SWGObject createTravelTicket(String departurePlanet, String departureLoc, String arrivalPlanet, String arrivalLoc) {
+		
+		Planet planet = core.terrainService.getPlanetByName(departurePlanet.toLowerCase());
 		SWGObject travelTicket = core.objectService.createObject("object/tangible/travel/travel_ticket/base/shared_base_travel_ticket.iff", planet);
 
-		travelTicket.setStringAttribute("@obj_attr_n:travel_departure_planet", departurePoint.getPlanetName());
-		travelTicket.setStringAttribute("@obj_attr_n:travel_departure_point", departurePoint.getName());
+		travelTicket.setStringAttribute("@obj_attr_n:travel_departure_planet", WordUtils.capitalize(departurePlanet));
+		travelTicket.setStringAttribute("@obj_attr_n:travel_departure_point", departureLoc);
 		
-		travelTicket.setStringAttribute("@obj_attr_n:travel_arrival_planet", arrivalPoint.getPlanetName());
-		travelTicket.setStringAttribute("@obj_attr_n:travel_arrival_point", arrivalPoint.getName());
+		travelTicket.setStringAttribute("@obj_attr_n:travel_arrival_planet", WordUtils.capitalize(arrivalPlanet));
+		travelTicket.setStringAttribute("@obj_attr_n:travel_arrival_point", arrivalLoc);
 		
 		return travelTicket;
 	}
 	
-	public void addTicketToPlayer(SWGObject player, SWGObject travelTicket) {
-		SWGObject playerInventory = player.getSlottedObject("inventory");
-		playerInventory._add(travelTicket);
+	public void purchaseTravelTicket(SWGObject player, String departurePlanet, String departureLoc, String arrivalPlanet, String arrivalLoc) {
+		//PlayerObject playerObj = (PlayerObject) player.getSlottedObject("ghost");
+		CreatureObject creatureObj = (CreatureObject) player;
+		
+		
+		SWGObject travelTicket = createTravelTicket(departurePlanet, departureLoc, arrivalPlanet, arrivalLoc);
+		
+		creatureObj.getSlottedObject("inventory").add(travelTicket);
+		
+		creatureObj.sendSystemMessage("@travel:ticket_purchase_complete", (byte) 0);
+		System.out.println("Created travel ticket: " + departurePlanet + " " + departureLoc + " " + arrivalPlanet + " " + arrivalLoc);
+	}
+	
+	public void handleTicketCollector(SWGObject player, TravelPoint tp) {
+		List<SWGObject> objectList = core.simulationService.get(player.getPlanet(), tp.getLocation().x, tp.getLocation().y, 100);
+		for (SWGObject obj : objectList) {
+			if (obj.getAttachment("transport") == tp) {
+				System.out.println("Shuttle is in range!");
+				break;
+				//obj.setAttachment(arg0, arg1);
+			}
+		}
 	}
 	
 	@Override
