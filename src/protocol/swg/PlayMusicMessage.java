@@ -19,55 +19,44 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package protocol.swg.objectControllerObjects;
+package protocol.swg;
 
 import java.nio.ByteOrder;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import protocol.swg.ObjControllerMessage;
+import resources.common.Opcodes;
 
-public class StartTask extends ObjControllerObject {
+public class PlayMusicMessage extends SWGMessage {
 	
-	private int actionCounter;
-	private long objectId;
-	private int commandCRC;
-	private int cooldownGroupCRC;
-	private float cooldown;
-
-	public StartTask(int actionCounter, long objectId, int commandCRC, int cooldownGroupCRC, float cooldown) {
-		this.actionCounter = actionCounter;
-		this.objectId = objectId;
-		this.commandCRC = commandCRC;
-		this.cooldownGroupCRC = cooldownGroupCRC;
-		this.cooldown = cooldown;
+	private long targetId;
+	private String sndFile;
+	private int repetitions;
+	private boolean flag;
+	
+	public PlayMusicMessage(String sndFile, long targetId, int repetitions, boolean flag) {
+		this.targetId = targetId;
+		this.sndFile = sndFile;
+		this.repetitions = repetitions;
+		this.flag = flag;
 	}
-
+	
+	@Override
+	public IoBuffer serialize() {
+		IoBuffer result = IoBuffer.allocate(21 + sndFile.length()).order(ByteOrder.LITTLE_ENDIAN);
+		result.putShort((short) 5);
+		result.putInt(Opcodes.PlayMusicMessage);
+		result.put(getAsciiString(sndFile));
+		result.putLong(targetId);
+		result.putInt(repetitions);
+		result.put((byte) ((flag) ? 1 : 0));
+		return result.flip();
+	}
+	
 	@Override
 	public void deserialize(IoBuffer data) {
 		// TODO Auto-generated method stub
 		
 	}
-
-	@Override
-	public IoBuffer serialize() {
-		
-		IoBuffer result = IoBuffer.allocate(45).order(ByteOrder.LITTLE_ENDIAN);
-
-		result.putInt(ObjControllerMessage.START_TASK);
-		result.putLong(objectId);
-		result.putInt(0);
-		result.put((byte) 4); // 0 for no cooldown, 0x26 adds execute time (usually 0.25)
-		result.putInt(actionCounter);
-		result.putInt(0);
-		result.putInt(0);
-		result.putInt(commandCRC);
-		result.putInt(cooldownGroupCRC); // second unknown crc
-		result.putInt(0); // unk
-		result.putFloat(cooldown); // cooldown
-		
-		return result.flip();
-		
-	}
-
+	
 }

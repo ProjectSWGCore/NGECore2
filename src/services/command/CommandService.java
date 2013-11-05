@@ -152,6 +152,13 @@ public class CommandService implements INetworkDispatch  {
 	
 	public void processCombatCommand(CreatureObject attacker, SWGObject target, CombatCommand command, int actionCounter, String commandArgs) {
 		
+		// Check if the person has access to this ability.
+		// Abilities (inc expertise ones) are added automatically as they level
+		// by reading the datatables.
+		if (!attacker.hasAbility(command.getCommandName())) {
+			return;
+		}
+		
 		if(FileUtilities.doesFileExist("scripts/commands/combat/" + command.getCommandName() + ".py"))
 			core.scriptService.callScript("scripts/commands/combat/", command.getCommandName(), "setup", core, attacker, target, command);
 		
@@ -213,7 +220,7 @@ public class CommandService implements INetworkDispatch  {
 		
 		if(target != attacker && success && !core.simulationService.checkLineOfSight(attacker, target)) {
 			
-			ShowFlyText los = new ShowFlyText(attacker.getObjectID(), attacker.getObjectID(), "combat_effects", "cant_see", (float) 1.5, (float) 429664.031250);
+			ShowFlyText los = new ShowFlyText(attacker.getObjectID(), attacker.getObjectID(), "combat_effects", "cant_see", (float) 1.5, new RGB(72, 209, 204), 1);
 			ObjControllerMessage objController = new ObjControllerMessage(0x1B, los);
 			attacker.getClient().getSession().write(objController.serialize());
 			success = false;

@@ -43,6 +43,7 @@ import services.PlayerService;
 import services.ScriptService;
 import services.SimulationService;
 import services.SkillModService;
+import services.SkillService;
 import services.StaticService;
 import services.TerrainService;
 import services.chat.ChatService;
@@ -119,6 +120,7 @@ public class NGECore {
 	public BuffService buffService;
 	public StaticService staticService;
 	public GroupService groupService;
+	public SkillService skillService;
 	public SkillModService skillModService;
 	
 	// Login Server
@@ -172,6 +174,7 @@ public class NGECore {
 		playerService = new PlayerService(this);
 		buffService = new BuffService(this);
 		groupService = new GroupService(this);
+		skillService = new SkillService(this);
 		skillModService = new SkillModService(this);
 		
 		// Ping Server
@@ -235,6 +238,8 @@ public class NGECore {
 
 		tradeService = new TradeService(this);
 		zoneDispatch.addService(tradeService);
+		
+		zoneDispatch.addService(skillService);
 		
 		didServerCrash = false;
 		System.out.println("Started Server.");

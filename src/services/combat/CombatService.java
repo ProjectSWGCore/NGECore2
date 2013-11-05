@@ -43,7 +43,6 @@ import protocol.swg.objectControllerObjects.StartTask;
 import resources.common.FileUtilities;
 import resources.objects.Buff;
 import resources.objects.DamageOverTime;
-import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;

@@ -30,13 +30,10 @@ import org.apache.mina.core.buffer.IoBuffer;
 
 import protocol.swg.ChatSystemMessage;
 import protocol.swg.ObjControllerMessage;
-import protocol.swg.PlayClientEffectObjectMessage;
-import protocol.swg.StopClientEffectObjectByLabel;
+import protocol.swg.PlayMusicMessage;
 import protocol.swg.UpdatePVPStatusMessage;
 import protocol.swg.UpdatePostureMessage;
 import protocol.swg.objectControllerObjects.Posture;
-
-
 
 import com.sleepycat.je.Environment;
 import com.sleepycat.je.Transaction;
@@ -104,7 +101,8 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 
 	// CREO6
 	private byte combatFlag = 0;
-	private short level = 90;
+	private short level = 1;
+	private int grantedHealth = 0;
 	private String currentAnimation;
 	private String moodAnimation;
 	private long weaponId = 0;
@@ -117,12 +115,12 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private byte moodId = 0;
 	private int performanceCounter = 0;
 	private int performanceId = 0;
-	private int health = 20000;
-	private int action = 12500;
+	private int health = 1000;
+	private int action = 300;
 	@NotPersistent
 	private int HAMListCounter = 0;
-	private int maxHealth = 20000;
-	private int maxAction = 12500;
+	private int maxHealth = 1000;
+	private int maxAction = 300;
 	@NotPersistent
 	private int maxHAMListCounter = 0;
 
@@ -200,6 +198,18 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 
 	public SWGList<String> getSkills() {
 		return skills;
+	}
+	
+	public boolean hasSkill(String name) {
+		synchronized(objectMutex) {
+			for (String skill : skills) {
+				if (skill.equals(name)) {
+					return true;
+				}
+			}
+			
+			return false;
+		}
 	}
 	
 	public short getSkillsUpdateCounter() {
@@ -394,11 +404,16 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 					return skillMod;
 			}
 		}
+		
 		return null;
 	}
 	
+	public int getSkillModBase(String name) {
+		SkillMod skillMod = getSkillMod(name);
+		return ((skillMod == null) ? 0 : skillMod.getBase());
+	}
+	
 	public void addSkillMod(String name, int base) {
-		
 		if(getSkillMod(name) == null) {
 			SkillMod skillMod = new SkillMod();
 			skillMod.setBase(base);
@@ -579,6 +594,16 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	public SWGList<String> getAbilities() {
 		return abilities;
 	}
+	
+	public boolean hasAbility(String name) {
+		for (String ability : abilities) {
+			if (ability.equals(name)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
 
 	public int getAbilitiesUpdateCounter() {
 		synchronized(objectMutex) {
@@ -656,6 +681,20 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		
 		notifyObservers(levelDelta, true);
 
+	}
+	
+	public int getGrantedHealth() {
+		synchronized(objectMutex) {
+			return grantedHealth;
+		}
+	}
+	
+	public void setGrantedHealth(int grantedHealth) {
+		synchronized(objectMutex) {
+			this.grantedHealth = grantedHealth;
+		}
+		
+		notifyObservers(messageBuilder.buildGrantedHealthDelta(grantedHealth), true);
 	}
 
 	public String getCurrentAnimation() {
@@ -912,6 +951,15 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 		
 	}
+	
+	public void sendSystemMessage(String stfFilename, String stfName, int stat, int displayType) {
+		
+		if(getClient() != null && getClient().getSession() != null) {
+			ChatSystemMessage systemMsg = new ChatSystemMessage(stfFilename, stfName, stat, (byte) displayType);
+			getClient().getSession().write(systemMsg.serialize());
+		}
+		
+	}
 
 	public int getHealth() {
 		synchronized(objectMutex) {
@@ -1099,14 +1147,6 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 	}
 	
-	public void playEffectObject(String effectFile, String commandString) {
-		notifyObservers(new PlayClientEffectObjectMessage(effectFile, getObjectID(), commandString), true);
-	}
-	
-	public void stopEffectObject(String commandString) {
-		notifyObservers(new StopClientEffectObjectByLabel(getObjectID(), commandString), true);
-	}
-
 	public SWGList<DamageOverTime> getDotList() {
 		return dotList;
 	}
@@ -1162,4 +1202,25 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		if(incapTask != null)
 			incapTask.cancel(true);
 	}
+	
+	public void playMusic(String sndFile) {
+		playMusic(sndFile, 0, 1, false);
+	}
+	
+	public void playMusic(String sndFile, long targetId) {
+		playMusic(sndFile, targetId, 1, false);
+	}
+	
+	public void playMusic(String sndFile, int repetitions) {
+		playMusic(sndFile, 0, repetitions, false);
+	}
+	
+	public void playMusic(String sndFile, long targetId, int repetitions) {
+		playMusic(sndFile, targetId, repetitions, false);
+	}
+	
+	public void playMusic(String sndFile, long targetId, int repetitions, boolean flag) {
+		getClient().getSession().write(new PlayMusicMessage(sndFile, targetId, 1, false));
+	}
+	
 }

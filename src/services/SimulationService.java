@@ -548,7 +548,14 @@ public class SimulationService implements INetworkDispatch {
 				}
 			}
 		}
-				
+		
+		if (!object.hasSkill(ghost.getProfessionWheelPosition())) {
+			object.showFlyText("cbt_spam", "skill_up", (float) 2.5, new RGB(154, 205, 50), 0);
+			object.playEffectObject("clienteffect/skill_granted.cef", "");
+			object.playMusic("sound/music_acq_bountyhunter.snd");
+			core.skillService.addSkill(object, ghost.getProfessionWheelPosition());
+		}
+		
 	}
 		
 	public void transferToPlanet(SWGObject object, Planet planet, Point3D newPos, Quaternion newOrientation, SWGObject newParent) {

@@ -36,7 +36,6 @@ import resources.objects.player.PlayerObject;
 
 import main.NGECore;
 
-import engine.resources.common.CRC;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
