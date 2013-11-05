@@ -12,6 +12,7 @@ def CreateStartingCharacter(core, object):
 	testObject.setMaxDamage(1150)
 	testObject.setElementalDamage(50)
 	testObject.setIntAttribute('cat_wpn_damage.weapon_dps', testObject.getDamagePerSecond())
+	testObject.setIntAttribute('cat_skill_mod_bonus.@stat_n:precision_modified', 35)
 	object.addSkillMod('kinetic' , 10000)
 	object.addSkillMod('energy' , 10000)
 	object.addSkillMod('heat' , 6000)

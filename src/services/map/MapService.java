@@ -138,4 +138,8 @@ public class MapService implements INetworkDispatch {
 		
 	}
 	
+	public Vector<MapLocation> getPlanetMapLocations(Planet planet) {
+		return locationMap.get(planet);
+	}
+	
 }

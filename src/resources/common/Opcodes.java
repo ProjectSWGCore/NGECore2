@@ -54,5 +54,6 @@ public class Opcodes {
 	public static int ExpertiseRequestMessage = 0xC19085D5;
 	public static int ClientMfdStatusUpdateMessage = CRC.StringtoCRC("ClientMdfStatusUpdateMessage");
 	public static int PlayMusicMessage = CRC.StringtoCRC("PlayMusicMessage");
+	public static int PlanetTravelPointListRequest = 0x96405D4D;
 	
 }

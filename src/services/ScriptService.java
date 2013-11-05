@@ -95,10 +95,9 @@ public class ScriptService {
 	}
 	
 	public PyObject getMethod(String path, String module, String method) {
-		PythonInterpreter interpreter = new PythonInterpreter();
-		interpreter.cleanup();
-		interpreter.exec("import sys\nsys.path.append('" + path + "')\nfrom " + module + " import " + method);	
-		PyObject func = interpreter.get(method);
+		PythonInterpreter python = new PythonInterpreter();
+		python.execfile(path + module + ".py");
+		PyObject func = python.get(method);
 		return func;
 	}
 
