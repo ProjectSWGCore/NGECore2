@@ -22,10 +22,13 @@
 package services.travel;
 
 import java.nio.ByteOrder;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.commons.lang3.text.WordUtils;
 import org.apache.mina.core.buffer.IoBuffer;
@@ -34,8 +37,10 @@ import org.apache.mina.core.session.IoSession;
 import protocol.swg.PlanetTravelPointListRequest;
 import protocol.swg.PlanetTravelPointListResponse;
 import engine.clients.Client;
+import engine.resources.container.Traverser;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
+import engine.resources.scene.Point3D;
 import engine.resources.scene.quadtree.QuadTree;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
@@ -45,12 +50,16 @@ import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import services.map.*;
+import services.sui.SUIService.ListBoxType;
+import services.sui.SUIWindow.SUICallback;
+import services.sui.SUIWindow.Trigger;
+import services.sui.SUIWindow;
 
 public class TravelService implements INetworkDispatch {
 	
 	private NGECore core;
-	
 	private Map<Planet, Vector<TravelPoint>> travelMap = new ConcurrentHashMap<Planet, Vector<TravelPoint>>();
+	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	
 	public TravelService(NGECore core) {
 		this.core = core;
@@ -88,16 +97,35 @@ public class TravelService implements INetworkDispatch {
 						PlanetTravelPointListResponse response = new PlanetTravelPointListResponse(planetString, travelMap.get(planet), planetList);
 						client.getSession().write(response.serialize());
 						break;
-						//System.out.println("Sent the list for the planet " + planet.getName());
 						
 					}
 				}
-				//PlanetTravelPointListResponse response = new PlanetTravelPointListResponse(request.getPlanet(), travelMap.get(request.getPlanet()));
-				//client.getSession().write(response.serialize());
 			}
-			
 		});
 		
+	}
+	
+	public TravelPoint getNearestTravelPoint() {
+		TravelPoint returnedPoint = null;
+		
+		
+		return returnedPoint;
+	}
+	
+	public TravelPoint getTravelPointByName(String planet, String tpName) {
+		Planet planetObj = core.terrainService.getPlanetByName(planet.toLowerCase());
+		
+		Vector<TravelPoint> tpMap = travelMap.get(planetObj);
+		
+		TravelPoint returnedPoint = null;
+		
+		for (TravelPoint tp : tpMap) {
+			if (tp.getName().equals(tpName)) {
+				returnedPoint = tp;
+			}
+		}
+		if (returnedPoint == null) { System.out.println("Couldn't find a travelpoint w/ name " + tpName); }
+		return returnedPoint;
 	}
 	
 	public void addPlanet(Planet planet) {
@@ -106,18 +134,26 @@ public class TravelService implements INetworkDispatch {
 		core.scriptService.callScript("scripts/", "addPoints", "static_travel_points", core, planet);
 	}
 
-
+	public void addShuttleToPoint(SWGObject obj) {
+		Vector<TravelPoint> travelPoints = travelMap.get(obj.getPlanet());
+		
+		for (TravelPoint tp : travelPoints) {
+			float distancePoint = tp.getLocation().getDistance2D(obj.getPosition());
+			System.out.println("Distance from point " + tp.getName() + ": " + distancePoint);
+			
+			// Travel points must be within 50 meters of shuttles!
+			if (distancePoint <= (float) 50) {
+				tp.setShuttle((ShuttleObject) obj);
+			}
+			
+		}
+	}
+	
 	public void addTravelPoint(Planet planet, String name, float x, float y, float z) {
 		// z should be y for 2d map
 		TravelPoint travelPoint = new TravelPoint(name, x, y, z, 100);
 
 		travelPoint.setPlanetName(WordUtils.capitalize(planet.getName()));
-		
-		//CreatureObject shuttleObj = (CreatureObject) core.objectService.createObject("object/creature/npc/theme_park/player_transport.iff", planet, x, z, y);
-		// 																										x   z    y
-		//core.objectService.createObject("object/creature/npc/theme_park/shared_player_transport.iff", planet, 3622, 5, -4792);
-		//TangibleObject collector = (TangibleObject) core.objectService.createObject("object/tangible/travel/ticket_collector/shared_ticket_collector.iff", planet, 3622, 5, -4792);
-		//core.simulationService.add(collector, collector.getPosition().x, collector.getPosition().y);
 		
 		if (travelMap.containsKey(planet)) {
 			
@@ -131,8 +167,6 @@ public class TravelService implements INetworkDispatch {
 			System.out.println("Added planet " + planet.getName() + " to TravelMap.");
 			System.out.println("Added travel point " + travelPoint.getName());
 		}
-		
-		
 	}
 	
 	public void removeTravelPointByName(Planet planet, String name){
@@ -155,32 +189,6 @@ public class TravelService implements INetworkDispatch {
 		}
 	}
 	
-	public void setTravelAttachment(SWGObject obj) {
-		Vector<TravelPoint> planetTravelPoints = travelMap.get(obj.getPlanet());
-		
-		TravelPoint travelPoint = null;
-		
-		for (TravelPoint point : planetTravelPoints) {
-			if (obj.getPosition().x == point.getLocation().x && obj.getPosition().y == point.getLocation().y && obj.getPosition().z == point.getLocation().z) {
-				
-				point = travelPoint;
-				
-				if (travelPoint == null)
-					return;
-				
-				obj.setAttachment("transport", travelPoint);
-				System.out.println("Set the objects travel point.");
-				
-				break;
-			}
-			
-			else {
-				System.out.println("Could not set a travel attachment for obj!");
-				break;
-			}
-		}
-	}
-	
 	public SWGObject createTravelTicket(String departurePlanet, String departureLoc, String arrivalPlanet, String arrivalLoc) {
 		
 		Planet planet = core.terrainService.getPlanetByName(departurePlanet.toLowerCase());
@@ -192,31 +200,110 @@ public class TravelService implements INetworkDispatch {
 		travelTicket.setStringAttribute("@obj_attr_n:travel_arrival_planet", WordUtils.capitalize(arrivalPlanet));
 		travelTicket.setStringAttribute("@obj_attr_n:travel_arrival_point", arrivalLoc);
 		
+		travelTicket.setAttachment("objType", "ticket");
+		System.out.println("Object type: " + travelTicket.getAttachment("objType"));
+		
 		return travelTicket;
 	}
 	
 	public void purchaseTravelTicket(SWGObject player, String departurePlanet, String departureLoc, String arrivalPlanet, String arrivalLoc) {
-		//PlayerObject playerObj = (PlayerObject) player.getSlottedObject("ghost");
 		CreatureObject creatureObj = (CreatureObject) player;
-		
 		
 		SWGObject travelTicket = createTravelTicket(departurePlanet, departureLoc, arrivalPlanet, arrivalLoc);
 		
 		creatureObj.getSlottedObject("inventory").add(travelTicket);
+		travelTicket.isSubChildOf(player);
 		
 		creatureObj.sendSystemMessage("@travel:ticket_purchase_complete", (byte) 0);
 		System.out.println("Created travel ticket: " + departurePlanet + " " + departureLoc + " " + arrivalPlanet + " " + arrivalLoc);
 	}
 	
-	public void handleTicketCollector(SWGObject player, TravelPoint tp) {
-		List<SWGObject> objectList = core.simulationService.get(player.getPlanet(), tp.getLocation().x, tp.getLocation().y, 100);
-		for (SWGObject obj : objectList) {
-			if (obj.getAttachment("transport") == tp) {
-				System.out.println("Shuttle is in range!");
-				break;
-				//obj.setAttachment(arg0, arg1);
+	// This returns all ticket objects in a players inventory
+	public Vector<SWGObject> getTicketList(SWGObject player) {
+
+		final Vector<SWGObject> ticketList = new Vector<SWGObject>();
+
+		TangibleObject playerInventory = (TangibleObject) player.getSlottedObject("inventory");
+
+		playerInventory.viewChildren(player, false, false, new Traverser() {
+			//                              ^-topDown-^-recursive
+			// topDown - If true, objects that are at the top of the tree are viewed first.
+			// 	the "viewer" needs to be whatever object wants to know this information (player)
+			@Override
+			public void process(SWGObject obj) {
+				if (obj.getAttachment("objType") != null) {
+					String objType = (String) obj.getAttachment("objType");
+					String ticket = "ticket";
+					if (objType.equals(ticket)) {
+						ticketList.add(obj);
+					}
+				}
 			}
+		});
+		return ticketList;
+	}
+	
+	// TravelPoint = the travelpoint player is going to travel to!
+	public void doTransport(SWGObject actor, TravelPoint tp) {
+		
+		if (tp.getPlanetName().toLowerCase().equals(actor.getPlanet().name)) { 
+			core.simulationService.teleport(actor, tp.getSpawnLocation().getPosition(), tp.getSpawnLocation().getOrientation(), 0); 
+		} 
+		
+		else { core.simulationService.transferToPlanet(actor, core.terrainService.getPlanetByName(tp.getPlanetName()), tp.getSpawnLocation().getPosition(), tp.getSpawnLocation().getOrientation(), actor); }
+	}
+
+	
+	public void sendTicketWindow(final CreatureObject creature) {
+		
+		if (creature == null)
+			return;
+		
+		Map<Long, String> ticketData = new HashMap<Long, String>();
+		Vector<SWGObject> invTickets = getTicketList(creature);
+		
+		for (SWGObject ticket : invTickets) {
+			ticketData.put(ticket.getObjectId(), ticket.getStringAttribute("@obj_attr_n:travel_arrival_planet") + " -- " 
+					+ ticket.getStringAttribute("@obj_attr_n:travel_arrival_point"));
 		}
+		
+		final SUIWindow window = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "Select Destination", "Select Destination", ticketData, creature, null, 0);
+		Vector<String> returnList = new Vector<String>();
+		returnList.add("List.lstList:SelectedRow");
+		
+		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, new SUICallback() {
+
+			@Override
+			public void process(SWGObject owner, int eventType, Vector<String> returnList) {
+				// return list = int number of selected row
+				int index = Integer.parseInt(returnList.get(0));
+				
+				SWGObject selectedTicket = core.objectService.getObject(window.getObjectIdByIndex(index));
+				System.out.println("Selected ticket obj: " + window.getObjectIdByIndex(index));
+				
+				TravelPoint arrivalPoint = getTravelPointByName(selectedTicket.getStringAttribute("@obj_attr_n:travel_arrival_planet").toLowerCase(), 
+						selectedTicket.getStringAttribute("@obj_attr_n:travel_arrival_point"));
+				
+				TravelPoint departurePoint = getTravelPointByName(creature.getPlanet().name, selectedTicket.getStringAttribute("@obj_attr_n:travel_departure_point"));
+				
+				if (departurePoint.getShuttle() == null) {
+					System.out.println("TravelPoint has no associated shuttle!");
+					return;
+				}
+				
+				if (departurePoint.getShuttle().isInPort()) {
+					selectedTicket.getContainer().remove(selectedTicket);
+					core.objectService.destroyObject(selectedTicket);
+					doTransport(creature, arrivalPoint);
+				}
+				else {
+					creature.sendSystemMessage("The next shuttle arrives in " + departurePoint.getShuttle().getNextShuttleTime() + " seconds.", (byte) 0);
+				}
+			}
+		});
+		
+		core.suiService.openSUIWindow(window);
+		
 	}
 	
 	@Override

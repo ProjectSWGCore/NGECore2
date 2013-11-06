@@ -139,6 +139,7 @@ public class SimulationService implements INetworkDispatch {
 		core.commandService.registerCommand("endduel");
 		core.commandService.registerCommand("duel");
 		core.commandService.registerCommand("purchaseticket");
+		core.commandService.registerCommand("boardshuttle");
 
 	}
 	

@@ -54,7 +54,7 @@ public class PlanetTravelPointListResponse extends SWGMessage {
 	public IoBuffer serialize() {
 		IoBuffer result = IoBuffer.allocate(700).order(ByteOrder.LITTLE_ENDIAN);
 		
-		result.putShort((short) 9);
+		result.putShort((short) 6);
 		result.putInt(0x4D32541F);
 		
 		result.put(getAsciiString(planetString));

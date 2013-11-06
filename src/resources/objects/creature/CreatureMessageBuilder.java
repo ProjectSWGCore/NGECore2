@@ -95,6 +95,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer.put(getAsciiString(creature.getStfFilename()));
 		buffer.putInt(0);	
 		buffer.put(getAsciiString(creature.getStfName()));
+		if (creature.getCustomName() == null) { creature.setCustomName(""); }//Not all CreatureObjects have CustomName (Shuttles)
 		buffer.put(getUnicodeString(creature.getCustomName()));
 		buffer.putInt(0x000F4240); // unk
 		String factionCRC = creature.getFaction();
@@ -109,7 +110,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		
 		byte[] customizationData = creature.getCustomization();
 		
-		if(customizationData.length <= 0)
+		if(customizationData == null || customizationData.length <= 0) // Shuttles have no customization data
 			buffer.putShort((short) 0);
 		else {
 			buffer.putShort((short) customizationData.length);

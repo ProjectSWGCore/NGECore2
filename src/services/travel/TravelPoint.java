@@ -21,17 +21,17 @@
  ******************************************************************************/
 package services.travel;
 
+import resources.common.SpawnPoint;
 import engine.resources.scene.Point3D;
 
 public class TravelPoint {
 	
 	private String planetName;
 	private String name;
-	//private float posX;
-	//private float posY;
-	//private float posZ;
 	private Point3D location;
+	private SpawnPoint spawnLocation;
 	private int ticketPrice;
+	private ShuttleObject shuttleObject;
 	
 	public TravelPoint() {
 	}
@@ -39,6 +39,8 @@ public class TravelPoint {
 	public TravelPoint(String name, float x, float y, float z, int price) {
 		this.name = name;
 		this.location = new Point3D(x, y, z);
+		this.spawnLocation = new SpawnPoint(this.location, 0, 1);
+		this.shuttleObject = new ShuttleObject();
 	}
 	
 	public String getName() {
@@ -71,5 +73,21 @@ public class TravelPoint {
 
 	public void setPlanetName(String planetName) {
 		this.planetName = planetName;
+	}
+	
+	public SpawnPoint getSpawnLocation() {
+		return this.spawnLocation;
+	}
+	
+	public void setSpawnLocation(SpawnPoint point) {
+		this.spawnLocation = point;
+	}
+	
+	public ShuttleObject getShuttle() {
+		return this.shuttleObject;
+	}
+	
+	public void setShuttle(ShuttleObject shuttleObj) {
+		this.shuttleObject = shuttleObj;
 	}
 }

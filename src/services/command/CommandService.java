@@ -250,6 +250,18 @@ public class CommandService implements INetworkDispatch  {
 		
 	}
 
+	public void callCommand(CreatureObject actor, String commandName, SWGObject target, String commandArgs) {
+		if (actor == null)
+			return;
+		
+		BaseSWGCommand command = getCommandByName(commandName);
+		
+		if (command == null)
+			return;
+		
+		core.scriptService.callScript("scripts/commands/", command.getCommandName(), "run", core, actor, target, commandArgs);
+		System.out.println("Script called.");
+	}
 	
 	@Override
 	public void shutdown() {

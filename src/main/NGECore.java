@@ -250,11 +250,11 @@ public class NGECore {
 		simulationService = new SimulationService(this);
 		zoneDispatch.addService(simulationService);
 		
-		// Static Spawns
-		staticService.spawnStatics();
-		
 		// Travel Points
 		travelService.loadTravelPoints();
+		
+		// Static Spawns
+		staticService.spawnStatics();
 		
 		guildService = new GuildService(this);
 		zoneDispatch.addService(guildService);
