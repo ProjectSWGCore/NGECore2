@@ -27,10 +27,6 @@ public class CombatCommands {
 	
 	public static void registerCommands(NGECore core) {
 		
-		// commands that arent associated with anythin
-		
-		core.commandService.registerCommand("setXp");
-		
 		// Auto Attacks
 		
 		core.commandService.registerCombatCommand("rangedshotrifle");
