@@ -40,6 +40,11 @@ public class SpawnPoint {
 		this.setOrientation(orientation);		
 	}
 	
+	public SpawnPoint(Point3D position, float oY, float oW) {
+		this.setPosition(position);
+		this.setOrientation(new Quaternion(oW, 0, oY, 0));
+	}
+	
 	public SpawnPoint(float x, float y, float z, float oY, float oW) {
 		this.setPosition(new Point3D(x, y, z));
 		this.setOrientation(new Quaternion(oW, 0, oY, 0));		

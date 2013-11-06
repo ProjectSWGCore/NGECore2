@@ -47,6 +47,7 @@ import services.PlayerService;
 import services.ScriptService;
 import services.SimulationService;
 import services.SkillModService;
+import services.SkillService;
 import services.StaticService;
 import services.TerrainService;
 import services.chat.ChatService;
@@ -124,6 +125,7 @@ public class NGECore {
 	public BuffService buffService;
 	public StaticService staticService;
 	public GroupService groupService;
+	public SkillService skillService;
 	public SkillModService skillModService;
 	public EquipmentService equipmentService;
 	public TravelService travelService;
@@ -193,6 +195,7 @@ public class NGECore {
 		playerService = new PlayerService(this);
 		buffService = new BuffService(this);
 		groupService = new GroupService(this);
+		skillService = new SkillService(this);
 		skillModService = new SkillModService(this);
 		equipmentService = new EquipmentService(this);
 		
@@ -247,11 +250,11 @@ public class NGECore {
 		simulationService = new SimulationService(this);
 		zoneDispatch.addService(simulationService);
 		
-		// Static Spawns
-		staticService.spawnStatics();
-		
 		// Travel Points
 		travelService.loadTravelPoints();
+		
+		// Static Spawns
+		staticService.spawnStatics();
 		
 		guildService = new GuildService(this);
 		zoneDispatch.addService(guildService);
@@ -261,6 +264,8 @@ public class NGECore {
 
 		tradeService = new TradeService(this);
 		zoneDispatch.addService(tradeService);
+		
+		zoneDispatch.addService(skillService);
 		
 		didServerCrash = false;
 		System.out.println("Started Server.");

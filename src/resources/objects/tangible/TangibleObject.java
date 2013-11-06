@@ -23,8 +23,15 @@ package resources.objects.tangible;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.Vector;
 
+import protocol.swg.ObjControllerMessage;
+import protocol.swg.PlayClientEffectObjectMessage;
+import protocol.swg.StopClientEffectObjectByLabel;
+import protocol.swg.objectControllerObjects.ShowFlyText;
+
+import resources.common.RGB;
 import resources.objects.creature.CreatureObject;
 
 
@@ -221,8 +228,39 @@ public class TangibleObject extends SWGObject {
 
 		return getPvPBitmask() == 1 || getPvPBitmask() == 2;
 	}
-
-
+	
+	public void showFlyText(String stfFile, String stfString, float scale, RGB color, int displayType) {
+		Set<Client> observers = getObservers();
+		
+		if (getClient() != null) {
+			getClient().getSession().write((new ObjControllerMessage(0x0000000B, new ShowFlyText(getObjectID(), getObjectID(), stfFile, stfString, scale, color, displayType))).serialize());
+		}
+		
+		for (Client client : observers) {
+			client.getSession().write((new ObjControllerMessage(0x0000000B, new ShowFlyText(client.getParent().getObjectID(), getObjectID(), stfFile, stfString, scale, color, displayType))).serialize());
+		}
+	}
+	
+	public void showFlyText(String stfFile, String stfString, int xp, float scale, RGB color, int displayType) {
+		Set<Client> observers = getObservers();
+		
+		if (getClient() != null) {
+			getClient().getSession().write((new ObjControllerMessage(0x0000000B, new ShowFlyText(getObjectID(), getObjectID(), 56, 1, 1, -1, stfFile, stfString, xp, scale, color, displayType))).serialize());
+		}
+		
+		for (Client client : observers) {
+			client.getSession().write((new ObjControllerMessage(0x0000000B, new ShowFlyText(client.getParent().getObjectID(), getObjectID(), 56, 1, 1, -1, stfFile, stfString, xp, scale, color, displayType))).serialize());
+		}
+	}
+	
+	public void playEffectObject(String effectFile, String commandString) {
+		notifyObservers(new PlayClientEffectObjectMessage(effectFile, getObjectID(), commandString), true);
+	}
+	
+	public void stopEffectObject(String commandString) {
+		notifyObservers(new StopClientEffectObjectByLabel(getObjectID(), commandString), true);
+	}
+	
 	@Override
 	public void sendBaselines(Client destination) {
 

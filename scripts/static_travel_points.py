@@ -72,11 +72,11 @@ def nabooPoints(core, planet):
         
 def roriPoints(core, planet):
     trvSvc = core.travelService
-   
+
     trvSvc.addTravelPoint(planet, "Narmle Starport", -5472, 80, 2161)
     trvSvc.addTravelPoint(planet, "Rebel Outpost", 3672, 96, -6421)
     return                
-        
+
 def talusPoints(core, planet):
     trvSvc = core.travelService
    

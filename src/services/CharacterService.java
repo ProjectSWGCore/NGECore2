@@ -45,6 +45,7 @@ import engine.resources.service.INetworkRemoteEvent;
 import resources.common.*;
 
 import protocol.swg.ClientCreateCharacter;
+import protocol.swg.ClientMfdStatusUpdateMessage;
 import protocol.swg.ClientRandomNameRequest;
 import protocol.swg.ClientRandomNameResponse;
 import protocol.swg.ClientVerifyAndLockNameRequest;
@@ -218,6 +219,18 @@ public class CharacterService implements INetworkDispatch {
 				object.setBankCredits(1000);
 				//object.setPosition(new Point3D(0, 0, 0));
 				object.setOrientation(new Quaternion(1, 0, 0, 0));
+				float luck = (((((float) (core.scriptService.getMethod("scripts/roadmap/", clientCreateCharacter.getProfession(), "getLuck").__call__().asInt()) + (core.scriptService.getMethod("scripts/roadmap/", object.getStfName(), "getLuck").__call__().asInt())) / ((float) 90)) * ((float) object.getLevel())) - ((float) object.getSkillModBase("luck")));
+				float precision = (((((float) (core.scriptService.getMethod("scripts/roadmap/", clientCreateCharacter.getProfession(), "getPrecision").__call__().asInt()) + (core.scriptService.getMethod("scripts/roadmap/", object.getStfName(), "getPrecision").__call__().asInt())) / ((float) 90)) * ((float) object.getLevel())) - ((float) object.getSkillModBase("precision")));
+				float strength = (((((float) (core.scriptService.getMethod("scripts/roadmap/", clientCreateCharacter.getProfession(), "getStrength").__call__().asInt()) + (core.scriptService.getMethod("scripts/roadmap/", object.getStfName(), "getStrength").__call__().asInt())) / ((float) 90)) * ((float) object.getLevel())) - ((float) object.getSkillModBase("strength")));
+				float constitution = (((((float) (core.scriptService.getMethod("scripts/roadmap/", clientCreateCharacter.getProfession(), "getConstitution").__call__().asInt()) + (core.scriptService.getMethod("scripts/roadmap/", object.getStfName(), "getConstitution").__call__().asInt())) / ((float) 90)) * ((float) object.getLevel())) - ((float) object.getSkillModBase("constitution")));
+				float stamina = (((((float) (core.scriptService.getMethod("scripts/roadmap/", clientCreateCharacter.getProfession(), "getStamina").__call__().asInt()) + (core.scriptService.getMethod("scripts/roadmap/", object.getStfName(), "getStamina").__call__().asInt())) / ((float) 90)) * ((float) object.getLevel())) - ((float) object.getSkillModBase("stamina")));
+				float agility = (((((float) (core.scriptService.getMethod("scripts/roadmap/", clientCreateCharacter.getProfession(), "getAgility").__call__().asInt()) + (core.scriptService.getMethod("scripts/roadmap/", object.getStfName(), "getAgility").__call__().asInt())) / ((float) 90)) * ((float) object.getLevel())) - ((float) object.getSkillModBase("agility")));
+				if (luck >= 1) core.skillModService.addSkillMod(object, "luck", (int) luck);
+				if (precision >= 1) core.skillModService.addSkillMod(object, "precision", (int) precision);
+				if (strength >= 1) core.skillModService.addSkillMod(object, "strength", (int) strength);
+				if (constitution >= 1) core.skillModService.addSkillMod(object, "constitution", (int) constitution);
+				if (stamina >= 1) core.skillModService.addSkillMod(object, "stamina", (int) stamina);
+				if (agility >= 1) core.skillModService.addSkillMod(object, "agility", (int) agility);
 				object.createTransaction(core.getCreatureODB().getEnvironment());
 				
 				PlayerObject player = (PlayerObject) core.objectService.createObject("object/player/shared_player.iff", object.getPlanet());
@@ -266,7 +279,7 @@ public class CharacterService implements INetworkDispatch {
 
 				core.scriptService.callScript("scripts/", "starterclothing", "CreateStarterClothing", core, object, clientCreateCharacter.getStarterProfession(), clientCreateCharacter.getRaceTemplate());
 				core.scriptService.callScript("scripts/", "CreateStartingCharacter", "demo", core, object);
-
+				
 				core.getCreatureODB().put(object, Long.class, CreatureObject.class, object.getTransaction());
 				// might not need to commit transaction but better safe than sorry
 				object.getTransaction().commitSync();
@@ -288,7 +301,7 @@ public class CharacterService implements INetworkDispatch {
 				session.write(core.loginService.getLoginClusterStatus().serialize());
 				
 				session.write(success.serialize());	
-								
+				session.write((new ClientMfdStatusUpdateMessage((float) 2, "/GroundHUD.MFDStatus.vsp.role.targetLevel")).serialize());		
 			}
 			
 		});

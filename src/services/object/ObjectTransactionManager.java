@@ -23,7 +23,6 @@ package services.object;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 
 import com.sleepycat.je.Transaction;
 

@@ -23,9 +23,6 @@ package resources.objects.group;
 
 import java.util.Vector;
 
-import org.apache.mina.core.buffer.IoBuffer;
-
-import resources.objects.SWGList;
 import engine.clients.Client;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;

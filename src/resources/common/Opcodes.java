@@ -29,6 +29,7 @@ public class Opcodes {
 	public static int ChatInstantMessageToCharacter = 0x84BB21F7;
 	public static int ChatPersistentMessageToServer = 0x25A29FA6;
 	public static int ChatRequestPersistentMessage = 0x07E3559F;
+	public static int ChatSystemMessage = CRC.StringtoCRC("ChatSystemMessage");
 	public static int ClientOpenContainerMessage = 0x2D2D6EE1;
 	public static int CmdSceneReady = 0x43FD1C22;
 	public static int ConnectPlayerMessage = 0x2E365218;
@@ -51,6 +52,8 @@ public class Opcodes {
 	public static int GcwRegionsRsp = CRC.StringtoCRC("GcwRegionsRsp");
 	public static int GcwGroupsRsp = CRC.StringtoCRC("GcwGroupsRsp");
 	public static int ExpertiseRequestMessage = 0xC19085D5;
+	public static int ClientMfdStatusUpdateMessage = CRC.StringtoCRC("ClientMdfStatusUpdateMessage");
+	public static int PlayMusicMessage = CRC.StringtoCRC("PlayMusicMessage");
 	public static int PlanetTravelPointListRequest = 0x96405D4D;
 	
 }

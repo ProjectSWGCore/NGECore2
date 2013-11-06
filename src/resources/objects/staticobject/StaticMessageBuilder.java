@@ -26,7 +26,6 @@ import java.nio.ByteOrder;
 import org.apache.mina.core.buffer.IoBuffer;
 
 import resources.objects.ObjectMessageBuilder;
-import resources.objects.tangible.TangibleObject;
 
 public class StaticMessageBuilder extends ObjectMessageBuilder {
 	

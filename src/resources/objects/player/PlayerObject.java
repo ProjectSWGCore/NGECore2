@@ -201,7 +201,39 @@ public class PlayerObject extends SWGObject {
 	public Map<String, Integer> getXpList() {
 		return xpList;
 	}
-
+	
+	public int getXp(String type) {
+		synchronized(objectMutex) {
+			return ((!xpList.containsKey(type)) ? 0 : xpList.get(type));
+		}
+	}
+	
+	// Temporary
+	public void setXp(String type, int amount) {
+		boolean xpExists;
+		
+		synchronized(objectMutex) {
+			xpExists = xpList.containsKey(type);
+			xpList.put(type, amount);
+		}
+		
+		if (getContainer() != null && getContainer().getClient() != null && getContainer().getClient().getSession() != null) {
+			getContainer().getClient().getSession().write(messageBuilder.buildXPListDelta(type, amount, xpExists));
+		}
+	}
+	
+	public int getXpListUpdateCounter() {
+		synchronized(objectMutex) {
+			return xpListUpdateCounter;
+		}
+	}
+	
+	public void setXpListUpdateCounter(int xpListUpdateCounter) {
+		synchronized(objectMutex) {
+			this.xpListUpdateCounter = xpListUpdateCounter;
+		}
+	}
+	
 	public List<WaypointObject> getWaypoints() {
 		return waypoints;
 	}
