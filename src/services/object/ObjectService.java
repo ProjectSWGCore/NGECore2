@@ -77,6 +77,7 @@ import resources.objects.staticobject.StaticObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.waypoint.WaypointObject;
 import resources.objects.weapon.WeaponObject;
+import services.travel.ShuttleObject;
 
 @SuppressWarnings("unused")
 
@@ -142,7 +143,11 @@ public class ObjectService implements INetworkDispatch {
 		if(objectID == 0)
 			objectID = generateObjectID();
 		
-		if(Template.startsWith("object/creature")) {
+		if(Template.equals(ShuttleObject.ShuttleType.CIVILIAN.toString()) || Template.equals(ShuttleObject.ShuttleType.STARSHIP.toString()) || 
+				Template.equals(ShuttleObject.ShuttleType.THEED.toString())) {
+			object = new ShuttleObject(objectID, planet, position, orientation, Template);
+			
+		} else if(Template.startsWith("object/creature")) {
 			
 			object = new CreatureObject(objectID, planet, position, orientation, Template);
 
@@ -182,7 +187,7 @@ public class ObjectService implements INetworkDispatch {
 			
 			object = new WaypointObject(objectID, planet, position);
 			
-		} else {
+		}  else {
 			
 			return null;
 			

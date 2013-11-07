@@ -31,18 +31,23 @@ import java.util.concurrent.ConcurrentHashMap;
 
 
 
+
+
 import resources.common.RadialOptions;
+import resources.common.ThreadMonitor;
 import resources.objects.creature.CreatureObject;
 import services.AttributeService;
 import services.BuffService;
 import services.CharacterService;
 import services.ConnectionService;
+import services.EquipmentService;
 import services.GroupService;
 import services.LoginService;
 import services.PlayerService;
 import services.ScriptService;
 import services.SimulationService;
 import services.SkillModService;
+import services.SkillService;
 import services.StaticService;
 import services.TerrainService;
 import services.chat.ChatService;
@@ -56,6 +61,7 @@ import services.object.ObjectService;
 import services.object.UpdateService;
 import services.sui.SUIService;
 import services.trade.TradeService;
+import services.travel.TravelService;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.CrcStringTableVisitor;
 import engine.clientdata.visitors.DatatableVisitor;
@@ -119,7 +125,10 @@ public class NGECore {
 	public BuffService buffService;
 	public StaticService staticService;
 	public GroupService groupService;
+	public SkillService skillService;
 	public SkillModService skillModService;
+	public EquipmentService equipmentService;
+	public TravelService travelService;
 	
 	// Login Server
 	public NetworkDispatch loginDispatch;
@@ -139,12 +148,25 @@ public class NGECore {
 	public void start() {
 		
 		instance = this;
+		
+		final ThreadMonitor deadlockDetector = new ThreadMonitor();
+		Thread deadlockMonitor = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					deadlockDetector.findDeadlock();
+					Thread.sleep(60000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		});
+		deadlockMonitor.start();
 		config = new Config();
 		config.setFilePath("nge.cfg");
 		if (!(config.loadConfigFile())) {
 			config = DefaultConfig.getConfig();
 		}
-
 		// Database
 		databaseConnection = new DatabaseConnection();
 		databaseConnection.connect(config.getString("DB.URL"), config.getString("DB.NAME"), config.getString("DB.USER"), config.getString("DB.PASS"), "postgresql");
@@ -159,6 +181,7 @@ public class NGECore {
 		connectionService = new ConnectionService(this);
 		characterService = new CharacterService(this);
 		mapService = new MapService(this);
+		travelService = new TravelService(this);
 
 		objectService = new ObjectService(this);
 		terrainService = new TerrainService(this);
@@ -172,7 +195,10 @@ public class NGECore {
 		playerService = new PlayerService(this);
 		buffService = new BuffService(this);
 		groupService = new GroupService(this);
+		skillService = new SkillService(this);
 		skillModService = new SkillModService(this);
+		equipmentService = new EquipmentService(this);
+		
 		
 		// Ping Server
 		try {
@@ -198,6 +224,7 @@ public class NGECore {
 		zoneDispatch.addService(chatService);
 		zoneDispatch.addService(suiService);
 		zoneDispatch.addService(mapService);
+		zoneDispatch.addService(travelService);
 		zoneDispatch.addService(playerService);
 
 		zoneServer = new MINAServer(zoneDispatch, config.getInt("ZONE.PORT"));
@@ -215,17 +242,19 @@ public class NGECore {
 		terrainService.addPlanet(8, "yavin4", "terrain/yavin4.trn", true);
 		terrainService.addPlanet(9, "endor", "terrain/endor.trn", true);
 		terrainService.addPlanet(10, "dathomir", "terrain/dathomir.trn", true);
+		terrainService.addPlanet(11, "mustafar", "terrain/mustafar.trn", true);
+		terrainService.addPlanet(12, "kashyyyk_main", "terrain/kashyyyk_main.trn", true);
 		terrainService.loadSnapShotObjects();
-
-
 		
 		// Zone services that need to be loaded after the above
 		simulationService = new SimulationService(this);
 		zoneDispatch.addService(simulationService);
 		
+		// Travel Points
+		travelService.loadTravelPoints();
+		
 		// Static Spawns
 		staticService.spawnStatics();
-		
 		
 		guildService = new GuildService(this);
 		zoneDispatch.addService(guildService);
@@ -235,6 +264,8 @@ public class NGECore {
 
 		tradeService = new TradeService(this);
 		zoneDispatch.addService(tradeService);
+		
+		zoneDispatch.addService(skillService);
 		
 		didServerCrash = false;
 		System.out.println("Started Server.");

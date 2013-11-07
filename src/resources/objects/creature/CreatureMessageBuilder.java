@@ -57,7 +57,13 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer.putInt(creature.getBankCredits());
 		buffer.putInt(creature.getCashCredits());
 
-		buffer.putInt(0);	// Base HAM List most likely unused in NGE
+		buffer.putInt(6);	// Base HAM List - so leveling knows the base HAM, before equipment etc
+		buffer.putInt(6);
+		buffer.putInt(creature.getHealth());
+		buffer.putInt(0);
+		buffer.putInt(creature.getAction());
+		buffer.putInt(0);
+		buffer.putInt(0x2C01);
 		buffer.putInt(0);
 		
 		if(creature.getSkills().isEmpty()) {
@@ -89,6 +95,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer.put(getAsciiString(creature.getStfFilename()));
 		buffer.putInt(0);	
 		buffer.put(getAsciiString(creature.getStfName()));
+		if (creature.getCustomName() == null) { creature.setCustomName(""); }//Not all CreatureObjects have CustomName (Shuttles)
 		buffer.put(getUnicodeString(creature.getCustomName()));
 		buffer.putInt(0x000F4240); // unk
 		String factionCRC = creature.getFaction();
@@ -103,7 +110,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		
 		byte[] customizationData = creature.getCustomization();
 		
-		if(customizationData.length <= 0)
+		if(customizationData == null || customizationData.length <= 0) // Shuttles have no customization data
 			buffer.putShort((short) 0);
 		else {
 			buffer.putShort((short) customizationData.length);
@@ -225,7 +232,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		
 		buffer.putShort(creature.getLevel());
 		//buffer.putShort((short) 90);
-		buffer.putInt(0xD007); // unk
+		buffer.putInt(creature.getGrantedHealth()); // From player_level.iff.  Ranges from 0-2000 as you level, consistent with that table.
 		
 		if(creature.getCurrentAnimation() == null || creature.getCurrentAnimation().length() == 0) 
 			buffer.putShort((short) 0);
@@ -568,6 +575,15 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		
 		return buffer;
 
+	}
+	
+	public IoBuffer buildGrantedHealthDelta(int grantedHealth) {
+		IoBuffer buffer = bufferPool.allocate(4, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putInt(grantedHealth);
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 9, buffer, size + 4);
+		return buffer;
 	}
 	
 	public IoBuffer buildLevelDelta(short level) {

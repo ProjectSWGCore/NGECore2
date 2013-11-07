@@ -38,7 +38,7 @@ public class ScriptService {
 		this.core = core;
 	}
 	
-	public void callScript(String path, String module, String method) {
+	public PyObject callScript(String path, String module, String method) {
 		/*PythonInterpreter interpreter = new PythonInterpreter();
 		interpreter.cleanup();
 		interpreter.exec("import sys\nsys.path.append('" + path + "')\nfrom " + module + " import " + method);	
@@ -46,10 +46,10 @@ public class ScriptService {
 		func.__call__(Py.java2py(core));*/
 		PythonInterpreter python = new PythonInterpreter();
 		python.execfile(path + module + ".py");
-		python.get(method).__call__();
+		return python.get(method).__call__();
 	}
 	
-	public void callScript(String path, String module, String method, Object arg1) {
+	public PyObject callScript(String path, String module, String method, Object arg1) {
 		/*PythonInterpreter interpreter = new PythonInterpreter();
 		interpreter.cleanup();
 		interpreter.exec("import sys\nsys.path.append('" + path + "')\nfrom " + module + " import " + method);	
@@ -57,10 +57,10 @@ public class ScriptService {
 		func.__call__(Py.java2py(core), Py.java2py(arg1));*/
 		PythonInterpreter python = new PythonInterpreter();
 		python.execfile(path + module + ".py");
-		python.get(method).__call__(Py.java2py(arg1));
+		return python.get(method).__call__(Py.java2py(arg1));
 	}
 	
-	public void callScript(String path, String method, String module, Object arg1, Object arg2) {
+	public PyObject callScript(String path, String method, String module, Object arg1, Object arg2) {
 		/*PythonInterpreter interpreter = new PythonInterpreter();
 		interpreter.cleanup();
 		interpreter.exec("import sys\nsys.path.append('" + path + "')\nfrom " + module + " import " + method);	
@@ -68,10 +68,10 @@ public class ScriptService {
 		func.__call__(Py.java2py(arg1), Py.java2py(arg2));*/
 		PythonInterpreter python = new PythonInterpreter();
 		python.execfile(path + module + ".py");
-		python.get(method).__call__(Py.java2py(arg1), Py.java2py(arg2));
+		return python.get(method).__call__(Py.java2py(arg1), Py.java2py(arg2));
 	}
 	
-	public void callScript(String path, String method, String module, Object arg1, Object arg2, Object arg3) {
+	public PyObject callScript(String path, String method, String module, Object arg1, Object arg2, Object arg3) {
 		/*PythonInterpreter interpreter = new PythonInterpreter();
 		interpreter.cleanup();
 		interpreter.exec("import sys\nsys.path.append('" + path + "')\nfrom " + module + " import " + method);	
@@ -79,11 +79,11 @@ public class ScriptService {
 		func.__call__(Py.java2py(arg1), Py.java2py(arg2), Py.java2py(arg3));*/
 		PythonInterpreter python = new PythonInterpreter();
 		python.execfile(path + module + ".py");
-		python.get(method).__call__(Py.java2py(arg1), Py.java2py(arg2), Py.java2py(arg3));
+		return python.get(method).__call__(Py.java2py(arg1), Py.java2py(arg2), Py.java2py(arg3));
 
 	}
 
-	public void callScript(String path, String module, String method, Object arg1, Object arg2, Object arg3, Object arg4) {
+	public PyObject callScript(String path, String module, String method, Object arg1, Object arg2, Object arg3, Object arg4) {
 		/*PythonInterpreter interpreter = new PythonInterpreter();
 		interpreter.cleanup();
 		interpreter.exec("import sys\nsys.path.append('" + path + "')\nfrom " + module + " import " + method);	
@@ -91,14 +91,13 @@ public class ScriptService {
 		func.__call__(Py.java2py(arg1), Py.java2py(arg2), Py.java2py(arg3), Py.java2py(arg4));*/
 		PythonInterpreter python = new PythonInterpreter();
 		python.execfile(path + module + ".py");
-		python.get(method).__call__(Py.java2py(arg1), Py.java2py(arg2), Py.java2py(arg3), Py.java2py(arg4));
+		return python.get(method).__call__(Py.java2py(arg1), Py.java2py(arg2), Py.java2py(arg3), Py.java2py(arg4));
 	}
 	
 	public PyObject getMethod(String path, String module, String method) {
-		PythonInterpreter interpreter = new PythonInterpreter();
-		interpreter.cleanup();
-		interpreter.exec("import sys\nsys.path.append('" + path + "')\nfrom " + module + " import " + method);	
-		PyObject func = interpreter.get(method);
+		PythonInterpreter python = new PythonInterpreter();
+		python.execfile(path + module + ".py");
+		PyObject func = python.get(method);
 		return func;
 	}
 

@@ -22,6 +22,7 @@
 package protocol.swg;
 
 import java.nio.ByteOrder;
+import java.util.List;
 import java.util.Vector;
 
 import main.NGECore;
@@ -34,12 +35,14 @@ import engine.resources.scene.Planet;
 @SuppressWarnings("unused")
 public class PlanetTravelPointListResponse extends SWGMessage {
 
-	private NGECore core;
-	private Planet originatePlanet;
+	private String planetString;
 	private Vector<TravelPoint> travelPoints;
+	private List<Planet> planetList;
 	
-	public PlanetTravelPointListResponse(Planet planet, Vector<TravelPoint> travelPoints) {
-		this.originatePlanet = planet;
+	public PlanetTravelPointListResponse(String planetString, Vector<TravelPoint> travelPoints, List<Planet> planetList) {
+		this.planetString = planetString;
+		this.travelPoints = travelPoints;
+		this.planetList = planetList;
 	}
 	
 	@Override
@@ -49,13 +52,12 @@ public class PlanetTravelPointListResponse extends SWGMessage {
 
 	@Override
 	public IoBuffer serialize() {
-		IoBuffer result = IoBuffer.allocate(100).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer result = IoBuffer.allocate(700).order(ByteOrder.LITTLE_ENDIAN);
 		
-		result.putShort((short) 9);
+		result.putShort((short) 6);
 		result.putInt(0x4D32541F);
 		
-		result.put(getAsciiString(originatePlanet.getName()));
-		result.putInt(core.terrainService.getPlanetList().size());
+		result.put(getAsciiString(planetString));
 		
 		result.putInt(travelPoints.size()); // shuttles/sp count
 		for (TravelPoint point : travelPoints) {
@@ -65,21 +67,19 @@ public class PlanetTravelPointListResponse extends SWGMessage {
 		result.putInt(travelPoints.size()); // shuttles/sp count
 		for (TravelPoint point : travelPoints) {
 			
-			result.putFloat(point.getPosX());
-			result.putFloat(point.getPosZ()); // Z and Y may be switched
-			result.putFloat(point.getPosY());
+			result.putFloat(point.getLocation().x);
+			result.putFloat(0);
+			result.putFloat(point.getLocation().z);
 
 		}
 		
 		result.putInt(travelPoints.size()); // shuttes/sp count
 		for (TravelPoint point : travelPoints) {
-			// TODO: Change ticket price based on planet/distance
 			result.putInt(point.getTicketPrice());
 		}
 		
 		result.putInt(travelPoints.size());
 		for (TravelPoint point : travelPoints) {
-			// TODO: Change based on planet/distance
 			result.put((byte) 1); // isReachable
 		}
 		result.flip();

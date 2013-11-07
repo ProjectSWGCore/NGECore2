@@ -21,22 +21,26 @@
  ******************************************************************************/
 package services.travel;
 
+import resources.common.SpawnPoint;
+import engine.resources.scene.Point3D;
+
 public class TravelPoint {
 	
+	private String planetName;
 	private String name;
-	private float posX;
-	private float posY;
-	private float posZ;
+	private Point3D location;
+	private SpawnPoint spawnLocation;
 	private int ticketPrice;
+	private ShuttleObject shuttleObject;
 	
 	public TravelPoint() {
 	}
 	
 	public TravelPoint(String name, float x, float y, float z, int price) {
 		this.name = name;
-		this.posX = x;
-		this.posY = y;
-		this.posZ = z;
+		this.location = new Point3D(x, y, z);
+		this.spawnLocation = new SpawnPoint(this.location, 0, 1);
+		this.shuttleObject = new ShuttleObject();
 	}
 	
 	public String getName() {
@@ -45,28 +49,45 @@ public class TravelPoint {
 	public void setName(String name) {
 		this.name = name;
 	}
-	public float getPosX() {
-		return posX;
+	
+	public Point3D getLocation() {
+		return location;
 	}
-	public void setPosX(float posX) {
-		this.posX = posX;
+	
+	public void setLocation(float x, float y, float z) {
+		this.location.x = x;
+		this.location.y = y;
+		this.location.z = z;
 	}
-	public float getPosY() {
-		return posY;
-	}
-	public void setPosY(float posY) {
-		this.posY = posY;
-	}
-	public float getPosZ() {
-		return posZ;
-	}
-	public void setPosZ(float posZ) {
-		this.posZ = posZ;
-	}
+	
 	public int getTicketPrice() {
 		return ticketPrice;
 	}
 	public void setTicketPrice(int ticketPrice) {
 		this.ticketPrice = ticketPrice;
+	}
+
+	public String getPlanetName() {
+		return planetName;
+	}
+
+	public void setPlanetName(String planetName) {
+		this.planetName = planetName;
+	}
+	
+	public SpawnPoint getSpawnLocation() {
+		return this.spawnLocation;
+	}
+	
+	public void setSpawnLocation(SpawnPoint point) {
+		this.spawnLocation = point;
+	}
+	
+	public ShuttleObject getShuttle() {
+		return this.shuttleObject;
+	}
+	
+	public void setShuttle(ShuttleObject shuttleObj) {
+		this.shuttleObject = shuttleObj;
 	}
 }

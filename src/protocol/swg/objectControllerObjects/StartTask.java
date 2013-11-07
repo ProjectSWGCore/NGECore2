@@ -25,8 +25,6 @@ import java.nio.ByteOrder;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import engine.resources.common.CRC;
-
 import protocol.swg.ObjControllerMessage;
 
 public class StartTask extends ObjControllerObject {

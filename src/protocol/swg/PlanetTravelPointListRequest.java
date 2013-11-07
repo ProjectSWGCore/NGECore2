@@ -21,6 +21,8 @@
  ******************************************************************************/
 package protocol.swg;
 
+import java.util.List;
+
 import main.NGECore;
 
 import org.apache.mina.core.buffer.IoBuffer;
@@ -31,16 +33,18 @@ public class PlanetTravelPointListRequest extends SWGMessage{
 
 	private NGECore core;
 	private long objectId;
-	private Planet planet;
+	private String planet;
 	
 	@Override
 	public void deserialize(IoBuffer buffer) {
 		
-		buffer.getShort();
-		buffer.getInt();
+		//buffer.getShort();
+		//buffer.getInt();
 		
 		setObjectId(buffer.getLong());
 		setPlanet(getAsciiString(buffer));
+		
+		//System.out.println("String: " + getAsciiString(buffer));
 		
 	}
 
@@ -57,13 +61,11 @@ public class PlanetTravelPointListRequest extends SWGMessage{
 		this.objectId = objectId;
 	}
 
-	public Planet getPlanet() {
+	public String getPlanet() {
 		return planet;
 	}
 
 	public void setPlanet(String asciiString) {
-		Planet planet = core.terrainService.getPlanetByName(asciiString);
-		this.planet = planet;
+		this.planet = asciiString;
 	}
-
 }

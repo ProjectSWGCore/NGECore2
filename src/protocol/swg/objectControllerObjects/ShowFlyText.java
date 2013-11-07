@@ -26,53 +26,103 @@ import java.nio.ByteOrder;
 import org.apache.mina.core.buffer.IoBuffer;
 
 import protocol.swg.ObjControllerMessage;
+import resources.common.RGB;
 
 public class ShowFlyText extends ObjControllerObject {
 	
 	private long recieverId;
 	private long objectId;
+	private int unknownInt1;
+	private short unknownShort1;
+	private byte unknownByte1;
+	private int unknownInt2;
 	private String stfFile;
 	private String stfString;
+	private short unknownShort2;
 	private float scale;
-	private float color;
-
-	public ShowFlyText(long recieverId, long objectId, String stfFile, String stfString, float scale, float color) {
+	private RGB color;
+	private int displayType;
+	private boolean alternativeStructure;
+	
+	public ShowFlyText(long recieverId, long objectId, String stfFile, String stfString, float scale, RGB color, int displayType) {
 		this.recieverId = recieverId;
 		this.objectId = objectId;
 		this.stfFile = stfFile;
 		this.stfString = stfString;
 		this.scale = scale;
 		this.color = color;
+		this.displayType = displayType;
+		this.alternativeStructure = false;
 	}
-
+	
+	public ShowFlyText(long recieverId, long objectId, int unknownInt1, int unknownShort1, int unknownByte1, int unknownInt2, String stfFile, String stfString, int unknownShort2, float scale, RGB color, int displayType) {
+		this.recieverId = recieverId;
+		this.objectId = objectId;
+		this.unknownInt1 = unknownInt1;
+		this.unknownShort1 = (short) unknownShort1;
+		this.unknownByte1 = (byte) unknownByte1;
+		this.unknownInt2 = unknownInt2;
+		this.stfFile = stfFile;
+		this.stfString = stfString;
+		this.unknownShort2 = (short) unknownShort2;
+		this.scale = scale;
+		this.color = color;
+		this.alternativeStructure = true;
+	}
+	
 	@Override
 	public void deserialize(IoBuffer data) {
 		// TODO Auto-generated method stub
 		
 	}
-
+	
 	@Override
-	public IoBuffer serialize() {
-		
-		IoBuffer result = IoBuffer.allocate(47 + stfFile.length() + stfString.length()).order(ByteOrder.LITTLE_ENDIAN);
-		result.setAutoExpand(true);
-		
-		result.putInt(ObjControllerMessage.SHOW_FLY_TEXT);
-		result.putLong(recieverId);
-		result.putInt(0);
-		result.putLong(objectId);
-		
-		result.put(getAsciiString(stfFile));
-		result.putInt(0);
-		result.put(getAsciiString(stfString));
-		result.putInt(0);
-		result.putFloat(scale);
-		result.putFloat(color); // color
-		result.putShort((short) 0);
-		result.put((byte) 0);
-		
-		return result.flip();
-		
+	public IoBuffer serialize() { 
+		if (!alternativeStructure) {
+			IoBuffer result = IoBuffer.allocate(47 + stfFile.length() + stfString.length()).order(ByteOrder.LITTLE_ENDIAN);
+			result.setAutoExpand(true);
+			result.putInt(ObjControllerMessage.SHOW_FLY_TEXT);
+			result.putLong(recieverId);
+			result.putInt(0);
+			result.putLong(objectId);
+			result.put(getAsciiString(stfFile));
+			result.putInt(0);
+			result.put(getAsciiString(stfString));
+			result.putInt(0);
+			result.putFloat(scale);
+			result.put(color.getBytes());
+			result.putInt(displayType);
+			return result.flip();
+		} else {
+			IoBuffer result = IoBuffer.allocate(124 + stfFile.length() + stfString.length()).order(ByteOrder.LITTLE_ENDIAN);
+			result.setAutoExpand(true);
+			result.putInt(ObjControllerMessage.SHOW_FLY_TEXT);
+			result.putLong(recieverId);
+			result.putInt(0);
+			result.putLong(objectId);
+			result.putLong(0);
+			result.putInt(unknownInt1);
+			result.putShort(unknownShort1);
+			result.put(unknownByte1);
+			result.putInt(unknownInt2);
+			result.put(getAsciiString(stfFile));
+			result.putInt(0);
+			result.put(getAsciiString(stfString));
+			result.putLong(0);
+			result.putLong(0);
+			result.putLong(0);
+			result.putLong(0);
+			result.putLong(0);
+			result.putLong(0);
+			result.putLong(0);
+			result.putInt(0);
+			result.putShort((short) unknownShort2);
+			result.putLong(0);
+			result.putFloat(scale);
+			result.put(color.getBytes());
+			result.putInt(displayType);
+			return result.flip();
+		}
 	}
 
 }
