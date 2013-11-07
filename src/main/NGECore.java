@@ -267,6 +267,8 @@ public class NGECore {
 		
 		zoneDispatch.addService(skillService);
 		
+		travelService.startShuttleSchedule();
+		
 		didServerCrash = false;
 		System.out.println("Started Server.");
 		setGalaxyStatus(2);

@@ -8,7 +8,7 @@ def run(core, actor, target, commandString):
     ticketList = trvSvc.getTicketList(actor)
     print ('command called')
     if ticketList.size() >= 1:
-        trvSvc.sendTicketWindow(actor)
+        trvSvc.sendTicketWindow(actor, target)
         return
         
     elif ticketList.size() == 1:

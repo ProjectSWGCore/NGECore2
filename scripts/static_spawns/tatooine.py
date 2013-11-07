@@ -9,9 +9,9 @@ def addPlanetSpawns(core, planet):
 	stcSvc.spawnObject('object/tangible/travel/ticket_collector/shared_ticket_collector.iff', 'tatooine', long(0), float(-1090.8), float(12.6), float(-3554.9), float(-0.67), float(0.74)) # bestine shuttleport
 	stcSvc.spawnObject('object/tangible/travel/ticket_collector/shared_ticket_collector.iff', 'tatooine', long(0), float(-1382.15), float(12), float(-3583.25), float(1), float(-0.08)) # bestine starport
 	stcSvc.spawnObject('object/tangible/travel/ticket_collector/shared_ticket_collector.iff', 'tatooine', long(0), float(3427.5), float(5.6), float(-4644.1), float(-0.485545), float(0.874212)) # mos eisley shuttleport
-	stcSvc.spawnObject('object/tangible/travel/ticket_collector/shared_ticket_collector.iff', 'tatooine', long(0), float(3623.5), float(5), float(-4793.5), float(-0.103924), float(0.994585)) # mos eisley starport
+	stcSvc.spawnObject('object/tangible/travel/ticket_collector/shared_ticket_collector.iff', 'tatooine', long(0), float(3622), float(5), float(-4788), float(-0.276903063059), float(0.960897982121)) # mos eisley starport
 	
-	stcSvc.spawnObject('object/creature/npc/theme_park/shared_player_transport.iff', 'tatooine', long(0), float(3619), float(5), float(-4801), float(-0.103924), float(0)) # mos eisley starport
+	stcSvc.spawnObject('object/creature/npc/theme_park/shared_player_transport.iff', 'tatooine', long(0), float(3618), float(5), float(-4801), float(0.500574469566), float(0.865693628788)) # mos eisley starport
 	
 	stcSvc.spawnObject('object/tangible/travel/ticket_collector/shared_ticket_collector.iff', 'tatooine', long(0), float(-2886.3), float(5.6), float(1929.4), float(-0.113814), float(0.993502)) # mos espa shuttleport a
 	stcSvc.spawnObject('object/tangible/travel/ticket_collector/shared_ticket_collector.iff', 'tatooine', long(0), float(-3116.3), float(5.6), float(2166.1), float(-0.621933), float(0.783071)) # mos espa shuttleport b
