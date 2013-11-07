@@ -12,7 +12,7 @@ def addExpertisePoint(core, actor):
 
 	actor.addSkill('expertise_fs_general_stance_saber_block_1')
 
-	actor.addSkillMod('expertise_stance_saber_block', 10)
+	actor.addSkillMod('display_only_parry', 1000)
 
 	addAbilities(core, actor, player)
 
@@ -30,7 +30,7 @@ def removeExpertisePoint(core, actor):
 
 	actor.removeSkill('expertise_fs_general_stance_saber_block_1')
 
-	actor.removeSkillMod('expertise_stance_saber_block', 10)
+	actor.removeSkillMod('display_only_parry', 1000)
 
 	removeAbilities(core, actor, player)
 
