@@ -1,9 +1,9 @@
 import sys
 
 def setup(core, actor, buff):
-	actor.setSpeedMultiplierBase(0)
+	core.skillModService.addSkillMod(actor, 'movement', 0)
 	return
 	
 def removeBuff(core, actor, buff):
-	actor.setSpeedMultiplierBase(1)
+	core.skillModService.deductSkillMod(actor, 'movement', 10)
 	return
