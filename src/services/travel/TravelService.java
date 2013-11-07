@@ -25,10 +25,12 @@ import java.nio.ByteOrder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.text.WordUtils;
 import org.apache.mina.core.buffer.IoBuffer;
@@ -41,6 +43,7 @@ import engine.resources.container.Traverser;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
+import engine.resources.scene.Quaternion;
 import engine.resources.scene.quadtree.QuadTree;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
@@ -104,11 +107,46 @@ public class TravelService implements INetworkDispatch {
 		});
 		
 	}
-	
-	public TravelPoint getNearestTravelPoint() {
+	public void startShuttleSchedule() {
+		final Runnable shuttleRun = new Runnable() {
+
+			@Override
+			public void run() {
+				
+				for (Entry<Planet, Vector<TravelPoint>> entry : travelMap.entrySet()) {
+					for(TravelPoint tp : entry.getValue()) {
+						if (tp.getShuttle() == null)
+							continue;
+						else {
+							 if (!tp.isShuttleAvailable()) {
+								 tp.getShuttle().setPosture((byte) 0);
+								 tp.setShuttleAvailable(true);
+							 }
+							 else { 
+								 tp.getShuttle().setPosture((byte) 2);
+								 tp.setShuttleAvailable(false);
+							 }
+						}
+					}
+				}
+				
+			}
+			
+		};
+		
+		scheduler.scheduleAtFixedRate(shuttleRun, 60, 60, TimeUnit.SECONDS);
+	}
+	public TravelPoint getNearestTravelPoint(SWGObject obj) {
 		TravelPoint returnedPoint = null;
 		
+		Vector<TravelPoint> planetTp = travelMap.get(obj.getPlanet());
 		
+		for (TravelPoint tp : planetTp) {
+			//System.out.println("Distance for point " + tp.getName() + " is " + tp.getLocation().getDistance2D(obj.getWorldPosition()));
+			if (tp.getLocation().getDistance2D(obj.getWorldPosition()) <= 10) {
+				returnedPoint = tp;
+			}
+		}
 		return returnedPoint;
 	}
 	
@@ -134,21 +172,6 @@ public class TravelService implements INetworkDispatch {
 		core.scriptService.callScript("scripts/", "addPoints", "static_travel_points", core, planet);
 	}
 
-	public void addShuttleToPoint(SWGObject obj) {
-		Vector<TravelPoint> travelPoints = travelMap.get(obj.getPlanet());
-		
-		for (TravelPoint tp : travelPoints) {
-			float distancePoint = tp.getLocation().getDistance2D(obj.getPosition());
-			System.out.println("Distance from point " + tp.getName() + ": " + distancePoint);
-			
-			// Travel points must be within 50 meters of shuttles!
-			if (distancePoint <= (float) 50) {
-				tp.setShuttle((ShuttleObject) obj);
-			}
-			
-		}
-	}
-	
 	public void addTravelPoint(Planet planet, String name, float x, float y, float z) {
 		// z should be y for 2d map
 		TravelPoint travelPoint = new TravelPoint(name, x, y, z, 100);
@@ -254,7 +277,7 @@ public class TravelService implements INetworkDispatch {
 	}
 
 	
-	public void sendTicketWindow(final CreatureObject creature) {
+	public void sendTicketWindow(final CreatureObject creature, SWGObject rangeObject) {
 		
 		if (creature == null)
 			return;
@@ -267,7 +290,7 @@ public class TravelService implements INetworkDispatch {
 					+ ticket.getStringAttribute("@obj_attr_n:travel_arrival_point"));
 		}
 		
-		final SUIWindow window = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "Select Destination", "Select Destination", ticketData, creature, null, 0);
+		final SUIWindow window = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "Select Destination", "Select Destination", ticketData, creature, rangeObject, 10);
 		Vector<String> returnList = new Vector<String>();
 		returnList.add("List.lstList:SelectedRow");
 		
@@ -284,20 +307,20 @@ public class TravelService implements INetworkDispatch {
 				TravelPoint arrivalPoint = getTravelPointByName(selectedTicket.getStringAttribute("@obj_attr_n:travel_arrival_planet").toLowerCase(), 
 						selectedTicket.getStringAttribute("@obj_attr_n:travel_arrival_point"));
 				
-				TravelPoint departurePoint = getTravelPointByName(creature.getPlanet().name, selectedTicket.getStringAttribute("@obj_attr_n:travel_departure_point"));
+				TravelPoint departurePoint = getNearestTravelPoint(creature);
 				
 				if (departurePoint.getShuttle() == null) {
 					System.out.println("TravelPoint has no associated shuttle!");
 					return;
 				}
 				
-				if (departurePoint.getShuttle().isInPort()) {
+				if (departurePoint.isShuttleAvailable() == true) {
 					selectedTicket.getContainer().remove(selectedTicket);
 					core.objectService.destroyObject(selectedTicket);
 					doTransport(creature, arrivalPoint);
 				}
 				else {
-					creature.sendSystemMessage("The next shuttle arrives in " + departurePoint.getShuttle().getNextShuttleTime() + " seconds.", (byte) 0);
+					creature.sendSystemMessage("The next shuttle arrives in " + "  60 seconds.", (byte) 0);
 				}
 			}
 		});

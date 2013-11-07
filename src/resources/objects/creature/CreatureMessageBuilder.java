@@ -119,7 +119,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer.putInt(1);	
 		buffer.putInt(0);	// TANO Data
 		buffer.putInt(0);	
-		buffer.putInt(0x80);
+		buffer.putInt(0x80); // 0x80 = Player, 0x08 = Quest NPC, 
 		buffer.putInt(creature.getIncapTimer());
 		buffer.putInt(0);
 		buffer.putInt(0x3A98);
