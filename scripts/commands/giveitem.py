@@ -19,4 +19,3 @@ def run(core, actor, target, commandString):
 		inventory.add(object)
 		
 	return
-	

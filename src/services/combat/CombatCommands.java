@@ -193,6 +193,8 @@ public class CombatCommands {
 		core.commandService.registerCommand("saberBlock"); // Saber Block
 		core.commandService.registerCommand("forcerun"); // Force Run
 		core.commandService.registerCommand("fs_buff_invis_1"); // Force Cloak
+		core.commandService.registerCombatCommand("fs_force_throw_1");
+		core.commandService.registerCommand("forceThrow");
 
 		
 		// Commando
@@ -492,6 +494,34 @@ public class CombatCommands {
 		core.commandService.registerCombatCommand("of_vortex_3");
 		core.commandService.registerCombatCommand("of_vortex_4");
 		core.commandService.registerCombatCommand("of_vortex_5");
+		core.commandService.registerCommand("of_charge_1");
+		core.commandService.registerCommand("of_inspiration_1");
+		core.commandService.registerCommand("of_inspiration_2");
+		core.commandService.registerCommand("of_inspiration_3");
+		core.commandService.registerCommand("of_inspiration_4");
+		core.commandService.registerCommand("of_inspiration_5");
+		core.commandService.registerCommand("of_inspiration_6");
+		core.commandService.registerCommand("of_focus_fire_1");
+		core.commandService.registerCommand("of_focus_fire_2");
+		core.commandService.registerCommand("of_focus_fire_3");
+		core.commandService.registerCommand("of_focus_fire_4");
+		core.commandService.registerCommand("of_focus_fire_5");
+		core.commandService.registerCommand("of_focus_fire_6");
+		core.commandService.registerCommand("of_drillmaster_1");
+		core.commandService.registerCommand("of_buff_def_1");
+		core.commandService.registerCommand("of_buff_def_2");
+		core.commandService.registerCommand("of_buff_def_3");
+		core.commandService.registerCommand("of_buff_def_4");
+		core.commandService.registerCommand("of_buff_def_5");
+		core.commandService.registerCommand("of_buff_def_6");
+		core.commandService.registerCommand("of_buff_def_7");
+		core.commandService.registerCommand("of_buff_def_8");
+		core.commandService.registerCommand("of_buff_def_9");
+		core.commandService.registerCommand("of_emergency_shield");
+		core.commandService.registerCommand("of_firepower_1");
+		core.commandService.registerCommand("of_purge_1");
+		core.commandService.registerCommand("of_scatter_1");
+		core.commandService.registerCommand("of_stimulator_1");
 		
 		// Smuggler
 		
