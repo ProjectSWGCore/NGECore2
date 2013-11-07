@@ -322,7 +322,7 @@ public class CombatService implements INetworkDispatch {
 			int armorAbsorbed = (int) (damageBeforeArmor - damage);
 			if(mitigationType == HitType.BLOCK) {
 					
-				float blockValue = (attacker.getSkillMod("strength_modified").getBase() + attacker.getSkillMod("combat_block_value").getBase()) / 2 + 25;
+				float blockValue = (attacker.getStrength() + attacker.getSkillMod("combat_block_value").getBase()) / 2 + 25;
 				damage -= blockValue;
 				
 			}
@@ -438,7 +438,7 @@ public class CombatService implements INetworkDispatch {
 		
 		if(hitType == HitType.STRIKETHROUGH) {
 			
-			float stMaxValue = attacker.getSkillMod("combat_strikethrough_value").getBase() / 2 + attacker.getSkillMod("luck_modified").getBase() / 10;
+			float stMaxValue = attacker.getSkillMod("combat_strikethrough_value").getBase() / 2 + attacker.getLuck() / 10;
 			if(stMaxValue > 99)
 				stMaxValue = 99;
 			float stMinValue = stMaxValue / 2;
@@ -531,10 +531,10 @@ public class CombatService implements INetworkDispatch {
 			weaponDmg *= command.getPercentFromWeapon();
 			rawDamage += weaponDmg;
 			
-			if(weapon.isMelee() && attacker.getSkillMod("strength_modified") != null) {
+			if(weapon.isMelee()) {
 				
-				if(attacker.getSkillMod("strength_modified").getBase() > 0) {
-					rawDamage += ((attacker.getSkillMod("strength_modified").getBase() / 100) * 33);
+				if(attacker.getStrength() > 0) {
+					rawDamage += ((attacker.getStrength() / 100) * 33);
 				}
 				
 			}
@@ -548,10 +548,10 @@ public class CombatService implements INetworkDispatch {
 			weaponDmg *= command.getPercentFromWeapon();
 			rawDamage += weaponDmg;
 			
-			if(weapon.isMelee() && attacker.getSkillMod("strength_modified") != null) {
+			if(weapon.isMelee()) {
 				
-				if(attacker.getSkillMod("strength_modified").getBase() > 0) {
-					rawDamage += ((attacker.getSkillMod("strength_modified").getBase() / 100) * 33);
+				if(attacker.getStrength() > 0) {
+					rawDamage += ((attacker.getStrength() / 100) * 33);
 				}
 				
 			}
@@ -596,10 +596,10 @@ public class CombatService implements INetworkDispatch {
 			weaponDmg *= command.getPercentFromWeapon();
 			rawDamage += weaponDmg;
 			
-			if(weapon.isMelee() && attacker.getSkillMod("strength_modified") != null) {
+			if(weapon.isMelee()) {
 				
-				if(attacker.getSkillMod("strength_modified").getBase() > 0) {
-					rawDamage += ((attacker.getSkillMod("strength_modified").getBase() / 100) * 33);
+				if(attacker.getStrength() > 0) {
+					rawDamage += ((attacker.getStrength() / 100) * 33);
 				}
 				
 			}
@@ -613,10 +613,10 @@ public class CombatService implements INetworkDispatch {
 			weaponDmg *= command.getPercentFromWeapon();
 			rawDamage += weaponDmg;
 			
-			if(weapon.isMelee() && attacker.getSkillMod("strength_modified") != null) {
+			if(weapon.isMelee()) {
 				
-				if(attacker.getSkillMod("strength_modified").getBase() > 0) {
-					rawDamage += ((attacker.getSkillMod("strength_modified").getBase() / 100) * 33);
+				if(attacker.getStrength() > 0) {
+					rawDamage += ((attacker.getStrength() / 100) * 33);
 				}
 				
 			}
@@ -636,8 +636,8 @@ public class CombatService implements INetworkDispatch {
 		
 			if(weapon.isRanged()) {
 				float missChance = 0.05f;
-				if(attacker.getSkillMod("strength_modified").getBase() > 0) {
-					float missNegation = (float) ((attacker.getSkillMod("strength_modified").getBase() / 100) * 0.1);
+				if(attacker.getStrength() > 0) {
+					float missNegation = (float) ((attacker.getStrength() / 100) * 0.1);
 					if(missNegation > 0.04f)
 						missNegation = 0.04f;
 					missChance -= missNegation;

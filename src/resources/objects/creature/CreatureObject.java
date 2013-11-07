@@ -960,7 +960,31 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 		
 	}
-
+	
+	public int getLuck() {
+		return (getSkillModBase("luck") + getSkillModBase("luck_modified"));
+	}
+	
+	public int getPrecision() {
+		return (getSkillModBase("precision") + getSkillModBase("precision_modified"));
+	}
+	
+	public int getStrength() {
+		return (getSkillModBase("strength") + getSkillModBase("strength_modified"));
+	}
+	
+	public int getConstitution() {
+		return (getSkillModBase("constitution") + getSkillModBase("constitution_modified"));
+	}
+	
+	public int getStamina() {
+		return (getSkillModBase("stamina") + getSkillModBase("stamina_modified"));
+	}
+	
+	public int getAgility() {
+		return (getSkillModBase("agility") + getSkillModBase("agility_modified"));
+	}
+	
 	public int getHealth() {
 		synchronized(objectMutex) {
 			return health;
