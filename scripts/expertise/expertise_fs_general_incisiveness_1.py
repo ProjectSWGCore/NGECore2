@@ -12,7 +12,7 @@ def addExpertisePoint(core, actor):
 
 	actor.addSkill('expertise_fs_general_incisiveness_1')
 
-	actor.addSkillMod('expertise_critical_niche_all', 2)
+	core.skillModService.addSkillMod(actor, 'expertise_critical_niche_all', 2)
 
 	addAbilities(core, actor, player)
 
@@ -30,7 +30,7 @@ def removeExpertisePoint(core, actor):
 
 	actor.removeSkill('expertise_fs_general_incisiveness_1')
 
-	actor.removeSkillMod('expertise_critical_niche_all', 2)
+	core.skillModService.deductSkillMod(actor, 'expertise_critical_niche_all', 2)
 
 	removeAbilities(core, actor, player)
 

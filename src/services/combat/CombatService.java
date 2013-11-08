@@ -566,6 +566,10 @@ public class CombatService implements INetworkDispatch {
 			rawDamage *= (1 - (target.getSkillMod("combat_divide_damage_dealt").getBase() / 100));			
 		}
 		
+		if(attacker.getSkillMod("expertise_damage_melee") != null) {
+			rawDamage *= (1 + (attacker.getSkillMod("expertise_damage_melee").getBase() / 100));			
+		}
+		
 		return rawDamage;
 		
 	}
