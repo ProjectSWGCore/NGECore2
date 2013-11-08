@@ -54,6 +54,7 @@ import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import services.map.*;
 import services.sui.SUIService.ListBoxType;
+import services.sui.SUIService.MessageBoxType;
 import services.sui.SUIWindow.SUICallback;
 import services.sui.SUIWindow.Trigger;
 import services.sui.SUIWindow;
@@ -118,13 +119,15 @@ public class TravelService implements INetworkDispatch {
 						if (tp.getShuttle() == null)
 							continue;
 						else {
-							 if (!tp.isShuttleAvailable()) {
+							 if (tp.isShuttleAvailable() == false) {
 								 tp.getShuttle().setPosture((byte) 0);
 								 tp.setShuttleAvailable(true);
+								 System.out.println("Shuttle is available");
 							 }
 							 else { 
 								 tp.getShuttle().setPosture((byte) 2);
 								 tp.setShuttleAvailable(false);
+								 System.out.println("Shuttle is not available.");
 							 }
 						}
 					}
@@ -138,14 +141,17 @@ public class TravelService implements INetworkDispatch {
 	}
 	public TravelPoint getNearestTravelPoint(SWGObject obj) {
 		TravelPoint returnedPoint = null;
-		
 		Vector<TravelPoint> planetTp = travelMap.get(obj.getPlanet());
 		
 		for (TravelPoint tp : planetTp) {
 			//System.out.println("Distance for point " + tp.getName() + " is " + tp.getLocation().getDistance2D(obj.getWorldPosition()));
-			if (tp.getLocation().getDistance2D(obj.getWorldPosition()) <= 10) {
+			if (tp.getLocation().getDistance2D(obj.getWorldPosition()) <= 70) {
 				returnedPoint = tp;
 			}
+		}
+		
+		if (returnedPoint == null) {
+			System.out.println("NULL TravelPoint!");
 		}
 		return returnedPoint;
 	}
@@ -229,7 +235,7 @@ public class TravelService implements INetworkDispatch {
 		return travelTicket;
 	}
 	
-	public void purchaseTravelTicket(SWGObject player, String departurePlanet, String departureLoc, String arrivalPlanet, String arrivalLoc) {
+	public void purchaseTravelTicket(SWGObject player, String departurePlanet, String departureLoc, String arrivalPlanet, String arrivalLoc, String cost) {
 		CreatureObject creatureObj = (CreatureObject) player;
 		
 		SWGObject travelTicket = createTravelTicket(departurePlanet, departureLoc, arrivalPlanet, arrivalLoc);
@@ -237,15 +243,17 @@ public class TravelService implements INetworkDispatch {
 		creatureObj.getSlottedObject("inventory").add(travelTicket);
 		travelTicket.isSubChildOf(player);
 		
-		creatureObj.sendSystemMessage("@travel:ticket_purchase_complete", (byte) 0);
-		System.out.println("Created travel ticket: " + departurePlanet + " " + departureLoc + " " + arrivalPlanet + " " + arrivalLoc);
+		SUIWindow window = core.suiService.createMessageBox(MessageBoxType.MESSAGE_BOX_OK, "STAR WARS GALAXIES", "Ticket purchase complete.", player, null, 0);
+		core.suiService.openSUIWindow(window);
+
+		creatureObj.sendSystemMessage("You successfully make a payment of " + cost + "credits to the Galactic Travel Commission.", (byte) 0);
 	}
 	
 	// This returns all ticket objects in a players inventory
 	public Vector<SWGObject> getTicketList(SWGObject player) {
 
 		final Vector<SWGObject> ticketList = new Vector<SWGObject>();
-
+		final TravelPoint nearestPoint = getNearestTravelPoint(player);
 		TangibleObject playerInventory = (TangibleObject) player.getSlottedObject("inventory");
 
 		playerInventory.viewChildren(player, false, false, new Traverser() {
@@ -257,7 +265,8 @@ public class TravelService implements INetworkDispatch {
 				if (obj.getAttachment("objType") != null) {
 					String objType = (String) obj.getAttachment("objType");
 					String ticket = "ticket";
-					if (objType.equals(ticket)) {
+					System.out.println("Nearest Point: " + nearestPoint.getName());
+					if (objType.equals(ticket) && obj.getStringAttribute("@obj_attr_n:travel_departure_point").equals(nearestPoint.getName())) {
 						ticketList.add(obj);
 					}
 				}
@@ -309,18 +318,10 @@ public class TravelService implements INetworkDispatch {
 				
 				TravelPoint departurePoint = getNearestTravelPoint(creature);
 				
-				if (departurePoint.getShuttle() == null) {
-					System.out.println("TravelPoint has no associated shuttle!");
-					return;
-				}
-				
 				if (departurePoint.isShuttleAvailable() == true) {
 					selectedTicket.getContainer().remove(selectedTicket);
 					core.objectService.destroyObject(selectedTicket);
 					doTransport(creature, arrivalPoint);
-				}
-				else {
-					creature.sendSystemMessage("The next shuttle arrives in " + "  60 seconds.", (byte) 0);
 				}
 			}
 		});

@@ -8,7 +8,6 @@ def handleSelection(core, owner, target, option):
     trvSvc = core.travelService
     if option == 21 and target:
         core.commandService.callCommand(owner, 'boardshuttle', target, '')
-        print ('command called')
         return
     return
     

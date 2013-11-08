@@ -25,8 +25,6 @@ import java.nio.ByteOrder;
 import java.util.List;
 import java.util.Vector;
 
-import main.NGECore;
-
 import org.apache.mina.core.buffer.IoBuffer;
 
 import services.travel.TravelPoint;
@@ -52,10 +50,11 @@ public class PlanetTravelPointListResponse extends SWGMessage {
 
 	@Override
 	public IoBuffer serialize() {
-		IoBuffer result = IoBuffer.allocate(700).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer result = IoBuffer.allocate(travelPoints.size() * 2).order(ByteOrder.LITTLE_ENDIAN);
+		result.setAutoExpand(true);
 		
-		result.putShort((short) 6);
-		result.putInt(0x4D32541F);
+		result.putShort((short) 6); //2
+		result.putInt(0x4D32541F); //4
 		
 		result.put(getAsciiString(planetString));
 		
