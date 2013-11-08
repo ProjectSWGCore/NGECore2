@@ -24,6 +24,5 @@ def run(core, actor, target, commandString):
 	
 	parent.remove(target)
 	core.objectService.destroyObject(target)
-	
 	return
 	

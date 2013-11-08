@@ -23,33 +23,42 @@ package protocol.swg;
 
 import java.nio.ByteOrder;
 
+import main.NGECore;
+
 import org.apache.mina.core.buffer.IoBuffer;
+
+import services.travel.TravelPoint;
+import engine.resources.objects.SWGObject;
 
 public class EnterTicketPurchaseModeMessage extends SWGMessage {
 
-	public String planetName;
-	public String cityName;
+	private String planetName;
+	private String cityName;
+	private SWGObject player;
 	
-	public EnterTicketPurchaseModeMessage(String planetName, String cityName) {
+	public EnterTicketPurchaseModeMessage(String planetName, String cityName, SWGObject player) {
 		this.planetName = planetName;
 		this.cityName = cityName;
+		this.player = player;
 	}
 	
 	@Override
 	public void deserialize(IoBuffer data) {
-		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public IoBuffer serialize() {
-		IoBuffer result = IoBuffer.allocate(100).order(ByteOrder.LITTLE_ENDIAN);
+		final NGECore core = NGECore.getInstance();
+		TravelPoint nearestPoint = core.travelService.getNearestTravelPoint(player);
+
+		IoBuffer result = IoBuffer.allocate(20 + planetName.length() + nearestPoint.getName().length()).order(ByteOrder.LITTLE_ENDIAN);
 		
 		result.putShort((short) 3);
 		result.putInt(0x904DAE1A);
 		
 		result.put(getAsciiString(planetName));
-		result.put(getAsciiString(cityName + " Starport"));
+		result.put(getAsciiString(nearestPoint.getName()));
 		
 		return result.flip();
 	}

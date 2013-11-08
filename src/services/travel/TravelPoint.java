@@ -42,7 +42,7 @@ public class TravelPoint {
 		this.name = name;
 		this.location = new Point3D(x, y, z);
 		this.spawnLocation = new SpawnPoint(this.location, 0, 1);
-		this.shuttleAvailable = true;
+		this.shuttleAvailable = false;
 	}
 	
 	public String getName() {
@@ -91,6 +91,7 @@ public class TravelPoint {
 	
 	public void setShuttle(CreatureObject shuttleObj) {
 		this.shuttle = shuttleObj;
+		this.shuttleAvailable = true;
 	}
 
 	public boolean isShuttleAvailable() {
