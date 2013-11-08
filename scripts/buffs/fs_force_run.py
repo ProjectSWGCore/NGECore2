@@ -15,7 +15,7 @@ def setup(core, actor, buff):
 	return
 	
 def removeBuff(core, actor, buff):
-	##Waiting for a remove particle effect function in CreatureObject. Twinkle toes won't go away without it.
+	actor.stopEffectObject('fs_force_run')
 	actor.setSpeedMultiplierBase(actor.getSpeedMultiplierBase() - 2.5 - (2.5 * (actor.getSkillModBase('expertise_movement_buff_fs_force_run')) / 100))
 	core.skillModService.deductSkillMod(actor, 'slope_move', 5)
 	core.skillModService.deductSkillMod(actor, 'movement_resist_snare', 100)
