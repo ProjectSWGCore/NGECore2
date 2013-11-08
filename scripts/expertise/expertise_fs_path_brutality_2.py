@@ -12,7 +12,7 @@ def addExpertisePoint(core, actor):
 
 	actor.addSkill('expertise_fs_path_brutality_2')
 
-	actor.addSkillMod('expertise_focus_critical_buff_line', 1)
+	core.skillModService.addSkillMod(actor, 'expertise_focus_critical_buff_line', 1)
 
 	addAbilities(core, actor, player)
 
@@ -30,7 +30,7 @@ def removeExpertisePoint(core, actor):
 
 	actor.removeSkill('expertise_fs_path_brutality_2')
 
-	actor.removeSkillMod('expertise_focus_critical_buff_line', 1)
+	core.skillModService.deductSkillMod(actor, 'expertise_focus_critical_buff_line', 1)
 
 	removeAbilities(core, actor, player)
 

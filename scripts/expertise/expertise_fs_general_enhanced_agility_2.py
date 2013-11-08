@@ -12,7 +12,7 @@ def addExpertisePoint(core, actor):
 
 	actor.addSkill('expertise_fs_general_enhanced_agility_2')
 
-	actor.addSkillMod('agility_modified', 25)
+	core.skillModService.addSkillMod(actor, 'agility_modified', 25)
 
 	addAbilities(core, actor, player)
 
@@ -30,7 +30,7 @@ def removeExpertisePoint(core, actor):
 
 	actor.removeSkill('expertise_fs_general_enhanced_agility_2')
 
-	actor.removeSkillMod('agility_modified', 25)
+	core.skillModService.deductSkillMod(actor, 'agility_modified', 25)
 
 	removeAbilities(core, actor, player)
 

@@ -12,9 +12,9 @@ def addExpertisePoint(core, actor):
 
 	actor.addSkill('expertise_fs_path_cautious_nature_1')
 
-	actor.addSkillMod('expertise_stance_constitution', 10)
-	actor.addSkillMod('expertise_stance_parry', 1)
-	actor.addSkillMod('expertise_stance_evasion', 1)
+	core.skillModService.addSkillMod(actor, 'expertise_stance_constitution', 10)
+	core.skillModService.addSkillMod(actor, 'expertise_stance_parry', 1)
+	core.skillModService.addSkillMod(actor, 'expertise_stance_evasion', 1)
 
 	addAbilities(core, actor, player)
 
@@ -32,9 +32,9 @@ def removeExpertisePoint(core, actor):
 
 	actor.removeSkill('expertise_fs_path_cautious_nature_1')
 
-	actor.removeSkillMod('expertise_stance_constitution', 10)
-	actor.removeSkillMod('expertise_stance_parry', 1)
-	actor.removeSkillMod('expertise_stance_evasion', 1)
+	core.skillModService.deductSkillMod(actor, 'expertise_stance_constitution', 10)
+	core.skillModService.deductSkillMod(actor, 'expertise_stance_parry', 1)
+	core.skillModService.deductSkillMod(actor, 'expertise_stance_evasion', 1)
 
 	removeAbilities(core, actor, player)
 

@@ -12,7 +12,7 @@ def addExpertisePoint(core, actor):
 
 	actor.addSkill('expertise_fs_general_fidelity_2')
 
-	actor.addSkillMod('expertise_damage_melee', 4)
+	core.skillModService.addSkillMod(actor, 'expertise_damage_melee', 4)
 
 	addAbilities(core, actor, player)
 
@@ -30,7 +30,7 @@ def removeExpertisePoint(core, actor):
 
 	actor.removeSkill('expertise_fs_general_fidelity_2')
 
-	actor.removeSkillMod('expertise_damage_melee', 4)
+	core.skillModService.deductSkillMod(actor, 'expertise_damage_melee', 4)
 
 	removeAbilities(core, actor, player)
 
