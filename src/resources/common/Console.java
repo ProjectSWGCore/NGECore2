@@ -19,45 +19,17 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package services;
+package resources.common;
 
-import java.util.Map;
+import java.util.Calendar;
 
-import resources.objects.SWGList;
-import resources.objects.creature.CreatureObject;
-import main.NGECore;
-import engine.resources.objects.SkillMod;
-import engine.resources.service.INetworkDispatch;
-import engine.resources.service.INetworkRemoteEvent;
-
-public class SkillModService implements INetworkDispatch {
-	
-	private NGECore core;
-
-	public SkillModService(NGECore core) {
-		this.core = core;
+public class Console {
+	public static void println(String string) {
+		Calendar cal = Calendar.getInstance();
+		System.out.println(cal.getTime() + ": " + string);
 	}
-	
-	public void addSkillMod(CreatureObject creature, String skillMod, int value) {
-		
-		core.scriptService.callScript("scripts/skillMods/", skillMod, "add", core, creature, skillMod, value);
-		
+	public static void print(String string) {
+		Calendar cal = Calendar.getInstance();
+		System.out.print(cal.getTime() + ": " + string);
 	}
-	
-	public void deductSkillMod(CreatureObject creature, String skillMod, int value) {
-		
-		core.scriptService.callScript("scripts/skillMods/", skillMod, "deduct", core, creature, skillMod, value);
-
-	}
-
-	@Override
-	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> arg0, Map<Integer, INetworkRemoteEvent> arg1) {
-		
-	}
-
-	@Override
-	public void shutdown() {
-		
-	}
-
 }

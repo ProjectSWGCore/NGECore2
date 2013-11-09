@@ -34,6 +34,7 @@ public class TravelPoint {
 	private int ticketPrice;
 	private CreatureObject shuttle;
 	private boolean shuttleAvailable;
+	private boolean shuttleLanding;
 	
 	public TravelPoint() {
 	}
@@ -43,6 +44,7 @@ public class TravelPoint {
 		this.location = new Point3D(x, y, z);
 		this.spawnLocation = new SpawnPoint(this.location, 0, 1);
 		this.shuttleAvailable = false;
+		this.shuttleLanding = false;
 	}
 	
 	public String getName() {
@@ -91,7 +93,6 @@ public class TravelPoint {
 	
 	public void setShuttle(CreatureObject shuttleObj) {
 		this.shuttle = shuttleObj;
-		this.shuttleAvailable = true;
 	}
 
 	public boolean isShuttleAvailable() {
@@ -100,5 +101,13 @@ public class TravelPoint {
 
 	public void setShuttleAvailable(boolean shuttleAvailable) {
 		this.shuttleAvailable = shuttleAvailable;
+	}
+
+	public boolean isShuttleLanding() {
+		return shuttleLanding;
+	}
+
+	public void setShuttleLanding(boolean shuttleLanding) {
+		this.shuttleLanding = shuttleLanding;
 	}
 }
