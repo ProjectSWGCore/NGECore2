@@ -141,7 +141,9 @@ public class BuffService implements INetworkDispatch {
 		// copy to array for thread safety
 					
 		for(final Buff buff : creature.getBuffList().get().toArray(new Buff[] { })) {
-				
+			
+			if (buff.getGroup1().startsWith("setBonus")) { continue; }
+
 			if(buff.getRemainingDuration() > 0 && buff.getDuration() > 0) {
 				ScheduledFuture<?> task = scheduler.schedule(new Runnable() {
 
