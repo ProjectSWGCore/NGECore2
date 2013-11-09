@@ -1,3 +1,4 @@
+from resources.common import Console
 import sys
 
 def setup():
@@ -18,8 +19,7 @@ def run(core, actor, target, commandString):
 	if not target.getPermissions().canRemove(actor, target):
 		return
 	if parent and not parent.getPermissions().canRemove(actor, parent):
-		return
-	if not target.isSubChildOf(actor):
+		Console.println("Doesn't have permission!")
 		return
 	
 	parent.remove(target)

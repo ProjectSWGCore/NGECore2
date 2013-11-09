@@ -49,22 +49,6 @@ public class SkillModService implements INetworkDispatch {
 		core.scriptService.callScript("scripts/skillMods/", skillMod, "deduct", core, creature, skillMod, value);
 
 	}
-	
-	public boolean hasSkillMod(CreatureObject creature, String skillMod) {
-		
-		SWGList<SkillMod> skillMods = creature.getSkillMods();
-		
-		if (skillMods.isEmpty()) { return false; }
-		
-		for (SkillMod skill : skillMods) {
-			if (skill.getSkillModString() == skillMod) {
-				return true;
-			}
-			else { return false; }
-		}
-		
-		return false;
-	}
 
 	@Override
 	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> arg0, Map<Integer, INetworkRemoteEvent> arg1) {

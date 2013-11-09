@@ -53,8 +53,8 @@ public class PlanetTravelPointListResponse extends SWGMessage {
 		IoBuffer result = IoBuffer.allocate(travelPoints.size() * 2).order(ByteOrder.LITTLE_ENDIAN);
 		result.setAutoExpand(true);
 		
-		result.putShort((short) 6); //2
-		result.putInt(0x4D32541F); //4
+		result.putShort((short) 6);
+		result.putInt(0x4D32541F);
 		
 		result.put(getAsciiString(planetString));
 		
