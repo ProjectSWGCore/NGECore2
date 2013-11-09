@@ -59,6 +59,8 @@ import services.command.CombatCommand;
 import services.command.CommandService;
 import services.gcw.GCWService;
 import services.guild.GuildService;
+import services.login.LoginService;
+import services.login.LoginService;
 import services.map.MapService;
 import services.object.ObjectService;
 import services.object.UpdateService;
@@ -176,12 +178,19 @@ public class NGECore {
 		// Database
 		databaseConnection = new DatabaseConnection();
 		databaseConnection.connect(config.getString("DB.URL"), config.getString("DB.NAME"), config.getString("DB.USER"), config.getString("DB.PASS"), "postgresql");
+
+		String db2Url = config.getString("DB2.URL");
+		if (db2Url == null || db2Url.matches("^\\s*$")) {
+			databaseConnection2 = null;
+		} else {
+			databaseConnection2 = new DatabaseConnection();
+			databaseConnection2.connect(config.getString("DB2.URL"), config.getString("DB2.NAME"), config.getString("DB2.USER"), config.getString("DB2.PASS"), "mysql");
+		}
 		
 		databaseConnection2 = new DatabaseConnection();
 		setGalaxyStatus(1);
 		creatureODB = new ObjectDatabase("creature", true, false, true);
 		mailODB = new ObjectDatabase("mails", true, false, true);
-
 		// Services
 		loginService = new LoginService(this);
 		connectionService = new ConnectionService(this);
