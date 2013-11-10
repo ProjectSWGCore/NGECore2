@@ -143,7 +143,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	@NotPersistent
 	private ScheduledFuture<?> incapTask;
 
-	
+	private boolean staticNPC = false; // temp
 	
 	public CreatureObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
 		super(objectID, planet, Template, position, orientation);
@@ -1245,6 +1245,14 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	public void playMusic(String sndFile, long targetId, int repetitions, boolean flag) {
 		getClient().getSession().write(new PlayMusicMessage(sndFile, targetId, 1, false));
+	}
+	
+	public boolean getStaticNPC() {
+		return staticNPC;
+	}
+	
+	public boolean setStaticNPC(boolean staticNPC) {
+		return this.staticNPC = staticNPC;
 	}
 	
 }

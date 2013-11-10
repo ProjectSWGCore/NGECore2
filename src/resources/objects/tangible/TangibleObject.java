@@ -65,6 +65,9 @@ public class TangibleObject extends SWGObject {
 	@NotPersistent
 	private TangibleMessageBuilder messageBuilder;
 	
+	private int respawnTime = 0;
+	private Point3D spawnCoordinates = new Point3D(0, 0, 0);
+	
 	public TangibleObject(long objectID, Planet planet, String template) {
 		super(objectID, planet, new Point3D(0, 0, 0), new Quaternion(1, 0, 1, 0), template);
 		messageBuilder = new TangibleMessageBuilder(this);
@@ -73,6 +76,7 @@ public class TangibleObject extends SWGObject {
 	public TangibleObject(long objectID, Planet planet, String template, Point3D position, Quaternion orientation) {
 		super(objectID, planet, position, orientation, template);
 		messageBuilder = new TangibleMessageBuilder(this);
+		spawnCoordinates = position.clone();
 	}
 	
 	public TangibleObject() {
@@ -259,6 +263,18 @@ public class TangibleObject extends SWGObject {
 	
 	public void stopEffectObject(String commandString) {
 		notifyObservers(new StopClientEffectObjectByLabel(getObjectID(), commandString), true);
+	}
+	
+	public int getRespawnTime() {
+		synchronized(objectMutex) {
+			return respawnTime;
+		}
+	}
+	
+	public void setRespawnTime(int respawnTime) {
+		synchronized(objectMutex) {
+			this.respawnTime = respawnTime;
+		}
 	}
 	
 	@Override
