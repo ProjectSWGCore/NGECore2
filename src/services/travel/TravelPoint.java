@@ -35,6 +35,8 @@ public class TravelPoint {
 	private CreatureObject shuttle;
 	private boolean shuttleAvailable;
 	private boolean shuttleLanding;
+	private int secondsRemaining;
+	private boolean shuttleDeparting;
 	
 	public TravelPoint() {
 	}
@@ -45,6 +47,7 @@ public class TravelPoint {
 		this.spawnLocation = new SpawnPoint(this.location, 0, 1);
 		this.shuttleAvailable = false;
 		this.shuttleLanding = false;
+		this.secondsRemaining = 0;
 	}
 	
 	public String getName() {
@@ -109,5 +112,21 @@ public class TravelPoint {
 
 	public void setShuttleLanding(boolean shuttleLanding) {
 		this.shuttleLanding = shuttleLanding;
+	}
+
+	public int getSecondsRemaining() {
+		return secondsRemaining;
+	}
+
+	public void setSecondsRemaining(int secondsRemaining) {
+		this.secondsRemaining = secondsRemaining;
+	}
+
+	public boolean isShuttleDeparting() {
+		return shuttleDeparting;
+	}
+
+	public void setShuttleDeparting(boolean shuttleDeparting) {
+		this.shuttleDeparting = shuttleDeparting;
 	}
 }

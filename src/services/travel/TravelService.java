@@ -129,12 +129,15 @@ public class TravelService implements INetworkDispatch {
 								 tp.getShuttle().setPosture((byte) 0);
 								 tp.setShuttleLanding(true);
 								 handleShuttleLanding();
+								 //Console.println("Started handle shuttle landing");
 							 }
 							 else {
 								 tp.getShuttle().setPosture((byte) 2);
 								 tp.setShuttleAvailable(false);
 								 tp.setShuttleLanding(false);
-								 Console.println("Shuttle is not available.");
+								 tp.setShuttleDeparting(true);
+								 handleShuttleDeparture();
+								 //Console.println("Shuttle is not available.");
 							 }
 						}
 					}
@@ -144,10 +147,12 @@ public class TravelService implements INetworkDispatch {
 			
 		};
 		
-		scheduler.scheduleAtFixedRate(shuttleRun, 60, 60, TimeUnit.SECONDS);
+		scheduler.scheduleAtFixedRate(shuttleRun, 83, 83, TimeUnit.SECONDS);
+		
+		//shuttleCountdown();
 	}
 	
-	public void handleShuttleLanding() {
+	private void handleShuttleLanding() {
 		scheduler.schedule(new Runnable() {
 
 			@Override
@@ -157,14 +162,56 @@ public class TravelService implements INetworkDispatch {
 						if (tp.isShuttleLanding()) {
 							tp.setShuttleLanding(false);
 							tp.setShuttleAvailable(true);
-							Console.println("Shuttle has landed!");
+							//Console.println("Shuttle has landed!");
 						}
 					}
 				}
 			}
 			
-		}, 26, TimeUnit.SECONDS);
+		}, 27, TimeUnit.SECONDS);
 
+	}
+	
+	private void handleShuttleDeparture() {
+		scheduler.schedule(new Runnable() {
+
+			@Override
+			public void run() {
+				for (Entry<Planet, Vector<TravelPoint>> entry : travelMap.entrySet()) {
+					for(TravelPoint tp : entry.getValue()) {
+						tp.setShuttleDeparting(false);
+						tp.setSecondsRemaining(60);
+						
+					}
+				}
+				shuttleCountdown();
+				//Console.println("Countdown initiated");
+			}
+			
+		}, 20, TimeUnit.SECONDS);
+	}
+	
+	private void shuttleCountdown() {
+		Runnable countDown = new Runnable() {
+			@Override
+			public void run() {
+				for (Entry<Planet, Vector<TravelPoint>> entry : travelMap.entrySet()) {
+					for(TravelPoint tp : entry.getValue()) {
+						if (tp.getShuttle() == null || tp.isShuttleDeparting() == true || tp.isShuttleAvailable() == true || tp.getSecondsRemaining() == 0)
+							continue;
+						
+						else {
+							tp.setSecondsRemaining(tp.getSecondsRemaining() - 1);
+							//Console.println("Time Remaining: " + tp.getSecondsRemaining());
+						}
+					}
+				}
+			}
+			
+		};
+		
+		runCountdown(countDown, scheduler);
+		
 	}
 	
 	public TravelPoint getNearestTravelPoint(SWGObject obj) {
@@ -376,6 +423,8 @@ public class TravelService implements INetworkDispatch {
 					selectedTicket.getContainer().remove(selectedTicket);
 					core.objectService.destroyObject(selectedTicket);
 					doTransport(creature, arrivalPoint);
+				} else {
+					creature.sendSystemMessage("@travel:shuttle_not_available ", (byte) 0);
 				}
 			}
 		});
@@ -428,6 +477,14 @@ public class TravelService implements INetworkDispatch {
 			e.printStackTrace();
 		}
 	}
+	
+	public Map<Planet, Vector<TravelPoint>> getTravelMap() {
+		return this.travelMap;
+	}
+	
+    public void runCountdown(Runnable task, ScheduledExecutorService executor) {
+        new ShuttleCountdown(task, this.core).startCountdown(executor);
+    }
 	
 	@Override
 	public void shutdown() {
