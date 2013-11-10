@@ -162,6 +162,12 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		messageBuilder = new CreatureMessageBuilder(this);
 	}
 	
+	public void setCustomName2(String customName) {
+		setCustomName(customName);
+		
+		notifyObservers(messageBuilder.buildCustomNameDelta(customName), true);
+	}
+	
 	public Transaction getTransaction() { return txn; }
 	
 	public void createTransaction(Environment env) { txn = env.beginTransaction(null, null); }
