@@ -33,7 +33,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import resources.common.*;
@@ -51,6 +53,7 @@ import protocol.swg.CmdStartScene;
 import protocol.swg.HeartBeatMessage;
 import protocol.swg.ParametersMessage;
 import protocol.swg.SelectCharacter;
+import protocol.swg.ServerTimeMessage;
 import protocol.swg.UnkByteFlag;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.CrcStringTableVisitor;
@@ -93,6 +96,8 @@ public class ObjectService implements INetworkDispatch {
 	private Random random = new Random();
 	
 	private Map<String, PyObject> serverTemplates = new ConcurrentHashMap<String, PyObject>();
+	
+	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	
 	public ObjectService(final NGECore core) {
 		this.core = core;
@@ -178,6 +183,10 @@ public class ObjectService implements INetworkDispatch {
 			
 			object = new GroupObject(objectID);
 			
+		} else if(Template.startsWith("object/mobile")){
+			
+			object = new CreatureObject(objectID, planet, position, orientation, Template);
+			
 		} else if(Template.startsWith("object/waypoint")) {
 			
 			object = new WaypointObject(objectID, planet, position);
@@ -243,7 +252,36 @@ public class ObjectService implements INetworkDispatch {
 	
 	public Map<Long, SWGObject> getObjectList() { return objectList; }
 	
+	public void destroyObject(final SWGObject object, int seconds) {
+		scheduler.schedule(new Runnable() {
+			
+			@Override
+			public void run() {
+				destroyObject(object);
+			}
+			
+		}, seconds, TimeUnit.SECONDS);
+	}
+	
 	public void destroyObject(SWGObject object) {
+		
+		if (object instanceof TangibleObject &&
+		((TangibleObject) object).getRespawnTime() > 0) {
+			final long objectId = object.getObjectID();
+			final String Template = object.getTemplate();
+			final Planet planet = object.getPlanet();
+			final Point3D position = object.getPosition();
+			final Quaternion orientation = object.getOrientation();
+			
+			scheduler.schedule(new Runnable() {
+				
+				@Override
+				public void run() {
+					createObject(Template, objectId, planet, position, orientation);
+				}
+				
+			}, ((TangibleObject) object).getRespawnTime(), TimeUnit.SECONDS);
+		}
 		
 		object.viewChildren(object, true, true, new Traverser() {
 			@Override
@@ -430,6 +468,26 @@ public class ObjectService implements INetworkDispatch {
 				
 				core.playerService.postZoneIn(creature);
 
+			}
+			
+		});
+		
+		objControllerOpcodes.put(ObjControllerOpcodes.USE_STATIC_OBJECT, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
+				CreatureObject creature = (CreatureObject) getObject(buffer.getLong());
+				if (creature == null || creature.getClient() == null) return;
+				buffer.skip(4);
+				SWGObject object = getObject(buffer.getLong());
+				if (object == null) return;
+				String filePath = "scripts/" + object.getTemplate().split(".")[0] + ".py";
+				if (!FileUtilities.doesFileExist(filePath)) {
+					PyObject method = core.scriptService.getMethod(filePath.substring(0, filePath.lastIndexOf("/")), filePath.substring(filePath.lastIndexOf("/") + 1).split(".")[0], "useStaticObject");
+					if (method != null && method.isCallable()) {
+						method.__call__(Py.java2py(core), Py.java2py(creature), Py.java2py(object));
+					}
+				}
 			}
 			
 		});

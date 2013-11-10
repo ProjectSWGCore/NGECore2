@@ -143,7 +143,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	@NotPersistent
 	private ScheduledFuture<?> incapTask;
 
-	
+	private boolean staticNPC = false; // temp
 	
 	public CreatureObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
 		super(objectID, planet, Template, position, orientation);
@@ -160,6 +160,12 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	public CreatureObject() {
 		super();
 		messageBuilder = new CreatureMessageBuilder(this);
+	}
+	
+	public void setCustomName2(String customName) {
+		setCustomName(customName);
+		
+		notifyObservers(messageBuilder.buildCustomNameDelta(customName), true);
 	}
 	
 	public Transaction getTransaction() { return txn; }
@@ -707,10 +713,13 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.currentAnimation = currentAnimation;
 		}
-		Animation animation = new Animation(getObjectId(), currentAnimation);
-		ObjControllerMessage objController = new ObjControllerMessage(0x1B, animation);
+		//Animation animation = new Animation(getObjectId(), currentAnimation);
+		//ObjControllerMessage objController = new ObjControllerMessage(0x1B, animation);
 		
-		notifyObservers(objController, true);
+		//notifyObservers(objController, true);
+		
+		notifyObservers(messageBuilder.buildCurrentAnimationDelta(currentAnimation), true);
+
 	}
 
 	public String getMoodAnimation() {
@@ -1249,6 +1258,14 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	public void playMusic(String sndFile, long targetId, int repetitions, boolean flag) {
 		getClient().getSession().write(new PlayMusicMessage(sndFile, targetId, 1, false));
+	}
+	
+	public boolean getStaticNPC() {
+		return staticNPC;
+	}
+	
+	public boolean setStaticNPC(boolean staticNPC) {
+		return this.staticNPC = staticNPC;
 	}
 	
 }
