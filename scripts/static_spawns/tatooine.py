@@ -13,6 +13,7 @@ def addPlanetSpawns(core, planet):
 	
 	stcSvc.spawnObject('object/creature/npc/theme_park/shared_player_transport.iff', 'tatooine', long(0), float(3618), float(5), float(-4801), float(0.500574469566), float(0.865693628788)) # mos eisley starport
 	
+	
 	stcSvc.spawnObject('object/tangible/travel/ticket_collector/shared_ticket_collector.iff', 'tatooine', long(0), float(-2886.3), float(5.6), float(1929.4), float(-0.113814), float(0.993502)) # mos espa shuttleport a
 	stcSvc.spawnObject('object/tangible/travel/ticket_collector/shared_ticket_collector.iff', 'tatooine', long(0), float(-3116.3), float(5.6), float(2166.1), float(-0.621933), float(0.783071)) # mos espa shuttleport b
 	stcSvc.spawnObject('object/tangible/travel/ticket_collector/shared_ticket_collector.iff', 'tatooine', long(0), float(3623.5), float(5.6), float(2178.4), float(-0.123692), float(0.992321)) # mos espa shuttleport c
@@ -31,6 +32,15 @@ def addPlanetSpawns(core, planet):
 	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'tatooine', long(0), float(1403.6), float(7.6), float(3474.4), float(1), float(0)) # mos entha shuttleport a
 	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'tatooine', long(0), float(1739), float(7.6), float(3192.1), float(1), float(0)) # mos entha shuttleport b
 	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'tatooine', long(0), float(3418.4), float(5.6), float(-4659.3), float(-0.485545), float(0.874212)) # mos eisley shuttleport
+	
+	stcSvc.spawnObject('object/mobile/shared_lifeday_saun_dann.iff', 'tatooine', long(0), float(-5037.00), float(75), float(-6561), float(-0.75), float(0)) # Life Day
+	stcSvc.spawnObject('object/tangible/holiday/life_day/shared_main_lifeday_tree.iff', 'tatooine', long(0), float(-5043.00), float(75), float(-6541.00), float(0.999132931232), float(-0.0416347384453)) # Lifeday Tree
+	stcSvc.spawnObject('object/mobile/shared_lifeday_figrin_dan.iff', 'tatooine', long(0), float(-5043.00), float(75), float(-6560), float(-0.75), float(0)) # LD Figrin
+	stcSvc.spawnObject('object/mobile/shared_lifeday_figrin_dan_band.iff', 'tatooine', long(0), float(-5040.00), float(75), float(-6557), float(-0.75), float(0)) # LD Band 1
+	stcSvc.spawnObject('object/mobile/shared_lifeday_figrin_dan_band.iff', 'tatooine', long(0), float(-5045.00), float(75), float(-6555), float(-0.75), float(0)) # LD band 2
+	stcSvc.spawnObject('object/mobile/shared_lifeday_figrin_dan_band.iff', 'tatooine', long(0), float(-5050.00), float(75), float(-6559), float(-0.75), float(0)) # LD Band 3
+	stcSvc.spawnObject('object/mobile/shared_lifeday_figrin_dan_band.iff', 'tatooine', long(0), float(-5050.00), float(75), float(-6563), float(-0.75), float(0)) # LD band 4
+	
 
 	return
 	

@@ -178,6 +178,10 @@ public class ObjectService implements INetworkDispatch {
 			
 			object = new GroupObject(objectID);
 			
+		} else if(Template.startsWith("object/mobile")){
+			
+			object = new CreatureObject(objectID, planet, position, orientation, Template);
+			
 		} else if(Template.startsWith("object/waypoint")) {
 			
 			object = new WaypointObject(objectID, planet, position);
