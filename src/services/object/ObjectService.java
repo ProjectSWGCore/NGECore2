@@ -474,7 +474,7 @@ public class ObjectService implements INetworkDispatch {
 				if (!FileUtilities.doesFileExist(filePath)) {
 					PyObject method = core.scriptService.getMethod(filePath.substring(0, filePath.lastIndexOf("/")), filePath.substring(filePath.lastIndexOf("/") + 1).split(".")[0], "useStaticObject");
 					if (method != null && method.isCallable()) {
-						method.__call__(Py.java2py(core), Py.java2py(creature));
+						method.__call__(Py.java2py(core), Py.java2py(creature), Py.java2py(object));
 					}
 				}
 			}
