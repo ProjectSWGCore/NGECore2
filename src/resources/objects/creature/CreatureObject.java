@@ -33,6 +33,7 @@ import protocol.swg.ObjControllerMessage;
 import protocol.swg.PlayMusicMessage;
 import protocol.swg.UpdatePVPStatusMessage;
 import protocol.swg.UpdatePostureMessage;
+import protocol.swg.objectControllerObjects.Animation;
 import protocol.swg.objectControllerObjects.Posture;
 
 import com.sleepycat.je.Environment;
@@ -51,7 +52,6 @@ import engine.resources.objects.SkillMod;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
-
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 
@@ -707,6 +707,10 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.currentAnimation = currentAnimation;
 		}
+		Animation animation = new Animation(getObjectId(), currentAnimation);
+		ObjControllerMessage objController = new ObjControllerMessage(0x1B, animation);
+		
+		notifyObservers(objController, true);
 	}
 
 	public String getMoodAnimation() {
