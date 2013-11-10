@@ -92,6 +92,15 @@ def tatooinePoints(core, planet):
     trvSvc.addTravelPoint(planet, "Mos Eisley Starport", 3619, 5, -4801)
     trvSvc.addTravelPoint(planet, "Mos Espa Starport", -2829, 5, 2080)
     trvSvc.addTravelPoint(planet, "Mos Entha Starport", 1238, 7, 3062)
+    trvSvc.addTravelPoint(planet, "Anchorhead Shuttleport", 48, 52, -5319)
+    trvSvc.addTravelPoint(planet, "Mos Entha Shuttleport A", 1731, 7, 3205)
+    trvSvc.addTravelPoint(planet, "Mos Entha Shuttleport B", 1396, 7, 3487)
+    trvSvc.addTravelPoint(planet, "Mos Espa Shuttleport A", -3132, 5, 2172)
+    trvSvc.addTravelPoint(planet, "Mos Espa Shuttleport B", -2799, 5, 2163)
+    trvSvc.addTravelPoint(planet, "Mos Espa Shuttleport C", -2892, 5, 1914)
+    trvSvc.addTravelPoint(planet, "Mos Eisley Shuttleport", 3434, 5, -4659)
+    trvSvc.addTravelPoint(planet, "Bestine Shuttleport", -1071, 12, -3566)
+    trvSvc.addTravelPoint(planet, "Wayfar Shuttleport", -5089, 75, -6594)
     return
         
 def yavin4Points(core, planet):
