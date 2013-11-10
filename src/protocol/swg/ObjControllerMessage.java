@@ -53,6 +53,8 @@ public class ObjControllerMessage extends SWGMessage {
 	public static final int SHOW_FLY_TEXT = 0x01BD;
 	public static final int START_TASK = 0x448;
 	public static final int ANIMATION = 0x00F2;
+	public static final int BUFF_BUILDER_START = 0x025C;
+	public static final int BUFF_BUILDER_CHANGE = 0x025A;
 
 	public ObjControllerMessage() { 
 		
@@ -76,7 +78,7 @@ public class ObjControllerMessage extends SWGMessage {
 		buffer.putInt(0x80CE5E46);
 		buffer.putInt(update);
 		buffer.put(objControllerObject.serialize());
-		
+		//System.out.println("OBJMSG: " + buffer.flip().getHexDump());
 		int size = buffer.position();
 		return IoBuffer.allocate(size).put(buffer.array(), 0, size).flip();
 	}
