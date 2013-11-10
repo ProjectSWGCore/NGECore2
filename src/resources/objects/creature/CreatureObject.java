@@ -713,6 +713,8 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.currentAnimation = currentAnimation;
 		}
+		
+		notifyObservers(messageBuilder.buildCurrentAnimationDelta(currentAnimation), true);
 	}
 
 	public String getMoodAnimation() {

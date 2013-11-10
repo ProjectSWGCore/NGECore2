@@ -586,6 +586,15 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		return buffer;
 	}
 	
+	public IoBuffer buildCurrentAnimationDelta(String currentAnimation) {
+		IoBuffer buffer = bufferPool.allocate(getAsciiString(currentAnimation).length, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.put(getAsciiString(currentAnimation));
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 10, buffer, size + 4);
+		return buffer;
+	}
+	
 	public IoBuffer buildLevelDelta(short level) {
 		
 		IoBuffer buffer = bufferPool.allocate(2, false).order(ByteOrder.LITTLE_ENDIAN);
