@@ -226,6 +226,7 @@ public class NGECore {
 		zoneDispatch.addService(mapService);
 		zoneDispatch.addService(travelService);
 		zoneDispatch.addService(playerService);
+		zoneDispatch.addService(buffService);
 
 		zoneServer = new MINAServer(zoneDispatch, config.getInt("ZONE.PORT"));
 		zoneServer.start();

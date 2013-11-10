@@ -30,5 +30,5 @@ public class ObjControllerOpcodes {
 	public static final int OBJECT_MENU_REQUEST = 0x46010000;
 	public static final int SECURE_TRADE = 0x15010000;
 	public static final int USE_STATIC_OBJECT = 0x26010000;
-
+	public static final int BUFF_BUILDER_CHANGE = 0x5A020000;
 }
