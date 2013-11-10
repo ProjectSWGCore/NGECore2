@@ -252,6 +252,17 @@ public class ObjectService implements INetworkDispatch {
 	
 	public Map<Long, SWGObject> getObjectList() { return objectList; }
 	
+	public void destroyObject(final SWGObject object, int seconds) {
+		scheduler.schedule(new Runnable() {
+			
+			@Override
+			public void run() {
+				destroyObject(object);
+			}
+			
+		}, seconds, TimeUnit.SECONDS);
+	}
+	
 	public void destroyObject(SWGObject object) {
 		
 		if (object instanceof TangibleObject &&
@@ -262,14 +273,14 @@ public class ObjectService implements INetworkDispatch {
 			final Point3D position = object.getPosition();
 			final Quaternion orientation = object.getOrientation();
 			
-			scheduler.scheduleWithFixedDelay(new Runnable() {
+			scheduler.schedule(new Runnable() {
 				
 				@Override
 				public void run() {
 					createObject(Template, objectId, planet, position, orientation);
 				}
 				
-			}, 0, ((TangibleObject) object).getRespawnTime(), TimeUnit.SECONDS);
+			}, ((TangibleObject) object).getRespawnTime(), TimeUnit.SECONDS);
 		}
 		
 		object.viewChildren(object, true, true, new Traverser() {
