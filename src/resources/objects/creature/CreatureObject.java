@@ -713,10 +713,10 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.currentAnimation = currentAnimation;
 		}
-		//Animation animation = new Animation(getObjectId(), currentAnimation);
-		//ObjControllerMessage objController = new ObjControllerMessage(0x1B, animation);
+		Animation animation = new Animation(getObjectId(), currentAnimation);
+		ObjControllerMessage objController = new ObjControllerMessage(0x1B, animation);
 		
-		//notifyObservers(objController, true);
+		notifyObservers(objController, true);
 		
 		notifyObservers(messageBuilder.buildCurrentAnimationDelta(currentAnimation), true);
 
