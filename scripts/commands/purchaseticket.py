@@ -4,10 +4,6 @@ def setup():
     return
     
 def run(core, actor, target, commandString):
-    #playerObject = actor.getSlottedObject('ghost')
-    #playerObject.setTitle(str(commandString))
-    #print ('Command string: ' + commandString)
-    
     trvSvc = core.travelService
     
     cmdArgs = commandString.split(" ")
@@ -16,7 +12,8 @@ def run(core, actor, target, commandString):
     departureLoc = cmdArgs[1].replace("_"," ")
     arrivalPlanet = cmdArgs[2]
     arrivalLoc = cmdArgs[3].replace("_", " ")
-    
-    trvSvc.purchaseTravelTicket(actor, departurePlanet, departureLoc, arrivalPlanet, arrivalLoc)
+    roundTrip = cmdArgs[4]
+
+    trvSvc.purchaseTravelTicket(actor, departurePlanet, departureLoc, arrivalPlanet, arrivalLoc, roundTrip)
     
     return

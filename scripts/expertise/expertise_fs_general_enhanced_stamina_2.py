@@ -11,7 +11,8 @@ def addExpertisePoint(core, actor):
 		return
 
 	actor.addSkill('expertise_fs_general_enhanced_stamina_2')
-	actor.addSkillMod('stamina_modified', 25)
+	
+	core.skillModService.addSkillMod(actor, 'stamina_modified', 25)
 
 	addAbilities(core, actor, player)
 
@@ -29,8 +30,8 @@ def removeExpertisePoint(core, actor):
 
 	actor.removeSkill('expertise_fs_general_enhanced_stamina_2')
 
-	actor.removeSkillMod('stamina_modified', 25)
-
+	core.skillModService.deductSkillMod(actor, 'stamina_modified', 25)
+	
 	removeAbilities(core, actor, player)
 
 	return

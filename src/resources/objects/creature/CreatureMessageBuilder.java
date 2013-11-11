@@ -119,7 +119,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer.putInt(1);	
 		buffer.putInt(0);	// TANO Data
 		buffer.putInt(0);	
-		buffer.putInt(0x80);
+		buffer.putInt(0x80); // 0x80 = Player, 0x08 = Quest NPC, 
 		buffer.putInt(creature.getIncapTimer());
 		buffer.putInt(0);
 		buffer.putInt(0x3A98);
@@ -586,6 +586,15 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		return buffer;
 	}
 	
+	public IoBuffer buildCurrentAnimationDelta(String currentAnimation) {
+		IoBuffer buffer = bufferPool.allocate(getAsciiString(currentAnimation).length, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.put(getAsciiString(currentAnimation));
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 10, buffer, size + 4);
+		return buffer;
+	}
+	
 	public IoBuffer buildLevelDelta(short level) {
 		
 		IoBuffer buffer = bufferPool.allocate(2, false).order(ByteOrder.LITTLE_ENDIAN);
@@ -954,6 +963,16 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 
 		return buffer;
 
+	}
+	
+	public IoBuffer buildCustomNameDelta(String customName) {
+		IoBuffer buffer = bufferPool.allocate(getUnicodeString(customName).length, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.put(getUnicodeString(customName));
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 3, (short) 1, (short) 2, buffer, size + 4);
+		return buffer;
+		
 	}
 	
 	@Override

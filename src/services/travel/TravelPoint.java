@@ -22,6 +22,7 @@
 package services.travel;
 
 import resources.common.SpawnPoint;
+import resources.objects.creature.CreatureObject;
 import engine.resources.scene.Point3D;
 
 public class TravelPoint {
@@ -31,7 +32,11 @@ public class TravelPoint {
 	private Point3D location;
 	private SpawnPoint spawnLocation;
 	private int ticketPrice;
-	private ShuttleObject shuttleObject;
+	private CreatureObject shuttle;
+	private boolean shuttleAvailable;
+	private boolean shuttleLanding;
+	private int secondsRemaining;
+	private boolean shuttleDeparting;
 	
 	public TravelPoint() {
 	}
@@ -40,7 +45,9 @@ public class TravelPoint {
 		this.name = name;
 		this.location = new Point3D(x, y, z);
 		this.spawnLocation = new SpawnPoint(this.location, 0, 1);
-		this.shuttleObject = new ShuttleObject();
+		this.shuttleAvailable = false;
+		this.shuttleLanding = false;
+		this.secondsRemaining = 0;
 	}
 	
 	public String getName() {
@@ -83,11 +90,43 @@ public class TravelPoint {
 		this.spawnLocation = point;
 	}
 	
-	public ShuttleObject getShuttle() {
-		return this.shuttleObject;
+	public CreatureObject getShuttle() {
+		return this.shuttle;
 	}
 	
-	public void setShuttle(ShuttleObject shuttleObj) {
-		this.shuttleObject = shuttleObj;
+	public void setShuttle(CreatureObject shuttleObj) {
+		this.shuttle = shuttleObj;
+	}
+
+	public boolean isShuttleAvailable() {
+		return shuttleAvailable;
+	}
+
+	public void setShuttleAvailable(boolean shuttleAvailable) {
+		this.shuttleAvailable = shuttleAvailable;
+	}
+
+	public boolean isShuttleLanding() {
+		return shuttleLanding;
+	}
+
+	public void setShuttleLanding(boolean shuttleLanding) {
+		this.shuttleLanding = shuttleLanding;
+	}
+
+	public int getSecondsRemaining() {
+		return secondsRemaining;
+	}
+
+	public void setSecondsRemaining(int secondsRemaining) {
+		this.secondsRemaining = secondsRemaining;
+	}
+
+	public boolean isShuttleDeparting() {
+		return shuttleDeparting;
+	}
+
+	public void setShuttleDeparting(boolean shuttleDeparting) {
+		this.shuttleDeparting = shuttleDeparting;
 	}
 }

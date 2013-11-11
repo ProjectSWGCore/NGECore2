@@ -226,6 +226,7 @@ public class NGECore {
 		zoneDispatch.addService(mapService);
 		zoneDispatch.addService(travelService);
 		zoneDispatch.addService(playerService);
+		zoneDispatch.addService(buffService);
 
 		zoneServer = new MINAServer(zoneDispatch, config.getInt("ZONE.PORT"));
 		zoneServer.start();
@@ -266,6 +267,8 @@ public class NGECore {
 		zoneDispatch.addService(tradeService);
 		
 		zoneDispatch.addService(skillService);
+		
+		travelService.startShuttleSchedule();
 		
 		didServerCrash = false;
 		System.out.println("Started Server.");

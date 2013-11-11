@@ -37,15 +37,10 @@ public class PlanetTravelPointListRequest extends SWGMessage{
 	
 	@Override
 	public void deserialize(IoBuffer buffer) {
-		
-		//buffer.getShort();
-		//buffer.getInt();
-		
+
 		setObjectId(buffer.getLong());
 		setPlanet(getAsciiString(buffer));
-		
-		//System.out.println("String: " + getAsciiString(buffer));
-		
+
 	}
 
 	@Override

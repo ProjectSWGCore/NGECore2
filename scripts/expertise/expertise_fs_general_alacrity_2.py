@@ -12,7 +12,7 @@ def addExpertisePoint(core, actor):
 
 	actor.addSkill('expertise_fs_general_alacrity_2')
 
-	actor.addSkillMod('expertise_glancing_blow_all', 2)
+	core.skillModService.addSkillMod(actor, 'expertise_glancing_blow_all', 2)
 
 	addAbilities(core, actor, player)
 
@@ -30,7 +30,7 @@ def removeExpertisePoint(core, actor):
 
 	actor.removeSkill('expertise_fs_general_alacrity_2')
 
-	actor.removeSkillMod('expertise_glancing_blow_all', 2)
+	core.skillModService.deductSkillMod(actor, 'expertise_glancing_blow_all', 2)
 
 	removeAbilities(core, actor, player)
 

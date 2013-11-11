@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 
 import resources.objects.building.BuildingObject;
+import resources.objects.creature.CreatureObject;
+import resources.objects.tangible.TangibleObject;
 
 import main.NGECore;
 
@@ -45,6 +47,11 @@ public class StaticService implements INetworkDispatch {
 	}
 
 	public void spawnStatics() {
+		for (SWGObject object : core.objectService.getObjectList().values())
+			if (object instanceof CreatureObject && ((CreatureObject) object).getStaticNPC()) {
+				((TangibleObject) object).setRespawnTime(0);
+				core.objectService.destroyObject(object);
+			}
 		spawnPlanetStaticObjs("rori");
 		spawnPlanetStaticObjs("naboo");
 		spawnPlanetStaticObjs("tatooine");
@@ -66,7 +73,8 @@ public class StaticService implements INetworkDispatch {
 		System.out.println("Loaded static objs for " + planetObj.getName());
 	}
 	
-	public void spawnObject(String template, String planetName, long cellId, float x, float y, float z, float qY, float qW) {
+	// TODO make sure static objects get unloaded
+	public SWGObject spawnObject(String template, String planetName, long cellId, float x, float y, float z, float qY, float qW) {
 		
 		Planet planet = core.terrainService.getPlanetByName(planetName);
 		
@@ -74,15 +82,17 @@ public class StaticService implements INetworkDispatch {
 		
 		if(planet == null) {
 			System.out.println("Cant spawn static object because planet is null");
-			return;
+			return null;
 		}
 		
 		SWGObject object = core.objectService.createObject(template, 0, planet, new Point3D(x, y, z), new Quaternion(qW, 0, qY, 0));
 		
 		if(object == null) {
 			System.out.println("Static object is null");
-			return;
+			return null;
 		}
+		
+		if (object instanceof CreatureObject) ((CreatureObject) object).setStaticNPC(true);
 		
 		if(cellId == 0) {
 			boolean add = core.simulationService.add(object, (float) x, (float) z);
@@ -93,11 +103,12 @@ public class StaticService implements INetworkDispatch {
 			SWGObject parent = core.objectService.getObject(cellId);
 			if(parent == null) {
 				System.out.println("Cell not found");
-				return;
+				return object;
 			}
 			parent.add(object);
 		}
 		
+		return object;
 	}
 	
 	public List<SWGObject> getCloningFacilitiesByPlanet(Planet planet) {

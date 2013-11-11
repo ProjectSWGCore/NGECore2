@@ -12,9 +12,9 @@ def addExpertisePoint(core, actor):
 
 	actor.addSkill('expertise_fs_general_premonition_1')
 
-	actor.addSkillMod('expertise_evasion_chance', 2)
-	actor.addSkillMod('expertise_evasion_value', 8)
-
+	core.skillModService.addSkillMod(actor, 'expertise_evasion_chance', 2)
+	core.skillModService.addSkillMod(actor, 'expertise_evasion_value', 8)
+	
 	addAbilities(core, actor, player)
 
 	return
@@ -31,8 +31,8 @@ def removeExpertisePoint(core, actor):
 
 	actor.removeSkill('expertise_fs_general_premonition_1')
 
-	actor.removeSkillMod('expertise_evasion_chance', 2)
-	actor.removeSkillMod('expertise_evasion_value', 8)
+	core.skillModService.deductSkillMod(actor, 'expertise_evasion_chance', 2)
+	core.skillModService.deductSkillMod(actor, 'expertise_evasion_value', 8)
 
 	removeAbilities(core, actor, player)
 

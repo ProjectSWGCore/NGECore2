@@ -12,7 +12,7 @@ def addExpertisePoint(core, actor):
 
 	actor.addSkill('expertise_fs_path_ruthless_precision_4')
 
-	actor.addSkillMod('expertise_focus_damage_increase', 2)
+	core.skillModService.addSkillMod(actor, 'expertise_focus_damage_increase', 2)
 
 	addAbilities(core, actor, player)
 
@@ -30,7 +30,7 @@ def removeExpertisePoint(core, actor):
 
 	actor.removeSkill('expertise_fs_path_ruthless_precision_4')
 
-	actor.removeSkillMod('expertise_focus_damage_increase', 2)
+	core.skillModService.deductSkillMod(actor, 'expertise_focus_damage_increase', 2)
 
 	removeAbilities(core, actor, player)
 
