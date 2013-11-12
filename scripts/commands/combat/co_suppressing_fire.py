@@ -1,15 +1,15 @@
 def setup(core, actor, target, command):
-    core.buffService.addBuffToCreature(target, 'co_supressing_fire_0')
-	if actor.getSkillMod('expertise_supression_speed', 10):
+	core.buffService.addBuffToCreature(target, 'co_supressing_fire_0')
+	if actor.getSkillMod('expertise_supression_speed'):
 		core.buffService.addBuffToCreature(target, 'co_supressing_fire_1')
-	if actor.getSkillMod('expertise_supression_speed', 20):
+	if actor.getSkillMod('expertise_supression_speed'):
 		core.buffService.addBuffToCreature(target, 'co_supressing_fire_2')
-	if actor.getSkillMod('expertise_supression_speed', 30):
+	if actor.getSkillMod('expertise_supression_speed'):
 		core.buffService.addBuffToCreature(target, 'co_supressing_fire_3')
-	if actor.getSkillMod('expertise_supression_speed', 40):
-		core.buffService.addBuffToCreature(target, 'co_supressing_fire_3')
-		return
-	
+	if actor.getSkillMod('expertise_supression_speed'):
+		core.buffService.addBuffToCreature(target, 'co_supressing_fire_4')
+	return
+        
 def preRun(core, actor, target, command):
 	return
 
