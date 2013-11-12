@@ -5,5 +5,5 @@ def setup(core, actor, buff):
 	return
 	
 def removeBuff(core, actor, buff):
-	core.skillModService.deductSkillMod(actor, 'movement', 15)
+	core.skillModService.deductSkillMod(actor, 'movement', 5)
 	return

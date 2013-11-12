@@ -7,5 +7,5 @@ def setup(core, actor, buff):
 	
 def removeBuff(core, actor, buff):
 	core.skillModService.deductSkillMod(actor, 'glancing_blow_vulnerable', 30)
-	core.skillModService.deductSkillMod(actor, 'movement', 15)
+	core.skillModService.deductSkillMod(actor, 'movement', 5)
 	return
