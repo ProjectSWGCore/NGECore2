@@ -10,9 +10,11 @@ public class BuffBuilderStartMessage extends ObjControllerObject {
 
 	private long objectId;
 	private long recieverId;
+	private long bufferId;
 	
-	public BuffBuilderStartMessage(long objectId, long recieverId) {
+	public BuffBuilderStartMessage(long objectId, long bufferId, long recieverId) {
 		this.objectId = objectId;
+		this.bufferId = bufferId;
 		this.recieverId = recieverId;
 	}
 	
@@ -30,7 +32,7 @@ public class BuffBuilderStartMessage extends ObjControllerObject {
 
 		result.putLong(objectId);
 		result.putInt(0); // tick count
-		result.putLong(objectId);
+		result.putLong(bufferId);
 		result.putLong(recieverId);
 		
 		

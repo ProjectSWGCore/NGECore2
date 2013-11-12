@@ -35,9 +35,13 @@ import java.util.concurrent.TimeUnit;
 
 
 
+
+
+
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 
+import protocol.swg.ObjControllerMessage;
 import protocol.swg.objectControllerObjects.BuffBuilderChange;
 import protocol.swg.objectControllerObjects.BuffBuilderStartMessage;
 import resources.common.Console;
@@ -48,6 +52,8 @@ import resources.objects.DamageOverTime;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import main.NGECore;
+import engine.clients.Client;
+import engine.resources.objects.SWGObject;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
@@ -70,25 +76,64 @@ public class BuffService implements INetworkDispatch {
 				Console.println("BUFF_BUILDER_CHANGE RECIEVED");
 				data.order(ByteOrder.LITTLE_ENDIAN);
 				
+				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				
+				if(client == null)
+					return;
+				
+				SWGObject sender = client.getParent();
+				
+				if(sender == null)
+					return;
+				
 				BuffBuilderChange changeMessage = new BuffBuilderChange();
 				changeMessage.deserialize(data);
 				
-				//Console.println("Unknown Long 1 (objId?): " + changeMessage.getUnk1());
-				//Console.println("Unknown Int 1 (tickCount?): " + changeMessage.getUnkI1());
-				//Console.println("Unknown Long 2 (objId?): " + changeMessage.getUnk2());
-				//Console.println("Unknown Long 3 (buff or buffer?): " + changeMessage.getUnk3());
-				//Console.println("Unknown Int 2 (???): " + changeMessage.getUnkI2());
-				//Console.println("Unknown Int 3 (buffCost?): " + changeMessage.getBuffCost());
-				//Console.println("Unknown Int 4 (accepted?): " + changeMessage.getAccepted());
-				//Console.println("Unknown Byte: " + changeMessage.getUnkByte());
-				//CreatureObject player = (CreatureObject) core.objectService.getObject(changeMessage.getUnk1());
+				SWGObject recipient = core.objectService.getObject(changeMessage.getRecipientId());
 				
-				//if (player == null)
-					//return;
+				if (recipient == null || recipient.getClient() == null)
+					return;
 				
-				//BuffBuilderStartMessage startMsg = new BuffBuilderStartMessage(changeMessage.getBufferId(), changeMessage.getUnknown());
-				//player.getClient().getSession().write(startMsg.serialize());
-				
+				if (sender.getClient().getSession().containsAttribute("buffWorkshop")) {
+
+					long attribute = (long) sender.getClient().getSession().getAttribute("buffWorkshop");
+					Console.println("Sender Attribute = " + attribute);
+					Console.println("Recipient ID (Packet) = " + changeMessage.getRecipientId());
+					
+					if (attribute == changeMessage.getObjectId()) {
+						// TODO: accepted checked? give buff
+						Console.println("Buffer buffing themselves!");
+						return;
+					}
+					
+					if (attribute == changeMessage.getRecipientId() && attribute != changeMessage.getObjectId()) {
+						Console.println("Attribute check passed!");
+						BuffBuilderChange recievingMsg = new BuffBuilderChange(recipient.getObjectId(), changeMessage.getBufferId(), recipient.getObjectId(), 0, changeMessage.getBuffCost());
+						recievingMsg.setStartTime(changeMessage.getStartTime());
+						
+						ObjControllerMessage objController = new ObjControllerMessage(0x23, recievingMsg);
+						recipient.getClient().getSession().write(objController.serialize());
+						Console.println("Msg sent to: " + recipient.getCustomName());
+					}
+
+				} else {
+					
+					// Don't need a Buff Recipient Window for buffing themselves..
+					if (changeMessage.getObjectId() == changeMessage.getRecipientId()) { 
+						sender.getClient().getSession().setAttribute("buffWorkshop", recipient.getObjectId());
+						Console.println("Sender attribute set to: " + sender.getClient().getSession().getAttribute("buffWorkshop").toString());
+						return;
+					}
+					
+					BuffBuilderStartMessage startMsg = new BuffBuilderStartMessage(recipient.getObjectId(), sender.getObjectId(), recipient.getObjectId());
+					ObjControllerMessage objController = new ObjControllerMessage(11, startMsg);
+					recipient.getClient().getSession().write(objController.serialize());
+					
+					recipient.getClient().getSession().setAttribute("buffWorkshop", changeMessage.getObjectId());
+					Console.println("Recipient attribute set to: " + recipient.getClient().getSession().getAttribute("buffWorkshop").toString());
+					sender.getClient().getSession().setAttribute("buffWorkshop", recipient.getObjectId());
+					Console.println("Sender attribute set to: " + sender.getClient().getSession().getAttribute("buffWorkshop").toString());
+				}
 			}
 		});
 	}
