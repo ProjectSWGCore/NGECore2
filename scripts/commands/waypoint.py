@@ -31,8 +31,9 @@ def run(core, actor, target, commandString):
         actor.sendSystemMessage('A waypoint has been created in your datapad at your location.', 0)
         return
     
+
     #/wp X Z Y NAME
-    if isFloat(commandArgs[0]) and isFloat(commandArgs[1]) and isFloat(commandArgs[2]):
+    if len(commandArgs) >= 4 and isFloat(commandArgs[0]) and isFloat(commandArgs[1]) and isFloat(commandArgs[2]):
         waypoint = core.objectService.createObject('object/waypoint/shared_waypoint.iff', actor.getPlanet(), float(commandArgs[0]), float(commandArgs[2]), float(commandArgs[1]))
         waypoint.setActive(True)
         waypoint.setColor(WaypointObject.BLUE)
@@ -43,7 +44,29 @@ def run(core, actor, target, commandString):
         actorPlayer.waypointAdd(waypoint)
         actor.sendSystemMessage('A waypoint has been created in your datapad at your location.', 0)
         return
-    
+    #/wp X Z Name
+    elif len(commandArgs) >= 3 and isFloat(commandArgs[0]) and isFloat(commandArgs[1]):
+        waypoint = core.objectService.createObject('object/waypoint/shared_waypoint.iff', actor.getPlanet(), float(commandArgs[0]), float(commandArgs[1]), actor.getWorldPosition().y)
+        waypoint.setActive(True)
+        waypoint.setColor(WaypointObject.BLUE)
+        name = commandString.split(" ", 2)
+        waypoint.setName(name[2])
+        waypoint.setPlanetCRC(crc.StringtoCRC(actor.getPlanet().getName()))
+        actorPlayer.getWaypoints().add(waypoint)
+        actorPlayer.waypointAdd(waypoint)
+        actor.sendSystemMessage('A waypoint has been created in your datapad at your location.', 0)
+        return
+    #/wp X Z
+    elif len(commandArgs) >= 2 and isFloat(commandArgs[0]) and isFloat(commandArgs[1]):
+        waypoint = core.objectService.createObject('object/waypoint/shared_waypoint.iff', actor.getPlanet(), float(commandArgs[0]), float(commandArgs[1]), actor.getWorldPosition().y)
+        waypoint.setActive(True)
+        waypoint.setColor(WaypointObject.BLUE)
+        waypoint.setName("Waypoint")
+        waypoint.setPlanetCRC(crc.StringtoCRC(actor.getPlanet().getName()))
+        actorPlayer.getWaypoints().add(waypoint)
+        actorPlayer.waypointAdd(waypoint)
+        actor.sendSystemMessage('A waypoint has been created in your datapad at your location.', 0)
+        return
     #/wp NAME
     else:
         waypoint = core.objectService.createObject('object/waypoint/shared_waypoint.iff', actor.getPlanet(), actor.getWorldPosition().x, actor.getWorldPosition().z, actor.getWorldPosition().y)
