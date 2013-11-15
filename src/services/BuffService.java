@@ -106,14 +106,23 @@ public class BuffService implements INetworkDispatch {
 						return;
 					}
 					
-					if (attribute == changeMessage.getRecipientId() && attribute != changeMessage.getObjectId()) {
-						Console.println("Attribute check passed!");
-						BuffBuilderChange recievingMsg = new BuffBuilderChange(recipient.getObjectId(), changeMessage.getBufferId(), recipient.getObjectId(), 0, changeMessage.getBuffCost());
+					else if (attribute == changeMessage.getRecipientId() && attribute != changeMessage.getObjectId()) {
+						Console.println("Attribute check passed!"); // LAST TRIED BYTE 6
+						BuffBuilderChange recievingMsg = new BuffBuilderChange(recipient.getObjectId(), changeMessage.getBufferId(), changeMessage.getRecipientId(), 0, changeMessage.getBuffCost(), (byte) 7);
 						recievingMsg.setStartTime(changeMessage.getStartTime());
+						recievingMsg.setTickCount(changeMessage.getTickCount() + 1);
 						
-						ObjControllerMessage objController = new ObjControllerMessage(0x23, recievingMsg);
-						recipient.getClient().getSession().write(objController.serialize());
-						Console.println("Msg sent to: " + recipient.getCustomName());
+						ObjControllerMessage objRcController = new ObjControllerMessage(0x23, recievingMsg);
+						recipient.getClient().getSession().write(objRcController.serialize());
+						Console.println("Msg sent to: " + recipient.getCustomName() + " that has an ID of: " + recipient.getObjectId());
+						Console.println("ObjectId: " + recievingMsg.getObjectId());
+						Console.println("BufferId: " + recievingMsg.getBufferId());
+						Console.println("RecipientId: " + recievingMsg.getRecipientId());
+						Console.println("Buff Cost: " + recievingMsg.getBuffCost());
+						Console.println("MessageRecipientId: " + recievingMsg.getRecipientId());
+						
+						Console.println("BYTE: " + recievingMsg.getUnkByte());
+						
 					}
 
 				} else {

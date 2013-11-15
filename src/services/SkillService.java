@@ -23,11 +23,10 @@ package services;
 
 import java.util.Map;
 
+import resources.common.Console;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
-
 import main.NGECore;
-
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.resources.service.INetworkDispatch;
@@ -62,7 +61,7 @@ public class SkillService implements INetworkDispatch {
 						//String parent = ((String) skillTable.getObject(s, 1));
 						//int graphType = ((Integer) skillTable.getObject(s, 2));
 						boolean godOnly = ((Boolean) skillTable.getObject(s, 3));
-						//boolean isTitle = ((Boolean) skillTable.getObject(s, 4));
+						boolean isTitle = ((Boolean) skillTable.getObject(s, 4));
 						boolean isProfession = ((Boolean) skillTable.getObject(s, 5));
 						boolean isHidden = ((Boolean) skillTable.getObject(s, 6));
 						int pointsRequired = ((Integer) skillTable.getObject(s, 8));
@@ -78,6 +77,11 @@ public class SkillService implements INetworkDispatch {
 						String[] skillMods = ((String) skillTable.getObject(s, 22)).split(",");
 						String[] schematicsGranted = ((String) skillTable.getObject(s, 23)).split(",");
 						String[] schematicsRevoked = ((String) skillTable.getObject(s, 24)).split(",");
+						
+						if (isTitle == true) {
+							core.playerService.addPlayerTitle(player, skill);
+							Console.println("Gave skill title: " + skill);
+						}
 						
 						if (isProfession) {
 							return;
@@ -180,13 +184,18 @@ public class SkillService implements INetworkDispatch {
 						String parent = ((String) skillTable.getObject(s, 1));
 						//int graphType = ((Integer) skillTable.getObject(s, 2));
 						boolean godOnly = ((Boolean) skillTable.getObject(s, 3));
-						//boolean isTitle = ((Boolean) skillTable.getObject(s, 4));
+						boolean isTitle = ((Boolean) skillTable.getObject(s, 4));
 						boolean isHidden = ((Boolean) skillTable.getObject(s, 6));
 						int pointsRequired = ((Integer) skillTable.getObject(s, 8));
 						String[] abilities = ((String) skillTable.getObject(s, 21)).split(",");
 						String[] skillMods = ((String) skillTable.getObject(s, 22)).split(",");
 						String[] schematicsGranted = ((String) skillTable.getObject(s, 23)).split(",");
 						String[] schematicsRevoked = ((String) skillTable.getObject(s, 24)).split(",");
+						
+						if (isTitle) {
+							core.playerService.removePlayerTitle(player, skill);
+							Console.println("Removed title: " + skill);
+						}
 						
 						if (pointsRequired > 0) {
 							//creature.addExpertisePoints(pointsRequired);

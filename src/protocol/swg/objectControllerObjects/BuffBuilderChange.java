@@ -8,6 +8,7 @@ import java.util.Vector;
 import org.apache.mina.core.buffer.IoBuffer;
 
 import protocol.swg.ObjControllerMessage;
+import resources.common.Console;
 import resources.objects.BuffItem;
 
 public class BuffBuilderChange extends ObjControllerObject {
@@ -15,6 +16,7 @@ public class BuffBuilderChange extends ObjControllerObject {
 	private int buffCost;
 	private int accepted;
 	private int startTime;
+	private int tickCount;
 
 	private long objectId;
 	private long bufferId;
@@ -22,25 +24,25 @@ public class BuffBuilderChange extends ObjControllerObject {
 	
 	private byte unkByte;
 	
-	private Vector<BuffItem> buffs;
+	private Vector<BuffItem> buffs = new Vector<BuffItem>();
 	
 	public BuffBuilderChange() {
 		
 	}
 	
-	public BuffBuilderChange(long objectId, long bufferId, long recipientId, int accepted, int cost) {
+	public BuffBuilderChange(long objectId, long bufferId, long recipientId, int accepted, int cost, byte unkByte) {
 		this.objectId = objectId;
 		this.bufferId = bufferId;
 		this.recipientId = recipientId;
 		this.accepted = accepted;
 		this.buffCost = cost;
-		//this.unkByte = (byte) 0;
+		this.unkByte = unkByte;
 	}
 	
 	@Override
 	public void deserialize(IoBuffer data) {
 		objectId = data.getLong(); // acting players id
-		data.getInt(); // tick count
+		tickCount = data.getInt(); // tick count
 		bufferId = data.getLong(); // objId
 		recipientId = data.getLong();
 		startTime = data.getInt();
@@ -56,10 +58,13 @@ public class BuffBuilderChange extends ObjControllerObject {
 				stringSize = data.getShort();
 				String buffName = new String(ByteBuffer.allocate(stringSize).put(data.array(), data.position(), size).array(), "US-ASCII");
 				buff.setSkillName(buffName);
+				Console.println("Buff Name: " + buffName);
 				data.position(data.position() + size);
 				buff.setUnknown(data.getInt());
+				Console.println("Buff Unknown: " + buff.getUnknown());
 				buff.setAmount(data.getInt());
-				
+				Console.println("Buff Amount: " + buff.getAmount());
+				buffs.add(buff);
 			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
 			}
@@ -75,13 +80,13 @@ public class BuffBuilderChange extends ObjControllerObject {
 		result.putInt(ObjControllerMessage.BUFF_BUILDER_CHANGE);
 		result.putLong(objectId);
 		
-		result.putInt(0); // tickCount
+		result.putInt(tickCount); // tickCount
 		result.putLong(bufferId);
 		result.putLong(recipientId);
 		result.putInt(startTime); // starting time
 		result.putInt(buffCost);
 		result.putInt(accepted);
-		result.put((byte) 0); // default 0
+		result.put(unkByte); // default 0
 		
 		if (buffs == null || buffs.isEmpty()){
 			result.putInt(0);
@@ -159,5 +164,13 @@ public class BuffBuilderChange extends ObjControllerObject {
 	
 	public Vector<BuffItem> getBuffVector() {
 		return this.buffs;
+	}
+
+	public int getTickCount() {
+		return tickCount;
+	}
+
+	public void setTickCount(int tickCount) {
+		this.tickCount = tickCount;
 	}
 }
