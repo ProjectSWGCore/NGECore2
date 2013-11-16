@@ -73,8 +73,12 @@ public class StaticService implements INetworkDispatch {
 		System.out.println("Loaded static objs for " + planetObj.getName());
 	}
 	
-	// TODO make sure static objects get unloaded
 	public SWGObject spawnObject(String template, String planetName, long cellId, float x, float y, float z, float qY, float qW) {
+		return spawnObject(template, planetName, cellId, x, y, z, qW, 0, qY, 0);
+	}
+	
+	// TODO make sure static objects get unloaded
+	public SWGObject spawnObject(String template, String planetName, long cellId, float x, float y, float z, float qW, float qX, float qY, float qZ) {
 		
 		Planet planet = core.terrainService.getPlanetByName(planetName);
 		
@@ -85,7 +89,7 @@ public class StaticService implements INetworkDispatch {
 			return null;
 		}
 		
-		SWGObject object = core.objectService.createObject(template, 0, planet, new Point3D(x, y, z), new Quaternion(qW, 0, qY, 0));
+		SWGObject object = core.objectService.createObject(template, 0, planet, new Point3D(x, y, z), new Quaternion(qW, qX, qY, qZ));
 		
 		if(object == null) {
 			System.out.println("Static object is null");

@@ -36,7 +36,7 @@ import org.python.core.Py;
 import org.python.core.PyObject;
 
 import protocol.swg.ObjControllerMessage;
-import protocol.swg.ObjectMenuSelect;
+import protocol.swg.ObjectMenuSelectMessage;
 import protocol.swg.SUICreatePageMessage;
 import protocol.swg.SUIEventNotification;
 import protocol.swg.SUIForceClosePageMessage;
@@ -82,7 +82,6 @@ public class SUIService implements INetworkDispatch {
 				if(target == null || owner == null)
 					return;
 						
-				
 				core.scriptService.callScript("scripts/radial/", getRadialFilename(target), "createRadial", core, owner, target, request.getRadialOptions());
 				if(getRadialFilename(target).equals("default"))
 					return;
@@ -93,7 +92,7 @@ public class SUIService implements INetworkDispatch {
 			
 		});
 		
-		swgOpcodes.put(Opcodes.ObjectSelectMenuMessage, new INetworkRemoteEvent() {
+		swgOpcodes.put(Opcodes.ObjectMenuSelectMessage, new INetworkRemoteEvent() {
 
 			@Override
 			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
@@ -101,7 +100,7 @@ public class SUIService implements INetworkDispatch {
 				data.order(ByteOrder.LITTLE_ENDIAN);
 				data.position(0);
 				
-				ObjectMenuSelect objMenuSelect = new ObjectMenuSelect();
+				ObjectMenuSelectMessage objMenuSelect = new ObjectMenuSelectMessage();
 				objMenuSelect.deserialize(data);
 				
 				Client client = core.getClient((Integer) session.getAttribute("connectionId"));

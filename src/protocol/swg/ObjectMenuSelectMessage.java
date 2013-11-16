@@ -23,9 +23,9 @@ package protocol.swg;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-public class ObjectMenuSelect extends SWGMessage {
+public class ObjectMenuSelectMessage extends SWGMessage {
 
-	private byte selection;
+	private short selection;
 	private long objectId;
 
 	@Override
@@ -34,7 +34,7 @@ public class ObjectMenuSelect extends SWGMessage {
 		buffer.getShort();
 		buffer.getInt();
 		setObjectId(buffer.getLong());
-		setSelection(buffer.get());
+		setSelection(buffer.getShort());
 		
 	}
 
@@ -44,11 +44,11 @@ public class ObjectMenuSelect extends SWGMessage {
 		return null;
 	}
 
-	public byte getSelection() {
+	public short getSelection() {
 		return selection;
 	}
 
-	public void setSelection(byte selection) {
+	public void setSelection(short selection) {
 		this.selection = selection;
 	}
 
