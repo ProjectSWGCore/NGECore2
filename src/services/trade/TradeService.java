@@ -203,6 +203,10 @@ public class TradeService implements INetworkDispatch{
 				
 				else {
 					
+					if (objectToTrade.getIntAttribute("no_trade") == 1) {
+						return;
+					}
+					
 					addItemForTrade(objectToTrade, tradingWithClient);
 					System.out.println("Trading item: " + objectToTrade.getCustomName() + " detail: " + objectToTrade.getDetailFilename());
 					
