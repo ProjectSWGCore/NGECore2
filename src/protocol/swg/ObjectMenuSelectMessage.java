@@ -19,17 +19,45 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package resources.common;
+package protocol.swg;
 
-public class ObjControllerOpcodes {
-	
-	public static final int DATA_TRANSFORM = 0x71000000;
-	public static final int DATA_TRANSFORM_WITH_PARENT = 0xF1000000;
-	public static final int COMMAND_QUEUE_ENQUEUE = 0x16010000;
-	public static final int TARGET_UPDATE = 0x26010000;
-	public static final int OBJECT_MENU_REQUEST = 0x46010000;
-	public static final int SECURE_TRADE = 0x15010000;
-	public static final int USE_OBJECT = 0xC5040000;
-	public static final int BUFF_BUILDER_CHANGE = 0x5A020000;
-	
+import org.apache.mina.core.buffer.IoBuffer;
+
+public class ObjectMenuSelectMessage extends SWGMessage {
+
+	private short selection;
+	private long objectId;
+
+	@Override
+	public void deserialize(IoBuffer buffer) {
+
+		buffer.getShort();
+		buffer.getInt();
+		setObjectId(buffer.getLong());
+		setSelection(buffer.getShort());
+		
+	}
+
+	@Override
+	public IoBuffer serialize() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public short getSelection() {
+		return selection;
+	}
+
+	public void setSelection(short selection) {
+		this.selection = selection;
+	}
+
+	public long getObjectId() {
+		return objectId;
+	}
+
+	public void setObjectId(long objectId) {
+		this.objectId = objectId;
+	}
+
 }

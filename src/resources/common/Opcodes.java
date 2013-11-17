@@ -42,7 +42,7 @@ public class Opcodes {
 	public static int LagRequest = 0x31805EE0;
 	public static int LoginClientId = 0x41131F96;
 	public static int ObjControllerMessage = 0x80CE5E46;
-	public static int ObjectSelectMenuMessage = 0x7CA18726;
+	public static int ObjectMenuSelectMessage = 0x7CA18726;
 	public static int RequestGalaxyLoopTimes = 0x7D842D68;
 	public static int SelectCharacter = 0xB5098D76;
 	public static int SuiEventNotification = 0x092D3564;

@@ -26,8 +26,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -40,6 +42,7 @@ import protocol.swg.ClientMfdStatusUpdateMessage;
 import protocol.swg.ExpertiseRequestMessage;
 import protocol.swg.ServerTimeMessage;
 import protocol.swg.objectControllerObjects.ShowFlyText;
+import resources.common.Console;
 import resources.common.FileUtilities;
 import resources.common.Opcodes;
 import resources.common.RGB;
@@ -48,14 +51,13 @@ import resources.objects.Buff;
 import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
+import resources.objects.player.PlayerMessageBuilder;
 import resources.objects.player.PlayerObject;
 import services.sui.SUIService.ListBoxType;
 import services.sui.SUIWindow;
 import services.sui.SUIWindow.Trigger;
 import services.sui.SUIWindow.SUICallback;
-
 import main.NGECore;
-
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.CrcStringTableVisitor;
 import engine.clientdata.visitors.DatatableVisitor;
@@ -94,6 +96,7 @@ public class PlayerService implements INetworkDispatch {
 			}
 			
 		}, 0, 30, TimeUnit.SECONDS);
+		
 	}
 	
 	public void postZoneIn(final CreatureObject creature) {
@@ -485,6 +488,26 @@ public class PlayerService implements INetworkDispatch {
 			}
 		}
 	}
+	
+	public void addPlayerTitle(PlayerObject player, String title) {
+		
+		if (player.getTitleList().contains(title))
+			return;
+		
+		player.getTitleList().add(title);
+		Console.println("Added title" + title);
+
+	}
+	
+	public void removePlayerTitle(PlayerObject player, String title) {
+		if (player == null || title == "")
+			return;
+		
+		if (player.getTitleList().contains(title))
+			player.getTitleList().remove(title);
+
+	}
+	
 	
 	@Override
 	public void shutdown() {

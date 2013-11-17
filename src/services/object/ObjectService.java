@@ -264,6 +264,9 @@ public class ObjectService implements INetworkDispatch {
 	}
 	
 	public void destroyObject(SWGObject object) {
+		if (object == null) {
+			return;
+		}
 		
 		if (object instanceof TangibleObject &&
 		((TangibleObject) object).getRespawnTime() > 0) {
@@ -281,6 +284,20 @@ public class ObjectService implements INetworkDispatch {
 				}
 				
 			}, ((TangibleObject) object).getRespawnTime(), TimeUnit.SECONDS);
+		}
+		
+		String filePath = "scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", "") + object.getTemplate().split("shared_" , 2)[1].replace(".iff", "") + ".py";
+		
+		if (FileUtilities.doesFileExist(filePath)) {
+			PyObject method = core.scriptService.getMethod("scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", ""), object.getTemplate().split("shared_" , 2)[1].replace(".iff", ""), "destroy");
+			
+			if (method != null && method.isCallable()) {
+				method.__call__(Py.java2py(core), Py.java2py(object));
+			}
+		}
+		
+		if (object == null) {
+			return;
 		}
 		
 		object.viewChildren(object, true, true, new Traverser() {
@@ -363,7 +380,23 @@ public class ObjectService implements INetworkDispatch {
 		
 
 	}
-
+	
+	public void useObject(CreatureObject creature, SWGObject object) {
+		if (object == null) {
+			return;
+		}
+		
+		String filePath = "scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", "") + object.getTemplate().split("shared_" , 2)[1].replace(".iff", "") + ".py";
+		
+		if (FileUtilities.doesFileExist(filePath)) {
+			PyObject method = core.scriptService.getMethod("scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", ""), object.getTemplate().split("shared_" , 2)[1].replace(".iff", ""), "useObject");
+			
+			if (method != null && method.isCallable()) {
+				method.__call__(Py.java2py(core), Py.java2py(creature), Py.java2py(object));
+			}
+		}
+	}
+	
 	public void insertTimedEventBindings(ScheduledExecutorService executor) {
 		
 	}
@@ -472,22 +505,27 @@ public class ObjectService implements INetworkDispatch {
 			
 		});
 		
-		objControllerOpcodes.put(ObjControllerOpcodes.USE_STATIC_OBJECT, new INetworkRemoteEvent() {
+		objControllerOpcodes.put(ObjControllerOpcodes.USE_OBJECT, new INetworkRemoteEvent() {
 
 			@Override
 			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
+				buffer.order(ByteOrder.LITTLE_ENDIAN);
+				
 				CreatureObject creature = (CreatureObject) getObject(buffer.getLong());
-				if (creature == null || creature.getClient() == null) return;
-				buffer.skip(4);
-				SWGObject object = getObject(buffer.getLong());
-				if (object == null) return;
-				String filePath = "scripts/" + object.getTemplate().split(".")[0] + ".py";
-				if (!FileUtilities.doesFileExist(filePath)) {
-					PyObject method = core.scriptService.getMethod(filePath.substring(0, filePath.lastIndexOf("/")), filePath.substring(filePath.lastIndexOf("/") + 1).split(".")[0], "useStaticObject");
-					if (method != null && method.isCallable()) {
-						method.__call__(Py.java2py(core), Py.java2py(creature), Py.java2py(object));
-					}
+				
+				if (creature == null || creature.getClient() == null) {
+					return;
 				}
+				
+				buffer.skip(4);
+				
+				SWGObject object = getObject(buffer.getLong());
+				
+				if (object == null) {
+					return;
+				}
+				
+				useObject(creature, object);
 			}
 			
 		});

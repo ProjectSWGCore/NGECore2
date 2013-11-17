@@ -19,45 +19,44 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package protocol.swg;
+package resources.objects;
 
-import org.apache.mina.core.buffer.IoBuffer;
-
-public class ObjectMenuSelect extends SWGMessage {
-
-	private byte selection;
-	private long objectId;
-
-	@Override
-	public void deserialize(IoBuffer buffer) {
-
-		buffer.getShort();
-		buffer.getInt();
-		setObjectId(buffer.getLong());
-		setSelection(buffer.get());
+public class BuffItem {
+	private String skillName;
+	private int unknown;
+	private int amount;
+	
+	public BuffItem() {
 		
 	}
-
-	@Override
-	public IoBuffer serialize() {
-		// TODO Auto-generated method stub
-		return null;
+	
+	public BuffItem(String skillName, int unknown, int amount) {
+		this.skillName = skillName;
+		this.unknown = unknown;
+		this.amount = amount;
 	}
 
-	public byte getSelection() {
-		return selection;
+	public String getSkillName() {
+		return skillName;
 	}
 
-	public void setSelection(byte selection) {
-		this.selection = selection;
+	public void setSkillName(String skillName) {
+		this.skillName = skillName;
 	}
 
-	public long getObjectId() {
-		return objectId;
+	public int getUnknown() {
+		return unknown;
 	}
 
-	public void setObjectId(long objectId) {
-		this.objectId = objectId;
+	public void setUnknown(int unknown) {
+		this.unknown = unknown;
 	}
 
+	public int getAmount() {
+		return amount;
+	}
+
+	public void setAmount(int amount) {
+		this.amount = amount;
+	}
 }

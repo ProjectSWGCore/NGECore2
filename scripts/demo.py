@@ -28,7 +28,7 @@ def CreateStartingCharacter(core, object):
 	object.addSkillMod('display_only_glancing_blow' , 750)
 	object.addSkillMod('display_only_block' , 2000)
 	object.addSkillMod('combat_block_value' , 0)
-
+	
 	inventory = object.getSlottedObject('inventory')
 	if not inventory:
 		return
