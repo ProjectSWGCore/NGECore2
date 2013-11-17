@@ -22,6 +22,7 @@
 package resources.objects;
 
 import java.nio.ByteOrder;
+import java.util.Vector;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -31,6 +32,7 @@ import main.NGECore;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.buffer.SimpleBufferAllocator;
 
+import resources.common.BuffBuilder;
 import resources.objects.creature.CreatureObject;
 
 import com.sleepycat.persist.model.NotPersistent;
@@ -67,6 +69,7 @@ public class Buff implements IListObject {
 	@NotPersistent
 	private ScheduledFuture<?> removalTask;
 	private int stacks = 1;
+	private Vector<BuffBuilder> builtBuffs;
 	
 	public Buff(String buffName, long ownerId) {
 		
@@ -415,6 +418,14 @@ public class Buff implements IListObject {
 
 	public void setStacks(int stacks) {
 		this.stacks = stacks;
+	}
+
+	public Vector<BuffBuilder> getBuiltBuffs() {
+		return builtBuffs;
+	}
+
+	public void setBuiltBuffs(Vector<BuffBuilder> builtBuffs) {
+		this.builtBuffs = builtBuffs;
 	}
 
 }

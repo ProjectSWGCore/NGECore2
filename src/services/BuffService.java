@@ -23,6 +23,7 @@ package services;
 
 import java.nio.ByteOrder;
 import java.util.Map;
+import java.util.Vector;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -38,16 +39,18 @@ import java.util.concurrent.TimeUnit;
 
 
 
+
+
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 
 import protocol.swg.ObjControllerMessage;
-import protocol.swg.objectControllerObjects.BuffBuilderChange;
 import protocol.swg.objectControllerObjects.BuffBuilderStartMessage;
 import resources.common.Console;
 import resources.common.FileUtilities;
 import resources.common.ObjControllerOpcodes;
 import resources.objects.Buff;
+import resources.objects.BuffItem;
 import resources.objects.DamageOverTime;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
@@ -68,83 +71,7 @@ public class BuffService implements INetworkDispatch {
 
 	@Override
 	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> swgOpcodes, Map<Integer, INetworkRemoteEvent> objControllerOpcodes) {
-		// BUFF_BUILDER_CHANGE sent every time something is clicked on in the Buff Builder. It's also sent when the buff session is started.
-		objControllerOpcodes.put(ObjControllerOpcodes.BUFF_BUILDER_CHANGE, new INetworkRemoteEvent() {
-
-			@Override
-			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
-				Console.println("BUFF_BUILDER_CHANGE RECIEVED");
-				data.order(ByteOrder.LITTLE_ENDIAN);
-				
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
-				
-				if(client == null)
-					return;
-				
-				SWGObject sender = client.getParent();
-				
-				if(sender == null)
-					return;
-				
-				BuffBuilderChange changeMessage = new BuffBuilderChange();
-				changeMessage.deserialize(data);
-				
-				SWGObject recipient = core.objectService.getObject(changeMessage.getRecipientId());
-				
-				if (recipient == null || recipient.getClient() == null)
-					return;
-				
-				if (sender.getClient().getSession().containsAttribute("buffWorkshop")) {
-
-					long attribute = (long) sender.getClient().getSession().getAttribute("buffWorkshop");
-					Console.println("Sender Attribute = " + attribute);
-					Console.println("Recipient ID (Packet) = " + changeMessage.getRecipientId());
-					
-					if (attribute == changeMessage.getObjectId()) {
-						// TODO: accepted checked? give buff
-						Console.println("Buffer buffing themselves!");
-						return;
-					}
-					
-					else if (attribute == changeMessage.getRecipientId() && attribute != changeMessage.getObjectId()) {
-						Console.println("Attribute check passed!"); // LAST TRIED BYTE 6
-						BuffBuilderChange recievingMsg = new BuffBuilderChange(recipient.getObjectId(), changeMessage.getBufferId(), changeMessage.getRecipientId(), 0, changeMessage.getBuffCost(), (byte) 7);
-						recievingMsg.setStartTime(changeMessage.getStartTime());
-						recievingMsg.setTickCount(changeMessage.getTickCount() + 1);
-						
-						ObjControllerMessage objRcController = new ObjControllerMessage(0x23, recievingMsg);
-						recipient.getClient().getSession().write(objRcController.serialize());
-						Console.println("Msg sent to: " + recipient.getCustomName() + " that has an ID of: " + recipient.getObjectId());
-						Console.println("ObjectId: " + recievingMsg.getObjectId());
-						Console.println("BufferId: " + recievingMsg.getBufferId());
-						Console.println("RecipientId: " + recievingMsg.getRecipientId());
-						Console.println("Buff Cost: " + recievingMsg.getBuffCost());
-						Console.println("MessageRecipientId: " + recievingMsg.getRecipientId());
-						
-						Console.println("BYTE: " + recievingMsg.getUnkByte());
-						
-					}
-
-				} else {
-					
-					// Don't need a Buff Recipient Window for buffing themselves..
-					if (changeMessage.getObjectId() == changeMessage.getRecipientId()) { 
-						sender.getClient().getSession().setAttribute("buffWorkshop", recipient.getObjectId());
-						Console.println("Sender attribute set to: " + sender.getClient().getSession().getAttribute("buffWorkshop").toString());
-						return;
-					}
-					
-					BuffBuilderStartMessage startMsg = new BuffBuilderStartMessage(recipient.getObjectId(), sender.getObjectId(), recipient.getObjectId());
-					ObjControllerMessage objController = new ObjControllerMessage(11, startMsg);
-					recipient.getClient().getSession().write(objController.serialize());
-					
-					recipient.getClient().getSession().setAttribute("buffWorkshop", changeMessage.getObjectId());
-					Console.println("Recipient attribute set to: " + recipient.getClient().getSession().getAttribute("buffWorkshop").toString());
-					sender.getClient().getSession().setAttribute("buffWorkshop", recipient.getObjectId());
-					Console.println("Sender attribute set to: " + sender.getClient().getSession().getAttribute("buffWorkshop").toString());
-				}
-			}
-		});
+		
 	}
 
 	@Override
