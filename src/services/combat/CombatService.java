@@ -650,15 +650,16 @@ public class CombatService implements INetworkDispatch {
 				if(r <= missChance)
 					return HitType.MISS;
 			}
-			float dodgeChance = (float) target.getSkillMod("display_only_dodge").getBase() / 10000;
-	
-			r = random.nextFloat();
-			if(r <= dodgeChance)
-				return HitType.DODGE;
-			
+			if(target.getSkillMod("display_only_dodge") != null) {
+				float dodgeChance = (float) target.getSkillMod("display_only_dodge").getBase() / 10000;
+		
+				r = random.nextFloat();
+				if(r <= dodgeChance)
+					return HitType.DODGE;
+			}
 				
 			WeaponObject weapon2 = (WeaponObject) core.objectService.getObject(((CreatureObject) target).getWeaponId());
-			if(weapon2 != null && weapon2.isMelee()) {
+			if(weapon2 != null && weapon2.isMelee() && target.getSkillMod("display_only_parry") != null) {
 				
 				float parryChance = (float) target.getSkillMod("display_only_parry").getBase() / 10000;
 	
@@ -708,7 +709,7 @@ public class CombatService implements INetworkDispatch {
 
 		}
 		
-		if(hitType == HitType.HIT) {
+		if(hitType == HitType.HIT && target.getSkillMod("display_only_glancing_blow") != null) {
 			
 			float glanceChance = (float) target.getSkillMod("display_only_glancing_blow").getBase() / 10000;
 			

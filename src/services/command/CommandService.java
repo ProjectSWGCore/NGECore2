@@ -155,9 +155,10 @@ public class CommandService implements INetworkDispatch  {
 		// Check if the person has access to this ability.
 		// Abilities (inc expertise ones) are added automatically as they level
 		// by reading the datatables.
-		if (!attacker.hasAbility(command.getCommandName())) {
-			return;
-		}
+		// disabled for now (breaks all combat)
+		//if (!attacker.hasAbility(command.getCommandName())) {
+	//		return;
+		//}
 		
 		if(FileUtilities.doesFileExist("scripts/commands/combat/" + command.getCommandName() + ".py"))
 			core.scriptService.callScript("scripts/commands/combat/", command.getCommandName(), "setup", core, attacker, target, command);
