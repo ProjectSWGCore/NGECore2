@@ -21,17 +21,97 @@
  ******************************************************************************/
 package services;
 
+import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import protocol.swg.ServerWeatherMessage;
+import resources.objects.creature.CreatureObject;
+import engine.resources.scene.Planet;
 import main.NGECore;
 
 public class WeatherService {
 	
 	private NGECore core;
+	private Map<Planet, Integer> weatherStability = new ConcurrentHashMap<Planet, Integer>();
+	private Map<Planet, Byte> currentWeatherMap = new ConcurrentHashMap<Planet, Byte>();
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
+    // TODO: randomise cloud vectors, proper algorithm for weather type rolls
+    
 	public WeatherService(NGECore core) {
 		this.core = core;
 	}
 	
+	public void loadPlanetSettings(){
+		core.scriptService.callScript("scripts/", "weather", "init", core);		
+	}
 	
+	public void addPlanetSettings(String planetName, int stability, byte defaultWeather) {
+		
+		final Planet planet = core.terrainService.getPlanetByName(planetName);
+		
+		if(planet == null)
+			return;
+		
+		if(stability > 100)
+			stability = 100;
+		if(defaultWeather > 4 || defaultWeather < 0)
+			defaultWeather = 0;
+		
+		weatherStability.put(planet, stability);
+		currentWeatherMap.put(planet, defaultWeather);
+		
+		scheduler.scheduleAtFixedRate(new Runnable() {
+			
+			@Override
+			public void run() {
+				runWeatherCycle(planet);
+			}
 
+			
+		}, 30, 30, TimeUnit.MINUTES);
+		
+	}
+
+	public void runWeatherCycle(Planet planet) {
+		
+		int stability = weatherStability.get(planet);
+		
+		Random rand = new Random();
+		int weatherRoll = rand.nextInt(100);
+		byte weatherType;
+		
+		if(weatherRoll < stability)
+			weatherType = 0;
+		else {
+			weatherType = (byte) (rand.nextInt(4) + 1);
+		}
+		
+		currentWeatherMap.put(planet, weatherType);
+		core.simulationService.notifyPlanet(planet, new ServerWeatherMessage(weatherType, 1, 0, 0).serialize());
+		//System.out.println("Weather type changed to: " + weatherType + " on: " + planet.getName());
+		
+	}
+	
+	public void sendWeather(CreatureObject player) {
+		
+		if(player.getClient() == null || player.getPlanet() == null)
+			return;
+		
+		byte weatherType;
+		
+		if(!currentWeatherMap.containsKey(player.getPlanet())) {
+			weatherType = 0;
+		} else {
+			weatherType = currentWeatherMap.get(player.getPlanet());
+		}
+		
+		ServerWeatherMessage weatherMsg = new ServerWeatherMessage(weatherType, 1, 0, 0);
+		player.getClient().getSession().write(weatherMsg.serialize());
+		
+	}
 
 }

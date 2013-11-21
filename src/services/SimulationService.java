@@ -553,6 +553,8 @@ public class SimulationService implements INetworkDispatch {
 			}
 		}
 		
+		core.weatherService.sendWeather(object);
+		
 		if (!object.hasSkill(ghost.getProfessionWheelPosition())) {
 			object.showFlyText("cbt_spam", "skill_up", (float) 2.5, new RGB(154, 205, 50), 0);
 			object.playEffectObject("clienteffect/skill_granted.cef", "");
@@ -870,6 +872,39 @@ public class SimulationService implements INetworkDispatch {
 			height /= 2.f;
 		
 		return height;
+
+	}
+	
+	public void notifyPlanet(Planet planet, IoBuffer packet) {
+		
+		ConcurrentHashMap<Integer, Client> clients = core.getActiveConnectionsMap();
+		
+		for(Client client : clients.values()) {
+			
+			if(client.getParent() == null)
+				continue;
+
+			if(client.getParent().getPlanet() == null)
+				continue;
+			else if(client.getParent().getPlanet() == planet)
+				client.getSession().write(packet);
+			
+		}
+		
+	}
+	
+	public void notifyAllClients(IoBuffer packet) {
+		
+		ConcurrentHashMap<Integer, Client> clients = core.getActiveConnectionsMap();
+		
+		for(Client client : clients.values()) {
+			
+			if(client.getParent() == null)
+				continue;
+
+			client.getSession().write(packet);
+			
+		}
 
 	}
 

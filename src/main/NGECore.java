@@ -52,6 +52,7 @@ import services.SkillModService;
 import services.SkillService;
 import services.StaticService;
 import services.TerrainService;
+import services.WeatherService;
 import services.chat.ChatService;
 import services.combat.CombatService;
 import services.command.CombatCommand;
@@ -132,6 +133,7 @@ public class NGECore {
 	public EquipmentService equipmentService;
 	public TravelService travelService;
 	public EntertainmentService entertainmentService;
+	public WeatherService weatherService;
 	
 	// Login Server
 	public NetworkDispatch loginDispatch;
@@ -143,6 +145,7 @@ public class NGECore {
 
 	private ObjectDatabase creatureODB;
 	private ObjectDatabase mailODB;
+
 	
 	public NGECore() {
 		
@@ -274,6 +277,9 @@ public class NGECore {
 		zoneDispatch.addService(skillService);
 		
 		travelService.startShuttleSchedule();
+		
+		weatherService = new WeatherService(this);
+		weatherService.loadPlanetSettings();
 		
 		didServerCrash = false;
 		System.out.println("Started Server.");
