@@ -103,13 +103,6 @@ public class SimulationService implements INetworkDispatch {
 			quadTrees.put(terrainService.getPlanetList().get(i).getName(), new QuadTree<SWGObject>(-8192, -8192, 8192, 8192));
 		}
 		
-		List<SWGObject> objectList = new ArrayList<SWGObject>(core.objectService.getObjectList().values());
-		for(SWGObject obj : objectList) {
-			if(obj.getParentId() == 0 && obj.isInSnapshot()) {
-				core.objectService.loadServerTemplate(obj);
-				add(obj, obj.getPosition().x, obj.getPosition().z);
-			}
-		}
 		core.commandService.registerCommand("opencontainer");
 		core.commandService.registerCommand("transferitem");
 		core.commandService.registerCommand("transferitemarmor");
@@ -145,13 +138,23 @@ public class SimulationService implements INetworkDispatch {
 
 	}
 	
+	public void insertSnapShotObjects() {
+		List<SWGObject> objectList = new ArrayList<SWGObject>(core.objectService.getObjectList().values());
+		for(SWGObject obj : objectList) {
+			if(obj.getParentId() == 0 && obj.isInSnapshot())
+				add(obj, obj.getPosition().x, obj.getPosition().z);
+		}
+	}
+	
 	public void add(SWGObject object, int x, int y) {
 		object.setIsInQuadtree(true);
+		core.objectService.loadServerTemplate(object);
 		quadTrees.get(object.getPlanet().getName()).put(x, y, object);
 	}
 	
 	public boolean add(SWGObject object, float x, float y) {
 		object.setIsInQuadtree(true);
+		core.objectService.loadServerTemplate(object);
 		return quadTrees.get(object.getPlanet().getName()).put(x, y, object);
 	}
 	
@@ -864,7 +867,7 @@ public class SimulationService implements INetworkDispatch {
 	
 	public float getHeightOrigin(CreatureObject creature) {
 		
-		float height = (float) (creature.getHeight() - 0.3);
+		float height = (float) (creature.getHeight()/* - 0.3*/);
 		
 		if(creature.getPosture() == 2 || creature.getPosture() == 13)
 			height = 0.3f;

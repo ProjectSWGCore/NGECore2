@@ -253,14 +253,16 @@ public class NGECore {
 		terrainService.addPlanet(10, "dathomir", "terrain/dathomir.trn", true);
 		terrainService.addPlanet(11, "mustafar", "terrain/mustafar.trn", true);
 		terrainService.addPlanet(12, "kashyyyk_main", "terrain/kashyyyk_main.trn", true);
-		terrainService.loadSnapShotObjects();
-		
-		// Zone services that need to be loaded after the above
-		simulationService = new SimulationService(this);
-		zoneDispatch.addService(simulationService);
-		
 		// Travel Points
 		travelService.loadTravelPoints();
+		simulationService = new SimulationService(this);
+		
+		terrainService.loadSnapShotObjects();
+		simulationService.insertSnapShotObjects();
+		
+		// Zone services that need to be loaded after the above
+		zoneDispatch.addService(simulationService);
+		
 		
 		// Static Spawns
 		staticService.spawnStatics();

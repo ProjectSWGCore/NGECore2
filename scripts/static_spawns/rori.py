@@ -2,17 +2,7 @@ import sys
 
 def addPlanetSpawns(core, planet):
 
-	stcSvc = core.staticService
-	
-	# Travel spawns
-	
-	stcSvc.spawnObject('object/tangible/travel/ticket_collector/shared_ticket_collector.iff', 'rori', long(0), float(3672.5), float(96), float(-6411.2), float(0.938551), float(0.345142)) # rebel outpost
-	stcSvc.spawnObject('object/tangible/travel/ticket_collector/shared_ticket_collector.iff', 'rori', long(0), float(-5381.5), float(80), float(-2162.8), float(1), float(0)) # narmle starport
-	stcSvc.spawnObject('object/tangible/travel/ticket_collector/shared_ticket_collector.iff', 'rori', long(0), float(-5257.2), float(81.3), float(-2150.3), float(-0.924076), float(0.382209)) # narmle shuttleport
-	
-	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'rori', long(0), float(-5243), float(81.3), float(-2163.5), float(-0.924076), float(0.382209)) # narmle shuttleport
-	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_travel.iff', 'rori', long(4505530), float(-3.5), float(0.1), float(-17.5), float(-0.69182), float(0.72207)) # rebel outpost
-	
+	stcSvc = core.staticService	
 	
 	# Restuss Spawns
 

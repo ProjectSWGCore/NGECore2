@@ -110,6 +110,7 @@ public class StaticService implements INetworkDispatch {
 				return object;
 			}
 			parent.add(object);
+			core.objectService.loadServerTemplate(object);
 		}
 		
 		return object;

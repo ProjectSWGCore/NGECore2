@@ -199,7 +199,7 @@ public class ObjectService implements INetworkDispatch {
 		
 		object.setPlanetId(planet.getID());
 		
-		loadServerTemplate(object);		
+		//loadServerTemplate(object);		
 		
 		objectList.put(objectID, object);
 
@@ -566,5 +566,37 @@ public class ObjectService implements INetworkDispatch {
 		System.out.println("Finished loading client objects for: " + planet.getName());
 		
 	}
+	/**
+	 * Creates a child object and places it at a position and orientation offset from the parent object.
+	 * @param parent The parent Object.
+	 * @param template The template file of the child.
+	 * @param position The position as an offset to the parent object.
+	 * @param orientation The orientation as an offset to the parent object.
+	 */
+	public void createChildObject(SWGObject parent, String template, Point3D position, Quaternion orientation) {
+		
+		
+		float radians = parent.getRadians();
+		Point3D parentPos = parent.getWorldPosition();
+		
+		float x = (float) ((Math.cos(radians) * position.x) + (Math.sin(radians) * position.z));
+		float y = position.y + parentPos.y;
+		float z = (float) ((Math.cos(radians) * position.z) - (Math.sin(radians) * position.x));
+		
+		x += parentPos.x;
+		z += parentPos.z;
+		
+		position = new Point3D(x, y, z);
+		orientation = MathUtilities.rotateQuaternion(orientation, radians, new Point3D(0, 1, 0));
+		SWGObject child = createObject(template, 0, parent.getPlanet(), position, orientation);
+		
+		core.simulationService.add(child, x, z);
+		
+	}
+	
+	public void createChildObject(SWGObject parent, String template, float x, float y, float z, float qy, float qw) {
+		createChildObject(parent, template, new Point3D(x, y, z), new Quaternion(qw, 0, qy, 0));
+	}
+
 	
 }
