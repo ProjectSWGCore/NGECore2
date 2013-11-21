@@ -7,6 +7,8 @@ public class BuffBuilder {
 	private int affectAmount;
 	private String requiredExperience;
 	
+	private int entBonus;
+	
 	public BuffBuilder() {
 		
 	}
@@ -51,8 +53,16 @@ public class BuffBuilder {
 		this.requiredExperience = requiredExperience;
 	}
 	
-	public int getTotalAffected(int bonusAmount) {
+	public int getTotalAffected() {
 		int totalAffected = getMaxTimesApplied() + getAffectAmount();
-		return totalAffected + bonusAmount;
+		return totalAffected + getEntBonus();
+	}
+
+	public int getEntBonus() {
+		return entBonus;
+	}
+
+	public void setEntBonus(int entBonus) {
+		this.entBonus = entBonus;
 	}
 }
