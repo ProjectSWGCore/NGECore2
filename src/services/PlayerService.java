@@ -320,7 +320,7 @@ public class PlayerService implements INetworkDispatch {
 		DatatableVisitor experienceTable;
 		PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
 		
-		synchronized(objectMutex) {
+		//synchronized(objectMutex) {
 			try {
 				experienceTable = ClientFileManager.loadFile("datatables/player/player_level.iff", DatatableVisitor.class);
 				
@@ -486,7 +486,7 @@ public class PlayerService implements INetworkDispatch {
 			} catch (InstantiationException | IllegalAccessException e) {
 				e.printStackTrace();
 			}
-		}
+		//}
 	}
 	
 	public void addPlayerTitle(PlayerObject player, String title) {

@@ -377,14 +377,9 @@ public class TravelService implements INetworkDispatch {
 	// TravelPoint = the travelpoint player is going to travel to!
 	public void doTransport(SWGObject actor, TravelPoint tp) {
 		
-		if (tp.getPlanetName().toLowerCase().equals(actor.getPlanet().name)) { 
-			core.simulationService.teleport(actor, tp.getSpawnLocation().getPosition(), tp.getSpawnLocation().getOrientation(), 0); 
-		} 
+		Planet planet = core.terrainService.getPlanetByName(tp.getPlanetName());
+		core.simulationService.transferToPlanet(actor, planet, tp.getSpawnLocation().getPosition(), tp.getSpawnLocation().getOrientation(), null);
 		
-		else {
-			Planet planet = core.terrainService.getPlanetByName(tp.getPlanetName());
-			core.simulationService.transferToPlanet(actor, planet, tp.getSpawnLocation().getPosition(), tp.getSpawnLocation().getOrientation(), null);
-		}
 	}
 
 	

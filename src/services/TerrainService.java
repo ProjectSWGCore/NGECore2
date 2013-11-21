@@ -90,7 +90,7 @@ public class TerrainService {
 	
 	public Planet getPlanetByName(String name) {
 		for (int i = 0; i < planets.size(); i++) {
-			if (planets.get(i).getName().equals(name)) {
+			if (planets.get(i).getName().equalsIgnoreCase(name)) {
 				return planets.get(i);
 			}
 		}

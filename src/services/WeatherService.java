@@ -21,6 +21,17 @@
  ******************************************************************************/
 package services;
 
+import main.NGECore;
+
 public class WeatherService {
+	
+	private NGECore core;
+
+	public WeatherService(NGECore core) {
+		this.core = core;
+	}
+	
+	
+
 
 }
