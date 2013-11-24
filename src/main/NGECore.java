@@ -278,7 +278,7 @@ public class NGECore {
 		
 		zoneDispatch.addService(skillService);
 		
-		travelService.startShuttleSchedule();
+		//travelService.startShuttleSchedule();
 		
 		weatherService = new WeatherService(this);
 		weatherService.loadPlanetSettings();

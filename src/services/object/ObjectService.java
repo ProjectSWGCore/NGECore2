@@ -524,7 +524,6 @@ public class ObjectService implements INetworkDispatch {
 				if (object == null) {
 					return;
 				}
-				
 				useObject(creature, object);
 			}
 			

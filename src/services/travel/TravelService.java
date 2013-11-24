@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -96,19 +97,42 @@ public class TravelService implements INetworkDispatch {
 				if(object == null)
 					return;
 				
-				List<Planet> planetList = core.terrainService.getPlanetList();
+				TravelPoint travelPoint = getNearestTravelPoint(object);
 				
-				for (Planet planet : planetList) {
-					String planetString = planet.getName();
+				if(travelPoint == null)
+					return;
+				
+				if(travelPoint.isStarport()) {
+				
+					List<Planet> planetList = core.terrainService.getPlanetList();
 					
-					if (request.getPlanet().equals(planetString)) {
+					for (Planet planet : planetList) {
+						String planetString = planet.getName();
 						
-						PlanetTravelPointListResponse response = new PlanetTravelPointListResponse(planetString, travelMap.get(planet), planetList);
-						client.getSession().write(response.serialize());
-						break;
-						
+						if (request.getPlanet().equals(planetString)) {
+							
+							Vector<TravelPoint> correctTravelPoints = new Vector<TravelPoint>();
+							
+							for(TravelPoint tp : travelMap.get(planet)) {
+								if(tp.isStarport() || tp.getPlanetName().equalsIgnoreCase(object.getPlanet().getName()))
+									correctTravelPoints.add(tp);
+							}
+							PlanetTravelPointListResponse response = new PlanetTravelPointListResponse(planetString, correctTravelPoints);
+							client.getSession().write(response.serialize());
+							break;
+							
+						} 
 					}
+				
+				} else {
+					
+					Planet planet = object.getPlanet();
+					
+					PlanetTravelPointListResponse response = new PlanetTravelPointListResponse(planet.getName(), travelMap.get(planet));
+					client.getSession().write(response.serialize());
+					
 				}
+				
 			}
 		});
 		
@@ -181,7 +205,6 @@ public class TravelService implements INetworkDispatch {
 					for(TravelPoint tp : entry.getValue()) {
 						tp.setShuttleDeparting(false);
 						tp.setSecondsRemaining(60);
-						
 					}
 				}
 				shuttleCountdown();
@@ -218,15 +241,17 @@ public class TravelService implements INetworkDispatch {
 		TravelPoint returnedPoint = null;
 		Vector<TravelPoint> planetTp = travelMap.get(obj.getPlanet());
 		
-		for (TravelPoint tp : planetTp) {
-			//System.out.println("Distance for point " + tp.getName() + " is " + tp.getLocation().getDistance2D(obj.getWorldPosition()));
-			if (tp.getLocation().getDistance2D(obj.getWorldPosition()) <= 70) {
-				returnedPoint = tp;
+		synchronized(travelMap) {
+			for (TravelPoint tp : planetTp) {
+				//System.out.println("Distance for point " + tp.getName() + " is " + tp.getLocation().getDistance2D(obj.getWorldPosition()));
+				if (tp.getLocation().getDistance2D(obj.getWorldPosition()) <= 70) {
+					returnedPoint = tp;
+				}
 			}
 		}
 		
 		if (returnedPoint == null) {
-			System.out.println("NULL TravelPoint!");
+			System.out.println("NULL TravelPoint at : " + core.mapService.getClosestCityName(obj));
 		}
 		return returnedPoint;
 	}
@@ -238,11 +263,14 @@ public class TravelService implements INetworkDispatch {
 		
 		TravelPoint returnedPoint = null;
 		
-		for (TravelPoint tp : tpMap) {
-			if (tp.getName().equals(tpName)) {
-				returnedPoint = tp;
+		synchronized(travelMap) {
+			for (TravelPoint tp : tpMap) {
+				if (tp.getName().equals(tpName)) {
+					returnedPoint = tp;
+				}
 			}
 		}
+		
 		if (returnedPoint == null) { System.out.println("Couldn't find a travelpoint w/ name " + tpName); }
 		return returnedPoint;
 	}
@@ -258,7 +286,6 @@ public class TravelService implements INetworkDispatch {
 		TravelPoint travelPoint = new TravelPoint(name, x, y, z, 150);
 
 		travelPoint.setPlanetName(WordUtils.capitalize(planet.getName()));
-		
 		if (travelMap.containsKey(planet)) {
 			
 			travelMap.get(planet).add(travelPoint);
@@ -271,6 +298,7 @@ public class TravelService implements INetworkDispatch {
 			System.out.println("Added planet " + planet.getName() + " to TravelMap.");
 			System.out.println("Added travel point " + travelPoint.getName());
 		}
+		
 	}
 	
 	public void removeTravelPointByName(Planet planet, String name){
