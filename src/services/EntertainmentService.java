@@ -89,12 +89,12 @@ public class EntertainmentService implements INetworkDispatch {
 						OkMessage closeMsg = new OkMessage();
 						buffer.getClient().getSession().write(closeMsg.serialize());
 						
-						// TODO: Give Buff
+						giveInspirationBuff(buffRecipient, statBuffs);
 						
 					} else if (sentPacket.getAccepted() == true && sentPacket.getBuffRecipientAccepted() == 0) {
 						changeMessage.setAccepted(true);
 						changeMessage.setObjectId(buffRecipient.getObjectId());
-
+						
 						ObjControllerMessage objMsg = new ObjControllerMessage(0x0B, changeMessage);
 						buffRecipient.getClient().getSession().write(objMsg.serialize());
 					} else {
@@ -106,7 +106,12 @@ public class EntertainmentService implements INetworkDispatch {
 					}
 					
 				} else {
-
+					if (sentPacket.getAccepted() == true) {
+						OkMessage closeMsg = new OkMessage();
+						buffer.getClient().getSession().write(closeMsg.serialize());
+						
+						giveInspirationBuff(buffRecipient, statBuffs);
+					}
 				}
 			}
 			
@@ -138,8 +143,8 @@ public class EntertainmentService implements INetworkDispatch {
 		}
 	}
 	
-	public void giveInspirationBuff(SWGObject buffer, SWGObject reciever, Vector<BuffItem> buffVector) {
-		CreatureObject buffCreature = (CreatureObject) buffer;
+	public void giveInspirationBuff(SWGObject reciever, Vector<BuffItem> buffVector) {
+		CreatureObject buffCreature = (CreatureObject) reciever;
 		
 		Vector<BuffBuilder> availableSkills = buffBuilderSkills;
 		
@@ -148,14 +153,18 @@ public class EntertainmentService implements INetworkDispatch {
 		for (BuffItem item : buffVector) {
 			for (BuffBuilder builder : availableSkills) {
 				if (builder.getStatName().equals(item.getSkillName())) {
+					builder.setEntBonus(item.getAmount());
 					buffsToAdd.add(builder);
 					Console.println("Added buff item: " + builder.getStatName());
 					break;
+				} else {
+					continue;
 				}
 			}
 		}
 		
-		//Buff builtBuff = new Buff("buildabuff_inspiration", reciever.getObjectId());
+		reciever.setAttachment("buffWorkshop", buffsToAdd);
+		
 		core.buffService.addBuffToCreature(buffCreature, "buildabuff_inspiration");
 		
 	}
