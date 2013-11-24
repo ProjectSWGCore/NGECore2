@@ -86,6 +86,8 @@ public class CharacterService implements INetworkDispatch {
 		swgOpcodes.put(Opcodes.ClientRandomNameRequest, new INetworkRemoteEvent() {
 			
 			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
+				
+				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
 				ClientRandomNameRequest randomNameRequest = new ClientRandomNameRequest();
 				ClientRandomNameResponse response;
 				String name = null;
@@ -102,7 +104,7 @@ public class CharacterService implements INetworkDispatch {
 					}
 					
 					try {
-						if (checkForDuplicateName(getfirstName(name, randomNameRequest.getSharedRaceTemplate()))) {
+						if (checkForDuplicateName(getfirstName(name, randomNameRequest.getSharedRaceTemplate()), client.getAccountId())) {
 							name = null;
 						}
 					} catch (SQLException e2) {
@@ -120,6 +122,8 @@ public class CharacterService implements INetworkDispatch {
 
 			@Override
 			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
+				
+				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
 				data = data.order(ByteOrder.LITTLE_ENDIAN);
 				data.position(0);
 				ClientVerifyAndLockNameRequest message = new ClientVerifyAndLockNameRequest();
@@ -132,7 +136,7 @@ public class CharacterService implements INetworkDispatch {
 
 				int length = firstName.length();
 				try {
-					if (checkForDuplicateName(firstName)) {
+					if (checkForDuplicateName(firstName, client.getAccountId())) {
 						
 						approved_flag = "name_declined_in_use";
 						isDeclined = true;
@@ -192,16 +196,15 @@ public class CharacterService implements INetworkDispatch {
 				}
 				
 				int galaxyId = config.getInt("GALAXY_ID");
+				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
 				
 				try {
-					if (checkForDuplicateName(getfirstName(clientCreateCharacter.getName(), clientCreateCharacter.getRaceTemplate()))) {
+					if (checkForDuplicateName(getfirstName(clientCreateCharacter.getName(), clientCreateCharacter.getRaceTemplate()), client.getAccountId())) {
 						return;
 					}
 				} catch (SQLException e2) {
 					e2.printStackTrace();
 				}
-				
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
 				
 				// TODO: Add starting location and items in a script
 				String raceTemplate = clientCreateCharacter.getRaceTemplate();
@@ -308,19 +311,29 @@ public class CharacterService implements INetworkDispatch {
 
 	}
 
-	private boolean checkForDuplicateName(String firstName) throws SQLException
+	private boolean checkForDuplicateName(String firstName, long accountId) throws SQLException
 	{
 		firstName = firstName.replace("'", "''");
 		firstName = firstName.toLowerCase();
-		PreparedStatement ps = databaseConnection.preparedStatement("SELECT id FROM characters WHERE LOWER(\"firstName\") ='" + firstName + "'");
+		PreparedStatement ps = databaseConnection.preparedStatement("SELECT id FROM characters WHERE LOWER(\"firstName\")=?");
+		ps.setString(1, firstName);
 		ResultSet resultSet = ps.executeQuery();
-		
-		boolean bool = resultSet.next();
+	
+		boolean isDuplicate = resultSet.next();
 		resultSet.getStatement().close();
-		return bool;
-	}
-
 		
+		//FIXME: this is a bit lazy... but it's only temporary :p
+		PreparedStatement ps2 = databaseConnection.preparedStatement("SELECT id FROM temp_reserved_char_names WHERE \"accountId\"!=? AND LOWER(\"firstName\")=?");
+		ps2.setLong(1, accountId);
+		ps2.setString(2, firstName);
+		ResultSet resultSet2 = ps2.executeQuery();
+		boolean isReserved = resultSet.next();
+		resultSet2.getStatement().close();
+		
+		return isDuplicate && isReserved;
+	}
+	
+	
 	private String getfirstName(String Name, String RaceTemplate)
 	{
 		String[] splitName;
