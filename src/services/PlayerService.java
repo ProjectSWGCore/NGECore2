@@ -330,8 +330,7 @@ public class PlayerService implements INetworkDispatch {
 				
 				// 1. Add the experience.
 				if (experience > 0) {
-					creature.showFlyText("base_player", "prose_flytext_xp", experience, (float) 2.5, new RGB(180, 60, 240), 1);
-					//creature.showFlyText("base_player", "prose_flytext_xp", "", experience, (float) 2.5, new RGB(180, 60, 240), 1);
+					creature.showFlyText("base_player", "prose_flytext_xp", "", experience, (float) 2.5, new RGB(180, 60, 240), 1);
 				}
 				
 				String xpType = ((player.getProfession().contains("entertainer")) ? "entertainer" : ((player.getProfession().contains("trader")) ? "crafting" : "combat_general"));

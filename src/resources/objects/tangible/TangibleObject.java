@@ -59,7 +59,7 @@ public class TangibleObject extends SWGObject {
 	protected int optionsBitmask = 0;
 	private int maxDamage = 0;
 	private boolean staticObject = false;
-	protected String faction = "";
+	protected String faction = "neutral"; // Says you're "Imperial Special Forces" if it's 0 for some reason
 	@NotPersistent
 	private Vector<TangibleObject> defendersList = new Vector<TangibleObject>();	// unused in packets but useful for the server
 	@NotPersistent
@@ -123,7 +123,7 @@ public class TangibleObject extends SWGObject {
 	public void setOptionsBitmask(int optionsBitmask) {
 		this.optionsBitmask = optionsBitmask;
 	}
-
+	
 	public int getMaxDamage() {
 		return maxDamage;
 	}
@@ -245,15 +245,15 @@ public class TangibleObject extends SWGObject {
 		}
 	}
 	
-	public void showFlyText(String stfFile, String stfString, int xp, float scale, RGB color, int displayType) {
+	public void showFlyText(String stfFile, String stfString, String customText, int xp, float scale, RGB color, int displayType) {
 		Set<Client> observers = getObservers();
 		
 		if (getClient() != null) {
-			getClient().getSession().write((new ObjControllerMessage(0x0000000B, new ShowFlyText(getObjectID(), getObjectID(), 56, 1, 1, -1, stfFile, stfString, xp, scale, color, displayType))).serialize());
+			getClient().getSession().write((new ObjControllerMessage(0x0000000B, new ShowFlyText(getObjectID(), getObjectID(), 56, 1, 1, -1, stfFile, stfString, customText, xp, scale, color, displayType))).serialize());
 		}
 		
 		for (Client client : observers) {
-			client.getSession().write((new ObjControllerMessage(0x0000000B, new ShowFlyText(client.getParent().getObjectID(), getObjectID(), 56, 1, 1, -1, stfFile, stfString, xp, scale, color, displayType))).serialize());
+			client.getSession().write((new ObjControllerMessage(0x0000000B, new ShowFlyText(client.getParent().getObjectID(), getObjectID(), 56, 1, 1, -1, stfFile, stfString, customText, xp, scale, color, displayType))).serialize());
 		}
 	}
 	
