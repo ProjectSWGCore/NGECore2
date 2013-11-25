@@ -944,13 +944,13 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 				upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Rebel);
 				upvpm.setStatus(55);
 			} 
-			if(factionStatus == 0 && faction == "neutral") {
+			if(factionStatus == 0 && faction == "neutral" && getClient() != null) {
 				upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Neutral);
 				upvpm.setStatus(16);
 			}
 			else {
 				upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Neutral);
-				upvpm.setStatus(16);
+				upvpm.setStatus(0);
 			}
 			destination.getSession().write(upvpm.serialize());
 		}

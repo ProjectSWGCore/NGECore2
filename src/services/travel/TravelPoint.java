@@ -170,9 +170,9 @@ public class TravelPoint {
 						setShuttleLanding(true);
 						getShuttle().setPosture((byte) 0);
 						if(isStarport())
-							Thread.sleep(16000);
+							Thread.sleep(21000);
 						else
-							Thread.sleep(13000);
+							Thread.sleep(17000);
 
 						
 					} catch (InterruptedException e) {
