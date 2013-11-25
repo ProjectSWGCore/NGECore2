@@ -212,6 +212,7 @@ public class LoginService implements INetworkDispatch{
 
 	    PreparedStatement ps = databaseConnection1.preparedStatement("INSERT INTO sessions (\"key\", \"accountId\") VALUES (?, ?)");
 	    ps.setBytes(1, client.getSessionKey());
+	    ps.setLong(2, client.getAccountId());
 	    ps.executeUpdate();
 	    ps.close(); 
 				
