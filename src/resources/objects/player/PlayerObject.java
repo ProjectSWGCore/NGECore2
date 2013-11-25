@@ -22,6 +22,7 @@
 package resources.objects.player;
 
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +52,8 @@ public class PlayerObject extends SWGObject {
 	private List<String> titleList = new ArrayList<String>();
 	private int bornDate = 0;
 	private int totalPlayTime = 0;
+	private byte[] collections = new byte[] { };
+	private int highestSetBit = 0;
 	
 	// PLAY 6
 	
@@ -116,8 +119,6 @@ public class PlayerObject extends SWGObject {
 	@NotPersistent
 	private long lastPlayTimeUpdate = System.currentTimeMillis();
 	
-	
-	
 	public PlayerObject() {
 		super();
 		messageBuilder = new PlayerMessageBuilder(this);
@@ -136,12 +137,13 @@ public class PlayerObject extends SWGObject {
 
 	public void setTitle(String title) {
 		synchronized(objectMutex) {
-			
 			if(!getTitleList().isEmpty() && getTitleList().contains(title)) {
 				this.title = title;
-				notifyObservers(messageBuilder.buildTitleDelta(title), true);
 			}
+
 		}
+		
+		notifyObservers(messageBuilder.buildTitleDelta(title), true);
 	}
 
 	public String getProfession() {
@@ -567,9 +569,30 @@ public class PlayerObject extends SWGObject {
 	public List<String> getTitleList() {
 		return titleList;
 	}
-
+	
 	public void setTitleList(List<String> titleList) {
 		this.titleList = titleList;
+	}
+	
+	public void setCollections(byte[] collections) {
+		synchronized(objectMutex) {
+			this.collections = collections;
+			this.highestSetBit = BitSet.valueOf(collections).length();
+		}
+		
+		notifyObservers(messageBuilder.buildCollectionsDelta(collections, getHighestSetBit()), true);
+	}
+	
+	public byte[] getCollections() {
+		synchronized(objectMutex) {
+			return collections;
+		}
+	}
+	
+	public int getHighestSetBit() {
+		synchronized(objectMutex) {
+			return highestSetBit;
+		}
 	}
 	
 }

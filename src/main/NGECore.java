@@ -29,10 +29,6 @@ import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
-
-
-
-
 import resources.common.RadialOptions;
 import resources.common.ThreadMonitor;
 import resources.objects.creature.CreatureObject;
@@ -51,6 +47,7 @@ import services.SkillService;
 import services.StaticService;
 import services.TerrainService;
 import services.chat.ChatService;
+import services.collections.CollectionService;
 import services.combat.CombatService;
 import services.command.CombatCommand;
 import services.command.CommandService;
@@ -129,6 +126,7 @@ public class NGECore {
 	public SkillModService skillModService;
 	public EquipmentService equipmentService;
 	public TravelService travelService;
+	public CollectionService collectionService;
 	
 	// Login Server
 	public NetworkDispatch loginDispatch;
@@ -262,6 +260,9 @@ public class NGECore {
 		
 		gcwService = new GCWService(this);
 		zoneDispatch.addService(gcwService);
+		
+		collectionService = new CollectionService(this);
+		zoneDispatch.addService(collectionService);
 
 		tradeService = new TradeService(this);
 		zoneDispatch.addService(tradeService);
