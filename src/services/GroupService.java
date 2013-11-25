@@ -201,13 +201,19 @@ public class GroupService implements INetworkDispatch {
 			creature.setGroupId(0);
 			creature.makeUnaware(group);
 			creature.sendSystemMessage("You have left the group.", (byte) 0);
-			
+
 			for(SWGObject member : memberList) {
 				
 				CreatureObject creature2 = (CreatureObject) member;
 				creature2.sendSystemMessage(creature.getCustomName() + " has left the group.", (byte) 0);
 				
 			}
+			
+			// Remove group buffs
+			
+			if(creature.hasBuff("co_base_of_operations"))
+				core.buffService.removeBuffFromCreature(creature, creature.getBuffByName("co_base_of_operations"));
+
 			
 		} else {
 			
@@ -224,6 +230,11 @@ public class GroupService implements INetworkDispatch {
 				creature2.makeUnaware(group);
 				
 				creature2.sendSystemMessage("The group has been disbanded.", (byte) 0);
+				
+				// Remove group buffs
+				
+				if(creature2.hasBuff("co_base_of_operations"))
+					core.buffService.removeBuffFromCreature(creature2, creature2.getBuffByName("co_base_of_operations"));
 
 			}
 			

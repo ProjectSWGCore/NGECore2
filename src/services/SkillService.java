@@ -30,6 +30,7 @@ import org.apache.mina.core.session.IoSession;
 import protocol.swg.ExpertiseRequestMessage;
 
 import resources.common.Console;
+import resources.common.FileUtilities;
 import resources.common.Opcodes;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
@@ -144,8 +145,10 @@ public class SkillService implements INetworkDispatch {
 							}
 						}
 						
-						for (String ability : abilities) {
-							creature.addAbility(ability);
+						if(!skill.contains("expertise")) {	// only mark 1 abilities in datatable need to remove abilities per script
+							for (String ability : abilities) {
+								creature.addAbility(ability);
+							}
 						}
 						
 						for (String skillMod : skillMods) {
@@ -209,8 +212,10 @@ public class SkillService implements INetworkDispatch {
 							//creature.addExpertisePoints(pointsRequired);
 						}
 						
-						for (String ability : abilities) {
-							creature.removeAbility(ability);
+						if(!skill.contains("expertise")) {	// only mark 1 abilities in datatable need to remove abilities per script
+							for (String ability : abilities) {
+								creature.removeAbility(ability);
+							}
 						}
 						
 						for (String skillMod : skillMods) {
@@ -235,7 +240,7 @@ public class SkillService implements INetworkDispatch {
 	@Override
 	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> swgOpcodes, Map<Integer, INetworkRemoteEvent> objControllerOpcodes) {
 		
-		/*swgOpcodes.put(Opcodes.ExpertiseRequestMessage, new INetworkRemoteEvent() {
+		swgOpcodes.put(Opcodes.ExpertiseRequestMessage, new INetworkRemoteEvent() {
 
 			@Override
 			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
@@ -256,13 +261,20 @@ public class SkillService implements INetworkDispatch {
 					return;
 				
 				CreatureObject creature = (CreatureObject) client.getParent();
+				PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
+				
+				if(player == null)
+					return;
 				
 				for(String expertiseName : expertise.getExpertiseSkills()) {
 					addSkill(creature, expertiseName);
+					if(!FileUtilities.doesFileExist("scripts/expertise/" + expertiseName + ".py"))
+						continue;
+					core.scriptService.callScript("scripts/expertise/", "addAbilities", expertiseName, core, creature, player);
 				}
 				
 			}
-		});*/
+		});
 		
 	}
 	

@@ -327,6 +327,11 @@ public class CombatService implements INetworkDispatch {
 				
 			}
 			
+			if(command.getAttackType() != 1 && target.getSkillMod("area_damage_resist_full_percentage") != null) {
+				if(new Random().nextFloat() <= target.getSkillModBase("area_damage_resist_full_percentage"))
+					damage = 0;
+			}
+			
 			if(damage > 0)
 				applyDamage(attacker, target, (int) damage);
 			
@@ -433,6 +438,9 @@ public class CombatService implements INetworkDispatch {
 				baseArmor = target.getSkillMod("electricity").getBase();
 
 		}
+		
+		if(target.getSkillMod("expertise_innate_reduction_all_player") != null)
+			baseArmor *= (100 - target.getSkillMod("expertise_innate_reduction_all_player").getBase()) / 100;
 			
 		float mitigation = (float) (90 * (1 - Math.exp(-0.000125 * baseArmor)) + baseArmor / 9000);
 		
@@ -677,7 +685,7 @@ public class CombatService implements INetworkDispatch {
 
 		}
 
-		float critChance = (float) attacker.getSkillMod("display_only_critical").getBase() / 10000;
+		float critChance = (float) (attacker.getSkillMod("display_only_critical").getBase() - target.getSkillModBase("display_only_expertise_critical_hit_reduction")) / 10000;
 		r = random.nextFloat();
 		if(r <= critChance)
 			return HitType.CRITICAL;
@@ -844,6 +852,12 @@ public class CombatService implements INetworkDispatch {
 	}
 	
 	private void doSingleTargetHeal(CreatureObject healer, CreatureObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {
+		
+		if(command.getDotDuration() > 0) {
+			addHealOverTimeToCreature(healer, target, command);
+			return;
+		}
+			
 		
 		int healAmount = command.getAddedDamage();
 		int healPotency = 0;
@@ -1123,6 +1137,10 @@ public class CombatService implements INetworkDispatch {
 				
 		}
 		
+		if(target.getSkillMod("expertise_innate_reduction_all_player") != null) {
+			baseArmor *= (100 - target.getSkillMod("expertise_innate_reduction_all_player").getBase()) / 100;
+		}
+		
 		if(baseArmor > 0) {
 			float mitigation = (float) (90 * (1 - Math.exp(-0.000125 * baseArmor)) + baseArmor / 9000);
             mitigation /= 100;
@@ -1137,7 +1155,101 @@ public class CombatService implements INetworkDispatch {
 		applyDamage(attacker, target, damage);
 		
 	}
+	
+	public void doSelfBuff(CreatureObject creature, WeaponObject weapon, CombatCommand command, int actionCounter) {
+		
+		boolean success = true;
+		
+		if(!applySpecialCost(creature, weapon, command))
+			success = false;
+		
+		if(!success) {
+			IoSession session = creature.getClient().getSession();
+			CommandEnqueueRemove commandRemove = new CommandEnqueueRemove(creature.getObjectId(), actionCounter);
+			session.write(new ObjControllerMessage(0x0B, commandRemove).serialize());
+			StartTask startTask = new StartTask(actionCounter, creature.getObjectID(), command.getCommandCRC(), CRC.StringtoCRC(command.getCooldownGroup()), -1);
+			session.write(new ObjControllerMessage(0x0B, startTask).serialize());
+			return;
+		}
+		
+		core.buffService.addBuffToCreature(creature, command.getBuffNameSelf());
 
+		StartTask startTask = new StartTask(actionCounter, creature.getObjectID(), command.getCommandCRC(), CRC.StringtoCRC(command.getCooldownGroup()), command.getCooldown());
+		ObjControllerMessage objController2 = new ObjControllerMessage(0x0B, startTask);
+		creature.getClient().getSession().write(objController2.serialize());
+		
+		CommandEnqueueRemove commandRemove = new CommandEnqueueRemove(creature.getObjectID(), actionCounter);
+		ObjControllerMessage objController3 = new ObjControllerMessage(0x0B, commandRemove);
+		creature.getClient().getSession().write(objController3.serialize());
+
+		
+	}
+	
+	public void addHealOverTimeToCreature(final CreatureObject healer, final CreatureObject target, final CombatCommand command) {
+		
+		if(target.getDotByName(command.getCommandName()) != null) {
+			
+			DamageOverTime oldDot = target.getDotByName(command.getCommandName());
+			oldDot.getTask().cancel(true);
+			target.removeDot(oldDot);
+			
+		}
+		
+		final DamageOverTime dot = new DamageOverTime(command.getCommandName(), null, command.getDotType(), command.getDotDuration(), command.getDotIntensity());
+		target.addDot(dot);
+		dot.setStartTime(System.currentTimeMillis());
+		
+		final ScheduledFuture<?> task = scheduler.scheduleAtFixedRate(new Runnable() {
+
+			@Override
+			public void run() {
+
+				if(dot.getRemainingDuration() <= 0) {
+					target.removeDot(dot);
+					dot.getTask().cancel(true);
+				}
+				
+				doHealOverTimeTick(healer, target, command, dot);
+				
+			}
+
+			
+			
+		}, 0, command.getDotDuration() / (command.getAddedDamage() / command.getDotIntensity()), TimeUnit.SECONDS);
+		
+		dot.setTask(task);
+
+		
+	}
+	
+	private void doHealOverTimeTick(CreatureObject healer, CreatureObject target, CombatCommand command, DamageOverTime dot) {
+				
+		int healAmount = command.getDotIntensity();
+		int healPotency = 0;
+		
+		if(healer.getSkillMod("expertise_healing_all") != null)
+			healPotency += healer.getSkillMod("expertise_healing_all").getBase();
+		if(healer.getSkillMod("expertise_healing_line_me_heal") != null)
+			healPotency += healer.getSkillMod("expertise_healing_line_me_heal").getBase();
+		if(healer.getSkillMod("expertise_healing_line_of_heal") != null)
+			healPotency += healer.getSkillMod("expertise_healing_line_of_heal").getBase();
+		if(healer.getSkillMod("expertise_healing_line_sm_heal") != null)
+			healPotency += healer.getSkillMod("expertise_healing_line_sm_heal").getBase();
+		if(healer.getSkillMod("expertise_healing_line_sp_heal") != null)
+			healPotency += healer.getSkillMod("expertise_healing_line_sp_heal").getBase();
+		if(healPotency > 0)
+			healAmount += (healAmount * (healPotency / 100));
+		if(target.getSkillMod("expertise_healing_reduction") != null)
+			healAmount *= (1 - target.getSkillMod("expertise_healing_reduction").getBase() / 100);
+		
+		synchronized(target.getMutex()) {
+			target.setHealth(target.getHealth() + healAmount);
+		}
+
+		target.notifyObservers(new PlayClientEffectLocMessage("appearance/pt_heal_2.prt", target.getPlanet().getName(), target.getWorldPosition()), true);
+		
+	}	
+	
 	public enum HitType{; 
 	
 		public static final byte MISS = 0;
@@ -1165,5 +1277,7 @@ public class CombatService implements INetworkDispatch {
 		public static final int ELECTRICITY = 256;
 
 	}
+
+	
 
 }

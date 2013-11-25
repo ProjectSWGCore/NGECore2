@@ -169,7 +169,7 @@ public class PlayerService implements INetworkDispatch {
 			
 		});
 		
-		swgOpcodes.put(Opcodes.ExpertiseRequestMessage, new INetworkRemoteEvent() {
+		/*swgOpcodes.put(Opcodes.ExpertiseRequestMessage, new INetworkRemoteEvent() {
 
 			@Override
 			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
@@ -198,7 +198,7 @@ public class PlayerService implements INetworkDispatch {
 				
 			}
 			
-		});
+		});*/
 
 		
 	}
