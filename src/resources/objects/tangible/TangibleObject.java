@@ -48,7 +48,6 @@ import engine.resources.scene.Quaternion;
 @Persistent
 public class TangibleObject extends SWGObject {
 	
-	
 	// TODO: Thread safety
 	
 	protected int incapTimer = 10;
@@ -71,12 +70,14 @@ public class TangibleObject extends SWGObject {
 	public TangibleObject(long objectID, Planet planet, String template) {
 		super(objectID, planet, new Point3D(0, 0, 0), new Quaternion(1, 0, 1, 0), template);
 		messageBuilder = new TangibleMessageBuilder(this);
+		if (this.getClass().getSimpleName().equals("TangibleObject")) setIntAttribute("volume", 1);
 	}
 	
 	public TangibleObject(long objectID, Planet planet, String template, Point3D position, Quaternion orientation) {
 		super(objectID, planet, position, orientation, template);
 		messageBuilder = new TangibleMessageBuilder(this);
 		spawnCoordinates = position.clone();
+		if (this.getClass().getSimpleName().equals("TangibleObject")) setIntAttribute("volume", 1);
 	}
 	
 	public TangibleObject() {
