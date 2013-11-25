@@ -21,7 +21,11 @@ def addPoints(core, planet):
     if planet.getName() == 'tatooine':
         tatooinePoints(core, planet)
     if planet.getName() == 'yavin4':
-        yavin4Points(core, planet)                
+        yavin4Points(core, planet)
+    if planet.getName() == 'kashyyyk_main':
+    	kashyyyk_mainPoints(core, planet)
+    if planet.getName() == 'mustafar':
+    	mustafarPoints(core, planet)                
     return
 
 def corelliaPoints(core, planet):
@@ -33,7 +37,7 @@ def corelliaPoints(core, planet):
     trvSvc.addTravelPoint(planet, "Tyrena Shuttle A", -5005, 21, -2386)
     trvSvc.addTravelPoint(planet, "Tyrena Shuttle B", -5600, 21, -2790)
     trvSvc.addTravelPoint(planet, "Doaba Guerfel Shuttleport", 3085, 280, 4993)
-    trvSvc.addTravelPoint(planet, "Kor Vella Shuttleport", -3775, 31, 3234)
+    trvSvc.addTravelPoint(planet, "Kor Vella Shuttleport", -3775, 86, 3234)
     trvSvc.addTravelPoint(planet, "Bela Vistal Shuttleport A", 6644, 330, -5922)
     trvSvc.addTravelPoint(planet, "Bela Vistal Shuttleport B", 6930, 330, -5534)
    
@@ -46,8 +50,8 @@ def corelliaPoints(core, planet):
 def dantooinePoints(core, planet):
     trvSvc = core.travelService
     
-    trvSvc.addTravelPoint(planet, "Mining Outpost", -635, 3, 2507)
-    trvSvc.addTravelPoint(planet, "Imperial Outpost", -4208, 3, -2350)
+    trvSvc.addTravelPoint(planet, "Imperial Outpost", -635, 3, 2507)
+    trvSvc.addTravelPoint(planet, "Mining Outpost", -4208, 3, -2350)
     trvSvc.addTravelPoint(planet, "Agro Outpost", 1569, 4, -6415)
     return                
         
@@ -56,6 +60,7 @@ def dathomirPoints(core, planet):
    
     trvSvc.addTravelPoint(planet, "Science Outpost", -49, 18, -1584)
     trvSvc.addTravelPoint(planet, "Trade Outpost", 618, 6, 3092)
+    trvSvc.addTravelPoint(planet, "Quarantine Zone", -5691, 511, -6467)
     return        
 
 def endorPoints(core, planet):
@@ -86,6 +91,7 @@ def nabooPoints(core, planet):
     trvSvc.addTravelPoint(planet, "Theed Shuttle A", -5856, 19, 4172)
     trvSvc.addTravelPoint(planet, "Theed Shuttle B", -5005, 19, 4072)
     trvSvc.addTravelPoint(planet, "Theed Shuttle C", -5411, 19, 4332)
+    trvSvc.addTravelPoint(planet, "Theed Starport", -4856, 6, 4162)
 
     return        
         
@@ -93,8 +99,10 @@ def roriPoints(core, planet):
     trvSvc = core.travelService
 
     trvSvc.addTravelPoint(planet, "Narmle Starport", -5374, 80, -2188)
-    trvSvc.addTravelPoint(planet, "Shuttleport", -5255, 80, -2161)    
+    trvSvc.addTravelPoint(planet, "Narmle Shuttleport", -5255, 80, -2161)    
     trvSvc.addTravelPoint(planet, "Rebel Outpost", 3672, 96, -6421)
+    trvSvc.addTravelPoint(planet, "Restuss Starport", 5298, 80, 6188)
+    trvSvc.addTravelPoint(planet, "Restuss Shuttleport", 5398, 80, 6195)
     return                
 
 def talusPoints(core, planet):
@@ -114,12 +122,12 @@ def tatooinePoints(core, planet):
     trvSvc.addTravelPoint(planet, "Mos Eisley Starport", 3619, 5, -4801)
     trvSvc.addTravelPoint(planet, "Mos Espa Starport", -2829, 5, 2080)
     trvSvc.addTravelPoint(planet, "Mos Entha Starport", 1238, 7, 3062)
-    trvSvc.addTravelPoint(planet, "Anchorhead Shuttleport", 48, 52, -5319)
+    trvSvc.addTravelPoint(planet, "Anchorhead Shuttle", 48, 52, -5319)
     trvSvc.addTravelPoint(planet, "Mos Entha Shuttleport A", 1731, 7, 3205)
     trvSvc.addTravelPoint(planet, "Mos Entha Shuttleport B", 1396, 7, 3487)
-    trvSvc.addTravelPoint(planet, "Mos Espa Shuttleport A", -3132, 5, 2172)
-    trvSvc.addTravelPoint(planet, "Mos Espa Shuttleport B", -2799, 5, 2163)
-    trvSvc.addTravelPoint(planet, "Mos Espa Shuttleport C", -2892, 5, 1914)
+    trvSvc.addTravelPoint(planet, "Mos Espa Shuttle West", -3132, 5, 2172)
+    trvSvc.addTravelPoint(planet, "Mos Espa Shuttle East", -2799, 5, 2163)
+    trvSvc.addTravelPoint(planet, "Mos Espa Shuttle South", -2892, 5, 1914)
     trvSvc.addTravelPoint(planet, "Mos Eisley Shuttleport", 3434, 5, -4659)
     trvSvc.addTravelPoint(planet, "Bestine Shuttleport", -1071, 12, -3566)
     trvSvc.addTravelPoint(planet, "Wayfar Shuttleport", -5089, 75, -6594)
@@ -132,3 +140,15 @@ def yavin4Points(core, planet):
     trvSvc.addTravelPoint(planet, "Labor Outpost", -6921, 73, -5726)
     trvSvc.addTravelPoint(planet, "Mining Outpost", -267, 35, 4896)
     return
+    
+def kashyyyk_mainPoints(core, planet):
+	trvSvc = core.travelService
+	
+	trvSvc.addTravelPoint(planet, "Kachiro Starport", -688, 19, -165)
+	return
+	
+def mustafarPoints(core, planet):
+	trvSvc = core.travelService
+	
+	trvSvc.addTravelPoint(planet, "Mensix", 405, 230, -1352)
+	return
