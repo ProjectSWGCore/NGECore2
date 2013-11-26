@@ -86,6 +86,16 @@ public class EntertainmentService implements INetworkDispatch {
 					
 					if (sentPacket.getAccepted() == true && sentPacket.getBuffRecipientAccepted() == 1) {
 						System.out.println("both accepted!");
+						
+						if (sentPacket.getBuffCost() > 0) {
+							CreatureObject recipientCreature = (CreatureObject) buffRecipient;
+							if (recipientCreature.getCashCredits() >= sentPacket.getBuffCost()) {
+								recipientCreature.setCashCredits(recipientCreature.getCashCredits() - sentPacket.getBuffCost());
+							} else {
+								return;
+							}
+						}
+						
 						OkMessage closeMsg = new OkMessage();
 						buffer.getClient().getSession().write(closeMsg.serialize());
 						
@@ -153,11 +163,9 @@ public class EntertainmentService implements INetworkDispatch {
 		for (BuffItem item : buffVector) {
 			for (BuffBuilder builder : availableSkills) {
 				if (builder.getStatName().equals(item.getSkillName())) {
-					builder.setEntBonus(item.getAmount());
+					builder.setEntBonus(item.getBonusAmount());
 					buffsToAdd.add(builder);
-					Console.println("Added buff item: " + builder.getStatName());
-					break;
-				} else {
+					Console.println("Added buff item: " + builder.getStatAffects() + " with total affect of " + builder.getTotalAffected() + " and ent bonus of " + builder.getEntBonus());
 					continue;
 				}
 			}
