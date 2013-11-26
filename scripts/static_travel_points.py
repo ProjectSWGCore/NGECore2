@@ -105,7 +105,7 @@ def roriPoints(core, planet):
     trvSvc.addTravelPoint(planet, "Narmle Starport", -5374, 80, -2188)
     trvSvc.addTravelPoint(planet, "Narmle Shuttleport", -5255, 80, -2161)    
     trvSvc.addTravelPoint(planet, "Rebel Outpost", 3672, 96, -6421)
-    trvSvc.addTravelPoint(planet, "Restuss Starport", 5298, 80, 6188)
+    trvSvc.addTravelPoint(planet, "Restuss Starport", 5281, 80, 6171)
     trvSvc.addTravelPoint(planet, "Restuss Shuttleport", 5398, 80, 6195)
     return                
 
@@ -157,10 +157,10 @@ def mustafarPoints(core, planet):
 	trvSvc.addTravelPoint(planet, "Mensix Mining Facility", 405, 230, -1352)
 	return
     
-def kaasPoints(core, planet):
-    trvSvc = core.travelService
-    return
+#def kaasPoints(core, planet):
+    #trvSvc = core.travelService
+    #Return
 
-def taanabPoints(core, planet):
-    trvSvc = core.travelService
-    return  
+#def taanabPoints(core, planet):
+    #trvSvc = core.travelService
+    #return  
