@@ -244,7 +244,7 @@ public class TravelService implements INetworkDispatch {
 		synchronized(travelMap) {
 			for (TravelPoint tp : planetTp) {
 				//System.out.println("Distance for point " + tp.getName() + " is " + tp.getLocation().getDistance2D(obj.getWorldPosition()));
-				if (tp.getLocation().getDistance2D(obj.getWorldPosition()) <= 70) {
+				if (tp.getLocation().getDistance2D(obj.getWorldPosition()) <= 125) {
 					returnedPoint = tp;
 				}
 			}

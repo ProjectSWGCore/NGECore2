@@ -248,7 +248,7 @@ public class SimulationService implements INetworkDispatch {
 				//		 + " should be: " + dataTransform.getYPosition());
 				UpdateTransformMessage utm = new UpdateTransformMessage(object.getObjectID(), dataTransform.getTransformedX(), dataTransform.getTransformedY(), dataTransform.getTransformedZ(), dataTransform.getMovementCounter(), (byte) dataTransform.getMovementAngle(), dataTransform.getSpeed());
 	
-				List<SWGObject> newAwareObjects = get(object.getPlanet(), newPos.x, newPos.z, 200);
+				List<SWGObject> newAwareObjects = get(object.getPlanet(), newPos.x, newPos.z, 512);
 				ArrayList<SWGObject> oldAwareObjects = new ArrayList<SWGObject>(object.getAwareObjects());
 				Collection<SWGObject> updateAwareObjects = CollectionUtils.intersection(oldAwareObjects, newAwareObjects);
 				object.notifyObservers(utm, false);
@@ -256,6 +256,8 @@ public class SimulationService implements INetworkDispatch {
 				for(int i = 0; i < oldAwareObjects.size(); i++) {
 					SWGObject obj = oldAwareObjects.get(i);
 					if(!updateAwareObjects.contains(obj) && obj != object && obj.getWorldPosition().getDistance2D(newPos) > 200 && obj.isInQuadtree() /*&& obj.getParentId() == 0*/) {
+						if(obj.getAttachment("bigSpawnRange") != null && obj.getWorldPosition().getDistance2D(newPos) < 512)
+							continue;
 						object.makeUnaware(obj);
 						if(obj.getClient() != null)
 							obj.makeUnaware(object);
@@ -263,7 +265,10 @@ public class SimulationService implements INetworkDispatch {
 				}
 				for(int i = 0; i < newAwareObjects.size(); i++) {
 					SWGObject obj = newAwareObjects.get(i);
-					if(!updateAwareObjects.contains(obj) && obj != object && !object.getAwareObjects().contains(obj) && obj.getWorldPosition().getDistance2D(newPos) <= 200 && obj.getContainer() != object && obj.isInQuadtree()) {						
+					//System.out.println(obj.getTemplate());
+					if(!updateAwareObjects.contains(obj) && obj != object && !object.getAwareObjects().contains(obj) &&  obj.getContainer() != object && obj.isInQuadtree()) {						
+						if(obj.getAttachment("bigSpawnRange") == null && obj.getWorldPosition().getDistance2D(newPos) > 200)
+							continue;						
 						object.makeAware(obj);
 						if(obj.getClient() != null)
 							obj.makeAware(object);
@@ -515,9 +520,11 @@ public class SimulationService implements INetworkDispatch {
 		
 		Point3D pos = object.getWorldPosition();
 		
-		Collection<SWGObject> newAwareObjects = get(object.getPlanet(), pos.x, pos.z, 200);
+		Collection<SWGObject> newAwareObjects = get(object.getPlanet(), pos.x, pos.z, 512);
 		for(Iterator<SWGObject> it = newAwareObjects.iterator(); it.hasNext();) {
 			SWGObject obj = it.next();
+			if(obj.getAttachment("bigSpawnRange") == null & obj.getWorldPosition().getDistance(pos) > 200)
+				continue;
 			object.makeAware(obj);
 			if(obj.getClient() != null)
 				obj.makeAware(object);

@@ -286,7 +286,7 @@ public class NGECore {
 		didServerCrash = false;
 		System.out.println("Started Server.");
 		setGalaxyStatus(2);
-		
+
 	}
 	
 

@@ -86,6 +86,7 @@ def nabooPoints(core, planet):
     trvSvc.addTravelPoint(planet, "Theed Shuttle A", -5856, 19, 4172)
     trvSvc.addTravelPoint(planet, "Theed Shuttle B", -5005, 19, 4072)
     trvSvc.addTravelPoint(planet, "Theed Shuttle C", -5411, 19, 4332)
+    trvSvc.addTravelPoint(planet, "Theed Spaceport", -4858, 5, 4164)
 
     return        
         

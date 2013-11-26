@@ -143,7 +143,7 @@ public class TravelPoint {
 	
 	public boolean isStarport() {
 		if(getShuttle() != null) {
-			return getShuttle().getTemplate().equals("object/creature/npc/theme_park/shared_player_transport.iff");
+			return (getShuttle().getTemplate().equals("object/creature/npc/theme_park/shared_player_transport.iff") || getShuttle().getTemplate().equals("object/creature/npc/theme_park/shared_player_transport_theed_hangar.iff"));
 		} else {
 			System.out.println("null shuttle at: " + getName());
 			return false;

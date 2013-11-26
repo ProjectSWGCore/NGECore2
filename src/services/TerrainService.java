@@ -130,7 +130,12 @@ public class TerrainService {
 						config.setFilePath("options.cfg");
 						
 						if (config.loadConfigFile() && config.getInt("LOAD.SNAPSHOT_OBJECTS") > 0) {
-							core.objectService.loadSnapshotObjects(planet);
+							try {							
+								core.objectService.loadSnapshotObjects(planet);
+								core.objectService.loadBuildoutObjects(planet);
+							} catch (InstantiationException | IllegalAccessException e) {
+								e.printStackTrace();
+							}
 						}
 					}
 					
