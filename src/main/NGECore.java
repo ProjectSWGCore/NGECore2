@@ -29,6 +29,8 @@ import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.mina.core.service.IoHandler;
+
 
 
 
@@ -85,7 +87,9 @@ import engine.resources.database.ObjectDatabase;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
+import engine.resources.service.InteractiveJythonAcceptor;
 import engine.resources.service.NetworkDispatch;
+import engine.servers.InteractiveJythonServer;
 import engine.servers.MINAServer;
 import engine.servers.PingServer;
 
@@ -143,6 +147,10 @@ public class NGECore {
 	// Zone Server
 	public NetworkDispatch zoneDispatch;
 	private MINAServer zoneServer;
+	
+	// Interactive Jython Console
+	public InteractiveJythonAcceptor jythonAcceptor;
+	private InteractiveJythonServer jythonServer;
 
 	private ObjectDatabase creatureODB;
 	private ObjectDatabase mailODB;
@@ -213,6 +221,17 @@ public class NGECore {
 		equipmentService = new EquipmentService(this);
 		entertainmentService = new EntertainmentService(this);
 		
+		if (config.keyExists("JYTHONCONSOLE.PORT")) {
+			int jythonPort = config.getInt("JYTHONCONSOLE.PORT");
+			if (jythonPort > 0) {
+				
+				System.out.println("Starting InteractiveJythonServer on Port " + jythonPort);
+				jythonAcceptor = new InteractiveJythonAcceptor();
+				jythonServer = new InteractiveJythonServer((IoHandler) jythonAcceptor, jythonPort);
+				jythonAcceptor.setServer(jythonServer);
+				jythonServer.start();
+			}
+		}
 		
 		// Ping Server
 		try {
@@ -290,13 +309,12 @@ public class NGECore {
 		weatherService = new WeatherService(this);
 		weatherService.loadPlanetSettings();
 		
+
 		didServerCrash = false;
 		System.out.println("Started Server.");
 		setGalaxyStatus(2);
 		
 	}
-	
-
 
 	public void stop() {
 		System.out.println("Stopping Servers and Connections.");
