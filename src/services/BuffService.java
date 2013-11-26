@@ -52,6 +52,7 @@ import resources.objects.Buff;
 import resources.objects.BuffItem;
 import resources.objects.DamageOverTime;
 import resources.objects.creature.CreatureObject;
+import resources.objects.group.GroupObject;
 import resources.objects.player.PlayerObject;
 import main.NGECore;
 import engine.clients.Client;
@@ -86,6 +87,16 @@ public class BuffService implements INetworkDispatch {
 		}*/
 		
 		final Buff buff = new Buff(buffName, creature.getObjectID());
+		if(buff.isGroupBuff()) {
+			addGroupBuff(creature, buffName);
+		} else {
+			doAddBuff(creature, buffName);
+		}
+	}
+		
+	public Buff doAddBuff(final CreatureObject creature, String buffName) {
+		
+		final Buff buff = new Buff(buffName, creature.getObjectID());
 		buff.setTotalPlayTime(((PlayerObject) creature.getSlottedObject("ghost")).getTotalPlayTime());
 		
 	
@@ -103,7 +114,7 @@ public class BuffService implements INetworkDispatch {
                         		}
                         	
                                 if (otherBuff.getRemainingDuration() > buff.getDuration() && otherBuff.getStacks() >= otherBuff.getMaxStacks()) {
-                                        return;
+                                        return null;
                                 }
                         }
                        
@@ -111,7 +122,7 @@ public class BuffService implements INetworkDispatch {
                         break;
                 } else {
                 	System.out.println("buff not added:" + buffName);
-                	return;
+                	return null;
                 }
         }	
 			
@@ -138,6 +149,8 @@ public class BuffService implements INetworkDispatch {
 			
 		}
 		
+		return buff;
+		
 	} 
 	
 	public void removeBuffFromCreature(CreatureObject creature, Buff buff) {
@@ -163,6 +176,11 @@ public class BuffService implements INetworkDispatch {
 		for(final Buff buff : creature.getBuffList().get().toArray(new Buff[] { })) {
 			
 			if (buff.getGroup1().startsWith("setBonus")) { continue; }
+			
+			if(buff.isGroupBuff() && buff.getGroupBufferId() != creature.getObjectID()) {
+				removeBuffFromCreature(creature, buff);
+				continue;
+			}
 
 			if(buff.getRemainingDuration() > 0 && buff.getDuration() > 0) {
 				ScheduledFuture<?> task = scheduler.schedule(new Runnable() {
@@ -185,6 +203,24 @@ public class BuffService implements INetworkDispatch {
 					
 	}
 	
-	
+	public void addGroupBuff(final CreatureObject buffer, String buffName) {
+		
+		if(buffer.getGroupId() == 0) {
+			doAddBuff(buffer, buffName);
+			return;
+		}
+			
+		GroupObject group = (GroupObject) core.objectService.getObject(buffer.getGroupId());
+		
+		if(group == null) {
+			doAddBuff(buffer, buffName);
+			return;
+		}
+		
+		for(SWGObject member : group.getMemberList()) {
+			Buff buff = doAddBuff((CreatureObject) member, buffName);
+			buff.setGroupBufferId(buffer.getObjectID());
+		}
 
+	}
 }

@@ -41,7 +41,7 @@ import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.resources.common.CRC;
 
-@Persistent(version=6)
+@Persistent(version=7)
 public class Buff implements IListObject {
 	
 	@NotPersistent
@@ -68,6 +68,7 @@ public class Buff implements IListObject {
 	@NotPersistent
 	private ScheduledFuture<?> removalTask;
 	private int stacks = 1;
+	private long groupBufferId;
 	
 	public Buff(String buffName, long ownerId) {
 		
@@ -416,6 +417,18 @@ public class Buff implements IListObject {
 
 	public void setStacks(int stacks) {
 		this.stacks = stacks;
+	}
+	
+	public boolean isGroupBuff() {
+		return effect1Name.equals("group");
+	}
+
+	public long getGroupBufferId() {
+		return groupBufferId;
+	}
+
+	public void setGroupBufferId(long groupBufferId) {
+		this.groupBufferId = groupBufferId;
 	}
 
 }

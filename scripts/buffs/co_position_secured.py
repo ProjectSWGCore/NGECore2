@@ -18,12 +18,7 @@ def setup(core, actor, buff):
 		core.skillModService.addSkillMod(actor, 'display_only_expertise_critical_hit_reduction', actor.getSkillMod('expertise_co_pos_secured_line_protection').getBase() * 100)
 	
 	if actor.hasSkill('expertise_co_base_of_operations_1'):
-		if actor.getGroupId() != 0 and core.objectService.getObject(actor.getGroupId()):
-			group = core.objectService.getObject(actor.getGroupId())
-			for member in group.getMemberList():
-				core.buffService.addBuffToCreature(member, 'co_base_of_operations')
-		else:
-			core.buffService.addBuffToCreature(actor, 'co_base_of_operations')
+		core.buffService.addBuffToCreature(actor, 'co_base_of_operations')
 	
 	return
 	
