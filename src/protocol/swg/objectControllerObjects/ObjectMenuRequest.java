@@ -47,11 +47,9 @@ public class ObjectMenuRequest extends ObjControllerObject {
 		int listSize = buffer.getInt();
 		for(int i = 0; i < listSize; i++) {
 			RadialOptions radial = new RadialOptions();
-			if(buffer.get() == 0)	// option #
-				return;			
+		    buffer.get();
 			radial.setParentId(buffer.get());
-			radial.setOptionId(buffer.get());
-			buffer.get();
+			radial.setOptionId(buffer.getShort());
 			radial.setOptionType(buffer.get());
 			int size = buffer.getInt();
 			if(size > 0) {

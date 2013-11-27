@@ -21,14 +21,10 @@
  ******************************************************************************/
 package resources.objects.building;
 
-
-
 import java.util.concurrent.atomic.AtomicReference;
-
 import resources.objects.cell.CellObject;
-
 import com.sleepycat.persist.model.Entity;
-
+import com.sleepycat.persist.model.NotPersistent;
 import engine.clients.Client;
 import engine.resources.container.Traverser;
 import engine.resources.objects.SWGObject;
@@ -39,18 +35,17 @@ import engine.resources.scene.Quaternion;
 @Entity
 public class BuildingObject extends SWGObject {
 	
+	@NotPersistent
+	private BuildingMessageBuilder messageBuilder;
+
 	public BuildingObject() {
 		super();
+		messageBuilder = new BuildingMessageBuilder(this);
 	}
 
 	public BuildingObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
 		super(objectID, planet, position, orientation, Template);
-	}
-
-	@Override
-	public void sendBaselines(Client client) {
-		// TODO Auto-generated method stub
-		
+		messageBuilder = new BuildingMessageBuilder(this);
 	}
 	
 	public CellObject getCellByCellNumber(final int cellNumber) {
@@ -73,5 +68,17 @@ public class BuildingObject extends SWGObject {
 		
 	}
 
-	
+	@Override
+	public void sendBaselines(Client destination) {
+		
+		if(destination == null || destination.getSession() == null) {
+			System.out.println("NULL session");
+			return;
+		}
+		
+		destination.getSession().write(messageBuilder.buildBaseline3());
+		destination.getSession().write(messageBuilder.buildBaseline6());
+		
+	}
+
 }

@@ -48,6 +48,7 @@ public class PlayerObject extends SWGObject {
 	private String profession;
 	private List<Integer> flagsList = new ArrayList<Integer>();
 	private List<Integer> profileList = new ArrayList<Integer>();
+	private List<String> titleList = new ArrayList<String>();
 	private int bornDate = 0;
 	private int totalPlayTime = 0;
 	
@@ -135,10 +136,12 @@ public class PlayerObject extends SWGObject {
 
 	public void setTitle(String title) {
 		synchronized(objectMutex) {
-			this.title = title;
+			
+			if(!getTitleList().isEmpty() && getTitleList().contains(title)) {
+				this.title = title;
+				notifyObservers(messageBuilder.buildTitleDelta(title), true);
+			}
 		}
-		
-		notifyObservers(messageBuilder.buildTitleDelta(title), true);
 	}
 
 	public String getProfession() {
@@ -559,6 +562,14 @@ public class PlayerObject extends SWGObject {
 		synchronized(objectMutex) {
 			this.lastPlayTimeUpdate = lastPlayTimeUpdate;
 		}
+	}
+
+	public List<String> getTitleList() {
+		return titleList;
+	}
+
+	public void setTitleList(List<String> titleList) {
+		this.titleList = titleList;
 	}
 	
 }

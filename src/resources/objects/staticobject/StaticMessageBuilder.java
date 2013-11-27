@@ -41,9 +41,11 @@ public class StaticMessageBuilder extends ObjectMessageBuilder {
 		
 		buffer.putShort((short) 4);
 		buffer.putInt(0);
+		//buffer.putShort((short) 0);
 
 		buffer.put(getAsciiString(object.getStfFilename()));
 		buffer.putInt(0);
+		//buffer.putShort((short) 0);
 		buffer.put(getAsciiString(object.getStfName()));
 		buffer.putInt(0);
 		buffer.putInt(0xFF);
@@ -63,9 +65,11 @@ public class StaticMessageBuilder extends ObjectMessageBuilder {
 		buffer.setAutoExpand(true);
 		buffer.putShort((short) 2);
 		buffer.putInt(0x92);
+		//buffer.putShort((short) 0);
 		buffer.put(getAsciiString(object.getDetailFilename()));
 		buffer.putInt(0);
 		buffer.put(getAsciiString(object.getDetailName()));
+	//	buffer.putShort((short) 0);
 		
 		int size = buffer.position();
 		buffer = bufferPool.allocate(size, false).put(buffer.array(), 0, size);

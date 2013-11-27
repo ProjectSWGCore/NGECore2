@@ -45,6 +45,7 @@ import engine.clients.Client;
 import resources.objects.Buff;
 import resources.objects.DamageOverTime;
 import resources.objects.SWGList;
+import engine.resources.common.CRC;
 import engine.resources.objects.IPersistent;
 import engine.resources.objects.MissionCriticalObject;
 import engine.resources.objects.SWGObject;
@@ -101,7 +102,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 
 	// CREO6
 	private byte combatFlag = 0;
-	private short level = 90;
+	private short level = 1;
 	private int grantedHealth = 0;
 	private String currentAnimation;
 	private String moodAnimation;
@@ -926,32 +927,25 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		
 		if(destination != getClient()) {
 			UpdatePVPStatusMessage upvpm = new UpdatePVPStatusMessage(getObjectID());
-			if (factionStatus == 1 && faction == "imperial") {
+			if (factionStatus == 1 && faction.equals("imperial")) {
 				upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Imperial);
 				upvpm.setStatus(16);
-			}
-			
-			if (factionStatus == 1 && faction == "rebel") {
+			} else if (factionStatus == 1 && faction.equals("rebel")) {
 				upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Rebel);
 				upvpm.setStatus(16);
-			}
-			
-			if (factionStatus == 2 && faction == "imperial") {
+			} else if (factionStatus == 2 && faction.equals("imperial")) {
 				upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Imperial);
 				upvpm.setStatus(55);
-			}
-			if (factionStatus == 2 && faction == "rebel") {
+			} else if (factionStatus == 2 && faction.equals("rebel")) {
 				upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Rebel);
 				upvpm.setStatus(55);
-			} 
-			if(factionStatus == 0 && faction == "neutral") {
-				upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Neutral);
+			} else if(getSlottedObject("ghost") != null) {
+				upvpm.setFaction(CRC.StringtoCRC(faction));
 				upvpm.setStatus(16);
-			}
-			else {
+			} else {
 				upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Neutral);
-				upvpm.setStatus(16);
-			}
+				upvpm.setStatus(0);
+			}			
 			destination.getSession().write(upvpm.serialize());
 		}
 	}

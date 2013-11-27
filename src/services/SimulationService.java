@@ -103,13 +103,6 @@ public class SimulationService implements INetworkDispatch {
 			quadTrees.put(terrainService.getPlanetList().get(i).getName(), new QuadTree<SWGObject>(-8192, -8192, 8192, 8192));
 		}
 		
-		List<SWGObject> objectList = new ArrayList<SWGObject>(core.objectService.getObjectList().values());
-		for(SWGObject obj : objectList) {
-			if(obj.getParentId() == 0 && obj.isInSnapshot()) {
-				core.objectService.loadServerTemplate(obj);
-				add(obj, obj.getPosition().x, obj.getPosition().z);
-			}
-		}
 		core.commandService.registerCommand("opencontainer");
 		core.commandService.registerCommand("transferitem");
 		core.commandService.registerCommand("transferitemarmor");
@@ -145,13 +138,23 @@ public class SimulationService implements INetworkDispatch {
 
 	}
 	
+	public void insertSnapShotObjects() {
+		List<SWGObject> objectList = new ArrayList<SWGObject>(core.objectService.getObjectList().values());
+		for(SWGObject obj : objectList) {
+			if(obj.getParentId() == 0 && obj.isInSnapshot())
+				add(obj, obj.getPosition().x, obj.getPosition().z);
+		}
+	}
+	
 	public void add(SWGObject object, int x, int y) {
 		object.setIsInQuadtree(true);
+		core.objectService.loadServerTemplate(object);
 		quadTrees.get(object.getPlanet().getName()).put(x, y, object);
 	}
 	
 	public boolean add(SWGObject object, float x, float y) {
 		object.setIsInQuadtree(true);
+		core.objectService.loadServerTemplate(object);
 		return quadTrees.get(object.getPlanet().getName()).put(x, y, object);
 	}
 	
@@ -245,7 +248,7 @@ public class SimulationService implements INetworkDispatch {
 				//		 + " should be: " + dataTransform.getYPosition());
 				UpdateTransformMessage utm = new UpdateTransformMessage(object.getObjectID(), dataTransform.getTransformedX(), dataTransform.getTransformedY(), dataTransform.getTransformedZ(), dataTransform.getMovementCounter(), (byte) dataTransform.getMovementAngle(), dataTransform.getSpeed());
 	
-				List<SWGObject> newAwareObjects = get(object.getPlanet(), newPos.x, newPos.z, 200);
+				List<SWGObject> newAwareObjects = get(object.getPlanet(), newPos.x, newPos.z, 512);
 				ArrayList<SWGObject> oldAwareObjects = new ArrayList<SWGObject>(object.getAwareObjects());
 				Collection<SWGObject> updateAwareObjects = CollectionUtils.intersection(oldAwareObjects, newAwareObjects);
 				object.notifyObservers(utm, false);
@@ -253,6 +256,8 @@ public class SimulationService implements INetworkDispatch {
 				for(int i = 0; i < oldAwareObjects.size(); i++) {
 					SWGObject obj = oldAwareObjects.get(i);
 					if(!updateAwareObjects.contains(obj) && obj != object && obj.getWorldPosition().getDistance2D(newPos) > 200 && obj.isInQuadtree() /*&& obj.getParentId() == 0*/) {
+						if(obj.getAttachment("bigSpawnRange") != null && obj.getWorldPosition().getDistance2D(newPos) < 512)
+							continue;
 						object.makeUnaware(obj);
 						if(obj.getClient() != null)
 							obj.makeUnaware(object);
@@ -260,7 +265,10 @@ public class SimulationService implements INetworkDispatch {
 				}
 				for(int i = 0; i < newAwareObjects.size(); i++) {
 					SWGObject obj = newAwareObjects.get(i);
-					if(!updateAwareObjects.contains(obj) && obj != object && !object.getAwareObjects().contains(obj) && obj.getWorldPosition().getDistance2D(newPos) <= 200 && obj.getContainer() != object && obj.isInQuadtree()) {						
+					//System.out.println(obj.getTemplate());
+					if(!updateAwareObjects.contains(obj) && obj != object && !object.getAwareObjects().contains(obj) &&  obj.getContainer() != object && obj.isInQuadtree()) {						
+						if(obj.getAttachment("bigSpawnRange") == null && obj.getWorldPosition().getDistance2D(newPos) > 200)
+							continue;						
 						object.makeAware(obj);
 						if(obj.getClient() != null)
 							obj.makeAware(object);
@@ -512,9 +520,11 @@ public class SimulationService implements INetworkDispatch {
 		
 		Point3D pos = object.getWorldPosition();
 		
-		Collection<SWGObject> newAwareObjects = get(object.getPlanet(), pos.x, pos.z, 200);
+		Collection<SWGObject> newAwareObjects = get(object.getPlanet(), pos.x, pos.z, 512);
 		for(Iterator<SWGObject> it = newAwareObjects.iterator(); it.hasNext();) {
 			SWGObject obj = it.next();
+			if(obj.getAttachment("bigSpawnRange") == null & obj.getWorldPosition().getDistance(pos) > 200)
+				continue;
 			object.makeAware(obj);
 			if(obj.getClient() != null)
 				obj.makeAware(object);
@@ -552,6 +562,8 @@ public class SimulationService implements INetworkDispatch {
 				}
 			}
 		}
+		
+		core.weatherService.sendWeather(object);
 		
 		if (!object.hasSkill(ghost.getProfessionWheelPosition())) {
 			object.showFlyText("cbt_spam", "skill_up", (float) 2.5, new RGB(154, 205, 50), 0);
@@ -862,7 +874,7 @@ public class SimulationService implements INetworkDispatch {
 	
 	public float getHeightOrigin(CreatureObject creature) {
 		
-		float height = (float) (creature.getHeight() - 0.3);
+		float height = (float) (creature.getHeight()/* - 0.3*/);
 		
 		if(creature.getPosture() == 2 || creature.getPosture() == 13)
 			height = 0.3f;
@@ -870,6 +882,39 @@ public class SimulationService implements INetworkDispatch {
 			height /= 2.f;
 		
 		return height;
+
+	}
+	
+	public void notifyPlanet(Planet planet, IoBuffer packet) {
+		
+		ConcurrentHashMap<Integer, Client> clients = core.getActiveConnectionsMap();
+		
+		for(Client client : clients.values()) {
+			
+			if(client.getParent() == null)
+				continue;
+
+			if(client.getParent().getPlanet() == null)
+				continue;
+			else if(client.getParent().getPlanet() == planet)
+				client.getSession().write(packet);
+			
+		}
+		
+	}
+	
+	public void notifyAllClients(IoBuffer packet) {
+		
+		ConcurrentHashMap<Integer, Client> clients = core.getActiveConnectionsMap();
+		
+		for(Client client : clients.values()) {
+			
+			if(client.getParent() == null)
+				continue;
+
+			client.getSession().write(packet);
+			
+		}
 
 	}
 

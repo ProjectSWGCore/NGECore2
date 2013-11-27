@@ -23,6 +23,7 @@ package services;
 
 import java.util.Map;
 
+import resources.common.FileUtilities;
 import resources.objects.SWGList;
 import resources.objects.creature.CreatureObject;
 import main.NGECore;
@@ -40,13 +41,19 @@ public class SkillModService implements INetworkDispatch {
 	
 	public void addSkillMod(CreatureObject creature, String skillMod, int value) {
 		
-		core.scriptService.callScript("scripts/skillMods/", skillMod, "add", core, creature, skillMod, value);
-		
+		if(FileUtilities.doesFileExist("scripts/skillMods/" + skillMod + ".py"))
+			core.scriptService.callScript("scripts/skillMods/", skillMod, "add", core, creature, skillMod, value);
+		else
+			creature.addSkillMod(skillMod, value);
 	}
 	
 	public void deductSkillMod(CreatureObject creature, String skillMod, int value) {
 		
-		core.scriptService.callScript("scripts/skillMods/", skillMod, "deduct", core, creature, skillMod, value);
+		if(FileUtilities.doesFileExist("scripts/skillMods/" + skillMod + ".py"))
+			core.scriptService.callScript("scripts/skillMods/", skillMod, "deduct", core, creature, skillMod, value);
+		else
+			creature.deductSkillMod(skillMod, value);
+
 
 	}
 

@@ -35,12 +35,10 @@ public class PlanetTravelPointListResponse extends SWGMessage {
 
 	private String planetString;
 	private Vector<TravelPoint> travelPoints;
-	private List<Planet> planetList;
 	
-	public PlanetTravelPointListResponse(String planetString, Vector<TravelPoint> travelPoints, List<Planet> planetList) {
+	public PlanetTravelPointListResponse(String planetString, Vector<TravelPoint> travelPoints) {
 		this.planetString = planetString;
 		this.travelPoints = travelPoints;
-		this.planetList = planetList;
 	}
 	
 	@Override
@@ -50,7 +48,7 @@ public class PlanetTravelPointListResponse extends SWGMessage {
 
 	@Override
 	public IoBuffer serialize() {
-		IoBuffer result = IoBuffer.allocate(travelPoints.size() * 2).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer result = IoBuffer.allocate(100).order(ByteOrder.LITTLE_ENDIAN);
 		result.setAutoExpand(true);
 		
 		result.putShort((short) 6);
@@ -81,8 +79,9 @@ public class PlanetTravelPointListResponse extends SWGMessage {
 		for (TravelPoint point : travelPoints) {
 			result.put((byte) 1); // isReachable
 		}
-		result.flip();
-		return result;
+		int size = result.position();
+		result = IoBuffer.allocate(size).put(result.array(), 0, size);
+		return result.flip();
 	}
 
 }

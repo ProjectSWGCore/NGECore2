@@ -42,13 +42,13 @@ public class UpdateCellPermissionMessage extends SWGMessage {
 	}
 	
 	public IoBuffer serialize() {
-		IoBuffer result = IoBuffer.allocate(128).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer result = IoBuffer.allocate(15).order(ByteOrder.LITTLE_ENDIAN);
 		
 		result.putShort((short)3);
 		result.putInt(0xF612499C);
 		result.put(permission);
 		result.putLong(cellId);
 		
-		return result;
+		return result.flip();
 	}
 }

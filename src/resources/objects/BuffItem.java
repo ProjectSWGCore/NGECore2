@@ -23,17 +23,17 @@ package resources.objects;
 
 public class BuffItem {
 	private String skillName;
-	private int unknown;
-	private int amount;
+	private int invested;
+	private int bonusAmount; // expertise bonus (50%*4 = 200) which would then result in bonusAmount + (maxTimesApplied * affectAmount) = result
 	
 	public BuffItem() {
 		
 	}
 	
-	public BuffItem(String skillName, int unknown, int amount) {
+	public BuffItem(String skillName, int invested, int amount) {
 		this.skillName = skillName;
-		this.unknown = unknown;
-		this.amount = amount;
+		this.invested = invested;
+		this.bonusAmount = amount;
 	}
 
 	public String getSkillName() {
@@ -44,19 +44,19 @@ public class BuffItem {
 		this.skillName = skillName;
 	}
 
-	public int getUnknown() {
-		return unknown;
+	public int getInvested() {
+		return invested;
 	}
 
-	public void setUnknown(int unknown) {
-		this.unknown = unknown;
+	public void setInvested(int invested) {
+		this.invested = invested;
 	}
 
-	public int getAmount() {
-		return amount;
+	public int getBonusAmount() {
+		return bonusAmount;
 	}
 
-	public void setAmount(int amount) {
-		this.amount = amount;
+	public void setBonusAmount(int amount) {
+		this.bonusAmount = amount;
 	}
 }

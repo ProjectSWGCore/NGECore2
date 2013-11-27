@@ -30,7 +30,7 @@ def run(core, actor, target, commandString):
         if nearestPoint.isShuttleAvailable() is False and nearestPoint.isShuttleDeparting() is True:
             actor.sendSystemMessage('@travel:shuttle_not_available', 0)
             return
-        elif nearestPoint.getSecondsRemaining() == 0:
+        elif nearestPoint.getSecondsRemaining() <= 0:
             actor.sendSystemMessage('The next shuttle is about to begin boarding.', 0)
             return
         else:

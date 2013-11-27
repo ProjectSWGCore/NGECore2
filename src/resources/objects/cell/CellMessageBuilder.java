@@ -21,6 +21,78 @@
  ******************************************************************************/
 package resources.objects.cell;
 
-public class CellMessageBuilder {
+import java.nio.ByteOrder;
 
+import org.apache.mina.core.buffer.IoBuffer;
+
+import resources.objects.ObjectMessageBuilder;
+import resources.objects.building.BuildingObject;
+
+public class CellMessageBuilder extends ObjectMessageBuilder {
+	
+	public CellMessageBuilder(CellObject cellObject) {
+		setObject(cellObject);
+	}
+	
+	public IoBuffer buildBaseline3() {
+
+		CellObject cell = (CellObject) object;
+		IoBuffer buffer = bufferPool.allocate(27, false).order(ByteOrder.LITTLE_ENDIAN);
+		
+		buffer.putShort((short) 6);
+		buffer.putFloat(0);
+		buffer.putShort((short) 0);
+		
+		buffer.putInt(0);
+		buffer.putShort((short) 0);
+		
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.put((byte) 1);
+		buffer.putInt(cell.getCellNumber());
+
+		int size = buffer.position();
+
+		buffer.flip();
+		buffer = createBaseline("SCLT", (byte) 3, buffer, size);
+
+		return buffer;
+
+	}
+	
+	public IoBuffer buildBaseline6() {
+
+		IoBuffer buffer = bufferPool.allocate(30, false).order(ByteOrder.LITTLE_ENDIAN);
+		
+		buffer.putShort((short) 4);
+		buffer.putInt(0x43);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+
+		int size = buffer.position();
+
+		buffer.flip();
+		buffer = createBaseline("SCLT", (byte) 6, buffer, size);
+
+		return buffer;
+
+	}
+
+
+
+	@Override
+	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void sendBaselines() {
+		// TODO Auto-generated method stub
+		
+	}
 }

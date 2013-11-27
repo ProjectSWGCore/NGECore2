@@ -155,9 +155,10 @@ public class CommandService implements INetworkDispatch  {
 		// Check if the person has access to this ability.
 		// Abilities (inc expertise ones) are added automatically as they level
 		// by reading the datatables.
-		if (!attacker.hasAbility(command.getCommandName())) {
-			return;
-		}
+		// disabled for now (breaks all combat)
+		//if (!attacker.hasAbility(command.getCommandName())) {
+	//		return;
+		//}
 		
 		if(FileUtilities.doesFileExist("scripts/commands/combat/" + command.getCommandName() + ".py"))
 			core.scriptService.callScript("scripts/commands/combat/", command.getCommandName(), "setup", core, attacker, target, command);
@@ -167,7 +168,7 @@ public class CommandService implements INetworkDispatch  {
 		//if((command.getHitType() == 5 || command.getHitType() == 7) && !(target instanceof CreatureObject))
 		//	success = false;
 		
-		if(!(command.getAttackType() == 2) && !(command.getHitType() == 5)) {
+		if(!(command.getAttackType() == 2) && !(command.getHitType() == 5) && !(command.getHitType() == 0)) {
 			if(target == null || !(target instanceof TangibleObject) || target == attacker)
 				success = false;
 		} else {
@@ -242,6 +243,11 @@ public class CommandService implements INetworkDispatch  {
 			
 			if(command.getHitType() == 7) {
 				core.combatService.doRevive(attacker, (CreatureObject) target, weapon, command, actionCounter);
+				return;
+			}
+			
+			if(command.getHitType() == 0 && command.getBuffNameSelf().length() > 0) {
+				core.combatService.doSelfBuff(attacker, weapon, command, actionCounter);
 				return;
 			}
 				

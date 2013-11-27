@@ -19,45 +19,29 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package protocol.swg;
+package resources.common;
 
-import org.apache.mina.core.buffer.IoBuffer;
+import engine.resources.scene.*;
 
-public class ObjectMenuSelect extends SWGMessage {
-
-	private byte selection;
-	private long objectId;
-
-	@Override
-	public void deserialize(IoBuffer buffer) {
-
-		buffer.getShort();
-		buffer.getInt();
-		setObjectId(buffer.getLong());
-		setSelection(buffer.get());
+public class MathUtilities {
+	
+	public static Quaternion rotateQuaternion(Quaternion quaternion, float radians, Point3D axis) {
+		
+		float sin = (float) Math.sin(radians / 2);
+	
+		Quaternion rotateQ = new Quaternion((float) Math.cos(radians / 2), axis.x * sin, axis.y * sin, axis.z * sin);
+		
+		return multiplyQuaternions(rotateQ, quaternion);
 		
 	}
-
-	@Override
-	public IoBuffer serialize() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public byte getSelection() {
-		return selection;
-	}
-
-	public void setSelection(byte selection) {
-		this.selection = selection;
-	}
-
-	public long getObjectId() {
-		return objectId;
-	}
-
-	public void setObjectId(long objectId) {
-		this.objectId = objectId;
+	
+	public static Quaternion multiplyQuaternions(Quaternion q1, Quaternion q2) {
+		
+		return new Quaternion(q1.w * q2.w - q1.x * q2.x - q1.y * q2.y - q1.z * q2.z,
+				q1.w * q2.x + q1.x * q2.w + q1.y * q2.z - q1.z * q2.y,
+				q1.w * q2.y + q1.y * q2.w + q1.z * q2.x - q1.x * q2.z,
+				q1.w * q2.z + q1.z * q2.w + q1.x * q2.y - q1.y * q2.x);
+		
 	}
 
 }

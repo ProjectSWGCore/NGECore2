@@ -45,6 +45,7 @@ public class ScriptService {
 		PyObject func = interpreter.get(method);
 		func.__call__(Py.java2py(core));*/
 		PythonInterpreter python = new PythonInterpreter();
+		python.cleanup();
 		python.execfile(path + module + ".py");
 		return python.get(method).__call__();
 	}
@@ -56,6 +57,7 @@ public class ScriptService {
 		PyObject func = interpreter.get(method);
 		func.__call__(Py.java2py(core), Py.java2py(arg1));*/
 		PythonInterpreter python = new PythonInterpreter();
+		python.cleanup();
 		python.execfile(path + module + ".py");
 		return python.get(method).__call__(Py.java2py(arg1));
 	}
@@ -67,6 +69,7 @@ public class ScriptService {
 		PyObject func = interpreter.get(method);
 		func.__call__(Py.java2py(arg1), Py.java2py(arg2));*/
 		PythonInterpreter python = new PythonInterpreter();
+		python.cleanup();
 		python.execfile(path + module + ".py");
 		return python.get(method).__call__(Py.java2py(arg1), Py.java2py(arg2));
 	}
@@ -78,6 +81,7 @@ public class ScriptService {
 		PyObject func = interpreter.get(method);
 		func.__call__(Py.java2py(arg1), Py.java2py(arg2), Py.java2py(arg3));*/
 		PythonInterpreter python = new PythonInterpreter();
+		python.cleanup();
 		python.execfile(path + module + ".py");
 		return python.get(method).__call__(Py.java2py(arg1), Py.java2py(arg2), Py.java2py(arg3));
 
@@ -90,12 +94,14 @@ public class ScriptService {
 		PyObject func = interpreter.get(method);
 		func.__call__(Py.java2py(arg1), Py.java2py(arg2), Py.java2py(arg3), Py.java2py(arg4));*/
 		PythonInterpreter python = new PythonInterpreter();
+		python.cleanup();
 		python.execfile(path + module + ".py");
 		return python.get(method).__call__(Py.java2py(arg1), Py.java2py(arg2), Py.java2py(arg3), Py.java2py(arg4));
 	}
 	
 	public PyObject getMethod(String path, String module, String method) {
 		PythonInterpreter python = new PythonInterpreter();
+		python.cleanup();
 		python.execfile(path + module + ".py");
 		PyObject func = python.get(method);
 		return func;
