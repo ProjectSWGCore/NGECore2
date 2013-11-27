@@ -227,7 +227,7 @@ public class NGECore {
 				
 				System.out.println("Starting InteractiveJythonServer on Port " + jythonPort);
 				jythonAcceptor = new InteractiveJythonAcceptor();
-				jythonServer = new InteractiveJythonServer((IoHandler) jythonAcceptor, jythonPort);
+				jythonServer = new InteractiveJythonServer((IoHandler) jythonAcceptor, jythonPort, this);
 				jythonAcceptor.setServer(jythonServer);
 				jythonServer.start();
 			}
