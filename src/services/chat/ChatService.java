@@ -46,6 +46,7 @@ import engine.resources.service.INetworkRemoteEvent;
 import resources.common.*;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
+import protocol.swg.AddIgnoreMessage;
 import protocol.swg.ChatOnChangeFriendStatus;
 import protocol.swg.ChatDeletePersistentMessage;
 import protocol.swg.ChatFriendsListUpdate;
@@ -71,6 +72,8 @@ public class ChatService implements INetworkDispatch {
 		this.core = core;
 		core.commandService.registerCommand("spatialchatinternal");
 		core.commandService.registerCommand("socialinternal");
+		core.commandService.registerCommand("addignore");
+		core.commandService.registerCommand("removeignore");
 		mailODB = core.getMailODB();
 	}
 	
@@ -177,9 +180,12 @@ public class ChatService implements INetworkDispatch {
 				if(sender == null)
 					return;
 				
-				
-				
 				SWGObject recipient = getObjectByFirstName(firstName);				
+				
+				PlayerObject recipientGhost = (PlayerObject) recipient.getSlottedObject("ghost");
+				
+				if (recipientGhost.getIgnoreList().contains(sender.getCustomName().toLowerCase())) 
+					return;
 				
 				if(recipient == null || recipient.getClient() == null || recipient.getClient().getSession() == null) {
 					ChatOnSendInstantMessage response = new ChatOnSendInstantMessage(4, chatInstantMsg.getSequence());
@@ -219,7 +225,12 @@ public class ChatService implements INetworkDispatch {
 					return;
 
 				SWGObject recipient = getObjectByFirstName(packet.getRecipient());
-								
+				
+				PlayerObject recipientGhost = (PlayerObject) recipient.getSlottedObject("ghost");
+				
+				if (recipientGhost.getIgnoreList().contains(sender.getCustomName().toLowerCase())) 
+					return;
+				
 				if(recipient == null || recipient.getSlottedObject("ghost" ) == null) {
 					ChatOnSendPersistentMessage response = new ChatOnSendPersistentMessage(4, packet.getCounter());
 					session.write(response.serialize());
@@ -419,6 +430,50 @@ public class ChatService implements INetworkDispatch {
 		actorCreature.sendSystemMessage(friendShortName + " has been added to your friends list.", (byte) 0);
 		
 		//actor.friendAdd(friendShortName);
+	}
+	
+	public void addToIgnoreList(SWGObject actor, String ignoreName) {
+		PlayerObject ghost = (PlayerObject) actor.getSlottedObject("ghost");
+		CreatureObject creature = (CreatureObject) actor;
+		List<String> ignoreList = ghost.getIgnoreList();
+		
+		if (ignoreList.contains(ignoreName.toLowerCase())) {
+			creature.sendSystemMessage(ignoreName + " is already in your ignore list.", (byte) 0);
+			return;
+		} else {
+			// TODO: Do check for valid names to ignore
+			
+			AddIgnoreMessage addIgnore = new AddIgnoreMessage(actor, ignoreName.toLowerCase(), true);
+			actor.getClient().getSession().write(addIgnore.serialize());
+			Console.println("Sent the add ignore message!");
+			ghost.ignoreAdd(ignoreName.toLowerCase());
+			Console.println("Sent the add ignore delta!");
+			creature.sendSystemMessage(ignoreName + " is now ignored.", (byte) 0);
+		}
+
+	}
+	
+	public void removeFromIgnoreList(SWGObject actor, String ignoreName) {
+		PlayerObject ghost = (PlayerObject) actor.getSlottedObject("ghost");
+		CreatureObject creature = (CreatureObject) actor;
+		List<String> ignoreList = ghost.getIgnoreList();
+		
+		if (ignoreList.contains(ignoreName.toLowerCase())) {
+			for (String name : ignoreList) {
+				if(name.equalsIgnoreCase(ignoreName)) {
+					//Console.println("Name found!");
+					AddIgnoreMessage removeIgnore = new AddIgnoreMessage(actor, ignoreName.toLowerCase(), false);
+					actor.getClient().getSession().write(removeIgnore.serialize());
+					//Console.println("Sent AddIgnoreMessage to remove friend!");
+					ghost.ignoreRemove(ignoreName.toLowerCase());
+					//Console.println("Sent ignoreRemove delta!");
+					creature.sendSystemMessage(ignoreName + " is no longer ignored.", (byte) 0);
+					
+					// TODO: Find out why player must click on name twice in list for name to be removed.
+					break;
+				}
+			}
+		} else { return; }
 	}
 	
 	public void sendPersistentMessageHeader(Client client, Mail mail) {

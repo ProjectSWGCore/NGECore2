@@ -137,105 +137,6 @@ public class TravelService implements INetworkDispatch {
 		});
 		
 	}
-	public void startShuttleSchedule() {
-		final Runnable shuttleRun = new Runnable() {
-
-			@Override
-			public void run() {
-				
-				for (Entry<Planet, Vector<TravelPoint>> entry : travelMap.entrySet()) {
-					for(TravelPoint tp : entry.getValue()) {
-						if (tp.getShuttle() == null)
-							continue;
-						else {
-
-							 if (tp.isShuttleAvailable() == false) {
-								 tp.getShuttle().setPosture((byte) 0);
-								 tp.setShuttleLanding(true);
-								 handleShuttleLanding();
-								 //Console.println("Started handle shuttle landing");
-							 }
-							 else {
-								 tp.getShuttle().setPosture((byte) 2);
-								 tp.setShuttleAvailable(false);
-								 tp.setShuttleLanding(false);
-								 tp.setShuttleDeparting(true);
-								 handleShuttleDeparture();
-								 //Console.println("Shuttle is not available.");
-							 }
-						}
-					}
-				}
-				
-			}
-			
-		};
-		
-		scheduler.scheduleAtFixedRate(shuttleRun, 83, 83, TimeUnit.SECONDS);
-		
-		//shuttleCountdown();
-	}
-	
-	private void handleShuttleLanding() {
-		scheduler.schedule(new Runnable() {
-
-			@Override
-			public void run() {
-				for (Entry<Planet, Vector<TravelPoint>> entry : travelMap.entrySet()) {
-					for(TravelPoint tp : entry.getValue()) {
-						if (tp.isShuttleLanding()) {
-							tp.setShuttleLanding(false);
-							tp.setShuttleAvailable(true);
-							//Console.println("Shuttle has landed!");
-						}
-					}
-				}
-			}
-			
-		}, 27, TimeUnit.SECONDS);
-
-	}
-	
-	private void handleShuttleDeparture() {
-		scheduler.schedule(new Runnable() {
-
-			@Override
-			public void run() {
-				for (Entry<Planet, Vector<TravelPoint>> entry : travelMap.entrySet()) {
-					for(TravelPoint tp : entry.getValue()) {
-						tp.setShuttleDeparting(false);
-						tp.setSecondsRemaining(60);
-					}
-				}
-				shuttleCountdown();
-				//Console.println("Countdown initiated");
-			}
-			
-		}, 20, TimeUnit.SECONDS);
-	}
-	
-	private void shuttleCountdown() {
-		Runnable countDown = new Runnable() {
-			@Override
-			public void run() {
-				for (Entry<Planet, Vector<TravelPoint>> entry : travelMap.entrySet()) {
-					for(TravelPoint tp : entry.getValue()) {
-						if (tp.getShuttle() == null || tp.isShuttleDeparting() == true || tp.isShuttleAvailable() == true || tp.getSecondsRemaining() == 0)
-							continue;
-						
-						else {
-							tp.setSecondsRemaining(tp.getSecondsRemaining() - 1);
-							//Console.println("Time Remaining: " + tp.getSecondsRemaining());
-						}
-					}
-				}
-			}
-			
-		};
-		
-		runCountdown(countDown, scheduler);
-		
-	}
 	
 	public TravelPoint getNearestTravelPoint(SWGObject obj) {
 		TravelPoint returnedPoint = null;
@@ -369,7 +270,7 @@ public class TravelService implements INetworkDispatch {
 		SWGObject travelTicket = createTravelTicket(departurePlanet, departureLoc, arrivalPlanet, arrivalLoc);
 		
 		creatureObj.getSlottedObject("inventory").add(travelTicket);
-		Console.println("Total cost: " + fare);
+		//Console.println("Total cost: " + fare);
 		SUIWindow window = core.suiService.createMessageBox(MessageBoxType.MESSAGE_BOX_OK, "STAR WARS GALAXIES", "Ticket purchase complete.", player, null, 0);
 		core.suiService.openSUIWindow(window);
 
@@ -504,10 +405,6 @@ public class TravelService implements INetworkDispatch {
 	public Map<Planet, Vector<TravelPoint>> getTravelMap() {
 		return this.travelMap;
 	}
-	
-    public void runCountdown(Runnable task, ScheduledExecutorService executor) {
-        new ShuttleCountdown(task, this.core).startCountdown(executor);
-    }
 	
 	@Override
 	public void shutdown() {

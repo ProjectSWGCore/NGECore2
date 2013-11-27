@@ -23,24 +23,51 @@ package protocol.swg;
 
 import java.nio.ByteOrder;
 
+import main.NGECore;
+
 import org.apache.mina.core.buffer.IoBuffer;
 
-public class ChatOnAddFriend extends SWGMessage {
+import engine.resources.config.Config;
+import engine.resources.config.DefaultConfig;
+import engine.resources.objects.SWGObject;
 
+public class AddIgnoreMessage extends SWGMessage {
+
+	private SWGObject player;
+	private boolean type;
+	private String ignoreName;
+	
+	public AddIgnoreMessage(SWGObject obj, String name, boolean type) {
+		this.player = obj;
+		this.ignoreName = name;
+		this.type = type;
+	}
+	
 	@Override
 	public void deserialize(IoBuffer data) {
-		
+
 	}
 
 	@Override
 	public IoBuffer serialize() {
-		IoBuffer result = IoBuffer.allocate(20).order(ByteOrder.LITTLE_ENDIAN);
-	    
-		result.putShort((short) 0x03);
-		result.putInt(0x2B2A0D94);
-		result.putLong(0);
-		result.flip();
-		return result;
+		Config config = NGECore.getInstance().getConfig();
+		String server = config.getProperty("GALAXY_NAME");
+		
+		IoBuffer result = IoBuffer.allocate(34 + server.length() + ignoreName.length()).order(ByteOrder.LITTLE_ENDIAN);
+		
+		result.putShort((short) 6);
+		result.putInt(0x70E9DA0F);
+		result.putLong(player.getObjectId());
+		
+		result.put(getAsciiString("SWG"));
+		result.put(getAsciiString(server));
+		result.put(getAsciiString(ignoreName));
+		
+		result.putInt(0);
+		result.put((byte) ((type) ? 1 : 0));  // add = T, remove = F
+		result.putInt(0);
+		
+		return result.flip();
 	}
 
 }
