@@ -21,6 +21,7 @@
  ******************************************************************************/
 package services.object;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteOrder;
 import java.sql.PreparedStatement;
@@ -237,10 +238,12 @@ public class ObjectService implements INetworkDispatch {
 				}
 			}
 
+		} catch (FileNotFoundException e) {
+			System.out.println("!File Not Found:" + template.toString());
 		} catch (IOException e) {
+			System.out.println("!IO error " + template.toString());
 			e.printStackTrace();
 		}
-
 	}
 	
 	public SWGObject createObject(String Template, Planet planet) {
