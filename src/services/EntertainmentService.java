@@ -258,9 +258,6 @@ public class EntertainmentService implements INetworkDispatch {
 	}
 	
 	public boolean canDance(CreatureObject actor, Performance dance) {
-		for (String x : actor.getAbilities() ) {
-			System.out.println(x);
-		}
 		if (actor.hasAbility(dance.getRequiredDance())) {
 			return true;
 		}
