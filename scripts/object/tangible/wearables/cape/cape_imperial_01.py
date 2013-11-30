@@ -1,7 +1,6 @@
 import sys
 
 def setup(core, object):
-	object = core.objectService.creatObject('object/tangible/werables/cape/shared_cape_imperial_01.iff', object.getPlanet())
 	object.setCustomName('Imperial Cape')
 	object.setStringAttribute('condition', '100/100')
 	object.setIntAttribute('volume', 1)
