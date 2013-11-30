@@ -4,8 +4,6 @@ def setup(core, object):
 
 	object = core.objectService.createObject('object/tangible/wearables/helmet/shared_helmet_tusken_raider_s02.iff', object.getPlanet())
 	object.setStringAttribute('condition', '100/100')
-	object.setStringAttribute('volume', '1')
-	
-	inventory.add(object)
-	
+	object.setIntAttribute('volume', 1)
+		
 	return
