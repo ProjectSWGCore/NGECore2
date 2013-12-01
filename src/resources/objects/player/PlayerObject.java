@@ -433,6 +433,22 @@ public class PlayerObject extends SWGObject {
 		}
 	}
 	
+	public void ignoreAdd(String ignoreName) {
+		synchronized(objectMutex) {
+			setIgnoreListUpdateCounter(getIgnoreListUpdateCounter() + 1);
+			getContainer().getClient().getSession().write(messageBuilder.buildIgnoreAddDelta(ignoreName));
+			ignoreList.add(ignoreName);
+		}
+	}
+	
+	public void ignoreRemove(String removeName) {
+		synchronized(objectMutex) {
+			setIgnoreListUpdateCounter(getIgnoreListUpdateCounter() + 1);
+			getContainer().getClient().getSession().write(messageBuilder.buildIgnoreRemoveDelta(removeName));
+			ignoreList.remove(removeName);
+		}
+	}
+	
 	public void setIgnoreListUpdateCounter(int ignoreListUpdateCounter) {
 		synchronized(objectMutex) {
 			this.ignoreListUpdateCounter = ignoreListUpdateCounter;
