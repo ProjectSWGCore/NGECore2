@@ -385,7 +385,7 @@ public class ObjectService implements INetworkDispatch {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		if(getObject(newId) == null)
+		if(getObject(newId) == null && getCreatureFromDB(newId) == null)
 			return newId;
 		else
 			return generateObjectID();
