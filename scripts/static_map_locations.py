@@ -59,11 +59,11 @@ def corelliaLocations(core, planet):
 	# Cities
 	
 	mapService.addLocation(planet, 'Coronet', -178, -4504, 17, 0, 0)
-	mapService.addLocation(planet, 'Tyrena', -5140, 2450, 17, 0, 0)
+	mapService.addLocation(planet, 'Tyrena', -5140, -2450, 17, 0, 0)
 	mapService.addLocation(planet, 'Bela Vistal', 6766, -5692, 17, 0, 0)
 	mapService.addLocation(planet, 'Kor Vella', -3420, 3146, 17, 0, 0)
 	mapService.addLocation(planet, 'Doaba Guerfel', 3274, 5582, 17, 0, 0)
-	mapService.addLocation(planet, 'Vreni Island', -5538, 6176, 17, 0, 0)
+	mapService.addLocation(planet, 'Vreni Island', -5538, -6176, 17, 0, 0)
 	
 def nabooLocations(core, planet):
 
