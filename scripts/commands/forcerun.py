@@ -5,5 +5,7 @@ def setup(core, actor, buff):
 	
 def run(core, actor, target, commandString):
 	core.buffService.addBuffToCreature(actor, 'fs_force_run')
+	actor.playEffectObject('clienteffect/pl_force_run_self.cef', 'root')
+		
 	return
 	
