@@ -4,7 +4,7 @@ def setup(core, actor, buff):
 	return
 	
 def run(core, actor, target, commandString):
-	core.buffService.addBuffToCreature(actor, 'of_firepower')^
+	core.buffService.addBuffToCreature(actor, 'of_firepower')
 	actor.playEffectObject('clienteffect/off_superior_firepower.cef', 'root')
 	return
 	
