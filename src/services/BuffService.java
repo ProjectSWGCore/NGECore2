@@ -28,18 +28,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-
-
-
-
-
-
-
-
-
-
-
-
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 
@@ -63,7 +51,7 @@ import engine.resources.service.INetworkRemoteEvent;
 public class BuffService implements INetworkDispatch {
 	
 	private NGECore core;
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
 	public BuffService(NGECore core) {
 		this.core = core;
@@ -149,6 +137,10 @@ public class BuffService implements INetworkDispatch {
 			
 		}
 		
+		for (String effect : buff.getParticleEffect().split(",")) {
+			creature.playEffectObject(effect, buff.getBuffName());
+		}
+		
 		return buff;
 		
 	} 
@@ -165,6 +157,10 @@ public class BuffService implements INetworkDispatch {
          if(FileUtilities.doesFileExist("scripts/buffs/" + buff.getBuffName() + ".py"))
         	 core.scriptService.callScript("scripts/buffs/", "removeBuff", buff.getBuffName(), core, creature, buff);
          creature.removeBuff(buff);
+         
+         	for (String effect : buff.getParticleEffect().split(",")) {
+			creature.stopEffectObject(buff.getBuffName());
+		}
          
 		
 	}
