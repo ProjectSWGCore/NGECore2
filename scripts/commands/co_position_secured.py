@@ -9,6 +9,8 @@ def run(core, actor, target, commandString):
 		core.buffService.removeBuffFromCreature(actor, actor.getBuff('co_position_secured'))
 	else:
 		core.buffService.addBuffToCreature(actor, 'co_position_secured')
+		actor.playEffectObject('clienteffect/commando_position_secured.cef', 'root')
+
 		
 	return
 	

@@ -10,6 +10,8 @@ def run(core, actor, target, commandString):
 	
 	weapon = core.objectService.getObject(actor.getWeaponId())
 	
+
+	
 	if not weapon:
 		weapon = actor.getSlottedObject('default_weapon')
 		
@@ -19,6 +21,7 @@ def run(core, actor, target, commandString):
 		return
 
 	core.buffService.addBuffToCreature(actor, 'me_stasis_self_1')
+	actor.playEffectObject('clienteffect/medic_stasis.cef', 'root')	
 	
 	return
 	

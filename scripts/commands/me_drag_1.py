@@ -10,9 +10,12 @@ def run(core, actor, target, commandString):
 		
 	group = core.objectService.getObject(actor.getGroupId())
 	
+
+	
 	for creature in group.getMemberList():
 		if creature.getPosture() == 14:
 			core.simulationService.teleport(creature, actor.getPosition(), actor.getOrientation(), actor.getParentId())
-
+	actor.playEffectObject('clienteffect/medic_drag.cef', 'root')
+	
 	return
 	
