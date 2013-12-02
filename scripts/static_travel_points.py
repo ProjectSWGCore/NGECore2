@@ -26,6 +26,7 @@ def addPoints(core, planet):
     	kashyyyk_mainPoints(core, planet)
     if planet.getName() == 'mustafar':
     	mustafarPoints(core, planet)
+    return
 
 def corelliaPoints(core, planet):
     trvSvc = core.travelService
