@@ -5,5 +5,6 @@ def setup(core, actor, buff):
 	
 def run(core, actor, target, commandString):
 	core.buffService.addBuffToCreature(actor, 'of_scatter_1')
+	actor.playEffectObject('clienteffect/off_scatter.cef', 'root')
 	return
 	
