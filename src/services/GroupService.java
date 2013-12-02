@@ -199,7 +199,7 @@ public class GroupService implements INetworkDispatch {
 	}
 	
 	public void removeGroupBuffs(CreatureObject member) {
-		for(Buff buff : member.getBuffList().get()) {
+		for(Buff buff : new ArrayList<Buff>(member.getBuffList().get())) {
 			if(buff.isGroupBuff() && buff.getGroupBufferId() != member.getObjectID()) {
 				core.buffService.removeBuffFromCreature(member, buff);
 			}

@@ -492,7 +492,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.speedMultiplierBase = speedMultiplierBase;
 		}
-		IoBuffer speedDelta = messageBuilder.buildSpeedModDelta(speedMultiplierBase);
+		IoBuffer speedDelta = messageBuilder.buildSpeedModBaseDelta(speedMultiplierBase);
 		
 		notifyObservers(speedDelta, true);
 
@@ -508,6 +508,9 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.speedMultiplierMod = speedMultiplierMod;
 		}
+		IoBuffer speedDelta = messageBuilder.buildSpeedModDelta(speedMultiplierMod);
+		
+		notifyObservers(speedDelta, true);
 	}
 
 	public long getListenToId() {
