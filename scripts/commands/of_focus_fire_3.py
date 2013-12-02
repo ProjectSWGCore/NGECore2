@@ -4,8 +4,11 @@ def setup(core, actor, buff):
 	return
 	
 def run(core, actor, target, commandString):
-	core.buffService.addBuffToCreature(actor, 'of_focus_fire_1')
+	core.buffService.addBuffToCreature(actor, 'of_focus_fire_3')
 	group = core.objectService.getObject(actor.getGroupId())
-	for creature in group.getMemberList():
-		core.buffService.addBuffToCreature(creature, 'of_focus_fire_3')
+	if group is not None:
+		for creature in group.getMemberList():
+			core.buffService.addBuffToCreature(creature, 'of_focus_fire_3')
+		return
 	return
+	

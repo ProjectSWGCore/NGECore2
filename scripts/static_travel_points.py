@@ -26,11 +26,6 @@ def addPoints(core, planet):
     	kashyyyk_mainPoints(core, planet)
     if planet.getName() == 'mustafar':
     	mustafarPoints(core, planet)
-    if planet.getName() == 'kaas':
-        kaasPoints(core, planet)
-    if planet.getName() == 'taanab':
-        taanabPoints(core, planet)                        
-    return
 
 def corelliaPoints(core, planet):
     trvSvc = core.travelService
@@ -155,11 +150,3 @@ def mustafarPoints(core, planet):
 	
 	trvSvc.addTravelPoint(planet, "Mensix Mining Facility", 405, 230, -1352)
 	return
-    
-#def kaasPoints(core, planet):
-    #trvSvc = core.travelService
-    #Return
-
-#def taanabPoints(core, planet):
-    #trvSvc = core.travelService
-    #return  

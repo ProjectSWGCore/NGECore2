@@ -6,6 +6,10 @@ def setup():
     return
 
 def run(core, actor, target, commandString):
+    
+    if (actor.getProfession() != "entertainer_1a"):
+        return
+    
     print ('Buffing Player: ' + str(target.getObjectId()) + ' or: ' + target.getCustomName())
     openBuffWindow = BuffBuilderStartMessage(actor.getObjectId(), actor.getObjectId(), target.getObjectId())
     objController = ObjControllerMessage(11, openBuffWindow)
