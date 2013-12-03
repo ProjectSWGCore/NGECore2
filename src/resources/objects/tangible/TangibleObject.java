@@ -67,6 +67,9 @@ public class TangibleObject extends SWGObject {
 	private int respawnTime = 0;
 	private Point3D spawnCoordinates = new Point3D(0, 0, 0);
 	
+	@NotPersistent
+	private TangibleObject killer = null;
+	
 	public TangibleObject(long objectID, Planet planet, String template) {
 		super(objectID, planet, new Point3D(0, 0, 0), new Quaternion(1, 0, 1, 0), template);
 		messageBuilder = new TangibleMessageBuilder(this);
@@ -150,6 +153,24 @@ public class TangibleObject extends SWGObject {
 	public void setPvPBitmask(int pvpBitmask) {
 		synchronized(objectMutex) {
 			this.pvpBitmask = pvpBitmask;
+		}
+	}
+	
+	public boolean getPvpStatus(int pvpStatus) {
+		synchronized(objectMutex) {
+			return ((pvpBitmask & pvpStatus) != 0);
+		}
+	}
+	
+	public void setPvpStatus(int pvpBitmask, boolean add) {
+		synchronized(objectMutex) {
+			if (pvpBitmask != 0) {
+				if (add) {
+					this.pvpBitmask |= pvpBitmask;
+				} else {
+					this.pvpBitmask &= ~pvpBitmask;
+				}
+			}
 		}
 	}
 	
@@ -275,6 +296,18 @@ public class TangibleObject extends SWGObject {
 	public void setRespawnTime(int respawnTime) {
 		synchronized(objectMutex) {
 			this.respawnTime = respawnTime;
+		}
+	}
+	
+	public TangibleObject getKiller() {
+		synchronized(objectMutex) {
+			return killer;
+		}
+	}
+	
+	public void setKiller(TangibleObject killer) {
+		synchronized(objectMutex) {
+			this.killer = killer;
 		}
 	}
 	
