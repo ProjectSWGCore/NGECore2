@@ -119,8 +119,8 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer.putInt(0x3A98);
 		
 		buffer.put((byte) 1);
+		buffer.put((byte) creature.getPosture());
 		buffer.put((byte) 0);
-		buffer.put((byte) 1);
 
 		buffer.putLong(creature.getOwnerId());
 		
@@ -535,7 +535,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 
 	}
 
-	public IoBuffer buildSpeedModDelta(float speed) {
+	public IoBuffer buildSpeedModBaseDelta(float speed) {
 		
 		IoBuffer buffer = bufferPool.allocate(4, false).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.putFloat(speed);
@@ -546,6 +546,19 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		return buffer;
 
 	}
+	
+	public IoBuffer buildSpeedModDelta(float speedModifier) {
+		
+		IoBuffer buffer = bufferPool.allocate(4, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putFloat(speedModifier);
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 4, (short) 1, (short) 5, buffer, size + 4);
+		
+		return buffer;
+
+	}
+
 
 	public IoBuffer buildTurnRadiusDelta(float turnRadius) {
 		

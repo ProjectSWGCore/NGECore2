@@ -64,7 +64,6 @@ public class CombatCommands {
 		core.commandService.registerCombatCommand("fireStunCannon");
 		core.commandService.registerCombatCommand("fireVoidRocketLauncher");
 		
-		
 		// Bounty Hunter
 		
 		core.commandService.registerCombatCommand("bh_ae_dm_1");
@@ -130,8 +129,6 @@ public class CombatCommands {
 		core.commandService.registerCombatCommand("bh_sh_2");
 		core.commandService.registerCombatCommand("bh_sh_3");
 		
-		
-		
 		// Jedi
 		
 		core.commandService.registerCombatCommand("fs_sweep_1");
@@ -195,7 +192,6 @@ public class CombatCommands {
 		core.commandService.registerCommand("fs_buff_invis_1"); // Force Cloak
 		core.commandService.registerCombatCommand("fs_force_throw_1");
 		core.commandService.registerCommand("forceThrow");
-
 		
 		// Commando
 		
@@ -233,8 +229,8 @@ public class CombatCommands {
 		core.commandService.registerCombatCommand("co_ae_hw_dot_kinetic_4");
 		core.commandService.registerCombatCommand("co_ae_hw_dot_kinetic_5");
 		core.commandService.registerCombatCommand("co_armor_cracker");
-		core.commandService.registerCombatCommand("co_cluster_bomb");
-		core.commandService.registerCombatCommand("co_cluster_bomblet");
+		//core.commandService.registerCombatCommand("co_cluster_bomb");
+		//core.commandService.registerCombatCommand("co_cluster_bomblet");
 		core.commandService.registerCombatCommand("co_del_ae_cc_1_1");
 		core.commandService.registerCombatCommand("co_del_ae_cc_1_2");
 		core.commandService.registerCombatCommand("co_del_ae_cc_1_3");
@@ -307,9 +303,10 @@ public class CombatCommands {
 		core.commandService.registerCombatCommand("co_sh_1");
 		core.commandService.registerCombatCommand("co_sh_2");
 		core.commandService.registerCombatCommand("co_sh_3");
+		core.commandService.registerCombatCommand("co_stand_fast");
 		core.commandService.registerCommand("co_hw_dot");
 		core.commandService.registerCommand("co_ae_hw_dot");
-		
+		core.commandService.registerCommand("co_position_secured");
 
 		// Entertainer
 		
@@ -522,6 +519,12 @@ public class CombatCommands {
 		core.commandService.registerCommand("of_purge_1");
 		core.commandService.registerCommand("of_scatter_1");
 		core.commandService.registerCommand("of_stimulator_1");
+		core.commandService.registerCommand("of_tactical_sup_1");
+		core.commandService.registerCommand("of_tactical_sup_2");
+		core.commandService.registerCommand("of_tactical_sup_3");
+		core.commandService.registerCommand("of_tactical_sup_4");
+		core.commandService.registerCommand("of_tactical_sup_5");
+		core.commandService.registerCommand("of_tactical_sup_6");
 		
 		// Smuggler
 		

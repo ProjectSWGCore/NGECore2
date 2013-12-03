@@ -73,12 +73,13 @@ public class ObjectMenuResponse extends ObjControllerObject {
 		result.putInt(size);
 		
 		if(size > 0) {
-			byte counter = 1;
+			byte counter = 0;
 			for(RadialOptions radialOption : radialOptions) {
-				result.put(counter++);
+				result.put(++counter);
 				result.put(radialOption.getParentId());
 				result.putShort(radialOption.getOptionId());
-				result.put(radialOption.getOptionType());
+				//result.put(radialOption.getOptionType());
+				result.put((byte) 3);
 
 				if(radialOption.getDescription().length() > 0)
 					result.put(getUnicodeString(radialOption.getDescription()));
@@ -87,7 +88,6 @@ public class ObjectMenuResponse extends ObjControllerObject {
 
 			}
 		}
-		
 		result.put(radialCount);
 		
 		int packetSize = result.position();

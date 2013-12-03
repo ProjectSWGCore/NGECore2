@@ -562,6 +562,44 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 		
 	}
 	
+	public IoBuffer buildIgnoreAddDelta(String ignoreName) {
+		IoBuffer buffer = bufferPool.allocate(30, false).order(ByteOrder.LITTLE_ENDIAN);
+		PlayerObject player = (PlayerObject) object;
+		
+		buffer.putInt(1);
+		buffer.putInt(player.getIgnoreListUpdateCounter());
+		
+		buffer.put((byte) 1); // updateType (SubType)
+		
+		buffer.putShort((short) player.getIgnoreList().indexOf(ignoreName));
+		buffer.put(getAsciiString(ignoreName));
+		
+		int size = buffer.position();
+		buffer.flip();
+		
+		buffer = createDelta("PLAY", (byte) 9, (short) 1, (short) 8, buffer, size + 4);
+		
+		return buffer;
+	}
+	
+	public IoBuffer buildIgnoreRemoveDelta(String removeName) {
+		IoBuffer buffer = bufferPool.allocate(30, false).order(ByteOrder.LITTLE_ENDIAN);
+		PlayerObject player = (PlayerObject) object;
+		
+		buffer.putInt(1);
+		buffer.putInt(player.getIgnoreListUpdateCounter());
+		
+		buffer.put((byte) 0);
+		buffer.putShort((short) player.getIgnoreList().indexOf(removeName));
+		
+		int size = buffer.position();
+		buffer.flip();
+		
+		buffer = createDelta("PLAY", (byte) 9, (short) 1, (short) 8, buffer, size + 4);
+		
+		return buffer;
+	}
+	
 	public int getProfData(String profession) {
 		
 		switch (profession) {

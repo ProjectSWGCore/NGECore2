@@ -57,6 +57,7 @@ import protocol.swg.ServerTimeMessage;
 import protocol.swg.UnkByteFlag;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.CrcStringTableVisitor;
+import engine.clientdata.visitors.DatatableVisitor;
 import engine.clientdata.visitors.WorldSnapshotVisitor;
 import engine.clientdata.visitors.WorldSnapshotVisitor.SnapshotChunk;
 import engine.clients.Client;
@@ -144,8 +145,11 @@ public class ObjectService implements INetworkDispatch {
 		} catch (InstantiationException | IllegalAccessException e) {
 			e.printStackTrace();
 		}
+		boolean isSnapshot = false;
 		if(objectID == 0)
 			objectID = generateObjectID();
+		else
+			isSnapshot = true;
 		
 		if(Template.startsWith("object/creature")) {
 			
@@ -163,9 +167,17 @@ public class ObjectService implements INetworkDispatch {
 			
 			object = new WeaponObject(objectID, planet, Template, position, orientation);
 
-		} else if(Template.startsWith("object/building")){
+		} else if(Template.startsWith("object/building") || Template.startsWith("object/static/worldbuilding/structures")){
 			
 			object = new BuildingObject(objectID, planet, position, orientation, Template);
+			if(!isSnapshot && object.getPortalVisitor() != null) {
+				int cellCount = object.getPortalVisitor().cells.size() - 1; // -1 for index 0 cell which is outside the building and used for ai pathfinding
+				for (int i = 0; i < cellCount; i++) {
+					CellObject cell = (CellObject) createObject("object/cell/shared_cell.iff", planet);
+					cell.setCellNumber(i+1);
+					object.add(cell);
+				}
+			}
 			
 		} else if(Template.startsWith("object/cell")) {
 			
@@ -201,7 +213,8 @@ public class ObjectService implements INetworkDispatch {
 		
 		object.setAttachment("serverTemplate", ((customServerTemplate != null) ? customServerTemplate : object.getTemplate()));
 		
-		loadServerTemplate(object);		
+		object.setisInSnapshot(isSnapshot);
+		//loadServerTemplate(object);		
 		
 		objectList.put(objectID, object);
 		
@@ -422,7 +435,7 @@ public class ObjectService implements INetworkDispatch {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		if(getObject(newId) == null)
+		if(getObject(newId) == null && getCreatureFromDB(newId) == null)
 			return newId;
 		else
 			return generateObjectID();
@@ -534,11 +547,11 @@ public class ObjectService implements INetworkDispatch {
 
 				CmdStartScene startScene = new CmdStartScene((byte) 0, objectId, creature.getPlanet().getPath(), creature.getTemplate(), position.x, position.y, position.z, System.currentTimeMillis() / 1000, 0);
 				session.write(startScene.serialize());
-				creature.makeAware(creature);
 				
 				creature.makeAware(core.guildService.getGuildObject());
 
 				core.simulationService.handleZoneIn(client);
+				creature.makeAware(creature);
 				
 				CmdSceneReady sceneReady = new CmdSceneReady();
 				client.getSession().write(sceneReady.serialize());
@@ -574,7 +587,6 @@ public class ObjectService implements INetworkDispatch {
 				if (object == null) {
 					return;
 				}
-				
 				useObject(creature, object);
 			}
 			
@@ -617,5 +629,137 @@ public class ObjectService implements INetworkDispatch {
 		System.out.println("Finished loading client objects for: " + planet.getName());
 		
 	}
+	/**
+	 * Creates a child object and places it at a position and orientation offset from the parent object.
+	 * @param parent The parent Object.
+	 * @param template The template file of the child.
+	 * @param position The position as an offset to the parent object.
+	 * @param orientation The orientation as an offset to the parent object.
+	 */
+	public void createChildObject(SWGObject parent, String template, Point3D position, Quaternion orientation) {
+		
+		
+		float radians = parent.getRadians();
+		Point3D parentPos = parent.getWorldPosition();
+		
+		float x = (float) ((Math.cos(radians) * position.x) + (Math.sin(radians) * position.z));
+		float y = position.y + parentPos.y;
+		float z = (float) ((Math.cos(radians) * position.z) - (Math.sin(radians) * position.x));
+		
+		x += parentPos.x;
+		z += parentPos.z;
+		
+		position = new Point3D(x, y, z);
+		orientation = MathUtilities.rotateQuaternion(orientation, radians, new Point3D(0, 1, 0));
+		SWGObject child = createObject(template, 0, parent.getPlanet(), position, orientation);
+		
+		core.simulationService.add(child, x, z);
+		
+	}
+	
+	public void createChildObject(SWGObject parent, String template, float x, float y, float z, float qy, float qw) {
+		createChildObject(parent, template, new Point3D(x, y, z), new Quaternion(qw, 0, qy, 0));
+	}
+	
+	public void loadBuildoutObjects(Planet planet) throws InstantiationException, IllegalAccessException {
+		
+		DatatableVisitor buildoutTable = ClientFileManager.loadFile("datatables/buildout/areas_" + planet.getName() + ".iff", DatatableVisitor.class);
+		
+		for (int i = 0; i < buildoutTable.getRowCount(); i++) {
+			
+			String areaName = (String) buildoutTable.getObject(i, 0);
+			float x1 = (Float) buildoutTable.getObject(i, 1);
+			float z1 = (Float) buildoutTable.getObject(i, 2);
+			
+			readBuildoutDatatable(ClientFileManager.loadFile("datatables/buildout/" + planet.getName() + "/" + areaName + ".iff", DatatableVisitor.class), planet, x1, z1);
+
+		}
+	}
+	
+	public void readBuildoutDatatable(DatatableVisitor buildoutTable, Planet planet, float x1, float z1) throws InstantiationException, IllegalAccessException {
+
+		CrcStringTableVisitor crcTable = ClientFileManager.loadFile("misc/object_template_crc_string_table.iff", CrcStringTableVisitor.class);
+
+		for (int i = 0; i < buildoutTable.getRowCount(); i++) {
+			
+			String template;
+			
+			if(buildoutTable.getColumnCount() <= 11)
+				template = crcTable.getTemplateString((Integer) buildoutTable.getObject(i, 0));
+			else
+				template = crcTable.getTemplateString((Integer) buildoutTable.getObject(i, 3));
+			
+			if(template != null) {
+				
+				float px, py, pz, qw, qx, qy, qz, radius;
+				long objectId = 0, containerId = 0;
+				int type = 0, cellIndex = 0, portalCRC;
+				
+				if(buildoutTable.getColumnCount() <= 11) {
+
+					cellIndex = (Integer) buildoutTable.getObject(i, 1);
+					px = (Float) buildoutTable.getObject(i, 2);
+					py = (Float) buildoutTable.getObject(i, 3);
+					pz = (Float) buildoutTable.getObject(i, 4);
+					qw = (Float) buildoutTable.getObject(i, 5);
+					qx = (Float) buildoutTable.getObject(i, 6);
+					qy = (Float) buildoutTable.getObject(i, 7);
+					qz = (Float) buildoutTable.getObject(i, 8);
+					radius = (Float) buildoutTable.getObject(i, 9);
+					portalCRC = (Integer) buildoutTable.getObject(i, 10);
+									
+				} else {
+					
+					objectId = (Integer) buildoutTable.getObject(i, 0);
+					containerId = (Integer) buildoutTable.getObject(i, 1);
+					type = (Integer) buildoutTable.getObject(i, 2);
+					cellIndex = (Integer) buildoutTable.getObject(i, 4);
+					
+					px = (Float) buildoutTable.getObject(i, 5);
+					py = (Float) buildoutTable.getObject(i, 6);
+					pz = (Float) buildoutTable.getObject(i, 7);
+					qw = (Float) buildoutTable.getObject(i, 8);
+					qx = (Float) buildoutTable.getObject(i, 9);
+					qy = (Float) buildoutTable.getObject(i, 10);
+					qz = (Float) buildoutTable.getObject(i, 11);
+					radius = (Float) buildoutTable.getObject(i, 12);
+					portalCRC = (Integer) buildoutTable.getObject(i, 13);
+
+				}
+				
+				SWGObject object;
+				
+				if(objectId != 0 && containerId == 0) {					
+					if(portalCRC != 0)
+						objectId = 0;
+					object = createObject(template, objectId, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz));
+					if(object == null)
+						continue;
+					if(radius > 256)
+						object.setAttachment("bigSpawnRange", new Boolean(true));
+					core.simulationService.add(object, object.getPosition().x, object.getPosition().z);
+				} else if(objectId != 0 && containerId != 0 && cellIndex != 0) {
+					object = createObject(template, objectId, planet, new Point3D(px, py, pz), new Quaternion(qw, qx, qy, qz));		
+					if(object instanceof CellObject)
+						((CellObject) object).setCellNumber(cellIndex);
+					SWGObject parent = getObject(containerId);
+					
+					if(parent != null && object != null)
+						parent.add(object);
+				} else {
+					object = createObject(template, 0, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz));
+					core.simulationService.add(object, object.getPosition().x, object.getPosition().z);					
+				}
+				
+				//System.out.println("Spawning: " + template + " at: X:" + object.getPosition().x + " Y: " + object.getPosition().y + " Z: " + object.getPosition().z);
+				
+			}
+				
+			
+		}
+
+		
+	}
+
 	
 }

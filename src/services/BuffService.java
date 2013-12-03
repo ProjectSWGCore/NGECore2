@@ -28,28 +28,19 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-
-
-
-
-
-
-
-
-
-
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 
 import protocol.swg.ObjControllerMessage;
-import protocol.swg.objectControllerObjects.BuffBuilderChange;
 import protocol.swg.objectControllerObjects.BuffBuilderStartMessage;
 import resources.common.Console;
 import resources.common.FileUtilities;
 import resources.common.ObjControllerOpcodes;
 import resources.objects.Buff;
+import resources.objects.BuffItem;
 import resources.objects.DamageOverTime;
 import resources.objects.creature.CreatureObject;
+import resources.objects.group.GroupObject;
 import resources.objects.player.PlayerObject;
 import main.NGECore;
 import engine.clients.Client;
@@ -60,7 +51,7 @@ import engine.resources.service.INetworkRemoteEvent;
 public class BuffService implements INetworkDispatch {
 	
 	private NGECore core;
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
 	public BuffService(NGECore core) {
 		this.core = core;
@@ -68,83 +59,7 @@ public class BuffService implements INetworkDispatch {
 
 	@Override
 	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> swgOpcodes, Map<Integer, INetworkRemoteEvent> objControllerOpcodes) {
-		// BUFF_BUILDER_CHANGE sent every time something is clicked on in the Buff Builder. It's also sent when the buff session is started.
-		objControllerOpcodes.put(ObjControllerOpcodes.BUFF_BUILDER_CHANGE, new INetworkRemoteEvent() {
-
-			@Override
-			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
-				Console.println("BUFF_BUILDER_CHANGE RECIEVED");
-				data.order(ByteOrder.LITTLE_ENDIAN);
-				
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
-				
-				if(client == null)
-					return;
-				
-				SWGObject sender = client.getParent();
-				
-				if(sender == null)
-					return;
-				
-				BuffBuilderChange changeMessage = new BuffBuilderChange();
-				changeMessage.deserialize(data);
-				
-				SWGObject recipient = core.objectService.getObject(changeMessage.getRecipientId());
-				
-				if (recipient == null || recipient.getClient() == null)
-					return;
-				
-				if (sender.getClient().getSession().containsAttribute("buffWorkshop")) {
-
-					long attribute = (long) sender.getClient().getSession().getAttribute("buffWorkshop");
-					Console.println("Sender Attribute = " + attribute);
-					Console.println("Recipient ID (Packet) = " + changeMessage.getRecipientId());
-					
-					if (attribute == changeMessage.getObjectId()) {
-						// TODO: accepted checked? give buff
-						Console.println("Buffer buffing themselves!");
-						return;
-					}
-					
-					else if (attribute == changeMessage.getRecipientId() && attribute != changeMessage.getObjectId()) {
-						Console.println("Attribute check passed!"); // LAST TRIED BYTE 6
-						BuffBuilderChange recievingMsg = new BuffBuilderChange(recipient.getObjectId(), changeMessage.getBufferId(), changeMessage.getRecipientId(), 0, changeMessage.getBuffCost(), (byte) 7);
-						recievingMsg.setStartTime(changeMessage.getStartTime());
-						recievingMsg.setTickCount(changeMessage.getTickCount() + 1);
-						
-						ObjControllerMessage objRcController = new ObjControllerMessage(0x23, recievingMsg);
-						recipient.getClient().getSession().write(objRcController.serialize());
-						Console.println("Msg sent to: " + recipient.getCustomName() + " that has an ID of: " + recipient.getObjectId());
-						Console.println("ObjectId: " + recievingMsg.getObjectId());
-						Console.println("BufferId: " + recievingMsg.getBufferId());
-						Console.println("RecipientId: " + recievingMsg.getRecipientId());
-						Console.println("Buff Cost: " + recievingMsg.getBuffCost());
-						Console.println("MessageRecipientId: " + recievingMsg.getRecipientId());
-						
-						Console.println("BYTE: " + recievingMsg.getUnkByte());
-						
-					}
-
-				} else {
-					
-					// Don't need a Buff Recipient Window for buffing themselves..
-					if (changeMessage.getObjectId() == changeMessage.getRecipientId()) { 
-						sender.getClient().getSession().setAttribute("buffWorkshop", recipient.getObjectId());
-						Console.println("Sender attribute set to: " + sender.getClient().getSession().getAttribute("buffWorkshop").toString());
-						return;
-					}
-					
-					BuffBuilderStartMessage startMsg = new BuffBuilderStartMessage(recipient.getObjectId(), sender.getObjectId(), recipient.getObjectId());
-					ObjControllerMessage objController = new ObjControllerMessage(11, startMsg);
-					recipient.getClient().getSession().write(objController.serialize());
-					
-					recipient.getClient().getSession().setAttribute("buffWorkshop", changeMessage.getObjectId());
-					Console.println("Recipient attribute set to: " + recipient.getClient().getSession().getAttribute("buffWorkshop").toString());
-					sender.getClient().getSession().setAttribute("buffWorkshop", recipient.getObjectId());
-					Console.println("Sender attribute set to: " + sender.getClient().getSession().getAttribute("buffWorkshop").toString());
-				}
-			}
-		});
+		
 	}
 
 	@Override
@@ -158,6 +73,16 @@ public class BuffService implements INetworkDispatch {
 			//System.out.println("Buff script doesnt exist for: " + buffName);
 			return;
 		}*/
+		
+		final Buff buff = new Buff(buffName, creature.getObjectID());
+		if(buff.isGroupBuff()) {
+			addGroupBuff(creature, buffName);
+		} else {
+			doAddBuff(creature, buffName);
+		}
+	}
+		
+	public Buff doAddBuff(final CreatureObject creature, String buffName) {
 		
 		final Buff buff = new Buff(buffName, creature.getObjectID());
 		buff.setTotalPlayTime(((PlayerObject) creature.getSlottedObject("ghost")).getTotalPlayTime());
@@ -177,7 +102,7 @@ public class BuffService implements INetworkDispatch {
                         		}
                         	
                                 if (otherBuff.getRemainingDuration() > buff.getDuration() && otherBuff.getStacks() >= otherBuff.getMaxStacks()) {
-                                        return;
+                                        return null;
                                 }
                         }
                        
@@ -185,7 +110,7 @@ public class BuffService implements INetworkDispatch {
                         break;
                 } else {
                 	System.out.println("buff not added:" + buffName);
-                	return;
+                	return null;
                 }
         }	
 			
@@ -212,6 +137,12 @@ public class BuffService implements INetworkDispatch {
 			
 		}
 		
+		for (String effect : buff.getParticleEffect().split(",")) {
+			creature.playEffectObject(effect, buff.getBuffName());
+		}
+		
+		return buff;
+		
 	} 
 	
 	public void removeBuffFromCreature(CreatureObject creature, Buff buff) {
@@ -227,6 +158,10 @@ public class BuffService implements INetworkDispatch {
         	 core.scriptService.callScript("scripts/buffs/", "removeBuff", buff.getBuffName(), core, creature, buff);
          creature.removeBuff(buff);
          
+         	for (String effect : buff.getParticleEffect().split(",")) {
+			creature.stopEffectObject(buff.getBuffName());
+		}
+         
 		
 	}
 	
@@ -237,6 +172,11 @@ public class BuffService implements INetworkDispatch {
 		for(final Buff buff : creature.getBuffList().get().toArray(new Buff[] { })) {
 			
 			if (buff.getGroup1().startsWith("setBonus")) { continue; }
+			
+			if(buff.isGroupBuff() && buff.getGroupBufferId() != creature.getObjectID()) {
+				removeBuffFromCreature(creature, buff);
+				continue;
+			}
 
 			if(buff.getRemainingDuration() > 0 && buff.getDuration() > 0) {
 				ScheduledFuture<?> task = scheduler.schedule(new Runnable() {
@@ -259,6 +199,24 @@ public class BuffService implements INetworkDispatch {
 					
 	}
 	
-	
+	public void addGroupBuff(final CreatureObject buffer, String buffName) {
+		
+		if(buffer.getGroupId() == 0) {
+			doAddBuff(buffer, buffName);
+			return;
+		}
+			
+		GroupObject group = (GroupObject) core.objectService.getObject(buffer.getGroupId());
+		
+		if(group == null) {
+			doAddBuff(buffer, buffName);
+			return;
+		}
+		
+		for(SWGObject member : group.getMemberList()) {
+			Buff buff = doAddBuff((CreatureObject) member, buffName);
+			buff.setGroupBufferId(buffer.getObjectID());
+		}
 
+	}
 }

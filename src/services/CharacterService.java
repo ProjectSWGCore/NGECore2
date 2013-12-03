@@ -218,6 +218,7 @@ public class CharacterService implements INetworkDispatch {
 				object.setPosition(new Point3D(3528, 0, -4804));
 				object.setCashCredits(100);
 				object.setBankCredits(1000);
+				object.setOptionsBitmask(0x80);
 				//object.setPosition(new Point3D(0, 0, 0));
 				object.setOrientation(new Quaternion(1, 0, 0, 0));
 				object.setLevel((short) 1);

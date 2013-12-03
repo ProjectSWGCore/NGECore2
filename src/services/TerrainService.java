@@ -90,7 +90,7 @@ public class TerrainService {
 	
 	public Planet getPlanetByName(String name) {
 		for (int i = 0; i < planets.size(); i++) {
-			if (planets.get(i).getName().equals(name)) {
+			if (planets.get(i).getName().equalsIgnoreCase(name)) {
 				return planets.get(i);
 			}
 		}
@@ -130,7 +130,12 @@ public class TerrainService {
 						config.setFilePath("options.cfg");
 						
 						if (config.loadConfigFile() && config.getInt("LOAD.SNAPSHOT_OBJECTS") > 0) {
-							core.objectService.loadSnapshotObjects(planet);
+							try {							
+								core.objectService.loadSnapshotObjects(planet);
+								core.objectService.loadBuildoutObjects(planet);
+							} catch (InstantiationException | IllegalAccessException e) {
+								e.printStackTrace();
+							}
 						}
 					}
 					

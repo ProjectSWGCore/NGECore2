@@ -30,7 +30,13 @@ def addLocations(core, planet):
 		dathomirLocations(core, planet)
 		
 	if planet.getName() == 'lok':
-		lokLocations(core, planet)		
+		lokLocations(core, planet)
+	
+	#if planet.getName() == 'kaas':
+		#kaasLocations(core, planet)	
+	
+	#if planet.getName() == 'taanab':
+		#taanabLocations(core, planet)			
 				
 def tatooineLocations(core, planet):
 
@@ -44,6 +50,7 @@ def tatooineLocations(core, planet):
 	mapService.addLocation(planet, 'Wayfar', -5124, -6530, 17, 0, 0)
 	mapService.addLocation(planet, 'Mos Eisley', 3528, -4804, 17, 0, 0)
 	mapService.addLocation(planet, 'Anchorhead', 40, -5348, 17, 0, 0)
+	mapService.addLocation(planet, 'Mos Taike', 3813, 2354, 17, 0, 0)
 
 def corelliaLocations(core, planet):
 
@@ -52,11 +59,11 @@ def corelliaLocations(core, planet):
 	# Cities
 	
 	mapService.addLocation(planet, 'Coronet', -178, -4504, 17, 0, 0)
-	mapService.addLocation(planet, 'Tyrena', -5140, 2450, 17, 0, 0)
+	mapService.addLocation(planet, 'Tyrena', -5140, -2450, 17, 0, 0)
 	mapService.addLocation(planet, 'Bela Vistal', 6766, -5692, 17, 0, 0)
 	mapService.addLocation(planet, 'Kor Vella', -3420, 3146, 17, 0, 0)
 	mapService.addLocation(planet, 'Doaba Guerfel', 3274, 5582, 17, 0, 0)
-	mapService.addLocation(planet, 'Vreni Island', -5538, 6176, 17, 0, 0)
+	mapService.addLocation(planet, 'Vreni Island', -5538, -6176, 17, 0, 0)
 	
 def nabooLocations(core, planet):
 
@@ -78,7 +85,7 @@ def roriLocations(core, planet):
 	
 	mapService.addLocation(planet, 'Narmle', -5140, -2368, 17, 0, 0)
 	mapService.addLocation(planet, 'Restuss', 5318, 5680, 17, 0, 0)
-	mapService.addLocation(planet, 'Rebel outpost', 3677, -6447, 17, 0, 0)
+	mapService.addLocation(planet, 'Rebel Outpost', 3677, -6447, 17, 0, 0)
 	
 def endorLocations(core, planet):
 
@@ -86,7 +93,7 @@ def endorLocations(core, planet):
 	
 	# Cities
 	
-	mapService.addLocation(planet, 'an outpost', -905, 1584, 17, 0, 0)
+	mapService.addLocation(planet, 'an Outpost', -905, 1584, 17, 0, 0)
 
 def talusLocations(core, planet):
 
@@ -96,7 +103,7 @@ def talusLocations(core, planet):
 	
 	mapService.addLocation(planet, 'Dearic', 422, -3004, 17, 0, 0)
 	mapService.addLocation(planet, 'Nashal', 4163, 5220, 17, 0, 0)
-	mapService.addLocation(planet, 'Imperial outpost', -2178, 2300, 17, 0, 0)
+	mapService.addLocation(planet, 'Imperial Outpost', -2178, 2300, 17, 0, 0)
 	
 def yavin4Locations(core, planet):
 
@@ -113,9 +120,9 @@ def dantooineLocations(core, planet):
 	
 	# Cities
 	
-	mapService.addLocation(planet, 'Mining outpost', -640, 2486, 17, 0, 0)
-	mapService.addLocation(planet, 'Pirate outpost', 1588, -6399, 17, 0, 0)
-	mapService.addLocation(planet, 'Imperial outpost', -4224, -2400, 17, 0, 0)
+	mapService.addLocation(planet, 'Mining Outpost', -640, 2486, 17, 0, 0)
+	mapService.addLocation(planet, 'Pirate Outpost', 1588, -6399, 17, 0, 0)
+	mapService.addLocation(planet, 'Imperial Outpost', -4224, -2400, 17, 0, 0)
 	
 def dathomirLocations(core, planet):
 
@@ -135,5 +142,20 @@ def lokLocations(core, planet):
 	
 	mapService.addLocation(planet, 'Nym\'s Stronghold', 440, 5029, 17, 0, 0)
 	mapService.addLocation(planet, 'Imperial outpost', -1920, -3084, 17, 0, 0)
+	
+#def kaasLocations(core, planet):
+	#mapService = core.mapService
+	
+	# Cities
+	
+	#mapService.addLocation(planet, 'Imperial Outpost', -5118, -2386, 17, 0, 0)
+	
+#def taanabLocations(core, planet):
+	
+	#mapService = core.mapService
+	
+	# Cities
+	
+	#mapService.addLocation(planet, 'Pandath Spaceport', 0, 0, 17, 0, 0)	
 	
 	

@@ -69,6 +69,7 @@ import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import resources.common.*;
+import resources.common.collidables.AbstractCollidable;
 import toxi.geom.Line3D;
 import toxi.geom.Ray3D;
 import toxi.geom.Vec3D;
@@ -91,6 +92,9 @@ import wblut.math.WB_M44;
 public class SimulationService implements INetworkDispatch {
 	
 	Map<String, QuadTree<SWGObject>> quadTrees;
+	Map<String, QuadTree<AbstractCollidable>> collidableQuadTrees;
+	
+	
 	private NGECore core;
 	private Map<String, MeshVisitor> cellMeshes = new ConcurrentHashMap<String, MeshVisitor>(); 
 	
@@ -98,18 +102,13 @@ public class SimulationService implements INetworkDispatch {
 		this.core = core;
 		TerrainService terrainService = core.terrainService;
 		quadTrees = new ConcurrentHashMap<String, QuadTree<SWGObject>>();
+		collidableQuadTrees = new ConcurrentHashMap<String, QuadTree<AbstractCollidable>>();
 		
 		for (int i = 0; i < core.terrainService.getPlanetList().size(); i++) {
 			quadTrees.put(terrainService.getPlanetList().get(i).getName(), new QuadTree<SWGObject>(-8192, -8192, 8192, 8192));
+			collidableQuadTrees.put(terrainService.getPlanetList().get(i).getName(), new QuadTree<AbstractCollidable>(-8192, -8192, 8192, 8192));
 		}
 		
-		List<SWGObject> objectList = new ArrayList<SWGObject>(core.objectService.getObjectList().values());
-		for(SWGObject obj : objectList) {
-			if(obj.getParentId() == 0 && obj.isInSnapshot()) {
-				core.objectService.loadServerTemplate(obj);
-				add(obj, obj.getPosition().x, obj.getPosition().z);
-			}
-		}
 		core.commandService.registerCommand("opencontainer");
 		core.commandService.registerCommand("transferitem");
 		core.commandService.registerCommand("transferitemarmor");
@@ -145,13 +144,35 @@ public class SimulationService implements INetworkDispatch {
 
 	}
 	
+	public void insertSnapShotObjects() {
+		List<SWGObject> objectList = new ArrayList<SWGObject>(core.objectService.getObjectList().values());
+		for(SWGObject obj : objectList) {
+			if(obj.getParentId() == 0 && obj.isInSnapshot())
+				add(obj, obj.getPosition().x, obj.getPosition().z);
+		}
+	}
+	
+	public void addCollidable(AbstractCollidable collidable, float x, float y) {
+		collidableQuadTrees.get(collidable.getPlanet().getName()).put(x, y, collidable);
+	}
+	
+	public void removeCollidable(AbstractCollidable collidable, float x, float y) {
+		collidableQuadTrees.get(collidable.getPlanet().getName()).remove(x, y, collidable);
+	}
+	
+	public List<AbstractCollidable> getCollidables(Planet planet, float x, float y, float range) {
+		return collidableQuadTrees.get(planet.getName()).get(x, y, range);
+	}
+	
 	public void add(SWGObject object, int x, int y) {
 		object.setIsInQuadtree(true);
+		core.objectService.loadServerTemplate(object);
 		quadTrees.get(object.getPlanet().getName()).put(x, y, object);
 	}
 	
 	public boolean add(SWGObject object, float x, float y) {
 		object.setIsInQuadtree(true);
+		core.objectService.loadServerTemplate(object);
 		return quadTrees.get(object.getPlanet().getName()).put(x, y, object);
 	}
 	
@@ -245,7 +266,7 @@ public class SimulationService implements INetworkDispatch {
 				//		 + " should be: " + dataTransform.getYPosition());
 				UpdateTransformMessage utm = new UpdateTransformMessage(object.getObjectID(), dataTransform.getTransformedX(), dataTransform.getTransformedY(), dataTransform.getTransformedZ(), dataTransform.getMovementCounter(), (byte) dataTransform.getMovementAngle(), dataTransform.getSpeed());
 	
-				List<SWGObject> newAwareObjects = get(object.getPlanet(), newPos.x, newPos.z, 200);
+				List<SWGObject> newAwareObjects = get(object.getPlanet(), newPos.x, newPos.z, 512);
 				ArrayList<SWGObject> oldAwareObjects = new ArrayList<SWGObject>(object.getAwareObjects());
 				Collection<SWGObject> updateAwareObjects = CollectionUtils.intersection(oldAwareObjects, newAwareObjects);
 				object.notifyObservers(utm, false);
@@ -253,6 +274,8 @@ public class SimulationService implements INetworkDispatch {
 				for(int i = 0; i < oldAwareObjects.size(); i++) {
 					SWGObject obj = oldAwareObjects.get(i);
 					if(!updateAwareObjects.contains(obj) && obj != object && obj.getWorldPosition().getDistance2D(newPos) > 200 && obj.isInQuadtree() /*&& obj.getParentId() == 0*/) {
+						if(obj.getAttachment("bigSpawnRange") != null && obj.getWorldPosition().getDistance2D(newPos) < 512)
+							continue;
 						object.makeUnaware(obj);
 						if(obj.getClient() != null)
 							obj.makeUnaware(object);
@@ -260,14 +283,17 @@ public class SimulationService implements INetworkDispatch {
 				}
 				for(int i = 0; i < newAwareObjects.size(); i++) {
 					SWGObject obj = newAwareObjects.get(i);
-					if(!updateAwareObjects.contains(obj) && obj != object && !object.getAwareObjects().contains(obj) && obj.getWorldPosition().getDistance2D(newPos) <= 200 && obj.getContainer() != object && obj.isInQuadtree()) {						
+					//System.out.println(obj.getTemplate());
+					if(!updateAwareObjects.contains(obj) && obj != object && !object.getAwareObjects().contains(obj) &&  obj.getContainer() != object && obj.isInQuadtree()) {						
+						if(obj.getAttachment("bigSpawnRange") == null && obj.getWorldPosition().getDistance2D(newPos) > 200)
+							continue;						
 						object.makeAware(obj);
 						if(obj.getClient() != null)
 							obj.makeAware(object);
 					}
 				}
 				
-				
+				checkForCollidables(object);
 
 			}
 				
@@ -318,6 +344,8 @@ public class SimulationService implements INetworkDispatch {
 				object.setOrientation(newOrientation);
 				object.setMovementCounter(dataTransform.getMovementCounter());
 				object.notifyObservers(utm, false);
+				
+				checkForCollidables(object);
 
 			}
 				
@@ -458,6 +486,14 @@ public class SimulationService implements INetworkDispatch {
 		if(object.getGroupId() != 0)
 			core.groupService.handleGroupDisband(object);
 		
+		Point3D objectPos = object.getWorldPosition();
+		
+		List<AbstractCollidable> collidables = getCollidables(object.getPlanet(), objectPos.x, objectPos.z, 512);
+
+		for(AbstractCollidable collidable : collidables) {
+			collidables.remove(object);
+		}
+		
 		
 		if (ghost != null) {
 			String objectShortName = object.getCustomName();
@@ -512,9 +548,11 @@ public class SimulationService implements INetworkDispatch {
 		
 		Point3D pos = object.getWorldPosition();
 		
-		Collection<SWGObject> newAwareObjects = get(object.getPlanet(), pos.x, pos.z, 200);
+		Collection<SWGObject> newAwareObjects = get(object.getPlanet(), pos.x, pos.z, 512);
 		for(Iterator<SWGObject> it = newAwareObjects.iterator(); it.hasNext();) {
 			SWGObject obj = it.next();
+			if(obj.getAttachment("bigSpawnRange") == null & obj.getWorldPosition().getDistance(pos) > 200)
+				continue;
 			object.makeAware(obj);
 			if(obj.getClient() != null)
 				obj.makeAware(object);
@@ -552,6 +590,8 @@ public class SimulationService implements INetworkDispatch {
 				}
 			}
 		}
+		
+		core.weatherService.sendWeather(object);
 		
 		if (!object.hasSkill(ghost.getProfessionWheelPosition())) {
 			object.showFlyText("cbt_spam", "skill_up", (float) 2.5, new RGB(154, 205, 50), 0);
@@ -862,7 +902,7 @@ public class SimulationService implements INetworkDispatch {
 	
 	public float getHeightOrigin(CreatureObject creature) {
 		
-		float height = (float) (creature.getHeight() - 0.3);
+		float height = (float) (creature.getHeight()/* - 0.3*/);
 		
 		if(creature.getPosture() == 2 || creature.getPosture() == 13)
 			height = 0.3f;
@@ -871,6 +911,48 @@ public class SimulationService implements INetworkDispatch {
 		
 		return height;
 
+	}
+	
+	public void notifyPlanet(Planet planet, IoBuffer packet) {
+		
+		ConcurrentHashMap<Integer, Client> clients = core.getActiveConnectionsMap();
+		
+		for(Client client : clients.values()) {
+			
+			if(client.getParent() == null)
+				continue;
+
+			if(client.getParent().getPlanet() == null)
+				continue;
+			else if(client.getParent().getPlanet() == planet)
+				client.getSession().write(packet);
+			
+		}
+		
+	}
+	
+	public void notifyAllClients(IoBuffer packet) {
+		
+		ConcurrentHashMap<Integer, Client> clients = core.getActiveConnectionsMap();
+		
+		for(Client client : clients.values()) {
+			
+			if(client.getParent() == null)
+				continue;
+
+			client.getSession().write(packet);
+			
+		}
+
+	}
+	
+	public void checkForCollidables(SWGObject object) {
+		Point3D objectPos = object.getWorldPosition();
+		List<AbstractCollidable> collidables = getCollidables(object.getPlanet(), objectPos.x, objectPos.z, 256);
+		
+		for(AbstractCollidable collidable : collidables) {
+			collidable.doCollisionCheck(object);
+		}
 	}
 
 }

@@ -322,9 +322,14 @@ public class CombatService implements INetworkDispatch {
 			int armorAbsorbed = (int) (damageBeforeArmor - damage);
 			if(mitigationType == HitType.BLOCK) {
 					
-				float blockValue = (attacker.getStrength() + attacker.getSkillMod("combat_block_value").getBase()) / 2 + 25;
+				float blockValue = (attacker.getStrength() + attacker.getSkillModBase("combat_block_value")) / 2 + 25;
 				damage -= blockValue;
 				
+			}
+			
+			if(command.getAttackType() != 1 && target.getSkillMod("area_damage_resist_full_percentage") != null) {
+				if(new Random().nextFloat() <= target.getSkillModBase("area_damage_resist_full_percentage"))
+					damage = 0;
 			}
 			
 			if(damage > 0)
@@ -433,6 +438,9 @@ public class CombatService implements INetworkDispatch {
 				baseArmor = target.getSkillMod("electricity").getBase();
 
 		}
+		
+		if(target.getSkillMod("expertise_innate_reduction_all_player") != null)
+			baseArmor *= (100 - target.getSkillMod("expertise_innate_reduction_all_player").getBase()) / 100;
 			
 		float mitigation = (float) (90 * (1 - Math.exp(-0.000125 * baseArmor)) + baseArmor / 9000);
 		
@@ -479,8 +487,7 @@ public class CombatService implements INetworkDispatch {
 		if(actionCost == 0 && healthCost == 0)
 			return true;
 		
-		if(attacker.getSkillMod("expertise_action_all") != null)
-			actionCost *= attacker.getSkillMod("expertise_action_all").getBase();
+		actionCost *= getWeaponActionCostReduction(attacker, weapon);
 		
 		float newAction = attacker.getAction() - actionCost;
 		if(newAction <= 0)
@@ -558,6 +565,8 @@ public class CombatService implements INetworkDispatch {
 			
 		}
 		
+		rawDamage *= getWeaponDamageIncrease(attacker, weapon);
+		
 		if(target.getSkillMod("damage_decrease_percentage") != null) {
 			rawDamage *= (1 - (target.getSkillMod("damage_decrease_percentage").getBase() / 100));
 		}
@@ -565,11 +574,7 @@ public class CombatService implements INetworkDispatch {
 		if(target.getSkillMod("combat_divide_damage_dealt") != null) {
 			rawDamage *= (1 - (target.getSkillMod("combat_divide_damage_dealt").getBase() / 100));			
 		}
-		
-		if(attacker.getSkillMod("expertise_damage_melee") != null) {
-			rawDamage *= (1 + (attacker.getSkillMod("expertise_damage_melee").getBase() / 100));			
-		}
-		
+				
 		return rawDamage;
 		
 	}
@@ -650,15 +655,16 @@ public class CombatService implements INetworkDispatch {
 				if(r <= missChance)
 					return HitType.MISS;
 			}
-			float dodgeChance = (float) target.getSkillMod("display_only_dodge").getBase() / 10000;
-	
-			r = random.nextFloat();
-			if(r <= dodgeChance)
-				return HitType.DODGE;
-			
+			if(target.getSkillMod("display_only_dodge") != null) {
+				float dodgeChance = (float) target.getSkillMod("display_only_dodge").getBase() / 10000;
+		
+				r = random.nextFloat();
+				if(r <= dodgeChance)
+					return HitType.DODGE;
+			}
 				
 			WeaponObject weapon2 = (WeaponObject) core.objectService.getObject(((CreatureObject) target).getWeaponId());
-			if(weapon2 != null && weapon2.isMelee()) {
+			if(weapon2 != null && weapon2.isMelee() && target.getSkillMod("display_only_parry") != null) {
 				
 				float parryChance = (float) target.getSkillMod("display_only_parry").getBase() / 10000;
 	
@@ -676,7 +682,7 @@ public class CombatService implements INetworkDispatch {
 
 		}
 
-		float critChance = (float) attacker.getSkillMod("display_only_critical").getBase() / 10000;
+		float critChance = (float) (attacker.getSkillMod("display_only_critical").getBase() - target.getSkillModBase("display_only_expertise_critical_hit_reduction")) / 10000;
 		r = random.nextFloat();
 		if(r <= critChance)
 			return HitType.CRITICAL;
@@ -692,7 +698,7 @@ public class CombatService implements INetworkDispatch {
 		float r;
 		Random random = new Random();
 					
-		float blockChance = (float) target.getSkillMod("display_only_block").getBase() / 10000;
+		float blockChance = (float) target.getSkillModBase("display_only_block") / 10000;
 			
 		r = random.nextFloat();
 		if(r <= blockChance)
@@ -700,7 +706,7 @@ public class CombatService implements INetworkDispatch {
 			
 		if(command.getAttackType() == 0 || command.getAttackType() == 2 || command.getAttackType() == 3) {
 				
-			float evasionChance = (float) target.getSkillMod("display_only_evasion").getBase() / 10000;
+			float evasionChance = (float) target.getSkillModBase("display_only_evasion") / 10000;
 				
 			r = random.nextFloat();
 			if(r <= evasionChance)
@@ -708,9 +714,9 @@ public class CombatService implements INetworkDispatch {
 
 		}
 		
-		if(hitType == HitType.HIT) {
+		if(hitType == HitType.HIT && target.getSkillMod("display_only_glancing_blow") != null) {
 			
-			float glanceChance = (float) target.getSkillMod("display_only_glancing_blow").getBase() / 10000;
+			float glanceChance = (float) target.getSkillModBase("display_only_glancing_blow") / 10000;
 			
 			r = random.nextFloat();
 			if(r <= glanceChance)
@@ -843,6 +849,12 @@ public class CombatService implements INetworkDispatch {
 	}
 	
 	private void doSingleTargetHeal(CreatureObject healer, CreatureObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {
+		
+		if(command.getDotDuration() > 0) {
+			addHealOverTimeToCreature(healer, target, command);
+			return;
+		}
+			
 		
 		int healAmount = command.getAddedDamage();
 		int healPotency = 0;
@@ -1122,6 +1134,10 @@ public class CombatService implements INetworkDispatch {
 				
 		}
 		
+		if(target.getSkillMod("expertise_innate_reduction_all_player") != null) {
+			baseArmor *= (100 - target.getSkillMod("expertise_innate_reduction_all_player").getBase()) / 100;
+		}
+		
 		if(baseArmor > 0) {
 			float mitigation = (float) (90 * (1 - Math.exp(-0.000125 * baseArmor)) + baseArmor / 9000);
             mitigation /= 100;
@@ -1136,7 +1152,162 @@ public class CombatService implements INetworkDispatch {
 		applyDamage(attacker, target, damage);
 		
 	}
+	
+	public void doSelfBuff(CreatureObject creature, WeaponObject weapon, CombatCommand command, int actionCounter) {
+		
+		boolean success = true;
+		
+		if(!applySpecialCost(creature, weapon, command))
+			success = false;
+		
+		if(!success) {
+			IoSession session = creature.getClient().getSession();
+			CommandEnqueueRemove commandRemove = new CommandEnqueueRemove(creature.getObjectId(), actionCounter);
+			session.write(new ObjControllerMessage(0x0B, commandRemove).serialize());
+			StartTask startTask = new StartTask(actionCounter, creature.getObjectID(), command.getCommandCRC(), CRC.StringtoCRC(command.getCooldownGroup()), -1);
+			session.write(new ObjControllerMessage(0x0B, startTask).serialize());
+			return;
+		}
+		
+		core.buffService.addBuffToCreature(creature, command.getBuffNameSelf());
 
+		StartTask startTask = new StartTask(actionCounter, creature.getObjectID(), command.getCommandCRC(), CRC.StringtoCRC(command.getCooldownGroup()), command.getCooldown());
+		ObjControllerMessage objController2 = new ObjControllerMessage(0x0B, startTask);
+		creature.getClient().getSession().write(objController2.serialize());
+		
+		CommandEnqueueRemove commandRemove = new CommandEnqueueRemove(creature.getObjectID(), actionCounter);
+		ObjControllerMessage objController3 = new ObjControllerMessage(0x0B, commandRemove);
+		creature.getClient().getSession().write(objController3.serialize());
+
+		
+	}
+	
+	public void addHealOverTimeToCreature(final CreatureObject healer, final CreatureObject target, final CombatCommand command) {
+		
+		if(target.getDotByName(command.getCommandName()) != null) {
+			
+			DamageOverTime oldDot = target.getDotByName(command.getCommandName());
+			oldDot.getTask().cancel(true);
+			target.removeDot(oldDot);
+			
+		}
+		
+		final DamageOverTime dot = new DamageOverTime(command.getCommandName(), null, command.getDotType(), command.getDotDuration(), command.getDotIntensity());
+		target.addDot(dot);
+		dot.setStartTime(System.currentTimeMillis());
+		
+		final ScheduledFuture<?> task = scheduler.scheduleAtFixedRate(new Runnable() {
+
+			@Override
+			public void run() {
+
+				if(dot.getRemainingDuration() <= 0) {
+					target.removeDot(dot);
+					dot.getTask().cancel(true);
+				}
+				
+				doHealOverTimeTick(healer, target, command, dot);
+				
+			}
+
+			
+			
+		}, 0, command.getDotDuration() / (command.getAddedDamage() / command.getDotIntensity()), TimeUnit.SECONDS);
+		
+		dot.setTask(task);
+
+		
+	}
+	
+	private void doHealOverTimeTick(CreatureObject healer, CreatureObject target, CombatCommand command, DamageOverTime dot) {
+				
+		int healAmount = command.getDotIntensity();
+		int healPotency = 0;
+		
+		if(healer.getSkillMod("expertise_healing_all") != null)
+			healPotency += healer.getSkillMod("expertise_healing_all").getBase();
+		if(healer.getSkillMod("expertise_healing_line_me_heal") != null)
+			healPotency += healer.getSkillMod("expertise_healing_line_me_heal").getBase();
+		if(healer.getSkillMod("expertise_healing_line_of_heal") != null)
+			healPotency += healer.getSkillMod("expertise_healing_line_of_heal").getBase();
+		if(healer.getSkillMod("expertise_healing_line_sm_heal") != null)
+			healPotency += healer.getSkillMod("expertise_healing_line_sm_heal").getBase();
+		if(healer.getSkillMod("expertise_healing_line_sp_heal") != null)
+			healPotency += healer.getSkillMod("expertise_healing_line_sp_heal").getBase();
+		if(healPotency > 0)
+			healAmount += (healAmount * (healPotency / 100));
+		if(target.getSkillMod("expertise_healing_reduction") != null)
+			healAmount *= (1 - target.getSkillMod("expertise_healing_reduction").getBase() / 100);
+		
+		synchronized(target.getMutex()) {
+			target.setHealth(target.getHealth() + healAmount);
+		}
+
+		target.notifyObservers(new PlayClientEffectLocMessage("appearance/pt_heal_2.prt", target.getPlanet().getName(), target.getWorldPosition()), true);
+		
+	}
+	
+	public float getWeaponActionCostReduction(CreatureObject attacker, WeaponObject weapon) {
+		
+		int weaponType = weapon.getWeaponType();
+		int actionReduction;
+		
+		switch(weaponType) {
+			
+			case 0: actionReduction = attacker.getSkillModBase("expertise_action_weapon_0");
+			case 1: actionReduction = attacker.getSkillModBase("expertise_action_weapon_1");
+			case 2: actionReduction = attacker.getSkillModBase("expertise_action_weapon_2");
+			case 4: actionReduction = attacker.getSkillModBase("expertise_action_weapon_4");
+			case 5: actionReduction = attacker.getSkillModBase("expertise_action_weapon_5");
+			case 6: actionReduction = attacker.getSkillModBase("expertise_action_weapon_6");
+			case 7: actionReduction = attacker.getSkillModBase("expertise_action_weapon_7");
+			case 8: actionReduction = attacker.getSkillModBase("expertise_action_weapon_8");
+			case 9: actionReduction = attacker.getSkillModBase("expertise_action_weapon_9");
+			case 10: actionReduction = attacker.getSkillModBase("expertise_action_weapon_10");
+			case 11: actionReduction = attacker.getSkillModBase("expertise_action_weapon_11");
+			case 12: actionReduction = attacker.getSkillModBase("expertise_action_weapon_3");
+			
+			default: actionReduction = 0;
+		
+		}
+		
+		actionReduction += attacker.getSkillModBase("expertise_action_all");
+		
+		return 1 + (actionReduction / 100);
+		
+	}
+	
+	public float getWeaponDamageIncrease(CreatureObject attacker, WeaponObject weapon) {
+		
+		int weaponType = weapon.getWeaponType();
+		int weaponDmgIncrease;
+		
+		switch(weaponType) {
+			
+			case 0: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_0");
+			case 1: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_1");
+			case 2: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_2");
+			case 4: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_4");
+			case 5: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_5");
+			case 6: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_6");
+			case 7: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_7");
+			case 8: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_8");
+			case 9: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_9");
+			case 10: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_10");
+			case 11: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_11");
+			case 12: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_3");
+			
+			default: weaponDmgIncrease = 0;
+		
+		}
+		
+		weaponDmgIncrease += attacker.getSkillModBase("expertise_damage_all");
+
+		
+		return 1 + (weaponDmgIncrease / 100);
+		
+	}
+	
 	public enum HitType{; 
 	
 		public static final byte MISS = 0;
@@ -1164,5 +1335,7 @@ public class CombatService implements INetworkDispatch {
 		public static final int ELECTRICITY = 256;
 
 	}
+
+	
 
 }

@@ -36,6 +36,7 @@ import services.AttributeService;
 import services.BuffService;
 import services.CharacterService;
 import services.ConnectionService;
+import services.EntertainmentService;
 import services.EquipmentService;
 import services.GroupService;
 import services.LoginService;
@@ -46,6 +47,7 @@ import services.SkillModService;
 import services.SkillService;
 import services.StaticService;
 import services.TerrainService;
+import services.WeatherService;
 import services.chat.ChatService;
 import services.collections.CollectionService;
 import services.combat.CombatService;
@@ -129,6 +131,8 @@ public class NGECore {
 	public EquipmentService equipmentService;
 	public TravelService travelService;
 	public CollectionService collectionService;
+	public EntertainmentService entertainmentService;
+	public WeatherService weatherService;
 	
 	// Login Server
 	public NetworkDispatch loginDispatch;
@@ -140,6 +144,7 @@ public class NGECore {
 
 	private ObjectDatabase creatureODB;
 	private ObjectDatabase mailODB;
+
 	
 	public NGECore() {
 		
@@ -198,6 +203,7 @@ public class NGECore {
 		skillService = new SkillService(this);
 		skillModService = new SkillModService(this);
 		equipmentService = new EquipmentService(this);
+		entertainmentService = new EntertainmentService(this);
 		
 		
 		// Ping Server
@@ -227,6 +233,7 @@ public class NGECore {
 		zoneDispatch.addService(travelService);
 		zoneDispatch.addService(playerService);
 		zoneDispatch.addService(buffService);
+		zoneDispatch.addService(entertainmentService);
 
 		zoneServer = new MINAServer(zoneDispatch, config.getInt("ZONE.PORT"));
 		zoneServer.start();
@@ -245,14 +252,17 @@ public class NGECore {
 		terrainService.addPlanet(10, "dathomir", "terrain/dathomir.trn", true);
 		terrainService.addPlanet(11, "mustafar", "terrain/mustafar.trn", true);
 		terrainService.addPlanet(12, "kashyyyk_main", "terrain/kashyyyk_main.trn", true);
-		terrainService.loadSnapShotObjects();
-		
-		// Zone services that need to be loaded after the above
-		simulationService = new SimulationService(this);
-		zoneDispatch.addService(simulationService);
 		
 		// Travel Points
 		travelService.loadTravelPoints();
+		simulationService = new SimulationService(this);
+		
+		terrainService.loadSnapShotObjects();
+		simulationService.insertSnapShotObjects();
+		
+		// Zone services that need to be loaded after the above
+		zoneDispatch.addService(simulationService);
+		
 		
 		// Static Spawns
 		staticService.spawnStatics();
@@ -274,11 +284,15 @@ public class NGECore {
 		
 		zoneDispatch.addService(skillService);
 		
-		travelService.startShuttleSchedule();
+		//travelService.startShuttleSchedule();
+		
+		weatherService = new WeatherService(this);
+		weatherService.loadPlanetSettings();
 		
 		didServerCrash = false;
 		System.out.println("Started Server.");
 		setGalaxyStatus(2);
+
 	}
 	
 
