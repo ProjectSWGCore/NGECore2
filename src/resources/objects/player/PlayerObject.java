@@ -26,6 +26,7 @@ import java.util.BitSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import resources.objects.waypoint.WaypointObject;
 
@@ -118,6 +119,8 @@ public class PlayerObject extends SWGObject {
 	
 	@NotPersistent
 	private long lastPlayTimeUpdate = System.currentTimeMillis();
+	
+	private Map<String, Integer> factionStandingMap = new TreeMap<String, Integer>();
 	
 	public PlayerObject() {
 		super();
@@ -537,7 +540,30 @@ public class PlayerObject extends SWGObject {
 			this.jediState = jediState;
 		}
 	}
-
+	
+	public Map<String, Integer> getFactionStandingMap() {
+		return factionStandingMap;
+	}
+	
+	public void setFactionStanding(String faction, int factionStanding) {
+		synchronized(objectMutex) {
+			factionStandingMap.put(faction, ((factionStanding < -5000) ? -5000 : ((factionStanding > 5000) ? 5000 : factionStanding)));
+		}
+	}
+	
+	public void modifyFactionStanding(String faction, int modifier) {
+		synchronized(objectMutex) {
+			int factionStanding = (((factionStandingMap.containsKey(faction)) ? factionStandingMap.get(faction) : 0) + modifier);
+			factionStandingMap.put(faction, ((factionStanding < -5000) ? -5000 : ((factionStanding > 5000) ? 5000 : factionStanding)));
+		}
+	}
+	
+	public int getFactionStanding(String faction) {
+		synchronized(objectMutex) {
+			return ((factionStandingMap.containsKey(faction)) ? factionStandingMap.get(faction) : 0);
+		}
+	}
+	
 	@Override
 	public void sendBaselines(Client destination) {
 		

@@ -51,6 +51,7 @@ import services.collections.CollectionService;
 import services.combat.CombatService;
 import services.command.CombatCommand;
 import services.command.CommandService;
+import services.gcw.FactionService;
 import services.gcw.GCWService;
 import services.guild.GuildService;
 import services.map.MapService;
@@ -115,6 +116,7 @@ public class NGECore {
 	public AttributeService attributeService;
 	public SUIService suiService;
 	public GuildService guildService;
+	public FactionService factionService;
 	public GCWService gcwService;
 	public TradeService tradeService;
 	public CombatService combatService;
@@ -258,6 +260,9 @@ public class NGECore {
 		guildService = new GuildService(this);
 		zoneDispatch.addService(guildService);
 		
+		factionService = new FactionService(this);
+		zoneDispatch.addService(factionService);
+		
 		gcwService = new GCWService(this);
 		zoneDispatch.addService(gcwService);
 		
@@ -274,7 +279,6 @@ public class NGECore {
 		didServerCrash = false;
 		System.out.println("Started Server.");
 		setGalaxyStatus(2);
-		
 	}
 	
 
