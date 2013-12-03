@@ -102,6 +102,10 @@ public class TangibleObject extends SWGObject {
 
 	public void setConditionDamage(int conditionDamage) {
 		this.conditionDamage = conditionDamage;
+		
+		if (maxDamage > 0) {
+			this.setStringAttribute("condition", (maxDamage + "/" + (maxDamage - conditionDamage)));
+		}
 	}
 
 	public byte[] getCustomization() {
@@ -134,6 +138,8 @@ public class TangibleObject extends SWGObject {
 
 	public void setMaxDamage(int maxDamage) {
 		this.maxDamage = maxDamage;
+		
+		this.setStringAttribute("condition", (maxDamage + "/" + (maxDamage - conditionDamage)));
 	}
 
 	public boolean isStaticObject() {
