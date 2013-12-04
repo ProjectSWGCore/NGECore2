@@ -56,7 +56,8 @@ import engine.resources.scene.Quaternion;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 
-@Entity(version=2)
+
+@Entity(version=4)
 public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	@NotPersistent
@@ -116,6 +117,8 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private byte moodId = 0;
 	private int performanceCounter = 0;
 	private int performanceId = 0;
+	private CreatureObject performanceWatchee;
+	private CreatureObject performanceListenee;
 	private int health = 1000;
 	private int action = 300;
 	@NotPersistent
@@ -1261,5 +1264,49 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	public boolean setStaticNPC(boolean staticNPC) {
 		return this.staticNPC = staticNPC;
 	}
+	public CreatureObject getPerformanceWatchee() {
+		synchronized(objectMutex) {
+			return performanceWatchee;
+		}
+	}
+
+	public void setPerformanceWatchee(CreatureObject performanceWatchee) {
+		synchronized(objectMutex) {
+			this.performanceWatchee = performanceWatchee;
+		}
+		getClient().getSession().write(messageBuilder.buildListenToId(performanceWatchee.getObjectId()));
+	}
+
+	public CreatureObject getPerformanceListenee() {
+		synchronized(objectMutex) {
+			return performanceListenee;
+		}
+	}
+
+	public void setPerformanceListenee(CreatureObject performanceListenee) {
+		synchronized(objectMutex) {
+			this.performanceListenee = performanceListenee;
+		}
+	}
+
+	public void startPerformance(int performanceId, int performanceCounter, String skillName, boolean doStart) {
+		synchronized(objectMutex) {
+			this.performanceId = performanceId;
+			this.performanceCounter = performanceCounter;
+		}
+		
+		if (doStart) { getClient().getSession().write(messageBuilder.buildPerformanceId(performanceId)); }
+		if (doStart) { getClient().getSession().write(messageBuilder.buildPerformanceCounter(performanceCounter)); }
+		if (doStart) { getClient().getSession().write(messageBuilder.buildSkillName(skillName)); }
+		getClient().getSession().write(messageBuilder.buildStartPerformance(doStart));
+		
+	}
+	
+	public void notifyAudience() {
+		//TODO: stub
+	}
+
+
+	
 	
 }

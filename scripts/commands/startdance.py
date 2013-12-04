@@ -50,3 +50,26 @@ def startDance(core, actor, danceName):
       actor.sendSystemMessage('@performance:dance_lack_skill_self',0)
       return
     return
+
+    if actor.getPerformanceId() > 0:
+      actor.sendSystemMessage('@performance:already_performing_self',0)
+      return
+
+    performance = entSvc.getPerformance(danceName)
+    #TODO: check costume, posture, etc
+
+    actor.sendSystemMessage('@performance:dance_start_self');
+    actor.notifyAudience('@performance:dance_start_other');
+
+    if not actor.getPerformanceWatchee():
+      #this also needs to notify the client with a delta4
+      actor.setPerformanceWatchee(actor)
+   
+    #this should send a CREO3 
+    actor.setPosture(0x09);
+    # send CREO6 here
+    # second param is some sort of counter or start tick
+    actor.startPerformance(performance.getLineNumber(), 0xCDCC4C3C, 'dance_' . performance.getVisualId true)
+
+   
+

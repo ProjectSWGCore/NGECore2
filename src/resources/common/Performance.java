@@ -29,6 +29,7 @@ public class Performance {
 	private String flourish8;
 	private String intro;
 	private String outro;
+	private int lineNumber;
 	
 	public Performance() {
 		
@@ -141,6 +142,10 @@ public class Performance {
 	public int getHealShockWound() {
 		return healShockWound;
 	}
+	
+	public int getLineNumber() {
+		return lineNumber;
+	}
 
 	public void setHealShockWound(int healShockWound) {
 		this.healShockWound = healShockWound;
@@ -240,6 +245,10 @@ public class Performance {
 
 	public void setOutro(String outro) {
 		this.outro = outro;
+	}
+
+	public void setLineNumber(int lineNumber) {
+		this.lineNumber = lineNumber;
 	}
 	
 }

@@ -176,6 +176,7 @@ public class EntertainmentService implements INetworkDispatch {
 				p.setFlourish8((String) PerformanceVisitor.getObject(r, 23));
 				p.setIntro((String) PerformanceVisitor.getObject(r, 24));
 				p.setOutro((String) PerformanceVisitor.getObject(r, 25));
+				p.setLineNumber(r);
 				
 				if (p.getType() == -1788534963) {
 					danceMap.put(new Integer(p.getDanceVisualId()), p);
@@ -267,6 +268,10 @@ public class EntertainmentService implements INetworkDispatch {
 	public boolean canDance(CreatureObject actor, String danceName) {
 		if (!isDance(danceName)) { return false; }
 		return canDance(actor, performances.get(danceName));
+	}
+	
+	public Performance getPerformance(String name) {
+		return performances.get(name);
 	}
 	
 	@Override
