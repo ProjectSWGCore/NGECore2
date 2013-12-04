@@ -36,11 +36,6 @@ import java.util.concurrent.TimeUnit;
 
 import net.engio.mbassy.bus.config.BusConfiguration;
 
-
-
-
-
-
 import resources.common.RadialOptions;
 import resources.common.ThreadMonitor;
 import resources.objects.creature.CreatureObject;
@@ -61,9 +56,11 @@ import services.StaticService;
 import services.TerrainService;
 import services.WeatherService;
 import services.chat.ChatService;
+import services.collections.CollectionService;
 import services.combat.CombatService;
 import services.command.CombatCommand;
 import services.command.CommandService;
+import services.gcw.FactionService;
 import services.gcw.GCWService;
 import services.guild.GuildService;
 import services.map.MapService;
@@ -118,6 +115,7 @@ public class NGECore {
 	public ConnectionService connectionService;
 	public CommandService commandService;
 	public CharacterService characterService;
+	public FactionService factionService;
 	public ObjectService objectService;
 	public MapService mapService;
 	public UpdateService updateService;
@@ -139,6 +137,7 @@ public class NGECore {
 	public SkillModService skillModService;
 	public EquipmentService equipmentService;
 	public TravelService travelService;
+	public CollectionService collectionService;
 	public EntertainmentService entertainmentService;
 	public WeatherService weatherService;
 	
@@ -197,7 +196,8 @@ public class NGECore {
 		characterService = new CharacterService(this);
 		mapService = new MapService(this);
 		travelService = new TravelService(this);
-
+		
+		factionService = new FactionService(this);
 		objectService = new ObjectService(this);
 		terrainService = new TerrainService(this);
 		updateService = new UpdateService(this);
@@ -235,6 +235,7 @@ public class NGECore {
 		zoneDispatch = new NetworkDispatch(this, true);
 		zoneDispatch.addService(connectionService);
 		zoneDispatch.addService(characterService);
+		zoneDispatch.addService(factionService);
 		zoneDispatch.addService(objectService);
 		zoneDispatch.addService(commandService);
 		zoneDispatch.addService(chatService);
@@ -282,6 +283,9 @@ public class NGECore {
 		
 		gcwService = new GCWService(this);
 		zoneDispatch.addService(gcwService);
+		
+		collectionService = new CollectionService(this);
+		zoneDispatch.addService(collectionService);
 
 		tradeService = new TradeService(this);
 		zoneDispatch.addService(tradeService);

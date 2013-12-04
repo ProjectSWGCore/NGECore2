@@ -31,8 +31,8 @@ import org.apache.mina.core.buffer.IoBuffer;
 import protocol.swg.ChatSystemMessage;
 import protocol.swg.ObjControllerMessage;
 import protocol.swg.PlayMusicMessage;
-import protocol.swg.UpdatePVPStatusMessage;
 import protocol.swg.UpdatePostureMessage;
+import protocol.swg.UpdatePVPStatusMessage;
 import protocol.swg.objectControllerObjects.Animation;
 import protocol.swg.objectControllerObjects.Posture;
 
@@ -102,7 +102,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 
 	// CREO6
 	private byte combatFlag = 0;
-	private short level = 1;
+	private short level = -1;
 	private int grantedHealth = 0;
 	private String currentAnimation;
 	private String moodAnimation;
@@ -258,7 +258,14 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 		
 	}
-
+	
+	@Override
+	public int getOptionsBitmask() {
+		synchronized(objectMutex) {
+			return optionsBitmask;
+		}
+	}
+	
 	@Override
 	public void setOptionsBitmask(int optionBitmask) {
 		synchronized(objectMutex) {
@@ -269,6 +276,14 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		
 		notifyObservers(optionDelta, true);
 
+	}
+	
+	public void addOption(int option) {
+		setOptionsBitmask(getOptionsBitmask() & option);
+	}
+	
+	public void removeOption(int option) {
+		setOptionsBitmask(getOptionsBitmask() |~ option);
 	}
 
 	public byte getPosture() {
@@ -295,10 +310,8 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			this.faction = faction;
 		}
 		
-		IoBuffer factionDelta = messageBuilder.buildFactionDelta(faction);
-		
-		notifyObservers(factionDelta, true);
-
+		notifyObservers(messageBuilder.buildFactionDelta(faction), true);
+		setPvpStatus(0, true);
 	}
 
 	public int getFactionStatus() {
@@ -312,10 +325,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			this.factionStatus = factionStatus;
 		}
 		
-		IoBuffer factionStatusDelta = messageBuilder.buildFactionStatusDelta(factionStatus);
-		
-		notifyObservers(factionStatusDelta, true);
-
+		notifyObservers(messageBuilder.buildFactionStatusDelta(factionStatus), true);
 	}
 
 	public float getHeight() {
@@ -929,26 +939,48 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		//destination.getSession().write(upm.serialize());
 		
 		if(destination != getClient()) {
-			UpdatePVPStatusMessage upvpm = new UpdatePVPStatusMessage(getObjectID());
-			if (factionStatus == 1 && faction.equals("imperial")) {
+			UpdatePVPStatusMessage upvpm = new UpdatePVPStatusMessage(getObjectID(), getPvPBitmask(), getFaction());
+			
+			/*
+			if (factionStatus == 1 && faction == "imperial") {
 				upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Imperial);
 				upvpm.setStatus(16);
-			} else if (factionStatus == 1 && faction.equals("rebel")) {
+				if ((getOptionsBitmask() & 128) == 128) upvpm.setStatus(0);
+				if (getOwnerId() != 0) upvpm.setStatus(256);
+			}
+			
+			if (factionStatus == 1 && faction == "rebel") {
 				upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Rebel);
 				upvpm.setStatus(16);
-			} else if (factionStatus == 2 && faction.equals("imperial")) {
+				if ((getOptionsBitmask() & 128) == 128) upvpm.setStatus(0);
+				if (getOwnerId() != 0) upvpm.setStatus(256);
+			}
+			
+			if (factionStatus == 2 && faction == "imperial") {
 				upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Imperial);
 				upvpm.setStatus(55);
-			} else if (factionStatus == 2 && faction.equals("rebel")) {
+				if ((getOptionsBitmask() & 128) == 128) upvpm.setStatus(39);
+				if (getOwnerId() != 0) upvpm.setStatus(295);
+			}
+			if (factionStatus == 2 && faction == "rebel") {
 				upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Rebel);
 				upvpm.setStatus(55);
-			} else if(getSlottedObject("ghost") != null) {
-				upvpm.setFaction(CRC.StringtoCRC(faction));
+				if ((getOptionsBitmask() & 128) == 128) upvpm.setStatus(39);
+				if (getOwnerId() != 0) upvpm.setStatus(295);
+			} 
+			if(factionStatus == 0 && faction == "neutral") {
+				upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Neutral);
 				upvpm.setStatus(16);
+				if ((getOptionsBitmask() & 128) == 128) upvpm.setStatus(0);
+				if (getOwnerId() != 0) upvpm.setStatus(256);
 			} else {
 				upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Neutral);
-				upvpm.setStatus(0);
-			}			
+				upvpm.setStatus(16);
+				if ((getOptionsBitmask() & 128) == 128) upvpm.setStatus(0);
+				if (getOwnerId() != 0) upvpm.setStatus(256);
+			}
+			*/
+			
 			destination.getSession().write(upvpm.serialize());
 		}
 	}
@@ -1263,6 +1295,18 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	public boolean setStaticNPC(boolean staticNPC) {
 		return this.staticNPC = staticNPC;
+	}
+	
+	@Override
+	public void setPvPBitmask(int pvpBitmask) {
+		super.setPvPBitmask(pvpBitmask);
+		notifyObservers(new UpdatePVPStatusMessage(getObjectID(), getPvPBitmask(), getFaction()), false);
+	}
+	
+	@Override
+	public void setPvpStatus(int pvpBitmask, boolean add) {
+		super.setPvpStatus(pvpBitmask, add);
+		notifyObservers(new UpdatePVPStatusMessage(getObjectID(), getPvPBitmask(), getFaction()), false);
 	}
 	
 }

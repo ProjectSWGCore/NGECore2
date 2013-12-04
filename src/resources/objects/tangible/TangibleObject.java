@@ -49,7 +49,6 @@ import engine.resources.scene.Quaternion;
 @Persistent
 public class TangibleObject extends SWGObject {
 	
-	
 	// TODO: Thread safety
 	
 	protected int incapTimer = 10;
@@ -60,7 +59,7 @@ public class TangibleObject extends SWGObject {
 	protected int optionsBitmask = 0;
 	private int maxDamage = 1000;
 	private boolean staticObject = false;
-	protected String faction = "";
+	protected String faction = "neutral"; // Says you're "Imperial Special Forces" if it's 0 for some reason
 	@NotPersistent
 	private Vector<TangibleObject> defendersList = new Vector<TangibleObject>();	// unused in packets but useful for the server
 	@NotPersistent
@@ -69,15 +68,20 @@ public class TangibleObject extends SWGObject {
 	private int respawnTime = 0;
 	private Point3D spawnCoordinates = new Point3D(0, 0, 0);
 	
+	@NotPersistent
+	private TangibleObject killer = null;
+	
 	public TangibleObject(long objectID, Planet planet, String template) {
 		super(objectID, planet, new Point3D(0, 0, 0), new Quaternion(1, 0, 1, 0), template);
 		messageBuilder = new TangibleMessageBuilder(this);
+		if (this.getClass().getSimpleName().equals("TangibleObject")) setIntAttribute("volume", 1);
 	}
 	
 	public TangibleObject(long objectID, Planet planet, String template, Point3D position, Quaternion orientation) {
 		super(objectID, planet, position, orientation, template);
 		messageBuilder = new TangibleMessageBuilder(this);
 		spawnCoordinates = position.clone();
+		if (this.getClass().getSimpleName().equals("TangibleObject")) setIntAttribute("volume", 1);
 	}
 	
 	public TangibleObject() {
@@ -104,6 +108,9 @@ public class TangibleObject extends SWGObject {
 			conditionDamage = getMaxDamage();
 		this.conditionDamage = conditionDamage;
 		notifyObservers(messageBuilder.buildConditionDamageDelta(conditionDamage), false);
+		if (maxDamage > 0) {
+			this.setStringAttribute("condition", (maxDamage + "/" + (maxDamage - conditionDamage)));
+		}
 	}
 
 	public byte[] getCustomization() {
@@ -129,13 +136,15 @@ public class TangibleObject extends SWGObject {
 	public void setOptionsBitmask(int optionsBitmask) {
 		this.optionsBitmask = optionsBitmask;
 	}
-
+	
 	public int getMaxDamage() {
 		return maxDamage;
 	}
 
 	public void setMaxDamage(int maxDamage) {
 		this.maxDamage = maxDamage;
+		
+		this.setStringAttribute("condition", (maxDamage + "/" + (maxDamage - conditionDamage)));
 	}
 
 	public boolean isStaticObject() {
@@ -155,6 +164,24 @@ public class TangibleObject extends SWGObject {
 	public void setPvPBitmask(int pvpBitmask) {
 		synchronized(objectMutex) {
 			this.pvpBitmask = pvpBitmask;
+		}
+	}
+	
+	public boolean getPvpStatus(int pvpStatus) {
+		synchronized(objectMutex) {
+			return ((pvpBitmask & pvpStatus) != 0);
+		}
+	}
+	
+	public void setPvpStatus(int pvpBitmask, boolean add) {
+		synchronized(objectMutex) {
+			if (pvpBitmask != 0) {
+				if (add) {
+					this.pvpBitmask |= pvpBitmask;
+				} else {
+					this.pvpBitmask &= ~pvpBitmask;
+				}
+			}
 		}
 	}
 	
@@ -251,15 +278,15 @@ public class TangibleObject extends SWGObject {
 		}
 	}
 	
-	public void showFlyText(String stfFile, String stfString, int xp, float scale, RGB color, int displayType) {
+	public void showFlyText(String stfFile, String stfString, String customText, int xp, float scale, RGB color, int displayType) {
 		Set<Client> observers = getObservers();
 		
 		if (getClient() != null) {
-			getClient().getSession().write((new ObjControllerMessage(0x0000000B, new ShowFlyText(getObjectID(), getObjectID(), 56, 1, 1, -1, stfFile, stfString, xp, scale, color, displayType))).serialize());
+			getClient().getSession().write((new ObjControllerMessage(0x0000000B, new ShowFlyText(getObjectID(), getObjectID(), 56, 1, 1, -1, stfFile, stfString, customText, xp, scale, color, displayType))).serialize());
 		}
 		
 		for (Client client : observers) {
-			client.getSession().write((new ObjControllerMessage(0x0000000B, new ShowFlyText(client.getParent().getObjectID(), getObjectID(), 56, 1, 1, -1, stfFile, stfString, xp, scale, color, displayType))).serialize());
+			client.getSession().write((new ObjControllerMessage(0x0000000B, new ShowFlyText(client.getParent().getObjectID(), getObjectID(), 56, 1, 1, -1, stfFile, stfString, customText, xp, scale, color, displayType))).serialize());
 		}
 	}
 	
@@ -280,6 +307,18 @@ public class TangibleObject extends SWGObject {
 	public void setRespawnTime(int respawnTime) {
 		synchronized(objectMutex) {
 			this.respawnTime = respawnTime;
+		}
+	}
+	
+	public TangibleObject getKiller() {
+		synchronized(objectMutex) {
+			return killer;
+		}
+	}
+	
+	public void setKiller(TangibleObject killer) {
+		synchronized(objectMutex) {
+			this.killer = killer;
 		}
 	}
 	

@@ -19,19 +19,38 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package resources.common;
+package services.collections;
 
-public class PvpStatus {
+import resources.objects.ListObject;
+
+import com.sleepycat.persist.model.Persistent;
+
+@Persistent
+public class ServerFirst extends ListObject {
 	
-	public static int None = 0;
-	public static int Attackable = 1;
-	public static int Aggressive = 2;
-	public static int Overt = 4;
-	public static int TEF = 8;
-	public static int Player = 16;
-	public static int Enemy = 32;
-	public static int GoingOvert = 64;
-	public static int GoingCovert = 128;
-	public static int Dueling = 256;
+	private String name;
+	private long time;
+	
+	public ServerFirst(String name, long time) {
+		this.name = name;
+		this.time = time;
+	}
+	
+	public ServerFirst() {
+		
+	}
+	
+	public String getName() {
+		return name;
+	}
+	
+	public long getTime() {
+		return time;
+	}
+	
+	@Override
+	public byte[] getBytes() {
+		return new byte[] { };
+	}
 	
 }
