@@ -141,6 +141,7 @@ public class SimulationService implements INetworkDispatch {
 		core.commandService.registerCommand("boardshuttle");
 		core.commandService.registerCommand("getplayerid");
 		core.commandService.registerCommand("inspire");
+		core.commandService.registerCommand("setgodmode");
 
 	}
 	
