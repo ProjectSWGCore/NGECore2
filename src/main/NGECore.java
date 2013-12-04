@@ -108,6 +108,7 @@ public class NGECore {
 	public ConnectionService connectionService;
 	public CommandService commandService;
 	public CharacterService characterService;
+	public FactionService factionService;
 	public ObjectService objectService;
 	public MapService mapService;
 	public UpdateService updateService;
@@ -118,7 +119,6 @@ public class NGECore {
 	public AttributeService attributeService;
 	public SUIService suiService;
 	public GuildService guildService;
-	public FactionService factionService;
 	public GCWService gcwService;
 	public TradeService tradeService;
 	public CombatService combatService;
@@ -187,7 +187,8 @@ public class NGECore {
 		characterService = new CharacterService(this);
 		mapService = new MapService(this);
 		travelService = new TravelService(this);
-
+		
+		factionService = new FactionService(this);
 		objectService = new ObjectService(this);
 		terrainService = new TerrainService(this);
 		updateService = new UpdateService(this);
@@ -225,6 +226,7 @@ public class NGECore {
 		zoneDispatch = new NetworkDispatch(this, true);
 		zoneDispatch.addService(connectionService);
 		zoneDispatch.addService(characterService);
+		zoneDispatch.addService(factionService);
 		zoneDispatch.addService(objectService);
 		zoneDispatch.addService(commandService);
 		zoneDispatch.addService(chatService);
@@ -269,9 +271,6 @@ public class NGECore {
 		
 		guildService = new GuildService(this);
 		zoneDispatch.addService(guildService);
-		
-		factionService = new FactionService(this);
-		zoneDispatch.addService(factionService);
 		
 		gcwService = new GCWService(this);
 		zoneDispatch.addService(gcwService);
