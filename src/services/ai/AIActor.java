@@ -23,11 +23,14 @@ package services.ai;
 
 import engine.resources.scene.Point3D;
 import resources.objects.creature.CreatureObject;
+import services.ai.states.AIState;
 
 public class AIActor {
 	
 	private CreatureObject creature;
 	private Point3D spawnPosition;
+	private volatile AIState currentState;
+	private CreatureObject followObject;
 	
 	public AIActor(CreatureObject creature, Point3D spawnPosition) {
 		this.creature = creature;
@@ -52,6 +55,26 @@ public class AIActor {
 	
 	public void doAggro(CreatureObject defender) {
 		
+	}
+
+	public AIState getCurrentState() {
+		return currentState;
+	}
+
+	public void setCurrentState(AIState currentState) {
+		if(currentState == this.currentState)
+			return;
+		this.currentState.onExit();
+		this.currentState = currentState;
+		currentState.onEnter();
+	}
+
+	public CreatureObject getFollowObject() {
+		return followObject;
+	}
+
+	public void setFollowObject(CreatureObject followObject) {
+		this.followObject = followObject;
 	}
 
 }

@@ -71,4 +71,13 @@ public class CollidableCircle extends AbstractCollidable {
 			return center.getDistance(objectPos) <= radius;
 		}
 	}
+
+	@Override
+	public boolean doesCollide(Point3D position) {
+		if(useYAxis) {
+			return center.getDistance(position) <= radius && position.y == center.y;
+		} else {
+			return center.getDistance(position) <= radius;
+		}
+	}
 }

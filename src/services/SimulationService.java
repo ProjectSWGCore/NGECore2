@@ -68,8 +68,10 @@ import protocol.swg.objectControllerObjects.TargetUpdate;
 import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
+import resources.objects.tangible.TangibleObject;
 import resources.common.*;
 import resources.common.collidables.AbstractCollidable;
+import services.ai.LairActor;
 import toxi.geom.Line3D;
 import toxi.geom.Ray3D;
 import toxi.geom.Vec3D;
@@ -543,11 +545,9 @@ public class SimulationService implements INetworkDispatch {
 		CreatureObject object = (CreatureObject) client.getParent();
 		Quaternion orientation = object.getOrientation();
 		Point3D position = object.getPosition();
-
-
 		
 		Point3D pos = object.getWorldPosition();
-		
+				
 		Collection<SWGObject> newAwareObjects = get(object.getPlanet(), pos.x, pos.z, 512);
 		for(Iterator<SWGObject> it = newAwareObjects.iterator(); it.hasNext();) {
 			SWGObject obj = it.next();
@@ -560,6 +560,7 @@ public class SimulationService implements INetworkDispatch {
 		
 		if(object.getParentId() == 0)
 			add(object, pos.x, pos.z);
+		
 		
 		PlayerObject ghost = (PlayerObject) object.getSlottedObject("ghost");
 		if (ghost != null) {

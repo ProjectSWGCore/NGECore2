@@ -21,6 +21,28 @@
  ******************************************************************************/
 package services.ai;
 
+import java.util.Vector;
+
+import engine.resources.scene.Point3D;
+
+import main.NGECore;
+
 public class AIService {
+	
+	private Vector<AIActor> aiActors = new Vector<AIActor>();
+	private NGECore core;
+	
+	public AIService(NGECore core) {
+		this.core = core;
+	}
+	
+	public void spawnCreature(String template, float x, float y, float z) {
+		spawnCreature(template, new Point3D(x, y, z));
+	}
+	
+	public void spawnCreature(String template, Point3D position) {
+		
+	}
+	
 
 }

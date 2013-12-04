@@ -29,6 +29,7 @@ import java.util.Vector;
 import protocol.swg.ObjControllerMessage;
 import protocol.swg.PlayClientEffectObjectMessage;
 import protocol.swg.StopClientEffectObjectByLabel;
+import protocol.swg.UpdatePVPStatusMessage;
 import protocol.swg.objectControllerObjects.ShowFlyText;
 
 import resources.common.RGB;
@@ -57,7 +58,7 @@ public class TangibleObject extends SWGObject {
 	protected byte[] customization;
 	private List<Integer> componentCustomizations = new ArrayList<Integer>();
 	protected int optionsBitmask = 0;
-	private int maxDamage = 0;
+	private int maxDamage = 1000;
 	private boolean staticObject = false;
 	protected String faction = "";
 	@NotPersistent
@@ -92,12 +93,17 @@ public class TangibleObject extends SWGObject {
 		this.incapTimer = incapTimer;
 	}
 
-	public int getConditionDamage() {
+	public synchronized int getConditionDamage() {
 		return conditionDamage;
 	}
 
-	public void setConditionDamage(int conditionDamage) {
+	public synchronized void setConditionDamage(int conditionDamage) {
+		if(conditionDamage < 0)
+			conditionDamage = 0;
+		else if(conditionDamage > getMaxDamage())
+			conditionDamage = getMaxDamage();
 		this.conditionDamage = conditionDamage;
+		notifyObservers(messageBuilder.buildConditionDamageDelta(conditionDamage), false);
 	}
 
 	public byte[] getCustomization() {
@@ -142,7 +148,7 @@ public class TangibleObject extends SWGObject {
 	
 	public int getPvPBitmask() {
 		synchronized(objectMutex) {
-			return optionsBitmask;
+			return pvpBitmask;
 		}
 	}
 
@@ -291,6 +297,11 @@ public class TangibleObject extends SWGObject {
 		destination.getSession().write(messageBuilder.buildBaseline8());
 		destination.getSession().write(messageBuilder.buildBaseline9());
 
+		UpdatePVPStatusMessage upvpm = new UpdatePVPStatusMessage(getObjectID());
+		upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Neutral);
+		upvpm.setStatus(1);
+		destination.getSession().write(upvpm.serialize());
+		
 
 	}
 	

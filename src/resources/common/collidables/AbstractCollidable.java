@@ -30,6 +30,7 @@ import org.python.core.PyObject;
 
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
+import engine.resources.scene.Point3D;
 
 public abstract class AbstractCollidable {
 	
@@ -38,6 +39,7 @@ public abstract class AbstractCollidable {
 	private Planet planet;
 
 	public abstract boolean doesCollide(SWGObject obj);
+	public abstract boolean doesCollide(Point3D position);
 
 	public PyObject getCallback() {
 		return callback;

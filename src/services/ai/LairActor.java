@@ -22,10 +22,7 @@
 package services.ai;
 
 import java.util.Vector;
-
 import net.engio.mbassy.listener.Handler;
-
-import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
 import services.combat.CombatEvents.DamageTaken;
 
@@ -116,6 +113,17 @@ public class LairActor {
 	
 	private void healLair() {
 		
+		if(lairObject.getConditionDamage() == 0 || creatures.isEmpty())
+			return;
+		
+		int healAmount = 0;
+		
+		for(AIActor ai : creatures) {
+			healAmount += lairObject.getMaxDamage() / 100;
+		}
+		
+		lairObject.setConditionDamage(lairObject.getConditionDamage() - healAmount);
+		lairObject.playEffectObject("clienteffect/healing_healdamage.cef", "root");
 		
 	}
 

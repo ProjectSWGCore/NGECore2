@@ -48,6 +48,7 @@ import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.waypoint.WaypointObject;
 import resources.objects.weapon.WeaponObject;
+import services.combat.CombatEvents.DamageTaken;
 import services.command.CombatCommand;
 import services.sui.SUIService.MessageBoxType;
 import services.sui.SUIWindow;
@@ -64,6 +65,7 @@ public class CombatService implements INetworkDispatch {
 	
 	private NGECore core;
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private CombatEvents events = new CombatEvents();
 
 	public CombatService(NGECore core) {
 		this.core = core;
@@ -240,8 +242,24 @@ public class CombatService implements INetworkDispatch {
 		}
 		
 		float damage = calculateDamage(attacker, target, weapon, command);
+		
+		if(damage > 0)
+			applyDamage(attacker, target, (int) damage);
+		
+		sendCombatPackets(attacker, target, weapon, command, actionCounter, damage, 0, HitType.HIT);
+	
+		if(FileUtilities.doesFileExist("scripts/commands/combat/" + command.getCommandName() + ".py"))
+			core.scriptService.callScript("scripts/commands/combat/", command.getCommandName(), "run", core, attacker, target, null);
+
 	}
 	
+	private void applyDamage(CreatureObject attacker, TangibleObject target, int damage) {
+		target.setConditionDamage(target.getConditionDamage() + damage);
+		DamageTaken event = events.new DamageTaken();
+		event.attacker = attacker;
+		target.getEventBus().publish(event);
+	}
+
 	private void doAreaCombat(CreatureObject attacker, CreatureObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {
 		
 		float x = attacker.getWorldPosition().x;
@@ -358,7 +376,7 @@ public class CombatService implements INetworkDispatch {
 		
 	}
 
-	private void sendCombatPackets(CreatureObject attacker, CreatureObject target, WeaponObject weapon, CombatCommand command, int actionCounter, float damage, int armorAbsorbed, int hitType) {
+	private void sendCombatPackets(CreatureObject attacker, TangibleObject target, WeaponObject weapon, CombatCommand command, int actionCounter, float damage, int armorAbsorbed, int hitType) {
 		
 		String animationStr = command.getRandomAnimation(weapon);
 		

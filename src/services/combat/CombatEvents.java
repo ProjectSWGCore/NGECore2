@@ -24,7 +24,7 @@ package services.combat;
 import resources.objects.creature.CreatureObject;
 import engine.resources.common.Event;
 
-public class CombatEvents {
+public class CombatEvents implements Event {
 	
 	public class DamageTaken implements Event {
 		

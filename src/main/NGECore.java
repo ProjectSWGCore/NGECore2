@@ -28,6 +28,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
+import net.engio.mbassy.bus.config.BusConfiguration;
 
 
 
@@ -145,6 +152,8 @@ public class NGECore {
 
 	private ObjectDatabase creatureODB;
 	private ObjectDatabase mailODB;
+	
+	private BusConfiguration eventBusConfig = BusConfiguration.Default(1, new ThreadPoolExecutor(1, 4, 1, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>()));
 
 	
 	public NGECore() {
@@ -253,7 +262,7 @@ public class NGECore {
 		terrainService.addPlanet(10, "dathomir", "terrain/dathomir.trn", true);
 		terrainService.addPlanet(11, "mustafar", "terrain/mustafar.trn", true);
 		terrainService.addPlanet(12, "kashyyyk_main", "terrain/kashyyyk_main.trn", true);
-		
+		terrainService.loadClientPois();
 		// Travel Points
 		travelService.loadTravelPoints();
 		simulationService = new SimulationService(this);
@@ -430,5 +439,10 @@ public class NGECore {
 	public static NGECore getInstance() {
 		return instance;
 	}
+	
+	public BusConfiguration getEventBusConfig() {
+		return eventBusConfig;
+	}
+	
 }
 

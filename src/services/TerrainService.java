@@ -26,9 +26,17 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
+import resources.common.FileUtilities;
+import resources.common.collidables.CollidableCircle;
+
+import engine.clientdata.ClientFileManager;
+import engine.clientdata.visitors.DatatableVisitor;
 import engine.resources.config.Config;
+import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
+import engine.resources.scene.Point3D;
 
 import main.NGECore;
 
@@ -36,13 +44,66 @@ public class TerrainService {
 	
 	private NGECore core;
 	private List<Planet> planets = Collections.synchronizedList(new ArrayList<Planet>());
+	private Map<Planet, List<CollidableCircle>> noBuildAreas = new ConcurrentHashMap<Planet, List<CollidableCircle>>();
 
 	public TerrainService(NGECore core) {
-
-		this.core = core;
-	
+		this.core = core;	
 	}
 	
+	public void loadClientPois()  {
+		
+		try {
+			
+			DatatableVisitor poiTable = ClientFileManager.loadFile("datatables/clientpoi/clientpoi.iff", DatatableVisitor.class);
+			
+			for (int i = 0; i < poiTable.getRowCount(); i++) {
+				
+				Planet planet = getPlanetByName((String) poiTable.getObject(i, 0));
+
+				if(planet == null)
+					continue;
+				
+				float x = (Float) poiTable.getObject(i, 4);
+				float z = (Float) poiTable.getObject(i, 6);
+				
+				CollidableCircle poiArea = new CollidableCircle(new Point3D(x, 0, z), 150, planet);
+				noBuildAreas.get(planet).add(poiArea);
+				
+			}
+
+		} catch (InstantiationException | IllegalAccessException e) {
+			e.printStackTrace();
+		}		
+		
+	}
+	
+	private void loadClientRegions(Planet planet)  {
+		
+		if(!FileUtilities.doesFileExist("datatables/clientregion/" + planet.getName() + ".iff"))
+			return;
+		
+		try {
+			
+			DatatableVisitor regionTable = ClientFileManager.loadFile("datatables/clientpoi/clientpoi.iff", DatatableVisitor.class);
+			
+			for (int i = 0; i < regionTable.getRowCount(); i++) {
+									
+				float x = (Float) regionTable.getObject(i, 1);
+				float z = (Float) regionTable.getObject(i, 2);
+				float radius = (Float) regionTable.getObject(i, 3);
+					
+				CollidableCircle region = new CollidableCircle(new Point3D(x, 0, z), radius, planet);
+				noBuildAreas.get(planet).add(region);
+				
+			}
+
+		} catch (InstantiationException | IllegalAccessException e) {
+			e.printStackTrace();
+		}		
+		
+	}
+
+
 	public boolean isWater(int planetId, float x, float z) {
 		
 		if(getPlanetByID(planetId) == null)
@@ -112,6 +173,8 @@ public class TerrainService {
 		Planet planet = new Planet(ID, name, path, loadSnapshot);
 		planets.add(planet);
 		core.mapService.addPlanet(planet);
+		noBuildAreas.put(planet, new ArrayList<CollidableCircle>());
+		loadClientRegions(planet);
 	}
 
 	
@@ -157,6 +220,21 @@ public class TerrainService {
 		
 	}
 	
+	public boolean canBuildAtPosition(SWGObject object, float x, float z) {
+		
+		if(isWater(object.getPlanet(), z, z))
+			return false;
+		
+		Point3D position = new Point3D(x, 0, z);
+		
+		for(CollidableCircle noBuildArea : noBuildAreas.get(object.getPlanet())) {
+			if(noBuildArea.doesCollide(position))
+				return false;
+		}
+		
+		return true;
+		
+	}
 	
 	
 
