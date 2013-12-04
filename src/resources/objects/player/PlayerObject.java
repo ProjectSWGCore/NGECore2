@@ -41,7 +41,7 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent
+@Persistent(version=1)
 public class PlayerObject extends SWGObject {
 	
 	// PLAY 3
