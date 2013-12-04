@@ -48,6 +48,7 @@ import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.waypoint.WaypointObject;
 import resources.objects.weapon.WeaponObject;
+import services.combat.CombatEvents.DamageTaken;
 import services.command.CombatCommand;
 import services.sui.SUIService.MessageBoxType;
 import services.sui.SUIWindow;
@@ -64,6 +65,7 @@ public class CombatService implements INetworkDispatch {
 	
 	private NGECore core;
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private CombatEvents events = new CombatEvents();
 
 	public CombatService(NGECore core) {
 		this.core = core;
@@ -240,8 +242,24 @@ public class CombatService implements INetworkDispatch {
 		}
 		
 		float damage = calculateDamage(attacker, target, weapon, command);
+		
+		if(damage > 0)
+			applyDamage(attacker, target, (int) damage);
+		
+		sendCombatPackets(attacker, target, weapon, command, actionCounter, damage, 0, HitType.HIT);
+	
+		if(FileUtilities.doesFileExist("scripts/commands/combat/" + command.getCommandName() + ".py"))
+			core.scriptService.callScript("scripts/commands/combat/", command.getCommandName(), "run", core, attacker, target, null);
+
 	}
 	
+	private void applyDamage(CreatureObject attacker, TangibleObject target, int damage) {
+		target.setConditionDamage(target.getConditionDamage() + damage);
+		DamageTaken event = events.new DamageTaken();
+		event.attacker = attacker;
+		target.getEventBus().publish(event);
+	}
+
 	private void doAreaCombat(CreatureObject attacker, CreatureObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {
 		
 		float x = attacker.getWorldPosition().x;
@@ -322,7 +340,7 @@ public class CombatService implements INetworkDispatch {
 			int armorAbsorbed = (int) (damageBeforeArmor - damage);
 			if(mitigationType == HitType.BLOCK) {
 					
-				float blockValue = (attacker.getStrength() + attacker.getSkillMod("combat_block_value").getBase()) / 2 + 25;
+				float blockValue = (attacker.getStrength() + attacker.getSkillModBase("combat_block_value")) / 2 + 25;
 				damage -= blockValue;
 				
 			}
@@ -358,7 +376,7 @@ public class CombatService implements INetworkDispatch {
 		
 	}
 
-	private void sendCombatPackets(CreatureObject attacker, CreatureObject target, WeaponObject weapon, CombatCommand command, int actionCounter, float damage, int armorAbsorbed, int hitType) {
+	private void sendCombatPackets(CreatureObject attacker, TangibleObject target, WeaponObject weapon, CombatCommand command, int actionCounter, float damage, int armorAbsorbed, int hitType) {
 		
 		String animationStr = command.getRandomAnimation(weapon);
 		
@@ -487,8 +505,7 @@ public class CombatService implements INetworkDispatch {
 		if(actionCost == 0 && healthCost == 0)
 			return true;
 		
-		if(attacker.getSkillMod("expertise_action_all") != null)
-			actionCost *= attacker.getSkillMod("expertise_action_all").getBase();
+		actionCost *= getWeaponActionCostReduction(attacker, weapon);
 		
 		float newAction = attacker.getAction() - actionCost;
 		if(newAction <= 0)
@@ -566,6 +583,8 @@ public class CombatService implements INetworkDispatch {
 			
 		}
 		
+		rawDamage *= getWeaponDamageIncrease(attacker, weapon);
+		
 		if(target.getSkillMod("damage_decrease_percentage") != null) {
 			rawDamage *= (1 - (target.getSkillMod("damage_decrease_percentage").getBase() / 100));
 		}
@@ -573,11 +592,7 @@ public class CombatService implements INetworkDispatch {
 		if(target.getSkillMod("combat_divide_damage_dealt") != null) {
 			rawDamage *= (1 - (target.getSkillMod("combat_divide_damage_dealt").getBase() / 100));			
 		}
-		
-		if(attacker.getSkillMod("expertise_damage_melee") != null) {
-			rawDamage *= (1 + (attacker.getSkillMod("expertise_damage_melee").getBase() / 100));			
-		}
-		
+				
 		return rawDamage;
 		
 	}
@@ -701,7 +716,7 @@ public class CombatService implements INetworkDispatch {
 		float r;
 		Random random = new Random();
 					
-		float blockChance = (float) target.getSkillMod("display_only_block").getBase() / 10000;
+		float blockChance = (float) target.getSkillModBase("display_only_block") / 10000;
 			
 		r = random.nextFloat();
 		if(r <= blockChance)
@@ -709,7 +724,7 @@ public class CombatService implements INetworkDispatch {
 			
 		if(command.getAttackType() == 0 || command.getAttackType() == 2 || command.getAttackType() == 3) {
 				
-			float evasionChance = (float) target.getSkillMod("display_only_evasion").getBase() / 10000;
+			float evasionChance = (float) target.getSkillModBase("display_only_evasion") / 10000;
 				
 			r = random.nextFloat();
 			if(r <= evasionChance)
@@ -719,7 +734,7 @@ public class CombatService implements INetworkDispatch {
 		
 		if(hitType == HitType.HIT && target.getSkillMod("display_only_glancing_blow") != null) {
 			
-			float glanceChance = (float) target.getSkillMod("display_only_glancing_blow").getBase() / 10000;
+			float glanceChance = (float) target.getSkillModBase("display_only_glancing_blow") / 10000;
 			
 			r = random.nextFloat();
 			if(r <= glanceChance)
@@ -1248,7 +1263,68 @@ public class CombatService implements INetworkDispatch {
 
 		target.notifyObservers(new PlayClientEffectLocMessage("appearance/pt_heal_2.prt", target.getPlanet().getName(), target.getWorldPosition()), true);
 		
-	}	
+	}
+	
+	public float getWeaponActionCostReduction(CreatureObject attacker, WeaponObject weapon) {
+		
+		int weaponType = weapon.getWeaponType();
+		int actionReduction;
+		
+		switch(weaponType) {
+			
+			case 0: actionReduction = attacker.getSkillModBase("expertise_action_weapon_0");
+			case 1: actionReduction = attacker.getSkillModBase("expertise_action_weapon_1");
+			case 2: actionReduction = attacker.getSkillModBase("expertise_action_weapon_2");
+			case 4: actionReduction = attacker.getSkillModBase("expertise_action_weapon_4");
+			case 5: actionReduction = attacker.getSkillModBase("expertise_action_weapon_5");
+			case 6: actionReduction = attacker.getSkillModBase("expertise_action_weapon_6");
+			case 7: actionReduction = attacker.getSkillModBase("expertise_action_weapon_7");
+			case 8: actionReduction = attacker.getSkillModBase("expertise_action_weapon_8");
+			case 9: actionReduction = attacker.getSkillModBase("expertise_action_weapon_9");
+			case 10: actionReduction = attacker.getSkillModBase("expertise_action_weapon_10");
+			case 11: actionReduction = attacker.getSkillModBase("expertise_action_weapon_11");
+			case 12: actionReduction = attacker.getSkillModBase("expertise_action_weapon_3");
+			
+			default: actionReduction = 0;
+		
+		}
+		
+		actionReduction += attacker.getSkillModBase("expertise_action_all");
+		
+		return 1 + (actionReduction / 100);
+		
+	}
+	
+	public float getWeaponDamageIncrease(CreatureObject attacker, WeaponObject weapon) {
+		
+		int weaponType = weapon.getWeaponType();
+		int weaponDmgIncrease;
+		
+		switch(weaponType) {
+			
+			case 0: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_0");
+			case 1: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_1");
+			case 2: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_2");
+			case 4: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_4");
+			case 5: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_5");
+			case 6: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_6");
+			case 7: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_7");
+			case 8: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_8");
+			case 9: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_9");
+			case 10: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_10");
+			case 11: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_11");
+			case 12: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_3");
+			
+			default: weaponDmgIncrease = 0;
+		
+		}
+		
+		weaponDmgIncrease += attacker.getSkillModBase("expertise_damage_all");
+
+		
+		return 1 + (weaponDmgIncrease / 100);
+		
+	}
 	
 	public enum HitType{; 
 	

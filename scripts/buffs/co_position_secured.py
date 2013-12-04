@@ -43,8 +43,8 @@ def removeBuff(core, actor, buff):
 		if actor.getGroupId() != 0 and core.objectService.getObject(actor.getGroupId()):
 			group = core.objectService.getObject(actor.getGroupId())
 			for member in group.getMemberList():
-				core.buffService.removeBuffToCreature(member, 'co_base_of_operations')
+				core.buffService.removeBuffFromCreature(member, member.getBuffByName('co_base_of_operations'))
 		else:
-			core.buffService.removeBuffToCreature(actor, 'co_base_of_operations')
+			core.buffService.removeBuffFromCreature(actor, actor.getBuffByName('co_base_of_operations'))
 		
 	return

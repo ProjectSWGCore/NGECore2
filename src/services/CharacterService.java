@@ -38,6 +38,7 @@ import engine.resources.common.CRC;
 import engine.resources.container.CreatureContainerPermissions;
 import engine.resources.container.CreaturePermissions;
 import engine.resources.database.DatabaseConnection;
+import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 import engine.resources.service.INetworkDispatch;
@@ -220,6 +221,7 @@ public class CharacterService implements INetworkDispatch {
 				object.setOptionsBitmask(0x80);
 				//object.setPosition(new Point3D(0, 0, 0));
 				object.setOrientation(new Quaternion(1, 0, 0, 0));
+				object.setLevel((short) 1);
 				float luck = (((((float) (core.scriptService.getMethod("scripts/roadmap/", clientCreateCharacter.getProfession(), "getLuck").__call__().asInt()) + (core.scriptService.getMethod("scripts/roadmap/", object.getStfName(), "getLuck").__call__().asInt())) / ((float) 90)) * ((float) object.getLevel())) - ((float) object.getSkillModBase("luck")));
 				float precision = (((((float) (core.scriptService.getMethod("scripts/roadmap/", clientCreateCharacter.getProfession(), "getPrecision").__call__().asInt()) + (core.scriptService.getMethod("scripts/roadmap/", object.getStfName(), "getPrecision").__call__().asInt())) / ((float) 90)) * ((float) object.getLevel())) - ((float) object.getSkillModBase("precision")));
 				float strength = (((((float) (core.scriptService.getMethod("scripts/roadmap/", clientCreateCharacter.getProfession(), "getStrength").__call__().asInt()) + (core.scriptService.getMethod("scripts/roadmap/", object.getStfName(), "getStrength").__call__().asInt())) / ((float) 90)) * ((float) object.getLevel())) - ((float) object.getSkillModBase("strength")));
@@ -304,7 +306,7 @@ public class CharacterService implements INetworkDispatch {
 				session.write(core.loginService.getLoginClusterStatus().serialize());
 				
 				session.write(success.serialize());	
-				session.write((new ClientMfdStatusUpdateMessage((float) 2, "/GroundHUD.MFDStatus.vsp.role.targetLevel")).serialize());		
+				session.write((new ClientMfdStatusUpdateMessage((float) 2, "/GroundHUD.MFDStatus.vsp.role.targetLevel")).serialize());
 			}
 			
 		});

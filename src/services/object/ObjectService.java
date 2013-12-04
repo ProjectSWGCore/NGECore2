@@ -134,7 +134,7 @@ public class ObjectService implements INetworkDispatch {
 		}
 	}
 	
-	public SWGObject createObject(String Template, long objectID, Planet planet, Point3D position, Quaternion orientation) {
+	public SWGObject createObject(String Template, long objectID, Planet planet, Point3D position, Quaternion orientation, String customServerTemplate) {
 		SWGObject object = null;
 		CrcStringTableVisitor crcTable;
 		try {
@@ -211,17 +211,51 @@ public class ObjectService implements INetworkDispatch {
 		}
 		
 		object.setPlanetId(planet.getID());
+		
+		object.setAttachment("serverTemplate", ((customServerTemplate != null) ? customServerTemplate : object.getTemplate()));
+		
 		object.setisInSnapshot(isSnapshot);
 		//loadServerTemplate(object);		
 		
 		objectList.put(objectID, object);
-
+		
+		// Set Default Tangible Options
+		/*
+		if (Template.startsWith("object/creature/") || Template.startsWith("object/mobile/")) {
+			((CreatureObject) object).setOptionsBitmask(Options.MOBILE);
+			
+			if (Template.startsWith("object/mobile/beast_master/")) {
+				((CreatureObject) object).setOptionsBitmask(Options.NONE);
+			} else if (Template.startsWith("object/mobile/vendor/")) {
+				((CreatureObject) object).setOptionsBitmask(Options.INVULNERABLE | Options.USABLE);
+			} else if (Template.startsWith("object/mobile/vehicle/")) {
+				((CreatureObject) object).addOption(Options.INVULNERABLE | Options.MOUNT);
+			} else if (Template.startsWith("object/mobile/hologram/")) {
+				((CreatureObject) object).addOption(Options.INVULNERABLE);
+			} else if (Template.startsWith("object/creature/npc/theme_park/")) {
+				((CreatureObject) object).addOption(Options.INVULNERABLE);
+			} else if (Template.startsWith("object/creature/general/")) {
+				((CreatureObject) object).setOptionsBitmask(Options.INVULNERABLE | Options.CONVERSABLE);
+			} else if (Template.startsWith("object/creature/droid/")) {
+				((CreatureObject) object).addOption(Options.INVULNERABLE);
+			}
+		} else if (object instanceof TangibleObject) {
+			((TangibleObject) object).setOptionsBitmask(Options.INVULNERABLE);
+			
+			if (Template.startsWith("object/tangible/vendor/")) {
+				((CreatureObject) object).addOption(Options.USABLE);
+			} else if (Template.startsWith("object/creature/droid/")) {
+				((CreatureObject) object).addOption(Options.INVULNERABLE);
+			}
+		}
+		*/
+		
 		return object;
 	}
 	
 	public void loadServerTemplate(SWGObject object) {
 		
-		String template = object.getTemplate();
+		String template = ((object.getAttachment("serverTemplate") == null) ? object.getTemplate() : ((String) object.getAttachment("serverTemplate")));
 		String serverTemplate = template.replace(".iff", "");
 		// check if template is empty(4 default lines) to reduce RAM usage(saves about 500 MB of RAM)
 		try {
@@ -252,6 +286,10 @@ public class ObjectService implements INetworkDispatch {
 	
 	public SWGObject createObject(String Template, Planet planet, float x, float z, float y) {
 		return createObject(Template, 0, planet, new Point3D(x, y, z), new Quaternion(1, 0, 0, 0));
+	}
+	
+	public SWGObject createObject(String Template, long objectID, Planet planet, Point3D position, Quaternion orientation) {
+		return createObject(Template, objectID, planet, position, orientation, null);	
 	}
 	
 	public void addObjectToScene(SWGObject object) {
@@ -308,6 +346,18 @@ public class ObjectService implements INetworkDispatch {
 			
 			if (method != null && method.isCallable()) {
 				method.__call__(Py.java2py(core), Py.java2py(object));
+			}
+		}
+		
+		if (object instanceof CreatureObject) {
+			if (core.factionService.getFactionMap().containsKey(((CreatureObject) object).getFaction())) {
+				if (FileUtilities.doesFileExist(filePath)) {
+					PyObject method = core.scriptService.getMethod("scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", ""), object.getTemplate().split("shared_" , 2)[1].replace(".iff", ""), "destroy");
+					
+					if (method != null && method.isCallable()) {
+						method.__call__(Py.java2py(core), Py.java2py(((TangibleObject) object).getKiller()), Py.java2py(object));
+					}
+				}
 			}
 		}
 		
@@ -388,7 +438,7 @@ public class ObjectService implements INetworkDispatch {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		if(getObject(newId) == null)
+		if(getObject(newId) == null && getCreatureFromDB(newId) == null)
 			return newId;
 		else
 			return generateObjectID();
@@ -520,6 +570,7 @@ public class ObjectService implements INetworkDispatch {
 			
 		});
 		
+		/*
 		objControllerOpcodes.put(ObjControllerOpcodes.USE_OBJECT, new INetworkRemoteEvent() {
 
 			@Override
@@ -543,6 +594,7 @@ public class ObjectService implements INetworkDispatch {
 			}
 			
 		});
+		*/
 		
 	}
 

@@ -31,7 +31,6 @@ import main.NGECore;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.buffer.SimpleBufferAllocator;
 
-import resources.common.BuffBuilder;
 import resources.objects.creature.CreatureObject;
 
 import com.sleepycat.persist.model.NotPersistent;
@@ -41,7 +40,7 @@ import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.resources.common.CRC;
 
-@Persistent(version=7)
+@Persistent(version=8)
 public class Buff implements IListObject {
 	
 	@NotPersistent
@@ -53,6 +52,7 @@ public class Buff implements IListObject {
 	private long ownerId;
 	private String effect1Name, effect2Name, effect3Name, effect4Name, effect5Name;
 	private float effect1Value, effect2Value, effect3Value, effect4Value, effect5Value;
+	private String callback;
 	private String particleEffect;
 	private boolean isDebuff;
 	private boolean removeOnDeath;
@@ -98,6 +98,7 @@ public class Buff implements IListObject {
 					effect4Value = (Float) visitor.getObject(i, 14);
 					effect5Name = (String) visitor.getObject(i, 15);
 					effect5Value = (Float) visitor.getObject(i, 16);
+					callback = (String) visitor.getObject(i, 18);
 					particleEffect = (String) visitor.getObject(i, 19);
 					isDebuff = (Boolean) visitor.getObject(i, 22);
 					removeOnDeath = (Integer) visitor.getObject(i, 25) != 0;
@@ -265,6 +266,14 @@ public class Buff implements IListObject {
 
 	public void setEffect5Value(float effect5Value) {
 		this.effect5Value = effect5Value;
+	}
+	
+	public String getCallback() {
+		return callback;
+	}
+	
+	public void setCallback(String callback) {
+		this.callback = callback;
 	}
 
 	public String getParticleEffect() {

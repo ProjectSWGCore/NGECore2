@@ -68,7 +68,10 @@ import protocol.swg.objectControllerObjects.TargetUpdate;
 import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
+import resources.objects.tangible.TangibleObject;
 import resources.common.*;
+import resources.common.collidables.AbstractCollidable;
+import services.ai.LairActor;
 import toxi.geom.Line3D;
 import toxi.geom.Ray3D;
 import toxi.geom.Vec3D;
@@ -91,6 +94,9 @@ import wblut.math.WB_M44;
 public class SimulationService implements INetworkDispatch {
 	
 	Map<String, QuadTree<SWGObject>> quadTrees;
+	Map<String, QuadTree<AbstractCollidable>> collidableQuadTrees;
+	
+	
 	private NGECore core;
 	private Map<String, MeshVisitor> cellMeshes = new ConcurrentHashMap<String, MeshVisitor>(); 
 	
@@ -98,9 +104,11 @@ public class SimulationService implements INetworkDispatch {
 		this.core = core;
 		TerrainService terrainService = core.terrainService;
 		quadTrees = new ConcurrentHashMap<String, QuadTree<SWGObject>>();
+		collidableQuadTrees = new ConcurrentHashMap<String, QuadTree<AbstractCollidable>>();
 		
 		for (int i = 0; i < core.terrainService.getPlanetList().size(); i++) {
 			quadTrees.put(terrainService.getPlanetList().get(i).getName(), new QuadTree<SWGObject>(-8192, -8192, 8192, 8192));
+			collidableQuadTrees.put(terrainService.getPlanetList().get(i).getName(), new QuadTree<AbstractCollidable>(-8192, -8192, 8192, 8192));
 		}
 		
 		core.commandService.registerCommand("opencontainer");
@@ -135,6 +143,7 @@ public class SimulationService implements INetworkDispatch {
 		core.commandService.registerCommand("boardshuttle");
 		core.commandService.registerCommand("getplayerid");
 		core.commandService.registerCommand("inspire");
+		core.commandService.registerCommand("setgodmode");
 
 	}
 	
@@ -144,6 +153,18 @@ public class SimulationService implements INetworkDispatch {
 			if(obj.getParentId() == 0 && obj.isInSnapshot())
 				add(obj, obj.getPosition().x, obj.getPosition().z);
 		}
+	}
+	
+	public void addCollidable(AbstractCollidable collidable, float x, float y) {
+		collidableQuadTrees.get(collidable.getPlanet().getName()).put(x, y, collidable);
+	}
+	
+	public void removeCollidable(AbstractCollidable collidable, float x, float y) {
+		collidableQuadTrees.get(collidable.getPlanet().getName()).remove(x, y, collidable);
+	}
+	
+	public List<AbstractCollidable> getCollidables(Planet planet, float x, float y, float range) {
+		return collidableQuadTrees.get(planet.getName()).get(x, y, range);
 	}
 	
 	public void add(SWGObject object, int x, int y) {
@@ -275,7 +296,7 @@ public class SimulationService implements INetworkDispatch {
 					}
 				}
 				
-				
+				checkForCollidables(object);
 
 			}
 				
@@ -326,6 +347,8 @@ public class SimulationService implements INetworkDispatch {
 				object.setOrientation(newOrientation);
 				object.setMovementCounter(dataTransform.getMovementCounter());
 				object.notifyObservers(utm, false);
+				
+				checkForCollidables(object);
 
 			}
 				
@@ -466,6 +489,14 @@ public class SimulationService implements INetworkDispatch {
 		if(object.getGroupId() != 0)
 			core.groupService.handleGroupDisband(object);
 		
+		Point3D objectPos = object.getWorldPosition();
+		
+		List<AbstractCollidable> collidables = getCollidables(object.getPlanet(), objectPos.x, objectPos.z, 512);
+
+		for(AbstractCollidable collidable : collidables) {
+			collidables.remove(object);
+		}
+		
 		
 		if (ghost != null) {
 			String objectShortName = object.getCustomName();
@@ -515,11 +546,9 @@ public class SimulationService implements INetworkDispatch {
 		CreatureObject object = (CreatureObject) client.getParent();
 		Quaternion orientation = object.getOrientation();
 		Point3D position = object.getPosition();
-
-
 		
 		Point3D pos = object.getWorldPosition();
-		
+				
 		Collection<SWGObject> newAwareObjects = get(object.getPlanet(), pos.x, pos.z, 512);
 		for(Iterator<SWGObject> it = newAwareObjects.iterator(); it.hasNext();) {
 			SWGObject obj = it.next();
@@ -532,6 +561,7 @@ public class SimulationService implements INetworkDispatch {
 		
 		if(object.getParentId() == 0)
 			add(object, pos.x, pos.z);
+		
 		
 		PlayerObject ghost = (PlayerObject) object.getSlottedObject("ghost");
 		if (ghost != null) {
@@ -916,6 +946,15 @@ public class SimulationService implements INetworkDispatch {
 			
 		}
 
+	}
+	
+	public void checkForCollidables(SWGObject object) {
+		Point3D objectPos = object.getWorldPosition();
+		List<AbstractCollidable> collidables = getCollidables(object.getPlanet(), objectPos.x, objectPos.z, 256);
+		
+		for(AbstractCollidable collidable : collidables) {
+			collidable.doCollisionCheck(object);
+		}
 	}
 
 }

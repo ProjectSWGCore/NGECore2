@@ -38,11 +38,12 @@ public class ShowFlyText extends ObjControllerObject {
 	private int unknownInt2;
 	private String stfFile;
 	private String stfString;
-	private short unknownShort2;
+	private short xp;
 	private float scale;
 	private RGB color;
 	private int displayType;
 	private boolean alternativeStructure;
+	private String customText;
 	
 	public ShowFlyText(long recieverId, long objectId, String stfFile, String stfString, float scale, RGB color, int displayType) {
 		this.recieverId = recieverId;
@@ -55,7 +56,7 @@ public class ShowFlyText extends ObjControllerObject {
 		this.alternativeStructure = false;
 	}
 	
-	public ShowFlyText(long recieverId, long objectId, int unknownInt1, int unknownShort1, int unknownByte1, int unknownInt2, String stfFile, String stfString, int unknownShort2, float scale, RGB color, int displayType) {
+	public ShowFlyText(long recieverId, long objectId, int unknownInt1, int unknownShort1, int unknownByte1, int unknownInt2, String stfFile, String stfString, String customText, int xp, float scale, RGB color, int displayType) {
 		this.recieverId = recieverId;
 		this.objectId = objectId;
 		this.unknownInt1 = unknownInt1;
@@ -64,7 +65,8 @@ public class ShowFlyText extends ObjControllerObject {
 		this.unknownInt2 = unknownInt2;
 		this.stfFile = stfFile;
 		this.stfString = stfString;
-		this.unknownShort2 = (short) unknownShort2;
+		this.customText = customText;
+		this.xp = (short) xp;
 		this.scale = scale;
 		this.color = color;
 		this.alternativeStructure = true;
@@ -115,8 +117,8 @@ public class ShowFlyText extends ObjControllerObject {
 			result.putLong(0);
 			result.putLong(0);
 			result.putLong(0);
-			result.putInt(0);
-			result.putShort((short) unknownShort2);
+			result.put(getUnicodeString(customText));
+			result.putShort(xp);
 			result.putLong(0);
 			result.putFloat(scale);
 			result.put(color.getBytes());

@@ -97,14 +97,8 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer.put(getAsciiString(creature.getStfName()));
 		if (creature.getCustomName() == null) { creature.setCustomName(""); }//Not all CreatureObjects have CustomName (Shuttles)
 		buffer.put(getUnicodeString(creature.getCustomName()));
-		buffer.putInt(0x000F4240); // unk
-		String factionCRC = creature.getFaction();
-		if(factionCRC == null)
-			buffer.putInt(0);
-		else if(factionCRC.equals("neutral"))
-			buffer.putInt(0);
-		else
-			buffer.putInt(CRC.StringtoCRC(factionCRC));
+		buffer.putInt(0x000F4240); // volume
+		buffer.putInt(CRC.StringtoCRC(creature.getFaction()));
 		
 		buffer.putInt(creature.getFactionStatus());
 		
@@ -545,7 +539,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 
 	}
 
-	public IoBuffer buildSpeedModDelta(float speed) {
+	public IoBuffer buildSpeedModBaseDelta(float speed) {
 		
 		IoBuffer buffer = bufferPool.allocate(4, false).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.putFloat(speed);
@@ -556,6 +550,19 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		return buffer;
 
 	}
+	
+	public IoBuffer buildSpeedModDelta(float speedModifier) {
+		
+		IoBuffer buffer = bufferPool.allocate(4, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putFloat(speedModifier);
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 4, (short) 1, (short) 5, buffer, size + 4);
+		
+		return buffer;
+
+	}
+
 
 	public IoBuffer buildTurnRadiusDelta(float turnRadius) {
 		

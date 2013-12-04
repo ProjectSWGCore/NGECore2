@@ -28,11 +28,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
-
-
-
-
+import net.engio.mbassy.bus.config.BusConfiguration;
 
 import resources.common.RadialOptions;
 import resources.common.ThreadMonitor;
@@ -54,9 +56,11 @@ import services.StaticService;
 import services.TerrainService;
 import services.WeatherService;
 import services.chat.ChatService;
+import services.collections.CollectionService;
 import services.combat.CombatService;
 import services.command.CombatCommand;
 import services.command.CommandService;
+import services.gcw.FactionService;
 import services.gcw.GCWService;
 import services.guild.GuildService;
 import services.map.MapService;
@@ -111,6 +115,7 @@ public class NGECore {
 	public ConnectionService connectionService;
 	public CommandService commandService;
 	public CharacterService characterService;
+	public FactionService factionService;
 	public ObjectService objectService;
 	public MapService mapService;
 	public UpdateService updateService;
@@ -132,6 +137,7 @@ public class NGECore {
 	public SkillModService skillModService;
 	public EquipmentService equipmentService;
 	public TravelService travelService;
+	public CollectionService collectionService;
 	public EntertainmentService entertainmentService;
 	public WeatherService weatherService;
 	
@@ -145,6 +151,8 @@ public class NGECore {
 
 	private ObjectDatabase creatureODB;
 	private ObjectDatabase mailODB;
+	
+	private BusConfiguration eventBusConfig = BusConfiguration.Default(1, new ThreadPoolExecutor(1, 4, 1, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>()));
 
 	
 	public NGECore() {
@@ -188,7 +196,8 @@ public class NGECore {
 		characterService = new CharacterService(this);
 		mapService = new MapService(this);
 		travelService = new TravelService(this);
-
+		
+		factionService = new FactionService(this);
 		objectService = new ObjectService(this);
 		terrainService = new TerrainService(this);
 		updateService = new UpdateService(this);
@@ -226,6 +235,7 @@ public class NGECore {
 		zoneDispatch = new NetworkDispatch(this, true);
 		zoneDispatch.addService(connectionService);
 		zoneDispatch.addService(characterService);
+		zoneDispatch.addService(factionService);
 		zoneDispatch.addService(objectService);
 		zoneDispatch.addService(commandService);
 		zoneDispatch.addService(chatService);
@@ -253,9 +263,7 @@ public class NGECore {
 		terrainService.addPlanet(10, "dathomir", "terrain/dathomir.trn", true);
 		terrainService.addPlanet(11, "mustafar", "terrain/mustafar.trn", true);
 		terrainService.addPlanet(12, "kashyyyk_main", "terrain/kashyyyk_main.trn", true);
-		//terrainService.addPlanet(13, "kaas", "terrain/kaas.trn", true);
-		//terrainService.addPlanet(14, "taanab", "terrain/taanab.trn", true);
-		
+		terrainService.loadClientPois();
 		// Travel Points
 		travelService.loadTravelPoints();
 		simulationService = new SimulationService(this);
@@ -275,6 +283,9 @@ public class NGECore {
 		
 		gcwService = new GCWService(this);
 		zoneDispatch.addService(gcwService);
+		
+		collectionService = new CollectionService(this);
+		zoneDispatch.addService(collectionService);
 
 		tradeService = new TradeService(this);
 		zoneDispatch.addService(tradeService);
@@ -432,5 +443,10 @@ public class NGECore {
 	public static NGECore getInstance() {
 		return instance;
 	}
+	
+	public BusConfiguration getEventBusConfig() {
+		return eventBusConfig;
+	}
+	
 }
 
