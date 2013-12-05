@@ -137,6 +137,26 @@ public class TangibleObject extends SWGObject {
 		this.optionsBitmask = optionsBitmask;
 	}
 	
+	public void setOptions(int options, boolean add) {
+		synchronized(objectMutex) {
+			if (options != 0) {
+				if (add) {
+					addOption(options);
+				} else {
+					removeOption(options);
+				}
+			}
+		}
+	}
+	
+	public void addOption(int option) {
+		setOptionsBitmask(getOptionsBitmask() | option);
+	}
+	
+	public void removeOption(int option) {
+		setOptionsBitmask(getOptionsBitmask() & ~option);
+	}
+	
 	public int getMaxDamage() {
 		return maxDamage;
 	}

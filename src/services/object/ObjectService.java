@@ -76,6 +76,7 @@ import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
 import resources.objects.guild.GuildObject;
+import resources.objects.mission.MissionObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.staticobject.StaticObject;
 import resources.objects.tangible.TangibleObject;
@@ -203,7 +204,11 @@ public class ObjectService implements INetworkDispatch {
 			
 			object = new WaypointObject(objectID, planet, position);
 			
-		}  else {
+		}  else if(Template.startsWith("object/mission")) {
+			
+			object = new MissionObject(objectID, planet, Template);
+			
+		} else {
 			
 			return null;
 			
@@ -214,7 +219,7 @@ public class ObjectService implements INetworkDispatch {
 		object.setAttachment("serverTemplate", ((customServerTemplate != null) ? customServerTemplate : object.getTemplate()));
 		
 		object.setisInSnapshot(isSnapshot);
-		//loadServerTemplate(object);		
+		loadServerTemplate(object);		
 		
 		objectList.put(objectID, object);
 		
@@ -566,32 +571,6 @@ public class ObjectService implements INetworkDispatch {
 			}
 			
 		});
-		
-		/*
-		objControllerOpcodes.put(ObjControllerOpcodes.USE_OBJECT, new INetworkRemoteEvent() {
-
-			@Override
-			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
-				buffer.order(ByteOrder.LITTLE_ENDIAN);
-				
-				CreatureObject creature = (CreatureObject) getObject(buffer.getLong());
-				
-				if (creature == null || creature.getClient() == null) {
-					return;
-				}
-				
-				buffer.skip(4);
-				
-				SWGObject object = getObject(buffer.getLong());
-				
-				if (object == null) {
-					return;
-				}
-				useObject(creature, object);
-			}
-			
-		});
-		*/
 		
 	}
 
