@@ -76,6 +76,7 @@ import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
 import resources.objects.guild.GuildObject;
+import resources.objects.mission.MissionObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.staticobject.StaticObject;
 import resources.objects.tangible.TangibleObject;
@@ -203,7 +204,11 @@ public class ObjectService implements INetworkDispatch {
 			
 			object = new WaypointObject(objectID, planet, position);
 			
-		}  else {
+		}  else if(Template.startsWith("object/mission")) {
+			
+			object = new MissionObject(objectID, planet, Template);
+			
+		} else {
 			
 			return null;
 			

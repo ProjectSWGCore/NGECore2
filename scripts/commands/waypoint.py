@@ -67,6 +67,24 @@ def run(core, actor, target, commandString):
         actorPlayer.waypointAdd(waypoint)
         actor.sendSystemMessage('A waypoint has been created in your datapad at your location.', 0)
         return
+    
+    #/wp planet x z y name
+    elif len(commandArgs) >= 3 and isFloat(commandArgs[2]) and isFloat(commandArgs[3]) and isFloat(commandArgs[4]):
+        waypoint = core.objectService.createObject('object/waypoint/shared_waypoint.iff', core.terrainService.getPlanetByName(commandArgs[1]), float(commandArgs[2]), float(commandArgs[4]), float(commandArgs[3]))
+        waypoint.setActive(True)
+        waypoint.setColor(WaypointObject.BLUE)
+        name = commandString.split(" ", 5)
+        print (name)
+        if name == "":
+            name = "Waypoint"
+
+        waypoint.setName(name[5])
+        waypoint.setPlanetCRC(crc.StringtoCRC(actor.getPlanet().getName()))
+        actorPlayer.getWaypoints().add(waypoint)
+        actorPlayer.waypointAdd(waypoint)
+        actor.sendSystemMessage('A waypoint has been created in your datapad at your location.', 0)
+        return
+    
     #/wp NAME
     else:
         waypoint = core.objectService.createObject('object/waypoint/shared_waypoint.iff', actor.getPlanet(), actor.getWorldPosition().x, actor.getWorldPosition().z, actor.getWorldPosition().y)
