@@ -45,7 +45,6 @@ import engine.clients.Client;
 import resources.objects.Buff;
 import resources.objects.DamageOverTime;
 import resources.objects.SWGList;
-import engine.resources.common.CRC;
 import engine.resources.objects.IPersistent;
 import engine.resources.objects.MissionCriticalObject;
 import engine.resources.objects.SWGObject;
@@ -56,7 +55,7 @@ import engine.resources.scene.Quaternion;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 
-@Entity(version=2)
+@Entity(version=3)
 public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	@NotPersistent
@@ -131,6 +130,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private SWGList<Buff> buffList  = new SWGList<Buff>();
 	@NotPersistent
 	private int buffListUpdateCounter = 0;
+	private byte difficulty = 0;
 	private SWGList<SWGObject> appearanceEquipmentList;
 	@NotPersistent
 	private int appearanceEquipmentListUpdateCounter = 0;
@@ -1319,6 +1319,20 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	public void setPvpStatus(int pvpBitmask, boolean add) {
 		super.setPvpStatus(pvpBitmask, add);
 		notifyObservers(new UpdatePVPStatusMessage(getObjectID(), getPvPBitmask(), getFaction()), false);
+	}
+	
+	public byte getDifficulty() {
+		synchronized(objectMutex) {
+			return difficulty;
+		}
+	}
+	
+	public void setDifficulty(byte difficulty) {
+		synchronized(objectMutex) {
+			this.difficulty = difficulty;
+		}
+		
+		notifyObservers(messageBuilder.buildDifficultyDelta(difficulty), true);
 	}
 	
 }

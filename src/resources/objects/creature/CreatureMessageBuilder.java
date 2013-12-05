@@ -366,8 +366,9 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 			buffer.putInt(1);
 				
 		}
-				
-		buffer.putShort((short) 0);
+		
+		buffer.put((byte) 0);
+		buffer.put(creature.getDifficulty());
 		buffer.putInt(0xFFFFFFFF);
 		buffer.put((byte) 1);
 		buffer.putShort((short) 0);
@@ -980,6 +981,15 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer = createDelta("CREO", (byte) 3, (short) 1, (short) 2, buffer, size + 4);
 		return buffer;
 		
+	}
+	
+	public IoBuffer buildDifficultyDelta(byte difficulty) {
+		IoBuffer buffer = bufferPool.allocate(1, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.put(difficulty);
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x1C, buffer, size + 4);
+		return buffer;
 	}
 	
 	@Override
