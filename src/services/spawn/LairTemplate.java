@@ -21,33 +21,25 @@
  ******************************************************************************/
 package services.spawn;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import engine.resources.scene.Planet;
-import engine.resources.scene.Point3D;
-import main.NGECore;
+public class LairTemplate {
+	
+	private String lairCRC;
+	private String mobileName;
 
-public class SpawnService {
-
-	private NGECore core;
-	private Map<Planet, List<SpawnArea>> spawnAreas = new ConcurrentHashMap<Planet, List<SpawnArea>>();
-	
-	public SpawnService(NGECore core) {
-		
-	}	
-	
-	public void spawnCreature(String template, float x, float y, float z) {
-		spawnCreature(template, new Point3D(x, y, z));
-	}
-	
-	public void spawnCreature(String template, Point3D position) {
-		
-	}
-	
-	public void spawnLair(LairTemplate lairTemplate, Planet planet, Point3D position, int level) {
-		
+	public String getLairCRC() {
+		return lairCRC;
 	}
 
-	
+	public void setLairCRC(String lairCRC) {
+		this.lairCRC = lairCRC;
+	}
+
+	public String getMobileName() {
+		return mobileName;
+	}
+
+	public void setMobileName(String mobileName) {
+		this.mobileName = mobileName;
+	}
+
 }

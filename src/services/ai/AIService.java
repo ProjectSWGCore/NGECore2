@@ -36,13 +36,6 @@ public class AIService {
 		this.core = core;
 	}
 	
-	public void spawnCreature(String template, float x, float y, float z) {
-		spawnCreature(template, new Point3D(x, y, z));
-	}
-	
-	public void spawnCreature(String template, Point3D position) {
-		
-	}
 	
 
 }

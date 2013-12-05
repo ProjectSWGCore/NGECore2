@@ -21,6 +21,28 @@
  ******************************************************************************/
 package services.spawn;
 
+import net.engio.mbassy.listener.Handler;
+import resources.common.collidables.AbstractCollidable;
+import resources.common.collidables.AbstractCollidable.EnterEvent;
+import resources.common.collidables.AbstractCollidable.ExitEvent;
+import engine.resources.scene.Planet;
+
 public class DynamicSpawnArea extends SpawnArea {
+
+	public DynamicSpawnArea(Planet planet, AbstractCollidable area) {
+		super(planet, area);
+	}
+
+	@Override
+	@Handler
+	public void onEnter(EnterEvent event) {
+		
+	}
+
+	@Override
+	@Handler
+	public void onExit(ExitEvent event) {
+		
+	}
 
 }
