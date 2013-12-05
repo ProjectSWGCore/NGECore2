@@ -5,5 +5,7 @@ def createRadial(core, owner, target, radials):
 	return
 	
 def handleSelection(core, owner, target, option):
+	if option == 21 and target:
+		core.objectService.useObject(owner, target)
 	return
 	

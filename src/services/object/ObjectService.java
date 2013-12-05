@@ -219,7 +219,7 @@ public class ObjectService implements INetworkDispatch {
 		object.setAttachment("serverTemplate", ((customServerTemplate != null) ? customServerTemplate : object.getTemplate()));
 		
 		object.setisInSnapshot(isSnapshot);
-		//loadServerTemplate(object);		
+		loadServerTemplate(object);		
 		
 		objectList.put(objectID, object);
 		
@@ -571,32 +571,6 @@ public class ObjectService implements INetworkDispatch {
 			}
 			
 		});
-		
-		/*
-		objControllerOpcodes.put(ObjControllerOpcodes.USE_OBJECT, new INetworkRemoteEvent() {
-
-			@Override
-			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
-				buffer.order(ByteOrder.LITTLE_ENDIAN);
-				
-				CreatureObject creature = (CreatureObject) getObject(buffer.getLong());
-				
-				if (creature == null || creature.getClient() == null) {
-					return;
-				}
-				
-				buffer.skip(4);
-				
-				SWGObject object = getObject(buffer.getLong());
-				
-				if (object == null) {
-					return;
-				}
-				useObject(creature, object);
-			}
-			
-		});
-		*/
 		
 	}
 

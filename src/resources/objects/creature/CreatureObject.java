@@ -278,12 +278,24 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 
 	}
 	
+	public void setOptions(int options, boolean add) {
+		synchronized(objectMutex) {
+			if (options != 0) {
+				if (add) {
+					addOption(options);
+				} else {
+					removeOption(options);
+				}
+			}
+		}
+	}
+	
 	public void addOption(int option) {
-		setOptionsBitmask(getOptionsBitmask() & option);
+		setOptionsBitmask(getOptionsBitmask() | option);
 	}
 	
 	public void removeOption(int option) {
-		setOptionsBitmask(getOptionsBitmask() |~ option);
+		setOptionsBitmask(getOptionsBitmask() & ~option);
 	}
 
 	public byte getPosture() {
