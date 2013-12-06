@@ -219,7 +219,7 @@ public class ObjectService implements INetworkDispatch {
 		object.setAttachment("serverTemplate", ((customServerTemplate != null) ? customServerTemplate : object.getTemplate()));
 		
 		object.setisInSnapshot(isSnapshot);
-		loadServerTemplate(object);		
+		//loadServerTemplate(object);		
 		
 		objectList.put(objectID, object);
 		
@@ -351,18 +351,6 @@ public class ObjectService implements INetworkDispatch {
 			}
 		}
 		
-		if (object instanceof CreatureObject) {
-			if (core.factionService.getFactionMap().containsKey(((CreatureObject) object).getFaction())) {
-				if (FileUtilities.doesFileExist(filePath)) {
-					PyObject method = core.scriptService.getMethod("scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", ""), object.getTemplate().split("shared_" , 2)[1].replace(".iff", ""), "destroy");
-					
-					if (method != null && method.isCallable()) {
-						method.__call__(Py.java2py(core), Py.java2py(((TangibleObject) object).getKiller()), Py.java2py(object));
-					}
-				}
-			}
-		}
-		
 		if (object == null) {
 			return;
 		}
@@ -456,10 +444,16 @@ public class ObjectService implements INetworkDispatch {
 		String filePath = "scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", "") + object.getTemplate().split("shared_" , 2)[1].replace(".iff", "") + ".py";
 		
 		if (FileUtilities.doesFileExist(filePath)) {
-			PyObject method = core.scriptService.getMethod("scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", ""), object.getTemplate().split("shared_" , 2)[1].replace(".iff", ""), "useObject");
+			filePath = "scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", "");
+			String fileName = object.getTemplate().split("shared_" , 2)[1].replace(".iff", "");
 			
-			if (method != null && method.isCallable()) {
-				method.__call__(Py.java2py(core), Py.java2py(creature), Py.java2py(object));
+			PyObject method1 = core.scriptService.getMethod("scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", ""), object.getTemplate().split("shared_" , 2)[1].replace(".iff", ""), "use");
+			PyObject method2 = core.scriptService.getMethod("scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", ""), object.getTemplate().split("shared_" , 2)[1].replace(".iff", ""), "useObject");
+			
+			if (method1 != null && method1.isCallable()) {
+				method1.__call__(Py.java2py(core), Py.java2py(creature), Py.java2py(object));
+			} else if (method2 != null && method2.isCallable()) {
+				method2.__call__(Py.java2py(core), Py.java2py(creature), Py.java2py(object));
 			}
 		}
 	}

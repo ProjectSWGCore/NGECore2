@@ -143,7 +143,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private SWGList<DamageOverTime> dotList = new SWGList<DamageOverTime>();
 	@NotPersistent
 	private ScheduledFuture<?> incapTask;
-
+	
 	private boolean staticNPC = false; // temp
 	
 	public CreatureObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
