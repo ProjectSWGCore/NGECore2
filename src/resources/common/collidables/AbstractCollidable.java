@@ -24,10 +24,12 @@ package resources.common.collidables;
 import java.util.Vector;
 
 import main.NGECore;
+import net.engio.mbassy.bus.SyncMessageBus;
 
 import org.python.core.Py;
 import org.python.core.PyObject;
 
+import engine.resources.common.Event;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -37,6 +39,7 @@ public abstract class AbstractCollidable {
 	private PyObject callback;
 	public Vector<SWGObject> collidedObjects = new Vector<SWGObject>();
 	private Planet planet;
+	private SyncMessageBus<Event> eventBus = new SyncMessageBus<Event>(NGECore.getInstance().getEventBusConfig());
 
 	public abstract boolean doesCollide(SWGObject obj);
 	public abstract boolean doesCollide(Point3D position);
@@ -51,10 +54,16 @@ public abstract class AbstractCollidable {
 	
 	public void addCollidedObject(SWGObject obj) {
 		collidedObjects.add(obj);
+		EnterEvent event = new EnterEvent();
+		event.object = obj;
+		eventBus.publish(event);
 	}
 	
 	public void removeCollidedObject(SWGObject obj) {
 		collidedObjects.remove(obj);
+		ExitEvent event = new ExitEvent();
+		event.object = obj;
+		eventBus.publish(event);
 	}
 
 	public boolean isInCollisionList(SWGObject obj) {
@@ -82,4 +91,20 @@ public abstract class AbstractCollidable {
 		this.planet = planet;
 	}
 	
+	public SyncMessageBus<Event> getEventBus() {
+		return eventBus;
+	}
+	
+	public class EnterEvent implements Event {
+		public SWGObject object;
+	}
+
+	public class ExitEvent implements Event {
+		public SWGObject object;
+	}
+	
+	public abstract Point3D getRandomPosition(Point3D origin, float minDistance, float maxDistance);
+	public abstract Point3D getRandomPosition();
+	
+
 }

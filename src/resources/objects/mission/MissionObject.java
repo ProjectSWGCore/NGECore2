@@ -36,11 +36,6 @@ import engine.resources.scene.Quaternion;
 
 public class MissionObject extends SWGObject implements IPersistent {
 
-	private String stfName;
-	private String customName;
-	private int volume;
-
-	private float missionComplexity;
 	private float missionDestinationX;
 	private float missionDestinationY;
 	private float missionDestinationZ;
@@ -73,85 +68,41 @@ public class MissionObject extends SWGObject implements IPersistent {
 	public MissionObject(long objectID, Planet planet, String template) {
 		super(objectID, planet, new Point3D(0, 0, 0), new Quaternion(1, 0, 0, 0), template);
 	}
-	
-	public String getStfName() {
-		return stfName;
-	}
-
-	public void setStfName(String stfName) {
-		this.stfName = stfName;
-	}
-
-	public String getCustomName() {
-		return customName;
-	}
-
-	public void setCustomName(String customName) {
-		this.customName = customName;
-	}
-
-	public int getVolume() {
-		return volume;
-	}
-
-	public void setVolume(int volume) {
-		this.volume = volume;
-	}
-
-	public float getMissionComplexity() {
-		return missionComplexity;
-	}
-
-	public void setMissionComplexity(float missionComplexity) {
-		this.missionComplexity = missionComplexity;
-	}
 
 	public float getMissionStartX() {
 		return missionStartX;
-	}
-
-	public void setMissionStartX(float missionStartX) {
-		this.missionStartX = missionStartX;
 	}
 
 	public float getMissionStartY() {
 		return missionStartY;
 	}
 
-	public void setMissionStartY(float missionStartY) {
-		this.missionStartY = missionStartY;
-	}
-
 	public float getMissionStartZ() {
 		return missionStartZ;
 	}
 
-	public void setMissionStartZ(float missionStartZ) {
-		this.missionStartZ = missionStartZ;
+	public void setMissionStart(float x, float y, float z) {
+		this.missionStartZ = z;
+		this.missionStartX = x;
+		this.missionStartY = y;
 	}
 
 	public float getMissionDestinationX() {
 		return missionDestinationX;
 	}
 
-	public void setMissionDestinationX(float missionDestinationX) {
-		this.missionDestinationX = missionDestinationX;
-	}
-
 	public float getMissionDestinationY() {
 		return missionDestinationY;
-	}
-
-	public void setMissionDestinationY(float missionDestinationY) {
-		this.missionDestinationY = missionDestinationY;
 	}
 
 	public float getMissionDestinationZ() {
 		return missionDestinationZ;
 	}
 
-	public void setMissionDestinationZ(float missionDestinationZ) {
-		this.missionDestinationZ = missionDestinationZ;
+	public void setMissionDestination(float x, float y, float z) {
+		this.missionDestinationZ = z;
+		this.missionDestinationY = y;
+		this.missionDestinationZ = z;
 	}
 
 	public String getMissionDestinationPlanet() {

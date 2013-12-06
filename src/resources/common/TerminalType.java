@@ -19,35 +19,12 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package services.spawn;
+package resources.common;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import engine.resources.scene.Planet;
-import engine.resources.scene.Point3D;
-import main.NGECore;
-
-public class SpawnService {
-
-	private NGECore core;
-	private Map<Planet, List<SpawnArea>> spawnAreas = new ConcurrentHashMap<Planet, List<SpawnArea>>();
-	
-	public SpawnService(NGECore core) {
-		
-	}	
-	
-	public void spawnCreature(String template, float x, float y, float z) {
-		spawnCreature(template, new Point3D(x, y, z));
-	}
-	
-	public void spawnCreature(String template, Point3D position) {
-		
-	}
-	
-	public void spawnLair(LairTemplate lairTemplate, Planet planet, Point3D position, int level) {
-		
-	}
-
-	
+public class TerminalType {
+	public static int MISSION_GENERIC = 1;
+	public static int MISSION_BOUNTYHUNTER = 2;
+	public static int MISSION_ENTERTAINER = 3;
+	public static int MISSION_ARTISAN  = 4;
+	public static int MISSION_EXPLORER = 5;
 }

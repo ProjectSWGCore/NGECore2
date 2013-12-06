@@ -114,11 +114,14 @@ public class TravelService implements INetworkDispatch {
 							Vector<TravelPoint> correctTravelPoints = new Vector<TravelPoint>();
 							
 							for(TravelPoint tp : travelMap.get(planet)) {
-								if(tp.isStarport() || tp.getPlanetName().equalsIgnoreCase(object.getPlanet().getName()))
+								if(tp.isStarport() || tp.getPlanetName().equalsIgnoreCase(object.getPlanet().getName())) {
 									correctTravelPoints.add(tp);
+									Console.println(tp.getName());
+								}
 							}
 							PlanetTravelPointListResponse response = new PlanetTravelPointListResponse(planetString, correctTravelPoints);
 							client.getSession().write(response.serialize());
+							
 							break;
 							
 						} 

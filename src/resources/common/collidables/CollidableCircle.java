@@ -21,6 +21,8 @@
  ******************************************************************************/
 package resources.common.collidables;
 
+import java.util.Random;
+
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -79,5 +81,27 @@ public class CollidableCircle extends AbstractCollidable {
 		} else {
 			return center.getDistance(position) <= radius;
 		}
+	}
+
+	@Override
+	public Point3D getRandomPosition(Point3D origin, float minDistance, float maxDistance) {
+		
+		Random random = new Random();
+		float distance = random.nextInt((int) (maxDistance - minDistance) + 1) + minDistance;
+		float angle = (float) (random.nextInt(360) * (Math.PI / 180));
+		
+		return new Point3D((float) (origin.x + distance * Math.cos(angle)), 0, (float) (origin.z + distance * Math.sin(angle)));
+		
+	}
+
+	@Override
+	public Point3D getRandomPosition() {
+		
+		Random random = new Random();
+		float distance = random.nextInt((int) radius);
+		float angle = (float) (random.nextInt(360) * (Math.PI / 180));
+		
+		return new Point3D((float) (center.x + distance * Math.cos(angle)), 0, (float) (center.z + distance * Math.sin(angle)));
+		
 	}
 }

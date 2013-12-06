@@ -21,33 +21,45 @@
  ******************************************************************************/
 package services.spawn;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import engine.resources.scene.Planet;
-import engine.resources.scene.Point3D;
-import main.NGECore;
+public class LairSpawnTemplate {
+	
+	private int maxSpawnLimit;
+	private LairTemplate lairTemplate;
+	private int minLevel;
+	private int maxLevel;
 
-public class SpawnService {
-
-	private NGECore core;
-	private Map<Planet, List<SpawnArea>> spawnAreas = new ConcurrentHashMap<Planet, List<SpawnArea>>();
-	
-	public SpawnService(NGECore core) {
-		
-	}	
-	
-	public void spawnCreature(String template, float x, float y, float z) {
-		spawnCreature(template, new Point3D(x, y, z));
-	}
-	
-	public void spawnCreature(String template, Point3D position) {
-		
-	}
-	
-	public void spawnLair(LairTemplate lairTemplate, Planet planet, Point3D position, int level) {
-		
+	public int getMaxSpawnLimit() {
+		return maxSpawnLimit;
 	}
 
+	public void setMaxSpawnLimit(int maxSpawnLimit) {
+		this.maxSpawnLimit = maxSpawnLimit;
+	}
+
+	public LairTemplate getLairTemplate() {
+		return lairTemplate;
+	}
+
+	public void setLairTemplate(LairTemplate lairTemplate) {
+		this.lairTemplate = lairTemplate;
+	}
+
+	public int getMinLevel() {
+		return minLevel;
+	}
+
+	public void setMinLevel(int minLevel) {
+		this.minLevel = minLevel;
+	}
+
+	public int getMaxLevel() {
+		return maxLevel;
+	}
+
+	public void setMaxLevel(int maxLevel) {
+		this.maxLevel = maxLevel;
+	}
 	
+	
+
 }

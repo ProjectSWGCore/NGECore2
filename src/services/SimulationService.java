@@ -42,6 +42,7 @@ import engine.clientdata.visitors.MeshVisitor;
 import engine.clientdata.visitors.PortalVisitor;
 import engine.clientdata.visitors.PortalVisitor.Cell;
 import engine.clients.Client;
+import engine.resources.common.Event;
 import engine.resources.common.Mesh3DTriangle;
 import engine.resources.common.Ray;
 import engine.resources.objects.SWGObject;
@@ -956,6 +957,12 @@ public class SimulationService implements INetworkDispatch {
 		for(AbstractCollidable collidable : collidables) {
 			collidable.doCollisionCheck(object);
 		}
+	}
+	
+	public class MoveEvent implements Event {
+		
+		public SWGObject object;
+		
 	}
 
 }

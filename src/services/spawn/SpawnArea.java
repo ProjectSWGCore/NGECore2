@@ -21,11 +21,30 @@
  ******************************************************************************/
 package services.spawn;
 
+import java.util.Vector;
+
+import net.engio.mbassy.listener.Handler;
+
+import resources.common.collidables.AbstractCollidable;
+import resources.common.collidables.AbstractCollidable.EnterEvent;
+import resources.common.collidables.AbstractCollidable.ExitEvent;
+
+import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
+import engine.resources.scene.Point3D;
 
 public abstract class SpawnArea {
 	
 	private Planet planet;
+	private Vector<String> templates;
+	private AbstractCollidable area;
+	private Vector<SWGObject> observers = new Vector<SWGObject>();
+	
+	public SpawnArea(Planet planet, AbstractCollidable area) {
+		this.planet = planet;
+		this.area = area;
+		area.getEventBus().subscribe(this);
+	}
 
 	public Planet getPlanet() {
 		return planet;
@@ -35,4 +54,58 @@ public abstract class SpawnArea {
 		this.planet = planet;
 	}
 
+	public Vector<String> getTemplates() {
+		return templates;
+	}
+
+	public void setTemplates(Vector<String> templates) {
+		this.templates = templates;
+	}
+
+	public AbstractCollidable getArea() {
+		return area;
+	}
+
+	public void setArea(AbstractCollidable area) {
+		this.area = area;
+	}
+	
+	@Handler
+	public abstract void onEnter(EnterEvent event);
+	@Handler
+	public abstract void onExit(ExitEvent event);
+
+	public Vector<SWGObject> getObservers() {
+		return observers;
+	}
+	
+	public Point3D getRandomPosition() {
+		
+		int tries = 0;
+		
+		while(tries++ < 10) {
+			Point3D randomPos = area.getRandomPosition();
+			if(area.doesCollide(randomPos))
+				return randomPos;
+		}
+		
+		return null;
+		
+	}
+	
+	public Point3D getRandomPosition(Point3D origin, float minDistance, float maxDistance) {
+		
+		int tries = 0;
+		
+		while(tries++ < 10) {
+			Point3D randomPos = area.getRandomPosition(origin, minDistance, maxDistance);
+			if(area.doesCollide(randomPos))
+				return randomPos;
+		}
+		
+		return null;
+		
+	}
+
+	
 }
