@@ -55,7 +55,7 @@ import engine.resources.scene.Quaternion;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 
-@Entity(version=5)
+@Entity(version=6)
 public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	@NotPersistent
