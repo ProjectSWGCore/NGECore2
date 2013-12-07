@@ -888,7 +888,7 @@ public class CombatService implements INetworkDispatch {
 		if(healer.getSkillMod("expertise_healing_line_sp_heal") != null)
 			healPotency += healer.getSkillMod("expertise_healing_line_sp_heal").getBase();
 		if(healPotency > 0)
-			healAmount += (healAmount * (healPotency / 100));
+			healAmount += ((healAmount * healPotency) / 100);
 		if(target.getSkillMod("expertise_healing_reduction") != null)
 			healAmount *= (1 - target.getSkillMod("expertise_healing_reduction").getBase() / 100);
 		
