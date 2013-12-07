@@ -25,7 +25,7 @@ def doStimDrop(core, actor):
     return
 
 def spawnCrate(core, actor, shuttle):
-    crate = core.staticService.spawnObject('object/tangible/container/loot/shared_npe_loot_crate_low.iff', shuttle.getPlanet().getName(), long(0), shuttle.getPosition().x, shuttle.getPosition().y, shuttle.getPosition().z, shuttle.getOrientation().y, shuttle.getOrientation().w)
+    crate = core.staticService.spawnObject('object/tangible/container/drum/shared_supply_drop_crate.iff', shuttle.getPlanet().getName(), long(0), shuttle.getPosition().x, shuttle.getPosition().y, shuttle.getPosition().z, shuttle.getOrientation().y, shuttle.getOrientation().w)
     crate.setCustomName('Supply Crate')
 	
     group = core.objectService.getObject(actor.getGroupId())
@@ -37,7 +37,7 @@ def spawnCrate(core, actor, shuttle):
 	
     if actor.hasSkill('expertise_of_tactical_sup_1'):
         for i in range(0, 8):
-            tactical = core.objectService.createObject('object/tangible/medicine/instant_stimpack/shared_stimpack_syren.iff', actor.getPlanet()) #FIXME: Use the correct template
+            tactical = core.objectService.createObject('object/tangible/loot/generic_usable/shared_stim_syringe_generic.iff', actor.getPlanet()) #FIXME: Use the correct template
             tactical.setCustomName('Tactical Serum A')
             crate.add(tactical)
     
