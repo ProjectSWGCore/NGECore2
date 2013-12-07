@@ -36,6 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import resources.common.*;
@@ -740,5 +741,24 @@ public class ObjectService implements INetworkDispatch {
 		
 	}
 
-	
+	public int objsInContainer(SWGObject owner, TangibleObject container) {
+		if (owner == null) {
+			Console.println("Owner null!");
+		}
+		if (container == null) {
+			Console.println("Container is null!");
+		}
+		final AtomicInteger count = new AtomicInteger();
+		
+		container.viewChildren(owner, false, false, new Traverser() {
+
+			@Override
+			public void process(SWGObject child) {
+				count.getAndIncrement();
+			}
+			
+		});
+		
+		return count.get();
+	}
 }

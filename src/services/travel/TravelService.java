@@ -116,7 +116,7 @@ public class TravelService implements INetworkDispatch {
 							for(TravelPoint tp : travelMap.get(planet)) {
 								if(tp.isStarport() || tp.getPlanetName().equalsIgnoreCase(object.getPlanet().getName())) {
 									correctTravelPoints.add(tp);
-									Console.println(tp.getName());
+									//Console.println(tp.getName());
 								}
 							}
 							PlanetTravelPointListResponse response = new PlanetTravelPointListResponse(planetString, correctTravelPoints);
@@ -367,7 +367,7 @@ public class TravelService implements INetworkDispatch {
 			for (int f = 0; f < travelFares.getRowCount(); f++) {
 				Planet planet = core.terrainService.getPlanetByName((String) travelFares.getObject(f, 0));
 				if (travelMap.containsKey(planet)) {
-					int corellia = ((Integer) travelFares.getObject(f, 1));
+					int corellia = ((int) travelFares.getObject(f, 1));
 					int dantooine = ((int) travelFares.getObject(f, 2));
 					int dathomir = ((int) travelFares.getObject(f, 3));
 					int endor = ((int) travelFares.getObject(f, 4));

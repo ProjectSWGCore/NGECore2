@@ -37,6 +37,7 @@ import engine.clients.Client;
 import engine.resources.common.CRC;
 import engine.resources.container.CreatureContainerPermissions;
 import engine.resources.container.CreaturePermissions;
+import engine.resources.container.Traverser;
 import engine.resources.database.DatabaseConnection;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
@@ -44,7 +45,6 @@ import engine.resources.scene.Quaternion;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import resources.common.*;
-
 import protocol.swg.ClientCreateCharacter;
 import protocol.swg.ClientMfdStatusUpdateMessage;
 import protocol.swg.ClientRandomNameRequest;
@@ -53,8 +53,8 @@ import protocol.swg.ClientVerifyAndLockNameRequest;
 import protocol.swg.ClientVerifyAndLockNameResponse;
 import protocol.swg.CreateCharacterSuccess;
 import protocol.swg.HeartBeatMessage;
-
 import resources.objects.creature.CreatureObject;
+import resources.objects.mission.MissionObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
@@ -264,6 +264,14 @@ public class CharacterService implements INetworkDispatch {
 				object._add(datapad);
 				object._add(bank);
 				object._add(missionBag);
+				
+				/*for(int missionsAdded = 0; missionsAdded < 12; missionsAdded++) {
+					MissionObject mission = (MissionObject) core.objectService.createObject("object/mission/shared_mission_object.iff", object.getPlanet());
+
+					missionBag._add(mission);
+					Console.println("Added empty mission " + missionsAdded);
+				}*/
+				
 				TangibleObject backpack = (TangibleObject) core.objectService.createObject("object/tangible/wearables/backpack/shared_backpack_galactic_marine.iff", object.getPlanet());
 				inventory._add(backpack);
 				//object.addObjectToEquipList(datapad);
