@@ -405,11 +405,21 @@ public class CombatService implements INetworkDispatch {
 	
 	private void sendHealPackets(CreatureObject attacker, CreatureObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {
 		
+		float cooldown = 0;
+
 		CombatAction combatAction = new CombatAction(CRC.StringtoCRC(command.getDefaultAnimations()[0]), attacker.getObjectID(), weapon.getObjectID(), target.getObjectID(), command.getCommandCRC());
 		ObjControllerMessage objController = new ObjControllerMessage(0x1B, combatAction);
 		attacker.notifyObserversInRange(objController, true, 125);
 		
-		StartTask startTask = new StartTask(actionCounter, attacker.getObjectID(), command.getCommandCRC(), CRC.StringtoCRC(command.getCooldownGroup()), command.getCooldown());
+		cooldown = command.getCooldown();
+		System.out.println(cooldown);
+		
+		if(attacker.getSkillMod("expertise_cooldown_line_of_heal") != null)
+			cooldown -= attacker.getSkillMod("expertise_cooldown_line_of_heal").getBase();
+		if(attacker.getSkillMod("expertise_cooldown_line_sh") != null)
+			cooldown -= ((attacker.getSkillMod("expertise_cooldown_line_sh").getBase())/10);	
+		
+		StartTask startTask = new StartTask(actionCounter, attacker.getObjectID(), command.getCommandCRC(), CRC.StringtoCRC(command.getCooldownGroup()), cooldown);
 		ObjControllerMessage objController2 = new ObjControllerMessage(0x0B, startTask);
 		attacker.getClient().getSession().write(objController2.serialize());
 		
