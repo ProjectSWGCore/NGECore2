@@ -12,23 +12,28 @@ def setup():
 def run(core, actor, target, commandString):
     
     entSvc = core.entertainmentService
+    global actorObject
+    global coreObject
+    global availableDances
+    global suiWindow
+    actorObject = actor
+    coreObject = core
 
     if len(commandString) > 0:
         params = commandString.split(" ")
-        startDance(core, actor, params[0])
+        startDance(core, actor, params[0], 0)
         return
     else:
 
-        available_dances = entSvc.getAvailableDances(actor)
+        availableDances = entSvc.getAvailableDances(actor)
+        print availableDances
 
         suiSvc = core.suiService
-        suiWindow = suiSvc.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "@performance:select_dance", "@performance:available_dances", available_dances, actor, actor, 10)
+        suiWindow = suiSvc.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "@performance:select_dance", "@performance:available_dances", availableDances, actor, None, 10)
 
-        returnParams = Vector()
-        returnParams.add('btnOk:Text')
-        returnParams.add('btnCancel:Text')
-        suiWindow.addHandler(0, '', Trigger.TRIGGER_OK, returnParams, handleStartdance)
-        suiWindow.addHandler(1, '', Trigger.TRIGGER_CANCEL, returnParams, handleStartdance)
+        returnList = Vector()
+        returnList.add("List.lstList:SelectedRow")
+        suiWindow.addHandler(0, '', Trigger.TRIGGER_OK, returnList, handleStartdance)
         
         suiSvc.openSUIWindow(suiWindow)
         return
@@ -36,40 +41,56 @@ def run(core, actor, target, commandString):
 
 
 def handleStartdance(core, owner, eventType, returnList):
+
+    item = suiWindow.getMenuItems().get(int(returnList.get(0)))
+
+    if not item:
+      return
+        
+    #if eventType == 0:
+    startDance(coreObject, actorObject, '', int(item.getObjectId()))
     return
 
-def startDance(core, actor, danceName):
+def startDance(core, actor, danceName, visual):
 
     entSvc = core.entertainmentService
 
-    if not entSvc.isDance(danceName):
+    if visual <= 0:
+      visual = entSvc.getDanceVisualId(danceName)
+
+    if visual <= 0:
+      return
+
+    if not entSvc.isDance(visual):
       actor.sendSystemMessage('@performance:dance_unknown_self',0)
       return
 
-    if not entSvc.canDance(actor, danceName):
+    if not entSvc.canDance(actor, visual):
       actor.sendSystemMessage('@performance:dance_lack_skill_self',0)
       return
-    return
 
     if actor.getPerformanceId() > 0:
       actor.sendSystemMessage('@performance:already_performing_self',0)
       return
 
-    performance = entSvc.getPerformance(danceName)
-    #TODO: check costume, posture, etc
+    #TODO: check costume, posture, etc?
 
-    actor.sendSystemMessage('@performance:dance_start_self');
+    actor.sendSystemMessage('@performance:dance_start_self',0);
     actor.notifyAudience('@performance:dance_start_other');
 
+    danceVisual = 'dance_' + str(visual)
+
     if not actor.getPerformanceWatchee():
-      #this also needs to notify the client with a delta4
+      #this also notifies the client with a delta4
       actor.setPerformanceWatchee(actor)
-   
+  
     #this should send a CREO3 
     actor.setPosture(0x09);
+
+    dance = entSvc.getDance(visual)
+
     # send CREO6 here
     # second param is some sort of counter or start tick
-    actor.startPerformance(performance.getLineNumber(), 0xCDCC4C3C, 'dance_' . performance.getVisualId true)
+    actor.startPerformance(dance.getLineNumber(), -842249156 , danceVisual, 1)
 
-   
-
+    return

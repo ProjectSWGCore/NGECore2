@@ -216,6 +216,9 @@ public class EntertainmentService implements INetworkDispatch {
 
 	private void registerCommands() {
 		core.commandService.registerCommand("startdance");
+		core.commandService.registerCommand("stopdance");
+		core.commandService.registerCommand("flourish");
+		core.commandService.registerCommand("bandflourish");
 	}
 	
 	public void giveInspirationBuff(SWGObject reciever, Vector<BuffItem> buffVector) {
@@ -242,20 +245,27 @@ public class EntertainmentService implements INetworkDispatch {
 		
 	}
 	
+	public int getDanceVisualId(String danceName) {
+		Performance p = performances.get(danceName);
+		
+		//if 0 , then it's no dance. need to handle that in the script.
+		return p.getDanceVisualId();
+	}
+	
 	public Map<Long,String> getAvailableDances(CreatureObject actor) {
 		
 		Map<Long,String> dances = new HashMap<Long, String>();
 		for (int index : danceMap.keySet()) {
 			if (!canDance(actor, danceMap.get(index) )) { continue; }
-			dances.put( new Long(index), danceMap.get(index).getPerformanceName() );
+			dances.put( new Long( danceMap.get(index).getDanceVisualId()  ), danceMap.get(index).getPerformanceName() );
 		}
 		
 		return dances;
 		
 	}
 	
-	public boolean isDance(String danceName) {
-		return ( performances.get(danceName) != null && performances.get(danceName).getType() ==  -1788534963);
+	public boolean isDance(int visualId) {
+		return ( danceMap.get(visualId) != null ) ;
 	}
 	
 	public boolean canDance(CreatureObject actor, Performance dance) {
@@ -265,9 +275,13 @@ public class EntertainmentService implements INetworkDispatch {
 		return false;
 	}
 	
-	public boolean canDance(CreatureObject actor, String danceName) {
-		if (!isDance(danceName)) { return false; }
-		return canDance(actor, performances.get(danceName));
+	public boolean canDance(CreatureObject actor, int visualId) {
+		if (!isDance(visualId)) { return false; }
+		return canDance(actor, danceMap.get(visualId));
+	}
+
+	public Performance getDance(int visualId) {
+		return danceMap.get(visualId);
 	}
 	
 	public Performance getPerformance(String name) {

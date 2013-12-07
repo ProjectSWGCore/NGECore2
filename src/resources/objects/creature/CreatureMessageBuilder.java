@@ -1000,7 +1000,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer.putInt(performanceId);
 		int size = buffer.position();
 		buffer.flip();
-		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 2, buffer, size + 4);
+		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x14, buffer, size + 4);
 		return buffer;	
 	}
 
@@ -1009,15 +1009,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer.putInt(performanceCounter);
 		int size = buffer.position();
 		buffer.flip();
-		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 2, buffer, size + 4);
-		return buffer;	
-	}
-
-	public IoBuffer buildSkillName(String skillName) {
-		IoBuffer buffer = bufferPool.allocate(getUnicodeString(skillName).length, false).order(ByteOrder.LITTLE_ENDIAN);
-		int size = buffer.position();
-		buffer.flip();
-		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 2, buffer, size + 4);
+		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x13, buffer, size + 4);
 		return buffer;	
 	}
 
@@ -1026,7 +1018,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer.put((byte) ((doStart) ? 1 : 0));
 		int size = buffer.position();
 		buffer.flip();
-		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 2, buffer, size + 4);
+		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x1B, buffer, size + 4);
 		return buffer;	
 	}
 	
