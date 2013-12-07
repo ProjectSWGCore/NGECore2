@@ -36,20 +36,20 @@ def run(core, actor, target, commandString):
     if flourish == 9:
       animation = 'mistake'
 
+    if actor.getAcceptBandflourishes():
+      actor.sendSystemMessage('@performance:flourish_perform_band_self', 0)
+      actor.sendSystemMessage('@performance:flourish_perform', 0)
+      actor.doSkillAnimation(animation)
+
     group = core.objectService.getObject(actor.getGroupId())
     if not group:
-      if actor.getAcceptBandflourishes():
-        actor.sendSystemMessage('@performance:flourish_perform_band_self', 0)
-        actor.sendSystemMessage('@performance:flourish_perform', 0)
-        actor.doSkillAnimation(animation)
       return
 
     for creature in group.getMemberList():
+      if creature == actor:
+        continue
       if creature.getAcceptBandflourishes():
-        if actor == creature:
-          creature.sendSystemMessage('@performance:flourish_perform_band_self', 0)
-        else:
-          creature.sendSystemMessage('@performance:flourish_perform_band_member', 0)
+        creature.sendSystemMessage('@performance:flourish_perform_band_member', 0)
         creature.sendSystemMessage('@performance:flourish_perform', 0)
         creature.doSkillAnimation(animation)
     return
