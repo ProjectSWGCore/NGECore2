@@ -218,6 +218,7 @@ public class EntertainmentService implements INetworkDispatch {
 		core.commandService.registerCommand("startdance");
 		core.commandService.registerCommand("stopdance");
 		core.commandService.registerCommand("flourish");
+		core.commandService.registerAlias("flo","flourish");
 		core.commandService.registerCommand("bandflourish");
 	}
 	
