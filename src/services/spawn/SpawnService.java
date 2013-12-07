@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import engine.resources.scene.Planet;
+import engine.resources.scene.Point3D;
 import main.NGECore;
 
 public class SpawnService {
@@ -34,6 +35,19 @@ public class SpawnService {
 	
 	public SpawnService(NGECore core) {
 		
+	}	
+	
+	public void spawnCreature(String template, float x, float y, float z) {
+		spawnCreature(template, new Point3D(x, y, z));
 	}
+	
+	public void spawnCreature(String template, Point3D position) {
+		
+	}
+	
+	public void spawnLair(LairTemplate lairTemplate, Planet planet, Point3D position, int level) {
+		
+	}
+
 	
 }

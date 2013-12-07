@@ -32,16 +32,17 @@ import org.apache.mina.core.session.IoSession;
 import org.python.core.Py;
 import org.python.core.PyObject;
 
+import protocol.swg.FactionResponseMessage;
+
 import resources.common.FileUtilities;
 import resources.common.Opcodes;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
-import resources.objects.tangible.TangibleObject;
 
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
+import engine.clients.Client;
 import engine.resources.common.CRC;
-import engine.resources.objects.SWGObject;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
@@ -85,6 +86,10 @@ public class FactionService implements INetworkDispatch {
 	}
 	
 	public void addFactionStanding(CreatureObject creature, String faction, int factionStanding) {
+		if (!isFaction(faction)) {
+			return;
+		}
+		
 		if (creature == null) {
 			return;
 		}
@@ -99,6 +104,10 @@ public class FactionService implements INetworkDispatch {
 	}
 	
 	public void removeFactionStanding(CreatureObject creature, String faction, int factionStanding) {
+		if (!isFaction(faction)) {
+			return;
+		}
+		
 		if (creature == null) {
 			return;
 		}
@@ -109,37 +118,68 @@ public class FactionService implements INetworkDispatch {
 			return;
 		}
 		
-		player.modifyFactionStanding(faction, factionStanding);
-	}
-	
-	public void updateFactionStanding(SWGObject killedObject) {
-		if (!(killedObject instanceof TangibleObject) || killedObject == null) {
-			return;
-		}
-		
-		TangibleObject target = (TangibleObject) killedObject;
-		
-		if (!(((TangibleObject) killedObject).getKiller() instanceof TangibleObject) || ((TangibleObject) killedObject).getKiller() == null) {
-			return;
-		}
-		
-		TangibleObject killer = ((TangibleObject) killedObject).getKiller();
-		
-		if (killer != null && target != null && isFaction(target.getFaction())) {
-			if (FileUtilities.doesFileExist("scripts/faction/standing/" + target.getFaction() + ".py")) {
-				
-				PyObject method = core.scriptService.getMethod("scripts/faction/standing/", target.getFaction(), "update");
-				
-				if (method != null && method.isCallable()) {
-					method.__call__(Py.java2py(core), Py.java2py(killer), Py.java2py(target));
-				}
-			}
-		}
+		player.modifyFactionStanding(faction, -factionStanding);
 	}
 	
 	public boolean isFaction(String faction) {
 		if (factionMap.containsKey(faction)) {
 			return true;
+		}
+		
+		return false;
+	}
+	
+	/*
+	 * Returns true if creature2 is an ally of creature1
+	 * 
+	 * Will be useful for NPC AI, so they know who to help and who to be indifferent to.
+	 */
+	public boolean isFactionAlly(CreatureObject creature1, CreatureObject creature2) {
+		if (creature1 == null || creature2 == null) {
+			return false;
+		}
+		
+		String faction1 = creature1.getFaction();
+		String faction2 = creature2.getFaction();
+		
+		if (!isFaction(faction1) || !isFaction(faction2)) {
+			return false;
+		}
+		
+		if (FileUtilities.doesFileExist("scripts/faction/" + faction1 + ".py")) {
+			PyObject method = core.scriptService.getMethod("scripts/faction/", faction1, "isAlly");
+			
+			if (method != null && method.isCallable()) {
+				return ((method.__call__(Py.java2py(faction2)).asInt() == 1) ? true : false);
+			}
+		}
+		
+		return false;
+	}
+	
+	/*
+	 * Returns true if creature2 is an enemy of creature1
+	 * 
+	 * Will be useful for NPC AI, so they know who to attack and who to be indifferent to.
+	 */
+	public boolean isFactionEnemy(CreatureObject creature1, CreatureObject creature2) {
+		if (creature1 == null || creature2 == null) {
+			return false;
+		}
+		
+		String faction1 = creature1.getFaction();
+		String faction2 = creature2.getFaction();
+		
+		if (!isFaction(faction1) || !isFaction(faction2)) {
+			return false;
+		}
+		
+		if (FileUtilities.doesFileExist("scripts/faction/" + faction1 + ".py")) {
+			PyObject method = core.scriptService.getMethod("scripts/faction/", faction1, "isEnemy");
+			
+			if (method != null && method.isCallable()) {
+				return ((method.__call__(Py.java2py(faction2)).asInt() == 1) ? true : false);
+			}
 		}
 		
 		return false;
@@ -156,7 +196,25 @@ public class FactionService implements INetworkDispatch {
 			
 			@Override
 			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
+				Client client = core.getClient((int) session.getAttribute("connectionId"));
 				
+				if (client == null) {
+					return;
+				}
+				
+				CreatureObject creature = (CreatureObject) client.getParent();
+				
+				if (creature == null) {
+					return;
+				}
+				
+				PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
+				
+				if (player == null) {
+					return;
+				}
+				
+				session.write((new FactionResponseMessage(player.getFactionStandingMap(), 0)).serialize());
 			}
 			
 		});

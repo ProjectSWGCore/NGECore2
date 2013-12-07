@@ -25,7 +25,7 @@ public class Options {
 	
 	// Any uncommented ones are confirmed correct for NGE with detailed analysis
 	
-	public static int NONE = 0;
+	public static int NONE = 0; // HAM is visible, but health is grey without the Attackable flag
 	public static int SPACE_ATTACKABLE = 1; // Ships that are attackable in space.  Includes everything except stations and asteroids so far
 	public static int USABLE = 2; // Vendors, collections (hand icon)
 	public static int INSURED = 4; // Unused in NGE

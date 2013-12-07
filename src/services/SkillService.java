@@ -181,7 +181,7 @@ public class SkillService implements INetworkDispatch {
 		PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
 		DatatableVisitor skillTable;
 		
-		if (creature.getClient() == null) {
+		if (player == null) {
 			return;
 		}
 		

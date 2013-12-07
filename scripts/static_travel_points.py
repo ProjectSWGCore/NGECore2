@@ -40,11 +40,10 @@ def corelliaPoints(core, planet):
     trvSvc.addTravelPoint(planet, "Kor Vella Shuttleport", -3775, 86, 3234)
     trvSvc.addTravelPoint(planet, "Bela Vistal Shuttleport A", 6644, 330, -5922)
     trvSvc.addTravelPoint(planet, "Bela Vistal Shuttleport B", 6930, 330, -5534)
-   
     trvSvc.addTravelPoint(planet, "Coronet Starport", -51, 28, -4735)
     trvSvc.addTravelPoint(planet, "Tyrena Starport", -4975, 21, -2230)
     trvSvc.addTravelPoint(planet, "Kor Vella Starport", -3136, 31, 2894)
-    trvSvc.addTravelPoint(planet, "Doaba Guerful Starport", 3377, 308, 5605)
+    trvSvc.addTravelPoint(planet, "Doaba Guerfel Starport", 3377, 308, 5605)
     return        
 
 def dantooinePoints(core, planet):

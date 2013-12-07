@@ -77,6 +77,7 @@ import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
 import resources.objects.guild.GuildObject;
+import resources.objects.mission.MissionObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.staticobject.StaticObject;
 import resources.objects.tangible.TangibleObject;
@@ -204,7 +205,11 @@ public class ObjectService implements INetworkDispatch {
 			
 			object = new WaypointObject(objectID, planet, position);
 			
-		}  else {
+		}  else if(Template.startsWith("object/mission")) {
+			
+			object = new MissionObject(objectID, planet, Template);
+			
+		} else {
 			
 			return null;
 			
@@ -349,18 +354,6 @@ public class ObjectService implements INetworkDispatch {
 			}
 		}
 		
-		if (object instanceof CreatureObject) {
-			if (core.factionService.getFactionMap().containsKey(((CreatureObject) object).getFaction())) {
-				if (FileUtilities.doesFileExist(filePath)) {
-					PyObject method = core.scriptService.getMethod("scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", ""), object.getTemplate().split("shared_" , 2)[1].replace(".iff", ""), "destroy");
-					
-					if (method != null && method.isCallable()) {
-						method.__call__(Py.java2py(core), Py.java2py(((TangibleObject) object).getKiller()), Py.java2py(object));
-					}
-				}
-			}
-		}
-		
 		if (object == null) {
 			return;
 		}
@@ -454,10 +447,16 @@ public class ObjectService implements INetworkDispatch {
 		String filePath = "scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", "") + object.getTemplate().split("shared_" , 2)[1].replace(".iff", "") + ".py";
 		
 		if (FileUtilities.doesFileExist(filePath)) {
-			PyObject method = core.scriptService.getMethod("scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", ""), object.getTemplate().split("shared_" , 2)[1].replace(".iff", ""), "useObject");
+			filePath = "scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", "");
+			String fileName = object.getTemplate().split("shared_" , 2)[1].replace(".iff", "");
 			
-			if (method != null && method.isCallable()) {
-				method.__call__(Py.java2py(core), Py.java2py(creature), Py.java2py(object));
+			PyObject method1 = core.scriptService.getMethod("scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", ""), object.getTemplate().split("shared_" , 2)[1].replace(".iff", ""), "use");
+			PyObject method2 = core.scriptService.getMethod("scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", ""), object.getTemplate().split("shared_" , 2)[1].replace(".iff", ""), "useObject");
+			
+			if (method1 != null && method1.isCallable()) {
+				method1.__call__(Py.java2py(core), Py.java2py(creature), Py.java2py(object));
+			} else if (method2 != null && method2.isCallable()) {
+				method2.__call__(Py.java2py(core), Py.java2py(creature), Py.java2py(object));
 			}
 		}
 	}
@@ -569,32 +568,6 @@ public class ObjectService implements INetworkDispatch {
 			}
 			
 		});
-		
-		/*
-		objControllerOpcodes.put(ObjControllerOpcodes.USE_OBJECT, new INetworkRemoteEvent() {
-
-			@Override
-			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
-				buffer.order(ByteOrder.LITTLE_ENDIAN);
-				
-				CreatureObject creature = (CreatureObject) getObject(buffer.getLong());
-				
-				if (creature == null || creature.getClient() == null) {
-					return;
-				}
-				
-				buffer.skip(4);
-				
-				SWGObject object = getObject(buffer.getLong());
-				
-				if (object == null) {
-					return;
-				}
-				useObject(creature, object);
-			}
-			
-		});
-		*/
 		
 	}
 

@@ -55,6 +55,7 @@ import services.SkillService;
 import services.StaticService;
 import services.TerrainService;
 import services.WeatherService;
+import services.ai.AIService;
 import services.chat.ChatService;
 import services.collections.CollectionService;
 import services.combat.CombatService;
@@ -66,6 +67,7 @@ import services.guild.GuildService;
 import services.map.MapService;
 import services.object.ObjectService;
 import services.object.UpdateService;
+import services.spawn.SpawnService;
 import services.sui.SUIService;
 import services.trade.TradeService;
 import services.travel.TravelService;
@@ -140,6 +142,8 @@ public class NGECore {
 	public CollectionService collectionService;
 	public EntertainmentService entertainmentService;
 	public WeatherService weatherService;
+	public SpawnService spawnService;
+	public AIService aiService;
 	
 	// Login Server
 	public NetworkDispatch loginDispatch;
@@ -214,7 +218,8 @@ public class NGECore {
 		skillModService = new SkillModService(this);
 		equipmentService = new EquipmentService(this);
 		entertainmentService = new EntertainmentService(this);
-		
+		spawnService = new SpawnService(this);
+		aiService = new AIService(this);
 		
 		// Ping Server
 		try {
