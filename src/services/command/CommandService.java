@@ -22,8 +22,11 @@
 package services.command;
 
 import java.nio.ByteOrder;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
+
 import main.NGECore;
 
 import org.apache.mina.core.buffer.IoBuffer;
@@ -50,6 +53,8 @@ import resources.objects.weapon.WeaponObject;
 public class CommandService implements INetworkDispatch  {
 	
 	private Vector<BaseSWGCommand> commandLookup = new Vector<BaseSWGCommand>();
+	private ConcurrentHashMap<String,BaseSWGCommand> aliases = new ConcurrentHashMap<String,BaseSWGCommand>();
+	private ConcurrentHashMap<Integer,BaseSWGCommand> aliasesByCRC = new ConcurrentHashMap<Integer,BaseSWGCommand>();
 	private NGECore core;
 	
 	public CommandService(NGECore core) {
@@ -125,8 +130,28 @@ public class CommandService implements INetworkDispatch  {
 		return command;
 		
 	}
+	
+	//FIXME: CRC could just be generated as well.
+	public void registerAlias(String name, String target) {
+		Vector<BaseSWGCommand> commands = new Vector<BaseSWGCommand>(commandLookup); 	// copy for thread safety
+		BaseSWGCommand targetCommand = null;
+		for(BaseSWGCommand command : commands) {
+			if(command.getCommandName().equalsIgnoreCase(target)) {
+				targetCommand = command;
+			}
+		}
+		if (targetCommand == null) { return; }
+		
+		aliases.put(name, targetCommand);
+		aliasesByCRC.put(CRC.StringtoCRC(name), targetCommand);
+		
+	}
 
 	public BaseSWGCommand getCommandByCRC(int CRC) {
+		
+		if (aliasesByCRC.containsKey(CRC)) {
+			return aliasesByCRC.get(CRC);
+		}
 		
 		Vector<BaseSWGCommand> commands = new Vector<BaseSWGCommand>(commandLookup); 	// copy for thread safety
 		
@@ -139,6 +164,10 @@ public class CommandService implements INetworkDispatch  {
 	}
 	
 	public BaseSWGCommand getCommandByName(String name) {
+		
+		if (aliases.containsKey(name)) {
+			return aliases.get(name);
+		}
 		
 		Vector<BaseSWGCommand> commands = new Vector<BaseSWGCommand>(commandLookup); 	// copy for thread safety
 		

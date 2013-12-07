@@ -55,7 +55,7 @@ import engine.resources.scene.Quaternion;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 
-@Entity(version=3)
+@Entity(version=6)
 public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	@NotPersistent
@@ -115,6 +115,13 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private byte moodId = 0;
 	private int performanceCounter = 0;
 	private int performanceId = 0;
+	//FIXME: this is a bit of a hack.
+	private boolean performanceType = false;
+	//FIXME: hmm.. or persistent?
+	@NotPersistent
+	private boolean acceptBandflourishes = true;
+	private CreatureObject performanceWatchee;
+	private CreatureObject performanceListenee;
 	private int health = 1000;
 	private int action = 300;
 	@NotPersistent
@@ -143,7 +150,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private SWGList<DamageOverTime> dotList = new SWGList<DamageOverTime>();
 	@NotPersistent
 	private ScheduledFuture<?> incapTask;
-
+	
 	private boolean staticNPC = false; // temp
 	
 	public CreatureObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
@@ -305,15 +312,25 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 
 	public void setPosture(byte posture) {
+		boolean needsStopPerformance =  false;
 		synchronized(objectMutex) {
+			if (this.posture == 0x09) {
+				needsStopPerformance = true;
+			}
 			this.posture = posture;
 		}
+		
 		IoBuffer postureDelta = messageBuilder.buildPostureDelta(posture);
 		Posture postureUpdate = new Posture(getObjectID(), posture);
 		ObjControllerMessage objController = new ObjControllerMessage(0x1B, postureUpdate);
 		
 		notifyObservers(postureDelta, true);
 		notifyObservers(objController, true);
+		
+		if (needsStopPerformance) {
+			stopPerformance();
+		}
+		
 	}
 
 	@Override
@@ -747,6 +764,14 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		notifyObservers(messageBuilder.buildCurrentAnimationDelta(currentAnimation), true);
 
 	}
+	
+	public void doSkillAnimation(String skillAnimation) {
+		Animation animation = new Animation(getObjectId(), skillAnimation);
+		ObjControllerMessage objController = new ObjControllerMessage(0x1B, animation);
+		
+		notifyObservers(objController, true);
+		
+	}
 
 	public String getMoodAnimation() {
 		synchronized(objectMutex) {
@@ -892,6 +917,14 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.performanceId = performanceId;
 		}
+	}
+
+	public boolean getAcceptBandflourishes() {
+		return acceptBandflourishes;
+	}
+
+	public void setAcceptBandflourishes(boolean acceptBandflourishes) {
+		this.acceptBandflourishes = acceptBandflourishes;
 	}
 
 	public SWGList<SWGObject> getEquipmentList() {
@@ -1308,7 +1341,66 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	public boolean setStaticNPC(boolean staticNPC) {
 		return this.staticNPC = staticNPC;
 	}
+	public CreatureObject getPerformanceWatchee() {
+		synchronized(objectMutex) {
+			return performanceWatchee;
+		}
+	}
+
+	public void setPerformanceWatchee(CreatureObject performanceWatchee) {
+		synchronized(objectMutex) {
+			this.performanceWatchee = performanceWatchee;
+		}
+		getClient().getSession().write(messageBuilder.buildListenToId(performanceWatchee.getObjectId()));
+	}
+
+	public CreatureObject getPerformanceListenee() {
+		synchronized(objectMutex) {
+			return performanceListenee;
+		}
+	}
+
+	public void setPerformanceListenee(CreatureObject performanceListenee) {
+		synchronized(objectMutex) {
+			this.performanceListenee = performanceListenee;
+		}
+	}
+
+	public void startPerformance(int performanceId, int performanceCounter, String skillName, boolean isDance) {
+		synchronized(objectMutex) {
+			this.performanceId = performanceId;
+			this.performanceCounter = performanceCounter;
+			this.currentAnimation = skillName;
+			this.performanceType = isDance;
+		}
+		
+		getClient().getSession().write(messageBuilder.buildPerformanceId(performanceId));
+		getClient().getSession().write(messageBuilder.buildPerformanceCounter(performanceCounter));
+		getClient().getSession().write(messageBuilder.buildCurrentAnimationDelta(skillName));
+		getClient().getSession().write(messageBuilder.buildStartPerformance(true));
+		
+	}
 	
+	public void stopPerformance() {
+		String type = "";
+		synchronized(objectMutex) {
+			this.performanceId = 0;
+			this.performanceCounter = 0;
+			this.currentAnimation = null;
+			type = (performanceType) ? "dance" : "music";
+		}
+		
+	    sendSystemMessage("@performance:" + type  + "_stop_self",(byte)0);
+	    notifyAudience("@performance:" + type + "_stop_other");
+
+		getClient().getSession().write(messageBuilder.buildStartPerformance(false));
+	}
+	
+	public void notifyAudience(String message) {
+		//TODO: stub
+	}
+	
+
 	@Override
 	public void setPvPBitmask(int pvpBitmask) {
 		super.setPvPBitmask(pvpBitmask);
