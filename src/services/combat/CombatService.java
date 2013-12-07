@@ -412,10 +412,13 @@ public class CombatService implements INetworkDispatch {
 		attacker.notifyObserversInRange(objController, true, 125);
 		
 		cooldown = command.getCooldown();
+		System.out.println(cooldown);
 		
 		if(attacker.getSkillMod("expertise_cooldown_line_of_heal") != null)
-			cooldown -= 2*(attacker.getSkillMod("expertise_cooldown_line_of_heal").getBase());
-
+			cooldown -= attacker.getSkillMod("expertise_cooldown_line_of_heal").getBase();
+		if(attacker.getSkillMod("expertise_cooldown_line_sh") != null)
+			cooldown -= ((attacker.getSkillMod("expertise_cooldown_line_sh").getBase())/10);	
+		
 		StartTask startTask = new StartTask(actionCounter, attacker.getObjectID(), command.getCommandCRC(), CRC.StringtoCRC(command.getCooldownGroup()), cooldown);
 		ObjControllerMessage objController2 = new ObjControllerMessage(0x0B, startTask);
 		attacker.getClient().getSession().write(objController2.serialize());
