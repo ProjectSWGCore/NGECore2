@@ -21,6 +21,93 @@
  ******************************************************************************/
 package resources.objects.building;
 
-public class BuildingMessageBuilder {
+import java.nio.ByteOrder;
+import org.apache.mina.core.buffer.IoBuffer;
+import resources.objects.ObjectMessageBuilder;
+
+public class BuildingMessageBuilder extends ObjectMessageBuilder {
+	
+	public BuildingMessageBuilder(BuildingObject buildingObject) {
+		setObject(buildingObject);
+	}
+	
+	public IoBuffer buildBaseline3() {
+
+		BuildingObject building = (BuildingObject) object;
+		IoBuffer buffer = bufferPool.allocate(100, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.setAutoExpand(true);
+		
+		buffer.putShort((short) 0x0D);
+		buffer.putFloat(building.getComplexity());
+		buffer.put(getAsciiString(building.getStfFilename()));
+		buffer.putInt(0);
+		buffer.put(getAsciiString(building.getStfName()));
+		buffer.putInt(0);
+		buffer.putInt(255);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(1).order(ByteOrder.BIG_ENDIAN);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putShort((short) 0);
+		buffer.putInt(0x201C);
+		buffer.put((byte) 1);
+		
+		int size = buffer.position();
+		buffer = bufferPool.allocate(size, false).put(buffer.array(), 0, size);
+
+		buffer.flip();
+		buffer = createBaseline("BUIO", (byte) 3, buffer, size);
+
+		return buffer;
+		
+	}
+
+	public IoBuffer buildBaseline6() {
+
+		BuildingObject building = (BuildingObject) object;
+		IoBuffer buffer = bufferPool.allocate(100, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.setAutoExpand(true);
+		
+		buffer.putShort((short) 8);
+		buffer.putInt(0x43);
+		
+		buffer.put(getAsciiString(building.getDetailFilename()));
+		buffer.putInt(0);
+		buffer.put(getAsciiString(building.getDetailName()));
+		buffer.putInt(0);
+		buffer.put((byte) 0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		
+		int size = buffer.position();
+		buffer = bufferPool.allocate(size, false).put(buffer.array(), 0, size);
+
+		buffer.flip();
+		buffer = createBaseline("BUIO", (byte) 6, buffer, size);
+
+		return buffer;
+
+	}
+
+
+	@Override
+	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void sendBaselines() {
+		
+	}
 
 }

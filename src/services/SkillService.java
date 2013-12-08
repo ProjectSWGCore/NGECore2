@@ -21,14 +21,23 @@
  ******************************************************************************/
 package services;
 
+import java.nio.ByteOrder;
 import java.util.Map;
 
+import org.apache.mina.core.buffer.IoBuffer;
+import org.apache.mina.core.session.IoSession;
+
+import protocol.swg.ExpertiseRequestMessage;
+
 import resources.common.Console;
+import resources.common.FileUtilities;
+import resources.common.Opcodes;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import main.NGECore;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
+import engine.clients.Client;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
@@ -78,6 +87,8 @@ public class SkillService implements INetworkDispatch {
 						String[] schematicsGranted = ((String) skillTable.getObject(s, 23)).split(",");
 						String[] schematicsRevoked = ((String) skillTable.getObject(s, 24)).split(",");
 						
+						boolean speciesSkill = skill.matches("^species.+$");
+						
 						if (isTitle == true) {
 							core.playerService.addPlayerTitle(player, skill);
 							Console.println("Gave skill title: " + skill);
@@ -86,8 +97,9 @@ public class SkillService implements INetworkDispatch {
 						if (isProfession) {
 							return;
 						}
-						
-						if (godOnly || isHidden) {
+
+						//exempt species skills from being returned -- they're marked godOnly but really meant to be granted
+						if ((!speciesSkill) && ( godOnly  || isHidden)) {
 							return;
 						}
 						
@@ -136,8 +148,10 @@ public class SkillService implements INetworkDispatch {
 							}
 						}
 						
-						for (String ability : abilities) {
-							creature.addAbility(ability);
+						if(!skill.contains("expertise")) {	// only mark 1 abilities in datatable need to remove abilities per script
+							for (String ability : abilities) {
+								creature.addAbility(ability);
+							}
 						}
 						
 						for (String skillMod : skillMods) {
@@ -167,7 +181,7 @@ public class SkillService implements INetworkDispatch {
 		PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
 		DatatableVisitor skillTable;
 		
-		if (creature.getClient() == null) {
+		if (player == null) {
 			return;
 		}
 		
@@ -201,8 +215,10 @@ public class SkillService implements INetworkDispatch {
 							//creature.addExpertisePoints(pointsRequired);
 						}
 						
-						for (String ability : abilities) {
-							creature.removeAbility(ability);
+						if(!skill.contains("expertise")) {	// only mark 1 abilities in datatable need to remove abilities per script
+							for (String ability : abilities) {
+								creature.removeAbility(ability);
+							}
 						}
 						
 						for (String skillMod : skillMods) {
@@ -225,7 +241,43 @@ public class SkillService implements INetworkDispatch {
 	}
 	
 	@Override
-	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> arg0, Map<Integer, INetworkRemoteEvent> arg1) {
+	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> swgOpcodes, Map<Integer, INetworkRemoteEvent> objControllerOpcodes) {
+		
+		swgOpcodes.put(Opcodes.ExpertiseRequestMessage, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
+				
+				buffer = buffer.order(ByteOrder.LITTLE_ENDIAN);
+				buffer.position(0);
+				
+				ExpertiseRequestMessage expertise = new ExpertiseRequestMessage();
+				expertise.deserialize(buffer);
+
+				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				if(client == null) {
+					System.out.println("NULL Client");
+					return;
+				}
+
+				if(client.getParent() == null)
+					return;
+				
+				CreatureObject creature = (CreatureObject) client.getParent();
+				PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
+				
+				if(player == null)
+					return;
+				
+				for(String expertiseName : expertise.getExpertiseSkills()) {
+					addSkill(creature, expertiseName);
+					if(!FileUtilities.doesFileExist("scripts/expertise/" + expertiseName + ".py"))
+						continue;
+					core.scriptService.callScript("scripts/expertise/", "addAbilities", expertiseName, core, creature, player);
+				}
+				
+			}
+		});
 		
 	}
 	

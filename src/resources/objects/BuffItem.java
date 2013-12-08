@@ -52,11 +52,11 @@ public class BuffItem {
 		this.invested = invested;
 	}
 
-	public int getAmount() {
+	public int getBonusAmount() {
 		return bonusAmount;
 	}
 
-	public void setAmount(int amount) {
+	public void setBonusAmount(int amount) {
 		this.bonusAmount = amount;
 	}
 }

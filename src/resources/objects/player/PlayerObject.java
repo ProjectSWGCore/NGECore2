@@ -22,9 +22,11 @@
 package resources.objects.player;
 
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import resources.objects.waypoint.WaypointObject;
 
@@ -39,7 +41,7 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent
+@Persistent(version=1)
 public class PlayerObject extends SWGObject {
 	
 	// PLAY 3
@@ -51,6 +53,8 @@ public class PlayerObject extends SWGObject {
 	private List<String> titleList = new ArrayList<String>();
 	private int bornDate = 0;
 	private int totalPlayTime = 0;
+	private byte[] collections = new byte[] { };
+	private int highestSetBit = 0;
 	
 	// PLAY 6
 	
@@ -116,7 +120,7 @@ public class PlayerObject extends SWGObject {
 	@NotPersistent
 	private long lastPlayTimeUpdate = System.currentTimeMillis();
 	
-	
+	private Map<String, Integer> factionStandingMap = new TreeMap<String, Integer>();
 	
 	public PlayerObject() {
 		super();
@@ -136,12 +140,13 @@ public class PlayerObject extends SWGObject {
 
 	public void setTitle(String title) {
 		synchronized(objectMutex) {
-			
 			if(!getTitleList().isEmpty() && getTitleList().contains(title)) {
 				this.title = title;
-				notifyObservers(messageBuilder.buildTitleDelta(title), true);
 			}
+
 		}
+		
+		notifyObservers(messageBuilder.buildTitleDelta(title), true);
 	}
 
 	public String getProfession() {
@@ -433,6 +438,22 @@ public class PlayerObject extends SWGObject {
 		}
 	}
 	
+	public void ignoreAdd(String ignoreName) {
+		synchronized(objectMutex) {
+			setIgnoreListUpdateCounter(getIgnoreListUpdateCounter() + 1);
+			getContainer().getClient().getSession().write(messageBuilder.buildIgnoreAddDelta(ignoreName));
+			ignoreList.add(ignoreName);
+		}
+	}
+	
+	public void ignoreRemove(String removeName) {
+		synchronized(objectMutex) {
+			setIgnoreListUpdateCounter(getIgnoreListUpdateCounter() + 1);
+			getContainer().getClient().getSession().write(messageBuilder.buildIgnoreRemoveDelta(removeName));
+			ignoreList.remove(removeName);
+		}
+	}
+	
 	public void setIgnoreListUpdateCounter(int ignoreListUpdateCounter) {
 		synchronized(objectMutex) {
 			this.ignoreListUpdateCounter = ignoreListUpdateCounter;
@@ -535,7 +556,30 @@ public class PlayerObject extends SWGObject {
 			this.jediState = jediState;
 		}
 	}
-
+	
+	public Map<String, Integer> getFactionStandingMap() {
+		return factionStandingMap;
+	}
+	
+	public void setFactionStanding(String faction, int factionStanding) {
+		synchronized(objectMutex) {
+			factionStandingMap.put(faction, ((factionStanding < -5000) ? -5000 : ((factionStanding > 5000) ? 5000 : factionStanding)));
+		}
+	}
+	
+	public void modifyFactionStanding(String faction, int modifier) {
+		synchronized(objectMutex) {
+			int factionStanding = (((factionStandingMap.containsKey(faction)) ? factionStandingMap.get(faction) : 0) + modifier);
+			factionStandingMap.put(faction, ((factionStanding < -5000) ? -5000 : ((factionStanding > 5000) ? 5000 : factionStanding)));
+		}
+	}
+	
+	public int getFactionStanding(String faction) {
+		synchronized(objectMutex) {
+			return ((factionStandingMap.containsKey(faction)) ? factionStandingMap.get(faction) : 0);
+		}
+	}
+	
 	@Override
 	public void sendBaselines(Client destination) {
 		
@@ -567,9 +611,30 @@ public class PlayerObject extends SWGObject {
 	public List<String> getTitleList() {
 		return titleList;
 	}
-
+	
 	public void setTitleList(List<String> titleList) {
 		this.titleList = titleList;
+	}
+	
+	public void setCollections(byte[] collections) {
+		synchronized(objectMutex) {
+			this.collections = collections;
+			this.highestSetBit = BitSet.valueOf(collections).length();
+		}
+		
+		notifyObservers(messageBuilder.buildCollectionsDelta(collections, getHighestSetBit()), true);
+	}
+	
+	public byte[] getCollections() {
+		synchronized(objectMutex) {
+			return collections;
+		}
+	}
+	
+	public int getHighestSetBit() {
+		synchronized(objectMutex) {
+			return highestSetBit;
+		}
 	}
 	
 }

@@ -21,6 +21,10 @@
  ******************************************************************************/
 package services.travel;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+
 import resources.common.SpawnPoint;
 import resources.objects.creature.CreatureObject;
 import engine.resources.scene.Point3D;
@@ -37,6 +41,8 @@ public class TravelPoint {
 	private boolean shuttleLanding;
 	private int secondsRemaining;
 	private boolean shuttleDeparting;
+	private ExecutorService scheduler = Executors.newFixedThreadPool(1);
+	private long departureTimestamp;
 	
 	public TravelPoint() {
 	}
@@ -96,6 +102,7 @@ public class TravelPoint {
 	
 	public void setShuttle(CreatureObject shuttleObj) {
 		this.shuttle = shuttleObj;
+		startShuttleSchedule();
 	}
 
 	public boolean isShuttleAvailable() {
@@ -115,11 +122,15 @@ public class TravelPoint {
 	}
 
 	public int getSecondsRemaining() {
-		return secondsRemaining;
+		long currentTime = System.currentTimeMillis() / 1000;
+		long diff = currentTime - getDepartureTimestamp();
+		
+		return (int) (60 - diff);
 	}
 
 	public void setSecondsRemaining(int secondsRemaining) {
 		this.secondsRemaining = secondsRemaining;
+		System.out.println(secondsRemaining);
 	}
 
 	public boolean isShuttleDeparting() {
@@ -128,5 +139,61 @@ public class TravelPoint {
 
 	public void setShuttleDeparting(boolean shuttleDeparting) {
 		this.shuttleDeparting = shuttleDeparting;
+	}
+	
+	public boolean isStarport() {
+		if(getShuttle() != null) {
+			return (getShuttle().getTemplate().equals("object/creature/npc/theme_park/shared_player_transport.iff") || getShuttle().getTemplate().equals("object/creature/npc/theme_park/shared_player_transport_theed_hangar.iff"));
+		} else {
+			System.out.println("null shuttle at: " + getName());
+			return false;
+		}
+	}
+	
+	private void startShuttleSchedule() {
+		
+		scheduler.execute(new Runnable() {
+			@Override
+			public void run() {
+				while(getShuttle() != null) {
+			
+					try {
+						setShuttleAvailable(true);
+						setShuttleLanding(false);
+						Thread.sleep(120000);
+						setShuttleAvailable(false);
+						setShuttleDeparting(true);
+						setDepartureTimestamp(System.currentTimeMillis() / 1000);	
+						getShuttle().setPosture((byte) 2);
+						setShuttleDeparting(false);
+						Thread.sleep(60000);
+						setShuttleLanding(true);
+						getShuttle().setPosture((byte) 0);
+						if(isStarport())
+							Thread.sleep(21000);
+						else
+							Thread.sleep(17000);
+
+						
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					
+				}
+			}
+
+		});
+
+			
+		
+		
+	}
+
+	public long getDepartureTimestamp() {
+		return departureTimestamp;
+	}
+
+	public void setDepartureTimestamp(long depatureTimestamp) {
+		this.departureTimestamp = depatureTimestamp;
 	}
 }

@@ -54,6 +54,7 @@ public class WeaponObject extends SWGObject {
 	public WeaponObject(long objectID, Planet planet, String template) {
 		super(objectID, planet, new Point3D(0, 0, 0), new Quaternion(1, 0, 1, 0), template);
 		messageBuilder = new WeaponMessageBuilder(this);
+		if (this.getClass().getSimpleName().equals("WeaponObject")) setIntAttribute("volume", 1);
 		calculateRange();
 		calculateAttackSpeed();
 	}
@@ -61,6 +62,7 @@ public class WeaponObject extends SWGObject {
 	public WeaponObject(long objectID, Planet planet, String template, Point3D position, Quaternion orientation) {
 		super(objectID, planet, position, orientation, template);
 		messageBuilder = new WeaponMessageBuilder(this);
+		if (this.getClass().getSimpleName().equals("WeaponObject")) setIntAttribute("volume", 1);
 		calculateRange();
 		calculateAttackSpeed();
 	}

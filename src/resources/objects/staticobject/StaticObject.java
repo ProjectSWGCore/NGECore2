@@ -55,8 +55,8 @@ public class StaticObject extends SWGObject {
 			return;
 		}
 		
-		destination.getSession().write(messageBuilder.buildBaseline3());
-		destination.getSession().write(messageBuilder.buildBaseline6());
+		//destination.getSession().write(messageBuilder.buildBaseline3());
+		//destination.getSession().write(messageBuilder.buildBaseline6());
 
 
 	}

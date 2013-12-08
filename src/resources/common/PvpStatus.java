@@ -23,6 +23,7 @@ package resources.common;
 
 public class PvpStatus {
 	
+	public static int None = 0;
 	public static int Attackable = 1;
 	public static int Aggressive = 2;
 	public static int Overt = 4;
@@ -30,7 +31,7 @@ public class PvpStatus {
 	public static int Player = 16;
 	public static int Enemy = 32;
 	public static int GoingOvert = 64;
-	public static int GoingCombatant = 128;
+	public static int GoingCovert = 128;
 	public static int Dueling = 256;
 	
 }

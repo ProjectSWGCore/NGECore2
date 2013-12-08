@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -96,121 +97,47 @@ public class TravelService implements INetworkDispatch {
 				if(object == null)
 					return;
 				
-				List<Planet> planetList = core.terrainService.getPlanetList();
+				TravelPoint travelPoint = getNearestTravelPoint(object);
 				
-				for (Planet planet : planetList) {
-					String planetString = planet.getName();
+				if(travelPoint == null)
+					return;
+				
+				if(travelPoint.isStarport()) {
+				
+					List<Planet> planetList = core.terrainService.getPlanetList();
 					
-					if (request.getPlanet().equals(planetString)) {
+					for (Planet planet : planetList) {
+						String planetString = planet.getName();
 						
-						PlanetTravelPointListResponse response = new PlanetTravelPointListResponse(planetString, travelMap.get(planet), planetList);
-						client.getSession().write(response.serialize());
-						break;
-						
+						if (request.getPlanet().equals(planetString)) {
+							
+							Vector<TravelPoint> correctTravelPoints = new Vector<TravelPoint>();
+							
+							for(TravelPoint tp : travelMap.get(planet)) {
+								if(tp.isStarport() || tp.getPlanetName().equalsIgnoreCase(object.getPlanet().getName())) {
+									correctTravelPoints.add(tp);
+									//Console.println(tp.getName());
+								}
+							}
+							PlanetTravelPointListResponse response = new PlanetTravelPointListResponse(planetString, correctTravelPoints);
+							client.getSession().write(response.serialize());
+							
+							break;
+							
+						} 
 					}
+				
+				} else {
+					
+					Planet planet = object.getPlanet();
+					
+					PlanetTravelPointListResponse response = new PlanetTravelPointListResponse(planet.getName(), travelMap.get(planet));
+					client.getSession().write(response.serialize());
+					
 				}
+				
 			}
 		});
-		
-	}
-	public void startShuttleSchedule() {
-		final Runnable shuttleRun = new Runnable() {
-
-			@Override
-			public void run() {
-				
-				for (Entry<Planet, Vector<TravelPoint>> entry : travelMap.entrySet()) {
-					for(TravelPoint tp : entry.getValue()) {
-						if (tp.getShuttle() == null)
-							continue;
-						else {
-
-							 if (tp.isShuttleAvailable() == false) {
-								 tp.getShuttle().setPosture((byte) 0);
-								 tp.setShuttleLanding(true);
-								 handleShuttleLanding();
-								 //Console.println("Started handle shuttle landing");
-							 }
-							 else {
-								 tp.getShuttle().setPosture((byte) 2);
-								 tp.setShuttleAvailable(false);
-								 tp.setShuttleLanding(false);
-								 tp.setShuttleDeparting(true);
-								 handleShuttleDeparture();
-								 //Console.println("Shuttle is not available.");
-							 }
-						}
-					}
-				}
-				
-			}
-			
-		};
-		
-		scheduler.scheduleAtFixedRate(shuttleRun, 83, 83, TimeUnit.SECONDS);
-		
-		//shuttleCountdown();
-	}
-	
-	private void handleShuttleLanding() {
-		scheduler.schedule(new Runnable() {
-
-			@Override
-			public void run() {
-				for (Entry<Planet, Vector<TravelPoint>> entry : travelMap.entrySet()) {
-					for(TravelPoint tp : entry.getValue()) {
-						if (tp.isShuttleLanding()) {
-							tp.setShuttleLanding(false);
-							tp.setShuttleAvailable(true);
-							//Console.println("Shuttle has landed!");
-						}
-					}
-				}
-			}
-			
-		}, 27, TimeUnit.SECONDS);
-
-	}
-	
-	private void handleShuttleDeparture() {
-		scheduler.schedule(new Runnable() {
-
-			@Override
-			public void run() {
-				for (Entry<Planet, Vector<TravelPoint>> entry : travelMap.entrySet()) {
-					for(TravelPoint tp : entry.getValue()) {
-						tp.setShuttleDeparting(false);
-						tp.setSecondsRemaining(60);
-						
-					}
-				}
-				shuttleCountdown();
-				//Console.println("Countdown initiated");
-			}
-			
-		}, 20, TimeUnit.SECONDS);
-	}
-	
-	private void shuttleCountdown() {
-		Runnable countDown = new Runnable() {
-			@Override
-			public void run() {
-				for (Entry<Planet, Vector<TravelPoint>> entry : travelMap.entrySet()) {
-					for(TravelPoint tp : entry.getValue()) {
-						if (tp.getShuttle() == null || tp.isShuttleDeparting() == true || tp.isShuttleAvailable() == true || tp.getSecondsRemaining() == 0)
-							continue;
-						
-						else {
-							tp.setSecondsRemaining(tp.getSecondsRemaining() - 1);
-							//Console.println("Time Remaining: " + tp.getSecondsRemaining());
-						}
-					}
-				}
-			}
-			
-		};
-		
-		runCountdown(countDown, scheduler);
 		
 	}
 	
@@ -218,15 +145,17 @@ public class TravelService implements INetworkDispatch {
 		TravelPoint returnedPoint = null;
 		Vector<TravelPoint> planetTp = travelMap.get(obj.getPlanet());
 		
-		for (TravelPoint tp : planetTp) {
-			//System.out.println("Distance for point " + tp.getName() + " is " + tp.getLocation().getDistance2D(obj.getWorldPosition()));
-			if (tp.getLocation().getDistance2D(obj.getWorldPosition()) <= 70) {
-				returnedPoint = tp;
+		synchronized(travelMap) {
+			for (TravelPoint tp : planetTp) {
+				//System.out.println("Distance for point " + tp.getName() + " is " + tp.getLocation().getDistance2D(obj.getWorldPosition()));
+				if (tp.getLocation().getDistance2D(obj.getWorldPosition()) <= 125) {
+					returnedPoint = tp;
+				}
 			}
 		}
 		
 		if (returnedPoint == null) {
-			System.out.println("NULL TravelPoint!");
+			System.out.println("NULL TravelPoint at : " + core.mapService.getClosestCityName(obj));
 		}
 		return returnedPoint;
 	}
@@ -238,11 +167,14 @@ public class TravelService implements INetworkDispatch {
 		
 		TravelPoint returnedPoint = null;
 		
-		for (TravelPoint tp : tpMap) {
-			if (tp.getName().equals(tpName)) {
-				returnedPoint = tp;
+		synchronized(travelMap) {
+			for (TravelPoint tp : tpMap) {
+				if (tp.getName().equals(tpName)) {
+					returnedPoint = tp;
+				}
 			}
 		}
+		
 		if (returnedPoint == null) { System.out.println("Couldn't find a travelpoint w/ name " + tpName); }
 		return returnedPoint;
 	}
@@ -258,7 +190,6 @@ public class TravelService implements INetworkDispatch {
 		TravelPoint travelPoint = new TravelPoint(name, x, y, z, 150);
 
 		travelPoint.setPlanetName(WordUtils.capitalize(planet.getName()));
-		
 		if (travelMap.containsKey(planet)) {
 			
 			travelMap.get(planet).add(travelPoint);
@@ -271,6 +202,7 @@ public class TravelService implements INetworkDispatch {
 			System.out.println("Added planet " + planet.getName() + " to TravelMap.");
 			System.out.println("Added travel point " + travelPoint.getName());
 		}
+		
 	}
 	
 	public void removeTravelPointByName(Planet planet, String name){
@@ -298,7 +230,7 @@ public class TravelService implements INetworkDispatch {
 		
 		Planet planet = core.terrainService.getPlanetByName(departurePlanet.toLowerCase());
 		SWGObject travelTicket = core.objectService.createObject("object/tangible/travel/travel_ticket/base/shared_base_travel_ticket.iff", planet);
-
+		
 		travelTicket.setStringAttribute("@obj_attr_n:travel_departure_planet", WordUtils.capitalize(departurePlanet));
 		travelTicket.setStringAttribute("@obj_attr_n:travel_departure_point", departureLoc);
 		
@@ -341,8 +273,8 @@ public class TravelService implements INetworkDispatch {
 		SWGObject travelTicket = createTravelTicket(departurePlanet, departureLoc, arrivalPlanet, arrivalLoc);
 		
 		creatureObj.getSlottedObject("inventory").add(travelTicket);
-		Console.println("Total cost: " + fare);
-		SUIWindow window = core.suiService.createMessageBox(MessageBoxType.MESSAGE_BOX_OK, "STAR WARS GALAXIES", "Ticket purchase complete.", player, null, 0);
+		//Console.println("Total cost: " + fare);
+		SUIWindow window = core.suiService.createMessageBox(MessageBoxType.MESSAGE_BOX_OK, "STAR WARS GALAXIES", "@travel:ticket_purchase_complete", player, null, 0);
 		core.suiService.openSUIWindow(window);
 
 		creatureObj.sendSystemMessage("You successfully make a payment of " + fare + " credits to the Galactic Travel Commission.", (byte) 0);
@@ -435,7 +367,7 @@ public class TravelService implements INetworkDispatch {
 			for (int f = 0; f < travelFares.getRowCount(); f++) {
 				Planet planet = core.terrainService.getPlanetByName((String) travelFares.getObject(f, 0));
 				if (travelMap.containsKey(planet)) {
-					int corellia = ((Integer) travelFares.getObject(f, 1));
+					int corellia = ((int) travelFares.getObject(f, 1));
 					int dantooine = ((int) travelFares.getObject(f, 2));
 					int dathomir = ((int) travelFares.getObject(f, 3));
 					int endor = ((int) travelFares.getObject(f, 4));
@@ -476,10 +408,6 @@ public class TravelService implements INetworkDispatch {
 	public Map<Planet, Vector<TravelPoint>> getTravelMap() {
 		return this.travelMap;
 	}
-	
-    public void runCountdown(Runnable task, ScheduledExecutorService executor) {
-        new ShuttleCountdown(task, this.core).startCountdown(executor);
-    }
 	
 	@Override
 	public void shutdown() {

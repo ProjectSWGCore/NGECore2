@@ -21,6 +21,7 @@
  ******************************************************************************/
 package resources.objects.guild;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -35,6 +36,7 @@ import resources.guild.Guild;
 import resources.objects.SWGList;
 import resources.objects.SWGMap;
 import resources.objects.SWGMultiMap;
+import services.collections.ServerFirst;
 
 import com.sleepycat.je.Environment;
 import com.sleepycat.je.Transaction;
@@ -54,7 +56,8 @@ public class GuildObject extends SWGObject implements IPersistent {
 	protected NGECore core;
 	@NotPersistent
 	private GuildMessageBuilder messageBuilder = new GuildMessageBuilder(this);
-
+	
+	private Map<String, ServerFirst> serverFirst = new HashMap<String, ServerFirst>();
 	private Map<String, Map<String, CurrentServerGCWZonePercent>> zoneMap = new TreeMap<String, Map<String, CurrentServerGCWZonePercent>>();
 	@NotPersistent
 	private Transaction txn;
@@ -257,6 +260,20 @@ public class GuildObject extends SWGObject implements IPersistent {
 	public Map<String, Map<String, CurrentServerGCWZonePercent>> getZoneMap() {
 		synchronized(objectMutex) {
 			return zoneMap;
+		}
+	}
+	
+	public Map<String, ServerFirst> getServerFirst() {
+		synchronized(objectMutex) {
+			return serverFirst;
+		}
+	}
+	
+	public void addServerFirst(String collectionName, ServerFirst player) {
+		synchronized(objectMutex) {
+			if (!serverFirst.containsKey(collectionName)) {
+				serverFirst.put(collectionName, player);
+			}
 		}
 	}
 	

@@ -22,8 +22,11 @@
 package services.command;
 
 import java.nio.ByteOrder;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
+
 import main.NGECore;
 
 import org.apache.mina.core.buffer.IoBuffer;
@@ -50,6 +53,8 @@ import resources.objects.weapon.WeaponObject;
 public class CommandService implements INetworkDispatch  {
 	
 	private Vector<BaseSWGCommand> commandLookup = new Vector<BaseSWGCommand>();
+	private ConcurrentHashMap<String,BaseSWGCommand> aliases = new ConcurrentHashMap<String,BaseSWGCommand>();
+	private ConcurrentHashMap<Integer,BaseSWGCommand> aliasesByCRC = new ConcurrentHashMap<Integer,BaseSWGCommand>();
 	private NGECore core;
 	
 	public CommandService(NGECore core) {
@@ -125,8 +130,27 @@ public class CommandService implements INetworkDispatch  {
 		return command;
 		
 	}
+	
+	public void registerAlias(String name, String target) {
+		Vector<BaseSWGCommand> commands = new Vector<BaseSWGCommand>(commandLookup); 	// copy for thread safety
+		BaseSWGCommand targetCommand = null;
+		for(BaseSWGCommand command : commands) {
+			if(command.getCommandName().equalsIgnoreCase(target)) {
+				targetCommand = command;
+			}
+		}
+		if (targetCommand == null) { return; }
+		
+		aliases.put(name, targetCommand);
+		aliasesByCRC.put(CRC.StringtoCRC(name), targetCommand);
+		
+	}
 
 	public BaseSWGCommand getCommandByCRC(int CRC) {
+		
+		if (aliasesByCRC.containsKey(CRC)) {
+			return aliasesByCRC.get(CRC);
+		}
 		
 		Vector<BaseSWGCommand> commands = new Vector<BaseSWGCommand>(commandLookup); 	// copy for thread safety
 		
@@ -139,6 +163,10 @@ public class CommandService implements INetworkDispatch  {
 	}
 	
 	public BaseSWGCommand getCommandByName(String name) {
+		
+		if (aliases.containsKey(name)) {
+			return aliases.get(name);
+		}
 		
 		Vector<BaseSWGCommand> commands = new Vector<BaseSWGCommand>(commandLookup); 	// copy for thread safety
 		
@@ -168,7 +196,7 @@ public class CommandService implements INetworkDispatch  {
 		//if((command.getHitType() == 5 || command.getHitType() == 7) && !(target instanceof CreatureObject))
 		//	success = false;
 		
-		if(!(command.getAttackType() == 2) && !(command.getHitType() == 5)) {
+		if(!(command.getAttackType() == 2) && !(command.getHitType() == 5) && !(command.getHitType() == 0)) {
 			if(target == null || !(target instanceof TangibleObject) || target == attacker)
 				success = false;
 		} else {
@@ -245,13 +273,18 @@ public class CommandService implements INetworkDispatch  {
 				core.combatService.doRevive(attacker, (CreatureObject) target, weapon, command, actionCounter);
 				return;
 			}
+			
+			if(command.getHitType() == 0 && command.getBuffNameSelf().length() > 0) {
+				core.combatService.doSelfBuff(attacker, weapon, command, actionCounter);
+				return;
+			}
 				
 			core.combatService.doCombat(attacker, (TangibleObject) target, weapon, command, actionCounter);
 		}
 		
 	}
 
-	public void callCommand(CreatureObject actor, String commandName, SWGObject target, String commandArgs) {
+	public void callCommand(SWGObject actor, String commandName, SWGObject target, String commandArgs) {
 		if (actor == null)
 			return;
 		

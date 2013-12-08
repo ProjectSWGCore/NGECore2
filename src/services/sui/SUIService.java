@@ -83,8 +83,6 @@ public class SUIService implements INetworkDispatch {
 					return;
 						
 				core.scriptService.callScript("scripts/radial/", getRadialFilename(target), "createRadial", core, owner, target, request.getRadialOptions());
-				if(getRadialFilename(target).equals("default"))
-					return;
 				
 				sendRadial(owner, target, request.getRadialOptions(), request.getRadialCount());
 				
@@ -104,7 +102,6 @@ public class SUIService implements INetworkDispatch {
 				objMenuSelect.deserialize(data);
 				
 				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
-
 				if(client == null || client.getSession() == null)
 					return;
 				
@@ -113,7 +110,7 @@ public class SUIService implements INetworkDispatch {
 				
 				if(target == null || owner == null)
 					return;
-
+				
 				core.scriptService.callScript("scripts/radial/", getRadialFilename(target), "handleSelection", core, owner, target, objMenuSelect.getSelection());
 
 			}

@@ -21,10 +21,10 @@
  ******************************************************************************/
 package resources.objects.cell;
 
+import protocol.swg.UpdateCellPermissionMessage;
 
-
+import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
-
 import engine.clients.Client;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
@@ -35,18 +35,23 @@ import engine.resources.scene.Quaternion;
 public class CellObject extends SWGObject {
 	
 	private int cellNumber = 0;
+	@NotPersistent
+	private CellMessageBuilder messageBuilder;
 	
 	public CellObject() { 
 		super();
+		messageBuilder = new CellMessageBuilder(this);
 	}
 	
 	public CellObject(long objectID, Planet planet, int cellNumber) { 
-		super(objectID, planet, new Point3D(0, 0, 0), new Quaternion(0, 0, 0, 1), "object/cell/shared_cell.iff");
+		super(objectID, planet, new Point3D(0, 0, 0), new Quaternion(1, 0, 0, 0), "object/cell/shared_cell.iff");
 		setCellNumber(cellNumber);
+		messageBuilder = new CellMessageBuilder(this);
 	}
 	
 	public CellObject(long objectID, Planet planet) { 
-		super(objectID, planet, new Point3D(0, 0, 0), new Quaternion(0, 0, 0, 1), "object/cell/shared_cell.iff");
+		super(objectID, planet, new Point3D(0, 0, 0), new Quaternion(1, 0, 0, 0), "object/cell/shared_cell.iff");
+		messageBuilder = new CellMessageBuilder(this);
 	}
 
 	public int getCellNumber() {
@@ -62,8 +67,17 @@ public class CellObject extends SWGObject {
 	}
 
 	@Override
-	public void sendBaselines(Client client) {
-		// TODO Auto-generated method stub
+	public void sendBaselines(Client destination) {
+		
+		if(destination == null || destination.getSession() == null) {
+			System.out.println("NULL session");
+			return;
+		}
+		
+		destination.getSession().write(messageBuilder.buildBaseline3());
+		destination.getSession().write(messageBuilder.buildBaseline6());
+		destination.getSession().write(new UpdateCellPermissionMessage((byte) 1, getObjectID()).serialize());
+		
 		
 	}
 

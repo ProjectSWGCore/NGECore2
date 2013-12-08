@@ -54,7 +54,9 @@ public class BuffBuilder {
 	}
 	
 	public int getTotalAffected() {
-		int totalAffected = getMaxTimesApplied() + getAffectAmount();
+		//                      10               * 10       = 100
+		int totalAffected = getMaxTimesApplied() * getAffectAmount();
+		Console.println("Total Affected: " + totalAffected + getEntBonus());
 		return totalAffected + getEntBonus();
 	}
 

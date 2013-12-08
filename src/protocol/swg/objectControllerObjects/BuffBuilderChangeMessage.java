@@ -64,9 +64,10 @@ public class BuffBuilderChangeMessage extends ObjControllerObject {
 			item.setInvested(investedPoints);
 			
 			int maxAmount = buffer.getInt();
-			item.setAmount(maxAmount);
+			item.setBonusAmount(maxAmount);
 			
 			statBuffs.add(item);
+			System.out.println("Added buff item with " + investedPoints + " invested points " + " which has a bonus amount of " + maxAmount);
 		}
 	}
 
@@ -95,7 +96,7 @@ public class BuffBuilderChangeMessage extends ObjControllerObject {
 			for (BuffItem item : statBuffs) {
 				result.put(getAsciiString(item.getSkillName()));
 				result.putInt(item.getInvested());
-				result.putInt(item.getAmount());
+				result.putInt(item.getBonusAmount());
 			}
 		}
 		

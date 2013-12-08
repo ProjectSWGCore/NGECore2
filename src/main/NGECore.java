@@ -28,14 +28,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.mina.core.service.IoHandler;
-
-
-
-
-
-
+import net.engio.mbassy.bus.config.BusConfiguration;
 import resources.common.RadialOptions;
 import resources.common.ThreadMonitor;
 import resources.objects.creature.CreatureObject;
@@ -47,6 +47,7 @@ import services.EntertainmentService;
 import services.EquipmentService;
 import services.GroupService;
 import services.LoginService;
+import services.MissionService;
 import services.PlayerService;
 import services.ScriptService;
 import services.SimulationService;
@@ -55,16 +56,20 @@ import services.SkillService;
 import services.StaticService;
 import services.TerrainService;
 import services.WeatherService;
+import services.ai.AIService;
 import services.chat.ChatService;
+import services.collections.CollectionService;
 import services.combat.CombatService;
 import services.command.CombatCommand;
 import services.command.CommandService;
+import services.gcw.FactionService;
 import services.gcw.GCWService;
 import services.guild.GuildService;
 import services.LoginService;
 import services.map.MapService;
 import services.object.ObjectService;
 import services.object.UpdateService;
+import services.spawn.SpawnService;
 import services.sui.SUIService;
 import services.trade.TradeService;
 import services.travel.TravelService;
@@ -116,6 +121,7 @@ public class NGECore {
 	public ConnectionService connectionService;
 	public CommandService commandService;
 	public CharacterService characterService;
+	public FactionService factionService;
 	public ObjectService objectService;
 	public MapService mapService;
 	public UpdateService updateService;
@@ -137,8 +143,12 @@ public class NGECore {
 	public SkillModService skillModService;
 	public EquipmentService equipmentService;
 	public TravelService travelService;
+	public CollectionService collectionService;
 	public EntertainmentService entertainmentService;
 	public WeatherService weatherService;
+	public SpawnService spawnService;
+	public AIService aiService;
+	//public MissionService missionService;
 	
 	// Login Server
 	public NetworkDispatch loginDispatch;
@@ -154,6 +164,8 @@ public class NGECore {
 
 	private ObjectDatabase creatureODB;
 	private ObjectDatabase mailODB;
+	
+	private BusConfiguration eventBusConfig = BusConfiguration.Default(1, new ThreadPoolExecutor(1, 4, 1, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>()));
 
 	
 	public NGECore() {
@@ -203,7 +215,8 @@ public class NGECore {
 		characterService = new CharacterService(this);
 		mapService = new MapService(this);
 		travelService = new TravelService(this);
-
+		
+		factionService = new FactionService(this);
 		objectService = new ObjectService(this);
 		terrainService = new TerrainService(this);
 		updateService = new UpdateService(this);
@@ -232,6 +245,9 @@ public class NGECore {
 				jythonServer.start();
 			}
 		}
+		spawnService = new SpawnService(this);
+		aiService = new AIService(this);
+		//missionService = new MissionService(this);
 		
 		// Ping Server
 		try {
@@ -252,6 +268,7 @@ public class NGECore {
 		zoneDispatch = new NetworkDispatch(this, true);
 		zoneDispatch.addService(connectionService);
 		zoneDispatch.addService(characterService);
+		zoneDispatch.addService(factionService);
 		zoneDispatch.addService(objectService);
 		zoneDispatch.addService(commandService);
 		zoneDispatch.addService(chatService);
@@ -261,6 +278,7 @@ public class NGECore {
 		zoneDispatch.addService(playerService);
 		zoneDispatch.addService(buffService);
 		zoneDispatch.addService(entertainmentService);
+		//zoneDispatch.addService(missionService);
 
 		zoneServer = new MINAServer(zoneDispatch, config.getInt("ZONE.PORT"));
 		zoneServer.start();
@@ -279,6 +297,7 @@ public class NGECore {
 		terrainService.addPlanet(10, "dathomir", "terrain/dathomir.trn", true);
 		terrainService.addPlanet(11, "mustafar", "terrain/mustafar.trn", true);
 		terrainService.addPlanet(12, "kashyyyk_main", "terrain/kashyyyk_main.trn", true);
+		terrainService.loadClientPois();
 		// Travel Points
 		travelService.loadTravelPoints();
 		simulationService = new SimulationService(this);
@@ -298,13 +317,16 @@ public class NGECore {
 		
 		gcwService = new GCWService(this);
 		zoneDispatch.addService(gcwService);
+		
+		collectionService = new CollectionService(this);
+		zoneDispatch.addService(collectionService);
 
 		tradeService = new TradeService(this);
 		zoneDispatch.addService(tradeService);
 		
 		zoneDispatch.addService(skillService);
 		
-		travelService.startShuttleSchedule();
+		//travelService.startShuttleSchedule();
 		
 		weatherService = new WeatherService(this);
 		weatherService.loadPlanetSettings();
@@ -313,7 +335,7 @@ public class NGECore {
 		didServerCrash = false;
 		System.out.println("Started Server.");
 		setGalaxyStatus(2);
-		
+
 	}
 
 	public void stop() {
@@ -454,5 +476,10 @@ public class NGECore {
 	public static NGECore getInstance() {
 		return instance;
 	}
+	
+	public BusConfiguration getEventBusConfig() {
+		return eventBusConfig;
+	}
+	
 }
 

@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import resources.objects.Buff;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
 
@@ -150,6 +151,8 @@ public class GroupService implements INetworkDispatch {
 			leader.setGroupId(group.getObjectID());
 			invited.makeAware(group);
 			invited.setGroupId(group.getObjectID());
+			addGroupBuffsToMember(group, leader);
+			addGroupBuffsToMember(group, invited);
 			return;
 			
 		}
@@ -162,6 +165,7 @@ public class GroupService implements INetworkDispatch {
 			invited.makeAware(group);
 			invited.setGroupId(group.getObjectID());	
 			invited.sendSystemMessage("@group:joined_self", (byte) 0);
+			addGroupBuffsToMember(group, invited);
 			
 		} else if(group.getMemberList().size() >= 8) {
 			
@@ -175,8 +179,31 @@ public class GroupService implements INetworkDispatch {
 			
 		}
 		
+	}
+	
+	public void addGroupBuffsToMember(GroupObject group, CreatureObject member) {
 		
+		// loop until we find a member other than ourself
+		for(SWGObject otherMember : group.getMemberList()) {
+			if(otherMember != member) {
+				for(Buff buff : ((CreatureObject) otherMember).getBuffList().get()) {
+					if(buff.isGroupBuff()) {
+						Buff newBuff = core.buffService.doAddBuff(member, buff.getBuffName());
+						newBuff.setGroupBufferId(buff.getGroupBufferId());
+					}
+				}
+				return;
+			}
+		}
 		
+	}
+	
+	public void removeGroupBuffs(CreatureObject member) {
+		for(Buff buff : new ArrayList<Buff>(member.getBuffList().get())) {
+			if(buff.isGroupBuff() && buff.getGroupBufferId() != member.getObjectID()) {
+				core.buffService.removeBuffFromCreature(member, buff);
+			}
+		}
 	}
 	
 	public void handleGroupDisband(CreatureObject creature) {
@@ -201,13 +228,15 @@ public class GroupService implements INetworkDispatch {
 			creature.setGroupId(0);
 			creature.makeUnaware(group);
 			creature.sendSystemMessage("You have left the group.", (byte) 0);
-			
+
 			for(SWGObject member : memberList) {
 				
 				CreatureObject creature2 = (CreatureObject) member;
 				creature2.sendSystemMessage(creature.getCustomName() + " has left the group.", (byte) 0);
 				
 			}
+			
+			removeGroupBuffs(creature);
 			
 		} else {
 			
@@ -224,7 +253,9 @@ public class GroupService implements INetworkDispatch {
 				creature2.makeUnaware(group);
 				
 				creature2.sendSystemMessage("The group has been disbanded.", (byte) 0);
-
+				
+				removeGroupBuffs((CreatureObject) member);
+				
 			}
 			
 			core.objectService.destroyObject(group.getObjectID());
