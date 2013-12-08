@@ -144,12 +144,23 @@ public class TravelService implements INetworkDispatch {
 	public TravelPoint getNearestTravelPoint(SWGObject obj) {
 		TravelPoint returnedPoint = null;
 		Vector<TravelPoint> planetTp = travelMap.get(obj.getPlanet());
-		
+
 		synchronized(travelMap) {
 			for (TravelPoint tp : planetTp) {
 				//System.out.println("Distance for point " + tp.getName() + " is " + tp.getLocation().getDistance2D(obj.getWorldPosition()));
 				if (tp.getLocation().getDistance2D(obj.getWorldPosition()) <= 125) {
-					returnedPoint = tp;
+					if (returnedPoint != null) {
+						float returnPointDistance = returnedPoint.getLocation().getDistance2D(obj.getWorldPosition());
+						float tpDistance = tp.getLocation().getDistance2D(obj.getWorldPosition());
+						//Console.println("Current point: " + returnedPoint.getName());
+						//Console.println("Return point distance: " + returnPointDistance + " for " + returnedPoint.getName());
+						//Console.println("tp point distance: " + tpDistance + " for " + tp.getName());
+						if (tpDistance < returnPointDistance) {
+							returnedPoint = tp;
+						}
+					} else {
+						returnedPoint = tp;
+					}
 				}
 			}
 		}
@@ -260,7 +271,7 @@ public class TravelService implements INetworkDispatch {
 			}
 			
 			creatureObj.setBankCredits(0);
-			creatureObj.setCashCredits(cashDifference);
+			creatureObj.setCashCredits(creatureObj.getCashCredits() - cashDifference);
 		} else {
 			creatureObj.setBankCredits(playerBankCredits - fare);
 		}

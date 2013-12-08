@@ -25,6 +25,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
+import resources.common.Console;
 import resources.common.SpawnPoint;
 import resources.objects.creature.CreatureObject;
 import engine.resources.scene.Point3D;
@@ -102,6 +103,9 @@ public class TravelPoint {
 	
 	public void setShuttle(CreatureObject shuttleObj) {
 		this.shuttle = shuttleObj;
+		if (shuttleObj == null) {
+			Console.println("NULL SHUTTLE SET FOR: " + getName());
+		}
 		startShuttleSchedule();
 	}
 
