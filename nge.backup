@@ -532,7 +532,6 @@ ALTER TABLE ONLY "sessions" ALTER COLUMN "id" SET DEFAULT "nextval"('"sessions_i
 
 INSERT INTO "accounts" VALUES (1, 'Light', 'password', 'test');
 INSERT INTO "accounts" VALUES (2, 'Darkk', 'Password1', 'xyz@x.de');
-INSERT INTO "accounts" VALUES (9261, 'darkk1138', 'nt31lhlfujf8oaht6a2oeniniq', 'cmdr_rdo@gmx.de');
 
 
 --
