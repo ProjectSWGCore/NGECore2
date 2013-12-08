@@ -35,7 +35,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import net.engio.mbassy.bus.config.BusConfiguration;
-
 import resources.common.RadialOptions;
 import resources.common.ThreadMonitor;
 import resources.objects.creature.CreatureObject;
@@ -47,6 +46,7 @@ import services.EntertainmentService;
 import services.EquipmentService;
 import services.GroupService;
 import services.LoginService;
+import services.MissionService;
 import services.PlayerService;
 import services.ScriptService;
 import services.SimulationService;
@@ -144,6 +144,7 @@ public class NGECore {
 	public WeatherService weatherService;
 	public SpawnService spawnService;
 	public AIService aiService;
+	//public MissionService missionService;
 	
 	// Login Server
 	public NetworkDispatch loginDispatch;
@@ -219,6 +220,7 @@ public class NGECore {
 		equipmentService = new EquipmentService(this);
 		entertainmentService = new EntertainmentService(this);
 		aiService = new AIService(this);
+		//missionService = new MissionService(this);
 		
 		// Ping Server
 		try {
@@ -249,6 +251,7 @@ public class NGECore {
 		zoneDispatch.addService(playerService);
 		zoneDispatch.addService(buffService);
 		zoneDispatch.addService(entertainmentService);
+		//zoneDispatch.addService(missionService);
 
 		zoneServer = new MINAServer(zoneDispatch, config.getInt("ZONE.PORT"));
 		zoneServer.start();

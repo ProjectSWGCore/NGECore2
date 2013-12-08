@@ -589,36 +589,9 @@ public class SimulationService implements INetworkDispatch {
 			add(object, pos.x, pos.z, true);
 		}
 		
-		
 		PlayerObject ghost = (PlayerObject) object.getSlottedObject("ghost");
-		if (ghost != null) {
-			
-			String objectShortName = object.getCustomName().toLowerCase();
-			
-			if (object.getCustomName().contains(" ")) {
-				String[] splitName = object.getCustomName().toLowerCase().split(" ");
-				objectShortName = splitName[0].toLowerCase();
-			}
-			
-			core.chatService.playerStatusChange(objectShortName, (byte) 1);
-			
-			if (ghost.getFriendList().isEmpty() == false) {
-				// Find out what friends are online/offline
-				for (String friend : ghost.getFriendList()) {
-					SWGObject friendObject = (SWGObject) core.chatService.getObjectByFirstName(friend);
-					if (friendObject == null)
-						continue;
-					if(friendObject.isInQuadtree() == true) {
-						ChatFriendsListUpdate onlineNotifyStatus = new ChatFriendsListUpdate(friend, (byte) 1);
-						client.getSession().write(onlineNotifyStatus.serialize());
-
-					} else {
-						ChatOnChangeFriendStatus changeStatus = new ChatOnChangeFriendStatus(object.getObjectID(), friend, 0);
-						client.getSession().write(changeStatus.serialize());
-					}
-				}
-			}
-		}
+		if(object.getParentId() == 0)
+			add(object, pos.x, pos.z);
 		
 		core.weatherService.sendWeather(object);
 		

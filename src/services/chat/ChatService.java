@@ -74,6 +74,7 @@ public class ChatService implements INetworkDispatch {
 		core.commandService.registerCommand("socialinternal");
 		core.commandService.registerCommand("addignore");
 		core.commandService.registerCommand("removeignore");
+		core.commandService.registerCommand("findfriend");
 		mailODB = core.getMailODB();
 	}
 	
@@ -110,6 +111,10 @@ public class ChatService implements INetworkDispatch {
 		for(Client client : observers) {
 			float distance = client.getParent().getPosition().getDistance2D(position);
 			if(client != null && client.getSession() != null && distance <= 80) {
+				
+				if(((PlayerObject)client.getParent().getSlottedObject("ghost")).getIgnoreList().contains(speaker.getCustomName().toLowerCase().split(" ")[0]))
+					continue;
+				
 				spatialChat.setDestinationId(client.getParent().getObjectID());
 				ObjControllerMessage objControllerMessage2 = new ObjControllerMessage(0x0B, spatialChat);
 				client.getSession().write(objControllerMessage2.serialize());

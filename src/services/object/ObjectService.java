@@ -21,6 +21,7 @@
  ******************************************************************************/
 package services.object;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteOrder;
 import java.sql.PreparedStatement;
@@ -36,6 +37,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import resources.common.*;
@@ -47,6 +49,8 @@ import org.python.core.PyObject;
 
 import com.sleepycat.persist.EntityCursor;
 
+import protocol.swg.ChatFriendsListUpdate;
+import protocol.swg.ChatOnChangeFriendStatus;
 import protocol.swg.ChatOnGetFriendsList;
 import protocol.swg.CmdSceneReady;
 import protocol.swg.CmdStartScene;
@@ -219,7 +223,7 @@ public class ObjectService implements INetworkDispatch {
 		object.setAttachment("serverTemplate", ((customServerTemplate != null) ? customServerTemplate : object.getTemplate()));
 		
 		object.setisInSnapshot(isSnapshot);
-		loadServerTemplate(object);		
+		//loadServerTemplate(object);		
 		
 		objectList.put(objectID, object);
 		
@@ -276,10 +280,12 @@ public class ObjectService implements INetworkDispatch {
 				}
 			}
 
+		} catch (FileNotFoundException e) {
+			System.out.println("!File Not Found:" + template.toString());
 		} catch (IOException e) {
+			System.out.println("!IO error " + template.toString());
 			e.printStackTrace();
 		}
-
 	}
 	
 	public SWGObject createObject(String Template, Planet planet) {
@@ -348,18 +354,6 @@ public class ObjectService implements INetworkDispatch {
 			
 			if (method != null && method.isCallable()) {
 				method.__call__(Py.java2py(core), Py.java2py(object));
-			}
-		}
-		
-		if (object instanceof CreatureObject) {
-			if (core.factionService.getFactionMap().containsKey(((CreatureObject) object).getFaction())) {
-				if (FileUtilities.doesFileExist(filePath)) {
-					PyObject method = core.scriptService.getMethod("scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", ""), object.getTemplate().split("shared_" , 2)[1].replace(".iff", ""), "destroy");
-					
-					if (method != null && method.isCallable()) {
-						method.__call__(Py.java2py(core), Py.java2py(((TangibleObject) object).getKiller()), Py.java2py(object));
-					}
-				}
 			}
 		}
 		
@@ -456,10 +450,16 @@ public class ObjectService implements INetworkDispatch {
 		String filePath = "scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", "") + object.getTemplate().split("shared_" , 2)[1].replace(".iff", "") + ".py";
 		
 		if (FileUtilities.doesFileExist(filePath)) {
-			PyObject method = core.scriptService.getMethod("scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", ""), object.getTemplate().split("shared_" , 2)[1].replace(".iff", ""), "useObject");
+			filePath = "scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", "");
+			String fileName = object.getTemplate().split("shared_" , 2)[1].replace(".iff", "");
 			
-			if (method != null && method.isCallable()) {
-				method.__call__(Py.java2py(core), Py.java2py(creature), Py.java2py(object));
+			PyObject method1 = core.scriptService.getMethod("scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", ""), object.getTemplate().split("shared_" , 2)[1].replace(".iff", ""), "use");
+			PyObject method2 = core.scriptService.getMethod("scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", ""), object.getTemplate().split("shared_" , 2)[1].replace(".iff", ""), "useObject");
+			
+			if (method1 != null && method1.isCallable()) {
+				method1.__call__(Py.java2py(core), Py.java2py(creature), Py.java2py(object));
+			} else if (method2 != null && method2.isCallable()) {
+				method2.__call__(Py.java2py(core), Py.java2py(creature), Py.java2py(object));
 			}
 		}
 	}
@@ -565,6 +565,35 @@ public class ObjectService implements INetworkDispatch {
 				
 				ChatOnGetFriendsList friendsListMessage = new ChatOnGetFriendsList(ghost);
 				client.getSession().write(friendsListMessage.serialize());
+				
+				if (ghost != null) {
+					
+					String objectShortName = creature.getCustomName().toLowerCase();
+					
+					if (creature.getCustomName().contains(" ")) {
+						String[] splitName = creature.getCustomName().toLowerCase().split(" ");
+						objectShortName = splitName[0].toLowerCase();
+					}
+					
+					core.chatService.playerStatusChange(objectShortName, (byte) 1);
+					
+					if (ghost.getFriendList().isEmpty() == false) {
+						// Find out what friends are online/offline
+						for (String friend : ghost.getFriendList()) {
+							SWGObject friendObject = (SWGObject) core.chatService.getObjectByFirstName(friend);
+							if (friendObject == null)
+								continue;
+							if(friendObject.isInQuadtree() == true) {
+								ChatFriendsListUpdate onlineNotifyStatus = new ChatFriendsListUpdate(friend, (byte) 1);
+								client.getSession().write(onlineNotifyStatus.serialize());
+
+							} else {
+								ChatOnChangeFriendStatus changeStatus = new ChatOnChangeFriendStatus(creature.getObjectID(), friend, 0);
+								client.getSession().write(changeStatus.serialize());
+							}
+						}
+					}
+				}
 				
 				core.playerService.postZoneIn(creature);
 
@@ -740,5 +769,24 @@ public class ObjectService implements INetworkDispatch {
 		
 	}
 
-	
+	public int objsInContainer(SWGObject owner, TangibleObject container) {
+		if (owner == null) {
+			Console.println("Owner null!");
+		}
+		if (container == null) {
+			Console.println("Container is null!");
+		}
+		final AtomicInteger count = new AtomicInteger();
+		
+		container.viewChildren(owner, false, false, new Traverser() {
+
+			@Override
+			public void process(SWGObject child) {
+				count.getAndIncrement();
+			}
+			
+		});
+		
+		return count.get();
+	}
 }

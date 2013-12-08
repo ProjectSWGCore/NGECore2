@@ -114,11 +114,14 @@ public class TravelService implements INetworkDispatch {
 							Vector<TravelPoint> correctTravelPoints = new Vector<TravelPoint>();
 							
 							for(TravelPoint tp : travelMap.get(planet)) {
-								if(tp.isStarport() || tp.getPlanetName().equalsIgnoreCase(object.getPlanet().getName()))
+								if(tp.isStarport() || tp.getPlanetName().equalsIgnoreCase(object.getPlanet().getName())) {
 									correctTravelPoints.add(tp);
+									//Console.println(tp.getName());
+								}
 							}
 							PlanetTravelPointListResponse response = new PlanetTravelPointListResponse(planetString, correctTravelPoints);
 							client.getSession().write(response.serialize());
+							
 							break;
 							
 						} 
@@ -227,7 +230,7 @@ public class TravelService implements INetworkDispatch {
 		
 		Planet planet = core.terrainService.getPlanetByName(departurePlanet.toLowerCase());
 		SWGObject travelTicket = core.objectService.createObject("object/tangible/travel/travel_ticket/base/shared_base_travel_ticket.iff", planet);
-
+		
 		travelTicket.setStringAttribute("@obj_attr_n:travel_departure_planet", WordUtils.capitalize(departurePlanet));
 		travelTicket.setStringAttribute("@obj_attr_n:travel_departure_point", departureLoc);
 		
@@ -271,7 +274,7 @@ public class TravelService implements INetworkDispatch {
 		
 		creatureObj.getSlottedObject("inventory").add(travelTicket);
 		//Console.println("Total cost: " + fare);
-		SUIWindow window = core.suiService.createMessageBox(MessageBoxType.MESSAGE_BOX_OK, "STAR WARS GALAXIES", "Ticket purchase complete.", player, null, 0);
+		SUIWindow window = core.suiService.createMessageBox(MessageBoxType.MESSAGE_BOX_OK, "STAR WARS GALAXIES", "@travel:ticket_purchase_complete", player, null, 0);
 		core.suiService.openSUIWindow(window);
 
 		creatureObj.sendSystemMessage("You successfully make a payment of " + fare + " credits to the Galactic Travel Commission.", (byte) 0);
@@ -364,7 +367,7 @@ public class TravelService implements INetworkDispatch {
 			for (int f = 0; f < travelFares.getRowCount(); f++) {
 				Planet planet = core.terrainService.getPlanetByName((String) travelFares.getObject(f, 0));
 				if (travelMap.containsKey(planet)) {
-					int corellia = ((Integer) travelFares.getObject(f, 1));
+					int corellia = ((int) travelFares.getObject(f, 1));
 					int dantooine = ((int) travelFares.getObject(f, 2));
 					int dathomir = ((int) travelFares.getObject(f, 3));
 					int endor = ((int) travelFares.getObject(f, 4));
