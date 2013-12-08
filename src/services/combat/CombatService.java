@@ -90,7 +90,7 @@ public class CombatService implements INetworkDispatch {
 		if((command.getAttackType() == 0 || command.getAttackType() == 1 || command.getAttackType() == 3) && !attemptCombat(attacker, target))
 			success = false;
 		
-		if(!applySpecialCost(attacker, weapon, command))
+		if(success && !applySpecialCost(attacker, weapon, command))
 			success = false;
 		
 		if(!success) {
@@ -839,14 +839,14 @@ public class CombatService implements INetworkDispatch {
 		
 		boolean success = true;
 		
+		if((command.getAttackType() == 0 || command.getAttackType() == 1 || command.getAttackType() == 3) && !attemptHeal(healer, target))	
+			target = healer;
+		
 		if(target.getMaxHealth() == target.getHealth())
 			success = command.getAttackType() != 1;
 		
-		if(!applySpecialCost(healer, weapon, command))
+		if(success && !applySpecialCost(healer, weapon, command))
 			success = false;
-		
-		if((command.getAttackType() == 0 || command.getAttackType() == 1 || command.getAttackType() == 3) && !attemptHeal(healer, target))	
-			target = healer;
 
 		if(!success) {
 			IoSession session = healer.getClient().getSession();

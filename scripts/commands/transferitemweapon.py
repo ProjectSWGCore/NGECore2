@@ -16,15 +16,22 @@ def run(core, actor, target, commandString):
 
 		replacedObject = None
 		slotName = None
+		replacedObjects = []
+		slotNames = None
 	        if actor == container:
-			slotName = container.getSlotNameForObject(target)
-			replacedObject = container.getSlottedObject(slotName)
-	       
+			slotNames = container.getSlotNamesForObject(target)
+			for slotName in slotNames:
+				object = container.getSlottedObject(slotName)
+				if not object in replacedObjects and not object == None:
+					replacedObjects.append(object)
+		
                 oldContainer.transferTo(actor, container, target)
                
                 if actor == container:
                         if target.getTemplate().find('/wearables/') or target.getTemplate().find('/weapon/'):
-                                core.equipmentService.equip(actor, target, replacedObject)
+                                core.equipmentService.equip(actor, target)
+				for object in replacedObjects:
+					core.equipmentService.unequip(actor, object)
 				#path = 'scripts/' + target.getTemplate().rpartition('/')[0] + '/'        
                                 #module = target.getTemplate().rpartition('/')[2].replace('shared_', '').replace('.iff', '')
                                 #core.scriptService.callScript(path, 'equip', module, core, actor, target)

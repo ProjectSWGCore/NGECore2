@@ -39,9 +39,11 @@ import engine.resources.scene.Point3D;
 public class LairSpawnArea extends SpawnArea {
 	
 	private LairGroupTemplate lairGroup;
+	private long lastSpawnTime = 0;
 	
-	public LairSpawnArea(Planet planet, AbstractCollidable area) {
+	public LairSpawnArea(Planet planet, AbstractCollidable area, LairGroupTemplate lairGroup) {
 		super(planet, area);
+		this.lairGroup = lairGroup;
 	}
 
 	public LairGroupTemplate getLairGroup() {
@@ -57,6 +59,9 @@ public class LairSpawnArea extends SpawnArea {
 		Vector<LairSpawnTemplate> lairTemplates = lairGroup.getLairSpawnTemplates();
 		
 		if(lairGroup == null || lairTemplates.isEmpty())
+			return;
+		
+		if((System.currentTimeMillis() - lastSpawnTime) < 3000)
 			return;
 	
 		Point3D randomPosition = getRandomPosition(object.getWorldPosition(), 32.f, 256.f);
@@ -79,6 +84,7 @@ public class LairSpawnArea extends SpawnArea {
 		int level = random.nextInt((int) (lairSpawn.getMaxLevel() - lairSpawn.getMinLevel()) + 1) + lairSpawn.getMinLevel();
 		
 		NGECore.getInstance().spawnService.spawnLair(lairSpawn.getLairTemplate(), getPlanet(), randomPosition, level);
+		lastSpawnTime = System.currentTimeMillis();
 		
 	}
 
@@ -97,12 +103,25 @@ public class LairSpawnArea extends SpawnArea {
 			return;
 		
 		spawnLair(creature);
-		
+		creature.getEventBus().subscribe(this);
+				
 	}
 
 	@Override
 	@Handler
 	public void onExit(ExitEvent event) {
+		
+		SWGObject object = event.object;
+		
+		if(object == null || !(object instanceof CreatureObject))
+			return;
+		
+		CreatureObject creature = (CreatureObject) object;
+		
+		if(creature.getSlottedObject("ghost") == null)
+			return;
+
+		creature.getEventBus().unsubscribe(this);
 		
 	}	
 	
@@ -122,6 +141,14 @@ public class LairSpawnArea extends SpawnArea {
 		if(new Random().nextFloat() <= 0.10)
 			spawnLair(creature);
 		
+	}
+
+	public long getLastSpawnTime() {
+		return lastSpawnTime;
+	}
+
+	public void setLastSpawnTime(long lastSpawnTime) {
+		this.lastSpawnTime = lastSpawnTime;
 	}
 	
 	

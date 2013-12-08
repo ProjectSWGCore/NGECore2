@@ -79,12 +79,12 @@ public class TerrainService {
 	
 	private void loadClientRegions(Planet planet)  {
 		
-		if(!FileUtilities.doesFileExist("datatables/clientregion/" + planet.getName() + ".iff"))
+		if(!FileUtilities.doesFileExist("clientdata/datatables/clientregion/" + planet.getName() + ".iff"))
 			return;
-		
+
 		try {
 			
-			DatatableVisitor regionTable = ClientFileManager.loadFile("datatables/clientpoi/clientpoi.iff", DatatableVisitor.class);
+			DatatableVisitor regionTable = ClientFileManager.loadFile("datatables/clientregion/" + planet.getName() + ".iff", DatatableVisitor.class);
 			
 			for (int i = 0; i < regionTable.getRowCount(); i++) {
 									
@@ -222,14 +222,15 @@ public class TerrainService {
 	
 	public boolean canBuildAtPosition(SWGObject object, float x, float z) {
 		
-		if(isWater(object.getPlanet(), z, z))
+		if(isWater(object.getPlanet(), x, z))
 			return false;
 		
 		Point3D position = new Point3D(x, 0, z);
 		
 		for(CollidableCircle noBuildArea : noBuildAreas.get(object.getPlanet())) {
-			if(noBuildArea.doesCollide(position))
+			if(noBuildArea.doesCollide(position)) {
 				return false;
+			}
 		}
 		
 		return true;

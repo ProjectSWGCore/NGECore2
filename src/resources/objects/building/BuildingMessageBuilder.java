@@ -43,7 +43,7 @@ public class BuildingMessageBuilder extends ObjectMessageBuilder {
 		buffer.putInt(0);
 		buffer.put(getAsciiString(building.getStfName()));
 		buffer.putInt(0);
-		buffer.putInt(255);
+		buffer.putInt(0);
 		buffer.putInt(0);
 		buffer.putInt(0);
 		buffer.putInt(0);

@@ -50,10 +50,10 @@ public class EquipmentService implements INetworkDispatch {
 		
 	}
 	
-	public void equip(CreatureObject actor, SWGObject item, SWGObject replacedItem) {
+	public void equip(CreatureObject actor, SWGObject item) {
 
-		if(replacedItem != null)
-			unequip(actor, replacedItem);
+		//if(replacedItem != null)
+		//	unequip(actor, replacedItem);
 		
 		String template = item.getTemplate();
 		String serverTemplate = template.replace(".iff", "");

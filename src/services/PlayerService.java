@@ -127,6 +127,7 @@ public class PlayerService implements INetworkDispatch {
 			}
 			
 		}, 0, 1000, TimeUnit.MILLISECONDS);
+		
 
 		scheduler.scheduleAtFixedRate(new Runnable() {
 
@@ -142,18 +143,6 @@ public class PlayerService implements INetworkDispatch {
 			
 		}, 0, 1000, TimeUnit.MILLISECONDS);
 		
-		/*scheduler.scheduleAtFixedRate(new Runnable() {
-
-			@Override
-			public void run() {
-				
-				if(creature.getCombatFlag() == 1)
-					creature.resetHAMList();
-				
-			}
-			
-		}, 0, 10, TimeUnit.SECONDS);*/
-
 
 	}
 

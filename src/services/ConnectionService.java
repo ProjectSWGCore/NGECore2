@@ -69,6 +69,8 @@ public class ConnectionService implements INetworkDispatch {
 
 			@Override
 			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
+				
+				System.out.println("xx");
 				data = data.order(ByteOrder.LITTLE_ENDIAN);
 				ClientIdMsg clientIdMsg = new ClientIdMsg();
 				data.position(0);
@@ -84,19 +86,22 @@ public class ConnectionService implements INetworkDispatch {
 	            PreparedStatement preparedStatement;
 
 	            try {
-	
+	            	
 		            preparedStatement = databaseConnection.preparedStatement("SELECT * FROM sessions WHERE key=?");
 		            preparedStatement.setBytes(1, clientIdMsg.getSessionKey());
 		            resultSet = preparedStatement.executeQuery();
 		            
 		            if (resultSet.next()) {
-		            	client.setAccountId(resultSet.getInt("accountId"));
+		            	client.setAccountId(resultSet.getLong("accountId"));
+		            	client.setSessionKey(clientIdMsg.getSessionKey());
 		            	AccountFeatureBits accountFeatureBits = new AccountFeatureBits();
 		            	ClientPermissionsMessage clientPermissionsMessage = new ClientPermissionsMessage();
 		            	session.write(new HeartBeatMessage().serialize());
 		            	session.write(accountFeatureBits.serialize());
 		            	session.write(clientPermissionsMessage.serialize());
 		                preparedStatement.close();
+		                
+		            	System.out.println("zyx");
 		            } else {
 		            	System.out.println("Cant get login session");
 		            }
@@ -105,8 +110,8 @@ public class ConnectionService implements INetworkDispatch {
 	
 	                e.printStackTrace();
 	
-	            } 
-				
+	            }
+	            
 			}
 			
 			

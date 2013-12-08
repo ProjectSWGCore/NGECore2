@@ -37,8 +37,11 @@ import org.apache.mina.core.session.IoSession;
 import engine.clients.Client;
 import engine.protocol.soe.Disconnect;
 import engine.resources.database.DatabaseConnection;
+import engine.resources.service.ILoginProvider;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
+import engine.resources.service.LocalDbLoginProvider;
+import engine.resources.service.VBLoginProvider;
 
 import protocol.swg.CharacterCreationDisabled;
 import protocol.swg.ClientUIErrorMessage;
@@ -61,16 +64,22 @@ public class LoginService implements INetworkDispatch{
 	
 	private int sessionKeyLength = 0;
 	private NGECore core;
-	private DatabaseConnection databaseConnection;
+	private DatabaseConnection databaseConnection1;
 	private DatabaseConnection databaseConnection2;
 	private Random random;
+	private ILoginProvider LoginProvider;
 	
 	public LoginService(NGECore core) {
 		this.core = core;
 		this.sessionKeyLength = core.getConfig().getInt("LOGIN.SESSION_KEY_SIZE");
-		this.databaseConnection = core.getDatabase1();
+		this.databaseConnection1 = core.getDatabase1();
 		this.databaseConnection2 = core.getDatabase2();
 		this.random = new Random();
+	    if (databaseConnection2 == null) {
+	    	LoginProvider = new LocalDbLoginProvider(databaseConnection1);
+	    } else {
+			LoginProvider = new VBLoginProvider(databaseConnection1, databaseConnection2);
+	    }
 	}
 	
 	public void insertTimedEventBindings(ScheduledExecutorService executor) {
@@ -88,19 +97,24 @@ public class LoginService implements INetworkDispatch{
 				data.position(0);
 				clientID.deserialize(data);
 				
-				String err         = "";
 				String user        = clientID.getAccountName();
 				String pass        = clientID.getPassword();
-				int id             = getAccountID(user);
-				if (id == -1)  err = "Invalid Username";
-				//String email       = getAccountEmail(user);
-				//String encryptPass = getAccountPassword(user);
+				int id             = LoginProvider.getAccountId(user, pass, session.getRemoteAddress().toString());
 				
-				if (err == "")
-					err = canUserLogin(user, /*email*/"", pass, /*encryptPass*/"", id, session.getRemoteAddress().toString());
-				
-				if (err != "") {
-					System.out.println(user + " failed login because " + err);
+				if (id < 0)  {
+					
+					String err = "";
+					switch (id) {
+						case -1:
+							err = "Database error";
+							break;
+						case -2:
+							err = "invalid user or password";
+							break;
+						case -3:
+							err = "user is banned";
+							break;
+					}
 					ClientUIErrorMessage errMsg = new ClientUIErrorMessage("Invalid Login", err);
 					session.write(errMsg.serialize());
 					Disconnect disconnect = new Disconnect((Integer)session.getAttribute("connectionId"), 6);
@@ -167,7 +181,7 @@ public class LoginService implements INetworkDispatch{
 				
                 PreparedStatement preparedStatement;
 	               
-	            preparedStatement = databaseConnection.preparedStatement("DELETE FROM characters WHERE \"id\"=? AND \"galaxyId\"=? AND \"accountId\"=?");
+	            preparedStatement = databaseConnection1.preparedStatement("DELETE FROM characters WHERE \"id\"=? AND \"galaxyId\"=? AND \"accountId\"=?");
 	            preparedStatement.setLong(1, packet.getcharId());
 	            preparedStatement.setInt(2, packet.getgalaxyId());
 	            preparedStatement.setInt(3, (int) client.getAccountId());
@@ -196,9 +210,9 @@ public class LoginService implements INetworkDispatch{
 	 */
 	private void persistSession(Client client) throws SQLException {
 
-	    String sessionValues = "?, " + client.getAccountId();
-	    PreparedStatement ps = databaseConnection.preparedStatement("INSERT INTO sessions (key, \"accountId\") VALUES (" + sessionValues + ")");
+	    PreparedStatement ps = databaseConnection1.preparedStatement("INSERT INTO sessions (\"key\", \"accountId\") VALUES (?, ?)");
 	    ps.setBytes(1, client.getSessionKey());
+	    ps.setLong(2, client.getAccountId());
 	    ps.executeUpdate();
 	    ps.close(); 
 				
@@ -226,7 +240,7 @@ public class LoginService implements INetworkDispatch{
 		PreparedStatement preparedStatement;
 
 		try {
-			preparedStatement = databaseConnection.preparedStatement("SELECT * FROM characters WHERE \"accountId\"=" + id + "");
+			preparedStatement = databaseConnection1.preparedStatement("SELECT * FROM characters WHERE \"accountId\"=" + id + "");
 			resultSet = preparedStatement.executeQuery();
 
 			while (resultSet.next() && !resultSet.isClosed()) {
@@ -257,7 +271,7 @@ public class LoginService implements INetworkDispatch{
 		LoginEnumCluster servers = new LoginEnumCluster(9);
 		PreparedStatement preparedStatement;
 		try {
-			preparedStatement = databaseConnection.preparedStatement("SELECT * FROM galaxies");
+			preparedStatement = databaseConnection1.preparedStatement("SELECT * FROM galaxies");
 			ResultSet resultSet = preparedStatement.executeQuery();
 			while (resultSet.next() && !resultSet.isClosed())
 				servers.addServer(resultSet.getInt("id"), resultSet.getString("name"));
@@ -276,7 +290,7 @@ public class LoginService implements INetworkDispatch{
 		LoginClusterStatus clusterStatus = new LoginClusterStatus();
 		ResultSet resultSet;
 		try {
-			PreparedStatement preparedStatement	= databaseConnection.preparedStatement("SELECT * FROM \"connectionServers\"");
+			PreparedStatement preparedStatement	= databaseConnection1.preparedStatement("SELECT * FROM \"connectionServers\"");
 			resultSet = preparedStatement.executeQuery();
 			while (resultSet.next() && !resultSet.isClosed())
 				clusterStatus.addServer(
@@ -295,111 +309,6 @@ public class LoginService implements INetworkDispatch{
 	}
 	
 	/**
-	 * Checks if account ID exists in game DB.
-	 * @param id Account ID.
-	 */
-	private boolean checkIfAccountExistInGameDB(int id) {
-		try {
-			PreparedStatement preparedStatement = databaseConnection.preparedStatement("SELECT * FROM accounts WHERE id=?");
-			preparedStatement.setInt(1, id);
-			ResultSet resultSet = preparedStatement.executeQuery();
-			if (resultSet.next()) {
-				return true;
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return false;
-	}
-	
-	/**
-	 * Saves forum account to game DB if the account does not exist in the game DB already.
-	 * @param id Account ID.
-	 * @param user Username
-	 * @param email User's email
-	 * @param pass Hashed password
-	 */
-	private void createAccountForGameDB(int id, String user, String email, String pass) {
-		try {
-			PreparedStatement ps = databaseConnection.preparedStatement("INSERT INTO accounts (id, \"user\", \"pass\", \"email\") VALUES (?, ?, ?, ?)");
-			ps.setInt(1, id);
-			ps.setString(2, user);
-			ps.setString(3, pass);
-			ps.setString(4, email);
-			ps.executeUpdate();
-			ps.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	/**
-	 * Checks if user is allowed to login.
-	 * @param id Account ID.
-	 * @param user Username
-	 * @param email User's email
-	 * @param pass User password
-	 * @param encryptPass encrypted password
-	 * @param ip Users IP address 
-	*/
-	private String canUserLogin(String user, String email, String pass, String encryptPass, int id, String ip) {
-		/*if ((new PHPBB3Auth()).phpbb_check_hash(pass, encryptPass)) {
-			if(checkBanlistforUserAndIP(id, ip)) {
-				return "You cannot login to the ProjectSWG server while being banned from ProjectSWG services";
-			}
-			return "";
-		} else {
-			return "Invalid Password";
-		}*/
-		
-		try {
-			PreparedStatement ps = databaseConnection.preparedStatement("SELECT * FROM accounts WHERE id=" + id + " AND \"pass\"='" + pass + "'");
-			ResultSet resultSet = ps.executeQuery();
-
-			if (resultSet.next()) {
-							
-				return "";
-				
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		
-		return "Invalid Password";
-
-		
-	}
-	/**
-	 * Checks if User has a forum account or IP ban.
-	 * @param id Account ID.
-	 * @param ip User's IP address.
-	 */
-	private boolean checkBanlistforUserAndIP(int id, String ip) {
-		if (!ip.contains("/"))
-			return false;
-		String IP = ((ip.split("/", 2)[1]).split(", ", 2)[0]).split(":", 2)[0];
-		try {
-			PreparedStatement preparedStatement = databaseConnection2.preparedStatement("SELECT ban_id FROM phpbb_banlist WHERE ban_ip=?");
-			preparedStatement.setString(1, IP);
-			ResultSet resultSet = preparedStatement.executeQuery();
-			if (resultSet.next()) {
-				return true;
-			} else {
-				preparedStatement.close();
-				preparedStatement = databaseConnection2.preparedStatement("SELECT ban_id FROM phpbb_banlist WHERE ban_userid=?");
-				preparedStatement.setInt(1, id);
-				resultSet = preparedStatement.executeQuery();
-				if (resultSet.next()) {
-					return true;
-				}
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return false;
-	}
-	
-	/**
 	 * Checks if User has correct client version.
 	 * @param version Client Version String
 	 */
@@ -407,61 +316,6 @@ public class LoginService implements INetworkDispatch{
 		System.out.println("Version Received: " + version);
 		return true;
 	}
-	
-	/**
-	 * Gets Account ID from forum DB by username.
-	 * @param user Username.
-	 */
-	private int getAccountID(String user) {
-		try {
-			PreparedStatement pStatement = databaseConnection.preparedStatement("SELECT id FROM accounts WHERE \"user\"='" + user + "'");
-			ResultSet resultSet = pStatement.executeQuery();
-			if (resultSet.next()) {
-				return resultSet.getInt("id");
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		};
-		return -1;
-	}
-	
-	/**
-	 * Gets Account Email from forum DB by username.
-	 * @param user Username.
-	 */
-	private String getAccountEmail(String user) {
-		try {
-			PreparedStatement pStatement = databaseConnection2.preparedStatement("SELECT user_email FROM phpbb_users WHERE username=?");
-			pStatement.setString(1, user);
-			ResultSet resultSet = pStatement.executeQuery();
-			
-			if (resultSet.next()) {
-				return resultSet.getString("user_email");
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		};
-		return "";
-	}
-	
-	/**
-	 * Gets hashed Account Password from forum DB by username.
-	 * @param user Username.
-	 */
-	private String getAccountPassword(String user) {
-		try {
-			PreparedStatement pStatement = databaseConnection2.preparedStatement("SELECT user_password FROM phpbb_users WHERE username=?");
-			pStatement.setString(1, user);
-			ResultSet resultSet = pStatement.executeQuery();
-			
-			if (resultSet.next()) {
-				return resultSet.getString("user_password");
-			}
-			pStatement.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		};
-		return "";
-	}
-	
+
 }
+	
