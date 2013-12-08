@@ -74,6 +74,7 @@ public class ChatService implements INetworkDispatch {
 		core.commandService.registerCommand("socialinternal");
 		core.commandService.registerCommand("addignore");
 		core.commandService.registerCommand("removeignore");
+		core.commandService.registerCommand("findfriend");
 		mailODB = core.getMailODB();
 	}
 	
