@@ -34,6 +34,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.mina.core.service.IoHandler;
 import net.engio.mbassy.bus.config.BusConfiguration;
 import resources.common.RadialOptions;
 import resources.common.ThreadMonitor;
@@ -64,6 +65,7 @@ import services.command.CommandService;
 import services.gcw.FactionService;
 import services.gcw.GCWService;
 import services.guild.GuildService;
+import services.LoginService;
 import services.map.MapService;
 import services.object.ObjectService;
 import services.object.UpdateService;
@@ -90,7 +92,9 @@ import engine.resources.database.ObjectDatabase;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
+import engine.resources.service.InteractiveJythonAcceptor;
 import engine.resources.service.NetworkDispatch;
+import engine.servers.InteractiveJythonServer;
 import engine.servers.MINAServer;
 import engine.servers.PingServer;
 
@@ -153,6 +157,10 @@ public class NGECore {
 	// Zone Server
 	public NetworkDispatch zoneDispatch;
 	private MINAServer zoneServer;
+	
+	// Interactive Jython Console
+	public InteractiveJythonAcceptor jythonAcceptor;
+	private InteractiveJythonServer jythonServer;
 
 	private ObjectDatabase creatureODB;
 	private ObjectDatabase mailODB;
@@ -189,12 +197,18 @@ public class NGECore {
 		// Database
 		databaseConnection = new DatabaseConnection();
 		databaseConnection.connect(config.getString("DB.URL"), config.getString("DB.NAME"), config.getString("DB.USER"), config.getString("DB.PASS"), "postgresql");
+
+		String db2Url = config.getString("DB2.URL");
+		if (db2Url == null || db2Url.matches("^\\s*$")) {
+			databaseConnection2 = null;
+		} else {
+			databaseConnection2 = new DatabaseConnection();
+			databaseConnection2.connect(config.getString("DB2.URL"), config.getString("DB2.NAME"), config.getString("DB2.USER"), config.getString("DB2.PASS"), "mysql");
+		}
 		
-		databaseConnection2 = new DatabaseConnection();
 		setGalaxyStatus(1);
 		creatureODB = new ObjectDatabase("creature", true, false, true);
 		mailODB = new ObjectDatabase("mails", true, false, true);
-
 		// Services
 		loginService = new LoginService(this);
 		connectionService = new ConnectionService(this);
@@ -219,6 +233,19 @@ public class NGECore {
 		skillModService = new SkillModService(this);
 		equipmentService = new EquipmentService(this);
 		entertainmentService = new EntertainmentService(this);
+		
+		if (config.keyExists("JYTHONCONSOLE.PORT")) {
+			int jythonPort = config.getInt("JYTHONCONSOLE.PORT");
+			if (jythonPort > 0) {
+				
+				System.out.println("Starting InteractiveJythonServer on Port " + jythonPort);
+				jythonAcceptor = new InteractiveJythonAcceptor();
+				jythonServer = new InteractiveJythonServer((IoHandler) jythonAcceptor, jythonPort, this);
+				jythonAcceptor.setServer(jythonServer);
+				jythonServer.start();
+			}
+		}
+		spawnService = new SpawnService(this);
 		aiService = new AIService(this);
 		//missionService = new MissionService(this);
 		
@@ -314,8 +341,6 @@ public class NGECore {
 		setGalaxyStatus(2);
 		
 	}
-	
-
 
 	public void stop() {
 		System.out.println("Stopping Servers and Connections.");

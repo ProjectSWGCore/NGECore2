@@ -87,6 +87,7 @@ public class CharacterService implements INetworkDispatch {
 		swgOpcodes.put(Opcodes.ClientRandomNameRequest, new INetworkRemoteEvent() {
 			
 			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
+				
 				ClientRandomNameRequest randomNameRequest = new ClientRandomNameRequest();
 				ClientRandomNameResponse response;
 				String name = null;
@@ -95,16 +96,23 @@ public class CharacterService implements INetworkDispatch {
 				data.position(0);
 				randomNameRequest.deserialize(data);
 				
+				
 				while (name == null) {
+					
+					String firstName ="";
+					String lastName = "";
 					if (randomNameRequest.getSharedRaceTemplate().contains("wookie")) {
-						name = nameGenerator.compose(4);
+						firstName = nameGenerator.compose(4);
+						
 					} else {
-						name = nameGenerator.compose(2) + " " + nameGenerator.compose(3);
+						firstName = nameGenerator.compose(2);
+						lastName = nameGenerator.compose(3);
 					}
 					
 					try {
-						if (checkForDuplicateName(getfirstName(name, randomNameRequest.getSharedRaceTemplate()))) {
-							name = null;
+						//it's fine here to just use 0 as accountId because we don't want reserved names to be random generated for anyone.
+						if (!checkForDuplicateName(firstName, 0)) {
+							name = firstName + ((lastName.length() > 0 ) ?  " " + lastName : "");
 						}
 					} catch (SQLException e2) {
 						e2.printStackTrace();
@@ -121,6 +129,8 @@ public class CharacterService implements INetworkDispatch {
 
 			@Override
 			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
+				
+				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
 				data = data.order(ByteOrder.LITTLE_ENDIAN);
 				data.position(0);
 				ClientVerifyAndLockNameRequest message = new ClientVerifyAndLockNameRequest();
@@ -129,11 +139,11 @@ public class CharacterService implements INetworkDispatch {
 				boolean isDeclined = false;
 				String firstName = getfirstName(message.getName(), message.getRaceTemplate());
 				String lastName = getlastName(message.getName(), message.getRaceTemplate());
-				if(message.getName() != null) System.out.println(message.getName());
+				//if(message.getName() != null) System.out.println(message.getName());
 
 				int length = firstName.length();
 				try {
-					if (checkForDuplicateName(firstName)) {
+					if (checkForDuplicateName(firstName, client.getAccountId())) {
 						
 						approved_flag = "name_declined_in_use";
 						isDeclined = true;
@@ -193,16 +203,15 @@ public class CharacterService implements INetworkDispatch {
 				}
 				
 				int galaxyId = config.getInt("GALAXY_ID");
+				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
 				
 				try {
-					if (checkForDuplicateName(getfirstName(clientCreateCharacter.getName(), clientCreateCharacter.getRaceTemplate()))) {
+					if (checkForDuplicateName(getfirstName(clientCreateCharacter.getName(), clientCreateCharacter.getRaceTemplate()), client.getAccountId())) {
 						return;
 					}
 				} catch (SQLException e2) {
 					e2.printStackTrace();
 				}
-				
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
 				
 				// TODO: Add starting location and items in a script
 				String raceTemplate = clientCreateCharacter.getRaceTemplate();
@@ -321,63 +330,72 @@ public class CharacterService implements INetworkDispatch {
 
 	}
 
-	private boolean checkForDuplicateName(String firstName) throws SQLException
+	private boolean checkForDuplicateName(String firstName, long accountId) throws SQLException
 	{
 		firstName = firstName.replace("'", "''");
 		firstName = firstName.toLowerCase();
-		PreparedStatement ps = databaseConnection.preparedStatement("SELECT id FROM characters WHERE LOWER(\"firstName\") ='" + firstName + "'");
+		PreparedStatement ps = databaseConnection.preparedStatement("SELECT id FROM characters WHERE LOWER(\"firstName\")=?");
+		ps.setString(1, firstName);
+		//System.out.println(ps.toString());
 		ResultSet resultSet = ps.executeQuery();
-		
-		boolean bool = resultSet.next();
+	
+		boolean isDuplicate = resultSet.next();
 		resultSet.getStatement().close();
-		return bool;
-	}
-
+		if (isDuplicate) { return true; }
 		
+		//FIXME: this is a bit lazy... but it's only temporary :p
+		PreparedStatement psc = databaseConnection.preparedStatement("SELECT * FROM pg_tables WHERE \"tablename\"=?");
+		psc.setString(1, "temp_reserved_char_names");
+		ResultSet resultSetC = psc.executeQuery();
+		boolean tableExists = resultSetC.next();
+		resultSetC.getStatement().close();
+		if (!tableExists) { return false; } 
+		
+		PreparedStatement ps2 = databaseConnection.preparedStatement("SELECT \"accountId\" FROM temp_reserved_char_names WHERE \"accountId\"!=? AND LOWER(\"firstName\")=?");
+		ps2.setLong(1, accountId);
+		ps2.setString(2, firstName);
+		ResultSet resultSet2 = ps2.executeQuery();
+		boolean isReserved = resultSet2.next();
+		resultSet2.getStatement().close();
+		
+		return isReserved;
+	}
+	
+	
 	private String getfirstName(String Name, String RaceTemplate)
 	{
-		String[] splitName;
-		if (RaceTemplate != "object/creature/player/wookiee_male.iff" | RaceTemplate != "object/creature/player/wookiee_female.iff")
+		if (RaceTemplate.contains("/wookiee_") ||
+				!Name.contains(" ")) 
 		{ // wookies don't have lastNames
-			if (Name.contains(" "))
-			{
-				splitName = Name.split(" ", 2);
-				return splitName[0];
-			}
-			else
-			{
 				return Name;
-			}
 		}
-		else
-		{
-			return Name;
-		}
+			
+		return Name.split(" ", 2)[0];
+
 	}
 	
 	private String getlastName(String Name, String RaceTemplate)
 	{
-		String[] splitName;
-		if (RaceTemplate != "object/creature/player/wookiee_male.iff" && RaceTemplate != "object/creature/player/wookiee_female.iff")
+		if (RaceTemplate.contains("/wookiee_") ||
+			!Name.contains(" ")) 
 		{ // wookies don't have lastNames
-			if (Name.contains(" "))
-			{
-				splitName = Name.split(" ", 2);
-				return splitName[1];
-			}
-			else
-			{
-				return "";
-			}
-		}
-		else
-		{
 			return "";
 		}
+		
+		return Name.split(" ", 2)[1];
+
 	}
 
 	private String checkForReservedName(String firstName, String lastName) throws SQLException
 	{
+		
+		PreparedStatement psc = databaseConnection.preparedStatement("SELECT * FROM pg_tables WHERE \"tablename\"=?");
+		psc.setString(1, "reservednames");
+		ResultSet rsc = psc.executeQuery();
+		if (!rsc.next()) {
+			return null;
+		}
+		
 		firstName = firstName.toLowerCase();
 		lastName = lastName.toLowerCase();
 		
