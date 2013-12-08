@@ -1,6 +1,4 @@
-from resources.objects.creature import CreatureObject
 from java.util import Date
-from engine.resources.objects import SWGObject
 from services.chat import ChatService
 from services.chat import Mail
 from services.sui import SUIWindow
@@ -8,6 +6,7 @@ from services.sui import SUIService
 from services.sui.SUIWindow import Trigger
 from services.sui.SUIService import MessageBoxType
 from java.util import Vector
+from main import NGECore
 import sys
 
 # initialize global vars (happens at compile time)
@@ -81,7 +80,8 @@ def run(core, actor, target, commandString):
         return
     return
 
-def handleBankTip(core, owner, eventType, returnList):
+def handleBankTip(owner, window, eventType, returnList):
+    core = NGECore.getInstance()
     chatSvc = core.chatService
     actorGlobal = core.objectService.getObject(actorID)
     targetGlobal = core.objectService.getObject(targetID)
@@ -115,7 +115,7 @@ def handleBankTip(core, owner, eventType, returnList):
             actorMail.setSubject('@base_player:wire_mail_subject')
             actorMail.setSenderName('bank')
             
-            targetGlobal.setBankCredits(int(tipAmount))
+            targetGlobal.setBankCredits(int(tipAmount) + int(targetGlobal.getBankCredits()))
             actorGlobal.setBankCredits(int(actorFunds) - int(totalLost))
             actorGlobal.sendSystemMessage('You have successfully sent ' + tipAmount + ' bank credits to ' + targetGlobal.getCustomName(), 0)
             targetGlobal.sendSystemMessage('You have successfully received ' + tipAmount + ' bank credits from ' + actorGlobal.getCustomName(), 0)

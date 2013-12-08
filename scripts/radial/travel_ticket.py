@@ -1,5 +1,4 @@
 from resources.common import RadialOptions
-from protocol.swg import EnterTicketPurchaseModeMessage
 import sys
 
 def createRadial(core, owner, target, radials):
@@ -17,9 +16,10 @@ def handleSelection(core, owner, target, option):
         tp = core.travelService.getNearestTravelPoint(owner)
         
         if owner is not None and tp is not None:
-            if tp.getLocation().getDistance2D(owner.getWorldPosition()) <= 25:
+            print (str(tp.getLocation().getDistance2D(owner.getWorldPosition())))
+            if tp.getLocation().getDistance2D(owner.getWorldPosition()) <= float(25):
                 if tp.isShuttleAvailable() is True:
-                    core.travelService.doTransport(owner, core.travelService.getTravelPointByName(target.getStringAttribute('@obj_attr_n:travel_arrival_planet'), 
+                    core.travelService.doTransport(owner, core.travelService.getTravelPointByName(target.getStringAttribute('@obj_attr_n:travel_arrival_planet'),
                                                                                                   target.getStringAttribute('@obj_attr_n:travel_arrival_point')))
                     core.objectService.destroyObject(target)
                     return
