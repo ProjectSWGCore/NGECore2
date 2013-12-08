@@ -215,11 +215,12 @@ public class EntertainmentService implements INetworkDispatch {
 	}
 
 	private void registerCommands() {
-		core.commandService.registerCommand("startdance");
-		core.commandService.registerCommand("stopdance");
+		core.commandService.registerCommand("bandflourish");
 		core.commandService.registerCommand("flourish");
 		core.commandService.registerAlias("flo","flourish");
-		core.commandService.registerCommand("bandflourish");
+		core.commandService.registerCommand("groupdance");
+		core.commandService.registerCommand("startdance");
+		core.commandService.registerCommand("stopdance");
 	}
 	
 	public void giveInspirationBuff(SWGObject reciever, Vector<BuffItem> buffVector) {

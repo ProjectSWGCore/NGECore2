@@ -131,7 +131,6 @@ public class CommandService implements INetworkDispatch  {
 		
 	}
 	
-	//FIXME: CRC could just be generated as well.
 	public void registerAlias(String name, String target) {
 		Vector<BaseSWGCommand> commands = new Vector<BaseSWGCommand>(commandLookup); 	// copy for thread safety
 		BaseSWGCommand targetCommand = null;

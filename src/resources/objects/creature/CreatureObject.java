@@ -55,7 +55,7 @@ import engine.resources.scene.Quaternion;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 
-@Entity(version=6)
+@Entity(version=7)
 public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	@NotPersistent
@@ -120,6 +120,8 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	//FIXME: hmm.. or persistent?
 	@NotPersistent
 	private boolean acceptBandflourishes = true;
+	@NotPersistent
+	private boolean groupDance = true;
 	private CreatureObject performanceWatchee;
 	private CreatureObject performanceListenee;
 	private int health = 1000;
@@ -1341,6 +1343,26 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	public boolean setStaticNPC(boolean staticNPC) {
 		return this.staticNPC = staticNPC;
 	}
+	
+	public boolean getGroupDance() {
+		synchronized(objectMutex) {
+			return groupDance;
+		}
+	}
+
+	public void setGroupDance(boolean groupDance) {
+		synchronized(objectMutex) {
+			this.groupDance = groupDance;
+		}
+	}
+
+	public boolean toggleGroupDance() {
+		synchronized(objectMutex) {
+			groupDance = !groupDance;
+			return groupDance;
+		}
+	}
+
 	public CreatureObject getPerformanceWatchee() {
 		synchronized(objectMutex) {
 			return performanceWatchee;
@@ -1351,7 +1373,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.performanceWatchee = performanceWatchee;
 		}
-		getClient().getSession().write(messageBuilder.buildListenToId(performanceWatchee.getObjectId()));
+		//getClient().getSession().write(messageBuilder.buildListenToId(0));
 	}
 
 	public CreatureObject getPerformanceListenee() {
@@ -1363,7 +1385,10 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	public void setPerformanceListenee(CreatureObject performanceListenee) {
 		synchronized(objectMutex) {
 			this.performanceListenee = performanceListenee;
+			//possibly redundant, need to research this further.
+			this.listenToId = performanceListenee.getObjectId();
 		}
+		getClient().getSession().write(messageBuilder.buildListenToId(this.listenToId));
 	}
 
 	public void startPerformance(int performanceId, int performanceCounter, String skillName, boolean isDance) {
