@@ -285,7 +285,7 @@ public class CommandService implements INetworkDispatch  {
 		
 	}
 
-	public void callCommand(CreatureObject actor, String commandName, SWGObject target, String commandArgs) {
+	public void callCommand(SWGObject actor, String commandName, SWGObject target, String commandArgs) {
 		if (actor == null)
 			return;
 		

@@ -230,7 +230,7 @@ public class TravelService implements INetworkDispatch {
 		
 		Planet planet = core.terrainService.getPlanetByName(departurePlanet.toLowerCase());
 		SWGObject travelTicket = core.objectService.createObject("object/tangible/travel/travel_ticket/base/shared_base_travel_ticket.iff", planet);
-
+		
 		travelTicket.setStringAttribute("@obj_attr_n:travel_departure_planet", WordUtils.capitalize(departurePlanet));
 		travelTicket.setStringAttribute("@obj_attr_n:travel_departure_point", departureLoc);
 		
@@ -274,7 +274,7 @@ public class TravelService implements INetworkDispatch {
 		
 		creatureObj.getSlottedObject("inventory").add(travelTicket);
 		//Console.println("Total cost: " + fare);
-		SUIWindow window = core.suiService.createMessageBox(MessageBoxType.MESSAGE_BOX_OK, "STAR WARS GALAXIES", "Ticket purchase complete.", player, null, 0);
+		SUIWindow window = core.suiService.createMessageBox(MessageBoxType.MESSAGE_BOX_OK, "STAR WARS GALAXIES", "@travel:ticket_purchase_complete", player, null, 0);
 		core.suiService.openSUIWindow(window);
 
 		creatureObj.sendSystemMessage("You successfully make a payment of " + fare + " credits to the Galactic Travel Commission.", (byte) 0);

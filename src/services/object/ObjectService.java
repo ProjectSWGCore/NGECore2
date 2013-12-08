@@ -49,6 +49,8 @@ import org.python.core.PyObject;
 
 import com.sleepycat.persist.EntityCursor;
 
+import protocol.swg.ChatFriendsListUpdate;
+import protocol.swg.ChatOnChangeFriendStatus;
 import protocol.swg.ChatOnGetFriendsList;
 import protocol.swg.CmdSceneReady;
 import protocol.swg.CmdStartScene;
@@ -563,6 +565,35 @@ public class ObjectService implements INetworkDispatch {
 				
 				ChatOnGetFriendsList friendsListMessage = new ChatOnGetFriendsList(ghost);
 				client.getSession().write(friendsListMessage.serialize());
+				
+				if (ghost != null) {
+					
+					String objectShortName = creature.getCustomName().toLowerCase();
+					
+					if (creature.getCustomName().contains(" ")) {
+						String[] splitName = creature.getCustomName().toLowerCase().split(" ");
+						objectShortName = splitName[0].toLowerCase();
+					}
+					
+					core.chatService.playerStatusChange(objectShortName, (byte) 1);
+					
+					if (ghost.getFriendList().isEmpty() == false) {
+						// Find out what friends are online/offline
+						for (String friend : ghost.getFriendList()) {
+							SWGObject friendObject = (SWGObject) core.chatService.getObjectByFirstName(friend);
+							if (friendObject == null)
+								continue;
+							if(friendObject.isInQuadtree() == true) {
+								ChatFriendsListUpdate onlineNotifyStatus = new ChatFriendsListUpdate(friend, (byte) 1);
+								client.getSession().write(onlineNotifyStatus.serialize());
+
+							} else {
+								ChatOnChangeFriendStatus changeStatus = new ChatOnChangeFriendStatus(creature.getObjectID(), friend, 0);
+								client.getSession().write(changeStatus.serialize());
+							}
+						}
+					}
+				}
 				
 				core.playerService.postZoneIn(creature);
 
