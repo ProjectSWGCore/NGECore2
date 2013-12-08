@@ -1381,6 +1381,8 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.performanceWatchee = performanceWatchee;
 		}
+		// not sure at this point if it makes a difference really.
+		// on Live, an empty CREO4 was sent, at least when listenToId was empty.
 		//getClient().getSession().write(messageBuilder.buildListenToId(0));
 	}
 

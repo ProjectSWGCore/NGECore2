@@ -284,7 +284,6 @@ public class ObjectService implements INetworkDispatch {
 			System.out.println("!File Not Found:" + template.toString());
 		} catch (IOException e) {
 			System.out.println("!IO error " + template.toString());
-			e.printStackTrace();
 		}
 	}
 	
