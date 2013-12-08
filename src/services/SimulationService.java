@@ -590,8 +590,6 @@ public class SimulationService implements INetworkDispatch {
 		}
 		
 		PlayerObject ghost = (PlayerObject) object.getSlottedObject("ghost");
-		if(object.getParentId() == 0)
-			add(object, pos.x, pos.z);
 		
 		core.weatherService.sendWeather(object);
 		
