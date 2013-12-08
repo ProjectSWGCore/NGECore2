@@ -175,7 +175,7 @@ public class SimulationService implements INetworkDispatch {
 		
 	public boolean add(SWGObject object, float x, float y, boolean notifyObservers) {
 		object.setIsInQuadtree(true);
-		//core.objectService.loadServerTemplate(object);
+		core.objectService.loadServerTemplate(object);
 		boolean success = quadTrees.get(object.getPlanet().getName()).put(x, y, object);
 		if(success && notifyObservers) {
 			Point3D pos = new Point3D(x, 0, y);
