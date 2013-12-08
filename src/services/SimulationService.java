@@ -169,18 +169,30 @@ public class SimulationService implements INetworkDispatch {
 		return collidableQuadTrees.get(planet.getName()).get(x, y, range);
 	}
 	
-	public void add(SWGObject object, int x, int y) {
-		object.setIsInQuadtree(true);
-		core.objectService.loadServerTemplate(object);
-		quadTrees.get(object.getPlanet().getName()).put(x, y, object);
-	}
-	
 	public boolean add(SWGObject object, float x, float y) {
-		object.setIsInQuadtree(true);
-		core.objectService.loadServerTemplate(object);
-		return quadTrees.get(object.getPlanet().getName()).put(x, y, object);
+		return add(object, x, y, false);
 	}
-	
+		
+	public boolean add(SWGObject object, float x, float y, boolean notifyObservers) {
+		object.setIsInQuadtree(true);
+		//core.objectService.loadServerTemplate(object);
+		boolean success = quadTrees.get(object.getPlanet().getName()).put(x, y, object);
+		if(success && notifyObservers) {
+			Point3D pos = new Point3D(x, 0, y);
+			Collection<SWGObject> newAwareObjects = get(object.getPlanet(), x, y, 512);
+			for(Iterator<SWGObject> it = newAwareObjects.iterator(); it.hasNext();) {
+				SWGObject obj = it.next();
+				if(obj.getAttachment("bigSpawnRange") == null && obj.getWorldPosition().getDistance(pos) > 200)
+					continue;
+				if(object.getClient() != null)
+					object.makeAware(obj);
+				if(obj.getClient() != null)
+					obj.makeAware(object);
+			}
+		}
+		return success;
+	}
+		
 	public boolean move(SWGObject object, int oldX, int oldY, int newX, int newY) {
 		if(quadTrees.get(object.getPlanet().getName()).remove(oldX, oldY, object)) {
 			return quadTrees.get(object.getPlanet().getName()).put(newX, newY, object);
@@ -198,22 +210,27 @@ public class SimulationService implements INetworkDispatch {
 		System.out.println("Move failed.");
 		return false;
 	}
-	
-	public List<SWGObject> get(Planet planet, int x, int y, int range) {
-		return quadTrees.get(planet.getName()).get(x, y, range);
-	}
-	
+		
 	public List<SWGObject> get(Planet planet, float x, float y, int range) {
 		List<SWGObject> list = quadTrees.get(planet.getName()).get((int)x, (int)y, range);
 		return list;
 	}
 	
-	public boolean remove(SWGObject object, int x, int y) {
-		return quadTrees.get(object.getPlanet().getName()).remove(x, y, object);
-	}
-	
 	public boolean remove(SWGObject object, float x, float y) {
+		return remove(object, x, y, false);
+	}
+		
+	public boolean remove(SWGObject object, float x, float y, boolean notifyObservers) {
 		boolean success = quadTrees.get(object.getPlanet().getName()).remove(x, y, object);
+		if(success) {
+			HashSet<Client> oldObservers = new HashSet<Client>(object.getObservers());
+			for(Iterator<Client> it = oldObservers.iterator(); it.hasNext();) {
+				Client observerClient = it.next();
+				if(observerClient.getParent() != null) {
+					observerClient.getParent().makeUnaware(object);
+				}
+			}
+		}
 		return success;
 	}
 
@@ -284,6 +301,10 @@ public class SimulationService implements INetworkDispatch {
 						object.makeUnaware(obj);
 						if(obj.getClient() != null)
 							obj.makeUnaware(object);
+					} else if(obj != object && obj.getWorldPosition().getDistance2D(newPos) > 200 && obj.isInQuadtree() && obj.getAttachment("bigSpawnRange") == null) {
+						object.makeUnaware(obj);
+						if(obj.getClient() != null)
+							obj.makeUnaware(object);
 					}
 				}
 				for(int i = 0; i < newAwareObjects.size(); i++) {
@@ -299,7 +320,10 @@ public class SimulationService implements INetworkDispatch {
 				}
 				
 				checkForCollidables(object);
-
+				MoveEvent event = new MoveEvent();
+				event.object = object;
+				object.getEventBus().publish(event);
+				
 			}
 				
 				
@@ -512,11 +536,11 @@ public class SimulationService implements INetworkDispatch {
 		}
 		
 		session.suspendWrite();
-
+		
 		boolean remove = remove(object, object.getPosition().x, object.getPosition().z);
 		if(remove)
 			System.out.println("Successful quadtree remove");
-
+		
 		//if(object.getContainer() == null) {
 			HashSet<Client> oldObservers = new HashSet<Client>(object.getObservers());
 			for(Iterator<Client> it = oldObservers.iterator(); it.hasNext();) {
@@ -551,18 +575,19 @@ public class SimulationService implements INetworkDispatch {
 		
 		Point3D pos = object.getWorldPosition();
 				
-		Collection<SWGObject> newAwareObjects = get(object.getPlanet(), pos.x, pos.z, 512);
-		for(Iterator<SWGObject> it = newAwareObjects.iterator(); it.hasNext();) {
-			SWGObject obj = it.next();
-			if(obj.getAttachment("bigSpawnRange") == null & obj.getWorldPosition().getDistance(pos) > 200)
-				continue;
-			object.makeAware(obj);
-			if(obj.getClient() != null)
-				obj.makeAware(object);
+		if(object.getParentId() != 0) {
+			Collection<SWGObject> newAwareObjects = get(object.getPlanet(), pos.x, pos.z, 512);
+			for(Iterator<SWGObject> it = newAwareObjects.iterator(); it.hasNext();) {
+				SWGObject obj = it.next();
+				if(obj.getAttachment("bigSpawnRange") == null & obj.getWorldPosition().getDistance(pos) > 200)
+					continue;
+				object.makeAware(obj);
+				if(obj.getClient() != null)
+					obj.makeAware(object);
+			}
+		} else {
+			add(object, pos.x, pos.z, true);
 		}
-		
-		if(object.getParentId() == 0)
-			add(object, pos.x, pos.z);
 		
 		
 		PlayerObject ghost = (PlayerObject) object.getSlottedObject("ghost");
@@ -621,18 +646,18 @@ public class SimulationService implements INetworkDispatch {
 		Point3D position = object.getPosition();
 		
 		if(object.getParentId() == 0 && object.getContainer() == null) {
-			remove(object, position.x, position.z);
+			remove(object, position.x, position.z, true);
 		} else {
 			object.getContainer().remove(object);
 		}
 
-		HashSet<Client> oldObservers = new HashSet<Client>(object.getObservers());
+		/*HashSet<Client> oldObservers = new HashSet<Client>(object.getObservers());
 
 		for(Client observerClient : oldObservers) {
 			if(observerClient.getParent() != null) {
 				observerClient.getParent().makeUnaware(object);
 			}
-		}
+		}*/
 		
 		
 		synchronized(object.getMutex()) {
@@ -952,7 +977,7 @@ public class SimulationService implements INetworkDispatch {
 	
 	public void checkForCollidables(SWGObject object) {
 		Point3D objectPos = object.getWorldPosition();
-		List<AbstractCollidable> collidables = getCollidables(object.getPlanet(), objectPos.x, objectPos.z, 256);
+		List<AbstractCollidable> collidables = getCollidables(object.getPlanet(), objectPos.x, objectPos.z, 2050);
 		
 		for(AbstractCollidable collidable : collidables) {
 			collidable.doCollisionCheck(object);

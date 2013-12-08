@@ -24,9 +24,16 @@ package services.spawn;
 public class LairSpawnTemplate {
 	
 	private int maxSpawnLimit;
-	private LairTemplate lairTemplate;
+	private String lairTemplate;
 	private int minLevel;
 	private int maxLevel;
+	
+	public LairSpawnTemplate(int maxSpawnLimit, String lairTemplate, int minLevel, int maxLevel) {
+		this.maxSpawnLimit = maxSpawnLimit;
+		this.lairTemplate = lairTemplate;
+		this.minLevel = minLevel;
+		this.maxLevel = maxLevel;
+	}
 
 	public int getMaxSpawnLimit() {
 		return maxSpawnLimit;
@@ -36,11 +43,11 @@ public class LairSpawnTemplate {
 		this.maxSpawnLimit = maxSpawnLimit;
 	}
 
-	public LairTemplate getLairTemplate() {
+	public String getLairTemplate() {
 		return lairTemplate;
 	}
 
-	public void setLairTemplate(LairTemplate lairTemplate) {
+	public void setLairTemplate(String lairTemplate) {
 		this.lairTemplate = lairTemplate;
 	}
 

@@ -23,8 +23,17 @@ package services.spawn;
 
 public class LairTemplate {
 	
+	private String name;
 	private String lairCRC;
 	private String mobileName;
+	private int mobileLimit;
+	
+	public LairTemplate(String name, String mobile, int mobileLimit, String lairCRC) {
+		this.name = name;
+		this.mobileName = mobile;
+		this.mobileLimit = mobileLimit;
+		this.lairCRC = lairCRC;
+	}
 
 	public String getLairCRC() {
 		return lairCRC;
@@ -40,6 +49,22 @@ public class LairTemplate {
 
 	public void setMobileName(String mobileName) {
 		this.mobileName = mobileName;
+	}
+
+	public int getMobileLimit() {
+		return mobileLimit;
+	}
+
+	public void setMobileLimit(int mobileLimit) {
+		this.mobileLimit = mobileLimit;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 }

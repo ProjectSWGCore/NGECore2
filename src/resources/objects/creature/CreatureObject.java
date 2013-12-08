@@ -948,11 +948,12 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		//destination.getSession().write(messageBuilder.buildBaseline9());
 		 
 		UpdatePostureMessage upm = new UpdatePostureMessage(getObjectID(), (byte) 0);
-		//destination.getSession().write(upm.serialize());
+	//	destination.getSession().write(upm.serialize());
 		
 		if(destination != getClient()) {
 			UpdatePVPStatusMessage upvpm = new UpdatePVPStatusMessage(getObjectID(), getPvPBitmask(), getFaction());
-			
+			if(getSlottedObject("ghost") != null)
+	            upvpm.setStatus(16);
 			/*
 			if (factionStatus == 1 && faction == "imperial") {
 				upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Imperial);
@@ -1067,7 +1068,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			if(health > maxHealth)
 				health = maxHealth;
 			setHamListCounter(getHamListCounter() + 1);
-			delta = messageBuilder.buildHealthDelta(health);
+			delta = messageBuilder.buildUpdateHAMListDelta();
 			
 			notifyObservers(delta, true);
 			this.health = health;
@@ -1087,7 +1088,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			if(action > maxAction)
 				action = maxAction;
 			setHamListCounter(getHamListCounter() + 1);
-			delta = messageBuilder.buildActionDelta(action);
+			delta = messageBuilder.buildUpdateHAMListDelta();
 			notifyObservers(delta, true);
 			this.action = action;
 		}
@@ -1222,6 +1223,13 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		synchronized(objectMutex) {
 			setHamListCounter(getHamListCounter() + 1);
 			notifyObservers(messageBuilder.buildResetHAMListDelta(), true);
+		}
+	}
+	
+	public void updateHAMList() {
+		synchronized(objectMutex) {
+			setHamListCounter(getHamListCounter() + 1);
+			notifyObservers(messageBuilder.buildUpdateHAMListDelta(), true);
 		}
 	}
 	

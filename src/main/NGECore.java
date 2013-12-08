@@ -218,7 +218,6 @@ public class NGECore {
 		skillModService = new SkillModService(this);
 		equipmentService = new EquipmentService(this);
 		entertainmentService = new EntertainmentService(this);
-		spawnService = new SpawnService(this);
 		aiService = new AIService(this);
 		
 		// Ping Server
@@ -268,6 +267,7 @@ public class NGECore {
 		terrainService.addPlanet(10, "dathomir", "terrain/dathomir.trn", true);
 		terrainService.addPlanet(11, "mustafar", "terrain/mustafar.trn", true);
 		terrainService.addPlanet(12, "kashyyyk_main", "terrain/kashyyyk_main.trn", true);
+		spawnService = new SpawnService(this);
 		terrainService.loadClientPois();
 		// Travel Points
 		travelService.loadTravelPoints();
@@ -302,10 +302,14 @@ public class NGECore {
 		weatherService = new WeatherService(this);
 		weatherService.loadPlanetSettings();
 		
+	//	spawnService.loadLairTemplates();
+	//	spawnService.loadLairGroups();
+	//	spawnService.loadSpawnAreas();
+		
 		didServerCrash = false;
 		System.out.println("Started Server.");
 		setGalaxyStatus(2);
-
+		
 	}
 	
 

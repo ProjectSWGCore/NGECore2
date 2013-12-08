@@ -54,7 +54,7 @@ public class AIActor {
 	}
 	
 	public void doAggro(CreatureObject defender) {
-		
+		creature.addDefender(defender);
 	}
 
 	public AIState getCurrentState() {

@@ -58,7 +58,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer.putInt(creature.getCashCredits());
 
 		buffer.putInt(6);	// Base HAM List - so leveling knows the base HAM, before equipment etc
-		buffer.putInt(6);
+		buffer.putInt(0);
 		buffer.putInt(creature.getHealth());
 		buffer.putInt(0);
 		buffer.putInt(creature.getAction());
@@ -113,7 +113,8 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer.putInt(1);	
 		buffer.putInt(0);	// TANO Data
 		buffer.putInt(0);	
-		buffer.putInt(creature.getOptionsBitmask()); // 0x80 = Player, 0x08 = Quest NPC, 
+	//	buffer.putInt(creature.getOptionsBitmask()); // 0x80 = Player, 0x08 = Quest NPC, 
+		buffer.putInt(0x80);
 		buffer.putInt(creature.getIncapTimer());
 		buffer.putInt(0);
 		buffer.putInt(0x3A98);
@@ -268,7 +269,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer.putInt(0);
 		
 		buffer.putInt(6);	// Max HAM
-		buffer.putInt(0);
+		buffer.putInt(creature.getMaxHAMListCounter());
 
 		buffer.putInt(creature.getMaxHealth());
 		buffer.putInt(0);
@@ -701,7 +702,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		
 		return buffer;
 		
-	}
+	}	
 	
 	public IoBuffer buildMaxHealthDelta(int health) {
 		

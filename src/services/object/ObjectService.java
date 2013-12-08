@@ -554,9 +554,9 @@ public class ObjectService implements INetworkDispatch {
 				session.write(startScene.serialize());
 				
 				creature.makeAware(core.guildService.getGuildObject());
+				creature.makeAware(creature);
 
 				core.simulationService.handleZoneIn(client);
-				creature.makeAware(creature);
 				
 				CmdSceneReady sceneReady = new CmdSceneReady();
 				client.getSession().write(sceneReady.serialize());
