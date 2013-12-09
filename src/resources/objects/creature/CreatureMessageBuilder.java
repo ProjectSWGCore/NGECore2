@@ -256,7 +256,11 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer.putLong(creature.getTargetId());
 		buffer.put(creature.getMoodId());
 		buffer.putInt(creature.getPerformanceCounter());
-		buffer.putInt(creature.getPerformanceId());
+		/*
+		 * minor dilemma: performance ID is needed for XP calculation, but it can't be sent
+		 * in the CREO, otherwise the evul note bubbles appear
+		 */ 
+		buffer.putInt((creature.getPerformanceType()) ? 0 : creature.getPerformanceId());
 
 		buffer.putInt(0);	// unks
 		buffer.putInt(0);
