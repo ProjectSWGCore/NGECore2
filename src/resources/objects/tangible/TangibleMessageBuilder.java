@@ -63,7 +63,8 @@ public class TangibleMessageBuilder extends ObjectMessageBuilder {
 		buffer.putInt(0);
 		buffer.putInt(0); 
 		
-		buffer.putInt(tangible.getOptionsBitmask());
+		buffer.putInt(0); 
+		//buffer.putInt(tangible.getOptionsBitmask());
 		buffer.putInt(0); // number of item uses
 		buffer.putInt(tangible.getConditionDamage());
 		buffer.putInt(tangible.getMaxDamage());

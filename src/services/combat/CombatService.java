@@ -90,7 +90,7 @@ public class CombatService implements INetworkDispatch {
 		if((command.getAttackType() == 0 || command.getAttackType() == 1 || command.getAttackType() == 3) && !attemptCombat(attacker, target))
 			success = false;
 		
-		if(!applySpecialCost(attacker, weapon, command))
+		if(success && !applySpecialCost(attacker, weapon, command))
 			success = false;
 		
 		if(!success) {
@@ -405,11 +405,21 @@ public class CombatService implements INetworkDispatch {
 	
 	private void sendHealPackets(CreatureObject attacker, CreatureObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {
 		
+		float cooldown = 0;
+
 		CombatAction combatAction = new CombatAction(CRC.StringtoCRC(command.getDefaultAnimations()[0]), attacker.getObjectID(), weapon.getObjectID(), target.getObjectID(), command.getCommandCRC());
 		ObjControllerMessage objController = new ObjControllerMessage(0x1B, combatAction);
 		attacker.notifyObserversInRange(objController, true, 125);
 		
-		StartTask startTask = new StartTask(actionCounter, attacker.getObjectID(), command.getCommandCRC(), CRC.StringtoCRC(command.getCooldownGroup()), command.getCooldown());
+		cooldown = command.getCooldown();
+		System.out.println(cooldown);
+		
+		if(attacker.getSkillMod("expertise_cooldown_line_of_heal") != null)
+			cooldown -= attacker.getSkillMod("expertise_cooldown_line_of_heal").getBase();
+		if(attacker.getSkillMod("expertise_cooldown_line_sh") != null)
+			cooldown -= ((attacker.getSkillMod("expertise_cooldown_line_sh").getBase())/10);	
+		
+		StartTask startTask = new StartTask(actionCounter, attacker.getObjectID(), command.getCommandCRC(), CRC.StringtoCRC(command.getCooldownGroup()), cooldown);
 		ObjControllerMessage objController2 = new ObjControllerMessage(0x0B, startTask);
 		attacker.getClient().getSession().write(objController2.serialize());
 		
@@ -839,14 +849,14 @@ public class CombatService implements INetworkDispatch {
 		
 		boolean success = true;
 		
+		if((command.getAttackType() == 0 || command.getAttackType() == 1 || command.getAttackType() == 3) && !attemptHeal(healer, target))	
+			target = healer;
+		
 		if(target.getMaxHealth() == target.getHealth())
 			success = command.getAttackType() != 1;
 		
-		if(!applySpecialCost(healer, weapon, command))
+		if(success && !applySpecialCost(healer, weapon, command))
 			success = false;
-		
-		if((command.getAttackType() == 0 || command.getAttackType() == 1 || command.getAttackType() == 3) && !attemptHeal(healer, target))	
-			target = healer;
 
 		if(!success) {
 			IoSession session = healer.getClient().getSession();
@@ -887,8 +897,10 @@ public class CombatService implements INetworkDispatch {
 			healPotency += healer.getSkillMod("expertise_healing_line_sm_heal").getBase();
 		if(healer.getSkillMod("expertise_healing_line_sp_heal") != null)
 			healPotency += healer.getSkillMod("expertise_healing_line_sp_heal").getBase();
+		if(healer.getSkillMod("expertise_stance_healing_line_fs_heal") != null)
+			healPotency += healer.getSkillMod("expertise_stance_healing_line_fs_heal").getBase();
 		if(healPotency > 0)
-			healAmount += (healAmount * (healPotency / 100));
+			healAmount += ((healAmount * healPotency) / 100);
 		if(target.getSkillMod("expertise_healing_reduction") != null)
 			healAmount *= (1 - target.getSkillMod("expertise_healing_reduction").getBase() / 100);
 		

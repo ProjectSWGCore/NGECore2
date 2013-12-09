@@ -516,15 +516,10 @@ public class CombatCommands {
 		core.commandService.registerCommand("of_buff_def_9");
 		core.commandService.registerCommand("of_emergency_shield");
 		core.commandService.registerCommand("of_firepower_1");
+		core.commandService.registerCommand("of_medical_sup_1");
 		core.commandService.registerCommand("of_purge_1");
 		core.commandService.registerCommand("of_scatter_1");
 		core.commandService.registerCommand("of_stimulator_1");
-		core.commandService.registerCommand("of_tactical_sup_1");
-		core.commandService.registerCommand("of_tactical_sup_2");
-		core.commandService.registerCommand("of_tactical_sup_3");
-		core.commandService.registerCommand("of_tactical_sup_4");
-		core.commandService.registerCommand("of_tactical_sup_5");
-		core.commandService.registerCommand("of_tactical_sup_6");
 		
 		// Smuggler
 		

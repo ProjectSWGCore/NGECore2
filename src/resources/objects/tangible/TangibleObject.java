@@ -358,7 +358,7 @@ public class TangibleObject extends SWGObject {
 
 		UpdatePVPStatusMessage upvpm = new UpdatePVPStatusMessage(getObjectID());
 		upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Neutral);
-		upvpm.setStatus(1);
+		upvpm.setStatus(getPvPBitmask());
 		destination.getSession().write(upvpm.serialize());
 		
 
