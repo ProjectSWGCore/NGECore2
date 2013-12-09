@@ -23,7 +23,9 @@ package resources.objects.creature;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Stack;
 import java.util.concurrent.ScheduledFuture;
 
 import org.apache.mina.core.buffer.IoBuffer;
@@ -55,7 +57,7 @@ import engine.resources.scene.Quaternion;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 
-@Entity(version=7)
+@Entity(version=8)
 public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	@NotPersistent
@@ -124,6 +126,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private boolean groupDance = true;
 	private CreatureObject performanceWatchee;
 	private CreatureObject performanceListenee;
+	private List<CreatureObject> audience = Collections.synchronizedList(new ArrayList<CreatureObject>());
 	private int health = 1000;
 	private int action = 300;
 	@NotPersistent
@@ -185,6 +188,12 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	public int getBankCredits() {
 		synchronized(objectMutex) {
 			return bankCredits;
+		}
+	}
+	
+	public boolean isPlayer() {
+		synchronized(objectMutex) {
+			return ( getSlottedObject("ghost") != null );
 		}
 	}
 
@@ -785,6 +794,8 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.moodAnimation = moodAnimation;
 		}
+		IoBuffer moodAnimationDelta = messageBuilder.buildMoodAnimationDelta(moodAnimation);
+		notifyObservers(moodAnimationDelta, true);
 	}
 
 	public long getWeaponId() {
@@ -1370,6 +1381,18 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			return groupDance;
 		}
 	}
+	
+	public void addAudience(CreatureObject audienceMember) {
+		synchronized(objectMutex) {
+			audience.add(audienceMember);
+		}
+	}
+	
+	public void removeAudience(CreatureObject audienceMember) {
+		synchronized(objectMutex) {
+			audience.remove(audienceMember);
+		}
+	}
 
 	public CreatureObject getPerformanceWatchee() {
 		synchronized(objectMutex) {
@@ -1426,18 +1449,37 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 		
 	    sendSystemMessage("@performance:" + type  + "_stop_self",(byte)0);
-	    notifyAudience("@performance:" + type + "_stop_other");
+	    stopAudience();
 
 		getClient().getSession().write(messageBuilder.buildPerformanceId(performanceId));
 		getClient().getSession().write(messageBuilder.buildPerformanceCounter(performanceCounter));
 		getClient().getSession().write(messageBuilder.buildStartPerformance(false));
 	}
 	
-	public void notifyAudience(String message) {
-		//TODO: stub
+	public void stopAudience() {
+		String type = "";
+		synchronized(objectMutex) {
+			type = (performanceType) ? "dance" : "music";
+			Iterator<CreatureObject> it = audience.iterator();
+			while (it.hasNext()) {
+				CreatureObject next = it.next();
+				if ((performanceType) && (next.getPerformanceWatchee() != this)) { continue; }
+				if ((!performanceType) && (next.getPerformanceListenee() != this)) { continue; }
+				if (performanceType) { next.setPerformanceWatchee(null); }
+				if (!performanceType) { next.setPerformanceListenee(null); }
+				//this may be a bit dodgy.
+				boolean isEntertained = next.getPerformanceListenee() != null && next.getPerformanceWatchee() != null;
+				if (!isEntertained) {
+					next.setMoodAnimation("");
+				}
+				if (next == this) { continue; }
+				next.sendSystemMessage("@performance:" + type  + "_stop_other",(byte)0);
+			}
+			//not sure if this behaviour is correct. might need fixing later.
+			audience = Collections.synchronizedList(new ArrayList<CreatureObject>());
+		}
 	}
 	
-
 	@Override
 	public void setPvPBitmask(int pvpBitmask) {
 		super.setPvPBitmask(pvpBitmask);

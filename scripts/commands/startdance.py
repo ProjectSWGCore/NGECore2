@@ -76,7 +76,9 @@ def startDance(core, actor, danceName, visual):
     #TODO: check costume, posture, etc?
 
     actor.sendSystemMessage('@performance:dance_start_self',0);
-    actor.notifyAudience('@performance:dance_start_other');
+    # i'm not sure about this. i think stopping just stopped any watchers anyways
+    # method doesn't exist now.
+    #actor.notifyAudience('@performance:dance_start_other');
 
     danceVisual = 'dance_' + str(visual)
 
