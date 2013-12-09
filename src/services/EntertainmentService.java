@@ -320,7 +320,7 @@ public class EntertainmentService implements INetworkDispatch {
 					return;
 				}
 				
-				int floXP = (int)( (float) p.getFlourishXpMod() / 6.0f);
+				int floXP = p.getFlourishXpMod();
 				int floCount = entertainer.getFlourishCount();
 				
 				int XP = ((floCount > 2) ? 2 : floCount) * floXP;
