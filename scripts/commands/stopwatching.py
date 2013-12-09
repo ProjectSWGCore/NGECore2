@@ -8,8 +8,8 @@ def run(core, actor, target, commandString):
     if not dancer:
       return
 
-    dancer.removeAudience(actor)
     actor.setPerformanceWatchee(None)
+    dancer.removeAudience(actor)
     if not actor.getPerformanceListenee():
       actor.setMoodAnimation('')
 

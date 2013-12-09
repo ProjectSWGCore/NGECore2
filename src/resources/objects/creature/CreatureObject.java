@@ -343,7 +343,51 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 		
 	}
+	
+	public void startPerformance() {
+		
+		getClient().getSession().write(messageBuilder.buildStartPerformance(true));
+		
+	}
+	
+	public void stopPerformance() {
+		String type = "";
+		synchronized(objectMutex) {
+			setPerformanceId(0);
+			setPerformanceCounter(0);
+			setCurrentAnimation("");
+			type = (performanceType) ? "dance" : "music";
+		}
+		
+	    sendSystemMessage("@performance:" + type  + "_stop_self",(byte)0);
+	    stopAudience();
 
+		getClient().getSession().write(messageBuilder.buildStartPerformance(false));
+	}
+	
+	public void stopAudience() {
+		String type = "";
+		synchronized(objectMutex) {
+			type = (performanceType) ? "dance" : "music";
+			Iterator<CreatureObject> it = audience.iterator();
+			while (it.hasNext()) {
+				CreatureObject next = it.next();
+				if ((performanceType) && (next.getPerformanceWatchee() != this)) { continue; }
+				if ((!performanceType) && (next.getPerformanceListenee() != this)) { continue; }
+				if (performanceType) { next.setPerformanceWatchee(null); }
+				if (!performanceType) { next.setPerformanceListenee(null); }
+				//this may be a bit dodgy.
+				boolean isEntertained = next.getPerformanceListenee() != null && next.getPerformanceWatchee() != null;
+				if (!isEntertained) {
+					next.setMoodAnimation("");
+				}
+				if (next == this) { continue; }
+				next.sendSystemMessage("@performance:" + type  + "_stop_other",(byte)0);
+			}
+			//not sure if this behaviour is correct. might need fixing later.
+			audience = Collections.synchronizedList(new ArrayList<CreatureObject>());
+		}
+	}
 	@Override
 	public void setFaction(String faction) {
 		synchronized(objectMutex) {
@@ -918,6 +962,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.performanceCounter = performanceCounter;
 		}
+		getClient().getSession().write(messageBuilder.buildPerformanceCounter(performanceCounter));
 	}
 
 	public int getPerformanceId() {
@@ -930,6 +975,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.performanceId = performanceId;
 		}
+		getClient().getSession().write(messageBuilder.buildPerformanceId(performanceId));
 	}
 
 	public boolean getAcceptBandflourishes() {
@@ -1424,61 +1470,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		getClient().getSession().write(messageBuilder.buildListenToId(this.listenToId));
 	}
 
-	public void startPerformance(int performanceId, int performanceCounter, String skillName, boolean isDance) {
-		synchronized(objectMutex) {
-			this.performanceId = performanceId;
-			this.performanceCounter = performanceCounter;
-			this.currentAnimation = skillName;
-			this.performanceType = isDance;
-		}
-		
-		getClient().getSession().write(messageBuilder.buildPerformanceId(performanceId));
-		getClient().getSession().write(messageBuilder.buildPerformanceCounter(performanceCounter));
-		getClient().getSession().write(messageBuilder.buildCurrentAnimationDelta(skillName));
-		getClient().getSession().write(messageBuilder.buildStartPerformance(true));
-		
-	}
-	
-	public void stopPerformance() {
-		String type = "";
-		synchronized(objectMutex) {
-			this.performanceId = 0;
-			this.performanceCounter = 0;
-			this.currentAnimation = null;
-			type = (performanceType) ? "dance" : "music";
-		}
-		
-	    sendSystemMessage("@performance:" + type  + "_stop_self",(byte)0);
-	    stopAudience();
 
-		getClient().getSession().write(messageBuilder.buildPerformanceId(performanceId));
-		getClient().getSession().write(messageBuilder.buildPerformanceCounter(performanceCounter));
-		getClient().getSession().write(messageBuilder.buildStartPerformance(false));
-	}
-	
-	public void stopAudience() {
-		String type = "";
-		synchronized(objectMutex) {
-			type = (performanceType) ? "dance" : "music";
-			Iterator<CreatureObject> it = audience.iterator();
-			while (it.hasNext()) {
-				CreatureObject next = it.next();
-				if ((performanceType) && (next.getPerformanceWatchee() != this)) { continue; }
-				if ((!performanceType) && (next.getPerformanceListenee() != this)) { continue; }
-				if (performanceType) { next.setPerformanceWatchee(null); }
-				if (!performanceType) { next.setPerformanceListenee(null); }
-				//this may be a bit dodgy.
-				boolean isEntertained = next.getPerformanceListenee() != null && next.getPerformanceWatchee() != null;
-				if (!isEntertained) {
-					next.setMoodAnimation("");
-				}
-				if (next == this) { continue; }
-				next.sendSystemMessage("@performance:" + type  + "_stop_other",(byte)0);
-			}
-			//not sure if this behaviour is correct. might need fixing later.
-			audience = Collections.synchronizedList(new ArrayList<CreatureObject>());
-		}
-	}
 	
 	@Override
 	public void setPvPBitmask(int pvpBitmask) {
@@ -1504,6 +1496,18 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 		
 		notifyObservers(messageBuilder.buildDifficultyDelta(difficulty), true);
+	}
+
+	public void setPerformanceType(boolean isDance) {
+		synchronized(objectMutex) {
+			this.performanceType = isDance;
+		}
+	}
+	
+	public boolean getPerformanceType() {
+		synchronized(objectMutex) {
+			return this.performanceType;
+		}
 	}
 	
 }

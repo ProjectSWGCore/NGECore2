@@ -221,6 +221,8 @@ public class EntertainmentService implements INetworkDispatch {
 		core.commandService.registerCommand("groupdance");
 		core.commandService.registerCommand("startdance");
 		core.commandService.registerCommand("stopdance");
+		core.commandService.registerCommand("watch");
+		core.commandService.registerCommand("stopwatching");
 	}
 	
 	public void giveInspirationBuff(SWGObject reciever, Vector<BuffItem> buffVector) {
@@ -251,7 +253,7 @@ public class EntertainmentService implements INetworkDispatch {
 		Performance p = performances.get(danceName);
 		
 		//if 0 , then it's no dance. need to handle that in the script.
-		return p.getDanceVisualId();
+		return ((p == null) ? 0 : p.getDanceVisualId());
 	}
 	
 	public Map<Long,String> getAvailableDances(CreatureObject actor) {
@@ -289,6 +291,18 @@ public class EntertainmentService implements INetworkDispatch {
 	public Performance getPerformance(String name) {
 		return performances.get(name);
 	}
+	
+	public void startPerformance(CreatureObject actor, int performanceId, int performanceCounter, String skillName, boolean isDance) {
+		actor.setPerformanceId(performanceId);
+		actor.setPerformanceCounter(performanceCounter);
+		actor.setCurrentAnimation(skillName);
+		actor.setPerformanceType(isDance);
+		
+		actor.startPerformance();
+	}
+	
+
+	
 	
 	@Override
 	public void shutdown() {
