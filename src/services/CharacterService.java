@@ -367,7 +367,7 @@ public class CharacterService implements INetworkDispatch {
 	{
 		if (RaceTemplate.contains("/wookiee_") ||
 				!Name.contains(" ")) 
-		{ // wookies don't have lastNames
+		{ // wookiees don't have lastNames
 				return Name;
 		}
 			
@@ -379,7 +379,7 @@ public class CharacterService implements INetworkDispatch {
 	{
 		if (RaceTemplate.contains("/wookiee_") ||
 			!Name.contains(" ")) 
-		{ // wookies don't have lastNames
+		{ // wookiees don't have lastNames
 			return "";
 		}
 		
