@@ -54,12 +54,13 @@ public class FactionService implements INetworkDispatch {
 		this.core = core;
 		
 		try {
-			/* Temporarily commented until another commit
-			StfTable stf = new StfTable("string/en/faction/faction_names.stf");
+			/*
+			StfTable stf = new StfTable("clientdata/string/en/faction/faction_names.stf");
 			
-			for (int s = 1; s < strings.length; s++) {
-				if (strings[0] != null) {
-					String faction = ((String) strings[s][0]);
+			for (int s = 1; s < stf.getRowCount(); s++) {
+				String faction = stf.getStringById(s).getKey();
+				
+				if (faction != null && faction != "") {
 					factionMap.put(faction, CRC.StringtoCRC(faction));
 				}
 			}
