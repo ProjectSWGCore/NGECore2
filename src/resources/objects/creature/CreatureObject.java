@@ -1428,6 +1428,8 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	    sendSystemMessage("@performance:" + type  + "_stop_self",(byte)0);
 	    notifyAudience("@performance:" + type + "_stop_other");
 
+		getClient().getSession().write(messageBuilder.buildPerformanceId(performanceId));
+		getClient().getSession().write(messageBuilder.buildPerformanceCounter(performanceCounter));
 		getClient().getSession().write(messageBuilder.buildStartPerformance(false));
 	}
 	

@@ -69,7 +69,7 @@ def startDance(core, actor, danceName, visual):
       actor.sendSystemMessage('@performance:dance_lack_skill_self',0)
       return
 
-    if actor.getPerformanceId() > 0:
+    if actor.getPosture() == 0x09:
       actor.sendSystemMessage('@performance:already_performing_self',0)
       return
 
@@ -89,8 +89,10 @@ def startDance(core, actor, danceName, visual):
 
     dance = entSvc.getDance(visual)
 
+    # performanceId > 0 seems to trigger the note bubble stuff, so use 0 here
+    # instead of dance.getLineNumber()
     # send CREO6 here
     # second param is some sort of counter or start tick
-    actor.startPerformance(dance.getLineNumber(), -842249156 , danceVisual, 1)
+    actor.startPerformance(0, -842249156 , danceVisual, 1)
 
     return
