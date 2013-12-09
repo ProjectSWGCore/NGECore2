@@ -988,6 +988,16 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		
 	}
 	
+	public IoBuffer buildMoodAnimationDelta(String moodAnimation) {
+		IoBuffer buffer = bufferPool.allocate(getAsciiString(moodAnimation).length, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.put(getAsciiString(moodAnimation));
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x0B, buffer, size + 4);
+		return buffer;
+		
+	}
+	
 	public IoBuffer buildListenToId(long creatureObjectId) {
 		IoBuffer buffer = bufferPool.allocate(8, false).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.putLong(creatureObjectId);

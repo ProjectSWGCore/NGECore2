@@ -59,6 +59,7 @@ def startDance(core, actor, danceName, visual):
       visual = entSvc.getDanceVisualId(danceName)
 
     if visual <= 0:
+      actor.sendSystemMessage('@performance:dance_unknown_self',0)
       return
 
     if not entSvc.isDance(visual):
@@ -76,14 +77,17 @@ def startDance(core, actor, danceName, visual):
     #TODO: check costume, posture, etc?
 
     actor.sendSystemMessage('@performance:dance_start_self',0);
-    actor.notifyAudience('@performance:dance_start_other');
+    # i'm not sure about this. i think stopping just stopped any watchers anyways
+    # method doesn't exist now.
+    #actor.notifyAudience('@performance:dance_start_other');
 
     danceVisual = 'dance_' + str(visual)
 
     if not actor.getPerformanceWatchee():
       #this also notifies the client with a delta4
       actor.setPerformanceWatchee(actor)
-  
+      actor.addAudience(actor)
+ 
     #this should send a CREO3 
     actor.setPosture(0x09);
 
@@ -93,6 +97,6 @@ def startDance(core, actor, danceName, visual):
     # instead of dance.getLineNumber()
     # send CREO6 here
     # second param is some sort of counter or start tick
-    actor.startPerformance(0, -842249156 , danceVisual, 1)
+    entSvc.startPerformance(actor, 0, -842249156 , danceVisual, 1)
 
     return

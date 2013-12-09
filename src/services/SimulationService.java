@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
 import main.NGECore;
@@ -66,6 +67,7 @@ import protocol.swg.objectControllerObjects.DataTransform;
 import protocol.swg.objectControllerObjects.DataTransformWithParent;
 import protocol.swg.objectControllerObjects.TargetUpdate;
 
+import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
@@ -175,22 +177,45 @@ public class SimulationService implements INetworkDispatch {
 		
 	public boolean add(SWGObject object, float x, float y, boolean notifyObservers) {
 		object.setIsInQuadtree(true);
-		core.objectService.loadServerTemplate(object);
 		boolean success = quadTrees.get(object.getPlanet().getName()).put(x, y, object);
-		if(success && notifyObservers) {
-			Point3D pos = new Point3D(x, 0, y);
-			Collection<SWGObject> newAwareObjects = get(object.getPlanet(), x, y, 512);
-			for(Iterator<SWGObject> it = newAwareObjects.iterator(); it.hasNext();) {
-				SWGObject obj = it.next();
-				if(obj.getAttachment("bigSpawnRange") == null && obj.getWorldPosition().getDistance(pos) > 200)
-					continue;
-				if(object.getClient() != null)
-					object.makeAware(obj);
-				if(obj.getClient() != null)
-					obj.makeAware(object);
+		if(success) {
+			Vector<SWGObject> childObjects = (Vector<SWGObject>) object.getAttachment("childObjects");
+			if(childObjects != null) {
+				addChildObjects(object, childObjects);
+				object.setAttachment("childObjects", null);
+			}
+			if(notifyObservers) {
+				Point3D pos = new Point3D(x, 0, y);
+				Collection<SWGObject> newAwareObjects = get(object.getPlanet(), x, y, 512);
+				for(Iterator<SWGObject> it = newAwareObjects.iterator(); it.hasNext();) {
+					SWGObject obj = it.next();
+					if(obj.getAttachment("bigSpawnRange") == null && obj.getWorldPosition().getDistance(pos) > 200)
+						continue;
+					if(object.getClient() != null)
+						object.makeAware(obj);
+					if(obj.getClient() != null)
+						obj.makeAware(object);
+				}
 			}
 		}
 		return success;
+	}
+	
+	public void addChildObjects(SWGObject object, Vector<SWGObject> childObjects) {
+		
+		for(SWGObject childObject : childObjects) {
+			if(childObject.getAttachment("cellNumber") == null)
+				add(childObject, childObject.getWorldPosition().x, childObject.getWorldPosition().z, true);
+			else {
+				BuildingObject building = (BuildingObject) object;
+				CellObject cell = building.getCellByCellNumber((Integer) childObject.getAttachment("cellNumber"));
+				if(cell == null)
+					continue;
+				cell.add(childObject);
+			}
+				
+		}
+		
 	}
 		
 	public boolean move(SWGObject object, int oldX, int oldY, int newX, int newY) {
