@@ -127,8 +127,6 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private CreatureObject performanceWatchee;
 	private CreatureObject performanceListenee;
 	private SWGList<CreatureObject> performanceAudience = new SWGList<CreatureObject>();
-	//FIXME: This one needs to be removed. anyone know how?
-	private List<CreatureObject> audience;
 	private int health = 1000;
 	private int action = 300;
 	@NotPersistent
