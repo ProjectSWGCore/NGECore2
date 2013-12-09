@@ -28,7 +28,6 @@ import main.NGECore;
 import org.apache.mina.core.buffer.IoBuffer;
 
 import engine.resources.config.Config;
-import engine.resources.config.DefaultConfig;
 
 public class ChatOnChangeFriendStatus extends SWGMessage {
 

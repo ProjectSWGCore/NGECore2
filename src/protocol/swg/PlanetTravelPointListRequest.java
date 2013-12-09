@@ -21,17 +21,10 @@
  ******************************************************************************/
 package protocol.swg;
 
-import java.util.List;
-
-import main.NGECore;
-
 import org.apache.mina.core.buffer.IoBuffer;
-
-import engine.resources.scene.Planet;
 
 public class PlanetTravelPointListRequest extends SWGMessage{
 
-	private NGECore core;
 	private long objectId;
 	private String planet;
 	

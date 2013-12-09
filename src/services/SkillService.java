@@ -41,6 +41,7 @@ import engine.clients.Client;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
+@SuppressWarnings("unused")
 public class SkillService implements INetworkDispatch {
 	
 	private NGECore core;

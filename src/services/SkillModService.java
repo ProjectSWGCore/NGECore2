@@ -24,10 +24,8 @@ package services;
 import java.util.Map;
 
 import resources.common.FileUtilities;
-import resources.objects.SWGList;
 import resources.objects.creature.CreatureObject;
 import main.NGECore;
-import engine.resources.objects.SkillMod;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
