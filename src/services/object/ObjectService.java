@@ -33,6 +33,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -643,29 +644,45 @@ public class ObjectService implements INetworkDispatch {
 	 * @param position The position as an offset to the parent object.
 	 * @param orientation The orientation as an offset to the parent object.
 	 */
-	public void createChildObject(SWGObject parent, String template, Point3D position, Quaternion orientation) {
+	public void createChildObject(SWGObject parent, String template, Point3D position, Quaternion orientation, int cellNumber) {
 		
+		if(cellNumber == -1) {
 		
-		float radians = parent.getRadians();
-		Point3D parentPos = parent.getWorldPosition();
+			float radians = parent.getRadians();
+			Point3D parentPos = parent.getWorldPosition();
+			
+			float x = (float) ((Math.cos(radians) * position.x) + (Math.sin(radians) * position.z));
+			float y = position.y + parentPos.y;
+			float z = (float) ((Math.cos(radians) * position.z) - (Math.sin(radians) * position.x));
+			
+			x += parentPos.x;
+			z += parentPos.z;
+			
+			position = new Point3D(x, y, z);
+			orientation = MathUtilities.rotateQuaternion(orientation, radians, new Point3D(0, 1, 0));
+			
+		}
 		
-		float x = (float) ((Math.cos(radians) * position.x) + (Math.sin(radians) * position.z));
-		float y = position.y + parentPos.y;
-		float z = (float) ((Math.cos(radians) * position.z) - (Math.sin(radians) * position.x));
-		
-		x += parentPos.x;
-		z += parentPos.z;
-		
-		position = new Point3D(x, y, z);
-		orientation = MathUtilities.rotateQuaternion(orientation, radians, new Point3D(0, 1, 0));
 		SWGObject child = createObject(template, 0, parent.getPlanet(), position, orientation);
 		
-		core.simulationService.add(child, x, z);
+		if(parent.getAttachment("childObjects") == null)
+			parent.setAttachment("childObjects", new Vector<SWGObject>());
+		
+		((Vector<SWGObject>) parent.getAttachment("childObjects")).add(child);
+		
+		if(cellNumber != -1)
+			child.setAttachment("cellNumber", cellNumber);
+		
+		//core.simulationService.add(child, x, z);
 		
 	}
 	
 	public void createChildObject(SWGObject parent, String template, float x, float y, float z, float qy, float qw) {
-		createChildObject(parent, template, new Point3D(x, y, z), new Quaternion(qw, 0, qy, 0));
+		createChildObject(parent, template, new Point3D(x, y, z), new Quaternion(qw, 0, qy, 0), -1);
+	}
+	
+	public void createChildObject(SWGObject parent, String template, float x, float y, float z, float qy, float qw, int cellNumber) {
+		createChildObject(parent, template, new Point3D(x, y, z), new Quaternion(qw, 0, qy, 0), cellNumber);
 	}
 	
 	public void loadBuildoutObjects(Planet planet) throws InstantiationException, IllegalAccessException {
