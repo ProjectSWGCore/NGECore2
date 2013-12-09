@@ -57,7 +57,7 @@ import engine.resources.scene.Quaternion;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 
-@Entity(version=8)
+@Entity(version=9)
 public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	@NotPersistent
@@ -126,7 +126,9 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private boolean groupDance = true;
 	private CreatureObject performanceWatchee;
 	private CreatureObject performanceListenee;
-	private List<CreatureObject> audience = Collections.synchronizedList(new ArrayList<CreatureObject>());
+	private SWGList<CreatureObject> performanceAudience = new SWGList<CreatureObject>();
+	//FIXME: This one needs to be removed. anyone know how?
+	private List<CreatureObject> audience;
 	private int health = 1000;
 	private int action = 300;
 	@NotPersistent
@@ -369,7 +371,10 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		String type = "";
 		synchronized(objectMutex) {
 			type = (performanceType) ? "dance" : "music";
-			Iterator<CreatureObject> it = audience.iterator();
+			if (performanceAudience == null) {
+				return;
+			}
+			Iterator<CreatureObject> it = performanceAudience.iterator();
 			while (it.hasNext()) {
 				CreatureObject next = it.next();
 				if ((performanceType) && (next.getPerformanceWatchee() != this)) { continue; }
@@ -385,7 +390,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 				next.sendSystemMessage("@performance:" + type  + "_stop_other",(byte)0);
 			}
 			//not sure if this behaviour is correct. might need fixing later.
-			audience = Collections.synchronizedList(new ArrayList<CreatureObject>());
+			performanceAudience = new SWGList<CreatureObject>();
 		}
 	}
 	@Override
@@ -1430,13 +1435,17 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	public void addAudience(CreatureObject audienceMember) {
 		synchronized(objectMutex) {
-			audience.add(audienceMember);
+			if (performanceAudience == null) {
+				performanceAudience = new SWGList<CreatureObject>();
+			}
+			performanceAudience.add(audienceMember);
 		}
 	}
 	
 	public void removeAudience(CreatureObject audienceMember) {
 		synchronized(objectMutex) {
-			audience.remove(audienceMember);
+			if (performanceAudience == null) { return; }
+			performanceAudience.remove(audienceMember);
 		}
 	}
 

@@ -19,7 +19,7 @@ def run(core, actor, target, commandString):
       return
 
     oldWatchee = actor.getPerformanceWatchee()
-    if oldWatchee:
+    if oldWatchee and oldWatchee != target:
       oldWatchee.removeAudience(actor)
 
     actor.setPerformanceWatchee(target)
