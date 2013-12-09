@@ -19,19 +19,12 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package resources.common;
+package resources.datatables;
 
-public class PvpStatus {
+public class Difficulty {
 	
-	public static int None = 0;
-	public static int Attackable = 1;
-	public static int Aggressive = 2;
-	public static int Overt = 4;
-	public static int TEF = 8;
-	public static int Player = 16;
-	public static int Enemy = 32;
-	public static int GoingOvert = 64;
-	public static int GoingCovert = 128;
-	public static int Dueling = 256;
+	public static byte NORMAL = 0; // Normal
+	public static byte ELITE = 1; // Elite
+	public static byte BOSS = 2; // Gold elite
 	
 }

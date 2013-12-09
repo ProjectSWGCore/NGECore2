@@ -37,9 +37,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.python.core.Py;
 
-import resources.common.Options;
-import resources.common.PvpStatus;
 import resources.common.collidables.CollidableCircle;
+import resources.datatables.Options;
+import resources.datatables.PvpStatus;
 import resources.objects.tangible.TangibleObject;
 import services.ai.LairActor;
 import engine.resources.scene.Planet;

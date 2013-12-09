@@ -19,12 +19,12 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package resources.common;
+package resources.datatables;
 
-public class Difficulty {
+public class FactionStatus {
 	
-	public static byte NORMAL = 0; // Normal
-	public static byte ELITE = 1; // Elite
-	public static byte BOSS = 2; // Gold elite
+	public static int OnLeave = 0;
+	public static int Combatant = 1;
+	public static int SpecialForces = 2;
 	
 }

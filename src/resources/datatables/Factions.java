@@ -19,12 +19,14 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package resources.common;
+package resources.datatables;
 
-public class FactionStatus {
+import engine.resources.common.CRC;
+
+public class Factions {
 	
-	public static int OnLeave = 0;
-	public static int Combatant = 1;
-	public static int SpecialForces = 2;
+	public static int Neutral = 0;
+	public static int Rebel = CRC.StringtoCRC("rebel");
+	public static int Imperial = CRC.StringtoCRC("imperial");
 	
 }

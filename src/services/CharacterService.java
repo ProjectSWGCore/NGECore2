@@ -45,6 +45,7 @@ import engine.resources.scene.Quaternion;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import resources.common.*;
+import resources.datatables.Options;
 import protocol.swg.ClientCreateCharacter;
 import protocol.swg.ClientMfdStatusUpdateMessage;
 import protocol.swg.ClientRandomNameRequest;
