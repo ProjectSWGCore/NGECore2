@@ -68,6 +68,8 @@ public class CombatCommands {
 		
 		core.commandService.registerCombatCommand("bh_ae_dm_1");
 		core.commandService.registerCombatCommand("bh_ae_dm_2");
+		core.commandService.registerCombatCommand("bh_armor_sprint_1");		//Power Asst. Sprint
+		core.commandService.registerCombatCommand("bh_cover_1");            	//Take Cover
 		core.commandService.registerCombatCommand("bh_dm_1");
 		core.commandService.registerCombatCommand("bh_dm_2");
 		core.commandService.registerCombatCommand("bh_dm_3");
@@ -105,14 +107,15 @@ public class CombatCommands {
 		core.commandService.registerCombatCommand("bh_intimidate_4");
 		core.commandService.registerCombatCommand("bh_intimidate_5");
 		core.commandService.registerCombatCommand("bh_intimidate_6");
+		core.commandService.registerCombatCommand("bh_prescience");   //Prescience
 		core.commandService.registerCombatCommand("bh_sniper_1");
 		core.commandService.registerCombatCommand("bh_sniper_2");
 		core.commandService.registerCombatCommand("bh_sniper_3");
 		core.commandService.registerCombatCommand("bh_sniper_4");
 		core.commandService.registerCombatCommand("bh_sniper_5");
 		core.commandService.registerCombatCommand("bh_sniper_6");
-		core.commandService.registerCombatCommand("bh_stun_1");
-		core.commandService.registerCombatCommand("bh_stun_2");
+		core.commandService.registerCombatCommand("bh_stun_1");		//Stun abilities were removed from expertise and
+		core.commandService.registerCombatCommand("bh_stun_2");		//replaced with Prescience after GU 7. Unused?
 		core.commandService.registerCombatCommand("bh_stun_3");
 		core.commandService.registerCombatCommand("bh_stun_4");
 		core.commandService.registerCombatCommand("bh_stun_5");
@@ -123,7 +126,8 @@ public class CombatCommands {
 		core.commandService.registerCombatCommand("bh_taunt_4");
 		core.commandService.registerCombatCommand("bh_taunt_5");
 		core.commandService.registerCombatCommand("bh_taunt_6");
-		core.commandService.registerCombatCommand("bh_return_fire_1");
+		core.commandService.registerCombatCommand("bh_return_fire_command_1");   //Return Fire - inconsistant naming
+		core.commandService.registerCombatCommand("bh_shields_1");		//BH Shields
 		core.commandService.registerCombatCommand("bh_sh_0");
 		core.commandService.registerCombatCommand("bh_sh_1");
 		core.commandService.registerCombatCommand("bh_sh_2");
