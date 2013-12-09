@@ -6,7 +6,7 @@ def setup():
 def run(core, actor, target, commandString):
     entSvc = core.entertainmentService
 
-    if (actor.getPerformanceId() <= 0):
+    if actor.getPosture() != 0x09 or actor.getPerformanceId() > 0:
       actor.sendSystemMessage('@performance:dance_not_performing', 0)
       return
 
