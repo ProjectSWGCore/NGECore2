@@ -223,7 +223,7 @@ public class ObjectService implements INetworkDispatch {
 		object.setAttachment("serverTemplate", ((customServerTemplate != null) ? customServerTemplate : object.getTemplate()));
 		
 		object.setisInSnapshot(isSnapshot);
-		//loadServerTemplate(object);		
+		loadServerTemplate(object);		
 		
 		objectList.put(objectID, object);
 		
