@@ -155,8 +155,14 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private SWGList<DamageOverTime> dotList = new SWGList<DamageOverTime>();
 	@NotPersistent
 	private ScheduledFuture<?> incapTask;
+	@NotPersistent
+	private ScheduledFuture<?> entertainerExperience;
+	@NotPersistent
+	private ScheduledFuture<?> inspirationTick;
 	
 	private boolean staticNPC = false; // temp
+	@NotPersistent
+	private int flourishCount = 0;
 	
 	public CreatureObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
 		super(objectID, planet, Template, position, orientation);
@@ -353,10 +359,14 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	public void stopPerformance() {
 		String type = "";
 		synchronized(objectMutex) {
-			setPerformanceId(0);
+			setPerformanceId(0,true);
 			setPerformanceCounter(0);
 			setCurrentAnimation("");
 			type = (performanceType) ? "dance" : "music";
+			if (entertainerExperience != null) {
+				entertainerExperience.cancel(true);
+				entertainerExperience = null;
+			}
 		}
 		
 	    sendSystemMessage("@performance:" + type  + "_stop_self",(byte)0);
@@ -391,6 +401,22 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			performanceAudience = new SWGList<CreatureObject>();
 		}
 	}
+	public ScheduledFuture<?> getEntertainerExperience() {
+		return entertainerExperience;
+	}
+
+	public void setEntertainerExperience(ScheduledFuture<?> entertainerExperience) {
+		this.entertainerExperience = entertainerExperience;
+	}
+
+	public ScheduledFuture<?> getInspirationTick() {
+		return inspirationTick;
+	}
+
+	public void setInspirationTick(ScheduledFuture<?> inspirationTick) {
+		this.inspirationTick = inspirationTick;
+	}
+
 	@Override
 	public void setFaction(String faction) {
 		synchronized(objectMutex) {
@@ -974,11 +1000,11 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 	}
 
-	public void setPerformanceId(int performanceId) {
+	public void setPerformanceId(int performanceId, boolean isDance) {
 		synchronized(objectMutex) {
 			this.performanceId = performanceId;
 		}
-		getClient().getSession().write(messageBuilder.buildPerformanceId(performanceId));
+		getClient().getSession().write(messageBuilder.buildPerformanceId((isDance) ? 0 : performanceId));
 	}
 
 	public boolean getAcceptBandflourishes() {
@@ -1514,6 +1540,24 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	public boolean getPerformanceType() {
 		synchronized(objectMutex) {
 			return this.performanceType;
+		}
+	}
+
+	public void setFlourishCount(int flourishCount) {
+		synchronized(objectMutex) {
+			this.flourishCount = flourishCount;
+		}
+	}
+
+	public int getFlourishCount() {
+		synchronized(objectMutex) {
+			return this.flourishCount;
+		}
+	}
+	
+	public void incFlourishCount() {
+		synchronized(objectMutex) {
+			this.flourishCount++;
 		}
 	}
 	

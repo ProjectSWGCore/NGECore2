@@ -74,7 +74,6 @@ def run(core, actor, target, commandString):
         waypoint.setActive(True)
         waypoint.setColor(WaypointObject.BLUE)
         name = commandString.split(" ", 5)
-        print (name)
         if name == "":
             name = "Waypoint"
 

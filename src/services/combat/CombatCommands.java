@@ -307,6 +307,7 @@ public class CombatCommands {
 		core.commandService.registerCommand("co_hw_dot");
 		core.commandService.registerCommand("co_ae_hw_dot");
 		core.commandService.registerCommand("co_position_secured");
+		core.commandService.registerCommand("co_first_aid_training");
 
 		// Entertainer
 		
@@ -424,14 +425,15 @@ public class CombatCommands {
 		core.commandService.registerCombatCommand("me_traumatize_4");
 		core.commandService.registerCombatCommand("me_traumatize_5");
 		core.commandService.registerCombatCommand("me_stasis_1");
-		core.commandService.registerCommand("me_stasis_self_1");
 		core.commandService.registerCommand("me_drag_1");
+		core.commandService.registerCommand("me_enhance_action_1");
 		core.commandService.registerCommand("me_reckless_stimulation_1");
 		core.commandService.registerCommand("me_reckless_stimulation_2");
 		core.commandService.registerCommand("me_reckless_stimulation_3");
 		core.commandService.registerCommand("me_reckless_stimulation_4");
 		core.commandService.registerCommand("me_reckless_stimulation_5");
 		core.commandService.registerCommand("me_reckless_stimulation_6");
+		core.commandService.registerCommand("me_stasis_self_1");
 		
 		// Officer
 		

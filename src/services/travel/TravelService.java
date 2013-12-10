@@ -156,9 +156,12 @@ public class TravelService implements INetworkDispatch {
 			}
 		}
 		
-		if (returnedPoint == null) {
-			System.out.println("NULL TravelPoint at : " + core.mapService.getClosestCityName(obj));
-		}
+		// Some transport obj's were used as deco (ex: ACLO bunker on Talus shared_player_transport). A null check should be performed before tp is used.
+		/*if (returnedPoint == null) {
+			System.out.println("Could not find travel point for " + obj.getTemplate() + " at " + obj.getPlanet().name + " Position: " + obj.getPosition().x + " " + obj.getPosition().z);
+			//Console.println("Travel Point NULL: " + returnedPoint.getName());
+		}*/
+		
 		return returnedPoint;
 	}
 	
