@@ -14,7 +14,11 @@ def run(core, actor, target, commandString):
       actor.sendSystemMessage('@performance:dance_watch_npc')
       return
 
-    if target.getPosture() != 0x09 or target.getPerformanceId() >0:
+    
+    entSvc = core.entertainmentService
+    perf = entSvc.getPerformanceByIndex(target.getPerformanceId())
+
+    if target.getPosture() != 0x09 or not perf or perf.getDanceVisualId() < 0:
       actor.sendSystemMessage('@performance:dance_watch_not_dancing',0)
       return
 
