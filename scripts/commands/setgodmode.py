@@ -13,12 +13,13 @@ def run(core, actor, target, commandString):
 	
 	commandArgs = commandString.split(' ')
 	command = commandArgs[0]
-	arg1 = commandArgs[1]
-	if commandArgs[2]:
+	if len(commandArgs) > 1:
+		arg1 = commandArgs[1]
+	if len(commandArgs) > 2:
 		arg2 = commandArgs[2]
-	if commandArgs[3]:
+	if len(commandArgs) > 3:
 		arg3 = commandArgs[3]
-	if commandArgs[4]:
+	if len(commandArgs) > 4:
 		arg4 = commandArgs[4]
 	
 	if not command:
