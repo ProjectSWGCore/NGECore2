@@ -40,4 +40,8 @@ def run(core, actor, target, commandString):
 	elif command == 'cash' and arg1 is int(arg1):
 		actor.setCash(actor.getCash() + int(arg1))
 		actor.sendSystemMessage('The Galactic Empire has transferred ' + arg1 + ' credits to you for your service.')
+		
+	elif command == 'addability' and arg1:
+		actor.addAbility(str(arg1))
+		actor.sendSystemMessage('You have learned ' + arg1 + '')
 	return
