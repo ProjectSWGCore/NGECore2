@@ -1163,7 +1163,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			if(health > maxHealth)
 				health = maxHealth;
 			setHamListCounter(getHamListCounter() + 1);
-			delta = messageBuilder.buildUpdateHAMListDelta();
+			delta = messageBuilder.buildHealthDelta(health);
 			
 			notifyObservers(delta, true);
 			this.health = health;
@@ -1183,7 +1183,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			if(action > maxAction)
 				action = maxAction;
 			setHamListCounter(getHamListCounter() + 1);
-			delta = messageBuilder.buildUpdateHAMListDelta();
+			delta = messageBuilder.buildActionDelta(action);
 			notifyObservers(delta, true);
 			this.action = action;
 		}
