@@ -13,12 +13,13 @@ def run(core, actor, target, commandString):
 	
 	commandArgs = commandString.split(' ')
 	command = commandArgs[0]
-	arg1 = commandArgs[1]
-	if commandArgs[2]:
+	if len(commandArgs) > 1:
+		arg1 = commandArgs[1]
+	if len(commandArgs) > 2:
 		arg2 = commandArgs[2]
-	if commandArgs[3]:
+	if len(commandArgs) > 3:
 		arg3 = commandArgs[3]
-	if commandArgs[4]:
+	if len(commandArgs) > 4:
 		arg4 = commandArgs[4]
 	
 	if not command:
@@ -27,13 +28,16 @@ def run(core, actor, target, commandString):
 	if command == 'giveExperience' and arg1:
 		core.playerService.giveExperience(actor, int(arg1))
 	
-	if command == 'setSpeed' and arg1:
+	elif command == 'setSpeed' and arg1:
 		actor.sendSystemMessage('Your speed was ' + str(actor.getSpeedMultiplierBase()) + '. Don\'t forget to set this back or it\'ll permanently imbalance your speed. Default without buffs or mods is 1.', 2)
 		actor.setSpeedMultiplierBase(float(arg1))
 		actor.sendSystemMessage('Your new speed is ' + str(actor.getSpeedMultiplierBase()) + '.', 2)
 	
-	if command == 'teleport' and arg2 and arg3 and arg4:
+	elif command == 'teleport' and arg2 and arg3 and arg4:
 		position = Point3D(float(arg2), float(arg3), float(arg4))
 		core.simulationService.transferToPlanet(actor, core.terrainService.getPlanetByName(arg1), position, actor.getOrientation(), None)
-	
+		
+	elif command == 'cash' and arg1 is int(arg1):
+		actor.setCash(actor.getCash() + int(arg1))
+		actor.sendSystemMessage('The Galactic Empire has transferred ' + arg1 + ' credits to you for your service.')
 	return

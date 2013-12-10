@@ -6,6 +6,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import main.NGECore;
 
@@ -34,10 +38,12 @@ import engine.resources.service.INetworkRemoteEvent;
 public class EntertainmentService implements INetworkDispatch {
 
 	private NGECore core;
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	
 	private Vector<BuffBuilder> buffBuilderSkills = new Vector<BuffBuilder>();
 	//FIXME: create a wrapper class for double key lookup maps
 	private HashMap<String,Performance> performances = new HashMap<String,Performance>();
+	private HashMap<Integer,Performance> performancesByIndex = new HashMap<Integer,Performance>();
 	private HashMap<Integer,Performance> danceMap = new HashMap<Integer,Performance>();
 	
 	public EntertainmentService(NGECore core) {
@@ -182,6 +188,7 @@ public class EntertainmentService implements INetworkDispatch {
 					danceMap.put(new Integer(p.getDanceVisualId()), p);
 				}
 				performances.put(p.getPerformanceName(), p);
+				performancesByIndex.put(r, p);
 			}
 			
 		} catch (InstantiationException | IllegalAccessException e) {
@@ -293,7 +300,7 @@ public class EntertainmentService implements INetworkDispatch {
 	}
 	
 	public void startPerformance(CreatureObject actor, int performanceId, int performanceCounter, String skillName, boolean isDance) {
-		actor.setPerformanceId(performanceId);
+		actor.setPerformanceId(performanceId, isDance);
 		actor.setPerformanceCounter(performanceCounter);
 		actor.setCurrentAnimation(skillName);
 		actor.setPerformanceType(isDance);
@@ -301,8 +308,34 @@ public class EntertainmentService implements INetworkDispatch {
 		actor.startPerformance();
 	}
 	
-
-	
+	public void startPerformanceExperience(final CreatureObject entertainer) {
+		final ScheduledFuture<?> experienceTask = scheduler.scheduleAtFixedRate(new Runnable() {
+			
+			@Override
+			public void run() {
+			
+				Performance p = performancesByIndex.get(entertainer.getPerformanceId());
+				if (p == null) {
+					entertainer.setFlourishCount(0);
+					return;
+				}
+				
+				int floXP = p.getFlourishXpMod();
+				int floCount = entertainer.getFlourishCount();
+				
+				int XP = ((floCount > 2) ? 2 : floCount) * floXP;
+				
+				entertainer.setFlourishCount(0);
+				core.playerService.giveExperience(entertainer, XP);
+				
+				
+			}
+			
+		},10, 10000, TimeUnit.MILLISECONDS);
+		
+		entertainer.setEntertainerExperience(experienceTask);
+		
+	}
 	
 	@Override
 	public void shutdown() {

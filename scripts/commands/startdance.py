@@ -91,12 +91,16 @@ def startDance(core, actor, danceName, visual):
     #this should send a CREO3 
     actor.setPosture(0x09);
 
+    playerObject = actor.getSlottedObject('ghost')
+    if playerObject and playerObject.getProfession() == "entertainer_1a":
+      entSvc.startPerformanceExperience(actor)
+
     dance = entSvc.getDance(visual)
 
     # performanceId > 0 seems to trigger the note bubble stuff, so use 0 here
     # instead of dance.getLineNumber()
     # send CREO6 here
     # second param is some sort of counter or start tick
-    entSvc.startPerformance(actor, 0, -842249156 , danceVisual, 1)
+    entSvc.startPerformance(actor, dance.getLineNumber(), -842249156 , danceVisual, 1)
 
     return

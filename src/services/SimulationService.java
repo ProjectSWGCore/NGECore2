@@ -444,7 +444,16 @@ public class SimulationService implements INetworkDispatch {
 			}
 			
 		});
+		
+		objControllerOpcodes.put(ObjControllerOpcodes.HOVER_TARGET, new INetworkRemoteEvent() {
 
+			@Override
+			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
+				
+			}
+			
+		});
+		
 	}
 
 	@Override
