@@ -299,6 +299,10 @@ public class EntertainmentService implements INetworkDispatch {
 		return performances.get(name);
 	}
 	
+	public Performance getPerformanceByIndex(int index) {
+		return performancesByIndex.get(index);
+	}
+	
 	public void startPerformance(CreatureObject actor, int performanceId, int performanceCounter, String skillName, boolean isDance) {
 		actor.setPerformanceId(performanceId, isDance);
 		actor.setPerformanceCounter(performanceCounter);

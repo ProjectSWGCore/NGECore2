@@ -2,100 +2,78 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 9.2.2
--- Dumped by pg_dump version 9.2.2
--- Started on 2013-11-24 10:56:35
+-- Dumped from database version 9.3.1
+-- Dumped by pg_dump version 9.3.1
+-- Started on 2013-12-10 03:08:23
 
 SET statement_timeout = 0;
+SET lock_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SET check_function_bodies = false;
 SET client_min_messages = warning;
 
 --
--- TOC entry 2040 (class 0 OID 0)
--- Dependencies: 6
--- Name: SCHEMA "public"; Type: COMMENT; Schema: -; Owner: postgres
---
-
-COMMENT ON SCHEMA "public" IS 'standard public schema';
-
-
---
--- TOC entry 189 (class 3079 OID 11727)
+-- TOC entry 189 (class 3079 OID 11750)
 -- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
 --
 
-CREATE EXTENSION IF NOT EXISTS "plpgsql" WITH SCHEMA "pg_catalog";
+CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
 
 
 --
--- TOC entry 2042 (class 0 OID 0)
+-- TOC entry 2035 (class 0 OID 0)
 -- Dependencies: 189
--- Name: EXTENSION "plpgsql"; Type: COMMENT; Schema: -; Owner: 
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
 --
 
-COMMENT ON EXTENSION "plpgsql" IS 'PL/pgSQL procedural language';
+COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
 
 
 --
--- TOC entry 188 (class 3079 OID 16598)
+-- TOC entry 188 (class 3079 OID 16601)
 -- Name: adminpack; Type: EXTENSION; Schema: -; Owner: 
 --
 
-CREATE EXTENSION IF NOT EXISTS "adminpack" WITH SCHEMA "pg_catalog";
+CREATE EXTENSION IF NOT EXISTS adminpack WITH SCHEMA pg_catalog;
 
 
 --
--- TOC entry 2043 (class 0 OID 0)
+-- TOC entry 2036 (class 0 OID 0)
 -- Dependencies: 188
--- Name: EXTENSION "adminpack"; Type: COMMENT; Schema: -; Owner: 
+-- Name: EXTENSION adminpack; Type: COMMENT; Schema: -; Owner: 
 --
 
-COMMENT ON EXTENSION "adminpack" IS 'administrative functions for PostgreSQL';
+COMMENT ON EXTENSION adminpack IS 'administrative functions for PostgreSQL';
 
 
-SET search_path = "public", pg_catalog;
-
---
--- TOC entry 575 (class 1247 OID 16733)
--- Name: reservation_type; Type: TYPE; Schema: public; Owner: nge
---
-
-CREATE TYPE "reservation_type" AS ENUM (
-    'name_declined_fictionally_reserved',
-    'name_declined_developer',
-    'name_declined_profane'
-);
-
-
-ALTER TYPE "public"."reservation_type" OWNER TO "nge";
+SET search_path = public, pg_catalog;
 
 SET default_tablespace = '';
 
 SET default_with_oids = false;
 
 --
--- TOC entry 168 (class 1259 OID 16607)
+-- TOC entry 170 (class 1259 OID 16610)
 -- Name: accounts; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
-CREATE TABLE "accounts" (
-    "id" integer NOT NULL,
+CREATE TABLE accounts (
+    id integer NOT NULL,
     "user" character varying(16) NOT NULL,
-    "pass" character varying(34) NOT NULL,
-    "email" character varying(32) NOT NULL
+    pass character varying(34) NOT NULL,
+    email character varying(32) NOT NULL
 );
 
 
-ALTER TABLE "public"."accounts" OWNER TO "postgres";
+ALTER TABLE public.accounts OWNER TO postgres;
 
 --
--- TOC entry 169 (class 1259 OID 16610)
+-- TOC entry 171 (class 1259 OID 16613)
 -- Name: accounts_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
-CREATE SEQUENCE "accounts_id_seq"
+CREATE SEQUENCE accounts_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -103,42 +81,42 @@ CREATE SEQUENCE "accounts_id_seq"
     CACHE 1;
 
 
-ALTER TABLE "public"."accounts_id_seq" OWNER TO "postgres";
+ALTER TABLE public.accounts_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2044 (class 0 OID 0)
--- Dependencies: 169
+-- TOC entry 2037 (class 0 OID 0)
+-- Dependencies: 171
 -- Name: accounts_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
-ALTER SEQUENCE "accounts_id_seq" OWNED BY "accounts"."id";
+ALTER SEQUENCE accounts_id_seq OWNED BY accounts.id;
 
 
 --
--- TOC entry 170 (class 1259 OID 16612)
+-- TOC entry 172 (class 1259 OID 16615)
 -- Name: characters; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
-CREATE TABLE "characters" (
-    "id" bigint NOT NULL,
+CREATE TABLE characters (
+    id bigint NOT NULL,
     "firstName" character varying(16) NOT NULL,
     "lastName" character varying,
     "accountId" integer NOT NULL,
     "galaxyId" integer NOT NULL,
     "statusId" integer NOT NULL,
-    "appearance" integer,
-    "gmflag" boolean
+    appearance integer,
+    gmflag boolean
 );
 
 
-ALTER TABLE "public"."characters" OWNER TO "postgres";
+ALTER TABLE public.characters OWNER TO postgres;
 
 --
--- TOC entry 171 (class 1259 OID 16618)
+-- TOC entry 173 (class 1259 OID 16621)
 -- Name: characters_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
-CREATE SEQUENCE "characters_id_seq"
+CREATE SEQUENCE characters_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -146,36 +124,36 @@ CREATE SEQUENCE "characters_id_seq"
     CACHE 1;
 
 
-ALTER TABLE "public"."characters_id_seq" OWNER TO "postgres";
+ALTER TABLE public.characters_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2045 (class 0 OID 0)
--- Dependencies: 171
+-- TOC entry 2038 (class 0 OID 0)
+-- Dependencies: 173
 -- Name: characters_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
-ALTER SEQUENCE "characters_id_seq" OWNED BY "characters"."id";
+ALTER SEQUENCE characters_id_seq OWNED BY characters.id;
 
 
 --
--- TOC entry 172 (class 1259 OID 16620)
+-- TOC entry 174 (class 1259 OID 16623)
 -- Name: connectionServers; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
 CREATE TABLE "connectionServers" (
-    "id" integer NOT NULL,
-    "address" character varying(40) NOT NULL,
-    "port" integer NOT NULL,
+    id integer NOT NULL,
+    address character varying(40) NOT NULL,
+    port integer NOT NULL,
     "galaxyId" integer NOT NULL,
     "statusId" integer,
     "pingPort" integer
 );
 
 
-ALTER TABLE "public"."connectionServers" OWNER TO "postgres";
+ALTER TABLE public."connectionServers" OWNER TO postgres;
 
 --
--- TOC entry 173 (class 1259 OID 16623)
+-- TOC entry 175 (class 1259 OID 16626)
 -- Name: connectionServers_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
@@ -187,36 +165,36 @@ CREATE SEQUENCE "connectionServers_id_seq"
     CACHE 1;
 
 
-ALTER TABLE "public"."connectionServers_id_seq" OWNER TO "postgres";
+ALTER TABLE public."connectionServers_id_seq" OWNER TO postgres;
 
 --
--- TOC entry 2046 (class 0 OID 0)
--- Dependencies: 173
+-- TOC entry 2039 (class 0 OID 0)
+-- Dependencies: 175
 -- Name: connectionServers_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
-ALTER SEQUENCE "connectionServers_id_seq" OWNED BY "connectionServers"."id";
+ALTER SEQUENCE "connectionServers_id_seq" OWNED BY "connectionServers".id;
 
 
 --
--- TOC entry 174 (class 1259 OID 16625)
+-- TOC entry 176 (class 1259 OID 16628)
 -- Name: fictionallyreservednames; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
-CREATE TABLE "fictionallyreservednames" (
-    "id" integer NOT NULL,
+CREATE TABLE fictionallyreservednames (
+    id integer NOT NULL,
     "firstName" character varying
 );
 
 
-ALTER TABLE "public"."fictionallyreservednames" OWNER TO "postgres";
+ALTER TABLE public.fictionallyreservednames OWNER TO postgres;
 
 --
--- TOC entry 175 (class 1259 OID 16631)
+-- TOC entry 177 (class 1259 OID 16634)
 -- Name: fictionallyreservednames_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
-CREATE SEQUENCE "fictionallyreservednames_id_seq"
+CREATE SEQUENCE fictionallyreservednames_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -224,36 +202,36 @@ CREATE SEQUENCE "fictionallyreservednames_id_seq"
     CACHE 1;
 
 
-ALTER TABLE "public"."fictionallyreservednames_id_seq" OWNER TO "postgres";
+ALTER TABLE public.fictionallyreservednames_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2047 (class 0 OID 0)
--- Dependencies: 175
+-- TOC entry 2040 (class 0 OID 0)
+-- Dependencies: 177
 -- Name: fictionallyreservednames_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
-ALTER SEQUENCE "fictionallyreservednames_id_seq" OWNED BY "fictionallyreservednames"."id";
+ALTER SEQUENCE fictionallyreservednames_id_seq OWNED BY fictionallyreservednames.id;
 
 
 --
--- TOC entry 176 (class 1259 OID 16633)
+-- TOC entry 178 (class 1259 OID 16636)
 -- Name: galaxies; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
-CREATE TABLE "galaxies" (
-    "id" integer NOT NULL,
-    "name" character varying(30) NOT NULL
+CREATE TABLE galaxies (
+    id integer NOT NULL,
+    name character varying(30) NOT NULL
 );
 
 
-ALTER TABLE "public"."galaxies" OWNER TO "postgres";
+ALTER TABLE public.galaxies OWNER TO postgres;
 
 --
--- TOC entry 177 (class 1259 OID 16636)
+-- TOC entry 179 (class 1259 OID 16639)
 -- Name: galaxies_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
-CREATE SEQUENCE "galaxies_id_seq"
+CREATE SEQUENCE galaxies_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -261,48 +239,48 @@ CREATE SEQUENCE "galaxies_id_seq"
     CACHE 1;
 
 
-ALTER TABLE "public"."galaxies_id_seq" OWNER TO "postgres";
+ALTER TABLE public.galaxies_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2048 (class 0 OID 0)
--- Dependencies: 177
+-- TOC entry 2041 (class 0 OID 0)
+-- Dependencies: 179
 -- Name: galaxies_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
-ALTER SEQUENCE "galaxies_id_seq" OWNED BY "galaxies"."id";
+ALTER SEQUENCE galaxies_id_seq OWNED BY galaxies.id;
 
 
 --
--- TOC entry 178 (class 1259 OID 16638)
+-- TOC entry 180 (class 1259 OID 16641)
 -- Name: highestid; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
-CREATE TABLE "highestid" (
-    "id" bigint NOT NULL
+CREATE TABLE highestid (
+    id bigint NOT NULL
 );
 
 
-ALTER TABLE "public"."highestid" OWNER TO "postgres";
+ALTER TABLE public.highestid OWNER TO postgres;
 
 --
--- TOC entry 179 (class 1259 OID 16641)
+-- TOC entry 181 (class 1259 OID 16644)
 -- Name: profanenames; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
-CREATE TABLE "profanenames" (
-    "id" integer NOT NULL,
+CREATE TABLE profanenames (
+    id integer NOT NULL,
     "firstName" character varying
 );
 
 
-ALTER TABLE "public"."profanenames" OWNER TO "postgres";
+ALTER TABLE public.profanenames OWNER TO postgres;
 
 --
--- TOC entry 180 (class 1259 OID 16647)
+-- TOC entry 182 (class 1259 OID 16650)
 -- Name: profanenames_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
-CREATE SEQUENCE "profanenames_id_seq"
+CREATE SEQUENCE profanenames_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -310,40 +288,23 @@ CREATE SEQUENCE "profanenames_id_seq"
     CACHE 1;
 
 
-ALTER TABLE "public"."profanenames_id_seq" OWNER TO "postgres";
+ALTER TABLE public.profanenames_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2049 (class 0 OID 0)
--- Dependencies: 180
+-- TOC entry 2042 (class 0 OID 0)
+-- Dependencies: 182
 -- Name: profanenames_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
-ALTER SEQUENCE "profanenames_id_seq" OWNED BY "profanenames"."id";
+ALTER SEQUENCE profanenames_id_seq OWNED BY profanenames.id;
 
 
 --
--- TOC entry 185 (class 1259 OID 16739)
--- Name: reservednames; Type: TABLE; Schema: public; Owner: nge; Tablespace: 
---
-
-CREATE TABLE "reservednames" (
-    "id" integer NOT NULL,
-    "pattern" character varying,
-    "type" "reservation_type" DEFAULT 'name_declined_profane'::"reservation_type" NOT NULL,
-    "match_firstname" boolean DEFAULT true NOT NULL,
-    "match_lastname" boolean DEFAULT true NOT NULL,
-    "match_both_names" boolean DEFAULT false
-);
-
-
-ALTER TABLE "public"."reservednames" OWNER TO "nge";
-
---
--- TOC entry 186 (class 1259 OID 16749)
+-- TOC entry 183 (class 1259 OID 16652)
 -- Name: reservednames_id_seq; Type: SEQUENCE; Schema: public; Owner: nge
 --
 
-CREATE SEQUENCE "reservednames_id_seq"
+CREATE SEQUENCE reservednames_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -351,36 +312,27 @@ CREATE SEQUENCE "reservednames_id_seq"
     CACHE 1;
 
 
-ALTER TABLE "public"."reservednames_id_seq" OWNER TO "nge";
+ALTER TABLE public.reservednames_id_seq OWNER TO nge;
 
 --
--- TOC entry 2051 (class 0 OID 0)
--- Dependencies: 186
--- Name: reservednames_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: nge
---
-
-ALTER SEQUENCE "reservednames_id_seq" OWNED BY "reservednames"."id";
-
-
---
--- TOC entry 181 (class 1259 OID 16651)
+-- TOC entry 184 (class 1259 OID 16654)
 -- Name: reservedstaffnames; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
-CREATE TABLE "reservedstaffnames" (
-    "id" integer NOT NULL,
+CREATE TABLE reservedstaffnames (
+    id integer NOT NULL,
     "firstName" character varying
 );
 
 
-ALTER TABLE "public"."reservedstaffnames" OWNER TO "postgres";
+ALTER TABLE public.reservedstaffnames OWNER TO postgres;
 
 --
--- TOC entry 182 (class 1259 OID 16657)
+-- TOC entry 185 (class 1259 OID 16660)
 -- Name: reservedstaffnames_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
-CREATE SEQUENCE "reservedstaffnames_id_seq"
+CREATE SEQUENCE reservedstaffnames_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -388,38 +340,38 @@ CREATE SEQUENCE "reservedstaffnames_id_seq"
     CACHE 1;
 
 
-ALTER TABLE "public"."reservedstaffnames_id_seq" OWNER TO "postgres";
+ALTER TABLE public.reservedstaffnames_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2053 (class 0 OID 0)
--- Dependencies: 182
+-- TOC entry 2044 (class 0 OID 0)
+-- Dependencies: 185
 -- Name: reservedstaffnames_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
-ALTER SEQUENCE "reservedstaffnames_id_seq" OWNED BY "reservedstaffnames"."id";
+ALTER SEQUENCE reservedstaffnames_id_seq OWNED BY reservedstaffnames.id;
 
 
 --
--- TOC entry 183 (class 1259 OID 16659)
+-- TOC entry 186 (class 1259 OID 16662)
 -- Name: sessions; Type: TABLE; Schema: public; Owner: postgres; Tablespace: 
 --
 
-CREATE TABLE "sessions" (
-    "id" integer NOT NULL,
-    "key" "bytea" NOT NULL,
+CREATE TABLE sessions (
+    id integer NOT NULL,
+    key bytea NOT NULL,
     "accountId" integer NOT NULL,
-    "valid" timestamp with time zone DEFAULT "now"() NOT NULL
+    valid timestamp with time zone DEFAULT now() NOT NULL
 );
 
 
-ALTER TABLE "public"."sessions" OWNER TO "postgres";
+ALTER TABLE public.sessions OWNER TO postgres;
 
 --
--- TOC entry 184 (class 1259 OID 16666)
+-- TOC entry 187 (class 1259 OID 16669)
 -- Name: sessions_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
-CREATE SEQUENCE "sessions_id_seq"
+CREATE SEQUENCE sessions_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -427,155 +379,127 @@ CREATE SEQUENCE "sessions_id_seq"
     CACHE 1;
 
 
-ALTER TABLE "public"."sessions_id_seq" OWNER TO "postgres";
+ALTER TABLE public.sessions_id_seq OWNER TO postgres;
 
 --
--- TOC entry 2054 (class 0 OID 0)
--- Dependencies: 184
+-- TOC entry 2045 (class 0 OID 0)
+-- Dependencies: 187
 -- Name: sessions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
-ALTER SEQUENCE "sessions_id_seq" OWNED BY "sessions"."id";
+ALTER SEQUENCE sessions_id_seq OWNED BY sessions.id;
 
 
 --
--- TOC entry 187 (class 1259 OID 16752)
--- Name: temp_reserved_char_names; Type: TABLE; Schema: public; Owner: nge; Tablespace: 
---
-
-CREATE TABLE "temp_reserved_char_names" (
-    "accountId" integer NOT NULL,
-    "firstName" character varying(16)
-);
-
-
-ALTER TABLE "public"."temp_reserved_char_names" OWNER TO "nge";
-
---
--- TOC entry 2055 (class 0 OID 0)
--- Dependencies: 187
--- Name: TABLE "temp_reserved_char_names"; Type: COMMENT; Schema: public; Owner: nge
---
-
-COMMENT ON TABLE "temp_reserved_char_names" IS 'this table is for temporary reservations.';
-
-
---
--- TOC entry 1982 (class 2604 OID 16668)
+-- TOC entry 1877 (class 2604 OID 16671)
 -- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY "accounts" ALTER COLUMN "id" SET DEFAULT "nextval"('"accounts_id_seq"'::"regclass");
+ALTER TABLE ONLY accounts ALTER COLUMN id SET DEFAULT nextval('accounts_id_seq'::regclass);
 
 
 --
--- TOC entry 1983 (class 2604 OID 16669)
+-- TOC entry 1878 (class 2604 OID 16672)
 -- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY "connectionServers" ALTER COLUMN "id" SET DEFAULT "nextval"('"connectionServers_id_seq"'::"regclass");
+ALTER TABLE ONLY "connectionServers" ALTER COLUMN id SET DEFAULT nextval('"connectionServers_id_seq"'::regclass);
 
 
 --
--- TOC entry 1984 (class 2604 OID 16670)
+-- TOC entry 1879 (class 2604 OID 16673)
 -- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY "fictionallyreservednames" ALTER COLUMN "id" SET DEFAULT "nextval"('"fictionallyreservednames_id_seq"'::"regclass");
+ALTER TABLE ONLY fictionallyreservednames ALTER COLUMN id SET DEFAULT nextval('fictionallyreservednames_id_seq'::regclass);
 
 
 --
--- TOC entry 1985 (class 2604 OID 16671)
+-- TOC entry 1880 (class 2604 OID 16674)
 -- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY "galaxies" ALTER COLUMN "id" SET DEFAULT "nextval"('"galaxies_id_seq"'::"regclass");
+ALTER TABLE ONLY galaxies ALTER COLUMN id SET DEFAULT nextval('galaxies_id_seq'::regclass);
 
 
 --
--- TOC entry 1986 (class 2604 OID 16672)
+-- TOC entry 1881 (class 2604 OID 16675)
 -- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY "profanenames" ALTER COLUMN "id" SET DEFAULT "nextval"('"profanenames_id_seq"'::"regclass");
+ALTER TABLE ONLY profanenames ALTER COLUMN id SET DEFAULT nextval('profanenames_id_seq'::regclass);
 
 
 --
--- TOC entry 1994 (class 2604 OID 16751)
--- Name: id; Type: DEFAULT; Schema: public; Owner: nge
---
-
-ALTER TABLE ONLY "reservednames" ALTER COLUMN "id" SET DEFAULT "nextval"('"reservednames_id_seq"'::"regclass");
-
-
---
--- TOC entry 1987 (class 2604 OID 16673)
+-- TOC entry 1882 (class 2604 OID 16676)
 -- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY "reservedstaffnames" ALTER COLUMN "id" SET DEFAULT "nextval"('"reservedstaffnames_id_seq"'::"regclass");
+ALTER TABLE ONLY reservedstaffnames ALTER COLUMN id SET DEFAULT nextval('reservedstaffnames_id_seq'::regclass);
 
 
 --
--- TOC entry 1989 (class 2604 OID 16674)
+-- TOC entry 1884 (class 2604 OID 16677)
 -- Name: id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY "sessions" ALTER COLUMN "id" SET DEFAULT "nextval"('"sessions_id_seq"'::"regclass");
+ALTER TABLE ONLY sessions ALTER COLUMN id SET DEFAULT nextval('sessions_id_seq'::regclass);
 
 
 --
--- TOC entry 2015 (class 0 OID 16607)
--- Dependencies: 168
+-- TOC entry 2010 (class 0 OID 16610)
+-- Dependencies: 170
 -- Data for Name: accounts; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO "accounts" VALUES (1, 'Light', 'password', 'test');
-INSERT INTO "accounts" VALUES (2, 'Darkk', 'Password1', 'xyz@x.de');
+COPY accounts (id, "user", pass, email) FROM stdin;
+1	Light	password	test
+2	postgres	nge	test
+\.
 
 
 --
--- TOC entry 2056 (class 0 OID 0)
--- Dependencies: 169
+-- TOC entry 2046 (class 0 OID 0)
+-- Dependencies: 171
 -- Name: accounts_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('"accounts_id_seq"', 2, true);
+SELECT pg_catalog.setval('accounts_id_seq', 2, true);
 
 
 --
--- TOC entry 2017 (class 0 OID 16612)
--- Dependencies: 170
+-- TOC entry 2012 (class 0 OID 16615)
+-- Dependencies: 172
 -- Data for Name: characters; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO "characters" VALUES (6521, 'Dhoemar', '', 2, 3, 1, 101601749, false);
-INSERT INTO "characters" VALUES (7068, 'Nyess', 'Shethersan', 9261, 2, 1, 101601749, false);
-INSERT INTO "characters" VALUES (8138, 'Ahdrim', 'Kaharean', 9261, 3, 1, 101601749, false);
+COPY characters (id, "firstName", "lastName", "accountId", "galaxyId", "statusId", appearance, gmflag) FROM stdin;
+\.
 
 
 --
--- TOC entry 2057 (class 0 OID 0)
--- Dependencies: 171
+-- TOC entry 2047 (class 0 OID 0)
+-- Dependencies: 173
 -- Name: characters_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('"characters_id_seq"', 4, true);
+SELECT pg_catalog.setval('characters_id_seq', 4, true);
 
 
 --
--- TOC entry 2019 (class 0 OID 16620)
--- Dependencies: 172
+-- TOC entry 2014 (class 0 OID 16623)
+-- Dependencies: 174
 -- Data for Name: connectionServers; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO "connectionServers" VALUES (2, '127.0.0.1', 44463, 2, 1, 44462);
-INSERT INTO "connectionServers" VALUES (3, '172.16.0.208', 44463, 3, 2, 44462);
+COPY "connectionServers" (id, address, port, "galaxyId", "statusId", "pingPort") FROM stdin;
+2	127.0.0.1	44463	2	2	44462
+\.
 
 
 --
--- TOC entry 2058 (class 0 OID 0)
--- Dependencies: 173
+-- TOC entry 2048 (class 0 OID 0)
+-- Dependencies: 175
 -- Name: connectionServers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
@@ -583,444 +507,594 @@ SELECT pg_catalog.setval('"connectionServers_id_seq"', 2, true);
 
 
 --
--- TOC entry 2021 (class 0 OID 16625)
--- Dependencies: 174
+-- TOC entry 2016 (class 0 OID 16628)
+-- Dependencies: 176
 -- Data for Name: fictionallyreservednames; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO "fictionallyreservednames" VALUES (1, 'luke');
-INSERT INTO "fictionallyreservednames" VALUES (2, 'darth');
-INSERT INTO "fictionallyreservednames" VALUES (3, 'vader');
-INSERT INTO "fictionallyreservednames" VALUES (8, 'han solo');
-INSERT INTO "fictionallyreservednames" VALUES (9, 'darth vader');
-INSERT INTO "fictionallyreservednames" VALUES (7, 'solo');
-INSERT INTO "fictionallyreservednames" VALUES (6, 'han');
-INSERT INTO "fictionallyreservednames" VALUES (5, 'leia');
-INSERT INTO "fictionallyreservednames" VALUES (4, 'emperor');
+COPY fictionallyreservednames (id, "firstName") FROM stdin;
+1	luke
+2	darth
+3	vader
+8	han solo
+9	darth vader
+7	solo
+6	han
+5	leia
+4	emperor
+10	lando
+11	jedi
+12	sith
+13	exar
+14	exar kun
+15	kun
+16	darth
+17	biggs
+18	wedge
+19	boba
+20	jango
+21	padme
+22	Obiwan
+23	ackbar
+24	greedo
+25	jabba
+26	watto
+27	anakin
+28	skywalker
+29	organa
+30	george lucas
+31	porkins
+32	bossk
+33	Dash Rendar
+34	Bib
+35	Bib Fortuna
+36	Aayla Secura
+37	Kit Fisto
+38	Shaak Ti
+39	Starkiller
+40	Lando Calrissian
+41	Chewbacca
+42	Revan
+43	Malak
+44	Desann
+45	Kyle Katarn
+46	Jerec
+47	Yun
+48	Sariss
+49	Marek Steele
+50	Moff
+51	Lieutenant
+52	Captain
+53	Colonel
+54	General
+55	Admiral
+56	Dex
+57	Cody
+58	Commander Cody
+59	Oola
+60	Max Rebo
+61	Sy Snootles
+62	Prince 
+63	Prince Xizor
+64	Sebulba
+65	Plo Koon
+66	Ki-Adi-Mundi
+67	Sarlacc
+68	Krayt
+69	C-3PO
+70	R2-D2
+71	Mark Hamill
+72	Harrison Ford
+73	Carrie Fisher
+74	Anthony Daniels
+75	Indiana Jones
+76	Thrawn
+77	Mon Mothma
+78	Chancellor
+79	Palpatine
+80	Sidious
+81	Tyranus
+82	Dooku
+83	Count Dooku
+84	Maul
+85	Asajj Ventress
+86	Plagueis
+87	HK-47
+88	TK
+89	Qui-Gon Jinn
+90	Qui-Gon
+91	Obi-Wan
+92	Obi'Wan
+93	Obiwan'
+94	-Obi-Wan-
+96	Quinlan Vos
+97	Wilhuff Tarkin
+98	Ahsoka Tano
+99	Ahsoka
+100	Abeloth
+101	Ashla
+102	Bogan
+103	Jacen
+104	Jaina
+105	Gilad Pellaeon
+106	Bail
+107	Bail Organa
+108	Ephant Mon
+109	Salacious Crumb
+110	Owen Lars
+111	Beru Lars
+112	Huff Darklighter
+113	Darklighter
+114	A'Sharad Hett
+115	Vergere
+116	Wyyrlok
+117	Attichitcuk
+118	Mallatobuck
+119	Lumpawaroo
+120	Canderous Ordo
+121	Mandalore
+122	Visas Marr
+123	Droopy McCool
+124	Ak-rev
+125	Joh-Yowza
+126	Greeata Jendowanian
+127	Figrin D'an
+128	Doikk Na'ts
+129	Sun'il Ei'de
+130	Tech Mo'r
+131	Wuher
+132	Ponda Baba
+95	Mara Jade
+\.
 
 
 --
--- TOC entry 2059 (class 0 OID 0)
--- Dependencies: 175
+-- TOC entry 2049 (class 0 OID 0)
+-- Dependencies: 177
 -- Name: fictionallyreservednames_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('"fictionallyreservednames_id_seq"', 1, false);
+SELECT pg_catalog.setval('fictionallyreservednames_id_seq', 1, false);
 
 
 --
--- TOC entry 2023 (class 0 OID 16633)
--- Dependencies: 176
+-- TOC entry 2018 (class 0 OID 16636)
+-- Dependencies: 178
 -- Data for Name: galaxies; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-INSERT INTO "galaxies" VALUES (2, 'Local Connection');
-INSERT INTO "galaxies" VALUES (3, 'VM');
-
-
---
--- TOC entry 2060 (class 0 OID 0)
--- Dependencies: 177
--- Name: galaxies_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('"galaxies_id_seq"', 2, true);
-
-
---
--- TOC entry 2025 (class 0 OID 16638)
--- Dependencies: 178
--- Data for Name: highestid; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-INSERT INTO "highestid" VALUES (8682);
-
-
---
--- TOC entry 2026 (class 0 OID 16641)
--- Dependencies: 179
--- Data for Name: profanenames; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-INSERT INTO "profanenames" VALUES (1, 'anal');
-INSERT INTO "profanenames" VALUES (2, 'ass');
-INSERT INTO "profanenames" VALUES (3, 'asshole');
-INSERT INTO "profanenames" VALUES (4, 'biatch');
-INSERT INTO "profanenames" VALUES (5, 'bitch');
-INSERT INTO "profanenames" VALUES (6, 'cock');
-INSERT INTO "profanenames" VALUES (7, 'cocksucker');
-INSERT INTO "profanenames" VALUES (8, 'cum');
-INSERT INTO "profanenames" VALUES (9, 'cunt');
-INSERT INTO "profanenames" VALUES (10, 'dick');
-INSERT INTO "profanenames" VALUES (11, 'dumb');
-INSERT INTO "profanenames" VALUES (12, 'dumbass');
-INSERT INTO "profanenames" VALUES (13, 'fag');
-INSERT INTO "profanenames" VALUES (14, 'faggot');
-INSERT INTO "profanenames" VALUES (15, 'fuck');
-INSERT INTO "profanenames" VALUES (16, 'fuk');
-INSERT INTO "profanenames" VALUES (17, 'hater');
-INSERT INTO "profanenames" VALUES (18, 'hooker');
-INSERT INTO "profanenames" VALUES (19, 'jackoff');
-INSERT INTO "profanenames" VALUES (20, 'jizz');
-INSERT INTO "profanenames" VALUES (21, 'kunt');
-INSERT INTO "profanenames" VALUES (22, 'nazi');
-INSERT INTO "profanenames" VALUES (23, 'negro');
-INSERT INTO "profanenames" VALUES (24, 'nigga');
-INSERT INTO "profanenames" VALUES (25, 'nigger');
-INSERT INTO "profanenames" VALUES (26, 'nipple');
-INSERT INTO "profanenames" VALUES (27, 'nude');
-INSERT INTO "profanenames" VALUES (28, 'nudity');
-INSERT INTO "profanenames" VALUES (29, 'penis');
-INSERT INTO "profanenames" VALUES (30, 'pussy');
-INSERT INTO "profanenames" VALUES (31, 'rape');
-INSERT INTO "profanenames" VALUES (32, 'rapist');
-INSERT INTO "profanenames" VALUES (33, 'sex');
-INSERT INTO "profanenames" VALUES (34, 'shit');
-INSERT INTO "profanenames" VALUES (35, 'skank');
-INSERT INTO "profanenames" VALUES (36, 'slut');
-INSERT INTO "profanenames" VALUES (37, 'suck');
-INSERT INTO "profanenames" VALUES (38, 'sucks');
-INSERT INTO "profanenames" VALUES (39, 'sucker');
-INSERT INTO "profanenames" VALUES (40, 'tit');
-INSERT INTO "profanenames" VALUES (41, 'tits');
-INSERT INTO "profanenames" VALUES (42, 'twat');
-INSERT INTO "profanenames" VALUES (43, 'vagina');
-INSERT INTO "profanenames" VALUES (44, 'whore');
-INSERT INTO "profanenames" VALUES (45, 'wtf');
-INSERT INTO "profanenames" VALUES (46, 'piss');
-INSERT INTO "profanenames" VALUES (47, 'damn');
-
-
---
--- TOC entry 2061 (class 0 OID 0)
--- Dependencies: 180
--- Name: profanenames_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('"profanenames_id_seq"', 1, false);
-
-
---
--- TOC entry 2032 (class 0 OID 16739)
--- Dependencies: 185
--- Data for Name: reservednames; Type: TABLE DATA; Schema: public; Owner: nge
---
-
-INSERT INTO "reservednames" VALUES (81, 'anal$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (82, '^ass$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (83, '^ass\\s*hole$', 'name_declined_profane', true, true, true);
-INSERT INTO "reservednames" VALUES (84, '^biatch$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (85, '^bitch$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (86, '^cock$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (87, '^cock\\s*sucker$', 'name_declined_profane', true, true, true);
-INSERT INTO "reservednames" VALUES (88, '^cum$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (89, '^cunt$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (90, '^dick$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (91, '^dumb$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (92, '^dum\\s*bass?$', 'name_declined_profane', true, true, true);
-INSERT INTO "reservednames" VALUES (93, '^fag$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (94, '^faggot$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (95, '^fuck$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (96, '^fuk$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (97, '^hater$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (98, '^hooker$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (99, '^jackoff$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (100, '^jizz$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (101, '^kunt$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (102, '^nazi$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (103, '^negro$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (104, '^nigga$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (105, '^nigger$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (106, '^nipple$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (107, '^nude$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (108, '^nudity$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (109, '^penis$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (110, '^pussy$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (111, '^rape$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (112, '^rapist$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (113, '^sex$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (114, '^shit$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (115, '^skank$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (116, '^slut$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (117, '^suck$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (118, '^sucks$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (119, '^sucker$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (120, '^tit$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (121, '^tits$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (122, '^twat$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (123, '^vagina$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (124, '^whore$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (125, '^wtf$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (126, '^piss$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (127, '^damn$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (128, '^luke$', 'name_declined_fictionally_reserved', true, false, false);
-INSERT INTO "reservednames" VALUES (129, '^darth$', 'name_declined_fictionally_reserved', true, false, false);
-INSERT INTO "reservednames" VALUES (130, '^vader$', 'name_declined_fictionally_reserved', false, true, false);
-INSERT INTO "reservednames" VALUES (131, '^han$', 'name_declined_fictionally_reserved', true, false, false);
-INSERT INTO "reservednames" VALUES (132, '^solo$', 'name_declined_fictionally_reserved', false, true, false);
-INSERT INTO "reservednames" VALUES (133, '^leia$', 'name_declined_fictionally_reserved', true, false, false);
-INSERT INTO "reservednames" VALUES (134, '^emperor$ ', 'name_declined_fictionally_reserved', true, false, false);
-INSERT INTO "reservednames" VALUES (135, '^notcho67$', 'name_declined_developer', true, false, false);
-INSERT INTO "reservednames" VALUES (136, '^mulligan$', 'name_declined_developer', true, false, false);
-INSERT INTO "reservednames" VALUES (137, '^bitsnbytes$', 'name_declined_developer', true, false, false);
-INSERT INTO "reservednames" VALUES (138, '^farstar_medic$', 'name_declined_developer', true, false, false);
-INSERT INTO "reservednames" VALUES (139, '^ilikenwf$', 'name_declined_developer', true, false, false);
-INSERT INTO "reservednames" VALUES (140, '^joshlarson$', 'name_declined_developer', true, false, false);
-INSERT INTO "reservednames" VALUES (141, '^sweetcake$', 'name_declined_developer', true, false, false);
-INSERT INTO "reservednames" VALUES (142, '^skorpios$', 'name_declined_developer', true, false, false);
-INSERT INTO "reservednames" VALUES (143, '^telsia$', 'name_declined_developer', true, false, false);
-INSERT INTO "reservednames" VALUES (144, '^fingies$', 'name_declined_developer', true, false, false);
-INSERT INTO "reservednames" VALUES (145, '^niypi$', 'name_declined_developer', true, false, false);
-INSERT INTO "reservednames" VALUES (146, '^caelen$', 'name_declined_developer', true, false, false);
-INSERT INTO "reservednames" VALUES (147, '^light$', 'name_declined_developer', true, false, false);
-INSERT INTO "reservednames" VALUES (149, '^mcurt$', 'name_declined_developer', true, false, false);
-INSERT INTO "reservednames" VALUES (150, '^peej$', 'name_declined_developer', true, false, false);
-INSERT INTO "reservednames" VALUES (151, '^synge$', 'name_declined_developer', true, false, false);
-INSERT INTO "reservednames" VALUES (152, '^timm$', 'name_declined_developer', true, false, false);
-INSERT INTO "reservednames" VALUES (153, '^treeku$', 'name_declined_developer', true, false, false);
-INSERT INTO "reservednames" VALUES (154, '^wefi$', 'name_declined_developer', true, false, false);
-INSERT INTO "reservednames" VALUES (155, '^royalguard$', 'name_declined_developer', true, false, false);
-INSERT INTO "reservednames" VALUES (156, '^estouk$', 'name_declined_developer', true, false, false);
-INSERT INTO "reservednames" VALUES (157, '^atheenah$', 'name_declined_developer', true, false, false);
-INSERT INTO "reservednames" VALUES (158, '^cable$', 'name_declined_developer', true, false, false);
-INSERT INTO "reservednames" VALUES (159, '^oblitrator$', 'name_declined_developer', true, false, false);
-INSERT INTO "reservednames" VALUES (160, '^katarn$ ', 'name_declined_fictionally_reserved', true, true, false);
-INSERT INTO "reservednames" VALUES (161, '^boba$ ', 'name_declined_fictionally_reserved', true, true, false);
-INSERT INTO "reservednames" VALUES (162, '^fett$ ', 'name_declined_fictionally_reserved', true, true, false);
-INSERT INTO "reservednames" VALUES (163, '^sidious$ ', 'name_declined_fictionally_reserved', true, true, false);
-INSERT INTO "reservednames" VALUES (164, '^tarkin$ ', 'name_declined_fictionally_reserved', true, true, false);
-INSERT INTO "reservednames" VALUES (165, '^dooku$ ', 'name_declined_fictionally_reserved', true, true, false);
-INSERT INTO "reservednames" VALUES (166, '^skywalker$ ', 'name_declined_fictionally_reserved', true, true, false);
-INSERT INTO "reservednames" VALUES (167, '^organa$ ', 'name_declined_fictionally_reserved', true, true, false);
-INSERT INTO "reservednames" VALUES (168, '^windu$ ', 'name_declined_fictionally_reserved', true, true, false);
-INSERT INTO "reservednames" VALUES (169, '^yoda$ ', 'name_declined_fictionally_reserved', true, true, false);
-INSERT INTO "reservednames" VALUES (170, '^obi\\s*wan$', 'name_declined_fictionally_reserved', true, true, true);
-INSERT INTO "reservednames" VALUES (171, '^mara\\s*jade$', 'name_declined_fictionally_reserved', true, true, true);
-INSERT INTO "reservednames" VALUES (172, '^old\\s*man$', 'name_declined_developer', false, false, true);
-INSERT INTO "reservednames" VALUES (173, '^tit\\s*ties$', 'name_declined_profane', true, true, true);
-INSERT INTO "reservednames" VALUES (174, '^hjal$', 'name_declined_developer', true, true, false);
-INSERT INTO "reservednames" VALUES (175, '^t\\s*squarred$', 'name_declined_developer', true, true, false);
-INSERT INTO "reservednames" VALUES (176, '^pex$', 'name_declined_developer', true, true, false);
-INSERT INTO "reservednames" VALUES (177, '^qui\\s*gon$', 'name_declined_fictionally_reserved', true, true, true);
-INSERT INTO "reservednames" VALUES (178, '^corran\\s*horn$', 'name_declined_fictionally_reserved', true, true, true);
-INSERT INTO "reservednames" VALUES (179, '^Ahsoka$', 'name_declined_fictionally_reserved', true, true, false);
-INSERT INTO "reservednames" VALUES (180, '^wat\\s*to$', 'name_declined_fictionally_reserved', true, true, false);
-INSERT INTO "reservednames" VALUES (181, '^sunrider$', 'name_declined_fictionally_reserved', true, true, false);
-INSERT INTO "reservednames" VALUES (182, '^bondara$', 'name_declined_fictionally_reserved', true, true, false);
-INSERT INTO "reservednames" VALUES (183, '^jeff\\s*freeman$', 'name_declined_developer', false, false, true);
-INSERT INTO "reservednames" VALUES (184, '^adept\\s*strain$', 'name_declined_developer', true, true, true);
-INSERT INTO "reservednames" VALUES (185, '^bnar$', 'name_declined_fictionally_reserved', true, true, false);
-INSERT INTO "reservednames" VALUES (186, '^revan$', 'name_declined_fictionally_reserved', true, true, false);
-INSERT INTO "reservednames" VALUES (187, '^malak$', 'name_declined_fictionally_reserved', true, true, false);
-INSERT INTO "reservednames" VALUES (188, '^kreia$', 'name_declined_fictionally_reserved', true, true, false);
-INSERT INTO "reservednames" VALUES (189, '^traya$', 'name_declined_fictionally_reserved', true, true, false);
-INSERT INTO "reservednames" VALUES (190, '^schnie\\s*del$', 'name_declined_profane', true, true, true);
-INSERT INTO "reservednames" VALUES (191, '^möp\\s*se$', 'name_declined_profane', true, true, true);
-INSERT INTO "reservednames" VALUES (192, '^schwanz$', 'name_declined_profane', true, true, true);
-INSERT INTO "reservednames" VALUES (193, '^muschi$', 'name_declined_profane', true, true, true);
-INSERT INTO "reservednames" VALUES (194, '^fotze$', 'name_declined_profane', true, true, true);
-INSERT INTO "reservednames" VALUES (195, '^jar\\s*jar$', 'name_declined_fictionally_reserved', true, true, true);
-INSERT INTO "reservednames" VALUES (196, '^arsch\\s*loch$', 'name_declined_profane', true, true, true);
-INSERT INTO "reservednames" VALUES (197, '^fick\\s*en$', 'name_declined_profane', true, true, true);
-INSERT INTO "reservednames" VALUES (198, '^fik\\s*ken$', 'name_declined_profane', true, true, true);
-INSERT INTO "reservednames" VALUES (199, '^fic\\s*ken$', 'name_declined_profane', true, true, true);
-INSERT INTO "reservednames" VALUES (200, '^ja\\s*bba$', 'name_declined_fictionally_reserved', true, true, true);
-INSERT INTO "reservednames" VALUES (201, '^arsch$', 'name_declined_profane', true, true, false);
-INSERT INTO "reservednames" VALUES (202, '^jab\\s*ba$', 'name_declined_fictionally_reserved', true, true, true);
-INSERT INTO "reservednames" VALUES (203, '^jabb\\s*a$', 'name_declined_fictionally_reserved', true, true, true);
-INSERT INTO "reservednames" VALUES (148, '^master\\s*idler$', 'name_declined_developer', false, false, false);
-INSERT INTO "reservednames" VALUES (204, '^gief$', 'name_declined_developer', true, false, false);
-INSERT INTO "reservednames" VALUES (205, '^server$', 'name_declined_developer', true, false, false);
-
-
---
--- TOC entry 2062 (class 0 OID 0)
--- Dependencies: 186
--- Name: reservednames_id_seq; Type: SEQUENCE SET; Schema: public; Owner: nge
---
-
-SELECT pg_catalog.setval('"reservednames_id_seq"', 205, true);
-
-
---
--- TOC entry 2028 (class 0 OID 16651)
--- Dependencies: 181
--- Data for Name: reservedstaffnames; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-INSERT INTO "reservedstaffnames" VALUES (5, 'notcho67');
-INSERT INTO "reservedstaffnames" VALUES (6, 'mulligan');
-INSERT INTO "reservedstaffnames" VALUES (7, 'bitsnbytes');
-INSERT INTO "reservedstaffnames" VALUES (9, 'farstar_medic');
-INSERT INTO "reservedstaffnames" VALUES (10, 'ilikenwf');
-INSERT INTO "reservedstaffnames" VALUES (11, 'joshlarson');
-INSERT INTO "reservedstaffnames" VALUES (25, 'abbs');
-INSERT INTO "reservedstaffnames" VALUES (1, 'skorpios');
-INSERT INTO "reservedstaffnames" VALUES (2, 'telsia');
-INSERT INTO "reservedstaffnames" VALUES (3, 'fingies');
-INSERT INTO "reservedstaffnames" VALUES (4, 'niypi');
-INSERT INTO "reservedstaffnames" VALUES (8, 'caelen');
-INSERT INTO "reservedstaffnames" VALUES (12, 'light');
-INSERT INTO "reservedstaffnames" VALUES (13, 'master idler');
-INSERT INTO "reservedstaffnames" VALUES (14, 'mcurt');
-INSERT INTO "reservedstaffnames" VALUES (15, 'peej');
-INSERT INTO "reservedstaffnames" VALUES (16, 'synge');
-INSERT INTO "reservedstaffnames" VALUES (17, 'timm');
-INSERT INTO "reservedstaffnames" VALUES (18, 'treeku');
-INSERT INTO "reservedstaffnames" VALUES (19, 'wefi');
-INSERT INTO "reservedstaffnames" VALUES (20, 'royalguard');
-INSERT INTO "reservedstaffnames" VALUES (21, 'estouk');
-INSERT INTO "reservedstaffnames" VALUES (22, 'atheenah');
-INSERT INTO "reservedstaffnames" VALUES (23, 'cable');
-INSERT INTO "reservedstaffnames" VALUES (24, 'oblitrator');
-
-
---
--- TOC entry 2063 (class 0 OID 0)
--- Dependencies: 182
--- Name: reservedstaffnames_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
---
-
-SELECT pg_catalog.setval('"reservedstaffnames_id_seq"', 1, false);
-
-
-SELECT pg_catalog.setval('"sessions_id_seq"', 1, true);
-
---
--- TOC entry 2034 (class 0 OID 16752)
--- Dependencies: 187
--- Data for Name: temp_reserved_char_names; Type: TABLE DATA; Schema: public; Owner: nge
---
-
-INSERT INTO "temp_reserved_char_names" VALUES (2, 'testchar');
-INSERT INTO "temp_reserved_char_names" VALUES (3, 'testchar2');
-
-
---
--- TOC entry 1996 (class 2606 OID 16676)
--- Name: accounts_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
---
-
-ALTER TABLE ONLY "accounts"
-    ADD CONSTRAINT "accounts_pkey" PRIMARY KEY ("id");
-
-
---
--- TOC entry 1998 (class 2606 OID 16678)
--- Name: characters_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
---
-
-ALTER TABLE ONLY "characters"
-    ADD CONSTRAINT "characters_pkey" PRIMARY KEY ("id");
-
-
---
--- TOC entry 2000 (class 2606 OID 16680)
--- Name: connectionServers_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
---
-
-ALTER TABLE ONLY "connectionServers"
-    ADD CONSTRAINT "connectionServers_pkey" PRIMARY KEY ("id");
-
-
---
--- TOC entry 2002 (class 2606 OID 16682)
--- Name: fictionallyreservednames_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
---
-
-ALTER TABLE ONLY "fictionallyreservednames"
-    ADD CONSTRAINT "fictionallyreservednames_pkey" PRIMARY KEY ("id");
-
-
---
--- TOC entry 2004 (class 2606 OID 16684)
--- Name: galaxies_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
---
-
-ALTER TABLE ONLY "galaxies"
-    ADD CONSTRAINT "galaxies_pkey" PRIMARY KEY ("id");
-
-
---
--- TOC entry 2006 (class 2606 OID 16686)
--- Name: id; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
---
-
-ALTER TABLE ONLY "highestid"
-    ADD CONSTRAINT "id" PRIMARY KEY ("id");
-
-
---
--- TOC entry 2008 (class 2606 OID 16688)
--- Name: profanenames_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
---
-
-ALTER TABLE ONLY "profanenames"
-    ADD CONSTRAINT "profanenames_pkey" PRIMARY KEY ("id");
-
-
---
--- TOC entry 2010 (class 2606 OID 16690)
--- Name: reservedstaffnames_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
---
-
-ALTER TABLE ONLY "reservedstaffnames"
-    ADD CONSTRAINT "reservedstaffnames_pkey" PRIMARY KEY ("id");
-
-
---
--- TOC entry 2012 (class 2606 OID 16692)
--- Name: sessions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
---
-
-ALTER TABLE ONLY "sessions"
-    ADD CONSTRAINT "sessions_pkey" PRIMARY KEY ("id");
-
-
---
--- TOC entry 2014 (class 2606 OID 16756)
--- Name: temp_reserved_char_names_primary; Type: CONSTRAINT; Schema: public; Owner: nge; Tablespace: 
---
-
-ALTER TABLE ONLY "temp_reserved_char_names"
-    ADD CONSTRAINT "temp_reserved_char_names_primary" PRIMARY KEY ("accountId");
-
-
---
--- TOC entry 2041 (class 0 OID 0)
--- Dependencies: 6
--- Name: public; Type: ACL; Schema: -; Owner: postgres
---
-
-REVOKE ALL ON SCHEMA "public" FROM PUBLIC;
-REVOKE ALL ON SCHEMA "public" FROM "postgres";
-GRANT ALL ON SCHEMA "public" TO "postgres";
-GRANT ALL ON SCHEMA "public" TO PUBLIC;
+COPY galaxies (id, name) FROM stdin;
+2	Local Connection
+\.
 
 
 --
 -- TOC entry 2050 (class 0 OID 0)
--- Dependencies: 185
--- Name: reservednames; Type: ACL; Schema: public; Owner: nge
+-- Dependencies: 179
+-- Name: galaxies_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-REVOKE ALL ON TABLE "reservednames" FROM PUBLIC;
-REVOKE ALL ON TABLE "reservednames" FROM "nge";
-GRANT ALL ON TABLE "reservednames" TO "nge";
+SELECT pg_catalog.setval('galaxies_id_seq', 2, true);
+
+
+--
+-- TOC entry 2020 (class 0 OID 16641)
+-- Dependencies: 180
+-- Data for Name: highestid; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY highestid (id) FROM stdin;
+20217
+\.
+
+
+--
+-- TOC entry 2021 (class 0 OID 16644)
+-- Dependencies: 181
+-- Data for Name: profanenames; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY profanenames (id, "firstName") FROM stdin;
+1	anal
+2	ass
+3	asshole
+4	biatch
+5	bitch
+6	cock
+7	cocksucker
+8	cum
+9	cunt
+10	dick
+11	dumb
+12	dumbass
+13	fag
+14	faggot
+15	fuck
+16	fuk
+17	hater
+18	hooker
+19	jackoff
+20	jizz
+21	kunt
+22	nazi
+23	negro
+24	nigga
+25	nigger
+26	nipple
+27	nude
+28	nudity
+29	penis
+30	pussy
+31	rape
+32	rapist
+33	sex
+34	shit
+35	skank
+36	slut
+37	suck
+38	sucks
+39	sucker
+40	tit
+41	tits
+42	twat
+43	vagina
+44	whore
+45	wtf
+46	piss
+47	damn
+48	jesus
+49	christ
+50	mohammed
+51	buddha
+52	islam
+53	jew
+54	jewish
+55	hitler
+56	adolf
+\.
+
+
+--
+-- TOC entry 2051 (class 0 OID 0)
+-- Dependencies: 182
+-- Name: profanenames_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('profanenames_id_seq', 1, false);
 
 
 --
 -- TOC entry 2052 (class 0 OID 0)
+-- Dependencies: 183
+-- Name: reservednames_id_seq; Type: SEQUENCE SET; Schema: public; Owner: nge
+--
+
+SELECT pg_catalog.setval('reservednames_id_seq', 203, true);
+
+
+--
+-- TOC entry 2024 (class 0 OID 16654)
+-- Dependencies: 184
+-- Data for Name: reservedstaffnames; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY reservedstaffnames (id, "firstName") FROM stdin;
+5	notcho67
+6	mulligan
+7	bitsnbytes
+9	farstar_medic
+10	ilikenwf
+11	joshlarson
+25	abbs
+1	skorpios
+2	telsia
+3	fingies
+4	niypi
+8	caelen
+12	light
+13	master idler
+14	mcurt
+15	peej
+16	synge
+17	timm
+18	treeku
+19	wefi
+20	royalguard
+21	estouk
+22	atheenah
+23	cable
+24	oblitrator
+26	levarris
+27	aysel
+28	fireflight
+30	adonai
+29	ulfedinn
+31	waverunner
+32	darkk1138
+33	ziggy
+34	aostai
+35	tjay
+36	cable
+37	seefo
+\.
+
+
+--
+-- TOC entry 2053 (class 0 OID 0)
+-- Dependencies: 185
+-- Name: reservedstaffnames_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('reservedstaffnames_id_seq', 1, false);
+
+
+--
+-- TOC entry 2026 (class 0 OID 16662)
 -- Dependencies: 186
+-- Data for Name: sessions; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY sessions (id, key, "accountId", valid) FROM stdin;
+6859	\\xf769d2bd8ad297745defc074c9400a0e525823c16cf4cfcc	2	2013-11-26 00:10:58.532-05
+6860	\\xfd8d14b8b536931c42cddd2c0386e16e035c612287c66770	2	2013-11-26 00:10:58.536-05
+6861	\\xe22c6e0f9c90b23ce953d223f7893846cac321a923f041a4	2	2013-11-26 00:22:55.994-05
+6862	\\xca4b24058e2ff61f075321323207da409b6e5bb96c0414d5	2	2013-11-26 00:23:04.927-05
+6863	\\x79fad92c557927c749aa0c6056fe22357c449a2ea7927b6f	2	2013-11-26 00:47:45.369-05
+6864	\\x103c6517ead8f8376a9adcdf1af6e94ee6e9b6addf6ee460	2	2013-11-26 02:34:57.382-05
+6865	\\x959810174f6e902954e702752b3f4d2789035be3eb38ea69	2	2013-11-26 02:37:53.138-05
+6866	\\xbff3f0909c9c4ed28fcc28a8d3ce5f0a7565feb63c91fe29	2	2013-11-26 02:38:47.263-05
+6867	\\x85f13e3e8d354f7f1686db22e70c6048e14921c9efe1b267	2	2013-11-26 02:43:09.775-05
+6868	\\x2fd117d31de93026f69faa21199247d927f9007c19d6739c	2	2013-11-26 03:09:08.016-05
+6869	\\x769a364fa452e15c5ed6723e228503b9373ac29f1b23ef4d	2	2013-11-26 03:09:12.502-05
+6870	\\x92a494cb20a47d4b39f06f0aa9ed2f3c85326207717ea97d	2	2013-11-26 03:09:13.112-05
+6871	\\x6ceeb65f5420f4c821a8d7de97b766d688b781375b5a9ae3	2	2013-11-26 03:10:06.82-05
+6872	\\xd6c9aa3534a9714d185c1c9263f7a245ae4894d78f333bcf	2	2013-11-26 03:10:07.689-05
+6873	\\xb7117ab949ebc5a6f2be4d9fa93a8aebb0d21e0af01e5918	2	2013-11-26 03:37:59.475-05
+6874	\\xe0023a3ab13c5cabb0ade1b53fd18e9a672c869ddabb9a4b	2	2013-11-26 04:18:54.136-05
+6875	\\xa73db2e10fcdcb55288d51355c5da253aa9a2da81b5ede60	2	2013-11-26 05:22:17.541-05
+6876	\\x4019c98139b69822b9322ac64da8712b21495981ac0ada44	2	2013-11-26 05:46:03.691-05
+6877	\\xe33e9d91fe839713cf248445403a3ed410662f90cd510132	2	2013-11-26 05:48:13.349-05
+6878	\\xcf9165785863199526693a4e6cce32394f1c64c52b5d9230	2	2013-11-26 05:48:37.756-05
+6879	\\x2f20d16758ef0d9baf4d1019fc252548801e3bb6271e2085	2	2013-11-26 05:50:13.85-05
+6880	\\x4267c4fa8f8021451df543292455378954853efcd7747118	2	2013-11-26 06:03:10.428-05
+6881	\\x5cb751841df153da6f6e8b36f3a77a6bc7a54c507a4c05b2	2	2013-11-26 06:05:59.446-05
+6882	\\xda9238f45bbfa80846239c3f91778c5c620028d356435e60	2	2013-11-26 06:11:43.688-05
+6883	\\x4a43d58059f8a99d043c9b5ea510471deb76228b668ce150	2	2013-11-26 06:16:14.523-05
+6884	\\xa37ba26ab25a187afbc6b7ec841397a20c8c305d5e029bed	2	2013-11-26 06:21:59.179-05
+6885	\\xdc304f64ddecfa9deabc091c7e2f055e459adb2d2148857f	2	2013-11-26 06:28:21.249-05
+6886	\\x26de341610c51e9921dc30de98a07bf7689fd4516ca44f0b	2	2013-11-26 06:32:45.299-05
+6887	\\xb71767307655ea90dde3b8c8b96f72eb0aba3be472f32e62	2	2013-11-26 06:33:39.313-05
+6888	\\x3b0ecbfda27fecb182d1f4939803e58801892406480063cc	2	2013-11-26 06:34:37.726-05
+6889	\\xcb9971395e73d05d030fcf8779697028fc615d2ff6e97d13	2	2013-11-26 06:35:12.352-05
+6890	\\xbac24798502265077f6c020340181aff71ad6d849bf9b28a	2	2013-11-26 06:36:41.459-05
+6891	\\xfab4cc5c9a84d94b07da4904fdea3295d934f92748992320	2	2013-11-26 06:54:06.097-05
+6892	\\x73eb37f7cf1840116ee2ea64c66e2aaa3d8d29d3c2ca30ee	2	2013-11-26 06:54:49.267-05
+6893	\\x1de45b0b3fe1af0050e3eb782683cfd350b6b6d075f10344	2	2013-11-26 06:55:48.13-05
+6894	\\x6ae9b2bf6c7abbd3f87b80b931e1652a59fc5c35d0f3fc29	2	2013-11-26 22:40:02.772-05
+6895	\\x436cabcaaf20de573043ad06e2a675c7b6d411599f6b6d42	2	2013-11-30 06:01:23.243-05
+6896	\\xdee9e2db64c68a832bc6dcf99d3a7fa4362476cae90a410b	2	2013-11-30 06:01:24.106-05
+6897	\\x12533c5275f6a7a8a221c08b6e4e52b30e5719d683970a87	2	2013-11-30 06:09:54.718-05
+6898	\\xdb6598535961ded8cbdd8346f8cc7fc51a30761e33dffd18	2	2013-11-30 06:11:26.994-05
+6899	\\xbd6809b1d1d9fee568fac06346687ee24e844301f69355d3	2	2013-11-30 06:12:02.539-05
+6900	\\xa6e27c7ff877b9e7d9c41d3aa7799a5120e8ec7227b5568b	2	2013-11-30 06:15:11.652-05
+6901	\\x0b5a8efd6484e106ede9e254fcee5b55861b882ebdbb7549	2	2013-11-30 06:19:27.791-05
+6902	\\x48db7a0d189b16094b39562502f9d56e63d9f1ca00594f2f	2	2013-12-01 03:57:24.742-05
+6903	\\x554f8eaa3219f3d58cfacce14233541454a6507fbdd7f4dc	2	2013-12-01 04:02:20.314-05
+6904	\\xfcf5117f15e78059b9dbe282281e13ea194415cbce44263e	2	2013-12-01 04:24:56.057-05
+6905	\\x609965aa7807ffe412968840cf27223b02d62b6fb1e320c6	2	2013-12-01 04:50:39.795-05
+6906	\\x52d1a769ff6198fd6d5065f1f5c71a7e03d8589a341515bf	2	2013-12-01 04:52:08.429-05
+6907	\\xdcd0932b1b450f7244678546beda270d31c9fa25d38a1f8b	2	2013-12-01 04:52:53.607-05
+6908	\\x5f9e98310dc88869191b8e8835724c2338322ced82dd595c	2	2013-12-01 06:05:28.919-05
+6909	\\xf45f667ad81ace8228b2872d5e166e61f4ef871eaff9db77	2	2013-12-01 06:11:14.057-05
+6910	\\x954ed8374b15f0afab0b5b2979204fbcddd3d01c2a0c4705	2	2013-12-01 06:12:59.433-05
+6911	\\x2704d81b58887ab8f80f6332b41c7ffec28faf7bda98112d	2	2013-12-01 06:14:14.863-05
+6912	\\x2f54b3455deffb72c5c6e0d39ebfd752e76f711168a7ab44	2	2013-12-01 06:16:20.945-05
+6913	\\x8ede9621c37f5faf2dd1fb54854b82d025dccf2308c55ce5	2	2013-12-01 06:24:06.356-05
+6914	\\x3614cbcb4986228758677313bec998bda99882216bdfcf07	2	2013-12-01 06:24:16.41-05
+6915	\\x51c86df6faf07288851e8746df60b4cf1a291759d04364b1	2	2013-12-01 06:25:36.84-05
+6916	\\x41cd67e522f9326162eb0e8ec10d21073409ae1ed72e4d65	2	2013-12-01 06:26:13.311-05
+6917	\\x8016502a714cd3ce37bb0a4b93f9774ab821109c9ce65f99	2	2013-12-01 06:26:21.715-05
+6918	\\x88ee1d3af4d3a49dbd9e493c4ade53faf0e87f90f85a01b9	2	2013-12-01 06:26:44.037-05
+6919	\\x7788e89842f23580282181488b0e41e9063aa678bc62cc28	2	2013-12-01 06:26:51.458-05
+6920	\\x78b7885061076a2b0552ff0d59cdad78a1544f1606b6568b	2	2013-12-01 06:29:58.135-05
+6921	\\x12068e4457546f07fd92aee932ffabb38eaab71f008531d8	2	2013-12-01 06:30:06.295-05
+6922	\\xe4559b52614924bca17244db63b1700c50b3632ea34f05d8	2	2013-12-01 06:31:19.043-05
+6923	\\x80ac644246b1142cc353affeb0cd9f6df2fd16605a3e075d	2	2013-12-01 06:32:57.048-05
+6924	\\x676c4bc33f5915e60f6517e9b05f57e577b7b9dc97fc914b	2	2013-12-01 06:33:33.185-05
+6925	\\x4a01b7336b986358de0e0c536566ec88b2e87829b7cdebf0	2	2013-12-01 06:37:54.434-05
+6926	\\x11449160b9ff261cae5703f1d1c6f9257f4a0afb6c144b89	2	2013-12-01 06:42:29.96-05
+6927	\\xeaaca2b4f9c4f686a592629444cb1ece07b54961926f37cb	2	2013-12-01 06:43:14.011-05
+6928	\\x766392702c2c70e2ad9c44edeab01f21b50f64f886c6e061	2	2013-12-01 06:55:47.337-05
+6929	\\xc86114a7b5abd8d1737ed0b15e69a2bfb0f937b266506a7c	2	2013-12-01 06:55:54.805-05
+6930	\\xd6377de7e2aa4a938a35df3fbf7348371bfa87dc12f31266	2	2013-12-01 06:56:13.561-05
+6931	\\xed08bd72ab3a82d3dd1a0842b3fd019bc71665e84bef5b00	2	2013-12-01 06:56:22.482-05
+6932	\\x96386e5b8807d70282a8fac24e9308aa66006fcac41a5ee5	2	2013-12-01 07:04:32.222-05
+6933	\\x6273b57185c3b953130cae52ba2e58f830d022b0b5c091e1	2	2013-12-01 07:04:39.198-05
+6934	\\x511c2a45d60e99071c495079afb16ce34233bc6bd03ca855	2	2013-12-01 07:11:15.775-05
+6935	\\x8259a9e0e435d017dc58ca7aabeb46ea7aa625779bc50984	2	2013-12-01 07:12:21.185-05
+6936	\\x03fb1bcfdad36c6fec07387be3ede355d51dc1d8dc723413	2	2013-12-01 07:15:42.496-05
+6937	\\xf0f1dc27258a2c356bcbfb4df75efe2ff30f399404838bb7	2	2013-12-01 07:15:50.504-05
+6938	\\xc11e0e2970d79669debb38bdade0a2cb7589c9d2f59094cd	2	2013-12-01 07:16:32.248-05
+6939	\\xb49f28025cd3329fab05bb223c04f9e1d1c5466e836d5bb1	2	2013-12-01 07:18:02.435-05
+6940	\\x3e7c67f8315767ee35f4954c1a810184a1ae7c5ebb90e0c0	2	2013-12-01 08:08:06.185-05
+6941	\\x60306c562818d13a3a435e4a32986539ffcb38cbecccdaa8	2	2013-12-01 08:08:48.63-05
+6942	\\x54be309d3d8bd09f9ea930279a9770ec1f0159b12d05714e	2	2013-12-01 08:08:49.54-05
+6943	\\x29d3da8febbec030ede1203388ae0294aee7ce53641b52d5	2	2013-12-01 08:09:20.139-05
+6944	\\x63992a31ec0b9f5f0c06348bfdbddb40480e2a79523f33f5	2	2013-12-01 08:20:40.026-05
+6945	\\xea2e37dc03dd9dc8a08ac6179619ba6feb5131b73e2b62c0	2	2013-12-01 08:23:53.561-05
+6946	\\xf92d3a04364047521f7a04e556fd076104b1c563596b78e6	2	2013-12-01 08:26:06.873-05
+6947	\\x82db0d08b80b5f0b8c290b1f1e9127813f4db37e1021ffbd	2	2013-12-01 10:19:12.708-05
+6948	\\x83de616ef2103f2362dcd5e75947b2d55191f2e51388a539	2	2013-12-01 10:19:39.634-05
+6949	\\xfbc5fa2b5bdf9677d64eb4d4d772c7286dafb415a5b6ea90	2	2013-12-01 17:23:06.24-05
+6950	\\x817cb28ca22bd3836fc387f077054b5c0596b64ce13be8d3	2	2013-12-01 17:47:29.319-05
+6951	\\xf5b278888372400355365c499462ad48cdef683ce5d648d9	2	2013-12-01 17:47:37.138-05
+6952	\\x26d2c1acd415e0cc82183adc05ab8170a365f67bc0d6cfe7	2	2013-12-01 17:48:52.344-05
+6953	\\xa3bd592f8669d334388866e30ffa05688bda4d2e7b9117d2	2	2013-12-01 17:52:04.846-05
+6954	\\xf561e884dbebac3c56d2dd16c778b044b7068e3b0def4853	2	2013-12-01 17:57:14.188-05
+6955	\\x4e646f71b17e6dd07eb16e1b4b7e4a0ad5d66dd7664e90b3	2	2013-12-01 18:00:03.374-05
+6956	\\x6e436cbae01c330f4539a0b1571e92f6c720ae710a96305a	2	2013-12-02 03:45:41.585-05
+6957	\\x05b0b9b176624f9e4a6fcbd5981f3da4c8e65f5e67a4afca	2	2013-12-02 03:47:12.05-05
+6958	\\xdc1d561db41a5b066c62067473d935b227c68f54756f8fea	2	2013-12-02 03:48:30.301-05
+6959	\\xe60c672c80ccbc582499cb4be5bcd7d75145a95bce02bb73	2	2013-12-02 03:49:37.398-05
+6960	\\x86e8278c71f3e9968b583ab4719c0e95040fdfa469ec1f40	2	2013-12-02 04:12:51.443-05
+6961	\\xfc6e118f833e7f6f55ff532ea23762c063dcca32fb907176	2	2013-12-02 04:18:34.22-05
+6962	\\xd9b4dda6c1ee4ef0b2ea2b38b3ecbb19d1a04d68c915cd69	2	2013-12-02 04:19:03.262-05
+6963	\\x305af59e17ae97245aabe7ea6bae796408dbfec876be7894	2	2013-12-02 04:28:06.449-05
+6964	\\x109c82606c45837e0922c2940e7b2308369adb9aec2bfaa7	2	2013-12-02 04:36:17.782-05
+6965	\\x03c66351a3fe32fc81d837aa4f50918477a6fbbf50db1c55	2	2013-12-02 04:37:50.025-05
+6966	\\x6de98788c7c15133782e6e49f2b879fedfeaf56dd47a8c0f	2	2013-12-02 05:01:54.746-05
+6967	\\x9bf4f1f61a38f22d584a3b157618918afa3fc2279434532e	2	2013-12-03 06:31:21.212-05
+6968	\\x2f34432867b678736ab99f9c51640b1d0fc33a892d285e6d	2	2013-12-03 06:32:33.357-05
+6969	\\x3f0ae7e07fb8cd00623a5a99c6b46d84d795430651c110b2	2	2013-12-03 06:32:33.358-05
+6970	\\x797d807305fc7d5cdb29cfcff1d29926670395c2a8a61308	2	2013-12-03 06:35:21.061-05
+6971	\\xc4ee4539b50561de2da5ba3ea983673da15c6a6a9185b8ef	2	2013-12-03 06:35:44.587-05
+6972	\\xc929123f08ff3599adce4727409c58806876dd171c5f9006	2	2013-12-03 06:43:10.919-05
+6973	\\x31b81c71b6c99ef952a9f7a58e1c90f9bd0eb5713361e81a	2	2013-12-03 06:43:10.924-05
+6974	\\x1e2c781119138245b30124138a8ed833a1e33e3e50fb14b6	2	2013-12-03 06:43:31.087-05
+6975	\\x56c576e0b4a9ae008561a7c2c5fd7e3e05ae08deefb02730	2	2013-12-04 05:56:57.897-05
+6976	\\x954576c348ce393c2ffc45369585a5f77d580064313be7b6	2	2013-12-04 06:23:55.139-05
+6977	\\xe1fb7600b58833a58ba3260467543f4af5f3af32b04687ea	2	2013-12-04 06:33:15.063-05
+6978	\\x12d0a1c7a9c892e532ee6ac491e04077cf93259549b0e1f2	2	2013-12-04 18:17:12.912-05
+6979	\\x205e400a771390b7b498f03ba89919926b0c30f9b512809f	2	2013-12-04 19:13:28.931-05
+6980	\\x7e94784bae1c345ed370f24effaca00a3992f7eca58a1db0	2	2013-12-04 19:13:31.469-05
+6981	\\x440414d4a9a5e53ad2f15fad40b8a7c78fdc84a045b89fb1	2	2013-12-04 19:13:31.974-05
+6982	\\x57292f5eafcfaa2259accd1fe9f950eb1fbd858a6be0f70d	2	2013-12-04 19:14:33.857-05
+6983	\\x75abf3eb46670a006c87789e2d6b4612aa85a888ae9a17a8	2	2013-12-04 19:14:34.555-05
+6984	\\xec3579974cd4a2cc9dd9b2d53aa54851afde8a40c29d2a37	2	2013-12-04 19:16:01.068-05
+6985	\\x1ec3e819a70b13bec57f0681fd1794a0689d442c4995a138	2	2013-12-04 19:21:42.436-05
+6986	\\x255535aff3cb3f67a6250de240969dd2cf28a01178f22d63	2	2013-12-04 19:36:11.774-05
+6987	\\x21457409f0e4abe16d73684fd05ad36376ca11c516491d4f	2	2013-12-04 19:36:45.73-05
+6988	\\xe3ad8c54be5d800c53f436222ec967c07fba179fd7dce399	2	2013-12-06 19:39:44.734-05
+6989	\\xde660ad7a2b484b4c1567b6a4fe5bdbdb32bc8fa1b4bc9ef	2	2013-12-06 19:40:56.993-05
+6990	\\xaebfa2b4792f3569c099c627ab161c31643cd7bb130914af	2	2013-12-06 22:21:10.853-05
+6991	\\xa84030a42459c2d466daca1876d246fbf249d35561a1ff55	2	2013-12-06 22:23:17.142-05
+6992	\\x307a31bef7494ad36280e1606cc83351f92fa681da560ebb	2	2013-12-06 22:23:32.476-05
+6993	\\xac83696be5ffc48f23029fda492de9a17b54a9d8a2ccbfe5	2	2013-12-06 22:23:33.383-05
+6994	\\x656fe29cf121e190b8836b01a13eab74aa7918441d2567e9	2	2013-12-06 22:25:35.104-05
+6995	\\x97b1d8bfb7b63bedb90aadbc0e8853c904c5527c2e2db59e	2	2013-12-09 18:40:02.189-05
+6996	\\xd71f525bbfa9814c6f31da9198d50ecfc67032746dc73e3c	2	2013-12-09 18:45:19.85-05
+6997	\\x5461bb320685dcebd86f4b0bfc75cb3d4fee42eed8990e01	2	2013-12-09 19:29:39.83-05
+6998	\\xd8c22c24ab5b0531c07d0646b083029656bb1431d41929b6	2	2013-12-09 19:29:52.502-05
+6999	\\xa2b12da2b3e90ad90f349223f22ae0d68c27315c585cdbb1	2	2013-12-09 19:45:10.399-05
+7000	\\xb42b577724fde876f1b132a560cf3bdbc9e92468477ff72c	2	2013-12-09 19:54:23.88-05
+7001	\\xdfb64c9618e1e077ad966814e51de7bf46d228fdd976cf52	2	2013-12-10 03:03:26.577-05
+\.
+
+
+--
+-- TOC entry 2054 (class 0 OID 0)
+-- Dependencies: 187
+-- Name: sessions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('sessions_id_seq', 7001, true);
+
+
+--
+-- TOC entry 1886 (class 2606 OID 16679)
+-- Name: accounts_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY accounts
+    ADD CONSTRAINT accounts_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 1888 (class 2606 OID 16681)
+-- Name: characters_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY characters
+    ADD CONSTRAINT characters_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 1890 (class 2606 OID 16683)
+-- Name: connectionServers_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY "connectionServers"
+    ADD CONSTRAINT "connectionServers_pkey" PRIMARY KEY (id);
+
+
+--
+-- TOC entry 1892 (class 2606 OID 16685)
+-- Name: fictionallyreservednames_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY fictionallyreservednames
+    ADD CONSTRAINT fictionallyreservednames_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 1894 (class 2606 OID 16687)
+-- Name: galaxies_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY galaxies
+    ADD CONSTRAINT galaxies_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 1896 (class 2606 OID 16689)
+-- Name: id; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY highestid
+    ADD CONSTRAINT id PRIMARY KEY (id);
+
+
+--
+-- TOC entry 1898 (class 2606 OID 16691)
+-- Name: profanenames_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY profanenames
+    ADD CONSTRAINT profanenames_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 1900 (class 2606 OID 16693)
+-- Name: reservedstaffnames_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY reservedstaffnames
+    ADD CONSTRAINT reservedstaffnames_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 1902 (class 2606 OID 16695)
+-- Name: sessions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres; Tablespace: 
+--
+
+ALTER TABLE ONLY sessions
+    ADD CONSTRAINT sessions_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 2034 (class 0 OID 0)
+-- Dependencies: 6
+-- Name: public; Type: ACL; Schema: -; Owner: postgres
+--
+
+REVOKE ALL ON SCHEMA public FROM PUBLIC;
+REVOKE ALL ON SCHEMA public FROM postgres;
+GRANT ALL ON SCHEMA public TO postgres;
+GRANT ALL ON SCHEMA public TO PUBLIC;
+
+
+--
+-- TOC entry 2043 (class 0 OID 0)
+-- Dependencies: 183
 -- Name: reservednames_id_seq; Type: ACL; Schema: public; Owner: nge
 --
 
-REVOKE ALL ON SEQUENCE "reservednames_id_seq" FROM PUBLIC;
-REVOKE ALL ON SEQUENCE "reservednames_id_seq" FROM "nge";
-GRANT ALL ON SEQUENCE "reservednames_id_seq" TO "nge";
+REVOKE ALL ON SEQUENCE reservednames_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE reservednames_id_seq FROM nge;
+GRANT ALL ON SEQUENCE reservednames_id_seq TO nge;
 
 
--- Completed on 2013-11-24 10:56:37
+-- Completed on 2013-12-10 03:08:23
 
 --
 -- PostgreSQL database dump complete

@@ -53,6 +53,7 @@ import protocol.swg.ChatFriendsListUpdate;
 import protocol.swg.ChatInstantMessageToCharacter;
 import protocol.swg.ChatInstantMessagetoClient;
 import protocol.swg.ChatOnAddFriend;
+import protocol.swg.ChatOnGetFriendsList;
 import protocol.swg.ChatOnSendInstantMessage;
 import protocol.swg.ChatOnSendPersistentMessage;
 import protocol.swg.ChatPersistentMessageToClient;
@@ -75,6 +76,8 @@ public class ChatService implements INetworkDispatch {
 		core.commandService.registerCommand("addignore");
 		core.commandService.registerCommand("removeignore");
 		core.commandService.registerCommand("findfriend");
+		core.commandService.registerCommand("addfriend");
+		core.commandService.registerCommand("removefriend");
 		mailODB = core.getMailODB();
 	}
 	
@@ -356,7 +359,7 @@ public class ChatService implements INetworkDispatch {
 		}
 	}
 	
-	public void removeFriend(PlayerObject actor, String friendName, boolean notify) {
+	public void removeFriend(PlayerObject actor, String friendName) {
 		
 		friendName = friendName.toLowerCase();
 		
@@ -367,15 +370,17 @@ public class ChatService implements INetworkDispatch {
 		
 		List<String> friendList = actor.getFriendList();
 		
-		if (notify) {
-
+		if(friendList.contains(friendName)) {
+				
+			actor.friendRemove(friendName);
+				
 			ChatOnChangeFriendStatus removeMessage = new ChatOnChangeFriendStatus(actor.getContainer().getObjectID(), friendName, 0);
 			actor.getContainer().getClient().getSession().write(removeMessage.serialize());
+				
+			ChatOnGetFriendsList sendFriendsList = new ChatOnGetFriendsList(actor);
+			actor.getContainer().getClient().getSession().write(sendFriendsList.serialize());
 			
-			if(friendList.contains(friendName)) {
-				actor.friendRemove(friendName);
-				friendList.remove(friendName);
-			}
+
 		}
 	}
 	
@@ -422,19 +427,17 @@ public class ChatService implements INetworkDispatch {
 				actorCreature.getClient().getSession().write(updateStatus.serialize());
 			}
 		}
+
+		actor.friendAdd(friendShortName);
 		
-		friendList.add(friendShortName);
-		
-		//actor.friendAdd(friendShortName);
-		//actor.friendAdd(friendShortName);
-		//if (actor.getFriendList().size() != 0) {
-			//ChatOnGetFriendsList sendFriendsList = new ChatOnGetFriendsList(actor);
-			//actorCreature.getClient().getSession().write(sendFriendsList.serialize());
-		//}
+		if (actor.getFriendList().size() != 0) {
+			ChatOnGetFriendsList sendFriendsList = new ChatOnGetFriendsList(actor);
+			actorCreature.getClient().getSession().write(sendFriendsList.serialize());
+		}
 		
 		actorCreature.sendSystemMessage(friendShortName + " has been added to your friends list.", (byte) 0);
 		
-		//actor.friendAdd(friendShortName);
+		
 	}
 	
 	public void addToIgnoreList(SWGObject actor, String ignoreName) {

@@ -136,8 +136,6 @@ public class SimulationService implements INetworkDispatch {
 		core.commandService.registerCommand("waypoint");
 		core.commandService.registerCommand("setwaypointactivestatus");
 		core.commandService.registerCommand("setwaypointname");
-		core.commandService.registerCommand("addfriend");
-		core.commandService.registerCommand("removefriend");
 		core.commandService.registerCommand("getfriendlist");
 		core.commandService.registerCommand("deathblow");
 		core.commandService.registerCommand("endduel");
@@ -148,6 +146,7 @@ public class SimulationService implements INetworkDispatch {
 		core.commandService.registerCommand("inspire");
 		core.commandService.registerCommand("setgodmode");
 		core.commandService.registerCommand("requestwaypointatposition");
+		core.commandService.registerCommand("meditate");
 
 	}
 	
