@@ -25,14 +25,10 @@ import java.nio.ByteOrder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.text.WordUtils;
 import org.apache.mina.core.buffer.IoBuffer;
@@ -46,18 +42,13 @@ import engine.clients.Client;
 import engine.resources.container.Traverser;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
-import engine.resources.scene.Point3D;
-import engine.resources.scene.Quaternion;
-import engine.resources.scene.quadtree.QuadTree;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import main.NGECore;
 import resources.common.Console;
 import resources.common.Opcodes;
 import resources.objects.creature.CreatureObject;
-import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
-import services.map.*;
 import services.sui.SUIService.ListBoxType;
 import services.sui.SUIService.MessageBoxType;
 import services.sui.SUIWindow.SUICallback;
@@ -165,9 +156,12 @@ public class TravelService implements INetworkDispatch {
 			}
 		}
 		
-		if (returnedPoint == null) {
-			System.out.println("NULL TravelPoint at : " + core.mapService.getClosestCityName(obj));
-		}
+		// Some transport obj's were used as deco (ex: ACLO bunker on Talus shared_player_transport). A null check should be performed before tp is used.
+		/*if (returnedPoint == null) {
+			System.out.println("Could not find travel point for " + obj.getTemplate() + " at " + obj.getPlanet().name + " Position: " + obj.getPosition().x + " " + obj.getPosition().z);
+			//Console.println("Travel Point NULL: " + returnedPoint.getName());
+		}*/
+		
 		return returnedPoint;
 	}
 	

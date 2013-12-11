@@ -45,6 +45,7 @@ import engine.resources.scene.Quaternion;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import resources.common.*;
+import resources.datatables.Options;
 import protocol.swg.ClientCreateCharacter;
 import protocol.swg.ClientMfdStatusUpdateMessage;
 import protocol.swg.ClientRandomNameRequest;
@@ -227,7 +228,7 @@ public class CharacterService implements INetworkDispatch {
 				object.setPosition(new Point3D(3528, 0, -4804));
 				object.setCashCredits(100);
 				object.setBankCredits(1000);
-				object.setOptionsBitmask(0x80);
+				object.setOptionsBitmask(Options.ATTACKABLE);
 				//object.setPosition(new Point3D(0, 0, 0));
 				object.setOrientation(new Quaternion(1, 0, 0, 0));
 				object.setLevel((short) 1);
@@ -366,7 +367,7 @@ public class CharacterService implements INetworkDispatch {
 	{
 		if (RaceTemplate.contains("/wookiee_") ||
 				!Name.contains(" ")) 
-		{ // wookies don't have lastNames
+		{ // wookiees don't have lastNames
 				return Name;
 		}
 			
@@ -378,7 +379,7 @@ public class CharacterService implements INetworkDispatch {
 	{
 		if (RaceTemplate.contains("/wookiee_") ||
 			!Name.contains(" ")) 
-		{ // wookies don't have lastNames
+		{ // wookiees don't have lastNames
 			return "";
 		}
 		

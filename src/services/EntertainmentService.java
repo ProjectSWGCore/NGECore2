@@ -6,6 +6,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import main.NGECore;
 
@@ -34,10 +38,12 @@ import engine.resources.service.INetworkRemoteEvent;
 public class EntertainmentService implements INetworkDispatch {
 
 	private NGECore core;
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	
 	private Vector<BuffBuilder> buffBuilderSkills = new Vector<BuffBuilder>();
 	//FIXME: create a wrapper class for double key lookup maps
 	private HashMap<String,Performance> performances = new HashMap<String,Performance>();
+	private HashMap<Integer,Performance> performancesByIndex = new HashMap<Integer,Performance>();
 	private HashMap<Integer,Performance> danceMap = new HashMap<Integer,Performance>();
 	
 	public EntertainmentService(NGECore core) {
@@ -182,6 +188,7 @@ public class EntertainmentService implements INetworkDispatch {
 					danceMap.put(new Integer(p.getDanceVisualId()), p);
 				}
 				performances.put(p.getPerformanceName(), p);
+				performancesByIndex.put(r, p);
 			}
 			
 		} catch (InstantiationException | IllegalAccessException e) {
@@ -221,6 +228,8 @@ public class EntertainmentService implements INetworkDispatch {
 		core.commandService.registerCommand("groupdance");
 		core.commandService.registerCommand("startdance");
 		core.commandService.registerCommand("stopdance");
+		core.commandService.registerCommand("watch");
+		core.commandService.registerCommand("stopwatching");
 	}
 	
 	public void giveInspirationBuff(SWGObject reciever, Vector<BuffItem> buffVector) {
@@ -251,7 +260,7 @@ public class EntertainmentService implements INetworkDispatch {
 		Performance p = performances.get(danceName);
 		
 		//if 0 , then it's no dance. need to handle that in the script.
-		return p.getDanceVisualId();
+		return ((p == null) ? 0 : p.getDanceVisualId());
 	}
 	
 	public Map<Long,String> getAvailableDances(CreatureObject actor) {
@@ -288,6 +297,48 @@ public class EntertainmentService implements INetworkDispatch {
 	
 	public Performance getPerformance(String name) {
 		return performances.get(name);
+	}
+	
+	public Performance getPerformanceByIndex(int index) {
+		return performancesByIndex.get(index);
+	}
+	
+	public void startPerformance(CreatureObject actor, int performanceId, int performanceCounter, String skillName, boolean isDance) {
+		actor.setPerformanceId(performanceId, isDance);
+		actor.setPerformanceCounter(performanceCounter);
+		actor.setCurrentAnimation(skillName);
+		actor.setPerformanceType(isDance);
+		
+		actor.startPerformance();
+	}
+	
+	public void startPerformanceExperience(final CreatureObject entertainer) {
+		final ScheduledFuture<?> experienceTask = scheduler.scheduleAtFixedRate(new Runnable() {
+			
+			@Override
+			public void run() {
+			
+				Performance p = performancesByIndex.get(entertainer.getPerformanceId());
+				if (p == null) {
+					entertainer.setFlourishCount(0);
+					return;
+				}
+				
+				int floXP = p.getFlourishXpMod();
+				int floCount = entertainer.getFlourishCount();
+				
+				int XP = ((floCount > 2) ? 2 : floCount) * floXP;
+				
+				entertainer.setFlourishCount(0);
+				core.playerService.giveExperience(entertainer, XP);
+				
+				
+			}
+			
+		},10, 10000, TimeUnit.MILLISECONDS);
+		
+		entertainer.setEntertainerExperience(experienceTask);
+		
 	}
 	
 	@Override

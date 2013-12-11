@@ -417,6 +417,7 @@ public class PlayerObject extends SWGObject {
 	public void friendAdd(String friend) {
 		synchronized(objectMutex) {
 			setFriendListUpdateCounter(getFriendListUpdateCounter() + 1);
+			friendList.add(friend);
 			getContainer().getClient().getSession().write(messageBuilder.buildFriendAddDelta(friend));
 		}
 	}
@@ -424,6 +425,7 @@ public class PlayerObject extends SWGObject {
 	public void friendRemove(String friend) {
 		synchronized(objectMutex) {
 			setFriendListUpdateCounter(getFriendListUpdateCounter() + 1);
+			friendList.remove(friend);
 			getContainer().getClient().getSession().write(messageBuilder.buildFriendRemoveDelta(friend));
 		}
 	}

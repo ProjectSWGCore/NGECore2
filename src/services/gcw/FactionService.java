@@ -39,8 +39,6 @@ import resources.common.Opcodes;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 
-import engine.clientdata.ClientFileManager;
-import engine.clientdata.visitors.DatatableVisitor;
 import engine.clients.Client;
 import engine.resources.common.CRC;
 import engine.resources.service.INetworkDispatch;
@@ -53,22 +51,23 @@ public class FactionService implements INetworkDispatch {
 	private Map<String, Integer> factionMap = new TreeMap<String, Integer>();
 	
 	public FactionService(NGECore core) {
-		DatatableVisitor factionTable;
-		
 		this.core = core;
 		
 		try {
-			factionTable = ClientFileManager.loadFile("strings/en/faction/faction_names.stf", DatatableVisitor.class);
+			/*
+			StfTable stf = new StfTable("clientdata/string/en/faction/faction_names.stf");
 			
-			for (int s = 0; s < factionTable.getRowCount(); s++) {
-				if (factionTable.getObject(s, 0) != null) {
-					String faction = ((String) factionTable.getObject(s, 1));
+			for (int s = 1; s < stf.getRowCount(); s++) {
+				String faction = stf.getStringById(s).getKey();
+				
+				if (faction != null && faction != "") {
 					factionMap.put(faction, CRC.StringtoCRC(faction));
 				}
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+			*/
+        } catch (Exception e) {
+                e.printStackTrace();
+        }
 	}
 	
 	public int getCRC(String faction) {

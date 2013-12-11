@@ -6,6 +6,6 @@ def setup():
 def run(core, actor, target, commandString):
     ghost = actor.getSlottedObject('ghost')
     chatSvc = core.chatService
-    chatSvc.removeFriend(ghost, commandString, 1)
+    chatSvc.removeFriend(ghost, commandString)
     return
     

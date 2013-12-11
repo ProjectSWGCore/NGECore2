@@ -256,7 +256,11 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer.putLong(creature.getTargetId());
 		buffer.put(creature.getMoodId());
 		buffer.putInt(creature.getPerformanceCounter());
-		buffer.putInt(creature.getPerformanceId());
+		/*
+		 * minor dilemma: performance ID is needed for XP calculation, but it can't be sent
+		 * in the CREO, otherwise the evul note bubbles appear
+		 */ 
+		buffer.putInt((creature.getPerformanceType()) ? 0 : creature.getPerformanceId());
 
 		buffer.putInt(0);	// unks
 		buffer.putInt(0);
@@ -984,6 +988,16 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		int size = buffer.position();
 		buffer.flip();
 		buffer = createDelta("CREO", (byte) 3, (short) 1, (short) 2, buffer, size + 4);
+		return buffer;
+		
+	}
+	
+	public IoBuffer buildMoodAnimationDelta(String moodAnimation) {
+		IoBuffer buffer = bufferPool.allocate(getAsciiString(moodAnimation).length, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.put(getAsciiString(moodAnimation));
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x0B, buffer, size + 4);
 		return buffer;
 		
 	}

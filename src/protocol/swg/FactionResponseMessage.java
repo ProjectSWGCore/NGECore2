@@ -55,7 +55,13 @@ public class FactionResponseMessage extends SWGMessage {
 	}
 	
 	public IoBuffer serialize() {
-		IoBuffer result = IoBuffer.allocate(26).order(ByteOrder.LITTLE_ENDIAN);
+		int size = 26 + (factionStandingMap.size() * 4);
+		
+		for (String faction : factionStandingMap.keySet()) {
+			size += (2 + faction.length());
+		}
+		
+		IoBuffer result = IoBuffer.allocate(size, false).order(ByteOrder.LITTLE_ENDIAN);
 		result.setAutoExpand(true);
 		result.putShort((short) 2);
 		result.putInt(Opcodes.FactionResponseMessage);
@@ -68,10 +74,10 @@ public class FactionResponseMessage extends SWGMessage {
 		}
 		result.putInt(factionStandingMap.size());
 		for (Integer points : factionStandingMap.values()) {
-			result.putInt(points);
+			result.putFloat((float) points);
 		}
-		
-		return result.flip();	
+		result.flip();
+		return result;
 	}
 	
 }

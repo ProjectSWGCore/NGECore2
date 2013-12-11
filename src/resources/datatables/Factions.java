@@ -19,50 +19,14 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package resources.objects;
+package resources.datatables;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map.Entry;
+import engine.resources.common.CRC;
 
-import org.python.google.common.collect.ArrayListMultimap;
-import org.python.google.common.collect.Multimap;
-
-import com.sleepycat.persist.model.Persistent;
-import com.sleepycat.persist.model.PersistentProxy;
-
-@Persistent(proxyFor=Multimap.class)
-public class MultimapProxy<K, V> implements PersistentProxy<Multimap<K, V>> {
+public class Factions {
 	
-	private int size = 0;
-	private K[] keys;
-	private V[] values;
-	
-	private MultimapProxy() { }
-	
-	public void initializeProxy(Multimap<K, V> object) {
-		List<K> keyList = new ArrayList<K>();
-		List<V> valueList = new ArrayList<V>();
-		
-		for (Entry<K, V> entry : object.entries()) {
-			keyList.add(entry.getKey());
-			valueList.add(entry.getValue());
-		}
-		
-		size = object.entries().size();
-		
-		keys = keyList.toArray(keys);
-		values = valueList.toArray(values);
-	}
-	
-	public Multimap<K, V> convertProxy() {
-		Multimap<K, V> map = ArrayListMultimap.create();
-		
-		for (int i = 0; i < size; i++) {
-			map.put(keys[i], values[i]);
-		}
-		
-		return map;
-	}
+	public static int Neutral = 0;
+	public static int Rebel = CRC.StringtoCRC("rebel");
+	public static int Imperial = CRC.StringtoCRC("imperial");
 	
 }

@@ -25,6 +25,8 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import org.apache.mina.core.buffer.IoBuffer;
+
 public class StringUtilities {
 	
 	final protected static char[] hexArray = {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
@@ -33,8 +35,24 @@ public class StringUtilities {
 		return getString(buffer, "US-ASCII");
 	}
 	
+	public static String getAsciiString(IoBuffer buffer) {
+		return getString(buffer, "US-ASCII");
+	}
+	
+	public static String getAsciiString(IoBuffer buffer, boolean integer) {
+		return getString(buffer, "US-ASCII", integer);
+	}
+	
 	public static String getUnicodeString(ByteBuffer buffer) {
 		return getString(buffer, "UTF-16LE");
+	}
+	
+	public static String getUnicodeString(IoBuffer buffer) {
+		return getString(buffer, "UTF-16LE");
+	}
+	
+	public static String getUnicodeString(IoBuffer buffer, boolean integer) {
+		return getString(buffer, "UTF-16LE", integer);
 	}
 	
 	public static byte[] getAsciiString(String string) {
@@ -53,6 +71,62 @@ public class StringUtilities {
 			length = buffer.order(ByteOrder.LITTLE_ENDIAN).getInt();
 		} else {
 			length = buffer.order(ByteOrder.LITTLE_ENDIAN).getShort();
+		}
+		
+		int bufferPosition = buffer.position();
+		
+		try {
+			result = new String(buffer.array(), bufferPosition, length, charFormat);
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			return "";
+		}
+		
+		buffer.position(bufferPosition + length);
+		
+		return result;
+	}
+	
+	private static String getString(IoBuffer buffer, String charFormat) {
+		String result;
+		int length;
+		
+		if (charFormat == "UTF-16LE") {
+			length = buffer.order(ByteOrder.LITTLE_ENDIAN).getInt();
+		} else {
+			length = buffer.order(ByteOrder.LITTLE_ENDIAN).getShort();
+		}
+		
+		int bufferPosition = buffer.position();
+		
+		try {
+			result = new String(buffer.array(), bufferPosition, length, charFormat);
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			return "";
+		}
+		
+		buffer.position(bufferPosition + length);
+		
+		return result;
+	}
+	
+	private static String getString(IoBuffer buffer, String charFormat, boolean integer) {
+		String result;
+		int length;
+		
+		if (charFormat == "UTF-16LE") {
+			if (integer) {
+				length = buffer.order(ByteOrder.LITTLE_ENDIAN).getInt() * 2;
+			} else {
+				length = buffer.order(ByteOrder.LITTLE_ENDIAN).getInt();
+			}
+		} else {
+			if (integer) {
+				length = buffer.order(ByteOrder.LITTLE_ENDIAN).getInt();
+			} else {
+				length = buffer.order(ByteOrder.LITTLE_ENDIAN).getShort();
+			}
 		}
 		
 		int bufferPosition = buffer.position();
