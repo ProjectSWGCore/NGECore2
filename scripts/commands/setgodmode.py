@@ -37,9 +37,9 @@ def run(core, actor, target, commandString):
 		position = Point3D(float(arg2), float(arg3), float(arg4))
 		core.simulationService.transferToPlanet(actor, core.terrainService.getPlanetByName(arg1), position, actor.getOrientation(), None)
 		
-	elif command == 'cash' and arg1 is int(arg1):
-		actor.setCash(actor.getCash() + int(arg1))
-		actor.sendSystemMessage('The Galactic Empire has transferred ' + arg1 + ' credits to you for your service.')
+	elif command == 'credits' and arg1:
+		actor.setCashCredits(actor.getCashCredits() + int(arg1))
+		actor.sendSystemMessage('The Galactic Empire has transferred ' + arg1 + ' credits to you for your service.', 0)
 		
 	elif command == 'addability' and arg1:
 		actor.addAbility(str(arg1))
