@@ -68,6 +68,8 @@ public class CombatCommands {
 		
 		core.commandService.registerCombatCommand("bh_ae_dm_1");
 		core.commandService.registerCombatCommand("bh_ae_dm_2");
+		core.commandService.registerCombatCommand("bh_armor_sprint_1");		
+		core.commandService.registerCombatCommand("bh_cover_1");
 		core.commandService.registerCombatCommand("bh_dm_1");
 		core.commandService.registerCombatCommand("bh_dm_2");
 		core.commandService.registerCombatCommand("bh_dm_3");
@@ -123,7 +125,7 @@ public class CombatCommands {
 		core.commandService.registerCombatCommand("bh_taunt_4");
 		core.commandService.registerCombatCommand("bh_taunt_5");
 		core.commandService.registerCombatCommand("bh_taunt_6");
-		core.commandService.registerCombatCommand("bh_return_fire_1");
+		core.commandService.registerCombatCommand("bh_return_fire_command_1");
 		core.commandService.registerCombatCommand("bh_sh_0");
 		core.commandService.registerCombatCommand("bh_sh_1");
 		core.commandService.registerCombatCommand("bh_sh_2");
