@@ -68,6 +68,8 @@ public class CombatCommands {
 		
 		core.commandService.registerCombatCommand("bh_ae_dm_1");
 		core.commandService.registerCombatCommand("bh_ae_dm_2");
+		core.commandService.registerCombatCommand("bh_armor_sprint_1");		
+		core.commandService.registerCombatCommand("bh_cover_1");
 		core.commandService.registerCombatCommand("bh_dm_1");
 		core.commandService.registerCombatCommand("bh_dm_2");
 		core.commandService.registerCombatCommand("bh_dm_3");
