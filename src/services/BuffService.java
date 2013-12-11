@@ -136,11 +136,18 @@ public class BuffService implements INetworkDispatch {
 		
 		if (!buff.getCallback().equals("")) {
 			if (FileUtilities.doesFileExist("scripts/buffs/" + buff.getBuffName() +  ".py")) {
-				PyObject method = core.scriptService.getMethod("scripts/buffs/", buff.getBuffName(), buff.getCallback());
-				
-				if (method != null && method.isCallable()) {
-					method.__call__(Py.java2py(core), Py.java2py(creature), Py.java2py(buff));
-				}
+				scheduler.schedule(new Runnable() {
+					
+					@Override
+					public void run() {
+						PyObject method = core.scriptService.getMethod("scripts/buffs/", buff.getBuffName(), buff.getCallback());
+						
+						if (method != null && method.isCallable()) {
+							method.__call__(Py.java2py(core), Py.java2py(creature), Py.java2py(buff));
+						}
+					}
+						
+				}, 0, TimeUnit.SECONDS);
 			}
 		}
 		
