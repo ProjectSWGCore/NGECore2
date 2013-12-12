@@ -41,13 +41,14 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent(version=1)
+@Persistent(version=2)
 public class PlayerObject extends SWGObject {
 	
 	// PLAY 3
 	
 	private String title;
 	private String profession;
+	private int professionIcon;
 	private List<Integer> flagsList = new ArrayList<Integer>();
 	private List<Integer> profileList = new ArrayList<Integer>();
 	private List<String> titleList = new ArrayList<String>();
@@ -146,7 +147,9 @@ public class PlayerObject extends SWGObject {
 
 		}
 		
-		notifyObservers(messageBuilder.buildTitleDelta(title), true);
+		if (getContainer() != null) {
+			getContainer().notifyObservers(messageBuilder.buildTitleDelta(title), true);
+		}
 	}
 
 	public String getProfession() {
@@ -636,6 +639,45 @@ public class PlayerObject extends SWGObject {
 	public int getHighestSetBit() {
 		synchronized(objectMutex) {
 			return highestSetBit;
+		}
+	}
+	
+	public int getProfessionIcon() {
+		synchronized(objectMutex) {
+			return professionIcon;
+		}
+	}
+	
+	public void setProfessionIcon(int professionIcon) {
+		synchronized(objectMutex) {
+			this.professionIcon = professionIcon;
+		}
+		
+		if (getContainer() != null) {
+			getContainer().notifyObservers(messageBuilder.buildProfessionIconDelta(professionIcon), true);
+		}
+	}
+	
+	public int getProfData(String profession) {
+		switch (profession) {
+			case "spy_1a":
+				return 0x23;
+			case "smuggler_1a":
+				return 0x19;
+			case "officer_1a":
+				return 0x0F;
+			case "force_sensitive_1a":
+				return 0x28;
+			case "commando_1a":
+				return 0x1E;
+			case "entertainer_1a":
+				return 0x05;
+			case "medic_1a":
+				return 0x0A;
+			case "bounty_hunter_1a":
+				return 0x14;
+			default:
+				return 0x00;
 		}
 	}
 	

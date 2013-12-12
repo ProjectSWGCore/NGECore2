@@ -251,6 +251,7 @@ public class CharacterService implements INetworkDispatch {
 				object._add(player);
 				core.skillService.addSkill(object, "species_" + object.getStfName());
 				player.setProfession(clientCreateCharacter.getProfession());
+				player.setProfessionIcon(player.getProfData(clientCreateCharacter.getProfession()));
 				player.setProfessionWheelPosition(clientCreateCharacter.getProfessionWheelPosition());
 				if(clientCreateCharacter.getHairObject().length() > 0) {
 					String sharedHairTemplate = clientCreateCharacter.getHairObject().replace("/hair_", "/shared_hair_");
