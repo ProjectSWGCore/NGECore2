@@ -439,7 +439,6 @@ public class CombatCommands {
 		core.commandService.registerCommand("me_reckless_stimulation_4");
 		core.commandService.registerCommand("me_reckless_stimulation_5");
 		core.commandService.registerCommand("me_reckless_stimulation_6");
-		core.commandService.registerCommand("me_stasis_self_1");
 		core.commandService.registerCommand("me_buff_health_1");
 		core.commandService.registerCommand("me_buff_health_2");
 		core.commandService.registerCommand("me_buff_health_3");
