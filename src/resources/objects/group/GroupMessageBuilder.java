@@ -147,7 +147,7 @@ public class GroupMessageBuilder extends ObjectMessageBuilder {
 		
 		GroupObject group = (GroupObject) object;
 		
-		IoBuffer buffer = bufferPool.allocate(15, false).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer buffer = bufferPool.allocate(21 + member.getCustomName().length(), false).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.putInt(1);
 		buffer.putInt(group.getMemberListUpdateCounter());
 		
@@ -166,7 +166,7 @@ public class GroupMessageBuilder extends ObjectMessageBuilder {
 		
 		GroupObject group = (GroupObject) object;
 		
-		IoBuffer buffer = bufferPool.allocate(15, false).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer buffer = bufferPool.allocate(11, false).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.putInt(1);
 		buffer.putInt(group.getMemberListUpdateCounter());
 		
