@@ -41,13 +41,14 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent(version=1)
+@Persistent(version=2)
 public class PlayerObject extends SWGObject {
 	
 	// PLAY 3
 	
 	private String title;
 	private String profession;
+	private int professionIcon;
 	private List<Integer> flagsList = new ArrayList<Integer>();
 	private List<Integer> profileList = new ArrayList<Integer>();
 	private List<String> titleList = new ArrayList<String>();
@@ -146,7 +147,9 @@ public class PlayerObject extends SWGObject {
 
 		}
 		
-		notifyObservers(messageBuilder.buildTitleDelta(title), true);
+		if (getContainer() != null) {
+			getContainer().notifyObservers(messageBuilder.buildTitleDelta(title), true);
+		}
 	}
 
 	public String getProfession() {
@@ -417,6 +420,7 @@ public class PlayerObject extends SWGObject {
 	public void friendAdd(String friend) {
 		synchronized(objectMutex) {
 			setFriendListUpdateCounter(getFriendListUpdateCounter() + 1);
+			friendList.add(friend);
 			getContainer().getClient().getSession().write(messageBuilder.buildFriendAddDelta(friend));
 		}
 	}
@@ -424,6 +428,7 @@ public class PlayerObject extends SWGObject {
 	public void friendRemove(String friend) {
 		synchronized(objectMutex) {
 			setFriendListUpdateCounter(getFriendListUpdateCounter() + 1);
+			friendList.remove(friend);
 			getContainer().getClient().getSession().write(messageBuilder.buildFriendRemoveDelta(friend));
 		}
 	}
@@ -634,6 +639,22 @@ public class PlayerObject extends SWGObject {
 	public int getHighestSetBit() {
 		synchronized(objectMutex) {
 			return highestSetBit;
+		}
+	}
+	
+	public int getProfessionIcon() {
+		synchronized(objectMutex) {
+			return professionIcon;
+		}
+	}
+	
+	public void setProfessionIcon(int professionIcon) {
+		synchronized(objectMutex) {
+			this.professionIcon = professionIcon;
+		}
+		
+		if (getContainer() != null) {
+			getContainer().notifyObservers(messageBuilder.buildProfessionIconDelta(professionIcon), true);
 		}
 	}
 	

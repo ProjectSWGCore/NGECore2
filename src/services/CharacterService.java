@@ -46,6 +46,7 @@ import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import resources.common.*;
 import resources.datatables.Options;
+import resources.datatables.Professions;
 import protocol.swg.ClientCreateCharacter;
 import protocol.swg.ClientMfdStatusUpdateMessage;
 import protocol.swg.ClientRandomNameRequest;
@@ -251,6 +252,7 @@ public class CharacterService implements INetworkDispatch {
 				object._add(player);
 				core.skillService.addSkill(object, "species_" + object.getStfName());
 				player.setProfession(clientCreateCharacter.getProfession());
+				player.setProfessionIcon(Professions.get(clientCreateCharacter.getProfession()));
 				player.setProfessionWheelPosition(clientCreateCharacter.getProfessionWheelPosition());
 				if(clientCreateCharacter.getHairObject().length() > 0) {
 					String sharedHairTemplate = clientCreateCharacter.getHairObject().replace("/hair_", "/shared_hair_");

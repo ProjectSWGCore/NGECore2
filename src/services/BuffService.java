@@ -66,7 +66,7 @@ public class BuffService implements INetworkDispatch {
 			//System.out.println("Buff script doesnt exist for: " + buffName);
 			return;
 		}*/
-		
+
 		final Buff buff = new Buff(buffName, creature.getObjectID());
 		if(buff.isGroupBuff()) {
 			addGroupBuff(creature, buffName);
@@ -92,6 +92,8 @@ public class BuffService implements INetworkDispatch {
                         			if(creature.getDotByBuff(otherBuff) != null)	// reset duration when theres a dot stack
                         				creature.getDotByBuff(otherBuff).setStartTime(buff.getStartTime());
                         			
+                        		} else {
+                        			buff.setStacks(buff.getMaxStacks());
                         		}
                         	
                                 if (otherBuff.getRemainingDuration() > buff.getDuration() && otherBuff.getStacks() >= otherBuff.getMaxStacks()) {
@@ -136,11 +138,18 @@ public class BuffService implements INetworkDispatch {
 		
 		if (!buff.getCallback().equals("")) {
 			if (FileUtilities.doesFileExist("scripts/buffs/" + buff.getBuffName() +  ".py")) {
-				PyObject method = core.scriptService.getMethod("scripts/buffs/", buff.getBuffName(), buff.getCallback());
-				
-				if (method != null && method.isCallable()) {
-					method.__call__(Py.java2py(core), Py.java2py(creature), Py.java2py(buff));
-				}
+				scheduler.schedule(new Runnable() {
+					
+					@Override
+					public void run() {
+						PyObject method = core.scriptService.getMethod("scripts/buffs/", buff.getBuffName(), buff.getCallback());
+						
+						if (method != null && method.isCallable()) {
+							method.__call__(Py.java2py(core), Py.java2py(creature), Py.java2py(buff));
+						}
+					}
+						
+				}, 0, TimeUnit.SECONDS);
 			}
 		}
 		

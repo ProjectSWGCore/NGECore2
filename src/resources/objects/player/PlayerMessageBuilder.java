@@ -34,16 +34,6 @@ import resources.objects.waypoint.WaypointObject;
 
 public class PlayerMessageBuilder extends ObjectMessageBuilder {
 	
-	public static final String SPY = "spy_1a";
-	public static final String SMUGGLER = "smuggler_1a";
-	public static final String OFFICER = "officer_1a";
-	public static final String JEDI = "force_sensitive_1a";
-	public static final String COMMANDO = "commando_1a";
-	public static final String ENTERTAINER = "entertainer_1a";
-	public static final String MEDIC = "medic_1a";
-	public static final String BOUNTYHUNTER = "bounty_hunter_1a";
-
-	
 	public PlayerMessageBuilder(PlayerObject playerObject) {
 		setObject(playerObject);
 	}
@@ -84,7 +74,7 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 		
 		buffer.putInt(player.getTotalPlayTime()); // total play time?
 		
-		buffer.putInt(getProfData(player.getProfession())); // prof icon
+		buffer.putInt(player.getProfessionIcon());
 		
 		buffer.put(getAsciiString(player.getProfession()));	
 		buffer.putInt(0); // GCW
@@ -350,6 +340,15 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 		
 	}
 	
+	public IoBuffer buildProfessionIconDelta(int professionIcon) {
+		IoBuffer buffer = bufferPool.allocate(4, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putInt(professionIcon);
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("PLAY", (byte) 3, (short) 1, (short) 0x0A, buffer, size + 4);
+		return buffer;
+	}
+	
 	public IoBuffer buildCollectionsDelta(byte[] collections, int highestSetBit) {
 		IoBuffer buffer = bufferPool.allocate(8 + collections.length, false).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.putInt(collections.length);
@@ -599,32 +598,6 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 		return buffer;
 	}
 	
-	public int getProfData(String profession) {
-		
-		switch (profession) {
-		
-			case SPY:
-				return 0x23;
-			case SMUGGLER:
-				return 0x19;
-			case OFFICER:
-				return 0x0F;
-			case JEDI:
-				return 0x28;
-			case COMMANDO:
-				return 0x1E;
-			case ENTERTAINER:
-				return 0x05;
-			case MEDIC:
-				return 0x0A;
-			case BOUNTYHUNTER:
-				return 0x14;
-			default:
-				return 0x00;
-				
-		}
-	}
-
 	@Override
 	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
 		// TODO Auto-generated method stub

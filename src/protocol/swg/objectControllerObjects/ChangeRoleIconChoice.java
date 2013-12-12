@@ -19,37 +19,36 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package resources.objects;
+package protocol.swg.objectControllerObjects;
 
-import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
-import org.apache.mina.core.buffer.SimpleBufferAllocator;
+import org.apache.mina.core.buffer.IoBuffer;
 
-
-import resources.common.StringUtilities;
-
-
-public abstract class ListObject implements IListObject {
+public class ChangeRoleIconChoice extends ObjControllerObject {
 	
-	public ListObject() { }
+	private long objectId = 0;
+	private int icon = 0;
 	
-	protected final Object objectMutex = new Object();
-	public SimpleBufferAllocator bufferPool = new SimpleBufferAllocator();
-	
-	protected String getAsciiString(ByteBuffer buffer) {
-		return StringUtilities.getAsciiString(buffer);
+	@Override
+	public IoBuffer serialize() {
+		return null;
 	}
 	
-	protected String getUnicodeString(ByteBuffer buffer) {
-		return StringUtilities.getUnicodeString(buffer);
+	@Override
+	public void deserialize(IoBuffer buffer) {
+		buffer.flip().order(ByteOrder.LITTLE_ENDIAN);
+		objectId = buffer.getLong();
+		buffer.skip(4);
+		icon = buffer.getInt();
 	}
 	
-	protected byte[] getAsciiString(String string) {
-		return StringUtilities.getAsciiString(string);
+	public long getObjectId() {
+		return objectId;
 	}
 	
-	protected byte[] getUnicodeString(String string) {
-		return StringUtilities.getUnicodeString(string);
+	public int getIcon() {
+		return icon;
 	}
 	
 }

@@ -164,6 +164,7 @@ public class NGECore {
 
 	private ObjectDatabase creatureODB;
 	private ObjectDatabase mailODB;
+	private ObjectDatabase guildODB;
 	
 	private BusConfiguration eventBusConfig = BusConfiguration.Default(1, new ThreadPoolExecutor(1, 4, 1, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>()));
 
@@ -209,6 +210,7 @@ public class NGECore {
 		setGalaxyStatus(1);
 		creatureODB = new ObjectDatabase("creature", true, false, true);
 		mailODB = new ObjectDatabase("mails", true, false, true);
+		guildODB = new ObjectDatabase("guild", true, false, true);
 		// Services
 		loginService = new LoginService(this);
 		connectionService = new ConnectionService(this);
@@ -412,6 +414,10 @@ public class NGECore {
 		return config;
 	}
 	
+	public String getGalaxyName() {
+		return config.getString("GALAXY_NAME");
+	}
+	
 	public DatabaseConnection getDatabase1() {
 		return databaseConnection;
 	}
@@ -426,6 +432,10 @@ public class NGECore {
 	
 	public ObjectDatabase getMailODB() {
 		return mailODB;
+	}
+	
+	public ObjectDatabase getGuildODB() {
+		return guildODB;
 	}
 	
 	public int getActiveClients() {

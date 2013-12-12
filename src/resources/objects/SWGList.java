@@ -33,7 +33,7 @@ import org.apache.mina.core.buffer.IoBuffer;
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
 
-/* A SWGList element MUST implement IListObject, or it will refuse to work with it */
+/* A SWGList element MUST implement IDelta, or it will refuse to work with it */
 
 @Persistent
 public class SWGList<E> implements List<E> {
@@ -58,8 +58,8 @@ public class SWGList<E> implements List<E> {
 	@Override
 	public boolean add(E e) {
 		synchronized(objectMutex) {				
-			if (list.add(e) && e instanceof IListObject) {
-				queue(item(1, list.lastIndexOf(e), ((IListObject) e).getBytes(), true, true));
+			if (list.add(e) && e instanceof IDelta) {
+				queue(item(1, list.lastIndexOf(e), ((IDelta) e).getBytes(), true, true));
 				return true;
 			}			
 			return false;
@@ -69,9 +69,9 @@ public class SWGList<E> implements List<E> {
 	@Override
 	public void add(int index, E element) {
 		synchronized(objectMutex) {
-			if (element instanceof IListObject) {
+			if (element instanceof IDelta) {
 				list.add(index, element);
-				queue(item(1, index, ((IListObject) element).getBytes(), true, true));
+				queue(item(1, index, ((IDelta) element).getBytes(), true, true));
 			}
 		}
 	}
@@ -84,9 +84,9 @@ public class SWGList<E> implements List<E> {
 				boolean success = false;
 				
 				for (E element : c) {
-					if (element instanceof IListObject) {
+					if (element instanceof IDelta) {
 						if (list.add(element)) {
-							buffer.add(item(1, list.lastIndexOf(element), ((IListObject) element).getBytes(), true, true));
+							buffer.add(item(1, list.lastIndexOf(element), ((IDelta) element).getBytes(), true, true));
 							success = true;
 						}
 					} else {
@@ -112,9 +112,9 @@ public class SWGList<E> implements List<E> {
 				List<byte[]> buffer = new ArrayList<byte[]>();
 				
 				for (E element : c) {
-					if (element instanceof IListObject) {
+					if (element instanceof IDelta) {
 						list.add(index, element);
-						buffer.add(item(1, index, ((IListObject) element).getBytes(), true, true));
+						buffer.add(item(1, index, ((IDelta) element).getBytes(), true, true));
 						index++;
 					} else {
 						return false;
@@ -268,10 +268,10 @@ public class SWGList<E> implements List<E> {
 	@Override
 	public E set(int index, E element) {
 		synchronized(objectMutex) {
-			if (element instanceof IListObject) {
+			if (element instanceof IDelta) {
 				E previousElement = list.set(index, element);
 				
-				queue(item(2, index, ((IListObject) element).getBytes(), true, true));
+				queue(item(2, index, ((IDelta) element).getBytes(), true, true));
 				
 				return previousElement;
 			}
@@ -286,10 +286,10 @@ public class SWGList<E> implements List<E> {
 			
 			if (!list.isEmpty()) {
 				for (E element : list) {
-					if (element instanceof IListObject) {
-						IoBuffer buffer = messageBuilder.bufferPool.allocate((newListData.length + ((IListObject) element).getBytes().length), false).order(ByteOrder.LITTLE_ENDIAN);
+					if (element instanceof IDelta) {
+						IoBuffer buffer = messageBuilder.bufferPool.allocate((newListData.length + ((IDelta) element).getBytes().length), false).order(ByteOrder.LITTLE_ENDIAN);
 						buffer.put(newListData);
-						buffer.put(((IListObject) element).getBytes());
+						buffer.put(((IDelta) element).getBytes());
 						newListData = buffer.array();
 					} else {
 						return false;

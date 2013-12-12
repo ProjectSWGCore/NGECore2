@@ -19,13 +19,32 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package resources.objects;
+package resources.datatables;
 
-import com.sleepycat.persist.model.Persistent;
+import java.util.HashMap;
+import java.util.Map;
 
-@Persistent
-public interface IListObject {
+public final class Professions {
 	
-	public byte[] getBytes();
+	private static Map<String, Integer> map = new HashMap<String, Integer>();
+
+	static {
+		map.put("trader_0a", 0);
+		map.put("trader_0b", 0);
+		map.put("trader_0c", 0);
+		map.put("trader_0d", 0);
+		map.put("entertainer_1a", 5);
+		map.put("medic_1a", 10);
+		map.put("officer_1a", 15);
+		map.put("bounty_hunter_1a", 20);
+		map.put("smuggler_1a", 25);
+		map.put("commando_1a", 30);
+		map.put("spy_1a", 35);
+		map.put("force_sensitive_1a", 40);
+	}
+	
+	public static int get(String profession) {
+		return map.get(profession);
+	}
 	
 }

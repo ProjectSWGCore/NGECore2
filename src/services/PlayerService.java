@@ -41,9 +41,11 @@ import protocol.swg.ClientIdMsg;
 import protocol.swg.ClientMfdStatusUpdateMessage;
 import protocol.swg.ExpertiseRequestMessage;
 import protocol.swg.ServerTimeMessage;
+import protocol.swg.objectControllerObjects.ChangeRoleIconChoice;
 import protocol.swg.objectControllerObjects.ShowFlyText;
 import resources.common.Console;
 import resources.common.FileUtilities;
+import resources.common.ObjControllerOpcodes;
 import resources.common.Opcodes;
 import resources.common.RGB;
 import resources.common.SpawnPoint;
@@ -149,6 +151,31 @@ public class PlayerService implements INetworkDispatch {
 	@Override
 	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> swgOpcodes, Map<Integer, INetworkRemoteEvent> objControllerOpcodes) {
 		
+		objControllerOpcodes.put(ObjControllerOpcodes.ChangeRoleIconChoice, new INetworkRemoteEvent() {
+			
+			@Override
+			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
+				Client c = core.getClient((Integer) session.getAttribute("connectionId"));
+				ChangeRoleIconChoice packet = new ChangeRoleIconChoice();
+				PlayerObject player;
+				SWGObject o;
+				
+				packet.deserialize(data);
+				o = core.objectService.getObject(packet.getObjectId());
+				
+				if (c.getParent() == null || o == null || c.getParent() != o
+				|| !(o instanceof CreatureObject) || !(o.getSlottedObject("ghost")
+				instanceof PlayerObject)) {
+					return;
+				}
+				
+				player = (PlayerObject) o.getSlottedObject("ghost");
+				
+				player.setProfessionIcon(packet.getIcon());
+			}
+			
+		});
+		
 		swgOpcodes.put(Opcodes.CmdSceneReady, new INetworkRemoteEvent() {
 
 			@Override
@@ -189,7 +216,6 @@ public class PlayerService implements INetworkDispatch {
 			}
 			
 		});*/
-
 		
 	}
 	
@@ -498,7 +524,6 @@ public class PlayerService implements INetworkDispatch {
 			player.getTitleList().remove(title);
 
 	}
-	
 	
 	@Override
 	public void shutdown() {
