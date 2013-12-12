@@ -1,7 +1,7 @@
 import sys
 
 def setup(core, actor, target, command):
-	core.buffService.addBuffToCreature(target, 'me_induce_insanity_1')
+	core.buffService.addBuffToCreature(target, 'me_doom')
 	return
 	
 def preRun(core, actor, target, command):
