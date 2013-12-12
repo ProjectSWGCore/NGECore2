@@ -164,6 +164,7 @@ public class NGECore {
 
 	private ObjectDatabase creatureODB;
 	private ObjectDatabase mailODB;
+	private ObjectDatabase guildODB;
 	
 	private BusConfiguration eventBusConfig = BusConfiguration.Default(1, new ThreadPoolExecutor(1, 4, 1, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>()));
 
@@ -426,6 +427,10 @@ public class NGECore {
 	
 	public ObjectDatabase getMailODB() {
 		return mailODB;
+	}
+	
+	public ObjectDatabase getGuildODB() {
+		return guildODB;
 	}
 	
 	public int getActiveClients() {
