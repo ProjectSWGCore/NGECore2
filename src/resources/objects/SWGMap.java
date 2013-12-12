@@ -112,17 +112,17 @@ public class SWGMap<K, V> implements Map<K, V> {
 		synchronized(objectMutex) {
 			if ((key instanceof String || key instanceof Byte || key instanceof Short ||
 				key instanceof Integer || key instanceof Float ||key instanceof Long) &&
-				value instanceof IListObject) {
+				value instanceof IDelta) {
 				if (map.containsKey(key)) {
 					V oldValue = map.put(key, value);
 					
-					queue(item(2, (String) key, ((IListObject) value).getBytes(), true, true));
+					queue(item(2, (String) key, ((IDelta) value).getBytes(), true, true));
 					
 					return oldValue;
 				} else {
 					V oldValue = map.put(key, value);
 					
-					queue(item(0, (String) key, ((IListObject) value).getBytes(), true, true));
+					queue(item(0, (String) key, ((IDelta) value).getBytes(), true, true));
 					
 					return oldValue;
 				}
@@ -142,14 +142,14 @@ public class SWGMap<K, V> implements Map<K, V> {
 				
 				if (key instanceof String || key instanceof Byte || key instanceof Short ||
 					key instanceof Integer || key instanceof Float || key instanceof Long ||
-					value instanceof IListObject) {
+					value instanceof IDelta) {
 					if (map.containsKey(key)) {
 						if (map.put(key, value) != null) {
-							buffer.add(item(2, (String) key, ((IListObject) value).getBytes(), true, true));
+							buffer.add(item(2, (String) key, ((IDelta) value).getBytes(), true, true));
 						}
 					} else {
 						if (map.put(key, value) != null) {
-							buffer.add(item(0, (String) key, ((IListObject) value).getBytes(), true, true));
+							buffer.add(item(0, (String) key, ((IDelta) value).getBytes(), true, true));
 						}
 					}
 				}
@@ -167,7 +167,7 @@ public class SWGMap<K, V> implements Map<K, V> {
 				key instanceof Integer || key instanceof Float || key instanceof Long) {
 				V value = map.remove(key);
 				
-				queue(item(1, key, ((IListObject) map.get(key)).getBytes(), true, true));
+				queue(item(1, key, ((IDelta) map.get(key)).getBytes(), true, true));
 				
 				return value;
 			}

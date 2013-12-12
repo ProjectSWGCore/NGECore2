@@ -26,11 +26,11 @@ import java.util.List;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import resources.objects.ListObject;
+import resources.objects.Delta;
 
 import engine.resources.objects.SWGObject;
 
-public class Guild extends ListObject {
+public class Guild extends Delta {
 	
 	private int id;
 	private String abbreviation;

@@ -210,6 +210,7 @@ public class NGECore {
 		setGalaxyStatus(1);
 		creatureODB = new ObjectDatabase("creature", true, false, true);
 		mailODB = new ObjectDatabase("mails", true, false, true);
+		guildODB = new ObjectDatabase("guild", true, false, true);
 		// Services
 		loginService = new LoginService(this);
 		connectionService = new ConnectionService(this);
@@ -411,6 +412,10 @@ public class NGECore {
 	 */
 	public Config getConfig() {
 		return config;
+	}
+	
+	public String getGalaxyName() {
+		return config.getString("GALAXY_NAME");
 	}
 	
 	public DatabaseConnection getDatabase1() {

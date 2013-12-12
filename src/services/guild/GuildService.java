@@ -49,9 +49,9 @@ public class GuildService implements INetworkDispatch {
 		
 		if (object == null) {
 			object = (GuildObject) this.core.objectService.createObject("object/guild/shared_guild_object.iff", core.terrainService.getPlanetList().get(0));
-			
-			object.createTransaction(core.getGuildODB().getEnvironment());
 		}
+		
+		object.createTransaction(core.getGuildODB().getEnvironment());
 	}
 	
 	public Guild createGuild(String abbreviation, String name, SWGObject leader) {
