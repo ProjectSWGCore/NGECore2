@@ -658,27 +658,4 @@ public class PlayerObject extends SWGObject {
 		}
 	}
 	
-	public int getProfData(String profession) {
-		switch (profession) {
-			case "spy_1a":
-				return 0x23;
-			case "smuggler_1a":
-				return 0x19;
-			case "officer_1a":
-				return 0x0F;
-			case "force_sensitive_1a":
-				return 0x28;
-			case "commando_1a":
-				return 0x1E;
-			case "entertainer_1a":
-				return 0x05;
-			case "medic_1a":
-				return 0x0A;
-			case "bounty_hunter_1a":
-				return 0x14;
-			default:
-				return 0x00;
-		}
-	}
-	
 }
