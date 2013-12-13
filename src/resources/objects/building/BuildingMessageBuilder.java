@@ -43,15 +43,16 @@ public class BuildingMessageBuilder extends ObjectMessageBuilder {
 		buffer.putInt(0);
 		buffer.put(getAsciiString(building.getStfName()));
 		buffer.putInt(0);
-		buffer.putInt(0);
-		buffer.putInt(0);
-		buffer.putInt(0);
-		buffer.putInt(0);
-		buffer.putInt(0);
-		buffer.putInt(1).order(ByteOrder.BIG_ENDIAN);
+		buffer.putInt(255);
 		buffer.putInt(0);
 		buffer.putInt(0);
 		buffer.putShort((short) 0);
+		
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(16777216);
+		buffer.putInt(0);
+		buffer.putInt(0);
 		buffer.putInt(0x201C);
 		buffer.put((byte) 1);
 		

@@ -673,18 +673,17 @@ public class CombatService implements INetworkDispatch {
 				if(r <= missChance)
 					return HitType.MISS;
 			}
-			if(target.getSkillMod("display_only_dodge") != null) {
-				float dodgeChance = (float) target.getSkillMod("display_only_dodge").getBase() / 10000;
+			float dodgeChance = (float) target.getSkillModBase("display_only_dodge") / 10000;
 		
-				r = random.nextFloat();
-				if(r <= dodgeChance)
-					return HitType.DODGE;
-			}
+			r = random.nextFloat();
+			if(r <= dodgeChance)
+				return HitType.DODGE;
+			
 				
 			WeaponObject weapon2 = (WeaponObject) core.objectService.getObject(((CreatureObject) target).getWeaponId());
-			if(weapon2 != null && weapon2.isMelee() && target.getSkillMod("display_only_parry") != null) {
+			if(weapon2 != null && weapon2.isMelee()) {
 				
-				float parryChance = (float) target.getSkillMod("display_only_parry").getBase() / 10000;
+				float parryChance = (float) target.getSkillModBase("display_only_parry") / 10000;
 	
 				r = random.nextFloat();
 				if(r <= parryChance)
@@ -692,7 +691,7 @@ public class CombatService implements INetworkDispatch {
 					
 			}
 			
-			float stChance = (float) attacker.getSkillMod("display_only_strikethrough").getBase() / 10000;
+			float stChance = (float) attacker.getSkillModBase("display_only_strikethrough") / 10000;
 			
 			r = random.nextFloat();
 			if(r <= stChance)
@@ -700,7 +699,7 @@ public class CombatService implements INetworkDispatch {
 
 		}
 
-		float critChance = (float) (attacker.getSkillMod("display_only_critical").getBase() - target.getSkillModBase("display_only_expertise_critical_hit_reduction")) / 10000;
+		float critChance = (float) (attacker.getSkillModBase("display_only_critical") - target.getSkillModBase("display_only_expertise_critical_hit_reduction")) / 10000;
 		r = random.nextFloat();
 		if(r <= critChance)
 			return HitType.CRITICAL;
