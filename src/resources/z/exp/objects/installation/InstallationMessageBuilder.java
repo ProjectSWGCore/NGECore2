@@ -19,12 +19,8 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package resources.datatables;
+package resources.z.exp.objects.installation;
 
-public class FactionStatus {
-	
-	public static final int OnLeave = 0;
-	public static final int Combatant = 1;
-	public static final int SpecialForces = 2;
-	
+public class InstallationMessageBuilder {
+
 }

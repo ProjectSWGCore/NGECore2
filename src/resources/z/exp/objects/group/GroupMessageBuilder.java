@@ -19,12 +19,31 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package resources.datatables;
+package resources.z.exp.objects.group;
 
-public class FactionStatus {
+import java.util.Map;
+
+import resources.z.exp.objects.Builder;
+import resources.z.exp.objects.universe.UniverseMessageBuilder;
+
+public class GroupMessageBuilder extends UniverseMessageBuilder {
 	
-	public static final int OnLeave = 0;
-	public static final int Combatant = 1;
-	public static final int SpecialForces = 2;
+	public GroupMessageBuilder(GroupObject groupObject) {
+		super(groupObject);
+	}
+	
+	public GroupMessageBuilder() {
+		super();
+	}
+	
+	@Override
+	public void buildBaseline3(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline3(baselineBuilders, deltaBuilders);
+	}
+	
+	@Override
+	public void buildBaseline6(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline6(baselineBuilders, deltaBuilders);
+	}
 	
 }

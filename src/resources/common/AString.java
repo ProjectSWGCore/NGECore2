@@ -19,12 +19,51 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package resources.datatables;
+package resources.common;
 
-public class FactionStatus {
+import java.nio.ByteOrder;
+
+import org.apache.mina.core.buffer.IoBuffer;
+
+import com.sleepycat.persist.model.Persistent;
+
+import resources.objects.Delta;
+
+@Persistent
+public final class AString extends Delta {
 	
-	public static final int OnLeave = 0;
-	public static final int Combatant = 1;
-	public static final int SpecialForces = 2;
+	private String string;
+	
+	public AString() {
+		string = "";
+	}
+	
+	public AString(String string) {
+		this.string = ((string == null) ? "" : string);
+	}
+	
+	public String get() {
+		synchronized(objectMutex) {
+			return string;
+		}
+	}
+	
+	public void set(String string) {
+		synchronized(objectMutex) {
+			this.string = string;
+		}
+	}
+	
+	public short length() {
+		synchronized(objectMutex) {
+			return (short) string.length();
+		}
+	}
+	
+	public byte[] getBytes() {
+		synchronized(objectMutex) {
+			return IoBuffer.allocate(2 + string.length(), false).order(ByteOrder.LITTLE_ENDIAN).putShort((short) string.length()).put(string.getBytes()).flip().array();
+		}
+	}
 	
 }

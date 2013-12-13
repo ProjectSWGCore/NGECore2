@@ -19,12 +19,45 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package resources.datatables;
+package resources.z.exp.manufacture;
 
-public class FactionStatus {
+import java.nio.ByteOrder;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import org.apache.mina.core.buffer.IoBuffer;
+
+import com.sleepycat.persist.model.Persistent;
+
+import resources.objects.Delta;
+import resources.z.exp.objects.Baseline;
+
+@Persistent
+public class SubList<o> extends Delta {
 	
-	public static final int OnLeave = 0;
-	public static final int Combatant = 1;
-	public static final int SpecialForces = 2;
+	private List<o> list = new CopyOnWriteArrayList<o>();
+	
+	public SubList() {
+		
+	}
+	
+	public List<o> getList() {
+		return list;
+	}
+	
+	public byte[] getBytes() {
+		synchronized(objectMutex) {
+			int size = 4;
+			for (o object : list) size += Baseline.toBytes(object).length;
+			
+			IoBuffer buffer = bufferPool.allocate(size, false).order(ByteOrder.LITTLE_ENDIAN);
+			buffer.putInt(list.size());
+			for (o object : list) {
+				buffer.put(Baseline.toBytes(object));
+			}
+			
+			return buffer.array();
+		}
+	}
 	
 }

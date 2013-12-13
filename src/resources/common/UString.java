@@ -19,12 +19,57 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package resources.datatables;
+package resources.common;
 
-public class FactionStatus {
+import java.io.UnsupportedEncodingException;
+import java.nio.ByteOrder;
+
+import org.apache.mina.core.buffer.IoBuffer;
+
+import com.sleepycat.persist.model.Persistent;
+
+import resources.objects.Delta;
+
+@Persistent
+public final class UString extends Delta {
 	
-	public static final int OnLeave = 0;
-	public static final int Combatant = 1;
-	public static final int SpecialForces = 2;
+	private String string;
+	
+	public UString() {
+		string = "";
+	}
+	
+	public UString(String string) {
+		this.string = ((string == null) ? "" : string);
+	}
+	
+	public String get() {
+		synchronized(objectMutex) {
+			return string;
+		}
+	}
+	
+	public void set(String string) {
+		synchronized(objectMutex) {
+			this.string = string;
+		}
+	}
+	
+	public int length() {
+		synchronized(objectMutex) {
+			return string.length();
+		}
+	}
+	
+	public byte[] getBytes() {
+		synchronized(objectMutex) {
+			try {
+				return IoBuffer.allocate(4 + string.length(), false).order(ByteOrder.LITTLE_ENDIAN).putInt(string.length()).put(string.getBytes("UTF-16LE")).flip().array();
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+				return new byte[] { 0x00, 0x00, 0x00, 0x00 };
+			}
+		}
+	}
 	
 }

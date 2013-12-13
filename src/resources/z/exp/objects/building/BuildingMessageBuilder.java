@@ -19,12 +19,31 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package resources.datatables;
+package resources.z.exp.objects.building;
 
-public class FactionStatus {
+import java.util.Map;
+
+import resources.z.exp.objects.Builder;
+import resources.z.exp.objects.tangible.TangibleMessageBuilder;
+
+public class BuildingMessageBuilder extends TangibleMessageBuilder {
 	
-	public static final int OnLeave = 0;
-	public static final int Combatant = 1;
-	public static final int SpecialForces = 2;
+	public BuildingMessageBuilder(BuildingObject object) {
+		super(object);
+	}
+	
+	public BuildingMessageBuilder() {
+		super();
+	}
+	
+	@Override
+	public void buildBaseline3(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline3(deltaBuilders, deltaBuilders);
+	}
+	
+	@Override
+	public void buildBaseline6(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline6(deltaBuilders, deltaBuilders);
+	}
 	
 }

@@ -19,12 +19,64 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package resources.datatables;
+package resources.z.exp.group;
 
-public class FactionStatus {
+import java.nio.ByteOrder;
+
+import org.apache.mina.core.buffer.IoBuffer;
+
+import com.sleepycat.persist.model.Persistent;
+
+import resources.objects.Delta;
+
+@Persistent
+public class MemberInfo extends Delta {
 	
-	public static final int OnLeave = 0;
-	public static final int Combatant = 1;
-	public static final int SpecialForces = 2;
+	private long info;
+	private int memberId;
+	
+	public MemberInfo(long info, int memberId) {
+		this.info = info;
+		this.memberId = memberId;
+	}
+	
+	public MemberInfo() {
+		
+	}
+	
+	public long getInfo() {
+		synchronized(objectMutex) {
+			return info;
+		}
+	}
+	
+	public MemberInfo setInfo(long info) {
+		synchronized(objectMutex) {
+			this.info = info;
+			return this;
+		}
+	}
+	
+	public int getMemberId() {
+		synchronized(objectMutex) {
+			return memberId;
+		}
+	}
+	
+	public MemberInfo setMemberId(int memberId) {
+		synchronized(objectMutex) {
+			this.memberId = memberId;
+			return this;
+		}
+	}
+	
+	public byte[] getBytes() {
+		synchronized(objectMutex) {
+			IoBuffer buffer = bufferPool.allocate(12, false).order(ByteOrder.LITTLE_ENDIAN);
+			buffer.putLong(info);
+			buffer.putInt(memberId);
+			return buffer.array();
+		}
+	}
 	
 }
