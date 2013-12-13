@@ -747,7 +747,7 @@ public class CombatService implements INetworkDispatch {
 		float r;
 		Random random = new Random();
 					
-		float blockChance = (float) target.getSkillModBase("display_only_block") / 10000;
+		float blockChance = (float) (target.getSkillModBase("display_only_block") - attacker.getSkillModBase("display_only_opp_block_reduction"))/ 10000;
 			
 		r = random.nextFloat();
 		if(r <= blockChance)
