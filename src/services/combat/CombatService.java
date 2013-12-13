@@ -683,7 +683,7 @@ public class CombatService implements INetworkDispatch {
 			WeaponObject weapon2 = (WeaponObject) core.objectService.getObject(((CreatureObject) target).getWeaponId());
 			if(weapon2 != null && weapon2.isMelee()) {
 				
-				float parryChance = (float) target.getSkillModBase("display_only_parry") / 10000;
+				float parryChance = (float) (target.getSkillModBase("display_only_parry") - attacker.getSkillModBase("display_only_parry_reduction"))/ 10000;
 	
 				r = random.nextFloat();
 				if(r <= parryChance)
