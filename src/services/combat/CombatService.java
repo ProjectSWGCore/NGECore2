@@ -699,9 +699,41 @@ public class CombatService implements INetworkDispatch {
 
 		}
 
-		float critChance = (float) (attacker.getSkillModBase("display_only_critical") - target.getSkillModBase("display_only_expertise_critical_hit_reduction")) / 10000;
+		float critChance = 0;
+		
+		switch(weapon.getWeaponType()) {
+
+			case 0: critChance += attacker.getSkillModBase("expertise_critical_rifle"); // rifle
+			case 1: critChance += attacker.getSkillModBase("expertise_critical_carbine"); // carbine
+			case 2: critChance += attacker.getSkillModBase("expertise_critical_pistol"); // pistol
+			case 4: critChance += attacker.getSkillModBase("expertise_critical_1h"); // one-handed
+			case 5: critChance += attacker.getSkillModBase("expertise_critical_2h"); // two-handed
+			case 6: critChance += attacker.getSkillModBase("expertise_critical_unarmed"); // unarmed
+			case 7: critChance += attacker.getSkillModBase("expertise_critical_polearm"); // polearm
+			case 12: critChance += attacker.getSkillModBase("expertise_critical_heavy"); // Heavy
+		
+			default: critChance += 0;
+
+		}
+		
+		if(weapon.getWeaponType() == 4 && weapon.getWeaponType() == 5 && weapon.getWeaponType() == 6 && weapon.getWeaponType() == 7)
+			critChance += attacker.getSkillModBase("expertise_critical_melee");	
+		
+		critChance += (command.getCriticalChance());
+		
+		critChance += ((float) attacker.getSkillModBase("display_only_critical") / 100);
+		
+		critChance -= ((float) target.getSkillModBase("display_only_expertise_critical_hit_reduction") / 100);
+		
+		critChance += ((float) target.getSkillModBase("critical_hit_vulnerable") / 100);
+		
+		if(target.isPlayer())
+			critChance += attacker.getSkillModBase("expertise_critical_niche_pvp");
+			critChance -= ((float) target.getSkillModBase("display_only_expertise_critical_hit_pvp_reduction") / 100);
+		
 		r = random.nextFloat();
-		if(r <= critChance)
+
+		if(r <= ((float) critChance / 100))
 			return HitType.CRITICAL;
 		
 		// TODO: Punishing blow once AI is implemented
