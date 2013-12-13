@@ -673,7 +673,7 @@ public class CombatService implements INetworkDispatch {
 				if(r <= missChance)
 					return HitType.MISS;
 			}
-			float dodgeChance = (float) target.getSkillModBase("display_only_dodge") / 10000;
+			float dodgeChance = (float) (target.getSkillModBase("display_only_dodge") - attacker.getSkillModBase("display_only_opp_dodge_reduction")) / 10000;
 		
 			r = random.nextFloat();
 			if(r <= dodgeChance)
