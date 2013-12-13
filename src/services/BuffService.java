@@ -96,7 +96,7 @@ public class BuffService implements INetworkDispatch {
                         			buff.setStacks(buff.getMaxStacks());
                         		}
                         	
-                                if (otherBuff.getRemainingDuration() > buff.getDuration() && otherBuff.getStacks() >= otherBuff.getMaxStacks()) {
+                                if (otherBuff.getRemainingDuration() > creature.getBuffByName(buffName).getDuration() && otherBuff.getStacks() >= otherBuff.getMaxStacks()) {
                                         return null;
                                 }
                         }
@@ -229,6 +229,7 @@ public class BuffService implements INetworkDispatch {
 		for(SWGObject member : group.getMemberList()) {
 			Buff buff = doAddBuff((CreatureObject) member, buffName);
 			buff.setGroupBufferId(buffer.getObjectID());
+			// TODO: Buff duration should be increased on fellow group members as well
 		}
 
 	}
