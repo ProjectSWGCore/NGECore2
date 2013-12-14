@@ -33,19 +33,19 @@ import protocol.swg.UpdatePVPStatusMessage;
 import protocol.swg.objectControllerObjects.ShowFlyText;
 
 import resources.common.RGB;
-import resources.objects.object.BaseObject;
 import resources.objects.creature.CreatureObject;
 
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
 
 import engine.clients.Client;
+import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
 @Persistent(version=0)
-public class TangibleObject extends BaseObject {
+public class TangibleObject extends SWGObject {
 	
 	// TODO: Thread safety
 	

@@ -22,17 +22,17 @@
 package resources.objects.cell;
 
 import protocol.swg.UpdateCellPermissionMessage;
-import resources.objects.object.BaseObject;
 
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
 import engine.clients.Client;
+import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
 @Persistent(version=0)
-public class CellObject extends BaseObject {
+public class CellObject extends SWGObject {
 	
 	private int cellNumber = 0;
 	@NotPersistent

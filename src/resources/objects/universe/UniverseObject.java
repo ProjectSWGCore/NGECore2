@@ -23,13 +23,14 @@ package resources.objects.universe;
 
 import com.sleepycat.persist.model.Persistent;
 
+import engine.clients.Client;
+import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
-import resources.objects.object.BaseObject;
 
 @Persistent(version=0)
-public class UniverseObject extends BaseObject {
+public class UniverseObject extends SWGObject {
 	
 	public UniverseObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
 		super(objectID, planet, position, orientation, Template);
@@ -37,6 +38,12 @@ public class UniverseObject extends BaseObject {
 	
 	public UniverseObject() {
 		super();
+	}
+
+	@Override
+	public void sendBaselines(Client arg0) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }

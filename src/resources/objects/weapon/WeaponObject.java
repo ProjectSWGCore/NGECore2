@@ -21,21 +21,17 @@
  ******************************************************************************/
 package resources.objects.weapon;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import resources.objects.tangible.TangibleObject;
 
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
 
 import engine.clients.Client;
-import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent(version=1)
+@Persistent(version=0)
 public class WeaponObject extends TangibleObject {
 	
 	// TODO: Thread safety
