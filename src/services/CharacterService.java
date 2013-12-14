@@ -356,7 +356,7 @@ public class CharacterService implements INetworkDispatch {
 		
 		PreparedStatement ps2 = databaseConnection.preparedStatement("SELECT \"accountId\" FROM temp_reserved_char_names WHERE \"accountId\"!=? AND LOWER(\"firstName\")=?");
 		ps2.setLong(1, accountId);
-		ps2.setString(2, firstName);
+		ps2.setString(2, firstName.toLowerCase());
 		ResultSet resultSet2 = ps2.executeQuery();
 		boolean isReserved = resultSet2.next();
 		resultSet2.getStatement().close();
