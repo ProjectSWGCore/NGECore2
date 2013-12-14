@@ -1,6 +1,6 @@
 import sys
 
-#def CreateStartingCharacter(core, object):
+def CreateStartingCharacter(core, object):
 	
 #	testObject = core.objectService.createObject('object/weapon/ranged/rifle/shared_rifle_t21.iff', object.getPlanet())
 #	testObject.setCustomName('This is a Jython Rifle')
@@ -147,10 +147,10 @@ import sys
 #	if not inventory:
 #		return
 #	inventory.add(heroism5)
-#	return
+	return
 	
-#def addProfessionAbilities(core, object, profession):
-
+def addProfessionAbilities(core, object, profession):
+	
 #	if profession == 'force_sensitive_1a':
 #		testObject = core.objectService.createObject('object/weapon/melee/2h_sword/crafted_saber/shared_sword_lightsaber_two_handed_gcw_s01_gen5.iff', object.getPlanet())
 #		testObject.setCustomName('Lightsaber')
@@ -471,4 +471,4 @@ import sys
 	#return
 	
 		
-	#return
+	return
