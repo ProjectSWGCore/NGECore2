@@ -73,6 +73,9 @@ public class EquipmentService implements INetworkDispatch {
 			
 		}
 		
+		if(!actor.getEquipmentList().contains(item))
+			actor.addObjectToEquipList(item);
+		
 	}
 	
 	public void unequip(CreatureObject actor, SWGObject item) {
@@ -94,6 +97,9 @@ public class EquipmentService implements INetworkDispatch {
 			}
 			
 		}
+		
+		if(actor.getEquipmentList().contains(item))
+			actor.removeObjectFromEquipList(item);
 
 	}
 

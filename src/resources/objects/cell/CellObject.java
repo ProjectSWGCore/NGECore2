@@ -73,11 +73,10 @@ public class CellObject extends SWGObject {
 			System.out.println("NULL session");
 			return;
 		}
-		
+				
 		destination.getSession().write(messageBuilder.buildBaseline3());
 		destination.getSession().write(messageBuilder.buildBaseline6());
 		destination.getSession().write(new UpdateCellPermissionMessage((byte) 1, getObjectID()).serialize());
-		
 		
 	}
 

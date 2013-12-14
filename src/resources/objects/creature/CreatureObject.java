@@ -1038,17 +1038,36 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void addObjectToEquipList(SWGObject object) {
-		if(object instanceof TangibleObject || object instanceof WeaponObject) {
-			equipmentList.add(object);
+		if(object instanceof TangibleObject) {
+			equipmentList.get().add(object);
+			setEquipmentListUpdateCounter(getEquipmentListUpdateCounter() + 1);
+			notifyObservers(messageBuilder.buildAddEquipmentDelta((TangibleObject) object), true);
 		}
 	}
 	
 	public void removeObjectFromEquipList(SWGObject object) {
-		if(object instanceof TangibleObject || object instanceof WeaponObject) {
-			equipmentList.remove(object);
+		if(object instanceof TangibleObject) {
+			setEquipmentListUpdateCounter(getEquipmentListUpdateCounter() + 1);
+			notifyObservers(messageBuilder.buildRemoveEquipmentDelta((TangibleObject) object), true);
+			equipmentList.get().remove(object);
 		}
 	}
-
+	
+	public void addObjectToAppearanceEquipList(SWGObject object) {
+		if(object instanceof TangibleObject) {
+			appearanceEquipmentList.get().add(object);
+			setAppearanceEquipmentListUpdateCounter(getAppearanceEquipmentListUpdateCounter() + 1);
+			notifyObservers(messageBuilder.buildAddAppearanceEquipmentDelta((TangibleObject) object), true);
+		}
+	}
+	
+	public void removeObjectFromAppearanceEquipList(SWGObject object) {
+		if(object instanceof TangibleObject) {
+			setAppearanceEquipmentListUpdateCounter(getAppearanceEquipmentListUpdateCounter() + 1);
+			notifyObservers(messageBuilder.buildRemoveAppearanceEquipmentDelta((TangibleObject) object), true);
+			appearanceEquipmentList.get().remove(object);
+		}
+	}
 
 	@SuppressWarnings("unused")
 	@Override
@@ -1069,7 +1088,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		//destination.getSession().write(messageBuilder.buildBaseline9());
 		 
 		UpdatePostureMessage upm = new UpdatePostureMessage(getObjectID(), (byte) 0);
-	//	destination.getSession().write(upm.serialize());
+		destination.getSession().write(upm.serialize());
 		
 		if(destination != getClient()) {
 			UpdatePVPStatusMessage upvpm = new UpdatePVPStatusMessage(getObjectID(), getPvPBitmask(), getFaction());
@@ -1558,6 +1577,30 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	public void incFlourishCount() {
 		synchronized(objectMutex) {
 			this.flourishCount++;
+		}
+	}
+
+	public int getEquipmentListUpdateCounter() {
+		synchronized(objectMutex) {
+			return equipmentListUpdateCounter;
+		}
+	}
+
+	public void setEquipmentListUpdateCounter(int equipmentListUpdateCounter) {
+		synchronized(objectMutex) {
+			this.equipmentListUpdateCounter = equipmentListUpdateCounter;
+		}
+	}
+
+	public int getAppearanceEquipmentListUpdateCounter() {
+		synchronized(objectMutex) {
+			return appearanceEquipmentListUpdateCounter;
+		}
+	}
+
+	public void setAppearanceEquipmentListUpdateCounter(int appearanceEquipmentListUpdateCounter) {
+		synchronized(objectMutex) {
+			this.appearanceEquipmentListUpdateCounter = appearanceEquipmentListUpdateCounter;
 		}
 	}
 	

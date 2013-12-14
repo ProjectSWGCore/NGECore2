@@ -260,6 +260,7 @@ public class CharacterService implements INetworkDispatch {
 					if(clientCreateCharacter.getHairCustomization().length > 0)
 						hair.setCustomization(clientCreateCharacter.getHairCustomization());
 					object._add(hair);
+					object.addObjectToEquipList(hair);
 				}
 				
 				TangibleObject inventory = (TangibleObject) core.objectService.createObject("object/tangible/inventory/shared_character_inventory.iff", object.getPlanet());
@@ -288,16 +289,20 @@ public class CharacterService implements INetworkDispatch {
 				
 				TangibleObject backpack = (TangibleObject) core.objectService.createObject("object/tangible/wearables/backpack/shared_backpack_galactic_marine.iff", object.getPlanet());
 				inventory._add(backpack);
-				//object.addObjectToEquipList(datapad);
-				//object.addObjectToEquipList(inventory);
+				object.addObjectToEquipList(datapad);
+				object.addObjectToEquipList(inventory);
+				object.addObjectToEquipList(bank);
+				object.addObjectToEquipList(missionBag);
+				object.addObjectToEquipList(appInventory);
+				
 				WeaponObject weapon = (WeaponObject) core.objectService.createObject("object/weapon/ranged/rifle/shared_rifle_a280.iff", object.getPlanet());
 				WeaponObject defaultWeapon = (WeaponObject) core.objectService.createObject("object/weapon/creature/shared_creature_default_weapon.iff", object.getPlanet());
 
-				//object.addObjectToEquipList(defaultWeapon);
+				object.addObjectToEquipList(defaultWeapon);
 
 				object._add(defaultWeapon);
 
-				//object.addObjectToEquipList(weapon);
+				object.addObjectToEquipList(weapon);
 
 				object._add(weapon);
 				object.setWeaponId(weapon.getObjectID());

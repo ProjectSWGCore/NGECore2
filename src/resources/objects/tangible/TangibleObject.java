@@ -58,7 +58,7 @@ public class TangibleObject extends SWGObject {
 	private List<Integer> componentCustomizations = new ArrayList<Integer>();
 	protected int optionsBitmask = 0;
 	private int maxDamage = 1000;
-	private boolean staticObject = false;
+	private boolean staticObject = true;
 	protected String faction = "neutral"; // Says you're "Imperial Special Forces" if it's 0 for some reason
 	@NotPersistent
 	private Vector<TangibleObject> defendersList = new Vector<TangibleObject>();	// unused in packets but useful for the server
@@ -355,11 +355,13 @@ public class TangibleObject extends SWGObject {
 		destination.getSession().write(messageBuilder.buildBaseline6());
 		destination.getSession().write(messageBuilder.buildBaseline8());
 		destination.getSession().write(messageBuilder.buildBaseline9());
-
-		UpdatePVPStatusMessage upvpm = new UpdatePVPStatusMessage(getObjectID());
-		upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Neutral);
-		upvpm.setStatus(getPvPBitmask());
-		destination.getSession().write(upvpm.serialize());
+		
+		if(getPvPBitmask() != 0) {
+			UpdatePVPStatusMessage upvpm = new UpdatePVPStatusMessage(getObjectID());
+			upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Neutral);
+			upvpm.setStatus(getPvPBitmask());
+			destination.getSession().write(upvpm.serialize());
+		}
 		
 
 	}

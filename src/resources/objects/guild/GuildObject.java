@@ -72,7 +72,7 @@ public class GuildObject extends SWGObject implements IPersistent {
 	private SWGList<Guild> guildList = new SWGList<Guild>(messageBuilder, 3, 4);
 	
 	// GILD 6
-	private int serverId = 0x00000041;
+	private int serverId = 0x43;
 	//private String STFName = "string_id_table";
 	private int unknown1 = 0;
 	private short unknown2 = 0;

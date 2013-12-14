@@ -43,14 +43,16 @@ public class BuildingMessageBuilder extends ObjectMessageBuilder {
 		buffer.putInt(0);
 		buffer.put(getAsciiString(building.getStfName()));
 		buffer.putInt(0);
-		buffer.putInt(255);
+		buffer.putInt(0xFF);
+		//buffer.putInt(0x64);
 		buffer.putInt(0);
 		buffer.putInt(0);
 		buffer.putShort((short) 0);
 		
 		buffer.putInt(0);
 		buffer.putInt(0);
-		buffer.putInt(16777216);
+	//	buffer.putInt(16777216);
+		buffer.putInt(0x100);
 		buffer.putInt(0);
 		buffer.putInt(0);
 		buffer.putInt(0x201C);
@@ -99,7 +101,29 @@ public class BuildingMessageBuilder extends ObjectMessageBuilder {
 
 	}
 
+	public IoBuffer buildBaseline8() {
+		IoBuffer buffer = bufferPool.allocate(2, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putShort((short) 0);
+		int size = buffer.position();
+		buffer = IoBuffer.allocate(size).put(buffer.array(), 0, size);
+		buffer.flip();
+		buffer = createBaseline("TANO", (byte) 8, buffer, size);
+		
+		return buffer;
+	}
+	
+	public IoBuffer buildBaseline9() {
+		IoBuffer buffer = bufferPool.allocate(2, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putShort((short) 0);
+		int size = buffer.position();
+		buffer = IoBuffer.allocate(size).put(buffer.array(), 0, size);
+		buffer.flip();
+		buffer = createBaseline("TANO", (byte) 9, buffer, size);
+		
+		return buffer;
+	}
 
+	
 	@Override
 	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
 		// TODO Auto-generated method stub

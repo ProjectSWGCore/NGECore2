@@ -64,7 +64,7 @@ public class StaticMessageBuilder extends ObjectMessageBuilder {
 		IoBuffer buffer = bufferPool.allocate(100, false).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.setAutoExpand(true);
 		buffer.putShort((short) 2);
-		buffer.putInt(0x92);
+		buffer.putInt(0x43);
 		//buffer.putShort((short) 0);
 		buffer.put(getAsciiString(object.getDetailFilename()));
 		buffer.putInt(0);
