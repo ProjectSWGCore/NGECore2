@@ -547,6 +547,9 @@ public class SimulationService implements INetworkDispatch {
 			return;
 
 		CreatureObject object = (CreatureObject) client.getParent();
+		object.setInviteCounter(0);
+		object.setInviteSenderId(0);
+		object.setInviteSenderName("");
 		object.setClient(null);
 		PlayerObject ghost = (PlayerObject) object.getSlottedObject("ghost");
 		
