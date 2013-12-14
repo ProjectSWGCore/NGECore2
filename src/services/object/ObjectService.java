@@ -264,7 +264,7 @@ public class ObjectService implements INetworkDispatch {
 	
 	public void loadServerTemplate(SWGObject object) {
 		
-		String template = ((object.getAttachment("serverTemplate") == null) ? object.getTemplate() : ((String) object.getAttachment("serverTemplate")));
+		String template = ((object.getAttachment("serverTemplate") == null) ? object.getTemplate() : (object.getTemplate().split("shared_")[0] + "shared_" + ((String) object.getAttachment("serverTemplate")) + ".iff"));
 		String serverTemplate = template.replace(".iff", "");
 		// check if template is empty(4 default lines) to reduce RAM usage(saves about 500 MB of RAM)
 		try {
