@@ -68,6 +68,7 @@ import engine.resources.common.CRC;
 import engine.resources.objects.DraftSchematic;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
+import engine.resources.scene.Quaternion;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
@@ -475,12 +476,15 @@ public class PlayerService implements INetworkDispatch {
 														}
 														
 														try {
+															String customServerTemplate = null;
+															
 															if (!item.contains("/")) {
+																customServerTemplate = item;
 																item = core.scriptService.callScript("scripts/roadmap/", "roadmap_rewards", "get", item).asString();
 															}
 															
 															if (item != null && item != "") {
-																creature.getSlottedObject("inventory").add(core.objectService.createObject(item, creature.getPlanet()));
+																creature.getSlottedObject("inventory").add(core.objectService.createObject(item, 0, creature.getPlanet(), new Point3D(0, 0, 0), new Quaternion(1, 0, 0, 0), customServerTemplate));
 															} else {
 																//System.out.println("Can't find template: " + item);
 															}
