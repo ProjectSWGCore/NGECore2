@@ -36,6 +36,7 @@ import resources.guild.Guild;
 import resources.objects.SWGList;
 import resources.objects.SWGMap;
 import resources.objects.SWGMultiMap;
+import resources.objects.universe.UniverseObject;
 import services.collections.ServerFirst;
 
 import com.sleepycat.je.Environment;
@@ -50,8 +51,8 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Entity
-public class GuildObject extends SWGObject implements IPersistent {
+@Entity(version=0)
+public class GuildObject extends UniverseObject implements IPersistent {
 	
 	protected NGECore core;
 	@NotPersistent

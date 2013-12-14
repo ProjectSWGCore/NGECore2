@@ -23,21 +23,19 @@ package resources.objects.mission;
 
 import com.sleepycat.je.Environment;
 import com.sleepycat.je.Transaction;
-import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
 
-import resources.objects.tangible.TangibleObject;
+import resources.objects.intangible.IntangibleObject;
 import resources.objects.waypoint.WaypointObject;
 import engine.clients.Client;
 import engine.resources.objects.IPersistent;
-import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent(version=1)
-public class MissionObject extends SWGObject implements IPersistent {
+@Persistent(version=0)
+public class MissionObject extends IntangibleObject implements IPersistent {
 
 	private float missionDestinationX;
 	private float missionDestinationY;

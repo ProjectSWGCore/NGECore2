@@ -21,17 +21,18 @@
  ******************************************************************************/
 package resources.objects.staticobject;
 
+import resources.objects.object.BaseObject;
+
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
 
 import engine.clients.Client;
-import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent
-public class StaticObject extends SWGObject {
+@Persistent(version=0)
+public class StaticObject extends BaseObject {
 	
 	@NotPersistent
 	private StaticMessageBuilder messageBuilder;

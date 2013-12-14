@@ -23,6 +23,8 @@ package resources.objects.building;
 
 import java.util.concurrent.atomic.AtomicReference;
 import resources.objects.cell.CellObject;
+import resources.objects.tangible.TangibleObject;
+
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.NotPersistent;
 import engine.clients.Client;
@@ -32,8 +34,8 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Entity
-public class BuildingObject extends SWGObject {
+@Entity(version=0)
+public class BuildingObject extends TangibleObject {
 	
 	@NotPersistent
 	private BuildingMessageBuilder messageBuilder;
@@ -44,7 +46,7 @@ public class BuildingObject extends SWGObject {
 	}
 
 	public BuildingObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
-		super(objectID, planet, position, orientation, Template);
+		super(objectID, planet, Template, position, orientation);
 		messageBuilder = new BuildingMessageBuilder(this);
 	}
 	

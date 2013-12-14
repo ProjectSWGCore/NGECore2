@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Stack;
 import java.util.concurrent.ScheduledFuture;
 
 import org.apache.mina.core.buffer.IoBuffer;
@@ -57,7 +56,7 @@ import engine.resources.scene.Quaternion;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 
-@Entity(version=9)
+@Entity(version=0)
 public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	@NotPersistent
