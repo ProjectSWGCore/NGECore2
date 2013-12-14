@@ -94,6 +94,7 @@ public class ConnectionService implements INetworkDispatch {
 		            if (resultSet.next()) {
 		            	client.setAccountId(resultSet.getLong("accountId"));
 		            	client.setSessionKey(clientIdMsg.getSessionKey());
+		            	client.setGM(core.loginService.checkForGmPermission((int) resultSet.getLong("accountId")));
 		            	AccountFeatureBits accountFeatureBits = new AccountFeatureBits();
 		            	ClientPermissionsMessage clientPermissionsMessage = new ClientPermissionsMessage();
 		            	session.write(new HeartBeatMessage().serialize());

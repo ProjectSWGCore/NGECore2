@@ -156,10 +156,10 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 		
 		if(player.getXpList().isEmpty()) {
 			buffer.putInt(0); 
-			buffer.putInt(0); 
+			buffer.putInt(player.getXpListUpdateCounter()); 
 		} else {
 			buffer.putInt(player.getXpList().size()); 
-			buffer.putInt(0); 
+			buffer.putInt(player.getXpListUpdateCounter()); 
 			
 			// no need for locking here, concurrent hash map iterator wont throw concurrency exceptions and multiple thread access at zone in is unlikely to occur for the PlayerObject
 			for(Entry<String, Integer> entry : player.getXpList().entrySet()) {

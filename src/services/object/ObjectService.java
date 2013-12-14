@@ -501,7 +501,9 @@ public class ObjectService implements INetworkDispatch {
 				} else {
 					
 					creature = (CreatureObject) getObject(objectId);
-
+					if(creature.getClient() != null)
+						return;
+					
 				}
 
 				creature.setClient(client);
@@ -770,7 +772,7 @@ public class ObjectService implements INetworkDispatch {
 						object.setAttachment("bigSpawnRange", new Boolean(true));
 					core.simulationService.add(object, object.getPosition().x, object.getPosition().z);
 				} else if(containerId != 0) {
-					object = createObject(template, 0, planet, new Point3D(px, py, pz), new Quaternion(qw, qx, qy, qz));	
+					object = createObject(template, objectId, planet, new Point3D(px, py, pz), new Quaternion(qw, qx, qy, qz));	
 					if(containers.contains(containerId)) {
 						object.setisInSnapshot(false);
 						containers.add(objectId);

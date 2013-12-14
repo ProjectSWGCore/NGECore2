@@ -126,14 +126,14 @@ public class SimulationService implements INetworkDispatch {
 		core.commandService.registerCommand("sitserver");
 		core.commandService.registerCommand("kneel");
 		core.commandService.registerCommand("serverdestroyobject");
-		core.commandService.registerCommand("giveitem");
-		core.commandService.registerCommand("object");
+		core.commandService.registerGmCommand("giveitem");
+		core.commandService.registerGmCommand("object");
 		core.commandService.registerCommand("getattributesbatch");
 		core.commandService.registerCommand("pvp");
 		core.commandService.registerCommand("setcurrentskilltitle");
 		core.commandService.registerCommand("tip");
 		core.commandService.registerCommand("faction");
-		core.commandService.registerCommand("setspeed");
+		core.commandService.registerGmCommand("setspeed");
 		core.commandService.registerCommand("waypoint");
 		core.commandService.registerCommand("setwaypointactivestatus");
 		core.commandService.registerCommand("setwaypointname");
@@ -145,7 +145,7 @@ public class SimulationService implements INetworkDispatch {
 		core.commandService.registerCommand("boardshuttle");
 		core.commandService.registerCommand("getplayerid");
 		core.commandService.registerCommand("inspire");
-		core.commandService.registerCommand("setgodmode");
+		core.commandService.registerGmCommand("setgodmode");
 		core.commandService.registerCommand("requestwaypointatposition");
 		core.commandService.registerCommand("meditate");
 
@@ -547,6 +547,7 @@ public class SimulationService implements INetworkDispatch {
 			return;
 
 		CreatureObject object = (CreatureObject) client.getParent();
+		object.setClient(null);
 		PlayerObject ghost = (PlayerObject) object.getSlottedObject("ghost");
 		
 		if(object.getGroupId() != 0)
@@ -590,11 +591,11 @@ public class SimulationService implements INetworkDispatch {
 		//	object.getContainer().remove(object);
 		//}
 		
-		core.objectService.destroyObject(object);
 
 		object.createTransaction(core.getCreatureODB().getEnvironment());
 		core.getCreatureODB().put(object, Long.class, CreatureObject.class, object.getTransaction());
 		object.getTransaction().commitSync();
+		core.objectService.destroyObject(object);
 		
 		core.getActiveConnectionsMap().remove((Integer) session.getAttribute("connectionId"));
 		

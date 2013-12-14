@@ -30,6 +30,7 @@ public class BaseSWGCommand implements Cloneable {
 	private String clientEffectTarget;
 	private int maxRangeToTarget;
 	private int commandCRC;
+	private boolean isGmCommand = false;
 	
 	public BaseSWGCommand(String commandName) {
 		setCommandName(commandName);
@@ -79,5 +80,13 @@ public class BaseSWGCommand implements Cloneable {
     public Object clone() throws CloneNotSupportedException {
         return super.clone();
     }
+
+	public boolean isGmCommand() {
+		return isGmCommand;
+	}
+
+	public void setGmCommand(boolean isGmCommand) {
+		this.isGmCommand = isGmCommand;
+	}
 
 }
