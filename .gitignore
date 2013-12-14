@@ -47,7 +47,7 @@ clientdata/
 # SWG Client Folders
 footprint/
 interiorlayout/
-quest/
+clientdata/quest/
 
 # External tool builders
 .externalToolBuilders/
