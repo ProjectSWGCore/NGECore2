@@ -100,6 +100,7 @@ public class LoginService implements INetworkDispatch{
 				String user        = clientID.getAccountName();
 				String pass        = clientID.getPassword();
 				int id             = LoginProvider.getAccountId(user, pass, session.getRemoteAddress().toString());
+				System.out.println("LOGIN: " + user + " login attempt "+session.getRemoteAddress().toString()+" returned " + id);
 				
 				if (id < 0)  {
 					
