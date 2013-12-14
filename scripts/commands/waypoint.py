@@ -28,7 +28,7 @@ def run(core, actor, target, commandString):
         waypoint.setPlanetCRC(crc.StringtoCRC(planet.getName()))
         actorPlayer.getWaypoints().add(waypoint)
         actorPlayer.waypointAdd(waypoint)
-        actor.sendSystemMessage('A waypoint has been created in your datapad at your location.', 0)
+        actor.sendSystemMessage('A waypoint has been created in your datapad at the location.', 0)
         return
     
 
@@ -42,7 +42,7 @@ def run(core, actor, target, commandString):
         waypoint.setPlanetCRC(crc.StringtoCRC(actor.getPlanet().getName()))
         actorPlayer.getWaypoints().add(waypoint)
         actorPlayer.waypointAdd(waypoint)
-        actor.sendSystemMessage('A waypoint has been created in your datapad at your location.', 0)
+        actor.sendSystemMessage('A waypoint has been created in your datapad at the location.', 0)
         return
     #/wp X Z Name
     elif len(commandArgs) >= 3 and isFloat(commandArgs[0]) and isFloat(commandArgs[1]):
@@ -54,7 +54,7 @@ def run(core, actor, target, commandString):
         waypoint.setPlanetCRC(crc.StringtoCRC(actor.getPlanet().getName()))
         actorPlayer.getWaypoints().add(waypoint)
         actorPlayer.waypointAdd(waypoint)
-        actor.sendSystemMessage('A waypoint has been created in your datapad at your location.', 0)
+        actor.sendSystemMessage('A waypoint has been created in your datapad at the location.', 0)
         return
     #/wp X Z
     elif len(commandArgs) >= 2 and isFloat(commandArgs[0]) and isFloat(commandArgs[1]):
@@ -65,7 +65,7 @@ def run(core, actor, target, commandString):
         waypoint.setPlanetCRC(crc.StringtoCRC(actor.getPlanet().getName()))
         actorPlayer.getWaypoints().add(waypoint)
         actorPlayer.waypointAdd(waypoint)
-        actor.sendSystemMessage('A waypoint has been created in your datapad at your location.', 0)
+        actor.sendSystemMessage('A waypoint has been created in your datapad at the location.', 0)
         return
     
     #/wp planet x z y name
@@ -81,7 +81,7 @@ def run(core, actor, target, commandString):
         waypoint.setPlanetCRC(crc.StringtoCRC(actor.getPlanet().getName()))
         actorPlayer.getWaypoints().add(waypoint)
         actorPlayer.waypointAdd(waypoint)
-        actor.sendSystemMessage('A waypoint has been created in your datapad at your location.', 0)
+        actor.sendSystemMessage('A waypoint has been created in your datapad at the location.', 0)
         return
     
     #/wp NAME

@@ -23,8 +23,8 @@ package resources.datatables;
 
 public class FactionStatus {
 	
-	public static int OnLeave = 0;
-	public static int Combatant = 1;
-	public static int SpecialForces = 2;
+	public static final int OnLeave = 0;
+	public static final int Combatant = 1;
+	public static final int SpecialForces = 2;
 	
 }

@@ -225,7 +225,7 @@ public class ObjectService implements INetworkDispatch {
 		
 		object.setPlanetId(planet.getID());
 		
-		object.setAttachment("serverTemplate", ((customServerTemplate != null) ? customServerTemplate : object.getTemplate()));
+		object.setAttachment("customServerTemplate", customServerTemplate);
 		
 		object.setisInSnapshot(isSnapshot);
 		loadServerTemplate(object);		
@@ -268,7 +268,7 @@ public class ObjectService implements INetworkDispatch {
 	
 	public void loadServerTemplate(SWGObject object) {
 		
-		String template = ((object.getAttachment("serverTemplate") == null) ? object.getTemplate() : ((String) object.getAttachment("serverTemplate")));
+		String template = ((object.getAttachment("customServerTemplate") == null) ? object.getTemplate() : (object.getTemplate().split("shared_")[0] + "shared_" + ((String) object.getAttachment("customServerTemplate")) + ".iff"));
 		String serverTemplate = template.replace(".iff", "");
 		// check if template is empty(4 default lines) to reduce RAM usage(saves about 500 MB of RAM)
 		try {
