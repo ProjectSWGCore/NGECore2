@@ -87,7 +87,7 @@ public class WeaponMessageBuilder extends ObjectMessageBuilder {
 		IoBuffer buffer = bufferPool.allocate(100, false).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.setAutoExpand(true);
 		buffer.putShort((short) 9);
-		buffer.putInt(0x4E);
+		buffer.putInt(0x43);
 		buffer.put(getAsciiString(weapon.getDetailFilename()));
 		buffer.putInt(0);
 		buffer.put(getAsciiString(weapon.getDetailName()));

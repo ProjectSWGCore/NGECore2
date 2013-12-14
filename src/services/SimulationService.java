@@ -46,6 +46,7 @@ import engine.clients.Client;
 import engine.resources.common.Event;
 import engine.resources.common.Mesh3DTriangle;
 import engine.resources.common.Ray;
+import engine.resources.container.Traverser;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -125,14 +126,14 @@ public class SimulationService implements INetworkDispatch {
 		core.commandService.registerCommand("sitserver");
 		core.commandService.registerCommand("kneel");
 		core.commandService.registerCommand("serverdestroyobject");
-		core.commandService.registerCommand("giveitem");
-		core.commandService.registerCommand("object");
+		core.commandService.registerGmCommand("giveitem");
+		core.commandService.registerGmCommand("object");
 		core.commandService.registerCommand("getattributesbatch");
 		core.commandService.registerCommand("pvp");
 		core.commandService.registerCommand("setcurrentskilltitle");
 		core.commandService.registerCommand("tip");
 		core.commandService.registerCommand("faction");
-		core.commandService.registerCommand("setspeed");
+		core.commandService.registerGmCommand("setspeed");
 		core.commandService.registerCommand("waypoint");
 		core.commandService.registerCommand("setwaypointactivestatus");
 		core.commandService.registerCommand("setwaypointname");
@@ -144,7 +145,7 @@ public class SimulationService implements INetworkDispatch {
 		core.commandService.registerCommand("boardshuttle");
 		core.commandService.registerCommand("getplayerid");
 		core.commandService.registerCommand("inspire");
-		core.commandService.registerCommand("setgodmode");
+		core.commandService.registerGmCommand("setgodmode");
 		core.commandService.registerCommand("requestwaypointatposition");
 		core.commandService.registerCommand("meditate");
 
@@ -188,8 +189,10 @@ public class SimulationService implements INetworkDispatch {
 				Collection<SWGObject> newAwareObjects = get(object.getPlanet(), x, y, 512);
 				for(Iterator<SWGObject> it = newAwareObjects.iterator(); it.hasNext();) {
 					SWGObject obj = it.next();
-					if(obj.getAttachment("bigSpawnRange") == null && obj.getWorldPosition().getDistance(pos) > 200)
+					if((obj.getAttachment("bigSpawnRange") == null && obj.getWorldPosition().getDistance2D(pos) > 200) || obj == object)
 						continue;
+					//if(!obj.isInSnapshot())
+					//	System.out.println(obj.getTemplate());
 					if(object.getClient() != null)
 						object.makeAware(obj);
 					if(obj.getClient() != null)
@@ -246,7 +249,8 @@ public class SimulationService implements INetworkDispatch {
 		
 	public boolean remove(SWGObject object, float x, float y, boolean notifyObservers) {
 		boolean success = quadTrees.get(object.getPlanet().getName()).remove(x, y, object);
-		if(success) {
+		object.setIsInQuadtree(success);
+		if(success && notifyObservers) {
 			HashSet<Client> oldObservers = new HashSet<Client>(object.getObservers());
 			for(Iterator<Client> it = oldObservers.iterator(); it.hasNext();) {
 				Client observerClient = it.next();
@@ -543,6 +547,10 @@ public class SimulationService implements INetworkDispatch {
 			return;
 
 		CreatureObject object = (CreatureObject) client.getParent();
+		object.setInviteCounter(0);
+		object.setInviteSenderId(0);
+		object.setInviteSenderName("");
+		object.setClient(null);
 		PlayerObject ghost = (PlayerObject) object.getSlottedObject("ghost");
 		
 		if(object.getGroupId() != 0)
@@ -590,8 +598,8 @@ public class SimulationService implements INetworkDispatch {
 		object.createTransaction(core.getCreatureODB().getEnvironment());
 		core.getCreatureODB().put(object, Long.class, CreatureObject.class, object.getTransaction());
 		object.getTransaction().commitSync();
-		
 		core.objectService.destroyObject(object);
+		
 		core.getActiveConnectionsMap().remove((Integer) session.getAttribute("connectionId"));
 		
 	}
@@ -612,8 +620,9 @@ public class SimulationService implements INetworkDispatch {
 			Collection<SWGObject> newAwareObjects = get(object.getPlanet(), pos.x, pos.z, 512);
 			for(Iterator<SWGObject> it = newAwareObjects.iterator(); it.hasNext();) {
 				SWGObject obj = it.next();
-				if(obj.getAttachment("bigSpawnRange") == null & obj.getWorldPosition().getDistance(pos) > 200)
+				if(obj.getAttachment("bigSpawnRange") == null && obj.getWorldPosition().getDistance(pos) > 200)
 					continue;
+				System.out.println(obj.getTemplate());
 				object.makeAware(obj);
 				if(obj.getClient() != null)
 					obj.makeAware(object);
@@ -689,7 +698,6 @@ public class SimulationService implements INetworkDispatch {
 
 	}
 
-	
 	public void openContainer(SWGObject requester, SWGObject container) {
 		
 		if(container.getPermissions().canView(requester, container)) {

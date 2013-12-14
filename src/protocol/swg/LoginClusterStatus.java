@@ -26,6 +26,8 @@ import java.util.TimeZone;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
+import engine.clients.Client;
+
 public class LoginClusterStatus extends SWGMessage {
 
 	private byte[] servers;
@@ -46,7 +48,7 @@ public class LoginClusterStatus extends SWGMessage {
 		result.flip();
 		return result;
 	}
-	public void addServer(int galaxyID, String serverIP, int serverPort, int pingPort, int maxCharacters, int status, int recommended, int population) {
+	public void addServer(int galaxyID, String serverIP, int serverPort, int pingPort, int maxCharacters, int status, int recommended, int population, Client client) {
 		IoBuffer result = IoBuffer.allocate(39 + serverIP.length()).order(ByteOrder.LITTLE_ENDIAN);
 		
 		int populationStatus = 0;
@@ -64,6 +66,8 @@ public class LoginClusterStatus extends SWGMessage {
 			populationStatus = 6;
 			status = 3;
 		}
+		if(status == 3 && client.isGM())
+			status = 2;
 		result.putInt(populationStatus); 	// 0 = very light, 1 = light, 2 = medium , 3 = heavy, 4 = very heavy, 5 = extremely heavy, 6 = full
 		result.putInt(maxCharacters);
 		//result.putInt(0xFFFF8F80); 	// Distance?

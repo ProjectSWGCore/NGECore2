@@ -25,6 +25,8 @@ import java.nio.ByteOrder;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
+import engine.resources.common.Utilities;
+
 public class ChangeRoleIconChoice extends ObjControllerObject {
 	
 	private long objectId = 0;
@@ -37,10 +39,11 @@ public class ChangeRoleIconChoice extends ObjControllerObject {
 	
 	@Override
 	public void deserialize(IoBuffer buffer) {
-		buffer.flip().order(ByteOrder.LITTLE_ENDIAN);
+		//System.out.println(Utilities.getHexString(buffer.array()));
 		objectId = buffer.getLong();
 		buffer.skip(4);
-		icon = buffer.getInt();
+		if(buffer.hasRemaining())
+			icon = buffer.getInt();
 	}
 	
 	public long getObjectId() {

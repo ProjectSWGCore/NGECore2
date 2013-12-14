@@ -260,6 +260,7 @@ public class CharacterService implements INetworkDispatch {
 					if(clientCreateCharacter.getHairCustomization().length > 0)
 						hair.setCustomization(clientCreateCharacter.getHairCustomization());
 					object._add(hair);
+					object.addObjectToEquipList(hair);
 				}
 				
 				TangibleObject inventory = (TangibleObject) core.objectService.createObject("object/tangible/inventory/shared_character_inventory.iff", object.getPlanet());
@@ -288,16 +289,20 @@ public class CharacterService implements INetworkDispatch {
 				
 				TangibleObject backpack = (TangibleObject) core.objectService.createObject("object/tangible/wearables/backpack/shared_backpack_galactic_marine.iff", object.getPlanet());
 				inventory._add(backpack);
-				//object.addObjectToEquipList(datapad);
-				//object.addObjectToEquipList(inventory);
+				object.addObjectToEquipList(datapad);
+				object.addObjectToEquipList(inventory);
+				object.addObjectToEquipList(bank);
+				object.addObjectToEquipList(missionBag);
+				object.addObjectToEquipList(appInventory);
+				
 				WeaponObject weapon = (WeaponObject) core.objectService.createObject("object/weapon/ranged/rifle/shared_rifle_a280.iff", object.getPlanet());
 				WeaponObject defaultWeapon = (WeaponObject) core.objectService.createObject("object/weapon/creature/shared_creature_default_weapon.iff", object.getPlanet());
 
-				//object.addObjectToEquipList(defaultWeapon);
+				object.addObjectToEquipList(defaultWeapon);
 
 				object._add(defaultWeapon);
 
-				//object.addObjectToEquipList(weapon);
+				object.addObjectToEquipList(weapon);
 
 				object._add(weapon);
 				object.setWeaponId(weapon.getObjectID());
@@ -323,7 +328,7 @@ public class CharacterService implements INetworkDispatch {
 				CreateCharacterSuccess success = new CreateCharacterSuccess(object.getObjectID());
 				session.write(new HeartBeatMessage().serialize());
 				session.write(core.loginService.getLoginCluster().serialize());
-				session.write(core.loginService.getLoginClusterStatus().serialize());
+				session.write(core.loginService.getLoginClusterStatus(client).serialize());
 				
 				session.write(success.serialize());	
 				session.write((new ClientMfdStatusUpdateMessage((float) 2, "/GroundHUD.MFDStatus.vsp.role.targetLevel")).serialize());
@@ -356,7 +361,7 @@ public class CharacterService implements INetworkDispatch {
 		
 		PreparedStatement ps2 = databaseConnection.preparedStatement("SELECT \"accountId\" FROM temp_reserved_char_names WHERE \"accountId\"!=? AND LOWER(\"firstName\")=?");
 		ps2.setLong(1, accountId);
-		ps2.setString(2, firstName);
+		ps2.setString(2, firstName.toLowerCase());
 		ResultSet resultSet2 = ps2.executeQuery();
 		boolean isReserved = resultSet2.next();
 		resultSet2.getStatement().close();

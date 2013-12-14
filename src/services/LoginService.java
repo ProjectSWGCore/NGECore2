@@ -100,6 +100,7 @@ public class LoginService implements INetworkDispatch{
 				String user        = clientID.getAccountName();
 				String pass        = clientID.getPassword();
 				int id             = LoginProvider.getAccountId(user, pass, session.getRemoteAddress().toString());
+				System.out.println("LOGIN: " + user + " login attempt "+session.getRemoteAddress().toString()+" returned " + id);
 				
 				if (id < 0)  {
 					
@@ -132,6 +133,7 @@ public class LoginService implements INetworkDispatch{
 				client.setAccountId(id);
 				//client.setAccountEmail(email);
 				client.setSession(session);
+				client.setGM(checkForGmPermission(id));
 				
 				core.addClient((Integer)session.getAttribute("connectionId"), client);
 				
@@ -142,7 +144,7 @@ public class LoginService implements INetworkDispatch{
 				persistSession(client);
 
 				LoginEnumCluster servers = getLoginCluster();
-				LoginClusterStatus serverStatus = getLoginClusterStatus();
+				LoginClusterStatus serverStatus = getLoginClusterStatus(client);
 				EnumerateCharacterId characters = getEnumerateCharacterId(id);
 
 				LoginClientToken clientToken = new LoginClientToken(client.getSessionKey(), id, user);
@@ -202,6 +204,18 @@ public class LoginService implements INetworkDispatch{
 	
 	public void shutdown() {
 		
+	}
+	
+	public boolean checkForGmPermission(int id) {
+		PreparedStatement preparedStatement;
+		try {
+			preparedStatement = databaseConnection1.preparedStatement("SELECT * FROM characters WHERE \"accountId\"=" + id + "");
+			ResultSet resultSet = preparedStatement.executeQuery();
+			return resultSet.getBoolean("gmflag");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return false;
 	}
 	
 	/**
@@ -286,7 +300,7 @@ public class LoginService implements INetworkDispatch{
 	 * Generates LoginClusterStatus packet.
 	 * @return LoginClusterStatus packet.
 	 */
-	public LoginClusterStatus getLoginClusterStatus() {
+	public LoginClusterStatus getLoginClusterStatus(Client client) {
 		LoginClusterStatus clusterStatus = new LoginClusterStatus();
 		ResultSet resultSet;
 		try {
@@ -301,7 +315,8 @@ public class LoginService implements INetworkDispatch{
 						100,
 						resultSet.getInt("statusId"),
 						1,
-						core.getActiveZoneClients());
+						core.getActiveZoneClients(),
+						client);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
