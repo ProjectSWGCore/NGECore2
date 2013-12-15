@@ -209,9 +209,10 @@ public class LoginService implements INetworkDispatch{
 	public boolean checkForGmPermission(int id) {
 		PreparedStatement preparedStatement;
 		try {
-			preparedStatement = databaseConnection1.preparedStatement("SELECT * FROM characters WHERE \"accountId\"=" + id + "");
+			preparedStatement = databaseConnection1.preparedStatement("SELECT * FROM accounts WHERE id=" + id + "");
 			ResultSet resultSet = preparedStatement.executeQuery();
-			return resultSet.getBoolean("gmflag");
+			if(resultSet.next())
+				return resultSet.getBoolean("gmflag");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

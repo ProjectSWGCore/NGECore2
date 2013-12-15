@@ -168,6 +168,8 @@ public class NGECore {
 	
 	private BusConfiguration eventBusConfig = BusConfiguration.Default(1, new ThreadPoolExecutor(1, 4, 1, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>()));
 
+	private ObjectDatabase buildingODB;
+
 	
 	public NGECore() {
 		
@@ -209,6 +211,7 @@ public class NGECore {
 		
 		setGalaxyStatus(1);
 		creatureODB = new ObjectDatabase("creature", true, false, true);
+		buildingODB = new ObjectDatabase("building", true, false, true);
 		mailODB = new ObjectDatabase("mails", true, false, true);
 		guildODB = new ObjectDatabase("guild", true, false, true);
 		// Services
@@ -305,6 +308,7 @@ public class NGECore {
 		travelService.loadTravelPoints();
 		simulationService = new SimulationService(this);
 		
+		objectService.loadBuildings();
 		terrainService.loadSnapShotObjects();
 		simulationService.insertSnapShotObjects();
 		
@@ -436,6 +440,10 @@ public class NGECore {
 	
 	public ObjectDatabase getGuildODB() {
 		return guildODB;
+	}
+	
+	public ObjectDatabase getBuildingODB() {
+		return buildingODB;
 	}
 	
 	public int getActiveClients() {

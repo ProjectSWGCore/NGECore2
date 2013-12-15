@@ -21,22 +21,29 @@
  ******************************************************************************/
 package resources.objects.building;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import resources.objects.cell.CellObject;
+
+import com.sleepycat.je.Environment;
+import com.sleepycat.je.Transaction;
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.NotPersistent;
 import engine.clients.Client;
 import engine.resources.container.Traverser;
+import engine.resources.objects.IPersistent;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
 @Entity
-public class BuildingObject extends SWGObject {
+public class BuildingObject extends SWGObject implements IPersistent {
 	
 	@NotPersistent
 	private BuildingMessageBuilder messageBuilder;
+	@NotPersistent
+	private Transaction txn;
 
 	public BuildingObject() {
 		super();
@@ -52,17 +59,21 @@ public class BuildingObject extends SWGObject {
 		
 		final AtomicReference<CellObject> ref = new AtomicReference<CellObject>();
 		
-		this.viewChildren(this, true, false, new Traverser() {
-
-			@Override
-			public void process(SWGObject obj) {
+		synchronized(objectMutex) {
+		
+			this.viewChildren(this, true, false, new Traverser() {
+	
+				@Override
+				public void process(SWGObject obj) {
+					
+					if(obj instanceof CellObject && ((CellObject) obj).getCellNumber() == cellNumber) 
+						ref.set((CellObject) obj);
+					
+				}
 				
-				if(obj instanceof CellObject && ((CellObject) obj).getCellNumber() == cellNumber) 
-					ref.set((CellObject) obj);
-				
-			}
-			
-		});
+			});
+		
+		}
 		
 		return ref.get();
 		
@@ -81,6 +92,13 @@ public class BuildingObject extends SWGObject {
 		destination.getSession().write(messageBuilder.buildBaseline8());
 		destination.getSession().write(messageBuilder.buildBaseline9());
 
+	}
+
+	public Transaction getTransaction() { return txn; }
+	
+	public void createTransaction(Environment env) { 
+		txn = env.beginTransaction(null, null); 
+		txn.setLockTimeout(500, TimeUnit.MILLISECONDS);
 	}
 
 }
