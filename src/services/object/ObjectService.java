@@ -106,6 +106,8 @@ public class ObjectService implements INetworkDispatch {
 	
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	
+	protected final Object objectMutex = new Object();
+	
 	public ObjectService(final NGECore core) {
 		this.core = core;
 		databaseConnection = core.getDatabase1();
@@ -458,7 +460,12 @@ public class ObjectService implements INetworkDispatch {
 
 		return objectID;*/
 		
-		long newId = highestId.incrementAndGet();
+		long newId;
+		
+		synchronized(objectMutex) {
+			newId = highestId.incrementAndGet();
+		}
+		
 		PreparedStatement ps2;
 
 		try {
