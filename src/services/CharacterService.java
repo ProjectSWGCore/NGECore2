@@ -145,6 +145,10 @@ public class CharacterService implements INetworkDispatch {
 
 				int length = firstName.length();
 				try {
+					if (client == null) {
+						System.out.println("NULL client in ClientVerifyAndLockNameRequest, something is still bust");
+						return;
+					}
 					if (checkForDuplicateName(firstName, client.getAccountId())) {
 						
 						approved_flag = "name_declined_in_use";
@@ -208,7 +212,7 @@ public class CharacterService implements INetworkDispatch {
 				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
 				
 				try {
-					if (checkForDuplicateName(getfirstName(clientCreateCharacter.getName(), clientCreateCharacter.getRaceTemplate()), client.getAccountId())) {
+					if (client == null || checkForDuplicateName(getfirstName(clientCreateCharacter.getName(), clientCreateCharacter.getRaceTemplate()), client.getAccountId())) {
 						return;
 					}
 				} catch (SQLException e2) {
