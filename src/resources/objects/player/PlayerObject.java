@@ -56,7 +56,7 @@ public class PlayerObject extends IntangibleObject {
 	private int totalPlayTime = 0;
 	private byte[] collections = new byte[] { };
 	private int highestSetBit = 0;
-	private int flagBitmask;
+	private int flagBitmask = 0;
 	
 	// PLAY 6
 	
