@@ -296,6 +296,10 @@ public class ObjectService implements INetworkDispatch {
 		return createObject(Template, 0, planet, new Point3D(0, 0, 0), new Quaternion(1, 0, 0, 0));
 	}
 	
+	public SWGObject createObject(String Template, Planet planet, String customServerTemplate) {
+		return createObject(Template, 0, planet, new Point3D(0, 0, 0), new Quaternion(1, 0, 0, 0), customServerTemplate);
+	}
+	
 	public SWGObject createObject(String Template, Planet planet, float x, float z, float y) {
 		return createObject(Template, 0, planet, new Point3D(x, y, z), new Quaternion(1, 0, 0, 0));
 	}
