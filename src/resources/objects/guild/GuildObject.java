@@ -270,11 +270,14 @@ public class GuildObject extends UniverseObject implements IPersistent {
 		}
 	}
 	
-	public void addServerFirst(String collectionName, ServerFirst player) {
+	public boolean addServerFirst(String collectionName, ServerFirst player) {
 		synchronized(objectMutex) {
 			if (!serverFirst.containsKey(collectionName)) {
 				serverFirst.put(collectionName, player);
+				return true;
 			}
+			
+			return false;
 		}
 	}
 	
