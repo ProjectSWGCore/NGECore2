@@ -447,5 +447,19 @@ public class CharacterService implements INetworkDispatch {
 		// TODO Auto-generated method stub
 		
 	}
+	
+	public int getNumberOfCharacters(int accountId) {
+		PreparedStatement preparedStatement;
+		int characters = 0;
+		try {
+			preparedStatement = databaseConnection.preparedStatement("SELECT * FROM characters WHERE \"accountId\"=" + accountId + "");
+			ResultSet resultSet = preparedStatement.executeQuery();
+			while(resultSet.next() && !resultSet.isClosed())
+				characters++;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return characters;
+	}
 
 }
