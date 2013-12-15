@@ -149,6 +149,12 @@ public class SimulationService implements INetworkDispatch {
 		core.commandService.registerCommand("requestwaypointatposition");
 		core.commandService.registerCommand("meditate");
 		core.commandService.registerGmCommand("server");
+		core.commandService.registerCommand("toggleawayfromkeyboard");
+		core.commandService.registerCommand("lfg");
+		core.commandService.registerCommand("newbiehelper");
+		core.commandService.registerCommand("roleplay");
+		core.commandService.registerAlias("afk", "toggleawayfromkeyboard");
+		core.commandService.registerCommand("toggledisplayingfactionrank");
 
 	}
 	
@@ -536,9 +542,17 @@ public class SimulationService implements INetworkDispatch {
 		
 	}
 
-
+	/*
+	 * Moved this to ConnectionService which will disconnect them
+	 * from the server if they don't send packets for 5 minutes or more
+	 * like on live.
+	 * 
+	 * We had significant issues with client nulls due to us taking
+	 * client disconnect requests too seriously.  It has a weird tendency
+	 * to bluff and send a disconnect packet when it's not disconnecting
+	 * and continues sending packets.
+	 */
 	public void handleDisconnect(IoSession session) {
-
 		Client client = core.getClient((Integer) session.getAttribute("connectionId"));
 
 		if(client == null)
@@ -554,55 +568,13 @@ public class SimulationService implements INetworkDispatch {
 		object.setClient(null);
 		PlayerObject ghost = (PlayerObject) object.getSlottedObject("ghost");
 		
-		if(object.getGroupId() != 0)
-			core.groupService.handleGroupDisband(object);
-		
-		Point3D objectPos = object.getWorldPosition();
-		
-		List<AbstractCollidable> collidables = getCollidables(object.getPlanet(), objectPos.x, objectPos.z, 512);
-
-		for(AbstractCollidable collidable : collidables) {
-			collidables.remove(object);
-		}
-		
-		
-		if (ghost != null) {
-			String objectShortName = object.getCustomName();
-			
-			if (object.getCustomName().contains(" ")) {
-				String[] splitName = object.getCustomName().toLowerCase().split(" ");
-				objectShortName = splitName[0];
-			}
-			
-			core.chatService.playerStatusChange(objectShortName, (byte) 0);
-		}
-		
 		session.suspendWrite();
 		
-		boolean remove = remove(object, object.getPosition().x, object.getPosition().z);
-		if(remove)
-			System.out.println("Successful quadtree remove");
+		ghost.toggleFlag(PlayerFlags.LD);
 		
-		//if(object.getContainer() == null) {
-			HashSet<Client> oldObservers = new HashSet<Client>(object.getObservers());
-			for(Iterator<Client> it = oldObservers.iterator(); it.hasNext();) {
-				Client observerClient = it.next();
-				if(observerClient.getParent() != null && !(observerClient.getSession() == session)) {
-					observerClient.getParent().makeUnaware(object);
-				}
-			}
-		//} else {
-		//	object.getContainer().remove(object);
-		//}
-		
-
 		object.createTransaction(core.getCreatureODB().getEnvironment());
 		core.getCreatureODB().put(object, Long.class, CreatureObject.class, object.getTransaction());
 		object.getTransaction().commitSync();
-		core.objectService.destroyObject(object);
-		
-		core.getActiveConnectionsMap().remove((Integer) session.getAttribute("connectionId"));
-		
 	}
 
 	public void handleZoneIn(Client client) {

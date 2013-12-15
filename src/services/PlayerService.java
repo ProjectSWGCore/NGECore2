@@ -41,6 +41,7 @@ import protocol.swg.ClientIdMsg;
 import protocol.swg.ClientMfdStatusUpdateMessage;
 import protocol.swg.ExpertiseRequestMessage;
 import protocol.swg.ServerTimeMessage;
+import protocol.swg.SetWaypointColor;
 import protocol.swg.objectControllerObjects.ChangeRoleIconChoice;
 import protocol.swg.objectControllerObjects.ShowFlyText;
 import resources.common.Console;
@@ -55,6 +56,7 @@ import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerMessageBuilder;
 import resources.objects.player.PlayerObject;
+import resources.objects.waypoint.WaypointObject;
 import services.sui.SUIService.ListBoxType;
 import services.sui.SUIWindow;
 import services.sui.SUIWindow.Trigger;
@@ -173,6 +175,64 @@ public class PlayerService implements INetworkDispatch {
 				player = (PlayerObject) o.getSlottedObject("ghost");
 				
 				player.setProfessionIcon(packet.getIcon());
+			}
+			
+		});
+		
+		swgOpcodes.put(Opcodes.SetWaypointColor, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
+				data.order(ByteOrder.LITTLE_ENDIAN);
+				
+				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				
+				if (client == null)
+					return;
+				
+				SWGObject player = client.getParent();
+				
+				if (player == null)
+					return;
+				
+				PlayerObject ghost = (PlayerObject) player.getSlottedObject("ghost");
+				
+				if (ghost == null)
+					return;
+				
+				SetWaypointColor packet = new SetWaypointColor();
+				packet.deserialize(data);
+				
+				WaypointObject packetWay = (WaypointObject) core.objectService.getObject(packet.getObjectId());
+				WaypointObject obj = (WaypointObject) ghost.getWaypointFromList(packetWay);
+				
+				if (obj == null || packetWay != obj)
+					return;
+				
+				String color = packet.getColor();
+				switch(color) {
+					case "purple":
+						obj.setColor(WaypointObject.PURPLE);
+						break;
+					case "green":
+						obj.setColor(WaypointObject.GREEN);
+						break;
+					case "blue":
+						obj.setColor(WaypointObject.BLUE);
+						break;
+					case "yellow":
+						obj.setColor(WaypointObject.YELLOW);
+						break;
+					case "white":
+						obj.setColor(WaypointObject.WHITE);
+						break;
+					case "orange":
+						obj.setColor(WaypointObject.ORANGE);
+						break;
+				}
+				
+				ghost.waypointUpdate(obj);
+				
 			}
 			
 		});

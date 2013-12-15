@@ -1,6 +1,6 @@
 from resources.common import RadialOptions
 import sys
-from java.util import Random
+import java.util.Random
 
 def createRadial(core, owner, target, radials):
 	radials.clear()
