@@ -1,6 +1,6 @@
 from resources.objects.creature import CreatureObject
-from resources.common import PvpStatus
-from resources.common import FactionStatus
+from resources.datatables import PvpStatus
+from resources.datatables import FactionStatus
 import sys
 import time
 

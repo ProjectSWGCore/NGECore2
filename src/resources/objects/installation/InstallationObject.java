@@ -21,6 +21,11 @@
  ******************************************************************************/
 package resources.objects.installation;
 
-public class InstallationObject {
+import com.sleepycat.persist.model.Persistent;
+
+import resources.objects.tangible.TangibleObject;
+
+@Persistent(version=0)
+public class InstallationObject extends TangibleObject {
 
 }

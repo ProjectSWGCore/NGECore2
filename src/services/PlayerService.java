@@ -41,9 +41,11 @@ import protocol.swg.ClientIdMsg;
 import protocol.swg.ClientMfdStatusUpdateMessage;
 import protocol.swg.ExpertiseRequestMessage;
 import protocol.swg.ServerTimeMessage;
+import protocol.swg.objectControllerObjects.ChangeRoleIconChoice;
 import protocol.swg.objectControllerObjects.ShowFlyText;
 import resources.common.Console;
 import resources.common.FileUtilities;
+import resources.common.ObjControllerOpcodes;
 import resources.common.Opcodes;
 import resources.common.RGB;
 import resources.common.SpawnPoint;
@@ -66,6 +68,7 @@ import engine.resources.common.CRC;
 import engine.resources.objects.DraftSchematic;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
+import engine.resources.scene.Quaternion;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
@@ -149,6 +152,31 @@ public class PlayerService implements INetworkDispatch {
 	@Override
 	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> swgOpcodes, Map<Integer, INetworkRemoteEvent> objControllerOpcodes) {
 		
+		objControllerOpcodes.put(ObjControllerOpcodes.ChangeRoleIconChoice, new INetworkRemoteEvent() {
+			
+			@Override
+			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
+				Client c = core.getClient((Integer) session.getAttribute("connectionId"));
+				ChangeRoleIconChoice packet = new ChangeRoleIconChoice();
+				PlayerObject player;
+				SWGObject o;
+				
+				packet.deserialize(data);
+				o = core.objectService.getObject(packet.getObjectId());
+				
+				if (c.getParent() == null || o == null || c.getParent() != o
+				|| !(o instanceof CreatureObject) || !(o.getSlottedObject("ghost")
+				instanceof PlayerObject)) {
+					return;
+				}
+				
+				player = (PlayerObject) o.getSlottedObject("ghost");
+				
+				player.setProfessionIcon(packet.getIcon());
+			}
+			
+		});
+		
 		swgOpcodes.put(Opcodes.CmdSceneReady, new INetworkRemoteEvent() {
 
 			@Override
@@ -189,7 +217,6 @@ public class PlayerService implements INetworkDispatch {
 			}
 			
 		});*/
-
 		
 	}
 	
@@ -449,12 +476,15 @@ public class PlayerService implements INetworkDispatch {
 														}
 														
 														try {
+															String customServerTemplate = null;
+															
 															if (!item.contains("/")) {
+																customServerTemplate = item;
 																item = core.scriptService.callScript("scripts/roadmap/", "roadmap_rewards", "get", item).asString();
 															}
 															
 															if (item != null && item != "") {
-																creature.getSlottedObject("inventory").add(core.objectService.createObject(item, creature.getPlanet()));
+																creature.getSlottedObject("inventory").add(core.objectService.createObject(item, 0, creature.getPlanet(), new Point3D(0, 0, 0), new Quaternion(1, 0, 0, 0), customServerTemplate));
 															} else {
 																//System.out.println("Can't find template: " + item);
 															}
@@ -498,7 +528,6 @@ public class PlayerService implements INetworkDispatch {
 			player.getTitleList().remove(title);
 
 	}
-	
 	
 	@Override
 	public void shutdown() {

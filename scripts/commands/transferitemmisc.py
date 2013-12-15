@@ -36,7 +36,14 @@ def run(core, actor, target, commandString):
 				#path = 'scripts/' + target.getTemplate().rpartition('/')[0] + '/'        
                                 #module = target.getTemplate().rpartition('/')[2].replace('shared_', '').replace('.iff', '')
                                 #core.scriptService.callScript(path, 'equip', module, core, actor, target)
-               
+               	if container == actor.getSlottedObject('appearance_inventory'):
+			actor.addObjectToAppearanceEquipList(target)
+			for object in replacedObjects:
+				actor.removeObjectFromAppearanceEquipList(object)
+		
+		if oldContainer == actor.getSlottedObject('appearance_inventory'):
+			actor.removeObjectFromAppearanceEquipList(target)
+
                 if actor == oldContainer:
                         if target.getTemplate().find('/wearables/') or target.getTemplate().find('/weapon/'):
                                 #path = 'scripts/' + target.getTemplate().rpartition('/')[0] + '/'        

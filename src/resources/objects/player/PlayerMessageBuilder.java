@@ -34,16 +34,6 @@ import resources.objects.waypoint.WaypointObject;
 
 public class PlayerMessageBuilder extends ObjectMessageBuilder {
 	
-	public static final String SPY = "spy_1a";
-	public static final String SMUGGLER = "smuggler_1a";
-	public static final String OFFICER = "officer_1a";
-	public static final String JEDI = "force_sensitive_1a";
-	public static final String COMMANDO = "commando_1a";
-	public static final String ENTERTAINER = "entertainer_1a";
-	public static final String MEDIC = "medic_1a";
-	public static final String BOUNTYHUNTER = "bounty_hunter_1a";
-
-	
 	public PlayerMessageBuilder(PlayerObject playerObject) {
 		setObject(playerObject);
 	}
@@ -84,7 +74,7 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 		
 		buffer.putInt(player.getTotalPlayTime()); // total play time?
 		
-		buffer.putInt(getProfData(player.getProfession())); // prof icon
+		buffer.putInt(player.getProfessionIcon());
 		
 		buffer.put(getAsciiString(player.getProfession()));	
 		buffer.putInt(0); // GCW
@@ -118,7 +108,7 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 		IoBuffer buffer = bufferPool.allocate(100, false).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.setAutoExpand(true);
 		buffer.putShort((short) 0x11);
-		buffer.putInt((short) 0x8A);
+		buffer.putInt((short) 0x43);
 		
 		buffer.put(getAsciiString("string_id_table"));
 		
@@ -166,10 +156,10 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 		
 		if(player.getXpList().isEmpty()) {
 			buffer.putInt(0); 
-			buffer.putInt(0); 
+			buffer.putInt(player.getXpListUpdateCounter()); 
 		} else {
 			buffer.putInt(player.getXpList().size()); 
-			buffer.putInt(0); 
+			buffer.putInt(player.getXpListUpdateCounter()); 
 			
 			// no need for locking here, concurrent hash map iterator wont throw concurrency exceptions and multiple thread access at zone in is unlikely to occur for the PlayerObject
 			for(Entry<String, Integer> entry : player.getXpList().entrySet()) {
@@ -348,6 +338,15 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 		buffer = createDelta("PLAY", (byte) 3, (short) 1, (short) 0x07, buffer, size + 4);
 		return buffer;
 		
+	}
+	
+	public IoBuffer buildProfessionIconDelta(int professionIcon) {
+		IoBuffer buffer = bufferPool.allocate(4, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putInt(professionIcon);
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("PLAY", (byte) 3, (short) 1, (short) 0x0A, buffer, size + 4);
+		return buffer;
 	}
 	
 	public IoBuffer buildCollectionsDelta(byte[] collections, int highestSetBit) {
@@ -599,32 +598,21 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 		return buffer;
 	}
 	
-	public int getProfData(String profession) {
+	public IoBuffer buildFlagBitmask(int bitmask) {
+		IoBuffer buffer = bufferPool.allocate(30, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putInt(4);
+		buffer.putInt(bitmask);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
 		
-		switch (profession) {
+		int size = buffer.position();
+		buffer.flip();
 		
-			case SPY:
-				return 0x23;
-			case SMUGGLER:
-				return 0x19;
-			case OFFICER:
-				return 0x0F;
-			case JEDI:
-				return 0x28;
-			case COMMANDO:
-				return 0x1E;
-			case ENTERTAINER:
-				return 0x05;
-			case MEDIC:
-				return 0x0A;
-			case BOUNTYHUNTER:
-				return 0x14;
-			default:
-				return 0x00;
-				
-		}
+		buffer = createDelta("PLAY", (byte) 3, (short) 1, (short) 5, buffer, size + 4);
+		return buffer;
 	}
-
+	
 	@Override
 	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
 		// TODO Auto-generated method stub

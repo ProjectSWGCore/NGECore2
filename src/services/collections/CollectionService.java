@@ -359,7 +359,9 @@ public class CollectionService implements INetworkDispatch {
 								}
 								
 								if (trackServerFirst) {
-									core.guildService.getGuildObject().addServerFirst(collectionName, new ServerFirst(creature.getCustomName(), System.currentTimeMillis()));
+									if (core.guildService.getGuildObject().addServerFirst(collectionName, new ServerFirst(creature.getCustomName(), System.currentTimeMillis()))) {
+										addCollection(creature, "bdg_server_first_01");
+									}
 								}
 								
 								if (clearOnComplete) {

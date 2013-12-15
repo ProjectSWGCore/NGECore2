@@ -31,7 +31,7 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent
+@Persistent(version=0)
 public class CellObject extends SWGObject {
 	
 	private int cellNumber = 0;
@@ -73,11 +73,10 @@ public class CellObject extends SWGObject {
 			System.out.println("NULL session");
 			return;
 		}
-		
+				
 		destination.getSession().write(messageBuilder.buildBaseline3());
 		destination.getSession().write(messageBuilder.buildBaseline6());
 		destination.getSession().write(new UpdateCellPermissionMessage((byte) 1, getObjectID()).serialize());
-		
 		
 	}
 

@@ -106,6 +106,8 @@ public class ObjectService implements INetworkDispatch {
 	
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	
+	protected final Object objectMutex = new Object();
+	
 	public ObjectService(final NGECore core) {
 		this.core = core;
 		databaseConnection = core.getDatabase1();
@@ -139,7 +141,37 @@ public class ObjectService implements INetworkDispatch {
 		}
 	}
 	
+	public void loadBuildings() {
+		EntityCursor<BuildingObject> cursor = core.getBuildingODB().getCursor(Long.class, BuildingObject.class);
+		
+		Iterator<BuildingObject> it = cursor.iterator();
+		
+		while(it.hasNext()) {
+			final BuildingObject building = it.next();
+			objectList.put(building.getObjectID(), building);
+			Planet planet = core.terrainService.getPlanetByID(building.getPlanetId());
+			building.setPlanet(planet);
+			building.viewChildren(building, true, true, new Traverser() {
+
+				@Override
+				public void process(SWGObject object) {
+					objectList.put(object.getObjectID(), object);
+					if(object.getParentId() != 0 && object.getContainer() == null)
+						object.setParent(building);
+					object.getContainerInfo(object.getTemplate());
+				}
+				
+			});	
+			core.simulationService.add(building, building.getPosition().x, building.getPosition().z);
+		}
+
+	}
+
 	public SWGObject createObject(String Template, long objectID, Planet planet, Point3D position, Quaternion orientation, String customServerTemplate) {
+		return createObject(Template, objectID, planet, position, orientation, customServerTemplate, false);
+	}
+	
+	public SWGObject createObject(String Template, long objectID, Planet planet, Point3D position, Quaternion orientation, String customServerTemplate, boolean overrideSnapshot) {
 		SWGObject object = null;
 		CrcStringTableVisitor crcTable;
 		try {
@@ -155,7 +187,7 @@ public class ObjectService implements INetworkDispatch {
 		if(objectID == 0)
 			objectID = generateObjectID();
 		else
-			isSnapshot = true;
+			isSnapshot = !overrideSnapshot;
 		
 		if(Template.startsWith("object/creature")) {
 			
@@ -173,10 +205,10 @@ public class ObjectService implements INetworkDispatch {
 			
 			object = new WeaponObject(objectID, planet, Template, position, orientation);
 
-		} else if(Template.startsWith("object/building") || Template.startsWith("object/static/worldbuilding/structures")){
+		} else if(Template.startsWith("object/building") || Template.startsWith("object/static/worldbuilding/structures") || Template.startsWith("object/static/structure")){
 			
 			object = new BuildingObject(objectID, planet, position, orientation, Template);
-			if(!isSnapshot && object.getPortalVisitor() != null) {
+			if(!isSnapshot && !overrideSnapshot && object.getPortalVisitor() != null) {
 				int cellCount = object.getPortalVisitor().cells.size() - 1; // -1 for index 0 cell which is outside the building and used for ai pathfinding
 				for (int i = 0; i < cellCount; i++) {
 					CellObject cell = (CellObject) createObject("object/cell/shared_cell.iff", planet);
@@ -221,7 +253,7 @@ public class ObjectService implements INetworkDispatch {
 		
 		object.setPlanetId(planet.getID());
 		
-		object.setAttachment("serverTemplate", ((customServerTemplate != null) ? customServerTemplate : object.getTemplate()));
+		object.setAttachment("customServerTemplate", customServerTemplate);
 		
 		object.setisInSnapshot(isSnapshot);
 		loadServerTemplate(object);		
@@ -264,7 +296,7 @@ public class ObjectService implements INetworkDispatch {
 	
 	public void loadServerTemplate(SWGObject object) {
 		
-		String template = ((object.getAttachment("serverTemplate") == null) ? object.getTemplate() : ((String) object.getAttachment("serverTemplate")));
+		String template = ((object.getAttachment("customServerTemplate") == null) ? object.getTemplate() : (object.getTemplate().split("shared_")[0] + "shared_" + ((String) object.getAttachment("customServerTemplate")) + ".iff"));
 		String serverTemplate = template.replace(".iff", "");
 		// check if template is empty(4 default lines) to reduce RAM usage(saves about 500 MB of RAM)
 		try {
@@ -290,6 +322,10 @@ public class ObjectService implements INetworkDispatch {
 	
 	public SWGObject createObject(String Template, Planet planet) {
 		return createObject(Template, 0, planet, new Point3D(0, 0, 0), new Quaternion(1, 0, 0, 0));
+	}
+	
+	public SWGObject createObject(String Template, Planet planet, String customServerTemplate) {
+		return createObject(Template, 0, planet, new Point3D(0, 0, 0), new Quaternion(1, 0, 0, 0), customServerTemplate);
 	}
 	
 	public SWGObject createObject(String Template, Planet planet, float x, float z, float y) {
@@ -424,7 +460,12 @@ public class ObjectService implements INetworkDispatch {
 
 		return objectID;*/
 		
-		long newId = highestId.incrementAndGet();
+		long newId;
+		
+		synchronized(objectMutex) {
+			newId = highestId.incrementAndGet();
+		}
+		
 		PreparedStatement ps2;
 
 		try {
@@ -497,7 +538,9 @@ public class ObjectService implements INetworkDispatch {
 				} else {
 					
 					creature = (CreatureObject) getObject(objectId);
-
+					if(creature.getClient() != null)
+						return;
+					
 				}
 
 				creature.setClient(client);
@@ -531,35 +574,32 @@ public class ObjectService implements INetworkDispatch {
 
 				if(creature.getParentId() != 0) {
 					SWGObject parent = getObject(creature.getParentId());
+					System.out.println("Building: " + parent.getContainer().getTemplate());
 					parent._add(creature);
 				}
 
 				Point3D position = creature.getPosition();
-		
-				
-				UnkByteFlag unkByteFlag = new UnkByteFlag();
-				session.write(unkByteFlag.serialize());
-				
-				ParametersMessage parameters = new ParametersMessage();
-				session.write(parameters.serialize());
-				
-				core.buffService.clearBuffs(creature);
-				
-				core.chatService.loadMailHeaders(client);
 				
 				HeartBeatMessage heartBeat = new HeartBeatMessage();
 				session.write(heartBeat.serialize());
+		
+				UnkByteFlag unkByteFlag = new UnkByteFlag();
+				session.write(unkByteFlag.serialize());
+				
+				core.buffService.clearBuffs(creature);
 
 				CmdStartScene startScene = new CmdStartScene((byte) 0, objectId, creature.getPlanet().getPath(), creature.getTemplate(), position.x, position.y, position.z, System.currentTimeMillis() / 1000, 0);
 				session.write(startScene.serialize());
 				
-				creature.makeAware(core.guildService.getGuildObject());
+				ParametersMessage parameters = new ParametersMessage();
+				session.write(parameters.serialize());
+				
+				creature.makeAware(core.guildService.getGuildObject());				
+				core.chatService.loadMailHeaders(client);
+				
+				core.simulationService.handleZoneIn(client);
 				creature.makeAware(creature);
 
-				core.simulationService.handleZoneIn(client);
-				
-				CmdSceneReady sceneReady = new CmdSceneReady();
-				client.getSession().write(sceneReady.serialize());
 				
 				PlayerObject ghost = (PlayerObject) creature.getSlottedObject("ghost");
 				
@@ -630,7 +670,7 @@ public class ObjectService implements INetworkDispatch {
 				if(obj.getParentId() != 0 && getObject(obj.getParentId()) != null) {
 					SWGObject parent = getObject(obj.getParentId());
 					parent.add(obj);
-				}
+				} 
 			}
 		}
 		
@@ -731,7 +771,7 @@ public class ObjectService implements INetworkDispatch {
 					qz = (Float) buildoutTable.getObject(i, 8);
 					radius = (Float) buildoutTable.getObject(i, 9);
 					portalCRC = (Integer) buildoutTable.getObject(i, 10);
-									
+
 				} else {
 					
 					objectId = (Integer) buildoutTable.getObject(i, 0);
@@ -750,26 +790,47 @@ public class ObjectService implements INetworkDispatch {
 					portalCRC = (Integer) buildoutTable.getObject(i, 13);
 
 				}
-				
+								
+				if(!template.equals("object/cell/shared_cell.iff") && objectId != 0 && getObject(objectId) != null) {
+					//System.out.println("Duplicate buildout object: " + template);
+					continue;
+				}
+												
+				List<Long> containers = new ArrayList<Long>();
 				SWGObject object;
-				
 				if(objectId != 0 && containerId == 0) {					
-					if(portalCRC != 0)
-						objectId = 0;
-					object = createObject(template, objectId, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz));
+					if(portalCRC != 0) {
+						containers.add(objectId);
+						object = createObject(template, objectId, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, true);
+						((BuildingObject) object).createTransaction(core.getBuildingODB().getEnvironment());
+					} else {
+						object = createObject(template, objectId, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz));
+					}
 					if(object == null)
 						continue;
 					if(radius > 256)
 						object.setAttachment("bigSpawnRange", new Boolean(true));
 					core.simulationService.add(object, object.getPosition().x, object.getPosition().z);
-				} else if(objectId != 0 && containerId != 0 && cellIndex != 0) {
-					object = createObject(template, objectId, planet, new Point3D(px, py, pz), new Quaternion(qw, qx, qy, qz));		
-					if(object instanceof CellObject)
+				} else if(containerId != 0) {
+					object = createObject(template, 0, planet, new Point3D(px, py, pz), new Quaternion(qw, qx, qy, qz));	
+					if(containers.contains(containerId)) {
+						object.setisInSnapshot(false);
+						containers.add(objectId);
+					}
+					if(object instanceof CellObject && cellIndex != 0)
 						((CellObject) object).setCellNumber(cellIndex);
 					SWGObject parent = getObject(containerId);
 					
-					if(parent != null && object != null)
+					if(parent != null && object != null) {
+						if(parent instanceof BuildingObject && ((BuildingObject) parent).getCellByCellNumber(cellIndex) != null)
+							continue;
 						parent.add(object);
+						/*if(parent instanceof BuildingObject) {
+							((BuildingObject) parent).createTransaction(core.getBuildingODB().getEnvironment());
+							core.getBuildingODB().put((BuildingObject) parent, Long.class, BuildingObject.class, ((BuildingObject) parent).getTransaction());
+							((BuildingObject) parent).getTransaction().commitSync();
+						}*/
+					}
 				} else {
 					object = createObject(template, 0, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz));
 					core.simulationService.add(object, object.getPosition().x, object.getPosition().z);					

@@ -211,10 +211,12 @@ public class GroupService implements INetworkDispatch {
 		if(creature.getGroupId() == 0)
 			return;
 		
-		GroupObject group = (GroupObject) core.objectService.getObject(creature.getGroupId());
+		SWGObject object = core.objectService.getObject(creature.getGroupId());
 
-		if(group == null)
+		if(object == null || !(object instanceof GroupObject))
 			return;
+		
+		GroupObject group = (GroupObject) object;
 		
 		List<SWGObject> memberList = new ArrayList<SWGObject>(group.getMemberList());
 		

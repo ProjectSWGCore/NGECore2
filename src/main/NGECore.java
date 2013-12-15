@@ -35,6 +35,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.mina.core.service.IoHandler;
+
+import protocol.swg.ChatSystemMessage;
 import net.engio.mbassy.bus.config.BusConfiguration;
 import resources.common.RadialOptions;
 import resources.common.ThreadMonitor;
@@ -108,6 +110,7 @@ public class NGECore {
 	
 	private Config config = null;
 
+	private volatile boolean isShuttingDown = false;
 	
 	private ConcurrentHashMap<Integer, Client> clients = new ConcurrentHashMap<Integer, Client>();
 	
@@ -164,8 +167,11 @@ public class NGECore {
 
 	private ObjectDatabase creatureODB;
 	private ObjectDatabase mailODB;
+	private ObjectDatabase guildODB;
 	
 	private BusConfiguration eventBusConfig = BusConfiguration.Default(1, new ThreadPoolExecutor(1, 4, 1, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>()));
+
+	private ObjectDatabase buildingODB;
 
 	
 	public NGECore() {
@@ -208,7 +214,9 @@ public class NGECore {
 		
 		setGalaxyStatus(1);
 		creatureODB = new ObjectDatabase("creature", true, false, true);
+		buildingODB = new ObjectDatabase("building", true, false, true);
 		mailODB = new ObjectDatabase("mails", true, false, true);
+		guildODB = new ObjectDatabase("guild", true, false, true);
 		// Services
 		loginService = new LoginService(this);
 		connectionService = new ConnectionService(this);
@@ -303,6 +311,7 @@ public class NGECore {
 		travelService.loadTravelPoints();
 		simulationService = new SimulationService(this);
 		
+		objectService.loadBuildings();
 		terrainService.loadSnapShotObjects();
 		simulationService.insertSnapShotObjects();
 		
@@ -412,6 +421,10 @@ public class NGECore {
 		return config;
 	}
 	
+	public String getGalaxyName() {
+		return config.getString("GALAXY_NAME");
+	}
+	
 	public DatabaseConnection getDatabase1() {
 		return databaseConnection;
 	}
@@ -426,6 +439,14 @@ public class NGECore {
 	
 	public ObjectDatabase getMailODB() {
 		return mailODB;
+	}
+	
+	public ObjectDatabase getGuildODB() {
+		return guildODB;
+	}
+	
+	public ObjectDatabase getBuildingODB() {
+		return buildingODB;
 	}
 	
 	public int getActiveClients() {
@@ -483,6 +504,40 @@ public class NGECore {
 	
 	public BusConfiguration getEventBusConfig() {
 		return eventBusConfig;
+	}
+	
+	public void initiateShutdown() {
+		if(isShuttingDown)
+			return;
+		try {
+	
+			for(int minutes = 15; minutes > 1; minutes--) {
+					simulationService.notifyAllClients(new ChatSystemMessage("The server will be shutting down soon. Please find a safe place to logout. (" + minutes + " minutes left)", (byte) 0 ).serialize());
+					Thread.sleep(60000);
+			}
+			setGalaxyStatus(3);
+			simulationService.notifyAllClients(new ChatSystemMessage("The server will be shutting down soon. Please find a safe place to logout. (" + 1 + " minutes left)", (byte) 0 ).serialize());
+			Thread.sleep(30000);
+			simulationService.notifyAllClients(new ChatSystemMessage("You will be disconnected in 30 seconds so the server can perform a final save before shutting down.  Please find a safe place to logout now.", (byte) 0 ).serialize());
+			Thread.sleep(20000);
+			simulationService.notifyAllClients(new ChatSystemMessage("You will be disconnected in 10 seconds so the server can perform a final save before shutting down.  Please find a safe place to logout now.", (byte) 0 ).serialize());
+			Thread.sleep(10000);
+			simulationService.notifyAllClients(new ChatSystemMessage("You will now be disconnected so the server can perform a final save before shutting down.", (byte) 0 ).serialize());
+			
+			synchronized(getActiveConnectionsMap()) {
+				for(Client client : getActiveConnectionsMap().values()) {
+					client.getSession().close(true);
+				}
+			}
+			
+			System.exit(0);
+			
+		} catch (InterruptedException e) {
+				e.printStackTrace();
+		}
+		
+		
+		
 	}
 	
 }

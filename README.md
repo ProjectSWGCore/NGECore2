@@ -43,6 +43,7 @@ Then export the following folders to your clientdata folder(should be located in
 - object
 - quest
 - snapshot
+- string
 - terrain
 
 Export the same folders from sku1_client.toc, sku2_client.toc and sku3_client.toc to avoid errors with kashyyyk.

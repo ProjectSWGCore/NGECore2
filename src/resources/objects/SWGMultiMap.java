@@ -136,9 +136,9 @@ public class SWGMultiMap<K, V> implements Multimap<K, V> {
 		synchronized(objectMutex) {
 			if (key instanceof String || key instanceof Byte || key instanceof Short ||
 				key instanceof Integer || key instanceof Float || key instanceof Long ||
-				value instanceof IListObject) {
+				value instanceof IDelta) {
 				if (map.put(key, value)) {
-					queue(item(0, (String) key, ((IListObject) value).getBytes(), true, true));
+					queue(item(0, (String) key, ((IDelta) value).getBytes(), true, true));
 					return true;
 				}
 			}
@@ -154,9 +154,9 @@ public class SWGMultiMap<K, V> implements Multimap<K, V> {
 				List<byte[]> buffer = new ArrayList<byte[]>();
 				
 				for (V value : values) {
-					if (value instanceof IListObject) {
+					if (value instanceof IDelta) {
 						if (map.put(key, value)) {
-							buffer.add(item(0, (String) key, ((IListObject) value).getBytes(), true, true));
+							buffer.add(item(0, (String) key, ((IDelta) value).getBytes(), true, true));
 						}
 					}
 				}
@@ -181,9 +181,9 @@ public class SWGMultiMap<K, V> implements Multimap<K, V> {
 				
 				if (key instanceof String || key instanceof Byte || key instanceof Short ||
 					key instanceof Integer || key instanceof Float || key instanceof Long ||
-					value instanceof IListObject) {
+					value instanceof IDelta) {
 					if (this.map.put(key, value)) {
-						buffer.add(item(0, (String) key, ((IListObject) value).getBytes(), true, true));
+						buffer.add(item(0, (String) key, ((IDelta) value).getBytes(), true, true));
 					}
 				}
 			}
@@ -203,7 +203,7 @@ public class SWGMultiMap<K, V> implements Multimap<K, V> {
 			if (key instanceof String || key instanceof Byte || key instanceof Short ||
 				key instanceof Integer || key instanceof Float || key instanceof Long) {
 				if (map.remove(key, value)) {
-					queue(item(1, (String) key, ((IListObject) map.get((K) key)).getBytes(), true, true));
+					queue(item(1, (String) key, ((IDelta) map.get((K) key)).getBytes(), true, true));
 					
 					return true;
 				}
@@ -223,7 +223,7 @@ public class SWGMultiMap<K, V> implements Multimap<K, V> {
 				
 				for (V value : map.get((K) key)) {
 					if (map.remove(key, value)) {
-						buffer.add(item(1, (String) key, ((IListObject) map.get((K) key)).getBytes(), true, true));
+						buffer.add(item(1, (String) key, ((IDelta) map.get((K) key)).getBytes(), true, true));
 					}
 				}
 				
@@ -245,9 +245,9 @@ public class SWGMultiMap<K, V> implements Multimap<K, V> {
 					List<byte[]> buffer = new ArrayList<byte[]>();
 					
 					for (V value : values) {
-						if (value instanceof IListObject) {
+						if (value instanceof IDelta) {
 							if (!map.get(key).contains(value)) {
-								buffer.add(item(2, (String) key, ((IListObject) value).getBytes(), true, true));
+								buffer.add(item(2, (String) key, ((IDelta) value).getBytes(), true, true));
 							}
 						} else {
 							return null;

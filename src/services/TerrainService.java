@@ -30,6 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import resources.common.FileUtilities;
 import resources.common.collidables.CollidableCircle;
+import resources.objects.building.BuildingObject;
 
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
@@ -191,10 +192,18 @@ public class TerrainService {
 					public void run() {
 						Config config = new Config();
 						config.setFilePath("options.cfg");
+						boolean loaded = config.loadConfigFile();
 						
-						if (config.loadConfigFile() && config.getInt("LOAD.SNAPSHOT_OBJECTS") > 0) {
+						if (loaded && config.getInt("LOAD.SNAPSHOT_OBJECTS") > 0) {
 							try {							
 								core.objectService.loadSnapshotObjects(planet);
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+						
+						if (loaded && config.getInt("LOAD.BUILDOUT_OBJECTS") > 0) {
+							try {							
 								core.objectService.loadBuildoutObjects(planet);
 							} catch (InstantiationException | IllegalAccessException e) {
 								e.printStackTrace();
@@ -216,6 +225,26 @@ public class TerrainService {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+		}
+		
+		synchronized(core.objectService.getObjectList()) {
+		
+			for(SWGObject object : core.objectService.getObjectList().values()) {
+				
+				if(!(object instanceof BuildingObject))
+					continue;
+				
+				BuildingObject building = (BuildingObject) object;
+				
+				if(building.getTransaction() == null)
+					continue;
+				
+				building.createTransaction(core.getBuildingODB().getEnvironment());
+				core.getBuildingODB().put(building, Long.class, BuildingObject.class, building.getTransaction());
+				building.getTransaction().commitSync();
+				
+			}
+			
 		}
 		
 	}

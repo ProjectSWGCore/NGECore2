@@ -21,6 +21,11 @@
  ******************************************************************************/
 package resources.objects.ship;
 
-public class ShipObject {
+import com.sleepycat.persist.model.Persistent;
+
+import resources.objects.tangible.TangibleObject;
+
+@Persistent(version=0)
+public class ShipObject extends TangibleObject {
 
 }

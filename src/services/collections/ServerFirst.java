@@ -21,12 +21,12 @@
  ******************************************************************************/
 package services.collections;
 
-import resources.objects.ListObject;
+import resources.objects.Delta;
 
 import com.sleepycat.persist.model.Persistent;
 
 @Persistent
-public class ServerFirst extends ListObject {
+public class ServerFirst extends Delta {
 	
 	private String name;
 	private long time;

@@ -41,7 +41,7 @@ import engine.clientdata.visitors.DatatableVisitor;
 import engine.resources.common.CRC;
 
 @Persistent(version=8)
-public class Buff implements IListObject {
+public class Buff implements IDelta {
 	
 	@NotPersistent
 	private SimpleBufferAllocator bufferPool = new SimpleBufferAllocator();

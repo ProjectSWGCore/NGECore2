@@ -27,10 +27,10 @@ import org.apache.mina.core.buffer.IoBuffer;
 
 import com.sleepycat.persist.model.Persistent;
 
-import resources.objects.ListObject;
+import resources.objects.Delta;
 
 @Persistent
-public class CurrentServerGCWZoneHistory extends ListObject implements Cloneable {
+public class CurrentServerGCWZoneHistory extends Delta implements Cloneable {
 	
 	private int lastUpdateTime;
 	private int percent;

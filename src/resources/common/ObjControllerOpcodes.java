@@ -32,5 +32,6 @@ public class ObjControllerOpcodes {
 	public static final int SECURE_TRADE = 0x15010000;
 	public static final int BUFF_BUILDER_CHANGE = 0x5A020000;
 	public static final int MISSION_LIST_REQUEST = 0xF5000000;
+	public static final int ChangeRoleIconChoice = 0x4D040000;
 	
 }

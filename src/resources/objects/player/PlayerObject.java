@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import resources.objects.intangible.IntangibleObject;
 import resources.objects.waypoint.WaypointObject;
 
 import com.sleepycat.persist.model.NotPersistent;
@@ -36,18 +37,18 @@ import com.sleepycat.persist.model.Persistent;
 import engine.clients.Client;
 import engine.resources.objects.DraftSchematic;
 import engine.resources.objects.Quest;
-import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent(version=1)
-public class PlayerObject extends SWGObject {
+@Persistent(version=3)
+public class PlayerObject extends IntangibleObject {
 	
 	// PLAY 3
 	
 	private String title;
 	private String profession;
+	private int professionIcon;
 	private List<Integer> flagsList = new ArrayList<Integer>();
 	private List<Integer> profileList = new ArrayList<Integer>();
 	private List<String> titleList = new ArrayList<String>();
@@ -55,6 +56,7 @@ public class PlayerObject extends SWGObject {
 	private int totalPlayTime = 0;
 	private byte[] collections = new byte[] { };
 	private int highestSetBit = 0;
+	private int flagBitmask = 0;
 	
 	// PLAY 6
 	
@@ -146,7 +148,9 @@ public class PlayerObject extends SWGObject {
 
 		}
 		
-		notifyObservers(messageBuilder.buildTitleDelta(title), true);
+		if (getContainer() != null) {
+			getContainer().notifyObservers(messageBuilder.buildTitleDelta(title), true);
+		}
 	}
 
 	public String getProfession() {
@@ -636,6 +640,56 @@ public class PlayerObject extends SWGObject {
 	public int getHighestSetBit() {
 		synchronized(objectMutex) {
 			return highestSetBit;
+		}
+	}
+	
+	public int getProfessionIcon() {
+		synchronized(objectMutex) {
+			return professionIcon;
+		}
+	}
+	
+	public void setProfessionIcon(int professionIcon) {
+		synchronized(objectMutex) {
+			this.professionIcon = professionIcon;
+		}
+		
+		if (getContainer() != null) {
+			getContainer().notifyObservers(messageBuilder.buildProfessionIconDelta(professionIcon), true);
+		}
+	}
+	
+	public int getFlagBitmask() {
+		synchronized(objectMutex) {
+			return flagBitmask;
+		}
+	}
+
+	public void setFlagBitmask(int flagBitmask) {
+		synchronized(objectMutex) {
+			this.flagBitmask |= flagBitmask;
+		}
+
+		if (getContainer() != null) {
+			getContainer().notifyObservers(messageBuilder.buildFlagBitmask(this.flagBitmask), true);
+		}
+	}
+	public void clearFlagBitmask(int flagBitmask) {
+		synchronized(objectMutex) {
+			// set flag bitmask to 0
+			this.flagBitmask &= ~flagBitmask;
+		}
+
+		if (getContainer() != null) {
+			getContainer().notifyObservers(messageBuilder.buildFlagBitmask(this.flagBitmask), true);
+		}
+	}
+	
+	public void toggleFlag(int flag) {
+		if ((this.flagBitmask & flag) == flag) {
+			clearFlagBitmask(flag);
+		} else {
+			setFlagBitmask(flag);
 		}
 	}
 	

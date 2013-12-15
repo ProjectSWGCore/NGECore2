@@ -95,6 +95,9 @@ public class CommandService implements INetworkDispatch  {
 					System.out.println("NULL Object");
 					return;
 				}
+				
+				if(command.isGmCommand() && !client.isGM())
+					return;
 
 				CreatureObject actor = (CreatureObject) client.getParent();
 
@@ -126,6 +129,15 @@ public class CommandService implements INetworkDispatch  {
 	public CombatCommand registerCombatCommand(String name) {
 		
 		CombatCommand command = new CombatCommand(name.toLowerCase());
+		commandLookup.add(command);
+		return command;
+		
+	}
+	
+	public BaseSWGCommand registerGmCommand(String name) {
+		
+		BaseSWGCommand command = new BaseSWGCommand(name.toLowerCase());
+		command.setGmCommand(true);
 		commandLookup.add(command);
 		return command;
 		

@@ -21,6 +21,11 @@
  ******************************************************************************/
 package resources.objects.resource;
 
-public class ResourceContainerObject {
+import com.sleepycat.persist.model.Persistent;
+
+import resources.objects.tangible.TangibleObject;
+
+@Persistent(version=0)
+public class ResourceContainerObject extends TangibleObject {
 
 }

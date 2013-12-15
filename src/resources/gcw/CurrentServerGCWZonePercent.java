@@ -31,10 +31,10 @@ import com.sleepycat.persist.model.Persistent;
 
 import engine.resources.scene.Point2D;
 
-import resources.objects.ListObject;
+import resources.objects.Delta;
 
 @Persistent
-public class CurrentServerGCWZonePercent extends ListObject implements Cloneable {
+public class CurrentServerGCWZonePercent extends Delta implements Cloneable {
 	
 	private Point2D position;
 	private float radius = 0;

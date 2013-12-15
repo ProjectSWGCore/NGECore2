@@ -23,13 +23,14 @@ package resources.objects.group;
 
 import java.util.Vector;
 
+import resources.objects.universe.UniverseObject;
+
 import engine.clients.Client;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-
-public class GroupObject extends SWGObject {
+public class GroupObject extends UniverseObject {
 	
 	private Vector<SWGObject> memberList = new Vector<SWGObject>();
 	private int memberListUpdateCounter;

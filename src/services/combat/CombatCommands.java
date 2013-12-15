@@ -68,6 +68,8 @@ public class CombatCommands {
 		
 		core.commandService.registerCombatCommand("bh_ae_dm_1");
 		core.commandService.registerCombatCommand("bh_ae_dm_2");
+		core.commandService.registerCombatCommand("bh_armor_sprint_1");		
+		core.commandService.registerCombatCommand("bh_cover_1");
 		core.commandService.registerCombatCommand("bh_dm_1");
 		core.commandService.registerCombatCommand("bh_dm_2");
 		core.commandService.registerCombatCommand("bh_dm_3");
@@ -123,7 +125,7 @@ public class CombatCommands {
 		core.commandService.registerCombatCommand("bh_taunt_4");
 		core.commandService.registerCombatCommand("bh_taunt_5");
 		core.commandService.registerCombatCommand("bh_taunt_6");
-		core.commandService.registerCombatCommand("bh_return_fire_1");
+		core.commandService.registerCombatCommand("bh_return_fire_command_1");
 		core.commandService.registerCombatCommand("bh_sh_0");
 		core.commandService.registerCombatCommand("bh_sh_1");
 		core.commandService.registerCombatCommand("bh_sh_2");
@@ -393,6 +395,7 @@ public class CombatCommands {
 		core.commandService.registerCombatCommand("me_cranial_smash_3");
 		core.commandService.registerCombatCommand("me_cranial_smash_4");
 		core.commandService.registerCombatCommand("me_cranial_smash_5");
+		core.commandService.registerCommand("me_cure_affliction_1");
 		core.commandService.registerCombatCommand("me_dm_1");
 		core.commandService.registerCombatCommand("me_dm_2");
 		core.commandService.registerCombatCommand("me_dm_3");
@@ -416,8 +419,11 @@ public class CombatCommands {
 		core.commandService.registerCombatCommand("me_rv_ooc");
 		core.commandService.registerCombatCommand("me_rv_pvp_area");
 		core.commandService.registerCombatCommand("me_rv_pvp_single");
+		core.commandService.registerCommand("me_serotonin_boost_1");
 		core.commandService.registerCombatCommand("me_serotonin_purge_1");
 		core.commandService.registerCombatCommand("me_sh_1");
+		core.commandService.registerCommand("me_stasis_1");
+		core.commandService.registerCommand("me_stasis_self_1");
 		core.commandService.registerCombatCommand("me_thyroid_rupture_1");
 		core.commandService.registerCombatCommand("me_traumatize_1");
 		core.commandService.registerCombatCommand("me_traumatize_2");
@@ -433,7 +439,24 @@ public class CombatCommands {
 		core.commandService.registerCommand("me_reckless_stimulation_4");
 		core.commandService.registerCommand("me_reckless_stimulation_5");
 		core.commandService.registerCommand("me_reckless_stimulation_6");
-		core.commandService.registerCommand("me_stasis_self_1");
+		core.commandService.registerCommand("me_buff_health_1");
+		core.commandService.registerCommand("me_buff_health_2");
+		core.commandService.registerCommand("me_buff_health_3");
+		core.commandService.registerCommand("me_enhance_action_1");
+		core.commandService.registerCommand("me_enhance_action_2");
+		core.commandService.registerCommand("me_enhance_action_3");
+		core.commandService.registerCommand("me_enhance_agility_1");
+		core.commandService.registerCommand("me_enhance_agility_2");
+		core.commandService.registerCommand("me_enhance_agility_3");
+		core.commandService.registerCommand("me_enhance_block_1");
+		core.commandService.registerCommand("me_enhance_dodge_1");
+		core.commandService.registerCommand("me_enhance_precision_1");
+		core.commandService.registerCommand("me_enhance_precision_2");
+		core.commandService.registerCommand("me_enhance_precision_3");
+		core.commandService.registerCommand("me_enhance_strength_1");
+		core.commandService.registerCommand("me_enhance_strength_2");
+		core.commandService.registerCommand("me_enhance_strength_3");
+		core.commandService.registerCommand("me_evasion_1");
 		
 		// Officer
 		
