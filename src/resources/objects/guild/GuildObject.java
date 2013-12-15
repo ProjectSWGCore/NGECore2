@@ -36,6 +36,7 @@ import resources.guild.Guild;
 import resources.objects.SWGList;
 import resources.objects.SWGMap;
 import resources.objects.SWGMultiMap;
+import resources.objects.universe.UniverseObject;
 import services.collections.ServerFirst;
 
 import com.sleepycat.je.Environment;
@@ -50,8 +51,8 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Entity
-public class GuildObject extends SWGObject implements IPersistent {
+@Entity(version=0)
+public class GuildObject extends UniverseObject implements IPersistent {
 	
 	protected NGECore core;
 	@NotPersistent
@@ -72,7 +73,7 @@ public class GuildObject extends SWGObject implements IPersistent {
 	private SWGList<Guild> guildList = new SWGList<Guild>(messageBuilder, 3, 4);
 	
 	// GILD 6
-	private int serverId = 0x00000041;
+	private int serverId = 0x43;
 	//private String STFName = "string_id_table";
 	private int unknown1 = 0;
 	private short unknown2 = 0;

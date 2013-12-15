@@ -108,7 +108,7 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 		IoBuffer buffer = bufferPool.allocate(100, false).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.setAutoExpand(true);
 		buffer.putShort((short) 0x11);
-		buffer.putInt((short) 0x8A);
+		buffer.putInt((short) 0x43);
 		
 		buffer.put(getAsciiString("string_id_table"));
 		
@@ -156,10 +156,10 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 		
 		if(player.getXpList().isEmpty()) {
 			buffer.putInt(0); 
-			buffer.putInt(0); 
+			buffer.putInt(player.getXpListUpdateCounter()); 
 		} else {
 			buffer.putInt(player.getXpList().size()); 
-			buffer.putInt(0); 
+			buffer.putInt(player.getXpListUpdateCounter()); 
 			
 			// no need for locking here, concurrent hash map iterator wont throw concurrency exceptions and multiple thread access at zone in is unlikely to occur for the PlayerObject
 			for(Entry<String, Integer> entry : player.getXpList().entrySet()) {
@@ -595,6 +595,21 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 		
 		buffer = createDelta("PLAY", (byte) 9, (short) 1, (short) 8, buffer, size + 4);
 		
+		return buffer;
+	}
+	
+	public IoBuffer buildFlagBitmask(int bitmask) {
+		IoBuffer buffer = bufferPool.allocate(30, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putInt(4);
+		buffer.putInt(bitmask);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		
+		int size = buffer.position();
+		buffer.flip();
+		
+		buffer = createDelta("PLAY", (byte) 3, (short) 1, (short) 5, buffer, size + 4);
 		return buffer;
 	}
 	

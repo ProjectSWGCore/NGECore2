@@ -21,8 +21,6 @@
  ******************************************************************************/
 package resources.objects.intangible;
 
-
-
 import com.sleepycat.persist.model.Persistent;
 
 import engine.clients.Client;
@@ -31,7 +29,7 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent
+@Persistent(version=0)
 public class IntangibleObject extends SWGObject {
 	
 	private int genericInt;

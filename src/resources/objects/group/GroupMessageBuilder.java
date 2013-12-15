@@ -83,7 +83,7 @@ public class GroupMessageBuilder extends ObjectMessageBuilder {
 		buffer.setAutoExpand(true);
 		
 		buffer.putShort((short) 0x0B); // Obj Operand Count
-		buffer.putInt(0x45);		   
+		buffer.putInt(0x43);		   
 		
 		buffer.put(getAsciiString("string_id_table"));
 		

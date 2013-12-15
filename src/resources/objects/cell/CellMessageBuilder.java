@@ -26,7 +26,6 @@ import java.nio.ByteOrder;
 import org.apache.mina.core.buffer.IoBuffer;
 
 import resources.objects.ObjectMessageBuilder;
-import resources.objects.building.BuildingObject;
 
 public class CellMessageBuilder extends ObjectMessageBuilder {
 	
@@ -65,7 +64,7 @@ public class CellMessageBuilder extends ObjectMessageBuilder {
 		IoBuffer buffer = bufferPool.allocate(30, false).order(ByteOrder.LITTLE_ENDIAN);
 		
 		buffer.putShort((short) 4);
-		buffer.putInt(0x8D);
+		buffer.putInt(0x43);
 		buffer.putInt(0);
 		buffer.putInt(0);
 		buffer.putInt(0);

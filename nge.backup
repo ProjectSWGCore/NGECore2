@@ -62,7 +62,8 @@ CREATE TABLE accounts (
     id integer NOT NULL,
     "user" character varying(16) NOT NULL,
     pass character varying(34) NOT NULL,
-    email character varying(32) NOT NULL
+    email character varying(32) NOT NULL,
+    gmflag boolean
 );
 
 

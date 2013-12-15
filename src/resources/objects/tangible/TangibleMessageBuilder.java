@@ -84,7 +84,7 @@ public class TangibleMessageBuilder extends ObjectMessageBuilder {
 		IoBuffer buffer = bufferPool.allocate(100, false).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.setAutoExpand(true);
 		buffer.putShort((short) 8);
-		buffer.putInt(0x64);
+		buffer.putInt(0x43);
 		buffer.put(getAsciiString(tangible.getDetailFilename()));
 		buffer.putInt(0);
 		buffer.put(getAsciiString(tangible.getDetailName()));
