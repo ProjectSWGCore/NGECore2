@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import resources.objects.intangible.IntangibleObject;
 import resources.objects.waypoint.WaypointObject;
 
 import com.sleepycat.persist.model.NotPersistent;
@@ -36,13 +37,12 @@ import com.sleepycat.persist.model.Persistent;
 import engine.clients.Client;
 import engine.resources.objects.DraftSchematic;
 import engine.resources.objects.Quest;
-import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent(version=2)
-public class PlayerObject extends SWGObject {
+@Persistent(version=0)
+public class PlayerObject extends IntangibleObject {
 	
 	// PLAY 3
 	

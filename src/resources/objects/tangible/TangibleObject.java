@@ -35,7 +35,6 @@ import protocol.swg.objectControllerObjects.ShowFlyText;
 import resources.common.RGB;
 import resources.objects.creature.CreatureObject;
 
-
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
 
@@ -45,8 +44,7 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-
-@Persistent
+@Persistent(version=0)
 public class TangibleObject extends SWGObject {
 	
 	// TODO: Thread safety

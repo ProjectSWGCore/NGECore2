@@ -31,7 +31,7 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent
+@Persistent(version=0)
 public class CellObject extends SWGObject {
 	
 	private int cellNumber = 0;

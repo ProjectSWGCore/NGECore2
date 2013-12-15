@@ -19,13 +19,13 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package resources.objects.resource;
+package resources.objects.manufacture;
 
 import com.sleepycat.persist.model.Persistent;
 
-import resources.objects.tangible.TangibleObject;
+import resources.objects.intangible.IntangibleObject;
 
 @Persistent(version=0)
-public class ResourceContainerObject extends TangibleObject {
+public class ManufactureSchematicObject extends IntangibleObject {
 
 }

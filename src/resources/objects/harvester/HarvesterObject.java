@@ -21,6 +21,11 @@
  ******************************************************************************/
 package resources.objects.harvester;
 
-public class HarvesterObject {
+import com.sleepycat.persist.model.Persistent;
+
+import resources.objects.installation.InstallationObject;
+
+@Persistent(version=0)
+public class HarvesterObject extends InstallationObject {
 
 }
