@@ -149,6 +149,11 @@ public class SimulationService implements INetworkDispatch {
 		core.commandService.registerCommand("requestwaypointatposition");
 		core.commandService.registerCommand("meditate");
 		core.commandService.registerGmCommand("server");
+		core.commandService.registerCommand("toggleawayfromkeyboard");
+		core.commandService.registerCommand("lfg");
+		core.commandService.registerCommand("newbiehelper");
+		core.commandService.registerCommand("roleplay");
+		core.commandService.registerAlias("afk", "toggleawayfromkeyboard");
 
 	}
 	

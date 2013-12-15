@@ -44,4 +44,5 @@ def run(core, actor, target, commandString):
 	elif command == 'addability' and arg1:
 		actor.addAbility(str(arg1))
 		actor.sendSystemMessage('You have learned ' + arg1 + '')
+	
 	return

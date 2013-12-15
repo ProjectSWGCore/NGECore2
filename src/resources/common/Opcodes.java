@@ -58,5 +58,6 @@ public class Opcodes {
 	public static int PlanetTravelPointListRequest = 0x96405D4D;
 	public static int FactionRequestMessage = CRC.StringtoCRC("FactionRequestMessage");
 	public static int FactionResponseMessage = CRC.StringtoCRC("FactionResponseMessage");
+	public static int SetWaypointColor = CRC.StringtoCRC("SetWaypointColor");
 	
 }

@@ -107,7 +107,6 @@ public class TravelService implements INetworkDispatch {
 							for(TravelPoint tp : travelMap.get(planet)) {
 								if(tp.isStarport() || tp.getPlanetName().equalsIgnoreCase(object.getPlanet().getName())) {
 									correctTravelPoints.add(tp);
-									//Console.println(tp.getName());
 								}
 							}
 							PlanetTravelPointListResponse response = new PlanetTravelPointListResponse(planetString, correctTravelPoints);
@@ -132,14 +131,14 @@ public class TravelService implements INetworkDispatch {
 		
 	}
 	
-	public TravelPoint getNearestTravelPoint(SWGObject obj) {
+	public TravelPoint getNearestTravelPoint(SWGObject obj, int distance) {
 		TravelPoint returnedPoint = null;
 		Vector<TravelPoint> planetTp = travelMap.get(obj.getPlanet());
 
 		synchronized(travelMap) {
 			for (TravelPoint tp : planetTp) {
 				//System.out.println("Distance for point " + tp.getName() + " is " + tp.getLocation().getDistance2D(obj.getWorldPosition()));
-				if (tp.getLocation().getDistance2D(obj.getWorldPosition()) <= 125) {
+				if (tp.getLocation().getDistance2D(obj.getWorldPosition()) <= distance) {
 					if (returnedPoint != null) {
 						float returnPointDistance = returnedPoint.getLocation().getDistance2D(obj.getWorldPosition());
 						float tpDistance = tp.getLocation().getDistance2D(obj.getWorldPosition());
@@ -155,14 +154,17 @@ public class TravelService implements INetworkDispatch {
 				}
 			}
 		}
-		
 		// Some transport obj's were used as deco (ex: ACLO bunker on Talus shared_player_transport). A null check should be performed before tp is used.
 		/*if (returnedPoint == null) {
-			System.out.println("Could not find travel point for " + obj.getTemplate() + " at " + obj.getPlanet().name + " Position: " + obj.getPosition().x + " " + obj.getPosition().z);
+			//System.out.println("Could not find travel point for " + obj.getTemplate() + " at " + obj.getPlanet().name + " Position: " + obj.getPosition().x + " " + obj.getPosition().z);
 			//Console.println("Travel Point NULL: " + returnedPoint.getName());
 		}*/
-		
+
 		return returnedPoint;
+	}
+	
+	public TravelPoint getNearestTravelPoint(SWGObject obj) {
+		return getNearestTravelPoint(obj, 125);
 	}
 	
 	public TravelPoint getTravelPointByName(String planet, String tpName) {
@@ -195,19 +197,21 @@ public class TravelService implements INetworkDispatch {
 		TravelPoint travelPoint = new TravelPoint(name, x, y, z, 150);
 
 		travelPoint.setPlanetName(WordUtils.capitalize(planet.getName()));
-		if (travelMap.containsKey(planet)) {
-			
-			travelMap.get(planet).add(travelPoint);
-			System.out.println("Added travel point " + travelPoint.getName());
-			
-		} else {
-			Vector<TravelPoint> travelPointVector = new Vector<TravelPoint>();
-			travelMap.put(planet, travelPointVector);
-			travelMap.get(planet).add(travelPoint);
-			System.out.println("Added planet " + planet.getName() + " to TravelMap.");
-			System.out.println("Added travel point " + travelPoint.getName());
-		}
 		
+		synchronized(travelMap) {
+			if (travelMap.containsKey(planet)) {
+				
+				travelMap.get(planet).add(travelPoint);
+				System.out.println("Added travel point " + travelPoint.getName());
+				
+			} else {
+				Vector<TravelPoint> travelPointVector = new Vector<TravelPoint>();
+				travelMap.put(planet, travelPointVector);
+				travelMap.get(planet).add(travelPoint);
+				System.out.println("Added planet " + planet.getName() + " to TravelMap.");
+				System.out.println("Added travel point " + travelPoint.getName());
+			}
+		}
 	}
 	
 	public void removeTravelPointByName(Planet planet, String name){

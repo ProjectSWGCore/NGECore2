@@ -26,7 +26,7 @@ def run(core, actor, target, commandString):
         name = commandString.split(" ", 5)
         waypoint.setName(name[5])
         waypoint.setPlanetCRC(crc.StringtoCRC(planet.getName()))
-        actorPlayer.getWaypoints().add(waypoint)
+        waypoint.setStringAttribute('', '') # This simply allows the attributes to display (nothing else has to be done)
         actorPlayer.waypointAdd(waypoint)
         actor.sendSystemMessage('A waypoint has been created in your datapad at the location.', 0)
         return
@@ -40,7 +40,7 @@ def run(core, actor, target, commandString):
         name = commandString.split(" ", 3)
         waypoint.setName(name[3])
         waypoint.setPlanetCRC(crc.StringtoCRC(actor.getPlanet().getName()))
-        actorPlayer.getWaypoints().add(waypoint)
+        waypoint.setStringAttribute('', '') # This simply allows the attributes to display (nothing else has to be done)
         actorPlayer.waypointAdd(waypoint)
         actor.sendSystemMessage('A waypoint has been created in your datapad at the location.', 0)
         return
@@ -52,7 +52,7 @@ def run(core, actor, target, commandString):
         name = commandString.split(" ", 2)
         waypoint.setName(name[2])
         waypoint.setPlanetCRC(crc.StringtoCRC(actor.getPlanet().getName()))
-        actorPlayer.getWaypoints().add(waypoint)
+        waypoint.setStringAttribute('', '') # This simply allows the attributes to display (nothing else has to be done)
         actorPlayer.waypointAdd(waypoint)
         actor.sendSystemMessage('A waypoint has been created in your datapad at the location.', 0)
         return
@@ -63,7 +63,7 @@ def run(core, actor, target, commandString):
         waypoint.setColor(WaypointObject.BLUE)
         waypoint.setName("Waypoint")
         waypoint.setPlanetCRC(crc.StringtoCRC(actor.getPlanet().getName()))
-        actorPlayer.getWaypoints().add(waypoint)
+        waypoint.setStringAttribute('', '') # This simply allows the attributes to display (nothing else has to be done)
         actorPlayer.waypointAdd(waypoint)
         actor.sendSystemMessage('A waypoint has been created in your datapad at the location.', 0)
         return
@@ -79,19 +79,19 @@ def run(core, actor, target, commandString):
 
         waypoint.setName(name[5])
         waypoint.setPlanetCRC(crc.StringtoCRC(actor.getPlanet().getName()))
-        actorPlayer.getWaypoints().add(waypoint)
+        waypoint.setStringAttribute('', '') # This simply allows the attributes to display (nothing else has to be done)
         actorPlayer.waypointAdd(waypoint)
         actor.sendSystemMessage('A waypoint has been created in your datapad at the location.', 0)
         return
     
-    #/wp NAME
+    #/wp
     else:
         waypoint = core.objectService.createObject('object/waypoint/shared_waypoint.iff', actor.getPlanet(), actor.getWorldPosition().x, actor.getWorldPosition().z, actor.getWorldPosition().y)
         waypoint.setActive(True)
         waypoint.setColor(WaypointObject.BLUE)
         waypoint.setName(commandString)
         waypoint.setPlanetCRC(crc.StringtoCRC(actor.getPlanet().getName()))
-        actorPlayer.getWaypoints().add(waypoint)
+        waypoint.setStringAttribute('', '') # This simply allows the attributes to display (nothing else has to be done)
         actorPlayer.waypointAdd(waypoint)
         actor.sendSystemMessage('A waypoint has been created in your datapad at your location.', 0)
         return
