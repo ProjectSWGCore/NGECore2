@@ -562,6 +562,8 @@ public class SimulationService implements INetworkDispatch {
 		object.setClient(null);
 		PlayerObject ghost = (PlayerObject) object.getSlottedObject("ghost");
 		
+		session.suspendWrite();
+		
 		object.createTransaction(core.getCreatureODB().getEnvironment());
 		core.getCreatureODB().put(object, Long.class, CreatureObject.class, object.getTransaction());
 		object.getTransaction().commitSync();
