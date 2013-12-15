@@ -287,26 +287,22 @@ public class CharacterService implements INetworkDispatch {
 					Console.println("Added empty mission " + missionsAdded);
 				}*/
 				
-				TangibleObject backpack = (TangibleObject) core.objectService.createObject("object/tangible/wearables/backpack/shared_backpack_galactic_marine.iff", object.getPlanet());
-				inventory._add(backpack);
 				object.addObjectToEquipList(datapad);
 				object.addObjectToEquipList(inventory);
 				object.addObjectToEquipList(bank);
 				object.addObjectToEquipList(missionBag);
 				object.addObjectToEquipList(appInventory);
 				
-				WeaponObject weapon = (WeaponObject) core.objectService.createObject("object/weapon/ranged/rifle/shared_rifle_a280.iff", object.getPlanet());
 				WeaponObject defaultWeapon = (WeaponObject) core.objectService.createObject("object/weapon/creature/shared_creature_default_weapon.iff", object.getPlanet());
-
+				defaultWeapon.setDamageType("@obj_attr_n:armor_eff_kinetic");
+				defaultWeapon.setStringAttribute("cat_wpn_damage.damage", "0-0");
+				defaultWeapon.setMaxDamage(100);
+				defaultWeapon.setMinDamage(50);
+				
 				object.addObjectToEquipList(defaultWeapon);
 
 				object._add(defaultWeapon);
-
-				object.addObjectToEquipList(weapon);
-
-				object._add(weapon);
-				object.setWeaponId(weapon.getObjectID());
-
+				object.setWeaponId(defaultWeapon.getObjectID());
 				core.scriptService.callScript("scripts/", "starterclothing", "CreateStarterClothing", core, object, clientCreateCharacter.getStarterProfession(), clientCreateCharacter.getRaceTemplate());
 				core.scriptService.callScript("scripts/", "CreateStartingCharacter", "demo", core, object);
 				
