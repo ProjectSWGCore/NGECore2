@@ -67,7 +67,7 @@ public class MissionService implements INetworkDispatch {
 				MissionListRequest request = new MissionListRequest();
 				request.deserialize(data);
 				
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				Client client = core.getClient(session);
 
 				if(client == null || client.getSession() == null)
 					return;

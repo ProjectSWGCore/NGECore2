@@ -400,7 +400,7 @@ public class GCWService implements INetworkDispatch {
 				GcwRegionsReq gcwRegionsReq = new GcwRegionsReq();
 				gcwRegionsReq.deserialize(data);
 				
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				Client client = core.getClient(session);
 				
 				if (client == null || client.getSession() == null) {
 					return;

@@ -78,7 +78,7 @@ public class ConnectionService implements INetworkDispatch {
 				synchronized(core.getActiveConnectionsMap()) {
 					for(Client c : core.getActiveConnectionsMap().values()) {
 						if(c.getParent() != null) {
-							if ((System.currentTimeMillis() - c.getSession().getLastReadTime()) > 300000) {
+							if ((System.currentTimeMillis() - c.getSession().getLastReadTime()) > 300000 && c.getSession().getAttribute("disconnectTask") == null) {
 								disconnect(c.getSession());
 							}
 						}
@@ -86,73 +86,8 @@ public class ConnectionService implements INetworkDispatch {
 				}
 			}
 			
-			public void disconnect(IoSession session) {
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
-
-				if(client == null)
-					return;
-				
-				if(client.getParent() == null)
-					return;
-
-				CreatureObject object = (CreatureObject) client.getParent();
-				object.setInviteCounter(0);
-				object.setInviteSenderId(0);
-				object.setInviteSenderName("");
-				object.setClient(null);
-				PlayerObject ghost = (PlayerObject) object.getSlottedObject("ghost");
-				
-				if(object.getGroupId() != 0)
-					core.groupService.handleGroupDisband(object);
-				
-				Point3D objectPos = object.getWorldPosition();
-				
-				List<AbstractCollidable> collidables = core.simulationService.getCollidables(object.getPlanet(), objectPos.x, objectPos.z, 512);
-
-				for(AbstractCollidable collidable : collidables) {
-					collidables.remove(object);
-				}
-				
-				
-				if (ghost != null) {
-					String objectShortName = object.getCustomName();
-					
-					if (object.getCustomName().contains(" ")) {
-						String[] splitName = object.getCustomName().toLowerCase().split(" ");
-						objectShortName = splitName[0];
-					}
-					
-					core.chatService.playerStatusChange(objectShortName, (byte) 0);
-				}
-				
-				session.suspendWrite();
-				
-				boolean remove = core.simulationService.remove(object, object.getPosition().x, object.getPosition().z);
-				if(remove)
-					System.out.println("Successful quadtree remove");
-				
-				//if(object.getContainer() == null) {
-					HashSet<Client> oldObservers = new HashSet<Client>(object.getObservers());
-					for(Iterator<Client> it = oldObservers.iterator(); it.hasNext();) {
-						Client observerClient = it.next();
-						if(observerClient.getParent() != null && !(observerClient.getSession() == session)) {
-							observerClient.getParent().makeUnaware(object);
-						}
-					}
-				//} else {
-				//	object.getContainer().remove(object);
-				//}
-				
-
-				object.createTransaction(core.getCreatureODB().getEnvironment());
-				core.getCreatureODB().put(object, Long.class, CreatureObject.class, object.getTransaction());
-				object.getTransaction().commitSync();
-				core.objectService.destroyObject(object);
-				
-				core.getActiveConnectionsMap().remove((Integer) session.getAttribute("connectionId"));
-			}
 			
-		}, 15, 15, TimeUnit.MINUTES);
+		}, 10, 10, TimeUnit.MINUTES);
 	
 	}
 	
@@ -169,7 +104,7 @@ public class ConnectionService implements INetworkDispatch {
 				data.position(0);
 				clientIdMsg.deserialize(data);
 				
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				Client client = core.getClient(session);
 				if(client == null) {
 					System.out.println("NULL Client");
 					return;
@@ -239,6 +174,80 @@ public class ConnectionService implements INetworkDispatch {
 
 		
 	}
+	
+	public void disconnect(IoSession session) {
+		Client client = core.getClient(session);
+
+		if(client == null)
+			return;
+		
+		if(client.getParent() == null)
+			return;
+		
+		CreatureObject object = (CreatureObject) client.getParent();
+		object.setInviteCounter(0);
+		object.setInviteSenderId(0);
+		object.setInviteSenderName("");
+		object.setClient(null);
+		PlayerObject ghost = (PlayerObject) object.getSlottedObject("ghost");
+		
+		if(ghost == null)
+			return;
+		
+		if(object.getGroupId() != 0)
+			core.groupService.handleGroupDisband(object);
+		
+		Point3D objectPos = object.getWorldPosition();
+		
+		List<AbstractCollidable> collidables = core.simulationService.getCollidables(object.getPlanet(), objectPos.x, objectPos.z, 512);
+
+		for(AbstractCollidable collidable : collidables) {
+			collidables.remove(object);
+		}
+		
+		
+		if (ghost != null) {
+			String objectShortName = object.getCustomName();
+			
+			if (object.getCustomName().contains(" ")) {
+				String[] splitName = object.getCustomName().toLowerCase().split(" ");
+				objectShortName = splitName[0];
+			}
+			
+			core.chatService.playerStatusChange(objectShortName, (byte) 0);
+		}
+		
+		session.suspendWrite();
+		
+		long parentId = object.getParentId();
+		
+		if(object.getContainer() == null) {
+			boolean remove = core.simulationService.remove(object, object.getPosition().x, object.getPosition().z);
+			if(remove)
+				System.out.println("Successful quadtree remove");
+		} else {
+			object.getContainer()._remove(object);
+			object.setParentId(parentId);
+		}
+
+		
+		HashSet<Client> oldObservers = new HashSet<Client>(object.getObservers());
+		for(Iterator<Client> it = oldObservers.iterator(); it.hasNext();) {
+			Client observerClient = it.next();
+			if(observerClient.getParent() != null && !(observerClient.getSession() == session)) {
+				observerClient.getParent().makeUnaware(object);
+			}
+		}
+		ghost.toggleFlag(PlayerFlags.LD);
+		
+		object.setAttachment("disconnectTask", null);
+		object.createTransaction(core.getCreatureODB().getEnvironment());
+		core.getCreatureODB().put(object, Long.class, CreatureObject.class, object.getTransaction());
+		object.getTransaction().commitSync();
+		core.objectService.destroyObject(object);
+		
+	}
+
 
 	@Override
 	public void shutdown() {

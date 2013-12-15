@@ -27,6 +27,7 @@ import java.nio.ByteOrder;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -37,6 +38,7 @@ import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -118,8 +120,10 @@ public class ObjectService implements INetworkDispatch {
 		    		for(SWGObject obj : objectList.values()) {
 		    			
 		    			if(obj.getSlottedObject("ghost") != null) {
-		    				((CreatureObject) obj).createTransaction(core.getCreatureODB().getEnvironment());
-		    				core.getCreatureODB().put((CreatureObject) obj, Long.class, CreatureObject.class, ((CreatureObject) obj).getTransaction());
+		    				CreatureObject creature = (CreatureObject) obj;
+		    				creature.setAttachment("disconnectTask", null);
+		    				creature.createTransaction(core.getCreatureODB().getEnvironment());
+		    				core.getCreatureODB().put(creature, Long.class, CreatureObject.class, creature.getTransaction());
 		    			}
 		    			
 		    		}
@@ -522,7 +526,7 @@ public class ObjectService implements INetworkDispatch {
 				selectCharacter.deserialize(data);
 
 				long objectId = selectCharacter.getCharacterId();
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				Client client = core.getClient(session);
 				if(client == null) {
 					System.out.println("NULL Client");
 					return;
@@ -538,9 +542,13 @@ public class ObjectService implements INetworkDispatch {
 				} else {
 					
 					creature = (CreatureObject) getObject(objectId);
-					if(creature.getClient() != null)
-						return;
 					
+				}
+				
+				if(creature.getAttachment("disconnectTask") != null) {
+					creature.getAwareObjects().removeAll(creature.getAwareObjects());
+					((ScheduledFuture<?>) creature.getAttachment("disconnectTask")).cancel(true);
+					creature.setAttachment("disconnectTask", null);
 				}
 
 				creature.setClient(client);

@@ -158,7 +158,7 @@ public class PlayerService implements INetworkDispatch {
 			
 			@Override
 			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
-				Client c = core.getClient((Integer) session.getAttribute("connectionId"));
+				Client c = core.getClient(session);
 				ChangeRoleIconChoice packet = new ChangeRoleIconChoice();
 				PlayerObject player;
 				SWGObject o;
@@ -185,7 +185,7 @@ public class PlayerService implements INetworkDispatch {
 			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
 				data.order(ByteOrder.LITTLE_ENDIAN);
 				
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				Client client = core.getClient(session);
 				
 				if (client == null)
 					return;

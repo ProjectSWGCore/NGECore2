@@ -132,7 +132,7 @@ public class CharacterService implements INetworkDispatch {
 			@Override
 			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
 				
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				Client client = core.getClient(session);
 				data = data.order(ByteOrder.LITTLE_ENDIAN);
 				data.position(0);
 				ClientVerifyAndLockNameRequest message = new ClientVerifyAndLockNameRequest();
@@ -209,7 +209,7 @@ public class CharacterService implements INetworkDispatch {
 				}
 				
 				int galaxyId = config.getInt("GALAXY_ID");
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				Client client = core.getClient(session);
 				
 				try {
 					if (client == null || checkForDuplicateName(getfirstName(clientCreateCharacter.getName(), clientCreateCharacter.getRaceTemplate()), client.getAccountId())) {

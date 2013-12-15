@@ -114,7 +114,7 @@ public class TradeService implements INetworkDispatch{
 				data.order(ByteOrder.LITTLE_ENDIAN);
 				data.position(0);
 				
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				Client client = core.getClient(session);
 				
 				if (client == null)
 					return;
@@ -185,7 +185,7 @@ public class TradeService implements INetworkDispatch{
 				AddItemMessage addItem = new AddItemMessage();
 				addItem.deserialize(data);
 				
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				Client client = core.getClient(session);
 				
 				if (client == null)
 					return;
@@ -230,7 +230,7 @@ public class TradeService implements INetworkDispatch{
 				data.order(ByteOrder.LITTLE_ENDIAN);
 				data.position(0);
 				
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				Client client = core.getClient(session);
 				long tradingWithClient = (long) client.getSession().getAttribute("tradeSession");
 				
 				CreatureObject tradingPartner = (CreatureObject) core.objectService.getObject(tradingWithClient);
@@ -267,7 +267,7 @@ public class TradeService implements INetworkDispatch{
 				
 				long objectToKeepID = request.getObjectID();
 				
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				Client client = core.getClient(session);
 				long tradingWithClient = (long) client.getSession().getAttribute("tradeSession");
 				
 				CreatureObject tradePartner = (CreatureObject) core.objectService.getObject(tradingWithClient);
@@ -288,7 +288,7 @@ public class TradeService implements INetworkDispatch{
 				
 				// client sends this packet to the server and then the server sends it to client.
 				
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				Client client = core.getClient(session);
 				long tradingWithClient = (long) client.getSession().getAttribute("tradeSession");
 				
 				CreatureObject tradePartner = (CreatureObject) core.objectService.getObject(tradingWithClient);
@@ -305,7 +305,7 @@ public class TradeService implements INetworkDispatch{
 			@Override
 			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
 				
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				Client client = core.getClient(session);
 				long tradingWithClient = (long) client.getSession().getAttribute("tradeSession");
 				
 				CreatureObject tradePartner = (CreatureObject) core.objectService.getObject(tradingWithClient);
@@ -322,7 +322,7 @@ public class TradeService implements INetworkDispatch{
 			@Override
 			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
 				System.out.println("Got BeginVerificationMessage");
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				Client client = core.getClient(session);
 				client.getSession().setAttribute("tradeSessionIsVerified");
 				System.out.println("Verified client");
 
@@ -337,7 +337,7 @@ public class TradeService implements INetworkDispatch{
 
 				// Sent first!
 
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				Client client = core.getClient(session);
 				long tradingWithClient = (long) getTradeAttribute(client);
 				
 				CreatureObject tradePartner = (CreatureObject) core.objectService.getObject(tradingWithClient);

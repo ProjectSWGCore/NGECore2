@@ -78,7 +78,7 @@ public class MapService implements INetworkDispatch {
 				if(planet == null)
 					return;*/
 				
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				Client client = core.getClient(session);
 
 				if(client == null || client.getSession() == null)
 					return;

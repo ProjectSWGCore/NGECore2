@@ -255,7 +255,7 @@ public class SkillService implements INetworkDispatch {
 				ExpertiseRequestMessage expertise = new ExpertiseRequestMessage();
 				expertise.deserialize(buffer);
 
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				Client client = core.getClient(session);
 				if(client == null) {
 					System.out.println("NULL Client");
 					return;

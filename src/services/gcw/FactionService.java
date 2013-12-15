@@ -195,7 +195,7 @@ public class FactionService implements INetworkDispatch {
 			
 			@Override
 			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
-				Client client = core.getClient((int) session.getAttribute("connectionId"));
+				Client client = core.getClient(session);
 				
 				if (client == null) {
 					return;

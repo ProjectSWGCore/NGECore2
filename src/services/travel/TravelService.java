@@ -78,7 +78,7 @@ public class TravelService implements INetworkDispatch {
 				PlanetTravelPointListRequest request = new PlanetTravelPointListRequest();
 				request.deserialize(data);
 				
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				Client client = core.getClient(session);
 
 				if(client == null || client.getSession() == null)
 					return;

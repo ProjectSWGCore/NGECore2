@@ -178,7 +178,7 @@ public class ChatService implements INetworkDispatch {
 				chatInstantMsg.deserialize(data);
 				String firstName = chatInstantMsg.getRecipient();
 				
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				Client client = core.getClient(session);
 				
 				if(client == null)
 					return;
@@ -222,7 +222,7 @@ public class ChatService implements INetworkDispatch {
 				ChatPersistentMessageToServer packet = new ChatPersistentMessageToServer();
 				packet.deserialize(data);
 				
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				Client client = core.getClient(session);
 				
 				if(client == null)
 					return;
@@ -278,7 +278,7 @@ public class ChatService implements INetworkDispatch {
 				ChatRequestPersistentMessage packet = new ChatRequestPersistentMessage();
 				packet.deserialize(data);
 				
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				Client client = core.getClient(session);
 				
 				if(client == null)
 					return;
@@ -313,7 +313,7 @@ public class ChatService implements INetworkDispatch {
 				ChatDeletePersistentMessage packet = new ChatDeletePersistentMessage();
 				packet.deserialize(data);
 				
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				Client client = core.getClient(session);
 				
 				if(client == null)
 					return;
@@ -336,7 +336,7 @@ public class ChatService implements INetworkDispatch {
 	public void playerStatusChange(String name, byte status) {
 		
 		String shortName = name.toLowerCase();
-		ConcurrentHashMap<Integer, Client> clients = core.getActiveConnectionsMap();
+		ConcurrentHashMap<IoSession, Client> clients = core.getActiveConnectionsMap();
 		
 		for(Client client : clients.values()) {
 			
@@ -559,7 +559,7 @@ public class ChatService implements INetworkDispatch {
 	}
 	
 	public SWGObject getObjectByFirstName(String name) {
-		ConcurrentHashMap<Integer, Client> clients = core.getActiveConnectionsMap();
+		ConcurrentHashMap<IoSession, Client> clients = core.getActiveConnectionsMap();
 		
 		for(Client client : clients.values()) {
 			if(client.getParent() == null)

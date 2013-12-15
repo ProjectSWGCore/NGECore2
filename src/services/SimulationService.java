@@ -30,6 +30,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import main.NGECore;
 
@@ -99,8 +103,7 @@ public class SimulationService implements INetworkDispatch {
 	
 	Map<String, QuadTree<SWGObject>> quadTrees;
 	Map<String, QuadTree<AbstractCollidable>> collidableQuadTrees;
-	
-	
+	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);	
 	private NGECore core;
 	private Map<String, MeshVisitor> cellMeshes = new ConcurrentHashMap<String, MeshVisitor>(); 
 	
@@ -282,7 +285,7 @@ public class SimulationService implements INetworkDispatch {
 				DataTransform dataTransform = new DataTransform();
 				dataTransform.deserialize(data);
 				//System.out.println("Movement Counter: " + dataTransform.getMovementCounter());
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				Client client = core.getClient(session);
 
 				if(client == null) {
 					System.out.println("NULL Client");
@@ -373,7 +376,7 @@ public class SimulationService implements INetworkDispatch {
 				
 				DataTransformWithParent dataTransform = new DataTransformWithParent();
 				dataTransform.deserialize(data);
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				Client client = core.getClient(session);
 
 				if(core.objectService.getObject(dataTransform.getCellId()) == null)
 					return;
@@ -433,7 +436,7 @@ public class SimulationService implements INetworkDispatch {
 				data = data.order(ByteOrder.LITTLE_ENDIAN);
 				data.position(0);
 				
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				Client client = core.getClient(session);
 				
 				if(client == null) {
 					System.out.println("NULL Client");
@@ -552,8 +555,8 @@ public class SimulationService implements INetworkDispatch {
 	 * to bluff and send a disconnect packet when it's not disconnecting
 	 * and continues sending packets.
 	 */
-	public void handleDisconnect(IoSession session) {
-		Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+	public void handleDisconnect(final IoSession session) {
+		Client client = core.getClient(session);
 
 		if(client == null)
 			return;
@@ -562,19 +565,25 @@ public class SimulationService implements INetworkDispatch {
 			return;
 
 		CreatureObject object = (CreatureObject) client.getParent();
-		object.setInviteCounter(0);
-		object.setInviteSenderId(0);
-		object.setInviteSenderName("");
-		object.setClient(null);
 		PlayerObject ghost = (PlayerObject) object.getSlottedObject("ghost");
 		
-		session.suspendWrite();
+		//session.suspendWrite();
 		
 		ghost.toggleFlag(PlayerFlags.LD);
 		
 		object.createTransaction(core.getCreatureODB().getEnvironment());
 		core.getCreatureODB().put(object, Long.class, CreatureObject.class, object.getTransaction());
 		object.getTransaction().commitSync();
+		
+		ScheduledFuture<?> disconnectTask = scheduler.schedule(new Runnable() {
+			@Override
+			public void run() {
+				core.connectionService.disconnect(session);
+			}
+		}, 5, TimeUnit.MINUTES);
+		
+		object.setAttachment("disconnectTask", disconnectTask);
+
 	}
 
 	public void handleZoneIn(Client client) {
@@ -929,7 +938,7 @@ public class SimulationService implements INetworkDispatch {
 	
 	public void notifyPlanet(Planet planet, IoBuffer packet) {
 		
-		ConcurrentHashMap<Integer, Client> clients = core.getActiveConnectionsMap();
+		ConcurrentHashMap<IoSession, Client> clients = core.getActiveConnectionsMap();
 		
 		for(Client client : clients.values()) {
 			
@@ -947,7 +956,7 @@ public class SimulationService implements INetworkDispatch {
 	
 	public void notifyAllClients(IoBuffer packet) {
 		
-		ConcurrentHashMap<Integer, Client> clients = core.getActiveConnectionsMap();
+		ConcurrentHashMap<IoSession, Client> clients = core.getActiveConnectionsMap();
 		
 		for(Client client : clients.values()) {
 			
