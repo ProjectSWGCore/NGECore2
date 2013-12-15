@@ -154,6 +154,7 @@ public class SimulationService implements INetworkDispatch {
 		core.commandService.registerCommand("newbiehelper");
 		core.commandService.registerCommand("roleplay");
 		core.commandService.registerAlias("afk", "toggleawayfromkeyboard");
+		core.commandService.registerCommand("toggledisplayingfactionrank");
 
 	}
 	
@@ -568,6 +569,8 @@ public class SimulationService implements INetworkDispatch {
 		PlayerObject ghost = (PlayerObject) object.getSlottedObject("ghost");
 		
 		session.suspendWrite();
+		
+		ghost.toggleFlag(PlayerFlags.LD);
 		
 		object.createTransaction(core.getCreatureODB().getEnvironment());
 		core.getCreatureODB().put(object, Long.class, CreatureObject.class, object.getTransaction());

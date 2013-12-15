@@ -607,7 +607,7 @@ public class ObjectService implements INetworkDispatch {
 				client.getSession().write(friendsListMessage.serialize());
 				
 				if (ghost != null) {
-					
+					ghost.clearFlagBitmask(PlayerFlags.LD);
 					String objectShortName = creature.getCustomName().toLowerCase();
 					
 					if (creature.getCustomName().contains(" ")) {
