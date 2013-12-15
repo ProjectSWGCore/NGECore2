@@ -327,7 +327,8 @@ public class EntertainmentService implements INetworkDispatch {
 				int floXP = p.getFlourishXpMod();
 				int floCount = entertainer.getFlourishCount();
 				
-				int XP = ((floCount > 2) ? 2 : floCount) * floXP;
+				//FIXME: this is not an accurate implementation yet. It needs group bonuses and other things.
+				int XP = (int) Math.round( ((floCount > 2) ? 2 : floCount) * floXP * 3.8 );
 				
 				entertainer.setFlourishCount(0);
 				core.playerService.giveExperience(entertainer, XP);

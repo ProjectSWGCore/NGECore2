@@ -29,5 +29,9 @@ def run(core, actor, target, commandString):
 		core.setGalaxyStatus(3)
 	if command == 'unlockServer':
 		core.setGalaxyStatus(2)
-
+	if command == 'info':
+		actor.sendSystemMessage(str(core.getActiveZoneClients()) + ' online characters.', 0)
+	if command == 'shutdown':
+		core.initiateShutdown()
+		
 	return

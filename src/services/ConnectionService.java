@@ -70,7 +70,6 @@ public class ConnectionService implements INetworkDispatch {
 			@Override
 			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
 				
-				System.out.println("xx");
 				data = data.order(ByteOrder.LITTLE_ENDIAN);
 				ClientIdMsg clientIdMsg = new ClientIdMsg();
 				data.position(0);
@@ -96,13 +95,12 @@ public class ConnectionService implements INetworkDispatch {
 		            	client.setSessionKey(clientIdMsg.getSessionKey());
 		            	client.setGM(core.loginService.checkForGmPermission((int) resultSet.getLong("accountId")));
 		            	AccountFeatureBits accountFeatureBits = new AccountFeatureBits();
-		            	ClientPermissionsMessage clientPermissionsMessage = new ClientPermissionsMessage();
+		            	ClientPermissionsMessage clientPermissionsMessage = new ClientPermissionsMessage(2 - core.characterService.getNumberOfCharacters((int) resultSet.getLong("accountId")));
 		            	session.write(new HeartBeatMessage().serialize());
 		            	session.write(accountFeatureBits.serialize());
 		            	session.write(clientPermissionsMessage.serialize());
 		                preparedStatement.close();
 		                
-		            	System.out.println("zyx");
 		            } else {
 		            	System.out.println("Cant get login session");
 		            }

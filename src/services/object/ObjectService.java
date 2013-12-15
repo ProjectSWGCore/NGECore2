@@ -106,6 +106,8 @@ public class ObjectService implements INetworkDispatch {
 	
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	
+	protected final Object objectMutex = new Object();
+	
 	public ObjectService(final NGECore core) {
 		this.core = core;
 		databaseConnection = core.getDatabase1();
@@ -322,6 +324,10 @@ public class ObjectService implements INetworkDispatch {
 		return createObject(Template, 0, planet, new Point3D(0, 0, 0), new Quaternion(1, 0, 0, 0));
 	}
 	
+	public SWGObject createObject(String Template, Planet planet, String customServerTemplate) {
+		return createObject(Template, 0, planet, new Point3D(0, 0, 0), new Quaternion(1, 0, 0, 0), customServerTemplate);
+	}
+	
 	public SWGObject createObject(String Template, Planet planet, float x, float z, float y) {
 		return createObject(Template, 0, planet, new Point3D(x, y, z), new Quaternion(1, 0, 0, 0));
 	}
@@ -454,7 +460,12 @@ public class ObjectService implements INetworkDispatch {
 
 		return objectID;*/
 		
-		long newId = highestId.incrementAndGet();
+		long newId;
+		
+		synchronized(objectMutex) {
+			newId = highestId.incrementAndGet();
+		}
+		
 		PreparedStatement ps2;
 
 		try {
