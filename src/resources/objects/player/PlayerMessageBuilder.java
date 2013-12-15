@@ -598,6 +598,21 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 		return buffer;
 	}
 	
+	public IoBuffer buildFlagBitmask(int bitmask) {
+		IoBuffer buffer = bufferPool.allocate(30, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putInt(4);
+		buffer.putInt(bitmask);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		
+		int size = buffer.position();
+		buffer.flip();
+		
+		buffer = createDelta("PLAY", (byte) 3, (short) 1, (short) 5, buffer, size + 4);
+		return buffer;
+	}
+	
 	@Override
 	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
 		// TODO Auto-generated method stub
