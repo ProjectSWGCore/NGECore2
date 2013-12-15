@@ -30,6 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import resources.common.FileUtilities;
 import resources.common.collidables.CollidableCircle;
+import resources.objects.building.BuildingObject;
 
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
@@ -224,6 +225,26 @@ public class TerrainService {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+		}
+		
+		synchronized(core.objectService.getObjectList()) {
+		
+			for(SWGObject object : core.objectService.getObjectList().values()) {
+				
+				if(!(object instanceof BuildingObject))
+					continue;
+				
+				BuildingObject building = (BuildingObject) object;
+				
+				if(building.getTransaction() == null)
+					continue;
+				
+				building.createTransaction(core.getBuildingODB().getEnvironment());
+				core.getBuildingODB().put(building, Long.class, BuildingObject.class, building.getTransaction());
+				building.getTransaction().commitSync();
+				
+			}
+			
 		}
 		
 	}

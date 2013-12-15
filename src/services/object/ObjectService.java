@@ -139,6 +139,32 @@ public class ObjectService implements INetworkDispatch {
 		}
 	}
 	
+	public void loadBuildings() {
+		EntityCursor<BuildingObject> cursor = core.getBuildingODB().getCursor(Long.class, BuildingObject.class);
+		
+		Iterator<BuildingObject> it = cursor.iterator();
+		
+		while(it.hasNext()) {
+			final BuildingObject building = it.next();
+			objectList.put(building.getObjectID(), building);
+			Planet planet = core.terrainService.getPlanetByID(building.getPlanetId());
+			building.setPlanet(planet);
+			building.viewChildren(building, true, true, new Traverser() {
+
+				@Override
+				public void process(SWGObject object) {
+					objectList.put(object.getObjectID(), object);
+					if(object.getParentId() != 0 && object.getContainer() == null)
+						object.setParent(building);
+					object.getContainerInfo(object.getTemplate());
+				}
+				
+			});	
+			core.simulationService.add(building, building.getPosition().x, building.getPosition().z);
+		}
+
+	}
+
 	public SWGObject createObject(String Template, long objectID, Planet planet, Point3D position, Quaternion orientation, String customServerTemplate) {
 		return createObject(Template, objectID, planet, position, orientation, customServerTemplate, false);
 	}
@@ -541,6 +567,7 @@ public class ObjectService implements INetworkDispatch {
 
 				if(creature.getParentId() != 0) {
 					SWGObject parent = getObject(creature.getParentId());
+					System.out.println("Building: " + parent.getContainer().getTemplate());
 					parent._add(creature);
 				}
 
@@ -562,9 +589,10 @@ public class ObjectService implements INetworkDispatch {
 				
 				creature.makeAware(core.guildService.getGuildObject());				
 				core.chatService.loadMailHeaders(client);
+				
 				core.simulationService.handleZoneIn(client);
-
 				creature.makeAware(creature);
+
 				
 				PlayerObject ghost = (PlayerObject) creature.getSlottedObject("ghost");
 				
@@ -635,7 +663,7 @@ public class ObjectService implements INetworkDispatch {
 				if(obj.getParentId() != 0 && getObject(obj.getParentId()) != null) {
 					SWGObject parent = getObject(obj.getParentId());
 					parent.add(obj);
-				}
+				} 
 			}
 		}
 		
@@ -755,7 +783,7 @@ public class ObjectService implements INetworkDispatch {
 					portalCRC = (Integer) buildoutTable.getObject(i, 13);
 
 				}
-				
+								
 				if(!template.equals("object/cell/shared_cell.iff") && objectId != 0 && getObject(objectId) != null) {
 					//System.out.println("Duplicate buildout object: " + template);
 					continue;
@@ -766,7 +794,8 @@ public class ObjectService implements INetworkDispatch {
 				if(objectId != 0 && containerId == 0) {					
 					if(portalCRC != 0) {
 						containers.add(objectId);
-						object = createObject(template, objectId, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, true);						
+						object = createObject(template, objectId, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, true);
+						((BuildingObject) object).createTransaction(core.getBuildingODB().getEnvironment());
 					} else {
 						object = createObject(template, objectId, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz));
 					}
@@ -776,7 +805,7 @@ public class ObjectService implements INetworkDispatch {
 						object.setAttachment("bigSpawnRange", new Boolean(true));
 					core.simulationService.add(object, object.getPosition().x, object.getPosition().z);
 				} else if(containerId != 0) {
-					object = createObject(template, objectId, planet, new Point3D(px, py, pz), new Quaternion(qw, qx, qy, qz));	
+					object = createObject(template, 0, planet, new Point3D(px, py, pz), new Quaternion(qw, qx, qy, qz));	
 					if(containers.contains(containerId)) {
 						object.setisInSnapshot(false);
 						containers.add(objectId);
@@ -785,8 +814,16 @@ public class ObjectService implements INetworkDispatch {
 						((CellObject) object).setCellNumber(cellIndex);
 					SWGObject parent = getObject(containerId);
 					
-					if(parent != null && object != null)
+					if(parent != null && object != null) {
+						if(parent instanceof BuildingObject && ((BuildingObject) parent).getCellByCellNumber(cellIndex) != null)
+							continue;
 						parent.add(object);
+						/*if(parent instanceof BuildingObject) {
+							((BuildingObject) parent).createTransaction(core.getBuildingODB().getEnvironment());
+							core.getBuildingODB().put((BuildingObject) parent, Long.class, BuildingObject.class, ((BuildingObject) parent).getTransaction());
+							((BuildingObject) parent).getTransaction().commitSync();
+						}*/
+					}
 				} else {
 					object = createObject(template, 0, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz));
 					core.simulationService.add(object, object.getPosition().x, object.getPosition().z);					

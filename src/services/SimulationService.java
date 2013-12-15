@@ -148,6 +148,7 @@ public class SimulationService implements INetworkDispatch {
 		core.commandService.registerGmCommand("setgodmode");
 		core.commandService.registerCommand("requestwaypointatposition");
 		core.commandService.registerCommand("meditate");
+		core.commandService.registerGmCommand("server");
 
 	}
 	
@@ -622,7 +623,7 @@ public class SimulationService implements INetworkDispatch {
 				SWGObject obj = it.next();
 				if(obj.getAttachment("bigSpawnRange") == null && obj.getWorldPosition().getDistance(pos) > 200)
 					continue;
-				System.out.println(obj.getTemplate());
+				//System.out.println(obj.getTemplate());
 				object.makeAware(obj);
 				if(obj.getClient() != null)
 					obj.makeAware(object);

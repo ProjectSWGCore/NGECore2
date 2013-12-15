@@ -21,24 +21,29 @@
  ******************************************************************************/
 package resources.objects.building;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import resources.objects.cell.CellObject;
+import com.sleepycat.je.Environment;
+import com.sleepycat.je.Transaction;
 import resources.objects.tangible.TangibleObject;
-
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.NotPersistent;
 import engine.clients.Client;
 import engine.resources.container.Traverser;
+import engine.resources.objects.IPersistent;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
 @Entity(version=0)
-public class BuildingObject extends TangibleObject {
+public class BuildingObject extends TangibleObject implements IPersistent {
 	
 	@NotPersistent
 	private BuildingMessageBuilder messageBuilder;
+	@NotPersistent
+	private Transaction txn;
 
 	public BuildingObject() {
 		super();
@@ -54,17 +59,21 @@ public class BuildingObject extends TangibleObject {
 		
 		final AtomicReference<CellObject> ref = new AtomicReference<CellObject>();
 		
-		this.viewChildren(this, true, false, new Traverser() {
-
-			@Override
-			public void process(SWGObject obj) {
+		synchronized(objectMutex) {
+		
+			this.viewChildren(this, true, false, new Traverser() {
+	
+				@Override
+				public void process(SWGObject obj) {
+					
+					if(obj instanceof CellObject && ((CellObject) obj).getCellNumber() == cellNumber) 
+						ref.set((CellObject) obj);
+					
+				}
 				
-				if(obj instanceof CellObject && ((CellObject) obj).getCellNumber() == cellNumber) 
-					ref.set((CellObject) obj);
-				
-			}
-			
-		});
+			});
+		
+		}
 		
 		return ref.get();
 		
@@ -83,6 +92,13 @@ public class BuildingObject extends TangibleObject {
 		destination.getSession().write(messageBuilder.buildBaseline8());
 		destination.getSession().write(messageBuilder.buildBaseline9());
 
+	}
+
+	public Transaction getTransaction() { return txn; }
+	
+	public void createTransaction(Environment env) { 
+		txn = env.beginTransaction(null, null); 
+		txn.setLockTimeout(500, TimeUnit.MILLISECONDS);
 	}
 
 }

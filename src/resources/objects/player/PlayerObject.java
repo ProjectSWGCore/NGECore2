@@ -41,7 +41,7 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent(version=0)
+@Persistent(version=3)
 public class PlayerObject extends IntangibleObject {
 	
 	// PLAY 3
@@ -56,6 +56,7 @@ public class PlayerObject extends IntangibleObject {
 	private int totalPlayTime = 0;
 	private byte[] collections = new byte[] { };
 	private int highestSetBit = 0;
+	private int flagBitmask = 0;
 	
 	// PLAY 6
 	
@@ -655,6 +656,40 @@ public class PlayerObject extends IntangibleObject {
 		
 		if (getContainer() != null) {
 			getContainer().notifyObservers(messageBuilder.buildProfessionIconDelta(professionIcon), true);
+		}
+	}
+	
+	public int getFlagBitmask() {
+		synchronized(objectMutex) {
+			return flagBitmask;
+		}
+	}
+
+	public void setFlagBitmask(int flagBitmask) {
+		synchronized(objectMutex) {
+			this.flagBitmask |= flagBitmask;
+		}
+
+		if (getContainer() != null) {
+			getContainer().notifyObservers(messageBuilder.buildFlagBitmask(this.flagBitmask), true);
+		}
+	}
+	public void clearFlagBitmask(int flagBitmask) {
+		synchronized(objectMutex) {
+			// set flag bitmask to 0
+			this.flagBitmask &= ~flagBitmask;
+		}
+
+		if (getContainer() != null) {
+			getContainer().notifyObservers(messageBuilder.buildFlagBitmask(this.flagBitmask), true);
+		}
+	}
+	
+	public void toggleFlag(int flag) {
+		if ((this.flagBitmask & flag) == flag) {
+			clearFlagBitmask(flag);
+		} else {
+			setFlagBitmask(flag);
 		}
 	}
 	

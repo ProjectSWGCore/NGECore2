@@ -37,7 +37,7 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent
+@Persistent(version=0)
 public class WaypointObject extends IntangibleObject implements IDelta {
 	
 	public static final byte BLUE, GREEN, ORANGE, YELLOW, PURPLE, WHITE, MULTICOLOR;
