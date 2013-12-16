@@ -1,13 +1,13 @@
 import sys
 
 def setup(core, object):
-	object.setAttachment('radial_filename', 'item')
+	object.setAttachment('radial_filename', 'vehicleDeed')
 	return
 
 def use(core, actor, object):
 	pcd = actor.getSlottedObject('datapad')
 	
-	pcd = core.objectService.createObject('object/intangible/vehicle/shared_speederbike_swoop_pcd.iff', actor.getPlanet(), actor.getPosition)
+	pcd = core.objectService.createObject('object/intangible/vehicle/shared_speederbike_swoop_pcd.iff', actor.getPlanet(), actor.getPosition())
 	
 	if datapad and pcd:
 		datapad.add(pcd)
