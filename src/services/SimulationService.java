@@ -615,6 +615,10 @@ public class SimulationService implements INetworkDispatch {
 		
 		PlayerObject ghost = (PlayerObject) object.getSlottedObject("ghost");
 		
+		if (ghost.isSet(PlayerFlags.LD)) {
+			ghost.toggleFlag(PlayerFlags.LD);
+		}
+		
 		core.weatherService.sendWeather(object);
 		
 		if (!object.hasSkill(ghost.getProfessionWheelPosition())) {
@@ -622,8 +626,7 @@ public class SimulationService implements INetworkDispatch {
 			object.playEffectObject("clienteffect/skill_granted.cef", "");
 			object.playMusic("sound/music_acq_bountyhunter.snd");
 			core.skillService.addSkill(object, ghost.getProfessionWheelPosition());
-		}
-		
+		}		
 	}
 		
 	public void transferToPlanet(SWGObject object, Planet planet, Point3D newPos, Quaternion newOrientation, SWGObject newParent) {
