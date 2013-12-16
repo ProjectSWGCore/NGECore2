@@ -39,6 +39,7 @@ import resources.common.Opcodes;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 
+import engine.clientdata.StfTable;
 import engine.clients.Client;
 import engine.resources.common.CRC;
 import engine.resources.service.INetworkDispatch;
@@ -54,7 +55,6 @@ public class FactionService implements INetworkDispatch {
 		this.core = core;
 		
 		try {
-			/*
 			StfTable stf = new StfTable("clientdata/string/en/faction/faction_names.stf");
 			
 			for (int s = 1; s < stf.getRowCount(); s++) {
@@ -64,7 +64,6 @@ public class FactionService implements INetworkDispatch {
 					factionMap.put(faction, CRC.StringtoCRC(faction));
 				}
 			}
-			*/
         } catch (Exception e) {
                 e.printStackTrace();
         }

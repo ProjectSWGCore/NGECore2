@@ -13,15 +13,15 @@ def run(core, actor, target, commandString):
 
     print 'x'
     if actor.getPosture() != 0x09:
-      actor.sendSystemMessage('@performance:insp_buff_must_perform')
+      actor.sendSystemMessage('@performance:insp_buff_must_perform', 2)
       return
 
-    if (target.getPerformanceWatchee() != actor):
+    if not target.getPerformanceWatchee() or target.getPerformanceWatchee() != actor:
       if actor.getPerformanceType():
-        actor.sendSystemMessage('@performance:insp_buff_must_watch')
+        actor.sendSystemMessage('@performance:insp_buff_must_watch', 2)
         return
       else:
-        actor.sendSystemMessage('@performance:insp_buff_must_listen')
+        actor.sendSystemMessage('@performance:insp_buff_must_listen', 2)
         return
 
     print ('Buffing Player: ' + str(target.getObjectId()) + ' or: ' + target.getCustomName())

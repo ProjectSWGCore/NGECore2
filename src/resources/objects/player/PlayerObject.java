@@ -698,4 +698,13 @@ public class PlayerObject extends IntangibleObject {
 		}
 	}
 	
+	/*
+	 * @return True if specified flag(s) are enabled
+	 */
+	public boolean isSet(int flags) {
+		synchronized(objectMutex) {
+			return ((flagBitmask & flags) == flags);
+		}
+	}
+	
 }
