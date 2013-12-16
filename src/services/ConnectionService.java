@@ -53,6 +53,7 @@ import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import resources.common.*;
 import resources.common.collidables.AbstractCollidable;
+import resources.datatables.PlayerFlags;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 

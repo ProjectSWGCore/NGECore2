@@ -79,6 +79,7 @@ import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.common.*;
 import resources.common.collidables.AbstractCollidable;
+import resources.datatables.PlayerFlags;
 import services.ai.LairActor;
 import toxi.geom.Line3D;
 import toxi.geom.Ray3D;
