@@ -28,7 +28,6 @@ import org.apache.mina.core.buffer.IoBuffer;
 
 import engine.resources.common.CRC;
 
-import resources.common.StringUtilities;
 import resources.objects.ObjectMessageBuilder;
 import resources.objects.waypoint.WaypointObject;
 
@@ -357,7 +356,6 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 		int size = buffer.position();
 		buffer.flip();
 		buffer = createDelta("PLAY", (byte) 3, (short) 1, (short) 16, buffer, size + 4);
-		System.out.println(StringUtilities.bytesToHex(buffer.array()));
 		return buffer;		
 	}
 	
