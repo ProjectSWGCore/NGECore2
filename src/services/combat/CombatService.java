@@ -443,17 +443,17 @@ public class CombatService implements INetworkDispatch {
 		switch(elementalType) {
 		
 			case ElementalType.KINETIC:
-				baseArmor = target.getSkillMod("kinetic").getBase();
+				baseArmor = target.getSkillModBase("kinetic");
 			case ElementalType.ENERGY:
-				baseArmor = target.getSkillMod("energy").getBase();
+				baseArmor = target.getSkillModBase("energy");
 			case ElementalType.HEAT:
-				baseArmor = target.getSkillMod("heat").getBase();
+				baseArmor = target.getSkillModBase("heat");
 			case ElementalType.COLD:
-				baseArmor = target.getSkillMod("cold").getBase();
+				baseArmor = target.getSkillModBase("cold");
 			case ElementalType.ACID:
-				baseArmor = target.getSkillMod("acid").getBase();
+				baseArmor = target.getSkillModBase("acid");
 			case ElementalType.ELECTRICITY:
-				baseArmor = target.getSkillMod("electricity").getBase();
+				baseArmor = target.getSkillModBase("electricity");
 
 		}
 		

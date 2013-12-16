@@ -54,7 +54,7 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 		buffer.putInt(0);	// generic int
 		
 		buffer.putInt(4);	// flag bitmask list size
-		buffer.putInt(0);	
+		buffer.putInt(player.getFlagBitmask());	
 		buffer.putInt(0);	
 		buffer.putInt(0);	
 		buffer.putInt(0);	

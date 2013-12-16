@@ -71,7 +71,7 @@ public class CommandService implements INetworkDispatch  {
 			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
 				
 				data.order(ByteOrder.LITTLE_ENDIAN);
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				Client client = core.getClient(session);
 
 				if(client == null) {
 					System.out.println("NULL Client");

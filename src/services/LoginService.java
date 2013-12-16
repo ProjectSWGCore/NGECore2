@@ -135,7 +135,7 @@ public class LoginService implements INetworkDispatch{
 				client.setSession(session);
 				client.setGM(checkForGmPermission(id));
 				
-				core.addClient((Integer)session.getAttribute("connectionId"), client);
+				core.addClient(session, client);
 				
 				/*if(!checkIfAccountExistInGameDB(id)) {
 					createAccountForGameDB(id, user, email, encryptPass);
@@ -179,7 +179,7 @@ public class LoginService implements INetworkDispatch{
 
 				DeleteCharacterMessage packet = new DeleteCharacterMessage();
 				packet.deserialize(data);
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				Client client = core.getClient(session);
 				
                 PreparedStatement preparedStatement;
 	               

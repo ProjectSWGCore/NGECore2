@@ -62,7 +62,7 @@ public class EntertainmentService implements INetworkDispatch {
 				Console.println("BUFF_BUILDER_CHANGE RECIEVED");
 				data.order(ByteOrder.LITTLE_ENDIAN);
 				
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				Client client = core.getClient(session);
 				
 				if(client == null)
 					return;

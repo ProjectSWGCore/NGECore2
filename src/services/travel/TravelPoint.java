@@ -106,6 +106,7 @@ public class TravelPoint {
 		if (shuttleObj == null) {
 			Console.println("NULL SHUTTLE SET FOR: " + getName());
 		}
+		//System.out.println("Shuttle obj " + shuttleObj.getTemplate() + " set for travelpoint " + getName());
 		startShuttleSchedule();
 	}
 
