@@ -3,10 +3,10 @@ package protocol.swg;
 import java.nio.ByteOrder;
 import java.util.List;
 
+import main.NGECore;
+
 import org.apache.mina.core.buffer.IoBuffer;
 
-import engine.resources.config.Config;
-import engine.resources.config.DefaultConfig;
 import resources.objects.player.PlayerObject;
 
 public class ChatOnGetFriendsList extends SWGMessage {
@@ -30,11 +30,6 @@ public class ChatOnGetFriendsList extends SWGMessage {
 
 	@Override
 	public IoBuffer serialize() {
-		Config config = new Config();
-		config.setFilePath("nge.cfg");
-		if (!(config.loadConfigFile())) {
-			config = DefaultConfig.getConfig();
-		}
 		
 		IoBuffer buffer = IoBuffer.allocate(200).order(ByteOrder.LITTLE_ENDIAN);
 		
@@ -47,7 +42,7 @@ public class ChatOnGetFriendsList extends SWGMessage {
 		for (String friend : player.getFriendList()) {
 			
 			buffer.put(getAsciiString("SWG"));
-			buffer.put(getAsciiString(config.getString("GALAXY_NAME")));
+			buffer.put(getAsciiString(NGECore.getInstance().getConfig().getString("GALAXY_NAME")));
 			
 			int friendIndex = friendList.indexOf(friend);
 			

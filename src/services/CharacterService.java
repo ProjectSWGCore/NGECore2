@@ -132,7 +132,7 @@ public class CharacterService implements INetworkDispatch {
 			@Override
 			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
 				
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				Client client = core.getClient(session);
 				data = data.order(ByteOrder.LITTLE_ENDIAN);
 				data.position(0);
 				ClientVerifyAndLockNameRequest message = new ClientVerifyAndLockNameRequest();
@@ -145,6 +145,10 @@ public class CharacterService implements INetworkDispatch {
 
 				int length = firstName.length();
 				try {
+					if (client == null) {
+						System.out.println("NULL client in ClientVerifyAndLockNameRequest, something is still bust");
+						return;
+					}
 					if (checkForDuplicateName(firstName, client.getAccountId())) {
 						
 						approved_flag = "name_declined_in_use";
@@ -205,10 +209,10 @@ public class CharacterService implements INetworkDispatch {
 				}
 				
 				int galaxyId = config.getInt("GALAXY_ID");
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				Client client = core.getClient(session);
 				
 				try {
-					if (checkForDuplicateName(getfirstName(clientCreateCharacter.getName(), clientCreateCharacter.getRaceTemplate()), client.getAccountId())) {
+					if (client == null || checkForDuplicateName(getfirstName(clientCreateCharacter.getName(), clientCreateCharacter.getRaceTemplate()), client.getAccountId())) {
 						return;
 					}
 				} catch (SQLException e2) {
@@ -287,26 +291,22 @@ public class CharacterService implements INetworkDispatch {
 					Console.println("Added empty mission " + missionsAdded);
 				}*/
 				
-				TangibleObject backpack = (TangibleObject) core.objectService.createObject("object/tangible/wearables/backpack/shared_backpack_galactic_marine.iff", object.getPlanet());
-				inventory._add(backpack);
 				object.addObjectToEquipList(datapad);
 				object.addObjectToEquipList(inventory);
 				object.addObjectToEquipList(bank);
 				object.addObjectToEquipList(missionBag);
 				object.addObjectToEquipList(appInventory);
 				
-				WeaponObject weapon = (WeaponObject) core.objectService.createObject("object/weapon/ranged/rifle/shared_rifle_a280.iff", object.getPlanet());
 				WeaponObject defaultWeapon = (WeaponObject) core.objectService.createObject("object/weapon/creature/shared_creature_default_weapon.iff", object.getPlanet());
-
+				defaultWeapon.setDamageType("@obj_attr_n:armor_eff_kinetic");
+				defaultWeapon.setStringAttribute("cat_wpn_damage.damage", "0-0");
+				defaultWeapon.setMaxDamage(100);
+				defaultWeapon.setMinDamage(50);
+				
 				object.addObjectToEquipList(defaultWeapon);
 
 				object._add(defaultWeapon);
-
-				object.addObjectToEquipList(weapon);
-
-				object._add(weapon);
-				object.setWeaponId(weapon.getObjectID());
-
+				object.setWeaponId(defaultWeapon.getObjectID());
 				core.scriptService.callScript("scripts/", "starterclothing", "CreateStarterClothing", core, object, clientCreateCharacter.getStarterProfession(), clientCreateCharacter.getRaceTemplate());
 				core.scriptService.callScript("scripts/", "CreateStartingCharacter", "demo", core, object);
 				

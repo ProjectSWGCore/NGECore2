@@ -5,9 +5,9 @@ def createRadial(core, owner, target, radials):
 	radials.clear()
 	player = owner.getSlottedObject('ghost')
 	radials.add(RadialOptions(0, 7, 1, ''))
-	if player and core.collectionService.isComplete(owner, 'col_lifeday_tree_tracking_2010') == False:
+	if player and core.collectionService.getCollection(owner, 'col_lifeday_tree_tracking_2010') < 1:
 		radials.add(RadialOptions(0, 21, 3, '@spam:tree_use'))
-	if player and core.collectionService.isComplete(owner, 'lifeday_badge_08') == False:
+	if player and core.collectionService.getCollection(owner, 'lifeday_badge_08') < 1:
 		radials.add(RadialOptions(0, 115, 3, '@spam:tree_badge'))
 	return
 
@@ -27,7 +27,7 @@ def handleSelection(core, owner, target, option):
 	if not player:
 		return
 	
-	if core.collectionService.isComplete(actor, 'lifeday_badge_08'):
+	if core.collectionService.isComplete(actor, 'col_lifeday_tree_tracking_2010'):
 		return
 	
 	inventory = actor.getSlottedObject('inventory')

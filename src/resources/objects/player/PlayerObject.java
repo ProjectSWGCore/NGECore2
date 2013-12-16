@@ -271,16 +271,21 @@ public class PlayerObject extends IntangibleObject {
 	public void waypointRemove(WaypointObject waypoint) {
 		synchronized(objectMutex) {
 			getContainer().getClient().getSession().write(messageBuilder.buildWaypointRemoveDelta(waypoint));
+			getWaypoints().remove(waypoint);
 		}
 	}
 	
 	public void waypointAdd(WaypointObject waypoint) {
 		synchronized(objectMutex) {
 			getContainer().getClient().getSession().write(messageBuilder.buildWaypointAddDelta(waypoint));
+			getWaypoints().add(waypoint);
 		}
 	}
 	
 	public WaypointObject getWaypointFromList(WaypointObject waypoint) {
+		if (waypoint == null)
+			return null;
+		
 		synchronized(objectMutex) {
 			for(WaypointObject wp : waypoints) {
 				if(wp.getObjectID() == waypoint.getObjectID())
@@ -690,6 +695,15 @@ public class PlayerObject extends IntangibleObject {
 			clearFlagBitmask(flag);
 		} else {
 			setFlagBitmask(flag);
+		}
+	}
+	
+	/*
+	 * @return True if specified flag(s) are enabled
+	 */
+	public boolean isSet(int flags) {
+		synchronized(objectMutex) {
+			return ((flagBitmask & flags) == flags);
 		}
 	}
 	

@@ -47,8 +47,8 @@ def handleSelection(core, actor, object, option):
 		if not inventory:
 			return
 		
-		reward1 = core.objectService.createObject('object/holiday/life_day/rewards_09/shared_lifeday_painting.iff', actor.getPlanet())
-		reward2 = core.objectService.createObject('object/holiday/life_day/' + objectName + '.iff', actor.getPlanet())
+		reward1 = core.objectService.createObject('object/tangible/holiday/life_day/rewards_09/shared_lifeday_painting.iff', actor.getPlanet())
+		reward2 = core.objectService.createObject('object/tangible/holiday/life_day/' + objectName + '.iff', actor.getPlanet())
 		
 		inventory.add(reward1)
 		inventory.add(reward2)

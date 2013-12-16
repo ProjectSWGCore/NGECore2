@@ -103,7 +103,7 @@ public class SUIService implements INetworkDispatch {
 				ObjectMenuSelectMessage objMenuSelect = new ObjectMenuSelectMessage();
 				objMenuSelect.deserialize(data);
 				
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				Client client = core.getClient(session);
 				if(client == null || client.getSession() == null)
 					return;
 				
@@ -135,7 +135,7 @@ public class SUIService implements INetworkDispatch {
 				if(window == null)
 					return;
 				
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				Client client = core.getClient(session);
 
 				if(client == null || client.getSession() == null)
 					return;

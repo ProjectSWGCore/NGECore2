@@ -30,6 +30,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import main.NGECore;
 
@@ -75,6 +79,7 @@ import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.common.*;
 import resources.common.collidables.AbstractCollidable;
+import resources.datatables.PlayerFlags;
 import services.ai.LairActor;
 import toxi.geom.Line3D;
 import toxi.geom.Ray3D;
@@ -99,8 +104,7 @@ public class SimulationService implements INetworkDispatch {
 	
 	Map<String, QuadTree<SWGObject>> quadTrees;
 	Map<String, QuadTree<AbstractCollidable>> collidableQuadTrees;
-	
-	
+	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);	
 	private NGECore core;
 	private Map<String, MeshVisitor> cellMeshes = new ConcurrentHashMap<String, MeshVisitor>(); 
 	
@@ -149,6 +153,12 @@ public class SimulationService implements INetworkDispatch {
 		core.commandService.registerCommand("requestwaypointatposition");
 		core.commandService.registerCommand("meditate");
 		core.commandService.registerGmCommand("server");
+		core.commandService.registerCommand("toggleawayfromkeyboard");
+		core.commandService.registerCommand("lfg");
+		core.commandService.registerCommand("newbiehelper");
+		core.commandService.registerCommand("roleplay");
+		core.commandService.registerAlias("afk", "toggleawayfromkeyboard");
+		core.commandService.registerCommand("toggledisplayingfactionrank");
 
 	}
 	
@@ -276,7 +286,7 @@ public class SimulationService implements INetworkDispatch {
 				DataTransform dataTransform = new DataTransform();
 				dataTransform.deserialize(data);
 				//System.out.println("Movement Counter: " + dataTransform.getMovementCounter());
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				Client client = core.getClient(session);
 
 				if(client == null) {
 					System.out.println("NULL Client");
@@ -367,7 +377,7 @@ public class SimulationService implements INetworkDispatch {
 				
 				DataTransformWithParent dataTransform = new DataTransformWithParent();
 				dataTransform.deserialize(data);
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				Client client = core.getClient(session);
 
 				if(core.objectService.getObject(dataTransform.getCellId()) == null)
 					return;
@@ -427,7 +437,7 @@ public class SimulationService implements INetworkDispatch {
 				data = data.order(ByteOrder.LITTLE_ENDIAN);
 				data.position(0);
 				
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				Client client = core.getClient(session);
 				
 				if(client == null) {
 					System.out.println("NULL Client");
@@ -536,10 +546,18 @@ public class SimulationService implements INetworkDispatch {
 		
 	}
 
-
-	public void handleDisconnect(IoSession session) {
-
-		Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+	/*
+	 * Moved this to ConnectionService which will disconnect them
+	 * from the server if they don't send packets for 5 minutes or more
+	 * like on live.
+	 * 
+	 * We had significant issues with client nulls due to us taking
+	 * client disconnect requests too seriously.  It has a weird tendency
+	 * to bluff and send a disconnect packet when it's not disconnecting
+	 * and continues sending packets.
+	 */
+	public void handleDisconnect(final IoSession session) {
+		Client client = core.getClient(session);
 
 		if(client == null)
 			return;
@@ -548,61 +566,28 @@ public class SimulationService implements INetworkDispatch {
 			return;
 
 		CreatureObject object = (CreatureObject) client.getParent();
-		object.setInviteCounter(0);
-		object.setInviteSenderId(0);
-		object.setInviteSenderName("");
-		object.setClient(null);
 		PlayerObject ghost = (PlayerObject) object.getSlottedObject("ghost");
 		
-		if(object.getGroupId() != 0)
-			core.groupService.handleGroupDisband(object);
+		//session.suspendWrite();
 		
-		Point3D objectPos = object.getWorldPosition();
+		ghost.toggleFlag(PlayerFlags.LD);
 		
-		List<AbstractCollidable> collidables = getCollidables(object.getPlanet(), objectPos.x, objectPos.z, 512);
-
-		for(AbstractCollidable collidable : collidables) {
-			collidables.remove(object);
-		}
-		
-		
-		if (ghost != null) {
-			String objectShortName = object.getCustomName();
-			
-			if (object.getCustomName().contains(" ")) {
-				String[] splitName = object.getCustomName().toLowerCase().split(" ");
-				objectShortName = splitName[0];
-			}
-			
-			core.chatService.playerStatusChange(objectShortName, (byte) 0);
-		}
-		
-		session.suspendWrite();
-		
-		boolean remove = remove(object, object.getPosition().x, object.getPosition().z);
-		if(remove)
-			System.out.println("Successful quadtree remove");
-		
-		//if(object.getContainer() == null) {
-			HashSet<Client> oldObservers = new HashSet<Client>(object.getObservers());
-			for(Iterator<Client> it = oldObservers.iterator(); it.hasNext();) {
-				Client observerClient = it.next();
-				if(observerClient.getParent() != null && !(observerClient.getSession() == session)) {
-					observerClient.getParent().makeUnaware(object);
-				}
-			}
-		//} else {
-		//	object.getContainer().remove(object);
-		//}
-		
-
+		// FIXME IllegalArgumentException: References to entities are not allowed: resources.objects.creature.CreatureObject
+		// FIXME ProtocolDecoderException
+		// FIXME LockTimeoutException
 		object.createTransaction(core.getCreatureODB().getEnvironment());
 		core.getCreatureODB().put(object, Long.class, CreatureObject.class, object.getTransaction());
 		object.getTransaction().commitSync();
-		core.objectService.destroyObject(object);
 		
-		core.getActiveConnectionsMap().remove((Integer) session.getAttribute("connectionId"));
+		ScheduledFuture<?> disconnectTask = scheduler.schedule(new Runnable() {
+			@Override
+			public void run() {
+				core.connectionService.disconnect(session);
+			}
+		}, 5, TimeUnit.MINUTES);
 		
+		object.setAttachment("disconnectTask", disconnectTask);
+
 	}
 
 	public void handleZoneIn(Client client) {
@@ -634,6 +619,10 @@ public class SimulationService implements INetworkDispatch {
 		
 		PlayerObject ghost = (PlayerObject) object.getSlottedObject("ghost");
 		
+		if (ghost.isSet(PlayerFlags.LD)) {
+			ghost.toggleFlag(PlayerFlags.LD);
+		}
+		
 		core.weatherService.sendWeather(object);
 		
 		if (!object.hasSkill(ghost.getProfessionWheelPosition())) {
@@ -641,8 +630,7 @@ public class SimulationService implements INetworkDispatch {
 			object.playEffectObject("clienteffect/skill_granted.cef", "");
 			object.playMusic("sound/music_acq_bountyhunter.snd");
 			core.skillService.addSkill(object, ghost.getProfessionWheelPosition());
-		}
-		
+		}		
 	}
 		
 	public void transferToPlanet(SWGObject object, Planet planet, Point3D newPos, Quaternion newOrientation, SWGObject newParent) {
@@ -957,7 +945,7 @@ public class SimulationService implements INetworkDispatch {
 	
 	public void notifyPlanet(Planet planet, IoBuffer packet) {
 		
-		ConcurrentHashMap<Integer, Client> clients = core.getActiveConnectionsMap();
+		ConcurrentHashMap<IoSession, Client> clients = core.getActiveConnectionsMap();
 		
 		for(Client client : clients.values()) {
 			
@@ -975,7 +963,7 @@ public class SimulationService implements INetworkDispatch {
 	
 	public void notifyAllClients(IoBuffer packet) {
 		
-		ConcurrentHashMap<Integer, Client> clients = core.getActiveConnectionsMap();
+		ConcurrentHashMap<IoSession, Client> clients = core.getActiveConnectionsMap();
 		
 		for(Client client : clients.values()) {
 			

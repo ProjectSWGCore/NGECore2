@@ -35,6 +35,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.mina.core.service.IoHandler;
+import org.apache.mina.core.session.IoSession;
 
 import protocol.swg.ChatSystemMessage;
 import net.engio.mbassy.bus.config.BusConfiguration;
@@ -112,7 +113,7 @@ public class NGECore {
 
 	private volatile boolean isShuttingDown = false;
 	
-	private ConcurrentHashMap<Integer, Client> clients = new ConcurrentHashMap<Integer, Client>();
+	private ConcurrentHashMap<IoSession, Client> clients = new ConcurrentHashMap<IoSession, Client>();
 	
 	// Database
 	
@@ -451,7 +452,7 @@ public class NGECore {
 	
 	public int getActiveClients() {
 		int connections = 0;
-		for (Map.Entry<Integer, Client> c : clients.entrySet()) {
+		for (Map.Entry<IoSession, Client> c : clients.entrySet()) {
 			if(c.getValue().getSession() != null) {
 				if (c.getValue().getSession().isConnected()) {
 					connections++;
@@ -463,7 +464,7 @@ public class NGECore {
 	
 	public int getActiveZoneClients() {
 		int connections = 0;
-		for (Map.Entry<Integer, Client> c : clients.entrySet()) {
+		for (Map.Entry<IoSession, Client> c : clients.entrySet()) {
 			if(c.getValue().getSession() != null) {
 				if (c.getValue().getSession().isConnected() && c.getValue().getParent() != null) {
 					connections++;
@@ -474,23 +475,23 @@ public class NGECore {
 	}
 
 	
-	public Client getClient(int connectionID) {
-		return clients.get(connectionID);
+	public Client getClient(IoSession session) {
+		return clients.get(session);
 	}
 	
-	public ConcurrentHashMap<Integer, Client> getActiveConnectionsMap() {
+	public ConcurrentHashMap<IoSession, Client> getActiveConnectionsMap() {
 		return clients;
 	}
 	
 	/*
 	 * --------------- Other methods for services ---------------
 	 */
-	public void addClient(Integer connectionID, Client client) {
-		clients.put(connectionID, client);
+	public void addClient(IoSession session, Client client) {
+		clients.put(session, client);
 	}
 	
-	public void removeClient(Integer connectionID) {
-		clients.remove(connectionID);
+	public void removeClient(IoSession session) {
+		clients.remove(session);
 	}
 	
 	// for python scripts
