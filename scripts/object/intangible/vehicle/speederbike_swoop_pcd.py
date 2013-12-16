@@ -1,7 +1,7 @@
 import sys
 
 def setup(core, object):
-	object.setAttachment('vehicleId', core.objectService.generateObjectId())
+	object.setAttachment('vehicleId', core.objectService.generateObjectID())
 	object.setAttachment('radial_filename', 'item')
 	return
 
