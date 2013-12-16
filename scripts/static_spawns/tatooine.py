@@ -17,7 +17,6 @@ def addPlanetSpawns(core, planet):
 	bandtat4.setCustomName2('Sunil Eide')
 	stcSvc.spawnObject('object/tangible/instrument/shared_nalargon.iff', 'tatooine', long(0), float(-5045.00), float(75), float(-6555), float(0.999132931232), float(-0.0416347384453)) # Drums
 	stcSvc.spawnObject('object/tangible/instrument/shared_ommni_box.iff', 'tatooine', long(0), float(-5043.00), float(75), float(-6559), float(0.999132931232), float(-0.0416347384453)) # Box
-	stcSvc.spawnObject('object/tangible/holiday/life_day/shared_life_day_tree.iff', 'tatooine', long(0), float(-5083.00), float(75), float(-6619.00), float(0.999132931232), float(-0.0416347384453)) # small tree
 
 	return
 	
