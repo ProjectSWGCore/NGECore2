@@ -100,7 +100,7 @@ public class SkillService implements INetworkDispatch {
 						}
 
 						//exempt species skills from being returned -- they're marked godOnly but really meant to be granted
-						if ((!speciesSkill) && ( godOnly  || isHidden)) {
+						if ((!speciesSkill) && (godOnly  || isHidden)) {
 							return;
 						}
 						

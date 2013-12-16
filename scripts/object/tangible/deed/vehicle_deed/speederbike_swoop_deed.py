@@ -7,7 +7,7 @@ def setup(core, object):
 def use(core, actor, object):
 	pcd = actor.getSlottedObject('datapad')
 	
-	pcd = createObject('object/intangible/vehicle/shared_speederbike_swoop_pcd.iff', actor.getPlanet(), actor.getPosition)
+	pcd = core.objectService.createObject('object/intangible/vehicle/shared_speederbike_swoop_pcd.iff', actor.getPlanet(), actor.getPosition)
 	
 	if datapad and pcd:
 		datapad.add(pcd)

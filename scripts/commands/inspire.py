@@ -16,7 +16,7 @@ def run(core, actor, target, commandString):
       actor.sendSystemMessage('@performance:insp_buff_must_perform', 2)
       return
 
-    if target.getPerformanceWatchee() != actor:
+    if not target.getPerformanceWatchee() or target.getPerformanceWatchee() != actor:
       if actor.getPerformanceType():
         actor.sendSystemMessage('@performance:insp_buff_must_watch', 2)
         return
