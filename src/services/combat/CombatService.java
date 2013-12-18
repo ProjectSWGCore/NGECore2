@@ -673,7 +673,7 @@ public class CombatService implements INetworkDispatch {
 				if(r <= missChance)
 					return HitType.MISS;
 			}
-			float dodgeChance = (float) target.getSkillModBase("display_only_dodge") / 10000;
+			float dodgeChance = (float) (target.getSkillModBase("display_only_dodge") - attacker.getSkillModBase("display_only_opp_dodge_reduction")) / 10000;
 		
 			r = random.nextFloat();
 			if(r <= dodgeChance)
@@ -683,7 +683,7 @@ public class CombatService implements INetworkDispatch {
 			WeaponObject weapon2 = (WeaponObject) core.objectService.getObject(((CreatureObject) target).getWeaponId());
 			if(weapon2 != null && weapon2.isMelee()) {
 				
-				float parryChance = (float) target.getSkillModBase("display_only_parry") / 10000;
+				float parryChance = (float) (target.getSkillModBase("display_only_parry") - attacker.getSkillModBase("display_only_parry_reduction"))/ 10000;
 	
 				r = random.nextFloat();
 				if(r <= parryChance)
@@ -699,9 +699,23 @@ public class CombatService implements INetworkDispatch {
 
 		}
 
-		float critChance = (float) (attacker.getSkillModBase("display_only_critical") - target.getSkillModBase("display_only_expertise_critical_hit_reduction")) / 10000;
+		float critChance = 0;
+		
+		critChance += (command.getCriticalChance());
+		
+		critChance += ((float) attacker.getSkillModBase("display_only_critical") / 100);
+		
+		critChance -= ((float) target.getSkillModBase("display_only_expertise_critical_hit_reduction") / 100);
+		
+		critChance += ((float) target.getSkillModBase("critical_hit_vulnerable") / 100);
+		
+		if(target.isPlayer())
+			critChance += attacker.getSkillModBase("expertise_critical_niche_pvp");
+			critChance -= ((float) target.getSkillModBase("display_only_expertise_critical_hit_pvp_reduction") / 100);
+		
 		r = random.nextFloat();
-		if(r <= critChance)
+
+		if(r <= ((float) critChance / 100))
 			return HitType.CRITICAL;
 		
 		// TODO: Punishing blow once AI is implemented
@@ -715,7 +729,7 @@ public class CombatService implements INetworkDispatch {
 		float r;
 		Random random = new Random();
 					
-		float blockChance = (float) target.getSkillModBase("display_only_block") / 10000;
+		float blockChance = (float) (target.getSkillModBase("display_only_block") - attacker.getSkillModBase("display_only_opp_block_reduction"))/ 10000;
 			
 		r = random.nextFloat();
 		if(r <= blockChance)

@@ -78,6 +78,7 @@ public class CombatCommand extends BaseSWGCommand {
 	private float executeTime;
 	private float warmupTime;
 	private float vigorCost; // for commando kill meter and bm specials
+	private float criticalChance;
 	
 	public CombatCommand(String commandName) {
 		super(commandName);
@@ -704,6 +705,14 @@ public class CombatCommand extends BaseSWGCommand {
 
 	public void setVigorCost(float vigorCost) {
 		this.vigorCost = vigorCost;
+	}
+
+	public float getCriticalChance() {
+		return criticalChance;
+	}
+
+	public void setCriticalChance(float criticalChance) {
+		this.criticalChance = criticalChance;
 	}
 	
 	
