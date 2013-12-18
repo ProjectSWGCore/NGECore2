@@ -9,6 +9,7 @@ import org.apache.mina.core.buffer.IoBuffer;
 
 import resources.objects.player.PlayerObject;
 
+// This is possibly unused
 public class ChatOnGetFriendsList extends SWGMessage {
 
 	private List<String> friendList;
@@ -24,8 +25,7 @@ public class ChatOnGetFriendsList extends SWGMessage {
 	}
 	@Override
 	public void deserialize(IoBuffer data) {
-		// XXX Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -51,7 +51,6 @@ public class ChatOnGetFriendsList extends SWGMessage {
 		int size = buffer.position();
 		buffer = IoBuffer.allocate(size).put(buffer.array(), 0, size);
 		buffer.flip();
-		//System.out.println("ChatOnGetFriendsList: " + buffer.getHexDump());
 		return buffer;
 	}
 
