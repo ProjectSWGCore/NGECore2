@@ -25,6 +25,7 @@ import java.nio.ByteOrder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -42,6 +43,8 @@ import engine.clients.Client;
 import engine.resources.container.Traverser;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
+import engine.resources.scene.Point3D;
+import engine.resources.scene.Quaternion;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import main.NGECore;
@@ -319,7 +322,23 @@ public class TravelService implements INetworkDispatch {
 	public void doTransport(SWGObject actor, TravelPoint tp) {
 		
 		Planet planet = core.terrainService.getPlanetByName(tp.getPlanetName());
-		core.simulationService.transferToPlanet(actor, planet, tp.getSpawnLocation().getPosition(), tp.getSpawnLocation().getOrientation(), null);
+		
+		Random ran = new Random();
+		
+		float oY = tp.getShuttle().getOrientation().y;
+		float dirDg = (float) ((Math.acos(oY) * 180 / Math.PI) * 2);
+		
+		ran.setSeed(32);
+		dirDg = dirDg - 18 + ran.nextFloat();
+		float dirRadian = (float) (dirDg * Math.PI / 180);
+		ran.setSeed(3);
+		float distance = 13 + ran.nextFloat();
+		
+		float x = (float) (tp.getSpawnLocation().getPosition().x + Math.sin(dirRadian) * distance);
+		float y = (float) (tp.getSpawnLocation().getPosition().y + Math.cos(dirRadian) * distance);
+
+		Point3D spawnPoint = new Point3D(x, y, tp.getSpawnLocation().getPosition().z);
+		core.simulationService.transferToPlanet(actor, planet, spawnPoint, new Quaternion(0, 0, 0, 0), null);
 		
 	}
 
