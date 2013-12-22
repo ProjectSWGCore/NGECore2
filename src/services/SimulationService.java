@@ -572,12 +572,10 @@ public class SimulationService implements INetworkDispatch {
 		
 		ghost.toggleFlag(PlayerFlags.LD);
 		
-		// FIXME IllegalArgumentException: References to entities are not allowed: resources.objects.creature.CreatureObject
-		// FIXME ProtocolDecoderException
-		// FIXME LockTimeoutException
+		/*
 		object.createTransaction(core.getCreatureODB().getEnvironment());
 		core.getCreatureODB().put(object, Long.class, CreatureObject.class, object.getTransaction());
-		object.getTransaction().commitSync();
+		object.getTransaction().commitSync();*/
 		
 		ScheduledFuture<?> disconnectTask = scheduler.schedule(new Runnable() {
 			@Override

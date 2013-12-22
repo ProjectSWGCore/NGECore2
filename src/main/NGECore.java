@@ -528,6 +528,7 @@ public class NGECore {
 			synchronized(getActiveConnectionsMap()) {
 				for(Client client : getActiveConnectionsMap().values()) {
 					client.getSession().close(true);
+					connectionService.disconnect(client.getSession());
 				}
 			}
 			
