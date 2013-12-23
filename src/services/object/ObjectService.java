@@ -120,11 +120,8 @@ public class ObjectService implements INetworkDispatch {
 		    	synchronized(objectList) {
 		    		for(SWGObject obj : objectList.values()) {
 		    			
-		    			if(obj.getSlottedObject("ghost") != null) {
-		    				CreatureObject creature = (CreatureObject) obj;
-		    				creature.setAttachment("disconnectTask", null);
-		    				creature.createTransaction(core.getCreatureODB().getEnvironment());
-		    				core.getCreatureODB().put(creature, Long.class, CreatureObject.class, creature.getTransaction());
+		    			if((obj.getClient() != null) && (obj.getClient().getSession() != null)) {
+		    				core.connectionService.disconnect(obj.getClient().getSession());
 		    			}
 		    			
 		    		}

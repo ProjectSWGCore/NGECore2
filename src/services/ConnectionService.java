@@ -219,8 +219,6 @@ public class ConnectionService implements INetworkDispatch {
 			core.chatService.playerStatusChange(objectShortName, (byte) 0);
 		}
 		
-		session.suspendWrite();
-		
 		long parentId = object.getParentId();
 		
 		if(object.getContainer() == null) {
@@ -243,6 +241,7 @@ public class ConnectionService implements INetworkDispatch {
 		ghost.toggleFlag(PlayerFlags.LD);
 		
 		object.setAttachment("disconnectTask", null);
+		object.setAttachment("buffWorkshop", null);
 		object.createTransaction(core.getCreatureODB().getEnvironment());
 		core.getCreatureODB().put(object, Long.class, CreatureObject.class, object.getTransaction());
 		object.getTransaction().commitSync();

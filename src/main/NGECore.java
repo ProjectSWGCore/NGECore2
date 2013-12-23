@@ -113,6 +113,8 @@ public class NGECore {
 
 	private volatile boolean isShuttingDown = false;
 	
+	private long galacticTime = System.currentTimeMillis();
+	
 	private ConcurrentHashMap<IoSession, Client> clients = new ConcurrentHashMap<IoSession, Client>();
 	
 	// Database
@@ -540,6 +542,10 @@ public class NGECore {
 		
 		
 		
+	}
+	
+	public long getGalacticTime() {
+		return System.currentTimeMillis() - this.galacticTime;
 	}
 	
 }

@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Vector;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -85,26 +84,21 @@ public class PlayerService implements INetworkDispatch {
     
 	public PlayerService(final NGECore core) {
 		this.core = core;
+		
+	}
+	
+	public void postZoneIn(final CreatureObject creature) {
+		
 		scheduler.scheduleAtFixedRate(new Runnable() {
 
 			@Override
 			public void run() {
 				ServerTimeMessage time = new ServerTimeMessage(System.currentTimeMillis() / 1000);
 				IoBuffer packet = time.serialize();
-				synchronized(core.getActiveConnectionsMap()) {
-					for(Client c : core.getActiveConnectionsMap().values()) {
-						if(c.getParent() != null) {
-							c.getSession().write(packet);
-						}
-					}
-				}
+				creature.getClient().getSession().write(packet);
 			}
 			
-		}, 0, 30, TimeUnit.SECONDS);
-		
-	}
-	
-	public void postZoneIn(final CreatureObject creature) {
+		}, 0, 45, TimeUnit.SECONDS);
 		
 		scheduler.scheduleAtFixedRate(new Runnable() {
 
@@ -147,6 +141,11 @@ public class PlayerService implements INetworkDispatch {
 			}
 			
 		}, 0, 1000, TimeUnit.MILLISECONDS);
+		
+		PlayerObject ghost = (PlayerObject)creature.getSlottedObject("ghost");
+		
+		if(ghost.isSet(256))
+			ghost.toggleFlag(256);
 		
 
 	}
