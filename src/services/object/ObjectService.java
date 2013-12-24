@@ -120,11 +120,8 @@ public class ObjectService implements INetworkDispatch {
 		    	synchronized(objectList) {
 		    		for(SWGObject obj : objectList.values()) {
 		    			
-		    			if(obj.getSlottedObject("ghost") != null) {
-		    				CreatureObject creature = (CreatureObject) obj;
-		    				creature.setAttachment("disconnectTask", null);
-		    				creature.createTransaction(core.getCreatureODB().getEnvironment());
-		    				core.getCreatureODB().put(creature, Long.class, CreatureObject.class, creature.getTransaction());
+		    			if((obj.getClient() != null) && (obj.getClient().getSession() != null)) {
+		    				core.connectionService.disconnect(obj.getClient().getSession());
 		    			}
 		    			
 		    		}
@@ -612,8 +609,8 @@ public class ObjectService implements INetworkDispatch {
 				
 				PlayerObject ghost = (PlayerObject) creature.getSlottedObject("ghost");
 				
-				ChatOnGetFriendsList friendsListMessage = new ChatOnGetFriendsList(ghost);
-				client.getSession().write(friendsListMessage.serialize());
+				//ChatOnGetFriendsList friendsListMessage = new ChatOnGetFriendsList(ghost);
+				//client.getSession().write(friendsListMessage.serialize());
 				
 				if (ghost != null) {
 					ghost.clearFlagBitmask(PlayerFlags.LD);
@@ -626,19 +623,19 @@ public class ObjectService implements INetworkDispatch {
 					
 					core.chatService.playerStatusChange(objectShortName, (byte) 1);
 					
-					if (ghost.getFriendList().isEmpty() == false) {
+					if (!ghost.getFriendList().isEmpty()) {
+
 						// Find out what friends are online/offline
 						for (String friend : ghost.getFriendList()) {
-							SWGObject friendObject = (SWGObject) core.chatService.getObjectByFirstName(friend);
-							if (friendObject == null)
-								continue;
-							if(friendObject.isInQuadtree() == true) {
+							SWGObject friendObject = core.chatService.getObjectByFirstName(friend);
+							
+							if(friendObject != null && friendObject.isInQuadtree()) {
 								ChatFriendsListUpdate onlineNotifyStatus = new ChatFriendsListUpdate(friend, (byte) 1);
 								client.getSession().write(onlineNotifyStatus.serialize());
 
 							} else {
-								ChatOnChangeFriendStatus changeStatus = new ChatOnChangeFriendStatus(creature.getObjectID(), friend, 0);
-								client.getSession().write(changeStatus.serialize());
+								ChatFriendsListUpdate onlineNotifyStatus = new ChatFriendsListUpdate(friend, (byte) 0);
+								client.getSession().write(onlineNotifyStatus.serialize());
 							}
 						}
 					}

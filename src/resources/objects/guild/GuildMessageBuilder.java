@@ -77,6 +77,7 @@ public class GuildMessageBuilder extends ObjectMessageBuilder {
 		for (Entry<String, OtherServerGCWZonePercent> entry : guilds.getOtherServerGCWTotalPercentMap().entries()) capacity += (11 + entry.getKey().length() + entry.getValue().getBytes().length);
 		
 		IoBuffer buffer = bufferPool.allocate(capacity, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.setAutoExpand(true);
 		buffer.putShort((short) 9);	// Object Count
 		buffer.putInt(guilds.getServerId());
 		buffer.put(getAsciiString(guilds.getSTFFile()));

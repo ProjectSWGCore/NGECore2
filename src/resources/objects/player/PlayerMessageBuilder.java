@@ -22,12 +22,12 @@
 package resources.objects.player;
 
 import java.nio.ByteOrder;
+import java.util.List;
 import java.util.Map.Entry;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
 import engine.resources.common.CRC;
-
 import resources.objects.ObjectMessageBuilder;
 import resources.objects.waypoint.WaypointObject;
 
@@ -251,7 +251,7 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 
 		if(player.getFriendList().isEmpty()) {
 			buffer.putInt(0); 
-			buffer.putInt(0); 
+			buffer.putInt(0);
 		} else {
 			buffer.putInt(player.getFriendList().size()); 
 			buffer.putInt(player.getFriendListUpdateCounter()); 
@@ -261,7 +261,6 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 				for(String friend : player.getFriendList()) {
 					buffer.put(getAsciiString(friend));
 				}
-				
 			}
 		}
 		
@@ -515,60 +514,70 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 		
 	}
 	
-	public IoBuffer buildFriendAddDelta(String friend) {
+	public IoBuffer buildFriendAddDelta(List<String> friends) {
 		
-		IoBuffer buffer = bufferPool.allocate(13 + friend.length(), false).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer buffer = bufferPool.allocate(13 + (friends.size() * 2), false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.setAutoExpand(true);
+		
 		PlayerObject player = (PlayerObject) object;
 		
 		buffer.putInt(1);
 		buffer.putInt(player.getFriendListUpdateCounter());
 		
-		buffer.put((byte) 1); // updateType (SubType)
+		buffer.put((byte) 3); // updateType (SubType)
 		
-		buffer.putShort((short) player.getFriendList().indexOf(friend));
-		buffer.put(getAsciiString(friend));
+		buffer.putShort((short) (player.getFriendList().size()));
+		for (String f : friends) {
+			buffer.put(getAsciiString(f));
+		}
 		
 		int size = buffer.position();
 		buffer.flip();
 		
 		buffer = createDelta("PLAY", (byte) 9, (short) 1, (short) 7, buffer, size + 4);
-		
-		return buffer;
-		
-	}
-	
-	public IoBuffer buildFriendRemoveDelta(String friend) {
-		
-		IoBuffer buffer = bufferPool.allocate(11, false).order(ByteOrder.LITTLE_ENDIAN);
-		PlayerObject player = (PlayerObject) object;
-		
-		buffer.putInt(1);
-		buffer.putInt(player.getFriendListUpdateCounter());
 
-		buffer.put((byte) 0); // updateType (SubType)
+		return buffer;
 		
-		buffer.putShort((short) player.getFriendList().indexOf(friend));
+	}
+	
+	public IoBuffer buildFriendRemoveDelta(List<String> friends) {
+		
+		IoBuffer buffer = bufferPool.allocate(13 + (friends.size() * 2), false).order(ByteOrder.LITTLE_ENDIAN);
+		PlayerObject player = (PlayerObject) object;
+		
+		buffer.putInt(1);
+		buffer.putInt(player.getFriendListUpdateCounter());
+		
+		buffer.put((byte) 3); // updateType (SubType)
+		
+		buffer.putShort((short) friends.size());
+		for (String f : friends) {
+			buffer.put(getAsciiString(f));
+		}
 		
 		int size = buffer.position();
 		buffer.flip();
 		
 		buffer = createDelta("PLAY", (byte) 9, (short) 1, (short) 7, buffer, size + 4);
-		
+
 		return buffer;
-		
 	}
+		
 	
-	public IoBuffer buildIgnoreAddDelta(String ignoreName) {
-		IoBuffer buffer = bufferPool.allocate(30, false).order(ByteOrder.LITTLE_ENDIAN);
+	public IoBuffer buildIgnoreAddDelta(List<String> ignoreList) {
+		IoBuffer buffer = bufferPool.allocate(13 + (ignoreList.size() * 2) , false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.setAutoExpand(true);
 		PlayerObject player = (PlayerObject) object;
 		
 		buffer.putInt(1);
 		buffer.putInt(player.getIgnoreListUpdateCounter());
 		
-		buffer.put((byte) 1); // updateType (SubType)
+		buffer.put((byte) 3); // updateType (SubType)
 		
-		buffer.putShort((short) player.getIgnoreList().indexOf(ignoreName));
-		buffer.put(getAsciiString(ignoreName));
+		buffer.putShort((short) ignoreList.size());
+		for (String ignore : ignoreList) {
+			buffer.put(getAsciiString(ignore));
+		}
 		
 		int size = buffer.position();
 		buffer.flip();
@@ -578,15 +587,20 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 		return buffer;
 	}
 	
-	public IoBuffer buildIgnoreRemoveDelta(String removeName) {
-		IoBuffer buffer = bufferPool.allocate(30, false).order(ByteOrder.LITTLE_ENDIAN);
+	public IoBuffer buildIgnoreRemoveDelta(List<String> ignoreList) {
+		IoBuffer buffer = bufferPool.allocate(13 + (ignoreList.size() * 2) , false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.setAutoExpand(true);
 		PlayerObject player = (PlayerObject) object;
 		
 		buffer.putInt(1);
 		buffer.putInt(player.getIgnoreListUpdateCounter());
 		
-		buffer.put((byte) 0);
-		buffer.putShort((short) player.getIgnoreList().indexOf(removeName));
+		buffer.put((byte) 3); // updateType (SubType)
+		
+		buffer.putShort((short) ignoreList.size());
+		for (String ignore : ignoreList) {
+			buffer.put(getAsciiString(ignore));
+		}
 		
 		int size = buffer.position();
 		buffer.flip();
@@ -597,7 +611,7 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 	}
 	
 	public IoBuffer buildFlagBitmask(int bitmask) {
-		IoBuffer buffer = bufferPool.allocate(30, false).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer buffer = bufferPool.allocate(20, false).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.putInt(4);
 		buffer.putInt(bitmask);
 		buffer.putInt(0);

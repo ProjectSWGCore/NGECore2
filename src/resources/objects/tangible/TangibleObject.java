@@ -147,6 +147,12 @@ public class TangibleObject extends SWGObject {
 		}
 	}
 	
+	public boolean getOption(int option) {
+		synchronized(objectMutex) {
+			return ((optionsBitmask & option) == option);
+		}
+	}
+	
 	public void addOption(int option) {
 		setOptionsBitmask(getOptionsBitmask() | option);
 	}
@@ -351,8 +357,6 @@ public class TangibleObject extends SWGObject {
 		
 		destination.getSession().write(messageBuilder.buildBaseline3());
 		destination.getSession().write(messageBuilder.buildBaseline6());
-		destination.getSession().write(messageBuilder.buildBaseline8());
-		destination.getSession().write(messageBuilder.buildBaseline9());
 		
 		if(getPvPBitmask() != 0) {
 			UpdatePVPStatusMessage upvpm = new UpdatePVPStatusMessage(getObjectID());

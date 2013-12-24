@@ -339,8 +339,7 @@ public class ChatService implements INetworkDispatch {
 		ConcurrentHashMap<IoSession, Client> clients = core.getActiveConnectionsMap();
 		
 		for(Client client : clients.values()) {
-			
-			
+
 			if(client.getParent() == null)
 				continue;
 			
@@ -360,128 +359,113 @@ public class ChatService implements INetworkDispatch {
 	}
 	
 	public void removeFriend(PlayerObject actor, String friendName) {
+		CreatureObject creature = (CreatureObject) actor.getContainer();
+		friendName = friendName.split(" ")[0].toLowerCase();
 		
-		friendName = friendName.toLowerCase();
-		
-		//SWGObject friendObject = getObjectByFirstName(friendName);
-		
-		if (actor == null || actor.getContainer() == null)
+		if (actor == null || creature == null || friendName.equals(""))
 			return;
 		
-		List<String> friendList = actor.getFriendList();
-		
-		if(friendList.contains(friendName)) {
-				
-			actor.friendRemove(friendName);
-				
-			ChatOnChangeFriendStatus removeMessage = new ChatOnChangeFriendStatus(actor.getContainer().getObjectID(), friendName, 0);
-			actor.getContainer().getClient().getSession().write(removeMessage.serialize());
-				
-			ChatOnGetFriendsList sendFriendsList = new ChatOnGetFriendsList(actor);
-			actor.getContainer().getClient().getSession().write(sendFriendsList.serialize());
-			
+		if(actor.getFriendList().contains(friendName)) {
 
+			ChatOnChangeFriendStatus removeMessage = new ChatOnChangeFriendStatus(actor.getContainer().getObjectID(), friendName, 0);
+			creature.getClient().getSession().write(removeMessage.serialize());
+			
+			actor.friendRemove(friendName);
+		} else {
+			creature.sendSystemMessage(friendName + " is not a valid friend name.", (byte) 0);
 		}
 	}
 	
-	public void addFriend(PlayerObject actor, String friendName, boolean notify) {
-		// ChatOnAddFriend, ChatOnChangeFriendStatus, ChatFriendsListUpdate, ChatSystemMessage, ChatOnGetFriendsList
-		SWGObject friendObject = getObjectByFirstName(friendName);
+	public void addFriend(PlayerObject actor, String friend) {
+		CreatureObject creature = (CreatureObject) actor.getContainer();
 		
-		PlayerObject friend = (PlayerObject) friendObject.getSlottedObject("ghost");
-		CreatureObject friendCreature = (CreatureObject) friend.getContainer();
-		List<String> friendList = actor.getFriendList();
-		
-		if (actor == null || friendObject.getSlottedObject("ghost") == null)
+		if (actor == null || creature == null || friend.equals(""))
 			return;
 		
-		CreatureObject actorCreature = (CreatureObject) actor.getContainer();
-		if (actorCreature == null)
-			return;
+		friend = friend.toLowerCase();
 		
-		boolean friendIsOnline = friendObject.isInQuadtree();
-		
-		String friendShortName = friendCreature.getCustomName().toLowerCase();
-		
-		if (friendCreature.getCustomName().contains(" ")) {
-			String[] splitName = friendCreature.getCustomName().toLowerCase().split(" ");
-			friendShortName = splitName[0];
+		if (friend.contains(" ")) {
+			friend = friend.split(" ")[0];
 		}
 		
-		if (friendList.contains(friendShortName)) {
-			actorCreature.sendSystemMessage(friendShortName + " is already on your friends list.", (byte) 0);
-			return;
-		}
-		
-		
-		
-		if (notify) {
-			ChatOnAddFriend init = new ChatOnAddFriend();
-			actorCreature.getClient().getSession().write(init.serialize());
+		if(core.characterService.playerExists(friend)) {
 			
-			ChatOnChangeFriendStatus addMessage = new ChatOnChangeFriendStatus(actorCreature.getObjectID(), friendShortName, 1);
-			actorCreature.getClient().getSession().write(addMessage.serialize());
-			
-			if(friendIsOnline) {
-				ChatFriendsListUpdate updateStatus = new ChatFriendsListUpdate(friendShortName, (byte)1);
-				actorCreature.getClient().getSession().write(updateStatus.serialize());
+			if(actor.getIgnoreList().contains(friend)) {
+				creature.sendSystemMessage(friend + " is being ignored, unable to put in your friends list.", (byte) 0);
 			}
-		}
+			
+			SWGObject friendObj = getObjectByFirstName(friend);
+			boolean isOnline = false;
+			
+			if (friendObj != null && friendObj.isInQuadtree())
+				isOnline = true;
+			
+			ChatOnAddFriend init = new ChatOnAddFriend();
+			creature.getClient().getSession().write(init.serialize());
 
-		actor.friendAdd(friendShortName);
-		
-		if (actor.getFriendList().size() != 0) {
-			ChatOnGetFriendsList sendFriendsList = new ChatOnGetFriendsList(actor);
-			actorCreature.getClient().getSession().write(sendFriendsList.serialize());
+			ChatOnChangeFriendStatus addFriend = new ChatOnChangeFriendStatus(creature.getObjectId(), friend, 1);
+			creature.getClient().getSession().write(addFriend.serialize());
+				
+			if (isOnline) {
+				ChatFriendsListUpdate onlineUpdate = new ChatFriendsListUpdate(friend, (byte) 1);
+				creature.getClient().getSession().write(onlineUpdate.serialize());
+			}
+				
+			actor.friendAdd(friend);
+			creature.sendSystemMessage(friend + " is now your friend.", (byte) 0);
+			
+		} else {
+			creature.sendSystemMessage(friend + " is not a valid friend name.", (byte) 0);
 		}
-		
-		actorCreature.sendSystemMessage(friendShortName + " has been added to your friends list.", (byte) 0);
-		
-		
 	}
 	
 	public void addToIgnoreList(SWGObject actor, String ignoreName) {
+		ignoreName = ignoreName.split(" ")[0].toLowerCase();
+		if (actor == null)
+			return;
+		
 		PlayerObject ghost = (PlayerObject) actor.getSlottedObject("ghost");
 		CreatureObject creature = (CreatureObject) actor;
-		List<String> ignoreList = ghost.getIgnoreList();
 		
-		if (ignoreList.contains(ignoreName.toLowerCase())) {
+		if(ghost == null)
+			return;
+		
+		if (ghost.getIgnoreList().contains(ignoreName)) {
 			creature.sendSystemMessage(ignoreName + " is already in your ignore list.", (byte) 0);
 			return;
-		} else {
-			// TODO: Do check for valid names to ignore
-			
-			AddIgnoreMessage addIgnore = new AddIgnoreMessage(actor, ignoreName.toLowerCase(), true);
-			actor.getClient().getSession().write(addIgnore.serialize());
-			Console.println("Sent the add ignore message!");
-			ghost.ignoreAdd(ignoreName.toLowerCase());
-			Console.println("Sent the add ignore delta!");
-			creature.sendSystemMessage(ignoreName + " is now ignored.", (byte) 0);
 		}
+		
+		if(!core.characterService.playerExists(ignoreName)) {
+			creature.sendSystemMessage(ignoreName + " is not a valid ignore name.", (byte) 0);
+			return;
+		}
+		
+		AddIgnoreMessage addIgnore = new AddIgnoreMessage(actor, ignoreName, true);
+		actor.getClient().getSession().write(addIgnore.serialize());
+		ghost.ignoreAdd(ignoreName);
+			
+		creature.sendSystemMessage(ignoreName + " is now ignored.", (byte) 0);
 
 	}
 	
 	public void removeFromIgnoreList(SWGObject actor, String ignoreName) {
+		if (actor == null)
+			return;
+		
 		PlayerObject ghost = (PlayerObject) actor.getSlottedObject("ghost");
 		CreatureObject creature = (CreatureObject) actor;
-		List<String> ignoreList = ghost.getIgnoreList();
 		
-		if (ignoreList.contains(ignoreName.toLowerCase())) {
-			for (String name : ignoreList) {
-				if(name.equalsIgnoreCase(ignoreName)) {
-					//Console.println("Name found!");
-					AddIgnoreMessage removeIgnore = new AddIgnoreMessage(actor, ignoreName.toLowerCase(), false);
-					actor.getClient().getSession().write(removeIgnore.serialize());
-					//Console.println("Sent AddIgnoreMessage to remove friend!");
-					ghost.ignoreRemove(ignoreName.toLowerCase());
-					//Console.println("Sent ignoreRemove delta!");
-					creature.sendSystemMessage(ignoreName + " is no longer ignored.", (byte) 0);
-					
-					// TODO: Find out why player must click on name twice in list for name to be removed.
-					break;
-				}
-			}
-		} else { return; }
+		if (ghost == null || creature == null)
+			return;
+		
+		if (ghost.getIgnoreList().contains(ignoreName)) {
+			AddIgnoreMessage message = new AddIgnoreMessage(actor, ignoreName, false);
+			creature.getClient().getSession().write(message.serialize());
+			
+			ghost.ignoreRemove(ignoreName);
+			
+			creature.sendSystemMessage(ignoreName + " is no longer ignored.", (byte) 0);
+		}
 	}
 	
 	public void sendPersistentMessageHeader(Client client, Mail mail) {

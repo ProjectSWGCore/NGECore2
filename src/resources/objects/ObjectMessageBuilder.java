@@ -63,7 +63,7 @@ public abstract class ObjectMessageBuilder {
 	}
 	
 	public IoBuffer createDelta(String objectType, byte viewType, short updateCount, short updateType, IoBuffer data, int size) {
-		IoBuffer buffer = bufferPool.allocate(27 + size, false).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer buffer = bufferPool.allocate(23 + size, false).order(ByteOrder.LITTLE_ENDIAN);
 		
 		buffer.putShort((short) 5);
 		buffer.putInt(Opcodes.DeltasMessage);

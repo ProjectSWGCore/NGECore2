@@ -195,7 +195,7 @@ public class PlayerObject extends IntangibleObject {
 		synchronized(objectMutex) {
 			this.totalPlayTime = totalPlayTime;
 		}
-		getContainer().notifyObservers(messageBuilder.buildTotalPlayTimeDelta(totalPlayTime), true);
+		notifyObservers(messageBuilder.buildTotalPlayTimeDelta(totalPlayTime), true);
 	}
 
 	public String getHome() {
@@ -427,7 +427,7 @@ public class PlayerObject extends IntangibleObject {
 		synchronized(objectMutex) {
 			setFriendListUpdateCounter(getFriendListUpdateCounter() + 1);
 			friendList.add(friend);
-			getContainer().getClient().getSession().write(messageBuilder.buildFriendAddDelta(friend));
+			getContainer().getClient().getSession().write(messageBuilder.buildFriendAddDelta(getFriendList()));
 		}
 	}
 	
@@ -435,7 +435,7 @@ public class PlayerObject extends IntangibleObject {
 		synchronized(objectMutex) {
 			setFriendListUpdateCounter(getFriendListUpdateCounter() + 1);
 			friendList.remove(friend);
-			getContainer().getClient().getSession().write(messageBuilder.buildFriendRemoveDelta(friend));
+			getContainer().getClient().getSession().write(messageBuilder.buildFriendRemoveDelta(getFriendList()));
 		}
 	}
 	
@@ -452,16 +452,16 @@ public class PlayerObject extends IntangibleObject {
 	public void ignoreAdd(String ignoreName) {
 		synchronized(objectMutex) {
 			setIgnoreListUpdateCounter(getIgnoreListUpdateCounter() + 1);
-			getContainer().getClient().getSession().write(messageBuilder.buildIgnoreAddDelta(ignoreName));
 			ignoreList.add(ignoreName);
+			getContainer().getClient().getSession().write(messageBuilder.buildIgnoreAddDelta(getIgnoreList()));
 		}
 	}
 	
 	public void ignoreRemove(String removeName) {
 		synchronized(objectMutex) {
 			setIgnoreListUpdateCounter(getIgnoreListUpdateCounter() + 1);
-			getContainer().getClient().getSession().write(messageBuilder.buildIgnoreRemoveDelta(removeName));
 			ignoreList.remove(removeName);
+			getContainer().getClient().getSession().write(messageBuilder.buildIgnoreRemoveDelta(getIgnoreList()));
 		}
 	}
 	

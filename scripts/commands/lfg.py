@@ -6,6 +6,5 @@ def setup():
     
 def run(core, actor, target, commandString):
     ghost = actor.getSlottedObject('ghost')
-    print ('Command recieved!')
     ghost.toggleFlag(PlayerFlags.LFG)
     return

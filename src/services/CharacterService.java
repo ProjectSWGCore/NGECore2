@@ -230,7 +230,7 @@ public class CharacterService implements INetworkDispatch {
 				object.setCustomName(clientCreateCharacter.getName());
 				object.setHeight(clientCreateCharacter.getScale());
 				object.setPersistent(true);
-				object.setPosition(new Point3D(3528, 0, -4804));
+				object.setPosition(SpawnPoint.getRandomPosition(new Point3D(3528, 0, -4804), (float) 0.5, 3, core.terrainService.getPlanetByName("tatooine").getID()));
 				object.setCashCredits(100);
 				object.setBankCredits(1000);
 				object.setOptionsBitmask(Options.ATTACKABLE);
@@ -460,6 +460,35 @@ public class CharacterService implements INetworkDispatch {
 			e.printStackTrace();
 		}
 		return characters;
+	}
+	
+	/**
+	 * Checks the database for if the name of the player exists. The name is
+	 * formated automatically in the method for checking the database, so no conversion is required.
+	 * @param name Name to check for in the database
+	 * @return Returns True if the player exists
+	 */
+	public boolean playerExists(String name) {
+		if (!name.equals("")) {
+			if (name.contains(" ")) {
+				name = name.split(" ")[0];
+			}
+			name = name.replace("'", "''");
+			name = name.toLowerCase();
+			try {
+				PreparedStatement ps = databaseConnection.preparedStatement("SELECT id FROM characters WHERE LOWER(\"firstName\")=?");
+				ps.setString(1, name);
+				ResultSet resultSet = ps.executeQuery();
+				
+				boolean isDuplicate = resultSet.next();
+				resultSet.getStatement().close();
+				if (isDuplicate) { return true; }
+				else { return false; }
+			} 
+			
+			catch (SQLException e) { e.printStackTrace(); }
+		}
+		return false;
 	}
 
 }
