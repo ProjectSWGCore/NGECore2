@@ -141,9 +141,7 @@ public class EquipmentService implements INetworkDispatch {
 		// TODO: Calculate actual armor values (REMINDER: Check if the player is wearing a jedi robe/cloak (look for force protection intensity). If they are, they shouldn't receive any additional protection from other items with armour.)
 		// TODO: bio-link (assign it by objectID with setAttachment and then just display it as a character name).
 		// TODO: item level requirement. if actorLevel >= itemLevel
-		// TODO: refactor equipable items that grant buffs. use setAttachment("itemBuff", "buffname") - example:	object.setAttachment("itemBuff", "fs_buff_def_1_1")
-		//																											if(item.getAttachment("itemBuff") != null )
-		//																												core.buffService.addBuffToCreature(actor, item.getAttachment("itemBuff"));
+		// TODO: refactor equipable items that grant buffs. use setAttachment("itemBuff", "buffname")
 		
 		if (actor.getSlotNameForObject(item).contentEquals("hold_r") == true)
 			weaponCriticalToDisplay(actor, item, true);
@@ -153,7 +151,13 @@ public class EquipmentService implements INetworkDispatch {
 		for(Entry<String, Object> e : attributes.entrySet()) {
 			if(e.getKey().startsWith("cat_skill_mod_bonus.@stat_n:")) {
 				core.skillModService.addSkillMod(actor, e.getKey().replace("cat_skill_mod_bonus.@stat_n:", ""), Integer.parseInt((String) e.getValue()));
-			}	
+			}
+			if(e.getKey().startsWith("cat_attrib_mod_bonus.attr_health")) {
+				actor.setMaxHealth(actor.getMaxHealth() + Integer.parseInt((String) e.getValue()));
+			}		
+			if(e.getKey().startsWith("cat_attrib_mod_bonus.attr_action")) {
+				actor.setMaxAction(actor.getMaxAction() + Integer.parseInt((String) e.getValue()));
+			}				
 			
 		}
 		
@@ -179,6 +183,12 @@ public class EquipmentService implements INetworkDispatch {
 			
 			if(e.getKey().startsWith("cat_skill_mod_bonus.@stat_n:")) {
 				core.skillModService.deductSkillMod(actor, e.getKey().replace("cat_skill_mod_bonus.@stat_n:", ""), Integer.parseInt((String) e.getValue()));
+			}	
+			if(e.getKey().startsWith("cat_attrib_mod_bonus.attr_health")) {
+				actor.setMaxHealth(actor.getMaxHealth() - Integer.parseInt((String) e.getValue()));
+			}		
+			if(e.getKey().startsWith("cat_attrib_mod_bonus.attr_action")) {
+				actor.setMaxAction(actor.getMaxAction() - Integer.parseInt((String) e.getValue()));
 			}				
 			
 		}
