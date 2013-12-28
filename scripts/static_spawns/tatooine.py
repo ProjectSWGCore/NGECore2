@@ -91,8 +91,14 @@ def addPlanetSpawns(core, planet):
 	commoner7 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_fat_zabrak_male_01.iff', 'tatooine', long(1082877), float(8.8), float(-0.9), float(-6.0), float(0.42), float(0.91)) 
 	commoner7.setCustomName2('a Patron')
 	
-	commoner2 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_naboo_human_male_08.iff', 'tatooine', long(1082877), float(6.8), float(-0.9), float(-6.5), float(0.42), float(0.91)) 
-	commoner2.setCustomName2('a Commoner')
+	commoner8 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_naboo_human_male_08.iff', 'tatooine', long(1082877), float(6.8), float(-0.9), float(-6.5), float(0.42), float(0.91)) 
+	commoner8.setCustomName2('a Patron')
+	
+	commoner9 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_tatooine_aqualish_male_09.iff', 'tatooine', long(1082877), float(1.1), float(-0.9), float(-7.7), float(0.42), float(0.91)) 
+	commoner9.setCustomName2('a Commoner')
+	
+	commoner10 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_tatooine_nikto_male_04.iff', 'tatooine', long(1082877), float(2.1), float(-0.9), float(-8.4), float(0.42), float(0.91)) 
+	commoner10.setCustomName2('a Commoner')
 	
 	#Starport Interior
 	
@@ -107,7 +113,59 @@ def addPlanetSpawns(core, planet):
 	#Miscellaneous Building Interiors
 	
 	#Outside
+	businessman2 = stcSvc.spawnObject('object/mobile/shared_dressed_businessman_human_male_01.iff', 'tatooine', long(0), float(3532.7), float(5.0), float(-4788.1), float(0), float(0)) 
+	businessman2.setCustomName2('a Businessman')
 	
+	noble2 = stcSvc.spawnObject('object/mobile/shared_dressed_noble_human_female_01.iff', 'tatooine', long(0), float(3542.3), float(5.0), float(-4826.0), float(0.42), float(0.91)) 
+	noble2.setCustomName2('a Noble')
+	
+	commoner11 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_naboo_human_male_06.iff', 'tatooine', long(0), float(3529.1), float(5.0), float(-4900.4), float(0.42), float(0.91)) 
+	commoner11.setCustomName2('a Commoner')
+	
+	businessman3 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_tatooine_trandoshan_male_02.iff', 'tatooine', long(0), float(3532.7), float(5.0), float(-4788.1), float(0), float(0)) 
+	businessman3.setCustomName2('a Businessman')
+	
+	jawa1 = stcSvc.spawnObject('object/mobile/shared_jawa.iff', 'tatooine', long(0), float(3663.3), float(5.0), float(-4858.6), float(0), float(0)) 
+	jawa1.setCustomName2('a Jawa')
+	
+	commoner12 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_naboo_moncal_male_01.iff', 'tatooine', long(0), float(3532.7), float(5.0), float(-4788.1), float(0), float(0)) 
+	commoner12.setCustomName2('a Scientist')
+	
+	commoner13 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_naboo_zabrak_female_02.iff', 'tatooine', long(0), float(3559.7), float(5.0), float(-4725.9), float(0), float(0)) 
+	commoner13.setCustomName2('a Commoner')
+	
+	commoner14 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_tatooine_devaronian_male_01.iff', 'tatooine', long(0), float(3527.7), float(5.0), float(-4721.1), float(0), float(0)) 
+	commoner14.setCustomName2('a Commoner')
+	
+	commoner15 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_tatooine_aqualish_female_01.iff', 'tatooine', long(0), float(3513.7), float(5.0), float(-4740.4), float(0), float(0)) 
+	commoner15.setCustomName2('a Commoner')
+	
+	ltHarburik = stcSvc.spawnObject('object/mobile/tatooine_npc/shared_lt_harburik.iff', 'tatooine', long(0), float(3485.4), float(5.0), float(-4788.1), float(0), float(0)) 
+	ltHarburik.setCustomName2('Lieutenant Harburik')
+	
+	jawa2 = stcSvc.spawnObject('object/mobile/shared_jawa.iff', 'tatooine', long(0), float(3475.4), float(5.0), float(-4852.7), float(0), float(0)) 
+	jawa2.setCustomName2('a Jawa')
+	
+	jawa3 = stcSvc.spawnObject('object/mobile/shared_jawa.iff', 'tatooine', long(0), float(3469.3), float(5.0), float(-4861.5), float(0), float(0)) 
+	jawa3.setCustomName2('a Jawa')
+	
+	jawa4 = stcSvc.spawnObject('object/mobile/shared_jawa.iff', 'tatooine', long(0), float(3486.1), float(5.0), float(-4884.7), float(0), float(0)) 
+	jawa4.setCustomName2('a Jawa')
+	
+	jawa5 = stcSvc.spawnObject('object/mobile/shared_jawa.iff', 'tatooine', long(0), float(3487.1), float(5.0), float(-4886.0), float(0), float(0)) 
+	jawa5.setCustomName2('a Jawa')
+	
+	jawa6 = stcSvc.spawnObject('object/mobile/shared_jawa.iff', 'tatooine', long(0), float(3488.8), float(5.0), float(-4884.4), float(0), float(0)) 
+	jawa6.setCustomName2('a Jawa')
+	
+	jawa7 = stcSvc.spawnObject('object/mobile/shared_jawa.iff', 'tatooine', long(0), float(3472.2), float(5.0), float(-4918.4), float(0), float(0)) 
+	jawa7.setCustomName2('a Jawa')
+	
+	jawa8 = stcSvc.spawnObject('object/mobile/shared_jawa.iff', 'tatooine', long(0), float(3471.4), float(5.0), float(-4919.5), float(0), float(0)) 
+	jawa8.setCustomName2('a Jawa')
+	
+	jawa9 = stcSvc.spawnObject('object/mobile/shared_jawa.iff', 'tatooine', long(0), float(3470.3), float(5.0), float(-4918.7), float(0), float(0)) 
+	jawa9.setCustomName2('a Jawa')
 # Mos Espa NPC Spawns
 
 # Mos Entha NPC Spawns
