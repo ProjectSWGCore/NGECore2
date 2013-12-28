@@ -55,8 +55,10 @@ import protocol.swg.LoginEnumCluster;
 import protocol.swg.ServerNowEpochTime;
 import protocol.swg.StationIdHasJediSlot;
 import resources.common.*;
+import resources.datatables.PlayerFlags;
 
 import resources.objects.creature.CreatureObject;
+import resources.objects.player.PlayerObject;
 
 @SuppressWarnings("unused")
 
@@ -181,21 +183,40 @@ public class LoginService implements INetworkDispatch{
 				packet.deserialize(data);
 				Client client = core.getClient(session);
 				
-                PreparedStatement preparedStatement;
-	               
-	            preparedStatement = databaseConnection1.preparedStatement("DELETE FROM characters WHERE \"id\"=? AND \"galaxyId\"=? AND \"accountId\"=?");
-	            preparedStatement.setLong(1, packet.getcharId());
-	            preparedStatement.setInt(2, packet.getgalaxyId());
-	            preparedStatement.setInt(3, (int) client.getAccountId());
-	            boolean resultSet = preparedStatement.execute();   
-	            //TODO: send deletecharacter failed
-	            if(!resultSet) {
-	            	core.getCreatureODB().delete(new Long(packet.getcharId()), Long.class, CreatureObject.class);
-		            DeleteCharacterReplyMessage reply = new DeleteCharacterReplyMessage(0);          
-					session.write(reply.serialize());
-	            } 
-	            preparedStatement.close();
-	            
+                		PreparedStatement preparedStatement;
+                		
+                		preparedStatement = databaseConnection1.preparedStatement("DELETE FROM characters WHERE \"id\"=? AND \"galaxyId\"=? AND \"accountId\"=?");
+                		preparedStatement.setLong(1, packet.getcharId());
+                		preparedStatement.setInt(2, packet.getgalaxyId());
+                		preparedStatement.setInt(3, (int) client.getAccountId());
+                		boolean resultSet = preparedStatement.execute();   
+                		
+                		//TODO: send deletecharacter failed
+                		if(!resultSet) {
+                			CreatureObject object = core.objectService.getObject(packet.getcharId());
+                			
+                			if (object != null) {
+                				PlayerObject player = object.getSlottedObject("ghost");
+                				
+                				
+                				if (player != null && !player.isSet(PlayerFlags.LD) && object.getClient()) {
+                					core.connectionService.disconnect(object.getClient().getSession());
+                				}
+                				
+                				if (object.isInQuadtree()) {
+                					core.simulationService.remove(object, object.getPosition().x, object.getPosition().z, true);
+                				}
+                				
+                				destroyObject(object);
+                			}
+                			
+                			core.getCreatureODB().delete(new Long(packet.getcharId()), Long.class, CreatureObject.class);
+                			DeleteCharacterReplyMessage reply = new DeleteCharacterReplyMessage(0);
+                			session.write(reply.serialize());
+                		}
+                		
+                		preparedStatement.close();
+                		
 			}
 			
 		});
