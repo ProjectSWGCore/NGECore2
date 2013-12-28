@@ -115,56 +115,94 @@ public class EquipmentService implements INetworkDispatch {
 			String profession = ((PlayerObject) actor.getSlottedObject("ghost")).getProfession();
 			if (item.getStringAttribute("class_required").contentEquals(getFormalProfessionName(profession))) {
 				result = true;
-			} else{
+			} else {
 				return false;
 			}
 		}
-
+		
 		return result;
 	}
 	
-	public void equip(CreatureObject actor, SWGObject item) {
+	public void calculateForceProtection(CreatureObject actor, SWGObject item, boolean add) {
+		int type = 0;
+		int level = 0;
+		int[][] protection = {{1400,3000,4000,5000,6500},{0, 0, 4500, 5600, 6500}};
 
+		switch ((String) item.getAttachment("type")) {
+			case "jedi_robe":	type = 0; break;
+			case "jedi_cloak":	type = 1; break;
+		}
+		
+		switch (item.getStringAttribute("protection_level")) {
+			case "Faint":		level = 0; break;
+			case "Weak":		level = 1; break;
+			case "Lucent":		level = 2; break;
+			case "Luminous":	level = 3; break;
+			case "Radiant":		level = 4; break;
+		}
+		
+		if (add==true) {
+			core.skillModService.addSkillMod(actor, "kinetic", protection[type][level]);
+			core.skillModService.addSkillMod(actor, "energy", protection[type][level]);
+			core.skillModService.addSkillMod(actor, "heat", protection[type][level]);
+			core.skillModService.addSkillMod(actor, "cold", protection[type][level]);
+			core.skillModService.addSkillMod(actor, "acid", protection[type][level]);
+			core.skillModService.addSkillMod(actor, "electricity", protection[type][level]);
+		} else {
+			core.skillModService.deductSkillMod(actor, "kinetic", protection[type][level]);
+			core.skillModService.deductSkillMod(actor, "energy", protection[type][level]);
+			core.skillModService.deductSkillMod(actor, "heat", protection[type][level]);
+			core.skillModService.deductSkillMod(actor, "cold", protection[type][level]);
+			core.skillModService.deductSkillMod(actor, "acid", protection[type][level]);
+			core.skillModService.deductSkillMod(actor, "electricity", protection[type][level]);
+		}
+		
+	}
+	
+	public void equip(CreatureObject actor, SWGObject item) {
+			
 		String template = ((item.getAttachment("customServerTemplate") == null) ? item.getTemplate() : (item.getTemplate().split("shared_")[0] + "shared_" + ((String) item.getAttachment("customServerTemplate")) + ".iff"));
 		String serverTemplate = template.replace(".iff", "");
 		PyObject func = core.scriptService.getMethod("scripts/" + serverTemplate.split("shared_" , 2)[0].replace("shared_", ""), serverTemplate.split("shared_" , 2)[1], "equip");
 		if(func != null)
 			func.__call__(Py.java2py(core), Py.java2py(actor), Py.java2py(item));
+
+		if (item.getStringAttribute("protection_level") != null)
+			calculateForceProtection(actor, item, true);
 		
-		// TODO: add health/action bonus from crafted weapon with augmentations (also seen with cybernetics)
 		// TODO: faction restrictions - You had to be a Combatant as minimum in order to EQUIP an item.
 		// TODO: Species restrictions
 		// TODO: Gender restrictions
 		// TODO: crit enhancement from crafted weapons
-		// TODO: Jedi robes Force Protection Intensity
 		// TODO: check for armor category in order to add resistance to certain DoT types
 		// TODO: Calculate actual armor values (REMINDER: Check if the player is wearing a jedi robe/cloak (look for force protection intensity). If they are, they shouldn't receive any additional protection from other items with armour.)
-		// TODO: bio-link (assign it by objectID with setAttachment and then just display it as a character name).
-		// TODO: item level requirement. if actorLevel >= itemLevel
-		// TODO: refactor equipable items that grant buffs. use setAttachment("itemBuff", "buffname")
+		// TODO: bio-link (assign it by objectID with setAttachment and then just display the customName for that objectID).
 		
-		if (actor.getSlotNameForObject(item).contentEquals("hold_r") == true)
-			weaponCriticalToDisplay(actor, item, true);
-		
+		if(item.getStringAttribute("cat_wpn_damage.wpn_category") != null)
+			if (actor.getSlotNameForObject(item).contentEquals("hold_r") == true)
+				weaponCriticalToDisplay(actor, item, true);
+			
 		Map<String, Object> attributes = new TreeMap<String, Object>(item.getAttributes());
 		
 		for(Entry<String, Object> e : attributes.entrySet()) {
 			if(e.getKey().startsWith("cat_skill_mod_bonus.@stat_n:")) {
 				core.skillModService.addSkillMod(actor, e.getKey().replace("cat_skill_mod_bonus.@stat_n:", ""), Integer.parseInt((String) e.getValue()));
 			}
+			
 			if(e.getKey().startsWith("cat_attrib_mod_bonus.attr_health")) {
 				actor.setMaxHealth(actor.getMaxHealth() + Integer.parseInt((String) e.getValue()));
-			}		
+			}
+			
 			if(e.getKey().startsWith("cat_attrib_mod_bonus.attr_action")) {
 				actor.setMaxAction(actor.getMaxAction() + Integer.parseInt((String) e.getValue()));
-			}				
-			
+			}
 		}
-		
+
 		if(!actor.getEquipmentList().contains(item))
 			actor.addObjectToEquipList(item);
-		
-	}
+
+}
+
 	
 	public void unequip(CreatureObject actor, SWGObject item) {
 		
@@ -174,8 +212,12 @@ public class EquipmentService implements INetworkDispatch {
 		if(func != null)
 			func.__call__(Py.java2py(core), Py.java2py(actor), Py.java2py(item));
 
-		if (actor.getSlotNameForObject(item).contentEquals("hold_r") == true)
-			weaponCriticalToDisplay(actor, item, false);
+		if (item.getStringAttribute("protection_level") != null)
+			calculateForceProtection(actor, item, false);
+		
+		if(item.getStringAttribute("cat_wpn_damage.wpn_category") != null)		
+			if (actor.getSlotNameForObject(item).contentEquals("hold_r") == true)
+				weaponCriticalToDisplay(actor, item, false);
 		
 		Map<String, Object> attributes = new TreeMap<String, Object>(item.getAttributes());
 		
@@ -189,14 +231,13 @@ public class EquipmentService implements INetworkDispatch {
 			}		
 			if(e.getKey().startsWith("cat_attrib_mod_bonus.attr_action")) {
 				actor.setMaxAction(actor.getMaxAction() - Integer.parseInt((String) e.getValue()));
-			}				
+			}
 			
-		}
+		}	
 		
 		if(actor.getEquipmentList().contains(item))
 			actor.removeObjectFromEquipList(item);
 
 	}
-
 
 }
