@@ -58,7 +58,6 @@ import resources.common.*;
 import resources.datatables.PlayerFlags;
 
 import resources.objects.creature.CreatureObject;
-import resources.objects.player.PlayerObject;
 
 @SuppressWarnings("unused")
 
@@ -178,7 +177,7 @@ public class LoginService implements INetworkDispatch{
 				
 				data = data.order(ByteOrder.LITTLE_ENDIAN);
 				data.position(0);
-
+				
 				DeleteCharacterMessage packet = new DeleteCharacterMessage();
 				packet.deserialize(data);
 				Client client = core.getClient(session);
@@ -196,12 +195,9 @@ public class LoginService implements INetworkDispatch{
                 			CreatureObject object = core.objectService.getObject(packet.getcharId());
                 			
                 			if (object != null) {
-                				PlayerObject player = object.getSlottedObject("ghost");
-                				
-                				
-                				if (player != null && !player.isSet(PlayerFlags.LD) && object.getClient()) {
+                				if (object.isInQuadtree() && object.getClient() != null) {
                 					core.connectionService.disconnect(object.getClient().getSession());
-                				}
+                				} 
                 				
                 				if (object.isInQuadtree()) {
                 					core.simulationService.remove(object, object.getPosition().x, object.getPosition().z, true);
