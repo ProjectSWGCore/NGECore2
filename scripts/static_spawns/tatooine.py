@@ -166,6 +166,10 @@ def addPlanetSpawns(core, planet):
 	
 	jawa9 = stcSvc.spawnObject('object/mobile/shared_jawa.iff', 'tatooine', long(0), float(3470.3), float(5.0), float(-4918.7), float(0), float(0)) 
 	jawa9.setCustomName2('a Jawa')
+	
+	bib = stcSvc.spawnObject('object/mobile/shared_bib_fortuna.iff', 'tatooine', long(0), float(3552.4), float(5.0), float(-4933.2), float(0), float(0))
+	bib.setCustomName2('Bib Fortuna')
+	
 # Mos Espa NPC Spawns
 
 # Mos Entha NPC Spawns
