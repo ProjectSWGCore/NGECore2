@@ -195,7 +195,7 @@ public class PlayerObject extends IntangibleObject {
 		synchronized(objectMutex) {
 			this.totalPlayTime = totalPlayTime;
 		}
-		getContainer().notifyObservers(messageBuilder.buildTotalPlayTimeDelta(totalPlayTime), true);
+		notifyObservers(messageBuilder.buildTotalPlayTimeDelta(totalPlayTime), true);
 	}
 
 	public String getHome() {
