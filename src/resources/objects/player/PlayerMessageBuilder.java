@@ -611,7 +611,7 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 	}
 	
 	public IoBuffer buildFlagBitmask(int bitmask) {
-		IoBuffer buffer = bufferPool.allocate(30, false).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer buffer = bufferPool.allocate(20, false).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.putInt(4);
 		buffer.putInt(bitmask);
 		buffer.putInt(0);

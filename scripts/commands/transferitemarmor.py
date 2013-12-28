@@ -5,7 +5,8 @@ def setup():
 	
 def run(core, actor, target, commandString):
 	if core.equipmentService.canEquip(actor, target) is False:
-		return	
+		return
+		
 
 	parsedMsg = commandString.split(' ', 3)
 	objService = core.objectService

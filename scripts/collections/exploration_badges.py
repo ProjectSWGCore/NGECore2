@@ -71,6 +71,6 @@ def setup(collectionService):
 	collectionService.registerExplorationBadge('tatooine', 'exp_tat_tusken_pool', -3966, 6267, 32)
 
 #Yavin
-	collectionService.registerExplorationBadge('yavin', 'exp_yav_temple_exar_kun', 5076, 5537, 32)
-	collectionService.registerExplorationBadge('yavin', 'exp_yav_temple_blueleaf', -875, -2047, 32)
-	collectionService.registerExplorationBadge('yavin', 'exp_yav_temple_woolamander', 519, -646, 32)
+	collectionService.registerExplorationBadge('yavin4', 'exp_yav_temple_exar_kun', 5076, 5537, 32)
+	collectionService.registerExplorationBadge('yavin4', 'exp_yav_temple_blueleaf', -875, -2047, 32)
+	collectionService.registerExplorationBadge('yavin4', 'exp_yav_temple_woolamander', 519, -646, 32)

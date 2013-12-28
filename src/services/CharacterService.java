@@ -230,7 +230,7 @@ public class CharacterService implements INetworkDispatch {
 				object.setCustomName(clientCreateCharacter.getName());
 				object.setHeight(clientCreateCharacter.getScale());
 				object.setPersistent(true);
-				object.setPosition(new Point3D(3528, 0, -4804));
+				object.setPosition(SpawnPoint.getRandomPosition(new Point3D(3528, 0, -4804), (float) 0.5, 3, core.terrainService.getPlanetByName("tatooine").getID()));
 				object.setCashCredits(100);
 				object.setBankCredits(1000);
 				object.setOptionsBitmask(Options.ATTACKABLE);

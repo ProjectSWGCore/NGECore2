@@ -570,7 +570,9 @@ public class SimulationService implements INetworkDispatch {
 		
 		//session.suspendWrite();
 		
-		ghost.toggleFlag(PlayerFlags.LD);
+		
+		if(!ghost.isSet(PlayerFlags.LD))
+			ghost.toggleFlag(PlayerFlags.LD);
 		
 		/*
 		object.createTransaction(core.getCreatureODB().getEnvironment());
@@ -616,11 +618,7 @@ public class SimulationService implements INetworkDispatch {
 		}
 		
 		PlayerObject ghost = (PlayerObject) object.getSlottedObject("ghost");
-		
-		if (ghost.isSet(PlayerFlags.LD)) {
-			ghost.toggleFlag(PlayerFlags.LD);
-		}
-		
+				
 		core.weatherService.sendWeather(object);
 		
 		if (!object.hasSkill(ghost.getProfessionWheelPosition())) {

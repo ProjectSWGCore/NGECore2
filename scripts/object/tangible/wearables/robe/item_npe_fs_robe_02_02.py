@@ -10,4 +10,5 @@ def setup(core, object):
 	object.setStringAttribute('protection_level', 'Faint')
 	object.setStringAttribute('class_required', 'Jedi')
 	object.setIntAttribute('required_combat_level', 20)
+	object.setAttachment('type', 'jedi_robe')
 	return

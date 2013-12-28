@@ -357,8 +357,8 @@ public class TangibleObject extends SWGObject {
 		
 		destination.getSession().write(messageBuilder.buildBaseline3());
 		destination.getSession().write(messageBuilder.buildBaseline6());
-		destination.getSession().write(messageBuilder.buildBaseline8());
-		destination.getSession().write(messageBuilder.buildBaseline9());
+		//destination.getSession().write(messageBuilder.buildBaseline8());
+		//destination.getSession().write(messageBuilder.buildBaseline9());
 		
 		if(getPvPBitmask() != 0) {
 			UpdatePVPStatusMessage upvpm = new UpdatePVPStatusMessage(getObjectID());
