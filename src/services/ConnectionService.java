@@ -189,6 +189,7 @@ public class ConnectionService implements INetworkDispatch {
 		object.setInviteCounter(0);
 		object.setInviteSenderId(0);
 		object.setInviteSenderName("");
+		core.groupService.handleGroupDisband(object);
 		object.setClient(null);
 		PlayerObject ghost = (PlayerObject) object.getSlottedObject("ghost");
 		

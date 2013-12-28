@@ -147,6 +147,12 @@ public class TangibleObject extends SWGObject {
 		}
 	}
 	
+	public boolean getOption(int option) {
+		synchronized(objectMutex) {
+			return ((optionsBitmask & option) == option);
+		}
+	}
+	
 	public void addOption(int option) {
 		setOptionsBitmask(getOptionsBitmask() | option);
 	}

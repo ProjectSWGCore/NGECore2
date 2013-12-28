@@ -22,7 +22,7 @@ def run(core, actor, target, commandString):
         planet = core.terrainService.getPlanetByName(commandArgs[0])
         waypoint = core.objectService.createObject('object/waypoint/shared_waypoint.iff', planet, float(commandArgs[1]), float(commandArgs[2]), float(commandArgs[3]))
         waypoint.setActive(True)
-        waypoint.setColor(colorCheck(core, actor, target, commandString, commandArgs[4]))
+        waypoint.setColor(colorCheck(commandArgs[4]))
         name = commandString.split(" ", 5)
         waypoint.setName(name[5])
         waypoint.setPlanetCRC(crc.StringtoCRC(planet.getName()))
@@ -89,7 +89,10 @@ def run(core, actor, target, commandString):
         waypoint = core.objectService.createObject('object/waypoint/shared_waypoint.iff', actor.getPlanet(), actor.getWorldPosition().x, actor.getWorldPosition().z, actor.getWorldPosition().y)
         waypoint.setActive(True)
         waypoint.setColor(WaypointObject.BLUE)
-        waypoint.setName(commandString)
+        if commandString == '':
+        	waypoint.setName(actor.getPlanet().name.capitalize())
+        else:
+        	waypoint.setName(commandString)
         waypoint.setPlanetCRC(crc.StringtoCRC(actor.getPlanet().getName()))
         waypoint.setStringAttribute('', '') # This simply allows the attributes to display (nothing else has to be done)
         actorPlayer.waypointAdd(waypoint)
@@ -98,7 +101,7 @@ def run(core, actor, target, commandString):
     
     return
 
-def colorCheck(core, actor, target, commandString, validcolors):
+def colorCheck(validcolors):
     if validcolors == "blue":
         return WaypointObject.BLUE
     if validcolors == "green":
