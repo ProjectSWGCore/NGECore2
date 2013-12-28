@@ -119,6 +119,13 @@ public class EquipmentService implements INetworkDispatch {
 				return false;
 			}
 		}
+
+		
+		if (item.getAttributes().toString().contains("required_combat_level"))
+			if (actor.getLevel() >= item.getIntAttribute("required_combat_level"))
+				result = true;
+			else
+				return false;
 		
 		return result;
 	}
