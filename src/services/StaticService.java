@@ -55,6 +55,7 @@ public class StaticService implements INetworkDispatch {
 		spawnPlanetStaticObjs("rori");
 		spawnPlanetStaticObjs("naboo");
 		spawnPlanetStaticObjs("tatooine");
+		spawnPlanetStaticObjs("lok");
 	}
 	
 	@Override
