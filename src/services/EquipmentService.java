@@ -28,6 +28,7 @@ import java.util.TreeMap;
 import org.python.core.Py;
 import org.python.core.PyObject;
 
+import resources.datatables.FactionStatus;
 import resources.objects.creature.CreatureObject;
 import main.NGECore;
 import engine.resources.objects.SWGObject;
@@ -113,13 +114,17 @@ public class EquipmentService implements INetworkDispatch {
 		
 		if (item.getStringAttribute("class_required") != null) {
 			String profession = ((PlayerObject) actor.getSlottedObject("ghost")).getProfession();
-			if (item.getStringAttribute("class_required").contentEquals(getFormalProfessionName(profession))) {
+			if (item.getStringAttribute("class_required").contentEquals(getFormalProfessionName(profession)))
 				result = true;
-			} else {
+			else
 				return false;
-			}
 		}
-
+		
+		if (item.getStringAttribute("faction_restriction") != null) 
+			if (item.getStringAttribute("faction_restriction").toLowerCase().contentEquals(actor.getFaction()) && actor.getFactionStatus() >= FactionStatus.Combatant)
+				result = true;
+			else
+				return false;			
 		
 		if (item.getAttributes().toString().contains("required_combat_level"))
 			if (actor.getLevel() >= item.getIntAttribute("required_combat_level"))
