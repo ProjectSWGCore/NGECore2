@@ -196,6 +196,10 @@ public class EquipmentService implements INetworkDispatch {
 				core.skillModService.addSkillMod(actor, e.getKey().replace("cat_skill_mod_bonus.@stat_n:", ""), Integer.parseInt((String) e.getValue()));
 			}
 			
+			if(e.getKey().startsWith("cat_stat_mod_bonus.@stat_n:")) {
+				core.skillModService.addSkillMod(actor, e.getKey().replace("cat_stat_mod_bonus.@stat_n:", ""), Integer.parseInt((String) e.getValue()));
+			}			
+			
 			if(e.getKey().startsWith("cat_attrib_mod_bonus.attr_health")) {
 				actor.setMaxHealth(actor.getMaxHealth() + Integer.parseInt((String) e.getValue()));
 			}
