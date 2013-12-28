@@ -192,7 +192,7 @@ public class LoginService implements INetworkDispatch{
                 		
                 		//TODO: send deletecharacter failed
                 		if(!resultSet) {
-                			CreatureObject object = core.objectService.getObject(packet.getcharId());
+                			CreatureObject object = (CreatureObject) core.objectService.getObject(packet.getcharId());
                 			
                 			if (object != null) {
                 				if (object.isInQuadtree() && object.getClient() != null) {
