@@ -1,4 +1,6 @@
 import sys
+from resources.datatables import Options
+from resources.datatables import StateStatus
 
 def addPlanetSpawns(core, planet):
 
@@ -24,6 +26,8 @@ def addPlanetSpawns(core, planet):
 	#Cantina Interior
 	wuher = stcSvc.spawnObject('object/mobile/shared_wuher.iff', 'tatooine', long(1082877), float(8.6), float(-0.9), float(0.4), float(0.71), float(0.71))
 	wuher.setCustomName2('Wuher')
+	wuher.addOption(Options.INVULNERABLE)
+	wuher.setStateBitmask(StateStatus.SittingOnChair)
 	
 	chadraFanFemale = stcSvc.spawnObject('object/mobile/shared_chadra_fan_female.iff', 'tatooine', long(1082877), float(10.6), float(-0.9), float(-1.5), float(0.42), float(0.90))
 	chadraFanFemale.setCustomName2('a Chadra Fan Female')
