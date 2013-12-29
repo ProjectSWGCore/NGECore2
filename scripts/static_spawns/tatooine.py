@@ -5,7 +5,7 @@ from resources.datatables import StateStatus
 def addPlanetSpawns(core, planet):
 
 	stcSvc = core.staticService
-# Wayfar Life Day, by Wefi
+# Wayfar Life Day, by Wefi, modified by Fingies
 		
 	stcSvc.spawnObject('object/mobile/shared_lifeday_saun_dann.iff', 'tatooine', long(0), float(-5037.00), float(75), float(-6561), float(-0.75), float(0)) # Life Day
 	stcSvc.spawnObject('object/tangible/holiday/life_day/shared_main_lifeday_tree.iff', 'tatooine', long(0), float(-5043.00), float(75), float(-6541.00), float(0.999132931232), float(-0.0416347384453)) # Lifeday Tree
@@ -18,6 +18,18 @@ def addPlanetSpawns(core, planet):
 	bandtat3.setCustomName2('Nalan Cheel')
 	bandtat4 = stcSvc.spawnObject('object/mobile/shared_lifeday_figrin_dan_band.iff', 'tatooine', long(0), float(-5045.00), float(75), float(-6555), float(-0.75), float(0)) # LD band 4
 	bandtat4.setCustomName2('Sunil Eide')
+	reblifevendor = stcSvc.spawnObject('object/mobile/shared_life_day_rebel_vendor.iff', 'tatooine', long(0), float(-5212.2), float(75.0), float(-6571.7), float(0.656), float(-0.7547)) #Rebel Wookiee Vendor
+	reblifevendor.setCustomName2('Oolovv \(Wookiee Freedom Fighter)')
+	reblifesold1 = stcSvc.spawnObject('object/mobile/shared_rebel_snow_m_01.iff', 'tatooine', long(0), float(-5208.8), float(75.0), float(-6569.6), float(0.669), float(-0.743)) #Rebel Vendor Guard 1
+	reblifesold1.setCustomName2('a Rebel Soldier')
+	reblifesold2 = stcSvc.spawnObject('object/mobile/shared_rebel_snow_m_01.iff', 'tatooine', long(0), float(-5208.8), float(75.0), float(-6573.1), float(0.669), float(-0.743)) #Rebel Vendor Guard 2
+	reblifesold2.setCustomName2('a Rebel Soldier')
+	implifevendor = stcSvc.spawnObject('object/mobile/shared_life_day_imperial_vendor.iff', 'tatooine', long(0), float(-5095.6), float(75.0), float(-6559.2), float(0.0436), float(0.9990)) #Imp Vendor
+	implifevendor.setCustomName2('Sstrigge \(Trandoshan \'Trader\')')
+	implifesold1 = stcSvc.spawnObject('object/mobile/shared_snowtrooper_s01.iff', 'tatooine', long(0), float(-5092.2), float(75.0), float(-6559.0), float(0.0087), float(0.9999)) #Imp Vendor Guard 1
+	implifesold1.setCustomName2('a Stormtrooper')
+	implifesold2 = stcSvc.spawnObject('object/mobile/shared_snowtrooper_s01.iff', 'tatooine', long(0), float(-5100.8), float(75.0), float(-6569.4), float(0.0261), float(0.9996)) #Imp Vendor Guard 2
+	implifesold2.setCustomName2('a Stormtrooper')
 	stcSvc.spawnObject('object/tangible/instrument/shared_nalargon.iff', 'tatooine', long(0), float(-5045.00), float(75), float(-6555), float(0.999132931232), float(-0.0416347384453)) # Drums
 	stcSvc.spawnObject('object/tangible/instrument/shared_ommni_box.iff', 'tatooine', long(0), float(-5043.00), float(75), float(-6559), float(0.999132931232), float(-0.0416347384453)) # Box
 	
