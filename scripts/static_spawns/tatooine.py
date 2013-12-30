@@ -9,7 +9,8 @@ def addPlanetSpawns(core, planet):
 		
 	stcSvc.spawnObject('object/mobile/shared_lifeday_saun_dann.iff', 'tatooine', long(0), float(-5037.00), float(75), float(-6561), float(-0.75), float(0)) # Life Day
 	stcSvc.spawnObject('object/tangible/holiday/life_day/shared_main_lifeday_tree.iff', 'tatooine', long(0), float(-5043.00), float(75), float(-6541.00), float(0.999132931232), float(-0.0416347384453)) # Lifeday Tree
-	stcSvc.spawnObject('object/mobile/shared_lifeday_figrin_dan.iff', 'tatooine', long(0), float(-5046.00), float(75), float(-6560), float(-0.75), float(0)) # LD Figrin
+	figlife = stcSvc.spawnObject('object/mobile/shared_lifeday_figrin_dan.iff', 'tatooine', long(0), float(-5046.00), float(75), float(-6560), float(-0.75), float(0)) # LD Figrin
+	figlife.setCustomName2('Figrin D\'an')
 	bandtat1 = stcSvc.spawnObject('object/mobile/shared_lifeday_figrin_dan_band.iff', 'tatooine', long(0), float(-5040.00), float(75), float(-6557), float(-0.75), float(0)) # LD Band 1
 	bandtat1.setCustomName2('Doikk Nats')
 	bandtat2 = stcSvc.spawnObject('object/mobile/shared_lifeday_figrin_dan_band.iff', 'tatooine', long(0), float(-5043.00), float(75), float(-6559), float(-0.75), float(0)) # LD band 2
@@ -24,11 +25,11 @@ def addPlanetSpawns(core, planet):
 	reblifesold1.setCustomName2('a Rebel Soldier')
 	reblifesold2 = stcSvc.spawnObject('object/mobile/shared_rebel_snow_m_01.iff', 'tatooine', long(0), float(-5208.8), float(75.0), float(-6573.1), float(0.669), float(-0.743)) #Rebel Vendor Guard 2
 	reblifesold2.setCustomName2('a Rebel Soldier')
-	implifevendor = stcSvc.spawnObject('object/mobile/shared_life_day_imperial_vendor.iff', 'tatooine', long(0), float(-5095.6), float(75.0), float(-6559.2), float(0.0436), float(0.9990)) #Imp Vendor
+	implifevendor = stcSvc.spawnObject('object/mobile/shared_life_day_imperial_vendor.iff', 'tatooine', long(0), float(-5097.1), float(75.0), float(-6570.7), float(0.0087), float(-0.9999)) #Imp Vendor
 	implifevendor.setCustomName2('Sstrigge \(Trandoshan \'Trader\')')
-	implifesold1 = stcSvc.spawnObject('object/mobile/shared_snowtrooper_s01.iff', 'tatooine', long(0), float(-5092.2), float(75.0), float(-6559.0), float(0.0087), float(0.9999)) #Imp Vendor Guard 1
+	implifesold1 = stcSvc.spawnObject('object/mobile/shared_snowtrooper_s01.iff', 'tatooine', long(0), float(-5092.2), float(75.0), float(-6569.0), float(0.0087), float(-0.9999)) #Imp Vendor Guard 1
 	implifesold1.setCustomName2('a Stormtrooper')
-	implifesold2 = stcSvc.spawnObject('object/mobile/shared_snowtrooper_s01.iff', 'tatooine', long(0), float(-5100.8), float(75.0), float(-6569.4), float(0.0261), float(0.9996)) #Imp Vendor Guard 2
+	implifesold2 = stcSvc.spawnObject('object/mobile/shared_snowtrooper_s01.iff', 'tatooine', long(0), float(-5100.8), float(75.0), float(-6569.4), float(0.0087), float(-0.9999)) #Imp Vendor Guard 2
 	implifesold2.setCustomName2('a Stormtrooper')
 	stcSvc.spawnObject('object/tangible/instrument/shared_nalargon.iff', 'tatooine', long(0), float(-5045.00), float(75), float(-6555), float(0.999132931232), float(-0.0416347384453)) # Drums
 	stcSvc.spawnObject('object/tangible/instrument/shared_ommni_box.iff', 'tatooine', long(0), float(-5043.00), float(75), float(-6559), float(0.999132931232), float(-0.0416347384453)) # Box
@@ -63,7 +64,7 @@ def addPlanetSpawns(core, planet):
 	cantinaStormL.setCustomName2('a Stormtrooper Squad Leader')
 	
 	figrinDan = stcSvc.spawnObject('object/mobile/tatooine_npc/shared_figrin_dan.iff', 'tatooine', long(1082880), float(3.7), float(-0.9), float(-14.4), float(0.42), float(0.91)) 
-	figrinDan.setCustomName2('Figrin Dan')
+	figrinDan.setCustomName2('Figrin D\'an')
 	
 	techMor = stcSvc.spawnObject('object/mobile/tatooine_npc/shared_figrin_dan.iff', 'tatooine', long(1082880), float(4.0), float(-0.9), float(-17.0), float(0.42), float(0.91)) 
 	techMor.setCustomName2('Tech M\'or')
@@ -159,19 +160,19 @@ def addPlanetSpawns(core, planet):
 	ltHarburik = stcSvc.spawnObject('object/mobile/tatooine_npc/shared_lt_harburik.iff', 'tatooine', long(0), float(3485.4), float(5.0), float(-4788.1), float(0), float(0)) 
 	ltHarburik.setCustomName2('Lieutenant Harburik')
 	
-	jawa2 = stcSvc.spawnObject('object/mobile/shared_jawa.iff', 'tatooine', long(0), float(3475.4), float(5.0), float(-4852.7), float(0), float(0)) 
+	jawa2 = stcSvc.spawnObject('object/mobile/shared_jawa.iff', 'tatooine', long(0), float(3475.4), float(4.9), float(-4852.7), float(0), float(0)) 
 	jawa2.setCustomName2('a Jawa')
 	
-	jawa3 = stcSvc.spawnObject('object/mobile/shared_jawa.iff', 'tatooine', long(0), float(3469.3), float(5.0), float(-4861.5), float(0), float(0)) 
+	jawa3 = stcSvc.spawnObject('object/mobile/shared_jawa.iff', 'tatooine', long(0), float(3469.3), float(4.1), float(-4861.5), float(0), float(0)) 
 	jawa3.setCustomName2('a Jawa')
 	
-	jawa4 = stcSvc.spawnObject('object/mobile/shared_jawa.iff', 'tatooine', long(0), float(3486.1), float(5.0), float(-4884.7), float(0), float(0)) 
+	jawa4 = stcSvc.spawnObject('object/mobile/shared_jawa.iff', 'tatooine', long(0), float(3486.8), float(5.0), float(-4884.7), float(0.43051), float(-0.9025)) 
 	jawa4.setCustomName2('a Jawa')
 	
-	jawa5 = stcSvc.spawnObject('object/mobile/shared_jawa.iff', 'tatooine', long(0), float(3487.1), float(5.0), float(-4886.0), float(0), float(0)) 
+	jawa5 = stcSvc.spawnObject('object/mobile/shared_jawa.iff', 'tatooine', long(0), float(3487.1), float(5.0), float(-4886.0), float(0.95105), float(0.3090)) 
 	jawa5.setCustomName2('a Jawa')
 	
-	jawa6 = stcSvc.spawnObject('object/mobile/shared_jawa.iff', 'tatooine', long(0), float(3488.8), float(5.0), float(-4884.4), float(0), float(0)) 
+	jawa6 = stcSvc.spawnObject('object/mobile/shared_jawa.iff', 'tatooine', long(0), float(3488.8), float(5.0), float(-4884.4), float(0.3255), float(-0.9455)) 
 	jawa6.setCustomName2('a Jawa')
 	
 	jawa7 = stcSvc.spawnObject('object/mobile/shared_jawa.iff', 'tatooine', long(0), float(3472.2), float(5.0), float(-4918.4), float(0), float(0)) 
@@ -183,8 +184,11 @@ def addPlanetSpawns(core, planet):
 	jawa9 = stcSvc.spawnObject('object/mobile/shared_jawa.iff', 'tatooine', long(0), float(3470.3), float(5.0), float(-4918.7), float(0), float(0)) 
 	jawa9.setCustomName2('a Jawa')
 	
-	bib = stcSvc.spawnObject('object/mobile/shared_bib_fortuna.iff', 'tatooine', long(0), float(3552.4), float(5.0), float(-4933.2), float(0), float(0))
+	bib = stcSvc.spawnObject('object/mobile/shared_bib_fortuna.iff', 'tatooine', long(0), float(3552.4), float(5.0), float(-4933.2), float(0.31730), float(-0.9483))
 	bib.setCustomName2('Bib Fortuna')
+	
+	#Eisley Ship Controller
+	stcSvc.spawnObject('object/mobile/shared_distant_ship_controller.iff', 'tatooine', long(0), float(3542.3), float(5.0), float(-4826.0), float(0.42), float(0.91))
 	
 # Mos Espa NPC Spawns
 
