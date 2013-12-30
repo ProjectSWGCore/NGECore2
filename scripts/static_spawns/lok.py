@@ -1,5 +1,7 @@
 
 import sys
+from resources.datatables import Options
+from resources.datatables import StateStatus
 
 def addPlanetSpawns(core, planet):
 
