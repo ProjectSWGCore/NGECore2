@@ -473,8 +473,8 @@ public class CharacterService implements INetworkDispatch {
 			if (name.contains(" ")) {
 				name = name.split(" ")[0];
 			}
-			name = name.replace("'", "''");
 			name = name.toLowerCase();
+
 			try {
 				PreparedStatement ps = databaseConnection.preparedStatement("SELECT id FROM characters WHERE LOWER(\"firstName\")=?");
 				ps.setString(1, name);
