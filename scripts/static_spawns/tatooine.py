@@ -78,37 +78,37 @@ def addPlanetSpawns(core, planet):
 	nalanCheel = stcSvc.spawnObject('object/mobile/tatooine_npc/shared_figrin_dan.iff', 'tatooine', long(1082880), float(0.5), float(-0.9), float(-17.1), float(0.42), float(0.91)) 
 	nalanCheel.setCustomName2('Nalan Cheel')
 	
-	businessman1 = stcSvc.spawnObject('object/mobile/shared_dressed_businessman_human_male_01.iff', 'tatooine', long(1082877), float(10.7), float(-0.9), float(1.9), float(0.42), float(0.91)) 
+	businessman1 = stcSvc.spawnObject('object/mobile/shared_dressed_businessman_human_male_01.iff', 'tatooine', long(1082877), float(11.0), float(-0.9), float(2.1), float(0.38), float(-0.92)) 
 	businessman1.setCustomName2('a Businessman')
 	
-	commoner1 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_tatooine_aqualish_male_01.iff', 'tatooine', long(1082877), float(10.3), float(-0.9), float(2.7), float(0.42), float(0.91)) 
+	commoner1 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_tatooine_aqualish_male_01.iff', 'tatooine', long(1082877), float(10.3), float(-0.9), float(2.7), float(0.82), float(0.57)) 
 	commoner1.setCustomName2('a Commoner')
 	
-	entertainer1 = stcSvc.spawnObject('object/mobile/shared_dressed_entertainer_trainer_twk_female_01.iff', 'tatooine', long(1082877), float(9.4), float(-0.9), float(3.9), float(0.42), float(0.91)) 
+	entertainer1 = stcSvc.spawnObject('object/mobile/shared_dressed_entertainer_trainer_twk_female_01.iff', 'tatooine', long(1082877), float(9.4), float(-0.9), float(3.9), float(0.38), float(-0.92)) 
 	entertainer1.setCustomName2('an Entertainer')
 	
-	noble1 = stcSvc.spawnObject('object/mobile/shared_dressed_noble_trandoshan_male_01.iff', 'tatooine', long(1082877), float(8.6), float(-0.9), float(4.8), float(0.42), float(0.91)) 
+	noble1 = stcSvc.spawnObject('object/mobile/shared_dressed_noble_trandoshan_male_01.iff', 'tatooine', long(1082877), float(8.6), float(-0.9), float(4.8), float(0.82), float(0.57)) 
 	noble1.setCustomName2('a Noble')
 	
-	commoner2 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_tatooine_trandoshan_female_01.iff', 'tatooine', long(1082877), float(4.1), float(-0.9), float(5.7), float(0.42), float(0.91)) 
+	commoner2 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_tatooine_trandoshan_female_01.iff', 'tatooine', long(1082877), float(4.1), float(-0.9), float(5.7), float(1), float(0)) 
 	commoner2.setCustomName2('a Commoner')
 	
-	commoner3 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_naboo_bothan_female_01.iff', 'tatooine', long(1082877), float(3.1), float(-0.9), float(5.9), float(0.42), float(0.91)) 
+	commoner3 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_naboo_bothan_female_01.iff', 'tatooine', long(1082877), float(3.1), float(-0.9), float(5.9), float(1), float(0)) 
 	commoner3.setCustomName2('a Commoner')
 	
-	commoner4 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_fat_twilek_male_01.iff', 'tatooine', long(1082877), float(1.7), float(-0.9), float(6.0), float(0.42), float(0.91)) 
+	commoner4 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_fat_twilek_male_01.iff', 'tatooine', long(1082877), float(1.7), float(-0.9), float(6.0), float(1), float(0)) 
 	commoner4.setCustomName2('a Commoner')
 	
-	commoner5 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_naboo_bothan_male_01.iff', 'tatooine', long(1082877), float(-0.4), float(-0.9), float(5.9), float(0.42), float(0.91)) 
+	commoner5 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_naboo_bothan_male_01.iff', 'tatooine', long(1082877), float(-0.4), float(-0.9), float(5.9), float(1), float(0)) 
 	commoner5.setCustomName2('a Commoner')
 	
-	commoner6 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_naboo_human_male_05.iff', 'tatooine', long(1082877), float(16.0), float(-0.9), float(4.1), float(0.42), float(0.91)) 
+	commoner6 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_naboo_human_male_05.iff', 'tatooine', long(1082877), float(16.0), float(-0.9), float(4.1), float(0), float(0)) 
 	commoner6.setCustomName2('a Commoner')
 	
-	commoner7 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_fat_zabrak_male_01.iff', 'tatooine', long(1082877), float(8.8), float(-0.9), float(-6.0), float(0.42), float(0.91)) 
+	commoner7 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_fat_zabrak_male_01.iff', 'tatooine', long(1082877), float(8.8), float(-0.9), float(-6.0), float(0.98), float(-0.22)) 
 	commoner7.setCustomName2('a Patron')
 	
-	commoner8 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_naboo_human_male_08.iff', 'tatooine', long(1082877), float(6.8), float(-0.9), float(-6.5), float(0.42), float(0.91)) 
+	commoner8 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_naboo_human_male_08.iff', 'tatooine', long(1082877), float(6.8), float(-0.9), float(-6.5), float(0.98), float(-0.22)) 
 	commoner8.setCustomName2('a Patron')
 	
 	commoner9 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_tatooine_aqualish_male_09.iff', 'tatooine', long(1082877), float(1.1), float(-0.9), float(-7.7), float(0.42), float(0.91)) 
@@ -130,7 +130,7 @@ def addPlanetSpawns(core, planet):
 	#Miscellaneous Building Interiors
 	
 	#Outside
-	businessman2 = stcSvc.spawnObject('object/mobile/shared_dressed_businessman_human_male_01.iff', 'tatooine', long(0), float(3532.7), float(5.0), float(-4788.1), float(0), float(0)) 
+	businessman2 = stcSvc.spawnObject('object/mobile/shared_dressed_businessman_human_male_01.iff', 'tatooine', long(0), float(3663.3), float(4.0), float(-4738.6), float(0), float(0)) 
 	businessman2.setCustomName2('a Businessman')
 	
 	noble2 = stcSvc.spawnObject('object/mobile/shared_dressed_noble_human_female_01.iff', 'tatooine', long(0), float(3542.3), float(5.0), float(-4826.0), float(0.42), float(0.91)) 
@@ -139,31 +139,28 @@ def addPlanetSpawns(core, planet):
 	commoner11 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_naboo_human_male_06.iff', 'tatooine', long(0), float(3529.1), float(5.0), float(-4900.4), float(0.42), float(0.91)) 
 	commoner11.setCustomName2('a Commoner')
 	
-	businessman3 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_tatooine_trandoshan_male_02.iff', 'tatooine', long(0), float(3532.7), float(5.0), float(-4788.1), float(0), float(0)) 
+	businessman3 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_tatooine_trandoshan_male_02.iff', 'tatooine', long(0), float(3595.7), float(5.0), float(-4740.1), float(0), float(0)) 
 	businessman3.setCustomName2('a Businessman')
 	
 	jawa1 = stcSvc.spawnObject('object/mobile/shared_jawa.iff', 'tatooine', long(0), float(3663.3), float(5.0), float(-4858.6), float(0), float(0)) 
 	jawa1.setCustomName2('a Jawa')
 	
-	commoner12 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_naboo_moncal_male_01.iff', 'tatooine', long(0), float(3532.7), float(5.0), float(-4788.1), float(0), float(0)) 
+	commoner12 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_naboo_moncal_male_01.iff', 'tatooine', long(0), float(3512.2), float(5.0), float(-4764.2), float(0), float(0)) 
 	commoner12.setCustomName2('a Scientist')
 	
 	commoner13 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_naboo_zabrak_female_02.iff', 'tatooine', long(0), float(3559.7), float(5.0), float(-4725.9), float(0), float(0)) 
 	commoner13.setCustomName2('a Commoner')
 	
-	commoner14 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_tatooine_devaronian_male_01.iff', 'tatooine', long(0), float(3527.7), float(5.0), float(-4721.1), float(0), float(0)) 
+	commoner14 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_tatooine_devaronian_male_01.iff', 'tatooine', long(0), float(3527.7), float(5.0), float(-4721.1), float(0.71), float(0.71)) 
 	commoner14.setCustomName2('a Commoner')
 	
-	commoner15 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_tatooine_aqualish_female_01.iff', 'tatooine', long(0), float(3513.7), float(5.0), float(-4740.4), float(0), float(0)) 
+	commoner15 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_tatooine_aqualish_female_01.iff', 'tatooine', long(0), float(3514.9), float(5.0), float(-4737.8), float(0), float(0)) 
 	commoner15.setCustomName2('a Commoner')
 	
-	ltHarburik = stcSvc.spawnObject('object/mobile/tatooine_npc/shared_lt_harburik.iff', 'tatooine', long(0), float(3485.4), float(5.0), float(-4788.1), float(0), float(0)) 
-	ltHarburik.setCustomName2('Lieutenant Harburik')
-	
-	jawa2 = stcSvc.spawnObject('object/mobile/shared_jawa.iff', 'tatooine', long(0), float(3475.4), float(4.9), float(-4852.7), float(0), float(0)) 
+	jawa2 = stcSvc.spawnObject('object/mobile/shared_jawa.iff', 'tatooine', long(0), float(3485.2), float(4.9), float(-4859.2), float(0), float(0)) 
 	jawa2.setCustomName2('a Jawa')
 	
-	jawa3 = stcSvc.spawnObject('object/mobile/shared_jawa.iff', 'tatooine', long(0), float(3469.3), float(4.1), float(-4861.5), float(0), float(0)) 
+	jawa3 = stcSvc.spawnObject('object/mobile/shared_jawa.iff', 'tatooine', long(0), float(3465.3), float(5.0), float(-4860.1), float(0.71), float(-0.71)) 
 	jawa3.setCustomName2('a Jawa')
 	
 	jawa4 = stcSvc.spawnObject('object/mobile/shared_jawa.iff', 'tatooine', long(0), float(3486.8), float(5.0), float(-4884.7), float(0.43051), float(-0.9025)) 
@@ -187,6 +184,34 @@ def addPlanetSpawns(core, planet):
 	bib = stcSvc.spawnObject('object/mobile/shared_bib_fortuna.iff', 'tatooine', long(0), float(3552.4), float(5.0), float(-4933.2), float(0.31730), float(-0.9483))
 	bib.setCustomName2('Bib Fortuna')
 	
+	commoner16 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_naboo_human_male_06.iff', 'tatooine', long(0), float(3398.2), float(4.0), float(-4654.2), float(0.42), float(0.91)) 
+	commoner16.setCustomName2('a Commoner')
+	
+	noble3 = stcSvc.spawnObject('object/mobile/shared_dressed_noble_human_female_01.iff', 'tatooine', long(0), float(3396.3), float(4.0), float(-4774.1), float(0.42), float(0.91)) 
+	noble3.setCustomName2('a Noble')
+	
+	entertainer1 = stcSvc.spawnObject('object/mobile/shared_dressed_entertainer_trainer_twk_female_01.iff', 'tatooine', long(0), float(3305.7), float(5.6), float(-4771.7), float(0), float(0)) 
+	entertainer1.setCustomName2('an Entertainer')
+	
+	r3m6 = stcSvc.spawnObject('object/mobile/shared_r3.iff', 'tatooine', long(0), float(3460.1), float(4.0), float(-4898.2), float(0.38), float(-0.92)) 
+	r3m6.setCustomName2('R3-M6')
+	
+	eg1 = stcSvc.spawnObject('object/mobile/shared_eg6_power_droid.iff', 'tatooine', long(0), float(3463.8), float(4.0), float(-4882.6), float(-0.38), float(0.92)) 
+	eg1.setCustomName2('an EG-6 Power Droid')
+
+	commoner17 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_naboo_zabrak_female_02.iff', 'tatooine', long(0), float(3452.6), float(4.0), float(-4937.1), float(0), float(0)) 
+	commoner17.setCustomName2('a Commoner')
+	
+	lifter1 = stcSvc.spawnObject('object/mobile/shared_cll8_binary_load_lifter.iff', 'tatooine', long(0), float(3547), float(5.0), float(-4768.9), float(0), float(0)) 
+	lifter1.setCustomName2('a CLL-8 Binary Load Lifter')
+	
+	r3j7 = stcSvc.spawnObject('object/mobile/shared_r3.iff', 'tatooine', long(0), float(3311.1), float(4.0), float(-4820.2), float(0.38), float(-0.92)) 
+	r3j7.setCustomName2('R3-J7')
+	
+	noble4 = stcSvc.spawnObject('object/mobile/shared_dressed_noble_human_female_03.iff', 'tatooine', long(0), float(3255.3), float(4.0), float(-4848.1), float(0.42), float(0.91)) 
+	noble4.setCustomName2('a Noble')
+
+
 	#Eisley Ship Controller
 	stcSvc.spawnObject('object/mobile/shared_distant_ship_controller.iff', 'tatooine', long(0), float(3542.3), float(5.0), float(-4826.0), float(0.42), float(0.91))
 	
