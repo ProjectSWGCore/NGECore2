@@ -171,6 +171,26 @@ public class EquipmentService implements INetworkDispatch {
 		
 	}
 	
+	public void calculateOverridableProtection(CreatureObject actor, boolean add) {
+		
+		if (add == false) {
+			actor.addSkillMod("kinetic", actor.getSkillModBase("expertise_overridable_protection_generic") - ( actor.getSkillModBase("kinetic") / 2 ) );
+			actor.addSkillMod("energy", actor.getSkillModBase("expertise_overridable_protection_generic") - ( actor.getSkillModBase("energy") / 2 ) );
+			actor.addSkillMod("heat", actor.getSkillModBase("expertise_overridable_protection_generic") - ( actor.getSkillModBase("heat") / 2 ) );
+			actor.addSkillMod("cold", actor.getSkillModBase("expertise_overridable_protection_generic") - ( actor.getSkillModBase("cold") / 2 ) );
+			actor.addSkillMod("acid", actor.getSkillModBase("expertise_overridable_protection_generic") - ( actor.getSkillModBase("acid") / 2 ) );
+			actor.addSkillMod("electricity", actor.getSkillModBase("expertise_overridable_protection_generic") - ( actor.getSkillModBase("electricity") / 2 ) );
+		} else {
+			actor.deductSkillMod("kinetic", actor.getSkillModBase("expertise_overridable_protection_generic") - ( actor.getSkillModBase("kinetic") / 2 ) );
+			actor.deductSkillMod("energy", actor.getSkillModBase("expertise_overridable_protection_generic") - ( actor.getSkillModBase("energy") / 2 ) );
+			actor.deductSkillMod("heat", actor.getSkillModBase("expertise_overridable_protection_generic") - ( actor.getSkillModBase("heat") / 2 ) );
+			actor.deductSkillMod("cold", actor.getSkillModBase("expertise_overridable_protection_generic") - ( actor.getSkillModBase("cold") / 2 ) );
+			actor.deductSkillMod("acid", actor.getSkillModBase("expertise_overridable_protection_generic") - ( actor.getSkillModBase("acid") / 2 ) );
+			actor.deductSkillMod("electricity", actor.getSkillModBase("expertise_overridable_protection_generic") - ( actor.getSkillModBase("electricity") / 2 ) );
+		}
+	
+	}
+	
 	public void equip(CreatureObject actor, SWGObject item) {
 			
 		String template = ((item.getAttachment("customServerTemplate") == null) ? item.getTemplate() : (item.getTemplate().split("shared_")[0] + "shared_" + ((String) item.getAttachment("customServerTemplate")) + ".iff"));
@@ -181,6 +201,9 @@ public class EquipmentService implements INetworkDispatch {
 
 		if (item.getStringAttribute("protection_level") != null)
 			calculateForceProtection(actor, item, true);
+		
+		if (actor.getSkillMod("expertise_overridable_protection_generic") != null)
+			calculateOverridableProtection(actor, true);
 		
 		// TODO: faction restrictions - You had to be a Combatant as minimum in order to EQUIP an item.
 		// TODO: Species restrictions
@@ -230,6 +253,9 @@ public class EquipmentService implements INetworkDispatch {
 
 		if (item.getStringAttribute("protection_level") != null)
 			calculateForceProtection(actor, item, false);
+		
+		if (actor.getSkillMod("expertise_overridable_protection_generic") != null)
+			calculateOverridableProtection(actor, false);		
 		
 		if(item.getStringAttribute("cat_wpn_damage.wpn_category") != null)		
 			if (actor.getSlotNameForObject(item).contentEquals("hold_r") == true)
