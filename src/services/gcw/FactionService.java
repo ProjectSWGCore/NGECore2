@@ -36,8 +36,12 @@ import protocol.swg.FactionResponseMessage;
 
 import resources.common.FileUtilities;
 import resources.common.Opcodes;
+import resources.datatables.FactionStatus;
+import resources.datatables.Options;
+import resources.datatables.PvpStatus;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
+import resources.objects.tangible.TangibleObject;
 
 import engine.clientdata.StfTable;
 import engine.clients.Client;
@@ -181,6 +185,52 @@ public class FactionService implements INetworkDispatch {
 		}
 		
 		return false;
+	}
+	
+	/*
+	 * Calculates the target's pvp bitmask based on the person's
+	 * faction standing and the enemy's options bitmask.
+	 * 
+	 * This shouldn't be what we "set" the bitmask to, just
+	 * what we use when calculating how to treat a target
+	 * and when we send it.
+	 * 
+	 * This should be used instead of getPvPBitmask where possible, but
+	 * should not be used in setPvPBitmask.
+	 */
+	public int calculatePvpStatus(CreatureObject player, TangibleObject target) {
+		PlayerObject ghost = (PlayerObject) player.getSlottedObject("ghost");
+		
+		int pvpBitmask = target.getPvPBitmask();
+		
+		if (target.getSlottedObject("ghost") != null) {
+			pvpBitmask |= PvpStatus.Player;
+			
+			if (player.getFactionStatus() == FactionStatus.SpecialForces &&
+			((CreatureObject) target).getFactionStatus() == FactionStatus.SpecialForces) {
+				pvpBitmask |= (PvpStatus.Attackable | PvpStatus.Aggressive);
+			}
+			
+			return pvpBitmask;
+		}
+		
+		if (target.getOption(Options.ATTACKABLE)) {
+			pvpBitmask |= PvpStatus.Attackable;
+		}
+		
+		if (target.getOption(Options.AGGRESSIVE)) {
+			pvpBitmask |= PvpStatus.Aggressive;
+		} else {
+			Integer factionStanding = ghost.getFactionStandingMap().get(target.getFaction());
+			
+			if (factionStanding != null) {
+				if (((TangibleObject) target).getOption(Options.ATTACKABLE) && factionStanding < 0) {
+					pvpBitmask |= PvpStatus.Aggressive;
+				}
+			}
+		}
+		
+		return pvpBitmask;
 	}
 	
 	public Map<String, Integer> getFactionMap() {
