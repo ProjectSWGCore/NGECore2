@@ -21,6 +21,10 @@
  ******************************************************************************/
 package resources.common;
 
+import java.util.Random;
+
+import main.NGECore;
+
 import com.sleepycat.persist.model.Persistent;
 
 import engine.resources.scene.Point3D;
@@ -82,6 +86,31 @@ public class SpawnPoint {
 	public void setCellNumber(int cellNumber) {
 		this.cellNumber = cellNumber;
 	}
+	
+	public Point3D getRandomPosition(float minDistance, float maxDistance) {
+		
+		Random random = new Random();
+		float distance = random.nextInt((int) (maxDistance - minDistance) + 1) + minDistance;
+		float angle = (float) (random.nextInt(360) * (Math.PI / 180));
+		float x = (float) (position.x + distance * Math.cos(angle));
+		float z = (float) (position.z + distance * Math.sin(angle));
+		
+		return new Point3D(x, 0, z);
+
+	}
+	
+	public static Point3D getRandomPosition(Point3D position, float minDistance, float maxDistance, int planetId) {
+		
+		Random random = new Random();
+		float distance = random.nextInt((int) (maxDistance - minDistance) + 1) + minDistance;
+		float angle = (float) (random.nextInt(360) * (Math.PI / 180));
+		float x = (float) (position.x + distance * Math.cos(angle));
+		float z = (float) (position.z + distance * Math.sin(angle));
+		
+		return new Point3D(x, NGECore.getInstance().terrainService.getHeight(planetId, x, z), z);
+
+	}
+
 
 	public Point3D getRandomPosition(float minDistance, float maxDistance) {
 		Random random = new Random();

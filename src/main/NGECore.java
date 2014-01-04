@@ -112,6 +112,7 @@ public class NGECore {
 	private Config config = null;
 
 	private volatile boolean isShuttingDown = false;
+	private long galacticTime = System.currentTimeMillis();
 	
 	private long galacticTime = System.currentTimeMillis();
 	
@@ -543,6 +544,11 @@ public class NGECore {
 		
 		
 	}
+
+	public long getGalacticTime() {
+		return System.currentTimeMillis() - galacticTime;
+	}
+
 	
 	public long getGalacticTime() {
 		return System.currentTimeMillis() - this.galacticTime;

@@ -570,9 +570,8 @@ public class SimulationService implements INetworkDispatch {
 		
 		//session.suspendWrite();
 		
-		if(!ghost.isSet(PlayerFlags.LD)) {
+		if(!ghost.isSet(PlayerFlags.LD))
 			ghost.toggleFlag(PlayerFlags.LD);
-		}
 		
 		/*
 		object.createTransaction(core.getCreatureODB().getEnvironment());

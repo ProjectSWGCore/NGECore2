@@ -346,14 +346,19 @@ public class SWGList<E> implements List<E> {
 	
 	private byte[] item(int type, int index, byte[] data, boolean useIndex, boolean useData) {
 		int size = 1 + ((useIndex) ? 2 : 0) + ((useData) ? data.length : 0);
-			
+		
+		if (messageBuilder == null) {
+			updateCounter++;
+			return new byte[] { };
+		}
+		
 		IoBuffer buffer = messageBuilder.bufferPool.allocate((size), false).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.put((byte) type);
 		if (useIndex) buffer.putShort((short) index);
 		if (useData) buffer.put(data);
-			
+		
 		updateCounter++;
-			
+		
 		return buffer.array();
 	}
 	

@@ -49,6 +49,7 @@ import resources.common.ObjControllerOpcodes;
 import resources.common.Opcodes;
 import resources.common.RGB;
 import resources.common.SpawnPoint;
+import resources.datatables.PlayerFlags;
 import resources.objects.Buff;
 import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
@@ -93,7 +94,7 @@ public class PlayerService implements INetworkDispatch {
 
 			@Override
 			public void run() {
-				ServerTimeMessage time = new ServerTimeMessage(System.currentTimeMillis() / 1000);
+				ServerTimeMessage time = new ServerTimeMessage(core.getGalacticTime() / 1000);
 				IoBuffer packet = time.serialize();
 				creature.getClient().getSession().write(packet);
 			}
@@ -106,7 +107,7 @@ public class PlayerService implements INetworkDispatch {
 			public void run() {
 				
 				PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
-				player.setTotalPlayTime(player.getTotalPlayTime() + 30);
+				player.setTotalPlayTime((int) (player.getTotalPlayTime() + ((System.currentTimeMillis() - player.getLastPlayTimeUpdate()) / 1000)));
 				player.setLastPlayTimeUpdate(System.currentTimeMillis());
 				core.collectionService.checkExplorationRegions(creature);
 				
@@ -142,11 +143,19 @@ public class PlayerService implements INetworkDispatch {
 			
 		}, 0, 1000, TimeUnit.MILLISECONDS);
 		
+<<<<<<< HEAD
 		PlayerObject ghost = (PlayerObject)creature.getSlottedObject("ghost");
 		
 		if(ghost.isSet(256))
 			ghost.toggleFlag(256);
 		
+=======
+		PlayerObject ghost = (PlayerObject) creature.getSlottedObject("ghost");
+
+		if (ghost.isSet(PlayerFlags.LD)) {
+			ghost.toggleFlag(PlayerFlags.LD);
+		}
+>>>>>>> origin/master
 
 	}
 

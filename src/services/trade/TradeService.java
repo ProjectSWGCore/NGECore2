@@ -202,8 +202,7 @@ public class TradeService implements INetworkDispatch{
 				}
 				
 				else {
-					
-					if (objectToTrade.getIntAttribute("no_trade") == 1) {
+					if(objectToTrade.getAttributes().toString().contains("no_trade")) {
 						return;
 					}
 					
