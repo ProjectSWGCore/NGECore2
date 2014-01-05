@@ -46,6 +46,7 @@ public class RetroService implements INetworkDispatch {
 		this.core = core;
 		modifications = new ArrayList<IRetroModification>();
 		
+		/*
 		core.retroService.addModification(new IRetroModification() {
 			
 			public void modify(NGECore core) {
@@ -53,6 +54,7 @@ public class RetroService implements INetworkDispatch {
 			}
 			
 		});
+		*/
 	}
 	
 	public void addModification(IRetroModification modification) {
