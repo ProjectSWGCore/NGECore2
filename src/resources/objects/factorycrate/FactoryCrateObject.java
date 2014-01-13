@@ -21,6 +21,11 @@
  ******************************************************************************/
 package resources.objects.factorycrate;
 
-public class FactoryCrateObject {
+import com.sleepycat.persist.model.Persistent;
+
+import resources.objects.tangible.TangibleObject;
+
+@Persistent(version=0)
+public class FactoryCrateObject extends TangibleObject {
 
 }

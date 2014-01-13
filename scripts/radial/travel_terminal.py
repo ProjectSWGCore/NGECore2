@@ -8,13 +8,10 @@ def createRadial(core, owner, target, radials):
 def handleSelection(core, owner, target, option):
 
     if option == 21 and target:
-        print ('Owner: ' + str(owner.getObjectId()))
-        
+
         if owner is not None:
             tpm = EnterTicketPurchaseModeMessage(owner.getPlanet().getName(), core.mapService.getClosestCityName(owner), owner)
             owner.getClient().getSession().write(tpm.serialize())
-            print ('Planet name: ' + owner.getPlanet().getName())
-            print ('City name: ' + core.mapService.getClosestCityName(owner))
             return
     return
     

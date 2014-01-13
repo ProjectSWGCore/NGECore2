@@ -55,6 +55,7 @@ public class StaticService implements INetworkDispatch {
 		spawnPlanetStaticObjs("rori");
 		spawnPlanetStaticObjs("naboo");
 		spawnPlanetStaticObjs("tatooine");
+		spawnPlanetStaticObjs("lok");
 	}
 	
 	@Override
@@ -99,7 +100,7 @@ public class StaticService implements INetworkDispatch {
 		if (object instanceof CreatureObject) ((CreatureObject) object).setStaticNPC(true);
 		
 		if(cellId == 0) {
-			boolean add = core.simulationService.add(object, (float) x, (float) z);
+			boolean add = core.simulationService.add(object, (float) x, (float) z, true);
 			if(!add)
 				System.out.println("Quadtree insert failed for: " + template);
 		}
@@ -110,7 +111,6 @@ public class StaticService implements INetworkDispatch {
 				return object;
 			}
 			parent.add(object);
-			core.objectService.loadServerTemplate(object);
 		}
 		
 		return object;

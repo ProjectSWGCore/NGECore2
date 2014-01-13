@@ -3,12 +3,9 @@ from java.util import Vector
 from resources.common import SpawnPoint
 
 def setup(core, object):
-	stcSvc = core.staticService
-	cell = object.getCellByCellNumber(6)
+	objSvc = core.objectService
+	objSvc.createChildObject(object, 'object/tangible/terminal/shared_terminal_cloning.iff', float(-5.5), float(0.125265), float(-3.43841), float(0.699512), float(0.714621), 6)
 	
-	if cell: 
-		stcSvc.spawnObject('object/tangible/terminal/shared_terminal_cloning.iff', object.getPlanet().getName(), cell.getObjectID(), float(-5.5), float(0.125265), float(-3.43841), float(0.699512), float(0.714621)) 
-
 	spawnPoints = Vector()
 	spawnPoints.add(SpawnPoint(4.44727, 0.125266, -3.80136, -0.706468, 0.707745, 5))
 	spawnPoints.add(SpawnPoint(4.65395, 0.125266, 1.49466, 0.714548, -0.699587, 4))

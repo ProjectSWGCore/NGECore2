@@ -41,18 +41,23 @@ import protocol.swg.ClientIdMsg;
 import protocol.swg.ClientMfdStatusUpdateMessage;
 import protocol.swg.ExpertiseRequestMessage;
 import protocol.swg.ServerTimeMessage;
+import protocol.swg.SetWaypointColor;
+import protocol.swg.objectControllerObjects.ChangeRoleIconChoice;
 import protocol.swg.objectControllerObjects.ShowFlyText;
 import resources.common.Console;
 import resources.common.FileUtilities;
+import resources.common.ObjControllerOpcodes;
 import resources.common.Opcodes;
 import resources.common.RGB;
 import resources.common.SpawnPoint;
+import resources.datatables.PlayerFlags;
 import resources.objects.Buff;
 import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerMessageBuilder;
 import resources.objects.player.PlayerObject;
+import resources.objects.waypoint.WaypointObject;
 import services.sui.SUIService.ListBoxType;
 import services.sui.SUIWindow;
 import services.sui.SUIWindow.Trigger;
@@ -66,6 +71,7 @@ import engine.resources.common.CRC;
 import engine.resources.objects.DraftSchematic;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
+import engine.resources.scene.Quaternion;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
@@ -80,22 +86,6 @@ public class PlayerService implements INetworkDispatch {
     
 	public PlayerService(final NGECore core) {
 		this.core = core;
-		scheduler.scheduleAtFixedRate(new Runnable() {
-
-			@Override
-			public void run() {
-				ServerTimeMessage time = new ServerTimeMessage(System.currentTimeMillis() / 1000);
-				IoBuffer packet = time.serialize();
-				synchronized(core.getActiveConnectionsMap()) {
-					for(Client c : core.getActiveConnectionsMap().values()) {
-						if(c.getParent() != null) {
-							c.getSession().write(packet);
-						}
-					}
-				}
-			}
-			
-		}, 0, 30, TimeUnit.SECONDS);
 		
 	}
 	
@@ -105,10 +95,23 @@ public class PlayerService implements INetworkDispatch {
 
 			@Override
 			public void run() {
+				ServerTimeMessage time = new ServerTimeMessage(core.getGalacticTime() / 1000);
+				IoBuffer packet = time.serialize();
+				creature.getClient().getSession().write(packet);
+			}
+			
+		}, 0, 45, TimeUnit.SECONDS);
+
+		
+		scheduler.scheduleAtFixedRate(new Runnable() {
+
+			@Override
+			public void run() {
 				
 				PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
-				player.setTotalPlayTime(player.getTotalPlayTime() + 30);
+				player.setTotalPlayTime((int) (player.getTotalPlayTime() + ((System.currentTimeMillis() - player.getLastPlayTimeUpdate()) / 1000)));
 				player.setLastPlayTimeUpdate(System.currentTimeMillis());
+				core.collectionService.checkExplorationRegions(creature);
 				
 			}
 			
@@ -126,6 +129,7 @@ public class PlayerService implements INetworkDispatch {
 			}
 			
 		}, 0, 1000, TimeUnit.MILLISECONDS);
+		
 
 		scheduler.scheduleAtFixedRate(new Runnable() {
 
@@ -141,23 +145,99 @@ public class PlayerService implements INetworkDispatch {
 			
 		}, 0, 1000, TimeUnit.MILLISECONDS);
 		
-		/*scheduler.scheduleAtFixedRate(new Runnable() {
+		PlayerObject ghost = (PlayerObject) creature.getSlottedObject("ghost");
 
-			@Override
-			public void run() {
-				
-				if(creature.getCombatFlag() == 1)
-					creature.resetHAMList();
-				
-			}
-			
-		}, 0, 10, TimeUnit.SECONDS);*/
-
+		if (ghost.isSet(PlayerFlags.LD)) {
+			ghost.toggleFlag(PlayerFlags.LD);
+		}
 
 	}
 
 	@Override
 	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> swgOpcodes, Map<Integer, INetworkRemoteEvent> objControllerOpcodes) {
+		
+		objControllerOpcodes.put(ObjControllerOpcodes.ChangeRoleIconChoice, new INetworkRemoteEvent() {
+			
+			@Override
+			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
+				Client c = core.getClient(session);
+				ChangeRoleIconChoice packet = new ChangeRoleIconChoice();
+				PlayerObject player;
+				SWGObject o;
+				
+				packet.deserialize(data);
+				o = core.objectService.getObject(packet.getObjectId());
+				
+				if (c.getParent() == null || o == null || c.getParent() != o
+				|| !(o instanceof CreatureObject) || !(o.getSlottedObject("ghost")
+				instanceof PlayerObject)) {
+					return;
+				}
+				
+				player = (PlayerObject) o.getSlottedObject("ghost");
+				
+				player.setProfessionIcon(packet.getIcon());
+			}
+			
+		});
+		
+		swgOpcodes.put(Opcodes.SetWaypointColor, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
+				data.order(ByteOrder.LITTLE_ENDIAN);
+				
+				Client client = core.getClient(session);
+				
+				if (client == null)
+					return;
+				
+				SWGObject player = client.getParent();
+				
+				if (player == null)
+					return;
+				
+				PlayerObject ghost = (PlayerObject) player.getSlottedObject("ghost");
+				
+				if (ghost == null)
+					return;
+				
+				SetWaypointColor packet = new SetWaypointColor();
+				packet.deserialize(data);
+				
+				WaypointObject packetWay = (WaypointObject) core.objectService.getObject(packet.getObjectId());
+				WaypointObject obj = (WaypointObject) ghost.getWaypointFromList(packetWay);
+				
+				if (obj == null || packetWay != obj)
+					return;
+				
+				String color = packet.getColor();
+				switch(color) {
+					case "purple":
+						obj.setColor(WaypointObject.PURPLE);
+						break;
+					case "green":
+						obj.setColor(WaypointObject.GREEN);
+						break;
+					case "blue":
+						obj.setColor(WaypointObject.BLUE);
+						break;
+					case "yellow":
+						obj.setColor(WaypointObject.YELLOW);
+						break;
+					case "white":
+						obj.setColor(WaypointObject.WHITE);
+						break;
+					case "orange":
+						obj.setColor(WaypointObject.ORANGE);
+						break;
+				}
+				
+				ghost.waypointUpdate(obj);
+				
+			}
+			
+		});
 		
 		swgOpcodes.put(Opcodes.CmdSceneReady, new INetworkRemoteEvent() {
 
@@ -199,7 +279,6 @@ public class PlayerService implements INetworkDispatch {
 			}
 			
 		});*/
-
 		
 	}
 	
@@ -329,7 +408,7 @@ public class PlayerService implements INetworkDispatch {
 				
 				// 1. Add the experience.
 				if (experience > 0) {
-					creature.showFlyText("base_player", "prose_flytext_xp", experience, (float) 2.5, new RGB(180, 60, 240), 1);
+					creature.showFlyText("base_player", "prose_flytext_xp", "", experience, (float) 2.5, new RGB(180, 60, 240), 1);
 				}
 				
 				String xpType = ((player.getProfession().contains("entertainer")) ? "entertainer" : ((player.getProfession().contains("trader")) ? "crafting" : "combat_general"));
@@ -348,6 +427,7 @@ public class PlayerService implements INetworkDispatch {
 								creature.playEffectObject("clienteffect/level_granted.cef", "");
 								creature.getClient().getSession().write((new ClientMfdStatusUpdateMessage((float) ((creature.getLevel() == 90) ? 90 : (creature.getLevel() + 1)), "/GroundHUD.MFDStatus.vsp.role.targetLevel")).serialize());
 								creature.setLevel(((Integer) experienceTable.getObject(i, 0)).shortValue());
+								core.scriptService.callScript("scripts/collections/", "addMasterBadge", "master_" + player.getProfession(), core, creature);
 								
 								// 3. Add the relevant health/action and expertise points.
 								float luck = (((((float) (core.scriptService.getMethod("scripts/roadmap/", player.getProfession(), "getLuck").__call__().asInt()) + (core.scriptService.getMethod("scripts/roadmap/", creature.getStfName(), "getLuck").__call__().asInt())) / ((float) 90)) * ((float) creature.getLevel())) - ((float) creature.getSkillModBase("luck")));
@@ -458,12 +538,15 @@ public class PlayerService implements INetworkDispatch {
 														}
 														
 														try {
+															String customServerTemplate = null;
+															
 															if (!item.contains("/")) {
+																customServerTemplate = item;
 																item = core.scriptService.callScript("scripts/roadmap/", "roadmap_rewards", "get", item).asString();
 															}
 															
 															if (item != null && item != "") {
-																creature.getSlottedObject("inventory").add(core.objectService.createObject(item, creature.getPlanet()));
+																creature.getSlottedObject("inventory").add(core.objectService.createObject(item, 0, creature.getPlanet(), new Point3D(0, 0, 0), new Quaternion(1, 0, 0, 0), customServerTemplate));
 															} else {
 																//System.out.println("Can't find template: " + item);
 															}
@@ -480,7 +563,7 @@ public class PlayerService implements INetworkDispatch {
 									}
 								}
 							}
-						}
+						}	
 					}
 				}
 			} catch (InstantiationException | IllegalAccessException e) {
@@ -507,7 +590,6 @@ public class PlayerService implements INetworkDispatch {
 			player.getTitleList().remove(title);
 
 	}
-	
 	
 	@Override
 	public void shutdown() {

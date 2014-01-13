@@ -38,8 +38,8 @@ public class ClientVerifyAndLockNameRequest extends SWGMessage {
 	public void deserialize(IoBuffer buffer) {
 		buffer.position(6); // Skips SOE and SWG opcodes
 		raceTemplate = getNextAsciiString(buffer);
-		name = getNextUnicodeString(buffer);;
-		
+		name = getNextUnicodeString(buffer);
+		System.out.println("msg: " + name);	
 		// Gets the first and last names
 		String [] splitName = name.split(" ");
 		firstName = splitName[0];

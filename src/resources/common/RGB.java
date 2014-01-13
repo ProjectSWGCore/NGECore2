@@ -1,8 +1,8 @@
 package resources.common;
 
-import resources.objects.ListObject;
+import resources.objects.Delta;
 
-public class RGB extends ListObject {
+public class RGB extends Delta {
 	
 	private byte red, green, blue;
 	

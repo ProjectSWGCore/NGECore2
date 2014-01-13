@@ -21,24 +21,31 @@
  ******************************************************************************/
 package services.object;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteOrder;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import resources.common.*;
+import resources.datatables.Options;
+import resources.datatables.PlayerFlags;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
@@ -47,6 +54,8 @@ import org.python.core.PyObject;
 
 import com.sleepycat.persist.EntityCursor;
 
+import protocol.swg.ChatFriendsListUpdate;
+import protocol.swg.ChatOnChangeFriendStatus;
 import protocol.swg.ChatOnGetFriendsList;
 import protocol.swg.CmdSceneReady;
 import protocol.swg.CmdStartScene;
@@ -76,6 +85,7 @@ import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
 import resources.objects.guild.GuildObject;
+import resources.objects.mission.MissionObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.staticobject.StaticObject;
 import resources.objects.tangible.TangibleObject;
@@ -100,6 +110,8 @@ public class ObjectService implements INetworkDispatch {
 	
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	
+	protected final Object objectMutex = new Object();
+	
 	public ObjectService(final NGECore core) {
 		this.core = core;
 		databaseConnection = core.getDatabase1();
@@ -109,9 +121,8 @@ public class ObjectService implements INetworkDispatch {
 		    	synchronized(objectList) {
 		    		for(SWGObject obj : objectList.values()) {
 		    			
-		    			if(obj.getSlottedObject("ghost") != null) {
-		    				((CreatureObject) obj).createTransaction(core.getCreatureODB().getEnvironment());
-		    				core.getCreatureODB().put((CreatureObject) obj, Long.class, CreatureObject.class, ((CreatureObject) obj).getTransaction());
+		    			if(obj.getClient() != null && obj.getClient().getSession() != null) {
+		    				core.connectionService.disconnect(obj.getClient().getSession());
 		    			}
 		    			
 		    		}
@@ -133,7 +144,37 @@ public class ObjectService implements INetworkDispatch {
 		}
 	}
 	
-	public SWGObject createObject(String Template, long objectID, Planet planet, Point3D position, Quaternion orientation) {
+	public void loadBuildings() {
+		EntityCursor<BuildingObject> cursor = core.getBuildingODB().getCursor(Long.class, BuildingObject.class);
+		
+		Iterator<BuildingObject> it = cursor.iterator();
+		
+		while(it.hasNext()) {
+			final BuildingObject building = it.next();
+			objectList.put(building.getObjectID(), building);
+			Planet planet = core.terrainService.getPlanetByID(building.getPlanetId());
+			building.setPlanet(planet);
+			building.viewChildren(building, true, true, new Traverser() {
+
+				@Override
+				public void process(SWGObject object) {
+					objectList.put(object.getObjectID(), object);
+					if(object.getParentId() != 0 && object.getContainer() == null)
+						object.setParent(building);
+					object.getContainerInfo(object.getTemplate());
+				}
+				
+			});	
+			core.simulationService.add(building, building.getPosition().x, building.getPosition().z);
+		}
+
+	}
+
+	public SWGObject createObject(String Template, long objectID, Planet planet, Point3D position, Quaternion orientation, String customServerTemplate) {
+		return createObject(Template, objectID, planet, position, orientation, customServerTemplate, false);
+	}
+	
+	public SWGObject createObject(String Template, long objectID, Planet planet, Point3D position, Quaternion orientation, String customServerTemplate, boolean overrideSnapshot) {
 		SWGObject object = null;
 		CrcStringTableVisitor crcTable;
 		try {
@@ -149,7 +190,7 @@ public class ObjectService implements INetworkDispatch {
 		if(objectID == 0)
 			objectID = generateObjectID();
 		else
-			isSnapshot = true;
+			isSnapshot = !overrideSnapshot;
 		
 		if(Template.startsWith("object/creature")) {
 			
@@ -167,10 +208,10 @@ public class ObjectService implements INetworkDispatch {
 			
 			object = new WeaponObject(objectID, planet, Template, position, orientation);
 
-		} else if(Template.startsWith("object/building") || Template.startsWith("object/static/worldbuilding/structures")){
+		} else if(Template.startsWith("object/building") || Template.startsWith("object/static/worldbuilding/structures") || Template.startsWith("object/static/structure")){
 			
 			object = new BuildingObject(objectID, planet, position, orientation, Template);
-			if(!isSnapshot && object.getPortalVisitor() != null) {
+			if(!isSnapshot && !overrideSnapshot && object.getPortalVisitor() != null) {
 				int cellCount = object.getPortalVisitor().cells.size() - 1; // -1 for index 0 cell which is outside the building and used for ai pathfinding
 				for (int i = 0; i < cellCount; i++) {
 					CellObject cell = (CellObject) createObject("object/cell/shared_cell.iff", planet);
@@ -203,24 +244,65 @@ public class ObjectService implements INetworkDispatch {
 			
 			object = new WaypointObject(objectID, planet, position);
 			
-		}  else {
+		}  else if(Template.startsWith("object/mission")) {
+			
+			object = new MissionObject(objectID, planet, Template);
+			
+		} else {
 			
 			return null;
 			
 		}
 		
 		object.setPlanetId(planet.getID());
+		
+		object.setAttachment("customServerTemplate", customServerTemplate);
+		
 		object.setisInSnapshot(isSnapshot);
-		//loadServerTemplate(object);		
+		loadServerTemplate(object);		
 		
 		objectList.put(objectID, object);
-
+		
+		// Set Options - easier to set them across the board here
+		// because we'll be spawning them despite most of them being unscripted.
+		// Any such settings can be completely reset with setOptionsBitmask
+		// in scripts and modified with setOptions(Options.X, true/false)
+		if (Template.startsWith("object/creature/") || Template.startsWith("object/mobile/")) {
+			if (Template.startsWith("object/mobile/")) {
+				((CreatureObject) object).setOptionsBitmask(Options.ATTACKABLE);
+			} else if (Template.startsWith("object/mobile/beast_master/")) {
+				((CreatureObject) object).setOptionsBitmask(Options.NONE);
+			} else if (Template.startsWith("object/mobile/vendor/")) {
+				((CreatureObject) object).setOptionsBitmask(Options.INVULNERABLE | Options.USABLE);
+			} else if (Template.startsWith("object/mobile/vehicle/")) {
+				((CreatureObject) object).setOptionsBitmask(Options.ATTACKABLE | Options.MOUNT);
+			} else if (Template.startsWith("object/mobile/hologram/")) {
+				((CreatureObject) object).setOptionsBitmask(Options.INVULNERABLE);
+			} else if (Template.startsWith("object/creature/npc/theme_park/")) {
+				((CreatureObject) object).setOptionsBitmask(Options.INVULNERABLE);
+			} else if (Template.startsWith("object/creature/npc/general/")) {
+				((CreatureObject) object).setOptionsBitmask(Options.INVULNERABLE | Options.CONVERSABLE);
+			}  else if (Template.startsWith("object/creature/droid/crafted/")) {
+				((CreatureObject) object).setOptionsBitmask(Options.NONE);
+			} else if (Template.startsWith("object/creature/droid/")) {
+				((CreatureObject) object).setOptionsBitmask(Options.ATTACKABLE | Options.INVULNERABLE);
+			} else if (Template.startsWith("object/creature/player/")) {
+				((CreatureObject) object).setOptionsBitmask(Options.ATTACKABLE);
+			}
+		} else if (object instanceof TangibleObject) {
+			((TangibleObject) object).setOptionsBitmask(Options.INVULNERABLE);
+			
+			if (Template.startsWith("object/tangible/vendor/")) {
+				((TangibleObject) object).setOptionsBitmask(Options.INVULNERABLE | Options.USABLE);
+			}
+		}
+		
 		return object;
 	}
 	
 	public void loadServerTemplate(SWGObject object) {
 		
-		String template = object.getTemplate();
+		String template = ((object.getAttachment("customServerTemplate") == null) ? object.getTemplate() : (object.getTemplate().split("shared_")[0] + "shared_" + ((String) object.getAttachment("customServerTemplate")) + ".iff"));
 		String serverTemplate = template.replace(".iff", "");
 		// check if template is empty(4 default lines) to reduce RAM usage(saves about 500 MB of RAM)
 		try {
@@ -237,18 +319,27 @@ public class ObjectService implements INetworkDispatch {
 				}
 			}
 
+		} catch (FileNotFoundException e) {
+			System.out.println("!File Not Found:" + template.toString());
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.out.println("!IO error " + template.toString());
 		}
-
 	}
 	
 	public SWGObject createObject(String Template, Planet planet) {
 		return createObject(Template, 0, planet, new Point3D(0, 0, 0), new Quaternion(1, 0, 0, 0));
 	}
 	
+	public SWGObject createObject(String Template, Planet planet, String customServerTemplate) {
+		return createObject(Template, 0, planet, new Point3D(0, 0, 0), new Quaternion(1, 0, 0, 0), customServerTemplate);
+	}
+	
 	public SWGObject createObject(String Template, Planet planet, float x, float z, float y) {
 		return createObject(Template, 0, planet, new Point3D(x, y, z), new Quaternion(1, 0, 0, 0));
+	}
+	
+	public SWGObject createObject(String Template, long objectID, Planet planet, Point3D position, Quaternion orientation) {
+		return createObject(Template, objectID, planet, position, orientation, null);	
 	}
 	
 	public void addObjectToScene(SWGObject object) {
@@ -375,7 +466,12 @@ public class ObjectService implements INetworkDispatch {
 
 		return objectID;*/
 		
-		long newId = highestId.incrementAndGet();
+		long newId;
+		
+		synchronized(objectMutex) {
+			newId = highestId.incrementAndGet();
+		}
+		
 		PreparedStatement ps2;
 
 		try {
@@ -385,7 +481,7 @@ public class ObjectService implements INetworkDispatch {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		if(getObject(newId) == null)
+		if(getObject(newId) == null && getCreatureFromDB(newId) == null)
 			return newId;
 		else
 			return generateObjectID();
@@ -401,10 +497,16 @@ public class ObjectService implements INetworkDispatch {
 		String filePath = "scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", "") + object.getTemplate().split("shared_" , 2)[1].replace(".iff", "") + ".py";
 		
 		if (FileUtilities.doesFileExist(filePath)) {
-			PyObject method = core.scriptService.getMethod("scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", ""), object.getTemplate().split("shared_" , 2)[1].replace(".iff", ""), "useObject");
+			filePath = "scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", "");
+			String fileName = object.getTemplate().split("shared_" , 2)[1].replace(".iff", "");
 			
-			if (method != null && method.isCallable()) {
-				method.__call__(Py.java2py(core), Py.java2py(creature), Py.java2py(object));
+			PyObject method1 = core.scriptService.getMethod("scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", ""), object.getTemplate().split("shared_" , 2)[1].replace(".iff", ""), "use");
+			PyObject method2 = core.scriptService.getMethod("scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", ""), object.getTemplate().split("shared_" , 2)[1].replace(".iff", ""), "useObject");
+			
+			if (method1 != null && method1.isCallable()) {
+				method1.__call__(Py.java2py(core), Py.java2py(creature), Py.java2py(object));
+			} else if (method2 != null && method2.isCallable()) {
+				method2.__call__(Py.java2py(core), Py.java2py(creature), Py.java2py(object));
 			}
 		}
 	}
@@ -426,7 +528,7 @@ public class ObjectService implements INetworkDispatch {
 				selectCharacter.deserialize(data);
 
 				long objectId = selectCharacter.getCharacterId();
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				Client client = core.getClient(session);
 				if(client == null) {
 					System.out.println("NULL Client");
 					return;
@@ -442,7 +544,13 @@ public class ObjectService implements INetworkDispatch {
 				} else {
 					
 					creature = (CreatureObject) getObject(objectId);
-
+					
+				}
+				
+				if(creature.getAttachment("disconnectTask") != null) {
+					creature.getAwareObjects().removeAll(creature.getAwareObjects());
+					((ScheduledFuture<?>) creature.getAttachment("disconnectTask")).cancel(true);
+					creature.setAttachment("disconnectTask", null);
 				}
 
 				creature.setClient(client);
@@ -476,67 +584,69 @@ public class ObjectService implements INetworkDispatch {
 
 				if(creature.getParentId() != 0) {
 					SWGObject parent = getObject(creature.getParentId());
+					System.out.println("Building: " + parent.getContainer().getTemplate());
 					parent._add(creature);
 				}
 
 				Point3D position = creature.getPosition();
-		
 				
+				HeartBeatMessage heartBeat = new HeartBeatMessage();
+				session.write(heartBeat.serialize());
+		
 				UnkByteFlag unkByteFlag = new UnkByteFlag();
 				session.write(unkByteFlag.serialize());
+				
+				core.buffService.clearBuffs(creature);
+
+				CmdStartScene startScene = new CmdStartScene((byte) 0, objectId, creature.getPlanet().getPath(), creature.getTemplate(), position.x, position.y, position.z, core.getGalacticTime(), 0);
+				session.write(startScene.serialize());
 				
 				ParametersMessage parameters = new ParametersMessage();
 				session.write(parameters.serialize());
 				
-				core.buffService.clearBuffs(creature);
-				
+				creature.makeAware(core.guildService.getGuildObject());				
 				core.chatService.loadMailHeaders(client);
 				
-				HeartBeatMessage heartBeat = new HeartBeatMessage();
-				session.write(heartBeat.serialize());
-
-				CmdStartScene startScene = new CmdStartScene((byte) 0, objectId, creature.getPlanet().getPath(), creature.getTemplate(), position.x, position.y, position.z, System.currentTimeMillis() / 1000, 0);
-				session.write(startScene.serialize());
-				
-				creature.makeAware(core.guildService.getGuildObject());
-
 				core.simulationService.handleZoneIn(client);
 				creature.makeAware(creature);
-				
-				CmdSceneReady sceneReady = new CmdSceneReady();
-				client.getSession().write(sceneReady.serialize());
+
 				
 				PlayerObject ghost = (PlayerObject) creature.getSlottedObject("ghost");
 				
-				ChatOnGetFriendsList friendsListMessage = new ChatOnGetFriendsList(ghost);
-				client.getSession().write(friendsListMessage.serialize());
+				//ChatOnGetFriendsList friendsListMessage = new ChatOnGetFriendsList(ghost);
+				//client.getSession().write(friendsListMessage.serialize());
+				
+				if (ghost != null) {
+					ghost.clearFlagBitmask(PlayerFlags.LD);
+					String objectShortName = creature.getCustomName().toLowerCase();
+					
+					if (creature.getCustomName().contains(" ")) {
+						String[] splitName = creature.getCustomName().toLowerCase().split(" ");
+						objectShortName = splitName[0].toLowerCase();
+					}
+					
+					core.chatService.playerStatusChange(objectShortName, (byte) 1);
+					
+					if (!ghost.getFriendList().isEmpty()) {
+
+						// Find out what friends are online/offline
+						for (String friend : ghost.getFriendList()) {
+							SWGObject friendObject = core.chatService.getObjectByFirstName(friend);
+							
+							if(friendObject != null && friendObject.isInQuadtree()) {
+								ChatFriendsListUpdate onlineNotifyStatus = new ChatFriendsListUpdate(friend, (byte) 1);
+								client.getSession().write(onlineNotifyStatus.serialize());
+
+							} else {
+								ChatFriendsListUpdate onlineNotifyStatus = new ChatFriendsListUpdate(friend, (byte) 0);
+								client.getSession().write(onlineNotifyStatus.serialize());
+							}
+						}
+					}
+				}
 				
 				core.playerService.postZoneIn(creature);
 
-			}
-			
-		});
-		
-		objControllerOpcodes.put(ObjControllerOpcodes.USE_OBJECT, new INetworkRemoteEvent() {
-
-			@Override
-			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
-				buffer.order(ByteOrder.LITTLE_ENDIAN);
-				
-				CreatureObject creature = (CreatureObject) getObject(buffer.getLong());
-				
-				if (creature == null || creature.getClient() == null) {
-					return;
-				}
-				
-				buffer.skip(4);
-				
-				SWGObject object = getObject(buffer.getLong());
-				
-				if (object == null) {
-					return;
-				}
-				useObject(creature, object);
 			}
 			
 		});
@@ -570,7 +680,7 @@ public class ObjectService implements INetworkDispatch {
 				if(obj.getParentId() != 0 && getObject(obj.getParentId()) != null) {
 					SWGObject parent = getObject(obj.getParentId());
 					parent.add(obj);
-				}
+				} 
 			}
 		}
 		
@@ -584,29 +694,45 @@ public class ObjectService implements INetworkDispatch {
 	 * @param position The position as an offset to the parent object.
 	 * @param orientation The orientation as an offset to the parent object.
 	 */
-	public void createChildObject(SWGObject parent, String template, Point3D position, Quaternion orientation) {
+	public void createChildObject(SWGObject parent, String template, Point3D position, Quaternion orientation, int cellNumber) {
 		
+		if(cellNumber == -1) {
 		
-		float radians = parent.getRadians();
-		Point3D parentPos = parent.getWorldPosition();
+			float radians = parent.getRadians();
+			Point3D parentPos = parent.getWorldPosition();
+			
+			float x = (float) ((Math.cos(radians) * position.x) + (Math.sin(radians) * position.z));
+			float y = position.y + parentPos.y;
+			float z = (float) ((Math.cos(radians) * position.z) - (Math.sin(radians) * position.x));
+			
+			x += parentPos.x;
+			z += parentPos.z;
+			
+			position = new Point3D(x, y, z);
+			orientation = MathUtilities.rotateQuaternion(orientation, radians, new Point3D(0, 1, 0));
+			
+		}
 		
-		float x = (float) ((Math.cos(radians) * position.x) + (Math.sin(radians) * position.z));
-		float y = position.y + parentPos.y;
-		float z = (float) ((Math.cos(radians) * position.z) - (Math.sin(radians) * position.x));
-		
-		x += parentPos.x;
-		z += parentPos.z;
-		
-		position = new Point3D(x, y, z);
-		orientation = MathUtilities.rotateQuaternion(orientation, radians, new Point3D(0, 1, 0));
 		SWGObject child = createObject(template, 0, parent.getPlanet(), position, orientation);
 		
-		core.simulationService.add(child, x, z);
+		if(parent.getAttachment("childObjects") == null)
+			parent.setAttachment("childObjects", new Vector<SWGObject>());
+		
+		((Vector<SWGObject>) parent.getAttachment("childObjects")).add(child);
+		
+		if(cellNumber != -1)
+			child.setAttachment("cellNumber", cellNumber);
+		
+		//core.simulationService.add(child, x, z);
 		
 	}
 	
 	public void createChildObject(SWGObject parent, String template, float x, float y, float z, float qy, float qw) {
-		createChildObject(parent, template, new Point3D(x, y, z), new Quaternion(qw, 0, qy, 0));
+		createChildObject(parent, template, new Point3D(x, y, z), new Quaternion(qw, 0, qy, 0), -1);
+	}
+	
+	public void createChildObject(SWGObject parent, String template, float x, float y, float z, float qy, float qw, int cellNumber) {
+		createChildObject(parent, template, new Point3D(x, y, z), new Quaternion(qw, 0, qy, 0), cellNumber);
 	}
 	
 	public void loadBuildoutObjects(Planet planet) throws InstantiationException, IllegalAccessException {
@@ -655,7 +781,7 @@ public class ObjectService implements INetworkDispatch {
 					qz = (Float) buildoutTable.getObject(i, 8);
 					radius = (Float) buildoutTable.getObject(i, 9);
 					portalCRC = (Integer) buildoutTable.getObject(i, 10);
-									
+
 				} else {
 					
 					objectId = (Integer) buildoutTable.getObject(i, 0);
@@ -674,26 +800,47 @@ public class ObjectService implements INetworkDispatch {
 					portalCRC = (Integer) buildoutTable.getObject(i, 13);
 
 				}
-				
+								
+				if(!template.equals("object/cell/shared_cell.iff") && objectId != 0 && getObject(objectId) != null) {
+					//System.out.println("Duplicate buildout object: " + template);
+					continue;
+				}
+												
+				List<Long> containers = new ArrayList<Long>();
 				SWGObject object;
-				
 				if(objectId != 0 && containerId == 0) {					
-					if(portalCRC != 0)
-						objectId = 0;
-					object = createObject(template, objectId, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz));
+					if(portalCRC != 0) {
+						containers.add(objectId);
+						object = createObject(template, objectId, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, true);
+						((BuildingObject) object).createTransaction(core.getBuildingODB().getEnvironment());
+					} else {
+						object = createObject(template, objectId, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz));
+					}
 					if(object == null)
 						continue;
 					if(radius > 256)
 						object.setAttachment("bigSpawnRange", new Boolean(true));
 					core.simulationService.add(object, object.getPosition().x, object.getPosition().z);
-				} else if(objectId != 0 && containerId != 0 && cellIndex != 0) {
-					object = createObject(template, objectId, planet, new Point3D(px, py, pz), new Quaternion(qw, qx, qy, qz));		
-					if(object instanceof CellObject)
+				} else if(containerId != 0) {
+					object = createObject(template, 0, planet, new Point3D(px, py, pz), new Quaternion(qw, qx, qy, qz));	
+					if(containers.contains(containerId)) {
+						object.setisInSnapshot(false);
+						containers.add(objectId);
+					}
+					if(object instanceof CellObject && cellIndex != 0)
 						((CellObject) object).setCellNumber(cellIndex);
 					SWGObject parent = getObject(containerId);
 					
-					if(parent != null && object != null)
+					if(parent != null && object != null) {
+						if(parent instanceof BuildingObject && ((BuildingObject) parent).getCellByCellNumber(cellIndex) != null)
+							continue;
 						parent.add(object);
+						/*if(parent instanceof BuildingObject) {
+							((BuildingObject) parent).createTransaction(core.getBuildingODB().getEnvironment());
+							core.getBuildingODB().put((BuildingObject) parent, Long.class, BuildingObject.class, ((BuildingObject) parent).getTransaction());
+							((BuildingObject) parent).getTransaction().commitSync();
+						}*/
+					}
 				} else {
 					object = createObject(template, 0, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz));
 					core.simulationService.add(object, object.getPosition().x, object.getPosition().z);					
@@ -709,5 +856,25 @@ public class ObjectService implements INetworkDispatch {
 		
 	}
 
+	public int objsInContainer(SWGObject owner, TangibleObject container) {
+		if (owner == null) {
+			Console.println("Owner null!");
+		}
+		if (container == null) {
+			Console.println("Container is null!");
+		}
+		final AtomicInteger count = new AtomicInteger();
+		
+		container.viewChildren(owner, false, false, new Traverser() {
+
+			@Override
+			public void process(SWGObject child) {
+				count.getAndIncrement();
+			}
+			
+		});
+		
+		return count.get();
+	}
 	
 }

@@ -25,14 +25,11 @@ import java.nio.ByteOrder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.text.WordUtils;
 import org.apache.mina.core.buffer.IoBuffer;
@@ -48,16 +45,13 @@ import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
-import engine.resources.scene.quadtree.QuadTree;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import main.NGECore;
 import resources.common.Console;
 import resources.common.Opcodes;
 import resources.objects.creature.CreatureObject;
-import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
-import services.map.*;
 import services.sui.SUIService.ListBoxType;
 import services.sui.SUIService.MessageBoxType;
 import services.sui.SUIWindow.SUICallback;
@@ -87,7 +81,7 @@ public class TravelService implements INetworkDispatch {
 				PlanetTravelPointListRequest request = new PlanetTravelPointListRequest();
 				request.deserialize(data);
 				
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				Client client = core.getClient(session);
 
 				if(client == null || client.getSession() == null)
 					return;
@@ -114,11 +108,13 @@ public class TravelService implements INetworkDispatch {
 							Vector<TravelPoint> correctTravelPoints = new Vector<TravelPoint>();
 							
 							for(TravelPoint tp : travelMap.get(planet)) {
-								if(tp.isStarport() || tp.getPlanetName().equalsIgnoreCase(object.getPlanet().getName()))
+								if(tp.isStarport() || tp.getPlanetName().equalsIgnoreCase(object.getPlanet().getName())) {
 									correctTravelPoints.add(tp);
+								}
 							}
 							PlanetTravelPointListResponse response = new PlanetTravelPointListResponse(planetString, correctTravelPoints);
 							client.getSession().write(response.serialize());
+							
 							break;
 							
 						} 
@@ -138,23 +134,40 @@ public class TravelService implements INetworkDispatch {
 		
 	}
 	
-	public TravelPoint getNearestTravelPoint(SWGObject obj) {
+	public TravelPoint getNearestTravelPoint(SWGObject obj, int distance) {
 		TravelPoint returnedPoint = null;
 		Vector<TravelPoint> planetTp = travelMap.get(obj.getPlanet());
-		
+
 		synchronized(travelMap) {
 			for (TravelPoint tp : planetTp) {
 				//System.out.println("Distance for point " + tp.getName() + " is " + tp.getLocation().getDistance2D(obj.getWorldPosition()));
-				if (tp.getLocation().getDistance2D(obj.getWorldPosition()) <= 125) {
-					returnedPoint = tp;
+				if (tp.getLocation().getDistance2D(obj.getWorldPosition()) <= distance) {
+					if (returnedPoint != null) {
+						float returnPointDistance = returnedPoint.getLocation().getDistance2D(obj.getWorldPosition());
+						float tpDistance = tp.getLocation().getDistance2D(obj.getWorldPosition());
+						//Console.println("Current point: " + returnedPoint.getName());
+						//Console.println("Return point distance: " + returnPointDistance + " for " + returnedPoint.getName());
+						//Console.println("tp point distance: " + tpDistance + " for " + tp.getName());
+						if (tpDistance < returnPointDistance) {
+							returnedPoint = tp;
+						}
+					} else {
+						returnedPoint = tp;
+					}
 				}
 			}
 		}
-		
-		if (returnedPoint == null) {
-			System.out.println("NULL TravelPoint at : " + core.mapService.getClosestCityName(obj));
-		}
+		// Some transport obj's were used as deco (ex: ACLO bunker on Talus shared_player_transport). A null check should be performed before tp is used.
+		/*if (returnedPoint == null) {
+			//System.out.println("Could not find travel point for " + obj.getTemplate() + " at " + obj.getPlanet().name + " Position: " + obj.getPosition().x + " " + obj.getPosition().z);
+			//Console.println("Travel Point NULL: " + returnedPoint.getName());
+		}*/
+
 		return returnedPoint;
+	}
+	
+	public TravelPoint getNearestTravelPoint(SWGObject obj) {
+		return getNearestTravelPoint(obj, 125);
 	}
 	
 	public TravelPoint getTravelPointByName(String planet, String tpName) {
@@ -187,19 +200,21 @@ public class TravelService implements INetworkDispatch {
 		TravelPoint travelPoint = new TravelPoint(name, x, y, z, 150);
 
 		travelPoint.setPlanetName(WordUtils.capitalize(planet.getName()));
-		if (travelMap.containsKey(planet)) {
-			
-			travelMap.get(planet).add(travelPoint);
-			System.out.println("Added travel point " + travelPoint.getName());
-			
-		} else {
-			Vector<TravelPoint> travelPointVector = new Vector<TravelPoint>();
-			travelMap.put(planet, travelPointVector);
-			travelMap.get(planet).add(travelPoint);
-			System.out.println("Added planet " + planet.getName() + " to TravelMap.");
-			System.out.println("Added travel point " + travelPoint.getName());
-		}
 		
+		synchronized(travelMap) {
+			if (travelMap.containsKey(planet)) {
+				
+				travelMap.get(planet).add(travelPoint);
+				System.out.println("Added travel point " + travelPoint.getName());
+				
+			} else {
+				Vector<TravelPoint> travelPointVector = new Vector<TravelPoint>();
+				travelMap.put(planet, travelPointVector);
+				travelMap.get(planet).add(travelPoint);
+				System.out.println("Added planet " + planet.getName() + " to TravelMap.");
+				System.out.println("Added travel point " + travelPoint.getName());
+			}
+		}
 	}
 	
 	public void removeTravelPointByName(Planet planet, String name){
@@ -227,7 +242,7 @@ public class TravelService implements INetworkDispatch {
 		
 		Planet planet = core.terrainService.getPlanetByName(departurePlanet.toLowerCase());
 		SWGObject travelTicket = core.objectService.createObject("object/tangible/travel/travel_ticket/base/shared_base_travel_ticket.iff", planet);
-
+		
 		travelTicket.setStringAttribute("@obj_attr_n:travel_departure_planet", WordUtils.capitalize(departurePlanet));
 		travelTicket.setStringAttribute("@obj_attr_n:travel_departure_point", departureLoc);
 		
@@ -257,7 +272,7 @@ public class TravelService implements INetworkDispatch {
 			}
 			
 			creatureObj.setBankCredits(0);
-			creatureObj.setCashCredits(cashDifference);
+			creatureObj.setCashCredits(creatureObj.getCashCredits() - cashDifference);
 		} else {
 			creatureObj.setBankCredits(playerBankCredits - fare);
 		}
@@ -271,7 +286,7 @@ public class TravelService implements INetworkDispatch {
 		
 		creatureObj.getSlottedObject("inventory").add(travelTicket);
 		//Console.println("Total cost: " + fare);
-		SUIWindow window = core.suiService.createMessageBox(MessageBoxType.MESSAGE_BOX_OK, "STAR WARS GALAXIES", "Ticket purchase complete.", player, null, 0);
+		SUIWindow window = core.suiService.createMessageBox(MessageBoxType.MESSAGE_BOX_OK, "STAR WARS GALAXIES", "@travel:ticket_purchase_complete", player, null, 0);
 		core.suiService.openSUIWindow(window);
 
 		creatureObj.sendSystemMessage("You successfully make a payment of " + fare + " credits to the Galactic Travel Commission.", (byte) 0);
@@ -307,7 +322,23 @@ public class TravelService implements INetworkDispatch {
 	public void doTransport(SWGObject actor, TravelPoint tp) {
 		
 		Planet planet = core.terrainService.getPlanetByName(tp.getPlanetName());
-		core.simulationService.transferToPlanet(actor, planet, tp.getSpawnLocation().getPosition(), tp.getSpawnLocation().getOrientation(), null);
+		
+		Random ran = new Random();
+		
+		float oY = tp.getShuttle().getOrientation().y;
+		float dirDg = (float) ((Math.acos(oY) * 180 / Math.PI) * 2);
+		
+		ran.setSeed(32);
+		dirDg = dirDg - 18 + ran.nextFloat();
+		float dirRadian = (float) (dirDg * Math.PI / 180);
+		ran.setSeed(3);
+		float distance = 13 + ran.nextFloat();
+		
+		float x = (float) (tp.getSpawnLocation().getPosition().x + Math.sin(dirRadian) * distance);
+		float y = (float) (tp.getSpawnLocation().getPosition().y + Math.cos(dirRadian) * distance);
+
+		Point3D spawnPoint = new Point3D(x, y, tp.getSpawnLocation().getPosition().z);
+		core.simulationService.transferToPlanet(actor, planet, spawnPoint, new Quaternion(0, 0, 0, 0), null);
 		
 	}
 
@@ -364,7 +395,7 @@ public class TravelService implements INetworkDispatch {
 			for (int f = 0; f < travelFares.getRowCount(); f++) {
 				Planet planet = core.terrainService.getPlanetByName((String) travelFares.getObject(f, 0));
 				if (travelMap.containsKey(planet)) {
-					int corellia = ((Integer) travelFares.getObject(f, 1));
+					int corellia = ((int) travelFares.getObject(f, 1));
 					int dantooine = ((int) travelFares.getObject(f, 2));
 					int dathomir = ((int) travelFares.getObject(f, 3));
 					int endor = ((int) travelFares.getObject(f, 4));

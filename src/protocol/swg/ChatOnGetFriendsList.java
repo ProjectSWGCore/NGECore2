@@ -3,12 +3,13 @@ package protocol.swg;
 import java.nio.ByteOrder;
 import java.util.List;
 
+import main.NGECore;
+
 import org.apache.mina.core.buffer.IoBuffer;
 
-import engine.resources.config.Config;
-import engine.resources.config.DefaultConfig;
 import resources.objects.player.PlayerObject;
 
+// This is possibly unused
 public class ChatOnGetFriendsList extends SWGMessage {
 
 	private List<String> friendList;
@@ -24,17 +25,11 @@ public class ChatOnGetFriendsList extends SWGMessage {
 	}
 	@Override
 	public void deserialize(IoBuffer data) {
-		// XXX Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public IoBuffer serialize() {
-		Config config = new Config();
-		config.setFilePath("nge.cfg");
-		if (!(config.loadConfigFile())) {
-			config = DefaultConfig.getConfig();
-		}
 		
 		IoBuffer buffer = IoBuffer.allocate(200).order(ByteOrder.LITTLE_ENDIAN);
 		
@@ -47,7 +42,7 @@ public class ChatOnGetFriendsList extends SWGMessage {
 		for (String friend : player.getFriendList()) {
 			
 			buffer.put(getAsciiString("SWG"));
-			buffer.put(getAsciiString(config.getString("GALAXY_NAME")));
+			buffer.put(getAsciiString(NGECore.getInstance().getConfig().getString("GALAXY_NAME")));
 			
 			int friendIndex = friendList.indexOf(friend);
 			
@@ -56,7 +51,6 @@ public class ChatOnGetFriendsList extends SWGMessage {
 		int size = buffer.position();
 		buffer = IoBuffer.allocate(size).put(buffer.array(), 0, size);
 		buffer.flip();
-		//System.out.println("ChatOnGetFriendsList: " + buffer.getHexDump());
 		return buffer;
 	}
 

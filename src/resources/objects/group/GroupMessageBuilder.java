@@ -83,7 +83,7 @@ public class GroupMessageBuilder extends ObjectMessageBuilder {
 		buffer.setAutoExpand(true);
 		
 		buffer.putShort((short) 0x0B); // Obj Operand Count
-		buffer.putInt(0x45);		   
+		buffer.putInt(0x43);		   
 		
 		buffer.put(getAsciiString("string_id_table"));
 		
@@ -147,7 +147,7 @@ public class GroupMessageBuilder extends ObjectMessageBuilder {
 		
 		GroupObject group = (GroupObject) object;
 		
-		IoBuffer buffer = bufferPool.allocate(15, false).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer buffer = bufferPool.allocate(21 + member.getCustomName().length(), false).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.putInt(1);
 		buffer.putInt(group.getMemberListUpdateCounter());
 		
@@ -166,7 +166,7 @@ public class GroupMessageBuilder extends ObjectMessageBuilder {
 		
 		GroupObject group = (GroupObject) object;
 		
-		IoBuffer buffer = bufferPool.allocate(15, false).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer buffer = bufferPool.allocate(11, false).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.putInt(1);
 		buffer.putInt(group.getMemberListUpdateCounter());
 		

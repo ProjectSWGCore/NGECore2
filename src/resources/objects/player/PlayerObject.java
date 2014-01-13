@@ -22,10 +22,13 @@
 package resources.objects.player;
 
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
+import resources.objects.intangible.IntangibleObject;
 import resources.objects.waypoint.WaypointObject;
 
 import com.sleepycat.persist.model.NotPersistent;
@@ -34,23 +37,26 @@ import com.sleepycat.persist.model.Persistent;
 import engine.clients.Client;
 import engine.resources.objects.DraftSchematic;
 import engine.resources.objects.Quest;
-import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent
-public class PlayerObject extends SWGObject {
+@Persistent(version=3)
+public class PlayerObject extends IntangibleObject {
 	
 	// PLAY 3
 	
 	private String title;
 	private String profession;
+	private int professionIcon;
 	private List<Integer> flagsList = new ArrayList<Integer>();
 	private List<Integer> profileList = new ArrayList<Integer>();
 	private List<String> titleList = new ArrayList<String>();
 	private int bornDate = 0;
 	private int totalPlayTime = 0;
+	private byte[] collections = new byte[] { };
+	private int highestSetBit = 0;
+	private int flagBitmask = 0;
 	
 	// PLAY 6
 	
@@ -116,7 +122,7 @@ public class PlayerObject extends SWGObject {
 	@NotPersistent
 	private long lastPlayTimeUpdate = System.currentTimeMillis();
 	
-	
+	private Map<String, Integer> factionStandingMap = new TreeMap<String, Integer>();
 	
 	public PlayerObject() {
 		super();
@@ -136,11 +142,14 @@ public class PlayerObject extends SWGObject {
 
 	public void setTitle(String title) {
 		synchronized(objectMutex) {
-			
 			if(!getTitleList().isEmpty() && getTitleList().contains(title)) {
 				this.title = title;
-				notifyObservers(messageBuilder.buildTitleDelta(title), true);
 			}
+
+		}
+		
+		if (getContainer() != null) {
+			getContainer().notifyObservers(messageBuilder.buildTitleDelta(title), true);
 		}
 	}
 
@@ -186,7 +195,7 @@ public class PlayerObject extends SWGObject {
 		synchronized(objectMutex) {
 			this.totalPlayTime = totalPlayTime;
 		}
-		getContainer().notifyObservers(messageBuilder.buildTotalPlayTimeDelta(totalPlayTime), true);
+		notifyObservers(messageBuilder.buildTotalPlayTimeDelta(totalPlayTime), true);
 	}
 
 	public String getHome() {
@@ -262,16 +271,21 @@ public class PlayerObject extends SWGObject {
 	public void waypointRemove(WaypointObject waypoint) {
 		synchronized(objectMutex) {
 			getContainer().getClient().getSession().write(messageBuilder.buildWaypointRemoveDelta(waypoint));
+			getWaypoints().remove(waypoint);
 		}
 	}
 	
 	public void waypointAdd(WaypointObject waypoint) {
 		synchronized(objectMutex) {
 			getContainer().getClient().getSession().write(messageBuilder.buildWaypointAddDelta(waypoint));
+			getWaypoints().add(waypoint);
 		}
 	}
 	
 	public WaypointObject getWaypointFromList(WaypointObject waypoint) {
+		if (waypoint == null)
+			return null;
+		
 		synchronized(objectMutex) {
 			for(WaypointObject wp : waypoints) {
 				if(wp.getObjectID() == waypoint.getObjectID())
@@ -412,14 +426,16 @@ public class PlayerObject extends SWGObject {
 	public void friendAdd(String friend) {
 		synchronized(objectMutex) {
 			setFriendListUpdateCounter(getFriendListUpdateCounter() + 1);
-			getContainer().getClient().getSession().write(messageBuilder.buildFriendAddDelta(friend));
+			friendList.add(friend);
+			getContainer().getClient().getSession().write(messageBuilder.buildFriendAddDelta(getFriendList()));
 		}
 	}
 	
 	public void friendRemove(String friend) {
 		synchronized(objectMutex) {
 			setFriendListUpdateCounter(getFriendListUpdateCounter() + 1);
-			getContainer().getClient().getSession().write(messageBuilder.buildFriendRemoveDelta(friend));
+			friendList.remove(friend);
+			getContainer().getClient().getSession().write(messageBuilder.buildFriendRemoveDelta(getFriendList()));
 		}
 	}
 	
@@ -436,16 +452,16 @@ public class PlayerObject extends SWGObject {
 	public void ignoreAdd(String ignoreName) {
 		synchronized(objectMutex) {
 			setIgnoreListUpdateCounter(getIgnoreListUpdateCounter() + 1);
-			getContainer().getClient().getSession().write(messageBuilder.buildIgnoreAddDelta(ignoreName));
 			ignoreList.add(ignoreName);
+			getContainer().getClient().getSession().write(messageBuilder.buildIgnoreAddDelta(getIgnoreList()));
 		}
 	}
 	
 	public void ignoreRemove(String removeName) {
 		synchronized(objectMutex) {
 			setIgnoreListUpdateCounter(getIgnoreListUpdateCounter() + 1);
-			getContainer().getClient().getSession().write(messageBuilder.buildIgnoreRemoveDelta(removeName));
 			ignoreList.remove(removeName);
+			getContainer().getClient().getSession().write(messageBuilder.buildIgnoreRemoveDelta(getIgnoreList()));
 		}
 	}
 	
@@ -551,7 +567,30 @@ public class PlayerObject extends SWGObject {
 			this.jediState = jediState;
 		}
 	}
-
+	
+	public Map<String, Integer> getFactionStandingMap() {
+		return factionStandingMap;
+	}
+	
+	public void setFactionStanding(String faction, int factionStanding) {
+		synchronized(objectMutex) {
+			factionStandingMap.put(faction, ((factionStanding < -5000) ? -5000 : ((factionStanding > 5000) ? 5000 : factionStanding)));
+		}
+	}
+	
+	public void modifyFactionStanding(String faction, int modifier) {
+		synchronized(objectMutex) {
+			int factionStanding = (((factionStandingMap.containsKey(faction)) ? factionStandingMap.get(faction) : 0) + modifier);
+			factionStandingMap.put(faction, ((factionStanding < -5000) ? -5000 : ((factionStanding > 5000) ? 5000 : factionStanding)));
+		}
+	}
+	
+	public int getFactionStanding(String faction) {
+		synchronized(objectMutex) {
+			return ((factionStandingMap.containsKey(faction)) ? factionStandingMap.get(faction) : 0);
+		}
+	}
+	
 	@Override
 	public void sendBaselines(Client destination) {
 		
@@ -583,9 +622,89 @@ public class PlayerObject extends SWGObject {
 	public List<String> getTitleList() {
 		return titleList;
 	}
-
+	
 	public void setTitleList(List<String> titleList) {
 		this.titleList = titleList;
+	}
+	
+	public void setCollections(byte[] collections) {
+		synchronized(objectMutex) {
+			this.collections = collections;
+			this.highestSetBit = BitSet.valueOf(collections).length();
+		}
+		
+		notifyObservers(messageBuilder.buildCollectionsDelta(collections, getHighestSetBit()), true);
+	}
+	
+	public byte[] getCollections() {
+		synchronized(objectMutex) {
+			return collections;
+		}
+	}
+	
+	public int getHighestSetBit() {
+		synchronized(objectMutex) {
+			return highestSetBit;
+		}
+	}
+	
+	public int getProfessionIcon() {
+		synchronized(objectMutex) {
+			return professionIcon;
+		}
+	}
+	
+	public void setProfessionIcon(int professionIcon) {
+		synchronized(objectMutex) {
+			this.professionIcon = professionIcon;
+		}
+		
+		if (getContainer() != null) {
+			getContainer().notifyObservers(messageBuilder.buildProfessionIconDelta(professionIcon), true);
+		}
+	}
+	
+	public int getFlagBitmask() {
+		synchronized(objectMutex) {
+			return flagBitmask;
+		}
+	}
+
+	public void setFlagBitmask(int flagBitmask) {
+		synchronized(objectMutex) {
+			this.flagBitmask |= flagBitmask;
+		}
+
+		if (getContainer() != null) {
+			getContainer().notifyObservers(messageBuilder.buildFlagBitmask(this.flagBitmask), true);
+		}
+	}
+	public void clearFlagBitmask(int flagBitmask) {
+		synchronized(objectMutex) {
+			// set flag bitmask to 0
+			this.flagBitmask &= ~flagBitmask;
+		}
+
+		if (getContainer() != null) {
+			getContainer().notifyObservers(messageBuilder.buildFlagBitmask(this.flagBitmask), true);
+		}
+	}
+	
+	public void toggleFlag(int flag) {
+		if ((this.flagBitmask & flag) == flag) {
+			clearFlagBitmask(flag);
+		} else {
+			setFlagBitmask(flag);
+		}
+	}
+	
+	/*
+	 * @return True if specified flag(s) are enabled
+	 */
+	public boolean isSet(int flags) {
+		synchronized(objectMutex) {
+			return ((flagBitmask & flags) == flags);
+		}
 	}
 	
 }

@@ -23,6 +23,7 @@ package resources.objects.creature;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 
@@ -31,8 +32,8 @@ import org.apache.mina.core.buffer.IoBuffer;
 import protocol.swg.ChatSystemMessage;
 import protocol.swg.ObjControllerMessage;
 import protocol.swg.PlayMusicMessage;
-import protocol.swg.UpdatePVPStatusMessage;
 import protocol.swg.UpdatePostureMessage;
+import protocol.swg.UpdatePVPStatusMessage;
 import protocol.swg.objectControllerObjects.Animation;
 import protocol.swg.objectControllerObjects.Posture;
 
@@ -45,7 +46,6 @@ import engine.clients.Client;
 import resources.objects.Buff;
 import resources.objects.DamageOverTime;
 import resources.objects.SWGList;
-import engine.resources.common.CRC;
 import engine.resources.objects.IPersistent;
 import engine.resources.objects.MissionCriticalObject;
 import engine.resources.objects.SWGObject;
@@ -56,7 +56,7 @@ import engine.resources.scene.Quaternion;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 
-@Entity(version=2)
+@Entity(version=0)
 public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	@NotPersistent
@@ -102,7 +102,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 
 	// CREO6
 	private byte combatFlag = 0;
-	private short level = 1;
+	private short level = -1;
 	private int grantedHealth = 0;
 	private String currentAnimation;
 	private String moodAnimation;
@@ -116,6 +116,16 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private byte moodId = 0;
 	private int performanceCounter = 0;
 	private int performanceId = 0;
+	//FIXME: this is a bit of a hack.
+	private boolean performanceType = false;
+	//FIXME: hmm.. or persistent?
+	@NotPersistent
+	private boolean acceptBandflourishes = true;
+	@NotPersistent
+	private boolean groupDance = true;
+	private CreatureObject performanceWatchee;
+	private CreatureObject performanceListenee;
+	private SWGList<CreatureObject> performanceAudience = new SWGList<CreatureObject>();
 	private int health = 1000;
 	private int action = 300;
 	@NotPersistent
@@ -131,6 +141,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private SWGList<Buff> buffList  = new SWGList<Buff>();
 	@NotPersistent
 	private int buffListUpdateCounter = 0;
+	private byte difficulty = 0;
 	private SWGList<SWGObject> appearanceEquipmentList;
 	@NotPersistent
 	private int appearanceEquipmentListUpdateCounter = 0;
@@ -143,8 +154,14 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private SWGList<DamageOverTime> dotList = new SWGList<DamageOverTime>();
 	@NotPersistent
 	private ScheduledFuture<?> incapTask;
-
+	@NotPersistent
+	private ScheduledFuture<?> entertainerExperience;
+	@NotPersistent
+	private ScheduledFuture<?> inspirationTick;
+	
 	private boolean staticNPC = false; // temp
+	@NotPersistent
+	private int flourishCount = 0;
 	
 	public CreatureObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
 		super(objectID, planet, Template, position, orientation);
@@ -176,6 +193,12 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	public int getBankCredits() {
 		synchronized(objectMutex) {
 			return bankCredits;
+		}
+	}
+	
+	public boolean isPlayer() {
+		synchronized(objectMutex) {
+			return ( getSlottedObject("ghost") != null );
 		}
 	}
 
@@ -258,7 +281,14 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 		
 	}
-
+	
+	@Override
+	public int getOptionsBitmask() {
+		synchronized(objectMutex) {
+			return optionsBitmask;
+		}
+	}
+	
 	@Override
 	public void setOptionsBitmask(int optionBitmask) {
 		synchronized(objectMutex) {
@@ -270,6 +300,26 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		notifyObservers(optionDelta, true);
 
 	}
+	
+	public void setOptions(int options, boolean add) {
+		synchronized(objectMutex) {
+			if (options != 0) {
+				if (add) {
+					addOption(options);
+				} else {
+					removeOption(options);
+				}
+			}
+		}
+	}
+	
+	public void addOption(int option) {
+		setOptionsBitmask(getOptionsBitmask() | option);
+	}
+	
+	public void removeOption(int option) {
+		setOptionsBitmask(getOptionsBitmask() & ~option);
+	}
 
 	public byte getPosture() {
 		synchronized(objectMutex) {
@@ -278,15 +328,92 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 
 	public void setPosture(byte posture) {
+		boolean needsStopPerformance =  false;
 		synchronized(objectMutex) {
+			if (this.posture == 0x09) {
+				needsStopPerformance = true;
+			}
 			this.posture = posture;
 		}
+		
 		IoBuffer postureDelta = messageBuilder.buildPostureDelta(posture);
 		Posture postureUpdate = new Posture(getObjectID(), posture);
 		ObjControllerMessage objController = new ObjControllerMessage(0x1B, postureUpdate);
 		
 		notifyObservers(postureDelta, true);
 		notifyObservers(objController, true);
+		
+		if (needsStopPerformance) {
+			stopPerformance();
+		}
+		
+	}
+	
+	public void startPerformance() {
+		
+		getClient().getSession().write(messageBuilder.buildStartPerformance(true));
+		
+	}
+	
+	public void stopPerformance() {
+		String type = "";
+		synchronized(objectMutex) {
+			setPerformanceId(0,true);
+			setPerformanceCounter(0);
+			setCurrentAnimation("");
+			type = (performanceType) ? "dance" : "music";
+			if (entertainerExperience != null) {
+				entertainerExperience.cancel(true);
+				entertainerExperience = null;
+			}
+		}
+		
+	    sendSystemMessage("@performance:" + type  + "_stop_self",(byte)0);
+	    stopAudience();
+
+		getClient().getSession().write(messageBuilder.buildStartPerformance(false));
+	}
+	
+	public void stopAudience() {
+		String type = "";
+		synchronized(objectMutex) {
+			type = (performanceType) ? "dance" : "music";
+			if (performanceAudience == null) {
+				return;
+			}
+			Iterator<CreatureObject> it = performanceAudience.iterator();
+			while (it.hasNext()) {
+				CreatureObject next = it.next();
+				if ((performanceType) && (next.getPerformanceWatchee() != this)) { continue; }
+				if ((!performanceType) && (next.getPerformanceListenee() != this)) { continue; }
+				if (performanceType) { next.setPerformanceWatchee(null); }
+				if (!performanceType) { next.setPerformanceListenee(null); }
+				//this may be a bit dodgy.
+				boolean isEntertained = next.getPerformanceListenee() != null && next.getPerformanceWatchee() != null;
+				if (!isEntertained) {
+					next.setMoodAnimation("");
+				}
+				if (next == this) { continue; }
+				next.sendSystemMessage("@performance:" + type  + "_stop_other",(byte)0);
+			}
+			//not sure if this behaviour is correct. might need fixing later.
+			performanceAudience = new SWGList<CreatureObject>();
+		}
+	}
+	public ScheduledFuture<?> getEntertainerExperience() {
+		return entertainerExperience;
+	}
+
+	public void setEntertainerExperience(ScheduledFuture<?> entertainerExperience) {
+		this.entertainerExperience = entertainerExperience;
+	}
+
+	public ScheduledFuture<?> getInspirationTick() {
+		return inspirationTick;
+	}
+
+	public void setInspirationTick(ScheduledFuture<?> inspirationTick) {
+		this.inspirationTick = inspirationTick;
 	}
 
 	@Override
@@ -295,10 +422,8 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			this.faction = faction;
 		}
 		
-		IoBuffer factionDelta = messageBuilder.buildFactionDelta(faction);
-		
-		notifyObservers(factionDelta, true);
-
+		notifyObservers(messageBuilder.buildFactionDelta(faction), true);
+		setPvpStatus(0, true);
 	}
 
 	public int getFactionStatus() {
@@ -312,10 +437,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			this.factionStatus = factionStatus;
 		}
 		
-		IoBuffer factionStatusDelta = messageBuilder.buildFactionStatusDelta(factionStatus);
-		
-		notifyObservers(factionStatusDelta, true);
-
+		notifyObservers(messageBuilder.buildFactionStatusDelta(factionStatus), true);
 	}
 
 	public float getHeight() {
@@ -492,7 +614,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.speedMultiplierBase = speedMultiplierBase;
 		}
-		IoBuffer speedDelta = messageBuilder.buildSpeedModDelta(speedMultiplierBase);
+		IoBuffer speedDelta = messageBuilder.buildSpeedModBaseDelta(speedMultiplierBase);
 		
 		notifyObservers(speedDelta, true);
 
@@ -508,6 +630,9 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.speedMultiplierMod = speedMultiplierMod;
 		}
+		IoBuffer speedDelta = messageBuilder.buildSpeedModDelta(speedMultiplierMod);
+		
+		notifyObservers(speedDelta, true);
 	}
 
 	public long getListenToId() {
@@ -722,6 +847,14 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		notifyObservers(messageBuilder.buildCurrentAnimationDelta(currentAnimation), true);
 
 	}
+	
+	public void doSkillAnimation(String skillAnimation) {
+		Animation animation = new Animation(getObjectId(), skillAnimation);
+		ObjControllerMessage objController = new ObjControllerMessage(0x1B, animation);
+		
+		notifyObservers(objController, true);
+		
+	}
 
 	public String getMoodAnimation() {
 		synchronized(objectMutex) {
@@ -733,6 +866,8 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.moodAnimation = moodAnimation;
 		}
+		IoBuffer moodAnimationDelta = messageBuilder.buildMoodAnimationDelta(moodAnimation);
+		notifyObservers(moodAnimationDelta, true);
 	}
 
 	public long getWeaponId() {
@@ -855,6 +990,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.performanceCounter = performanceCounter;
 		}
+		getClient().getSession().write(messageBuilder.buildPerformanceCounter(performanceCounter));
 	}
 
 	public int getPerformanceId() {
@@ -863,10 +999,19 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 	}
 
-	public void setPerformanceId(int performanceId) {
+	public void setPerformanceId(int performanceId, boolean isDance) {
 		synchronized(objectMutex) {
 			this.performanceId = performanceId;
 		}
+		getClient().getSession().write(messageBuilder.buildPerformanceId((isDance) ? 0 : performanceId));
+	}
+
+	public boolean getAcceptBandflourishes() {
+		return acceptBandflourishes;
+	}
+
+	public void setAcceptBandflourishes(boolean acceptBandflourishes) {
+		this.acceptBandflourishes = acceptBandflourishes;
 	}
 
 	public SWGList<SWGObject> getEquipmentList() {
@@ -892,17 +1037,36 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void addObjectToEquipList(SWGObject object) {
-		if(object instanceof TangibleObject || object instanceof WeaponObject) {
-			equipmentList.add(object);
+		if(object instanceof TangibleObject) {
+			equipmentList.get().add(object);
+			setEquipmentListUpdateCounter(getEquipmentListUpdateCounter() + 1);
+			notifyObservers(messageBuilder.buildAddEquipmentDelta((TangibleObject) object), true);
 		}
 	}
 	
 	public void removeObjectFromEquipList(SWGObject object) {
-		if(object instanceof TangibleObject || object instanceof WeaponObject) {
-			equipmentList.remove(object);
+		if(object instanceof TangibleObject) {
+			setEquipmentListUpdateCounter(getEquipmentListUpdateCounter() + 1);
+			notifyObservers(messageBuilder.buildRemoveEquipmentDelta((TangibleObject) object), true);
+			equipmentList.get().remove(object);
 		}
 	}
-
+	
+	public void addObjectToAppearanceEquipList(SWGObject object) {
+		if(object instanceof TangibleObject) {
+			appearanceEquipmentList.get().add(object);
+			setAppearanceEquipmentListUpdateCounter(getAppearanceEquipmentListUpdateCounter() + 1);
+			notifyObservers(messageBuilder.buildAddAppearanceEquipmentDelta((TangibleObject) object), true);
+		}
+	}
+	
+	public void removeObjectFromAppearanceEquipList(SWGObject object) {
+		if(object instanceof TangibleObject) {
+			setAppearanceEquipmentListUpdateCounter(getAppearanceEquipmentListUpdateCounter() + 1);
+			notifyObservers(messageBuilder.buildRemoveAppearanceEquipmentDelta((TangibleObject) object), true);
+			appearanceEquipmentList.get().remove(object);
+		}
+	}
 
 	@SuppressWarnings("unused")
 	@Override
@@ -923,29 +1087,52 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		//destination.getSession().write(messageBuilder.buildBaseline9());
 		 
 		UpdatePostureMessage upm = new UpdatePostureMessage(getObjectID(), (byte) 0);
-		//destination.getSession().write(upm.serialize());
+		destination.getSession().write(upm.serialize());
 		
 		if(destination != getClient()) {
-			UpdatePVPStatusMessage upvpm = new UpdatePVPStatusMessage(getObjectID());
-			if (factionStatus == 1 && faction.equals("imperial")) {
+			UpdatePVPStatusMessage upvpm = new UpdatePVPStatusMessage(getObjectID(), getPvPBitmask(), getFaction());
+			if(getSlottedObject("ghost") != null)
+	            upvpm.setStatus(16);
+			/*
+			if (factionStatus == 1 && faction == "imperial") {
 				upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Imperial);
 				upvpm.setStatus(16);
-			} else if (factionStatus == 1 && faction.equals("rebel")) {
+				if ((getOptionsBitmask() & 128) == 128) upvpm.setStatus(0);
+				if (getOwnerId() != 0) upvpm.setStatus(256);
+			}
+			
+			if (factionStatus == 1 && faction == "rebel") {
 				upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Rebel);
 				upvpm.setStatus(16);
-			} else if (factionStatus == 2 && faction.equals("imperial")) {
+				if ((getOptionsBitmask() & 128) == 128) upvpm.setStatus(0);
+				if (getOwnerId() != 0) upvpm.setStatus(256);
+			}
+			
+			if (factionStatus == 2 && faction == "imperial") {
 				upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Imperial);
 				upvpm.setStatus(55);
-			} else if (factionStatus == 2 && faction.equals("rebel")) {
+				if ((getOptionsBitmask() & 128) == 128) upvpm.setStatus(39);
+				if (getOwnerId() != 0) upvpm.setStatus(295);
+			}
+			if (factionStatus == 2 && faction == "rebel") {
 				upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Rebel);
 				upvpm.setStatus(55);
-			} else if(getSlottedObject("ghost") != null) {
-				upvpm.setFaction(CRC.StringtoCRC(faction));
+				if ((getOptionsBitmask() & 128) == 128) upvpm.setStatus(39);
+				if (getOwnerId() != 0) upvpm.setStatus(295);
+			} 
+			if(factionStatus == 0 && faction == "neutral") {
+				upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Neutral);
 				upvpm.setStatus(16);
+				if ((getOptionsBitmask() & 128) == 128) upvpm.setStatus(0);
+				if (getOwnerId() != 0) upvpm.setStatus(256);
 			} else {
 				upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Neutral);
-				upvpm.setStatus(0);
-			}			
+				upvpm.setStatus(16);
+				if ((getOptionsBitmask() & 128) == 128) upvpm.setStatus(0);
+				if (getOwnerId() != 0) upvpm.setStatus(256);
+			}
+			*/
+			
 			destination.getSession().write(upvpm.serialize());
 		}
 	}
@@ -1178,6 +1365,13 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 	}
 	
+	public void updateHAMList() {
+		synchronized(objectMutex) {
+			setHamListCounter(getHamListCounter() + 1);
+			notifyObservers(messageBuilder.buildUpdateHAMListDelta(), true);
+		}
+	}
+	
 	public SWGList<DamageOverTime> getDotList() {
 		return dotList;
 	}
@@ -1260,6 +1454,153 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	public boolean setStaticNPC(boolean staticNPC) {
 		return this.staticNPC = staticNPC;
+	}
+	
+	public boolean getGroupDance() {
+		synchronized(objectMutex) {
+			return groupDance;
+		}
+	}
+
+	public void setGroupDance(boolean groupDance) {
+		synchronized(objectMutex) {
+			this.groupDance = groupDance;
+		}
+	}
+
+	public boolean toggleGroupDance() {
+		synchronized(objectMutex) {
+			groupDance = !groupDance;
+			return groupDance;
+		}
+	}
+	
+	public void addAudience(CreatureObject audienceMember) {
+		synchronized(objectMutex) {
+			if (performanceAudience == null) {
+				performanceAudience = new SWGList<CreatureObject>();
+			}
+			performanceAudience.add(audienceMember);
+		}
+	}
+	
+	public void removeAudience(CreatureObject audienceMember) {
+		synchronized(objectMutex) {
+			if (performanceAudience == null) { return; }
+			performanceAudience.remove(audienceMember);
+		}
+	}
+
+	public CreatureObject getPerformanceWatchee() {
+		synchronized(objectMutex) {
+			return performanceWatchee;
+		}
+	}
+
+	public void setPerformanceWatchee(CreatureObject performanceWatchee) {
+		synchronized(objectMutex) {
+			this.performanceWatchee = performanceWatchee;
+		}
+		// not sure at this point if it makes a difference really.
+		// on Live, an empty CREO4 was sent, at least when listenToId was empty.
+		//getClient().getSession().write(messageBuilder.buildListenToId(0));
+	}
+
+	public CreatureObject getPerformanceListenee() {
+		synchronized(objectMutex) {
+			return performanceListenee;
+		}
+	}
+
+	public void setPerformanceListenee(CreatureObject performanceListenee) {
+		synchronized(objectMutex) {
+			this.performanceListenee = performanceListenee;
+			//possibly redundant, need to research this further.
+			this.listenToId = performanceListenee.getObjectId();
+		}
+		getClient().getSession().write(messageBuilder.buildListenToId(this.listenToId));
+	}
+
+
+	
+	@Override
+	public void setPvPBitmask(int pvpBitmask) {
+		super.setPvPBitmask(pvpBitmask);
+		notifyObservers(new UpdatePVPStatusMessage(getObjectID(), getPvPBitmask(), getFaction()), false);
+	}
+	
+	@Override
+	public void setPvpStatus(int pvpBitmask, boolean add) {
+		super.setPvpStatus(pvpBitmask, add);
+		notifyObservers(new UpdatePVPStatusMessage(getObjectID(), getPvPBitmask(), getFaction()), false);
+	}
+	
+	public byte getDifficulty() {
+		synchronized(objectMutex) {
+			return difficulty;
+		}
+	}
+	
+	public void setDifficulty(byte difficulty) {
+		synchronized(objectMutex) {
+			this.difficulty = difficulty;
+		}
+		
+		notifyObservers(messageBuilder.buildDifficultyDelta(difficulty), true);
+	}
+
+	public void setPerformanceType(boolean isDance) {
+		synchronized(objectMutex) {
+			this.performanceType = isDance;
+		}
+	}
+	
+	public boolean getPerformanceType() {
+		synchronized(objectMutex) {
+			return this.performanceType;
+		}
+	}
+
+	public void setFlourishCount(int flourishCount) {
+		synchronized(objectMutex) {
+			this.flourishCount = flourishCount;
+		}
+	}
+
+	public int getFlourishCount() {
+		synchronized(objectMutex) {
+			return this.flourishCount;
+		}
+	}
+	
+	public void incFlourishCount() {
+		synchronized(objectMutex) {
+			this.flourishCount++;
+		}
+	}
+
+	public int getEquipmentListUpdateCounter() {
+		synchronized(objectMutex) {
+			return equipmentListUpdateCounter;
+		}
+	}
+
+	public void setEquipmentListUpdateCounter(int equipmentListUpdateCounter) {
+		synchronized(objectMutex) {
+			this.equipmentListUpdateCounter = equipmentListUpdateCounter;
+		}
+	}
+
+	public int getAppearanceEquipmentListUpdateCounter() {
+		synchronized(objectMutex) {
+			return appearanceEquipmentListUpdateCounter;
+		}
+	}
+
+	public void setAppearanceEquipmentListUpdateCounter(int appearanceEquipmentListUpdateCounter) {
+		synchronized(objectMutex) {
+			this.appearanceEquipmentListUpdateCounter = appearanceEquipmentListUpdateCounter;
+		}
 	}
 	
 }

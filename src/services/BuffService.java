@@ -21,41 +21,22 @@
  ******************************************************************************/
 package services;
 
-import java.nio.ByteOrder;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import org.python.core.Py;
+import org.python.core.PyObject;
 
-
-
-
-
-
-
-
-
-
-
-
-import org.apache.mina.core.buffer.IoBuffer;
-import org.apache.mina.core.session.IoSession;
-
-import protocol.swg.ObjControllerMessage;
-import protocol.swg.objectControllerObjects.BuffBuilderStartMessage;
-import resources.common.Console;
 import resources.common.FileUtilities;
-import resources.common.ObjControllerOpcodes;
 import resources.objects.Buff;
-import resources.objects.BuffItem;
 import resources.objects.DamageOverTime;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
 import resources.objects.player.PlayerObject;
 import main.NGECore;
-import engine.clients.Client;
 import engine.resources.objects.SWGObject;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
@@ -63,7 +44,7 @@ import engine.resources.service.INetworkRemoteEvent;
 public class BuffService implements INetworkDispatch {
 	
 	private NGECore core;
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
 	public BuffService(NGECore core) {
 		this.core = core;
@@ -85,7 +66,7 @@ public class BuffService implements INetworkDispatch {
 			//System.out.println("Buff script doesnt exist for: " + buffName);
 			return;
 		}*/
-		
+
 		final Buff buff = new Buff(buffName, creature.getObjectID());
 		if(buff.isGroupBuff()) {
 			addGroupBuff(creature, buffName);
@@ -111,6 +92,8 @@ public class BuffService implements INetworkDispatch {
                         			if(creature.getDotByBuff(otherBuff) != null)	// reset duration when theres a dot stack
                         				creature.getDotByBuff(otherBuff).setStartTime(buff.getStartTime());
                         			
+                        		} else {
+                        			buff.setStacks(buff.getMaxStacks());
                         		}
                         	
                                 if (otherBuff.getRemainingDuration() > buff.getDuration() && otherBuff.getStacks() >= otherBuff.getMaxStacks()) {
@@ -149,10 +132,32 @@ public class BuffService implements INetworkDispatch {
 			
 		}
 		
+		for (String effect : buff.getParticleEffect().split(",")) {
+			creature.playEffectObject(effect, buff.getBuffName());
+		}
+		
+		if (!buff.getCallback().equals("")) {
+			if (FileUtilities.doesFileExist("scripts/buffs/" + buff.getBuffName() +  ".py")) {
+				scheduler.schedule(new Runnable() {
+					
+					@Override
+					public void run() {
+						PyObject method = core.scriptService.getMethod("scripts/buffs/", buff.getBuffName(), buff.getCallback());
+						
+						if (method != null && method.isCallable()) {
+							method.__call__(Py.java2py(core), Py.java2py(creature), Py.java2py(buff));
+						}
+					}
+						
+				}, 0, TimeUnit.SECONDS);
+			}
+		}
+		
 		return buff;
 		
 	} 
 	
+	@SuppressWarnings("unused")
 	public void removeBuffFromCreature(CreatureObject creature, Buff buff) {
 		
 		 if(!creature.getBuffList().contains(buff))
@@ -165,6 +170,10 @@ public class BuffService implements INetworkDispatch {
          if(FileUtilities.doesFileExist("scripts/buffs/" + buff.getBuffName() + ".py"))
         	 core.scriptService.callScript("scripts/buffs/", "removeBuff", buff.getBuffName(), core, creature, buff);
          creature.removeBuff(buff);
+         
+        for (String effect : buff.getParticleEffect().split(",")) {
+        	creature.stopEffectObject(buff.getBuffName());
+		}
          
 		
 	}

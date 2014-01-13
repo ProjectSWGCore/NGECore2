@@ -29,12 +29,8 @@ public class ChatFriendsListUpdate extends SWGMessage {
 
 	@Override
 	public IoBuffer serialize() {
-		Config config = new Config();
-		config.setFilePath("nge.cfg");
-		if (!(config.loadConfigFile())) {
-			config = DefaultConfig.getConfig();
-		}
-		String serverName = config.getString("GALAXY_NAME");
+
+		String serverName = NGECore.getInstance().getConfig().getString("GALAXY_NAME");
 		
 		IoBuffer result = IoBuffer.allocate(50 + friendName.length()).order(ByteOrder.LITTLE_ENDIAN);
 		result.putShort((short) 3);

@@ -43,8 +43,8 @@ import protocol.swg.GcwGroupsRsp;
 import protocol.swg.GcwRegionsReq;
 import protocol.swg.GcwRegionsRsp;
 
-import resources.common.FactionStatus;
 import resources.common.Opcodes;
+import resources.datatables.FactionStatus;
 import resources.gcw.CurrentServerGCWZoneHistory;
 import resources.gcw.CurrentServerGCWZonePercent;
 import resources.gcw.OtherServerGCWZonePercent;
@@ -400,7 +400,7 @@ public class GCWService implements INetworkDispatch {
 				GcwRegionsReq gcwRegionsReq = new GcwRegionsReq();
 				gcwRegionsReq.deserialize(data);
 				
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				Client client = core.getClient(session);
 				
 				if (client == null || client.getSession() == null) {
 					return;

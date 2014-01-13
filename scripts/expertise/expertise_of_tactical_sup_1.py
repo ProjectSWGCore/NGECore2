@@ -36,11 +36,9 @@ def removeExpertisePoint(core, actor):
 
 # this checks what abilities the player gets by level, need to also call this on level-up
 def addAbilities(core, actor, player):
-
-
+	
 	return
 
 def removeAbilities(core, actor, player):
-
-
+	
 	return

@@ -48,6 +48,7 @@ import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.waypoint.WaypointObject;
 import resources.objects.weapon.WeaponObject;
+import services.combat.CombatEvents.DamageTaken;
 import services.command.CombatCommand;
 import services.sui.SUIService.MessageBoxType;
 import services.sui.SUIWindow;
@@ -64,6 +65,7 @@ public class CombatService implements INetworkDispatch {
 	
 	private NGECore core;
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private CombatEvents events = new CombatEvents();
 
 	public CombatService(NGECore core) {
 		this.core = core;
@@ -88,7 +90,7 @@ public class CombatService implements INetworkDispatch {
 		if((command.getAttackType() == 0 || command.getAttackType() == 1 || command.getAttackType() == 3) && !attemptCombat(attacker, target))
 			success = false;
 		
-		if(!applySpecialCost(attacker, weapon, command))
+		if(success && !applySpecialCost(attacker, weapon, command))
 			success = false;
 		
 		if(!success) {
@@ -240,8 +242,24 @@ public class CombatService implements INetworkDispatch {
 		}
 		
 		float damage = calculateDamage(attacker, target, weapon, command);
+		
+		if(damage > 0)
+			applyDamage(attacker, target, (int) damage);
+		
+		sendCombatPackets(attacker, target, weapon, command, actionCounter, damage, 0, HitType.HIT);
+	
+		if(FileUtilities.doesFileExist("scripts/commands/combat/" + command.getCommandName() + ".py"))
+			core.scriptService.callScript("scripts/commands/combat/", command.getCommandName(), "run", core, attacker, target, null);
+
 	}
 	
+	private void applyDamage(CreatureObject attacker, TangibleObject target, int damage) {
+		target.setConditionDamage(target.getConditionDamage() + damage);
+		DamageTaken event = events.new DamageTaken();
+		event.attacker = attacker;
+		target.getEventBus().publish(event);
+	}
+
 	private void doAreaCombat(CreatureObject attacker, CreatureObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {
 		
 		float x = attacker.getWorldPosition().x;
@@ -322,7 +340,7 @@ public class CombatService implements INetworkDispatch {
 			int armorAbsorbed = (int) (damageBeforeArmor - damage);
 			if(mitigationType == HitType.BLOCK) {
 					
-				float blockValue = (attacker.getStrength() + attacker.getSkillMod("combat_block_value").getBase()) / 2 + 25;
+				float blockValue = (attacker.getStrength() + attacker.getSkillModBase("combat_block_value")) / 2 + 25;
 				damage -= blockValue;
 				
 			}
@@ -358,7 +376,7 @@ public class CombatService implements INetworkDispatch {
 		
 	}
 
-	private void sendCombatPackets(CreatureObject attacker, CreatureObject target, WeaponObject weapon, CombatCommand command, int actionCounter, float damage, int armorAbsorbed, int hitType) {
+	private void sendCombatPackets(CreatureObject attacker, TangibleObject target, WeaponObject weapon, CombatCommand command, int actionCounter, float damage, int armorAbsorbed, int hitType) {
 		
 		String animationStr = command.getRandomAnimation(weapon);
 		
@@ -386,7 +404,7 @@ public class CombatService implements INetworkDispatch {
 	}
 	
 	private void sendHealPackets(CreatureObject attacker, CreatureObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {
-		
+
 		CombatAction combatAction = new CombatAction(CRC.StringtoCRC(command.getDefaultAnimations()[0]), attacker.getObjectID(), weapon.getObjectID(), target.getObjectID(), command.getCommandCRC());
 		ObjControllerMessage objController = new ObjControllerMessage(0x1B, combatAction);
 		attacker.notifyObserversInRange(objController, true, 125);
@@ -425,17 +443,17 @@ public class CombatService implements INetworkDispatch {
 		switch(elementalType) {
 		
 			case ElementalType.KINETIC:
-				baseArmor = target.getSkillMod("kinetic").getBase();
+				baseArmor = target.getSkillModBase("kinetic");
 			case ElementalType.ENERGY:
-				baseArmor = target.getSkillMod("energy").getBase();
+				baseArmor = target.getSkillModBase("energy");
 			case ElementalType.HEAT:
-				baseArmor = target.getSkillMod("heat").getBase();
+				baseArmor = target.getSkillModBase("heat");
 			case ElementalType.COLD:
-				baseArmor = target.getSkillMod("cold").getBase();
+				baseArmor = target.getSkillModBase("cold");
 			case ElementalType.ACID:
-				baseArmor = target.getSkillMod("acid").getBase();
+				baseArmor = target.getSkillModBase("acid");
 			case ElementalType.ELECTRICITY:
-				baseArmor = target.getSkillMod("electricity").getBase();
+				baseArmor = target.getSkillModBase("electricity");
 
 		}
 		
@@ -487,8 +505,7 @@ public class CombatService implements INetworkDispatch {
 		if(actionCost == 0 && healthCost == 0)
 			return true;
 		
-		if(attacker.getSkillMod("expertise_action_all") != null)
-			actionCost *= attacker.getSkillMod("expertise_action_all").getBase();
+		actionCost *= getWeaponActionCostReduction(attacker, weapon);
 		
 		float newAction = attacker.getAction() - actionCost;
 		if(newAction <= 0)
@@ -566,6 +583,8 @@ public class CombatService implements INetworkDispatch {
 			
 		}
 		
+		rawDamage *= getWeaponDamageIncrease(attacker, weapon);
+		
 		if(target.getSkillMod("damage_decrease_percentage") != null) {
 			rawDamage *= (1 - (target.getSkillMod("damage_decrease_percentage").getBase() / 100));
 		}
@@ -573,11 +592,7 @@ public class CombatService implements INetworkDispatch {
 		if(target.getSkillMod("combat_divide_damage_dealt") != null) {
 			rawDamage *= (1 - (target.getSkillMod("combat_divide_damage_dealt").getBase() / 100));			
 		}
-		
-		if(attacker.getSkillMod("expertise_damage_melee") != null) {
-			rawDamage *= (1 + (attacker.getSkillMod("expertise_damage_melee").getBase() / 100));			
-		}
-		
+				
 		return rawDamage;
 		
 	}
@@ -658,18 +673,17 @@ public class CombatService implements INetworkDispatch {
 				if(r <= missChance)
 					return HitType.MISS;
 			}
-			if(target.getSkillMod("display_only_dodge") != null) {
-				float dodgeChance = (float) target.getSkillMod("display_only_dodge").getBase() / 10000;
+			float dodgeChance = (float) (target.getSkillModBase("display_only_dodge") - attacker.getSkillModBase("display_only_opp_dodge_reduction")) / 10000;
 		
-				r = random.nextFloat();
-				if(r <= dodgeChance)
-					return HitType.DODGE;
-			}
+			r = random.nextFloat();
+			if(r <= dodgeChance)
+				return HitType.DODGE;
+			
 				
 			WeaponObject weapon2 = (WeaponObject) core.objectService.getObject(((CreatureObject) target).getWeaponId());
-			if(weapon2 != null && weapon2.isMelee() && target.getSkillMod("display_only_parry") != null) {
+			if(weapon2 != null && weapon2.isMelee()) {
 				
-				float parryChance = (float) target.getSkillMod("display_only_parry").getBase() / 10000;
+				float parryChance = (float) (target.getSkillModBase("display_only_parry") - attacker.getSkillModBase("display_only_parry_reduction"))/ 10000;
 	
 				r = random.nextFloat();
 				if(r <= parryChance)
@@ -677,7 +691,7 @@ public class CombatService implements INetworkDispatch {
 					
 			}
 			
-			float stChance = (float) attacker.getSkillMod("display_only_strikethrough").getBase() / 10000;
+			float stChance = (float) attacker.getSkillModBase("display_only_strikethrough") / 10000;
 			
 			r = random.nextFloat();
 			if(r <= stChance)
@@ -685,9 +699,23 @@ public class CombatService implements INetworkDispatch {
 
 		}
 
-		float critChance = (float) (attacker.getSkillMod("display_only_critical").getBase() - target.getSkillModBase("display_only_expertise_critical_hit_reduction")) / 10000;
+		float critChance = 0;
+		
+		critChance += (command.getCriticalChance());
+		
+		critChance += ((float) attacker.getSkillModBase("display_only_critical") / 100);
+		
+		critChance -= ((float) target.getSkillModBase("display_only_expertise_critical_hit_reduction") / 100);
+		
+		critChance += ((float) target.getSkillModBase("critical_hit_vulnerable") / 100);
+		
+		if(target.isPlayer())
+			critChance += attacker.getSkillModBase("expertise_critical_niche_pvp");
+			critChance -= ((float) target.getSkillModBase("display_only_expertise_critical_hit_pvp_reduction") / 100);
+		
 		r = random.nextFloat();
-		if(r <= critChance)
+
+		if(r <= ((float) critChance / 100))
 			return HitType.CRITICAL;
 		
 		// TODO: Punishing blow once AI is implemented
@@ -701,7 +729,7 @@ public class CombatService implements INetworkDispatch {
 		float r;
 		Random random = new Random();
 					
-		float blockChance = (float) target.getSkillMod("display_only_block").getBase() / 10000;
+		float blockChance = (float) (target.getSkillModBase("display_only_block") - attacker.getSkillModBase("display_only_opp_block_reduction"))/ 10000;
 			
 		r = random.nextFloat();
 		if(r <= blockChance)
@@ -709,7 +737,7 @@ public class CombatService implements INetworkDispatch {
 			
 		if(command.getAttackType() == 0 || command.getAttackType() == 2 || command.getAttackType() == 3) {
 				
-			float evasionChance = (float) target.getSkillMod("display_only_evasion").getBase() / 10000;
+			float evasionChance = (float) target.getSkillModBase("display_only_evasion") / 10000;
 				
 			r = random.nextFloat();
 			if(r <= evasionChance)
@@ -719,7 +747,7 @@ public class CombatService implements INetworkDispatch {
 		
 		if(hitType == HitType.HIT && target.getSkillMod("display_only_glancing_blow") != null) {
 			
-			float glanceChance = (float) target.getSkillMod("display_only_glancing_blow").getBase() / 10000;
+			float glanceChance = (float) target.getSkillModBase("display_only_glancing_blow") / 10000;
 			
 			r = random.nextFloat();
 			if(r <= glanceChance)
@@ -824,14 +852,14 @@ public class CombatService implements INetworkDispatch {
 		
 		boolean success = true;
 		
+		if((command.getAttackType() == 0 || command.getAttackType() == 1 || command.getAttackType() == 3) && !attemptHeal(healer, target))	
+			target = healer;
+		
 		if(target.getMaxHealth() == target.getHealth())
 			success = command.getAttackType() != 1;
 		
-		if(!applySpecialCost(healer, weapon, command))
+		if(success && !applySpecialCost(healer, weapon, command))
 			success = false;
-		
-		if((command.getAttackType() == 0 || command.getAttackType() == 1 || command.getAttackType() == 3) && !attemptHeal(healer, target))	
-			target = healer;
 
 		if(!success) {
 			IoSession session = healer.getClient().getSession();
@@ -872,8 +900,11 @@ public class CombatService implements INetworkDispatch {
 			healPotency += healer.getSkillMod("expertise_healing_line_sm_heal").getBase();
 		if(healer.getSkillMod("expertise_healing_line_sp_heal") != null)
 			healPotency += healer.getSkillMod("expertise_healing_line_sp_heal").getBase();
+		if(healer.hasBuff("fs_buff_def_1_1"))
+			if(healer.getSkillMod("expertise_stance_healing_line_fs_heal") != null)
+				healPotency += healer.getSkillMod("expertise_stance_healing_line_fs_heal").getBase();
 		if(healPotency > 0)
-			healAmount += (healAmount * (healPotency / 100));
+			healAmount += ((healAmount * healPotency) / 100);
 		if(target.getSkillMod("expertise_healing_reduction") != null)
 			healAmount *= (1 - target.getSkillMod("expertise_healing_reduction").getBase() / 100);
 		
@@ -1248,7 +1279,68 @@ public class CombatService implements INetworkDispatch {
 
 		target.notifyObservers(new PlayClientEffectLocMessage("appearance/pt_heal_2.prt", target.getPlanet().getName(), target.getWorldPosition()), true);
 		
-	}	
+	}
+	
+	public float getWeaponActionCostReduction(CreatureObject attacker, WeaponObject weapon) {
+		
+		int weaponType = weapon.getWeaponType();
+		int actionReduction;
+		
+		switch(weaponType) {
+			
+			case 0: actionReduction = attacker.getSkillModBase("expertise_action_weapon_0");
+			case 1: actionReduction = attacker.getSkillModBase("expertise_action_weapon_1");
+			case 2: actionReduction = attacker.getSkillModBase("expertise_action_weapon_2");
+			case 4: actionReduction = attacker.getSkillModBase("expertise_action_weapon_4");
+			case 5: actionReduction = attacker.getSkillModBase("expertise_action_weapon_5");
+			case 6: actionReduction = attacker.getSkillModBase("expertise_action_weapon_6");
+			case 7: actionReduction = attacker.getSkillModBase("expertise_action_weapon_7");
+			case 8: actionReduction = attacker.getSkillModBase("expertise_action_weapon_8");
+			case 9: actionReduction = attacker.getSkillModBase("expertise_action_weapon_9");
+			case 10: actionReduction = attacker.getSkillModBase("expertise_action_weapon_10");
+			case 11: actionReduction = attacker.getSkillModBase("expertise_action_weapon_11");
+			case 12: actionReduction = attacker.getSkillModBase("expertise_action_weapon_3");
+			
+			default: actionReduction = 0;
+		
+		}
+		
+		actionReduction += attacker.getSkillModBase("expertise_action_all");
+		
+		return 1 + (actionReduction / 100);
+		
+	}
+	
+	public float getWeaponDamageIncrease(CreatureObject attacker, WeaponObject weapon) {
+		
+		int weaponType = weapon.getWeaponType();
+		int weaponDmgIncrease;
+		
+		switch(weaponType) {
+			
+			case 0: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_0");
+			case 1: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_1");
+			case 2: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_2");
+			case 4: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_4");
+			case 5: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_5");
+			case 6: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_6");
+			case 7: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_7");
+			case 8: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_8");
+			case 9: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_9");
+			case 10: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_10");
+			case 11: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_11");
+			case 12: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_3");
+			
+			default: weaponDmgIncrease = 0;
+		
+		}
+		
+		weaponDmgIncrease += attacker.getSkillModBase("expertise_damage_all");
+
+		
+		return 1 + (weaponDmgIncrease / 100);
+		
+	}
 	
 	public enum HitType{; 
 	

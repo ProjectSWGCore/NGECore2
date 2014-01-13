@@ -21,16 +21,17 @@
  ******************************************************************************/
 package resources.objects.waypoint;
 
+import resources.objects.intangible.IntangibleObject;
+
 import com.sleepycat.persist.model.Persistent;
 
 import engine.clients.Client;
-import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent
-public class WaypointObject extends SWGObject {
+@Persistent(version=0)
+public class WaypointObject extends IntangibleObject {
 	
 	private int cellId; // ???
 	private long locationNetworkId;

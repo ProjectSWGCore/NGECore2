@@ -39,6 +39,15 @@ public class CommandEnqueue extends ObjControllerObject {
 	public static final int STAND					= 0xA8A25C79;
 	public static final int ATTACK					= 0xA8FEF90A;
 	public static final int TRANSFERITEM			= 0x3CFB449D;
+
+    //ent
+	// this really needed?
+    public static final int STARTDANCE 				= 0x7B1DCBE0;
+    public static final int STOPDANCE 				= 0xECC171CC;
+    public static final int FLOURISH 				= 0xC8998CE9;
+    public static final int FLO 					= 0x3B159B76;
+    public static final int BANDFLOURISH 			= 0xF4C60EC3;
+    public static final int BANDFLO 				= 0xDD3FB008;
 	
 	private int actionCounter;
 	private int commandCRC;

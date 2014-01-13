@@ -26,10 +26,6 @@ def addPoints(core, planet):
     	kashyyyk_mainPoints(core, planet)
     if planet.getName() == 'mustafar':
     	mustafarPoints(core, planet)
-    if planet.getName() == 'kaas':
-        kaasPoints(core, planet)
-    if planet.getName() == 'taanab':
-        taanabPoints(core, planet)                        
     return
 
 def corelliaPoints(core, planet):
@@ -44,11 +40,10 @@ def corelliaPoints(core, planet):
     trvSvc.addTravelPoint(planet, "Kor Vella Shuttleport", -3775, 86, 3234)
     trvSvc.addTravelPoint(planet, "Bela Vistal Shuttleport A", 6644, 330, -5922)
     trvSvc.addTravelPoint(planet, "Bela Vistal Shuttleport B", 6930, 330, -5534)
-   
     trvSvc.addTravelPoint(planet, "Coronet Starport", -51, 28, -4735)
     trvSvc.addTravelPoint(planet, "Tyrena Starport", -4975, 21, -2230)
     trvSvc.addTravelPoint(planet, "Kor Vella Starport", -3136, 31, 2894)
-    trvSvc.addTravelPoint(planet, "Doaba Guerful Starport", 3377, 308, 5605)
+    trvSvc.addTravelPoint(planet, "Doaba Guerfel Starport", 3377, 308, 5605)
     return        
 
 def dantooinePoints(core, planet):
@@ -155,11 +150,3 @@ def mustafarPoints(core, planet):
 	
 	trvSvc.addTravelPoint(planet, "Mensix Mining Facility", 405, 230, -1352)
 	return
-    
-#def kaasPoints(core, planet):
-    #trvSvc = core.travelService
-    #Return
-
-#def taanabPoints(core, planet):
-    #trvSvc = core.travelService
-    #return  

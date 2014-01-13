@@ -30,7 +30,7 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent
+@Persistent(version=0)
 public class StaticObject extends SWGObject {
 	
 	@NotPersistent

@@ -41,6 +41,7 @@ import engine.clients.Client;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
+@SuppressWarnings("unused")
 public class SkillService implements INetworkDispatch {
 	
 	private NGECore core;
@@ -87,6 +88,8 @@ public class SkillService implements INetworkDispatch {
 						String[] schematicsGranted = ((String) skillTable.getObject(s, 23)).split(",");
 						String[] schematicsRevoked = ((String) skillTable.getObject(s, 24)).split(",");
 						
+						boolean speciesSkill = skill.matches("^species.+$");
+						
 						if (isTitle == true) {
 							core.playerService.addPlayerTitle(player, skill);
 							Console.println("Gave skill title: " + skill);
@@ -95,8 +98,9 @@ public class SkillService implements INetworkDispatch {
 						if (isProfession) {
 							return;
 						}
-						
-						if (godOnly || isHidden) {
+
+						//exempt species skills from being returned -- they're marked godOnly but really meant to be granted
+						if ((!speciesSkill) && (godOnly  || isHidden)) {
 							return;
 						}
 						
@@ -178,7 +182,7 @@ public class SkillService implements INetworkDispatch {
 		PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
 		DatatableVisitor skillTable;
 		
-		if (creature.getClient() == null) {
+		if (player == null) {
 			return;
 		}
 		
@@ -251,7 +255,7 @@ public class SkillService implements INetworkDispatch {
 				ExpertiseRequestMessage expertise = new ExpertiseRequestMessage();
 				expertise.deserialize(buffer);
 
-				Client client = core.getClient((Integer) session.getAttribute("connectionId"));
+				Client client = core.getClient(session);
 				if(client == null) {
 					System.out.println("NULL Client");
 					return;

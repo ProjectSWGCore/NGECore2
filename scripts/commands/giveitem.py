@@ -5,6 +5,9 @@ def setup():
 	
 def run(core, actor, target, commandString):
 	
+	if actor.getClient() and actor.getClient().isGM() == False:
+		return
+	
 	if not commandString.startswith('object/tangible') and not commandString.startswith('object/weapon'):
 		return
 		

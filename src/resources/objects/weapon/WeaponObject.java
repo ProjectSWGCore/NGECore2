@@ -21,30 +21,21 @@
  ******************************************************************************/
 package resources.objects.weapon;
 
-import java.util.ArrayList;
-import java.util.List;
+import resources.objects.tangible.TangibleObject;
 
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
 
 import engine.clients.Client;
-import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent(version=1)
-public class WeaponObject extends SWGObject {
+@Persistent(version=0)
+public class WeaponObject extends TangibleObject {
 	
 	// TODO: Thread safety
 	
-	private int incapTimer = 10;
-	private int conditionDamage = 0;
-
-	private byte[] customization;
-	private List<Integer> componentCustomizations = new ArrayList<Integer>();
-	private int optionsBitmask = 0;
-	private boolean staticObject = true;
 	@NotPersistent
 	private WeaponMessageBuilder messageBuilder;
 	
@@ -52,15 +43,17 @@ public class WeaponObject extends SWGObject {
 	private float maxRange;
 	
 	public WeaponObject(long objectID, Planet planet, String template) {
-		super(objectID, planet, new Point3D(0, 0, 0), new Quaternion(1, 0, 1, 0), template);
+		super(objectID, planet, template, new Point3D(0, 0, 0), new Quaternion(1, 0, 1, 0));
 		messageBuilder = new WeaponMessageBuilder(this);
+		if (this.getClass().getSimpleName().equals("WeaponObject")) setIntAttribute("volume", 1);
 		calculateRange();
 		calculateAttackSpeed();
 	}
 
 	public WeaponObject(long objectID, Planet planet, String template, Point3D position, Quaternion orientation) {
-		super(objectID, planet, position, orientation, template);
+		super(objectID, planet, template, position, orientation);
 		messageBuilder = new WeaponMessageBuilder(this);
+		if (this.getClass().getSimpleName().equals("WeaponObject")) setIntAttribute("volume", 1);
 		calculateRange();
 		calculateAttackSpeed();
 	}
@@ -103,13 +96,6 @@ public class WeaponObject extends SWGObject {
 		this.incapTimer = incapTimer;
 	}
 
-	public int getConditionDamage() {
-		return conditionDamage;
-	}
-
-	public void setConditionDamage(int conditionDamage) {
-		this.conditionDamage = conditionDamage;
-	}
 
 	public byte[] getCustomization() {
 		return customization;
@@ -117,14 +103,6 @@ public class WeaponObject extends SWGObject {
 
 	public void setCustomization(byte[] customization) {
 		this.customization = customization;
-	}
-
-	public List<Integer> getComponentCustomizations() {
-		return componentCustomizations;
-	}
-
-	public void setComponentCustomizations(List<Integer> componentCustomizations) {
-		this.componentCustomizations = componentCustomizations;
 	}
 
 	public int getOptionsBitmask() {
@@ -177,14 +155,6 @@ public class WeaponObject extends SWGObject {
 	
 	public int getDamagePerSecond() {
 		return (int) (((getMaxDamage() + getElementalDamage()  + getMinDamage() + getElementalDamage()) / 2 + getElementalDamage()) * (1 / getAttackSpeed()));
-	}
-
-	public boolean isStaticObject() {
-		return staticObject;
-	}
-
-	public void setStaticObject(boolean staticObject) {
-		this.staticObject = staticObject;
 	}
 
 	public int getWeaponType() {

@@ -30,6 +30,7 @@ import org.apache.mina.core.buffer.IoBuffer;
 import services.travel.TravelPoint;
 import engine.resources.objects.SWGObject;
 
+@SuppressWarnings("unused")
 public class EnterTicketPurchaseModeMessage extends SWGMessage {
 
 	private String planetName;

@@ -199,7 +199,7 @@ public class GroupService implements INetworkDispatch {
 	}
 	
 	public void removeGroupBuffs(CreatureObject member) {
-		for(Buff buff : member.getBuffList().get()) {
+		for(Buff buff : new ArrayList<Buff>(member.getBuffList().get())) {
 			if(buff.isGroupBuff() && buff.getGroupBufferId() != member.getObjectID()) {
 				core.buffService.removeBuffFromCreature(member, buff);
 			}
@@ -211,10 +211,12 @@ public class GroupService implements INetworkDispatch {
 		if(creature.getGroupId() == 0)
 			return;
 		
-		GroupObject group = (GroupObject) core.objectService.getObject(creature.getGroupId());
+		SWGObject object = core.objectService.getObject(creature.getGroupId());
 
-		if(group == null)
+		if(object == null || !(object instanceof GroupObject))
 			return;
+		
+		GroupObject group = (GroupObject) object;
 		
 		List<SWGObject> memberList = new ArrayList<SWGObject>(group.getMemberList());
 		
