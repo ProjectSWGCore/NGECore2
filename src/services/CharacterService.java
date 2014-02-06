@@ -297,6 +297,8 @@ public class CharacterService implements INetworkDispatch {
 				object.addObjectToEquipList(missionBag);
 				object.addObjectToEquipList(appInventory);
 				
+				core.missionService.createDefaultMissions(object);
+				
 				WeaponObject defaultWeapon = (WeaponObject) core.objectService.createObject("object/weapon/creature/shared_creature_default_weapon.iff", object.getPlanet());
 				defaultWeapon.setDamageType("@obj_attr_n:armor_eff_kinetic");
 				defaultWeapon.setStringAttribute("cat_wpn_damage.damage", "0-0");

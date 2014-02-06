@@ -37,25 +37,25 @@ import engine.resources.scene.Quaternion;
 @Persistent(version=0)
 public class MissionObject extends IntangibleObject implements IPersistent {
 
-	private float missionDestinationX;
-	private float missionDestinationY;
-	private float missionDestinationZ;
-	private float missionStartX;
-	private float missionStartY;
-	private float missionStartZ;
-	private String missionStartPlanet;
-	private int missionLevel; // Difficulty level displayed in details
-	private String missionDestinationPlanet;
-	private int missionRepeatCounter; // increases for each player using the mission; used for redisplaying on mission term too
-	private int missionCredits;
-	private String missionCreator = "";
-	private String missionDescription = "";
-	private String missionTitle = "";
-	private String missionTargetName = ""; // Target object I guess?
-	private String missionDescId = "";
-	private String missionTitleId = "";
-	private String missionType;
-	private WaypointObject missionAttachedWaypoint;
+	private float destX;
+	private float destY;
+	private float destZ;
+	private float startX;
+	private float startY;
+	private float startZ;
+	private String startPlanet;
+	private int difficultyLevel; // Difficulty level displayed in details
+	private String destinationPlanet;
+	private int repeatCount; // increases for each player using the mission; used for redisplaying on mission term too
+	private int reward;
+	private String creator;
+	private String description; // TODO: Base off of a new Object, SWGString?
+	private String title; // TODO: Base off of a new Object, SWGString?
+	private String missionTargetName; // Target object I guess?
+	private String descId;
+	private String titleId;
+	private String type;
+	private WaypointObject attachedWaypoint;
 	
 	private String missionTemplateObject;
 
@@ -75,28 +75,28 @@ public class MissionObject extends IntangibleObject implements IPersistent {
 
 	public float getMissionStartX() {
 		synchronized(objectMutex) {
-			return missionStartX;
+			return startX;
 		}
 	}
 
 	public float getMissionStartY() {
 		synchronized(objectMutex) {
-			return missionStartY;
+			return startY;
 		}
 	}
 
 	public float getMissionStartZ() {
 		synchronized(objectMutex) {
-			return missionStartZ;
+			return startZ;
 		}
 	}
 
 	public void setMissionStart(float x, float y, float z, String planet) {
 		synchronized(objectMutex) {
-			this.missionStartZ = z;
-			this.missionStartX = x;
-			this.missionStartY = y;
-			this.missionStartPlanet = planet;
+			this.startZ = z;
+			this.startX = x;
+			this.startY = y;
+			this.startPlanet = planet;
 		}
 		
 		notifyObservers(messageBuilder.buildStartLocationDelta(x, z, y, planet), false);
@@ -104,117 +104,119 @@ public class MissionObject extends IntangibleObject implements IPersistent {
 
 	public float getMissionDestinationX() {
 		synchronized(objectMutex) {
-			return missionDestinationX;
+			return destX;
 		}
 	}
 
 	public float getMissionDestinationY() {
 		synchronized(objectMutex) {
-			return missionDestinationY;
+			return destY;
 		}
 	}
 
 	public float getMissionDestinationZ() {
 		synchronized(objectMutex) {
-			return missionDestinationZ;
+			return destZ;
 		}
 	}
 
 	public void setMissionDestination(float x, float y, float z, String planet) {
 		synchronized(objectMutex) {
-			this.missionDestinationZ = z;
-			this.missionDestinationY = y;
-			this.missionDestinationZ = z;
-			this.missionDestinationPlanet = planet;
+			this.destZ = z;
+			this.destY = y;
+			this.destZ = z;
+			this.destinationPlanet = planet;
 		}
+		notifyObservers(messageBuilder.buildDestinationDelta(x, z, y, planet), false);
 	}
 
 	public String getMissionDestinationPlanet() {
 		synchronized(objectMutex) {
-			return missionDestinationPlanet;
+			return destinationPlanet;
 		}
 	}
 
 	public int getMissionLevel() {
 		synchronized(objectMutex) {
-			return missionLevel;
+			return difficultyLevel;
 		}
 	}
 
 	public void setMissionLevel(int missionLevel) {
 		synchronized(objectMutex) {
-			this.missionLevel = missionLevel;
+			this.difficultyLevel = missionLevel;
 		}
+		notifyObservers(messageBuilder.buildDifficultyLevelDelta(missionLevel), false);
 	}
 
 	public String getMissionStartPlanet() {
 		synchronized(objectMutex) {
-			return missionStartPlanet;
+			return startPlanet;
 		}
 	}
 
 	public int getMissionRepeatCounter() {
 		synchronized(objectMutex) {
-			return missionRepeatCounter;
+			return repeatCount;
 		}
 	}
 
-	public void setMissionRepeatCounter(int missionRepeatCounter) {
+	public void setRepeatCount(int missionRepeatCounter) {
 		synchronized(objectMutex) {
-			this.missionRepeatCounter = missionRepeatCounter;
+			this.repeatCount = missionRepeatCounter;
 		}
 	}
 
-	public int getMissionCredits() {
+	public int getCreditReward() {
 		synchronized(objectMutex) {
-			return missionCredits;
+			return reward;
 		}
 	}
 
-	public void setMissionCredits(int missionCredits) {
+	public void setCreditReward(int missionCredits) {
 		synchronized(objectMutex) {
-			this.missionCredits = missionCredits;
+			this.reward = missionCredits;
 		}
 		notifyObservers(messageBuilder.buildCreditsRewardDelta(missionCredits), false);
 	}
 
 	public String getMissionCreator() {
 		synchronized(objectMutex) {
-			return missionCreator;
+			return creator;
 		}
 	}
 
 	public void setMissionCreator(String missionCreator) {
 		synchronized(objectMutex) {
-			this.missionCreator = missionCreator;
+			this.creator = missionCreator;
 		}
 		notifyObservers(messageBuilder.buildCreatorNameDelta(missionCreator), false);
 	}
 
 	public String getMissionDescription() {
 		synchronized(objectMutex) {
-			return missionDescription;
+			return description;
 		}
 	}
 
 	public void setMissionDescription(String missionDescription, String id) {
 		synchronized(objectMutex) {
-			this.missionDescription = missionDescription;
-			this.missionDescId = id;
+			this.description = missionDescription;
+			this.descId = id;
 		}
 		notifyObservers(messageBuilder.buildMissionDescriptionDelta(missionDescription, id), false);
 	}
 
 	public String getMissionTitle() {
 		synchronized(objectMutex) {
-			return missionTitle;
+			return title;
 		}
 	}
 
 	public void setMissionTitle(String missionTitle, String id) {
 		synchronized(objectMutex) {
-			this.missionTitle = missionTitle;
-			this.missionTitleId = id;
+			this.title = missionTitle;
+			this.titleId = id;
 		}
 		notifyObservers(messageBuilder.buildMissionTitleDelta(missionTitle, id), false);
 	}
@@ -232,25 +234,25 @@ public class MissionObject extends IntangibleObject implements IPersistent {
 		notifyObservers(messageBuilder.buildTargetNameDelta(missionTargetName), false);
 	}
 
-	public WaypointObject getMissionAttachedWaypoint() {
+	public WaypointObject getAttachedWaypoint() {
 		synchronized(objectMutex) {
-			return missionAttachedWaypoint;
+			return attachedWaypoint;
 		}
 	}
 
-	public void setMissionAttachedWaypoint(WaypointObject missionAttachedWaypoint) {
+	public void setAttachedWaypoint(WaypointObject missionAttachedWaypoint) {
 		synchronized(objectMutex) {
-			this.missionAttachedWaypoint = missionAttachedWaypoint;
+			this.attachedWaypoint = missionAttachedWaypoint;
 		}
 	}
 
-	public String getTargetTemplateObject() {
+	public String getMissionTemplateObject() {
 		synchronized(objectMutex) {
 			return missionTemplateObject;
 		}
 	}
 
-	public void setTargetTemplateObject(String missionTemplateObject) {
+	public void setMissionTemplateObject(String missionTemplateObject) {
 		synchronized(objectMutex) {
 			this.missionTemplateObject = missionTemplateObject;
 		}
@@ -259,25 +261,25 @@ public class MissionObject extends IntangibleObject implements IPersistent {
 
 	public String getMissionDescId() {
 		synchronized(objectMutex) {
-			return missionDescId;
+			return descId;
 		}
 	}
 
 	public String getMissionTitleId() {
 		synchronized(objectMutex) {
-			return missionTitleId;
+			return titleId;
 		}
 	}
 
 	public String getMissionType() {
 		synchronized(objectMutex) {
-			return missionType;
+			return type;
 		}
 	}
 
 	public void setMissionType(String missionType) {
 		synchronized(objectMutex) {
-			this.missionType = missionType;
+			this.type = missionType;
 		}
 		notifyObservers(messageBuilder.buildMissionTypeDelta(missionType), false);
 	}

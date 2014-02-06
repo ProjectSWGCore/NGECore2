@@ -48,8 +48,8 @@ public class MissionMessageBuilder extends ObjectMessageBuilder {
 		buffer.put(getAsciiString(mission.getStfFilename()));
 		buffer.putInt(0);
 		buffer.put(getAsciiString(mission.getStfName()));
-		
-		if (mission.getCustomName() == null) { buffer.put(getUnicodeString("")); } 
+
+		if (mission.getCustomName() == null) { buffer.putInt(0); } 
 		else { buffer.put(getUnicodeString(mission.getCustomName())); }
 
 		buffer.putInt(0); // volume
@@ -57,10 +57,10 @@ public class MissionMessageBuilder extends ObjectMessageBuilder {
 		buffer.putInt(mission.getMissionLevel());
 		
 		buffer.putFloat(mission.getMissionStartX());
-		buffer.putFloat(0); // missionStartZ
+		buffer.putFloat(mission.getMissionStartZ()); // missionStartZ
 		buffer.putFloat(mission.getMissionStartY());
 		
-		buffer.putLong(0); // ??
+		buffer.putLong(0); // Start Object ID
 		
 		if (mission.getMissionStartPlanet() == null) {
 			buffer.putInt(0);
@@ -69,13 +69,13 @@ public class MissionMessageBuilder extends ObjectMessageBuilder {
 		}
 	
 		buffer.put(getUnicodeString(mission.getMissionCreator()));
-		buffer.putInt(mission.getMissionCredits());
+		buffer.putInt(mission.getCreditReward());
 		
 		buffer.putFloat(mission.getMissionDestinationX());
-		buffer.putFloat(0); // missionDestinationZ
+		buffer.putFloat(mission.getMissionDestinationZ());
 		buffer.putFloat(mission.getMissionDestinationY());
 		
-		buffer.putLong(0); // ??
+		buffer.putLong(0); // Destination Object ID
 		
 		if (mission.getMissionDestinationPlanet() == null) {
 			buffer.putInt(0);
@@ -83,10 +83,10 @@ public class MissionMessageBuilder extends ObjectMessageBuilder {
 			buffer.putInt(CRC.StringtoCRC(mission.getMissionDestinationPlanet()));
 		}
 		
-		if (mission.getTargetTemplateObject() == null) {
+		if (mission.getMissionTemplateObject() == null) {
 			buffer.putInt(0);
 		} else {
-			buffer.putInt(CRC.StringtoCRC(mission.getTargetTemplateObject()));
+			buffer.putInt(CRC.StringtoCRC(mission.getMissionTemplateObject()));
 		}
 
 		buffer.put(getAsciiString(mission.getMissionDescription()));
@@ -107,7 +107,7 @@ public class MissionMessageBuilder extends ObjectMessageBuilder {
 
 		buffer.put(getAsciiString(mission.getMissionTargetName()));
 		
-		WaypointObject wp = mission.getMissionAttachedWaypoint();
+		WaypointObject wp = mission.getAttachedWaypoint();
 		
 		if (wp == null) {
 			buffer.putInt(0);
@@ -116,7 +116,7 @@ public class MissionMessageBuilder extends ObjectMessageBuilder {
 			buffer.putFloat(0); // y
 			buffer.putLong(0); // target id
 			buffer.putInt(0); // planet crc
-			buffer.put(getUnicodeString(""));
+			buffer.putInt(0);
 			buffer.putLong(0); // waypoint id
 			buffer.put((byte) 0); // color
 			buffer.put((byte) 0x01); //active
@@ -130,13 +130,14 @@ public class MissionMessageBuilder extends ObjectMessageBuilder {
 			buffer.put((byte) 0);
 			buffer.put((byte) 0x01);
 		}
+		
 		int size = buffer.position();
 		buffer = bufferPool.allocate(size, false).put(buffer.array(), 0, size);
 		
 		buffer.flip();
 		buffer = createBaseline("MISO", (byte) 3, buffer, size);
 		
-		Console.println("Bytes: " + StringUtilities.bytesToHex(buffer.array()));
+		//Console.println("MISO3 Bytes: " + StringUtilities.bytesToHex(buffer.array()));
 		return buffer;
 	}
 	
@@ -144,7 +145,7 @@ public class MissionMessageBuilder extends ObjectMessageBuilder {
 		
 		IoBuffer buffer = IoBuffer.allocate(4, false).order(ByteOrder.LITTLE_ENDIAN);
 		
-		buffer.putInt(121); // unk
+		buffer.putInt(121); // server id
 		
 		int size = buffer.position();
 		buffer.flip();
@@ -191,8 +192,11 @@ public class MissionMessageBuilder extends ObjectMessageBuilder {
 
 		buffer.putLong(0);
 		
-		buffer.putInt(CRC.StringtoCRC(planet));
-		
+		if (planet == null) {
+			buffer.putInt(CRC.StringtoCRC(object.getPlanet().name));
+		} else {
+			buffer.putInt(CRC.StringtoCRC(planet));
+		}
 		int size = buffer.position();
 		buffer.flip();
 		buffer = createDelta("MISO", (byte) 3, (short) 1, (short) 0x06, buffer, size + 4);
@@ -236,7 +240,11 @@ public class MissionMessageBuilder extends ObjectMessageBuilder {
 		
 		buffer.putLong(0); // Destination Object ID
 		
-		buffer.putInt(CRC.StringtoCRC(planet));
+		if (planet == null) {
+			buffer.putInt(CRC.StringtoCRC(object.getPlanet().name));
+		} else {
+			buffer.putInt(CRC.StringtoCRC(planet));
+		}
 		
 		int size = buffer.position();
 		buffer.flip();

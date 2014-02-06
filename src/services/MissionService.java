@@ -114,33 +114,27 @@ public class MissionService implements INetworkDispatch {
 			for(int missionsAdded = 0; missionsAdded < 12; missionsAdded++) {
 				MissionObject mission = (MissionObject) core.objectService.createObject("object/mission/shared_mission_object.iff", creature.getPlanet());
 				
-				int textId = ran.nextInt(deliveryEntries);
 				
-				Console.println("Random Int Value: " + textId);
-				Console.println("Now the value is: " + textId);
+				//mission.setStfFilename("mission/mission_object");
+				//mission.setStfName("destroy_mission");
 				
-				mission.setMissionLevel(5);
+				mission.setMissionLevel(50);
+				mission.setMissionStart(0, 0, 0, null);
+				mission.setMissionCreator("");
+				mission.setCreditReward(100);
 				
-				mission.setMissionStart(0, 0, 0, player.getPlanet().name);
+				mission.setMissionDestination(0, 0, 0, null);
 				
-				mission.setMissionCreator("Waverunner");
-				mission.setMissionCredits(9000);
+				//mission.setMissionTemplateObject(missionTemplateObject);
+				mission.setMissionDescription("mission/mission_npc_survey_neutral_easy", "m1o");
+				mission.setMissionTitle("mission/mission_npc_survey_neutral_easy", "m1t");
 				
-				// TODO: Base this off of textId + f
-				mission.setTargetTemplateObject("object/tangible/mission/shared_mission_datadisk.iff");
-				// TODO: Base this off of textId + l
-				mission.setMissionTargetName("Osskscosco");
+				mission.setMissionType("survey"); // 0x19C9FAC1
 				
-				mission.setMissionDescription("mission/mission_deliver_neutral_easy", "m" + textId + "d");
-				mission.setMissionTitle("mission/mission_deliver_neutral_easy", "m" + textId + "t");
-				
-				mission.setMissionType("deliver");
-				
-				mission.setMissionDestination(-5962, 0, -6259, player.getPlanet().name);
-				deliveryCount.getAndIncrement();
-				
-				
+				mission.setMissionTargetName("Testing target name");
+
 				missionBag._add(mission);
+
 				Console.println("Added mission " + missionsAdded);
 			}
 			return;
@@ -156,28 +150,23 @@ public class MissionService implements INetworkDispatch {
 				MissionObject mission = (MissionObject) child;
 				int textId = ran.nextInt(deliveryEntries);
 				
-				Console.println("Random Int Value: " + textId);
-				Console.println("Now the value is: " + textId);
-				
-				mission.setMissionLevel(5);
-				
-				mission.setMissionStart(0, 0, 0, player.getPlanet().name);
-				
-				mission.setMissionCreator("Waverunner");
-				mission.setMissionCredits(9000);
-				
-				// TODO: Base this off of textId + f
-				mission.setTargetTemplateObject("object/tangible/mission/shared_mission_datadisk.iff");
-				// TODO: Base this off of textId + l
-				mission.setMissionTargetName("Osskscosco");
-				
-				mission.setMissionDescription("mission/mission_deliver_neutral_easy", "m" + textId + "d");
-				mission.setMissionTitle("mission/mission_deliver_neutral_easy", "m" + textId + "t");
-				
-				mission.setMissionType("deliver");
-				
-				mission.setMissionDestination(-5962, 0, -6259, player.getPlanet().name);
 				deliveryCount.getAndIncrement();
+				
+				mission.setMissionLevel(10);
+				mission.setMissionStart(0, 0, 0, null);
+				mission.setMissionCreator("Waverunner");
+				mission.setCreditReward(100);
+				
+				mission.setMissionDestination(0, 0, 0, null);
+				
+				//mission.setMissionTemplateObject(missionTemplateObject);
+				mission.setMissionDescription("mission/mission_npc_survey_neutral_easy", "m1o");
+				mission.setMissionTitle("mission/mission_npc_survey_neutral_easy", "m1t");
+				
+				mission.setMissionType("survey"); // 0x19C9FAC1
+				
+				mission.setMissionTargetName("Testing target name");
+				Console.println("Sent delta/'s!");
 			}
 			
 		});
@@ -205,6 +194,37 @@ public class MissionService implements INetworkDispatch {
 		}
 		
 		return 0;
+	}
+	
+	public void createDefaultMissions(CreatureObject player) {
+		for(int missionsAdded = 0; missionsAdded < 12; missionsAdded++) {
+			MissionObject mission = (MissionObject) core.objectService.createObject("object/mission/shared_mission_object.iff", player.getPlanet());
+			
+			
+			//mission.setStfFilename("mission/mission_object");
+			//mission.setStfName("destroy_mission");
+			
+			mission.setMissionLevel(50);
+			mission.setMissionStart(0, 0, 0, null);
+			mission.setMissionCreator("");
+			mission.setCreditReward(100);
+			
+			mission.setMissionDestination(0, 0, 0, null);
+			
+			//mission.setMissionTemplateObject(missionTemplateObject);
+			mission.setMissionDescription("mission/mission_npc_survey_neutral_easy", "m1o");
+			mission.setMissionTitle("mission/mission_npc_survey_neutral_easy", "m1t");
+			
+			mission.setMissionType("survey"); // 0x19C9FAC1
+			
+			mission.setMissionTargetName("Testing target name");
+
+			TangibleObject missionBag = (TangibleObject) player.getSlottedObject("mission_bag");
+			missionBag._add(mission);
+
+			Console.println("Added mission " + missionsAdded);
+		}
+		Console.println("Successfully created default missions");
 	}
 	
 	@Override

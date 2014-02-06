@@ -155,7 +155,7 @@ public class NGECore {
 	public WeatherService weatherService;
 	public SpawnService spawnService;
 	public AIService aiService;
-	//public MissionService missionService;
+	public MissionService missionService;
 	
 	// Login Server
 	public NetworkDispatch loginDispatch;
@@ -260,7 +260,7 @@ public class NGECore {
 		}
 		spawnService = new SpawnService(this);
 		aiService = new AIService(this);
-		//missionService = new MissionService(this);
+		missionService = new MissionService(this);
 		
 		// Ping Server
 		try {
@@ -292,7 +292,7 @@ public class NGECore {
 		zoneDispatch.addService(playerService);
 		zoneDispatch.addService(buffService);
 		zoneDispatch.addService(entertainmentService);
-		//zoneDispatch.addService(missionService);
+		zoneDispatch.addService(missionService);
 
 		zoneServer = new MINAServer(zoneDispatch, config.getInt("ZONE.PORT"));
 		zoneServer.start();
