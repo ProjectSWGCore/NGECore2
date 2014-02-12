@@ -5,33 +5,34 @@ from resources.datatables import StateStatus
 def addPlanetSpawns(core, planet):
 
 	stcSvc = core.staticService
+	
 # Wayfar Life Day, by Wefi, modified by Fingies
 		
-	stcSvc.spawnObject('object/mobile/shared_lifeday_saun_dann.iff', 'tatooine', long(0), float(-5037.00), float(75), float(-6561), float(-0.75), float(0)) # Life Day
-	figlife = stcSvc.spawnObject('object/mobile/shared_lifeday_figrin_dan.iff', 'tatooine', long(0), float(-5046.00), float(75), float(-6560), float(-0.75), float(0)) # LD Figrin
-	figlife.setCustomName2('Figrin D\'an')
-	bandtat1 = stcSvc.spawnObject('object/mobile/shared_lifeday_figrin_dan_band.iff', 'tatooine', long(0), float(-5040.00), float(75), float(-6557), float(-0.75), float(0)) # LD Band 1
-	bandtat1.setCustomName2('Doikk Nats')
-	bandtat2 = stcSvc.spawnObject('object/mobile/shared_lifeday_figrin_dan_band.iff', 'tatooine', long(0), float(-5043.00), float(75), float(-6559), float(-0.75), float(0)) # LD band 2
-	bandtat2.setCustomName2('Tech Mor')
-	bandtat3 = stcSvc.spawnObject('object/mobile/shared_lifeday_figrin_dan_band.iff', 'tatooine', long(0), float(-5048.00), float(75), float(-6557), float(-0.75), float(0)) # LD Band 3
-	bandtat3.setCustomName2('Nalan Cheel')
-	bandtat4 = stcSvc.spawnObject('object/mobile/shared_lifeday_figrin_dan_band.iff', 'tatooine', long(0), float(-5045.00), float(75), float(-6555), float(-0.75), float(0)) # LD band 4
-	bandtat4.setCustomName2('Sunil Eide')
-	reblifevendor = stcSvc.spawnObject('object/mobile/shared_life_day_rebel_vendor.iff', 'tatooine', long(0), float(-5212.2), float(75.0), float(-6571.7), float(0.656), float(-0.7547)) #Rebel Wookiee Vendor
-	reblifevendor.setCustomName2('Oolovv \(Wookiee Freedom Fighter)')
-	reblifesold1 = stcSvc.spawnObject('object/mobile/shared_rebel_snow_m_01.iff', 'tatooine', long(0), float(-5208.8), float(75.0), float(-6569.6), float(0.669), float(-0.743)) #Rebel Vendor Guard 1
-	reblifesold1.setCustomName2('a Rebel Soldier')
-	reblifesold2 = stcSvc.spawnObject('object/mobile/shared_rebel_snow_m_01.iff', 'tatooine', long(0), float(-5208.8), float(75.0), float(-6573.1), float(0.669), float(-0.743)) #Rebel Vendor Guard 2
-	reblifesold2.setCustomName2('a Rebel Soldier')
-	implifevendor = stcSvc.spawnObject('object/mobile/shared_life_day_imperial_vendor.iff', 'tatooine', long(0), float(-5097.1), float(75.0), float(-6570.7), float(0.0087), float(-0.9999)) #Imp Vendor
-	implifevendor.setCustomName2('Sstrigge \(Trandoshan \'Trader\')')
-	implifesold1 = stcSvc.spawnObject('object/mobile/shared_snowtrooper_s01.iff', 'tatooine', long(0), float(-5092.2), float(75.0), float(-6569.0), float(0.0087), float(-0.9999)) #Imp Vendor Guard 1
-	implifesold1.setCustomName2('a Stormtrooper')
-	implifesold2 = stcSvc.spawnObject('object/mobile/shared_snowtrooper_s01.iff', 'tatooine', long(0), float(-5100.8), float(75.0), float(-6569.4), float(0.0087), float(-0.9999)) #Imp Vendor Guard 2
-	implifesold2.setCustomName2('a Stormtrooper')
-	stcSvc.spawnObject('object/tangible/instrument/shared_nalargon.iff', 'tatooine', long(0), float(-5045.00), float(75), float(-6555), float(0.999132931232), float(-0.0416347384453)) # Drums
-	stcSvc.spawnObject('object/tangible/instrument/shared_ommni_box.iff', 'tatooine', long(0), float(-5043.00), float(75), float(-6559), float(0.999132931232), float(-0.0416347384453)) # Box
+#	stcSvc.spawnObject('object/mobile/shared_lifeday_saun_dann.iff', 'tatooine', long(0), float(-5037.00), float(75), float(-6561), float(-0.75), float(0)) # Life Day
+#	figlife = stcSvc.spawnObject('object/mobile/shared_lifeday_figrin_dan.iff', 'tatooine', long(0), float(-5046.00), float(75), float(-6560), float(-0.75), float(0)) # LD Figrin
+#	figlife.setCustomName2('Figrin D\'an')
+#	bandtat1 = stcSvc.spawnObject('object/mobile/shared_lifeday_figrin_dan_band.iff', 'tatooine', long(0), float(-5040.00), float(75), float(-6557), float(-0.75), float(0)) # LD Band 1
+#	bandtat1.setCustomName2('Doikk Nats')
+#	bandtat2 = stcSvc.spawnObject('object/mobile/shared_lifeday_figrin_dan_band.iff', 'tatooine', long(0), float(-5043.00), float(75), float(-6559), float(-0.75), float(0)) # LD band 2
+#	bandtat2.setCustomName2('Tech Mor')
+#	bandtat3 = stcSvc.spawnObject('object/mobile/shared_lifeday_figrin_dan_band.iff', 'tatooine', long(0), float(-5048.00), float(75), float(-6557), float(-0.75), float(0)) # LD Band 3
+#	bandtat3.setCustomName2('Nalan Cheel')
+#	bandtat4 = stcSvc.spawnObject('object/mobile/shared_lifeday_figrin_dan_band.iff', 'tatooine', long(0), float(-5045.00), float(75), float(-6555), float(-0.75), float(0)) # LD band 4
+#	bandtat4.setCustomName2('Sunil Eide')
+#	reblifevendor = stcSvc.spawnObject('object/mobile/shared_life_day_rebel_vendor.iff', 'tatooine', long(0), float(-5212.2), float(75.0), float(-6571.7), float(0.656), float(-0.7547)) #Rebel Wookiee Vendor
+#	reblifevendor.setCustomName2('Oolovv \(Wookiee Freedom Fighter)')
+#	reblifesold1 = stcSvc.spawnObject('object/mobile/shared_rebel_snow_m_01.iff', 'tatooine', long(0), float(-5208.8), float(75.0), float(-6569.6), float(0.669), float(-0.743)) #Rebel Vendor Guard 1
+#	reblifesold1.setCustomName2('a Rebel Soldier')
+#	reblifesold2 = stcSvc.spawnObject('object/mobile/shared_rebel_snow_m_01.iff', 'tatooine', long(0), float(-5208.8), float(75.0), float(-6573.1), float(0.669), float(-0.743)) #Rebel Vendor Guard 2
+#	reblifesold2.setCustomName2('a Rebel Soldier')
+#	implifevendor = stcSvc.spawnObject('object/mobile/shared_life_day_imperial_vendor.iff', 'tatooine', long(0), float(-5097.1), float(75.0), float(-6570.7), float(0.0087), float(-0.9999)) #Imp Vendor
+#	implifevendor.setCustomName2('Sstrigge \(Trandoshan \'Trader\')')
+#	implifesold1 = stcSvc.spawnObject('object/mobile/shared_snowtrooper_s01.iff', 'tatooine', long(0), float(-5092.2), float(75.0), float(-6569.0), float(0.0087), float(-0.9999)) #Imp Vendor Guard 1
+#	implifesold1.setCustomName2('a Stormtrooper')
+#	implifesold2 = stcSvc.spawnObject('object/mobile/shared_snowtrooper_s01.iff', 'tatooine', long(0), float(-5100.8), float(75.0), float(-6569.4), float(0.0087), float(-0.9999)) #Imp Vendor Guard 2
+#	implifesold2.setCustomName2('a Stormtrooper')
+#	stcSvc.spawnObject('object/tangible/instrument/shared_nalargon.iff', 'tatooine', long(0), float(-5045.00), float(75), float(-6555), float(0.999132931232), float(-0.0416347384453)) # Drums
+#	stcSvc.spawnObject('object/tangible/instrument/shared_ommni_box.iff', 'tatooine', long(0), float(-5043.00), float(75), float(-6559), float(0.999132931232), float(-0.0416347384453)) # Box
 	
 # Mos Eisley Spawns:  WORK IN PROGRESS by Levarris
 	
@@ -118,9 +119,15 @@ def addPlanetSpawns(core, planet):
 	
 	#Starport Interior
 	
+	bartender1 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_tatooine_nikto_male_04.iff', 'tatooine', long(1106380), float(-59.1), float(2.6), float(39.5), float(0), float(0)) 
+	bartender1.setCustomName2('a Bartender')
+	
 	#City Hall Interior
 	
 	#Lucky Despot Interior
+	
+	hansolo1 = stcSvc.spawnObject('object/mobile/shared_han_solo.iff', 'tatooine', long(26949), float(32.3), float(7.0), float(1.6), float(0), float(0)) 
+	hansolo1.setCustomName2('Han Solo')
 	
 	#Medical Center Interior
 	
@@ -144,7 +151,7 @@ def addPlanetSpawns(core, planet):
 	jawa1 = stcSvc.spawnObject('object/mobile/shared_jawa.iff', 'tatooine', long(0), float(3663.3), float(5.0), float(-4858.6), float(0), float(0)) 
 	jawa1.setCustomName2('a Jawa')
 	
-	commoner12 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_naboo_moncal_male_01.iff', 'tatooine', long(0), float(3512.2), float(5.0), float(-4764.2), float(0), float(0)) 
+	commoner12 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_naboo_moncal_male_01.iff', 'tatooine', long(0), float(3490.3), float(5.0), float(-4799.4), float(0), float(0)) 
 	commoner12.setCustomName2('a Scientist')
 	
 	commoner13 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_naboo_zabrak_female_02.iff', 'tatooine', long(0), float(3559.7), float(5.0), float(-4725.9), float(0), float(0)) 
@@ -209,8 +216,30 @@ def addPlanetSpawns(core, planet):
 	
 	noble4 = stcSvc.spawnObject('object/mobile/shared_dressed_noble_human_female_03.iff', 'tatooine', long(0), float(3255.3), float(4.0), float(-4848.1), float(0.42), float(0.91)) 
 	noble4.setCustomName2('a Noble')
-
-
+	
+	#Eisley Legacy Quest NPCs
+	
+	vourk = stcSvc.spawnObject('object/mobile/shared_dressed_tatooine_opening_santos.iff', 'tatooine', long(0), float(3520.0), float(5.0), float(-4821.0), float(0.42), float(0.91))
+	vourk.setCustomName2('Vourk Ver\'Zremp')
+	
+	mayor = stcSvc.spawnObject('object/mobile/shared_dressed_mayor_mikdanyell_guhrantt.iff', 'tatooine', long(1279960), float(1.2), float(2.5), float(5.4), float(0), float(0))
+	mayor.setCustomName2('Mayor Mikdanyell Guh\'rantt')
+	
+	enthaKandela = stcSvc.spawnObject('object/mobile/shared_dressed_entha_kandela.iff', 'tatooine', long(0), float(3511), float(5.0), float(-4785), float(0.70), float(0.71))
+	enthaKandela.setCustomName2('Entha Kandela')
+	
+	purvis = stcSvc.spawnObject('object/mobile/shared_dressed_purvis_arrison.iff', 'tatooine', long(0), float(3512.4), float(5.0), float(-4764.9), float(0.38), float(-0.92))
+	purvis.setCustomName2('Purvis Arrison')
+	
+	peawpRdawc = stcSvc.spawnObject('object/mobile/shared_peawp_bodyguard_trainer.iff', 'tatooine', long(1189639), float(-11.8), float(1.1), float(-10.1), float(0), float(0))
+	peawpRdawc.setCustomName2('Peawp R\'dawc')
+	
+	peawpRdawc = stcSvc.spawnObject('object/mobile/shared_dressed_tatooine_opening_niko.iff', 'tatooine', long(0), float(3506.7), float(5.0), float(-4795.8), float(0.70), float(0.71))
+	peawpRdawc.setCustomName2('Niko Brehe')
+	
+	dunir = stcSvc.spawnObject('object/mobile/shared_dressed_tatooine_opening_dunir.iff', 'tatooine', long(0), float(3520.7), float(5.0), float(-4683.7), float(0.99), float(-0.08))
+	dunir.setCustomName2('Dunir')
+	
 	#Eisley Ship Controller
 	stcSvc.spawnObject('object/mobile/shared_distant_ship_controller.iff', 'tatooine', long(0), float(3542.3), float(5.0), float(-4826.0), float(0.42), float(0.91))
 	
