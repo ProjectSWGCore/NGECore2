@@ -302,6 +302,8 @@ public class MissionObject extends IntangibleObject implements IPersistent {
 		
 		destination.getSession().write(messageBuilder.buildBaseline3());
 		destination.getSession().write(messageBuilder.buildBaseline6());
+		destination.getSession().write(messageBuilder.buildBaseline8());
+		destination.getSession().write(messageBuilder.buildBaseline9());
 	}
 
 }

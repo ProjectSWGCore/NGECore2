@@ -143,13 +143,40 @@ public class MissionMessageBuilder extends ObjectMessageBuilder {
 	
 	public IoBuffer buildBaseline6() {
 		
-		IoBuffer buffer = IoBuffer.allocate(4, false).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer buffer = IoBuffer.allocate(18, false).order(ByteOrder.LITTLE_ENDIAN);
 		
-		buffer.putInt(121); // server id
+		buffer.putShort((short) 3);
+		buffer.putInt(76); // server id
+		buffer.putLong(0); // detail stf
+		buffer.putInt(0xFFFFFFFF); // unknown
 		
 		int size = buffer.position();
 		buffer.flip();
 		buffer = createBaseline("MISO", (byte) 6, buffer, size);
+		
+		return buffer;
+	}
+	
+	public IoBuffer buildBaseline8() {
+		IoBuffer buffer = IoBuffer.allocate(2, false).order(ByteOrder.LITTLE_ENDIAN);
+		
+		buffer.putShort((short) 0); // unknown
+		
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createBaseline("MISO", (byte) 8, buffer, size);
+		
+		return buffer;
+	}
+	
+	public IoBuffer buildBaseline9() {
+		IoBuffer buffer = IoBuffer.allocate(2, false).order(ByteOrder.LITTLE_ENDIAN);
+		
+		buffer.putShort((short) 0); // unknown
+		
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createBaseline("MISO", (byte) 9, buffer, size);
 		
 		return buffer;
 	}

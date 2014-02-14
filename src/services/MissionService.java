@@ -110,8 +110,9 @@ public class MissionService implements INetworkDispatch {
 		
 		final int bagSize = core.objectService.objsInContainer(creature, missionBag);
 		Console.println("Delivery Entries: " + deliveryEntries);
-		if (bagSize != 12) {
-			for(int missionsAdded = 0; missionsAdded < 12; missionsAdded++) {
+		if (bagSize != 10) {
+			for(int missionsAdded = 0; missionsAdded < 10; missionsAdded++) {
+				//																		 object/mission/shared_mission_object.iff
 				MissionObject mission = (MissionObject) core.objectService.createObject("object/mission/shared_mission_object.iff", creature.getPlanet());
 				
 				
@@ -197,7 +198,7 @@ public class MissionService implements INetworkDispatch {
 	}
 	
 	public void createDefaultMissions(CreatureObject player) {
-		for(int missionsAdded = 0; missionsAdded < 12; missionsAdded++) {
+		for(int missionsAdded = 0; missionsAdded < 10; missionsAdded++) {
 			MissionObject mission = (MissionObject) core.objectService.createObject("object/mission/shared_mission_object.iff", player.getPlanet());
 			
 			
