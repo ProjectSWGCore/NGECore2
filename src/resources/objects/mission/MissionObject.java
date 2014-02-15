@@ -55,9 +55,8 @@ public class MissionObject extends IntangibleObject implements IPersistent {
 	private String descId;
 	private String titleId;
 	private String type;
-	private WaypointObject attachedWaypoint;
-	
 	private String missionTemplateObject;
+	private WaypointObject attachedWaypoint;
 
 	@NotPersistent
 	MissionMessageBuilder messageBuilder = new MissionMessageBuilder(this);
@@ -98,8 +97,9 @@ public class MissionObject extends IntangibleObject implements IPersistent {
 			this.startY = y;
 			this.startPlanet = planet;
 		}
-		
-		notifyObservers(messageBuilder.buildStartLocationDelta(x, z, y, planet), false);
+		if (getContainer() != null && getContainer().getClient() != null && getContainer().getClient().getSession() != null) {
+			getContainer().getClient().getSession().write(messageBuilder.buildStartLocationDelta(x, z, y, planet));
+		}
 	}
 
 	public float getMissionDestinationX() {
@@ -127,7 +127,9 @@ public class MissionObject extends IntangibleObject implements IPersistent {
 			this.destZ = z;
 			this.destinationPlanet = planet;
 		}
-		notifyObservers(messageBuilder.buildDestinationDelta(x, z, y, planet), false);
+		if (getContainer() != null && getContainer().getClient() != null && getContainer().getClient().getSession() != null) {
+			getContainer().getClient().getSession().write(messageBuilder.buildDestinationDelta(x, z, y, planet));
+		}
 	}
 
 	public String getMissionDestinationPlanet() {
@@ -146,7 +148,9 @@ public class MissionObject extends IntangibleObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.difficultyLevel = missionLevel;
 		}
-		notifyObservers(messageBuilder.buildDifficultyLevelDelta(missionLevel), false);
+		if (getContainer() != null && getContainer().getClient() != null && getContainer().getClient().getSession() != null) {
+			getContainer().getClient().getSession().write(messageBuilder.buildDifficultyLevelDelta(missionLevel));
+		}
 	}
 
 	public String getMissionStartPlanet() {
@@ -177,20 +181,24 @@ public class MissionObject extends IntangibleObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.reward = missionCredits;
 		}
-		notifyObservers(messageBuilder.buildCreditsRewardDelta(missionCredits), false);
+		if (getContainer() != null && getContainer().getClient() != null && getContainer().getClient().getSession() != null) {
+			getContainer().getClient().getSession().write(messageBuilder.buildCreditsRewardDelta(missionCredits));
+		}
 	}
 
-	public String getMissionCreator() {
+	public String getCreator() {
 		synchronized(objectMutex) {
 			return creator;
 		}
 	}
 
-	public void setMissionCreator(String missionCreator) {
+	public void setCreator(String missionCreator) {
 		synchronized(objectMutex) {
 			this.creator = missionCreator;
 		}
-		notifyObservers(messageBuilder.buildCreatorNameDelta(missionCreator), false);
+		if (getContainer() != null && getContainer().getClient() != null && getContainer().getClient().getSession() != null) {
+			getContainer().getClient().getSession().write(messageBuilder.buildCreatorNameDelta(missionCreator));
+		}
 	}
 
 	public String getMissionDescription() {
@@ -204,7 +212,9 @@ public class MissionObject extends IntangibleObject implements IPersistent {
 			this.description = missionDescription;
 			this.descId = id;
 		}
-		notifyObservers(messageBuilder.buildMissionDescriptionDelta(missionDescription, id), false);
+		if (getContainer() != null && getContainer().getClient() != null && getContainer().getClient().getSession() != null) {
+			getContainer().getClient().getSession().write(messageBuilder.buildMissionDescriptionDelta(missionDescription, id));
+		}
 	}
 
 	public String getMissionTitle() {
@@ -218,7 +228,9 @@ public class MissionObject extends IntangibleObject implements IPersistent {
 			this.title = missionTitle;
 			this.titleId = id;
 		}
-		notifyObservers(messageBuilder.buildMissionTitleDelta(missionTitle, id), false);
+		if (getContainer() != null && getContainer().getClient() != null && getContainer().getClient().getSession() != null) {
+			getContainer().getClient().getSession().write(messageBuilder.buildMissionTitleDelta(missionTitle, id));
+		}
 	}
 
 	public String getMissionTargetName() {
@@ -231,7 +243,9 @@ public class MissionObject extends IntangibleObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.missionTargetName = missionTargetName;
 		}
-		notifyObservers(messageBuilder.buildTargetNameDelta(missionTargetName), false);
+		if (getContainer() != null && getContainer().getClient() != null && getContainer().getClient().getSession() != null) {
+			getContainer().getClient().getSession().write(messageBuilder.buildTargetNameDelta(missionTargetName));
+		}
 	}
 
 	public WaypointObject getAttachedWaypoint() {
@@ -256,7 +270,9 @@ public class MissionObject extends IntangibleObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.missionTemplateObject = missionTemplateObject;
 		}
-		notifyObservers(messageBuilder.buildTargetObjectIffDelta(missionTemplateObject), false);
+		if (getContainer() != null && getContainer().getClient() != null && getContainer().getClient().getSession() != null) {
+			getContainer().getClient().getSession().write(messageBuilder.buildTargetObjectIffDelta(missionTemplateObject));
+		}
 	}
 
 	public String getMissionDescId() {
@@ -281,7 +297,15 @@ public class MissionObject extends IntangibleObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.type = missionType;
 		}
-		notifyObservers(messageBuilder.buildMissionTypeDelta(missionType), false);
+		if (getContainer() != null && getContainer().getClient() != null && getContainer().getClient().getSession() != null) {
+			getContainer().getClient().getSession().write(messageBuilder.buildMissionTypeDelta(missionType));
+		}
+	}
+	
+	public void sendMissionDelta() {
+		if (getContainer() != null && getContainer().getClient() != null && getContainer().getClient().getSession() != null) {
+			getContainer().getClient().getSession().write(messageBuilder.buildMissionDelta());
+		}
 	}
 
 	public Transaction getTransaction() {

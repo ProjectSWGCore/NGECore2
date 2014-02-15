@@ -39,12 +39,14 @@ import resources.common.ObjControllerOpcodes;
 import resources.objects.creature.CreatureObject;
 import resources.objects.mission.MissionObject;
 import resources.objects.tangible.TangibleObject;
+import resources.objects.waypoint.WaypointObject;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.clients.Client;
 import engine.resources.container.Traverser;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
+import engine.resources.scene.Point3D;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
@@ -101,78 +103,48 @@ public class MissionService implements INetworkDispatch {
 		CreatureObject creature = (CreatureObject) player;
 		TangibleObject missionBag = (TangibleObject) creature.getSlottedObject("mission_bag");
 		
-		final AtomicInteger deliveryCount = new AtomicInteger();
-		final AtomicInteger destroyCount = new AtomicInteger();
-
-		final int deliveryEntries = 30;
-		
-		final Random ran = new Random();
-		
-		final int bagSize = core.objectService.objsInContainer(creature, missionBag);
-		Console.println("Delivery Entries: " + deliveryEntries);
-		if (bagSize != 10) {
-			for(int missionsAdded = 0; missionsAdded < 10; missionsAdded++) {
-				//																		 object/mission/shared_mission_object.iff
-				MissionObject mission = (MissionObject) core.objectService.createObject("object/mission/shared_mission_object.iff", creature.getPlanet());
-				
-				
-				//mission.setStfFilename("mission/mission_object");
-				//mission.setStfName("destroy_mission");
-				
-				mission.setMissionLevel(50);
-				mission.setMissionStart(0, 0, 0, null);
-				mission.setMissionCreator("");
-				mission.setCreditReward(100);
-				
-				mission.setMissionDestination(0, 0, 0, null);
-				
-				//mission.setMissionTemplateObject(missionTemplateObject);
-				mission.setMissionDescription("mission/mission_npc_survey_neutral_easy", "m1o");
-				mission.setMissionTitle("mission/mission_npc_survey_neutral_easy", "m1t");
-				
-				mission.setMissionType("survey"); // 0x19C9FAC1
-				
-				mission.setMissionTargetName("Testing target name");
-
-				missionBag._add(mission);
-
-				Console.println("Added mission " + missionsAdded);
-			}
-			return;
-		}
-		
-		missionBag.viewChildren(player, false, false, new Traverser() {
+		final AtomicInteger deCount = new AtomicInteger();
+		final AtomicInteger dCount = new AtomicInteger();
+		//createDefaultMissions(creature);
+		missionBag.viewChildren(creature, true, false, new Traverser() {
 
 			@Override
 			public void process(SWGObject child) {
-				if (deliveryCount.get() == 6)
-					return;
-				
 				MissionObject mission = (MissionObject) child;
-				int textId = ran.nextInt(deliveryEntries);
-				
-				deliveryCount.getAndIncrement();
-				
+				if (deCount.get() <= 7) {
+					mission.setMissionType("destroy");
+					deCount.getAndIncrement();
+					Console.println("Destroy missions: " + String.valueOf(deCount.get()));
+				}
+				else if (dCount.get() <= 7) {
+					mission.setMissionType("deliver");
+					dCount.getAndIncrement();
+					Console.println("Deliver missions: " + String.valueOf(dCount.get()));
+				} else {
+					return;
+				}
+				mission.setCreditReward(1337);
+				mission.setCreator("Waverunner");
 				mission.setMissionLevel(10);
-				mission.setMissionStart(0, 0, 0, null);
-				mission.setMissionCreator("Waverunner");
-				mission.setCreditReward(100);
+				mission.setMissionDescription("mission/mission_destroy_neutral_hard_creature_tatooine", "m17d");
+				mission.setMissionTitle("mission/mission_destroy_neutral_hard_creature_tatooine", "m17t");
+				mission.setMissionDestination(0, 0, 0, "tatooine");
+				mission.setMissionTemplateObject("object/tangible/lair/womp_rat/shared_lair_womp_rat_desert");
+				mission.setMissionTargetName("@lair_n:tatooine_giant_worrt_lair_neutral_medium");
 				
-				mission.setMissionDestination(0, 0, 0, null);
+				WaypointObject wp = new WaypointObject();
+				wp.setName("@mission/mission_destroy_neutral_hard_creature_tatooine:m17t");
+				wp.setColor(WaypointObject.ORANGE);
+				wp.setPosition(new Point3D(10, 10, 10));
+				wp.setCellId(0);
+				wp.setPlanet(core.terrainService.getPlanetByName("tatooine"));
+				//mission.sendMissionDelta();
 				
-				//mission.setMissionTemplateObject(missionTemplateObject);
-				mission.setMissionDescription("mission/mission_npc_survey_neutral_easy", "m1o");
-				mission.setMissionTitle("mission/mission_npc_survey_neutral_easy", "m1t");
-				
-				mission.setMissionType("survey"); // 0x19C9FAC1
-				
-				mission.setMissionTargetName("Testing target name");
-				Console.println("Sent delta/'s!");
 			}
 			
 		});
 		
-		Console.println("Outside of the traverser now!");
+		Console.println("Sent deltas");
 	}
 	
 	// May want to create a map for the server with needed info
@@ -198,16 +170,16 @@ public class MissionService implements INetworkDispatch {
 	}
 	
 	public void createDefaultMissions(CreatureObject player) {
-		for(int missionsAdded = 0; missionsAdded < 10; missionsAdded++) {
+		for(int missionsAdded = 0; missionsAdded <= 16; missionsAdded++) {
 			MissionObject mission = (MissionObject) core.objectService.createObject("object/mission/shared_mission_object.iff", player.getPlanet());
 			
 			
-			//mission.setStfFilename("mission/mission_object");
-			//mission.setStfName("destroy_mission");
+			mission.setStfFilename("mission/mission_object");
+			mission.setStfName("destroy_mission");
 			
 			mission.setMissionLevel(50);
 			mission.setMissionStart(0, 0, 0, null);
-			mission.setMissionCreator("");
+			mission.setCreator("");
 			mission.setCreditReward(100);
 			
 			mission.setMissionDestination(0, 0, 0, null);
