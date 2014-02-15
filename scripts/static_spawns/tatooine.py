@@ -117,6 +117,15 @@ def addPlanetSpawns(core, planet):
 	commoner10 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_tatooine_nikto_male_04.iff', 'tatooine', long(1082877), float(2.1), float(-0.9), float(-8.4), float(0.42), float(0.91)) 
 	commoner10.setCustomName2('a Commoner')
 	
+	anetiaKahryn = stcSvc.spawnObject('object/mobile/shared_dressed_twk_entertainer.iff', 'tatooine', long(1082878), float(19.8), float(-0.9), float(-21), float(-0.03), float(0.99)) 
+	anetiaKahryn.setCustomName2('Anetia Kah\'ryn')
+	
+	dravis = stcSvc.spawnObject('object/mobile/shared_space_privateer_tier1_tatooine.iff', 'tatooine', long(1082886), float(-21.7), float(-0.9), float(25.5), float(0.99), float(0.03)) 
+	dravis.setCustomName2('Dravis')
+	
+	talonKarrde = stcSvc.spawnObject('object/mobile/shared_dressed_talon_karrde.iff', 'tatooine', long(1082887), float(-25.7), float(-0.5), float(8.8), float(0.21), float(0.97)) 
+	talonKarrde.setCustomName2('Talon Karrde')
+	
 	#Starport Interior
 	
 	bartender1 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_tatooine_nikto_male_04.iff', 'tatooine', long(1106380), float(-59.1), float(2.6), float(39.5), float(0), float(0)) 
@@ -134,7 +143,7 @@ def addPlanetSpawns(core, planet):
 	#Theater Interior
 	
 	#Miscellaneous Building Interiors
-	
+
 	#Outside
 	businessman2 = stcSvc.spawnObject('object/mobile/shared_dressed_businessman_human_male_01.iff', 'tatooine', long(0), float(3663.3), float(4.0), float(-4738.6), float(0), float(0)) 
 	businessman2.setCustomName2('a Businessman')
@@ -217,6 +226,24 @@ def addPlanetSpawns(core, planet):
 	noble4 = stcSvc.spawnObject('object/mobile/shared_dressed_noble_human_female_03.iff', 'tatooine', long(0), float(3255.3), float(4.0), float(-4848.1), float(0.42), float(0.91)) 
 	noble4.setCustomName2('a Noble')
 	
+	byxlePedette = stcSvc.spawnObject('object/mobile/shared_dressed_tatooine_opening_byxle.iff', 'tatooine', long(0), float(3365), float(5), float(-4639), float(0.99), float(0.12)) 
+	byxlePedette.setCustomName2('Byxle Pedette')
+	
+	errikDarksider = stcSvc.spawnObject('object/mobile/shared_dressed_herald_tatooine_01.iff', 'tatooine', long(0), float(3381), float(4.6), float(-4498), float(0.91), float(0.40)) 
+	errikDarksider.setCustomName2('Errik Darksider')
+	
+	gendra = stcSvc.spawnObject('object/mobile/shared_dressed_gendra.iff', 'tatooine', long(0), float(3308), float(5.6), float(-4785), float(0.84), float(0.53)) 
+	gendra.setCustomName2('Gendra')
+	
+	lurval = stcSvc.spawnObject('object/mobile/shared_lurval.iff', 'tatooine', long(0), float(3387), float(5), float(-4791), float(-0.4), float(0.91)) 
+	lurval.setCustomName2('Lurval')
+	
+	matildaCarson = stcSvc.spawnObject('object/mobile/shared_dressed_noble_human_female_02.iff', 'tatooine', long(0), float(3490.2), float(5), float(-4778), float(0.87), float(0.48)) 
+	matildaCarson.setCustomName2('Matilda Carson')
+	
+	vanvi = stcSvc.spawnObject('object/mobile/shared_dressed_bestine_artist01.iff', 'tatooine', long(0), float(3312), float(5), float(-4655), float(0.95), float(-0.28)) 
+	vanvi.setCustomName2('Vanvi Hotn')
+	
 	#Eisley Legacy Quest NPCs
 	
 	vourk = stcSvc.spawnObject('object/mobile/shared_dressed_tatooine_opening_santos.iff', 'tatooine', long(0), float(3520.0), float(5.0), float(-4821.0), float(0.42), float(0.91))
@@ -244,7 +271,10 @@ def addPlanetSpawns(core, planet):
 	stcSvc.spawnObject('object/mobile/shared_distant_ship_controller.iff', 'tatooine', long(0), float(3542.3), float(5.0), float(-4826.0), float(0.42), float(0.91))
 	
 # Mos Espa NPC Spawns
-
+	# Cantina Interior
+	dalaSocuna = stcSvc.spawnObject('object/mobile/shared_space_rebel_tier1_tatooine_socuna.iff', 'tatooine', long(1256068), float(-28.4), float(-0.5), float(9.4), float(0.33), float(0.94))
+	dalaSocuna.setCustomName2('Commander Da\'la Socuna')
+	
 	watto = stcSvc.spawnObject('object/mobile/shared_watto.iff', 'tatooine', long(26670), float(4.7), float(-0.5), float(2.4), float(0.70), float(-0.71))
 	watto.setCustomName2('Watto')
 	
@@ -277,12 +307,92 @@ def addPlanetSpawns(core, planet):
 	commoner23.setCustomName2('a Commoner')
 	
 # Mos Entha NPC Spawns
-
+	#Outside
+	ankwee = stcSvc.spawnObject('object/mobile/shared_dressed_tatooine_entha_ankwee.iff', 'tatooine', long(0), float(1351), float(5.0), float(3108), float(0.42), float(0.91))
+	ankwee.setCustomName2('An\'kwee')
+	
 # Bestine NPC Spawns
+	# City hall
+	indigoSiyan = stcSvc.spawnObject('object/mobile/shared_dressed_indigo_siyan.iff', 'tatooine', long(926483), float(24.7), float(3.2), float(-30.7), float(-0.06), float(0.99))
+	indigoSiyan.setCustomName2('Indigo Siyan')
+	
+	keanna = stcSvc.spawnObject('object/mobile/shared_dressed_keanna_likyna.iff', 'tatooine', long(926480), float(-18.7), float(3.2), float(20.6), float(-0.97), float(0.2))
+	keanna.setCustomName2('Keanna Li\'kyna')
+	
+	oberhaur = stcSvc.spawnObject('object/mobile/shared_space_imperial_tier2_tatooine_oberhaur.iff', 'tatooine', long(926480), float(-21.9), float(3.2), float(26.9), float(0.99), float(0.01))
+	oberhaur.setCustomName2('Commander Oberhaur')
+	
+	seanTrenwell = stcSvc.spawnObject('object/mobile/shared_dressed_sean_trenwell.iff', 'tatooine', long(926483), float(19.4), float(3.2), float(-36), float(-0.06), float(0.99))
+	seanTrenwell.setCustomName2('Sean Trenwell ')
+	
+	talmont = stcSvc.spawnObject('object/mobile/shared_prefect_talmont.iff', 'tatooine', long(926475), float(-1.9), float(3.1), float(-10.3), float(0.99), float(0))
+	
+	tourAryon = stcSvc.spawnObject('object/mobile/shared_dressed_tatooine_tour_aryon.iff', 'tatooine', long(926479), float(-36.8), float(1.3), float(0.3), float(0.8), float(0.59))
+	tourAryon.setCustomName2('Tour Aryon')
+	
+	victorVisalis = stcSvc.spawnObject('object/mobile/shared_dressed_victor_visalis.iff', 'tatooine', long(926480), float(-26.7), float(3.2), float(20.8), float(0.96), float(0.24))
+	victorVisalis.setCustomName2('Victor Visalis')
+	
+	wilhalmSkrim = stcSvc.spawnObject('object/mobile/shared_dressed_tatooine_wilhalm_skrim.iff', 'tatooine', long(926482), float(28.9), float(1.3), float(-6.0), float(0.23), float(0.97))
+	
+	#Miscellaneous Building Interiors
+	akalColzet = stcSvc.spawnObject('object/mobile/shared_dressed_imperial_trainer_space_01.iff', 'tatooine', long(1212359), float(0.7), float(1.8), float(-14), float(0), float(0.99))
+	akalColzet.setCustomName2('lt. Akal Colzet')
+	
+	fariousGletch = stcSvc.spawnObject('object/mobile/shared_dressed_tatooine_farious_gletch.iff', 'tatooine', long(1278989), float(2.0), float(-0.4), float(-5.7), float(-0.15), float(0.98))
 
+	pfilbeeJhorn = stcSvc.spawnObject('object/mobile/shared_dressed_tatooine_pfilbee_jhorn.iff', 'tatooine', long(1279923), float(5.1), float(0.1), float(-3.8), float(-0.7), float(0.71))
+	pfilbeeJhorn.setCustomName2('Pfilbee Jhorn')
+	
+	#Hotel interior
+	gilBurtin = stcSvc.spawnObject('object/mobile/shared_dressed_industrialist_trainer_01.iff', 'tatooine', long(1223850), float(20.3), float(1.6), float(12.8), float(0.99), float(0))
+	gilBurtin.setCustomName2('Gil Burtin')
+	
+	# Outside
+	barak = stcSvc.spawnObject('object/mobile/shared_smuggler_broker_barak.iff', 'tatooine', long(0), float(-1049), float(5.0), float(-3537), float(0.97), float(0.23))
+	barak.setCustomName2('Barak')
+	
+	barrezz = stcSvc.spawnObject('object/mobile/shared_dressed_dressed_legacy_barrezz.iff', 'tatooine', long(0), float(-1146.8), float(98.0), float(-3892.1), float(0.75), float(0.65))
+	barrezz.setCustomName2('Commander Barrezz')
+	
+	jasha = stcSvc.spawnObject('object/mobile/shared_dressed_bestinejobs_jasha.iff', 'tatooine', long(0), float(-1128), float(98.0), float(-3900), float(-0.42), float(0.90))
+	jasha.setCustomName2('Captain Jasha')
+
+	dkrn = stcSvc.spawnObject('object/mobile/shared_dressed_imperial_general_m.iff', 'tatooine', long(0), float(-1160), float(5.0), float(-3525), float(0.90), float(-0.41))
+	dkrn.setCustomName2('Commander D\'krn')
+	
+	gunham = stcSvc.spawnObject('object/mobile/shared_dressed_imperial_lieutenant_m.iff', 'tatooine', long(0), float(-1125), float(12.2), float(-3620), float(0.9), float(0.42))
+	gunham.setCustomName2('Commander Gunham')
+	
+	kormundThrylle = stcSvc.spawnObject('object/mobile/shared_dressed_tatooine_kormund_thrylle.iff', 'tatooine', long(0), float(-1043), float(10.0), float(-3530), float(0.99), float(0.06))
+	kormundThrylle.setCustomName2('Kormund Thrylle')
+	
+	calebKnolar = stcSvc.spawnObject('object/mobile/shared_dressed_imperial_major_cold_m.iff', 'tatooine', long(0), float(-1149), float(98.0), float(-3903), float(0.42), float(0.91))
+	calebKnolar.setCustomName2('Major Caleb Knolar')
+	
 # Anchorhead NPC Spawns
+	# Cantina Interior
+	borraSetas = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_tatooine_rodian_female_03.iff', 'tatooine', long(1213345), float(9.8), float(0.4), float(-1.2), float(-0.65), float(0.75))
+	borraSetas.setCustomName2('Borra Setas')
+		
+	# Outside
+	aaphKoden = stcSvc.spawnObject('object/mobile/shared_dressed_tatooine_aaph_koden.iff', 'tatooine', long(0), float(129), float(5.0), float(-5399), float(-0.67), float(0.73))
+	aaphKoden.setCustomName2('Aaph Koden')
+	
+	Alger = stcSvc.spawnObject('object/mobile/shared_smuggler_fence_alger.iff', 'tatooine', long(0), float(107), float(5.0), float(-5315), float(0.96), float(0.26))
+	Alger.setCustomName2('Alger')
+	
+	carhlaBastra = stcSvc.spawnObject('object/mobile/shared_dressed_legacy_bastra.iff', 'tatooine', long(0), float(128), float(5.0), float(-5428), float(-0.26), float(0.96))
+	carhlaBastra.setCustomName2('Carh\'la Bastra')
+	
 	cuanTalon = stcSvc.spawnObject('object/mobile/shared_dressed_legacy_cuan.iff', 'tatooine', long(0), float(-161.7), float(65.0), float(-5322.8), float(0), float(0))
 	cuanTalon.setCustomName2('Cuan Talon')
+	
+	dromaOrdo = stcSvc.spawnObject('object/mobile/shared_dressed_anchorjobs_ordo.iff', 'tatooine', long(0), float(110), float(52.0), float(-5431), float(0.36), float(0.93))
+	dromaOrdo.setCustomName2('Droma Ordo')
+	
+	Sorna = stcSvc.spawnObject('object/mobile/shared_dressed_tatooine_tosche_sorna.iff', 'tatooine', long(0), float(-135), float(52.0), float(-5331), float(0.36), float(0.93))
+	Sorna.setCustomName2('Sorna')
 	
 # Lars Homestead
 	zefAndo = stcSvc.spawnObject('object/mobile/shared_dressed_legacy_zef.iff', 'tatooine', long(0), float(-2574.9), float(0), float(-5516.7), float(0), float(0))

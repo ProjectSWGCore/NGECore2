@@ -11,6 +11,11 @@ def addPlanetSpawns(core, planet):
 	pooja = stcSvc.spawnObject('object/mobile/shared_dressed_pooja_naberrie.iff', 'naboo', long(0), float(-5479.1), float(14), float(4467.3), float(-0.96), float(0.25))
 	pooja.setCustomName2('Pooja Naberrie')
 	
+	vaikannaSilverlight = stcSvc.spawnObject('object/mobile/shared_dressed_herald_naboo_01.iff', 'naboo', long(0), float(-5484), float(10), float(4424), float(-0.93), float(0.34))
+	vaikannaSilverlight.setCustomName2('Vaik\'anna Silverlight')
+	
+	hannaSkiyah = stcSvc.spawnObject('object/mobile/shared_dressed_herald_noble_twk_female_01.iff', 'naboo', long(0), float(-5480), float(-0.5), float(4398), float(0.44), float(0.89))
+	hannaSkiyah.setCustomName2('Hanna S\'kiyah')
 # Keren Spawns
 	# Cantina interior
 	lergoBrazee = stcSvc.spawnObject('object/mobile/shared_dressed_lergo_brazee.iff', 'naboo', long(5), float(2.8), float(-0.9), float(-5.3), float(0.25), float(0.96))
@@ -21,10 +26,10 @@ def addPlanetSpawns(core, planet):
 	gavynSykes.setCustomName2('Capt. Gavyn Sykes')
 	
 	#Miscellaneous Building Interiors
-	kritusMorven = stcSvc.spawnObject('object/mobile/shared_dressed_kritus_morven.iff', 'naboo', long(1685077), float(-3.9), float(-4.9), float(-7.5), float(0.95), float(0.30))
+	kritusMorven = stcSvc.spawnObject('object/mobile/shared_dressed_kritus_morven.iff', 'naboo', long(1685077), float(-3.9), float(-4.9), float(-7.5), float(-0.57), float(0.81))
 	kritusMorven.setCustomName2('Kritus Morven')
 	
-	Raev = stcSvc.spawnObject('object/mobile/ep3/shared_ep3_clone_relics_major_raev.iff', 'naboo', long(1393881), float(-10), float(1.7), float(-9.5), float(0.93), float(0.34))
+	Raev = stcSvc.spawnObject('object/mobile/ep3/shared_ep3_clone_relics_major_raev.iff', 'naboo', long(1393881), float(-10), float(1.7), float(-9.5), float(0.38), float(0.92))
 	Raev.setCustomName2('Major Raev')
 	
 	# Outside
@@ -99,6 +104,12 @@ def addPlanetSpawns(core, planet):
 	v3fx = stcSvc.spawnObject('object/mobile/shared_space_rebel_tier1_naboo_v3fx.iff', 'naboo', long(0), float(4764.2), float(6.1), float(-4795), float(0.99), float(0.08))
 	v3fx.setCustomName2('V3-FX')
 	
+	roninLightrunner = stcSvc.spawnObject('object/mobile/shared_dressed_herald_naboo_02.iff', 'naboo', long(0), float(4810), float(6.3), float(-4977), float(0), float(1))
+	roninLightrunner.setCustomName2('Ronin Lightrunner')
+	
+	dagorel = stcSvc.spawnObject('object/mobile/shared_dressed_gendra.iff', 'naboo', long(0), float(4471), float(4), float(-4714), float(-0.64), float(0.76))
+	dagorel.setCustomName2('Dagorel')
+	
 # Emperor's Retreat interior
 	kaja = stcSvc.spawnObject('object/mobile/shared_kaja_orzee.iff', 'naboo', long(1418872), float(1.9), float(0.2), float(-13.4), float(0), float(1))
 	kaja.setCustomName2('Kaja Or\'Zee')
@@ -125,7 +136,7 @@ def addPlanetSpawns(core, planet):
 	
 	# Outside Emperor's Retreat
 	veers = stcSvc.spawnObject('object/mobile/naboo_npc/shared_veers.iff', 'naboo', long(0), float(2368), float(291), float(-3921), float(0.64), float(0.76))
-	veers.setCustomName2('Maximilian Veers')
+	veers.setCustomName2('Colonel Veers')
 	
 	thrawn = stcSvc.spawnObject('object/mobile/naboo_npc/shared_thrawn.iff', 'naboo', long(0), float(2369), float(291), float(-3922), float(0.34), float(0.93))
 	thrawn.setCustomName2('Captain Thrawn')
