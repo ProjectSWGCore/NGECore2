@@ -245,17 +245,110 @@ def addPlanetSpawns(core, planet):
 	
 # Mos Espa NPC Spawns
 
+	watto = stcSvc.spawnObject('object/mobile/shared_watto.iff', 'tatooine', long(26670), float(4.7), float(-0.5), float(2.4), float(0.70), float(-0.71))
+	watto.setCustomName2('Watto')
+	
+	#Exterior Uninteractables
+	commoner18 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_naboo_zabrak_female_02.iff', 'tatooine', long(0), float(-2915.3), float(5.0), float(2148.5), float(0), float(0)) 
+	commoner18.setCustomName2('a Commoner')
+	
+	jawa10 = stcSvc.spawnObject('object/mobile/shared_jawa.iff', 'tatooine', long(0), float(-2966.3), float(5.0), float(2196.9), float(0), float(0)) 
+	jawa10.setCustomName2('a Jawa')
+
+	commoner19 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_naboo_human_male_06.iff', 'tatooine', long(0), float(-2960.4), float(5.0), float(2271.3), float(0), float(0)) 
+	commoner19.setCustomName2('a Commoner')
+	
+	commoner20 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_tatooine_devaronian_male_01.iff', 'tatooine', long(0), float(-2934.3), float(5.0), float(2298.9), float(0.71), float(0.71)) 
+	commoner20.setCustomName2('a Commoner')
+	
+	commoner21 = stcSvc.spawnObject('object/mobile/shared_dressed_noble_human_female_01.iff', 'tatooine', long(0), float(-2897.7), float(5.0), float(2345.4), float(0.71), float(0.71)) 
+	commoner21.setCustomName2('a Commoner')
+	
+	commoner22 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_fat_twilek_male_01.iff', 'tatooine', long(0), float(-2763.8), float(5.0), float(2305.2), float(0.71), float(0.71)) 
+	commoner22.setCustomName2('a Commoner')
+	
+	jawa11 = stcSvc.spawnObject('object/mobile/shared_jawa.iff', 'tatooine', long(0), float(-2936.8), float(5.0), float(2078.4), float(0.95105), float(0.3090)) 
+	jawa11.setCustomName2('a Jawa')
+	
+	businessman4 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_tatooine_trandoshan_male_02.iff', 'tatooine', long(0), float(-2914.2), float(5.0), float(2022.4), float(0), float(0)) 
+	businessman4.setCustomName2('a Businessman')
+	
+	commoner23 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_naboo_moncal_male_01.iff', 'tatooine', long(0), float(-2904.1), float(5.0), float(1965.3), float(0.71), float(0.71)) 
+	commoner23.setCustomName2('a Commoner')
+	
 # Mos Entha NPC Spawns
 
 # Bestine NPC Spawns
 
 # Anchorhead NPC Spawns
+	cuanTalon = stcSvc.spawnObject('object/mobile/shared_dressed_legacy_cuan.iff', 'tatooine', long(0), float(-161.7), float(65.0), float(-5322.8), float(0), float(0))
+	cuanTalon.setCustomName2('Cuan Talon')
+	
+# Lars Homestead
+	zefAndo = stcSvc.spawnObject('object/mobile/shared_dressed_legacy_zef.iff', 'tatooine', long(0), float(-2574.9), float(0), float(-5516.7), float(0), float(0))
+	zefAndo.setCustomName2('Zef Ando')
+	
+# Jawa Sandcrawler (legacy quest)
+	fa2po = stcSvc.spawnObject('object/mobile/shared_3po_protocol_droid.iff', 'tatooine', long(0), float(-3805.7), float(30.4), float(-4721.6), float(0), float(0))
+	fa2po.setCustomName2('FA-2PO')
+	
+# Darklighter Cache Cave (tat -260 -6930 not spawning from buildout)
+
+
+	
 
 # Mos Taike NPC Spawns
 
 # Wayfar NPC Spawns
 
-# Jabba's Palace Theme Park Spawns	
+# Jabba's Palace Theme Park Spawns
+
+	reelo = stcSvc.spawnObject('object/mobile/shared_reelo_baruk.iff', 'tatooine', long(26560), float(-3.5), float(0.2), float(113.5), float(0), float(0))
+	reelo.setCustomName2('Reelo Baruk')
+	
+	reeyees = stcSvc.spawnObject('object/mobile/shared_dressed_gran_thug_male_01.iff', 'tatooine', long(26560), float(5.8), float(0.2), float(115.7), float(0.70), float(-0.71))
+	reeyees.setCustomName2('Ree-Yees')
+	
+	ephant = stcSvc.spawnObject('object/mobile/shared_ephant_mon.iff', 'tatooine', long(26564), float(-6.1), float(5.8), float(86.1), float(0), float(0))
+	ephant.setCustomName2('Ephant Mon')
+	
+	porcellus = stcSvc.spawnObject('object/mobile/shared_dressed_porcellus.iff', 'tatooine', long(26572), float(-44.0), float(3.0), float(63.4), float(0), float(0))
+	porcellus.setCustomName2('Porcellus')
+	
+	barada = stcSvc.spawnObject('object/mobile/shared_barada.iff', 'tatooine', long(26596), float(31.2), float(0.2), float(-1.0), float(0.98), float(-0.17))
+	barada.setCustomName2('Barada')
+	
+	bibMain = stcSvc.spawnObject('object/mobile/shared_bib_fortuna.iff', 'tatooine', long(26582), float(-11.1), float(2.0), float(49.5), float(0.70), float(0.71))
+	bibMain.setCustomName2('Bib Fortuna')
+	
+	jabba = stcSvc.spawnObject('object/mobile/shared_jabba_the_hutt.iff', 'tatooine', long(26582), float(-17.0), float(2.8), float(44.9), float(0.70), float(0.71))
+	jabba.setCustomName2('Jabba the Hutt')
+	
+	oola = stcSvc.spawnObject('object/mobile/shared_oola.iff', 'tatooine', long(26582), float(-10.3), float(2.0), float(43.9), float(0.70), float(-0.71))
+	oola.setCustomName2('Oola')
+	oola.setCurrentAnimation('wave1')
+	
+	bobaFett = stcSvc.spawnObject('object/mobile/shared_boba_fett.iff', 'tatooine', long(26582), float(-1.0), float(3.0), float(33.1), float(0), float(0))
+	bobaFett.setCustomName2('Boba Fett')
+	
+	ev9d9 = stcSvc.spawnObject('object/mobile/shared_ev_9d9.iff', 'tatooine', long(26574), float(18.8), float(0.2), float(78.7), float(1.0), float(0))
+	ev9d9.setCustomName2('EV-9D9')
+	
+	malakili = stcSvc.spawnObject('object/mobile/shared_malakili.iff', 'tatooine', long(26599), float(17.3), float(-11.0), float(43.8), float(0), float(0))
+	malakili.setCustomName2('Malakili')
+		#Need to somehow get the cellID for the Rancor Pit or it will NEVER be spawned.
+		
+	maxRebo = stcSvc.spawnObject('object/mobile/shared_max_rebo.iff', 'tatooine', long(26582), float(-1.4), float(3.0), float(26.9), float(0.42), float(-0.9))
+	maxRebo.setCustomName2('Max Rebo')
+	
+	droopy = stcSvc.spawnObject('object/mobile/shared_droopy_mccool.iff', 'tatooine', long(26582), float(-3.9), float(3.0), float(26.1), float(0.42), float(-0.9))
+	droopy.setCustomName2('Droopy McCool')
+	
+	sySnootles = stcSvc.spawnObject('object/mobile/shared_sy_snootles.iff', 'tatooine', long(26582), float(-1.4), float(3.0), float(29.8), float(0.42), float(-0.))
+	sySnootles.setCustomName2('Sy Snootles')
+	
+	g5po = stcSvc.spawnObject('object/mobile/shared_3po_protocol_droid_red.iff', 'tatooine', long(26582), float(-14.3), float(2.0), float(47.4), float(0.70), float(0.71))
+	g5po.setCustomName2('G5-PO')
 	
 	return
 	
