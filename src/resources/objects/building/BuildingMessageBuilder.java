@@ -107,7 +107,7 @@ public class BuildingMessageBuilder extends ObjectMessageBuilder {
 		int size = buffer.position();
 		buffer = IoBuffer.allocate(size).put(buffer.array(), 0, size);
 		buffer.flip();
-		buffer = createBaseline("TANO", (byte) 8, buffer, size);
+		buffer = createBaseline("BUIO", (byte) 8, buffer, size);
 		
 		return buffer;
 	}
@@ -118,7 +118,7 @@ public class BuildingMessageBuilder extends ObjectMessageBuilder {
 		int size = buffer.position();
 		buffer = IoBuffer.allocate(size).put(buffer.array(), 0, size);
 		buffer.flip();
-		buffer = createBaseline("TANO", (byte) 9, buffer, size);
+		buffer = createBaseline("BUIO", (byte) 9, buffer, size);
 		
 		return buffer;
 	}

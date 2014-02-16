@@ -45,4 +45,8 @@ def run(core, actor, target, commandString):
 		actor.addAbility(str(arg1))
 		actor.sendSystemMessage('You have learned ' + arg1 + '')
 	
+	elif command == 'anim' and arg1:
+		actor.setCurrentAnimation(arg1)
+		actor.sendSystemMessage('Performed ' + arg1 ,0)
+		
 	return

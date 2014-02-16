@@ -138,6 +138,16 @@ public class TangibleMessageBuilder extends ObjectMessageBuilder {
 
 	}
 	
+	public IoBuffer buildCustomNameDelta(String customName) {
+		IoBuffer buffer = bufferPool.allocate(getUnicodeString(customName).length, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.put(getUnicodeString(customName));
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("TANO", (byte) 3, (short) 1, (short) 2, buffer, size + 4);
+		return buffer;
+		
+	}
+	
 	@Override
 	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
 		// TODO Auto-generated method stub

@@ -45,7 +45,7 @@ public class Animation extends ObjControllerObject {
 
 	@Override
 	public IoBuffer serialize() {
-		IoBuffer result = IoBuffer.allocate(36).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer result = IoBuffer.allocate(20 + animation.length()).order(ByteOrder.LITTLE_ENDIAN);
 		
 		result.putInt(ObjControllerMessage.ANIMATION);
 		

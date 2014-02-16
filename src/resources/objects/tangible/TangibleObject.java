@@ -86,6 +86,12 @@ public class TangibleObject extends SWGObject {
 		super();
 		messageBuilder = new TangibleMessageBuilder(this);
 	}
+	
+	public void setCustomName2(String customName) {
+		setCustomName(customName);
+		
+		notifyObservers(messageBuilder.buildCustomNameDelta(customName), true);
+	}
 
 	public int getIncapTimer() {
 		return incapTimer;

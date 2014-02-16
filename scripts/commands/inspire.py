@@ -10,9 +10,15 @@ def run(core, actor, target, commandString):
     print playerObject.getProfession()
     if not playerObject or playerObject.getProfession() != "entertainer_1a":
       return
-
-    print 'x'
-    if actor.getPosture() != 0x09:
+    
+    if target is None or actor.getObjectId() == target.getObjectId():
+    	print ('Buffing Player: ' + str(target.getObjectId()) + ' or: ' + target.getCustomName())
+    	openBuffWindow = BuffBuilderStartMessage(actor.getObjectId(), actor.getObjectId(), actor.getObjectId())
+    	objController = ObjControllerMessage(11, openBuffWindow)
+    	actor.getClient().getSession().write(objController.serialize())
+    	return
+    
+    if actor.getPosture() != 0x09 and target.getObjectId() != actor.getObjectId():
       actor.sendSystemMessage('@performance:insp_buff_must_perform', 2)
       return
 
