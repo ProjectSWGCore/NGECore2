@@ -159,6 +159,9 @@ public class SimulationService implements INetworkDispatch {
 		core.commandService.registerCommand("roleplay");
 		core.commandService.registerAlias("afk", "toggleawayfromkeyboard");
 		core.commandService.registerCommand("toggledisplayingfactionrank");
+		core.commandService.registerCommand("editbiography");
+		core.commandService.registerCommand("setbiography");
+		core.commandService.registerCommand("requestbiography");
 
 	}
 	
@@ -620,7 +623,7 @@ public class SimulationService implements INetworkDispatch {
 		PlayerObject ghost = (PlayerObject) object.getSlottedObject("ghost");
 				
 		core.weatherService.sendWeather(object);
-		
+
 		if (!object.hasSkill(ghost.getProfessionWheelPosition())) {
 			object.showFlyText("cbt_spam", "skill_up", (float) 2.5, new RGB(154, 205, 50), 0);
 			object.playEffectObject("clienteffect/skill_granted.cef", "");

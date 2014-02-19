@@ -578,7 +578,6 @@ public class PlayerService implements INetworkDispatch {
 			return;
 		
 		player.getTitleList().add(title);
-		Console.println("Added title" + title);
 
 	}
 	
