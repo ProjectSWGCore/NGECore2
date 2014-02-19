@@ -59,5 +59,6 @@ public class Opcodes {
 	public static int FactionRequestMessage = CRC.StringtoCRC("FactionRequestMessage");
 	public static int FactionResponseMessage = CRC.StringtoCRC("FactionResponseMessage");
 	public static int SetWaypointColor = CRC.StringtoCRC("SetWaypointColor");
+	public static int GuildRequestMessage = CRC.StringtoCRC("GuildRequestMessage");
 	
 }
