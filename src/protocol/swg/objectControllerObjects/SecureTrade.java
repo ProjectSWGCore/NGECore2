@@ -27,8 +27,7 @@ public class SecureTrade extends ObjControllerObject{
 
 	@Override
 	public IoBuffer serialize() {
-		IoBuffer result = IoBuffer.allocate(100).order(ByteOrder.LITTLE_ENDIAN);
-		result.setAutoExpand(true);
+		IoBuffer result = IoBuffer.allocate(40).order(ByteOrder.LITTLE_ENDIAN);
 		
 		result.putInt(ObjControllerMessage.SPACIAL_CHAT);
 		result.putInt(1);

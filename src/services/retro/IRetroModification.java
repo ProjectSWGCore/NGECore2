@@ -19,18 +19,12 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package resources.common;
+package services.retro;
 
-public class ObjControllerOpcodes {
+import main.NGECore;
+
+public interface IRetroModification {
 	
-	public static final int DATA_TRANSFORM = 0x71000000;
-	public static final int DATA_TRANSFORM_WITH_PARENT = 0xF1000000;
-	public static final int COMMAND_QUEUE_ENQUEUE = 0x16010000;
-	public static final int HOVER_TARGET = 0x26010000; // lookAtTarget
-	public static final int TARGET_UPDATE = 0xC5040000; // intendedTarget
-	public static final int OBJECT_MENU_REQUEST = 0x46010000;
-	public static final int SECURE_TRADE = 0x15010000;
-	public static final int BUFF_BUILDER_CHANGE = 0x5A020000;
-	public static final int MISSION_LIST_REQUEST = 0xF5000000;
-	public static final int ChangeRoleIconChoice = 0x4D040000;
+	public void modify(NGECore core);
+	
 }

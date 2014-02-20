@@ -26,50 +26,40 @@ import java.nio.ByteOrder;
 import org.apache.mina.core.buffer.IoBuffer;
 
 import protocol.swg.ObjControllerMessage;
-import protocol.swg.SWGMessage;
+import resources.common.Console;
+import resources.common.StringUtilities;
 
-public class Animation extends ObjControllerObject {
-
+public class BiographyUpdate extends ObjControllerObject {
+	
 	private long objectId;
-	private String animation;
+	private long targetObjectId;
 	
-	public Animation(long objectId, String animation) {
+	private String biography;
+
+	public BiographyUpdate(long objectId, long targetObjectId, String biography) {
 		this.objectId = objectId;
-		this.animation = animation;
+		this.biography = biography;
+		this.targetObjectId = targetObjectId;
 	}
-	
+
 	@Override
 	public void deserialize(IoBuffer data) {
-
+		
+		
 	}
 
 	@Override
 	public IoBuffer serialize() {
-		IoBuffer result = IoBuffer.allocate(20 + animation.length()).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer buffer = IoBuffer.allocate(28 + (biography.length() * 2)).order(ByteOrder.LITTLE_ENDIAN);
 		
-		result.putInt(ObjControllerMessage.ANIMATION);
+		buffer.putInt(0x000001DB);
+		buffer.putLong(objectId); // requester
+		buffer.putInt(0);
+		buffer.putLong(targetObjectId);
+		buffer.put(getUnicodeString(biography));
 		
-		result.putLong(objectId); // person performing animation's id
-		result.putInt(0); // seems to be just a place holder
-		result.put(getAsciiString(animation)); // animation name ex: tumble_to_standing
-		
-		return result.flip();
+		return buffer.flip();
 	}
-
-	public long getObjectId() {
-		return objectId;
-	}
-
-	public void setObjectId(long objectId) {
-		this.objectId = objectId;
-	}
-
-	public String getAnimation() {
-		return animation;
-	}
-
-	public void setAnimation(String animation) {
-		this.animation = animation;
-	}
-
+	
+	
 }

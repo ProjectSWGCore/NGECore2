@@ -44,6 +44,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import resources.common.*;
+import resources.datatables.Options;
 import resources.datatables.PlayerFlags;
 
 import org.apache.mina.core.buffer.IoBuffer;
@@ -262,36 +263,39 @@ public class ObjectService implements INetworkDispatch {
 		
 		objectList.put(objectID, object);
 		
-		// Set Default Tangible Options
-		/*
+		// Set Options - easier to set them across the board here
+		// because we'll be spawning them despite most of them being unscripted.
+		// Any such settings can be completely reset with setOptionsBitmask
+		// in scripts and modified with setOptions(Options.X, true/false)
 		if (Template.startsWith("object/creature/") || Template.startsWith("object/mobile/")) {
-			((CreatureObject) object).setOptionsBitmask(Options.MOBILE);
-			
-			if (Template.startsWith("object/mobile/beast_master/")) {
+			if (Template.startsWith("object/mobile/")) {
+				((CreatureObject) object).setOptionsBitmask(Options.ATTACKABLE);
+			} else if (Template.startsWith("object/mobile/beast_master/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.NONE);
 			} else if (Template.startsWith("object/mobile/vendor/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.INVULNERABLE | Options.USABLE);
 			} else if (Template.startsWith("object/mobile/vehicle/")) {
-				((CreatureObject) object).addOption(Options.INVULNERABLE | Options.MOUNT);
+				((CreatureObject) object).setOptionsBitmask(Options.ATTACKABLE | Options.MOUNT);
 			} else if (Template.startsWith("object/mobile/hologram/")) {
-				((CreatureObject) object).addOption(Options.INVULNERABLE);
+				((CreatureObject) object).setOptionsBitmask(Options.INVULNERABLE);
 			} else if (Template.startsWith("object/creature/npc/theme_park/")) {
-				((CreatureObject) object).addOption(Options.INVULNERABLE);
-			} else if (Template.startsWith("object/creature/general/")) {
+				((CreatureObject) object).setOptionsBitmask(Options.INVULNERABLE);
+			} else if (Template.startsWith("object/creature/npc/general/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.INVULNERABLE | Options.CONVERSABLE);
+			}  else if (Template.startsWith("object/creature/droid/crafted/")) {
+				((CreatureObject) object).setOptionsBitmask(Options.NONE);
 			} else if (Template.startsWith("object/creature/droid/")) {
-				((CreatureObject) object).addOption(Options.INVULNERABLE);
+				((CreatureObject) object).setOptionsBitmask(Options.ATTACKABLE | Options.INVULNERABLE);
+			} else if (Template.startsWith("object/creature/player/")) {
+				((CreatureObject) object).setOptionsBitmask(Options.ATTACKABLE);
 			}
 		} else if (object instanceof TangibleObject) {
 			((TangibleObject) object).setOptionsBitmask(Options.INVULNERABLE);
 			
 			if (Template.startsWith("object/tangible/vendor/")) {
-				((CreatureObject) object).addOption(Options.USABLE);
-			} else if (Template.startsWith("object/creature/droid/")) {
-				((CreatureObject) object).addOption(Options.INVULNERABLE);
+				((TangibleObject) object).setOptionsBitmask(Options.INVULNERABLE | Options.USABLE);
 			}
 		}
-		*/
 		
 		return object;
 	}

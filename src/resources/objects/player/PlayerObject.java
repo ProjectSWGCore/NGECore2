@@ -41,7 +41,7 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent(version=3)
+@Persistent(version=4)
 public class PlayerObject extends IntangibleObject {
 	
 	// PLAY 3
@@ -115,6 +115,8 @@ public class PlayerObject extends IntangibleObject {
 	// TODO: research new NGE vars between maxConsumable and jediState
 	
 	private int jediState = 0; 			// unused in NGE
+	
+	private String biography = "";
 	
 	@NotPersistent
 	private PlayerMessageBuilder messageBuilder;
@@ -664,6 +666,16 @@ public class PlayerObject extends IntangibleObject {
 		}
 	}
 	
+	public String getBiography() {
+		return biography;
+	}
+
+	public void setBiography(String biography) {
+		synchronized(objectMutex) {
+			this.biography = biography;
+		}
+	}
+
 	public int getFlagBitmask() {
 		synchronized(objectMutex) {
 			return flagBitmask;

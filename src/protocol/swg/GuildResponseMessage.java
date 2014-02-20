@@ -19,57 +19,43 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package protocol.swg.objectControllerObjects;
+package protocol.swg;
 
 import java.nio.ByteOrder;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import protocol.swg.ObjControllerMessage;
-import protocol.swg.SWGMessage;
+import resources.common.Console;
+import resources.common.StringUtilities;
+import resources.guild.Guild;
+import resources.objects.creature.CreatureObject;
 
-public class Animation extends ObjControllerObject {
+public class GuildResponseMessage extends SWGMessage {
 
-	private long objectId;
-	private String animation;
+	private long player;
+	private String guildName;
 	
-	public Animation(long objectId, String animation) {
-		this.objectId = objectId;
-		this.animation = animation;
+	public GuildResponseMessage(long player, String guild) {
+		this.player = player;
+		this.guildName = guild;
 	}
 	
 	@Override
 	public void deserialize(IoBuffer data) {
+		
 
 	}
 
 	@Override
 	public IoBuffer serialize() {
-		IoBuffer result = IoBuffer.allocate(20 + animation.length()).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer buffer = IoBuffer.allocate(18 + guildName.length()).order(ByteOrder.LITTLE_ENDIAN);
 		
-		result.putInt(ObjControllerMessage.ANIMATION);
+		buffer.putShort((short) 4);
+		buffer.putInt(0x32263F20);
 		
-		result.putLong(objectId); // person performing animation's id
-		result.putInt(0); // seems to be just a place holder
-		result.put(getAsciiString(animation)); // animation name ex: tumble_to_standing
-		
-		return result.flip();
-	}
+		buffer.putLong(player);
+		buffer.put(getAsciiString(guildName));
 
-	public long getObjectId() {
-		return objectId;
+		return buffer.flip();
 	}
-
-	public void setObjectId(long objectId) {
-		this.objectId = objectId;
-	}
-
-	public String getAnimation() {
-		return animation;
-	}
-
-	public void setAnimation(String animation) {
-		this.animation = animation;
-	}
-
 }
