@@ -576,7 +576,7 @@ public class PlayerService implements INetworkDispatch {
 															String customServerTemplate = null;
 															
 															if (item.contains("/")) {
-																item = (item.substring(0, (item.lastIndexOf("/") + 1)) + "/shared_" + item.substring((item.lastIndexOf("/") + 1)));
+																item = (item.substring(0, (item.lastIndexOf("/") + 1)) + "shared_" + item.substring((item.lastIndexOf("/") + 1)));
 															} else {
 																customServerTemplate = item;
 																item = core.scriptService.callScript("scripts/roadmap/", "roadmap_rewards", "get", item).asString();
