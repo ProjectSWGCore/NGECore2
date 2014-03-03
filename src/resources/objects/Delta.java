@@ -23,18 +23,22 @@ package resources.objects;
 
 import java.nio.ByteBuffer;
 
-import org.apache.mina.core.buffer.SimpleBufferAllocator;
+import org.apache.mina.core.buffer.IoBuffer;
 
+import com.sleepycat.persist.model.NotPersistent;
+import com.sleepycat.persist.model.Persistent;
 
 import resources.common.StringUtilities;
 
-
+@Persistent
 public abstract class Delta implements IDelta {
 	
-	public Delta() { }
+	@NotPersistent
+	protected final Object objectMutex;
 	
-	protected final Object objectMutex = new Object();
-	public SimpleBufferAllocator bufferPool = new SimpleBufferAllocator();
+	public Delta() {
+		objectMutex = new Object();
+	}
 	
 	protected String getAsciiString(ByteBuffer buffer) {
 		return StringUtilities.getAsciiString(buffer);
@@ -54,6 +58,10 @@ public abstract class Delta implements IDelta {
 	
 	protected byte getBoolean(boolean variable) {
 		return ((byte) ((variable) ? 1 : 0));
+	}
+	
+	public static IoBuffer createBuffer(int size) {
+		return Baseline.createBuffer(size);
 	}
 	
 }
