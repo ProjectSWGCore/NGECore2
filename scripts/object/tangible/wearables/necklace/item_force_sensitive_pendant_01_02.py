@@ -1,7 +1,6 @@
 import sys
 
 def setup(core, object):
-	object.setIntAttribute('no_trade', 1)
 	object.setStfFilename('static_item_n')
 	object.setStfName('item_force_sensitive_pendant_01_02')
 	object.setDetailFilename('static_item_d')
