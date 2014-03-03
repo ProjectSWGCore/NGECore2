@@ -157,7 +157,7 @@ public class WeaponObject extends TangibleObject {
 		if (getElementalType() != null)
 				return (int) (((getMaxDamage() + getElementalDamage()  + getMinDamage() + getElementalDamage()) / 2 + getElementalDamage()) * (1 / getAttackSpeed()));
 		else
-			return (int) ((getMaxDamage() + getMinDamage()/2)*(1 / getAttackSpeed()));
+			return (int) (((getMaxDamage() + getMinDamage()) / 2 ) * (1 / getAttackSpeed()));
 	}
 
 	public int getWeaponType() {
