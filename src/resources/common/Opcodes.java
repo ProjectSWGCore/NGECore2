@@ -29,8 +29,11 @@ public class Opcodes {
 	public static int ChatInstantMessageToCharacter = 0x84BB21F7;
 	public static int ChatPersistentMessageToServer = 0x25A29FA6;
 	public static int ChatRequestPersistentMessage = 0x07E3559F;
+	public static int ChatRequestRoomList = 0x4C3D2CFA;
 	public static int ChatSystemMessage = CRC.StringtoCRC("ChatSystemMessage");
 	public static int ClientOpenContainerMessage = 0x2D2D6EE1;
+	public static int CommodotiesItemTypeListRequest = 0x48F493C5; // needs catching
+	public static int NewbieTutorialResponse = 0xCA88FBAD; // needs catching
 	public static int CmdSceneReady = 0x43FD1C22;
 	public static int ConnectPlayerMessage = 0x2E365218;
 	public static int ClientCreateCharacter = 0xB97F3074;

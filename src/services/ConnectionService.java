@@ -172,7 +172,15 @@ public class ConnectionService implements INetworkDispatch {
 			}
 			
 		});
+		
+		swgOpcodes.put(Opcodes.ConnectPlayerMessage, new INetworkRemoteEvent() {
 
+			@Override
+			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
+				//ConnectPlayerResponseMessage
+			}
+			
+		});
 		
 	}
 	
