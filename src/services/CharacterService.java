@@ -191,7 +191,16 @@ public class CharacterService implements INetworkDispatch {
 			
 			
 		});
+		
+		swgOpcodes.put(Opcodes.LagReport, new INetworkRemoteEvent() {
 
+			@Override
+			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
+
+			}
+			
+		});
+		
 		swgOpcodes.put(Opcodes.ClientCreateCharacter, new INetworkRemoteEvent() {
 
 			@Override

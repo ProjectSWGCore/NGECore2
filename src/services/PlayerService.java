@@ -42,6 +42,7 @@ import protocol.swg.ClientMfdStatusUpdateMessage;
 import protocol.swg.ExpertiseRequestMessage;
 import protocol.swg.GuildRequestMessage;
 import protocol.swg.GuildResponseMessage;
+import protocol.swg.PlayerMoneyResponse;
 import protocol.swg.ServerTimeMessage;
 import protocol.swg.SetWaypointColor;
 import protocol.swg.objectControllerObjects.ChangeRoleIconChoice;
@@ -270,6 +271,32 @@ public class PlayerService implements INetworkDispatch {
 					GuildResponseMessage response = new GuildResponseMessage(request.getCharacterId(), "None");
 					client.getSession().write(response.serialize());
 				}
+			}
+			
+		});
+		
+		swgOpcodes.put(Opcodes.PlayerMoneyRequest, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
+
+				Client client = core.getClient(session);
+				
+				if (client == null)
+					return;
+				
+				SWGObject player = client.getParent();
+				
+				if (player == null)
+					return;
+				
+				CreatureObject creature = (CreatureObject) player;
+				
+				if (creature == null)
+					return;
+				
+				PlayerMoneyResponse response = new PlayerMoneyResponse(creature.getCashCredits(), creature.getBankCredits());
+				session.write(response.serialize());
 			}
 			
 		});
