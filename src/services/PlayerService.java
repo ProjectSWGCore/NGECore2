@@ -40,6 +40,8 @@ import org.apache.mina.core.session.IoSession;
 import protocol.swg.ClientIdMsg;
 import protocol.swg.ClientMfdStatusUpdateMessage;
 import protocol.swg.ExpertiseRequestMessage;
+import protocol.swg.GuildRequestMessage;
+import protocol.swg.GuildResponseMessage;
 import protocol.swg.ServerTimeMessage;
 import protocol.swg.SetWaypointColor;
 import protocol.swg.objectControllerObjects.ChangeRoleIconChoice;
@@ -51,6 +53,7 @@ import resources.common.Opcodes;
 import resources.common.RGB;
 import resources.common.SpawnPoint;
 import resources.datatables.PlayerFlags;
+import resources.guild.Guild;
 import resources.objects.Buff;
 import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
@@ -235,6 +238,38 @@ public class PlayerService implements INetworkDispatch {
 				
 				ghost.waypointUpdate(obj);
 				
+			}
+			
+		});
+		swgOpcodes.put(Opcodes.GuildRequestMessage, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
+				data.order(ByteOrder.LITTLE_ENDIAN);
+				
+				Client client = core.getClient(session);
+				
+				if (client == null)
+					return;
+				
+				SWGObject player = client.getParent();
+				
+				if (player == null)
+					return;
+				
+				GuildRequestMessage request = new GuildRequestMessage();
+				request.deserialize(data);
+				
+				CreatureObject targetPlayer = (CreatureObject) core.objectService.getObject(request.getCharacterId());
+				
+				if (targetPlayer.getGuildId() != 0) {
+					Guild targetGuild = core.guildService.getGuildById(targetPlayer.getGuildId());
+					GuildResponseMessage response = new GuildResponseMessage(request.getCharacterId(), targetGuild.getName());
+					client.getSession().write(response.serialize());
+				} else {
+					GuildResponseMessage response = new GuildResponseMessage(request.getCharacterId(), "None");
+					client.getSession().write(response.serialize());
+				}
 			}
 			
 		});
@@ -540,7 +575,9 @@ public class PlayerService implements INetworkDispatch {
 														try {
 															String customServerTemplate = null;
 															
-															if (!item.contains("/")) {
+															if (item.contains("/")) {
+																item = (item.substring(0, (item.lastIndexOf("/") + 1)) + "/shared_" + item.substring((item.lastIndexOf("/") + 1)));
+															} else {
 																customServerTemplate = item;
 																item = core.scriptService.callScript("scripts/roadmap/", "roadmap_rewards", "get", item).asString();
 															}
@@ -578,7 +615,6 @@ public class PlayerService implements INetworkDispatch {
 			return;
 		
 		player.getTitleList().add(title);
-		Console.println("Added title" + title);
 
 	}
 	
