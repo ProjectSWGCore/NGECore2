@@ -566,9 +566,9 @@ public class PlayerService implements INetworkDispatch {
 													for (int n = 0; n < items.length; n++) {
 														String item = items[n];
 														
-														if (wookieeItems.length > 0 && creature.getStfName().contains("wookiee")) {
+														if (wookieeItems[0].length() > 0 && creature.getStfName().contains("wookiee")) {
 															item = wookieeItems[n];
-														} else if (ithorianItems.length > 0 && creature.getStfName().contains("ithorian")) {
+														} else if (ithorianItems[0].length() > 0 && creature.getStfName().contains("ithorian")) {
 															item = ithorianItems[n];
 														}
 														
