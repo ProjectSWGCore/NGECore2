@@ -207,9 +207,8 @@ public class TradeService implements INetworkDispatch{
 					}
 					
 					addItemForTrade(objectToTrade, tradingWithClient);
-					System.out.println("Trading item: " + objectToTrade.getCustomName() + " detail: " + objectToTrade.getDetailFilename());
-					
-					System.out.println("tradingObjectTable: " + tradingObjectsTable.toString());
+					//System.out.println("Trading item: " + objectToTrade.getCustomName() + " detail: " + objectToTrade.getDetailFilename());
+
 					tradee.makeAware(objectToTrade);
 					AddItemMessage tradeeResponse = new AddItemMessage();
 					tradeeResponse.setTradeObjectID(tradeItemID);
@@ -314,20 +313,6 @@ public class TradeService implements INetworkDispatch{
 			}
 			
 		});
-		// not used, but just in case.... VerifyTradeMessage is sent instead when a user
-		// hits the Accept button. Can use this as an additional check if need to.
-		swgOpcodes.put(TradeOpcodes.BeginVerificationMessage, new INetworkRemoteEvent() {
-
-			@Override
-			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
-				System.out.println("Got BeginVerificationMessage");
-				Client client = core.getClient(session);
-				client.getSession().setAttribute("tradeSessionIsVerified");
-				System.out.println("Verified client");
-
-			}
-			
-		});
 		
 		swgOpcodes.put(TradeOpcodes.VerifyTradeMessage, new INetworkRemoteEvent() {
 
@@ -405,12 +390,7 @@ public class TradeService implements INetworkDispatch{
 						actingTrader.setCashCredits(tradePartnerCredits - moneyToGive);
 						tradePartner.setCashCredits(tradePartnerCredits + moneyToGive);
 					}
-					
-					
-					System.out.println("Finished trading items/credits");
-					
 					cleanTradeSession(client, tradePartner.getClient());
-					
 				}
 				
 			}

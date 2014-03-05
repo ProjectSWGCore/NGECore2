@@ -65,4 +65,5 @@ public class Opcodes {
 	public static int GuildRequestMessage = CRC.StringtoCRC("GuildRequestMessage");
 	public static int PlayerMoneyRequest = CRC.StringtoCRC("PlayerMoneyRequest");
 	public static int LagReport = CRC.StringtoCRC("LagReport");
+	public static int GetSpecificMapLocationsMessage = CRC.StringtoCRC("GetSpecificMapLocationsMessage");
 }

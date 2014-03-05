@@ -1,6 +1,6 @@
 import sys
 from engine.resources.scene import Point3D
-from protocol.swg import CommPlayerMessage
+
 def setup():
     return
     
@@ -51,9 +51,5 @@ def run(core, actor, target, commandString):
 	
 	elif command == 'changeBio' and arg1:
 		actor.getSlottedObject('ghost').setBiography(arg1)
-    
-	elif command == 'testComm':
-		comm = CommPlayerMessage()
-		actor.getClient().getSession().write(comm.serialize())
-		print ('sent comm message')
+
 	return

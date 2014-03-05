@@ -39,6 +39,7 @@ import org.apache.mina.core.session.IoSession;
 
 import protocol.swg.ClientIdMsg;
 import protocol.swg.ClientMfdStatusUpdateMessage;
+import protocol.swg.CreateClientPathMessage;
 import protocol.swg.ExpertiseRequestMessage;
 import protocol.swg.GuildRequestMessage;
 import protocol.swg.GuildResponseMessage;
@@ -300,7 +301,14 @@ public class PlayerService implements INetworkDispatch {
 			}
 			
 		});
-		
+		swgOpcodes.put(Opcodes.GetSpecificMapLocationsMessage, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
+
+			}
+			
+		});
 		swgOpcodes.put(Opcodes.CmdSceneReady, new INetworkRemoteEvent() {
 
 			@Override
@@ -652,6 +660,26 @@ public class PlayerService implements INetworkDispatch {
 		if (player.getTitleList().contains(title))
 			player.getTitleList().remove(title);
 
+	}
+	/**
+	 * Creates a blue path to the destination point.
+	 * @param actor Player that will be seeing the blue path.
+	 * @param destination Where the blue path will lead to.
+	 */
+	public void createClientPath(SWGObject actor, Point3D destination) {
+		
+		if (actor == null || actor.getClient() == null || actor.getClient().getSession() == null)
+			return;
+		
+		List<Point3D> coordinates = new ArrayList<Point3D>();
+		coordinates.add(actor.getPosition());
+		
+		// TODO: Generate a path to destination based off of objects in the world.
+		
+		coordinates.add(destination); // Destination MUST be last coordinate in array
+		
+		CreateClientPathMessage path = new CreateClientPathMessage(coordinates);
+		actor.getClient().getSession().write(path.serialize());
 	}
 	
 	@Override
