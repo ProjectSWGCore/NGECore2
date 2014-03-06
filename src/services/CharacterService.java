@@ -344,6 +344,24 @@ public class CharacterService implements INetworkDispatch {
 			}
 			
 		});
+		
+		swgOpcodes.put(Opcodes.NewbieTutorialResponse, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
+				
+			}
+			
+		});
+		
+		swgOpcodes.put(Opcodes.SetJediSlotInfo, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
+				
+			}
+			
+		});
 
 	}
 
