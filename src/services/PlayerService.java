@@ -674,9 +674,9 @@ public class PlayerService implements INetworkDispatch {
 													for (int n = 0; n < items.length; n++) {
 														String item = items[n];
 														
-														if (wookieeItems.length > 0 && creature.getStfName().contains("wookiee")) {
+														if (wookieeItems[0].length() > 0 && creature.getStfName().contains("wookiee")) {
 															item = wookieeItems[n];
-														} else if (ithorianItems.length > 0 && creature.getStfName().contains("ithorian")) {
+														} else if (ithorianItems[0].length() > 0 && creature.getStfName().contains("ithorian")) {
 															item = ithorianItems[n];
 														}
 														
@@ -684,7 +684,7 @@ public class PlayerService implements INetworkDispatch {
 															String customServerTemplate = null;
 															
 															if (item.contains("/")) {
-																item = (item.substring(0, (item.lastIndexOf("/") + 1)) + "/shared_" + item.substring((item.lastIndexOf("/") + 1)));
+																item = (item.substring(0, (item.lastIndexOf("/") + 1)) + "shared_" + item.substring((item.lastIndexOf("/") + 1)));
 															} else {
 																customServerTemplate = item;
 																item = core.scriptService.callScript("scripts/roadmap/", "roadmap_rewards", "get", item).asString();
