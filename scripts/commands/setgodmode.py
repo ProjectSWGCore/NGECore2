@@ -1,5 +1,8 @@
 import sys
 from engine.resources.scene import Point3D
+from protocol.swg import CommPlayerMessage
+from protocol.swg.objectControllerObjects import ShowLootBox
+from protocol.swg import ObjControllerMessage
 
 def setup():
     return
@@ -11,6 +14,9 @@ def run(core, actor, target, commandString):
 	if not playerObject:
 		return
 	
+	if target is not None:
+		print ('has target!')
+		
 	commandArgs = commandString.split(' ')
 	command = commandArgs[0]
 	if len(commandArgs) > 1:
@@ -51,5 +57,20 @@ def run(core, actor, target, commandString):
 	
 	elif command == 'changeBio' and arg1:
 		actor.getSlottedObject('ghost').setBiography(arg1)
-
+	
+	elif command == 'rewardMe':
+		testObject = core.objectService.createObject('object/weapon/ranged/rifle/shared_rifle_t21.iff', actor.getPlanet())
+		testObject.setCustomName('Crush4r')
+		testObject.setStringAttribute('crafter', 'Wavescrub')
+		actor.getSlottedObject('inventory').add(testObject)
+		listedRewards = [testObject]
+		rewards = ShowLootBox(actor.getObjectId(), listedRewards)
+		objMessage = ObjControllerMessage(11, rewards)
+		actor.getClient().getSession().write(objMessage.serialize())
+		
+		return
+	
+	elif command == 'comm':
+		comm = CommPlayerMessage(actor.getObjectId())
+		actor.getClient().getSession().write(comm.serialize())
 	return

@@ -31,9 +31,12 @@ import engine.resources.common.CRC;
 
 public class CommPlayerMessage extends SWGMessage {
 
-	public CommPlayerMessage() {
-		
+	private long objectId;
+	
+	public CommPlayerMessage(long objectId) {
+		this.objectId = objectId;
 	}
+	
 	@Override
 	public void deserialize(IoBuffer data) {
 
@@ -48,20 +51,26 @@ public class CommPlayerMessage extends SWGMessage {
 		
 		buffer.put((byte) 0); // aurebesh borders on comm, space version? Can cause crashes
 		
-		//buffer.putInt(0x3E46EED5);
-		buffer.putInt(0); // some random number, can be 0, doesn't seem to affect anything
+		buffer.putLong(objectId);
 		
-		buffer.putInt(51); // unknown, seems to always be 51
-		buffer.putInt(54); // unknown, changes for each comm message (counter?)
+		/*Seen numbers:
+		 * 52 (Starting Station Comms)
+		 * 54 (Tansarii Comms)
+		 * 57 (Supply Drops)
+		 * 58 (Faction Covert->Overt)
+		 * 68 (Imperial stop)
+		 * 
+		 */
+		buffer.putInt(57); // unknown, changes for each comm message (counter?)
 		
 		buffer.putShort((short) 0); // unknonw flag, seems to do nothing
-		buffer.put((byte) 1); // unknown, always 0
+		buffer.put((byte) 0); // unknown, always 0 except for imperial stop message
 		
 		buffer.putInt(0xFFFFFFFF);
 		
-		buffer.put(getAsciiString("npe_hangar_1")); // StfFile
+		buffer.put(getAsciiString("stormtrooper")); // StfFile
 		buffer.putInt(0); // stf spacer
-		buffer.put(getAsciiString("droid_xp_bar")); // StfName
+		buffer.put(getAsciiString("u11")); // StfName
 		
 		buffer.putInt(0); // stf spacer
 		buffer.putLong(0);
@@ -75,12 +84,13 @@ public class CommPlayerMessage extends SWGMessage {
 		buffer.put((byte) 0);
 		
 		// Officer Supply Drop: 0x3E894347
-		buffer.putInt(0xF19429F0); // model crc
+		// Rebel Faction Dude: 0x528CB3D7
+		buffer.putInt(0x528CB3D7); // model crc, can be anything w/o crashing
 		
-		buffer.put(getAsciiString("sound/vo_c3po_9a.snd")); // does not cause crash when changing to anything
+		buffer.putInt(0); // sound
 		
 		buffer.putShort((short) 0); // unk
-		buffer.putShort((short) 16544); // comm display time, unsure on how it's calculated
+		buffer.putShort((short) 16576); // comm display time, unsure on how it's calculated
 		buffer.flip();
 		Console.println("CPM: " + StringUtilities.bytesToHex(buffer.array()));
 		return buffer;
