@@ -191,7 +191,16 @@ public class CharacterService implements INetworkDispatch {
 			
 			
 		});
+		
+		swgOpcodes.put(Opcodes.LagReport, new INetworkRemoteEvent() {
 
+			@Override
+			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
+
+			}
+			
+		});
+		
 		swgOpcodes.put(Opcodes.ClientCreateCharacter, new INetworkRemoteEvent() {
 
 			@Override
@@ -332,6 +341,24 @@ public class CharacterService implements INetworkDispatch {
 				
 				session.write(success.serialize());	
 				session.write((new ClientMfdStatusUpdateMessage((float) 2, "/GroundHUD.MFDStatus.vsp.role.targetLevel")).serialize());
+			}
+			
+		});
+		
+		swgOpcodes.put(Opcodes.NewbieTutorialResponse, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
+				
+			}
+			
+		});
+		
+		swgOpcodes.put(Opcodes.SetJediSlotInfo, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
+				
 			}
 			
 		});

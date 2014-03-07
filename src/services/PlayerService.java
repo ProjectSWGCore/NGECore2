@@ -39,9 +39,11 @@ import org.apache.mina.core.session.IoSession;
 
 import protocol.swg.ClientIdMsg;
 import protocol.swg.ClientMfdStatusUpdateMessage;
+import protocol.swg.CreateClientPathMessage;
 import protocol.swg.ExpertiseRequestMessage;
 import protocol.swg.GuildRequestMessage;
 import protocol.swg.GuildResponseMessage;
+import protocol.swg.PlayerMoneyResponse;
 import protocol.swg.ServerTimeMessage;
 import protocol.swg.SetWaypointColor;
 import protocol.swg.objectControllerObjects.ChangeRoleIconChoice;
@@ -270,6 +272,112 @@ public class PlayerService implements INetworkDispatch {
 					GuildResponseMessage response = new GuildResponseMessage(request.getCharacterId(), "None");
 					client.getSession().write(response.serialize());
 				}
+			}
+			
+		});
+		
+		swgOpcodes.put(Opcodes.PlayerMoneyRequest, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
+
+				Client client = core.getClient(session);
+				
+				if (client == null)
+					return;
+				
+				SWGObject player = client.getParent();
+				
+				if (player == null)
+					return;
+				
+				CreatureObject creature = (CreatureObject) player;
+				
+				if (creature == null)
+					return;
+				
+				PlayerMoneyResponse response = new PlayerMoneyResponse(creature.getCashCredits(), creature.getBankCredits());
+				session.write(response.serialize());
+			}
+			
+		});
+		swgOpcodes.put(Opcodes.GetSpecificMapLocationsMessage, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
+
+			}
+			
+		});
+		
+		swgOpcodes.put(Opcodes.SetCombatSpamFilter, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
+				
+			}
+			
+		});
+		
+		swgOpcodes.put(Opcodes.SetCombatSpamRangeFilter, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
+				
+			}
+			
+		});
+		
+		swgOpcodes.put(Opcodes.SetLfgInterests, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
+				
+			}
+			
+		});
+		
+		swgOpcodes.put(Opcodes.CommodotiesItemTypeListRequest, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
+				
+			}
+			
+		});
+		
+		swgOpcodes.put(Opcodes.SetFurnitureRoationDegree, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
+				
+			}
+			
+		});
+		
+		swgOpcodes.put(Opcodes.CommoditiesResourceTypeListRequest, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
+				
+			}
+			
+		});
+		
+		swgOpcodes.put(Opcodes.CollectionServerFirstListRequest, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
+				
+			}
+			
+		});
+		
+		swgOpcodes.put(Opcodes.Unknown, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
+				
 			}
 			
 		});
@@ -625,6 +733,26 @@ public class PlayerService implements INetworkDispatch {
 		if (player.getTitleList().contains(title))
 			player.getTitleList().remove(title);
 
+	}
+	/**
+	 * Creates a blue path to the destination point.
+	 * @param actor Player that will be seeing the blue path.
+	 * @param destination Where the blue path will lead to.
+	 */
+	public void createClientPath(SWGObject actor, Point3D destination) {
+		
+		if (actor == null || actor.getClient() == null || actor.getClient().getSession() == null)
+			return;
+		
+		List<Point3D> coordinates = new ArrayList<Point3D>();
+		coordinates.add(actor.getPosition());
+		
+		// TODO: Generate a path to destination based off of objects in the world.
+		
+		coordinates.add(destination); // Destination MUST be last coordinate in array
+		
+		CreateClientPathMessage path = new CreateClientPathMessage(coordinates);
+		actor.getClient().getSession().write(path.serialize());
 	}
 	
 	@Override

@@ -46,9 +46,10 @@ def run(core, actor, target, commandString):
 		actor.sendSystemMessage('You have learned ' + arg1 + '')
 	
 	elif command == 'anim' and arg1:
-		actor.setCurrentAnimation(arg1)
+		actor.doSkillAnimation(arg1)
 		actor.sendSystemMessage('Performed ' + arg1 ,0)
 	
 	elif command == 'changeBio' and arg1:
 		actor.getSlottedObject('ghost').setBiography(arg1)
+
 	return

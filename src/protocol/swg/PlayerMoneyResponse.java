@@ -19,8 +19,39 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package resources.z.exp.objects.installation;
+package protocol.swg;
 
-public class InstallationMessageBuilder {
+import java.nio.ByteOrder;
+
+import org.apache.mina.core.buffer.IoBuffer;
+
+public class PlayerMoneyResponse extends SWGMessage {
+
+	int cash;
+	int bank;
+	
+	public PlayerMoneyResponse(int cash, int bank) {
+		this.cash = cash;
+		this.bank = bank;
+	}
+	
+	@Override
+	public void deserialize(IoBuffer data) {
+
+	}
+
+	@Override
+	public IoBuffer serialize() {
+		IoBuffer buffer = IoBuffer.allocate(14).order(ByteOrder.LITTLE_ENDIAN);
+		
+		buffer.putShort((short) 3);
+		buffer.putInt(0x367E737E);
+		
+		buffer.putInt(bank);
+		buffer.putInt(cash);
+
+		buffer.flip();
+		return buffer;
+	}
 
 }

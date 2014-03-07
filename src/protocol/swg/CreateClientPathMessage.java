@@ -19,8 +19,47 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package resources.z.exp.objects.harvester;
+package protocol.swg;
 
-public class HarvesterMessageBuilder {
+import java.nio.ByteOrder;
+import java.util.List;
+
+import org.apache.mina.core.buffer.IoBuffer;
+
+import resources.common.StringUtilities;
+import engine.resources.common.CRC;
+import engine.resources.scene.Point3D;
+
+public class CreateClientPathMessage extends SWGMessage {
+
+	private List<Point3D> coordinates;
+	
+	public CreateClientPathMessage(List<Point3D> coordinates) {
+		this.coordinates = coordinates;
+	}
+	
+	@Override
+	public void deserialize(IoBuffer data) {
+
+	}
+
+	@Override
+	public IoBuffer serialize() {
+		IoBuffer buffer = IoBuffer.allocate((coordinates.size() * 12) + 10).order(ByteOrder.LITTLE_ENDIAN);
+
+		buffer.putShort((short) 2);
+		buffer.putInt(CRC.StringtoCRC("CreateClientPathMessage"));
+		
+		buffer.putInt(coordinates.size());
+		for(Point3D point : coordinates) {
+			buffer.putFloat(point.x);
+			buffer.putFloat(point.z);
+			buffer.putFloat(point.y);
+		}
+		
+		buffer.flip();
+		StringUtilities.printBytes(buffer.array());
+		return buffer;
+	}
 
 }
