@@ -33,9 +33,9 @@ import resources.common.StringUtilities;
 public class ShowLootBox extends ObjControllerObject {
 
 	private long playerId;
-	private List<SWGObject> rewards;
+	private SWGObject[] rewards;
 	
-	public ShowLootBox(long playerId, List<SWGObject> rewards) {
+	public ShowLootBox(long playerId, SWGObject[] rewards) {
 		this.playerId = playerId;
 		this.rewards = rewards;
 	}
@@ -48,18 +48,22 @@ public class ShowLootBox extends ObjControllerObject {
 	@Override
 	public IoBuffer serialize() {
 		// Controller Type = 11
-		IoBuffer buffer = IoBuffer.allocate(20 + (rewards.size() * 8)).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer buffer = IoBuffer.allocate(20 + (rewards.length * 8)).order(ByteOrder.LITTLE_ENDIAN);
 		
 		buffer.putInt(ObjControllerMessage.SHOW_LOOT_BOX);
 		buffer.putLong(playerId);
 		
-		buffer.putInt(1); // 0 for a black background on icon, 1 for transparent (default)
+		buffer.putInt(0); // 1 for a black background on icon, 0 or 2 for transparent (default)
 		
-		buffer.putInt(rewards.size());
-		for(SWGObject obj : rewards) {
-			buffer.putLong(obj.getObjectID());
+		if (rewards.length == 1) {
+			buffer.putInt(1);
+			buffer.putLong(rewards[0].getObjectId());
+		} else {
+			buffer.putInt(rewards.length);
+			for(SWGObject obj : rewards) {
+				buffer.putLong(obj.getObjectID());
+			}
 		}
-
 		return buffer.flip();
 	}
 

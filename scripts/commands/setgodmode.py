@@ -3,6 +3,8 @@ from engine.resources.scene import Point3D
 from protocol.swg import CommPlayerMessage
 from protocol.swg.objectControllerObjects import ShowLootBox
 from protocol.swg import ObjControllerMessage
+from engine.resources.objects import SWGObject
+from jarray import array
 
 def setup():
     return
@@ -62,12 +64,11 @@ def run(core, actor, target, commandString):
 		testObject = core.objectService.createObject('object/weapon/ranged/rifle/shared_rifle_t21.iff', actor.getPlanet())
 		testObject.setCustomName('Crush4r')
 		testObject.setStringAttribute('crafter', 'Wavescrub')
-		actor.getSlottedObject('inventory').add(testObject)
-		listedRewards = [testObject]
-		rewards = ShowLootBox(actor.getObjectId(), listedRewards)
-		objMessage = ObjControllerMessage(11, rewards)
-		actor.getClient().getSession().write(objMessage.serialize())
-		
+		dGun = core.objectService.createObject('object/weapon/ranged/rifle/shared_rifle_tc22_blaster.iff', actor.getPlanet())
+		dGun.setCustomName('Supertoms Gun')
+		dGun.setStringAttribute('crafter', 'Wavescrub')
+		a = array([dGun], SWGObject)
+		core.playerService.giveItems(actor, a)
 		return
 	
 	elif command == 'comm':

@@ -43,11 +43,13 @@ import protocol.swg.CreateClientPathMessage;
 import protocol.swg.ExpertiseRequestMessage;
 import protocol.swg.GuildRequestMessage;
 import protocol.swg.GuildResponseMessage;
+import protocol.swg.ObjControllerMessage;
 import protocol.swg.PlayerMoneyResponse;
 import protocol.swg.ServerTimeMessage;
 import protocol.swg.SetWaypointColor;
 import protocol.swg.objectControllerObjects.ChangeRoleIconChoice;
 import protocol.swg.objectControllerObjects.ShowFlyText;
+import protocol.swg.objectControllerObjects.ShowLootBox;
 import resources.common.Console;
 import resources.common.FileUtilities;
 import resources.common.ObjControllerOpcodes;
@@ -734,6 +736,7 @@ public class PlayerService implements INetworkDispatch {
 			player.getTitleList().remove(title);
 
 	}
+	
 	/**
 	 * Creates a blue path to the destination point.
 	 * @param actor Player that will be seeing the blue path.
@@ -753,6 +756,34 @@ public class PlayerService implements INetworkDispatch {
 		
 		CreateClientPathMessage path = new CreateClientPathMessage(coordinates);
 		actor.getClient().getSession().write(path.serialize());
+	}
+	
+	/**
+	 * Gives a player items and shows the "New Items" message.
+	 * @param reciever Player receiving the items
+	 * @param items The object(s) to be given.
+	 */
+	public void giveItems(CreatureObject reciever, SWGObject[] items) {
+		if (reciever == null || items == null)
+			return;
+		
+		if (reciever.getClient() == null)
+			return;
+		Client client = reciever.getClient();
+		
+		if (client.getSession() == null)
+			return;
+		SWGObject inventory = reciever.getSlottedObject("inventory");
+		
+		if (inventory == null)
+			return;
+		
+		for (SWGObject obj : items) {
+			inventory.add(obj);
+		}
+		
+		ObjControllerMessage objController = new ObjControllerMessage(11, new ShowLootBox(reciever.getObjectID(), items));
+		client.getSession().write(objController.serialize());
 	}
 	
 	@Override
