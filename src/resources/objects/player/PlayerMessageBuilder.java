@@ -365,7 +365,7 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 		// Some problem with createDelta()
 		IoBuffer result = bufferPool.allocate(42 + type.length(), false).order(ByteOrder.LITTLE_ENDIAN);
 		result.putShort((short) 5);
-		result.putInt(CRC.StringtoCRC("BaselinesMessage"));
+		result.putInt(CRC.StringtoCRC("DeltasMessage"));
 		result.putLong(object.getContainer().getObjectID());
 		result.put("YALP".getBytes());
 		result.put((byte) 8);
