@@ -259,6 +259,12 @@ public class CharacterService implements INetworkDispatch {
 				if (stamina >= 1) core.skillModService.addSkillMod(object, "stamina", (int) stamina);
 				if (agility >= 1) core.skillModService.addSkillMod(object, "agility", (int) agility);
 
+				core.skillModService.addSkillMod(object, "language_basic_comprehend", 100);
+				core.skillModService.addSkillMod(object, "language_basic_speak", 100);
+				core.skillModService.addSkillMod(object, "creature_harvesting", 25);
+				core.skillModService.addSkillMod(object, "language_wookiee_comprehend", 100);
+				
+				
 				object.createTransaction(core.getCreatureODB().getEnvironment());
 				
 				PlayerObject player = (PlayerObject) core.objectService.createObject("object/player/shared_player.iff", object.getPlanet());

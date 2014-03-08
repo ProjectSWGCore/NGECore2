@@ -343,6 +343,9 @@ public class PlayerObject extends IntangibleObject {
 		synchronized(objectMutex) {
 			this.professionWheelPosition = professionWheelPosition;
 		}
+		if (getContainer() != null && getContainer().getClient() != null && getContainer().getClient().getSession() != null) {
+			getContainer().getClient().getSession().write(messageBuilder.buildProfessionWheelPositionDelta(professionWheelPosition));
+		}
 	}
 
 	public int getExperimentationFlag() {

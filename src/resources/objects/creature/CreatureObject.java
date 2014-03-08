@@ -90,8 +90,8 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private float slopeModAngle = 1;
 	private float slopeModPercent = 1;
 	private float turnRadius = 1;
-	private float walkSpeed = (float) 2.75;
-	private float waterModPercent = 1;
+	private float walkSpeed = (float) 1.549;
+	private float waterModPercent = (float) 0.75;
 	private SWGList<String> abilities;
 	private int abilitiesUpdateCounter = 0;
 

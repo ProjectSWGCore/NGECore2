@@ -382,6 +382,18 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 		return result.flip();
 	}
 	
+	public IoBuffer buildProfessionWheelPositionDelta(String professionWheelPosition) {
+		IoBuffer buffer = bufferPool.allocate(2 + professionWheelPosition.length(), false).order(ByteOrder.LITTLE_ENDIAN);
+		
+		buffer.put(getAsciiString(professionWheelPosition));
+		
+		int size = buffer.position();
+		buffer.flip();
+		
+		buffer = createDelta("PLAY", (byte) 8, (short) 1, (short) 8, buffer, size + 4);
+		return buffer;
+	}
+	
 	public IoBuffer buildWaypointAddDelta(WaypointObject waypoint) {
 		
 		PlayerObject player = (PlayerObject) object;
