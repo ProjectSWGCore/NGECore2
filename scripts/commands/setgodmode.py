@@ -67,8 +67,7 @@ def run(core, actor, target, commandString):
 		dGun = core.objectService.createObject('object/weapon/ranged/rifle/shared_rifle_tc22_blaster.iff', actor.getPlanet())
 		dGun.setCustomName('Supertoms Gun')
 		dGun.setStringAttribute('crafter', 'Wavescrub')
-		a = array([dGun], SWGObject)
-		core.playerService.giveItems(actor, a)
+		core.playerService.giveItems(actor, testObject, dGun)
 		return
 	
 	elif command == 'comm':

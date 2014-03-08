@@ -761,9 +761,9 @@ public class PlayerService implements INetworkDispatch {
 	/**
 	 * Gives a player items and shows the "New Items" message.
 	 * @param reciever Player receiving the items
-	 * @param items The object(s) to be given.
+	 * @param items The object(s) to be given. This will allow multiple arguments.
 	 */
-	public void giveItems(CreatureObject reciever, SWGObject[] items) {
+	public void giveItems(CreatureObject reciever, SWGObject... items) {
 		if (reciever == null || items == null)
 			return;
 		
