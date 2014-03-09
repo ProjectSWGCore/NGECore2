@@ -21,7 +21,7 @@ def handleSelection(core, owner, target, option):
                 if tp.isShuttleAvailable() is True:
                     core.travelService.doTransport(owner, core.travelService.getTravelPointByName(target.getStringAttribute('@obj_attr_n:travel_arrival_planet'),
                                                                                                   target.getStringAttribute('@obj_attr_n:travel_arrival_point')))
-                    core.objectService.destroyObject(target)
+                    core.commandService.callCommand(owner, 'serverdestroyobject', target, None)
                     return
                 return
             else:

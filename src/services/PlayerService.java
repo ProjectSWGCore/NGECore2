@@ -37,6 +37,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 
+import protocol.swg.CharacterSheetResponseMessage;
 import protocol.swg.ClientIdMsg;
 import protocol.swg.ClientMfdStatusUpdateMessage;
 import protocol.swg.CreateClientPathMessage;
@@ -300,6 +301,13 @@ public class PlayerService implements INetworkDispatch {
 				
 				PlayerMoneyResponse response = new PlayerMoneyResponse(creature.getCashCredits(), creature.getBankCredits());
 				session.write(response.serialize());
+				
+				PlayerObject ghost = (PlayerObject) player.getSlottedObject("ghost");
+				if (ghost == null)
+					return;
+				
+				CharacterSheetResponseMessage msg = new CharacterSheetResponseMessage(ghost);
+				session.write(msg.serialize());
 			}
 			
 		});

@@ -345,8 +345,7 @@ public class CharacterService implements INetworkDispatch {
 				session.write(core.loginService.getLoginCluster().serialize());
 				session.write(core.loginService.getLoginClusterStatus(client).serialize());
 				
-				session.write(success.serialize());	
-				session.write((new ClientMfdStatusUpdateMessage((float) 2, "/GroundHUD.MFDStatus.vsp.role.targetLevel")).serialize());
+				session.write(success.serialize());
 			}
 			
 		});

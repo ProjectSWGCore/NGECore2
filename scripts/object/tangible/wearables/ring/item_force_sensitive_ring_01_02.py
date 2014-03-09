@@ -8,4 +8,5 @@ def setup(core, object):
 	object.setIntAttribute('cat_stat_mod_bonus.@stat_n:constitution_modified', 6)
 	object.setIntAttribute('cat_stat_mod_bonus.@stat_n:strength_modified', 6)
 	object.setStringAttribute('class_required', 'Jedi')
+	object.setAttachment('radial_filename', 'ring/unity')
 	return

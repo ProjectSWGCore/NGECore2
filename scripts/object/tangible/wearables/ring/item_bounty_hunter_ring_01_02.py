@@ -8,4 +8,5 @@ def setup(core, object):
 	object.setIntAttribute('cat_stat_mod_bonus.@stat_n:constitution_modified', 6)
 	object.setIntAttribute('cat_stat_mod_bonus.@stat_n:precision_modified', 6)
 	object.setStringAttribute('class_required', 'Bounty Hunter')
+	object.setAttachment('radial_filename', 'ring/unity')
 	return

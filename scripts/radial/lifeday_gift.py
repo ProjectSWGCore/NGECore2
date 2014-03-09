@@ -53,5 +53,5 @@ def handleSelection(core, actor, object, option):
 		inventory.add(reward1)
 		inventory.add(reward2)
 		
-		core.objectService.destroyObject(object)
+		core.commandService.callCommand(actor, 'serverdestroyobject', object, None)
 	return
