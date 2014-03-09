@@ -78,6 +78,7 @@ import services.LoginService;
 import services.map.MapService;
 import services.object.ObjectService;
 import services.object.UpdateService;
+import services.retro.RetroService;
 import services.spawn.SpawnService;
 import services.sui.SUIService;
 import services.trade.TradeService;
@@ -130,6 +131,7 @@ public class NGECore {
 		
 	// Services
 	public LoginService loginService;
+	public RetroService retroService;
 	public ConnectionService connectionService;
 	public CommandService commandService;
 	public CharacterService characterService;
@@ -230,6 +232,7 @@ public class NGECore {
 
 		// Services
 		loginService = new LoginService(this);
+		retroService = new RetroService(this);
 		connectionService = new ConnectionService(this);
 		characterService = new CharacterService(this);
 		mapService = new MapService(this);
@@ -285,6 +288,7 @@ public class NGECore {
 		
 		// Zone Server
 		zoneDispatch = new NetworkDispatch(this, true);
+		zoneDispatch.addService(retroService);
 		zoneDispatch.addService(connectionService);
 		zoneDispatch.addService(characterService);
 		zoneDispatch.addService(factionService);
@@ -356,6 +360,8 @@ public class NGECore {
 		spawnService.loadLairTemplates();
 		spawnService.loadLairGroups();
 		spawnService.loadSpawnAreas();*/
+		
+		retroService.run();
 		
 		didServerCrash = false;
 		System.out.println("Started Server.");

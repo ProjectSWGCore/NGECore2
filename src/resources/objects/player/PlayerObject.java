@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import resources.common.Console;
 import resources.objects.intangible.IntangibleObject;
 import resources.objects.waypoint.WaypointObject;
 
@@ -41,7 +42,7 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent(version=3)
+@Persistent(version=5)
 public class PlayerObject extends IntangibleObject {
 	
 	// PLAY 3
@@ -115,6 +116,9 @@ public class PlayerObject extends IntangibleObject {
 	// TODO: research new NGE vars between maxConsumable and jediState
 	
 	private int jediState = 0; 			// unused in NGE
+	
+	private String biography = "";
+	private String spouse;
 	
 	@NotPersistent
 	private PlayerMessageBuilder messageBuilder;
@@ -228,6 +232,8 @@ public class PlayerObject extends IntangibleObject {
 		synchronized(objectMutex) {
 			xpExists = xpList.containsKey(type);
 			xpList.put(type, amount);
+			Console.println("Put " + type + " exp of " + amount + " in the map.");
+			Console.println("Map is now: " + xpList.get(type).intValue());
 		}
 		
 		if (getContainer() != null && getContainer().getClient() != null && getContainer().getClient().getSession() != null) {
@@ -341,6 +347,9 @@ public class PlayerObject extends IntangibleObject {
 	public void setProfessionWheelPosition(String professionWheelPosition) {
 		synchronized(objectMutex) {
 			this.professionWheelPosition = professionWheelPosition;
+		}
+		if (getContainer() != null && getContainer().getClient() != null && getContainer().getClient().getSession() != null) {
+			getContainer().getClient().getSession().write(messageBuilder.buildProfessionWheelPositionDelta(professionWheelPosition));
 		}
 	}
 
@@ -664,6 +673,26 @@ public class PlayerObject extends IntangibleObject {
 		}
 	}
 	
+	public String getBiography() {
+		return biography;
+	}
+
+	public void setBiography(String biography) {
+		synchronized(objectMutex) {
+			this.biography = biography;
+		}
+	}
+
+	public String getSpouseName() {
+		return spouse;
+	}
+
+	public void setSpouseName(String spouse) {
+		synchronized(objectMutex) {
+			this.spouse = spouse;
+		}
+	}
+
 	public int getFlagBitmask() {
 		synchronized(objectMutex) {
 			return flagBitmask;

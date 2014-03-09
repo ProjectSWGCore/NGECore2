@@ -28,6 +28,7 @@ import java.util.Map.Entry;
 import org.apache.mina.core.buffer.IoBuffer;
 
 import engine.resources.common.CRC;
+import resources.common.StringUtilities;
 import resources.objects.ObjectMessageBuilder;
 import resources.objects.waypoint.WaypointObject;
 
@@ -362,7 +363,7 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 		PlayerObject player = (PlayerObject) object;
 		player.setXpListUpdateCounter(player.getXpListUpdateCounter() + 1);
 
-		IoBuffer result = bufferPool.allocate(17 + type.length(), false).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer result = bufferPool.allocate(15 + type.length(), false).order(ByteOrder.LITTLE_ENDIAN);
 		
 		result.putInt(1);
 		result.putInt(player.getXpListUpdateCounter());
@@ -372,10 +373,21 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 		
 		int size = result.position();
 		result.flip();
-
 		result = createDelta("PLAY", (byte) 8, (short) 1, (short) 0, result, size + 4);
-
 		return result;
+	}
+	
+	public IoBuffer buildProfessionWheelPositionDelta(String professionWheelPosition) {
+		IoBuffer buffer = bufferPool.allocate(2 + professionWheelPosition.length(), false).order(ByteOrder.LITTLE_ENDIAN);
+		
+		buffer.put(getAsciiString(professionWheelPosition));
+		
+		int size = buffer.position();
+		buffer.flip();
+		
+		buffer = createDelta("PLAY", (byte) 8, (short) 1, (short) 8, buffer, size + 4);
+		return buffer;
+
 	}
 	
 	public IoBuffer buildWaypointAddDelta(WaypointObject waypoint) {

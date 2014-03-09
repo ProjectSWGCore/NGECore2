@@ -37,13 +37,20 @@ import java.util.concurrent.TimeUnit;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 
+import protocol.swg.CharacterSheetResponseMessage;
 import protocol.swg.ClientIdMsg;
 import protocol.swg.ClientMfdStatusUpdateMessage;
+import protocol.swg.CreateClientPathMessage;
 import protocol.swg.ExpertiseRequestMessage;
+import protocol.swg.GuildRequestMessage;
+import protocol.swg.GuildResponseMessage;
+import protocol.swg.ObjControllerMessage;
+import protocol.swg.PlayerMoneyResponse;
 import protocol.swg.ServerTimeMessage;
 import protocol.swg.SetWaypointColor;
 import protocol.swg.objectControllerObjects.ChangeRoleIconChoice;
 import protocol.swg.objectControllerObjects.ShowFlyText;
+import protocol.swg.objectControllerObjects.ShowLootBox;
 import resources.common.Console;
 import resources.common.FileUtilities;
 import resources.common.ObjControllerOpcodes;
@@ -51,6 +58,7 @@ import resources.common.Opcodes;
 import resources.common.RGB;
 import resources.common.SpawnPoint;
 import resources.datatables.PlayerFlags;
+import resources.guild.Guild;
 import resources.objects.Buff;
 import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
@@ -246,6 +254,151 @@ public class PlayerService implements INetworkDispatch {
 				}
 				
 				ghost.waypointUpdate(obj);
+				
+			}
+			
+		});
+		swgOpcodes.put(Opcodes.GuildRequestMessage, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
+				data.order(ByteOrder.LITTLE_ENDIAN);
+				
+				Client client = core.getClient(session);
+				
+				if (client == null)
+					return;
+				
+				SWGObject player = client.getParent();
+				
+				if (player == null)
+					return;
+				
+				GuildRequestMessage request = new GuildRequestMessage();
+				request.deserialize(data);
+				
+				CreatureObject targetPlayer = (CreatureObject) core.objectService.getObject(request.getCharacterId());
+				
+				if (targetPlayer.getGuildId() != 0) {
+					Guild targetGuild = core.guildService.getGuildById(targetPlayer.getGuildId());
+					GuildResponseMessage response = new GuildResponseMessage(request.getCharacterId(), targetGuild.getName());
+					client.getSession().write(response.serialize());
+				} else {
+					GuildResponseMessage response = new GuildResponseMessage(request.getCharacterId(), "None");
+					client.getSession().write(response.serialize());
+				}
+			}
+			
+		});
+		
+		swgOpcodes.put(Opcodes.PlayerMoneyRequest, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
+
+				Client client = core.getClient(session);
+				
+				if (client == null)
+					return;
+				
+				SWGObject player = client.getParent();
+				
+				if (player == null)
+					return;
+				
+				CreatureObject creature = (CreatureObject) player;
+				
+				if (creature == null)
+					return;
+				
+				PlayerMoneyResponse response = new PlayerMoneyResponse(creature.getCashCredits(), creature.getBankCredits());
+				session.write(response.serialize());
+				
+				PlayerObject ghost = (PlayerObject) player.getSlottedObject("ghost");
+				if (ghost == null)
+					return;
+				
+				CharacterSheetResponseMessage msg = new CharacterSheetResponseMessage(ghost);
+				session.write(msg.serialize());
+			}
+			
+		});
+		swgOpcodes.put(Opcodes.GetSpecificMapLocationsMessage, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
+
+			}
+			
+		});
+		
+		swgOpcodes.put(Opcodes.SetCombatSpamFilter, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
+				
+			}
+			
+		});
+		
+		swgOpcodes.put(Opcodes.SetCombatSpamRangeFilter, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
+				
+			}
+			
+		});
+		
+		swgOpcodes.put(Opcodes.SetLfgInterests, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
+				
+			}
+			
+		});
+		
+		swgOpcodes.put(Opcodes.CommodotiesItemTypeListRequest, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
+				
+			}
+			
+		});
+		
+		swgOpcodes.put(Opcodes.SetFurnitureRoationDegree, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
+				
+			}
+			
+		});
+		
+		swgOpcodes.put(Opcodes.CommoditiesResourceTypeListRequest, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
+				
+			}
+			
+		});
+		
+		swgOpcodes.put(Opcodes.CollectionServerFirstListRequest, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
+				
+			}
+			
+		});
+		
+		swgOpcodes.put(Opcodes.Unknown, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
 				
 			}
 			
@@ -543,16 +696,18 @@ public class PlayerService implements INetworkDispatch {
 													for (int n = 0; n < items.length; n++) {
 														String item = items[n];
 														
-														if (wookieeItems.length > 0 && creature.getStfName().contains("wookiee")) {
+														if (wookieeItems[0].length() > 0 && creature.getStfName().contains("wookiee")) {
 															item = wookieeItems[n];
-														} else if (ithorianItems.length > 0 && creature.getStfName().contains("ithorian")) {
+														} else if (ithorianItems[0].length() > 0 && creature.getStfName().contains("ithorian")) {
 															item = ithorianItems[n];
 														}
 														
 														try {
 															String customServerTemplate = null;
 															
-															if (!item.contains("/")) {
+															if (item.contains("/")) {
+																item = (item.substring(0, (item.lastIndexOf("/") + 1)) + "shared_" + item.substring((item.lastIndexOf("/") + 1)));
+															} else {
 																customServerTemplate = item;
 																item = core.scriptService.callScript("scripts/roadmap/", "roadmap_rewards", "get", item).asString();
 															}
@@ -590,7 +745,6 @@ public class PlayerService implements INetworkDispatch {
 			return;
 		
 		player.getTitleList().add(title);
-		Console.println("Added title" + title);
 
 	}
 	
@@ -601,6 +755,55 @@ public class PlayerService implements INetworkDispatch {
 		if (player.getTitleList().contains(title))
 			player.getTitleList().remove(title);
 
+	}
+	
+	/**
+	 * Creates a blue path to the destination point.
+	 * @param actor Player that will be seeing the blue path.
+	 * @param destination Where the blue path will lead to.
+	 */
+	public void createClientPath(SWGObject actor, Point3D destination) {
+		
+		if (actor == null || actor.getClient() == null || actor.getClient().getSession() == null)
+			return;
+		
+		List<Point3D> coordinates = new ArrayList<Point3D>();
+		coordinates.add(actor.getPosition());
+		
+		// TODO: Generate a path to destination based off of objects in the world.
+		
+		coordinates.add(destination); // Destination MUST be last coordinate in array
+		
+		CreateClientPathMessage path = new CreateClientPathMessage(coordinates);
+		actor.getClient().getSession().write(path.serialize());
+	}
+	
+	/**
+	 * Gives a player items and shows the "New Items" message.
+	 * @param reciever Player receiving the items
+	 * @param items The object(s) to be given. This will allow multiple arguments.
+	 */
+	public void giveItems(CreatureObject reciever, SWGObject... items) {
+		if (reciever == null || items == null)
+			return;
+		
+		if (reciever.getClient() == null)
+			return;
+		Client client = reciever.getClient();
+		
+		if (client.getSession() == null)
+			return;
+		SWGObject inventory = reciever.getSlottedObject("inventory");
+		
+		if (inventory == null)
+			return;
+		
+		for (SWGObject obj : items) {
+			inventory.add(obj);
+		}
+		
+		ObjControllerMessage objController = new ObjControllerMessage(11, new ShowLootBox(reciever.getObjectID(), items));
+		client.getSession().write(objController.serialize());
 	}
 	
 	@Override

@@ -23,7 +23,6 @@ package services.travel;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 import resources.common.Console;
 import resources.common.SpawnPoint;

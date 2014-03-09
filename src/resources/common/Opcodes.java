@@ -29,8 +29,12 @@ public class Opcodes {
 	public static int ChatInstantMessageToCharacter = 0x84BB21F7;
 	public static int ChatPersistentMessageToServer = 0x25A29FA6;
 	public static int ChatRequestPersistentMessage = 0x07E3559F;
+	public static int ChatRequestRoomList = 0x4C3D2CFA;
 	public static int ChatSystemMessage = CRC.StringtoCRC("ChatSystemMessage");
 	public static int ClientOpenContainerMessage = 0x2D2D6EE1;
+	public static int CommodotiesItemTypeListRequest = 0x48F493C5;
+	public static int CommoditiesResourceTypeListRequest = 0xCB1AE82D;
+	public static int NewbieTutorialResponse = 0xCA88FBAD;
 	public static int CmdSceneReady = 0x43FD1C22;
 	public static int ConnectPlayerMessage = 0x2E365218;
 	public static int ClientCreateCharacter = 0xB97F3074;
@@ -59,5 +63,16 @@ public class Opcodes {
 	public static int FactionRequestMessage = CRC.StringtoCRC("FactionRequestMessage");
 	public static int FactionResponseMessage = CRC.StringtoCRC("FactionResponseMessage");
 	public static int SetWaypointColor = CRC.StringtoCRC("SetWaypointColor");
+	public static int GuildRequestMessage = CRC.StringtoCRC("GuildRequestMessage");
+	public static int PlayerMoneyRequest = CRC.StringtoCRC("PlayerMoneyRequest");
+	public static int LagReport = CRC.StringtoCRC("LagReport");
+	public static int GetSpecificMapLocationsMessage = CRC.StringtoCRC("GetSpecificMapLocationsMessage");
+	public static int SetCombatSpamFilter = CRC.StringtoCRC("SetCombatSpamFilter");
+	public static int SetCombatSpamRangeFilter = CRC.StringtoCRC("SetCombatSpamRangeFilter");
+	public static int SetLfgInterests = CRC.StringtoCRC("SetLfgInterests");
+	public static int SetFurnitureRoationDegree = CRC.StringtoCRC("SetFurnitureRotationDegree");
+	public static int SetJediSlotInfo = CRC.StringtoCRC("SetJediSlotInfo");
+	public static int CollectionServerFirstListRequest = CRC.StringtoCRC("CollectionServerFirstListRequest");
 	
+	public static int Unknown = 0x173B91C2; // packet sent to server on every character load-in
 }

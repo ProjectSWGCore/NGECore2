@@ -22,7 +22,6 @@
 package services.command;
 
 import java.nio.ByteOrder;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
@@ -113,6 +112,15 @@ public class CommandService implements INetworkDispatch  {
 				
 			}
 
+		});
+		
+		objControllerOpcodes.put(ObjControllerOpcodes.COMMAND_QUEUE_REMOVE, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
+				
+			}
+			
 		});
 			
 		

@@ -191,7 +191,16 @@ public class CharacterService implements INetworkDispatch {
 			
 			
 		});
+		
+		swgOpcodes.put(Opcodes.LagReport, new INetworkRemoteEvent() {
 
+			@Override
+			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
+
+			}
+			
+		});
+		
 		swgOpcodes.put(Opcodes.ClientCreateCharacter, new INetworkRemoteEvent() {
 
 			@Override
@@ -250,6 +259,12 @@ public class CharacterService implements INetworkDispatch {
 				if (stamina >= 1) core.skillModService.addSkillMod(object, "stamina", (int) stamina);
 				if (agility >= 1) core.skillModService.addSkillMod(object, "agility", (int) agility);
 
+				core.skillModService.addSkillMod(object, "language_basic_comprehend", 100);
+				core.skillModService.addSkillMod(object, "language_basic_speak", 100);
+				core.skillModService.addSkillMod(object, "creature_harvesting", 25);
+				core.skillModService.addSkillMod(object, "language_wookiee_comprehend", 100);
+				
+				
 				object.createTransaction(core.getCreatureODB().getEnvironment());
 				
 				PlayerObject player = (PlayerObject) core.objectService.createObject("object/player/shared_player.iff", object.getPlanet());
@@ -332,8 +347,25 @@ public class CharacterService implements INetworkDispatch {
 				session.write(core.loginService.getLoginCluster().serialize());
 				session.write(core.loginService.getLoginClusterStatus(client).serialize());
 				
-				session.write(success.serialize());	
-				session.write((new ClientMfdStatusUpdateMessage((float) 2, "/GroundHUD.MFDStatus.vsp.role.targetLevel")).serialize());
+				session.write(success.serialize());
+			}
+			
+		});
+		
+		swgOpcodes.put(Opcodes.NewbieTutorialResponse, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
+				
+			}
+			
+		});
+		
+		swgOpcodes.put(Opcodes.SetJediSlotInfo, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
+				
 			}
 			
 		});
@@ -475,8 +507,8 @@ public class CharacterService implements INetworkDispatch {
 			if (name.contains(" ")) {
 				name = name.split(" ")[0];
 			}
-			name = name.replace("'", "''");
 			name = name.toLowerCase();
+
 			try {
 				PreparedStatement ps = databaseConnection.preparedStatement("SELECT id FROM characters WHERE LOWER(\"firstName\")=?");
 				ps.setString(1, name);
