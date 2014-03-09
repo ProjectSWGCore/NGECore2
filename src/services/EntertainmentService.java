@@ -336,7 +336,7 @@ public class EntertainmentService implements INetworkDispatch {
 				
 			}
 			
-		},10, 10000, TimeUnit.MILLISECONDS);
+		},10000, 10000, TimeUnit.MILLISECONDS);
 		
 		entertainer.setEntertainerExperience(experienceTask);
 		

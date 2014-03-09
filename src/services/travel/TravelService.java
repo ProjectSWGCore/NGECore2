@@ -335,9 +335,9 @@ public class TravelService implements INetworkDispatch {
 		float distance = 13 + ran.nextFloat();
 		
 		float x = (float) (tp.getSpawnLocation().getPosition().x + Math.sin(dirRadian) * distance);
-		float y = (float) (tp.getSpawnLocation().getPosition().y + Math.cos(dirRadian) * distance);
+		float z = (float) (tp.getSpawnLocation().getPosition().z + Math.cos(dirRadian) * distance);
 
-		Point3D spawnPoint = new Point3D(x, y, tp.getSpawnLocation().getPosition().z);
+		Point3D spawnPoint = new Point3D(x, tp.getSpawnLocation().getPosition().y, z);
 		core.simulationService.transferToPlanet(actor, planet, spawnPoint, new Quaternion(0, 0, 0, 0), null);
 		
 	}

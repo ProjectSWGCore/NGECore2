@@ -268,7 +268,7 @@ public class CommandService implements INetworkDispatch  {
 			
 		}
 		
-		if(!success) {
+		if(!success && attacker.getClient() != null) {
 			IoSession session = attacker.getClient().getSession();
 			CommandEnqueueRemove commandRemove = new CommandEnqueueRemove(attacker.getObjectId(), actionCounter);
 			session.write(new ObjControllerMessage(0x0B, commandRemove).serialize());
@@ -304,6 +304,17 @@ public class CommandService implements INetworkDispatch  {
 		
 		if (command == null)
 			return;
+		
+		if(command instanceof CombatCommand) {
+			CombatCommand command2;
+			try {
+				command2 = (CombatCommand) command.clone();
+				processCombatCommand((CreatureObject) actor, target, command2, 0, "");
+			} catch (CloneNotSupportedException e) {
+				e.printStackTrace();
+			}
+			return;
+		}
 		
 		core.scriptService.callScript("scripts/commands/", command.getCommandName(), "run", core, actor, target, commandArgs);
 	}

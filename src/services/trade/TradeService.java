@@ -202,7 +202,7 @@ public class TradeService implements INetworkDispatch{
 				}
 				
 				else {
-					if(objectToTrade.getAttributes().toString().contains("no_trade")) {
+					if(objectToTrade.getAttributes()/*.toString()*/.containsKey("no_trade")) {
 						return;
 					}
 					
@@ -341,7 +341,7 @@ public class TradeService implements INetworkDispatch{
 				
 				CreatureObject tradePartner = (CreatureObject) core.objectService.getObject(tradingWithClient);
 				CreatureObject actingTrader = (CreatureObject) client.getParent();
-				CreatureObject tradePartnerContainer = (CreatureObject) tradePartner.getContainer();
+				SWGObject tradePartnerContainer = tradePartner.getContainer();
 				
 				SWGObject tradePartnerInventory = tradePartner.getSlottedObject("inventory");
 				SWGObject actingTraderInventory = actingTrader.getSlottedObject("inventory");

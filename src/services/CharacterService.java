@@ -264,7 +264,6 @@ public class CharacterService implements INetworkDispatch {
 					if(clientCreateCharacter.getHairCustomization().length > 0)
 						hair.setCustomization(clientCreateCharacter.getHairCustomization());
 					object._add(hair);
-					object.addObjectToEquipList(hair);
 				}
 				
 				TangibleObject inventory = (TangibleObject) core.objectService.createObject("object/tangible/inventory/shared_character_inventory.iff", object.getPlanet());
@@ -273,10 +272,13 @@ public class CharacterService implements INetworkDispatch {
 				appInventory.setContainerPermissions(CreaturePermissions.CREATURE_PERMISSIONS);
 				TangibleObject datapad = (TangibleObject) core.objectService.createObject("object/tangible/datapad/shared_character_datapad.iff", object.getPlanet());
 				datapad.setContainerPermissions(CreatureContainerPermissions.CREATURE_CONTAINER_PERMISSIONS);
+				datapad.setStaticObject(false);
 				TangibleObject bank = (TangibleObject) core.objectService.createObject("object/tangible/bank/shared_character_bank.iff", object.getPlanet());
 				bank.setContainerPermissions(CreatureContainerPermissions.CREATURE_CONTAINER_PERMISSIONS);
+				bank.setStaticObject(false);
 				TangibleObject missionBag = (TangibleObject) core.objectService.createObject("object/tangible/mission_bag/shared_mission_bag.iff", object.getPlanet());
 				missionBag.setContainerPermissions(CreatureContainerPermissions.CREATURE_CONTAINER_PERMISSIONS);
+				missionBag.setStaticObject(false);
 				
 				object._add(inventory);
 				object._add(appInventory);

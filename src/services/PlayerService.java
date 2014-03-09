@@ -100,7 +100,7 @@ public class PlayerService implements INetworkDispatch {
 				creature.getClient().getSession().write(packet);
 			}
 			
-		}, 0, 45, TimeUnit.SECONDS);
+		}, 45, 45, TimeUnit.SECONDS);
 
 		
 		scheduler.scheduleAtFixedRate(new Runnable() {
@@ -123,8 +123,13 @@ public class PlayerService implements INetworkDispatch {
 			public void run() {
 				
 				synchronized(creature.getMutex()) {
-					if(creature.getAction() < creature.getMaxAction() && creature.getPosture() != 14)
-						creature.setAction(creature.getAction() + 200);
+					if(creature.getAction() < creature.getMaxAction() && creature.getPosture() != 14) {
+						if(creature.getCombatFlag() == 0)
+							creature.setAction(creature.getAction() + (15 + creature.getLevel() * 5));
+						else
+							creature.setAction(creature.getAction() + ((15 + creature.getLevel() * 5) / 2));
+
+					}
 				}
 			}
 			
@@ -138,18 +143,25 @@ public class PlayerService implements INetworkDispatch {
 				
 				synchronized(creature.getMutex()) {
 					if(creature.getHealth() < creature.getMaxHealth() && creature.getCombatFlag() == 0 && creature.getPosture() != 13 && creature.getPosture() != 14)
-						creature.setHealth(creature.getHealth() + 300);
+						creature.setHealth(creature.getHealth() + (36 + creature.getLevel() * 4));
 				}
 				
 			}
 			
 		}, 0, 1000, TimeUnit.MILLISECONDS);
 		
-		PlayerObject ghost = (PlayerObject) creature.getSlottedObject("ghost");
+		/*final PlayerObject ghost = (PlayerObject) creature.getSlottedObject("ghost");
+		scheduler.schedule(new Runnable() {
 
-		if (ghost.isSet(PlayerFlags.LD)) {
-			ghost.toggleFlag(PlayerFlags.LD);
-		}
+			@Override
+			public void run() {
+				if (ghost.isSet(PlayerFlags.LD)) {
+					ghost.toggleFlag(PlayerFlags.LD);
+				}
+
+			}
+			
+		}, 1, TimeUnit.SECONDS);*/
 
 	}
 
