@@ -50,6 +50,7 @@ import engine.resources.service.INetworkRemoteEvent;
 import main.NGECore;
 import resources.common.Console;
 import resources.common.Opcodes;
+import resources.common.SpawnPoint;
 import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
 import services.sui.SUIService.ListBoxType;
@@ -323,22 +324,9 @@ public class TravelService implements INetworkDispatch {
 		
 		Planet planet = core.terrainService.getPlanetByName(tp.getPlanetName());
 		
-		Random ran = new Random();
+		Point3D spawnLocation = SpawnPoint.getRandomPosition(tp.getShuttle().getPosition(), 10, 50, actor.getPlanetId());
 		
-		float oY = tp.getShuttle().getOrientation().y;
-		float dirDg = (float) ((Math.acos(oY) * 180 / Math.PI) * 2);
-		
-		ran.setSeed(32);
-		dirDg = dirDg - 18 + ran.nextFloat();
-		float dirRadian = (float) (dirDg * Math.PI / 180);
-		ran.setSeed(3);
-		float distance = 13 + ran.nextFloat();
-		
-		float x = (float) (tp.getSpawnLocation().getPosition().x + Math.sin(dirRadian) * distance);
-		float y = (float) (tp.getSpawnLocation().getPosition().y + Math.cos(dirRadian) * distance);
-
-		Point3D spawnPoint = new Point3D(x, y, tp.getSpawnLocation().getPosition().z);
-		core.simulationService.transferToPlanet(actor, planet, spawnPoint, new Quaternion(0, 0, 0, 0), null);
+		core.simulationService.transferToPlanet(actor, planet, spawnLocation, new Quaternion(0, 0, 0, 0), null);
 		
 	}
 

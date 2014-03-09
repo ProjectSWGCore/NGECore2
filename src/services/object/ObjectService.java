@@ -410,7 +410,7 @@ public class ObjectService implements INetworkDispatch {
 			}
 		});
 		objectList.remove(object.getObjectID());
-		//core.simulationService.remove(object, object.getPosition().x, object.getPosition().y);
+		core.simulationService.remove(object, object.getPosition().x, object.getPosition().y);
 		
 	}
 	
