@@ -199,7 +199,8 @@ public class PlayerObject extends IntangibleObject {
 		synchronized(objectMutex) {
 			this.totalPlayTime = totalPlayTime;
 		}
-		notifyObservers(messageBuilder.buildTotalPlayTimeDelta(totalPlayTime), true);
+		//notifyObservers(messageBuilder.buildTotalPlayTimeDelta(totalPlayTime), true);
+		getContainer().getClient().getSession().write(messageBuilder.buildTotalPlayTimeDelta(totalPlayTime));
 	}
 
 	public String getHome() {
@@ -605,13 +606,12 @@ public class PlayerObject extends IntangibleObject {
 		
 		if(destination == null || destination.getSession() == null)
 			return;
-		
-		//if(destination.getParent().getObjectID() == getParentId()) {				// only send to self
-			destination.getSession().write(messageBuilder.buildBaseline3());
-			destination.getSession().write(messageBuilder.buildBaseline6());
+		destination.getSession().write(messageBuilder.buildBaseline3());
+		destination.getSession().write(messageBuilder.buildBaseline6());
+		if(destination.getParent().getObjectID() == getParentId()) {				// only send to self
 			destination.getSession().write(messageBuilder.buildBaseline8());
 			destination.getSession().write(messageBuilder.buildBaseline9());
-		//}
+		}
 
 
 	}

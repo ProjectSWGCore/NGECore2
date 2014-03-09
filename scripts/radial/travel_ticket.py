@@ -2,7 +2,7 @@ from resources.common import RadialOptions
 import sys
 
 def createRadial(core, owner, target, radials):
-    radials.clear
+    radials.clear()
     
     radials.add(RadialOptions(0, 21, 1, 'Use Travel Ticket'))
     #radials.add(RadialOptions(0, 7, 1, ''))
@@ -21,7 +21,7 @@ def handleSelection(core, owner, target, option):
                 if tp.isShuttleAvailable() is True:
                     core.travelService.doTransport(owner, core.travelService.getTravelPointByName(target.getStringAttribute('@obj_attr_n:travel_arrival_planet'),
                                                                                                   target.getStringAttribute('@obj_attr_n:travel_arrival_point')))
-                    core.commandService.callCommand(owner, 'serverdestroyobject', target, None)
+                    core.objectService.destroyObject(target)
                     return
                 return
             else:
@@ -31,7 +31,7 @@ def handleSelection(core, owner, target, option):
         return
     
     if option == 15 and target:
-        core.commandService.callCommand(owner, 'serverdestroyobject', target, None)
+        core.objectService.destroyObject(target)
         return
     return
     

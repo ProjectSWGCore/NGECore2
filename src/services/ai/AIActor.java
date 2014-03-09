@@ -21,9 +21,31 @@
  ******************************************************************************/
 package services.ai;
 
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import main.NGECore;
+import net.engio.mbassy.listener.Handler;
+
+import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
+import engine.resources.scene.Quaternion;
+import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
+import resources.objects.tangible.TangibleObject;
 import services.ai.states.AIState;
+import services.ai.states.AIState.StateResult;
+import services.ai.states.AttackState;
+import services.ai.states.DeathState;
+import services.ai.states.IdleState;
+import services.ai.states.RetreatState;
+import services.ai.states.SpawnState;
+import services.combat.CombatEvents.DamageTaken;
+import services.spawn.MobileTemplate;
 
 public class AIActor {
 	
@@ -31,10 +53,19 @@ public class AIActor {
 	private Point3D spawnPosition;
 	private volatile AIState currentState;
 	private CreatureObject followObject;
+	private Vector<Point3D> movementPoints = new Vector<Point3D>();
+	private MobileTemplate mobileTemplate;
+	private ScheduledExecutorService scheduler;
+	private Map<CreatureObject, Integer> damageMap = new ConcurrentHashMap<CreatureObject, Integer>();
+	private volatile boolean hasReachedPosition;
+	private long lastAttackTimestamp;
 	
-	public AIActor(CreatureObject creature, Point3D spawnPosition) {
+	public AIActor(CreatureObject creature, Point3D spawnPosition, ScheduledExecutorService scheduler) {
 		this.creature = creature;
 		this.spawnPosition = spawnPosition;
+		this.scheduler = scheduler;
+		creature.getEventBus().subscribe(this);
+		this.currentState = new IdleState();
 	}
 
 	public CreatureObject getCreature() {
@@ -52,9 +83,42 @@ public class AIActor {
 	public void setSpawnPosition(Point3D spawnPosition) {
 		this.spawnPosition = spawnPosition;
 	}
-	
-	public void doAggro(CreatureObject defender) {
+		
+	public void addDefender(CreatureObject defender) {
 		creature.addDefender(defender);
+		if(followObject == null)
+			setFollowObject(defender);
+		setCurrentState(new AttackState());
+	}
+	
+	public void removeDefender(CreatureObject defender) {
+		creature.removeDefender(defender);
+		damageMap.remove(defender);
+		defender.removeDefender(creature);
+		if(followObject == defender) {
+			setFollowObject(getHighestDamageDealer());
+			if(creature.getDefendersList().size() == 0)
+				setCurrentState(new RetreatState());
+		}
+	}
+
+	public CreatureObject getHighestDamageDealer() {
+		CreatureObject highestDamageDealer = null;
+		int highestDamage = 0;
+		for(Entry<CreatureObject, Integer> e : damageMap.entrySet()) {
+			if(e.getValue() > highestDamage && highestDamage > 0) {
+				highestDamage = e.getValue();
+				highestDamageDealer = e.getKey();
+			}
+		}
+		// return first defender if no damage has been dealt
+		if(highestDamageDealer == null) {
+			for(TangibleObject tangible : creature.getDefendersList().toArray(new TangibleObject[]{})) {
+				if(tangible instanceof CreatureObject)
+					return (CreatureObject) tangible;
+			}
+		}
+		return highestDamageDealer;
 	}
 
 	public AIState getCurrentState() {
@@ -62,11 +126,12 @@ public class AIActor {
 	}
 
 	public void setCurrentState(AIState currentState) {
-		if(currentState == this.currentState)
+		if(currentState.getClass() == this.currentState.getClass())
 			return;
-		this.currentState.onExit();
+		if(this.currentState != null)
+			doStateAction(this.currentState.onExit(this));
 		this.currentState = currentState;
-		currentState.onEnter();
+		doStateAction(currentState.onEnter(this));
 	}
 
 	public CreatureObject getFollowObject() {
@@ -77,4 +142,116 @@ public class AIActor {
 		this.followObject = followObject;
 	}
 
+	public Vector<Point3D> getMovementPoints() {
+		return movementPoints;
+	}
+
+	public void setMovementPoints(Vector<Point3D> movementPoints) {
+		this.movementPoints = movementPoints;
+	}
+
+	public MobileTemplate getMobileTemplate() {
+		return mobileTemplate;
+	}
+
+	public void setMobileTemplate(MobileTemplate mobileTemplate) {
+		this.mobileTemplate = mobileTemplate;
+	}
+	
+	public void scheduleMovement() {
+		scheduler.schedule(new Runnable() {
+
+			@Override
+			public void run() {
+				doStateAction(currentState.move(AIActor.this));
+			}
+			
+		}, 500, TimeUnit.MILLISECONDS);
+	}
+	
+	public void scheduleRecovery() {
+		scheduler.schedule(new Runnable() { 
+
+			@Override
+			public void run() {
+				doStateAction(currentState.recover(AIActor.this));
+			}
+			
+		}, 2000, TimeUnit.MILLISECONDS);
+
+	}
+	
+	public void setNextPosition(Point3D position) {
+		movementPoints.add(0, position);
+	}
+	
+	@Handler
+	public void handleDamage(DamageTaken event) {
+		CreatureObject attacker = event.attacker;
+		if(damageMap.containsKey(attacker))
+			damageMap.put(attacker, damageMap.get(attacker) + event.damage);
+		else 
+			damageMap.put(attacker, event.damage);
+	}
+	
+	public Map<CreatureObject, Integer> getDamageMap() {
+		return damageMap;
+	}
+
+	public boolean hasReachedPosition() {
+		return hasReachedPosition;
+	}
+
+	public void setHasReachedPosition(boolean hasReachedPosition) {
+		this.hasReachedPosition = hasReachedPosition;
+	}
+	
+	public void faceObject(SWGObject object) {
+		float direction = (float) Math.atan2(object.getWorldPosition().x - creature.getWorldPosition().x, object.getWorldPosition().z - creature.getWorldPosition().z);
+		if(direction < 0)
+			direction = (float) (2 * Math.PI + direction);
+		if(Math.abs(direction - creature.getRadians()) < 0.05)
+			return;
+		Quaternion quaternion = new Quaternion((float) Math.cos(direction / 2), 0, (float) Math.sin(direction / 2), 0);
+        if (quaternion.y < 0.0f && quaternion.w > 0.0f) {
+        	quaternion.y *= -1;
+        	quaternion.w *= -1;
+        }
+		if(creature.getContainer() instanceof CellObject)
+			NGECore.getInstance().simulationService.moveObject(creature, creature.getPosition(), quaternion, creature.getMovementCounter(), 0, (CellObject) creature.getContainer());
+		else
+			NGECore.getInstance().simulationService.moveObject(creature, creature.getPosition(), quaternion, creature.getMovementCounter(), 0, null);
+
+	}
+
+	public long getLastAttackTimestamp() {
+		return lastAttackTimestamp;
+	}
+
+	public void setLastAttackTimestamp(long lastAttackTimestamp) {
+		this.lastAttackTimestamp = lastAttackTimestamp;
+	}
+	
+	public long getTimeSinceLastAttack() {
+		return System.currentTimeMillis() - getLastAttackTimestamp();
+	}
+	
+	public void doStateAction(byte result) {
+		
+		switch(result) {
+		
+			case StateResult.DEAD:
+				setCurrentState(new DeathState());
+			case StateResult.FINISHED:
+				// TODO: add state transitions
+			case StateResult.UNFINISHED:
+				return;
+			case StateResult.IDLE:
+				setCurrentState(new IdleState());
+			//case StateResult.NONE:
+		//		System.out.println("State action returned error result");
+		
+		}
+		
+	}
 }

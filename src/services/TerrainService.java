@@ -31,10 +31,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import resources.common.FileUtilities;
 import resources.common.collidables.CollidableCircle;
 import resources.objects.building.BuildingObject;
+import resources.objects.creature.CreatureObject;
 
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.resources.config.Config;
+import engine.resources.container.Traverser;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -235,10 +237,23 @@ public class TerrainService {
 					continue;
 				
 				BuildingObject building = (BuildingObject) object;
-				
+				final List<CreatureObject> creatures = new ArrayList<CreatureObject>();
+				building.viewChildren(building, true, true, new Traverser() {
+
+					@Override
+					public void process(SWGObject obj) {
+						if(obj instanceof CreatureObject)
+							creatures.add((CreatureObject) obj);
+					}
+					
+				});
+				for(CreatureObject creature : creatures) {
+					long parentId = creature.getParentId();
+					creature.getContainer().remove(creature);
+					creature.setParentId(parentId);
+				}
 				if(building.getTransaction() == null)
 					continue;
-				
 				building.createTransaction(core.getBuildingODB().getEnvironment());
 				core.getBuildingODB().put(building, Long.class, BuildingObject.class, building.getTransaction());
 				building.getTransaction().commitSync();
@@ -264,6 +279,15 @@ public class TerrainService {
 		
 		return true;
 		
+	}
+
+	public boolean isWater(int planetId, Point3D worldPosition) {
+		if(getPlanetByID(planetId) == null)
+			return false;
+		
+		Planet planet = getPlanetByID(planetId);
+
+		return planet.getTerrainVisitor().isWater(worldPosition.x, worldPosition.z);
 	}
 	
 	

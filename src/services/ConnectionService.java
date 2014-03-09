@@ -79,8 +79,8 @@ public class ConnectionService implements INetworkDispatch {
 				synchronized(core.getActiveConnectionsMap()) {
 					for(Client c : core.getActiveConnectionsMap().values()) {
 						if(c.getParent() != null) {
-							if ((System.currentTimeMillis() - c.getSession().getLastReadTime()) > 300000 && c.getSession().getAttribute("disconnectTask") == null) {
-								disconnect(c.getSession());
+							if ((System.currentTimeMillis() - c.getSession().getLastReadTime()) > 300000) {
+								disconnect(c);
 							}
 						}
 					}
@@ -184,13 +184,10 @@ public class ConnectionService implements INetworkDispatch {
 		
 	}
 	
-	public void disconnect(IoSession session) {
-		Client client = core.getClient(session);
-
-		if(client == null)
-			return;
-		
-		if(client.getParent() == null)
+	public void disconnect(Client client) {
+		//Client client = core.getClient(session);
+		IoSession session = client.getSession();
+		if(session == null || client.getParent() == null)
 			return;
 		
 		CreatureObject object = (CreatureObject) client.getParent();

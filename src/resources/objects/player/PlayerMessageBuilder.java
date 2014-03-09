@@ -201,8 +201,8 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 			}
 		}
 		
-		buffer.putInt(100); // Current force power ?
-		buffer.putInt(100); // Max force power ?
+		buffer.putInt(0); // Current force power ?
+		buffer.putInt(0); // Max force power ?
 		buffer.putInt(0); // Current FS Quest List size ?
 		buffer.putInt(0); // Current FS Quest List update counter ?
 		
@@ -293,18 +293,6 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 		buffer.putInt(0);
 		
 		buffer.putInt(0);
-		buffer.putInt(3);
-		buffer.putInt(0);
-		buffer.putInt(0);
-		
-		buffer.putInt(0);
-		buffer.putInt(0);
-		buffer.putInt(0);
-		buffer.putInt(0);
-		buffer.putInt(0);
-		
-		buffer.putInt(0);
-		buffer.putInt(2);
 		buffer.putInt(0);
 		buffer.putInt(0);
 		buffer.putInt(0);
@@ -315,7 +303,19 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 		buffer.putInt(0);
 		buffer.putInt(0);
 		
-		buffer.putInt(4); // jedi state???
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		
+		buffer.putInt(0); // jedi state???
 		buffer.putShort((short) 0);
 		int size = buffer.position();
 
@@ -365,7 +365,7 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 
 		IoBuffer result = bufferPool.allocate(15 + type.length(), false).order(ByteOrder.LITTLE_ENDIAN);
 		
-		result.putInt(player.getXpList().size());
+		result.putInt(1);
 		result.putInt(player.getXpListUpdateCounter());
 		result.put((byte) ((alreadyExists) ? 2 : 0));
 		result.put(getAsciiString(type));
@@ -373,7 +373,6 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 		
 		int size = result.position();
 		result.flip();
-		//StringUtilities.printBytes(result.array());
 		result = createDelta("PLAY", (byte) 8, (short) 1, (short) 0, result, size + 4);
 		return result;
 	}
@@ -388,6 +387,7 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 		
 		buffer = createDelta("PLAY", (byte) 8, (short) 1, (short) 8, buffer, size + 4);
 		return buffer;
+
 	}
 	
 	public IoBuffer buildWaypointAddDelta(WaypointObject waypoint) {

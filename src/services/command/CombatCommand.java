@@ -591,7 +591,7 @@ public class CombatCommand extends BaseSWGCommand {
 				animations = twoHandedAnimations;
 				break;
 			case 6:
-				animations = unarmedAnimations;
+				animations = defaultAnimations;
 				break;
 			case 7:
 				animations = polearmAnimations;
@@ -610,10 +610,13 @@ public class CombatCommand extends BaseSWGCommand {
 				break;
 
 			default:
-				animations = unarmedAnimations;
+				animations = defaultAnimations;
 				break;
 
 		}
+		
+		if(animations.length == 0)
+			animations = defaultAnimations;
 		
 		return animations[new Random().nextInt(animations.length)];
 		

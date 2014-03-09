@@ -196,7 +196,7 @@ public class LoginService implements INetworkDispatch{
                 			
                 			if (object != null) {
                 				if (object.isInQuadtree() && object.getClient() != null) {
-                					core.connectionService.disconnect(object.getClient().getSession());
+                					core.connectionService.disconnect(object.getClient());
                 				} 
                 				
                 				if (object.isInQuadtree()) {
