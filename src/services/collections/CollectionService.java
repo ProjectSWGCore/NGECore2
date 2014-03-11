@@ -439,7 +439,6 @@ public class CollectionService implements INetworkDispatch {
 			String bookName = "";
 			String pageName = "";
 			String collectionName = "";
-			boolean found = false;
 			boolean collectionComplete = false;
 			
 			collections = BitSet.valueOf(player.getCollections());
@@ -483,14 +482,9 @@ public class CollectionService implements INetworkDispatch {
 								System.out.println("Checking if a page is complete is unsupported at this time.");
 								throw new Exception();
 							} else if (collection == collectionName) {
-								collectionComplete = collections.get(beginSlotId);
-								found = true;
+								return collections.get(beginSlotId);
 							} else if (collection == slotName) {
 								return collections.get(beginSlotId);
-							}
-							
-							if (found && collectionName != collection) {
-								return collectionComplete;
 							}
 						}
 					}
