@@ -24,13 +24,16 @@ package services;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import resources.common.FileUtilities;
 import resources.common.collidables.CollidableCircle;
 import resources.objects.building.BuildingObject;
+import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
 
 import engine.clientdata.ClientFileManager;
@@ -229,15 +232,15 @@ public class TerrainService {
 			}
 		}
 		
-		synchronized(core.objectService.getObjectList()) {
+		/*synchronized(core.objectService.getObjectList()) {
 		
 			for(SWGObject object : core.objectService.getObjectList().values()) {
 				
-				if(!(object instanceof BuildingObject))
+				if(!(object instanceof BuildingObject) || object.isInSnapshot())
 					continue;
 				
 				BuildingObject building = (BuildingObject) object;
-				final List<CreatureObject> creatures = new ArrayList<CreatureObject>();
+				final Set<CreatureObject> creatures = new HashSet<CreatureObject>();
 				building.viewChildren(building, true, true, new Traverser() {
 
 					@Override
@@ -260,7 +263,7 @@ public class TerrainService {
 				
 			}
 			
-		}
+		}*/
 		
 	}
 	

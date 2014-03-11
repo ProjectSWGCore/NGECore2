@@ -163,6 +163,7 @@ public class ObjectService implements INetworkDispatch {
 				}
 				
 			});	
+			loadServerTemplate(building);
 			core.simulationService.add(building, building.getPosition().x, building.getPosition().z);
 		}
 
@@ -825,7 +826,10 @@ public class ObjectService implements INetworkDispatch {
 					if(portalCRC != 0) {
 						containers.add(objectId);
 						object = createObject(template, objectId, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, true);
+						object.setAttachment("childObjects", null);
 						((BuildingObject) object).createTransaction(core.getBuildingODB().getEnvironment());
+						core.getBuildingODB().put((BuildingObject) object, Long.class, BuildingObject.class, ((BuildingObject) object).getTransaction());
+						((BuildingObject) object).getTransaction().commitSync();
 					} else {
 						object = createObject(template, objectId, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz));
 					}
@@ -848,11 +852,6 @@ public class ObjectService implements INetworkDispatch {
 						if(parent instanceof BuildingObject && ((BuildingObject) parent).getCellByCellNumber(cellIndex) != null)
 							continue;
 						parent.add(object);
-						/*if(parent instanceof BuildingObject) {
-							((BuildingObject) parent).createTransaction(core.getBuildingODB().getEnvironment());
-							core.getBuildingODB().put((BuildingObject) parent, Long.class, BuildingObject.class, ((BuildingObject) parent).getTransaction());
-							((BuildingObject) parent).getTransaction().commitSync();
-						}*/
 					}
 				} else {
 					object = createObject(template, 0, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz));
