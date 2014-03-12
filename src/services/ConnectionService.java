@@ -226,13 +226,10 @@ public class ConnectionService implements INetworkDispatch {
 				
 		long parentId = object.getParentId();
 		
-		boolean removed = false;
 		if(object.getContainer() == null) {
 			boolean remove = core.simulationService.remove(object, object.getPosition().x, object.getPosition().z);
-			if(remove) {
+			if(remove)
 				System.out.println("Successful quadtree remove");
-				removed = true;
-			}
 		} else {
 			object.getContainer()._remove(object);
 			object.setParentId(parentId);
@@ -253,10 +250,8 @@ public class ConnectionService implements INetworkDispatch {
 		object.createTransaction(core.getCreatureODB().getEnvironment());
 		core.getCreatureODB().put(object, Long.class, CreatureObject.class, object.getTransaction());
 		object.getTransaction().commitSync();
-		if(removed)
-			core.objectService.destroyObject(object, false);
-		else
-			core.objectService.destroyObject(object);
+		core.objectService.destroyObject(object);
+		
 	}
 
 
