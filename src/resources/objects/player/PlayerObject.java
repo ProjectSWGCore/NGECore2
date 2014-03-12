@@ -684,7 +684,9 @@ public class PlayerObject extends IntangibleObject {
 	}
 
 	public String getSpouseName() {
-		return spouse;
+		synchronized(objectMutex) {
+			return spouse;
+		}
 	}
 
 	public void setSpouseName(String spouse) {

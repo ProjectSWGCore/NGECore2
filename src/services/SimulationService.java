@@ -440,17 +440,16 @@ public class SimulationService implements INetworkDispatch {
 
 			@Override
 			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
-								
-				data = data.order(ByteOrder.LITTLE_ENDIAN);
-				data.position(0);
-				
+
+				data.order(ByteOrder.LITTLE_ENDIAN);
+
 				Client client = core.getClient(session);
-				
+
 				if(client == null) {
 					System.out.println("NULL Client");
 					return;
 				}
-				
+
 				if(client.getParent() == null) {
 					System.out.println("NULL Object");
 					return;
@@ -459,18 +458,18 @@ public class SimulationService implements INetworkDispatch {
 
 				TargetUpdate targetUpdate = new TargetUpdate();
 				targetUpdate.deserialize(data);
-				
+
 				object.setTargetId(targetUpdate.getTargetId());
-				
+
 			}
-			
+
 		});
 		
 		objControllerOpcodes.put(ObjControllerOpcodes.HOVER_TARGET, new INetworkRemoteEvent() {
 
 			@Override
 			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
-				
+
 			}
 			
 		});

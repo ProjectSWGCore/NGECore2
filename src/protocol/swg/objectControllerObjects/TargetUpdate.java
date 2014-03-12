@@ -39,7 +39,7 @@ public class TargetUpdate extends ObjControllerObject {
 
 	@Override
 	public IoBuffer serialize() {
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
