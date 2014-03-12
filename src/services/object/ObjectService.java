@@ -357,18 +357,22 @@ public class ObjectService implements INetworkDispatch {
 	
 	public Map<Long, SWGObject> getObjectList() { return objectList; }
 	
+	public void destroyObject(SWGObject object) {
+		destroyObject(object, false, true);
+	}
+	
 	public void destroyObject(final SWGObject object, int seconds) {
 		scheduler.schedule(new Runnable() {
 			
 			@Override
 			public void run() {
-				destroyObject(object);
+				destroyObject(object, false, true);
 			}
 			
 		}, seconds, TimeUnit.SECONDS);
 	}
 	
-	public void destroyObject(SWGObject object) {
+	public void destroyObject(SWGObject object, boolean notify, boolean removeFromQt) {
 		if (object == null) {
 			return;
 		}
@@ -411,20 +415,29 @@ public class ObjectService implements INetworkDispatch {
 				objectList.remove(obj.getObjectID());
 			}
 		});
-		objectList.remove(object.getObjectID());
-		core.simulationService.remove(object, object.getPosition().x, object.getPosition().y);
 		
+		if(removeFromQt && !notify)
+			core.simulationService.remove(object, object.getPosition().x, object.getPosition().y);
+
+		else if(notify && removeFromQt)
+			core.simulationService.remove(object, object.getPosition().x, object.getPosition().y, true);
+
+		objectList.remove(object.getObjectID());
+
 	}
 	
 	public void destroyObject(long objectID) {
 		
 		SWGObject object = getObject(objectID);
 		if(object != null) {
-			destroyObject(object);
+			destroyObject(object, false, true);
 		}
 		
 	}
 	
+	public void destroyObject(SWGObject object, boolean removeFromQt) {
+		destroyObject(object, false, removeFromQt);
+	}
 	public SWGObject getObjectByCustomName(String customName) {
 		
 		synchronized(objectList) {
