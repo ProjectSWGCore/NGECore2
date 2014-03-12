@@ -172,55 +172,55 @@ public class LoginService implements INetworkDispatch{
 
 			@Override
 			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
-				
+
 				data = data.order(ByteOrder.LITTLE_ENDIAN);
 				data.position(0);
-				
+
 				DeleteCharacterMessage packet = new DeleteCharacterMessage();
 				packet.deserialize(data);
 				Client client = core.getClient(session);
-				
-                PreparedStatement preparedStatement;
-                		
-                preparedStatement = databaseConnection1.preparedStatement("DELETE FROM characters WHERE \"id\"=? AND \"galaxyId\"=? AND \"accountId\"=?");
-                preparedStatement.setLong(1, packet.getcharId());
-                preparedStatement.setInt(2, packet.getgalaxyId());
-                preparedStatement.setInt(3, (int) client.getAccountId());
-                boolean resultSet = preparedStatement.execute();
-                CreatureObject object = (CreatureObject) core.objectService.getObject(packet.getcharId());
-                
-                // TODO: Revert DELETE if everything fails for some reason... ?
-                if(!resultSet) {
-                	if (object != null) {
-                    	boolean destroyed = false;
-                    	if(object.isInQuadtree() && object.getClient() != null) {
-                    		core.connectionService.disconnect(object.getClient()); // destroyed in method
-                    		destroyed = true;
-                    	}
-                    	else {
-                    		core.objectService.destroyObject(object, false, false);
-                    		destroyed = true;
-                    	}
-                    	if(destroyed) {
-                    		core.getCreatureODB().delete(new Long(packet.getcharId()), Long.class, CreatureObject.class);
-                    		DeleteCharacterReplyMessage reply = new DeleteCharacterReplyMessage(0);
-                    		session.write(reply.serialize());
-                    	} else {
-                    		//core.getCreatureODB().delete(new Long(packet.getcharId()), Long.class, CreatureObject.class);
-                    		DeleteCharacterReplyMessage reply = new DeleteCharacterReplyMessage(1);
-                    		session.write(reply.serialize());
-                    	}
-                	} else {
-                		//core.getCreatureODB().delete(new Long(packet.getcharId()), Long.class, CreatureObject.class);
-                		DeleteCharacterReplyMessage reply = new DeleteCharacterReplyMessage(1);
-                		session.write(reply.serialize());
-                	}
-                } else {
-                	//core.getCreatureODB().delete(new Long(packet.getcharId()), Long.class, CreatureObject.class);
-            		DeleteCharacterReplyMessage reply = new DeleteCharacterReplyMessage(1);
-            		session.write(reply.serialize());
-                }
-                preparedStatement.close();
+
+				PreparedStatement preparedStatement;
+
+				preparedStatement = databaseConnection1.preparedStatement("DELETE FROM characters WHERE \"id\"=? AND \"galaxyId\"=? AND \"accountId\"=?");
+				preparedStatement.setLong(1, packet.getcharId());
+				preparedStatement.setInt(2, packet.getgalaxyId());
+				preparedStatement.setInt(3, (int) client.getAccountId());
+				boolean resultSet = preparedStatement.execute();
+				CreatureObject object = (CreatureObject) core.objectService.getObject(packet.getcharId());
+
+				// TODO: Revert DELETE if everything fails for some reason... ?
+				if(!resultSet) {
+					if (object != null) {
+						boolean destroyed = false;
+						if(object.isInQuadtree() && object.getClient() != null) {
+							core.connectionService.disconnect(object.getClient()); // destroyed in method
+							destroyed = true;
+						}
+						else {
+							core.objectService.destroyObject(object, false, false);
+							destroyed = true;
+						}
+						if(destroyed) {
+							core.getCreatureODB().delete(new Long(packet.getcharId()), Long.class, CreatureObject.class);
+							DeleteCharacterReplyMessage reply = new DeleteCharacterReplyMessage(0);
+							session.write(reply.serialize());
+						} else {
+							//core.getCreatureODB().delete(new Long(packet.getcharId()), Long.class, CreatureObject.class);
+							DeleteCharacterReplyMessage reply = new DeleteCharacterReplyMessage(1);
+							session.write(reply.serialize());
+						}
+					} else {
+						//core.getCreatureODB().delete(new Long(packet.getcharId()), Long.class, CreatureObject.class);
+						DeleteCharacterReplyMessage reply = new DeleteCharacterReplyMessage(1);
+						session.write(reply.serialize());
+					}
+				} else {
+					//core.getCreatureODB().delete(new Long(packet.getcharId()), Long.class, CreatureObject.class);
+					DeleteCharacterReplyMessage reply = new DeleteCharacterReplyMessage(1);
+					session.write(reply.serialize());
+				}
+				preparedStatement.close();
 			}
 		});
 	}
