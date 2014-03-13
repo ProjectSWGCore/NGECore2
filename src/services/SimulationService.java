@@ -697,6 +697,9 @@ public class SimulationService implements INetworkDispatch {
 		final CreatureObject object = (CreatureObject) client.getParent();
 		PlayerObject ghost = (PlayerObject) object.getSlottedObject("ghost");
 		
+		if(object.getAttachment("proposer") != null)
+			object.setAttachment("proposer", null);
+		
 		//session.suspendWrite();
 		final long objectId = object.getObjectID();
 		

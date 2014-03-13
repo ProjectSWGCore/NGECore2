@@ -33,6 +33,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
@@ -51,7 +52,6 @@ import protocol.swg.SetWaypointColor;
 import protocol.swg.objectControllerObjects.ChangeRoleIconChoice;
 import protocol.swg.objectControllerObjects.ShowFlyText;
 import protocol.swg.objectControllerObjects.ShowLootBox;
-import resources.common.Console;
 import resources.common.FileUtilities;
 import resources.common.ObjControllerOpcodes;
 import resources.common.Opcodes;
@@ -65,6 +65,7 @@ import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerMessageBuilder;
 import resources.objects.player.PlayerObject;
+import resources.objects.tangible.TangibleObject;
 import resources.objects.waypoint.WaypointObject;
 import services.sui.SUIService.ListBoxType;
 import services.sui.SUIWindow;
@@ -76,6 +77,7 @@ import engine.clientdata.visitors.CrcStringTableVisitor;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.clients.Client;
 import engine.resources.common.CRC;
+import engine.resources.container.Traverser;
 import engine.resources.objects.DraftSchematic;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
@@ -804,6 +806,128 @@ public class PlayerService implements INetworkDispatch {
 		
 		ObjControllerMessage objController = new ObjControllerMessage(11, new ShowLootBox(reciever.getObjectID(), items));
 		client.getSession().write(objController.serialize());
+	}
+	
+	public void performUnity(final CreatureObject acceptor, final CreatureObject proposer){
+		TangibleObject acceptorInventory = (TangibleObject) acceptor.getSlottedObject("inventory");
+		final AtomicBoolean acceptorHasRing = new AtomicBoolean();
+
+		acceptorInventory.viewChildren(acceptor, false, false, new Traverser() {
+
+			@Override
+			public void process(SWGObject obj) {
+				if(obj.getAttachment("objType") != null) {
+					String objType = (String) obj.getAttachment("objType");
+					if(objType == "ring") {
+						acceptorHasRing.set(true);
+					}
+				}
+			}
+		});
+
+		if(acceptorHasRing.get() == false) {
+			acceptor.sendSystemMessage("@unity:no_ring", (byte) 0);
+			proposer.sendSystemMessage("@unity:accept_fail", (byte) 0);
+			acceptor.setAttachment("proposer", null);
+		} else {
+			PlayerObject aGhost = (PlayerObject) acceptor.getSlottedObject("ghost");
+			PlayerObject pGhost = (PlayerObject) proposer.getSlottedObject("ghost");
+
+			if (aGhost == null || pGhost == null) {
+				acceptor.sendSystemMessage("@unity:wed_error", (byte) 0);
+				proposer.sendSystemMessage("@unity:wed_error", (byte) 0);
+				acceptor.setAttachment("proposer", null);
+				return;
+			} else {
+				final Vector<SWGObject> ringList = new Vector<SWGObject>();
+				acceptorInventory.viewChildren(acceptor, false, false, new Traverser() {
+
+					@Override
+					public void process(SWGObject obj) {
+						if (obj.getAttachment("objType") != null) {
+							if (obj.getAttachment("objType") == "ring") {
+								ringList.add(obj);
+							}
+						}
+					}
+				});
+
+				if (ringList.size() > 1) {
+					sendRingSelectWindow(acceptor, proposer, ringList);
+				} else {
+					// Proposer's ring is already 'unified' from the start, so no
+					// need to set a unity attachment.
+					ringList.get(0).setAttachment("unity", (Boolean) true);
+
+					if(!acceptor.getEquipmentList().contains(ringList.get(0)))
+						core.equipmentService.equip(acceptor, ringList.get(0));
+
+					aGhost.setSpouseName(proposer.getCustomName());
+					pGhost.setSpouseName(acceptor.getCustomName());
+
+					acceptor.sendSystemMessage("Your union with " + proposer.getCustomName() + " is complete.", (byte) 0);
+					proposer.sendSystemMessage("Your union with " + acceptor.getCustomName() + " is complete.", (byte) 0);
+
+					acceptor.setAttachment("proposer", null);
+				}
+			}
+		}
+	}
+
+	private void sendRingSelectWindow(final CreatureObject actor, final CreatureObject proposer, Vector<SWGObject> ringList) {
+		Map<Long, String> ringData = new HashMap<Long, String>();
+
+		for(SWGObject obj : ringList) {
+			ringData.put(obj.getObjectId(), obj.getCustomName());
+		}
+
+		final SUIWindow ringWindow = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "@unity:ring_prompt", "@unity:ring_prompt", ringData, actor, proposer, (float) 15);
+		Vector<String> returnList = new Vector<String>();
+		returnList.add("List.lstList:SelectedRow");
+
+		ringWindow.addHandler(0, "", Trigger.TRIGGER_OK, returnList, new SUICallback() {
+
+			@Override
+			public void process(SWGObject owner, int eventType, Vector<String> returnList) {
+				int index = Integer.parseInt(returnList.get(0));
+
+				SWGObject selectedRing = core.objectService.getObject(ringWindow.getObjectIdByIndex(index));
+				selectedRing.setAttachment("unity", (Boolean) true);
+
+				if(!actor.getEquipmentList().contains(selectedRing))
+					core.equipmentService.equip(actor, selectedRing);
+
+				PlayerObject aGhost = (PlayerObject) actor.getSlottedObject("ghost");
+				PlayerObject pGhost = (PlayerObject) proposer.getSlottedObject("ghost");
+				aGhost.setSpouseName(proposer.getCustomName());
+				pGhost.setSpouseName(actor.getCustomName());
+
+				actor.sendSystemMessage("Your union with " + proposer.getCustomName() + " is complete.", (byte) 0);
+				proposer.sendSystemMessage("Your union with " + actor.getCustomName() + " is complete.", (byte) 0);
+			}
+
+		});
+
+		ringWindow.addHandler(1, "", Trigger.TRIGGER_CANCEL, returnList, new SUICallback() {
+
+			@Override
+			public void process(SWGObject owner, int eventType, Vector<String> returnList) {
+
+				PlayerObject aGhost = (PlayerObject) actor.getSlottedObject("ghost");
+				PlayerObject pGhost = (PlayerObject) proposer.getSlottedObject("ghost");
+
+				actor.sendSystemMessage("@unity:decline", (byte) 0);
+				proposer.sendSystemMessage("@unity:declined", (byte) 0);
+				actor.setAttachment("proposer", null);
+				for(SWGObject obj : proposer.getEquipmentList()) {
+					if(obj.getAttachment("unity") != null) {
+						obj.setAttachment("unity", null);
+						break;
+					}
+				}
+			}
+		});
+		core.suiService.openSUIWindow(ringWindow);
 	}
 	
 	@Override

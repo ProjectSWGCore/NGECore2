@@ -1,6 +1,7 @@
 import sys
 
 def setup(core, object):
+	object.setAttachment('objType', 'ring')
 	object.setStfFilename('static_item_n')
 	object.setStfName('item_force_sensitive_ring_02_01')
 	object.setDetailFilename('static_item_d')
