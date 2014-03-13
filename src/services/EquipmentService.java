@@ -35,7 +35,6 @@ import engine.resources.objects.SWGObject;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import resources.objects.player.PlayerObject;
-import resources.objects.tangible.TangibleObject;
 
 public class EquipmentService implements INetworkDispatch {
 	
@@ -215,16 +214,14 @@ public class EquipmentService implements INetworkDispatch {
 			}
 		}
 
-		if(!actor.getEquipmentList().contains(item)) {
-			TangibleObject inventory = (TangibleObject) actor.getSlottedObject("inventory");
-			inventory.transferTo(actor, actor, item);
+		if(!actor.getEquipmentList().contains(item))
 			actor.addObjectToEquipList(item);
-		}
-	}
+
+}
 
 	
 	public void unequip(CreatureObject actor, SWGObject item) {
-
+		
 		String template = ((item.getAttachment("customServerTemplate") == null) ? item.getTemplate() : (item.getTemplate().split("shared_")[0] + "shared_" + ((String) item.getAttachment("customServerTemplate")) + ".iff"));
 		String serverTemplate = template.replace(".iff", "");
 		PyObject func = core.scriptService.getMethod("scripts/" + serverTemplate.split("shared_" , 2)[0].replace("shared_", ""), serverTemplate.split("shared_" , 2)[1], "unequip");
@@ -233,15 +230,15 @@ public class EquipmentService implements INetworkDispatch {
 
 		if (item.getStringAttribute("protection_level") != null)
 			calculateForceProtection(actor, item, false);
-
+		
 		if(item.getStringAttribute("cat_wpn_damage.wpn_category") != null)		
 			if (actor.getSlotNameForObject(item).contentEquals("hold_r") == true)
 				weaponCriticalToDisplay(actor, item, false);
-
+		
 		Map<String, Object> attributes = new TreeMap<String, Object>(item.getAttributes());
-
+		
 		for(Entry<String, Object> e : attributes.entrySet()) {
-
+			
 			if(e.getKey().startsWith("cat_skill_mod_bonus.@stat_n:")) {
 				core.skillModService.deductSkillMod(actor, e.getKey().replace("cat_skill_mod_bonus.@stat_n:", ""), Integer.parseInt((String) e.getValue()));
 			}	
@@ -251,16 +248,17 @@ public class EquipmentService implements INetworkDispatch {
 			if(e.getKey().startsWith("cat_attrib_mod_bonus.attr_action")) {
 				actor.setMaxAction(actor.getMaxAction() - Integer.parseInt((String) e.getValue()));
 			}
-
+			
 		}	
-
+		
 		if(item.getAttachment("unity") != null) {
 			actor.sendSystemMessage("@unity:cannot_remove_ring", (byte) 0);
 			return;
 		}
-
-		if (actor.getEquipmentList().contains(item))
+		
+		if(actor.getEquipmentList().contains(item))
 			actor.removeObjectFromEquipList(item);
+
 	}
 
 }
