@@ -185,17 +185,17 @@ public class CollectionService implements INetworkDispatch {
 									((String) collectionTable.getObject(c, 32))
 							};
 							
-							if (bookName == "") {
+							if (bookName.equals("")) {
 								System.out.println(slotName + ", row " + c + ": slot " + slotName + " must be in a book");
 								throw new Exception();
 							}
 							
-							if (pageName == "") {
+							if (pageName.equals("")) {
 								System.out.println(slotName + ", row " + c + ": slot " + slotName + " must be in a page");
 								throw new Exception();
 							}
 							
-							if (collectionName == "") {
+							if (collectionName.equals("")) {
 								System.out.println(slotName + ", row " + c + ": slot " + slotName + " must be in a collection");
 								throw new Exception();
 							}
@@ -460,30 +460,30 @@ public class CollectionService implements INetworkDispatch {
 						if (slotName.equals(collection)) {
 							int beginSlotId = ((Integer) collectionTable.getObject(c, 4));
 							
-							if (bookName == "") {
+							if (bookName.equals("")) {
 								System.out.println(slotName + ", row " + c + ": slot " + slotName + " must be in a book");
 								throw new Exception();
 							}
 							
-							if (pageName == "") {
+							if (pageName.equals("")) {
 								System.out.println(slotName + ", row " + c + ": slot " + slotName + " must be in a page");
 								throw new Exception();
 							}
 							
-							if (collectionName == "") {
+							if (collectionName.equals("")) {
 								System.out.println(slotName + ", row " + c + ": slot " + slotName + " must be in a collection");
 								throw new Exception();
 							}
 							
-							if (collection == bookName) {
+							if (collection.equals(bookName)) {
 								System.out.println("Checking if a book is complete is unsupported at this time.");
 								throw new Exception();
-							} else if (collection == pageName) {
+							} else if (collection.equals(pageName)) {
 								System.out.println("Checking if a page is complete is unsupported at this time.");
 								throw new Exception();
-							} else if (collection == collectionName) {
+							} else if (collection.equals(collectionName)) {
 								return collections.get(beginSlotId);
-							} else if (collection == slotName) {
+							} else if (collection.equals(slotName)) {
 								return collections.get(beginSlotId);
 							}
 						}
@@ -545,34 +545,34 @@ public class CollectionService implements INetworkDispatch {
 						int maxSlotValue = ((Integer) collectionTable.getObject(c, 6));
 						int bits = 0;
 						
-						if (bookName == "") {
+						if (bookName.equals("")) {
 							System.out.println(slotName + ", row " + c + ": slot " + slotName + " must be in a book");
 							throw new Exception();
 						}
 						
-						if (pageName == "") {
+						if (pageName.equals("")) {
 							System.out.println(slotName + ", row " + c + ": slot " + slotName + " must be in a page");
 							throw new Exception();
 						}
 						
-						if (collectionName == "") {
+						if (collectionName.equals("")) {
 							System.out.println(slotName + ", row " + c + ": slot " + slotName + " must be in a collection");
 							throw new Exception();
 						}
 						
-						if (collection == bookName) {
+						if (collection.equals(bookName)) {
 							found += getCollection(creature, pageName);
 							continue;
-						} else if (collection == pageName) {
+						} else if (collection.equals(pageName)) {
 							found += getCollection(creature, collectionName);
 							continue;
-						} else if (collection == collectionName) {
+						} else if (collection.equals(collectionName)) {
 							if (collections.get(beginSlotId)) {
 								found++;
 							}
 							
 							continue;
-						} else if (collection == slotName) {
+						} else if (collection.equals(slotName)) {
 							if (endSlotId != -1) {
 								if (beginSlotId >= endSlotId) {
 									System.out.println(slotName + ", row " + c + ": begin slot id " + beginSlotId + " must be < end slot id" + endSlotId);
@@ -705,23 +705,23 @@ public class CollectionService implements INetworkDispatch {
 						int beginSlotId = ((Integer) collectionTable.getObject(c, 4));
 						int endSlotId = ((Integer) collectionTable.getObject(c, 5));
 						
-						if (bookName == "") {
+						if (bookName.equals("")) {
 							System.out.println(slotName + ", row " + c + ": slot " + slotName + " must be in a book");
 							throw new Exception();
 						}
 						
-						if (pageName == "") {
+						if (pageName.equals("")) {
 							System.out.println(slotName + ", row " + c + ": slot " + slotName + " must be in a page");
 							throw new Exception();
 						}
 						
-						if (collectionName == "") {
+						if (collectionName.equals("")) {
 							System.out.println(slotName + ", row " + c + ": slot " + slotName + " must be in a collection");
 							throw new Exception();
 						}
 						
-						if (collection == bookName || collection == pageName ||
-						collection == collectionName || collection == slotName) {
+						if (collection.equals(bookName) || collection.equals(pageName) ||
+						collection.equals(collectionName) || collection.equals(slotName)) {
 							found = true;
 							
 							if (collections.get(beginSlotId, endSlotId + 1).cardinality() > 0) {
@@ -794,17 +794,17 @@ public class CollectionService implements INetworkDispatch {
 						int beginSlotId = ((Integer) collectionTable.getObject(c, 4));
 						int endSlotId = ((Integer) collectionTable.getObject(c, 5));
 						
-						if (bookName == "") {
+						if (bookName.equals("")) {
 							System.out.println(slotName + ", row " + c + ": slot " + slotName + " must be in a book");
 							throw new Exception();
 						}
 						
-						if (pageName == "") {
+						if (pageName.equals("")) {
 							System.out.println(slotName + ", row " + c + ": slot " + slotName + " must be in a page");
 							throw new Exception();
 						}
 						
-						if (collectionName == "") {
+						if (collectionName.equals("")) {
 							System.out.println(slotName + ", row " + c + ": slot " + slotName + " must be in a collection");
 							throw new Exception();
 						}
