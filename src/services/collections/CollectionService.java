@@ -289,7 +289,7 @@ public class CollectionService implements INetworkDispatch {
 								}
 							} else {
 								if (numAltTitles > 0 || alternateTitles.length > 0) {
-									System.out.println(slotName + ": slot " + slotName + " cannot have any alternative titles unless it is defined as \"titleable\"");
+									//System.out.println(slotName + ": slot " + slotName + " cannot have any alternative titles unless it is defined as \"titleable\"");
 								}
 							}
 							
