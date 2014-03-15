@@ -21,6 +21,8 @@
  ******************************************************************************/
 package services.collections;
 
+import org.apache.mina.core.buffer.IoBuffer;
+
 import resources.objects.Delta;
 
 import com.sleepycat.persist.model.Persistent;
@@ -29,11 +31,15 @@ import com.sleepycat.persist.model.Persistent;
 public class ServerFirst extends Delta {
 	
 	private String name;
+	private String collection;
 	private long time;
+	private long objectId;
 	
-	public ServerFirst(String name, long time) {
+	public ServerFirst(String name, long objectId, String collection, long time) {
 		this.name = name;
+		this.objectId = objectId;
 		this.time = time;
+		this.collection = collection;
 	}
 	
 	public ServerFirst() {
@@ -48,9 +54,24 @@ public class ServerFirst extends Delta {
 		return time;
 	}
 	
+	public long getObjectId() {
+		return objectId;
+	}
+	
+	public String getCollection() {
+		return collection;
+	}
+	
 	@Override
 	public byte[] getBytes() {
-		return new byte[] { };
+		synchronized(objectMutex) {
+			IoBuffer buffer = createBuffer(18 + collection.length() + (name.length() * 2));
+			buffer.putInt((int) time / 1000);
+			buffer.put(getAsciiString(collection));
+			buffer.putLong(objectId);
+			buffer.put(getUnicodeString(name));
+			return buffer.array();
+		}
 	}
 	
 }

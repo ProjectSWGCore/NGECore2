@@ -41,6 +41,7 @@ import org.apache.mina.core.session.IoSession;
 import protocol.swg.CharacterSheetResponseMessage;
 import protocol.swg.ClientIdMsg;
 import protocol.swg.ClientMfdStatusUpdateMessage;
+import protocol.swg.CollectionServerFirstListResponse;
 import protocol.swg.CreateClientPathMessage;
 import protocol.swg.ExpertiseRequestMessage;
 import protocol.swg.GuildRequestMessage;
@@ -392,7 +393,19 @@ public class PlayerService implements INetworkDispatch {
 
 			@Override
 			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
+
+				Client client = core.getClient(session);
 				
+				if (client == null)
+					return;
+				
+				SWGObject player = client.getParent();
+				
+				if (player == null)
+					return;
+				
+				CollectionServerFirstListResponse response = new CollectionServerFirstListResponse(core.guildService.getGuildObject().getServerFirst());
+				session.write(response.serialize());
 			}
 			
 		});
