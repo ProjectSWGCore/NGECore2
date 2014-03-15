@@ -24,7 +24,10 @@ package main;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,6 +39,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.mina.core.service.IoHandler;
 import org.apache.mina.core.session.IoSession;
+
+import com.sleepycat.je.Transaction;
+import com.sleepycat.persist.EntityCursor;
 
 import protocol.swg.ChatSystemMessage;
 import net.engio.mbassy.bus.config.BusConfiguration;
@@ -91,6 +97,7 @@ import engine.resources.common.CRC;
 import engine.resources.common.PHPBB3Auth;
 import engine.resources.config.Config;
 import engine.resources.config.DefaultConfig;
+import engine.resources.container.Traverser;
 import engine.resources.database.DatabaseConnection;
 import engine.resources.database.ObjectDatabase;
 import engine.resources.objects.SWGObject;
@@ -172,6 +179,7 @@ public class NGECore {
 	private ObjectDatabase creatureODB;
 	private ObjectDatabase mailODB;
 	private ObjectDatabase guildODB;
+	private ObjectDatabase objectIdODB;
 	
 	private BusConfiguration eventBusConfig = BusConfiguration.Default(1, new ThreadPoolExecutor(1, 4, 1, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>()));
 
@@ -185,7 +193,6 @@ public class NGECore {
 	public void start() {
 		
 		instance = this;
-		
 		final ThreadMonitor deadlockDetector = new ThreadMonitor();
 		Thread deadlockMonitor = new Thread(new Runnable() {
 			@Override
@@ -221,6 +228,8 @@ public class NGECore {
 		buildingODB = new ObjectDatabase("building", true, false, true);
 		mailODB = new ObjectDatabase("mails", true, false, true);
 		guildODB = new ObjectDatabase("guild", true, false, true);
+		objectIdODB = new ObjectDatabase("oids", true, false, false);
+
 		// Services
 		loginService = new LoginService(this);
 		retroService = new RetroService(this);
@@ -347,9 +356,10 @@ public class NGECore {
 		weatherService = new WeatherService(this);
 		weatherService.loadPlanetSettings();
 		
-	//	spawnService.loadLairTemplates();
-	//	spawnService.loadLairGroups();
-	//	spawnService.loadSpawnAreas();
+		/*spawnService.loadMobileTemplates();
+		spawnService.loadLairTemplates();
+		spawnService.loadLairGroups();
+		spawnService.loadSpawnAreas();*/
 		
 		retroService.run();
 		
@@ -457,6 +467,10 @@ public class NGECore {
 		return buildingODB;
 	}
 	
+	public ObjectDatabase getObjectIdODB() {
+		return objectIdODB;
+	}
+	
 	public int getActiveClients() {
 		int connections = 0;
 		for (Map.Entry<IoSession, Client> c : clients.entrySet()) {
@@ -535,7 +549,7 @@ public class NGECore {
 			synchronized(getActiveConnectionsMap()) {
 				for(Client client : getActiveConnectionsMap().values()) {
 					client.getSession().close(true);
-					connectionService.disconnect(client.getSession());
+					connectionService.disconnect(client);
 				}
 			}
 			

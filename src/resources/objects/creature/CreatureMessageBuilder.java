@@ -97,7 +97,8 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer.put(getAsciiString(creature.getStfName()));
 		if (creature.getCustomName() == null) { creature.setCustomName(""); }//Not all CreatureObjects have CustomName (Shuttles)
 		buffer.put(getUnicodeString(creature.getCustomName()));
-		buffer.putInt(0x000F4240); // volume
+	//	buffer.putInt(0x000F4240); // volume
+		buffer.putInt(1);
 		buffer.putInt(CRC.StringtoCRC(creature.getFaction()));
 		
 		buffer.putInt(creature.getFactionStatus());
@@ -110,11 +111,11 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 			buffer.putShort((short) customizationData.length);
 			buffer.put(customizationData);
 		}
-		buffer.putInt(1);	
+		//buffer.putInt(1);	
 		buffer.putInt(0);	// TANO Data
 		buffer.putInt(0);	
-	//	buffer.putInt(creature.getOptionsBitmask()); // 0x80 = Player, 0x08 = Quest NPC, 
-		buffer.putInt(0x80);
+		buffer.putInt(creature.getOptionsBitmask()); // 0x80 = Player, 0x08 = Quest NPC, 
+		//buffer.putInt(0x80);
 		buffer.putInt(creature.getIncapTimer());
 		buffer.putInt(0);
 		buffer.putInt(0x3A98);
@@ -126,8 +127,8 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer.putLong(creature.getOwnerId());
 		
 		float height = creature.getHeight();
-		if (height < 0.7 || height > 1.5)
-			height = 1;
+		//if (height < 0.7 || height > 1.5)
+		//	height = 1;
 		buffer.putFloat(height);
 		buffer.putInt(0); // battle fatigue
 		buffer.putLong(creature.getStateBitmask());
@@ -296,7 +297,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 			
 			for(SWGObject obj : creature.getEquipmentList().get()) {
 				
-				if(obj instanceof TangibleObject) {
+				if(obj instanceof TangibleObject && !(obj instanceof WeaponObject)) {
 					TangibleObject tangible = (TangibleObject) obj;
 					if(tangible.getCustomization() == null || tangible.getCustomization().length == 0) {
 						buffer.putShort((short) 0);
