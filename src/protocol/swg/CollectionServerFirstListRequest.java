@@ -16,60 +16,36 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * 
- * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
+ * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine.
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
 package protocol.swg;
 
-import java.nio.ByteOrder;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import main.NGECore;
-
 import org.apache.mina.core.buffer.IoBuffer;
 
-import services.collections.ServerFirst;
-import engine.resources.common.CRC;
+public class CollectionServerFirstListRequest extends SWGMessage {
 
-public class CollectionServerFirstListResponse extends SWGMessage {
-	
-	private Map<String, ServerFirst> sfList;
 	private String server;
-	
-	public CollectionServerFirstListResponse(String server, Map<String, ServerFirst> serverFirstList){
-		this.sfList = serverFirstList;
-		this.server = server;
+
+	public CollectionServerFirstListRequest() {
 	}
-	
+
 	@Override
 	public void deserialize(IoBuffer data) {
+		setServer(getAsciiString(data));
+	}
 
+	public String getServer() {
+		return server;
 	}
 
 	@Override
 	public IoBuffer serialize() {
-		IoBuffer buffer;
-		
-		int size = 0;
-		
-		synchronized (sfList) {
-			for (Entry<String, ServerFirst> entry : sfList.entrySet()) {
-				size += entry.getValue().getBytes().length;
-			}
-			
-			buffer = IoBuffer.allocate(12 + server.length() + size).order(ByteOrder.LITTLE_ENDIAN);
-			buffer.putShort((short) 2);
-			buffer.putInt(CRC.StringtoCRC("CollectionServerFirstListResponse"));
-			
-			buffer.put(getAsciiString(server));
-			buffer.putInt(sfList.size());
-			
-			for (Entry<String, ServerFirst> entry : sfList.entrySet()) {
-				buffer.put(entry.getValue().getBytes());
-
-			}
-			return buffer.flip();
-		}
+		return null;
 	}
+
+	public void setServer(String server) {
+		this.server = server;
+	}
+
 }

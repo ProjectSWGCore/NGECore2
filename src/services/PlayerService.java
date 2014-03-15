@@ -41,6 +41,7 @@ import org.apache.mina.core.session.IoSession;
 import protocol.swg.CharacterSheetResponseMessage;
 import protocol.swg.ClientIdMsg;
 import protocol.swg.ClientMfdStatusUpdateMessage;
+import protocol.swg.CollectionServerFirstListRequest;
 import protocol.swg.CollectionServerFirstListResponse;
 import protocol.swg.CreateClientPathMessage;
 import protocol.swg.ExpertiseRequestMessage;
@@ -58,6 +59,7 @@ import resources.common.ObjControllerOpcodes;
 import resources.common.Opcodes;
 import resources.common.RGB;
 import resources.common.SpawnPoint;
+import resources.common.StringUtilities;
 import resources.datatables.PlayerFlags;
 import resources.guild.Guild;
 import resources.objects.Buff;
@@ -392,8 +394,9 @@ public class PlayerService implements INetworkDispatch {
 		swgOpcodes.put(Opcodes.CollectionServerFirstListRequest, new INetworkRemoteEvent() {
 
 			@Override
-			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
-
+			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
+				data.order(ByteOrder.LITTLE_ENDIAN);
+				
 				Client client = core.getClient(session);
 				
 				if (client == null)
@@ -404,7 +407,10 @@ public class PlayerService implements INetworkDispatch {
 				if (player == null)
 					return;
 				
-				CollectionServerFirstListResponse response = new CollectionServerFirstListResponse(core.guildService.getGuildObject().getServerFirst());
+				CollectionServerFirstListRequest request = new CollectionServerFirstListRequest();
+				request.deserialize(data);
+
+				CollectionServerFirstListResponse response = new CollectionServerFirstListResponse(request.getServer(), core.guildService.getGuildObject().getServerFirst());
 				session.write(response.serialize());
 			}
 			
