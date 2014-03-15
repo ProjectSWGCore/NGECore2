@@ -32,6 +32,8 @@ public class CollectionServerFirstListRequest extends SWGMessage {
 
 	@Override
 	public void deserialize(IoBuffer data) {
+		data.getShort();
+		data.getInt();
 		setServer(getAsciiString(data));
 	}
 

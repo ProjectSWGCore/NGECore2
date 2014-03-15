@@ -396,7 +396,8 @@ public class PlayerService implements INetworkDispatch {
 			@Override
 			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
 				data.order(ByteOrder.LITTLE_ENDIAN);
-				
+				data.position(0);
+
 				Client client = core.getClient(session);
 				
 				if (client == null)
@@ -409,8 +410,13 @@ public class PlayerService implements INetworkDispatch {
 				
 				CollectionServerFirstListRequest request = new CollectionServerFirstListRequest();
 				request.deserialize(data);
+				
+				String server = request.getServer();
+				System.out.println(server);
+				if (server == null || server.equals(""))
+					return;
 
-				CollectionServerFirstListResponse response = new CollectionServerFirstListResponse(request.getServer(), core.guildService.getGuildObject().getServerFirst());
+				CollectionServerFirstListResponse response = new CollectionServerFirstListResponse(server, core.guildService.getGuildObject().getServerFirst());
 				session.write(response.serialize());
 			}
 			
