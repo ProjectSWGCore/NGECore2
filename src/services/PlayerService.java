@@ -573,6 +573,10 @@ public class PlayerService implements INetworkDispatch {
 				// Cannot gain more than half of the XP needed for the next level in one go
 				// Do check
 				
+				int experienceBonus = creature.getSkillModBase("flush_with_success");
+				
+				experience += ((experience * experienceBonus) / 100);
+				
 				// 1. Add the experience.
 				if (experience > 0) {
 					creature.showFlyText("base_player", "prose_flytext_xp", "", experience, (float) 2.5, new RGB(180, 60, 240), 1);
