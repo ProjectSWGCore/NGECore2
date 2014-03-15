@@ -45,9 +45,9 @@ public class MissionMessageBuilder extends ObjectMessageBuilder {
 		buffer.putShort((short) 17);
 		
 		buffer.putFloat(1); // mission complexity ??
-		buffer.put(getAsciiString(mission.getStfFilename()));
+		buffer.put(getAsciiString("mission/mission_object"));
 		buffer.putInt(0);
-		buffer.put(getAsciiString(mission.getStfName()));
+		buffer.put(getAsciiString("destroy_mission"));
 
 		if (mission.getCustomName() == null) { buffer.putInt(0); } 
 		else { buffer.put(getUnicodeString(mission.getCustomName())); }
@@ -83,11 +83,7 @@ public class MissionMessageBuilder extends ObjectMessageBuilder {
 			buffer.putInt(CRC.StringtoCRC(mission.getMissionDestinationPlanet()));
 		}
 		
-		if (mission.getMissionTemplateObject() == null) {
-			buffer.putInt(0);
-		} else {
-			buffer.putInt(CRC.StringtoCRC(mission.getMissionTemplateObject()));
-		}
+		buffer.putInt(mission.getMissionTemplateObject());
 
 		buffer.put(getAsciiString(mission.getMissionDescription()));
 		buffer.putInt(0);
@@ -182,7 +178,7 @@ public class MissionMessageBuilder extends ObjectMessageBuilder {
 		
 		return buffer;
 	}
-	
+/*	
 	public IoBuffer buildStfDelta(String stfFile, String stfName) {
 		
 		IoBuffer buffer = IoBuffer.allocate(4 + stfFile.length() + stfName.length(), false).order(ByteOrder.LITTLE_ENDIAN);
@@ -363,71 +359,64 @@ public class MissionMessageBuilder extends ObjectMessageBuilder {
 		
 		return buffer;
 	}
-	
+*/	
+	@SuppressWarnings("unused")
 	public IoBuffer buildMissionDelta() {
-		IoBuffer buffer = IoBuffer.allocate(100, false).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer buffer = IoBuffer.allocate(500, false).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.isAutoExpand();
+		buffer.isAutoShrink();
 		
 		MissionObject mission = (MissionObject) object;
 		
-		buffer.putShort((short) 0x05);
+		buffer.putShort((short) 11);
+		buffer.put(getAsciiString(mission.getMissionDescription()));
+		buffer.putInt(0);
+		buffer.put(getAsciiString(mission.getMissionDescId()));
+		
+		buffer.putShort((short) 5);
 		buffer.putInt(mission.getMissionLevel());
 		
-		buffer.putShort((short) 0x06);
-		buffer.putFloat(mission.getMissionStartX());
-		buffer.putFloat(mission.getMissionStartZ());
-		buffer.putFloat(mission.getMissionStartY());
-		buffer.putLong(0);
-		buffer.putInt(CRC.StringtoCRC(mission.getMissionStartPlanet()));
-		
-		buffer.putShort((short) 0x07);
+		buffer.putShort((short) 7);
 		buffer.put(getUnicodeString(mission.getCreator()));
 		
-		buffer.putShort((short) 0x08);
+		buffer.putShort((short) 8);
 		buffer.putInt(mission.getCreditReward());
 		
-		buffer.putShort((short) 0x09);
+		buffer.putShort((short) 9);
 		buffer.putFloat(mission.getMissionDestinationX());
 		buffer.putFloat(mission.getMissionDestinationZ());
 		buffer.putFloat(mission.getMissionDestinationY());
 		buffer.putLong(0);
 		buffer.putInt(CRC.StringtoCRC(mission.getMissionDestinationPlanet()));
 		
-		buffer.putShort((short) 0x0A);
-		buffer.putInt(CRC.StringtoCRC(mission.getMissionTemplateObject()));
+		buffer.putShort((short) 10);
+		buffer.putInt(mission.getMissionTemplateObject());
 		
-		buffer.putShort((short) 0x0B);
-		buffer.put(getAsciiString(mission.getMissionDescription()));
-		buffer.putInt(0);
-		buffer.put(getAsciiString(mission.getMissionDescId()));
-		
-		buffer.putShort((short) 0x0C);
+		buffer.putShort((short) 12);
 		buffer.put(getAsciiString(mission.getMissionTitle()));
 		buffer.putInt(0);
 		buffer.put(getAsciiString(mission.getMissionTitleId()));
 		
-		buffer.putShort((short) 0x0E);
+		buffer.putShort((short) 13);
+		buffer.putInt(mission.getMissionRepeatCounter());
+		
+		buffer.putShort((short) 14);
 		buffer.putInt(CRC.StringtoCRC(mission.getMissionType()));
 		
-		buffer.putShort((short) 0x0F);
+		buffer.putShort((short) 15);
 		buffer.put(getAsciiString(mission.getMissionTargetName()));
 		
-		buffer.putShort((short) 0x10);
-		WaypointObject wp = mission.getAttachedWaypoint();
-		buffer.putInt(wp.getCellId()); // wp cell
-		buffer.putFloat(wp.getPosition().x);
-		buffer.putFloat(wp.getPosition().z);
-		buffer.putFloat(wp.getPosition().y);
-		buffer.putLong(0);
-		buffer.putInt(CRC.StringtoCRC(wp.getPlanet().name));
-		buffer.put(getUnicodeString(wp.getName()));
-		buffer.putLong(mission.getObjectId() + 1);
-		buffer.put(wp.getColor());
-		buffer.put((byte) 0x01);
+		buffer.putShort((short) 6);
+		buffer.putFloat(mission.getMissionStartX());
+		buffer.putFloat(mission.getMissionStartZ());
+		buffer.putFloat(mission.getMissionStartY());
+		buffer.putLong(0); // Start Object ID
+		buffer.putInt(CRC.StringtoCRC(mission.getMissionStartPlanet()));
 		
 		int size = buffer.position();
 		buffer.flip();
-		buffer = createDelta("MISO", (byte) 3, (short) 11, buffer, size + 4);
+		buffer = createDelta("MISO", (byte) 3, (short) 8, buffer, size + 4);
+		Console.println("MISO3 Delta: " + StringUtilities.bytesToHex(buffer.array()));
 		return buffer;
 	}
 	@Override
