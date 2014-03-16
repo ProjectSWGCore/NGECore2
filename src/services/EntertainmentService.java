@@ -172,10 +172,10 @@ public class EntertainmentService implements INetworkDispatch {
 						endRecipient.setObjectId(buffRecipient.getObjectId());
 
 						ObjControllerMessage closeBuilder = new ObjControllerMessage(0x0B, endBuilder);
-						session.write(closeBuilder.serialize());
+						buffer.getClient().getSession().write(closeBuilder.serialize());
 
 						ObjControllerMessage closeRecipient = new ObjControllerMessage(0x0B, endRecipient);
-						session.write(closeRecipient.serialize());
+						buffRecipient.getClient().getSession().write(closeRecipient.serialize());
 
 					} else if (sentPacket.getAccepted() == true && sentPacket.getBuffRecipientAccepted() == 0) {
 						changeMessage.setAccepted(true);
