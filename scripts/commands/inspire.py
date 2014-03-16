@@ -30,7 +30,7 @@ def run(core, actor, target, commandString):
         return
     
     if target.getPosition().getDistance2D(actor.getWorldPosition()) > float(20):
-        actor.sendSystemMessage(target.getCustomName() + ' is too far away to inspire.')
+        actor.sendSystemMessage(target.getCustomName() + ' is too far away to inspire.', 0)
         return
     
     builderWindow = BuffBuilderStartMessage(actor.getObjectId(), actor.getObjectId(), target.getObjectId())
