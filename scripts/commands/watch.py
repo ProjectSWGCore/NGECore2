@@ -11,7 +11,12 @@ def run(core, actor, target, commandString):
 	
 	if target is None:
 		return
-	
+
+
+	if target.getPosition().getDistance2D(actor.getWorldPosition()) > float(20):
+		actor.sendSystemMessage(target.getCustomName() + ' is too far away to watch.', 0)
+		return
+    
 	if not target.isPlayer():
 		actor.sendSystemMessage('@performance:dance_watch_npc', 0)
 		return

@@ -28,7 +28,11 @@ def run(core, actor, target, commandString):
       else:
         actor.sendSystemMessage('@performance:insp_buff_must_listen', 2)
         return
-
+    
+    if target.getPosition().getDistance2D(actor.getWorldPosition()) > float(20):
+        actor.sendSystemMessage(target.getCustomName() + ' is too far away to inspire.')
+        return
+    
     builderWindow = BuffBuilderStartMessage(actor.getObjectId(), actor.getObjectId(), target.getObjectId())
     objController = ObjControllerMessage(11, builderWindow)
     actor.getClient().getSession().write(objController.serialize())
