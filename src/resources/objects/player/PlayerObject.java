@@ -232,8 +232,8 @@ public class PlayerObject extends IntangibleObject {
 		synchronized(objectMutex) {
 			xpExists = xpList.containsKey(type);
 			xpList.put(type, amount);
-			Console.println("Put " + type + " exp of " + amount + " in the map.");
-			Console.println("Map is now: " + xpList.get(type).intValue());
+			//Console.println("Put " + type + " exp of " + amount + " in the map.");
+			//Console.println("Map is now: " + xpList.get(type).intValue());
 		}
 		
 		if (getContainer() != null && getContainer().getClient() != null && getContainer().getClient().getSession() != null) {

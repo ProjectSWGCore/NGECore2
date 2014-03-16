@@ -12,7 +12,6 @@ def run(core, actor, target, commandString):
       return
     
     if target is None or actor.getObjectId() == target.getObjectId():
-    	print ('Buffing Player: ' + str(target.getObjectId()) + ' or: ' + target.getCustomName())
     	openBuffWindow = BuffBuilderStartMessage(actor.getObjectId(), actor.getObjectId(), actor.getObjectId())
     	objController = ObjControllerMessage(11, openBuffWindow)
     	actor.getClient().getSession().write(objController.serialize())
@@ -30,12 +29,11 @@ def run(core, actor, target, commandString):
         actor.sendSystemMessage('@performance:insp_buff_must_listen', 2)
         return
 
-    print ('Buffing Player: ' + str(target.getObjectId()) + ' or: ' + target.getCustomName())
-    openBuffWindow = BuffBuilderStartMessage(actor.getObjectId(), actor.getObjectId(), target.getObjectId())
-    objController = ObjControllerMessage(11, openBuffWindow)
+    builderWindow = BuffBuilderStartMessage(actor.getObjectId(), actor.getObjectId(), target.getObjectId())
+    objController = ObjControllerMessage(11, builderWindow)
     actor.getClient().getSession().write(objController.serialize())
     
-    openBuffWindow = BuffBuilderStartMessage(target.getObjectId(), actor.getObjectId(), target.getObjectId())
-    objController2 = ObjControllerMessage(11, openBuffWindow)
+    recipientWindow = BuffBuilderStartMessage(target.getObjectId(), actor.getObjectId(), target.getObjectId())
+    objController2 = ObjControllerMessage(11, recipientWindow)
     target.getClient().getSession().write(objController2.serialize())
     return
