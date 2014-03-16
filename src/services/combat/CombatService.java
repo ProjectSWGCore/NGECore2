@@ -855,7 +855,7 @@ public class CombatService implements INetworkDispatch {
 		if(healer == target)
 			return true;
 		
-		PlayerObject healerPo = healer.getSlottedObject("ghost");
+		PlayerObject healerPo = (PlayerObject) healer.getSlottedObject("ghost");
 		
 		if (healerPo != null && !healerPo.getProfession().startsWith("medic")) {
 			return false;
