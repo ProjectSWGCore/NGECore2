@@ -210,7 +210,7 @@ public class ConnectionService implements INetworkDispatch {
 		if(ghost == null)
 			return;
 		
-		if ()
+		//if ()
 		
 		Point3D objectPos = object.getWorldPosition();
 		

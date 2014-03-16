@@ -321,16 +321,18 @@ public class NGECore {
 		terrainService.addPlanet(11, "mustafar", "terrain/mustafar.trn", true);
 		terrainService.addPlanet(12, "kashyyyk_main", "terrain/kashyyyk_main.trn", true);
 		//Dungeon Terrains
-		terrainService.addPlanet(13, "kashyyyk_dead_forest", "terrain/kashyyyk_dead_forest.trn", true);
+		// TODO: Fix BufferUnderFlow Errors on loaded of dungeon instances.
+		/*terrainService.addPlanet(13, "kashyyyk_dead_forest", "terrain/kashyyyk_dead_forest.trn", true);
 		terrainService.addPlanet(14, "kashyyyk_hunting", "terrain/kashyyyk_hunting.trn", true);
 		terrainService.addPlanet(15, "kashyyyk_north_dungeons", "terrain/kashyyyk_north_dungeons.trn", true);
 		terrainService.addPlanet(16, "kashyyyk_rryatt_trail", "terrain/kashyyyk_rryatt_trail.trn", true);
 		terrainService.addPlanet(17, "kashyyyk_south_dungeons", "terrain/kashyyyk_south_dungeons.trn", true);
 		terrainService.addPlanet(18, "adventure1", "terrain/adventure1.trn", true);
 		terrainService.addPlanet(19, "adventure2", "terrain/adventure2.trn", true);
-		terrainService.addPlanet(20, "dungeon1", "terrain/dungeon1.trn", true);
+		terrainService.addPlanet(20, "dungeon1", "terrain/dungeon1.trn", true);*/
 		//Space Zones
-		terrainService.addPlanet(21, "space_corellia", "terrain/space_corellia.trn", true);
+		// NOTE: Commented out for now until space is implemented. No need to be loaded into memory when space is not implemented.
+		/*terrainService.addPlanet(21, "space_corellia", "terrain/space_corellia.trn", true);
 		terrainService.addPlanet(22, "space_corellia_2", "terrain/space_corellia_2.trn", true);
 		terrainService.addPlanet(23, "space_dantooine", "terrain/space_dantooine.trn", true);
 		terrainService.addPlanet(24, "space_dathomir", "terrain/space_dathomir.trn", true);
@@ -343,9 +345,9 @@ public class NGECore {
 		terrainService.addPlanet(31, "space_lok", "terrain/space_lok.trn", true);
 		terrainService.addPlanet(32, "space_naboo", "terrain/space_naboo.trn", true);
 		terrainService.addPlanet(33, "space_naboo_2", "terrain/space_naboo_2.trn", true);
-		terrainService.addPlanet(34, "space_nova_orion", "terrain/space_nova_orion.trn", true);
-		terrainService.addPlanet(35, "space_npe_falcon", "terrain/space_npe_falcon.trn", true);
-		terrainService.addPlanet(36, "space_npe_falcon_2", "terrain/space_npe_falcon_2.trn", true);
+		terrainService.addPlanet(34, "space_nova_orion", "terrain/space_nova_orion.trn", true); 
+		terrainService.addPlanet(35, "space_npe_falcon", "terrain/space_npe_falcon.trn", true); // TODO: New Player Tutorial
+		terrainService.addPlanet(36, "space_npe_falcon_2", "terrain/space_npe_falcon_2.trn", true); // TODO: New Player Tutorial
 		terrainService.addPlanet(37, "space_ord_mantell", "terrain/space_ord_mantell.trn", true);
 		terrainService.addPlanet(38, "space_ord_mantell_2", "terrain/space_ord_mantell_2.trn", true);
 		terrainService.addPlanet(39, "space_ord_mantell_3", "terrain/space_ord_mantell_3.trn", true);
@@ -354,11 +356,11 @@ public class NGECore {
 		terrainService.addPlanet(42, "space_ord_mantell_6", "terrain/space_ord_mantell_6.trn", true);
 		terrainService.addPlanet(43, "space_tatooine", "terrain/space_tatooine.trn", true);
 		terrainService.addPlanet(44, "space_tatooine_2", "terrain/space_tatooine_2.trn", true);
-		terrainService.addPlanet(45, "space_yavin4", "terrain/space_yavin4.trn", true);
+		terrainService.addPlanet(45, "space_yavin4", "terrain/space_yavin4.trn", true);*/
 		//PSWG New Content Terrains  (WARNING Keep commented out unless you have the current build of kaas!)
-		/*
-		terrainService.addPlanet(46, "kaas", "terrain/kaas.trn", true);
-		*/
+
+		//terrainService.addPlanet(46, "kaas", "terrain/kaas.trn", true);
+
 		//end terrainList
 		spawnService = new SpawnService(this);
 		terrainService.loadClientPois();
