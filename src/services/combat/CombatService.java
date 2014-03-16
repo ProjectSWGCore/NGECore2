@@ -855,6 +855,10 @@ public class CombatService implements INetworkDispatch {
 		if(healer == target)
 			return true;
 		
+		if (areInDuel(healer, target)) {
+			return false;
+		}
+		
 		if(healer.getFaction().equals(target.getFaction())) {
 			
 			if(healer.getFactionStatus() < target.getFactionStatus())
