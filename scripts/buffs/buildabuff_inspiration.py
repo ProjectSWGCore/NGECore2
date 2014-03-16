@@ -10,18 +10,14 @@ def setup(core, actor, buff):
     
     buff.setDuration(3600) #1 hour
     
-    for BuffBuilder in buffWorkshop:
-        core.skillModService.addSkillMod(actor, BuffBuilder.getStatAffects(), BuffBuilder.getTotalAffected())
-        print (' gave the skill mod ' + BuffBuilder.getStatAffects() + ' with affect of ' + str(BuffBuilder.getTotalAffected()))
-        return
-    
+    for BuffItem in buffWorkshop:
+        core.skillModService.addSkillMod(actor, BuffItem.getSkillName(), BuffItem.getAffectAmount())
+
     return
     
 def removeBuff(core, actor, buff):
-    for BuffBuilder in actor.getAttachment('buffWorkshop'):
-        core.skillModService.deductSkillMod(actor, BuffBuilder.getStatAffects(), BuffBuilder.getTotalAffected())
-        print ('removed skill mod!')
-        return
+    for BuffItem in actor.getAttachment('buffWorkshop'):
+        core.skillModService.deductSkillMod(actor, BuffItem.getSkillName(), BuffItem.getAffectAmount())
     
     actor.setAttachment('buffWorkshop', 'none')
     return
