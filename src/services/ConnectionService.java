@@ -56,7 +56,6 @@ import resources.common.collidables.AbstractCollidable;
 import resources.datatables.PlayerFlags;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
-import resources.objects.tangible.TangibleObject;
 
 @SuppressWarnings("unused")
 
@@ -198,7 +197,7 @@ public class ConnectionService implements INetworkDispatch {
 		object.setInviteSenderName("");
 		core.groupService.handleGroupDisband(object);
 		
-		for (TangibleObject opponent : object.getDuelList()) {
+		for (CreatureObject opponent : object.getDuelList()) {
 			if (opponent != null) {
 				core.combatService.handleEndDuel(object, opponent);
 			}
