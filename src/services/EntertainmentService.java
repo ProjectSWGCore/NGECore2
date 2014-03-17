@@ -422,6 +422,36 @@ public class EntertainmentService implements INetworkDispatch {
 		
 	}
 	
+	public void startSpectating(final CreatureObject spectator, final CreatureObject performer) {
+		final ScheduledFuture<?> spectatorTask = scheduler.scheduleAtFixedRate(new Runnable() {
+
+			@Override
+			public void run() {
+				if (spectator.getPosition().getDistance2D(performer.getWorldPosition()) > (float) 70) {
+
+					String pType = (performer.getPerformanceType()) ? "dance" : "music";
+					if(pType.equals("dance")) {
+						spectator.setPerformanceWatchee(null);
+						spectator.sendSystemMessage("You stop watching " + performer.getCustomName() + " because " + performer.getCustomName()
+								+ " is out of range.", (byte) 0);
+					}
+					else {
+						spectator.setPerformanceListenee(null);
+						spectator.sendSystemMessage("You stop listening to " + performer.getCustomName() + " because " + performer.getCustomName()
+								+ " is out of range.", (byte) 0);
+					}
+					spectator.setMoodAnimation("neutral");
+					performer.removeAudience(spectator);
+
+					spectator.getSpectatorTask().cancel(true);
+				}
+			}
+
+		}, 2, 2, TimeUnit.SECONDS);
+
+		spectator.setSpectatorTask(spectatorTask);
+	}
+	
 	@Override
 	public void shutdown() {
 

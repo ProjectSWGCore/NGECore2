@@ -159,6 +159,9 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	@NotPersistent
 	private ScheduledFuture<?> inspirationTick;
 	
+	@NotPersistent
+	private ScheduledFuture<?> spectatorTask;
+	
 	private boolean staticNPC = false; // temp
 	@NotPersistent
 	private int flourishCount = 0;
@@ -411,6 +414,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 				}
 				if (next == this) { continue; }
 				next.sendSystemMessage("@performance:" + type  + "_stop_other",(byte)0);
+				next.getSpectatorTask().cancel(true);
 			}
 			//not sure if this behaviour is correct. might need fixing later.
 			performanceAudience = new SWGList<CreatureObject>();
@@ -1617,5 +1621,16 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			this.appearanceEquipmentListUpdateCounter = appearanceEquipmentListUpdateCounter;
 		}
 	}
-	
+
+	public ScheduledFuture<?> getSpectatorTask() {
+		synchronized(objectMutex) {
+			return spectatorTask;
+		}
+	}
+
+	public void setSpectatorTask(ScheduledFuture<?> spectatorTask) {
+		synchronized(objectMutex) {
+			this.spectatorTask = spectatorTask;
+		}
+	}
 }

@@ -33,6 +33,7 @@ def run(core, actor, target, commandString):
 
 	actor.setPerformanceWatchee(target)
 	target.addAudience(actor)
+	core.entertainmentService.startSpectating(actor, target)
 	actor.setMoodAnimation('entertained')
-	actor.sendSystemMessage('You start watching ' + target.getCustomName() + '.',0) 
+	actor.sendSystemMessage('You start watching ' + target.getCustomName() + '.',0)
 	return
