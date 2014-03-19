@@ -71,7 +71,7 @@ public class CollectionService implements INetworkDispatch {
 		}
 	}
 	
-	/*
+	/**
 	 * @see datatables/collection/collections.iff
 	 * 
 	 * Count and exploration count badges are added automatically.
@@ -417,7 +417,7 @@ public class CollectionService implements INetworkDispatch {
 		return false;
 	}
 	
-	/*
+	/**
 	 * @param creature The player's CreatureObject instance.
 	 * @param collection slotName or collectionName from collection.iff.
 	 * 
@@ -497,7 +497,7 @@ public class CollectionService implements INetworkDispatch {
 		return false;
 	}
 	
-	/*
+	/**
 	 * Returns number of completed bits in a slot or the number of completed
 	 * slots in a collection, page or book.
 	 * 
@@ -623,7 +623,8 @@ public class CollectionService implements INetworkDispatch {
 		return 0;
 	}
 	
-	/*
+
+	/**
 	 * Registers an exploration badge location.
 	 * 
 	 * @param planet Name from Planet.getName().
@@ -640,7 +641,7 @@ public class CollectionService implements INetworkDispatch {
 		explorationLocations.get(planet).put(badgeName, new ExplorationRegion(new Point3D(x, 0, z), range));
 	}
 	
-	/*
+	/**
 	 * Checks if the player is in range of any exploration regions
 	 * and grants any ungranted badges.
 	 * 
@@ -660,7 +661,7 @@ public class CollectionService implements INetworkDispatch {
 		}
 	}
 	
-	/*
+	/**
 	 * Clears the specified slot, collection, page or book.
 	 * 
 	 * @param creature The player's CreatureObject instance.
@@ -749,7 +750,7 @@ public class CollectionService implements INetworkDispatch {
 		return false;
 	}
 	
-	/*
+	/**
 	 * Clears all collections.
 	 * 
 	 * This must cycle through all the collections because
