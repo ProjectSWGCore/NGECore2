@@ -356,11 +356,10 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			this.posture = posture;
 		}
 		
-		IoBuffer postureDelta = messageBuilder.buildPostureDelta(posture);
 		Posture postureUpdate = new Posture(getObjectID(), posture);
 		ObjControllerMessage objController = new ObjControllerMessage(0x1B, postureUpdate);
 		
-		notifyObservers(postureDelta, true);
+		notifyObservers(messageBuilder.buildPostureDelta(posture), true);
 		notifyObservers(objController, true);
 		
 		if (needsStopPerformance) {
@@ -378,6 +377,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	public void stopPerformance() {
 		String type = "";
 		synchronized(objectMutex) {
+			// TODO: Minimum check to wait for song to finish before stopping... ?
 			setPerformanceId(0,true);
 			setPerformanceCounter(0);
 			setCurrentAnimation("");
@@ -414,7 +414,8 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 					next.setMoodAnimation("");
 				}
 				if (next == this) { continue; }
-				next.sendSystemMessage("@performance:" + type  + "_stop_other",(byte)0);
+				if(performanceType) { next.sendSystemMessage("You stop watching " + getCustomName() + ".",(byte)0); }
+				else { next.sendSystemMessage("You stop listening to " + getCustomName() + ".",(byte)0); }
 				next.getSpectatorTask().cancel(true);
 			}
 			//not sure if this behaviour is correct. might need fixing later.
