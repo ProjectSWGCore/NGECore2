@@ -7,17 +7,17 @@ def CreateStarterClothing(core, object, starterProfession, raceTemplate):
         if starterProfession == 'outdoors_scout' and raceTemplate == 'object/creature/player/human_male.iff':
 				core.scriptService.callScript("scripts/starter_clothing/", "outdoors_scout_humanoid_male", "OutdoorScoutHumanoidMale", core, object)
         elif starterProfession == 'outdoors_scout' and raceTemplate == 'object/creature/player/zabrak_male.iff':
-				core.scriptService.callScript("scripts/starter_clothing/", "outdoors_scout_humanoid_male", "OutdoorScoutHumanoidMale", core, object)
+				core.scriptService.callScript("scripts/starter_clothing/", "outdoors_scout_humanoid_male", "OutdoorScoutHumanoidMale", coree, object)
         elif starterProfession == 'outdoors_scout' and raceTemplate == 'object/creature/player/bothan_male.iff':
-				core.scriptService.callScript("scripts/starter_clothing/", "outdoors_scout_humanoid_male", "OutdoorScoutHumanoidMale", core, object)
+				core.scriptService.callScript("scripts/starter_clothing/", "outdoors_scout_humanoid_male", "OutdoorScoutHumanoidMale", coree, object)
         elif starterProfession == 'outdoors_scout' and raceTemplate == 'object/creature/player/sullustan_male.iff':
-				core.scriptService.callScript("scripts/starter_clothing/", "outdoors_scout_humanoid_male", "OutdoorScoutHumanoidMale", core, object)
+				core.scriptService.callScript("scripts/starter_clothing/", "outdoors_scout_humanoid_male", "OutdoorScoutHumanoidMale", coree, object)
         elif starterProfession == 'outdoors_scout' and raceTemplate == 'object/creature/player/twilek_male.iff':
-				core.scriptService.callScript("scripts/starter_clothing/", "outdoors_scout_humanoid_male", "OutdoorScoutHumanoidMale", core, object)
+				core.scriptService.callScript("scripts/starter_clothing/", "outdoors_scout_humanoid_male", "OutdoorScoutHumanoidMale", coree, object)
         elif starterProfession == 'outdoors_scout' and raceTemplate == 'object/creature/player/moncal_male.iff':
-				core.scriptService.callScript("scripts/starter_clothing/", "outdoors_scout_humanoid_male", "OutdoorScoutHumanoidMale", core, object)
+				core.scriptService.callScript("scripts/starter_clothing/", "outdoors_scout_humanoid_male", "OutdoorScoutHumanoidMale", coree, object)
         elif starterProfession == 'outdoors_scout' and raceTemplate == 'object/creature/player/rodian_male.iff':
-				core.scriptService.callScript("scripts/starter_clothing/", "outdoors_scout_humanoid_male", "OutdoorScoutHumanoidMale", core, object)
+				core.scriptService.callScript("scripts/starter_clothing/", "outdoors_scout_humanoid_male", "OutdoorScoutHumanoidMale", coree, object)
 
         elif starterProfession == 'outdoors_scout' and raceTemplate == 'object/creature/player/human_female.iff':
  				core.scriptService.callScript("scripts/starter_clothing/", "outdoors_scout_humanoid_female", "OutdoorScoutHumanoidFemale", core, object)
