@@ -55,6 +55,7 @@ import services.ConnectionService;
 import services.EntertainmentService;
 import services.EquipmentService;
 import services.GroupService;
+import services.InstanceService;
 import services.LoginService;
 import services.MissionService;
 import services.PlayerService;
@@ -163,6 +164,7 @@ public class NGECore {
 	public SpawnService spawnService;
 	public AIService aiService;
 	//public MissionService missionService;
+	public InstanceService instanceService;
 	
 	// Login Server
 	public NetworkDispatch loginDispatch;
@@ -390,6 +392,9 @@ public class NGECore {
 		zoneDispatch.addService(tradeService);
 		
 		zoneDispatch.addService(skillService);
+		
+		instanceService = new InstanceService(this);
+		zoneDispatch.addService(instanceService);
 		
 		//travelService.startShuttleSchedule();
 		

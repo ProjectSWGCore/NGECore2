@@ -162,6 +162,7 @@ public class SimulationService implements INetworkDispatch {
 		core.commandService.registerCommand("editbiography");
 		core.commandService.registerCommand("setbiography");
 		core.commandService.registerCommand("requestbiography");
+		core.commandService.registerCommand("eject");
 
 	}
 	

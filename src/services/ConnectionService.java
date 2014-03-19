@@ -203,14 +203,16 @@ public class ConnectionService implements INetworkDispatch {
 			}
 		}
 		
+		if (core.instanceService.isInInstance(object)) {
+			core.instanceService.remove(core.instanceService.getActiveInstance(object), object);
+		}
+		
 		object.setClient(null);
 		
 		PlayerObject ghost = (PlayerObject) object.getSlottedObject("ghost");
 		
 		if(ghost == null)
 			return;
-		
-		if ()
 		
 		Point3D objectPos = object.getWorldPosition();
 		
