@@ -809,8 +809,8 @@ public class ObjectService implements INetworkDispatch {
 					
 					// Since the ids are just ints, they append 0xFFFF86F9 to them
 					// This is demonstated in the packet sent to the server when you /target client-spawned objects
-					objectId = Delta.createBuffer(8).putInt((Integer) buildoutTable.getObject(i, 0)).putInt(0xF986FFFF).flip().getLong();
-					containerId = (Integer) buildoutTable.getObject(i, 1);
+					objectId = (((Integer) buildoutTable.getObject(i, 0) == 0) ? 0 : Delta.createBuffer(8).putInt((Integer) buildoutTable.getObject(i, 0)).putInt(0xF986FFFF).flip().getLong());
+					containerId = (((Integer) buildoutTable.getObject(i, 1) == 0) ? 0 : Delta.createBuffer(8).putInt((Integer) buildoutTable.getObject(i, 1)).putInt(0xF986FFFF).flip().getLong());
 					type = (Integer) buildoutTable.getObject(i, 2);
 					cellIndex = (Integer) buildoutTable.getObject(i, 4);
 					
