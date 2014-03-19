@@ -454,7 +454,7 @@ public class PlayerService implements INetworkDispatch {
 		if(!FileUtilities.doesFileExist("scripts/expertise/" + expertiseBox + ".py"))
 			return;
 		
-		core.scriptService.callScript("scripts/expertise/", "addExpertisePoint", expertiseBox, core, creature);
+		core.scriptService.callScript("scripts/expertise/", expertiseBox, "addExpertisePoint", core, creature);
 		
 	}
 	
@@ -598,7 +598,7 @@ public class PlayerService implements INetworkDispatch {
 								creature.playEffectObject("clienteffect/level_granted.cef", "");
 								creature.getClient().getSession().write((new ClientMfdStatusUpdateMessage((float) ((creature.getLevel() == 90) ? 90 : (creature.getLevel() + 1)), "/GroundHUD.MFDStatus.vsp.role.targetLevel")).serialize());
 								creature.setLevel(((Integer) experienceTable.getObject(i, 0)).shortValue());
-								core.scriptService.callScript("scripts/collections/", "addMasterBadge", "master_" + player.getProfession(), core, creature);
+								core.scriptService.callScript("scripts/collections/", "master_" + player.getProfession(), "addMasterBadge", core, creature);
 								
 								// 3. Add the relevant health/action and expertise points.
 								float luck = (((((float) (core.scriptService.getMethod("scripts/roadmap/", player.getProfession(), "getLuck").__call__().asInt()) + (core.scriptService.getMethod("scripts/roadmap/", creature.getStfName(), "getLuck").__call__().asInt())) / ((float) 90)) * ((float) creature.getLevel())) - ((float) creature.getSkillModBase("luck")));

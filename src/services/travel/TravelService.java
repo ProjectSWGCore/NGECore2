@@ -193,7 +193,7 @@ public class TravelService implements INetworkDispatch {
 	public void addPlanet(Planet planet) {
 		Vector<TravelPoint> travelPointVector = new Vector<TravelPoint>();
 		travelMap.put(planet, travelPointVector);
-		core.scriptService.callScript("scripts/", "addPoints", "static_travel_points", core, planet);
+		core.scriptService.callScript("scripts/", "static_travel_points", "addPoints", core, planet);
 	}
 
 	public void addTravelPoint(Planet planet, String name, float x, float y, float z) {
