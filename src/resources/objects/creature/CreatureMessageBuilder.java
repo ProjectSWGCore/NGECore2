@@ -256,8 +256,8 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 
 		buffer.putInt(creature.getGuildId());
 		
-		buffer.putLong(0); // lookAtTarget 0x10
-		buffer.putLong(creature.getTargetId()); // intendedTarget 0x11
+		buffer.putLong(creature.getLookAtTarget()); // lookAtTarget 0x10
+		buffer.putLong(creature.getIntendedTarget()); // intendedTarget 0x11
 		buffer.put(creature.getMoodId());
 		buffer.putInt(creature.getPerformanceCounter());
 		/*
@@ -664,16 +664,22 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 
 	}
 	
-	public IoBuffer buildTargetDelta(long targetId) {
-		
+	public IoBuffer buildLookAtTargetDelta(long targetId) {
 		IoBuffer buffer = bufferPool.allocate(8, false).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.putLong(targetId);
 		int size = buffer.position();
 		buffer.flip();
 		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x10, buffer, size + 4);
-		
 		return buffer;
-
+	}
+	
+	public IoBuffer buildIntendedTargetDelta(long targetId) {
+		IoBuffer buffer = bufferPool.allocate(8, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putLong(targetId);
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x11, buffer, size + 4);
+		return buffer;
 	}
 	
 	public IoBuffer buildHealthDelta(int health) {

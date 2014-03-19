@@ -56,7 +56,7 @@ import engine.resources.scene.Quaternion;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 
-@Entity(version=0)
+@Entity(version=1)
 public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	@NotPersistent
@@ -112,6 +112,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private String inviteSenderName;
 	private long inviteCounter = 0;
 	private int guildId = 0;
+	private long lookAtTarget = 0;
 	private long targetId = 0;
 	private byte moodId = 0;
 	private int performanceCounter = 0;
@@ -959,23 +960,43 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			this.guildId = guildId;
 		}
 	}
-
-	public long getTargetId() {
+	
+	public long getLookAtTarget() {
+		synchronized(objectMutex) {
+			return lookAtTarget;
+		}
+	}
+	
+	public void setLookAtTarget(long lookAtTarget) {
+		synchronized(objectMutex) {
+			this.lookAtTarget = lookAtTarget;
+		}
+		
+		notifyObservers(messageBuilder.buildLookAtTargetDelta(lookAtTarget), true);
+	}
+	
+	public long getIntendedTarget() {
 		synchronized(objectMutex) {
 			return targetId;
 		}
 	}
 
-	public void setTargetId(long targetId) {
+	public void setIntendedTarget(long intendedTarget) {
 		synchronized(objectMutex) {
-			this.targetId = targetId;
+			this.targetId = intendedTarget;
 		}
-		IoBuffer targetDelta = messageBuilder.buildTargetDelta(targetId);
 		
-		notifyObservers(targetDelta, false);
-
+		notifyObservers(messageBuilder.buildIntendedTargetDelta(intendedTarget), true);
 	}
-
+	
+	public long getTargetId() {
+		return getIntendedTarget();
+	}
+	
+	public void setTargetId(long targetId) {
+		setIntendedTarget(targetId);
+	}
+	
 	public long getInviteCounter() {
 		synchronized(objectMutex) {
 			return inviteCounter;
