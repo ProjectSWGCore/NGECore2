@@ -263,6 +263,10 @@ public class SimulationService implements INetworkDispatch {
 	}
 		
 	public boolean remove(SWGObject object, float x, float y, boolean notifyObservers) {
+		if (object == null || !object.isInQuadtree()) {
+			return false;
+		}
+		
 		boolean success = quadTrees.get(object.getPlanet().getName()).remove(x, y, object);
 		object.setIsInQuadtree(success);
 		if(success && notifyObservers) {
