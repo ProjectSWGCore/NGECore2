@@ -9,7 +9,7 @@ def run(core, actor, target, commandString):
 	effect = 'entertainer_smoke_bomb_level_1.cef'
 	
 	if actor.getLevel() < 50:
-		actor.sendSystemMessage('@performance:effect_lack_skill_self')
+		actor.sendSystemMessage('@performance:effect_lack_skill_self', 0)
 		return
 	
 	# TODO: Find out levels for other smoke bomb 2 and 3

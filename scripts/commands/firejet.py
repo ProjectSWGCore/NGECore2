@@ -9,7 +9,7 @@ def run(core, actor, target, commandString):
 	effect = 'entertainer_fire_jets_level_1.cef'
 	
 	if actor.getLevel() < 26:
-		actor.sendSystemMessage('@performance:effect_lack_skill_self')
+		actor.sendSystemMessage('@performance:effect_lack_skill_self', 0)
 		return
 	
 	# TODO: Find out levels for other firejets 2 and 3
