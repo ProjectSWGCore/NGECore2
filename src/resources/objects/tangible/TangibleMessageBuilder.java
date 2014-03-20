@@ -53,7 +53,7 @@ public class TangibleMessageBuilder extends ObjectMessageBuilder {
 		buffer.putInt(0);
 		buffer.putInt(0); // faction vars
 		
-		if(tangible.getCustomization() == null || tangible.getCustomization().length < 1)
+		if(tangible.getCustomization() == null || tangible.getCustomization().length <= 0)
 			buffer.putShort((short) 0);
 		else {
 			buffer.putShort((short) tangible.getCustomization().length);
@@ -64,6 +64,8 @@ public class TangibleMessageBuilder extends ObjectMessageBuilder {
 		buffer.putInt(0); 
 		
 		//buffer.putInt(0); 
+		if(tangible.getOptionsBitmask() == 0)
+			tangible.setOptionsBitmask(0x100);
 		buffer.putInt(tangible.getOptionsBitmask());
 		buffer.putInt(0); // number of item uses
 		buffer.putInt(tangible.getConditionDamage());

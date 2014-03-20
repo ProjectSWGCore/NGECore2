@@ -21,30 +21,131 @@
  ******************************************************************************/
 package services.ai.states;
 
+import java.util.Random;
+import java.util.Vector;
+
+import main.NGECore;
+
+import resources.objects.creature.CreatureObject;
+import resources.objects.weapon.WeaponObject;
+import services.ai.AIActor;
+
 public class AttackState extends AIState {
 
 	@Override
-	public byte onEnter() {
-		// TODO Auto-generated method stub
-		return 0;
+	public byte onEnter(AIActor actor) {
+		CreatureObject creature = actor.getCreature();
+		if(creature.getPosture() == 14)
+			return StateResult.DEAD;
+		if(creature.getCombatFlag() == 0 || creature.getDefendersList().size() == 0 || actor.getFollowObject() == null)
+			return StateResult.FINISHED;
+		actor.scheduleMovement();
+		actor.scheduleRecovery();
+		return StateResult.UNFINISHED;
 	}
 
 	@Override
-	public byte onExit() {
+	public byte onExit(AIActor actor) {
 		// TODO Auto-generated method stub
-		return 0;
+		return StateResult.FINISHED;
 	}
 
 	@Override
-	public byte move() {
-		// TODO Auto-generated method stub
-		return 0;
+	public byte move(AIActor actor) {
+		CreatureObject creature = actor.getCreature();
+		if(creature.getPosture() == 14)
+			return StateResult.DEAD;
+		actor.getMovementPoints().clear();
+		if(actor.getFollowObject() != null) {
+			if(actor.getSpawnPosition().getWorldPosition().getDistance(creature.getWorldPosition()) > 128 || NGECore.getInstance().terrainService.isWater(creature.getPlanetId(), actor.getFollowObject().getWorldPosition())) {
+				actor.removeDefender(actor.getFollowObject());
+				//actor.scheduleMovement();
+				return StateResult.UNFINISHED;
+			}
+			float maxDistance = 0;
+			if(creature.getWeaponId() != 0) {
+				WeaponObject weapon = (WeaponObject) NGECore.getInstance().objectService.getObject(creature.getWeaponId());
+				if(weapon != null)
+					maxDistance = weapon.getMaxRange() - 1;
+			} else if(creature.getSlottedObject("default_weapon") != null) {
+				WeaponObject weapon = (WeaponObject) creature.getSlottedObject("default_weapon");
+				if(weapon != null)
+					maxDistance = weapon.getMaxRange() - 1;
+			}
+			if(actor.getFollowObject().getWorldPosition().getDistance2D(creature.getWorldPosition()) > maxDistance)
+				actor.setNextPosition(actor.getFollowObject().getPosition());
+			else {
+				//recover(actor);
+				actor.scheduleMovement();
+				return StateResult.UNFINISHED;
+			}
+
+		}
+		else
+			return StateResult.FINISHED;
+		doMove(actor);
+		actor.scheduleMovement();
+		return StateResult.UNFINISHED;
 	}
 
 	@Override
-	public byte recover() {
-		// TODO Auto-generated method stub
-		return 0;
+	public byte recover(AIActor actor) {
+		if(actor.getTimeSinceLastAttack() < 2000) {
+			//actor.scheduleRecovery();
+			return StateResult.UNFINISHED;
+		}
+		NGECore core = NGECore.getInstance();
+		CreatureObject creature = actor.getCreature();
+		if(creature.getPosture() == 14)
+			return StateResult.DEAD;
+		if(creature.getCombatFlag() == 0 || creature.getDefendersList().size() == 0 || actor.getFollowObject() == null)
+			return StateResult.FINISHED;
+		CreatureObject target = actor.getFollowObject();
+		if(target != actor.getHighestDamageDealer() && actor.getHighestDamageDealer() != null) {
+			actor.setFollowObject(actor.getHighestDamageDealer());
+			target = actor.getFollowObject();
+		}
+		if(target == null) {
+			System.out.println("null target");
+			actor.scheduleRecovery();
+			return StateResult.UNFINISHED;
+		}
+		if(target.getWorldPosition().getDistance(creature.getWorldPosition()) > 128 || target.getPosture() == 13 || target.getPosture() == 14) {
+			actor.removeDefender(target);
+			actor.scheduleRecovery();
+			return StateResult.UNFINISHED;
+		}
+		float maxDistance = 0;
+		if(creature.getWeaponId() != 0) {
+			WeaponObject weapon = (WeaponObject) NGECore.getInstance().objectService.getObject(creature.getWeaponId());
+			if(weapon != null)
+				maxDistance = weapon.getMaxRange() - 1;
+		} else if(creature.getSlottedObject("default_weapon") != null) {
+			WeaponObject weapon = (WeaponObject) creature.getSlottedObject("default_weapon");
+			if(weapon != null)
+				maxDistance = weapon.getMaxRange() - 1;
+		}
+		if(target.getWorldPosition().getDistance2D(creature.getWorldPosition()) > maxDistance) {
+			actor.scheduleRecovery();
+			return StateResult.UNFINISHED;
+		}
+		actor.faceObject(target);
+		
+		Vector<String> attacks = actor.getMobileTemplate().getAttacks();
+		
+		if(attacks.size() == 0) {
+			core.commandService.callCommand(creature, actor.getMobileTemplate().getDefaultAttack(), target, "");
+		} else {
+			Random rand = new Random();
+			if(rand.nextFloat() <= 0.33f) {
+				core.commandService.callCommand(creature, attacks.get(rand.nextInt(attacks.size())), target, "");
+			} else {
+				core.commandService.callCommand(creature, actor.getMobileTemplate().getDefaultAttack(), target, "");
+			}
+		}
+		actor.setLastAttackTimestamp(System.currentTimeMillis());
+		actor.scheduleRecovery();
+		return StateResult.UNFINISHED;
 	}
 
 }

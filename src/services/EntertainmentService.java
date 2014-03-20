@@ -19,11 +19,13 @@ import org.apache.mina.core.session.IoSession;
 import protocol.swg.ObjControllerMessage;
 import protocol.swg.OkMessage;
 import protocol.swg.objectControllerObjects.BuffBuilderChangeMessage;
+import protocol.swg.objectControllerObjects.BuffBuilderEndMessage;
 import protocol.swg.objectControllerObjects.BuffBuilderStartMessage;
 import resources.common.BuffBuilder;
 import resources.common.Console;
 import resources.common.ObjControllerOpcodes;
 import resources.common.Performance;
+import resources.common.StringUtilities;
 import resources.objects.Buff;
 import resources.objects.BuffItem;
 import resources.objects.creature.CreatureObject;
@@ -55,52 +57,103 @@ public class EntertainmentService implements INetworkDispatch {
 	
 	@Override
 	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> swgOpcodes, Map<Integer, INetworkRemoteEvent> objControllerOpcodes) {
+		objControllerOpcodes.put(ObjControllerOpcodes.BUFF_BUILDER_END, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
+
+				data.order(ByteOrder.LITTLE_ENDIAN);
+				StringUtilities.printBytes(data.array());
+				Client client = core.getClient(session);
+
+				if(client == null)
+					return;
+
+				SWGObject sender = client.getParent();
+
+				if(sender == null)
+					return;
+
+				BuffBuilderEndMessage sentPacket = new BuffBuilderEndMessage();
+				sentPacket.deserialize(data);
+
+				SWGObject buffer = core.objectService.getObject(sentPacket.getBufferId());
+				SWGObject buffRecipient = core.objectService.getObject(sentPacket.getBuffRecipientId());
+
+				if(buffer == null || buffRecipient == null)
+					return;
+
+				// No need to send end packet when buffing yourself.
+				if (buffRecipient != buffer) {
+					if(buffRecipient.getClient() == null || buffRecipient.getClient().getSession() == null)
+						return;
+
+					if (sender.getObjectId() == buffer.getObjectId()) {
+						// send close packet to recipient
+						BuffBuilderEndMessage end = new BuffBuilderEndMessage(sentPacket);
+						end.setObjectId(buffRecipient.getObjectId());
+
+						end.setBufferId(buffer.getObjectId());
+						end.setBuffRecipientId(buffRecipient.getObjectId());
+
+						ObjControllerMessage closeMessage = new ObjControllerMessage(0x0B, end);
+						buffRecipient.getClient().getSession().write(closeMessage.serialize());
+
+					}
+					if (sender.getObjectId() == buffRecipient.getObjectId()) {
+						// send close packet to buffer
+						BuffBuilderEndMessage end = new BuffBuilderEndMessage(sentPacket);
+						end.setObjectId(buffer.getObjectId());
+
+						end.setBufferId(buffer.getObjectId());
+						end.setBuffRecipientId(buffRecipient.getObjectId());
+
+						ObjControllerMessage closeMessage = new ObjControllerMessage(0x0B, end);
+						buffer.getClient().getSession().write(closeMessage.serialize());
+						CreatureObject cre = (CreatureObject) buffer;
+						cre.sendSystemMessage("The buff recipient cancelled the buff builder session.", (byte) 0);
+					}
+				}
+			}
+		});
+
 		objControllerOpcodes.put(ObjControllerOpcodes.BUFF_BUILDER_CHANGE, new INetworkRemoteEvent() {
 
 			@Override
 			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
-				Console.println("BUFF_BUILDER_CHANGE RECIEVED");
 				data.order(ByteOrder.LITTLE_ENDIAN);
-				
+
 				Client client = core.getClient(session);
-				
+
 				if(client == null)
 					return;
-				
+
 				SWGObject sender = client.getParent();
-				
+
 				if(sender == null)
 					return;
-				
+
 				BuffBuilderChangeMessage sentPacket = new BuffBuilderChangeMessage();
 				sentPacket.deserialize(data);
 
 				Vector<BuffItem> statBuffs = sentPacket.getStatBuffs();
-				
-				/*for (BuffItem item : statBuffs) {
-					System.out.println("Buff Name: " + item.getSkillName());
-					System.out.println("Ents bonus to item: " + item.getAmount());
-				}*/
-				
+
 				SWGObject buffer = core.objectService.getObject(sentPacket.getBufferId());
 				SWGObject buffRecipient = core.objectService.getObject(sentPacket.getBuffRecipientId());
-				
-				Console.println("Packet Sender ID: " + sender.getObjectId());
-				
+
 				if (buffer != buffRecipient) {
-					
+
 					BuffBuilderChangeMessage changeMessage = new BuffBuilderChangeMessage();
 					changeMessage.setBuffCost(sentPacket.getBuffCost());
 					changeMessage.setTime(sentPacket.getTime());
 					changeMessage.setBufferId(buffer.getObjectId());
 					changeMessage.setBuffRecipientId(buffRecipient.getObjectId());
-					
+
 					if (!statBuffs.isEmpty())
 						changeMessage.setStatBuffs(statBuffs);
-					
+
 					if (sentPacket.getAccepted() == true && sentPacket.getBuffRecipientAccepted() == 1) {
-						System.out.println("both accepted!");
-						
+
 						if (sentPacket.getBuffCost() > 0) {
 							CreatureObject recipientCreature = (CreatureObject) buffRecipient;
 							if (recipientCreature.getCashCredits() >= sentPacket.getBuffCost()) {
@@ -109,36 +162,47 @@ public class EntertainmentService implements INetworkDispatch {
 								return;
 							}
 						}
-						
-						OkMessage closeMsg = new OkMessage();
-						buffer.getClient().getSession().write(closeMsg.serialize());
-						
+
 						giveInspirationBuff(buffRecipient, statBuffs);
-						
+
+						BuffBuilderEndMessage endBuilder = new BuffBuilderEndMessage(changeMessage);
+						endBuilder.setObjectId(buffer.getObjectId());
+
+						BuffBuilderEndMessage endRecipient = new BuffBuilderEndMessage(changeMessage);
+						endRecipient.setObjectId(buffRecipient.getObjectId());
+
+						ObjControllerMessage closeBuilder = new ObjControllerMessage(0x0B, endBuilder);
+						buffer.getClient().getSession().write(closeBuilder.serialize());
+
+						ObjControllerMessage closeRecipient = new ObjControllerMessage(0x0B, endRecipient);
+						buffRecipient.getClient().getSession().write(closeRecipient.serialize());
+
 					} else if (sentPacket.getAccepted() == true && sentPacket.getBuffRecipientAccepted() == 0) {
 						changeMessage.setAccepted(true);
 						changeMessage.setObjectId(buffRecipient.getObjectId());
-						
+
 						ObjControllerMessage objMsg = new ObjControllerMessage(0x0B, changeMessage);
 						buffRecipient.getClient().getSession().write(objMsg.serialize());
 					} else {
 						changeMessage.setAccepted(false);
 						changeMessage.setObjectId(sentPacket.getBuffRecipientId());
-						
+
 						ObjControllerMessage objMsg = new ObjControllerMessage(0x0B, changeMessage);
 						buffRecipient.getClient().getSession().write(objMsg.serialize());
 					}
-					
+
 				} else {
 					if (sentPacket.getAccepted() == true) {
-						OkMessage closeMsg = new OkMessage();
-						buffer.getClient().getSession().write(closeMsg.serialize());
-						
 						giveInspirationBuff(buffRecipient, statBuffs);
+						BuffBuilderEndMessage endBuilder = new BuffBuilderEndMessage(sentPacket);
+						endBuilder.setObjectId(buffer.getObjectId());
+
+						ObjControllerMessage objMsg = new ObjControllerMessage(0x0B, endBuilder);
+						buffRecipient.getClient().getSession().write(objMsg.serialize());
 					}
 				}
 			}
-			
+
 		});
 	}
 
@@ -202,17 +266,21 @@ public class EntertainmentService implements INetworkDispatch {
 			
 			for (int r = 0; r < buffBuilder.getRowCount(); r++) {
 				String skillName = ((String) buffBuilder.getObject(r, 0));
+				String category = ((String) buffBuilder.getObject(r, 1));
 				String statAffects = ((String) buffBuilder.getObject(r, 2));
 				int maxTimes = ((int) buffBuilder.getObject(r, 3));
+				int cost = ((int) buffBuilder.getObject(r, 4));
 				int affectAmount = ((int) buffBuilder.getObject(r, 5));
-				String requiredExperience = ((String) buffBuilder.getObject(r, 6));
+				String requiredExpertise = ((String) buffBuilder.getObject(r, 6));
 				
 				BuffBuilder item = new BuffBuilder();
 				item.setStatName(skillName);
+				item.setCategory(category);
 				item.setStatAffects(statAffects);
 				item.setMaxTimesApplied(maxTimes);
+				item.setCost(cost);
 				item.setAffectAmount(affectAmount);
-				item.setRequiredExperience(requiredExperience);
+				item.setRequiredExpertise(requiredExpertise);
 				
 				buffBuilderSkills.add(item);
 			}
@@ -235,22 +303,34 @@ public class EntertainmentService implements INetworkDispatch {
 	public void giveInspirationBuff(SWGObject reciever, Vector<BuffItem> buffVector) {
 		CreatureObject buffCreature = (CreatureObject) reciever;
 		
-		Vector<BuffBuilder> availableSkills = buffBuilderSkills;
-		
-		Vector<BuffBuilder> buffsToAdd = new Vector<BuffBuilder>();
-		
+		Vector<BuffBuilder> availableStats = buffBuilderSkills;
+		Vector<BuffItem> stats = new Vector<BuffItem>();
+
 		for (BuffItem item : buffVector) {
-			for (BuffBuilder builder : availableSkills) {
-				if (builder.getStatName().equals(item.getSkillName())) {
-					builder.setEntBonus(item.getBonusAmount());
-					buffsToAdd.add(builder);
-					Console.println("Added buff item: " + builder.getStatAffects() + " with total affect of " + builder.getTotalAffected() + " and ent bonus of " + builder.getEntBonus());
-					continue;
+			for(BuffBuilder builder : availableStats) {
+				if(builder.getStatName().equalsIgnoreCase(item.getSkillName())) {
+					if(builder.getMaxTimesApplied() < item.getInvested())
+						return;
+					
+					// Ent. Expertise Percent + (invested points * affect amount) = stat
+					int bonusPoints = (int) (builder.getAffectAmount() *((float) item.getEntertainerBonus()/100f));
+					int affectTotal = bonusPoints + (item.getInvested() * builder.getAffectAmount());
+
+					BuffItem stat = new BuffItem(builder.getStatAffects(), item.getInvested(), item.getEntertainerBonus());
+					stat.setAffectAmount(affectTotal);
+					
+					/*System.out.println("Invested Points: " + item.getInvested());
+					System.out.println("Entertainer Bonus: " + item.getEntertainerBonus());
+					System.out.println("Affect Total: " + affectTotal);*/
+
+					stats.add(stat);
+					
+					break;
 				}
 			}
 		}
 		
-		reciever.setAttachment("buffWorkshop", buffsToAdd);
+		reciever.setAttachment("buffWorkshop", buffVector);
 		
 		core.buffService.addBuffToCreature(buffCreature, "buildabuff_inspiration");
 		
@@ -336,12 +416,71 @@ public class EntertainmentService implements INetworkDispatch {
 				
 			}
 			
-		},10, 10000, TimeUnit.MILLISECONDS);
+		},10000, 10000, TimeUnit.MILLISECONDS);
 		
 		entertainer.setEntertainerExperience(experienceTask);
 		
 	}
 	
+	public void startSpectating(final CreatureObject spectator, final CreatureObject performer) {
+		final ScheduledFuture<?> spectatorTask = scheduler.scheduleAtFixedRate(new Runnable() {
+
+			@Override
+			public void run() {
+				if (spectator.getPosition().getDistance2D(performer.getWorldPosition()) > (float) 70) {
+
+					if(((performer.getPerformanceType()) ? "dance" : "music").equals("dance")) {
+						spectator.setPerformanceWatchee(null);
+						spectator.sendSystemMessage("You stop watching " + performer.getCustomName() + " because " + performer.getCustomName()
+								+ " is out of range.", (byte) 0);
+					}
+					else {
+						spectator.setPerformanceListenee(null);
+						spectator.sendSystemMessage("You stop listening to " + performer.getCustomName() + " because " + performer.getCustomName()
+								+ " is out of range.", (byte) 0);
+					}
+					spectator.setMoodAnimation("neutral");
+					performer.removeAudience(spectator);
+
+					spectator.getSpectatorTask().cancel(true);
+				}
+			}
+
+		}, 2, 2, TimeUnit.SECONDS);
+
+		spectator.setSpectatorTask(spectatorTask);
+	}
+	
+	public void performFlourish(final CreatureObject performer, int flourish) {
+
+		if (performer.getFlourishCount() > 0) {
+			performer.sendSystemMessage("@performance:wait_flourish_self", (byte) 0);
+			return;
+		}
+		Performance performance = getPerformanceByIndex(performer.getPerformanceId());
+
+		if(performance == null)
+			return;
+
+		String anmFlo = "skill_action_" + flourish;
+
+		if (flourish == 9)
+			anmFlo = "mistake";
+		
+		performer.setFlourishCount(1);
+		performer.sendSystemMessage("@performance:flourish_perform", (byte) 0);
+		performer.doSkillAnimation(anmFlo);
+
+		scheduler.schedule(new Runnable() {
+
+			@Override
+			public void run() {
+				performer.setFlourishCount(0);
+			}
+
+		}, (long) performance.getLoopDuration(), TimeUnit.SECONDS);
+	}
+
 	@Override
 	public void shutdown() {
 

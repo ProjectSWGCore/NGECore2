@@ -191,7 +191,16 @@ public class CharacterService implements INetworkDispatch {
 			
 			
 		});
+		
+		swgOpcodes.put(Opcodes.LagReport, new INetworkRemoteEvent() {
 
+			@Override
+			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
+
+			}
+			
+		});
+		
 		swgOpcodes.put(Opcodes.ClientCreateCharacter, new INetworkRemoteEvent() {
 
 			@Override
@@ -250,6 +259,12 @@ public class CharacterService implements INetworkDispatch {
 				if (stamina >= 1) core.skillModService.addSkillMod(object, "stamina", (int) stamina);
 				if (agility >= 1) core.skillModService.addSkillMod(object, "agility", (int) agility);
 
+				core.skillModService.addSkillMod(object, "language_basic_comprehend", 100);
+				core.skillModService.addSkillMod(object, "language_basic_speak", 100);
+				core.skillModService.addSkillMod(object, "creature_harvesting", 25);
+				core.skillModService.addSkillMod(object, "language_wookiee_comprehend", 100);
+				
+				
 				object.createTransaction(core.getCreatureODB().getEnvironment());
 				
 				PlayerObject player = (PlayerObject) core.objectService.createObject("object/player/shared_player.iff", object.getPlanet());
@@ -264,7 +279,6 @@ public class CharacterService implements INetworkDispatch {
 					if(clientCreateCharacter.getHairCustomization().length > 0)
 						hair.setCustomization(clientCreateCharacter.getHairCustomization());
 					object._add(hair);
-					object.addObjectToEquipList(hair);
 				}
 				
 				TangibleObject inventory = (TangibleObject) core.objectService.createObject("object/tangible/inventory/shared_character_inventory.iff", object.getPlanet());
@@ -273,10 +287,13 @@ public class CharacterService implements INetworkDispatch {
 				appInventory.setContainerPermissions(CreaturePermissions.CREATURE_PERMISSIONS);
 				TangibleObject datapad = (TangibleObject) core.objectService.createObject("object/tangible/datapad/shared_character_datapad.iff", object.getPlanet());
 				datapad.setContainerPermissions(CreatureContainerPermissions.CREATURE_CONTAINER_PERMISSIONS);
+				datapad.setStaticObject(false);
 				TangibleObject bank = (TangibleObject) core.objectService.createObject("object/tangible/bank/shared_character_bank.iff", object.getPlanet());
 				bank.setContainerPermissions(CreatureContainerPermissions.CREATURE_CONTAINER_PERMISSIONS);
+				bank.setStaticObject(false);
 				TangibleObject missionBag = (TangibleObject) core.objectService.createObject("object/tangible/mission_bag/shared_mission_bag.iff", object.getPlanet());
 				missionBag.setContainerPermissions(CreatureContainerPermissions.CREATURE_CONTAINER_PERMISSIONS);
+				missionBag.setStaticObject(false);
 				
 				object._add(inventory);
 				object._add(appInventory);
@@ -308,7 +325,7 @@ public class CharacterService implements INetworkDispatch {
 				object._add(defaultWeapon);
 				object.setWeaponId(defaultWeapon.getObjectID());
 				core.scriptService.callScript("scripts/", "starterclothing", "CreateStarterClothing", core, object, clientCreateCharacter.getStarterProfession(), clientCreateCharacter.getRaceTemplate());
-				core.scriptService.callScript("scripts/", "CreateStartingCharacter", "demo", core, object);
+				core.scriptService.callScript("scripts/", "demo", "CreateStartingCharacter", core, object);
 				
 				core.getCreatureODB().put(object, Long.class, CreatureObject.class, object.getTransaction());
 				// might not need to commit transaction but better safe than sorry
@@ -330,8 +347,25 @@ public class CharacterService implements INetworkDispatch {
 				session.write(core.loginService.getLoginCluster().serialize());
 				session.write(core.loginService.getLoginClusterStatus(client).serialize());
 				
-				session.write(success.serialize());	
-				session.write((new ClientMfdStatusUpdateMessage((float) 2, "/GroundHUD.MFDStatus.vsp.role.targetLevel")).serialize());
+				session.write(success.serialize());
+			}
+			
+		});
+		
+		swgOpcodes.put(Opcodes.NewbieTutorialResponse, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
+				
+			}
+			
+		});
+		
+		swgOpcodes.put(Opcodes.SetJediSlotInfo, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
+				
 			}
 			
 		});

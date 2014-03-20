@@ -29,6 +29,7 @@ public class CombatEvents implements Event {
 	public class DamageTaken implements Event {
 		
 		public CreatureObject attacker;
+		public int damage;
 		
 	}
 

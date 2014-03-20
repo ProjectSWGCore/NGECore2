@@ -32,6 +32,7 @@ import resources.common.collidables.AbstractCollidable.ExitEvent;
 import resources.objects.creature.CreatureObject;
 import services.SimulationService.MoveEvent;
 import services.TerrainService;
+import services.ai.LairActor;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -40,6 +41,7 @@ public class LairSpawnArea extends SpawnArea {
 	
 	private LairGroupTemplate lairGroup;
 	private long lastSpawnTime = 0;
+	private Vector<LairActor> lairs = new Vector<LairActor>();
 	
 	public LairSpawnArea(Planet planet, AbstractCollidable area, LairGroupTemplate lairGroup) {
 		super(planet, area);
@@ -56,23 +58,30 @@ public class LairSpawnArea extends SpawnArea {
 
 	public void spawnLair(CreatureObject object) {
 		
+		NGECore core = NGECore.getInstance();
+		
 		Vector<LairSpawnTemplate> lairTemplates = lairGroup.getLairSpawnTemplates();
 		
 		if(lairGroup == null || lairTemplates.isEmpty())
 			return;
 		
-		if((System.currentTimeMillis() - lastSpawnTime) < 3000)
+		if((System.currentTimeMillis() - lastSpawnTime) < 10000)
 			return;
-	
-		Point3D randomPosition = getRandomPosition(object.getWorldPosition(), 32.f, 256.f);
+			
+		Point3D randomPosition = getRandomPosition(object.getWorldPosition(), 32.f, 200.f);
 		
 		if(randomPosition == null)
 			return;
 		
-		TerrainService terrainSvc = NGECore.getInstance().terrainService;
+		TerrainService terrainSvc = core.terrainService;
 		
 		float height = terrainSvc.getHeight(getPlanet().getID(), randomPosition.x, randomPosition.z);
 		randomPosition.y = height;
+		
+		for(LairActor otherLair : lairs) {
+			if(otherLair.getLairObject().getWorldPosition().getDistance(randomPosition) < 10)
+				return;
+		}
 		
 		if(!terrainSvc.canBuildAtPosition(object, randomPosition.x, randomPosition.z))
 			return;
@@ -83,7 +92,10 @@ public class LairSpawnArea extends SpawnArea {
 		
 		int level = random.nextInt((int) (lairSpawn.getMaxLevel() - lairSpawn.getMinLevel()) + 1) + lairSpawn.getMinLevel();
 		
-		NGECore.getInstance().spawnService.spawnLair(lairSpawn.getLairTemplate(), getPlanet(), randomPosition, level);
+		LairActor lairActor = core.spawnService.spawnLair(lairSpawn.getLairTemplate(), getPlanet(), randomPosition, (short) level);
+		if(lairActor == null)
+			return;
+		lairs.add(lairActor);
 		lastSpawnTime = System.currentTimeMillis();
 		
 	}
@@ -138,7 +150,7 @@ public class LairSpawnArea extends SpawnArea {
 		if(creature.getSlottedObject("ghost") == null)
 			return;
 		
-		if(new Random().nextFloat() <= 0.10)
+		if(new Random().nextFloat() <= 0.05)
 			spawnLair(creature);
 		
 	}

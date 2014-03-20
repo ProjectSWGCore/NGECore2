@@ -21,8 +21,14 @@
  ******************************************************************************/
 package services.ai;
 
+import java.util.Random;
 import java.util.Vector;
+
+import engine.resources.scene.Point3D;
+import main.NGECore;
 import net.engio.mbassy.listener.Handler;
+import resources.common.SpawnPoint;
+import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
 import services.combat.CombatEvents.DamageTaken;
 
@@ -33,6 +39,7 @@ public class LairActor {
 	private int maxSpawns;
 	private String creatureTemplate;
 	private volatile int spawnWave = 0;
+	private short level;
 	
 	public LairActor(TangibleObject lairObject, String creatureTemplate) {
 		this.lairObject = lairObject;
@@ -40,10 +47,11 @@ public class LairActor {
 		lairObject.getEventBus().subscribe(this);
 	}
 	
-	public LairActor(TangibleObject lairObject, String creatureTemplate, int maxSpawns) {
+	public LairActor(TangibleObject lairObject, String creatureTemplate, int maxSpawns, short level) {
 		this.lairObject = lairObject;
 		this.creatureTemplate = creatureTemplate;
 		this.maxSpawns = maxSpawns;
+		this.level = level;
 		lairObject.getEventBus().subscribe(this);
 	}
 
@@ -63,15 +71,17 @@ public class LairActor {
 	@Handler
 	public void handleLairDamageEvent(DamageTaken event) {
 		
+		spawnNewCreatures();
+		
 		for(AIActor ai : creatures) {
-			ai.doAggro(event.attacker);
+			ai.addDefender(event.attacker);
+			event.attacker.addDefender(ai.getCreature());
 		}
 		
-		spawnNewCreatures();
 		
 	}
 
-	private void spawnNewCreatures() {
+	public void spawnNewCreatures() {
 		
 		if(creatures.size() >= maxSpawns)
 			return;
@@ -104,10 +114,27 @@ public class LairActor {
 				return;
 				
 		}
-		
-		// TODO: spawn creatures
+						
+		int creatureAmount = 0;
+		int tries = 0;
+		do {
+			creatureAmount = new Random().nextInt(4) + (maxSpawns / 5);
+			tries++;
+		}
+		while(creatureAmount > maxSpawns && tries < 10);
+				
+		for(int i = 0; i < creatureAmount; i++) {
+			Point3D position = SpawnPoint.getRandomPosition(lairObject.getPosition(), 5, 30, lairObject.getPlanetId());
+			CreatureObject creature = NGECore.getInstance().spawnService.spawnCreature(creatureTemplate, lairObject.getPlanet().getName(), 0, position.x, position.y, position.z, level);
+			if(creature == null || !creature.isInQuadtree()) {
+				System.out.println("NULL Creature");
+				continue;
+			}
+			creatures.add((AIActor) creature.getAttachment("AI"));
+		}
 		
 		healLair();
+		
 		
 	}
 	
@@ -141,5 +168,13 @@ public class LairActor {
 
 	public void setCreatureTemplate(String creatureTemplate) {
 		this.creatureTemplate = creatureTemplate;
+	}
+
+	public short getLevel() {
+		return level;
+	}
+
+	public void setLevel(short level) {
+		this.level = level;
 	}
 }

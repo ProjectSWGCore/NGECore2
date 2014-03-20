@@ -59,41 +59,30 @@ public class ObjectMenuResponse extends ObjControllerObject {
 
 	@Override
 	public IoBuffer serialize() {
+		int size = 37;
+		byte counter = 0;
 		
-		IoBuffer result = IoBuffer.allocate(100).order(ByteOrder.LITTLE_ENDIAN);
-		result.setAutoExpand(true);
+		for (RadialOptions radialOption : radialOptions) {
+			size += 5 + getUnicodeString(radialOption.getDescription()).length;
+		}
 		
+		IoBuffer result = IoBuffer.allocate(size).order(ByteOrder.LITTLE_ENDIAN);
 		result.putInt(ObjControllerMessage.OBJECT_MENU_RESPONSE);
 		result.putLong(ownerId);
 		result.putInt(0);
 		result.putLong(targetId);
 		result.putLong(ownerId);
-		
-		int size = radialOptions.size();
-		result.putInt(size);
-		
-		if(size > 0) {
-			byte counter = 0;
-			for(RadialOptions radialOption : radialOptions) {
-				result.put(++counter);
-				result.put(radialOption.getParentId());
-				result.putShort(radialOption.getOptionId());
-				//result.put(radialOption.getOptionType());
-				result.put((byte) 3);
-
-				if(radialOption.getDescription().length() > 0)
-					result.put(getUnicodeString(radialOption.getDescription()));
-				else
-					result.putInt(0);
-
-			}
+		result.putInt(radialOptions.size());
+		for (RadialOptions radialOption : radialOptions) {
+			result.put(++counter);
+			result.put(radialOption.getParentId());
+			result.putShort(radialOption.getOptionId());
+			result.put(radialOption.getOptionType()); //result.put((byte) 3);
+			result.put(getUnicodeString(radialOption.getDescription()));
 		}
 		result.put(radialCount);
 		
-		int packetSize = result.position();
-		result = IoBuffer.allocate(packetSize).put(result.array(), 0, packetSize);
 		return result.flip();
-
 	}
 
 }

@@ -26,11 +26,13 @@ import java.nio.ByteOrder;
 import org.apache.mina.core.buffer.IoBuffer;
 
 
+
 import protocol.swg.objectControllerObjects.CommandEnqueue;
 import protocol.swg.objectControllerObjects.DataTransform;
 import protocol.swg.objectControllerObjects.DataTransformWithParent;
 import protocol.swg.objectControllerObjects.ObjControllerObject;
 import protocol.swg.objectControllerObjects.UnknownObjController;
+import resources.common.StringUtilities;
 
 public class ObjControllerMessage extends SWGMessage {
 	
@@ -53,8 +55,11 @@ public class ObjControllerMessage extends SWGMessage {
 	public static final int SHOW_FLY_TEXT = 0x01BD;
 	public static final int START_TASK = 0x448;
 	public static final int ANIMATION = 0x00F2;
-	public static final int BUFF_BUILDER_START = 0x025C;
 	public static final int BUFF_BUILDER_CHANGE = 0x025A;
+	public static final int BUFF_BUILDER_END = 0x025B;
+	public static final int BUFF_BUILDER_START = 0x025C;
+	public static final int UI_PLAY_EFFECT = 0x0401;
+	public static final int SHOW_LOOT_BOX = 0x04BC;
 
 	public ObjControllerMessage() { 
 		
@@ -78,7 +83,7 @@ public class ObjControllerMessage extends SWGMessage {
 		buffer.putInt(0x80CE5E46);
 		buffer.putInt(update);
 		buffer.put(objControllerObject.serialize());
-		//System.out.println("OBJMSG: " + buffer.flip().getHexDump());
+		//System.out.println("OBJMSG: " + StringUtilities.bytesToHex(buffer.flip().array()));
 		int size = buffer.position();
 		return IoBuffer.allocate(size).put(buffer.array(), 0, size).flip();
 	}

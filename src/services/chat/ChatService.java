@@ -24,7 +24,6 @@ package services.chat;
 import java.nio.ByteOrder;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
@@ -53,7 +52,6 @@ import protocol.swg.ChatFriendsListUpdate;
 import protocol.swg.ChatInstantMessageToCharacter;
 import protocol.swg.ChatInstantMessagetoClient;
 import protocol.swg.ChatOnAddFriend;
-import protocol.swg.ChatOnGetFriendsList;
 import protocol.swg.ChatOnSendInstantMessage;
 import protocol.swg.ChatOnSendPersistentMessage;
 import protocol.swg.ChatPersistentMessageToClient;
@@ -331,6 +329,16 @@ public class ChatService implements INetworkDispatch {
 			}
 
 		});
+		
+		swgOpcodes.put(Opcodes.ChatRequestRoomList, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
+				//ChatRoomList
+			}
+
+		});
+		
 	}
 	
 	public void playerStatusChange(String name, byte status) {
@@ -544,6 +552,9 @@ public class ChatService implements INetworkDispatch {
 	
 	public SWGObject getObjectByFirstName(String name) {
 		ConcurrentHashMap<IoSession, Client> clients = core.getActiveConnectionsMap();
+		
+		if(name.contains(" "))
+			name = name.split(" ")[0];
 		
 		for(Client client : clients.values()) {
 			if(client.getParent() == null)

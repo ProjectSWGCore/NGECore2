@@ -34,6 +34,7 @@ import protocol.swg.objectControllerObjects.ShowFlyText;
 
 import resources.common.RGB;
 import resources.objects.creature.CreatureObject;
+import services.ai.AIActor;
 
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
@@ -232,7 +233,7 @@ public class TangibleObject extends SWGObject {
 	}
 	
 	public void addDefender(TangibleObject defender) {
-		
+				
 		defendersList.add(defender);
 		
 		if(this instanceof CreatureObject) {
@@ -363,8 +364,8 @@ public class TangibleObject extends SWGObject {
 		
 		destination.getSession().write(messageBuilder.buildBaseline3());
 		destination.getSession().write(messageBuilder.buildBaseline6());
-		//destination.getSession().write(messageBuilder.buildBaseline8());
-		//destination.getSession().write(messageBuilder.buildBaseline9());
+		destination.getSession().write(messageBuilder.buildBaseline8());
+		destination.getSession().write(messageBuilder.buildBaseline9());
 		
 		if(getPvPBitmask() != 0) {
 			UpdatePVPStatusMessage upvpm = new UpdatePVPStatusMessage(getObjectID());

@@ -8,13 +8,13 @@ def setup(core, object):
 	objSvc.createChildObject(object, 'object/tangible/terminal/shared_terminal_cloning.iff', float(1), float(-0.05), float(-1.35), float(1), float(0), 2)
 
 	spawnPoints = Vector()
-	spawnPoints.add(SpawnPoint(-16.6514, -4.29167, -10.4976, 0.709453, 0.704753, 4))
-	spawnPoints.add(SpawnPoint(-16.5965, -4.29167, -14.1652, 0.721346, 0.692575, 4))
-	spawnPoints.add(SpawnPoint(16.5771, -4.29167, -14.2091, 0.71195, -0.702231, 4))
-	spawnPoints.add(SpawnPoint(16.6876, -4.29167, -10.5391, -0.6972, 0.716877, 4))
-	spawnPoints.add(SpawnPoint(6.32992, -4.79167, 0.613332, 0.999992, 0.00405023, 4))
-	spawnPoints.add(SpawnPoint(1.58067, -4.79167, 0.582775, 0.989691, 0.0143216, 4))
-	spawnPoints.add(SpawnPoint(-2.84125, -4.79167, 0.657588, -0.0356012, 0.999366, 4))
+	spawnPoints.add(SpawnPoint(-16.66, -4.29, -10.50, 0.71, 0.70, 4))
+	spawnPoints.add(SpawnPoint(-16.60, -4.29, -14.17, 0.72, 0.69, 4))
+	spawnPoints.add(SpawnPoint(16.58, -4.29, -14.21, 0.71, -0.70, 4))
+	spawnPoints.add(SpawnPoint(16.69, -4.29, -10.54, -0.70, 0.72, 4))
+	spawnPoints.add(SpawnPoint(6.33, -4.79, 0.61, 0.99, 0.01, 4))
+	spawnPoints.add(SpawnPoint(1.58, -4.79, 0.58, 0.99, 0.01, 4))
+	spawnPoints.add(SpawnPoint(-2.84, -4.79, 0.66, -0.04, 0.99, 4))
 		
 	object.setAttachment('spawnPoints', spawnPoints)
 

@@ -4,12 +4,12 @@ from resources.common import SpawnPoint
 
 def setup(core, object):
 	objSvc = core.objectService
-	objSvc.createChildObject(object, 'object/tangible/terminal/shared_terminal_cloning.iff', float(-5.5), float(0.125265), float(-3.43841), float(0.699512), float(0.714621), 6)
+	objSvc.createChildObject(object, 'object/tangible/terminal/shared_terminal_cloning.iff', float(-5.5), float(0.13), float(-3.44), float(0.70), float(0.71), 6)
 	
 	spawnPoints = Vector()
-	spawnPoints.add(SpawnPoint(4.44727, 0.125266, -3.80136, -0.706468, 0.707745, 5))
-	spawnPoints.add(SpawnPoint(4.65395, 0.125266, 1.49466, 0.714548, -0.699587, 4))
-	spawnPoints.add(SpawnPoint(-3.99569, 0.125266, -3.51553, 0.70407, 0.710131, 6))
+	spawnPoints.add(SpawnPoint(4.45, 0.13, -3.80, -0.71, 0.71, 5))
+	spawnPoints.add(SpawnPoint(4.65, 0.13, 1.50, 0.71, -0.70, 4))
+	spawnPoints.add(SpawnPoint(-3.99, 0.13, -3.52, 0.70, 0.71, 6))
 		
 	object.setAttachment('spawnPoints', spawnPoints)
 

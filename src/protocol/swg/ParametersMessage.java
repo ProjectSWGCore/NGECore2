@@ -40,7 +40,7 @@ public class ParametersMessage extends SWGMessage {
 		IoBuffer packet = IoBuffer.allocate(10).order(ByteOrder.LITTLE_ENDIAN);
 		
 		packet.putShort((short) 2);
-		packet.putInt(0x7102B15F);
+		packet.putInt(0x487652DA);
 		packet.putInt(0x00000384);
 		
 		return packet.flip();

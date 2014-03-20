@@ -21,15 +21,13 @@
  ******************************************************************************/
 package resources.gcw;
 
-import java.nio.ByteOrder;
-
 import org.apache.mina.core.buffer.IoBuffer;
 
 import com.sleepycat.persist.model.Persistent;
 
 import resources.objects.Delta;
 
-@Persistent
+@Persistent(version=0)
 public class OtherServerGCWZonePercent extends Delta implements Cloneable {
 	
 	private String zone = "";
@@ -37,6 +35,10 @@ public class OtherServerGCWZonePercent extends Delta implements Cloneable {
 
 	public OtherServerGCWZonePercent(String zone) {
 		this.zone = zone;
+	}
+	
+	public OtherServerGCWZonePercent() {
+		
 	}
 	
 	public String getZone() {
@@ -60,7 +62,7 @@ public class OtherServerGCWZonePercent extends Delta implements Cloneable {
 	
 	public byte[] getBytes() {
 		synchronized(objectMutex) {
-			IoBuffer buffer = bufferPool.allocate((2 + zone.length() + 4), false).order(ByteOrder.LITTLE_ENDIAN);
+			IoBuffer buffer = createBuffer((2 + zone.length() + 4));
 			buffer.put(getAsciiString(zone));
 			buffer.putInt(percent);
 			return buffer.array();

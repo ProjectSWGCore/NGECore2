@@ -21,9 +21,15 @@
  ******************************************************************************/
 package services.ai;
 
+import java.util.Random;
 import java.util.Vector;
 
+import resources.objects.cell.CellObject;
+import resources.objects.creature.CreatureObject;
+
+import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
+import engine.resources.scene.Quaternion;
 
 import main.NGECore;
 
@@ -36,6 +42,17 @@ public class AIService {
 		this.core = core;
 	}
 	
-	
+	public Vector<Point3D> findPath(int planetId, Point3D pointA, Point3D pointB) {
+		
+		// TODO: implement cell pathfinding, returning straight line for now
+		Vector<Point3D> path = new Vector<Point3D>();
+		path.add(pointA);
+		float x = pointB.x - 1 + new Random().nextFloat();
+		float z = pointB.z - 1 + new Random().nextFloat();
+		Point3D endPoint = new Point3D(x, core.terrainService.getHeight(planetId, x, z), z);
+		endPoint.setCell(pointB.getCell());
+		path.add(endPoint);
+		return path;
+	}
 
 }

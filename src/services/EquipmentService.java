@@ -251,6 +251,11 @@ public class EquipmentService implements INetworkDispatch {
 			
 		}	
 		
+		if(item.getAttachment("unity") != null) {
+			actor.sendSystemMessage("@unity:cannot_remove_ring", (byte) 0);
+			return;
+		}
+		
 		if(actor.getEquipmentList().contains(item))
 			actor.removeObjectFromEquipList(item);
 

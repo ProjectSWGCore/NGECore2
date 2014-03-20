@@ -48,6 +48,7 @@ import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.waypoint.WaypointObject;
 import resources.objects.weapon.WeaponObject;
+import services.ai.AIActor;
 import services.combat.CombatEvents.DamageTaken;
 import services.command.CombatCommand;
 import services.sui.SUIService.MessageBoxType;
@@ -257,6 +258,7 @@ public class CombatService implements INetworkDispatch {
 		target.setConditionDamage(target.getConditionDamage() + damage);
 		DamageTaken event = events.new DamageTaken();
 		event.attacker = attacker;
+		event.damage = damage;
 		target.getEventBus().publish(event);
 	}
 
@@ -379,23 +381,25 @@ public class CombatService implements INetworkDispatch {
 	private void sendCombatPackets(CreatureObject attacker, TangibleObject target, WeaponObject weapon, CombatCommand command, int actionCounter, float damage, int armorAbsorbed, int hitType) {
 		
 		String animationStr = command.getRandomAnimation(weapon);
-		
 		CombatAction combatAction = new CombatAction(CRC.StringtoCRC(animationStr), attacker.getObjectID(), weapon.getObjectID(), target.getObjectID(), command.getCommandCRC());
 		ObjControllerMessage objController = new ObjControllerMessage(0x1B, combatAction);
 		attacker.notifyObserversInRange(objController, true, 125);
-		
-		StartTask startTask = new StartTask(actionCounter, attacker.getObjectID(), command.getCommandCRC(), CRC.StringtoCRC(command.getCooldownGroup()), command.getCooldown());
-		ObjControllerMessage objController2 = new ObjControllerMessage(0x0B, startTask);
-		attacker.getClient().getSession().write(objController2.serialize());
-		
-		CommandEnqueueRemove commandRemove = new CommandEnqueueRemove(attacker.getObjectID(), actionCounter);
-		ObjControllerMessage objController3 = new ObjControllerMessage(0x0B, commandRemove);
-		attacker.getClient().getSession().write(objController3.serialize());
-		
 		CombatSpam combatSpam = new CombatSpam(attacker.getObjectID(), target.getObjectID(), weapon.getObjectID(), (int) damage, armorAbsorbed, hitType);
 		ObjControllerMessage objController4 = new ObjControllerMessage(0x1B, combatSpam);
 		IoBuffer spam = objController4.serialize();
-		attacker.getClient().getSession().write(spam);
+		
+		if(attacker.getClient() != null) {
+
+			StartTask startTask = new StartTask(actionCounter, attacker.getObjectID(), command.getCommandCRC(), CRC.StringtoCRC(command.getCooldownGroup()), command.getCooldown());
+			ObjControllerMessage objController2 = new ObjControllerMessage(0x0B, startTask);
+			attacker.getClient().getSession().write(objController2.serialize());
+			
+			CommandEnqueueRemove commandRemove = new CommandEnqueueRemove(attacker.getObjectID(), actionCounter);
+			ObjControllerMessage objController3 = new ObjControllerMessage(0x0B, commandRemove);
+			attacker.getClient().getSession().write(objController3.serialize());
+			attacker.getClient().getSession().write(spam);
+
+		}
 		
 		if(target.getClient() != null)
 			target.getClient().getSession().write(spam);
@@ -409,13 +413,15 @@ public class CombatService implements INetworkDispatch {
 		ObjControllerMessage objController = new ObjControllerMessage(0x1B, combatAction);
 		attacker.notifyObserversInRange(objController, true, 125);
 		
-		StartTask startTask = new StartTask(actionCounter, attacker.getObjectID(), command.getCommandCRC(), CRC.StringtoCRC(command.getCooldownGroup()), command.getCooldown());
-		ObjControllerMessage objController2 = new ObjControllerMessage(0x0B, startTask);
-		attacker.getClient().getSession().write(objController2.serialize());
-		
-		CommandEnqueueRemove commandRemove = new CommandEnqueueRemove(attacker.getObjectID(), actionCounter);
-		ObjControllerMessage objController3 = new ObjControllerMessage(0x0B, commandRemove);
-		attacker.getClient().getSession().write(objController3.serialize());
+		if(attacker.getClient() != null) {
+			StartTask startTask = new StartTask(actionCounter, attacker.getObjectID(), command.getCommandCRC(), CRC.StringtoCRC(command.getCooldownGroup()), command.getCooldown());
+			ObjControllerMessage objController2 = new ObjControllerMessage(0x0B, startTask);
+			attacker.getClient().getSession().write(objController2.serialize());
+			
+			CommandEnqueueRemove commandRemove = new CommandEnqueueRemove(attacker.getObjectID(), actionCounter);
+			ObjControllerMessage objController3 = new ObjControllerMessage(0x0B, commandRemove);
+			attacker.getClient().getSession().write(objController3.serialize());
+		}
 
 	}
 
@@ -490,7 +496,17 @@ public class CombatService implements INetworkDispatch {
 		if(!target.isAttackableBy(attacker))
 			return false;
 		
-		target.addDefender(attacker);
+		if(target.getAttachment("AI") instanceof AIActor && attacker instanceof CreatureObject) {
+			((AIActor) target.getAttachment("AI")).addDefender((CreatureObject) attacker);
+		} else {
+			target.addDefender(attacker);
+		}
+		if(attacker.getAttachment("AI") instanceof AIActor && target instanceof CreatureObject) {
+			((AIActor) attacker.getAttachment("AI")).addDefender((CreatureObject) target);
+		} else {
+			attacker.addDefender(target);
+		}
+
 		attacker.addDefender(target);
 		
 		return true;
@@ -761,7 +777,7 @@ public class CombatService implements INetworkDispatch {
 	
 	public void applyDamage(CreatureObject attacker, final CreatureObject target, int damage) {
 		
-		if(target.getHealth() - damage <= 0) {
+		if(target.getHealth() - damage <= 0 && target.getSlottedObject("ghost") != null) {
 			
 			if(target.hasBuff("incapWeaken")) {
 				deathblowPlayer(attacker, target);
@@ -798,11 +814,20 @@ public class CombatService implements INetworkDispatch {
 			if(target.getSlottedObject("ghost") != null)
 				attacker.sendSystemMessage("You incapacitate " + target.getCustomName() + ".", (byte) 0);
 			return;
+		} else if(target.getHealth() - damage <= 0 && target.getAttachment("AI") != null) {
+			synchronized(target.getMutex()) {
+				target.setHealth(0);
+				target.setPosture((byte) 14);
+			}
+			return;
 		}
 		synchronized(target.getMutex()) {
 			target.setHealth(target.getHealth() - damage);
 		}
-		
+		DamageTaken event = events.new DamageTaken();
+		event.attacker = attacker;
+		event.damage = damage;
+		target.getEventBus().publish(event);
 	}
 	
 	private boolean isInConeAngle(CreatureObject attacker, SWGObject target, int coneLength, int coneWidth, float directionX, float directionZ) {
@@ -829,6 +854,16 @@ public class CombatService implements INetworkDispatch {
 		
 		if(healer == target)
 			return true;
+		
+		PlayerObject healerPo = (PlayerObject) healer.getSlottedObject("ghost");
+		
+		if (healerPo != null && !healerPo.getProfession().startsWith("medic")) {
+			return false;
+		}
+		
+		if (areInDuel(healer, target)) {
+			return false;
+		}
 		
 		if(healer.getFaction().equals(target.getFaction())) {
 			

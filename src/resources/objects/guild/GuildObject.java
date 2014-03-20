@@ -46,12 +46,11 @@ import com.sleepycat.persist.model.NotPersistent;
 
 import engine.clients.Client;
 import engine.resources.objects.IPersistent;
-import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Entity(version=0)
+@Entity(version=1)
 public class GuildObject extends UniverseObject implements IPersistent {
 	
 	protected NGECore core;
@@ -62,6 +61,8 @@ public class GuildObject extends UniverseObject implements IPersistent {
 	private Map<String, Map<String, CurrentServerGCWZonePercent>> zoneMap = new TreeMap<String, Map<String, CurrentServerGCWZonePercent>>();
 	@NotPersistent
 	private Transaction txn;
+	
+	private long nextInstanceId = 0;
 	
 	// GILD 3
 	private float complexity = 0x803F0F00;
@@ -279,6 +280,12 @@ public class GuildObject extends UniverseObject implements IPersistent {
 			
 			return false;
 		}
+	}
+	
+	public synchronized long getNextInstanceId() {
+		long ret = nextInstanceId;
+		nextInstanceId++;
+		return ret;
 	}
 	
 	@Override

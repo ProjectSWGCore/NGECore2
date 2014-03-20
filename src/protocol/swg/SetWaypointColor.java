@@ -26,8 +26,6 @@ import java.nio.ByteBuffer;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import resources.common.StringUtilities;
-
 public class SetWaypointColor extends SWGMessage {
 
 	private long objectId;

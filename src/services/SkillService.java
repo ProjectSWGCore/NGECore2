@@ -274,7 +274,7 @@ public class SkillService implements INetworkDispatch {
 					addSkill(creature, expertiseName);
 					if(!FileUtilities.doesFileExist("scripts/expertise/" + expertiseName + ".py"))
 						continue;
-					core.scriptService.callScript("scripts/expertise/", "addAbilities", expertiseName, core, creature, player);
+					core.scriptService.callScript("scripts/expertise/", expertiseName, "addAbilities", core, creature, player);
 				}
 				
 			}
