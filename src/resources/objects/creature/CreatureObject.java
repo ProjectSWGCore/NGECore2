@@ -31,6 +31,7 @@ import org.apache.mina.core.buffer.IoBuffer;
 
 import protocol.swg.ChatSystemMessage;
 import protocol.swg.ObjControllerMessage;
+import protocol.swg.PlayClientEffectObjectMessage;
 import protocol.swg.PlayMusicMessage;
 import protocol.swg.UpdatePostureMessage;
 import protocol.swg.UpdatePVPStatusMessage;
@@ -166,6 +167,9 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private boolean staticNPC = false; // temp
 	@NotPersistent
 	private int flourishCount = 0;
+	
+	@NotPersistent
+	private boolean performingEffect;
 	
 	public CreatureObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
 		super(objectID, planet, Template, position, orientation);
@@ -1653,6 +1657,18 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	public void setSpectatorTask(ScheduledFuture<?> spectatorTask) {
 		synchronized(objectMutex) {
 			this.spectatorTask = spectatorTask;
+		}
+	}
+
+	public boolean isPerformingEffect() {
+		synchronized(objectMutex) {
+			return performingEffect;
+		}
+	}
+
+	public void setPerformingEffect(boolean hasEffect) {
+		synchronized(objectMutex) {
+			this.performingEffect = hasEffect;
 		}
 	}
 }
