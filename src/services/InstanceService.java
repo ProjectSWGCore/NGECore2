@@ -66,6 +66,7 @@ public class InstanceService implements INetworkDispatch {
 		private CreatureObject owner;
 		private List<CreatureObject> participants = new CopyOnWriteArrayList<CreatureObject>();
 		private List<CreatureObject> activeParticipants = new CopyOnWriteArrayList<CreatureObject>();
+		private List<SWGObject> objectList = new CopyOnWriteArrayList<SWGObject>();
 		private ScheduledFuture<?> task;
 		private boolean faulty = false;
 		private boolean closed = false;
@@ -137,6 +138,10 @@ public class InstanceService implements INetworkDispatch {
 			return participants;
 		}
 		
+		public List<SWGObject> getObjectList() {
+			return objectList;
+		}
+		
 		public synchronized boolean addParticipant(CreatureObject participant) {
 			if (activeParticipants.contains(participant)) {
 				return true;
@@ -185,6 +190,12 @@ public class InstanceService implements INetworkDispatch {
 		}
 		
 		public synchronized void close() {
+			for (SWGObject object : objectList) {
+				core.objectService.destroyObject(object);
+			}
+			
+			objectList.clear();
+			
 			closed = true;
 		}
 		
