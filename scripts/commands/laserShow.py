@@ -10,5 +10,5 @@ def run(core, actor, target, commandString):
 		return
 	
 	if core.entertainmentService.performEffect(actor, 'LaserShow', 'clienteffect/entertainer_laser_show.cef', target) is True:
-		actor.sendSystemMessage('@performance:effect_perform_lase_show', 0)
+		actor.sendSystemMessage('@performance:effect_perform_laser_show', 0)
 	return
