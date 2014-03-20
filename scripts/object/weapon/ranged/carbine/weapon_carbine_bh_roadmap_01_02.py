@@ -11,7 +11,7 @@ def setup(core, object):
 	object.setFloatAttribute('cat_wpn_damage.wpn_attack_speed', 0.6)
 	object.setStringAttribute('cat_wpn_damage.wpn_damage_type', 'Energy')
 	object.setStringAttribute('cat_wpn_damage.damage', '109-218')
-	object.setStringAttribute('cat_wpn_damage.range', '0-55m')
+	object.setStringAttribute('cat_wpn_damage.wpn_range', '0-55m')
 	object.setStringAttribute('cat_wpn_damage.wpn_category', 'Carbine')
 	object.setIntAttribute('cat_wpn_damage.dps', object.getDamagePerSecond())
 	return
