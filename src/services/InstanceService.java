@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -63,9 +64,8 @@ public class InstanceService implements INetworkDispatch {
 		private int duration = 0;
 		private int lockoutTime = 0;
 		private CreatureObject owner;
-		private List<CreatureObject> participants = new ArrayList<CreatureObject>();
-		private List<CreatureObject> activeParticipants = new ArrayList<CreatureObject>();
-		protected final Object objectMutex = new Object();
+		private List<CreatureObject> participants = new CopyOnWriteArrayList<CreatureObject>();
+		private List<CreatureObject> activeParticipants = new CopyOnWriteArrayList<CreatureObject>();
 		private ScheduledFuture<?> task;
 		private boolean faulty = false;
 		private boolean closed = false;
@@ -85,68 +85,48 @@ public class InstanceService implements INetworkDispatch {
 			
 		}
 		
-		public long getInstanceId() {
-			synchronized(objectMutex) {
-				return instanceId;
-			}
+		public synchronized long getInstanceId() {
+			return instanceId;
 		}
 		
-		public String getName() {
-			synchronized(objectMutex) {
-				return name;
-			}
+		public synchronized String getName() {
+			return name;
 		}
 		
-		public long getStartTime() {
-			synchronized(objectMutex) {
-				return startTime;
-			}
+		public synchronized long getStartTime() {
+			return startTime;
 		}
 		
-		public long getTimeRemaining() {
-			synchronized(objectMutex) {
-				return ((closed) ? 0 : (((long) duration) - (System.currentTimeMillis() - startTime)));
-			}
+		public synchronized long getTimeRemaining() {
+			return ((closed) ? 0 : (((long) duration) - (System.currentTimeMillis() - startTime)));
 		}
 		
-		public boolean isOpen() {
-			synchronized(objectMutex) {
-				if (closed || getTimeRemaining() <= 0) {
-					return false;
-				}
-				
-				return true;
+		public synchronized boolean isOpen() {
+			if (closed || getTimeRemaining() <= 0) {
+				return false;
 			}
+			
+			return true;
 		}
 		
-		public Point3D getInstancePosition() {
-			synchronized(objectMutex) {
-				return instancePosition;
-			}
+		public synchronized Point3D getInstancePosition() {
+			return instancePosition;
 		}
 		
-		public Point3D getSpawnPosition() {
-			synchronized(objectMutex) {
-				return spawnPosition;
-			}
+		public synchronized Point3D getSpawnPosition() {
+			return spawnPosition;
 		}
 		
-		public int getDuration() {
-			synchronized(objectMutex) {
-				return duration;
-			}
+		public synchronized int getDuration() {
+			return duration;
 		}
 		
-		public int getLockoutTime() {
-			synchronized(objectMutex) {
-				return lockoutTime;
-			}
+		public synchronized int getLockoutTime() {
+			return lockoutTime;
 		}
 		
-		public CreatureObject getOwner() {
-			synchronized(objectMutex) {
-				return owner;
-			}
+		public synchronized CreatureObject getOwner() {
+			return owner;
 		}
 		
 		public List<CreatureObject> getParticipants() {
@@ -157,75 +137,55 @@ public class InstanceService implements INetworkDispatch {
 			return participants;
 		}
 		
-		public boolean addParticipant(CreatureObject participant) {
-			synchronized(objectMutex) {
-				if (activeParticipants.contains(participant)) {
-					return true;
-				}
-				
-				if (activeParticipants.size() >= 8) {
-					return false;
-				}
-				
-				activeParticipants.add(participant);
-				participants.add(participant);
-				
+		public synchronized boolean addParticipant(CreatureObject participant) {
+			if (activeParticipants.contains(participant)) {
 				return true;
 			}
+			
+			if (activeParticipants.size() >= 8) {
+				return false;
+			}
+			
+			activeParticipants.add(participant);
+			participants.add(participant);
+			
+			return true;
 		}
 		
-		public boolean isActiveParticipant(CreatureObject participant) {
-			synchronized(objectMutex) {
-				return activeParticipants.contains(participant);
-			}
+		public synchronized boolean isActiveParticipant(CreatureObject participant) {
+			return activeParticipants.contains(participant);
 		}
 		
-		public boolean isFormerParticipant(CreatureObject participant) {
-			synchronized(objectMutex) {
-				return participants.contains(participant);
-			}
+		public synchronized boolean isFormerParticipant(CreatureObject participant) {
+			return participants.contains(participant);
 		}
 		
-		public boolean removeParticipant(CreatureObject participant) {
-			synchronized(objectMutex) {
-				return activeParticipants.remove(participant);
-			}
+		public synchronized boolean removeParticipant(CreatureObject participant) {
+			return activeParticipants.remove(participant);
 		}
 		
-		public ScheduledFuture<?> getTask() {
-			synchronized(objectMutex) {
-				return task;
-			}
+		public synchronized ScheduledFuture<?> getTask() {
+			return task;
 		}
 		
-		public void setTask(ScheduledFuture<?> task) {
-			synchronized(objectMutex) {
-				this.task = task;
-			}
+		public synchronized void setTask(ScheduledFuture<?> task) {
+			this.task = task;
 		}
 		
-		public boolean isFaulty() {
-			synchronized(objectMutex) {
-				return faulty;
-			}
+		public synchronized boolean isFaulty() {
+			return faulty;
 		}
 		
-		public void setFaulty(boolean faulty) {
-			synchronized(objectMutex) {
-				this.faulty = faulty;
-			}
+		public synchronized void setFaulty(boolean faulty) {
+			this.faulty = faulty;
 		}
 		
-		public boolean isClosed() {
-			synchronized(objectMutex) {
-				return closed;
-			}
+		public synchronized boolean isClosed() {
+			return closed;
 		}
 		
-		public void close() {
-			synchronized(objectMutex) {
-				closed = true;
-			}
+		public synchronized void close() {
+			closed = true;
 		}
 		
 	}
@@ -235,8 +195,6 @@ public class InstanceService implements INetworkDispatch {
 	}
 	
 	/*
-	 * @author Treeku
-	 * 
 	 * @description Create a brand new instance.
 	 * 
 	 * @param instanceName Buildout name of the instance to build.
@@ -316,8 +274,6 @@ public class InstanceService implements INetworkDispatch {
 	
 	
 	/*
-	 * @author Treeku
-	 * 
 	 * @description Queue them for an instance for 19 seconds, remove if none available.
 	 * 
 	 * @param instanceName Name of the instance .py script.
@@ -397,8 +353,6 @@ public class InstanceService implements INetworkDispatch {
 	}
 	
 	/*
-	 * @author Treeku
-	 * 
 	 * @description Adds a player to an instance. Can be used directly to avoid queue.
 	 * 
 	 * @param instance Instance object.
@@ -406,7 +360,7 @@ public class InstanceService implements INetworkDispatch {
 	 * 
 	 * @return None.
 	 */
-	public synchronized void add(Instance instance, CreatureObject creature) {
+	public void add(Instance instance, CreatureObject creature) {
 		try {
 			String terrain = core.scriptService.callScript("scripts/instances/", instance.getName(), "getTerrain").asString();
 			Planet planet = core.terrainService.getPlanetByPath(terrain);
@@ -462,8 +416,6 @@ public class InstanceService implements INetworkDispatch {
 	}
 	
 	/*
-	 * @author Treeku
-	 * 
 	 * @description Removes a player from an instance. Can be used directly.
 	 * 
 	 * @param instance Instance object.
@@ -499,8 +451,6 @@ public class InstanceService implements INetworkDispatch {
 	}
 	
 	/*
-	 * @author Treeku
-	 * 
 	 * @description Closes an instance.
 	 * 
 	 * @param instance Instance object.
@@ -538,8 +488,6 @@ public class InstanceService implements INetworkDispatch {
 	}
 	
 	/*
-	 * @author Treeku
-	 * 
 	 * @description Checks if an instance area is in use.
 	 * 
 	 * @param instanceName Buildout name of the instance.
@@ -562,8 +510,6 @@ public class InstanceService implements INetworkDispatch {
 	}
 	
 	/*
-	 * @author Treeku
-	 * 
 	 * @description Gets an instance object from an instanceId.
 	 * 
 	 * @param instanceId Id of an instance you want an object for.
@@ -583,8 +529,6 @@ public class InstanceService implements INetworkDispatch {
 	}
 	
 	/*
-	 * @author Treeku
-	 * 
 	 * @description Checks if player is in an instance.
 	 * 
 	 * @param creature Player's creature object.
@@ -604,8 +548,6 @@ public class InstanceService implements INetworkDispatch {
 	}
 	
 	/*
-	 * @author Treeku
-	 * 
 	 * @description Checks if player is in a specific instance.
 	 * 
 	 * @param instanceName Buildout name of the instance.
@@ -626,8 +568,6 @@ public class InstanceService implements INetworkDispatch {
 	}
 	
 	/*
-	 * @author Treeku
-	 * 
 	 * @description Checks if player is in a specific instance.
 	 * 
 	 * @param instance Instance object.
@@ -640,8 +580,6 @@ public class InstanceService implements INetworkDispatch {
 	}
 	
 	/*
-	 * @author Treeku
-	 * 
 	 * @description Finds the instance object a player is currently in.
 	 * 
 	 * @param creature Player's creature object.
@@ -661,8 +599,6 @@ public class InstanceService implements INetworkDispatch {
 	}
 	
 	/*
-	 * @author Treeku
-	 * 
 	 * @description Finds the instance object of an instance a player is/has been in.
 	 * 
 	 * @param instanceName Buildout name of the instance.
@@ -683,8 +619,6 @@ public class InstanceService implements INetworkDispatch {
 	}
 	
 	/*
-	 * @author Treeku
-	 * 
 	 * @description Checks if player has any instance lockouts.
 	 * 
 	 * @param creature Player's creature object.
@@ -704,8 +638,6 @@ public class InstanceService implements INetworkDispatch {
 	}
 	
 	/*
-	 * @author Treeku
-	 * 
 	 * @description Finds the instance object of an instance a player is/has been in.
 	 * 
 	 * @param instanceName Buildout name of the instance.
@@ -728,8 +660,6 @@ public class InstanceService implements INetworkDispatch {
 	}
 	
 	/*
-	 * @author Treeku
-	 * 
 	 * @description Checks if player is locked out of an instance.
 	 * 
 	 * @param instanceName Buildout name of the instance.
@@ -750,8 +680,6 @@ public class InstanceService implements INetworkDispatch {
 	}
 	
 	/*
-	 * @author Treeku
-	 * 
 	 * @description Shows the instance UI.
 	 * 
 	 * @param creature Player's creature object.
