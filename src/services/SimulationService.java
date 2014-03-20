@@ -162,6 +162,7 @@ public class SimulationService implements INetworkDispatch {
 		core.commandService.registerCommand("editbiography");
 		core.commandService.registerCommand("setbiography");
 		core.commandService.registerCommand("requestbiography");
+		core.commandService.registerCommand("eject");
 
 	}
 	
@@ -262,6 +263,10 @@ public class SimulationService implements INetworkDispatch {
 	}
 		
 	public boolean remove(SWGObject object, float x, float y, boolean notifyObservers) {
+		if (object == null || !object.isInQuadtree()) {
+			return false;
+		}
+		
 		boolean success = quadTrees.get(object.getPlanet().getName()).remove(x, y, object);
 		object.setIsInQuadtree(success);
 		if(success && notifyObservers) {
@@ -436,7 +441,7 @@ public class SimulationService implements INetworkDispatch {
 			
 		});
 		
-		objControllerOpcodes.put(ObjControllerOpcodes.TARGET_UPDATE, new INetworkRemoteEvent() {
+		objControllerOpcodes.put(ObjControllerOpcodes.lookAtTarget, new INetworkRemoteEvent() {
 
 			@Override
 			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
@@ -459,19 +464,39 @@ public class SimulationService implements INetworkDispatch {
 				TargetUpdate targetUpdate = new TargetUpdate();
 				targetUpdate.deserialize(data);
 
-				object.setTargetId(targetUpdate.getTargetId());
+				object.setLookAtTarget(targetUpdate.getTargetId());
 
 			}
-
+			
 		});
 		
-		objControllerOpcodes.put(ObjControllerOpcodes.HOVER_TARGET, new INetworkRemoteEvent() {
+		objControllerOpcodes.put(ObjControllerOpcodes.intendedTarget, new INetworkRemoteEvent() {
 
 			@Override
 			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
 
+				data.order(ByteOrder.LITTLE_ENDIAN);
+
+				Client client = core.getClient(session);
+
+				if(client == null) {
+					System.out.println("NULL Client");
+					return;
+				}
+
+				if(client.getParent() == null) {
+					System.out.println("NULL Object");
+					return;
+				}
+				CreatureObject object = (CreatureObject) client.getParent();
+
+				TargetUpdate targetUpdate = new TargetUpdate();
+				targetUpdate.deserialize(data);
+
+				object.setIntendedTarget(targetUpdate.getTargetId());
+
 			}
-			
+
 		});
 		
 	}

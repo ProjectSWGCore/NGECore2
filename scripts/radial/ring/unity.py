@@ -14,6 +14,8 @@ def createRadial(core, owner, target, radials):
 	if ghost.getSpouseName() is None or ghost.getSpouseName() is "":
 		targetPlayer = core.objectService.getObject(owner.getTargetId())
 		if targetPlayer is not None and targetPlayer.getSlottedObject('ghost') is not None:
+			if targetPlayer.getObjectID() == owner.getObjectID():
+				return
 			radials.add(RadialOptions(0, 69, 1, '@unity:mnu_propose'))
 			return
 	else:

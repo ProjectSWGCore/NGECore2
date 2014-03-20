@@ -110,7 +110,7 @@ public class BuffService implements INetworkDispatch {
         }	
 			
         if(FileUtilities.doesFileExist("scripts/buffs/" + buffName + ".py"))
-        	core.scriptService.callScript("scripts/buffs/", "setup", buffName, core, creature, buff);
+        	core.scriptService.callScript("scripts/buffs/", buffName, "setup", core, creature, buff);
 		
 		creature.addBuff(buff);
 		
@@ -168,7 +168,7 @@ public class BuffService implements INetworkDispatch {
         	 creature.removeDot(dot);
          }
          if(FileUtilities.doesFileExist("scripts/buffs/" + buff.getBuffName() + ".py"))
-        	 core.scriptService.callScript("scripts/buffs/", "removeBuff", buff.getBuffName(), core, creature, buff);
+        	 core.scriptService.callScript("scripts/buffs/", buff.getBuffName(), "removeBuff", core, creature, buff);
          creature.removeBuff(buff);
          
         for (String effect : buff.getParticleEffect().split(",")) {

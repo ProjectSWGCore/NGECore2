@@ -191,18 +191,28 @@ public class ConnectionService implements INetworkDispatch {
 			return;
 		
 		CreatureObject object = (CreatureObject) client.getParent();
+		
 		object.setInviteCounter(0);
 		object.setInviteSenderId(0);
 		object.setInviteSenderName("");
 		core.groupService.handleGroupDisband(object);
+		
+		for (CreatureObject opponent : object.getDuelList()) {
+			if (opponent != null) {
+				core.combatService.handleEndDuel(object, opponent);
+			}
+		}
+		
+		if (core.instanceService.isInInstance(object)) {
+			core.instanceService.remove(core.instanceService.getActiveInstance(object), object);
+		}
+		
 		object.setClient(null);
+		
 		PlayerObject ghost = (PlayerObject) object.getSlottedObject("ghost");
 		
 		if(ghost == null)
 			return;
-		
-		if(object.getGroupId() != 0)
-			core.groupService.handleGroupDisband(object);
 		
 		Point3D objectPos = object.getWorldPosition();
 		
