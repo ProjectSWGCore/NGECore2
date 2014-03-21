@@ -1056,10 +1056,20 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		return buffer;
 	}
 	
-	@Override
 	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
-		// TODO Auto-generated method stub
-		
+		switch (viewType) {
+			case 3:
+			case 6:
+			{
+				object.notifyObservers(buffer, true);
+			}
+			default:
+			{
+				if (object.getClient() != null && object.getClient().getSession() != null) {
+					object.getClient().getSession().write(buffer);
+				}
+			}
+		}
 	}
 	
 	public IoBuffer buildAddEquipmentDelta(TangibleObject item) {
