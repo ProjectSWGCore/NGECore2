@@ -44,6 +44,7 @@ import protocol.swg.SUIUpdatePageMessage;
 import protocol.swg.objectControllerObjects.ObjectMenuRequest;
 import protocol.swg.objectControllerObjects.ObjectMenuResponse;
 
+import resources.common.FileUtilities;
 import resources.common.ObjControllerOpcodes;
 import resources.common.Opcodes;
 import resources.common.RadialOptions;
@@ -169,12 +170,26 @@ public class SUIService implements INetworkDispatch {
 	}
 	
 	public String getRadialFilename(SWGObject object) {
+		String serverTemplate = ("scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", "") + object.getTemplate().split("shared_" , 2)[1] + ".py");
+		String radialFilename = "default";
 		
-		if(object.getAttachment("radial_filename") != null)
-			return (String) object.getAttachment("radial_filename");
-		else 
-			return "default";
+		if (FileUtilities.doesFileExist(serverTemplate)) {
+			PyObject method = core.scriptService.getMethod("scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", ""), object.getTemplate().split("shared_" , 2)[1].replace(".iff", ""), "getRadialFilename");
+			
+			if (method != null && method.isCallable()) {
+				radialFilename = method.__call__().asString();
+				
+				if (radialFilename == null || radialFilename.equals("")) {
+					radialFilename = "default";
+				}
+			}
+		}
 		
+		if (radialFilename.equals("default") && object.getAttachment("radial_filename") != null) {
+			radialFilename = (String) object.getAttachment("radial_filename");
+		}
+		
+		return radialFilename;
 	}
 	
 	public void sendRadial(SWGObject owner, SWGObject target, Vector<RadialOptions> radialOptions, byte radialCount) {
