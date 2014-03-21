@@ -22,6 +22,8 @@
 package services;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -203,6 +205,40 @@ public class InstanceService implements INetworkDispatch {
 	
 	public InstanceService(NGECore core) {
 		this.core = core;
+		
+		Calendar c = Calendar.getInstance();
+		Date now = new Date();
+		
+		c.setTime(now);
+		
+		if (c.get(Calendar.HOUR_OF_DAY) >= 6) {
+			c.add(Calendar.DAY_OF_MONTH, 1);
+		}
+		
+		c.set(Calendar.HOUR_OF_DAY, 6);
+		c.set(Calendar.MINUTE, 0);
+		c.set(Calendar.SECOND, 0);
+		c.set(Calendar.MILLISECOND, 0);
+		
+		long initialDelay = (c.getTimeInMillis() - now.getTime());
+		
+		final Map<String, List<Instance>> reference = instanceMap;
+		
+        scheduler.scheduleAtFixedRate(new Runnable() {
+			
+			private Map<String, List<Instance>> instanceMap = reference;
+			
+			public void run() {
+				for (List<Instance> instanceList : instanceMap.values()) {
+					for (Instance instance : instanceList) {
+						if ((instance.isClosed() || !instance.isOpen())) {
+							instanceList.remove(instance);
+						}
+					}
+				}
+			}
+			
+		}, initialDelay, 86400000, TimeUnit.MILLISECONDS);
 	}
 	
 	/*
@@ -245,7 +281,7 @@ public class InstanceService implements INetworkDispatch {
 			
 			instance.setTask(scheduler.scheduleAtFixedRate(new Runnable() {
 				
-				private final Instance instance = reference;
+				private Instance instance = reference;
 				private boolean sentCloseWarning = false;
 				
 				public void run() {
