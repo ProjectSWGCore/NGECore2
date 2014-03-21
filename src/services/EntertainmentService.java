@@ -18,6 +18,7 @@ import org.apache.mina.core.session.IoSession;
 
 import protocol.swg.ObjControllerMessage;
 import protocol.swg.OkMessage;
+import protocol.swg.PlayClientEffectObjectMessage;
 import protocol.swg.objectControllerObjects.BuffBuilderChangeMessage;
 import protocol.swg.objectControllerObjects.BuffBuilderEndMessage;
 import protocol.swg.objectControllerObjects.BuffBuilderStartMessage;
@@ -25,11 +26,14 @@ import resources.common.BuffBuilder;
 import resources.common.Console;
 import resources.common.ObjControllerOpcodes;
 import resources.common.Performance;
+import resources.common.PerformanceEffect;
 import resources.common.StringUtilities;
+import resources.datatables.Posture;
 import resources.objects.Buff;
 import resources.objects.BuffItem;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
+import resources.objects.tangible.TangibleObject;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.clients.Client;
@@ -44,14 +48,17 @@ public class EntertainmentService implements INetworkDispatch {
 	
 	private Vector<BuffBuilder> buffBuilderSkills = new Vector<BuffBuilder>();
 	//FIXME: create a wrapper class for double key lookup maps
-	private HashMap<String,Performance> performances = new HashMap<String,Performance>();
-	private HashMap<Integer,Performance> performancesByIndex = new HashMap<Integer,Performance>();
-	private HashMap<Integer,Performance> danceMap = new HashMap<Integer,Performance>();
+	private ConcurrentHashMap<String,Performance> performances = new ConcurrentHashMap<String,Performance>();
+	private ConcurrentHashMap<Integer,Performance> performancesByIndex = new ConcurrentHashMap<Integer,Performance>();
+	private ConcurrentHashMap<Integer,Performance> danceMap = new ConcurrentHashMap<Integer,Performance>();
+	
+	private Map<String, PerformanceEffect> performanceEffects = new ConcurrentHashMap<String, PerformanceEffect>();
 	
 	public EntertainmentService(NGECore core) {
 		this.core = core;
 		populateSkillCaps();
 		populatePerformanceTable();
+		populatePerformanceEffects();
 		registerCommands();
 	}
 	
@@ -288,7 +295,37 @@ public class EntertainmentService implements INetworkDispatch {
 			e.printStackTrace();
 		}
 	}
+	
+	private void populatePerformanceEffects() {
+		try {
+			DatatableVisitor effects = ClientFileManager.loadFile("datatables/performance/perform_effect.iff", DatatableVisitor.class);
 
+			for (int r = 0; r < effects.getRowCount(); r++) {
+				String effectName = ((String) effects.getObject(r, 0));
+				String performanceType = ((String) effects.getObject(r, 1));
+				int requiredSkillModValue = ((int) effects.getObject(r, 2));
+				Boolean requiredPerforming = ((Boolean) effects.getObject(r, 3));
+				int targetType = ((int) effects.getObject(r, 4));
+				float effectDuration = ((float) effects.getObject(r, 5));
+				int effectActionCost = ((int) effects.getObject(r, 6));
+
+				PerformanceEffect item = new PerformanceEffect();
+				item.setEffectActionCost(effectActionCost);
+				item.setEffectDuration(effectDuration);
+				item.setName(effectName);
+				item.setPerformanceType(performanceType);
+				item.setRequiredPerforming(requiredPerforming);
+				item.setRequiredSkillModValue(requiredSkillModValue);
+				item.setTargetType(targetType);
+
+				performanceEffects.put(effectName.toLowerCase(), item);
+
+			}
+		} catch (InstantiationException | IllegalAccessException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	private void registerCommands() {
 		core.commandService.registerCommand("bandflourish");
 		core.commandService.registerCommand("flourish");
@@ -298,6 +335,23 @@ public class EntertainmentService implements INetworkDispatch {
 		core.commandService.registerCommand("stopdance");
 		core.commandService.registerCommand("watch");
 		core.commandService.registerCommand("stopwatching");
+		//core.commandService.registerCommand("holoEmote");
+		// TODO: Add /bandsolo, /bandpause, /changeBandMusic, /changeDance, /changeGroupDance, /changeMusic
+		
+		// Entertainer Effects
+		core.commandService.registerCommand("centerStage");
+		core.commandService.registerCommand("colorSwirl");
+		core.commandService.registerCommand("colorlights");
+		core.commandService.registerCommand("floorLights"); // referred to also as Dance Floor
+		core.commandService.registerCommand("dazzle");
+		core.commandService.registerCommand("distract");
+		core.commandService.registerCommand("featuredSolo");
+		core.commandService.registerCommand("firejet");
+		core.commandService.registerCommand("firejet2");
+		core.commandService.registerCommand("laserShow");
+		core.commandService.registerCommand("smokebomb");
+		core.commandService.registerCommand("spotlight");
+		core.commandService.registerCommand("ventriloquism");
 	}
 	
 	public void giveInspirationBuff(SWGObject reciever, Vector<BuffItem> buffVector) {
@@ -381,6 +435,10 @@ public class EntertainmentService implements INetworkDispatch {
 	
 	public Performance getPerformanceByIndex(int index) {
 		return performancesByIndex.get(index);
+	}
+	
+	public Map<String, PerformanceEffect> getPerformanceEffects() {
+		return performanceEffects;
 	}
 	
 	public void startPerformance(CreatureObject actor, int performanceId, int performanceCounter, String skillName, boolean isDance) {
@@ -480,7 +538,59 @@ public class EntertainmentService implements INetworkDispatch {
 
 		}, (long) performance.getLoopDuration(), TimeUnit.SECONDS);
 	}
+	
+	public boolean performEffect(final CreatureObject performer, String command, String effect, TangibleObject target) {
+		PerformanceEffect pEffect = performanceEffects.get(command.toLowerCase());
 
+		if(pEffect == null)
+			return false;
+
+		String performance = (performer.getPerformanceType()) ? "dance" : "music";
+
+		// TODO: Skill Level check
+
+		if(performer.isPerformingEffect()) {
+			performer.sendSystemMessage("@performance:effect_wait_self", (byte) 0);
+			return false;
+		}
+
+		if (performer.getPosture() != Posture.SkillAnimating) {
+			performer.sendSystemMessage("@performance:effect_not_performing", (byte) 0);
+			return false;
+		}
+
+		if(performance.equals("dance") && !pEffect.isDance() || performance.equals("music") && !pEffect.isMusic()) {
+			performer.sendSystemMessage("@performance:effect_not_performing_correct", (byte) 0);
+			return false;
+		}
+
+		if(performer.getAction() < pEffect.getEffectActionCost()) {
+			performer.sendSystemMessage("@performance:effect_too_tired", (byte) 0);
+			return false;
+		}
+
+		performer.setAction(performer.getAction() - pEffect.getEffectActionCost());
+
+		performer.setPerformingEffect(true);
+		
+		if(target != null)
+			target.playEffectObject(effect, "");
+		
+		else
+			performer.playEffectObject(effect, "");
+		
+		scheduler.schedule(new Runnable() {
+
+			@Override
+			public void run() {
+				performer.setPerformingEffect(false);
+			}
+
+		}, (long) pEffect.getEffectDuration(), TimeUnit.SECONDS);
+
+		return true;
+	}
+	
 	@Override
 	public void shutdown() {
 
