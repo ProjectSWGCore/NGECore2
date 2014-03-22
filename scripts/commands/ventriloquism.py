@@ -21,7 +21,6 @@ def run(core, actor, target, commandString):
 	
 	if actor.getLevel() < rLevel:
 		actor.sendSystemMessage('@performance:effect_lack_skill_self')
-		return
 	
 	if core.entertainmentService.performEffect(actor, command, effect, target) is True:
 		actor.sendSystemMessage('@performance:effect_perform_ventriloquism', 0)

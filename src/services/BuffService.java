@@ -71,15 +71,17 @@ public class BuffService implements INetworkDispatch {
 		if(buff.isGroupBuff()) {
 			addGroupBuff(creature, buffName);
 		} else {
-			doAddBuff(creature, buffName);
+			doAddBuff(creature, buffName, null);
 		}
 	}
 		
-	public Buff doAddBuff(final CreatureObject creature, String buffName) {
+	public Buff doAddBuff(final CreatureObject creature, String buffName, CreatureObject buffer) {
 		
 		final Buff buff = new Buff(buffName, creature.getObjectID());
 		buff.setTotalPlayTime(((PlayerObject) creature.getSlottedObject("ghost")).getTotalPlayTime());
 		
+        if(FileUtilities.doesFileExist("scripts/buffs/" + buffName + ".py"))
+        	core.scriptService.callScript("scripts/buffs/", buffName, "setup", core, ((buffer == null) ? creature : buffer), buff);
 	
             for (final Buff otherBuff : creature.getBuffList()) {
                 if (buff.getGroup1().equals(otherBuff.getGroup1()))  
@@ -110,7 +112,7 @@ public class BuffService implements INetworkDispatch {
         }	
 			
         if(FileUtilities.doesFileExist("scripts/buffs/" + buffName + ".py"))
-        	core.scriptService.callScript("scripts/buffs/", buffName, "setup", core, creature, buff);
+        	core.scriptService.callScript("scripts/buffs/", buffName, "add", core, creature, buff);
 		
 		creature.addBuff(buff);
 		
@@ -153,6 +155,10 @@ public class BuffService implements INetworkDispatch {
 			}
 		}
 		
+		if (buffer != null && creature.getGroupId() != 0 && creature.getGroupId() == buffer.getGroupId()) {
+			buff.setGroupBufferId(buffer.getObjectID());
+		}
+		
 		return buff;
 		
 	} 
@@ -168,7 +174,7 @@ public class BuffService implements INetworkDispatch {
         	 creature.removeDot(dot);
          }
          if(FileUtilities.doesFileExist("scripts/buffs/" + buff.getBuffName() + ".py"))
-        	 core.scriptService.callScript("scripts/buffs/", buff.getBuffName(), "removeBuff", core, creature, buff);
+        	 core.scriptService.callScript("scripts/buffs/", buff.getBuffName(), "remove", core, creature, buff);
          creature.removeBuff(buff);
          
         for (String effect : buff.getParticleEffect().split(",")) {
@@ -215,20 +221,19 @@ public class BuffService implements INetworkDispatch {
 	public void addGroupBuff(final CreatureObject buffer, String buffName) {
 		
 		if(buffer.getGroupId() == 0) {
-			doAddBuff(buffer, buffName);
+			doAddBuff(buffer, buffName, null);
 			return;
 		}
 			
 		GroupObject group = (GroupObject) core.objectService.getObject(buffer.getGroupId());
 		
 		if(group == null) {
-			doAddBuff(buffer, buffName);
+			doAddBuff(buffer, buffName, null);
 			return;
 		}
 		
 		for(SWGObject member : group.getMemberList()) {
-			Buff buff = doAddBuff((CreatureObject) member, buffName);
-			buff.setGroupBufferId(buffer.getObjectID());
+			Buff buff = doAddBuff((CreatureObject) member, buffName, buffer);
 		}
 
 	}

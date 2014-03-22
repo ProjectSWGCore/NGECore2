@@ -1,10 +1,13 @@
 import sys
 
 def setup(core, actor, buff):
+	return
+
+def add(core, actor, buff):
 	core.skillModService.addSkillMod(actor, 'dot_fire', 200)
 
 	return
 	
-def removeBuff(core, actor, buff):
+def remove(core, actor, buff):
 	core.skillModService.deductSkillMod(actor, 'dot_fire', 200)
 	return

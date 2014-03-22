@@ -6,7 +6,7 @@ def setup():
 def run(core, actor, target, commandString):
 	
 	if actor.getLevel() < 76:
-		actor.sendSystemMessage('@performance:effect_lack_skill_self')
+		actor.sendSystemMessage('@performance:effect_lack_skill_self', 0)
 		return
 	
 	if core.entertainmentService.performEffect(actor, 'FireJetsB', 'clienteffect/entertainer_fire_jets2.cef', target) is True:
