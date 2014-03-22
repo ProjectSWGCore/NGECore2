@@ -142,7 +142,7 @@ public class CollectionService implements INetworkDispatch {
 							int bits = 0;
 							boolean noScriptOnModify = false;
 							boolean clearOnComplete = false;
-							boolean noMessage = true;
+							boolean noMessage = false;
 							boolean grantIfPreReqMet = true;
 							boolean buddyCollection = false;
 							int numAltTitles = 0;
@@ -359,7 +359,7 @@ public class CollectionService implements INetworkDispatch {
 								}
 								
 								if (trackServerFirst) {
-									if (core.guildService.getGuildObject().addServerFirst(collectionName, new ServerFirst(creature.getCustomName(), System.currentTimeMillis()))) {
+									if (core.guildService.getGuildObject().addServerFirst(collectionName, new ServerFirst(creature.getCustomName(), creature.getObjectId(), collectionName, System.currentTimeMillis()))) {
 										addCollection(creature, "bdg_server_first_01");
 									}
 								}
