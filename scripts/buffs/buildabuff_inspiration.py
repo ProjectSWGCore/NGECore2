@@ -2,6 +2,9 @@ from resources.common import BuffBuilder
 import sys
 
 def setup(core, actor, buff):
+	return
+
+def add(core, actor, buff):
     
     buffWorkshop = actor.getAttachment('buffWorkshop')
     
@@ -15,7 +18,7 @@ def setup(core, actor, buff):
 
     return
     
-def removeBuff(core, actor, buff):
+def remove(core, actor, buff):
     for BuffItem in actor.getAttachment('buffWorkshop'):
         core.skillModService.deductSkillMod(actor, BuffItem.getSkillName(), BuffItem.getAffectAmount())
     

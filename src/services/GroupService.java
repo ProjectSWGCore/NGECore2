@@ -188,8 +188,7 @@ public class GroupService implements INetworkDispatch {
 			if(otherMember != member) {
 				for(Buff buff : ((CreatureObject) otherMember).getBuffList().get()) {
 					if(buff.isGroupBuff()) {
-						Buff newBuff = core.buffService.doAddBuff(member, buff.getBuffName());
-						newBuff.setGroupBufferId(buff.getGroupBufferId());
+						core.buffService.doAddBuff(member, buff.getBuffName(), (CreatureObject) core.objectService.getObject(buff.getGroupBufferId()));
 					}
 				}
 				return;

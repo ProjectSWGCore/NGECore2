@@ -1,9 +1,12 @@
 import sys
 
 def setup(core, actor, buff):
+	return
+
+def add(core, actor, buff):
 	core.skillModService.addSkillMod(actor, 'debuff_purge', 1)
 	return
 	
-def removeBuff(core, actor, buff):
+def remove(core, actor, buff):
 	core.skillModService.deductSkillMod(actor, 'debuff_purge', 1)
 	return
