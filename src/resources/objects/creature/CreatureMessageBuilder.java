@@ -1061,12 +1061,12 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 			case 3:
 			case 6:
 			{
-				object.notifyObservers(buffer, true);
+				object.notifyObservers(buffer.flip(), true);
 			}
 			default:
 			{
 				if (object.getClient() != null && object.getClient().getSession() != null) {
-					object.getClient().getSession().write(buffer);
+					object.getClient().getSession().write(buffer.flip());
 				}
 			}
 		}
