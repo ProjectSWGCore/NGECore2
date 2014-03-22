@@ -435,11 +435,15 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 
 	public ScheduledFuture<?> getInspirationTick() {
-		return inspirationTick;
+		synchronized(objectMutex) {
+			return inspirationTick;
+		}
 	}
 
 	public void setInspirationTick(ScheduledFuture<?> inspirationTick) {
-		this.inspirationTick = inspirationTick;
+		synchronized(objectMutex) {
+			this.inspirationTick = inspirationTick;
+		}
 	}
 
 	@Override
@@ -570,6 +574,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	public void addSkillMod(String name, int base) {
 		if(getSkillMod(name) == null) {
+			// TODO: This will need to be fixed as it doesn't update in the character sheet properly (wrong delta)
 			SkillMod skillMod = new SkillMod();
 			skillMod.setBase(base);
 			skillMod.setSkillModString(name);

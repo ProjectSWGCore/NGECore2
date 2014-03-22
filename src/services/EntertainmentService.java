@@ -24,13 +24,16 @@ import protocol.swg.objectControllerObjects.BuffBuilderEndMessage;
 import protocol.swg.objectControllerObjects.BuffBuilderStartMessage;
 import resources.common.BuffBuilder;
 import resources.common.Console;
+import resources.common.MathUtilities;
 import resources.common.ObjControllerOpcodes;
 import resources.common.Performance;
 import resources.common.PerformanceEffect;
+import resources.common.RGB;
 import resources.common.StringUtilities;
 import resources.datatables.Posture;
 import resources.objects.Buff;
 import resources.objects.BuffItem;
+import resources.objects.SWGList;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
@@ -38,6 +41,7 @@ import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.clients.Client;
 import engine.resources.objects.SWGObject;
+import engine.resources.objects.SkillMod;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
@@ -70,7 +74,7 @@ public class EntertainmentService implements INetworkDispatch {
 			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
 
 				data.order(ByteOrder.LITTLE_ENDIAN);
-				StringUtilities.printBytes(data.array());
+
 				Client client = core.getClient(session);
 
 				if(client == null)
@@ -145,8 +149,8 @@ public class EntertainmentService implements INetworkDispatch {
 
 				Vector<BuffItem> statBuffs = sentPacket.getStatBuffs();
 
-				SWGObject buffer = core.objectService.getObject(sentPacket.getBufferId());
-				SWGObject buffRecipient = core.objectService.getObject(sentPacket.getBuffRecipientId());
+				CreatureObject buffer = (CreatureObject) core.objectService.getObject(sentPacket.getBufferId());
+				CreatureObject buffRecipient = (CreatureObject) core.objectService.getObject(sentPacket.getBuffRecipientId());
 
 				if (buffer != buffRecipient) {
 
@@ -354,7 +358,7 @@ public class EntertainmentService implements INetworkDispatch {
 		core.commandService.registerCommand("ventriloquism");
 	}
 	
-	public void giveInspirationBuff(SWGObject reciever, Vector<BuffItem> buffVector) {
+	public void giveInspirationBuff(CreatureObject reciever, Vector<BuffItem> buffVector) {
 		CreatureObject buffCreature = (CreatureObject) reciever;
 		
 		Vector<BuffBuilder> availableStats = buffBuilderSkills;
@@ -372,19 +376,13 @@ public class EntertainmentService implements INetworkDispatch {
 
 					BuffItem stat = new BuffItem(builder.getStatAffects(), item.getInvested(), item.getEntertainerBonus());
 					stat.setAffectAmount(affectTotal);
-					
-					/*System.out.println("Invested Points: " + item.getInvested());
-					System.out.println("Entertainer Bonus: " + item.getEntertainerBonus());
-					System.out.println("Affect Total: " + affectTotal);*/
 
 					stats.add(stat);
-					
-					break;
 				}
 			}
 		}
 		
-		reciever.setAttachment("buffWorkshop", buffVector);
+		reciever.setAttachment("buffWorkshop", stats);
 		
 		core.buffService.addBuffToCreature(buffCreature, "buildabuff_inspiration");
 		
@@ -481,6 +479,7 @@ public class EntertainmentService implements INetworkDispatch {
 	}
 	
 	public void startSpectating(final CreatureObject spectator, final CreatureObject performer) {
+		
 		final ScheduledFuture<?> spectatorTask = scheduler.scheduleAtFixedRate(new Runnable() {
 
 			@Override
@@ -499,14 +498,20 @@ public class EntertainmentService implements INetworkDispatch {
 					}
 					spectator.setMoodAnimation("neutral");
 					performer.removeAudience(spectator);
-
-					spectator.getSpectatorTask().cancel(true);
+					
+					if (spectator.getInspirationTick().cancel(true))
+						spectator.getSpectatorTask().cancel(true);
 				}
 			}
 
 		}, 2, 2, TimeUnit.SECONDS);
 
 		spectator.setSpectatorTask(spectatorTask);
+		
+		if(((PlayerObject)performer.getSlottedObject("ghost")).getProfession().equals("entertainer_1a")) {
+			handleInspirationTicks(spectator, performer);
+		}
+		
 	}
 	
 	public void performFlourish(final CreatureObject performer, int flourish) {
@@ -546,8 +551,6 @@ public class EntertainmentService implements INetworkDispatch {
 			return false;
 
 		String performance = (performer.getPerformanceType()) ? "dance" : "music";
-
-		// TODO: Skill Level check
 
 		if(performer.isPerformingEffect()) {
 			performer.sendSystemMessage("@performance:effect_wait_self", (byte) 0);
@@ -589,6 +592,48 @@ public class EntertainmentService implements INetworkDispatch {
 		}, (long) pEffect.getEffectDuration(), TimeUnit.SECONDS);
 
 		return true;
+	}
+	
+	public void handleInspirationTicks(final CreatureObject spectator, final CreatureObject performer) {
+		// http://youtu.be/WqyAde-oC7o?t=11m14s  << Player watching entertainer (Has ring only, no pet, + 15 min ticks)
+		// TODO: Camp/Cantina checks for expertise and duration bonus %. Right now only using basic values.
+		final ScheduledFuture<?> inspirationTick = scheduler.scheduleAtFixedRate(new Runnable() {
+
+			@Override
+			public void run() {
+				int time = 0; // current buff duration time (minutes)
+				int buffCap = 215; // 5 hours 35 minutes - 2 hours (buff duration increase bonus) << Taken from video, doesn't account for performance bonuses etc.
+				
+				if (spectator.getAttachment("inspireDuration") != null)
+					time+= (int) spectator.getAttachment("inspireDuration");
+				
+				if (performer.getSkillMod("expertise_en_inspire_buff_duration_increase") != null) {
+					SkillMod durationMod = performer.getSkillMod("expertise_en_inspire_buff_duration_increase");
+					buffCap += durationMod.getBase() + durationMod.getModifier();
+				}
+				
+				if (time == buffCap) {
+
+				} else {
+					int entTick = 10;
+					if (performer.getSkillMod("expertise_en_inspire_pulse_duration_increase") != null) {
+						SkillMod pulseMod = performer.getSkillMod("expertise_en_inspire_pulse_duration_increase");
+						entTick += pulseMod.getBase() + pulseMod.getModifier();
+					}
+					
+					int duration = (time + entTick); // minutes
+					int hMinutes = MathUtilities.secondsToHourMinutes(duration * 60);
+					int hours = MathUtilities.secondsToWholeHours(duration * 60);
+
+					spectator.showFlyText("spam", "buff_duration_tick_observer", String.valueOf(hours) + " hours , " + hMinutes + " minutes ", 0, (float) 0.66, new RGB(255, 182, 193), 3, 78);
+					
+					spectator.setAttachment("inspireDuration", duration);
+					//System.out.println("Inspire Duration: " + spectator.getAttachment("inspireDuration") + " on " + spectator.getCustomName());
+				}
+			}
+			
+		}, 10, 10, TimeUnit.SECONDS);
+		spectator.setInspirationTick(inspirationTick);
 	}
 	
 	@Override

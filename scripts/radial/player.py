@@ -5,9 +5,9 @@ import sys
 def createRadial(core, owner, target, radials):
 	if target.getPosture() == Posture.SkillAnimating:
 		if target.getPerformanceType() is True:
-			radials.add(RadialOptions(0, 140, 1, 'Watch'))
+			radials.add(RadialOptions(0, 140, 3, 'Watch'))
 		else:
-			radials.add(RadialOptions(0, 140, 1, 'Listen'))
+			radials.add(RadialOptions(0, 140, 3, 'Listen'))
 
 	return
 	

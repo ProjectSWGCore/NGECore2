@@ -8,10 +8,13 @@ def setup(core, actor, buff):
     if buffWorkshop is None:
         return
     
-    buff.setDuration(3600) #1 hour
-    
+    attached = actor.getAttachment('inspireDuration')
+    print (attached)
+    buff.setDuration(float(actor.getAttachment('inspireDuration') * 60))
+    print ('Buff Duration: ' + str(actor.getAttachment('inspireDuration')))
     for BuffItem in buffWorkshop:
         core.skillModService.addSkillMod(actor, BuffItem.getSkillName(), BuffItem.getAffectAmount())
+        print ('Gave skill mod ' + BuffItem.getSkillName() + ' with affect of ' + str(BuffItem.getAffectAmount()))
 
     return
     
