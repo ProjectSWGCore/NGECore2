@@ -381,7 +381,7 @@ public class CombatCommand extends BaseSWGCommand {
 		this.percentFromWeapon = percentFromWeapon;
 	}
 
-	public float isBypassArmor() {
+	public float getBypassArmor() {
 		return bypassArmor;
 	}
 
