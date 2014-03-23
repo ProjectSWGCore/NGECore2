@@ -4,9 +4,6 @@ def setup(core, actor, buff):
 	return
 	
 def run(core, actor, target, commandString):
-	core.buffService.addBuffToCreature(actor, 'of_buff_def_4')
-	group = core.objectService.getObject(actor.getGroupId())
-	for creature in group.getMemberList():
-		core.buffService.addBuffToCreature(creature, 'of_buff_def_4')
+	core.buffService.addGroupBuff(actor, 'of_buff_def_4')
 	return
 	
