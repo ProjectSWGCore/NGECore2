@@ -225,10 +225,10 @@ public class CollectionService implements INetworkDispatch {
 									BitSet maxValue = new BitSet(64);
 									maxValue.set(64-maxSlotValue, 64);
 									
-									if (bitValue.toLongArray()[0] < maxValue.toLongArray()[0]) {
+									/*if (bitValue.toLongArray()[0] < maxValue.toLongArray()[0]) {
 										System.out.println(slotName + ", row " + c + ": counter-type slot uses " + bits + " bits, which can only hold a max value of " + bitValue.toLongArray()[0] + ", which is less than the specified max value of " + maxValue.toLongArray()[0]);
 										throw new Exception();
-									}
+									}*/
 								}
 							} else {
 								bits = 1;

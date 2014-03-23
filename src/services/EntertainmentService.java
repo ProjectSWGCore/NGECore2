@@ -4,6 +4,7 @@ import java.nio.ByteOrder;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -55,6 +56,8 @@ public class EntertainmentService implements INetworkDispatch {
 	private ConcurrentHashMap<String,Performance> performances = new ConcurrentHashMap<String,Performance>();
 	private ConcurrentHashMap<Integer,Performance> performancesByIndex = new ConcurrentHashMap<Integer,Performance>();
 	private ConcurrentHashMap<Integer,Performance> danceMap = new ConcurrentHashMap<Integer,Performance>();
+	
+	private Random ranWorkshop = new Random();
 	
 	private Map<String, PerformanceEffect> performanceEffects = new ConcurrentHashMap<String, PerformanceEffect>();
 	
@@ -174,7 +177,7 @@ public class EntertainmentService implements INetworkDispatch {
 							}
 						}
 
-						giveInspirationBuff(buffRecipient, statBuffs);
+						giveInspirationBuff(buffRecipient, buffer, statBuffs);
 
 						BuffBuilderEndMessage endBuilder = new BuffBuilderEndMessage(changeMessage);
 						endBuilder.setObjectId(buffer.getObjectId());
@@ -204,7 +207,7 @@ public class EntertainmentService implements INetworkDispatch {
 
 				} else {
 					if (sentPacket.getAccepted() == true) {
-						giveInspirationBuff(buffRecipient, statBuffs);
+						giveInspirationBuff(buffRecipient, buffer, statBuffs);
 						BuffBuilderEndMessage endBuilder = new BuffBuilderEndMessage(sentPacket);
 						endBuilder.setObjectId(buffer.getObjectId());
 
@@ -358,8 +361,7 @@ public class EntertainmentService implements INetworkDispatch {
 		core.commandService.registerCommand("ventriloquism");
 	}
 	
-	public void giveInspirationBuff(CreatureObject reciever, Vector<BuffItem> buffVector) {
-		CreatureObject buffCreature = (CreatureObject) reciever;
+	public void giveInspirationBuff(CreatureObject reciever, CreatureObject buffer, Vector<BuffItem> buffVector) {
 		
 		Vector<BuffBuilder> availableStats = buffBuilderSkills;
 		Vector<BuffItem> stats = new Vector<BuffItem>();
@@ -384,8 +386,30 @@ public class EntertainmentService implements INetworkDispatch {
 		
 		reciever.setAttachment("buffWorkshop", stats);
 		
-		core.buffService.addBuffToCreature(buffCreature, "buildabuff_inspiration");
+		core.buffService.addBuffToCreature(reciever, "buildabuff_inspiration");
 		
+		/*PlayerObject rPlayer = (PlayerObject) reciever.getSlottedObject("ghost");
+
+		
+		long timeStamp = 0;
+		if (reciever.getAttachment("buffWorkshopTimestamp") != null)
+			timeStamp = (long) reciever.getAttachment("buffWorkshopTimestamp");
+
+		
+		if (core.buffService.addBuffToCreature(reciever, "buildabuff_inspiration") && !rPlayer.getProfession().equals("entertainer_1a")) {
+			if (timeStamp == 0 || (System.currentTimeMillis() - timeStamp > 86400000)) {
+				float random = ranWorkshop.nextFloat();
+				if (random < 0.75f) {
+
+					if(rPlayer.getProfession().contains("trader")) { core.collectionService.addCollection(buffer, "prof_trader"); } 
+
+					else {
+						core.collectionService.addCollection(buffer, rPlayer.getProfession());
+					}
+				}
+			} else { buffer.sendSystemMessage("@collection:buffed_too_soon", (byte) 0); }
+			reciever.setAttachment("buffWorkshopTimestamp", System.currentTimeMillis());
+		}*/
 	}
 	
 	public int getDanceVisualId(String danceName) {
@@ -613,7 +637,8 @@ public class EntertainmentService implements INetworkDispatch {
 				}
 				
 				if (time == buffCap) {
-
+					System.out.println("Reached buff cap");
+					spectator.getInspirationTick().cancel(true);
 				} else {
 					int entTick = 10;
 					if (performer.getSkillMod("expertise_en_inspire_pulse_duration_increase") != null) {
@@ -628,7 +653,7 @@ public class EntertainmentService implements INetworkDispatch {
 					spectator.showFlyText("spam", "buff_duration_tick_observer", String.valueOf(hours) + " hours , " + hMinutes + " minutes ", 0, (float) 0.66, new RGB(255, 182, 193), 3, 78);
 					
 					spectator.setAttachment("inspireDuration", duration);
-					//System.out.println("Inspire Duration: " + spectator.getAttachment("inspireDuration") + " on " + spectator.getCustomName());
+					System.out.println("Inspire Duration: " + spectator.getAttachment("inspireDuration") + " on " + spectator.getCustomName());
 				}
 			}
 			

@@ -57,7 +57,7 @@ import engine.resources.scene.Quaternion;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 
-@Entity(version=1)
+@Entity(version=2)
 public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	@NotPersistent
@@ -118,6 +118,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private byte moodId = 0;
 	private int performanceCounter = 0;
 	private int performanceId = 0;
+	private boolean hologram = false;
 	//FIXME: this is a bit of a hack.
 	private boolean performanceType = false;
 	//FIXME: hmm.. or persistent?
@@ -1674,6 +1675,18 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	public void setPerformingEffect(boolean hasEffect) {
 		synchronized(objectMutex) {
 			this.performingEffect = hasEffect;
+		}
+	}
+	
+	public void setHologram(boolean isHologram) {
+		synchronized(objectMutex) {
+			this.hologram = isHologram;
+		}
+	}
+	
+	public boolean isHologram() {
+		synchronized(objectMutex) {
+			return hologram;
 		}
 	}
 }

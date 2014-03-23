@@ -60,7 +60,7 @@ public class BuffService implements INetworkDispatch {
 		
 	}
 	
-	public void addBuffToCreature(final CreatureObject creature, String buffName) {		
+	public boolean addBuffToCreature(final CreatureObject creature, String buffName) {		
 
 		/*if(!FileUtilities.doesFileExist("scripts/buffs/" + buffName + ".py")) {
 			//System.out.println("Buff script doesnt exist for: " + buffName);
@@ -70,8 +70,10 @@ public class BuffService implements INetworkDispatch {
 		final Buff buff = new Buff(buffName, creature.getObjectID());
 		if(buff.isGroupBuff()) {
 			addGroupBuff(creature, buffName);
+			return true;
 		} else {
 			doAddBuff(creature, buffName, null);
+			return true;
 		}
 	}
 		
