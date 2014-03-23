@@ -422,6 +422,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 				if(performanceType) { next.sendSystemMessage("You stop watching " + getCustomName() + ".",(byte)0); }
 				else { next.sendSystemMessage("You stop listening to " + getCustomName() + ".",(byte)0); }
 				next.getSpectatorTask().cancel(true);
+				next.getInspirationTick().cancel(true);
 			}
 			//not sure if this behaviour is correct. might need fixing later.
 			performanceAudience = new SWGList<CreatureObject>();

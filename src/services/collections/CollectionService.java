@@ -142,7 +142,7 @@ public class CollectionService implements INetworkDispatch {
 							int bits = 0;
 							boolean noScriptOnModify = false;
 							boolean clearOnComplete = false;
-							boolean noMessage = false;
+							boolean noMessage = true;
 							boolean grantIfPreReqMet = true;
 							boolean buddyCollection = false;
 							int numAltTitles = 0;

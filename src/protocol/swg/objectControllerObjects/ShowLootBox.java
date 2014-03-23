@@ -23,6 +23,7 @@ package protocol.swg.objectControllerObjects;
 
 import java.nio.ByteOrder;
 import java.util.List;
+import java.util.Vector;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
@@ -33,9 +34,15 @@ import resources.common.StringUtilities;
 public class ShowLootBox extends ObjControllerObject {
 
 	private long playerId;
-	private SWGObject[] rewards;
+	private Vector<SWGObject> rewards;
+	private SWGObject reward;
 	
-	public ShowLootBox(long playerId, SWGObject[] rewards) {
+	public ShowLootBox(long playerId, SWGObject reward) {
+		this.playerId = playerId;
+		this.rewards = rewards;
+	}
+	
+	public ShowLootBox(long playerId, Vector<SWGObject> rewards) {
 		this.playerId = playerId;
 		this.rewards = rewards;
 	}
@@ -47,19 +54,24 @@ public class ShowLootBox extends ObjControllerObject {
 
 	@Override
 	public IoBuffer serialize() {
-		// Controller Type = 11
-		IoBuffer buffer = IoBuffer.allocate(20 + (rewards.length * 8)).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer buffer;
+		
+		if (rewards != null)
+			buffer = IoBuffer.allocate(20 + (rewards.size() * 8)).order(ByteOrder.LITTLE_ENDIAN);
+		
+		else
+			buffer = IoBuffer.allocate(28).order(ByteOrder.LITTLE_ENDIAN);
 		
 		buffer.putInt(ObjControllerMessage.SHOW_LOOT_BOX);
 		buffer.putLong(playerId);
 		
 		buffer.putInt(0); // 1 for a black background on icon, 0 or 2 for transparent (default)
 		
-		if (rewards.length == 1) {
+		if (rewards == null) {
 			buffer.putInt(1);
-			buffer.putLong(rewards[0].getObjectId());
+			buffer.putLong(reward.getObjectId());
 		} else {
-			buffer.putInt(rewards.length);
+			buffer.putInt(rewards.size());
 			for(SWGObject obj : rewards) {
 				buffer.putLong(obj.getObjectID());
 			}

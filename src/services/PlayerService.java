@@ -761,7 +761,7 @@ public class PlayerService implements INetworkDispatch {
 										}
 										
 										if (rewards != null && !rewards.isEmpty()) {
-											giveItems(creature, (SWGObject[]) rewards.toArray());
+											giveItems(creature, rewards);
 										}
 										
 									}  catch (InstantiationException | IllegalAccessException e) {
@@ -775,6 +775,9 @@ public class PlayerService implements INetworkDispatch {
 			} catch (InstantiationException | IllegalAccessException e) {
 				e.printStackTrace();
 			}
+			
+			if(player.getProfession().equals("entertainer_1a") && creature.getLevel() == (short) 90)
+				creature.getEntertainerExperience().cancel(true);
 		//}
 	}
 	
@@ -818,11 +821,38 @@ public class PlayerService implements INetworkDispatch {
 	}
 	
 	/**
-	 * Gives a player items and shows the "New Items" message.
-	 * @param reciever Player receiving the items
-	 * @param items The object(s) to be given. This will allow multiple arguments.
+	 * Gives a player an item and shows the "New Items" message.
+	 * @param reciever Player receiving the item.
+	 * @param item The object to be given.
+	 * @author Waverunner
 	 */
-	public void giveItems(CreatureObject reciever, SWGObject... items) {
+	public void giveItem(CreatureObject reciever, SWGObject item) {
+		if (reciever == null || item == null)
+			return;
+		
+		if (reciever.getClient() == null)
+			return;
+		Client client = reciever.getClient();
+		
+		if (client.getSession() == null)
+			return;
+		SWGObject inventory = reciever.getSlottedObject("inventory");
+		
+		if (inventory == null)
+			return;
+		
+		inventory.add(item);
+		
+		ObjControllerMessage objController = new ObjControllerMessage(11, new ShowLootBox(reciever.getObjectID(), item));
+		client.getSession().write(objController.serialize());
+	}
+	
+	/**
+	 * Gives a player a variety of items and shows the "New Items" message.
+	 * @param reciever Player receiving the items.
+	 * @param items Vector of the items.
+	 */
+	public void giveItems(CreatureObject reciever, Vector<SWGObject> items) {
 		if (reciever == null || items == null)
 			return;
 		

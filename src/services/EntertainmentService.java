@@ -386,17 +386,14 @@ public class EntertainmentService implements INetworkDispatch {
 		
 		reciever.setAttachment("buffWorkshop", stats);
 		
-		core.buffService.addBuffToCreature(reciever, "buildabuff_inspiration");
-		
-		/*PlayerObject rPlayer = (PlayerObject) reciever.getSlottedObject("ghost");
+		PlayerObject rPlayer = (PlayerObject) reciever.getSlottedObject("ghost");
 
-		
 		long timeStamp = 0;
 		if (reciever.getAttachment("buffWorkshopTimestamp") != null)
 			timeStamp = (long) reciever.getAttachment("buffWorkshopTimestamp");
 
-		
-		if (core.buffService.addBuffToCreature(reciever, "buildabuff_inspiration") && !rPlayer.getProfession().equals("entertainer_1a")) {
+		core.buffService.addBuffToCreature(reciever, "buildabuff_inspiration", buffer);
+		/*if (core.buffService.addBuffToCreature(reciever, "buildabuff_inspiration", buffer) && !rPlayer.getProfession().equals("entertainer_1a")) {
 			if (timeStamp == 0 || (System.currentTimeMillis() - timeStamp > 86400000)) {
 				float random = ranWorkshop.nextFloat();
 				if (random < 0.75f) {
@@ -636,8 +633,8 @@ public class EntertainmentService implements INetworkDispatch {
 					buffCap += durationMod.getBase() + durationMod.getModifier();
 				}
 				
-				if (time == buffCap) {
-					System.out.println("Reached buff cap");
+				if (time >= buffCap) {
+					spectator.setAttachment("inspireDuration", buffCap); // incase someone went over cap
 					spectator.getInspirationTick().cancel(true);
 				} else {
 					int entTick = 10;
@@ -653,7 +650,7 @@ public class EntertainmentService implements INetworkDispatch {
 					spectator.showFlyText("spam", "buff_duration_tick_observer", String.valueOf(hours) + " hours , " + hMinutes + " minutes ", 0, (float) 0.66, new RGB(255, 182, 193), 3, 78);
 					
 					spectator.setAttachment("inspireDuration", duration);
-					System.out.println("Inspire Duration: " + spectator.getAttachment("inspireDuration") + " on " + spectator.getCustomName());
+					//System.out.println("Inspire Duration: " + spectator.getAttachment("inspireDuration") + " on " + spectator.getCustomName());
 				}
 			}
 			
