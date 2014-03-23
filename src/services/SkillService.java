@@ -271,15 +271,32 @@ public class SkillService implements INetworkDispatch {
 					return;
 				
 				for(String expertiseName : expertise.getExpertiseSkills()) {
-					addSkill(creature, expertiseName);
-					if(!FileUtilities.doesFileExist("scripts/expertise/" + expertiseName + ".py"))
-						continue;
-					core.scriptService.callScript("scripts/expertise/", expertiseName, "addAbilities", core, creature, player);
-				}
-				
+					if(expertiseName.startsWith("expertise_") && ((caluclateExpertisePoints(creature) - 1) > 0)) // Prevent possible glitches/exploits
+					{
+						addSkill(creature, expertiseName);
+						if(!FileUtilities.doesFileExist("scripts/expertise/" + expertiseName + ".py"))
+							continue;
+						core.scriptService.callScript("scripts/expertise/", expertiseName, "addAbilities", core, creature, player);
+					}
+				}			
 			}
 		});
 		
+	}
+
+	public int caluclateExpertisePoints(CreatureObject creature)
+	{
+		int expertisePoints = 0;
+		
+		try 
+		{
+			DatatableVisitor table = ClientFileManager.loadFile("datatables/player/player_level.iff", DatatableVisitor.class);		
+			for (int i = 0; i <= creature.getLevel(); i++) expertisePoints += (int) table.getObject(i, 5);	
+		}
+		catch (Exception e) { e.printStackTrace(); }
+		
+		System.out.println("Player should have " + expertisePoints + " expertise points.");
+		return expertisePoints;
 	}
 	
 	@Override
