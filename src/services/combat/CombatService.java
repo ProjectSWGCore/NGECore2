@@ -504,10 +504,10 @@ public class CombatService implements INetworkDispatch {
 		if(attacker.getAttachment("AI") instanceof AIActor && target instanceof CreatureObject) {
 			((AIActor) attacker.getAttachment("AI")).addDefender((CreatureObject) target);
 		} else {
-			attacker.addDefender(target);
+			attacker.addDefender(target); // See below comment
 		}
 
-		attacker.addDefender(target);
+		//attacker.addDefender(target); // Why do we need to add target to defender list twice?
 		
 		return true;
 		
