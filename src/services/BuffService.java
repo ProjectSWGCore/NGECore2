@@ -97,10 +97,9 @@ public class BuffService implements INetworkDispatch {
                         		} else {
                         			buff.setStacks(buff.getMaxStacks());
                         		}
-                        	
-                                if (otherBuff.getRemainingDuration() > buff.getDuration() && otherBuff.getStacks() >= otherBuff.getMaxStacks()) {
-                                        return null;
-                                }
+                        		if (buff.getDuration() != -1.0)
+                        			if (otherBuff.getRemainingDuration() > buff.getDuration() && otherBuff.getStacks() >= otherBuff.getMaxStacks())
+                        				return null;
                         }
                        
                         removeBuffFromCreature(creature, otherBuff);
