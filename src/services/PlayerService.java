@@ -691,6 +691,8 @@ public class PlayerService implements INetworkDispatch {
 									try {
 										roadmap = ClientFileManager.loadFile("datatables/roadmap/item_rewards.iff", DatatableVisitor.class);
 										
+										Vector<SWGObject> rewards = new Vector<SWGObject>();
+										
 										for (int s = 0; s < roadmap.getRowCount(); s++) {
 											if (roadmap.getObject(s, 0) != null) {
 												if (((String) roadmap.getObject(s, 1)).equals(roadmapSkillName)) {
@@ -715,11 +717,12 @@ public class PlayerService implements INetworkDispatch {
 																item = (item.substring(0, (item.lastIndexOf("/") + 1)) + "shared_" + item.substring((item.lastIndexOf("/") + 1)));
 															} else {
 																customServerTemplate = item;
-																item = core.scriptService.callScript("scripts/roadmap/", "roadmap_rewards", "get", item).asString();
+																item = core.scriptService.callScript("scripts/roadmap/", player.getProfession(), "getRewards", item).asString();
 															}
 															
 															if (item != null && item != "") {
-																creature.getSlottedObject("inventory").add(core.objectService.createObject(item, 0, creature.getPlanet(), new Point3D(0, 0, 0), new Quaternion(1, 0, 0, 0), customServerTemplate));
+																SWGObject itemObj = core.objectService.createObject(item, 0, creature.getPlanet(), new Point3D(0, 0, 0), new Quaternion(1, 0, 0, 0), customServerTemplate);
+																rewards.add(itemObj);
 															} else {
 																//System.out.println("Can't find template: " + item);
 															}
@@ -731,6 +734,11 @@ public class PlayerService implements INetworkDispatch {
 												}
 											}
 										}
+										
+										if (rewards != null && !rewards.isEmpty()) {
+											giveItems(creature, (SWGObject[]) rewards.toArray());
+										}
+										
 									}  catch (InstantiationException | IllegalAccessException e) {
 										e.printStackTrace();
 									}
