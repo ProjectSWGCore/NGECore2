@@ -287,15 +287,12 @@ public class SkillService implements INetworkDispatch {
 	public int caluclateExpertisePoints(CreatureObject creature)
 	{
 		int expertisePoints = 0;
-		
 		try 
 		{
 			DatatableVisitor table = ClientFileManager.loadFile("datatables/player/player_level.iff", DatatableVisitor.class);		
 			for (int i = 0; i <= creature.getLevel(); i++) expertisePoints += (int) table.getObject(i, 5);	
 		}
 		catch (Exception e) { e.printStackTrace(); }
-		
-		System.out.println("Player should have " + expertisePoints + " expertise points.");
 		return expertisePoints;
 	}
 	
