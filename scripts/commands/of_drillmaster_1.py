@@ -4,6 +4,6 @@ def setup(core, actor, buff):
 	return
 	
 def run(core, actor, target, commandString):
-	core.buffService.addBuffToCreature(actor, 'of_drillmaster_1')
+	core.buffService.addGroupBuff(actor, 'of_drillmaster_1')
 	return
 	
