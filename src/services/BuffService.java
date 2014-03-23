@@ -60,30 +60,50 @@ public class BuffService implements INetworkDispatch {
 		
 	}
 	
-	public void addBuffToCreature(final CreatureObject creature, String buffName) {		
+	public void addBuffToCreature(CreatureObject creature, String buffName) {
+		try {
+			throw new Exception();
+		} catch (Exception e) {
+			// New system becoming necessary.  Target can be the buffer for abilities that can't buff others.
+			System.out.println("WARNING: New AddBuff Format: target, buffName, buffer");
+			e.printStackTrace();
+		}
+		
+		addBuffToCreature(creature, buffName, creature);
+	}
+	
+	public void addBuffToCreature(CreatureObject target, String buffName, CreatureObject buffer) {		
 
 		/*if(!FileUtilities.doesFileExist("scripts/buffs/" + buffName + ".py")) {
 			//System.out.println("Buff script doesnt exist for: " + buffName);
 			return;
 		}*/
 
-		final Buff buff = new Buff(buffName, creature.getObjectID());
+		final Buff buff = new Buff(buffName, buffer.getObjectID());
 		if(buff.isGroupBuff()) {
-			addGroupBuff(creature, buffName);
+			addGroupBuff(buffer, buffName, buffer);
 		} else {
-			doAddBuff(creature, buffName, null);
+			doAddBuff(target, buffName, buffer);
 		}
 	}
 		
-	public Buff doAddBuff(final CreatureObject creature, String buffName, CreatureObject buffer) {
+	public Buff doAddBuff(final CreatureObject target, String buffName, CreatureObject buffer) {
 		
-		final Buff buff = new Buff(buffName, creature.getObjectID());
-		buff.setTotalPlayTime(((PlayerObject) creature.getSlottedObject("ghost")).getTotalPlayTime());
+		if (target.getPosition().getDistance(buffer.getPosition()) > 20) {
+			return null;
+		}
+		
+		if (!core.simulationService.checkLineOfSight(buffer, target)) {
+			return null;
+		}
+		
+		final Buff buff = new Buff(buffName, target.getObjectID());
+		buff.setTotalPlayTime(((PlayerObject) target.getSlottedObject("ghost")).getTotalPlayTime());
 		
         if(FileUtilities.doesFileExist("scripts/buffs/" + buffName + ".py"))
-        	core.scriptService.callScript("scripts/buffs/", buffName, "setup", core, ((buffer == null) ? creature : buffer), buff);
+        	core.scriptService.callScript("scripts/buffs/", buffName, "setup", core, buffer, buff);
 	
-            for (final Buff otherBuff : creature.getBuffList()) {
+            for (final Buff otherBuff : target.getBuffList()) {
                 if (buff.getGroup1().equals(otherBuff.getGroup1()))  
                 	if (buff.getPriority() >= otherBuff.getPriority()) {
                         if (buff.getBuffName().equals(otherBuff.getBuffName())) {
@@ -91,8 +111,8 @@ public class BuffService implements INetworkDispatch {
                         		if(otherBuff.getStacks() < otherBuff.getMaxStacks()) {
                         			
                         			buff.setStacks(otherBuff.getStacks() + 1);
-                        			if(creature.getDotByBuff(otherBuff) != null)	// reset duration when theres a dot stack
-                        				creature.getDotByBuff(otherBuff).setStartTime(buff.getStartTime());
+                        			if(target.getDotByBuff(otherBuff) != null)	// reset duration when theres a dot stack
+                        				target.getDotByBuff(otherBuff).setStartTime(buff.getStartTime());
                         			
                         		} else {
                         			buff.setStacks(buff.getMaxStacks());
@@ -102,7 +122,7 @@ public class BuffService implements INetworkDispatch {
                         				return null;
                         }
                        
-                        removeBuffFromCreature(creature, otherBuff);
+                        removeBuffFromCreature(target, otherBuff);
                         break;
                 } else {
                 	System.out.println("buff not added:" + buffName);
@@ -111,9 +131,9 @@ public class BuffService implements INetworkDispatch {
         }	
 			
         if(FileUtilities.doesFileExist("scripts/buffs/" + buffName + ".py"))
-        	core.scriptService.callScript("scripts/buffs/", buffName, "add", core, creature, buff);
+        	core.scriptService.callScript("scripts/buffs/", buffName, "add", core, target, buff);
 		
-		creature.addBuff(buff);
+		target.addBuff(buff);
 		
 		if(buff.getDuration() > 0) {
 			
@@ -122,7 +142,7 @@ public class BuffService implements INetworkDispatch {
 				@Override
 				public void run() {
 					
-					removeBuffFromCreature(creature, buff);
+					removeBuffFromCreature(target, buff);
 					
 				
 				}
@@ -134,7 +154,7 @@ public class BuffService implements INetworkDispatch {
 		}
 		
 		for (String effect : buff.getParticleEffect().split(",")) {
-			creature.playEffectObject(effect, buff.getBuffName());
+			target.playEffectObject(effect, buff.getBuffName());
 		}
 		
 		if (!buff.getCallback().equals("")) {
@@ -146,7 +166,7 @@ public class BuffService implements INetworkDispatch {
 						PyObject method = core.scriptService.getMethod("scripts/buffs/", buff.getBuffName(), buff.getCallback());
 						
 						if (method != null && method.isCallable()) {
-							method.__call__(Py.java2py(core), Py.java2py(creature), Py.java2py(buff));
+							method.__call__(Py.java2py(core), Py.java2py(target), Py.java2py(buff));
 						}
 					}
 						
@@ -154,7 +174,7 @@ public class BuffService implements INetworkDispatch {
 			}
 		}
 		
-		if (buffer != null && creature.getGroupId() != 0 && creature.getGroupId() == buffer.getGroupId()) {
+		if (buffer != null && target.getGroupId() != 0 && target.getGroupId() == buffer.getGroupId()) {
 			buff.setGroupBufferId(buffer.getObjectID());
 		}
 		
@@ -217,22 +237,34 @@ public class BuffService implements INetworkDispatch {
 					
 	}
 	
-	public void addGroupBuff(final CreatureObject buffer, String buffName) {
+	public void addGroupBuff(CreatureObject buffer, String buffName) {
+		try {
+			throw new Exception();
+		} catch (Exception e) {
+			// New system becoming necessary.  Target can be the buffer for abilities that can't buff others.
+			System.out.println("WARNING: New GroupAddBuff Format: target, buffName, buffer");
+			e.printStackTrace();
+		}
+		
+		addGroupBuff(buffer, buffName, buffer);
+	}
+	
+	public void addGroupBuff(CreatureObject target, String buffName, CreatureObject buffer) {
 		
 		if(buffer.getGroupId() == 0) {
-			doAddBuff(buffer, buffName, null);
+			doAddBuff(target, buffName, buffer);
 			return;
 		}
 			
 		GroupObject group = (GroupObject) core.objectService.getObject(buffer.getGroupId());
 		
 		if(group == null) {
-			doAddBuff(buffer, buffName, null);
+			doAddBuff(target, buffName, buffer);
 			return;
 		}
 		
 		for(SWGObject member : group.getMemberList()) {
-			Buff buff = doAddBuff((CreatureObject) member, buffName, buffer);
+			doAddBuff((CreatureObject) member, buffName, buffer);
 		}
 
 	}
