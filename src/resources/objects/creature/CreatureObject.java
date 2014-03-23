@@ -57,7 +57,7 @@ import engine.resources.scene.Quaternion;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 
-@Entity(version=1)
+@Entity(version=2)
 public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	@NotPersistent
@@ -118,6 +118,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private byte moodId = 0;
 	private int performanceCounter = 0;
 	private int performanceId = 0;
+	private boolean hologram = false;
 	//FIXME: this is a bit of a hack.
 	private boolean performanceType = false;
 	//FIXME: hmm.. or persistent?
@@ -421,6 +422,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 				if(performanceType) { next.sendSystemMessage("You stop watching " + getCustomName() + ".",(byte)0); }
 				else { next.sendSystemMessage("You stop listening to " + getCustomName() + ".",(byte)0); }
 				next.getSpectatorTask().cancel(true);
+				next.getInspirationTick().cancel(true);
 			}
 			//not sure if this behaviour is correct. might need fixing later.
 			performanceAudience = new SWGList<CreatureObject>();
@@ -435,11 +437,15 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 
 	public ScheduledFuture<?> getInspirationTick() {
-		return inspirationTick;
+		synchronized(objectMutex) {
+			return inspirationTick;
+		}
 	}
 
 	public void setInspirationTick(ScheduledFuture<?> inspirationTick) {
-		this.inspirationTick = inspirationTick;
+		synchronized(objectMutex) {
+			this.inspirationTick = inspirationTick;
+		}
 	}
 
 	@Override
@@ -570,6 +576,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	public void addSkillMod(String name, int base) {
 		if(getSkillMod(name) == null) {
+			// TODO: This will need to be fixed as it doesn't update in the character sheet properly (wrong delta)
 			SkillMod skillMod = new SkillMod();
 			skillMod.setBase(base);
 			skillMod.setSkillModString(name);
@@ -1669,6 +1676,18 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	public void setPerformingEffect(boolean hasEffect) {
 		synchronized(objectMutex) {
 			this.performingEffect = hasEffect;
+		}
+	}
+	
+	public void setHologram(boolean isHologram) {
+		synchronized(objectMutex) {
+			this.hologram = isHologram;
+		}
+	}
+	
+	public boolean isHologram() {
+		synchronized(objectMutex) {
+			return hologram;
 		}
 	}
 }

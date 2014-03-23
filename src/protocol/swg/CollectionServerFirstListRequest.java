@@ -16,62 +16,38 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * 
- * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
+ * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine.
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package services.collections;
+package protocol.swg;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import resources.objects.Delta;
+public class CollectionServerFirstListRequest extends SWGMessage {
 
-import com.sleepycat.persist.model.Persistent;
+	private String server;
 
-@Persistent
-public class ServerFirst extends Delta {
-	
-	private String name;
-	private String collection;
-	private long time;
-	private long objectId;
-	
-	public ServerFirst(String name, long objectId, String collection, long time) {
-		this.name = name;
-		this.objectId = objectId;
-		this.time = time;
-		this.collection = collection;
+	public CollectionServerFirstListRequest() {
 	}
-	
-	public ServerFirst() {
-		
-	}
-	
-	public String getName() {
-		return name;
-	}
-	
-	public long getTime() {
-		return time;
-	}
-	
-	public long getObjectId() {
-		return objectId;
-	}
-	
-	public String getCollection() {
-		return collection;
-	}
-	
+
 	@Override
-	public byte[] getBytes() {
-		synchronized(objectMutex) {
-			IoBuffer buffer = createBuffer(18 + collection.length() + (name.length() * 2));
-			buffer.putInt((int) time / 1000);
-			buffer.put(getAsciiString(collection));
-			buffer.putLong(objectId);
-			buffer.put(getUnicodeString(name));
-			return buffer.array();
-		}
+	public void deserialize(IoBuffer data) {
+		data.getShort();
+		data.getInt();
+		setServer(getAsciiString(data));
 	}
-	
+
+	public String getServer() {
+		return server;
+	}
+
+	@Override
+	public IoBuffer serialize() {
+		return null;
+	}
+
+	public void setServer(String server) {
+		this.server = server;
+	}
+
 }

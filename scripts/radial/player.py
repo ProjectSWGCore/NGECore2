@@ -4,11 +4,16 @@ import sys
 
 def createRadial(core, owner, target, radials):
 	if target.getPosture() == Posture.SkillAnimating:
-		if target.getPerformanceType() is True:
-			radials.add(RadialOptions(0, 140, 1, 'Watch'))
+		if owner.getPerformanceWatchee() == target:
+			if target.getPerformanceType() is True:
+				radials.add(RadialOptions(0, 141, 3, 'Stop Watching'))
+		elif owner.getPerformanceListenee() == target: # TODO: Get rid of PerformanceWatchee variable, no need for listenee (same thing really)
+			radials.add(RadialOptions(0, 141, 3, 'Stop Listening'))
 		else:
-			radials.add(RadialOptions(0, 140, 1, 'Listen'))
-
+			if target.getPerformanceType() is True:
+				radials.add(RadialOptions(0, 140, 3, 'Watch'))
+			else:
+				radials.add(RadialOptions(0, 140, 3, 'Listen'))
 	return
 	
 def handleSelection(core, owner, target, option):
@@ -19,5 +24,9 @@ def handleSelection(core, owner, target, option):
 		else:
 			# TODO: Insert callCommand /listen
 			return
+		return
+	
+	if option == 141:
+		#core.commandService.callCommand(owner, 'stopwatching', target, '') #SWGList error for remove audience in CreatureObject
 		return
 	return

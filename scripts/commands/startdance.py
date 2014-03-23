@@ -77,7 +77,6 @@ def startDance(core, actor, danceName, visual):
     #TODO: check costume
     
     if actor.getPosture() != Posture.Upright:
-    	print (' can\t dance because ' + str(actor.getPosture()))
     	actor.sendSystemMessage('@performance:dance_fail', 0)
     	return
     
@@ -97,7 +96,7 @@ def startDance(core, actor, danceName, visual):
     actor.setPosture(0x09);
 
     playerObject = actor.getSlottedObject('ghost')
-    if playerObject and playerObject.getProfession() == "entertainer_1a":
+    if playerObject and playerObject.getProfession() == "entertainer_1a" and actor.getLevel() != 90:
       entSvc.startPerformanceExperience(actor)
 
     dance = entSvc.getDance(visual)

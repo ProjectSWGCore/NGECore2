@@ -11,8 +11,10 @@ def add(core, actor, buff):
     if buffWorkshop is None:
         return
     
-    buff.setDuration(3600) #1 hour
-    
+    attached = actor.getAttachment('inspireDuration')
+
+    buff.setDuration(float(actor.getAttachment('inspireDuration') * 60))
+
     for BuffItem in buffWorkshop:
         core.skillModService.addSkillMod(actor, BuffItem.getSkillName(), BuffItem.getAffectAmount())
 
@@ -22,5 +24,5 @@ def remove(core, actor, buff):
     for BuffItem in actor.getAttachment('buffWorkshop'):
         core.skillModService.deductSkillMod(actor, BuffItem.getSkillName(), BuffItem.getAffectAmount())
     
-    actor.setAttachment('buffWorkshop', 'none')
+    actor.setAttachment('buffWorkshop', None)
     return

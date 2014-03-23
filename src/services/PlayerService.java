@@ -41,6 +41,8 @@ import org.apache.mina.core.session.IoSession;
 import protocol.swg.CharacterSheetResponseMessage;
 import protocol.swg.ClientIdMsg;
 import protocol.swg.ClientMfdStatusUpdateMessage;
+import protocol.swg.CollectionServerFirstListRequest;
+import protocol.swg.CollectionServerFirstListResponse;
 import protocol.swg.CreateClientPathMessage;
 import protocol.swg.ExpertiseRequestMessage;
 import protocol.swg.GuildRequestMessage;
@@ -57,6 +59,7 @@ import resources.common.ObjControllerOpcodes;
 import resources.common.Opcodes;
 import resources.common.RGB;
 import resources.common.SpawnPoint;
+import resources.common.StringUtilities;
 import resources.datatables.PlayerFlags;
 import resources.guild.Guild;
 import resources.objects.Buff;
@@ -391,8 +394,30 @@ public class PlayerService implements INetworkDispatch {
 		swgOpcodes.put(Opcodes.CollectionServerFirstListRequest, new INetworkRemoteEvent() {
 
 			@Override
-			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
+			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
+				data.order(ByteOrder.LITTLE_ENDIAN);
+				data.position(0);
+
+				Client client = core.getClient(session);
 				
+				if (client == null)
+					return;
+				
+				SWGObject player = client.getParent();
+				
+				if (player == null)
+					return;
+				
+				CollectionServerFirstListRequest request = new CollectionServerFirstListRequest();
+				request.deserialize(data);
+				
+				String server = request.getServer();
+				System.out.println(server);
+				if (server == null || server.equals(""))
+					return;
+
+				CollectionServerFirstListResponse response = new CollectionServerFirstListResponse(server, core.guildService.getGuildObject().getServerFirst());
+				session.write(response.serialize());
 			}
 			
 		});
@@ -736,7 +761,7 @@ public class PlayerService implements INetworkDispatch {
 										}
 										
 										if (rewards != null && !rewards.isEmpty()) {
-											giveItems(creature, (SWGObject[]) rewards.toArray());
+											giveItems(creature, rewards);
 										}
 										
 									}  catch (InstantiationException | IllegalAccessException e) {
@@ -750,6 +775,9 @@ public class PlayerService implements INetworkDispatch {
 			} catch (InstantiationException | IllegalAccessException e) {
 				e.printStackTrace();
 			}
+			
+			if(player.getProfession().equals("entertainer_1a") && creature.getLevel() == (short) 90)
+				creature.getEntertainerExperience().cancel(true);
 		//}
 	}
 	
@@ -793,11 +821,38 @@ public class PlayerService implements INetworkDispatch {
 	}
 	
 	/**
-	 * Gives a player items and shows the "New Items" message.
-	 * @param reciever Player receiving the items
-	 * @param items The object(s) to be given. This will allow multiple arguments.
+	 * Gives a player an item and shows the "New Items" message.
+	 * @param reciever Player receiving the item.
+	 * @param item The object to be given.
+	 * @author Waverunner
 	 */
-	public void giveItems(CreatureObject reciever, SWGObject... items) {
+	public void giveItem(CreatureObject reciever, SWGObject item) {
+		if (reciever == null || item == null)
+			return;
+		
+		if (reciever.getClient() == null)
+			return;
+		Client client = reciever.getClient();
+		
+		if (client.getSession() == null)
+			return;
+		SWGObject inventory = reciever.getSlottedObject("inventory");
+		
+		if (inventory == null)
+			return;
+		
+		inventory.add(item);
+		
+		ObjControllerMessage objController = new ObjControllerMessage(11, new ShowLootBox(reciever.getObjectID(), item));
+		client.getSession().write(objController.serialize());
+	}
+	
+	/**
+	 * Gives a player a variety of items and shows the "New Items" message.
+	 * @param reciever Player receiving the items.
+	 * @param items Vector of the items.
+	 */
+	public void giveItems(CreatureObject reciever, Vector<SWGObject> items) {
 		if (reciever == null || items == null)
 			return;
 		

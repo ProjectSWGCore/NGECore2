@@ -379,7 +379,12 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		
 		buffer.put((byte) 0); // performing? boolean
 		buffer.put(creature.getDifficulty());
-		buffer.putInt(0xFFFFFFFF); // -1 normal appearance, 0 hologram
+		
+		if(creature.isHologram())
+			buffer.putInt(0);
+		else
+			buffer.putInt(0xFFFFFFFF);
+
 		buffer.put((byte) 1); // visibleOnRadar? boolean
 		buffer.put((byte) 0); // no effect for 1?
 		buffer.put((byte) 0); // no effect for 1?
