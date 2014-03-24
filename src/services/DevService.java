@@ -70,18 +70,24 @@ public class DevService implements INetworkDispatch {
 		
 		switch(childMenu)
 		{
-			case 0:
+			case 0: // Root
 				suiOptions.put((long) 1, "Character");
 				suiOptions.put((long) 2, "Items");
 				break;
-			case 1:
+			case 1: // Character
 				suiOptions.put((long) 10, "Set combat level to 90");
 				suiOptions.put((long) 11, "Give 100,000 credits");
 				break;
-			case 2: 
+			case 2: // Items
 				suiOptions.put((long) 20, "(Light) Jedi Robe");
 				suiOptions.put((long) 21, "(Dark) Jedi Robe");
 				suiOptions.put((long) 22, "Composite Armor");
+				suiOptions.put((long) 23, "Weapons");
+				break;
+			case 3: // [Items] Weapons
+				suiOptions.put((long) 30, "Jedi Weapons");
+				suiOptions.put((long) 31, "Melee Weapons");
+				suiOptions.put((long) 32, "Ranged Weapons");
 				break;
 		}
 		
@@ -103,25 +109,30 @@ public class DevService implements INetworkDispatch {
 				
 				switch(childIndex)
 				{
-					case 1:
-						sendCharacterBuilderSUI(player, childIndex);
+					// Root
+					case 1: // Character
+						sendCharacterBuilderSUI(player, 1);
 						return;
-					case 2:
-						sendCharacterBuilderSUI(player, childIndex);
+					case 2: // Items
+						sendCharacterBuilderSUI(player, 2);
 						return;
-					case 10:
+					
+					// Character
+					case 10: // Set combat level to 90
 						core.playerService.giveExperience(player, 999999999);
 						return;
-					case 11:
+					case 11: // Give 100,000 credits
 						player.setCashCredits(player.getCashCredits() + 100000);
 						return;
-					case 20:
+						
+					// Items
+					case 20: // (Light) Jedi Robe
 						inventory.add(core.objectService.createObject("object/tangible/wearables/robe/shared_robe_jedi_light_s03.iff", planet));
 						return;
-					case 21:
+					case 21: // (Dark) Jedi Robe
 						inventory.add(core.objectService.createObject("object/tangible/wearables/robe/shared_robe_jedi_dark_s03.iff", planet));
 						return;
-					case 22:
+					case 22: // Composite Armor
 						inventory.add(core.objectService.createObject("object/tangible/wearables/armor/composite/shared_armor_composite_bicep_r.iff", planet));
 						inventory.add(core.objectService.createObject("object/tangible/wearables/armor/composite/shared_armor_composite_bicep_l.iff", planet));
 						inventory.add(core.objectService.createObject("object/tangible/wearables/armor/composite/shared_armor_composite_bracer_r.iff", planet));
@@ -131,6 +142,57 @@ public class DevService implements INetworkDispatch {
 						inventory.add(core.objectService.createObject("object/tangible/wearables/armor/composite/shared_armor_composite_leggings.iff", planet));
 						inventory.add(core.objectService.createObject("object/tangible/wearables/armor/composite/shared_armor_composite_boots.iff", planet));
 						inventory.add(core.objectService.createObject("object/tangible/wearables/armor/composite/shared_armor_composite_gloves.iff", planet));
+						return;
+					case 23: // Weapons
+						sendCharacterBuilderSUI(player, 3);
+						return;
+						
+					// [Items] Weapons
+					case 30: // Jedi Weapons
+						SWGObject lightsaber1 = core.objectService.createObject("object/weapon/melee/sword/crafted_saber/shared_sword_lightsaber_one_handed_gen5.iff", planet);
+						lightsaber1.setIntAttribute("required_combat_level", 90);
+						lightsaber1.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 1);
+						lightsaber1.setStringAttribute("class_required", "Jedi");
+						lightsaber1.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
+						lightsaber1.setStringAttribute("cat_wpn_damage.damage", "689-1379");
+						
+						SWGObject lightsaber2 = core.objectService.createObject("object/weapon/melee/2h_sword/crafted_saber/shared_sword_lightsaber_two_handed_gen5.iff", planet);
+						lightsaber2.setIntAttribute("required_combat_level", 90);
+						lightsaber2.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 1);
+						lightsaber2.setStringAttribute("class_required", "Jedi");
+						lightsaber2.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
+						lightsaber2.setStringAttribute("cat_wpn_damage.damage", "689-1379");
+						
+						SWGObject lightsaber3 = core.objectService.createObject("object/weapon/melee/polearm/crafted_saber/shared_sword_lightsaber_polearm_gen5.iff", planet);
+						lightsaber3.setIntAttribute("required_combat_level", 90);
+						lightsaber3.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 1);
+						lightsaber3.setStringAttribute("class_required", "Jedi");
+						lightsaber3.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
+						lightsaber3.setStringAttribute("cat_wpn_damage.damage", "689-1379");
+						
+						inventory.add(lightsaber1);
+						inventory.add(lightsaber2);
+						inventory.add(lightsaber3);
+						return;
+					case 31: // Melee Weapons
+						SWGObject sword1 = core.objectService.createObject("object/weapon/melee/sword/shared_sword_01.iff", planet);
+						sword1.setIntAttribute("required_combat_level", 90);
+						sword1.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 1);
+						sword1.setStringAttribute("class_required", "None");
+						sword1.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
+						sword1.setStringAttribute("cat_wpn_damage.damage", "1100-1200");
+						
+						inventory.add(sword1);
+						return;
+					case 32: // Ranged Weapons
+						SWGObject rifle1 = core.objectService.createObject("object/weapon/ranged/rifle/shared_rifle_e11.iff", planet);
+						rifle1.setIntAttribute("required_combat_level", 90);
+						rifle1.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 1);
+						rifle1.setStringAttribute("class_required", "None");
+						rifle1.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
+						rifle1.setStringAttribute("cat_wpn_damage.damage", "800-1250");
+						
+						inventory.add(rifle1);
 						return;
 				}
 			}	

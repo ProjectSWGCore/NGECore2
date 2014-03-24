@@ -114,7 +114,7 @@ public class EquipmentService implements INetworkDispatch {
 		
 		if (item.getStringAttribute("class_required") != null) {
 			String profession = ((PlayerObject) actor.getSlottedObject("ghost")).getProfession();
-			if (item.getStringAttribute("class_required").contentEquals(getFormalProfessionName(profession)))
+			if (item.getStringAttribute("class_required").contentEquals(getFormalProfessionName(profession)) || item.getStringAttribute("class_required").contentEquals("None"))
 				result = true;
 			else
 				return false;
