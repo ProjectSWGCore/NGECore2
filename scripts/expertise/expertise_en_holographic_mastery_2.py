@@ -10,7 +10,7 @@ def addExpertisePoint(core, actor):
         if not player.getProfession() == 'entertainer_1a':
                 return
 
-        actor.addSkill('expertise_en_holographic_mastery_2')
+        core.services.skillModService.addSkillMod(actor, 'expertise_en_holographic_additional_backup', 1)
         addAbilities(core, actor, player)
 
         return
@@ -25,7 +25,7 @@ def removeExpertisePoint(core, actor):
         if not player.getProfession() == 'entertainer_1a':
                 return
 
-        actor.removeSkill('expertise_en_holographic_mastery_2')
+        core.services.skillModService.deductSkillMod(actor, 'expertise_en_holographic_additional_backup', 1)
 
         removeAbilities(core, actor, player)
 

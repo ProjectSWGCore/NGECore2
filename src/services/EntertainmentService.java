@@ -35,6 +35,7 @@ import resources.datatables.Posture;
 import resources.objects.Buff;
 import resources.objects.BuffItem;
 import resources.objects.SWGList;
+import resources.objects.SkillMod;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
@@ -46,7 +47,6 @@ import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.clients.Client;
 import engine.resources.objects.SWGObject;
-import engine.resources.objects.SkillMod;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
@@ -348,7 +348,8 @@ public class EntertainmentService implements INetworkDispatch {
 		//core.commandService.registerCommand("stopwatching"); // SWGList error
 		//core.commandService.registerCommand("holoEmote");
 		core.commandService.registerCommand("covercharge");
-		
+		//core.commandService.registerCommand("en_holographic_recall");
+		//core.commandService.registerCommand("en_holographic_image");
 		// TODO: Add /bandsolo, /bandpause, /changeBandMusic, /changeDance, /changeGroupDance, /changeMusic
 		
 		// Entertainer Effects
@@ -392,11 +393,14 @@ public class EntertainmentService implements INetworkDispatch {
 		
 		reciever.setAttachment("buffWorkshop", stats);
 		
-		PlayerObject rPlayer = (PlayerObject) reciever.getSlottedObject("ghost");
+		if (buffer == reciever)
+			reciever.setAttachment("inspireDuration", 215);
+		
+		//PlayerObject rPlayer = (PlayerObject) reciever.getSlottedObject("ghost");
 
-		long timeStamp = 0;
-		if (reciever.getAttachment("buffWorkshopTimestamp") != null)
-			timeStamp = (long) reciever.getAttachment("buffWorkshopTimestamp");
+		//long timeStamp = 0;
+		//if (reciever.getAttachment("buffWorkshopTimestamp") != null)
+			//timeStamp = (long) reciever.getAttachment("buffWorkshopTimestamp");
 
 		core.buffService.addBuffToCreature(reciever, "buildabuff_inspiration", buffer);
 		/*if (core.buffService.addBuffToCreature(reciever, "buildabuff_inspiration", buffer) && !rPlayer.getProfession().equals("entertainer_1a")) {

@@ -39,7 +39,7 @@ def handleCoverCharge(actor, window, eventType, returnList):
 			actor.sendSystemMessage('@performance:cc_stop_charge', 0)
 			return
 		else:
-			actor.setCoverCharge(int(returnList.get(0)))
+			actor.setCoverCharge(charge)
 			actor.sendSystemMessage('You are now charging a cover of ' + returnList.get(0) + ' credits(s).', 0)
 			return
 		return
