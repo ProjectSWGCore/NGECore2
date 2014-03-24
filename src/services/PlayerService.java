@@ -776,7 +776,7 @@ public class PlayerService implements INetworkDispatch {
 				e.printStackTrace();
 			}
 			
-			if(player.getProfession().equals("entertainer_1a") && creature.getLevel() == (short) 90)
+			if(player.getProfession().equals("entertainer_1a") && creature.getLevel() == (short) 90 && creature.getEntertainerExperience() != null)
 				creature.getEntertainerExperience().cancel(true);
 		//}
 	}

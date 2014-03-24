@@ -53,6 +53,7 @@ import org.apache.mina.core.session.IoSession;
 import org.python.core.Py;
 import org.python.core.PyObject;
 
+import com.sleepycat.je.Transaction;
 import com.sleepycat.persist.EntityCursor;
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
@@ -832,21 +833,36 @@ public class ObjectService implements INetworkDispatch {
 					SWGObject object = getObject(objectId);
 					
 					// Same coordinates is a true duplicate
-					if ((px + x1) == object.getPosition().x &&
+					if ((px + ((containerId == 0) ? 0 : x1)) == object.getPosition().x &&
 						py == object.getPosition().y &&
-						(pz + z1) == object.getPosition().z) {
+						(pz + ((containerId == 0) ? 0 : z1)) == object.getPosition().z) {
 						//System.out.println("Duplicate buildout object: " + template);
 						continue;
 					}
 				}
 				
-				if (objectId != 0 && getObject(objectId) != null) {
-					duplicate.put(objectId, generateObjectID());
-					objectId = duplicate.get(objectId);
-				}
-				
 				if (duplicate.containsKey(containerId)) {
 					containerId = duplicate.get(containerId);
+				}
+				
+				if (objectId != 0 && getObject(objectId) != null) {
+					SWGObject container = getObject(containerId);
+					int x = ((int) (px + ((container == null) ? x1 : container.getPosition().x)));
+					int z = ((int) (pz + ((container == null) ? z1 : container.getPosition().z)));
+					String key = "" + CRC.StringtoCRC(planet.getName()) + CRC.StringtoCRC(template) + type + containerId + cellIndex + x + py + z;
+					long newObjectId = 0;
+					
+					if (core.getDuplicateIdODB().contains(key, String.class, DuplicateId.class)) {
+						newObjectId = core.getDuplicateIdODB().get(key, String.class, DuplicateId.class).getObjectId();
+					} else {
+						newObjectId = generateObjectID();
+						Transaction txn = core.getDuplicateIdODB().getEnvironment().beginTransaction(null, null);
+						core.getDuplicateIdODB().put(new DuplicateId(key, newObjectId), String.class, DuplicateId.class, txn);
+						txn.commitSync();
+					}
+					
+					duplicate.put(objectId, newObjectId);
+					objectId = newObjectId;
 				}
 				
 				List<Long> containers = new ArrayList<Long>();
@@ -856,9 +872,11 @@ public class ObjectService implements INetworkDispatch {
 						containers.add(objectId);
 						object = createObject(template, objectId, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, true);
 						object.setAttachment("childObjects", null);
-						((BuildingObject) object).createTransaction(core.getBuildingODB().getEnvironment());
-						core.getBuildingODB().put((BuildingObject) object, Long.class, BuildingObject.class, ((BuildingObject) object).getTransaction());
-						((BuildingObject) object).getTransaction().commitSync();
+						if (!duplicate.containsValue(objectId)) {
+							((BuildingObject) object).createTransaction(core.getBuildingODB().getEnvironment());
+							core.getBuildingODB().put((BuildingObject) object, Long.class, BuildingObject.class, ((BuildingObject) object).getTransaction());
+							((BuildingObject) object).getTransaction().commitSync();
+						}
 					} else {
 						object = createObject(template, objectId, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz));
 					}

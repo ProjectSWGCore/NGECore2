@@ -151,10 +151,10 @@ public class CombatCommand extends BaseSWGCommand {
 						minDamage = (Integer) visitor.getObject(i, 77);
 						maxDamage = (Integer) visitor.getObject(i, 78);
 						maxRangeOverload = (Float) visitor.getObject(i, 79);
-						weaponCategory = ((Integer) visitor.getObject(i, 80)).byteValue();
-						damageType = ((Integer) visitor.getObject(i, 81)).byteValue();
-						elementalType = ((Integer) visitor.getObject(i, 82)).byteValue();
-						elementalValue = (Integer) visitor.getObject(i, 83);
+						weaponCategory = ((Integer) visitor.getObject(i, 81)).byteValue();
+						damageType = ((Integer) visitor.getObject(i, 82)).byteValue();
+						elementalType = ((Integer) visitor.getObject(i, 83));
+						elementalValue = (Integer) visitor.getObject(i, 84);
 						performanceSpam = (String) visitor.getObject(i, 89);
 						hitSpam = ((Integer) visitor.getObject(i, 90)).byteValue();
 						
@@ -381,7 +381,7 @@ public class CombatCommand extends BaseSWGCommand {
 		this.percentFromWeapon = percentFromWeapon;
 	}
 
-	public float isBypassArmor() {
+	public float getBypassArmor() {
 		return bypassArmor;
 	}
 

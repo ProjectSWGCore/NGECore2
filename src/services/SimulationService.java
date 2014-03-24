@@ -982,6 +982,13 @@ public class SimulationService implements INetworkDispatch {
 		Point3D end = new Point3D(position2.x, position2.y + 1, position2.z);
 		
 		Vector3D direction = new Vector3D(end.x - origin.x, end.y - origin.y, end.z - origin.z).normalize();
+		
+		if (direction.getNorm() != 0) {
+			direction.normalize();
+		} else {
+			System.out.println("WARNING: checkLineOfSightInBuilding: Vector norm was 0.");
+		}
+		
 		float distance = position1.getDistance2D(position2);
 		Ray ray = new Ray(origin, direction);
 		

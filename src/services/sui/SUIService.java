@@ -43,13 +43,12 @@ import protocol.swg.SUIForceClosePageMessage;
 import protocol.swg.SUIUpdatePageMessage;
 import protocol.swg.objectControllerObjects.ObjectMenuRequest;
 import protocol.swg.objectControllerObjects.ObjectMenuResponse;
-
 import resources.common.FileUtilities;
 import resources.common.ObjControllerOpcodes;
 import resources.common.Opcodes;
 import resources.common.RadialOptions;
 import services.sui.SUIWindow.SUICallback;
-
+import services.sui.SUIWindow.Trigger;
 import engine.clients.Client;
 import engine.resources.objects.SWGObject;
 import engine.resources.service.INetworkDispatch;
@@ -331,6 +330,34 @@ public class SUIService implements INetworkDispatch {
 			window.setProperty("btnOk:Text", "@ok");
 			window.setProperty("cmbInput:visible", "False");
 		}
+		return window;
+	}
+	
+	/**
+	 * Creates an Input Box SUIWindow and adds a handler that will return text inputed into text box with the callback as the specified PyObject.
+	 * @param PyObject Definition that will be run when user clicks on "OK"
+	 * @return SUIWindow
+	 * @author Waverunner
+	 */
+	public SUIWindow createInputBox(int type, String title, String promptText, SWGObject owner, SWGObject rangeObject, float maxDistance, PyObject handleFunc) {
+		SUIWindow window = createInputBox(type, title, promptText, owner, rangeObject, maxDistance);
+		Vector<String> returnParams = new Vector<String>();
+		returnParams.add("txtInput:LocalText");
+		window.addHandler(0, "", Trigger.TRIGGER_OK, returnParams, handleFunc);
+		return window;
+	}
+	
+	/**
+	 * Creates an Input Box SUIWindow and adds a handler that will return text inputed into text box with the callback as the specified PyObject.
+	 * @param SUICallback Callback that will be ran when user clicks on "OK"
+	 * @return SUIWindow
+	 * @author Waverunner
+	 */
+	public SUIWindow createInputBox(int type, String title, String promptText, SWGObject owner, SWGObject rangeObject, float maxDistance, SUICallback handleFunc) {
+		SUIWindow window = createInputBox(type, title, promptText, owner, rangeObject, maxDistance);
+		Vector<String> returnParams = new Vector<String>();
+		returnParams.add("txtInput:LocalText");
+		window.addHandler(0, "", Trigger.TRIGGER_OK, returnParams, handleFunc);
 		return window;
 	}
 	

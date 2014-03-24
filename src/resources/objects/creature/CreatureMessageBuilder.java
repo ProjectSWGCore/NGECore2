@@ -31,9 +31,8 @@ import com.sleepycat.persist.model.Persistent;
 import engine.resources.common.CRC;
 import resources.objects.Buff;
 import resources.objects.ObjectMessageBuilder;
+import resources.objects.SkillMod;
 import engine.resources.objects.SWGObject;
-import engine.resources.objects.SkillMod;
-
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
@@ -158,18 +157,22 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 			buffer.putInt(0);
 		} else {
 			buffer.putInt(creature.getSkillMods().size());
-			buffer.putInt(creature.getSkillModsUpdateCounter());
+			buffer.putInt(creature.getSkillMods().getUpdateCounter());
 			
-			for(SkillMod skillMod : creature.getSkillMods().get()) {
+			for(SkillMod skillMod : creature.getSkillMods()) {
 				buffer.put((byte) 0);
-				buffer.put(getAsciiString(skillMod.getSkillModString()));
+				buffer.put(getAsciiString(skillMod.getName()));
 				buffer.putInt(skillMod.getBase());
 				buffer.putInt(skillMod.getModifier());
 			}
 		}
 		buffer.putFloat(creature.getSpeedMultiplierBase());
 		buffer.putFloat(creature.getSpeedMultiplierMod());
-		buffer.putLong(creature.getListenToId());
+		
+		if(creature.getPerformanceListenee() != null)
+			buffer.putLong(creature.getPerformanceListenee().getObjectId());
+		else
+			buffer.putLong(0);
 		
 		buffer.putFloat(creature.getRunSpeed());
 		
@@ -833,7 +836,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 
 	}
 	
-	public IoBuffer buildAddSkillModDelta(String name, int base) {
+	/*public IoBuffer buildAddSkillModDelta(String name, int base) {
 		
 		CreatureObject creature = (CreatureObject) object;
 		
@@ -851,9 +854,9 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		
 		return buffer;
 
-	}
+	}*/
 	
-	public IoBuffer buildRemoveSkillModDelta(String name, int base) {
+	/*public IoBuffer buildRemoveSkillModDelta(String name, int base) {
 		
 		CreatureObject creature = (CreatureObject) object;
 		
@@ -871,7 +874,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		
 		return buffer;
 
-	}
+	}*/
 	
 	public IoBuffer buildAddSkillDelta(String name) {
 		
@@ -1060,23 +1063,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x1C, buffer, size + 4);
 		return buffer;
 	}
-	
-	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
-		switch (viewType) {
-			case 3:
-			case 6:
-			{
-				object.notifyObservers(buffer.flip(), true);
-			}
-			default:
-			{
-				if (object.getClient() != null && object.getClient().getSession() != null) {
-					object.getClient().getSession().write(buffer.flip());
-				}
-			}
-		}
-	}
-	
+
 	public IoBuffer buildAddEquipmentDelta(TangibleObject item) {
 		
 		CreatureObject creature = (CreatureObject) object;
@@ -1178,11 +1165,36 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		
 	}
 
+	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
+		switch (viewType) {
+			case 1:
+			case 3:
+			case 4: {
+				switch(updateType) {
+					case 3: {
+						buffer = createDelta("CREO", (byte) 4, (short) 1, (byte) 3, buffer.flip(), buffer.array().length + 4);
+						
+						if (object.getClient() != null && object.getClient().getSession() != null) {
+							//object.getClient().getSession().write(buffer);
+						}
+						break;
+					}
+					
+				}
+			}
+			case 6:
+			case 8:
+			case 9:
+			default:
+			{
+				return;
+			}
+		}
+	}
+	
 	@Override
 	public void sendBaselines() {
 		
 	}
-
-
 	
 }
