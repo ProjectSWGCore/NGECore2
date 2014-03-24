@@ -727,9 +727,12 @@ public class CombatService implements INetworkDispatch {
 		
 		critChance += ((float) target.getSkillModBase("critical_hit_vulnerable") / 100);
 		
-		if(target.isPlayer())
-			critChance += attacker.getSkillModBase("expertise_critical_niche_pvp");
-			critChance -= ((float) target.getSkillModBase("display_only_expertise_critical_hit_pvp_reduction") / 100);
+		if(target.getSlottedObject("ghost") != null) 
+			if(target.isPlayer()) {
+				critChance += attacker.getSkillModBase("expertise_critical_niche_pvp");
+				critChance -= ((float) target.getSkillModBase("display_only_expertise_critical_hit_pvp_reduction") / 100);
+		}
+
 		
 		r = random.nextFloat();
 
