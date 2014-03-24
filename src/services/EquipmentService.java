@@ -108,7 +108,7 @@ public class EquipmentService implements INetworkDispatch {
 
 		if (item.getStringAttribute("class_required") != null) {
 			String profession = ((PlayerObject) actor.getSlottedObject("ghost")).getProfession();
-			if (item.getStringAttribute("class_required").contentEquals(getFormalProfessionName(profession)))
+			if (item.getStringAttribute("class_required").contentEquals(getFormalProfessionName(profession)) || item.getStringAttribute("class_required").contentEquals("None"))
 				result = true;
 			else
 				return false;
@@ -142,7 +142,6 @@ public class EquipmentService implements INetworkDispatch {
 	}
 	
 	public void equip(CreatureObject actor, SWGObject item) {
-			
 		String template = ((item.getAttachment("customServerTemplate") == null) ? item.getTemplate() : (item.getTemplate().split("shared_")[0] + "shared_" + ((String) item.getAttachment("customServerTemplate")) + ".iff"));
 		String serverTemplate = template.replace(".iff", "");
 		PyObject func = core.scriptService.getMethod("scripts/" + serverTemplate.split("shared_" , 2)[0].replace("shared_", ""), serverTemplate.split("shared_" , 2)[1], "equip");
@@ -191,7 +190,6 @@ public class EquipmentService implements INetworkDispatch {
 
 	
 	public void unequip(CreatureObject actor, SWGObject item) {
-		
 		String template = ((item.getAttachment("customServerTemplate") == null) ? item.getTemplate() : (item.getTemplate().split("shared_")[0] + "shared_" + ((String) item.getAttachment("customServerTemplate")) + ".iff"));
 		String serverTemplate = template.replace(".iff", "");
 		PyObject func = core.scriptService.getMethod("scripts/" + serverTemplate.split("shared_" , 2)[0].replace("shared_", ""), serverTemplate.split("shared_" , 2)[1], "unequip");
@@ -210,6 +208,9 @@ public class EquipmentService implements INetworkDispatch {
 			
 			if(e.getKey().startsWith("cat_skill_mod_bonus.@stat_n:")) {
 				core.skillModService.deductSkillMod(actor, e.getKey().replace("cat_skill_mod_bonus.@stat_n:", ""), Integer.parseInt((String) e.getValue()));
+			}			
+			if(e.getKey().startsWith("cat_stat_mod_bonus.@stat_n:")) {
+				core.skillModService.deductSkillMod(actor, e.getKey().replace("cat_stat_mod_bonus.@stat_n:", ""), Integer.parseInt((String) e.getValue()));
 			}	
 			if(e.getKey().startsWith("cat_attrib_mod_bonus.attr_health")) {
 				actor.setMaxHealth(actor.getMaxHealth() - Integer.parseInt((String) e.getValue()));

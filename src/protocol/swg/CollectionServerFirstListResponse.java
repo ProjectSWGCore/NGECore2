@@ -19,32 +19,27 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package protocol.swg.objectControllerObjects;
+package protocol.swg;
 
 import java.nio.ByteOrder;
-import java.util.List;
-import java.util.Vector;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import main.NGECore;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import engine.resources.objects.SWGObject;
-import protocol.swg.ObjControllerMessage;
-import resources.common.StringUtilities;
+import services.collections.ServerFirst;
+import engine.resources.common.CRC;
 
-public class ShowLootBox extends ObjControllerObject {
-
-	private long playerId;
-	private Vector<SWGObject> rewards;
-	private SWGObject reward;
+public class CollectionServerFirstListResponse extends SWGMessage {
 	
-	public ShowLootBox(long playerId, SWGObject reward) {
-		this.playerId = playerId;
-		this.rewards = rewards;
-	}
+	private Map<String, ServerFirst> sfList;
+	private String server;
 	
-	public ShowLootBox(long playerId, Vector<SWGObject> rewards) {
-		this.playerId = playerId;
-		this.rewards = rewards;
+	public CollectionServerFirstListResponse(String server, Map<String, ServerFirst> serverFirstList){
+		this.sfList = serverFirstList;
+		this.server = server;
 	}
 	
 	@Override
@@ -56,27 +51,25 @@ public class ShowLootBox extends ObjControllerObject {
 	public IoBuffer serialize() {
 		IoBuffer buffer;
 		
-		if (rewards != null)
-			buffer = IoBuffer.allocate(20 + (rewards.size() * 8)).order(ByteOrder.LITTLE_ENDIAN);
+		int size = 0;
 		
-		else
-			buffer = IoBuffer.allocate(28).order(ByteOrder.LITTLE_ENDIAN);
-		
-		buffer.putInt(ObjControllerMessage.SHOW_LOOT_BOX);
-		buffer.putLong(playerId);
-		
-		buffer.putInt(0); // 1 for a black background on icon, 0 or 2 for transparent (default)
-		
-		if (rewards == null) {
-			buffer.putInt(1);
-			buffer.putLong(reward.getObjectId());
-		} else {
-			buffer.putInt(rewards.size());
-			for(SWGObject obj : rewards) {
-				buffer.putLong(obj.getObjectID());
+		synchronized (sfList) {
+			for (Entry<String, ServerFirst> entry : sfList.entrySet()) {
+				size += entry.getValue().getBytes().length;
 			}
-		}
-		return buffer.flip();
-	}
+			
+			buffer = IoBuffer.allocate(12 + server.length() + size).order(ByteOrder.LITTLE_ENDIAN);
+			buffer.putShort((short) 2);
+			buffer.putInt(CRC.StringtoCRC("CollectionServerFirstListResponse"));
+			
+			buffer.put(getAsciiString(server));
+			buffer.putInt(sfList.size());
+			
+			for (Entry<String, ServerFirst> entry : sfList.entrySet()) {
+				buffer.put(entry.getValue().getBytes());
 
+			}
+			return buffer.flip();
+		}
+	}
 }
