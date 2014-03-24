@@ -4,6 +4,7 @@ import java.nio.ByteOrder;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -24,20 +25,28 @@ import protocol.swg.objectControllerObjects.BuffBuilderEndMessage;
 import protocol.swg.objectControllerObjects.BuffBuilderStartMessage;
 import resources.common.BuffBuilder;
 import resources.common.Console;
+import resources.common.MathUtilities;
 import resources.common.ObjControllerOpcodes;
 import resources.common.Performance;
 import resources.common.PerformanceEffect;
+import resources.common.RGB;
 import resources.common.StringUtilities;
 import resources.datatables.Posture;
 import resources.objects.Buff;
 import resources.objects.BuffItem;
+import resources.objects.SWGList;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
+import services.sui.SUIService.InputBoxType;
+import services.sui.SUIWindow;
+import services.sui.SUIWindow.SUICallback;
+import services.sui.SUIWindow.Trigger;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.clients.Client;
 import engine.resources.objects.SWGObject;
+import engine.resources.objects.SkillMod;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
@@ -51,6 +60,8 @@ public class EntertainmentService implements INetworkDispatch {
 	private ConcurrentHashMap<String,Performance> performances = new ConcurrentHashMap<String,Performance>();
 	private ConcurrentHashMap<Integer,Performance> performancesByIndex = new ConcurrentHashMap<Integer,Performance>();
 	private ConcurrentHashMap<Integer,Performance> danceMap = new ConcurrentHashMap<Integer,Performance>();
+	
+	private Random ranWorkshop = new Random();
 	
 	private Map<String, PerformanceEffect> performanceEffects = new ConcurrentHashMap<String, PerformanceEffect>();
 	
@@ -70,7 +81,7 @@ public class EntertainmentService implements INetworkDispatch {
 			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
 
 				data.order(ByteOrder.LITTLE_ENDIAN);
-				StringUtilities.printBytes(data.array());
+
 				Client client = core.getClient(session);
 
 				if(client == null)
@@ -145,8 +156,8 @@ public class EntertainmentService implements INetworkDispatch {
 
 				Vector<BuffItem> statBuffs = sentPacket.getStatBuffs();
 
-				SWGObject buffer = core.objectService.getObject(sentPacket.getBufferId());
-				SWGObject buffRecipient = core.objectService.getObject(sentPacket.getBuffRecipientId());
+				CreatureObject buffer = (CreatureObject) core.objectService.getObject(sentPacket.getBufferId());
+				CreatureObject buffRecipient = (CreatureObject) core.objectService.getObject(sentPacket.getBuffRecipientId());
 
 				if (buffer != buffRecipient) {
 
@@ -170,7 +181,7 @@ public class EntertainmentService implements INetworkDispatch {
 							}
 						}
 
-						giveInspirationBuff(buffRecipient, statBuffs);
+						giveInspirationBuff(buffRecipient, buffer, statBuffs);
 
 						BuffBuilderEndMessage endBuilder = new BuffBuilderEndMessage(changeMessage);
 						endBuilder.setObjectId(buffer.getObjectId());
@@ -200,7 +211,7 @@ public class EntertainmentService implements INetworkDispatch {
 
 				} else {
 					if (sentPacket.getAccepted() == true) {
-						giveInspirationBuff(buffRecipient, statBuffs);
+						giveInspirationBuff(buffRecipient, buffer, statBuffs);
 						BuffBuilderEndMessage endBuilder = new BuffBuilderEndMessage(sentPacket);
 						endBuilder.setObjectId(buffer.getObjectId());
 
@@ -334,8 +345,10 @@ public class EntertainmentService implements INetworkDispatch {
 		core.commandService.registerCommand("startdance");
 		core.commandService.registerCommand("stopdance");
 		core.commandService.registerCommand("watch");
-		core.commandService.registerCommand("stopwatching");
+		//core.commandService.registerCommand("stopwatching"); // SWGList error
 		//core.commandService.registerCommand("holoEmote");
+		core.commandService.registerCommand("covercharge");
+		
 		// TODO: Add /bandsolo, /bandpause, /changeBandMusic, /changeDance, /changeGroupDance, /changeMusic
 		
 		// Entertainer Effects
@@ -354,8 +367,7 @@ public class EntertainmentService implements INetworkDispatch {
 		core.commandService.registerCommand("ventriloquism");
 	}
 	
-	public void giveInspirationBuff(SWGObject reciever, Vector<BuffItem> buffVector) {
-		CreatureObject buffCreature = (CreatureObject) reciever;
+	public void giveInspirationBuff(CreatureObject reciever, CreatureObject buffer, Vector<BuffItem> buffVector) {
 		
 		Vector<BuffBuilder> availableStats = buffBuilderSkills;
 		Vector<BuffItem> stats = new Vector<BuffItem>();
@@ -372,22 +384,35 @@ public class EntertainmentService implements INetworkDispatch {
 
 					BuffItem stat = new BuffItem(builder.getStatAffects(), item.getInvested(), item.getEntertainerBonus());
 					stat.setAffectAmount(affectTotal);
-					
-					/*System.out.println("Invested Points: " + item.getInvested());
-					System.out.println("Entertainer Bonus: " + item.getEntertainerBonus());
-					System.out.println("Affect Total: " + affectTotal);*/
 
 					stats.add(stat);
-					
-					break;
 				}
 			}
 		}
 		
-		reciever.setAttachment("buffWorkshop", buffVector);
+		reciever.setAttachment("buffWorkshop", stats);
 		
-		core.buffService.addBuffToCreature(buffCreature, "buildabuff_inspiration");
-		
+		PlayerObject rPlayer = (PlayerObject) reciever.getSlottedObject("ghost");
+
+		long timeStamp = 0;
+		if (reciever.getAttachment("buffWorkshopTimestamp") != null)
+			timeStamp = (long) reciever.getAttachment("buffWorkshopTimestamp");
+
+		core.buffService.addBuffToCreature(reciever, "buildabuff_inspiration", buffer);
+		/*if (core.buffService.addBuffToCreature(reciever, "buildabuff_inspiration", buffer) && !rPlayer.getProfession().equals("entertainer_1a")) {
+			if (timeStamp == 0 || (System.currentTimeMillis() - timeStamp > 86400000)) {
+				float random = ranWorkshop.nextFloat();
+				if (random < 0.75f) {
+
+					if(rPlayer.getProfession().contains("trader")) { core.collectionService.addCollection(buffer, "prof_trader"); } 
+
+					else {
+						core.collectionService.addCollection(buffer, rPlayer.getProfession());
+					}
+				}
+			} else { buffer.sendSystemMessage("@collection:buffed_too_soon", (byte) 0); }
+			reciever.setAttachment("buffWorkshopTimestamp", System.currentTimeMillis());
+		}*/
 	}
 	
 	public int getDanceVisualId(String danceName) {
@@ -480,7 +505,19 @@ public class EntertainmentService implements INetworkDispatch {
 		
 	}
 	
-	public void startSpectating(final CreatureObject spectator, final CreatureObject performer) {
+	public void startSpectating(final CreatureObject spectator, final CreatureObject performer, boolean spectateType) {
+
+		// visual
+		if (spectator.getPerformanceWatchee() == performer && spectateType)
+			spectator.getPerformanceWatchee().removeAudience(spectator);
+		// music
+		else if (spectator.getPerformanceListenee() == performer && !spectateType)
+			spectator.getPerformanceListenee().removeAudience(spectator);
+
+		spectator.setPerformanceWatchee(performer);
+		performer.addAudience(spectator);
+		spectator.setMoodAnimation("entertained");
+
 		final ScheduledFuture<?> spectatorTask = scheduler.scheduleAtFixedRate(new Runnable() {
 
 			@Override
@@ -500,13 +537,24 @@ public class EntertainmentService implements INetworkDispatch {
 					spectator.setMoodAnimation("neutral");
 					performer.removeAudience(spectator);
 
-					spectator.getSpectatorTask().cancel(true);
+					if (spectator.getInspirationTick().cancel(true))
+						spectator.getSpectatorTask().cancel(true);
 				}
 			}
 
 		}, 2, 2, TimeUnit.SECONDS);
 
 		spectator.setSpectatorTask(spectatorTask);
+
+		if(((PlayerObject)performer.getSlottedObject("ghost")).getProfession().equals("entertainer_1a")) {
+			handleInspirationTicks(spectator, performer);
+		}
+
+		if(spectateType)
+			spectator.sendSystemMessage("You start watching " + performer.getCustomName() + ".", (byte) 0);
+		else
+			spectator.sendSystemMessage("You start listening to " + performer.getCustomName() + ".", (byte) 0);
+
 	}
 	
 	public void performFlourish(final CreatureObject performer, int flourish) {
@@ -546,8 +594,6 @@ public class EntertainmentService implements INetworkDispatch {
 			return false;
 
 		String performance = (performer.getPerformanceType()) ? "dance" : "music";
-
-		// TODO: Skill Level check
 
 		if(performer.isPerformingEffect()) {
 			performer.sendSystemMessage("@performance:effect_wait_self", (byte) 0);
@@ -589,6 +635,85 @@ public class EntertainmentService implements INetworkDispatch {
 		}, (long) pEffect.getEffectDuration(), TimeUnit.SECONDS);
 
 		return true;
+	}
+	
+	public void handleInspirationTicks(final CreatureObject spectator, final CreatureObject performer) {
+		// http://youtu.be/WqyAde-oC7o?t=11m14s  << Player watching entertainer (Has ring only, no pet, + 15 min ticks)
+		// TODO: Camp/Cantina checks for expertise and duration bonus %. Right now only using basic values.
+		final ScheduledFuture<?> inspirationTick = scheduler.scheduleAtFixedRate(new Runnable() {
+
+			@Override
+			public void run() {
+				int time = 0; // current buff duration time (minutes)
+				int buffCap = 215; // 5 hours 35 minutes - 2 hours (buff duration increase bonus) << Taken from video, doesn't account for performance bonuses etc.
+
+				if (spectator.getAttachment("inspireDuration") != null)
+					time+= (int) spectator.getAttachment("inspireDuration");
+
+				if (performer.getSkillMod("expertise_en_inspire_buff_duration_increase") != null) {
+					SkillMod durationMod = performer.getSkillMod("expertise_en_inspire_buff_duration_increase");
+					buffCap += durationMod.getBase() + durationMod.getModifier();
+				}
+
+				if (time >= buffCap) {
+					spectator.setAttachment("inspireDuration", buffCap); // incase someone went over cap
+					spectator.getInspirationTick().cancel(true);
+				} else {
+					int entTick = 10;
+					if (performer.getSkillMod("expertise_en_inspire_pulse_duration_increase") != null) {
+						SkillMod pulseMod = performer.getSkillMod("expertise_en_inspire_pulse_duration_increase");
+						entTick += pulseMod.getBase() + pulseMod.getModifier();
+					}
+
+					int duration = (time + entTick); // minutes
+					int hMinutes = MathUtilities.secondsToHourMinutes(duration * 60);
+					int hours = MathUtilities.secondsToWholeHours(duration * 60);
+
+					spectator.showFlyText("spam", "buff_duration_tick_observer", String.valueOf(hours) + " hours , " + hMinutes + " minutes ", 0, (float) 0.66, new RGB(255, 182, 193), 3, 78);
+
+					spectator.setAttachment("inspireDuration", duration);
+					//System.out.println("Inspire Duration: " + spectator.getAttachment("inspireDuration") + " on " + spectator.getCustomName());
+				}
+			}
+
+		}, 10, 10, TimeUnit.SECONDS);
+		spectator.setInspirationTick(inspirationTick);
+	}
+	
+	public void handleCoverCharge(final CreatureObject actor, final CreatureObject performer) {
+		final int charge = performer.getCoverCharge();
+
+		if (charge == 0)
+			return;
+
+		else {
+			SUIWindow notification = core.suiService.createMessageBox(InputBoxType.INPUT_BOX_OK, "Cover Charge", performer.getCustomName() +
+					" has a cover charge of " + performer.getCoverCharge() + ". Do you wish to pay it?", actor, performer, (float) 30);
+			Vector<String> returnParams = new Vector<String>();
+
+			returnParams.add("btnOk:Text");
+
+			notification.addHandler(0, "", Trigger.TRIGGER_OK, returnParams, new SUICallback(){
+
+				@Override
+				public void process(SWGObject owner, int eventType, Vector<String> returnList) {
+					if (eventType == 0) {
+						if (charge > actor.getCashCredits()) {
+							actor.sendSystemMessage("You do not have enough credits to cover the charge.", (byte) 0); // TODO: Find the message in the STF files.
+							return;
+						} else{
+							actor.setCashCredits(actor.getCashCredits() - charge);
+							actor.sendSystemMessage("You payed the cover charge of " + charge + " to " + performer.getCustomName(), (byte) 0); // TODO: Find the message in the STF files.
+							performer.setCashCredits(performer.getCashCredits() + charge);
+
+							startSpectating(actor, performer, performer.getPerformanceType());
+
+						}
+					}
+				}
+			});
+			core.suiService.openSUIWindow(notification);
+		}
 	}
 	
 	@Override

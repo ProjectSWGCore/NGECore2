@@ -85,7 +85,7 @@ public class CombatService implements INetworkDispatch {
 	}
 	
 	public void doCombat(final CreatureObject attacker, final TangibleObject target, final WeaponObject weapon, final CombatCommand command, final int actionCounter) {
-		
+
 		boolean success = true;
 		
 		if((command.getAttackType() == 0 || command.getAttackType() == 1 || command.getAttackType() == 3) && !attemptCombat(attacker, target))
@@ -441,7 +441,7 @@ public class CombatService implements INetworkDispatch {
 		} else {
 			
 			elementalType = command.getElementalType();
-			
+
 		}
 		
 		int baseArmor = 0;
@@ -460,14 +460,16 @@ public class CombatService implements INetworkDispatch {
 				baseArmor = target.getSkillModBase("acid");
 			case ElementalType.ELECTRICITY:
 				baseArmor = target.getSkillModBase("electricity");
-
 		}
 		
 		if(target.getSkillMod("expertise_innate_reduction_all_player") != null)
 			baseArmor *= (100 - target.getSkillMod("expertise_innate_reduction_all_player").getBase()) / 100;
 			
-		float mitigation = (float) (90 * (1 - Math.exp(-0.000125 * baseArmor)) + baseArmor / 9000);
+		if(command.getBypassArmor() > 0)
+			baseArmor *= (100 - command.getBypassArmor()) / 100;
 		
+		float mitigation = (float) (90 * (1 - Math.exp(-0.000125 * baseArmor))) + baseArmor / 9000;
+
 		if(hitType == HitType.STRIKETHROUGH) {
 			
 			float stMaxValue = attacker.getSkillMod("combat_strikethrough_value").getBase() / 2 + attacker.getLuck() / 10;
@@ -480,7 +482,7 @@ public class CombatService implements INetworkDispatch {
 			stValue = 1 - stValue;
 			mitigation *= stValue;
 		}
-		
+
 		return mitigation / 100;
 		
 	}
@@ -504,10 +506,10 @@ public class CombatService implements INetworkDispatch {
 		if(attacker.getAttachment("AI") instanceof AIActor && target instanceof CreatureObject) {
 			((AIActor) attacker.getAttachment("AI")).addDefender((CreatureObject) target);
 		} else {
-			attacker.addDefender(target);
+			attacker.addDefender(target); // See below comment
 		}
 
-		attacker.addDefender(target);
+		//attacker.addDefender(target); // Why do we need to add target to defender list twice?
 		
 		return true;
 		

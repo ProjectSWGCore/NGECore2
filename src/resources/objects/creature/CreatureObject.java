@@ -57,7 +57,7 @@ import engine.resources.scene.Quaternion;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 
-@Entity(version=1)
+@Entity(version=3)
 public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	@NotPersistent
@@ -118,12 +118,9 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private byte moodId = 0;
 	private int performanceCounter = 0;
 	private int performanceId = 0;
-	//FIXME: this is a bit of a hack.
+	private boolean hologram = false;
 	private boolean performanceType = false;
-	//FIXME: hmm.. or persistent?
-	@NotPersistent
 	private boolean acceptBandflourishes = true;
-	@NotPersistent
 	private boolean groupDance = true;
 	private CreatureObject performanceWatchee;
 	private CreatureObject performanceListenee;
@@ -170,6 +167,8 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	@NotPersistent
 	private boolean performingEffect;
+	
+	private int coverCharge;
 	
 	public CreatureObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
 		super(objectID, planet, Template, position, orientation);
@@ -435,11 +434,15 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 
 	public ScheduledFuture<?> getInspirationTick() {
-		return inspirationTick;
+		synchronized(objectMutex) {
+			return inspirationTick;
+		}
 	}
 
 	public void setInspirationTick(ScheduledFuture<?> inspirationTick) {
-		this.inspirationTick = inspirationTick;
+		synchronized(objectMutex) {
+			this.inspirationTick = inspirationTick;
+		}
 	}
 
 	@Override
@@ -570,6 +573,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	public void addSkillMod(String name, int base) {
 		if(getSkillMod(name) == null) {
+			// TODO: This will need to be fixed as it doesn't update in the character sheet properly (wrong delta)
 			SkillMod skillMod = new SkillMod();
 			skillMod.setBase(base);
 			skillMod.setSkillModString(name);
@@ -1532,7 +1536,11 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	public void removeAudience(CreatureObject audienceMember) {
 		synchronized(objectMutex) {
 			if (performanceAudience == null) { return; }
-			performanceAudience.remove(audienceMember);
+			if (audienceMember.getInspirationTick() != null)
+				audienceMember.getInspirationTick().cancel(true);
+			
+			if(performanceAudience.contains(audienceMember))
+				performanceAudience.remove(audienceMember); // SWGList error
 		}
 	}
 
@@ -1669,6 +1677,30 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	public void setPerformingEffect(boolean hasEffect) {
 		synchronized(objectMutex) {
 			this.performingEffect = hasEffect;
+		}
+	}
+	
+	public void setHologram(boolean isHologram) {
+		synchronized(objectMutex) {
+			this.hologram = isHologram;
+		}
+	}
+	
+	public boolean isHologram() {
+		synchronized(objectMutex) {
+			return hologram;
+		}
+	}
+
+	public int getCoverCharge() {
+		synchronized(objectMutex) {
+			return coverCharge;
+		}
+	}
+
+	public void setCoverCharge(int coverCharge) {
+		synchronized (objectMutex) {
+			this.coverCharge = coverCharge;
 		}
 	}
 }

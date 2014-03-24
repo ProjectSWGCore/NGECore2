@@ -7,7 +7,7 @@ def setup():
 
 def run(core, actor, target, commandString):
     playerObject = actor.getSlottedObject('ghost')
-    print playerObject.getProfession()
+
     if not playerObject or playerObject.getProfession() != "entertainer_1a":
       return
     

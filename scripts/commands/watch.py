@@ -26,14 +26,10 @@ def run(core, actor, target, commandString):
 	if target.getPosture() != 0x09 or not perf or perf.getDanceVisualId() < 0:
 		actor.sendSystemMessage(target.getCustomName() + ' is not dancing.',0)
 		return
-
-	oldWatchee = actor.getPerformanceWatchee()
-	if oldWatchee and oldWatchee != target:
-		oldWatchee.removeAudience(actor)
-
-	actor.setPerformanceWatchee(target)
-	target.addAudience(actor)
-	core.entertainmentService.startSpectating(actor, target)
-	actor.setMoodAnimation('entertained')
-	actor.sendSystemMessage('You start watching ' + target.getCustomName() + '.',0)
+	
+	if target.getCoverCharge() > 0 or target.getCoverCharge() == None:
+		core.entertainmentService.handleCoverCharge(actor, target)
+		return
+	else:
+		core.entertainmentService.startSpectating(actor, target, True)
 	return

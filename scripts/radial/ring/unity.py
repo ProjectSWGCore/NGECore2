@@ -16,10 +16,10 @@ def createRadial(core, owner, target, radials):
 		if targetPlayer is not None and targetPlayer.getSlottedObject('ghost') is not None:
 			if targetPlayer.getObjectID() == owner.getObjectID():
 				return
-			radials.add(RadialOptions(0, 69, 1, '@unity:mnu_propose'))
+			radials.add(RadialOptions(0, 69, 3, '@unity:mnu_propose'))
 			return
 	else:
-		radials.add(RadialOptions(0, 70, 1, '@unity:mnu_divorce'))
+		radials.add(RadialOptions(0, 70, 3, '@unity:mnu_divorce'))
 		return
 	return
 	

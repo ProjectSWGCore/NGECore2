@@ -4,15 +4,35 @@ def setup():
     return
     
 def run(core, actor, target, commandString):
-	
+	level = actor.getLevel()
 	command = 'Dazzle1'
-	effect = 'entertainer_dazzle_level_1.cef'
+	effect = 'clienteffect/entertainer_dazzle_level_1.cef'
+	rLevel = 10 # minimum level to perform this effect
 	
-	if actor.getLevel() < 10:
+	if commandString is None or commandString == '':
+
+		if level >= 30:
+			command = 'Dazzle3'
+			effect = 'clienteffect/entertainer_dazzle_level_3.cef'
+		
+		elif level >= 20:
+			command = 'Dazzle2'
+			effect = 'clienteffect/entertainer_dazzle_level_2.cef'
+	
+	if commandString is not None:
+		if commandString == '2':
+			command = 'Dazzle2'
+			effect = 'clienteffect/entertainer_dazzle_level_2.cef'
+			rLevel = 20
+			
+		elif commandString == '3':
+			command = 'Dazzle3'
+			effect = 'clienteffect/entertainer_dazzle_level_3.cef'
+			rLevel = 30
+		
+	if level < rLevel:
 		actor.sendSystemMessage('@performance:effect_lack_skill_self', 0)
 		return
-	
-	# TODO: Find out levels for other dazzle 2 and 3
 	
 	if core.entertainmentService.performEffect(actor, command, effect, target) is True:
 		actor.sendSystemMessage('@performance:effect_perform_dazzle', 0)

@@ -39,7 +39,7 @@ import resources.objects.player.PlayerObject;
 public class EquipmentService implements INetworkDispatch {
 	
 	private NGECore core;
-
+	
 	public EquipmentService(NGECore core) {
 		this.core = core;
 	}
@@ -51,44 +51,32 @@ public class EquipmentService implements INetworkDispatch {
 
 	@Override
 	public void shutdown() {
-		
+
 	}
 	
-	public void weaponCriticalToDisplay(CreatureObject actor, SWGObject item, boolean add) {
+	private int getWeaponCriticalChance(CreatureObject actor, SWGObject item) {
+		int weaponCriticalChance = 0;
+		String weaponCriticalSkillMod = (core.scriptService.getMethod("scripts/equipment/", "weapon_critical", item.getStringAttribute("cat_wpn_damage.wpn_category")/*.replace(" ", "").replace("-", "") + "_" */).__call__().asString());
 		
-		if (add == true) {
-
-			switch(item.getStringAttribute("cat_wpn_damage.wpn_category")) {
-
-				case "Rifle": actor.addSkillMod("display_only_critical", actor.getSkillModBase("expertise_critical_rifle") * 100); // rifle
-				case "Carbine": actor.addSkillMod("display_only_critical", actor.getSkillModBase("expertise_critical_carbine") * 100); // carbine
-				case "Pistol": actor.addSkillMod("display_only_critical", actor.getSkillModBase("expertise_critical_pistol") * 100); // pistol
-				case "One-Handed Melee": actor.addSkillMod("display_only_critical", ((actor.getSkillModBase("expertise_critical_1h") + actor.getSkillModBase("expertise_critical_melee")) * 100)); // one-handed
-				case "Two-Handed Melee": actor.addSkillMod("display_only_critical", ((actor.getSkillModBase("expertise_critical_2h") + actor.getSkillModBase("expertise_critical_melee")) * 100)); // two-handed
-				case "Unarmed": actor.addSkillMod("display_only_critical", ((actor.getSkillModBase("expertise_critical_unarmed") + actor.getSkillModBase("expertise_critical_melee")) * 100)); // unarmed
-				case "Polearm": actor.addSkillMod("display_only_critical", ((actor.getSkillModBase("expertise_critical_polearm") + actor.getSkillModBase("expertise_critical_melee")) * 100)); // polearm
-				case "Free Targeting Heavy Weapon": actor.addSkillMod("display_only_critical", actor.getSkillModBase("expertise_critical_heavy") * 100); // Heavy
-
-
-			}
-			
-		}
+		if(weaponCriticalSkillMod.contains(" "))
+			weaponCriticalSkillMod.replace(" ", "");
 		
-		if (add == false) {
-
-			switch(item.getStringAttribute("cat_wpn_damage.wpn_category")) {
-
-				case "Rifle": actor.deductSkillMod("display_only_critical", actor.getSkillModBase("expertise_critical_rifle") * 100); // rifle
-				case "Carbine": actor.deductSkillMod("display_only_critical", actor.getSkillModBase("expertise_critical_carbine") * 100); // carbine
-				case "Pistol": actor.deductSkillMod("display_only_critical", actor.getSkillModBase("expertise_critical_pistol") * 100); // pistol
-				case "One-Handed Melee": actor.deductSkillMod("display_only_critical", ((actor.getSkillModBase("expertise_critical_1h") + actor.getSkillModBase("expertise_critical_melee")) * 100)); // one-handed
-				case "Two-Handed Melee": actor.deductSkillMod("display_only_critical", ((actor.getSkillModBase("expertise_critical_2h") + actor.getSkillModBase("expertise_critical_melee")) * 100)); // two-handed
-				case "Unarmed": actor.deductSkillMod("display_only_critical", ((actor.getSkillModBase("expertise_critical_unarmed") + actor.getSkillModBase("expertise_critical_melee")) * 100)); // unarmed
-				case "Polearm": actor.deductSkillMod("display_only_critical", ((actor.getSkillModBase("expertise_critical_polearm") + actor.getSkillModBase("expertise_critical_melee")) * 100)); // polearm
-				case "Free Targeting Heavy Weapon": actor.deductSkillMod("display_only_critical", actor.getSkillModBase("expertise_critical_heavy") * 100); // Heavy
-			}
-		}
+		if(weaponCriticalSkillMod.contains("-"))
+			weaponCriticalSkillMod.replace("-", "");		
+		
+		if(actor.getSkillMod(weaponCriticalSkillMod) != null)
+			weaponCriticalChance = actor.getSkillModBase((core.scriptService.getMethod("scripts/equipment/", "weapon_critical", item.getStringAttribute("cat_wpn_damage.wpn_category").replace(" ", "").replace("-", "") + "_" ).__call__().asString()));
+		
+		return weaponCriticalChance;
 	}
+	
+	private void addWeaponCriticalChance(CreatureObject actor, SWGObject item) {
+		actor.addSkillMod("display_only_critical", getWeaponCriticalChance(actor, item));
+	}
+	
+	private void deductWeaponCriticalChance(CreatureObject actor, SWGObject item) {
+		actor.deductSkillMod("display_only_critical", getWeaponCriticalChance(actor, item));
+	}	
 	
 	public String getFormalProfessionName(String stfName) {
 		String formalName = "";
@@ -112,9 +100,15 @@ public class EquipmentService implements INetworkDispatch {
 	public boolean canEquip(CreatureObject actor, SWGObject item) {
 		boolean result = true;
 		
+		if (item.getAttributes().toString().contains("cat_armor"))
+			if (actor.getLevel() >= 22)
+				result = true;
+			else
+				return false;
+
 		if (item.getStringAttribute("class_required") != null) {
 			String profession = ((PlayerObject) actor.getSlottedObject("ghost")).getProfession();
-			if (item.getStringAttribute("class_required").contentEquals(getFormalProfessionName(profession)))
+			if (item.getStringAttribute("class_required").contentEquals(getFormalProfessionName(profession)) || item.getStringAttribute("class_required").contentEquals("None"))
 				result = true;
 			else
 				return false;
@@ -126,7 +120,7 @@ public class EquipmentService implements INetworkDispatch {
 			else
 				return false;			
 		
-		if (item.getAttributes().toString().contains("required_combat_level"))
+		if (item.getAttributes().containsKey("required_combat_level"))
 			if (actor.getLevel() >= item.getIntAttribute("required_combat_level"))
 				result = true;
 			else
@@ -135,44 +129,19 @@ public class EquipmentService implements INetworkDispatch {
 		return result;
 	}
 	
-	public void calculateForceProtection(CreatureObject actor, SWGObject item, boolean add) {
-		int type = 0;
-		int level = 0;
-		int[][] protection = {{1400,3000,4000,5000,6500},{0, 0, 4500, 5600, 6500}};
-
-		switch ((String) item.getAttachment("type")) {
-			case "jedi_robe":	type = 0; break;
-			case "jedi_cloak":	type = 1; break;
-		}
-		
-		switch (item.getStringAttribute("protection_level")) {
-			case "Faint":		level = 0; break;
-			case "Weak":		level = 1; break;
-			case "Lucent":		level = 2; break;
-			case "Luminous":	level = 3; break;
-			case "Radiant":		level = 4; break;
-		}
-		
-		if (add==true) {
-			core.skillModService.addSkillMod(actor, "kinetic", protection[type][level]);
-			core.skillModService.addSkillMod(actor, "energy", protection[type][level]);
-			core.skillModService.addSkillMod(actor, "heat", protection[type][level]);
-			core.skillModService.addSkillMod(actor, "cold", protection[type][level]);
-			core.skillModService.addSkillMod(actor, "acid", protection[type][level]);
-			core.skillModService.addSkillMod(actor, "electricity", protection[type][level]);
-		} else {
-			core.skillModService.deductSkillMod(actor, "kinetic", protection[type][level]);
-			core.skillModService.deductSkillMod(actor, "energy", protection[type][level]);
-			core.skillModService.deductSkillMod(actor, "heat", protection[type][level]);
-			core.skillModService.deductSkillMod(actor, "cold", protection[type][level]);
-			core.skillModService.deductSkillMod(actor, "acid", protection[type][level]);
-			core.skillModService.deductSkillMod(actor, "electricity", protection[type][level]);
-		}
-		
+	private void addForceProtection(CreatureObject actor, SWGObject item) {
+		actor.addSkillMod("expertise_innate_protection_all", getForceProtection(item));
+	}	
+	
+	private void deductForceProtection(CreatureObject actor, SWGObject item) {
+		actor.deductSkillMod("expertise_innate_protection_all", getForceProtection(item));
+	}	
+	
+	private int getForceProtection(SWGObject item) {
+		return core.scriptService.getMethod("scripts/equipment/", "force_protection", item.getAttachment("type") + "_" + item.getStringAttribute("protection_level")).__call__().asInt();
 	}
 	
 	public void equip(CreatureObject actor, SWGObject item) {
-			
 		String template = ((item.getAttachment("customServerTemplate") == null) ? item.getTemplate() : (item.getTemplate().split("shared_")[0] + "shared_" + ((String) item.getAttachment("customServerTemplate")) + ".iff"));
 		String serverTemplate = template.replace(".iff", "");
 		PyObject func = core.scriptService.getMethod("scripts/" + serverTemplate.split("shared_" , 2)[0].replace("shared_", ""), serverTemplate.split("shared_" , 2)[1], "equip");
@@ -180,7 +149,7 @@ public class EquipmentService implements INetworkDispatch {
 			func.__call__(Py.java2py(core), Py.java2py(actor), Py.java2py(item));
 
 		if (item.getStringAttribute("protection_level") != null)
-			calculateForceProtection(actor, item, true);
+			addForceProtection(actor, item);
 		
 		// TODO: faction restrictions - You had to be a Combatant as minimum in order to EQUIP an item.
 		// TODO: Species restrictions
@@ -192,8 +161,8 @@ public class EquipmentService implements INetworkDispatch {
 		
 		if(item.getStringAttribute("cat_wpn_damage.wpn_category") != null)
 			if (actor.getSlotNameForObject(item).contentEquals("hold_r") == true)
-				weaponCriticalToDisplay(actor, item, true);
-			
+				addWeaponCriticalChance(actor, item);
+				
 		Map<String, Object> attributes = new TreeMap<String, Object>(item.getAttributes());
 		
 		for(Entry<String, Object> e : attributes.entrySet()) {
@@ -221,7 +190,6 @@ public class EquipmentService implements INetworkDispatch {
 
 	
 	public void unequip(CreatureObject actor, SWGObject item) {
-		
 		String template = ((item.getAttachment("customServerTemplate") == null) ? item.getTemplate() : (item.getTemplate().split("shared_")[0] + "shared_" + ((String) item.getAttachment("customServerTemplate")) + ".iff"));
 		String serverTemplate = template.replace(".iff", "");
 		PyObject func = core.scriptService.getMethod("scripts/" + serverTemplate.split("shared_" , 2)[0].replace("shared_", ""), serverTemplate.split("shared_" , 2)[1], "unequip");
@@ -229,11 +197,10 @@ public class EquipmentService implements INetworkDispatch {
 			func.__call__(Py.java2py(core), Py.java2py(actor), Py.java2py(item));
 
 		if (item.getStringAttribute("protection_level") != null)
-			calculateForceProtection(actor, item, false);
+			deductForceProtection(actor, item);
 		
 		if(item.getStringAttribute("cat_wpn_damage.wpn_category") != null)		
-			if (actor.getSlotNameForObject(item).contentEquals("hold_r") == true)
-				weaponCriticalToDisplay(actor, item, false);
+			deductWeaponCriticalChance(actor, item);
 		
 		Map<String, Object> attributes = new TreeMap<String, Object>(item.getAttributes());
 		
@@ -241,6 +208,9 @@ public class EquipmentService implements INetworkDispatch {
 			
 			if(e.getKey().startsWith("cat_skill_mod_bonus.@stat_n:")) {
 				core.skillModService.deductSkillMod(actor, e.getKey().replace("cat_skill_mod_bonus.@stat_n:", ""), Integer.parseInt((String) e.getValue()));
+			}			
+			if(e.getKey().startsWith("cat_stat_mod_bonus.@stat_n:")) {
+				core.skillModService.deductSkillMod(actor, e.getKey().replace("cat_stat_mod_bonus.@stat_n:", ""), Integer.parseInt((String) e.getValue()));
 			}	
 			if(e.getKey().startsWith("cat_attrib_mod_bonus.attr_health")) {
 				actor.setMaxHealth(actor.getMaxHealth() - Integer.parseInt((String) e.getValue()));

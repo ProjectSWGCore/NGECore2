@@ -195,6 +195,20 @@ public class ConnectionService implements INetworkDispatch {
 		object.setInviteCounter(0);
 		object.setInviteSenderId(0);
 		object.setInviteSenderName("");
+		
+		if(object.getAttachment("inspireDuration") != null)
+			object.setAttachment("inspireDuration", null);
+		
+		if(object.getInspirationTick() != null) {
+			object.getInspirationTick().cancel(true);
+			object.setInspirationTick(null);
+		}
+		
+		if(object.getSpectatorTask() != null) {
+			object.getSpectatorTask().cancel(true);
+			object.setSpectatorTask(null);
+		}
+		
 		core.groupService.handleGroupDisband(object);
 		
 		for (CreatureObject opponent : object.getDuelList()) {
