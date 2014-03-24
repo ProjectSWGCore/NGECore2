@@ -57,7 +57,7 @@ import engine.resources.scene.Quaternion;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 
-@Entity(version=2)
+@Entity(version=3)
 public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	@NotPersistent
@@ -119,12 +119,8 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private int performanceCounter = 0;
 	private int performanceId = 0;
 	private boolean hologram = false;
-	//FIXME: this is a bit of a hack.
 	private boolean performanceType = false;
-	//FIXME: hmm.. or persistent?
-	@NotPersistent
 	private boolean acceptBandflourishes = true;
-	@NotPersistent
 	private boolean groupDance = true;
 	private CreatureObject performanceWatchee;
 	private CreatureObject performanceListenee;
@@ -171,6 +167,8 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	@NotPersistent
 	private boolean performingEffect;
+	
+	private int coverCharge;
 	
 	public CreatureObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
 		super(objectID, planet, Template, position, orientation);
@@ -422,7 +420,6 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 				if(performanceType) { next.sendSystemMessage("You stop watching " + getCustomName() + ".",(byte)0); }
 				else { next.sendSystemMessage("You stop listening to " + getCustomName() + ".",(byte)0); }
 				next.getSpectatorTask().cancel(true);
-				next.getInspirationTick().cancel(true);
 			}
 			//not sure if this behaviour is correct. might need fixing later.
 			performanceAudience = new SWGList<CreatureObject>();
@@ -1539,7 +1536,11 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	public void removeAudience(CreatureObject audienceMember) {
 		synchronized(objectMutex) {
 			if (performanceAudience == null) { return; }
-			performanceAudience.remove(audienceMember);
+			if (audienceMember.getInspirationTick() != null)
+				audienceMember.getInspirationTick().cancel(true);
+			
+			if(performanceAudience.contains(audienceMember))
+				performanceAudience.remove(audienceMember); // SWGList error
 		}
 	}
 
@@ -1688,6 +1689,18 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	public boolean isHologram() {
 		synchronized(objectMutex) {
 			return hologram;
+		}
+	}
+
+	public int getCoverCharge() {
+		synchronized(objectMutex) {
+			return coverCharge;
+		}
+	}
+
+	public void setCoverCharge(int coverCharge) {
+		synchronized (objectMutex) {
+			this.coverCharge = coverCharge;
 		}
 	}
 }

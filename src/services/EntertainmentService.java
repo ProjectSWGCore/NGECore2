@@ -38,6 +38,10 @@ import resources.objects.SWGList;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
+import services.sui.SUIService.InputBoxType;
+import services.sui.SUIWindow;
+import services.sui.SUIWindow.SUICallback;
+import services.sui.SUIWindow.Trigger;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.clients.Client;
@@ -341,8 +345,10 @@ public class EntertainmentService implements INetworkDispatch {
 		core.commandService.registerCommand("startdance");
 		core.commandService.registerCommand("stopdance");
 		core.commandService.registerCommand("watch");
-		core.commandService.registerCommand("stopwatching");
+		//core.commandService.registerCommand("stopwatching"); // SWGList error
 		//core.commandService.registerCommand("holoEmote");
+		core.commandService.registerCommand("covercharge");
+		
 		// TODO: Add /bandsolo, /bandpause, /changeBandMusic, /changeDance, /changeGroupDance, /changeMusic
 		
 		// Entertainer Effects
@@ -499,8 +505,19 @@ public class EntertainmentService implements INetworkDispatch {
 		
 	}
 	
-	public void startSpectating(final CreatureObject spectator, final CreatureObject performer) {
-		
+	public void startSpectating(final CreatureObject spectator, final CreatureObject performer, boolean spectateType) {
+
+		// visual
+		if (spectator.getPerformanceWatchee() == performer && spectateType)
+			spectator.getPerformanceWatchee().removeAudience(spectator);
+		// music
+		else if (spectator.getPerformanceListenee() == performer && !spectateType)
+			spectator.getPerformanceListenee().removeAudience(spectator);
+
+		spectator.setPerformanceWatchee(performer);
+		performer.addAudience(spectator);
+		spectator.setMoodAnimation("entertained");
+
 		final ScheduledFuture<?> spectatorTask = scheduler.scheduleAtFixedRate(new Runnable() {
 
 			@Override
@@ -519,7 +536,7 @@ public class EntertainmentService implements INetworkDispatch {
 					}
 					spectator.setMoodAnimation("neutral");
 					performer.removeAudience(spectator);
-					
+
 					if (spectator.getInspirationTick().cancel(true))
 						spectator.getSpectatorTask().cancel(true);
 				}
@@ -528,11 +545,16 @@ public class EntertainmentService implements INetworkDispatch {
 		}, 2, 2, TimeUnit.SECONDS);
 
 		spectator.setSpectatorTask(spectatorTask);
-		
+
 		if(((PlayerObject)performer.getSlottedObject("ghost")).getProfession().equals("entertainer_1a")) {
 			handleInspirationTicks(spectator, performer);
 		}
-		
+
+		if(spectateType)
+			spectator.sendSystemMessage("You start watching " + performer.getCustomName() + ".", (byte) 0);
+		else
+			spectator.sendSystemMessage("You start listening to " + performer.getCustomName() + ".", (byte) 0);
+
 	}
 	
 	public void performFlourish(final CreatureObject performer, int flourish) {
@@ -624,15 +646,15 @@ public class EntertainmentService implements INetworkDispatch {
 			public void run() {
 				int time = 0; // current buff duration time (minutes)
 				int buffCap = 215; // 5 hours 35 minutes - 2 hours (buff duration increase bonus) << Taken from video, doesn't account for performance bonuses etc.
-				
+
 				if (spectator.getAttachment("inspireDuration") != null)
 					time+= (int) spectator.getAttachment("inspireDuration");
-				
+
 				if (performer.getSkillMod("expertise_en_inspire_buff_duration_increase") != null) {
 					SkillMod durationMod = performer.getSkillMod("expertise_en_inspire_buff_duration_increase");
 					buffCap += durationMod.getBase() + durationMod.getModifier();
 				}
-				
+
 				if (time >= buffCap) {
 					spectator.setAttachment("inspireDuration", buffCap); // incase someone went over cap
 					spectator.getInspirationTick().cancel(true);
@@ -642,20 +664,56 @@ public class EntertainmentService implements INetworkDispatch {
 						SkillMod pulseMod = performer.getSkillMod("expertise_en_inspire_pulse_duration_increase");
 						entTick += pulseMod.getBase() + pulseMod.getModifier();
 					}
-					
+
 					int duration = (time + entTick); // minutes
 					int hMinutes = MathUtilities.secondsToHourMinutes(duration * 60);
 					int hours = MathUtilities.secondsToWholeHours(duration * 60);
 
 					spectator.showFlyText("spam", "buff_duration_tick_observer", String.valueOf(hours) + " hours , " + hMinutes + " minutes ", 0, (float) 0.66, new RGB(255, 182, 193), 3, 78);
-					
+
 					spectator.setAttachment("inspireDuration", duration);
 					//System.out.println("Inspire Duration: " + spectator.getAttachment("inspireDuration") + " on " + spectator.getCustomName());
 				}
 			}
-			
+
 		}, 10, 10, TimeUnit.SECONDS);
 		spectator.setInspirationTick(inspirationTick);
+	}
+	
+	public void handleCoverCharge(final CreatureObject actor, final CreatureObject performer) {
+		final int charge = performer.getCoverCharge();
+
+		if (charge == 0)
+			return;
+
+		else {
+			SUIWindow notification = core.suiService.createMessageBox(InputBoxType.INPUT_BOX_OK, "Cover Charge", performer.getCustomName() +
+					" has a cover charge of " + performer.getCoverCharge() + ". Do you wish to pay it?", actor, performer, (float) 30);
+			Vector<String> returnParams = new Vector<String>();
+
+			returnParams.add("btnOk:Text");
+
+			notification.addHandler(0, "", Trigger.TRIGGER_OK, returnParams, new SUICallback(){
+
+				@Override
+				public void process(SWGObject owner, int eventType, Vector<String> returnList) {
+					if (eventType == 0) {
+						if (charge > actor.getCashCredits()) {
+							actor.sendSystemMessage("You do not have enough credits to cover the charge.", (byte) 0); // TODO: Find the message in the STF files.
+							return;
+						} else{
+							actor.setCashCredits(actor.getCashCredits() - charge);
+							actor.sendSystemMessage("You payed the cover charge of " + charge + " to " + performer.getCustomName(), (byte) 0); // TODO: Find the message in the STF files.
+							performer.setCashCredits(performer.getCashCredits() + charge);
+
+							startSpectating(actor, performer, performer.getPerformanceType());
+
+						}
+					}
+				}
+			});
+			core.suiService.openSUIWindow(notification);
+		}
 	}
 	
 	@Override
