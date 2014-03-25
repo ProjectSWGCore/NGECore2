@@ -11,6 +11,7 @@ def addExpertisePoint(core, actor):
                 return
 
         actor.addSkill('expertise_en_lasting_impression_2')
+        core.skillModService.addSkillMod(actor, 'expertise_en_inspire_buff_duration_increase', 30)
         addAbilities(core, actor, player)
 
         return
@@ -26,7 +27,7 @@ def removeExpertisePoint(core, actor):
                 return
 
         actor.removeSkill('expertise_en_lasting_impression_2')
-
+        core.skillModService.deductSkillMod(actor, 'expertise_en_inspire_buff_duration_increase', 30)
         removeAbilities(core, actor, player)
 
         return

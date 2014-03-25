@@ -193,7 +193,7 @@ public class TravelService implements INetworkDispatch {
 	public void addPlanet(Planet planet) {
 		Vector<TravelPoint> travelPointVector = new Vector<TravelPoint>();
 		travelMap.put(planet, travelPointVector);
-		core.scriptService.callScript("scripts/", "addPoints", "static_travel_points", core, planet);
+		core.scriptService.callScript("scripts/", "static_travel_points", "addPoints", core, planet);
 	}
 
 	public void addTravelPoint(Planet planet, String name, float x, float y, float z) {
@@ -323,7 +323,7 @@ public class TravelService implements INetworkDispatch {
 	public void doTransport(SWGObject actor, TravelPoint tp) {
 		
 		Planet planet = core.terrainService.getPlanetByName(tp.getPlanetName());
-		Point3D spawnLocation = SpawnPoint.getRandomPosition(tp.getShuttle().getPosition(), 10, 50, actor.getPlanetId());
+		Point3D spawnLocation = SpawnPoint.getRandomPosition(tp.getShuttle().getPosition(), 5, 20, actor.getPlanetId());
 		core.simulationService.transferToPlanet(actor, planet, spawnLocation, new Quaternion(0, 0, 0, 0), null);
 		
 	}

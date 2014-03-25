@@ -174,10 +174,10 @@ public class LoginService implements INetworkDispatch{
 
 			@Override
 			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
-				
+
 				data = data.order(ByteOrder.LITTLE_ENDIAN);
 				data.position(0);
-				
+
 				DeleteCharacterMessage packet = new DeleteCharacterMessage();
 				packet.deserialize(data);
 				Client client = core.getClient(session);

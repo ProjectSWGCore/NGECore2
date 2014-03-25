@@ -55,8 +55,9 @@ public class ObjControllerMessage extends SWGMessage {
 	public static final int SHOW_FLY_TEXT = 0x01BD;
 	public static final int START_TASK = 0x448;
 	public static final int ANIMATION = 0x00F2;
-	public static final int BUFF_BUILDER_START = 0x025C;
 	public static final int BUFF_BUILDER_CHANGE = 0x025A;
+	public static final int BUFF_BUILDER_END = 0x025B;
+	public static final int BUFF_BUILDER_START = 0x025C;
 	public static final int UI_PLAY_EFFECT = 0x0401;
 	public static final int SHOW_LOOT_BOX = 0x04BC;
 

@@ -162,6 +162,7 @@ public class SimulationService implements INetworkDispatch {
 		core.commandService.registerCommand("editbiography");
 		core.commandService.registerCommand("setbiography");
 		core.commandService.registerCommand("requestbiography");
+		core.commandService.registerCommand("eject");
 
 	}
 	
@@ -262,6 +263,10 @@ public class SimulationService implements INetworkDispatch {
 	}
 		
 	public boolean remove(SWGObject object, float x, float y, boolean notifyObservers) {
+		if (object == null || !object.isInQuadtree()) {
+			return false;
+		}
+		
 		boolean success = quadTrees.get(object.getPlanet().getName()).remove(x, y, object);
 		object.setIsInQuadtree(success);
 		if(success && notifyObservers) {
@@ -436,21 +441,20 @@ public class SimulationService implements INetworkDispatch {
 			
 		});
 		
-		objControllerOpcodes.put(ObjControllerOpcodes.TARGET_UPDATE, new INetworkRemoteEvent() {
+		objControllerOpcodes.put(ObjControllerOpcodes.lookAtTarget, new INetworkRemoteEvent() {
 
 			@Override
 			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
-								
-				data = data.order(ByteOrder.LITTLE_ENDIAN);
-				data.position(0);
-				
+
+				data.order(ByteOrder.LITTLE_ENDIAN);
+
 				Client client = core.getClient(session);
-				
+
 				if(client == null) {
 					System.out.println("NULL Client");
 					return;
 				}
-				
+
 				if(client.getParent() == null) {
 					System.out.println("NULL Object");
 					return;
@@ -459,20 +463,40 @@ public class SimulationService implements INetworkDispatch {
 
 				TargetUpdate targetUpdate = new TargetUpdate();
 				targetUpdate.deserialize(data);
-				
-				object.setTargetId(targetUpdate.getTargetId());
-				
+
+				object.setLookAtTarget(targetUpdate.getTargetId());
+
 			}
 			
 		});
 		
-		objControllerOpcodes.put(ObjControllerOpcodes.HOVER_TARGET, new INetworkRemoteEvent() {
+		objControllerOpcodes.put(ObjControllerOpcodes.intendedTarget, new INetworkRemoteEvent() {
 
 			@Override
 			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
-				
+
+				data.order(ByteOrder.LITTLE_ENDIAN);
+
+				Client client = core.getClient(session);
+
+				if(client == null) {
+					System.out.println("NULL Client");
+					return;
+				}
+
+				if(client.getParent() == null) {
+					System.out.println("NULL Object");
+					return;
+				}
+				CreatureObject object = (CreatureObject) client.getParent();
+
+				TargetUpdate targetUpdate = new TargetUpdate();
+				targetUpdate.deserialize(data);
+
+				object.setIntendedTarget(targetUpdate.getTargetId());
+
 			}
-			
+
 		});
 		
 	}
@@ -697,6 +721,9 @@ public class SimulationService implements INetworkDispatch {
 
 		final CreatureObject object = (CreatureObject) client.getParent();
 		PlayerObject ghost = (PlayerObject) object.getSlottedObject("ghost");
+		
+		if(object.getAttachment("proposer") != null)
+			object.setAttachment("proposer", null);
 		
 		//session.suspendWrite();
 		final long objectId = object.getObjectID();
@@ -955,6 +982,13 @@ public class SimulationService implements INetworkDispatch {
 		Point3D end = new Point3D(position2.x, position2.y + 1, position2.z);
 		
 		Vector3D direction = new Vector3D(end.x - origin.x, end.y - origin.y, end.z - origin.z).normalize();
+		
+		if (direction.getNorm() != 0) {
+			direction.normalize();
+		} else {
+			System.out.println("WARNING: checkLineOfSightInBuilding: Vector norm was 0.");
+		}
+		
 		float distance = position1.getDistance2D(position2);
 		Ray ray = new Ray(origin, direction);
 		

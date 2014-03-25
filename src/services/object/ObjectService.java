@@ -30,6 +30,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +53,7 @@ import org.apache.mina.core.session.IoSession;
 import org.python.core.Py;
 import org.python.core.PyObject;
 
+import com.sleepycat.je.Transaction;
 import com.sleepycat.persist.EntityCursor;
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
@@ -84,6 +86,7 @@ import engine.resources.scene.Quaternion;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import main.NGECore;
+import resources.objects.Delta;
 import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
@@ -686,7 +689,12 @@ public class ObjectService implements INetworkDispatch {
 		int counter = 0;
 		for(SnapshotChunk chunk : visitor.getChunks()) {
 			++counter;
-			SWGObject obj = createObject(visitor.getName(chunk.nameId), chunk.id, planet, new Point3D(chunk.xPosition, chunk.yPosition, chunk.zPosition), new Quaternion(chunk.orientationW, chunk.orientationX, chunk.orientationY, chunk.orientationZ));
+			// Since the ids are just ints, they append 0xFFFF86F9 to them
+			// This is demonstated in the packet sent to the server when you /target client-spawned buildouts
+			// This is done for buildouts; uncertain about snapshot objects so it's commented for now
+			//long objectId = Delta.createBuffer(8).putInt(chunk.id).putInt(0xF986FFFF).flip().getLong(); // Not sure what extension they add to 4-byte-only snapshot objectIds.  With buildouts they add 0xFFFF86F9.  This is demonstated in the packet sent to the server when you /target client-spawned objects
+			int objectId = chunk.id;
+			SWGObject obj = createObject(visitor.getName(chunk.nameId), objectId, planet, new Point3D(chunk.xPosition, chunk.yPosition, chunk.zPosition), new Quaternion(chunk.orientationW, chunk.orientationX, chunk.orientationY, chunk.orientationZ));
 			if(obj != null) {
 				obj.setisInSnapshot(true);
 				obj.setParentId(chunk.parentId);
@@ -776,6 +784,8 @@ public class ObjectService implements INetworkDispatch {
 
 		CrcStringTableVisitor crcTable = ClientFileManager.loadFile("misc/object_template_crc_string_table.iff", CrcStringTableVisitor.class);
 		List<SWGObject> quadtreeObjects = new ArrayList<SWGObject>();
+		Map<Long, Long> duplicate = new HashMap<Long, Long>();
+		
 		for (int i = 0; i < buildoutTable.getRowCount(); i++) {
 			
 			String template;
@@ -806,8 +816,10 @@ public class ObjectService implements INetworkDispatch {
 
 				} else {
 					
-					objectId = (Integer) buildoutTable.getObject(i, 0);
-					containerId = (Integer) buildoutTable.getObject(i, 1);
+					// Since the ids are just ints, they append 0xFFFF86F9 to them
+					// This is demonstated in the packet sent to the server when you /target client-spawned objects
+					objectId = (((Integer) buildoutTable.getObject(i, 0) == 0) ? 0 : Delta.createBuffer(8).putInt((Integer) buildoutTable.getObject(i, 0)).putInt(0xF986FFFF).flip().getLong());
+					containerId = (((Integer) buildoutTable.getObject(i, 1) == 0) ? 0 : Delta.createBuffer(8).putInt((Integer) buildoutTable.getObject(i, 1)).putInt(0xF986FFFF).flip().getLong());
 					type = (Integer) buildoutTable.getObject(i, 2);
 					cellIndex = (Integer) buildoutTable.getObject(i, 4);
 					
@@ -822,12 +834,45 @@ public class ObjectService implements INetworkDispatch {
 					portalCRC = (Integer) buildoutTable.getObject(i, 13);
 
 				}
-								
+				
+				// Treeku - Refactored to work around duplicate objectIds
+				// Required for instances/heroics which are duplicated ie. 10 times
 				if(!template.equals("object/cell/shared_cell.iff") && objectId != 0 && getObject(objectId) != null) {
-					//System.out.println("Duplicate buildout object: " + template);
-					continue;
+					SWGObject object = getObject(objectId);
+					
+					// Same coordinates is a true duplicate
+					if ((px + ((containerId == 0) ? 0 : x1)) == object.getPosition().x &&
+						py == object.getPosition().y &&
+						(pz + ((containerId == 0) ? 0 : z1)) == object.getPosition().z) {
+						//System.out.println("Duplicate buildout object: " + template);
+						continue;
+					}
 				}
-												
+				
+				if (duplicate.containsKey(containerId)) {
+					containerId = duplicate.get(containerId);
+				}
+				
+				if (objectId != 0 && getObject(objectId) != null) {
+					SWGObject container = getObject(containerId);
+					int x = ((int) (px + ((container == null) ? x1 : container.getPosition().x)));
+					int z = ((int) (pz + ((container == null) ? z1 : container.getPosition().z)));
+					String key = "" + CRC.StringtoCRC(planet.getName()) + CRC.StringtoCRC(template) + type + containerId + cellIndex + x + py + z;
+					long newObjectId = 0;
+					
+					if (core.getDuplicateIdODB().contains(key, String.class, DuplicateId.class)) {
+						newObjectId = core.getDuplicateIdODB().get(key, String.class, DuplicateId.class).getObjectId();
+					} else {
+						newObjectId = generateObjectID();
+						Transaction txn = core.getDuplicateIdODB().getEnvironment().beginTransaction(null, null);
+						core.getDuplicateIdODB().put(new DuplicateId(key, newObjectId), String.class, DuplicateId.class, txn);
+						txn.commitSync();
+					}
+					
+					duplicate.put(objectId, newObjectId);
+					objectId = newObjectId;
+				}
+				
 				List<Long> containers = new ArrayList<Long>();
 				SWGObject object;
 				if(objectId != 0 && containerId == 0) {					
@@ -835,9 +880,11 @@ public class ObjectService implements INetworkDispatch {
 						containers.add(objectId);
 						object = createObject(template, objectId, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, true);
 						object.setAttachment("childObjects", null);
-						((BuildingObject) object).createTransaction(core.getBuildingODB().getEnvironment());
-						core.getBuildingODB().put((BuildingObject) object, Long.class, BuildingObject.class, ((BuildingObject) object).getTransaction());
-						((BuildingObject) object).getTransaction().commitSync();
+						if (!duplicate.containsValue(objectId)) {
+							((BuildingObject) object).createTransaction(core.getBuildingODB().getEnvironment());
+							core.getBuildingODB().put((BuildingObject) object, Long.class, BuildingObject.class, ((BuildingObject) object).getTransaction());
+							((BuildingObject) object).getTransaction().commitSync();
+						}
 					} else {
 						object = createObject(template, objectId, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz));
 					}

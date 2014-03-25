@@ -52,9 +52,11 @@ import services.AttributeService;
 import services.BuffService;
 import services.CharacterService;
 import services.ConnectionService;
+import services.DevService;
 import services.EntertainmentService;
 import services.EquipmentService;
 import services.GroupService;
+import services.InstanceService;
 import services.LoginService;
 import services.MissionService;
 import services.PlayerService;
@@ -163,6 +165,8 @@ public class NGECore {
 	public SpawnService spawnService;
 	public AIService aiService;
 	//public MissionService missionService;
+	public InstanceService instanceService;
+	public DevService devService;
 	
 	// Login Server
 	public NetworkDispatch loginDispatch;
@@ -180,6 +184,7 @@ public class NGECore {
 	private ObjectDatabase mailODB;
 	private ObjectDatabase guildODB;
 	private ObjectDatabase objectIdODB;
+	private ObjectDatabase duplicateIdODB;
 	
 	private BusConfiguration eventBusConfig = BusConfiguration.Default(1, new ThreadPoolExecutor(1, 4, 1, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>()));
 
@@ -229,6 +234,7 @@ public class NGECore {
 		mailODB = new ObjectDatabase("mails", true, false, true);
 		guildODB = new ObjectDatabase("guild", true, false, true);
 		objectIdODB = new ObjectDatabase("oids", true, false, false);
+		duplicateIdODB = new ObjectDatabase("doids", true, false, true);
 
 		// Services
 		loginService = new LoginService(this);
@@ -255,6 +261,7 @@ public class NGECore {
 		skillModService = new SkillModService(this);
 		equipmentService = new EquipmentService(this);
 		entertainmentService = new EntertainmentService(this);
+		devService = new DevService(this);
 		
 		if (config.keyExists("JYTHONCONSOLE.PORT")) {
 			int jythonPort = config.getInt("JYTHONCONSOLE.PORT");
@@ -306,8 +313,8 @@ public class NGECore {
 		zoneServer = new MINAServer(zoneDispatch, config.getInt("ZONE.PORT"));
 		zoneServer.start();
 		staticService = new StaticService(this);
-		
-		// Planets
+		//Start terrainList
+		// Original Planets
 		terrainService.addPlanet(1, "tatooine", "terrain/tatooine.trn", true);
 		terrainService.addPlanet(2, "naboo", "terrain/naboo.trn", true);
 		terrainService.addPlanet(3, "corellia", "terrain/corellia.trn", true);
@@ -320,6 +327,48 @@ public class NGECore {
 		terrainService.addPlanet(10, "dathomir", "terrain/dathomir.trn", true);
 		terrainService.addPlanet(11, "mustafar", "terrain/mustafar.trn", true);
 		terrainService.addPlanet(12, "kashyyyk_main", "terrain/kashyyyk_main.trn", true);
+		//Dungeon Terrains
+		// TODO: Fix BufferUnderFlow Errors on loaded of dungeon instances.
+		/*terrainService.addPlanet(13, "kashyyyk_dead_forest", "terrain/kashyyyk_dead_forest.trn", true);
+		terrainService.addPlanet(14, "kashyyyk_hunting", "terrain/kashyyyk_hunting.trn", true);
+		terrainService.addPlanet(15, "kashyyyk_north_dungeons", "terrain/kashyyyk_north_dungeons.trn", true);
+		terrainService.addPlanet(16, "kashyyyk_rryatt_trail", "terrain/kashyyyk_rryatt_trail.trn", true);
+		terrainService.addPlanet(17, "kashyyyk_south_dungeons", "terrain/kashyyyk_south_dungeons.trn", true);*/
+		terrainService.addPlanet(18, "adventure1", "terrain/adventure1.trn", true);
+		terrainService.addPlanet(19, "adventure2", "terrain/adventure2.trn", true);
+		terrainService.addPlanet(20, "dungeon1", "terrain/dungeon1.trn", true);
+		//Space Zones
+		// NOTE: Commented out for now until space is implemented. No need to be loaded into memory when space is not implemented.
+		/*terrainService.addPlanet(21, "space_corellia", "terrain/space_corellia.trn", true);
+		terrainService.addPlanet(22, "space_corellia_2", "terrain/space_corellia_2.trn", true);
+		terrainService.addPlanet(23, "space_dantooine", "terrain/space_dantooine.trn", true);
+		terrainService.addPlanet(24, "space_dathomir", "terrain/space_dathomir.trn", true);
+		terrainService.addPlanet(25, "space_endor", "terrain/space_endor.trn", true);
+		terrainService.addPlanet(26, "space_env", "terrain/space_env.trn", true);
+		terrainService.addPlanet(27, "space_halos", "terrain/space_halos.trn", true);
+		terrainService.addPlanet(28, "space_heavy1", "terrain/space_heavy1.trn", true);
+		terrainService.addPlanet(29, "space_kashyyyk", "terrain/space_kashyyyk.trn", true);
+		terrainService.addPlanet(30, "space_light1", "terrain/space_light1.trn", true);
+		terrainService.addPlanet(31, "space_lok", "terrain/space_lok.trn", true);
+		terrainService.addPlanet(32, "space_naboo", "terrain/space_naboo.trn", true);
+		terrainService.addPlanet(33, "space_naboo_2", "terrain/space_naboo_2.trn", true);
+		terrainService.addPlanet(34, "space_nova_orion", "terrain/space_nova_orion.trn", true); 
+		terrainService.addPlanet(35, "space_npe_falcon", "terrain/space_npe_falcon.trn", true); // TODO: New Player Tutorial
+		terrainService.addPlanet(36, "space_npe_falcon_2", "terrain/space_npe_falcon_2.trn", true); // TODO: New Player Tutorial
+		terrainService.addPlanet(37, "space_ord_mantell", "terrain/space_ord_mantell.trn", true);
+		terrainService.addPlanet(38, "space_ord_mantell_2", "terrain/space_ord_mantell_2.trn", true);
+		terrainService.addPlanet(39, "space_ord_mantell_3", "terrain/space_ord_mantell_3.trn", true);
+		terrainService.addPlanet(40, "space_ord_mantell_4", "terrain/space_ord_mantell_4.trn", true);
+		terrainService.addPlanet(41, "space_ord_mantell_5", "terrain/space_ord_mantell_5.trn", true);
+		terrainService.addPlanet(42, "space_ord_mantell_6", "terrain/space_ord_mantell_6.trn", true);
+		terrainService.addPlanet(43, "space_tatooine", "terrain/space_tatooine.trn", true);
+		terrainService.addPlanet(44, "space_tatooine_2", "terrain/space_tatooine_2.trn", true);
+		terrainService.addPlanet(45, "space_yavin4", "terrain/space_yavin4.trn", true);*/
+		//PSWG New Content Terrains  (WARNING Keep commented out unless you have the current build of kaas!)
+
+		//terrainService.addPlanet(46, "kaas", "terrain/kaas.trn", true);
+
+		//end terrainList
 		spawnService = new SpawnService(this);
 		terrainService.loadClientPois();
 		// Travel Points
@@ -350,6 +399,9 @@ public class NGECore {
 		zoneDispatch.addService(tradeService);
 		
 		zoneDispatch.addService(skillService);
+		
+		instanceService = new InstanceService(this);
+		zoneDispatch.addService(instanceService);
 		
 		//travelService.startShuttleSchedule();
 		
@@ -469,6 +521,10 @@ public class NGECore {
 	
 	public ObjectDatabase getObjectIdODB() {
 		return objectIdODB;
+	}
+	
+	public ObjectDatabase getDuplicateIdODB() {
+		return duplicateIdODB;
 	}
 	
 	public int getActiveClients() {

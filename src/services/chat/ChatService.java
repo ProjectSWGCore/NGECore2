@@ -553,6 +553,9 @@ public class ChatService implements INetworkDispatch {
 	public SWGObject getObjectByFirstName(String name) {
 		ConcurrentHashMap<IoSession, Client> clients = core.getActiveConnectionsMap();
 		
+		if(name.contains(" "))
+			name = name.split(" ")[0];
+		
 		for(Client client : clients.values()) {
 			if(client.getParent() == null)
 				continue;

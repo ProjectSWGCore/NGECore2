@@ -105,7 +105,7 @@ public class MapService implements INetworkDispatch {
 	public void addPlanet(Planet planet) {
 		locationMap.put(planet, new Vector<MapLocation>());
 		
-		core.scriptService.callScript("scripts/", "addLocations", "static_map_locations", core, planet);
+		core.scriptService.callScript("scripts/", "static_map_locations", "addLocations", core, planet);
 	}
 	
 	public void addLocation(Planet planet, String name, float x, float y, byte category, byte subcategory, byte active) {
