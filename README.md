@@ -13,7 +13,7 @@ Requirements for Building the Core:
 ======== 
 
 - JDK 8
-- A Java 8 compatible IDE like Eclipse Luna (http://download.eclipse.org/eclipse/downloads/drops4/I20140318-0830/)
+- A Java 8 compatible IDE like Eclipse Kepler (https://wiki.eclipse.org/JDT/Eclipse_Java_8_Support_For_Kepler)
 - A valid Star Wars Galaxies Installation with the final patch
 - Postgresql server (www.postgresql.org)
 - TRE Explorer(http://forum.modsource.org/index.php?PHPSESSID=bf02fd8244123807f4716c1686abb59f&action=dlattach;topic=33.0;attach=49)
