@@ -33,5 +33,8 @@ def run(core, actor, target, commandString):
 		actor.sendSystemMessage(str(core.getActiveZoneClients()) + ' online characters.', 0)
 	if command == 'shutdown':
 		core.initiateShutdown()
+	if command == 'getheight':
+		actor.sendSystemMessage(str(core.terrainService.getHeight(actor.getPlanetId(), actor.getWorldPosition().x, actor.getWorldPosition().z)), 0)
+
 		
 	return

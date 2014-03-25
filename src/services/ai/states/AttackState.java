@@ -57,7 +57,7 @@ public class AttackState extends AIState {
 			return StateResult.DEAD;
 		actor.getMovementPoints().clear();
 		if(actor.getFollowObject() != null) {
-			if(actor.getSpawnPosition().getWorldPosition().getDistance(creature.getWorldPosition()) > 128 || NGECore.getInstance().terrainService.isWater(creature.getPlanetId(), actor.getFollowObject().getWorldPosition())) {
+			if(/*actor.getSpawnPosition().getWorldPosition().getDistance(creature.getWorldPosition()) > 128 ||*/ NGECore.getInstance().terrainService.isWater(creature.getPlanetId(), actor.getFollowObject().getWorldPosition())) {
 				actor.removeDefender(actor.getFollowObject());
 				//actor.scheduleMovement();
 				return StateResult.UNFINISHED;
@@ -110,7 +110,7 @@ public class AttackState extends AIState {
 			actor.scheduleRecovery();
 			return StateResult.UNFINISHED;
 		}
-		if(target.getWorldPosition().getDistance(creature.getWorldPosition()) > 128 || target.getPosture() == 13 || target.getPosture() == 14) {
+		if(/*target.getWorldPosition().getDistance(creature.getWorldPosition()) > 128 ||*/ target.getPosture() == 13 || target.getPosture() == 14) {
 			actor.removeDefender(target);
 			actor.scheduleRecovery();
 			return StateResult.UNFINISHED;

@@ -104,13 +104,7 @@ public class AIActor {
 
 	public CreatureObject getHighestDamageDealer() {
 		CreatureObject highestDamageDealer = null;
-		int highestDamage = 0;
-		for(Entry<CreatureObject, Integer> e : damageMap.entrySet()) {
-			if(e.getValue() > highestDamage && highestDamage > 0) {
-				highestDamage = e.getValue();
-				highestDamageDealer = e.getKey();
-			}
-		}
+		highestDamageDealer = damageMap.keySet().stream().max((c1, c2) -> damageMap.get(c1) - damageMap.get(c2)).orElse(null);
 		// return first defender if no damage has been dealt
 		if(highestDamageDealer == null) {
 			for(TangibleObject tangible : creature.getDefendersList().toArray(new TangibleObject[]{})) {
@@ -159,26 +153,11 @@ public class AIActor {
 	}
 	
 	public void scheduleMovement() {
-		scheduler.schedule(new Runnable() {
-
-			@Override
-			public void run() {
-				doStateAction(currentState.move(AIActor.this));
-			}
-			
-		}, 500, TimeUnit.MILLISECONDS);
+		scheduler.schedule(() -> doStateAction(currentState.move(AIActor.this)), 500, TimeUnit.MILLISECONDS);
 	}
 	
 	public void scheduleRecovery() {
-		scheduler.schedule(new Runnable() { 
-
-			@Override
-			public void run() {
-				doStateAction(currentState.recover(AIActor.this));
-			}
-			
-		}, 2000, TimeUnit.MILLISECONDS);
-
+		scheduler.schedule(() -> doStateAction(currentState.recover(AIActor.this)), 2000, TimeUnit.MILLISECONDS);
 	}
 	
 	public void setNextPosition(Point3D position) {

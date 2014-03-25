@@ -41,7 +41,7 @@ public class GroupObject extends UniverseObject {
 	private GroupMessageBuilder messageBuilder;
 	
 	public GroupObject(long objectId) {
-		super(objectId, null, new Point3D(0, 0, 0), new Quaternion(0, 0, 0, 1), "object/group/shared_group_object.iff");
+		super(objectId, null, new Point3D(0, 0, 0), new Quaternion(1, 0, 0, 0), "object/group/shared_group_object.iff");
 		messageBuilder = new GroupMessageBuilder(this);
 	}
 

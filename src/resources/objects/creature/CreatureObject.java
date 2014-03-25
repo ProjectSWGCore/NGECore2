@@ -56,7 +56,7 @@ import engine.resources.scene.Quaternion;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 
-@Entity(version=0)
+@Entity(version=2)
 public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	@NotPersistent
@@ -94,6 +94,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private float waterModPercent = (float) 0.75;
 	private SWGList<String> abilities;
 	private int abilitiesUpdateCounter = 0;
+	private int xpBarValue = 0;
 
 	private SWGList<MissionCriticalObject> missionCriticalObjects;
 	@NotPersistent
@@ -125,6 +126,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private boolean groupDance = true;
 	private CreatureObject performanceWatchee;
 	private CreatureObject performanceListenee;
+	@NotPersistent
 	private SWGList<CreatureObject> performanceAudience = new SWGList<CreatureObject>();
 	private int health = 1000;
 	private int action = 300;
@@ -1616,6 +1618,19 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.appearanceEquipmentListUpdateCounter = appearanceEquipmentListUpdateCounter;
 		}
+	}
+
+	public int getXpBarValue() {
+		synchronized(objectMutex) {
+			return xpBarValue;
+		}
+	}
+
+	public void setXpBarValue(int xpBarValue) {
+		synchronized(objectMutex) {
+			this.xpBarValue = xpBarValue;
+		}
+		getClient().getSession().write(messageBuilder.buildXPBarDelta(xpBarValue));
 	}
 	
 }

@@ -226,23 +226,23 @@ public class ConnectionService implements INetworkDispatch {
 				
 		long parentId = object.getParentId();
 		
-		if(object.getContainer() == null) {
+		/*if(object.getContainer() == null) {
 			boolean remove = core.simulationService.remove(object, object.getPosition().x, object.getPosition().z);
 			if(remove)
 				System.out.println("Successful quadtree remove");
 		} else {
 			object.getContainer()._remove(object);
 			object.setParentId(parentId);
-		}
+		}*/
 
 		
-		HashSet<Client> oldObservers = new HashSet<Client>(object.getObservers());
+		/*HashSet<Client> oldObservers = new HashSet<Client>(object.getObservers());
 		for(Iterator<Client> it = oldObservers.iterator(); it.hasNext();) {
 			Client observerClient = it.next();
 			if(observerClient.getParent() != null && !(observerClient.getSession() == session)) {
 				observerClient.getParent().makeUnaware(object);
 			}
-		}
+		}*/
 		ghost.toggleFlag(PlayerFlags.LD);
 		
 		object.setAttachment("disconnectTask", null);

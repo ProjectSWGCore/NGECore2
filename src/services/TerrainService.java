@@ -226,7 +226,8 @@ public class TerrainService {
 		// wait for threads to finish loading
 		for(Planet planet : planets) {
 			try {
-				threadMap.get(planet).join();
+				if(threadMap.get(planet) != null)
+					threadMap.get(planet).join();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

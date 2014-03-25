@@ -196,7 +196,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 				buffer.putInt(1);
 			}
 		}
-		buffer.putInt(0);	// unk
+		buffer.putInt(0);	// xp bar value
 		int size = buffer.position();
 		buffer = bufferPool.allocate(size, false).put(buffer.array(), 0, size);
 
@@ -1157,6 +1157,16 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		return buffer;
 		
 	}
+	
+	public IoBuffer buildXPBarDelta(int xpBarValue) {
+		IoBuffer buffer = bufferPool.allocate(4, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putInt(xpBarValue);
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 4, (short) 1, (short) 0x0F, buffer, size + 4);
+		return buffer;	
+	}
+
 
 	@Override
 	public void sendBaselines() {

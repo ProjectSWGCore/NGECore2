@@ -60,19 +60,10 @@ public class BuildingObject extends TangibleObject implements IPersistent {
 		final AtomicReference<CellObject> ref = new AtomicReference<CellObject>();
 		
 		synchronized(objectMutex) {
-		
-			this.viewChildren(this, true, false, new Traverser() {
-	
-				@Override
-				public void process(SWGObject obj) {
-					
-					if(obj instanceof CellObject && ((CellObject) obj).getCellNumber() == cellNumber) 
-						ref.set((CellObject) obj);
-					
-				}
-				
+			this.viewChildren(this, true, false, (obj) -> {
+				if(obj instanceof CellObject && ((CellObject) obj).getCellNumber() == cellNumber) 
+					ref.set((CellObject) obj);
 			});
-		
 		}
 		
 		return ref.get();

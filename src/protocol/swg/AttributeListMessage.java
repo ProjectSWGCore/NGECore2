@@ -47,7 +47,7 @@ public class AttributeListMessage extends SWGMessage {
 
 	@Override
 	public IoBuffer serialize() {
-		IoBuffer result = bufferPool.allocate(100, false).order(ByteOrder.LITTLE_ENDIAN);
+		final IoBuffer result = bufferPool.allocate(100, false).order(ByteOrder.LITTLE_ENDIAN);
 		result.setAutoExpand(true);
 		
 		result.putShort((short) 5);
@@ -58,17 +58,16 @@ public class AttributeListMessage extends SWGMessage {
 
 		synchronized(target.getMutex()) {
 			result.putInt(target.getAttributes().size());
-	
-			for(Entry<String, String> e : target.getAttributes().entrySet()) {
-				result.put(getAsciiString(e.getKey()));
-				result.put(getUnicodeString(e.getValue()));
-			}
+			target.getAttributes().forEach((key, value) -> {
+				result.put(getAsciiString(key));
+				result.put(getUnicodeString(value));
+			});
 		}
 		result.putInt(0);
 		int size = result.position();
-		result = bufferPool.allocate(size, false).put(result.array(), 0, size);
+		IoBuffer result2 = bufferPool.allocate(size, false).put(result.array(), 0, size);
 
-		return result.flip();
+		return result2.flip();
 		
 	}
 

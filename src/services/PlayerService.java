@@ -33,6 +33,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
@@ -99,63 +100,35 @@ public class PlayerService implements INetworkDispatch {
 	
 	public void postZoneIn(final CreatureObject creature) {
 		
-		scheduler.scheduleAtFixedRate(new Runnable() {
-
-			@Override
-			public void run() {
-				ServerTimeMessage time = new ServerTimeMessage(core.getGalacticTime() / 1000);
-				IoBuffer packet = time.serialize();
-				creature.getClient().getSession().write(packet);
-			}
-			
+		scheduler.scheduleAtFixedRate(() -> {
+			ServerTimeMessage time = new ServerTimeMessage(core.getGalacticTime() / 1000);
+			IoBuffer packet = time.serialize();
+			creature.getClient().getSession().write(packet);
 		}, 45, 45, TimeUnit.SECONDS);
-
 		
-		scheduler.scheduleAtFixedRate(new Runnable() {
-
-			@Override
-			public void run() {
-				
-				PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
-				player.setTotalPlayTime((int) (player.getTotalPlayTime() + ((System.currentTimeMillis() - player.getLastPlayTimeUpdate()) / 1000)));
-				player.setLastPlayTimeUpdate(System.currentTimeMillis());
-				core.collectionService.checkExplorationRegions(creature);
-				
-			}
-			
+		scheduler.scheduleAtFixedRate(() -> {
+			PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
+			player.setTotalPlayTime((int) (player.getTotalPlayTime() + ((System.currentTimeMillis() - player.getLastPlayTimeUpdate()) / 1000)));
+			player.setLastPlayTimeUpdate(System.currentTimeMillis());
+			core.collectionService.checkExplorationRegions(creature);
 		}, 30, 30, TimeUnit.SECONDS);
 		
-		scheduler.scheduleAtFixedRate(new Runnable() {
-
-			@Override
-			public void run() {
-				
-				synchronized(creature.getMutex()) {
-					if(creature.getAction() < creature.getMaxAction() && creature.getPosture() != 14) {
-						if(creature.getCombatFlag() == 0)
-							creature.setAction(creature.getAction() + (15 + creature.getLevel() * 5));
-						else
-							creature.setAction(creature.getAction() + ((15 + creature.getLevel() * 5) / 2));
-
-					}
+		scheduler.scheduleAtFixedRate(() -> {
+			synchronized(creature.getMutex()) {
+				if(creature.getAction() < creature.getMaxAction() && creature.getPosture() != 14) {
+					if(creature.getCombatFlag() == 0)
+						creature.setAction(creature.getAction() + (15 + creature.getLevel() * 5));
+					else
+						creature.setAction(creature.getAction() + ((15 + creature.getLevel() * 5) / 2));
 				}
 			}
-			
 		}, 0, 1000, TimeUnit.MILLISECONDS);
-		
 
-		scheduler.scheduleAtFixedRate(new Runnable() {
-
-			@Override
-			public void run() {
-				
-				synchronized(creature.getMutex()) {
-					if(creature.getHealth() < creature.getMaxHealth() && creature.getCombatFlag() == 0 && creature.getPosture() != 13 && creature.getPosture() != 14)
-						creature.setHealth(creature.getHealth() + (36 + creature.getLevel() * 4));
-				}
-				
+		scheduler.scheduleAtFixedRate(() -> {
+			synchronized(creature.getMutex()) {
+				if(creature.getHealth() < creature.getMaxHealth() && creature.getCombatFlag() == 0 && creature.getPosture() != 13 && creature.getPosture() != 14)
+					creature.setHealth(creature.getHealth() + (36 + creature.getLevel() * 4));
 			}
-			
 		}, 0, 1000, TimeUnit.MILLISECONDS);
 		
 		/*final PlayerObject ghost = (PlayerObject) creature.getSlottedObject("ghost");
@@ -176,242 +149,178 @@ public class PlayerService implements INetworkDispatch {
 	@Override
 	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> swgOpcodes, Map<Integer, INetworkRemoteEvent> objControllerOpcodes) {
 		
-		objControllerOpcodes.put(ObjControllerOpcodes.ChangeRoleIconChoice, new INetworkRemoteEvent() {
+		objControllerOpcodes.put(ObjControllerOpcodes.ChangeRoleIconChoice, (session, data) -> {
 			
-			@Override
-			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
-				Client c = core.getClient(session);
-				ChangeRoleIconChoice packet = new ChangeRoleIconChoice();
-				PlayerObject player;
-				SWGObject o;
-				
-				packet.deserialize(data);
-				o = core.objectService.getObject(packet.getObjectId());
-				
-				if (c.getParent() == null || o == null || c.getParent() != o
-				|| !(o instanceof CreatureObject) || !(o.getSlottedObject("ghost")
-				instanceof PlayerObject)) {
-					return;
-				}
-				
-				player = (PlayerObject) o.getSlottedObject("ghost");
-				
-				player.setProfessionIcon(packet.getIcon());
+			Client c = core.getClient(session);
+			ChangeRoleIconChoice packet = new ChangeRoleIconChoice();
+			PlayerObject player;
+			SWGObject o;
+			
+			packet.deserialize(data);
+			o = core.objectService.getObject(packet.getObjectId());
+			
+			if (c.getParent() == null || o == null || c.getParent() != o
+			|| !(o instanceof CreatureObject) || !(o.getSlottedObject("ghost")
+			instanceof PlayerObject)) {
+				return;
 			}
+			
+			player = (PlayerObject) o.getSlottedObject("ghost");
+			
+			player.setProfessionIcon(packet.getIcon());
 			
 		});
 		
-		swgOpcodes.put(Opcodes.SetWaypointColor, new INetworkRemoteEvent() {
+		swgOpcodes.put(Opcodes.SetWaypointColor, (session, data) -> {
 
-			@Override
-			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
-				data.order(ByteOrder.LITTLE_ENDIAN);
-				
-				Client client = core.getClient(session);
-				
-				if (client == null)
-					return;
-				
-				SWGObject player = client.getParent();
-				
-				if (player == null)
-					return;
-				
-				PlayerObject ghost = (PlayerObject) player.getSlottedObject("ghost");
-				
-				if (ghost == null)
-					return;
-				
-				SetWaypointColor packet = new SetWaypointColor();
-				packet.deserialize(data);
-				
-				WaypointObject packetWay = (WaypointObject) core.objectService.getObject(packet.getObjectId());
-				WaypointObject obj = (WaypointObject) ghost.getWaypointFromList(packetWay);
-				
-				if (obj == null || packetWay != obj)
-					return;
-				
-				String color = packet.getColor();
-				switch(color) {
-					case "purple":
-						obj.setColor(WaypointObject.PURPLE);
-						break;
-					case "green":
-						obj.setColor(WaypointObject.GREEN);
-						break;
-					case "blue":
-						obj.setColor(WaypointObject.BLUE);
-						break;
-					case "yellow":
-						obj.setColor(WaypointObject.YELLOW);
-						break;
-					case "white":
-						obj.setColor(WaypointObject.WHITE);
-						break;
-					case "orange":
-						obj.setColor(WaypointObject.ORANGE);
-						break;
-				}
-				
-				ghost.waypointUpdate(obj);
-				
+			data.order(ByteOrder.LITTLE_ENDIAN);
+			
+			Client client = core.getClient(session);
+			
+			if (client == null)
+				return;
+			
+			SWGObject player = client.getParent();
+			
+			if (player == null)
+				return;
+			
+			PlayerObject ghost = (PlayerObject) player.getSlottedObject("ghost");
+			
+			if (ghost == null)
+				return;
+			
+			SetWaypointColor packet = new SetWaypointColor();
+			packet.deserialize(data);
+			
+			WaypointObject packetWay = (WaypointObject) core.objectService.getObject(packet.getObjectId());
+			WaypointObject obj = (WaypointObject) ghost.getWaypointFromList(packetWay);
+			
+			if (obj == null || packetWay != obj)
+				return;
+			
+			String color = packet.getColor();
+			switch(color) {
+				case "purple":
+					obj.setColor(WaypointObject.PURPLE);
+					break;
+				case "green":
+					obj.setColor(WaypointObject.GREEN);
+					break;
+				case "blue":
+					obj.setColor(WaypointObject.BLUE);
+					break;
+				case "yellow":
+					obj.setColor(WaypointObject.YELLOW);
+					break;
+				case "white":
+					obj.setColor(WaypointObject.WHITE);
+					break;
+				case "orange":
+					obj.setColor(WaypointObject.ORANGE);
+					break;
 			}
 			
+			ghost.waypointUpdate(obj);
+			
 		});
-		swgOpcodes.put(Opcodes.GuildRequestMessage, new INetworkRemoteEvent() {
+		swgOpcodes.put(Opcodes.GuildRequestMessage, (session, data) -> {
 
-			@Override
-			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
-				data.order(ByteOrder.LITTLE_ENDIAN);
-				
-				Client client = core.getClient(session);
-				
-				if (client == null)
-					return;
-				
-				SWGObject player = client.getParent();
-				
-				if (player == null)
-					return;
-				
-				GuildRequestMessage request = new GuildRequestMessage();
-				request.deserialize(data);
-				
-				CreatureObject targetPlayer = (CreatureObject) core.objectService.getObject(request.getCharacterId());
-				
-				if (targetPlayer.getGuildId() != 0) {
-					Guild targetGuild = core.guildService.getGuildById(targetPlayer.getGuildId());
-					GuildResponseMessage response = new GuildResponseMessage(request.getCharacterId(), targetGuild.getName());
-					client.getSession().write(response.serialize());
-				} else {
-					GuildResponseMessage response = new GuildResponseMessage(request.getCharacterId(), "None");
-					client.getSession().write(response.serialize());
-				}
+			data.order(ByteOrder.LITTLE_ENDIAN);
+			
+			Client client = core.getClient(session);
+			
+			if (client == null)
+				return;
+			
+			SWGObject player = client.getParent();
+			
+			if (player == null)
+				return;
+			
+			GuildRequestMessage request = new GuildRequestMessage();
+			request.deserialize(data);
+			
+			CreatureObject targetPlayer = (CreatureObject) core.objectService.getObject(request.getCharacterId());
+			
+			if (targetPlayer.getGuildId() != 0) {
+				Guild targetGuild = core.guildService.getGuildById(targetPlayer.getGuildId());
+				GuildResponseMessage response = new GuildResponseMessage(request.getCharacterId(), targetGuild.getName());
+				client.getSession().write(response.serialize());
+			} else {
+				GuildResponseMessage response = new GuildResponseMessage(request.getCharacterId(), "None");
+				client.getSession().write(response.serialize());
 			}
+		
+		});
+		
+		swgOpcodes.put(Opcodes.PlayerMoneyRequest, (session, data) -> {
+
+			Client client = core.getClient(session);
+			
+			if (client == null)
+				return;
+			
+			SWGObject player = client.getParent();
+			
+			if (player == null)
+				return;
+			
+			CreatureObject creature = (CreatureObject) player;
+			
+			if (creature == null)
+				return;
+			
+			PlayerMoneyResponse response = new PlayerMoneyResponse(creature.getCashCredits(), creature.getBankCredits());
+			session.write(response.serialize());
+			
+			PlayerObject ghost = (PlayerObject) player.getSlottedObject("ghost");
+			if (ghost == null)
+				return;
+			
+			CharacterSheetResponseMessage msg = new CharacterSheetResponseMessage(ghost);
+			session.write(msg.serialize());
+		
+		});
+		
+		swgOpcodes.put(Opcodes.GetSpecificMapLocationsMessage, (session, data) -> {
 			
 		});
 		
-		swgOpcodes.put(Opcodes.PlayerMoneyRequest, new INetworkRemoteEvent() {
-
-			@Override
-			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
-
-				Client client = core.getClient(session);
-				
-				if (client == null)
-					return;
-				
-				SWGObject player = client.getParent();
-				
-				if (player == null)
-					return;
-				
-				CreatureObject creature = (CreatureObject) player;
-				
-				if (creature == null)
-					return;
-				
-				PlayerMoneyResponse response = new PlayerMoneyResponse(creature.getCashCredits(), creature.getBankCredits());
-				session.write(response.serialize());
-				
-				PlayerObject ghost = (PlayerObject) player.getSlottedObject("ghost");
-				if (ghost == null)
-					return;
-				
-				CharacterSheetResponseMessage msg = new CharacterSheetResponseMessage(ghost);
-				session.write(msg.serialize());
-			}
-			
-		});
-		swgOpcodes.put(Opcodes.GetSpecificMapLocationsMessage, new INetworkRemoteEvent() {
-
-			@Override
-			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
-
-			}
+		swgOpcodes.put(Opcodes.SetCombatSpamFilter, (session, data) -> {
 			
 		});
 		
-		swgOpcodes.put(Opcodes.SetCombatSpamFilter, new INetworkRemoteEvent() {
+		swgOpcodes.put(Opcodes.SetCombatSpamRangeFilter, (session, data) -> {
 
-			@Override
-			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
-				
-			}
-			
 		});
 		
-		swgOpcodes.put(Opcodes.SetCombatSpamRangeFilter, new INetworkRemoteEvent() {
+		swgOpcodes.put(Opcodes.SetLfgInterests, (session, data) -> {
 
-			@Override
-			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
-				
-			}
-			
 		});
 		
-		swgOpcodes.put(Opcodes.SetLfgInterests, new INetworkRemoteEvent() {
+		swgOpcodes.put(Opcodes.CommodotiesItemTypeListRequest, (session, data) -> {
 
-			@Override
-			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
-				
-			}
-			
 		});
 		
-		swgOpcodes.put(Opcodes.CommodotiesItemTypeListRequest, new INetworkRemoteEvent() {
+		swgOpcodes.put(Opcodes.SetFurnitureRoationDegree, (session, data) -> {
 
-			@Override
-			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
-				
-			}
-			
 		});
 		
-		swgOpcodes.put(Opcodes.SetFurnitureRoationDegree, new INetworkRemoteEvent() {
+		swgOpcodes.put(Opcodes.CommoditiesResourceTypeListRequest, (session, data) -> {
 
-			@Override
-			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
-				
-			}
-			
 		});
 		
-		swgOpcodes.put(Opcodes.CommoditiesResourceTypeListRequest, new INetworkRemoteEvent() {
+		swgOpcodes.put(Opcodes.CollectionServerFirstListRequest, (session, data) -> {
 
-			@Override
-			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
-				
-			}
-			
 		});
 		
-		swgOpcodes.put(Opcodes.CollectionServerFirstListRequest, new INetworkRemoteEvent() {
+		swgOpcodes.put(Opcodes.Unknown, (session, data) -> {
 
-			@Override
-			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
-				
-			}
-			
 		});
 		
-		swgOpcodes.put(Opcodes.Unknown, new INetworkRemoteEvent() {
+		swgOpcodes.put(Opcodes.CmdSceneReady, (session, data) -> {
 
-			@Override
-			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
-				
-			}
-			
-		});
-		
-		swgOpcodes.put(Opcodes.CmdSceneReady, new INetworkRemoteEvent() {
-
-			@Override
-			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
-				
-				
-			}
-			
 		});
 		
 		/*swgOpcodes.put(Opcodes.ExpertiseRequestMessage, new INetworkRemoteEvent() {
@@ -472,47 +381,36 @@ public class PlayerService implements INetworkDispatch {
 			if(preDesignatedCloner != null) 
 				cloneData.put(preDesignatedCloner.getObjectID(), core.mapService.getClosestCityName(preDesignatedCloner) /*+ " (" + String.valueOf(position.getDistance2D(cloner.getPosition())) + "m)"*/);
 		}
-		
-		for(SWGObject cloner : cloners) {
-			
-			if(cloner != preDesignatedCloner)
-				cloneData.put(cloner.getObjectID(), core.mapService.getClosestCityName(cloner) /*+ " (" + String.valueOf(position.getDistance2D(cloner.getPosition())) + "m)"*/);
-			
-		}
+		final long preDesignatedObjectId = preDesignatedCloner.getObjectID();
+		cloners.stream().filter(c -> c.getObjectID() != preDesignatedObjectId).forEach(c -> cloneData.put(c.getObjectID(), core.mapService.getClosestCityName(c)));
 		
 		final SUIWindow window = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "@base_player:revive_title", "Select the desired option and click OK.", 
 				cloneData, creature, null, 0);
 		Vector<String> returnList = new Vector<String>();
 		returnList.add("List.lstList:SelectedRow");
 		
-		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, new SUICallback() {
-
-			@SuppressWarnings("unchecked")
-			@Override
-			public void process(SWGObject owner, int eventType, Vector<String> returnList) {
+		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, (owner, eventType, resultList) -> {
 				
-			//	if(((CreatureObject)owner).getPosture() != 14)
-			//		return;
-								
-				int index = Integer.parseInt(returnList.get(0));
-				
-				if(window.getObjectIdByIndex(index) == 0 || core.objectService.getObject(window.getObjectIdByIndex(index)) == null)
-					return;
-					
-					
-				SWGObject cloner = core.objectService.getObject(window.getObjectIdByIndex(index));
-					
-				if(cloner.getAttachment("spawnPoints") == null)
-					return;
-				
-				Vector<SpawnPoint> spawnPoints = (Vector<SpawnPoint>) cloner.getAttachment("spawnPoints");
-				
-				SpawnPoint spawnPoint = spawnPoints.get(new Random().nextInt(spawnPoints.size()));
-
-				handleCloneRequest((CreatureObject) owner, (BuildingObject) cloner, spawnPoint, pvpDeath);
-				
-			}
+			if(((CreatureObject)owner).getPosture() != 14)
+				return;
+							
+			int index = Integer.parseInt(resultList.get(0));
 			
+			if(window.getObjectIdByIndex(index) == 0 || core.objectService.getObject(window.getObjectIdByIndex(index)) == null)
+				return;
+				
+				
+			SWGObject cloner = core.objectService.getObject(window.getObjectIdByIndex(index));
+				
+			if(cloner.getAttachment("spawnPoints") == null)
+				return;
+			
+			Vector<SpawnPoint> spawnPoints = (Vector<SpawnPoint>) cloner.getAttachment("spawnPoints");
+			
+			SpawnPoint spawnPoint = spawnPoints.get(new Random().nextInt(spawnPoints.size()));
+
+			handleCloneRequest((CreatureObject) owner, (BuildingObject) cloner, spawnPoint, pvpDeath);
+							
 		});
 		
 		core.suiService.openSUIWindow(window);
@@ -537,12 +435,7 @@ public class PlayerService implements INetworkDispatch {
 		
 		if(pvpDeath) {
 			List<Buff> buffs = new ArrayList<Buff>(creature.getBuffList().get());
-			
-			for(Buff buff : buffs) {
-				if(buff.isDecayOnPvPDeath())
-					buff.incDecayCounter();
-			}
-			
+			buffs.stream().filter(Buff::isDecayOnPvPDeath).forEach(Buff::incDecayCounter);			
 			creature.updateAllBuffs();
 		}
 		

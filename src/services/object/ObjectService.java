@@ -412,7 +412,13 @@ public class ObjectService implements INetworkDispatch {
 			}
 		});
 		objectList.remove(object.getObjectID());
-		core.simulationService.remove(object, object.getPosition().x, object.getPosition().y);
+		if(object.getContainer() != null) {
+			long parentId = object.getParentId();
+			object.getContainer()._remove(object);
+			object.setParentId(parentId);
+		} else {
+			core.simulationService.remove(object, object.getWorldPosition().x, object.getWorldPosition().z, true);
+		}
 		
 	}
 	
@@ -468,28 +474,30 @@ public class ObjectService implements INetworkDispatch {
 
 		return objectID;*/
 		
-		long newId;
-		
-		synchronized(objectMutex) {
-			newId = highestId.incrementAndGet();
+		long newId = 0;
+		boolean found = false;
+		// stack overflow when using recursion
+		while(!found) {
+			synchronized(objectMutex) {
+				newId = highestId.incrementAndGet();
+			}
+			
+			PreparedStatement ps2;
+	
+			try {
+				ps2 = databaseConnection.preparedStatement("UPDATE highestid SET id=" + newId + " WHERE id=" + (newId-1));
+				ps2.executeUpdate();
+				ps2.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+			if(getObject(newId) != null || core.getObjectIdODB().contains(newId, Long.class, ObjectId.class))
+				found = false;
+			else
+				found = true;		
 		}
 		
-		PreparedStatement ps2;
-
-		try {
-			ps2 = databaseConnection.preparedStatement("UPDATE highestid SET id=" + newId + " WHERE id=" + (newId-1));
-			ps2.executeUpdate();
-			ps2.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		if(getObject(newId) == null /*&& getCreatureFromDB(newId) == null*/ && !core.getObjectIdODB().contains(newId, Long.class, ObjectId.class))
-			return newId;
-		else {
-			System.out.println("Object ID already exists: " + newId);
-			return generateObjectID();
-		}
-		
+		return newId;		
 
 	}
 	

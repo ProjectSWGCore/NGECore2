@@ -31,6 +31,7 @@ import java.util.TreeMap;
 import resources.common.Console;
 import resources.objects.intangible.IntangibleObject;
 import resources.objects.waypoint.WaypointObject;
+import resources.objects.creature.CreatureObject;
 
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
@@ -238,7 +239,9 @@ public class PlayerObject extends IntangibleObject {
 		
 		if (getContainer() != null && getContainer().getClient() != null && getContainer().getClient().getSession() != null) {
 			getContainer().getClient().getSession().write(messageBuilder.buildXPListDelta(type, amount, xpExists));
+			((CreatureObject) getContainer()).setXpBarValue(amount);
 		}
+		
 	}
 	
 	public int getXpListUpdateCounter() {

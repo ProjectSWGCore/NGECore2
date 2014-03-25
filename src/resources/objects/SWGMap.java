@@ -29,6 +29,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.Map.Entry;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
@@ -254,6 +257,77 @@ public class SWGMap<K, V> implements Map<K, V> {
 		for (byte[] queued : data) buffer.put(queued);
 		
 		messageBuilder.sendListDelta(viewType, updateType, buffer);
+	}
+
+	@Override
+	public V getOrDefault(Object key, V defaultValue) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void forEach(BiConsumer<? super K, ? super V> action) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void replaceAll(
+			BiFunction<? super K, ? super V, ? extends V> function) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public V putIfAbsent(K key, V value) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean remove(Object key, Object value) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean replace(K key, V oldValue, V newValue) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public V replace(K key, V value) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public V computeIfAbsent(K key,
+			Function<? super K, ? extends V> mappingFunction) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public V computeIfPresent(K key,
+			BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public V compute(K key,
+			BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public V merge(K key, V value,
+			BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }
