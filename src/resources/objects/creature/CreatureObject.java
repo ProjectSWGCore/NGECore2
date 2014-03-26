@@ -585,10 +585,10 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			SkillMod mod = getSkillMod(name);
 			mod.setBase(mod.getBase() + base);
 
-			/*if(getClient() != null) {
+			if(getClient() != null) {
 				setSkillModsUpdateCounter((short) (getSkillModsUpdateCounter() + 1));
 				getClient().getSession().write(messageBuilder.buildAddSkillModDelta(name, mod.getBase()));
-			}*/
+			}
 		}
 		
 	}
@@ -606,10 +606,10 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		} else {
 			skillMods.set(skillMods.indexOf(mod), mod);
 			System.out.println("Deducted mod!");
-			/*if(getClient() != null) {
+			if(getClient() != null) {
 				setSkillModsUpdateCounter((short) (getSkillModsUpdateCounter() + 1));
 				getClient().getSession().write(messageBuilder.buildAddSkillModDelta(name, mod.getBase()));
-			}*/
+			}
 		}
 		
 	}
@@ -617,10 +617,10 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	public void removeSkillMod(SkillMod mod) {
 		skillMods.remove(mod);
 		
-		/*if(getClient() != null) {
+		if(getClient() != null) {
 			setSkillModsUpdateCounter((short) (getSkillModsUpdateCounter() + 1));
 			getClient().getSession().write(messageBuilder.buildRemoveSkillModDelta(mod.getName(), mod.getBase()));
-		}*/
+		}
 	}
 
 	public short getSkillModsUpdateCounter() {

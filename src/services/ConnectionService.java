@@ -214,7 +214,7 @@ public class ConnectionService implements INetworkDispatch {
 		
 		for (CreatureObject opponent : object.getDuelList()) {
 			if (opponent != null) {
-				core.combatService.handleEndDuel(object, opponent);
+				core.combatService.handleEndDuel(object, opponent, false);
 			}
 		}
 		
