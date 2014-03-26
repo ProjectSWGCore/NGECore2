@@ -15,9 +15,6 @@ def run(core, actor, target, commandString):
 
 	if not playerObject:
 		return
-	
-	if target is not None:
-		print ('has target!')
 		
 	commandArgs = commandString.split(' ')
 	command = commandArgs[0]
@@ -73,12 +70,14 @@ def run(core, actor, target, commandString):
 	elif command == 'comm':
 		comm = CommPlayerMessage(actor.getObjectId())
 		actor.getClient().getSession().write(comm.serialize())
-		
 	elif command == 'spawn' and arg1 and arg2:
 		pos = actor.getWorldPosition()
 		core.spawnService.spawnCreature(arg1, actor.getPlanet().getName(), 0, pos.x, pos.y, pos.z, 1, 0, 1, 0, int(arg2))
 		
 	elif command == 'instance' and arg1:
-		core.instanceService.queue(arg1, actor)
+		core.instanceService.queue(arg1, actor)	
 		
+	elif command == 'id':
+		actor.sendSystemMessage('Your id is: ' + str(actor.getObjectId()), 0)
+´	
 	return

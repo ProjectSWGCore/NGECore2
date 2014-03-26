@@ -55,14 +55,9 @@ public class BuffBuilderChangeMessage extends ObjControllerObject {
 		for (int i = 0; i < statSize; i++) {
 			BuffItem item = new BuffItem();
 
-			String statName = getAsciiString(data);
-			item.setSkillName(statName);
-
-			int investedPoints = data.getInt();
-			item.setInvested(investedPoints);
-
-			int entBonus = data.getInt();
-			item.setEntertainerBonus(entBonus);
+			item.setSkillName(getAsciiString(data));
+			item.setInvested(data.getInt());
+			item.setEntertainerBonus(data.getInt());
 
 			statBuffs.add(item);
 		}
