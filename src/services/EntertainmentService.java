@@ -23,8 +23,10 @@ import protocol.swg.PlayClientEffectObjectMessage;
 import protocol.swg.objectControllerObjects.BuffBuilderChangeMessage;
 import protocol.swg.objectControllerObjects.BuffBuilderEndMessage;
 import protocol.swg.objectControllerObjects.BuffBuilderStartMessage;
+import protocol.swg.objectControllerObjects.ImageDesignMessage;
 import resources.common.BuffBuilder;
 import resources.common.Console;
+import resources.common.IDAttribute;
 import resources.common.MathUtilities;
 import resources.common.ObjControllerOpcodes;
 import resources.common.Performance;
@@ -75,6 +77,146 @@ public class EntertainmentService implements INetworkDispatch {
 	
 	@Override
 	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> swgOpcodes, Map<Integer, INetworkRemoteEvent> objControllerOpcodes) {
+		objControllerOpcodes.put(ObjControllerOpcodes.IMAGE_DESIGN_CHANGE, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
+				
+				data.order(ByteOrder.LITTLE_ENDIAN);
+				
+				Client client = core.getClient(session);
+
+				if(client == null)
+					return;
+
+				SWGObject sender = client.getParent();
+
+				if(sender == null)
+					return;
+				
+				ImageDesignMessage sentPacket = new ImageDesignMessage();
+				sentPacket.deserialize(data);
+				
+				CreatureObject designTarget = (CreatureObject) core.objectService.getObject(sentPacket.getTargetId());
+				CreatureObject designer = (CreatureObject) core.objectService.getObject(sentPacket.getDesignerId());
+				
+				if (designTarget == null || designer == null)
+					return;
+				
+				if (designTarget.getClient() == null || designTarget.getClient().getSession() == null)
+					return;
+				
+				if (designer.getClient() == null || designer.getClient().getSession() == null)
+					return;
+				
+				Vector<IDAttribute> colorAttributes = sentPacket.getColorAttributes();
+				Vector<IDAttribute> bodyAttributes = sentPacket.getBodyAttributes();
+				// TODO: Attribute check for colors?
+				if (bodyAttributes != null) {
+					for (IDAttribute atr : bodyAttributes) {
+						System.out.println("ATTRIBUTE: " + atr.getName());
+						if (atr.getFloatValue() > 1f || atr.getFloatValue() < 0) { // RIP Height Exploit <3
+							return;
+						}
+					}
+				}
+				
+				if (colorAttributes != null) {
+					for (IDAttribute atr : colorAttributes) {
+						System.out.println("COLOR ATTRIBUTE: " + atr.getName());
+					}
+				}
+				
+				if (sentPacket.getTargetId() != sentPacket.getDesignerId()) {
+					
+					if (sentPacket.isCustomerAccepted() && sentPacket.isDesignerCommited()) {
+						System.out.print("Both Accepted!");
+						// TODO: Send close packet to target & apply changes
+						sentPacket.setEndMessage(true);
+						
+						if (sentPacket.getMoneyDemanded() > 0) {
+							int payersCash = designTarget.getCashCredits();
+							int fee = sentPacket.getMoneyDemanded();
+							int tip = sentPacket.getMoneyOffered();
+							
+							if (payersCash < fee) {
+								
+								if (designTarget != designer) {
+									ObjControllerMessage msg = new ObjControllerMessage(0x0B, sentPacket);
+									designTarget.getClient().getSession().write(msg.serialize());
+									
+									// Window is closed already, so this shouldn't be necessary
+									//ObjControllerMessage designMsg = new ObjControllerMessage(0x0B, sentPacket);
+									//designer.getClient().getSession().write(designMsg.serialize());
+									
+									designTarget.sendSystemMessage("You don't have enough credits to pay the fee.", (byte) 0);
+									designer.sendSystemMessage("Your target did not have the required payment fee", (byte) 0);
+
+								}
+							} else if (payersCash < tip) {
+								designTarget.sendSystemMessage("You tried to offer more credits than you had and the Image Design session has ended.", (byte) 0);
+								
+								ObjControllerMessage msg = new ObjControllerMessage(0x0B, sentPacket);
+								designTarget.getClient().getSession().write(msg.serialize());
+							} else {
+								// TODO: Apply customization
+								for (IDAttribute atr : bodyAttributes) {
+									if (atr.getName().equals("height"))
+										designTarget.setHeight(atr.getFloatValue());
+								}
+								
+								for (IDAttribute atr : colorAttributes) {
+									if (atr.getName().equals("color_hair")){
+										if (sentPacket.getHair() != null) {
+											designTarget._remove(designTarget.getSlottedObject("hair"));
+											TangibleObject hair = (TangibleObject) core.objectService.createObject(sentPacket.getHair(), designTarget.getPlanet());
+											hair.setCustomization(atr.getHexValue());
+											designTarget._add(hair);
+											System.out.print("Added hair");
+										}
+									}
+								}
+							}
+						}
+						
+					} else if (sentPacket.getObjectId() == designTarget.getObjectId()) {
+						sentPacket.setObjectId(designer.getObjectId());
+						
+						ObjControllerMessage msg = new ObjControllerMessage(0x0B, sentPacket);
+						designer.getClient().getSession().write(msg.serialize());
+						
+					} else if (sentPacket.getObjectId() == designer.getObjectId()) {
+						sentPacket.setObjectId(designTarget.getObjectId());
+
+						ObjControllerMessage msg = new ObjControllerMessage(0x0B, sentPacket);
+						designTarget.getClient().getSession().write(msg.serialize());
+					}
+				}
+			}
+			
+		});
+		
+		objControllerOpcodes.put(ObjControllerOpcodes.IMAGE_DESIGN_END, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
+
+				data.order(ByteOrder.LITTLE_ENDIAN);
+				
+				Client client = core.getClient(session);
+
+				if(client == null)
+					return;
+
+				SWGObject sender = client.getParent();
+
+				if(sender == null)
+					return;
+				
+			}
+			
+		});
+		
 		objControllerOpcodes.put(ObjControllerOpcodes.BUFF_BUILDER_END, new INetworkRemoteEvent() {
 
 			@Override
@@ -173,9 +315,8 @@ public class EntertainmentService implements INetworkDispatch {
 					if (sentPacket.getAccepted() == true && sentPacket.getBuffRecipientAccepted() == 1) {
 
 						if (sentPacket.getBuffCost() > 0) {
-							CreatureObject recipientCreature = (CreatureObject) buffRecipient;
-							if (recipientCreature.getCashCredits() >= sentPacket.getBuffCost()) {
-								recipientCreature.setCashCredits(recipientCreature.getCashCredits() - sentPacket.getBuffCost());
+							if (buffRecipient.getCashCredits() >= sentPacket.getBuffCost()) {
+								buffRecipient.setCashCredits(buffRecipient.getCashCredits() - sentPacket.getBuffCost());
 							} else {
 								return;
 							}
@@ -350,6 +491,7 @@ public class EntertainmentService implements INetworkDispatch {
 		core.commandService.registerCommand("covercharge");
 		//core.commandService.registerCommand("en_holographic_recall");
 		//core.commandService.registerCommand("en_holographic_image");
+		//core.commandService.registerCommand("imagedesign");
 		// TODO: Add /bandsolo, /bandpause, /changeBandMusic, /changeDance, /changeGroupDance, /changeMusic
 		
 		// Entertainer Effects
@@ -718,6 +860,10 @@ public class EntertainmentService implements INetworkDispatch {
 			});
 			core.suiService.openSUIWindow(notification);
 		}
+	}
+	
+	private void doAppearanceChange(CreatureObject designee, ImageDesignMessage msg) {
+		
 	}
 	
 	@Override

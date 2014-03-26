@@ -15,9 +15,6 @@ def run(core, actor, target, commandString):
 
 	if not playerObject:
 		return
-	
-	if target is not None:
-		print ('has target!')
 		
 	commandArgs = commandString.split(' ')
 	command = commandArgs[0]
@@ -73,4 +70,7 @@ def run(core, actor, target, commandString):
 	elif command == 'comm':
 		comm = CommPlayerMessage(actor.getObjectId())
 		actor.getClient().getSession().write(comm.serialize())
+	
+	elif command == 'id':
+		actor.sendSystemMessage('Your id is: ' + str(actor.getObjectId()), 0)
 	return
