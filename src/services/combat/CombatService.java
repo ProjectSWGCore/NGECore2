@@ -795,24 +795,19 @@ public class CombatService implements INetworkDispatch {
 				target.setTurnRadius(0);
 				target.setSpeedMultiplierBase(0);
 			}
-			ScheduledFuture<?> incapTask = scheduler.schedule(new Runnable() {
-
-				@Override
-				public void run() {
-					
-					synchronized(target.getMutex()) {
-
-						if(target.getPosture() != 13)
-							return;
-						
-						target.setPosture((byte) 0);
-						target.setTurnRadius(1);
-						target.setSpeedMultiplierBase(1);
-					
-					}
-
-				}
+			ScheduledFuture<?> incapTask = scheduler.schedule(() -> {
 				
+				synchronized(target.getMutex()) {
+
+					if(target.getPosture() != 13)
+						return;
+					
+					target.setPosture((byte) 0);
+					target.setTurnRadius(1);
+					target.setSpeedMultiplierBase(1);
+				
+				}
+			
 			}, target.getIncapTimer(), TimeUnit.SECONDS);
 			target.setIncapTask(incapTask);
 			core.buffService.addBuffToCreature(target, "incapWeaken");
@@ -824,6 +819,8 @@ public class CombatService implements INetworkDispatch {
 				target.setHealth(0);
 				target.setPosture((byte) 14);
 			}
+			attacker.removeDefender(target);
+			target.removeDefender(attacker);
 			return;
 		}
 		synchronized(target.getMutex()) {

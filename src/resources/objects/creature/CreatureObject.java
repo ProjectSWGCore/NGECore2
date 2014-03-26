@@ -1085,7 +1085,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void removeObjectFromEquipList(SWGObject object) {
-		if(object instanceof TangibleObject) {
+		if(object instanceof TangibleObject && equipmentList.contains(object)) {
 			setEquipmentListUpdateCounter(getEquipmentListUpdateCounter() + 1);
 			notifyObservers(messageBuilder.buildRemoveEquipmentDelta((TangibleObject) object), true);
 			equipmentList.get().remove(object);
@@ -1101,7 +1101,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void removeObjectFromAppearanceEquipList(SWGObject object) {
-		if(object instanceof TangibleObject) {
+		if(object instanceof TangibleObject && appearanceEquipmentList.contains(object)) {
 			setAppearanceEquipmentListUpdateCounter(getAppearanceEquipmentListUpdateCounter() + 1);
 			notifyObservers(messageBuilder.buildRemoveAppearanceEquipmentDelta((TangibleObject) object), true);
 			appearanceEquipmentList.get().remove(object);

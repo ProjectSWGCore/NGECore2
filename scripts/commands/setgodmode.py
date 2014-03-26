@@ -73,4 +73,12 @@ def run(core, actor, target, commandString):
 	elif command == 'comm':
 		comm = CommPlayerMessage(actor.getObjectId())
 		actor.getClient().getSession().write(comm.serialize())
+		
+	elif command == 'spawn' and arg1 and arg2:
+		pos = actor.getWorldPosition()
+		core.spawnService.spawnCreature(arg1, actor.getPlanet().getName(), 0, pos.x, pos.y, pos.z, 1, 0, 1, 0, int(arg2))
+		
+	elif command == 'instance' and arg1:
+		core.instanceService.queue(arg1, actor)
+		
 	return
