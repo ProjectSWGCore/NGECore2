@@ -742,7 +742,7 @@ public class SimulationService implements INetworkDispatch {
 				if(core.objectService.getObject(objectId).getAttachment("disconnectTask") != null)
 					core.connectionService.disconnect(client);
 			}
-		}, 10, TimeUnit.SECONDS);
+		}, 5, TimeUnit.MINUTES);
 		core.removeClient(session);
 		
 		object.setAttachment("disconnectTask", disconnectTask);
