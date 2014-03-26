@@ -169,6 +169,9 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	@NotPersistent
 	private boolean performingEffect;
 	
+	@NotPersistent
+	private boolean performingFlourish;
+	
 	private int coverCharge;
 	
 	public CreatureObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
@@ -350,25 +353,21 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 
 	public void setPosture(byte posture) {
-		boolean needsStopPerformance =  false;
+
 		synchronized(objectMutex) {
 			if (this.posture == 0x09) {
-				needsStopPerformance = true;
+				stopPerformance();
 			}
 			if(this.posture == posture)
 				return;
 			this.posture = posture;
 		}
-		
+
 		Posture postureUpdate = new Posture(getObjectID(), posture);
 		ObjControllerMessage objController = new ObjControllerMessage(0x1B, postureUpdate);
 		
 		notifyObservers(messageBuilder.buildPostureDelta(posture), true);
 		notifyObservers(objController, true);
-		
-		if (needsStopPerformance) {
-			stopPerformance();
-		}
 		
 	}
 	
@@ -379,12 +378,16 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void stopPerformance() {
+		System.out.println("Stop Performance called!");
 		String type = "";
 		synchronized(objectMutex) {
-			// TODO: Minimum check to wait for song to finish before stopping... ?
-			setPerformanceId(0,true);
+			
+			// Some reason this prevents the animation for playing an instrument when stopping (unless that's what "" does)
+			setCurrentAnimation(getCurrentAnimation());
+			
 			setPerformanceCounter(0);
-			setCurrentAnimation("");
+			setPerformanceId(0,true);
+			
 			type = (performanceType) ? "dance" : "music";
 			if (entertainerExperience != null) {
 				entertainerExperience.cancel(true);
@@ -396,12 +399,12 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	    stopAudience();
 
 		getClient().getSession().write(messageBuilder.buildStartPerformance(false));
+
 	}
 	
 	public void stopAudience() {
-		String type = "";
 		synchronized(objectMutex) {
-			type = (performanceType) ? "dance" : "music";
+			//String type = (performanceType) ? "dance" : "music";
 			if (performanceAudience == null) {
 				return;
 			}
@@ -1701,6 +1704,18 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	public void setCoverCharge(int coverCharge) {
 		synchronized (objectMutex) {
 			this.coverCharge = coverCharge;
+		}
+	}
+
+	public boolean isPerformingFlourish() {
+		synchronized(objectMutex){
+			return performingFlourish;
+		}
+	}
+
+	public void setPerformingFlourish(boolean performingFlourish) {
+		synchronized(objectMutex) {
+			this.performingFlourish = performingFlourish;
 		}
 	}
 }

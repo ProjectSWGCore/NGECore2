@@ -15,6 +15,6 @@ def run(core, actor, target, commandString):
     # all packets are triggered in setPosture.
     # this may not be very consistent, but it prevents
     # duplicate code.
-    actor.setPosture(0x00)
+    actor.stopPerformance()
 
     return
