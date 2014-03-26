@@ -191,28 +191,25 @@ public class TerrainService {
 		for(final Planet planet : planets) {
 			
 			if(planet.getSnapshotVisitor() != null) {
-				Thread thread = new Thread(new Runnable() {
+				Thread thread = new Thread(() -> {
 
-					@Override
-					public void run() {
-						Config config = new Config();
-						config.setFilePath("options.cfg");
-						boolean loaded = config.loadConfigFile();
-						
-						if (loaded && config.getInt("LOAD.SNAPSHOT_OBJECTS") > 0) {
-							try {							
-								core.objectService.loadSnapshotObjects(planet);
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
+					Config config = new Config();
+					config.setFilePath("options.cfg");
+					boolean loaded = config.loadConfigFile();
+					
+					if (loaded && config.getInt("LOAD.SNAPSHOT_OBJECTS") > 0) {
+						try {							
+							core.objectService.loadSnapshotObjects(planet);
+						} catch (Exception e) {
+							e.printStackTrace();
 						}
-						
-						if (loaded && config.getInt("LOAD.BUILDOUT_OBJECTS") > 0) {
-							try {							
-								core.objectService.loadBuildoutObjects(planet);
-							} catch (InstantiationException | IllegalAccessException e) {
-								e.printStackTrace();
-							}
+					}
+					
+					if (loaded && config.getInt("LOAD.BUILDOUT_OBJECTS") > 0) {
+						try {							
+							core.objectService.loadBuildoutObjects(planet);
+						} catch (InstantiationException | IllegalAccessException e) {
+							e.printStackTrace();
 						}
 					}
 					

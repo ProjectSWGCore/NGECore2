@@ -257,19 +257,7 @@ public class SUIService implements INetworkDispatch {
 		
 		window.clearDataSource("List.dataList");
 		
-		//int index = 0;
-		
-		for(Entry<Long, String> e : cloneData.entrySet()) {
-			
-			/*window.addDataItem("List.dataList:Name", String.valueOf(index));
-			
-			window.setProperty("List.dataList." + index + ":Text", string);
-
-			++index;*/
-			
-			window.addListBoxMenuItem(e.getValue(), e.getKey());
-			
-		}
+		cloneData.entrySet().forEach(e -> window.addListBoxMenuItem(e.getValue(), e.getKey()));
 		
 		return window;
 		

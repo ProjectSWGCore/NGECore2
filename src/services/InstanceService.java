@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
 import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
-
+import services.object.ObjectService;
 import main.NGECore;
 
 import engine.clientdata.ClientFileManager;
@@ -192,12 +192,8 @@ public class InstanceService implements INetworkDispatch {
 		}
 		
 		public synchronized void close() {
-			for (SWGObject object : objectList) {
-				core.objectService.destroyObject(object);
-			}
-			
+			objectList.stream().forEach(core.objectService::destroyObject);
 			objectList.clear();
-			
 			closed = true;
 		}
 		
@@ -286,18 +282,12 @@ public class InstanceService implements INetworkDispatch {
 				
 				public void run() {
 					if (instance.getDuration() > 300 && instance.getTimeRemaining() <= 300 && !sentCloseWarning) {
-						for (CreatureObject player : instance.getActiveParticipants()) {
-							player.sendSystemMessage("@instance:five_minute_warning", (byte) 0);
-						}
-						
+						instance.getActiveParticipants().stream().forEach(p -> p.sendSystemMessage("@instance:five_minute_warning", (byte) 0));
 						sentCloseWarning = true;
 					}
 					
 					if (!instance.isOpen()) {
-						for (CreatureObject player : instance.getActiveParticipants()) {
-							player.sendSystemMessage("@instance:instance_time_out", (byte) 0);
-						}
-						
+						instance.getActiveParticipants().stream().forEach(p -> p.sendSystemMessage("@instance:instance_time_out", (byte) 0));
 						close(instance);
 					}
 					
@@ -696,11 +686,7 @@ public class InstanceService implements INetworkDispatch {
 		List<Instance> lockoutList = new ArrayList<Instance>();
 		
 		for (List<Instance> instanceList : instanceMap.values()) {
-			for (Instance instance : instanceList) {
-				if (instance.isFormerParticipant(creature)) {
-					lockoutList.add(instance);
-				}
-			}
+			instanceList.stream().filter(i -> i.isFormerParticipant(creature)).forEach(i -> lockoutList.add(i));
 		}
 		
 		return lockoutList;

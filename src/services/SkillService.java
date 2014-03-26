@@ -181,7 +181,7 @@ public class SkillService implements INetworkDispatch {
 	public void removeSkill(CreatureObject creature, String skill) {
 		PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
 		DatatableVisitor skillTable;
-		
+
 		if (player == null) {
 			return;
 		}

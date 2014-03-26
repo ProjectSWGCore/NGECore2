@@ -408,10 +408,10 @@ public class NGECore {
 		weatherService = new WeatherService(this);
 		weatherService.loadPlanetSettings();
 		
-		/*spawnService.loadMobileTemplates();
+		spawnService.loadMobileTemplates();
 		spawnService.loadLairTemplates();
 		spawnService.loadLairGroups();
-		spawnService.loadSpawnAreas();*/
+		spawnService.loadSpawnAreas();
 		
 		retroService.run();
 		

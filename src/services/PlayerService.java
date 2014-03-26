@@ -95,12 +95,14 @@ public class PlayerService implements INetworkDispatch {
 	
 	private NGECore core;
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-    
+    private float xpMultiplier;
     protected final Object objectMutex = new Object();
     
 	public PlayerService(final NGECore core) {
 		this.core = core;
-		
+		this.xpMultiplier = (float) core.getConfig().getDouble("XPMULTIPLIER");
+		if(xpMultiplier == 0)
+			xpMultiplier = 1;
 	}
 	
 	public void postZoneIn(final CreatureObject creature) {
@@ -483,7 +485,7 @@ public class PlayerService implements INetworkDispatch {
 	public void giveExperience(CreatureObject creature, int experience) {
 		DatatableVisitor experienceTable;
 		PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
-		
+		experience *= xpMultiplier;
 		//synchronized(objectMutex) {
 			try {
 				experienceTable = ClientFileManager.loadFile("datatables/player/player_level.iff", DatatableVisitor.class);

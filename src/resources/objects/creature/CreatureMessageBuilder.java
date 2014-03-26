@@ -836,7 +836,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 
 	}
 	
-	/*public IoBuffer buildAddSkillModDelta(String name, int base) {
+	public IoBuffer buildAddSkillModDelta(String name, int base) {
 		
 		CreatureObject creature = (CreatureObject) object;
 		
@@ -854,9 +854,9 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		
 		return buffer;
 
-	}*/
+	}
 	
-	/*public IoBuffer buildRemoveSkillModDelta(String name, int base) {
+	public IoBuffer buildRemoveSkillModDelta(String name, int base) {
 		
 		CreatureObject creature = (CreatureObject) object;
 		
@@ -874,7 +874,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		
 		return buffer;
 
-	}*/
+	}
 	
 	public IoBuffer buildAddSkillDelta(String name) {
 		

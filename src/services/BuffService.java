@@ -95,7 +95,7 @@ public class BuffService implements INetworkDispatch {
 			return null;
 		}
 		
-		if (!core.simulationService.checkLineOfSight(buffer, target)) {
+		if (target != buffer && !core.simulationService.checkLineOfSight(buffer, target)) {
 			return null;
 		}
 		

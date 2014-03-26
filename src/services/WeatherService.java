@@ -64,14 +64,8 @@ public class WeatherService {
 		weatherStability.put(planet, stability);
 		currentWeatherMap.put(planet, defaultWeather);
 		
-		scheduler.scheduleAtFixedRate(new Runnable() {
-			
-			@Override
-			public void run() {
-				runWeatherCycle(planet);
-			}
-
-			
+		scheduler.scheduleAtFixedRate(() -> {
+			runWeatherCycle(planet);
 		}, 30, 30, TimeUnit.MINUTES);
 		
 	}
