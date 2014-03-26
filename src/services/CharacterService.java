@@ -530,7 +530,7 @@ public class CharacterService implements INetworkDispatch {
 		return false;
 	}
 	
-	private void createStarterClothing(CreatureObject creature, String raceTemplate, String profession) {
+	/*private void createStarterClothing(CreatureObject creature, String raceTemplate, String profession) {
 		try {
 			ProfessionTemplateVisitor visitor = ClientFileManager.loadFile("creation/profession_defaults_" + profession + ".iff", ProfessionTemplateVisitor.class);
 			TangibleObject inventory = (TangibleObject) creature.getSlottedObject("inventory");
@@ -545,5 +545,5 @@ public class CharacterService implements INetworkDispatch {
 			}
 		} 
 		catch (InstantiationException | IllegalAccessException e) { e.printStackTrace();}
-	}
+	}*/
 }
