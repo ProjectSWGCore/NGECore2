@@ -33,7 +33,7 @@ import main.NGECore;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 
-import clientdata.visitors.ProfessionTemplateVisitor;
+//import clientdata.visitors.ProfessionTemplateVisitor;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.clients.Client;
@@ -329,7 +329,7 @@ public class CharacterService implements INetworkDispatch {
 				object._add(defaultWeapon);
 				object.setWeaponId(defaultWeapon.getObjectID());
 				
-				createStarterClothing(object, sharedRaceTemplate, clientCreateCharacter.getStarterProfession());
+				//createStarterClothing(object, sharedRaceTemplate, clientCreateCharacter.getStarterProfession());
 				//core.scriptService.callScript("scripts/", "demo", "CreateStartingCharacter", core, object);
 				
 				core.getCreatureODB().put(object, Long.class, CreatureObject.class, object.getTransaction());
