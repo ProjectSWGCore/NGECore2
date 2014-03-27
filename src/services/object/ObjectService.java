@@ -679,6 +679,9 @@ public class ObjectService implements INetworkDispatch {
 					}
 				}
 				
+				if(!core.getConfig().getString("MOTD").equals(""))
+					creature.sendSystemMessage(core.getConfig().getString("MOTD"), (byte) 2);
+				
 				core.playerService.postZoneIn(creature);
 			}
 			

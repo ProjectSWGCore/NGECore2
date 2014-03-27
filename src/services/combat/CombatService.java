@@ -817,7 +817,7 @@ public class CombatService implements INetworkDispatch {
 			
 			}, target.getIncapTimer(), TimeUnit.SECONDS);
 			target.setIncapTask(incapTask);
-			core.buffService.addBuffToCreature(target, "incapWeaken");
+			core.buffService.addBuffToCreature(target, "incapWeaken", target);
 			if(target.getSlottedObject("ghost") != null)
 				attacker.sendSystemMessage("You incapacitate " + target.getCustomName() + ".", (byte) 0);
 			return;
