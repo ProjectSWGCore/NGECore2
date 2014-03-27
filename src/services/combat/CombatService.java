@@ -41,6 +41,7 @@ import protocol.swg.objectControllerObjects.CombatSpam;
 import protocol.swg.objectControllerObjects.CommandEnqueueRemove;
 import protocol.swg.objectControllerObjects.StartTask;
 import resources.common.FileUtilities;
+import resources.datatables.Posture;
 import resources.objects.Buff;
 import resources.objects.DamageOverTime;
 import resources.objects.creature.CreatureObject;
@@ -178,8 +179,14 @@ public class CombatService implements INetworkDispatch {
 		
 		}
 		
-		//core.buffService.addBuffToCreature(attacker, command.getBuffNameSelf());
-		
+		if(target instanceof CreatureObject)
+		{
+			if(((CreatureObject)(target)).getPosture() == Posture.Incapacitated)
+			{
+				attacker.removeDefender(target);
+				target.removeDefender(attacker);		
+			}
+		}	
 	}
 
 	private void doAreaCombat(CreatureObject attacker, TangibleObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {
