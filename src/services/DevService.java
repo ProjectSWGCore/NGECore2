@@ -280,7 +280,7 @@ public class DevService implements INetworkDispatch {
 						sendCharacterBuilderSUI(player, 4);
 					case 34: // Breathe of Heaven
 						SWGObject food1 = core.objectService.createObject("object/tangible/food/crafted/shared_drink_breath_of_heaven.iff", planet);
-						food1.setFloatAttribute("cat_stat_mod_bonus.@stat_n:constitution_modified", 100);
+						food1.setFloatAttribute("cat_stat_mod_bonus.@stat_n:constitution_modified", 80);
 						food1.setFloatAttribute("cat_stat_mod_bonus.@stat_n:dodge", 3);
 						
 						inventory.add(food1);
