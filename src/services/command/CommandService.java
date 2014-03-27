@@ -38,13 +38,11 @@ import engine.resources.scene.Point3D;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import resources.common.*;
-
 import protocol.swg.ObjControllerMessage;
 import protocol.swg.objectControllerObjects.CommandEnqueue;
 import protocol.swg.objectControllerObjects.CommandEnqueueRemove;
 import protocol.swg.objectControllerObjects.ShowFlyText;
 import protocol.swg.objectControllerObjects.StartTask;
-
 import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
@@ -298,8 +296,10 @@ public class CommandService implements INetworkDispatch  {
 				core.combatService.doSelfBuff(attacker, weapon, command, actionCounter);
 				return;
 			}
-				
-			core.combatService.doCombat(attacker, (TangibleObject) target, weapon, command, actionCounter);
+			for(int i = 0 ; i < command.getAttack_rolls(); i++) {
+				core.combatService.doCombat(attacker, (TangibleObject) target, weapon, command, actionCounter);
+			}
+			
 		}
 		
 	}

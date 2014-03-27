@@ -19,54 +19,48 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package protocol.swg;
+package resources.visitors;
 
-import java.nio.ByteOrder;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-public class PlayClientEffectObjectMessage extends SWGMessage {
+import engine.clientdata.VisitorInterface;
 
-	private long objectId;
-	private String effectFile;
-	private String commandString;
+public class IDManagerVisitor implements VisitorInterface {
 
-	public PlayClientEffectObjectMessage(String effectFile, long objectId, String commandString) {
-		
-		this.effectFile = effectFile;
-		this.objectId = objectId;
-		this.commandString = commandString;
+	private ConcurrentHashMap<String, Short> customizationMap;
+	private CharsetDecoder charsetDecoder;
+	
+	public IDManagerVisitor() {
+		customizationMap = new ConcurrentHashMap<String, Short>();
+		charsetDecoder = Charset.forName("US-ASCII").newDecoder();
 	}
 	
 	@Override
-	public IoBuffer serialize() {
+	public void parseData(String node, IoBuffer data, int depth, int size) throws Exception {
 
-		IoBuffer result = IoBuffer.allocate(20 + effectFile.length() + commandString.length()).order(ByteOrder.LITTLE_ENDIAN);
-
-		result.putShort((short) 5);
-		result.putInt(0x8855434A);
-		result.put(getAsciiString(effectFile));
+		if (!node.equals("0001DATA") || depth != 2)
+			return;
 		
-		if(!effectFile.startsWith("clienteffect/holoemote_")) 
-		{
-			result.putShort((short) 0); // Because waverunner is a dweeb
-			result.putLong(objectId);
-			result.put(getAsciiString(commandString));	
+		while(data.hasRemaining()) {
+			short designNumber = data.getShort();
+			String customizationType = data.getString(charsetDecoder);
+			charsetDecoder.reset();
+			
+			customizationMap.put(customizationType, designNumber);
+			
+			//System.out.println(designNumber + ": " + customizationType);
 		}
-		else
-		{
-			result.put(getAsciiString(commandString));
-			result.putLong(objectId);
-		}
-		
-		return result.flip();
-
 	}
 
 	@Override
-	public void deserialize(IoBuffer data) {
-		// TODO Auto-generated method stub
-		
+	public void notifyFolder(String node, int depth) throws Exception {
 	}
-
+	
+	public ConcurrentHashMap<String, Short> getCustomizationMap() {
+		return this.customizationMap;
+	}
 }

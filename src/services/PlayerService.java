@@ -52,6 +52,8 @@ import protocol.swg.ObjControllerMessage;
 import protocol.swg.PlayerMoneyResponse;
 import protocol.swg.ServerTimeMessage;
 import protocol.swg.SetWaypointColor;
+import protocol.swg.ShowBackpack;
+import protocol.swg.ShowHelmet;
 import protocol.swg.objectControllerObjects.ChangeRoleIconChoice;
 import protocol.swg.objectControllerObjects.ShowFlyText;
 import protocol.swg.objectControllerObjects.ShowLootBox;
@@ -155,7 +157,55 @@ public class PlayerService implements INetworkDispatch {
 
 	@Override
 	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> swgOpcodes, Map<Integer, INetworkRemoteEvent> objControllerOpcodes) {
-		
+
+		swgOpcodes.put(Opcodes.ShowBackpack, (session, data) -> {
+			data.order(ByteOrder.LITTLE_ENDIAN);
+
+			Client client = core.getClient(session);
+
+			if (client == null)
+				return;
+
+			SWGObject player = client.getParent();
+
+			if (player == null)
+				return;
+
+			PlayerObject ghost = (PlayerObject) player.getSlottedObject("ghost");
+
+			if (ghost == null)
+				return;
+
+			ShowBackpack sentPacket = new ShowBackpack();
+			sentPacket.deserialize(data);
+
+			ghost.setShowBackpack(sentPacket.isShowBackpack());
+		});
+
+		swgOpcodes.put(Opcodes.ShowHelmet, (session, data) -> {
+			data.order(ByteOrder.LITTLE_ENDIAN);
+
+			Client client = core.getClient(session);
+
+			if (client == null)
+				return;
+
+			SWGObject player = client.getParent();
+
+			if (player == null)
+				return;
+
+			PlayerObject ghost = (PlayerObject) player.getSlottedObject("ghost");
+
+			if (ghost == null)
+				return;
+
+			ShowHelmet sentPacket = new ShowHelmet();
+			sentPacket.deserialize(data);
+
+			ghost.setShowHelmet(sentPacket.isShowHelmet());
+		});
+
 		objControllerOpcodes.put(ObjControllerOpcodes.ChangeRoleIconChoice, (session, data) -> {
 			
 			Client c = core.getClient(session);
@@ -410,7 +460,7 @@ public class PlayerService implements INetworkDispatch {
 			if(preDesignatedCloner != null) 
 				cloneData.put(preDesignatedCloner.getObjectID(), core.mapService.getClosestCityName(preDesignatedCloner) /*+ " (" + String.valueOf(position.getDistance2D(cloner.getPosition())) + "m)"*/);
 		}
-		final long preDesignatedObjectId = preDesignatedCloner.getObjectID();
+		final long preDesignatedObjectId = (preDesignatedCloner != null) ? preDesignatedCloner.getObjectID() : 0;
 		cloners.stream().filter(c -> c.getObjectID() != preDesignatedObjectId).forEach(c -> cloneData.put(c.getObjectID(), core.mapService.getClosestCityName(c)));
 		
 		final SUIWindow window = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "@base_player:revive_title", "Select the desired option and click OK.", 

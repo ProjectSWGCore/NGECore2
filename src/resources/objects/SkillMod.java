@@ -25,11 +25,11 @@ import org.apache.mina.core.buffer.IoBuffer;
 
 import com.sleepycat.persist.model.Persistent;
 
-@Persistent
+@Persistent(version=1)
 public class SkillMod extends Delta {
 
 	private int base;
-	private int modifier;
+	private float modifier;
 	private String name;
 
 	public SkillMod() {
@@ -49,11 +49,11 @@ public class SkillMod extends Delta {
 		this.base = base;
 	}
 
-	public int getModifier() {
+	public float getModifier() {
 		return modifier;
 	}
 
-	public void setModifier(int modifier) {
+	public void setModifier(float modifier) {
 		this.modifier = modifier;
 	}
 
@@ -71,8 +71,8 @@ public class SkillMod extends Delta {
 		
 		buffer.put(getAsciiString(name));
 		buffer.putInt(base);
-		buffer.putInt(modifier);
-		
+		buffer.putInt((int) modifier);
+
 		return buffer.array();
 	}
 

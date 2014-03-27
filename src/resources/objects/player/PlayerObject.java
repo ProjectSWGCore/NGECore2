@@ -43,7 +43,7 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent(version=5)
+@Persistent(version=8)
 public class PlayerObject extends IntangibleObject {
 	
 	// PLAY 3
@@ -54,11 +54,13 @@ public class PlayerObject extends IntangibleObject {
 	private List<Integer> flagsList = new ArrayList<Integer>();
 	private List<Integer> profileList = new ArrayList<Integer>();
 	private List<String> titleList = new ArrayList<String>();
-	private int bornDate = 0;
+	private long bornDate = 0;
 	private int totalPlayTime = 0;
 	private byte[] collections = new byte[] { };
 	private int highestSetBit = 0;
 	private int flagBitmask = 0;
+	private boolean showHelmet = true;
+	private boolean showBackpack = true;
 	
 	// PLAY 6
 	
@@ -120,6 +122,8 @@ public class PlayerObject extends IntangibleObject {
 	
 	private String biography = "";
 	private String spouse;
+	private String holoEmote;
+	private int holoEmoteUses;
 	
 	@NotPersistent
 	private PlayerMessageBuilder messageBuilder;
@@ -178,13 +182,13 @@ public class PlayerObject extends IntangibleObject {
 		return profileList;
 	}
 
-	public int getBornDate() {
+	public long getBornDate() {
 		synchronized(objectMutex) {
 			return bornDate;
 		}
 	}
 
-	public void setBornDate(int bornDate) {
+	public void setBornDate(long bornDate) {
 		synchronized(objectMutex) {
 			this.bornDate = bornDate;
 		}
@@ -740,5 +744,48 @@ public class PlayerObject extends IntangibleObject {
 			return ((flagBitmask & flags) == flags);
 		}
 	}
-	
+
+	public String getHoloEmote() {
+		return holoEmote;
+	}
+
+	public void setHoloEmote(String holoEmote) {
+		this.holoEmote = holoEmote;
+	}
+
+	public int getHoloEmoteUses() {
+		return holoEmoteUses;
+	}
+
+	public void setHoloEmoteUses(int holoEmoteUses) {
+		this.holoEmoteUses = holoEmoteUses;
+	}
+
+	public boolean isShowHelmet() {
+		return showHelmet;
+	}
+
+	public void setShowHelmet(boolean showHelmet) {
+		synchronized(objectMutex) {
+			this.showHelmet = showHelmet;
+		}
+		
+		if (getContainer() != null) {
+			getContainer().getClient().getSession().write(messageBuilder.buildShowHelmetDelta(showHelmet));
+		}
+	}
+
+	public boolean isShowBackpack() {
+		return showBackpack;
+	}
+
+	public void setShowBackpack(boolean showBackpack) {
+		synchronized(objectMutex) {
+			this.showBackpack = showBackpack;
+		}
+		
+		if (getContainer() != null) {
+			getContainer().getClient().getSession().write(messageBuilder.buildShowBackpackDelta(showBackpack));
+		}
+	}
 }

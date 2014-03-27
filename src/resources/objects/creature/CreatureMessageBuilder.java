@@ -163,7 +163,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 				buffer.put((byte) 0);
 				buffer.put(getAsciiString(skillMod.getName()));
 				buffer.putInt(skillMod.getBase());
-				buffer.putInt(skillMod.getModifier());
+				buffer.putInt((int) skillMod.getModifier());
 			}
 		}
 		buffer.putFloat(creature.getSpeedMultiplierBase());
@@ -836,7 +836,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 
 	}
 	
-	/*public IoBuffer buildAddSkillModDelta(String name, int base) {
+	public IoBuffer buildAddSkillModDelta(String name, int base) {
 		
 		CreatureObject creature = (CreatureObject) object;
 		
@@ -854,9 +854,9 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		
 		return buffer;
 
-	}*/
+	}
 	
-	/*public IoBuffer buildRemoveSkillModDelta(String name, int base) {
+	public IoBuffer buildRemoveSkillModDelta(String name, int base) {
 		
 		CreatureObject creature = (CreatureObject) object;
 		
@@ -874,7 +874,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		
 		return buffer;
 
-	}*/
+	}
 	
 	public IoBuffer buildAddSkillDelta(String name) {
 		

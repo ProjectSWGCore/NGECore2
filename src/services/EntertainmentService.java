@@ -4,6 +4,7 @@ import java.nio.ByteOrder;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
@@ -41,6 +42,7 @@ import resources.objects.SkillMod;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
+import resources.visitors.IDManagerVisitor;
 import services.sui.SUIService.InputBoxType;
 import services.sui.SUIWindow;
 import services.sui.SUIWindow.SUICallback;
@@ -63,6 +65,8 @@ public class EntertainmentService implements INetworkDispatch {
 	private ConcurrentHashMap<Integer,Performance> performancesByIndex = new ConcurrentHashMap<Integer,Performance>();
 	private ConcurrentHashMap<Integer,Performance> danceMap = new ConcurrentHashMap<Integer,Performance>();
 	
+	private ConcurrentHashMap<String, Short> designMap = new ConcurrentHashMap<String, Short>();
+	
 	private Random ranWorkshop = new Random();
 	
 	private Map<String, PerformanceEffect> performanceEffects = new ConcurrentHashMap<String, PerformanceEffect>();
@@ -73,6 +77,7 @@ public class EntertainmentService implements INetworkDispatch {
 		populatePerformanceTable();
 		populatePerformanceEffects();
 		registerCommands();
+		loadCharacterCustomizationData();
 	}
 	
 	@Override
@@ -114,31 +119,30 @@ public class EntertainmentService implements INetworkDispatch {
 				// TODO: Attribute check for colors?
 				if (bodyAttributes != null) {
 					for (IDAttribute atr : bodyAttributes) {
-						System.out.println("ATTRIBUTE: " + atr.getName());
+						//System.out.println("ATTRIBUTE: " + atr.getName() + " value of " + atr.getFloatValue());
 						if (atr.getFloatValue() > 1f || atr.getFloatValue() < 0) { // RIP Height Exploit <3
 							return;
 						}
 					}
 				}
 				
-				if (colorAttributes != null) {
+				/*if (colorAttributes != null) {
 					for (IDAttribute atr : colorAttributes) {
-						System.out.println("COLOR ATTRIBUTE: " + atr.getName());
+						System.out.println("COLOR ATTRIBUTE: " + atr.getName() + " value of " + atr.getValue());
 					}
-				}
+				}*/
 				
 				if (sentPacket.getTargetId() != sentPacket.getDesignerId()) {
 					
 					if (sentPacket.isCustomerAccepted() && sentPacket.isDesignerCommited()) {
 						System.out.print("Both Accepted!");
-						// TODO: Send close packet to target & apply changes
+
 						sentPacket.setEndMessage(true);
 						
-						if (sentPacket.getMoneyDemanded() > 0) {
+						int fee = sentPacket.getMoneyDemanded() + sentPacket.getMoneyOffered();
+						if (fee > 0) {
 							int payersCash = designTarget.getCashCredits();
-							int fee = sentPacket.getMoneyDemanded();
-							int tip = sentPacket.getMoneyOffered();
-							
+
 							if (payersCash < fee) {
 								
 								if (designTarget != designer) {
@@ -153,30 +157,26 @@ public class EntertainmentService implements INetworkDispatch {
 									designer.sendSystemMessage("Your target did not have the required payment fee", (byte) 0);
 
 								}
-							} else if (payersCash < tip) {
-								designTarget.sendSystemMessage("You tried to offer more credits than you had and the Image Design session has ended.", (byte) 0);
+							}else {
+								// TODO: Apply customization
+								designTarget.setCashCredits(designTarget.getCashCredits() - fee);
+								designer.setCashCredits(designer.getCashCredits() + fee);
+								
+								handleImageDesign(designer, designTarget, colorAttributes, bodyAttributes, sentPacket.getHair(), sentPacket.getHoloEmote());
+								
+								sentPacket.setEndMessage(true);
+								sentPacket.setObjectId(designTarget.getObjectId());
 								
 								ObjControllerMessage msg = new ObjControllerMessage(0x0B, sentPacket);
 								designTarget.getClient().getSession().write(msg.serialize());
-							} else {
-								// TODO: Apply customization
-								for (IDAttribute atr : bodyAttributes) {
-									if (atr.getName().equals("height"))
-										designTarget.setHeight(atr.getFloatValue());
-								}
-								
-								for (IDAttribute atr : colorAttributes) {
-									if (atr.getName().equals("color_hair")){
-										if (sentPacket.getHair() != null) {
-											designTarget._remove(designTarget.getSlottedObject("hair"));
-											TangibleObject hair = (TangibleObject) core.objectService.createObject(sentPacket.getHair(), designTarget.getPlanet());
-											hair.setCustomization(atr.getHexValue());
-											designTarget._add(hair);
-											System.out.print("Added hair");
-										}
-									}
-								}
 							}
+						} else {
+							handleImageDesign(designer, designTarget, colorAttributes, bodyAttributes, sentPacket.getHair(), sentPacket.getHoloEmote());
+							sentPacket.setEndMessage(true);
+							sentPacket.setObjectId(designTarget.getObjectId());
+							
+							ObjControllerMessage msg = new ObjControllerMessage(0x0B, sentPacket);
+							designTarget.getClient().getSession().write(msg.serialize());
 						}
 						
 					} else if (sentPacket.getObjectId() == designTarget.getObjectId()) {
@@ -191,6 +191,12 @@ public class EntertainmentService implements INetworkDispatch {
 						ObjControllerMessage msg = new ObjControllerMessage(0x0B, sentPacket);
 						designTarget.getClient().getSession().write(msg.serialize());
 					}
+				} else {
+					// No need to send a close packet message because the client automatically closes the ID window for the Desginer when they commit
+					if (sentPacket.isDesignerCommited())
+						handleImageDesign(designer, designTarget, colorAttributes, bodyAttributes, sentPacket.getHair(), sentPacket.getHoloEmote());
+					else
+						return;
 				}
 			}
 			
@@ -213,6 +219,32 @@ public class EntertainmentService implements INetworkDispatch {
 				if(sender == null)
 					return;
 				
+				ImageDesignMessage sentPacket = new ImageDesignMessage();
+				sentPacket.deserialize(data);
+				
+				if (sentPacket.getTargetId() == sentPacket.getDesignerId())
+					return;
+				
+				if (sentPacket.getObjectId() == sentPacket.getDesignerId()) {
+					CreatureObject target = (CreatureObject) core.objectService.getObject(sentPacket.getTargetId());
+					if (target == null)
+						return;
+					
+					sentPacket.setEndMessage(true);
+					sentPacket.setObjectId(target.getObjectId());
+					ObjControllerMessage endMessage = new ObjControllerMessage(0x0B, sentPacket);
+					target.getClient().getSession().write(endMessage.serialize());
+					
+				} else if (sentPacket.getObjectId() == sentPacket.getTargetId()) {
+					CreatureObject designer = (CreatureObject) core.objectService.getObject(sentPacket.getDesignerId());
+					if (designer == null)
+						return;
+					
+					sentPacket.setEndMessage(true);
+					sentPacket.setObjectId(designer.getObjectId());
+					ObjControllerMessage endMessage = new ObjControllerMessage(0x0B, sentPacket);
+					designer.getClient().getSession().write(endMessage.serialize());
+				}
 			}
 			
 		});
@@ -487,11 +519,11 @@ public class EntertainmentService implements INetworkDispatch {
 		core.commandService.registerCommand("stopdance");
 		core.commandService.registerCommand("watch");
 		//core.commandService.registerCommand("stopwatching"); // SWGList error
-		//core.commandService.registerCommand("holoEmote");
+		core.commandService.registerCommand("holoEmote");
 		core.commandService.registerCommand("covercharge");
 		//core.commandService.registerCommand("en_holographic_recall");
 		//core.commandService.registerCommand("en_holographic_image");
-		//core.commandService.registerCommand("imagedesign");
+		core.commandService.registerCommand("imagedesign");
 		// TODO: Add /bandsolo, /bandpause, /changeBandMusic, /changeDance, /changeGroupDance, /changeMusic
 		
 		// Entertainer Effects
@@ -696,8 +728,8 @@ public class EntertainmentService implements INetworkDispatch {
 	
 	public void performFlourish(final CreatureObject performer, int flourish) {
 
-		if (performer.getFlourishCount() > 0) {
-			performer.sendSystemMessage("@performance:wait_flourish_self", (byte) 0);
+		if (performer.getFlourishCount() > 0 || performer.isPerformingFlourish()) {
+			performer.sendSystemMessage("@performance:flourish_wait_self", (byte) 0);
 			return;
 		}
 		Performance performance = getPerformanceByIndex(performer.getPerformanceId());
@@ -711,11 +743,13 @@ public class EntertainmentService implements INetworkDispatch {
 			anmFlo = "mistake";
 		
 		performer.setFlourishCount(1);
+		performer.setPerformingFlourish(true);
 		performer.sendSystemMessage("@performance:flourish_perform", (byte) 0);
 		performer.doSkillAnimation(anmFlo);
 
 		scheduler.schedule(() -> {
 			performer.setFlourishCount(0);
+			performer.setPerformingFlourish(true);
 		}, (long) performance.getLoopDuration(), TimeUnit.SECONDS);
 	}
 	
@@ -836,8 +870,86 @@ public class EntertainmentService implements INetworkDispatch {
 		}
 	}
 	
-	private void doAppearanceChange(CreatureObject designee, ImageDesignMessage msg) {
+	private void handleImageDesign(CreatureObject designer, CreatureObject designTarget, Vector<IDAttribute> colorAttributes, Vector<IDAttribute> bodyAttributes, String hairTemplate, String holoEmote) {
+
+		if (hairTemplate != null && !hairTemplate.equals("")) {
+			if(!hairTemplate.startsWith("object/tangible/hair/"))
+				return;
+			String sharedHairTemplate = hairTemplate.replace("/hair_", "/shared_hair_");
+			TangibleObject hairObject = (TangibleObject) core.objectService.createObject(sharedHairTemplate, designTarget.getPlanet());
+			
+			if (hairObject == null)
+				return;
+			
+			TangibleObject oldHair = (TangibleObject) designTarget.getSlottedObject("hair");
+			if (oldHair == null)
+				return;
+			core.objectService.destroyObject(oldHair);
+			
+			designTarget.add(hairObject);
+
+			designTarget.addObjectToEquipList(hairObject);
+			
+		}
 		
+		if (bodyAttributes != null) {
+			for (IDAttribute atr : bodyAttributes) {
+				if (atr.getName().equals("height"))
+					designTarget.setHeight(atr.getFloatValue());
+				
+				// TODO: Body Attributes
+			}
+		}
+		
+		if (colorAttributes != null) {
+			for (IDAttribute atr : colorAttributes) {
+				if (atr.getName().equals("color_hair")){
+					// TODO: Color Attributes
+				}
+			}
+		}
+		if (holoEmote != null) {
+			PlayerObject player = (PlayerObject) designTarget.getSlottedObject("ghost");
+			if (player != null) {
+				player.setHoloEmote(holoEmote);
+				player.setHoloEmoteUses(20);
+				designTarget.sendSystemMessage("@image_designer:new_holoemote", (byte) 0);
+			}
+		}
+		
+	}
+	
+	private void loadCharacterCustomizationData() {
+		try {
+			IDManagerVisitor visitor = ClientFileManager.loadFile("customization/customization_id_manager.iff", IDManagerVisitor.class);
+			
+			designMap = visitor.getCustomizationMap();
+			
+		} catch (InstantiationException | IllegalAccessException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public String getCustomizationString(int number){
+		synchronized (designMap) {
+			for (Entry<String, Short> entry : designMap.entrySet()) {
+				if (entry.getValue().intValue() == number) {
+					return entry.getKey();
+				}
+			}
+		}
+		return "";
+	}
+	
+	public int getCustomizationValue(String customizationString) {
+		synchronized(designMap){
+			for(Entry<String, Short> entry : designMap.entrySet()) {
+				if (entry.getKey().equals(customizationString)) {
+					return entry.getValue().intValue();
+				}
+			}
+		}
+		return 0;
 	}
 	
 	@Override

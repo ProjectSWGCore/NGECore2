@@ -169,6 +169,9 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	@NotPersistent
 	private boolean performingEffect;
 	
+	@NotPersistent
+	private boolean performingFlourish;
+	
 	private int coverCharge;
 	
 	public CreatureObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
@@ -350,25 +353,21 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 
 	public void setPosture(byte posture) {
-		boolean needsStopPerformance =  false;
+
 		synchronized(objectMutex) {
 			if (this.posture == 0x09) {
-				needsStopPerformance = true;
+				stopPerformance();
 			}
 			if(this.posture == posture)
 				return;
 			this.posture = posture;
 		}
-		
+
 		Posture postureUpdate = new Posture(getObjectID(), posture);
 		ObjControllerMessage objController = new ObjControllerMessage(0x1B, postureUpdate);
 		
 		notifyObservers(messageBuilder.buildPostureDelta(posture), true);
 		notifyObservers(objController, true);
-		
-		if (needsStopPerformance) {
-			stopPerformance();
-		}
 		
 	}
 	
@@ -379,12 +378,16 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void stopPerformance() {
+
 		String type = "";
 		synchronized(objectMutex) {
-			// TODO: Minimum check to wait for song to finish before stopping... ?
-			setPerformanceId(0,true);
+			
+			// Some reason this prevents the animation for playing an instrument when stopping (unless that's what "" does)
+			setCurrentAnimation(getCurrentAnimation());
+			
 			setPerformanceCounter(0);
-			setCurrentAnimation("");
+			setPerformanceId(0,true);
+			
 			type = (performanceType) ? "dance" : "music";
 			if (entertainerExperience != null) {
 				entertainerExperience.cancel(true);
@@ -396,12 +399,12 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	    stopAudience();
 
 		getClient().getSession().write(messageBuilder.buildStartPerformance(false));
+
 	}
 	
 	public void stopAudience() {
-		String type = "";
 		synchronized(objectMutex) {
-			type = (performanceType) ? "dance" : "music";
+			//String type = (performanceType) ? "dance" : "music";
 			if (performanceAudience == null) {
 				return;
 			}
@@ -573,6 +576,9 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void addSkillMod(String name, int base) {
+		
+		if(name == "movement") setSpeedMultiplierMod(getSpeedMultiplierMod() + ((float)base / 10));
+
 		if(getSkillMod(name) == null) {
 			// TODO: Send skill mods delta in sendListDelta
 			SkillMod skillMod = new SkillMod();
@@ -585,10 +591,10 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			SkillMod mod = getSkillMod(name);
 			mod.setBase(mod.getBase() + base);
 
-			/*if(getClient() != null) {
+			if(getClient() != null) {
 				setSkillModsUpdateCounter((short) (getSkillModsUpdateCounter() + 1));
 				getClient().getSession().write(messageBuilder.buildAddSkillModDelta(name, mod.getBase()));
-			}*/
+			}
 		}
 		
 	}
@@ -598,6 +604,8 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		if(getSkillMod(name) == null)
 			return;
 		
+		if(name == "movement") this.setSpeedMultiplierMod(getSpeedMultiplierMod() - ((float)base / 10));
+		
 		SkillMod mod = getSkillMod(name);
 		mod.setBase(mod.getBase() - base);
 		
@@ -606,10 +614,10 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		} else {
 			skillMods.set(skillMods.indexOf(mod), mod);
 			System.out.println("Deducted mod!");
-			/*if(getClient() != null) {
+			if(getClient() != null) {
 				setSkillModsUpdateCounter((short) (getSkillModsUpdateCounter() + 1));
 				getClient().getSession().write(messageBuilder.buildAddSkillModDelta(name, mod.getBase()));
-			}*/
+			}
 		}
 		
 	}
@@ -617,10 +625,10 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	public void removeSkillMod(SkillMod mod) {
 		skillMods.remove(mod);
 		
-		/*if(getClient() != null) {
+		if(getClient() != null) {
 			setSkillModsUpdateCounter((short) (getSkillModsUpdateCounter() + 1));
 			getClient().getSession().write(messageBuilder.buildRemoveSkillModDelta(mod.getName(), mod.getBase()));
-		}*/
+		}
 	}
 
 	public short getSkillModsUpdateCounter() {
@@ -1243,8 +1251,12 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 
 		IoBuffer delta;
 		synchronized(objectMutex) {
+			if (this.health == health) return;
 			if(health > maxHealth)
-				health = maxHealth;
+			{
+				setHealth(maxHealth);
+				return;	
+			}
 			setHamListCounter(getHamListCounter() + 1);
 			delta = messageBuilder.buildHealthDelta(health);
 			
@@ -1261,10 +1273,15 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 
 	public void setAction(int action) {
+		
 		IoBuffer delta;
 		synchronized(objectMutex) {
+			if (this.action == action) return;
 			if(action > maxAction)
-				action = maxAction;
+			{
+				setAction(maxAction);
+				return;	
+			}
 			setHamListCounter(getHamListCounter() + 1);
 			delta = messageBuilder.buildActionDelta(action);
 			notifyObservers(delta, true);
@@ -1701,6 +1718,18 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	public void setCoverCharge(int coverCharge) {
 		synchronized (objectMutex) {
 			this.coverCharge = coverCharge;
+		}
+	}
+
+	public boolean isPerformingFlourish() {
+		synchronized(objectMutex){
+			return performingFlourish;
+		}
+	}
+
+	public void setPerformingFlourish(boolean performingFlourish) {
+		synchronized(objectMutex) {
+			this.performingFlourish = performingFlourish;
 		}
 	}
 }

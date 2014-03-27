@@ -41,6 +41,7 @@ import protocol.swg.objectControllerObjects.CombatSpam;
 import protocol.swg.objectControllerObjects.CommandEnqueueRemove;
 import protocol.swg.objectControllerObjects.StartTask;
 import resources.common.FileUtilities;
+import resources.datatables.Posture;
 import resources.objects.Buff;
 import resources.objects.DamageOverTime;
 import resources.objects.creature.CreatureObject;
@@ -178,8 +179,14 @@ public class CombatService implements INetworkDispatch {
 		
 		}
 		
-		//core.buffService.addBuffToCreature(attacker, command.getBuffNameSelf());
-		
+		if(target instanceof CreatureObject)
+		{
+			if(((CreatureObject)(target)).getPosture() == Posture.Incapacitated)
+			{
+				attacker.removeDefender(target);
+				target.removeDefender(attacker);		
+			}
+		}	
 	}
 
 	private void doAreaCombat(CreatureObject attacker, TangibleObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {
@@ -810,7 +817,7 @@ public class CombatService implements INetworkDispatch {
 			
 			}, target.getIncapTimer(), TimeUnit.SECONDS);
 			target.setIncapTask(incapTask);
-			core.buffService.addBuffToCreature(target, "incapWeaken");
+			core.buffService.addBuffToCreature(target, "incapWeaken", target);
 			if(target.getSlottedObject("ghost") != null)
 				attacker.sendSystemMessage("You incapacitate " + target.getCustomName() + ".", (byte) 0);
 			return;
@@ -990,8 +997,9 @@ public class CombatService implements INetworkDispatch {
 		attacker.removeDefender(target);
 		target.removeDefender(attacker);
 		
-		core.playerService.sendCloningWindow(target, attacker.getSlottedObject("ghost") != null);
+		if(target.getDuelList().contains(attacker)) handleEndDuel(target, attacker, false);
 		
+		core.playerService.sendCloningWindow(target, attacker.getSlottedObject("ghost") != null);
 	}
 	
 	public boolean areInDuel(CreatureObject creature1, CreatureObject creature2) {
@@ -1000,7 +1008,6 @@ public class CombatService implements INetworkDispatch {
 			return true;
 		
 		return false;
-		
 	}
 	
 	public void handleDuel(CreatureObject requester, CreatureObject target) {
@@ -1025,7 +1032,7 @@ public class CombatService implements INetworkDispatch {
 		
 	}
 	
-	public void handleEndDuel(CreatureObject requester, CreatureObject target) {
+	public void handleEndDuel(CreatureObject requester, CreatureObject target, boolean announce) {
 		
 		requester.getDuelList().remove(target);
 		target.getDuelList().remove(requester);
@@ -1036,8 +1043,11 @@ public class CombatService implements INetworkDispatch {
 		target.getClient().getSession().write(new UpdatePVPStatusMessage(requester.getObjectID(), 0x16, requester.getFaction()).serialize());
 		requester.getClient().getSession().write(new UpdatePVPStatusMessage(target.getObjectID(), 0x16, target.getFaction()).serialize());
 		
-		requester.sendSystemMessage("You end your duel with " + target.getCustomName() + ".", (byte) 0);
-		target.sendSystemMessage(requester.getCustomName() + " ends your duel.", (byte) 0);
+		if(announce)
+		{
+			requester.sendSystemMessage("You end your duel with " + target.getCustomName() + ".", (byte) 0);
+			target.sendSystemMessage(requester.getCustomName() + " ends your duel.", (byte) 0);
+		}
 
 	}
 
@@ -1065,8 +1075,7 @@ public class CombatService implements INetworkDispatch {
 		else if(command.getAttackType() == 0 || command.getAttackType() == 2 || command.getAttackType() == 3)
 			doAreaRevive(medic, target, weapon, command, actionCounter);
 		
-		sendHealPackets(medic, target, weapon, command, actionCounter);
-		
+		//sendHealPackets(medic, target, weapon, command, actionCounter); // Is there a reason this is here (combat log...?) - it causes a player to come back from the dead die again.
 	}
 	
 	private void doSingleTargetRevive(CreatureObject medic, CreatureObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {

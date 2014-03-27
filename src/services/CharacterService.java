@@ -26,12 +26,14 @@ import java.nio.ByteOrder;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Calendar;
 import java.util.Map;
 
 import main.NGECore;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
+
 
 
 import engine.clientdata.ClientFileManager;
@@ -286,6 +288,8 @@ public class CharacterService implements INetworkDispatch {
 					object.addObjectToEquipList(hair);
 				}
 				
+				player.setBornDate((int) System.currentTimeMillis());
+
 				TangibleObject inventory = (TangibleObject) core.objectService.createObject("object/tangible/inventory/shared_character_inventory.iff", object.getPlanet());
 				inventory.setContainerPermissions(CreatureContainerPermissions.CREATURE_CONTAINER_PERMISSIONS);
 				TangibleObject appInventory = (TangibleObject) core.objectService.createObject("object/tangible/inventory/shared_appearance_inventory.iff", object.getPlanet());
