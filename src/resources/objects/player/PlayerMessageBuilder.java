@@ -70,7 +70,7 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 		else
 			buffer.put(getAsciiString(player.getTitle()));	
 		
-		buffer.putInt(0); // born date?
+		buffer.putInt(0); // born date - Needs to be in yyymmdd format - Stored as epoch time of character create
 		
 		buffer.putInt(player.getTotalPlayTime()); // total play time?
 		
@@ -86,8 +86,8 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 		buffer.put(player.getCollections());
 		buffer.putInt(0); // Unknown, part of one delta, maybe a list
 		buffer.putInt(0); // Unknown, part of one delta, maybe a list
-		buffer.put((byte) 0); // Unknown Boolean used in Tansarii
-		buffer.put((byte) 0); // Unknown Boolean used in Tansarii
+		buffer.put((byte) ((player.isShowBackpack()) ? 1 : 0));
+		buffer.put((byte) ((player.isShowHelmet()) ? 1 : 0));
 		
 		int size = buffer.position();
 
@@ -633,6 +633,30 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 		return buffer;
 	}
 	
+	public IoBuffer buildShowBackpackDelta(boolean showBackpack) {
+		IoBuffer buffer = bufferPool.allocate(1, false).order(ByteOrder.LITTLE_ENDIAN);
+		
+		buffer.put((byte) (showBackpack ? 1 : 0));
+
+		int size = buffer.position();
+		buffer.flip();
+		
+		buffer = createDelta("PLAY", (byte) 3, (short) 1, (short) 18, buffer, size + 4);
+		return buffer;
+	}
+
+	public IoBuffer buildShowHelmetDelta(boolean showHelmet) {
+		IoBuffer buffer = bufferPool.allocate(1, false).order(ByteOrder.LITTLE_ENDIAN);
+
+		buffer.put((byte) (showHelmet ? 1 : 0));
+
+		int size = buffer.position();
+		buffer.flip();
+		
+		buffer = createDelta("PLAY", (byte) 3, (short) 1, (short) 19, buffer, size + 4);
+		return buffer;
+	}
+
 	@Override
 	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
 		// TODO Auto-generated method stub
