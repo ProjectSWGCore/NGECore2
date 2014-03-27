@@ -124,7 +124,6 @@ public class DevService implements INetworkDispatch {
 					case 11: // Give 100,000 credits
 						player.setCashCredits(player.getCashCredits() + 100000);
 						return;
-						
 					// Items
 					case 20: // (Light) Jedi Robe
 						inventory.add(core.objectService.createObject("object/tangible/wearables/robe/shared_robe_jedi_light_s03.iff", planet));
@@ -255,7 +254,23 @@ public class DevService implements INetworkDispatch {
 						rifle1.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
 						rifle1.setStringAttribute("cat_wpn_damage.damage", "800-1250");
 						
+						SWGObject pistol1 = core.objectService.createObject("object/weapon/ranged/pistol/shared_pistol_heroic_sd.iff", planet);
+						pistol1.setIntAttribute("required_combat_level", 90);
+						pistol1.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 1);
+						pistol1.setStringAttribute("class_required", "None");
+						pistol1.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Acid");
+						pistol1.setStringAttribute("cat_wpn_damage.damage", "800-1250");
+						
+						SWGObject heavy1 = core.objectService.createObject("object/weapon/ranged/heavy/shared_som_lava_cannon.iff", planet);
+						heavy1.setIntAttribute("required_combat_level", 90);
+						heavy1.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 1);
+						heavy1.setStringAttribute("class_required", "Commando");
+						heavy1.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Heat");
+						heavy1.setStringAttribute("cat_wpn_damage.damage", "900-1150");
+						
+						inventory.add(heavy1);
 						inventory.add(rifle1);
+						inventory.add(pistol1);
 						return;
 				}
 			}	
