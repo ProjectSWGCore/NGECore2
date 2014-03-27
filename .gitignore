@@ -49,6 +49,14 @@ footprint/
 interiorlayout/
 clientdata/quest/
 
+# PSWG Object Databases
+odb/building/je.info.0.19
+odb/creature/je.info.0.19
+odb/doids/je.info.0.18
+odb/guild/je.info.0.19
+odb/mails/je.info.0.19
+odb/oids/je.info.0.19
+
 # External tool builders
 .externalToolBuilders/
 
