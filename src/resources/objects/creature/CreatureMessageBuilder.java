@@ -163,7 +163,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 				buffer.put((byte) 0);
 				buffer.put(getAsciiString(skillMod.getName()));
 				buffer.putInt(skillMod.getBase());
-				buffer.putInt(skillMod.getModifier());
+				buffer.putInt((int) skillMod.getModifier());
 			}
 		}
 		buffer.putFloat(creature.getSpeedMultiplierBase());
