@@ -119,7 +119,7 @@ public class EntertainmentService implements INetworkDispatch {
 				// TODO: Attribute check for colors?
 				if (bodyAttributes != null) {
 					for (IDAttribute atr : bodyAttributes) {
-						System.out.println("ATTRIBUTE: " + atr.getName() + " value of " + atr.getFloatValue());
+						//System.out.println("ATTRIBUTE: " + atr.getName() + " value of " + atr.getFloatValue());
 						if (atr.getFloatValue() > 1f || atr.getFloatValue() < 0) { // RIP Height Exploit <3
 							return;
 						}
@@ -219,6 +219,32 @@ public class EntertainmentService implements INetworkDispatch {
 				if(sender == null)
 					return;
 				
+				ImageDesignMessage sentPacket = new ImageDesignMessage();
+				sentPacket.deserialize(data);
+				
+				if (sentPacket.getTargetId() == sentPacket.getDesignerId())
+					return;
+				
+				if (sentPacket.getObjectId() == sentPacket.getDesignerId()) {
+					CreatureObject target = (CreatureObject) core.objectService.getObject(sentPacket.getTargetId());
+					if (target == null)
+						return;
+					
+					sentPacket.setEndMessage(true);
+					sentPacket.setObjectId(target.getObjectId());
+					ObjControllerMessage endMessage = new ObjControllerMessage(0x0B, sentPacket);
+					target.getClient().getSession().write(endMessage.serialize());
+					
+				} else if (sentPacket.getObjectId() == sentPacket.getTargetId()) {
+					CreatureObject designer = (CreatureObject) core.objectService.getObject(sentPacket.getDesignerId());
+					if (designer == null)
+						return;
+					
+					sentPacket.setEndMessage(true);
+					sentPacket.setObjectId(designer.getObjectId());
+					ObjControllerMessage endMessage = new ObjControllerMessage(0x0B, sentPacket);
+					designer.getClient().getSession().write(endMessage.serialize());
+				}
 			}
 			
 		});
