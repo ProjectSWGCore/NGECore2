@@ -7,13 +7,18 @@ def setup():
 	
 def run(core, actor, target, commandString):
 
-	if target is None:
+	if target is None and commandString is None:
 		design = ImageDesignStartMessage(actor.getObjectId(), actor.getObjectId(), target.getObjectId())
 		obj = ObjControllerMessage(11, design)
 		actor.getClient().getSession().write(obj.serialize())
 		return
 	
 	else:
+		if target is None and commandString is not None:
+			target = core.chatService.getObjectByFirstName(commandString)
+			if target is None:
+				return
+
 		if target.getGroupId() == actor.getGroupId():
 
 			tDesign = ImageDesignStartMessage(target.getObjectId(), actor.getObjectId(), target.getObjectId())

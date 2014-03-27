@@ -92,7 +92,6 @@ public class SkillService implements INetworkDispatch {
 						
 						if (isTitle == true) {
 							core.playerService.addPlayerTitle(player, skill);
-							Console.println("Gave skill title: " + skill);
 						}
 						
 						if (isProfession) {
@@ -118,7 +117,6 @@ public class SkillService implements INetworkDispatch {
 						
 						for (String skillName : skillsRequired) {
 							if (skillName != "" && !creature.hasSkill(skillName)) {
-								System.out.println("Skill Name: " + skillName);
 								return;
 							}
 						}

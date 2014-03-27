@@ -89,7 +89,7 @@ public class BuffService implements INetworkDispatch {
 		}
 	}
 		
-	public Buff doAddBuff(final CreatureObject target, String buffName, CreatureObject buffer) {
+	public Buff doAddBuff(final CreatureObject target, String buffName, final CreatureObject buffer) {
 		
 		if (target.getPosition().getDistance(buffer.getPosition()) > 20) {
 			return null;
@@ -153,6 +153,23 @@ public class BuffService implements INetworkDispatch {
 			
 			buff.setRemovalTask(task);
 			
+		} else if (buff.getGroup2().contains("of_aura") && buffer != null && buffer.getObjectId() != target.getObjectId()) {
+
+			// I'm not sure if all aura effects follow the same rules, so this is simply restricted to officer aura's atm
+			ScheduledFuture<?> task = scheduler.scheduleAtFixedRate(new Runnable() {
+				@SuppressWarnings("unused")
+				@Override
+				public void run() {
+					if (buffer == null)
+						removeBuffFromCreature(target, buff);
+
+					if (target.getPosition().getDistance2D(buffer.getWorldPosition()) > 80) {
+						removeBuffFromCreature(target, buff);
+					}
+				}
+			}, 5, 5, TimeUnit.SECONDS);
+			
+			buff.setRemovalTask(task);
 		}
 		
 		for (String effect : buff.getParticleEffect().split(",")) {
@@ -186,7 +203,6 @@ public class BuffService implements INetworkDispatch {
 	
 	@SuppressWarnings("unused")
 	public void removeBuffFromCreature(CreatureObject creature, Buff buff) {
-		
 		 if(!creature.getBuffList().contains(buff))
              return;
 		 DamageOverTime dot = creature.getDotByBuff(buff);
@@ -201,8 +217,11 @@ public class BuffService implements INetworkDispatch {
         for (String effect : buff.getParticleEffect().split(",")) {
         	creature.stopEffectObject(buff.getBuffName());
 		}
-         
-		
+        
+        if (buff.getRemovalTask() != null) {
+       	 buff.getRemovalTask().cancel(true);
+       	 buff.setRemovalTask(null);
+        }
 	}
 	
 	public void clearBuffs(final CreatureObject creature) {
