@@ -258,7 +258,7 @@ public class DevService implements INetworkDispatch {
 						pistol1.setIntAttribute("required_combat_level", 90);
 						pistol1.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 4 / 10);
 						pistol1.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Kinetic");
-						pistol1.setStringAttribute("cat_wpn_damage.damage", "800-1150");
+						pistol1.setStringAttribute("cat_wpn_damage.damage", "250-650");
 						pistol1.setStringAttribute("cat_wpn_damage.wpn_range", "0-38m");
 						
 						SWGObject heavy1 = core.objectService.createObject("object/weapon/ranged/heavy/shared_som_lava_cannon.iff", planet);
