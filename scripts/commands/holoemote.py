@@ -18,7 +18,7 @@ def run(core, actor, target, commandString):
 		installedEmote = player.getHoloEmote().replace('holoemote_','')
 	
 	if commandString is None or commandString == "":
-		commandString == installedEmote
+		commandString = installedEmote
 
 	if installedEmote == None or installedEmote == "":
 		actor.sendSystemMessage('@image_designer:no_holoemote', 0)
@@ -41,7 +41,7 @@ def run(core, actor, target, commandString):
 		return
 	
 	effectObj = 'clienteffect/holoemote_' + commandString + '.cef'
-	actor.playEffectObject(effectObj, 'Head')
+	actor.playEffectObject(effectObj, 'head')
 	player.setHoloEmoteUses(player.getHoloEmoteUses() - 1)
 	# TODO: Cooldowns for the holo-emote's
 	return
