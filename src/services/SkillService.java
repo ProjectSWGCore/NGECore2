@@ -290,9 +290,10 @@ public class SkillService implements INetworkDispatch {
 		try 
 		{
 			DatatableVisitor table = ClientFileManager.loadFile("datatables/player/player_level.iff", DatatableVisitor.class);		
-			for (int i = 0; i <= creature.getLevel(); i++) expertisePoints += (int) table.getObject(i, 5);	
+			for (int i = 0; i <= creature.getLevel(); i++) expertisePoints += (int) table.getObject(i, 5);
+			for (String skill : creature.getSkills()) if(skill.startsWith("expertise_")) expertisePoints--;
 		}
-		catch (Exception e) { e.printStackTrace(); }
+		catch (Exception e) { e.printStackTrace(); }	
 		return expertisePoints;
 	}
 	

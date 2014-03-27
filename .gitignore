@@ -57,6 +57,9 @@ odb/guild/je.info.*
 odb/mails/je.info.*
 odb/oids/je.info.*
 
+# PSWG Configs
+options.cfg
+
 # External tool builders
 .externalToolBuilders/
 

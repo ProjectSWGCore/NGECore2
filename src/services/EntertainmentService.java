@@ -872,6 +872,8 @@ public class EntertainmentService implements INetworkDispatch {
 	
 	private void handleImageDesign(CreatureObject designer, CreatureObject designTarget, Vector<IDAttribute> colorAttributes, Vector<IDAttribute> bodyAttributes, String hairTemplate, String holoEmote) {
 
+		if(!hairTemplate.startsWith("object/tangible/hair/")) return;
+		
 		if (hairTemplate != null && !hairTemplate.equals("")) {
 			System.out.println(hairTemplate);
 			String sharedHairTemplate = hairTemplate.replace("/hair_", "/shared_hair_");
