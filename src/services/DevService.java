@@ -83,12 +83,15 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 21, "(Dark) Jedi Robe");
 				suiOptions.put((long) 22, "Composite Armor");
 				suiOptions.put((long) 23, "Weapons");
+				suiOptions.put((long) 24, "Medicine");
 				break;
 			case 3: // [Items] Weapons
 				suiOptions.put((long) 30, "Jedi Weapons");
 				suiOptions.put((long) 31, "Melee Weapons");
 				suiOptions.put((long) 32, "Ranged Weapons");
 				break;
+			case 4: // Medicine
+				suiOptions.put((long) 34, "Breath Of Heaven");
 		}
 		
 		final SUIWindow window = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "Character Builder Terminal", "Select the desired option and click OK.", suiOptions, creature, null, 10);
@@ -273,6 +276,15 @@ public class DevService implements INetworkDispatch {
 						inventory.add(rifle1);
 						inventory.add(pistol1);
 						return;
+					case 24: // Medicine
+						sendCharacterBuilderSUI(player, 4);
+					case 34: // Breathe of Heaven
+						SWGObject food1 = core.objectService.createObject("object/tangible/food/crafted/shared_drink_breath_of_heaven.iff", planet);
+						food1.setFloatAttribute("cat_stat_mod_bonus.@stat_n:constitution_modified", 100);
+						food1.setFloatAttribute("cat_stat_mod_bonus.@stat_n:dodge", 3);
+						
+						inventory.add(food1);
+						
 				}
 			}	
 		});
