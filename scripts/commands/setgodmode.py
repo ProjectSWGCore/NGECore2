@@ -78,6 +78,12 @@ def run(core, actor, target, commandString):
 	elif command == 'instance' and arg1:
 		core.instanceService.queue(arg1, actor)	
 		
+	elif command == 'action' and arg1:
+		actor.setAction(int(arg1))
+		
+	elif command == 'health' and arg1:
+		actor.setHealth(int(arg1))
+		
 	elif command == 'id':
 		actor.sendSystemMessage('Your id is: ' + str(actor.getObjectId()), 0)
 

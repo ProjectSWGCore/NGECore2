@@ -1246,8 +1246,12 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 
 		IoBuffer delta;
 		synchronized(objectMutex) {
+			if (this.health == health) return;
 			if(health > maxHealth)
-				health = maxHealth;
+			{
+				setHealth(maxHealth);
+				return;	
+			}
 			setHamListCounter(getHamListCounter() + 1);
 			delta = messageBuilder.buildHealthDelta(health);
 			
@@ -1264,10 +1268,15 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 
 	public void setAction(int action) {
+		
 		IoBuffer delta;
 		synchronized(objectMutex) {
+			if (this.action == action) return;
 			if(action > maxAction)
-				action = maxAction;
+			{
+				setAction(maxAction);
+				return;	
+			}
 			setHamListCounter(getHamListCounter() + 1);
 			delta = messageBuilder.buildActionDelta(action);
 			notifyObservers(delta, true);

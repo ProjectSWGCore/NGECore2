@@ -50,12 +50,12 @@ interiorlayout/
 clientdata/quest/
 
 # PSWG Object Databases
-odb/building/je.info.0.19
-odb/creature/je.info.0.19
-odb/doids/je.info.0.18
-odb/guild/je.info.0.19
-odb/mails/je.info.0.19
-odb/oids/je.info.0.19
+odb/building/je.info.*
+odb/creature/je.info.*
+odb/doids/je.info.*
+odb/guild/je.info.*
+odb/mails/je.info.*
+odb/oids/je.info.*
 
 # External tool builders
 .externalToolBuilders/
