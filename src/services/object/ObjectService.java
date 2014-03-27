@@ -78,6 +78,8 @@ import engine.clientdata.visitors.WorldSnapshotVisitor.SnapshotChunk;
 import engine.clients.Client;
 import engine.resources.common.CRC;
 import engine.resources.container.Traverser;
+import engine.resources.container.WorldCellPermissions;
+import engine.resources.container.WorldPermissions;
 import engine.resources.database.DatabaseConnection;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
@@ -415,7 +417,19 @@ public class ObjectService implements INetworkDispatch {
 			}
 		});
 		objectList.remove(object.getObjectID());
-		core.simulationService.remove(object, object.getPosition().x, object.getPosition().y);
+		SWGObject parent = object.getContainer();
+
+		if(parent != null) {
+			if(parent instanceof CreatureObject) {
+				((CreatureObject) parent).removeObjectFromEquipList(object);
+				((CreatureObject) parent).removeObjectFromAppearanceEquipList(object);
+			}
+			long parentId = object.getParentId();
+			parent.remove(object);
+			object.setParentId(parentId);
+		} else {
+			core.simulationService.remove(object, object.getWorldPosition().x, object.getWorldPosition().z, true);
+		}
 		
 	}
 	
@@ -471,28 +485,30 @@ public class ObjectService implements INetworkDispatch {
 
 		return objectID;*/
 		
-		long newId;
-		
-		synchronized(objectMutex) {
-			newId = highestId.incrementAndGet();
+		long newId = 0;
+		boolean found = false;
+		// stack overflow when using recursion
+		while(!found) {
+			synchronized(objectMutex) {
+				newId = highestId.incrementAndGet();
+			}
+			
+			PreparedStatement ps2;
+	
+			try {
+				ps2 = databaseConnection.preparedStatement("UPDATE highestid SET id=" + newId + " WHERE id=" + (newId-1));
+				ps2.executeUpdate();
+				ps2.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+			if(getObject(newId) != null || core.getObjectIdODB().contains(newId, Long.class, ObjectId.class))
+				found = false;
+			else
+				found = true;		
 		}
 		
-		PreparedStatement ps2;
-
-		try {
-			ps2 = databaseConnection.preparedStatement("UPDATE highestid SET id=" + newId + " WHERE id=" + (newId-1));
-			ps2.executeUpdate();
-			ps2.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		if(getObject(newId) == null /*&& getCreatureFromDB(newId) == null*/ && !core.getObjectIdODB().contains(newId, Long.class, ObjectId.class))
-			return newId;
-		else {
-			System.out.println("Object ID already exists: " + newId);
-			return generateObjectID();
-		}
-		
+		return newId;		
 
 	}
 	
@@ -688,10 +704,12 @@ public class ObjectService implements INetworkDispatch {
 			int objectId = chunk.id;
 			SWGObject obj = createObject(visitor.getName(chunk.nameId), objectId, planet, new Point3D(chunk.xPosition, chunk.yPosition, chunk.zPosition), new Quaternion(chunk.orientationW, chunk.orientationX, chunk.orientationY, chunk.orientationZ));
 			if(obj != null) {
+				obj.setContainerPermissions(WorldPermissions.WORLD_PERMISSIONS);
 				obj.setisInSnapshot(true);
 				obj.setParentId(chunk.parentId);
 				if(obj instanceof CellObject) {
 					((CellObject) obj).setCellNumber(chunk.cellNumber);
+					obj.setContainerPermissions(WorldCellPermissions.WORLD_CELL_PERMISSIONS);
 				}
 			}
 			//System.out.print("\rLoading Object [" + counter + "/" +  visitor.getChunks().size() + "] : " + visitor.getName(chunk.nameId));
@@ -736,7 +754,7 @@ public class ObjectService implements INetworkDispatch {
 		}
 		
 		SWGObject child = createObject(template, 0, parent.getPlanet(), position, orientation);
-		
+		child.setContainerPermissions(WorldPermissions.WORLD_PERMISSIONS);
 		if(parent.getAttachment("childObjects") == null)
 			parent.setAttachment("childObjects", new Vector<SWGObject>());
 		
@@ -882,17 +900,21 @@ public class ObjectService implements INetworkDispatch {
 					}
 					if(object == null)
 						continue;
+					object.setContainerPermissions(WorldPermissions.WORLD_PERMISSIONS);
 					if(radius > 256)
 						object.setAttachment("bigSpawnRange", new Boolean(true));
 					quadtreeObjects.add(object);
 				} else if(containerId != 0) {
-					object = createObject(template, 0, planet, new Point3D(px, py, pz), new Quaternion(qw, qx, qy, qz));	
+					object = createObject(template, 0, planet, new Point3D(px, py, pz), new Quaternion(qw, qx, qy, qz));
 					if(containers.contains(containerId)) {
+						object.setContainerPermissions(WorldPermissions.WORLD_PERMISSIONS);
 						object.setisInSnapshot(false);
 						containers.add(objectId);
 					}
-					if(object instanceof CellObject && cellIndex != 0)
+					if(object instanceof CellObject && cellIndex != 0) {
+						object.setContainerPermissions(WorldCellPermissions.WORLD_CELL_PERMISSIONS);
 						((CellObject) object).setCellNumber(cellIndex);
+					}
 					SWGObject parent = getObject(containerId);
 					
 					if(parent != null && object != null) {
@@ -902,6 +924,7 @@ public class ObjectService implements INetworkDispatch {
 					}
 				} else {
 					object = createObject(template, 0, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz));
+					object.setContainerPermissions(WorldPermissions.WORLD_PERMISSIONS);
 					quadtreeObjects.add(object);
 				}
 				

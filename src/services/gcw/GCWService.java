@@ -377,7 +377,7 @@ public class GCWService implements INetworkDispatch {
 		}
 		
 		Iterator<SWGObject> it = flagged.iterator();
-		
+
 		while(it.hasNext()) {
 			SWGObject obj = it.next();
 			if (((CreatureObject) obj).getFactionStatus() != 2) {

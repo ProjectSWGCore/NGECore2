@@ -123,7 +123,11 @@ public class TangibleObject extends SWGObject {
 	}
 
 	public void setCustomization(byte[] customization) {
-		this.customization = customization;
+		synchronized(objectMutex) {
+			this.customization = customization;
+		}
+		
+		notifyObservers(messageBuilder.buildCustomizationDelta(customization), false);
 	}
 
 	public List<Integer> getComponentCustomizations() {

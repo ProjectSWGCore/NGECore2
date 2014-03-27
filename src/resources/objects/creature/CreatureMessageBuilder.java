@@ -199,7 +199,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 				buffer.putInt(1);
 			}
 		}
-		buffer.putInt(0);	// displayXp
+		buffer.putInt(creature.getXpBarValue());	// xp bar value
 		int size = buffer.position();
 		buffer = bufferPool.allocate(size, false).put(buffer.array(), 0, size);
 
@@ -836,7 +836,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 
 	}
 	
-	/*public IoBuffer buildAddSkillModDelta(String name, int base) {
+	public IoBuffer buildAddSkillModDelta(String name, int base) {
 		
 		CreatureObject creature = (CreatureObject) object;
 		
@@ -854,9 +854,9 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		
 		return buffer;
 
-	}*/
+	}
 	
-	/*public IoBuffer buildRemoveSkillModDelta(String name, int base) {
+	public IoBuffer buildRemoveSkillModDelta(String name, int base) {
 		
 		CreatureObject creature = (CreatureObject) object;
 		
@@ -874,7 +874,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		
 		return buffer;
 
-	}*/
+	}
 	
 	public IoBuffer buildAddSkillDelta(String name) {
 		
@@ -1164,6 +1164,16 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		return buffer;
 		
 	}
+	
+	public IoBuffer buildXPBarDelta(int xpBarValue) {
+		IoBuffer buffer = bufferPool.allocate(4, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putInt(xpBarValue);
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 4, (short) 1, (short) 0x0F, buffer, size + 4);
+		return buffer;	
+	}
+
 
 	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
 		switch (viewType) {

@@ -795,24 +795,19 @@ public class CombatService implements INetworkDispatch {
 				target.setTurnRadius(0);
 				target.setSpeedMultiplierBase(0);
 			}
-			ScheduledFuture<?> incapTask = scheduler.schedule(new Runnable() {
-
-				@Override
-				public void run() {
-					
-					synchronized(target.getMutex()) {
-
-						if(target.getPosture() != 13)
-							return;
-						
-						target.setPosture((byte) 0);
-						target.setTurnRadius(1);
-						target.setSpeedMultiplierBase(1);
-					
-					}
-
-				}
+			ScheduledFuture<?> incapTask = scheduler.schedule(() -> {
 				
+				synchronized(target.getMutex()) {
+
+					if(target.getPosture() != 13)
+						return;
+					
+					target.setPosture((byte) 0);
+					target.setTurnRadius(1);
+					target.setSpeedMultiplierBase(1);
+				
+				}
+			
 			}, target.getIncapTimer(), TimeUnit.SECONDS);
 			target.setIncapTask(incapTask);
 			core.buffService.addBuffToCreature(target, "incapWeaken");
@@ -824,6 +819,8 @@ public class CombatService implements INetworkDispatch {
 				target.setHealth(0);
 				target.setPosture((byte) 14);
 			}
+			attacker.removeDefender(target);
+			target.removeDefender(attacker);
 			return;
 		}
 		synchronized(target.getMutex()) {
@@ -993,8 +990,9 @@ public class CombatService implements INetworkDispatch {
 		attacker.removeDefender(target);
 		target.removeDefender(attacker);
 		
-		core.playerService.sendCloningWindow(target, attacker.getSlottedObject("ghost") != null);
+		if(target.getDuelList().contains(attacker)) handleEndDuel(target, attacker, false);
 		
+		core.playerService.sendCloningWindow(target, attacker.getSlottedObject("ghost") != null);
 	}
 	
 	public boolean areInDuel(CreatureObject creature1, CreatureObject creature2) {
@@ -1003,7 +1001,6 @@ public class CombatService implements INetworkDispatch {
 			return true;
 		
 		return false;
-		
 	}
 	
 	public void handleDuel(CreatureObject requester, CreatureObject target) {
@@ -1028,7 +1025,7 @@ public class CombatService implements INetworkDispatch {
 		
 	}
 	
-	public void handleEndDuel(CreatureObject requester, CreatureObject target) {
+	public void handleEndDuel(CreatureObject requester, CreatureObject target, boolean announce) {
 		
 		requester.getDuelList().remove(target);
 		target.getDuelList().remove(requester);
@@ -1039,8 +1036,11 @@ public class CombatService implements INetworkDispatch {
 		target.getClient().getSession().write(new UpdatePVPStatusMessage(requester.getObjectID(), 0x16, requester.getFaction()).serialize());
 		requester.getClient().getSession().write(new UpdatePVPStatusMessage(target.getObjectID(), 0x16, target.getFaction()).serialize());
 		
-		requester.sendSystemMessage("You end your duel with " + target.getCustomName() + ".", (byte) 0);
-		target.sendSystemMessage(requester.getCustomName() + " ends your duel.", (byte) 0);
+		if(announce)
+		{
+			requester.sendSystemMessage("You end your duel with " + target.getCustomName() + ".", (byte) 0);
+			target.sendSystemMessage(requester.getCustomName() + " ends your duel.", (byte) 0);
+		}
 
 	}
 

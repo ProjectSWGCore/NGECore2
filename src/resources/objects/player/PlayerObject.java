@@ -31,6 +31,7 @@ import java.util.TreeMap;
 import resources.common.Console;
 import resources.objects.intangible.IntangibleObject;
 import resources.objects.waypoint.WaypointObject;
+import resources.objects.creature.CreatureObject;
 
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
@@ -42,7 +43,7 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent(version=5)
+@Persistent(version=6)
 public class PlayerObject extends IntangibleObject {
 	
 	// PLAY 3
@@ -119,6 +120,8 @@ public class PlayerObject extends IntangibleObject {
 	
 	private String biography = "";
 	private String spouse;
+	private String holoEmote;
+	private int holoEmoteUses;
 	
 	@NotPersistent
 	private PlayerMessageBuilder messageBuilder;
@@ -238,7 +241,9 @@ public class PlayerObject extends IntangibleObject {
 		
 		if (getContainer() != null && getContainer().getClient() != null && getContainer().getClient().getSession() != null) {
 			getContainer().getClient().getSession().write(messageBuilder.buildXPListDelta(type, amount, xpExists));
+			((CreatureObject) getContainer()).setXpBarValue(amount);
 		}
+		
 	}
 	
 	public int getXpListUpdateCounter() {
@@ -737,5 +742,20 @@ public class PlayerObject extends IntangibleObject {
 			return ((flagBitmask & flags) == flags);
 		}
 	}
-	
+
+	public String getHoloEmote() {
+		return holoEmote;
+	}
+
+	public void setHoloEmote(String holoEmote) {
+		this.holoEmote = holoEmote;
+	}
+
+	public int getHoloEmoteUses() {
+		return holoEmoteUses;
+	}
+
+	public void setHoloEmoteUses(int holoEmoteUses) {
+		this.holoEmoteUses = holoEmoteUses;
+	}
 }

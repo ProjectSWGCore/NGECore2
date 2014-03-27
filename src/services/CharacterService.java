@@ -33,6 +33,9 @@ import main.NGECore;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 
+
+import engine.clientdata.ClientFileManager;
+import engine.clientdata.visitors.DatatableVisitor;
 import engine.clients.Client;
 import engine.resources.common.CRC;
 import engine.resources.container.CreatureContainerPermissions;
@@ -60,6 +63,7 @@ import resources.objects.mission.MissionObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
+import resources.visitors.ProfessionTemplateVisitor;
 
 @SuppressWarnings("unused")
 
@@ -279,6 +283,7 @@ public class CharacterService implements INetworkDispatch {
 					if(clientCreateCharacter.getHairCustomization().length > 0)
 						hair.setCustomization(clientCreateCharacter.getHairCustomization());
 					object._add(hair);
+					object.addObjectToEquipList(hair);
 				}
 				
 				TangibleObject inventory = (TangibleObject) core.objectService.createObject("object/tangible/inventory/shared_character_inventory.iff", object.getPlanet());
@@ -324,8 +329,9 @@ public class CharacterService implements INetworkDispatch {
 
 				object._add(defaultWeapon);
 				object.setWeaponId(defaultWeapon.getObjectID());
-				core.scriptService.callScript("scripts/", "starterclothing", "CreateStarterClothing", core, object, clientCreateCharacter.getStarterProfession(), clientCreateCharacter.getRaceTemplate());
-				core.scriptService.callScript("scripts/", "demo", "CreateStartingCharacter", core, object);
+				
+				createStarterClothing(object, sharedRaceTemplate, clientCreateCharacter.getStarterProfession());
+				//core.scriptService.callScript("scripts/", "demo", "CreateStartingCharacter", core, object);
 				
 				core.getCreatureODB().put(object, Long.class, CreatureObject.class, object.getTransaction());
 				// might not need to commit transaction but better safe than sorry
@@ -524,5 +530,25 @@ public class CharacterService implements INetworkDispatch {
 		}
 		return false;
 	}
+	
+	private void createStarterClothing(CreatureObject creature, String raceTemplate, String profession) {
+		try {
+			ProfessionTemplateVisitor visitor = ClientFileManager.loadFile("creation/profession_defaults_" + profession + ".iff", ProfessionTemplateVisitor.class);
+			TangibleObject inventory = (TangibleObject) creature.getSlottedObject("inventory");
 
+			if (inventory == null)
+				return;
+
+			for(String item : visitor.getItems(raceTemplate)) {
+				TangibleObject createdItem = (TangibleObject) core.objectService.createObject(item, creature.getPlanet());
+
+				if (createdItem == null)
+					return;
+
+				creature._add(createdItem);
+				creature.addObjectToEquipList(createdItem);
+			}
+		} 
+		catch (InstantiationException | IllegalAccessException e) { e.printStackTrace();}
+	}
 }

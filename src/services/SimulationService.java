@@ -981,7 +981,7 @@ public class SimulationService implements INetworkDispatch {
 		Point3D origin = new Point3D(position1.x, position1.y + 1, position1.z);
 		Point3D end = new Point3D(position2.x, position2.y + 1, position2.z);
 		
-		Vector3D direction = new Vector3D(end.x - origin.x, end.y - origin.y, end.z - origin.z).normalize();
+		Vector3D direction = new Vector3D(end.x - origin.x, end.y - origin.y, end.z - origin.z);
 		
 		if (direction.getNorm() != 0) {
 			direction.normalize();

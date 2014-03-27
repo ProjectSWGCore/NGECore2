@@ -100,6 +100,9 @@ public class EquipmentService implements INetworkDispatch {
 	public boolean canEquip(CreatureObject actor, SWGObject item) {
 		boolean result = true;
 		
+		if (item == null)
+			return false;
+		
 		if (item.getAttributes().toString().contains("cat_armor"))
 			if (actor.getLevel() >= 22)
 				result = true;

@@ -39,7 +39,7 @@ public class ShowLootBox extends ObjControllerObject {
 	
 	public ShowLootBox(long playerId, SWGObject reward) {
 		this.playerId = playerId;
-		this.rewards = rewards;
+		this.reward = reward;
 	}
 	
 	public ShowLootBox(long playerId, Vector<SWGObject> rewards) {
