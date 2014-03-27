@@ -79,6 +79,7 @@ public class CombatCommand extends BaseSWGCommand {
 	private float warmupTime;
 	private float vigorCost; // for commando kill meter and bm specials
 	private float criticalChance;
+	private int attack_rolls;
 	
 	public CombatCommand(String commandName) {
 		super(commandName);
@@ -157,6 +158,7 @@ public class CombatCommand extends BaseSWGCommand {
 						elementalValue = (Integer) visitor.getObject(i, 84);
 						performanceSpam = (String) visitor.getObject(i, 89);
 						hitSpam = ((Integer) visitor.getObject(i, 90)).byteValue();
+						attack_rolls = (Integer) visitor.getObject(i, 93);
 						
 					}
 			}
@@ -484,7 +486,7 @@ public class CombatCommand extends BaseSWGCommand {
 	public void setCanBePunishing(boolean canBePunishing) {
 		this.canBePunishing = canBePunishing;
 	}
-
+	
 	public int getMinDamage() {
 		return minDamage;
 	}
@@ -716,6 +718,14 @@ public class CombatCommand extends BaseSWGCommand {
 
 	public void setCriticalChance(float criticalChance) {
 		this.criticalChance = criticalChance;
+	}
+
+	public int getAttack_rolls() {
+		return attack_rolls;
+	}
+
+	public void setAttack_rolls(int attack_rolls) {
+		this.attack_rolls = attack_rolls;
 	}
 	
 	
