@@ -9,9 +9,17 @@ def run(core, actor, target, commandString):
 	if player is None:
 		return
 	
-	commandString = commandString.lower()
-	installedEmote = player.getHoloEmote().replace('holoemote_','')
+	if commandString is not None:
+		commandString = commandString.lower()
 	
+	installedEmote = ''
+	
+	if player.getHoloEmote() is not None:
+		installedEmote = player.getHoloEmote().replace('holoemote_','')
+	
+	if commandString is None or commandString == "":
+		commandString == installedEmote
+
 	if installedEmote == None or installedEmote == "":
 		actor.sendSystemMessage('@image_designer:no_holoemote', 0)
 		return
@@ -27,9 +35,6 @@ def run(core, actor, target, commandString):
 	
 	if commandString == "kitty":
 		commandString = "technokitty"
-	
-	if commandString is None or commandString == "":
-		commandString == installedEmote
 	
 	if commandString != installedEmote and installedEmote != 'all':
 		actor.sendSystemMessage('Your installed Holo-Emote generator does not support that emote.', 0)

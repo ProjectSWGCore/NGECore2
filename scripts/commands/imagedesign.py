@@ -8,7 +8,7 @@ def setup():
 def run(core, actor, target, commandString):
 
 	if target is None and commandString is None:
-		design = ImageDesignStartMessage(actor.getObjectId(), actor.getObjectId(), target.getObjectId())
+		design = ImageDesignStartMessage(actor.getObjectId(), actor.getObjectId(), actor.getObjectId())
 		obj = ObjControllerMessage(11, design)
 		actor.getClient().getSession().write(obj.serialize())
 		return
