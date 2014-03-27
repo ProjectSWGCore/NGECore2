@@ -1075,8 +1075,7 @@ public class CombatService implements INetworkDispatch {
 		else if(command.getAttackType() == 0 || command.getAttackType() == 2 || command.getAttackType() == 3)
 			doAreaRevive(medic, target, weapon, command, actionCounter);
 		
-		sendHealPackets(medic, target, weapon, command, actionCounter);
-		
+		//sendHealPackets(medic, target, weapon, command, actionCounter); // Is there a reason this is here (combat log...?) - it causes a player to come back from the dead die again.
 	}
 	
 	private void doSingleTargetRevive(CreatureObject medic, CreatureObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {
