@@ -378,7 +378,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void stopPerformance() {
-		System.out.println("Stop Performance called!");
+
 		String type = "";
 		synchronized(objectMutex) {
 			
