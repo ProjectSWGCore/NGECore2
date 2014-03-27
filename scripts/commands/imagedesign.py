@@ -15,7 +15,7 @@ def run(core, actor, target, commandString):
 	
 	else:
 		if target.getGroupId() == actor.getGroupId():
-			print ('same group')
+
 			tDesign = ImageDesignStartMessage(target.getObjectId(), actor.getObjectId(), target.getObjectId())
 			tObj = ObjControllerMessage(11, tDesign)
 			target.getClient().getSession().write(tObj.serialize())
