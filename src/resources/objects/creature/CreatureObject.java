@@ -588,10 +588,10 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			SkillMod mod = getSkillMod(name);
 			mod.setBase(mod.getBase() + base);
 
-			/*if(getClient() != null) {
+			if(getClient() != null) {
 				setSkillModsUpdateCounter((short) (getSkillModsUpdateCounter() + 1));
 				getClient().getSession().write(messageBuilder.buildAddSkillModDelta(name, mod.getBase()));
-			}*/
+			}
 		}
 		
 	}
@@ -609,10 +609,10 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		} else {
 			skillMods.set(skillMods.indexOf(mod), mod);
 			System.out.println("Deducted mod!");
-			/*if(getClient() != null) {
+			if(getClient() != null) {
 				setSkillModsUpdateCounter((short) (getSkillModsUpdateCounter() + 1));
 				getClient().getSession().write(messageBuilder.buildAddSkillModDelta(name, mod.getBase()));
-			}*/
+			}
 		}
 		
 	}
@@ -620,10 +620,10 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	public void removeSkillMod(SkillMod mod) {
 		skillMods.remove(mod);
 		
-		/*if(getClient() != null) {
+		if(getClient() != null) {
 			setSkillModsUpdateCounter((short) (getSkillModsUpdateCounter() + 1));
 			getClient().getSession().write(messageBuilder.buildRemoveSkillModDelta(mod.getName(), mod.getBase()));
-		}*/
+		}
 	}
 
 	public short getSkillModsUpdateCounter() {
@@ -1088,7 +1088,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void removeObjectFromEquipList(SWGObject object) {
-		if(object instanceof TangibleObject) {
+		if(object instanceof TangibleObject && equipmentList.contains(object)) {
 			setEquipmentListUpdateCounter(getEquipmentListUpdateCounter() + 1);
 			notifyObservers(messageBuilder.buildRemoveEquipmentDelta((TangibleObject) object), true);
 			equipmentList.get().remove(object);
@@ -1104,7 +1104,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void removeObjectFromAppearanceEquipList(SWGObject object) {
-		if(object instanceof TangibleObject) {
+		if(object instanceof TangibleObject && appearanceEquipmentList.contains(object)) {
 			setAppearanceEquipmentListUpdateCounter(getAppearanceEquipmentListUpdateCounter() + 1);
 			notifyObservers(messageBuilder.buildRemoveAppearanceEquipmentDelta((TangibleObject) object), true);
 			appearanceEquipmentList.get().remove(object);

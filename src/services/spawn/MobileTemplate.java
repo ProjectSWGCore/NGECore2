@@ -39,6 +39,8 @@ public class MobileTemplate {
 	private int maxDamage;
 	private int difficulty = 0;
 	private int health, action;
+	private String creatureName;
+	private float scale = 1;
 
 	public Vector<String> getTemplates() {
 		return templates;
@@ -126,6 +128,22 @@ public class MobileTemplate {
 
 	public void setDefaultAttack(String defaultAttack) {
 		this.defaultAttack = defaultAttack;
+	}
+
+	public String getCreatureName() {
+		return creatureName;
+	}
+
+	public void setCreatureName(String creatureName) {
+		this.creatureName = creatureName;
+	}
+
+	public float getScale() {
+		return scale;
+	}
+
+	public void setScale(float scale) {
+		this.scale = scale;
 	}
 
 }
