@@ -43,7 +43,7 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent(version=5)
+@Persistent(version=6)
 public class PlayerObject extends IntangibleObject {
 	
 	// PLAY 3
@@ -120,6 +120,8 @@ public class PlayerObject extends IntangibleObject {
 	
 	private String biography = "";
 	private String spouse;
+	private String holoEmote;
+	private int holoEmoteUses;
 	
 	@NotPersistent
 	private PlayerMessageBuilder messageBuilder;
@@ -740,5 +742,20 @@ public class PlayerObject extends IntangibleObject {
 			return ((flagBitmask & flags) == flags);
 		}
 	}
-	
+
+	public String getHoloEmote() {
+		return holoEmote;
+	}
+
+	public void setHoloEmote(String holoEmote) {
+		this.holoEmote = holoEmote;
+	}
+
+	public int getHoloEmoteUses() {
+		return holoEmoteUses;
+	}
+
+	public void setHoloEmoteUses(int holoEmoteUses) {
+		this.holoEmoteUses = holoEmoteUses;
+	}
 }

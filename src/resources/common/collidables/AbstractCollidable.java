@@ -60,6 +60,8 @@ public abstract class AbstractCollidable {
 	}
 	
 	public void removeCollidedObject(SWGObject obj) {
+		if(!collidedObjects.contains(obj))
+			return;
 		collidedObjects.remove(obj);
 		ExitEvent event = new ExitEvent();
 		event.object = obj;

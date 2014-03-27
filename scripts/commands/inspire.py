@@ -17,6 +17,11 @@ def run(core, actor, target, commandString):
     	actor.getClient().getSession().write(objController.serialize())
     	return
     
+    if target is None and commandString is not None:
+    	target = core.chatService.getObjectByFirstName(commandString)
+    	if target is None:
+    		return
+    
     if actor.getPosture() != 0x09 and target.getObjectId() != actor.getObjectId():
       actor.sendSystemMessage('@performance:insp_buff_must_perform', 2)
       return

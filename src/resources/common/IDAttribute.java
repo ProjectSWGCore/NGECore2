@@ -55,9 +55,4 @@ public class IDAttribute {
 		this.value = value;
 	}
 
-	public byte[] getHexValue() {
-		System.out.println(BigInteger.valueOf(value).toByteArray());
-		return BigInteger.valueOf(value).toByteArray();
-	}
-
 }

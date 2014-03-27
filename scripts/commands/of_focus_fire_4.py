@@ -4,6 +4,8 @@ def setup(core, actor, buff):
 	return
 	
 def run(core, actor, target, commandString):
-	core.buffService.addGroupBuff(actor, 'of_focus_fire_4')
+	if target is None:
+		target = actor
+	core.buffService.addGroupBuff(target, 'of_focus_fire_4', actor)
 	return
 	

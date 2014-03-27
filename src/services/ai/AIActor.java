@@ -233,4 +233,16 @@ public class AIActor {
 		}
 		
 	}
+	
+	public void scheduleDespawn() {
+		scheduler.schedule(() -> {
+			
+			damageMap.clear();
+			followObject = null;
+			creature.setAttachment("AI", null);
+			NGECore.getInstance().objectService.destroyObject(creature);
+			
+		}, 30000, TimeUnit.MILLISECONDS);
+	}
+	
 }

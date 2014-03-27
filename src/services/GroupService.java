@@ -187,8 +187,8 @@ public class GroupService implements INetworkDispatch {
 		for(SWGObject otherMember : group.getMemberList()) {
 			if(otherMember != member) {
 				for(Buff buff : ((CreatureObject) otherMember).getBuffList().get()) {
-					if(buff.isGroupBuff()) {
-						core.buffService.doAddBuff(member, buff.getBuffName(), (CreatureObject) core.objectService.getObject(buff.getGroupBufferId()));
+					if(buff.isGroupBuff() && otherMember.getPlanet() == member.getPlanet() && otherMember.getPosition().getDistance2D(member.getWorldPosition()) <= 80) {
+						core.buffService.addBuffToCreature((CreatureObject) otherMember, buff.getBuffName(), member);
 					}
 				}
 				return;

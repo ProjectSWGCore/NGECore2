@@ -47,10 +47,8 @@ public class PlayClientEffectObjectMessage extends SWGMessage {
 		result.putShort((short) 5);
 		result.putInt(0x8855434A);
 		result.put(getAsciiString(effectFile));
-		result.putShort((short) 0);
-		result.putLong(objectId);
 		result.put(getAsciiString(commandString));
-		
+		result.putLong(objectId);
 		return result.flip();
 
 	}

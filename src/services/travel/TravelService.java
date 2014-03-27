@@ -233,9 +233,7 @@ public class TravelService implements INetworkDispatch {
 	
 	public void loadTravelPoints() {
 		List<Planet> planetList = core.terrainService.getPlanetList();
-		for (Planet planet : planetList) {
-			addPlanet(planet);
-		}
+		planetList.forEach(this::addPlanet);
 		populateTravelFares();
 	}
 	

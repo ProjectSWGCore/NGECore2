@@ -21,13 +21,15 @@
  ******************************************************************************/
 package services.ai.states;
 
+import main.NGECore;
 import services.ai.AIActor;
 
 public class DeathState extends AIState {
 
 	@Override
 	public byte onEnter(AIActor actor) {
-		// TODO Auto-generated method stub
+		NGECore.getInstance().aiService.awardExperience(actor);
+		actor.scheduleDespawn();
 		return 0;
 	}
 

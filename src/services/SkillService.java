@@ -92,7 +92,6 @@ public class SkillService implements INetworkDispatch {
 						
 						if (isTitle == true) {
 							core.playerService.addPlayerTitle(player, skill);
-							Console.println("Gave skill title: " + skill);
 						}
 						
 						if (isProfession) {
@@ -118,7 +117,6 @@ public class SkillService implements INetworkDispatch {
 						
 						for (String skillName : skillsRequired) {
 							if (skillName != "" && !creature.hasSkill(skillName)) {
-								System.out.println("Skill Name: " + skillName);
 								return;
 							}
 						}
@@ -181,7 +179,7 @@ public class SkillService implements INetworkDispatch {
 	public void removeSkill(CreatureObject creature, String skill) {
 		PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
 		DatatableVisitor skillTable;
-		
+
 		if (player == null) {
 			return;
 		}
@@ -290,9 +288,10 @@ public class SkillService implements INetworkDispatch {
 		try 
 		{
 			DatatableVisitor table = ClientFileManager.loadFile("datatables/player/player_level.iff", DatatableVisitor.class);		
-			for (int i = 0; i <= creature.getLevel(); i++) expertisePoints += (int) table.getObject(i, 5);	
+			for (int i = 0; i <= creature.getLevel(); i++) expertisePoints += (int) table.getObject(i, 5);
+			for (String skill : creature.getSkills()) if(skill.startsWith("expertise_")) expertisePoints--;
 		}
-		catch (Exception e) { e.printStackTrace(); }
+		catch (Exception e) { e.printStackTrace(); }	
 		return expertisePoints;
 	}
 	
