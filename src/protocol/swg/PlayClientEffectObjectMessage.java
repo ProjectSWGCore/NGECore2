@@ -36,7 +36,6 @@ public class PlayClientEffectObjectMessage extends SWGMessage {
 		this.effectFile = effectFile;
 		this.objectId = objectId;
 		this.commandString = commandString;
-
 	}
 	
 	@Override
@@ -47,8 +46,10 @@ public class PlayClientEffectObjectMessage extends SWGMessage {
 		result.putShort((short) 5);
 		result.putInt(0x8855434A);
 		result.put(getAsciiString(effectFile));
-		result.put(getAsciiString(commandString));
+		result.putShort((short) 0);
 		result.putLong(objectId);
+		result.put(getAsciiString(commandString));
+
 		return result.flip();
 
 	}

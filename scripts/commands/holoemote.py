@@ -36,7 +36,7 @@ def run(core, actor, target, commandString):
 		return
 	
 	effectObj = 'clienteffect/holoemote_' + commandString + '.cef'
-	actor.playEffectObject(effectObj, 'head')
+	actor.playEffectObject(effectObj, 'Head')
 	player.setHoloEmoteUses(player.getHoloEmoteUses() - 1)
 	# TODO: Cooldowns for the holo-emote's
 	return
