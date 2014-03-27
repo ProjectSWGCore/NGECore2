@@ -731,6 +731,12 @@ public class SimulationService implements INetworkDispatch {
 		if(!ghost.isSet(PlayerFlags.LD))
 			ghost.toggleFlag(PlayerFlags.LD);
 		
+		for (CreatureObject opponent : object.getDuelList()) {
+			if (opponent != null) {
+				core.combatService.handleEndDuel(object, opponent, true);
+			}
+		}
+		
 		/*
 		object.createTransaction(core.getCreatureODB().getEnvironment());
 		core.getCreatureODB().put(object, Long.class, CreatureObject.class, object.getTransaction());
