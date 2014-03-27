@@ -124,7 +124,6 @@ public class DevService implements INetworkDispatch {
 					case 11: // Give 100,000 credits
 						player.setCashCredits(player.getCashCredits() + 100000);
 						return;
-						
 					// Items
 					case 20: // (Light) Jedi Robe
 						inventory.add(core.objectService.createObject("object/tangible/wearables/robe/shared_robe_jedi_light_s03.iff", planet));
@@ -251,11 +250,28 @@ public class DevService implements INetworkDispatch {
 						SWGObject rifle1 = core.objectService.createObject("object/weapon/ranged/rifle/shared_rifle_e11.iff", planet);
 						rifle1.setIntAttribute("required_combat_level", 90);
 						rifle1.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 1);
-						rifle1.setStringAttribute("class_required", "None");
 						rifle1.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
 						rifle1.setStringAttribute("cat_wpn_damage.damage", "800-1250");
+						rifle1.setStringAttribute("cat_wpn_damage.wpn_range", "0-64m");
 						
+						SWGObject pistol1 = core.objectService.createObject("object/weapon/ranged/pistol/shared_pistol_heroic_sd.iff", planet);
+						pistol1.setIntAttribute("required_combat_level", 90);
+						pistol1.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 4 / 10);
+						pistol1.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Kinetic");
+						pistol1.setStringAttribute("cat_wpn_damage.damage", "800-1150");
+						pistol1.setStringAttribute("cat_wpn_damage.wpn_range", "0-38m");
+						
+						SWGObject heavy1 = core.objectService.createObject("object/weapon/ranged/heavy/shared_som_lava_cannon.iff", planet);
+						heavy1.setIntAttribute("required_combat_level", 90);
+						heavy1.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 1);
+						heavy1.setStringAttribute("class_required", "Commando");
+						heavy1.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
+						heavy1.setStringAttribute("cat_wpn_damage.damage", "800-1150");
+						heavy1.setStringAttribute("cat_wpn_damage.wpn_range", "0-64m");
+						
+						inventory.add(heavy1);
 						inventory.add(rifle1);
+						inventory.add(pistol1);
 						return;
 				}
 			}	
