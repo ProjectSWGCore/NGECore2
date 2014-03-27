@@ -269,7 +269,7 @@ public class SkillService implements INetworkDispatch {
 					return;
 				
 				for(String expertiseName : expertise.getExpertiseSkills()) {
-					if(expertiseName.startsWith("expertise_") && ((caluclateExpertisePoints(creature) - 1) > 0)) // Prevent possible glitches/exploits
+					if(expertiseName.startsWith("expertise_") && ((caluclateExpertisePoints(creature) - 1) >= 0)) // Prevent possible glitches/exploits
 					{
 						addSkill(creature, expertiseName);
 						if(!FileUtilities.doesFileExist("scripts/expertise/" + expertiseName + ".py"))
@@ -288,7 +288,7 @@ public class SkillService implements INetworkDispatch {
 		try 
 		{
 			DatatableVisitor table = ClientFileManager.loadFile("datatables/player/player_level.iff", DatatableVisitor.class);		
-			for (int i = 0; i < creature.getLevel(); i++) expertisePoints += (int) table.getObject(i, 5);
+			for (int i = 0; i < creature.getLevel(); ++i) expertisePoints += (int) table.getObject(i, 5);
 			for (String skill : creature.getSkills()) if(skill.startsWith("expertise_")) expertisePoints--;
 		}
 		catch (Exception e) { e.printStackTrace(); }	
