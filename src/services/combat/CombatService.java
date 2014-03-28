@@ -477,7 +477,7 @@ public class CombatService implements INetworkDispatch {
 		}
 		
 		if(target.getSkillMod("expertise_innate_reduction_all_player") != null)
-			baseArmor *= (100 - target.getSkillMod("expertise_innate_reduction_all_player").getBase()) / 100;
+			baseArmor *= (100 - target.getSkillModBase("expertise_innate_reduction_all_player")) / 100;
 			
 		if(command.getBypassArmor() > 0)
 			baseArmor *= (100 - command.getBypassArmor()) / 100;
@@ -486,7 +486,7 @@ public class CombatService implements INetworkDispatch {
 
 		if(hitType == HitType.STRIKETHROUGH) {
 			
-			float stMaxValue = attacker.getSkillMod("combat_strikethrough_value").getBase() / 2 + attacker.getLuck() / 10;
+			float stMaxValue = attacker.getSkillModBase("combat_strikethrough_value") / 2 + attacker.getLuck() / 10;
 			if(stMaxValue > 99)
 				stMaxValue = 99;
 			float stMinValue = stMaxValue / 2;
