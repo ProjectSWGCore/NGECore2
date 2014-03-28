@@ -77,6 +77,7 @@ public class DevService implements INetworkDispatch {
 			case 1: // Character
 				suiOptions.put((long) 10, "Set combat level to 90");
 				suiOptions.put((long) 11, "Give 100,000 credits");
+				suiOptions.put((long) 12, "Reset expertise");
 				break;
 			case 2: // Items
 				suiOptions.put((long) 20, "(Light) Jedi Robe");
@@ -126,6 +127,9 @@ public class DevService implements INetworkDispatch {
 						return;
 					case 11: // Give 100,000 credits
 						player.setCashCredits(player.getCashCredits() + 100000);
+						return;
+					case 12: // Reset expertise
+						resetExpertiseSkills(player);
 						return;
 						
 					// Items
@@ -273,7 +277,17 @@ public class DevService implements INetworkDispatch {
 		
 		core.suiService.openSUIWindow(window);	
 	}
+	
+	public void resetExpertiseSkills(CreatureObject creature)
+	{
+		for(int i = creature.getSkills().size() - 1; i >= 0; i-- )
+		{
+		    String skill = creature.getSkills().get(i);
+		    if(skill.contains("expertise")) creature.removeSkill(skill);
+		}
+	}
 
+	
 	@Override
 	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> swgOpcodes, Map<Integer, INetworkRemoteEvent> objControllerOpcodes) {
 	}
