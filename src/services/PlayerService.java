@@ -632,11 +632,8 @@ public class PlayerService implements INetworkDispatch {
 			
 			int healthGranted = ((Integer) experienceTable.getObject((level - 1), 4));;
 			
+			// 3. Add skills and roadmap items.
 			for (int i = 1; i <= level; i++) {
-			    //System.out.println("Now: " + healthGranted + ", adding: " + ((Integer) experienceTable.getObject((i - 1), 4)));
-				//healthGranted = ((Integer) experienceTable.getObject((i - 1), 4));
-				// 3. Add skills and roadmap items.
-			      
 				if ((i == 4 || i == 7 || i == 10) || ((i > 10) && (((i - 10)  % 4) == 0))) {
 					int skill = ((i <= 10) ? ((i - 1) / 3) : ((((i - 10) / 4)) + 3));
 					String roadmapSkillName = "";
@@ -709,19 +706,7 @@ public class PlayerService implements INetworkDispatch {
 					}
 				}
 			}
-				
-			/*creature.setMaxHealth((int) health + healthGranted);
-			creature.setHealth(creature.getMaxHealth());
-			creature.setMaxAction((int) action);
-			creature.setAction(creature.getMaxAction());
-			creature.setGrantedHealth(healthGranted);
 			
-			core.skillModService.addSkillMod(creature, "luck", (int) luck);
-			core.skillModService.addSkillMod(creature, "precision", (int) precision);
-			core.skillModService.addSkillMod(creature, "strength", (int) strength);
-			core.skillModService.addSkillMod(creature, "constitution", (int) constitution);
-			core.skillModService.addSkillMod(creature, "stamina", (int) stamina);
-			core.skillModService.addSkillMod(creature, "agility", (int) agility);*/
 			if (luck >= 1) {
 				core.skillModService.addSkillMod(creature, "luck", (int) luck);
 				creature.sendSystemMessage("spam", "level_up_stat_gain_0", (int) luck, 0);
@@ -766,9 +751,6 @@ public class PlayerService implements INetworkDispatch {
 			
 			creature.setGrantedHealth(healthGranted);
 			
-			System.out.print("Health: " + creature.getHealth());
-			System.out.print("Constitution: " + healthGranted);
-			
 			creature.getClient().getSession().write((new ClientMfdStatusUpdateMessage((float) ((level >= 90) ? 90 : (level + 1)), "/GroundHUD.MFDStatus.vsp.role.targetLevel")).serialize());
 			creature.setLevel((short) level);
 			core.scriptService.callScript("scripts/collections/", "master_" + player.getProfession(), "addMasterBadge", core, creature);
@@ -776,7 +758,6 @@ public class PlayerService implements INetworkDispatch {
 			creature.showFlyText("cbt_spam", "skill_up", (float) 2.5, new RGB(154, 205, 50), 0);
 			creature.playEffectObject("clienteffect/skill_granted.cef", "");
 			creature.playMusic("sound/music_acq_bountyhunter.snd");
-			
 		} catch (InstantiationException | IllegalAccessException e) {
 			e.printStackTrace();
 		}
