@@ -530,6 +530,24 @@ public class PlayerService implements INetworkDispatch {
 		PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
 		
 		for (SWGObject equipment : creature.getEquipmentList()) {
+			if (equipment == null) {
+				continue;
+			}
+			
+			switch (equipment.getTemplate()) {
+				case "object/tangible/inventory/shared_character_inventory.iff":
+				case "object/tangible/inventory/shared_appearance_inventory.iff":
+				case "object/tangible/datapad/shared_character_datapad.iff":
+				case "object/tangible/bank/shared_character_bank.iff":
+				case "object/tangible/mission_bag/shared_mission_bag.iff":
+				case "object/weapon/creature/shared_creature_default_weapon.iff": {
+					continue;
+				}
+				default: {
+					//
+				}
+			}
+			
 			core.equipmentService.unequip(creature, equipment);
 		}
 		
