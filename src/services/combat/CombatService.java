@@ -566,7 +566,7 @@ public class CombatService implements INetworkDispatch {
 		
 		float rawDamage = command.getAddedDamage();
 		
-		if(command.getPercentFromWeapon() > 0 && weapon != attacker.getSlottedObject("default_weapon")) {
+		if(command.getPercentFromWeapon() > 0) {
 			
 			float weaponMinDmg = weapon.getMinDamage();
 			float weaponMaxDmg = weapon.getMaxDamage();
@@ -582,23 +582,6 @@ public class CombatService implements INetworkDispatch {
 					
 				}
 			}
-			
-			float weaponDmg = new Random().nextInt((int) (weaponMaxDmg - weaponMinDmg + 1)) + weaponMinDmg;
-			weaponDmg *= command.getPercentFromWeapon();
-			rawDamage += weaponDmg;
-			
-			if(weapon.isMelee()) {
-				
-				if(attacker.getStrength() > 0) {
-					rawDamage += ((attacker.getStrength() / 100) * 33);
-				}
-				
-			}
-			
-		} else if(command.getPercentFromWeapon() > 0) {
-			
-			float weaponMinDmg = 50;
-			float weaponMaxDmg = 100;
 			
 			float weaponDmg = new Random().nextInt((int) (weaponMaxDmg - weaponMinDmg + 1)) + weaponMinDmg;
 			weaponDmg *= command.getPercentFromWeapon();
@@ -649,23 +632,6 @@ public class CombatService implements INetworkDispatch {
 					
 				}
 			}
-			
-			float weaponDmg = new Random().nextInt((int) (weaponMaxDmg - weaponMinDmg + 1)) + weaponMinDmg;
-			weaponDmg *= command.getPercentFromWeapon();
-			rawDamage += weaponDmg;
-			
-			if(weapon.isMelee()) {
-				
-				if(attacker.getStrength() > 0) {
-					rawDamage += ((attacker.getStrength() / 100) * 33);
-				}
-				
-			}
-			
-		} else if(command.getPercentFromWeapon() > 0) {
-			
-			float weaponMinDmg = 50;
-			float weaponMaxDmg = 100;
 			
 			float weaponDmg = new Random().nextInt((int) (weaponMaxDmg - weaponMinDmg + 1)) + weaponMinDmg;
 			weaponDmg *= command.getPercentFromWeapon();

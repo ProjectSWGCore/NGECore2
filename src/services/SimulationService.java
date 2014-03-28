@@ -163,6 +163,7 @@ public class SimulationService implements INetworkDispatch {
 		core.commandService.registerCommand("setbiography");
 		core.commandService.registerCommand("requestbiography");
 		core.commandService.registerCommand("eject");
+		core.commandService.registerGmCommand("broadcast");
 
 	}
 	

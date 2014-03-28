@@ -35,8 +35,8 @@ public class MobileTemplate {
 	private short level;
 	private Vector<String> attacks;
 	private String defaultAttack;
-	private int minDamage;
-	private int maxDamage;
+	private int minDamage = 0;
+	private int maxDamage = 0;
 	private int difficulty = 0;
 	private int health, action;
 	private String creatureName;

@@ -93,6 +93,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer.putFloat(1);
 		buffer.put(getAsciiString(creature.getStfFilename()));
 		buffer.putInt(0);	
+		if(creature.getStfName() == null) creature.setStfName("");
 		buffer.put(getAsciiString(creature.getStfName()));
 		if (creature.getCustomName() == null) { creature.setCustomName(""); }//Not all CreatureObjects have CustomName (Shuttles)
 		buffer.put(getUnicodeString(creature.getCustomName()));

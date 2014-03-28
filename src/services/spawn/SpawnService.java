@@ -125,6 +125,7 @@ public class SpawnService {
 		}
 		creature.addObjectToEquipList(defaultWeapon);
 		creature.add(defaultWeapon);
+		creature.setWeaponId(defaultWeapon.getObjectID());
 		creature.addObjectToEquipList(inventory);
 		creature.add(inventory);
 
