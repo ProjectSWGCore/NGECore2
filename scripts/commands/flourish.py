@@ -4,9 +4,9 @@ def setup():
     return
 
 def run(core, actor, target, commandString):
-
-    if len(commandString) <= 0:
-      actor.sendSystemMessage('@performance:flourish_not_valid', 0)
+	
+    if len(commandString) == 0 or commandString == None or commandString == "":
+      actor.sendSystemMessage('@performance:flourish_format')
       return
 
     try:
@@ -22,11 +22,5 @@ def run(core, actor, target, commandString):
     if actor.getPerformanceId() <= 0:
       actor.sendSystemMessage('@performance:flourish_not_performing', 0)
       return
-    
-    actor.incFlourishCount()  
-    actor.sendSystemMessage('@performance:flourish_perform', 0)
-    animation = 'skill_action_' + str(flourish)
-    if flourish == 9:
-      animation = 'mistake'
 
-    actor.doSkillAnimation(animation)
+    core.entertainmentService.performFlourish(actor, flourish)

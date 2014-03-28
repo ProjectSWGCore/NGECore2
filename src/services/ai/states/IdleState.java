@@ -21,28 +21,30 @@
  ******************************************************************************/
 package services.ai.states;
 
+import services.ai.AIActor;
+
 public class IdleState extends AIState {
 
 	@Override
-	public byte onEnter() {
+	public byte onEnter(AIActor actor) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
-	public byte onExit() {
+	public byte onExit(AIActor actor) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
-	public byte move() {
+	public byte move(AIActor actor) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
-	public byte recover() {
+	public byte recover(AIActor actor) {
 		// TODO Auto-generated method stub
 		return 0;
 	}

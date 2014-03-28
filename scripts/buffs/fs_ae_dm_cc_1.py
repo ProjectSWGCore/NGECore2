@@ -1,10 +1,12 @@
 import sys
 
 def setup(core, actor, buff):
-	actor.setSpeedMultiplierBase(0.5)
+	return
+
+def add(core, actor, buff):
+	core.skillModService.deductSkillMod(actor, 'movement', 5)
 	return
 	
-def removeBuff(core, actor, buff):
-	actor.setSpeedMultiplierBase(1)
+def remove(core, actor, buff):
+	core.skillModService.addSkillMod(actor, 'movement', 5)
 	return
-	

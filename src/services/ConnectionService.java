@@ -25,6 +25,7 @@ import java.nio.ByteOrder;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -45,7 +46,6 @@ import protocol.swg.ConnectionServerLagResponse;
 import protocol.swg.GalaxyLoopTimesResponse;
 import protocol.swg.GameServerLagResponse;
 import protocol.swg.HeartBeatMessage;
-
 import engine.clients.Client;
 import engine.resources.database.DatabaseConnection;
 import engine.resources.scene.Point3D;
@@ -64,7 +64,7 @@ public class ConnectionService implements INetworkDispatch {
 	private NGECore core;
 	private DatabaseConnection databaseConnection;
 	private DatabaseConnection databaseConnection2;
-	
+	private int maxNumberOfCharacters;
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
 	public ConnectionService(final NGECore core) {
@@ -72,6 +72,7 @@ public class ConnectionService implements INetworkDispatch {
 		this.core = core;
 		this.databaseConnection = core.getDatabase1();
 		this.databaseConnection2 = core.getDatabase2();
+		this.maxNumberOfCharacters = core.getConfig().getInt("MAXNUMBEROFCHARACTERS");
 		
 		scheduler.scheduleAtFixedRate(new Runnable() {
 			
@@ -79,8 +80,8 @@ public class ConnectionService implements INetworkDispatch {
 				synchronized(core.getActiveConnectionsMap()) {
 					for(Client c : core.getActiveConnectionsMap().values()) {
 						if(c.getParent() != null) {
-							if ((System.currentTimeMillis() - c.getSession().getLastReadTime()) > 300000 && c.getSession().getAttribute("disconnectTask") == null) {
-								disconnect(c.getSession());
+							if ((System.currentTimeMillis() - c.getSession().getLastReadTime()) > 300000) {
+								disconnect(c);
 							}
 						}
 					}
@@ -125,7 +126,7 @@ public class ConnectionService implements INetworkDispatch {
 		            	client.setSessionKey(clientIdMsg.getSessionKey());
 		            	client.setGM(core.loginService.checkForGmPermission((int) resultSet.getLong("accountId")));
 		            	AccountFeatureBits accountFeatureBits = new AccountFeatureBits();
-		            	ClientPermissionsMessage clientPermissionsMessage = new ClientPermissionsMessage(2 - core.characterService.getNumberOfCharacters((int) resultSet.getLong("accountId")));
+		            	ClientPermissionsMessage clientPermissionsMessage = new ClientPermissionsMessage(maxNumberOfCharacters - core.characterService.getNumberOfCharacters((int) resultSet.getLong("accountId")));
 		            	session.write(new HeartBeatMessage().serialize());
 		            	session.write(accountFeatureBits.serialize());
 		            	session.write(clientPermissionsMessage.serialize());
@@ -172,41 +173,61 @@ public class ConnectionService implements INetworkDispatch {
 			}
 			
 		});
+		
+		swgOpcodes.put(Opcodes.ConnectPlayerMessage, new INetworkRemoteEvent() {
 
+			@Override
+			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
+				//ConnectPlayerResponseMessage
+			}
+			
+		});
 		
 	}
 	
-	public void disconnect(IoSession session) {
-		Client client = core.getClient(session);
-
-		if(client == null)
-			return;
-		
-		if(client.getParent() == null)
+	public void disconnect(Client client) {
+		//Client client = core.getClient(session);
+		IoSession session = client.getSession();
+		if(session == null || client.getParent() == null)
 			return;
 		
 		CreatureObject object = (CreatureObject) client.getParent();
+		
 		object.setInviteCounter(0);
 		object.setInviteSenderId(0);
 		object.setInviteSenderName("");
+		
+		if(object.getAttachment("inspireDuration") != null)
+			object.setAttachment("inspireDuration", null);
+		
+		if(object.getInspirationTick() != null) {
+			object.getInspirationTick().cancel(true);
+			object.setInspirationTick(null);
+		}
+		
+		if(object.getSpectatorTask() != null) {
+			object.getSpectatorTask().cancel(true);
+			object.setSpectatorTask(null);
+		}
+		
 		core.groupService.handleGroupDisband(object);
+		
+		if (core.instanceService.isInInstance(object)) {
+			core.instanceService.remove(core.instanceService.getActiveInstance(object), object);
+		}
+		
 		object.setClient(null);
+		
 		PlayerObject ghost = (PlayerObject) object.getSlottedObject("ghost");
 		
 		if(ghost == null)
 			return;
 		
-		if(object.getGroupId() != 0)
-			core.groupService.handleGroupDisband(object);
-		
 		Point3D objectPos = object.getWorldPosition();
 		
 		List<AbstractCollidable> collidables = core.simulationService.getCollidables(object.getPlanet(), objectPos.x, objectPos.z, 512);
 
-		for(AbstractCollidable collidable : collidables) {
-			collidables.remove(object);
-		}
-		
+		collidables.forEach(c -> c.removeCollidedObject(object));		
 		
 		if (ghost != null) {
 			String objectShortName = object.getCustomName();
@@ -221,23 +242,23 @@ public class ConnectionService implements INetworkDispatch {
 		
 		long parentId = object.getParentId();
 		
-		if(object.getContainer() == null) {
+		/*if(object.getContainer() == null) {
 			boolean remove = core.simulationService.remove(object, object.getPosition().x, object.getPosition().z);
 			if(remove)
 				System.out.println("Successful quadtree remove");
 		} else {
 			object.getContainer()._remove(object);
 			object.setParentId(parentId);
-		}
+		}*/
 
 		
-		HashSet<Client> oldObservers = new HashSet<Client>(object.getObservers());
+		/*HashSet<Client> oldObservers = new HashSet<Client>(object.getObservers());
 		for(Iterator<Client> it = oldObservers.iterator(); it.hasNext();) {
 			Client observerClient = it.next();
 			if(observerClient.getParent() != null && !(observerClient.getSession() == session)) {
 				observerClient.getParent().makeUnaware(object);
 			}
-		}
+		}*/
 		ghost.toggleFlag(PlayerFlags.LD);
 		
 		object.setAttachment("disconnectTask", null);

@@ -23,7 +23,6 @@ package resources.common;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import resources.z.exp.objects.Baseline;
 import resources.objects.Delta;
 
 import com.sleepycat.persist.model.Persistent;
@@ -81,11 +80,25 @@ public class Stf extends Delta {
 		}
 	}
 	
+	public String getString() {
+		synchronized(objectMutex) {
+			return ("@" + stfFilename + ":" + stfName);
+		}
+	}
+	
+	public void setString(String stf) {
+		synchronized(objectMutex) {
+			stf = stf.replace("@", "");
+			stfFilename.set(stf.split(":")[0]);
+			stfName.set(stf.split(":")[1]);
+		}
+	}
+	
 	public byte[] getBytes() {
 		synchronized(objectMutex) {
 			int size = stfFilename.getBytes().length + 4 + stfName.getBytes().length;
 			
-			IoBuffer buffer = Baseline.createBuffer(size);
+			IoBuffer buffer = createBuffer(size);
 			buffer.put(stfFilename.getBytes());
 			buffer.putInt(spacer);
 			buffer.put(stfName.getBytes());

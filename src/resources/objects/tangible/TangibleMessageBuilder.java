@@ -53,7 +53,7 @@ public class TangibleMessageBuilder extends ObjectMessageBuilder {
 		buffer.putInt(0);
 		buffer.putInt(0); // faction vars
 		
-		if(tangible.getCustomization() == null || tangible.getCustomization().length < 1)
+		if(tangible.getCustomization() == null || tangible.getCustomization().length <= 0)
 			buffer.putShort((short) 0);
 		else {
 			buffer.putShort((short) tangible.getCustomization().length);
@@ -64,6 +64,8 @@ public class TangibleMessageBuilder extends ObjectMessageBuilder {
 		buffer.putInt(0); 
 		
 		//buffer.putInt(0); 
+		if(tangible.getOptionsBitmask() == 0)
+			tangible.setOptionsBitmask(0x100);
 		buffer.putInt(tangible.getOptionsBitmask());
 		buffer.putInt(0); // number of item uses
 		buffer.putInt(tangible.getConditionDamage());
@@ -136,6 +138,27 @@ public class TangibleMessageBuilder extends ObjectMessageBuilder {
 		
 		return buffer;
 
+	}
+	
+	public IoBuffer buildCustomNameDelta(String customName) {
+		IoBuffer buffer = bufferPool.allocate(getUnicodeString(customName).length, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.put(getUnicodeString(customName));
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("TANO", (byte) 3, (short) 1, (short) 2, buffer, size + 4);
+		return buffer;
+		
+	}
+	
+	public IoBuffer buildCustomizationDelta(byte[] customization) {
+		IoBuffer buffer = bufferPool.allocate(customization.length, false).order(ByteOrder.LITTLE_ENDIAN);
+
+		buffer.put(customization);
+
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("TANO", (byte) 3, (short) 1, (short) 6, buffer, size + 4);
+		return buffer;
 	}
 	
 	@Override

@@ -1,4 +1,4 @@
-from resources.common import PlayerFlags
+from resources.datatables import PlayerFlags
 import sys
 
 def setup():

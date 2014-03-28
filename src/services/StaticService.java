@@ -56,6 +56,7 @@ public class StaticService implements INetworkDispatch {
 		spawnPlanetStaticObjs("naboo");
 		spawnPlanetStaticObjs("tatooine");
 		spawnPlanetStaticObjs("lok");
+		//spawnPlanetStaticObjs("kaas");    // Keep commented out unless you possess the latest build of Kaas!
 	}
 	
 	@Override
@@ -70,7 +71,7 @@ public class StaticService implements INetworkDispatch {
 	
 	public void spawnPlanetStaticObjs(String planet) {
 		Planet planetObj = (Planet) core.terrainService.getPlanetByName(planet);
-		core.scriptService.callScript("scripts/static_spawns/", "addPlanetSpawns", planetObj.getName(), core, planetObj);
+		core.scriptService.callScript("scripts/static_spawns/", planetObj.getName(), "addPlanetSpawns", core, planetObj);
 		System.out.println("Loaded static objs for " + planetObj.getName());
 	}
 	

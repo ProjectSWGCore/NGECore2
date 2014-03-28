@@ -4,6 +4,7 @@ from services.sui.SUIWindow import Trigger
 from services.sui.SUIService import ListBoxType
 from java.util import Vector
 from java.util import HashMap
+from resources.datatables import Posture
 import sys
 
 def setup():
@@ -26,7 +27,6 @@ def run(core, actor, target, commandString):
     else:
 
         availableDances = entSvc.getAvailableDances(actor)
-        print availableDances
 
         suiSvc = core.suiService
         suiWindow = suiSvc.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "@performance:select_dance", "@performance:available_dances", availableDances, actor, None, 10)
@@ -74,8 +74,12 @@ def startDance(core, actor, danceName, visual):
       actor.sendSystemMessage('@performance:already_performing_self',0)
       return
 
-    #TODO: check costume, posture, etc?
-
+    #TODO: check costume
+    
+    if actor.getPosture() != Posture.Upright:
+    	actor.sendSystemMessage('@performance:dance_fail', 0)
+    	return
+    
     actor.sendSystemMessage('@performance:dance_start_self',0);
     # i'm not sure about this. i think stopping just stopped any watchers anyways
     # method doesn't exist now.
@@ -92,7 +96,7 @@ def startDance(core, actor, danceName, visual):
     actor.setPosture(0x09);
 
     playerObject = actor.getSlottedObject('ghost')
-    if playerObject and playerObject.getProfession() == "entertainer_1a":
+    if playerObject and playerObject.getProfession() == "entertainer_1a" and actor.getLevel() != 90:
       entSvc.startPerformanceExperience(actor)
 
     dance = entSvc.getDance(visual)

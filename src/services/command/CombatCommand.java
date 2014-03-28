@@ -79,6 +79,7 @@ public class CombatCommand extends BaseSWGCommand {
 	private float warmupTime;
 	private float vigorCost; // for commando kill meter and bm specials
 	private float criticalChance;
+	private int attack_rolls;
 	
 	public CombatCommand(String commandName) {
 		super(commandName);
@@ -151,12 +152,13 @@ public class CombatCommand extends BaseSWGCommand {
 						minDamage = (Integer) visitor.getObject(i, 77);
 						maxDamage = (Integer) visitor.getObject(i, 78);
 						maxRangeOverload = (Float) visitor.getObject(i, 79);
-						weaponCategory = ((Integer) visitor.getObject(i, 80)).byteValue();
-						damageType = ((Integer) visitor.getObject(i, 81)).byteValue();
-						elementalType = ((Integer) visitor.getObject(i, 82)).byteValue();
-						elementalValue = (Integer) visitor.getObject(i, 83);
+						weaponCategory = ((Integer) visitor.getObject(i, 81)).byteValue();
+						damageType = ((Integer) visitor.getObject(i, 82)).byteValue();
+						elementalType = ((Integer) visitor.getObject(i, 83));
+						elementalValue = (Integer) visitor.getObject(i, 84);
 						performanceSpam = (String) visitor.getObject(i, 89);
 						hitSpam = ((Integer) visitor.getObject(i, 90)).byteValue();
+						attack_rolls = (Integer) visitor.getObject(i, 93);
 						
 					}
 			}
@@ -381,7 +383,7 @@ public class CombatCommand extends BaseSWGCommand {
 		this.percentFromWeapon = percentFromWeapon;
 	}
 
-	public float isBypassArmor() {
+	public float getBypassArmor() {
 		return bypassArmor;
 	}
 
@@ -484,7 +486,7 @@ public class CombatCommand extends BaseSWGCommand {
 	public void setCanBePunishing(boolean canBePunishing) {
 		this.canBePunishing = canBePunishing;
 	}
-
+	
 	public int getMinDamage() {
 		return minDamage;
 	}
@@ -591,7 +593,7 @@ public class CombatCommand extends BaseSWGCommand {
 				animations = twoHandedAnimations;
 				break;
 			case 6:
-				animations = unarmedAnimations;
+				animations = defaultAnimations;
 				break;
 			case 7:
 				animations = polearmAnimations;
@@ -610,10 +612,13 @@ public class CombatCommand extends BaseSWGCommand {
 				break;
 
 			default:
-				animations = unarmedAnimations;
+				animations = defaultAnimations;
 				break;
 
 		}
+		
+		if(animations.length == 0)
+			animations = defaultAnimations;
 		
 		return animations[new Random().nextInt(animations.length)];
 		
@@ -713,6 +718,14 @@ public class CombatCommand extends BaseSWGCommand {
 
 	public void setCriticalChance(float criticalChance) {
 		this.criticalChance = criticalChance;
+	}
+
+	public int getAttack_rolls() {
+		return attack_rolls;
+	}
+
+	public void setAttack_rolls(int attack_rolls) {
+		this.attack_rolls = attack_rolls;
 	}
 	
 	

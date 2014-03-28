@@ -22,7 +22,6 @@
 package services.command;
 
 import java.nio.ByteOrder;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
@@ -39,13 +38,11 @@ import engine.resources.scene.Point3D;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import resources.common.*;
-
 import protocol.swg.ObjControllerMessage;
 import protocol.swg.objectControllerObjects.CommandEnqueue;
 import protocol.swg.objectControllerObjects.CommandEnqueueRemove;
 import protocol.swg.objectControllerObjects.ShowFlyText;
 import protocol.swg.objectControllerObjects.StartTask;
-
 import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
@@ -113,6 +110,15 @@ public class CommandService implements INetworkDispatch  {
 				
 			}
 
+		});
+		
+		objControllerOpcodes.put(ObjControllerOpcodes.COMMAND_QUEUE_REMOVE, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
+				
+			}
+			
 		});
 			
 		
@@ -268,7 +274,7 @@ public class CommandService implements INetworkDispatch  {
 			
 		}
 		
-		if(!success) {
+		if(!success && attacker.getClient() != null) {
 			IoSession session = attacker.getClient().getSession();
 			CommandEnqueueRemove commandRemove = new CommandEnqueueRemove(attacker.getObjectId(), actionCounter);
 			session.write(new ObjControllerMessage(0x0B, commandRemove).serialize());
@@ -290,8 +296,10 @@ public class CommandService implements INetworkDispatch  {
 				core.combatService.doSelfBuff(attacker, weapon, command, actionCounter);
 				return;
 			}
-				
-			core.combatService.doCombat(attacker, (TangibleObject) target, weapon, command, actionCounter);
+			for(int i = 0 ; i < command.getAttack_rolls(); i++) {
+				core.combatService.doCombat(attacker, (TangibleObject) target, weapon, command, actionCounter);
+			}
+			
 		}
 		
 	}
@@ -304,6 +312,17 @@ public class CommandService implements INetworkDispatch  {
 		
 		if (command == null)
 			return;
+		
+		if(command instanceof CombatCommand) {
+			CombatCommand command2;
+			try {
+				command2 = (CombatCommand) command.clone();
+				processCombatCommand((CreatureObject) actor, target, command2, 0, "");
+			} catch (CloneNotSupportedException e) {
+				e.printStackTrace();
+			}
+			return;
+		}
 		
 		core.scriptService.callScript("scripts/commands/", command.getCommandName(), "run", core, actor, target, commandArgs);
 	}

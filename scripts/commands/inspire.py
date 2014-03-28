@@ -7,12 +7,22 @@ def setup():
 
 def run(core, actor, target, commandString):
     playerObject = actor.getSlottedObject('ghost')
-    print playerObject.getProfession()
+
     if not playerObject or playerObject.getProfession() != "entertainer_1a":
       return
-
-    print 'x'
-    if actor.getPosture() != 0x09:
+    
+    if target is None or actor.getObjectId() == target.getObjectId():
+    	openBuffWindow = BuffBuilderStartMessage(actor.getObjectId(), actor.getObjectId(), actor.getObjectId())
+    	objController = ObjControllerMessage(11, openBuffWindow)
+    	actor.getClient().getSession().write(objController.serialize())
+    	return
+    
+    if target is None and commandString is not None:
+    	target = core.chatService.getObjectByFirstName(commandString)
+    	if target is None:
+    		return
+    
+    if actor.getPosture() != 0x09 and target.getObjectId() != actor.getObjectId():
       actor.sendSystemMessage('@performance:insp_buff_must_perform', 2)
       return
 
@@ -23,13 +33,16 @@ def run(core, actor, target, commandString):
       else:
         actor.sendSystemMessage('@performance:insp_buff_must_listen', 2)
         return
-
-    print ('Buffing Player: ' + str(target.getObjectId()) + ' or: ' + target.getCustomName())
-    openBuffWindow = BuffBuilderStartMessage(actor.getObjectId(), actor.getObjectId(), target.getObjectId())
-    objController = ObjControllerMessage(11, openBuffWindow)
+    
+    if target.getPosition().getDistance2D(actor.getWorldPosition()) > float(20):
+        actor.sendSystemMessage(target.getCustomName() + ' is too far away to inspire.', 0)
+        return
+    
+    builderWindow = BuffBuilderStartMessage(actor.getObjectId(), actor.getObjectId(), target.getObjectId())
+    objController = ObjControllerMessage(11, builderWindow)
     actor.getClient().getSession().write(objController.serialize())
     
-    openBuffWindow = BuffBuilderStartMessage(target.getObjectId(), actor.getObjectId(), target.getObjectId())
-    objController2 = ObjControllerMessage(11, openBuffWindow)
+    recipientWindow = BuffBuilderStartMessage(target.getObjectId(), actor.getObjectId(), target.getObjectId())
+    objController2 = ObjControllerMessage(11, recipientWindow)
     target.getClient().getSession().write(objController2.serialize())
     return

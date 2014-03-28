@@ -16,47 +16,56 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * 
- * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
+ * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine.
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
 package resources.objects;
 
 public class BuffItem {
-	private String skillName;
+	private int affectAmount;
+	private int entertainerBonus;
 	private int invested;
-	private int bonusAmount; // expertise bonus (50%*4 = 200) which would then result in bonusAmount + (maxTimesApplied * affectAmount) = result
-	
+	private String skillName;
+
 	public BuffItem() {
-		
+
 	}
-	
-	public BuffItem(String skillName, int invested, int amount) {
+
+	public BuffItem(String skillName, int invested, int entBonus) {
 		this.skillName = skillName;
 		this.invested = invested;
-		this.bonusAmount = amount;
+		this.entertainerBonus = entBonus;
 	}
 
-	public String getSkillName() {
-		return skillName;
+	public int getAffectAmount() {
+		return affectAmount;
 	}
 
-	public void setSkillName(String skillName) {
-		this.skillName = skillName;
+	public int getEntertainerBonus() {
+		return entertainerBonus;
 	}
 
 	public int getInvested() {
 		return invested;
 	}
 
+	public String getSkillName() {
+		return skillName;
+	}
+
+	public void setAffectAmount(int amount) {
+		this.affectAmount = amount;
+	}
+
+	public void setEntertainerBonus(int entertainerBonus) {
+		this.entertainerBonus = entertainerBonus;
+	}
+
 	public void setInvested(int invested) {
 		this.invested = invested;
 	}
 
-	public int getBonusAmount() {
-		return bonusAmount;
-	}
-
-	public void setBonusAmount(int amount) {
-		this.bonusAmount = amount;
+	public void setSkillName(String skillName) {
+		this.skillName = skillName;
 	}
 }

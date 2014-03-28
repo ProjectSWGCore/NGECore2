@@ -30,10 +30,10 @@ import main.NGECore;
 @SuppressWarnings("unused")
 
 public class ScriptService {
-
+	
 	private NGECore core;
 	private PythonInterpreter interpreter;
-
+	
 	public ScriptService(NGECore core) {
 		this.core = core;
 	}
@@ -62,7 +62,7 @@ public class ScriptService {
 		return python.get(method).__call__(Py.java2py(arg1));
 	}
 	
-	public PyObject callScript(String path, String method, String module, Object arg1, Object arg2) {
+	public PyObject callScript(String path, String module, String method, Object arg1, Object arg2) {
 		/*PythonInterpreter interpreter = new PythonInterpreter();
 		interpreter.cleanup();
 		interpreter.exec("import sys\nsys.path.append('" + path + "')\nfrom " + module + " import " + method);	
@@ -74,7 +74,7 @@ public class ScriptService {
 		return python.get(method).__call__(Py.java2py(arg1), Py.java2py(arg2));
 	}
 	
-	public PyObject callScript(String path, String method, String module, Object arg1, Object arg2, Object arg3) {
+	public PyObject callScript(String path, String module, String method, Object arg1, Object arg2, Object arg3) {
 		/*PythonInterpreter interpreter = new PythonInterpreter();
 		interpreter.cleanup();
 		interpreter.exec("import sys\nsys.path.append('" + path + "')\nfrom " + module + " import " + method);	
@@ -86,7 +86,7 @@ public class ScriptService {
 		return python.get(method).__call__(Py.java2py(arg1), Py.java2py(arg2), Py.java2py(arg3));
 
 	}
-
+	
 	public PyObject callScript(String path, String module, String method, Object arg1, Object arg2, Object arg3, Object arg4) {
 		/*PythonInterpreter interpreter = new PythonInterpreter();
 		interpreter.cleanup();
@@ -106,5 +106,5 @@ public class ScriptService {
 		PyObject func = python.get(method);
 		return func;
 	}
-
+	
 }

@@ -34,6 +34,7 @@ import protocol.swg.objectControllerObjects.ShowFlyText;
 
 import resources.common.RGB;
 import resources.objects.creature.CreatureObject;
+import services.ai.AIActor;
 
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
@@ -86,6 +87,12 @@ public class TangibleObject extends SWGObject {
 		super();
 		messageBuilder = new TangibleMessageBuilder(this);
 	}
+	
+	public void setCustomName2(String customName) {
+		setCustomName(customName);
+		
+		notifyObservers(messageBuilder.buildCustomNameDelta(customName), true);
+	}
 
 	public int getIncapTimer() {
 		return incapTimer;
@@ -116,7 +123,11 @@ public class TangibleObject extends SWGObject {
 	}
 
 	public void setCustomization(byte[] customization) {
-		this.customization = customization;
+		synchronized(objectMutex) {
+			this.customization = customization;
+		}
+		
+		notifyObservers(messageBuilder.buildCustomizationDelta(customization), false);
 	}
 
 	public List<Integer> getComponentCustomizations() {
@@ -222,11 +233,13 @@ public class TangibleObject extends SWGObject {
 	}
 
 	public Vector<TangibleObject> getDefendersList() {
-		return defendersList;
+	    synchronized(objectMutex) {
+    			return defendersList;
+    	    }	
 	}
 	
 	public void addDefender(TangibleObject defender) {
-		
+				
 		defendersList.add(defender);
 		
 		if(this instanceof CreatureObject) {
@@ -314,6 +327,18 @@ public class TangibleObject extends SWGObject {
 		}
 	}
 	
+	public void showFlyText(String stfFile, String stfString, String customText, int xp, float scale, RGB color, int displayType, int unkInt) {
+		//Set<Client> observers = getObservers();
+		
+		if (getClient() != null) {
+			getClient().getSession().write((new ObjControllerMessage(0x0000000B, new ShowFlyText(getObjectID(), getObjectID(), unkInt, 1, 1, -1, stfFile, stfString, customText, xp, scale, color, displayType))).serialize());
+		}
+		
+		/*for (Client client : observers) {
+			client.getSession().write((new ObjControllerMessage(0x0000000B, new ShowFlyText(client.getParent().getObjectID(), getObjectID(), unkInt, 1, 1, -1, stfFile, stfString, customText, xp, scale, color, displayType))).serialize());
+		}*/
+	}
+	
 	public void playEffectObject(String effectFile, String commandString) {
 		notifyObservers(new PlayClientEffectObjectMessage(effectFile, getObjectID(), commandString), true);
 	}
@@ -357,8 +382,8 @@ public class TangibleObject extends SWGObject {
 		
 		destination.getSession().write(messageBuilder.buildBaseline3());
 		destination.getSession().write(messageBuilder.buildBaseline6());
-		//destination.getSession().write(messageBuilder.buildBaseline8());
-		//destination.getSession().write(messageBuilder.buildBaseline9());
+		destination.getSession().write(messageBuilder.buildBaseline8());
+		destination.getSession().write(messageBuilder.buildBaseline9());
 		
 		if(getPvPBitmask() != 0) {
 			UpdatePVPStatusMessage upvpm = new UpdatePVPStatusMessage(getObjectID());

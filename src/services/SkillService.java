@@ -92,7 +92,6 @@ public class SkillService implements INetworkDispatch {
 						
 						if (isTitle == true) {
 							core.playerService.addPlayerTitle(player, skill);
-							Console.println("Gave skill title: " + skill);
 						}
 						
 						if (isProfession) {
@@ -118,7 +117,6 @@ public class SkillService implements INetworkDispatch {
 						
 						for (String skillName : skillsRequired) {
 							if (skillName != "" && !creature.hasSkill(skillName)) {
-								System.out.println("Skill Name: " + skillName);
 								return;
 							}
 						}
@@ -181,7 +179,7 @@ public class SkillService implements INetworkDispatch {
 	public void removeSkill(CreatureObject creature, String skill) {
 		PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
 		DatatableVisitor skillTable;
-		
+
 		if (player == null) {
 			return;
 		}
@@ -191,7 +189,7 @@ public class SkillService implements INetworkDispatch {
 		}
 		
 		try {
-			skillTable = ClientFileManager.loadFile("datatables/skills/skills.iff", DatatableVisitor.class);
+			skillTable = ClientFileManager.loadFile("datatables/skill/skills.iff", DatatableVisitor.class);
 			
 			for (int s = 0; s < skillTable.getRowCount(); s++) {
 				if (skillTable.getObject(s, 0) != null) {
@@ -220,10 +218,10 @@ public class SkillService implements INetworkDispatch {
 							for (String ability : abilities) {
 								creature.removeAbility(ability);
 							}
-						}
+						}									
 						
 						for (String skillMod : skillMods) {
-							core.skillModService.deductSkillMod(creature, skillMod.split("=")[0], new Integer(skillMod.split("=")[1]));
+							if(skillMod.split("=").length == 2) core.skillModService.deductSkillMod(creature, skillMod.split("=")[0], new Integer(skillMod.split("=")[1]));
 						}
 						
 						for (String schematic : schematicsGranted) {
@@ -233,6 +231,8 @@ public class SkillService implements INetworkDispatch {
 						for (String schematic : schematicsRevoked) {
 							//player.getDraftSchematicList().add(new DraftSchematic());
 						}
+						
+						creature.removeSkill(skill);
 					}
 				}
 			}
@@ -271,15 +271,30 @@ public class SkillService implements INetworkDispatch {
 					return;
 				
 				for(String expertiseName : expertise.getExpertiseSkills()) {
-					addSkill(creature, expertiseName);
-					if(!FileUtilities.doesFileExist("scripts/expertise/" + expertiseName + ".py"))
-						continue;
-					core.scriptService.callScript("scripts/expertise/", "addAbilities", expertiseName, core, creature, player);
-				}
-				
+					if(expertiseName.startsWith("expertise_") && ((caluclateExpertisePoints(creature) - 1) >= 0)) // Prevent possible glitches/exploits
+					{
+						addSkill(creature, expertiseName);
+						if(!FileUtilities.doesFileExist("scripts/expertise/" + expertiseName + ".py"))
+							continue;
+						core.scriptService.callScript("scripts/expertise/", expertiseName, "addAbilities", core, creature, player);
+					}
+				}			
 			}
 		});
 		
+	}
+
+	public int caluclateExpertisePoints(CreatureObject creature)
+	{
+		int expertisePoints = 0;
+		try 
+		{
+			DatatableVisitor table = ClientFileManager.loadFile("datatables/player/player_level.iff", DatatableVisitor.class);		
+			for (int i = 0; i < creature.getLevel(); ++i) expertisePoints += (int) table.getObject(i, 5);
+			for (String skill : creature.getSkills()) if(skill.startsWith("expertise_")) expertisePoints--;
+		}
+		catch (Exception e) { e.printStackTrace(); }	
+		return expertisePoints;
 	}
 	
 	@Override

@@ -30,6 +30,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +45,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import resources.common.*;
+import resources.datatables.Options;
 import resources.datatables.PlayerFlags;
 
 import org.apache.mina.core.buffer.IoBuffer;
@@ -51,7 +53,10 @@ import org.apache.mina.core.session.IoSession;
 import org.python.core.Py;
 import org.python.core.PyObject;
 
+import com.sleepycat.je.Transaction;
 import com.sleepycat.persist.EntityCursor;
+import com.sleepycat.persist.model.Entity;
+import com.sleepycat.persist.model.PrimaryKey;
 
 import protocol.swg.ChatFriendsListUpdate;
 import protocol.swg.ChatOnChangeFriendStatus;
@@ -59,10 +64,12 @@ import protocol.swg.ChatOnGetFriendsList;
 import protocol.swg.CmdSceneReady;
 import protocol.swg.CmdStartScene;
 import protocol.swg.HeartBeatMessage;
+import protocol.swg.ObjControllerMessage;
 import protocol.swg.ParametersMessage;
 import protocol.swg.SelectCharacter;
 import protocol.swg.ServerTimeMessage;
 import protocol.swg.UnkByteFlag;
+import protocol.swg.objectControllerObjects.UiPlayEffect;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.CrcStringTableVisitor;
 import engine.clientdata.visitors.DatatableVisitor;
@@ -71,6 +78,8 @@ import engine.clientdata.visitors.WorldSnapshotVisitor.SnapshotChunk;
 import engine.clients.Client;
 import engine.resources.common.CRC;
 import engine.resources.container.Traverser;
+import engine.resources.container.WorldCellPermissions;
+import engine.resources.container.WorldPermissions;
 import engine.resources.database.DatabaseConnection;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
@@ -79,6 +88,7 @@ import engine.resources.scene.Quaternion;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import main.NGECore;
+import resources.objects.Delta;
 import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
@@ -96,20 +106,14 @@ import resources.objects.weapon.WeaponObject;
 public class ObjectService implements INetworkDispatch {
 
 	private Map<Long, SWGObject> objectList = new ConcurrentHashMap<Long, SWGObject>();
-	
 	private NGECore core;
-	
 	private DatabaseConnection databaseConnection;
-
 	private AtomicLong highestId = new AtomicLong();
-	
 	private Random random = new Random();
-	
 	private Map<String, PyObject> serverTemplates = new ConcurrentHashMap<String, PyObject>();
-	
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-	
 	protected final Object objectMutex = new Object();
+	private List<Runnable> loadServerTemplateTasks = Collections.synchronizedList(new ArrayList<Runnable>());
 	
 	public ObjectService(final NGECore core) {
 		this.core = core;
@@ -117,11 +121,12 @@ public class ObjectService implements INetworkDispatch {
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
 		    public void run() {
+		    	core.getObjectIdODB().getEnvironment().flushLog(true);
 		    	synchronized(objectList) {
 		    		for(SWGObject obj : objectList.values()) {
 		    			
 		    			if(obj.getClient() != null && obj.getClient().getSession() != null) {
-		    				core.connectionService.disconnect(obj.getClient().getSession());
+		    				core.connectionService.disconnect(obj.getClient());
 		    			}
 		    			
 		    		}
@@ -164,16 +169,24 @@ public class ObjectService implements INetworkDispatch {
 				}
 				
 			});	
-			core.simulationService.add(building, building.getPosition().x, building.getPosition().z);
 		}
 
 	}
-
-	public SWGObject createObject(String Template, long objectID, Planet planet, Point3D position, Quaternion orientation, String customServerTemplate) {
-		return createObject(Template, objectID, planet, position, orientation, customServerTemplate, false);
+	
+	public void loadServerTemplates() {
+		System.out.println("Loading server templates...");
+		for(Runnable r : loadServerTemplateTasks) {
+			r.run();
+		}
+		loadServerTemplateTasks.clear();
+		System.out.println("Finished loading server templates...");
 	}
 	
-	public SWGObject createObject(String Template, long objectID, Planet planet, Point3D position, Quaternion orientation, String customServerTemplate, boolean overrideSnapshot) {
+	public SWGObject createObject(String Template, long objectID, Planet planet, Point3D position, Quaternion orientation, String customServerTemplate) {
+		return createObject(Template, objectID, planet, position, orientation, customServerTemplate, false, true);
+	}
+	
+	public SWGObject createObject(String Template, long objectID, Planet planet, Point3D position, Quaternion orientation, String customServerTemplate, boolean overrideSnapshot, boolean loadServerTemplate) {
 		SWGObject object = null;
 		CrcStringTableVisitor crcTable;
 		try {
@@ -258,40 +271,51 @@ public class ObjectService implements INetworkDispatch {
 		object.setAttachment("customServerTemplate", customServerTemplate);
 		
 		object.setisInSnapshot(isSnapshot);
-		loadServerTemplate(object);		
+		if(!core.getObjectIdODB().contains(objectID, Long.class, ObjectId.class)) {
+			core.getObjectIdODB().put(new ObjectId(objectID), Long.class, ObjectId.class);
+		}
+		if(loadServerTemplate)
+			loadServerTemplate(object);		
+		else {
+			final SWGObject pointer = object;
+			loadServerTemplateTasks.add(() -> loadServerTemplate(pointer));
+		}
 		
 		objectList.put(objectID, object);
 		
-		// Set Default Tangible Options
-		/*
+		// Set Options - easier to set them across the board here
+		// because we'll be spawning them despite most of them being unscripted.
+		// Any such settings can be completely reset with setOptionsBitmask
+		// in scripts and modified with setOptions(Options.X, true/false)
 		if (Template.startsWith("object/creature/") || Template.startsWith("object/mobile/")) {
-			((CreatureObject) object).setOptionsBitmask(Options.MOBILE);
-			
-			if (Template.startsWith("object/mobile/beast_master/")) {
+			if (Template.startsWith("object/mobile/")) {
+				((CreatureObject) object).setOptionsBitmask(Options.ATTACKABLE);
+			} else if (Template.startsWith("object/mobile/beast_master/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.NONE);
 			} else if (Template.startsWith("object/mobile/vendor/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.INVULNERABLE | Options.USABLE);
 			} else if (Template.startsWith("object/mobile/vehicle/")) {
-				((CreatureObject) object).addOption(Options.INVULNERABLE | Options.MOUNT);
+				((CreatureObject) object).setOptionsBitmask(Options.ATTACKABLE | Options.MOUNT);
 			} else if (Template.startsWith("object/mobile/hologram/")) {
-				((CreatureObject) object).addOption(Options.INVULNERABLE);
+				((CreatureObject) object).setOptionsBitmask(Options.INVULNERABLE);
 			} else if (Template.startsWith("object/creature/npc/theme_park/")) {
-				((CreatureObject) object).addOption(Options.INVULNERABLE);
-			} else if (Template.startsWith("object/creature/general/")) {
+				((CreatureObject) object).setOptionsBitmask(Options.INVULNERABLE);
+			} else if (Template.startsWith("object/creature/npc/general/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.INVULNERABLE | Options.CONVERSABLE);
+			}  else if (Template.startsWith("object/creature/droid/crafted/")) {
+				((CreatureObject) object).setOptionsBitmask(Options.NONE);
 			} else if (Template.startsWith("object/creature/droid/")) {
-				((CreatureObject) object).addOption(Options.INVULNERABLE);
+				((CreatureObject) object).setOptionsBitmask(Options.ATTACKABLE | Options.INVULNERABLE);
+			} else if (Template.startsWith("object/creature/player/")) {
+				((CreatureObject) object).setOptionsBitmask(Options.ATTACKABLE);
 			}
 		} else if (object instanceof TangibleObject) {
 			((TangibleObject) object).setOptionsBitmask(Options.INVULNERABLE);
 			
 			if (Template.startsWith("object/tangible/vendor/")) {
-				((CreatureObject) object).addOption(Options.USABLE);
-			} else if (Template.startsWith("object/creature/droid/")) {
-				((CreatureObject) object).addOption(Options.INVULNERABLE);
+				((TangibleObject) object).setOptionsBitmask(Options.INVULNERABLE | Options.USABLE);
 			}
 		}
-		*/
 		
 		return object;
 	}
@@ -320,6 +344,7 @@ public class ObjectService implements INetworkDispatch {
 		} catch (IOException e) {
 			System.out.println("!IO error " + template.toString());
 		}
+		object.setAttachment("hasLoadedServerTemplate", new Boolean(true));
 	}
 	
 	public SWGObject createObject(String Template, Planet planet) {
@@ -406,7 +431,19 @@ public class ObjectService implements INetworkDispatch {
 			}
 		});
 		objectList.remove(object.getObjectID());
-		//core.simulationService.remove(object, object.getPosition().x, object.getPosition().y);
+		SWGObject parent = object.getContainer();
+
+		if(parent != null) {
+			if(parent instanceof CreatureObject) {
+				((CreatureObject) parent).removeObjectFromEquipList(object);
+				((CreatureObject) parent).removeObjectFromAppearanceEquipList(object);
+			}
+			long parentId = object.getParentId();
+			parent.remove(object);
+			object.setParentId(parentId);
+		} else {
+			core.simulationService.remove(object, object.getWorldPosition().x, object.getWorldPosition().z, true);
+		}
 		
 	}
 	
@@ -462,26 +499,30 @@ public class ObjectService implements INetworkDispatch {
 
 		return objectID;*/
 		
-		long newId;
-		
-		synchronized(objectMutex) {
-			newId = highestId.incrementAndGet();
+		long newId = 0;
+		boolean found = false;
+		// stack overflow when using recursion
+		while(!found) {
+			synchronized(objectMutex) {
+				newId = highestId.incrementAndGet();
+			}
+			
+			PreparedStatement ps2;
+	
+			try {
+				ps2 = databaseConnection.preparedStatement("UPDATE highestid SET id=" + newId + " WHERE id=" + (newId-1));
+				ps2.executeUpdate();
+				ps2.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+			if(getObject(newId) != null || core.getObjectIdODB().contains(newId, Long.class, ObjectId.class))
+				found = false;
+			else
+				found = true;		
 		}
 		
-		PreparedStatement ps2;
-
-		try {
-			ps2 = databaseConnection.preparedStatement("UPDATE highestid SET id=" + newId + " WHERE id=" + (newId-1));
-			ps2.executeUpdate();
-			ps2.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		if(getObject(newId) == null && getCreatureFromDB(newId) == null)
-			return newId;
-		else
-			return generateObjectID();
-		
+		return newId;		
 
 	}
 	
@@ -540,14 +581,23 @@ public class ObjectService implements INetworkDispatch {
 				} else {
 					
 					creature = (CreatureObject) getObject(objectId);
-					
+					if(creature.getAttachment("disconnectTask") != null && creature.getClient() != null && !creature.getClient().getSession().isClosing())
+						return;
+
 				}
 				
+				PlayerObject ghost = (PlayerObject) creature.getSlottedObject("ghost");
+
+				if(ghost == null)
+					return;
+				
+				ghost.clearFlagBitmask(PlayerFlags.LD);
+				
 				if(creature.getAttachment("disconnectTask") != null) {
-					creature.getAwareObjects().removeAll(creature.getAwareObjects());
 					((ScheduledFuture<?>) creature.getAttachment("disconnectTask")).cancel(true);
-					creature.setAttachment("disconnectTask", null);
-				}
+				}					
+				creature.getAwareObjects().removeAll(creature.getAwareObjects());
+				creature.setAttachment("disconnectTask", null);
 
 				creature.setClient(client);
 				Planet planet = core.terrainService.getPlanetByID(creature.getPlanetId());
@@ -586,6 +636,11 @@ public class ObjectService implements INetworkDispatch {
 
 				Point3D position = creature.getPosition();
 				
+				if(Float.isNaN(position.x) || Float.isNaN(position.y) || Float.isNaN(position.z)) {
+					creature.setPosition(new Point3D(0, 0, 0));
+					position = creature.getPosition();
+				}
+				
 				HeartBeatMessage heartBeat = new HeartBeatMessage();
 				session.write(heartBeat.serialize());
 		
@@ -605,15 +660,12 @@ public class ObjectService implements INetworkDispatch {
 				
 				core.simulationService.handleZoneIn(client);
 				creature.makeAware(creature);
-
-				
-				PlayerObject ghost = (PlayerObject) creature.getSlottedObject("ghost");
 				
 				//ChatOnGetFriendsList friendsListMessage = new ChatOnGetFriendsList(ghost);
 				//client.getSession().write(friendsListMessage.serialize());
 				
 				if (ghost != null) {
-					ghost.clearFlagBitmask(PlayerFlags.LD);
+					//ghost.clearFlagBitmask(PlayerFlags.LD);
 					String objectShortName = creature.getCustomName().toLowerCase();
 					
 					if (creature.getCustomName().contains(" ")) {
@@ -641,8 +693,10 @@ public class ObjectService implements INetworkDispatch {
 					}
 				}
 				
+				if(!core.getConfig().getString("MOTD").equals(""))
+					creature.sendSystemMessage(core.getConfig().getString("MOTD"), (byte) 2);
+				
 				core.playerService.postZoneIn(creature);
-
 			}
 			
 		});
@@ -660,12 +714,19 @@ public class ObjectService implements INetworkDispatch {
 		int counter = 0;
 		for(SnapshotChunk chunk : visitor.getChunks()) {
 			++counter;
-			SWGObject obj = createObject(visitor.getName(chunk.nameId), chunk.id, planet, new Point3D(chunk.xPosition, chunk.yPosition, chunk.zPosition), new Quaternion(chunk.orientationW, chunk.orientationX, chunk.orientationY, chunk.orientationZ));
+			// Since the ids are just ints, they append 0xFFFF86F9 to them
+			// This is demonstated in the packet sent to the server when you /target client-spawned buildouts
+			// This is done for buildouts; uncertain about snapshot objects so it's commented for now
+			//long objectId = Delta.createBuffer(8).putInt(chunk.id).putInt(0xF986FFFF).flip().getLong(); // Not sure what extension they add to 4-byte-only snapshot objectIds.  With buildouts they add 0xFFFF86F9.  This is demonstated in the packet sent to the server when you /target client-spawned objects
+			int objectId = chunk.id;
+			SWGObject obj = createObject(visitor.getName(chunk.nameId), objectId, planet, new Point3D(chunk.xPosition, chunk.yPosition, chunk.zPosition), new Quaternion(chunk.orientationW, chunk.orientationX, chunk.orientationY, chunk.orientationZ), null, false, false);
 			if(obj != null) {
+				obj.setContainerPermissions(WorldPermissions.WORLD_PERMISSIONS);
 				obj.setisInSnapshot(true);
 				obj.setParentId(chunk.parentId);
 				if(obj instanceof CellObject) {
 					((CellObject) obj).setCellNumber(chunk.cellNumber);
+					obj.setContainerPermissions(WorldCellPermissions.WORLD_CELL_PERMISSIONS);
 				}
 			}
 			//System.out.print("\rLoading Object [" + counter + "/" +  visitor.getChunks().size() + "] : " + visitor.getName(chunk.nameId));
@@ -710,7 +771,7 @@ public class ObjectService implements INetworkDispatch {
 		}
 		
 		SWGObject child = createObject(template, 0, parent.getPlanet(), position, orientation);
-		
+		child.setContainerPermissions(WorldPermissions.WORLD_PERMISSIONS);
 		if(parent.getAttachment("childObjects") == null)
 			parent.setAttachment("childObjects", new Vector<SWGObject>());
 		
@@ -749,7 +810,9 @@ public class ObjectService implements INetworkDispatch {
 	public void readBuildoutDatatable(DatatableVisitor buildoutTable, Planet planet, float x1, float z1) throws InstantiationException, IllegalAccessException {
 
 		CrcStringTableVisitor crcTable = ClientFileManager.loadFile("misc/object_template_crc_string_table.iff", CrcStringTableVisitor.class);
-
+		List<SWGObject> quadtreeObjects = new ArrayList<SWGObject>();
+		Map<Long, Long> duplicate = new HashMap<Long, Long>();
+		
 		for (int i = 0; i < buildoutTable.getRowCount(); i++) {
 			
 			String template;
@@ -780,8 +843,10 @@ public class ObjectService implements INetworkDispatch {
 
 				} else {
 					
-					objectId = (Integer) buildoutTable.getObject(i, 0);
-					containerId = (Integer) buildoutTable.getObject(i, 1);
+					// Since the ids are just ints, they append 0xFFFF86F9 to them
+					// This is demonstated in the packet sent to the server when you /target client-spawned objects
+					objectId = (((Integer) buildoutTable.getObject(i, 0) == 0) ? 0 : Delta.createBuffer(8).putInt((Integer) buildoutTable.getObject(i, 0)).putInt(0xF986FFFF).flip().getLong());
+					containerId = (((Integer) buildoutTable.getObject(i, 1) == 0) ? 0 : Delta.createBuffer(8).putInt((Integer) buildoutTable.getObject(i, 1)).putInt(0xF986FFFF).flip().getLong());
 					type = (Integer) buildoutTable.getObject(i, 2);
 					cellIndex = (Integer) buildoutTable.getObject(i, 4);
 					
@@ -796,59 +861,101 @@ public class ObjectService implements INetworkDispatch {
 					portalCRC = (Integer) buildoutTable.getObject(i, 13);
 
 				}
-								
+				
+				// Treeku - Refactored to work around duplicate objectIds
+				// Required for instances/heroics which are duplicated ie. 10 times
 				if(!template.equals("object/cell/shared_cell.iff") && objectId != 0 && getObject(objectId) != null) {
-					//System.out.println("Duplicate buildout object: " + template);
-					continue;
+					SWGObject object = getObject(objectId);
+					
+					// Same coordinates is a true duplicate
+					if ((px + ((containerId == 0) ? 0 : x1)) == object.getPosition().x &&
+						py == object.getPosition().y &&
+						(pz + ((containerId == 0) ? 0 : z1)) == object.getPosition().z) {
+						//System.out.println("Duplicate buildout object: " + template);
+						continue;
+					}
 				}
-												
+				
+				if (duplicate.containsKey(containerId)) {
+					containerId = duplicate.get(containerId);
+				}
+				
+				if (objectId != 0 && getObject(objectId) != null) {
+					SWGObject container = getObject(containerId);
+					int x = ((int) (px + ((container == null) ? x1 : container.getPosition().x)));
+					int z = ((int) (pz + ((container == null) ? z1 : container.getPosition().z)));
+					String key = "" + CRC.StringtoCRC(planet.getName()) + CRC.StringtoCRC(template) + type + containerId + cellIndex + x + py + z;
+					long newObjectId = 0;
+					
+					if (core.getDuplicateIdODB().contains(key, String.class, DuplicateId.class)) {
+						newObjectId = core.getDuplicateIdODB().get(key, String.class, DuplicateId.class).getObjectId();
+					} else {
+						newObjectId = generateObjectID();
+						Transaction txn = core.getDuplicateIdODB().getEnvironment().beginTransaction(null, null);
+						core.getDuplicateIdODB().put(new DuplicateId(key, newObjectId), String.class, DuplicateId.class, txn);
+						txn.commitSync();
+					}
+					
+					duplicate.put(objectId, newObjectId);
+					objectId = newObjectId;
+				}
+				
 				List<Long> containers = new ArrayList<Long>();
 				SWGObject object;
 				if(objectId != 0 && containerId == 0) {					
 					if(portalCRC != 0) {
 						containers.add(objectId);
-						object = createObject(template, objectId, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, true);
-						((BuildingObject) object).createTransaction(core.getBuildingODB().getEnvironment());
+						object = createObject(template, objectId, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, true, false);
+						object.setAttachment("childObjects", null);
+						if (!duplicate.containsValue(objectId)) {
+							((BuildingObject) object).createTransaction(core.getBuildingODB().getEnvironment());
+							core.getBuildingODB().put((BuildingObject) object, Long.class, BuildingObject.class, ((BuildingObject) object).getTransaction());
+							((BuildingObject) object).getTransaction().commitSync();
+						}
 					} else {
-						object = createObject(template, objectId, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz));
+						object = createObject(template, objectId, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, false, false);
 					}
 					if(object == null)
 						continue;
+					object.setContainerPermissions(WorldPermissions.WORLD_PERMISSIONS);
 					if(radius > 256)
 						object.setAttachment("bigSpawnRange", new Boolean(true));
-					core.simulationService.add(object, object.getPosition().x, object.getPosition().z);
+					quadtreeObjects.add(object);
 				} else if(containerId != 0) {
-					object = createObject(template, 0, planet, new Point3D(px, py, pz), new Quaternion(qw, qx, qy, qz));	
+					object = createObject(template, 0, planet, new Point3D(px, py, pz), new Quaternion(qw, qx, qy, qz), null, false, false);
 					if(containers.contains(containerId)) {
+						object.setContainerPermissions(WorldPermissions.WORLD_PERMISSIONS);
 						object.setisInSnapshot(false);
 						containers.add(objectId);
 					}
-					if(object instanceof CellObject && cellIndex != 0)
+					if(object instanceof CellObject && cellIndex != 0) {
+						object.setContainerPermissions(WorldCellPermissions.WORLD_CELL_PERMISSIONS);
 						((CellObject) object).setCellNumber(cellIndex);
+					}
 					SWGObject parent = getObject(containerId);
 					
 					if(parent != null && object != null) {
 						if(parent instanceof BuildingObject && ((BuildingObject) parent).getCellByCellNumber(cellIndex) != null)
 							continue;
 						parent.add(object);
-						/*if(parent instanceof BuildingObject) {
-							((BuildingObject) parent).createTransaction(core.getBuildingODB().getEnvironment());
-							core.getBuildingODB().put((BuildingObject) parent, Long.class, BuildingObject.class, ((BuildingObject) parent).getTransaction());
-							((BuildingObject) parent).getTransaction().commitSync();
-						}*/
 					}
 				} else {
-					object = createObject(template, 0, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz));
-					core.simulationService.add(object, object.getPosition().x, object.getPosition().z);					
+					object = createObject(template, 0, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, false, false);
+					object.setContainerPermissions(WorldPermissions.WORLD_PERMISSIONS);
+					quadtreeObjects.add(object);
 				}
 				
 				//System.out.println("Spawning: " + template + " at: X:" + object.getPosition().x + " Y: " + object.getPosition().y + " Z: " + object.getPosition().z);
-				
+				if(object != null)
+					object.setAttachment("isBuildout", new Boolean(true));
 			}
 				
 			
 		}
-
+		// this might load stuff before snapshots of other planets are finished
+		/*for(SWGObject obj : quadtreeObjects) {
+			core.simulationService.add(obj, obj.getPosition().x, obj.getPosition().z);
+		}*/
 		
 	}
 

@@ -1,5 +1,10 @@
 import sys
 from engine.resources.scene import Point3D
+from protocol.swg import CommPlayerMessage
+from protocol.swg.objectControllerObjects import ShowLootBox
+from protocol.swg import ObjControllerMessage
+from engine.resources.objects import SWGObject
+from jarray import array
 
 def setup():
     return
@@ -10,7 +15,7 @@ def run(core, actor, target, commandString):
 
 	if not playerObject:
 		return
-	
+		
 	commandArgs = commandString.split(' ')
 	command = commandArgs[0]
 	if len(commandArgs) > 1:
@@ -27,6 +32,9 @@ def run(core, actor, target, commandString):
 	
 	if command == 'giveExperience' and arg1:
 		core.playerService.giveExperience(actor, int(arg1))
+		
+	if command == 'level' and arg1:
+		core.playerService.grantLevel(actor, int(arg1))
 	
 	elif command == 'setSpeed' and arg1:
 		actor.sendSystemMessage('Your speed was ' + str(actor.getSpeedMultiplierBase()) + '. Don\'t forget to set this back or it\'ll permanently imbalance your speed. Default without buffs or mods is 1.', 2)
@@ -45,4 +53,41 @@ def run(core, actor, target, commandString):
 		actor.addAbility(str(arg1))
 		actor.sendSystemMessage('You have learned ' + arg1 + '')
 	
+	elif command == 'anim' and arg1:
+		actor.doSkillAnimation(arg1)
+		actor.sendSystemMessage('Performed ' + arg1 ,0)
+	
+	elif command == 'changeBio' and arg1:
+		actor.getSlottedObject('ghost').setBiography(arg1)
+	
+	elif command == 'rewardMe':
+		testObject = core.objectService.createObject('object/weapon/ranged/rifle/shared_rifle_t21.iff', actor.getPlanet())
+		testObject.setCustomName('Crush4r')
+		testObject.setStringAttribute('crafter', 'Wavescrub')
+		dGun = core.objectService.createObject('object/weapon/ranged/rifle/shared_rifle_tc22_blaster.iff', actor.getPlanet())
+		dGun.setCustomName('Supertoms Gun')
+		dGun.setStringAttribute('crafter', 'Wavescrub')
+		core.playerService.giveItems(actor, testObject, dGun)
+		return
+		
+	elif command == 'comm':
+		comm = CommPlayerMessage(actor.getObjectId())
+		actor.getClient().getSession().write(comm.serialize())
+		
+	elif command == 'spawn' and arg1 and arg2:
+		pos = actor.getWorldPosition()
+		
+		core.spawnService.spawnCreature(arg1, actor.getPlanet().getName(), 0, pos.x, pos.y, pos.z, 1, 0, 1, 0, int(arg2))			
+	elif command == 'instance' and arg1:
+		core.instanceService.queue(arg1, actor)	
+		
+	elif command == 'action' and arg1:
+		actor.setAction(int(arg1))
+		
+	elif command == 'health' and arg1:
+		actor.setHealth(int(arg1))
+		
+	elif command == 'id':
+		actor.sendSystemMessage('Your id is: ' + str(actor.getObjectId()), 0)
+
 	return
