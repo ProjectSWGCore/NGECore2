@@ -87,6 +87,8 @@ public class CombatService implements INetworkDispatch {
 	
 	public void doCombat(final CreatureObject attacker, final TangibleObject target, final WeaponObject weapon, final CombatCommand command, final int actionCounter) {
 
+		if(target instanceof CreatureObject) if(((CreatureObject) target).getPosture() == Posture.Incapacitated || ((CreatureObject) target).getPosture() == Posture.Dead) return;
+		
 		boolean success = true;
 		
 		if((command.getAttackType() == 0 || command.getAttackType() == 1 || command.getAttackType() == 3) && !attemptCombat(attacker, target))
@@ -181,10 +183,14 @@ public class CombatService implements INetworkDispatch {
 		
 		if(target instanceof CreatureObject)
 		{
-			if(((CreatureObject)(target)).getPosture() == Posture.Incapacitated)
+			CreatureObject creature = (CreatureObject)target;
+			if(creature.getPosture() == Posture.Incapacitated || creature.getPosture() == Posture.Dead)
 			{
-				attacker.removeDefender(target);
-				target.removeDefender(attacker);		
+				for (TangibleObject defender : creature.getDefendersList())
+				{
+					defender.removeDefender(creature);
+					creature.removeDefender(defender);
+				}	
 			}
 		}	
 	}
