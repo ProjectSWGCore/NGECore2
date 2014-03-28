@@ -110,6 +110,13 @@ public class AttackState extends AIState {
 			actor.scheduleRecovery();
 			return StateResult.UNFINISHED;
 		}
+		if(target.getPosture() == 13 || target.getPosture() == 14) {
+			actor.getDamageMap().remove(target);
+			actor.setFollowObject(actor.getHighestDamageDealer());
+			target = actor.getFollowObject();
+			if(target == null)
+				return StateResult.FINISHED;
+		}
 		if(target.getWorldPosition().getDistance(creature.getWorldPosition()) > 128 || target.getPosture() == 13 || target.getPosture() == 14) {
 			actor.removeDefender(target);
 			actor.scheduleRecovery();
