@@ -119,12 +119,12 @@ public class DevService implements INetworkDispatch {
 						return;
 					case 2: // Items
 						sendCharacterBuilderSUI(player, 2);
-						return;
+						return; 
 					
 					// Character
 					case 10: // Set combat level to 90
-						//core.playerService.grantLevel(player, 90); // Commented out until fixed
-					    	core.playerService.giveExperience(player, 999999999);
+						core.playerService.grantLevel(player, 90); // Commented out until fixed
+					    //core.playerService.giveExperience(player, 999999999);
 						return;
 					case 11: // Give 100,000 credits
 						player.setCashCredits(player.getCashCredits() + 100000);
