@@ -163,6 +163,7 @@ public class SimulationService implements INetworkDispatch {
 		core.commandService.registerCommand("setbiography");
 		core.commandService.registerCommand("requestbiography");
 		core.commandService.registerCommand("eject");
+		core.commandService.registerGmCommand("broadcast");
 
 	}
 	
@@ -730,6 +731,12 @@ public class SimulationService implements INetworkDispatch {
 		
 		if(!ghost.isSet(PlayerFlags.LD))
 			ghost.toggleFlag(PlayerFlags.LD);
+		
+		for (CreatureObject opponent : object.getDuelList()) {
+			if (opponent != null) {
+				core.combatService.handleEndDuel(object, opponent, true);
+			}
+		}
 		
 		/*
 		object.createTransaction(core.getCreatureODB().getEnvironment());

@@ -77,18 +77,22 @@ public class DevService implements INetworkDispatch {
 			case 1: // Character
 				suiOptions.put((long) 10, "Set combat level to 90");
 				suiOptions.put((long) 11, "Give 100,000 credits");
+				suiOptions.put((long) 12, "Reset expertise");
 				break;
 			case 2: // Items
 				suiOptions.put((long) 20, "(Light) Jedi Robe");
 				suiOptions.put((long) 21, "(Dark) Jedi Robe");
 				suiOptions.put((long) 22, "Composite Armor");
 				suiOptions.put((long) 23, "Weapons");
+				suiOptions.put((long) 24, "Misc Items");
 				break;
 			case 3: // [Items] Weapons
 				suiOptions.put((long) 30, "Jedi Weapons");
 				suiOptions.put((long) 31, "Melee Weapons");
 				suiOptions.put((long) 32, "Ranged Weapons");
 				break;
+			case 4: // [Items] Misc Items
+				suiOptions.put((long) 40, "Unity Ring");
 		}
 		
 		final SUIWindow window = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "Character Builder Terminal", "Select the desired option and click OK.", suiOptions, creature, null, 10);
@@ -119,10 +123,13 @@ public class DevService implements INetworkDispatch {
 					
 					// Character
 					case 10: // Set combat level to 90
-						core.playerService.giveExperience(player, 999999999);
+						core.playerService.grantLevel(player, 90);
 						return;
 					case 11: // Give 100,000 credits
 						player.setCashCredits(player.getCashCredits() + 100000);
+						return;
+					case 12: // Reset expertise
+						player.getSkills().get().stream().filter(s -> s.contains("expertise")).forEach(s -> core.skillService.removeSkill(creature, s));
 						return;
 						
 					// Items
@@ -209,7 +216,10 @@ public class DevService implements INetworkDispatch {
 					case 23: // Weapons
 						sendCharacterBuilderSUI(player, 3);
 						return;
-						
+					
+					case 24: // Misc Items
+						sendCharacterBuilderSUI(player, 4);
+						return;
 					// [Items] Weapons
 					case 30: // Jedi Weapons
 						SWGObject lightsaber1 = core.objectService.createObject("object/weapon/melee/sword/crafted_saber/shared_sword_lightsaber_one_handed_gen5.iff", planet);
@@ -257,13 +267,17 @@ public class DevService implements INetworkDispatch {
 						
 						inventory.add(rifle1);
 						return;
+					case 40:
+						TangibleObject ring = (TangibleObject) core.objectService.createObject("object/tangible/wearables/ring/shared_ring_s01.iff", planet);
+						ring.setCustomName("Unity Ring");
+						inventory.add(ring);
 				}
 			}	
 		});
 		
 		core.suiService.openSUIWindow(window);	
 	}
-
+	
 	@Override
 	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> swgOpcodes, Map<Integer, INetworkRemoteEvent> objControllerOpcodes) {
 	}

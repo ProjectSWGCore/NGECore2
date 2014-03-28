@@ -9,9 +9,17 @@ def run(core, actor, target, commandString):
 	if player is None:
 		return
 	
-	commandString = commandString.lower()
-	installedEmote = player.getHoloEmote().replace('holoemote_','')
+	if commandString is not None:
+		commandString = commandString.lower()
 	
+	installedEmote = ''
+	
+	if player.getHoloEmote() is not None:
+		installedEmote = player.getHoloEmote().replace('holoemote_','')
+	
+	if commandString is None or commandString == "":
+		commandString = installedEmote
+
 	if installedEmote == None or installedEmote == "":
 		actor.sendSystemMessage('@image_designer:no_holoemote', 0)
 		return
@@ -27,7 +35,7 @@ def run(core, actor, target, commandString):
 	
 	if commandString == "kitty":
 		commandString = "technokitty"
-
+	
 	if commandString != installedEmote and installedEmote != 'all':
 		actor.sendSystemMessage('Your installed Holo-Emote generator does not support that emote.', 0)
 		return
@@ -47,7 +55,7 @@ def holoPrompt(player, emote):
 	if player.getHoloEmoteUses() == 1:
 		remainingCharges = "You have 1 charge remaining.\n"
 	
-	body = "To play a Holo-Emote, type /holoemote <name>." \
+	body = "To play a Holo-Emote, type /holoemote <name>.\n" \
 "To delete your Holo-Emote type /holoemote delete.\n" \
 "Purchasing a new Holo-Emote will automatically delete your current Holo-Emote.\n" \
 "\n" \

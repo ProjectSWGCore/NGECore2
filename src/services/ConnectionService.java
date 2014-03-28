@@ -212,12 +212,6 @@ public class ConnectionService implements INetworkDispatch {
 		
 		core.groupService.handleGroupDisband(object);
 		
-		for (CreatureObject opponent : object.getDuelList()) {
-			if (opponent != null) {
-				core.combatService.handleEndDuel(object, opponent, false);
-			}
-		}
-		
 		if (core.instanceService.isInInstance(object)) {
 			core.instanceService.remove(core.instanceService.getActiveInstance(object), object);
 		}

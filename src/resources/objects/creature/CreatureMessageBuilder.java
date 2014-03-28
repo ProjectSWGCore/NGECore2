@@ -88,6 +88,11 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		CreatureObject creature = (CreatureObject) object;
 		IoBuffer buffer = bufferPool.allocate(100, false).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.setAutoExpand(true);
+		
+		if(creature.getStfName() == null || creature.getStfFilename() == null) {
+			creature.setStfName("");
+			creature.setStfFilename("");
+		}
 
 		buffer.putShort((short) 19);	// Object Count
 		buffer.putFloat(1);
@@ -163,7 +168,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 				buffer.put((byte) 0);
 				buffer.put(getAsciiString(skillMod.getName()));
 				buffer.putInt(skillMod.getBase());
-				buffer.putInt(skillMod.getModifier());
+				buffer.putInt((int) skillMod.getModifier());
 			}
 		}
 		buffer.putFloat(creature.getSpeedMultiplierBase());

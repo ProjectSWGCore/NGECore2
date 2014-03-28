@@ -19,7 +19,7 @@ def run(core, actor, target, commandString):
 	if not combatSvc.areInDuel(actor, target):
 		return
 
-	combatSvc.handleEndDuel(actor, target, true)
+	combatSvc.handleEndDuel(actor, target, True)
 
 	return
 	

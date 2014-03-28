@@ -41,6 +41,7 @@ import protocol.swg.objectControllerObjects.CombatSpam;
 import protocol.swg.objectControllerObjects.CommandEnqueueRemove;
 import protocol.swg.objectControllerObjects.StartTask;
 import resources.common.FileUtilities;
+import resources.datatables.Posture;
 import resources.objects.Buff;
 import resources.objects.DamageOverTime;
 import resources.objects.creature.CreatureObject;
@@ -86,6 +87,8 @@ public class CombatService implements INetworkDispatch {
 	
 	public void doCombat(final CreatureObject attacker, final TangibleObject target, final WeaponObject weapon, final CombatCommand command, final int actionCounter) {
 
+		if(target instanceof CreatureObject) if(((CreatureObject) target).getPosture() == Posture.Incapacitated || ((CreatureObject) target).getPosture() == Posture.Dead) return;
+		
 		boolean success = true;
 		
 		if((command.getAttackType() == 0 || command.getAttackType() == 1 || command.getAttackType() == 3) && !attemptCombat(attacker, target))
@@ -178,8 +181,18 @@ public class CombatService implements INetworkDispatch {
 		
 		}
 		
-		//core.buffService.addBuffToCreature(attacker, command.getBuffNameSelf());
-		
+		if(target instanceof CreatureObject)
+		{
+			CreatureObject creature = (CreatureObject)target;
+			if(creature.getPosture() == Posture.Incapacitated || creature.getPosture() == Posture.Dead)
+			{
+				for (TangibleObject defender : creature.getDefendersList())
+				{
+					defender.removeDefender(creature);
+					creature.removeDefender(defender);
+				}	
+			}
+		}	
 	}
 
 	private void doAreaCombat(CreatureObject attacker, TangibleObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {
@@ -553,7 +566,7 @@ public class CombatService implements INetworkDispatch {
 		
 		float rawDamage = command.getAddedDamage();
 		
-		if(command.getPercentFromWeapon() > 0 && weapon != attacker.getSlottedObject("default_weapon")) {
+		if(command.getPercentFromWeapon() > 0) {
 			
 			float weaponMinDmg = weapon.getMinDamage();
 			float weaponMaxDmg = weapon.getMaxDamage();
@@ -569,23 +582,6 @@ public class CombatService implements INetworkDispatch {
 					
 				}
 			}
-			
-			float weaponDmg = new Random().nextInt((int) (weaponMaxDmg - weaponMinDmg + 1)) + weaponMinDmg;
-			weaponDmg *= command.getPercentFromWeapon();
-			rawDamage += weaponDmg;
-			
-			if(weapon.isMelee()) {
-				
-				if(attacker.getStrength() > 0) {
-					rawDamage += ((attacker.getStrength() / 100) * 33);
-				}
-				
-			}
-			
-		} else if(command.getPercentFromWeapon() > 0) {
-			
-			float weaponMinDmg = 50;
-			float weaponMaxDmg = 100;
 			
 			float weaponDmg = new Random().nextInt((int) (weaponMaxDmg - weaponMinDmg + 1)) + weaponMinDmg;
 			weaponDmg *= command.getPercentFromWeapon();
@@ -636,23 +632,6 @@ public class CombatService implements INetworkDispatch {
 					
 				}
 			}
-			
-			float weaponDmg = new Random().nextInt((int) (weaponMaxDmg - weaponMinDmg + 1)) + weaponMinDmg;
-			weaponDmg *= command.getPercentFromWeapon();
-			rawDamage += weaponDmg;
-			
-			if(weapon.isMelee()) {
-				
-				if(attacker.getStrength() > 0) {
-					rawDamage += ((attacker.getStrength() / 100) * 33);
-				}
-				
-			}
-			
-		} else if(command.getPercentFromWeapon() > 0) {
-			
-			float weaponMinDmg = 50;
-			float weaponMaxDmg = 100;
 			
 			float weaponDmg = new Random().nextInt((int) (weaponMaxDmg - weaponMinDmg + 1)) + weaponMinDmg;
 			weaponDmg *= command.getPercentFromWeapon();
@@ -810,7 +789,7 @@ public class CombatService implements INetworkDispatch {
 			
 			}, target.getIncapTimer(), TimeUnit.SECONDS);
 			target.setIncapTask(incapTask);
-			core.buffService.addBuffToCreature(target, "incapWeaken");
+			core.buffService.addBuffToCreature(target, "incapWeaken", target);
 			if(target.getSlottedObject("ghost") != null)
 				attacker.sendSystemMessage("You incapacitate " + target.getCustomName() + ".", (byte) 0);
 			return;
@@ -1068,8 +1047,7 @@ public class CombatService implements INetworkDispatch {
 		else if(command.getAttackType() == 0 || command.getAttackType() == 2 || command.getAttackType() == 3)
 			doAreaRevive(medic, target, weapon, command, actionCounter);
 		
-		sendHealPackets(medic, target, weapon, command, actionCounter);
-		
+		//sendHealPackets(medic, target, weapon, command, actionCounter); // Is there a reason this is here (combat log...?) - it causes a player to come back from the dead die again.
 	}
 	
 	private void doSingleTargetRevive(CreatureObject medic, CreatureObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {

@@ -36,7 +36,6 @@ public class PlayClientEffectObjectMessage extends SWGMessage {
 		this.effectFile = effectFile;
 		this.objectId = objectId;
 		this.commandString = commandString;
-
 	}
 	
 	@Override
@@ -47,8 +46,19 @@ public class PlayClientEffectObjectMessage extends SWGMessage {
 		result.putShort((short) 5);
 		result.putInt(0x8855434A);
 		result.put(getAsciiString(effectFile));
-		result.put(getAsciiString(commandString));
-		result.putLong(objectId);
+		
+		if(!effectFile.startsWith("clienteffect/holoemote_")) 
+		{
+			result.putShort((short) 0); // Because waverunner is a dweeb
+			result.putLong(objectId);
+			result.put(getAsciiString(commandString));	
+		}
+		else
+		{
+			result.put(getAsciiString(commandString));
+			result.putLong(objectId);
+		}
+		
 		return result.flip();
 
 	}
