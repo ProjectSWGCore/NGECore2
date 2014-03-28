@@ -123,13 +123,13 @@ public class DevService implements INetworkDispatch {
 					
 					// Character
 					case 10: // Set combat level to 90
-						core.playerService.giveExperience(player, 999999999);
+						core.playerService.grantLevel(player, 90);
 						return;
 					case 11: // Give 100,000 credits
 						player.setCashCredits(player.getCashCredits() + 100000);
 						return;
 					case 12: // Reset expertise
-						resetExpertiseSkills(player);
+						player.getSkills().get().stream().filter(s -> s.contains("expertise")).forEach(s -> core.skillService.removeSkill(creature, s));
 						return;
 						
 					// Items
@@ -277,16 +277,6 @@ public class DevService implements INetworkDispatch {
 		
 		core.suiService.openSUIWindow(window);	
 	}
-	
-	public void resetExpertiseSkills(CreatureObject creature)
-	{
-		for(int i = creature.getSkills().size() - 1; i >= 0; i-- )
-		{
-		    String skill = creature.getSkills().get(i);
-		    if(skill.contains("expertise")) creature.removeSkill(skill);
-		}
-	}
-
 	
 	@Override
 	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> swgOpcodes, Map<Integer, INetworkRemoteEvent> objControllerOpcodes) {
