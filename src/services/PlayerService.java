@@ -827,4 +827,320 @@ public class PlayerService implements INetworkDispatch {
 								int level = creature.getLevel();
 								
 								if ((level == 4 || level == 7 || level == 10) || ((level > 10) && (((creature.getLevel() - 10)  % 4) == 0))) {
-									int skill = ((level 
+									int skill = ((level <= 10) ? ((level - 1) / 3) : ((((level - 10) / 4)) + 3));
+									String roadmapSkillName = "";
+									DatatableVisitor skillTemplate, roadmap;
+									
+									try {
+										skillTemplate = ClientFileManager.loadFile("datatables/skill_template/skill_template.iff", DatatableVisitor.class);
+										
+										for (int s = 0; s < skillTemplate.getRowCount(); s++) {
+											if (skillTemplate.getObject(s, 0) != null) {
+												if (((String) skillTemplate.getObject(s, 0)).equals(player.getProfession())) {
+													String[] skillArray = ((String) skillTemplate.getObject(s, 4)).split(",");
+													roadmapSkillName = skillArray[skill];
+													break;
+												}
+											}
+										}
+										
+										creature.showFlyText("cbt_spam", "skill_up", (float) 2.5, new RGB(154, 205, 50), 0);
+										creature.playEffectObject("clienteffect/skill_granted.cef", "");
+										creature.playMusic("sound/music_acq_bountyhunter.snd");
+										core.skillService.addSkill(creature, roadmapSkillName);
+										player.setProfessionWheelPosition(roadmapSkillName);
+									}  catch (InstantiationException | IllegalAccessException e) {
+										e.printStackTrace();
+									}
+									
+									try {
+										roadmap = ClientFileManager.loadFile("datatables/roadmap/item_rewards.iff", DatatableVisitor.class);
+										
+										Vector<SWGObject> rewards = new Vector<SWGObject>();
+										
+										for (int s = 0; s < roadmap.getRowCount(); s++) {
+											if (roadmap.getObject(s, 0) != null) {
+												if (((String) roadmap.getObject(s, 1)).equals(roadmapSkillName)) {
+													String[] apts = ((String) roadmap.getObject(s, 2)).split(",");
+													String[] items = ((String) roadmap.getObject(s, 4)).split(",");
+													String[] wookieeItems = ((String) roadmap.getObject(s, 5)).split(",");
+													String[] ithorianItems = ((String) roadmap.getObject(s, 6)).split(",");
+													
+													for (int n = 0; n < items.length; n++) {
+														String item = items[n];
+														
+														if (wookieeItems[0].length() > 0 && creature.getStfName().contains("wookiee")) {
+															item = wookieeItems[n];
+														} else if (ithorianItems[0].length() > 0 && creature.getStfName().contains("ithorian")) {
+															item = ithorianItems[n];
+														}
+														
+														try {
+															String customServerTemplate = null;
+															
+															if (item.contains("/")) {
+																item = (item.substring(0, (item.lastIndexOf("/") + 1)) + "shared_" + item.substring((item.lastIndexOf("/") + 1)));
+															} else {
+																customServerTemplate = item;
+																item = core.scriptService.callScript("scripts/roadmap/", player.getProfession(), "getRewards", item).asString();
+															}
+															
+															if (item != null && item != "") {
+																SWGObject itemObj = core.objectService.createObject(item, 0, creature.getPlanet(), new Point3D(0, 0, 0), new Quaternion(1, 0, 0, 0), customServerTemplate);
+																rewards.add(itemObj);
+															} else {
+																//System.out.println("Can't find template: " + item);
+															}
+														} catch (Exception e) {
+															e.printStackTrace();
+														}
+													}
+													
+												}
+											}
+										}
+										
+										if (rewards != null && !rewards.isEmpty()) {
+											giveItems(creature, rewards);
+										}
+										
+									}  catch (InstantiationException | IllegalAccessException e) {
+										e.printStackTrace();
+									}
+								}
+							}
+						}	
+					}
+				}
+			} catch (InstantiationException | IllegalAccessException e) {
+				e.printStackTrace();
+			}
+			
+			if(player.getProfession().equals("entertainer_1a") && creature.getLevel() == (short) 90 && creature.getEntertainerExperience() != null)
+				creature.getEntertainerExperience().cancel(true);
+		//}
+	}
+	
+	public void addPlayerTitle(PlayerObject player, String title) {
+		
+		if (player.getTitleList().contains(title))
+			return;
+		
+		player.getTitleList().add(title);
+
+	}
+	
+	public void removePlayerTitle(PlayerObject player, String title) {
+		if (player == null || title == "")
+			return;
+		
+		if (player.getTitleList().contains(title))
+			player.getTitleList().remove(title);
+
+	}
+	
+	/**
+	 * Creates a blue path to the destination point.
+	 * @param actor Player that will be seeing the blue path.
+	 * @param destination Where the blue path will lead to.
+	 */
+	public void createClientPath(SWGObject actor, Point3D destination) {
+		
+		if (actor == null || actor.getClient() == null || actor.getClient().getSession() == null)
+			return;
+		
+		List<Point3D> coordinates = new ArrayList<Point3D>();
+		coordinates.add(actor.getPosition());
+		
+		// TODO: Generate a path to destination based off of objects in the world.
+		
+		coordinates.add(destination); // Destination MUST be last coordinate in array
+		
+		CreateClientPathMessage path = new CreateClientPathMessage(coordinates);
+		actor.getClient().getSession().write(path.serialize());
+	}
+	
+	/**
+	 * Gives a player an item and shows the "New Items" message.
+	 * @param reciever Player receiving the item.
+	 * @param item The object to be given.
+	 * @author Waverunner
+	 */
+	public void giveItem(CreatureObject reciever, SWGObject item) {
+		if (reciever == null || item == null)
+			return;
+		
+		if (reciever.getClient() == null)
+			return;
+		Client client = reciever.getClient();
+		
+		if (client.getSession() == null)
+			return;
+		SWGObject inventory = reciever.getSlottedObject("inventory");
+		
+		if (inventory == null)
+			return;
+		
+		inventory.add(item);
+		
+		ObjControllerMessage objController = new ObjControllerMessage(11, new ShowLootBox(reciever.getObjectID(), item));
+		client.getSession().write(objController.serialize());
+	}
+	
+	/**
+	 * Gives a player a variety of items and shows the "New Items" message.
+	 * @param reciever Player receiving the items.
+	 * @param items Vector of the items.
+	 */
+	public void giveItems(CreatureObject reciever, Vector<SWGObject> items) {
+		if (reciever == null || items == null)
+			return;
+		
+		if (reciever.getClient() == null)
+			return;
+		Client client = reciever.getClient();
+		
+		if (client.getSession() == null)
+			return;
+		SWGObject inventory = reciever.getSlottedObject("inventory");
+		
+		if (inventory == null)
+			return;
+		
+		for (SWGObject obj : items) {
+			inventory.add(obj);
+		}
+		
+		ObjControllerMessage objController = new ObjControllerMessage(11, new ShowLootBox(reciever.getObjectID(), items));
+		client.getSession().write(objController.serialize());
+	}
+	
+	public void performUnity(final CreatureObject acceptor, final CreatureObject proposer){
+		TangibleObject acceptorInventory = (TangibleObject) acceptor.getSlottedObject("inventory");
+		final AtomicBoolean acceptorHasRing = new AtomicBoolean();
+
+		acceptorInventory.viewChildren(acceptor, false, false, new Traverser() {
+
+			@Override
+			public void process(SWGObject obj) {
+				if(obj.getAttachment("objType") != null) {
+					String objType = (String) obj.getAttachment("objType");
+					if(objType == "ring") {
+						acceptorHasRing.set(true);
+					}
+				}
+			}
+		});
+
+		if(acceptorHasRing.get() == false) {
+			acceptor.sendSystemMessage("@unity:no_ring", (byte) 0);
+			proposer.sendSystemMessage("@unity:accept_fail", (byte) 0);
+			acceptor.setAttachment("proposer", null);
+		} else {
+			PlayerObject aGhost = (PlayerObject) acceptor.getSlottedObject("ghost");
+			PlayerObject pGhost = (PlayerObject) proposer.getSlottedObject("ghost");
+
+			if (aGhost == null || pGhost == null) {
+				acceptor.sendSystemMessage("@unity:wed_error", (byte) 0);
+				proposer.sendSystemMessage("@unity:wed_error", (byte) 0);
+				acceptor.setAttachment("proposer", null);
+				return;
+			} else {
+				final Vector<SWGObject> ringList = new Vector<SWGObject>();
+				acceptorInventory.viewChildren(acceptor, false, false, new Traverser() {
+
+					@Override
+					public void process(SWGObject obj) {
+						if (obj.getAttachment("objType") != null) {
+							if (obj.getAttachment("objType") == "ring") {
+								ringList.add(obj);
+							}
+						}
+					}
+				});
+
+				if (ringList.size() > 1) {
+					sendRingSelectWindow(acceptor, proposer, ringList);
+				} else {
+					// Proposer's ring is already 'unified' from the start, so no
+					// need to set a unity attachment.
+					ringList.get(0).setAttachment("unity", (Boolean) true);
+
+					if(!acceptor.getEquipmentList().contains(ringList.get(0)))
+						core.equipmentService.equip(acceptor, ringList.get(0));
+
+					aGhost.setSpouseName(proposer.getCustomName());
+					pGhost.setSpouseName(acceptor.getCustomName());
+
+					acceptor.sendSystemMessage("Your union with " + proposer.getCustomName() + " is complete.", (byte) 0);
+					proposer.sendSystemMessage("Your union with " + acceptor.getCustomName() + " is complete.", (byte) 0);
+
+					acceptor.setAttachment("proposer", null);
+				}
+			}
+		}
+	}
+
+	private void sendRingSelectWindow(final CreatureObject actor, final CreatureObject proposer, Vector<SWGObject> ringList) {
+		Map<Long, String> ringData = new HashMap<Long, String>();
+
+		for(SWGObject obj : ringList) {
+			ringData.put(obj.getObjectId(), obj.getCustomName());
+		}
+
+		final SUIWindow ringWindow = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "@unity:ring_prompt", "@unity:ring_prompt", ringData, actor, proposer, (float) 15);
+		Vector<String> returnList = new Vector<String>();
+		returnList.add("List.lstList:SelectedRow");
+
+		ringWindow.addHandler(0, "", Trigger.TRIGGER_OK, returnList, new SUICallback() {
+
+			@Override
+			public void process(SWGObject owner, int eventType, Vector<String> returnList) {
+				int index = Integer.parseInt(returnList.get(0));
+
+				SWGObject selectedRing = core.objectService.getObject(ringWindow.getObjectIdByIndex(index));
+				selectedRing.setAttachment("unity", (Boolean) true);
+
+				if(!actor.getEquipmentList().contains(selectedRing))
+					core.equipmentService.equip(actor, selectedRing);
+
+				PlayerObject aGhost = (PlayerObject) actor.getSlottedObject("ghost");
+				PlayerObject pGhost = (PlayerObject) proposer.getSlottedObject("ghost");
+				aGhost.setSpouseName(proposer.getCustomName());
+				pGhost.setSpouseName(actor.getCustomName());
+
+				actor.sendSystemMessage("Your union with " + proposer.getCustomName() + " is complete.", (byte) 0);
+				proposer.sendSystemMessage("Your union with " + actor.getCustomName() + " is complete.", (byte) 0);
+			}
+
+		});
+
+		ringWindow.addHandler(1, "", Trigger.TRIGGER_CANCEL, returnList, new SUICallback() {
+
+			@Override
+			public void process(SWGObject owner, int eventType, Vector<String> returnList) {
+
+				PlayerObject aGhost = (PlayerObject) actor.getSlottedObject("ghost");
+				PlayerObject pGhost = (PlayerObject) proposer.getSlottedObject("ghost");
+
+				actor.sendSystemMessage("@unity:decline", (byte) 0);
+				proposer.sendSystemMessage("@unity:declined", (byte) 0);
+				actor.setAttachment("proposer", null);
+				for(SWGObject obj : proposer.getEquipmentList()) {
+					if(obj.getAttachment("unity") != null) {
+						obj.setAttachment("unity", null);
+						break;
+					}
+				}
+			}
+		});
+		core.suiService.openSUIWindow(ringWindow);
+	}
+	
+	@Override
+	public void shutdown() {
+		// TODO Auto-generated method stub
+		
+	}
+	
+}
