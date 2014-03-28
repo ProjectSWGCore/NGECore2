@@ -524,6 +524,41 @@ public class PlayerService implements INetworkDispatch {
 	}
 	
 	/*
+	 * Respecs to the specified profession.
+	 */
+	public void respec(CreatureObject creature, String profession) {
+		DatatableVisitor experienceTable;
+		PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
+		int level = 0;
+		
+		if (player == null) {
+			return;
+		}
+		
+		player.setProfession(profession);
+		
+		String xpType = ((player.getProfession().contains("entertainer")) ? "entertainer" : ((player.getProfession().contains("trader")) ? "crafting" : "combat_general"));
+			
+		int experience = player.getXp(xpType);
+		
+		try {
+			experienceTable = ClientFileManager.loadFile("datatables/player/player_level.iff", DatatableVisitor.class);
+			
+			for (int i = 0; i < experienceTable.getRowCount(); i++) {
+				if (experienceTable.getObject(i, 0) != null) {
+					if (experience >= ((Integer) experienceTable.getObject(i, 1))) {
+						level = (Integer) experienceTable.getObject(i, 1);
+					}
+				}
+			}
+		} catch (InstantiationException | IllegalAccessException e) {
+			e.printStackTrace();
+		}
+		
+		grantLevel(creature, level);
+	}
+	
+	/*
 	 * Resets to level 0
 	 */
 	public void resetLevel(CreatureObject creature) {
@@ -709,44 +744,36 @@ public class PlayerService implements INetworkDispatch {
 			
 			if (luck >= 1) {
 				core.skillModService.addSkillMod(creature, "luck", (int) luck);
-				creature.sendSystemMessage("spam", "level_up_stat_gain_0", (int) luck, 0);
 			}
 			
 			if (precision >= 1) {
 				core.skillModService.addSkillMod(creature, "precision", (int) precision);
-				creature.sendSystemMessage("spam", "level_up_stat_gain_1", (int) precision, 0);
 			}
 			
 			if (strength >= 1) {
 				core.skillModService.addSkillMod(creature, "strength", (int) strength);
-				creature.sendSystemMessage("spam", "level_up_stat_gain_2", (int) strength, 0);
 			}
 			
 			if (constitution >= 1) {
 				core.skillModService.addSkillMod(creature, "constitution", (int) constitution);
-				creature.sendSystemMessage("spam", "level_up_stat_gain_3", (int) constitution, 0);
 			}
 			
 			if (stamina >= 1) {
 				core.skillModService.addSkillMod(creature, "stamina", (int) stamina);
-				creature.sendSystemMessage("spam", "level_up_stat_gain_4", (int) stamina, 0);
 			}
 			
 			if (agility >= 1) {
 				core.skillModService.addSkillMod(creature, "agility", (int) agility);
-				creature.sendSystemMessage("spam", "level_up_stat_gain_5", (int) agility, 0);
 			}
 			
 			if (health >= 1) {
 				creature.setMaxHealth((creature.getMaxHealth() + (int) health + (healthGranted - creature.getGrantedHealth())));
 				creature.setHealth(creature.getMaxHealth());
-				creature.sendSystemMessage("spam", "level_up_stat_gain_6", (((int) health) + (((int) constitution)) + (((int) stamina))), 0);
 			}
 			
 			if (action >= 1) {
 				creature.setMaxAction((creature.getMaxAction() + (int) action));
 				creature.setAction(creature.getMaxAction());
-				creature.sendSystemMessage("spam", "level_up_stat_gain_7", (((int) action) + (((int) stamina) * 8) + (((int) constitution) * 2)), 0);
 			}
 			
 			creature.setGrantedHealth(healthGranted);
