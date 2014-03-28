@@ -32,6 +32,9 @@ def run(core, actor, target, commandString):
 	
 	if command == 'giveExperience' and arg1:
 		core.playerService.giveExperience(actor, int(arg1))
+		
+	if command == 'level' and arg1:
+		core.playerService.grantLevel(actor, int(arg1))
 	
 	elif command == 'setSpeed' and arg1:
 		actor.sendSystemMessage('Your speed was ' + str(actor.getSpeedMultiplierBase()) + '. Don\'t forget to set this back or it\'ll permanently imbalance your speed. Default without buffs or mods is 1.', 2)
