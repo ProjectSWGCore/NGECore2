@@ -144,8 +144,8 @@ public abstract class AIState {
 					
 				} else {
 					newX = currentPathPosition.x;
-					newY = currentPathPosition.y;
 					newZ = currentPathPosition.z;
+					newY = core.terrainService.getHeight(creature.getPlanetId(), newX, newX);
 				}
 				oldPosition = currentPathPosition;
 			}

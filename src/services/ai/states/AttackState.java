@@ -76,6 +76,7 @@ public class AttackState extends AIState {
 				actor.setNextPosition(actor.getFollowObject().getPosition());
 			else {
 				//recover(actor);
+				actor.faceObject(actor.getFollowObject());
 				actor.scheduleMovement();
 				return StateResult.UNFINISHED;
 			}
@@ -136,7 +137,7 @@ public class AttackState extends AIState {
 			actor.scheduleRecovery();
 			return StateResult.UNFINISHED;
 		}
-		actor.faceObject(target);
+		//actor.faceObject(target);
 		
 		Vector<String> attacks = actor.getMobileTemplate().getAttacks();
 		

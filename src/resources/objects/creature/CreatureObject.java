@@ -1580,7 +1580,8 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.performanceListenee = performanceListenee;
 		}
-		getClient().getSession().write(messageBuilder.buildListenToId(performanceListenee.getObjectId()));
+		if(getClient() != null)
+			getClient().getSession().write(messageBuilder.buildListenToId(performanceListenee.getObjectId()));
 	}
 
 
