@@ -7,7 +7,7 @@ def setup():
 
 def run(core, actor, target, commandString):
     playerObject = actor.getSlottedObject('ghost')
-    print playerObject.getProfession()
+
     if not playerObject or playerObject.getProfession() != "entertainer_1a":
       return
     
@@ -16,6 +16,11 @@ def run(core, actor, target, commandString):
     	objController = ObjControllerMessage(11, openBuffWindow)
     	actor.getClient().getSession().write(objController.serialize())
     	return
+    
+    if target is None and commandString is not None:
+    	target = core.chatService.getObjectByFirstName(commandString)
+    	if target is None:
+    		return
     
     if actor.getPosture() != 0x09 and target.getObjectId() != actor.getObjectId():
       actor.sendSystemMessage('@performance:insp_buff_must_perform', 2)

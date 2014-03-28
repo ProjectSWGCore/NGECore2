@@ -233,9 +233,7 @@ public class TravelService implements INetworkDispatch {
 	
 	public void loadTravelPoints() {
 		List<Planet> planetList = core.terrainService.getPlanetList();
-		for (Planet planet : planetList) {
-			addPlanet(planet);
-		}
+		planetList.forEach(this::addPlanet);
 		populateTravelFares();
 	}
 	
@@ -323,7 +321,7 @@ public class TravelService implements INetworkDispatch {
 	public void doTransport(SWGObject actor, TravelPoint tp) {
 		
 		Planet planet = core.terrainService.getPlanetByName(tp.getPlanetName());
-		Point3D spawnLocation = SpawnPoint.getRandomPosition(tp.getShuttle().getPosition(), 10, 50, actor.getPlanetId());
+		Point3D spawnLocation = SpawnPoint.getRandomPosition(tp.getShuttle().getPosition(), 5, 20, actor.getPlanetId());
 		core.simulationService.transferToPlanet(actor, planet, spawnLocation, new Quaternion(0, 0, 0, 0), null);
 		
 	}

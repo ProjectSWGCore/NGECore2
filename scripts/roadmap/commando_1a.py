@@ -23,3 +23,6 @@ def getHealth():
 
 def getAction():
 	return 75
+
+def getRewards(name):
+	return

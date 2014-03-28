@@ -4,12 +4,14 @@ def setup():
     return
 
 def run(core, actor, target, commandString):
-    dancer = actor.getPerformanceWatchee()
-    if not dancer:
-      return
-
+    performer = target
+    if commandString is not None and target is None:
+        performer = core.chatService.getObjectByFirstName(commandString)
+    
+    if performer is None:
+    	return
+    performer.removeAudience(actor)
     actor.setPerformanceWatchee(None)
-    dancer.removeAudience(actor)
     if not actor.getPerformanceListenee():
       actor.setMoodAnimation('')
 

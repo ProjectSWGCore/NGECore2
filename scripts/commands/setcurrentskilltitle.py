@@ -11,5 +11,6 @@ def run(core, actor, target, commandString):
     if playerObject is None:
         return
     
-    playerObject.setTitle(str(commandString))
+    if str(commandString) in playerObject.getTitleList() or str(commandString) == "citizenship" or str(commandString) == "": playerObject.setTitle(str(commandString))
+   
     return

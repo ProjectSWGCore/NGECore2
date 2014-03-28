@@ -21,6 +21,8 @@
  ******************************************************************************/
 package resources.common;
 
+import java.math.BigDecimal;
+
 import engine.resources.scene.*;
 
 public class MathUtilities {
@@ -43,5 +45,27 @@ public class MathUtilities {
 				q1.w * q2.z + q1.z * q2.w + q1.x * q2.y - q1.y * q2.x);
 		
 	}
+	
+	/**
+	 * Converts seconds to a whole hour.
+	 * @author Waverunner
+	 * @param seconds
+	 * @return hour(s)
+	 */
+	public static int secondsToWholeHours(int seconds) {
+		BigDecimal dec = new BigDecimal(seconds);
 
+		return dec.divide(new BigDecimal(3600), BigDecimal.ROUND_FLOOR).intValue();
+	}
+	
+	/**
+	 * Converts seconds to minutes of the hour.
+	 * @author Waverunner
+	 * @param seconds
+	 * @return hour(s)
+	 */
+	public static int secondsToHourMinutes(int seconds) {
+		BigDecimal dec = new BigDecimal(seconds);
+		return dec.remainder(new BigDecimal(3600)).divide(new BigDecimal(60), BigDecimal.ROUND_FLOOR).intValue();
+	}
 }

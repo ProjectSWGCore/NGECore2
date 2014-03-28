@@ -22,6 +22,7 @@ def run(core, actor, target, commandString):
 		
 	if actor.getDuelList().contains(target):
 		actor.sendSystemMessage('You already challenged ' + target.getCustomName() + ' to a duel.', 0)
+		return
 
 	combatSvc.handleDuel(actor, target)
 		

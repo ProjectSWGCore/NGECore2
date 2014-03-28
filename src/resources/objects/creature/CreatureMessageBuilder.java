@@ -31,9 +31,8 @@ import com.sleepycat.persist.model.Persistent;
 import engine.resources.common.CRC;
 import resources.objects.Buff;
 import resources.objects.ObjectMessageBuilder;
+import resources.objects.SkillMod;
 import engine.resources.objects.SWGObject;
-import engine.resources.objects.SkillMod;
-
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
@@ -89,6 +88,11 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		CreatureObject creature = (CreatureObject) object;
 		IoBuffer buffer = bufferPool.allocate(100, false).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.setAutoExpand(true);
+		
+		if(creature.getStfName() == null || creature.getStfFilename() == null) {
+			creature.setStfName("");
+			creature.setStfFilename("");
+		}
 
 		buffer.putShort((short) 19);	// Object Count
 		buffer.putFloat(1);
@@ -158,18 +162,22 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 			buffer.putInt(0);
 		} else {
 			buffer.putInt(creature.getSkillMods().size());
-			buffer.putInt(creature.getSkillModsUpdateCounter());
+			buffer.putInt(creature.getSkillMods().getUpdateCounter());
 			
-			for(SkillMod skillMod : creature.getSkillMods().get()) {
+			for(SkillMod skillMod : creature.getSkillMods()) {
 				buffer.put((byte) 0);
-				buffer.put(getAsciiString(skillMod.getSkillModString()));
+				buffer.put(getAsciiString(skillMod.getName()));
 				buffer.putInt(skillMod.getBase());
-				buffer.putInt(skillMod.getModifier());
+				buffer.putInt((int) skillMod.getModifier());
 			}
 		}
 		buffer.putFloat(creature.getSpeedMultiplierBase());
 		buffer.putFloat(creature.getSpeedMultiplierMod());
-		buffer.putLong(creature.getListenToId());
+		
+		if(creature.getPerformanceListenee() != null)
+			buffer.putLong(creature.getPerformanceListenee().getObjectId());
+		else
+			buffer.putLong(0);
 		
 		buffer.putFloat(creature.getRunSpeed());
 		
@@ -196,7 +204,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 				buffer.putInt(1);
 			}
 		}
-		buffer.putInt(0);	// displayXp
+		buffer.putInt(creature.getXpBarValue());	// xp bar value
 		int size = buffer.position();
 		buffer = bufferPool.allocate(size, false).put(buffer.array(), 0, size);
 
@@ -379,7 +387,12 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		
 		buffer.put((byte) 0); // performing? boolean
 		buffer.put(creature.getDifficulty());
-		buffer.putInt(0xFFFFFFFF); // -1 normal appearance, 0 hologram
+		
+		if(creature.isHologram())
+			buffer.putInt(0);
+		else
+			buffer.putInt(0xFFFFFFFF);
+
 		buffer.put((byte) 1); // visibleOnRadar? boolean
 		buffer.put((byte) 0); // no effect for 1?
 		buffer.put((byte) 0); // no effect for 1?
@@ -1055,13 +1068,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x1C, buffer, size + 4);
 		return buffer;
 	}
-	
-	@Override
-	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
-		// TODO Auto-generated method stub
-		
-	}
-	
+
 	public IoBuffer buildAddEquipmentDelta(TangibleObject item) {
 		
 		CreatureObject creature = (CreatureObject) object;
@@ -1162,12 +1169,47 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		return buffer;
 		
 	}
+	
+	public IoBuffer buildXPBarDelta(int xpBarValue) {
+		IoBuffer buffer = bufferPool.allocate(4, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putInt(xpBarValue);
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 4, (short) 1, (short) 0x0F, buffer, size + 4);
+		return buffer;	
+	}
 
+
+	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
+		switch (viewType) {
+			case 1:
+			case 3:
+			case 4: {
+				switch(updateType) {
+					case 3: {
+						buffer = createDelta("CREO", (byte) 4, (short) 1, (byte) 3, buffer.flip(), buffer.array().length + 4);
+						
+						if (object.getClient() != null && object.getClient().getSession() != null) {
+							//object.getClient().getSession().write(buffer);
+						}
+						break;
+					}
+					
+				}
+			}
+			case 6:
+			case 8:
+			case 9:
+			default:
+			{
+				return;
+			}
+		}
+	}
+	
 	@Override
 	public void sendBaselines() {
 		
 	}
-
-
 	
 }

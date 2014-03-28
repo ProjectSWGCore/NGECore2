@@ -222,11 +222,8 @@ public class CollectionService implements INetworkDispatch {
 									BitSet bitValue = new BitSet(64);
 									bitValue.set(64-bits, 64);
 									
-									BitSet maxValue = new BitSet(64);
-									maxValue.set(64-maxSlotValue, 64);
-									
-									if (bitValue.toLongArray()[0] < maxValue.toLongArray()[0]) {
-										System.out.println(slotName + ", row " + c + ": counter-type slot uses " + bits + " bits, which can only hold a max value of " + bitValue.toLongArray()[0] + ", which is less than the specified max value of " + maxValue.toLongArray()[0]);
+									if (bitValue.toLongArray()[0] < maxSlotValue) {
+										System.out.println(slotName + ", row " + c + ": counter-type slot uses " + bits + " bits, which can only hold a max value of " + bitValue.toLongArray()[0] + ", which is less than the specified max value of " + maxSlotValue);
 										throw new Exception();
 									}
 								}
@@ -293,14 +290,20 @@ public class CollectionService implements INetworkDispatch {
 								}
 							}
 							
-							if (bits > 1) {
+							if (maxSlotValue > -1) {
+								BitSet value = BitSet.valueOf(new long[] { collections.get(beginSlotId, (endSlotId + 1)).toLongArray()[0]++ });
+								
+								for (int i = beginSlotId; i <= endSlotId; i++) {
+									collections.set(i, value.get((i - beginSlotId)));
+								}
+							} else if (bits > 1) {
 								int nextBit = collections.get(beginSlotId, (endSlotId + 1)).previousClearBit(endSlotId);
 								
 								if (nextBit == -1) {
 									return false;
 								}
 								
-								collections.set((beginSlotId + nextBit));
+								collections.set(nextBit);
 							} else {
 								collections.set(beginSlotId);
 							}
@@ -359,7 +362,7 @@ public class CollectionService implements INetworkDispatch {
 								}
 								
 								if (trackServerFirst) {
-									if (core.guildService.getGuildObject().addServerFirst(collectionName, new ServerFirst(creature.getCustomName(), System.currentTimeMillis()))) {
+									if (core.guildService.getGuildObject().addServerFirst(collectionName, new ServerFirst(creature.getCustomName(), creature.getObjectId(), collectionName, System.currentTimeMillis()))) {
 										addCollection(creature, "bdg_server_first_01");
 									}
 								}
@@ -439,7 +442,6 @@ public class CollectionService implements INetworkDispatch {
 			String bookName = "";
 			String pageName = "";
 			String collectionName = "";
-			boolean collectionComplete = false;
 			
 			collections = BitSet.valueOf(player.getCollections());
 			
@@ -595,14 +597,15 @@ public class CollectionService implements INetworkDispatch {
 									BitSet bitValue = new BitSet(64);
 									bitValue.set(64-bits, 64);
 									
-									BitSet maxValue = new BitSet(64);
-									maxValue.set(64-maxSlotValue, 64);
-									
-									if (bitValue.toLongArray()[0] < maxValue.toLongArray()[0]) {
-										System.out.println(slotName + ", row " + c + ": counter-type slot uses " + bits + " bits, which can only hold a max value of " + bitValue.toLongArray()[0] + ", which is less than the specified max value of " + maxValue.toLongArray()[0]);
+									if (bitValue.toLongArray()[0] < maxSlotValue) {
+										System.out.println(slotName + ", row " + c + ": counter-type slot uses " + bits + " bits, which can only hold a max value of " + bitValue.toLongArray()[0] + ", which is less than the specified max value of " + maxSlotValue);
 										throw new Exception();
 									}
-									
+								}
+								
+								if (maxSlotValue > 0) {
+									return (int) collections.get(beginSlotId, (endSlotId + 1)).toLongArray()[0];
+								} else {
 									return collections.get(beginSlotId, (endSlotId + 1)).cardinality();
 								}
 							} else {

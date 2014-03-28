@@ -1,6 +1,9 @@
 import sys
 
 def setup(core, actor, buff):
+	return
+
+def add(core, actor, buff):
 
 	actor.setSpeedMultiplierMod(0)
 
@@ -22,7 +25,7 @@ def setup(core, actor, buff):
 	
 	return
 	
-def removeBuff(core, actor, buff):
+def remove(core, actor, buff):
 
 	actor.setSpeedMultiplierMod(1)
 

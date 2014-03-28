@@ -1,7 +1,10 @@
 import sys
 
-def setup(core, actor, buff): 
+def setup(core, actor, buff):
 	buff.setDuration(buff.getDuration()+(actor.getSkillModBase('expertise_buff_duration_line_fs_force_run')))
+	return
+
+def add(core, actor, buff):
 	actor.playEffectObject('clienteffect/pl_force_run.cef', 'fs_force_run')
 	actor.playEffectObject('appearance/pt_force_speed.prt', 'fs_force_run')
 	actor.setSpeedMultiplierBase(actor.getSpeedMultiplierBase() + 2.5 + (2.5 * (actor.getSkillModBase('expertise_movement_buff_fs_force_run')) / 100))
@@ -14,7 +17,7 @@ def setup(core, actor, buff):
 	
 	return
 	
-def removeBuff(core, actor, buff):
+def remove(core, actor, buff):
 	actor.stopEffectObject('fs_force_run')
 	actor.setSpeedMultiplierBase(actor.getSpeedMultiplierBase() - 2.5 - (2.5 * (actor.getSkillModBase('expertise_movement_buff_fs_force_run')) / 100))
 	core.skillModService.deductSkillMod(actor, 'slope_move', 5)

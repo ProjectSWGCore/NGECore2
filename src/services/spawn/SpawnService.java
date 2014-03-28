@@ -103,6 +103,9 @@ public class SpawnService {
 		
 		creature.setOptionsBitmask(mobileTemplate.getOptionBitmask());
 		creature.setPvPBitmask(mobileTemplate.getPvpBitmask());
+		creature.setStfFilename("mob/creature_names"); // TODO: set other STFs for NPCs other than creatures
+		creature.setStfName(mobileTemplate.getCreatureName());
+		creature.setHeight(mobileTemplate.getScale());
 		int difficulty = mobileTemplate.getDifficulty();
 		creature.setDifficulty((byte) difficulty);
 		if(level != -1)
@@ -122,6 +125,7 @@ public class SpawnService {
 		}
 		creature.addObjectToEquipList(defaultWeapon);
 		creature.add(defaultWeapon);
+		creature.setWeaponId(defaultWeapon.getObjectID());
 		creature.addObjectToEquipList(inventory);
 		creature.add(inventory);
 
@@ -169,6 +173,10 @@ public class SpawnService {
 			cell.add(creature);
 		}
 		return creature;
+	}
+	
+	public CreatureObject spawnCreature(String mobileTemplate, String planetName, long cellId, float x, float y, float z, float qW, float qX, float qY, float qZ, int level) {
+		return spawnCreature(mobileTemplate, planetName, cellId, x, y, z, 1, 0, 0, 0, (short) level);
 	}
 	
 	public CreatureObject spawnCreature(String mobileTemplate, String planetName, long cellId, float x, float y, float z) {

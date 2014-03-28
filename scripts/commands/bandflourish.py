@@ -31,15 +31,10 @@ def run(core, actor, target, commandString):
     if actor.getPerformanceId() <= 0:
       actor.sendSystemMessage('@performance:flourish_not_performing', 0)
       return
-      
-    animation = 'skill_action_' + str(flourish)
-    if flourish == 9:
-      animation = 'mistake'
 
     if actor.getAcceptBandflourishes():
       actor.sendSystemMessage('@performance:flourish_perform_band_self', 0)
-      actor.sendSystemMessage('@performance:flourish_perform', 0)
-      actor.doSkillAnimation(animation)
+      core.entertainmentService.performFlourish(actor, flourish)
 
     group = core.objectService.getObject(actor.getGroupId())
     if not group:
@@ -50,8 +45,7 @@ def run(core, actor, target, commandString):
         continue
       if creature.getAcceptBandflourishes():
         creature.sendSystemMessage('@performance:flourish_perform_band_member', 0)
-        creature.sendSystemMessage('@performance:flourish_perform', 0)
-        creature.doSkillAnimation(animation)
+        core.entertainmentService.performFlourish(creature, flourish)
     return
 
 

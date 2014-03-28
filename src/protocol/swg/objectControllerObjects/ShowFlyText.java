@@ -27,6 +27,7 @@ import org.apache.mina.core.buffer.IoBuffer;
 
 import protocol.swg.ObjControllerMessage;
 import resources.common.RGB;
+import resources.common.StringUtilities;
 
 public class ShowFlyText extends ObjControllerObject {
 	
@@ -70,6 +71,7 @@ public class ShowFlyText extends ObjControllerObject {
 		this.scale = scale;
 		this.color = color;
 		this.alternativeStructure = true;
+		this.displayType = displayType;
 	}
 	
 	@Override
@@ -117,13 +119,16 @@ public class ShowFlyText extends ObjControllerObject {
 			result.putLong(0);
 			result.putLong(0);
 			result.putLong(0);
-			result.put(getUnicodeString(customText));
-			result.putShort(xp);
+			result.put(getUnicodeString(customText)); // %TO?
+			result.putShort(xp); // %DI ?
 			result.putLong(0);
 			result.putFloat(scale);
 			result.put(color.getBytes());
 			result.putInt(displayType);
-			return result.flip();
+			
+			result.flip();
+			//StringUtilities.printBytes(result.array());
+			return result;
 		}
 	}
 

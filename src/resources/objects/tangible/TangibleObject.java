@@ -123,7 +123,11 @@ public class TangibleObject extends SWGObject {
 	}
 
 	public void setCustomization(byte[] customization) {
-		this.customization = customization;
+		synchronized(objectMutex) {
+			this.customization = customization;
+		}
+		
+		notifyObservers(messageBuilder.buildCustomizationDelta(customization), false);
 	}
 
 	public List<Integer> getComponentCustomizations() {
@@ -229,7 +233,9 @@ public class TangibleObject extends SWGObject {
 	}
 
 	public Vector<TangibleObject> getDefendersList() {
-		return defendersList;
+	    synchronized(objectMutex) {
+    			return defendersList;
+    	    }	
 	}
 	
 	public void addDefender(TangibleObject defender) {
@@ -319,6 +325,18 @@ public class TangibleObject extends SWGObject {
 		for (Client client : observers) {
 			client.getSession().write((new ObjControllerMessage(0x0000000B, new ShowFlyText(client.getParent().getObjectID(), getObjectID(), 56, 1, 1, -1, stfFile, stfString, customText, xp, scale, color, displayType))).serialize());
 		}
+	}
+	
+	public void showFlyText(String stfFile, String stfString, String customText, int xp, float scale, RGB color, int displayType, int unkInt) {
+		//Set<Client> observers = getObservers();
+		
+		if (getClient() != null) {
+			getClient().getSession().write((new ObjControllerMessage(0x0000000B, new ShowFlyText(getObjectID(), getObjectID(), unkInt, 1, 1, -1, stfFile, stfString, customText, xp, scale, color, displayType))).serialize());
+		}
+		
+		/*for (Client client : observers) {
+			client.getSession().write((new ObjControllerMessage(0x0000000B, new ShowFlyText(client.getParent().getObjectID(), getObjectID(), unkInt, 1, 1, -1, stfFile, stfString, customText, xp, scale, color, displayType))).serialize());
+		}*/
 	}
 	
 	public void playEffectObject(String effectFile, String commandString) {
