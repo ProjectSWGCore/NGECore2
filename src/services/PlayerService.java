@@ -599,7 +599,15 @@ public class PlayerService implements INetworkDispatch {
 		PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
 		int experience = 0;
 		
+		if (player == null) {
+			return;
+		}
+		
 		resetLevel(creature);
+		
+		if (level == 0) {
+			return;
+		}
 		
 		try {
 			experienceTable = ClientFileManager.loadFile("datatables/player/player_level.iff", DatatableVisitor.class);
@@ -623,8 +631,8 @@ public class PlayerService implements INetworkDispatch {
 			
 			int healthGranted = 0;
 			
-			for (int i = 0; i < level; i++) {
-				healthGranted += ((Integer) experienceTable.getObject(i, 4));
+			for (int i = 1; i < level; i++) {
+				healthGranted += ((Integer) experienceTable.getObject((i - 0), 4));
 				
 				// 3. Add skills and roadmap items.
 				if ((i == 4 || i == 7 || i == 10) || ((i > 10) && (((i - 10)  % 4) == 0))) {
@@ -706,9 +714,9 @@ public class PlayerService implements INetworkDispatch {
 			core.skillModService.addSkillMod(creature, "constitution", (int) constitution);
 			core.skillModService.addSkillMod(creature, "stamina", (int) stamina);
 			core.skillModService.addSkillMod(creature, "agility", (int) agility);
-			creature.setMaxHealth(creature.getMaxHealth() + (int) health + healthGranted);
+			creature.setMaxHealth((int) health + healthGranted);
 			creature.setHealth(creature.getMaxHealth());
-			creature.setMaxAction((creature.getMaxAction() + (int) action));
+			creature.setMaxAction((int) action);
 			creature.setAction(creature.getMaxAction());
 			creature.setGrantedHealth(healthGranted);
 			
