@@ -567,12 +567,12 @@ public class PlayerService implements INetworkDispatch {
 		
 		player.setProfessionWheelPosition("");
 		
-		core.skillModService.removeSkillMod(creature, "luck", creature.getSkillModBase("luck"));
-		core.skillModService.addSkillMod(creature, "precision", creature.getSkillModBase("precision"));
-		core.skillModService.addSkillMod(creature, "strength", creature.getSkillModBase("strength"));
-		core.skillModService.addSkillMod(creature, "constitution", creature.getSkillModBase("constitution"));
-		core.skillModService.addSkillMod(creature, "stamina", creature.getSkillModBase("stamina"));
-		core.skillModService.addSkillMod(creature, "agility", creature.getSkillModBase("agility"));
+		core.skillModService.deductSkillMod(creature, "luck", creature.getSkillModBase("luck"));
+		core.skillModService.deductSkillMod(creature, "precision", creature.getSkillModBase("precision"));
+		core.skillModService.deductSkillMod(creature, "strength", creature.getSkillModBase("strength"));
+		core.skillModService.deductSkillMod(creature, "constitution", creature.getSkillModBase("constitution"));
+		core.skillModService.deductSkillMod(creature, "stamina", creature.getSkillModBase("stamina"));
+		core.skillModService.deductSkillMod(creature, "agility", creature.getSkillModBase("agility"));
 		creature.setMaxHealth(1000);
 		creature.setHealth(1000);
 		creature.setMaxAction(300);
