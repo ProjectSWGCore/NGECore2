@@ -233,7 +233,9 @@ public class TangibleObject extends SWGObject {
 	}
 
 	public Vector<TangibleObject> getDefendersList() {
-		return defendersList;
+	    synchronized(objectMutex) {
+    			return defendersList;
+    	    }	
 	}
 	
 	public void addDefender(TangibleObject defender) {

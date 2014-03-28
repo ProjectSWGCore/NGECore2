@@ -613,13 +613,11 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			removeSkillMod(mod);
 		} else {
 			skillMods.set(skillMods.indexOf(mod), mod);
-			System.out.println("Deducted mod!");
 			if(getClient() != null) {
 				setSkillModsUpdateCounter((short) (getSkillModsUpdateCounter() + 1));
 				getClient().getSession().write(messageBuilder.buildAddSkillModDelta(name, mod.getBase()));
 			}
 		}
-		
 	}
 
 	public void removeSkillMod(SkillMod mod) {
@@ -1063,7 +1061,9 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 
 	public SWGList<SWGObject> getEquipmentList() {
+	    synchronized(objectMutex) {
 		return equipmentList;
+	    }
 	}
 
 	public SWGList<Buff> getBuffList() {
@@ -1309,6 +1309,8 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 
 	public void setMaxHealth(int maxHealth) {
 		synchronized(objectMutex) {
+		    	if(this.maxHealth == maxHealth) return;
+		    
 			this.maxHealth = maxHealth;
 			setMaxHAMListCounter(getMaxHAMListCounter() + 1);
 			if(maxHealth < getHealth())
@@ -1325,6 +1327,8 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 
 	public void setMaxAction(int maxAction) {
 		synchronized(objectMutex) {
+		    	if(this.maxAction == maxAction) return;
+		    
 			this.maxAction = maxAction;
 			setMaxHAMListCounter(getMaxHAMListCounter() + 1);
 			if(maxAction < getAction())

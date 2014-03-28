@@ -123,14 +123,23 @@ public class DevService implements INetworkDispatch {
 					
 					// Character
 					case 10: // Set combat level to 90
-						core.playerService.grantLevel(player, 90);
+						//core.playerService.grantLevel(player, 90); // Commented out until fixed
+					    	core.playerService.giveExperience(player, 999999999);
 						return;
 					case 11: // Give 100,000 credits
 						player.setCashCredits(player.getCashCredits() + 100000);
 						return;
 					case 12: // Reset expertise
-						player.getSkills().get().stream().filter(s -> s.contains("expertise")).forEach(s -> core.skillService.removeSkill(creature, s));
-						return;
+					    // Seefo->Light: I commented out the below line because it gave us an error and didn't properly remove the skill, could you try the method SWGList.reverseGet that I added?
+					    //player.getSkills().get().stream().filter(s -> s.contains("expertise")).forEach(s -> core.skillService.removeSkill(creature, s));
+					    
+					    // Using this for now
+					    for(int i = creature.getSkills().size() - 1; i >= 0; i-- )
+						{
+						    String skill = creature.getSkills().get(i);
+						    if(skill.contains("expertise")) core.skillService.removeSkill(player, skill);
+						}
+					    return;
 						
 					// Items
 					case 20: // (Light) Jedi Robe

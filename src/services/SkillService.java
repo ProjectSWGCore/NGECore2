@@ -189,7 +189,7 @@ public class SkillService implements INetworkDispatch {
 		}
 		
 		try {
-			skillTable = ClientFileManager.loadFile("datatables/skills/skills.iff", DatatableVisitor.class);
+			skillTable = ClientFileManager.loadFile("datatables/skill/skills.iff", DatatableVisitor.class);
 			
 			for (int s = 0; s < skillTable.getRowCount(); s++) {
 				if (skillTable.getObject(s, 0) != null) {
@@ -218,7 +218,7 @@ public class SkillService implements INetworkDispatch {
 							for (String ability : abilities) {
 								creature.removeAbility(ability);
 							}
-						}
+						}									
 						
 						for (String skillMod : skillMods) {
 							core.skillModService.deductSkillMod(creature, skillMod.split("=")[0], new Integer(skillMod.split("=")[1]));
@@ -231,6 +231,8 @@ public class SkillService implements INetworkDispatch {
 						for (String schematic : schematicsRevoked) {
 							//player.getDraftSchematicList().add(new DraftSchematic());
 						}
+						
+						creature.removeSkill(skill);
 					}
 				}
 			}

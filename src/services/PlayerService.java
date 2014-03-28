@@ -619,22 +619,25 @@ public class PlayerService implements INetworkDispatch {
 			
 			player.setXp(xpType, experience);
 			
+
 			// 2. Add the relevant health/action and expertise points.
-			float luck = (((float) ((core.scriptService.getMethod("scripts/roadmap/", player.getProfession(), "getLuck").__call__().asInt() + (core.scriptService.getMethod("scripts/roadmap/", creature.getStfName(), "getLuck").__call__().asInt()) / (float) 90) * (float) level);
-			float precision = (((float) ((core.scriptService.getMethod("scripts/roadmap/", player.getProfession(), "getPrecision").__call__().asInt() + (core.scriptService.getMethod("scripts/roadmap/", creature.getStfName(), "getPrecision").__call__().asInt()) / (float) 90) * (float) level);
-			float strength = (((float) ((core.scriptService.getMethod("scripts/roadmap/", player.getProfession(), "getStrength").__call__().asInt() + (core.scriptService.getMethod("scripts/roadmap/", creature.getStfName(), "getStrength").__call__().asInt()) / (float) 90) * (float) level);
-			float constitution = (((float) ((core.scriptService.getMethod("scripts/roadmap/", player.getProfession(), "getConstitution").__call__().asInt() + (core.scriptService.getMethod("scripts/roadmap/", creature.getStfName(), "getConstitution").__call__().asInt()) / (float) 90) * (float) level);
-			float stamina = (((float) ((core.scriptService.getMethod("scripts/roadmap/", player.getProfession(), "getStamina").__call__().asInt() + (core.scriptService.getMethod("scripts/roadmap/", creature.getStfName(), "getStamina").__call__().asInt()) / (float) 90) * (float) level);
-			float agility = (((float) ((core.scriptService.getMethod("scripts/roadmap/", player.getProfession(), "getAgility").__call__().asInt() + (core.scriptService.getMethod("scripts/roadmap/", creature.getStfName(), "getAgility").__call__().asInt()) / (float) 90) * (float) level);
+			float luck = 0, precision = 0, strength = 0, constitution = 0, stamina = 0, agility = 0;
+			luck = (((((float) (core.scriptService.getMethod("scripts/roadmap/", player.getProfession(), "getLuck").__call__().asInt()) + (core.scriptService.getMethod("scripts/roadmap/", creature.getStfName(), "getLuck").__call__().asInt())) / ((float) 90)) * ((float) level)) - ((float) creature.getSkillModBase("luck")));
+			precision = (((((float) (core.scriptService.getMethod("scripts/roadmap/", player.getProfession(), "getPrecision").__call__().asInt()) + (core.scriptService.getMethod("scripts/roadmap/", creature.getStfName(), "getPrecision").__call__().asInt())) / ((float) 90)) * ((float) level)) - ((float) creature.getSkillModBase("precision")));
+			strength = (((((float) (core.scriptService.getMethod("scripts/roadmap/", player.getProfession(), "getStrength").__call__().asInt()) + (core.scriptService.getMethod("scripts/roadmap/", creature.getStfName(), "getStrength").__call__().asInt())) / ((float) 90)) * ((float) level)) - ((float) creature.getSkillModBase("strength")));
+			constitution = (((((float) (core.scriptService.getMethod("scripts/roadmap/", player.getProfession(), "getConstitution").__call__().asInt()) + (core.scriptService.getMethod("scripts/roadmap/", creature.getStfName(), "getConstitution").__call__().asInt())) / ((float) 90)) * ((float) level)) - ((float) creature.getSkillModBase("constitution")));
+			stamina = (((((float) (core.scriptService.getMethod("scripts/roadmap/", player.getProfession(), "getStamina").__call__().asInt()) + (core.scriptService.getMethod("scripts/roadmap/", creature.getStfName(), "getStamina").__call__().asInt())) / ((float) 90)) * ((float) level)) - ((float) creature.getSkillModBase("stamina")));
+			agility = (((((float) (core.scriptService.getMethod("scripts/roadmap/", player.getProfession(), "getAgility").__call__().asInt()) + (core.scriptService.getMethod("scripts/roadmap/", creature.getStfName(), "getAgility").__call__().asInt())) / ((float) 90)) * ((float) level)) - ((float) creature.getSkillModBase("agility")));
 			float health = (100 * level);
 			float action = (75 * level);
 			
-			int healthGranted = 0;
+			int healthGranted = ((Integer) experienceTable.getObject((level - 1), 4));;
 			
-			for (int i = 1; i < level; i++) {
-				healthGranted += ((Integer) experienceTable.getObject((i - 0), 4));
-				
+			for (int i = 1; i <= level; i++) {
+			    //System.out.println("Now: " + healthGranted + ", adding: " + ((Integer) experienceTable.getObject((i - 1), 4)));
+				//healthGranted = ((Integer) experienceTable.getObject((i - 1), 4));
 				// 3. Add skills and roadmap items.
+			      
 				if ((i == 4 || i == 7 || i == 10) || ((i > 10) && (((i - 10)  % 4) == 0))) {
 					int skill = ((i <= 10) ? ((i - 1) / 3) : ((((i - 10) / 4)) + 3));
 					String roadmapSkillName = "";
@@ -720,6 +723,9 @@ public class PlayerService implements INetworkDispatch {
 			creature.setAction(creature.getMaxAction());
 			creature.setGrantedHealth(healthGranted);
 			
+			System.out.print("Health: " + creature.getHealth());
+			System.out.print("Constitution: " + healthGranted);
+			
 			creature.getClient().getSession().write((new ClientMfdStatusUpdateMessage((float) ((level >= 90) ? 90 : (level + 1)), "/GroundHUD.MFDStatus.vsp.role.targetLevel")).serialize());
 			creature.setLevel((short) level);
 			core.scriptService.callScript("scripts/collections/", "master_" + player.getProfession(), "addMasterBadge", core, creature);
@@ -727,6 +733,7 @@ public class PlayerService implements INetworkDispatch {
 			creature.showFlyText("cbt_spam", "skill_up", (float) 2.5, new RGB(154, 205, 50), 0);
 			creature.playEffectObject("clienteffect/skill_granted.cef", "");
 			creature.playMusic("sound/music_acq_bountyhunter.snd");
+			
 		} catch (InstantiationException | IllegalAccessException e) {
 			e.printStackTrace();
 		}
