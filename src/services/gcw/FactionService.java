@@ -204,6 +204,10 @@ public class FactionService implements INetworkDispatch {
 		int pvpBitmask = target.getPvPBitmask();
 		
 		if (target.getSlottedObject("ghost") != null) {
+			if (target.getFaction() == null || (!target.getFaction().equals("rebel") && !target.getFaction().equals("imperial"))) {
+				return 0;
+			}
+			
 			pvpBitmask |= PvpStatus.Player;
 			
 			if (player.getFactionStatus() == FactionStatus.SpecialForces &&
