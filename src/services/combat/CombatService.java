@@ -21,6 +21,7 @@
  ******************************************************************************/
 package services.combat;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -186,7 +187,7 @@ public class CombatService implements INetworkDispatch {
 			CreatureObject creature = (CreatureObject)target;
 			if(creature.getPosture() == Posture.Incapacitated || creature.getPosture() == Posture.Dead)
 			{
-				for (TangibleObject defender : creature.getDefendersList())
+				for (TangibleObject defender : new ArrayList<TangibleObject>(creature.getDefendersList()))
 				{
 					defender.removeDefender(creature);
 					creature.removeDefender(defender);

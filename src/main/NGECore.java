@@ -377,8 +377,9 @@ public class NGECore {
 		
 		objectService.loadBuildings();
 		terrainService.loadSnapShotObjects();
+		objectService.loadServerTemplates();
 		simulationService.insertSnapShotObjects();
-		
+		simulationService.insertPersistentBuildings();
 		// Zone services that need to be loaded after the above
 		zoneDispatch.addService(simulationService);
 		

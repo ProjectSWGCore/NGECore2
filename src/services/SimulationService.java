@@ -42,6 +42,8 @@ import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 
+import com.sleepycat.persist.EntityCursor;
+
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.MeshVisitor;
 import engine.clientdata.visitors.PortalVisitor;
@@ -58,7 +60,6 @@ import engine.resources.scene.Quaternion;
 import engine.resources.scene.quadtree.QuadTree;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
-
 import protocol.swg.ChatFriendsListUpdate;
 import protocol.swg.ChatOnChangeFriendStatus;
 import protocol.swg.ChatOnGetFriendsList;
@@ -71,7 +72,6 @@ import protocol.swg.UpdateTransformWithParentMessage;
 import protocol.swg.objectControllerObjects.DataTransform;
 import protocol.swg.objectControllerObjects.DataTransformWithParent;
 import protocol.swg.objectControllerObjects.TargetUpdate;
-
 import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
@@ -170,10 +170,26 @@ public class SimulationService implements INetworkDispatch {
 	public void insertSnapShotObjects() {
 		List<SWGObject> objectList = new ArrayList<SWGObject>(core.objectService.getObjectList().values());
 		for(SWGObject obj : objectList) {
-			if(obj.getParentId() == 0 && obj.isInSnapshot())
+			if(obj.getParentId() == 0 && (obj.isInSnapshot() || obj.getAttachment("isBuildout") != null))
 				add(obj, obj.getPosition().x, obj.getPosition().z);
 		}
 	}
+	
+	public void insertPersistentBuildings() {
+		EntityCursor<BuildingObject> cursor = core.getBuildingODB().getCursor(Long.class, BuildingObject.class);
+		
+		Iterator<BuildingObject> it = cursor.iterator();
+		
+		while(it.hasNext()) {
+			final BuildingObject building = (BuildingObject) core.objectService.getObject(it.next().getObjectID());
+			if(building == null)
+				continue;
+			if(building.getAttachment("hasLoadedServerTemplate") == null)
+				core.objectService.loadServerTemplate(building);
+			add(building, building.getPosition().x, building.getPosition().z);
+		}
+	}
+
 	
 	public void addCollidable(AbstractCollidable collidable, float x, float y) {
 		collidableQuadTrees.get(collidable.getPlanet().getName()).put(x, y, collidable);
@@ -198,7 +214,7 @@ public class SimulationService implements INetworkDispatch {
 			Vector<SWGObject> childObjects = (Vector<SWGObject>) object.getAttachment("childObjects");
 			if(childObjects != null) {
 				addChildObjects(object, childObjects);
-				//object.setAttachment("childObjects", null);
+				object.setAttachment("childObjects", null);
 			}
 			if(notifyObservers) {
 				Point3D pos = new Point3D(x, 0, y);

@@ -566,7 +566,7 @@ public class PlayerService implements INetworkDispatch {
 		
 		try
 		{
-        		for (SWGObject equipment : creature.getEquipmentList()) {
+        		for (SWGObject equipment : new ArrayList<SWGObject>(creature.getEquipmentList())) {
         			if (equipment == null) {
         				continue;
         			}
