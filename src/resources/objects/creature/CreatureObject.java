@@ -43,6 +43,8 @@ import com.sleepycat.je.Transaction;
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.NotPersistent;
 
+import main.NGECore;
+
 import engine.clients.Client;
 import resources.objects.Buff;
 import resources.objects.DamageOverTime;
@@ -1135,49 +1137,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		//destination.getSession().write(messageBuilder.buildBaseline9());
 		 		
 		if(destination != getClient()) {
-			UpdatePVPStatusMessage upvpm = new UpdatePVPStatusMessage(getObjectID(), getPvPBitmask(), getFaction());
-			if(getSlottedObject("ghost") != null)
-	            upvpm.setStatus(16);
-			/*
-			if (factionStatus == 1 && faction == "imperial") {
-				upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Imperial);
-				upvpm.setStatus(16);
-				if ((getOptionsBitmask() & 128) == 128) upvpm.setStatus(0);
-				if (getOwnerId() != 0) upvpm.setStatus(256);
-			}
-			
-			if (factionStatus == 1 && faction == "rebel") {
-				upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Rebel);
-				upvpm.setStatus(16);
-				if ((getOptionsBitmask() & 128) == 128) upvpm.setStatus(0);
-				if (getOwnerId() != 0) upvpm.setStatus(256);
-			}
-			
-			if (factionStatus == 2 && faction == "imperial") {
-				upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Imperial);
-				upvpm.setStatus(55);
-				if ((getOptionsBitmask() & 128) == 128) upvpm.setStatus(39);
-				if (getOwnerId() != 0) upvpm.setStatus(295);
-			}
-			if (factionStatus == 2 && faction == "rebel") {
-				upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Rebel);
-				upvpm.setStatus(55);
-				if ((getOptionsBitmask() & 128) == 128) upvpm.setStatus(39);
-				if (getOwnerId() != 0) upvpm.setStatus(295);
-			} 
-			if(factionStatus == 0 && faction == "neutral") {
-				upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Neutral);
-				upvpm.setStatus(16);
-				if ((getOptionsBitmask() & 128) == 128) upvpm.setStatus(0);
-				if (getOwnerId() != 0) upvpm.setStatus(256);
-			} else {
-				upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Neutral);
-				upvpm.setStatus(16);
-				if ((getOptionsBitmask() & 128) == 128) upvpm.setStatus(0);
-				if (getOwnerId() != 0) upvpm.setStatus(256);
-			}
-			*/
-			
+			UpdatePVPStatusMessage upvpm = new UpdatePVPStatusMessage(getObjectID(), NGECore.getInstance().factionService.calculatePvpStatus(destination.getParent(), this), getFaction());
 			destination.getSession().write(upvpm.serialize());
 			UpdatePostureMessage upm = new UpdatePostureMessage(getObjectID(), getPosture());
 			destination.getSession().write(upm.serialize());
