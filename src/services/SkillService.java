@@ -221,7 +221,7 @@ public class SkillService implements INetworkDispatch {
 						}									
 						
 						for (String skillMod : skillMods) {
-							core.skillModService.deductSkillMod(creature, skillMod.split("=")[0], new Integer(skillMod.split("=")[1]));
+							if(skillMod.split("=").length == 2) core.skillModService.deductSkillMod(creature, skillMod.split("=")[0], new Integer(skillMod.split("=")[1]));
 						}
 						
 						for (String schematic : schematicsGranted) {
