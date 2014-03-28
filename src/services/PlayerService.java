@@ -526,7 +526,7 @@ public class PlayerService implements INetworkDispatch {
 	/*
 	 * Resets to level 0
 	 */
-	public void resetLevel(CreatureObject creature, int level) {
+	public void resetLevel(CreatureObject creature) {
 		PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
 		
 		for (SWGObject equipment : creature.getEquipmentList()) {
@@ -669,8 +669,9 @@ public class PlayerService implements INetworkDispatch {
 													
 								}
 							}
-						}
-										
+						}				
+					} catch (InstantiationException | IllegalAccessException e) {
+						e.printStackTrace();
 					}
 				}
 			}
