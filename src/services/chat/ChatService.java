@@ -57,6 +57,7 @@ import protocol.swg.ChatOnSendPersistentMessage;
 import protocol.swg.ChatPersistentMessageToClient;
 import protocol.swg.ChatPersistentMessageToServer;
 import protocol.swg.ChatRequestPersistentMessage;
+import protocol.swg.ChatSystemMessage;
 import protocol.swg.ObjControllerMessage;
 import protocol.swg.objectControllerObjects.PlayerEmote;
 import protocol.swg.objectControllerObjects.SpatialChat;
@@ -585,6 +586,10 @@ public class ChatService implements INetworkDispatch {
 		Mail mail = mailODB.get(new Integer(mailId), Integer.class, Mail.class);
 		return mail;
 		
+	}
+	
+	public void broadcastGalaxy(String message) {
+		core.simulationService.notifyAllClients(new ChatSystemMessage(message, (byte) 0).serialize());
 	}
 
 }
