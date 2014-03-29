@@ -81,6 +81,7 @@ import resources.objects.tangible.TangibleObject;
 import resources.common.*;
 import resources.common.collidables.AbstractCollidable;
 import resources.datatables.PlayerFlags;
+import resources.datatables.Posture;
 import services.ai.LairActor;
 import toxi.geom.Line3D;
 import toxi.geom.Ray3D;
@@ -189,6 +190,7 @@ public class SimulationService implements INetworkDispatch {
 				core.objectService.loadServerTemplate(building);
 			add(building, building.getPosition().x, building.getPosition().z);
 		}
+		cursor.close();
 	}
 
 	
@@ -803,7 +805,7 @@ public class SimulationService implements INetworkDispatch {
 		PlayerObject ghost = (PlayerObject) object.getSlottedObject("ghost");
 				
 		core.weatherService.sendWeather(object);
-
+				
 		if (!object.hasSkill(ghost.getProfessionWheelPosition())) {
 			object.showFlyText("cbt_spam", "skill_up", (float) 2.5, new RGB(154, 205, 50), 0);
 			object.playEffectObject("clienteffect/skill_granted.cef", "");
@@ -813,6 +815,9 @@ public class SimulationService implements INetworkDispatch {
 		
 		if(object.getGroupId() != 0 && core.objectService.getObject(object.getGroupId()) instanceof GroupObject)
 			object.makeAware(core.objectService.getObject(object.getGroupId()));
+		
+		if(object.getPosture() == Posture.Dead)
+			core.playerService.sendCloningWindow(object, false);
 		
 	}
 		

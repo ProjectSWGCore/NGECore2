@@ -1370,6 +1370,17 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		return null;
 	}
 	
+	public Buff getBuffByCRC(int crc) {
+		synchronized(objectMutex) {
+			for (Buff buff : buffList.get()) {
+				if (buff.getBuffCRC() == crc) {
+					return buff;
+				}
+			}
+		}
+		return null;
+	}
+	
 	public void updateGroupInviteInfo() {
 		
 		if(getClient() == null || getClient().getSession() == null)

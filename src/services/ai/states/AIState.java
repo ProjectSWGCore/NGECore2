@@ -134,7 +134,7 @@ public abstract class AIState {
 							}
 							
 							if(cell == null) {
-								float height = core.terrainService.getHeight(creature.getPlanetId(), newX, newX);
+								float height = core.terrainService.getHeight(creature.getPlanetId(), newX, newZ);
 								newY = height;
 							} else {
 								newY = currentPathPosition.y;
@@ -145,7 +145,7 @@ public abstract class AIState {
 				} else {
 					newX = currentPathPosition.x;
 					newZ = currentPathPosition.z;
-					newY = core.terrainService.getHeight(creature.getPlanetId(), newX, newX);
+					newY = core.terrainService.getHeight(creature.getPlanetId(), newX, newZ);			
 				}
 				oldPosition = currentPathPosition;
 			}

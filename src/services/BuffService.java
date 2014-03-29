@@ -48,6 +48,7 @@ public class BuffService implements INetworkDispatch {
 
 	public BuffService(NGECore core) {
 		this.core = core;
+		core.commandService.registerCommand("removeBuff");
 	}
 
 	@Override
