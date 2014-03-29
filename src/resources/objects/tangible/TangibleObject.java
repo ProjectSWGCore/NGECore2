@@ -233,7 +233,7 @@ public class TangibleObject extends SWGObject {
 			Client observer = it.next();
 			
 			if (observer.getParent() != null) {
-				observer.getSession().write(new UpdatePVPStatusMessage(this.getObjectID(), NGECore.getInstance().factionService.calculatePvpStatus(observer, this), getFaction()).serialize());
+				observer.getSession().write(new UpdatePVPStatusMessage(this.getObjectID(), NGECore.getInstance().factionService.calculatePvpStatus((CreatureObject) observer.getParent(), this), getFaction()).serialize());
 			}
 		}
 	}
