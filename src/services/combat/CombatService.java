@@ -855,6 +855,8 @@ public class CombatService implements INetworkDispatch {
 			return false;
 		}
 		
+		if(target.getAttachment("AI") != null) return false;
+		
 		if(healer.getFaction().equals(target.getFaction())) {
 			
 			if(healer.getFactionStatus() < target.getFactionStatus())

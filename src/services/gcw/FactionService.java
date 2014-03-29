@@ -203,11 +203,12 @@ public class FactionService implements INetworkDispatch {
 		
 		int pvpBitmask = target.getPvPBitmask();
 		
-		if (target.getFactionStatus() == FactionStatus.Combatant) {
+		// Seefo: Casting target to type CreatureObject as temporary fix.  I am unsure whether or not we want to put a factionStatus member inside of TangibleObject.
+		if (((CreatureObject) target).getFactionStatus() == FactionStatus.Combatant) {
 			pvpBitmask |= PvpStatus.Enemy;
 		}
 		
-		if (target.getFactionStatus() == FactionStatus.SpecialForces) {
+		if (((CreatureObject) target).getFactionStatus() == FactionStatus.SpecialForces) {
 			pvpBitmask |= PvpStatus.Overt;
 			
 			if (target.getSlottedObject("ghost") != null) {
@@ -232,7 +233,7 @@ public class FactionService implements INetworkDispatch {
 			return pvpBitmask;
 		}
 		
-		if (player.getFaction().equals(target.getFaction()) {
+		if (player.getFaction().equals(target.getFaction())) {
 			return pvpBitmask;
 		}
 		
