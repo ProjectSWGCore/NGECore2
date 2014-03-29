@@ -100,8 +100,11 @@ public class BuffService implements INetworkDispatch {
 		}
 		
 		final Buff buff = new Buff(buffName, target.getObjectID());
-		buff.setTotalPlayTime(((PlayerObject) target.getSlottedObject("ghost")).getTotalPlayTime());
-		
+		if(target.getSlottedObject("ghost") != null)
+			buff.setTotalPlayTime(((PlayerObject) target.getSlottedObject("ghost")).getTotalPlayTime());
+		else
+			buff.setTotalPlayTime(0);
+			
         if(FileUtilities.doesFileExist("scripts/buffs/" + buffName + ".py"))
         	core.scriptService.callScript("scripts/buffs/", buffName, "setup", core, buffer, buff);
 	

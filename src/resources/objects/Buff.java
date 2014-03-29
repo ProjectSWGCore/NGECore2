@@ -430,7 +430,7 @@ public class Buff implements IDelta {
 	}
 	
 	public boolean isGroupBuff() {
-		return effect1Name.equals("group");
+		return effect1Name == null ? false : effect1Name.equals("group");
 	}
 
 	public long getGroupBufferId() {

@@ -112,6 +112,8 @@ public abstract class AIState {
 							
 							float distance = oldWorldPos.getDistance(currentPathPosition.getWorldPosition());
 							float travelDistance = distance - (pathDistance - maxDistance);
+							// temp fix for melee npcs
+							travelDistance *= 1.3;
 							if(travelDistance <= 0) {
 								newX = currentPathPosition.x;
 								newZ = currentPathPosition.z;
@@ -142,8 +144,8 @@ public abstract class AIState {
 					
 				} else {
 					newX = currentPathPosition.x;
-					newY = currentPathPosition.y;
 					newZ = currentPathPosition.z;
+					newY = core.terrainService.getHeight(creature.getPlanetId(), newX, newX);
 				}
 				oldPosition = currentPathPosition;
 			}
