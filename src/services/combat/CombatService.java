@@ -847,6 +847,8 @@ public class CombatService implements INetworkDispatch {
 			return false;
 		}
 		
+		if(target.getAttachment("AI") != null) return false;
+		
 		if(healer.getFaction().equals(target.getFaction())) {
 			
 			if(healer.getFactionStatus() < target.getFactionStatus())
@@ -997,8 +999,8 @@ public class CombatService implements INetworkDispatch {
 			requester.getDuelList().add(target);
 			requester.sendSystemMessage("You accept " + target.getCustomName() + "'s challenge.", (byte) 0);
 			target.sendSystemMessage(requester.getCustomName() + " accepts your challenge.", (byte) 0);
-			target.getClient().getSession().write(new UpdatePVPStatusMessage(requester.getObjectID(), 55, requester.getFaction()).serialize());
-			requester.getClient().getSession().write(new UpdatePVPStatusMessage(target.getObjectID(), 55, target.getFaction()).serialize());
+			target.updatePvpStatus();
+			requester.updatePvpStatus();
 			
 		}
 		
@@ -1013,8 +1015,8 @@ public class CombatService implements INetworkDispatch {
 		target.removeDefender(requester);
 		requester.removeDefender(target);
 		
-		target.getClient().getSession().write(new UpdatePVPStatusMessage(requester.getObjectID(), 0x16, requester.getFaction()).serialize());
-		requester.getClient().getSession().write(new UpdatePVPStatusMessage(target.getObjectID(), 0x16, target.getFaction()).serialize());
+		target.updatePvpStatus();
+		requester.updatePvpStatus();
 		
 		if(announce)
 		{
