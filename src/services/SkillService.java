@@ -30,7 +30,6 @@ import org.python.core.Py;
 import org.python.core.PyObject;
 
 import protocol.swg.ExpertiseRequestMessage;
-
 import resources.common.Console;
 import resources.common.FileUtilities;
 import resources.common.Opcodes;
@@ -303,7 +302,7 @@ public class SkillService implements INetworkDispatch {
 					return;
 				
 				for(String expertiseName : expertise.getExpertiseSkills()) {
-					if(expertiseName.startsWith("expertise_") && ((caluclateExpertisePoints(creature) - 1) >= 0)) { // Prevent possible glitches/exploits
+					if(expertiseName.startsWith("expertise_") && ((caluclateExpertisePoints(creature) - 1) >= 0) && validExpertiseSkill(player, expertiseName)) { // Prevent possible glitches/exploits
 						addSkill(creature, expertiseName);
 					}
 				}			
@@ -323,6 +322,49 @@ public class SkillService implements INetworkDispatch {
 		}
 		catch (Exception e) { e.printStackTrace(); }	
 		return expertisePoints;
+	}
+	
+	public boolean validExpertiseSkill(PlayerObject player, String skill)
+	{
+		try 
+		{
+			DatatableVisitor table = ClientFileManager.loadFile("datatables/expertise/expertise.iff", DatatableVisitor.class);
+			String profession;
+			
+			switch(player.getProfession())
+			{
+				case "trader_0a":
+					profession = "trader_dom";
+					break;
+					
+				case "trader_0b":
+					profession = "trader_struct";
+					break;
+					
+				case "trader_0c":
+					profession = "trader_mun";
+					break;
+					
+				case "trader_0d":
+					profession = "trader_eng";
+					break;
+						
+				default:
+					profession = player.getProfession().replace("_1a", "");
+					break;
+			}
+
+			for (int s = 0; s < table.getRowCount(); s++) 
+			{	
+				if (table.getObject(s, 0) != null && ((String) table.getObject(s, 0)).equals(skill))
+				{
+					if(((String)table.getObject(s, 7)).equals(profession) || ((String)table.getObject(s, 7)).equals("all")) return true;
+					else return false;
+				}
+			}		
+		}
+		catch (Exception e) { e.printStackTrace(); }
+		return false;
 	}
 	
 	@Override

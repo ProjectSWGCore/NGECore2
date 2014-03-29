@@ -22,9 +22,13 @@
 package resources.objects.tangible;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.Vector;
+
+import main.NGECore;
 
 import protocol.swg.ObjControllerMessage;
 import protocol.swg.PlayClientEffectObjectMessage;
@@ -58,7 +62,7 @@ public class TangibleObject extends SWGObject {
 	protected int optionsBitmask = 0;
 	private int maxDamage = 1000;
 	private boolean staticObject = true;
-	protected String faction = "neutral"; // Says you're "Imperial Special Forces" if it's 0 for some reason
+	protected String faction = ""; // Says you're "Imperial Special Forces" if it's 0 for some reason
 	@NotPersistent
 	private Vector<TangibleObject> defendersList = new Vector<TangibleObject>();	// unused in packets but useful for the server
 	@NotPersistent
@@ -218,6 +222,23 @@ public class TangibleObject extends SWGObject {
 				}
 			}
 		}
+
+		//updatePvpStatus();
+	}
+	
+	public void updatePvpStatus() {
+		HashSet<Client> observers = new HashSet<Client>(getObservers());
+		
+		for (Iterator<Client> it = observers.iterator(); it.hasNext();) {
+			Client observer = it.next();
+			
+			if (observer.getParent() != null) {
+				observer.getSession().write(new UpdatePVPStatusMessage(this.getObjectID(), NGECore.getInstance().factionService.calculatePvpStatus((CreatureObject) observer.getParent(), this), getFaction()).serialize());
+				if(getClient() != null)
+					getClient().getSession().write(new UpdatePVPStatusMessage(observer.getParent().getObjectID(), NGECore.getInstance().factionService.calculatePvpStatus((CreatureObject) this, (CreatureObject) observer.getParent()), getFaction()).serialize());
+			}
+
+		}
 	}
 	
 	public String getFaction() {
@@ -230,6 +251,8 @@ public class TangibleObject extends SWGObject {
 		synchronized(objectMutex) {
 			this.faction = faction;
 		}
+		
+		updatePvpStatus();
 	}
 
 	public Vector<TangibleObject> getDefendersList() {
