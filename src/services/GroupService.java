@@ -28,9 +28,8 @@ import java.util.Map;
 import resources.objects.Buff;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
-
+import services.chat.ChatRoom;
 import main.NGECore;
-
 import engine.clients.Client;
 import engine.resources.objects.SWGObject;
 import engine.resources.service.INetworkDispatch;
@@ -153,6 +152,13 @@ public class GroupService implements INetworkDispatch {
 			invited.setGroupId(group.getObjectID());
 			addGroupBuffsToMember(group, leader);
 			addGroupBuffsToMember(group, invited);
+			
+			//ChatRoom groupChat = core.chatService.createChatRoom(leader.getCustomName() + group.getObjectID(), "GroupChat", leader.getCustomName(), true);
+			//group.setChatRoomId(groupChat.getRoomId());
+
+			//core.chatService.joinChatRoom(leader, groupChat.getRoomId());
+			//core.chatService.joinChatRoom(invited, groupChat.getRoomId());
+			
 			return;
 			
 		}

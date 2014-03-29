@@ -34,10 +34,10 @@ import services.ai.AIActor;
 
 public abstract class AIState {
 
-	public abstract byte onEnter(AIActor actor);
-	public abstract byte onExit(AIActor actor);
-	public abstract byte move(AIActor actor);
-	public abstract byte recover(AIActor actor);
+	public abstract byte onEnter(AIActor actor) throws Exception;
+	public abstract byte onExit(AIActor actor) throws Exception;
+	public abstract byte move(AIActor actor) throws Exception;
+	public abstract byte recover(AIActor actor) throws Exception;
 	
 	public enum StateResult {;
 	

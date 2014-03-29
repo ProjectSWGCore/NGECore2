@@ -75,6 +75,9 @@ public class Opcodes {
 	public static int CollectionServerFirstListRequest = CRC.StringtoCRC("CollectionServerFirstListRequest");
 	public static int ShowHelmet = CRC.StringtoCRC("ShowHelmet");
 	public static int ShowBackpack = CRC.StringtoCRC("ShowBackpack");
+	public static int ChatOnEnteredRoom = CRC.StringtoCRC("ChatOnEnteredRoom");
+	public static int ChatCreateRoom = CRC.StringtoCRC("ChatCreateRoom");
+	public static int ChatQueryRoom = 0x9CF2B192;
 
 	public static int Unknown = 0x173B91C2; // packet sent to server on every character load-in
 }

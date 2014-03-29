@@ -75,11 +75,13 @@ import protocol.swg.objectControllerObjects.TargetUpdate;
 import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
+import resources.objects.group.GroupObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.common.*;
 import resources.common.collidables.AbstractCollidable;
 import resources.datatables.PlayerFlags;
+import resources.datatables.Posture;
 import services.ai.LairActor;
 import toxi.geom.Line3D;
 import toxi.geom.Ray3D;
@@ -188,6 +190,7 @@ public class SimulationService implements INetworkDispatch {
 				core.objectService.loadServerTemplate(building);
 			add(building, building.getPosition().x, building.getPosition().z);
 		}
+		cursor.close();
 	}
 
 	
@@ -754,8 +757,6 @@ public class SimulationService implements INetworkDispatch {
 			}
 		}
 		
-		core.groupService.handleGroupDisband(object); // Seefo: Temporarily moved from connectionService.disconnect as a temporary fix for issue #295
-		
 		/*
 		object.createTransaction(core.getCreatureODB().getEnvironment());
 		core.getCreatureODB().put(object, Long.class, CreatureObject.class, object.getTransaction());
@@ -804,13 +805,20 @@ public class SimulationService implements INetworkDispatch {
 		PlayerObject ghost = (PlayerObject) object.getSlottedObject("ghost");
 				
 		core.weatherService.sendWeather(object);
-
+				
 		if (!object.hasSkill(ghost.getProfessionWheelPosition())) {
 			object.showFlyText("cbt_spam", "skill_up", (float) 2.5, new RGB(154, 205, 50), 0);
 			object.playEffectObject("clienteffect/skill_granted.cef", "");
 			object.playMusic("sound/music_acq_bountyhunter.snd");
 			core.skillService.addSkill(object, ghost.getProfessionWheelPosition());
 		}
+		
+		if(object.getGroupId() != 0 && core.objectService.getObject(object.getGroupId()) instanceof GroupObject)
+			object.makeAware(core.objectService.getObject(object.getGroupId()));
+		
+		if(object.getPosture() == Posture.Dead)
+			core.playerService.sendCloningWindow(object, false);
+		
 	}
 		
 	public void transferToPlanet(SWGObject object, Planet planet, Point3D newPos, Quaternion newOrientation, SWGObject newParent) {
@@ -843,9 +851,7 @@ public class SimulationService implements INetworkDispatch {
 		
 		
 		synchronized(object.getMutex()) {
-			
 			object.getAwareObjects().removeAll(object.getAwareObjects());
-			
 		}
 		
 		object.setPlanet(planet);
@@ -871,7 +877,7 @@ public class SimulationService implements INetworkDispatch {
 		
 		if(container.getPermissions().canView(requester, container)) {
 			OpenedContainerMessage opm = new OpenedContainerMessage(container.getObjectID());
-			if(requester.getClient() != null && requester.getClient().getSession() != null)
+			if(requester.getClient() != null && requester.getClient().getSession() != null && !(container instanceof CreatureObject))
 				requester.getClient().getSession().write(opm.serialize());
 		}
 		
