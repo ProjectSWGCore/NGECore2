@@ -75,6 +75,7 @@ import protocol.swg.objectControllerObjects.TargetUpdate;
 import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
+import resources.objects.group.GroupObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.common.*;
@@ -811,6 +812,10 @@ public class SimulationService implements INetworkDispatch {
 			object.playMusic("sound/music_acq_bountyhunter.snd");
 			core.skillService.addSkill(object, ghost.getProfessionWheelPosition());
 		}
+		
+		if(object.getGroupId() != 0 && core.objectService.getObject(object.getGroupId()) instanceof GroupObject)
+			object.makeAware(core.objectService.getObject(object.getGroupId()));
+		
 	}
 		
 	public void transferToPlanet(SWGObject object, Planet planet, Point3D newPos, Quaternion newOrientation, SWGObject newParent) {
@@ -843,9 +848,7 @@ public class SimulationService implements INetworkDispatch {
 		
 		
 		synchronized(object.getMutex()) {
-			
 			object.getAwareObjects().removeAll(object.getAwareObjects());
-			
 		}
 		
 		object.setPlanet(planet);
