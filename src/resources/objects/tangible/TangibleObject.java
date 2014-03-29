@@ -223,7 +223,7 @@ public class TangibleObject extends SWGObject {
 			}
 		}
 
-		updatePvpStatus();
+		//updatePvpStatus();
 	}
 	
 	public void updatePvpStatus() {
@@ -234,7 +234,10 @@ public class TangibleObject extends SWGObject {
 			
 			if (observer.getParent() != null) {
 				observer.getSession().write(new UpdatePVPStatusMessage(this.getObjectID(), NGECore.getInstance().factionService.calculatePvpStatus((CreatureObject) observer.getParent(), this), getFaction()).serialize());
+				if(getClient() != null)
+					getClient().getSession().write(new UpdatePVPStatusMessage(observer.getParent().getObjectID(), NGECore.getInstance().factionService.calculatePvpStatus((CreatureObject) this, (CreatureObject) observer.getParent()), getFaction()).serialize());
 			}
+
 		}
 	}
 	
