@@ -198,7 +198,7 @@ public class FactionService implements INetworkDispatch {
 	 * This should be used instead of getPvPBitmask where possible, but
 	 * should not be used in setPvPBitmask.
 	 */
-	public int calculatePvpStatus(CreatureObject player, TangibleObject target) {
+	/*public int calculatePvpStatus(CreatureObject player, TangibleObject target) {
 		PlayerObject ghost = (PlayerObject) player.getSlottedObject("ghost");
 		
 		int pvpBitmask = target.getPvPBitmask();
@@ -254,6 +254,27 @@ public class FactionService implements INetworkDispatch {
 		}
 		
 		return pvpBitmask;
+	}*/
+	
+	// temp fix until calculatePvpStatus is fixed
+	public int calculatePvpStatus(CreatureObject player, TangibleObject target) {
+		
+		if(target.getSlottedObject("ghost") != null) {
+			
+			if(!player.getFaction().equals(target.getFaction()) && player.getFactionStatus() == FactionStatus.SpecialForces && ((CreatureObject) target).getFactionStatus() == FactionStatus.SpecialForces)
+				return 55;
+			else if(core.combatService.areInDuel(player, (CreatureObject) target))
+				return 55;
+			else
+				return 0x14;
+						
+		} else {
+			if(target.getAttachment("AI") != null)
+				return PvpStatus.Attackable;
+			else
+				return 0;
+		}
+		
 	}
 	
 	public Map<String, Integer> getFactionMap() {

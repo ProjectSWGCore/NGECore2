@@ -52,6 +52,7 @@ def run(core, actor, target, commandString):
 		actor.setFactionStatus(FactionStatus.Combatant)
 		actor.setPvpStatus(PvpStatus.GoingCovert, False)
 		actor.sendSystemMessage('@faction_recruiter:covert_complete', 0)
+		actor.updatePvpStatus()
 		return
 	
 	if factionStatus == FactionStatus.Combatant:
@@ -61,6 +62,7 @@ def run(core, actor, target, commandString):
 		actor.setFactionStatus(FactionStatus.SpecialForces)
 		actor.setPvpStatus(PvpStatus.GoingOvert, False)
 		actor.sendSystemMessage('@faction_recruiter:overt_complete', 0)
+		actor.updatePvpStatus()
 		return
 	
 	if factionStatus == FactionStatus.SpecialForces:
@@ -70,6 +72,7 @@ def run(core, actor, target, commandString):
 		actor.setFactionStatus(FactionStatus.Combatant)
 		actor.setPvpStatus(PvpStatus.GoingCovert, False)
 		actor.sendSystemMessage('@faction_recruiter:covert_complete', 0)
+		actor.updatePvpStatus()
 		return
 	
 	return

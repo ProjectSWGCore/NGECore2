@@ -34,10 +34,10 @@ import services.ai.AIActor;
 
 public abstract class AIState {
 
-	public abstract byte onEnter(AIActor actor);
-	public abstract byte onExit(AIActor actor);
-	public abstract byte move(AIActor actor);
-	public abstract byte recover(AIActor actor);
+	public abstract byte onEnter(AIActor actor) throws Exception;
+	public abstract byte onExit(AIActor actor) throws Exception;
+	public abstract byte move(AIActor actor) throws Exception;
+	public abstract byte recover(AIActor actor) throws Exception;
 	
 	public enum StateResult {;
 	
@@ -134,7 +134,7 @@ public abstract class AIState {
 							}
 							
 							if(cell == null) {
-								float height = core.terrainService.getHeight(creature.getPlanetId(), newX, newX);
+								float height = core.terrainService.getHeight(creature.getPlanetId(), newX, newZ);
 								newY = height;
 							} else {
 								newY = currentPathPosition.y;
@@ -145,7 +145,7 @@ public abstract class AIState {
 				} else {
 					newX = currentPathPosition.x;
 					newZ = currentPathPosition.z;
-					newY = core.terrainService.getHeight(creature.getPlanetId(), newX, newX);
+					newY = core.terrainService.getHeight(creature.getPlanetId(), newX, newZ);			
 				}
 				oldPosition = currentPathPosition;
 			}

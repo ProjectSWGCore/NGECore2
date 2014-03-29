@@ -749,7 +749,7 @@ public class EntertainmentService implements INetworkDispatch {
 
 		scheduler.schedule(() -> {
 			performer.setFlourishCount(0);
-			performer.setPerformingFlourish(true);
+			performer.setPerformingFlourish(false);
 		}, (long) performance.getLoopDuration(), TimeUnit.SECONDS);
 	}
 	

@@ -458,7 +458,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 		
 		notifyObservers(messageBuilder.buildFactionDelta(faction), true);
-		updatePvpStatus();
+		//updatePvpStatus();
 	}
 
 	public int getFactionStatus() {
@@ -473,7 +473,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 		
 		notifyObservers(messageBuilder.buildFactionStatusDelta(factionStatus), true);
-		updatePvpStatus();
+		//updatePvpStatus();
 	}
 
 	public float getHeight() {
@@ -1365,6 +1365,17 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			for(Buff buff : buffList.get()) {
 				if(buff.getBuffName().equals(buffName))
 					return buff;
+			}
+		}
+		return null;
+	}
+	
+	public Buff getBuffByCRC(int crc) {
+		synchronized(objectMutex) {
+			for (Buff buff : buffList.get()) {
+				if (buff.getBuffCRC() == crc) {
+					return buff;
+				}
 			}
 		}
 		return null;
