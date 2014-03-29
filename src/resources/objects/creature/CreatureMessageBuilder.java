@@ -1178,7 +1178,16 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer = createDelta("CREO", (byte) 4, (short) 1, (short) 0x0F, buffer, size + 4);
 		return buffer;	
 	}
-
+	
+	// TODO: This seems to be somehow related to chairs as well.
+	public IoBuffer buildOwnerIdDelta(long ownerId) {
+		IoBuffer buffer = bufferPool.allocate(8, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putLong(ownerId);
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 3, (short) 1, (short) 0x0D, buffer, size + 4);
+		return buffer;
+	}
 
 	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
 		switch (viewType) {
