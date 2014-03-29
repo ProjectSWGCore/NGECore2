@@ -31,9 +31,16 @@ def run(core, actor, target, commandString):
 				actor.setFaction('')
 				actor.sendSystemMessage('@faction_recruiter:resign_complete', 0)
 			
+			if commandString == 'neutral':
+				time.sleep(1)
+				actor.setFaction('')
+				actor.setPvpStatus(PvpStatus.Player, False)
+				actor.sendSystemMessage('@faction_recruiter:resign_complete', 0)
+				return
 			
 			time.sleep(1)
 			actor.setFaction(commandString)
+			actor.setPvpStatus(PvpStatus.Player, True)
 		return
 	
 	if faction == 'neutral' or faction == '':
