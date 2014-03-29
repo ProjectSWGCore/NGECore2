@@ -210,7 +210,7 @@ public class ConnectionService implements INetworkDispatch {
 			object.setSpectatorTask(null);
 		}
 		
-		//core.groupService.handleGroupDisband(object); // Seefo: Temporarily moved to simulationService.handleDisconnect as a temporary fix for issue #295
+		core.groupService.handleGroupDisband(object);
 		
 		if (core.instanceService.isInInstance(object)) {
 			core.instanceService.remove(core.instanceService.getActiveInstance(object), object);
