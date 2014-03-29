@@ -1034,7 +1034,7 @@ public class CombatService implements INetworkDispatch {
 			success = false;
 		
 		if((command.getAttackType() == 0 || command.getAttackType() == 1 || command.getAttackType() == 3) && !attemptHeal(medic, target))	
-			target = medic;
+			success = false;
 
 		if(!success) {
 			IoSession session = medic.getClient().getSession();
