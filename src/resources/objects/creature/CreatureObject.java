@@ -458,7 +458,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 		
 		notifyObservers(messageBuilder.buildFactionDelta(faction), true);
-		updatePvpStatus();
+		//updatePvpStatus();
 	}
 
 	public int getFactionStatus() {
@@ -473,7 +473,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 		
 		notifyObservers(messageBuilder.buildFactionStatusDelta(factionStatus), true);
-		updatePvpStatus();
+		//updatePvpStatus();
 	}
 
 	public float getHeight() {
