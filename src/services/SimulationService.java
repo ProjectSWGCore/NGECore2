@@ -755,8 +755,6 @@ public class SimulationService implements INetworkDispatch {
 			}
 		}
 		
-		core.groupService.handleGroupDisband(object); // Seefo: Temporarily moved from connectionService.disconnect as a temporary fix for issue #295
-		
 		/*
 		object.createTransaction(core.getCreatureODB().getEnvironment());
 		core.getCreatureODB().put(object, Long.class, CreatureObject.class, object.getTransaction());
