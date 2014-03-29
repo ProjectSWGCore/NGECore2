@@ -203,18 +203,36 @@ public class FactionService implements INetworkDispatch {
 		
 		int pvpBitmask = target.getPvPBitmask();
 		
-		if (target.getSlottedObject("ghost") != null) {
-			if (target.getFaction() == null || (!target.getFaction().equals("rebel") && !target.getFaction().equals("imperial"))) {
-				return 0;
-			}
+		if (target.getFactionStatus() == FactionStatus.Combatant) {
+			pvpBitmask |= PvpStatus.Enemy;
+		}
+		
+		if (target.getFactionStatus() == FactionStatus.SpecialForces) {
+			pvpBitmask |= PvpStatus.Overt;
 			
+			if (target.getSlottedObject("ghost") != null) {
+				pvpBitmask |= PvpStatus.Enemy;
+			}
+		}
+		
+		if (target.getSlottedObject("ghost") != null) {
 			pvpBitmask |= PvpStatus.Player;
 			
-			if (player.getFactionStatus() == FactionStatus.SpecialForces &&
-			((CreatureObject) target).getFactionStatus() == FactionStatus.SpecialForces) {
+			if ((!player.getFaction().equals(target.getFaction()) &&
+			player.getFactionStatus() == FactionStatus.SpecialForces &&
+			((CreatureObject) target).getFactionStatus() == FactionStatus.SpecialForces) ||
+			core.combatService.areInDuel(player, (CreatureObject) target)) {
 				pvpBitmask |= (PvpStatus.Attackable | PvpStatus.Aggressive);
 			}
 			
+			if (core.combatService.areInDuel(player, (CreatureObject) target)) {
+				//pvpBitmask |= PvpStatus.Dueling;
+			}
+			
+			return pvpBitmask;
+		}
+		
+		if (player.getFaction().equals(target.getFaction()) {
 			return pvpBitmask;
 		}
 		
