@@ -598,7 +598,7 @@ public class PlayerService implements INetworkDispatch {
 		
 		core.buffService.clearBuffs(creature);
 		
-		for (String skill : creature.getSkills()) {
+		for (String skill : new ArrayList<String>(creature.getSkills())) {
 			core.skillService.removeSkill(creature, skill);
 		}
 		
