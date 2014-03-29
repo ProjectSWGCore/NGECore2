@@ -22,11 +22,11 @@ def run(core, actor, target, commandString):
 		actor.setPosture(8)
 		actor.setStateBitmask(32768)
 		actor.setTurnRadius(0)
+		# These 3 were outside of the return statement. Not sure why.. - Waverunner
+		#actor.setPosture(8)
+		actor.setSpeedMultiplierBase(0)
+		actor.setTurnRadius(0)
+		actor.setChairCellId(cellId)
 		return
-
-	actor.setPosture(8)
-	actor.setSpeedMultiplierBase(0)
-	actor.setTurnRadius(0)
-
 	return
 	

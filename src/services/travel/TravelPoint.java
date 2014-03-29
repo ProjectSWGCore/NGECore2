@@ -149,7 +149,8 @@ public class TravelPoint {
 		if(getShuttle() != null) {
 			return (getShuttle().getTemplate().equals("object/creature/npc/theme_park/shared_player_transport.iff") || getShuttle().getTemplate().equals("object/creature/npc/theme_park/shared_player_transport_theed_hangar.iff"));
 		} else {
-			System.out.println("null shuttle at: " + getName());
+			// TODO: Null shuttles currently at: Mensix Mining Facility, Kachirho Starport, Quarantine Zone, Theed Spaceport, Restuss Shuttleport
+			//System.out.println("null shuttle at: " + getName());
 			return false;
 		}
 	}

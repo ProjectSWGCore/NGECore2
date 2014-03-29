@@ -116,6 +116,8 @@ public class SpawnService {
 		defaultWeapon.setAttackSpeed(2);
 		defaultWeapon.setDamageType("@obj_attr_n:armor_eff_kinetic");
 		defaultWeapon.setStringAttribute("cat_wpn_damage.damage", "0-0");
+		if(mobileTemplate.getAttackRange() > 0)
+			defaultWeapon.setMaxRange(mobileTemplate.getAttackRange());
 		if(mobileTemplate.getMaxDamage() != 0) {
 			defaultWeapon.setMaxDamage(mobileTemplate.getMaxDamage());
 			defaultWeapon.setMinDamage(mobileTemplate.getMinDamage());

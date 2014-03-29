@@ -810,7 +810,7 @@ public class ObjectService implements INetworkDispatch {
 	public void readBuildoutDatatable(DatatableVisitor buildoutTable, Planet planet, float x1, float z1) throws InstantiationException, IllegalAccessException {
 
 		CrcStringTableVisitor crcTable = ClientFileManager.loadFile("misc/object_template_crc_string_table.iff", CrcStringTableVisitor.class);
-		List<SWGObject> quadtreeObjects = new ArrayList<SWGObject>();
+		List<BuildingObject> persistentBuildings = new ArrayList<BuildingObject>();
 		Map<Long, Long> duplicate = new HashMap<Long, Long>();
 		
 		for (int i = 0; i < buildoutTable.getRowCount(); i++) {
@@ -907,11 +907,11 @@ public class ObjectService implements INetworkDispatch {
 						containers.add(objectId);
 						object = createObject(template, objectId, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, true, false);
 						object.setAttachment("childObjects", null);
-						if (!duplicate.containsValue(objectId)) {
+						/*if (!duplicate.containsValue(objectId)) {
 							((BuildingObject) object).createTransaction(core.getBuildingODB().getEnvironment());
 							core.getBuildingODB().put((BuildingObject) object, Long.class, BuildingObject.class, ((BuildingObject) object).getTransaction());
 							((BuildingObject) object).getTransaction().commitSync();
-						}
+						}*/
 					} else {
 						object = createObject(template, objectId, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, false, false);
 					}
@@ -920,7 +920,8 @@ public class ObjectService implements INetworkDispatch {
 					object.setContainerPermissions(WorldPermissions.WORLD_PERMISSIONS);
 					if(radius > 256)
 						object.setAttachment("bigSpawnRange", new Boolean(true));
-					quadtreeObjects.add(object);
+					if (!duplicate.containsValue(objectId) && object instanceof BuildingObject)
+						persistentBuildings.add((BuildingObject) object);
 				} else if(containerId != 0) {
 					object = createObject(template, 0, planet, new Point3D(px, py, pz), new Quaternion(qw, qx, qy, qz), null, false, false);
 					if(containers.contains(containerId)) {
@@ -942,7 +943,6 @@ public class ObjectService implements INetworkDispatch {
 				} else {
 					object = createObject(template, 0, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, false, false);
 					object.setContainerPermissions(WorldPermissions.WORLD_PERMISSIONS);
-					quadtreeObjects.add(object);
 				}
 				
 				//System.out.println("Spawning: " + template + " at: X:" + object.getPosition().x + " Y: " + object.getPosition().y + " Z: " + object.getPosition().z);
@@ -952,10 +952,12 @@ public class ObjectService implements INetworkDispatch {
 				
 			
 		}
-		// this might load stuff before snapshots of other planets are finished
-		/*for(SWGObject obj : quadtreeObjects) {
-			core.simulationService.add(obj, obj.getPosition().x, obj.getPosition().z);
-		}*/
+
+		for(BuildingObject building : persistentBuildings) {
+			building.createTransaction(core.getBuildingODB().getEnvironment());
+			core.getBuildingODB().put(building, Long.class, BuildingObject.class, building.getTransaction());
+			building.getTransaction().commitSync();
+		}
 		
 	}
 

@@ -748,11 +748,13 @@ public class SimulationService implements INetworkDispatch {
 		if(!ghost.isSet(PlayerFlags.LD))
 			ghost.toggleFlag(PlayerFlags.LD);
 		
-		for (CreatureObject opponent : object.getDuelList()) {
+		for (CreatureObject opponent : new ArrayList<CreatureObject>(object.getDuelList())) {
 			if (opponent != null) {
 				core.combatService.handleEndDuel(object, opponent, true);
 			}
 		}
+		
+		core.groupService.handleGroupDisband(object); // Seefo: Temporarily moved from connectionService.disconnect as a temporary fix for issue #295
 		
 		/*
 		object.createTransaction(core.getCreatureODB().getEnvironment());
@@ -765,7 +767,7 @@ public class SimulationService implements INetworkDispatch {
 				if(core.objectService.getObject(objectId).getAttachment("disconnectTask") != null)
 					core.connectionService.disconnect(client);
 			}
-		}, 5, TimeUnit.MINUTES);
+		}, 1, TimeUnit.MINUTES);
 		core.removeClient(session);
 		
 		object.setAttachment("disconnectTask", disconnectTask);

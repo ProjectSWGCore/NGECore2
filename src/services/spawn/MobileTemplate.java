@@ -41,6 +41,8 @@ public class MobileTemplate {
 	private int health, action;
 	private String creatureName;
 	private float scale = 1;
+	// this is a custom attack Range setting to use for large mobs like krayts
+	private int attackRange;
 
 	public Vector<String> getTemplates() {
 		return templates;
@@ -144,6 +146,14 @@ public class MobileTemplate {
 
 	public void setScale(float scale) {
 		this.scale = scale;
+	}
+
+	public int getAttackRange() {
+		return attackRange;
+	}
+
+	public void setAttackRange(int attackRange) {
+		this.attackRange = attackRange;
 	}
 
 }
