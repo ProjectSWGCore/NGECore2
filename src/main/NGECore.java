@@ -185,6 +185,7 @@ public class NGECore {
 	private ObjectDatabase guildODB;
 	private ObjectDatabase objectIdODB;
 	private ObjectDatabase duplicateIdODB;
+	private ObjectDatabase chatRoomODB;
 	
 	private BusConfiguration eventBusConfig = BusConfiguration.Default(1, new ThreadPoolExecutor(1, 4, 1, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>()));
 
@@ -235,7 +236,8 @@ public class NGECore {
 		guildODB = new ObjectDatabase("guild", true, false, true);
 		objectIdODB = new ObjectDatabase("oids", true, false, false);
 		duplicateIdODB = new ObjectDatabase("doids", true, false, true);
-
+		chatRoomODB = new ObjectDatabase("chatRooms", true, false, true);
+		
 		// Services
 		loginService = new LoginService(this);
 		retroService = new RetroService(this);
@@ -526,6 +528,10 @@ public class NGECore {
 	
 	public ObjectDatabase getDuplicateIdODB() {
 		return duplicateIdODB;
+	}
+	
+	public ObjectDatabase getChatRoomODB() {
+		return chatRoomODB;
 	}
 	
 	public int getActiveClients() {

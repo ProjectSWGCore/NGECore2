@@ -26,6 +26,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
+import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.mina.core.buffer.IoBuffer;
@@ -33,6 +34,8 @@ import org.apache.mina.core.session.IoSession;
 
 import com.sleepycat.je.Transaction;
 import com.sleepycat.persist.EntityCursor;
+import com.sleepycat.persist.PrimaryIndex;
+import com.sleepycat.persist.SecondaryIndex;
 
 import engine.clients.Client;
 import engine.resources.config.Config;
@@ -52,11 +55,15 @@ import protocol.swg.ChatFriendsListUpdate;
 import protocol.swg.ChatInstantMessageToCharacter;
 import protocol.swg.ChatInstantMessagetoClient;
 import protocol.swg.ChatOnAddFriend;
+import protocol.swg.ChatOnEnteredRoom;
 import protocol.swg.ChatOnSendInstantMessage;
 import protocol.swg.ChatOnSendPersistentMessage;
+import protocol.swg.ChatOnSendRoomMessage;
 import protocol.swg.ChatPersistentMessageToClient;
 import protocol.swg.ChatPersistentMessageToServer;
 import protocol.swg.ChatRequestPersistentMessage;
+import protocol.swg.ChatRoomList;
+import protocol.swg.ChatRoomMessage;
 import protocol.swg.ChatSystemMessage;
 import protocol.swg.ObjControllerMessage;
 import protocol.swg.objectControllerObjects.PlayerEmote;
@@ -67,7 +74,9 @@ public class ChatService implements INetworkDispatch {
 	
 	private NGECore core;
 	private ObjectDatabase mailODB;
-
+	private ObjectDatabase chatRoomsODB;
+	private ConcurrentHashMap<Integer, ChatRoom> chatRooms = new ConcurrentHashMap<Integer, ChatRoom>();
+	
 	public ChatService(NGECore core) {
 		this.core = core;
 		core.commandService.registerCommand("spatialchatinternal");
@@ -77,7 +86,12 @@ public class ChatService implements INetworkDispatch {
 		core.commandService.registerCommand("findfriend");
 		core.commandService.registerCommand("addfriend");
 		core.commandService.registerCommand("removefriend");
+		//core.commandService.registerCommand("gc");
+		//core.commandService.registerAlias("g", "gc");
 		mailODB = core.getMailODB();
+		chatRoomsODB = core.getChatRoomODB();
+
+		loadChatRooms();
 	}
 	
 	public void handleSpatialChat(SWGObject speaker, SWGObject target, String chatMessage, short chatType, short moodId) {
@@ -335,11 +349,28 @@ public class ChatService implements INetworkDispatch {
 
 			@Override
 			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
-				//ChatRoomList
+				Client client = core.getClient(session);
+				
+				if(client == null)
+					return;
+				
+				SWGObject obj = client.getParent();
+				
+				if (obj == null)
+					return;
+				
+				ChatRoomList listMessage = new ChatRoomList(chatRooms);
+				
+				client.getSession().write(listMessage.serialize());
 			}
 
 		});
 		
+		swgOpcodes.put(Opcodes.ChatCreateRoom, (session, data) -> {
+		});
+		
+		swgOpcodes.put(Opcodes.ChatQueryRoom, (session, data) -> {
+		});
 	}
 	
 	public void playerStatusChange(String name, byte status) {
@@ -539,11 +570,11 @@ public class ChatService implements INetworkDispatch {
 		
 		for(Mail mail : cursor) {
 			
-			if(mail.getRecieverId() == obj.getObjectID())
+			if(mail.getRecieverId() == obj.getObjectID()) {
 				sendPersistentMessageHeader(client, mail);
-			
+			}
 		}
-		
+		cursor.close();
 	}
 
 	@Override
@@ -588,8 +619,123 @@ public class ChatService implements INetworkDispatch {
 		
 	}
 	
+	public ChatRoom getChatRoom(int roomId) {
+		return chatRooms.get(roomId);
+	}
+	
+	public int generateChatRoomId() {
+		Random rand = new Random();
+		int id = rand.nextInt();
+		
+		if (chatRoomsODB.contains(new Integer(id), Integer.class, ChatRoom.class))
+			return generateChatRoomId();
+		else
+			return id;
+	}
+	
 	public void broadcastGalaxy(String message) {
 		core.simulationService.notifyAllClients(new ChatSystemMessage(message, (byte) 0).serialize());
 	}
+	
+	private void loadChatRooms() {
+		ChatRoom system = createChatRoom("Waves Dungeon", "ProjectSWGTest.Dungeon", "Waverunner", true);
+		chatRooms.put(system.getRoomId(), system);
+		
+		EntityCursor<ChatRoom> cursor = chatRoomsODB.getCursor(Integer.class, ChatRoom.class);
+		cursor.forEach(room -> {
+			chatRooms.put(room.getRoomId(), room);
+		});
+		cursor.close();
+	}
+	
+	public ChatRoom createChatRoom(String roomName, String address, String creator, boolean showInList) {
+		return createChatRoom(roomName, address, creator, showInList, false);
+	}
+	public ChatRoom createChatRoom(String roomName, String address, String creator, boolean showInList, boolean store) {
 
+		if (creator.contains(" "))
+			creator = creator.split(" ")[0];
+
+		ChatRoom room = new ChatRoom();
+		room.setDescription(roomName);
+		room.setRoomAddress("SWG." + core.getGalaxyName() + "." + address);
+		room.setCreator(creator);
+		room.setOwner(creator);
+		room.setVisible(showInList);
+		room.setRoomId(generateChatRoomId());
+		
+		chatRooms.put(room.getRoomId(), room);
+		
+		if(store){
+			Transaction txn = chatRoomsODB.getEnvironment().beginTransaction(null, null);
+			chatRoomsODB.put(room, Integer.class, ChatRoom.class, txn);
+			txn.commitSync();
+		}
+
+		return room;
+	}
+	
+	public void joinChatRoom(CreatureObject player, int roomId) {
+		
+		String playerName = player.getCustomName().toLowerCase();
+		
+		if (playerName.contains(" "))
+			playerName = playerName.split(" ")[0];
+		
+		ChatRoom room = getChatRoom(roomId);
+		if (room == null)
+			return;
+
+		ChatOnEnteredRoom enterRoom = new ChatOnEnteredRoom(playerName, 0, roomId, true);
+		player.getClient().getSession().write(enterRoom.serialize());
+		
+		if (!room.getUserList().contains(player))
+			room.getUserList().add(player);
+	}
+	
+	public void leaveChatRoom(CreatureObject player, int roomId) {
+		
+		String playerName = player.getCustomName().toLowerCase();
+		
+		if (playerName.contains(" "))
+			playerName = playerName.split(" ")[0];
+		
+		ChatRoom room = getChatRoom(roomId);
+		if (room == null)
+			return;
+		
+		ChatOnEnteredRoom enterRoom = new ChatOnEnteredRoom(playerName, 0, roomId, false);
+		player.getClient().getSession().write(enterRoom.serialize());
+		
+		if (room.getUserList().contains(player))
+			room.getUserList().remove(player);
+	}
+	
+	public void sendChatRoomMessage(CreatureObject sender, int roomId, String message) {
+		String senderName = sender.getCustomName().toLowerCase();
+		
+		if (senderName.contains(" "))
+			senderName = senderName.split(" ")[0];
+
+		ChatRoom room = getChatRoom(roomId);
+		if (room == null)
+			return;
+
+		ChatOnSendRoomMessage onSend = new ChatOnSendRoomMessage(ChatOnSendRoomMessage.SUCCESS);
+		sender.getClient().getSession().write(onSend.serialize());
+		
+		ChatRoomMessage roomMessage = new ChatRoomMessage(roomId, senderName, message);
+		Vector<CreatureObject> users = room.getUserList();
+		
+		for (CreatureObject user : users) {
+			if (user == sender)
+				continue;
+			
+			user.getClient().getSession().write(roomMessage.serialize());
+		}
+	}
+	
+	public ConcurrentHashMap<Integer, ChatRoom> getChatRooms() {
+		return chatRooms;
+	}
 }

@@ -61,6 +61,7 @@ import com.sleepycat.persist.model.PrimaryKey;
 import protocol.swg.ChatFriendsListUpdate;
 import protocol.swg.ChatOnChangeFriendStatus;
 import protocol.swg.ChatOnGetFriendsList;
+import protocol.swg.ChatRoomList;
 import protocol.swg.CmdSceneReady;
 import protocol.swg.CmdStartScene;
 import protocol.swg.HeartBeatMessage;
@@ -168,9 +169,9 @@ public class ObjectService implements INetworkDispatch {
 					object.getContainerInfo(object.getTemplate());
 				}
 				
-			});	
+			});
 		}
-
+		cursor.close();
 	}
 	
 	public void loadServerTemplates() {
@@ -661,6 +662,8 @@ public class ObjectService implements INetworkDispatch {
 				core.simulationService.handleZoneIn(client);
 				creature.makeAware(creature);
 				
+				ChatRoomList chatRooms = new ChatRoomList(core.chatService.getChatRooms());
+				creature.getClient().getSession().write(chatRooms.serialize());
 				//ChatOnGetFriendsList friendsListMessage = new ChatOnGetFriendsList(ghost);
 				//client.getSession().write(friendsListMessage.serialize());
 				
