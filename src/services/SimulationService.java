@@ -872,7 +872,7 @@ public class SimulationService implements INetworkDispatch {
 		
 		if(container.getPermissions().canView(requester, container)) {
 			OpenedContainerMessage opm = new OpenedContainerMessage(container.getObjectID());
-			if(requester.getClient() != null && requester.getClient().getSession() != null)
+			if(requester.getClient() != null && requester.getClient().getSession() != null && !(container instanceof CreatureObject))
 				requester.getClient().getSession().write(opm.serialize());
 		}
 		

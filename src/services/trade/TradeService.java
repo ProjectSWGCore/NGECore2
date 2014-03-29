@@ -25,6 +25,7 @@ import resources.objects.creature.CreatureObject;
 import engine.clients.Client;
 import engine.resources.container.AllPermissions;
 import engine.resources.container.CreatureContainerPermissions;
+import engine.resources.container.CreaturePermissions;
 import engine.resources.objects.SWGObject;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
@@ -205,7 +206,7 @@ public class TradeService implements INetworkDispatch{
 				}
 				
 				else {
-					if(objectToTrade.getAttributes().containsKey("no_trade")) {
+					if(objectToTrade.getAttributes().containsKey("no_trade") || !objectToTrade.getPermissions().canRemove(client.getParent(), objectToTrade.getContainer()) || (objectToTrade.getContainer() instanceof CreatureObject)) {
 						return;
 					}
 					
