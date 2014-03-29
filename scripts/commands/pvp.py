@@ -31,16 +31,14 @@ def run(core, actor, target, commandString):
 				actor.setFaction('')
 				actor.sendSystemMessage('@faction_recruiter:resign_complete', 0)
 			
-			if commandString == 'neutral':
+			if commandString == 'neutral' or commandString == 'resign':
 				time.sleep(1)
 				actor.setFaction('')
-				actor.setPvpStatus(PvpStatus.Player, False)
 				actor.sendSystemMessage('@faction_recruiter:resign_complete', 0)
 				return
 			
 			time.sleep(1)
 			actor.setFaction(commandString)
-			actor.setPvpStatus(PvpStatus.Player, True)
 		return
 	
 	if faction == 'neutral' or faction == '':
@@ -53,7 +51,6 @@ def run(core, actor, target, commandString):
 		time.sleep(1)
 		actor.setFactionStatus(FactionStatus.Combatant)
 		actor.setPvpStatus(PvpStatus.GoingCovert, False)
-		actor.setPvpStatus(PvpStatus.Enemy, True)
 		actor.sendSystemMessage('@faction_recruiter:covert_complete', 0)
 		return
 	
@@ -63,7 +60,6 @@ def run(core, actor, target, commandString):
 		time.sleep(30)
 		actor.setFactionStatus(FactionStatus.SpecialForces)
 		actor.setPvpStatus(PvpStatus.GoingOvert, False)
-		actor.setPvpStatus(PvpStatus.Overt | PvpStatus.Attackable | PvpStatus.Aggressive, True)
 		actor.sendSystemMessage('@faction_recruiter:overt_complete', 0)
 		return
 	
@@ -72,7 +68,7 @@ def run(core, actor, target, commandString):
 		actor.setPvpStatus(PvpStatus.GoingCovert, True)
 		time.sleep(300)
 		actor.setFactionStatus(FactionStatus.Combatant)
-		actor.setPvpStatus(PvpStatus.GoingCovert | PvpStatus.Overt | PvpStatus.Attackable | PvpStatus.Aggressive, False)
+		actor.setPvpStatus(PvpStatus.GoingCovert, False)
 		actor.sendSystemMessage('@faction_recruiter:covert_complete', 0)
 		return
 	
