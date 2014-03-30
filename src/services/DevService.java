@@ -93,6 +93,7 @@ public class DevService implements INetworkDispatch {
 				break;
 			case 4: // [Items] Misc Items
 				suiOptions.put((long) 40, "Unity Ring");
+				suiOptions.put((long) 41, "Tusken rucksack");
 				break;
 		}
 		
@@ -276,7 +277,7 @@ public class DevService implements INetworkDispatch {
 					case 32: // Ranged Weapons
 						SWGObject rifle1 = core.objectService.createObject("object/weapon/ranged/rifle/shared_rifle_e11.iff", planet);
 						rifle1.setIntAttribute("required_combat_level", 90);
-						rifle1.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 1);
+						rifle1.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 0.8);
 						rifle1.setStringAttribute("class_required", "None");
 						rifle1.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
 						rifle1.setStringAttribute("cat_wpn_damage.damage", "800-1250");
@@ -285,7 +286,7 @@ public class DevService implements INetworkDispatch {
 						
 						SWGObject pistol = core.objectService.createObject("object/weapon/ranged/pistol/shared_pistol_cdef.iff", planet);
 						pistol.setIntAttribute("required_combat_level", 90);
-						pistol.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 1);
+						pistol.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 0.4);
 						pistol.setStringAttribute("class_required", "None");
 						pistol.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
 						pistol.setStringAttribute("cat_wpn_damage.damage", "400-559");
@@ -296,6 +297,17 @@ public class DevService implements INetworkDispatch {
 						TangibleObject ring = (TangibleObject) core.objectService.createObject("object/tangible/wearables/ring/shared_ring_s01.iff", planet);
 						ring.setCustomName("Unity Ring");
 						inventory.add(ring);
+					case 41:
+						TangibleObject backpack = (TangibleObject) core.objectService.createObject("object/tangible/wearables/backpack/shared_backpack_krayt_skull.iff", planet);
+						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:agility_modified", 25)
+						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:constitution_modified", 30)
+						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:luck_modified", 25)
+						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:precision_modified", 35)
+						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:stamina_modified", 30)
+						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:strength_modified", 35)
+						
+						inventory.add(backpack);
+						return;
 				}
 			}	
 		});
