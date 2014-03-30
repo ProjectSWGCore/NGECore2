@@ -93,6 +93,7 @@ public class DevService implements INetworkDispatch {
 				break;
 			case 4: // [Items] Misc Items
 				suiOptions.put((long) 40, "Unity Ring");
+				suiOptions.put((long) 42, "Tauntaun Rucksack"
 				break;
 		}
 		
@@ -296,6 +297,8 @@ public class DevService implements INetworkDispatch {
 						TangibleObject ring = (TangibleObject) core.objectService.createObject("object/tangible/wearables/ring/shared_ring_s01.iff", planet);
 						ring.setCustomName("Unity Ring");
 						inventory.add(ring);
+					case 42:
+						TangibleObject backpack = (TangibleObject) core.objectService.createObject("object/tangible/wearables/backpack/shared_backpack_tauntaun_skull.iff", planet);
 				}
 			}	
 		});
