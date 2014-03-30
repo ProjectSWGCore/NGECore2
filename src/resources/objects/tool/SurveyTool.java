@@ -1,0 +1,274 @@
+/*******************************************************************************
+ * Copyright (c) 2013 <Project SWG>
+ * 
+ * This File is part of NGECore2.
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
+ * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
+ ******************************************************************************/
+package resources.objects.tool;
+
+import com.sleepycat.persist.model.Persistent;
+
+import engine.resources.scene.Planet;
+import engine.resources.scene.Point3D;
+import engine.resources.scene.Quaternion;
+import resources.objects.creature.CreatureObject;
+import resources.objects.resource.GalacticResource;
+import resources.objects.tangible.TangibleObject;
+
+/** 
+ * @author Charon 
+ */
+
+@Persistent(version=0)
+public class SurveyTool extends TangibleObject{
+	
+	private byte toolType;
+	private String surveyEffectString;
+	private String sampleEffectString;
+	private boolean currentlySurveying;
+	private boolean currentlySampling;
+	private boolean currentlyCoolingDown;
+	private boolean exceptionalState;
+	private boolean RecoveryMode;
+	private Long lastSurveyTime;
+	private Long lastSampleTime;
+	private Long recoveryTime;
+	private GalacticResource surveyResource;
+	private CreatureObject user;
+	private Long tanoID;
+	private byte SurveyRangeSetting;
+	
+	public static byte MineralSurveyDevice	           = 1;
+	public static byte ChemicalSurveyDevice	           = 2;
+	public static byte FloraSurveyTool	               = 3;
+	public static byte GasPocketSurveyDevice	       = 4;
+	public static byte WaterSurveyDevice	           = 5;
+	public static byte WindCurrentSurveyingTool	       = 6;
+	public static byte AmbientSolarEnergySurveyingTool = 7;
+	public static byte CompleteResourceSurveyDevice	   = 8;
+
+	public SurveyTool() {
+		super();
+		this.exceptionalState = false;
+	}
+	
+	public SurveyTool(long objectID, Planet planet, String template, Point3D position, Quaternion orientation){
+		super(objectID, planet, template, position, orientation);
+		surveyEffectString = "";
+		sampleEffectString = "";
+		this.tanoID = objectID; 
+		this.exceptionalState = false;
+		switch (template) {
+			case "object/tangible/survey_tool/shared_survey_tool_mineral.iff"   : 
+				toolType = 1; 
+				surveyEffectString = "clienteffect/survey_tool_mineral.cef";
+				sampleEffectString = "clienteffect/survey_sample_mineral.cef";
+				break; 
+			case "object/tangible/survey_tool/shared_survey_tool_inorganic.iff" : 
+				toolType = 2; 
+				surveyEffectString = "clienteffect/survey_tool_lumber.cef";
+				sampleEffectString = "clienteffect/survey_sample_lumber.cef";
+				break; 
+			case "object/tangible/survey_tool/shared_survey_tool_lumber.iff"   : 
+				toolType = 3; 
+				surveyEffectString = "clienteffect/survey_tool_lumber.cef";
+				sampleEffectString = "clienteffect/survey_sample_lumber.cef";
+				break; 
+			case "object/tangible/survey_tool/shared_survey_tool_gas.iff"       : 
+				toolType = 4; 
+				surveyEffectString = "clienteffect/survey_tool_gas.cef";
+				sampleEffectString = "clienteffect/survey_sample_gas.cef";				
+				break; 
+			case "object/tangible/survey_tool/shared_survey_tool_liquid.iff"    : 
+				toolType = 5; 
+				surveyEffectString = "clienteffect/survey_tool_liquid.cef";
+				sampleEffectString = "clienteffect/survey_sample_liquid.cef";
+				break; 
+			case "object/tangible/survey_tool/shared_survey_tool_wind.iff"      : toolType = 6; break; 
+			case "object/tangible/survey_tool/shared_survey_tool_solar.iff"     : toolType = 7; break; 
+			case "object/tangible/survey_tool/shared_survey_tool_all.iff"       : toolType = 8; break; 
+			default: toolType = -1;
+		}
+		System.out.println("TOOLTYPE " + toolType);
+	}
+	
+	public SurveyTool(String template, Long tanoID) {
+		super();
+		surveyEffectString = "";
+		sampleEffectString = "";
+		this.tanoID = tanoID; 
+		this.exceptionalState = false;
+		switch (template) {
+			case "object/tangible/survey_tool/shared_survey_tool_mineral.iff"   : 
+				toolType = 1; 
+				surveyEffectString = "clienteffect/survey_tool_mineral.cef";
+				sampleEffectString = "clienteffect/survey_sample_mineral.cef";
+				break; 
+			case "object/tangible/survey_tool/shared_survey_tool_inorganic.iff" : 
+				toolType = 2; 
+				surveyEffectString = "clienteffect/survey_tool_lumber.cef";
+				sampleEffectString = "clienteffect/survey_sample_lumber.cef";
+				break; 
+			case "object/tangible/survey_tool/shared_survey_tool_lumber.iff"   : 
+				toolType = 3; 
+				surveyEffectString = "clienteffect/survey_tool_lumber.cef";
+				sampleEffectString = "clienteffect/survey_sample_lumber.cef";
+				break; 
+			case "object/tangible/survey_tool/shared_survey_tool_gas.iff"       : 
+				toolType = 4; 
+				surveyEffectString = "clienteffect/survey_tool_gas.cef";
+				sampleEffectString = "clienteffect/survey_sample_gas.cef";				
+				break; 
+			case "object/tangible/survey_tool/shared_survey_tool_liquid.iff"    : 
+				toolType = 5; 
+				surveyEffectString = "clienteffect/survey_tool_liquid.cef";
+				sampleEffectString = "clienteffect/survey_sample_liquid.cef";
+				break; 
+			case "object/tangible/survey_tool/shared_survey_tool_wind.iff"      : toolType = 6; break; 
+			case "object/tangible/survey_tool/shared_survey_tool_solar.iff"     : toolType = 7; break; 
+			case "object/tangible/survey_tool/shared_survey_tool_all.iff"       : toolType = 8; break; 
+			default: toolType = -1;
+		}
+		System.out.println("TOOLTYPE " + toolType);
+	}
+	
+	public void setToolType(byte toolType) {
+		this.toolType = toolType;
+	}
+	
+	public byte getToolType() {
+		return this.toolType;
+	}
+	
+	public String getSurveyEffectString() {
+		return surveyEffectString;
+	}
+
+	public String getSampleEffectString() {
+		return sampleEffectString;
+	}
+	
+	public void setCurrentlySurveying(boolean toggle){
+		this.currentlySurveying=toggle;
+	}
+	
+	public boolean getCurrentlySurveying(){
+		return this.currentlySurveying;
+	}
+	
+	public void setCurrentlySampling(boolean toggle){
+		this.currentlySampling=toggle;
+	}
+	
+	public boolean getCurrentlySampling(){
+		return this.currentlySampling;
+	}
+	
+	public void setLastSurveyTime(Long time){
+		this.lastSurveyTime = time;
+	}
+	
+	public Long getLastSurveyTime(){
+		return this.lastSurveyTime;
+	}
+	
+	public void setLastSampleTime(Long time){
+		this.lastSampleTime = time;
+	}
+	
+	public Long getLastSampleTime(){
+		return this.lastSampleTime;
+	}
+	
+	public void setSurveyResource(GalacticResource surveyResource){
+		this.surveyResource = surveyResource;
+	}
+	
+	public GalacticResource getSurveyResource(){
+		return this.surveyResource;
+	}
+
+	public boolean getCurrentlyCoolingDown() {
+		return currentlyCoolingDown;
+	}
+
+	public void setCurrentlyCoolingDown(boolean currentlyCoolingDown) {
+		this.currentlyCoolingDown = currentlyCoolingDown;
+	}
+
+	public Long getRecoveryTime() {
+		return recoveryTime;
+	}
+
+	public void setRecoveryTime(Long recoveryTime) {
+		this.recoveryTime = recoveryTime;
+	}
+
+	public CreatureObject getUser() {
+		return user;
+	}
+
+	public void setUser(CreatureObject user) {
+		this.user = user;
+	}
+
+	public Long getTanoID() {
+		return tanoID;
+	}
+
+	public void setTanoID(Long tanoID) {
+		this.tanoID = tanoID;
+	}
+
+	public boolean isExceptionalState() {
+		return exceptionalState;
+	}
+
+	public void setExceptionalState(boolean exceptionalState) {
+		this.exceptionalState = exceptionalState;
+	}
+
+	public boolean isRecoveryMode() {
+		return RecoveryMode;
+	}
+
+	public void setRecoveryMode(boolean recoveryMode) {
+		RecoveryMode = recoveryMode;
+	}
+
+	public byte getSurveyRangeSetting() {
+		return SurveyRangeSetting;
+	}
+
+	public void setSurveyRangeSetting(byte surveyRangeSetting) {
+		SurveyRangeSetting = surveyRangeSetting;
+	}
+}
+
+//"clienteffect/survey_tool_mineral.cef",
+//"clienteffect/survey_tool_lumber.cef",
+//"clienteffect/survey_tool_moisture.cef",
+//"clienteffect/survey_tool_liquid.cef",
+//"clienteffect/survey_tool_gas.cef",
+
+
+//"clienteffect/survey_sample_mineral.cef",
+//"clienteffect/survey_sample_lumber.cef",
+//"clienteffect/survey_sample_moisture.cef",
+//"clienteffect/survey_sample_liquid.cef",
+//"clienteffect/survey_sample_gas.cef",

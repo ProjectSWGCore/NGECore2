@@ -105,6 +105,14 @@ public class CommandService implements INetworkDispatch  {
 					processCombatCommand(actor, target, command2, commandEnqueue.getActionCounter(), commandEnqueue.getCommandArguments());
 					return;
 				}
+				
+				// survey command filter
+				if(command instanceof SurveyCommand) {
+					System.out.println("SurveyCommand Instance: " + command.getCommandName());
+					SurveyCommand command2 = (SurveyCommand) command.clone();
+					processSurveyCommand(actor, target, command2, commandEnqueue.getActionCounter(), commandEnqueue.getCommandArguments());
+					return;
+				}
 					
 				core.scriptService.callScript("scripts/commands/", command.getCommandName(), "run", core, actor, target, commandEnqueue.getCommandArguments());
 				
@@ -135,6 +143,14 @@ public class CommandService implements INetworkDispatch  {
 	public CombatCommand registerCombatCommand(String name) {
 		
 		CombatCommand command = new CombatCommand(name.toLowerCase());
+		commandLookup.add(command);
+		return command;
+		
+	}
+	
+	public SurveyCommand registerSurveyCommand(String name) {
+		
+		SurveyCommand command = new SurveyCommand(name.toLowerCase());
 		commandLookup.add(command);
 		return command;
 		
@@ -302,6 +318,17 @@ public class CommandService implements INetworkDispatch  {
 			
 		}
 		
+	}
+	
+	public void processSurveyCommand(CreatureObject crafter, SWGObject target, SurveyCommand command, int actionCounter, String commandArgs) {
+		
+		if(command.getCommandName().equalsIgnoreCase("requestsurvey")){
+			core.surveyService.requestSurvey(crafter, target, command, actionCounter, commandArgs);			
+		}
+
+		if(command.getCommandName().equalsIgnoreCase("requestcoresample")){	
+			core.surveyService.requestSampling(crafter, target, command, actionCounter, commandArgs);		
+		}
 	}
 
 	public void callCommand(SWGObject actor, String commandName, SWGObject target, String commandArgs) {

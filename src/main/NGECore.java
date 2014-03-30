@@ -65,6 +65,7 @@ import services.SimulationService;
 import services.SkillModService;
 import services.SkillService;
 import services.StaticService;
+import services.SurveyService;
 import services.TerrainService;
 import services.WeatherService;
 import services.ai.AIService;
@@ -80,6 +81,7 @@ import services.LoginService;
 import services.map.MapService;
 import services.object.ObjectService;
 import services.object.UpdateService;
+import services.resources.ResourceService;
 import services.retro.RetroService;
 import services.spawn.SpawnService;
 import services.sui.SUIService;
@@ -167,6 +169,8 @@ public class NGECore {
 	//public MissionService missionService;
 	public InstanceService instanceService;
 	public DevService devService;
+	public SurveyService surveyService;
+	public ResourceService resourceService;
 	
 	// Login Server
 	public NetworkDispatch loginDispatch;
@@ -190,6 +194,8 @@ public class NGECore {
 	private BusConfiguration eventBusConfig = BusConfiguration.Default(1, new ThreadPoolExecutor(1, 4, 1, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>()));
 
 	private ObjectDatabase buildingODB;
+	private ObjectDatabase resourcesODB;
+	private ObjectDatabase resourceRootsODB;
 
 	
 	public NGECore() {
@@ -237,6 +243,8 @@ public class NGECore {
 		objectIdODB = new ObjectDatabase("oids", true, false, false);
 		duplicateIdODB = new ObjectDatabase("doids", true, false, true);
 		chatRoomODB = new ObjectDatabase("chatRooms", true, false, true);
+		resourcesODB = new ObjectDatabase("resources", true, false, true);
+		resourceRootsODB = new ObjectDatabase("resourceroots", true, false, true);
 		
 		// Services
 		loginService = new LoginService(this);
@@ -279,6 +287,8 @@ public class NGECore {
 		spawnService = new SpawnService(this);
 		aiService = new AIService(this);
 		//missionService = new MissionService(this);
+		surveyService = new SurveyService(this);
+		resourceService = new ResourceService(this);
 		
 		// Ping Server
 		try {
@@ -378,6 +388,10 @@ public class NGECore {
 		simulationService = new SimulationService(this);
 		
 		objectService.loadBuildings();
+		
+		objectService.loadResourceRoots();
+		objectService.loadResources();
+		
 		terrainService.loadSnapShotObjects();
 		objectService.loadServerTemplates();
 		simulationService.insertSnapShotObjects();
@@ -532,6 +546,14 @@ public class NGECore {
 	
 	public ObjectDatabase getChatRoomODB() {
 		return chatRoomODB;
+	}
+	
+	public ObjectDatabase getResourcesODB() {
+		return resourcesODB;
+	}
+
+	public ObjectDatabase getResourceRootsODB() {
+		return resourceRootsODB;
 	}
 	
 	public int getActiveClients() {
