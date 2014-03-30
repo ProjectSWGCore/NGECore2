@@ -83,6 +83,7 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 20, "(Light) Jedi Robe");
 				suiOptions.put((long) 21, "(Dark) Jedi Robe");
 				suiOptions.put((long) 22, "Composite Armor");
+				suiOptions.put((long) 41, "Mandolorian Armor");
 				suiOptions.put((long) 23, "Weapons");
 				suiOptions.put((long) 24, "Misc Items");
 				break;
@@ -221,6 +222,78 @@ public class DevService implements INetworkDispatch {
 						inventory.add(gloves);
 
 						
+						return;
+					case 41: // Mandolorian Armor
+						SWGObject bicep_r = core.objectService.createObject("object/tangible/wearables/armor/mandolorian/shared_armor_mandolorian_bicep_r.iff", planet);
+						bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+						bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+						bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+						bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+						bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+						bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+						
+						SWGObject bicep_l = core.objectService.createObject("object/tangible/wearables/armor/mandolorian/shared_armor_mandolorian_bicep_l.iff", planet);
+						bicep_l.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+						bicep_l.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+						bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+						bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+						bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+						bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+						
+						SWGObject bracer_r = core.objectService.createObject("object/tangible/wearables/armor/mandolorian/shared_armor_mandolorian_bracer_r.iff", planet);
+						bracer_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+						bracer_r.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+						bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+						bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+						bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+						bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+						
+						SWGObject bracer_l = core.objectService.createObject("object/tangible/wearables/armor/mandolorian/shared_armor_mandolorian_bracer_l.iff", planet);
+						bracer_l.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+						bracer_l.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+						bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+						bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+						bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+						bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+						
+						SWGObject leggings = core.objectService.createObject("object/tangible/wearables/armor/bounty_hunter/shared_armor_bounty_hunter_leggings.iff", planet);
+						leggings.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+						leggings.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+						leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+						leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+						leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+						leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+						
+						SWGObject helmet = core.objectService.createObject("object/tangible/wearables/armor/mandolorian/shared_armor_mandolorian_helmet.iff", planet);
+						helmet.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+						helmet.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+						helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+						helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+						helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+						helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+						
+						SWGObject chest = core.objectService.createObject("object/tangible/wearables/armor/mandolorian/shared_armor_mandolorian_chest_plate.iff", planet);
+						chest.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+						chest.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+						chest.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+						chest.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+						chest.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+						chest.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+						
+						SWGObject boots = core.objectService.createObject("object/tangible/wearables/armor/mandolorian/shared_armor_mandolorian_boots.iff", planet);
+						SWGObject gloves = core.objectService.createObject("object/tangible/wearables/armor/mandolorian/shared_armor_mandolorian_gloves.iff", planet);
+						
+						
+						
+						inventory.add(bicep_r);
+						inventory.add(bicep_l);
+						inventory.add(bracer_r);
+						inventory.add(bracer_l);
+						inventory.add(leggings);
+						inventory.add(helmet);
+						inventory.add(chest);
+						inventory.add(boots);
+						inventory.add(gloves);
 						return;
 					case 23: // Weapons
 						sendCharacterBuilderSUI(player, 3);
