@@ -67,7 +67,7 @@ public class EntertainmentService implements INetworkDispatch {
 	
 	private ConcurrentHashMap<String, Short> designMap = new ConcurrentHashMap<String, Short>();
 	
-	private Random ranWorkshop = new Random();
+	//private Random ranWorkshop = new Random();
 	
 	private Map<String, PerformanceEffect> performanceEffects = new ConcurrentHashMap<String, PerformanceEffect>();
 	

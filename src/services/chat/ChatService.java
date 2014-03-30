@@ -49,6 +49,7 @@ import resources.common.*;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import protocol.swg.AddIgnoreMessage;
+import protocol.swg.ChatEnterRoomById;
 import protocol.swg.ChatOnChangeFriendStatus;
 import protocol.swg.ChatDeletePersistentMessage;
 import protocol.swg.ChatFriendsListUpdate;
@@ -64,6 +65,7 @@ import protocol.swg.ChatPersistentMessageToServer;
 import protocol.swg.ChatRequestPersistentMessage;
 import protocol.swg.ChatRoomList;
 import protocol.swg.ChatRoomMessage;
+import protocol.swg.ChatSendToRoom;
 import protocol.swg.ChatSystemMessage;
 import protocol.swg.ObjControllerMessage;
 import protocol.swg.objectControllerObjects.PlayerEmote;
@@ -367,9 +369,53 @@ public class ChatService implements INetworkDispatch {
 		});
 		
 		swgOpcodes.put(Opcodes.ChatCreateRoom, (session, data) -> {
+			//System.out.println("CREATE:");
+			//StringUtilities.printBytes(data.array());
 		});
 		
 		swgOpcodes.put(Opcodes.ChatQueryRoom, (session, data) -> {
+			//System.out.println("QUERY: ");
+			//StringUtilities.printBytes(data.array());
+		});
+		
+		swgOpcodes.put(Opcodes.ChatSendToRoom, (session, data) -> {
+			Client client = core.getClient(session);
+			
+			if(client == null)
+				return;
+			
+			SWGObject obj = client.getParent();
+			
+			if (obj == null)
+				return;
+			
+			ChatSendToRoom sentPacket = new ChatSendToRoom();
+			sentPacket.deserialize(data);
+			
+			//ChatRoom room = getChatRoom(sentPacket.getRoomId());
+			
+			sendChatRoomMessage((CreatureObject) obj, sentPacket.getRoomId(), sentPacket.getMsgId(), sentPacket.getMessage());
+
+		});
+		
+		swgOpcodes.put(Opcodes.ChatEnterRoomById, (session, data) -> {
+			Client client = core.getClient(session);
+			
+			if(client == null)
+				return;
+			
+			SWGObject obj = client.getParent();
+			
+			if (obj == null)
+				return;
+			
+			ChatEnterRoomById sentPacket = new ChatEnterRoomById();
+			sentPacket.deserialize(data);
+			
+			joinChatRoom((CreatureObject) obj, sentPacket.getRoomId());
+			
+			//System.out.println("Entering room...");
+			
 		});
 	}
 	
@@ -687,10 +733,12 @@ public class ChatService implements INetworkDispatch {
 			return;
 
 		ChatOnEnteredRoom enterRoom = new ChatOnEnteredRoom(playerName, 0, roomId, true);
-		player.getClient().getSession().write(enterRoom.serialize());
 		
 		if (!room.getUserList().contains(player))
 			room.getUserList().add(player);
+		
+		room.getUserList().stream().forEach(user -> user.getClient().getSession().write(enterRoom.serialize()));
+
 	}
 	
 	public void leaveChatRoom(CreatureObject player, int roomId) {
@@ -711,7 +759,7 @@ public class ChatService implements INetworkDispatch {
 			room.getUserList().remove(player);
 	}
 	
-	public void sendChatRoomMessage(CreatureObject sender, int roomId, String message) {
+	public void sendChatRoomMessage(CreatureObject sender, int roomId, int msgId, String message) {
 		String senderName = sender.getCustomName().toLowerCase();
 		
 		if (senderName.contains(" "))
@@ -720,17 +768,14 @@ public class ChatService implements INetworkDispatch {
 		ChatRoom room = getChatRoom(roomId);
 		if (room == null)
 			return;
-
-		ChatOnSendRoomMessage onSend = new ChatOnSendRoomMessage(ChatOnSendRoomMessage.SUCCESS);
+		
+		ChatOnSendRoomMessage onSend = new ChatOnSendRoomMessage(0, msgId);
 		sender.getClient().getSession().write(onSend.serialize());
 		
 		ChatRoomMessage roomMessage = new ChatRoomMessage(roomId, senderName, message);
 		Vector<CreatureObject> users = room.getUserList();
 		
 		for (CreatureObject user : users) {
-			if (user == sender)
-				continue;
-			
 			user.getClient().getSession().write(roomMessage.serialize());
 		}
 	}

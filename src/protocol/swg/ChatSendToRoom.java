@@ -21,36 +21,51 @@
  ******************************************************************************/
 package protocol.swg;
 
-import java.nio.ByteOrder;
-
 import org.apache.mina.core.buffer.IoBuffer;
 
-public class ChatOnSendRoomMessage extends SWGMessage {
-
-	private int errorCode;
+public class ChatSendToRoom extends SWGMessage {
+	
+	private String message;
+	private int roomId;
 	private int msgId;
-
-	public ChatOnSendRoomMessage(int errorCode, int msgId) {
-		this.errorCode = errorCode;
-		this.msgId = msgId;
-	}
-
+	
+	public ChatSendToRoom() { }
+	
 	@Override
 	public void deserialize(IoBuffer data) {
+		setMessage(getUnicodeString(data));
+		data.getInt();
+		setRoomId(data.getInt());
+		setMsgId(data.getInt());
 	}
 
 	@Override
 	public IoBuffer serialize() {
-		IoBuffer buffer = IoBuffer.allocate(14).order(ByteOrder.LITTLE_ENDIAN);
-		buffer.putShort((short) 3);
-		buffer.putInt(0xE7B61633);
-		buffer.putInt(errorCode);
-		buffer.putInt(msgId); // msg id
-		return buffer.flip();
+		return null;
 	}
-	
-	public static final int SUCCESS = 0;
-	public static final int FAILED_MODERATOR = 9;
-	public static final int FAILED_LENGTH = 16;
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
+	}
+
+	public int getRoomId() {
+		return roomId;
+	}
+
+	public void setRoomId(int roomId) {
+		this.roomId = roomId;
+	}
+
+	public int getMsgId() {
+		return msgId;
+	}
+
+	public void setMsgId(int msgId) {
+		this.msgId = msgId;
+	}
 
 }

@@ -93,6 +93,7 @@ public class DevService implements INetworkDispatch {
 				break;
 			case 4: // [Items] Misc Items
 				suiOptions.put((long) 40, "Unity Ring");
+				break;
 		}
 		
 		final SUIWindow window = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "Character Builder Terminal", "Select the desired option and click OK.", suiOptions, creature, null, 10);
@@ -275,6 +276,15 @@ public class DevService implements INetworkDispatch {
 						rifle1.setStringAttribute("cat_wpn_damage.damage", "800-1250");
 						
 						inventory.add(rifle1);
+						
+						SWGObject pistol = core.objectService.createObject("object/weapon/ranged/pistol/shared_pistol_cdef.iff", planet);
+						pistol.setIntAttribute("required_combat_level", 90);
+						pistol.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 1);
+						pistol.setStringAttribute("class_required", "None");
+						pistol.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
+						pistol.setStringAttribute("cat_wpn_damage.damage", "400-559");
+						
+						inventory.add(pistol);
 						return;
 					case 40:
 						TangibleObject ring = (TangibleObject) core.objectService.createObject("object/tangible/wearables/ring/shared_ring_s01.iff", planet);
