@@ -112,7 +112,7 @@ public class SpawnService {
 			creature.setLevel(level);
 		else
 			creature.setLevel(mobileTemplate.getLevel());		
-		WeaponObject defaultWeapon = (WeaponObject) core.objectService.createObject("object/weapon/creature/shared_creature_default_weapon.iff", creature.getPlanet());
+		WeaponObject defaultWeapon = (mobileTemplate.getCustomWeaponTemplate() != null) ?  (WeaponObject) core.objectService.createObject(mobileTemplate.getCustomWeaponTemplate(), creature.getPlanet()) : (WeaponObject) core.objectService.createObject("object/weapon/creature/shared_creature_default_weapon.iff", creature.getPlanet());
 		defaultWeapon.setAttackSpeed(2);
 		defaultWeapon.setDamageType("@obj_attr_n:armor_eff_kinetic");
 		defaultWeapon.setStringAttribute("cat_wpn_damage.damage", "0-0");

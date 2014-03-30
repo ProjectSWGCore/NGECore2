@@ -28,9 +28,11 @@ import org.apache.mina.core.buffer.IoBuffer;
 public class ChatOnSendRoomMessage extends SWGMessage {
 
 	private int errorCode;
+	private int msgId;
 
-	public ChatOnSendRoomMessage(int errorCode) {
+	public ChatOnSendRoomMessage(int errorCode, int msgId) {
 		this.errorCode = errorCode;
+		this.msgId = msgId;
 	}
 
 	@Override
@@ -43,7 +45,7 @@ public class ChatOnSendRoomMessage extends SWGMessage {
 		buffer.putShort((short) 3);
 		buffer.putInt(0xE7B61633);
 		buffer.putInt(errorCode);
-		buffer.putInt(1); // msg id
+		buffer.putInt(msgId); // msg id
 		return buffer.flip();
 	}
 	

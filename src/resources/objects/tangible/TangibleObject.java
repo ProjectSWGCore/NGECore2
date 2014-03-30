@@ -21,35 +21,40 @@
  ******************************************************************************/
 package resources.objects.tangible;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
-import main.NGECore;
+import javax.xml.bind.DatatypeConverter;
 
+import main.NGECore;
 import protocol.swg.ObjControllerMessage;
 import protocol.swg.PlayClientEffectObjectMessage;
 import protocol.swg.StopClientEffectObjectByLabel;
 import protocol.swg.UpdatePVPStatusMessage;
 import protocol.swg.objectControllerObjects.ShowFlyText;
-
 import resources.common.RGB;
 import resources.objects.creature.CreatureObject;
+import resources.visitors.IDManagerVisitor;
 import services.ai.AIActor;
 
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
 
+import engine.clientdata.ClientFileManager;
 import engine.clients.Client;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent(version=0)
+@Persistent(version=1)
 public class TangibleObject extends SWGObject {
 	
 	// TODO: Thread safety
@@ -59,6 +64,7 @@ public class TangibleObject extends SWGObject {
 	protected int pvpBitmask = 0;
 	protected byte[] customization;
 	private List<Integer> componentCustomizations = new ArrayList<Integer>();
+	private Map<String, Byte> customizationVariables = new HashMap<String, Byte>();
 	protected int optionsBitmask = 0;
 	private int maxDamage = 1000;
 	private boolean staticObject = true;
@@ -239,6 +245,50 @@ public class TangibleObject extends SWGObject {
 			}
 
 		}
+	}
+	
+	public void setCustomizationVariable(String type, byte value)
+	{
+		if(customizationVariables.containsKey(type)) customizationVariables.replace(type, value);
+		else customizationVariables.put(type, value);
+		
+		buildCustomizationBytes();
+	}
+	
+	public void removeCustomizationVariable(String type)
+	{
+		if(customizationVariables.containsKey(type)) 
+		{
+			customizationVariables.remove(type);
+			buildCustomizationBytes();
+		}
+	}
+	
+	private void buildCustomizationBytes()
+	{
+		//if(customizationVariables.size() == 0) customization = { 0x00 };
+		
+		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+		try
+		{
+			IDManagerVisitor visitor = ClientFileManager.loadFile("customization/customization_id_manager.iff", IDManagerVisitor.class);	
+			
+			stream.write((byte)0x02); // Unk
+			stream.write((byte)customizationVariables.size()); // Number of customization attributes
+			
+			for(String type : customizationVariables.keySet())
+			{
+				stream.write(visitor.getAttributeIndex(type)); // Index of palette type within "customization/customization_id_manager.iff"
+				stream.write(customizationVariables.get(type)); // Value/Index within palette
+				
+				// Seperator/Footer
+				stream.write((byte) 0xC3);
+				stream.write((byte) 0xBF);
+				stream.write((byte) 0x03);
+			}
+			customization = stream.toByteArray();
+		}
+		catch (Exception e) { e.printStackTrace(); }	
 	}
 	
 	public String getFaction() {
