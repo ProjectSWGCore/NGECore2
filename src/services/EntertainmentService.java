@@ -65,7 +65,7 @@ public class EntertainmentService implements INetworkDispatch {
 	private ConcurrentHashMap<Integer,Performance> performancesByIndex = new ConcurrentHashMap<Integer,Performance>();
 	private ConcurrentHashMap<Integer,Performance> danceMap = new ConcurrentHashMap<Integer,Performance>();
 	
-	private ConcurrentHashMap<String, Short> designMap = new ConcurrentHashMap<String, Short>();
+	private ConcurrentHashMap<String, Byte> designMap = new ConcurrentHashMap<String, Byte>();
 	
 	private Random ranWorkshop = new Random();
 	
@@ -932,7 +932,7 @@ public class EntertainmentService implements INetworkDispatch {
 	
 	public String getCustomizationString(int number){
 		synchronized (designMap) {
-			for (Entry<String, Short> entry : designMap.entrySet()) {
+			for (Entry<String, Byte> entry : designMap.entrySet()) {
 				if (entry.getValue().intValue() == number) {
 					return entry.getKey();
 				}
@@ -943,7 +943,7 @@ public class EntertainmentService implements INetworkDispatch {
 	
 	public int getCustomizationValue(String customizationString) {
 		synchronized(designMap){
-			for(Entry<String, Short> entry : designMap.entrySet()) {
+			for(Entry<String, Byte> entry : designMap.entrySet()) {
 				if (entry.getKey().equals(customizationString)) {
 					return entry.getValue().intValue();
 				}
