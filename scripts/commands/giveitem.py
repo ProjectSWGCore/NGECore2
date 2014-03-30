@@ -13,6 +13,9 @@ def run(core, actor, target, commandString):
 
 	object = core.objectService.createObject(commandString, actor.getPlanet())
 
+	#object.setCustomizationVariable('/private/index_color_blade', 0x02)
+	#object.setCustomizationVariable('private/alternate_shader_blade', 0x02)
+
 	if not object:
 		return
 
