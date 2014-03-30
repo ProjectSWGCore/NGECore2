@@ -153,7 +153,7 @@ public class GroupService implements INetworkDispatch {
 			addGroupBuffsToMember(group, leader);
 			addGroupBuffsToMember(group, invited);
 			
-			//ChatRoom groupChat = core.chatService.createChatRoom(leader.getCustomName() + group.getObjectID(), "GroupChat", leader.getCustomName(), true);
+			//ChatRoom groupChat = core.chatService.createChatRoom("GroupChat", "group." + group.getObjectID(), leader.getCustomName(), true);
 			//group.setChatRoomId(groupChat.getRoomId());
 
 			//core.chatService.joinChatRoom(leader, groupChat.getRoomId());

@@ -25,6 +25,8 @@ import engine.resources.common.CRC;
 
 public class Opcodes {
 	
+	public static int ChatEnterRoomById = CRC.StringtoCRC("ChatEnterRoomById");
+	public static int ChatSendToRoom = CRC.StringtoCRC("ChatSendToRoom");
 	public static int ChatDeletePersistentMessage = 0x8F251641;
 	public static int ChatInstantMessageToCharacter = 0x84BB21F7;
 	public static int ChatPersistentMessageToServer = 0x25A29FA6;

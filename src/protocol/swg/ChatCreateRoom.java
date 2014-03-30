@@ -21,36 +21,18 @@
  ******************************************************************************/
 package protocol.swg;
 
-import java.nio.ByteOrder;
-
 import org.apache.mina.core.buffer.IoBuffer;
 
-public class ChatOnSendRoomMessage extends SWGMessage {
-
-	private int errorCode;
-	private int msgId;
-
-	public ChatOnSendRoomMessage(int errorCode, int msgId) {
-		this.errorCode = errorCode;
-		this.msgId = msgId;
-	}
+public class ChatCreateRoom extends SWGMessage {
 
 	@Override
 	public void deserialize(IoBuffer data) {
+
 	}
 
 	@Override
 	public IoBuffer serialize() {
-		IoBuffer buffer = IoBuffer.allocate(14).order(ByteOrder.LITTLE_ENDIAN);
-		buffer.putShort((short) 3);
-		buffer.putInt(0xE7B61633);
-		buffer.putInt(errorCode);
-		buffer.putInt(msgId); // msg id
-		return buffer.flip();
+		return null;
 	}
-	
-	public static final int SUCCESS = 0;
-	public static final int FAILED_MODERATOR = 9;
-	public static final int FAILED_LENGTH = 16;
 
 }
