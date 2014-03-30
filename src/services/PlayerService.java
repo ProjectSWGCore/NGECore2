@@ -499,12 +499,13 @@ public class PlayerService implements INetworkDispatch {
 		if(cell == null)
 			return;
 		
+		creature.setPosture((byte) 0);
+		
 		core.simulationService.transferToPlanet(creature, cloner.getPlanet(), spawnPoint.getPosition(), spawnPoint.getOrientation(), cell);
 		
 		creature.setHealth(creature.getMaxHealth());
 		creature.setAction(creature.getMaxAction());
 		
-		creature.setPosture((byte) 0);
 		creature.setSpeedMultiplierBase(1);
 		creature.setTurnRadius(1);
 		
