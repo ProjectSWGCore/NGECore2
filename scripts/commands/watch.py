@@ -9,7 +9,7 @@ def run(core, actor, target, commandString):
 	if not target and commandString is not None:
 		target = core.chatService.getObjectByFirstName(commandString)
 	
-	if target is None:
+	if target is None or actor.getPerformanceWatchee():
 		return
 
 
