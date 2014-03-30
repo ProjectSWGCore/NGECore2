@@ -232,26 +232,32 @@ public class DevService implements INetworkDispatch {
 						return;
 					// [Items] Weapons
 					case 30: // Jedi Weapons
-						SWGObject lightsaber1 = core.objectService.createObject("object/weapon/melee/sword/crafted_saber/shared_sword_lightsaber_one_handed_gen5.iff", planet);
+						TangibleObject lightsaber1 = (TangibleObject) core.objectService.createObject("object/weapon/melee/sword/crafted_saber/shared_sword_lightsaber_one_handed_gen5.iff", planet);
 						lightsaber1.setIntAttribute("required_combat_level", 90);
 						lightsaber1.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 1);
 						lightsaber1.setStringAttribute("class_required", "Jedi");
 						lightsaber1.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
 						lightsaber1.setStringAttribute("cat_wpn_damage.damage", "689-1379");
 						
-						SWGObject lightsaber2 = core.objectService.createObject("object/weapon/melee/2h_sword/crafted_saber/shared_sword_lightsaber_two_handed_gen5.iff", planet);
+						TangibleObject lightsaber2 = (TangibleObject) core.objectService.createObject("object/weapon/melee/2h_sword/crafted_saber/shared_sword_lightsaber_two_handed_gen5.iff", planet);
 						lightsaber2.setIntAttribute("required_combat_level", 90);
 						lightsaber2.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 1);
 						lightsaber2.setStringAttribute("class_required", "Jedi");
 						lightsaber2.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
 						lightsaber2.setStringAttribute("cat_wpn_damage.damage", "689-1379");
 						
-						SWGObject lightsaber3 = core.objectService.createObject("object/weapon/melee/polearm/crafted_saber/shared_sword_lightsaber_polearm_gen5.iff", planet);
+						TangibleObject lightsaber3 = (TangibleObject) core.objectService.createObject("object/weapon/melee/polearm/crafted_saber/shared_sword_lightsaber_polearm_gen5.iff", planet);
 						lightsaber3.setIntAttribute("required_combat_level", 90);
 						lightsaber3.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 1);
 						lightsaber3.setStringAttribute("class_required", "Jedi");
 						lightsaber3.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
 						lightsaber3.setStringAttribute("cat_wpn_damage.damage", "689-1379");
+						
+						Random random = new Random();
+						
+						lightsaber1.setCustomizationVariable("/private/index_color_blade", (byte) random.nextInt(47));
+						lightsaber2.setCustomizationVariable("/private/index_color_blade", (byte) random.nextInt(47));
+						lightsaber3.setCustomizationVariable("/private/index_color_blade", (byte) random.nextInt(47));
 						
 						inventory.add(lightsaber1);
 						inventory.add(lightsaber2);
