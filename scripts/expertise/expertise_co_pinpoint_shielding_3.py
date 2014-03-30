@@ -28,7 +28,7 @@ def removeExpertisePoint(core, actor):
 	if not player.getProfession() == 'commando_1a':
 		return
 
-	actor.removeSkill('expertise_co_pinpoint_shielding_3)
+	actor.removeSkill('expertise_co_pinpoint_shielding_3')
 
 	actor.removeSkillMod('expertise_innate_protection_all', 250)
 
