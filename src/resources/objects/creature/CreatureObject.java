@@ -59,7 +59,7 @@ import engine.resources.scene.Quaternion;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 
-@Entity(version=3)
+@Entity(version=4)
 public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	@NotPersistent
@@ -147,7 +147,11 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private SWGList<SWGObject> appearanceEquipmentList;
 	@NotPersistent
 	private int appearanceEquipmentListUpdateCounter = 0;
-
+	
+	private boolean inStealth = false;
+	private boolean radarVisible = true; // radar
+	private boolean stationary = false;
+	
 	// non-baseline vars
 	@NotPersistent
 	private List<CreatureObject> duelList = Collections.synchronizedList(new ArrayList<CreatureObject>());
@@ -1707,6 +1711,44 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	public void setPerformingFlourish(boolean performingFlourish) {
 		synchronized(objectMutex) {
 			this.performingFlourish = performingFlourish;
+		}
+	}
+
+	public boolean isInStealth() {
+		synchronized(objectMutex) {
+			return inStealth;
+		}
+	}
+
+	public void setInStealth(boolean inStealth) {
+		synchronized(objectMutex) {
+			this.inStealth = inStealth;
+		}
+		notifyObservers(messageBuilder.buildStealthFlagDelta(inStealth), false);
+	}
+
+	public boolean isRadarVisible() {
+		synchronized(objectMutex) {
+			return radarVisible;
+		}
+	}
+
+	public void setRadarVisible(boolean radarVisible) {
+		synchronized(objectMutex) {
+			this.radarVisible = radarVisible;
+		}
+		notifyObservers(messageBuilder.buildRadarVisibleFlagDelta(radarVisible), false);
+	}
+
+	public boolean isStationary() {
+		synchronized(objectMutex) {
+			return stationary;
+		}
+	}
+
+	public void setStationary(boolean stationary) {
+		synchronized(objectMutex) {
+			this.stationary = stationary;
 		}
 	}
 }

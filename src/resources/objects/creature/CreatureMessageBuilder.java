@@ -342,7 +342,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		
 		buffer.putShort((short) 0); // costume
 		//buffer.put(getAsciiString("appearance/gungan_m.sat"));
-		buffer.put((byte) 1); // visible boolean. default: true. cloaked if false.
+		buffer.put((byte) (creature.isInStealth() ? 0 : 1));
 
 		if(creature.getBuffList().isEmpty()) {
 			buffer.putInt(0);	
@@ -385,7 +385,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 				
 		}
 		
-		buffer.put((byte) 0); // performing? boolean
+		buffer.put((byte) (creature.isStationary() ? 1 : 0)); // if the server accepts transforms from the object
 		buffer.put(creature.getDifficulty());
 		
 		if(creature.isHologram())
@@ -393,7 +393,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		else
 			buffer.putInt(0xFFFFFFFF);
 
-		buffer.put((byte) 1); // visibleOnRadar? boolean
+		buffer.put((byte) (creature.isRadarVisible() ? 1 : 0));
 		buffer.put((byte) 0); // no effect for 1?
 		buffer.put((byte) 0); // no effect for 1?
 		
@@ -1186,6 +1186,24 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		int size = buffer.position();
 		buffer.flip();
 		buffer = createDelta("CREO", (byte) 3, (short) 1, (short) 0x0D, buffer, size + 4);
+		return buffer;
+	}
+	
+	public IoBuffer buildStealthFlagDelta(boolean flag) {
+		IoBuffer buffer = bufferPool.allocate(8, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.put((byte) (flag ? 0 : 1));
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x19, buffer, size + 4);
+		return buffer;
+	}
+	
+	public IoBuffer buildRadarVisibleFlagDelta(boolean flag) {
+		IoBuffer buffer = bufferPool.allocate(1, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.put((byte) (flag ? 1 : 0));
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x1E, buffer, size + 4);
 		return buffer;
 	}
 
