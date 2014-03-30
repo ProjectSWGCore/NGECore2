@@ -987,6 +987,8 @@ public class CombatService implements INetworkDispatch {
 		target.sendSystemMessage("@base_player:victim_dead", (byte) 0);
 		attacker.removeDefender(target);
 		target.removeDefender(attacker);
+		target.setSpeedMultiplierBase(0);
+		target.setTurnRadius(0);
 		
 		if(target.getDuelList().contains(attacker)) handleEndDuel(target, attacker, false);
 		
