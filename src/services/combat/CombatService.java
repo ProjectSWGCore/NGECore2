@@ -193,7 +193,15 @@ public class CombatService implements INetworkDispatch {
 					creature.removeDefender(defender);
 				}	
 			}
-		}	
+		}
+		else if(target instanceof TangibleObject)
+		{
+			if(target.getConditionDamage() == target.getMaxDamage()) 
+			{
+				for(TangibleObject defender : target.getDefendersList()) defender.removeDefender(target);
+				core.objectService.destroyObject(target);
+			}
+		}
 	}
 
 	private void doAreaCombat(CreatureObject attacker, TangibleObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {

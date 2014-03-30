@@ -362,8 +362,11 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 			PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
 			
 			for(Buff buff : creature.getBuffList().get()) {
-					
-				buff.setTotalPlayTime((int) (player.getTotalPlayTime() + (System.currentTimeMillis() - player.getLastPlayTimeUpdate()) / 1000));
+				
+				if(player != null)
+					buff.setTotalPlayTime((int) (player.getTotalPlayTime() + (System.currentTimeMillis() - player.getLastPlayTimeUpdate()) / 1000));
+				else 
+					buff.setTotalPlayTime(0);
 				buffer.put((byte) 1);
 				buffer.putInt(0);
 				buffer.putInt(CRC.StringtoCRC(buff.getBuffName()));
@@ -777,7 +780,10 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		IoBuffer buffer = bufferPool.allocate(37, false).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.putInt(1);
 		buffer.putInt(creature.getBuffListCounter());
-		buff.setTotalPlayTime((int) (player.getTotalPlayTime() + (System.currentTimeMillis() - player.getLastPlayTimeUpdate()) / 1000));
+		if(player != null)
+			buff.setTotalPlayTime((int) (player.getTotalPlayTime() + (System.currentTimeMillis() - player.getLastPlayTimeUpdate()) / 1000));
+		else
+			buff.setTotalPlayTime(0);
 		buffer.put((byte) 0);
 		buffer.put(buff.getBytes());
 		int size = buffer.position();
@@ -813,7 +819,10 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		IoBuffer buffer = bufferPool.allocate(37, false).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.putInt(1);
 		buffer.putInt(creature.getBuffListCounter());
-		buff.setTotalPlayTime((int) (player.getTotalPlayTime() + (System.currentTimeMillis() - player.getLastPlayTimeUpdate()) / 1000));
+		if(player != null)
+			buff.setTotalPlayTime((int) (player.getTotalPlayTime() + (System.currentTimeMillis() - player.getLastPlayTimeUpdate()) / 1000));
+		else
+			buff.setTotalPlayTime(0);
 		buffer.put((byte) 2);
 		buffer.put(buff.getBytes());
 		int size = buffer.position();
