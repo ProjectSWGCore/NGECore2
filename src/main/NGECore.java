@@ -420,8 +420,31 @@ public class NGECore {
 		
 		didServerCrash = false;
 		System.out.println("Started Server.");
+		cleanupCreatureODB();
 		setGalaxyStatus(2);
 		
+	}
+
+	private void cleanupCreatureODB() {
+		EntityCursor<CreatureObject> cursor = creatureODB.getCursor(Long.class, CreatureObject.class);
+		
+		Iterator<CreatureObject> it = cursor.iterator();
+		List<CreatureObject> deletedObjects = new ArrayList<CreatureObject>();
+		
+		while(it.hasNext()) {
+			CreatureObject creature = it.next();
+			if(!characterService.playerExists(creature.getObjectID()))
+				deletedObjects.add(creature);
+		}
+		
+		cursor.close();
+		
+		Transaction txn = creatureODB.getEnvironment().beginTransaction(null, null);
+		for(CreatureObject creature : deletedObjects) {
+			creatureODB.delete(creature.getObjectID(), Long.class, CreatureObject.class, txn);
+		}
+		txn.commitSync();
+		System.out.println("Deleted " + deletedObjects.size() + " creatures.");
 	}
 
 	public void stop() {
