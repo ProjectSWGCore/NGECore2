@@ -276,7 +276,7 @@ public class DevService implements INetworkDispatch {
 					case 32: // Ranged Weapons
 						SWGObject rifle1 = core.objectService.createObject("object/weapon/ranged/rifle/shared_rifle_e11.iff", planet);
 						rifle1.setIntAttribute("required_combat_level", 90);
-						rifle1.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 1);
+						rifle1.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 0.8);
 						rifle1.setStringAttribute("class_required", "None");
 						rifle1.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
 						rifle1.setStringAttribute("cat_wpn_damage.damage", "800-1250");
@@ -285,7 +285,7 @@ public class DevService implements INetworkDispatch {
 						
 						SWGObject pistol = core.objectService.createObject("object/weapon/ranged/pistol/shared_pistol_cdef.iff", planet);
 						pistol.setIntAttribute("required_combat_level", 90);
-						pistol.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 1);
+						pistol.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 0.4);
 						pistol.setStringAttribute("class_required", "None");
 						pistol.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
 						pistol.setStringAttribute("cat_wpn_damage.damage", "400-559");
