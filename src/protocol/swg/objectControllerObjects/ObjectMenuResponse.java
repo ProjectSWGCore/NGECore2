@@ -57,8 +57,8 @@ public class ObjectMenuResponse extends ObjControllerObject {
 		
 	}
 
-	@Override
-	public IoBuffer serialize() {
+	//@Override
+	public IoBuffer serializeDefunct() {
 		int size = 37;
 		byte counter = 0;
 		
@@ -83,6 +83,44 @@ public class ObjectMenuResponse extends ObjControllerObject {
 		result.put(radialCount);
 		
 		return result.flip();
+	}
+	
+	public IoBuffer serialize() {
+		
+		IoBuffer result = IoBuffer.allocate(100).order(ByteOrder.LITTLE_ENDIAN);
+		result.setAutoExpand(true);
+		
+		result.putInt(ObjControllerMessage.OBJECT_MENU_RESPONSE);
+		result.putLong(ownerId);
+		result.putInt(0);
+		result.putLong(targetId);
+		result.putLong(ownerId);
+		
+		int size = radialOptions.size();
+		result.putInt(size);
+		
+		if(size > 0) {
+			byte counter = 0;
+			for(RadialOptions radialOption : radialOptions) {
+				result.put(++counter);
+				result.put(radialOption.getParentId());
+				result.putShort(radialOption.getOptionId());
+				//result.put(radialOption.getOptionType());
+				result.put((byte) 3);
+
+				if(radialOption.getDescription().length() > 0)
+					result.put(getUnicodeString(radialOption.getDescription()));
+				else
+					result.putInt(0);
+
+			}
+		}
+		result.put(radialCount);
+		
+		int packetSize = result.position();
+		result = IoBuffer.allocate(packetSize).put(result.array(), 0, packetSize);
+		return result.flip();
+
 	}
 
 }
