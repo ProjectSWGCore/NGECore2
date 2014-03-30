@@ -87,6 +87,7 @@ import toxi.geom.Line3D;
 import toxi.geom.Ray3D;
 import toxi.geom.Vec3D;
 import toxi.geom.mesh.TriangleMesh;
+import wblut.geom.WB_AABB;
 import wblut.geom.WB_AABBNode;
 import wblut.geom.WB_AABBTree;
 import wblut.geom.WB_Distance;
@@ -689,7 +690,6 @@ public class SimulationService implements INetworkDispatch {
         float endZ = (float) (modelSpace.m31 * end.x + modelSpace.m32 * end.y + modelSpace.m33 * end.z + modelSpace.m34);
         
         end = new Point3D(endX, endY, endZ);
- 
 		Vector3D direction = new Vector3D(end.x - origin.x, end.y - origin.y, end.z - origin.z);
 		if(direction.getX() > 0 && direction.getY() > 0 && direction.getZ() > 0)
 			direction.normalize();
@@ -719,7 +719,6 @@ public class SimulationService implements INetworkDispatch {
         return new Point3D(x, y, z);
 
 	}
-
 	/*
 	 * Moved this to ConnectionService which will disconnect them
 	 * from the server if they don't send packets for 5 minutes or more
@@ -902,7 +901,7 @@ public class SimulationService implements INetworkDispatch {
 	}
 	
 	public boolean checkLineOfSight(SWGObject obj1, SWGObject obj2) {
-		
+		long startTime = System.nanoTime();
 		if(obj1.getPlanet() != obj2.getPlanet())
 			return false;
 		
@@ -931,7 +930,7 @@ public class SimulationService implements INetworkDispatch {
 		Point3D end = new Point3D(position2.x, position2.y + heightDirection, position2.z);
 		float distance = position1.getDistance2D(position2);
 		
-		List<SWGObject> inRangeObjects = get(obj1.getPlanet(), position1.x, position1.z, 150);
+		List<SWGObject> inRangeObjects = get(obj1.getPlanet(), position1.x, position1.z, (int) (distance + 1));
 
 		for(SWGObject object : inRangeObjects) {
 			
@@ -959,6 +958,7 @@ public class SimulationService implements INetworkDispatch {
 			for(Mesh3DTriangle tri : tris) {
 				
 				if(ray.intersectsTriangle(tri, distance) != null) {
+					//System.out.println("Collision took: " + (System.nanoTime() - startTime) + " ns (collided)");
 				//	System.out.println("Collided with " + object.getTemplate() + " X: " + object.getPosition().x + " Y: " + object.getPosition().y + " Z: " + object.getPosition().z);	
 					return false;
 				}
@@ -981,8 +981,8 @@ public class SimulationService implements INetworkDispatch {
 				return checkLineOfSightWorldToCell(obj1, obj2, cell);
 		}
 		
-		/*List<Vec3D> segments = new ArrayList<Vec3D>();
-		Line3D.splitIntoSegments(new Vec3D(position1.x, position1.y + 1, position1.z), new Vec3D(position2.x, position2.y + 1, position2.z), (float) 0.5, segments, true);
+		List<Vec3D> segments = new ArrayList<Vec3D>();
+		Line3D.splitIntoSegments(new Vec3D(position1.x, position1.y + 1, position1.z), new Vec3D(position2.x, position2.y + 1, position2.z), (float) 1, segments, true);
 		
 		for(Vec3D segment : segments) {
 			float y = segment.y;
@@ -990,11 +990,12 @@ public class SimulationService implements INetworkDispatch {
 			int height = (int) core.terrainService.getHeight(obj1.getPlanetId(), segment.x, segment.z); // round down to int
 			
 			if(height > y) {
-				System.out.println("Collision with terrain");
+				//System.out.println("Collision took: " + (System.nanoTime() - startTime) + " ns (terrain collision)");				
 				return false;
 			}
-		}*/
-	
+		}
+		//System.out.println("Collision took: " + (System.nanoTime() - startTime) + " ns (did not collide)");
+
 		return true;
 
 	}
@@ -1031,6 +1032,7 @@ public class SimulationService implements INetworkDispatch {
 				MeshVisitor meshVisitor;
 				if(!cellMeshes.containsKey(cell.mesh)) {
 					meshVisitor = ClientFileManager.loadFile(cell.mesh, MeshVisitor.class);
+					meshVisitor.getTriangles();
 					cellMeshes.put(cell.mesh, meshVisitor);
 				} else {
 					meshVisitor = cellMeshes.get(cell.mesh);
