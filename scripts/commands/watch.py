@@ -13,7 +13,7 @@ def run(core, actor, target, commandString):
 		return
 
 
-	if target.getPosition().getDistance2D(actor.getWorldPosition()) > float(20):
+	if target.getWorldPosition().getDistance2D(actor.getWorldPosition()) > float(20):
 		actor.sendSystemMessage(target.getCustomName() + ' is too far away to watch.', 0)
 		return
     
