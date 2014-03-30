@@ -167,6 +167,7 @@ public class SimulationService implements INetworkDispatch {
 		core.commandService.registerCommand("requestbiography");
 		core.commandService.registerCommand("eject");
 		core.commandService.registerGmCommand("broadcast");
+		core.commandService.registerGmCommand("teleporttarget");
 
 	}
 	
@@ -958,7 +959,7 @@ public class SimulationService implements INetworkDispatch {
 			for(Mesh3DTriangle tri : tris) {
 				
 				if(ray.intersectsTriangle(tri, distance) != null) {
-					System.out.println("Collision took: " + (System.nanoTime() - startTime) + " ns (collided)");
+					//System.out.println("Collision took: " + (System.nanoTime() - startTime) + " ns (collided)");
 				//	System.out.println("Collided with " + object.getTemplate() + " X: " + object.getPosition().x + " Y: " + object.getPosition().y + " Z: " + object.getPosition().z);	
 					return false;
 				}
@@ -990,11 +991,11 @@ public class SimulationService implements INetworkDispatch {
 			int height = (int) core.terrainService.getHeight(obj1.getPlanetId(), segment.x, segment.z); // round down to int
 			
 			if(height > y) {
-				System.out.println("Collision took: " + (System.nanoTime() - startTime) + " ns (terrain collision)");				
+				//System.out.println("Collision took: " + (System.nanoTime() - startTime) + " ns (terrain collision)");				
 				return false;
 			}
 		}
-		System.out.println("Collision took: " + (System.nanoTime() - startTime) + " ns (did not collide)");
+		//System.out.println("Collision took: " + (System.nanoTime() - startTime) + " ns (did not collide)");
 
 		return true;
 
