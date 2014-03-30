@@ -73,6 +73,10 @@ def run(core, actor, target, commandString):
 	elif command == 'id':
 		actor.sendSystemMessage('Your id is: ' + str(actor.getObjectId()), 0)
 	
+	elif command == 'cust' and arg1 and arg2 and arg3:
+		obj = core.objectService.getObject(long(arg1))
+		obj.setCustomizationVariable(str(arg2), int(arg3))
+	
 	elif command == 'stealth':
 		if (actor.isInStealth()):
 			actor.setInStealth(False)
