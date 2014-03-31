@@ -187,7 +187,7 @@ public abstract class AIState {
 		Point3D newPosition = new Point3D();
 		boolean foundNewPos = findNewPosition(actor, speed, maxDistance, newPosition);
 
-		if(!foundNewPos)
+		if(!foundNewPos || (newPosition.x == 0 && newPosition.z == 0))
 			return;
 		
 		Point3D newWorldPos = newPosition.getWorldPosition();

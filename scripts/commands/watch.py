@@ -9,11 +9,11 @@ def run(core, actor, target, commandString):
 	if not target and commandString is not None:
 		target = core.chatService.getObjectByFirstName(commandString)
 	
-	if target is None:
+	if target is None or actor.getPerformanceWatchee():
 		return
 
 
-	if target.getPosition().getDistance2D(actor.getWorldPosition()) > float(20):
+	if target.getWorldPosition().getDistance2D(actor.getWorldPosition()) > float(20):
 		actor.sendSystemMessage(target.getCustomName() + ' is too far away to watch.', 0)
 		return
     
