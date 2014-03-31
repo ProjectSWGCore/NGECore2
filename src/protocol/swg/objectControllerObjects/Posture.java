@@ -47,9 +47,9 @@ public class Posture extends ObjControllerObject {
 		result.putInt(ObjControllerMessage.POSTURE);
 
 		result.putLong(objectId);
-		result.putInt(0); //unk
+		result.putInt(0); // tick count ?
 		result.put((byte) posture);
-		result.put((byte) 0);
+		result.put((byte) 0); // seen also as 1
 
 		return result.flip();
 	}

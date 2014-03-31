@@ -23,6 +23,7 @@ package services.spawn;
 
 import java.util.Vector;
 
+import main.NGECore;
 import resources.datatables.Options;
 import resources.datatables.PvpStatus;
 import resources.objects.weapon.WeaponObject;
@@ -41,6 +42,9 @@ public class MobileTemplate {
 	private int health, action;
 	private String creatureName;
 	private float scale = 1;
+	// this is a custom attack Range setting to use for large mobs like krayts
+	private int attackRange;
+	private String customWeaponTemplate;
 
 	public Vector<String> getTemplates() {
 		return templates;
@@ -146,4 +150,21 @@ public class MobileTemplate {
 		this.scale = scale;
 	}
 
+	public int getAttackRange() {
+		return attackRange;
+	}
+
+	public void setAttackRange(int attackRange) {
+		this.attackRange = attackRange;
+	}
+	
+	public void setCustomWeaponTemplate(String template)
+	{
+		this.customWeaponTemplate = template;
+	}
+	
+	public String getCustomWeaponTemplate()
+	{
+		return customWeaponTemplate;
+	}
 }

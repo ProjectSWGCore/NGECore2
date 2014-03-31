@@ -26,9 +26,10 @@ import java.util.Map;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
+import org.python.core.Py;
+import org.python.core.PyObject;
 
 import protocol.swg.ExpertiseRequestMessage;
-
 import resources.common.Console;
 import resources.common.FileUtilities;
 import resources.common.Opcodes;
@@ -147,9 +148,31 @@ public class SkillService implements INetworkDispatch {
 							}
 						}
 						
-						if(!skill.contains("expertise")) {	// only mark 1 abilities in datatable need to remove abilities per script
+						if (skill.contains("expertise")) {
+							if (FileUtilities.doesFileExist("scripts/expertise/" + skill + ".py")) {
+								PyObject method = core.scriptService.getMethod("scripts/expertise/", skill, "addAbilities");
+								
+								if (method != null && method.isCallable()) {
+									method.__call__(Py.java2py(core), Py.java2py(creature), Py.java2py(player));
+								}
+							}
+						} else {
 							for (String ability : abilities) {
 								creature.addAbility(ability);
+							}
+							
+							// When leveling, add all new unadded expertise abilities
+							// It's up to the script to not add abilities that are already added
+							for (String expertiseName : creature.getSkills()) {
+								if (expertiseName.startsWith("expertise")) {
+									if (FileUtilities.doesFileExist("scripts/expertise/" + expertiseName + ".py")) {
+										PyObject method = core.scriptService.getMethod("scripts/expertise/", expertiseName, "addAbilities");
+										
+										if (method != null && method.isCallable()) {
+											method.__call__(Py.java2py(core), Py.java2py(creature), Py.java2py(player));
+										}
+									}
+								}
 							}
 						}
 						
@@ -189,7 +212,7 @@ public class SkillService implements INetworkDispatch {
 		}
 		
 		try {
-			skillTable = ClientFileManager.loadFile("datatables/skills/skills.iff", DatatableVisitor.class);
+			skillTable = ClientFileManager.loadFile("datatables/skill/skills.iff", DatatableVisitor.class);
 			
 			for (int s = 0; s < skillTable.getRowCount(); s++) {
 				if (skillTable.getObject(s, 0) != null) {
@@ -214,14 +237,22 @@ public class SkillService implements INetworkDispatch {
 							//creature.addExpertisePoints(pointsRequired);
 						}
 						
-						if(!skill.contains("expertise")) {	// only mark 1 abilities in datatable need to remove abilities per script
+						if (skill.contains("expertise")) {
+							if (FileUtilities.doesFileExist("scripts/expertise/" + skill + ".py")) {
+								PyObject method = core.scriptService.getMethod("scripts/expertise/", skill, "removeAbilities");
+								
+								if (method != null && method.isCallable()) {
+									method.__call__(Py.java2py(core), Py.java2py(creature), Py.java2py(player));
+								}
+							}
+						} else {
 							for (String ability : abilities) {
 								creature.removeAbility(ability);
 							}
-						}
+						}									
 						
 						for (String skillMod : skillMods) {
-							core.skillModService.deductSkillMod(creature, skillMod.split("=")[0], new Integer(skillMod.split("=")[1]));
+							if(skillMod.split("=").length == 2) core.skillModService.deductSkillMod(creature, skillMod.split("=")[0], new Integer(skillMod.split("=")[1]));
 						}
 						
 						for (String schematic : schematicsGranted) {
@@ -231,6 +262,8 @@ public class SkillService implements INetworkDispatch {
 						for (String schematic : schematicsRevoked) {
 							//player.getDraftSchematicList().add(new DraftSchematic());
 						}
+						
+						creature.removeSkill(skill);
 					}
 				}
 			}
@@ -269,12 +302,8 @@ public class SkillService implements INetworkDispatch {
 					return;
 				
 				for(String expertiseName : expertise.getExpertiseSkills()) {
-					if(expertiseName.startsWith("expertise_") && ((caluclateExpertisePoints(creature) - 1) >= 0)) // Prevent possible glitches/exploits
-					{
+					if(expertiseName.startsWith("expertise_") && ((caluclateExpertisePoints(creature) - 1) >= 0) && validExpertiseSkill(player, expertiseName)) { // Prevent possible glitches/exploits
 						addSkill(creature, expertiseName);
-						if(!FileUtilities.doesFileExist("scripts/expertise/" + expertiseName + ".py"))
-							continue;
-						core.scriptService.callScript("scripts/expertise/", expertiseName, "addAbilities", core, creature, player);
 					}
 				}			
 			}
@@ -293,6 +322,49 @@ public class SkillService implements INetworkDispatch {
 		}
 		catch (Exception e) { e.printStackTrace(); }	
 		return expertisePoints;
+	}
+	
+	public boolean validExpertiseSkill(PlayerObject player, String skill)
+	{
+		try 
+		{
+			DatatableVisitor table = ClientFileManager.loadFile("datatables/expertise/expertise.iff", DatatableVisitor.class);
+			String profession;
+			
+			switch(player.getProfession())
+			{
+				case "trader_0a":
+					profession = "trader_dom";
+					break;
+					
+				case "trader_0b":
+					profession = "trader_struct";
+					break;
+					
+				case "trader_0c":
+					profession = "trader_mun";
+					break;
+					
+				case "trader_0d":
+					profession = "trader_eng";
+					break;
+						
+				default:
+					profession = player.getProfession().replace("_1a", "");
+					break;
+			}
+
+			for (int s = 0; s < table.getRowCount(); s++) 
+			{	
+				if (table.getObject(s, 0) != null && ((String) table.getObject(s, 0)).equals(skill))
+				{
+					if(((String)table.getObject(s, 7)).equals(profession) || ((String)table.getObject(s, 7)).equals("all")) return true;
+					else return false;
+				}
+			}		
+		}
+		catch (Exception e) { e.printStackTrace(); }
+		return false;
 	}
 	
 	@Override

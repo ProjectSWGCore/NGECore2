@@ -40,7 +40,7 @@ import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.resources.common.CRC;
 
-@Persistent(version=9)
+@Persistent(version=10)
 public class Buff implements IDelta {
 	
 	@NotPersistent
@@ -69,12 +69,14 @@ public class Buff implements IDelta {
 	private ScheduledFuture<?> removalTask;
 	private int stacks = 1;
 	private long groupBufferId;
+	private int buffCRC;
 	
 	public Buff(String buffName, long ownerId) {
 		
 		this.buffName = buffName;
 		this.ownerId = ownerId;
-		
+		this.buffCRC = CRC.StringtoCRC(buffName);
+
 		DatatableVisitor visitor;
 		
 		try {
@@ -430,7 +432,7 @@ public class Buff implements IDelta {
 	}
 	
 	public boolean isGroupBuff() {
-		return effect1Name.equals("group");
+		return effect1Name == null ? false : effect1Name.equals("group");
 	}
 
 	public long getGroupBufferId() {
@@ -447,6 +449,10 @@ public class Buff implements IDelta {
 
 	public void setGroup2(String group2) {
 		this.group2 = group2;
+	}
+
+	public int getBuffCRC() {
+		return buffCRC;
 	}
 
 }

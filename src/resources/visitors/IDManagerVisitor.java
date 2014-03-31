@@ -31,11 +31,11 @@ import engine.clientdata.VisitorInterface;
 
 public class IDManagerVisitor implements VisitorInterface {
 
-	private ConcurrentHashMap<String, Short> customizationMap;
+	private ConcurrentHashMap<String, Byte> customizationMap;
 	private CharsetDecoder charsetDecoder;
 	
 	public IDManagerVisitor() {
-		customizationMap = new ConcurrentHashMap<String, Short>();
+		customizationMap = new ConcurrentHashMap<String, Byte>();
 		charsetDecoder = Charset.forName("US-ASCII").newDecoder();
 	}
 	
@@ -46,21 +46,28 @@ public class IDManagerVisitor implements VisitorInterface {
 			return;
 		
 		while(data.hasRemaining()) {
-			short designNumber = data.getShort();
+			
+			byte designNumber = data.get();
+			data.get();
 			String customizationType = data.getString(charsetDecoder);
 			charsetDecoder.reset();
-			
+				
 			customizationMap.put(customizationType, designNumber);
 			
 			//System.out.println(designNumber + ": " + customizationType);
 		}
+	}
+	
+	public byte getAttributeIndex(String type)
+	{
+		return customizationMap.get(type);
 	}
 
 	@Override
 	public void notifyFolder(String node, int depth) throws Exception {
 	}
 	
-	public ConcurrentHashMap<String, Short> getCustomizationMap() {
+	public ConcurrentHashMap<String, Byte> getCustomizationMap() {
 		return this.customizationMap;
 	}
 }

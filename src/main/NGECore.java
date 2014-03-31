@@ -185,6 +185,7 @@ public class NGECore {
 	private ObjectDatabase guildODB;
 	private ObjectDatabase objectIdODB;
 	private ObjectDatabase duplicateIdODB;
+	private ObjectDatabase chatRoomODB;
 	
 	private BusConfiguration eventBusConfig = BusConfiguration.Default(1, new ThreadPoolExecutor(1, 4, 1, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>()));
 
@@ -235,7 +236,8 @@ public class NGECore {
 		guildODB = new ObjectDatabase("guild", true, false, true);
 		objectIdODB = new ObjectDatabase("oids", true, false, false);
 		duplicateIdODB = new ObjectDatabase("doids", true, false, true);
-
+		chatRoomODB = new ObjectDatabase("chatRooms", true, false, true);
+		
 		// Services
 		loginService = new LoginService(this);
 		retroService = new RetroService(this);
@@ -377,8 +379,9 @@ public class NGECore {
 		
 		objectService.loadBuildings();
 		terrainService.loadSnapShotObjects();
+		objectService.loadServerTemplates();
 		simulationService.insertSnapShotObjects();
-		
+		simulationService.insertPersistentBuildings();
 		// Zone services that need to be loaded after the above
 		zoneDispatch.addService(simulationService);
 		
@@ -417,8 +420,31 @@ public class NGECore {
 		
 		didServerCrash = false;
 		System.out.println("Started Server.");
+		cleanupCreatureODB();
 		setGalaxyStatus(2);
 		
+	}
+
+	private void cleanupCreatureODB() {
+		EntityCursor<CreatureObject> cursor = creatureODB.getCursor(Long.class, CreatureObject.class);
+		
+		Iterator<CreatureObject> it = cursor.iterator();
+		List<CreatureObject> deletedObjects = new ArrayList<CreatureObject>();
+		
+		while(it.hasNext()) {
+			CreatureObject creature = it.next();
+			if(!characterService.playerExists(creature.getObjectID()))
+				deletedObjects.add(creature);
+		}
+		
+		cursor.close();
+		
+		Transaction txn = creatureODB.getEnvironment().beginTransaction(null, null);
+		for(CreatureObject creature : deletedObjects) {
+			creatureODB.delete(creature.getObjectID(), Long.class, CreatureObject.class, txn);
+		}
+		txn.commitSync();
+		System.out.println("Deleted " + deletedObjects.size() + " creatures.");
 	}
 
 	public void stop() {
@@ -525,6 +551,10 @@ public class NGECore {
 	
 	public ObjectDatabase getDuplicateIdODB() {
 		return duplicateIdODB;
+	}
+	
+	public ObjectDatabase getChatRoomODB() {
+		return chatRoomODB;
 	}
 	
 	public int getActiveClients() {

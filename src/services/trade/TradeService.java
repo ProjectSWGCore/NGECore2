@@ -25,6 +25,7 @@ import resources.objects.creature.CreatureObject;
 import engine.clients.Client;
 import engine.resources.container.AllPermissions;
 import engine.resources.container.CreatureContainerPermissions;
+import engine.resources.container.CreaturePermissions;
 import engine.resources.objects.SWGObject;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
@@ -98,10 +99,13 @@ public class TradeService implements INetworkDispatch{
 					
 					// creates a new trade session for the user who sent the request. It's given the objectID 
 					// that the player wants to trade with.
-					senderClient.getSession().setAttribute("tradeSession", recieverID);
-					
-					recieverObject.sendSystemMessage(senderObject.getCustomName() + " wants to trade with you.", (byte) 0);		
-
+					if (senderObject.getCombatFlag() == 0 && recieverObject.getCombatFlag() == 0) {
+						senderClient.getSession().setAttribute("tradeSession", recieverID);
+						
+						recieverObject.sendSystemMessage(senderObject.getCustomName() + " wants to trade with you.", (byte) 0);		
+					} else {
+						senderObject.sendSystemMessage("You can't send a trade request while you or your target is in combat.", (byte) 0);
+					}
 				}
 			}
 			
@@ -202,7 +206,7 @@ public class TradeService implements INetworkDispatch{
 				}
 				
 				else {
-					if(objectToTrade.getAttributes().containsKey("no_trade")) {
+					if(objectToTrade.getAttributes().containsKey("no_trade") || !objectToTrade.getPermissions().canRemove(client.getParent(), objectToTrade.getContainer()) || (objectToTrade.getContainer() instanceof CreatureObject)) {
 						return;
 					}
 					

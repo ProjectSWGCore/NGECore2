@@ -14,5 +14,6 @@ def addTemplate(core):
 	mobileTemplate.setAttacks(attacks)
 	mobileTemplate.setCreatureName('krayt_dragon_ancient')
 	mobileTemplate.setScale(2)
+	mobileTemplate.setAttackRange(12)
 	core.spawnService.addMobileTemplate('krayt_dragon_ancient', mobileTemplate)
 	

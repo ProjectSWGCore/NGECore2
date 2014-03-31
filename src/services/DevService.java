@@ -93,6 +93,8 @@ public class DevService implements INetworkDispatch {
 				break;
 			case 4: // [Items] Misc Items
 				suiOptions.put((long) 40, "Unity Ring");
+				suiOptions.put((long) 41, "Tusken rucksack");
+				break;
 		}
 		
 		final SUIWindow window = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "Character Builder Terminal", "Select the desired option and click OK.", suiOptions, creature, null, 10);
@@ -119,18 +121,27 @@ public class DevService implements INetworkDispatch {
 						return;
 					case 2: // Items
 						sendCharacterBuilderSUI(player, 2);
-						return;
+						return; 
 					
 					// Character
 					case 10: // Set combat level to 90
-						core.playerService.grantLevel(player, 90);
+						core.playerService.grantLevel(player, 90); // Commented out until fixed
+					    //core.playerService.giveExperience(player, 999999999);
 						return;
 					case 11: // Give 100,000 credits
 						player.setCashCredits(player.getCashCredits() + 100000);
 						return;
 					case 12: // Reset expertise
-						player.getSkills().get().stream().filter(s -> s.contains("expertise")).forEach(s -> core.skillService.removeSkill(creature, s));
-						return;
+					    // Seefo->Light: I commented out the below line because it gave us an error and didn't properly remove the skill, could you try the method SWGList.reverseGet that I added?
+					    //player.getSkills().get().stream().filter(s -> s.contains("expertise")).forEach(s -> core.skillService.removeSkill(creature, s));
+					    
+					    // Using this for now
+					    for(int i = creature.getSkills().size() - 1; i >= 0; i-- )
+						{
+						    String skill = creature.getSkills().get(i);
+						    if(skill.contains("expertise")) core.skillService.removeSkill(player, skill);
+						}
+					    return;
 						
 					// Items
 					case 20: // (Light) Jedi Robe
@@ -222,26 +233,32 @@ public class DevService implements INetworkDispatch {
 						return;
 					// [Items] Weapons
 					case 30: // Jedi Weapons
-						SWGObject lightsaber1 = core.objectService.createObject("object/weapon/melee/sword/crafted_saber/shared_sword_lightsaber_one_handed_gen5.iff", planet);
+						TangibleObject lightsaber1 = (TangibleObject) core.objectService.createObject("object/weapon/melee/sword/crafted_saber/shared_sword_lightsaber_one_handed_gen5.iff", planet);
 						lightsaber1.setIntAttribute("required_combat_level", 90);
 						lightsaber1.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 1);
 						lightsaber1.setStringAttribute("class_required", "Jedi");
 						lightsaber1.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
 						lightsaber1.setStringAttribute("cat_wpn_damage.damage", "689-1379");
 						
-						SWGObject lightsaber2 = core.objectService.createObject("object/weapon/melee/2h_sword/crafted_saber/shared_sword_lightsaber_two_handed_gen5.iff", planet);
+						TangibleObject lightsaber2 = (TangibleObject) core.objectService.createObject("object/weapon/melee/2h_sword/crafted_saber/shared_sword_lightsaber_two_handed_gen5.iff", planet);
 						lightsaber2.setIntAttribute("required_combat_level", 90);
 						lightsaber2.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 1);
 						lightsaber2.setStringAttribute("class_required", "Jedi");
 						lightsaber2.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
 						lightsaber2.setStringAttribute("cat_wpn_damage.damage", "689-1379");
 						
-						SWGObject lightsaber3 = core.objectService.createObject("object/weapon/melee/polearm/crafted_saber/shared_sword_lightsaber_polearm_gen5.iff", planet);
+						TangibleObject lightsaber3 = (TangibleObject) core.objectService.createObject("object/weapon/melee/polearm/crafted_saber/shared_sword_lightsaber_polearm_gen5.iff", planet);
 						lightsaber3.setIntAttribute("required_combat_level", 90);
 						lightsaber3.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 1);
 						lightsaber3.setStringAttribute("class_required", "Jedi");
 						lightsaber3.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
 						lightsaber3.setStringAttribute("cat_wpn_damage.damage", "689-1379");
+						
+						Random random = new Random();
+						
+						lightsaber1.setCustomizationVariable("/private/index_color_blade", (byte) random.nextInt(47));
+						lightsaber2.setCustomizationVariable("/private/index_color_blade", (byte) random.nextInt(47));
+						lightsaber3.setCustomizationVariable("/private/index_color_blade", (byte) random.nextInt(47));
 						
 						inventory.add(lightsaber1);
 						inventory.add(lightsaber2);
@@ -260,17 +277,37 @@ public class DevService implements INetworkDispatch {
 					case 32: // Ranged Weapons
 						SWGObject rifle1 = core.objectService.createObject("object/weapon/ranged/rifle/shared_rifle_e11.iff", planet);
 						rifle1.setIntAttribute("required_combat_level", 90);
-						rifle1.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 1);
+						rifle1.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", (float) 0.8);
 						rifle1.setStringAttribute("class_required", "None");
 						rifle1.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
 						rifle1.setStringAttribute("cat_wpn_damage.damage", "800-1250");
 						
 						inventory.add(rifle1);
+						
+						SWGObject pistol = core.objectService.createObject("object/weapon/ranged/pistol/shared_pistol_cdef.iff", planet);
+						pistol.setIntAttribute("required_combat_level", 90);
+						pistol.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", (float) 0.4);
+						pistol.setStringAttribute("class_required", "None");
+						pistol.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
+						pistol.setStringAttribute("cat_wpn_damage.damage", "400-559");
+						
+						inventory.add(pistol);
 						return;
 					case 40:
 						TangibleObject ring = (TangibleObject) core.objectService.createObject("object/tangible/wearables/ring/shared_ring_s01.iff", planet);
 						ring.setCustomName("Unity Ring");
 						inventory.add(ring);
+					case 41:
+						TangibleObject backpack = (TangibleObject) core.objectService.createObject("object/tangible/wearables/backpack/shared_backpack_krayt_skull.iff", planet);
+						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:agility_modified", 25);
+						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:constitution_modified", 30);
+						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:luck_modified", 25);
+						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:precision_modified", 35);
+						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:stamina_modified", 30);
+						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:strength_modified", 35);
+						
+						inventory.add(backpack);
+						return;
 				}
 			}	
 		});

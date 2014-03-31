@@ -25,6 +25,8 @@ import engine.resources.common.CRC;
 
 public class Opcodes {
 	
+	public static int ChatEnterRoomById = CRC.StringtoCRC("ChatEnterRoomById");
+	public static int ChatSendToRoom = CRC.StringtoCRC("ChatSendToRoom");
 	public static int ChatDeletePersistentMessage = 0x8F251641;
 	public static int ChatInstantMessageToCharacter = 0x84BB21F7;
 	public static int ChatPersistentMessageToServer = 0x25A29FA6;
@@ -75,6 +77,9 @@ public class Opcodes {
 	public static int CollectionServerFirstListRequest = CRC.StringtoCRC("CollectionServerFirstListRequest");
 	public static int ShowHelmet = CRC.StringtoCRC("ShowHelmet");
 	public static int ShowBackpack = CRC.StringtoCRC("ShowBackpack");
+	public static int ChatOnEnteredRoom = CRC.StringtoCRC("ChatOnEnteredRoom");
+	public static int ChatCreateRoom = CRC.StringtoCRC("ChatCreateRoom");
+	public static int ChatQueryRoom = 0x9CF2B192;
 
 	public static int Unknown = 0x173B91C2; // packet sent to server on every character load-in
 }

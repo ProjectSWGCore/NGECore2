@@ -123,21 +123,17 @@ public class PlayerService implements INetworkDispatch {
 		}, 30, 30, TimeUnit.SECONDS);
 		
 		scheduler.scheduleAtFixedRate(() -> {
-			synchronized(creature.getMutex()) {
-				if(creature.getAction() < creature.getMaxAction() && creature.getPosture() != 14) {
-					if(creature.getCombatFlag() == 0)
-						creature.setAction(creature.getAction() + (15 + creature.getLevel() * 5));
-					else
-						creature.setAction(creature.getAction() + ((15 + creature.getLevel() * 5) / 2));
-				}
+			if(creature.getAction() < creature.getMaxAction() && creature.getPosture() != 14) {
+				if(creature.getCombatFlag() == 0)
+					creature.setAction(creature.getAction() + (15 + creature.getLevel() * 5));
+				else
+					creature.setAction(creature.getAction() + ((15 + creature.getLevel() * 5) / 2));
 			}
 		}, 0, 1000, TimeUnit.MILLISECONDS);
 
 		scheduler.scheduleAtFixedRate(() -> {
-			synchronized(creature.getMutex()) {
-				if(creature.getHealth() < creature.getMaxHealth() && creature.getCombatFlag() == 0 && creature.getPosture() != 13 && creature.getPosture() != 14)
-					creature.setHealth(creature.getHealth() + (36 + creature.getLevel() * 4));
-			}
+			if(creature.getHealth() < creature.getMaxHealth() && creature.getCombatFlag() == 0 && creature.getPosture() != 13 && creature.getPosture() != 14)
+				creature.setHealth(creature.getHealth() + (36 + creature.getLevel() * 4));
 		}, 0, 1000, TimeUnit.MILLISECONDS);
 		
 		/*final PlayerObject ghost = (PlayerObject) creature.getSlottedObject("ghost");
@@ -503,12 +499,13 @@ public class PlayerService implements INetworkDispatch {
 		if(cell == null)
 			return;
 		
+		creature.setPosture((byte) 0);
+		
 		core.simulationService.transferToPlanet(creature, cloner.getPlanet(), spawnPoint.getPosition(), spawnPoint.getOrientation(), cell);
 		
 		creature.setHealth(creature.getMaxHealth());
 		creature.setAction(creature.getMaxAction());
 		
-		creature.setPosture((byte) 0);
 		creature.setSpeedMultiplierBase(1);
 		creature.setTurnRadius(1);
 		
@@ -524,6 +521,41 @@ public class PlayerService implements INetworkDispatch {
 	}
 	
 	/*
+	 * Respecs to the specified profession.
+	 */
+	public void respec(CreatureObject creature, String profession) {
+		DatatableVisitor experienceTable;
+		PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
+		int level = 0;
+		
+		if (player == null) {
+			return;
+		}
+		
+		player.setProfession(profession);
+		
+		String xpType = ((player.getProfession().contains("entertainer")) ? "entertainer" : ((player.getProfession().contains("trader")) ? "crafting" : "combat_general"));
+			
+		int experience = player.getXp(xpType);
+		
+		try {
+			experienceTable = ClientFileManager.loadFile("datatables/player/player_level.iff", DatatableVisitor.class);
+			
+			for (int i = 0; i < experienceTable.getRowCount(); i++) {
+				if (experienceTable.getObject(i, 0) != null) {
+					if (experience >= ((Integer) experienceTable.getObject(i, 1))) {
+						level = (Integer) experienceTable.getObject(i, 1);
+					}
+				}
+			}
+		} catch (InstantiationException | IllegalAccessException e) {
+			e.printStackTrace();
+		}
+		
+		grantLevel(creature, level);
+	}
+	
+	/*
 	 * Resets to level 0
 	 */
 	public void resetLevel(CreatureObject creature) {
@@ -531,7 +563,7 @@ public class PlayerService implements INetworkDispatch {
 		
 		try
 		{
-        		for (SWGObject equipment : creature.getEquipmentList()) {
+        		for (SWGObject equipment : new ArrayList<SWGObject>(creature.getEquipmentList())) {
         			if (equipment == null) {
         				continue;
         			}
@@ -619,22 +651,21 @@ public class PlayerService implements INetworkDispatch {
 			
 			player.setXp(xpType, experience);
 			
+
 			// 2. Add the relevant health/action and expertise points.
-			float luck = (((float) ((core.scriptService.getMethod("scripts/roadmap/", player.getProfession(), "getLuck").__call__().asInt() + (core.scriptService.getMethod("scripts/roadmap/", creature.getStfName(), "getLuck").__call__().asInt()) / (float) 90) * (float) level);
-			float precision = (((float) ((core.scriptService.getMethod("scripts/roadmap/", player.getProfession(), "getPrecision").__call__().asInt() + (core.scriptService.getMethod("scripts/roadmap/", creature.getStfName(), "getPrecision").__call__().asInt()) / (float) 90) * (float) level);
-			float strength = (((float) ((core.scriptService.getMethod("scripts/roadmap/", player.getProfession(), "getStrength").__call__().asInt() + (core.scriptService.getMethod("scripts/roadmap/", creature.getStfName(), "getStrength").__call__().asInt()) / (float) 90) * (float) level);
-			float constitution = (((float) ((core.scriptService.getMethod("scripts/roadmap/", player.getProfession(), "getConstitution").__call__().asInt() + (core.scriptService.getMethod("scripts/roadmap/", creature.getStfName(), "getConstitution").__call__().asInt()) / (float) 90) * (float) level);
-			float stamina = (((float) ((core.scriptService.getMethod("scripts/roadmap/", player.getProfession(), "getStamina").__call__().asInt() + (core.scriptService.getMethod("scripts/roadmap/", creature.getStfName(), "getStamina").__call__().asInt()) / (float) 90) * (float) level);
-			float agility = (((float) ((core.scriptService.getMethod("scripts/roadmap/", player.getProfession(), "getAgility").__call__().asInt() + (core.scriptService.getMethod("scripts/roadmap/", creature.getStfName(), "getAgility").__call__().asInt()) / (float) 90) * (float) level);
+			float luck = (((((float) (core.scriptService.getMethod("scripts/roadmap/", player.getProfession(), "getLuck").__call__().asInt()) + (core.scriptService.getMethod("scripts/roadmap/", creature.getStfName(), "getLuck").__call__().asInt())) / ((float) 90)) * ((float) level)));
+			float precision = (((((float) (core.scriptService.getMethod("scripts/roadmap/", player.getProfession(), "getPrecision").__call__().asInt()) + (core.scriptService.getMethod("scripts/roadmap/", creature.getStfName(), "getPrecision").__call__().asInt())) / ((float) 90)) * ((float) level)));
+			float strength = (((((float) (core.scriptService.getMethod("scripts/roadmap/", player.getProfession(), "getStrength").__call__().asInt()) + (core.scriptService.getMethod("scripts/roadmap/", creature.getStfName(), "getStrength").__call__().asInt())) / ((float) 90)) * ((float) level)));
+			float constitution = (((((float) (core.scriptService.getMethod("scripts/roadmap/", player.getProfession(), "getConstitution").__call__().asInt()) + (core.scriptService.getMethod("scripts/roadmap/", creature.getStfName(), "getConstitution").__call__().asInt())) / ((float) 90)) * ((float) level)));
+			float stamina = (((((float) (core.scriptService.getMethod("scripts/roadmap/", player.getProfession(), "getStamina").__call__().asInt()) + (core.scriptService.getMethod("scripts/roadmap/", creature.getStfName(), "getStamina").__call__().asInt())) / ((float) 90)) * ((float) level)));
+			float agility = (((((float) (core.scriptService.getMethod("scripts/roadmap/", player.getProfession(), "getAgility").__call__().asInt()) + (core.scriptService.getMethod("scripts/roadmap/", creature.getStfName(), "getAgility").__call__().asInt())) / ((float) 90)) * ((float) level)));
 			float health = (100 * level);
 			float action = (75 * level);
 			
-			int healthGranted = 0;
+			int healthGranted = ((Integer) experienceTable.getObject((level - 1), 4));;
 			
-			for (int i = 1; i < level; i++) {
-				healthGranted += ((Integer) experienceTable.getObject((i - 0), 4));
-				
-				// 3. Add skills and roadmap items.
+			// 3. Add skills and roadmap items.
+			for (int i = 1; i <= level; i++) {
 				if ((i == 4 || i == 7 || i == 10) || ((i > 10) && (((i - 10)  % 4) == 0))) {
 					int skill = ((i <= 10) ? ((i - 1) / 3) : ((((i - 10) / 4)) + 3));
 					String roadmapSkillName = "";
@@ -708,16 +739,40 @@ public class PlayerService implements INetworkDispatch {
 				}
 			}
 			
-			core.skillModService.addSkillMod(creature, "luck", (int) luck);
-			core.skillModService.addSkillMod(creature, "precision", (int) precision);
-			core.skillModService.addSkillMod(creature, "strength", (int) strength);
-			core.skillModService.addSkillMod(creature, "constitution", (int) constitution);
-			core.skillModService.addSkillMod(creature, "stamina", (int) stamina);
-			core.skillModService.addSkillMod(creature, "agility", (int) agility);
-			creature.setMaxHealth((int) health + healthGranted);
-			creature.setHealth(creature.getMaxHealth());
-			creature.setMaxAction((int) action);
-			creature.setAction(creature.getMaxAction());
+			if (luck >= 1) {
+				core.skillModService.addSkillMod(creature, "luck", (int) luck);
+			}
+			
+			if (precision >= 1) {
+				core.skillModService.addSkillMod(creature, "precision", (int) precision);
+			}
+			
+			if (strength >= 1) {
+				core.skillModService.addSkillMod(creature, "strength", (int) strength);
+			}
+			
+			if (constitution >= 1) {
+				core.skillModService.addSkillMod(creature, "constitution", (int) constitution);
+			}
+			
+			if (stamina >= 1) {
+				core.skillModService.addSkillMod(creature, "stamina", (int) stamina);
+			}
+			
+			if (agility >= 1) {
+				core.skillModService.addSkillMod(creature, "agility", (int) agility);
+			}
+			
+			if (health >= 1) {
+				creature.setMaxHealth((creature.getMaxHealth() + (int) health + (healthGranted - creature.getGrantedHealth())));
+				creature.setHealth(creature.getMaxHealth());
+			}
+			
+			if (action >= 1) {
+				creature.setMaxAction((creature.getMaxAction() + (int) action));
+				creature.setAction(creature.getMaxAction());
+			}
+			
 			creature.setGrantedHealth(healthGranted);
 			
 			creature.getClient().getSession().write((new ClientMfdStatusUpdateMessage((float) ((level >= 90) ? 90 : (level + 1)), "/GroundHUD.MFDStatus.vsp.role.targetLevel")).serialize());

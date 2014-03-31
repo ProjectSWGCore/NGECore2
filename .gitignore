@@ -56,6 +56,7 @@ odb/doids/je.info.*
 odb/guild/je.info.*
 odb/mails/je.info.*
 odb/oids/je.info.*
+odb/chatRooms/je.info.*
 
 # PSWG Configs
 options.cfg

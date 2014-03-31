@@ -35,6 +35,7 @@ import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 import org.apache.mina.core.buffer.IoBuffer;
+import org.python.google.common.collect.Lists;
 
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
@@ -394,6 +395,11 @@ public class SWGList<E> implements List<E> {
 	@Override
 	public boolean removeIf(Predicate<? super E> filter) {
 		return false;
+	}
+	
+	public List<E> reverseGet()
+	{     
+	    return Lists.reverse(list);
 	}
 
 	@Override
