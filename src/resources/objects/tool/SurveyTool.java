@@ -21,6 +21,7 @@
  ******************************************************************************/
 package resources.objects.tool;
 
+import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
 
 import engine.resources.scene.Planet;
@@ -38,20 +39,31 @@ import resources.objects.tangible.TangibleObject;
 public class SurveyTool extends TangibleObject{
 	
 	private byte toolType;
-	private String surveyEffectString;
-	private String sampleEffectString;
-	private boolean currentlySurveying;
-	private boolean currentlySampling;
-	private boolean currentlyCoolingDown;
-	private boolean exceptionalState;
-	private boolean RecoveryMode;
-	private Long lastSurveyTime;
-	private Long lastSampleTime;
-	private Long recoveryTime;
 	private GalacticResource surveyResource;
 	private CreatureObject user;
 	private Long tanoID;
 	private byte SurveyRangeSetting;
+	
+	@NotPersistent
+	private String surveyEffectString;
+	@NotPersistent
+	private String sampleEffectString;
+	@NotPersistent
+	private boolean currentlySurveying;
+	@NotPersistent
+	private boolean currentlySampling;
+	@NotPersistent
+	private boolean currentlyCoolingDown;
+	@NotPersistent
+	private boolean exceptionalState;
+	@NotPersistent
+	private boolean recoveryMode;
+	@NotPersistent
+	private Long lastSurveyTime;
+	@NotPersistent
+	private Long lastSampleTime;
+	@NotPersistent
+	private Long recoveryTime;
 	
 	public static byte MineralSurveyDevice	           = 1;
 	public static byte ChemicalSurveyDevice	           = 2;
@@ -73,6 +85,7 @@ public class SurveyTool extends TangibleObject{
 		sampleEffectString = "";
 		this.tanoID = objectID; 
 		this.exceptionalState = false;
+		this.recoveryMode = false;
 		switch (template) {
 			case "object/tangible/survey_tool/shared_survey_tool_mineral.iff"   : 
 				toolType = 1; 
@@ -84,7 +97,7 @@ public class SurveyTool extends TangibleObject{
 				surveyEffectString = "clienteffect/survey_tool_lumber.cef";
 				sampleEffectString = "clienteffect/survey_sample_lumber.cef";
 				break; 
-			case "object/tangible/survey_tool/shared_survey_tool_lumber.iff"   : 
+			case "object/tangible/survey_tool/shared_survey_tool_lumber.iff"    : 
 				toolType = 3; 
 				surveyEffectString = "clienteffect/survey_tool_lumber.cef";
 				sampleEffectString = "clienteffect/survey_sample_lumber.cef";
@@ -94,14 +107,26 @@ public class SurveyTool extends TangibleObject{
 				surveyEffectString = "clienteffect/survey_tool_gas.cef";
 				sampleEffectString = "clienteffect/survey_sample_gas.cef";				
 				break; 
-			case "object/tangible/survey_tool/shared_survey_tool_liquid.iff"    : 
+			case "object/tangible/survey_tool/shared_survey_tool_moisture.iff"    : 
 				toolType = 5; 
 				surveyEffectString = "clienteffect/survey_tool_liquid.cef";
 				sampleEffectString = "clienteffect/survey_sample_liquid.cef";
 				break; 
-			case "object/tangible/survey_tool/shared_survey_tool_wind.iff"      : toolType = 6; break; 
-			case "object/tangible/survey_tool/shared_survey_tool_solar.iff"     : toolType = 7; break; 
-			case "object/tangible/survey_tool/shared_survey_tool_all.iff"       : toolType = 8; break; 
+			case "object/tangible/survey_tool/shared_survey_tool_wind.iff"      : 
+				toolType = 6; 
+				surveyEffectString = "clienteffect/survey_tool_gas.cef";
+				sampleEffectString = "clienteffect/survey_sample_gas.cef";				
+				break; 
+			case "object/tangible/survey_tool/shared_survey_tool_solar.iff"     : 
+				toolType = 7; 
+				surveyEffectString = "clienteffect/survey_tool_moisture.cef";
+				sampleEffectString = "clienteffect/survey_sample_moisture.cef";				
+				break; 
+			case "object/tangible/survey_tool/shared_survey_tool_all.iff"       : 
+				toolType = 8; 
+				surveyEffectString = "clienteffect/survey_tool_liquid.cef";
+				sampleEffectString = "clienteffect/survey_sample_liquid.cef";
+				break; 
 			default: toolType = -1;
 		}
 		System.out.println("TOOLTYPE " + toolType);
@@ -124,7 +149,7 @@ public class SurveyTool extends TangibleObject{
 				surveyEffectString = "clienteffect/survey_tool_lumber.cef";
 				sampleEffectString = "clienteffect/survey_sample_lumber.cef";
 				break; 
-			case "object/tangible/survey_tool/shared_survey_tool_lumber.iff"   : 
+			case "object/tangible/survey_tool/shared_survey_tool_lumber.iff"    : 
 				toolType = 3; 
 				surveyEffectString = "clienteffect/survey_tool_lumber.cef";
 				sampleEffectString = "clienteffect/survey_sample_lumber.cef";
@@ -134,14 +159,26 @@ public class SurveyTool extends TangibleObject{
 				surveyEffectString = "clienteffect/survey_tool_gas.cef";
 				sampleEffectString = "clienteffect/survey_sample_gas.cef";				
 				break; 
-			case "object/tangible/survey_tool/shared_survey_tool_liquid.iff"    : 
+			case "object/tangible/survey_tool/shared_survey_tool_moisture.iff"    : 
 				toolType = 5; 
 				surveyEffectString = "clienteffect/survey_tool_liquid.cef";
 				sampleEffectString = "clienteffect/survey_sample_liquid.cef";
 				break; 
-			case "object/tangible/survey_tool/shared_survey_tool_wind.iff"      : toolType = 6; break; 
-			case "object/tangible/survey_tool/shared_survey_tool_solar.iff"     : toolType = 7; break; 
-			case "object/tangible/survey_tool/shared_survey_tool_all.iff"       : toolType = 8; break; 
+			case "object/tangible/survey_tool/shared_survey_tool_wind.iff"      : 
+				toolType = 6; 
+				surveyEffectString = "clienteffect/survey_tool_gas.cef";
+				sampleEffectString = "clienteffect/survey_sample_gas.cef";				
+				break; 
+			case "object/tangible/survey_tool/shared_survey_tool_solar.iff"     : 
+				toolType = 7; 
+				surveyEffectString = "clienteffect/survey_tool_moisture.cef";
+				sampleEffectString = "clienteffect/survey_sample_moisture.cef";				
+				break; 
+			case "object/tangible/survey_tool/shared_survey_tool_all.iff"       : 
+				toolType = 8; 
+				surveyEffectString = "clienteffect/survey_tool_liquid.cef";
+				sampleEffectString = "clienteffect/survey_sample_liquid.cef";
+				break; 
 			default: toolType = -1;
 		}
 		System.out.println("TOOLTYPE " + toolType);
@@ -244,11 +281,11 @@ public class SurveyTool extends TangibleObject{
 	}
 
 	public boolean isRecoveryMode() {
-		return RecoveryMode;
+		return this.recoveryMode;
 	}
 
 	public void setRecoveryMode(boolean recoveryMode) {
-		RecoveryMode = recoveryMode;
+		recoveryMode = recoveryMode;
 	}
 
 	public byte getSurveyRangeSetting() {
@@ -259,16 +296,3 @@ public class SurveyTool extends TangibleObject{
 		SurveyRangeSetting = surveyRangeSetting;
 	}
 }
-
-//"clienteffect/survey_tool_mineral.cef",
-//"clienteffect/survey_tool_lumber.cef",
-//"clienteffect/survey_tool_moisture.cef",
-//"clienteffect/survey_tool_liquid.cef",
-//"clienteffect/survey_tool_gas.cef",
-
-
-//"clienteffect/survey_sample_mineral.cef",
-//"clienteffect/survey_sample_lumber.cef",
-//"clienteffect/survey_sample_moisture.cef",
-//"clienteffect/survey_sample_liquid.cef",
-//"clienteffect/survey_sample_gas.cef",

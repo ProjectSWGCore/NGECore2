@@ -277,6 +277,7 @@ public class SurveyService implements INetworkDispatch {
 				}
 			} else { // Mismatch -> new container
 				String resourceContainerIFF = ResourceRoot.CONTAINER_TYPE_IFF_SIGNIFIER[sampleResource.getResourceRoot().getContainerType()];           		  				
+
 				ResourceContainerObject containerObject = (ResourceContainerObject) core.objectService.createObject(resourceContainerIFF, crafter.getPlanet());
 				containerObject.initializeStats(sampleResource);
 				containerObject.setProprietor(crafter);
@@ -373,7 +374,7 @@ public class SurveyService implements INetworkDispatch {
 		
 		// Counter too frequent survey button activation
 		if(surveyTool.getCurrentlySurveying()){
-			System.out.println("TOO FREQUENT!");
+			//System.out.println("TOO FREQUENT!");
 			return;		
 		}
 		
@@ -433,6 +434,9 @@ public class SurveyService implements INetworkDispatch {
 
 		PlayerObject player = (PlayerObject) crafter.getSlottedObject("ghost");	
 		SurveyTool surveyTool = player.getLastUsedSurveyTool();
+		
+		if (crafter.getPosture()!=1) // QA
+			surveyTool.setCurrentlySampling(false);
 		
 		if (surveyTool.getCurrentlySampling()) { // QA
 			crafter.sendSystemMessage("@survey:already_sampling", (byte) 0);
@@ -544,61 +548,96 @@ public class SurveyService implements INetworkDispatch {
 				crafter.setPosture((byte) 0);
 				surveyTool.setCurrentlySampling(false);
 				surveyTool.setExceptionalState(false);
-				removeActiveSurveyTool(surveyTool);
+				//removeActiveSurveyTool(surveyTool);
 				return;
 			}			
 			
-			int exceptionalChance = new Random().nextInt(100);			
-			if (exceptionalChance<7 && ! surveyTool.isExceptionalState()){
-				crafter.sendSystemMessage("@survey:gnode_d", (byte) 0);
-				surveyTool.setExceptionalState(true);
-				
-				final SUIWindow window = core.suiService.createSUIWindow("Script.listBox", crafter, surveyTool, 0);
-				window.setProperty("bg.caption.lblTitle:Text", "@base_player:swg");
-				window.setProperty("Prompt.lblPrompt:Text", "@survey:gnode_d");
-				window.addListBoxMenuItem("@survey:gnode_1", 0);
-				window.addListBoxMenuItem("@survey:gnode_2", 1);	
-				window.setProperty("btnOk:visible", "True");
-				window.setProperty("btnCancel:visible", "True");
-				window.setProperty("btnOk:Text", "@ok");
-				window.setProperty("btnCancel:Text", "@cancel");				
-				Vector<String> returnList = new Vector<String>();
-				returnList.add("List.lstList:SelectedRow");
-				
-				window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, new SUICallback() {
-					@SuppressWarnings("unchecked")
-					@Override
-					public void process(SWGObject owner, int eventType, Vector<String> returnList) {										
-						int index = Integer.parseInt(returnList.get(0));
-						if (index==0){
-							// Continue working
-							CreatureObject crafter = (CreatureObject)owner;
-							PlayerObject player = (PlayerObject) crafter.getSlottedObject("ghost");	
-							if (crafter!=null){
-								SurveyTool surveyTool = player.getLastUsedSurveyTool();
+			if (! surveyTool.isRecoveryMode()){
+			
+				int exceptionalChance = new Random().nextInt(100);			
+				if (exceptionalChance<7 && ! surveyTool.isExceptionalState()){
+					crafter.sendSystemMessage("@survey:gnode_d", (byte) 0);
+					surveyTool.setExceptionalState(true);
+					
+					final SUIWindow window = core.suiService.createSUIWindow("Script.listBox", crafter, surveyTool, 0);
+					window.setProperty("bg.caption.lblTitle:Text", "@base_player:swg");
+					window.setProperty("Prompt.lblPrompt:Text", "@survey:gnode_d");
+					window.addListBoxMenuItem("@survey:gnode_1", 0);
+					window.addListBoxMenuItem("@survey:gnode_2", 1);	
+					window.setProperty("btnOk:visible", "True");
+					window.setProperty("btnCancel:visible", "True");
+					window.setProperty("btnOk:Text", "@ok");
+					window.setProperty("btnCancel:Text", "@cancel");				
+					Vector<String> returnList = new Vector<String>();
+					returnList.add("List.lstList:SelectedRow");
+					
+					window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, new SUICallback() {
+						@SuppressWarnings("unchecked")
+						@Override
+						public void process(SWGObject owner, int eventType, Vector<String> returnList) {										
+							int index = Integer.parseInt(returnList.get(0));
+							if (index==0){
+								// Continue working
+								CreatureObject crafter = (CreatureObject)owner;
+								PlayerObject player = (PlayerObject) crafter.getSlottedObject("ghost");	
+								if (crafter!=null){
+									SurveyTool surveyTool = player.getLastUsedSurveyTool();
+									if (surveyTool!=null){
+										surveyTool.setExceptionalState(false);
+										core.suiService.closeSUIWindow(owner, 0);
+										continueSampling(surveyTool);
+									}
+								}	
+							} else {
+								// Attempt to recover	
+								CreatureObject crafter = (CreatureObject)owner;
+								PlayerObject player = (PlayerObject) crafter.getSlottedObject("ghost");	
+								SurveyTool surveyTool = player.getLastUsedSurveyTool();							
 								if (surveyTool!=null){
+									surveyTool.setRecoveryMode(true);
 									surveyTool.setExceptionalState(false);
 									core.suiService.closeSUIWindow(owner, 0);
 									continueSampling(surveyTool);
 								}
-							}	
-						} else {
-							// Attempt to recover	
-							CreatureObject crafter = (CreatureObject)owner;
-							PlayerObject player = (PlayerObject) crafter.getSlottedObject("ghost");	
-							SurveyTool surveyTool = player.getLastUsedSurveyTool();							
-							if (surveyTool!=null){
-								surveyTool.setRecoveryMode(true);
-								surveyTool.setExceptionalState(false);
-								core.suiService.closeSUIWindow(owner, 0);
-								continueSampling(surveyTool);
-							}
-						}							
-					}					
-				});
+							}							
+						}					
+					});
+					
+					core.suiService.openSUIWindow(window);
+					return;
+				}
 				
-				core.suiService.openSUIWindow(window);
-				return;
+				surveyTool.setCurrentlySampling(true);
+				surveyTool.setLastSampleTime(System.currentTimeMillis());
+				
+				String effectFile = surveyTool.getSampleEffectString();					
+				PlayClientEffectLocMessage cEffMsg = new PlayClientEffectLocMessage(effectFile,crafter.getPlanet().getName(),crafter.getPosition());
+				crafter.getClient().getSession().write(cEffMsg.serialize());
+				
+				crafter.setAction(crafter.getAction()-samplingCost);
+			
+			} else {
+				// sampling cost for recovery
+				surveyTool.setRecoveryMode(false);
+				samplingCost = 200;
+				if (crafter.getAction()-samplingCost<0){
+					crafter.sendSystemMessage("@survey:gamble_no_action", (byte) 0);
+					crafter.setPosture((byte) 0);
+					surveyTool.setCurrentlySampling(false);
+					surveyTool.setExceptionalState(false);
+					surveyTool.setLastSampleTime(System.currentTimeMillis());
+					removeActiveSurveyTool(surveyTool);
+					return;
+				}
+				surveyTool.setCurrentlySampling(true);
+				surveyTool.setLastSampleTime(System.currentTimeMillis());
+				surveyTool.setExceptionalState(false);
+				
+				String effectFile = surveyTool.getSampleEffectString();					
+				PlayClientEffectLocMessage cEffMsg = new PlayClientEffectLocMessage(effectFile,crafter.getPlanet().getName(),crafter.getPosition());
+				crafter.getClient().getSession().write(cEffMsg.serialize());
+				crafter.setAction(crafter.getAction()-samplingCost);
+				
 			}
 
 			surveyTool.setCurrentlySampling(true);
@@ -607,6 +646,8 @@ public class SurveyService implements INetworkDispatch {
 			String effectFile = surveyTool.getSampleEffectString();					
 			PlayClientEffectLocMessage cEffMsg = new PlayClientEffectLocMessage(effectFile,crafter.getPlanet().getName(),crafter.getPosition());
 			crafter.getClient().getSession().write(cEffMsg.serialize());
+			
+			crafter.setAction(crafter.getAction()-samplingCost);
 		
 		} else {
 			crafter.sendSystemMessage("There are only trace amounts of " + sampleResource.getName() + " here.  Find a higher concentration of the resource, and try sampling again.", (byte) 0); // "@survey:trace_amount:"

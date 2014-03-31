@@ -213,12 +213,13 @@ public class GalacticResource extends SWGObject implements IPersistent {
 		setIffFileName(resourceRoot.getResourceFileName());
 		this.category = resourceRoot.getResourceClass();
 		this.setGeneralType(resourceRoot.getGeneralType());
+		this.setResourceRootID(resourceRoot.getResourceRootID()); // FK
 					//setResourceContainerTemplateID(resourceRoot.getTemplateID());
 	}
 	
 	public void generateResourceType(){
-//		theResource.setResourceType(template.getResourceType());
-//		theResource.setResourceClass(template.getResourceClass());
+//		this.setResourceType(template.getResourceType());
+//		this.setResourceClass(template.getResourceClass());
 	}
 	
 	public void generateResourceStats(){
@@ -379,6 +380,7 @@ public class GalacticResource extends SWGObject implements IPersistent {
 	}
 
 	public void constructResourceName(Vector<String> completeResourceNameHistory){
+		// ToDo: This is where the database check for past names must be added
 		boolean check=true;                  
         while(check)
         {
@@ -592,7 +594,7 @@ public class GalacticResource extends SWGObject implements IPersistent {
 		this.getresourceType = getresourceType;
 	}
 	
-	public GalacticResource convertIntoHistoricResource(){
+	public GalacticResource convertToHistoricResource(){
 		GalacticResource historicResource = new GalacticResource();
 		historicResource.setName(this.getName());
 		historicResource.setResourceClass(this.getResourceClass());

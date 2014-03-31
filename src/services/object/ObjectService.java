@@ -95,6 +95,7 @@ import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
 import resources.objects.guild.GuildObject;
+import resources.objects.intangible.IntangibleObject;
 import resources.objects.mission.MissionObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.resource.GalacticResource;
@@ -183,7 +184,7 @@ public class ObjectService implements INetworkDispatch {
 			EntityCursor<ResourceRoot> cursor = core.getResourceRootsODB().getCursor(Integer.class, ResourceRoot.class);
 			Iterator<ResourceRoot> it = cursor.iterator();
 			int loadedResourceRootsCounter = 0;
-			
+			System.out.println("Loading resource roots...");
 			while(it.hasNext()) {
 				final ResourceRoot resourceRoot = it.next();
 				System.err.println("resourceRoot loaded ID: " + resourceRoot.getResourceRootID() + " " + resourceRoot.getResourceFileName());
@@ -194,8 +195,9 @@ public class ObjectService implements INetworkDispatch {
 			if (loadedResourceRootsCounter==0){
 				//big bang will take care of it
 			}
-			System.err.println("loadedResourceRootsCounter " + loadedResourceRootsCounter);
+			//System.err.println("loadedResourceRootsCounter " + loadedResourceRootsCounter);
 			cursor.close();
+			System.out.println("Finished loading resource roots.");
 		}
 		
 		// loads the currently spawned resources at server start
@@ -203,10 +205,10 @@ public class ObjectService implements INetworkDispatch {
 			EntityCursor<GalacticResource> cursor = core.getResourcesODB().getCursor(Long.class, GalacticResource.class);
 			Iterator<GalacticResource> it = cursor.iterator();
 			int loadedResourceCounter = 0;
-			
+			System.out.println("Loading resources...");
 			while(it.hasNext()) {
 				final GalacticResource resource = it.next();
-				System.err.println("resource " + resource.getName());
+				System.err.println("resource " + resource.getName() + " rootID " + resource.getResourceRootID());
 				objectList.put(resource.getId(), resource); 
 				
 				// re-reference ResourceRoot
@@ -242,6 +244,7 @@ public class ObjectService implements INetworkDispatch {
 			}
 			
 			cursor.close();
+			System.out.println("Finished loading resources.");
 		}
 	
 	public SWGObject createResource() {
@@ -281,6 +284,7 @@ public class ObjectService implements INetworkDispatch {
 	
 	public SWGObject createObject(String Template, long objectID, Planet planet, Point3D position, Quaternion orientation, String customServerTemplate, boolean overrideSnapshot, boolean loadServerTemplate) {
 		SWGObject object = null;
+		System.out.println("Template passed " + Template);
 		CrcStringTableVisitor crcTable;
 		try {
 			crcTable = ClientFileManager.loadFile("misc/object_template_crc_string_table.iff", CrcStringTableVisitor.class);
@@ -313,7 +317,11 @@ public class ObjectService implements INetworkDispatch {
 			
 			object = new TangibleObject(objectID, planet, Template, position, orientation);
 
-		} else if(Template.startsWith("object/weapon")) {
+		} else if(Template.startsWith("object/intangible")) {
+			
+			object = new IntangibleObject(objectID, planet, position, orientation,Template);
+
+		}else if(Template.startsWith("object/weapon")) {
 			
 			object = new WeaponObject(objectID, planet, Template, position, orientation);
 
@@ -362,7 +370,7 @@ public class ObjectService implements INetworkDispatch {
 			object = new ResourceContainerObject(objectID, planet, Template, position, orientation);
 			
 		}else {
-			
+			System.err.println("return null;");
 			return null;
 			
 		}
@@ -397,6 +405,7 @@ public class ObjectService implements INetworkDispatch {
 				((CreatureObject) object).setOptionsBitmask(Options.INVULNERABLE | Options.USABLE);
 			} else if (Template.startsWith("object/mobile/vehicle/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.ATTACKABLE | Options.MOUNT);
+				System.err.println("Options.MOUNT");
 			} else if (Template.startsWith("object/mobile/hologram/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.INVULNERABLE);
 			} else if (Template.startsWith("object/creature/npc/theme_park/")) {
@@ -681,9 +690,13 @@ public class ObjectService implements INetworkDispatch {
 					
 				} else {
 					
+					if (!(getObject(objectId) instanceof CreatureObject))
+						return;
+
 					creature = (CreatureObject) getObject(objectId);
 					if(creature.getAttachment("disconnectTask") != null && creature.getClient() != null && !creature.getClient().getSession().isClosing())
 						return;
+					
 
 				}
 				

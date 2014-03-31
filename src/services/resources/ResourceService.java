@@ -69,6 +69,7 @@ public class ResourceService implements INetworkDispatch {
 	
 	private NGECore core;
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+	private boolean enableResourceHistory = true; // Set this to false, to prevent persistence of resources into history Db
 		
 	private Hashtable<Integer, ResourceRoot> resourceRootTable = new Hashtable<Integer, ResourceRoot>(); // synchronized
 	private Vector<ResourceRoot> ironRoots = new Vector<ResourceRoot>();
@@ -11108,10 +11109,12 @@ public class ResourceService implements INetworkDispatch {
 			core.getResourcesODB().put(resource, Long.class, GalacticResource.class, resource.getTransaction());
 			resource.getTransaction().commitSync();
 			
-//			GalacticResource historicResource = resource.convertIntoHistoricResource();
-//			historicResource.createTransaction(core.getResourceHistoryODB().getEnvironment());
-//			core.getResourceHistoryODB().put(historicResource, Long.class, GalacticResource.class, historicResource.getTransaction());
-//			historicResource.getTransaction().commitSync();
+			if (enableResourceHistory){
+				GalacticResource historicResource = resource.convertToHistoricResource();
+				historicResource.createTransaction(core.getResourceHistoryODB().getEnvironment());
+				core.getResourceHistoryODB().put(historicResource, Long.class, GalacticResource.class, historicResource.getTransaction());
+				historicResource.getTransaction().commitSync();
+			}
 			
 			completeResourceNameHistory.add(resource.getName());
 			spawnedResourcesPool1.add(resource);
@@ -11135,11 +11138,13 @@ public class ResourceService implements INetworkDispatch {
 			core.getResourcesODB().put(resource, Long.class, GalacticResource.class, resource.getTransaction());
 			resource.getTransaction().commitSync();
 			
-//			GalacticResource historicResource = resource.convertIntoHistoricResource();
-//			historicResource.createTransaction(core.getResourceHistoryODB().getEnvironment());
-//			core.getResourceHistoryODB().put(historicResource, Long.class, GalacticResource.class, historicResource.getTransaction());
-//			historicResource.getTransaction().commitSync();
-			
+			if (enableResourceHistory){
+				GalacticResource historicResource = resource.convertToHistoricResource();
+				historicResource.createTransaction(core.getResourceHistoryODB().getEnvironment());
+				core.getResourceHistoryODB().put(historicResource, Long.class, GalacticResource.class, historicResource.getTransaction());
+				historicResource.getTransaction().commitSync();
+			}
+				
 			completeResourceNameHistory.add(resource.getName());
 			spawnedResourcesPool2.add(resource);
 			allSpawnedResources.add(resource);
@@ -11162,11 +11167,13 @@ public class ResourceService implements INetworkDispatch {
 			core.getResourcesODB().put(resource, Long.class, GalacticResource.class, resource.getTransaction());
 			resource.getTransaction().commitSync();
 			
-//			GalacticResource historicResource = resource.convertIntoHistoricResource();
-//			historicResource.createTransaction(core.getResourceHistoryODB().getEnvironment());
-//			core.getResourceHistoryODB().put(historicResource, Long.class, GalacticResource.class, historicResource.getTransaction());
-//			historicResource.getTransaction().commitSync();
-						
+			if (enableResourceHistory){
+				GalacticResource historicResource = resource.convertToHistoricResource();
+				historicResource.createTransaction(core.getResourceHistoryODB().getEnvironment());
+				core.getResourceHistoryODB().put(historicResource, Long.class, GalacticResource.class, historicResource.getTransaction());
+				historicResource.getTransaction().commitSync();
+			}
+				
 			completeResourceNameHistory.add(resource.getName());
 			spawnedResourcesPool3.add(resource);
 			allSpawnedResources.add(resource);
@@ -11190,10 +11197,12 @@ public class ResourceService implements INetworkDispatch {
 			core.getResourcesODB().put(resource, Long.class, GalacticResource.class, resource.getTransaction());
 			resource.getTransaction().commitSync();
 			
-//			GalacticResource historicResource = resource.convertIntoHistoricResource();
-//			historicResource.createTransaction(core.getResourceHistoryODB().getEnvironment());
-//			core.getResourceHistoryODB().put(historicResource, Long.class, GalacticResource.class, historicResource.getTransaction());
-//			historicResource.getTransaction().commitSync();
+			if (enableResourceHistory){
+				GalacticResource historicResource = resource.convertToHistoricResource();
+				historicResource.createTransaction(core.getResourceHistoryODB().getEnvironment());
+				core.getResourceHistoryODB().put(historicResource, Long.class, GalacticResource.class, historicResource.getTransaction());
+				historicResource.getTransaction().commitSync();
+			}
 			
 			completeResourceNameHistory.add(resource.getName());
 			spawnedResourcesPool4.add(resource);

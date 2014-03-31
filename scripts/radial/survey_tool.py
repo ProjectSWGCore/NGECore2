@@ -9,18 +9,16 @@ import sys
 def createRadial(core, owner, target, radials):
 	radials.clear()
 	radials.add(RadialOptions(0, 21, 1, 'Use'))
-	radials.add(RadialOptions(0, 133, 4, 'Tool Options'))	
-	radials.add(RadialOptions(0, 134, 6, 'Tool Resolution'))
+	radials.add(RadialOptions(0, 132, 1, 'Tool Options'))	
 	return
 	
 def handleSelection(core, owner, target, option):
-	owner.sendSystemMessage('Distance to nearest Deposit : ' ,0)
 	if option == 21 and target:
 		if owner is not None:	
 			rlfsm = ResourceListForSurveyMessage(core,target,owner)
 			owner.getClient().getSession().write(rlfsm.serialize())	
 			return
-	if option == 133:
+	if option == 132:
 		if owner is not None:
 			surSvc = core.surveyService
 			surSvc.createSurveyRangeSUIWindow(owner, target)

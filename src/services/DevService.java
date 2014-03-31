@@ -32,7 +32,9 @@ import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 
 import protocol.swg.ExpertiseRequestMessage;
-
+import protocol.swg.SceneCreateObjectByCrc;
+import protocol.swg.SceneEndBaselines;
+import protocol.swg.UpdateContainmentMessage;
 import resources.common.Console;
 import resources.common.FileUtilities;
 import resources.common.Opcodes;
@@ -41,6 +43,7 @@ import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
+import resources.objects.tool.SurveyTool;
 import services.sui.SUIWindow;
 import services.sui.SUIService.ListBoxType;
 import services.sui.SUIWindow.SUICallback;
@@ -49,6 +52,7 @@ import main.NGECore;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.clients.Client;
+import engine.resources.common.CRC;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -85,6 +89,7 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 22, "Composite Armor");
 				suiOptions.put((long) 23, "Weapons");
 				suiOptions.put((long) 24, "Misc Items");
+				suiOptions.put((long) 25, "Tools");
 				break;
 			case 3: // [Items] Weapons
 				suiOptions.put((long) 30, "Jedi Weapons");
@@ -93,6 +98,15 @@ public class DevService implements INetworkDispatch {
 				break;
 			case 4: // [Items] Misc Items
 				suiOptions.put((long) 40, "Unity Ring");
+			case 5: // [Items] Tools
+				suiOptions.put((long) 110, "Mineral Survey Device");
+				suiOptions.put((long) 111, "Chemical Survey Device");
+				suiOptions.put((long) 112, "Flora Survey Device");
+				suiOptions.put((long) 113, "Gas Survey Device");
+				suiOptions.put((long) 114, "Water Survey Device");
+				suiOptions.put((long) 115, "Wind Survey Device");
+				suiOptions.put((long) 116, "Solar Survey Device");
+				suiOptions.put((long) 117, "Swoop");
 		}
 		
 		final SUIWindow window = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "Character Builder Terminal", "Select the desired option and click OK.", suiOptions, creature, null, 10);
@@ -229,6 +243,10 @@ public class DevService implements INetworkDispatch {
 					case 24: // Misc Items
 						sendCharacterBuilderSUI(player, 4);
 						return;
+					case 25: // Tools
+						sendCharacterBuilderSUI(player, 5);
+						return;	
+					
 					// [Items] Weapons
 					case 30: // Jedi Weapons
 						TangibleObject lightsaber1 = (TangibleObject) core.objectService.createObject("object/weapon/melee/sword/crafted_saber/shared_sword_lightsaber_one_handed_gen5.iff", planet);
@@ -286,6 +304,52 @@ public class DevService implements INetworkDispatch {
 						TangibleObject ring = (TangibleObject) core.objectService.createObject("object/tangible/wearables/ring/shared_ring_s01.iff", planet);
 						ring.setCustomName("Unity Ring");
 						inventory.add(ring);
+						
+					case 110:
+						SurveyTool mineralSurveyTool = (SurveyTool) core.objectService.createObject("object/tangible/survey_tool/shared_survey_tool_mineral.iff", planet);
+						mineralSurveyTool.setCustomName("Mineral Survey Device");
+						inventory.add(mineralSurveyTool);
+					case 111:
+						SurveyTool chemicalSurveyTool = (SurveyTool) core.objectService.createObject("object/tangible/survey_tool/shared_survey_tool_inorganic.iff", planet);
+						chemicalSurveyTool.setCustomName("Chemical Survey Device");
+						inventory.add(chemicalSurveyTool);
+					case 112:
+						SurveyTool floraSurveyTool = (SurveyTool) core.objectService.createObject("object/tangible/survey_tool/shared_survey_tool_lumber.iff", planet);
+						floraSurveyTool.setCustomName("Flora Survey Device");
+						inventory.add(floraSurveyTool);
+					case 113:
+						SurveyTool gasSurveyTool = (SurveyTool) core.objectService.createObject("object/tangible/survey_tool/shared_survey_tool_gas.iff", planet);
+						gasSurveyTool.setCustomName("Gas Survey Device");
+						inventory.add(gasSurveyTool);
+					case 114:
+						SurveyTool waterSurveyTool = (SurveyTool) core.objectService.createObject("object/tangible/survey_tool/shared_survey_tool_moisture.iff", planet);
+						waterSurveyTool.setCustomName("Water Survey Device");
+						inventory.add(waterSurveyTool);
+					case 115:
+						SurveyTool windSurveyTool = (SurveyTool) core.objectService.createObject("object/tangible/survey_tool/shared_survey_tool_wind.iff", planet);
+						windSurveyTool.setCustomName("Wind Survey Device");
+						inventory.add(windSurveyTool);
+					case 116:
+						SurveyTool solarSurveyTool = (SurveyTool) core.objectService.createObject("object/tangible/survey_tool/shared_survey_tool_solar.iff", planet);
+						solarSurveyTool.setCustomName("Solar Survey Device");
+						inventory.add(solarSurveyTool);
+					case 117:
+//						CreatureObject swoop = (CreatureObject) core.objectService.createObject("object/mobile/vehicle/shared_speederbike_swoop.iff", planet);
+//						swoop.setCustomName("Swoop");
+//						int resCRC = CRC.StringtoCRC("object/mobile/vehicle/shared_speederbike_swoop.iff");
+//						SceneCreateObjectByCrc createObjectMsg = new SceneCreateObjectByCrc(swoop.getObjectID(), player.getOrientation().x, player.getOrientation().y, player.getOrientation().z, player.getOrientation().w, player.getPosition().x, player.getPosition().y, player.getPosition().z, resCRC, (byte) 0);
+//						player.getClient().getSession().write(createObjectMsg.serialize());      				
+//						services.resources.CharonPacketUtils.printAnalysis(createObjectMsg.serialize());
+//						swoop.sendBaselines(player.getClient());				    
+//						SceneEndBaselines sceneEndBaselinesMsg = new SceneEndBaselines(swoop.getObjectID());
+//						player.getClient().getSession().write(sceneEndBaselinesMsg.serialize());
+//						services.resources.CharonPacketUtils.printAnalysis(sceneEndBaselinesMsg.serialize());
+//						System.out.println("SWOOP");
+//						UpdateContainmentMessage updateContainmentMessage= new UpdateContainmentMessage(player.getObjectID(), swoop.getObjectID(), -1);
+//						player.getClient().getSession().write(updateContainmentMessage.serialize());
+						
+						TangibleObject deed = (TangibleObject) core.objectService.createObject("object/tangible/deed/vehicle_deed/shared_speederbike_swoop_deed.iff", planet);
+						inventory.add(deed);
 				}
 			}	
 		});

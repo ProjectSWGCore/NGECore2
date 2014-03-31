@@ -196,7 +196,7 @@ public class NGECore {
 	private ObjectDatabase buildingODB;
 	private ObjectDatabase resourcesODB;
 	private ObjectDatabase resourceRootsODB;
-
+	private ObjectDatabase resourceHistoryODB;
 	
 	public NGECore() {
 		
@@ -245,6 +245,7 @@ public class NGECore {
 		chatRoomODB = new ObjectDatabase("chatRooms", true, false, true);
 		resourcesODB = new ObjectDatabase("resources", true, false, true);
 		resourceRootsODB = new ObjectDatabase("resourceroots", true, false, true);
+		resourceHistoryODB = new ObjectDatabase("resourcehistory", true, false, true);
 		
 		// Services
 		loginService = new LoginService(this);
@@ -555,6 +556,11 @@ public class NGECore {
 	public ObjectDatabase getResourceRootsODB() {
 		return resourceRootsODB;
 	}
+	
+	public ObjectDatabase getResourceHistoryODB() {
+		return resourceHistoryODB;
+	}
+	
 	
 	public int getActiveClients() {
 		int connections = 0;
