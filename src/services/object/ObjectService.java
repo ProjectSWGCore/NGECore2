@@ -916,14 +916,14 @@ public class ObjectService implements INetworkDispatch {
 							((BuildingObject) object).getTransaction().commitSync();
 						}*/
 					} else {
-						object = createObject(template, objectId, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, false, false);
+						object = createObject(template, 0, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, false, false);
 					}
 					if(object == null)
 						continue;
 					object.setContainerPermissions(WorldPermissions.WORLD_PERMISSIONS);
 					if(radius > 256)
 						object.setAttachment("bigSpawnRange", new Boolean(true));
-					if (!duplicate.containsValue(objectId) && object instanceof BuildingObject)
+					if (!duplicate.containsValue(objectId) && object instanceof BuildingObject && portalCRC != 0)
 						persistentBuildings.add((BuildingObject) object);
 				} else if(containerId != 0) {
 					object = createObject(template, 0, planet, new Point3D(px, py, pz), new Quaternion(qw, qx, qy, qz), null, false, false);
