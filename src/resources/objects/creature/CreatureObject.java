@@ -583,9 +583,6 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void addSkillMod(String name, int base) {
-		
-		if(name == "movement") setSpeedMultiplierMod(getSpeedMultiplierMod() + ((float)base / 10));
-
 		if(getSkillMod(name) == null) {
 			// TODO: Send skill mods delta in sendListDelta
 			SkillMod skillMod = new SkillMod();
@@ -610,8 +607,6 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		
 		if(getSkillMod(name) == null)
 			return;
-		
-		if(name == "movement") this.setSpeedMultiplierMod(getSpeedMultiplierMod() - ((float)base / 10));
 		
 		SkillMod mod = getSkillMod(name);
 		mod.setBase(mod.getBase() - base);
@@ -1225,9 +1220,9 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			setHamListCounter(getHamListCounter() + 1);
 			delta = messageBuilder.buildHealthDelta(health);
 			
-			notifyObservers(delta, true);
 			this.health = health;
 		}
+		notifyObservers(delta, true);
 
 	}
 
@@ -1249,9 +1244,10 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			}
 			setHamListCounter(getHamListCounter() + 1);
 			delta = messageBuilder.buildActionDelta(action);
-			notifyObservers(delta, true);
 			this.action = action;
-		}
+		}			
+		notifyObservers(delta, true);
+
 	}
 
 	public int getHamListCounter() {

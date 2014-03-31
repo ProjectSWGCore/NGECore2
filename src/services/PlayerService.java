@@ -123,21 +123,17 @@ public class PlayerService implements INetworkDispatch {
 		}, 30, 30, TimeUnit.SECONDS);
 		
 		scheduler.scheduleAtFixedRate(() -> {
-			synchronized(creature.getMutex()) {
-				if(creature.getAction() < creature.getMaxAction() && creature.getPosture() != 14) {
-					if(creature.getCombatFlag() == 0)
-						creature.setAction(creature.getAction() + (15 + creature.getLevel() * 5));
-					else
-						creature.setAction(creature.getAction() + ((15 + creature.getLevel() * 5) / 2));
-				}
+			if(creature.getAction() < creature.getMaxAction() && creature.getPosture() != 14) {
+				if(creature.getCombatFlag() == 0)
+					creature.setAction(creature.getAction() + (15 + creature.getLevel() * 5));
+				else
+					creature.setAction(creature.getAction() + ((15 + creature.getLevel() * 5) / 2));
 			}
 		}, 0, 1000, TimeUnit.MILLISECONDS);
 
 		scheduler.scheduleAtFixedRate(() -> {
-			synchronized(creature.getMutex()) {
-				if(creature.getHealth() < creature.getMaxHealth() && creature.getCombatFlag() == 0 && creature.getPosture() != 13 && creature.getPosture() != 14)
-					creature.setHealth(creature.getHealth() + (36 + creature.getLevel() * 4));
-			}
+			if(creature.getHealth() < creature.getMaxHealth() && creature.getCombatFlag() == 0 && creature.getPosture() != 13 && creature.getPosture() != 14)
+				creature.setHealth(creature.getHealth() + (36 + creature.getLevel() * 4));
 		}, 0, 1000, TimeUnit.MILLISECONDS);
 		
 		/*final PlayerObject ghost = (PlayerObject) creature.getSlottedObject("ghost");
@@ -503,12 +499,13 @@ public class PlayerService implements INetworkDispatch {
 		if(cell == null)
 			return;
 		
+		creature.setPosture((byte) 0);
+		
 		core.simulationService.transferToPlanet(creature, cloner.getPlanet(), spawnPoint.getPosition(), spawnPoint.getOrientation(), cell);
 		
 		creature.setHealth(creature.getMaxHealth());
 		creature.setAction(creature.getMaxAction());
 		
-		creature.setPosture((byte) 0);
 		creature.setSpeedMultiplierBase(1);
 		creature.setTurnRadius(1);
 		

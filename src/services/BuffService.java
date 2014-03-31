@@ -106,21 +106,24 @@ public class BuffService implements INetworkDispatch {
 		else
 			buff.setTotalPlayTime(0);
 			
-        if(FileUtilities.doesFileExist("scripts/buffs/" + buffName + ".py"))
-        	core.scriptService.callScript("scripts/buffs/", buffName, "setup", core, buffer, buff);
+        if(FileUtilities.doesFileExist("scripts/buffs/" + buffName + ".py")) core.scriptService.callScript("scripts/buffs/", buffName, "setup", core, buffer, buff);
 	
             for (final Buff otherBuff : target.getBuffList()) {
                 if (buff.getGroup1().equals(otherBuff.getGroup1()))  
                 	if (buff.getPriority() >= otherBuff.getPriority()) {
-                        if (buff.getBuffName().equals(otherBuff.getBuffName())) {
+                        if (buff.getBuffName().equals(otherBuff.getBuffName()))
+                        {
                         	
-                        		if(otherBuff.getStacks() < otherBuff.getMaxStacks()) {
+                        		if(otherBuff.getStacks() < otherBuff.getMaxStacks()) 
+                        		{
                         			
                         			buff.setStacks(otherBuff.getStacks() + 1);
                         			if(target.getDotByBuff(otherBuff) != null)	// reset duration when theres a dot stack
                         				target.getDotByBuff(otherBuff).setStartTime(buff.getStartTime());
                         			
-                        		} else {
+                        		} 
+                        		else 
+                        		{
                         			buff.setStacks(buff.getMaxStacks());
                         		}
                         		if (buff.getDuration() != -1.0)
@@ -136,8 +139,15 @@ public class BuffService implements INetworkDispatch {
                 }
         }	
 			
-        if(FileUtilities.doesFileExist("scripts/buffs/" + buffName + ".py"))
-        	core.scriptService.callScript("scripts/buffs/", buffName, "add", core, target, buff);
+        if(FileUtilities.doesFileExist("scripts/buffs/" + buffName + ".py")) core.scriptService.callScript("scripts/buffs/", buffName, "add", core, target, buff);
+        else
+        {
+        	if(buff.getEffect1Name().length() > 0) core.skillModService.addSkillMod(target, buff.getEffect1Name(), (int) buff.getEffect1Value());
+        	if(buff.getEffect2Name().length() > 0) core.skillModService.addSkillMod(target, buff.getEffect2Name(), (int) buff.getEffect2Value());
+        	if(buff.getEffect3Name().length() > 0) core.skillModService.addSkillMod(target, buff.getEffect3Name(), (int) buff.getEffect3Value());
+        	if(buff.getEffect4Name().length() > 0) core.skillModService.addSkillMod(target, buff.getEffect4Name(), (int) buff.getEffect4Value());
+        	if(buff.getEffect5Name().length() > 0) core.skillModService.addSkillMod(target, buff.getEffect5Name(), (int) buff.getEffect5Value());
+        }
 		
 		target.addBuff(buff);
 		
@@ -214,8 +224,15 @@ public class BuffService implements INetworkDispatch {
         	 dot.getTask().cancel(true);
         	 creature.removeDot(dot);
          }
-         if(FileUtilities.doesFileExist("scripts/buffs/" + buff.getBuffName() + ".py"))
-        	 core.scriptService.callScript("scripts/buffs/", buff.getBuffName(), "remove", core, creature, buff);
+         if(FileUtilities.doesFileExist("scripts/buffs/" + buff.getBuffName() + ".py")) core.scriptService.callScript("scripts/buffs/", buff.getBuffName(), "remove", core, creature, buff);
+         else
+         {
+         	if(buff.getEffect1Name().length() > 0) core.skillModService.deductSkillMod(creature, buff.getEffect1Name(), (int) buff.getEffect1Value());
+         	if(buff.getEffect2Name().length() > 0) core.skillModService.deductSkillMod(creature, buff.getEffect2Name(), (int) buff.getEffect2Value());
+         	if(buff.getEffect1Name().length() > 0) core.skillModService.deductSkillMod(creature, buff.getEffect3Name(), (int) buff.getEffect3Value());
+         	if(buff.getEffect1Name().length() > 0) core.skillModService.deductSkillMod(creature, buff.getEffect4Name(), (int) buff.getEffect4Value());
+         	if(buff.getEffect1Name().length() > 0) core.skillModService.deductSkillMod(creature, buff.getEffect5Name(), (int) buff.getEffect5Value());
+         }
          creature.removeBuff(buff);
          
         for (String effect : buff.getParticleEffect().split(",")) {
