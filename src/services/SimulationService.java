@@ -772,6 +772,7 @@ public class SimulationService implements INetworkDispatch {
 		core.removeClient(session);
 		
 		object.setAttachment("disconnectTask", disconnectTask);
+		for(TangibleObject obj : object.getDefendersList()) object.removeDefender(obj);	// temp fix for being stuck in combat
 
 	}
 
@@ -818,8 +819,6 @@ public class SimulationService implements INetworkDispatch {
 		
 		if(object.getPosture() == Posture.Dead)
 			core.playerService.sendCloningWindow(object, false);
-		
-		for(TangibleObject obj : object.getDefendersList()) object.removeDefender(obj);	// temp fix for being stuck in combat
 	}
 		
 	public void transferToPlanet(SWGObject object, Planet planet, Point3D newPos, Quaternion newOrientation, SWGObject newParent) {
