@@ -28,7 +28,7 @@ def addPlanetSpawns(core, planet):
 #	implifevendor = stcSvc.spawnObject('object/mobile/shared_life_day_imperial_vendor.iff', 'tatooine', long(0), float(-5097.1), float(75.0), float(-6570.7), float(0.0087), float(-0.9999)) #Imp Vendor
 #	implifevendor.setCustomName2('Sstrigge \(Trandoshan \'Trader\')')
 #	implifesold1 = stcSvc.spawnObject('object/mobile/shared_snowtrooper_s01.iff', 'tatooine', long(0), float(-5092.2), float(75.0), float(-6569.0), float(0.0087), float(-0.9999)) #Imp Vendor Guard 1
-#	implifesold1.setCustomName2('a Stormtrooper')
+#	implifesold1.setCustomName2('a Stormtrooper Elite')
 #	implifesold2 = stcSvc.spawnObject('object/mobile/shared_snowtrooper_s01.iff', 'tatooine', long(0), float(-5100.8), float(75.0), float(-6569.4), float(0.0087), float(-0.9999)) #Imp Vendor Guard 2
 #	implifesold2.setCustomName2('a Stormtrooper')
 #	stcSvc.spawnObject('object/tangible/instrument/shared_nalargon.iff', 'tatooine', long(0), float(-5045.00), float(75), float(-6555), float(0.999132931232), float(-0.0416347384453)) # Drums
