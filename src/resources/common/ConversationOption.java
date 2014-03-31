@@ -21,25 +21,20 @@
  ******************************************************************************/
 package resources.common;
 
-public class ObjControllerOpcodes {
+public class ConversationOption {
 	
-	public static final int DATA_TRANSFORM = 0x71000000;
-	public static final int DATA_TRANSFORM_WITH_PARENT = 0xF1000000;
-	public static final int COMMAND_QUEUE_ENQUEUE = 0x16010000;
-	public static final int COMMAND_QUEUE_REMOVE = 0x17010000;
-	public static final int lookAtTarget = 0x26010000;
-	public static final int intendedTarget = 0xC5040000;
-	public static final int OBJECT_MENU_REQUEST = 0x46010000;
-	public static final int SECURE_TRADE = 0x15010000;
-	public static final int BUFF_BUILDER_CHANGE = 0x5A020000;
-	public static final int BUFF_BUILDER_END = 0x5B020000;
-	public static final int MISSION_LIST_REQUEST = 0xF5000000;
-	public static final int ChangeRoleIconChoice = 0x4D040000;
-	public static final int IMAGE_DESIGN_CHANGE = 0x38020000;
-	public static final int IMAGE_DESIGN_END = 0x39020000;
-	public static final int NPC_CONVERSATION_MESSAGE = 0xDF000000;
-	public static final int START_NPC_CONVERSATION = 0xDD000000;
-	public static final int STOP_NPC_CONVERSATION = 0xDE000000;
-	public static final int NPC_CONVERSATION_OPTIONS = 0xE0000000;
+	private OutOfBand outOfBand;
+
+	public ConversationOption(OutOfBand outOfBand) {
+		this.setOutOfBand(outOfBand);
+	}
+
+	public OutOfBand getOutOfBand() {
+		return outOfBand;
+	}
+
+	public void setOutOfBand(OutOfBand outOfBand) {
+		this.outOfBand = outOfBand;
+	}
 
 }

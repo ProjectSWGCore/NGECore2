@@ -22,58 +22,47 @@
 package protocol.swg.objectControllerObjects;
 
 import java.nio.ByteOrder;
+import java.util.Vector;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import protocol.swg.ObjControllerMessage;
+import resources.common.ConversationOption;
+import resources.common.ObjControllerOpcodes;
 
-public class SecureTrade extends ObjControllerObject{
-
-	private long senderID;
-	private long recieverID;
-	private short unknown;
+public class NpcConversationOptions extends ObjControllerObject {
 	
-	public SecureTrade() {
+	private long npcId;
+	private long objectId;
+	private Vector<ConversationOption> conversationOptions = new Vector<ConversationOption>();
+
+	public NpcConversationOptions(long objectId, long npcId) {
+		this.objectId = objectId;
+		this.npcId = npcId;
+	}
+
+	@Override
+	public void deserialize(IoBuffer data) {		
 	}
 	
-	@Override
-	public void deserialize(IoBuffer data) {
-		
-		setSenderID(data.getLong());
-		data.getLong(); // skip through 0's
-		data.getLong(); // skip through 0's
-		setRecieverID(data.getLong());
-		
+	public void addOption(ConversationOption option) {
+		conversationOptions.add(option);
 	}
 
 	@Override
 	public IoBuffer serialize() {
-		IoBuffer result = IoBuffer.allocate(40).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer buffer = IoBuffer.allocate(17).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.setAutoExpand(true);
+		buffer.putInt(ObjControllerOpcodes.NPC_CONVERSATION_OPTIONS);
+		buffer.putLong(objectId);
 		
-		result.putInt(ObjControllerMessage.SPACIAL_CHAT);
-		result.putInt(1);
-		result.putLong(senderID);
-		result.putLong(0);
-		result.putLong(0);
-		result.putLong(recieverID);
+		buffer.putInt(0);
+		buffer.put((byte) conversationOptions.size());
 
-		return result.flip();
+		for(ConversationOption option : conversationOptions) {
+			buffer.put(option.getOutOfBand().serialize());
+		}
+		
+		return IoBuffer.allocate(buffer.position()).order(ByteOrder.LITTLE_ENDIAN).put(buffer).flip();
 	}
-	
-	public long getSenderID() { return this.senderID; }
-	public long getRecieverID() { return this.recieverID; }
-	public short getUnkn() { return this.unknown; }
-	
-	public void setUnknown(short unknown) {
-		this.unknown = unknown;
-	}
-	public void setSenderID(long senderID) {
-		this.senderID = senderID;
-	}
-	
-	public void setRecieverID(long recieverID) {
-		this.recieverID = recieverID;
-	}
-	
-	
+
 }
