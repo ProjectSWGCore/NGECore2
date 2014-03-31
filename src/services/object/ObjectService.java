@@ -176,9 +176,7 @@ public class ObjectService implements INetworkDispatch {
 	
 	public void loadServerTemplates() {
 		System.out.println("Loading server templates...");
-		for(Runnable r : loadServerTemplateTasks) {
-			r.run();
-		}
+		loadServerTemplateTasks.forEach(Runnable::run);
 		loadServerTemplateTasks.clear();
 		System.out.println("Finished loading server templates...");
 	}
@@ -882,8 +880,8 @@ public class ObjectService implements INetworkDispatch {
 				if (duplicate.containsKey(containerId)) {
 					containerId = duplicate.get(containerId);
 				}
-				
-				if (objectId != 0 && getObject(objectId) != null) {
+				String planetName = planet.getName();
+				if (objectId != 0 && getObject(objectId) != null && (planetName.contains("dungeon") || planetName.contains("adventure"))) {
 					SWGObject container = getObject(containerId);
 					int x = ((int) (px + ((container == null) ? x1 : container.getPosition().x)));
 					int z = ((int) (pz + ((container == null) ? z1 : container.getPosition().z)));
@@ -907,6 +905,8 @@ public class ObjectService implements INetworkDispatch {
 				SWGObject object;
 				if(objectId != 0 && containerId == 0) {					
 					if(portalCRC != 0) {
+						if (core.getBuildingODB().contains(objectId, Long.class, BuildingObject.class) && !duplicate.containsValue(objectId))
+							continue;
 						containers.add(objectId);
 						object = createObject(template, objectId, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, true, false);
 						object.setAttachment("childObjects", null);
@@ -960,6 +960,7 @@ public class ObjectService implements INetworkDispatch {
 			building.createTransaction(core.getBuildingODB().getEnvironment());
 			core.getBuildingODB().put(building, Long.class, BuildingObject.class, building.getTransaction());
 			building.getTransaction().commitSync();
+			destroyObject(building);
 		}
 		
 	}

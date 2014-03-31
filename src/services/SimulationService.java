@@ -174,7 +174,7 @@ public class SimulationService implements INetworkDispatch {
 	public void insertSnapShotObjects() {
 		List<SWGObject> objectList = new ArrayList<SWGObject>(core.objectService.getObjectList().values());
 		for(SWGObject obj : objectList) {
-			if(obj.getParentId() == 0 && (obj.isInSnapshot() || obj.getAttachment("isBuildout") != null))
+			if(obj.getParentId() == 0 && /*(*/obj.isInSnapshot() /*|| obj.getAttachment("isBuildout") != null)*/)
 				add(obj, obj.getPosition().x, obj.getPosition().z);
 		}
 	}
