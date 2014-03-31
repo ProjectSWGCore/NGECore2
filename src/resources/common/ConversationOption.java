@@ -19,48 +19,22 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package protocol.swg.objectControllerObjects;
+package resources.common;
 
-import java.nio.ByteOrder;
-
-import org.apache.mina.core.buffer.IoBuffer;
-
-import resources.common.ObjControllerOpcodes;
-
-public class StopNpcConversation extends ObjControllerObject {
+public class ConversationOption {
 	
-	private long npcId;
-	private long objectId;
-	private String stfFile;
-	private String stfLabel;
+	private OutOfBand outOfBand;
 
-	public StopNpcConversation(long objectId, long npcId, String stfFile, String stfLabel) {
-		this.objectId = objectId;
-		this.npcId = npcId;
-		this.stfFile = stfFile;
-		this.stfLabel = stfLabel;
+	public ConversationOption(OutOfBand outOfBand) {
+		this.setOutOfBand(outOfBand);
 	}
 
-	@Override
-	public void deserialize(IoBuffer data) {
-		// TODO Auto-generated method stub
-		
+	public OutOfBand getOutOfBand() {
+		return outOfBand;
 	}
 
-	@Override
-	public IoBuffer serialize() {
-		IoBuffer buffer = IoBuffer.allocate(40 + stfFile.length() + stfLabel.length()).order(ByteOrder.LITTLE_ENDIAN);
-		
-		buffer.putInt(ObjControllerOpcodes.STOP_NPC_CONVERSATION);
-		buffer.putLong(objectId);
-		
-		buffer.putInt(0);
-		buffer.putLong(npcId);
-		buffer.put(getAsciiString(stfFile));
-		buffer.putInt(0);
-		buffer.put(getAsciiString(stfLabel));	
-		buffer.putLong(0);
-		
-		return buffer.flip();
+	public void setOutOfBand(OutOfBand outOfBand) {
+		this.outOfBand = outOfBand;
 	}
+
 }
