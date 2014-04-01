@@ -77,7 +77,8 @@ public class ObjectMenuResponse extends ObjControllerObject {
 			result.put(++counter);
 			result.put(radialOption.getParentId());
 			result.putShort(radialOption.getOptionId());
-			result.put(radialOption.getOptionType()); //result.put((byte) 3);
+			//result.put(radialOption.getOptionType()); 
+			result.put((byte) 3);
 			result.put(getUnicodeString(radialOption.getDescription()));
 		}
 		result.put(radialCount);

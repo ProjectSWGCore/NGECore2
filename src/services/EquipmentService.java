@@ -215,10 +215,12 @@ public class EquipmentService implements INetworkDispatch {
 			}
 			
 		}
+		
+		if(item.getStringAttribute("proc_name") != null) core.buffService.addBuffToCreature(actor, item.getStringAttribute("proc_name").replace("@ui_buff:", ""), actor);
+		
 
 		if(!actor.getEquipmentList().contains(item))
 			actor.addObjectToEquipList(item);
-
 }
 
 	
@@ -267,6 +269,8 @@ public class EquipmentService implements INetworkDispatch {
 			actor.sendSystemMessage("@unity:cannot_remove_ring", (byte) 0);
 			return;
 		}
+		
+		if(item.getStringAttribute("proc_name") != null) core.buffService.removeBuffFromCreatureByName(actor, item.getStringAttribute("proc_name").replace("@ui_buff:", ""));
 		
 		if(actor.getEquipmentList().contains(item))
 			actor.removeObjectFromEquipList(item);

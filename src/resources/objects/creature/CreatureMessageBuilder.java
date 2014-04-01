@@ -369,7 +369,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 					buff.setTotalPlayTime(0);
 				buffer.put((byte) 1);
 				buffer.putInt(0);
-				buffer.putInt(CRC.StringtoCRC(buff.getBuffName()));
+				buffer.putInt(CRC.StringtoCRC(buff.getBuffName().toLowerCase()));
 				if(buff.getDuration() > 0) {
 					buffer.putInt((int) (buff.getTotalPlayTime() + buff.getRemainingDuration()));		
 					buffer.putInt(0);

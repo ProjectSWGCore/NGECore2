@@ -85,6 +85,9 @@ def run(core, actor, target, commandString):
 	elif command == 'cust' and arg1 and arg2 and arg3:
 		obj = core.objectService.getObject(long(arg1))
 		obj.setCustomizationVariable(str(arg2), int(arg3))
+		
+	elif command == 'buff' and arg1:
+		core.buffService.addBuffToCreature(actor, str(arg1), actor)
 	
 	elif command == 'stealth':
 		if (actor.isInStealth()):

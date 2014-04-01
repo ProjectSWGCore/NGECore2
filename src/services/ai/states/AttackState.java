@@ -47,6 +47,9 @@ public class AttackState extends AIState {
 	@Override
 	public byte onExit(AIActor actor) {
 		// TODO Auto-generated method stub
+		actor.getCreature().setLookAtTarget(0);
+		actor.getCreature().setIntendedTarget(0);
+		
 		return StateResult.FINISHED;
 	}
 
@@ -100,7 +103,12 @@ public class AttackState extends AIState {
 		if(creature.getPosture() == 14)
 			return StateResult.DEAD;
 		if(creature.getCombatFlag() == 0 || creature.getDefendersList().size() == 0 || actor.getFollowObject() == null)
+		{
+			creature.setLookAtTarget(0);
+			creature.setIntendedTarget(0);
+			actor.setFollowObject(null);
 			return StateResult.FINISHED;
+		}
 		CreatureObject target = actor.getFollowObject();
 		if(target != actor.getHighestDamageDealer() && actor.getHighestDamageDealer() != null) {
 			actor.setFollowObject(actor.getHighestDamageDealer());
@@ -116,7 +124,11 @@ public class AttackState extends AIState {
 			actor.setFollowObject(actor.getHighestDamageDealer());
 			target = actor.getFollowObject();
 			if(target == null)
+			{
+				creature.setLookAtTarget(0);
+				creature.setIntendedTarget(0);
 				return StateResult.FINISHED;
+			}
 		}
 		if(target.getWorldPosition().getDistance(creature.getWorldPosition()) > 128 || target.getPosture() == 13 || target.getPosture() == 14) {
 			actor.removeDefender(target);
@@ -140,6 +152,9 @@ public class AttackState extends AIState {
 		//actor.faceObject(target);
 		
 		Vector<String> attacks = actor.getMobileTemplate().getAttacks();
+		
+		creature.setLookAtTarget(target.getObjectId());
+		creature.setIntendedTarget(target.getObjectId());
 		
 		if(attacks.size() == 0) {
 			core.commandService.callCommand(creature, actor.getMobileTemplate().getDefaultAttack(), target, "");
