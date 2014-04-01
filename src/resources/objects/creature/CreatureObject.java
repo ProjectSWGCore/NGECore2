@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Vector;
 import java.util.concurrent.ScheduledFuture;
 
 import org.apache.mina.core.buffer.IoBuffer;
@@ -44,7 +45,6 @@ import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.NotPersistent;
 
 import main.NGECore;
-
 import engine.clients.Client;
 import resources.objects.Buff;
 import resources.objects.DamageOverTime;
@@ -127,7 +127,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private CreatureObject performanceWatchee;
 	private CreatureObject performanceListenee;
 	@NotPersistent
-	private SWGList<CreatureObject> performanceAudience = new SWGList<CreatureObject>();
+	private Vector<CreatureObject> performanceAudience = new Vector<CreatureObject>();
 	private int health = 1000;
 	private int action = 300;
 	@NotPersistent
@@ -430,8 +430,6 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 				else { next.sendSystemMessage("You stop listening to " + getCustomName() + ".",(byte)0); }
 				next.getSpectatorTask().cancel(true);
 			}
-			//not sure if this behaviour is correct. might need fixing later.
-			performanceAudience = new SWGList<CreatureObject>();
 		}
 	}
 	public ScheduledFuture<?> getEntertainerExperience() {
@@ -1506,23 +1504,20 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 	}
 	
-	public void addAudience(CreatureObject audienceMember) {
+	public void addSpectator(CreatureObject audienceMember) {
 		synchronized(objectMutex) {
-			if (performanceAudience == null) {
-				performanceAudience = new SWGList<CreatureObject>();
-			}
 			performanceAudience.add(audienceMember);
 		}
 	}
 	
-	public void removeAudience(CreatureObject audienceMember) {
+	public void removeSpectator(CreatureObject audienceMember) {
 		synchronized(objectMutex) {
 			if (performanceAudience == null) { return; }
 			if (audienceMember.getInspirationTick() != null)
 				audienceMember.getInspirationTick().cancel(true);
 			
 			if(performanceAudience.contains(audienceMember))
-				performanceAudience.remove(audienceMember); // SWGList error
+				performanceAudience.remove(audienceMember);
 		}
 	}
 
