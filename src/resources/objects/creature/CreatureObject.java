@@ -171,14 +171,13 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private boolean staticNPC = false; // temp
 	@NotPersistent
 	private int flourishCount = 0;
-	
 	@NotPersistent
 	private boolean performingEffect;
-	
 	@NotPersistent
 	private boolean performingFlourish;
-	
 	private int coverCharge;
+	@NotPersistent
+	private TangibleObject conversingNpc;
 	
 	public CreatureObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
 		super(objectID, planet, Template, position, orientation);
@@ -1747,4 +1746,17 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			this.stationary = stationary;
 		}
 	}
+
+	public TangibleObject getConversingNpc() {
+		synchronized(objectMutex) {
+			return conversingNpc;
+		}
+	}
+
+	public void setConversingNpc(TangibleObject conversingNpc) {
+		synchronized(objectMutex) {
+			this.conversingNpc = conversingNpc;
+		}
+	}
+	
 }
