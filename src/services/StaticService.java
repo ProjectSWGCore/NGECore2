@@ -56,6 +56,7 @@ public class StaticService implements INetworkDispatch {
 		spawnPlanetStaticObjs("naboo");
 		spawnPlanetStaticObjs("tatooine");
 		spawnPlanetStaticObjs("lok");
+		//
 		//spawnPlanetStaticObjs("kaas");    // Keep commented out unless you possess the latest build of Kaas!
 	}
 	
