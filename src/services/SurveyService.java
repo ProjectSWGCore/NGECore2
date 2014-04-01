@@ -21,7 +21,6 @@
  ******************************************************************************/
 package services;
 
-import java.nio.ByteOrder;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Random;
@@ -30,9 +29,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import org.apache.mina.core.buffer.IoBuffer;
 import protocol.swg.PlayClientEffectLocMessage;
-import protocol.swg.ResourceMessenger;
 import protocol.swg.SceneCreateObjectByCrc;
 import protocol.swg.SceneEndBaselines;
 import protocol.swg.SurveyMapUpdateMessage;
@@ -224,7 +221,7 @@ public class SurveyService implements INetworkDispatch {
 		else { // handle particularly rich case
 			stackCount = core.resourceService.getResourceSampleQuantity(crafter, sampleResource); 
 			int recoveryChance = new Random().nextInt(100);	
-			if (recoveryChance<70){
+			if (recoveryChance<60){
 				stackCount *= 3;
 			}
 		}
@@ -232,11 +229,11 @@ public class SurveyService implements INetworkDispatch {
 		if (container!=null) {
 			if (container.getReferenceID()==sampleResource.getId()) {
 				int stackCountToUpdate = container.getStackCount();
-				if (stackCountToUpdate<100000-stackCount){ // sample fits into container
+				if (stackCountToUpdate<ResourceContainerObject.maximalStackCapacity-stackCount){ // sample fits into container
 					SWGObject crafterInventory = crafter.getSlottedObject("inventory");   
 					container.setStackCount(stackCountToUpdate+stackCount);
-					crafter.sendSystemMessage("@base_player:prose_grant_xp @exp_n:resource_harvesting_inorganic", (byte) 0);
-					core.playerService.giveExperience(crafter,(int)(2.5F*stackCount)); // resource_harvesting_inorganic						
+					//crafter.sendSystemMessage("@base_player:prose_grant_xp @exp_n:resource_harvesting_inorganic", (byte) 0);
+					core.playerService.giveExperience(crafter,(int)(2.5F*stackCount));
 					//exp_n:resource_harvesting_inorganic
 					
 					container.sendDelta3(crafter.getClient());
@@ -444,15 +441,17 @@ public class SurveyService implements INetworkDispatch {
 		}
 		
 		if (crafter.getPosture()==13)
-			return;
+			return; // QA
 		
-		if (crafter.getCombatFlag()!=0){
+		if (crafter.getCombatFlag()!=0){ // QA
 			crafter.sendSystemMessage("@survey:sample_cancel_attack", (byte) 0);
 			return;
 		}
 		
-		// ToDo: check mounted
-		
+		if (crafter.getPosture()==10 || crafter.getPosture()==11){ // QA
+			crafter.sendSystemMessage("You cannot sample while on a mount", (byte) 0);
+			return;
+		}
 		
 		surveyTool.setCurrentlyCoolingDown(false);
 		GalacticResource sampleResource = surveyTool.getSurveyResource();
@@ -466,7 +465,8 @@ public class SurveyService implements INetworkDispatch {
 		
 		if (sampleResource.getName().equals(commandArgs)) {
 		
-			float localConcentration = 1.0F;
+			float localConcentration = sampleResource.deliverConcentrationForSurvey(crafter.getPlanetId(), crafter.getPosition().x, crafter.getPosition().z);
+			//float localConcentration = 1.0F;
 			if (localConcentration > 0.3) {
 				// Is the tool ready?
 				if (surveyTool.getCurrentlySampling() || surveyTool.getCurrentlyCoolingDown() ) {
@@ -476,7 +476,7 @@ public class SurveyService implements INetworkDispatch {
 					crafter.setPosture((byte) 1);
 					crafter.sendSystemMessage("You kneel", (byte) 0);
 								
-					// Radiation is good for you
+					// ToDo:
 					//if (.equals("radioactive"))
 					
 					int samplingCost=125-(int)crafter.getSkillMod("surveying").getModifier();
@@ -535,8 +535,8 @@ public class SurveyService implements INetworkDispatch {
 		}
 					
 		GalacticResource sampleResource = surveyTool.getSurveyResource();
-		//float localConcentration = sampleResource.deliverConcentrationForSurvey(crafter.getPlanetId(), crafter.getPosition().x, crafter.getPosition().z);
-		float localConcentration = 1.0F;
+		float localConcentration = sampleResource.deliverConcentrationForSurvey(crafter.getPlanetId(), crafter.getPosition().x, crafter.getPosition().z);
+		//float localConcentration = 1.0F;
 		if (localConcentration > 0.3) {
 			crafter.setPosture((byte) 1);
 			
@@ -718,7 +718,7 @@ public class SurveyService implements INetworkDispatch {
 			@Override
 			public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
 				CreatureObject crafter = (CreatureObject)owner;
-				crafter.sendSystemMessage("handleSurveyRangeInput process", (byte) 0);
+				//crafter.sendSystemMessage("handleSurveyRangeInput process", (byte) 0);
 				if (crafter!=null) {
 					if (outerSurveyTool!=null){
 						int index = Integer.parseInt(returnList.get(0));
@@ -786,122 +786,4 @@ public class SurveyService implements INetworkDispatch {
 		return callback;
 	}	
 	
-	// helper method to delete later
-	public void levelUpto90(SWGObject crafter){
-		
-		int[] xpArray = new int[] 	{50,
-				1000,	
-				6000,	
-				18000,	
-				21000,	
-				60000,	
-				91000,	
-				120000,
-				140000,
-				182650,
-				213900,	
-				245150,
-				276400,	
-				307650,	
-				395150,	
-				482650,	
-				607650,	
-				732650,	
-				849316,	
-				965982,	
-				1082650,	
-				1307650,	
-				1532650,	
-				1620150,	
-				1707650,	
-				1832650,	
-				1957650,	
-				2074316,	
-				2190982,	
-				2307650,	
-				2532650,	
-				2757650,	
-				2845150,	
-				2932650,	
-				3057650,	
-				3182650,	
-				3299316,	
-				3415982,	
-				3532650,	
-				3757650,	
-				3982650,	
-				4070150,	
-				4157650,	
-				4282650,	
-				4407650,	
-				4524316,	
-				4640982,	
-				4757650,	
-				4982650,	
-				5102650,	
-				5352650,	
-				5602650,	
-				5852650,	
-				6102650,
-				6227650,	
-				6390850,	
-				6679050,	
-				6967250,	
-				7255450,	
-				7543650,	
-				7788650,	
-				8033650,	
-				8278650,	
-				8523650,	
-				8768650,	
-				9013650,	
-				9258650,	
-				9503650,	
-				9748650,	
-				9993650,	
-				10242650,	
-				10491650,	
-				10740650,	
-				10989650,	
-				11238650,	
-				11438650,	
-				11638650,	
-				11838650,
-				12038650};
-
-		int xpCounter = 0;
-		float delta = 0.0F;
-		float threshold = 1.0F;		
-		int currentXP = 0;
-		CreatureObject crafterObj = (CreatureObject)crafter;
-		int currentLevel = (int) crafterObj.getLevel();
-		int distance = xpArray[currentLevel+1] - currentXP;
-		float dd = distance/400000000000000.0F;
-		while (xpCounter<20000000){
-			
-			if (delta>threshold){
-				int setXp = (int)Math.floor(delta);
-				core.playerService.giveExperience(crafterObj, setXp);
-				currentXP += setXp;
-			}
-			
-			if (crafterObj.getLevel()>currentLevel) {
-				distance = xpArray[currentLevel+1] - currentXP;
-				if (currentLevel>30)
-					dd = distance/4000000000.0F;
-				else if (currentLevel>20)
-					dd = distance/40000000000.0F;
-				else if (currentLevel>12)
-					dd = distance/400000000000.0F;
-				delta = 0.0F;
-				currentLevel = crafterObj.getLevel();
-				//System.out.println(" dd " + dd );
-			}
-			
-			delta += dd;
-			System.out.println("delta " + delta + " dd " + dd + " currentXP " + currentXP);
-
-		}
-		
-	}	
 }

@@ -21,17 +21,14 @@
  ******************************************************************************/
 package resources.objects.resource;
 
-import java.util.Random;
 
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
-
 import engine.clients.Client;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 import resources.objects.creature.CreatureObject;
-import resources.objects.tangible.TangibleMessageBuilder;
 import resources.objects.tangible.TangibleObject;
 
 /** 
@@ -126,6 +123,9 @@ public class ResourceContainerObject extends TangibleObject {
 		"object/resource_container/shared_resource_container_energy_radioactive.iff",
 		"object/resource_container/shared_resource_container_energy_solid.iff"		
 	};
+	
+	@NotPersistent
+	public static int maximalStackCapacity = 100000;
 	
 	@NotPersistent
 	private ResourceContainerMessageBuilder messageBuilder;

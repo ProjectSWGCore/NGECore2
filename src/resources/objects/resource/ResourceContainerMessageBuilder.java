@@ -91,7 +91,7 @@ public class ResourceContainerMessageBuilder extends ObjectMessageBuilder {
 		buffer.putInt(0);
 		buffer.put((byte)0);
 
-		buffer.putInt(1000000);
+		buffer.putInt(ResourceContainerObject.maximalStackCapacity);
 		buffer.put(getAsciiString(iffFileName)); 
 		buffer.put(getUnicodeString(contName)); 
 		buffer.putLong(0);	
@@ -200,8 +200,8 @@ public class ResourceContainerMessageBuilder extends ObjectMessageBuilder {
 		result.put(getUnicodeString("1"));
 		
 		result.put(getAsciiString("resource_contents"));
-		result.put(getUnicodeString(resourceContainer.getStackCount()+"/"+100000));
-		System.out.println("XXXXXXXXX " + resourceContainer.getStackCount()+"/"+100000);
+		result.put(getUnicodeString(resourceContainer.getStackCount()+"/"+ResourceContainerObject.maximalStackCapacity));
+
 		result.put(getAsciiString("resource_name"));
 		result.put(getUnicodeString(resourceContainer.getResourceName()));
 		
