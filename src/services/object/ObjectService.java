@@ -530,6 +530,18 @@ public class ObjectService implements INetworkDispatch {
 			return;
 		}
 		
+		if(object.getStringAttribute("proc_name") != null)
+		{
+			if(object.getAttachment("tempUseCount") != null) 
+			{
+				int useCount = (int)object.getAttachment("tempUseCount"); // Placeholder until delta for stack count/use count
+				
+				if(useCount - 1 == 0) destroyObject(object);
+				else object.setAttachment("tempUseCount", useCount--);
+			}
+			core.buffService.addBuffToCreature(creature, object.getStringAttribute("proc_name").replace("@ui_buff:", ""), creature);
+		}
+		
 		String filePath = "scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", "") + object.getTemplate().split("shared_" , 2)[1].replace(".iff", "") + ".py";
 		
 		if (FileUtilities.doesFileExist(filePath)) {

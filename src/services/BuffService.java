@@ -245,6 +245,11 @@ public class BuffService implements INetworkDispatch {
         }
 	}
 	
+	public void removeBuffFromCreatureByName(CreatureObject creature, String buffName)
+	{
+		removeBuffFromCreature(creature, creature.getBuffByName(buffName));
+	}
+	
 	public void clearBuffs(final CreatureObject creature) {
 		
 		// copy to array for thread safety
