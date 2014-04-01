@@ -21,14 +21,6 @@
  ******************************************************************************/
 package services.resources;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.OpenOption;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
@@ -45,15 +37,12 @@ import com.sleepycat.persist.EntityCursor;
 import protocol.swg.ResourceMessenger;
 import protocol.swg.SceneCreateObjectByCrc;
 import protocol.swg.SceneEndBaselines;
+import protocol.swg.UpdateContainmentMessage;
 import main.NGECore;
 import engine.resources.common.CRC;
-import engine.resources.container.CreaturePermissions;
-import engine.resources.container.Traverser;
 import engine.resources.objects.SWGObject;
-import engine.resources.scene.Planet;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
-import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.resource.GalacticResource;
 import resources.objects.resource.ResourceContainerObject;
@@ -62,8 +51,6 @@ import resources.objects.resource.ResourceRoot;
 /** 
  * @author Charon 
  */
-
-// ToDo: Persistence management control / persistence verification queries
 
 public class ResourceService implements INetworkDispatch {
 	
@@ -10720,7 +10707,7 @@ public class ResourceService implements INetworkDispatch {
 		int indices = resourceRootTable.size();
 		for (int i=0;i<indices;i++){
 			ResourceRoot persistRoot = resourceRootTable.get(new Integer(i));
-			System.err.println("persistRoot ID " + persistRoot.getResourceRootID() +" " + persistRoot.getResourceType());
+			System.err.println("Persisting Root with ID " + persistRoot.getResourceRootID() +" " + persistRoot.getResourceFileName());
 			persistRoot.createTransaction(core.getResourceRootsODB().getEnvironment());
 			core.getResourceRootsODB().put(persistRoot, Integer.class, ResourceRoot.class, persistRoot.getTransaction());
 			persistRoot.getTransaction().commitSync();		
@@ -10944,7 +10931,7 @@ public class ResourceService implements INetworkDispatch {
 			return false;
 		bigBangOccured = true;
 		
-		
+		System.out.println("Persisting resources...");
 		// Database table ResourceRootData
 		
 		// ID
@@ -11094,6 +11081,7 @@ public class ResourceService implements INetworkDispatch {
 //		}
 		
 		System.out.println(allSpawnedResources.size() + " RESOURCES SPAWNED.");
+		System.out.println("Finished persisting resources.");
 		return true;
 	}
 		
@@ -11299,11 +11287,11 @@ public class ResourceService implements INetworkDispatch {
 			for (GalacticResource sampleResource : allSpawnedResources){
 				if (sampleResource.getResourceRoot().getResourceClass().contains(spawnType)){
 					String resourceContainerIFF = ResourceRoot.CONTAINER_TYPE_IFF_SIGNIFIER[sampleResource.getResourceRoot().getContainerType()];           		  				
-    				containerObject = (ResourceContainerObject) core.objectService.createObject(resourceContainerIFF, crafter.getPlanet());
-    				containerObject.initializeStats(sampleResource);
+    				containerObject = (ResourceContainerObject) core.objectService.createObject(resourceContainerIFF, crafter.getPlanet());  				
     				containerObject.setProprietor(crafter);
+    				containerObject.setStackCount(stackCount,false);
     				//int stackCount = core.resourceService.getResourceSampleQuantity(crafter, sampleResource); 
-            		containerObject.setStackCount(stackCount,false);            		          		
+    				containerObject.initializeStats(sampleResource);            		          		
             		int resCRC = CRC.StringtoCRC(resourceContainerIFF);
     				containerObject.setIffFileName(resourceContainerIFF);             		
     				long objectId = containerObject.getObjectID();  					
@@ -11311,16 +11299,13 @@ public class ResourceService implements INetworkDispatch {
     				SceneCreateObjectByCrc createObjectMsg = new SceneCreateObjectByCrc(objectId, crafter.getOrientation().x, crafter.getOrientation().y, crafter.getOrientation().z, crafter.getOrientation().w, crafter.getPosition().x, crafter.getPosition().y, crafter.getPosition().z, resCRC, (byte) 0);
     				crafter.getClient().getSession().write(createObjectMsg.serialize());      				
     				services.resources.CharonPacketUtils.printAnalysis(createObjectMsg.serialize());				
-    				ResourceMessenger messenger = new ResourceMessenger(IoBuffer.allocate(1));
-   				 	crafter.getClient().getSession().write(messenger.serialize_buildUpdateContainmentMessage(containerObject, crafterInventory));      				
-   				    crafter.getClient().getSession().write(messenger.serialize_buildRCNO3Baseline(containerObject));
-   				    crafter.getClient().getSession().write(messenger.serialize_buildRCNO6Baseline(containerObject));
-   				    crafter.getClient().getSession().write(messenger.serialize_buildRCNO8Baseline(containerObject));
-				    crafter.getClient().getSession().write(messenger.serialize_buildRCNO9Baseline(containerObject));       
+    				UpdateContainmentMessage updateContainmentMessage= new UpdateContainmentMessage(containerObject.getObjectID(), crafterInventory.getObjectID(), -1);
+					crafter.getClient().getSession().write(updateContainmentMessage.serialize());
+					containerObject.sendBaselines(crafter.getClient());     
     				SceneEndBaselines sceneEndBaselinesMsg = new SceneEndBaselines(containerObject.getObjectID());
     				crafter.getClient().getSession().write(sceneEndBaselinesMsg.serialize());
-    				services.resources.CharonPacketUtils.printAnalysis(sceneEndBaselinesMsg.serialize());
-    				crafter.getClient().getSession().write(messenger.serialize_buildAttributeListMessage(containerObject));					
+    				services.resources.CharonPacketUtils.printAnalysis(sceneEndBaselinesMsg.serialize());   				 				
+    				//containerObject.buildAttributeListMessage(crafter.getClient());
     				return containerObject;
 				}
 			}

@@ -284,7 +284,6 @@ public class ObjectService implements INetworkDispatch {
 	
 	public SWGObject createObject(String Template, long objectID, Planet planet, Point3D position, Quaternion orientation, String customServerTemplate, boolean overrideSnapshot, boolean loadServerTemplate) {
 		SWGObject object = null;
-		System.out.println("Template passed " + Template);
 		CrcStringTableVisitor crcTable;
 		try {
 			crcTable = ClientFileManager.loadFile("misc/object_template_crc_string_table.iff", CrcStringTableVisitor.class);
@@ -370,9 +369,7 @@ public class ObjectService implements INetworkDispatch {
 			object = new ResourceContainerObject(objectID, planet, Template, position, orientation);
 			
 		}else {
-			System.err.println("return null;");
-			return null;
-			
+			return null;			
 		}
 		
 		object.setPlanetId(planet.getID());
