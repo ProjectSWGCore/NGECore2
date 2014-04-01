@@ -43,6 +43,7 @@ public class OutOfBand {
 		
 		buffer.putInt(2);
 		buffer.putShort(getCount());
+		buffer.putShort((short) 0); // unk
 		
 		for(ProsePackage prosePackage : prosePackages) {
 			
@@ -88,7 +89,7 @@ public class OutOfBand {
 		
 		setLength(buffer);
 		
-		return buffer.flip();
+		return IoBuffer.allocate(buffer.position()).order(ByteOrder.LITTLE_ENDIAN).put(buffer).flip();
 	}
 	
 	public void setLength(IoBuffer buffer) {

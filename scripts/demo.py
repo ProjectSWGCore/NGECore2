@@ -2,23 +2,23 @@ import sys
 
 def CreateStartingCharacter(core, object):
 	
-#	testObject = core.objectService.createObject('object/weapon/ranged/rifle/shared_rifle_t21.iff', object.getPlanet())
-#	testObject.setCustomName('This is a Jython Rifle')
-#	testObject.setStringAttribute('crafter', 'Light')
-#	testObject.setDamageType('@obj_attr_n:armor_eff_energy')
-#	testObject.setElementalType('@obj_attr_n:elemental_cold')
-#	testObject.setStringAttribute('cat_wpn_damage.damage', '0-0')	
-#	testObject.setMinDamage(425)
-#	testObject.setMaxDamage(1150)
-#	testObject.setElementalDamage(50)
-#	testObject.setIntAttribute('cat_wpn_damage.weapon_dps', testObject.getDamagePerSecond())
-#	testObject.setIntAttribute('cat_skill_mod_bonus.@stat_n:precision_modified', 35)
-#	object.addSkillMod('kinetic' , 0)
-#	object.addSkillMod('energy' , 0)
-#	object.addSkillMod('heat' , 0)
-#	object.addSkillMod('cold' , 0)
-#	object.addSkillMod('acid' , 0)
-#	object.addSkillMod('electricity' , 0)
+	#testObject = core.objectService.createObject('object/weapon/ranged/rifle/shared_rifle_t21.iff', object.getPlanet())
+	#testObject.setCustomName('This is a Jython Rifle')
+	#testObject.setStringAttribute('crafter', 'Light')
+	#testObject.setDamageType('@obj_attr_n:armor_eff_energy')
+	#testObject.setElementalType('@obj_attr_n:elemental_cold')
+	#testObject.setStringAttribute('cat_wpn_damage.damage', '0-0')	
+	#testObject.setMinDamage(425)
+	#testObject.setMaxDamage(1150)
+	#testObject.setElementalDamage(50)
+	#testObject.setIntAttribute('cat_wpn_damage.weapon_dps', testObject.getDamagePerSecond())
+	#testObject.setIntAttribute('cat_skill_mod_bonus.@stat_n:precision_modified', 35)
+	#object.addSkillMod('kinetic' , 0)
+	#object.addSkillMod('energy' , 0)
+	#object.addSkillMod('heat' , 0)
+	#object.addSkillMod('cold' , 0)
+	#object.addSkillMod('acid' , 0)
+	#object.addSkillMod('electricity' , 0)
 	#object.addSkillMod('combat_strikethrough_value' , 50)
 	#object.addSkillMod('display_only_dodge' , 2000)
 	#object.addSkillMod('display_only_parry' , 1000)
@@ -29,40 +29,40 @@ def CreateStartingCharacter(core, object):
 	#object.addSkillMod('display_only_block' , 2000)
 	#object.addSkillMod('combat_block_value' , 0)
 	
-#	inventory = object.getSlottedObject('inventory')
-#	if not inventory:
-#		return
-#	inventory.add(testObject)
+#	#inventory = object.getSlottedObject('inventory')
+#	#if not inventory:
+#	#	return
+#	#inventory.add(testObject)
 	
-#	testClothing = core.objectService.createObject('object/tangible/wearables/cape/shared_cape_rebel_01.iff', object.getPlanet())
-#	testClothing.setCustomName('Test Cape')
-#	testCloak = core.objectService.createObject('object/tangible/wearables/robe/shared_robe_jedi_dark_s05.iff', object.getPlanet())
-#	testCloak.setCustomName('Test Cloak')
+#	#testClothing = core.objectService.createObject('object/tangible/wearables/cape/shared_cape_rebel_01.iff', object.getPlanet())
+#	#testClothing.setCustomName('Test Cape')
+#	#testCloak = core.objectService.createObject('object/tangible/wearables/robe/shared_robe_jedi_dark_s05.iff', object.getPlanet())
+#	#testCloak.setCustomName('Test Cloak')
 
-#	inventory.add(testClothing)
-#	inventory.add(testCloak)
-#	profession = object.getSlottedObject('ghost').getProfession()
-#	if profession == 'commando_1a':
-#		object.addSkillMod('expertise_devastation_bonus' , 20)
-#		testObject2 = core.objectService.createObject('object/weapon/ranged/heavy/shared_heavy_rocket_launcher.iff', object.getPlanet())
-#		testObject2.setCustomName('Test Heavy Weapon')
-#		testObject2.setStringAttribute('crafter', 'Light')
-#		testObject2.setDamageType('@obj_attr_n:armor_eff_kinetic')
-#		testObject2.setElementalType('@obj_attr_n:elemental_heat')
-#		testObject2.setStringAttribute('cat_wpn_damage.damage', '0-0')	
-#		testObject2.setMinDamage(550)
-#		testObject2.setMaxDamage(1315)
-#		testObject2.setElementalDamage(216)
-#		testObject2.setIntAttribute('cat_wpn_damage.weapon_dps', testObject2.getDamagePerSecond())
-#		inventory.add(testObject2)
-
+#	#inventory.add(testClothing)
+#	#inventory.add(testCloak)
+#	#profession = object.getSlottedObject('ghost').getProfession()
+#	#if profession == 'commando_1a':
+#	#	object.addSkillMod('expertise_devastation_bonus' , 20)
+#	#	testObject2 = core.objectService.createObject('object/weapon/ranged/heavy/shared_heavy_rocket_launcher.iff', object.getPlanet())
+#	#	testObject2.setCustomName('Test Heavy Weapon')
+#	#	testObject2.setStringAttribute('crafter', 'Light')
+#	#	testObject2.setDamageType('@obj_attr_n:armor_eff_kinetic')
+#	#	testObject2.setElementalType('@obj_attr_n:elemental_heat')
+#	#	testObject2.setStringAttribute('cat_wpn_damage.damage', '0-0')	
+#	#	testObject2.setMinDamage(550)
+#	#	testObject2.setMaxDamage(1315)
+#	#	testObject2.setElementalDamage(216)
+#	#	testObject2.setIntAttribute('cat_wpn_damage.weapon_dps', testObject2.getDamagePerSecond())
+#	#	inventory.add(testObject2)
+#
 #	addProfessionAbilities(core, object, profession)
 	
 #	heroism1 = core.objectService.createObject('object/tangible/wearables/necklace/shared_necklace_s10.iff', object.getPlanet())
-#	heroism1.setStfFilename('static_item_n')
-#	heroism1.setStfName('item_necklace_set_hero_01_01')
-#	heroism1.setDetailFilename('static_item_d')
-#	heroism1.setDetailName('item_necklace_set_hero_01_01')
+ #	heroism1.setStfFilename('static_item_n')
+ #	heroism1.setStfName('item_necklace_set_hero_01_01')
+ #	heroism1.setDetailFilename('static_item_d')
+ #	heroism1.setDetailName('item_necklace_set_hero_01_01')
 #	heroism1.setStringAttribute('@set_bonus:piece_bonus_count_2', '@set_bonus:set_bonus_hero_1')
 #	heroism1.setStringAttribute('@set_bonus:piece_bonus_count_3', '@set_bonus:set_bonus_hero_2')
 #	heroism1.setStringAttribute('@set_bonus:piece_bonus_count_5', '@set_bonus:set_bonus_hero_3')
@@ -71,22 +71,22 @@ def CreateStartingCharacter(core, object):
 #	heroism1.setIntAttribute('cat_stat_mod_bonus.food_strength_modified' , 30)
 	
 
-#	inventory = object.getSlottedObject('inventory')
-#	if not inventory:
-#		return
-#	inventory.add(heroism1)
+ #	inventory = object.getSlottedObject('inventory')
+ #	if not inventory:
+ #		return
+ #	inventory.add(heroism1)
 	
-#	heroism2 = core.objectService.createObject('object/tangible/wearables/bracelet/shared_bracelet_s03_r.iff', object.getPlanet())
-#	heroism2.setStfFilename('static_item_n')
-#	heroism2.setStfName('item_bracelet_r_set_hero_01_01')
-#	heroism2.setDetailFilename('static_item_d')
-#	heroism2.setDetailName('item_bracelet_r_set_hero_01_01')
-#	heroism2.setStringAttribute('@set_bonus:piece_bonus_count_2', '@set_bonus:set_bonus_hero_1')
-#	heroism2.setStringAttribute('@set_bonus:piece_bonus_count_3', '@set_bonus:set_bonus_hero_2')
-#	heroism2.setStringAttribute('@set_bonus:piece_bonus_count_5', '@set_bonus:set_bonus_hero_3')
-#	heroism2.setIntAttribute('cat_stat_mod_bonus.food_luck_modified' , 30)
-#	heroism2.setIntAttribute('cat_stat_mod_bonus.food_precision_modified' , 30)
-#	heroism2.setIntAttribute('cat_stat_mod_bonus.food_strength_modified' , 30)
+ #	heroism2 = core.objectService.createObject('object/tangible/wearables/bracelet/shared_bracelet_s03_r.iff', object.getPlanet())
+ #	heroism2.setStfFilename('static_item_n')
+ #	heroism2.setStfName('item_bracelet_r_set_hero_01_01')
+ #	heroism2.setDetailFilename('static_item_d')
+ #	heroism2.setDetailName('item_bracelet_r_set_hero_01_01')
+ #	heroism2.setStringAttribute('@set_bonus:piece_bonus_count_2', '@set_bonus:set_bonus_hero_1')
+ #	heroism2.setStringAttribute('@set_bonus:piece_bonus_count_3', '@set_bonus:set_bonus_hero_2')
+ #	heroism2.setStringAttribute('@set_bonus:piece_bonus_count_5', '@set_bonus:set_bonus_hero_3')
+ #	heroism2.setIntAttribute('cat_stat_mod_bonus.food_luck_modified' , 30)
+ #	heroism2.setIntAttribute('cat_stat_mod_bonus.food_precision_modified' , 30)
+ #	heroism2.setIntAttribute('cat_stat_mod_bonus.food_strength_modified' , 30)
 	
 
 #	inventory = object.getSlottedObject('inventory')
@@ -102,27 +102,27 @@ def CreateStartingCharacter(core, object):
 #	heroism3.setStringAttribute('@set_bonus:piece_bonus_count_2', '@set_bonus:set_bonus_hero_1')
 #	heroism3.setStringAttribute('@set_bonus:piece_bonus_count_3', '@set_bonus:set_bonus_hero_2')
 #	heroism3.setStringAttribute('@set_bonus:piece_bonus_count_5', '@set_bonus:set_bonus_hero_3')
-#	heroism3.setIntAttribute('cat_stat_mod_bonus.food_luck_modified' , 30)
-#	heroism3.setIntAttribute('cat_stat_mod_bonus.food_precision_modified' , 30)
-#	heroism3.setIntAttribute('cat_stat_mod_bonus.food_strength_modified' , 30)
+ #	heroism3.setIntAttribute('cat_stat_mod_bonus.food_luck_modified' , 30)
+ #	heroism3.setIntAttribute('cat_stat_mod_bonus.food_precision_modified' , 30)
+ #	heroism3.setIntAttribute('cat_stat_mod_bonus.food_strength_modified' , 30)
 	
 
-#	inventory = object.getSlottedObject('inventory')
-#	if not inventory:
-#		return
-#	inventory.add(heroism3)
+ #	inventory = object.getSlottedObject('inventory')
+ #	if not inventory:
+ #		return
+ #	inventory.add(heroism3)
 	
-#	heroism4 = core.objectService.createObject('object/tangible/wearables/ring/shared_ring_s04.iff', object.getPlanet())
-#	heroism4.setStfFilename('static_item_n')
-#	heroism4.setStfName('item_ring_set_hero_01_01')
-#	heroism4.setDetailFilename('static_item_d')
-#	heroism4.setDetailName('item_ring_set_hero_01_01')
-#	heroism4.setStringAttribute('@set_bonus:piece_bonus_count_2', '@set_bonus:set_bonus_hero_1')
-#	heroism4.setStringAttribute('@set_bonus:piece_bonus_count_3', '@set_bonus:set_bonus_hero_2')
-#	heroism4.setStringAttribute('@set_bonus:piece_bonus_count_5', '@set_bonus:set_bonus_hero_3')
-#	heroism4.setIntAttribute('cat_stat_mod_bonus.food_luck_modified' , 30)
-#	heroism4.setIntAttribute('cat_stat_mod_bonus.food_precision_modified' , 30)
-#	heroism4.setIntAttribute('cat_stat_mod_bonus.food_strength_modified' , 30)
+ #	heroism4 = core.objectService.createObject('object/tangible/wearables/ring/shared_ring_s04.iff', object.getPlanet())
+ #	heroism4.setStfFilename('static_item_n')
+ #	heroism4.setStfName('item_ring_set_hero_01_01')
+ #	heroism4.setDetailFilename('static_item_d')
+ #	heroism4.setDetailName('item_ring_set_hero_01_01')
+ #	heroism4.setStringAttribute('@set_bonus:piece_bonus_count_2', '@set_bonus:set_bonus_hero_1')
+ #	heroism4.setStringAttribute('@set_bonus:piece_bonus_count_3', '@set_bonus:set_bonus_hero_2')
+ #	heroism4.setStringAttribute('@set_bonus:piece_bonus_count_5', '@set_bonus:set_bonus_hero_3')
+ #	heroism4.setIntAttribute('cat_stat_mod_bonus.food_luck_modified' , 30)
+ #	heroism4.setIntAttribute('cat_stat_mod_bonus.food_precision_modified' , 30)
+ #	heroism4.setIntAttribute('cat_stat_mod_bonus.food_strength_modified' , 30)
 	
 
 #	inventory = object.getSlottedObject('inventory')
@@ -130,39 +130,39 @@ def CreateStartingCharacter(core, object):
 #		return
 #	inventory.add(heroism4)
 	
-#	heroism5 = core.objectService.createObject('object/tangible/wearables/ring/shared_ring_s02.iff', object.getPlanet())
-#	heroism5.setStfFilename('static_item_n')
-#	heroism5.setStfName('item_ring_a_set_hero')
-#	heroism5.setDetailFilename('static_item_d')
-#	heroism5.setDetailName('item_ring_a_set_hero')
-#	heroism5.setStringAttribute('@set_bonus:piece_bonus_count_2', '@set_bonus:set_bonus_hero_1')
-#	heroism5.setStringAttribute('@set_bonus:piece_bonus_count_3', '@set_bonus:set_bonus_hero_2')
-#	heroism5.setStringAttribute('@set_bonus:piece_bonus_count_5', '@set_bonus:set_bonus_hero_3')
-#	heroism5.setIntAttribute('cat_stat_mod_bonus.food_luck_modified' , 30)
-#	heroism5.setIntAttribute('cat_stat_mod_bonus.food_precision_modified' , 30)
-#	heroism5.setIntAttribute('cat_stat_mod_bonus.food_strength_modified' , 30)
+ #	heroism5 = core.objectService.createObject('object/tangible/wearables/ring/shared_ring_s02.iff', object.getPlanet())
+ #	heroism5.setStfFilename('static_item_n')
+ #	heroism5.setStfName('item_ring_a_set_hero')
+ #	heroism5.setDetailFilename('static_item_d')
+ #	heroism5.setDetailName('item_ring_a_set_hero')
+ #	heroism5.setStringAttribute('@set_bonus:piece_bonus_count_2', '@set_bonus:set_bonus_hero_1')
+ #	heroism5.setStringAttribute('@set_bonus:piece_bonus_count_3', '@set_bonus:set_bonus_hero_2')
+ #	heroism5.setStringAttribute('@set_bonus:piece_bonus_count_5', '@set_bonus:set_bonus_hero_3')
+ #	heroism5.setIntAttribute('cat_stat_mod_bonus.food_luck_modified' , 30)
+ #	heroism5.setIntAttribute('cat_stat_mod_bonus.food_precision_modified' , 30)
+ # 	heroism5.setIntAttribute('cat_stat_mod_bonus.food_strength_modified' , 30)
 	
 
-#	inventory = object.getSlottedObject('inventory')
-#	if not inventory:
-#		return
-#	inventory.add(heroism5)
+ #	inventory = object.getSlottedObject('inventory')
+ #	if not inventory:
+ #		return
+ #	inventory.add(heroism5)
 	return
 	
 def addProfessionAbilities(core, object, profession):
 	
 #	if profession == 'force_sensitive_1a':
 #		testObject = core.objectService.createObject('object/weapon/melee/2h_sword/crafted_saber/shared_sword_lightsaber_two_handed_gcw_s01_gen5.iff', object.getPlanet())
-#		testObject.setCustomName('Lightsaber')
+#	 	testObject.setCustomName('Lightsaber')
 #		testObject.setStringAttribute('crafter', 'Light')
 #		testObject.setDamageType('@obj_attr_n:armor_eff_energy')
-#		testObject.setElementalType('@obj_attr_n:elemental_cold')
+#	 	testObject.setElementalType('@obj_attr_n:elemental_cold')
 #		testObject.setStringAttribute('cat_wpn_damage.damage', '0-0')			
 #		testObject.setMinDamage(600)
 #		testObject.setMaxDamage(1190)
-#		testObject.setElementalDamage(72)
+#	 	testObject.setElementalDamage(72)
 #		testObject.setIntAttribute('cat_wpn_damage.weapon_dps', testObject.getDamagePerSecond())
-#		inventory = object.getSlottedObject('inventory')
+#	 	inventory = object.getSlottedObject('inventory')
 #		inventory.add(testObject)
 
 		##Case Sensitive
@@ -203,16 +203,16 @@ def addProfessionAbilities(core, object, profession):
 	#	object.addAbility('co_hw_dot')
 	#	object.addAbility('co_ae_hw_dot')
 	#elif profession == 'bounty_hunter_1a':
-	#	object.addAbility('bh_shields_1')
-	#	object.addAbility('bh_dm_8')
-	#	object.addAbility('bh_sh_3')
-	#	object.addAbility('bh_armor_sprint_1')
-	#	object.addAbility('bh_prescience')
-	#	object.addAbility('bh_dm_crit_8')
-	#	object.addAbility('crippleShot')
-	#	object.addAbility('bh_fumble_6')
-	#	object.addAbility('bh_intimidate_6')
-	#	object.addAbility('bh_flawless_strike')
+	#object.addAbility('bh_shields_1')
+	#object.addAbility('bh_dm_8')
+	#object.addAbility('bh_sh_3')
+	#object.addAbility('bh_armor_sprint_1')
+	#object.addAbility('bh_prescience')
+	#object.addAbility('bh_dm_crit_8')
+	#object.addAbility('crippleShot')
+	#object.addAbility('bh_fumble_6')
+	#object.addAbility('bh_intimidate_6')
+	#object.addAbility('bh_flawless_strike')
 		
 	#	direfate1 = core.objectService.createObject('object/tangible/wearables/necklace/shared_necklace_s03.iff', object.getPlanet())
 	#	direfate1.setStfFilename('static_item_n')
@@ -404,71 +404,71 @@ def addProfessionAbilities(core, object, profession):
 	#	enforcer2.setStringAttribute('@set_bonus:piece_bonus_count_2', '@set_bonus:set_bonus_bh_dps_1')
 	#	enforcer2.setStringAttribute('@set_bonus:piece_bonus_count_3', '@set_bonus:set_bonus_bh_dps_2')
 	#	enforcer2.setStringAttribute('@set_bonus:piece_bonus_count_5', '@set_bonus:set_bonus_bh_dps_3')
-	#	enforcer2.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_action_line_dm' , 1)
-	#	enforcer2.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_action_line_dm_crit' , 1)
-	#	enforcer2.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_buff_duration_line_bh_return_fire' , 1)
-	#	enforcer2.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_cooldown_line_dm' , 1)
-	
-	#	inventory = object.getSlottedObject('inventory')
-	#	if not inventory:
-	#		return
-	#	inventory.add(enforcer2)
-		
-	#	enforcer3 = core.objectService.createObject('object/tangible/wearables/bracelet/shared_bracelet_s02_l.iff', object.getPlanet())
-	#	enforcer3.setStfFilename('static_item_n')
-	#	enforcer3.setStfName('item_bracelet_l_set_bh_dps_01_01')
-	#	enforcer3.setDetailFilename('static_item_d')
-	#	enforcer3.setDetailName('item_bracelet_l_set_bh_dps_01_01')
-	#	enforcer3.setStringAttribute('@set_bonus:piece_bonus_count_2', '@set_bonus:set_bonus_bh_dps_1')
-	#	enforcer3.setStringAttribute('@set_bonus:piece_bonus_count_3', '@set_bonus:set_bonus_bh_dps_2')
-	#	enforcer3.setStringAttribute('@set_bonus:piece_bonus_count_5', '@set_bonus:set_bonus_bh_dps_3')
-	#	enforcer3.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_action_line_dm' , 1)
-	#	enforcer3.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_action_line_dm_crit' , 1)
-	#	enforcer3.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_buff_duration_line_bh_return_fire' , 1)
-	#	enforcer3.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_cooldown_line_dm' , 1)
-	
-	#	inventory = object.getSlottedObject('inventory')
-	#	if not inventory:
-	#		return
-	#	inventory.add(enforcer3)
-		
-	#	enforcer4 = core.objectService.createObject('object/tangible/wearables/ring/shared_ring_s01.iff', object.getPlanet())
-	#	enforcer4.setStfFilename('static_item_n')
-	#	enforcer4.setStfName('item_ring_set_bh_dps_01_01')
-	#	enforcer4.setDetailFilename('static_item_d')
-	#	enforcer4.setDetailName('item_ring_set_bh_dps_01_01')
-	#	enforcer4.setStringAttribute('@set_bonus:piece_bonus_count_2', '@set_bonus:set_bonus_bh_dps_1')
-	#	enforcer4.setStringAttribute('@set_bonus:piece_bonus_count_3', '@set_bonus:set_bonus_bh_dps_2')
-	#	enforcer4.setStringAttribute('@set_bonus:piece_bonus_count_5', '@set_bonus:set_bonus_bh_dps_3')
-	#	enforcer4.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_action_line_dm' , 1)
-	#	enforcer4.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_action_line_dm_crit' , 1)
-	#	enforcer4.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_buff_duration_line_bh_return_fire' , 1)
-	#	enforcer4.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_cooldown_line_dm' , 1)
-	
-	#	inventory = object.getSlottedObject('inventory')
-	#	if not inventory:
-	#		return
-	#	inventory.add(enforcer4)
-		
-	#	enforcer5 = core.objectService.createObject('object/tangible/wearables/ring/shared_ring_s03.iff', object.getPlanet())
-	#	enforcer5.setStfFilename('static_item_n')
-	#	enforcer5.setStfName('item_ring_a_set_bh_dps')
-	#	enforcer5.setDetailFilename('static_item_d')
-	#	enforcer5.setDetailName('item_ring_a_set_bh_dps')
-	#	enforcer5.setStringAttribute('@set_bonus:piece_bonus_count_2', '@set_bonus:set_bonus_bh_dps_1')
-	#	enforcer5.setStringAttribute('@set_bonus:piece_bonus_count_3', '@set_bonus:set_bonus_bh_dps_2')
-	#	enforcer5.setStringAttribute('@set_bonus:piece_bonus_count_5', '@set_bonus:set_bonus_bh_dps_3')
-	#	enforcer5.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_action_line_dm' , 1)
-	#	enforcer5.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_action_line_dm_crit' , 1)
-	#	enforcer5.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_buff_duration_line_bh_return_fire' , 1)
-	#	enforcer5.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_cooldown_line_dm' , 1)
-	
-	#	inventory = object.getSlottedObject('inventory')
-	#	if not inventory:
-	#		return
-	#	inventory.add(enforcer5)		
-	#	return
-	#return
+ 	#	enforcer2.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_action_line_dm' , 1)
+ 	#	enforcer2.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_action_line_dm_crit' , 1)
+ 	#	enforcer2.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_buff_duration_line_bh_return_fire' , 1)
+ 	#	enforcer2.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_cooldown_line_dm' , 1)
+ 	
+ 	#	inventory = object.getSlottedObject('inventory')
+ 	#	if not inventory:
+ 	#		return
+ 	#	inventory.add(enforcer2)
+ 		
+ 	#	enforcer3 = core.objectService.createObject('object/tangible/wearables/bracelet/shared_bracelet_s02_l.iff', object.getPlanet())
+ 	#	enforcer3.setStfFilename('static_item_n')
+ 	#	enforcer3.setStfName('item_bracelet_l_set_bh_dps_01_01')
+ 	#enforcer3.setDetailFilename('static_item_d')
+ 	#	enforcer3.setDetailName('item_bracelet_l_set_bh_dps_01_01')
+ 	#	enforcer3.setStringAttribute('@set_bonus:piece_bonus_count_2', '@set_bonus:set_bonus_bh_dps_1')
+ 	#	enforcer3.setStringAttribute('@set_bonus:piece_bonus_count_3', '@set_bonus:set_bonus_bh_dps_2')
+ 	#	enforcer3.setStringAttribute('@set_bonus:piece_bonus_count_5', '@set_bonus:set_bonus_bh_dps_3')
+ 	#enforcer3.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_action_line_dm' , 1)
+ 	#	enforcer3.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_action_line_dm_crit' , 1)
+ 	#	enforcer3.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_buff_duration_line_bh_return_fire' , 1)
+ 	#	enforcer3.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_cooldown_line_dm' , 1)
+ 	
+ 	#inventory = object.getSlottedObject('inventory')
+ 	#if not inventory:
+ 	#	return
+ 	#inventory.add(enforcer3)
+ 	
+ 	#enforcer4 = core.objectService.createObject('object/tangible/wearables/ring/shared_ring_s01.iff', object.getPlanet())
+ 	#enforcer4.setStfFilename('static_item_n')
+ 	#enforcer4.setStfName('item_ring_set_bh_dps_01_01')
+ 	#enforcer4.setDetailFilename('static_item_d')
+ 	#enforcer4.setDetailName('item_ring_set_bh_dps_01_01')
+ 	#enforcer4.setStringAttribute('@set_bonus:piece_bonus_count_2', '@set_bonus:set_bonus_bh_dps_1')
+ 	#enforcer4.setStringAttribute('@set_bonus:piece_bonus_count_3', '@set_bonus:set_bonus_bh_dps_2')
+ 	#enforcer4.setStringAttribute('@set_bonus:piece_bonus_count_5', '@set_bonus:set_bonus_bh_dps_3')
+ 	#enforcer4.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_action_line_dm' , 1)
+ 	#enforcer4.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_action_line_dm_crit' , 1)
+ 	#enforcer4.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_buff_duration_line_bh_return_fire' , 1)
+ 	#enforcer4.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_cooldown_line_dm' , 1)
+ 	
+ 	#inventory = object.getSlottedObject('inventory')
+ 	#if not inventory:
+ 	#	return
+ 	#inventory.add(enforcer4)
+ 	
+ 	#enforcer5 = core.objectService.createObject('object/tangible/wearables/ring/shared_ring_s03.iff', object.getPlanet())
+ 	#enforcer5.setStfFilename('static_item_n')
+ 	#enforcer5.setStfName('item_ring_a_set_bh_dps')
+ 	#enforcer5.setDetailFilename('static_item_d')
+ 	#enforcer5.setDetailName('item_ring_a_set_bh_dps')
+ 	#enforcer5.setStringAttribute('@set_bonus:piece_bonus_count_2', '@set_bonus:set_bonus_bh_dps_1')
+ 	#enforcer5.setStringAttribute('@set_bonus:piece_bonus_count_3', '@set_bonus:set_bonus_bh_dps_2')
+ 	#enforcer5.setStringAttribute('@set_bonus:piece_bonus_count_5', '@set_bonus:set_bonus_bh_dps_3')
+ 	#enforcer5.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_action_line_dm' , 1)
+ 	#enforcer5.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_action_line_dm_crit' , 1)
+ 	#enforcer5.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_buff_duration_line_bh_return_fire' , 1)
+ 	#enforcer5.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_cooldown_line_dm' , 1)
+ 
+  	#inventory = object.getSlottedObject('inventory')
+ 	#if not inventory:
+ 	#	return
+ 	#inventory.add(enforcer5)		
+ 	#return
+ 	#return
 	
 		
 	return
