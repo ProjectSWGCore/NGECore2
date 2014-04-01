@@ -252,38 +252,14 @@ public class BuffService implements INetworkDispatch {
 		removeBuffFromCreature(creature, creature.getBuffByName(buffName));
 	}
 	
-	public void clearBuffs(final CreatureObject creature) {
-		
-		// copy to array for thread safety
-					
-		for(final Buff buff : creature.getBuffList().get().toArray(new Buff[] { })) {
-			
-			if (buff.getGroup1().startsWith("setBonus")) { continue; }
-			
-			if(buff.isGroupBuff() && buff.getGroupBufferId() != creature.getObjectID()) {
-				removeBuffFromCreature(creature, buff);
-				continue;
-			}
-
-			if(buff.getRemainingDuration() > 0 && buff.getDuration() > 0) {
-				ScheduledFuture<?> task = scheduler.schedule(new Runnable() {
-
-					@Override
-					public void run() {
-						
-						removeBuffFromCreature(creature, buff);
-						
-					}
-					
-				}, (long) buff.getRemainingDuration(), TimeUnit.SECONDS);
-				buff.setRemovalTask(task);
-				continue;
-			} else {
-				removeBuffFromCreature(creature, buff);
-			}
-				
-		}
-					
+	public void clearBuffs(final CreatureObject creature) 
+	{		
+		// This method sucks ass, someone please fix me
+		for(Buff buff : creature.getBuffList().get())
+		{
+			if(buff.getRemainingDuration() > 0 && buff.getDuration() > 0) buff.setRemovalTask(null);
+			removeBuffFromCreature(creature, buff);			
+		}				
 	}
 	
 	public void addGroupBuff(CreatureObject buffer, String buffName) {
