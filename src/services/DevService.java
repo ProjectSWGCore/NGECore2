@@ -93,7 +93,8 @@ public class DevService implements INetworkDispatch {
 				break;
 			case 4: // [Items] Misc Items
 				suiOptions.put((long) 40, "Unity Ring");
-				suiOptions.put((long) 41, "Tusken rucksack");
+				suiOptions.put((long) 41, "Tusken Rucksack");
+				suiOptions.put((long) 42, "Tauntaun Rucksack");
 				break;
 		}
 		
@@ -307,6 +308,18 @@ public class DevService implements INetworkDispatch {
 						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:strength_modified", 35);
 						
 						inventory.add(backpack);
+						return;
+						
+					case 42:
+						TangibleObject backpack1 = (TangibleObject) core.objectService.createObject("object/tangible/wearables/backpack/shared_backpack_tauntaun_skull.iff", planet);
+						backpack1.setIntAttribute("cat_stat_mod_bonus.@stat_n:agility_modified", 25);
+						backpack1.setIntAttribute("cat_stat_mod_bonus.@stat_n:constitution_modified", 30);
+						backpack1.setIntAttribute("cat_stat_mod_bonus.@stat_n:luck_modified", 25);
+						backpack1.setIntAttribute("cat_stat_mod_bonus.@stat_n:precision_modified", 35);
+						backpack1.setIntAttribute("cat_stat_mod_bonus.@stat_n:stamina_modified", 30);
+						backpack1.setIntAttribute("cat_stat_mod_bonus.@stat_n:strength_modified", 35);
+						
+						inventory.add(backpack1);
 						return;
 				}
 			}	
