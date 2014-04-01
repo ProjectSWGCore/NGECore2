@@ -5,7 +5,7 @@ from java.util import Vector
 def addBonusSet(core):
 	bonusSet = BonusSetTemplate("set_bonus_jedi_robe")
 	
-	# Waitpack
+	# Waistpack
 	bonusSet.addRequiredTemplate("object/tangible/wearables/backpack/shared_fannypack_s01.iff")
 	
 	# Jedi Robes - Light
