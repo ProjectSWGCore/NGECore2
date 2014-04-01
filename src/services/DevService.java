@@ -232,7 +232,7 @@ public class DevService implements INetworkDispatch {
 						pistol.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", (float) 0.4);
 						pistol.setStringAttribute("class_required", "None");
 						pistol.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
-						pistol.setStringAttribute("cat_wpn_damage.damage", "400-559");
+						pistol.setStringAttribute("cat_wpn_damage.damage", "400-625");
 						
 						inventory.add(pistol);
 						return;
