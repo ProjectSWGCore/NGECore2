@@ -11,6 +11,8 @@ def setup(core, object):
 	object.setStringAttribute('protection_level', 'Luminous')
 	object.setStringAttribute('class_required', 'Jedi')
 	object.setIntAttribute('required_combat_level', 80)
-	object.setAttachment('type', 'jedi_robe')
 	object.setStringAttribute('@set_bonus:piece_bonus_count_2', '@set_bonus:set_bonus_jedi_robe_1')
+	
+	object.setAttachment('type', 'jedi_robe')
+	object.setAttachment('setBonus', 'set_bonus_jedi_robe')
 	return
