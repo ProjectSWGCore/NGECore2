@@ -230,14 +230,16 @@ public class EquipmentService implements INetworkDispatch {
 		}
 		
 		if(item.getStringAttribute("proc_name") != null) core.buffService.addBuffToCreature(actor, item.getStringAttribute("proc_name").replace("@ui_buff:", ""), actor);
+		
+
+		if(!actor.getEquipmentList().contains(item))
+			actor.addObjectToEquipList(item);
+		
 		if(item.getAttachment("setBonus") != null)
 		{
 			BonusSetTemplate bonus = bonusSetTemplates.get((String)item.getAttachment("setBonus"));
 			bonus.callScript(actor);
 		}
-
-		if(!actor.getEquipmentList().contains(item))
-			actor.addObjectToEquipList(item);
 }
 
 	public void unequip(CreatureObject actor, SWGObject item) {
@@ -288,9 +290,15 @@ public class EquipmentService implements INetworkDispatch {
 		
 		if(item.getStringAttribute("proc_name") != null) core.buffService.removeBuffFromCreatureByName(actor, item.getStringAttribute("proc_name").replace("@ui_buff:", ""));
 		
+		
 		if(actor.getEquipmentList().contains(item))
 			actor.removeObjectFromEquipList(item);
 
+		if(item.getAttachment("setBonus") != null)
+		{
+			BonusSetTemplate bonus = bonusSetTemplates.get((String)item.getAttachment("setBonus"));
+			bonus.callScript(actor);
+		}
 	}
 
 	public void addBonusSetTemplate(BonusSetTemplate bonusSet)

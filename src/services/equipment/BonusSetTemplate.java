@@ -61,15 +61,15 @@ public class BonusSetTemplate
 			if(requiredWornTemplates.contains(item.getTemplate())) wornItems++;
 		}
 		
-		System.out.println("[BonusSetTemplate] Worn items: " + wornItems);
+		//System.out.println("[BonusSetTemplate] Worn items: " + wornItems);
 		return wornItems;
 	}
 	
 	public void callScript(CreatureObject creature)
 	{
-		System.out.println("[BonusSetTemplate] Calling script for: " + this.getName());
+		//System.out.println("[BonusSetTemplate] Calling script for: " + this.getName());
 		
-		PyObject func = NGECore.getInstance().scriptService.getMethod("scripts/equipment/bonus_sets/", name, "handleEquip");
+		PyObject func = NGECore.getInstance().scriptService.getMethod("scripts/equipment/bonus_sets/", name, "handleChange");
 		if(func != null) func.__call__(Py.java2py(NGECore.getInstance()), Py.java2py(creature), Py.java2py(this));
 	}
 }
