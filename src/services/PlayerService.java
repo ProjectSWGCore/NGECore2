@@ -1206,6 +1206,25 @@ public class PlayerService implements INetworkDispatch {
 		core.suiService.openSUIWindow(ringWindow);
 	}
 	
+	public String getFormalProfessionName(String template) {
+		String formalName = "";
+
+		switch (template) {
+		case "force_sensitive_1a":	formalName = "Jedi"; break;
+		case "bounty_hunter_1a":	formalName = "Bounty Hunter"; break;
+		case "officer_1a":			formalName = "Officer"; break;
+		case "smuggler_1a":			formalName = "Smuggler"; break;
+		case "entertainer_1a":		formalName = "Entertainer"; break;
+		case "spy_1a":				formalName = "Spy"; break;
+		case "medic_1a":			formalName = "Medic"; break;
+		case "commando_1a":			formalName = "Commando"; break;
+		
+		default:					formalName = "Trader"; break;	// Ziggy: Trader profession names are a bit irregular, so this is used.
+
+		}
+		return formalName;
+	}
+	
 	@Override
 	public void shutdown() {
 		// TODO Auto-generated method stub
