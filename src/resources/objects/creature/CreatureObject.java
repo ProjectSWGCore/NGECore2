@@ -261,7 +261,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public boolean hasSkill(String name) {
-		synchronized(objectMutex) {
+		/*synchronized(objectMutex) {
 			for (String skill : skills) {
 				if (skill.equals(name)) {
 					return true;
@@ -269,7 +269,8 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			}
 			
 			return false;
-		}
+		}*/
+		return skills.contains(name);
 	}
 	
 	public short getSkillsUpdateCounter() {
