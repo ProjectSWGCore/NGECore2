@@ -93,7 +93,6 @@ public class DevService implements INetworkDispatch {
 				break;
 			case 4: // [Items] Misc Items
 				suiOptions.put((long) 40, "Unity Ring");
-				suiOptions.put((long) 41, "Tusken rucksack");
 				break;
 			case 5: // [Items] Armor
 				suiOptions.put((long) 50, "Assault Armor");
@@ -114,6 +113,14 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 80, "Marauder");
 				suiOptions.put((long) 81, "Ithorian Guardian");
 				suiOptions.put((long) 82, "Kashyyykian Ceremonial");
+				break;
+			case 9: // [Items] Backpacks
+				suiOptions.put((long) 90, "Tusken King Rucksack");
+				suiOptions.put((long) 91, "Tauntaun Skull Rucksack");
+				suiOptions.put((long) 92, "Singing Mountain Clan Backpack");
+				suiOptions.put((long) 93, "Snowtrooper Backpack");
+				suiOptions.put((long) 94, "Rebel Endor Backpack");
+				suiOptions.put((long) 95, "Imperial Sandtrooper Backpack");
 				break;
 		}
 		
@@ -179,6 +186,9 @@ public class DevService implements INetworkDispatch {
 					
 					case 24: // Misc Items
 						sendCharacterBuilderSUI(player, 4);
+						return;
+					case 25: // Backpacks
+						sendCharacterBuilderSUI (player, 2);
 						return;
 					// [Items] Weapons
 					case 30: // Jedi Weapons
@@ -888,6 +898,73 @@ public class DevService implements INetworkDispatch {
 						inventory.add(cer_leggings);
 						inventory.add(cer_chest);
 						
+						return;
+					// [Items] Backpacks
+					case 90: // Tusken Rucksack
+						TangibleObject backpack = (TangibleObject) core.objectService.createObject("object/tangible/wearables/backpack/shared_backpack_krayt_skull.iff", planet);
+						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:agility_modified", 25);
+						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:constitution_modified", 30);
+						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:luck_modified", 25);
+						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:precision_modified", 35);
+						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:stamina_modified", 30);
+						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:strength_modified", 35);
+
+						inventory.add(backpack);
+						return;
+					case 91: // Tauntaun Rucksack
+						TangibleObject backpack1 = (TangibleObject) core.objectService.createObject("object/tangible/wearables/backpack/shared_backpack_tauntaun_skull.iff", planet);
+						backpack1.setIntAttribute("cat_stat_mod_bonus.@stat_n:agility_modified", 25);
+						backpack1.setIntAttribute("cat_stat_mod_bonus.@stat_n:constitution_modified", 30);
+						backpack1.setIntAttribute("cat_stat_mod_bonus.@stat_n:luck_modified", 25);
+						backpack1.setIntAttribute("cat_stat_mod_bonus.@stat_n:precision_modified", 35);
+						backpack1.setIntAttribute("cat_stat_mod_bonus.@stat_n:stamina_modified", 30);
+						backpack1.setIntAttribute("cat_stat_mod_bonus.@stat_n:strength_modified", 35);
+
+						inventory.add(backpack1);
+						return;
+					case 92: // Singing Mountain Clan
+						TangibleObject backpack2 = (TangibleObject) core.objectService.createObject("object/tangible/wearables/backpack/shared_backpack_singing_mountain_clan_backpack.iff", planet);
+						backpack2.setIntAttribute("cat_stat_mod_bonus.@stat_n:agility_modified", 25);
+						backpack2.setIntAttribute("cat_stat_mod_bonus.@stat_n:constitution_modified", 30);
+						backpack2.setIntAttribute("cat_stat_mod_bonus.@stat_n:luck_modified", 25);
+						backpack2.setIntAttribute("cat_stat_mod_bonus.@stat_n:precision_modified", 35);
+						backpack2.setIntAttribute("cat_stat_mod_bonus.@stat_n:stamina_modified", 30);
+						backpack2.setIntAttribute("cat_stat_mod_bonus.@stat_n:strength_modified", 35);
+						
+						inventory.add(backpack2);
+						return;
+					case 93: // Snowtrooper Backpack
+						TangibleObject backpack3 = (TangibleObject) core.objectService.createObject("object/tangible/wearables/backpack/shared_backpack_snowtrooper.iff", planet);
+						backpack3.setIntAttribute("cat_stat_mod_bonus.@stat_n:agility_modified", 25);
+						backpack3.setIntAttribute("cat_stat_mod_bonus.@stat_n:constitution_modified", 30);
+						backpack3.setIntAttribute("cat_stat_mod_bonus.@stat_n:luck_modified", 25);
+						backpack3.setIntAttribute("cat_stat_mod_bonus.@stat_n:precision_modified", 35);
+						backpack3.setIntAttribute("cat_stat_mod_bonus.@stat_n:stamina_modified", 30);
+						backpack3.setIntAttribute("cat_stat_mod_bonus.@stat_n:strength_modified", 35);
+						
+						inventory.add(backpack3);
+						return;
+					case 94: // Rebel Backpack
+						TangibleObject backpack4 = (TangibleObject) core.objectService.createObject("object/tangible/wearables/backpack/shared_backpack_empireday_rebel_endor_backpack.iff", planet);
+						backpack4.setIntAttribute("cat_stat_mod_bonus.@stat_n:agility_modified", 25);
+						backpack4.setIntAttribute("cat_stat_mod_bonus.@stat_n:constitution_modified", 30);
+						backpack4.setIntAttribute("cat_stat_mod_bonus.@stat_n:luck_modified", 25);
+						backpack4.setIntAttribute("cat_stat_mod_bonus.@stat_n:precision_modified", 35);
+						backpack4.setIntAttribute("cat_stat_mod_bonus.@stat_n:stamina_modified", 30);
+						backpack4.setIntAttribute("cat_stat_mod_bonus.@stat_n:strength_modified", 35);
+						
+						inventory.add(backpack4);
+						return;
+					case 95: // Imperial Sandtrooper Backpack
+						TangibleObject backpack5 = (TangibleObject) core.objectService.createObject("object/tangible/wearables/backpack/shared_backpack_empireday_sandtrooper_backpack.iff", planet);
+						backpack5.setIntAttribute("cat_stat_mod_bonus.@stat_n:agility_modified", 25);
+						backpack5.setIntAttribute("cat_stat_mod_bonus.@stat_n:constitution_modified", 30);
+						backpack5.setIntAttribute("cat_stat_mod_bonus.@stat_n:luck_modified", 25);
+						backpack5.setIntAttribute("cat_stat_mod_bonus.@stat_n:precision_modified", 35);
+						backpack5.setIntAttribute("cat_stat_mod_bonus.@stat_n:stamina_modified", 30);
+						backpack5.setIntAttribute("cat_stat_mod_bonus.@stat_n:strength_modified", 35);
+						
+						inventory.add(backpack5);
 						return;
 				}
 			}	
