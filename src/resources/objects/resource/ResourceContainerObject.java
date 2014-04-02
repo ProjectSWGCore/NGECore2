@@ -22,9 +22,13 @@
 package resources.objects.resource;
 
 
+import main.NGECore;
+
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
+
 import engine.clients.Client;
+import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
@@ -137,6 +141,7 @@ public class ResourceContainerObject extends TangibleObject {
 	public ResourceContainerObject(long objectID, Planet planet, String template, Point3D position, Quaternion orientation){
 		super(objectID, planet, template, position, orientation);
 		messageBuilder = new ResourceContainerMessageBuilder(this);
+		this.setAttachment("radial_filename", "resourceContainer");
 		}
 			
 	public void initializeStats(GalacticResource resource){
@@ -221,6 +226,78 @@ public class ResourceContainerObject extends TangibleObject {
 			this.getAttributes().put("res_potential_energy", ""+this.getPotentialEnergy());
 			resource.getAttributes().put("res_potential_energy", ""+this.getPotentialEnergy());
 		}	
+	}
+	
+	public void cloneStats(ResourceContainerObject original){
+		this.setResourceName(original.getResourceName());
+		this.setResourceClass(original.getResourceClass());
+		this.setColdResistance(original.getColdResistance());
+		this.setConductivity(original.getConductivity());
+		this.setDecayResistance(original.getDecayResistance());
+		this.setHeatResistance(original.getHeatResistance());
+		this.setMalleability(original.getMalleability());
+		this.setShockResistance(original.getShockResistance());
+		this.setUnitToughness(original.getUnitToughness());
+		this.setEntangleResistance(original.getEntangleResistance());
+		this.setPotentialEnergy(original.getPotentialEnergy());
+		this.setOverallQuality(original.getOverallQuality());
+		this.setFlavor(original.getFlavor());
+		this.setResourceType(original.getResourceType());
+		this.setGeneralType(original.getGeneralType());
+		this.setReferenceID(original.getReferenceID());
+		this.setResourceFileName(original.getResourceFileName());
+	
+		// set attributes
+		this.getAttributes().put("@obj_attr_n:condition", "100/100");
+		this.getAttributes().put("@obj_attr_n:volume", "1");
+		this.getAttributes().put("@obj_attr_n:resource_contents", this.getStackCount()+"/"+maximalStackCapacity);
+		this.getAttributes().put("@obj_attr_n:resource_name", this.getResourceName());
+		this.getAttributes().put("@obj_attr_n:resource_class", "@resource/resource_names:" + this.getResourceFileName());
+					
+		if (this.getColdResistance()>0){
+			this.getAttributes().put("res_cold_resist", ""+this.getColdResistance());
+		}
+		
+		if (this.getConductivity()>0){
+			this.getAttributes().put("res_conductivity", ""+this.getConductivity());
+		}
+		
+		if (this.getDecayResistance()>0){
+			this.getAttributes().put("res_decay_resist", ""+this.getDecayResistance());
+		}
+		
+		if (this.getHeatResistance()>0){
+			this.getAttributes().put("res_heat_resist", ""+this.getHeatResistance());
+		}		
+		
+		if (this.getMalleability()>0){
+			this.getAttributes().put("res_malleability", ""+this.getMalleability());
+		}
+		
+		if (this.getOverallQuality()>0){
+			this.getAttributes().put("res_quality", ""+this.getOverallQuality());
+		}
+		
+		if (this.getShockResistance()>0){
+			this.getAttributes().put("res_shock_resistance", ""+this.getShockResistance());
+		}
+		
+		if (this.getUnitToughness()>0){	
+			this.getAttributes().put("res_toughness", ""+this.getUnitToughness());
+		}
+		
+		if (this.getFlavor()>0){
+			this.getAttributes().put("res_flavor", ""+this.getFlavor());
+		}
+		
+		if (this.getEntangleResistance()>0){
+			this.getAttributes().put("entangle_resistance", ""+this.getEntangleResistance());
+		}
+		
+		if (this.getPotentialEnergy()>0){
+			this.getAttributes().put("res_potential_energy", ""+this.getPotentialEnergy());
+		}	
+		
 	}
 	
 	public long getContainerID() {
@@ -396,6 +473,7 @@ public class ResourceContainerObject extends TangibleObject {
 	public void setStackCount(int stackCount) {
 		this.stackCount = stackCount;
 		this.getAttributes().put("@obj_attr_n:resource_contents", this.getStackCount()+"/"+maximalStackCapacity);
+		this.sendDelta3(this.getProprietor().getClient());
 	}
 
 	public byte getContainerType() {
@@ -408,6 +486,38 @@ public class ResourceContainerObject extends TangibleObject {
 	
 	public void buildAttributeListMessage(Client destination){
 		destination.getSession().write(messageBuilder.serialized_buildAttributeListMessage());
+	}
+	
+	public void splitContainer(CreatureObject owner,ResourceContainerObject originalObject,String commandString){
+		String[] splitArray = commandString.split(" ");
+		if (splitArray.length<3)
+			return;
+		int cloneStackQuantity= Integer.parseInt(splitArray[0]);
+		int parentcontainerID= Integer.parseInt(splitArray[1]);
+		SWGObject objectParentContainer = (SWGObject) NGECore.getInstance().objectService.getObject(parentcontainerID);			
+		if (objectParentContainer==null || originalObject==null)
+			return;
+		CreatureObject proprietor = originalObject.getProprietor();
+		ResourceContainerObject containerObject = (ResourceContainerObject) NGECore.getInstance().objectService.createObject(originalObject.getTemplate(), proprietor.getPlanet());
+		containerObject.cloneStats(originalObject);
+		containerObject.setProprietor(originalObject.getProprietor());
+		containerObject.setStackCount(cloneStackQuantity);
+		originalObject.setStackCount(originalObject.getStackCount()-cloneStackQuantity);
+		objectParentContainer.add(containerObject);
+	}
+	
+	public void transferContainer(CreatureObject owner,ResourceContainerObject disposableObject,String commandString){
+		String[] splitArray = commandString.split(" ");
+		if (splitArray.length<2)
+			return;
+		int parentcontainerID= Integer.parseInt(splitArray[0]);
+		int cloneStackQuantity= Integer.parseInt(splitArray[1]);		
+		ResourceContainerObject resourceContainer = (ResourceContainerObject) NGECore.getInstance().objectService.getObject(parentcontainerID);			
+		if (resourceContainer==null)
+			return;
+		resourceContainer.setStackCount(resourceContainer.getStackCount()+cloneStackQuantity);
+		SWGObject objectParentContainer = (SWGObject) NGECore.getInstance().objectService.getObject(resourceContainer.getParentId());			
+		objectParentContainer.remove(disposableObject);
 	}
 	
 	@Override

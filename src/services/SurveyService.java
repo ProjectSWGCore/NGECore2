@@ -126,20 +126,25 @@ public class SurveyService implements INetworkDispatch {
 	}
 	
 	public void handleSamplingStages(SurveyTool surveyTool){
-		CreatureObject crafter = surveyTool.getUser();
-					
+		
+		if (surveyTool.isExceptionalState())
+			return;
+		CreatureObject crafter = surveyTool.getUser();			
 		PlayerObject player = (PlayerObject) crafter.getSlottedObject("ghost");	
 		GalacticResource sampleResource = surveyTool.getSurveyResource();
 		int stackCount = 0;
+		boolean gamblingwon = false;
 		ResourceContainerObject container = player.getRecentContainer();
 		if (! surveyTool.isRecoveryMode()) 
 			stackCount = core.resourceService.getResourceSampleQuantity(crafter, sampleResource); 
 		else { // handle particularly rich case
 			stackCount = core.resourceService.getResourceSampleQuantity(crafter, sampleResource); 
 			int recoveryChance = new Random().nextInt(100);	
-			if (recoveryChance<60){
+			if (recoveryChance<99){
+				gamblingwon = true;
 				stackCount *= 3;
 			}
+			surveyTool.setRecoveryMode(false);
 		}
 					
 		if (container!=null) {
@@ -152,52 +157,69 @@ public class SurveyService implements INetworkDispatch {
 					core.playerService.giveExperience(crafter,(int)(2.5F*stackCount));
 					//exp_n:resource_harvesting_inorganic
 					
-					container.sendDelta3(crafter.getClient());
-					container.buildAttributeListMessage(crafter.getClient());
+					//container.sendDelta3(crafter.getClient());
+					//container.buildAttributeListMessage(crafter.getClient());
 				} else { // new container
-					
-					String resourceContainerIFF = ResourceRoot.CONTAINER_TYPE_IFF_SIGNIFIER[sampleResource.getResourceRoot().getContainerType()];           		  				
+					if ((stackCount > 0) && (!surveyTool.isRecoveryMode())) {
+						String resourceContainerIFF = ResourceRoot.CONTAINER_TYPE_IFF_SIGNIFIER[sampleResource.getResourceRoot().getContainerType()];           		  				
+						ResourceContainerObject containerObject = (ResourceContainerObject) core.objectService.createObject(resourceContainerIFF, crafter.getPlanet());
+						containerObject.initializeStats(sampleResource);
+						containerObject.setProprietor(crafter);
+						SWGObject crafterInventory = crafter.getSlottedObject("inventory");
+						container.setStackCount(stackCount);
+						crafterInventory.add(containerObject);
+						player.setRecentContainer(containerObject);
+					}
+
+				}
+			} else { // Mismatch -> new container
+				String resourceContainerIFF = ResourceRoot.CONTAINER_TYPE_IFF_SIGNIFIER[sampleResource.getResourceRoot().getContainerType()];           		  				
+				if ((stackCount > 0) && (!surveyTool.isRecoveryMode())) {
 					ResourceContainerObject containerObject = (ResourceContainerObject) core.objectService.createObject(resourceContainerIFF, crafter.getPlanet());
 					containerObject.initializeStats(sampleResource);
 					containerObject.setProprietor(crafter);
 					SWGObject crafterInventory = crafter.getSlottedObject("inventory");
 					crafterInventory.add(containerObject);
 					player.setRecentContainer(containerObject);
-
 				}
-			} else { // Mismatch -> new container
-				String resourceContainerIFF = ResourceRoot.CONTAINER_TYPE_IFF_SIGNIFIER[sampleResource.getResourceRoot().getContainerType()];           		  				
-
-				ResourceContainerObject containerObject = (ResourceContainerObject) core.objectService.createObject(resourceContainerIFF, crafter.getPlanet());
-				containerObject.initializeStats(sampleResource);
-				containerObject.setProprietor(crafter);
-				SWGObject crafterInventory = crafter.getSlottedObject("inventory");
-				crafterInventory.add(containerObject);
-				player.setRecentContainer(containerObject);
 				
 			}
 		} else { // create new container, first sample
-			String resourceContainerIFF = ResourceRoot.CONTAINER_TYPE_IFF_SIGNIFIER[sampleResource.getResourceRoot().getContainerType()];           		  				
-			ResourceContainerObject containerObject = (ResourceContainerObject) core.objectService.createObject(resourceContainerIFF, crafter.getPlanet());
-			containerObject.initializeStats(sampleResource);
-			containerObject.setProprietor(crafter);
-			stackCount = core.resourceService.getResourceSampleQuantity(crafter, sampleResource); 
-    		containerObject.setStackCount(stackCount,false);
-    		SWGObject crafterInventory = crafter.getSlottedObject("inventory");
-			crafterInventory.add(containerObject);
-			player.setRecentContainer(containerObject);
+			if ((stackCount > 0) && (!surveyTool.isRecoveryMode())) {
+				String resourceContainerIFF = ResourceRoot.CONTAINER_TYPE_IFF_SIGNIFIER[sampleResource.getResourceRoot().getContainerType()];           		  				
+				ResourceContainerObject containerObject = (ResourceContainerObject) core.objectService.createObject(resourceContainerIFF, crafter.getPlanet());
+				containerObject.initializeStats(sampleResource);
+				containerObject.setProprietor(crafter);
+				stackCount = core.resourceService.getResourceSampleQuantity(crafter, sampleResource); 
+	    		containerObject.setStackCount(stackCount,false);
+	    		SWGObject crafterInventory = crafter.getSlottedObject("inventory");
+				crafterInventory.add(containerObject);
+				player.setRecentContainer(containerObject);
+			}
 		}
 		
+		if (gamblingwon) {
+			crafter.sendSystemMessage("@survey:critical_success", (byte) 0);
+			core.playerService.giveExperience(crafter,(int)(2.5F*stackCount)); 
+			surveyTool.setExceptionalState(false);
+			return;
+		}
 		
 		if ((stackCount > 0) && (!surveyTool.isRecoveryMode())) {
 			// @survey:sample_located
 			crafter.sendSystemMessage("You successfully locate a " + stackCount + " unit sample of " + sampleResource.getName() + "." , (byte) 0);
-			core.playerService.giveExperience(crafter,(int)(2.5F*stackCount)); // resource_harvesting_inorganic
+			core.playerService.giveExperience(crafter,(int)(2.5F*stackCount)); 
 		} 
 		if ((stackCount > 0) && (surveyTool.isRecoveryMode())) {
 			crafter.sendSystemMessage("@survey:node_recovery", (byte) 0);
-			core.playerService.giveExperience(crafter,(int)(2.5F*stackCount)); // resource_harvesting_inorganic
+			core.playerService.giveExperience(crafter,(int)(2.5F*stackCount)); 
 			
+		}
+		if ((stackCount == 0) && (!surveyTool.isRecoveryMode())) {
+			crafter.sendSystemMessage("@survey:sample_failed", (byte) 0);
+			core.playerService.giveExperience(crafter,(int)(2.5F*stackCount));
+			//surveyTool.setRecoveryMode(true);
+			//surveyTool.setRecoveryTime(System.currentTimeMillis());						
 		}
 	}
 	
@@ -328,13 +350,19 @@ public class SurveyService implements INetworkDispatch {
 					int remaining = 0; // calculate remaining time
 					crafter.sendSystemMessage("You will be able to sample again in " + remaining + " seconds.", (byte) 0); // "@survey:tool_recharge_time"
 				} else {
+					
+					// ToDo:
+					if (sampleResource.getResourceRoot().getResourceClass().equals("Radioactive")){ //resourceRoot.getResourceClass("Radioactive");
+						createRadioactivityWarningSUIWindow(crafter, surveyTool);
+						return;
+					}
+					
 					crafter.setPosture((byte) 1);
 					crafter.sendSystemMessage("You kneel", (byte) 0);
 								
-					// ToDo:
-					//if (.equals("radioactive"))
-					
-					int samplingCost=125-(int)crafter.getSkillMod("surveying").getModifier();
+						
+					//int samplingCost=125-(int)crafter.getSkillMod("surveying").getModifier();
+					int samplingCost=125;
 					if (crafter.getAction()-samplingCost<0){ // Check HAM
 						crafter.sendSystemMessage("@survey:gamble_no_action", (byte) 0);
 						crafter.setPosture((byte) 0);
@@ -360,6 +388,8 @@ public class SurveyService implements INetworkDispatch {
 				}
 			} else {
 				crafter.sendSystemMessage("There are only trace amounts of " + commandArgs + " here.  Find a higher concentration of the resource, and try sampling again.", (byte) 0); // "@survey:trace_amount:"
+				surveyTool.setCurrentlySampling(true);
+				surveyTool.setLastSampleTime(System.currentTimeMillis());
 			}
 		} else {
 			crafter.sendSystemMessage("You must survey for " + commandArgs + " before you can sample for it.", (byte) 0);
@@ -397,8 +427,9 @@ public class SurveyService implements INetworkDispatch {
 			
 			// ToDo: overfilling resource container with continuesampling
 			
-			int samplingCost=125-(int)crafter.getSkillMod("surveying").getModifier();
-			if (crafter.getAction()-samplingCost<0){
+			//int samplingCost=125-(int)crafter.getSkillMod("surveying").getModifier();
+			int samplingCost=125;
+			if (crafter.getAction()-samplingCost<0 && ! surveyTool.isExceptionalState()){
 				crafter.sendSystemMessage("@survey:gamble_no_action", (byte) 0);
 				crafter.setPosture((byte) 0);
 				surveyTool.setCurrentlySampling(false);
@@ -408,9 +439,8 @@ public class SurveyService implements INetworkDispatch {
 			}			
 			
 			if (! surveyTool.isRecoveryMode()){
-			
-				int exceptionalChance = new Random().nextInt(100);			
-				if (exceptionalChance<7 && ! surveyTool.isExceptionalState()){
+				int exceptionalChance = new Random().nextInt(100);		 // 7 was good	
+				if (exceptionalChance<20 && ! surveyTool.isExceptionalState()){
 					crafter.sendSystemMessage("@survey:gnode_d", (byte) 0);
 					surveyTool.setExceptionalState(true);
 					
@@ -441,6 +471,7 @@ public class SurveyService implements INetworkDispatch {
 										surveyTool.setExceptionalState(false);
 										core.suiService.closeSUIWindow(owner, 0);
 										continueSampling(surveyTool);
+										return;
 									}
 								}	
 							} else {
@@ -453,6 +484,7 @@ public class SurveyService implements INetworkDispatch {
 									surveyTool.setExceptionalState(false);
 									core.suiService.closeSUIWindow(owner, 0);
 									continueSampling(surveyTool);
+									return;
 								}
 							}							
 						}					
@@ -473,7 +505,7 @@ public class SurveyService implements INetworkDispatch {
 			
 			} else {
 				// sampling cost for recovery
-				surveyTool.setRecoveryMode(false);
+				//surveyTool.setRecoveryMode(false);
 				samplingCost = 200;
 				if (crafter.getAction()-samplingCost<0){
 					crafter.sendSystemMessage("@survey:gamble_no_action", (byte) 0);
@@ -506,6 +538,8 @@ public class SurveyService implements INetworkDispatch {
 		
 		} else {
 			crafter.sendSystemMessage("There are only trace amounts of " + sampleResource.getName() + " here.  Find a higher concentration of the resource, and try sampling again.", (byte) 0); // "@survey:trace_amount:"
+			surveyTool.setCurrentlySampling(true);
+			surveyTool.setLastSampleTime(System.currentTimeMillis());
 		}
 	}
 	
@@ -544,9 +578,15 @@ public class SurveyService implements INetworkDispatch {
 	public SUICallback handleExceptionalInput(SWGObject crafter,SUIWindow suiWindow){
 		
 		SUICallback callback = suiWindow.getCallbackByEventId(1);
-		if (callback!=null)
-			System.out.println("handleExceptionalInput " + callback.toString());
-		core.suiService.closeSUIWindow(crafter, 0);
+//		if (callback!=null)
+//			System.out.println("handleExceptionalInput " + callback.toString());
+//		if (callback.toString().equals("1")){
+//			System.out.println("1");
+//			PlayerObject player = (PlayerObject) crafter.getSlottedObject("ghost");	
+//			SurveyTool surveyTool = player.getLastUsedSurveyTool();
+//			surveyTool.setExceptionalState(false);
+//			core.suiService.closeSUIWindow(crafter, 0);
+//		}
 		return callback;
 	}
 	
@@ -618,18 +658,16 @@ public class SurveyService implements INetworkDispatch {
 			@SuppressWarnings("unchecked")
 			@Override
 			public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
-				CreatureObject crafter = (CreatureObject)owner;
-				if (crafter!=null) {
-					if (outerSurveyTool!=null){
-						int index = Integer.parseInt(returnList.get(0));
-						if (index==0){
-							outerSurveyTool.setSurveyRangeSetting((byte)0);
-						} 
-						
-					}
-				}
+				((CreatureObject)owner).sendSystemMessage("Rad confirmed", (byte) 0);
 			}					
 		});		
+		window.addHandler(1, "", Trigger.TRIGGER_CANCEL, returnList, new SUICallback() {
+			@SuppressWarnings("unchecked")
+			@Override
+			public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
+				((CreatureObject)owner).sendSystemMessage("Rad declined", (byte) 0);
+			}					
+		});	
 		core.suiService.openSUIWindow(window);
 	}
 		

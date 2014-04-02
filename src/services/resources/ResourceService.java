@@ -41,6 +41,7 @@ import protocol.swg.UpdateContainmentMessage;
 import main.NGECore;
 import engine.resources.common.CRC;
 import engine.resources.objects.SWGObject;
+import engine.resources.scene.Planet;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import resources.objects.creature.CreatureObject;
@@ -125,6 +126,10 @@ public class ResourceService implements INetworkDispatch {
 				createCollections3();
 			}
 //		}
+			
+		core.commandService.registerCommand("resourcecontainersplit");
+		core.commandService.registerCommand("resourcecontainertransfer");			
+		core.commandService.registerCommand("factorycratesplit");	
 		start();
 	}
 	
@@ -11290,8 +11295,44 @@ public class ResourceService implements INetworkDispatch {
 		return resource;
 	}
 	
-
-		
+	public GalacticResource grabResourceByFileName(String searchName){
+		GalacticResource resource = null;
+		Vector<GalacticResource> allResources = core.resourceService.getAllSpawnedResources();
+		for (GalacticResource res : allResources){
+			if (res.getResourceRoot().getResourceFileName().equals(searchName)){
+				resource = res; // resourceFileName= "meat_insect_mustafar" i.e.
+			}
+		}
+		return resource;
+	}
+	
+	public GalacticResource grabResourceByClass(String searchName,int planetId){
+		GalacticResource resource = null;
+		Vector<GalacticResource> allResources = core.resourceService.getAllSpawnedResources();
+		for (GalacticResource res : allResources){
+			Vector<Integer> spawnedPlanets = res.getAllSpawnedPlanetIds();
+			if (spawnedPlanets.contains(planetId) && res.getResourceRoot().getResourceClass().equals(searchName)){
+				resource = res; // resourceClass= "Insect Meat" i.e.
+			}
+		}
+		return resource;
+	}
+	
+	// ToDo: Improve
+	public GalacticResource grabMeatForCreature(CreatureObject corpse){
+		GalacticResource resource = null;
+		int planetId = corpse.getPlanetId();
+		String meatName = corpse.getStfName(); // placeholder
+		Vector<GalacticResource> allResources = core.resourceService.getAllSpawnedResources();
+		for (GalacticResource res : allResources){
+			Vector<Integer> spawnedPlanets = res.getAllSpawnedPlanetIds();
+			if (spawnedPlanets.contains(planetId) && res.getResourceRoot().getResourceClass().equals(meatName)){
+				resource = res; 
+			}
+		}
+		return resource;
+	}
+	
 	// Utility method to quickly spawn resource containers into the inventory
 		public ResourceContainerObject spawnSpecificResourceContainer(String spawnType, CreatureObject crafter,int stackCount){	
 			ResourceContainerObject containerObject = null;

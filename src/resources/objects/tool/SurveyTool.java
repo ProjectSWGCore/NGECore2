@@ -285,7 +285,7 @@ public class SurveyTool extends TangibleObject{
 	}
 
 	public void setRecoveryMode(boolean recoveryMode) {
-		recoveryMode = recoveryMode;
+		this.recoveryMode = recoveryMode;
 	}
 
 	public byte getSurveyRangeSetting() {
