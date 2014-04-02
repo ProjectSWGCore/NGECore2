@@ -21,6 +21,9 @@
  ******************************************************************************/
 package resources.objects;
 
+import com.sleepycat.persist.model.Persistent;
+
+@Persistent
 public class BuffItem {
 	private int affectAmount;
 	private int entertainerBonus;

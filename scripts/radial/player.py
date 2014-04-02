@@ -7,7 +7,7 @@ def createRadial(core, owner, target, radials):
 		if owner.getPerformanceWatchee() == target:
 			if target.getPerformanceType() is True:
 				radials.add(RadialOptions(0, 141, 3, 'Stop Watching'))
-		elif owner.getPerformanceListenee() == target: # TODO: Get rid of PerformanceWatchee variable, no need for listenee (same thing really)
+		elif owner.getPerformanceListenee() == target:
 			radials.add(RadialOptions(0, 141, 3, 'Stop Listening'))
 		else:
 			if target.getPerformanceType() is True:
@@ -27,6 +27,6 @@ def handleSelection(core, owner, target, option):
 		return
 	
 	if option == 141:
-		#core.commandService.callCommand(owner, 'stopwatching', target, '') #SWGList error for remove audience in CreatureObject
+		core.commandService.callCommand(owner, 'stopwatching', target, '')
 		return
 	return

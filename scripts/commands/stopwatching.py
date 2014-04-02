@@ -10,7 +10,7 @@ def run(core, actor, target, commandString):
     
     if performer is None:
     	return
-    performer.removeAudience(actor)
+    performer.removeSpectator(actor)
     actor.setPerformanceWatchee(None)
     if not actor.getPerformanceListenee():
       actor.setMoodAnimation('')

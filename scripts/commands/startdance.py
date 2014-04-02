@@ -46,7 +46,7 @@ def handleStartdance(core, owner, eventType, returnList):
 
     if not item:
       return
-        
+
     #if eventType == 0:
     startDance(coreObject, actorObject, '', int(item.getObjectId()))
     return
@@ -90,7 +90,7 @@ def startDance(core, actor, danceName, visual):
     if not actor.getPerformanceWatchee():
       #this also notifies the client with a delta4
       actor.setPerformanceWatchee(actor)
-      actor.addAudience(actor)
+      actor.addSpectator(actor)
  
     #this should send a CREO3 
     actor.setPosture(0x09);

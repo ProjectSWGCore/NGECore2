@@ -317,6 +317,9 @@ public class CharacterService implements INetworkDispatch {
 					Console.println("Added empty mission " + missionsAdded);
 				}*/
 				
+				object.addAbility("startDance");
+				object.addAbility("startDance+Basic");
+				
 				object.addObjectToEquipList(datapad);
 				object.addObjectToEquipList(inventory);
 				object.addObjectToEquipList(bank);

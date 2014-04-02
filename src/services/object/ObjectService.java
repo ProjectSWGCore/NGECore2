@@ -534,11 +534,13 @@ public class ObjectService implements INetworkDispatch {
 		{
 			if(object.getAttachment("tempUseCount") != null) 
 			{
-				int useCount = (int)object.getAttachment("tempUseCount"); // Placeholder until delta for stack count/use count
+				int useCount = (int)object.getAttachment("tempUseCount"); // Seefo: Placeholder until delta for stack count/use count
 				
-				if(useCount - 1 == 0) destroyObject(object);
+				if((useCount - 1) == 0) destroyObject(object);
 				else object.setAttachment("tempUseCount", useCount--);
 			}
+			
+			// Seefo: We need to add cool downs for buff items
 			core.buffService.addBuffToCreature(creature, object.getStringAttribute("proc_name").replace("@ui_buff:", ""), creature);
 		}
 		

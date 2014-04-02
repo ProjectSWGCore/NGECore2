@@ -24,9 +24,11 @@ package resources.common;
 public class ConversationOption {
 	
 	private OutOfBand outOfBand;
-
-	public ConversationOption(OutOfBand outOfBand) {
+	private int index;
+	
+	public ConversationOption(OutOfBand outOfBand, int index) {
 		this.setOutOfBand(outOfBand);
+		this.setIndex(index);
 	}
 
 	public OutOfBand getOutOfBand() {
@@ -35,6 +37,14 @@ public class ConversationOption {
 
 	public void setOutOfBand(OutOfBand outOfBand) {
 		this.outOfBand = outOfBand;
+	}
+
+	public int getIndex() {
+		return index;
+	}
+
+	public void setIndex(int index) {
+		this.index = index;
 	}
 
 }

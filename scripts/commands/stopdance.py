@@ -11,10 +11,5 @@ def run(core, actor, target, commandString):
       actor.sendSystemMessage('@performance:dance_not_performing', 0)
       return
 
-    #since we need to stop performance for any posture change,
-    # all packets are triggered in setPosture.
-    # this may not be very consistent, but it prevents
-    # duplicate code.
     actor.stopPerformance()
-
     return

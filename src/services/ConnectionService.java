@@ -200,17 +200,17 @@ public class ConnectionService implements INetworkDispatch {
 		if(object.getAttachment("inspireDuration") != null)
 			object.setAttachment("inspireDuration", null);
 		
-		if(object.getInspirationTick() != null) {
-			object.getInspirationTick().cancel(true);
-			object.setInspirationTick(null);
+		if(object.getPerformanceListenee() != null) {
+			object.getPerformanceListenee().removeSpectator(object);
+			object.setPerformanceListenee(null);
 		}
 		
-		if(object.getSpectatorTask() != null) {
-			object.getSpectatorTask().cancel(true);
-			object.setSpectatorTask(null);
+		if(object.getPerformanceWatchee() != null) {
+			object.getPerformanceWatchee().removeSpectator(object);
+			object.setPerformanceWatchee(null);
 		}
 		
-		core.groupService.handleGroupDisband(object);
+		core.groupService.handleGroupDisband(object, false);
 		
 		if (core.instanceService.isInInstance(object)) {
 			core.instanceService.remove(core.instanceService.getActiveInstance(object), object);
@@ -264,7 +264,6 @@ public class ConnectionService implements INetworkDispatch {
 		object.setPerformanceListenee(null);
 		object.setPerformanceWatchee(null);
 		object.setAttachment("disconnectTask", null);
-		object.setAttachment("buffWorkshop", null);
 
 		object.createTransaction(core.getCreatureODB().getEnvironment());
 		core.getCreatureODB().put(object, Long.class, CreatureObject.class, object.getTransaction());
