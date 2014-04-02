@@ -21,47 +21,42 @@
  ******************************************************************************/
 package protocol.swg.objectControllerObjects;
 
-import java.nio.ByteOrder;
+import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import protocol.swg.ObjControllerMessage;
-import resources.common.ObjControllerOpcodes;
+import engine.resources.common.Utilities;
 
-public class StopNpcConversation extends ObjControllerObject {
+public class SetProfessionTemplate extends ObjControllerObject {
 	
-	private long npcId;
-	private long objectId;
-	private String stfFile;
-	private String stfLabel;
-
-	public StopNpcConversation(long objectId, long npcId, String stfFile, String stfLabel) {
-		this.objectId = objectId;
-		this.npcId = npcId;
-		this.stfFile = stfFile;
-		this.stfLabel = stfLabel;
-	}
+	private String profession;
 
 	@Override
 	public void deserialize(IoBuffer data) {
-		// TODO Auto-generated method stub
-		
+		data.getLong();
+		data.getInt();
+		short size = data.getShort();
+		try {
+			profession = new String(ByteBuffer.allocate(size).put(data.array(), data.position(), size).array(), "US-ASCII");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		data.position(data.position() + size);
 	}
 
 	@Override
 	public IoBuffer serialize() {
-		IoBuffer buffer = IoBuffer.allocate(40 + stfFile.length() + stfLabel.length()).order(ByteOrder.LITTLE_ENDIAN);
-		
-		buffer.putInt(ObjControllerMessage.STOP_CONVERSATION);
-		buffer.putLong(objectId);
-		
-		buffer.putInt(0);
-		buffer.putLong(npcId);
-		buffer.put(getAsciiString(stfFile));
-		buffer.putInt(0);
-		buffer.put(getAsciiString(stfLabel));	
-		buffer.putLong(0);
-		
-		return buffer.flip();
+		// TODO Auto-generated method stub
+		return null;
 	}
+
+	public String getProfession() {
+		return profession;
+	}
+
+	public void setProfession(String profession) {
+		this.profession = profession;
+	}
+
 }

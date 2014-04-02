@@ -64,6 +64,7 @@ import resources.common.RGB;
 import resources.common.SpawnPoint;
 import resources.common.StringUtilities;
 import resources.datatables.PlayerFlags;
+import resources.datatables.Professions;
 import resources.guild.Guild;
 import resources.objects.Buff;
 import resources.objects.building.BuildingObject;
@@ -533,8 +534,8 @@ public class PlayerService implements INetworkDispatch {
 		}
 		
 		player.setProfession(profession);
-		
-		String xpType = ((player.getProfession().contains("entertainer")) ? "entertainer" : ((player.getProfession().contains("trader")) ? "crafting" : "combat_general"));
+
+		String xpType = ((profession.contains("entertainer")) ? "entertainer" : ((profession.contains("trader")) ? "crafting" : "combat_general"));
 			
 		int experience = player.getXp(xpType);
 		
@@ -544,7 +545,7 @@ public class PlayerService implements INetworkDispatch {
 			for (int i = 0; i < experienceTable.getRowCount(); i++) {
 				if (experienceTable.getObject(i, 0) != null) {
 					if (experience >= ((Integer) experienceTable.getObject(i, 1))) {
-						level = (Integer) experienceTable.getObject(i, 1);
+						level = (Integer) experienceTable.getObject(i, 0);
 					}
 				}
 			}
@@ -553,6 +554,7 @@ public class PlayerService implements INetworkDispatch {
 		}
 		
 		grantLevel(creature, level);
+		player.setProfessionIcon(Professions.get(profession));
 	}
 	
 	/*
@@ -598,7 +600,7 @@ public class PlayerService implements INetworkDispatch {
 		for (String skill : creature.getSkills()) {
 			core.skillService.removeSkill(creature, skill);
 		}
-		
+
 		String xpType = ((player.getProfession().contains("entertainer")) ? "entertainer" : ((player.getProfession().contains("trader")) ? "crafting" : "combat_general"));
 			
 		player.setXp(xpType, 0);

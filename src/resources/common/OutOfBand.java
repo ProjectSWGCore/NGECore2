@@ -41,9 +41,9 @@ public class OutOfBand {
 		IoBuffer buffer = IoBuffer.allocate(50).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.setAutoExpand(true);
 		
-		buffer.putInt(2);
-		buffer.putShort(getCount());
+		buffer.putInt(4);
 		buffer.putShort((short) 0); // unk
+		buffer.putShort(getCount());
 		
 		for(ProsePackage prosePackage : prosePackages) {
 			
@@ -74,22 +74,24 @@ public class OutOfBand {
 			buffer.putInt(prosePackage.getDiInteger());
 			buffer.putFloat(prosePackage.getDfFloat());
 			
-			buffer.put(prosePackage.getDisplayFlag());
-			
+			//buffer.put(prosePackage.getDisplayFlag());
+			buffer.put((byte) 0);
+
 			int stfLength = prosePackage.getStfFile().length() + prosePackage.getStfLabel().length() +
 							prosePackage.getTuStfFile().length() + prosePackage.getTuStfLabel().length() +
 							prosePackage.getTtStfFile().length() + prosePackage.getTtStfLabel().length() +
 							prosePackage.getToStfFile().length() + prosePackage.getToStfLabel().length();
 			
-			if(stfLength % 2 == 1) {
+			//if(stfLength % 2 == 1) {
 				buffer.put((byte) 0);
-			}
+			//}
 			
 		}
 		
 		setLength(buffer);
-		
-		return IoBuffer.allocate(buffer.position()).order(ByteOrder.LITTLE_ENDIAN).put(buffer).flip();
+		int size = buffer.position();
+		buffer.flip();
+		return IoBuffer.allocate(size).order(ByteOrder.LITTLE_ENDIAN).put(buffer.array(), 0, size).flip();
 	}
 	
 	public void setLength(IoBuffer buffer) {
