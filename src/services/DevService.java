@@ -93,7 +93,6 @@ public class DevService implements INetworkDispatch {
 				break;
 			case 4: // [Items] Misc Items
 				suiOptions.put((long) 40, "Unity Ring");
-				suiOptions.put((long) 41, "Tusken rucksack");
 				break;
 			case 5: // [Items] Armor
 				suiOptions.put((long) 50, "Assault Armor");
@@ -102,13 +101,19 @@ public class DevService implements INetworkDispatch {
 				break;
 			case 6: // [Items] Assault Armor
 				suiOptions.put((long) 60, "Composite");
+				suiOptions.put((long) 61, "Chitin");
 				break;
 			case 7: // [Items] Battle Armor
 				suiOptions.put((long) 70, "Bone");
+				suiOptions.put((long) 71, "Padded");
 				break;
 			case 8: // [Items] Reconnaissance Armor
 				suiOptions.put((long) 80, "Marauder");
+				suiOptions.put((long) 81, "Tantel");
 				break;
+			case 9: // [Items] Backpacks
+				suiOptions.put((long) 90, "Tusken Rucksack");
+				suiOptions.put((long) 91, "Tauntaun Rucksack");
 		}
 		
 		final SUIWindow window = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "Character Builder Terminal", "Select the desired option and click OK.", suiOptions, creature, null, 10);
@@ -240,16 +245,6 @@ public class DevService implements INetworkDispatch {
 						TangibleObject ring = (TangibleObject) core.objectService.createObject("object/tangible/wearables/ring/shared_ring_s01.iff", planet);
 						ring.setCustomName("Unity Ring");
 						inventory.add(ring);
-					case 41:
-						TangibleObject backpack = (TangibleObject) core.objectService.createObject("object/tangible/wearables/backpack/shared_backpack_krayt_skull.iff", planet);
-						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:agility_modified", 25);
-						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:constitution_modified", 30);
-						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:luck_modified", 25);
-						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:precision_modified", 35);
-						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:stamina_modified", 30);
-						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:strength_modified", 35);
-						
-						inventory.add(backpack);
 						return;
 					case 50: // [Items] Assault Armor
 						sendCharacterBuilderSUI(player, 6);
@@ -259,6 +254,9 @@ public class DevService implements INetworkDispatch {
 						return;
 					case 52: // [Items] Reconnaissance Armor
 						sendCharacterBuilderSUI(player, 8);
+						return;
+					case 53: // [Items] Backpacks
+						sendCharacterBuilderSUI (player, 9);
 						return;
 					case 60: // Composite Armor
 						SWGObject comp_bicep_r = core.objectService.createObject("object/tangible/wearables/armor/composite/shared_armor_composite_bicep_r.iff", planet);
@@ -331,6 +329,80 @@ public class DevService implements INetworkDispatch {
 						inventory.add(comp_chest);
 						inventory.add(comp_boots);
 						inventory.add(comp_gloves);
+
+						
+						return;
+					case 61: // Chitin Armor
+						SWGObject chitin_bicep_r = core.objectService.createObject("object/tangible/wearables/armor/chitin/shared_armor_chitin_s01_bicep_r.iff", planet);
+						chitin_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+						chitin_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+						chitin_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+						chitin_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+						chitin_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+						chitin_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+						
+						SWGObject chitin_bicep_l = core.objectService.createObject("object/tangible/wearables/armor/chitin/shared_armor_chitin_s01_bicep_l.iff", planet);
+						chitin_bicep_l.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+						chitin_bicep_l.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+						chitin_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+						chitin_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+						chitin_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+						chitin_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+						
+						SWGObject chitin_bracer_r = core.objectService.createObject("object/tangible/wearables/armor/chitin/shared_armor_chitin_s01_bracer_r.iff", planet);
+						chitin_bracer_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+						chitin_bracer_r.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+						chitin_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+						chitin_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+						chitin_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+						chitin_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+						
+						SWGObject chitin_bracer_l = core.objectService.createObject("object/tangible/wearables/armor/chitin/shared_armor_chitin_s01_bracer_l.iff", planet);
+						chitin_bracer_l.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+						chitin_bracer_l.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+						chitin_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+						chitin_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+						chitin_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+						chitin_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+						
+						SWGObject chitin_leggings = core.objectService.createObject("object/tangible/wearables/armor/chitin/shared_armor_chitin_s01_leggings.iff", planet);
+						chitin_leggings.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+						chitin_leggings.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+						chitin_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+						chitin_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+						chitin_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+						chitin_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+						
+						SWGObject chitin_helmet = core.objectService.createObject("object/tangible/wearables/armor/chitin/shared_armor_chitin_s01_helmet.iff", planet);
+						chitin_helmet.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+						chitin_helmet.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+						chitin_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+						chitin_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+						chitin_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+						chitin_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+						
+						SWGObject chitin_chest = core.objectService.createObject("object/tangible/wearables/armor/chitin/shared_armor_chitin_s01_chest_plate.iff", planet);
+						chitin_chest.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
+						chitin_chest.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5000);
+						chitin_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+						chitin_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+						chitin_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+						chitin_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+						
+						SWGObject chitin_boots = core.objectService.createObject("object/tangible/wearables/armor/chitin/shared_armor_chitin_s01_boots.iff", planet);
+						SWGObject chitin_gloves = core.objectService.createObject("object/tangible/wearables/armor/chitin/shared_armor_chitin_s01_gloves.iff", planet);
+						
+						
+						
+						inventory.add(chitin_bicep_r);
+						inventory.add(chitin_bicep_l);
+						inventory.add(chitin_bracer_r);
+						inventory.add(chitin_bracer_l);
+						inventory.add(chitin_leggings);
+						inventory.add(chitin_helmet);
+						inventory.add(chitin_chest);
+						inventory.add(chitin_boots);
+						inventory.add(chitin_gloves);
 
 						
 						return;
@@ -408,6 +480,80 @@ public class DevService implements INetworkDispatch {
 
 						
 						return;
+					case 71: // Padded Armor
+						SWGObject padded_bicep_r = core.objectService.createObject("object/tangible/wearables/armor/padded/shared_armor_padded_s01_bicep_r.iff", planet);
+						padded_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 6000);
+						padded_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 6000);
+						padded_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+						padded_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+						padded_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+						padded_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+						
+						SWGObject padded_bicep_l = core.objectService.createObject("object/tangible/wearables/armor/padded/shared_armor_padded_s01_bicep_l.iff", planet);
+						padded_bicep_l.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 6000);
+						padded_bicep_l.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 6000);
+						padded_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+						padded_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+						padded_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+						padded_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+						
+						SWGObject padded_bracer_r = core.objectService.createObject("object/tangible/wearables/armor/padded/shared_armor_padded_s01_bracer_r.iff", planet);
+						padded_bracer_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 6000);
+						padded_bracer_r.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 6000);
+						padded_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+						padded_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+						padded_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+						padded_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+						
+						SWGObject padded_bracer_l = core.objectService.createObject("object/tangible/wearables/armor/padded/shared_armor_padded_s01_bracer_l.iff", planet);
+						padded_bracer_l.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 6000);
+						padded_bracer_l.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 6000);
+						padded_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+						padded_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+						padded_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+						padded_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+						
+						SWGObject padded_leggings = core.objectService.createObject("object/tangible/wearables/armor/padded/shared_armor_padded_s01_leggings.iff", planet);
+						padded_leggings.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 6000);
+						padded_leggings.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 6000);
+						padded_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+						padded_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+						padded_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+						padded_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+						
+						SWGObject padded_helmet = core.objectService.createObject("object/tangible/wearables/armor/padded/shared_armor_padded_s01_helmet.iff", planet);
+						padded_helmet.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 6000);
+						padded_helmet.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 6000);
+						padded_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+						padded_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+						padded_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+						padded_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+						
+						SWGObject padded_chest = core.objectService.createObject("object/tangible/wearables/armor/padded/shared_armor_padded_s01_chest_plate.iff", planet);
+						padded_chest.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 6000);
+						padded_chest.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 6000);
+						padded_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+						padded_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+						padded_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+						padded_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+						
+						SWGObject padded_boots = core.objectService.createObject("object/tangible/wearables/armor/padded/shared_armor_padded_s01_boots.iff", planet);
+						SWGObject padded_gloves = core.objectService.createObject("object/tangible/wearables/armor/padded/shared_armor_padded_s01_gloves.iff", planet);
+						
+						
+						
+						inventory.add(padded_bicep_r);
+						inventory.add(padded_bicep_l);
+						inventory.add(padded_bracer_r);
+						inventory.add(padded_bracer_l);
+						inventory.add(padded_leggings);
+						inventory.add(padded_helmet);
+						inventory.add(padded_chest);
+						inventory.add(padded_boots);
+						inventory.add(padded_gloves);
+
+						
+						return;
 					case 80: // Marauder Armor
 						SWGObject mar_bicep_r = core.objectService.createObject("object/tangible/wearables/armor/marauder/shared_armor_marauder_s02_bicep_r.iff", planet);
 						mar_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 5000);
@@ -481,6 +627,103 @@ public class DevService implements INetworkDispatch {
 						inventory.add(mar_gloves);
 
 						
+						return;
+						case 81: // Tantel Armor
+						SWGObject tantel_bicep_r = core.objectService.createObject("object/tangible/wearables/armor/tantel/shared_armor_tantel_skreej_bicep_r.iff", planet);
+						tantel_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 5000);
+						tantel_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 7000);
+						tantel_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+						tantel_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+						tantel_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+						tantel_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+						
+						SWGObject tantel_bicep_l = core.objectService.createObject("object/tangible/wearables/armor/tantel/shared_armor_tantel_skreej__bicep_l.iff", planet);
+						tantel_bicep_l.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 5000);
+						tantel_bicep_l.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 7000);
+						tantel_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+						tantel_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+						tantel_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+						tantel_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+						
+						SWGObject tantel_bracer_r = core.objectService.createObject("object/tangible/wearables/armor/tantel/shared_armor_tantel_skreej__bracer_r.iff", planet);
+						tantel_bracer_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 5000);
+						tantel_bracer_r.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 7000);
+						tantel_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+						tantel_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+						tantel_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+						tantel_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+						
+						SWGObject tantel_bracer_l = core.objectService.createObject("object/tangible/wearables/armor/tantel/shared_armor_tantel_skreej__bracer_l.iff", planet);
+						tantel_bracer_l.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 5000);
+						tantel_bracer_l.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 7000);
+						tantel_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+						tantel_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+						tantel_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+						tantel_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+						
+						SWGObject tantel_leggings = core.objectService.createObject("object/tangible/wearables/armor/tantel/shared_armor_tantel_skreej__leggings.iff", planet);
+						tantel_leggings.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 5000);
+						tantel_leggings.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 7000);
+						tantel_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+						tantel_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+						tantel_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+						tantel_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+						
+						SWGObject tantel_helmet = core.objectService.createObject("object/tangible/wearables/armor/tantel/shared_armor_tantel_skreej__helmet.iff", planet);
+						tantel_helmet.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 5000);
+						tantel_helmet.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 7000);
+						tantel_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+						tantel_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+						tantel_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+						tantel_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+						
+						SWGObject tantel_chest = core.objectService.createObject("object/tangible/wearables/armor/tantel/shared_armor_tantel_skreej__chest_plate.iff", planet);
+						tantel_chest.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 5000);
+						tantel_chest.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 7000);
+						tantel_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 6000);
+						tantel_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 6000);
+						tantel_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
+						tantel_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
+						
+						SWGObject tantel_boots = core.objectService.createObject("object/tangible/wearables/armor/tantel/shared_armor_tantel_skreej__boots.iff", planet);
+						SWGObject tantel_gloves = core.objectService.createObject("object/tangible/wearables/armor/tantel/shared_armor_tantel_skreej__gloves.iff", planet);
+						
+						
+						
+						inventory.add(tantel_bicep_r);
+						inventory.add(tantel_bicep_l);
+						inventory.add(tantel_bracer_r);
+						inventory.add(tantel_bracer_l);
+						inventory.add(tantel_leggings);
+						inventory.add(tantel_helmet);
+						inventory.add(tantel_chest);
+						inventory.add(tantel_boots);
+						inventory.add(tantel_gloves);
+
+						
+						return;
+					// [Items] Backpacks
+					case 90: // Tusken Rucksack
+						TangibleObject backpack = (TangibleObject) core.objectService.createObject("object/tangible/wearables/backpack/shared_backpack_krayt_skull.iff", planet);
+						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:agility_modified", 25);
+						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:constitution_modified", 30);
+						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:luck_modified", 25);
+						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:precision_modified", 35);
+						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:stamina_modified", 30);
+						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:strength_modified", 35);
+						
+						inventory.add(backpack);
+						return;
+					case 91: // Tauntaun Rucksack
+						TangibleObject backpack = (TangibleObject) core.objectService.createObject("object/tangible/wearables/backpack/shared_backpack_tauntaun_skull.iff", planet);
+						backpack1.setIntAttribute("cat_stat_mod_bonus.@stat_n:agility_modified", 25);
+						backpack1.setIntAttribute("cat_stat_mod_bonus.@stat_n:constitution_modified", 30);
+						backpack1.setIntAttribute("cat_stat_mod_bonus.@stat_n:luck_modified", 25);
+						backpack1.setIntAttribute("cat_stat_mod_bonus.@stat_n:precision_modified", 35);
+						backpack1.setIntAttribute("cat_stat_mod_bonus.@stat_n:stamina_modified", 30);
+						backpack1.setIntAttribute("cat_stat_mod_bonus.@stat_n:strength_modified", 35);
+						
+						inventory.add(backpack1);
 						return;
 				}
 			}	
