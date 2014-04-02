@@ -420,6 +420,8 @@ public class NGECore {
 		spawnService.loadLairGroups();
 		spawnService.loadSpawnAreas();
 		
+		equipmentService.loadBonusSets();
+		
 		retroService.run();
 		
 		didServerCrash = false;

@@ -21,10 +21,20 @@
  ******************************************************************************/
 package services;
 
+import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.TreeMap;
 
+import org.python.antlr.ast.Str;
 import org.python.core.Py;
 import org.python.core.PyObject;
 
@@ -35,10 +45,13 @@ import engine.resources.objects.SWGObject;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import resources.objects.player.PlayerObject;
+import services.equipment.BonusSetTemplate;
+import services.spawn.MobileTemplate;
 
 public class EquipmentService implements INetworkDispatch {
 	
 	private NGECore core;
+	private Map<String, BonusSetTemplate> bonusSetTemplates = new ConcurrentHashMap<String, BonusSetTemplate>();
 	
 	public EquipmentService(NGECore core) {
 		this.core = core;
@@ -221,9 +234,14 @@ public class EquipmentService implements INetworkDispatch {
 
 		if(!actor.getEquipmentList().contains(item))
 			actor.addObjectToEquipList(item);
+		
+		if(item.getAttachment("setBonus") != null)
+		{
+			BonusSetTemplate bonus = bonusSetTemplates.get((String)item.getAttachment("setBonus"));
+			bonus.callScript(actor);
+		}
 }
 
-	
 	public void unequip(CreatureObject actor, SWGObject item) {
 		String template = ((item.getAttachment("customServerTemplate") == null) ? item.getTemplate() : (item.getTemplate().split("shared_")[0] + "shared_" + ((String) item.getAttachment("customServerTemplate")) + ".iff"));
 		String serverTemplate = template.replace(".iff", "");
@@ -272,9 +290,35 @@ public class EquipmentService implements INetworkDispatch {
 		
 		if(item.getStringAttribute("proc_name") != null) core.buffService.removeBuffFromCreatureByName(actor, item.getStringAttribute("proc_name").replace("@ui_buff:", ""));
 		
+		
 		if(actor.getEquipmentList().contains(item))
 			actor.removeObjectFromEquipList(item);
 
+		if(item.getAttachment("setBonus") != null)
+		{
+			BonusSetTemplate bonus = bonusSetTemplates.get((String)item.getAttachment("setBonus"));
+			bonus.callScript(actor);
+		}
 	}
 
+	public void addBonusSetTemplate(BonusSetTemplate bonusSet)
+	{
+		bonusSetTemplates.put(bonusSet.getName(), bonusSet);
+	}
+	
+	public void loadBonusSets() {
+	    Path p = Paths.get("scripts/equipment/bonus_sets/");
+	    FileVisitor<Path> fv = new SimpleFileVisitor<Path>() {
+	        @Override
+	        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+	        	core.scriptService.callScript("scripts/equipment/bonus_sets/", file.getFileName().toString().replace(".py", ""), "addBonusSet", core);
+	        	return FileVisitResult.CONTINUE;
+	        }
+	    };
+        try {
+			Files.walkFileTree(p, fv);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }
