@@ -11279,6 +11279,17 @@ public class ResourceService implements INetworkDispatch {
 		return resourceRootreference;
 	}
 	
+	public GalacticResource grabResourceByName(String searchName){
+		GalacticResource resource = null;
+		Vector<GalacticResource> allResources = core.resourceService.getAllSpawnedResources();
+		for (GalacticResource res : allResources){
+			if (res.getName().equals(searchName)){
+				resource = res;
+			}
+		}
+		return resource;
+	}
+	
 
 		
 	// Utility method to quickly spawn resource containers into the inventory

@@ -26,7 +26,12 @@ import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.TimeUnit;
 
+import main.NGECore;
+import protocol.swg.SurveyMapUpdateMessage;
+import resources.objects.creature.CreatureObject;
+import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
+import resources.objects.waypoint.WaypointObject;
 
 import com.sleepycat.je.Environment;
 import com.sleepycat.je.Transaction;
@@ -372,6 +377,78 @@ public class GalacticResource extends SWGObject implements IPersistent {
 			return 0;
 		//measuredOutput=80.0f;
 		return measuredOutput;
+	}
+	
+	public Vector<ResourceConcentration> buildConcentrationsCollection(Point3D measurePos, GalacticResource resource, float radius,float differential, int planetId){
+		float leftXCoordinate = measurePos.x - (0.5f*radius);
+		float topZCoordinate  = measurePos.z - (0.5f*radius);
+		float cursorX = leftXCoordinate;
+		float cursorZ = topZCoordinate;
+		int divisions=5;
+		if (radius<=192.0f){
+			divisions = 4;
+		}
+		if (radius<=64.0f){
+			divisions = 3;
+		}
+
+		Vector<ResourceConcentration> concentrationsCollection = new Vector<ResourceConcentration>();
+		for (int z=0;z<divisions;z++) {
+			for (int x=0;x<divisions;x++) {
+				ResourceConcentration concentration = new ResourceConcentration(cursorX,cursorZ,(resource.deliverConcentrationForSurvey(planetId, cursorX, cursorZ)));
+				concentrationsCollection.add(concentration);
+				cursorZ+=differential;
+			}
+			cursorZ=topZCoordinate;
+			cursorX+=differential;
+		}		
+		return concentrationsCollection;	
+	}
+	
+	public void constructSurveyMapMessage(CreatureObject crafter, Vector<ResourceConcentration> concentrationMap, float radius){
+		
+		int pointsAmount = 25;
+		if (radius<=64.0f) {
+			pointsAmount=9;
+		} else if (radius<=128.0) {
+			pointsAmount = 16;
+		} else if (radius<=192.0f) {
+			pointsAmount = 16;
+		} else if (radius<=256.0f) {
+			pointsAmount = 25;
+		} else if (radius>=256.0f) {
+			pointsAmount = 25;
+		}
+			
+		SurveyMapUpdateMessage smuMsg = new SurveyMapUpdateMessage(concentrationMap, pointsAmount);
+		crafter.getClient().getSession().write(smuMsg.serialize());	
+		services.resources.CharonPacketUtils.printAnalysis(smuMsg.serialize());
+		
+		PlayerObject player = (PlayerObject) crafter.getSlottedObject("ghost");	
+		if (smuMsg.getHighestConcentration() > 0.10f){
+			WaypointObject lastSurveyWaypoint = player.getLastSurveyWaypoint();
+			WaypointObject surveyWaypoint = null;
+			if (lastSurveyWaypoint==null){
+				surveyWaypoint = (WaypointObject) NGECore.getInstance().objectService.createObject("object/waypoint/shared_world_waypoint_blue.iff", crafter.getPlanet(), smuMsg.getHighestX(), 0 ,smuMsg.getHighestZ());
+				surveyWaypoint.setName("Survey location");
+				surveyWaypoint.setPlanetCRC(engine.resources.common.CRC.StringtoCRC(crafter.getPlanet().getName()));
+				surveyWaypoint.setPosition(new Point3D(smuMsg.getHighestX(),0, smuMsg.getHighestZ()));	
+				player.waypointAdd(surveyWaypoint);
+				surveyWaypoint.setPosition(new Point3D(smuMsg.getHighestX(),0, smuMsg.getHighestZ()));
+				surveyWaypoint.setActive(true);
+				surveyWaypoint.setColor((byte)1);
+				surveyWaypoint.setStringAttribute("", "");
+				player.waypointAdd(surveyWaypoint);
+				surveyWaypoint.setName("Survey location");
+				surveyWaypoint.setPlanetCRC(engine.resources.common.CRC.StringtoCRC(crafter.getPlanet().getName()));							
+				player.setLastSurveyWaypoint(surveyWaypoint);
+			} else {
+				surveyWaypoint = lastSurveyWaypoint;
+				surveyWaypoint.setPosition(new Point3D(smuMsg.getHighestX(),0, smuMsg.getHighestZ()));	
+				player.waypointUpdate(surveyWaypoint);	
+			}		
+			crafter.sendSystemMessage("@survey:survey_waypoint", (byte) 0);
+		}
 	}
 	
 	// Redundant just for Testing !!!

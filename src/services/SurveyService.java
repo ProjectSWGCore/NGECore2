@@ -70,91 +70,7 @@ public class SurveyService implements INetworkDispatch {
 		core.commandService.registerSurveyCommand("RequestCoreSample");
 	}
 		
-	public GalacticResource grabResourceByName(String searchName){
-		GalacticResource resource = null;
-		Vector<GalacticResource> allResources = core.resourceService.getAllSpawnedResources();
-		for (GalacticResource res : allResources){
-			if (res.getName().equals(searchName)){
-				resource = res;
-			}
-		}
-		return resource;
-	}
-	
-	public Vector<ResourceConcentration> buildConcentrationsCollection(Point3D measurePos, GalacticResource resource, float radius,float differential, int planetId){
-		float leftXCoordinate = measurePos.x - (0.5f*radius);
-		float topZCoordinate  = measurePos.z - (0.5f*radius);
-//		System.out.println("measurePos.x " + measurePos.x);
-//		System.out.println("measurePos.z " + measurePos.z);
-		float cursorX = leftXCoordinate;
-		float cursorZ = topZCoordinate;
-		int divisions=5;
-		if (radius<=192.0f){
-			divisions = 4;
-		}
-		if (radius<=64.0f){
-			divisions = 3;
-		}
 
-		Vector<ResourceConcentration> concentrationsCollection = new Vector<ResourceConcentration>();
-		for (int z=0;z<divisions;z++) {
-			for (int x=0;x<divisions;x++) {
-				ResourceConcentration concentration = new ResourceConcentration(cursorX,cursorZ,(resource.deliverConcentrationForSurvey(planetId, cursorX, cursorZ)));
-				concentrationsCollection.add(concentration);
-				cursorZ+=differential;
-			}
-			cursorZ=topZCoordinate;
-			cursorX+=differential;
-		}		
-		return concentrationsCollection;	
-	}
-	
-	public void constructSurveyMapMessage(CreatureObject crafter, Vector<ResourceConcentration> concentrationMap, float radius){
-	
-		int pointsAmount = 25;
-		if (radius<=64.0f) {
-			pointsAmount=9;
-		} else if (radius<=128.0) {
-			pointsAmount = 16;
-		} else if (radius<=192.0f) {
-			pointsAmount = 16;
-		} else if (radius<=256.0f) {
-			pointsAmount = 25;
-		} else if (radius>=256.0f) {
-			pointsAmount = 25;
-		}
-			
-		SurveyMapUpdateMessage smuMsg = new SurveyMapUpdateMessage(concentrationMap, pointsAmount);
-		crafter.getClient().getSession().write(smuMsg.serialize());	
-		services.resources.CharonPacketUtils.printAnalysis(smuMsg.serialize());
-		
-		PlayerObject player = (PlayerObject) crafter.getSlottedObject("ghost");	
-		if (smuMsg.getHighestConcentration() > 0.10f){
-			WaypointObject lastSurveyWaypoint = player.getLastSurveyWaypoint();
-			WaypointObject surveyWaypoint = null;
-			if (lastSurveyWaypoint==null){
-				surveyWaypoint = (WaypointObject)core.objectService.createObject("object/waypoint/shared_world_waypoint_blue.iff", crafter.getPlanet(), smuMsg.getHighestX(), 0 ,smuMsg.getHighestZ());
-				surveyWaypoint.setName("Survey location");
-				surveyWaypoint.setPlanetCRC(engine.resources.common.CRC.StringtoCRC(crafter.getPlanet().getName()));
-				surveyWaypoint.setPosition(new Point3D(smuMsg.getHighestX(),0, smuMsg.getHighestZ()));	
-				player.waypointAdd(surveyWaypoint);
-				surveyWaypoint.setPosition(new Point3D(smuMsg.getHighestX(),0, smuMsg.getHighestZ()));
-				surveyWaypoint.setActive(true);
-				surveyWaypoint.setColor((byte)1);
-				surveyWaypoint.setStringAttribute("", "");
-				player.waypointAdd(surveyWaypoint);
-				surveyWaypoint.setName("Survey location");
-				surveyWaypoint.setPlanetCRC(engine.resources.common.CRC.StringtoCRC(crafter.getPlanet().getName()));							
-				player.setLastSurveyWaypoint(surveyWaypoint);
-			} else {
-				surveyWaypoint = lastSurveyWaypoint;
-				surveyWaypoint.setPosition(new Point3D(smuMsg.getHighestX(),0, smuMsg.getHighestZ()));	
-				player.waypointUpdate(surveyWaypoint);	
-			}		
-			crafter.sendSystemMessage("@survey:survey_waypoint", (byte) 0);
-		}
-	}
-	
 	public void scheduleSurveyService(){
 		
 		final ScheduledFuture<?> task = scheduler.scheduleAtFixedRate(new Runnable() {
@@ -244,33 +160,10 @@ public class SurveyService implements INetworkDispatch {
 					ResourceContainerObject containerObject = (ResourceContainerObject) core.objectService.createObject(resourceContainerIFF, crafter.getPlanet());
 					containerObject.initializeStats(sampleResource);
 					containerObject.setProprietor(crafter);
-					
-					int resCRC = CRC.StringtoCRC(resourceContainerIFF);
-					containerObject.setIffFileName(resourceContainerIFF);
-					
-					long objectId = containerObject.getObjectID();										
 					SWGObject crafterInventory = crafter.getSlottedObject("inventory");
-					containerObject.setParent(crafterInventory);
-
-					SceneCreateObjectByCrc createObjectMsg = new SceneCreateObjectByCrc(objectId, crafter.getOrientation().x, crafter.getOrientation().y, crafter.getOrientation().z, crafter.getOrientation().w, crafter.getPosition().x, crafter.getPosition().y, crafter.getPosition().z, resCRC, (byte) 0);
-					crafter.getClient().getSession().write(createObjectMsg.serialize());      				
-					services.resources.CharonPacketUtils.printAnalysis(createObjectMsg.serialize());
-				    				 	
-					UpdateContainmentMessage updateContainmentMessage= new UpdateContainmentMessage(containerObject.getObjectID(), crafterInventory.getObjectID(), -1);
-					crafter.getClient().getSession().write(updateContainmentMessage.serialize());
-					containerObject.sendBaselines(crafter.getClient());
-				    
-					SceneEndBaselines sceneEndBaselinesMsg = new SceneEndBaselines(containerObject.getObjectID());
-					crafter.getClient().getSession().write(sceneEndBaselinesMsg.serialize());
-					services.resources.CharonPacketUtils.printAnalysis(sceneEndBaselinesMsg.serialize());
-
-					containerObject.buildAttributeListMessage(crafter.getClient());
+					crafterInventory.add(containerObject);
 					player.setRecentContainer(containerObject);
-					
-//					base_player
-//					prose_grant_xp
-//					exp_n
-//					resource_harvesting_inorganic			
+
 				}
 			} else { // Mismatch -> new container
 				String resourceContainerIFF = ResourceRoot.CONTAINER_TYPE_IFF_SIGNIFIER[sampleResource.getResourceRoot().getContainerType()];           		  				
@@ -278,28 +171,10 @@ public class SurveyService implements INetworkDispatch {
 				ResourceContainerObject containerObject = (ResourceContainerObject) core.objectService.createObject(resourceContainerIFF, crafter.getPlanet());
 				containerObject.initializeStats(sampleResource);
 				containerObject.setProprietor(crafter);
-				
-				int resCRC = CRC.StringtoCRC(resourceContainerIFF);
-				containerObject.setIffFileName(resourceContainerIFF);
-				
-				long objectId = containerObject.getObjectID();										
 				SWGObject crafterInventory = crafter.getSlottedObject("inventory");
-				containerObject.setParent(crafterInventory);
-
-				SceneCreateObjectByCrc createObjectMsg = new SceneCreateObjectByCrc(objectId, crafter.getOrientation().x, crafter.getOrientation().y, crafter.getOrientation().z, crafter.getOrientation().w, crafter.getPosition().x, crafter.getPosition().y, crafter.getPosition().z, resCRC, (byte) 0);
-				crafter.getClient().getSession().write(createObjectMsg.serialize());      				
-				services.resources.CharonPacketUtils.printAnalysis(createObjectMsg.serialize());
-				
-			 	UpdateContainmentMessage updateContainmentMessage= new UpdateContainmentMessage(containerObject.getObjectID(), crafterInventory.getObjectID(), -1);
-				crafter.getClient().getSession().write(updateContainmentMessage.serialize());
-			 	containerObject.sendBaselines(crafter.getClient());
-	
-				SceneEndBaselines sceneEndBaselinesMsg = new SceneEndBaselines(containerObject.getObjectID());
-				crafter.getClient().getSession().write(sceneEndBaselinesMsg.serialize());
-				services.resources.CharonPacketUtils.printAnalysis(sceneEndBaselinesMsg.serialize());
-	       	
-				containerObject.buildAttributeListMessage(crafter.getClient());
+				crafterInventory.add(containerObject);
 				player.setRecentContainer(containerObject);
+				
 			}
 		} else { // create new container, first sample
 			String resourceContainerIFF = ResourceRoot.CONTAINER_TYPE_IFF_SIGNIFIER[sampleResource.getResourceRoot().getContainerType()];           		  				
@@ -308,27 +183,8 @@ public class SurveyService implements INetworkDispatch {
 			containerObject.setProprietor(crafter);
 			stackCount = core.resourceService.getResourceSampleQuantity(crafter, sampleResource); 
     		containerObject.setStackCount(stackCount,false);
-
-			int resCRC = CRC.StringtoCRC(resourceContainerIFF);
-			containerObject.setIffFileName(resourceContainerIFF);
-			
-			long objectId = containerObject.getObjectID();				
-			SWGObject crafterInventory = crafter.getSlottedObject("inventory"); 
-			containerObject.setParent(crafterInventory);
-
-			SceneCreateObjectByCrc createObjectMsg = new SceneCreateObjectByCrc(objectId, crafter.getOrientation().x, crafter.getOrientation().y, crafter.getOrientation().z, crafter.getOrientation().w, crafter.getPosition().x, crafter.getPosition().y, crafter.getPosition().z, resCRC, (byte) 0);
-			crafter.getClient().getSession().write(createObjectMsg.serialize());      				
-			services.resources.CharonPacketUtils.printAnalysis(createObjectMsg.serialize());
-			
-		 	UpdateContainmentMessage updateContainmentMessage= new UpdateContainmentMessage(containerObject.getObjectID(), crafterInventory.getObjectID(), -1);
-			crafter.getClient().getSession().write(updateContainmentMessage.serialize());
-		 	containerObject.sendBaselines(crafter.getClient());
-
-			SceneEndBaselines sceneEndBaselinesMsg = new SceneEndBaselines(containerObject.getObjectID());
-			crafter.getClient().getSession().write(sceneEndBaselinesMsg.serialize());
-			services.resources.CharonPacketUtils.printAnalysis(sceneEndBaselinesMsg.serialize());
-			
-			containerObject.buildAttributeListMessage(crafter.getClient());
+    		SWGObject crafterInventory = crafter.getSlottedObject("inventory");
+			crafterInventory.add(containerObject);
 			player.setRecentContainer(containerObject);
 		}
 		
@@ -371,7 +227,6 @@ public class SurveyService implements INetworkDispatch {
 		
 		// Counter too frequent survey button activation
 		if(surveyTool.getCurrentlySurveying()){
-			//System.out.println("TOO FREQUENT!");
 			return;		
 		}
 		
@@ -385,7 +240,7 @@ public class SurveyService implements INetworkDispatch {
 			addActiveSurveyTool(surveyTool);
 					
 		String resourceNameString = commandArgs;
-		GalacticResource resource = core.surveyService.grabResourceByName(resourceNameString);
+		GalacticResource resource = core.resourceService.grabResourceByName(resourceNameString);
 		
 		surveyTool.setCurrentlySurveying(true);
 		surveyTool.setLastSurveyTime(System.currentTimeMillis());
@@ -422,8 +277,8 @@ public class SurveyService implements INetworkDispatch {
 
 		float differential = surveyRadius / (float) divisor;
 		GalacticResource resourceToSurvey = surveyTool.getSurveyResource();			
-		Vector<ResourceConcentration> concentrationMap = buildConcentrationsCollection(crafter.getPosition(),resourceToSurvey, surveyRadius, differential, crafter.getPlanetId());		
-		constructSurveyMapMessage(crafter, concentrationMap, surveyRadius);
+		Vector<ResourceConcentration> concentrationMap = resourceToSurvey.buildConcentrationsCollection(crafter.getPosition(),resourceToSurvey, surveyRadius, differential, crafter.getPlanetId());		
+		resourceToSurvey.constructSurveyMapMessage(crafter, concentrationMap, surveyRadius);
 		crafter.sendSystemMessage("Distance to nearest Deposit : " + resourceToSurvey.getHelperMinDist(), (byte) 0);
 	}
 	
@@ -780,8 +635,8 @@ public class SurveyService implements INetworkDispatch {
 		
 	public SUICallback handleSurveyRangeInput(SWGObject crafter,SUIWindow suiWindow){
 		SUICallback callback = suiWindow.getCallbackByEventId(1);
-		if (callback!=null)
-			System.out.println("handleExceptionalInput " + callback.toString());
+//		if (callback!=null)
+//			System.out.println("handleExceptionalInput " + callback.toString());
 		core.suiService.closeSUIWindow(crafter, 0);
 		return callback;
 	}	

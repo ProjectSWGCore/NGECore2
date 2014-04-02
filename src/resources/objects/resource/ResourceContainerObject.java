@@ -134,70 +134,11 @@ public class ResourceContainerObject extends TangibleObject {
 		
 	}
 	
-	// Overload to initialize with stack count
-//	public ResourceContainerObject(int stackCount){
-//		this.stackCount = stackCount;
-//		long range = 1234567L;
-//		Random r = new Random();
-//		this.containerID = (long)(r.nextDouble()*range);
-//		messageBuilder = new ResourceContainerMessageBuilder(this);
-//	}
-	
-	// Overload for objectservice call
 	public ResourceContainerObject(long objectID, Planet planet, String template, Point3D position, Quaternion orientation){
 		super(objectID, planet, template, position, orientation);
 		messageBuilder = new ResourceContainerMessageBuilder(this);
 		}
-		
-	// Overload to initialize with stack count
-	// and resource reference
-//	public ResourceContainerObject(int stackCount, GalacticResource resource){
-//		this.stackCount = stackCount;
-//		long range = 1234567L;
-//		Random r = new Random();
-//		this.containerID = (long)(r.nextDouble()*range);
-//		this.setResourceName(resource.getName());
-//		this.setResourceClass(resource.getResourceRoot().getResourceClass());
-//		this.setColdResistance(resource.getResourceStats()[0]);
-//		this.setConductivity(resource.getResourceStats()[1]);
-//		this.setDecayResistance(resource.getResourceStats()[2]);
-//		this.setHeatResistance(resource.getResourceStats()[3]);
-//		this.setMalleability(resource.getResourceStats()[4]);
-//		this.setShockResistance(resource.getResourceStats()[5]);
-//		this.setUnitToughness(resource.getResourceStats()[6]);
-//		this.setEntangleResistance(resource.getResourceStats()[7]);
-//		this.setPotentialEnergy(resource.getResourceStats()[8]);
-//		this.setOverallQuality(resource.getResourceStats()[9]);
-//		this.setFlavor(resource.getResourceStats()[10]);
-//		this.setResourceType(resource.getResourceRoot().getResourceType());
-//		this.setIffFileName(resource.getResourceRoot().getResourceFileName());
-//		messageBuilder = new ResourceContainerMessageBuilder(this);
-//	}
-//	
-//	public ResourceContainerObject(int stackCount, GalacticResource resource, String template,long objectID, Planet planet){
-//		super(objectID, planet, template);
-//		this.stackCount = stackCount;
-//		long range = 1234567L;
-//		Random r = new Random();
-//		this.containerID = (long)(r.nextDouble()*range);
-//		this.setResourceName(resource.getName());
-//		this.setResourceClass(resource.getResourceRoot().getResourceClass());
-//		this.setColdResistance(resource.getResourceStats()[0]);
-//		this.setConductivity(resource.getResourceStats()[1]);
-//		this.setDecayResistance(resource.getResourceStats()[2]);
-//		this.setHeatResistance(resource.getResourceStats()[3]);
-//		this.setMalleability(resource.getResourceStats()[4]);
-//		this.setShockResistance(resource.getResourceStats()[5]);
-//		this.setUnitToughness(resource.getResourceStats()[6]);
-//		this.setEntangleResistance(resource.getResourceStats()[7]);
-//		this.setPotentialEnergy(resource.getResourceStats()[8]);
-//		this.setOverallQuality(resource.getResourceStats()[9]);
-//		this.setFlavor(resource.getResourceStats()[10]);
-//		this.setResourceType(resource.getResourceRoot().getResourceType());
-//		this.setIffFileName(resource.getResourceRoot().getResourceFileName());
-//		messageBuilder = new ResourceContainerMessageBuilder(this);
-//		}
-	
+			
 	public void initializeStats(GalacticResource resource){
 		this.setResourceName(resource.getName());
 		this.setResourceClass(resource.getResourceClass());
@@ -216,29 +157,72 @@ public class ResourceContainerObject extends TangibleObject {
 		this.setGeneralType(resource.getGeneralType());
 		this.setReferenceID(resource.getId());
 		this.setResourceFileName(resource.getIffFileName());
+		//this.setIffFileName(resource.getIffFileName());
+		
+		// set attributes
+		this.getAttributes().put("@obj_attr_n:condition", "100/100");
+		this.getAttributes().put("@obj_attr_n:volume", "1");
+		this.getAttributes().put("@obj_attr_n:resource_contents", this.getStackCount()+"/"+maximalStackCapacity);
+		this.getAttributes().put("@obj_attr_n:resource_name", this.getResourceName());
+		this.getAttributes().put("@obj_attr_n:resource_class", "@resource/resource_names:" + this.getResourceFileName());
+					
+		if (this.getColdResistance()>0){
+			this.getAttributes().put("res_cold_resist", ""+this.getColdResistance());
+			resource.getAttributes().put("res_cold_resist", ""+this.getColdResistance());
+		}
+		
+		if (this.getConductivity()>0){
+			this.getAttributes().put("res_conductivity", ""+this.getConductivity());
+			resource.getAttributes().put("res_conductivity", ""+this.getConductivity());
+		}
+		
+		if (this.getDecayResistance()>0){
+			this.getAttributes().put("res_decay_resist", ""+this.getDecayResistance());
+			resource.getAttributes().put("res_decay_resist", ""+this.getDecayResistance());
+		}
+		
+		if (this.getHeatResistance()>0){
+			this.getAttributes().put("res_heat_resist", ""+this.getHeatResistance());
+			resource.getAttributes().put("res_heat_resist", ""+this.getHeatResistance());
+		}		
+		
+		if (this.getMalleability()>0){
+			this.getAttributes().put("res_malleability", ""+this.getMalleability());
+			resource.getAttributes().put("res_malleability", ""+this.getMalleability());
+		}
+		
+		if (this.getOverallQuality()>0){
+			this.getAttributes().put("res_quality", ""+this.getOverallQuality());
+			resource.getAttributes().put("res_quality", ""+this.getOverallQuality());
+
+		}
+		
+		if (this.getShockResistance()>0){
+			this.getAttributes().put("res_shock_resistance", ""+this.getShockResistance());
+			resource.getAttributes().put("res_shock_resistance", ""+this.getShockResistance());
+		}
+		
+		if (this.getUnitToughness()>0){	
+			this.getAttributes().put("res_toughness", ""+this.getUnitToughness());
+			resource.getAttributes().put("res_toughness", ""+this.getUnitToughness());
+		}
+		
+		if (this.getFlavor()>0){
+			this.getAttributes().put("res_flavor", ""+this.getFlavor());
+			resource.getAttributes().put("res_flavor", ""+this.getFlavor());
+		}
+		
+		if (this.getEntangleResistance()>0){
+			this.getAttributes().put("entangle_resistance", ""+this.getEntangleResistance());
+			resource.getAttributes().put("entangle_resistance", ""+this.getEntangleResistance());
+		}
+		
+		if (this.getPotentialEnergy()>0){
+			this.getAttributes().put("res_potential_energy", ""+this.getPotentialEnergy());
+			resource.getAttributes().put("res_potential_energy", ""+this.getPotentialEnergy());
+		}	
 	}
 	
-//	public void initializeStats(GalacticResource resource){
-//		this.setResourceName(resource.getName());
-//		this.setResourceClass(resource.getResourceRoot().getResourceClass());
-//		this.setColdResistance(resource.getResourceStats()[0]);
-//		this.setConductivity(resource.getResourceStats()[1]);
-//		this.setDecayResistance(resource.getResourceStats()[2]);
-//		this.setHeatResistance(resource.getResourceStats()[3]);
-//		this.setMalleability(resource.getResourceStats()[4]);
-//		this.setShockResistance(resource.getResourceStats()[5]);
-//		this.setUnitToughness(resource.getResourceStats()[6]);
-//		this.setEntangleResistance(resource.getResourceStats()[7]);
-//		this.setPotentialEnergy(resource.getResourceStats()[8]);
-//		this.setOverallQuality(resource.getResourceStats()[9]);
-//		this.setFlavor(resource.getResourceStats()[10]);
-//		this.setResourceType(resource.getResourceRoot().getResourceType());
-//		this.setGeneralType(resource.getResourceRoot().getGeneralType());
-//		this.setReferenceID(resource.getId());
-//		this.setResourceFileName(resource.getResourceRoot().getResourceFileName());
-//	}
-	
-
 	public long getContainerID() {
 		return containerID;
 	}
@@ -411,6 +395,7 @@ public class ResourceContainerObject extends TangibleObject {
 
 	public void setStackCount(int stackCount) {
 		this.stackCount = stackCount;
+		this.getAttributes().put("@obj_attr_n:resource_contents", this.getStackCount()+"/"+maximalStackCapacity);
 	}
 
 	public byte getContainerType() {
