@@ -85,6 +85,7 @@ public class SurveyService implements INetworkDispatch {
 	}
 	
 	public void ServiceProcessing(){
+		// All tools sampling
 		SurveyTool removeTool=null;
 		for (SurveyTool surveyTool : activeSurveyTools){
 			if (surveyTool.getCurrentlySurveying()){
@@ -92,6 +93,7 @@ public class SurveyService implements INetworkDispatch {
 				if (System.currentTimeMillis()>surveyTool.getLastSurveyTime()+3000){					
 					removeTool = surveyTool;
 					surveyTool.setCurrentlySurveying(false);
+					surveyTool.sendConstructSurveyMapMessage();
 				}
 			}
 			if (surveyTool.getCurrentlySampling()){
@@ -122,6 +124,8 @@ public class SurveyService implements INetworkDispatch {
 		}
 		if (removeTool!=null)
 			activeSurveyTools.remove(removeTool); // remove after notification
+		
+		
 		
 	}
 	
@@ -247,6 +251,12 @@ public class SurveyService implements INetworkDispatch {
 			return;
 		}
 		
+		// QA tool lockup countermeasure
+		if(surveyTool.getCurrentlySurveying() && surveyTool.getLastSurveyTime()<System.currentTimeMillis()-3000){
+			surveyTool.setCurrentlySurveying(false);
+			surveyTool.setLastSurveyTime(System.currentTimeMillis());
+		}
+		
 		// Counter too frequent survey button activation
 		if(surveyTool.getCurrentlySurveying()){
 			return;		
@@ -273,41 +283,46 @@ public class SurveyService implements INetworkDispatch {
 		crafter.getClient().getSession().write(cEffMsg.serialize());						
 		crafter.sendSystemMessage("You begin to survey for " + commandArgs, (byte) 0);
 
-		float surveyRadius = 64.0f;		
-		int surveyToolRangeSetting = surveyTool.getSurveyRangeSetting();
-		//surveyToolRangeSetting = 4;
-		int divisor = 0;
-		if (surveyToolRangeSetting==0) {
-			divisor = 2;
-			surveyRadius = 64.0f;
-		} else if (surveyToolRangeSetting==1) {
-			divisor = 3;
-			surveyRadius = 128.0f;
-		} else if (surveyToolRangeSetting==2) {
-			divisor = 3;
-			surveyRadius = 192.0f;
-		} else if (surveyToolRangeSetting==3) {
-			divisor = 4;
-			surveyRadius = 256.0f;
-		} else if (surveyToolRangeSetting==4) {
-			divisor = 4;
-			surveyRadius = 320.0f;
-		} else {
-			divisor = 5;
-			surveyRadius = 3072.0f;
-		}
-
-		float differential = surveyRadius / (float) divisor;
-		GalacticResource resourceToSurvey = surveyTool.getSurveyResource();			
-		Vector<ResourceConcentration> concentrationMap = resourceToSurvey.buildConcentrationsCollection(crafter.getPosition(),resourceToSurvey, surveyRadius, differential, crafter.getPlanetId());		
-		resourceToSurvey.constructSurveyMapMessage(crafter, concentrationMap, surveyRadius);
-		crafter.sendSystemMessage("Distance to nearest Deposit : " + resourceToSurvey.getHelperMinDist(), (byte) 0);
+//		float surveyRadius = 64.0f;		
+//		int surveyToolRangeSetting = surveyTool.getSurveyRangeSetting();
+//		//surveyToolRangeSetting = 4;
+//		int divisor = 0;
+//		if (surveyToolRangeSetting==0) {
+//			divisor = 2;
+//			surveyRadius = 64.0f;
+//		} else if (surveyToolRangeSetting==1) {
+//			divisor = 3;
+//			surveyRadius = 128.0f;
+//		} else if (surveyToolRangeSetting==2) {
+//			divisor = 3;
+//			surveyRadius = 192.0f;
+//		} else if (surveyToolRangeSetting==3) {
+//			divisor = 4;
+//			surveyRadius = 256.0f;
+//		} else if (surveyToolRangeSetting==4) {
+//			divisor = 4;
+//			surveyRadius = 320.0f;
+//		} else {
+//			divisor = 5;
+//			surveyRadius = 3072.0f;
+//		}
+//
+//		float differential = surveyRadius / (float) divisor;
+//		GalacticResource resourceToSurvey = surveyTool.getSurveyResource();			
+//		Vector<ResourceConcentration> concentrationMap = resourceToSurvey.buildConcentrationsCollection(crafter.getPosition(),resourceToSurvey, surveyRadius, differential, crafter.getPlanetId());		
+//		resourceToSurvey.constructSurveyMapMessage(crafter, concentrationMap, surveyRadius);
+//		crafter.sendSystemMessage("Distance to nearest Deposit : " + resourceToSurvey.getHelperMinDist(), (byte) 0);
 	}
 	
 	public void requestSampling(CreatureObject crafter, SWGObject target, SurveyCommand command, int actionCounter, String commandArgs){	
 
 		PlayerObject player = (PlayerObject) crafter.getSlottedObject("ghost");	
 		SurveyTool surveyTool = player.getLastUsedSurveyTool();
+		
+		if (surveyTool.getCurrentlySurveying()){
+			crafter.sendSystemMessage("@survey:sample_survey", (byte) 0);
+			return;
+		}
 		
 		if (crafter.getPosture()!=1) // QA
 			surveyTool.setCurrentlySampling(false);
@@ -351,11 +366,11 @@ public class SurveyService implements INetworkDispatch {
 					crafter.sendSystemMessage("You will be able to sample again in " + remaining + " seconds.", (byte) 0); // "@survey:tool_recharge_time"
 				} else {
 					
-					// ToDo:
-					if (sampleResource.getResourceRoot().getResourceClass().equals("Radioactive")){ //resourceRoot.getResourceClass("Radioactive");
-						createRadioactivityWarningSUIWindow(crafter, surveyTool);
-						return;
-					}
+					// ToDo: Find out if NGE really still did this
+//					if (sampleResource.getResourceRoot().getResourceClass().equals("Radioactive")){ //resourceRoot.getResourceClass("Radioactive");
+//						createRadioactivityWarningSUIWindow(crafter, surveyTool);
+//						return;
+//					}
 					
 					crafter.setPosture((byte) 1);
 					crafter.sendSystemMessage("You kneel", (byte) 0);
@@ -544,7 +559,8 @@ public class SurveyService implements INetworkDispatch {
 	}
 	
 	public void addActiveSurveyTool(SurveyTool tool){
-		activeSurveyTools.add(tool);
+		if (! activeSurveyTools.contains(tool))
+			activeSurveyTools.add(tool);
 	}
 	
 	public Vector<SurveyTool> getActiveSurveyTools(){

@@ -21,6 +21,8 @@
  ******************************************************************************/
 package resources.objects.tool;
 
+import java.util.Vector;
+
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
 
@@ -29,6 +31,7 @@ import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 import resources.objects.creature.CreatureObject;
 import resources.objects.resource.GalacticResource;
+import resources.objects.resource.ResourceConcentration;
 import resources.objects.tangible.TangibleObject;
 
 /** 
@@ -294,5 +297,37 @@ public class SurveyTool extends TangibleObject{
 
 	public void setSurveyRangeSetting(byte surveyRangeSetting) {
 		SurveyRangeSetting = surveyRangeSetting;
+	}
+	
+	public void sendConstructSurveyMapMessage(){
+		float surveyRadius = 64.0f;		
+		int surveyToolRangeSetting = this.getSurveyRangeSetting();
+		//surveyToolRangeSetting = 4;
+		int divisor = 0;
+		if (surveyToolRangeSetting==0) {
+			divisor = 2;
+			surveyRadius = 64.0f;
+		} else if (surveyToolRangeSetting==1) {
+			divisor = 3;
+			surveyRadius = 128.0f;
+		} else if (surveyToolRangeSetting==2) {
+			divisor = 3;
+			surveyRadius = 192.0f;
+		} else if (surveyToolRangeSetting==3) {
+			divisor = 4;
+			surveyRadius = 256.0f;
+		} else if (surveyToolRangeSetting==4) {
+			divisor = 4;
+			surveyRadius = 320.0f;
+		} else {
+			divisor = 5;
+			surveyRadius = 3072.0f;
+		}
+
+		float differential = surveyRadius / (float) divisor;
+		GalacticResource resourceToSurvey = this.getSurveyResource();			
+		Vector<ResourceConcentration> concentrationMap = resourceToSurvey.buildConcentrationsCollection(this.getUser().getPosition(),resourceToSurvey, surveyRadius, differential, this.getUser().getPlanetId());		
+		this.getSurveyResource().constructSurveyMapMessage(this.getUser(), concentrationMap, surveyRadius);
+		this.getUser().sendSystemMessage("Distance to nearest Deposit : " + this.getSurveyResource().getHelperMinDist(), (byte) 0);
 	}
 }
