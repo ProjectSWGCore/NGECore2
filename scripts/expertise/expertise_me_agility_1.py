@@ -36,13 +36,11 @@ def removeExpertisePoint(core, actor):
 
 	return
 
-# this checks what abilities the player gets by level, need to also call this on level-up
 def addAbilities(core, actor, player):
-
-
+	if actor.getLevel() == 10:
+		actor.addAbility("me_enhance_agility_1")
 	return
 
 def removeAbilities(core, actor, player):
-
-
+	actor.removeAbility("me_enhance_agility_1")
 	return
