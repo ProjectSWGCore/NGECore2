@@ -1226,7 +1226,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 						buffer = createDelta("CREO", (byte) 4, (short) 1, (byte) 3, buffer.flip(), buffer.array().length + 4);
 						
 						if (object.getClient() != null && object.getClient().getSession() != null) {
-							//object.getClient().getSession().write(buffer);
+							object.getClient().getSession().write(buffer);
 						}
 						break;
 					}
