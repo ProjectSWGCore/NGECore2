@@ -809,6 +809,11 @@ public class PlayerService implements INetworkDispatch {
 		DatatableVisitor experienceTable;
 		PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
 		experience *= xpMultiplier;
+		
+		if (creature.getLevel() >= 90) {
+			return;
+		}
+		
 		//synchronized(objectMutex) {
 			try {
 				experienceTable = ClientFileManager.loadFile("datatables/player/player_level.iff", DatatableVisitor.class);
