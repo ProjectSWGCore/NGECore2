@@ -558,7 +558,7 @@ public class PlayerService implements INetworkDispatch {
 	}
 	
 	/*
-	 * Resets to level 0
+	 * Resets to level 1
 	 */
 	public void resetLevel(CreatureObject creature) {
 		PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
@@ -576,18 +576,13 @@ public class PlayerService implements INetworkDispatch {
         				case "object/tangible/datapad/shared_character_datapad.iff":
         				case "object/tangible/bank/shared_character_bank.iff":
         				case "object/tangible/mission_bag/shared_mission_bag.iff":
-        				case "object/weapon/creature/shared_creature_default_weapon.iff": {
+        				case "object/weapon/creature/shared_creature_default_weapon.iff":
         					continue;
-        				}
-        				default: {
-        					//
-        				}
+        				default:
+        					core.equipmentService.unequip(creature, equipment);
         			}
-        			
-        			core.equipmentService.unequip(creature, equipment);
         		}
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
@@ -597,10 +592,30 @@ public class PlayerService implements INetworkDispatch {
 		
 		core.buffService.clearBuffs(creature);
 		
-		for (String skill : creature.getSkills()) {
-			core.skillService.removeSkill(creature, skill);
+		try {
+			String[] skills;
+			
+			DatatableVisitor skillTemplate = ClientFileManager.loadFile("datatables/skill_template/skill_template.iff", DatatableVisitor.class);
+			
+			for (int s = 0; s < skillTemplate.getRowCount(); s++) {
+				if (skillTemplate.getObject(s, 0) != null) {
+					if (((String) skillTemplate.getObject(s, 0)).equals(player.getProfession())) {
+						skills = ((String) skillTemplate.getObject(s, 4)).split(",");
+						
+						for (String skill : skills) {
+							creature.removeSkill(skill);
+						}
+						
+						break;
+					}
+				}
+			}
+		}  catch (InstantiationException | IllegalAccessException e) {
+			e.printStackTrace();
 		}
-
+		
+		core.skillService.resetExpertise(creature);
+		
 		String xpType = ((player.getProfession().contains("entertainer")) ? "entertainer" : ((player.getProfession().contains("trader")) ? "crafting" : "combat_general"));
 			
 		player.setXp(xpType, 0);
@@ -619,7 +634,7 @@ public class PlayerService implements INetworkDispatch {
 		creature.setAction(300);
 		creature.setGrantedHealth(0);
 		
-		creature.setLevel((short) 0);
+		creature.setLevel((short) 1);
 	}
 	
 	/*
@@ -637,11 +652,9 @@ public class PlayerService implements INetworkDispatch {
 			return;
 		}
 		
-		resetLevel(creature);
+		if(level == 0) return;
 		
-		if (level == 0) {
-			return;
-		}
+		resetLevel(creature);
 		
 		try {
 			experienceTable = ClientFileManager.loadFile("datatables/player/player_level.iff", DatatableVisitor.class);
@@ -802,6 +815,11 @@ public class PlayerService implements INetworkDispatch {
 		DatatableVisitor experienceTable;
 		PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
 		experience *= xpMultiplier;
+		
+		if (creature.getLevel() >= 90) {
+			return;
+		}
+		
 		//synchronized(objectMutex) {
 			try {
 				experienceTable = ClientFileManager.loadFile("datatables/player/player_level.iff", DatatableVisitor.class);
@@ -814,7 +832,7 @@ public class PlayerService implements INetworkDispatch {
 				experience += ((experience * experienceBonus) / 100);
 				
 				// 1. Add the experience.
-				if (experience > 0) {
+				if (experience > 0 && !creature.isStationary()) {
 					creature.showFlyText("base_player", "prose_flytext_xp", "", experience, (float) 2.5, new RGB(180, 60, 240), 1);
 				}
 				
@@ -1206,6 +1224,25 @@ public class PlayerService implements INetworkDispatch {
 			}
 		});
 		core.suiService.openSUIWindow(ringWindow);
+	}
+	
+	public String getFormalProfessionName(String template) {
+		String formalName = "";
+
+		switch (template) {
+		case "force_sensitive_1a":	formalName = "Jedi"; break;
+		case "bounty_hunter_1a":	formalName = "Bounty Hunter"; break;
+		case "officer_1a":			formalName = "Officer"; break;
+		case "smuggler_1a":			formalName = "Smuggler"; break;
+		case "entertainer_1a":		formalName = "Entertainer"; break;
+		case "spy_1a":				formalName = "Spy"; break;
+		case "medic_1a":			formalName = "Medic"; break;
+		case "commando_1a":			formalName = "Commando"; break;
+		
+		default:					formalName = "Trader"; break;	// Ziggy: Trader profession names are a bit irregular, so this is used.
+
+		}
+		return formalName;
 	}
 	
 	@Override

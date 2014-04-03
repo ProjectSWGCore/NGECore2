@@ -80,11 +80,10 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 12, "Reset expertise");
 				break;
 			case 2: // Items
-				suiOptions.put((long) 20, "(Light) Jedi Robe");
-				suiOptions.put((long) 21, "(Dark) Jedi Robe");
-				suiOptions.put((long) 22, "Armor");
-				suiOptions.put((long) 23, "Weapons");
-				suiOptions.put((long) 24, "Misc Items");
+				suiOptions.put((long) 20, "Armor");
+				suiOptions.put((long) 21, "Weapons");
+				suiOptions.put((long) 22, "Misc Items");
+				suiOptions.put((long) 23, "Jedi Items");
 				break;
 			case 3: // [Items] Weapons
 				suiOptions.put((long) 30, "Jedi Weapons");
@@ -114,6 +113,11 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 80, "Marauder");
 				suiOptions.put((long) 81, "Ithorian Guardian");
 				suiOptions.put((long) 82, "Kashyyykian Ceremonial");
+				break;
+			case 9: // [Items] Jedi Items
+				suiOptions.put((long) 90, "(Light) Jedi Robe");
+				suiOptions.put((long) 91, "(Dark) Jedi Robe");
+				suiOptions.put((long) 92, "Belt of Master Bodo Baas");
 				break;
 		}
 		
@@ -164,22 +168,19 @@ public class DevService implements INetworkDispatch {
 					    return;
 						
 					// Items
-					case 20: // (Light) Jedi Robe
-						inventory.add(core.objectService.createObject("object/tangible/wearables/robe/shared_robe_jedi_light_s03.iff", planet));
-						return;
-					case 21: // (Dark) Jedi Robe
-						inventory.add(core.objectService.createObject("object/tangible/wearables/robe/shared_robe_jedi_dark_s03.iff", planet));
-						return;
-					case 22: // Armor
+					case 20: // Armor
 						sendCharacterBuilderSUI(player, 5);
 						return;
-					case 23: // Weapons
+					case 21: // Weapons
 						sendCharacterBuilderSUI(player, 3);
 						return;
-					
-					case 24: // Misc Items
+					case 22: // Misc Items
 						sendCharacterBuilderSUI(player, 4);
 						return;
+					case 23: // Jedi Items
+						sendCharacterBuilderSUI(player, 9);
+						return;
+						
 					// [Items] Weapons
 					case 30: // Jedi Weapons
 						TangibleObject lightsaber1 = (TangibleObject) core.objectService.createObject("object/weapon/melee/sword/crafted_saber/shared_sword_lightsaber_one_handed_gen5.iff", planet);
@@ -888,6 +889,16 @@ public class DevService implements INetworkDispatch {
 						inventory.add(cer_leggings);
 						inventory.add(cer_chest);
 						
+						return;
+						
+					case 90: // (Light) Jedi Robe
+						inventory.add(core.objectService.createObject("object/tangible/wearables/robe/shared_robe_jedi_light_s03.iff", planet));
+						return;
+					case 91: // (Dark) Jedi Robe
+						inventory.add(core.objectService.createObject("object/tangible/wearables/robe/shared_robe_jedi_dark_s03.iff", planet));
+						return;
+					case 92: // Belt of Master Bodo Baas
+						inventory.add(core.objectService.createObject("object/tangible/wearables/backpack/shared_fannypack_s01.iff", planet));
 						return;
 				}
 			}	
