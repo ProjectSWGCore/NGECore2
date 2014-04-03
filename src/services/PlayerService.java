@@ -826,7 +826,7 @@ public class PlayerService implements INetworkDispatch {
 				experience += ((experience * experienceBonus) / 100);
 				
 				// 1. Add the experience.
-				if (experience > 0) {
+				if (experience > 0 && !creature.isStationary()) {
 					creature.showFlyText("base_player", "prose_flytext_xp", "", experience, (float) 2.5, new RGB(180, 60, 240), 1);
 				}
 				
