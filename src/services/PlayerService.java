@@ -576,18 +576,13 @@ public class PlayerService implements INetworkDispatch {
         				case "object/tangible/datapad/shared_character_datapad.iff":
         				case "object/tangible/bank/shared_character_bank.iff":
         				case "object/tangible/mission_bag/shared_mission_bag.iff":
-        				case "object/weapon/creature/shared_creature_default_weapon.iff": {
+        				case "object/weapon/creature/shared_creature_default_weapon.iff":
         					continue;
-        				}
-        				default: {
-        					//
-        				}
+        				default:
+        					core.equipmentService.unequip(creature, equipment);
         			}
-        			
-        			core.equipmentService.unequip(creature, equipment);
         		}
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
@@ -598,7 +593,19 @@ public class PlayerService implements INetworkDispatch {
 		core.buffService.clearBuffs(creature);
 		
 		for (String skill : creature.getSkills()) {
-			core.skillService.removeSkill(creature, skill);
+			if (skill.startsWith("species_")) {
+				continue;
+			}
+			
+			switch (skill) {
+				case "language_basic_comprehend":
+				case "language_basic_speak":
+				case "creature_harvesting":
+				case "language_wookiee_comprehend":
+					continue;
+				default:
+					core.skillService.removeSkill(creature, skill);
+			}
 		}
 
 		String xpType = ((player.getProfession().contains("entertainer")) ? "entertainer" : ((player.getProfession().contains("trader")) ? "crafting" : "combat_general"));
