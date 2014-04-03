@@ -183,7 +183,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		messageBuilder = new CreatureMessageBuilder(this);
 		loadTemplateData();
 		skills = new SWGList<String>(messageBuilder, 1, 3);
-		skillMods = new SWGMap<SkillMod>(messageBuilder, 4, 3);
+		skillMods = new SWGMap<String, SkillMod>(messageBuilder, 4, 3);
 		abilities = new SWGList<String>(messageBuilder, 4, 14);
 		missionCriticalObjects = new SWGList<MissionCriticalObject>(messageBuilder, 4, 13);
 		equipmentList = new SWGList<SWGObject>(messageBuilder, 6, 0x17);
