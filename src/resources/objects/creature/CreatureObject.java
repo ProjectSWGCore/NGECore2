@@ -607,19 +607,6 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		skillMods.remove(mod.getName());
 	}
 	
-	public short getSkillModsUpdateCounter() {
-		synchronized(objectMutex) {
-			return (short) skillModsUpdateCounter;
-		}
-	}
-	
-	public void setSkillModsUpdateCounter(short skillModsUpdateCounter) {
-		synchronized(objectMutex) {
-			this.skillModsUpdateCounter = skillModsUpdateCounter;
-		}
-	}
-
-	
 	public float getSpeedMultiplierBase() {
 		synchronized(objectMutex) {
 			return speedMultiplierBase;
