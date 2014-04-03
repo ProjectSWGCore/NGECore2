@@ -595,7 +595,7 @@ public class PlayerService implements INetworkDispatch {
 		try {
 			String[] skills;
 			
-			skillTemplate = ClientFileManager.loadFile("datatables/skill_template/skill_template.iff", DatatableVisitor.class);
+			DatatableVisitor skillTemplate = ClientFileManager.loadFile("datatables/skill_template/skill_template.iff", DatatableVisitor.class);
 			
 			for (int s = 0; s < skillTemplate.getRowCount(); s++) {
 				if (skillTemplate.getObject(s, 0) != null) {
