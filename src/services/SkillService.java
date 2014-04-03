@@ -22,6 +22,8 @@
 package services;
 
 import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.mina.core.buffer.IoBuffer;
@@ -30,8 +32,12 @@ import org.python.core.Py;
 import org.python.core.PyObject;
 
 import protocol.swg.ExpertiseRequestMessage;
+import protocol.swg.ObjControllerMessage;
+import protocol.swg.objectControllerObjects.SetProfessionTemplate;
+import protocol.swg.objectControllerObjects.UiPlayEffect;
 import resources.common.Console;
 import resources.common.FileUtilities;
+import resources.common.ObjControllerOpcodes;
 import resources.common.Opcodes;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
@@ -275,38 +281,63 @@ public class SkillService implements INetworkDispatch {
 	@Override
 	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> swgOpcodes, Map<Integer, INetworkRemoteEvent> objControllerOpcodes) {
 		
-		swgOpcodes.put(Opcodes.ExpertiseRequestMessage, new INetworkRemoteEvent() {
+		swgOpcodes.put(Opcodes.ExpertiseRequestMessage, (session, buffer) -> {
 
-			@Override
-			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
-				
-				buffer = buffer.order(ByteOrder.LITTLE_ENDIAN);
-				buffer.position(0);
-				
-				ExpertiseRequestMessage expertise = new ExpertiseRequestMessage();
-				expertise.deserialize(buffer);
+			buffer = buffer.order(ByteOrder.LITTLE_ENDIAN);
+			buffer.position(0);
+			
+			ExpertiseRequestMessage expertise = new ExpertiseRequestMessage();
+			expertise.deserialize(buffer);
 
-				Client client = core.getClient(session);
-				if(client == null) {
-					System.out.println("NULL Client");
-					return;
-				}
-
-				if(client.getParent() == null)
-					return;
-				
-				CreatureObject creature = (CreatureObject) client.getParent();
-				PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
-				
-				if(player == null)
-					return;
-				
-				for(String expertiseName : expertise.getExpertiseSkills()) {
-					if(expertiseName.startsWith("expertise_") && ((caluclateExpertisePoints(creature) - 1) >= 0) && validExpertiseSkill(player, expertiseName)) { // Prevent possible glitches/exploits
-						addSkill(creature, expertiseName);
-					}
-				}			
+			Client client = core.getClient(session);
+			if(client == null) {
+				System.out.println("NULL Client");
+				return;
 			}
+
+			if(client.getParent() == null)
+				return;
+			
+			CreatureObject creature = (CreatureObject) client.getParent();
+			PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
+			
+			if(player == null)
+				return;
+			
+			for(String expertiseName : expertise.getExpertiseSkills()) {
+				if(expertiseName.startsWith("expertise_") && ((caluclateExpertisePoints(creature) - 1) >= 0) && validExpertiseSkill(player, expertiseName)) { // Prevent possible glitches/exploits
+					addSkill(creature, expertiseName);
+				}
+			}
+			
+		});
+		
+		objControllerOpcodes.put(ObjControllerOpcodes.SET_PROFESSION_TEMPLATE, (session, buffer) -> {
+			
+			buffer = buffer.order(ByteOrder.LITTLE_ENDIAN);
+
+			SetProfessionTemplate profTemplate = new SetProfessionTemplate();
+			profTemplate.deserialize(buffer);
+			String profession = profTemplate.getProfession();
+			
+			Client client = core.getClient(session);
+			if(client == null) {
+				System.out.println("NULL Client");
+				return;
+			}
+
+			if(client.getParent() == null)
+				return;
+			
+			CreatureObject creature = (CreatureObject) client.getParent();
+			PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
+			
+			//System.out.println(profession);
+			if(player == null || player.getProfession().equals(profession) || profession == null)
+				return;
+			
+			core.playerService.respec(creature, profession);
+
 		});
 		
 	}
@@ -365,6 +396,19 @@ public class SkillService implements INetworkDispatch {
 		}
 		catch (Exception e) { e.printStackTrace(); }
 		return false;
+	}
+	
+	public void resetExpertise(CreatureObject creature) {
+		List<String> skills = new ArrayList<String>(creature.getSkills().get());
+		skills.stream().filter(s -> s.contains("expertise")).forEach(s -> removeSkill(creature, s));
+	}
+	
+	public void sendRespecWindow(CreatureObject creature) {
+		if(creature.getClient() == null)
+			return;
+		UiPlayEffect ui = new UiPlayEffect(creature.getObjectID(), "showMediator=ws_professiontemplateselect");
+		ObjControllerMessage objController = new ObjControllerMessage(0x0B, ui);
+		creature.getClient().getSession().write(objController.serialize());
 	}
 	
 	@Override

@@ -25,6 +25,7 @@ import java.nio.ByteOrder;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
+import protocol.swg.ObjControllerMessage;
 import resources.common.ObjControllerOpcodes;
 import resources.common.OutOfBand;
 
@@ -48,11 +49,11 @@ public class NpcConversationMessage extends ObjControllerObject {
 		IoBuffer outOfBandBuffer = outOfBand.serialize();
 		IoBuffer buffer = IoBuffer.allocate(16 + outOfBandBuffer.array().length).order(ByteOrder.LITTLE_ENDIAN);
 		
-		buffer.putInt(ObjControllerOpcodes.NPC_CONVERSATION_MESSAGE);
+		buffer.putInt(ObjControllerMessage.CONVERSATION_MESSAGE);
 		buffer.putLong(objectId);
 		buffer.putInt(0);
-		buffer.put(outOfBandBuffer);
-		
+		buffer.put(outOfBandBuffer.array());
+		System.out.println(buffer.getInt(16));
 		return buffer.flip();
 	}
 

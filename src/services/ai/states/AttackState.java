@@ -94,12 +94,25 @@ public class AttackState extends AIState {
 
 	@Override
 	public byte recover(AIActor actor) {
-		if(actor.getTimeSinceLastAttack() < 2000) {
+		CreatureObject creature = actor.getCreature();
+		float maxDistance = 0;
+		WeaponObject weapon = null;
+		if(creature.getWeaponId() != 0) {
+			weapon = (WeaponObject) NGECore.getInstance().objectService.getObject(creature.getWeaponId());
+			if(weapon != null)
+				maxDistance = weapon.getMaxRange() - 1;
+		} else if(creature.getSlottedObject("default_weapon") != null) {
+			weapon = (WeaponObject) creature.getSlottedObject("default_weapon");
+			if(weapon != null)
+				maxDistance = weapon.getMaxRange() - 1;
+		}
+		if(weapon == null)
+			return StateResult.FINISHED;
+		if(actor.getTimeSinceLastAttack() < weapon.getAttackSpeed() * 1000) {
 			//actor.scheduleRecovery();
 			return StateResult.UNFINISHED;
 		}
 		NGECore core = NGECore.getInstance();
-		CreatureObject creature = actor.getCreature();
 		if(creature.getPosture() == 14)
 			return StateResult.DEAD;
 		if(creature.getCombatFlag() == 0 || creature.getDefendersList().size() == 0 || actor.getFollowObject() == null)
@@ -134,16 +147,6 @@ public class AttackState extends AIState {
 			actor.removeDefender(target);
 			actor.scheduleRecovery();
 			return StateResult.UNFINISHED;
-		}
-		float maxDistance = 0;
-		if(creature.getWeaponId() != 0) {
-			WeaponObject weapon = (WeaponObject) NGECore.getInstance().objectService.getObject(creature.getWeaponId());
-			if(weapon != null)
-				maxDistance = weapon.getMaxRange() - 1;
-		} else if(creature.getSlottedObject("default_weapon") != null) {
-			WeaponObject weapon = (WeaponObject) creature.getSlottedObject("default_weapon");
-			if(weapon != null)
-				maxDistance = weapon.getMaxRange() - 1;
 		}
 		if(target.getWorldPosition().getDistance2D(creature.getWorldPosition()) > maxDistance) {
 			actor.scheduleRecovery();

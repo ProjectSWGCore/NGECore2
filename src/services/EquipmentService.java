@@ -83,33 +83,6 @@ public class EquipmentService implements INetworkDispatch {
 		return weaponCriticalChance;
 	}
 	
-	private void addWeaponCriticalChance(CreatureObject actor, SWGObject item) {
-		actor.addSkillMod("display_only_critical", getWeaponCriticalChance(actor, item));
-	}
-	
-	private void deductWeaponCriticalChance(CreatureObject actor, SWGObject item) {
-		actor.deductSkillMod("display_only_critical", getWeaponCriticalChance(actor, item));
-	}	
-	
-	public String getFormalProfessionName(String stfName) {
-		String formalName = "";
-
-		switch (stfName) {
-		case "force_sensitive_1a":	formalName = "Jedi"; break;
-		case "bounty_hunter_1a":	formalName = "Bounty Hunter"; break;
-		case "officer_1a":			formalName = "Officer"; break;
-		case "smuggler_1a":			formalName = "Smuggler"; break;
-		case "entertainer_1a":		formalName = "Entertainer"; break;
-		case "spy_1a":				formalName = "Spy"; break;
-		case "medic_1a":			formalName = "Medic"; break;
-		case "commando_1a":			formalName = "Commando"; break;
-		
-		default:					formalName = "Trader"; break;	// Ziggy: Trader profession names are a bit irregular, so this is used.
-
-		}
-		return formalName;
-	}
-	
 	public boolean canEquip(CreatureObject actor, SWGObject item) {
 		boolean result = true;
 		
@@ -117,14 +90,14 @@ public class EquipmentService implements INetworkDispatch {
 			return false;
 		
 		if (item.getAttributes().toString().contains("cat_armor"))
-			if (actor.getLevel() >= 22)
-				result = true;
-			else
-				return false;
+		{
+			if (actor.hasAbility("wear_all_armor")) result = true; // Change to "wear_all_armor" ability instead of lvl 22		
+			else return false;
+		}
 
 		if (item.getStringAttribute("class_required") != null) {
 			String profession = ((PlayerObject) actor.getSlottedObject("ghost")).getProfession();
-			if (item.getStringAttribute("class_required").contentEquals(getFormalProfessionName(profession)) || item.getStringAttribute("class_required").contentEquals("None"))
+			if (item.getStringAttribute("class_required").contentEquals(core.playerService.getFormalProfessionName(profession)) || item.getStringAttribute("class_required").contentEquals("None"))
 				result = true;
 			else
 				return false;
@@ -137,10 +110,18 @@ public class EquipmentService implements INetworkDispatch {
 				return false;			
 		
 		if (item.getAttributes().containsKey("required_combat_level"))
+		{
 			if (actor.getLevel() >= item.getIntAttribute("required_combat_level"))
 				result = true;
 			else
 				return false;
+		}
+		
+		if(item.getAttachment("unity") != null) 
+		{
+			actor.sendSystemMessage("@unity:cannot_remove_ring", (byte) 0);
+			return false;
+		}
 		
 		return result;
 	}
@@ -150,7 +131,7 @@ public class EquipmentService implements INetworkDispatch {
 	}
 	
 	private void addArmorProtection(CreatureObject actor, String protectionType, float protection, String slotName) {
-		actor.addSkillMod(protectionType, (int) (calculateArmorProtection(protection, slotName)));
+		actor.addSkillMod(protectionType, (int) Math.ceil(calculateArmorProtection(protection, slotName)));
 	}
 	
 	private void deductArmorProtection(CreatureObject actor, String protectionType, float protection, String slotName) {
@@ -179,17 +160,14 @@ public class EquipmentService implements INetworkDispatch {
 		return core.scriptService.getMethod("scripts/equipment/", "force_protection", item.getAttachment("type") + "_" + item.getStringAttribute("protection_level")).__call__().asInt();
 	}
 	
-	public void equip(CreatureObject actor, SWGObject item) {
+	public void equip(CreatureObject actor, SWGObject item) 
+	{
 		String template = ((item.getAttachment("customServerTemplate") == null) ? item.getTemplate() : (item.getTemplate().split("shared_")[0] + "shared_" + ((String) item.getAttachment("customServerTemplate")) + ".iff"));
 		String serverTemplate = template.replace(".iff", "");
-		PyObject func = core.scriptService.getMethod("scripts/" + serverTemplate.split("shared_" , 2)[0].replace("shared_", ""), serverTemplate.split("shared_" , 2)[1], "equip");
-		if(func != null)
-			func.__call__(Py.java2py(core), Py.java2py(actor), Py.java2py(item));
-
-		if (item.getStringAttribute("protection_level") != null)
-			addForceProtection(actor, item);
 		
-		// TODO: faction restrictions - You had to be a Combatant as minimum in order to EQUIP an item.
+		PyObject func = core.scriptService.getMethod("scripts/" + serverTemplate.split("shared_" , 2)[0].replace("shared_", ""), serverTemplate.split("shared_" , 2)[1], "equip");
+		if(func != null) func.__call__(Py.java2py(core), Py.java2py(actor), Py.java2py(item));
+		
 		// TODO: Species restrictions
 		// TODO: Gender restrictions
 		// TODO: crit enhancement from crafted weapons
@@ -197,107 +175,115 @@ public class EquipmentService implements INetworkDispatch {
 		// TODO: Calculate actual armor values (REMINDER: Check if the player is wearing a jedi robe/cloak (look for force protection intensity). If they are, they shouldn't receive any additional protection from other items with armour.)
 		// TODO: bio-link (assign it by objectID with setAttachment and then just display the customName for that objectID).
 		
-		if(item.getStringAttribute("cat_wpn_damage.wpn_category") != null)
-			addWeaponCriticalChance(actor, item);
-				
-		Map<String, Object> attributes = new TreeMap<String, Object>(item.getAttributes());
-		
-		for(Entry<String, Object> e : attributes.entrySet()) {
-			if(e.getKey().startsWith("cat_skill_mod_bonus.@stat_n:")) {
-				core.skillModService.addSkillMod(actor, e.getKey().replace("cat_skill_mod_bonus.@stat_n:", ""), Integer.parseInt((String) e.getValue()));
-			}
-			
-			if(e.getKey().startsWith("cat_stat_mod_bonus.@stat_n:")) {
-				core.skillModService.addSkillMod(actor, e.getKey().replace("cat_stat_mod_bonus.@stat_n:", ""), Integer.parseInt((String) e.getValue()));
-			}			
-			
-			if(e.getKey().startsWith("cat_armor_standard_protection")) {
-				addArmorProtection(actor, e.getKey().replace("cat_armor_standard_protection.armor_eff_", ""), Float.parseFloat((String) e.getValue()), actor.getSlotNameForObject(item));
-			}	
-			
-			if(e.getKey().startsWith("cat_armor_special_protection")) {
-				addArmorProtection(actor, e.getKey().replace("cat_armor_special_protection.special_protection_type_", ""), Float.parseFloat((String) e.getValue()), actor.getSlotNameForObject(item));
-			}		
-						
-			if(e.getKey().startsWith("cat_attrib_mod_bonus.attr_health")) {
-				actor.setMaxHealth(actor.getMaxHealth() + Integer.parseInt((String) e.getValue()));
-			}
-			
-			if(e.getKey().startsWith("cat_attrib_mod_bonus.attr_action")) {
-				actor.setMaxAction(actor.getMaxAction() + Integer.parseInt((String) e.getValue()));
-			}
-			
-		}
-		
-		if(item.getStringAttribute("proc_name") != null) core.buffService.addBuffToCreature(actor, item.getStringAttribute("proc_name").replace("@ui_buff:", ""), actor);
-		
-
-		if(!actor.getEquipmentList().contains(item))
-			actor.addObjectToEquipList(item);
-		
-		if(item.getAttachment("setBonus") != null)
+		if(!actor.getEquipmentList().contains(item)) 
 		{
-			BonusSetTemplate bonus = bonusSetTemplates.get((String)item.getAttachment("setBonus"));
-			bonus.callScript(actor);
+			actor.addObjectToEquipList(item);
+			processItemAtrributes(actor, item, true);
 		}
 }
 
-	public void unequip(CreatureObject actor, SWGObject item) {
+	public void unequip(CreatureObject actor, SWGObject item) 
+	{
 		String template = ((item.getAttachment("customServerTemplate") == null) ? item.getTemplate() : (item.getTemplate().split("shared_")[0] + "shared_" + ((String) item.getAttachment("customServerTemplate")) + ".iff"));
 		String serverTemplate = template.replace(".iff", "");
+		
 		PyObject func = core.scriptService.getMethod("scripts/" + serverTemplate.split("shared_" , 2)[0].replace("shared_", ""), serverTemplate.split("shared_" , 2)[1], "unequip");
-		if(func != null)
-			func.__call__(Py.java2py(core), Py.java2py(actor), Py.java2py(item));
+		if(func != null) func.__call__(Py.java2py(core), Py.java2py(actor), Py.java2py(item));
 
-		if (item.getStringAttribute("protection_level") != null)
-			deductForceProtection(actor, item);
 		
-		if(item.getStringAttribute("cat_wpn_damage.wpn_category") != null)		
-			deductWeaponCriticalChance(actor, item);
-		
+		if(actor.getEquipmentList().contains(item)) 
+		{
+			actor.removeObjectFromEquipList(item);
+			processItemAtrributes(actor, item, false);
+		}
+	}
+	
+	public void processItemAtrributes(CreatureObject creature, SWGObject item, boolean equipping)
+	{
 		Map<String, Object> attributes = new TreeMap<String, Object>(item.getAttributes());
 		
-		for(Entry<String, Object> e : attributes.entrySet()) {
-			
-			if(e.getKey().startsWith("cat_skill_mod_bonus.@stat_n:")) {
-				core.skillModService.deductSkillMod(actor, e.getKey().replace("cat_skill_mod_bonus.@stat_n:", ""), Integer.parseInt((String) e.getValue()));
-			}			
-			if(e.getKey().startsWith("cat_stat_mod_bonus.@stat_n:")) {
-				core.skillModService.deductSkillMod(actor, e.getKey().replace("cat_stat_mod_bonus.@stat_n:", ""), Integer.parseInt((String) e.getValue()));
-			}	
-			
-			if(e.getKey().startsWith("cat_armor_standard_protection")) {
-				deductArmorProtection(actor, e.getKey().replace("cat_armor_standard_protection.armor_eff_", ""), Float.parseFloat((String) e.getValue()), actor.getSlotNameForObject(item));
-			}	
-			
-			if(e.getKey().startsWith("cat_armor_special_protection")) {
-				deductArmorProtection(actor, e.getKey().replace("cat_armor_special_protection.special_protection_type_", ""), Float.parseFloat((String) e.getValue()), actor.getSlotNameForObject(item));
-			}		
-			
-			if(e.getKey().startsWith("cat_attrib_mod_bonus.attr_health")) {
-				actor.setMaxHealth(actor.getMaxHealth() - Integer.parseInt((String) e.getValue()));
-			}		
-			if(e.getKey().startsWith("cat_attrib_mod_bonus.attr_action")) {
-				actor.setMaxAction(actor.getMaxAction() - Integer.parseInt((String) e.getValue()));
+		if(equipping)
+		{
+			if(item.getStringAttribute("cat_wpn_damage.wpn_category") != null) creature.addSkillMod("display_only_critical", getWeaponCriticalChance(creature, item));
+			if(item.getStringAttribute("protection_level") != null) addForceProtection(creature, item);
+			if(item.getStringAttribute("proc_name") != null) core.buffService.addBuffToCreature(creature, item.getStringAttribute("proc_name").replace("@ui_buff:", ""), creature);
+	
+			for(Entry<String, Object> e : attributes.entrySet()) 
+			{	
+				if(e.getKey().startsWith("cat_skill_mod_bonus.@stat_n:")) 
+				{
+					core.skillModService.addSkillMod(creature, e.getKey().replace("cat_skill_mod_bonus.@stat_n:", ""), Integer.parseInt((String) e.getValue()));
+				}
+				
+				if(e.getKey().startsWith("cat_stat_mod_bonus.@stat_n:")) 
+				{
+					core.skillModService.addSkillMod(creature, e.getKey().replace("cat_stat_mod_bonus.@stat_n:", ""), Integer.parseInt((String) e.getValue()));
+				}			
+				
+				if(e.getKey().startsWith("cat_armor_standard_protection")) 
+				{
+					addArmorProtection(creature, e.getKey().replace("cat_armor_standard_protection.armor_eff_", ""), Float.parseFloat((String) e.getValue()), creature.getSlotNameForObject(item));
+				}	
+				
+				if(e.getKey().startsWith("cat_armor_special_protection")) 
+				{
+					addArmorProtection(creature, e.getKey().replace("cat_armor_special_protection.special_protection_type_", ""), Float.parseFloat((String) e.getValue()), creature.getSlotNameForObject(item));
+				}		
+							
+				if(e.getKey().startsWith("cat_attrib_mod_bonus.attr_health")) 
+				{
+					creature.setMaxHealth(creature.getMaxHealth() + Integer.parseInt((String) e.getValue()));
+				}
+				
+				if(e.getKey().startsWith("cat_attrib_mod_bonus.attr_action")) 
+				{
+					creature.setMaxAction(creature.getMaxAction() + Integer.parseInt((String) e.getValue()));
+				}
+				
 			}
+		}
+		else
+		{
+			if(item.getStringAttribute("cat_wpn_damage.wpn_category") != null) creature.deductSkillMod("display_only_critical", getWeaponCriticalChance(creature, item));
+			if(item.getStringAttribute("protection_level") != null) deductForceProtection(creature, item);
+			if(item.getStringAttribute("proc_name") != null) core.buffService.removeBuffFromCreatureByName(creature, item.getStringAttribute("proc_name").replace("@ui_buff:", ""));
 			
-		}	
-		
-		if(item.getAttachment("unity") != null) {
-			actor.sendSystemMessage("@unity:cannot_remove_ring", (byte) 0);
-			return;
+			for(Entry<String, Object> e : attributes.entrySet())
+			{
+				if(e.getKey().startsWith("cat_skill_mod_bonus.@stat_n:")) 
+				{
+					core.skillModService.deductSkillMod(creature, e.getKey().replace("cat_skill_mod_bonus.@stat_n:", ""), Integer.parseInt((String) e.getValue()));
+				}			
+				if(e.getKey().startsWith("cat_stat_mod_bonus.@stat_n:")) 
+				{
+					core.skillModService.deductSkillMod(creature, e.getKey().replace("cat_stat_mod_bonus.@stat_n:", ""), Integer.parseInt((String) e.getValue()));
+				}	
+				
+				if(e.getKey().startsWith("cat_armor_standard_protection")) 
+				{
+					deductArmorProtection(creature, e.getKey().replace("cat_armor_standard_protection.armor_eff_", ""), Float.parseFloat((String) e.getValue()), creature.getSlotNameForObject(item));
+				}	
+				
+				if(e.getKey().startsWith("cat_armor_special_protection")) 
+				{
+					deductArmorProtection(creature, e.getKey().replace("cat_armor_special_protection.special_protection_type_", ""), Float.parseFloat((String) e.getValue()), creature.getSlotNameForObject(item));
+				}		
+				
+				if(e.getKey().startsWith("cat_attrib_mod_bonus.attr_health")) 
+				{
+					creature.setMaxHealth(creature.getMaxHealth() - Integer.parseInt((String) e.getValue()));
+				}		
+				if(e.getKey().startsWith("cat_attrib_mod_bonus.attr_action")) 
+				{
+					creature.setMaxAction(creature.getMaxAction() - Integer.parseInt((String) e.getValue()));
+				}	
+			}	
 		}
 		
-		if(item.getStringAttribute("proc_name") != null) core.buffService.removeBuffFromCreatureByName(actor, item.getStringAttribute("proc_name").replace("@ui_buff:", ""));
-		
-		
-		if(actor.getEquipmentList().contains(item))
-			actor.removeObjectFromEquipList(item);
-
 		if(item.getAttachment("setBonus") != null)
 		{
 			BonusSetTemplate bonus = bonusSetTemplates.get((String)item.getAttachment("setBonus"));
-			bonus.callScript(actor);
+			bonus.callScript(creature);
 		}
 	}
 

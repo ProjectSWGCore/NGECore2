@@ -26,6 +26,7 @@ import java.util.Vector;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
+import protocol.swg.ObjControllerMessage;
 import resources.common.ConversationOption;
 import resources.common.ObjControllerOpcodes;
 
@@ -52,7 +53,7 @@ public class NpcConversationOptions extends ObjControllerObject {
 	public IoBuffer serialize() {
 		IoBuffer buffer = IoBuffer.allocate(17).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.setAutoExpand(true);
-		buffer.putInt(ObjControllerOpcodes.NPC_CONVERSATION_OPTIONS);
+		buffer.putInt(ObjControllerMessage.CONVERSATION_OPTIONS);
 		buffer.putLong(objectId);
 		
 		buffer.putInt(0);
@@ -61,8 +62,9 @@ public class NpcConversationOptions extends ObjControllerObject {
 		for(ConversationOption option : conversationOptions) {
 			buffer.put(option.getOutOfBand().serialize());
 		}
-		
-		return IoBuffer.allocate(buffer.position()).order(ByteOrder.LITTLE_ENDIAN).put(buffer).flip();
+		int size = buffer.position();
+		buffer.flip();
+		return IoBuffer.allocate(size).order(ByteOrder.LITTLE_ENDIAN).put(buffer.array(), 0, size).flip();
 	}
 
 }

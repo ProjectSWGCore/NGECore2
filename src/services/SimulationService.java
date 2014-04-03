@@ -168,6 +168,8 @@ public class SimulationService implements INetworkDispatch {
 		core.commandService.registerCommand("eject");
 		core.commandService.registerGmCommand("broadcast");
 		core.commandService.registerGmCommand("teleporttarget");
+		core.commandService.registerCommand("npcconversationselect");
+		core.commandService.registerCommand("npcconversationstop");
 
 	}
 	
@@ -772,7 +774,8 @@ public class SimulationService implements INetworkDispatch {
 		core.removeClient(session);
 		
 		object.setAttachment("disconnectTask", disconnectTask);
-		for(TangibleObject obj : object.getDefendersList()) object.removeDefender(obj);	// temp fix for being stuck in combat
+		for(TangibleObject obj : new Vector<TangibleObject>(object.getDefendersList())) 
+			object.removeDefender(obj);	// temp fix for being stuck in combat
 
 	}
 
