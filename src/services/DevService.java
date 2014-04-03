@@ -114,7 +114,7 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 81, "Ithorian Guardian");
 				suiOptions.put((long) 82, "Kashyyykian Ceremonial");
 				break;
-			case 9: // [Items] Reconnaissance Armor
+			case 9: // [Items] Jedi Items
 				suiOptions.put((long) 90, "(Light) Jedi Robe");
 				suiOptions.put((long) 91, "(Dark) Jedi Robe");
 				suiOptions.put((long) 92, "Belt of Master Bodo Baas");
