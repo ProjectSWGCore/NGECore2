@@ -26,7 +26,10 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
@@ -46,6 +49,7 @@ import com.sleepycat.persist.model.NotPersistent;
 
 import main.NGECore;
 import engine.clients.Client;
+import resources.common.Cooldown;
 import resources.objects.Buff;
 import resources.objects.DamageOverTime;
 import resources.objects.SWGList;
@@ -177,6 +181,8 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private int coverCharge;
 	@NotPersistent
 	private TangibleObject conversingNpc;
+	@NotPersistent
+	private ConcurrentHashMap<String, Cooldown> cooldowns = new ConcurrentHashMap<String, Cooldown>();
 	
 	public CreatureObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
 		super(objectID, planet, Template, position, orientation);
@@ -1722,4 +1728,43 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 	}
 	
+	public void addCooldown(String ability, long duration) {
+		if (cooldowns.containsKey(ability))
+			cooldowns.remove(ability);
+		
+		Cooldown cd = new Cooldown(duration);
+		cd.setRemovalTask(Executors.newScheduledThreadPool(1).schedule(new Runnable() {
+
+			@Override
+			public void run() {
+				removeCooldown(ability);
+			}
+			
+		}, duration, TimeUnit.MILLISECONDS));
+		cooldowns.put(ability, cd);
+	}
+	
+	public boolean hasCooldown(String ability) {
+		if (cooldowns.containsKey(ability))
+			return true;
+		else
+			return false;
+	}
+	
+	public boolean removeCooldown(String ability) {
+		if (cooldowns.containsKey(ability)) {
+			cooldowns.remove(ability);
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	public Cooldown getCooldown(String ability) {
+		if (cooldowns.containsKey(ability)) {
+			return cooldowns.get(ability);
+		} else {
+			return null;
+		}
+	}
 }
