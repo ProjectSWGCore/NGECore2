@@ -592,22 +592,30 @@ public class PlayerService implements INetworkDispatch {
 		
 		core.buffService.clearBuffs(creature);
 		
-		for (String skill : creature.getSkills()) {
-			if (skill.startsWith("species_")) {
-				continue;
-			}
+		try {
+			String[] skills;
 			
-			switch (skill) {
-				case "language_basic_comprehend":
-				case "language_basic_speak":
-				case "creature_harvesting":
-				case "language_wookiee_comprehend":
-					continue;
-				default:
-					core.skillService.removeSkill(creature, skill);
+			skillTemplate = ClientFileManager.loadFile("datatables/skill_template/skill_template.iff", DatatableVisitor.class);
+			
+			for (int s = 0; s < skillTemplate.getRowCount(); s++) {
+				if (skillTemplate.getObject(s, 0) != null) {
+					if (((String) skillTemplate.getObject(s, 0)).equals(player.getProfession())) {
+						skills = ((String) skillTemplate.getObject(s, 4)).split(",");
+						
+						for (String skill : skills) {
+							creature.removeSkill(skill);
+						}
+						
+						break;
+					}
+				}
 			}
+		}  catch (InstantiationException | IllegalAccessException e) {
+			e.printStackTrace();
 		}
-
+		
+		core.skillService.resetExpertise(creature);
+		
 		String xpType = ((player.getProfession().contains("entertainer")) ? "entertainer" : ((player.getProfession().contains("trader")) ? "crafting" : "combat_general"));
 			
 		player.setXp(xpType, 0);
