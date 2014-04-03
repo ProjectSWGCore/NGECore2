@@ -559,7 +559,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 	}
 	
-	public SWGMap<SkillMod> getSkillMods() {
+	public SWGMap<String, SkillMod> getSkillMods() {
 		return skillMods;
 	}
 	
