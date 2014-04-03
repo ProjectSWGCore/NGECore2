@@ -332,21 +332,21 @@ public class EquipmentService implements INetworkDispatch {
 
 	// Need to refactor below
 	private void addForceProtection(CreatureObject actor, SWGObject item) {
-		actor.addSkillMod("kinetic", getForceProtection(item));
-		actor.addSkillMod("energy", getForceProtection(item));
-		actor.addSkillMod("heat", getForceProtection(item));
-		actor.addSkillMod("cold", getForceProtection(item));
-		actor.addSkillMod("acid", getForceProtection(item));
-		actor.addSkillMod("electricity", getForceProtection(item));
+		core.skillModService.addSkillMod(actor, "kinetic", getForceProtection(item));
+		core.skillModService.addSkillMod(actor, "energy", getForceProtection(item));
+		core.skillModService.addSkillMod(actor, "heat", getForceProtection(item));
+		core.skillModService.addSkillMod(actor, "cold", getForceProtection(item));
+		core.skillModService.addSkillMod(actor, "acid", getForceProtection(item));
+		core.skillModService.addSkillMod(actor, "electricity", getForceProtection(item));
 	}	
 	
 	private void deductForceProtection(CreatureObject actor, SWGObject item) {
-		actor.deductSkillMod("kinetic", getForceProtection(item));
-		actor.deductSkillMod("energy", getForceProtection(item));
-		actor.deductSkillMod("heat", getForceProtection(item));
-		actor.deductSkillMod("cold", getForceProtection(item));
-		actor.deductSkillMod("acid", getForceProtection(item));
-		actor.deductSkillMod("electricity", getForceProtection(item));
+		core.skillModService.deductSkillMod(actor, "kinetic", getForceProtection(item));
+		core.skillModService.deductSkillMod(actor, "energy", getForceProtection(item));
+		core.skillModService.deductSkillMod(actor, "heat", getForceProtection(item));
+		core.skillModService.deductSkillMod(actor, "cold", getForceProtection(item));
+		core.skillModService.deductSkillMod(actor, "acid", getForceProtection(item));
+		core.skillModService.deductSkillMod(actor, "electricity", getForceProtection(item));
 	}	
 	
 	private int getForceProtection(SWGObject item) {

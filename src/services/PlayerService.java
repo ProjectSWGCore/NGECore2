@@ -652,11 +652,9 @@ public class PlayerService implements INetworkDispatch {
 			return;
 		}
 		
-		resetLevel(creature);
+		if(level == 0) return;
 		
-		if (level == 0) {
-			return;
-		}
+		resetLevel(creature);
 		
 		try {
 			experienceTable = ClientFileManager.loadFile("datatables/player/player_level.iff", DatatableVisitor.class);
