@@ -40,12 +40,13 @@ def spawnCrate(core, actor, shuttle):
             tactical = core.objectService.createObject('object/tangible/loot/generic_usable/shared_stim_syringe_generic.iff', actor.getPlanet()) #FIXME: Use the correct template
             tactical.setCustomName('Tactical Serum A')
             tactical.setStringAttribute('proc_name', '@ui_buff:of_tactical_drop_6')
-            tactical.setAttachment("tempUseCount", 1)
+            tactical.setAttachment("tempUseCount", 4)
             crate.add(tactical)
     
     for i in range(0, 8):
         stimpack = core.objectService.createObject('object/tangible/medicine/instant_stimpack/shared_stimpack_e.iff', actor.getPlanet()) #FIXME: Use the correct template
         stimpack.setCustomName('Field Stimpack A')
+        stimpack.setAttachment("tempUseCount", 4)
         crate.add(stimpack)
     
     time.sleep(60)
