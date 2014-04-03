@@ -84,7 +84,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	// CREO 4
 	private float accelerationMultiplierBase = 1;
 	private float accelerationMultiplierMod = 1;
-	private SWGMap<SkillMod> skillMods;
+	private SWGMap<String, SkillMod> skillMods;
 	private float speedMultiplierBase = 1;
 	private float speedMultiplierMod = 1;
 	private float runSpeed = (float) 7.3;
