@@ -37,7 +37,7 @@ def removeExpertisePoint(core, actor):
 	return
 
 def addAbilities(core, actor, player):
-	if actor.getLevel() == 10:
+	if actor.getLevel() >= 10:
 		actor.addAbility("me_enhance_agility_1")
 	return
 
