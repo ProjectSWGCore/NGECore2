@@ -558,7 +558,7 @@ public class PlayerService implements INetworkDispatch {
 	}
 	
 	/*
-	 * Resets to level 0
+	 * Resets to level 1
 	 */
 	public void resetLevel(CreatureObject creature) {
 		PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
@@ -634,7 +634,7 @@ public class PlayerService implements INetworkDispatch {
 		creature.setAction(300);
 		creature.setGrantedHealth(0);
 		
-		creature.setLevel((short) 0);
+		creature.setLevel((short) 1);
 	}
 	
 	/*
