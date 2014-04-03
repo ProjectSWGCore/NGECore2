@@ -161,6 +161,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer.putInt(creature.getSkillMods().getUpdateCounter());
 		for (SkillMod skillMod : creature.getSkillMods().values()) {
 			buffer.put((byte) 0);
+			buffer.put(skillMod.getName());
 			buffer.put(skillMod.getBytes());
 		}
 		
