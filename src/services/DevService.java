@@ -92,7 +92,7 @@ public class DevService implements INetworkDispatch {
 				break;
 			case 4: // [Items] Misc Items
 				suiOptions.put((long) 40, "Unity Ring");
-				suiOptions.put((long) 41, "Tusken rucksack");
+				suiOptions.put((long) 41, "Tusken Rucksack");
 				break;
 			case 5: // [Items] Armor
 				suiOptions.put((long) 50, "Assault Armor");
@@ -215,33 +215,56 @@ public class DevService implements INetworkDispatch {
 						inventory.add(lightsaber3);
 						return;
 					case 31: // Melee Weapons
-						SWGObject sword1 = core.objectService.createObject("object/weapon/melee/sword/shared_sword_01.iff", planet);
-						sword1.setIntAttribute("required_combat_level", 90);
-						sword1.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 1);
-						sword1.setStringAttribute("class_required", "None");
-						sword1.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
-						sword1.setStringAttribute("cat_wpn_damage.damage", "1100-1200");
+						SWGObject melee1 = core.objectService.createObject("object/weapon/melee/2h_sword/2h_sword_maul_legendary.iff", planet);
+						melee1.setIntAttribute("required_combat_level", 90);
+						melee1.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 1);
+						melee1.setStringAttribute("class_required", "None");
+						melee1.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
+						melee1.setStringAttribute("cat_wpn_damage.damage", "900-1350");
 						
-						inventory.add(sword1);
+						SWGObject melee2 = core.objectService.createObject("object/weapon/melee/baton/baton_stun_legendary.iff", planet);
+						melee2.setIntAttribute("required_combat_level", 90);
+						melee2.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 1);
+						melee2.setStringAttribute("class_required", "None");
+						melee2.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
+						melee2.setStringAttribute("cat_wpn_damage.damage", "600-1300");
+						
+						SWGObject melee3 = core.objectService.createObject("object/weapon/melee/polearm/lance_nightsister_legendary.iff", planet);
+						melee3.setIntAttribute("required_combat_level", 90);
+						melee3.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 1);
+						melee3.setStringAttribute("class_required", "None");
+						melee3.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
+						melee3.setStringAttribute("cat_wpn_damage.damage", "800-1200");
+						
+						inventory.add(melee1);
+						inventory.add(melee2);
+						inventory.add(melee3);
 						return;
 					case 32: // Ranged Weapons
-						SWGObject rifle1 = core.objectService.createObject("object/weapon/ranged/rifle/shared_rifle_e11.iff", planet);
-						rifle1.setIntAttribute("required_combat_level", 90);
-						rifle1.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", (float) 0.8);
-						rifle1.setStringAttribute("class_required", "None");
-						rifle1.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
-						rifle1.setStringAttribute("cat_wpn_damage.damage", "800-1250");
+						SWGObject ranged1 = core.objectService.createObject("object/weapon/ranged/pistol/pistol_fw5_legendary.iff", planet);
+						ranged1.setIntAttribute("required_combat_level", 90);
+						ranged1.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 0.4);
+						ranged1.setStringAttribute("class_required", "None");
+						ranged1.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
+						ranged1.setStringAttribute("cat_wpn_damage.damage", "250-500");
 						
-						inventory.add(rifle1);
+						SWGObject ranged2 = core.objectService.createObject("object/weapon/ranged/rifle/rifle_t21_legendary.iff", planet);
+						ranged2.setIntAttribute("required_combat_level", 90);
+						ranged2.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 0.8);
+						ranged2.setStringAttribute("class_required", "None");
+						ranged2.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
+						ranged2.setStringAttribute("cat_wpn_damage.damage", "550-1100");
 						
-						SWGObject pistol = core.objectService.createObject("object/weapon/ranged/pistol/shared_pistol_cdef.iff", planet);
-						pistol.setIntAttribute("required_combat_level", 90);
-						pistol.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", (float) 0.4);
-						pistol.setStringAttribute("class_required", "None");
-						pistol.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
-						pistol.setStringAttribute("cat_wpn_damage.damage", "400-559");
+						SWGObject ranged3 = core.objectService.createObject("object/weapon/ranged/carbine/carbine_e5_legend.iff", planet);
+						ranged3.setIntAttribute("required_combat_level", 90);
+						ranged3.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 0.6);
+						ranged3.setStringAttribute("class_required", "None");
+						ranged3.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
+						ranged3.setStringAttribute("cat_wpn_damage.damage", "400-850");
 						
-						inventory.add(pistol);
+						inventory.add(ranged1);
+						inventory.add(ranged2);
+						inventory.add(ranged3);
 						return;
 					case 40:
 						TangibleObject ring = (TangibleObject) core.objectService.createObject("object/tangible/wearables/ring/shared_ring_s01.iff", planet);
