@@ -399,7 +399,7 @@ public class SkillService implements INetworkDispatch {
 	}
 	
 	public void resetExpertise(CreatureObject creature) {
-		List<String> skills = new ArrayList<String>(creature.getSkills().get());
+		List<String> skills = new ArrayList<String>(creature.getSkills());
 		skills.stream().filter(s -> s.contains("expertise")).forEach(s -> removeSkill(creature, s));
 	}
 	

@@ -71,7 +71,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		} else {
 			buffer.putInt(creature.getSkills().size());	
 			buffer.putInt(creature.getSkillsUpdateCounter());
-			for(String skill : creature.getSkills().get())
+			for(String skill : creature.getSkills())
 				buffer.put(getAsciiString(skill));
 		}
 		int size = buffer.position();
