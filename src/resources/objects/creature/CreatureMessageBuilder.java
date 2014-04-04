@@ -1172,26 +1172,25 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 
 	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
 		switch (viewType) {
-			case 1:
-			case 3:
 			case 4: {
-				switch(updateType) {
+				switch (updateType) {
 					case 3: {
 						buffer = createDelta("CREO", (byte) 4, (short) 1, (byte) 3, buffer.flip(), buffer.array().length + 4);
 						
 						if (object.getClient() != null && object.getClient().getSession() != null) {
 							object.getClient().getSession().write(buffer);
 						}
+						
 						break;
 					}
-					
 				}
 			}
+			case 1:
+			case 3:
 			case 6:
 			case 8:
 			case 9:
-			default:
-			{
+			default: {
 				return;
 			}
 		}
