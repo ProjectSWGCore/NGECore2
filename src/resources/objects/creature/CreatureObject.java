@@ -64,7 +64,7 @@ import engine.resources.scene.Quaternion;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 
-@Entity(version=5)
+@Entity(version=6)
 public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	@NotPersistent
@@ -73,7 +73,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	// CREO 1
 	private int bankCredits = 0;
 	private int cashCredits = 0;
-	private SWGList<String> skills;
+	private List<String> skills;
 	@NotPersistent
 	private int skillsUpdateCounter = 0;
 
@@ -188,7 +188,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		super(objectID, planet, Template, position, orientation);
 		messageBuilder = new CreatureMessageBuilder(this);
 		loadTemplateData();
-		skills = new SWGList<String>(messageBuilder, 1, 3);
+		skills = new ArrayList<String>();
 		skillMods = new SWGMap<String, SkillMod>(messageBuilder, 4, 3);
 		abilities = new SWGList<String>(messageBuilder, 4, 14);
 		missionCriticalObjects = new SWGList<MissionCriticalObject>(messageBuilder, 4, 13);
@@ -261,7 +261,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 	}
 
-	public SWGList<String> getSkills() {
+	public List<String> getSkills() {
 		return skills;
 	}
 	
