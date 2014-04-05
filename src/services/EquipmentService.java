@@ -185,8 +185,6 @@ public class EquipmentService implements INetworkDispatch {
 		PyObject func = core.scriptService.getMethod("scripts/" + serverTemplate.split("shared_" , 2)[0].replace("shared_", ""), serverTemplate.split("shared_" , 2)[1], "equip");
 		if(func != null) func.__call__(Py.java2py(core), Py.java2py(actor), Py.java2py(item));
 		
-		// TODO: crit enhancement from crafted weapons
-		// TODO: check for armor category in order to add resistance to certain DoT types
 		// TODO: bio-link (assign it by objectID with setAttachment and then just display the customName for that objectID).
 		
 		if(!actor.getEquipmentList().contains(item)) 
@@ -214,6 +212,9 @@ public class EquipmentService implements INetworkDispatch {
 	
 	public void processItemAtrributes(CreatureObject creature, SWGObject item, boolean equipping)
 	{
+		// TODO: crit enhancement from crafted weapons
+		// TODO: check for armor category in order to add resistance to certain DoT types
+		
 		Map<String, Object> attributes = new TreeMap<String, Object>(item.getAttributes());
 		
 		calculateArmorProtection(creature, equipping);
@@ -244,13 +245,11 @@ public class EquipmentService implements INetworkDispatch {
 				{
 					creature.setMaxAction(creature.getMaxAction() + Integer.parseInt((String) e.getValue()));
 				}
-				
 			}
 		}
 		else
 		{
 			if(item.getStringAttribute("cat_wpn_damage.wpn_category") != null) creature.deductSkillMod("display_only_critical", getWeaponCriticalChance(creature, item));
-			if(item.getStringAttribute("protection_level") != null) deductForceProtection(creature, item);
 			if(item.getStringAttribute("proc_name") != null) core.buffService.removeBuffFromCreatureByName(creature, item.getStringAttribute("proc_name").replace("@ui_buff:", ""));
 			
 			for(Entry<String, Object> e : attributes.entrySet())
@@ -304,25 +303,6 @@ public class EquipmentService implements INetworkDispatch {
 		} 
         catch (IOException e) { e.printStackTrace(); }
 	}
-
-	// Need to refactor below
-	private void addForceProtection(CreatureObject actor, SWGObject item) {
-		core.skillModService.addSkillMod(actor, "kinetic", getForceProtection(item));
-		core.skillModService.addSkillMod(actor, "energy", getForceProtection(item));
-		core.skillModService.addSkillMod(actor, "heat", getForceProtection(item));
-		core.skillModService.addSkillMod(actor, "cold", getForceProtection(item));
-		core.skillModService.addSkillMod(actor, "acid", getForceProtection(item));
-		core.skillModService.addSkillMod(actor, "electricity", getForceProtection(item));
-	}	
-	
-	private void deductForceProtection(CreatureObject actor, SWGObject item) {
-		core.skillModService.deductSkillMod(actor, "kinetic", getForceProtection(item));
-		core.skillModService.deductSkillMod(actor, "energy", getForceProtection(item));
-		core.skillModService.deductSkillMod(actor, "heat", getForceProtection(item));
-		core.skillModService.deductSkillMod(actor, "cold", getForceProtection(item));
-		core.skillModService.deductSkillMod(actor, "acid", getForceProtection(item));
-		core.skillModService.deductSkillMod(actor, "electricity", getForceProtection(item));
-	}	
 	
 	private int getForceProtection(SWGObject item) {
 		return core.scriptService.getMethod("scripts/equipment/", "force_protection", item.getAttachment("type") + "_" + item.getStringAttribute("protection_level")).__call__().asInt();
