@@ -168,13 +168,15 @@ public class SimulationService implements INetworkDispatch {
 		core.commandService.registerCommand("eject");
 		core.commandService.registerGmCommand("broadcast");
 		core.commandService.registerGmCommand("teleporttarget");
+		core.commandService.registerCommand("npcconversationselect");
+		core.commandService.registerCommand("npcconversationstop");
 
 	}
 	
 	public void insertSnapShotObjects() {
 		List<SWGObject> objectList = new ArrayList<SWGObject>(core.objectService.getObjectList().values());
 		for(SWGObject obj : objectList) {
-			if(obj.getParentId() == 0 && (obj.isInSnapshot() || obj.getAttachment("isBuildout") != null))
+			if(obj.getParentId() == 0 && /*(*/obj.isInSnapshot() /*|| obj.getAttachment("isBuildout") != null)*/)
 				add(obj, obj.getPosition().x, obj.getPosition().z);
 		}
 	}
@@ -772,6 +774,8 @@ public class SimulationService implements INetworkDispatch {
 		core.removeClient(session);
 		
 		object.setAttachment("disconnectTask", disconnectTask);
+		for(TangibleObject obj : new Vector<TangibleObject>(object.getDefendersList())) 
+			object.removeDefender(obj);	// temp fix for being stuck in combat
 
 	}
 
@@ -818,7 +822,6 @@ public class SimulationService implements INetworkDispatch {
 		
 		if(object.getPosture() == Posture.Dead)
 			core.playerService.sendCloningWindow(object, false);
-		
 	}
 		
 	public void transferToPlanet(SWGObject object, Planet planet, Point3D newPos, Quaternion newOrientation, SWGObject newParent) {

@@ -37,4 +37,10 @@ public class ObjControllerOpcodes {
 	public static final int ChangeRoleIconChoice = 0x4D040000;
 	public static final int IMAGE_DESIGN_CHANGE = 0x38020000;
 	public static final int IMAGE_DESIGN_END = 0x39020000;
+	public static final int NPC_CONVERSATION_MESSAGE = 0xDF000000;
+	public static final int START_NPC_CONVERSATION = 0xDD000000;
+	public static final int STOP_NPC_CONVERSATION = 0xDE000000;
+	public static final int NPC_CONVERSATION_OPTIONS = 0xE0000000;
+	public static final int SET_PROFESSION_TEMPLATE = 0x5C040000;
+
 }

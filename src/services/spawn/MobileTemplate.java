@@ -44,7 +44,7 @@ public class MobileTemplate {
 	private float scale = 1;
 	// this is a custom attack Range setting to use for large mobs like krayts
 	private int attackRange;
-	private String customWeaponTemplate;
+	private Vector<String> weaponTemplates = new Vector<String>();
 
 	public Vector<String> getTemplates() {
 		return templates;
@@ -158,13 +158,11 @@ public class MobileTemplate {
 		this.attackRange = attackRange;
 	}
 	
-	public void setCustomWeaponTemplate(String template)
-	{
-		this.customWeaponTemplate = template;
+	public Vector<String> getWeaponTemplates() {
+		return weaponTemplates;
 	}
-	
-	public String getCustomWeaponTemplate()
-	{
-		return customWeaponTemplate;
+
+	public void setWeaponTemplates(Vector<String> weaponTemplates) {
+		this.weaponTemplates = weaponTemplates;
 	}
 }

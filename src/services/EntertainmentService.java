@@ -518,7 +518,7 @@ public class EntertainmentService implements INetworkDispatch {
 		core.commandService.registerCommand("startdance");
 		core.commandService.registerCommand("stopdance");
 		core.commandService.registerCommand("watch");
-		//core.commandService.registerCommand("stopwatching"); // SWGList error
+		core.commandService.registerCommand("stopwatching");
 		core.commandService.registerCommand("holoEmote");
 		core.commandService.registerCommand("covercharge");
 		//core.commandService.registerCommand("en_holographic_recall");
@@ -575,7 +575,10 @@ public class EntertainmentService implements INetworkDispatch {
 		//long timeStamp = 0;
 		//if (reciever.getAttachment("buffWorkshopTimestamp") != null)
 			//timeStamp = (long) reciever.getAttachment("buffWorkshopTimestamp");
-
+		
+		if (reciever.hasBuff("buildabuff_inspiration"))
+			core.buffService.removeBuffFromCreature(reciever, reciever.getBuffByName("buildabuff_inspiration"));
+		
 		core.buffService.addBuffToCreature(reciever, "buildabuff_inspiration", buffer);
 		/*if (core.buffService.addBuffToCreature(reciever, "buildabuff_inspiration", buffer) && !rPlayer.getProfession().equals("entertainer_1a")) {
 			if (timeStamp == 0 || (System.currentTimeMillis() - timeStamp > 86400000)) {
@@ -681,13 +684,13 @@ public class EntertainmentService implements INetworkDispatch {
 
 		// visual
 		if (spectator.getPerformanceWatchee() == performer && spectateType)
-			spectator.getPerformanceWatchee().removeAudience(spectator);
+			spectator.getPerformanceWatchee().removeSpectator(spectator);
 		// music
 		else if (spectator.getPerformanceListenee() == performer && !spectateType)
-			spectator.getPerformanceListenee().removeAudience(spectator);
+			spectator.getPerformanceListenee().removeSpectator(spectator);
 
 		spectator.setPerformanceWatchee(performer);
-		performer.addAudience(spectator);
+		performer.addSpectator(spectator);
 		spectator.setMoodAnimation("entertained");
 
 		final ScheduledFuture<?> spectatorTask = scheduler.scheduleAtFixedRate(() -> {
@@ -705,7 +708,7 @@ public class EntertainmentService implements INetworkDispatch {
 							+ " is out of range.", (byte) 0);
 				}
 				spectator.setMoodAnimation("neutral");
-				performer.removeAudience(spectator);
+				performer.removeSpectator(spectator);
 
 				if (spectator.getInspirationTick().cancel(true))
 					spectator.getSpectatorTask().cancel(true);

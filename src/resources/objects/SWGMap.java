@@ -119,13 +119,17 @@ public class SWGMap<K, V> implements Map<K, V> {
 				if (map.containsKey(key)) {
 					V oldValue = map.put(key, value);
 					
-					queue(item(2, (String) key, ((IDelta) value).getBytes(), true, true));
+					if (oldValue != null) {
+						queue(item(2, (String) key, ((IDelta) value).getBytes(), true, true));
+					}
 					
 					return oldValue;
 				} else {
 					V oldValue = map.put(key, value);
 					
-					queue(item(0, (String) key, ((IDelta) value).getBytes(), true, true));
+					if (oldValue != null) {
+						queue(item(0, (String) key, ((IDelta) value).getBytes(), true, true));
+					}
 					
 					return oldValue;
 				}
@@ -170,7 +174,9 @@ public class SWGMap<K, V> implements Map<K, V> {
 				key instanceof Integer || key instanceof Float || key instanceof Long) {
 				V value = map.remove(key);
 				
-				queue(item(1, key, ((IDelta) map.get(key)).getBytes(), true, true));
+				if (value != null) {
+					queue(item(1, key, ((IDelta) map.get(key)).getBytes(), true, true));
+				}
 				
 				return value;
 			}
@@ -230,6 +236,7 @@ public class SWGMap<K, V> implements Map<K, V> {
 				}
 			}
 			if (useData) buffer.put(data);
+			buffer.flip();
 				
 			updateCounter++;
 			
@@ -241,6 +248,7 @@ public class SWGMap<K, V> implements Map<K, V> {
 		buffer.putInt(1);
 		buffer.putInt(updateCounter);
 		buffer.put(data);
+		buffer.flip();
 		messageBuilder.sendListDelta(viewType, updateType, buffer);
 	}
 	
@@ -255,6 +263,7 @@ public class SWGMap<K, V> implements Map<K, V> {
 		buffer.putInt(data.size());
 		buffer.putInt(updateCounter);
 		for (byte[] queued : data) buffer.put(queued);
+		buffer.flip();
 		
 		messageBuilder.sendListDelta(viewType, updateType, buffer);
 	}

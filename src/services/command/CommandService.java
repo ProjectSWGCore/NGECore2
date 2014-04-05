@@ -25,6 +25,9 @@ import java.nio.ByteOrder;
 import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import main.NGECore;
 
@@ -52,6 +55,7 @@ public class CommandService implements INetworkDispatch  {
 	private Vector<BaseSWGCommand> commandLookup = new Vector<BaseSWGCommand>();
 	private ConcurrentHashMap<String,BaseSWGCommand> aliases = new ConcurrentHashMap<String,BaseSWGCommand>();
 	private ConcurrentHashMap<Integer,BaseSWGCommand> aliasesByCRC = new ConcurrentHashMap<Integer,BaseSWGCommand>();
+	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	private NGECore core;
 	
 	public CommandService(NGECore core) {
@@ -98,16 +102,30 @@ public class CommandService implements INetworkDispatch  {
 
 				CreatureObject actor = (CreatureObject) client.getParent();
 
-				SWGObject target = core.objectService.getObject(commandEnqueue.getTargetID());
-								
-				if(command instanceof CombatCommand) {
-					CombatCommand command2 = (CombatCommand) command.clone();
-					processCombatCommand(actor, target, command2, commandEnqueue.getActionCounter(), commandEnqueue.getCommandArguments());
+				if (actor.hasCooldown(command.getCommandName()))
 					return;
-				}
-					
-				core.scriptService.callScript("scripts/commands/", command.getCommandName(), "run", core, actor, target, commandEnqueue.getCommandArguments());
 				
+				SWGObject target = core.objectService.getObject(commandEnqueue.getTargetID());
+				
+				// May want to have a warmup def to be called at some point in the future.
+				if (command.getWarmupTime() != 0 && !(command instanceof CombatCommand)) {
+					scheduler.schedule(new Runnable() {
+
+						@Override
+						public void run() {
+							core.scriptService.callScript("scripts/commands/", command.getCommandName(), "run", core, actor, target, commandEnqueue.getCommandArguments());
+						}
+					}, (long) command.getWarmupTime(), TimeUnit.SECONDS);
+				} else {
+
+					if(command instanceof CombatCommand) {
+						CombatCommand command2 = (CombatCommand) command.clone();
+						processCombatCommand(actor, target, command2, commandEnqueue.getActionCounter(), commandEnqueue.getCommandArguments());
+						return;
+					}
+
+					core.scriptService.callScript("scripts/commands/", command.getCommandName(), "run", core, actor, target, commandEnqueue.getCommandArguments());
+				}
 			}
 
 		});

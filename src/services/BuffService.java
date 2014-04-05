@@ -100,27 +100,32 @@ public class BuffService implements INetworkDispatch {
 			return null;
 		}
 		
+		if(target.hasBuff(buffName)) return null;
+		
 		final Buff buff = new Buff(buffName, target.getObjectID());
 		if(target.getSlottedObject("ghost") != null)
 			buff.setTotalPlayTime(((PlayerObject) target.getSlottedObject("ghost")).getTotalPlayTime());
 		else
 			buff.setTotalPlayTime(0);
 			
-        if(FileUtilities.doesFileExist("scripts/buffs/" + buffName + ".py"))
-        	core.scriptService.callScript("scripts/buffs/", buffName, "setup", core, buffer, buff);
+        if(FileUtilities.doesFileExist("scripts/buffs/" + buffName + ".py")) core.scriptService.callScript("scripts/buffs/", buffName, "setup", core, buffer, buff);
 	
             for (final Buff otherBuff : target.getBuffList()) {
                 if (buff.getGroup1().equals(otherBuff.getGroup1()))  
                 	if (buff.getPriority() >= otherBuff.getPriority()) {
-                        if (buff.getBuffName().equals(otherBuff.getBuffName())) {
+                        if (buff.getBuffName().equals(otherBuff.getBuffName()))
+                        {
                         	
-                        		if(otherBuff.getStacks() < otherBuff.getMaxStacks()) {
+                        		if(otherBuff.getStacks() < otherBuff.getMaxStacks()) 
+                        		{
                         			
                         			buff.setStacks(otherBuff.getStacks() + 1);
                         			if(target.getDotByBuff(otherBuff) != null)	// reset duration when theres a dot stack
                         				target.getDotByBuff(otherBuff).setStartTime(buff.getStartTime());
                         			
-                        		} else {
+                        		} 
+                        		else 
+                        		{
                         			buff.setStacks(buff.getMaxStacks());
                         		}
                         		if (buff.getDuration() != -1.0)
@@ -136,8 +141,15 @@ public class BuffService implements INetworkDispatch {
                 }
         }	
 			
-        if(FileUtilities.doesFileExist("scripts/buffs/" + buffName + ".py"))
-        	core.scriptService.callScript("scripts/buffs/", buffName, "add", core, target, buff);
+        if(FileUtilities.doesFileExist("scripts/buffs/" + buffName + ".py")) core.scriptService.callScript("scripts/buffs/", buffName, "add", core, target, buff);
+        else
+        {
+        	if(buff.getEffect1Name().length() > 0) core.skillModService.addSkillMod(target, buff.getEffect1Name(), (int) buff.getEffect1Value());
+        	if(buff.getEffect2Name().length() > 0) core.skillModService.addSkillMod(target, buff.getEffect2Name(), (int) buff.getEffect2Value());
+        	if(buff.getEffect3Name().length() > 0) core.skillModService.addSkillMod(target, buff.getEffect3Name(), (int) buff.getEffect3Value());
+        	if(buff.getEffect4Name().length() > 0) core.skillModService.addSkillMod(target, buff.getEffect4Name(), (int) buff.getEffect4Value());
+        	if(buff.getEffect5Name().length() > 0) core.skillModService.addSkillMod(target, buff.getEffect5Name(), (int) buff.getEffect5Value());
+        }
 		
 		target.addBuff(buff);
 		
@@ -167,7 +179,7 @@ public class BuffService implements INetworkDispatch {
 					if (buffer == null)
 						removeBuffFromCreature(target, buff);
 
-					if (target.getPosition().getDistance2D(buffer.getWorldPosition()) > 80) {
+					if (target.getWorldPosition().getDistance2D(buffer.getWorldPosition()) > 80) {
 						removeBuffFromCreature(target, buff);
 					}
 				}
@@ -214,8 +226,15 @@ public class BuffService implements INetworkDispatch {
         	 dot.getTask().cancel(true);
         	 creature.removeDot(dot);
          }
-         if(FileUtilities.doesFileExist("scripts/buffs/" + buff.getBuffName() + ".py"))
-        	 core.scriptService.callScript("scripts/buffs/", buff.getBuffName(), "remove", core, creature, buff);
+         if(FileUtilities.doesFileExist("scripts/buffs/" + buff.getBuffName() + ".py")) core.scriptService.callScript("scripts/buffs/", buff.getBuffName(), "remove", core, creature, buff);
+         else
+         {
+         	if(buff.getEffect1Name().length() > 0) core.skillModService.deductSkillMod(creature, buff.getEffect1Name(), (int) buff.getEffect1Value());
+         	if(buff.getEffect2Name().length() > 0) core.skillModService.deductSkillMod(creature, buff.getEffect2Name(), (int) buff.getEffect2Value());
+         	if(buff.getEffect1Name().length() > 0) core.skillModService.deductSkillMod(creature, buff.getEffect3Name(), (int) buff.getEffect3Value());
+         	if(buff.getEffect1Name().length() > 0) core.skillModService.deductSkillMod(creature, buff.getEffect4Name(), (int) buff.getEffect4Value());
+         	if(buff.getEffect1Name().length() > 0) core.skillModService.deductSkillMod(creature, buff.getEffect5Name(), (int) buff.getEffect5Value());
+         }
          creature.removeBuff(buff);
          
         for (String effect : buff.getParticleEffect().split(",")) {
@@ -228,38 +247,46 @@ public class BuffService implements INetworkDispatch {
         }
 	}
 	
-	public void clearBuffs(final CreatureObject creature) {
+	public void removeBuffFromCreatureByName(CreatureObject creature, String buffName)
+	{
+		removeBuffFromCreature(creature, creature.getBuffByName(buffName));
+	}
+	/*
+	public void clearBuffs(final CreatureObject creature) 
+	{		
+		// This method sucks ass, someone please fix me. indeed, it doesnt even work at all!
+		for(Buff buff : creature.getBuffList().get())
+		{
+			if(buff.getRemainingDuration() > 0 && buff.getDuration() > 0) buff.setRemovalTask(null);
+			removeBuffFromCreature(creature, buff);			
+		}				
 		
+	}
+	*/
+	
+	public void clearBuffs(final CreatureObject creature) {
+
 		// copy to array for thread safety
-					
+
 		for(final Buff buff : creature.getBuffList().get().toArray(new Buff[] { })) {
-			
+
 			if (buff.getGroup1().startsWith("setBonus")) { continue; }
-			
+
 			if(buff.isGroupBuff() && buff.getGroupBufferId() != creature.getObjectID()) {
 				removeBuffFromCreature(creature, buff);
 				continue;
 			}
 
 			if(buff.getRemainingDuration() > 0 && buff.getDuration() > 0) {
-				ScheduledFuture<?> task = scheduler.schedule(new Runnable() {
-
-					@Override
-					public void run() {
-						
-						removeBuffFromCreature(creature, buff);
-						
-					}
-					
-				}, (long) buff.getRemainingDuration(), TimeUnit.SECONDS);
+				ScheduledFuture<?> task = scheduler.schedule(() -> removeBuffFromCreature(creature, buff), (long) buff.getRemainingDuration(), TimeUnit.SECONDS);
 				buff.setRemovalTask(task);
 				continue;
 			} else {
 				removeBuffFromCreature(creature, buff);
 			}
-				
+
 		}
-					
+
 	}
 	
 	public void addGroupBuff(CreatureObject buffer, String buffName) {

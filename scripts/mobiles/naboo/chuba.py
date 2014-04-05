@@ -6,6 +6,7 @@ def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	templates = Vector()
 	templates.add('object/mobile/shared_chuba_hue.iff')
+	mobileTemplate.setCreatureName('chuba')
 	mobileTemplate.setTemplates(templates)
 	mobileTemplate.setLevel(5)
 	attacks = Vector()
