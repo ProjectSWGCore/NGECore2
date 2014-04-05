@@ -85,6 +85,9 @@ public class EquipmentService implements INetworkDispatch {
 	}
 	
 	public boolean canEquip(CreatureObject actor, SWGObject item) {
+		// TODO: Species restrictions
+		// TODO: Gender restrictions
+		
 		boolean result = true;
 		
 		if (item == null)
@@ -182,11 +185,8 @@ public class EquipmentService implements INetworkDispatch {
 		PyObject func = core.scriptService.getMethod("scripts/" + serverTemplate.split("shared_" , 2)[0].replace("shared_", ""), serverTemplate.split("shared_" , 2)[1], "equip");
 		if(func != null) func.__call__(Py.java2py(core), Py.java2py(actor), Py.java2py(item));
 		
-		// TODO: Species restrictions
-		// TODO: Gender restrictions
 		// TODO: crit enhancement from crafted weapons
 		// TODO: check for armor category in order to add resistance to certain DoT types
-		// TODO: Calculate actual armor values (REMINDER: Check if the player is wearing a jedi robe/cloak (look for force protection intensity). If they are, they shouldn't receive any additional protection from other items with armour.)
 		// TODO: bio-link (assign it by objectID with setAttachment and then just display the customName for that objectID).
 		
 		if(!actor.getEquipmentList().contains(item)) 
@@ -235,16 +235,6 @@ public class EquipmentService implements INetworkDispatch {
 				{
 					core.skillModService.addSkillMod(creature, e.getKey().replace("cat_stat_mod_bonus.@stat_n:", ""), Integer.parseInt((String) e.getValue()));
 				}			
-				
-				/*if(e.getKey().startsWith("cat_armor_standard_protection")) 
-				{
-					addArmorProtection(creature, e.getKey().replace("cat_armor_standard_protection.armor_eff_", ""), Float.parseFloat((String) e.getValue()), creature.getSlotNameForObject(item));
-				}	
-				
-				if(e.getKey().startsWith("cat_armor_special_protection")) 
-				{
-					addArmorProtection(creature, e.getKey().replace("cat_armor_special_protection.special_protection_type_", ""), Float.parseFloat((String) e.getValue()), creature.getSlotNameForObject(item));
-				}		*/
 							
 				if(e.getKey().startsWith("cat_attrib_mod_bonus.attr_health")) 
 				{
@@ -274,16 +264,6 @@ public class EquipmentService implements INetworkDispatch {
 				{
 					core.skillModService.deductSkillMod(creature, e.getKey().replace("cat_stat_mod_bonus.@stat_n:", ""), Integer.parseInt((String) e.getValue()));
 				}	
-				
-				/*if(e.getKey().startsWith("cat_armor_standard_protection")) 
-				{
-					deductArmorProtection(creature, e.getKey().replace("cat_armor_standard_protection.armor_eff_", ""), Float.parseFloat((String) e.getValue()), creature.getSlotNameForObject(item));
-				}	
-				
-				if(e.getKey().startsWith("cat_armor_special_protection")) 
-				{
-					deductArmorProtection(creature, e.getKey().replace("cat_armor_special_protection.special_protection_type_", ""), Float.parseFloat((String) e.getValue()), creature.getSlotNameForObject(item));
-				}	*/	
 				
 				if(e.getKey().startsWith("cat_attrib_mod_bonus.attr_health")) 
 				{
