@@ -603,8 +603,10 @@ public class PlayerService implements INetworkDispatch {
 						skills = ((String) skillTemplate.getObject(s, 4)).split(",");
 						
 						for (String skill : skills) {
-							creature.removeSkill(skill);
+							core.skillService.removeSkill(creature, skill);
 						}
+						
+						core.skillService.addSkill(creature, skills[0]);
 						
 						break;
 					}
