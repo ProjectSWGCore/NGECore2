@@ -197,7 +197,9 @@ public class CombatCommands {
 		core.commandService.registerCommand("forcerun"); // Force Run
 		core.commandService.registerCommand("fs_buff_invis_1"); // Force Cloak
 		core.commandService.registerCombatCommand("fs_force_throw_1");
-		core.commandService.registerCommand("forceThrow");
+		core.commandService.registerCombatCommand("forceThrow");
+		core.commandService.registerCombatCommand("fs_set_heroic_taunt_1"); // Guardian Strike
+		core.commandService.registerCombatCommand("fs_force_spark");
 		
 		// Commando
 		
