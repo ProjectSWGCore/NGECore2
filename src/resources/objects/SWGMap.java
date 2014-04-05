@@ -175,7 +175,7 @@ public class SWGMap<K, V> implements Map<K, V> {
 				V value = map.remove(key);
 				
 				if (value != null) {
-					queue(item(1, key, ((IDelta) map.get(key)).getBytes(), true, true));
+					queue(item(1, (String) key, ((IDelta) value).getBytes(), true, true));
 				}
 				
 				return value;

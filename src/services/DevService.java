@@ -92,7 +92,8 @@ public class DevService implements INetworkDispatch {
 				break;
 			case 4: // [Items] Misc Items
 				suiOptions.put((long) 40, "Unity Ring");
-				suiOptions.put((long) 41, "Tusken rucksack");
+				suiOptions.put((long) 41, "Tusken Rucksack");
+				suiOptions.put((long) 42, "Heroism Jewlery Set");
 				break;
 			case 5: // [Items] Armor
 				suiOptions.put((long) 50, "Assault Armor");
@@ -255,8 +256,54 @@ public class DevService implements INetworkDispatch {
 						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:precision_modified", 35);
 						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:stamina_modified", 30);
 						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:strength_modified", 35);
-						
 						inventory.add(backpack);
+						return;
+					case 42:
+						TangibleObject heroismBand = (TangibleObject) core.objectService.createObject("object/tangible/wearables/ring/shared_ring_s01.iff", planet);
+						heroismBand.setStfFilename("static_item_n");
+						heroismBand.setStfName("item_band_set_hero_01_01");
+						heroismBand.setStringAttribute("@set_bonus:piece_bonus_count_3", "@set_bonus:set_bonus_hero_1");
+						heroismBand.setStringAttribute("@set_bonus:piece_bonus_count_4", "@set_bonus:set_bonus_hero_2");
+						heroismBand.setStringAttribute("@set_bonus:piece_bonus_count_5", "@set_bonus:set_bonus_hero_3");
+						heroismBand.setAttachment("setBonus", "set_bonus_hero");
+						
+						TangibleObject heroismRing = (TangibleObject) core.objectService.createObject("object/tangible/wearables/ring/shared_ring_s01.iff", planet);
+						heroismRing.setStfFilename("static_item_n");
+						heroismRing.setStfName("item_ring_set_hero_01_01");
+						heroismRing.setStringAttribute("@set_bonus:piece_bonus_count_3", "@set_bonus:set_bonus_hero_1");
+						heroismRing.setStringAttribute("@set_bonus:piece_bonus_count_4", "@set_bonus:set_bonus_hero_2");
+						heroismRing.setStringAttribute("@set_bonus:piece_bonus_count_5", "@set_bonus:set_bonus_hero_3");
+						heroismRing.setAttachment("setBonus", "set_bonus_hero");
+						
+						TangibleObject heroismNecklace = (TangibleObject) core.objectService.createObject("object/tangible/wearables/necklace/shared_necklace_s01.iff", planet);
+						heroismNecklace.setStfFilename("static_item_n");
+						heroismNecklace.setStfName("item_necklace_set_hero_01_01");
+						heroismNecklace.setStringAttribute("@set_bonus:piece_bonus_count_3", "@set_bonus:set_bonus_hero_1");
+						heroismNecklace.setStringAttribute("@set_bonus:piece_bonus_count_4", "@set_bonus:set_bonus_hero_2");
+						heroismNecklace.setStringAttribute("@set_bonus:piece_bonus_count_5", "@set_bonus:set_bonus_hero_3");
+						heroismNecklace.setAttachment("setBonus", "set_bonus_hero");
+						
+						TangibleObject heroismBraceletRight = (TangibleObject) core.objectService.createObject("object/tangible/wearables/bracelet/shared_bracelet_s02_r.iff", planet);
+						heroismBraceletRight.setStfFilename("static_item_n");
+						heroismBraceletRight.setStfName("item_bracelet_r_set_hero_01_01");
+						heroismBraceletRight.setStringAttribute("@set_bonus:piece_bonus_count_3", "@set_bonus:set_bonus_hero_1");
+						heroismBraceletRight.setStringAttribute("@set_bonus:piece_bonus_count_4", "@set_bonus:set_bonus_hero_2");
+						heroismBraceletRight.setStringAttribute("@set_bonus:piece_bonus_count_5", "@set_bonus:set_bonus_hero_3");
+						heroismBraceletRight.setAttachment("setBonus", "set_bonus_hero");
+						
+						TangibleObject heroismBraceletLeft = (TangibleObject) core.objectService.createObject("object/tangible/wearables/bracelet/shared_bracelet_s02_l.iff", planet);
+						heroismBraceletLeft.setStfFilename("static_item_n");
+						heroismBraceletLeft.setStfName("item_bracelet_l_set_hero_01_01");
+						heroismBraceletLeft.setStringAttribute("@set_bonus:piece_bonus_count_3", "@set_bonus:set_bonus_hero_1");
+						heroismBraceletLeft.setStringAttribute("@set_bonus:piece_bonus_count_4", "@set_bonus:set_bonus_hero_2");
+						heroismBraceletLeft.setStringAttribute("@set_bonus:piece_bonus_count_5", "@set_bonus:set_bonus_hero_3");
+						heroismBraceletLeft.setAttachment("setBonus", "set_bonus_hero");
+						
+						inventory.add(heroismBand);
+						inventory.add(heroismRing);
+						inventory.add(heroismNecklace);
+						inventory.add(heroismBraceletRight);
+						inventory.add(heroismBraceletLeft);
 						return;
 					case 50: // [Items] Assault Armor
 						sendCharacterBuilderSUI(player, 6);
