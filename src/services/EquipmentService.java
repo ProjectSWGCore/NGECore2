@@ -68,22 +68,6 @@ public class EquipmentService implements INetworkDispatch {
 
 	}
 	
-	private int getWeaponCriticalChance(CreatureObject actor, SWGObject item) {
-		int weaponCriticalChance = 0;
-		String weaponCriticalSkillMod = (core.scriptService.getMethod("scripts/equipment/", "weapon_critical", item.getStringAttribute("cat_wpn_damage.wpn_category")).__call__().asString());
-		
-		if(weaponCriticalSkillMod.contains(" "))
-			weaponCriticalSkillMod.replace(" ", "");
-		
-		if(weaponCriticalSkillMod.contains("-"))
-			weaponCriticalSkillMod.replace("-", "");		
-		
-		if(actor.getSkillMod(weaponCriticalSkillMod) != null)
-			weaponCriticalChance = actor.getSkillModBase(weaponCriticalSkillMod);
-		
-		return weaponCriticalChance;
-	}
-	
 	public boolean canEquip(CreatureObject actor, SWGObject item) {
 		// TODO: Species restrictions
 		// TODO: Gender restrictions
@@ -130,53 +114,6 @@ public class EquipmentService implements INetworkDispatch {
 		return result;
 	}
 	
-	private void calculateArmorProtection(CreatureObject creature, boolean equipping)//float protection, String slotName)
-	{
-		int wornArmourPieces = 0, forceProtection = 0;
-		Map<String, Float> protection = new TreeMap<String, Float>();
-		
-		for(SWGObject item : creature.getEquipmentList())
-		{
-			Map<String, Object> attributes = new TreeMap<String, Object>(item.getAttributes());
-			boolean incPieceCount = false;
-			
-			for(Entry<String, Object> e : attributes.entrySet()) 
-			{	
-				if(item.getStringAttribute("protection_level") != null) forceProtection = getForceProtection(item);
-				
-				if(e.getKey().startsWith("cat_armor_standard_protection")) 
-				{
-					String protectionType = e.getKey().replace("cat_armor_standard_protection.armor_eff_", "");
-					float modifier = Float.parseFloat(core.scriptService.getMethod("scripts/equipment/", "slot_protection", creature.getSlotNameForObject(item)).__call__().asString()) / 100;
-					Float protectionAmount = Float.parseFloat((String) e.getValue()) * modifier;
-				
-					if(protection.containsKey(protectionType)) protection.replace(protectionType, protection.get(protectionType) + protectionAmount);
-					else protection.put(protectionType, protectionAmount);
-					incPieceCount = true;
-				}
-				else if(e.getKey().startsWith("cat_armor_special_protection")) 
-				{
-					String protectionType = e.getKey().replace("cat_armor_special_protection.special_protection_type_", "");
-					float modifier = Float.parseFloat(core.scriptService.getMethod("scripts/equipment/", "slot_protection", creature.getSlotNameForObject(item)).__call__().asString()) / 100;
-					Float protectionAmount = Float.parseFloat((String) e.getValue()) * modifier;
-					
-					if(protection.containsKey(protectionType)) protection.replace(protectionType, protection.get(protectionType) + protectionAmount);
-					else protection.put(protectionType, protectionAmount);
-					incPieceCount = true;
-				}	
-			}
-			if(incPieceCount) wornArmourPieces++;
-		}
-		
-		for(Entry<String, Float> e : protection.entrySet()) 
-		{	
-			core.skillModService.deductSkillMod(creature, e.getKey(), creature.getSkillModBase(e.getKey()));
-			core.skillModService.addSkillMod(creature, e.getKey(), forceProtection);
-			if(wornArmourPieces >= 3) core.skillModService.addSkillMod(creature, e.getKey(), (int) e.getValue().floatValue());
-		}
-		
-	}
-
 	public void equip(CreatureObject actor, SWGObject item) 
 	{
 		String template = ((item.getAttachment("customServerTemplate") == null) ? item.getTemplate() : (item.getTemplate().split("shared_")[0] + "shared_" + ((String) item.getAttachment("customServerTemplate")) + ".iff"));
@@ -281,6 +218,72 @@ public class EquipmentService implements INetworkDispatch {
 		}
 	}
 
+	private void calculateArmorProtection(CreatureObject creature, boolean equipping)
+	{
+		int wornArmourPieces = 0, forceProtection = 0;
+		Map<String, Float> protection = new TreeMap<String, Float>();
+		
+		for(SWGObject item : creature.getEquipmentList())
+		{
+			Map<String, Object> attributes = new TreeMap<String, Object>(item.getAttributes());
+			boolean incPieceCount = false;
+			
+			for(Entry<String, Object> e : attributes.entrySet()) 
+			{	
+				if(item.getStringAttribute("protection_level") != null) forceProtection = getForceProtection(item);
+				
+				if(e.getKey().startsWith("cat_armor_standard_protection")) 
+				{
+					String protectionType = e.getKey().replace("cat_armor_standard_protection.armor_eff_", "");
+					float modifier = Float.parseFloat(core.scriptService.getMethod("scripts/equipment/", "slot_protection", creature.getSlotNameForObject(item)).__call__().asString()) / 100;
+					Float protectionAmount = Float.parseFloat((String) e.getValue()) * modifier;
+				
+					if(protection.containsKey(protectionType)) protection.replace(protectionType, protection.get(protectionType) + protectionAmount);
+					else protection.put(protectionType, protectionAmount);
+					incPieceCount = true;
+				}
+				else if(e.getKey().startsWith("cat_armor_special_protection")) 
+				{
+					String protectionType = e.getKey().replace("cat_armor_special_protection.special_protection_type_", "");
+					float modifier = Float.parseFloat(core.scriptService.getMethod("scripts/equipment/", "slot_protection", creature.getSlotNameForObject(item)).__call__().asString()) / 100;
+					Float protectionAmount = Float.parseFloat((String) e.getValue()) * modifier;
+					
+					if(protection.containsKey(protectionType)) protection.replace(protectionType, protection.get(protectionType) + protectionAmount);
+					else protection.put(protectionType, protectionAmount);
+					incPieceCount = true;
+				}	
+			}
+			if(incPieceCount) wornArmourPieces++;
+		}
+		
+		for(Entry<String, Float> e : protection.entrySet()) 
+		{	
+			core.skillModService.deductSkillMod(creature, e.getKey(), creature.getSkillModBase(e.getKey()));
+			core.skillModService.addSkillMod(creature, e.getKey(), forceProtection);
+			if(wornArmourPieces >= 3) core.skillModService.addSkillMod(creature, e.getKey(), (int) e.getValue().floatValue());
+		}
+	}
+	
+	private int getWeaponCriticalChance(CreatureObject actor, SWGObject item) {
+		int weaponCriticalChance = 0;
+		String weaponCriticalSkillMod = (core.scriptService.getMethod("scripts/equipment/", "weapon_critical", item.getStringAttribute("cat_wpn_damage.wpn_category")).__call__().asString());
+		
+		if(weaponCriticalSkillMod.contains(" "))
+			weaponCriticalSkillMod.replace(" ", "");
+		
+		if(weaponCriticalSkillMod.contains("-"))
+			weaponCriticalSkillMod.replace("-", "");		
+		
+		if(actor.getSkillMod(weaponCriticalSkillMod) != null)
+			weaponCriticalChance = actor.getSkillModBase(weaponCriticalSkillMod);
+		
+		return weaponCriticalChance;
+	}
+		
+	private int getForceProtection(SWGObject item) {
+		return core.scriptService.getMethod("scripts/equipment/", "force_protection", item.getAttachment("type") + "_" + item.getStringAttribute("protection_level")).__call__().asInt();
+	}
+	
 	public void addBonusSetTemplate(BonusSetTemplate bonusSet)
 	{
 		bonusSetTemplates.put(bonusSet.getName(), bonusSet);
@@ -302,9 +305,5 @@ public class EquipmentService implements INetworkDispatch {
 			Files.walkFileTree(p, fv);
 		} 
         catch (IOException e) { e.printStackTrace(); }
-	}
-	
-	private int getForceProtection(SWGObject item) {
-		return core.scriptService.getMethod("scripts/equipment/", "force_protection", item.getAttachment("type") + "_" + item.getStringAttribute("protection_level")).__call__().asInt();
 	}
 }
