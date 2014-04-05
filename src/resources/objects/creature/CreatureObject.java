@@ -611,7 +611,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	public void removeSkillMod(SkillMod mod) {
 		if (mod != null) {
-			skillMods.remove(mod);
+			skillMods.remove(mod.getName());
 		}
 	}
 	

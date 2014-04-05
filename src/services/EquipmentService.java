@@ -221,7 +221,6 @@ public class EquipmentService implements INetworkDispatch {
 		if(equipping)
 		{
 			if(item.getStringAttribute("cat_wpn_damage.wpn_category") != null) creature.addSkillMod("display_only_critical", getWeaponCriticalChance(creature, item));
-			if(item.getStringAttribute("protection_level") != null) addForceProtection(creature, item);
 			if(item.getStringAttribute("proc_name") != null) core.buffService.addBuffToCreature(creature, item.getStringAttribute("proc_name").replace("@ui_buff:", ""), creature);
 			
 			for(Entry<String, Object> e : attributes.entrySet()) 
