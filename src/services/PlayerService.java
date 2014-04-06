@@ -204,25 +204,29 @@ public class PlayerService implements INetworkDispatch {
 		});
 
 		objControllerOpcodes.put(ObjControllerOpcodes.ChangeRoleIconChoice, (session, data) -> {
-			
-			Client c = core.getClient(session);
-			ChangeRoleIconChoice packet = new ChangeRoleIconChoice();
-			PlayerObject player;
-			SWGObject o;
-			
-			packet.deserialize(data);
-			o = core.objectService.getObject(packet.getObjectId());
-			
-			if (c.getParent() == null || o == null || c.getParent() != o
-			|| !(o instanceof CreatureObject) || !(o.getSlottedObject("ghost")
-			instanceof PlayerObject)) {
+
+			Client client = core.getClient(session);
+
+			if (client == null)
 				return;
-			}
-			
-			player = (PlayerObject) o.getSlottedObject("ghost");
-			
+
+			SWGObject object = client.getParent();
+
+			if (object == null)
+				return;
+
+			PlayerObject player = (PlayerObject) object.getSlottedObject("ghost");
+
+			if (player == null)
+				return;
+
+			data.order(ByteOrder.LITTLE_ENDIAN);
+
+			ChangeRoleIconChoice packet = new ChangeRoleIconChoice();
+			packet.deserialize(data);
+
 			player.setProfessionIcon(packet.getIcon());
-			
+
 		});
 		
 		swgOpcodes.put(Opcodes.SetWaypointColor, (session, data) -> {
