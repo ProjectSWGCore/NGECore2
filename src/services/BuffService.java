@@ -174,7 +174,7 @@ public class BuffService implements INetworkDispatch {
 				@SuppressWarnings("unused")
 				@Override
 				public void run() {
-					if (buffer == null)
+					if (buffer == null  || buffer.getClient() == null)
 						removeBuffFromCreature(target, buff);
 
 					if (target.getWorldPosition().getDistance2D(buffer.getWorldPosition()) > 80) {
@@ -188,23 +188,6 @@ public class BuffService implements INetworkDispatch {
 		
 		for (String effect : buff.getParticleEffect().split(",")) {
 			target.playEffectObject(effect, buff.getBuffName());
-		}
-		
-		if (!buff.getCallback().equals("")) {
-			if (FileUtilities.doesFileExist("scripts/buffs/" + buff.getBuffName() +  ".py")) {
-				scheduler.schedule(new Runnable() {
-					
-					@Override
-					public void run() {
-						PyObject method = core.scriptService.getMethod("scripts/buffs/", buff.getBuffName(), buff.getCallback());
-						
-						if (method != null && method.isCallable()) {
-							method.__call__(Py.java2py(core), Py.java2py(target), Py.java2py(buff));
-						}
-					}
-						
-				}, 0, TimeUnit.SECONDS);
-			}
 		}
 		
 		if (buffer != null && target.getGroupId() != 0 && target.getGroupId() == buffer.getGroupId()) {
@@ -233,6 +216,17 @@ public class BuffService implements INetworkDispatch {
          	if(buff.getEffect1Name().length() > 0) core.skillModService.deductSkillMod(creature, buff.getEffect4Name(), (int) buff.getEffect4Value());
          	if(buff.getEffect1Name().length() > 0) core.skillModService.deductSkillMod(creature, buff.getEffect5Name(), (int) buff.getEffect5Value());
          }
+         	
+	if (!buff.getCallback().equals("none") && !buff.getCallback().equals("")) {
+		if (FileUtilities.doesFileExist("scripts/buffs/" + buff.getBuffName() +  ".py")) {
+			PyObject method = core.scriptService.getMethod("scripts/buffs/", buff.getBuffName(), buff.getCallback());
+			
+			if (method != null && method.isCallable()) {
+				method.__call__(Py.java2py(core), Py.java2py(target), Py.java2py(buff));
+			}
+		}
+	}
+         
          creature.removeBuff(buff);
          
         for (String effect : buff.getParticleEffect().split(",")) {
