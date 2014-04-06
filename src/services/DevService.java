@@ -32,7 +32,6 @@ import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 
 import protocol.swg.ExpertiseRequestMessage;
-
 import resources.common.Console;
 import resources.common.FileUtilities;
 import resources.common.Opcodes;
@@ -41,6 +40,7 @@ import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
+import resources.objects.tool.SurveyTool;
 import services.sui.SUIWindow;
 import services.sui.SUIService.ListBoxType;
 import services.sui.SUIWindow.SUICallback;
@@ -84,6 +84,7 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 21, "Weapons");
 				suiOptions.put((long) 22, "Misc Items");
 				suiOptions.put((long) 23, "Jedi Items");
+				suiOptions.put((long) 110, "Survey Devices");
 				break;
 			case 3: // [Items] Weapons
 				suiOptions.put((long) 30, "Jedi Weapons");
@@ -120,6 +121,7 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 91, "(Dark) Jedi Robe");
 				suiOptions.put((long) 92, "Belt of Master Bodo Baas");
 				break;
+		
 		}
 		
 		final SUIWindow window = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "Character Builder Terminal", "Select the desired option and click OK.", suiOptions, creature, null, 10);
@@ -181,6 +183,9 @@ public class DevService implements INetworkDispatch {
 					case 23: // Jedi Items
 						sendCharacterBuilderSUI(player, 9);
 						return;
+					case 25: // Tools
+						sendCharacterBuilderSUI(player, 15);
+						return;	
 						
 					// [Items] Weapons
 					case 30: // Jedi Weapons
@@ -947,6 +952,36 @@ public class DevService implements INetworkDispatch {
 					case 92: // Belt of Master Bodo Baas
 						inventory.add(core.objectService.createObject("object/tangible/wearables/backpack/shared_fannypack_s01.iff", planet));
 						return;
+					case 110:
+						SurveyTool mineralSurveyTool = (SurveyTool) core.objectService.createObject("object/tangible/survey_tool/shared_survey_tool_mineral.iff", planet);
+						mineralSurveyTool.setCustomName("Mineral Survey Device");
+						inventory.add(mineralSurveyTool);
+						
+						SurveyTool chemicalSurveyTool = (SurveyTool) core.objectService.createObject("object/tangible/survey_tool/shared_survey_tool_inorganic.iff", planet);
+						chemicalSurveyTool.setCustomName("Chemical Survey Device");
+						inventory.add(chemicalSurveyTool);
+						
+						SurveyTool floraSurveyTool = (SurveyTool) core.objectService.createObject("object/tangible/survey_tool/shared_survey_tool_lumber.iff", planet);
+						floraSurveyTool.setCustomName("Flora Survey Device");
+						inventory.add(floraSurveyTool);
+
+						SurveyTool gasSurveyTool = (SurveyTool) core.objectService.createObject("object/tangible/survey_tool/shared_survey_tool_gas.iff", planet);
+						gasSurveyTool.setCustomName("Gas Survey Device");
+						inventory.add(gasSurveyTool);
+
+						SurveyTool waterSurveyTool = (SurveyTool) core.objectService.createObject("object/tangible/survey_tool/shared_survey_tool_moisture.iff", planet);
+						waterSurveyTool.setCustomName("Water Survey Device");
+						inventory.add(waterSurveyTool);
+
+						SurveyTool windSurveyTool = (SurveyTool) core.objectService.createObject("object/tangible/survey_tool/shared_survey_tool_wind.iff", planet);
+						windSurveyTool.setCustomName("Wind Survey Device");
+						inventory.add(windSurveyTool);
+
+						SurveyTool solarSurveyTool = (SurveyTool) core.objectService.createObject("object/tangible/survey_tool/shared_survey_tool_solar.iff", planet);
+						solarSurveyTool.setCustomName("Solar Survey Device");
+						inventory.add(solarSurveyTool);
+						
+						break;
 				}
 			}	
 		});
@@ -965,3 +1000,4 @@ public class DevService implements INetworkDispatch {
 	}
 	
 }
+
