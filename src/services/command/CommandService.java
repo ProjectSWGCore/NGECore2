@@ -102,6 +102,9 @@ public class CommandService implements INetworkDispatch  {
 
 				CreatureObject actor = (CreatureObject) client.getParent();
 
+				if (command.getRequiredAbility().length() > 0 && !actor.hasAbility(command.getRequiredAbility()))
+					return;
+
 				if (actor.hasCooldown(command.getCommandName()))
 					return;
 				
