@@ -32,6 +32,7 @@ import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -100,6 +101,7 @@ public class PlayerService implements INetworkDispatch {
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private float xpMultiplier;
     protected final Object objectMutex = new Object();
+    private ConcurrentHashMap<Long, List<ScheduledFuture<?>>> schedulers = new ConcurrentHashMap<Long, List<ScheduledFuture<?>>>();
     
 	public PlayerService(final NGECore core) {
 		this.core = core;
@@ -110,33 +112,36 @@ public class PlayerService implements INetworkDispatch {
 	
 	public void postZoneIn(final CreatureObject creature) {
 		
-		scheduler.scheduleAtFixedRate(() -> {
+		if(schedulers.get(creature.getObjectID()) != null)
+			return;
+		List<ScheduledFuture<?>> scheduleList = new ArrayList<ScheduledFuture<?>>();
+		scheduleList.add(scheduler.scheduleAtFixedRate(() -> {
 			ServerTimeMessage time = new ServerTimeMessage(core.getGalacticTime() / 1000);
 			IoBuffer packet = time.serialize();
 			creature.getClient().getSession().write(packet);
-		}, 45, 45, TimeUnit.SECONDS);
+		}, 45, 45, TimeUnit.SECONDS));
 		
-		scheduler.scheduleAtFixedRate(() -> {
+		scheduleList.add(scheduler.scheduleAtFixedRate(() -> {
 			PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
 			player.setTotalPlayTime((int) (player.getTotalPlayTime() + ((System.currentTimeMillis() - player.getLastPlayTimeUpdate()) / 1000)));
 			player.setLastPlayTimeUpdate(System.currentTimeMillis());
 			core.collectionService.checkExplorationRegions(creature);
-		}, 30, 30, TimeUnit.SECONDS);
+		}, 30, 30, TimeUnit.SECONDS));
 		
-		scheduler.scheduleAtFixedRate(() -> {
+		scheduleList.add(scheduler.scheduleAtFixedRate(() -> {
 			if(creature.getAction() < creature.getMaxAction() && creature.getPosture() != 14) {
 				if(creature.getCombatFlag() == 0)
 					creature.setAction(creature.getAction() + (15 + creature.getLevel() * 5));
 				else
 					creature.setAction(creature.getAction() + ((15 + creature.getLevel() * 5) / 2));
 			}
-		}, 0, 1000, TimeUnit.MILLISECONDS);
+		}, 0, 1000, TimeUnit.MILLISECONDS));
 
-		scheduler.scheduleAtFixedRate(() -> {
+		scheduleList.add(scheduler.scheduleAtFixedRate(() -> {
 			if(creature.getHealth() < creature.getMaxHealth() && creature.getCombatFlag() == 0 && creature.getPosture() != 13 && creature.getPosture() != 14)
 				creature.setHealth(creature.getHealth() + (36 + creature.getLevel() * 4));
-		}, 0, 1000, TimeUnit.MILLISECONDS);
-		
+		}, 0, 1000, TimeUnit.MILLISECONDS));
+		schedulers.put(creature.getObjectID(), scheduleList);
 		/*final PlayerObject ghost = (PlayerObject) creature.getSlottedObject("ghost");
 		scheduler.schedule(new Runnable() {
 
@@ -1261,6 +1266,10 @@ public class PlayerService implements INetworkDispatch {
 	public void shutdown() {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	public Map<Long, List<ScheduledFuture<?>>> getSchedulers() {
+		return schedulers;
 	}
 	
 }

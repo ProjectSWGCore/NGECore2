@@ -71,7 +71,36 @@ public class Buff implements IDelta {
 	private long groupBufferId;
 	private int buffCRC;
 	
-	public Buff(String buffName, long ownerId) {
+	public Buff(Buff baseBuff, long ownerId) {
+		this.buffName = baseBuff.getBuffName();
+		this.buffCRC = baseBuff.getBuffCRC();
+		this.group1 = baseBuff.getGroup1();
+		this.group2 = baseBuff.getGroup2();
+		this.priority = baseBuff.getPriority();
+		this.duration = baseBuff.getDuration();
+		this.effect1Name = baseBuff.getEffect1Name();
+		this.effect1Value = baseBuff.getEffect1Value();
+		this.effect2Name = baseBuff.getEffect2Name();
+		this.effect2Value = baseBuff.getEffect2Value();
+		this.effect3Name = baseBuff.getEffect3Name();
+		this.effect3Value = baseBuff.getEffect3Value();
+		this.effect4Name = baseBuff.getEffect4Name();
+		this.effect4Value = baseBuff.getEffect4Value();
+		this.effect5Name = baseBuff.getEffect5Name();
+		this.effect5Value = baseBuff.getEffect5Value();
+		this.callback = baseBuff.getCallback();
+		this.particleEffect = baseBuff.getParticleEffect();
+		this.isDebuff = baseBuff.isDebuff();
+		this.removeOnDeath = baseBuff.isRemoveOnDeath();
+		this.isRemovableByPlayer = baseBuff.isRemovableByPlayer();
+		this.maxStacks = baseBuff.getMaxStacks();
+		this.isPersistent = baseBuff.isPersistent();
+		this.removeOnRespec = baseBuff.isRemoveOnRespec();
+		this.aiRemoveOnEndCombat = baseBuff.isAiRemoveOnEndCombat();
+		this.decayOnPvPDeath = baseBuff.isDecayOnPvPDeath();
+	}
+	
+	/*public Buff(String buffName, long ownerId) {
 		
 		this.buffName = buffName;
 		this.ownerId = ownerId;
@@ -119,12 +148,8 @@ public class Buff implements IDelta {
 		} catch (InstantiationException | IllegalAccessException e) {
 			e.printStackTrace();
 		}
-		
-		
+	}*/
 
-		
-	}
-	
 	public Buff() { }
 
 	@Override
@@ -159,7 +184,7 @@ public class Buff implements IDelta {
 		this.group1 = group1;
 	}
  
-	public float getPriority() {
+	public int getPriority() {
 		return priority;
 	}
 	
@@ -453,6 +478,10 @@ public class Buff implements IDelta {
 
 	public int getBuffCRC() {
 		return buffCRC;
+	}
+	
+	public void setBuffCRC(int buffCRC) {
+		this.buffCRC = buffCRC;
 	}
 
 }

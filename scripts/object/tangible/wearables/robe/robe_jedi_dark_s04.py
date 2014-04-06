@@ -14,7 +14,7 @@ def setup(core, object):
 	object.setIntAttribute('cat_stat_mod_bonus.@stat_n:precision_modified', 250)
 	object.setIntAttribute('cat_stat_mod_bonus.@stat_n:luck_modified', 250)
 	
-	object.setStringAttribute('proc_name', '@ui_buff:proc_old_light_jedi_gift')
+	object.setStringAttribute('proc_name', '@ui_buff:proc_old_dark_jedi_gift')
 	object.setStringAttribute('@set_bonus:piece_bonus_count_2', '@set_bonus:set_bonus_jedi_robe_1')
 	
 	object.setAttachment('type', 'jedi_robe')

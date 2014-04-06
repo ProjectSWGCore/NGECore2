@@ -75,7 +75,7 @@ public class AttackState extends AIState {
 				if(weapon != null)
 					maxDistance = weapon.getMaxRange() - 1;
 			}
-			if(actor.getFollowObject().getWorldPosition().getDistance2D(creature.getWorldPosition()) > maxDistance)
+			if(actor.getFollowObject().getWorldPosition().getDistance(creature.getWorldPosition()) > maxDistance)
 				actor.setNextPosition(actor.getFollowObject().getPosition());
 			else {
 				//recover(actor);
@@ -120,6 +120,7 @@ public class AttackState extends AIState {
 			creature.setLookAtTarget(0);
 			creature.setIntendedTarget(0);
 			actor.setFollowObject(null);
+			actor.setCurrentState(new RetreatState());
 			return StateResult.FINISHED;
 		}
 		CreatureObject target = actor.getFollowObject();
@@ -133,7 +134,7 @@ public class AttackState extends AIState {
 			return StateResult.UNFINISHED;
 		}
 		if(target.getPosture() == 13 || target.getPosture() == 14) {
-			actor.getDamageMap().remove(target);
+			actor.removeDefender(target);
 			actor.setFollowObject(actor.getHighestDamageDealer());
 			target = actor.getFollowObject();
 			if(target == null)
@@ -148,7 +149,7 @@ public class AttackState extends AIState {
 			actor.scheduleRecovery();
 			return StateResult.UNFINISHED;
 		}
-		if(target.getWorldPosition().getDistance2D(creature.getWorldPosition()) > maxDistance) {
+		if(target.getWorldPosition().getDistance(creature.getWorldPosition()) > maxDistance) {
 			actor.scheduleRecovery();
 			return StateResult.UNFINISHED;
 		}

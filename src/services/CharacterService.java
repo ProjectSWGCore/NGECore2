@@ -564,7 +564,25 @@ public class CharacterService implements INetworkDispatch {
 		return false;
 	}
 
-	
+	/**
+	 * Checks the database for the Account ID associated with the Object ID.
+	 * Intended for GM use only!
+	 * @param objectId Object ID of the player, used to obtain the Account ID.
+	 * @return Returns Account ID
+	 */
+	public int getAccountId(long objectId) {
+		try {
+			PreparedStatement ps = databaseConnection.preparedStatement("SELECT * FROM characters WHERE id=?");
+			ps.setLong(1, objectId);
+			ResultSet resultSet = ps.executeQuery();
+			resultSet.next();
+			return resultSet.getInt("accountId");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
+
 	private void createStarterClothing(CreatureObject creature, String raceTemplate, String profession) {
 		try {
 			ProfessionTemplateVisitor visitor = ClientFileManager.loadFile("creation/profession_defaults_" + profession + ".iff", ProfessionTemplateVisitor.class);

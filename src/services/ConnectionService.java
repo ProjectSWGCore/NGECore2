@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import main.NGECore;
@@ -264,7 +265,12 @@ public class ConnectionService implements INetworkDispatch {
 		object.setPerformanceListenee(null);
 		object.setPerformanceWatchee(null);
 		object.setAttachment("disconnectTask", null);
-
+		
+		List<ScheduledFuture<?>> schedulers = core.playerService.getSchedulers().get(object.getObjectID());
+		schedulers.forEach(s -> s.cancel(true));
+		schedulers.clear();
+		core.playerService.getSchedulers().remove(object.getObjectID());
+		
 		object.createTransaction(core.getCreatureODB().getEnvironment());
 		core.getCreatureODB().put(object, Long.class, CreatureObject.class, object.getTransaction());
 		object.getTransaction().commitSync();

@@ -48,7 +48,7 @@ def run(core, actor, target, commandString):
 	actor.playEffectObject(effectObj, 'head')
 	player.setHoloEmoteUses(player.getHoloEmoteUses() - 1)
 	
-	actor.addCooldown('holoEmote', long(30 * 1000))
+	actor.addCooldown('holoEmote', float(30))
 	
 	return
 
