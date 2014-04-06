@@ -317,6 +317,13 @@ public class CharacterService implements INetworkDispatch {
 					Console.println("Added empty mission " + missionsAdded);
 				}*/
 				
+				// TODO: Race abilities
+				if (client.isGM())
+					object.addAbility("admin");
+				
+				object.addAbility("startDance");
+				object.addAbility("startDance+Basic");
+				
 				object.addObjectToEquipList(datapad);
 				object.addObjectToEquipList(inventory);
 				object.addObjectToEquipList(bank);

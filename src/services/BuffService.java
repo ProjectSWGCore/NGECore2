@@ -179,7 +179,7 @@ public class BuffService implements INetworkDispatch {
 					if (buffer == null)
 						removeBuffFromCreature(target, buff);
 
-					if (target.getPosition().getDistance2D(buffer.getWorldPosition()) > 80) {
+					if (target.getWorldPosition().getDistance2D(buffer.getWorldPosition()) > 80) {
 						removeBuffFromCreature(target, buff);
 					}
 				}

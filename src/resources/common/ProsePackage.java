@@ -55,12 +55,12 @@ public class ProsePackage {
 	
 	// TODO: Add more constructors
 	
-	private ProsePackage(String stfFile, String stfLabel) {
+	public ProsePackage(String stfFile, String stfLabel) {
 		this.stfFile = stfFile;
 		this.stfLabel = stfLabel;
 	}
 	
-	private ProsePackage(String stfFile, String stfLabel, long tuObjectId, String tuStfFile, String tuStfLabel, String tuCustomString) {
+	public ProsePackage(String stfFile, String stfLabel, long tuObjectId, String tuStfFile, String tuStfLabel, String tuCustomString) {
 		this.stfFile = stfFile;
 		this.stfLabel = stfLabel;
 		this.tuObjectId = tuObjectId;

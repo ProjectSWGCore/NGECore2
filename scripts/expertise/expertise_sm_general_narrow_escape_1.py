@@ -1,48 +1,19 @@
 import sys
 
-def addExpertisePoint(core, actor):
-
-	player = actor.getSlottedObject('ghost')
-
-	if not player:
-		return
-
-	if not player.getProfession() == 'smuggler_1a':
-		return
-
-	actor.addSkill('expertise_sm_general_narrow_escape_1')
-
-
-	addAbilities(core, actor, player)
-
-	return
-
-def removeExpertisePoint(core, actor):
-
-	player = actor.getSlottedObject('ghost')
-
-	if not player:
-		return
-
-	if not player.getProfession() == 'smuggler_1a':
-		return
-
-	actor.removeSkill('expertise_sm_general_narrow_escape_1')
-
-
-	removeAbilities(core, actor, player)
-
-	return
-
-# this checks what abilities the player gets by level, need to also call this on level-up
 def addAbilities(core, actor, player):
-
-	actor.addAbility('sm_narrow_escape_1')
-
+	if actor.getLevel() >= 34:
+		actor.addAbility("sm_narrow_escape_1")
+	if actor.getLevel() >= 50:
+		actor.addAbility("sm_narrow_escape_2")
+	if actor.getLevel() >= 66:
+		actor.addAbility("sm_narrow_escape_3")
+	if actor.getLevel() >= 82:
+		actor.addAbility("sm_narrow_escape_4")
 	return
 
 def removeAbilities(core, actor, player):
-
-	actor.removeAbility('sm_narrow_escape_1')
-
+	actor.removeAbility("sm_narrow_escape_1")
+	actor.removeAbility("sm_narrow_escape_2")
+	actor.removeAbility("sm_narrow_escape_3")
+	actor.removeAbility("sm_narrow_escape_4")
 	return

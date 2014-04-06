@@ -25,6 +25,7 @@ import java.nio.ByteOrder;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
+import protocol.swg.ObjControllerMessage;
 import resources.common.ObjControllerOpcodes;
 
 public class StopNpcConversation extends ObjControllerObject {
@@ -51,7 +52,7 @@ public class StopNpcConversation extends ObjControllerObject {
 	public IoBuffer serialize() {
 		IoBuffer buffer = IoBuffer.allocate(40 + stfFile.length() + stfLabel.length()).order(ByteOrder.LITTLE_ENDIAN);
 		
-		buffer.putInt(ObjControllerOpcodes.STOP_NPC_CONVERSATION);
+		buffer.putInt(ObjControllerMessage.STOP_CONVERSATION);
 		buffer.putLong(objectId);
 		
 		buffer.putInt(0);

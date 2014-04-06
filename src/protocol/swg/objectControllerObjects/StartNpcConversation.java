@@ -22,7 +22,10 @@
 package protocol.swg.objectControllerObjects;
 
 import java.nio.ByteOrder;
+
 import org.apache.mina.core.buffer.IoBuffer;
+
+import protocol.swg.ObjControllerMessage;
 import resources.common.ObjControllerOpcodes;
 
 public class StartNpcConversation extends ObjControllerObject {
@@ -45,7 +48,7 @@ public class StartNpcConversation extends ObjControllerObject {
 	public IoBuffer serialize() {
 		IoBuffer buffer = IoBuffer.allocate(31).order(ByteOrder.LITTLE_ENDIAN);
 		
-		buffer.putInt(ObjControllerOpcodes.START_NPC_CONVERSATION);
+		buffer.putInt(ObjControllerMessage.START_CONVERSATION);
 		buffer.putLong(objectId);
 		
 		buffer.putInt(0);

@@ -1,7 +1,7 @@
 import sys
 
 def chest2():
-	return "35.71"
+	return "35.70"
 	
 def pants1():
 	return "21.43"

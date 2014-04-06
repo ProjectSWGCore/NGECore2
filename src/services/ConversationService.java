@@ -57,6 +57,7 @@ public class ConversationService implements INetworkDispatch {
 		if(player.getConversingNpc() != null && player.getConversingNpc() != npc)
 			handleEndConversation(player, player.getConversingNpc());
 		
+		player.setConversingNpc(npc);
 		sendStartConversation(player, npc);
 		core.scriptService.callScript("scripts/conversation/", (String) npc.getAttachment("conversationFile"), "startConversation", core, player, npc);
 	}
@@ -65,16 +66,19 @@ public class ConversationService implements INetworkDispatch {
 		
 		TangibleObject npc = player.getConversingNpc();
 		
-		if(npc == null)
+		if(npc == null) {
+			System.out.println("npc is null");			
 			return;
+		}
 		
 		PyObject func = conversationHandlers.get(player);
 		
-		if(func == null)
+		if(func == null) {
+			System.out.println("handler func is null");
 			return;
+		}
 		
 		conversationHandlers.remove(player);
-		
 		func.__call__(Py.java2py(core), Py.java2py(player), Py.java2py(npc), Py.java2py(selectionId));
 		
 	}
