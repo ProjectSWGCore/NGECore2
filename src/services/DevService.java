@@ -32,7 +32,6 @@ import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 
 import protocol.swg.ExpertiseRequestMessage;
-
 import resources.common.Console;
 import resources.common.FileUtilities;
 import resources.common.Opcodes;
@@ -41,6 +40,7 @@ import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
+import resources.objects.tool.SurveyTool;
 import services.sui.SUIWindow;
 import services.sui.SUIService.ListBoxType;
 import services.sui.SUIWindow.SUICallback;
@@ -84,6 +84,7 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 21, "Weapons");
 				suiOptions.put((long) 22, "Misc Items");
 				suiOptions.put((long) 23, "Jedi Items");
+				suiOptions.put((long) 110, "Survey Devices");
 				break;
 			case 3: // [Items] Weapons
 				suiOptions.put((long) 30, "Jedi Weapons");
@@ -92,7 +93,8 @@ public class DevService implements INetworkDispatch {
 				break;
 			case 4: // [Items] Misc Items
 				suiOptions.put((long) 40, "Unity Ring");
-				suiOptions.put((long) 41, "Tusken rucksack");
+				suiOptions.put((long) 41, "Tusken Rucksack");
+				suiOptions.put((long) 42, "Heroism Jewlery Set");
 				break;
 			case 5: // [Items] Armor
 				suiOptions.put((long) 50, "Assault Armor");
@@ -119,6 +121,7 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 91, "(Dark) Jedi Robe");
 				suiOptions.put((long) 92, "Belt of Master Bodo Baas");
 				break;
+		
 		}
 		
 		final SUIWindow window = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "Character Builder Terminal", "Select the desired option and click OK.", suiOptions, creature, null, 10);
@@ -180,6 +183,9 @@ public class DevService implements INetworkDispatch {
 					case 23: // Jedi Items
 						sendCharacterBuilderSUI(player, 9);
 						return;
+					case 25: // Tools
+						sendCharacterBuilderSUI(player, 15);
+						return;	
 						
 					// [Items] Weapons
 					case 30: // Jedi Weapons
@@ -242,6 +248,15 @@ public class DevService implements INetworkDispatch {
 						pistol.setStringAttribute("cat_wpn_damage.damage", "400-559");
 						
 						inventory.add(pistol);
+						
+						SWGObject heavy = core.objectService.createObject("object/weapon/ranged/heavy/shared_som_lava_cannon_generic.iff", planet);
+						heavy.setIntAttribute("required_combat_level", 90);
+						heavy.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 1);
+						heavy.setStringAttribute("class_required", "Commando");
+						heavy.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
+						heavy.setStringAttribute("cat_wpn_damage.damage", "700-1400");
+						
+						inventory.add(heavy);
 						return;
 					case 40:
 						TangibleObject ring = (TangibleObject) core.objectService.createObject("object/tangible/wearables/ring/shared_ring_s01.iff", planet);
@@ -255,8 +270,54 @@ public class DevService implements INetworkDispatch {
 						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:precision_modified", 35);
 						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:stamina_modified", 30);
 						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:strength_modified", 35);
-						
 						inventory.add(backpack);
+						return;
+					case 42:
+						TangibleObject heroismBand = (TangibleObject) core.objectService.createObject("object/tangible/wearables/ring/shared_ring_s01.iff", planet);
+						heroismBand.setStfFilename("static_item_n");
+						heroismBand.setStfName("item_band_set_hero_01_01");
+						heroismBand.setStringAttribute("@set_bonus:piece_bonus_count_3", "@set_bonus:set_bonus_hero_1");
+						heroismBand.setStringAttribute("@set_bonus:piece_bonus_count_4", "@set_bonus:set_bonus_hero_2");
+						heroismBand.setStringAttribute("@set_bonus:piece_bonus_count_5", "@set_bonus:set_bonus_hero_3");
+						heroismBand.setAttachment("setBonus", "set_bonus_hero");
+						
+						TangibleObject heroismRing = (TangibleObject) core.objectService.createObject("object/tangible/wearables/ring/shared_ring_s01.iff", planet);
+						heroismRing.setStfFilename("static_item_n");
+						heroismRing.setStfName("item_ring_set_hero_01_01");
+						heroismRing.setStringAttribute("@set_bonus:piece_bonus_count_3", "@set_bonus:set_bonus_hero_1");
+						heroismRing.setStringAttribute("@set_bonus:piece_bonus_count_4", "@set_bonus:set_bonus_hero_2");
+						heroismRing.setStringAttribute("@set_bonus:piece_bonus_count_5", "@set_bonus:set_bonus_hero_3");
+						heroismRing.setAttachment("setBonus", "set_bonus_hero");
+						
+						TangibleObject heroismNecklace = (TangibleObject) core.objectService.createObject("object/tangible/wearables/necklace/shared_necklace_s01.iff", planet);
+						heroismNecklace.setStfFilename("static_item_n");
+						heroismNecklace.setStfName("item_necklace_set_hero_01_01");
+						heroismNecklace.setStringAttribute("@set_bonus:piece_bonus_count_3", "@set_bonus:set_bonus_hero_1");
+						heroismNecklace.setStringAttribute("@set_bonus:piece_bonus_count_4", "@set_bonus:set_bonus_hero_2");
+						heroismNecklace.setStringAttribute("@set_bonus:piece_bonus_count_5", "@set_bonus:set_bonus_hero_3");
+						heroismNecklace.setAttachment("setBonus", "set_bonus_hero");
+						
+						TangibleObject heroismBraceletRight = (TangibleObject) core.objectService.createObject("object/tangible/wearables/bracelet/shared_bracelet_s02_r.iff", planet);
+						heroismBraceletRight.setStfFilename("static_item_n");
+						heroismBraceletRight.setStfName("item_bracelet_r_set_hero_01_01");
+						heroismBraceletRight.setStringAttribute("@set_bonus:piece_bonus_count_3", "@set_bonus:set_bonus_hero_1");
+						heroismBraceletRight.setStringAttribute("@set_bonus:piece_bonus_count_4", "@set_bonus:set_bonus_hero_2");
+						heroismBraceletRight.setStringAttribute("@set_bonus:piece_bonus_count_5", "@set_bonus:set_bonus_hero_3");
+						heroismBraceletRight.setAttachment("setBonus", "set_bonus_hero");
+						
+						TangibleObject heroismBraceletLeft = (TangibleObject) core.objectService.createObject("object/tangible/wearables/bracelet/shared_bracelet_s02_l.iff", planet);
+						heroismBraceletLeft.setStfFilename("static_item_n");
+						heroismBraceletLeft.setStfName("item_bracelet_l_set_hero_01_01");
+						heroismBraceletLeft.setStringAttribute("@set_bonus:piece_bonus_count_3", "@set_bonus:set_bonus_hero_1");
+						heroismBraceletLeft.setStringAttribute("@set_bonus:piece_bonus_count_4", "@set_bonus:set_bonus_hero_2");
+						heroismBraceletLeft.setStringAttribute("@set_bonus:piece_bonus_count_5", "@set_bonus:set_bonus_hero_3");
+						heroismBraceletLeft.setAttachment("setBonus", "set_bonus_hero");
+						
+						inventory.add(heroismBand);
+						inventory.add(heroismRing);
+						inventory.add(heroismNecklace);
+						inventory.add(heroismBraceletRight);
+						inventory.add(heroismBraceletLeft);
 						return;
 					case 50: // [Items] Assault Armor
 						sendCharacterBuilderSUI(player, 6);
@@ -900,6 +961,36 @@ public class DevService implements INetworkDispatch {
 					case 92: // Belt of Master Bodo Baas
 						inventory.add(core.objectService.createObject("object/tangible/wearables/backpack/shared_fannypack_s01.iff", planet));
 						return;
+					case 110:
+						SurveyTool mineralSurveyTool = (SurveyTool) core.objectService.createObject("object/tangible/survey_tool/shared_survey_tool_mineral.iff", planet);
+						mineralSurveyTool.setCustomName("Mineral Survey Device");
+						inventory.add(mineralSurveyTool);
+						
+						SurveyTool chemicalSurveyTool = (SurveyTool) core.objectService.createObject("object/tangible/survey_tool/shared_survey_tool_inorganic.iff", planet);
+						chemicalSurveyTool.setCustomName("Chemical Survey Device");
+						inventory.add(chemicalSurveyTool);
+						
+						SurveyTool floraSurveyTool = (SurveyTool) core.objectService.createObject("object/tangible/survey_tool/shared_survey_tool_lumber.iff", planet);
+						floraSurveyTool.setCustomName("Flora Survey Device");
+						inventory.add(floraSurveyTool);
+
+						SurveyTool gasSurveyTool = (SurveyTool) core.objectService.createObject("object/tangible/survey_tool/shared_survey_tool_gas.iff", planet);
+						gasSurveyTool.setCustomName("Gas Survey Device");
+						inventory.add(gasSurveyTool);
+
+						SurveyTool waterSurveyTool = (SurveyTool) core.objectService.createObject("object/tangible/survey_tool/shared_survey_tool_moisture.iff", planet);
+						waterSurveyTool.setCustomName("Water Survey Device");
+						inventory.add(waterSurveyTool);
+
+						SurveyTool windSurveyTool = (SurveyTool) core.objectService.createObject("object/tangible/survey_tool/shared_survey_tool_wind.iff", planet);
+						windSurveyTool.setCustomName("Wind Survey Device");
+						inventory.add(windSurveyTool);
+
+						SurveyTool solarSurveyTool = (SurveyTool) core.objectService.createObject("object/tangible/survey_tool/shared_survey_tool_solar.iff", planet);
+						solarSurveyTool.setCustomName("Solar Survey Device");
+						inventory.add(solarSurveyTool);
+						
+						break;
 				}
 			}	
 		});
@@ -918,3 +1009,4 @@ public class DevService implements INetworkDispatch {
 	}
 	
 }
+

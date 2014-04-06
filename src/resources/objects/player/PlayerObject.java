@@ -30,6 +30,8 @@ import java.util.TreeMap;
 
 import resources.common.Console;
 import resources.objects.intangible.IntangibleObject;
+import resources.objects.resource.ResourceContainerObject;
+import resources.objects.tool.SurveyTool;
 import resources.objects.waypoint.WaypointObject;
 import resources.objects.creature.CreatureObject;
 
@@ -43,7 +45,7 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent(version=8)
+@Persistent(version=9)
 public class PlayerObject extends IntangibleObject {
 	
 	// PLAY 3
@@ -132,6 +134,10 @@ public class PlayerObject extends IntangibleObject {
 	private long lastPlayTimeUpdate = System.currentTimeMillis();
 	
 	private Map<String, Integer> factionStandingMap = new TreeMap<String, Integer>();
+	
+	private WaypointObject lastSurveyWaypoint;
+	private SurveyTool lastUsedSurveyTool;
+	private ResourceContainerObject recentContainer;
 	
 	public PlayerObject() {
 		super();
@@ -787,5 +793,33 @@ public class PlayerObject extends IntangibleObject {
 		if (getContainer() != null) {
 			getContainer().getClient().getSession().write(messageBuilder.buildShowBackpackDelta(showBackpack));
 		}
+	}
+	
+	public WaypointObject getLastSurveyWaypoint() {
+		return lastSurveyWaypoint;
+	}
+
+	public void setLastSurveyWaypoint(WaypointObject lastSurveyWaypoint) {
+		this.lastSurveyWaypoint = lastSurveyWaypoint;
+	}
+	
+	public SurveyTool getLastUsedSurveyTool() {
+		synchronized(objectMutex) {
+			return this.lastUsedSurveyTool;
+		}
+	}
+	
+	public void setLastUsedSurveyTool(SurveyTool surveyTool) {
+		synchronized(objectMutex) {
+			this.lastUsedSurveyTool = surveyTool;
+		}
+	}
+
+	public ResourceContainerObject getRecentContainer() {
+		return recentContainer;
+	}
+
+	public void setRecentContainer(ResourceContainerObject recentContainer) {
+		this.recentContainer = recentContainer;
 	}
 }

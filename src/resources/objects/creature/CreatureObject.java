@@ -26,7 +26,10 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
@@ -46,6 +49,7 @@ import com.sleepycat.persist.model.NotPersistent;
 
 import main.NGECore;
 import engine.clients.Client;
+import resources.common.Cooldown;
 import resources.objects.Buff;
 import resources.objects.DamageOverTime;
 import resources.objects.SWGList;
@@ -60,7 +64,7 @@ import engine.resources.scene.Quaternion;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 
-@Entity(version=5)
+@Entity(version=6)
 public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	@NotPersistent
@@ -69,7 +73,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	// CREO 1
 	private int bankCredits = 0;
 	private int cashCredits = 0;
-	private SWGList<String> skills;
+	private List<String> skills;
 	@NotPersistent
 	private int skillsUpdateCounter = 0;
 
@@ -177,12 +181,14 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private int coverCharge;
 	@NotPersistent
 	private TangibleObject conversingNpc;
+	@NotPersistent
+	private ConcurrentHashMap<String, Cooldown> cooldowns = new ConcurrentHashMap<String, Cooldown>();
 	
 	public CreatureObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
 		super(objectID, planet, Template, position, orientation);
 		messageBuilder = new CreatureMessageBuilder(this);
 		loadTemplateData();
-		skills = new SWGList<String>(messageBuilder, 1, 3);
+		skills = new ArrayList<String>();
 		skillMods = new SWGMap<String, SkillMod>(messageBuilder, 4, 3);
 		abilities = new SWGList<String>(messageBuilder, 4, 14);
 		missionCriticalObjects = new SWGList<MissionCriticalObject>(messageBuilder, 4, 13);
@@ -255,7 +261,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 	}
 
-	public SWGList<String> getSkills() {
+	public List<String> getSkills() {
 		return skills;
 	}
 	
@@ -605,7 +611,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	public void removeSkillMod(SkillMod mod) {
 		if (mod != null) {
-			skillMods.remove(mod);
+			skillMods.remove(mod.getName());
 		}
 	}
 	
@@ -1720,6 +1726,44 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.conversingNpc = conversingNpc;
 		}
+	}
+	
+	public void addCooldown(String cooldownGroup, float cooldownTime) {
+		if (cooldowns.containsKey(cooldownGroup)) {
+			cooldowns.remove(cooldownGroup);
+		}
+		
+		long duration = ((long) (cooldownTime * 1000)); 
+		
+		Cooldown cooldown = new Cooldown(duration);
+		
+		cooldown.setRemovalTask(Executors.newScheduledThreadPool(1).schedule(new Runnable() {
+			
+			@Override
+			public void run() {
+				removeCooldown(cooldownGroup);
+			}
+			
+		}, duration, TimeUnit.MILLISECONDS));
+		
+		cooldowns.put(cooldownGroup, cooldown);
+	}
+	
+	public boolean hasCooldown(String cooldownGroup) {
+		return cooldowns.containsKey(cooldownGroup);
+	}
+	
+	public boolean removeCooldown(String cooldownGroup) {
+		if (cooldowns.containsKey(cooldownGroup)) {
+			cooldowns.remove(cooldownGroup);
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public Cooldown getCooldown(String cooldownGroup) {
+		return cooldowns.get(cooldownGroup);
 	}
 	
 }

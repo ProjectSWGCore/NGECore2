@@ -11,4 +11,6 @@ def addAbilities(core, actor, player):
 
 def removeAbilities(core, actor, player):
 	actor.removeAbility("me_enhance_agility_1")
+	actor.removeAbility("me_enhance_agility_2")
+	actor.removeAbility("me_enhance_agility_3")
 	return

@@ -204,25 +204,29 @@ public class PlayerService implements INetworkDispatch {
 		});
 
 		objControllerOpcodes.put(ObjControllerOpcodes.ChangeRoleIconChoice, (session, data) -> {
-			
-			Client c = core.getClient(session);
-			ChangeRoleIconChoice packet = new ChangeRoleIconChoice();
-			PlayerObject player;
-			SWGObject o;
-			
-			packet.deserialize(data);
-			o = core.objectService.getObject(packet.getObjectId());
-			
-			if (c.getParent() == null || o == null || c.getParent() != o
-			|| !(o instanceof CreatureObject) || !(o.getSlottedObject("ghost")
-			instanceof PlayerObject)) {
+
+			Client client = core.getClient(session);
+
+			if (client == null)
 				return;
-			}
-			
-			player = (PlayerObject) o.getSlottedObject("ghost");
-			
+
+			SWGObject object = client.getParent();
+
+			if (object == null)
+				return;
+
+			PlayerObject player = (PlayerObject) object.getSlottedObject("ghost");
+
+			if (player == null)
+				return;
+
+			data.order(ByteOrder.LITTLE_ENDIAN);
+
+			ChangeRoleIconChoice packet = new ChangeRoleIconChoice();
+			packet.deserialize(data);
+
 			player.setProfessionIcon(packet.getIcon());
-			
+
 		});
 		
 		swgOpcodes.put(Opcodes.SetWaypointColor, (session, data) -> {
@@ -603,8 +607,10 @@ public class PlayerService implements INetworkDispatch {
 						skills = ((String) skillTemplate.getObject(s, 4)).split(",");
 						
 						for (String skill : skills) {
-							creature.removeSkill(skill);
+							core.skillService.removeSkill(creature, skill);
 						}
+						
+						core.skillService.addSkill(creature, skills[0]);
 						
 						break;
 					}
@@ -716,14 +722,20 @@ public class PlayerService implements INetworkDispatch {
 									String[] wookieeItems = ((String) roadmap.getObject(s, 5)).split(",");
 									String[] ithorianItems = ((String) roadmap.getObject(s, 6)).split(",");
 									
-									for (int n = 0; n < items.length; n++) {
+									int arrayLength = items.length;
+									
+									if (wookieeItems.length > 0 && creature.getStfName().contains("wookiee"))
+										arrayLength = wookieeItems.length;
+									else if (ithorianItems.length > 0 && creature.getStfName().contains("ithorian"))
+										arrayLength = ithorianItems.length;
+
+									for (int n = 0; n < arrayLength; n++) {
 										String item = items[n];
 										
-										if (wookieeItems[0].length() > 0 && creature.getStfName().contains("wookiee")) {
+										if (creature.getStfName().contains("wookiee"))
 											item = wookieeItems[n];
-										} else if (ithorianItems[0].length() > 0 && creature.getStfName().contains("ithorian")) {
+										else if (creature.getStfName().contains("ithorian"))
 											item = ithorianItems[n];
-										}
 										
 										try {
 											String customServerTemplate = null;

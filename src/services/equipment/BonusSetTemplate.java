@@ -34,17 +34,17 @@ import resources.objects.creature.CreatureObject;
 public class BonusSetTemplate
 {
 	private String name;
-	private Vector<String> requiredWornTemplates;
+	private Vector<String> requiredWornItems;
 	
 	public BonusSetTemplate(String name) 
 	{
 		this.name = name;
-		this.requiredWornTemplates = new Vector<String>();
+		this.requiredWornItems = new Vector<String>();
 	}
 	
-	public void addRequiredTemplate(String template)
+	public void addRequiredItem(String item)
 	{
-		requiredWornTemplates.add(template);
+		requiredWornItems.add(item);
 	}
 	
 	public String getName()
@@ -55,20 +55,15 @@ public class BonusSetTemplate
 	public int getWornTemplateCount(CreatureObject creature)
 	{
 		int wornItems = 0;
-		
 		for (SWGObject item : creature.getEquipmentList().get())
 		{
-			if(requiredWornTemplates.contains(item.getTemplate())) wornItems++;
+			if(requiredWornItems.contains(item.getTemplate()) || requiredWornItems.contains(item.getStfName())) wornItems++;
 		}
-		
-		//System.out.println("[BonusSetTemplate] Worn items: " + wornItems);
 		return wornItems;
 	}
 	
 	public void callScript(CreatureObject creature)
-	{
-		//System.out.println("[BonusSetTemplate] Calling script for: " + this.getName());
-		
+	{	
 		PyObject func = NGECore.getInstance().scriptService.getMethod("scripts/equipment/bonus_sets/", name, "handleChange");
 		if(func != null) func.__call__(Py.java2py(NGECore.getInstance()), Py.java2py(creature), Py.java2py(this));
 	}

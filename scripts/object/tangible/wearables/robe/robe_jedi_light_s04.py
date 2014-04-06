@@ -8,7 +8,7 @@ def setup(core, object):
 	
 	object.setStringAttribute('protection_level', 'Radiant')
 	object.setStringAttribute('class_required', 'Jedi')
-	object.setIntAttribute('required_combat_level', 90)
+	object.setIntAttribute('required_combat_level', 80)
 	
 	object.setIntAttribute('cat_stat_mod_bonus.@stat_n:constitution_modified', 250)
 	object.setIntAttribute('cat_stat_mod_bonus.@stat_n:strength_modified', 250)

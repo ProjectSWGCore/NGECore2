@@ -24,11 +24,13 @@ package resources.objects.creature;
 import java.nio.ByteOrder;
 
 
+
 import org.apache.mina.core.buffer.IoBuffer;
 
 import com.sleepycat.persist.model.Persistent;
 
 import engine.resources.common.CRC;
+import resources.common.StringUtilities;
 import resources.objects.Buff;
 import resources.objects.ObjectMessageBuilder;
 import resources.objects.SkillMod;
@@ -71,7 +73,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		} else {
 			buffer.putInt(creature.getSkills().size());	
 			buffer.putInt(creature.getSkillsUpdateCounter());
-			for(String skill : creature.getSkills().get())
+			for(String skill : creature.getSkills())
 				buffer.put(getAsciiString(skill));
 		}
 		int size = buffer.position();
@@ -1172,26 +1174,25 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 
 	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
 		switch (viewType) {
-			case 1:
-			case 3:
 			case 4: {
-				switch(updateType) {
-					case 3: {
-						buffer = createDelta("CREO", (byte) 4, (short) 1, (byte) 3, buffer.flip(), buffer.array().length + 4);
+				switch (updateType) {
+					case 3: { 
+						buffer = createDelta("CREO", (byte) 4, (short) 1, (byte) 3, buffer, buffer.array().length + 4);
 						
 						if (object.getClient() != null && object.getClient().getSession() != null) {
 							object.getClient().getSession().write(buffer);
 						}
+						
 						break;
 					}
-					
 				}
 			}
+			case 1:
+			case 3:
 			case 6:
 			case 8:
 			case 9:
-			default:
-			{
+			default: {
 				return;
 			}
 		}

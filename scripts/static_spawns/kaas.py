@@ -11,6 +11,7 @@ def addPlanetSpawns(core, planet):
 
 
 	stcSvc = core.staticService
+	objSvc = core.objectService
 #Dark Temple Area
 	#Structures
 	stcSvc.spawnObject('object/building/military/shared_military_base_police_station_imperial_lok_otto.iff', 'kaas', long(0), float(-5117.8), float(80.0), float(-2314.1), float(0), float(0))
@@ -49,5 +50,25 @@ def addPlanetSpawns(core, planet):
 #Kaas City Ruins
 
 #Tomb of Vitiate	
+	
+#Northwest Cave
+	stcSvc.spawnObject('object/building/general/shared_cave_01.iff', 'kaas', long(0), float(-6135.3), float(185), float(6575.0), float(0), float(0))
+
+#Abandoned Separatist Base
+	stcSvc.spawnObject('object/building/military/shared_military_base_police_station_rebel_style_01.iff', 'kaas', long(0), float(-3509), float(77), float(6800), float(0), float(0))
+
+#Sith Meditation Chamber
+	stcSvc.spawnObject('object/building/player/shared_player_house_sith_meditation_room.iff', 'kaas', long(0), float(4766), float(126), float(-7307), float(0), float(0))
+
+#Large Ruin
+	stcSvc.spawnObject('object/static/structure/dantooine/shared_dant_jedi_main_structure.iff', 'kaas', long(0), float(-434), float(77), float(-2252), float(0), float(0))
+
+#Central North Ruin
+	stcSvc.spawnObject('object/static/structure/dantooine/shared_dant_jedi_wall_1.iff', 'kaas', long(0), float(-50), float(77), float(6313), float(0), float(0))
+	stcSvc.spawnObject('object/static/structure/dantooine/shared_dant_jedi_wall_2.iff', 'kaas', long(0), float(-58), float(77), float(6304), float(0.71), float(0.71))
+	stcSvc.spawnObject('object/static/structure/dantooine/shared_dant_jedi_wall_1.iff', 'kaas', long(0), float(-58), float(77), float(6321), float(-0.71), float(0.71))
+	stcSvc.spawnObject('object/static/structure/dantooine/shared_dant_jedi_wall_2.iff', 'kaas', long(0), float(-71), float(77), float(6312), float(0), float(0))
+	stcSvc.spawnObject('object/static/structure/dantooine/shared_dant_jedi_temple_pillar.iff', 'kaas', long(0), float(-71.0), float(78), float(6320.8), float(0), float(0))
+
 	return
 	
