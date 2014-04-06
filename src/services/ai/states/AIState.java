@@ -123,8 +123,8 @@ public abstract class AIState {
 									dx = currentPathPosition.x - oldPosition.x;
 									dz = currentPathPosition.z - oldPosition.z;
 									float deltaDist = (float) Math.sqrt((dx * dx) + (dz * dz));
-									newX = (float) (oldPosition.x + (travelDistance * (dx / deltaDist)));
-									newZ = (float) (oldPosition.z + (travelDistance * (dz / deltaDist)));
+									newX = (float) (oldPosition.x + (speed * (dx / deltaDist)));
+									newZ = (float) (oldPosition.z + (speed * (dz / deltaDist)));
 									
 								} else {
 									newX = currentPathPosition.x;
@@ -200,7 +200,7 @@ public abstract class AIState {
         	quaternion.w *= -1;
         }
         
-		core.simulationService.moveObject(creature, newPosition, quaternion, creature.getMovementCounter(), 0, newPosition.getCell());
+		core.simulationService.moveObject(creature, newPosition, quaternion, creature.getMovementCounter(), speed, newPosition.getCell());
 		
 	}
 

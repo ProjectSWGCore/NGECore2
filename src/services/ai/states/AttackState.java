@@ -75,7 +75,7 @@ public class AttackState extends AIState {
 				if(weapon != null)
 					maxDistance = weapon.getMaxRange() - 1;
 			}
-			if(actor.getFollowObject().getWorldPosition().getDistance2D(creature.getWorldPosition()) > maxDistance)
+			if(actor.getFollowObject().getWorldPosition().getDistance(creature.getWorldPosition()) > maxDistance)
 				actor.setNextPosition(actor.getFollowObject().getPosition());
 			else {
 				//recover(actor);
@@ -148,7 +148,7 @@ public class AttackState extends AIState {
 			actor.scheduleRecovery();
 			return StateResult.UNFINISHED;
 		}
-		if(target.getWorldPosition().getDistance2D(creature.getWorldPosition()) > maxDistance) {
+		if(target.getWorldPosition().getDistance(creature.getWorldPosition()) > maxDistance) {
 			actor.scheduleRecovery();
 			return StateResult.UNFINISHED;
 		}
