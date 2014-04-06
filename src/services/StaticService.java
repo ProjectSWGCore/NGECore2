@@ -41,76 +41,77 @@ import engine.resources.service.INetworkRemoteEvent;
 public class StaticService implements INetworkDispatch {
 	
 	private NGECore core;
-
+	
 	public StaticService(NGECore core) {
 		this.core = core;
 	}
-
+	
 	public void spawnStatics() {
-		for (SWGObject object : core.objectService.getObjectList().values())
+		for (SWGObject object : core.objectService.getObjectList().values()) {
 			if (object instanceof CreatureObject && ((CreatureObject) object).getStaticNPC()) {
 				((TangibleObject) object).setRespawnTime(0);
 				core.objectService.destroyObject(object);
 			}
-		spawnPlanetStaticObjs("rori");
-		spawnPlanetStaticObjs("naboo");
-		spawnPlanetStaticObjs("tatooine");
-		spawnPlanetStaticObjs("lok");
-		//spawnPlanetStaticObjs("kaas");    // Keep commented out unless you possess the latest build of Kaas!
+		}
+		
+		spawnObjects("rori");
+		spawnObjects("naboo");
+		spawnObjects("tatooine");
+		spawnObjects("lok");
+		//spawnObjects("kaas");    // Keep commented out unless you possess the latest build of Kaas!
 	}
 	
-	@Override
-	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> arg0, Map<Integer, INetworkRemoteEvent> arg1) {
-		
-	}
-
-	@Override
-	public void shutdown() {
-		
-	}
-	
-	public void spawnPlanetStaticObjs(String planet) {
-		Planet planetObj = (Planet) core.terrainService.getPlanetByName(planet);
-		core.scriptService.callScript("scripts/static_spawns/", planetObj.getName(), "addPlanetSpawns", core, planetObj);
-		System.out.println("Loaded static objs for " + planetObj.getName());
+	public void spawnObjects(String planetName) {
+		Planet planet = (Planet) core.terrainService.getPlanetByName(planetName);
+		core.scriptService.callScript("scripts/static_spawns/", planet.getName(), "addPlanetSpawns", core, planet);
+		System.out.println("Loaded static objects for " + planet.getName());
 	}
 	
 	public SWGObject spawnObject(String template, String planetName, long cellId, float x, float y, float z, float qY, float qW) {
 		return spawnObject(template, planetName, cellId, x, y, z, qW, 0, qY, 0);
 	}
 	
-	// TODO make sure static objects get unloaded
 	public SWGObject spawnObject(String template, String planetName, long cellId, float x, float y, float z, float qW, float qX, float qY, float qZ) {
-		
+		return spawnObject(template, 0, planetName, cellId, x, y, z, qW, qX, qY, qZ);
+	}
+	
+	public SWGObject spawnObject(String template, long objectId, String planetName, long cellId, float x, float y, float z, float qW, float qX, float qY, float qZ) {
 		Planet planet = core.terrainService.getPlanetByName(planetName);
 		
-		//System.out.println("template: " + template + " x: " + x + " y: " + y + " z: " + z);
-		
-		if(planet == null) {
-			System.out.println("Cant spawn static object because planet is null");
+		if (planet == null) {
+			System.out.println("StaticService: Can't spawn static object because planet is null.");
 			return null;
 		}
 		
-		SWGObject object = core.objectService.createObject(template, 0, planet, new Point3D(x, y, z), new Quaternion(qW, qX, qY, qZ));
+		SWGObject object = core.objectService.createObject(template, objectId, planet, new Point3D(x, y, z), new Quaternion(qW, qX, qY, qZ));
 		
-		if(object == null) {
-			System.out.println("Static object is null");
+		if (object == null) {
+			System.out.println("Static object is null with id " + objectId + " and template " + template + ".");
 			return null;
 		}
 		
-		if (object instanceof CreatureObject) ((CreatureObject) object).setStaticNPC(true);
+		if (objectId != 0 && object.getObjectID() != objectId) {
+			System.out.println("StaticService: ObjectId " + objectId + " was taken for object with template " + object.getTemplate() + ".  Replacement: " + object.getObjectID());
+		}
 		
-		if(cellId == 0) {
+		if (object instanceof CreatureObject) {
+			((CreatureObject) object).setStaticNPC(true);
+		}
+		
+		if (cellId == 0) {
 			boolean add = core.simulationService.add(object, (float) x, (float) z, true);
-			if(!add)
-				System.out.println("Quadtree insert failed for: " + template);
-		}
-		else {
+			
+			if (!add) {
+				System.out.println("StaticService: Quadtree insert failed for: " + template);
+			}
+		} else {
 			SWGObject parent = core.objectService.getObject(cellId);
-			if(parent == null) {
-				System.out.println("Cell not found");
+			
+			if (parent == null) {
+				System.out.println("StaticService: Cell not found");
 				return object;
 			}
+			
 			parent.add(object);
 		}
 		
@@ -118,11 +119,10 @@ public class StaticService implements INetworkDispatch {
 	}
 	
 	public List<SWGObject> getCloningFacilitiesByPlanet(Planet planet) {
-		
 		List<SWGObject> objects = core.simulationService.get(planet, 0, 0, 8300);
 		List<SWGObject> cloners = new ArrayList<SWGObject>();
 		
-		for(SWGObject obj : objects) {
+		for (SWGObject obj : objects) {
 			if(obj instanceof BuildingObject && (obj.getTemplate().contains("cloning_facility") || obj.getTemplate().contains("cloning_tatooine") || obj.getTemplate().contains("cloning_naboo") || obj.getTemplate().contains("cloning_corellia"))) {
 				if(!obj.getTemplate().equals("object/building/general/shared_cloning_facility_general.iff"))
 					cloners.add(obj);
@@ -131,5 +131,15 @@ public class StaticService implements INetworkDispatch {
 		return cloners;
 		
 	}
-
+	
+	@Override
+	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> arg0, Map<Integer, INetworkRemoteEvent> arg1) {
+		
+	}
+	
+	@Override
+	public void shutdown() {
+		
+	}
+	
 }

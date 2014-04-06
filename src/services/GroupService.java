@@ -153,7 +153,7 @@ public class GroupService implements INetworkDispatch {
 			addGroupBuffsToMember(group, leader);
 			addGroupBuffsToMember(group, invited);
 			
-			//ChatRoom groupChat = core.chatService.createChatRoom(leader.getCustomName() + group.getObjectID(), "GroupChat", leader.getCustomName(), true);
+			//ChatRoom groupChat = core.chatService.createChatRoom("GroupChat", "group." + group.getObjectID(), leader.getCustomName(), true);
 			//group.setChatRoomId(groupChat.getRoomId());
 
 			//core.chatService.joinChatRoom(leader, groupChat.getRoomId());
@@ -211,7 +211,7 @@ public class GroupService implements INetworkDispatch {
 		}
 	}
 	
-	public void handleGroupDisband(CreatureObject creature) {
+	public void handleGroupDisband(CreatureObject creature, boolean destroy) {
 		
 		if(creature.getGroupId() == 0)
 			return;
@@ -225,7 +225,7 @@ public class GroupService implements INetworkDispatch {
 		
 		List<SWGObject> memberList = new ArrayList<SWGObject>(group.getMemberList());
 		
-		if(group.getGroupLeader() != creature && group.getMemberList().size() > 2) {
+		if(group.getGroupLeader() != creature || !destroy || memberList.size() > 2) {
 			
 			group.removeMember(creature);
 			creature.setInviteCounter(creature.getInviteCounter() + 1);
@@ -245,6 +245,9 @@ public class GroupService implements INetworkDispatch {
 			
 			removeGroupBuffs(creature);
 			
+			if (group.getMemberList().size() == 0) // ensure that there are no empty groups just incase..
+				core.objectService.destroyObject(group.getObjectID());
+
 		} else {
 			
 			for(SWGObject member : memberList) {
@@ -264,14 +267,11 @@ public class GroupService implements INetworkDispatch {
 				removeGroupBuffs((CreatureObject) member);
 				
 			}
-			
 			core.objectService.destroyObject(group.getObjectID());
-			
 		}
-		
 	}
-
-
 	
-
+	public void handleGroupDisband(CreatureObject creature) {
+		handleGroupDisband(creature, true);
+	}
 }

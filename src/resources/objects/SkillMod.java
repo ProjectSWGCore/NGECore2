@@ -67,12 +67,9 @@ public class SkillMod extends Delta {
 	
 	@Override
 	public byte[] getBytes() {
-		IoBuffer buffer = createBuffer(name.length() + 10);
-		
-		buffer.put(getAsciiString(name));
+		IoBuffer buffer = createBuffer(8);
 		buffer.putInt(base);
 		buffer.putInt((int) modifier);
-
 		return buffer.array();
 	}
 

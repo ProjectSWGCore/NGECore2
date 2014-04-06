@@ -63,6 +63,10 @@ public class ObjControllerMessage extends SWGMessage {
 	public static final int IMAGE_DESIGN_START = 0x023A;
 	public static final int IMAGE_DESIGN_CHANGE = 0x0238;
 	public static final int IMAGE_DESIGN_END = 0x0239;
+	public static final int START_CONVERSATION = 0x00DD;
+	public static final int STOP_CONVERSATION = 0x00DE;
+	public static final int CONVERSATION_MESSAGE = 0x00DF;
+	public static final int CONVERSATION_OPTIONS = 0x00E0;
 
 	public ObjControllerMessage() { 
 		
