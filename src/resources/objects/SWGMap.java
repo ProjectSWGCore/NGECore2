@@ -127,9 +127,7 @@ public class SWGMap<K, V> implements Map<K, V> {
 				} else {
 					V oldValue = map.put(key, value);
 					
-					if (oldValue != null) {
-						queue(item(0, (String) key, ((IDelta) value).getBytes(), true, true));
-					}
+					queue(item(0, (String) key, ((IDelta) value).getBytes(), true, true));
 					
 					return oldValue;
 				}
