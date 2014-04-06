@@ -86,7 +86,7 @@ public class CommandService implements INetworkDispatch  {
 				BaseSWGCommand command = getCommandByCRC(commandEnqueue.getCommandCRC());
 				
 				if(command == null) {
-					System.out.println("Unknown Command CRC: " + commandEnqueue.getCommandCRC());
+					//System.out.println("Unknown Command CRC: " + commandEnqueue.getCommandCRC());
 					return;
 				}
 				
