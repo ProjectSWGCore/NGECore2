@@ -35,6 +35,7 @@ public class BaseSWGCommand implements Cloneable {
 	public BaseSWGCommand(String commandName) {
 		setCommandName(commandName);
 		setCommandCRC(CRC.StringtoCRC(commandName));
+		// must be
 	}
 
 	public String getCommandName() {
