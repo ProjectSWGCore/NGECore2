@@ -248,6 +248,15 @@ public class DevService implements INetworkDispatch {
 						pistol.setStringAttribute("cat_wpn_damage.damage", "400-559");
 						
 						inventory.add(pistol);
+						
+						SWGObject heavy = core.objectService.createObject("object/weapon/ranged/heavy/shared_som_lava_cannon_generic.iff", planet);
+						heavy.setIntAttribute("required_combat_level", 90);
+						heavy.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 1);
+						heavy.setStringAttribute("class_required", "Commando");
+						heavy.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
+						heavy.setStringAttribute("cat_wpn_damage.damage", "700-1400");
+						
+						inventory.add(heavy);
 						return;
 					case 40:
 						TangibleObject ring = (TangibleObject) core.objectService.createObject("object/tangible/wearables/ring/shared_ring_s01.iff", planet);
