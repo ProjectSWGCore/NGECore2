@@ -93,8 +93,7 @@ public class DevService implements INetworkDispatch {
 				break;
 			case 4: // [Items] Misc Items
 				suiOptions.put((long) 40, "Unity Ring");
-				suiOptions.put((long) 41, "Tusken Rucksack");
-				suiOptions.put((long) 42, "Heroism Jewlery Set");
+				suiOptions.put((long) 41, "Heroism Jewlery Set");
 				break;
 			case 5: // [Items] Armor
 				suiOptions.put((long) 50, "Assault Armor");
@@ -121,7 +120,9 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 91, "(Dark) Jedi Robe");
 				suiOptions.put((long) 92, "Belt of Master Bodo Baas");
 				break;
-		
+			case 10: // [Items] Backpacks
+				suiOptions.put((long) 100, "Tusken Rucksack");
+				suiOptions.put((long) 101, "Tauntaun Rucksack");
 		}
 		
 		final SUIWindow window = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "Character Builder Terminal", "Select the desired option and click OK.", suiOptions, creature, null, 10);
@@ -185,7 +186,9 @@ public class DevService implements INetworkDispatch {
 						return;
 					case 25: // Tools
 						sendCharacterBuilderSUI(player, 15);
-						return;	
+						return;
+					case 26: // Backpacks
+						sendCharacterBuilderSUI(player, 10);
 						
 					// [Items] Weapons
 					case 30: // Jedi Weapons
@@ -262,17 +265,8 @@ public class DevService implements INetworkDispatch {
 						TangibleObject ring = (TangibleObject) core.objectService.createObject("object/tangible/wearables/ring/shared_ring_s01.iff", planet);
 						ring.setCustomName("Unity Ring");
 						inventory.add(ring);
-					case 41:
-						TangibleObject backpack = (TangibleObject) core.objectService.createObject("object/tangible/wearables/backpack/shared_backpack_krayt_skull.iff", planet);
-						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:agility_modified", 25);
-						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:constitution_modified", 30);
-						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:luck_modified", 25);
-						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:precision_modified", 35);
-						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:stamina_modified", 30);
-						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:strength_modified", 35);
-						inventory.add(backpack);
 						return;
-					case 42:
+					case 41:
 						TangibleObject heroismBand = (TangibleObject) core.objectService.createObject("object/tangible/wearables/ring/shared_ring_s01.iff", planet);
 						heroismBand.setStfFilename("static_item_n");
 						heroismBand.setStfName("item_band_set_hero_01_01");
@@ -960,6 +954,26 @@ public class DevService implements INetworkDispatch {
 						return;
 					case 92: // Belt of Master Bodo Baas
 						inventory.add(core.objectService.createObject("object/tangible/wearables/backpack/shared_fannypack_s01.iff", planet));
+						return;
+					case 100:
+						TangibleObject backpack = (TangibleObject) core.objectService.createObject("object/tangible/wearables/backpack/shared_backpack_krayt_skull.iff", planet);
+						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:agility_modified", 25);
+						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:constitution_modified", 30);
+						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:luck_modified", 25);
+						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:precision_modified", 35);
+						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:stamina_modified", 30);
+						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:strength_modified", 35);
+						inventory.add(backpack);
+						return;
+					case 101:
+						TangibleObject backpack1 = (TangibleObject) core.objectService.createObject("object/tangible/wearables/backpack/shared_backpack_tauntaun_skull.iff", planet);
+						backpack1.setIntAttribute("cat_stat_mod_bonus.@stat_n:agility_modified", 20);
+						backpack1.setIntAttribute("cat_stat_mod_bonus.@stat_n:constitution_modified", 25);
+						backpack1.setIntAttribute("cat_stat_mod_bonus.@stat_n:luck_modified", 20);
+						backpack1.setIntAttribute("cat_stat_mod_bonus.@stat_n:precision_modified", 30);
+						backpack1.setIntAttribute("cat_stat_mod_bonus.@stat_n:stamina_modified", 25);
+						backpack1.setIntAttribute("cat_stat_mod_bonus.@stat_n:strength_modified", 30);
+						inventory.add(backpack1);
 						return;
 					case 110:
 						SurveyTool mineralSurveyTool = (SurveyTool) core.objectService.createObject("object/tangible/survey_tool/shared_survey_tool_mineral.iff", planet);
