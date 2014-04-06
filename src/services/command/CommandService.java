@@ -34,6 +34,8 @@ import main.NGECore;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 
+import engine.clientdata.ClientFileManager;
+import engine.clientdata.visitors.DatatableVisitor;
 import engine.clients.Client;
 import engine.resources.common.CRC;
 import engine.resources.objects.SWGObject;
@@ -41,6 +43,7 @@ import engine.resources.scene.Point3D;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import resources.common.*;
+import resources.datatables.StateStatus;
 import protocol.swg.ObjControllerMessage;
 import protocol.swg.objectControllerObjects.CommandEnqueue;
 import protocol.swg.objectControllerObjects.CommandEnqueueRemove;
@@ -53,168 +56,265 @@ import resources.objects.weapon.WeaponObject;
 public class CommandService implements INetworkDispatch  {
 	
 	private Vector<BaseSWGCommand> commandLookup = new Vector<BaseSWGCommand>();
-	private ConcurrentHashMap<String,BaseSWGCommand> aliases = new ConcurrentHashMap<String,BaseSWGCommand>();
-	private ConcurrentHashMap<Integer,BaseSWGCommand> aliasesByCRC = new ConcurrentHashMap<Integer,BaseSWGCommand>();
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	private NGECore core;
 	
 	public CommandService(NGECore core) {
 		this.core = core;
 	}
-
-
-	@Override
-	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> swgOpcodes, Map<Integer, INetworkRemoteEvent> objControllerOpcodes) {
-		
-		objControllerOpcodes.put(ObjControllerOpcodes.COMMAND_QUEUE_ENQUEUE, new INetworkRemoteEvent() {
-
-			@Override
-			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
-				
-				data.order(ByteOrder.LITTLE_ENDIAN);
-				Client client = core.getClient(session);
-
-				if(client == null) {
-					System.out.println("NULL Client");
-					return;
-				}
-
-				CommandEnqueue commandEnqueue = new CommandEnqueue();
-				commandEnqueue.deserialize(data);
-				
-				
-				BaseSWGCommand command = getCommandByCRC(commandEnqueue.getCommandCRC());
-				
-				if(command == null) {
-					//System.out.println("Unknown Command CRC: " + commandEnqueue.getCommandCRC());
-					return;
-				}
-				
-				// TODO: command filters for state, posture etc.
-				
-				if(client.getParent() == null) {
-					System.out.println("NULL Object");
-					return;
-				}
-				
-				if(command.isGmCommand() && !client.isGM())
-					return;
-
-				CreatureObject actor = (CreatureObject) client.getParent();
-
-				if (command.getRequiredAbility().length() > 0 && !actor.hasAbility(command.getRequiredAbility()))
-					return;
-
-				if (actor.hasCooldown(command.getCommandName()))
-					return;
-				
-				SWGObject target = core.objectService.getObject(commandEnqueue.getTargetID());
-				
-				// May want to have a warmup def to be called at some point in the future.
-				if (command.getWarmupTime() != 0 && !(command instanceof CombatCommand)) {
-					scheduler.schedule(new Runnable() {
-
-						@Override
-						public void run() {
-							core.scriptService.callScript("scripts/commands/", command.getCommandName(), "run", core, actor, target, commandEnqueue.getCommandArguments());
-						}
-					}, (long) command.getWarmupTime(), TimeUnit.SECONDS);
-				} else {
-
-					if(command instanceof CombatCommand) {
-						CombatCommand command2 = (CombatCommand) command.clone();
-						processCombatCommand(actor, target, command2, commandEnqueue.getActionCounter(), commandEnqueue.getCommandArguments());
-						return;
-					}
-
-					core.scriptService.callScript("scripts/commands/", command.getCommandName(), "run", core, actor, target, commandEnqueue.getCommandArguments());
-				}
-			}
-
-		});
-		
-		objControllerOpcodes.put(ObjControllerOpcodes.COMMAND_QUEUE_REMOVE, new INetworkRemoteEvent() {
-
-			@Override
-			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
-				
-			}
-			
-		});
-			
-		
-	}
 	
-	public BaseSWGCommand registerCommand(String name) {
+	public boolean callCommand(CreatureObject actor, SWGObject target, BaseSWGCommand command, int actionCounter, String commandArgs) {
+		if (actor == null) {
+			return false;
+		}
 		
-		BaseSWGCommand command = new BaseSWGCommand(name.toLowerCase());
-		commandLookup.add(command);
-		return command;
+		if (command == null) {
+			return false;
+		}
 		
-	}
-
-	public CombatCommand registerCombatCommand(String name) {
+		if (command.getCharacterAbility().length() > 0 && !actor.hasAbility(command.getCharacterAbility())) {
+			return false;
+		}
 		
-		CombatCommand command = new CombatCommand(name.toLowerCase());
-		commandLookup.add(command);
-		return command;
+		if (command.isDisabled()) {
+			return false;
+		}
 		
-	}
-	
-	public BaseSWGCommand registerGmCommand(String name) {
+		if (command.getGodLevel() > 0 && !client.isGM()) {
+			return false;
+		}
 		
-		BaseSWGCommand command = new BaseSWGCommand(name.toLowerCase());
-		command.setGmCommand(true);
-		commandLookup.add(command);
-		return command;
+		if (actor.hasCooldown(command.getCooldownGroup())) {
+			return false;
+		}
 		
-	}
-	
-	public void registerAlias(String name, String target) {
-		Vector<BaseSWGCommand> commands = new Vector<BaseSWGCommand>(commandLookup); 	// copy for thread safety
-		BaseSWGCommand targetCommand = null;
-		for(BaseSWGCommand command : commands) {
-			if(command.getCommandName().equalsIgnoreCase(target)) {
-				targetCommand = command;
+		if (target != null && actor.getPosition().getDistance(target.getPosition) > command.getMaxRangeToTarget()) {
+			return false;
+		}
+		
+		WeaponObject weapon = (WeaponObject) core.objectService.getObject(actor.getWeaponId());
+		
+		if (weapon != null && weapon.getWeaponType() == command.getInvalidWeapon()) {
+			return false;
+		}
+		
+		// The two below statements need testing before use
+		
+		for (long state : command.getInvalidStates()) {
+			if ((actor.getStateBitmask() & state) == state) {
+				//return false;
 			}
 		}
-		if (targetCommand == null) { return; }
 		
-		aliases.put(name, targetCommand);
-		aliasesByCRC.put(CRC.StringtoCRC(name), targetCommand);
+		for (byte posture : command.getInvalidPostures()) {
+			if (actor.getPosture() == posture) {
+				//return false;
+			}
+		}
 		
+		switch (command.getTargetType()) {
+			case 0: // Target Not Used For This Command or Self
+				target = actor;
+				
+				break;
+			case 1: // Other Only
+				if (target == null || target == actor) {
+					return false;
+				}
+				
+				break;
+			case 2: // Self Only
+				if (target == null) {
+					target = actor;
+				}
+				
+				if (target != actor) {
+					return false;
+				}
+				
+				break;
+			case 3: // Free Target Mode (rally points, group waypoints)
+				target = null;
+				
+				break;
+			case 4: // Anyone
+				if (target == null) {
+					target = actor;
+				}
+				
+				break;
+			default:
+				break;
+		}
+		
+		switch (command.getTarget()) {
+			case 0: // Ally Only
+				if (target == null) {
+					target = actor;
+				}
+				
+				if (!(target instanceof TangibleObject)) {
+					return false;
+				}
+				
+				TangibleObject object = (TangibleObject) target;
+				
+				if (object.isAttackableBy(actor) || actor.getFactionStatus() < object.getFactionStatus() || (!object.getFaction().equals("") && !object.getFaction().equals(actor.getFaction()))) {
+					return false;
+				}
+				
+				break;
+			case 1: // Enemy Only
+				if (target == null || !(target instanceof TangibleObject)) {
+					return false;
+				}
+				
+				TangibleObject object = (TangibleObject) target;
+				
+				if (!object.isAttackableBy(actor)) {
+					return false;
+				}
+				
+				break;
+			case 2: // Indifferent
+				break;
+			default:
+				break;
+		}
+		
+		if (command.shouldCallOnTarget()) {
+			if (target == null || !(target instanceof CreatureObject)) {
+				return false;
+			}
+			
+			actor = (CreatureObject) target;
+		}
+		
+		long warmupTime = (command.getWarmupTime() * 1000F);
+		
+		if (warmupTime != 0) {
+			scheduler.schedule(new Runnable() {
+				
+				@Override
+				public void run() {
+					processCommand(actor, target, command, actionCounter, commandArgs);
+				}
+				
+			}, warmupTime, TimeUnit.MILLISECONDS);
+		} else {
+			processCommand(actor, target, command, actionCounter, commandArgs);
+		}
 	}
-
+	
+	public void callCommand(SWGObject actor, String commandName, SWGObject target, String commandArgs) {
+		if (actor == null)
+			return;
+		
+		BaseSWGCommand command = getCommandByName(commandName);
+		
+		if (command == null)
+			return;
+		
+		if(command instanceof CombatCommand) {
+			CombatCommand command2;
+			try {
+				command2 = (CombatCommand) command.clone();
+				processCombatCommand((CreatureObject) actor, target, command2, 0, "");
+			} catch (CloneNotSupportedException e) {
+				e.printStackTrace();
+			}
+			return;
+		}
+		
+		core.scriptService.callScript("scripts/commands/", command.getCommandName(), "run", core, actor, target, commandArgs);
+	}
+	
 	public BaseSWGCommand getCommandByCRC(int CRC) {
+		Vector<BaseSWGCommand> commands = new Vector<BaseSWGCommand>(commandLookup);
 		
-		if (aliasesByCRC.containsKey(CRC)) {
-			return aliasesByCRC.get(CRC);
-		}
-		
-		Vector<BaseSWGCommand> commands = new Vector<BaseSWGCommand>(commandLookup); 	// copy for thread safety
-		
-		for(BaseSWGCommand command : commands) {
-			if(command.getCommandCRC() == CRC)
+		for (BaseSWGCommand command : commands) {
+			if (command.getCommandCRC() == CRC) {
 				return command;
+			}
 		}
+		
+		try {
+			DatatableVisitor visitor = ClientFileManager.loadFile("datatables/command/command_table.iff", DatatableVisitor.class);
+			
+			for (int i = 0; i < visitor.getRowCount(); i++) {
+				if (visitor.getObject(i, 0) != null) {
+					String name = ((String) visitor.getObject(i, 0)).toLowerCase();
+					
+					if (CRC.StringtoCRC(name) == CRC) {
+						boolean combatCommand = ((String) (visitor.getObject(i, 7)).length() > 0);
+						
+						if (combatCommand) {
+							CombatCommand command = new CombatCommand(name.toLowerCase());
+							commandLookup.add(command);
+							return command;
+						} else {
+							BaseSWGCommand command = new BaseSWGCommand(name.toLowerCase());
+							commandLookup.add(command);
+							return command;
+						}
+					}
+				}
+			}
+		} catch (InstantiationException | IllegalAccessException e) {
+			e.printStackTrace();
+		}
+		
 		return null;
-
 	}
 	
 	public BaseSWGCommand getCommandByName(String name) {
+		Vector<BaseSWGCommand> commands = new Vector<BaseSWGCommand>(commandLookup);
 		
-		if (aliases.containsKey(name)) {
-			return aliases.get(name);
-		}
-		
-		Vector<BaseSWGCommand> commands = new Vector<BaseSWGCommand>(commandLookup); 	// copy for thread safety
-		
-		for(BaseSWGCommand command : commands) {
-			if(command.getCommandName().equalsIgnoreCase(name))
+		for (BaseSWGCommand command : commands) {
+			if (command.getCommandName().equalsIgnoreCase(name)) {
 				return command;
+			}
 		}
+		
+		try {
+			DatatableVisitor visitor = ClientFileManager.loadFile("datatables/command/command_table.iff", DatatableVisitor.class);
+			
+			for (int i = 0; i < visitor.getRowCount(); i++) {
+				if (visitor.getObject(i, 0) != null) {
+					String commandName = ((String) visitor.getObject(i, 0)).toLowerCase();
+					
+					if (commandName.equalsIgnoreCase(name) {
+						boolean combatCommand = ((String) (visitor.getObject(i, 7)).length() > 0);
+						
+						if (combatCommand) {
+							CombatCommand command = new CombatCommand(commandName);
+							commandLookup.add(command);
+							return command;
+						} else {
+							BaseSWGCommand command = new BaseSWGCommand(commandName);
+							commandLookup.add(command);
+							return command;
+						}
+					}
+				}
+			}
+		} catch (InstantiationException | IllegalAccessException e) {
+			e.printStackTrace();
+		}
+		
 		return null;
-
+	}
+	
+	public void processCommand(CreatureObject actor, SWGObject target, BaseSWGCommand command, int actionCounter, String commandArgs) {
+		actor.addCooldown(command.getCooldownGroup(), command.getCooldown());
+		
+		if (command instanceof CombatCommand) {
+			processCombatCommand(actor, target, (CombatCommand) command, actionCounter, commandArgs);
+		} else {
+			if (FileUtilities.doesFileExist("scripts/commands/" + command.getCommandName() + ".py")) {
+				core.scriptService.callScript("scripts/commands/", command.getCommandName(), "run", core, actor, target, commandEnqueue.getCommandArguments());
+			}
+		}
 	}
 	
 	public void processCombatCommand(CreatureObject attacker, SWGObject target, CombatCommand command, int actionCounter, String commandArgs) {
@@ -324,34 +424,68 @@ public class CommandService implements INetworkDispatch  {
 		}
 		
 	}
-
-	public void callCommand(SWGObject actor, String commandName, SWGObject target, String commandArgs) {
-		if (actor == null)
-			return;
-		
-		BaseSWGCommand command = getCommandByName(commandName);
-		
-		if (command == null)
-			return;
-		
-		if(command instanceof CombatCommand) {
-			CombatCommand command2;
-			try {
-				command2 = (CombatCommand) command.clone();
-				processCombatCommand((CreatureObject) actor, target, command2, 0, "");
-			} catch (CloneNotSupportedException e) {
-				e.printStackTrace();
-			}
-			return;
-		}
-		
-		core.scriptService.callScript("scripts/commands/", command.getCommandName(), "run", core, actor, target, commandArgs);
-	}
 	
 	@Override
-	public void shutdown() {
-		// TODO Auto-generated method stub
+	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> swgOpcodes, Map<Integer, INetworkRemoteEvent> objControllerOpcodes) {
+		
+		objControllerOpcodes.put(ObjControllerOpcodes.COMMAND_QUEUE_ENQUEUE, new INetworkRemoteEvent() {
+			
+			@Override
+			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
+				
+				data.order(ByteOrder.LITTLE_ENDIAN);
+				Client client = core.getClient(session);
+				
+				if (client == null) {
+					System.out.println("NULL Client");
+					return;
+				}
+				
+				CommandEnqueue commandEnqueue = new CommandEnqueue();
+				commandEnqueue.deserialize(data);
+				
+				BaseSWGCommand command = getCommandByCRC(commandEnqueue.getCommandCRC());
+				
+				if (command == null) {
+					//System.out.println("Unknown Command CRC: " + commandEnqueue.getCommandCRC());
+					return;
+				}
+				
+				if (client.getParent() == null) {
+					System.out.println("NULL Object");
+					return;
+				}
+				
+				CreatureObject actor = (CreatureObject) client.getParent();
+				
+				SWGObject target = core.objectService.getObject(commandEnqueue.getTargetID());
+				
+				if (!callCommand(actor, command, target, commandEnqueue.getActionCounter(), commandEnqueue.getCommandArguments())) {
+					// Call failScriptHook
+				}
+			}
+
+		});
+		
+		objControllerOpcodes.put(ObjControllerOpcodes.COMMAND_QUEUE_REMOVE, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
+				
+			}
+			
+		});
+			
 		
 	}
-
+	
+	public void shutdown() {
+		
+	}
+	
+	@Deprecated public BaseSWGCommand registerCommand(String name) { return null; }
+	@Deprecated public CombatCommand registerCombatCommand(String name) { return null; }
+	@Deprecated public BaseSWGCommand registerGmCommand(String name) { return null; }
+	@Deprecated public void registerAlias(String name, String target) { }
+	
 }
