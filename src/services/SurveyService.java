@@ -29,6 +29,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+
 import protocol.swg.PlayClientEffectLocMessage;
 import protocol.swg.SceneCreateObjectByCrc;
 import protocol.swg.SceneEndBaselines;
@@ -49,6 +50,7 @@ import services.sui.SUIWindow.SUICallback;
 import services.sui.SUIWindow.Trigger;
 import main.NGECore;
 import engine.resources.common.CRC;
+import engine.resources.container.Traverser;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
 import engine.resources.service.INetworkDispatch;
@@ -138,7 +140,14 @@ public class SurveyService implements INetworkDispatch {
 		GalacticResource sampleResource = surveyTool.getSurveyResource();
 		int stackCount = 0;
 		boolean gamblingwon = false;
-		ResourceContainerObject container = player.getRecentContainer();
+		//ResourceContainerObject container = player.getRecentContainer();
+		ResourceContainerObject container = null;
+		// Attempt to find container with the currently sampled resource in
+		// player inventory tree
+		ResourceContainerObject foundContainer = findResourceContainerInInventory(crafter,sampleResource);
+		if (foundContainer!=null)
+			container = foundContainer;
+		
 		if (! surveyTool.isRecoveryMode()) 
 			stackCount = core.resourceService.getResourceSampleQuantity(crafter, sampleResource); 
 		else { // handle particularly rich case
@@ -150,7 +159,7 @@ public class SurveyService implements INetworkDispatch {
 			}
 			surveyTool.setRecoveryMode(false);
 		}
-					
+	
 		if (container!=null) {
 			if (container.getReferenceID()==sampleResource.getId()) {
 				int stackCountToUpdate = container.getStackCount();
@@ -177,11 +186,13 @@ public class SurveyService implements INetworkDispatch {
 
 				}
 			} else { // Mismatch -> new container
+
 				String resourceContainerIFF = ResourceRoot.CONTAINER_TYPE_IFF_SIGNIFIER[sampleResource.getResourceRoot().getContainerType()];           		  				
 				if ((stackCount > 0) && (!surveyTool.isRecoveryMode())) {
 					ResourceContainerObject containerObject = (ResourceContainerObject) core.objectService.createObject(resourceContainerIFF, crafter.getPlanet());
 					containerObject.initializeStats(sampleResource);
 					containerObject.setProprietor(crafter);
+					container.setStackCount(stackCount,crafter);
 					SWGObject crafterInventory = crafter.getSlottedObject("inventory");
 					crafterInventory.add(containerObject);
 					player.setRecentContainer(containerObject);
@@ -189,16 +200,19 @@ public class SurveyService implements INetworkDispatch {
 				
 			}
 		} else { // create new container, first sample
+	
 			if ((stackCount > 0) && (!surveyTool.isRecoveryMode())) {
+
 				String resourceContainerIFF = ResourceRoot.CONTAINER_TYPE_IFF_SIGNIFIER[sampleResource.getResourceRoot().getContainerType()];           		  				
 				ResourceContainerObject containerObject = (ResourceContainerObject) core.objectService.createObject(resourceContainerIFF, crafter.getPlanet());
 				containerObject.initializeStats(sampleResource);
 				containerObject.setProprietor(crafter);
-				stackCount = core.resourceService.getResourceSampleQuantity(crafter, sampleResource); 
+				//stackCount = core.resourceService.getResourceSampleQuantity(crafter, sampleResource); 
 	    		containerObject.setStackCount(stackCount,crafter);
 	    		SWGObject crafterInventory = crafter.getSlottedObject("inventory");
 				crafterInventory.add(containerObject);
 				player.setRecentContainer(containerObject);
+	
 			}
 		}
 		
@@ -225,6 +239,29 @@ public class SurveyService implements INetworkDispatch {
 			//surveyTool.setRecoveryMode(true);
 			//surveyTool.setRecoveryTime(System.currentTimeMillis());						
 		}
+	}
+	
+	
+	public ResourceContainerObject findResourceContainerInInventory(CreatureObject owner, GalacticResource resource){
+		ResourceContainerObject foundContainer = null;
+		final Vector<ResourceContainerObject> found = new Vector<ResourceContainerObject>();
+		TangibleObject playerInventory = (TangibleObject) owner.getSlottedObject("inventory");
+		playerInventory.viewChildren(owner, false, false, new Traverser() {
+			@Override
+			public void process(SWGObject obj) {
+				
+				if (obj instanceof ResourceContainerObject){
+					ResourceContainerObject container = (ResourceContainerObject) obj;
+					if (container.getReferenceID()==resource.getId() 
+					    && container.getStackCount()<ResourceContainerObject.maximalStackCapacity-10)
+						found.add(container);
+				}
+			}
+		});
+		
+		if (found.size()>0)
+			foundContainer = found.get(0);
+		return foundContainer;
 	}
 	
 	public void requestSurvey(CreatureObject crafter, SWGObject target, String commandArgs){
