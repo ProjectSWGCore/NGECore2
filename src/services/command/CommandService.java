@@ -86,7 +86,7 @@ public class CommandService implements INetworkDispatch  {
 				BaseSWGCommand command = getCommandByCRC(commandEnqueue.getCommandCRC());
 				
 				if(command == null) {
-					//System.out.println("Unknown Command CRC: " + Integer.toHexString(commandEnqueue.getCommandCRC()));
+					//System.out.println("Unknown Command CRC: " + commandEnqueue.getCommandCRC());
 					return;
 				}
 				
@@ -102,19 +102,10 @@ public class CommandService implements INetworkDispatch  {
 
 				CreatureObject actor = (CreatureObject) client.getParent();
 
-				if (!actor.hasAbility(command.getRequiredAbility()))
-					return;
-<<<<<<< HEAD
-				}
-				
-				core.scriptService.callScript("scripts/commands/", command.getCommandName(), "run", core, actor, target, commandEnqueue.getCommandArguments());
-=======
-
 				if (actor.hasCooldown(command.getCommandName()))
 					return;
 				
 				SWGObject target = core.objectService.getObject(commandEnqueue.getTargetID());
->>>>>>> origin/master
 				
 				// May want to have a warmup def to be called at some point in the future.
 				if (command.getWarmupTime() != 0 && !(command instanceof CombatCommand)) {
@@ -330,7 +321,7 @@ public class CommandService implements INetworkDispatch  {
 		}
 		
 	}
-	
+
 	public void callCommand(SWGObject actor, String commandName, SWGObject target, String commandArgs) {
 		if (actor == null)
 			return;

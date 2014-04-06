@@ -170,12 +170,12 @@ public class NGECore {
 	//public MissionService missionService;
 	public InstanceService instanceService;
 	public DevService devService;
-<<<<<<< HEAD
+
 	public SurveyService surveyService;
 	public ResourceService resourceService;
-=======
+
 	public ConversationService conversationService;
->>>>>>> origin/master
+
 	
 	// Login Server
 	public NetworkDispatch loginDispatch;
@@ -199,16 +199,16 @@ public class NGECore {
 	private BusConfiguration eventBusConfig = BusConfiguration.Default(1, new ThreadPoolExecutor(1, 4, 1, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>()));
 
 	private ObjectDatabase buildingODB;
-<<<<<<< HEAD
+
 	private ObjectDatabase resourcesODB;
 	private ObjectDatabase resourceRootsODB;
 	private ObjectDatabase resourceHistoryODB;
 	
 	public static boolean PACKET_DEBUG = false;
-=======
 
 
->>>>>>> origin/master
+
+
 	
 	public NGECore() {
 		
