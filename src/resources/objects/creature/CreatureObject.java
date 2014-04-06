@@ -1733,7 +1733,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			cooldowns.remove(cooldownGroup);
 		}
 		
-		long duration = ((long) (cooldownTime * 1000)); 
+		long duration = ((long) (cooldownTime * 1000F)); 
 		
 		Cooldown cooldown = new Cooldown(duration);
 		
