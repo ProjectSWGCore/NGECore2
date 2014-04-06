@@ -29,6 +29,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -223,7 +224,7 @@ public class EquipmentService implements INetworkDispatch {
 		int wornArmourPieces = 0, forceProtection = 0;
 		Map<String, Float> protection = new TreeMap<String, Float>();
 		
-		for(SWGObject item : creature.getEquipmentList())
+		for(SWGObject item : new ArrayList<SWGObject>(creature.getEquipmentList()))
 		{
 			Map<String, Object> attributes = new TreeMap<String, Object>(item.getAttributes());
 			boolean incPieceCount = false;
