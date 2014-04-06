@@ -217,16 +217,15 @@ public class BuffService implements INetworkDispatch {
          	if(buff.getEffect1Name().length() > 0) core.skillModService.deductSkillMod(creature, buff.getEffect5Name(), (int) buff.getEffect5Value());
          }
          	
-	if (!buff.getCallback().equals("none") && !buff.getCallback().equals("")) {
-		if (FileUtilities.doesFileExist("scripts/buffs/" + buff.getBuffName() +  ".py")) {
-			PyObject method = core.scriptService.getMethod("scripts/buffs/", buff.getBuffName(), buff.getCallback());
+         if (!buff.getCallback().equals("none") && !buff.getCallback().equals("")) {
+        	 if (FileUtilities.doesFileExist("scripts/buffs/" + buff.getBuffName() +  ".py")) {
+        		 PyObject method = core.scriptService.getMethod("scripts/buffs/", buff.getBuffName(), buff.getCallback());
 			
-			if (method != null && method.isCallable()) {
-				method.__call__(Py.java2py(core), Py.java2py(target), Py.java2py(buff));
-			}
-		}
-	}
-         
+        		 if (method != null && method.isCallable()) {
+        			 method.__call__(Py.java2py(core), Py.java2py(creature), Py.java2py(buff));
+        		 }
+        	 }
+         }
          creature.removeBuff(buff);
          
         for (String effect : buff.getParticleEffect().split(",")) {
