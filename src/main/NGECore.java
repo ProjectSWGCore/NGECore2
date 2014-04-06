@@ -118,7 +118,7 @@ import engine.servers.PingServer;
 public class NGECore {
 	
 	public static boolean didServerCrash = false;
-
+	
 	private static NGECore instance;
 	
 	private Config config = null;
@@ -197,6 +197,8 @@ public class NGECore {
 	private ObjectDatabase resourcesODB;
 	private ObjectDatabase resourceRootsODB;
 	private ObjectDatabase resourceHistoryODB;
+	
+	public static boolean PACKET_DEBUG = false;
 	
 	public NGECore() {
 		

@@ -9,6 +9,8 @@ import sys
 def createRadial(core, owner, target, radials):
 	radials.clear()
 	radials.add(RadialOptions(0, 21, 1, 'Use'))
+	radials.add(RadialOptions(0, 7, 0, 'Examine'))
+	radials.add(RadialOptions(0, 15, 0, 'Destroy'))
 	radials.add(RadialOptions(0, 132, 1, 'Tool Options'))	
 	return
 	

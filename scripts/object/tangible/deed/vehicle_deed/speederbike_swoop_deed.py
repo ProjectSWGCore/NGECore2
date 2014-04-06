@@ -7,13 +7,13 @@ def setup(core, object):
 def use(core, actor, object):
 	datapad = actor.getSlottedObject('datapad')
 	
-	pcd = core.objectService.createObject('object/intangible/vehicle/shared_speederbike_swoop_pcd.iff', actor.getPlanet(), actor.getPosition().x, actor.getPosition().z,actor.getPosition().y)
+	pcd = core.objectService.createObject('object/intangible/vehicle/shared_speederbike_swoop_pcd.iff', actor.getPlanet(), actor.getPosition())
 	
 	if datapad and pcd:
 		datapad.add(pcd)
 		core.objectService.destroyObject(object)
-		vehicle = core.objectService.createObject('object/mobile/vehicle/shared_speederbike_swoop.iff', actor.getPlanet(), actor.getPosition().x, actor.getPosition().z,actor.getPosition().y)
+		vehicle = createObject('object/mobile/vehicle/shared_speederbike_swoop.iff', pcd.getAttachment('vehicleId'), actor.getPlanet(), actor.getPosition(), actor.getOrientation())
 		vehicle.setOwnerId(actor.getObjectID())
 		core.simulationService.add(vehicle, vehicle.getPosition().x, vehicle.getPosition().z, True)
-		
+	
 	return

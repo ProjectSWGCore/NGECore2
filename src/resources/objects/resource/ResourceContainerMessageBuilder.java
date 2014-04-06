@@ -267,7 +267,7 @@ public class ResourceContainerMessageBuilder extends ObjectMessageBuilder {
 		result.putInt(10);  
 		int size = result.position();
 		result.flip();
-		services.resources.CharonPacketUtils.printAnalysis(IoBuffer.allocate(size).put(result.array(), 0, size).flip());
+		tools.CharonPacketUtils.printAnalysis(IoBuffer.allocate(size).put(result.array(), 0, size).flip());
 		return IoBuffer.allocate(size).put(result.array(), 0, size).flip();		
 	}
 	

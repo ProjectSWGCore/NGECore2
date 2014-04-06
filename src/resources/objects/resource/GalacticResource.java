@@ -422,7 +422,7 @@ public class GalacticResource extends SWGObject implements IPersistent {
 			
 		SurveyMapUpdateMessage smuMsg = new SurveyMapUpdateMessage(concentrationMap, pointsAmount);
 		crafter.getClient().getSession().write(smuMsg.serialize());	
-		services.resources.CharonPacketUtils.printAnalysis(smuMsg.serialize());
+		tools.CharonPacketUtils.printAnalysis(smuMsg.serialize());
 		
 		PlayerObject player = (PlayerObject) crafter.getSlottedObject("ghost");	
 		if (smuMsg.getHighestConcentration() > 0.10f){

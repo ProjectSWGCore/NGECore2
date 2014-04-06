@@ -333,6 +333,13 @@ public class ResourceContainerObject extends TangibleObject {
 		if (isNewContainer)
 			this.stackCount = stackCount;
 	}
+	
+	public void setStackCount(int stackCount,CreatureObject owner) {
+		this.stackCount = stackCount;
+		this.getAttributes().put("@obj_attr_n:resource_contents", this.getStackCount()+"/"+maximalStackCapacity);
+		if (stackCount>0)
+			this.sendDelta3(owner.getClient());
+	}
 
 	public short getColdResistance() {
 		return coldResistance;

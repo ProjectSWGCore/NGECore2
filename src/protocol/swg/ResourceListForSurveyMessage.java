@@ -41,7 +41,6 @@ public class ResourceListForSurveyMessage extends SWGMessage {
 	
 	private TangibleObject tool;
 	private List<GalacticResource> resourceList;
-	private NGECore core;
 	
 	public ResourceListForSurveyMessage(TangibleObject tool, List<GalacticResource> resourceList) {
 		this.tool = tool;
@@ -51,13 +50,7 @@ public class ResourceListForSurveyMessage extends SWGMessage {
 	public ResourceListForSurveyMessage(NGECore core, TangibleObject tool, CreatureObject surveyor) {
 		this.tool = tool;
 		this.resourceList = new ArrayList<GalacticResource>();
-		GalacticResource sample1 = new GalacticResource("Zyogiskian","ore_siliclastic_robindun","mineral");	
-		GalacticResource sample2 = new GalacticResource("Odoajfaadf","steel_thoranium","mineral");	
-		//Vector<GalacticResource> planetVector = core.resourceService.getSpawnedResourcesByPlanet(surveyor.getPlanetId());
-		
-		//byte generalType = ((SurveyTool)tool).getToolType();
 		byte generalType = 0;
-		System.out.println("tool.getDetailName() " + tool.getDetailName());
 		String toolName = tool.getDetailName();
 		if (toolName.equals("survey_tool_mineral"))
 			generalType = (byte) 0;
@@ -76,12 +69,10 @@ public class ResourceListForSurveyMessage extends SWGMessage {
 		if (toolName.equals("survey_tool_liquid"))
 			generalType = (byte) 7;
 		
-		//generalType = (byte) 0; // Here the surveytool type gets set
 		Vector<GalacticResource> planetVector = core.resourceService.getSpawnedResourcesByPlanetAndType(surveyor.getPlanetId(),generalType);
 		
 		resourceList = new ArrayList(planetVector);
-//		resourceList.add(sample1);
-//		resourceList.add(sample2);
+		
 	}
 
 	public void deserialize(IoBuffer data) {
@@ -124,7 +115,7 @@ public class ResourceListForSurveyMessage extends SWGMessage {
 		
 		int size = result.position();
 		result.flip();
-		services.resources.CharonPacketUtils.printAnalysis(IoBuffer.allocate(size).put(result.array(), 0, size).flip());
+		tools.CharonPacketUtils.printAnalysis(IoBuffer.allocate(size).put(result.array(), 0, size).flip());
 		return IoBuffer.allocate(size).put(result.array(), 0, size).flip();
 	}
 }

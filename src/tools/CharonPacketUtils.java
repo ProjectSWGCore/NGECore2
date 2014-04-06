@@ -1,8 +1,14 @@
-package services.resources;
+package tools;
 
 import java.io.UnsupportedEncodingException;
+
+import main.NGECore;
+
 import org.apache.mina.core.buffer.IoBuffer;
 
+/** 
+ * @author Charon 
+ */
 
 public class CharonPacketUtils {
 	
@@ -49,6 +55,10 @@ public class CharonPacketUtils {
 	}
 	
 	public static void printAnalysis(IoBuffer pack){
+		
+		if (!NGECore.getInstance().PACKET_DEBUG)
+			return;
+		
 		byte[] packArray = pack.array();
 		int lineCount = packArray.length/16;
 		int actualIndex = 0;

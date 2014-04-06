@@ -29,19 +29,10 @@ import java.util.Vector;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
-import org.apache.mina.core.buffer.IoBuffer;
-
 import com.sleepycat.persist.EntityCursor;
-
-import protocol.swg.ResourceMessenger;
-import protocol.swg.SceneCreateObjectByCrc;
-import protocol.swg.SceneEndBaselines;
-import protocol.swg.UpdateContainmentMessage;
 import main.NGECore;
 import engine.resources.common.CRC;
 import engine.resources.objects.SWGObject;
-import engine.resources.scene.Planet;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import resources.objects.creature.CreatureObject;
@@ -10772,10 +10763,8 @@ public class ResourceService implements INetworkDispatch {
 			return 0; 
 		}  
 		int skillMod=crafter.getSkillModBase("surveying");
-		System.out.println("skillModBase " + skillMod);
 		crafter.addSkillMod("surveying",100);
 		skillMod=(int)(Math.round(crafter.getSkillMod("surveying").getModifier()));
-		System.out.println("skillMod modifier" + skillMod);
 		skillMod=35; // TEST!
 		float concentration=sampleResource.deliverConcentrationForSurvey(crafter.getPlanetId(), crafter.getPosition().x, crafter.getPosition().z); 
 		float concentrationPercentage=0.01F*concentration;
@@ -11348,16 +11337,7 @@ public class ResourceService implements INetworkDispatch {
     				containerObject.setIffFileName(resourceContainerIFF);             		
     				long objectId = containerObject.getObjectID();  					
     				SWGObject crafterInventory = crafter.getSlottedObject("inventory");        				   					
-    				SceneCreateObjectByCrc createObjectMsg = new SceneCreateObjectByCrc(objectId, crafter.getOrientation().x, crafter.getOrientation().y, crafter.getOrientation().z, crafter.getOrientation().w, crafter.getPosition().x, crafter.getPosition().y, crafter.getPosition().z, resCRC, (byte) 0);
-    				crafter.getClient().getSession().write(createObjectMsg.serialize());      				
-    				services.resources.CharonPacketUtils.printAnalysis(createObjectMsg.serialize());				
-    				UpdateContainmentMessage updateContainmentMessage= new UpdateContainmentMessage(containerObject.getObjectID(), crafterInventory.getObjectID(), -1);
-					crafter.getClient().getSession().write(updateContainmentMessage.serialize());
-					containerObject.sendBaselines(crafter.getClient());     
-    				SceneEndBaselines sceneEndBaselinesMsg = new SceneEndBaselines(containerObject.getObjectID());
-    				crafter.getClient().getSession().write(sceneEndBaselinesMsg.serialize());
-    				services.resources.CharonPacketUtils.printAnalysis(sceneEndBaselinesMsg.serialize());   				 				
-    				//containerObject.buildAttributeListMessage(crafter.getClient());
+    				crafterInventory.add(containerObject);
     				return containerObject;
 				}
 			}

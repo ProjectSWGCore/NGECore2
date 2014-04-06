@@ -132,7 +132,6 @@ public class SurveyTool extends TangibleObject{
 				break; 
 			default: toolType = -1;
 		}
-		System.out.println("TOOLTYPE " + toolType);
 	}
 	
 	public SurveyTool(String template, Long tanoID) {
@@ -184,7 +183,7 @@ public class SurveyTool extends TangibleObject{
 				break; 
 			default: toolType = -1;
 		}
-		System.out.println("TOOLTYPE " + toolType);
+		
 	}
 	
 	public void setToolType(byte toolType) {
@@ -328,6 +327,6 @@ public class SurveyTool extends TangibleObject{
 		GalacticResource resourceToSurvey = this.getSurveyResource();			
 		Vector<ResourceConcentration> concentrationMap = resourceToSurvey.buildConcentrationsCollection(this.getUser().getPosition(),resourceToSurvey, surveyRadius, differential, this.getUser().getPlanetId());		
 		this.getSurveyResource().constructSurveyMapMessage(this.getUser(), concentrationMap, surveyRadius);
-		this.getUser().sendSystemMessage("Distance to nearest Deposit : " + this.getSurveyResource().getHelperMinDist(), (byte) 0);
+		//this.getUser().sendSystemMessage("Distance to nearest Deposit : " + this.getSurveyResource().getHelperMinDist(), (byte) 0);
 	}
 }

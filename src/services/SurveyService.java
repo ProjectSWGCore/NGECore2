@@ -66,8 +66,8 @@ public class SurveyService implements INetworkDispatch {
 	public SurveyService(NGECore core) {
 		this.core = core;
 		scheduleSurveyService();
-		core.commandService.registerSurveyCommand("RequestSurvey");
-		core.commandService.registerSurveyCommand("RequestCoreSample");
+		core.commandService.registerCommand("requestsurvey");
+		core.commandService.registerCommand("requestcoreSample");
 	}
 		
 
@@ -156,7 +156,7 @@ public class SurveyService implements INetworkDispatch {
 				int stackCountToUpdate = container.getStackCount();
 				if (stackCountToUpdate<ResourceContainerObject.maximalStackCapacity-stackCount){ // sample fits into container
 					SWGObject crafterInventory = crafter.getSlottedObject("inventory");   
-					container.setStackCount(stackCountToUpdate+stackCount);
+					container.setStackCount(stackCountToUpdate+stackCount,crafter);
 					//crafter.sendSystemMessage("@base_player:prose_grant_xp @exp_n:resource_harvesting_inorganic", (byte) 0);
 					core.playerService.giveExperience(crafter,(int)(2.5F*stackCount));
 					//exp_n:resource_harvesting_inorganic
@@ -170,7 +170,7 @@ public class SurveyService implements INetworkDispatch {
 						containerObject.initializeStats(sampleResource);
 						containerObject.setProprietor(crafter);
 						SWGObject crafterInventory = crafter.getSlottedObject("inventory");
-						container.setStackCount(stackCount);
+						container.setStackCount(stackCount,crafter);
 						crafterInventory.add(containerObject);
 						player.setRecentContainer(containerObject);
 					}
@@ -195,7 +195,7 @@ public class SurveyService implements INetworkDispatch {
 				containerObject.initializeStats(sampleResource);
 				containerObject.setProprietor(crafter);
 				stackCount = core.resourceService.getResourceSampleQuantity(crafter, sampleResource); 
-	    		containerObject.setStackCount(stackCount,false);
+	    		containerObject.setStackCount(stackCount,crafter);
 	    		SWGObject crafterInventory = crafter.getSlottedObject("inventory");
 				crafterInventory.add(containerObject);
 				player.setRecentContainer(containerObject);
@@ -227,13 +227,13 @@ public class SurveyService implements INetworkDispatch {
 		}
 	}
 	
-	public void requestSurvey(CreatureObject crafter, SWGObject target, SurveyCommand command, int actionCounter, String commandArgs){
+	public void requestSurvey(CreatureObject crafter, SWGObject target, String commandArgs){
 		// Check if crafter has survey skill
 		
-		if (crafter.hasAbility(command.getCommandName())) { // ToDo !
-			crafter.sendSystemMessage("You have insufficient skill to survey", (byte) 0);
-			return;
-		}
+//		if (!crafter.hasAbility("surveying")) { // ToDo !
+//			crafter.sendSystemMessage("You have insufficient skill to survey", (byte) 0);
+//			return;
+//		}
 		if (target==null)
 			return; // target object not valid
 		
@@ -283,38 +283,9 @@ public class SurveyService implements INetworkDispatch {
 		crafter.getClient().getSession().write(cEffMsg.serialize());						
 		crafter.sendSystemMessage("You begin to survey for " + commandArgs, (byte) 0);
 
-//		float surveyRadius = 64.0f;		
-//		int surveyToolRangeSetting = surveyTool.getSurveyRangeSetting();
-//		//surveyToolRangeSetting = 4;
-//		int divisor = 0;
-//		if (surveyToolRangeSetting==0) {
-//			divisor = 2;
-//			surveyRadius = 64.0f;
-//		} else if (surveyToolRangeSetting==1) {
-//			divisor = 3;
-//			surveyRadius = 128.0f;
-//		} else if (surveyToolRangeSetting==2) {
-//			divisor = 3;
-//			surveyRadius = 192.0f;
-//		} else if (surveyToolRangeSetting==3) {
-//			divisor = 4;
-//			surveyRadius = 256.0f;
-//		} else if (surveyToolRangeSetting==4) {
-//			divisor = 4;
-//			surveyRadius = 320.0f;
-//		} else {
-//			divisor = 5;
-//			surveyRadius = 3072.0f;
-//		}
-//
-//		float differential = surveyRadius / (float) divisor;
-//		GalacticResource resourceToSurvey = surveyTool.getSurveyResource();			
-//		Vector<ResourceConcentration> concentrationMap = resourceToSurvey.buildConcentrationsCollection(crafter.getPosition(),resourceToSurvey, surveyRadius, differential, crafter.getPlanetId());		
-//		resourceToSurvey.constructSurveyMapMessage(crafter, concentrationMap, surveyRadius);
-//		crafter.sendSystemMessage("Distance to nearest Deposit : " + resourceToSurvey.getHelperMinDist(), (byte) 0);
 	}
 	
-	public void requestSampling(CreatureObject crafter, SWGObject target, SurveyCommand command, int actionCounter, String commandArgs){	
+	public void requestSampling(CreatureObject crafter, SWGObject target, String commandArgs){	
 
 		PlayerObject player = (PlayerObject) crafter.getSlottedObject("ghost");	
 		SurveyTool surveyTool = player.getLastUsedSurveyTool();
@@ -403,8 +374,9 @@ public class SurveyService implements INetworkDispatch {
 				}
 			} else {
 				crafter.sendSystemMessage("There are only trace amounts of " + commandArgs + " here.  Find a higher concentration of the resource, and try sampling again.", (byte) 0); // "@survey:trace_amount:"
-				surveyTool.setCurrentlySampling(true);
-				surveyTool.setLastSampleTime(System.currentTimeMillis());
+				surveyTool.setCurrentlySampling(false);
+				surveyTool.setCurrentlySurveying(false);
+				//surveyTool.setLastSampleTime(System.currentTimeMillis());
 			}
 		} else {
 			crafter.sendSystemMessage("You must survey for " + commandArgs + " before you can sample for it.", (byte) 0);
@@ -437,7 +409,7 @@ public class SurveyService implements INetworkDispatch {
 		GalacticResource sampleResource = surveyTool.getSurveyResource();
 		float localConcentration = sampleResource.deliverConcentrationForSurvey(crafter.getPlanetId(), crafter.getPosition().x, crafter.getPosition().z);
 		//float localConcentration = 1.0F;
-		if (localConcentration > 0.3) {
+		if (localConcentration > 0.1) {
 			crafter.setPosture((byte) 1);
 			
 			// ToDo: overfilling resource container with continuesampling
@@ -553,8 +525,8 @@ public class SurveyService implements INetworkDispatch {
 		
 		} else {
 			crafter.sendSystemMessage("There are only trace amounts of " + sampleResource.getName() + " here.  Find a higher concentration of the resource, and try sampling again.", (byte) 0); // "@survey:trace_amount:"
-			surveyTool.setCurrentlySampling(true);
-			surveyTool.setLastSampleTime(System.currentTimeMillis());
+			surveyTool.setCurrentlySampling(false);
+			surveyTool.setCurrentlySurveying(false);
 		}
 	}
 	
@@ -594,15 +566,6 @@ public class SurveyService implements INetworkDispatch {
 	public SUICallback handleExceptionalInput(SWGObject crafter,SUIWindow suiWindow){
 		
 		SUICallback callback = suiWindow.getCallbackByEventId(1);
-//		if (callback!=null)
-//			System.out.println("handleExceptionalInput " + callback.toString());
-//		if (callback.toString().equals("1")){
-//			System.out.println("1");
-//			PlayerObject player = (PlayerObject) crafter.getSlottedObject("ghost");	
-//			SurveyTool surveyTool = player.getLastUsedSurveyTool();
-//			surveyTool.setExceptionalState(false);
-//			core.suiService.closeSUIWindow(crafter, 0);
-//		}
 		return callback;
 	}
 	
@@ -689,8 +652,6 @@ public class SurveyService implements INetworkDispatch {
 		
 	public SUICallback handleSurveyRangeInput(SWGObject crafter,SUIWindow suiWindow){
 		SUICallback callback = suiWindow.getCallbackByEventId(1);
-//		if (callback!=null)
-//			System.out.println("handleExceptionalInput " + callback.toString());
 		core.suiService.closeSUIWindow(crafter, 0);
 		return callback;
 	}	
