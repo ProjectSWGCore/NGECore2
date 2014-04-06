@@ -281,6 +281,9 @@ public class DevService implements INetworkDispatch {
 						heroismBand.setStringAttribute("@set_bonus:piece_bonus_count_4", "@set_bonus:set_bonus_hero_2");
 						heroismBand.setStringAttribute("@set_bonus:piece_bonus_count_5", "@set_bonus:set_bonus_hero_3");
 						heroismBand.setAttachment("setBonus", "set_bonus_hero");
+						heroismBand.setIntAttribute("cat_stat_mod_bonus.@stat_n:luck_modified", 30);
+						heroismBand.setIntAttribute("cat_stat_mod_bonus.@stat_n:precision_modified", 30);
+						heroismBand.setIntAttribute("cat_stat_mod_bonus.@stat_n:strength_modified", 30);
 						
 						TangibleObject heroismRing = (TangibleObject) core.objectService.createObject("object/tangible/wearables/ring/shared_ring_s01.iff", planet);
 						heroismRing.setStfFilename("static_item_n");
@@ -289,6 +292,9 @@ public class DevService implements INetworkDispatch {
 						heroismRing.setStringAttribute("@set_bonus:piece_bonus_count_4", "@set_bonus:set_bonus_hero_2");
 						heroismRing.setStringAttribute("@set_bonus:piece_bonus_count_5", "@set_bonus:set_bonus_hero_3");
 						heroismRing.setAttachment("setBonus", "set_bonus_hero");
+						heroismRing.setIntAttribute("cat_stat_mod_bonus.@stat_n:luck_modified", 30);
+						heroismRing.setIntAttribute("cat_stat_mod_bonus.@stat_n:precision_modified", 30);
+						heroismRing.setIntAttribute("cat_stat_mod_bonus.@stat_n:strength_modified", 30);
 						
 						TangibleObject heroismNecklace = (TangibleObject) core.objectService.createObject("object/tangible/wearables/necklace/shared_necklace_s01.iff", planet);
 						heroismNecklace.setStfFilename("static_item_n");
@@ -297,6 +303,9 @@ public class DevService implements INetworkDispatch {
 						heroismNecklace.setStringAttribute("@set_bonus:piece_bonus_count_4", "@set_bonus:set_bonus_hero_2");
 						heroismNecklace.setStringAttribute("@set_bonus:piece_bonus_count_5", "@set_bonus:set_bonus_hero_3");
 						heroismNecklace.setAttachment("setBonus", "set_bonus_hero");
+						heroismNecklace.setIntAttribute("cat_stat_mod_bonus.@stat_n:luck_modified", 30);
+						heroismNecklace.setIntAttribute("cat_stat_mod_bonus.@stat_n:precision_modified", 30);
+						heroismNecklace.setIntAttribute("cat_stat_mod_bonus.@stat_n:strength_modified", 30);
 						
 						TangibleObject heroismBraceletRight = (TangibleObject) core.objectService.createObject("object/tangible/wearables/bracelet/shared_bracelet_s02_r.iff", planet);
 						heroismBraceletRight.setStfFilename("static_item_n");
@@ -305,6 +314,9 @@ public class DevService implements INetworkDispatch {
 						heroismBraceletRight.setStringAttribute("@set_bonus:piece_bonus_count_4", "@set_bonus:set_bonus_hero_2");
 						heroismBraceletRight.setStringAttribute("@set_bonus:piece_bonus_count_5", "@set_bonus:set_bonus_hero_3");
 						heroismBraceletRight.setAttachment("setBonus", "set_bonus_hero");
+						heroismBraceletRight.setIntAttribute("cat_stat_mod_bonus.@stat_n:luck_modified", 30);
+						heroismBraceletRight.setIntAttribute("cat_stat_mod_bonus.@stat_n:precision_modified", 30);
+						heroismBraceletRight.setIntAttribute("cat_stat_mod_bonus.@stat_n:strength_modified", 30);
 						
 						TangibleObject heroismBraceletLeft = (TangibleObject) core.objectService.createObject("object/tangible/wearables/bracelet/shared_bracelet_s02_l.iff", planet);
 						heroismBraceletLeft.setStfFilename("static_item_n");
@@ -313,6 +325,9 @@ public class DevService implements INetworkDispatch {
 						heroismBraceletLeft.setStringAttribute("@set_bonus:piece_bonus_count_4", "@set_bonus:set_bonus_hero_2");
 						heroismBraceletLeft.setStringAttribute("@set_bonus:piece_bonus_count_5", "@set_bonus:set_bonus_hero_3");
 						heroismBraceletLeft.setAttachment("setBonus", "set_bonus_hero");
+						heroismBraceletLeft.setIntAttribute("cat_stat_mod_bonus.@stat_n:luck_modified", 30);
+						heroismBraceletLeft.setIntAttribute("cat_stat_mod_bonus.@stat_n:precision_modified", 30);
+						heroismBraceletLeft.setIntAttribute("cat_stat_mod_bonus.@stat_n:strength_modified", 30);
 						
 						inventory.add(heroismBand);
 						inventory.add(heroismRing);
