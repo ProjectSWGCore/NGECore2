@@ -718,14 +718,20 @@ public class PlayerService implements INetworkDispatch {
 									String[] wookieeItems = ((String) roadmap.getObject(s, 5)).split(",");
 									String[] ithorianItems = ((String) roadmap.getObject(s, 6)).split(",");
 									
-									for (int n = 0; n < items.length; n++) {
+									int arrayLength = items.length;
+									
+									if (wookieeItems.length > 0 && creature.getStfName().contains("wookiee"))
+										arrayLength = wookieeItems.length;
+									else if (ithorianItems.length > 0 && creature.getStfName().contains("ithorian"))
+										arrayLength = ithorianItems.length;
+
+									for (int n = 0; n < arrayLength; n++) {
 										String item = items[n];
 										
-										if (wookieeItems[0].length() > 0 && creature.getStfName().contains("wookiee")) {
+										if (creature.getStfName().contains("wookiee"))
 											item = wookieeItems[n];
-										} else if (ithorianItems[0].length() > 0 && creature.getStfName().contains("ithorian")) {
+										else if (creature.getStfName().contains("ithorian"))
 											item = ithorianItems[n];
-										}
 										
 										try {
 											String customServerTemplate = null;

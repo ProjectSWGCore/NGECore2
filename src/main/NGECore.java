@@ -301,8 +301,11 @@ public class NGECore {
 		spawnService = new SpawnService(this);
 		aiService = new AIService(this);
 		//missionService = new MissionService(this);
-		surveyService = new SurveyService(this);
-		resourceService = new ResourceService(this);
+		
+		if (config.getInt("LOAD.RESOURCE.SYSTEM") == 1) {
+			surveyService = new SurveyService(this);
+			resourceService = new ResourceService(this);
+		}
 		
 		// Ping Server
 		try {
@@ -403,8 +406,10 @@ public class NGECore {
 		
 		objectService.loadBuildings();
 		
-		objectService.loadResourceRoots();
-		objectService.loadResources();
+		if (config.getInt("LOAD.RESOURCE.SYSTEM") == 1) {
+			objectService.loadResourceRoots();
+			objectService.loadResources();
+		}
 		
 		terrainService.loadSnapShotObjects();
 		objectService.loadServerTemplates();
