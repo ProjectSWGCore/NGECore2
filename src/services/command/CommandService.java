@@ -84,7 +84,7 @@ public class CommandService implements INetworkDispatch  {
 			return false;
 		}
 		
-		if (actor.hasCooldown(command.getCooldownGroup())) {
+		if (actor.hasCooldown(command.getCooldownGroup()) || actor.hasCooldown(command.getCommandName())) {
 			return false;
 		}
 		
