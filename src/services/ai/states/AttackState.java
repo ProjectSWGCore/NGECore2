@@ -120,6 +120,7 @@ public class AttackState extends AIState {
 			creature.setLookAtTarget(0);
 			creature.setIntendedTarget(0);
 			actor.setFollowObject(null);
+			actor.setCurrentState(new RetreatState());
 			return StateResult.FINISHED;
 		}
 		CreatureObject target = actor.getFollowObject();
@@ -133,7 +134,7 @@ public class AttackState extends AIState {
 			return StateResult.UNFINISHED;
 		}
 		if(target.getPosture() == 13 || target.getPosture() == 14) {
-			actor.getDamageMap().remove(target);
+			actor.removeDefender(target);
 			actor.setFollowObject(actor.getHighestDamageDealer());
 			target = actor.getFollowObject();
 			if(target == null)

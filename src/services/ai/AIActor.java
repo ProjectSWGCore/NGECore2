@@ -237,7 +237,6 @@ public class AIActor {
 			case StateResult.DEAD:
 				setCurrentState(new DeathState());
 			case StateResult.FINISHED:
-				// TODO: add state transitions
 			case StateResult.UNFINISHED:
 				return;
 			case StateResult.IDLE:
