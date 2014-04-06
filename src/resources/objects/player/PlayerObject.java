@@ -45,7 +45,7 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent(version=8)
+@Persistent(version=9)
 public class PlayerObject extends IntangibleObject {
 	
 	// PLAY 3
