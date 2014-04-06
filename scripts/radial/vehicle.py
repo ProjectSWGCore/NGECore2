@@ -11,7 +11,6 @@ def createRadial(core, owner, target, radials):
 def handleSelection(core, owner, target, option):
 	if target:
 		if option == 21 or option == 40:
-			owner.sendSystemMessage('21', 0)
 			core.objectService.useObject(owner, target)
 		if option == 60:
 			core.objectService.destroyObject(target)

@@ -44,7 +44,6 @@ import resources.objects.resource.ResourceRoot;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.tool.SurveyTool;
 import resources.objects.waypoint.WaypointObject;
-import services.command.SurveyCommand;
 import services.sui.SUIWindow;
 import services.sui.SUIWindow.SUICallback;
 import services.sui.SUIWindow.Trigger;
