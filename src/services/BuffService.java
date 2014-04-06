@@ -100,8 +100,6 @@ public class BuffService implements INetworkDispatch {
 			return null;
 		}
 		
-		if(target.hasBuff(buffName)) return null;
-		
 		final Buff buff = new Buff(buffName, target.getObjectID());
 		if(target.getSlottedObject("ghost") != null)
 			buff.setTotalPlayTime(((PlayerObject) target.getSlottedObject("ghost")).getTotalPlayTime());
