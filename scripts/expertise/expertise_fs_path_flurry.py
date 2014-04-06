@@ -1,48 +1,29 @@
 import sys
 
-def addExpertisePoint(core, actor):
-
-	player = actor.getSlottedObject('ghost')
-
-	if not player:
-		return
-
-	if not player.getProfession() == 'force_sensitive_1a':
-		return
-
-	actor.addSkill('expertise_fs_path_flurry')
-
-
-	addAbilities(core, actor, player)
-
-	return
-
-def removeExpertisePoint(core, actor):
-
-	player = actor.getSlottedObject('ghost')
-
-	if not player:
-		return
-
-	if not player.getProfession() == 'force_sensitive_1a':
-		return
-
-	actor.removeSkill('expertise_fs_path_flurry')
-
-
-	removeAbilities(core, actor, player)
-
-	return
-
-# this checks what abilities the player gets by level, need to also call this on level-up
 def addAbilities(core, actor, player):
-
-	actor.addAbility('fs_flurry_1')
-
+	if actor.getLevel() >= 4:
+		actor.addAbility("fs_flurry_1")
+	if actor.getLevel() >= 12:
+		actor.addAbility("fs_flurry_2")
+	if actor.getLevel() >= 20:
+		actor.addAbility("fs_flurry_3")
+	if actor.getLevel() >= 30:
+		actor.addAbility("fs_flurry_4")
+	if actor.getLevel() >= 38:
+		actor.addAbility("fs_flurry_5")
+	if actor.getLevel() >= 52:
+		actor.addAbility("fs_flurry_6")
+	if actor.getLevel() >= 62:
+		actor.addAbility("fs_flurry_7")
 	return
 
 def removeAbilities(core, actor, player):
-
-	actor.removeAbility('fs_flurry_1')
+	actor.removeAbility("fs_flurry_1")
+	actor.removeAbility("fs_flurry_2")
+	actor.removeAbility("fs_flurry_3")
+	actor.removeAbility("fs_flurry_4")
+	actor.removeAbility("fs_flurry_5")
+	actor.removeAbility("fs_flurry_6")
+	actor.removeAbility("fs_flurry_7")
 
 	return

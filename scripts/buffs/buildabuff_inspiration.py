@@ -21,8 +21,10 @@ def add(core, actor, buff):
     return
     
 def remove(core, actor, buff):
-    for BuffItem in actor.getAttachment('buffWorkshop'):
-        core.skillModService.deductSkillMod(actor, BuffItem.getSkillName(), BuffItem.getAffectAmount())
-    
-    actor.setAttachment('buffWorkshop', None)
-    return
+	if actor.getAttachment('buffWorkshop') is not None:
+		
+		for BuffItem in actor.getAttachment('buffWorkshop'):
+			core.skillModService.deductSkillMod(actor, BuffItem.getSkillName(), BuffItem.getAffectAmount())
+		
+		actor.setAttachment('buffWorkshop', None)
+	return

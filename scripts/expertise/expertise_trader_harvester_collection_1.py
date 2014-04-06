@@ -1,48 +1,9 @@
 import sys
 
-def addExpertisePoint(core, actor):
-
-	player = actor.getSlottedObject('ghost')
-
-	if not player:
-		return
-
-	if not player.getProfession() == 'trader_1a':
-		return
-
-	actor.addSkill('expertise_trader_harvester_collection_1')
-
-	actor.addSkillMod('expertise_harvester_collection_increase', 20)
-
-	addAbilities(core, actor, player)
-
-	return
-
-def removeExpertisePoint(core, actor):
-
-	player = actor.getSlottedObject('ghost')
-
-	if not player:
-		return
-
-	if not player.getProfession() == 'trader_1a':
-		return
-
-	actor.removeSkill('expertise_trader_harvester_collection_1')
-
-	actor.removeSkillMod('expertise_harvester_collection_increase', 20)
-
-	removeAbilities(core, actor, player)
-
-	return
-
-# this checks what abilities the player gets by level, need to also call this on level-up
 def addAbilities(core, actor, player):
-
-
+	actor.addAbility("expertise_trader_harvester_collection_1")
 	return
 
 def removeAbilities(core, actor, player):
-
-
+	actor.removeAbility("expertise_trader_harvester_collection_1")
 	return

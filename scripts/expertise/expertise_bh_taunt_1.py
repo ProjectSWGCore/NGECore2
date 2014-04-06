@@ -1,48 +1,25 @@
 import sys
 
-def addExpertisePoint(core, actor):
-
-	player = actor.getSlottedObject('ghost')
-
-	if not player:
-		return
-
-	if not player.getProfession() == 'bounty_hunter_1a':
-		return
-
-	actor.addSkill('expertise_bh_taunt_1')
-
-
-	addAbilities(core, actor, player)
-
-	return
-
-def removeExpertisePoint(core, actor):
-
-	player = actor.getSlottedObject('ghost')
-
-	if not player:
-		return
-
-	if not player.getProfession() == 'bounty_hunter_1a':
-		return
-
-	actor.removeSkill('expertise_bh_taunt_1')
-
-
-	removeAbilities(core, actor, player)
-
-	return
-
-# this checks what abilities the player gets by level, need to also call this on level-up
 def addAbilities(core, actor, player):
-
-	actor.addAbility('bh_taunt_1')
-
+	if actor.getLevel() >= 26:
+		actor.addAbility("bh_taunt_1")
+	if actor.getLevel() >= 34:
+		actor.addAbility("bh_taunt_2")
+	if actor.getLevel() >= 48:
+		actor.addAbility("bh_taunt_3")
+	if actor.getLevel() >= 62:
+		actor.addAbility("bh_taunt_4")
+	if actor.getLevel() >= 76:
+		actor.addAbility("bh_taunt_5")
+	if actor.getLevel() >= 90:
+		actor.addAbility("bh_taunt_6")
 	return
 
 def removeAbilities(core, actor, player):
-
-	actor.removeAbility('bh_taunt_1')
-
+	actor.removeAbility("bh_taunt_1")
+	actor.removeAbility("bh_taunt_2")
+	actor.removeAbility("bh_taunt_3")
+	actor.removeAbility("bh_taunt_4")
+	actor.removeAbility("bh_taunt_5")
+	actor.removeAbility("bh_taunt_6")
 	return

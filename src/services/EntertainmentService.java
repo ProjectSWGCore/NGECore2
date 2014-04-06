@@ -575,7 +575,10 @@ public class EntertainmentService implements INetworkDispatch {
 		//long timeStamp = 0;
 		//if (reciever.getAttachment("buffWorkshopTimestamp") != null)
 			//timeStamp = (long) reciever.getAttachment("buffWorkshopTimestamp");
-
+		
+		if (reciever.hasBuff("buildabuff_inspiration"))
+			core.buffService.removeBuffFromCreature(reciever, reciever.getBuffByName("buildabuff_inspiration"));
+		
 		core.buffService.addBuffToCreature(reciever, "buildabuff_inspiration", buffer);
 		/*if (core.buffService.addBuffToCreature(reciever, "buildabuff_inspiration", buffer) && !rPlayer.getProfession().equals("entertainer_1a")) {
 			if (timeStamp == 0 || (System.currentTimeMillis() - timeStamp > 86400000)) {

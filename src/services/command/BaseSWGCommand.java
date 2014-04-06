@@ -21,6 +21,8 @@
  ******************************************************************************/
 package services.command;
 
+import engine.clientdata.ClientFileManager;
+import engine.clientdata.visitors.DatatableVisitor;
 import engine.resources.common.CRC;
 
 public class BaseSWGCommand implements Cloneable {
@@ -31,10 +33,32 @@ public class BaseSWGCommand implements Cloneable {
 	private int maxRangeToTarget;
 	private int commandCRC;
 	private boolean isGmCommand = false;
+	private String requiredAbility;
+	private String cooldownGroup;
+	private float cooldown;
+	private float executeTime;
+	private float warmupTime;
 	
 	public BaseSWGCommand(String commandName) {
 		setCommandName(commandName);
 		setCommandCRC(CRC.StringtoCRC(commandName));
+		
+		try {
+			DatatableVisitor visitor2 = ClientFileManager.loadFile("datatables/command/command_table.iff", DatatableVisitor.class);
+			for (int i = 0; i < visitor2.getRowCount(); i++) {
+				if (visitor2.getObject(i, 0) != null) {
+					if (((String) visitor2.getObject(i, 0)).equalsIgnoreCase(commandName)) {
+						requiredAbility = (String) visitor2.getObject(i, 7);
+						cooldownGroup = (String) visitor2.getObject(i, 85);
+						warmupTime = (Float) visitor2.getObject(i, 86);
+						executeTime = (Float) visitor2.getObject(i, 87);
+						cooldown = (Float) visitor2.getObject(i, 88);
+					}
+				}
+			}
+		} catch (InstantiationException | IllegalAccessException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public String getCommandName() {
@@ -87,6 +111,46 @@ public class BaseSWGCommand implements Cloneable {
 
 	public void setGmCommand(boolean isGmCommand) {
 		this.isGmCommand = isGmCommand;
+	}
+
+	public String getRequiredAbility() {
+		return requiredAbility;
+	}
+
+	public void setRequiredAbility(String requiredAbility) {
+		this.requiredAbility = requiredAbility;
+	}
+
+	public String getCooldownGroup() {
+		return cooldownGroup;
+	}
+
+	public void setCooldownGroup(String cooldownGroup) {
+		this.cooldownGroup = cooldownGroup;
+	}
+
+	public float getCooldown() {
+		return cooldown;
+	}
+
+	public void setCooldown(float cooldown) {
+		this.cooldown = cooldown;
+	}
+
+	public float getExecuteTime() {
+		return executeTime;
+	}
+
+	public void setExecuteTime(float executeTime) {
+		this.executeTime = executeTime;
+	}
+
+	public float getWarmupTime() {
+		return warmupTime;
+	}
+
+	public void setWarmupTime(float warmupTime) {
+		this.warmupTime = warmupTime;
 	}
 
 }

@@ -95,10 +95,15 @@ import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
 import resources.objects.guild.GuildObject;
+import resources.objects.intangible.IntangibleObject;
 import resources.objects.mission.MissionObject;
 import resources.objects.player.PlayerObject;
+import resources.objects.resource.GalacticResource;
+import resources.objects.resource.ResourceContainerObject;
+import resources.objects.resource.ResourceRoot;
 import resources.objects.staticobject.StaticObject;
 import resources.objects.tangible.TangibleObject;
+import resources.objects.tool.SurveyTool;
 import resources.objects.waypoint.WaypointObject;
 import resources.objects.weapon.WeaponObject;
 
@@ -147,6 +152,7 @@ public class ObjectService implements INetworkDispatch {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+		
 	}
 	
 	public void loadBuildings() {
@@ -172,6 +178,96 @@ public class ObjectService implements INetworkDispatch {
 			});
 		}
 		cursor.close();
+	}
+	
+	// loads the resource roots at server start
+		public void loadResourceRoots() {
+			EntityCursor<ResourceRoot> cursor = core.getResourceRootsODB().getCursor(Integer.class, ResourceRoot.class);
+			Iterator<ResourceRoot> it = cursor.iterator();
+			int loadedResourceRootsCounter = 0;
+			System.out.println("Loading resource roots...");
+			while(it.hasNext()) {
+				final ResourceRoot resourceRoot = it.next();
+				System.err.println("resourceRoot loaded ID: " + resourceRoot.getResourceRootID() + " " + resourceRoot.getResourceFileName());
+				core.resourceService.add_resourceRoot(resourceRoot);
+				loadedResourceRootsCounter++;
+			}
+			
+			if (loadedResourceRootsCounter==0){
+				//big bang will take care of it
+			}
+			//System.err.println("loadedResourceRootsCounter " + loadedResourceRootsCounter);
+			cursor.close();
+			System.out.println("Finished loading resource roots.");
+		}
+		
+		// loads the currently spawned resources at server start
+		public void loadResources() {
+			EntityCursor<GalacticResource> cursor = core.getResourcesODB().getCursor(Long.class, GalacticResource.class);
+			Iterator<GalacticResource> it = cursor.iterator();
+			int loadedResourceCounter = 0;
+			System.out.println("Loading resources...");
+			while(it.hasNext()) {
+				final GalacticResource resource = it.next();
+				System.err.println("resource " + resource.getName() + " rootID " + resource.getResourceRootID());
+				objectList.put(resource.getId(), resource); 
+				
+				// re-reference ResourceRoot
+				int resourceRootID = resource.getResourceRootID();
+				ResourceRoot resourceRoot = core.resourceService.retrieveResourceRootReference(resourceRootID);
+				resource.setResourceRoot(resourceRoot);
+				
+				// recreate the collections
+				core.resourceService.addSpawnedResource(resource);  
+				byte pool = resource.getPoolNumber();
+				switch (pool){
+					case 1:
+						core.resourceService.add_spawnedResourcesPool1(resource);
+						break;
+					case 2:
+						core.resourceService.add_spawnedResourcesPool2(resource);
+						break;
+					case 3:
+						core.resourceService.add_spawnedResourcesPool3(resource);
+						break;
+					case 4:
+						core.resourceService.add_spawnedResourcesPool4(resource);
+						break;
+					default:
+						System.err.println("Loaded resource " + resource.getName() + " has no valid pool value!");
+						resource.setPoolNumber((byte)4); // Make it a pool 4
+				}			
+				loadedResourceCounter++;
+			}
+			
+			if (loadedResourceCounter==0){
+				core.resourceService.kickOffBigBang(); // spawn resources initially once
+			}
+			
+			cursor.close();
+			System.out.println("Finished loading resources.");
+		}
+	
+	public SWGObject createResource() {
+		SWGObject object = null;	
+		Planet planet = core.terrainService.getPlanetByID(1);
+		Point3D position = new Point3D(0,0,0);
+		Quaternion orientation = new Quaternion(1,1,1,1);
+		String Template = "object/resource_container/base/shared_base_resource_container.iff";
+		boolean isSnapshot = false;
+
+		long objectID = generateObjectID();
+		
+		object = new GalacticResource(objectID, planet, position, orientation, Template);
+		
+		object.setPlanetId(planet.getID());
+		
+		object.setAttachment("customServerTemplate", Template);
+		
+		object.setisInSnapshot(isSnapshot);
+				
+		objectList.put(objectID, object);
+		return object;
 	}
 	
 	public void loadServerTemplates() {
@@ -211,11 +307,19 @@ public class ObjectService implements INetworkDispatch {
 			
 			object = new PlayerObject(objectID, planet);
 			
-		} else if(Template.startsWith("object/tangible")) {
+		} else if(Template.startsWith("object/tangible/survey_tool")) {
+			
+			object = new SurveyTool(objectID, planet, Template, position, orientation);
+			
+		}else if(Template.startsWith("object/tangible")) {
 			
 			object = new TangibleObject(objectID, planet, Template, position, orientation);
 
-		} else if(Template.startsWith("object/weapon")) {
+		} else if(Template.startsWith("object/intangible")) {
+			
+			object = new IntangibleObject(objectID, planet, position, orientation,Template);
+
+		}else if(Template.startsWith("object/weapon")) {
 			
 			object = new WeaponObject(objectID, planet, Template, position, orientation);
 
@@ -259,10 +363,12 @@ public class ObjectService implements INetworkDispatch {
 			
 			object = new MissionObject(objectID, planet, Template);
 			
-		} else {
+		} else if(Template.startsWith("object/resource_container")) {
 			
-			return null;
+			object = new ResourceContainerObject(objectID, planet, Template, position, orientation);
 			
+		}else {
+			return null;			
 		}
 		
 		object.setPlanetId(planet.getID());
@@ -295,6 +401,7 @@ public class ObjectService implements INetworkDispatch {
 				((CreatureObject) object).setOptionsBitmask(Options.INVULNERABLE | Options.USABLE);
 			} else if (Template.startsWith("object/mobile/vehicle/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.ATTACKABLE | Options.MOUNT);
+				System.err.println("Options.MOUNT");
 			} else if (Template.startsWith("object/mobile/hologram/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.INVULNERABLE);
 			} else if (Template.startsWith("object/creature/npc/theme_park/")) {
@@ -593,9 +700,13 @@ public class ObjectService implements INetworkDispatch {
 					
 				} else {
 					
+					if (!(getObject(objectId) instanceof CreatureObject))
+						return;
+
 					creature = (CreatureObject) getObject(objectId);
 					if(creature.getAttachment("disconnectTask") != null && creature.getClient() != null && !creature.getClient().getSession().isClosing())
 						return;
+					
 
 				}
 				

@@ -67,16 +67,16 @@ public class CombatCommand extends BaseSWGCommand {
 	private int damageType, elementalType, elementalValue;
 	private String performanceSpam;
 	private byte hitSpam;
-	private float cooldown;
+	//private float cooldown;
 	private String delayAttackEggTemplate;
 	private String delayAttackParticle;
 	private float initialAttackDelay;
 	private float delayAttackInterval;
 	private int delayAttackLoops;
 	private int delayAttackEggPosition;
-	private String cooldownGroup;
-	private float executeTime;
-	private float warmupTime;
+	//private String cooldownGroup;
+	//private float executeTime;
+	//private float warmupTime;
 	private float vigorCost; // for commando kill meter and bm specials
 	private float criticalChance;
 	private int attack_rolls;
@@ -162,22 +162,6 @@ public class CombatCommand extends BaseSWGCommand {
 						
 					}
 			}
-			
-			DatatableVisitor visitor2 = ClientFileManager.loadFile("datatables/command/command_table.iff", DatatableVisitor.class);
-
-			for(int i = 0; i < visitor2.getRowCount(); i++) {
-				if(visitor2.getObject(i, 0) != null) {
-					if(((String) visitor2.getObject(i, 0)).equalsIgnoreCase(commandName)) {
-						
-						cooldownGroup = (String) visitor2.getObject(i, 85);
-						warmupTime = (Float) visitor2.getObject(i, 86);
-						executeTime = (Float) visitor2.getObject(i, 87);
-						cooldown = (Float) visitor2.getObject(i, 88);
-						
-					}
-				} 
-			}
-			
 		} catch (InstantiationException | IllegalAccessException e) {
 			e.printStackTrace();
 		}
@@ -624,14 +608,6 @@ public class CombatCommand extends BaseSWGCommand {
 		
 	}
 
-	public float getCooldown() {
-		return cooldown;
-	}
-
-	public void setCooldown(float cooldown) {
-		this.cooldown = cooldown;
-	}
-
 	public String getDelayAttackEggTemplate() {
 		return delayAttackEggTemplate;
 	}
@@ -678,30 +654,6 @@ public class CombatCommand extends BaseSWGCommand {
 
 	public void setDelayAttackLoops(int delayAttackLoops) {
 		this.delayAttackLoops = delayAttackLoops;
-	}
-
-	public String getCooldownGroup() {
-		return cooldownGroup;
-	}
-
-	public void setCooldownGroup(String cooldownGroup) {
-		this.cooldownGroup = cooldownGroup;
-	}
-
-	public float getExecuteTime() {
-		return executeTime;
-	}
-
-	public void setExecuteTime(float executeTime) {
-		this.executeTime = executeTime;
-	}
-
-	public float getWarmupTime() {
-		return warmupTime;
-	}
-
-	public void setWarmupTime(float warmupTime) {
-		this.warmupTime = warmupTime;
 	}
 
 	public float getVigorCost() {

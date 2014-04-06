@@ -29,6 +29,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -45,6 +46,7 @@ import engine.resources.objects.SWGObject;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import resources.objects.player.PlayerObject;
+import resources.objects.tangible.TangibleObject;
 import services.equipment.BonusSetTemplate;
 import services.spawn.MobileTemplate;
 
@@ -67,23 +69,10 @@ public class EquipmentService implements INetworkDispatch {
 
 	}
 	
-	private int getWeaponCriticalChance(CreatureObject actor, SWGObject item) {
-		int weaponCriticalChance = 0;
-		String weaponCriticalSkillMod = (core.scriptService.getMethod("scripts/equipment/", "weapon_critical", item.getStringAttribute("cat_wpn_damage.wpn_category")).__call__().asString());
-		
-		if(weaponCriticalSkillMod.contains(" "))
-			weaponCriticalSkillMod.replace(" ", "");
-		
-		if(weaponCriticalSkillMod.contains("-"))
-			weaponCriticalSkillMod.replace("-", "");		
-		
-		if(actor.getSkillMod(weaponCriticalSkillMod) != null)
-			weaponCriticalChance = actor.getSkillModBase(weaponCriticalSkillMod);
-		
-		return weaponCriticalChance;
-	}
-	
 	public boolean canEquip(CreatureObject actor, SWGObject item) {
+		// TODO: Species restrictions
+		// TODO: Gender restrictions
+		
 		boolean result = true;
 		
 		if (item == null)
@@ -126,40 +115,6 @@ public class EquipmentService implements INetworkDispatch {
 		return result;
 	}
 	
-	private float calculateArmorProtection (float protection, String slotName) {
-		return protection *= (Float.parseFloat(core.scriptService.getMethod("scripts/equipment/", "slot_protection", slotName).__call__().asString()) / 100);
-	}
-	
-	private void addArmorProtection(CreatureObject actor, String protectionType, float protection, String slotName) {
-		actor.addSkillMod(protectionType, (int) Math.ceil(calculateArmorProtection(protection, slotName)));
-	}
-	
-	private void deductArmorProtection(CreatureObject actor, String protectionType, float protection, String slotName) {
-		actor.deductSkillMod(protectionType, (int) calculateArmorProtection(protection, slotName)); 
-	}
-	
-	private void addForceProtection(CreatureObject actor, SWGObject item) {
-		actor.addSkillMod("kinetic", getForceProtection(item));
-		actor.addSkillMod("energy", getForceProtection(item));
-		actor.addSkillMod("heat", getForceProtection(item));
-		actor.addSkillMod("cold", getForceProtection(item));
-		actor.addSkillMod("acid", getForceProtection(item));
-		actor.addSkillMod("electricity", getForceProtection(item));
-	}	
-	
-	private void deductForceProtection(CreatureObject actor, SWGObject item) {
-		actor.deductSkillMod("kinetic", getForceProtection(item));
-		actor.deductSkillMod("energy", getForceProtection(item));
-		actor.deductSkillMod("heat", getForceProtection(item));
-		actor.deductSkillMod("cold", getForceProtection(item));
-		actor.deductSkillMod("acid", getForceProtection(item));
-		actor.deductSkillMod("electricity", getForceProtection(item));
-	}	
-	
-	private int getForceProtection(SWGObject item) {
-		return core.scriptService.getMethod("scripts/equipment/", "force_protection", item.getAttachment("type") + "_" + item.getStringAttribute("protection_level")).__call__().asInt();
-	}
-	
 	public void equip(CreatureObject actor, SWGObject item) 
 	{
 		String template = ((item.getAttachment("customServerTemplate") == null) ? item.getTemplate() : (item.getTemplate().split("shared_")[0] + "shared_" + ((String) item.getAttachment("customServerTemplate")) + ".iff"));
@@ -168,11 +123,6 @@ public class EquipmentService implements INetworkDispatch {
 		PyObject func = core.scriptService.getMethod("scripts/" + serverTemplate.split("shared_" , 2)[0].replace("shared_", ""), serverTemplate.split("shared_" , 2)[1], "equip");
 		if(func != null) func.__call__(Py.java2py(core), Py.java2py(actor), Py.java2py(item));
 		
-		// TODO: Species restrictions
-		// TODO: Gender restrictions
-		// TODO: crit enhancement from crafted weapons
-		// TODO: check for armor category in order to add resistance to certain DoT types
-		// TODO: Calculate actual armor values (REMINDER: Check if the player is wearing a jedi robe/cloak (look for force protection intensity). If they are, they shouldn't receive any additional protection from other items with armour.)
 		// TODO: bio-link (assign it by objectID with setAttachment and then just display the customName for that objectID).
 		
 		if(!actor.getEquipmentList().contains(item)) 
@@ -200,14 +150,18 @@ public class EquipmentService implements INetworkDispatch {
 	
 	public void processItemAtrributes(CreatureObject creature, SWGObject item, boolean equipping)
 	{
+		// TODO: crit enhancement from crafted weapons
+		// TODO: check for armor category in order to add resistance to certain DoT types
+		
 		Map<String, Object> attributes = new TreeMap<String, Object>(item.getAttributes());
+		
+		calculateArmorProtection(creature, equipping);
 		
 		if(equipping)
 		{
 			if(item.getStringAttribute("cat_wpn_damage.wpn_category") != null) creature.addSkillMod("display_only_critical", getWeaponCriticalChance(creature, item));
-			if(item.getStringAttribute("protection_level") != null) addForceProtection(creature, item);
 			if(item.getStringAttribute("proc_name") != null) core.buffService.addBuffToCreature(creature, item.getStringAttribute("proc_name").replace("@ui_buff:", ""), creature);
-	
+			
 			for(Entry<String, Object> e : attributes.entrySet()) 
 			{	
 				if(e.getKey().startsWith("cat_skill_mod_bonus.@stat_n:")) 
@@ -219,16 +173,6 @@ public class EquipmentService implements INetworkDispatch {
 				{
 					core.skillModService.addSkillMod(creature, e.getKey().replace("cat_stat_mod_bonus.@stat_n:", ""), Integer.parseInt((String) e.getValue()));
 				}			
-				
-				if(e.getKey().startsWith("cat_armor_standard_protection")) 
-				{
-					addArmorProtection(creature, e.getKey().replace("cat_armor_standard_protection.armor_eff_", ""), Float.parseFloat((String) e.getValue()), creature.getSlotNameForObject(item));
-				}	
-				
-				if(e.getKey().startsWith("cat_armor_special_protection")) 
-				{
-					addArmorProtection(creature, e.getKey().replace("cat_armor_special_protection.special_protection_type_", ""), Float.parseFloat((String) e.getValue()), creature.getSlotNameForObject(item));
-				}		
 							
 				if(e.getKey().startsWith("cat_attrib_mod_bonus.attr_health")) 
 				{
@@ -239,13 +183,11 @@ public class EquipmentService implements INetworkDispatch {
 				{
 					creature.setMaxAction(creature.getMaxAction() + Integer.parseInt((String) e.getValue()));
 				}
-				
 			}
 		}
 		else
 		{
 			if(item.getStringAttribute("cat_wpn_damage.wpn_category") != null) creature.deductSkillMod("display_only_critical", getWeaponCriticalChance(creature, item));
-			if(item.getStringAttribute("protection_level") != null) deductForceProtection(creature, item);
 			if(item.getStringAttribute("proc_name") != null) core.buffService.removeBuffFromCreatureByName(creature, item.getStringAttribute("proc_name").replace("@ui_buff:", ""));
 			
 			for(Entry<String, Object> e : attributes.entrySet())
@@ -258,16 +200,6 @@ public class EquipmentService implements INetworkDispatch {
 				{
 					core.skillModService.deductSkillMod(creature, e.getKey().replace("cat_stat_mod_bonus.@stat_n:", ""), Integer.parseInt((String) e.getValue()));
 				}	
-				
-				if(e.getKey().startsWith("cat_armor_standard_protection")) 
-				{
-					deductArmorProtection(creature, e.getKey().replace("cat_armor_standard_protection.armor_eff_", ""), Float.parseFloat((String) e.getValue()), creature.getSlotNameForObject(item));
-				}	
-				
-				if(e.getKey().startsWith("cat_armor_special_protection")) 
-				{
-					deductArmorProtection(creature, e.getKey().replace("cat_armor_special_protection.special_protection_type_", ""), Float.parseFloat((String) e.getValue()), creature.getSlotNameForObject(item));
-				}		
 				
 				if(e.getKey().startsWith("cat_attrib_mod_bonus.attr_health")) 
 				{
@@ -287,6 +219,72 @@ public class EquipmentService implements INetworkDispatch {
 		}
 	}
 
+	private void calculateArmorProtection(CreatureObject creature, boolean equipping)
+	{
+		int wornArmourPieces = 0, forceProtection = 0;
+		Map<String, Float> protection = new TreeMap<String, Float>();
+		
+		for(SWGObject item : new ArrayList<SWGObject>(creature.getEquipmentList()))
+		{
+			Map<String, Object> attributes = new TreeMap<String, Object>(item.getAttributes());
+			boolean incPieceCount = false;
+			
+			for(Entry<String, Object> e : attributes.entrySet()) 
+			{	
+				if(item.getStringAttribute("protection_level") != null) forceProtection = getForceProtection(item);
+				
+				if(e.getKey().startsWith("cat_armor_standard_protection")) 
+				{
+					String protectionType = e.getKey().replace("cat_armor_standard_protection.armor_eff_", "");
+					float modifier = Float.parseFloat(core.scriptService.getMethod("scripts/equipment/", "slot_protection", creature.getSlotNameForObject(item)).__call__().asString()) / 100;
+					Float protectionAmount = Float.parseFloat((String) e.getValue()) * modifier;
+				
+					if(protection.containsKey(protectionType)) protection.replace(protectionType, protection.get(protectionType) + protectionAmount);
+					else protection.put(protectionType, protectionAmount);
+					incPieceCount = true;
+				}
+				else if(e.getKey().startsWith("cat_armor_special_protection")) 
+				{
+					String protectionType = e.getKey().replace("cat_armor_special_protection.special_protection_type_", "");
+					float modifier = Float.parseFloat(core.scriptService.getMethod("scripts/equipment/", "slot_protection", creature.getSlotNameForObject(item)).__call__().asString()) / 100;
+					Float protectionAmount = Float.parseFloat((String) e.getValue()) * modifier;
+					
+					if(protection.containsKey(protectionType)) protection.replace(protectionType, protection.get(protectionType) + protectionAmount);
+					else protection.put(protectionType, protectionAmount);
+					incPieceCount = true;
+				}	
+			}
+			if(incPieceCount) wornArmourPieces++;
+		}
+		
+		for(Entry<String, Float> e : protection.entrySet()) 
+		{	
+			core.skillModService.deductSkillMod(creature, e.getKey(), creature.getSkillModBase(e.getKey()));
+			core.skillModService.addSkillMod(creature, e.getKey(), forceProtection);
+			if(wornArmourPieces >= 3) core.skillModService.addSkillMod(creature, e.getKey(), (int) e.getValue().floatValue());
+		}
+	}
+	
+	private int getWeaponCriticalChance(CreatureObject actor, SWGObject item) {
+		int weaponCriticalChance = 0;
+		String weaponCriticalSkillMod = (core.scriptService.getMethod("scripts/equipment/", "weapon_critical", item.getStringAttribute("cat_wpn_damage.wpn_category")).__call__().asString());
+		
+		if(weaponCriticalSkillMod.contains(" "))
+			weaponCriticalSkillMod.replace(" ", "");
+		
+		if(weaponCriticalSkillMod.contains("-"))
+			weaponCriticalSkillMod.replace("-", "");		
+		
+		if(actor.getSkillMod(weaponCriticalSkillMod) != null)
+			weaponCriticalChance = actor.getSkillModBase(weaponCriticalSkillMod);
+		
+		return weaponCriticalChance;
+	}
+		
+	private int getForceProtection(SWGObject item) {
+		return core.scriptService.getMethod("scripts/equipment/", "force_protection", item.getAttachment("type") + "_" + item.getStringAttribute("protection_level")).__call__().asInt();
+	}
+	
 	public void addBonusSetTemplate(BonusSetTemplate bonusSet)
 	{
 		bonusSetTemplates.put(bonusSet.getName(), bonusSet);
@@ -294,17 +292,19 @@ public class EquipmentService implements INetworkDispatch {
 	
 	public void loadBonusSets() {
 	    Path p = Paths.get("scripts/equipment/bonus_sets/");
-	    FileVisitor<Path> fv = new SimpleFileVisitor<Path>() {
+	    FileVisitor<Path> fv = new SimpleFileVisitor<Path>() 
+	    {
 	        @Override
-	        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+	        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
+	        {
 	        	core.scriptService.callScript("scripts/equipment/bonus_sets/", file.getFileName().toString().replace(".py", ""), "addBonusSet", core);
 	        	return FileVisitResult.CONTINUE;
 	        }
 	    };
-        try {
+        try 
+        {
 			Files.walkFileTree(p, fv);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		} 
+        catch (IOException e) { e.printStackTrace(); }
 	}
 }

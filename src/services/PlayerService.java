@@ -204,25 +204,29 @@ public class PlayerService implements INetworkDispatch {
 		});
 
 		objControllerOpcodes.put(ObjControllerOpcodes.ChangeRoleIconChoice, (session, data) -> {
-			
-			Client c = core.getClient(session);
-			ChangeRoleIconChoice packet = new ChangeRoleIconChoice();
-			PlayerObject player;
-			SWGObject o;
-			
-			packet.deserialize(data);
-			o = core.objectService.getObject(packet.getObjectId());
-			
-			if (c.getParent() == null || o == null || c.getParent() != o
-			|| !(o instanceof CreatureObject) || !(o.getSlottedObject("ghost")
-			instanceof PlayerObject)) {
+
+			Client client = core.getClient(session);
+
+			if (client == null)
 				return;
-			}
-			
-			player = (PlayerObject) o.getSlottedObject("ghost");
-			
+
+			SWGObject object = client.getParent();
+
+			if (object == null)
+				return;
+
+			PlayerObject player = (PlayerObject) object.getSlottedObject("ghost");
+
+			if (player == null)
+				return;
+
+			data.order(ByteOrder.LITTLE_ENDIAN);
+
+			ChangeRoleIconChoice packet = new ChangeRoleIconChoice();
+			packet.deserialize(data);
+
 			player.setProfessionIcon(packet.getIcon());
-			
+
 		});
 		
 		swgOpcodes.put(Opcodes.SetWaypointColor, (session, data) -> {
@@ -558,7 +562,7 @@ public class PlayerService implements INetworkDispatch {
 	}
 	
 	/*
-	 * Resets to level 0
+	 * Resets to level 1
 	 */
 	public void resetLevel(CreatureObject creature) {
 		PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
@@ -576,18 +580,13 @@ public class PlayerService implements INetworkDispatch {
         				case "object/tangible/datapad/shared_character_datapad.iff":
         				case "object/tangible/bank/shared_character_bank.iff":
         				case "object/tangible/mission_bag/shared_mission_bag.iff":
-        				case "object/weapon/creature/shared_creature_default_weapon.iff": {
+        				case "object/weapon/creature/shared_creature_default_weapon.iff":
         					continue;
-        				}
-        				default: {
-        					//
-        				}
+        				default:
+        					core.equipmentService.unequip(creature, equipment);
         			}
-        			
-        			core.equipmentService.unequip(creature, equipment);
         		}
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
@@ -597,10 +596,32 @@ public class PlayerService implements INetworkDispatch {
 		
 		core.buffService.clearBuffs(creature);
 		
-		for (String skill : creature.getSkills()) {
-			core.skillService.removeSkill(creature, skill);
+		try {
+			String[] skills;
+			
+			DatatableVisitor skillTemplate = ClientFileManager.loadFile("datatables/skill_template/skill_template.iff", DatatableVisitor.class);
+			
+			for (int s = 0; s < skillTemplate.getRowCount(); s++) {
+				if (skillTemplate.getObject(s, 0) != null) {
+					if (((String) skillTemplate.getObject(s, 0)).equals(player.getProfession())) {
+						skills = ((String) skillTemplate.getObject(s, 4)).split(",");
+						
+						for (String skill : skills) {
+							core.skillService.removeSkill(creature, skill);
+						}
+						
+						core.skillService.addSkill(creature, skills[0]);
+						
+						break;
+					}
+				}
+			}
+		}  catch (InstantiationException | IllegalAccessException e) {
+			e.printStackTrace();
 		}
-
+		
+		core.skillService.resetExpertise(creature);
+		
 		String xpType = ((player.getProfession().contains("entertainer")) ? "entertainer" : ((player.getProfession().contains("trader")) ? "crafting" : "combat_general"));
 			
 		player.setXp(xpType, 0);
@@ -619,7 +640,7 @@ public class PlayerService implements INetworkDispatch {
 		creature.setAction(300);
 		creature.setGrantedHealth(0);
 		
-		creature.setLevel((short) 0);
+		creature.setLevel((short) 1);
 	}
 	
 	/*
@@ -637,11 +658,9 @@ public class PlayerService implements INetworkDispatch {
 			return;
 		}
 		
-		resetLevel(creature);
+		if(level == 0) return;
 		
-		if (level == 0) {
-			return;
-		}
+		resetLevel(creature);
 		
 		try {
 			experienceTable = ClientFileManager.loadFile("datatables/player/player_level.iff", DatatableVisitor.class);
@@ -703,14 +722,20 @@ public class PlayerService implements INetworkDispatch {
 									String[] wookieeItems = ((String) roadmap.getObject(s, 5)).split(",");
 									String[] ithorianItems = ((String) roadmap.getObject(s, 6)).split(",");
 									
-									for (int n = 0; n < items.length; n++) {
+									int arrayLength = items.length;
+									
+									if (wookieeItems.length > 0 && creature.getStfName().contains("wookiee"))
+										arrayLength = wookieeItems.length;
+									else if (ithorianItems.length > 0 && creature.getStfName().contains("ithorian"))
+										arrayLength = ithorianItems.length;
+
+									for (int n = 0; n < arrayLength; n++) {
 										String item = items[n];
 										
-										if (wookieeItems[0].length() > 0 && creature.getStfName().contains("wookiee")) {
+										if (creature.getStfName().contains("wookiee"))
 											item = wookieeItems[n];
-										} else if (ithorianItems[0].length() > 0 && creature.getStfName().contains("ithorian")) {
+										else if (creature.getStfName().contains("ithorian"))
 											item = ithorianItems[n];
-										}
 										
 										try {
 											String customServerTemplate = null;
@@ -802,6 +827,11 @@ public class PlayerService implements INetworkDispatch {
 		DatatableVisitor experienceTable;
 		PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
 		experience *= xpMultiplier;
+		
+		if (creature.getLevel() >= 90) {
+			return;
+		}
+		
 		//synchronized(objectMutex) {
 			try {
 				experienceTable = ClientFileManager.loadFile("datatables/player/player_level.iff", DatatableVisitor.class);
@@ -814,7 +844,7 @@ public class PlayerService implements INetworkDispatch {
 				experience += ((experience * experienceBonus) / 100);
 				
 				// 1. Add the experience.
-				if (experience > 0) {
+				if (experience > 0 && !creature.isStationary()) {
 					creature.showFlyText("base_player", "prose_flytext_xp", "", experience, (float) 2.5, new RGB(180, 60, 240), 1);
 				}
 				

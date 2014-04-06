@@ -9,6 +9,7 @@ def run(core, actor, target, commandString):
 	
 	if buffObj is None:
 		return
-
-	core.buffService.removeBuffFromCreature(actor, buffObj)
+	
+	if buffObj.isRemovableByPlayer() and buffObj.isDebuff() is False:
+		core.buffService.removeBuffFromCreature(actor, buffObj)
 	return

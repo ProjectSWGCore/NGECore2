@@ -9,11 +9,11 @@ def run(core, actor, target, commandString):
 	
 	if target and target.getSlottedObject("ghost"):
 		if group and target in group.getMemberList():
-			core.buffService.addGroupBuff(target, 'me_buff_health', actor)
+			core.buffService.addGroupBuff(target, 'me_buff_health_0', actor)
 		else:
-			core.buffService.addBuffToCreature(target, 'me_buff_health', actor)
+			core.buffService.addBuffToCreature(target, 'me_buff_health_0', actor)
 	else:
-		core.buffService.addGroupBuff(actor, 'me_buff_health', actor)
+		core.buffService.addGroupBuff(actor, 'me_buff_health_0', actor)
 		
 	return
 	

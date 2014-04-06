@@ -1,48 +1,9 @@
 import sys
 
-def addExpertisePoint(core, actor):
-
-	player = actor.getSlottedObject('ghost')
-
-	if not player:
-		return
-
-	if not player.getProfession() == 'force_sensitive_1a':
-		return
-
-	actor.addSkill('expertise_fs_path_expansive_trickery_1')
-
-	actor.addSkillMod('expertise_area_size_single_fs_mind_trick_2', 4)
-
-	addAbilities(core, actor, player)
-
-	return
-
-def removeExpertisePoint(core, actor):
-
-	player = actor.getSlottedObject('ghost')
-
-	if not player:
-		return
-
-	if not player.getProfession() == 'force_sensitive_1a':
-		return
-
-	actor.removeSkill('expertise_fs_path_expansive_trickery_1')
-
-	actor.removeSkillMod('expertise_area_size_single_fs_mind_trick_2', 4)
-
-	removeAbilities(core, actor, player)
-
-	return
-
-# this checks what abilities the player gets by level, need to also call this on level-up
 def addAbilities(core, actor, player):
-
-
+	actor.addAbility("expertise_fs_path_expensive_trickery_2")
 	return
 
 def removeAbilities(core, actor, player):
-
-
+	actor.removeAbility("expertise_fs_path_expensive_trickery_2")
 	return

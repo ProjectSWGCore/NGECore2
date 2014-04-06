@@ -26,7 +26,10 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
@@ -46,9 +49,11 @@ import com.sleepycat.persist.model.NotPersistent;
 
 import main.NGECore;
 import engine.clients.Client;
+import resources.common.Cooldown;
 import resources.objects.Buff;
 import resources.objects.DamageOverTime;
 import resources.objects.SWGList;
+import resources.objects.SWGMap;
 import resources.objects.SkillMod;
 import engine.resources.objects.IPersistent;
 import engine.resources.objects.MissionCriticalObject;
@@ -59,7 +64,7 @@ import engine.resources.scene.Quaternion;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 
-@Entity(version=4)
+@Entity(version=6)
 public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	@NotPersistent
@@ -68,7 +73,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	// CREO 1
 	private int bankCredits = 0;
 	private int cashCredits = 0;
-	private SWGList<String> skills;
+	private List<String> skills;
 	@NotPersistent
 	private int skillsUpdateCounter = 0;
 
@@ -83,9 +88,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	// CREO 4
 	private float accelerationMultiplierBase = 1;
 	private float accelerationMultiplierMod = 1;
-	private SWGList<SkillMod> skillMods;
-	@NotPersistent
-	private int skillModsUpdateCounter = 0;
+	private SWGMap<String, SkillMod> skillMods;
 	private float speedMultiplierBase = 1;
 	private float speedMultiplierMod = 1;
 	private float runSpeed = (float) 7.3;
@@ -178,13 +181,15 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private int coverCharge;
 	@NotPersistent
 	private TangibleObject conversingNpc;
+	@NotPersistent
+	private ConcurrentHashMap<String, Cooldown> cooldowns = new ConcurrentHashMap<String, Cooldown>();
 	
 	public CreatureObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
 		super(objectID, planet, Template, position, orientation);
 		messageBuilder = new CreatureMessageBuilder(this);
 		loadTemplateData();
-		skills = new SWGList<String>(messageBuilder, 1, 3);
-		skillMods = new SWGList<SkillMod>(messageBuilder, 4, 3);
+		skills = new ArrayList<String>();
+		skillMods = new SWGMap<String, SkillMod>(messageBuilder, 4, 3);
 		abilities = new SWGList<String>(messageBuilder, 4, 14);
 		missionCriticalObjects = new SWGList<MissionCriticalObject>(messageBuilder, 4, 13);
 		equipmentList = new SWGList<SWGObject>(messageBuilder, 6, 0x17);
@@ -256,7 +261,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 	}
 
-	public SWGList<String> getSkills() {
+	public List<String> getSkills() {
 		return skills;
 	}
 	
@@ -559,20 +564,13 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			this.accelerationMultiplierMod = accelerationMultiplierMod;
 		}
 	}
-
-	public SWGList<SkillMod> getSkillMods() {
+	
+	public SWGMap<String, SkillMod> getSkillMods() {
 		return skillMods;
 	}
 	
 	public SkillMod getSkillMod(String name) {
-		synchronized(skillMods.getMutex()) {
-			for(SkillMod skillMod : skillMods.get()) {
-				if(skillMod.getName().equals(name))
-					return skillMod;
-			}
-		}
-		
-		return null;
+		return skillMods.get(name);
 	}
 	
 	public int getSkillModBase(String name) {
@@ -581,66 +579,41 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void addSkillMod(String name, int base) {
-		if(getSkillMod(name) == null) {
-			// TODO: Send skill mods delta in sendListDelta
-			SkillMod skillMod = new SkillMod();
-			skillMod.setBase(base);
-			skillMod.setName(name);
-			skillMod.setModifier(0);
-			skillMods.add(skillMod);
+		SkillMod mod;
+		
+		if (getSkillMod(name) == null) {
+			mod = new SkillMod();
+			mod.setBase(base);
+			mod.setName(name);
+			mod.setModifier(0);
 		} else {
-			
-			SkillMod mod = getSkillMod(name);
+			mod = getSkillMod(name);
 			mod.setBase(mod.getBase() + base);
-
-			if(getClient() != null) {
-				setSkillModsUpdateCounter((short) (getSkillModsUpdateCounter() + 1));
-				getClient().getSession().write(messageBuilder.buildAddSkillModDelta(name, mod.getBase()));
-			}
 		}
 		
+		skillMods.put(name, mod);
 	}
 	
 	public void deductSkillMod(String name, int base) {
-		
-		if(getSkillMod(name) == null)
+		if (getSkillMod(name) == null) {
 			return;
+		}
 		
 		SkillMod mod = getSkillMod(name);
 		mod.setBase(mod.getBase() - base);
 		
-		if(mod.getBase() <= 0) {
+		if (mod.getBase() <= 0) {
 			removeSkillMod(mod);
 		} else {
-			skillMods.set(skillMods.indexOf(mod), mod);
-			if(getClient() != null) {
-				setSkillModsUpdateCounter((short) (getSkillModsUpdateCounter() + 1));
-				getClient().getSession().write(messageBuilder.buildAddSkillModDelta(name, mod.getBase()));
-			}
-		}
-	}
-
-	public void removeSkillMod(SkillMod mod) {
-		skillMods.remove(mod);
-		
-		if(getClient() != null) {
-			setSkillModsUpdateCounter((short) (getSkillModsUpdateCounter() + 1));
-			getClient().getSession().write(messageBuilder.buildRemoveSkillModDelta(mod.getName(), mod.getBase()));
-		}
-	}
-
-	public short getSkillModsUpdateCounter() {
-		synchronized(objectMutex) {
-			return (short) skillModsUpdateCounter;
+			skillMods.put(name, mod);
 		}
 	}
 	
-	public void setSkillModsUpdateCounter(short skillModsUpdateCounter) {
-		synchronized(objectMutex) {
-			this.skillModsUpdateCounter = skillModsUpdateCounter;
+	public void removeSkillMod(SkillMod mod) {
+		if (mod != null) {
+			skillMods.remove(mod.getName());
 		}
 	}
-
 	
 	public float getSpeedMultiplierBase() {
 		synchronized(objectMutex) {
@@ -1755,4 +1728,43 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 	}
 	
+	public void addCooldown(String ability, long duration) {
+		if (cooldowns.containsKey(ability))
+			cooldowns.remove(ability);
+		
+		Cooldown cd = new Cooldown(duration);
+		cd.setRemovalTask(Executors.newScheduledThreadPool(1).schedule(new Runnable() {
+
+			@Override
+			public void run() {
+				removeCooldown(ability);
+			}
+			
+		}, duration, TimeUnit.MILLISECONDS));
+		cooldowns.put(ability, cd);
+	}
+	
+	public boolean hasCooldown(String ability) {
+		if (cooldowns.containsKey(ability))
+			return true;
+		else
+			return false;
+	}
+	
+	public boolean removeCooldown(String ability) {
+		if (cooldowns.containsKey(ability)) {
+			cooldowns.remove(ability);
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	public Cooldown getCooldown(String ability) {
+		if (cooldowns.containsKey(ability)) {
+			return cooldowns.get(ability);
+		} else {
+			return null;
+		}
+	}
 }

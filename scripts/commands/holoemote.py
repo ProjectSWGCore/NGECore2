@@ -14,6 +14,10 @@ def run(core, actor, target, commandString):
 	
 	installedEmote = ''
 	
+	if actor.hasCooldown('holoEmote'):
+		actor.sendSystemMessage('Your Holo-Emote generator is in use or recharging.', 0) # Not sure if this is correct.
+		return
+	
 	if player.getHoloEmote() is not None:
 		installedEmote = player.getHoloEmote().replace('holoemote_','')
 	
@@ -43,7 +47,9 @@ def run(core, actor, target, commandString):
 	effectObj = 'clienteffect/holoemote_' + commandString + '.cef'
 	actor.playEffectObject(effectObj, 'head')
 	player.setHoloEmoteUses(player.getHoloEmoteUses() - 1)
-	# TODO: Cooldowns for the holo-emote's
+	
+	actor.addCooldown('holoEmote', long(30 * 1000))
+	
 	return
 
 def holoPrompt(player, emote):
