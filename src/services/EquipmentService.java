@@ -221,13 +221,12 @@ public class EquipmentService implements INetworkDispatch {
 
 	private void calculateArmorProtection(CreatureObject creature, boolean equipping)
 	{
-		int wornArmourPieces = 0, forceProtection = 0;
+		int forceProtection = 0;
 		Map<String, Float> protection = new TreeMap<String, Float>();
 		
 		for(SWGObject item : new ArrayList<SWGObject>(creature.getEquipmentList()))
 		{
 			Map<String, Object> attributes = new TreeMap<String, Object>(item.getAttributes());
-			boolean incPieceCount = false;
 			
 			for(Entry<String, Object> e : attributes.entrySet()) 
 			{	
@@ -241,7 +240,6 @@ public class EquipmentService implements INetworkDispatch {
 				
 					if(protection.containsKey(protectionType)) protection.replace(protectionType, protection.get(protectionType) + protectionAmount);
 					else protection.put(protectionType, protectionAmount);
-					incPieceCount = true;
 				}
 				else if(e.getKey().startsWith("cat_armor_special_protection")) 
 				{
@@ -251,17 +249,14 @@ public class EquipmentService implements INetworkDispatch {
 					
 					if(protection.containsKey(protectionType)) protection.replace(protectionType, protection.get(protectionType) + protectionAmount);
 					else protection.put(protectionType, protectionAmount);
-					incPieceCount = true;
 				}	
 			}
-			if(incPieceCount) wornArmourPieces++;
 		}
 		
 		for(Entry<String, Float> e : protection.entrySet()) 
-		{	
+		{
 			core.skillModService.deductSkillMod(creature, e.getKey(), creature.getSkillModBase(e.getKey()));
-			core.skillModService.addSkillMod(creature, e.getKey(), forceProtection);
-			if(wornArmourPieces >= 3) core.skillModService.addSkillMod(creature, e.getKey(), (int) e.getValue().floatValue());
+			core.skillModService.addSkillMod(creature, e.getKey(),  (forceProtection > 0) ? forceProtection : (int) e.getValue().floatValue());
 		}
 	}
 	
