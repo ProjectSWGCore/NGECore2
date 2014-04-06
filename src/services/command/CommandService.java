@@ -204,6 +204,8 @@ public class CommandService implements INetworkDispatch  {
 		} else {
 			processCommand(actor, target, command, actionCounter, commandArgs);
 		}
+		
+		return true;
 	}
 	
 	public void callCommand(SWGObject actor, String commandName, SWGObject target, String commandArgs) {
