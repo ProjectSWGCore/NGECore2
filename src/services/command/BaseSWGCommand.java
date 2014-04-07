@@ -140,8 +140,8 @@ public class BaseSWGCommand implements Cloneable {
 						if (!((Boolean) visitor2.getObject(i, 69))) invalidStates.add(137438953472L);
 						if (!((Boolean) visitor2.getObject(i, 70))) invalidStates.add(274877906944L);
 						
-						this.invalidPostures = (Byte[]) invalidPostures.toArray();
-						this.invalidStates = (Long[]) invalidStates.toArray();
+						this.invalidPostures = invalidPostures.toArray(new Byte[] { });
+						this.invalidStates = invalidStates.toArray(new Long[] { });
 						
 						break;
 					}
