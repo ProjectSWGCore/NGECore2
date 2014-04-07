@@ -94,7 +94,7 @@ public class BaseSWGCommand implements Cloneable {
 							if (!((Boolean) visitor2.getObject(i, 28-sub))) invalidPostures.add((byte) 14);
 							if (!((Boolean) visitor2.getObject(i, 29-sub))) invalidPostures.add((byte) 4);
 							
-							if (tableArray[n].startsWith("client_") && tableArray[n].startsWith("command_table_")) {
+							if (tableArray[n].startsWith("client_") || tableArray[n].startsWith("command_table_")) {
 								sub += 1;
 							}
 							
