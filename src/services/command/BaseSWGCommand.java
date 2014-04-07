@@ -74,7 +74,7 @@ public class BaseSWGCommand implements Cloneable {
 						callOnTarget = (Boolean) visitor2.getObject(i, 76);
 						commandGroup = (Integer) visitor2.getObject(i, 77);
 						disabled = (Boolean) visitor2.getObject(i, 78);
-						maxRangeToTarget = (Integer) visitor2.getObject(i, 79);
+						maxRangeToTarget = (int) ((Float) visitor2.getObject(i, 79));
 						godLevel = (Integer) visitor2.getObject(i, 80);
 						displayGroup = (Integer) visitor2.getObject(i, 81);
 						combatCommand = (Boolean) visitor2.getObject(i, 82);
