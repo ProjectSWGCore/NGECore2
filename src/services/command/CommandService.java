@@ -88,10 +88,6 @@ public class CommandService implements INetworkDispatch  {
 			return false;
 		}
 		
-		if (target != null && actor.getPosition().getDistance(target.getPosition) > command.getMaxRangeToTarget()) {
-			return false;
-		}
-		
 		WeaponObject weapon = (WeaponObject) core.objectService.getObject(actor.getWeaponId());
 		
 		if (weapon != null && weapon.getWeaponType() == command.getInvalidWeapon()) {
@@ -180,6 +176,10 @@ public class CommandService implements INetworkDispatch  {
 				break;
 			default:
 				break;
+		}
+		
+		if (target != null && actor.getPosition().getDistance(target.getPosition) > command.getMaxRangeToTarget()) {
+			return false;
 		}
 		
 		if (command.shouldCallOnTarget()) {
@@ -468,7 +468,7 @@ public class CommandService implements INetworkDispatch  {
 				
 				SWGObject target = core.objectService.getObject(commandEnqueue.getTargetID());
 				
-				if (!callCommand(actor, command, target, commandEnqueue.getActionCounter(), commandEnqueue.getCommandArguments())) {
+				if (!callCommand(actor, target, command, commandEnqueue.getActionCounter(), commandEnqueue.getCommandArguments())) {
 					// Call failScriptHook
 				}
 			}
