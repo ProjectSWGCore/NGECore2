@@ -248,7 +248,7 @@ public class CommandService implements INetworkDispatch  {
 					String name = ((String) visitor.getObject(i, 0)).toLowerCase();
 					
 					if (CRC.StringtoCRC(name) == CRC) {
-						boolean combatCommand = ((String) (visitor.getObject(i, 7)).length() > 0);
+						boolean combatCommand = (((String) visitor.getObject(i, 7)).length() > 0);
 						
 						if (combatCommand) {
 							CombatCommand command = new CombatCommand(name.toLowerCase());
@@ -286,7 +286,7 @@ public class CommandService implements INetworkDispatch  {
 					String commandName = ((String) visitor.getObject(i, 0)).toLowerCase();
 					
 					if (commandName.equalsIgnoreCase(name)) {
-						boolean combatCommand = (((String) (visitor.getObject(i, 7)).length() > 0);
+						boolean combatCommand = (((String) visitor.getObject(i, 7)).length() > 0);
 						
 						if (combatCommand) {
 							CombatCommand command = new CombatCommand(commandName);
