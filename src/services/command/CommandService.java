@@ -485,9 +485,9 @@ public class CommandService implements INetworkDispatch  {
 		
 	}
 	
-	@Deprecated public BaseSWGCommand registerCommand(String name) { return null; }
-	@Deprecated public CombatCommand registerCombatCommand(String name) { return null; }
-	@Deprecated public BaseSWGCommand registerGmCommand(String name) { return null; }
-	@Deprecated public void registerAlias(String name, String target) { }
+	public BaseSWGCommand registerCommand(String name) { return getCommandByName(name); }
+	public CombatCommand registerCombatCommand(String name) { return getCommandByName(name); }
+	public BaseSWGCommand registerGmCommand(String name) { return getCommandByName(name); }
+	public void registerAlias(String name, String target) { }
 	
 }
