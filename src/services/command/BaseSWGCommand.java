@@ -33,7 +33,6 @@ public class BaseSWGCommand implements Cloneable {
 	private String commandName;
 	private String clientEffectSelf;
 	private String clientEffectTarget;
-	private int maxRangeToTarget;
 	private int commandCRC;
 	private boolean isGmCommand = false;
 	private String characterAbility;
@@ -175,14 +174,6 @@ public class BaseSWGCommand implements Cloneable {
 	
 	public void setClientEffectTarget(String clientEffectTarget) {
 		this.clientEffectTarget = clientEffectTarget;
-	}
-	
-	public int getMaxRangeToTarget() {
-		return maxRangeToTarget;
-	}
-	
-	public void setMaxRangeToTarget(int maxRangeToTarget) {
-		this.maxRangeToTarget = maxRangeToTarget;
 	}
 	
 	public int getCommandCRC() {
