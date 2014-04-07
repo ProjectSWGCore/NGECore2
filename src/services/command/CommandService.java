@@ -507,8 +507,6 @@ public class CommandService implements INetworkDispatch  {
 			commandLookup.add(combatCommand);
 			return combatCommand;
 		}
-		
-		return null;
 	}
 	
 	public BaseSWGCommand registerCommand(String name) { return getCommandByName(name); }
