@@ -256,24 +256,30 @@ public class CommandService implements INetworkDispatch  {
 		}
 		
 		try {
-			DatatableVisitor visitor = ClientFileManager.loadFile("datatables/command/command_table.iff", DatatableVisitor.class);
+			String[] tableArray = new String[] {
+			"client_command_table", "command_table", "client_command_table_ground", "command_table_ground",
+			"client_command_table_space", "command_table_space", "command_table_atmospheric_flight" };
 			
-			for (int i = 0; i < visitor.getRowCount(); i++) {
-				if (visitor.getObject(i, 0) != null) {
-					String name = ((String) visitor.getObject(i, 0)).toLowerCase();
-					
-					if (CRC.StringtoCRC(name) == commandCRC) {
-						boolean hasCharacterAbility = (((String) visitor.getObject(i, 7)).length() > 0);
-						boolean isCombatCommand = (Boolean) visitor.getObject(i, 82);
+			for (int n = 0; n < tableArray.length; n++) {
+				DatatableVisitor visitor = ClientFileManager.loadFile("datatables/command/" + tableArray[n] + ".iff", DatatableVisitor.class);
+				
+				for (int i = 0; i < visitor.getRowCount(); i++) {
+					if (visitor.getObject(i, 0) != null) {
+						String name = ((String) visitor.getObject(i, 0)).toLowerCase();
 						
-						if (hasCharacterAbility || isCombatCommand) {
-							CombatCommand command = new CombatCommand(name.toLowerCase());
-							commandLookup.add(command);
-							return command;
-						} else {
-							BaseSWGCommand command = new BaseSWGCommand(name.toLowerCase());
-							commandLookup.add(command);
-							return command;
+						if (CRC.StringtoCRC(name) == commandCRC) {
+							boolean hasCharacterAbility = (((String) visitor.getObject(i, 7)).length() > 0);
+							boolean isCombatCommand = (Boolean) visitor.getObject(i, 82);
+							
+							if (hasCharacterAbility || isCombatCommand) {
+								CombatCommand command = new CombatCommand(name.toLowerCase());
+								commandLookup.add(command);
+								return command;
+							} else {
+								BaseSWGCommand command = new BaseSWGCommand(name.toLowerCase());
+								commandLookup.add(command);
+								return command;
+							}
 						}
 					}
 				}
@@ -297,24 +303,30 @@ public class CommandService implements INetworkDispatch  {
 		}
 		
 		try {
-			DatatableVisitor visitor = ClientFileManager.loadFile("datatables/command/command_table.iff", DatatableVisitor.class);
+			String[] tableArray = new String[] {
+			"client_command_table", "command_table", "client_command_table_ground", "command_table_ground",
+			"client_command_table_space", "command_table_space", "command_table_atmospheric_flight" };
 			
-			for (int i = 0; i < visitor.getRowCount(); i++) {
-				if (visitor.getObject(i, 0) != null) {
-					String commandName = ((String) visitor.getObject(i, 0)).toLowerCase();
-					
-					if (commandName.equalsIgnoreCase(name)) {
-						boolean hasCharacterAbility = (((String) visitor.getObject(i, 7)).length() > 0);
-						boolean isCombatCommand = (Boolean) visitor.getObject(i, 82);
+			for (int n = 0; n < tableArray.length; n++) {
+				DatatableVisitor visitor = ClientFileManager.loadFile("datatables/command/" + tableArray[n] + ".iff", DatatableVisitor.class);
+				
+				for (int i = 0; i < visitor.getRowCount(); i++) {
+					if (visitor.getObject(i, 0) != null) {
+						String commandName = ((String) visitor.getObject(i, 0)).toLowerCase();
 						
-						if (hasCharacterAbility || isCombatCommand) {
-							CombatCommand command = new CombatCommand(commandName);
-							commandLookup.add(command);
-							return command;
-						} else {
-							BaseSWGCommand command = new BaseSWGCommand(commandName);
-							commandLookup.add(command);
-							return command;
+						if (commandName.equalsIgnoreCase(name)) {
+							boolean hasCharacterAbility = (((String) visitor.getObject(i, 7)).length() > 0);
+							boolean isCombatCommand = (Boolean) visitor.getObject(i, 82);
+							
+							if (hasCharacterAbility || isCombatCommand) {
+								CombatCommand command = new CombatCommand(commandName);
+								commandLookup.add(command);
+								return command;
+							} else {
+								BaseSWGCommand command = new BaseSWGCommand(commandName);
+								commandLookup.add(command);
+								return command;
+							}
 						}
 					}
 				}
