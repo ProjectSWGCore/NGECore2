@@ -118,6 +118,14 @@ public class CommandService implements INetworkDispatch  {
 					return false;
 				}
 				
+				if (target != null && actor.getPosition().getDistance(target.getPosition) > command.getMaxRangeToTarget()) {
+					return false;
+				}
+				
+				if (!core.simulationService.checkLineOfSight(actor, target)) {
+					return false;
+				}
+				
 				break;
 			case 2: // Self Only
 				if (target == null) {
@@ -136,6 +144,10 @@ public class CommandService implements INetworkDispatch  {
 			case 4: // Anyone
 				if (target == null) {
 					target = actor;
+				}
+				
+				if (!core.simulationService.checkLineOfSight(actor, target)) {
+					return false;
 				}
 				
 				break;
@@ -159,6 +171,11 @@ public class CommandService implements INetworkDispatch  {
 					return false;
 				}
 				
+				// Without this we could be buffing ally NPCs and such
+				if (object.getSlottedObject("ghost") == null) {
+					return;
+				}
+				
 				break;
 			case 1: // Enemy Only
 				if (target == null || !(target instanceof TangibleObject)) {
@@ -176,10 +193,6 @@ public class CommandService implements INetworkDispatch  {
 				break;
 			default:
 				break;
-		}
-		
-		if (target != null && actor.getPosition().getDistance(target.getPosition) > command.getMaxRangeToTarget()) {
-			return false;
 		}
 		
 		if (command.shouldCallOnTarget()) {
