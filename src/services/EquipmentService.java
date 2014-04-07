@@ -29,6 +29,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -152,9 +153,7 @@ public class EquipmentService implements INetworkDispatch {
 		// TODO: crit enhancement from crafted weapons
 		// TODO: check for armor category in order to add resistance to certain DoT types
 		
-		Map<String, Object> attributes = new TreeMap<String, Object>(item.getAttributes());
-		
-		calculateArmorProtection(creature, equipping);
+		Map<String, Object> attributes = new TreeMap<String, Object>(item.getAttributes());	
 		
 		if(equipping)
 		{
@@ -211,6 +210,8 @@ public class EquipmentService implements INetworkDispatch {
 			}	
 		}
 		
+		calculateArmorProtection(creature, equipping);
+		
 		if(item.getAttachment("setBonus") != null)
 		{
 			BonusSetTemplate bonus = bonusSetTemplates.get((String)item.getAttachment("setBonus"));
@@ -223,15 +224,19 @@ public class EquipmentService implements INetworkDispatch {
 		int wornArmourPieces = 0, forceProtection = 0;
 		Map<String, Float> protection = new TreeMap<String, Float>();
 		
-		for(SWGObject item : creature.getEquipmentList())
+		for(SWGObject item : new ArrayList<SWGObject>(creature.getEquipmentList()))
 		{
 			Map<String, Object> attributes = new TreeMap<String, Object>(item.getAttributes());
 			boolean incPieceCount = false;
 			
+			if(item.getStringAttribute("protection_level") != null) 
+			{
+				forceProtection = getForceProtection(item);
+				break;
+			}
+			
 			for(Entry<String, Object> e : attributes.entrySet()) 
-			{	
-				if(item.getStringAttribute("protection_level") != null) forceProtection = getForceProtection(item);
-				
+			{		
 				if(e.getKey().startsWith("cat_armor_standard_protection")) 
 				{
 					String protectionType = e.getKey().replace("cat_armor_standard_protection.armor_eff_", "");
@@ -251,9 +256,19 @@ public class EquipmentService implements INetworkDispatch {
 					if(protection.containsKey(protectionType)) protection.replace(protectionType, protection.get(protectionType) + protectionAmount);
 					else protection.put(protectionType, protectionAmount);
 					incPieceCount = true;
-				}	
+				}
 			}
 			if(incPieceCount) wornArmourPieces++;
+		}
+		
+		if(protection.size() == 0)
+		{
+			protection.put("kinetic", (float) 0);
+			protection.put("energy", (float) 0);
+			protection.put("heat", (float) 0);
+			protection.put("cold", (float) 0);
+			protection.put("acid", (float) 0);
+			protection.put("electricity", (float) 0);
 		}
 		
 		for(Entry<String, Float> e : protection.entrySet()) 

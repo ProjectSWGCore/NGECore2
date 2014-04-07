@@ -168,6 +168,7 @@ public class SimulationService implements INetworkDispatch {
 		core.commandService.registerCommand("eject");
 		core.commandService.registerGmCommand("broadcast");
 		core.commandService.registerGmCommand("teleporttarget");
+		core.commandService.registerGmCommand("getplayerid");
 		core.commandService.registerCommand("npcconversationselect");
 		core.commandService.registerCommand("npcconversationstop");
 

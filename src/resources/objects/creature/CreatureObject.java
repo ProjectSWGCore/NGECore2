@@ -1728,43 +1728,42 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 	}
 	
-	public void addCooldown(String ability, long duration) {
-		if (cooldowns.containsKey(ability))
-			cooldowns.remove(ability);
+	public void addCooldown(String cooldownGroup, float cooldownTime) {
+		if (cooldowns.containsKey(cooldownGroup)) {
+			cooldowns.remove(cooldownGroup);
+		}
 		
-		Cooldown cd = new Cooldown(duration);
-		cd.setRemovalTask(Executors.newScheduledThreadPool(1).schedule(new Runnable() {
-
+		long duration = ((long) (cooldownTime * 1000F)); 
+		
+		Cooldown cooldown = new Cooldown(duration);
+		
+		cooldown.setRemovalTask(Executors.newScheduledThreadPool(1).schedule(new Runnable() {
+			
 			@Override
 			public void run() {
-				removeCooldown(ability);
+				removeCooldown(cooldownGroup);
 			}
 			
 		}, duration, TimeUnit.MILLISECONDS));
-		cooldowns.put(ability, cd);
+		
+		cooldowns.put(cooldownGroup, cooldown);
 	}
 	
-	public boolean hasCooldown(String ability) {
-		if (cooldowns.containsKey(ability))
+	public boolean hasCooldown(String cooldownGroup) {
+		return cooldowns.containsKey(cooldownGroup);
+	}
+	
+	public boolean removeCooldown(String cooldownGroup) {
+		if (cooldowns.containsKey(cooldownGroup)) {
+			cooldowns.remove(cooldownGroup);
 			return true;
-		else
-			return false;
+		}
+		
+		return false;
 	}
 	
-	public boolean removeCooldown(String ability) {
-		if (cooldowns.containsKey(ability)) {
-			cooldowns.remove(ability);
-			return true;
-		} else {
-			return false;
-		}
+	public Cooldown getCooldown(String cooldownGroup) {
+		return cooldowns.get(cooldownGroup);
 	}
 	
-	public Cooldown getCooldown(String ability) {
-		if (cooldowns.containsKey(ability)) {
-			return cooldowns.get(ability);
-		} else {
-			return null;
-		}
-	}
 }
