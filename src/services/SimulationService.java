@@ -775,8 +775,7 @@ public class SimulationService implements INetworkDispatch {
 		core.removeClient(session);
 		
 		object.setAttachment("disconnectTask", disconnectTask);
-		for(TangibleObject obj : new Vector<TangibleObject>(object.getDefendersList())) 
-			object.removeDefender(obj);	// temp fix for being stuck in combat
+		core.combatService.endCombat(object); // temp fix for ending combat on disconnect
 
 	}
 

@@ -258,7 +258,7 @@ public class CommandService implements INetworkDispatch  {
 		try {
 			String[] tableArray = new String[] {
 			"client_command_table", "command_table", "client_command_table_ground", "command_table_ground",
-			"client_command_table_space", "command_table_space", "command_table_atmospheric_flight" };
+			"client_command_table_space", "command_table_space" };
 			
 			for (int n = 0; n < tableArray.length; n++) {
 				DatatableVisitor visitor = ClientFileManager.loadFile("datatables/command/" + tableArray[n] + ".iff", DatatableVisitor.class);
@@ -268,8 +268,22 @@ public class CommandService implements INetworkDispatch  {
 						String name = ((String) visitor.getObject(i, 0)).toLowerCase();
 						
 						if (CRC.StringtoCRC(name) == commandCRC) {
-							boolean hasCharacterAbility = (((String) visitor.getObject(i, 7)).length() > 0);
-							boolean isCombatCommand = (Boolean) visitor.getObject(i, 82);
+							int sub = 0;
+							
+							boolean hasCharacterAbility = (((String) visitor.getObject(i, 7-sub)).length() > 0);
+							
+							if (tableArray[n].startsWith("client_") && tableArray[n].startsWith("command_table_")) {
+								sub += 7;
+							}
+							
+							if (tableArray[n].equals("client_command_table_space")) {
+								sub += 5;
+							}
+							
+							boolean isCombatCommand = false;
+							
+							if(visitor.getObject(i, 82-sub) instanceof Boolean)
+								isCombatCommand = (Boolean) visitor.getObject(i, 82-sub);
 							
 							if (hasCharacterAbility || isCombatCommand) {
 								CombatCommand command = new CombatCommand(name.toLowerCase());
@@ -305,7 +319,7 @@ public class CommandService implements INetworkDispatch  {
 		try {
 			String[] tableArray = new String[] {
 			"client_command_table", "command_table", "client_command_table_ground", "command_table_ground",
-			"client_command_table_space", "command_table_space", "command_table_atmospheric_flight" };
+			"client_command_table_space", "command_table_space" };
 			
 			for (int n = 0; n < tableArray.length; n++) {
 				DatatableVisitor visitor = ClientFileManager.loadFile("datatables/command/" + tableArray[n] + ".iff", DatatableVisitor.class);
@@ -315,8 +329,22 @@ public class CommandService implements INetworkDispatch  {
 						String commandName = ((String) visitor.getObject(i, 0)).toLowerCase();
 						
 						if (commandName.equalsIgnoreCase(name)) {
-							boolean hasCharacterAbility = (((String) visitor.getObject(i, 7)).length() > 0);
-							boolean isCombatCommand = (Boolean) visitor.getObject(i, 82);
+							int sub = 0;
+							
+							boolean hasCharacterAbility = (((String) visitor.getObject(i, 7-sub)).length() > 0);
+														
+							if (tableArray[n].startsWith("client_") && tableArray[n].startsWith("command_table_")) {
+								sub += 7;
+							}
+							
+							if (tableArray[n].equals("client_command_table_space")) {
+								sub += 5;
+							}
+							
+							boolean isCombatCommand = false;
+							
+							if(visitor.getObject(i, 82-sub) instanceof Boolean)
+								isCombatCommand = (Boolean) visitor.getObject(i, 82-sub);
 							
 							if (hasCharacterAbility || isCombatCommand) {
 								CombatCommand command = new CombatCommand(commandName);
