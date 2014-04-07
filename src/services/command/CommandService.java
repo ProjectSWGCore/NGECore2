@@ -338,7 +338,10 @@ public class CommandService implements INetworkDispatch  {
 								sub += 5;
 							}
 							
-							boolean isCombatCommand = (Boolean) visitor.getObject(i, 82-sub);
+							boolean isCombatCommand = false;
+							
+							if(visitor.getObject(i, 82-sub) instanceof Boolean)
+								isCombatCommand = (Boolean) visitor.getObject(i, 82-sub);
 							
 							if (hasCharacterAbility || isCombatCommand) {
 								CombatCommand command = new CombatCommand(commandName);
