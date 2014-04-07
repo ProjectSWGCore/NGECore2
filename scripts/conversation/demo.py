@@ -17,10 +17,10 @@ def startConversation(core, actor, npc):
 	return
 
 def handleFirstScreen(core, actor, npc, selection):
-  convSvc = core.conversationService
-  
-  # TODO: check for prices
-  
+	convSvc = core.conversationService
+	
+	# TODO: check for prices
+	
 	if selection == 0: # respec
 		convSvc.sendConversationMessage(actor, npc, OutOfBand(ProsePackage('conversation/respecseller', 's_58')))
 		
