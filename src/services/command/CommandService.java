@@ -285,8 +285,8 @@ public class CommandService implements INetworkDispatch  {
 				if (visitor.getObject(i, 0) != null) {
 					String commandName = ((String) visitor.getObject(i, 0)).toLowerCase();
 					
-					if (commandName.equalsIgnoreCase(name) {
-						boolean combatCommand = ((String) (visitor.getObject(i, 7)).length() > 0);
+					if (commandName.equalsIgnoreCase(name)) {
+						boolean combatCommand = (((String) (visitor.getObject(i, 7)).length() > 0);
 						
 						if (combatCommand) {
 							CombatCommand command = new CombatCommand(commandName);
