@@ -85,20 +85,20 @@ public class BaseSWGCommand implements Cloneable {
 						executeTime = (Float) visitor2.getObject(i, 87);
 						cooldown = (Float) visitor2.getObject(i, 88);
 						
-						if (!((Boolean) visitor2.getObject(8))) invalidPostures.add(0B);
-						if (!((Boolean) visitor2.getObject(9))) invalidPostures.add(3B);
-						if (!((Boolean) visitor2.getObject(16))) invalidPostures.add(2B);
-						if (!((Boolean) visitor2.getObject(19))) invalidPostures.add(5B);
-						if (!((Boolean) visitor2.getObject(21))) invalidPostures.add(6B);
-						if (!((Boolean) visitor2.getObject(22))) invalidPostures.add(7B);
-						if (!((Boolean) visitor2.getObject(23))) invalidPostures.add(8B);
-						if (!((Boolean) visitor2.getObject(24))) invalidPostures.add(9B);
-						if (!((Boolean) visitor2.getObject(25))) invalidPostures.add(10B);
-						if (!((Boolean) visitor2.getObject(26))) invalidPostures.add(11B);
-						if (!((Boolean) visitor2.getObject(27))) invalidPostures.add(12B);
-						if (!((Boolean) visitor2.getObject(28))) invalidPostures.add(13B);
-						if (!((Boolean) visitor2.getObject(29))) invalidPostures.add(14B);
-						if (!((Boolean) visitor2.getObject(30))) invalidPostures.add(4B);
+						if (!((Boolean) visitor2.getObject(8))) invalidPostures.add((byte) 0);
+						if (!((Boolean) visitor2.getObject(9))) invalidPostures.add((byte) 3);
+						if (!((Boolean) visitor2.getObject(16))) invalidPostures.add((byte) 2);
+						if (!((Boolean) visitor2.getObject(19))) invalidPostures.add((byte) 5);
+						if (!((Boolean) visitor2.getObject(21))) invalidPostures.add((byte) 6);
+						if (!((Boolean) visitor2.getObject(22))) invalidPostures.add((byte) 7);
+						if (!((Boolean) visitor2.getObject(23))) invalidPostures.add((byte) 8);
+						if (!((Boolean) visitor2.getObject(24))) invalidPostures.add((byte) 9);
+						if (!((Boolean) visitor2.getObject(25))) invalidPostures.add((byte) 10);
+						if (!((Boolean) visitor2.getObject(26))) invalidPostures.add((byte) 11);
+						if (!((Boolean) visitor2.getObject(27))) invalidPostures.add((byte) 12);
+						if (!((Boolean) visitor2.getObject(28))) invalidPostures.add((byte) 13);
+						if (!((Boolean) visitor2.getObject(29))) invalidPostures.add((byte) 14);
+						if (!((Boolean) visitor2.getObject(30))) invalidPostures.add((byte) 4);
 						
 						if (!((Boolean) visitor2.getObject(32))) invalidStates.add(1L);
 						if (!((Boolean) visitor2.getObject(33))) invalidStates.add(2L);
