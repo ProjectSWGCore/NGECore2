@@ -80,7 +80,7 @@ public class CommandService implements INetworkDispatch  {
 			return false;
 		}
 		
-		if (command.getGodLevel() > 0 && !client.isGM()) {
+		if (command.getGodLevel() > 0 && !actor.getClient().isGM()) {
 			return false;
 		}
 		
@@ -118,7 +118,7 @@ public class CommandService implements INetworkDispatch  {
 					return false;
 				}
 				
-				if (target != null && actor.getPosition().getDistance(target.getPosition) > command.getMaxRangeToTarget()) {
+				if (target != null && actor.getPosition().getDistance(target.getPosition()) > command.getMaxRangeToTarget()) {
 					return false;
 				}
 				
@@ -167,13 +167,13 @@ public class CommandService implements INetworkDispatch  {
 				
 				TangibleObject object = (TangibleObject) target;
 				
-				if (object.isAttackableBy(actor) || actor.getFactionStatus() < object.getFactionStatus() || (!object.getFaction().equals("") && !object.getFaction().equals(actor.getFaction()))) {
+				if (object.isAttackableBy(actor) || actor.getFactionStatus() < ((CreatureObject) object).getFactionStatus() || (!object.getFaction().equals("") && !object.getFaction().equals(actor.getFaction()))) {
 					return false;
 				}
 				
 				// Without this we could be buffing ally NPCs and such
 				if (object.getSlottedObject("ghost") == null) {
-					return;
+					return false;
 				}
 				
 				break;
@@ -182,9 +182,9 @@ public class CommandService implements INetworkDispatch  {
 					return false;
 				}
 				
-				TangibleObject object = (TangibleObject) target;
+				TangibleObject targetObject = (TangibleObject) target;
 				
-				if (!object.isAttackableBy(actor)) {
+				if (!targetObject.isAttackableBy(actor)) {
 					return false;
 				}
 				
@@ -203,14 +203,16 @@ public class CommandService implements INetworkDispatch  {
 			actor = (CreatureObject) target;
 		}
 		
-		long warmupTime = (command.getWarmupTime() * 1000F);
+		long warmupTime = (long) (command.getWarmupTime() * 1000F);
+		final CreatureObject actorObject = actor;
+		final SWGObject targetObject = target;
 		
 		if (warmupTime != 0) {
 			scheduler.schedule(new Runnable() {
 				
 				@Override
 				public void run() {
-					processCommand(actor, target, command, actionCounter, commandArgs);
+					processCommand(actorObject, targetObject, command, actionCounter, commandArgs);
 				}
 				
 			}, warmupTime, TimeUnit.MILLISECONDS);
@@ -333,7 +335,7 @@ public class CommandService implements INetworkDispatch  {
 			processCombatCommand(actor, target, (CombatCommand) command, actionCounter, commandArgs);
 		} else {
 			if (FileUtilities.doesFileExist("scripts/commands/" + command.getCommandName() + ".py")) {
-				core.scriptService.callScript("scripts/commands/", command.getCommandName(), "run", core, actor, target, commandEnqueue.getCommandArguments());
+				core.scriptService.callScript("scripts/commands/", command.getCommandName(), "run", core, actor, target, commandArgs);
 			}
 		}
 	}
