@@ -51,9 +51,9 @@ public class BaseSWGCommand implements Cloneable {
 	private float cooldown;
 	private float executeTime;
 	private float warmupTime;
-	//private long[] invalidLocomotions; // Not tracked anywhere
-	private byte[] invalidPostures;
-	private long[] invalidStates;
+	//private Long[] invalidLocomotions; // Not tracked anywhere
+	private Byte[] invalidPostures;
+	private Long[] invalidStates;
 	
 	public BaseSWGCommand(String commandName) {
 		setCommandName(commandName);
@@ -85,63 +85,63 @@ public class BaseSWGCommand implements Cloneable {
 						executeTime = (Float) visitor2.getObject(i, 87);
 						cooldown = (Float) visitor2.getObject(i, 88);
 						
-						if (!((Boolean) visitor2.getObject(8))) invalidPostures.add((byte) 0);
-						if (!((Boolean) visitor2.getObject(9))) invalidPostures.add((byte) 3);
-						if (!((Boolean) visitor2.getObject(16))) invalidPostures.add((byte) 2);
-						if (!((Boolean) visitor2.getObject(19))) invalidPostures.add((byte) 5);
-						if (!((Boolean) visitor2.getObject(21))) invalidPostures.add((byte) 6);
-						if (!((Boolean) visitor2.getObject(22))) invalidPostures.add((byte) 7);
-						if (!((Boolean) visitor2.getObject(23))) invalidPostures.add((byte) 8);
-						if (!((Boolean) visitor2.getObject(24))) invalidPostures.add((byte) 9);
-						if (!((Boolean) visitor2.getObject(25))) invalidPostures.add((byte) 10);
-						if (!((Boolean) visitor2.getObject(26))) invalidPostures.add((byte) 11);
-						if (!((Boolean) visitor2.getObject(27))) invalidPostures.add((byte) 12);
-						if (!((Boolean) visitor2.getObject(28))) invalidPostures.add((byte) 13);
-						if (!((Boolean) visitor2.getObject(29))) invalidPostures.add((byte) 14);
-						if (!((Boolean) visitor2.getObject(30))) invalidPostures.add((byte) 4);
+						if (!((Boolean) visitor2.getObject(i, 8))) invalidPostures.add((byte) 0);
+						if (!((Boolean) visitor2.getObject(i, 9))) invalidPostures.add((byte) 3);
+						if (!((Boolean) visitor2.getObject(i, 16))) invalidPostures.add((byte) 2);
+						if (!((Boolean) visitor2.getObject(i, 19))) invalidPostures.add((byte) 5);
+						if (!((Boolean) visitor2.getObject(i, 21))) invalidPostures.add((byte) 6);
+						if (!((Boolean) visitor2.getObject(i, 22))) invalidPostures.add((byte) 7);
+						if (!((Boolean) visitor2.getObject(i, 23))) invalidPostures.add((byte) 8);
+						if (!((Boolean) visitor2.getObject(i, 24))) invalidPostures.add((byte) 9);
+						if (!((Boolean) visitor2.getObject(i, 25))) invalidPostures.add((byte) 10);
+						if (!((Boolean) visitor2.getObject(i, 26))) invalidPostures.add((byte) 11);
+						if (!((Boolean) visitor2.getObject(i, 27))) invalidPostures.add((byte) 12);
+						if (!((Boolean) visitor2.getObject(i, 28))) invalidPostures.add((byte) 13);
+						if (!((Boolean) visitor2.getObject(i, 29))) invalidPostures.add((byte) 14);
+						if (!((Boolean) visitor2.getObject(i, 30))) invalidPostures.add((byte) 4);
 						
-						if (!((Boolean) visitor2.getObject(32))) invalidStates.add(1L);
-						if (!((Boolean) visitor2.getObject(33))) invalidStates.add(2L);
-						if (!((Boolean) visitor2.getObject(34))) invalidStates.add(4L);
-						if (!((Boolean) visitor2.getObject(35))) invalidStates.add(8L);
-						if (!((Boolean) visitor2.getObject(36))) invalidStates.add(16L);
-						if (!((Boolean) visitor2.getObject(37))) invalidStates.add(32L);
-						if (!((Boolean) visitor2.getObject(38))) invalidStates.add(64L);
-						if (!((Boolean) visitor2.getObject(39))) invalidStates.add(128L);
-						if (!((Boolean) visitor2.getObject(40))) invalidStates.add(256L);
-						if (!((Boolean) visitor2.getObject(41))) invalidStates.add(512L);
-						if (!((Boolean) visitor2.getObject(42))) invalidStates.add(1024L);
-						if (!((Boolean) visitor2.getObject(43))) invalidStates.add(2048L);
-						if (!((Boolean) visitor2.getObject(44))) invalidStates.add(4096L);
-						if (!((Boolean) visitor2.getObject(45))) invalidStates.add(8192L);
-						if (!((Boolean) visitor2.getObject(46))) invalidStates.add(16384L);
-						if (!((Boolean) visitor2.getObject(47))) invalidStates.add(32768L);
-						if (!((Boolean) visitor2.getObject(48))) invalidStates.add(65536L);
-						if (!((Boolean) visitor2.getObject(49))) invalidStates.add(131072L);
-						if (!((Boolean) visitor2.getObject(50))) invalidStates.add(262144L);
-						if (!((Boolean) visitor2.getObject(51))) invalidStates.add(524288L);
-						if (!((Boolean) visitor2.getObject(52))) invalidStates.add(1048576L);
-						if (!((Boolean) visitor2.getObject(53))) invalidStates.add(2097152L);
-						if (!((Boolean) visitor2.getObject(54))) invalidStates.add(4194304L);
-						if (!((Boolean) visitor2.getObject(55))) invalidStates.add(8388608L);
-						if (!((Boolean) visitor2.getObject(56))) invalidStates.add(16777216L);
-						if (!((Boolean) visitor2.getObject(57))) invalidStates.add(33554432L);
-						if (!((Boolean) visitor2.getObject(58))) invalidStates.add(67108864L);
-						if (!((Boolean) visitor2.getObject(59))) invalidStates.add(134217728L);
-						if (!((Boolean) visitor2.getObject(60))) invalidStates.add(268435456L);
-						if (!((Boolean) visitor2.getObject(61))) invalidStates.add(536870912L);
-						if (!((Boolean) visitor2.getObject(62))) invalidStates.add(1073741824L);
-						if (!((Boolean) visitor2.getObject(63))) invalidStates.add(2147483648L);
-						if (!((Boolean) visitor2.getObject(64))) invalidStates.add(4294967296L);
-						if (!((Boolean) visitor2.getObject(65))) invalidStates.add(8589934592L);
-						if (!((Boolean) visitor2.getObject(66))) invalidStates.add(17179869184L);
-						if (!((Boolean) visitor2.getObject(67))) invalidStates.add(34359738368L);
-						if (!((Boolean) visitor2.getObject(68))) invalidStates.add(68719476736L);
-						if (!((Boolean) visitor2.getObject(69))) invalidStates.add(137438953472L);
-						if (!((Boolean) visitor2.getObject(70))) invalidStates.add(274877906944L);
+						if (!((Boolean) visitor2.getObject(i, 32))) invalidStates.add(1L);
+						if (!((Boolean) visitor2.getObject(i, 33))) invalidStates.add(2L);
+						if (!((Boolean) visitor2.getObject(i, 34))) invalidStates.add(4L);
+						if (!((Boolean) visitor2.getObject(i, 35))) invalidStates.add(8L);
+						if (!((Boolean) visitor2.getObject(i, 36))) invalidStates.add(16L);
+						if (!((Boolean) visitor2.getObject(i, 37))) invalidStates.add(32L);
+						if (!((Boolean) visitor2.getObject(i, 38))) invalidStates.add(64L);
+						if (!((Boolean) visitor2.getObject(i, 39))) invalidStates.add(128L);
+						if (!((Boolean) visitor2.getObject(i, 40))) invalidStates.add(256L);
+						if (!((Boolean) visitor2.getObject(i, 41))) invalidStates.add(512L);
+						if (!((Boolean) visitor2.getObject(i, 42))) invalidStates.add(1024L);
+						if (!((Boolean) visitor2.getObject(i, 43))) invalidStates.add(2048L);
+						if (!((Boolean) visitor2.getObject(i, 44))) invalidStates.add(4096L);
+						if (!((Boolean) visitor2.getObject(i, 45))) invalidStates.add(8192L);
+						if (!((Boolean) visitor2.getObject(i, 46))) invalidStates.add(16384L);
+						if (!((Boolean) visitor2.getObject(i, 47))) invalidStates.add(32768L);
+						if (!((Boolean) visitor2.getObject(i, 48))) invalidStates.add(65536L);
+						if (!((Boolean) visitor2.getObject(i, 49))) invalidStates.add(131072L);
+						if (!((Boolean) visitor2.getObject(i, 50))) invalidStates.add(262144L);
+						if (!((Boolean) visitor2.getObject(i, 51))) invalidStates.add(524288L);
+						if (!((Boolean) visitor2.getObject(i, 52))) invalidStates.add(1048576L);
+						if (!((Boolean) visitor2.getObject(i, 53))) invalidStates.add(2097152L);
+						if (!((Boolean) visitor2.getObject(i, 54))) invalidStates.add(4194304L);
+						if (!((Boolean) visitor2.getObject(i, 55))) invalidStates.add(8388608L);
+						if (!((Boolean) visitor2.getObject(i, 56))) invalidStates.add(16777216L);
+						if (!((Boolean) visitor2.getObject(i, 57))) invalidStates.add(33554432L);
+						if (!((Boolean) visitor2.getObject(i, 58))) invalidStates.add(67108864L);
+						if (!((Boolean) visitor2.getObject(i, 59))) invalidStates.add(134217728L);
+						if (!((Boolean) visitor2.getObject(i, 60))) invalidStates.add(268435456L);
+						if (!((Boolean) visitor2.getObject(i, 61))) invalidStates.add(536870912L);
+						if (!((Boolean) visitor2.getObject(i, 62))) invalidStates.add(1073741824L);
+						if (!((Boolean) visitor2.getObject(i, 63))) invalidStates.add(2147483648L);
+						if (!((Boolean) visitor2.getObject(i, 64))) invalidStates.add(4294967296L);
+						if (!((Boolean) visitor2.getObject(i, 65))) invalidStates.add(8589934592L);
+						if (!((Boolean) visitor2.getObject(i, 66))) invalidStates.add(17179869184L);
+						if (!((Boolean) visitor2.getObject(i, 67))) invalidStates.add(34359738368L);
+						if (!((Boolean) visitor2.getObject(i, 68))) invalidStates.add(68719476736L);
+						if (!((Boolean) visitor2.getObject(i, 69))) invalidStates.add(137438953472L);
+						if (!((Boolean) visitor2.getObject(i, 70))) invalidStates.add(274877906944L);
 						
-						this.invalidPostures = (byte[]) invalidPostures.toArray();
-						this.invalidStates = (long[]) invalidStates.toArray();
+						this.invalidPostures = (Byte[]) invalidPostures.toArray();
+						this.invalidStates = (Long[]) invalidStates.toArray();
 						
 						break;
 					}
@@ -204,11 +204,11 @@ public class BaseSWGCommand implements Cloneable {
 		this.characterAbility = characterAbility;
 	}
 	
-	public byte[] getInvalidPostures() {
+	public Byte[] getInvalidPostures() {
 		return invalidPostures;
 	}
 	
-	public long[] getInvalidStates() {
+	public Long[] getInvalidStates() {
 		return invalidStates;
 	}
 	
