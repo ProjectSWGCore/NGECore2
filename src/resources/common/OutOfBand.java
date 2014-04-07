@@ -31,6 +31,14 @@ public class OutOfBand {
 	private short count;
 	private Vector<ProsePackage> prosePackages = new Vector<ProsePackage>();
 	
+	public OutOfBand(ProsePackage prosePackage) {
+		addProsePackage(prosePackage);
+	}
+	
+	public OutOfBand() {
+		
+	}
+	
 	public void addProsePackage(ProsePackage prosePackage) {
 		prosePackages.add(prosePackage);
 		setCount((short) (getCount() + 1));
@@ -114,6 +122,4 @@ public class OutOfBand {
 		this.prosePackages = prosePackages;
 	}
 	
-	
-
 }
