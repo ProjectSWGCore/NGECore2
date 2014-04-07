@@ -220,12 +220,12 @@ public class BaseSWGCommand implements Cloneable {
 		this.target = target;
 	}
 	
-	public void getTargetType() {
+	public int getTargetType() {
 		return targetType;
 	}
 	
-	public void setTargetType() {
-		return targetType;
+	public void setTargetType(int targetType) {
+		this.targetType = targetType;
 	}
 	
 	public boolean shouldCallOnTarget() {
