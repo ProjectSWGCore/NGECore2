@@ -1381,6 +1381,13 @@ public class CombatService implements INetworkDispatch {
 		
 	}
 	
+	public void endCombat(CreatureObject defender) {
+		Vector<TangibleObject> defenderList = new Vector<TangibleObject>(defender.getDefendersList());
+		if (defenderList.size() > 0) {
+			defenderList.stream().forEach(attacker -> defender.removeDefender(attacker));
+		}
+	}
+	
 	public enum HitType{; 
 	
 		public static final byte MISS = 0;
