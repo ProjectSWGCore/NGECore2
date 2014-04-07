@@ -86,48 +86,47 @@ public class SurveyService implements INetworkDispatch {
 	}
 	
 	public void ServiceProcessing(){
-		// All tools sampling
-		SurveyTool removeTool=null;
-		for (SurveyTool surveyTool : activeSurveyTools){
-			if (surveyTool.getCurrentlySurveying()){
-				// Check if survey process has finished
-				if (System.currentTimeMillis()>surveyTool.getLastSurveyTime()+3000){					
-					removeTool = surveyTool;
-					surveyTool.setCurrentlySurveying(false);
-					surveyTool.sendConstructSurveyMapMessage();
+		synchronized(activeSurveyTools){
+			// All tools sampling
+			SurveyTool removeTool=null;
+			for (SurveyTool surveyTool : activeSurveyTools){
+				if (surveyTool.getCurrentlySurveying()){
+					// Check if survey process has finished
+					if (System.currentTimeMillis()>surveyTool.getLastSurveyTime()+3000){					
+						removeTool = surveyTool;
+						surveyTool.setCurrentlySurveying(false);
+						surveyTool.sendConstructSurveyMapMessage();
+					}
+				}
+				if (surveyTool.getCurrentlySampling()){
+					// Check if sampling process has finished
+					if ((System.currentTimeMillis()>surveyTool.getLastSampleTime()+3000) && !surveyTool.getCurrentlyCoolingDown()){					
+						surveyTool.setCurrentlyCoolingDown(true);
+						// Update inventory
+						handleSamplingStages(surveyTool);
+						
+					}
+					// Check if sampling recovery is over
+					long sampleRecoveryTime = surveyTool.getRecoveryTime();
+					if (System.currentTimeMillis()>surveyTool.getLastSampleTime()+sampleRecoveryTime && ! surveyTool.isExceptionalState()){
+						// kick off another sampling attempt
+						surveyTool.setCurrentlyCoolingDown(false);
+						continueSampling(surveyTool);
+					}
+					if (surveyTool.getUser().getPosture()!=1){
+						surveyTool.setExceptionalState(false);
+						surveyTool.setCurrentlySampling(false);
+						removeTool = surveyTool;
+						if (surveyTool.getUser().getPosture()==0)
+							surveyTool.getUser().sendSystemMessage("You stand up", (byte) 0);
+						
+						surveyTool.getUser().sendSystemMessage("@survey:sample_cancel", (byte) 0);
+					}
 				}
 			}
-			if (surveyTool.getCurrentlySampling()){
-				// Check if sampling process has finished
-				if ((System.currentTimeMillis()>surveyTool.getLastSampleTime()+3000) && !surveyTool.getCurrentlyCoolingDown()){					
-					surveyTool.setCurrentlyCoolingDown(true);
-					// Update inventory
-					handleSamplingStages(surveyTool);
-					
-				}
-				// Check if sampling recovery is over
-				long sampleRecoveryTime = surveyTool.getRecoveryTime();
-				if (System.currentTimeMillis()>surveyTool.getLastSampleTime()+sampleRecoveryTime && ! surveyTool.isExceptionalState()){
-					// kick off another sampling attempt
-					surveyTool.setCurrentlyCoolingDown(false);
-					continueSampling(surveyTool);
-				}
-				if (surveyTool.getUser().getPosture()!=1){
-					surveyTool.setExceptionalState(false);
-					surveyTool.setCurrentlySampling(false);
-					removeTool = surveyTool;
-					if (surveyTool.getUser().getPosture()==0)
-						surveyTool.getUser().sendSystemMessage("You stand up", (byte) 0);
-					
-					surveyTool.getUser().sendSystemMessage("@survey:sample_cancel", (byte) 0);
-				}
-			}
-		}
-		if (removeTool!=null)
-			activeSurveyTools.remove(removeTool); // remove after notification
-		
-		
-		
+			if (removeTool!=null)
+				activeSurveyTools.remove(removeTool); // remove after notification
+		}	
 	}
 	
 	public void handleSamplingStages(SurveyTool surveyTool){
@@ -567,8 +566,10 @@ public class SurveyService implements INetworkDispatch {
 	}
 	
 	public void addActiveSurveyTool(SurveyTool tool){
-		if (! activeSurveyTools.contains(tool))
-			activeSurveyTools.add(tool);
+		synchronized(activeSurveyTools){
+			if (! activeSurveyTools.contains(tool))
+				activeSurveyTools.add(tool);
+		}
 	}
 	
 	public Vector<SurveyTool> getActiveSurveyTools(){
@@ -576,7 +577,9 @@ public class SurveyService implements INetworkDispatch {
 	}
 	
 	public void removeActiveSurveyTool(SurveyTool surveyTool){
-		activeSurveyTools.remove(surveyTool);
+		synchronized(activeSurveyTools){
+			activeSurveyTools.remove(surveyTool);
+		}
 	}
 	
 	public boolean toolIsInList(SurveyTool surveyTool){
