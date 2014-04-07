@@ -248,9 +248,10 @@ public class CommandService implements INetworkDispatch  {
 					String name = ((String) visitor.getObject(i, 0)).toLowerCase();
 					
 					if (CRC.StringtoCRC(name) == CRC) {
-						boolean combatCommand = (((String) visitor.getObject(i, 7)).length() > 0);
+						boolean hasCharacterAbility = (((String) visitor.getObject(i, 7)).length() > 0);
+						boolean isCombatCommand = (Boolean) visitor.getObject(i, 82);
 						
-						if (combatCommand) {
+						if (hasCharacterAbility || isCombatCommand) {
 							CombatCommand command = new CombatCommand(name.toLowerCase());
 							commandLookup.add(command);
 							return command;
@@ -272,6 +273,8 @@ public class CommandService implements INetworkDispatch  {
 	public BaseSWGCommand getCommandByName(String name) {
 		Vector<BaseSWGCommand> commands = new Vector<BaseSWGCommand>(commandLookup);
 		
+		name = name.toLowerCase();
+		
 		for (BaseSWGCommand command : commands) {
 			if (command.getCommandName().equalsIgnoreCase(name)) {
 				return command;
@@ -286,9 +289,10 @@ public class CommandService implements INetworkDispatch  {
 					String commandName = ((String) visitor.getObject(i, 0)).toLowerCase();
 					
 					if (commandName.equalsIgnoreCase(name)) {
-						boolean combatCommand = (((String) visitor.getObject(i, 7)).length() > 0);
+						boolean hasCharacterAbility = (((String) visitor.getObject(i, 7)).length() > 0);
+						boolean isCombatCommand = (Boolean) visitor.getObject(i, 82);
 						
-						if (combatCommand) {
+						if (hasCharacterAbility || isCombatCommand) {
 							CombatCommand command = new CombatCommand(commandName);
 							commandLookup.add(command);
 							return command;
@@ -490,8 +494,18 @@ public class CommandService implements INetworkDispatch  {
 	public CombatCommand registerCombatCommand(String name) {
 		BaseSWGCommand command = getCommandByName(name);
 		
+		if (command == null) {
+			return null;
+		}
+		
 		if (command instanceof CombatCommand) {
 			return (CombatCommand) command;
+		} else {
+			System.out.println("Warning: Forced to make non-combat command " + name + " a combat command.");
+			commandLookup.remove(command);
+			CombatCommand combatCommand = new CombatCommand(name.toLowerCase());
+			commandLookup.add(combatCommand);
+			return combatCommand;
 		}
 		
 		return null;
