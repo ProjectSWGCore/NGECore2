@@ -308,7 +308,9 @@ public class CommandService implements INetworkDispatch  {
 	}
 	
 	public void processCommand(CreatureObject actor, SWGObject target, BaseSWGCommand command, int actionCounter, String commandArgs) {
-		actor.addCooldown(command.getCooldownGroup(), command.getCooldown());
+		if (command.getCooldown() > (float) 1) {
+			actor.addCooldown(command.getCooldownGroup(), command.getCooldown());
+		}
 		
 		if (command instanceof CombatCommand) {
 			processCombatCommand(actor, target, (CombatCommand) command, actionCounter, commandArgs);
