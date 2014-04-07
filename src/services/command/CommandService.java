@@ -487,8 +487,17 @@ public class CommandService implements INetworkDispatch  {
 		
 	}
 	
+	public CombatCommand registerCombatCommand(String name) {
+		BaseSWGCommand command = getCommandByName(name);
+		
+		if (command instanceof CombatCommand) {
+			return (CombatCommand) command;
+		}
+		
+		return null;
+	}
+	
 	public BaseSWGCommand registerCommand(String name) { return getCommandByName(name); }
-	public CombatCommand registerCombatCommand(String name) { return getCommandByName(name); }
 	public BaseSWGCommand registerGmCommand(String name) { return getCommandByName(name); }
 	public void registerAlias(String name, String target) { }
 	
