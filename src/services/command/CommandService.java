@@ -244,11 +244,11 @@ public class CommandService implements INetworkDispatch  {
 		core.scriptService.callScript("scripts/commands/", command.getCommandName(), "run", core, actor, target, commandArgs);
 	}
 	
-	public BaseSWGCommand getCommandByCRC(int CRC) {
+	public BaseSWGCommand getCommandByCRC(int commandCRC) {
 		Vector<BaseSWGCommand> commands = new Vector<BaseSWGCommand>(commandLookup);
 		
 		for (BaseSWGCommand command : commands) {
-			if (command.getCommandCRC() == CRC) {
+			if (command.getCommandCRC() == commandCRC) {
 				return command;
 			}
 		}
@@ -260,7 +260,7 @@ public class CommandService implements INetworkDispatch  {
 				if (visitor.getObject(i, 0) != null) {
 					String name = ((String) visitor.getObject(i, 0)).toLowerCase();
 					
-					if (CRC.StringtoCRC(name) == CRC) {
+					if (CRC.StringtoCRC(name) == commandCRC) {
 						boolean hasCharacterAbility = (((String) visitor.getObject(i, 7)).length() > 0);
 						boolean isCombatCommand = (Boolean) visitor.getObject(i, 82);
 						
