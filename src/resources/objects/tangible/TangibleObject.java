@@ -23,12 +23,17 @@ package resources.objects.tangible;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.Vector;
 
 import javax.xml.bind.DatatypeConverter;
@@ -54,7 +59,7 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent(version=1)
+@Persistent(version=2)
 public class TangibleObject extends SWGObject {
 	
 	// TODO: Thread safety
@@ -77,6 +82,8 @@ public class TangibleObject extends SWGObject {
 	private int respawnTime = 0;
 	private Point3D spawnCoordinates = new Point3D(0, 0, 0);
 	
+	private TreeSet<TreeMap<String,Integer>> lootSpecification = new TreeSet<TreeMap<String,Integer>>();
+
 	@NotPersistent
 	private TangibleObject killer = null;
 	
@@ -444,6 +451,15 @@ public class TangibleObject extends SWGObject {
 		}
 	}
 	
+	public TreeSet<TreeMap<String,Integer>> getLootSpecification() {
+		return lootSpecification;
+	}
+
+	public void setLootSpecification(
+			TreeSet<TreeMap<String,Integer>> lootSpecification) {
+		this.lootSpecification = lootSpecification;
+	}
+	
 	@Override
 	public void sendBaselines(Client destination) {
 
@@ -467,5 +483,4 @@ public class TangibleObject extends SWGObject {
 		
 
 	}
-	
 }

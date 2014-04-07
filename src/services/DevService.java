@@ -991,6 +991,9 @@ public class DevService implements INetworkDispatch {
 						solarSurveyTool.setCustomName("Solar Survey Device");
 						inventory.add(solarSurveyTool);
 						
+							
+						core.staticService.spawnObject("object/mobile/shared_tusken_raider.iff", "tatooine", 0L, 3522F, 4F, -4801F, 0.70F, 0.71F);
+						
 						break;
 				}
 			}	
