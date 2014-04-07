@@ -21,11 +21,24 @@ def addPlanetSpawns(core, planet):
 	stcSvc.spawnObject('object/building/content/aurilia/shared_aurilia_pyramid_hut.iff', 'kaas', long(0), float(-5163.9), float(79.0), float(-2351.6), float(0.71), float(0.71))
 	stcSvc.spawnObject('object/building/content/aurilia/shared_aurilia_pyramid_hut.iff', 'kaas', long(0), float(-5072.1), float(79.0), float(-2369.6), float(-0.71), float(0.71))
 	stcSvc.spawnObject('object/building/content/aurilia/shared_aurilia_pyramid_hut.iff', 'kaas', long(0), float(-5072.1), float(79.0), float(-2351.6), float(-0.71), float(0.71))
+	stcSvc.spawnObject('object/building/military/shared_outpost_cloning_facility_s02.iff', long(0), 'kaas', long(0), float(-5072.1), float(80.0), float(-2279.5), float(0.71), float(0), float(-0.71), float(0))
+	
+	#Terminals
+	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_bank.iff', 'kaas', long(0), float(-5080.8), float(80.0), float(-2275.7), float(-0.71), float(0.71))
+	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_mission.iff', 'kaas', long(0), float(-5108.7), float(80.0), float(-2289.2), float(0), float(0))
+	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_mission.iff', 'kaas', long(0), float(-5127.3), float(80.0), float(-2289.2), float(0), float(0))
+	
 	
 	#Decor
 	stcSvc.spawnObject('object/static/vehicle/shared_static_lambda_shuttle.iff', 'kaas', long(0), float(-5078.1), float(80.0), float(-2256.0), float(-0.70), float(0.70))
 	stcSvc.spawnObject('object/building/content/aurilia/shared_aurilia_crystal_centerpiece.iff', 'kaas', long(0), float(-5121.5), float(80.0), float(-2360.5), float(0), float(0))
 	stcSvc.spawnObject('object/static/structure/tatooine/shared_antenna_tatt_style_1.iff', 'kaas', long(0), float(-5146.7), float(80.0), float(-2301.7), float(0), float(0))
+	stcSvc.spawnObject('object/static/installation/shared_mockup_power_generator_fusion_style_1.iff', 'kaas', long(0), float(-5146.7), float(80.0), float(-2301.7), float(0.71), float(0.71))
+	stcSvc.spawnObject('object/static/installation/shared_mockup_power_generator_photo_bio_style_1.iff', 'kaas', long(0), float(-5146.9), float(80.0), float(-2294.5), float(0), float(0))
+	stcSvc.spawnObject('object/static/vehicle/shared_static_tie_bomber.iff', 'kaas', long(0), float(-5158.5), float(80.5), float(-2232.4), float(0.70), float(0.70))
+	stcSvc.spawnObject('object/static/vehicle/shared_static_tie_fighter.iff', 'kaas', long(0), float(-5158.5), float(85.0), float(-2257.4), float(0.70), float(0.70))
+	
+	
 	#Streetlamps
 	stcSvc.spawnObject('object/static/structure/general/shared_streetlamp_large_blue_style_01_on.iff', 'kaas', long(0), float(-5109.9), float(80.0), float(-2289.9), float(0), float(0))
 	stcSvc.spawnObject('object/static/structure/general/shared_streetlamp_large_blue_style_01_on.iff', 'kaas', long(0), float(-5125.9), float(80.0), float(-2289.9), float(0), float(0))
