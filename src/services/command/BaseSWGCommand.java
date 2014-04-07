@@ -41,7 +41,7 @@ public class BaseSWGCommand implements Cloneable {
 	private boolean callOnTarget = false;
 	private int commandGroup;
 	private boolean disabled = true;
-	private int maxRangeToTarget;
+	private float maxRangeToTarget;
 	private int godLevel;
 	private int displayGroup;
 	private boolean combatCommand = false;
@@ -74,7 +74,7 @@ public class BaseSWGCommand implements Cloneable {
 						callOnTarget = (Boolean) visitor2.getObject(i, 76);
 						commandGroup = (Integer) visitor2.getObject(i, 77);
 						disabled = (Boolean) visitor2.getObject(i, 78);
-						maxRangeToTarget = (int) ((Float) visitor2.getObject(i, 79));
+						maxRangeToTarget = (Float) visitor2.getObject(i, 79);
 						godLevel = (Integer) visitor2.getObject(i, 80);
 						displayGroup = (Integer) visitor2.getObject(i, 81);
 						combatCommand = (Boolean) visitor2.getObject(i, 82);
@@ -252,11 +252,11 @@ public class BaseSWGCommand implements Cloneable {
 		this.disabled = disabled;
 	}
 	
-	public int getMaxRangeToTarget() {
+	public float getMaxRangeToTarget() {
 		return maxRangeToTarget;
 	}
 	
-	public void setMaxRangeToTarget(int maxRangeToTarget) {
+	public void setMaxRangeToTarget(float maxRangeToTarget) {
 		this.maxRangeToTarget = maxRangeToTarget;
 	}
 	
