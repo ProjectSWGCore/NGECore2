@@ -21,22 +21,29 @@
  ******************************************************************************/
 package resources.objects.loot;
 
-import java.util.ArrayList;
-import java.util.List;
+/** 
+ * @author Charon 
+ */
 
-public class LootDrop {
+public class LootGroup {
 	
-	private List<String> elements = new ArrayList<String>();
+	private String[] lootPoolNames;
+	private int[] lootPoolChances; 
+	private int lootGroupChance;
 	
-	public LootDrop(){
+	public LootGroup(){
 		
 	}
 	
-	public void addElement(String element){
-		elements.add(element);
+	public LootGroup(String[] lootPoolName, int[] lootPoolChance, int lootGroupChance){
+		this.lootPoolNames   = lootPoolNames;
+		this.lootPoolChances = lootPoolChances;
+		this.lootGroupChance = lootGroupChance;
 	}
-	
-	public List<String> getElements(){
-		return elements;
+		
+	public void addLootData(String[] lootPoolNames, int[] lootPoolChances, int lootGroupChance){
+		this.lootPoolNames   = lootPoolNames;
+		this.lootPoolChances = lootPoolChances;
+		this.lootGroupChance = lootGroupChance;
 	}
 }

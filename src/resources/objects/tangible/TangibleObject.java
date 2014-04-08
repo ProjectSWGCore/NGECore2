@@ -46,6 +46,7 @@ import protocol.swg.UpdatePVPStatusMessage;
 import protocol.swg.objectControllerObjects.ShowFlyText;
 import resources.common.RGB;
 import resources.objects.creature.CreatureObject;
+import resources.objects.loot.LootGroup;
 import resources.visitors.IDManagerVisitor;
 import services.ai.AIActor;
 
@@ -82,8 +83,9 @@ public class TangibleObject extends SWGObject {
 	private int respawnTime = 0;
 	private Point3D spawnCoordinates = new Point3D(0, 0, 0);
 	
-	private TreeSet<TreeMap<String,Integer>> lootSpecification = new TreeSet<TreeMap<String,Integer>>();
-
+	//private TreeSet<TreeMap<String,Integer>> lootSpecification = new TreeSet<TreeMap<String,Integer>>();
+	private List<LootGroup> lootGroups = new ArrayList<LootGroup>();
+	
 	@NotPersistent
 	private TangibleObject killer = null;
 	
@@ -451,14 +453,6 @@ public class TangibleObject extends SWGObject {
 		}
 	}
 	
-	public TreeSet<TreeMap<String,Integer>> getLootSpecification() {
-		return lootSpecification;
-	}
-
-	public void setLootSpecification(
-			TreeSet<TreeMap<String,Integer>> lootSpecification) {
-		this.lootSpecification = lootSpecification;
-	}
 	
 	@Override
 	public void sendBaselines(Client destination) {
@@ -482,5 +476,14 @@ public class TangibleObject extends SWGObject {
 		}
 		
 
+	}
+
+	public List<LootGroup> getLootGroups() {
+		return lootGroups;
+	}
+
+	public void addToLootGroups(String[] lootPoolName, int[] lootPoolChance, int lootGroupChance) {
+		LootGroup lootGroup = new LootGroup(lootPoolName, lootPoolChance, lootGroupChance);
+		this.lootGroups.add(lootGroup);
 	}
 }

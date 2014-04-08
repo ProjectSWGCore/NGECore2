@@ -126,7 +126,7 @@ public class LootService implements INetworkDispatch {
 	    	}
 	    }
 	    
-    
+   
 	    // ToDo: Group loot settings etc.
 	    
 		// [20:35] <@_Light> your actual loot chance was lootgroupchance*lootchance
@@ -158,4 +158,28 @@ public class LootService implements INetworkDispatch {
 		
 		return lootDropList;
 	}	
+	
+	
+	public void test(TreeSet test1){
+		
+	}
+	
+	public void test2(String test2){
+		System.out.println(test2);
+	}
+	
+	public void saveLootData(String[] lootPoolName, int[] lootPoolChance, int lootGroupChance){
+		for (String ui : lootPoolName){
+			System.out.println(ui);
+		}
+		for (int ui : lootPoolChance){
+			System.out.println(ui);
+		}
+		
+		System.out.println(lootGroupChance);
+		
+	}
+	
+	
+	
 }
