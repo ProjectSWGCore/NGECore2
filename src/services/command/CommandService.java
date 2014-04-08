@@ -350,6 +350,7 @@ public class CommandService implements INetworkDispatch  {
 							if(visitor.getObject(i, 82-sub) instanceof Boolean)
 								isCombatCommand = (Boolean) visitor.getObject(i, 82-sub);
 							
+							// "isCombatCommand" needs to be changed so that non-combat commands that are flagged to added to a combat queue are not considered combat commands
 							if (hasCharacterAbility || isCombatCommand) {
 								CombatCommand command = new CombatCommand(commandName);
 								commandLookup.add(command);
@@ -393,7 +394,15 @@ public class CommandService implements INetworkDispatch  {
 		//}
 		
 		if(FileUtilities.doesFileExist("scripts/commands/combat/" + command.getCommandName() + ".py"))
+		{
 			core.scriptService.callScript("scripts/commands/combat/", command.getCommandName(), "setup", core, attacker, target, command);
+		}
+		// Temporary fix for certain non-combat commands being registered as combat commands
+		else if(FileUtilities.doesFileExist("scripts/commands/" + command.getCommandName() + ".py"))
+		{
+			core.scriptService.callScript("scripts/commands/", command.getCommandName(), "run", core, attacker, target, commandArgs);
+			return;
+		}
 		
 		boolean success = true;
 		
