@@ -84,9 +84,9 @@ public class LootService implements INetworkDispatch {
 			CreatureObject lootedCreature = (CreatureObject) lootedObject;
 			int creatureCL = lootedCreature.getLevel();
 			creatureCL = 90;
-			int minimalCredits = 40 * creatureCL; // Predetermined factor of 40 per CL
-			int spanOfCredits  = 15 * creatureCL; // Predetermined factor of 15 per CL
-			System.out.println("spanOfCredits " + spanOfCredits);
+			int maximalCredits = (int)Math.floor(4*creatureCL + creatureCL*creatureCL*4/100); 
+			int minimalCredits = (int)Math.floor(creatureCL*2 + maximalCredits/2); 
+			int spanOfCredits  = maximalCredits - minimalCredits;			
 			lootedCredits = minimalCredits + new Random().nextInt(spanOfCredits);
 			requester.sendSystemMessage("You looted " + lootedCredits + " credits.", (byte)1); 
 		}
