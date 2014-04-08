@@ -21,6 +21,10 @@
  ******************************************************************************/
 package protocol.swg;
 
+import java.nio.ByteOrder;
+
+import main.NGECore;
+
 import org.apache.mina.core.buffer.IoBuffer;
 
 import services.chat.ChatRoom;
@@ -28,9 +32,13 @@ import services.chat.ChatRoom;
 public class ChatOnCreateRoom extends SWGMessage {
 
 	private ChatRoom room;
+	private int error;
+	private int requestId;
 	
-	public ChatOnCreateRoom(ChatRoom room) {
+	public ChatOnCreateRoom(ChatRoom room, int error, int requestId) {
 		this.room = room;
+		this.error = error;
+		this.requestId = requestId;
 	}
 
 	@Override
@@ -40,8 +48,46 @@ public class ChatOnCreateRoom extends SWGMessage {
 
 	@Override
 	public IoBuffer serialize() {
-		// TODO Auto-generated method stub
-		return null;
+		String server = NGECore.getInstance().getGalaxyName();
+		IoBuffer data = IoBuffer.allocate(100).order(ByteOrder.LITTLE_ENDIAN);
+		data.setAutoExpand(true);
+
+		data.putShort((short) 4);
+		data.putInt(0x35D7CC9F);
+		
+		data.putInt(error);
+		data.putInt(room.getRoomId());
+		data.putInt(room.isPrivateRoom() ? 0 : 1);
+		data.put((byte) (room.isModeratorsOnly() ? 1 : 0));
+		data.put(getAsciiString(room.getRoomAddress()));
+		data.put(getAsciiString("SWG"));
+		data.put(getAsciiString(server));
+		data.put(getAsciiString(room.getCreator()));
+		data.put(getAsciiString("SWG"));
+		data.put(getAsciiString(server));
+		data.put(getAsciiString(room.getOwner()));
+		data.put(getUnicodeString(room.getDescription()));
+		
+		data.putInt(0);
+		/*if (room.getModeratorList().size() > 0) {
+			for (CreatureObject creo : room.getModeratorList()) {
+				data.put(getAsciiString("SWG"));
+				data.put(getAsciiString(server));
+				data.put(getAsciiString(creo.getCustomName()));
+			}
+		}*/
+		
+		data.putInt(0);	
+		/*if (room.getUserList().size() > 0) {
+			for (CreatureObject creo : room.getUserList()) {
+				data.put(getAsciiString("SWG"));
+				data.put(getAsciiString(server));
+				data.put(getAsciiString(creo.getCustomName()));
+			}
+		}*/
+		
+		data.putInt(requestId);
+		return data.flip();
 	}
 
 }

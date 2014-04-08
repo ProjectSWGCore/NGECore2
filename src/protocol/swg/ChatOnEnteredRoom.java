@@ -62,6 +62,7 @@ public class ChatOnEnteredRoom extends SWGMessage {
 		buffer.put(getAsciiString(characterName));
 		buffer.putInt(success);
 		buffer.putInt(roomId);
+		buffer.putInt(0);
 		return buffer.flip();
 	}
 
