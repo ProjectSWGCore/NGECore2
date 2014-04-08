@@ -25,37 +25,9 @@ package resources.objects.loot;
  * @author Charon 
  */
 
-public class LootGroup {
+public class LootPool {
 	
-	private String[] lootPoolNames;
-	private int[] lootPoolChances; 
-	private int lootGroupChance;
-	
-	public LootGroup(){
+	public LootPool(){
 		
-	}
-	
-	public LootGroup(String[] lootPoolName, int[] lootPoolChance, int lootGroupChance){
-		this.lootPoolNames   = lootPoolNames;
-		this.lootPoolChances = lootPoolChances;
-		this.lootGroupChance = lootGroupChance;
-	}
-		
-	public void addLootData(String[] lootPoolNames, int[] lootPoolChances, int lootGroupChance){
-		this.lootPoolNames   = lootPoolNames;
-		this.lootPoolChances = lootPoolChances;
-		this.lootGroupChance = lootGroupChance;
-	}
-	
-	public String[] getLootPoolNames() {
-		return lootPoolNames;
-	}
-	
-	public int[] getLootPoolChances() {
-		return lootPoolChances;
-	}
-	
-	public int getLootGroupChance() {
-		return lootGroupChance;
 	}
 }

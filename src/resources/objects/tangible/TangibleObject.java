@@ -453,6 +453,15 @@ public class TangibleObject extends SWGObject {
 		}
 	}
 	
+	public List<LootGroup> getLootGroups() {
+		return lootGroups;
+	}
+
+	public void addToLootGroups(String[] lootPoolName, int[] lootPoolChance, int lootGroupChance) {
+		LootGroup lootGroup = new LootGroup(lootPoolName, lootPoolChance, lootGroupChance);
+		this.lootGroups.add(lootGroup);
+	}
+	
 	
 	@Override
 	public void sendBaselines(Client destination) {
@@ -476,14 +485,5 @@ public class TangibleObject extends SWGObject {
 		}
 		
 
-	}
-
-	public List<LootGroup> getLootGroups() {
-		return lootGroups;
-	}
-
-	public void addToLootGroups(String[] lootPoolName, int[] lootPoolChance, int lootGroupChance) {
-		LootGroup lootGroup = new LootGroup(lootPoolName, lootPoolChance, lootGroupChance);
-		this.lootGroups.add(lootGroup);
 	}
 }
