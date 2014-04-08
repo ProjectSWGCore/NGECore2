@@ -2,7 +2,7 @@
 
 def itemTemplates():
 	
-	templates=['object/tangible/loot/npc_loot/shared_generic_crystal.iff']
+	templates=['object/tangible/component/weapon/lightsaber/lightsaber_module_force_crystal.iff']
 	return templates
 	
 def itemChances():
