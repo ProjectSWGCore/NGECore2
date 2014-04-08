@@ -31,12 +31,14 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.Vector;
 
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
 import resources.objects.loot.LootDrop;
 import resources.objects.loot.LootGroup;
 import resources.objects.loot.LootPool;
+import resources.objects.loot.LootRollSession;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.tool.SurveyTool;
@@ -70,6 +72,7 @@ public class LootService implements INetworkDispatch {
 	
 	public void handleLootRequest(CreatureObject requester, TangibleObject lootedObject) {
 			
+		LootRollSession lootRollSession = new LootRollSession(requester);
 		String lootedObjectType = "Tangible";
 		if (lootedObject instanceof CreatureObject)
 			lootedObjectType = "Creature";
@@ -80,9 +83,12 @@ public class LootService implements INetworkDispatch {
 		if (lootedObjectType.equals("Creature")){
 			CreatureObject lootedCreature = (CreatureObject) lootedObject;
 			int creatureCL = lootedCreature.getLevel();
+			creatureCL = 90;
 			int minimalCredits = 40 * creatureCL; // Predetermined factor of 40 per CL
 			int spanOfCredits  = 15 * creatureCL; // Predetermined factor of 15 per CL
+			System.out.println("spanOfCredits " + spanOfCredits);
 			lootedCredits = minimalCredits + new Random().nextInt(spanOfCredits);
+			requester.sendSystemMessage("You looted " + lootedCredits + " credits.", (byte)1); 
 		}
 		
 		if (lootedObjectType.equals("Tangible")){
@@ -93,11 +99,9 @@ public class LootService implements INetworkDispatch {
 		
 		CreatureObject lootedCreature = (CreatureObject) lootedObject;
 		
-		List<LootDrop> lootDrops = new ArrayList<LootDrop>();
-		List<String> lootElements = new ArrayList<String>();
-		
 		//TreeSet<TreeMap<String,Integer>> lootSpec = lootedObject.getLootSpecification();
 		 List<LootGroup> lootGroups = lootedCreature.getLootGroups();
+		 System.out.println("lootGroups size " + lootGroups.size());
 		 Iterator<LootGroup> iterator = lootGroups.iterator();
 	     	    
 	    while (iterator.hasNext()){
@@ -105,75 +109,72 @@ public class LootService implements INetworkDispatch {
 	    	int groupChance = lootGroup.getLootGroupChance();
 	    	int lootGroupRoll = new Random().nextInt(100);
 	    	if (lootGroupRoll <= groupChance){    		
-	    		handleLootGroup(lootGroup); //this lootGroup will drop something
+	    		System.out.println("this lootGroup will drop something");
+	    		handleLootGroup(lootGroup,lootRollSession); //this lootGroup will drop something	    		
 	    	}		
 	    }
+	    
+	    for (String s : lootRollSession.getDroppedItemTemplates()){
+			System.out.println("lootRollSession template: " + s);
+		}
+	    
 	 
 	    // ********** Phase 1 complete, loot items determined **********
+	    // stored in the lootSession
 	    
 	    // Distribute the loot drops according to group loot rules	    
 	    // For now just spawn items into requester's inventory
-	    for (LootDrop dropElem : lootDrops){
-	    	PlayerObject requesterObj = (PlayerObject) requester.getSlottedObject("ghost");	
-	    	SWGObject requesterInventory = requesterObj.getSlottedObject("inventory");
-	    	List<String> elementList = dropElem.getElements();
-	    	for (String template : elementList){		    
-		    	TangibleObject droppedItem = (TangibleObject) core.objectService.createObject(template, requester.getPlanet());				
-		    	requesterInventory.add(droppedItem);
-	    	}
-	    }
-	       
-	    // ToDo: Group loot settings etc.	    
+    	SWGObject requesterInventory = requester.getSlottedObject("inventory");
+    	System.out.println("requesterInventory " + requesterInventory);
+    	for (String template : lootRollSession.getDroppedItemTemplates()){		    
+	    	TangibleObject droppedItem = (TangibleObject) core.objectService.createObject(template, requester.getPlanet());				
+	    	System.out.println("droppedItem " + droppedItem);
+	    	requesterInventory.add(droppedItem);
+    	}
+       
+	    // ToDo: Group loot settings etc.  actual loot chance was lootgroupchance*lootchance    
 	}
 	
 	
-	private List<String> handleLootGroup(LootGroup lootGroup){
-		List<String> lootElements = new ArrayList<String>();
+	private void handleLootGroup(LootGroup lootGroup,LootRollSession lootRollSession){
+		
 		int[] lootPoolChances = lootGroup.getLootPoolChances();
 		String[] lootPoolNames = lootGroup.getLootPoolNames();
+		if (lootPoolChances==null || lootPoolNames==null){
+			System.err.println("Lootpools are null!");
+			return;
+		}
+		if (lootPoolChances.length==0 || lootPoolNames.length==0){
+			System.err.println("No Lootpools in Lootgroup!");
+			return;
+		}
 		for(int i=0;i<lootPoolChances.length;i++) {
 		    	int lootPoolElementRoll = new Random().nextInt(100);
 		    	if (lootPoolElementRoll <= lootPoolChances[i]){
-		    		handleLootPool(lootPoolNames[i]); // This loot pool will drop something		    		
+		    		System.out.println("this loot pool will drop something");
+		    		handleLootPool(lootPoolNames[i],lootRollSession); // This loot pool will drop something			    		
 		    	}			 
 			}
-
-		return lootElements;
 	}
 		
-	private List<LootDrop> handleLootPool(String poolName){
-		List<LootDrop> lootDropList = new ArrayList<LootDrop>();
-		LootDrop lootDrop = new LootDrop();
-		// Fetch the loot pool data from the poolName.py script
-		
-		String path = "scripts/lootPools/"+poolName; // + ".py";
-		//Vector<String> quantityList = (Vector<String>)core.scriptService.fetchStringVector(path,"resourceQuantities");
-		
-//		for (String s : quantityList){
-//			System.out.println("OOO: " + s);
-//		}
-		
-		//LootPool lootPool = loadfrompyreturn();
-		
-		return lootDropList;
-	}	
+	private void handleLootPool(String poolName,LootRollSession lootRollSession){
 
-	public void saveLootData(String[] lootPoolName, int[] lootPoolChance, int lootGroupChance){
-		for (String ui : lootPoolName){
-			System.out.println(ui);
-		}
-		for (int ui : lootPoolChance){
-			System.out.println(ui);
+		// Fetch the loot pool data from the poolName.py script		
+		String path = "scripts/lootPools/"+poolName.toLowerCase(); 
+		Vector<String> itemTemplates = (Vector<String>)core.scriptService.fetchStringVector(path,"itemTemplates");
+		
+		for (String s : itemTemplates){
+			System.out.println("template: " + s);
 		}
 		
-		System.out.println(lootGroupChance);
+		Vector<Integer> itemChances = (Vector<Integer>)core.scriptService.fetchIntegerVector(path,"itemChances");
 		
+		// Now here maybe all items in pool have an equal chance to spawn
+		// or they have percentages assigned to them as well
+		
+		int randomItemFromPool = new Random().nextInt(100);
+		int itemIndex = (int)Math.floor(randomItemFromPool/100*itemTemplates.size()); // 5 Elements,rnd is 83 -> 0.83*5=
+		
+		lootRollSession.addDroppedItemTemplate(itemTemplates.get(itemIndex));
 	}	
-}
-
-////[20:35] <@_Light> your actual loot chance was lootgroupchance*lootchance
-//		long leaderGroupId = requester.getGroupId();
-//		GroupObject group = (GroupObject) core.objectService.getObject(leaderGroupId);
-//		if(group.getMemberList().size() == 1) {
-//			// looter is alone
-//		}	
+}	

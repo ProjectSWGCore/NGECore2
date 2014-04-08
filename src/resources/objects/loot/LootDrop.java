@@ -27,6 +27,7 @@ import java.util.List;
 public class LootDrop {
 	
 	private List<String> elements = new ArrayList<String>();
+	private String droppedItemTemplate;
 	
 	public LootDrop(){
 		
@@ -39,4 +40,12 @@ public class LootDrop {
 	public List<String> getElements(){
 		return elements;
 	}
+
+	public String getDroppedItemTemplate() {
+		return droppedItemTemplate;
+	}
+
+	public void setDroppedItemTemplate(String droppedItemTemplate) {
+		this.droppedItemTemplate = droppedItemTemplate;
+	}	
 }

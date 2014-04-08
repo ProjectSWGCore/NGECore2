@@ -21,10 +21,13 @@
  ******************************************************************************/
 package resources.objects.loot;
 
+import com.sleepycat.persist.model.Persistent;
+
 /** 
  * @author Charon 
  */
 
+@Persistent(version=0)
 public class LootGroup {
 	
 	private String[] lootPoolNames;
@@ -35,7 +38,7 @@ public class LootGroup {
 		
 	}
 	
-	public LootGroup(String[] lootPoolName, int[] lootPoolChance, int lootGroupChance){
+	public LootGroup(String[] lootPoolNames, int[] lootPoolChances, int lootGroupChance){
 		this.lootPoolNames   = lootPoolNames;
 		this.lootPoolChances = lootPoolChances;
 		this.lootGroupChance = lootGroupChance;

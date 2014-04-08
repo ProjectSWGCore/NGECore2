@@ -457,8 +457,9 @@ public class TangibleObject extends SWGObject {
 		return lootGroups;
 	}
 
-	public void addToLootGroups(String[] lootPoolName, int[] lootPoolChance, int lootGroupChance) {
-		LootGroup lootGroup = new LootGroup(lootPoolName, lootPoolChance, lootGroupChance);
+	public void addToLootGroups(String[] lootPoolNames, int[] lootPoolChances, int lootGroupChance) {
+		System.out.println("lootPoolNames[0] " + lootPoolNames[0]);
+		LootGroup lootGroup = new LootGroup(lootPoolNames, lootPoolChances, lootGroupChance);
 		this.lootGroups.add(lootGroup);
 	}
 	

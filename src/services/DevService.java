@@ -997,7 +997,9 @@ public class DevService implements INetworkDispatch {
 						
 						break;
 					case 111:
-						core.staticService.spawnObject("object/mobile/shared_tusken_raider.iff", "tatooine", 0L, 3522F, 4F, -4801F, 0.70F, 0.71F);
+						SWGObject spawned = core.staticService.spawnObject("object/mobile/shared_tusken_raider.iff", "tatooine", 0L, 3522F, 4F, -4801F, 0.70F, 0.71F);
+						
+						core.lootService.handleLootRequest(player,(TangibleObject)spawned);
 						break;
 				}
 			}	

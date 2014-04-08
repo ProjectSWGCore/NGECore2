@@ -21,13 +21,54 @@
  ******************************************************************************/
 package resources.objects.loot;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import main.NGECore;
+import resources.objects.creature.CreatureObject;
+import resources.objects.group.GroupObject;
+
 /** 
  * @author Charon 
  */
 
 public class LootRollSession {
 	
-	public LootRollSession(){
-		
+	private String SessionID; // leaderName-SystemTime
+	private GroupObject playerGroup; 
+	private List<String> droppedItemTemplates;
+	
+	public LootRollSession(){	
+	}
+	
+	public LootRollSession(CreatureObject requester){
+		long requesterGroupId = requester.getGroupId();
+		if (requesterGroupId>0){
+			this.playerGroup = (GroupObject) NGECore.getInstance().objectService.getObject(requesterGroupId);
+			this.SessionID = playerGroup.getGroupLeader().getCustomName()+"-"+System.currentTimeMillis();
+		} else {
+			this.SessionID = requester.getCustomName()+"-"+System.currentTimeMillis();
+		}
+		droppedItemTemplates = new ArrayList<String>();
+	}
+
+	public List<String> getDroppedItemTemplates() {
+		return droppedItemTemplates;
+	}
+
+	public void addDroppedItemTemplate(String droppedItemTemplate) {
+		this.droppedItemTemplates.add(droppedItemTemplate);
+	}
+
+	public String getSessionID() {
+		return SessionID;
+	}
+
+	public void setSessionID(String sessionID) {
+		SessionID = sessionID;
+	}
+	
+	public void generateSessionID(String sessionID) {
+		SessionID = sessionID;
 	}
 }
