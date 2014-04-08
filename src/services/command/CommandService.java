@@ -114,7 +114,7 @@ public class CommandService implements INetworkDispatch  {
 				
 				break;
 			case 1: // Other Only
-				if (target == null || target == actor) {
+				if (target == actor) {
 					return false;
 				}
 				
@@ -272,7 +272,7 @@ public class CommandService implements INetworkDispatch  {
 							
 							boolean hasCharacterAbility = (((String) visitor.getObject(i, 7-sub)).length() > 0);
 							
-							if (tableArray[n].startsWith("client_") && tableArray[n].startsWith("command_table_")) {
+							if (tableArray[n].startsWith("client_") || tableArray[n].startsWith("command_table_")) {
 								sub += 7;
 							}
 							
@@ -333,7 +333,7 @@ public class CommandService implements INetworkDispatch  {
 							
 							boolean hasCharacterAbility = (((String) visitor.getObject(i, 7-sub)).length() > 0);
 														
-							if (tableArray[n].startsWith("client_") && tableArray[n].startsWith("command_table_")) {
+							if (tableArray[n].startsWith("client_") || tableArray[n].startsWith("command_table_")) {
 								sub += 7;
 							}
 							
@@ -367,9 +367,7 @@ public class CommandService implements INetworkDispatch  {
 	}
 	
 	public void processCommand(CreatureObject actor, SWGObject target, BaseSWGCommand command, int actionCounter, String commandArgs) {
-		if (command.getCooldown() > (float) 1) {
-			actor.addCooldown(command.getCooldownGroup(), command.getCooldown());
-		}
+		actor.addCooldown(command.getCooldownGroup(), command.getCooldown());
 		
 		if (command instanceof CombatCommand) {
 			processCombatCommand(actor, target, (CombatCommand) command, actionCounter, commandArgs);
