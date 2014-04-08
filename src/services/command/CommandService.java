@@ -478,7 +478,7 @@ public class CommandService implements INetworkDispatch  {
 				return;
 			}
 			
-			if(command.getHitType() == 0 && command.getBuffNameSelf().length() > 0) {
+			if(command.getHitType() == 0 && command.getBuffNameSelf() != null && command.getBuffNameSelf().length() > 0) {
 				core.combatService.doSelfBuff(attacker, weapon, command, actionCounter);
 				return;
 			}
