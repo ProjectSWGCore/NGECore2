@@ -114,7 +114,7 @@ public class CommandService implements INetworkDispatch  {
 				
 				break;
 			case 1: // Other Only
-				if (target == actor) {
+				if (target != null && target == actor) {
 					return false;
 				}
 				
