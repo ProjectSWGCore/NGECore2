@@ -909,6 +909,11 @@ public class SimulationService implements INetworkDispatch {
 		if(obj1.getPlanet() != obj2.getPlanet())
 			return false;
 		
+		// If obj1 is an item in inventory and vice versa
+		if (obj1 == obj2.getGrandparent() || obj2 == obj1.getGrandparent()) {
+			return true;
+		}
+		
 		if(obj1.getGrandparent() != null || obj2.getGrandparent() != null) {
 			
 			if(obj1.getGrandparent() == obj2.getGrandparent())
