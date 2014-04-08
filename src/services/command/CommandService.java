@@ -114,11 +114,15 @@ public class CommandService implements INetworkDispatch  {
 				
 				break;
 			case 1: // Other Only
-				if (target != null && target == actor) {
+				if (target == null || target == actor) {
 					return false;
 				}
 				
-				if (target != null && actor.getPosition().getDistance(target.getPosition()) > command.getMaxRangeToTarget()) {
+				if (target.getContainer() == actor || target.getGrandparent() == actor) {
+					break;
+				}
+				
+				if (actor.getPosition().getDistance(target.getPosition()) > command.getMaxRangeToTarget()) {
 					return false;
 				}
 				
