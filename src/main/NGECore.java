@@ -60,6 +60,7 @@ import services.GroupService;
 import services.housing.HousingService;
 import services.InstanceService;
 import services.LoginService;
+import services.LootService;
 import services.MissionService;
 import services.PlayerService;
 import services.ScriptService;
@@ -178,6 +179,7 @@ public class NGECore {
 	public ConversationService conversationService;
 	
 	public HousingService housingService;
+	public LootService lootService;
 
 	
 	// Login Server
@@ -290,6 +292,7 @@ public class NGECore {
 		devService = new DevService(this);
 		conversationService = new ConversationService(this);
 		housingService = new HousingService(this);
+		lootService = new LootService(this);
 		
 		if (config.keyExists("JYTHONCONSOLE.PORT")) {
 			int jythonPort = config.getInt("JYTHONCONSOLE.PORT");
