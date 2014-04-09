@@ -57,6 +57,7 @@ import services.DevService;
 import services.EntertainmentService;
 import services.EquipmentService;
 import services.GroupService;
+import services.housing.HousingService;
 import services.InstanceService;
 import services.LoginService;
 import services.MissionService;
@@ -175,6 +176,8 @@ public class NGECore {
 	public ResourceService resourceService;
 
 	public ConversationService conversationService;
+	
+	public HousingService housingService;
 
 	
 	// Login Server
@@ -286,6 +289,7 @@ public class NGECore {
 		entertainmentService = new EntertainmentService(this);
 		devService = new DevService(this);
 		conversationService = new ConversationService(this);
+		housingService = new HousingService(this);
 		
 		if (config.keyExists("JYTHONCONSOLE.PORT")) {
 			int jythonPort = config.getInt("JYTHONCONSOLE.PORT");
@@ -449,6 +453,7 @@ public class NGECore {
 		spawnService.loadLairGroups();
 		spawnService.loadSpawnAreas();
 		
+		housingService.loadHousingTemplates();
 		equipmentService.loadBonusSets();
 		
 		retroService.run();
