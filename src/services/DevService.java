@@ -84,8 +84,8 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 21, "Weapons");
 				suiOptions.put((long) 22, "Misc Items");
 				suiOptions.put((long) 23, "Jedi Items");
-				//suiOptions.put((long) 120, "House Deeds");
 				suiOptions.put((long) 110, "Survey Devices");
+				//suiOptions.put((long) 120, "House Deeds");
 				break;
 			case 3: // [Items] Weapons
 				suiOptions.put((long) 30, "Jedi Weapons");

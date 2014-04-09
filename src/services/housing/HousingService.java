@@ -61,13 +61,19 @@ public class HousingService implements INetworkDispatch {
 		core.commandService.registerCommand("rotatefurniture");
 	}
 	
-	public void enterStructureMode(CreatureObject player, TangibleObject deed)
+	public void enterStructureMode(CreatureObject actor, TangibleObject deed)
 	{	
+		if(!actor.getClient().isGM() && !core.terrainService.canBuildAtPosition(actor, actor.getWorldPosition().x, actor.getWorldPosition().z))
+		{
+			actor.sendSystemMessage("You may not place a structure here.", (byte) 0); // should probably load this from an stf
+			return;
+		}
+		
 		if(housingTemplates.containsKey(deed.getTemplate()))
 		{
 			HouseTemplate houseTemplate = housingTemplates.get(deed.getTemplate());
 			EnterStructurePlacementModeMessage packet = new EnterStructurePlacementModeMessage(deed, houseTemplate.getBuildingTemplate());	
-			player.getClient().getSession().write(packet.serialize());
+			actor.getClient().getSession().write(packet.serialize());
 		}
 	}
 	
@@ -81,6 +87,12 @@ public class HousingService implements INetworkDispatch {
 		if(!houseTemplate.canBePlacedOn(actor.getPlanet().getName()))
 		{
 			actor.sendSystemMessage("You may not place this structure on this planet.", (byte) 0); // should probably load this from an stf
+			return;
+		}
+		
+		if(!actor.getClient().isGM() && !core.terrainService.canBuildAtPosition(actor, positionX, positionZ))
+		{
+			actor.sendSystemMessage("You may not place a structure here.", (byte) 0); // should probably load this from an stf
 			return;
 		}
 		
