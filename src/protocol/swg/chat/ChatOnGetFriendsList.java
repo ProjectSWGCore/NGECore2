@@ -1,4 +1,4 @@
-package protocol.swg;
+package protocol.swg.chat;
 
 import java.nio.ByteOrder;
 import java.util.List;
@@ -7,6 +7,7 @@ import main.NGECore;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
+import protocol.swg.SWGMessage;
 import resources.objects.player.PlayerObject;
 
 // This is possibly unused

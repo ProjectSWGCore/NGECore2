@@ -21,7 +21,6 @@
  ******************************************************************************/
 package services.chat;
 
-import java.util.List;
 import java.util.Vector;
 
 import resources.objects.creature.CreatureObject;
@@ -29,8 +28,6 @@ import resources.objects.creature.CreatureObject;
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.PrimaryKey;
-import com.sleepycat.persist.model.Relationship;
-import com.sleepycat.persist.model.SecondaryKey;
 
 @Entity
 public class ChatRoom {
@@ -45,8 +42,6 @@ public class ChatRoom {
 	@NotPersistent
 	private Vector<CreatureObject> userList = new Vector<CreatureObject>(); // current users
 
-	@NotPersistent
-	private int requestId; // not-persistent
 	private boolean moderatorsOnly;
 	private boolean privateRoom;
 	private boolean visible;
@@ -90,14 +85,6 @@ public class ChatRoom {
 
 	public void setUserList(Vector<CreatureObject> userList) {
 		this.userList = userList;
-	}
-
-	public int getRequestId() {
-		return requestId;
-	}
-
-	public void setRequestId(int requestId) {
-		this.requestId = requestId;
 	}
 
 	public boolean isModeratorsOnly() {

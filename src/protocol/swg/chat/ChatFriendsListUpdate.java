@@ -1,10 +1,12 @@
-package protocol.swg;
+package protocol.swg.chat;
 
 import java.nio.ByteOrder;
 
 import main.NGECore;
 
 import org.apache.mina.core.buffer.IoBuffer;
+
+import protocol.swg.SWGMessage;
 
 public class ChatFriendsListUpdate extends SWGMessage {
 

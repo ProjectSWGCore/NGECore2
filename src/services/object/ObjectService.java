@@ -58,10 +58,6 @@ import com.sleepycat.persist.EntityCursor;
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 
-import protocol.swg.ChatFriendsListUpdate;
-import protocol.swg.ChatOnChangeFriendStatus;
-import protocol.swg.ChatOnGetFriendsList;
-import protocol.swg.ChatRoomList;
 import protocol.swg.CmdSceneReady;
 import protocol.swg.CmdStartScene;
 import protocol.swg.HeartBeatMessage;
@@ -70,6 +66,12 @@ import protocol.swg.ParametersMessage;
 import protocol.swg.SelectCharacter;
 import protocol.swg.ServerTimeMessage;
 import protocol.swg.UnkByteFlag;
+import protocol.swg.chat.ChatFriendsListUpdate;
+import protocol.swg.chat.ChatOnChangeFriendStatus;
+import protocol.swg.chat.ChatOnConnectAvatar;
+import protocol.swg.chat.ChatOnGetFriendsList;
+import protocol.swg.chat.ChatRoomList;
+import protocol.swg.chat.ChatServerStatus;
 import protocol.swg.objectControllerObjects.UiPlayEffect;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.CrcStringTableVisitor;
@@ -783,10 +785,18 @@ public class ObjectService implements INetworkDispatch {
 				core.chatService.loadMailHeaders(client);
 				
 				core.simulationService.handleZoneIn(client);
+				
 				creature.makeAware(creature);
 				
+				ChatServerStatus chatStatus = new ChatServerStatus();
+				creature.getClient().getSession().write(chatStatus.serialize());
+				
+				ChatOnConnectAvatar chatConnect = new ChatOnConnectAvatar();
+				creature.getClient().getSession().write(chatConnect.serialize());
+
 				ChatRoomList chatRooms = new ChatRoomList(core.chatService.getChatRooms());
 				creature.getClient().getSession().write(chatRooms.serialize());
+				
 				//ChatOnGetFriendsList friendsListMessage = new ChatOnGetFriendsList(ghost);
 				//client.getSession().write(friendsListMessage.serialize());
 				

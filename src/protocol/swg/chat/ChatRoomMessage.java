@@ -19,49 +19,47 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package protocol.swg;
+package protocol.swg.chat;
+
+import java.nio.ByteOrder;
+
+import main.NGECore;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
+import protocol.swg.SWGMessage;
 
-public class ChatCreateRoom extends SWGMessage {
+public class ChatRoomMessage extends SWGMessage {
 
-	private String address, title;
-	private boolean privacy, moderatorOnly;
-	private int request;
+	private String character;
+	private String message;
+	private int roomId;
 
-	public ChatCreateRoom() { }
+	public ChatRoomMessage(int roomId, String player, String message) {
+		this.roomId = roomId;
+		this.character = player;
+		this.message = message;
+	}
+
 	@Override
 	public void deserialize(IoBuffer data) {
-
-		this.privacy = (boolean) ((data.get() == 1) ? false : true);
-		this.moderatorOnly = (boolean) ((data.get() == 1) ? true : false);
-		data.getShort(); // unk
-		this.address = getAsciiString(data);
-		this.title = getAsciiString(data);
-		this.request = data.getInt();
 	}
 
 	@Override
 	public IoBuffer serialize() {
-		return null;
-	}
+		String server = NGECore.getInstance().getGalaxyName();
 
-	public String getAddress() {
-		return address;
-	}
-	public String getTitle() {
-		return title;
-	}
-	public boolean isPrivacy() {
-		return privacy;
-	}
-	public boolean isModeratorOnly() {
-		return moderatorOnly;
-	}
-	
-	public int getRequest() {
-		return request;
+		IoBuffer buffer = IoBuffer.allocate(27 + server.length() + character.length() + (message.length() * 2)).order(ByteOrder.LITTLE_ENDIAN);
+
+		buffer.putShort((short) 5);
+		buffer.putInt(0xCD4CE444);
+		buffer.put(getAsciiString("SWG"));
+		buffer.put(getAsciiString(server));
+		buffer.put(getAsciiString(character));
+		buffer.putInt(roomId);
+		buffer.put(getUnicodeString(message));
+		buffer.putInt(0); // out of band package ?
+		return buffer.flip();
 	}
 
 }

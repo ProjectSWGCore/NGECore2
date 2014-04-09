@@ -34,12 +34,12 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import protocol.swg.ChatSystemMessage;
 import protocol.swg.ObjControllerMessage;
 import protocol.swg.PlayClientEffectObjectMessage;
 import protocol.swg.PlayMusicMessage;
 import protocol.swg.UpdatePostureMessage;
 import protocol.swg.UpdatePVPStatusMessage;
+import protocol.swg.chat.ChatSystemMessage;
 import protocol.swg.objectControllerObjects.Animation;
 import protocol.swg.objectControllerObjects.Posture;
 

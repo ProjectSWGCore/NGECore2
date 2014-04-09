@@ -19,36 +19,40 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package protocol.swg;
+package protocol.swg.chat;
+
+import java.nio.ByteOrder;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
+import protocol.swg.SWGMessage;
 
-public class ChatDeletePersistentMessage extends SWGMessage {
+public class ChatOnSendRoomMessage extends SWGMessage {
 
-	private int mailId;
+	private int errorCode;
+	private int msgId;
+
+	public ChatOnSendRoomMessage(int errorCode, int msgId) {
+		this.errorCode = errorCode;
+		this.msgId = msgId;
+	}
 
 	@Override
-	public void deserialize(IoBuffer buffer) {
-		
-		buffer.getShort();
-		buffer.getInt();
-		setMailId(buffer.getInt());
-		
+	public void deserialize(IoBuffer data) {
 	}
 
 	@Override
 	public IoBuffer serialize() {
-		// TODO Auto-generated method stub
-		return null;
+		IoBuffer buffer = IoBuffer.allocate(14).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putShort((short) 3);
+		buffer.putInt(0xE7B61633);
+		buffer.putInt(errorCode);
+		buffer.putInt(msgId); // msg id
+		return buffer.flip();
 	}
-
-	public int getMailId() {
-		return mailId;
-	}
-
-	public void setMailId(int mailId) {
-		this.mailId = mailId;
-	}
+	
+	public static final int SUCCESS = 0;
+	public static final int FAILED_MODERATOR = 9;
+	public static final int FAILED_LENGTH = 16;
 
 }
