@@ -19,28 +19,55 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package protocol.swg;
-
-import java.nio.ByteOrder;
+package protocol.swg.chat;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-public class ChatOnAddFriend extends SWGMessage {
+import protocol.swg.SWGMessage;
 
+public class ChatSendToRoom extends SWGMessage {
+	
+	private String message;
+	private int roomId;
+	private int msgId;
+	
+	public ChatSendToRoom() { }
+	
 	@Override
 	public void deserialize(IoBuffer data) {
-		
+		setMessage(getUnicodeString(data));
+		data.getInt();
+		setRoomId(data.getInt());
+		setMsgId(data.getInt());
 	}
 
 	@Override
 	public IoBuffer serialize() {
-		IoBuffer result = IoBuffer.allocate(20).order(ByteOrder.LITTLE_ENDIAN);
-	    
-		result.putShort((short) 0x03);
-		result.putInt(0x2B2A0D94);
-		result.putLong(0);
-		result.flip();
-		return result;
+		return null;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
+	}
+
+	public int getRoomId() {
+		return roomId;
+	}
+
+	public void setRoomId(int roomId) {
+		this.roomId = roomId;
+	}
+
+	public int getMsgId() {
+		return msgId;
+	}
+
+	public void setMsgId(int msgId) {
+		this.msgId = msgId;
 	}
 
 }

@@ -19,45 +19,38 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package protocol.swg;
-
-import java.nio.ByteOrder;
-
-import main.NGECore;
+package protocol.swg.chat;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-public class ChatRoomMessage extends SWGMessage {
+import protocol.swg.SWGMessage;
 
-	private String character;
-	private String message;
-	private int roomId;
 
-	public ChatRoomMessage(int roomId, String player, String message) {
-		this.roomId = roomId;
-		this.character = player;
-		this.message = message;
-	}
+public class ChatDeletePersistentMessage extends SWGMessage {
+
+	private int mailId;
 
 	@Override
-	public void deserialize(IoBuffer data) {
+	public void deserialize(IoBuffer buffer) {
+		
+		buffer.getShort();
+		buffer.getInt();
+		setMailId(buffer.getInt());
+		
 	}
 
 	@Override
 	public IoBuffer serialize() {
-		String server = NGECore.getInstance().getGalaxyName();
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-		IoBuffer buffer = IoBuffer.allocate(27 + server.length() + character.length() + (message.length() * 2)).order(ByteOrder.LITTLE_ENDIAN);
+	public int getMailId() {
+		return mailId;
+	}
 
-		buffer.putShort((short) 5);
-		buffer.putInt(0xCD4CE444);
-		buffer.put(getAsciiString("SWG"));
-		buffer.put(getAsciiString(server));
-		buffer.put(getAsciiString(character));
-		buffer.putInt(roomId);
-		buffer.put(getUnicodeString(message));
-		buffer.putInt(0); // out of band package ?
-		return buffer.flip();
+	public void setMailId(int mailId) {
+		this.mailId = mailId;
 	}
 
 }

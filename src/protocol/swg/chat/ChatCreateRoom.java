@@ -19,52 +19,51 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package protocol.swg;
-
-import java.nio.ByteOrder;
-
-import main.NGECore;
+package protocol.swg.chat;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import engine.resources.config.Config;
+import protocol.swg.SWGMessage;
 
-public class ChatOnChangeFriendStatus extends SWGMessage {
 
-	private String name;
-	private int type;
-	private long playerID;
+public class ChatCreateRoom extends SWGMessage {
 
-	// Adds or Removes a friend, not to be confused with online/offline status
-	public ChatOnChangeFriendStatus(long playerID, String name, int type) {
-		this.name = name;
-		this.type = type;
-		this.playerID = playerID;
-	}
+	private String address, title;
+	private boolean privacy, moderatorOnly;
+	private int request;
+
+	public ChatCreateRoom() { }
 	@Override
 	public void deserialize(IoBuffer data) {
-		
+
+		this.privacy = (boolean) ((data.get() == 1) ? false : true);
+		this.moderatorOnly = (boolean) ((data.get() == 1) ? true : false);
+		data.getShort(); // unk
+		this.address = getAsciiString(data);
+		this.title = getAsciiString(data);
+		this.request = data.getInt();
 	}
 
 	@Override
 	public IoBuffer serialize() {
-		Config config = NGECore.getInstance().getConfig();
-		String server = config.getString("GALAXY_NAME");
-		
-		IoBuffer result = IoBuffer.allocate(100 + this.name.length() + server.length()).order(ByteOrder.LITTLE_ENDIAN);
-		result.putShort((short)0x06);
-		result.putInt(0x54336726);
-		result.putLong(playerID);
-		
-		result.put(getAsciiString("SWG"));
-		result.put(getAsciiString(server));
-		result.put(getAsciiString(name));
-		result.putInt(0);
-		result.putInt(type);
-		result.put((byte) 0);
-		result.flip();
-		//System.out.println("ChatOnChangeFriendStatus: " + result.getHexDump());
-		return result;
+		return null;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+	public String getTitle() {
+		return title;
+	}
+	public boolean isPrivacy() {
+		return privacy;
+	}
+	public boolean isModeratorOnly() {
+		return moderatorOnly;
+	}
+	
+	public int getRequest() {
+		return request;
 	}
 
 }

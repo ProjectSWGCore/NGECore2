@@ -49,27 +49,28 @@ import resources.common.*;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import protocol.swg.AddIgnoreMessage;
-import protocol.swg.ChatCreateRoom;
-import protocol.swg.ChatEnterRoomById;
-import protocol.swg.ChatOnChangeFriendStatus;
-import protocol.swg.ChatDeletePersistentMessage;
-import protocol.swg.ChatFriendsListUpdate;
-import protocol.swg.ChatInstantMessageToCharacter;
-import protocol.swg.ChatInstantMessagetoClient;
-import protocol.swg.ChatOnAddFriend;
-import protocol.swg.ChatOnCreateRoom;
-import protocol.swg.ChatOnEnteredRoom;
-import protocol.swg.ChatOnSendInstantMessage;
-import protocol.swg.ChatOnSendPersistentMessage;
-import protocol.swg.ChatOnSendRoomMessage;
-import protocol.swg.ChatPersistentMessageToClient;
-import protocol.swg.ChatPersistentMessageToServer;
-import protocol.swg.ChatRequestPersistentMessage;
-import protocol.swg.ChatRoomList;
-import protocol.swg.ChatRoomMessage;
-import protocol.swg.ChatSendToRoom;
-import protocol.swg.ChatSystemMessage;
 import protocol.swg.ObjControllerMessage;
+import protocol.swg.chat.ChatCreateRoom;
+import protocol.swg.chat.ChatDeletePersistentMessage;
+import protocol.swg.chat.ChatEnterRoomById;
+import protocol.swg.chat.ChatFriendsListUpdate;
+import protocol.swg.chat.ChatInstantMessageToCharacter;
+import protocol.swg.chat.ChatInstantMessagetoClient;
+import protocol.swg.chat.ChatOnAddFriend;
+import protocol.swg.chat.ChatOnChangeFriendStatus;
+import protocol.swg.chat.ChatOnCreateRoom;
+import protocol.swg.chat.ChatOnEnteredRoom;
+import protocol.swg.chat.ChatOnSendInstantMessage;
+import protocol.swg.chat.ChatOnSendPersistentMessage;
+import protocol.swg.chat.ChatOnSendRoomMessage;
+import protocol.swg.chat.ChatPersistentMessageToClient;
+import protocol.swg.chat.ChatPersistentMessageToServer;
+import protocol.swg.chat.ChatRequestPersistentMessage;
+import protocol.swg.chat.ChatRoomList;
+import protocol.swg.chat.ChatRoomMessage;
+import protocol.swg.chat.ChatSendToRoom;
+import protocol.swg.chat.ChatServerStatus;
+import protocol.swg.chat.ChatSystemMessage;
 import protocol.swg.objectControllerObjects.PlayerEmote;
 import protocol.swg.objectControllerObjects.SpatialChat;
 import main.NGECore;
@@ -363,15 +364,17 @@ public class ChatService implements INetworkDispatch {
 				if (obj == null)
 					return;
 				
-				ChatRoomList listMessage = new ChatRoomList(chatRooms);
+				//ChatServerStatus chatServerStatus = new ChatServerStatus();
+				//client.getSession().write(chatServerStatus.serialize());
 				
+				ChatRoomList listMessage = new ChatRoomList(chatRooms);
 				client.getSession().write(listMessage.serialize());
 			}
 
 		});
 		
 		swgOpcodes.put(Opcodes.ChatCreateRoom, (session, data) -> {
-			data.order(ByteOrder.LITTLE_ENDIAN);
+			/*data.order(ByteOrder.LITTLE_ENDIAN);
 			
 			Client client = core.getClient(session);
 			
@@ -389,19 +392,33 @@ public class ChatService implements INetworkDispatch {
 			sentPacket.deserialize(data);
 			
 			ChatRoom room = createChatRoom(sentPacket.getTitle(), sentPacket.getAddress(), creo.getCustomName().toLowerCase(), true, false);
-			room.setPrivateRoom(sentPacket.isPrivacy());
-			room.setModeratorsOnly(sentPacket.isModeratorOnly());
 
 			if (room != null) {
+				room.setPrivateRoom(sentPacket.isPrivacy());
+				room.setModeratorsOnly(sentPacket.isModeratorOnly());
 				room.getUserList().add(creo);
 				room.getModeratorList().add(creo);
 				ChatOnCreateRoom response = new ChatOnCreateRoom(room, 0, sentPacket.getRequest());
 				session.write(response.serialize());
-			}
+			}*/
 			
 		});
 		
 		swgOpcodes.put(Opcodes.ChatQueryRoom, (session, data) -> {
+			data.order(ByteOrder.LITTLE_ENDIAN);
+			//StringUtilities.printBytes(data.array());
+			Client client = core.getClient(session);
+			
+			if(client == null)
+				return;
+			
+			SWGObject obj = client.getParent();
+			
+			if (obj == null)
+				return;
+			
+			
+			
 		});
 		
 		swgOpcodes.put(Opcodes.ChatSendToRoom, (session, data) -> {
@@ -441,7 +458,7 @@ public class ChatService implements INetworkDispatch {
 			
 			joinChatRoom((CreatureObject) obj, sentPacket.getRoomId());
 			
-			System.out.println("Entering room... " + sentPacket.getRoomId());
+			//System.out.println("Entering room... " + sentPacket.getRoomId());
 			
 		});
 	}
@@ -728,15 +745,15 @@ public class ChatService implements INetworkDispatch {
 
 		if (creator.contains(" "))
 			creator = creator.split(" ")[0];
-
+		
 		ChatRoom room = new ChatRoom();
 		room.setDescription(roomName);
 		if (!address.startsWith("SWG."))
 			room.setRoomAddress("SWG." + core.getGalaxyName() + "." + address);
 		else
 			room.setRoomAddress(address);
-		room.setCreator(creator);
-		room.setOwner(creator);
+		room.setCreator(creator.toLowerCase());
+		room.setOwner(creator.toLowerCase());
 		room.setVisible(showInList);
 		room.setRoomId(generateChatRoomId());
 		

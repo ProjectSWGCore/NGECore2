@@ -19,22 +19,15 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package protocol.swg;
+package protocol.swg.chat;
 
 import java.nio.ByteOrder;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
+import protocol.swg.SWGMessage;
 
-public class ChatOnSendPersistentMessage extends SWGMessage {
-	
-	private int error;
-	private int counter;
-
-	public ChatOnSendPersistentMessage(int error, int counter) {
-		this.error = error;
-		this.counter = counter;
-	}
+public class ChatOnAddFriend extends SWGMessage {
 
 	@Override
 	public void deserialize(IoBuffer data) {
@@ -43,16 +36,13 @@ public class ChatOnSendPersistentMessage extends SWGMessage {
 
 	@Override
 	public IoBuffer serialize() {
-		
-		IoBuffer result = IoBuffer.allocate(14).order(ByteOrder.LITTLE_ENDIAN);
-		
-		result.putShort((short) 3);
-		result.putInt(0x94E7A7AE);
-		result.putInt(error);
-		result.putInt(counter);
-		
-		return result.flip();
-		
+		IoBuffer result = IoBuffer.allocate(20).order(ByteOrder.LITTLE_ENDIAN);
+	    
+		result.putShort((short) 0x03);
+		result.putInt(0x2B2A0D94);
+		result.putLong(0);
+		result.flip();
+		return result;
 	}
 
 }

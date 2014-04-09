@@ -19,38 +19,41 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package protocol.swg;
-
-import java.nio.ByteOrder;
+package protocol.swg.chat;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-public class ChatOnSendRoomMessage extends SWGMessage {
+import protocol.swg.SWGMessage;
+import resources.common.StringUtilities;
 
-	private int errorCode;
-	private int msgId;
+public class ChatEnterRoomById extends SWGMessage {
 
-	public ChatOnSendRoomMessage(int errorCode, int msgId) {
-		this.errorCode = errorCode;
-		this.msgId = msgId;
-	}
+	private int roomId;
+	private int requestId;
 
+	public ChatEnterRoomById() { }
+	
 	@Override
 	public void deserialize(IoBuffer data) {
+		data.getShort();
+		data.getInt();
+		
+		this.requestId = data.getInt();
+		this.roomId = data.getInt();
+		// getAsciiString(data); // name of the room but don't need it since we have id.
 	}
 
 	@Override
 	public IoBuffer serialize() {
-		IoBuffer buffer = IoBuffer.allocate(14).order(ByteOrder.LITTLE_ENDIAN);
-		buffer.putShort((short) 3);
-		buffer.putInt(0xE7B61633);
-		buffer.putInt(errorCode);
-		buffer.putInt(msgId); // msg id
-		return buffer.flip();
+		return null;
 	}
-	
-	public static final int SUCCESS = 0;
-	public static final int FAILED_MODERATOR = 9;
-	public static final int FAILED_LENGTH = 16;
+
+	public int getRequestId() {
+		return requestId;
+	}
+
+	public int getRoomId() {
+		return roomId;
+	}
 
 }
