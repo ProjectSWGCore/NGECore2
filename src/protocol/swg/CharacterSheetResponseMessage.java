@@ -99,7 +99,7 @@ public class CharacterSheetResponseMessage extends SWGMessage {
 
 			buffer.put(getUnicodeString(spouse));
 
-			buffer.putInt(10); // lots remaining
+			buffer.putInt(creature.getPlayerObject().getLotsRemaining()); // lots remaining
 
 			return buffer.flip();
 		}

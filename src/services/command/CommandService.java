@@ -118,7 +118,11 @@ public class CommandService implements INetworkDispatch  {
 					return false;
 				}
 				
-				if (target != null && actor.getPosition().getDistance(target.getPosition()) > command.getMaxRangeToTarget()) {
+				if (target.getContainer() == actor || target.getGrandparent() == actor) {
+					break;
+				}
+				
+				if (command.getMaxRangeToTarget() != 0 && actor.getPosition().getDistance(target.getPosition()) > command.getMaxRangeToTarget()) {
 					return false;
 				}
 				
@@ -272,7 +276,7 @@ public class CommandService implements INetworkDispatch  {
 							
 							boolean hasCharacterAbility = (((String) visitor.getObject(i, 7-sub)).length() > 0);
 							
-							if (tableArray[n].startsWith("client_") && tableArray[n].startsWith("command_table_")) {
+							if (tableArray[n].startsWith("client_") || tableArray[n].startsWith("command_table_")) {
 								sub += 7;
 							}
 							
@@ -282,8 +286,11 @@ public class CommandService implements INetworkDispatch  {
 							
 							boolean isCombatCommand = false;
 							
-							if(visitor.getObject(i, 82-sub) instanceof Boolean)
-								isCombatCommand = (Boolean) visitor.getObject(i, 82-sub);
+							System.out.println(((String) visitor.getObject(i, 85-sub)));
+							
+							if(((String) visitor.getObject(i, 3)).equals("failSpecialAttack") || ((String) visitor.getObject(i, 85-sub)).equals("defaultattack")) 
+								isCombatCommand = true;
+
 							
 							if (hasCharacterAbility || isCombatCommand) {
 								CombatCommand command = new CombatCommand(name.toLowerCase());
@@ -333,7 +340,7 @@ public class CommandService implements INetworkDispatch  {
 							
 							boolean hasCharacterAbility = (((String) visitor.getObject(i, 7-sub)).length() > 0);
 														
-							if (tableArray[n].startsWith("client_") && tableArray[n].startsWith("command_table_")) {
+							if (tableArray[n].startsWith("client_") || tableArray[n].startsWith("command_table_")) {
 								sub += 7;
 							}
 							
@@ -343,9 +350,10 @@ public class CommandService implements INetworkDispatch  {
 							
 							boolean isCombatCommand = false;
 							
-							if(visitor.getObject(i, 82-sub) instanceof Boolean)
-								isCombatCommand = (Boolean) visitor.getObject(i, 82-sub);
+							if(((String) visitor.getObject(i, 3)).equals("failSpecialAttack") || ((String) visitor.getObject(i, 85-sub)).equals("defaultattack")) 
+								isCombatCommand = true;
 							
+							// "isCombatCommand" needs to be changed so that non-combat commands that are flagged to added to a combat queue are not considered combat commands
 							if (hasCharacterAbility || isCombatCommand) {
 								CombatCommand command = new CombatCommand(commandName);
 								commandLookup.add(command);
@@ -367,10 +375,7 @@ public class CommandService implements INetworkDispatch  {
 	}
 	
 	public void processCommand(CreatureObject actor, SWGObject target, BaseSWGCommand command, int actionCounter, String commandArgs) {
-		if (command.getCooldown() > (float) 1) {
-			actor.addCooldown(command.getCooldownGroup(), command.getCooldown());
-		}
-		
+		actor.addCooldown(command.getCooldownGroup(), command.getCooldown());
 		if (command instanceof CombatCommand) {
 			processCombatCommand(actor, target, (CombatCommand) command, actionCounter, commandArgs);
 		} else {
@@ -391,7 +396,9 @@ public class CommandService implements INetworkDispatch  {
 		//}
 		
 		if(FileUtilities.doesFileExist("scripts/commands/combat/" + command.getCommandName() + ".py"))
+		{
 			core.scriptService.callScript("scripts/commands/combat/", command.getCommandName(), "setup", core, attacker, target, command);
+		}
 		
 		boolean success = true;
 		
@@ -476,7 +483,7 @@ public class CommandService implements INetworkDispatch  {
 				return;
 			}
 			
-			if(command.getHitType() == 0 && command.getBuffNameSelf().length() > 0) {
+			if(command.getHitType() == 0 && command.getBuffNameSelf() != null && command.getBuffNameSelf().length() > 0) {
 				core.combatService.doSelfBuff(attacker, weapon, command, actionCounter);
 				return;
 			}

@@ -23,15 +23,24 @@ package protocol.swg;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
+import resources.common.StringUtilities;
+
 public class ChatEnterRoomById extends SWGMessage {
 
 	private int roomId;
+	private int requestId;
 
 	public ChatEnterRoomById() { }
 	
 	@Override
 	public void deserialize(IoBuffer data) {
-		setRoomId(data.getInt());
+		StringUtilities.printBytes(data.array());
+		data.getShort();
+		data.getInt();
+		
+		this.requestId = data.getInt();
+		this.roomId = data.getInt();
+		// getAsciiString(data); // name of the room but don't need it since we have id.
 	}
 
 	@Override
@@ -39,12 +48,12 @@ public class ChatEnterRoomById extends SWGMessage {
 		return null;
 	}
 
-	public int getRoomId() {
-		return roomId;
+	public int getRequestId() {
+		return requestId;
 	}
 
-	public void setRoomId(int roomId) {
-		this.roomId = roomId;
+	public int getRoomId() {
+		return roomId;
 	}
 
 }

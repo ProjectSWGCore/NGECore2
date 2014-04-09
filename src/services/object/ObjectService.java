@@ -877,7 +877,7 @@ public class ObjectService implements INetworkDispatch {
 	 * @param position The position as an offset to the parent object.
 	 * @param orientation The orientation as an offset to the parent object.
 	 */
-	public void createChildObject(SWGObject parent, String template, Point3D position, Quaternion orientation, int cellNumber) {
+	public SWGObject createChildObject(SWGObject parent, String template, Point3D position, Quaternion orientation, int cellNumber) {
 		
 		if(cellNumber == -1) {
 		
@@ -907,15 +907,15 @@ public class ObjectService implements INetworkDispatch {
 			child.setAttachment("cellNumber", cellNumber);
 		
 		//core.simulationService.add(child, x, z);
-		
+		return child;
 	}
 	
-	public void createChildObject(SWGObject parent, String template, float x, float y, float z, float qy, float qw) {
-		createChildObject(parent, template, new Point3D(x, y, z), new Quaternion(qw, 0, qy, 0), -1);
+	public SWGObject createChildObject(SWGObject parent, String template, float x, float y, float z, float qy, float qw) {
+		return createChildObject(parent, template, new Point3D(x, y, z), new Quaternion(qw, 0, qy, 0), -1);
 	}
 	
-	public void createChildObject(SWGObject parent, String template, float x, float y, float z, float qy, float qw, int cellNumber) {
-		createChildObject(parent, template, new Point3D(x, y, z), new Quaternion(qw, 0, qy, 0), cellNumber);
+	public SWGObject createChildObject(SWGObject parent, String template, float x, float y, float z, float qy, float qw, int cellNumber) {
+		return createChildObject(parent, template, new Point3D(x, y, z), new Quaternion(qw, 0, qy, 0), cellNumber);
 	}
 	
 	public void loadBuildoutObjects(Planet planet) throws InstantiationException, IllegalAccessException {

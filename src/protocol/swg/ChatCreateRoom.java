@@ -23,16 +23,45 @@ package protocol.swg;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
+
 public class ChatCreateRoom extends SWGMessage {
 
+	private String address, title;
+	private boolean privacy, moderatorOnly;
+	private int request;
+
+	public ChatCreateRoom() { }
 	@Override
 	public void deserialize(IoBuffer data) {
 
+		this.privacy = (boolean) ((data.get() == 1) ? false : true);
+		this.moderatorOnly = (boolean) ((data.get() == 1) ? true : false);
+		data.getShort(); // unk
+		this.address = getAsciiString(data);
+		this.title = getAsciiString(data);
+		this.request = data.getInt();
 	}
 
 	@Override
 	public IoBuffer serialize() {
 		return null;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+	public String getTitle() {
+		return title;
+	}
+	public boolean isPrivacy() {
+		return privacy;
+	}
+	public boolean isModeratorOnly() {
+		return moderatorOnly;
+	}
+	
+	public int getRequest() {
+		return request;
 	}
 
 }

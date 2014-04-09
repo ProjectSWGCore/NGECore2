@@ -85,6 +85,7 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 22, "Misc Items");
 				suiOptions.put((long) 23, "Jedi Items");
 				suiOptions.put((long) 110, "Survey Devices");
+				//suiOptions.put((long) 120, "House Deeds");
 				break;
 			case 3: // [Items] Weapons
 				suiOptions.put((long) 30, "Jedi Weapons");
@@ -990,8 +991,12 @@ public class DevService implements INetworkDispatch {
 						SurveyTool solarSurveyTool = (SurveyTool) core.objectService.createObject("object/tangible/survey_tool/shared_survey_tool_solar.iff", planet);
 						solarSurveyTool.setCustomName("Solar Survey Device");
 						inventory.add(solarSurveyTool);
+						return;
 						
-						break;
+					case 120:
+						SWGObject houseDeed = core.objectService.createObject("object/tangible/deed/player_house_deed/shared_generic_house_small_deed.iff", planet);
+						inventory.add(houseDeed);
+						return;
 				}
 			}	
 		});
