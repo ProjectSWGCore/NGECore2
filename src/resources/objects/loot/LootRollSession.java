@@ -24,9 +24,11 @@ package resources.objects.loot;
 import java.util.ArrayList;
 import java.util.List;
 
+import engine.resources.scene.Planet;
 import main.NGECore;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
+import resources.objects.tangible.TangibleObject;
 
 /** 
  * @author Charon 
@@ -36,7 +38,8 @@ public class LootRollSession {
 	
 	private String SessionID; // leaderName-SystemTime
 	private GroupObject playerGroup; 
-	private List<String> droppedItemTemplates;
+	private List<TangibleObject> droppedItems;
+	private Planet sessionPlanet;
 	
 	public LootRollSession(){	
 	}
@@ -49,15 +52,16 @@ public class LootRollSession {
 		} else {
 			this.SessionID = requester.getCustomName()+"-"+System.currentTimeMillis();
 		}
-		droppedItemTemplates = new ArrayList<String>();
+		droppedItems = new ArrayList<TangibleObject>();
+		sessionPlanet = requester.getPlanet();
 	}
 
-	public List<String> getDroppedItemTemplates() {
-		return droppedItemTemplates;
+	public List<TangibleObject> getDroppedItems() {
+		return droppedItems;
 	}
 
-	public void addDroppedItemTemplate(String droppedItemTemplate) {
-		this.droppedItemTemplates.add(droppedItemTemplate);
+	public void addDroppedItem(TangibleObject droppedItem) {
+		this.droppedItems.add(droppedItem);
 	}
 
 	public String getSessionID() {
@@ -70,5 +74,9 @@ public class LootRollSession {
 	
 	public void generateSessionID(String sessionID) {
 		SessionID = sessionID;
+	}
+
+	public Planet getSessionPlanet() {
+		return sessionPlanet;
 	}
 }

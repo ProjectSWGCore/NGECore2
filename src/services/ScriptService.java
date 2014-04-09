@@ -110,6 +110,16 @@ public class ScriptService {
 		return func;
 	}
 	
+	public String fetchString(String path, String method) {
+		PyObject result = core.scriptService.callScript(path, "", method);
+		return ((PyObject)result).asString();		
+	}
+	
+	public int fetchInteger(String path, String method) {
+		PyObject result = core.scriptService.callScript(path, "", method);
+		return ((PyObject)result).asInt();		
+	}
+	
 	public Vector<String> fetchStringVector(String path, String method) {
 		Vector<String> vector = new Vector<String>();
 		PyObject result = core.scriptService.callScript(path, "", method);

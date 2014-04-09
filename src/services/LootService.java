@@ -21,29 +21,18 @@
  ******************************************************************************/
 package services;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Random;
-import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.Vector;
-
 import resources.objects.creature.CreatureObject;
-import resources.objects.group.GroupObject;
-import resources.objects.loot.LootDrop;
 import resources.objects.loot.LootGroup;
-import resources.objects.loot.LootPool;
 import resources.objects.loot.LootRollSession;
-import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
-import resources.objects.tool.SurveyTool;
 import main.NGECore;
 import engine.resources.objects.SWGObject;
+import engine.resources.scene.Planet;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
@@ -110,27 +99,23 @@ public class LootService implements INetworkDispatch {
 	    	int lootGroupRoll = new Random().nextInt(100);
 	    	if (lootGroupRoll <= groupChance){    		
 	    		System.out.println("this lootGroup will drop something");
-	    		handleLootGroup(lootGroup,lootRollSession); //this lootGroup will drop something	    		
+	    		handleLootGroup(lootGroup,lootRollSession); //this lootGroup will drop something e.g. {kraytpearl_range,krayt_tissue_rare}	    		
 	    	}		
 	    }
 	    
-	    for (String s : lootRollSession.getDroppedItemTemplates()){
-			System.out.println("lootRollSession template: " + s);
-		}
 	    
-	 
 	    // ********** Phase 1 complete, loot items determined **********
 	    // stored in the lootSession
 	    
 	    // Distribute the loot drops according to group loot rules	    
 	    // For now just spawn items into requester's inventory
     	SWGObject requesterInventory = requester.getSlottedObject("inventory");
-    	System.out.println("requesterInventory " + requesterInventory);
-    	for (String template : lootRollSession.getDroppedItemTemplates()){		    
-	    	TangibleObject droppedItem = (TangibleObject) core.objectService.createObject(template, requester.getPlanet());				
-	    	System.out.println("droppedItem " + droppedItem);
+    	
+    	for (TangibleObject droppedItem : lootRollSession.getDroppedItems()){		    
+    		
 	    	requesterInventory.add(droppedItem);
     	}
+    	 
        
 	    // ToDo: Group loot settings etc.  actual loot chance was lootgroupchance*lootchance    
 	}
@@ -148,33 +133,131 @@ public class LootService implements INetworkDispatch {
 			System.err.println("No Lootpools in Lootgroup!");
 			return;
 		}
+		
+		int randomItemFromGroup = new Random().nextInt(100);
+		int remainder = 0; // [10,20,30,34,5,1] 
+		
 		for(int i=0;i<lootPoolChances.length;i++) {
-		    	int lootPoolElementRoll = new Random().nextInt(100);
-		    	if (lootPoolElementRoll <= lootPoolChances[i]){
-		    		System.out.println("this loot pool will drop something");
-		    		handleLootPool(lootPoolNames[i],lootRollSession); // This loot pool will drop something			    		
-		    	}			 
-			}
+			remainder += lootPoolChances[i]; 
+	    	if (randomItemFromGroup <= remainder){
+	    		System.out.println("this loot pool will drop something"); // e.g. kraytpearl_range
+	    		handleLootPool(lootPoolNames[i],lootRollSession); // This loot pool will drop something	
+	    		break;
+	    	}			 
+		}
 	}
 		
 	private void handleLootPool(String poolName,LootRollSession lootRollSession){
 
 		// Fetch the loot pool data from the poolName.py script		
-		String path = "scripts/lootPools/"+poolName.toLowerCase(); 
-		Vector<String> itemTemplates = (Vector<String>)core.scriptService.fetchStringVector(path,"itemTemplates");
+		String path = "scripts/loot/lootPools/"+poolName.toLowerCase(); 
+		Vector<String> itemNames = (Vector<String>)core.scriptService.fetchStringVector(path,"itemNames");
 		
-		for (String s : itemTemplates){
+		for (String s : itemNames){
 			System.out.println("template: " + s);
 		}
 		
 		Vector<Integer> itemChances = (Vector<Integer>)core.scriptService.fetchIntegerVector(path,"itemChances");
-		
-		// Now here maybe all items in pool have an equal chance to spawn
-		// or they have percentages assigned to them as well
-		
+				
 		int randomItemFromPool = new Random().nextInt(100);
-		int itemIndex = (int)Math.floor(randomItemFromPool/100*itemTemplates.size()); // 5 Elements,rnd is 83 -> 0.83*5=
+		int remainder = 0; // [10,20,30,34,5,1]
 		
-		lootRollSession.addDroppedItemTemplate(itemTemplates.get(itemIndex));
+		for (int i=0;i<itemNames.size();i++){
+			remainder += itemChances.get(i); 
+			if (randomItemFromPool<=remainder){
+				// this element has been chosen e.g. kraytpearl_flawless
+				handleLootPoolItems(itemNames.get(i), lootRollSession);
+				break;
+			}						
+		}
 	}	
+	
+	private void handleLootPoolItems(String itemName,LootRollSession lootRollSession){
+
+		String path = "scripts/loot/lootItems/"+itemName.toLowerCase(); 
+		System.out.println("path: " + path);
+		String itemTemplate = (String)core.scriptService.fetchString(path,"itemTemplate");
+		String customName = (String)core.scriptService.fetchString(path,"customItemName");
+		int stackCount = (Integer)core.scriptService.fetchInteger(path,"customItemStackCount");
+		Vector<String> customizationAttributes = (Vector<String>)core.scriptService.fetchStringVector(path,"customizationAttributes");
+		Vector<Integer> customizationValues = (Vector<Integer>)core.scriptService.fetchIntegerVector(path,"customizationValues");
+		
+		System.out.println("itemTemplate " + itemTemplate);
+		
+		/*
+		 craftingValues = {
+		{"mindamage",25,35,0},
+		{"maxdamage",40,50,0},
+		{"attackspeed",1,-1,5},
+		{"woundchance",4,8,5},
+		{"hitpoints",800,1200,0},
+		{"attackhealthcost",0,9,0},
+		{"attackactioncost",0,9,0},
+		{"attackmindcost",0,9,0},
+		{"forcecost",0,9.9,0},
+		{"color",31,31,0},
+		{"quality",6,6,0},
+	},
+		 */
+		
+		
+		
+		
+		
+		
+		
+		
+		TangibleObject droppedItem = createDroppedItem(itemTemplate,lootRollSession.getSessionPlanet());
+    	
+    	handleCustomDropName(droppedItem);
+    	handleStats(droppedItem);
+    	setCustomization(droppedItem);
+		
+		lootRollSession.addDroppedItem(droppedItem);
+	}	
+
+	
+	
+	private void handleCustomDropName(TangibleObject droppedItem) {
+		String customName = droppedItem.getCustomName();
+
+		if (customName!=null) {
+			if (customName.charAt(0) == '@' || customName.contains("_n:")) {
+				customName = ""; // Look the name up in some tre table
+			}
+		}
+		droppedItem.setCustomName(customName);
+	}
+	
+	private TangibleObject createDroppedItem(String template,Planet planet){
+		TangibleObject droppedItem = (TangibleObject) core.objectService.createObject(template, planet);				
+    	System.out.println("droppedItem " + droppedItem);
+    	return droppedItem;
+	}
+	
+	
+	
+	private void setCustomization(TangibleObject droppedItem) {
+		
+		// Example color crystal
+		droppedItem.setCustomizationVariable("/private/index_color_1", (byte) new Random().nextInt(7));  // 4 blue
+		
+		// More general 
+//		String path = "scripts/loot/lootItems/"+droppedItem.getCustomName().toLowerCase(); 
+//		Vector<String> customizationPaths = (Vector<String>)core.scriptService.fetchStringVector(path,"itemCustomizationPaths");
+//		Vector<Integer> customizationValues = (Vector<Integer>)core.scriptService.fetchIntegerVector(path,"itemCustomizationValues");
+//		for (int i=0;i<customizationPaths.size();i++){
+//			String attributePath = customizationPaths.get(i);
+//			int attributeValue = customizationValues.get(i);
+//			droppedItem.setCustomizationVariable(attributePath, (byte)attributeValue);
+//		}
+	}
+	
+	private void handleStats(TangibleObject droppedItem) {
+		// ToDo: Min,Max for weapons , Dots on weapons etc.
+		// This must be considered for the python scripts as well
+		// So basically every item needs to have loot-related data in their py scripts as well
+	}
+	
+	
 }	
