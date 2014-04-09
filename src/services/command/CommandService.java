@@ -122,7 +122,7 @@ public class CommandService implements INetworkDispatch  {
 					break;
 				}
 				
-				if (actor.getPosition().getDistance(target.getPosition()) > command.getMaxRangeToTarget()) {
+				if (command.getMaxRangeToTarget() != 0 && actor.getPosition().getDistance(target.getPosition()) > command.getMaxRangeToTarget()) {
 					return false;
 				}
 				
@@ -286,8 +286,11 @@ public class CommandService implements INetworkDispatch  {
 							
 							boolean isCombatCommand = false;
 							
-							if(visitor.getObject(i, 82-sub) instanceof Boolean)
-								isCombatCommand = (Boolean) visitor.getObject(i, 82-sub);
+							System.out.println(((String) visitor.getObject(i, 85-sub)));
+							
+							if(((String) visitor.getObject(i, 3)).equals("failSpecialAttack") || ((String) visitor.getObject(i, 85-sub)).equals("defaultattack")) 
+								isCombatCommand = true;
+
 							
 							if (hasCharacterAbility || isCombatCommand) {
 								CombatCommand command = new CombatCommand(name.toLowerCase());
@@ -347,8 +350,8 @@ public class CommandService implements INetworkDispatch  {
 							
 							boolean isCombatCommand = false;
 							
-							if(visitor.getObject(i, 82-sub) instanceof Boolean)
-								isCombatCommand = (Boolean) visitor.getObject(i, 82-sub);
+							if(((String) visitor.getObject(i, 3)).equals("failSpecialAttack") || ((String) visitor.getObject(i, 85-sub)).equals("defaultattack")) 
+								isCombatCommand = true;
 							
 							// "isCombatCommand" needs to be changed so that non-combat commands that are flagged to added to a combat queue are not considered combat commands
 							if (hasCharacterAbility || isCombatCommand) {
@@ -373,7 +376,6 @@ public class CommandService implements INetworkDispatch  {
 	
 	public void processCommand(CreatureObject actor, SWGObject target, BaseSWGCommand command, int actionCounter, String commandArgs) {
 		actor.addCooldown(command.getCooldownGroup(), command.getCooldown());
-		
 		if (command instanceof CombatCommand) {
 			processCombatCommand(actor, target, (CombatCommand) command, actionCounter, commandArgs);
 		} else {
@@ -396,12 +398,6 @@ public class CommandService implements INetworkDispatch  {
 		if(FileUtilities.doesFileExist("scripts/commands/combat/" + command.getCommandName() + ".py"))
 		{
 			core.scriptService.callScript("scripts/commands/combat/", command.getCommandName(), "setup", core, attacker, target, command);
-		}
-		// Temporary fix for certain non-combat commands being registered as combat commands
-		else if(FileUtilities.doesFileExist("scripts/commands/" + command.getCommandName() + ".py"))
-		{
-			core.scriptService.callScript("scripts/commands/", command.getCommandName(), "run", core, attacker, target, commandArgs);
-			return;
 		}
 		
 		boolean success = true;
