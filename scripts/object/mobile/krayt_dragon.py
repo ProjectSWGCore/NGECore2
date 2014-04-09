@@ -7,9 +7,9 @@ def setup(core, object):
 	lootGroupChance_1 = 65
 	object.addToLootGroups(lootPoolNames_1,lootPoolChances_1,lootGroupChance_1)
 	
-	lootPoolNames_2 = ['kraytpearl_loq']
+	lootPoolNames_2 = ['kraytpearl_lowq']
 	lootPoolChances_2 = [100]
-	lootGroupChance_2 = 35
+	lootGroupChance_2 = 85
 	object.addToLootGroups(lootPoolNames_2,lootPoolChances_2,lootGroupChance_2)
 	
 	return 

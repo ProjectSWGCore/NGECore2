@@ -86,6 +86,7 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 23, "Jedi Items");
 				suiOptions.put((long) 110, "Survey Devices");
 				suiOptions.put((long) 111, "Spawn Tusken");
+				suiOptions.put((long) 112, "Spawn Krayt");
 				break;
 			case 3: // [Items] Weapons
 				suiOptions.put((long) 30, "Jedi Weapons");
@@ -1000,6 +1001,11 @@ public class DevService implements INetworkDispatch {
 						SWGObject spawned = core.staticService.spawnObject("object/mobile/shared_tusken_raider.iff", "tatooine", 0L, 3522F, 4F, -4801F, 0.70F, 0.71F);
 						
 						core.lootService.handleLootRequest(player,(TangibleObject)spawned);
+						break;
+					case 112:
+						SWGObject spawned2 = core.staticService.spawnObject("object/mobile/shared_krayt_dragon.iff", "tatooine", 0L, 3512F, 4F, -4801F, 0.70F, 0.71F);
+						
+						core.lootService.handleLootRequest(player,(TangibleObject)spawned2);
 						break;
 				}
 			}	

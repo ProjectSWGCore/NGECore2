@@ -40,6 +40,7 @@ public class LootRollSession {
 	private GroupObject playerGroup; 
 	private List<TangibleObject> droppedItems;
 	private Planet sessionPlanet;
+	private List<String> errorMessages; 
 	
 	public LootRollSession(){	
 	}
@@ -53,6 +54,7 @@ public class LootRollSession {
 			this.SessionID = requester.getCustomName()+"-"+System.currentTimeMillis();
 		}
 		droppedItems = new ArrayList<TangibleObject>();
+		errorMessages = new ArrayList<String>();
 		sessionPlanet = requester.getPlanet();
 	}
 
@@ -78,5 +80,13 @@ public class LootRollSession {
 
 	public Planet getSessionPlanet() {
 		return sessionPlanet;
+	}
+
+	public List<String> getErrorMessages() {
+		return errorMessages;
+	}
+
+	public void addErrorMessage(String errorMessage) {
+		this.errorMessages.add(errorMessage);
 	}
 }

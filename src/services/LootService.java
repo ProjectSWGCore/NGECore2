@@ -21,11 +21,23 @@
  ******************************************************************************/
 package services;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.DirectoryStream.Filter;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributeView;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
+
 import resources.objects.creature.CreatureObject;
 import resources.objects.loot.LootGroup;
 import resources.objects.loot.LootRollSession;
@@ -60,7 +72,13 @@ public class LootService implements INetworkDispatch {
 	}
 	
 	public void handleLootRequest(CreatureObject requester, TangibleObject lootedObject) {
-			
+		
+		if (requester.getCustomName().contains("Kun")){
+			requester.setCashCredits(requester.getCashCredits()+1);
+			requester.sendSystemMessage("You looted 1 lousy credit.", (byte)1); 
+			return;
+		}
+				
 		LootRollSession lootRollSession = new LootRollSession(requester);
 		String lootedObjectType = "Tangible";
 		if (lootedObject instanceof CreatureObject)
@@ -109,6 +127,14 @@ public class LootService implements INetworkDispatch {
 	    
 	    // Distribute the loot drops according to group loot rules	    
 	    // For now just spawn items into requester's inventory
+	    
+	    if (lootRollSession.getErrorMessages().size()>0){
+	    	for (String msg : lootRollSession.getErrorMessages()){
+	    		// ToDo: Show this for each group member later!
+	    		requester.sendSystemMessage(msg,(byte) 1);
+	    	}
+	    }
+	    
     	SWGObject requesterInventory = requester.getSlottedObject("inventory");
     	
     	for (TangibleObject droppedItem : lootRollSession.getDroppedItems()){		    
@@ -172,60 +198,92 @@ public class LootService implements INetworkDispatch {
 		}
 	}	
 	
+	private static class DirectoriesFilter implements Filter<Path> {
+	    @Override
+	    public boolean accept(Path entry) throws IOException {
+	        return Files.isDirectory(entry);
+	    }
+	}
+	
 	private void handleLootPoolItems(String itemName,LootRollSession lootRollSession){
 
-		String path = "scripts/loot/lootItems/"+itemName.toLowerCase(); 
-		System.out.println("path: " + path);
-		String itemTemplate = (String)core.scriptService.fetchString(path,"itemTemplate");
-		String customName = (String)core.scriptService.fetchString(path,"customItemName");
-		int stackCount = (Integer)core.scriptService.fetchInteger(path,"customItemStackCount");
-		Vector<String> customizationAttributes = (Vector<String>)core.scriptService.fetchStringVector(path,"customizationAttributes");
-		Vector<Integer> customizationValues = (Vector<Integer>)core.scriptService.fetchIntegerVector(path,"customizationValues");
+		List<String> subfolders = new ArrayList<String>(); // Consider all sub-folders		
+		try (DirectoryStream<Path> ds = Files.newDirectoryStream(FileSystems.getDefault().getPath("scripts/loot/lootItems/"), new DirectoriesFilter())) {
+		        for (Path p : ds) {
+		        	subfolders.add(p.getFileName().toString());
+		        }
+		    } catch (IOException e) {
+		    	lootRollSession.addErrorMessage("File system check caused an error. Please contact Charon about this issue.");
+	        	return;
+		    }
+
+		String itemPath = "scripts/loot/lootItems/"+itemName.toLowerCase()+".py";
+		File file = new File(itemPath);
+		if (!file.isFile()){
+			for (String subfolderName : subfolders){
+				itemPath = "scripts/loot/lootItems/"+ subfolderName +"/"+itemName.toLowerCase()+".py"; 
+				File subfile = new File(itemPath);
+				if (subfile.isFile())
+					break;			
+			}
+		}
+
+		File checkfile = new File(itemPath);
+		if (!checkfile.isFile()){
+			String errorMessage = "Loot item  '" + itemName + "'  not found in file system. Please contact Charon about this issue.";
+			lootRollSession.addErrorMessage(errorMessage);
+			return;
+		}
+		
+		itemPath = itemPath.substring(0, itemPath.length()-3); // remove the file type
+
+		String customName = "";
+		String itemTemplate = "";
+		int stackCount = 1;
+		Vector<String> customizationAttributes = null;
+		Vector<Integer> customizationValues = null;
+				
+		if(core.scriptService.getMethod(itemPath,"","itemTemplate")==null){
+			String errorMessage = "Loot item  '" + itemName + "'  has no template function assigned in its script. Please contact Charon about this issue.";
+			lootRollSession.addErrorMessage(errorMessage);
+			return;
+		}
+		
+		itemTemplate = (String)core.scriptService.fetchString(itemPath,"itemTemplate");
+		
+		// only consider the following variables, if they are in the python-script file
+		if(core.scriptService.getMethod(itemPath,"","customItemName")!=null) 
+			customName = (String)core.scriptService.fetchString(itemPath,"customItemName");
+		
+		if(core.scriptService.getMethod(itemPath,"","customItemStackCount")!=null)
+			stackCount = (Integer)core.scriptService.fetchInteger(itemPath,"customItemStackCount");
+		
+		if(core.scriptService.getMethod(itemPath,"","customizationAttributes")!=null)
+			customizationAttributes = (Vector<String>)core.scriptService.fetchStringVector(itemPath,"customizationAttributes");
+		
+		if(core.scriptService.getMethod(itemPath,"","customizationValues")!=null)
+			customizationValues = (Vector<Integer>)core.scriptService.fetchIntegerVector(itemPath,"customizationValues");
 		
 		System.out.println("itemTemplate " + itemTemplate);
 		
-		/*
-		 craftingValues = {
-		{"mindamage",25,35,0},
-		{"maxdamage",40,50,0},
-		{"attackspeed",1,-1,5},
-		{"woundchance",4,8,5},
-		{"hitpoints",800,1200,0},
-		{"attackhealthcost",0,9,0},
-		{"attackactioncost",0,9,0},
-		{"attackmindcost",0,9,0},
-		{"forcecost",0,9.9,0},
-		{"color",31,31,0},
-		{"quality",6,6,0},
-	},
-		 */
-		
-		
-		
-		
-		
-		
-		
-		
 		TangibleObject droppedItem = createDroppedItem(itemTemplate,lootRollSession.getSessionPlanet());
     	
-    	handleCustomDropName(droppedItem);
+		droppedItem.setAttachment("LootItemName", itemName);
+    	handleCustomDropName(droppedItem,customName);
     	handleStats(droppedItem);
     	setCustomization(droppedItem);
+    	handleSpecialItems(droppedItem);
 		
 		lootRollSession.addDroppedItem(droppedItem);
 	}	
-
 	
-	
-	private void handleCustomDropName(TangibleObject droppedItem) {
-		String customName = droppedItem.getCustomName();
-
-		if (customName!=null) {
-			if (customName.charAt(0) == '@' || customName.contains("_n:")) {
-				customName = ""; // Look the name up in some tre table
-			}
-		}
+	private void handleCustomDropName(TangibleObject droppedItem,String customName) {
+//		String customItemName = droppedItem.getCustomName();
+//		if (customName.charAt(0) == '@' || customName.contains("_n:")) {
+//				if (customName!=null) {
+//			customName = ""; // Look the name up in some tre table
+//			}
+//		}
 		droppedItem.setCustomName(customName);
 	}
 	
@@ -234,9 +292,7 @@ public class LootService implements INetworkDispatch {
     	System.out.println("droppedItem " + droppedItem);
     	return droppedItem;
 	}
-	
-	
-	
+		
 	private void setCustomization(TangibleObject droppedItem) {
 		
 		// Example color crystal
@@ -253,11 +309,109 @@ public class LootService implements INetworkDispatch {
 //		}
 	}
 	
+	private void handleSpecialItems(TangibleObject droppedItem) {
+		if (droppedItem.getTemplate().contains("shared_lightsaber_module_krayt_dragon_pearl")){
+			handleKraytPearl(droppedItem);
+		}
+		if (droppedItem.getTemplate().contains("shared_lightsaber_module_force_crystal.iff")){
+			handlePowerCrystal(droppedItem);
+		}		
+	}
+	
 	private void handleStats(TangibleObject droppedItem) {
 		// ToDo: Min,Max for weapons , Dots on weapons etc.
 		// This must be considered for the python scripts as well
 		// So basically every item needs to have loot-related data in their py scripts as well
+		
+		
+	}	
+	
+	// ************* Special items ************
+	private void handleKraytPearl(TangibleObject droppedItem) {
+		
+		String itemName = (String)droppedItem.getAttachment("LootItemName");
+		String qualityString = "";
+		switch (itemName) {
+		case "kraytpearl_cracked": 
+			droppedItem.setStfFilename("static_item_n");
+			droppedItem.setStfName("item_junk_imitation_pearl_01_02");
+			droppedItem.setDetailFilename("static_item_d");
+			droppedItem.setDetailName("item_junk_imitation_pearl_01_02");
+			return;
+		case "kraytpearl_scratched": 
+			droppedItem.setStfFilename("static_item_n");
+			droppedItem.setStfName("item_junk_imitation_pearl_01_01");
+			droppedItem.setDetailFilename("static_item_d");
+			droppedItem.setDetailName("item_junk_imitation_pearl_01_01");
+			return;
+		case "kraytpearl_poor": 
+			qualityString="Poor";
+			break;
+		case "kraytpearl_fair": 
+			qualityString="Fair";
+			break;
+		case "kraytpearl_good": 
+			qualityString="Good";
+			break;
+		case "kraytpearl_quality": 
+			qualityString="Quality";
+			break;
+		case "kraytpearl_select": 
+			qualityString="Select";
+			break;
+		case "kraytpearl_premium": 
+			qualityString="Premium";
+			break;
+		case "kraytpearl_flawless": 
+			qualityString="Flawless";
+			break;
+		default:
+			qualityString="Undetermined";
+			break;
+	}                               
+		droppedItem.getAttributes().put("@obj_attr_n:condition", "100/100");
+		droppedItem.getAttributes().put("@obj_attr_n:crystal_owner", "\\#D1F56F UNTUNED \\#FFFFFF ");		
+		droppedItem.getAttributes().put("@obj_attr_n:crystal_quality", qualityString);	
+		droppedItem.setAttachment("radial_filename", "tunable");
 	}
 	
-	
+	private void handlePowerCrystal(TangibleObject droppedItem) {
+		
+		String itemName = (String)droppedItem.getAttachment("LootItemName");
+		String qualityString = "";
+		switch (itemName) {
+		
+		case "powercrystal_poor": 
+			qualityString="Poor";
+			break;
+		case "powercrystal_fair": 
+			qualityString="Fair";
+			break;
+		case "powercrystal_good": 
+			qualityString="Good";
+			break;
+		case "powercrystal_quality": 
+			qualityString="Quality";
+			break;
+		case "powercrystal_select": 
+			qualityString="Select";
+			break;
+		case "powercrystal_premium": 
+			qualityString="Premium";
+			break;
+		case "powercrystal_flawless": 
+			qualityString="Flawless";
+			break;
+		case "powercrystal_perfect": 
+			qualityString="Perfect";
+			break;
+		default:
+			qualityString="Undetermined";
+			break;
+	}                               
+		droppedItem.getAttributes().put("@obj_attr_n:condition", "100/100");
+		droppedItem.getAttributes().put("@obj_attr_n:crystal_owner", "\\#D1F56F UNTUNED \\#FFFFFF ");
+		droppedItem.getAttributes().put("@obj_attr_n:crystal_quality", qualityString);	
+		droppedItem.setAttachment("radial_filename", "tunable");
+	}	
 }	
