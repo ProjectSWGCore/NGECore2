@@ -27,22 +27,20 @@ import main.NGECore;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import engine.resources.common.CRC;
-import resources.common.Opcodes;
+import services.travel.TravelPoint;
+import engine.resources.objects.SWGObject;
 
-public class ChatOnEnteredRoom extends SWGMessage {
+@SuppressWarnings("unused")
+public class EnterStructurePlacementModeMessage extends SWGMessage {
 
-	private String characterName;
-	private int success;
-	private int roomId;
-	private boolean join;
-
-	public ChatOnEnteredRoom(String characterName, int success, int roomId, boolean join) {
-		this.characterName = characterName;
-		this.success = success;
-		this.roomId = roomId;
+	private SWGObject deed;
+	private String structureTemplate;
+	
+	public EnterStructurePlacementModeMessage(SWGObject deed, String structureTemplate) {
+		this.deed = deed;
+		this.structureTemplate = structureTemplate;
 	}
-
+	
 	@Override
 	public void deserialize(IoBuffer data) {
 
@@ -50,22 +48,17 @@ public class ChatOnEnteredRoom extends SWGMessage {
 
 	@Override
 	public IoBuffer serialize() {
-		String galaxy = NGECore.getInstance().getGalaxyName();
-		IoBuffer buffer = IoBuffer.allocate(27 + galaxy.length() + characterName.length()).order(ByteOrder.LITTLE_ENDIAN);
-		buffer.putShort((short) 5);
-		if (join)
-			buffer.putInt(Opcodes.ChatOnEnteredRoom);
-		else
-			buffer.putInt(CRC.StringtoCRC("ChatOnLeaveRoom"));
-		buffer.put(getAsciiString("SWG"));
-		buffer.put(getAsciiString(galaxy));
-		buffer.put(getAsciiString(characterName));
-		buffer.putInt(success);
-		buffer.putInt(roomId);
-		buffer.putInt(0);
-		return buffer.flip();
+		IoBuffer result = IoBuffer.allocate(16 + structureTemplate.length()).order(ByteOrder.LITTLE_ENDIAN);
+		
+		result.putShort((short) 3);
+		result.putInt(0xE8A54DC1);
+		
+		result.putLong(deed.getObjectID());
+		
+		deed.setAttachment("structureTemplate", structureTemplate);
+		result.put(getAsciiString(structureTemplate));
+		
+		return result.flip();
 	}
 
-	public static final int JOIN_SUCCESS = 0;
-	public static final int JOIN_FAIL_NO_INVITE = 0x10;
 }

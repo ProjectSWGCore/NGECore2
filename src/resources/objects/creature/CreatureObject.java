@@ -22,7 +22,6 @@
 package resources.objects.creature;
 
 import java.lang.System;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -63,6 +62,7 @@ import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
+import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 
@@ -1775,6 +1775,11 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 		
 		return 0L;
+	}
+	
+	public PlayerObject getPlayerObject()
+	{
+		return (PlayerObject) this.getSlottedObject("ghost");
 	}
 	
 	//public float getCooldown(String cooldownGroup) {
