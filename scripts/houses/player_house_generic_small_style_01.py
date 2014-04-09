@@ -9,6 +9,11 @@ def setup(core):
 	houseTemplate.addPlaceablePlanet("tatooine")
 	houseTemplate.addPlaceablePlanet("corellia")
 	houseTemplate.addPlaceablePlanet("naboo")
+	houseTemplate.addPlaceablePlanet("talus")
+	houseTemplate.addPlaceablePlanet("rori")
+	houseTemplate.addPlaceablePlanet("dantooine")
+	houseTemplate.addPlaceablePlanet("lok")
+	houseTemplate.setDefaultItemLimit(200)
 	
 	core.housingService.addHousingTemplate(houseTemplate)
 	return

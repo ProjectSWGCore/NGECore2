@@ -78,16 +78,19 @@ public class HousingService implements INetworkDispatch {
 		int structureLotCost = houseTemplate.getLotCost();
 		String structureTemplate = houseTemplate.getBuildingTemplate();
 		
-		// Lot stuff
-		if(actor.getAttachment("structureLots") == null) actor.setAttachment("structureLots", 10); // Temporary until better
+		if(!houseTemplate.canBePlacedOn(actor.getPlanet().getName()))
+		{
+			actor.sendSystemMessage("You may not place this structure on this planet.", (byte) 0); // should probably load this from an stf
+			return;
+		}
 		
-		int playerLots = (int) actor.getAttachment("structureLots");
-		if(playerLots - structureLotCost < 0)
+		// Lot stuff
+		if(actor.getPlayerObject().getLotsRemaining() - structureLotCost < 0)
 		{
 			actor.sendSystemMessage("You do not have enough available lots to place this structure.", (byte) 0); // should probably load this from an stf
 			return;
 		}
-		actor.setAttachment("structureLots", playerLots - structureLotCost);	
+		actor.getPlayerObject().deductLots(structureLotCost);
 		
 		// Calculate our orientation and height
 		Quaternion quaternion = new Quaternion(1, 0, 0, 0);
@@ -101,7 +104,8 @@ public class HousingService implements INetworkDispatch {
 		
 		// Name the sign
 		TangibleObject sign = (TangibleObject) building.getAttachment("structureSign");	
-		sign.setCustomName2(actor.getCustomName() + "'s House");
+		String playerFirstName = actor.getCustomName().split(" ")[0];
+		sign.setCustomName2(playerFirstName + "'s House");
 		//building.add(sign);
 
 		core.objectService.destroyObject(deed);

@@ -11,6 +11,7 @@ public class HouseTemplate
 	private String deedTemplate;
 	private String buildingTemplate;
 	private int lotCost;
+	private int defaultItemLimit;
 	private Vector<String> placeablePlanets;
 	private Map<String, Point3D> buildingSigns;
 	
@@ -19,6 +20,7 @@ public class HouseTemplate
 		this.deedTemplate = deedTemplate;
 		this.buildingTemplate = buildingTemplate;
 		this.lotCost = lotCost;
+		this.defaultItemLimit = 50;
 		this.placeablePlanets = new Vector<String>();
 		this.buildingSigns = new HashMap<String, Point3D>();
 	}
@@ -30,6 +32,10 @@ public class HouseTemplate
 	public void addPlaceablePlanet(String planetName)
 	{
 		this.placeablePlanets.add(planetName);
+	}
+	public void setDefaultItemLimit(int itemLimit)
+	{
+		this.defaultItemLimit = itemLimit;
 	}
 	
 	public String getDeedTemplate()
@@ -48,8 +54,17 @@ public class HouseTemplate
 	{
 		return this.placeablePlanets;
 	}
+	public boolean canBePlacedOn(String planetName)
+	{
+		if(placeablePlanets.contains(planetName)) return true;
+		else return false;
+	}
 	public int getLotCost()
 	{
 		return this.lotCost;
+	}
+	public int getDefaultItemLimit()
+	{
+		return this.defaultItemLimit;
 	}
 }
