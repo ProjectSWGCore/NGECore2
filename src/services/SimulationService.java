@@ -886,6 +886,24 @@ public class SimulationService implements INetworkDispatch {
 		
 	}
 	
+	public void transform(TangibleObject obj, Point3D position)
+	{
+		Point3D oldPosition = obj.getPosition();
+		Point3D newPosition = new Point3D(oldPosition.x + position.x, oldPosition.y + position.y, oldPosition.z + position.z);
+		
+		teleport(obj, newPosition, obj.getOrientation(), obj.getParentId());
+	}
+	
+	public void transform(SWGObject obj, float rotation, Point3D axis)
+	{
+		rotation *= (Math.PI / 180);
+		
+		Quaternion oldRotation = obj.getOrientation();
+		Quaternion newRotation = resources.common.MathUtilities.rotateQuaternion(oldRotation, rotation, axis);
+		
+		teleport(obj, obj.getPosition(), newRotation, obj.getParentId());
+	}
+	
 	public void teleport(SWGObject obj, Point3D position, Quaternion orientation, long cellId) {
 		
 		if(cellId == 0) {
@@ -900,6 +918,9 @@ public class SimulationService implements INetworkDispatch {
 			DataTransformWithParent dataTransform = new DataTransformWithParent(new Point3D(position.x, position.y, position.z), orientation, obj.getMovementCounter(), obj.getObjectID(), cellId);
 			ObjControllerMessage objController = new ObjControllerMessage(0x1B, dataTransform);
 			obj.notifyObservers(objController, true);
+			
+			obj.setPosition(position);
+			obj.setOrientation(orientation);
 		}
 			
 	}
