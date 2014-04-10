@@ -178,7 +178,6 @@ public class BuffService implements INetworkDispatch {
 
 			// I'm not sure if all aura effects follow the same rules, so this is simply restricted to officer aura's atm
 			ScheduledFuture<?> task = scheduler.scheduleAtFixedRate(new Runnable() {
-				@SuppressWarnings("unused")
 				@Override
 				public void run() {
 					if (buffer == null  || buffer.getClient() == null)

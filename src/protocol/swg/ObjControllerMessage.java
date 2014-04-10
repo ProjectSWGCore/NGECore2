@@ -32,7 +32,6 @@ import protocol.swg.objectControllerObjects.DataTransform;
 import protocol.swg.objectControllerObjects.DataTransformWithParent;
 import protocol.swg.objectControllerObjects.ObjControllerObject;
 import protocol.swg.objectControllerObjects.UnknownObjController;
-import resources.common.StringUtilities;
 
 public class ObjControllerMessage extends SWGMessage {
 	

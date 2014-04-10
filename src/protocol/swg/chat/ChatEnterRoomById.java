@@ -24,7 +24,6 @@ package protocol.swg.chat;
 import org.apache.mina.core.buffer.IoBuffer;
 
 import protocol.swg.SWGMessage;
-import resources.common.StringUtilities;
 
 public class ChatEnterRoomById extends SWGMessage {
 

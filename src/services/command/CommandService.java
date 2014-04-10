@@ -83,7 +83,7 @@ public class CommandService implements INetworkDispatch  {
 			return false;
 		}
 		
-		if (command.getGodLevel() > 0 && !actor.getClient().isGM()) {
+		if (command.getGodLevel() > 0 && (actor.getClient() == null || !actor.getClient().isGM())) {
 			return false;
 		}
 		
@@ -177,7 +177,7 @@ public class CommandService implements INetworkDispatch  {
 				}
 				
 				// Without this we could be buffing ally NPCs and such
-				if (object.getSlottedObject("ghost") == null) {
+				if (actor.getSlottedObject("ghost") != null && object.getSlottedObject("ghost") == null) {
 					return false;
 				}
 				
@@ -222,28 +222,7 @@ public class CommandService implements INetworkDispatch  {
 	}
 	
 	public void callCommand(SWGObject actor, String commandName, SWGObject target, String commandArgs) {
-		System.out.println("CommandService: void callCommand(actor, commandName, target, commandArgs): This shouldn't be called anymore.");
-		
-		if (actor == null)
-			return;
-		
-		BaseSWGCommand command = getCommandByName(commandName);
-		
-		if (command == null)
-			return;
-		
-		if(command instanceof CombatCommand) {
-			CombatCommand command2;
-			try {
-				command2 = (CombatCommand) command.clone();
-				processCombatCommand((CreatureObject) actor, target, command2, 0, "");
-			} catch (CloneNotSupportedException e) {
-				e.printStackTrace();
-			}
-			return;
-		}
-		
-		core.scriptService.callScript("scripts/commands/", command.getCommandName(), "run", core, actor, target, commandArgs);
+		callCommand((CreatureObject) actor, target, getCommandByName(commandName), 0, commandArgs);	
 	}
 	
 	public BaseSWGCommand getCommandByCRC(int commandCRC) {
@@ -364,9 +343,7 @@ public class CommandService implements INetworkDispatch  {
 		} else {
 			if (FileUtilities.doesFileExist("scripts/commands/" + command.getCommandName() + ".py")) {
 				core.scriptService.callScript("scripts/commands/", command.getCommandName(), "run", core, actor, target, commandArgs);
-			}
-			
-			if (FileUtilities.doesFileExist("scripts/commands/combat/" + command.getCommandName() + ".py")) {
+			} else if (FileUtilities.doesFileExist("scripts/commands/combat/" + command.getCommandName() + ".py")) {
 				core.scriptService.callScript("scripts/commands/combat/", command.getCommandName(), "run", core, actor, target, commandArgs);
 			}
 		}

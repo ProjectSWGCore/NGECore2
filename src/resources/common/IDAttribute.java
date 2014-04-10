@@ -21,8 +21,6 @@
  ******************************************************************************/
 package resources.common;
 
-import java.math.BigInteger;
-
 public class IDAttribute {
 
 	private float floatValue;

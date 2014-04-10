@@ -36,7 +36,6 @@ import org.apache.mina.core.session.IoSession;
 
 import protocol.swg.ObjControllerMessage;
 import protocol.swg.PlayClientEffectLocMessage;
-import protocol.swg.UpdatePVPStatusMessage;
 import protocol.swg.objectControllerObjects.CombatAction;
 import protocol.swg.objectControllerObjects.CombatSpam;
 import protocol.swg.objectControllerObjects.CommandEnqueueRemove;
@@ -821,7 +820,6 @@ public class CombatService implements INetworkDispatch {
 		target.getEventBus().publish(event);
 	}
 	
-	@SuppressWarnings("unused")
 	public void doDrainHeal(CreatureObject receiver, int drainAmount) {
 		synchronized(receiver.getMutex()) {
 			receiver.setHealth(receiver.getHealth() + drainAmount);

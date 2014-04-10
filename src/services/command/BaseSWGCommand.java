@@ -37,7 +37,6 @@ public class BaseSWGCommand implements Cloneable {
 	private String clientEffectSelf;
 	private String clientEffectTarget;
 	private int commandCRC;
-	private boolean isGmCommand = false;
 	private String characterAbility;
 	private int target;
 	private int targetType;
@@ -238,10 +237,6 @@ public class BaseSWGCommand implements Cloneable {
     	
 	public boolean isGmCommand() {
 		return (godLevel > 0);
-	}
-	
-	public void setGmCommand(boolean isGmCommand) {
-		this.isGmCommand = isGmCommand;
 	}
 	
 	public String getCharacterAbility() {
