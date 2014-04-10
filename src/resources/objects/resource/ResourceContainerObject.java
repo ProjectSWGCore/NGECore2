@@ -47,7 +47,7 @@ public class ResourceContainerObject extends TangibleObject {
 	
 	private CreatureObject proprietor;
 	private String resourceType;
-	private String resourceClass;
+	private String resourceClass="";
 	private String resourceName;
 	private byte generalType;
 	private long referenceID;
@@ -148,7 +148,7 @@ public class ResourceContainerObject extends TangibleObject {
 			
 	public void initializeStats(GalacticResource resource){
 		this.setResourceName(resource.getName());
-		this.setResourceClass(resource.getResourceClass());
+		this.setResourceClass(resource.getCategory());
 		this.setColdResistance(resource.getResourceStats()[0]);
 		this.setConductivity(resource.getResourceStats()[1]);
 		this.setDecayResistance(resource.getResourceStats()[2]);
