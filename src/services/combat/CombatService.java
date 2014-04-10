@@ -191,7 +191,9 @@ public class CombatService implements INetworkDispatch {
 				{
 					defender.removeDefender(creature);
 					creature.removeDefender(defender);
-				}	
+				}
+				
+				if(((CreatureObject) target).getPlayerObject() == null) target.setKiller(attacker);
 			}
 		}
 		else if(target instanceof TangibleObject)
