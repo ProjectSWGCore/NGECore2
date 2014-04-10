@@ -240,6 +240,11 @@ public class NGECore {
 		if (!(config.loadConfigFile())) {
 			config = DefaultConfig.getConfig();
 		}
+		
+		Config options = new Config();
+		options.setFilePath("options.cfg");
+		boolean optionsConfigLoaded = options.loadConfigFile();
+		
 		// Database
 		databaseConnection = new DatabaseConnection();
 		databaseConnection.connect(config.getString("DB.URL"), config.getString("DB.NAME"), config.getString("DB.USER"), config.getString("DB.PASS"), "postgresql");
@@ -309,7 +314,7 @@ public class NGECore {
 		aiService = new AIService(this);
 		//missionService = new MissionService(this);
 		
-		if (config.getInt("LOAD.RESOURCE.SYSTEM") == 1) {
+		if (optionsConfigLoaded && options.getInt("LOAD.RESOURCE.SYSTEM") == 1) {
 			surveyService = new SurveyService(this);
 			resourceService = new ResourceService(this);
 		}
@@ -413,7 +418,7 @@ public class NGECore {
 		
 		objectService.loadBuildings();
 		
-		if (config.getInt("LOAD.RESOURCE.SYSTEM") == 1) {
+		if (optionsConfigLoaded && options.getInt("LOAD.RESOURCE.SYSTEM") > 0) {
 			objectService.loadResourceRoots();
 			objectService.loadResources();
 		}
