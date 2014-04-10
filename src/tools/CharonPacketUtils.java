@@ -56,7 +56,7 @@ public class CharonPacketUtils {
 	
 	public static void printAnalysis(IoBuffer pack){
 		
-		if (!NGECore.getInstance().PACKET_DEBUG)
+		if (!NGECore.PACKET_DEBUG)
 			return;
 		
 		byte[] packArray = pack.array();

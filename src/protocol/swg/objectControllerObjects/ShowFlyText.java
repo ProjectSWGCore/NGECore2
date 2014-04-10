@@ -27,7 +27,6 @@ import org.apache.mina.core.buffer.IoBuffer;
 
 import protocol.swg.ObjControllerMessage;
 import resources.common.RGB;
-import resources.common.StringUtilities;
 
 public class ShowFlyText extends ObjControllerObject {
 	

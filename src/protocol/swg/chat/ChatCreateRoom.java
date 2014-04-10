@@ -19,33 +19,51 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package protocol.swg;
-
-import java.nio.ByteOrder;
+package protocol.swg.chat;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-public class ChatOnSendInstantMessage extends SWGMessage {
+import protocol.swg.SWGMessage;
 
-	private int errorType;
-	private int counter;
 
-	public ChatOnSendInstantMessage(int errorType, int counter) {
-		this.errorType = errorType;
-		this.counter = counter;
-	}
-	
+public class ChatCreateRoom extends SWGMessage {
+
+	private String address, title;
+	private boolean privacy, moderatorOnly;
+	private int request;
+
+	public ChatCreateRoom() { }
+	@Override
 	public void deserialize(IoBuffer data) {
-		
+
+		this.privacy = (boolean) ((data.get() == 1) ? false : true);
+		this.moderatorOnly = (boolean) ((data.get() == 1) ? true : false);
+		data.getShort(); // unk
+		this.address = getAsciiString(data);
+		this.title = getAsciiString(data);
+		this.request = data.getInt();
+	}
+
+	@Override
+	public IoBuffer serialize() {
+		return null;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+	public String getTitle() {
+		return title;
+	}
+	public boolean isPrivacy() {
+		return privacy;
+	}
+	public boolean isModeratorOnly() {
+		return moderatorOnly;
 	}
 	
-	public IoBuffer serialize() {
-		IoBuffer result = IoBuffer.allocate(14).order(ByteOrder.LITTLE_ENDIAN);
-		result.putShort((short) 3);
-		result.putInt(0x88DBB381);
-		result.putInt(errorType);    							
-		result.putInt(counter);    							
-		
-		return result.flip();
+	public int getRequest() {
+		return request;
 	}
+
 }

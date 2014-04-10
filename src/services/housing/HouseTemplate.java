@@ -57,7 +57,7 @@ public class HouseTemplate
 	public boolean canBePlacedOn(String planetName)
 	{
 		if(placeablePlanets.contains(planetName)) return true;
-		else return false;
+		return false;
 	}
 	public int getLotCost()
 	{

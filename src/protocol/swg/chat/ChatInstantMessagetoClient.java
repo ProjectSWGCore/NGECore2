@@ -19,37 +19,46 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package protocol.swg;
+package protocol.swg.chat;
+
+import java.nio.ByteOrder;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
+import protocol.swg.SWGMessage;
 
-public class ChatRequestPersistentMessage extends SWGMessage {
+
+public class ChatInstantMessagetoClient extends SWGMessage{
 	
-	private int mailId;
+	private String galaxy;
+	private String message;
+	private String name;
 
-	@Override
-	public void deserialize(IoBuffer buffer) {
+	public ChatInstantMessagetoClient(String galaxy, String message, String name) {
 		
-		buffer.getShort();
-		buffer.getInt();
-		buffer.getInt();
-		setMailId(buffer.getInt());
+		this.galaxy = galaxy;
+		this.message = message;
+		this.name = name;
 		
 	}
-
-	@Override
+	
+	public void deserialize(IoBuffer data) {
+		
+	}
+	
 	public IoBuffer serialize() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
-	public int getMailId() {
-		return mailId;
-	}
+		
+		IoBuffer result = IoBuffer.allocate(30 + galaxy.length() + message.length() * 2 + name.length()).order(ByteOrder.LITTLE_ENDIAN);
 
-	public void setMailId(int mailId) {
-		this.mailId = mailId;
-	}
+		result.putShort((short) 4);
+		result.putInt(0x3C565CED);
+		result.put(getAsciiString("SWG"));    							
+		result.put(getAsciiString(galaxy));  
+		result.put(getAsciiString(name));  
+		result.put(getUnicodeString(message));    							
+		result.putInt(0);
 
+		return result.flip();
+		
+	}
 }

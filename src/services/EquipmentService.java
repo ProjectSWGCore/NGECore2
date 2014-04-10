@@ -35,7 +35,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.TreeMap;
 
-import org.python.antlr.ast.Str;
 import org.python.core.Py;
 import org.python.core.PyObject;
 
@@ -46,9 +45,7 @@ import engine.resources.objects.SWGObject;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import resources.objects.player.PlayerObject;
-import resources.objects.tangible.TangibleObject;
 import services.equipment.BonusSetTemplate;
-import services.spawn.MobileTemplate;
 
 public class EquipmentService implements INetworkDispatch {
 	

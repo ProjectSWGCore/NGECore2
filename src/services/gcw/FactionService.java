@@ -37,7 +37,6 @@ import protocol.swg.FactionResponseMessage;
 import resources.common.FileUtilities;
 import resources.common.Opcodes;
 import resources.datatables.FactionStatus;
-import resources.datatables.Options;
 import resources.datatables.PvpStatus;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;

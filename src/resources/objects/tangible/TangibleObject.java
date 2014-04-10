@@ -31,8 +31,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
-import javax.xml.bind.DatatypeConverter;
-
 import main.NGECore;
 import protocol.swg.ObjControllerMessage;
 import protocol.swg.PlayClientEffectObjectMessage;
@@ -42,7 +40,6 @@ import protocol.swg.objectControllerObjects.ShowFlyText;
 import resources.common.RGB;
 import resources.objects.creature.CreatureObject;
 import resources.visitors.IDManagerVisitor;
-import services.ai.AIActor;
 
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;

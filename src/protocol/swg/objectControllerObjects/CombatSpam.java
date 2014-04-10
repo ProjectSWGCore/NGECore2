@@ -33,9 +33,9 @@ public class CombatSpam extends ObjControllerObject{
 	private long attackerId;
 	private long defenderId;
 	private int damage;
-	private String file;
-	private String text;
-	private byte colorFlag;
+	//private String file;
+	//private String text;
+	//private byte colorFlag;
 	private boolean hit = true;
 	private boolean critical = false;
 	private boolean dodge = false;

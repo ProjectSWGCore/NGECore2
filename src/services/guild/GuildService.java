@@ -23,7 +23,6 @@ package services.guild;
 
 import java.util.Map;
 
-import resources.common.Console;
 import resources.guild.Guild;
 import resources.objects.SWGList;
 import resources.objects.guild.GuildObject;

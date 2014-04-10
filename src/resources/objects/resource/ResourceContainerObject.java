@@ -70,6 +70,7 @@ public class ResourceContainerObject extends TangibleObject {
 	private short overallQuality;
 	private short flavor;
 	
+	/*
 	private static byte CONTAINER_TYPE_INORGANIC_MINERALS          = 0;
 	private static byte CONTAINER_TYPE_INORGANIC_CHEMICALS         = 1;
 	private static byte CONTAINER_TYPE_INORGANIC_GAS               = 2;
@@ -127,6 +128,7 @@ public class ResourceContainerObject extends TangibleObject {
 		"object/resource_container/shared_resource_container_energy_radioactive.iff",
 		"object/resource_container/shared_resource_container_energy_solid.iff"		
 	};
+	*/
 	
 	@NotPersistent
 	public static int maximalStackCapacity = 100000;

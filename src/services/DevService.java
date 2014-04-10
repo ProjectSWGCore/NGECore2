@@ -67,7 +67,7 @@ public class DevService implements INetworkDispatch {
 	public void sendCharacterBuilderSUI(CreatureObject creature, int childMenu) 
 	{
 		Map<Long, String> suiOptions = new HashMap<Long, String>();
-		
+
 		switch(childMenu)
 		{
 			case 0: // Root
@@ -85,7 +85,7 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 22, "Misc Items");
 				suiOptions.put((long) 23, "Jedi Items");
 				suiOptions.put((long) 110, "Survey Devices");
-				//suiOptions.put((long) 120, "House Deeds");
+				if(creature.getClient().isGM()) suiOptions.put((long) 120, "House Deeds");
 				break;
 			case 3: // [Items] Weapons
 				suiOptions.put((long) 30, "Jedi Weapons");

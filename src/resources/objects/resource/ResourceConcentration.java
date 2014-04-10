@@ -27,7 +27,7 @@ public class ResourceConcentration {
 		return coordsZ;
 	}
 
-	public void setCoordsZ(float coordsY) {
+	public void setCoordsZ(float coordsZ) {
 		this.coordsZ = coordsZ;
 	}
 
