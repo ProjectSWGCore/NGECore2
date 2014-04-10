@@ -19,53 +19,39 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package protocol.swg;
+package protocol.swg.chat;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-public class ChatSendToRoom extends SWGMessage {
+import protocol.swg.SWGMessage;
+
+
+public class ChatRequestPersistentMessage extends SWGMessage {
 	
-	private String message;
-	private int roomId;
-	private int msgId;
-	
-	public ChatSendToRoom() { }
-	
+	private int mailId;
+
 	@Override
-	public void deserialize(IoBuffer data) {
-		setMessage(getUnicodeString(data));
-		data.getInt();
-		setRoomId(data.getInt());
-		setMsgId(data.getInt());
+	public void deserialize(IoBuffer buffer) {
+		
+		buffer.getShort();
+		buffer.getInt();
+		buffer.getInt();
+		setMailId(buffer.getInt());
+		
 	}
 
 	@Override
 	public IoBuffer serialize() {
+		// TODO Auto-generated method stub
 		return null;
 	}
-
-	public String getMessage() {
-		return message;
+	
+	public int getMailId() {
+		return mailId;
 	}
 
-	public void setMessage(String message) {
-		this.message = message;
-	}
-
-	public int getRoomId() {
-		return roomId;
-	}
-
-	public void setRoomId(int roomId) {
-		this.roomId = roomId;
-	}
-
-	public int getMsgId() {
-		return msgId;
-	}
-
-	public void setMsgId(int msgId) {
-		this.msgId = msgId;
+	public void setMailId(int mailId) {
+		this.mailId = mailId;
 	}
 
 }

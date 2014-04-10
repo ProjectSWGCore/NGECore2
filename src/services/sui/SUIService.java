@@ -23,7 +23,6 @@ package services.sui;
 
 import java.nio.ByteOrder;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
@@ -81,6 +80,16 @@ public class SUIService implements INetworkDispatch {
 	
 				if(target == null || owner == null)
 					return;
+				
+				if(target.getGrandparent() != null && target.getGrandparent().getAttachment("structureAdmins") != null)
+				{
+					if(core.housingService.getPermissions(owner, target.getContainer()))
+					{
+						core.scriptService.callScript("scripts/radial/", "moveable", "createRadial", core, owner, target, request.getRadialOptions());
+						sendRadial(owner, target, request.getRadialOptions(), request.getRadialCount());
+						return;
+					}
+				}
 				
 				core.scriptService.callScript("scripts/radial/", getRadialFilename(target), "createRadial", core, owner, target, request.getRadialOptions());
 				if(getRadialFilename(target).equals("default"))

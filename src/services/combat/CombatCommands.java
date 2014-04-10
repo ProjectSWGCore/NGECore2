@@ -21,7 +21,6 @@
  ******************************************************************************/
 package services.combat;
 
-import services.command.CombatCommand;
 import main.NGECore;
 
 public class CombatCommands {

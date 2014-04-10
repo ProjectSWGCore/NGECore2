@@ -21,9 +21,7 @@
  ******************************************************************************/
 package services.ai.states;
 
-import resources.objects.creature.CreatureObject;
 import services.ai.AIActor;
-import services.ai.states.AIState.StateResult;
 
 public class RetreatState extends AIState {
 

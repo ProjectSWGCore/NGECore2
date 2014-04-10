@@ -43,7 +43,7 @@ import org.apache.mina.core.session.IoSession;
 import com.sleepycat.je.Transaction;
 import com.sleepycat.persist.EntityCursor;
 
-import protocol.swg.ChatSystemMessage;
+import protocol.swg.chat.ChatSystemMessage;
 import net.engio.mbassy.bus.config.BusConfiguration;
 import resources.common.RadialOptions;
 import resources.common.ThreadMonitor;

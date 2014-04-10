@@ -28,17 +28,14 @@ import org.apache.mina.core.buffer.IoBuffer;
 
 import protocol.swg.ObjControllerMessage;
 import resources.common.ConversationOption;
-import resources.common.ObjControllerOpcodes;
 
 public class NpcConversationOptions extends ObjControllerObject {
 	
-	private long npcId;
 	private long objectId;
 	private Vector<ConversationOption> conversationOptions = new Vector<ConversationOption>();
 
-	public NpcConversationOptions(long objectId, long npcId) {
+	public NpcConversationOptions(long objectId) {
 		this.objectId = objectId;
-		this.npcId = npcId;
 	}
 
 	@Override

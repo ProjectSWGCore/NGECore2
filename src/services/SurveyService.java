@@ -22,7 +22,6 @@
 package services;
 
 import java.util.Map;
-import java.util.Observable;
 import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.Executors;
@@ -31,27 +30,19 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import protocol.swg.PlayClientEffectLocMessage;
-import protocol.swg.SceneCreateObjectByCrc;
-import protocol.swg.SceneEndBaselines;
-import protocol.swg.SurveyMapUpdateMessage;
-import protocol.swg.UpdateContainmentMessage;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.resource.GalacticResource;
-import resources.objects.resource.ResourceConcentration;
 import resources.objects.resource.ResourceContainerObject;
 import resources.objects.resource.ResourceRoot;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.tool.SurveyTool;
-import resources.objects.waypoint.WaypointObject;
 import services.sui.SUIWindow;
 import services.sui.SUIWindow.SUICallback;
 import services.sui.SUIWindow.Trigger;
 import main.NGECore;
-import engine.resources.common.CRC;
 import engine.resources.container.Traverser;
 import engine.resources.objects.SWGObject;
-import engine.resources.scene.Point3D;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
@@ -479,7 +470,6 @@ public class SurveyService implements INetworkDispatch {
 					returnList.add("List.lstList:SelectedRow");
 					
 					window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, new SUICallback() {
-						@SuppressWarnings("unchecked")
 						@Override
 						public void process(SWGObject owner, int eventType, Vector<String> returnList) {										
 							int index = Integer.parseInt(returnList.get(0));
@@ -627,7 +617,6 @@ public class SurveyService implements INetworkDispatch {
 		final SurveyTool outerSurveyTool = (SurveyTool)target;
 		
 		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, new SUICallback() {
-			@SuppressWarnings("unchecked")
 			@Override
 			public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
 				CreatureObject crafter = (CreatureObject)owner;
@@ -673,14 +662,12 @@ public class SurveyService implements INetworkDispatch {
 		final SurveyTool outerSurveyTool = (SurveyTool)target;
 		
 		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, new SUICallback() {
-			@SuppressWarnings("unchecked")
 			@Override
 			public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
 				((CreatureObject)owner).sendSystemMessage("Rad confirmed", (byte) 0);
 			}					
 		});		
 		window.addHandler(1, "", Trigger.TRIGGER_CANCEL, returnList, new SUICallback() {
-			@SuppressWarnings("unchecked")
 			@Override
 			public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
 				((CreatureObject)owner).sendSystemMessage("Rad declined", (byte) 0);

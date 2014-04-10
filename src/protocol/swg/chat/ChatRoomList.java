@@ -19,7 +19,7 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package protocol.swg;
+package protocol.swg.chat;
 
 import java.nio.ByteOrder;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,6 +28,7 @@ import main.NGECore;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
+import protocol.swg.SWGMessage;
 import services.chat.ChatRoom;
 
 public class ChatRoomList extends SWGMessage {
@@ -46,7 +47,7 @@ public class ChatRoomList extends SWGMessage {
 	@Override
 	public IoBuffer serialize() {
 		String server = NGECore.getInstance().getGalaxyName();
-		IoBuffer buffer = IoBuffer.allocate(100).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer buffer = IoBuffer.allocate(53).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.setAutoExpand(true);
 		
 		buffer.putShort((short) 2);
@@ -70,7 +71,9 @@ public class ChatRoomList extends SWGMessage {
 				buffer.putInt(0); // user list (not used by client)
 			}
 		});
-		return buffer.flip();
+		buffer.flip();
+		//StringUtilities.printBytes(buffer.array());
+		return buffer;
 	}
 
 }

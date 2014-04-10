@@ -63,7 +63,7 @@ public class SurveyMapUpdateMessage extends SWGMessage {
 				highestConcentration = concentration;
 			}
 		}	
-		int size = buffer.position();
+		//int size = buffer.position();
 		buffer.flip();		
 	}
 	

@@ -38,8 +38,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-import org.python.core.Py;
-
 import resources.common.collidables.CollidableCircle;
 import resources.datatables.Options;
 import resources.datatables.PvpStatus;

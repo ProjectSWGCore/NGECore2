@@ -19,45 +19,30 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package protocol.swg;
+package protocol.swg.chat;
 
 import java.nio.ByteOrder;
 
-import main.NGECore;
-
 import org.apache.mina.core.buffer.IoBuffer;
 
-public class ChatRoomMessage extends SWGMessage {
+import protocol.swg.SWGMessage;
 
-	private String character;
-	private String message;
-	private int roomId;
-
-	public ChatRoomMessage(int roomId, String player, String message) {
-		this.roomId = roomId;
-		this.character = player;
-		this.message = message;
-	}
+public class ChatOnAddFriend extends SWGMessage {
 
 	@Override
 	public void deserialize(IoBuffer data) {
+		
 	}
 
 	@Override
 	public IoBuffer serialize() {
-		String server = NGECore.getInstance().getGalaxyName();
-
-		IoBuffer buffer = IoBuffer.allocate(27 + server.length() + character.length() + (message.length() * 2)).order(ByteOrder.LITTLE_ENDIAN);
-
-		buffer.putShort((short) 5);
-		buffer.putInt(0xCD4CE444);
-		buffer.put(getAsciiString("SWG"));
-		buffer.put(getAsciiString(server));
-		buffer.put(getAsciiString(character));
-		buffer.putInt(roomId);
-		buffer.put(getUnicodeString(message));
-		buffer.putInt(0); // out of band package ?
-		return buffer.flip();
+		IoBuffer result = IoBuffer.allocate(20).order(ByteOrder.LITTLE_ENDIAN);
+	    
+		result.putShort((short) 0x03);
+		result.putInt(0x2B2A0D94);
+		result.putLong(0);
+		result.flip();
+		return result;
 	}
 
 }

@@ -34,8 +34,6 @@ import protocol.swg.SWGMessage;
 import resources.objects.creature.CreatureObject;
 import resources.objects.resource.GalacticResource;
 import resources.objects.tangible.TangibleObject;
-import resources.objects.tool.SurveyTool;
-
 
 public class ResourceListForSurveyMessage extends SWGMessage {
 	
@@ -71,7 +69,7 @@ public class ResourceListForSurveyMessage extends SWGMessage {
 		
 		Vector<GalacticResource> planetVector = core.resourceService.getSpawnedResourcesByPlanetAndType(surveyor.getPlanetId(),generalType);
 		
-		resourceList = new ArrayList(planetVector);
+		resourceList = new ArrayList<GalacticResource>(planetVector);
 		
 	}
 
