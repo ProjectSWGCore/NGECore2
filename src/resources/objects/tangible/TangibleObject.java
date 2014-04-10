@@ -60,7 +60,7 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent(version=3)
+@Persistent(version=4)
 public class TangibleObject extends SWGObject {
 	
 	// TODO: Thread safety
@@ -85,6 +85,8 @@ public class TangibleObject extends SWGObject {
 	
 	//private TreeSet<TreeMap<String,Integer>> lootSpecification = new TreeSet<TreeMap<String,Integer>>();
 	private List<LootGroup> lootGroups = new ArrayList<LootGroup>();
+	
+	private boolean looted = false;
 	
 	@NotPersistent
 	private TangibleObject killer = null;
@@ -461,6 +463,14 @@ public class TangibleObject extends SWGObject {
 		System.out.println("lootPoolNames[0] " + lootPoolNames[0]);
 		LootGroup lootGroup = new LootGroup(lootPoolNames, lootPoolChances, lootGroupChance);
 		this.lootGroups.add(lootGroup);
+	}
+	
+	public boolean isLooted() {
+		return looted;
+	}
+
+	public void setLooted(boolean looted) {
+		this.looted = looted;
 	}
 	
 	

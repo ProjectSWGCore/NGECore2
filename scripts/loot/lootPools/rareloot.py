@@ -2,8 +2,8 @@
 
 def itemNames():
 	
-	templates=['object/tangible/item/shared_rare_loot_chest_3.iff']
+	templates=['rarelootchest1','rarelootchest2']
 	return templates
 	
 def itemChances():
-	return [1]
+	return [70,30]

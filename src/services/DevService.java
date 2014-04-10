@@ -996,14 +996,26 @@ public class DevService implements INetworkDispatch {
 						return;
 						
 					case 111:
-						SWGObject spawned = core.staticService.spawnObject("object/mobile/shared_tusken_raider.iff", "tatooine", 0L, 3522F, 4F, -4801F, 0.70F, 0.71F);
 						
-						core.lootService.handleLootRequest(player,(TangibleObject)spawned);
+						
+						CreatureObject spawned2 = core.spawnService.spawnCreature("object/mobile/shared_tusken_raider.iff", "tatooine", 0, player.getPosition().x, player.getPosition().y, player.getPosition().z, 1, 0, 1, 0, 5);
+						// core.spawnService.spawnCreature(arg1, actor.getPlanet().getName(), 0, pos.x, pos.y, pos.z, 1, 0, 1, 0, int(arg2))
+						//SWGObject spawned = core.staticService.spawnObject("object/mobile/shared_tusken_raider.iff", "tatooine", 0L, 3522F, 4F, -4801F, 0.70F, 0.71F);
+						//CreatureObject spawned2 = (CreatureObject) spawned;
+//						spawned2.setLevel((short)5);
+//						spawned2.setCombatFlag((byte)1);
+//						spawned2.setStateBitmask(1);
+//						spawned2.setOptionsBitmask(128);
+						
+						//core.lootService.handleLootRequest(player,(TangibleObject)spawned2);
 						break;
 					case 112:
-						SWGObject spawned2 = core.staticService.spawnObject("object/mobile/shared_krayt_dragon.iff", "tatooine", 0L, 3512F, 4F, -4801F, 0.70F, 0.71F);
+						SWGObject spawned3 = core.staticService.spawnObject("object/mobile/shared_krayt_dragon.iff", "tatooine", 0L, 3512F, 4F, -4801F, 0.70F, 0.71F);
 						
-						core.lootService.handleLootRequest(player,(TangibleObject)spawned2);
+//						pos = actor.getWorldPosition()
+//								core.spawnService.spawnCreature(arg1, actor.getPlanet().getName(), 0, pos.x, pos.y, pos.z, 1, 0, 1, 0, int(arg2))
+//						
+						core.lootService.handleLootRequest(player,(TangibleObject)spawned3);
 						break;
 						
 					case 120:

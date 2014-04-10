@@ -58,7 +58,6 @@ public class LootService implements INetworkDispatch {
 
 	public LootService(NGECore core) {
 		this.core = core;
-		//core.commandService.registerCommand("");
 	}
 
 	@Override
@@ -73,37 +72,19 @@ public class LootService implements INetworkDispatch {
 	
 	public void handleLootRequest(CreatureObject requester, TangibleObject lootedObject) {
 		
+		if (lootedObject.isLooted())
+			return;
+		
 		if (requester.getCustomName().contains("Kun")){
 			requester.setCashCredits(requester.getCashCredits()+1);
-			requester.sendSystemMessage("You looted 1 lousy credit.", (byte)1); 
+			requester.sendSystemMessage("You looted 1 credit.", (byte)1); 
 			return;
 		}
 				
 		LootRollSession lootRollSession = new LootRollSession(requester);
-		String lootedObjectType = "Tangible";
-		if (lootedObject instanceof CreatureObject)
-			lootedObjectType = "Creature";
-
-		// Credit drop is depending on the CL of the looted CreatureObject
-		// or if explicitely assigned in the .py script
-		int lootedCredits = 0;
-		if (lootedObjectType.equals("Creature")){
-			CreatureObject lootedCreature = (CreatureObject) lootedObject;
-			int creatureCL = lootedCreature.getLevel();
-			creatureCL = 90;
-			int maximalCredits = (int)Math.floor(4*creatureCL + creatureCL*creatureCL*4/100); 
-			int minimalCredits = (int)Math.floor(creatureCL*2 + maximalCredits/2); 
-			int spanOfCredits  = maximalCredits - minimalCredits;			
-			lootedCredits = minimalCredits + new Random().nextInt(spanOfCredits);
-			requester.sendSystemMessage("You looted " + lootedCredits + " credits.", (byte)1); 
-		}
 		
-		if (lootedObjectType.equals("Tangible")){
-			// This is for chests etc.
-			// Check the py script
-		}
-		
-		
+		handleCreditDrop(requester,lootedObject);
+				
 		CreatureObject lootedCreature = (CreatureObject) lootedObject;
 		
 		//TreeSet<TreeMap<String,Integer>> lootSpec = lootedObject.getLootSpecification();
@@ -141,6 +122,8 @@ public class LootService implements INetworkDispatch {
     		
 	    	requesterInventory.add(droppedItem);
     	}
+    	
+    	lootedObject.setLooted(true);
     	 
        
 	    // ToDo: Group loot settings etc.  actual loot chance was lootgroupchance*lootchance    
@@ -271,8 +254,8 @@ public class LootService implements INetworkDispatch {
 		droppedItem.setAttachment("LootItemName", itemName);
     	handleCustomDropName(droppedItem,customName);
     	handleStats(droppedItem);
-    	setCustomization(droppedItem);
-    	handleSpecialItems(droppedItem);
+    	setCustomization(droppedItem, itemName);
+    	handleSpecialItems(droppedItem,itemName);
 		
 		lootRollSession.addDroppedItem(droppedItem);
 	}	
@@ -293,10 +276,19 @@ public class LootService implements INetworkDispatch {
     	return droppedItem;
 	}
 		
-	private void setCustomization(TangibleObject droppedItem) {
+	private void setCustomization(TangibleObject droppedItem,String itemName) {
 		
 		// Example color crystal
-		droppedItem.setCustomizationVariable("/private/index_color_1", (byte) new Random().nextInt(7));  // 4 blue
+		if (itemName.contains("colorcrystal")) {
+			System.out.println("colorcrystal");
+			droppedItem.setCustomizationVariable("/private/index_color_1", (byte) new Random().nextInt(11));
+		}
+		
+		// Example power crystal
+		if (itemName.contains("powercrystal")) {
+			System.out.println("powercrystal");
+			droppedItem.setCustomizationVariable("/private/index_color_1", (byte) 0x21);  //  0x1F
+		}
 		
 		// More general 
 //		String path = "scripts/loot/lootItems/"+droppedItem.getCustomName().toLowerCase(); 
@@ -309,11 +301,11 @@ public class LootService implements INetworkDispatch {
 //		}
 	}
 	
-	private void handleSpecialItems(TangibleObject droppedItem) {
-		if (droppedItem.getTemplate().contains("shared_lightsaber_module_krayt_dragon_pearl")){
+	private void handleSpecialItems(TangibleObject droppedItem,String itemName) {
+		if (itemName.contains("kraytpearl")){
 			handleKraytPearl(droppedItem);
 		}
-		if (droppedItem.getTemplate().contains("shared_lightsaber_module_force_crystal.iff")){
+		if (itemName.contains("powercrystal")){
 			handlePowerCrystal(droppedItem);
 		}		
 	}
@@ -325,6 +317,28 @@ public class LootService implements INetworkDispatch {
 		
 		
 	}	
+	
+	private void handleCreditDrop(CreatureObject requester,TangibleObject lootedObject){
+		int lootedCredits = 0;
+		// Credit drop is depending on the CL of the looted CreatureObject
+		// or if explicitely assigned in the .py script
+		if (lootedObject instanceof CreatureObject){
+			CreatureObject lootedCreature = (CreatureObject) lootedObject;
+			int creatureCL = lootedCreature.getLevel();
+			creatureCL = 90;
+			int maximalCredits = (int)Math.floor(4*creatureCL + creatureCL*creatureCL*4/100); 
+			int minimalCredits = (int)Math.floor(creatureCL*2 + maximalCredits/2); 
+			int spanOfCredits  = maximalCredits - minimalCredits;			
+			lootedCredits = minimalCredits + new Random().nextInt(spanOfCredits);
+			requester.setCashCredits(requester.getCashCredits()+lootedCredits);
+			requester.sendSystemMessage("You looted " + lootedCredits + " credits.", (byte)1); 
+		}
+		
+		if (lootedObject instanceof TangibleObject){
+			// This is for chests etc.
+			// Check the py script
+		}	
+	}
 	
 	// ************* Special items ************
 	private void handleKraytPearl(TangibleObject droppedItem) {
