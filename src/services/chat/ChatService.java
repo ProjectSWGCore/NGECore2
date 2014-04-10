@@ -451,7 +451,7 @@ public class ChatService implements INetworkDispatch {
 			ChatEnterRoomById sentPacket = new ChatEnterRoomById();
 			sentPacket.deserialize(data);
 			
-			joinChatRoom((CreatureObject) obj, sentPacket.getRoomId());
+			joinChatRoom(obj.getCustomName(), sentPacket.getRoomId());
 			
 			//System.out.println("Entering room... " + sentPacket.getRoomId());
 			
@@ -763,24 +763,25 @@ public class ChatService implements INetworkDispatch {
 		return room;
 	}
 	
-	public void joinChatRoom(CreatureObject player, int roomId) {
+	public void joinChatRoom(String user, int roomId) {
 		
-		String playerName = player.getCustomName().toLowerCase();
-		
-		if (playerName.contains(" "))
-			playerName = playerName.split(" ")[0];
+		if (user.contains(" "))
+			user = user.split(" ")[0];
 		
 		ChatRoom room = getChatRoom(roomId);
 		if (room == null)
 			return;
 
-		ChatOnEnteredRoom enterRoom = new ChatOnEnteredRoom(playerName, 0, roomId, true);
-		
-		if (!room.getUserList().contains(player))
-			room.getUserList().add(player);
-		
-		room.getUserList().stream().forEach(user -> user.getClient().getSession().write(enterRoom.serialize()));
+		if (!room.hasUser(user)) {
 
+			ChatOnEnteredRoom enterRoom = new ChatOnEnteredRoom(user, 0, roomId, true);
+			room.addUser(user);
+
+			room.getUserList().stream().forEach(str -> {
+				SWGObject userObj = getObjectByFirstName(str);
+				if (userObj != null) { userObj.getClient().getSession().write(enterRoom.serialize()); }
+			});
+		}
 	}
 	
 	public void leaveChatRoom(CreatureObject player, int roomId) {
@@ -815,11 +816,8 @@ public class ChatService implements INetworkDispatch {
 		sender.getClient().getSession().write(onSend.serialize());
 		
 		ChatRoomMessage roomMessage = new ChatRoomMessage(roomId, senderName, message);
-		Vector<CreatureObject> users = room.getUserList();
+		Vector<String> users = room.getUserList();
 		
-		for (CreatureObject user : users) {
-			user.getClient().getSession().write(roomMessage.serialize());
-		}
 	}
 	
 	public ConcurrentHashMap<Integer, ChatRoom> getChatRooms() {
