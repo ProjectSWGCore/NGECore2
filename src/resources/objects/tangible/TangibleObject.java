@@ -39,6 +39,7 @@ import protocol.swg.UpdatePVPStatusMessage;
 import protocol.swg.objectControllerObjects.ShowFlyText;
 import resources.common.RGB;
 import resources.objects.creature.CreatureObject;
+import resources.objects.loot.LootGroup;
 import resources.visitors.IDManagerVisitor;
 
 import com.sleepycat.persist.model.NotPersistent;
@@ -51,7 +52,7 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent(version=1)
+@Persistent(version=5)
 public class TangibleObject extends SWGObject {
 	
 	// TODO: Thread safety
@@ -73,6 +74,12 @@ public class TangibleObject extends SWGObject {
 	
 	private int respawnTime = 0;
 	private Point3D spawnCoordinates = new Point3D(0, 0, 0);
+	
+	//private TreeSet<TreeMap<String,Integer>> lootSpecification = new TreeSet<TreeMap<String,Integer>>();
+	private List<LootGroup> lootGroups = new ArrayList<LootGroup>();
+	
+	private boolean looted = false;
+	private boolean lootLock = false;
 	
 	@NotPersistent
 	private TangibleObject killer = null;
@@ -441,6 +448,33 @@ public class TangibleObject extends SWGObject {
 		}
 	}
 	
+	public List<LootGroup> getLootGroups() {
+		return lootGroups;
+	}
+
+	public void addToLootGroups(String[] lootPoolNames, int[] lootPoolChances, int lootGroupChance) {
+		System.out.println("lootPoolNames[0] " + lootPoolNames[0]);
+		LootGroup lootGroup = new LootGroup(lootPoolNames, lootPoolChances, lootGroupChance);
+		this.lootGroups.add(lootGroup);
+	}
+	
+	public boolean isLooted() {
+		return looted;
+	}
+
+	public void setLooted(boolean looted) {
+		this.looted = looted;
+	}
+	
+	public boolean isLootLock() {
+		return lootLock;
+	}
+
+	public void setLootLock(boolean lootLock) {
+		this.lootLock = lootLock;
+	}
+	
+	
 	@Override
 	public void sendBaselines(Client destination) {
 
@@ -464,5 +498,5 @@ public class TangibleObject extends SWGObject {
 		
 
 	}
-	
+
 }

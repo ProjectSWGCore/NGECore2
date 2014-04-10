@@ -164,6 +164,7 @@ public class SpawnService {
 		AIActor actor = new AIActor(creature, creature.getPosition(), scheduler);
 		creature.setAttachment("AI", actor);
 		actor.setMobileTemplate(mobileTemplate);
+		
 	
 		
 		if(cell == null) {
