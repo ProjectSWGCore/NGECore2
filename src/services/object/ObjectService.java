@@ -95,8 +95,11 @@ import resources.objects.Delta;
 import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
+import resources.objects.deed.Harvester_Deed;
 import resources.objects.group.GroupObject;
 import resources.objects.guild.GuildObject;
+import resources.objects.harvester.HarvesterObject;
+import resources.objects.installation.InstallationObject;
 import resources.objects.intangible.IntangibleObject;
 import resources.objects.mission.MissionObject;
 import resources.objects.player.PlayerObject;
@@ -313,7 +316,11 @@ public class ObjectService implements INetworkDispatch {
 			
 			object = new SurveyTool(objectID, planet, Template, position, orientation);
 			
-		}else if(Template.startsWith("object/tangible")) {
+		} else if(Template.startsWith("object/tangible/deed/harvester_deed") || Template.startsWith("object/tangible/deed/generator_deed")) {
+			
+			object = new Harvester_Deed(objectID, planet, Template, position, orientation);
+		
+		} else if(Template.startsWith("object/tangible")) {
 			
 			object = new TangibleObject(objectID, planet, Template, position, orientation);
 
@@ -369,7 +376,22 @@ public class ObjectService implements INetworkDispatch {
 			
 			object = new ResourceContainerObject(objectID, planet, Template, position, orientation);
 			
-		}else {
+		} else if(Template.startsWith("object/installation/mining_ore/construction")) {
+			
+			float positionY = core.terrainService.getHeight(planet.getID(), position.x, position.z)-1f;
+			Point3D newpoint = new Point3D(position.x,positionY,position.z);				
+			object = new InstallationObject(objectID, planet, Template, newpoint, orientation);
+			
+		} else if(Template.startsWith("object/installation/mining_ore") || Template.startsWith("object/installation/mining_liquid") ||
+				  Template.startsWith("object/installation/mining_gas") || Template.startsWith("object/installation/mining_organic") || 
+				  Template.startsWith("object/installation/generators")) {
+			
+			float positionY = core.terrainService.getHeight(planet.getID(), position.x, position.z)-1f;
+			Point3D newpoint = new Point3D(position.x,positionY,position.z);			
+			object = new HarvesterObject(objectID, planet, Template, newpoint, orientation);
+			core.harvesterService.addHarvester(object);		
+			
+		} else {
 			return null;			
 		}
 		

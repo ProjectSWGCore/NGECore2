@@ -84,6 +84,7 @@ import services.LoginService;
 import services.map.MapService;
 import services.object.ObjectService;
 import services.object.UpdateService;
+import services.resources.HarvesterService;
 import services.resources.ResourceService;
 import services.retro.RetroService;
 import services.spawn.SpawnService;
@@ -180,6 +181,7 @@ public class NGECore {
 	
 	public HousingService housingService;
 	public LootService lootService;
+	public HarvesterService harvesterService;
 
 	
 	// Login Server
@@ -293,6 +295,7 @@ public class NGECore {
 		conversationService = new ConversationService(this);
 		housingService = new HousingService(this);
 		lootService = new LootService(this);
+		harvesterService = new HarvesterService(this);
 		
 		if (config.keyExists("JYTHONCONSOLE.PORT")) {
 			int jythonPort = config.getInt("JYTHONCONSOLE.PORT");
