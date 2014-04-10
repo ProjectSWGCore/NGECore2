@@ -24,6 +24,7 @@ package services.chat;
 import java.nio.ByteOrder;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
@@ -40,6 +41,7 @@ import engine.resources.config.Config;
 import engine.resources.config.DefaultConfig;
 import engine.resources.database.ObjectDatabase;
 import engine.resources.objects.SWGObject;
+import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
@@ -48,6 +50,7 @@ import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import protocol.swg.AddIgnoreMessage;
 import protocol.swg.ObjControllerMessage;
+import protocol.swg.chat.ChatCreateRoom;
 import protocol.swg.chat.ChatDeletePersistentMessage;
 import protocol.swg.chat.ChatEnterRoomById;
 import protocol.swg.chat.ChatFriendsListUpdate;
@@ -55,6 +58,7 @@ import protocol.swg.chat.ChatInstantMessageToCharacter;
 import protocol.swg.chat.ChatInstantMessagetoClient;
 import protocol.swg.chat.ChatOnAddFriend;
 import protocol.swg.chat.ChatOnChangeFriendStatus;
+import protocol.swg.chat.ChatOnCreateRoom;
 import protocol.swg.chat.ChatOnEnteredRoom;
 import protocol.swg.chat.ChatOnSendInstantMessage;
 import protocol.swg.chat.ChatOnSendPersistentMessage;
@@ -65,6 +69,7 @@ import protocol.swg.chat.ChatRequestPersistentMessage;
 import protocol.swg.chat.ChatRoomList;
 import protocol.swg.chat.ChatRoomMessage;
 import protocol.swg.chat.ChatSendToRoom;
+import protocol.swg.chat.ChatServerStatus;
 import protocol.swg.chat.ChatSystemMessage;
 import protocol.swg.objectControllerObjects.PlayerEmote;
 import protocol.swg.objectControllerObjects.SpatialChat;
@@ -359,11 +364,10 @@ public class ChatService implements INetworkDispatch {
 				if (obj == null)
 					return;
 				
-				//ChatServerStatus chatServerStatus = new ChatServerStatus();
-				//client.getSession().write(chatServerStatus.serialize());
-				
 				ChatRoomList listMessage = new ChatRoomList(chatRooms);
 				client.getSession().write(listMessage.serialize());
+				
+				//System.out.println("Sent the room request responses.");
 			}
 
 		});
@@ -391,11 +395,13 @@ public class ChatService implements INetworkDispatch {
 			if (room != null) {
 				room.setPrivateRoom(sentPacket.isPrivacy());
 				room.setModeratorsOnly(sentPacket.isModeratorOnly());
-				room.getUserList().add(creo);
-				room.getModeratorList().add(creo);
+				room.addUser(creo.getCustomName());
+				room.addModerator(creo.getCustomName());
 				ChatOnCreateRoom response = new ChatOnCreateRoom(room, 0, sentPacket.getRequest());
 				session.write(response.serialize());
-			}*/
+			}
+			
+			System.out.println("Created room.");*/
 			
 		});
 		
@@ -417,6 +423,7 @@ public class ChatService implements INetworkDispatch {
 		});
 		
 		swgOpcodes.put(Opcodes.ChatSendToRoom, (session, data) -> {
+			//System.out.println("send to room!");
 			Client client = core.getClient(session);
 			
 			if(client == null)
@@ -723,8 +730,19 @@ public class ChatService implements INetworkDispatch {
 	}
 	
 	private void loadChatRooms() {
-		ChatRoom system = createChatRoom("", "Chat", "system", true);
-		chatRooms.put(system.getRoomId(), system);
+		
+		/*
+		 * Battlefields channel format:
+		 * 	SWG.serverName.battlefield.bfMapName
+		 * 
+		 * TODO: Research other channel address formats
+		 */
+		
+		ChatRoom system = createChatRoom("", "system", "system", true);
+		System.out.println("Created chat room " + system.getRoomAddress());
+		
+		//createChatRoom("Bounty Hunter chat for this galaxy", "BountyHunter", "SYSTEM", true);
+		//createChatRoom("Commando chat for this galaxy", "Commando", "SYSTEM", true);
 		
 		EntityCursor<ChatRoom> cursor = chatRoomsODB.getCursor(Integer.class, ChatRoom.class);
 		cursor.forEach(room -> {
@@ -763,25 +781,43 @@ public class ChatService implements INetworkDispatch {
 		return room;
 	}
 	
-	public void joinChatRoom(String user, int roomId) {
+	public boolean joinChatRoom(String user, String roomAddress) {
+		chatRooms.forEach((k, v) -> {
+			if (v.getRoomAddress().equals(roomAddress)) {
+				joinChatRoom(user, k);
+				return;
+			}
+		});
+		return false;
+	}
+	public boolean joinChatRoom(String user, int roomId) {
 		
 		if (user.contains(" "))
 			user = user.split(" ")[0];
 		
 		ChatRoom room = getChatRoom(roomId);
 		if (room == null)
-			return;
+			return false;
 
-		if (!room.hasUser(user)) {
-
+		if (!room.hasUser(user.toLowerCase())) {
+			room.addUser(user.toLowerCase());
+			
+			if (!room.isVisible()) {
+				CreatureObject creo = (CreatureObject) getObjectByFirstName(user);
+				if (creo != null) {
+					ChatRoomList listMessage = new ChatRoomList(room);
+					creo.getClient().getSession().write(listMessage.serialize());
+				}
+			}
 			ChatOnEnteredRoom enterRoom = new ChatOnEnteredRoom(user, 0, roomId, true);
-			room.addUser(user);
-
+			
 			room.getUserList().stream().forEach(str -> {
 				SWGObject userObj = getObjectByFirstName(str);
-				if (userObj != null) { userObj.getClient().getSession().write(enterRoom.serialize()); }
+				userObj.getClient().getSession().write(enterRoom.serialize());
 			});
+			return true;
 		}
+		return false;
 	}
 	
 	public void leaveChatRoom(CreatureObject player, int roomId) {

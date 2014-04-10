@@ -27,9 +27,9 @@ import org.apache.mina.core.buffer.IoBuffer;
 
 import protocol.swg.SWGMessage;
 
-public class ChatServerStatus extends SWGMessage {
+public class VoiceChatStatus extends SWGMessage {
 
-	public ChatServerStatus() { }
+	public VoiceChatStatus() { }
 
 	@Override
 	public void deserialize(IoBuffer data) {
@@ -37,10 +37,11 @@ public class ChatServerStatus extends SWGMessage {
 
 	@Override
 	public IoBuffer serialize() {
-		IoBuffer buffer = IoBuffer.allocate(7).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer buffer = IoBuffer.allocate(10).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.putShort((short) 2);
-		buffer.putInt(0x7102B15F);
-		buffer.put((byte) 1);
+		buffer.putInt(0x9E601905);
+		buffer.putInt(1);
 		return buffer.flip();
 	}
+
 }

@@ -72,6 +72,7 @@ import protocol.swg.chat.ChatOnConnectAvatar;
 import protocol.swg.chat.ChatOnGetFriendsList;
 import protocol.swg.chat.ChatRoomList;
 import protocol.swg.chat.ChatServerStatus;
+import protocol.swg.chat.VoiceChatStatus;
 import protocol.swg.objectControllerObjects.UiPlayEffect;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.CrcStringTableVisitor;
@@ -752,7 +753,7 @@ public class ObjectService implements INetworkDispatch {
 							objectList.put(object.getObjectID(), object);
 					}
 					
-				});				
+				});
 
 				if(creature.getParentId() != 0) {
 					SWGObject parent = getObject(creature.getParentId());
@@ -778,24 +779,24 @@ public class ObjectService implements INetworkDispatch {
 				CmdStartScene startScene = new CmdStartScene((byte) 0, objectId, creature.getPlanet().getPath(), creature.getTemplate(), position.x, position.y, position.z, core.getGalacticTime(), 0);
 				session.write(startScene.serialize());
 				
+				ChatServerStatus chatServerStatus = new ChatServerStatus();
+				client.getSession().write(chatServerStatus.serialize());
+				
+				VoiceChatStatus voiceStatus = new VoiceChatStatus();
+				client.getSession().write(voiceStatus.serialize());
+				
 				ParametersMessage parameters = new ParametersMessage();
 				session.write(parameters.serialize());
 				
-				creature.makeAware(core.guildService.getGuildObject());				
+				ChatOnConnectAvatar chatConnect = new ChatOnConnectAvatar();
+				creature.getClient().getSession().write(chatConnect.serialize());
+				
+				creature.makeAware(core.guildService.getGuildObject());
 				core.chatService.loadMailHeaders(client);
 				
 				core.simulationService.handleZoneIn(client);
 				
 				creature.makeAware(creature);
-				
-				ChatServerStatus chatStatus = new ChatServerStatus();
-				creature.getClient().getSession().write(chatStatus.serialize());
-				
-				ChatOnConnectAvatar chatConnect = new ChatOnConnectAvatar();
-				creature.getClient().getSession().write(chatConnect.serialize());
-
-				ChatRoomList chatRooms = new ChatRoomList(core.chatService.getChatRooms());
-				creature.getClient().getSession().write(chatRooms.serialize());
 				
 				//ChatOnGetFriendsList friendsListMessage = new ChatOnGetFriendsList(ghost);
 				//client.getSession().write(friendsListMessage.serialize());
@@ -832,6 +833,7 @@ public class ObjectService implements INetworkDispatch {
 				if(!core.getConfig().getString("MOTD").equals(""))
 					creature.sendSystemMessage(core.getConfig().getString("MOTD"), (byte) 2);
 				
+				core.chatService.joinChatRoom(creature.getCustomName().toLowerCase(), "SWG." + core.getGalaxyName() + "." + creature.getPlanet().getName() + ".Planet");
 				core.playerService.postZoneIn(creature);
 			}
 			

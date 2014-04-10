@@ -23,7 +23,6 @@ package services.chat;
 
 import java.util.Vector;
 
-import resources.objects.creature.CreatureObject;
 
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.NotPersistent;
