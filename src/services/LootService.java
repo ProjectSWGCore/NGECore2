@@ -39,6 +39,7 @@ import java.util.Random;
 import java.util.Vector;
 
 import resources.objects.creature.CreatureObject;
+import resources.objects.group.GroupObject;
 import resources.objects.loot.LootGroup;
 import resources.objects.loot.LootRollSession;
 import resources.objects.tangible.TangibleObject;
@@ -72,18 +73,23 @@ public class LootService implements INetworkDispatch {
 	
 	public void handleLootRequest(CreatureObject requester, TangibleObject lootedObject) {
 		
-		if (lootedObject.isLooted())
+		if (lootedObject.isLooted() || lootedObject.isLootLock())
 			return;
+		
+		lootedObject.setLootLock(true);
 		
 		if (requester.getCustomName().contains("Kun")){
 			requester.setCashCredits(requester.getCashCredits()+1);
 			requester.sendSystemMessage("You looted 1 credit.", (byte)1); 
+			lootedObject.setLooted(true);
 			return;
 		}
 				
-		LootRollSession lootRollSession = new LootRollSession(requester);
+		LootRollSession lootRollSession = new LootRollSession(requester,lootedObject);
 		
 		handleCreditDrop(requester,lootedObject);
+		
+		lootSituationAssessment(requester,lootedObject,lootRollSession);
 				
 		CreatureObject lootedCreature = (CreatureObject) lootedObject;
 		
@@ -96,12 +102,23 @@ public class LootService implements INetworkDispatch {
 	    	LootGroup lootGroup = iterator.next();
 	    	int groupChance = lootGroup.getLootGroupChance();
 	    	int lootGroupRoll = new Random().nextInt(100);
-	    	if (lootGroupRoll <= groupChance){    		
+	    	if (lootGroupRoll <= groupChance){    	
 	    		System.out.println("this lootGroup will drop something");
 	    		handleLootGroup(lootGroup,lootRollSession); //this lootGroup will drop something e.g. {kraytpearl_range,krayt_tissue_rare}	    		
 	    	}		
 	    }
 	    
+	    // Rare Loot System Stage (Is in place for all looted creatures)
+	    if (lootRollSession.isAllowRareLoot()){
+	    	int randomRareLoot = new Random().nextInt(100);
+	    	int chanceRequirement = 1; 
+	    	if (lootRollSession.isIncreasedRLSChance())
+	    		chanceRequirement+=3; // RLS chance is at 4% for groupsize >= 4
+	    	if (randomRareLoot <= chanceRequirement){ 
+	    		handleRareLootChest(lootRollSession);
+	    	}
+	    }
+		
 	    
 	    // ********** Phase 1 complete, loot items determined **********
 	    // stored in the lootSession
@@ -113,6 +130,8 @@ public class LootService implements INetworkDispatch {
 	    	for (String msg : lootRollSession.getErrorMessages()){
 	    		// ToDo: Show this for each group member later!
 	    		requester.sendSystemMessage(msg,(byte) 1);
+	    		lootedObject.setLootLock(false);
+	    		return;
 	    	}
 	    }
 	    
@@ -121,6 +140,9 @@ public class LootService implements INetworkDispatch {
     	for (TangibleObject droppedItem : lootRollSession.getDroppedItems()){		    
     		
 	    	requesterInventory.add(droppedItem);
+	    	if (droppedItem.getAttachment("LootItemName").toString().contains("Loot Chest")){
+	    		requester.playEffectObject("clienteffect/level_granted.cef", "");
+	    	}
     	}
     	
     	lootedObject.setLooted(true);
@@ -148,7 +170,7 @@ public class LootService implements INetworkDispatch {
 		
 		for(int i=0;i<lootPoolChances.length;i++) {
 			remainder += lootPoolChances[i]; 
-	    	if (randomItemFromGroup <= remainder){
+	    	if (randomItemFromGroup <= remainder){ 		
 	    		System.out.println("this loot pool will drop something"); // e.g. kraytpearl_range
 	    		handleLootPool(lootPoolNames[i],lootRollSession); // This loot pool will drop something	
 	    		break;
@@ -275,6 +297,67 @@ public class LootService implements INetworkDispatch {
     	System.out.println("droppedItem " + droppedItem);
     	return droppedItem;
 	}
+	
+	private void handleRareLootChest(LootRollSession lootRollSession){
+		
+		TangibleObject droppedItem = null;
+		
+		int legendaryRoll = new Random().nextInt(100);
+		int exceptionalRoll = new Random().nextInt(100);
+		int chancemodifier = 0;
+		if (lootRollSession.isIncreasedRLSChance())
+			chancemodifier += 15;
+		
+		if (legendaryRoll<2+chancemodifier){ 
+			String itemTemplate="object/tangible/item/shared_rare_loot_chest_3.iff";
+			droppedItem = createDroppedItem(itemTemplate,lootRollSession.getSessionPlanet());
+			String itemName = "Legendary Loot Chest";
+			droppedItem.setStfFilename("loot_n");
+			droppedItem.setStfName("rare_loot_chest_3_n");
+			droppedItem.setDetailFilename("loot_n");
+			droppedItem.setDetailName("rare_loot_chest_3_d");
+			droppedItem.setAttachment("LootItemName", itemName);
+			droppedItem.getAttributes().put("@obj_attr_n:rare_loot_category", "\\#D1F56F Rare Item \\#FFFFFF ");
+			fillLegendaryChest(droppedItem);
+			
+		} else if (exceptionalRoll<10+chancemodifier){
+			String itemTemplate="object/tangible/item/shared_rare_loot_chest_2.iff";
+			droppedItem = createDroppedItem(itemTemplate,lootRollSession.getSessionPlanet());
+			String itemName = "Exceptional Loot Chest";
+			droppedItem.setStfFilename("loot_n");
+			droppedItem.setStfName("rare_loot_chest_2_n");
+			droppedItem.setDetailFilename("loot_n");
+			droppedItem.setDetailName("rare_loot_chest_2_d");
+			droppedItem.setAttachment("LootItemName", itemName);
+			droppedItem.getAttributes().put("@obj_attr_n:rare_loot_category", "\\#D1F56F Rare Item \\#FFFFFF ");
+			fillExceptionalChest(droppedItem);
+		} else {
+			String itemTemplate="object/tangible/item/shared_rare_loot_chest_1.iff";
+			droppedItem = createDroppedItem(itemTemplate,lootRollSession.getSessionPlanet());
+			String itemName = "Rare Loot Chest";
+			droppedItem.setStfFilename("loot_n");
+			droppedItem.setStfName("rare_loot_chest_1_n");
+			droppedItem.setDetailFilename("loot_n");
+			droppedItem.setDetailName("rare_loot_chest_1_d");
+			droppedItem.setAttachment("LootItemName", itemName);
+			droppedItem.getAttributes().put("@obj_attr_n:rare_loot_category", "\\#D1F56F Rare Item \\#FFFFFF ");
+			fillRareChest(droppedItem);
+		}
+
+		lootRollSession.addDroppedItem(droppedItem);
+	}
+	
+	private void fillLegendaryChest(TangibleObject droppedItem){
+		
+	}
+	
+	private void fillExceptionalChest(TangibleObject droppedItem){
+		
+	}
+
+	private void fillRareChest(TangibleObject droppedItem){
+		
+	}
 		
 	private void setCustomization(TangibleObject droppedItem,String itemName) {
 		
@@ -307,7 +390,7 @@ public class LootService implements INetworkDispatch {
 		}
 		if (itemName.contains("powercrystal")){
 			handlePowerCrystal(droppedItem);
-		}		
+		}	
 	}
 	
 	private void handleStats(TangibleObject droppedItem) {
@@ -338,6 +421,11 @@ public class LootService implements INetworkDispatch {
 			// This is for chests etc.
 			// Check the py script
 		}	
+	}
+	
+	private void lootSituationAssessment(CreatureObject requester,TangibleObject lootedObject, LootRollSession lootRollSession){
+		
+		// reserved for possible necessities
 	}
 	
 	// ************* Special items ************

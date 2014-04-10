@@ -41,6 +41,11 @@ public class GroupObject extends UniverseObject {
 	private GroupMessageBuilder messageBuilder;
 	private int chatRoomId;
 	
+	public static int FREE_FOR_ALL  = 0;
+	public static int MASTER_LOOTER = 1;
+	public static int LOTTERY       = 2;
+	
+	
 	public GroupObject(long objectId) {
 		super(objectId, null, new Point3D(0, 0, 0), new Quaternion(1, 0, 0, 0), "object/group/shared_group_object.iff");
 		messageBuilder = new GroupMessageBuilder(this);

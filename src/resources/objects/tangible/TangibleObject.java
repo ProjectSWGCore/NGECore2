@@ -60,7 +60,7 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent(version=4)
+@Persistent(version=5)
 public class TangibleObject extends SWGObject {
 	
 	// TODO: Thread safety
@@ -87,6 +87,7 @@ public class TangibleObject extends SWGObject {
 	private List<LootGroup> lootGroups = new ArrayList<LootGroup>();
 	
 	private boolean looted = false;
+	private boolean lootLock = false;
 	
 	@NotPersistent
 	private TangibleObject killer = null;
@@ -473,6 +474,14 @@ public class TangibleObject extends SWGObject {
 		this.looted = looted;
 	}
 	
+	public boolean isLootLock() {
+		return lootLock;
+	}
+
+	public void setLootLock(boolean lootLock) {
+		this.lootLock = lootLock;
+	}
+	
 	
 	@Override
 	public void sendBaselines(Client destination) {
@@ -497,4 +506,5 @@ public class TangibleObject extends SWGObject {
 		
 
 	}
+
 }
