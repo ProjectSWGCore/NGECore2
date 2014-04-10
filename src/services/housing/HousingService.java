@@ -97,12 +97,11 @@ public class HousingService implements INetworkDispatch {
 		}
 		
 		// Lot stuff
-		if(actor.getPlayerObject().getLotsRemaining() - structureLotCost < 0)
+		if(!actor.getPlayerObject().deductLots(structureLotCost))
 		{
 			actor.sendSystemMessage("You do not have enough available lots to place this structure.", (byte) 0); // should probably load this from an stf
 			return;
 		}
-		actor.getPlayerObject().deductLots(structureLotCost);
 		
 		// Calculate our orientation and height
 		Quaternion quaternion = new Quaternion(1, 0, 0, 0);

@@ -82,6 +82,16 @@ public class SUIService implements INetworkDispatch {
 				if(target == null || owner == null)
 					return;
 				
+				if(target.getGrandparent() != null && target.getGrandparent().getAttachment("structureAdmins") != null)
+				{
+					if(core.housingService.getPermissions(owner, target.getContainer()))
+					{
+						core.scriptService.callScript("scripts/radial/", "moveable", "createRadial", core, owner, target, request.getRadialOptions());
+						sendRadial(owner, target, request.getRadialOptions(), request.getRadialCount());
+						return;
+					}
+				}
+				
 				core.scriptService.callScript("scripts/radial/", getRadialFilename(target), "createRadial", core, owner, target, request.getRadialOptions());
 				if(getRadialFilename(target).equals("default"))
 					return;

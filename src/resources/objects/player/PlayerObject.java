@@ -838,7 +838,7 @@ public class PlayerObject extends IntangibleObject {
 	
 	public boolean deductLots(int amount)
 	{
-		if(this.lotsRemaining - amount > 0)
+		if(this.lotsRemaining - amount >= 0)
 		{
 			this.lotsRemaining -= amount;
 			return true;
