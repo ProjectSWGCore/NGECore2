@@ -97,14 +97,14 @@ public class CommandService implements INetworkDispatch  {
 			return false;
 		}
 		
-		// The two below statements need testing before use
-		
 		for (long state : command.getInvalidStates()) {
 			if ((actor.getStateBitmask() & state) == state) {
 				//return false;
 			}
 		}
 		
+		// This SHOULD be invalid locomotions but we don't track these currently.
+		// Postures are the best we can do.
 		for (byte posture : command.getInvalidPostures()) {
 			if (actor.getPosture() == posture) {
 				//return false;
@@ -259,7 +259,7 @@ public class CommandService implements INetworkDispatch  {
 								sub += 5;
 							}
 							
-							if (hasCharacterAbility) {
+							if (hasCharacterAbility || isCombatCommand(name)) {
 								CombatCommand command = new CombatCommand(name.toLowerCase());
 								commandLookup.add(command);
 								return command;
@@ -315,7 +315,7 @@ public class CommandService implements INetworkDispatch  {
 								sub += 5;
 							}
 							
-							if (hasCharacterAbility) {
+							if (hasCharacterAbility || isCombatCommand(commandName)) {
 								CombatCommand command = new CombatCommand(commandName);
 								commandLookup.add(command);
 								return command;
@@ -333,6 +333,22 @@ public class CommandService implements INetworkDispatch  {
 		}
 		
 		return null;
+	}
+	
+	public boolean isCombatCommand(String commandName) {
+		try {
+			DatatableVisitor visitor = ClientFileManager.loadFile("datatables/combat/combat_data.iff", DatatableVisitor.class);
+			
+			for (int i = 0; i < visitor.getRowCount(); i++) {
+				if (visitor.getObject(i, 0) != null && ((String) (visitor.getObject(i, 0))).equalsIgnoreCase(commandName)) {
+					return true;
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return false;
 	}
 	
 	public void processCommand(CreatureObject actor, SWGObject target, BaseSWGCommand command, int actionCounter, String commandArgs) {
