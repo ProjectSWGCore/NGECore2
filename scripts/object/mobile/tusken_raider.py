@@ -12,9 +12,4 @@ def setup(core, object):
 	lootGroupChance_2 = 20
 	object.addToLootGroups(lootPoolNames_2,lootPoolChances_2,lootGroupChance_2)
 	
-	lootPoolNames_3 = ['Rareloot']
-	lootPoolChances_3 = [100]
-	lootGroupChance_3 = 1
-	object.addToLootGroups(lootPoolNames_3,lootPoolChances_3,lootGroupChance_3)
-
 	return 

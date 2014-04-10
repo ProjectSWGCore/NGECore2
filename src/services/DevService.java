@@ -67,7 +67,7 @@ public class DevService implements INetworkDispatch {
 	public void sendCharacterBuilderSUI(CreatureObject creature, int childMenu) 
 	{
 		Map<Long, String> suiOptions = new HashMap<Long, String>();
-		
+
 		switch(childMenu)
 		{
 			case 0: // Root
@@ -85,9 +85,7 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 22, "Misc Items");
 				suiOptions.put((long) 23, "Jedi Items");
 				suiOptions.put((long) 110, "Survey Devices");
-				//suiOptions.put((long) 120, "House Deeds");
-				suiOptions.put((long) 111, "Spawn Tusken");
-				suiOptions.put((long) 112, "Spawn Krayt");
+				if(creature.getClient().isGM()) suiOptions.put((long) 120, "House Deeds");
 				break;
 			case 3: // [Items] Weapons
 				suiOptions.put((long) 30, "Jedi Weapons");
@@ -994,29 +992,6 @@ public class DevService implements INetworkDispatch {
 						solarSurveyTool.setCustomName("Solar Survey Device");
 						inventory.add(solarSurveyTool);
 						return;
-						
-					case 111:
-						
-						
-						CreatureObject spawned2 = core.spawnService.spawnCreature("object/mobile/shared_tusken_raider.iff", "tatooine", 0, player.getPosition().x, player.getPosition().y, player.getPosition().z, 1, 0, 1, 0, 5);
-						// core.spawnService.spawnCreature(arg1, actor.getPlanet().getName(), 0, pos.x, pos.y, pos.z, 1, 0, 1, 0, int(arg2))
-						//SWGObject spawned = core.staticService.spawnObject("object/mobile/shared_tusken_raider.iff", "tatooine", 0L, 3522F, 4F, -4801F, 0.70F, 0.71F);
-						//CreatureObject spawned2 = (CreatureObject) spawned;
-//						spawned2.setLevel((short)5);
-//						spawned2.setCombatFlag((byte)1);
-//						spawned2.setStateBitmask(1);
-//						spawned2.setOptionsBitmask(128);
-						
-						//core.lootService.handleLootRequest(player,(TangibleObject)spawned2);
-						break;
-					case 112:
-						SWGObject spawned3 = core.staticService.spawnObject("object/mobile/shared_krayt_dragon.iff", "tatooine", 0L, 3512F, 4F, -4801F, 0.70F, 0.71F);
-						
-//						pos = actor.getWorldPosition()
-//								core.spawnService.spawnCreature(arg1, actor.getPlanet().getName(), 0, pos.x, pos.y, pos.z, 1, 0, 1, 0, int(arg2))
-//						
-						core.lootService.handleLootRequest(player,(TangibleObject)spawned3);
-						break;
 						
 					case 120:
 						SWGObject houseDeed = core.objectService.createObject("object/tangible/deed/player_house_deed/shared_generic_house_small_deed.iff", planet);
