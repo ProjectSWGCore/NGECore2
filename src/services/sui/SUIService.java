@@ -46,6 +46,7 @@ import resources.common.FileUtilities;
 import resources.common.ObjControllerOpcodes;
 import resources.common.Opcodes;
 import resources.common.RadialOptions;
+import resources.objects.harvester.HarvesterObject;
 import services.sui.SUIWindow.SUICallback;
 import services.sui.SUIWindow.Trigger;
 import engine.clients.Client;
@@ -80,6 +81,26 @@ public class SUIService implements INetworkDispatch {
 	
 				if(target == null || owner == null)
 					return;
+				
+				if (target instanceof HarvesterObject){
+					HarvesterObject harvester = (HarvesterObject) target;
+					Vector<String> admins = harvester.getAdminList();
+					Vector<String> hoppers = harvester.getHopperList();
+					
+					if (harvester.getOwner()==owner && !admins.contains(owner.getCustomName())){
+						admins.add(owner.getCustomName());
+					}
+					
+					if (! admins.contains(owner.getCustomName()) && ! hoppers.contains(owner.getCustomName())){
+						return; // Completely unauthorized				
+					}
+					
+					if (! admins.contains(owner.getCustomName()) && hoppers.contains(owner.getCustomName())){
+						 // authorized for hopper
+						// change radialOptions to hopper access
+						harvester.setAttachment("radial_filename", "harvesterHopper");				
+					}
+				}
 				
 				if(target.getGrandparent() != null && target.getGrandparent().getAttachment("structureAdmins") != null)
 				{
