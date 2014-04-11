@@ -738,8 +738,11 @@ public class ChatService implements INetworkDispatch {
 		 * TODO: Research other channel address formats
 		 */
 		
-		ChatRoom system = createChatRoom("", "system", "system", true);
-		System.out.println("Created chat room " + system.getRoomAddress());
+		createChatRoom("", "SWG", "system", true);
+		createChatRoom("", "SWG." + core.getGalaxyName(), "system", true);
+		
+		createChatRoom("", "system", "system", true); // galaxy system messages
+		createChatRoom("", "Auction", "system", true);
 		
 		//createChatRoom("Bounty Hunter chat for this galaxy", "BountyHunter", "SYSTEM", true);
 		//createChatRoom("Commando chat for this galaxy", "Commando", "SYSTEM", true);
@@ -751,23 +754,23 @@ public class ChatService implements INetworkDispatch {
 		cursor.close();
 	}
 	
-	public ChatRoom createChatRoom(String roomName, String address, String creator, boolean showInList) {
-		return createChatRoom(roomName, address, creator, showInList, false);
+	public ChatRoom createChatRoom(String roomName, String address, String creator, boolean isPublic) {
+		return createChatRoom(roomName, address, creator, isPublic, false);
 	}
-	public ChatRoom createChatRoom(String roomName, String address, String creator, boolean showInList, boolean store) {
+	public ChatRoom createChatRoom(String roomName, String address, String creator, boolean isPublic, boolean store) {
 
 		if (creator.contains(" "))
 			creator = creator.split(" ")[0];
 		
 		ChatRoom room = new ChatRoom();
 		room.setDescription(roomName);
-		if (!address.startsWith("SWG."))
+		if (!address.startsWith("SWG"))
 			room.setRoomAddress("SWG." + core.getGalaxyName() + "." + address);
 		else
 			room.setRoomAddress(address);
 		room.setCreator(creator.toLowerCase());
 		room.setOwner(creator.toLowerCase());
-		room.setVisible(showInList);
+		room.setVisible(isPublic);
 		room.setRoomId(generateChatRoomId());
 		
 		chatRooms.put(room.getRoomId(), room);
@@ -784,13 +787,13 @@ public class ChatService implements INetworkDispatch {
 	public boolean joinChatRoom(String user, String roomAddress) {
 		chatRooms.forEach((k, v) -> {
 			if (v.getRoomAddress().equals(roomAddress)) {
-				joinChatRoom(user, k);
+				joinChatRoom(user, k, true);
 				return;
 			}
 		});
 		return false;
 	}
-	public boolean joinChatRoom(String user, int roomId) {
+	public boolean joinChatRoom(String user, int roomId, boolean resendList) {
 		
 		if (user.contains(" "))
 			user = user.split(" ")[0];
@@ -802,7 +805,7 @@ public class ChatService implements INetworkDispatch {
 		if (!room.hasUser(user.toLowerCase())) {
 			room.addUser(user.toLowerCase());
 			
-			if (!room.isVisible()) {
+			if (!room.isVisible() || resendList) {
 				CreatureObject creo = (CreatureObject) getObjectByFirstName(user);
 				if (creo != null) {
 					ChatRoomList listMessage = new ChatRoomList(room);
@@ -810,16 +813,16 @@ public class ChatService implements INetworkDispatch {
 				}
 			}
 			ChatOnEnteredRoom enterRoom = new ChatOnEnteredRoom(user, 0, roomId, true);
-			
-			room.getUserList().stream().forEach(str -> {
-				SWGObject userObj = getObjectByFirstName(str);
-				userObj.getClient().getSession().write(enterRoom.serialize());
-			});
+			getObjectByFirstName(user).getClient().getSession().write(enterRoom.serialize());
+			//System.out.println("Sent message for room " + room.getRoomAddress());
 			return true;
 		}
 		return false;
 	}
 	
+	public boolean joinChatRoom(String user, int roomId) {
+		return joinChatRoom(user, roomId, false);
+	}
 	public void leaveChatRoom(CreatureObject player, int roomId) {
 		
 		String playerName = player.getCustomName().toLowerCase();
