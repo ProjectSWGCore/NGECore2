@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import resources.common.Console;
 import resources.objects.intangible.IntangibleObject;
 import resources.objects.resource.ResourceContainerObject;
 import resources.objects.tool.SurveyTool;
@@ -45,7 +44,7 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent(version=9)
+@Persistent(version=10)
 public class PlayerObject extends IntangibleObject {
 	
 	// PLAY 3
@@ -126,6 +125,8 @@ public class PlayerObject extends IntangibleObject {
 	private String spouse;
 	private String holoEmote;
 	private int holoEmoteUses;
+	
+	private int lotsRemaining = 10;
 	
 	@NotPersistent
 	private PlayerMessageBuilder messageBuilder;
@@ -821,5 +822,31 @@ public class PlayerObject extends IntangibleObject {
 
 	public void setRecentContainer(ResourceContainerObject recentContainer) {
 		this.recentContainer = recentContainer;
+	}
+	
+	public void setLotsRemaining(int amount)
+	{
+		this.lotsRemaining = amount;
+	}
+	
+	public boolean addLots(int amount)
+	{
+		this.lotsRemaining += amount;
+		return true;
+	}
+	
+	public boolean deductLots(int amount)
+	{
+		if(this.lotsRemaining - amount >= 0)
+		{
+			this.lotsRemaining -= amount;
+			return true;
+		}
+		return false;
+	}
+	
+	public int getLotsRemaining()
+	{
+		return this.lotsRemaining;
 	}
 }

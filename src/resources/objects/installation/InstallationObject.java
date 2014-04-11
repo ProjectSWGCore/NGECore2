@@ -23,9 +23,16 @@ package resources.objects.installation;
 
 import com.sleepycat.persist.model.Persistent;
 
+import engine.resources.scene.Planet;
+import engine.resources.scene.Point3D;
+import engine.resources.scene.Quaternion;
+
 import resources.objects.tangible.TangibleObject;
 
 @Persistent(version=0)
 public class InstallationObject extends TangibleObject {
-
+	
+	public InstallationObject(long objectID, Planet planet, String template, Point3D position, Quaternion orientation){
+		super(objectID, planet, template, position, orientation);		
+	}	
 }

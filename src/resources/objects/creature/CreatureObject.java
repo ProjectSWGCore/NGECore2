@@ -22,25 +22,21 @@
 package resources.objects.creature;
 
 import java.lang.System;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import protocol.swg.ChatSystemMessage;
 import protocol.swg.ObjControllerMessage;
-import protocol.swg.PlayClientEffectObjectMessage;
 import protocol.swg.PlayMusicMessage;
 import protocol.swg.UpdatePostureMessage;
 import protocol.swg.UpdatePVPStatusMessage;
+import protocol.swg.chat.ChatSystemMessage;
 import protocol.swg.objectControllerObjects.Animation;
 import protocol.swg.objectControllerObjects.Posture;
 
@@ -63,8 +59,8 @@ import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
+import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
-import resources.objects.weapon.WeaponObject;
 
 @Entity(version=6)
 public class CreatureObject extends TangibleObject implements IPersistent {
@@ -1090,8 +1086,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			appearanceEquipmentList.get().remove(object);
 		}
 	}
-
-	@SuppressWarnings("unused")
+	
 	@Override
 	public void sendBaselines(Client destination) {
 				
@@ -1775,6 +1770,11 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 		
 		return 0L;
+	}
+	
+	public PlayerObject getPlayerObject()
+	{
+		return (PlayerObject) this.getSlottedObject("ghost");
 	}
 	
 	//public float getCooldown(String cooldownGroup) {

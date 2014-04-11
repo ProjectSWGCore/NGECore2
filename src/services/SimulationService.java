@@ -60,15 +60,15 @@ import engine.resources.scene.Quaternion;
 import engine.resources.scene.quadtree.QuadTree;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
-import protocol.swg.ChatFriendsListUpdate;
-import protocol.swg.ChatOnChangeFriendStatus;
-import protocol.swg.ChatOnGetFriendsList;
 import protocol.swg.CmdStartScene;
 import protocol.swg.HeartBeatMessage;
 import protocol.swg.ObjControllerMessage;
 import protocol.swg.OpenedContainerMessage;
 import protocol.swg.UpdateTransformMessage;
 import protocol.swg.UpdateTransformWithParentMessage;
+import protocol.swg.chat.ChatFriendsListUpdate;
+import protocol.swg.chat.ChatOnChangeFriendStatus;
+import protocol.swg.chat.ChatOnGetFriendsList;
 import protocol.swg.objectControllerObjects.DataTransform;
 import protocol.swg.objectControllerObjects.DataTransformWithParent;
 import protocol.swg.objectControllerObjects.TargetUpdate;
@@ -809,7 +809,9 @@ public class SimulationService implements INetworkDispatch {
 		PlayerObject ghost = (PlayerObject) object.getSlottedObject("ghost");
 				
 		core.weatherService.sendWeather(object);
-				
+		
+		//core.chatService.joinChatRoom(object.getCustomName().toLowerCase(), "SWG." + core.getGalaxyName() + "." + object.getPlanet().getName());
+
 		if (!object.hasSkill(ghost.getProfessionWheelPosition())) {
 			object.showFlyText("cbt_spam", "skill_up", (float) 2.5, new RGB(154, 205, 50), 0);
 			object.playEffectObject("clienteffect/skill_granted.cef", "");
@@ -886,6 +888,24 @@ public class SimulationService implements INetworkDispatch {
 		
 	}
 	
+	public void transform(TangibleObject obj, Point3D position)
+	{
+		Point3D oldPosition = obj.getPosition();
+		Point3D newPosition = new Point3D(oldPosition.x + position.x, oldPosition.y + position.y, oldPosition.z + position.z);
+		
+		teleport(obj, newPosition, obj.getOrientation(), obj.getParentId());
+	}
+	
+	public void transform(SWGObject obj, float rotation, Point3D axis)
+	{
+		rotation *= (Math.PI / 180);
+		
+		Quaternion oldRotation = obj.getOrientation();
+		Quaternion newRotation = resources.common.MathUtilities.rotateQuaternion(oldRotation, rotation, axis);
+		
+		teleport(obj, obj.getPosition(), newRotation, obj.getParentId());
+	}
+	
 	public void teleport(SWGObject obj, Point3D position, Quaternion orientation, long cellId) {
 		
 		if(cellId == 0) {
@@ -900,6 +920,9 @@ public class SimulationService implements INetworkDispatch {
 			DataTransformWithParent dataTransform = new DataTransformWithParent(new Point3D(position.x, position.y, position.z), orientation, obj.getMovementCounter(), obj.getObjectID(), cellId);
 			ObjControllerMessage objController = new ObjControllerMessage(0x1B, dataTransform);
 			obj.notifyObservers(objController, true);
+			
+			obj.setPosition(position);
+			obj.setOrientation(orientation);
 		}
 			
 	}

@@ -24,22 +24,16 @@ package services;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import resources.common.FileUtilities;
 import resources.common.collidables.CollidableCircle;
-import resources.objects.building.BuildingObject;
-import resources.objects.cell.CellObject;
-import resources.objects.creature.CreatureObject;
 
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.resources.config.Config;
-import engine.resources.container.Traverser;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -181,6 +175,12 @@ public class TerrainService {
 		core.mapService.addPlanet(planet);
 		noBuildAreas.put(planet, new ArrayList<CollidableCircle>());
 		loadClientRegions(planet);
+		
+		core.chatService.createChatRoom("", name, "system", true);
+		core.chatService.createChatRoom("public chat for this planet, cannot create rooms here", name + ".Planet", "SYSTEM", true);
+		core.chatService.createChatRoom("system messages for this planet, cannot create rooms here", name + ".system", "SYSTEM", true);
+		
+		System.out.println("Created chat rooms for " + name);
 	}
 
 	

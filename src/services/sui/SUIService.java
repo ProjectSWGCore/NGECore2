@@ -23,7 +23,6 @@ package services.sui;
 
 import java.nio.ByteOrder;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
@@ -47,6 +46,7 @@ import resources.common.FileUtilities;
 import resources.common.ObjControllerOpcodes;
 import resources.common.Opcodes;
 import resources.common.RadialOptions;
+import resources.objects.harvester.HarvesterObject;
 import services.sui.SUIWindow.SUICallback;
 import services.sui.SUIWindow.Trigger;
 import engine.clients.Client;
@@ -81,6 +81,36 @@ public class SUIService implements INetworkDispatch {
 	
 				if(target == null || owner == null)
 					return;
+				
+				if (target instanceof HarvesterObject){
+					HarvesterObject harvester = (HarvesterObject) target;
+					Vector<String> admins = harvester.getAdminList();
+					Vector<String> hoppers = harvester.getHopperList();
+					
+					if (harvester.getOwner()==owner && !admins.contains(owner.getCustomName())){
+						admins.add(owner.getCustomName());
+					}
+					
+					if (! admins.contains(owner.getCustomName()) && ! hoppers.contains(owner.getCustomName())){
+						return; // Completely unauthorized				
+					}
+					
+					if (! admins.contains(owner.getCustomName()) && hoppers.contains(owner.getCustomName())){
+						 // authorized for hopper
+						// change radialOptions to hopper access
+						harvester.setAttachment("radial_filename", "harvesterHopper");				
+					}
+				}
+				
+				if(target.getGrandparent() != null && target.getGrandparent().getAttachment("structureAdmins") != null)
+				{
+					if(core.housingService.getPermissions(owner, target.getContainer()))
+					{
+						core.scriptService.callScript("scripts/radial/", "moveable", "createRadial", core, owner, target, request.getRadialOptions());
+						sendRadial(owner, target, request.getRadialOptions(), request.getRadialCount());
+						return;
+					}
+				}
 				
 				core.scriptService.callScript("scripts/radial/", getRadialFilename(target), "createRadial", core, owner, target, request.getRadialOptions());
 				if(getRadialFilename(target).equals("default"))

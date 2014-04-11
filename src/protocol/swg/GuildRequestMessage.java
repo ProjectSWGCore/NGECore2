@@ -2,9 +2,6 @@ package protocol.swg;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import resources.common.Console;
-import resources.common.StringUtilities;
-
 public class GuildRequestMessage extends SWGMessage {
 
 	private long characterId;

@@ -30,7 +30,6 @@ import org.apache.mina.core.buffer.IoBuffer;
 import com.sleepycat.persist.model.Persistent;
 
 import engine.resources.common.CRC;
-import resources.common.StringUtilities;
 import resources.objects.Buff;
 import resources.objects.ObjectMessageBuilder;
 import resources.objects.SkillMod;

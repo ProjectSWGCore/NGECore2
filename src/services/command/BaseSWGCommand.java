@@ -27,6 +27,9 @@ import engine.resources.common.CRC;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+
+import resources.objects.weapon.WeaponObject;
 
 public class BaseSWGCommand implements Cloneable {
 	
@@ -34,7 +37,6 @@ public class BaseSWGCommand implements Cloneable {
 	private String clientEffectSelf;
 	private String clientEffectTarget;
 	private int commandCRC;
-	private boolean isGmCommand = false;
 	private String characterAbility;
 	private int target;
 	private int targetType;
@@ -54,6 +56,21 @@ public class BaseSWGCommand implements Cloneable {
 	//private Long[] invalidLocomotions; // Not tracked anywhere
 	private Byte[] invalidPostures;
 	private Long[] invalidStates;
+	
+	private String[] defaultAnimations = new String[]{};
+	private String[] oneHandedAnimations = new String[]{};
+	private String[] twoHandedAnimations = new String[]{};
+	private String[] polearmAnimations = new String[]{};
+	private String[] unarmedAnimations = new String[]{};
+	private String[] pistolAnimations = new String[]{};
+	private String[] carbineAnimations = new String[]{};
+	private String[] lightRifleAnimations = new String[]{};
+	private String[] rifleAnimations = new String[]{};
+	private String[] heavyWpnAnimations = new String[]{};
+	private String[] oneHandedLSAnimations = new String[]{};
+	private String[] twoHandedLSAnimations = new String[]{};
+	private String[] polearmLSAnimations = new String[]{};
+	private String[] thrownAnimations = new String[]{};
 	
 	public BaseSWGCommand(String commandName) {
 		setCommandName(commandName);
@@ -222,10 +239,6 @@ public class BaseSWGCommand implements Cloneable {
 		return (godLevel > 0);
 	}
 	
-	public void setGmCommand(boolean isGmCommand) {
-		this.isGmCommand = isGmCommand;
-	}
-	
 	public String getCharacterAbility() {
 		return characterAbility;
 	}
@@ -360,6 +373,171 @@ public class BaseSWGCommand implements Cloneable {
 	
 	public void setWarmupTime(float warmupTime) {
 		this.warmupTime = warmupTime;
+	}
+	
+	public String[] getDefaultAnimations() {
+		return defaultAnimations;
+	}
+	
+	public void setDefaultAnimations(String[] defaultAnimations) {
+		this.defaultAnimations = defaultAnimations;
+	}
+	
+	public String[] getOneHandedAnimations() {
+		return oneHandedAnimations;
+	}
+	
+	public void setOneHandedAnimations(String[] oneHandedAnimations) {
+		this.oneHandedAnimations = oneHandedAnimations;
+	}
+	
+	public String[] getTwoHandedAnimations() {
+		return twoHandedAnimations;
+	}
+	
+	public void setTwoHandedAnimations(String[] twoHandedAnimations) {
+		this.twoHandedAnimations = twoHandedAnimations;
+	}
+	
+	public String[] getPolearmAnimations() {
+		return polearmAnimations;
+	}
+	
+	public void setPolearmAnimations(String[] polearmAnimations) {
+		this.polearmAnimations = polearmAnimations;
+	}
+	
+	public String[] getUnarmedAnimations() {
+		return unarmedAnimations;
+	}
+	
+	public void setUnarmedAnimations(String[] unarmedAnimations) {
+		this.unarmedAnimations = unarmedAnimations;
+	}
+	
+	public String[] getPistolAnimations() {
+		return pistolAnimations;
+	}
+	
+	public void setPistolAnimations(String[] pistolAnimations) {
+		this.pistolAnimations = pistolAnimations;
+	}
+	
+	public String[] getCarbineAnimations() {
+		return carbineAnimations;
+	}
+	
+	public void setCarbineAnimations(String[] carbineAnimations) {
+		this.carbineAnimations = carbineAnimations;
+	}
+	
+	public String[] getLightRifleAnimations() {
+		return lightRifleAnimations;
+	}
+	
+	public void setLightRifleAnimations(String[] lightRifleAnimations) {
+		this.lightRifleAnimations = lightRifleAnimations;
+	}
+	
+	public String[] getRifleAnimations() {
+		return rifleAnimations;
+	}
+	
+	public void setRifleAnimations(String[] rifleAnimations) {
+		this.rifleAnimations = rifleAnimations;
+	}
+	
+	public String[] getHeavyWpnAnimations() {
+		return heavyWpnAnimations;
+	}
+	
+	public void setHeavyWpnAnimations(String[] heavyWpnAnimations) {
+		this.heavyWpnAnimations = heavyWpnAnimations;
+	}
+	
+	public String[] getOneHandedLSAnimations() {
+		return oneHandedLSAnimations;
+	}
+	
+	public void setOneHandedLSAnimations(String[] oneHandedLSAnimations) {
+		this.oneHandedLSAnimations = oneHandedLSAnimations;
+	}
+	
+	public String[] getTwoHandedLSAnimations() {
+		return twoHandedLSAnimations;
+	}
+	
+	public void setTwoHandedLSAnimations(String[] twoHandedLSAnimations) {
+		this.twoHandedLSAnimations = twoHandedLSAnimations;
+	}
+	
+	public String[] getPolearmLSAnimations() {
+		return polearmLSAnimations;
+	}
+	
+	public void setPolearmLSAnimations(String[] polearmLSAnimations) {
+		this.polearmLSAnimations = polearmLSAnimations;
+	}
+	
+	public String[] getThrownAnimations() {
+		return thrownAnimations;
+	}
+	
+	public void setThrownAnimations(String[] thrownAnimations) {
+		this.thrownAnimations = thrownAnimations;
+	}
+	
+	public String getRandomAnimation(WeaponObject weapon) {
+		int weaponType = weapon.getWeaponType();
+		String[] animations;
+		
+		switch (weaponType) {
+			case 0:
+				animations = rifleAnimations;
+				break;
+			case 1:
+				animations = carbineAnimations;
+				break;
+			case 2:
+				animations = pistolAnimations;
+				break;
+			case 3:
+				animations = heavyWpnAnimations;
+				break;
+			case 4:
+				animations = oneHandedAnimations;
+				break;
+			case 5:
+				animations = twoHandedAnimations;
+				break;
+			case 6:
+				animations = defaultAnimations;
+				break;
+			case 7:
+				animations = polearmAnimations;
+				break;
+			case 8:
+				animations = thrownAnimations;
+				break;
+			case 9:
+				animations = oneHandedLSAnimations;				
+				break;
+			case 10:
+				animations = twoHandedLSAnimations;
+				break;
+			case 11:
+				animations = polearmLSAnimations;
+				break;
+			default:
+				animations = defaultAnimations;
+				break;
+		}
+		
+		if (animations.length == 0) {
+			animations = defaultAnimations;
+		}
+		
+		return animations[new Random().nextInt(animations.length)];
 	}
 	
 }

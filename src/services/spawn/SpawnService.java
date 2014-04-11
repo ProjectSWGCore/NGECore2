@@ -38,8 +38,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-import org.python.core.Py;
-
 import resources.common.collidables.CollidableCircle;
 import resources.datatables.Options;
 import resources.datatables.PvpStatus;
@@ -166,6 +164,7 @@ public class SpawnService {
 		AIActor actor = new AIActor(creature, creature.getPosition(), scheduler);
 		creature.setAttachment("AI", actor);
 		actor.setMobileTemplate(mobileTemplate);
+		
 	
 		
 		if(cell == null) {

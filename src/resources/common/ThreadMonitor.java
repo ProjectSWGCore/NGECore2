@@ -187,7 +187,8 @@ public class ThreadMonitor {
 	    return true;
 	  }
 
-	  private void parseMBeanInfo() throws IOException {
+	  @SuppressWarnings("unused")
+	private void parseMBeanInfo() throws IOException {
 	    try {
 	      MBeanOperationInfo[] mopis = server.getMBeanInfo(objname).getOperations();
 
