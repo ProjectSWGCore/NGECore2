@@ -30,14 +30,23 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Map;
+import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
 import main.NGECore;
 import protocol.swg.EnterStructurePlacementModeMessage;
+import protocol.swg.SceneDestroyObject;
 import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
+import resources.objects.deed.Harvester_Deed;
+import resources.objects.deed.Player_House_Deed;
+import resources.objects.harvester.HarvesterObject;
+import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
+import services.sui.SUIWindow;
+import services.sui.SUIWindow.SUICallback;
+import services.sui.SUIWindow.Trigger;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
@@ -58,11 +67,11 @@ public class HousingService implements INetworkDispatch {
 	
 	public void enterStructureMode(CreatureObject actor, TangibleObject deed)
 	{	
-		if(!actor.getClient().isGM() && !core.terrainService.canBuildAtPosition(actor, actor.getWorldPosition().x, actor.getWorldPosition().z))
-		{
-			actor.sendSystemMessage("You may not place a structure here.", (byte) 0); // should probably load this from an stf
-			return;
-		}
+//		if(!actor.getClient().isGM() && !core.terrainService.canBuildAtPosition(actor, actor.getWorldPosition().x, actor.getWorldPosition().z))
+//		{
+//			actor.sendSystemMessage("You may not place a structure here.", (byte) 0); // should probably load this from an stf
+//			return;
+//		}
 		
 		if(housingTemplates.containsKey(deed.getTemplate()))
 		{
@@ -79,24 +88,24 @@ public class HousingService implements INetworkDispatch {
 		int structureLotCost = houseTemplate.getLotCost();
 		String structureTemplate = houseTemplate.getBuildingTemplate();
 		
-		if(!houseTemplate.canBePlacedOn(actor.getPlanet().getName()))
-		{
-			actor.sendSystemMessage("You may not place this structure on this planet.", (byte) 0); // should probably load this from an stf
-			return;
-		}
-		
-		if(!actor.getClient().isGM() && !core.terrainService.canBuildAtPosition(actor, positionX, positionZ))
-		{
-			actor.sendSystemMessage("You may not place a structure here.", (byte) 0); // should probably load this from an stf
-			return;
-		}
-		
-		// Lot stuff
-		if(!actor.getPlayerObject().deductLots(structureLotCost))
-		{
-			actor.sendSystemMessage("You do not have enough available lots to place this structure.", (byte) 0); // should probably load this from an stf
-			return;
-		}
+//		if(!houseTemplate.canBePlacedOn(actor.getPlanet().getName()))
+//		{
+//			actor.sendSystemMessage("You may not place this structure on this planet.", (byte) 0); // should probably load this from an stf
+//			return;
+//		}
+//		
+//		if(!actor.getClient().isGM() && !core.terrainService.canBuildAtPosition(actor, positionX, positionZ))
+//		{
+//			actor.sendSystemMessage("You may not place a structure here.", (byte) 0); // should probably load this from an stf
+//			return;
+//		}
+//		
+//		// Lot stuff
+//		if(!actor.getPlayerObject().deductLots(structureLotCost))
+//		{
+//			actor.sendSystemMessage("You do not have enough available lots to place this structure.", (byte) 0); // should probably load this from an stf
+//			return;
+//		}
 		
 		// Calculate our orientation and height
 		Quaternion quaternion = new Quaternion(1, 0, 0, 0);
@@ -122,6 +131,7 @@ public class HousingService implements INetworkDispatch {
 		
 		building.setAttachment("structureOwner", actor.getObjectID());
 		building.setAttachment("structureAdmins", admins);
+		building.setDeedTemplate(deed.getTemplate());
 		
 		// Save structure to DB
 		//building.createTransaction(core.getBuildingODB().getEnvironment());
@@ -159,6 +169,132 @@ public class HousingService implements INetworkDispatch {
 		} 
         catch (IOException e) { e.printStackTrace(); }
 	}
+	
+	public void createDestroySUIPage(final SWGObject owner, final TangibleObject target) {
+		
+			final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
+			//final BuildingObject building = (BuildingObject) core.objectService.getObject(target.getParentId());
+			// harvester.getStfFilename(); installation_n .getTemplate();
+			String displayname = "@installation_n:"+building.getStfName();
+			if (building.getCustomName()!=null)
+				displayname = building.getCustomName();
+			final SUIWindow window = core.suiService.createSUIWindow("Script.listBox", owner, target, 0);
+			window.setProperty("bg.caption.lblTitle:Text", displayname);
+			window.setProperty("Prompt.lblPrompt:Text", "@player_structure:confirm_destruction_d1 " +
+													    "@player_structure:confirm_destruction_d2 "  +
+													    "\n \n @player_structure:confirm_destruction_d3a " +
+													    "\\#32CD32 @player_structure:confirm_destruction_d3b \\#FFFFFF " +
+													    "@player_structure:confirm_destruction_d4 ");
+			if (building.getConditionDamage()<20 && building.getMaintenanceAmount()<3000){
+				window.addListBoxMenuItem("@player_structure:redeed_confirmation \\#BB0000 @player_structure:can_redeed_no_suffix \\#FFFFFF ",1 );
+			} else {
+				window.addListBoxMenuItem("@player_structure:redeed_confirmation \\#32CD32 @player_structure:can_redeed_yes_suffix \\#FFFFFF ",1 );
+			}
+			if (building.getConditionDamage()<20){
+				window.addListBoxMenuItem("@player_structure:redeed_condition \\#BB0000 " + building.getConditionDamage() + " \\#FFFFFF ",1 );
+			} else {
+				window.addListBoxMenuItem("@player_structure:redeed_condition \\#32CD32 " + building.getConditionDamage() + " \\#FFFFFF ",1 );
+			}
+			if (building.getMaintenanceAmount()<0){
+				window.addListBoxMenuItem("@player_structure:redeed_maintenance \\#BB0000 " + (int)building.getMaintenanceAmount() + " \\#FFFFFF ",2 );
+			} else {
+				window.addListBoxMenuItem("@player_structure:redeed_maintenance \\#32CD32  " + (int)building.getMaintenanceAmount() + " \\#FFFFFF ",2 );
+			}
+			window.setProperty("btnOk:visible", "True");
+			window.setProperty("btnCancel:visible", "True");
+			window.setProperty("btnOk:Text", "@yes");
+			window.setProperty("btnCancel:Text", "@no");				
+			Vector<String> returnList = new Vector<String>();
+			returnList.add("List.lstList:SelectedRow");	
+			window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, new SUICallback() {
+				@SuppressWarnings("unchecked")
+				@Override
+				public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
+					core.suiService.closeSUIWindow(owner, 0);
+					createCodeWindow(owner, target);
+				}					
+			});		
+			window.addHandler(1, "", Trigger.TRIGGER_CANCEL, returnList, new SUICallback() {
+				@SuppressWarnings("unchecked")
+				@Override
+				public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
+					core.suiService.closeSUIWindow(owner, 0);
+				}					
+			});	
+			core.suiService.openSUIWindow(window);
+		}
+		
+	public void createCodeWindow(SWGObject owner, TangibleObject target) {
+			
+			final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
+			//final BuildingObject building = (BuildingObject)target;
+			// harvester.getStfFilename(); installation_n .getTemplate();
+			Random rnd = new Random();
+			final int confirmCode = 100000 + rnd.nextInt(900000);
+			final SUIWindow window = core.suiService.createInputBox(2,"@player_structure:structure_status","@player_structure:structure_name_prompt", owner, target, 0);
+			window.setProperty("bg.caption.lblTitle:Text", "@player_structure:confirm_destruction_t");
+			window.setProperty("Prompt.lblPrompt:Text", "@player_structure:your_structure_prefix " +
+														"\\#32CD32 @player_structure:will_redeed_confirm \\#FFFFFF "+
+													    "@player_structure:will_redeed_suffix "  +
+													    "\n \n Code: " + confirmCode);
+			
+			window.setProperty("btnOk:visible", "True");
+			window.setProperty("btnCancel:visible", "True");
+			window.setProperty("btnOk:Text", "@yes");
+			window.setProperty("btnCancel:Text", "@no");				
+			Vector<String> returnList = new Vector<String>();
+			returnList.add("txtInput:LocalText");
+			
+			window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, new SUICallback() {
+				@SuppressWarnings("unchecked")
+				@Override
+				public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
+					CreatureObject crafter = (CreatureObject)owner;
+					core.suiService.closeSUIWindow(owner, 0);
+					if (returnList.get(0).equals(""+confirmCode)){
+						// handle creation of correct deed in player inventory
+						PlayerObject player = (PlayerObject) crafter.getSlottedObject("ghost");	
+						String deedTemplate = building.getDeedTemplate(); 
+		
+						Player_House_Deed deed = (Player_House_Deed)core.objectService.createObject(deedTemplate, owner.getPlanet());
+						if(player.getLotsRemaining()+deed.getLotRequirement()>10){
+							// Something went wrong or hacking attempt
+							crafter.sendSystemMessage("Structure can't be redeeded. Maximum lot count exceeded.",(byte)1);
+							return;
+						}
+								
+						deed.setStructureTemplate(building.getTemplate());					
+						deed.setSurplusMaintenance((int)building.getMaintenanceAmount());					
+						deed.setAttributes();
+						
+						SceneDestroyObject destroyObjectMsg = new SceneDestroyObject(building.getObjectID());
+						owner.getClient().getSession().write(destroyObjectMsg.serialize());
+						core.objectService.destroyObject(building.getObjectID());
+	 
+						SWGObject ownerInventory = owner.getSlottedObject("inventory");
+						ownerInventory.add(deed);
+						
+						if(player.getLotsRemaining()+deed.getLotRequirement()<=10)
+							player.setLotsRemaining(player.getLotsRemaining()+deed.getLotRequirement());
+						
+						crafter.sendSystemMessage("@player_structure:processing_destruction",(byte)1);
+						crafter.sendSystemMessage("@player_structure:deed_reclaimed",(byte)1);
+						
+					} else {
+						crafter.sendSystemMessage("@player_structure:incorrect_destroy_code",(byte)1);
+					}
+						
+				}					
+			});		
+			window.addHandler(1, "", Trigger.TRIGGER_CANCEL, returnList, new SUICallback() {
+				@SuppressWarnings("unchecked")
+				@Override
+				public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
+					core.suiService.closeSUIWindow(owner, 0);
+				}					
+			});		
+			core.suiService.openSUIWindow(window);
+		}
 	
 	
 	

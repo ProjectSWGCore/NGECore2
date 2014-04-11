@@ -23,34 +23,44 @@ package resources.objects.building;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+
 import resources.objects.cell.CellObject;
+
 import com.sleepycat.je.Environment;
 import com.sleepycat.je.Transaction;
+
 import resources.objects.tangible.TangibleObject;
+
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.NotPersistent;
+
 import engine.clients.Client;
 import engine.resources.objects.IPersistent;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Entity(version=0)
+@Entity(version=2)
 public class BuildingObject extends TangibleObject implements IPersistent {
 	
 	@NotPersistent
 	private BuildingMessageBuilder messageBuilder;
 	@NotPersistent
 	private Transaction txn;
+	
+	private float maintenanceAmount = 0;
+	private String deedTemplate;
 
 	public BuildingObject() {
 		super();
 		messageBuilder = new BuildingMessageBuilder(this);
+		this.setConditionDamage(100);
 	}
 
 	public BuildingObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
 		super(objectID, planet, Template, position, orientation);
 		messageBuilder = new BuildingMessageBuilder(this);
+		this.setConditionDamage(100);
 	}
 	
 	public CellObject getCellByCellNumber(final int cellNumber) {
@@ -66,6 +76,22 @@ public class BuildingObject extends TangibleObject implements IPersistent {
 		
 		return ref.get();
 		
+	}
+	
+	public float getMaintenanceAmount() {
+		return maintenanceAmount;
+	}
+
+	public void setMaintenanceAmount(float maintenanceAmount) {
+		this.maintenanceAmount = maintenanceAmount;
+	}
+	
+	public void setDeedTemplate(String deedTemplate){
+		this.deedTemplate = deedTemplate;
+	}
+	
+	public String getDeedTemplate(){
+		return this.deedTemplate;
 	}
 
 	@Override
