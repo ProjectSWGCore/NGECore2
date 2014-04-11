@@ -21,6 +21,9 @@
  ******************************************************************************/
 package services;
 
+import java.util.Iterator;
+import java.util.Vector;
+
 import org.python.core.Py;
 import org.python.core.PyObject;
 import org.python.util.PythonInterpreter;
@@ -105,6 +108,36 @@ public class ScriptService {
 		python.execfile(path + module + ".py");
 		PyObject func = python.get(method);
 		return func;
+	}
+	
+	public String fetchString(String path, String method) {
+		PyObject result = core.scriptService.callScript(path, "", method);
+		return ((PyObject)result).asString();		
+	}
+	
+	public int fetchInteger(String path, String method) {
+		PyObject result = core.scriptService.callScript(path, "", method);
+		return ((PyObject)result).asInt();		
+	}
+	
+	public Vector<String> fetchStringVector(String path, String method) {
+		Vector<String> vector = new Vector<String>();
+		PyObject result = core.scriptService.callScript(path, "", method);
+		Iterable<PyObject> comp = (Iterable<PyObject>)result.asIterable();
+		for (Iterator<PyObject> temp = comp.iterator(); temp.hasNext();){
+			vector.add(temp.next().asString());
+		}
+		return vector;
+	}
+	
+	public Vector<Integer> fetchIntegerVector(String path, String method) {
+		Vector<Integer> vector = new Vector<Integer>();
+		PyObject result = core.scriptService.callScript(path, "", method);
+		Iterable<PyObject> comp = (Iterable<PyObject>)result.asIterable();
+		for (Iterator<PyObject> temp = comp.iterator(); temp.hasNext();){
+			vector.add(temp.next().asInt());
+		}
+		return vector;
 	}
 	
 }

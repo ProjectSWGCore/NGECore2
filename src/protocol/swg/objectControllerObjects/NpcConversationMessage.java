@@ -26,7 +26,6 @@ import java.nio.ByteOrder;
 import org.apache.mina.core.buffer.IoBuffer;
 
 import protocol.swg.ObjControllerMessage;
-import resources.common.ObjControllerOpcodes;
 import resources.common.OutOfBand;
 
 public class NpcConversationMessage extends ObjControllerObject {

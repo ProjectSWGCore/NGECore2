@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import resources.common.Console;
 import resources.objects.intangible.IntangibleObject;
 import resources.objects.resource.ResourceContainerObject;
 import resources.objects.tool.SurveyTool;
@@ -838,7 +837,7 @@ public class PlayerObject extends IntangibleObject {
 	
 	public boolean deductLots(int amount)
 	{
-		if(this.lotsRemaining - amount > 0)
+		if(this.lotsRemaining - amount >= 0)
 		{
 			this.lotsRemaining -= amount;
 			return true;

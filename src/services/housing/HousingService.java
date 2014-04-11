@@ -33,16 +33,11 @@ import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.sleepycat.persist.EntityCursor;
-
 import main.NGECore;
 import protocol.swg.EnterStructurePlacementModeMessage;
 import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
-import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
-import services.chat.Mail;
-import services.equipment.BonusSetTemplate;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
@@ -97,12 +92,11 @@ public class HousingService implements INetworkDispatch {
 		}
 		
 		// Lot stuff
-		if(actor.getPlayerObject().getLotsRemaining() - structureLotCost < 0)
+		if(!actor.getPlayerObject().deductLots(structureLotCost))
 		{
 			actor.sendSystemMessage("You do not have enough available lots to place this structure.", (byte) 0); // should probably load this from an stf
 			return;
 		}
-		actor.getPlayerObject().deductLots(structureLotCost);
 		
 		// Calculate our orientation and height
 		Quaternion quaternion = new Quaternion(1, 0, 0, 0);

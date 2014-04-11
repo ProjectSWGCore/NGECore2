@@ -28,14 +28,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
 import protocol.swg.ObjControllerMessage;
-import protocol.swg.PlayClientEffectObjectMessage;
 import protocol.swg.PlayMusicMessage;
 import protocol.swg.UpdatePostureMessage;
 import protocol.swg.UpdatePVPStatusMessage;
@@ -64,7 +61,6 @@ import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
-import resources.objects.weapon.WeaponObject;
 
 @Entity(version=6)
 public class CreatureObject extends TangibleObject implements IPersistent {
@@ -1090,8 +1086,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			appearanceEquipmentList.get().remove(object);
 		}
 	}
-
-	@SuppressWarnings("unused")
+	
 	@Override
 	public void sendBaselines(Client destination) {
 				

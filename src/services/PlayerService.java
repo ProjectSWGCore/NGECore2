@@ -361,11 +361,7 @@ public class PlayerService implements INetworkDispatch {
 		swgOpcodes.put(Opcodes.SetLfgInterests, (session, data) -> {
 
 		});
-		
-		swgOpcodes.put(Opcodes.CommodotiesItemTypeListRequest, (session, data) -> {
-
-		});
-		
+				
 		swgOpcodes.put(Opcodes.SetFurnitureRoationDegree, (session, data) -> {
 
 		});

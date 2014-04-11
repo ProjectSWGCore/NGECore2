@@ -54,37 +54,37 @@ public class ChatQueryRoomResults extends SWGMessage {
 		buffer.putShort((short) 7);
 		buffer.putInt(0xC4DE864E);
 		
-		Vector<CreatureObject> users = room.getUserList();
+		Vector<String> users = room.getUserList();
 		
 		buffer.putInt(users.size());
 		if (users.size() > 0) {
-			for (CreatureObject creo : users) {
+			for (String str : users) {
 				buffer.put(getAsciiString("SWG"));
 				buffer.put(getAsciiString(server));
-				buffer.put(getAsciiString(creo.getCustomName()));
+				buffer.put(getAsciiString(str));
 			}
 		}
 		
 		buffer.putInt(0); // TODO: Invited list for chat rooms
 		
-		Vector<CreatureObject> moderators = room.getModeratorList();
+		Vector<String> moderators = room.getModeratorList();
 		
 		buffer.putInt(moderators.size());
 		if (moderators.size() > 0) {
-			for (CreatureObject creo : users) {
+			for (String str : moderators) {
 				buffer.put(getAsciiString("SWG"));
 				buffer.put(getAsciiString(server));
-				buffer.put(getAsciiString(creo.getCustomName()));
+				buffer.put(getAsciiString(str));
 			}
 		}
 		
-		Vector<CreatureObject> banned = room.getBanList();
+		Vector<String> banned = room.getBanList();
 		buffer.putInt(banned.size());
 		if (banned.size() > 0) {
-			for (CreatureObject creo : users) {
+			for (String str : banned) {
 				buffer.put(getAsciiString("SWG"));
 				buffer.put(getAsciiString(server));
-				buffer.put(getAsciiString(creo.getCustomName()));
+				buffer.put(getAsciiString(str));
 			}
 		}
 		

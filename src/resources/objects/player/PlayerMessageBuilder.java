@@ -27,8 +27,6 @@ import java.util.Map.Entry;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import engine.resources.common.CRC;
-import resources.common.StringUtilities;
 import resources.objects.ObjectMessageBuilder;
 import resources.objects.waypoint.WaypointObject;
 

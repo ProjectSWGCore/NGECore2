@@ -27,7 +27,6 @@ import org.apache.mina.core.buffer.IoBuffer;
 
 import resources.common.Console;
 import resources.common.StringUtilities;
-import engine.resources.common.CRC;
 
 public class CommPlayerMessage extends SWGMessage {
 

@@ -25,8 +25,6 @@ import java.nio.ByteOrder;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import main.NGECore;
-
 import org.apache.mina.core.buffer.IoBuffer;
 
 import services.collections.ServerFirst;

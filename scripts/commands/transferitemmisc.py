@@ -1,18 +1,29 @@
 import sys
- 
+from engine.resources.scene import Quaternion
+
 def setup():
         return
        
 def run(core, actor, target, commandString):
+        parsedMsg = commandString.split(' ', 3)
+        objService = core.objectService
+        containerID = long(parsedMsg[1])
+        container = objService.getObject(containerID)
+        actorContainer = actor.getContainer()
+        
+        if actorContainer != None and (container.getTemplate() == "object/cell/shared_cell.iff") & core.housingService.getPermissions(actor, actorContainer):
+            target.getContainer().transferTo(actor, container, target)
+            core.simulationService.teleport(target, actor.getPosition(), Quaternion(1,0,0,0), containerID)
+            return
+        elif actorContainer != None and container.getTemplate() == "object/cell/shared_cell.iff":
+            actor.sendSystemMessage("You do not have permission to access that container!", 0)
+            return
+
         if core.equipmentService.canEquip(actor, target) is False:
             actor.sendSystemMessage('@error_message:insufficient_skill', 0)
             return
 			
 			
-        parsedMsg = commandString.split(' ', 3)
-        objService = core.objectService
-        containerID = long(parsedMsg[1])
-        container = objService.getObject(containerID)
         if target and container and target.getContainer():
                 oldContainer = target.getContainer()
                

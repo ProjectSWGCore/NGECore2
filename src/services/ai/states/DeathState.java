@@ -29,6 +29,7 @@ public class DeathState extends AIState {
 	@Override
 	public byte onEnter(AIActor actor) {
 		NGECore.getInstance().aiService.awardExperience(actor);
+		actor.getCreature().setAttachment("radial_filename", "npc/corpse");
 		actor.scheduleDespawn();
 		return 0;
 	}
