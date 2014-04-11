@@ -47,7 +47,7 @@ public class ResourceContainerObject extends TangibleObject {
 	
 	private CreatureObject proprietor;
 	private String resourceType;
-	private String resourceClass;
+	private String resourceClass="";
 	private String resourceName;
 	private byte generalType;
 	private long referenceID;
@@ -70,6 +70,7 @@ public class ResourceContainerObject extends TangibleObject {
 	private short overallQuality;
 	private short flavor;
 	
+	/*
 	private static byte CONTAINER_TYPE_INORGANIC_MINERALS          = 0;
 	private static byte CONTAINER_TYPE_INORGANIC_CHEMICALS         = 1;
 	private static byte CONTAINER_TYPE_INORGANIC_GAS               = 2;
@@ -127,6 +128,7 @@ public class ResourceContainerObject extends TangibleObject {
 		"object/resource_container/shared_resource_container_energy_radioactive.iff",
 		"object/resource_container/shared_resource_container_energy_solid.iff"		
 	};
+	*/
 	
 	@NotPersistent
 	public static int maximalStackCapacity = 100000;
@@ -146,7 +148,7 @@ public class ResourceContainerObject extends TangibleObject {
 			
 	public void initializeStats(GalacticResource resource){
 		this.setResourceName(resource.getName());
-		this.setResourceClass(resource.getResourceClass());
+		this.setResourceClass(resource.getCategory());
 		this.setColdResistance(resource.getResourceStats()[0]);
 		this.setConductivity(resource.getResourceStats()[1]);
 		this.setDecayResistance(resource.getResourceStats()[2]);

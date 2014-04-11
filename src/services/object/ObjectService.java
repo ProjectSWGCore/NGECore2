@@ -58,10 +58,6 @@ import com.sleepycat.persist.EntityCursor;
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 
-import protocol.swg.ChatFriendsListUpdate;
-import protocol.swg.ChatOnChangeFriendStatus;
-import protocol.swg.ChatOnGetFriendsList;
-import protocol.swg.ChatRoomList;
 import protocol.swg.CmdSceneReady;
 import protocol.swg.CmdStartScene;
 import protocol.swg.HeartBeatMessage;
@@ -70,6 +66,13 @@ import protocol.swg.ParametersMessage;
 import protocol.swg.SelectCharacter;
 import protocol.swg.ServerTimeMessage;
 import protocol.swg.UnkByteFlag;
+import protocol.swg.chat.ChatFriendsListUpdate;
+import protocol.swg.chat.ChatOnChangeFriendStatus;
+import protocol.swg.chat.ChatOnConnectAvatar;
+import protocol.swg.chat.ChatOnGetFriendsList;
+import protocol.swg.chat.ChatRoomList;
+import protocol.swg.chat.ChatServerStatus;
+import protocol.swg.chat.VoiceChatStatus;
 import protocol.swg.objectControllerObjects.UiPlayEffect;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.CrcStringTableVisitor;
@@ -93,8 +96,11 @@ import resources.objects.Delta;
 import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
+import resources.objects.deed.Harvester_Deed;
 import resources.objects.group.GroupObject;
 import resources.objects.guild.GuildObject;
+import resources.objects.harvester.HarvesterObject;
+import resources.objects.installation.InstallationObject;
 import resources.objects.intangible.IntangibleObject;
 import resources.objects.mission.MissionObject;
 import resources.objects.player.PlayerObject;
@@ -311,7 +317,11 @@ public class ObjectService implements INetworkDispatch {
 			
 			object = new SurveyTool(objectID, planet, Template, position, orientation);
 			
-		}else if(Template.startsWith("object/tangible")) {
+		} else if(Template.startsWith("object/tangible/deed/harvester_deed") || Template.startsWith("object/tangible/deed/generator_deed")) {
+			
+			object = new Harvester_Deed(objectID, planet, Template, position, orientation);
+		
+		} else if(Template.startsWith("object/tangible")) {
 			
 			object = new TangibleObject(objectID, planet, Template, position, orientation);
 
@@ -367,7 +377,22 @@ public class ObjectService implements INetworkDispatch {
 			
 			object = new ResourceContainerObject(objectID, planet, Template, position, orientation);
 			
-		}else {
+		} else if(Template.startsWith("object/installation/mining_ore/construction")) {
+			
+			float positionY = core.terrainService.getHeight(planet.getID(), position.x, position.z)-1f;
+			Point3D newpoint = new Point3D(position.x,positionY,position.z);				
+			object = new InstallationObject(objectID, planet, Template, newpoint, orientation);
+			
+		} else if(Template.startsWith("object/installation/mining_ore") || Template.startsWith("object/installation/mining_liquid") ||
+				  Template.startsWith("object/installation/mining_gas") || Template.startsWith("object/installation/mining_organic") || 
+				  Template.startsWith("object/installation/generators")) {
+			
+			float positionY = core.terrainService.getHeight(planet.getID(), position.x, position.z)-1f;
+			Point3D newpoint = new Point3D(position.x,positionY,position.z);			
+			object = new HarvesterObject(objectID, planet, Template, newpoint, orientation);
+			core.harvesterService.addHarvester(object);		
+			
+		} else {
 			return null;			
 		}
 		
@@ -750,7 +775,7 @@ public class ObjectService implements INetworkDispatch {
 							objectList.put(object.getObjectID(), object);
 					}
 					
-				});				
+				});
 
 				if(creature.getParentId() != 0) {
 					SWGObject parent = getObject(creature.getParentId());
@@ -776,17 +801,25 @@ public class ObjectService implements INetworkDispatch {
 				CmdStartScene startScene = new CmdStartScene((byte) 0, objectId, creature.getPlanet().getPath(), creature.getTemplate(), position.x, position.y, position.z, core.getGalacticTime(), 0);
 				session.write(startScene.serialize());
 				
+				ChatServerStatus chatServerStatus = new ChatServerStatus();
+				client.getSession().write(chatServerStatus.serialize());
+				
+				VoiceChatStatus voiceStatus = new VoiceChatStatus();
+				client.getSession().write(voiceStatus.serialize());
+				
 				ParametersMessage parameters = new ParametersMessage();
 				session.write(parameters.serialize());
 				
-				creature.makeAware(core.guildService.getGuildObject());				
+				ChatOnConnectAvatar chatConnect = new ChatOnConnectAvatar();
+				creature.getClient().getSession().write(chatConnect.serialize());
+				
+				creature.makeAware(core.guildService.getGuildObject());
 				core.chatService.loadMailHeaders(client);
 				
 				core.simulationService.handleZoneIn(client);
+				
 				creature.makeAware(creature);
 				
-				ChatRoomList chatRooms = new ChatRoomList(core.chatService.getChatRooms());
-				creature.getClient().getSession().write(chatRooms.serialize());
 				//ChatOnGetFriendsList friendsListMessage = new ChatOnGetFriendsList(ghost);
 				//client.getSession().write(friendsListMessage.serialize());
 				
@@ -877,7 +910,7 @@ public class ObjectService implements INetworkDispatch {
 	 * @param position The position as an offset to the parent object.
 	 * @param orientation The orientation as an offset to the parent object.
 	 */
-	public void createChildObject(SWGObject parent, String template, Point3D position, Quaternion orientation, int cellNumber) {
+	public SWGObject createChildObject(SWGObject parent, String template, Point3D position, Quaternion orientation, int cellNumber) {
 		
 		if(cellNumber == -1) {
 		
@@ -907,15 +940,15 @@ public class ObjectService implements INetworkDispatch {
 			child.setAttachment("cellNumber", cellNumber);
 		
 		//core.simulationService.add(child, x, z);
-		
+		return child;
 	}
 	
-	public void createChildObject(SWGObject parent, String template, float x, float y, float z, float qy, float qw) {
-		createChildObject(parent, template, new Point3D(x, y, z), new Quaternion(qw, 0, qy, 0), -1);
+	public SWGObject createChildObject(SWGObject parent, String template, float x, float y, float z, float qy, float qw) {
+		return createChildObject(parent, template, new Point3D(x, y, z), new Quaternion(qw, 0, qy, 0), -1);
 	}
 	
-	public void createChildObject(SWGObject parent, String template, float x, float y, float z, float qy, float qw, int cellNumber) {
-		createChildObject(parent, template, new Point3D(x, y, z), new Quaternion(qw, 0, qy, 0), cellNumber);
+	public SWGObject createChildObject(SWGObject parent, String template, float x, float y, float z, float qy, float qw, int cellNumber) {
+		return createChildObject(parent, template, new Point3D(x, y, z), new Quaternion(qw, 0, qy, 0), cellNumber);
 	}
 	
 	public void loadBuildoutObjects(Planet planet) throws InstantiationException, IllegalAccessException {

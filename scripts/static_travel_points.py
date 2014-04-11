@@ -49,8 +49,8 @@ def corelliaPoints(core, planet):
 def dantooinePoints(core, planet):
     trvSvc = core.travelService
     
-    trvSvc.addTravelPoint(planet, "Imperial Outpost", -635, 3, 2507)
-    trvSvc.addTravelPoint(planet, "Mining Outpost", -4208, 3, -2350)
+    trvSvc.addTravelPoint(planet, "Mining Outpost", -635, 3, 2507)
+    trvSvc.addTravelPoint(planet, "Imperial Outpost", -4208, 3, -2350)
     trvSvc.addTravelPoint(planet, "Agro Outpost", 1569, 4, -6415)
     return                
         

@@ -36,7 +36,6 @@ import java.util.concurrent.TimeUnit;
 import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
-import services.object.ObjectService;
 import main.NGECore;
 
 import engine.clientdata.ClientFileManager;

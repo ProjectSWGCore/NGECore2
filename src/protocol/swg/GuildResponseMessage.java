@@ -25,11 +25,6 @@ import java.nio.ByteOrder;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import resources.common.Console;
-import resources.common.StringUtilities;
-import resources.guild.Guild;
-import resources.objects.creature.CreatureObject;
-
 public class GuildResponseMessage extends SWGMessage {
 
 	private long player;

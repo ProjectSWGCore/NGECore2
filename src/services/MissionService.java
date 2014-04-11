@@ -24,7 +24,6 @@ package services;
 import java.nio.ByteOrder;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import main.NGECore;
@@ -44,7 +43,6 @@ import engine.clientdata.visitors.DatatableVisitor;
 import engine.clients.Client;
 import engine.resources.container.Traverser;
 import engine.resources.objects.SWGObject;
-import engine.resources.scene.Planet;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 

@@ -27,22 +27,23 @@ import engine.resources.common.CRC;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+
+import resources.objects.weapon.WeaponObject;
 
 public class BaseSWGCommand implements Cloneable {
 	
 	private String commandName;
 	private String clientEffectSelf;
 	private String clientEffectTarget;
-	private int maxRangeToTarget;
 	private int commandCRC;
-	private boolean isGmCommand = false;
 	private String characterAbility;
 	private int target;
 	private int targetType;
 	private boolean callOnTarget = false;
 	private int commandGroup;
 	private boolean disabled = true;
-	private int maxRangeToTarget;
+	private float maxRangeToTarget;
 	private int godLevel;
 	private int displayGroup;
 	private boolean combatCommand = false;
@@ -52,100 +53,145 @@ public class BaseSWGCommand implements Cloneable {
 	private float cooldown;
 	private float executeTime;
 	private float warmupTime;
-	//private long[] invalidLocomotions; // Not tracked anywhere
-	private byte[] invalidPostures;
-	private long[] invalidStates;
+	//private Long[] invalidLocomotions; // Not tracked anywhere
+	private Byte[] invalidPostures;
+	private Long[] invalidStates;
+	
+	private String[] defaultAnimations = new String[]{};
+	private String[] oneHandedAnimations = new String[]{};
+	private String[] twoHandedAnimations = new String[]{};
+	private String[] polearmAnimations = new String[]{};
+	private String[] unarmedAnimations = new String[]{};
+	private String[] pistolAnimations = new String[]{};
+	private String[] carbineAnimations = new String[]{};
+	private String[] lightRifleAnimations = new String[]{};
+	private String[] rifleAnimations = new String[]{};
+	private String[] heavyWpnAnimations = new String[]{};
+	private String[] oneHandedLSAnimations = new String[]{};
+	private String[] twoHandedLSAnimations = new String[]{};
+	private String[] polearmLSAnimations = new String[]{};
+	private String[] thrownAnimations = new String[]{};
 	
 	public BaseSWGCommand(String commandName) {
 		setCommandName(commandName);
 		setCommandCRC(CRC.StringtoCRC(commandName));
 		
 		try {
-			List<Long> invalidStates = new ArrayList<Long>();
-			List<Byte> invalidPostures = new ArrayList<Byte>();
+			boolean foundCommand = false;
 			
-			DatatableVisitor visitor2 = ClientFileManager.loadFile("datatables/command/command_table.iff", DatatableVisitor.class);
+			String[] tableArray = new String[] {
+			"client_command_table", "client_command_table_ground", "client_command_table_space",
+			"command_table", "command_table_ground", "command_table_space" };
 			
-			for (int i = 0; i < visitor2.getRowCount(); i++) {
-				if (visitor2.getObject(i, 0) != null) {
-					if (((String) visitor2.getObject(i, 0)).equalsIgnoreCase(commandName)) {
-						characterAbility = (String) visitor2.getObject(i, 7);
-						target = (Integer) visitor2.getObject(i, 72);
-						targetType = (Integer) visitor2.getObject(i, 73);
-						callOnTarget = (Boolean) visitor2.getObject(i, 76);
-						commandGroup = (Integer) visitor2.getObject(i, 77);
-						disabled = (Boolean) visitor2.getObject(i, 78);
-						maxRangeToTarget = (Integer) visitor2.getObject(i, 79);
-						godLevel = (Integer) visitor2.getObject(i, 80);
-						displayGroup = (Integer) visitor2.getObject(i, 81);
-						combatCommand = (Boolean) visitor2.getObject(i, 82);
-						validWeapon = (Integer) visitor2.getObject(i, 83);
-						invalidWeapon = (Integer) visitor2.getObject(i, 84);
-						cooldownGroup = (String) visitor2.getObject(i, 85);
-						warmupTime = (Float) visitor2.getObject(i, 86);
-						executeTime = (Float) visitor2.getObject(i, 87);
-						cooldown = (Float) visitor2.getObject(i, 88);
-						
-						if (!((Boolean) visitor2.getObject(8))) invalidPostures.add(0B);
-						if (!((Boolean) visitor2.getObject(9))) invalidPostures.add(3B);
-						if (!((Boolean) visitor2.getObject(16))) invalidPostures.add(2B);
-						if (!((Boolean) visitor2.getObject(19))) invalidPostures.add(5B);
-						if (!((Boolean) visitor2.getObject(21))) invalidPostures.add(6B);
-						if (!((Boolean) visitor2.getObject(22))) invalidPostures.add(7B);
-						if (!((Boolean) visitor2.getObject(23))) invalidPostures.add(8B);
-						if (!((Boolean) visitor2.getObject(24))) invalidPostures.add(9B);
-						if (!((Boolean) visitor2.getObject(25))) invalidPostures.add(10B);
-						if (!((Boolean) visitor2.getObject(26))) invalidPostures.add(11B);
-						if (!((Boolean) visitor2.getObject(27))) invalidPostures.add(12B);
-						if (!((Boolean) visitor2.getObject(28))) invalidPostures.add(13B);
-						if (!((Boolean) visitor2.getObject(29))) invalidPostures.add(14B);
-						if (!((Boolean) visitor2.getObject(30))) invalidPostures.add(4B);
-						
-						if (!((Boolean) visitor2.getObject(32))) invalidStates.add(1L);
-						if (!((Boolean) visitor2.getObject(33))) invalidStates.add(2L);
-						if (!((Boolean) visitor2.getObject(34))) invalidStates.add(4L);
-						if (!((Boolean) visitor2.getObject(35))) invalidStates.add(8L);
-						if (!((Boolean) visitor2.getObject(36))) invalidStates.add(16L);
-						if (!((Boolean) visitor2.getObject(37))) invalidStates.add(32L);
-						if (!((Boolean) visitor2.getObject(38))) invalidStates.add(64L);
-						if (!((Boolean) visitor2.getObject(39))) invalidStates.add(128L);
-						if (!((Boolean) visitor2.getObject(40))) invalidStates.add(256L);
-						if (!((Boolean) visitor2.getObject(41))) invalidStates.add(512L);
-						if (!((Boolean) visitor2.getObject(42))) invalidStates.add(1024L);
-						if (!((Boolean) visitor2.getObject(43))) invalidStates.add(2048L);
-						if (!((Boolean) visitor2.getObject(44))) invalidStates.add(4096L);
-						if (!((Boolean) visitor2.getObject(45))) invalidStates.add(8192L);
-						if (!((Boolean) visitor2.getObject(46))) invalidStates.add(16384L);
-						if (!((Boolean) visitor2.getObject(47))) invalidStates.add(32768L);
-						if (!((Boolean) visitor2.getObject(48))) invalidStates.add(65536L);
-						if (!((Boolean) visitor2.getObject(49))) invalidStates.add(131072L);
-						if (!((Boolean) visitor2.getObject(50))) invalidStates.add(262144L);
-						if (!((Boolean) visitor2.getObject(51))) invalidStates.add(524288L);
-						if (!((Boolean) visitor2.getObject(52))) invalidStates.add(1048576L);
-						if (!((Boolean) visitor2.getObject(53))) invalidStates.add(2097152L);
-						if (!((Boolean) visitor2.getObject(54))) invalidStates.add(4194304L);
-						if (!((Boolean) visitor2.getObject(55))) invalidStates.add(8388608L);
-						if (!((Boolean) visitor2.getObject(56))) invalidStates.add(16777216L);
-						if (!((Boolean) visitor2.getObject(57))) invalidStates.add(33554432L);
-						if (!((Boolean) visitor2.getObject(58))) invalidStates.add(67108864L);
-						if (!((Boolean) visitor2.getObject(59))) invalidStates.add(134217728L);
-						if (!((Boolean) visitor2.getObject(60))) invalidStates.add(268435456L);
-						if (!((Boolean) visitor2.getObject(61))) invalidStates.add(536870912L);
-						if (!((Boolean) visitor2.getObject(62))) invalidStates.add(1073741824L);
-						if (!((Boolean) visitor2.getObject(63))) invalidStates.add(2147483648L);
-						if (!((Boolean) visitor2.getObject(64))) invalidStates.add(4294967296L);
-						if (!((Boolean) visitor2.getObject(65))) invalidStates.add(8589934592L);
-						if (!((Boolean) visitor2.getObject(66))) invalidStates.add(17179869184L);
-						if (!((Boolean) visitor2.getObject(67))) invalidStates.add(34359738368L);
-						if (!((Boolean) visitor2.getObject(68))) invalidStates.add(68719476736L);
-						if (!((Boolean) visitor2.getObject(69))) invalidStates.add(137438953472L);
-						if (!((Boolean) visitor2.getObject(70))) invalidStates.add(274877906944L);
-						
-						this.invalidPostures = (byte[]) invalidPostures.toArray();
-						this.invalidStates = (long[]) invalidStates.toArray();
-						
-						break;
+			for (int n = 0; n < tableArray.length; n++) {
+				List<Long> invalidStates = new ArrayList<Long>();
+				List<Byte> invalidPostures = new ArrayList<Byte>();
+				
+				DatatableVisitor visitor2 = ClientFileManager.loadFile("datatables/command/" + tableArray[n] + ".iff", DatatableVisitor.class);
+				
+				for (int i = 0; i < visitor2.getRowCount(); i++) {
+					if (visitor2.getObject(i, 0) != null) {
+						if (((String) visitor2.getObject(i, 0)).equalsIgnoreCase(commandName)) {
+							int sub = 0; // Subtract due to command table structures being different
+							
+							characterAbility = (String) visitor2.getObject(i, 7);
+							
+							if (!((Boolean) visitor2.getObject(i, 8-sub))) invalidPostures.add((byte) 0);
+							if (!((Boolean) visitor2.getObject(i, 9-sub))) invalidPostures.add((byte) 3);
+							if (!((Boolean) visitor2.getObject(i, 15-sub))) invalidPostures.add((byte) 2);
+							if (!((Boolean) visitor2.getObject(i, 18-sub))) invalidPostures.add((byte) 5);
+							if (!((Boolean) visitor2.getObject(i, 20-sub))) invalidPostures.add((byte) 6);
+							if (!((Boolean) visitor2.getObject(i, 21-sub))) invalidPostures.add((byte) 7);
+							if (!((Boolean) visitor2.getObject(i, 22-sub))) invalidPostures.add((byte) 8);
+							if (!((Boolean) visitor2.getObject(i, 23-sub))) invalidPostures.add((byte) 9);
+							if (!((Boolean) visitor2.getObject(i, 24-sub))) invalidPostures.add((byte) 10);
+							if (!((Boolean) visitor2.getObject(i, 25-sub))) invalidPostures.add((byte) 11);
+							if (!((Boolean) visitor2.getObject(i, 26-sub))) invalidPostures.add((byte) 12);
+							if (!((Boolean) visitor2.getObject(i, 27-sub))) invalidPostures.add((byte) 13);
+							if (!((Boolean) visitor2.getObject(i, 28-sub))) invalidPostures.add((byte) 14);
+							if (!((Boolean) visitor2.getObject(i, 29-sub))) invalidPostures.add((byte) 4);
+							
+							if (tableArray[n].startsWith("client_") || tableArray[n].startsWith("command_table_")) {
+								sub += 1;
+							}
+							
+							if (!((Boolean) visitor2.getObject(i, 32-sub))) invalidStates.add(1L);
+							if (!((Boolean) visitor2.getObject(i, 33-sub))) invalidStates.add(2L);
+							if (!((Boolean) visitor2.getObject(i, 34-sub))) invalidStates.add(4L);
+							if (!((Boolean) visitor2.getObject(i, 35-sub))) invalidStates.add(8L);
+							if (!((Boolean) visitor2.getObject(i, 36-sub))) invalidStates.add(16L);
+							if (!((Boolean) visitor2.getObject(i, 37-sub))) invalidStates.add(32L);
+							if (!((Boolean) visitor2.getObject(i, 38-sub))) invalidStates.add(64L);
+							if (!((Boolean) visitor2.getObject(i, 39-sub))) invalidStates.add(128L);
+							if (!((Boolean) visitor2.getObject(i, 40-sub))) invalidStates.add(256L);
+							if (!((Boolean) visitor2.getObject(i, 41-sub))) invalidStates.add(512L);
+							if (!((Boolean) visitor2.getObject(i, 42-sub))) invalidStates.add(1024L);
+							if (!((Boolean) visitor2.getObject(i, 43-sub))) invalidStates.add(2048L);
+							if (!((Boolean) visitor2.getObject(i, 44-sub))) invalidStates.add(4096L);
+							if (!((Boolean) visitor2.getObject(i, 45-sub))) invalidStates.add(8192L);
+							if (!((Boolean) visitor2.getObject(i, 46-sub))) invalidStates.add(16384L);
+							if (!((Boolean) visitor2.getObject(i, 47-sub))) invalidStates.add(32768L);
+							if (!((Boolean) visitor2.getObject(i, 48-sub))) invalidStates.add(65536L);
+							if (!((Boolean) visitor2.getObject(i, 49-sub))) invalidStates.add(131072L);
+							if (!((Boolean) visitor2.getObject(i, 50-sub))) invalidStates.add(262144L);
+							if (!((Boolean) visitor2.getObject(i, 51-sub))) invalidStates.add(524288L);
+							if (!((Boolean) visitor2.getObject(i, 52-sub))) invalidStates.add(1048576L);
+							if (!((Boolean) visitor2.getObject(i, 53-sub))) invalidStates.add(2097152L);
+							if (!((Boolean) visitor2.getObject(i, 54-sub))) invalidStates.add(4194304L);
+							if (!((Boolean) visitor2.getObject(i, 55-sub))) invalidStates.add(8388608L);
+							if (!((Boolean) visitor2.getObject(i, 56-sub))) invalidStates.add(16777216L);
+							if (!((Boolean) visitor2.getObject(i, 57-sub))) invalidStates.add(33554432L);
+							if (!((Boolean) visitor2.getObject(i, 58-sub))) invalidStates.add(67108864L);
+							if (!((Boolean) visitor2.getObject(i, 59-sub))) invalidStates.add(134217728L);
+							
+							if (!tableArray[n].equals("client_command_table_space")) {
+								if (!((Boolean) visitor2.getObject(i, 60-sub))) invalidStates.add(268435456L);
+								if (!((Boolean) visitor2.getObject(i, 61-sub))) invalidStates.add(536870912L);
+								if (!((Boolean) visitor2.getObject(i, 62-sub))) invalidStates.add(1073741824L);
+								if (!((Boolean) visitor2.getObject(i, 63-sub))) invalidStates.add(2147483648L);
+								if (!((Boolean) visitor2.getObject(i, 64-sub))) invalidStates.add(4294967296L);
+							} else {
+								sub += 5;
+							}
+							
+							if (!tableArray[n].startsWith("client_") && !tableArray[n].startsWith("command_table_")) {
+								if (!((Boolean) visitor2.getObject(i, 65-sub))) invalidStates.add(8589934592L);
+								if (!((Boolean) visitor2.getObject(i, 66-sub))) invalidStates.add(17179869184L);
+								if (!((Boolean) visitor2.getObject(i, 67-sub))) invalidStates.add(34359738368L);
+								if (!((Boolean) visitor2.getObject(i, 68-sub))) invalidStates.add(68719476736L);
+								if (!((Boolean) visitor2.getObject(i, 69-sub))) invalidStates.add(137438953472L);
+								if (!((Boolean) visitor2.getObject(i, 70-sub))) invalidStates.add(274877906944L);
+							} else {
+								sub += 6;
+							}
+							
+							target = (Integer) visitor2.getObject(i, 72-sub);
+							targetType = (Integer) visitor2.getObject(i, 73-sub);
+							callOnTarget = (Boolean) visitor2.getObject(i, 76-sub);
+							commandGroup = (Integer) visitor2.getObject(i, 77-sub);
+							disabled = (Boolean) visitor2.getObject(i, 78-sub);
+							maxRangeToTarget = (Float) visitor2.getObject(i, 79-sub);
+							godLevel = (Integer) visitor2.getObject(i, 80-sub);
+							displayGroup = (Integer) visitor2.getObject(i, 81-sub);
+							combatCommand = (Boolean) visitor2.getObject(i, 82-sub);
+							validWeapon = (Integer) visitor2.getObject(i, 83-sub);
+							invalidWeapon = (Integer) visitor2.getObject(i, 84-sub);
+							cooldownGroup = (String) visitor2.getObject(i, 85-sub);
+							warmupTime = (Float) visitor2.getObject(i, 86-sub);
+							executeTime = (Float) visitor2.getObject(i, 87-sub);
+							cooldown = (Float) visitor2.getObject(i, 88-sub);
+							
+							this.invalidPostures = invalidPostures.toArray(new Byte[] { });
+							this.invalidStates = invalidStates.toArray(new Long[] { });
+							
+							foundCommand = true;
+							break;
+						}
 					}
+				}
+				
+				if (foundCommand) {
+					break;
 				}
 			}
 		} catch (InstantiationException | IllegalAccessException e) {
@@ -177,14 +223,6 @@ public class BaseSWGCommand implements Cloneable {
 		this.clientEffectTarget = clientEffectTarget;
 	}
 	
-	public int getMaxRangeToTarget() {
-		return maxRangeToTarget;
-	}
-	
-	public void setMaxRangeToTarget(int maxRangeToTarget) {
-		this.maxRangeToTarget = maxRangeToTarget;
-	}
-	
 	public int getCommandCRC() {
 		return commandCRC;
 	}
@@ -201,10 +239,6 @@ public class BaseSWGCommand implements Cloneable {
 		return (godLevel > 0);
 	}
 	
-	public void setGmCommand(boolean isGmCommand) {
-		this.isGmCommand = isGmCommand;
-	}
-	
 	public String getCharacterAbility() {
 		return characterAbility;
 	}
@@ -213,11 +247,11 @@ public class BaseSWGCommand implements Cloneable {
 		this.characterAbility = characterAbility;
 	}
 	
-	public byte[] getInvalidPostures() {
+	public Byte[] getInvalidPostures() {
 		return invalidPostures;
 	}
 	
-	public long[] getInvalidStates() {
+	public Long[] getInvalidStates() {
 		return invalidStates;
 	}
 	
@@ -229,12 +263,12 @@ public class BaseSWGCommand implements Cloneable {
 		this.target = target;
 	}
 	
-	public void getTargetType() {
+	public int getTargetType() {
 		return targetType;
 	}
 	
-	public void setTargetType() {
-		return targetType;
+	public void setTargetType(int targetType) {
+		this.targetType = targetType;
 	}
 	
 	public boolean shouldCallOnTarget() {
@@ -261,11 +295,11 @@ public class BaseSWGCommand implements Cloneable {
 		this.disabled = disabled;
 	}
 	
-	public int getMaxRangeToTarget() {
+	public float getMaxRangeToTarget() {
 		return maxRangeToTarget;
 	}
 	
-	public void setMaxRangeToTarget(int maxRangeToTarget) {
+	public void setMaxRangeToTarget(float maxRangeToTarget) {
 		this.maxRangeToTarget = maxRangeToTarget;
 	}
 	
@@ -339,6 +373,171 @@ public class BaseSWGCommand implements Cloneable {
 	
 	public void setWarmupTime(float warmupTime) {
 		this.warmupTime = warmupTime;
+	}
+	
+	public String[] getDefaultAnimations() {
+		return defaultAnimations;
+	}
+	
+	public void setDefaultAnimations(String[] defaultAnimations) {
+		this.defaultAnimations = defaultAnimations;
+	}
+	
+	public String[] getOneHandedAnimations() {
+		return oneHandedAnimations;
+	}
+	
+	public void setOneHandedAnimations(String[] oneHandedAnimations) {
+		this.oneHandedAnimations = oneHandedAnimations;
+	}
+	
+	public String[] getTwoHandedAnimations() {
+		return twoHandedAnimations;
+	}
+	
+	public void setTwoHandedAnimations(String[] twoHandedAnimations) {
+		this.twoHandedAnimations = twoHandedAnimations;
+	}
+	
+	public String[] getPolearmAnimations() {
+		return polearmAnimations;
+	}
+	
+	public void setPolearmAnimations(String[] polearmAnimations) {
+		this.polearmAnimations = polearmAnimations;
+	}
+	
+	public String[] getUnarmedAnimations() {
+		return unarmedAnimations;
+	}
+	
+	public void setUnarmedAnimations(String[] unarmedAnimations) {
+		this.unarmedAnimations = unarmedAnimations;
+	}
+	
+	public String[] getPistolAnimations() {
+		return pistolAnimations;
+	}
+	
+	public void setPistolAnimations(String[] pistolAnimations) {
+		this.pistolAnimations = pistolAnimations;
+	}
+	
+	public String[] getCarbineAnimations() {
+		return carbineAnimations;
+	}
+	
+	public void setCarbineAnimations(String[] carbineAnimations) {
+		this.carbineAnimations = carbineAnimations;
+	}
+	
+	public String[] getLightRifleAnimations() {
+		return lightRifleAnimations;
+	}
+	
+	public void setLightRifleAnimations(String[] lightRifleAnimations) {
+		this.lightRifleAnimations = lightRifleAnimations;
+	}
+	
+	public String[] getRifleAnimations() {
+		return rifleAnimations;
+	}
+	
+	public void setRifleAnimations(String[] rifleAnimations) {
+		this.rifleAnimations = rifleAnimations;
+	}
+	
+	public String[] getHeavyWpnAnimations() {
+		return heavyWpnAnimations;
+	}
+	
+	public void setHeavyWpnAnimations(String[] heavyWpnAnimations) {
+		this.heavyWpnAnimations = heavyWpnAnimations;
+	}
+	
+	public String[] getOneHandedLSAnimations() {
+		return oneHandedLSAnimations;
+	}
+	
+	public void setOneHandedLSAnimations(String[] oneHandedLSAnimations) {
+		this.oneHandedLSAnimations = oneHandedLSAnimations;
+	}
+	
+	public String[] getTwoHandedLSAnimations() {
+		return twoHandedLSAnimations;
+	}
+	
+	public void setTwoHandedLSAnimations(String[] twoHandedLSAnimations) {
+		this.twoHandedLSAnimations = twoHandedLSAnimations;
+	}
+	
+	public String[] getPolearmLSAnimations() {
+		return polearmLSAnimations;
+	}
+	
+	public void setPolearmLSAnimations(String[] polearmLSAnimations) {
+		this.polearmLSAnimations = polearmLSAnimations;
+	}
+	
+	public String[] getThrownAnimations() {
+		return thrownAnimations;
+	}
+	
+	public void setThrownAnimations(String[] thrownAnimations) {
+		this.thrownAnimations = thrownAnimations;
+	}
+	
+	public String getRandomAnimation(WeaponObject weapon) {
+		int weaponType = weapon.getWeaponType();
+		String[] animations;
+		
+		switch (weaponType) {
+			case 0:
+				animations = rifleAnimations;
+				break;
+			case 1:
+				animations = carbineAnimations;
+				break;
+			case 2:
+				animations = pistolAnimations;
+				break;
+			case 3:
+				animations = heavyWpnAnimations;
+				break;
+			case 4:
+				animations = oneHandedAnimations;
+				break;
+			case 5:
+				animations = twoHandedAnimations;
+				break;
+			case 6:
+				animations = defaultAnimations;
+				break;
+			case 7:
+				animations = polearmAnimations;
+				break;
+			case 8:
+				animations = thrownAnimations;
+				break;
+			case 9:
+				animations = oneHandedLSAnimations;				
+				break;
+			case 10:
+				animations = twoHandedLSAnimations;
+				break;
+			case 11:
+				animations = polearmLSAnimations;
+				break;
+			default:
+				animations = defaultAnimations;
+				break;
+		}
+		
+		if (animations.length == 0) {
+			animations = defaultAnimations;
+		}
+		
+		return animations[new Random().nextInt(animations.length)];
 	}
 	
 }

@@ -124,7 +124,7 @@ public class ConversationService implements INetworkDispatch {
 		
 		conversationHandlers.put(player, handler);
 		
-		NpcConversationOptions convoOptions = new NpcConversationOptions(player.getObjectID(), npc.getObjectID());
+		NpcConversationOptions convoOptions = new NpcConversationOptions(player.getObjectID());
 		options.forEach(convoOptions::addOption);
 		ObjControllerMessage objController = new ObjControllerMessage(0x0B, convoOptions);
 		player.getClient().getSession().write(objController.serialize());

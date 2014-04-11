@@ -24,6 +24,7 @@ package protocol.swg;
 import java.nio.ByteBuffer;
 
 import protocol.Message;
+import protocol.swg.chat.ChatInstantMessageToCharacter;
 
 
 public class SWGMessageFactory {

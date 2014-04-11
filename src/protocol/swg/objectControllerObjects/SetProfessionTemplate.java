@@ -26,8 +26,6 @@ import java.nio.ByteBuffer;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import engine.resources.common.Utilities;
-
 public class SetProfessionTemplate extends ObjControllerObject {
 	
 	private String profession;

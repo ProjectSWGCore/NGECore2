@@ -22,7 +22,6 @@
 package services;
 
 import java.util.Map;
-import java.util.Observable;
 import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.Executors;
@@ -31,27 +30,19 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import protocol.swg.PlayClientEffectLocMessage;
-import protocol.swg.SceneCreateObjectByCrc;
-import protocol.swg.SceneEndBaselines;
-import protocol.swg.SurveyMapUpdateMessage;
-import protocol.swg.UpdateContainmentMessage;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.resource.GalacticResource;
-import resources.objects.resource.ResourceConcentration;
 import resources.objects.resource.ResourceContainerObject;
 import resources.objects.resource.ResourceRoot;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.tool.SurveyTool;
-import resources.objects.waypoint.WaypointObject;
 import services.sui.SUIWindow;
 import services.sui.SUIWindow.SUICallback;
 import services.sui.SUIWindow.Trigger;
 import main.NGECore;
-import engine.resources.common.CRC;
 import engine.resources.container.Traverser;
 import engine.resources.objects.SWGObject;
-import engine.resources.scene.Point3D;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
@@ -86,48 +77,47 @@ public class SurveyService implements INetworkDispatch {
 	}
 	
 	public void ServiceProcessing(){
-		// All tools sampling
-		SurveyTool removeTool=null;
-		for (SurveyTool surveyTool : activeSurveyTools){
-			if (surveyTool.getCurrentlySurveying()){
-				// Check if survey process has finished
-				if (System.currentTimeMillis()>surveyTool.getLastSurveyTime()+3000){					
-					removeTool = surveyTool;
-					surveyTool.setCurrentlySurveying(false);
-					surveyTool.sendConstructSurveyMapMessage();
+		synchronized(activeSurveyTools){
+			// All tools sampling
+			SurveyTool removeTool=null;
+			for (SurveyTool surveyTool : activeSurveyTools){
+				if (surveyTool.getCurrentlySurveying()){
+					// Check if survey process has finished
+					if (System.currentTimeMillis()>surveyTool.getLastSurveyTime()+3000){					
+						removeTool = surveyTool;
+						surveyTool.setCurrentlySurveying(false);
+						surveyTool.sendConstructSurveyMapMessage();
+					}
+				}
+				if (surveyTool.getCurrentlySampling()){
+					// Check if sampling process has finished
+					if ((System.currentTimeMillis()>surveyTool.getLastSampleTime()+3000) && !surveyTool.getCurrentlyCoolingDown()){					
+						surveyTool.setCurrentlyCoolingDown(true);
+						// Update inventory
+						handleSamplingStages(surveyTool);
+						
+					}
+					// Check if sampling recovery is over
+					long sampleRecoveryTime = surveyTool.getRecoveryTime();
+					if (System.currentTimeMillis()>surveyTool.getLastSampleTime()+sampleRecoveryTime && ! surveyTool.isExceptionalState()){
+						// kick off another sampling attempt
+						surveyTool.setCurrentlyCoolingDown(false);
+						continueSampling(surveyTool);
+					}
+					if (surveyTool.getUser().getPosture()!=1){
+						surveyTool.setExceptionalState(false);
+						surveyTool.setCurrentlySampling(false);
+						removeTool = surveyTool;
+						if (surveyTool.getUser().getPosture()==0)
+							surveyTool.getUser().sendSystemMessage("You stand up", (byte) 0);
+						
+						surveyTool.getUser().sendSystemMessage("@survey:sample_cancel", (byte) 0);
+					}
 				}
 			}
-			if (surveyTool.getCurrentlySampling()){
-				// Check if sampling process has finished
-				if ((System.currentTimeMillis()>surveyTool.getLastSampleTime()+3000) && !surveyTool.getCurrentlyCoolingDown()){					
-					surveyTool.setCurrentlyCoolingDown(true);
-					// Update inventory
-					handleSamplingStages(surveyTool);
-					
-				}
-				// Check if sampling recovery is over
-				long sampleRecoveryTime = surveyTool.getRecoveryTime();
-				if (System.currentTimeMillis()>surveyTool.getLastSampleTime()+sampleRecoveryTime && ! surveyTool.isExceptionalState()){
-					// kick off another sampling attempt
-					surveyTool.setCurrentlyCoolingDown(false);
-					continueSampling(surveyTool);
-				}
-				if (surveyTool.getUser().getPosture()!=1){
-					surveyTool.setExceptionalState(false);
-					surveyTool.setCurrentlySampling(false);
-					removeTool = surveyTool;
-					if (surveyTool.getUser().getPosture()==0)
-						surveyTool.getUser().sendSystemMessage("You stand up", (byte) 0);
-					
-					surveyTool.getUser().sendSystemMessage("@survey:sample_cancel", (byte) 0);
-				}
-			}
-		}
-		if (removeTool!=null)
-			activeSurveyTools.remove(removeTool); // remove after notification
-		
-		
-		
+			if (removeTool!=null)
+				activeSurveyTools.remove(removeTool); // remove after notification
+		}	
 	}
 	
 	public void handleSamplingStages(SurveyTool surveyTool){
@@ -480,7 +470,6 @@ public class SurveyService implements INetworkDispatch {
 					returnList.add("List.lstList:SelectedRow");
 					
 					window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, new SUICallback() {
-						@SuppressWarnings("unchecked")
 						@Override
 						public void process(SWGObject owner, int eventType, Vector<String> returnList) {										
 							int index = Integer.parseInt(returnList.get(0));
@@ -567,8 +556,10 @@ public class SurveyService implements INetworkDispatch {
 	}
 	
 	public void addActiveSurveyTool(SurveyTool tool){
-		if (! activeSurveyTools.contains(tool))
-			activeSurveyTools.add(tool);
+		synchronized(activeSurveyTools){
+			if (! activeSurveyTools.contains(tool))
+				activeSurveyTools.add(tool);
+		}
 	}
 	
 	public Vector<SurveyTool> getActiveSurveyTools(){
@@ -576,7 +567,9 @@ public class SurveyService implements INetworkDispatch {
 	}
 	
 	public void removeActiveSurveyTool(SurveyTool surveyTool){
-		activeSurveyTools.remove(surveyTool);
+		synchronized(activeSurveyTools){
+			activeSurveyTools.remove(surveyTool);
+		}
 	}
 	
 	public boolean toolIsInList(SurveyTool surveyTool){
@@ -624,7 +617,6 @@ public class SurveyService implements INetworkDispatch {
 		final SurveyTool outerSurveyTool = (SurveyTool)target;
 		
 		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, new SUICallback() {
-			@SuppressWarnings("unchecked")
 			@Override
 			public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
 				CreatureObject crafter = (CreatureObject)owner;
@@ -670,14 +662,12 @@ public class SurveyService implements INetworkDispatch {
 		final SurveyTool outerSurveyTool = (SurveyTool)target;
 		
 		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, new SUICallback() {
-			@SuppressWarnings("unchecked")
 			@Override
 			public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
 				((CreatureObject)owner).sendSystemMessage("Rad confirmed", (byte) 0);
 			}					
 		});		
 		window.addHandler(1, "", Trigger.TRIGGER_CANCEL, returnList, new SUICallback() {
-			@SuppressWarnings("unchecked")
 			@Override
 			public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
 				((CreatureObject)owner).sendSystemMessage("Rad declined", (byte) 0);

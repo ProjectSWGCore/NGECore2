@@ -21,16 +21,12 @@
  ******************************************************************************/
 package services.chat;
 
-import java.util.List;
 import java.util.Vector;
 
-import resources.objects.creature.CreatureObject;
 
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.PrimaryKey;
-import com.sleepycat.persist.model.Relationship;
-import com.sleepycat.persist.model.SecondaryKey;
 
 @Entity
 public class ChatRoom {
@@ -40,13 +36,11 @@ public class ChatRoom {
 	private int roomId;
 	private String roomAddress; // name
 
-	private Vector<CreatureObject> moderatorList = new Vector<CreatureObject>();
-	private Vector<CreatureObject> banList = new Vector<CreatureObject>();
+	private Vector<String> moderatorList = new Vector<String>();
+	private Vector<String> banList = new Vector<String>();
 	@NotPersistent
-	private Vector<CreatureObject> userList = new Vector<CreatureObject>(); // current users
+	private Vector<String> userList = new Vector<String>(); // current users
 
-	@NotPersistent
-	private int requestId; // not-persistent
 	private boolean moderatorsOnly;
 	private boolean privateRoom;
 	private boolean visible;
@@ -55,9 +49,9 @@ public class ChatRoom {
 	public String getCreator() {
 		return creator;
 	}
-
+	
 	public void setCreator(String creator) {
-		this.creator = creator;
+		this.creator = creator.toLowerCase();
 	}
 
 	public String getRoomAddress() {
@@ -76,28 +70,12 @@ public class ChatRoom {
 		this.roomId = roomId;
 	}
 
-	public Vector<CreatureObject> getModeratorList() {
+	public Vector<String> getModeratorList() {
 		return moderatorList;
 	}
 
-	public void setModeratorList(Vector<CreatureObject> moderatorList) {
-		this.moderatorList = moderatorList;
-	}
-
-	public Vector<CreatureObject> getUserList() {
+	public Vector<String> getUserList() {
 		return userList;
-	}
-
-	public void setUserList(Vector<CreatureObject> userList) {
-		this.userList = userList;
-	}
-
-	public int getRequestId() {
-		return requestId;
-	}
-
-	public void setRequestId(int requestId) {
-		this.requestId = requestId;
 	}
 
 	public boolean isModeratorsOnly() {
@@ -121,15 +99,11 @@ public class ChatRoom {
 	}
 
 	public void setOwner(String owner) {
-		this.owner = owner;
+		this.owner = owner.toLowerCase();
 	}
 
-	public Vector<CreatureObject> getBanList() {
+	public Vector<String> getBanList() {
 		return banList;
-	}
-
-	public void setBanList(Vector<CreatureObject> banList) {
-		this.banList = banList;
 	}
 
 	public String getDescription() {
@@ -146,5 +120,29 @@ public class ChatRoom {
 
 	public void setVisible(boolean visible) {
 		this.visible = visible;
+	}
+	
+	public void addUser(String user) {
+		userList.add(user.toLowerCase());
+	}
+	
+	public void addModerator(String moderator) {
+		moderatorList.add(moderator.toLowerCase());
+	}
+	
+	public void banUser(String user) {
+		banList.add(user.toLowerCase());
+	}
+	
+	public boolean hasUser(String user) {
+		return userList.contains(user.toLowerCase());
+	}
+	
+	public boolean hasModerator(String moderator) {
+		return moderatorList.contains(moderator.toLowerCase());
+	}
+	
+	public boolean hasBan(String user) {
+		return banList.contains(user.toLowerCase());
 	}
 }

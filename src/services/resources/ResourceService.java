@@ -28,14 +28,16 @@ import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+
 import com.sleepycat.persist.EntityCursor;
+
 import main.NGECore;
 import engine.resources.common.CRC;
 import engine.resources.objects.SWGObject;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import resources.objects.creature.CreatureObject;
+import resources.objects.harvester.HarvesterObject;
 import resources.objects.resource.GalacticResource;
 import resources.objects.resource.ResourceContainerObject;
 import resources.objects.resource.ResourceRoot;
@@ -11303,6 +11305,36 @@ public class ResourceService implements INetworkDispatch {
 			if (spawnedPlanets.contains(planetId) && res.getResourceRoot().getResourceClass().equals(searchName)){
 				resource = res; // resourceClass= "Insect Meat" i.e.
 			}
+		}
+		return resource;
+	}
+	
+	public Vector<GalacticResource> getSpawnedResourcesByPlanetAndHarvesterType(int planetId, byte harvesterType) {
+		Vector<GalacticResource> planetResourceList = new Vector<GalacticResource>();
+		byte searchtype = harvesterType;
+		if (harvesterType==7) searchtype = (byte) 0;
+		for (GalacticResource gal : allSpawnedResources){
+			if (gal.isSpawnedOn(planetId) && gal.getGeneralType()==searchtype)
+				if (harvesterType!=HarvesterObject.HARVESTER_TYPE_FUSION) 
+					planetResourceList.add(gal);
+				else if (harvesterType==HarvesterObject.HARVESTER_TYPE_FUSION) {
+					System.err.println("gal.getContainerType() " + gal.getContainerType());
+					if (gal.getResourceRoot().getContainerType()==ResourceRoot.CONTAINER_TYPE_ENERGY_RADIOACTIVE)
+						planetResourceList.add(gal);
+				} else if (harvesterType==HarvesterObject.HARVESTER_TYPE_GEO) {
+					System.err.println("gal.getContainerType() " + gal.getContainerType());
+					if (gal.getGeneralType()==GalacticResource.GENERAL_GEOTHERM)
+						planetResourceList.add(gal);
+				}
+		}
+		return planetResourceList;
+	}
+	
+	public GalacticResource findResourceById(long id){
+		GalacticResource resource = new GalacticResource();
+		for (GalacticResource sampleResource : allSpawnedResources){
+			if (sampleResource.getId()==id)
+				return sampleResource;
 		}
 		return resource;
 	}

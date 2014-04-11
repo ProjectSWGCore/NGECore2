@@ -43,7 +43,7 @@ import org.apache.mina.core.session.IoSession;
 import com.sleepycat.je.Transaction;
 import com.sleepycat.persist.EntityCursor;
 
-import protocol.swg.ChatSystemMessage;
+import protocol.swg.chat.ChatSystemMessage;
 import net.engio.mbassy.bus.config.BusConfiguration;
 import resources.common.RadialOptions;
 import resources.common.ThreadMonitor;
@@ -57,8 +57,10 @@ import services.DevService;
 import services.EntertainmentService;
 import services.EquipmentService;
 import services.GroupService;
+import services.housing.HousingService;
 import services.InstanceService;
 import services.LoginService;
+import services.LootService;
 import services.MissionService;
 import services.PlayerService;
 import services.ScriptService;
@@ -82,6 +84,7 @@ import services.LoginService;
 import services.map.MapService;
 import services.object.ObjectService;
 import services.object.UpdateService;
+import services.resources.HarvesterService;
 import services.resources.ResourceService;
 import services.retro.RetroService;
 import services.spawn.SpawnService;
@@ -175,6 +178,10 @@ public class NGECore {
 	public ResourceService resourceService;
 
 	public ConversationService conversationService;
+	
+	public HousingService housingService;
+	public LootService lootService;
+	public HarvesterService harvesterService;
 
 	
 	// Login Server
@@ -235,6 +242,11 @@ public class NGECore {
 		if (!(config.loadConfigFile())) {
 			config = DefaultConfig.getConfig();
 		}
+		
+		Config options = new Config();
+		options.setFilePath("options.cfg");
+		boolean optionsConfigLoaded = options.loadConfigFile();
+		
 		// Database
 		databaseConnection = new DatabaseConnection();
 		databaseConnection.connect(config.getString("DB.URL"), config.getString("DB.NAME"), config.getString("DB.USER"), config.getString("DB.PASS"), "postgresql");
@@ -286,6 +298,9 @@ public class NGECore {
 		entertainmentService = new EntertainmentService(this);
 		devService = new DevService(this);
 		conversationService = new ConversationService(this);
+		housingService = new HousingService(this);
+		lootService = new LootService(this);
+		harvesterService = new HarvesterService(this);
 		
 		if (config.keyExists("JYTHONCONSOLE.PORT")) {
 			int jythonPort = config.getInt("JYTHONCONSOLE.PORT");
@@ -302,7 +317,7 @@ public class NGECore {
 		aiService = new AIService(this);
 		//missionService = new MissionService(this);
 		
-		if (config.getInt("LOAD.RESOURCE.SYSTEM") == 1) {
+		if (optionsConfigLoaded && options.getInt("LOAD.RESOURCE.SYSTEM") == 1) {
 			surveyService = new SurveyService(this);
 			resourceService = new ResourceService(this);
 		}
@@ -406,7 +421,7 @@ public class NGECore {
 		
 		objectService.loadBuildings();
 		
-		if (config.getInt("LOAD.RESOURCE.SYSTEM") == 1) {
+		if (optionsConfigLoaded && options.getInt("LOAD.RESOURCE.SYSTEM") > 0) {
 			objectService.loadResourceRoots();
 			objectService.loadResources();
 		}
@@ -449,6 +464,7 @@ public class NGECore {
 		spawnService.loadLairGroups();
 		spawnService.loadSpawnAreas();
 		
+		housingService.loadHousingTemplates();
 		equipmentService.loadBonusSets();
 		
 		retroService.run();

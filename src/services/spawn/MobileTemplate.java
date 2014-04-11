@@ -23,10 +23,8 @@ package services.spawn;
 
 import java.util.Vector;
 
-import main.NGECore;
 import resources.datatables.Options;
 import resources.datatables.PvpStatus;
-import resources.objects.weapon.WeaponObject;
 
 public class MobileTemplate {
 	

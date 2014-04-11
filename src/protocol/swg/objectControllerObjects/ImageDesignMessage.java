@@ -21,8 +21,6 @@
  ******************************************************************************/
 package protocol.swg.objectControllerObjects;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Vector;
 
@@ -30,7 +28,6 @@ import org.apache.mina.core.buffer.IoBuffer;
 
 import protocol.swg.ObjControllerMessage;
 import resources.common.IDAttribute;
-import resources.common.StringUtilities;
 
 public class ImageDesignMessage extends ObjControllerObject {
 

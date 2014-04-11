@@ -22,7 +22,6 @@
 package services.ai;
 
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
@@ -42,7 +41,6 @@ import services.ai.states.AttackState;
 import services.ai.states.DeathState;
 import services.ai.states.IdleState;
 import services.ai.states.RetreatState;
-import services.ai.states.SpawnState;
 import services.combat.CombatEvents.DamageTaken;
 import services.spawn.MobileTemplate;
 

@@ -36,8 +36,6 @@ import resources.objects.creature.CreatureObject;
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
 
-import engine.clientdata.ClientFileManager;
-import engine.clientdata.visitors.DatatableVisitor;
 import engine.resources.common.CRC;
 
 @Persistent(version=10)
