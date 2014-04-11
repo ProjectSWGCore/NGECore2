@@ -833,7 +833,6 @@ public class ObjectService implements INetworkDispatch {
 				if(!core.getConfig().getString("MOTD").equals(""))
 					creature.sendSystemMessage(core.getConfig().getString("MOTD"), (byte) 2);
 				
-				core.chatService.joinChatRoom(creature.getCustomName().toLowerCase(), "SWG." + core.getGalaxyName() + "." + creature.getPlanet().getName() + ".Planet");
 				core.playerService.postZoneIn(creature);
 			}
 			
