@@ -11375,4 +11375,8 @@ public class ResourceService implements INetworkDispatch {
 			}
 			return containerObject;
 		}
+		
+		public Vector<String> getCompleteResourceNameHistory() {
+			return completeResourceNameHistory;
+		}
 }

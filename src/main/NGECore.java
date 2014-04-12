@@ -72,6 +72,7 @@ import services.SurveyService;
 import services.TerrainService;
 import services.WeatherService;
 import services.ai.AIService;
+import services.bazaar.BazaarService;
 import services.chat.ChatService;
 import services.collections.CollectionService;
 import services.combat.CombatService;
@@ -173,12 +174,10 @@ public class NGECore {
 	//public MissionService missionService;
 	public InstanceService instanceService;
 	public DevService devService;
-
 	public SurveyService surveyService;
 	public ResourceService resourceService;
-
 	public ConversationService conversationService;
-	
+	public BazaarService bazaarService;
 	public HousingService housingService;
 	public LootService lootService;
 	public HarvesterService harvesterService;
@@ -206,7 +205,7 @@ public class NGECore {
 	private BusConfiguration eventBusConfig = BusConfiguration.Default(1, new ThreadPoolExecutor(1, 4, 1, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>()));
 
 	private ObjectDatabase buildingODB;
-
+	private ObjectDatabase auctionODB;
 	private ObjectDatabase resourcesODB;
 	private ObjectDatabase resourceRootsODB;
 	private ObjectDatabase resourceHistoryODB;
@@ -270,6 +269,7 @@ public class NGECore {
 		resourcesODB = new ObjectDatabase("resources", true, false, true);
 		resourceRootsODB = new ObjectDatabase("resourceroots", true, false, true);
 		resourceHistoryODB = new ObjectDatabase("resourcehistory", true, false, true);
+		auctionODB = new ObjectDatabase("auction", true, false, true);
 		
 		// Services
 		loginService = new LoginService(this);
@@ -298,6 +298,7 @@ public class NGECore {
 		entertainmentService = new EntertainmentService(this);
 		devService = new DevService(this);
 		conversationService = new ConversationService(this);
+		bazaarService = new BazaarService(this);
 		housingService = new HousingService(this);
 		lootService = new LootService(this);
 		harvesterService = new HarvesterService(this);
@@ -353,6 +354,7 @@ public class NGECore {
 		zoneDispatch.addService(buffService);
 		zoneDispatch.addService(entertainmentService);
 		//zoneDispatch.addService(missionService);
+		zoneDispatch.addService(bazaarService);
 
 		zoneServer = new MINAServer(zoneDispatch, config.getInt("ZONE.PORT"));
 		zoneServer.start();

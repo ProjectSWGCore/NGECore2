@@ -73,7 +73,9 @@ public class LootService implements INetworkDispatch {
 	
 	public void handleLootRequest(CreatureObject requester, TangibleObject lootedObject) {
 		
-		if (lootedObject.isLooted() || lootedObject.isLootLock())
+		GroupObject group = (GroupObject) core.objectService.getObject(requester.getGroupId());
+		
+		if (lootedObject.isLooted() || lootedObject.isLootLock() || (group == null && !lootedObject.getKiller().equals(requester)) || (group != null && !group.getMemberList().contains(lootedObject.getKiller())))
 			return;
 		
 		lootedObject.setLootLock(true);
