@@ -151,7 +151,7 @@ public class BuildingObject extends TangibleObject implements IPersistent {
 	public Vector<TangibleObject> getItemsList() {
 		Vector<TangibleObject> items = new Vector<TangibleObject>();
 		getCells().forEach(c -> c.viewChildren(c, true, false, (item) -> {
-			if(!(item instanceof CreatureObject))
+			if(!(item instanceof CreatureObject) && item.getTemplate() != "object/tangible/terminal/shared_terminal_player_structure.iff")
 				items.add((TangibleObject) item);
 		}));
 		return items;
