@@ -48,6 +48,7 @@ import resources.objects.weapon.WeaponObject;
 import services.ai.AIActor;
 import services.ai.LairActor;
 import engine.resources.container.CreatureContainerPermissions;
+import engine.resources.container.StaticContainerPermissions;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
@@ -90,7 +91,7 @@ public class SpawnService {
 			return null;
 		
 		TangibleObject inventory = (TangibleObject) core.objectService.createObject("object/tangible/inventory/shared_character_inventory.iff", creature.getPlanet());
-		inventory.setContainerPermissions(CreatureContainerPermissions.CREATURE_CONTAINER_PERMISSIONS);
+		inventory.setContainerPermissions(StaticContainerPermissions.STATIC_CONTAINER_PERMISSIONS);
 
 		
 		/*if(mobileTemplate.getCustomWeapon() != null) {
