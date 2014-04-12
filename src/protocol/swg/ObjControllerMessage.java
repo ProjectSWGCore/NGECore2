@@ -83,8 +83,9 @@ public class ObjControllerMessage extends SWGMessage {
 	}
 	
 	public IoBuffer serialize() {
-		IoBuffer buffer = IoBuffer.allocate(1024).order(ByteOrder.LITTLE_ENDIAN);
-		
+		//IoBuffer buffer = IoBuffer.allocate(1024).order(ByteOrder.LITTLE_ENDIAN); -> java.nio.BufferOverflowException
+		IoBuffer buffer = IoBuffer.allocate(10).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.setAutoExpand(true);
 		buffer.putShort((short)5);
 		buffer.putInt(0x80CE5E46);
 		buffer.putInt(update);

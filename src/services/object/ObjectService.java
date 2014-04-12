@@ -97,6 +97,7 @@ import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.deed.Harvester_Deed;
+import resources.objects.deed.Player_House_Deed;
 import resources.objects.group.GroupObject;
 import resources.objects.guild.GuildObject;
 import resources.objects.harvester.HarvesterObject;
@@ -320,7 +321,11 @@ public class ObjectService implements INetworkDispatch {
 		} else if(Template.startsWith("object/tangible/deed/harvester_deed") || Template.startsWith("object/tangible/deed/generator_deed")) {
 			
 			object = new Harvester_Deed(objectID, planet, Template, position, orientation);
-		
+			
+		} else if(Template.startsWith("object/tangible/deed/player_house_deed")) {
+			
+			object = new Player_House_Deed(objectID, planet, Template, position, orientation);
+			
 		} else if(Template.startsWith("object/tangible")) {
 			
 			object = new TangibleObject(objectID, planet, Template, position, orientation);
