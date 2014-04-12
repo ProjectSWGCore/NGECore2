@@ -24,183 +24,209 @@ package resources.common;
 public class ProsePackage {
 	
 	/*
-	 * TU = Text You
+	 * TU = Text User
 	 * TT = Text Target
 	 * TO = Text Object
-	 * DI/DF = Decimal Value
+	 * DI = Decimal Integer
+	 * DF = Decimal Float
 	 */
 	
-	private byte displayFlag = 1;
+	private Stf stf = new Stf();
 	
-	private String stfFile = "";
-	private String stfLabel = "";
-
-	private long tuObjectId;
-	private String tuStfFile = "";
-	private String tuStfLabel = "";
+	private long tuObjectId = 0;
+	private Stf tuStf = new Stf();
 	private String tuCustomString = "";
 	
-	private long ttObjectId;
-	private String ttStfFile = "";
-	private String ttStfLabel = "";
+	private long ttObjectId = 0;
+	private Stf ttStf = new Stf();
 	private String ttCustomString = "";
 	
-	private long toObjectId;
-	private String toStfFile = "";
-	private String toStfLabel = "";
+	private long toObjectId = 0;
+	private Stf toStf = new Stf();
 	private String toCustomString = "";
 	
-	private int diInteger;
-	private float dfFloat;
+	private int diInteger = 0;
+	private float dfFloat = 0;
 	
 	// TODO: Add more constructors
 	
 	public ProsePackage(String stfFile, String stfLabel) {
-		this.stfFile = stfFile;
-		this.stfLabel = stfLabel;
+		stf.setStfFilename(stfFile);
+		stf.setStfName(stfLabel);
 	}
 	
 	public ProsePackage(String stfFile, String stfLabel, long tuObjectId, String tuStfFile, String tuStfLabel, String tuCustomString) {
-		this.stfFile = stfFile;
-		this.stfLabel = stfLabel;
+		stf.setStfFilename(stfFile);
+		stf.setStfName(stfLabel);
 		this.tuObjectId = tuObjectId;
-		this.tuStfFile = tuStfFile;
-		this.tuStfLabel = tuStfLabel;
+		tuStf.setStfFilename(tuStfFile);
+		tuStf.setStfName(tuStfLabel);
 		this.tuCustomString = tuCustomString;
 	}
-
-	public byte getDisplayFlag() {
-		return displayFlag;
+	
+	/*
+	 * Any parameters can be entered.
+	 * 
+	 * Any integers set diInteger
+	 * Any floats set dfFloat
+	 * Any "@stfFile:label" sets the default stf
+	 * "TU" followed by objectId, "@stfFile:label" or customString
+	 * "TT" followed by objectId, "@stfFile:label" or customString
+	 * "TO" followed by objectId, "@stfFile:label" or customString
+	 */
+	public ProsePackage(Object ... objects) {
+		for (Object object: objects) {
+			if (object instanceof Object[]) {
+				objects = (Object[]) object;
+				break;
+			}
+		}
+		
+		for (int i = 0; i < objects.length; i++) {
+			Object object = objects[i];
+			
+			if (object instanceof String) {
+				String string = (String) object;
+				
+				if ((i + 1) < objects.length) {
+					long objectId = 0;
+					Stf stf = null;
+					String customString = null;
+					
+					if (objects[i + 1] instanceof Long) {
+						objectId = (Long) objects[i + 1];
+					} else if (objects[i + 1] instanceof String) {
+						String str = (String) objects[i + 1];
+						
+						if (str.startsWith("@") && str.contains(":") && !str.contains(" ")) {
+							stf = new Stf(str);
+						} else {
+							customString = str;
+						}
+					}
+					
+					switch (string.toUpperCase())  {
+						case "TU":
+							tuObjectId = (objectId == 0) ? tuObjectId : objectId;
+							tuStf = (stf == null) ? tuStf : stf;
+							tuCustomString = (customString == null) ? tuCustomString : customString;
+							continue;
+						case "TT":
+							ttObjectId = (objectId == 0) ? ttObjectId : objectId;
+							ttStf = (stf == null) ? ttStf : stf;
+							ttCustomString = (customString == null) ? ttCustomString : customString;
+							continue;
+						case "TO":
+							toObjectId = (objectId == 0) ? toObjectId : objectId;
+							toStf = (stf == null) ? toStf : stf;
+							toCustomString = (customString == null) ? toCustomString : customString;
+							continue;
+						default:
+							//
+					}
+				}
+				
+				stf.setString((String) object);
+			} else if (object instanceof Integer) {
+				diInteger = (Integer) object;
+			} else if (object instanceof Float) {
+				dfFloat = (Float) object;
+			}
+		}
 	}
 	
-	public void setDisplayFlag(byte displayFlag) {
-		this.displayFlag = displayFlag;
+	public Stf getStf() {
+		return stf;
 	}
-
-	public String getStfFile() {
-		return stfFile;
+	
+	public void setStf(Stf stf) {
+		this.stf = stf;
 	}
-
-	public void setStfFile(String stfFile) {
-		this.stfFile = stfFile;
-	}
-
-	public String getStfLabel() {
-		return stfLabel;
-	}
-
-	public void setStfLabel(String stfLabel) {
-		this.stfLabel = stfLabel;
-	}
-
+	
 	public long getTuObjectId() {
 		return tuObjectId;
 	}
-
+	
 	public void setTuObjectId(long tuObjectId) {
 		this.tuObjectId = tuObjectId;
 	}
-
-	public String getTuStfFile() {
-		return tuStfFile;
+	
+	public Stf getTuStf() {
+		return tuStf;
 	}
-
-	public void setTuStfFile(String tuStfFile) {
-		this.tuStfFile = tuStfFile;
+	
+	public void setTuStf(Stf tuStf) {
+		this.tuStf = tuStf;
 	}
-
-	public String getTuStfLabel() {
-		return tuStfLabel;
-	}
-
-	public void setTuStfLabel(String tuStfLabel) {
-		this.tuStfLabel = tuStfLabel;
-	}
-
+	
 	public String getTuCustomString() {
 		return tuCustomString;
 	}
-
+	
 	public void setTuCustomString(String tuCustomString) {
 		this.tuCustomString = tuCustomString;
 	}
-
+	
 	public long getTtObjectId() {
 		return ttObjectId;
 	}
-
+	
 	public void setTtObjectId(long ttObjectId) {
 		this.ttObjectId = ttObjectId;
 	}
-
-	public String getTtStfFile() {
-		return ttStfFile;
+	
+	public Stf getTtStf() {
+		return ttStf;
 	}
-
-	public void setTtStfFile(String ttStfFile) {
-		this.ttStfFile = ttStfFile;
+	
+	public void setTtStf(Stf ttStf) {
+		this.ttStf = ttStf;
 	}
-
-	public String getTtStfLabel() {
-		return ttStfLabel;
-	}
-
-	public void setTtStfLabel(String ttStfLabel) {
-		this.ttStfLabel = ttStfLabel;
-	}
-
+	
 	public String getTtCustomString() {
 		return ttCustomString;
 	}
-
+	
 	public void setTtCustomString(String ttCustomString) {
 		this.ttCustomString = ttCustomString;
 	}
-
+	
 	public long getToObjectId() {
 		return toObjectId;
 	}
-
+	
 	public void setToObjectId(long toObjectId) {
 		this.toObjectId = toObjectId;
 	}
-
-	public String getToStfFile() {
-		return toStfFile;
+	
+	public Stf getToStf() {
+		return toStf;
 	}
 
-	public void setToStfFile(String toStfFile) {
-		this.toStfFile = toStfFile;
+	public void setToStf(Stf toStf) {
+		this.toStf = toStf;
 	}
-
-	public String getToStfLabel() {
-		return toStfLabel;
-	}
-
-	public void setToStfLabel(String toStfLabel) {
-		this.toStfLabel = toStfLabel;
-	}
-
+	
 	public String getToCustomString() {
 		return toCustomString;
 	}
-
+	
 	public void setToCustomString(String toCustomString) {
 		this.toCustomString = toCustomString;
 	}
-
+	
 	public int getDiInteger() {
 		return diInteger;
 	}
-
+	
 	public void setDiInteger(int diInteger) {
 		this.diInteger = diInteger;
 	}
-
+	
 	public float getDfFloat() {
 		return dfFloat;
 	}
-
+	
 	public void setDfFloat(float dfFloat) {
 		this.dfFloat = dfFloat;
 	}

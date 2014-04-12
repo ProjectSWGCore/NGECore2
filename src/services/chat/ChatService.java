@@ -44,6 +44,7 @@ import engine.resources.scene.Point3D;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import resources.common.*;
+import resources.datatables.DisplayType;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import protocol.swg.AddIgnoreMessage;
@@ -719,7 +720,7 @@ public class ChatService implements INetworkDispatch {
 	}
 	
 	public void broadcastGalaxy(String message) {
-		core.simulationService.notifyAllClients(new ChatSystemMessage(message, (byte) 0).serialize());
+		core.simulationService.notifyAllClients(new ChatSystemMessage(message, new OutOfBand(), DisplayType.Broadcast).serialize());
 	}
 	
 	private void loadChatRooms() {
