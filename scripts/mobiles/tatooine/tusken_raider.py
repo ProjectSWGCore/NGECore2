@@ -5,7 +5,7 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('tuskenraider')
+	mobileTemplate.setCreatureName('tusken_raider')
 	mobileTemplate.setLevel(90)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(24)
@@ -15,8 +15,7 @@ def addTemplate(core):
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
-	weaponTemplates.add('object/weapon/ranged/rifle/shared_rifle_e11.iff')
-	weaponTemplates.add('object/weapon/ranged/rifle/shared_rifle_t21.iff')
+	weaponTemplates.add('object/weapon/ranged/rifle/shared_rifle_tusken.iff')
 	mobileTemplate.setWeaponTemplates(weaponTemplates)
 
 	
@@ -24,5 +23,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('rangedShot')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('tuskenraider', mobileTemplate)
+	core.spawnService.addMobileTemplate('tusken_raider', mobileTemplate)
 	

@@ -903,11 +903,9 @@ public class HarvesterService implements INetworkDispatch {
 	
 	public void placeHarvester(SWGObject object) {	
 		CreatureObject actor = (CreatureObject) object.getAttachment("Owner");
-
 		String structureTemplate = (String)object.getAttachment("Deed_StructureTemplate");
 		HarvesterObject harvester = (HarvesterObject) NGECore.getInstance().objectService.createObject(structureTemplate, actor.getPlanet());
 		long objectId = harvester.getObjectID();
-
 		Vector<String> adminList = harvester.getAdminList();
 		//String[] fullName = ((CreatureObject)actor).getCustomName().split(" ");
 		adminList.add(actor.getCustomName());
@@ -927,9 +925,7 @@ public class HarvesterService implements INetworkDispatch {
 		// build harvester
 		float positionY = NGECore.getInstance().terrainService.getHeight(actor.getPlanetId(), object.getPosition().x, object.getPosition().z);
 		harvester.setPosition(new Point3D(object.getPosition().x,positionY, object.getPosition().z));
-		core.simulationService.add(harvester, harvester.getPosition().x, harvester.getPosition().x, true);
-		
-		
+		core.simulationService.add(harvester, harvester.getPosition().x, harvester.getPosition().z, true);
 		PlayerObject player = (PlayerObject) actor.getSlottedObject("ghost");
 		WaypointObject constructionWaypoint = (WaypointObject)NGECore.getInstance().objectService.createObject("object/waypoint/shared_world_waypoint_blue.iff", actor.getPlanet(), harvester.getPosition().x, 0 ,harvester.getPosition().z);
 		String displayname = "@installation_n:"+harvester.getStfName();
