@@ -29,6 +29,8 @@ import protocol.swg.SWGMessage;
 
 public class ChatServerStatus extends SWGMessage {
 
+	public ChatServerStatus() { }
+
 	@Override
 	public void deserialize(IoBuffer data) {
 	}

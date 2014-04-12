@@ -34,9 +34,14 @@ import services.chat.ChatRoom;
 public class ChatRoomList extends SWGMessage {
 
 	private ConcurrentHashMap<Integer, ChatRoom> chatRooms;
+	private ChatRoom room;
 
 	public ChatRoomList(ConcurrentHashMap<Integer, ChatRoom> chatRooms) {
 		this.chatRooms = chatRooms;
+	}
+	
+	public ChatRoomList(ChatRoom room) {
+		this.room = room;
 	}
 	
 	@Override
@@ -53,24 +58,42 @@ public class ChatRoomList extends SWGMessage {
 		buffer.putShort((short) 2);
 		buffer.putInt(0x70DEB197);
 		
-		buffer.putInt(chatRooms.size());
-		chatRooms.forEach((key, value) -> {
-			if (value.isVisible()) {
-				buffer.putInt(value.getRoomId());
-				buffer.putInt((int) ((value.isPrivateRoom() ? 1 : 0)));
-				buffer.put((byte) ((value.isModeratorsOnly() ? 1 : 0)));
-				buffer.put(getAsciiString(value.getRoomAddress()));
-				buffer.put(getAsciiString("SWG"));
-				buffer.put(getAsciiString(server));
-				buffer.put(getAsciiString(value.getOwner()));
-				buffer.put(getAsciiString("SWG"));
-				buffer.put(getAsciiString(server));
-				buffer.put(getAsciiString(value.getCreator()));
-				buffer.put(getUnicodeString(value.getDescription()));
-				buffer.putInt(0); // moderator list (not used by client)
-				buffer.putInt(0); // user list (not used by client)
-			}
-		});
+		if (room != null) {
+			buffer.putInt(1);
+			
+			buffer.putInt(room.getRoomId());
+			buffer.putInt((int) ((room.isPrivateRoom() ? 1 : 0)));
+			buffer.put((byte) ((room.isModeratorsOnly() ? 1 : 0)));
+			buffer.put(getAsciiString(room.getRoomAddress()));
+			buffer.put(getAsciiString("SWG"));
+			buffer.put(getAsciiString(server));
+			buffer.put(getAsciiString(room.getOwner()));
+			buffer.put(getAsciiString("SWG"));
+			buffer.put(getAsciiString(server));
+			buffer.put(getAsciiString(room.getCreator()));
+			buffer.put(getUnicodeString(room.getDescription()));
+			buffer.putInt(0); // moderator list (not used by client)
+			buffer.putInt(0); // user list (not used by client)
+		} else {
+			buffer.putInt(chatRooms.size());
+			chatRooms.forEach((key, value) -> {
+				if (value.isVisible()) {
+					buffer.putInt(value.getRoomId());
+					buffer.putInt((int) ((value.isPrivateRoom() ? 1 : 0)));
+					buffer.put((byte) ((value.isModeratorsOnly() ? 1 : 0)));
+					buffer.put(getAsciiString(value.getRoomAddress()));
+					buffer.put(getAsciiString("SWG"));
+					buffer.put(getAsciiString(server));
+					buffer.put(getAsciiString(value.getOwner()));
+					buffer.put(getAsciiString("SWG"));
+					buffer.put(getAsciiString(server));
+					buffer.put(getAsciiString(value.getCreator()));
+					buffer.put(getUnicodeString(value.getDescription()));
+					buffer.putInt(0); // moderator list (not used by client)
+					buffer.putInt(0); // user list (not used by client)
+				}
+			});
+		}
 		buffer.flip();
 		//StringUtilities.printBytes(buffer.array());
 		return buffer;

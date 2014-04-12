@@ -46,6 +46,8 @@ import resources.common.FileUtilities;
 import resources.common.ObjControllerOpcodes;
 import resources.common.Opcodes;
 import resources.common.RadialOptions;
+import resources.objects.creature.CreatureObject;
+import resources.objects.harvester.HarvesterObject;
 import services.sui.SUIWindow.SUICallback;
 import services.sui.SUIWindow.Trigger;
 import engine.clients.Client;
@@ -81,9 +83,31 @@ public class SUIService implements INetworkDispatch {
 				if(target == null || owner == null)
 					return;
 				
+				if (target instanceof HarvesterObject){
+					HarvesterObject harvester = (HarvesterObject) target;
+					Vector<String> admins = harvester.getAdminList();
+					Vector<String> hoppers = harvester.getHopperList();
+					CreatureObject creature = (CreatureObject) core.objectService.getObject(harvester.getOwner());
+					if (creature == owner && !admins.contains(owner.getCustomName())){
+						admins.add(owner.getCustomName());
+					}
+					
+					if (! admins.contains(owner.getCustomName()) && ! hoppers.contains(owner.getCustomName())){
+						return; // Completely unauthorized				
+					}
+					
+					if (! admins.contains(owner.getCustomName()) && hoppers.contains(owner.getCustomName())){
+						 // authorized for hopper
+						// change radialOptions to hopper access
+						core.scriptService.callScript("scripts/radial/", "harvesterHopper", "createRadial", core, owner, target, request.getRadialOptions());
+						sendRadial(owner, target, request.getRadialOptions(), request.getRadialCount());
+						return;
+					}
+				}
+				
 				if(target.getGrandparent() != null && target.getGrandparent().getAttachment("structureAdmins") != null)
 				{
-					if(core.housingService.getPermissions(owner, target.getContainer()))
+					if(core.housingService.getPermissions(owner, target.getContainer()) && !getRadialFilename(target).equals("structure_management_terminal"))
 					{
 						core.scriptService.callScript("scripts/radial/", "moveable", "createRadial", core, owner, target, request.getRadialOptions());
 						sendRadial(owner, target, request.getRadialOptions(), request.getRadialCount());

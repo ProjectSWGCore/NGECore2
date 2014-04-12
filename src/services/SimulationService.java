@@ -809,7 +809,9 @@ public class SimulationService implements INetworkDispatch {
 		PlayerObject ghost = (PlayerObject) object.getSlottedObject("ghost");
 				
 		core.weatherService.sendWeather(object);
-				
+		
+		//core.chatService.joinChatRoom(object.getCustomName().toLowerCase(), "SWG." + core.getGalaxyName() + "." + object.getPlanet().getName());
+
 		if (!object.hasSkill(ghost.getProfessionWheelPosition())) {
 			object.showFlyText(OutOfBand.ProsePackage("@cbt_spam:skill_up"), 2.5f, new RGB(154, 205, 50), 0, true);
 			object.playEffectObject("clienteffect/skill_granted.cef", "");

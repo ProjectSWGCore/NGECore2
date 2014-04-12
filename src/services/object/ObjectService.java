@@ -55,6 +55,7 @@ import org.python.core.Py;
 import org.python.core.PyObject;
 
 import com.sleepycat.je.Transaction;
+import com.sleepycat.je.TransactionConfig;
 import com.sleepycat.persist.EntityCursor;
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
@@ -74,6 +75,7 @@ import protocol.swg.chat.ChatOnGetFriendsList;
 import protocol.swg.chat.ChatRoomList;
 import protocol.swg.chat.ChatServerStatus;
 import protocol.swg.objectControllerObjects.ShowFlyText;
+import protocol.swg.chat.VoiceChatStatus;
 import protocol.swg.objectControllerObjects.UiPlayEffect;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.CrcStringTableVisitor;
@@ -97,8 +99,12 @@ import resources.objects.Delta;
 import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
+import resources.objects.deed.Harvester_Deed;
+import resources.objects.deed.Player_House_Deed;
 import resources.objects.group.GroupObject;
 import resources.objects.guild.GuildObject;
+import resources.objects.harvester.HarvesterObject;
+import resources.objects.installation.InstallationObject;
 import resources.objects.intangible.IntangibleObject;
 import resources.objects.mission.MissionObject;
 import resources.objects.player.PlayerObject;
@@ -315,7 +321,15 @@ public class ObjectService implements INetworkDispatch {
 			
 			object = new SurveyTool(objectID, planet, Template, position, orientation);
 			
-		}else if(Template.startsWith("object/tangible")) {
+		} else if(Template.startsWith("object/tangible/deed/harvester_deed") || Template.startsWith("object/tangible/deed/generator_deed")) {
+			
+			object = new Harvester_Deed(objectID, planet, Template, position, orientation);
+			
+		} else if(Template.startsWith("object/tangible/deed/player_house_deed")) {
+			
+			object = new Player_House_Deed(objectID, planet, Template, position, orientation);
+			
+		} else if(Template.startsWith("object/tangible")) {
 			
 			object = new TangibleObject(objectID, planet, Template, position, orientation);
 
@@ -371,7 +385,22 @@ public class ObjectService implements INetworkDispatch {
 			
 			object = new ResourceContainerObject(objectID, planet, Template, position, orientation);
 			
-		}else {
+		} else if(Template.startsWith("object/installation/mining_ore/construction")) {
+			
+			float positionY = core.terrainService.getHeight(planet.getID(), position.x, position.z)-1f;
+			Point3D newpoint = new Point3D(position.x,positionY,position.z);				
+			object = new InstallationObject(objectID, planet, Template, newpoint, orientation);
+			
+		} else if(Template.startsWith("object/installation/mining_ore") || Template.startsWith("object/installation/mining_liquid") ||
+				  Template.startsWith("object/installation/mining_gas") || Template.startsWith("object/installation/mining_organic") || 
+				  Template.startsWith("object/installation/generators")) {
+			
+			float positionY = core.terrainService.getHeight(planet.getID(), position.x, position.z)-1f;
+			Point3D newpoint = new Point3D(position.x,positionY,position.z);			
+			object = new HarvesterObject(objectID, planet, Template, newpoint, orientation);
+			core.harvesterService.addHarvester(object);		
+			
+		} else {
 			return null;			
 		}
 		
@@ -780,7 +809,7 @@ public class ObjectService implements INetworkDispatch {
 							objectList.put(object.getObjectID(), object);
 					}
 					
-				});				
+				});
 
 				if(creature.getParentId() != 0) {
 					SWGObject parent = getObject(creature.getParentId());
@@ -806,24 +835,24 @@ public class ObjectService implements INetworkDispatch {
 				CmdStartScene startScene = new CmdStartScene((byte) 0, objectId, creature.getPlanet().getPath(), creature.getTemplate(), position.x, position.y, position.z, core.getGalacticTime(), 0);
 				session.write(startScene.serialize());
 				
+				ChatServerStatus chatServerStatus = new ChatServerStatus();
+				client.getSession().write(chatServerStatus.serialize());
+				
+				VoiceChatStatus voiceStatus = new VoiceChatStatus();
+				client.getSession().write(voiceStatus.serialize());
+				
 				ParametersMessage parameters = new ParametersMessage();
 				session.write(parameters.serialize());
 				
-				creature.makeAware(core.guildService.getGuildObject());				
+				ChatOnConnectAvatar chatConnect = new ChatOnConnectAvatar();
+				creature.getClient().getSession().write(chatConnect.serialize());
+				
+				creature.makeAware(core.guildService.getGuildObject());
 				core.chatService.loadMailHeaders(client);
 				
 				core.simulationService.handleZoneIn(client);
 				
 				creature.makeAware(creature);
-				
-				ChatServerStatus chatStatus = new ChatServerStatus();
-				creature.getClient().getSession().write(chatStatus.serialize());
-				
-				ChatOnConnectAvatar chatConnect = new ChatOnConnectAvatar();
-				creature.getClient().getSession().write(chatConnect.serialize());
-
-				ChatRoomList chatRooms = new ChatRoomList(core.chatService.getChatRooms());
-				creature.getClient().getSession().write(chatRooms.serialize());
 				
 				//ChatOnGetFriendsList friendsListMessage = new ChatOnGetFriendsList(ghost);
 				//client.getSession().write(friendsListMessage.serialize());
@@ -976,7 +1005,8 @@ public class ObjectService implements INetworkDispatch {
 		CrcStringTableVisitor crcTable = ClientFileManager.loadFile("misc/object_template_crc_string_table.iff", CrcStringTableVisitor.class);
 		List<BuildingObject> persistentBuildings = new ArrayList<BuildingObject>();
 		Map<Long, Long> duplicate = new HashMap<Long, Long>();
-		
+		Transaction txn = core.getDuplicateIdODB().getEnvironment().beginTransaction(null, null);
+
 		for (int i = 0; i < buildoutTable.getRowCount(); i++) {
 			
 			String template;
@@ -1055,15 +1085,17 @@ public class ObjectService implements INetworkDispatch {
 						newObjectId = core.getDuplicateIdODB().get(key, String.class, DuplicateId.class).getObjectId();
 					} else {
 						newObjectId = generateObjectID();
-						Transaction txn = core.getDuplicateIdODB().getEnvironment().beginTransaction(null, null);
 						core.getDuplicateIdODB().put(new DuplicateId(key, newObjectId), String.class, DuplicateId.class, txn);
-						txn.commitSync();
 					}
 					
 					duplicate.put(objectId, newObjectId);
 					objectId = newObjectId;
 				}
-				
+				if(txn.isValid()) {
+					System.out.println("Committed doid transaction.");
+					txn.commitSync();
+				}
+
 				List<Long> containers = new ArrayList<Long>();
 				SWGObject object;
 				if(objectId != 0 && containerId == 0) {					
