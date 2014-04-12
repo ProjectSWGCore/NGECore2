@@ -739,12 +739,6 @@ public class HousingService implements INetworkDispatch {
 		
 	}
 	
-	public void addItemToHouseItemList(TangibleObject item, SWGObject container){
-		BuildingObject building = (BuildingObject) container.getContainer();
-		building.getItemsList().add(item);
-	}
-	
-	
 	public String fetchPrivacyString(TangibleObject object){
 		final BuildingObject building = (BuildingObject) object.getAttachment("housing_parentstruct");
 		return building.getPrivacyString();

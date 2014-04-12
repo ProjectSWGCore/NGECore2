@@ -76,7 +76,7 @@ public class CommandService implements INetworkDispatch  {
 			return false;
 		}
 		
-		if (command.getCharacterAbility().length() > 0 && !actor.hasAbility(command.getCharacterAbility()) && !command.getCharacterAbility().equals("admin")) {
+		if (command.getCharacterAbility().length() > 0 && !actor.hasAbility(command.getCharacterAbility()) && !command.getCharacterAbility().equals("admin") && actor.getClient() != null) {
 			return false;
 		}
 		
@@ -134,6 +134,10 @@ public class CommandService implements INetworkDispatch  {
 				
 				break;
 			case 2: // Self Only
+				
+				if(actor.getClient() == null)
+					break;
+				
 				if (target == null) {
 					target = actor;
 				}
@@ -173,7 +177,10 @@ public class CommandService implements INetworkDispatch  {
 				
 				TangibleObject object = (TangibleObject) target;
 				
-				if (object.isAttackableBy(actor) || actor.getFactionStatus() < ((CreatureObject) object).getFactionStatus() || (!object.getFaction().equals("") && !object.getFaction().equals(actor.getFaction()))) {
+				if(object instanceof CreatureObject && actor.getFactionStatus() < ((CreatureObject) object).getFactionStatus())
+					return false;
+				
+				if (object.isAttackableBy(actor) || (!object.getFaction().equals("") && !object.getFaction().equals(actor.getFaction()))) {
 					return false;
 				}
 				

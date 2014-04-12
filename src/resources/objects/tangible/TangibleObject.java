@@ -375,7 +375,8 @@ public class TangibleObject extends SWGObject {
 			
 			return getPvPBitmask() == 1 || getPvPBitmask() == 2;
 			
-		}
+		} else if(attacker.getSlottedObject("ghost") == null)
+			return true;
 
 		return getPvPBitmask() == 1 || getPvPBitmask() == 2;
 	}
