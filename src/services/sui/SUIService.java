@@ -99,13 +99,15 @@ public class SUIService implements INetworkDispatch {
 					if (! admins.contains(owner.getCustomName()) && hoppers.contains(owner.getCustomName())){
 						 // authorized for hopper
 						// change radialOptions to hopper access
-						harvester.setAttachment("radial_filename", "harvesterHopper");				
+						core.scriptService.callScript("scripts/radial/", "harvesterHopper", "createRadial", core, owner, target, request.getRadialOptions());
+						sendRadial(owner, target, request.getRadialOptions(), request.getRadialCount());
+						return;
 					}
 				}
 				
 				if(target.getGrandparent() != null && target.getGrandparent().getAttachment("structureAdmins") != null)
 				{
-					if(core.housingService.getPermissions(owner, target.getContainer()))
+					if(core.housingService.getPermissions(owner, target.getContainer()) && !getRadialFilename(target).equals("structure_management_terminal"))
 					{
 						core.scriptService.callScript("scripts/radial/", "moveable", "createRadial", core, owner, target, request.getRadialOptions());
 						sendRadial(owner, target, request.getRadialOptions(), request.getRadialCount());

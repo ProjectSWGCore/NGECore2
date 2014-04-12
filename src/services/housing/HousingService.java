@@ -276,8 +276,6 @@ public class HousingService implements INetworkDispatch {
 					deed.setSurplusMaintenance((int)building.getMaintenanceAmount());					
 					deed.setAttributes();
 					
-					SceneDestroyObject destroyObjectMsg = new SceneDestroyObject(building.getObjectID());
-					owner.getClient().getSession().write(destroyObjectMsg.serialize());
 					core.objectService.destroyObject(building.getObjectID());
  
 					SWGObject ownerInventory = owner.getSlottedObject("inventory");

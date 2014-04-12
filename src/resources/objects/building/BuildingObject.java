@@ -150,7 +150,10 @@ public class BuildingObject extends TangibleObject implements IPersistent {
 	
 	public Vector<TangibleObject> getItemsList() {
 		Vector<TangibleObject> items = new Vector<TangibleObject>();
-		getCells().forEach(c -> c.viewChildren(c, true, false, (item) -> items.add((TangibleObject) item)));
+		getCells().forEach(c -> c.viewChildren(c, true, false, (item) -> {
+			if(!(item instanceof CreatureObject))
+				items.add((TangibleObject) item);
+		}));
 		return items;
 	}
 
@@ -237,8 +240,11 @@ public class BuildingObject extends TangibleObject implements IPersistent {
 	}
 	
 	public Vector<CellObject> getCells() {
-		Vector<CellObject> cells = new Vector<CellObject>();
-		this.viewChildren(this, true, false, (cell) -> cells.add((CellObject) cell));
+		final Vector<CellObject> cells = new Vector<CellObject>();
+		this.viewChildren(this, true, false, (obj) -> {
+			if(obj instanceof CellObject)
+				cells.add((CellObject) obj);
+		});
 		return cells;
 	}
 	
