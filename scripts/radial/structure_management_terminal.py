@@ -2,14 +2,12 @@ from resources.common import RadialOptions
 from protocol.swg import ResourceListForSurveyMessage
 from services.sui.SUIService import MessageBoxType
 from services.sui.SUIWindow import Trigger
-from tools import JythonUtilities
 from java.util import Vector
 import sys
 
 def createRadial(core, owner, target, radials):
 	#(byte parentId, short optionId, byte optionType, String description)
 	radials.clear()
-	owner.sendSystemMessage('target template ' + target.getTemplate(),1)
 	radials.add(RadialOptions(0, 7, 0, 'Examine'))
 	radials.add(RadialOptions(0, 78, 0, '@player_structure:management'))
 	radials.add(RadialOptions(0, 117, 0, '@player_structure:permissions'))	
@@ -18,7 +16,7 @@ def createRadial(core, owner, target, radials):
 	radials.add(RadialOptions(2, 129, 0, '@player_structure:management_pay')) 
 	radials.add(RadialOptions(2,  50, 0, '@base_player:set_name')) 
 	radials.add(RadialOptions(2,  127, 0, '@player_structure:management_residence')) 
-	#radials.add(RadialOptions(2,  125, 0, '@player_structure:management_privacy : ' + core.housingService.fetchPrivacyString(target)))
+	radials.add(RadialOptions(2,  125, 0, '@player_structure:management_privacy : ' + core.housingService.fetchPrivacyString(target)))
 	radials.add(RadialOptions(2,  171, 0, '@player_structure:find_items_find_all_house_items'))
 	radials.add(RadialOptions(2,  173, 0, '@player_structure:move_first_item'))
 	radials.add(RadialOptions(2,  174, 0, '@player_structure:find_items_search_for_house_items'))
