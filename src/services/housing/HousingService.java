@@ -70,11 +70,11 @@ public class HousingService implements INetworkDispatch {
 	
 	public void enterStructureMode(CreatureObject actor, TangibleObject deed)
 	{	
-//		if(!actor.getClient().isGM() && !core.terrainService.canBuildAtPosition(actor, actor.getWorldPosition().x, actor.getWorldPosition().z))
-//		{
-//			actor.sendSystemMessage("You may not place a structure here.", (byte) 0); // should probably load this from an stf
-//			return;
-//		}
+		if(!actor.getClient().isGM() && !core.terrainService.canBuildAtPosition(actor, actor.getWorldPosition().x, actor.getWorldPosition().z))
+		{
+			actor.sendSystemMessage("You may not place a structure here.", (byte) 0); // should probably load this from an stf
+			return;
+		}
 		
 		if(housingTemplates.containsKey(deed.getTemplate()))
 		{
@@ -91,18 +91,18 @@ public class HousingService implements INetworkDispatch {
 		int structureLotCost = houseTemplate.getLotCost();
 		String structureTemplate = houseTemplate.getBuildingTemplate();
 		
-//		if(!houseTemplate.canBePlacedOn(actor.getPlanet().getName()))
-//		{
-//			actor.sendSystemMessage("You may not place this structure on this planet.", (byte) 0); // should probably load this from an stf
-//			return;
-//		}
-//		
-//		if(!actor.getClient().isGM() && !core.terrainService.canBuildAtPosition(actor, positionX, positionZ))
-//		{
-//			actor.sendSystemMessage("You may not place a structure here.", (byte) 0); // should probably load this from an stf
-//			return;
-//		}
-//		
+		if(!houseTemplate.canBePlacedOn(actor.getPlanet().getName()))
+		{
+			actor.sendSystemMessage("You may not place this structure on this planet.", (byte) 0); // should probably load this from an stf
+			return;
+		}
+		
+		if(!actor.getClient().isGM() && !core.terrainService.canBuildAtPosition(actor, positionX, positionZ))
+		{
+			actor.sendSystemMessage("You may not place a structure here.", (byte) 0); // should probably load this from an stf
+			return;
+		}
+		
 		// Lot stuff
 		if(!actor.getPlayerObject().deductLots(structureLotCost))
 		{
@@ -753,9 +753,6 @@ public class HousingService implements INetworkDispatch {
 		return building.getPrivacyString();
 	}
 	
-	public String fetchStringFromCastedClass(SWGObject object, String classToCastTo, String methodName){
-		return tools.JythonUtilities.fetchStringFromCastedClass(object,classToCastTo,methodName);
-	}
 	
 	@Override
 	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> arg0,
