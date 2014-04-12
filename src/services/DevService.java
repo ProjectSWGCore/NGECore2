@@ -88,8 +88,8 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 23, "Jedi Items");
 				suiOptions.put((long) 26, "Installations");
 				suiOptions.put((long) 110, "Survey Devices");
-				//if(creature.getClient().isGM()) suiOptions.put((long) 120, "House Deeds");
-				suiOptions.put((long) 120, "House Deeds");
+				if(creature.getClient().isGM()) suiOptions.put((long) 120, "House Deeds");
+				//suiOptions.put((long) 120, "House Deeds");
 				break;
 			case 3: // [Items] Weapons
 				suiOptions.put((long) 30, "Jedi Weapons");
