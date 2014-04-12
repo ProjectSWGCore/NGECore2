@@ -544,7 +544,6 @@ public class HousingService implements INetworkDispatch {
 				for (TangibleObject del : building.getItemsList()){
 					core.objectService.destroyObject(del);
 				}
-				building.getItemsList().clear();					
 				ownerC.sendSystemMessage("@player_structure:items_deleted",(byte)1);
 				core.suiService.closeSUIWindow(owner, 0);
 			}					

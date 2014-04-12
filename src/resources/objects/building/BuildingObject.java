@@ -43,7 +43,7 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Entity(version=5)
+@Entity(version=6)
 public class BuildingObject extends TangibleObject implements IPersistent {
 	
 	@NotPersistent
@@ -58,7 +58,6 @@ public class BuildingObject extends TangibleObject implements IPersistent {
 	private byte privacy=(byte)0; 
 	public static byte PRIVATE = (byte)0;
 	public static byte PUBLIC = (byte)1;
-	private Vector<TangibleObject> itemsList = new Vector<TangibleObject>();
 	private short maximumStorageCapacity=0;
 	private Vector<Long> entryList = new Vector<Long>(); // Preferably the OIDs should be stored, because of name changes
 	private Vector<Long> banList = new Vector<Long>();
@@ -150,13 +149,11 @@ public class BuildingObject extends TangibleObject implements IPersistent {
 	}
 	
 	public Vector<TangibleObject> getItemsList() {
-		return itemsList;
+		Vector<TangibleObject> items = new Vector<TangibleObject>();
+		getCells().forEach(c -> c.viewChildren(c, true, false, (item) -> items.add((TangibleObject) item)));
+		return items;
 	}
 
-	public void setItemsList(Vector<TangibleObject> itemsList) {
-		this.itemsList = itemsList;
-	}	
-	
 	public short getMaximumStorageCapacity() {
 		return maximumStorageCapacity;
 	}
@@ -238,4 +235,11 @@ public class BuildingObject extends TangibleObject implements IPersistent {
 		txn = env.beginTransaction(null, null); 
 		txn.setLockTimeout(500, TimeUnit.MILLISECONDS);
 	}
+	
+	public Vector<CellObject> getCells() {
+		Vector<CellObject> cells = new Vector<CellObject>();
+		this.viewChildren(this, true, false, (cell) -> cells.add((CellObject) cell));
+		return cells;
+	}
+	
 }

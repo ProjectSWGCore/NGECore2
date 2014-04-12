@@ -787,12 +787,12 @@ public class HarvesterService implements INetworkDispatch {
 		
 	public void updateHarvester(HarvesterObject harvester){
 		
-	
+		CreatureObject owner = (CreatureObject)core.objectService.getObject(harvester.getOwner());
+
 		if(harvester.isActivated())
         {    
 			// Check maintenance and power
 			if (harvester.getMaintenanceAmount()<=0){
-				CreatureObject owner = (CreatureObject)harvester.getOwner();
 				owner.sendSystemMessage("The installation is lacking maintenance.", (byte) 0);
 				// ToDo: Send mail
 				harvester.deactivateHarvester(owner);
@@ -800,7 +800,6 @@ public class HarvesterService implements INetworkDispatch {
 			}
 			
 			if (harvester.getPowerLevel()<=0 && !harvester.isGenerator()){
-				CreatureObject owner = (CreatureObject)harvester.getOwner();
 				owner.sendSystemMessage("The installation is lacking power.", (byte) 0);
 				// ToDo: Send mail
 				harvester.deactivateHarvester(owner);
@@ -840,7 +839,6 @@ public class HarvesterService implements INetworkDispatch {
          	          	
             	int oldStackCount = hopperContainer.getStackCount();
             	int newStackCount = (int) (harvester.getCurrentHarvestedCountFloat());
-            	CreatureObject owner = (CreatureObject)harvester.getOwner();
             	if (newStackCount>oldStackCount){          		
             		for (ResourceContainerObject iterContainer : outputHopperContent){
                 		if (iterContainer.getReferenceID()==hopperContainer.getReferenceID()){
