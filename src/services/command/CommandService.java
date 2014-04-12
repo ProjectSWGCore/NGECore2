@@ -76,7 +76,7 @@ public class CommandService implements INetworkDispatch  {
 			return false;
 		}
 		
-		if (command.getCharacterAbility().length() > 0 && !actor.hasAbility(command.getCharacterAbility())) {
+		if (command.getCharacterAbility().length() > 0 && !actor.hasAbility(command.getCharacterAbility()) && command.getGodLevel() < 1) {
 			return false;
 		}
 		
@@ -111,7 +111,7 @@ public class CommandService implements INetworkDispatch  {
 				//return false;
 			}
 		}
-		
+
 		switch (command.getTargetType()) {
 			case 0: // Target Not Used For This Command
 				break;
@@ -138,7 +138,7 @@ public class CommandService implements INetworkDispatch  {
 					target = actor;
 				}
 				
-				if (target != actor && target instanceof CreatureObject) {
+				if (target != actor && target instanceof CreatureObject && actor.getClient() != null) {
 					return false;
 				}
 				
@@ -571,6 +571,11 @@ public class CommandService implements INetworkDispatch  {
 	
 	public BaseSWGCommand registerCombatCommand(String name) { return getCommandByName(name); }
 	public BaseSWGCommand registerCommand(String name) { return getCommandByName(name); }
-	public BaseSWGCommand registerGmCommand(String name) { return getCommandByName(name); }
+	public BaseSWGCommand registerGmCommand(String name) { 
+		BaseSWGCommand command = getCommandByName(name);
+		if(command != null)
+			command.setGodLevel(5);
+		return command; 
+	}
 	
 }
