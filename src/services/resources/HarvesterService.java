@@ -21,8 +21,11 @@
  ******************************************************************************/
 package services.resources;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
@@ -30,6 +33,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+
 import protocol.swg.EnterStructurePlacementModeMessage;
 import protocol.swg.SceneCreateObjectByCrc;
 import protocol.swg.SceneDestroyObject;
@@ -53,6 +57,8 @@ import resources.objects.resource.ResourceContainerObject;
 import resources.objects.resource.ResourceRoot;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.waypoint.WaypointObject;
+import services.chat.Mail;
+import services.chat.WaypointAttachment;
 import services.sui.SUIWindow;
 import services.sui.SUIWindow.SUICallback;
 import services.sui.SUIWindow.Trigger;
@@ -383,8 +389,6 @@ public class HarvesterService implements INetworkDispatch {
 						deed.setSurplusPower((int)harvester.getPowerLevel());
 						deed.setAttributes();
 						
-						SceneDestroyObject destroyObjectMsg = new SceneDestroyObject(harvester.getObjectID());
-						owner.getClient().getSession().write(destroyObjectMsg.serialize());
 						core.objectService.destroyObject(harvester.getObjectID());
 	 
 						SWGObject crafterInventory = owner.getSlottedObject("inventory");
@@ -557,9 +561,7 @@ public class HarvesterService implements INetworkDispatch {
 			int containerEnergy = containerVector.get(i).getStackCount();
 			if (containerEnergy <= deductedEnergy){
 				deductedEnergy -= containerEnergy;
-				playerInventory._remove(containerVector.get(i));
-				SceneDestroyObject destroyObjectMsg = new SceneDestroyObject(containerVector.get(i).getObjectID());
-				owner.getClient().getSession().write(destroyObjectMsg.serialize());      				
+				playerInventory.remove(containerVector.get(i));
 			} else {
 				containerEnergy -= deductedEnergy;
 				containerVector.get(i).setStackCount(containerEnergy,(CreatureObject)owner);
@@ -787,12 +789,12 @@ public class HarvesterService implements INetworkDispatch {
 		
 	public void updateHarvester(HarvesterObject harvester){
 		
-	
+		CreatureObject owner = (CreatureObject)core.objectService.getObject(harvester.getOwner());
+
 		if(harvester.isActivated())
         {    
 			// Check maintenance and power
 			if (harvester.getMaintenanceAmount()<=0){
-				CreatureObject owner = (CreatureObject)harvester.getOwner();
 				owner.sendSystemMessage("The installation is lacking maintenance.", (byte) 0);
 				// ToDo: Send mail
 				harvester.deactivateHarvester(owner);
@@ -800,7 +802,6 @@ public class HarvesterService implements INetworkDispatch {
 			}
 			
 			if (harvester.getPowerLevel()<=0 && !harvester.isGenerator()){
-				CreatureObject owner = (CreatureObject)harvester.getOwner();
 				owner.sendSystemMessage("The installation is lacking power.", (byte) 0);
 				// ToDo: Send mail
 				harvester.deactivateHarvester(owner);
@@ -840,7 +841,6 @@ public class HarvesterService implements INetworkDispatch {
          	          	
             	int oldStackCount = hopperContainer.getStackCount();
             	int newStackCount = (int) (harvester.getCurrentHarvestedCountFloat());
-            	CreatureObject owner = (CreatureObject)harvester.getOwner();
             	if (newStackCount>oldStackCount){          		
             		for (ResourceContainerObject iterContainer : outputHopperContent){
                 		if (iterContainer.getReferenceID()==hopperContainer.getReferenceID()){
@@ -890,17 +890,9 @@ public class HarvesterService implements INetworkDispatch {
 		
 		// destroy deed
 		TangibleObject playerInventory = (TangibleObject) actor.getSlottedObject("inventory");
-		playerInventory._remove(usedDeed);
-		SceneDestroyObject destroyObjectMsg = new SceneDestroyObject(usedDeed.getObjectID());
-		actor.getClient().getSession().write(destroyObjectMsg.serialize());   
+		playerInventory.remove(usedDeed);
 	
-		int resCRC = CRC.StringtoCRC(constructorTemplate);
-		SceneCreateObjectByCrc createObjectMsg = new SceneCreateObjectByCrc(installation.getObjectID(), quaternion.x, quaternion.y, quaternion.z, quaternion.w, posX, positionY, posZ, resCRC, (byte) 0);
-		actor.getClient().getSession().write(createObjectMsg.serialize());      				
-		tools.CharonPacketUtils.printAnalysis(createObjectMsg.serialize());
-		SceneEndBaselines sceneEndBaselinesMsg = new SceneEndBaselines(installation.getObjectID());
-		actor.getClient().getSession().write(sceneEndBaselinesMsg.serialize());
-		tools.CharonPacketUtils.printAnalysis(sceneEndBaselinesMsg.serialize());
+		core.simulationService.add(installation, posX, posZ, true);
 		
 		PlayerObject player = (PlayerObject) actor.getSlottedObject("ghost");
 		player.setLotsRemaining(player.getLotsRemaining()-(int)((Harvester_Deed)usedDeed).getLotRequirement());
@@ -909,8 +901,77 @@ public class HarvesterService implements INetworkDispatch {
 		}
 	}
 	
-	public void placeHarvester(SWGObject object){	
-		HarvesterObject.createAndPlaceHarvester(object);
+	public void placeHarvester(SWGObject object) {	
+		CreatureObject actor = (CreatureObject) object.getAttachment("Owner");
+		String structureTemplate = (String)object.getAttachment("Deed_StructureTemplate");
+		HarvesterObject harvester = (HarvesterObject) NGECore.getInstance().objectService.createObject(structureTemplate, actor.getPlanet());
+		long objectId = harvester.getObjectID();
+		Vector<String> adminList = harvester.getAdminList();
+		//String[] fullName = ((CreatureObject)actor).getCustomName().split(" ");
+		adminList.add(actor.getCustomName());
+		// Set BER and outputhopper capacity here, take it from deed
+		harvester.setBER((int)object.getAttachment("Deed_BER"));
+		harvester.setSpecRate((int)(1.5F*(int)object.getAttachment("Deed_BER")));
+		harvester.setOutputHopperCapacity((int)object.getAttachment("Deed_Capacity"));
+		harvester.setDeedTemplate((String)object.getAttachment("Deed_DeedTemplate"));	
+		if ((int)object.getAttachment("Deed_SurplusMaintenance")>0){
+			harvester.setMaintenanceAmount((int)object.getAttachment("Deed_SurplusMaintenance"));
+		}		
+		if ((int)object.getAttachment("Deed_SurplusPower")>0){
+			harvester.setPowerLevel((int)object.getAttachment("Deed_SurplusPower"));
+		}
+		
+		
+		// build harvester
+		float positionY = NGECore.getInstance().terrainService.getHeight(actor.getPlanetId(), object.getPosition().x, object.getPosition().z);
+		harvester.setPosition(new Point3D(object.getPosition().x,positionY, object.getPosition().z));
+		core.simulationService.add(harvester, harvester.getPosition().x, harvester.getPosition().z, true);
+		PlayerObject player = (PlayerObject) actor.getSlottedObject("ghost");
+		WaypointObject constructionWaypoint = (WaypointObject)NGECore.getInstance().objectService.createObject("object/waypoint/shared_world_waypoint_blue.iff", actor.getPlanet(), harvester.getPosition().x, 0 ,harvester.getPosition().z);
+		String displayname = "@installation_n:"+harvester.getStfName();
+		constructionWaypoint.setName(displayname);
+		constructionWaypoint.setPlanetCRC(engine.resources.common.CRC.StringtoCRC(actor.getPlanet().getName()));
+		constructionWaypoint.setPosition(new Point3D(object.getPosition().x,0, object.getPosition().z));	
+		player.waypointAdd(constructionWaypoint);
+		constructionWaypoint.setPosition(new Point3D(object.getPosition().x,0, object.getPosition().z));
+		constructionWaypoint.setActive(true);
+		constructionWaypoint.setColor((byte)1);
+		constructionWaypoint.setStringAttribute("", "");
+		player.waypointAdd(constructionWaypoint);
+		constructionWaypoint.setName(displayname);
+		constructionWaypoint.setPlanetCRC(engine.resources.common.CRC.StringtoCRC(actor.getPlanet().getName()));							
+		player.setLastSurveyWaypoint(constructionWaypoint);
+		
+		List<WaypointAttachment> attachments = new ArrayList<WaypointAttachment>(); 
+		WaypointAttachment attachment = new WaypointAttachment();
+		attachment.active = true;
+		attachment.cellID = constructionWaypoint.getCellId();
+		attachment.color = (byte)1;
+		attachment.name = displayname;
+		attachment.planetCRC = engine.resources.common.CRC.StringtoCRC(actor.getPlanet().getName());
+		attachment.positionX = object.getPosition().x;
+		attachment.positionY = 0;
+		attachment.positionZ = object.getPosition().z;
+		attachments.add(attachment);
+		
+		// remove constructor
+		NGECore.getInstance().objectService.destroyObject(object);
+		
+		// ToDo: waypoint attachment fix
+		Date date = new Date();
+		Mail constructionNotificationMail = new Mail();
+		constructionNotificationMail.setSenderName("Structure Service");
+		constructionNotificationMail.setSubject("Your structure");
+		constructionNotificationMail.setRecieverId(actor.getObjectID());
+		constructionNotificationMail.setTimeStamp((int) (date.getTime() / 1000));
+		constructionNotificationMail.setMailId(NGECore.getInstance().chatService.generateMailId());
+		String message = "Your construction is ready";
+		constructionNotificationMail.setMessage(message);
+		constructionNotificationMail.setStatus(Mail.NEW);
+		constructionNotificationMail.setAttachments(attachments);
+		//NGECore.getInstance().chatService.sendPersistentMessage(actor.getClient(), constructionNotificationMail);
+		NGECore.getInstance().chatService.storePersistentMessage(constructionNotificationMail);
+		NGECore.getInstance().chatService.sendPersistentMessageHeader(actor.getClient(), constructionNotificationMail);
 	}
 	
 	

@@ -12,9 +12,10 @@ def run(core, actor, target, commandString):
         actorContainer = actor.getContainer()
         
         if actorContainer != None and (container.getTemplate() == "object/cell/shared_cell.iff") & core.housingService.getPermissions(actor, actorContainer):
-            target.getContainer().transferTo(actor, container, target)
-            core.simulationService.teleport(target, actor.getPosition(), Quaternion(1,0,0,0), containerID)
-            return
+			target.getContainer().transferTo(actor, container, target)
+			core.simulationService.teleport(target, actor.getPosition(), Quaternion(1,0,0,0), containerID)
+			#core.housingService.addItemToHouseItemList(target,actorContainer)
+			return
         elif actorContainer != None and container.getTemplate() == "object/cell/shared_cell.iff":
             actor.sendSystemMessage("You do not have permission to access that container!", 0)
             return

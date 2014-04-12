@@ -54,6 +54,7 @@ import org.python.core.Py;
 import org.python.core.PyObject;
 
 import com.sleepycat.je.Transaction;
+import com.sleepycat.je.TransactionConfig;
 import com.sleepycat.persist.EntityCursor;
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
@@ -97,6 +98,7 @@ import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.deed.Harvester_Deed;
+import resources.objects.deed.Player_House_Deed;
 import resources.objects.group.GroupObject;
 import resources.objects.guild.GuildObject;
 import resources.objects.harvester.HarvesterObject;
@@ -320,7 +322,11 @@ public class ObjectService implements INetworkDispatch {
 		} else if(Template.startsWith("object/tangible/deed/harvester_deed") || Template.startsWith("object/tangible/deed/generator_deed")) {
 			
 			object = new Harvester_Deed(objectID, planet, Template, position, orientation);
-		
+			
+		} else if(Template.startsWith("object/tangible/deed/player_house_deed")) {
+			
+			object = new Player_House_Deed(objectID, planet, Template, position, orientation);
+			
 		} else if(Template.startsWith("object/tangible")) {
 			
 			object = new TangibleObject(objectID, planet, Template, position, orientation);
@@ -971,7 +977,8 @@ public class ObjectService implements INetworkDispatch {
 		CrcStringTableVisitor crcTable = ClientFileManager.loadFile("misc/object_template_crc_string_table.iff", CrcStringTableVisitor.class);
 		List<BuildingObject> persistentBuildings = new ArrayList<BuildingObject>();
 		Map<Long, Long> duplicate = new HashMap<Long, Long>();
-		
+		Transaction txn = core.getDuplicateIdODB().getEnvironment().beginTransaction(null, null);
+
 		for (int i = 0; i < buildoutTable.getRowCount(); i++) {
 			
 			String template;
@@ -1050,15 +1057,17 @@ public class ObjectService implements INetworkDispatch {
 						newObjectId = core.getDuplicateIdODB().get(key, String.class, DuplicateId.class).getObjectId();
 					} else {
 						newObjectId = generateObjectID();
-						Transaction txn = core.getDuplicateIdODB().getEnvironment().beginTransaction(null, null);
 						core.getDuplicateIdODB().put(new DuplicateId(key, newObjectId), String.class, DuplicateId.class, txn);
-						txn.commitSync();
 					}
 					
 					duplicate.put(objectId, newObjectId);
 					objectId = newObjectId;
 				}
-				
+				if(txn.isValid()) {
+					System.out.println("Committed doid transaction.");
+					txn.commitSync();
+				}
+
 				List<Long> containers = new ArrayList<Long>();
 				SWGObject object;
 				if(objectId != 0 && containerId == 0) {					

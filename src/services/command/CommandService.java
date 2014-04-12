@@ -76,7 +76,7 @@ public class CommandService implements INetworkDispatch  {
 			return false;
 		}
 		
-		if (command.getCharacterAbility().length() > 0 && !actor.hasAbility(command.getCharacterAbility())) {
+		if (command.getCharacterAbility().length() > 0 && !actor.hasAbility(command.getCharacterAbility()) && !command.getCharacterAbility().equals("admin")) {
 			return false;
 		}
 		
@@ -111,7 +111,7 @@ public class CommandService implements INetworkDispatch  {
 				//return false;
 			}
 		}
-		
+
 		switch (command.getTargetType()) {
 			case 0: // Target Not Used For This Command
 				break;
@@ -138,7 +138,7 @@ public class CommandService implements INetworkDispatch  {
 					target = actor;
 				}
 				
-				if (target != actor && target instanceof CreatureObject) {
+				if (target != actor && target instanceof CreatureObject && actor.getClient() != null) {
 					return false;
 				}
 				
@@ -200,7 +200,7 @@ public class CommandService implements INetworkDispatch  {
 			default:
 				break;
 		}
-		
+
 		if (command.shouldCallOnTarget()) {
 			if (target == null || !(target instanceof CreatureObject)) {
 				return false;
@@ -211,10 +211,12 @@ public class CommandService implements INetworkDispatch  {
 		
 		long warmupTime = (long) (command.getWarmupTime() * 1000F);
 		
-		try {
-			Thread.sleep(warmupTime);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+		if(warmupTime > 0) {
+			try {
+				Thread.sleep(warmupTime);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 		
 		processCommand(actor, target, command, actionCounter, commandArgs);
@@ -316,7 +318,7 @@ public class CommandService implements INetworkDispatch  {
 								sub += 5;
 							}
 							
-							if (hasCharacterAbility || isCombatCommand(commandName)) {
+							if (/*hasCharacterAbility ||*/ isCombatCommand(commandName)) {
 								CombatCommand command = new CombatCommand(commandName);
 								commandLookup.add(command);
 								return command;
@@ -353,15 +355,16 @@ public class CommandService implements INetworkDispatch  {
 	}
 	
 	public void processCommand(CreatureObject actor, SWGObject target, BaseSWGCommand command, int actionCounter, String commandArgs) {
-		actor.addCooldown(command.getCooldownGroup(), command.getCooldown());
-		
+		if(command.getCooldown() > 0)
+			actor.addCooldown(command.getCooldownGroup(), command.getCooldown());
+	
 		if (command instanceof CombatCommand) {
 			processCombatCommand(actor, target, (CombatCommand) command, actionCounter, commandArgs);
 		} else {
-			if (FileUtilities.doesFileExist("scripts/commands/" + command.getCommandName() + ".py")) {
-				core.scriptService.callScript("scripts/commands/", command.getCommandName(), "run", core, actor, target, commandArgs);
-			} else if (FileUtilities.doesFileExist("scripts/commands/combat/" + command.getCommandName() + ".py")) {
-				core.scriptService.callScript("scripts/commands/combat/", command.getCommandName(), "run", core, actor, target, commandArgs);
+			if (FileUtilities.doesFileExist("scripts/commands/" + command.getCommandName().toLowerCase() + ".py")) {
+				core.scriptService.callScript("scripts/commands/", command.getCommandName().toLowerCase(), "run", core, actor, target, commandArgs);
+			} else if (FileUtilities.doesFileExist("scripts/commands/combat/" + command.getCommandName().toLowerCase() + ".py")) {
+				core.scriptService.callScript("scripts/commands/combat/", command.getCommandName().toLowerCase(), "run", core, actor, target, commandArgs);
 			}
 		}
 	}
@@ -571,6 +574,11 @@ public class CommandService implements INetworkDispatch  {
 	
 	public BaseSWGCommand registerCombatCommand(String name) { return getCommandByName(name); }
 	public BaseSWGCommand registerCommand(String name) { return getCommandByName(name); }
-	public BaseSWGCommand registerGmCommand(String name) { return getCommandByName(name); }
+	public BaseSWGCommand registerGmCommand(String name) { 
+		BaseSWGCommand command = getCommandByName(name);
+		if(command != null)
+			command.setGodLevel(5);
+		return command; 
+	}
 	
 }

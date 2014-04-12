@@ -125,7 +125,7 @@ public class HarvesterObject extends InstallationObject {
 	private byte resourceUpdateCount;
 	private Vector<String> adminList = new Vector<String>();
 	private Vector<String> hopperList = new Vector<String>();
-	private SWGObject owner;
+	private long owner;
 	private float currentHarvestedCountFloat=0.0F;
 	private String deedTemplate;
 	
@@ -192,7 +192,7 @@ public class HarvesterObject extends InstallationObject {
 	
 	public void activateHarvester(CreatureObject owner){
 		activated = true;
-		this.setOwner(owner);
+		this.setOwner(owner.getObjectID());
 		owner.getClient().getSession().write(messageBuilder.buildHINO3Delta(this,(byte)1));  
 		owner.getClient().getSession().write(messageBuilder.buildHINO7ActivateDelta2(this));
     }
@@ -335,12 +335,12 @@ public class HarvesterObject extends InstallationObject {
 	}
 
 
-	public SWGObject getOwner() {
+	public long getOwner() {
 		return owner;
 	}
 
 
-	public void setOwner(SWGObject owner) {
+	public void setOwner(long owner) {
 		this.owner = owner;
 	}
 		
@@ -388,113 +388,23 @@ public class HarvesterObject extends InstallationObject {
 	}
 	
 	public void deActivate(){
-		owner.getClient().getSession().write(messageBuilder.buildResourceHarvesterActivatePageMessage(this));
+		NGECore.getInstance().objectService.getObject(owner).getClient().getSession().write(messageBuilder.buildResourceHarvesterActivatePageMessage(this));
 	}
 	
 	public void placeHarvester(){
-		owner.getClient().getSession().write(messageBuilder.buildResourceHarvesterActivatePageMessage(this));
+		NGECore.getInstance().objectService.getObject(owner).getClient().getSession().write(messageBuilder.buildResourceHarvesterActivatePageMessage(this));
 	}
-	
-	public static void createAndPlaceHarvester(SWGObject object){
-		CreatureObject actor = (CreatureObject) object.getAttachment("Owner");
-
-		String structureTemplate = (String)object.getAttachment("Deed_StructureTemplate");
-		HarvesterObject harvester = (HarvesterObject) NGECore.getInstance().objectService.createObject(structureTemplate, actor.getPlanet());
-		long objectId = harvester.getObjectID();
-
-		Vector<String> adminList = harvester.getAdminList();
-		String[] fullName = ((CreatureObject)actor).getCustomName().split(" ");
-		adminList.add(fullName[0]);
-		harvester.setAdminList(adminList);
-		// Set BER and outputhopper capacity here, take it from deed
-		harvester.setBER((int)object.getAttachment("Deed_BER"));
-		harvester.setSpecRate((int)(1.5F*(int)object.getAttachment("Deed_BER")));
-		harvester.setOutputHopperCapacity((int)object.getAttachment("Deed_Capacity"));
-		harvester.setDeedTemplate((String)object.getAttachment("Deed_DeedTemplate"));	
-		if ((int)object.getAttachment("Deed_SurplusMaintenance")>0){
-			harvester.setMaintenanceAmount((int)object.getAttachment("Deed_SurplusMaintenance"));
-		}		
-		if ((int)object.getAttachment("Deed_SurplusPower")>0){
-			harvester.setPowerLevel((int)object.getAttachment("Deed_SurplusPower"));
-		}
 		
-		
-		// build harvester
-		int resCRC = CRC.StringtoCRC(structureTemplate);
-		float positionY = NGECore.getInstance().terrainService.getHeight(actor.getPlanetId(), object.getPosition().x, object.getPosition().z);
-		SceneCreateObjectByCrc createObjectMsg = new SceneCreateObjectByCrc(objectId, object.getOrientation().x, object.getOrientation().y, object.getOrientation().z, object.getOrientation().w, object.getPosition().x, positionY, object.getPosition().z, resCRC, (byte) 0);
-		actor.getClient().getSession().write(createObjectMsg.serialize());      				
-		tools.CharonPacketUtils.printAnalysis(createObjectMsg.serialize());
-		
-		harvester.setPosition(new Point3D(object.getPosition().x,positionY, object.getPosition().z));
-		
-		resources.objects.installation.InstallationMessageBuilder messenger = new resources.objects.installation.InstallationMessageBuilder((InstallationObject)harvester);
-		actor.getClient().getSession().write(messenger.buildBaseline3((InstallationObject)harvester));   
-	 	SceneEndBaselines sceneEndBaselinesMsg = new SceneEndBaselines(harvester.getObjectID());
-	 	actor.getClient().getSession().write(sceneEndBaselinesMsg.serialize());
-		tools.CharonPacketUtils.printAnalysis(sceneEndBaselinesMsg.serialize());
-		
-		PlayerObject player = (PlayerObject) actor.getSlottedObject("ghost");
-		WaypointObject constructionWaypoint = (WaypointObject)NGECore.getInstance().objectService.createObject("object/waypoint/shared_world_waypoint_blue.iff", actor.getPlanet(), harvester.getPosition().x, 0 ,harvester.getPosition().z);
-		String displayname = "@installation_n:"+harvester.getStfName();
-		constructionWaypoint.setName(displayname);
-		constructionWaypoint.setPlanetCRC(engine.resources.common.CRC.StringtoCRC(actor.getPlanet().getName()));
-		constructionWaypoint.setPosition(new Point3D(object.getPosition().x,0, object.getPosition().z));	
-		player.waypointAdd(constructionWaypoint);
-		constructionWaypoint.setPosition(new Point3D(object.getPosition().x,0, object.getPosition().z));
-		constructionWaypoint.setActive(true);
-		constructionWaypoint.setColor((byte)1);
-		constructionWaypoint.setStringAttribute("", "");
-		player.waypointAdd(constructionWaypoint);
-		constructionWaypoint.setName(displayname);
-		constructionWaypoint.setPlanetCRC(engine.resources.common.CRC.StringtoCRC(actor.getPlanet().getName()));							
-		player.setLastSurveyWaypoint(constructionWaypoint);
-		
-		List<WaypointAttachment> attachments = new ArrayList<WaypointAttachment>(); 
-		WaypointAttachment attachment = new WaypointAttachment();
-		attachment.active = true;
-		attachment.cellID = constructionWaypoint.getCellId();
-		attachment.color = (byte)1;
-		attachment.name = displayname;
-		attachment.planetCRC = engine.resources.common.CRC.StringtoCRC(actor.getPlanet().getName());
-		attachment.positionX = object.getPosition().x;
-		attachment.positionY = 0;
-		attachment.positionZ = object.getPosition().z;
-		attachments.add(attachment);
-		
-		// remove constructor
-		NGECore.getInstance().objectService.destroyObject(object);
-		SceneDestroyObject destroyObjectMsg = new SceneDestroyObject(object.getObjectID());
-		actor.getClient().getSession().write(destroyObjectMsg.serialize()); 
-		
-		// ToDo: waypoint attachment fix
-		Date date = new Date();
-		Mail constructionNotificationMail = new Mail();
-		constructionNotificationMail.setSenderName("Structure Service");
-		constructionNotificationMail.setSubject("Your structure");
-		constructionNotificationMail.setRecieverId(actor.getObjectID());
-		constructionNotificationMail.setTimeStamp((int) (date.getTime() / 1000));
-		constructionNotificationMail.setMailId(NGECore.getInstance().chatService.generateMailId());
-		String message = "Your construction is ready";
-		constructionNotificationMail.setMessage(message);
-		constructionNotificationMail.setStatus(Mail.NEW);
-		constructionNotificationMail.setAttachments(attachments);
-		//NGECore.getInstance().chatService.sendPersistentMessage(actor.getClient(), constructionNotificationMail);
-		NGECore.getInstance().chatService.storePersistentMessage(constructionNotificationMail);
-		NGECore.getInstance().chatService.sendPersistentMessageHeader(actor.getClient(), constructionNotificationMail);
-		
-	}
-	
 	public void createNewHopperContainer(){
 		Vector<GalacticResource> planetResourcesVector = NGECore.getInstance().resourceService.getSpawnedResourcesByPlanetAndHarvesterType(this.getPlanetId(),this.getHarvester_type());	
-    	((CreatureObject)this.getOwner()).getClient().getSession().write(messageBuilder.buildHINOBaseline7(this, planetResourcesVector));      					
-		((CreatureObject)this.getOwner()).getClient().getSession().write(messageBuilder.buildHINO7Delta(this,(byte)1)); 
+		NGECore.getInstance().objectService.getObject(owner).getClient().getSession().write(messageBuilder.buildHINOBaseline7(this, planetResourcesVector));      					
+		NGECore.getInstance().objectService.getObject(owner).getClient().getSession().write(messageBuilder.buildHINO7Delta(this,(byte)1)); 
 	}
 	
 	public void continueHopperContainer(){
     	Vector<GalacticResource> planetResourcesVector = NGECore.getInstance().resourceService.getSpawnedResourcesByPlanetAndHarvesterType(this.getPlanetId(),this.getHarvester_type());		
-    	((CreatureObject)this.getOwner()).getClient().getSession().write(messageBuilder.buildHarvesterGetResourceData(this, owner, planetResourcesVector)); 
-    	((CreatureObject)this.getOwner()).getClient().getSession().write(messageBuilder.buildHINOBaseline7(this, planetResourcesVector));
+    	NGECore.getInstance().objectService.getObject(owner).getClient().getSession().write(messageBuilder.buildHarvesterGetResourceData(this, NGECore.getInstance().objectService.getObject(owner), planetResourcesVector)); 
+    	NGECore.getInstance().objectService.getObject(owner).getClient().getSession().write(messageBuilder.buildHINOBaseline7(this, planetResourcesVector));
 	}
 	
 	@Override
@@ -506,16 +416,10 @@ public class HarvesterObject extends InstallationObject {
 			return;
 		}
 		
-		destination.getSession().write(messageBuilder.buildBaseline3());
-		destination.getSession().write(messageBuilder.buildBaseline6());
-		destination.getSession().write(messageBuilder.buildBaseline8());
-		destination.getSession().write(messageBuilder.buildBaseline9());
+		destination.getSession().write(installationMessageBuilder.buildBaseline3(this));
+		//destination.getSession().write(installationMessageBuilder.buildBaseline6(this));
+		//destination.getSession().write(installationMessageBuilder.buildBaseline8());
+		//destination.getSession().write(installationMessageBuilder.buildBaseline9());
 		
-		if(getPvPBitmask() != 0) {
-			UpdatePVPStatusMessage upvpm = new UpdatePVPStatusMessage(getObjectID());
-			upvpm.setFaction(UpdatePVPStatusMessage.factionCRC.Neutral);
-			upvpm.setStatus(getPvPBitmask());
-			destination.getSession().write(upvpm.serialize());
-		}
 	}
 }
