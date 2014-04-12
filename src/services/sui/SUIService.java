@@ -46,6 +46,7 @@ import resources.common.FileUtilities;
 import resources.common.ObjControllerOpcodes;
 import resources.common.Opcodes;
 import resources.common.RadialOptions;
+import resources.objects.creature.CreatureObject;
 import resources.objects.harvester.HarvesterObject;
 import services.sui.SUIWindow.SUICallback;
 import services.sui.SUIWindow.Trigger;
@@ -86,8 +87,8 @@ public class SUIService implements INetworkDispatch {
 					HarvesterObject harvester = (HarvesterObject) target;
 					Vector<String> admins = harvester.getAdminList();
 					Vector<String> hoppers = harvester.getHopperList();
-					
-					if (harvester.getOwner()==owner && !admins.contains(owner.getCustomName())){
+					CreatureObject creature = (CreatureObject) core.objectService.getObject(harvester.getOwner());
+					if (creature == owner && !admins.contains(owner.getCustomName())){
 						admins.add(owner.getCustomName());
 					}
 					

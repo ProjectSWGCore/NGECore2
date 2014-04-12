@@ -125,7 +125,7 @@ public class HarvesterObject extends InstallationObject {
 	private byte resourceUpdateCount;
 	private Vector<String> adminList = new Vector<String>();
 	private Vector<String> hopperList = new Vector<String>();
-	private SWGObject owner;
+	private long owner;
 	private float currentHarvestedCountFloat=0.0F;
 	private String deedTemplate;
 	
@@ -192,7 +192,7 @@ public class HarvesterObject extends InstallationObject {
 	
 	public void activateHarvester(CreatureObject owner){
 		activated = true;
-		this.setOwner(owner);
+		this.setOwner(owner.getObjectID());
 		owner.getClient().getSession().write(messageBuilder.buildHINO3Delta(this,(byte)1));  
 		owner.getClient().getSession().write(messageBuilder.buildHINO7ActivateDelta2(this));
     }
@@ -335,12 +335,12 @@ public class HarvesterObject extends InstallationObject {
 	}
 
 
-	public SWGObject getOwner() {
+	public long getOwner() {
 		return owner;
 	}
 
 
-	public void setOwner(SWGObject owner) {
+	public void setOwner(long owner) {
 		this.owner = owner;
 	}
 		
@@ -388,11 +388,11 @@ public class HarvesterObject extends InstallationObject {
 	}
 	
 	public void deActivate(){
-		owner.getClient().getSession().write(messageBuilder.buildResourceHarvesterActivatePageMessage(this));
+		NGECore.getInstance().objectService.getObject(owner).getClient().getSession().write(messageBuilder.buildResourceHarvesterActivatePageMessage(this));
 	}
 	
 	public void placeHarvester(){
-		owner.getClient().getSession().write(messageBuilder.buildResourceHarvesterActivatePageMessage(this));
+		NGECore.getInstance().objectService.getObject(owner).getClient().getSession().write(messageBuilder.buildResourceHarvesterActivatePageMessage(this));
 	}
 	
 	public static void createAndPlaceHarvester(SWGObject object){
@@ -487,14 +487,14 @@ public class HarvesterObject extends InstallationObject {
 	
 	public void createNewHopperContainer(){
 		Vector<GalacticResource> planetResourcesVector = NGECore.getInstance().resourceService.getSpawnedResourcesByPlanetAndHarvesterType(this.getPlanetId(),this.getHarvester_type());	
-    	((CreatureObject)this.getOwner()).getClient().getSession().write(messageBuilder.buildHINOBaseline7(this, planetResourcesVector));      					
-		((CreatureObject)this.getOwner()).getClient().getSession().write(messageBuilder.buildHINO7Delta(this,(byte)1)); 
+		NGECore.getInstance().objectService.getObject(owner).getClient().getSession().write(messageBuilder.buildHINOBaseline7(this, planetResourcesVector));      					
+		NGECore.getInstance().objectService.getObject(owner).getClient().getSession().write(messageBuilder.buildHINO7Delta(this,(byte)1)); 
 	}
 	
 	public void continueHopperContainer(){
     	Vector<GalacticResource> planetResourcesVector = NGECore.getInstance().resourceService.getSpawnedResourcesByPlanetAndHarvesterType(this.getPlanetId(),this.getHarvester_type());		
-    	((CreatureObject)this.getOwner()).getClient().getSession().write(messageBuilder.buildHarvesterGetResourceData(this, owner, planetResourcesVector)); 
-    	((CreatureObject)this.getOwner()).getClient().getSession().write(messageBuilder.buildHINOBaseline7(this, planetResourcesVector));
+    	NGECore.getInstance().objectService.getObject(owner).getClient().getSession().write(messageBuilder.buildHarvesterGetResourceData(this, NGECore.getInstance().objectService.getObject(owner), planetResourcesVector)); 
+    	NGECore.getInstance().objectService.getObject(owner).getClient().getSession().write(messageBuilder.buildHINOBaseline7(this, planetResourcesVector));
 	}
 	
 	@Override
