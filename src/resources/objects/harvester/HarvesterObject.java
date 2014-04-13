@@ -21,35 +21,21 @@
  ******************************************************************************/
 package resources.objects.harvester;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 import java.util.Vector;
 
 import main.NGECore;
-import protocol.swg.SceneCreateObjectByCrc;
-import protocol.swg.SceneDestroyObject;
-import protocol.swg.SceneEndBaselines;
-import protocol.swg.UpdatePVPStatusMessage;
 
 import com.sleepycat.persist.model.Persistent;
 
-import services.chat.WaypointAttachment;
 import engine.clients.Client;
-import engine.resources.common.CRC;
-import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 import resources.objects.creature.CreatureObject;
 import resources.objects.installation.InstallationMessageBuilder;
 import resources.objects.installation.InstallationObject;
-import resources.objects.player.PlayerObject;
 import resources.objects.resource.GalacticResource;
 import resources.objects.resource.ResourceContainerObject;
-import resources.objects.waypoint.WaypointObject;
-import services.chat.Mail;
-
 
 /** 
  * @author Charon 

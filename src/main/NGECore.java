@@ -355,7 +355,12 @@ public class NGECore {
 		zoneDispatch.addService(entertainmentService);
 		//zoneDispatch.addService(missionService);
 		zoneDispatch.addService(bazaarService);
-
+		
+		if (optionsConfigLoaded && options.getInt("LOAD.RESOURCE.SYSTEM") == 1) {
+			zoneDispatch.addService(surveyService);
+			zoneDispatch.addService(resourceService);
+		}
+		
 		zoneServer = new MINAServer(zoneDispatch, config.getInt("ZONE.PORT"));
 		zoneServer.start();
 		staticService = new StaticService(this);
