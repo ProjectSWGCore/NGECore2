@@ -53,7 +53,7 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent(version=5)
+@Persistent(version=6)
 public class TangibleObject extends SWGObject {
 	
 	// TODO: Thread safety
