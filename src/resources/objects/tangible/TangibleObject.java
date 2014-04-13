@@ -486,11 +486,11 @@ public class TangibleObject extends SWGObject {
 	}
 	
 	public String getSerialNumber() {
-		return serialNumber;
+		return getStringAttribute("serial_number");
 	}
 
 	public void setSerialNumber(String serialNumber) {
-		this.serialNumber = serialNumber;
+		setStringAttribute("serial_number", serialNumber);
 	}
 	
 	public void sendDelta3(Client destination) {
