@@ -43,6 +43,7 @@ import resources.objects.deed.Player_House_Deed;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.tool.SurveyTool;
+import resources.objects.weapon.WeaponObject;
 import services.sui.SUIWindow;
 import services.sui.SUIService.ListBoxType;
 import services.sui.SUIWindow.SUICallback;
@@ -96,6 +97,7 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 30, "Jedi Weapons");
 				suiOptions.put((long) 31, "Melee Weapons");
 				suiOptions.put((long) 32, "Ranged Weapons");
+				suiOptions.put((long) 33, "Heavy Weapons");
 				break;
 			case 4: // [Items] Misc Items
 				suiOptions.put((long) 40, "Unity Ring");
@@ -202,26 +204,35 @@ public class DevService implements INetworkDispatch {
 						
 					// [Items] Weapons
 					case 30: // Jedi Weapons
-						TangibleObject lightsaber1 = (TangibleObject) core.objectService.createObject("object/weapon/melee/sword/crafted_saber/shared_sword_lightsaber_one_handed_gen5.iff", planet);
+						WeaponObject lightsaber1 = (WeaponObject) core.objectService.createObject("object/weapon/melee/sword/crafted_saber/shared_sword_lightsaber_one_handed_gen5.iff", planet);
 						lightsaber1.setIntAttribute("required_combat_level", 90);
-						lightsaber1.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 1);
 						lightsaber1.setStringAttribute("class_required", "Jedi");
-						lightsaber1.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
-						lightsaber1.setStringAttribute("cat_wpn_damage.damage", "689-1379");
+						lightsaber1.setAttackSpeed(1);
+						lightsaber1.setDamageType("energy");
+						lightsaber1.setMaxRange(5);
+						lightsaber1.setMinDamage(689);
+						lightsaber1.setMaxDamage(1379);
+						lightsaber1.setWeaponType(9);
 						
-						TangibleObject lightsaber2 = (TangibleObject) core.objectService.createObject("object/weapon/melee/2h_sword/crafted_saber/shared_sword_lightsaber_two_handed_gen5.iff", planet);
+						WeaponObject lightsaber2 = (WeaponObject) core.objectService.createObject("object/weapon/melee/2h_sword/crafted_saber/shared_sword_lightsaber_two_handed_gen5.iff", planet);
 						lightsaber2.setIntAttribute("required_combat_level", 90);
-						lightsaber2.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 1);
 						lightsaber2.setStringAttribute("class_required", "Jedi");
-						lightsaber2.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
-						lightsaber2.setStringAttribute("cat_wpn_damage.damage", "689-1379");
+						lightsaber2.setAttackSpeed(1);
+						lightsaber2.setDamageType("energy");
+						lightsaber2.setMaxRange(5);
+						lightsaber2.setMinDamage(689);
+						lightsaber2.setMaxDamage(1379);
+						lightsaber2.setWeaponType(10);
 						
-						TangibleObject lightsaber3 = (TangibleObject) core.objectService.createObject("object/weapon/melee/polearm/crafted_saber/shared_sword_lightsaber_polearm_gen5.iff", planet);
+						WeaponObject lightsaber3 = (WeaponObject) core.objectService.createObject("object/weapon/melee/polearm/crafted_saber/shared_sword_lightsaber_polearm_gen5.iff", planet);
 						lightsaber3.setIntAttribute("required_combat_level", 90);
-						lightsaber3.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 1);
 						lightsaber3.setStringAttribute("class_required", "Jedi");
-						lightsaber3.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
-						lightsaber3.setStringAttribute("cat_wpn_damage.damage", "689-1379");
+						lightsaber3.setAttackSpeed(1);
+						lightsaber3.setDamageType("energy");
+						lightsaber3.setMaxRange(5);
+						lightsaber3.setMinDamage(689);
+						lightsaber3.setMaxDamage(1379);
+						lightsaber3.setWeaponType(11);
 						
 						Random random = new Random();
 						
@@ -234,43 +245,67 @@ public class DevService implements INetworkDispatch {
 						inventory.add(lightsaber3);
 						return;
 					case 31: // Melee Weapons
-						SWGObject sword1 = core.objectService.createObject("object/weapon/melee/sword/shared_sword_01.iff", planet);
+						WeaponObject sword1 = (WeaponObject) core.objectService.createObject("object/weapon/melee/sword/shared_sword_01.iff", planet);
 						sword1.setIntAttribute("required_combat_level", 90);
-						sword1.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 1);
-						sword1.setStringAttribute("class_required", "None");
-						sword1.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
-						sword1.setStringAttribute("cat_wpn_damage.damage", "1100-1200");
+						sword1.setAttackSpeed(1);
+						sword1.setMaxRange(5);
+						sword1.setDamageType("kinetic");
+						sword1.setMinDamage(1100);
+						sword1.setMaxDamage(1200);
+						sword1.setWeaponType(4);
 						
 						inventory.add(sword1);
 						return;
 					case 32: // Ranged Weapons
-						SWGObject rifle1 = core.objectService.createObject("object/weapon/ranged/rifle/shared_rifle_e11.iff", planet);
+						WeaponObject rifle1 = (WeaponObject) core.objectService.createObject("object/weapon/ranged/rifle/shared_rifle_e11.iff", planet);
 						rifle1.setIntAttribute("required_combat_level", 90);
-						rifle1.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", (float) 0.8);
-						rifle1.setStringAttribute("class_required", "None");
-						rifle1.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
-						rifle1.setStringAttribute("cat_wpn_damage.damage", "800-1250");
+						rifle1.setAttackSpeed((float) 0.8);
+						rifle1.setMaxRange(64);
+						rifle1.setDamageType("energy");
+						rifle1.setMinDamage(800);
+						rifle1.setMaxDamage(1250);
+						rifle1.setWeaponType(0);
 						
 						inventory.add(rifle1);
 						
-						SWGObject pistol = core.objectService.createObject("object/weapon/ranged/pistol/shared_pistol_cdef.iff", planet);
+						WeaponObject carbine1 = (WeaponObject) core.objectService.createObject("object/weapon/ranged/carbine/shared_carbine_cdef.iff", planet);
+						carbine1.setIntAttribute("required_combat_level", 90);
+						carbine1.setAttackSpeed((float) 0.6);
+						carbine1.setMaxRange(50);
+						carbine1.setDamageType("energy");
+						carbine1.setMinDamage(600);
+						carbine1.setMaxDamage(937);
+						carbine1.setWeaponType(1);
+						
+						inventory.add(carbine1);
+						
+						WeaponObject pistol = (WeaponObject) core.objectService.createObject("object/weapon/ranged/pistol/shared_pistol_cdef.iff", planet);
 						pistol.setIntAttribute("required_combat_level", 90);
-						pistol.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", (float) 0.4);
-						pistol.setStringAttribute("class_required", "None");
-						pistol.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
-						pistol.setStringAttribute("cat_wpn_damage.damage", "400-559");
+						pistol.setAttackSpeed((float) 0.4);
+						pistol.setMaxRange(35);
+						pistol.setDamageType("energy");
+						pistol.setMinDamage(400);
+						pistol.setMaxDamage(625);
+						pistol.setWeaponType(2);
 						
 						inventory.add(pistol);
+						return;
 						
-						/* == Disabled until Elemental Damage is implemented. ==
-						SWGObject heavy = core.objectService.createObject("object/weapon/ranged/heavy/shared_som_lava_cannon_generic.iff", planet);
+					case 33:
+						WeaponObject heavy = (WeaponObject) core.objectService.createObject("object/weapon/ranged/heavy/shared_som_lava_cannon_generic.iff", planet);
 						heavy.setIntAttribute("required_combat_level", 90);
-						heavy.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 1);
-						heavy.setStringAttribute("class_required", "Commando");
-						heavy.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
-						heavy.setStringAttribute("cat_wpn_damage.damage", "700-1400");
 						
-						inventory.add(heavy);*/
+						heavy.setStringAttribute("class_required", "Commando");
+						heavy.setDamageType("kinetic");
+						heavy.setMinDamage(700);
+						heavy.setMaxDamage(1400);
+						heavy.setMaxRange(64);
+						heavy.setAttackSpeed(1);
+						heavy.setElementalType("heat");
+						heavy.setElementalDamage(200);
+						heavy.setWeaponType(12);
+						
+						inventory.add(heavy);
 						return;
 					case 40:
 						TangibleObject ring = (TangibleObject) core.objectService.createObject("object/tangible/wearables/ring/shared_ring_s01.iff", planet);
