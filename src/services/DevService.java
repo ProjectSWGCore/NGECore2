@@ -89,6 +89,7 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 26, "Installations");
 				suiOptions.put((long) 110, "Survey Devices");
 				if(creature.getClient().isGM()) suiOptions.put((long) 120, "House Deeds");
+				if(creature.getClient().isGM()) suiOptions.put((long) 130, "Vehicle Deeds");
 				//suiOptions.put((long) 120, "House Deeds");
 				break;
 			case 3: // [Items] Weapons
@@ -1203,6 +1204,10 @@ public class DevService implements INetworkDispatch {
 						deed.setAttributes();
 						inventory.add(deed);
 						
+						return;
+					case 130:
+						TangibleObject swoopDeed = (TangibleObject) core.objectService.createObject("object/tangible/deed/vehicle_deed/shared_speederbike_swoop_deed.iff", planet);
+						inventory.add(swoopDeed);
 						return;
 				}
 			}	
