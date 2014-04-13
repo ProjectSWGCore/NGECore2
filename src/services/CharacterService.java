@@ -543,6 +543,59 @@ public class CharacterService implements INetworkDispatch {
 	}
 	
 	/**
+	 * Checks the database if a player with the given first name exists
+	 * and returns the objectID of that player.
+	 * @param name : String
+	 * @return objectID : long
+	 */
+	public long getPlayerOID(String name) {
+		if (!name.equals("")) {
+			long oid = 0L;
+			try {
+				PreparedStatement ps = databaseConnection.preparedStatement("SELECT * FROM characters WHERE \"firstName\"=?");
+				ps.setString(1, name);
+				ResultSet resultSet = ps.executeQuery();
+				while (resultSet.next()) {	
+					oid = resultSet.getLong("id");
+				}
+				return oid;
+			} 
+			
+			catch (SQLException e) { e.printStackTrace(); }
+		}
+		return 0L;
+	}
+	
+	/**
+	 * Delivers the first name of a player
+	 * @param oid : long
+	 * @return firstName : String
+	 */
+	public String getPlayerFirstName(long oid) {
+					
+			String name = "";
+			try {
+				PreparedStatement ps = databaseConnection.preparedStatement("SELECT * FROM characters WHERE \"id\"=?");
+				ps.setLong(1, oid);
+				ResultSet resultSet = ps.executeQuery();
+				while (resultSet.next()) {				 
+					name = resultSet.getString("firstName");
+					if (!name.equals("")) {
+						if (name.contains(" ")) {
+							name = name.split(" ")[0];
+						}
+						name = name.toLowerCase();
+
+				}
+				return name;
+			} 
+			
+			} catch (SQLException e) { e.printStackTrace(); }
+
+		return "";
+	}
+	
+	/**
 	 * Checks the database for if the object ID of the player exists.
 	 * @param objectId Object ID to check for in the database
 	 * @return Returns True if the player exists

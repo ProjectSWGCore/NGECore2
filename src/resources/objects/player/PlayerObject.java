@@ -44,7 +44,7 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent(version=10)
+@Persistent(version=11)
 public class PlayerObject extends IntangibleObject {
 	
 	// PLAY 3
@@ -139,6 +139,8 @@ public class PlayerObject extends IntangibleObject {
 	private WaypointObject lastSurveyWaypoint;
 	private SurveyTool lastUsedSurveyTool;
 	private ResourceContainerObject recentContainer;
+	
+	private byte godLevel = 0;
 	
 	public PlayerObject() {
 		super();
@@ -849,4 +851,17 @@ public class PlayerObject extends IntangibleObject {
 	{
 		return this.lotsRemaining;
 	}
+	
+	public byte getGodLevel() {
+		return godLevel;
+	}
+	
+	public void setGodLevel(int godLevel) {
+		this.godLevel = (byte) godLevel;
+		
+		if (getContainer() != null) {
+			getContainer().getClient().getSession().write(messageBuilder.buildGodLevelDelta((byte) godLevel));
+		}
+	}
+	
 }

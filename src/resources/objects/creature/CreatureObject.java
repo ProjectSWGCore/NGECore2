@@ -34,11 +34,13 @@ import org.apache.mina.core.buffer.IoBuffer;
 
 import protocol.swg.ObjControllerMessage;
 import protocol.swg.PlayMusicMessage;
+import protocol.swg.UpdateContainmentMessage;
 import protocol.swg.UpdatePostureMessage;
 import protocol.swg.UpdatePVPStatusMessage;
 import protocol.swg.chat.ChatSystemMessage;
 import protocol.swg.objectControllerObjects.Animation;
 import protocol.swg.objectControllerObjects.Posture;
+import protocol.swg.objectControllerObjects.StartTask;
 
 import com.sleepycat.je.Environment;
 import com.sleepycat.je.Transaction;
@@ -48,11 +50,14 @@ import com.sleepycat.persist.model.NotPersistent;
 import main.NGECore;
 import engine.clients.Client;
 import resources.common.Cooldown;
+import resources.common.OutOfBand;
+import resources.datatables.Options;
 import resources.objects.Buff;
 import resources.objects.DamageOverTime;
 import resources.objects.SWGList;
 import resources.objects.SWGMap;
 import resources.objects.SkillMod;
+import engine.resources.common.CRC;
 import engine.resources.objects.IPersistent;
 import engine.resources.objects.MissionCriticalObject;
 import engine.resources.objects.SWGObject;
@@ -61,8 +66,9 @@ import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
+import services.command.BaseSWGCommand;
 
-@Entity(version=6)
+@Entity(version=8)
 public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	@NotPersistent
@@ -77,7 +83,6 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 
 	// CREO 3
 	private byte posture = 0;
-	private int factionStatus = 0;
 	private float height;
 	private int battleFatigue = 0;
 	private long stateBitmask = 0;
@@ -181,6 +186,10 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private TangibleObject conversingNpc;
 	@NotPersistent
 	private ConcurrentHashMap<String, Long> cooldowns = new ConcurrentHashMap<String, Long>();
+	
+	public boolean mounted = false;
+	@NotPersistent
+	public CreatureObject mountedVehicle;
 	
 	public CreatureObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
 		super(objectID, planet, Template, position, orientation);
@@ -465,13 +474,8 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		notifyObservers(messageBuilder.buildFactionDelta(faction), true);
 		//updatePvpStatus();
 	}
-
-	public int getFactionStatus() {
-		synchronized(objectMutex) {
-			return factionStatus;
-		}
-	}
-
+	
+	@Override
 	public void setFactionStatus(int factionStatus) {
 		synchronized(objectMutex) {
 			this.factionStatus = factionStatus;
@@ -480,7 +484,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		notifyObservers(messageBuilder.buildFactionStatusDelta(factionStatus), true);
 		//updatePvpStatus();
 	}
-
+	
 	public float getHeight() {
 		synchronized(objectMutex) {
 			return height;
@@ -537,6 +541,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.ownerId = ownerId;
 		}
+		notifyObservers(messageBuilder.buildOwnerIdDelta(ownerId), true);
 	}
 
 	public float getAccelerationMultiplierBase() {
@@ -1113,18 +1118,17 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 
 	public void sendSystemMessage(String message, byte displayType) {
-		
-		if(getClient() != null && getClient().getSession() != null) {
-			ChatSystemMessage systemMsg = new ChatSystemMessage(message, displayType);
-			getClient().getSession().write(systemMsg.serialize());
-		}
-		
+		sendSystemMessage(message, new OutOfBand(), displayType);
 	}
 	
-	public void sendSystemMessage(String stfFilename, String stfName, int stat, int displayType) {
+	public void sendSystemMessage(OutOfBand outOfBand, byte displayType) {
+		sendSystemMessage("", outOfBand, displayType);
+	}
+	
+	public void sendSystemMessage(String message, OutOfBand outOfBand, byte displayType) {
 		
 		if(getClient() != null && getClient().getSession() != null) {
-			ChatSystemMessage systemMsg = new ChatSystemMessage(stfFilename, stfName, stat, (byte) displayType);
+			ChatSystemMessage systemMsg = new ChatSystemMessage(message, outOfBand, displayType);
 			getClient().getSession().write(systemMsg.serialize());
 		}
 		
@@ -1740,16 +1744,17 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			if (System.currentTimeMillis() < cooldowns.get(cooldownGroup)) {
 				return true;
 			} else {
-				removeCooldown(cooldownGroup);
+				cooldowns.remove(cooldownGroup);
 			}
 		}
 		
 		return false;
 	}
 	
-	public boolean removeCooldown(String cooldownGroup) {
-		if (cooldowns.containsKey(cooldownGroup)) {
-			cooldowns.remove(cooldownGroup);
+	public boolean removeCooldown(int actionCounter, BaseSWGCommand command) {
+		if (cooldowns.containsKey(command.getCooldownGroup())) {
+			cooldowns.remove(command.getCooldownGroup());
+			getClient().getSession().write(new ObjControllerMessage(0x0B, new StartTask(actionCounter, getObjectID(), command.getCommandCRC(), CRC.StringtoCRC(command.getCooldownGroup()), -1)).serialize());
 			return true;
 		}
 		
@@ -1765,7 +1770,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			if (System.currentTimeMillis() < cooldowns.get(cooldownGroup)) {
 				return (long) (cooldowns.get(cooldownGroup) - System.currentTimeMillis());
 			} else {
-				removeCooldown(cooldownGroup);
+				cooldowns.remove(cooldownGroup);
 			}
 		}
 		
@@ -1775,6 +1780,74 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	public PlayerObject getPlayerObject()
 	{
 		return (PlayerObject) this.getSlottedObject("ghost");
+	}
+	
+	public boolean isMounted() {
+		return mounted;
+	}
+
+	public void setMounted(boolean mounted) {
+		this.mounted = mounted;
+	}
+
+	public CreatureObject getMountedVehicle() {
+		return mountedVehicle;
+	}
+
+	public void setMountedVehicle(CreatureObject mountedVehicle) {
+		this.mountedVehicle = mountedVehicle;
+	}
+	
+	public void mount(CreatureObject owner) {
+		boolean remove = false;
+		synchronized(objectMutex) {
+			if ((this.getOptionsBitmask() & Options.MOUNT) == Options.MOUNT){
+				remove = true;
+				_add(owner);
+				UpdateContainmentMessage updateContainmentMessage = new UpdateContainmentMessage(owner.getObjectID(), this.getObjectID(), 4);
+				notifyObservers(updateContainmentMessage, true);
+			}
+		}
+		if(remove)
+			NGECore.getInstance().simulationService.remove(owner, owner.getWorldPosition().x, owner.getWorldPosition().z, false);
+	}
+	
+	public void unmount(CreatureObject owner) {
+		boolean add = false;
+		synchronized(objectMutex) {
+			if ((this.getOptionsBitmask() & Options.MOUNT) == Options.MOUNT){
+				add = true;
+				_remove(owner);
+				UpdateContainmentMessage updateContainmentMessage = new UpdateContainmentMessage(owner.getObjectID(), 0, -1);
+				notifyObservers(updateContainmentMessage, true);
+			}
+		}
+		if(add) {
+			owner.setMounted(false);
+			owner.setMountedVehicle(null);
+			owner.setStateBitmask(0);
+			owner.setPosture((byte) 0);
+			NGECore.getInstance().simulationService.add(owner, getWorldPosition().x, getWorldPosition().z, false);
+			NGECore.getInstance().simulationService.teleport(owner, getWorldPosition(), getOrientation(), 0);
+		}
+	}
+	
+	public void initMount(CreatureObject owner) {
+		synchronized(objectMutex) {
+			this.ownerId = owner.getObjectID();
+			setStateBitmask(0x10000000);
+			owner.setMountedVehicle(this);
+			this.setOwnerId(owner.getObjectID());
+						//this.add(owner); // NPE at engine.resources.objects.SWGObject.getCorrectArrangementId(kd:844)
+			this.mount(owner);
+						//			setStateBitmask(28);
+						//			owner.setStateBitmask(27);		
+			owner.setStateBitmask(0x8000000);
+			this.setPosture((byte)10);
+			
+			//this.sendBaselines(owner.getClient());
+			
+		}
 	}
 	
 	//public float getCooldown(String cooldownGroup) {

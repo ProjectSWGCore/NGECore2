@@ -24,6 +24,7 @@ import resources.common.BuffBuilder;
 import resources.common.IDAttribute;
 import resources.common.MathUtilities;
 import resources.common.ObjControllerOpcodes;
+import resources.common.OutOfBand;
 import resources.common.Performance;
 import resources.common.PerformanceEffect;
 import resources.common.RGB;
@@ -821,7 +822,7 @@ public class EntertainmentService implements INetworkDispatch {
 				int hMinutes = MathUtilities.secondsToHourMinutes(duration * 60);
 				int hours = MathUtilities.secondsToWholeHours(duration * 60);
 
-				spectator.showFlyText("spam", "buff_duration_tick_observer", String.valueOf(hours) + " hours , " + hMinutes + " minutes ", 0, (float) 0.66, new RGB(255, 182, 193), 3, 78);
+				spectator.showFlyText(OutOfBand.ProsePackage("@spam:buff_duration_tick_observer", "TO", hours + " hours , " + hMinutes + " minutes "), 0.66f, new RGB(255, 182, 193), 3, false);
 
 				spectator.setAttachment("inspireDuration", duration);
 				//System.out.println("Inspire Duration: " + spectator.getAttachment("inspireDuration") + " on " + spectator.getCustomName());

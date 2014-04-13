@@ -6,7 +6,6 @@ def setup():
 	
 def run(core, actor, target, commandString):
 	tarObj = core.objectService.getObject(actor.getTargetId())
-	
 	container = actor.getContainer()
 	parsedMsg = commandString.split(' ', 2)
 	

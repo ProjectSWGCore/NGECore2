@@ -35,6 +35,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -54,6 +55,7 @@ import org.python.core.Py;
 import org.python.core.PyObject;
 
 import com.sleepycat.je.Transaction;
+import com.sleepycat.je.TransactionConfig;
 import com.sleepycat.persist.EntityCursor;
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
@@ -72,6 +74,7 @@ import protocol.swg.chat.ChatOnConnectAvatar;
 import protocol.swg.chat.ChatOnGetFriendsList;
 import protocol.swg.chat.ChatRoomList;
 import protocol.swg.chat.ChatServerStatus;
+import protocol.swg.objectControllerObjects.ShowFlyText;
 import protocol.swg.chat.VoiceChatStatus;
 import protocol.swg.objectControllerObjects.UiPlayEffect;
 import engine.clientdata.ClientFileManager;
@@ -97,6 +100,7 @@ import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.deed.Harvester_Deed;
+import resources.objects.deed.Player_House_Deed;
 import resources.objects.group.GroupObject;
 import resources.objects.guild.GuildObject;
 import resources.objects.harvester.HarvesterObject;
@@ -320,7 +324,11 @@ public class ObjectService implements INetworkDispatch {
 		} else if(Template.startsWith("object/tangible/deed/harvester_deed") || Template.startsWith("object/tangible/deed/generator_deed")) {
 			
 			object = new Harvester_Deed(objectID, planet, Template, position, orientation);
-		
+			
+		} else if(Template.startsWith("object/tangible/deed/player_house_deed")) {
+			
+			object = new Player_House_Deed(objectID, planet, Template, position, orientation);
+			
 		} else if(Template.startsWith("object/tangible")) {
 			
 			object = new TangibleObject(objectID, planet, Template, position, orientation);
@@ -389,8 +397,7 @@ public class ObjectService implements INetworkDispatch {
 			
 			float positionY = core.terrainService.getHeight(planet.getID(), position.x, position.z)-1f;
 			Point3D newpoint = new Point3D(position.x,positionY,position.z);			
-			object = new HarvesterObject(objectID, planet, Template, newpoint, orientation);
-			core.harvesterService.addHarvester(object);		
+			object = new HarvesterObject(objectID, planet, Template, newpoint, orientation);	
 			
 		} else {
 			return null;			
@@ -420,24 +427,32 @@ public class ObjectService implements INetworkDispatch {
 		if (Template.startsWith("object/creature/") || Template.startsWith("object/mobile/")) {
 			if (Template.startsWith("object/mobile/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.ATTACKABLE);
-			} else if (Template.startsWith("object/mobile/beast_master/")) {
+			}
+			if (Template.startsWith("object/mobile/beast_master/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.NONE);
-			} else if (Template.startsWith("object/mobile/vendor/")) {
+			}
+			if (Template.startsWith("object/mobile/vendor/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.INVULNERABLE | Options.USABLE);
-			} else if (Template.startsWith("object/mobile/vehicle/")) {
+			}
+			if (Template.startsWith("object/mobile/vehicle/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.ATTACKABLE | Options.MOUNT);
-				System.err.println("Options.MOUNT");
-			} else if (Template.startsWith("object/mobile/hologram/")) {
+			}
+			if (Template.startsWith("object/mobile/hologram/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.INVULNERABLE);
-			} else if (Template.startsWith("object/creature/npc/theme_park/")) {
+			}
+			if (Template.startsWith("object/creature/npc/theme_park/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.INVULNERABLE);
-			} else if (Template.startsWith("object/creature/npc/general/")) {
+			}
+			if (Template.startsWith("object/creature/npc/general/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.INVULNERABLE | Options.CONVERSABLE);
-			}  else if (Template.startsWith("object/creature/droid/crafted/")) {
+			}
+			if (Template.startsWith("object/creature/droid/crafted/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.NONE);
-			} else if (Template.startsWith("object/creature/droid/")) {
+			}
+			if (Template.startsWith("object/creature/droid/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.ATTACKABLE | Options.INVULNERABLE);
-			} else if (Template.startsWith("object/creature/player/")) {
+			}
+			if (Template.startsWith("object/creature/player/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.ATTACKABLE);
 			}
 		} else if (object instanceof TangibleObject) {
@@ -606,6 +621,32 @@ public class ObjectService implements INetworkDispatch {
 		
 		while(it.hasNext()) {
 			if(it.next().getCustomName().equals(customName))
+				return it.next();
+		}
+
+		return null;
+
+	}
+	
+	public SWGObject getObjectByFirstName(String customName) {
+		
+		synchronized(objectList) {
+			
+			for(SWGObject obj : objectList.values()) {
+				if(obj.getCustomName() == null)
+					continue;
+				if(obj.getCustomName().startsWith(customName))
+					return obj;
+			}
+			
+		}
+		
+		EntityCursor<CreatureObject> cursor = core.getCreatureODB().getCursor(Long.class, CreatureObject.class);
+		
+		Iterator<CreatureObject> it = cursor.iterator();
+		
+		while(it.hasNext()) {
+			if(it.next().getCustomName().startsWith(customName))
 				return it.next();
 		}
 
@@ -971,7 +1012,7 @@ public class ObjectService implements INetworkDispatch {
 		CrcStringTableVisitor crcTable = ClientFileManager.loadFile("misc/object_template_crc_string_table.iff", CrcStringTableVisitor.class);
 		List<BuildingObject> persistentBuildings = new ArrayList<BuildingObject>();
 		Map<Long, Long> duplicate = new HashMap<Long, Long>();
-		
+
 		for (int i = 0; i < buildoutTable.getRowCount(); i++) {
 			
 			String template;
@@ -1058,7 +1099,7 @@ public class ObjectService implements INetworkDispatch {
 					duplicate.put(objectId, newObjectId);
 					objectId = newObjectId;
 				}
-				
+
 				List<Long> containers = new ArrayList<Long>();
 				SWGObject object;
 				if(objectId != 0 && containerId == 0) {					

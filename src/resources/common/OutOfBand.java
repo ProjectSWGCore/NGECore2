@@ -23,13 +23,20 @@ package resources.common;
 
 import java.nio.ByteOrder;
 import java.util.Vector;
+
 import resources.common.StringUtilities;
+import resources.objects.Delta;
+
 import org.apache.mina.core.buffer.IoBuffer;
 
 public class OutOfBand {
 	
-	private short count;
 	private Vector<ProsePackage> prosePackages = new Vector<ProsePackage>();
+	private int headerBytes = 0;
+	
+	public OutOfBand(Vector<ProsePackage> prosePackages) {
+		setProsePackages(prosePackages);
+	}
 	
 	public OutOfBand(ProsePackage prosePackage) {
 		addProsePackage(prosePackage);
@@ -39,85 +46,86 @@ public class OutOfBand {
 		
 	}
 	
+	public static OutOfBand ProsePackage(Object ... objects) {
+		return new OutOfBand(new ProsePackage(objects));
+	}
+	
 	public void addProsePackage(ProsePackage prosePackage) {
 		prosePackages.add(prosePackage);
-		setCount((short) (getCount() + 1));
 	}
 	
 	public IoBuffer serialize() {
-		
 		IoBuffer buffer = IoBuffer.allocate(50).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.setAutoExpand(true);
 		
-		buffer.putInt(4);
-		buffer.putShort((short) 0); // unk
-		buffer.putShort(getCount());
+		// The short that was here is only in conversation OutOfBands.
+		// Count doesn't seem to be count.  It seems to be indicating if there's an extra byte.
 		
-		for(ProsePackage prosePackage : prosePackages) {
-			
+		for (ProsePackage prosePackage : prosePackages) {
 			buffer.put((byte) 1);
 			buffer.putInt(-1);
-			buffer.put(StringUtilities.getAsciiString(prosePackage.getStfFile()));
-			buffer.putInt(0);
-			buffer.put(StringUtilities.getAsciiString(prosePackage.getStfLabel()));
+			buffer.put(prosePackage.getStf().getBytes());
 			
 			buffer.putLong(prosePackage.getTuObjectId());
-			buffer.put(StringUtilities.getAsciiString(prosePackage.getTuStfFile()));
-			buffer.putInt(0);
-			buffer.put(StringUtilities.getAsciiString(prosePackage.getTuStfLabel()));
+			buffer.put(prosePackage.getTuStf().getBytes());
 			buffer.put(StringUtilities.getUnicodeString(prosePackage.getTuCustomString()));
-
+			
 			buffer.putLong(prosePackage.getTtObjectId());
-			buffer.put(StringUtilities.getAsciiString(prosePackage.getTtStfFile()));
-			buffer.putInt(0);
-			buffer.put(StringUtilities.getAsciiString(prosePackage.getTtStfLabel()));
+			buffer.put(prosePackage.getTtStf().getBytes());
 			buffer.put(StringUtilities.getUnicodeString(prosePackage.getTtCustomString()));
 			
 			buffer.putLong(prosePackage.getToObjectId());
-			buffer.put(StringUtilities.getAsciiString(prosePackage.getToStfFile()));
-			buffer.putInt(0);
-			buffer.put(StringUtilities.getAsciiString(prosePackage.getToStfLabel()));
+			buffer.put(prosePackage.getToStf().getBytes());
 			buffer.put(StringUtilities.getUnicodeString(prosePackage.getToCustomString()));
 			
 			buffer.putInt(prosePackage.getDiInteger());
 			buffer.putFloat(prosePackage.getDfFloat());
 			
-			//buffer.put(prosePackage.getDisplayFlag());
 			buffer.put((byte) 0);
-
-			int stfLength = prosePackage.getStfFile().length() + prosePackage.getStfLabel().length() +
-							prosePackage.getTuStfFile().length() + prosePackage.getTuStfLabel().length() +
-							prosePackage.getTtStfFile().length() + prosePackage.getTtStfLabel().length() +
-							prosePackage.getToStfFile().length() + prosePackage.getToStfLabel().length();
-			
-			//if(stfLength % 2 == 1) {
-				buffer.put((byte) 0);
-			//}
-			
 		}
 		
-		setLength(buffer);
 		int size = buffer.position();
-		buffer.flip();
-		return IoBuffer.allocate(size).order(ByteOrder.LITTLE_ENDIAN).put(buffer.array(), 0, size).flip();
+		
+		if (size > 0) {
+			if ((size % 2) == 1) {
+				size++;
+				buffer.put((byte) 0);
+				buffer = Delta.createBuffer(size + 2).putShort((short) 1).put(buffer.flip().array(), 0, size);
+			} else {
+				buffer = Delta.createBuffer(size + 2).putShort((short) 0).put(buffer.flip().array(), 0, size);
+			}
+			
+			size += 2;
+		} else {
+			return Delta.createBuffer(4).putInt(size);
+		}
+		
+		if (headerBytes > 0) {
+			IoBuffer result = Delta.createBuffer(size + headerBytes);
+			
+			for (int i = 0; i < headerBytes; i++) {
+				result.put((byte) 0);
+			}
+			
+			buffer = result.put(buffer.flip().array(), 0, size);
+			size += headerBytes;
+		}
+		
+		return Delta.resizeBuffer(Delta.createBuffer(size + 4).putInt(size / 2).put(buffer.flip().array()));
 	}
 	
-	public void setLength(IoBuffer buffer) {
-		buffer.putInt(0, (buffer.position() - 4) / 2);
+	/*
+	 * No idea what the extra short in conversation OutOfBands is.
+	 * It's not in any of the other packets that use OutOfBand.
+	 */
+	public void setHeaderBytes(int headerBytes) {
+		this.headerBytes = headerBytes;
 	}
-		
-	public short getCount() {
-		return count;
-	}
-
-	public void setCount(short count) {
-		this.count = count;
-	}
-
+	
 	public Vector<ProsePackage> getProsePackages() {
 		return prosePackages;
 	}
-
+	
 	public void setProsePackages(Vector<ProsePackage> prosePackages) {
 		this.prosePackages = prosePackages;
 	}

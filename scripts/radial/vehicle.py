@@ -1,4 +1,5 @@
 from resources.common import RadialOptions
+
 import sys
 
 def createRadial(core, owner, target, radials):
@@ -11,7 +12,12 @@ def createRadial(core, owner, target, radials):
 def handleSelection(core, owner, target, option):
 	if target:
 		if option == 21 or option == 40:
-			core.objectService.useObject(owner, target)
+			if not owner.isMounted():
+				owner.setMounted(1)
+				target.initMount(owner)	
+			else:
+				target.unmount(owner)
+			
 		if option == 60:
 			core.objectService.destroyObject(target)
 	return

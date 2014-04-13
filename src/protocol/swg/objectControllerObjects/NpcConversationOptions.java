@@ -28,6 +28,7 @@ import org.apache.mina.core.buffer.IoBuffer;
 
 import protocol.swg.ObjControllerMessage;
 import resources.common.ConversationOption;
+import resources.objects.Delta;
 
 public class NpcConversationOptions extends ObjControllerObject {
 	
@@ -52,16 +53,13 @@ public class NpcConversationOptions extends ObjControllerObject {
 		buffer.setAutoExpand(true);
 		buffer.putInt(ObjControllerMessage.CONVERSATION_OPTIONS);
 		buffer.putLong(objectId);
-		
 		buffer.putInt(0);
 		buffer.put((byte) conversationOptions.size());
-
-		for(ConversationOption option : conversationOptions) {
-			buffer.put(option.getOutOfBand().serialize());
+		for (ConversationOption option : conversationOptions) {
+			option.getOutOfBand().setHeaderBytes(2);
+			buffer.put(option.getOutOfBand().serialize().array());
 		}
-		int size = buffer.position();
-		buffer.flip();
-		return IoBuffer.allocate(size).order(ByteOrder.LITTLE_ENDIAN).put(buffer.array(), 0, size).flip();
+		return Delta.resizeBuffer(buffer);
 	}
 
 }

@@ -65,7 +65,12 @@ public abstract class Delta implements IDelta {
 	}
 	
 	public static IoBuffer createBuffer(int size) {
-		return bufferPool.allocate(size, false).order(ByteOrder.LITTLE_ENDIAN);
+		return IoBuffer.allocate(size, false).order(ByteOrder.LITTLE_ENDIAN);
+	}
+	
+	public static IoBuffer resizeBuffer(IoBuffer buffer) {
+		int size = buffer.position();
+		return buffer == null ? createBuffer(0) : createBuffer(size).put(buffer.flip().array(), 0, size).flip();
 	}
 	
 }

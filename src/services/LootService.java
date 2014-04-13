@@ -73,7 +73,9 @@ public class LootService implements INetworkDispatch {
 	
 	public void handleLootRequest(CreatureObject requester, TangibleObject lootedObject) {
 		
-		if (lootedObject.isLooted() || lootedObject.isLootLock())
+		GroupObject group = (GroupObject) core.objectService.getObject(requester.getGroupId());
+		
+		if (lootedObject.isLooted() || lootedObject.isLootLock() || (group == null && !lootedObject.getKiller().equals(requester)) || (group != null && !group.getMemberList().contains(lootedObject.getKiller())))
 			return;
 		
 		lootedObject.setLootLock(true);
@@ -408,7 +410,7 @@ public class LootService implements INetworkDispatch {
 		if (lootedObject instanceof CreatureObject){
 			CreatureObject lootedCreature = (CreatureObject) lootedObject;
 			int creatureCL = lootedCreature.getLevel();
-			creatureCL = 90;
+			//creatureCL = 90;
 			int maximalCredits = (int)Math.floor(4*creatureCL + creatureCL*creatureCL*4/100); 
 			int minimalCredits = (int)Math.floor(creatureCL*2 + maximalCredits/2); 
 			int spanOfCredits  = maximalCredits - minimalCredits;			

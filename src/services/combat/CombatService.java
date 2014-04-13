@@ -51,7 +51,6 @@ import resources.objects.waypoint.WaypointObject;
 import resources.objects.weapon.WeaponObject;
 import services.ai.AIActor;
 import services.combat.CombatEvents.DamageTaken;
-import services.command.BaseSWGCommand;
 import services.command.CombatCommand;
 import services.sui.SUIService.MessageBoxType;
 import services.sui.SUIWindow;
@@ -402,7 +401,7 @@ public class CombatService implements INetworkDispatch {
 		
 	}
 
-	private void sendCombatPackets(CreatureObject attacker, TangibleObject target, WeaponObject weapon, BaseSWGCommand command, int actionCounter, float damage, int armorAbsorbed, int hitType) {
+	private void sendCombatPackets(CreatureObject attacker, TangibleObject target, WeaponObject weapon, CombatCommand command, int actionCounter, float damage, int armorAbsorbed, int hitType) {
 		
 		String animationStr = command.getRandomAnimation(weapon);
 		CombatAction combatAction = new CombatAction(CRC.StringtoCRC(animationStr), attacker.getObjectID(), weapon.getObjectID(), target.getObjectID(), command.getCommandCRC());
@@ -431,7 +430,7 @@ public class CombatService implements INetworkDispatch {
 
 	}
 	
-	private void sendHealPackets(CreatureObject attacker, CreatureObject target, WeaponObject weapon, BaseSWGCommand command, int actionCounter) {
+	private void sendHealPackets(CreatureObject attacker, CreatureObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {
 
 		CombatAction combatAction = new CombatAction(CRC.StringtoCRC(command.getDefaultAnimations()[0]), attacker.getObjectID(), weapon.getObjectID(), target.getObjectID(), command.getCommandCRC());
 		ObjControllerMessage objController = new ObjControllerMessage(0x1B, combatAction);

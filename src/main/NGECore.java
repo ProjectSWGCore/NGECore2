@@ -72,6 +72,7 @@ import services.SurveyService;
 import services.TerrainService;
 import services.WeatherService;
 import services.ai.AIService;
+import services.bazaar.BazaarService;
 import services.chat.ChatService;
 import services.collections.CollectionService;
 import services.combat.CombatService;
@@ -173,12 +174,10 @@ public class NGECore {
 	//public MissionService missionService;
 	public InstanceService instanceService;
 	public DevService devService;
-
 	public SurveyService surveyService;
 	public ResourceService resourceService;
-
 	public ConversationService conversationService;
-	
+	public BazaarService bazaarService;
 	public HousingService housingService;
 	public LootService lootService;
 	public HarvesterService harvesterService;
@@ -206,7 +205,7 @@ public class NGECore {
 	private BusConfiguration eventBusConfig = BusConfiguration.Default(1, new ThreadPoolExecutor(1, 4, 1, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>()));
 
 	private ObjectDatabase buildingODB;
-
+	private ObjectDatabase auctionODB;
 	private ObjectDatabase resourcesODB;
 	private ObjectDatabase resourceRootsODB;
 	private ObjectDatabase resourceHistoryODB;
@@ -270,6 +269,7 @@ public class NGECore {
 		resourcesODB = new ObjectDatabase("resources", true, false, true);
 		resourceRootsODB = new ObjectDatabase("resourceroots", true, false, true);
 		resourceHistoryODB = new ObjectDatabase("resourcehistory", true, false, true);
+		auctionODB = new ObjectDatabase("auction", true, false, true);
 		
 		// Services
 		loginService = new LoginService(this);
@@ -298,6 +298,7 @@ public class NGECore {
 		entertainmentService = new EntertainmentService(this);
 		devService = new DevService(this);
 		conversationService = new ConversationService(this);
+		bazaarService = new BazaarService(this);
 		housingService = new HousingService(this);
 		lootService = new LootService(this);
 		harvesterService = new HarvesterService(this);
@@ -353,7 +354,13 @@ public class NGECore {
 		zoneDispatch.addService(buffService);
 		zoneDispatch.addService(entertainmentService);
 		//zoneDispatch.addService(missionService);
-
+		zoneDispatch.addService(bazaarService);
+		
+		if (optionsConfigLoaded && options.getInt("LOAD.RESOURCE.SYSTEM") == 1) {
+			zoneDispatch.addService(surveyService);
+			zoneDispatch.addService(resourceService);
+		}
+		
 		zoneServer = new MINAServer(zoneDispatch, config.getInt("ZONE.PORT"));
 		zoneServer.start();
 		staticService = new StaticService(this);
@@ -684,17 +691,17 @@ public class NGECore {
 		try {
 	
 			for(int minutes = 15; minutes > 1; minutes--) {
-					simulationService.notifyAllClients(new ChatSystemMessage("The server will be shutting down soon. Please find a safe place to logout. (" + minutes + " minutes left)", (byte) 0 ).serialize());
+					chatService.broadcastGalaxy("The server will be shutting down soon. Please find a safe place to logout. (" + minutes + " minutes left)");
 					Thread.sleep(60000);
 			}
 			setGalaxyStatus(3);
-			simulationService.notifyAllClients(new ChatSystemMessage("The server will be shutting down soon. Please find a safe place to logout. (" + 1 + " minutes left)", (byte) 0 ).serialize());
+			chatService.broadcastGalaxy("The server will be shutting down soon. Please find a safe place to logout. (" + 1 + " minutes left)");
 			Thread.sleep(30000);
-			simulationService.notifyAllClients(new ChatSystemMessage("You will be disconnected in 30 seconds so the server can perform a final save before shutting down.  Please find a safe place to logout now.", (byte) 0 ).serialize());
+			chatService.broadcastGalaxy("You will be disconnected in 30 seconds so the server can perform a final save before shutting down.  Please find a safe place to logout now.");
 			Thread.sleep(20000);
-			simulationService.notifyAllClients(new ChatSystemMessage("You will be disconnected in 10 seconds so the server can perform a final save before shutting down.  Please find a safe place to logout now.", (byte) 0 ).serialize());
+			chatService.broadcastGalaxy("You will be disconnected in 10 seconds so the server can perform a final save before shutting down.  Please find a safe place to logout now.");
 			Thread.sleep(10000);
-			simulationService.notifyAllClients(new ChatSystemMessage("You will now be disconnected so the server can perform a final save before shutting down.", (byte) 0 ).serialize());
+			chatService.broadcastGalaxy("You will now be disconnected so the server can perform a final save before shutting down.");
 			
 			synchronized(getActiveConnectionsMap()) {
 				for(Client client : getActiveConnectionsMap().values()) {

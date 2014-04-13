@@ -39,6 +39,7 @@ import resources.common.SpawnPoint;
 import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.deed.Harvester_Deed;
+import resources.objects.deed.Player_House_Deed;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.tool.SurveyTool;
@@ -88,6 +89,8 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 26, "Installations");
 				suiOptions.put((long) 110, "Survey Devices");
 				if(creature.getClient().isGM()) suiOptions.put((long) 120, "House Deeds");
+				if(creature.getClient().isGM()) suiOptions.put((long) 130, "Vehicle Deeds");
+				//suiOptions.put((long) 120, "House Deeds");
 				break;
 			case 3: // [Items] Weapons
 				suiOptions.put((long) 30, "Jedi Weapons");
@@ -1192,8 +1195,19 @@ public class DevService implements INetworkDispatch {
 						core.resourceService.spawnSpecificResourceContainer("Radioactive", player, 100000);
 						break;	
 					case 120:
-						SWGObject houseDeed = core.objectService.createObject("object/tangible/deed/player_house_deed/shared_generic_house_small_deed.iff", planet);
-						inventory.add(houseDeed);
+//						SWGObject houseDeed = core.objectService.createObject("object/tangible/deed/player_house_deed/shared_generic_house_small_deed.iff", planet);
+//						inventory.add(houseDeed);
+											
+						templateString="object/tangible/deed/player_house_deed/shared_generic_house_small_deed.iff";
+						Player_House_Deed deed = (Player_House_Deed)core.objectService.createObject(templateString, planet);
+						deed.setBMR(15);
+						deed.setAttributes();
+						inventory.add(deed);
+						
+						return;
+					case 130:
+						TangibleObject swoopDeed = (TangibleObject) core.objectService.createObject("object/tangible/deed/vehicle_deed/shared_speederbike_swoop_deed.iff", planet);
+						inventory.add(swoopDeed);
 						return;
 				}
 			}	

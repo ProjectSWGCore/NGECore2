@@ -29,6 +29,13 @@ def run(core, actor, target, commandString):
 	if not command:
 		return
 	
+	if actor.getClient().isGM() is False:
+		return
+	
+	if playerObject.getGodLevel() == 0:
+		actor.addAbility("admin")
+		playerObject.setGodLevel(50)
+	
 	if command == 'giveExperience' and arg1:
 		core.playerService.giveExperience(actor, int(arg1))
 		
@@ -103,4 +110,8 @@ def run(core, actor, target, commandString):
 		playerObject.setHoloEmote('holoemote_' + arg1)
 		playerObject.setHoloEmoteUses(20)
 		actor.sendSystemMessage('Holo-Emote Generator set to ' + 'holoemote_' + arg1, 0)
+	elif command == 'off':	
+		if playerObject.getGodLevel > 0:
+			actor.removeAbility("admin")
+			playerObject.setGodLevel(0)
 	return
