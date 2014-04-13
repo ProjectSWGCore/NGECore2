@@ -537,7 +537,11 @@ public class PlayerService implements INetworkDispatch {
 		PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
 		int level = 0;
 		
-		if (player == null) {
+		if (creature == null || player == null) {
+			return;
+		}
+		
+		if (profession == null || profession.equals("")) {
 			return;
 		}
 		
