@@ -83,8 +83,6 @@ public class TangibleObject extends SWGObject {
 	private boolean looted = false;
 	private boolean lootLock = false;
 	
-	private String serialNumber;
-	
 	@NotPersistent
 	private TangibleObject killer = null;
 	
@@ -486,13 +484,12 @@ public class TangibleObject extends SWGObject {
 	}
 	
 	public String getSerialNumber() {
-		return serialNumber;
+		return getStringAttribute("serial_number");
 	}
 
 	public void setSerialNumber(String serialNumber) {
-		this.serialNumber = serialNumber;
+		setStringAttribute("serial_number", serialNumber);
 	}
-	
 	
 	@Override
 	public void sendBaselines(Client destination) {

@@ -655,10 +655,24 @@ public class ObjectService implements INetworkDispatch {
 	}
 	
 	public CreatureObject getCreatureFromDB(long objectId) {
-		return core.getCreatureODB().get(new Long(objectId), Long.class, CreatureObject.class);
+		CreatureObject object = core.getCreatureODB().get(new Long(objectId), Long.class, CreatureObject.class);
+		
+		if (object != null && getObject(object.getObjectID()) == null) {
+			loadServerTemplate(object);
+			
+			object.viewChildren(object, true, true, new Traverser() {
+				
+				public void process(SWGObject child) {
+					loadServerTemplate(child);
+				}
+				
+			});
+		}
+		
+		return object;
 	}
 	
-	private long generateObjectID() {
+	public long generateObjectID() {
 		/*Random random = new Random();
 		
 		long objectID = random.nextInt();
