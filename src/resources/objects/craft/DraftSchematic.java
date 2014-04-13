@@ -19,29 +19,28 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package resources.objects.manufacture;
+package resources.objects.craft;
 
-
-import resources.objects.intangible.IntangibleObject;
 import com.sleepycat.persist.model.Persistent;
+import engine.clients.Client;
+import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-
-/** 
- * @author Charon 
- */
-
-@Persistent(version=0)
-public class ManufactureSchematicObject extends IntangibleObject{
+@Persistent
+public class DraftSchematic extends SWGObject {
 	
-	//@NotPersistent
-	//private ManufactureSchematicMessageBuilder messageBuilder;
-
-	public ManufactureSchematicObject(long objectID, Planet planet, String template, Point3D position, Quaternion orientation) {
+	
+	public DraftSchematic(long objectID, Planet planet, String template, Point3D position, Quaternion orientation){
 		super(objectID, planet, position, orientation, template);
-		//messageBuilder = new ManufactureSchematicMessageBuilder(this);
 	}
+
+	@Override
+	public void sendBaselines(Client arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+	
 	
 }
