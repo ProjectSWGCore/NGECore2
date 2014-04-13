@@ -120,6 +120,10 @@ public class CommandService implements INetworkDispatch  {
 						String name = commandArgs.split(" ")[0];
 						
 						target = core.objectService.getObjectByFirstName(name);
+						
+						if (target == actor) {
+							target = null;
+						}
 					}
 					
 					break;
@@ -191,6 +195,8 @@ public class CommandService implements INetworkDispatch  {
 						x = Integer.valueOf(args[0]);
 						y = Integer.valueOf(args[1]);
 						z = Integer.valueOf(args[2]);
+					} else {
+						return false;
 					}
 				} catch (NumberFormatException e) {
 					return false;
@@ -595,46 +601,6 @@ public class CommandService implements INetworkDispatch  {
 			}
 			
 		});
-		
-		objControllerOpcodes.put(ObjControllerOpcodes.RESOURCE_EMPTY_HOPPER, new INetworkRemoteEvent() {
-
-			@Override
-			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
-				data.order(ByteOrder.LITTLE_ENDIAN);
-				Client client = core.getClient(session);			
-				CommandEnqueue commandEnqueue = new CommandEnqueue();
-												
-//				StringBuilder sb = new StringBuilder();
-//			    for (byte b : data.array()) {
-//			        sb.append(String.format("%02X ", b));
-//			    }
-//			    System.out.println(sb.toString());
-			    
-			    /*
-			    05 00 46 5E CE 80 83 00   00 00 ED 00 00 00 3E 45 
-			    04 00 00 00 00 00 00 00   00 00 3E 45 04 00 00 00 
-			    00 00 90 52 05 00 00 00   00 00 D7 35 05 00 00 00 
-			    00 00 01 00 00 00 00 07			    
-			    */
-			    
-			    long playerId = data.getLong(); // 3E 45 04 00 00 00 00 00
-			    data.getInt();   // 00 00 00 00
-			    data.getLong(); // 3E 45 04 00 00 00 00 00
-			    long harvesterId = data.getLong(); // 1E 55 05 00 00 00 00 00
-			    //long containerId = data.getLong(); // 1E 55 05 00 00 00 00 00  	Resources ID 
-			    long resourceId = data.getLong(); // 1E 55 05 00 00 00 00 00  	Resources ID
-			    int stackCount = data.getInt();   // Stack count
-			    byte actionMode = data.get();     // 0 for retrieving, 1 for discarding 
-			    byte updateCount = data.get();     // updateCount
-	
-				CreatureObject actor = (CreatureObject) client.getParent();
-				SWGObject target = core.objectService.getObject(harvesterId);
-
-				core.harvesterService.handleEmptyHopper(actor,target,harvesterId,resourceId,stackCount,actionMode,updateCount);
-			}
-		});
-			
-			
 		
 	}
 	
