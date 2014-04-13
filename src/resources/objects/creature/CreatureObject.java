@@ -68,7 +68,7 @@ import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import services.command.BaseSWGCommand;
 
-@Entity(version=7)
+@Entity(version=8)
 public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	@NotPersistent
@@ -83,7 +83,6 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 
 	// CREO 3
 	private byte posture = 0;
-	private int factionStatus = 0;
 	private float height;
 	private int battleFatigue = 0;
 	private long stateBitmask = 0;
@@ -189,6 +188,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private ConcurrentHashMap<String, Long> cooldowns = new ConcurrentHashMap<String, Long>();
 	
 	public boolean mounted = false;
+	@NotPersistent
 	public CreatureObject mountedVehicle;
 	
 	public CreatureObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
@@ -474,13 +474,8 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		notifyObservers(messageBuilder.buildFactionDelta(faction), true);
 		//updatePvpStatus();
 	}
-
-	public int getFactionStatus() {
-		synchronized(objectMutex) {
-			return factionStatus;
-		}
-	}
-
+	
+	@Override
 	public void setFactionStatus(int factionStatus) {
 		synchronized(objectMutex) {
 			this.factionStatus = factionStatus;
@@ -489,7 +484,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		notifyObservers(messageBuilder.buildFactionStatusDelta(factionStatus), true);
 		//updatePvpStatus();
 	}
-
+	
 	public float getHeight() {
 		synchronized(objectMutex) {
 			return height;
@@ -546,6 +541,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.ownerId = ownerId;
 		}
+		notifyObservers(messageBuilder.buildOwnerIdDelta(ownerId), true);
 	}
 
 	public float getAccelerationMultiplierBase() {
@@ -1803,21 +1799,36 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void mount(CreatureObject owner) {
+		boolean remove = false;
 		synchronized(objectMutex) {
 			if ((this.getOptionsBitmask() & Options.MOUNT) == Options.MOUNT){
-				UpdateContainmentMessage updateContainmentMessage= new UpdateContainmentMessage(owner.getObjectID(), this.getObjectID(), -1);
-				owner.getClient().getSession().write(updateContainmentMessage.serialize());
-				owner.setParent(this);	
+				remove = true;
+				_add(owner);
+				UpdateContainmentMessage updateContainmentMessage = new UpdateContainmentMessage(owner.getObjectID(), this.getObjectID(), 4);
+				notifyObservers(updateContainmentMessage, true);
 			}
 		}
+		if(remove)
+			NGECore.getInstance().simulationService.remove(owner, owner.getWorldPosition().x, owner.getWorldPosition().z, false);
 	}
 	
 	public void unmount(CreatureObject owner) {
+		boolean add = false;
 		synchronized(objectMutex) {
 			if ((this.getOptionsBitmask() & Options.MOUNT) == Options.MOUNT){
-				UpdateContainmentMessage updateContainmentMessage= new UpdateContainmentMessage(owner.getObjectID(), this.getObjectID(), -1);
-				owner.getClient().getSession().write(updateContainmentMessage.serialize());
+				add = true;
+				_remove(owner);
+				UpdateContainmentMessage updateContainmentMessage = new UpdateContainmentMessage(owner.getObjectID(), 0, -1);
+				notifyObservers(updateContainmentMessage, true);
 			}
+		}
+		if(add) {
+			owner.setMounted(false);
+			owner.setMountedVehicle(null);
+			owner.setStateBitmask(0);
+			owner.setPosture((byte) 0);
+			NGECore.getInstance().simulationService.add(owner, getWorldPosition().x, getWorldPosition().z, false);
+			NGECore.getInstance().simulationService.teleport(owner, getWorldPosition(), getOrientation(), 0);
 		}
 	}
 	
@@ -1825,8 +1836,6 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.ownerId = owner.getObjectID();
 			setStateBitmask(0x10000000);
-			owner.setParent(this);
-			owner.getClient().getSession().write(messageBuilder.buildOwnerIdDelta(ownerId));
 			owner.setMountedVehicle(this);
 			this.setOwnerId(owner.getObjectID());
 						//this.add(owner); // NPE at engine.resources.objects.SWGObject.getCorrectArrangementId(kd:844)

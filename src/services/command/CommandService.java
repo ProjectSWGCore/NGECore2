@@ -47,7 +47,6 @@ import protocol.swg.objectControllerObjects.CommandEnqueue;
 import protocol.swg.objectControllerObjects.CommandEnqueueRemove;
 import protocol.swg.objectControllerObjects.StartTask;
 import resources.objects.creature.CreatureObject;
-import resources.objects.harvester.HarvesterObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 
@@ -75,7 +74,7 @@ public class CommandService implements INetworkDispatch  {
 			return false;
 		}
 		
-		if (command.getCharacterAbility().length() > 0 && !actor.hasAbility(command.getCharacterAbility()) && !command.getCharacterAbility().equals("admin") && actor.getClient() != null) {
+		if (command.getCharacterAbility().length() > 0 && !actor.hasAbility(command.getCharacterAbility()) && actor.getClient() != null) {
 			return false;
 		}
 		
@@ -83,7 +82,7 @@ public class CommandService implements INetworkDispatch  {
 			return false;
 		}
 		
-		if (command.getGodLevel() > 0 && (actor.getClient() == null || !actor.getClient().isGM())) {
+		if (actor.getClient() != null && command.getGodLevel() > actor.getPlayerObject().getGodLevel()) {
 			return false;
 		}
 		
@@ -120,6 +119,10 @@ public class CommandService implements INetworkDispatch  {
 						String name = commandArgs.split(" ")[0];
 						
 						target = core.objectService.getObjectByFirstName(name);
+						
+						if (target == actor) {
+							target = null;
+						}
 					}
 					
 					break;
@@ -144,15 +147,15 @@ public class CommandService implements INetworkDispatch  {
 				
 				break;
 			case 2: // Anyone (objectId/targetName)
-				if (actor.getClient() == null) {
-					break;
-				}
-				
 				if (target == null) {
 					if (commandArgs != null && !commandArgs.equals("")) {
 						String name = commandArgs.split(" ")[0];
 						
 						target = core.objectService.getObjectByFirstName(name);
+						
+						if (target == actor) {
+							target = null;
+						}
 					}
 					
 					break;
@@ -191,6 +194,8 @@ public class CommandService implements INetworkDispatch  {
 						x = Integer.valueOf(args[0]);
 						y = Integer.valueOf(args[1]);
 						z = Integer.valueOf(args[2]);
+					} else {
+						return false;
 					}
 				} catch (NumberFormatException e) {
 					return false;
@@ -234,14 +239,20 @@ public class CommandService implements INetworkDispatch  {
 				
 				TangibleObject object = (TangibleObject) target;
 				
-				if(object instanceof CreatureObject && actor.getFactionStatus() < ((CreatureObject) object).getFactionStatus())
+				if (!object.getFaction().equals("") && !object.getFaction().equals(actor.getFaction())) {
 					return false;
+				}
 				
-				if (object.isAttackableBy(actor) || (!object.getFaction().equals("") && !object.getFaction().equals(actor.getFaction()))) {
+				if (actor.getFactionStatus() < object.getFactionStatus()) {
+					return false;
+				}
+				
+				if (object.isAttackableBy(actor)) {
 					return false;
 				}
 				
 				// Without this we could be buffing ally NPCs and such
+				// Think this is checked later on
 				if (actor.getSlottedObject("ghost") != null && object.getSlottedObject("ghost") == null) {
 					return false;
 				}
@@ -264,7 +275,7 @@ public class CommandService implements INetworkDispatch  {
 			default:
 				break;
 		}
-
+		
 		if (command.shouldCallOnTarget()) {
 			if (target == null || !(target instanceof CreatureObject)) {
 				return false;
@@ -273,7 +284,7 @@ public class CommandService implements INetworkDispatch  {
 			actor = (CreatureObject) target;
 		}
 		
-		long warmupTime = (long) (command.getWarmupTime() * 1000F);
+		long warmupTime = (long) (command.getWarmupTime() * 1000f);
 		
 		if(warmupTime > 0) {
 			try {
@@ -314,19 +325,7 @@ public class CommandService implements INetworkDispatch  {
 						String name = ((String) visitor.getObject(i, 0)).toLowerCase();
 						
 						if (CRC.StringtoCRC(name) == commandCRC) {
-							int sub = 0;
-							
-							boolean hasCharacterAbility = (((String) visitor.getObject(i, 7-sub)).length() > 0);
-							
-							if (tableArray[n].startsWith("client_") || tableArray[n].startsWith("command_table_")) {
-								sub += 7;
-							}
-							
-							if (tableArray[n].equals("client_command_table_space")) {
-								sub += 5;
-							}
-							
-							if (hasCharacterAbility || isCombatCommand(name)) {
+							if (isCombatCommand(name)) {
 								CombatCommand command = new CombatCommand(name.toLowerCase());
 								commandLookup.add(command);
 								return command;
@@ -370,19 +369,7 @@ public class CommandService implements INetworkDispatch  {
 						String commandName = ((String) visitor.getObject(i, 0)).toLowerCase();
 						
 						if (commandName.equalsIgnoreCase(name)) {
-							int sub = 0;
-							
-							boolean hasCharacterAbility = (((String) visitor.getObject(i, 7-sub)).length() > 0);
-														
-							if (tableArray[n].startsWith("client_") || tableArray[n].startsWith("command_table_")) {
-								sub += 7;
-							}
-							
-							if (tableArray[n].equals("client_command_table_space")) {
-								sub += 5;
-							}
-							
-							if (/*hasCharacterAbility ||*/ isCombatCommand(commandName)) {
+							if (isCombatCommand(commandName)) {
 								CombatCommand command = new CombatCommand(commandName);
 								commandLookup.add(command);
 								return command;
@@ -419,9 +406,10 @@ public class CommandService implements INetworkDispatch  {
 	}
 	
 	public void processCommand(CreatureObject actor, SWGObject target, BaseSWGCommand command, int actionCounter, String commandArgs) {
-		if(command.getCooldown() > 0)
+		if (command.getCooldown() > 0f) {
 			actor.addCooldown(command.getCooldownGroup(), command.getCooldown());
-	
+		}
+		
 		if (command instanceof CombatCommand) {
 			processCombatCommand(actor, target, (CombatCommand) command, actionCounter, commandArgs);
 		} else {
@@ -596,59 +584,31 @@ public class CommandService implements INetworkDispatch  {
 			
 		});
 		
-		objControllerOpcodes.put(ObjControllerOpcodes.RESOURCE_EMPTY_HOPPER, new INetworkRemoteEvent() {
-
-			@Override
-			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
-				data.order(ByteOrder.LITTLE_ENDIAN);
-				Client client = core.getClient(session);			
-				CommandEnqueue commandEnqueue = new CommandEnqueue();
-												
-//				StringBuilder sb = new StringBuilder();
-//			    for (byte b : data.array()) {
-//			        sb.append(String.format("%02X ", b));
-//			    }
-//			    System.out.println(sb.toString());
-			    
-			    /*
-			    05 00 46 5E CE 80 83 00   00 00 ED 00 00 00 3E 45 
-			    04 00 00 00 00 00 00 00   00 00 3E 45 04 00 00 00 
-			    00 00 90 52 05 00 00 00   00 00 D7 35 05 00 00 00 
-			    00 00 01 00 00 00 00 07			    
-			    */
-			    
-			    long playerId = data.getLong(); // 3E 45 04 00 00 00 00 00
-			    data.getInt();   // 00 00 00 00
-			    data.getLong(); // 3E 45 04 00 00 00 00 00
-			    long harvesterId = data.getLong(); // 1E 55 05 00 00 00 00 00
-			    //long containerId = data.getLong(); // 1E 55 05 00 00 00 00 00  	Resources ID 
-			    long resourceId = data.getLong(); // 1E 55 05 00 00 00 00 00  	Resources ID
-			    int stackCount = data.getInt();   // Stack count
-			    byte actionMode = data.get();     // 0 for retrieving, 1 for discarding 
-			    byte updateCount = data.get();     // updateCount
-	
-				CreatureObject actor = (CreatureObject) client.getParent();
-				SWGObject target = core.objectService.getObject(harvesterId);
-
-				core.harvesterService.handleEmptyHopper(actor,target,harvesterId,resourceId,stackCount,actionMode,updateCount);
-			}
-		});
-			
-			
-		
 	}
 	
 	public void shutdown() {
 		
 	}
 	
-	public BaseSWGCommand registerCombatCommand(String name) { return getCommandByName(name); }
-	public BaseSWGCommand registerCommand(String name) { return getCommandByName(name); }
-	public BaseSWGCommand registerGmCommand(String name) { 
+	public BaseSWGCommand registerCommand(String name) {
+		return getCommandByName(name);
+	}
+	
+	public CombatCommand registerCombatCommand(String name) {
 		BaseSWGCommand command = getCommandByName(name);
-		if(command != null)
-			command.setGodLevel(5);
-		return command; 
+		
+		if (command instanceof CombatCommand) {
+			return (CombatCommand) command;
+		}
+		
+		return null;
+	}
+	
+	public BaseSWGCommand registerGmCommand(String name) {
+		BaseSWGCommand command = getCommandByName(name);
+		//if(command != null)
+			//command.setGodLevel(5); // not sure if still needed after more recent commits
+		return command;
 	}
 	
 }

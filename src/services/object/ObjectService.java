@@ -397,8 +397,7 @@ public class ObjectService implements INetworkDispatch {
 			
 			float positionY = core.terrainService.getHeight(planet.getID(), position.x, position.z)-1f;
 			Point3D newpoint = new Point3D(position.x,positionY,position.z);			
-			object = new HarvesterObject(objectID, planet, Template, newpoint, orientation);
-			core.harvesterService.addHarvester(object);		
+			object = new HarvesterObject(objectID, planet, Template, newpoint, orientation);	
 			
 		} else {
 			return null;			
@@ -1013,7 +1012,6 @@ public class ObjectService implements INetworkDispatch {
 		CrcStringTableVisitor crcTable = ClientFileManager.loadFile("misc/object_template_crc_string_table.iff", CrcStringTableVisitor.class);
 		List<BuildingObject> persistentBuildings = new ArrayList<BuildingObject>();
 		Map<Long, Long> duplicate = new HashMap<Long, Long>();
-		Transaction txn = core.getDuplicateIdODB().getEnvironment().beginTransaction(null, null);
 
 		for (int i = 0; i < buildoutTable.getRowCount(); i++) {
 			
@@ -1093,15 +1091,13 @@ public class ObjectService implements INetworkDispatch {
 						newObjectId = core.getDuplicateIdODB().get(key, String.class, DuplicateId.class).getObjectId();
 					} else {
 						newObjectId = generateObjectID();
+						Transaction txn = core.getDuplicateIdODB().getEnvironment().beginTransaction(null, null);
 						core.getDuplicateIdODB().put(new DuplicateId(key, newObjectId), String.class, DuplicateId.class, txn);
+						txn.commitSync();
 					}
 					
 					duplicate.put(objectId, newObjectId);
 					objectId = newObjectId;
-				}
-				if(txn.isValid()) {
-					System.out.println("Committed doid transaction.");
-					txn.commitSync();
 				}
 
 				List<Long> containers = new ArrayList<Long>();

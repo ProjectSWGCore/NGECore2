@@ -21,6 +21,7 @@
  ******************************************************************************/
 package services.resources;
 
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -29,16 +30,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.mina.core.buffer.IoBuffer;
+import org.apache.mina.core.session.IoSession;
+
 import protocol.swg.EnterStructurePlacementModeMessage;
 import protocol.swg.SceneCreateObjectByCrc;
 import protocol.swg.SceneDestroyObject;
 import protocol.swg.SceneEndBaselines;
+import protocol.swg.objectControllerObjects.CommandEnqueue;
 import main.NGECore;
+import engine.clients.Client;
 import engine.resources.common.CRC;
 import engine.resources.container.Traverser;
 import engine.resources.objects.SWGObject;
@@ -46,6 +53,7 @@ import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
+import resources.common.ObjControllerOpcodes;
 import resources.objects.creature.CreatureObject;
 import resources.objects.deed.Harvester_Deed;
 import resources.objects.harvester.HarvesterMessageBuilder;
@@ -92,6 +100,42 @@ public class HarvesterService implements INetworkDispatch {
 	@Override
 	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> swgOpcodes, Map<Integer, INetworkRemoteEvent> objControllerOpcodes) {
 		
+		objControllerOpcodes.put(ObjControllerOpcodes.RESOURCE_EMPTY_HOPPER, new INetworkRemoteEvent() {
+			
+			@Override
+			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
+				data.order(ByteOrder.LITTLE_ENDIAN);
+				Client client = core.getClient(session);
+				
+//				StringBuilder sb = new StringBuilder();
+//			    for (byte b : data.array()) {
+//			        sb.append(String.format("%02X ", b));
+//			    }
+//			    System.out.println(sb.toString());
+			    
+			    /*
+			    05 00 46 5E CE 80 83 00   00 00 ED 00 00 00 3E 45 
+			    04 00 00 00 00 00 00 00   00 00 3E 45 04 00 00 00 
+			    00 00 90 52 05 00 00 00   00 00 D7 35 05 00 00 00 
+			    00 00 01 00 00 00 00 07			    
+			    */
+			    
+			    long playerId = data.getLong(); // 3E 45 04 00 00 00 00 00
+			    data.getInt();   // 00 00 00 00
+			    data.getLong(); // 3E 45 04 00 00 00 00 00
+			    long harvesterId = data.getLong(); // 1E 55 05 00 00 00 00 00
+			    //long containerId = data.getLong(); // 1E 55 05 00 00 00 00 00  	Resources ID 
+			    long resourceId = data.getLong(); // 1E 55 05 00 00 00 00 00  	Resources ID
+			    int stackCount = data.getInt();   // Stack count
+			    byte actionMode = data.get();     // 0 for retrieving, 1 for discarding 
+			    byte updateCount = data.get();     // updateCount
+			    
+				CreatureObject actor = (CreatureObject) client.getParent();
+				SWGObject target = core.objectService.getObject(harvesterId);
+				
+				handleEmptyHopper(actor, target, harvesterId, resourceId, stackCount, actionMode, updateCount);
+			}
+		});
 		
 	}
 
@@ -106,14 +150,39 @@ public class HarvesterService implements INetworkDispatch {
 			}
 			
 		}, 10, 5000, TimeUnit.MILLISECONDS);
-
+		
+		ExecutionSurveillanceThread executionSurveillance = new ExecutionSurveillanceThread(task);
+		executionSurveillance.start();
 	}
+	
+	class ExecutionSurveillanceThread extends Thread {
+		ScheduledFuture<?> task;
+	  
+	    public ExecutionSurveillanceThread(ScheduledFuture<?> task) {
+	      this.task = task;
+	    }
+	  
+	    public void run() {
+	    	try {
+	    		try {
+					task.get();
+				} catch (InterruptedException e1) {
+					System.err.println("InterruptedException IN HARVESTERSERVICE !!! " + e1.getMessage());
+				}
+	    		} catch (ExecutionException e2) {
+	    			System.err.println("EXCEPTION IN HARVESTERSERVICE !!! " + e2.getMessage());
+	    			System.err.println("EXCEPTION CAUSE : " + e2.getCause());
+	    		}
+	    }
+	  }
 	
 	public void ServiceProcessing(){
 		synchronized(allHarvesters){
 			for (HarvesterObject harvester : allHarvesters){
-				updateHarvester(harvester);
+				if (harvester!=null)
+					updateHarvester(harvester);
 			}	
+			allHarvesters.removeAll(Collections.singleton(null));
 		}
 		synchronized(allConstructors){
 			Vector<InstallationObject> removeConstructors = new Vector<InstallationObject>();
@@ -123,19 +192,22 @@ public class HarvesterService implements INetworkDispatch {
 					removeConstructors.add(constructor);
 			}	
 			allConstructors.removeAll(removeConstructors);
+			allConstructors.removeAll(Collections.singleton(null));
 		}
 	}
 	
 	
 	public void addHarvester(SWGObject harvester){
 		synchronized(allHarvesters){
-			allHarvesters.add((HarvesterObject)harvester);
+			if (harvester!=null)
+				allHarvesters.add((HarvesterObject)harvester);
 		}
 	}
 	
 	public void removeHarvester(SWGObject harvester){
 		synchronized(allHarvesters){
-			allHarvesters.remove((HarvesterObject)harvester);
+			if (harvester!=null)
+				allHarvesters.remove((HarvesterObject)harvester);
 		}
 	}
 	
@@ -389,6 +461,7 @@ public class HarvesterService implements INetworkDispatch {
 						deed.setSurplusPower((int)harvester.getPowerLevel());
 						deed.setAttributes();
 						
+						removeHarvester(harvester);
 						core.objectService.destroyObject(harvester.getObjectID());
 	 
 						SWGObject crafterInventory = owner.getSlottedObject("inventory");
@@ -926,6 +999,8 @@ public class HarvesterService implements INetworkDispatch {
 		float positionY = NGECore.getInstance().terrainService.getHeight(actor.getPlanetId(), object.getPosition().x, object.getPosition().z);
 		harvester.setPosition(new Point3D(object.getPosition().x,positionY, object.getPosition().z));
 		core.simulationService.add(harvester, harvester.getPosition().x, harvester.getPosition().z, true);
+		addHarvester(harvester);	
+		
 		PlayerObject player = (PlayerObject) actor.getSlottedObject("ghost");
 		WaypointObject constructionWaypoint = (WaypointObject)NGECore.getInstance().objectService.createObject("object/waypoint/shared_world_waypoint_blue.iff", actor.getPlanet(), harvester.getPosition().x, 0 ,harvester.getPosition().z);
 		String displayname = "@installation_n:"+harvester.getStfName();
@@ -977,7 +1052,7 @@ public class HarvesterService implements INetworkDispatch {
 	
 	public void enterStructurePlacementMode(SWGObject object, CreatureObject actor){
 
-		if (!core.terrainService.canBuildAtPosition(actor,actor.getPosition().x,actor.getPosition().z)){
+		if (!actor.getClient().isGM() && !core.terrainService.canBuildAtPosition(actor,actor.getPosition().x,actor.getPosition().z)){
 			actor.sendSystemMessage("@player_structure:not_permitted", (byte) 0);
 			return;
 		}
