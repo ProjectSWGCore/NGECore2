@@ -53,7 +53,7 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent(version=6)
+@Persistent(version=7)
 public class TangibleObject extends SWGObject {
 	
 	// TODO: Thread safety
@@ -82,6 +82,8 @@ public class TangibleObject extends SWGObject {
 	
 	private boolean looted = false;
 	private boolean lootLock = false;
+	
+	private String serialNumber;
 	
 	@NotPersistent
 	private TangibleObject killer = null;
@@ -484,12 +486,28 @@ public class TangibleObject extends SWGObject {
 	}
 	
 	public String getSerialNumber() {
-		return getStringAttribute("serial_number");
+		return serialNumber;
 	}
 
 	public void setSerialNumber(String serialNumber) {
-		setStringAttribute("serial_number", serialNumber);
+		this.serialNumber = serialNumber;
 	}
+	
+	public void sendDelta3(Client destination) {
+		destination.getSession().write(messageBuilder.buildDelta3());
+		//tools.CharonPacketUtils.printAnalysis(messageBuilder.buildDelta3(),"TANO3 Delta");
+	}
+	
+	public void sendAssemblyDelta3(Client destination) {
+		destination.getSession().write(messageBuilder.buildAssemblyDelta3());
+		//tools.CharonPacketUtils.printAnalysis(messageBuilder.buildAssemblyDelta3(),"TANO3 Assembly Delta");
+	}
+	
+	public void sendCustomizationDelta3(Client destination, String enteredName){
+		destination.getSession().write(messageBuilder.buildCustomNameDelta(enteredName));
+		//tools.CharonPacketUtils.printAnalysis(messageBuilder.buildCustomNameDelta(enteredName),"TANO3 Customization Delta");
+	}	
+	
 	
 	@Override
 	public void sendBaselines(Client destination) {
