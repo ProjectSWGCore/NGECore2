@@ -45,7 +45,6 @@ import resources.common.*;
 import protocol.swg.ObjControllerMessage;
 import protocol.swg.objectControllerObjects.CommandEnqueue;
 import protocol.swg.objectControllerObjects.CommandEnqueueRemove;
-import protocol.swg.objectControllerObjects.ShowFlyText;
 import protocol.swg.objectControllerObjects.StartTask;
 import resources.objects.creature.CreatureObject;
 import resources.objects.harvester.HarvesterObject;
@@ -76,7 +75,7 @@ public class CommandService implements INetworkDispatch  {
 			return false;
 		}
 		
-		if (command.getCharacterAbility().length() > 0 && !actor.hasAbility(command.getCharacterAbility()) && !command.getCharacterAbility().equals("admin")) {
+		if (command.getCharacterAbility().length() > 0 && !actor.hasAbility(command.getCharacterAbility()) && !command.getCharacterAbility().equals("admin") && actor.getClient() != null) {
 			return false;
 		}
 		
@@ -115,8 +114,18 @@ public class CommandService implements INetworkDispatch  {
 		switch (command.getTargetType()) {
 			case 0: // Target Not Used For This Command
 				break;
-			case 1: // Other Only
-				if (target == null || target == actor) {
+			case 1: // Other Only (objectId/targetName)
+				if (target == null) {
+					if (commandArgs != null && !commandArgs.equals("")) {
+						String name = commandArgs.split(" ")[0];
+						
+						target = core.objectService.getObjectByFirstName(name);
+					}
+					
+					break;
+				}
+				
+				if (target == actor) {
 					return false;
 				}
 				
@@ -129,16 +138,36 @@ public class CommandService implements INetworkDispatch  {
 				}
 				
 				if (!core.simulationService.checkLineOfSight(actor, target)) {
+					actor.showFlyText("@combat_effects:cant_see", 1.5f, new RGB(72, 209, 204), 1, true);
 					return false;
 				}
 				
 				break;
-			case 2: // Self Only
-				if (target == null) {
-					target = actor;
+			case 2: // Anyone (objectId/targetName)
+				if (actor.getClient() == null) {
+					break;
 				}
 				
-				if (target != actor && target instanceof CreatureObject && actor.getClient() != null) {
+				if (target == null) {
+					if (commandArgs != null && !commandArgs.equals("")) {
+						String name = commandArgs.split(" ")[0];
+						
+						target = core.objectService.getObjectByFirstName(name);
+					}
+					
+					break;
+				}
+				
+				if (target.getContainer() == actor || target.getGrandparent() == actor) {
+					break;
+				}
+				
+				if (command.getMaxRangeToTarget() != 0 && actor.getPosition().getDistance(target.getPosition()) > command.getMaxRangeToTarget()) {
+					return false;
+				}
+				
+				if (!core.simulationService.checkLineOfSight(actor, target)) {
+					actor.showFlyText("@combat_effects:cant_see", 1.5f, new RGB(72, 209, 204), 1, true);
 					return false;
 				}
 				
@@ -146,13 +175,45 @@ public class CommandService implements INetworkDispatch  {
 			case 3: // Free Target Mode (rally points, group waypoints)
 				target = null;
 				
+				if (commandArgs == null) {
+					break;
+				}
+				
+				String[] args = commandArgs.split(" ");
+				
+				float x = 0, y = 0, z = 0;
+				
+				try {
+					if (args.length == 2) {
+						x = Integer.valueOf(args[0]);
+						z = Integer.valueOf(args[1]);
+					} else if (args.length > 2) {
+						x = Integer.valueOf(args[0]);
+						y = Integer.valueOf(args[1]);
+						z = Integer.valueOf(args[2]);
+					}
+				} catch (NumberFormatException e) {
+					return false;
+				}
+				
+				Point3D position = new Point3D(x, y, z);
+				
+				if (command.getMaxRangeToTarget() != 0 && actor.getPosition().getDistance(position) > command.getMaxRangeToTarget()) {
+					return false;
+				}
+				
 				break;
-			case 4: // Anyone
+			case 4: // Any object
 				if (target == null) {
-					target = actor;
+					break;
+				}
+				
+				if (command.getMaxRangeToTarget() != 0 && actor.getPosition().getDistance(target.getPosition()) > command.getMaxRangeToTarget()) {
+					return false;
 				}
 				
 				if (!core.simulationService.checkLineOfSight(actor, target)) {
+					actor.showFlyText("@combat_effects:cant_see", 1.5f, new RGB(72, 209, 204), 1, true);
 					return false;
 				}
 				
@@ -173,7 +234,10 @@ public class CommandService implements INetworkDispatch  {
 				
 				TangibleObject object = (TangibleObject) target;
 				
-				if (object.isAttackableBy(actor) || actor.getFactionStatus() < ((CreatureObject) object).getFactionStatus() || (!object.getFaction().equals("") && !object.getFaction().equals(actor.getFaction()))) {
+				if(object instanceof CreatureObject && actor.getFactionStatus() < ((CreatureObject) object).getFactionStatus())
+					return false;
+				
+				if (object.isAttackableBy(actor) || (!object.getFaction().equals("") && !object.getFaction().equals(actor.getFaction()))) {
 					return false;
 				}
 				
@@ -432,12 +496,8 @@ public class CommandService implements INetworkDispatch  {
 		
 		
 		if(target != attacker && success && !core.simulationService.checkLineOfSight(attacker, target)) {
-			
-			ShowFlyText los = new ShowFlyText(attacker.getObjectID(), attacker.getObjectID(), "combat_effects", "cant_see", (float) 1.5, new RGB(72, 209, 204), 1);
-			ObjControllerMessage objController = new ObjControllerMessage(0x1B, los);
-			attacker.getClient().getSession().write(objController.serialize());
+			attacker.showFlyText("@combat_effects:cant_see", 1.5f, new RGB(72, 209, 204), 1, true);
 			success = false;
-			
 		}
 		
 		if(!success && attacker.getClient() != null) {
@@ -468,6 +528,15 @@ public class CommandService implements INetworkDispatch  {
 			
 		}
 		
+	}
+	
+	public void removeCommand(CreatureObject actor, int actionCounter, BaseSWGCommand command) {
+		if (actor == null || actor.getClient() == null || command == null) {
+			return;
+		}
+		
+		actor.getClient().getSession().write(new ObjControllerMessage(0x0B, new CommandEnqueueRemove(actor.getObjectId(), actionCounter)).serialize());
+		actor.removeCooldown(actionCounter, command);
 	}
 	
 	@Override
@@ -512,6 +581,7 @@ public class CommandService implements INetworkDispatch  {
 				
 				if (!callCommand(actor, target, command, commandEnqueue.getActionCounter(), commandEnqueue.getCommandArguments())) {
 					// Call failScriptHook
+					removeCommand(actor, commandEnqueue.getActionCounter(), command);
 				}
 			}
 

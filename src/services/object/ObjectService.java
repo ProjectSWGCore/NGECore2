@@ -35,6 +35,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -73,6 +74,7 @@ import protocol.swg.chat.ChatOnConnectAvatar;
 import protocol.swg.chat.ChatOnGetFriendsList;
 import protocol.swg.chat.ChatRoomList;
 import protocol.swg.chat.ChatServerStatus;
+import protocol.swg.objectControllerObjects.ShowFlyText;
 import protocol.swg.chat.VoiceChatStatus;
 import protocol.swg.objectControllerObjects.UiPlayEffect;
 import engine.clientdata.ClientFileManager;
@@ -612,6 +614,32 @@ public class ObjectService implements INetworkDispatch {
 		
 		while(it.hasNext()) {
 			if(it.next().getCustomName().equals(customName))
+				return it.next();
+		}
+
+		return null;
+
+	}
+	
+	public SWGObject getObjectByFirstName(String customName) {
+		
+		synchronized(objectList) {
+			
+			for(SWGObject obj : objectList.values()) {
+				if(obj.getCustomName() == null)
+					continue;
+				if(obj.getCustomName().startsWith(customName))
+					return obj;
+			}
+			
+		}
+		
+		EntityCursor<CreatureObject> cursor = core.getCreatureODB().getCursor(Long.class, CreatureObject.class);
+		
+		Iterator<CreatureObject> it = cursor.iterator();
+		
+		while(it.hasNext()) {
+			if(it.next().getCustomName().startsWith(customName))
 				return it.next();
 		}
 

@@ -30,14 +30,18 @@ import com.sleepycat.persist.model.Persistent;
 @Persistent
 public class Stf extends Delta {
 	
-	private AString stfFilename;
+	private AString stfFilename = new AString("");
 	private int spacer = 0;
-	private AString stfName;
+	private AString stfName = new AString("");
 	
 	public Stf(String stfFilename, int spacer, String stfName) {
 		this.stfFilename = new AString(stfFilename);
 		this.spacer = spacer;
 		this.stfName = new AString(stfName);
+	}
+	
+	public Stf(String stf) {
+		setString(stf);
 	}
 	
 	public Stf() {
@@ -82,15 +86,20 @@ public class Stf extends Delta {
 	
 	public String getString() {
 		synchronized(objectMutex) {
-			return ("@" + stfFilename + ":" + stfName);
+			return ("@" + stfFilename.get() + ":" + stfName.get());
 		}
 	}
 	
 	public void setString(String stf) {
 		synchronized(objectMutex) {
-			stf = stf.replace("@", "");
-			stfFilename.set(stf.split(":")[0]);
-			stfName.set(stf.split(":")[1]);
+			if (stf == null || stf.equals("")) {
+				stfFilename.set("");
+				stfName.set("");
+			} else if (stf.contains(":")) {
+				stf = stf.replace("@", "");
+				stfFilename.set(stf.split(":")[0]);
+				stfName.set(stf.split(":")[1]);
+			}
 		}
 	}
 	

@@ -37,6 +37,7 @@ import protocol.swg.PlayClientEffectObjectMessage;
 import protocol.swg.StopClientEffectObjectByLabel;
 import protocol.swg.UpdatePVPStatusMessage;
 import protocol.swg.objectControllerObjects.ShowFlyText;
+import resources.common.OutOfBand;
 import resources.common.RGB;
 import resources.objects.creature.CreatureObject;
 import resources.objects.loot.LootGroup;
@@ -375,45 +376,40 @@ public class TangibleObject extends SWGObject {
 			
 			return getPvPBitmask() == 1 || getPvPBitmask() == 2;
 			
-		}
+		} else if(attacker.getSlottedObject("ghost") == null)
+			return true;
 
 		return getPvPBitmask() == 1 || getPvPBitmask() == 2;
 	}
 	
-	public void showFlyText(String stfFile, String stfString, float scale, RGB color, int displayType) {
-		Set<Client> observers = getObservers();
-		
-		if (getClient() != null) {
-			getClient().getSession().write((new ObjControllerMessage(0x0000000B, new ShowFlyText(getObjectID(), getObjectID(), stfFile, stfString, scale, color, displayType))).serialize());
-		}
-		
-		for (Client client : observers) {
-			client.getSession().write((new ObjControllerMessage(0x0000000B, new ShowFlyText(client.getParent().getObjectID(), getObjectID(), stfFile, stfString, scale, color, displayType))).serialize());
-		}
+	public void showFlyText(OutOfBand outOfBand, float scale, RGB color, int displayType, boolean notifyObservers) {
+		showFlyText("", outOfBand, scale, color, displayType, notifyObservers);
 	}
 	
-	public void showFlyText(String stfFile, String stfString, String customText, int xp, float scale, RGB color, int displayType) {
-		Set<Client> observers = getObservers();
-		
-		if (getClient() != null) {
-			getClient().getSession().write((new ObjControllerMessage(0x0000000B, new ShowFlyText(getObjectID(), getObjectID(), 56, 1, 1, -1, stfFile, stfString, customText, xp, scale, color, displayType))).serialize());
-		}
-		
-		for (Client client : observers) {
-			client.getSession().write((new ObjControllerMessage(0x0000000B, new ShowFlyText(client.getParent().getObjectID(), getObjectID(), 56, 1, 1, -1, stfFile, stfString, customText, xp, scale, color, displayType))).serialize());
-		}
+	public void showFlyText(String stf, float scale, RGB color, int displayType, boolean notifyObservers) {
+		showFlyText(stf, new OutOfBand(), scale, color, displayType, notifyObservers);
 	}
 	
-	public void showFlyText(String stfFile, String stfString, String customText, int xp, float scale, RGB color, int displayType, int unkInt) {
-		//Set<Client> observers = getObservers();
-		
-		if (getClient() != null) {
-			getClient().getSession().write((new ObjControllerMessage(0x0000000B, new ShowFlyText(getObjectID(), getObjectID(), unkInt, 1, 1, -1, stfFile, stfString, customText, xp, scale, color, displayType))).serialize());
+	public void showFlyText(String stf, OutOfBand outOfBand, float scale, RGB color, int displayType, boolean notifyObservers) {
+		if (outOfBand == null) {
+			outOfBand = new OutOfBand();
 		}
 		
-		/*for (Client client : observers) {
-			client.getSession().write((new ObjControllerMessage(0x0000000B, new ShowFlyText(client.getParent().getObjectID(), getObjectID(), unkInt, 1, 1, -1, stfFile, stfString, customText, xp, scale, color, displayType))).serialize());
-		}*/
+		if (color == null) {
+			color = new RGB(255, 255, 255);
+		}
+		
+		if (getClient() != null) {
+			getClient().getSession().write((new ObjControllerMessage(0x0000000B, new ShowFlyText(getObjectID(), getObjectID(), stf, outOfBand, scale, color, displayType))).serialize());
+		}
+		
+		if (notifyObservers) {
+			Set<Client> observers = getObservers();
+			
+			for (Client client : observers) {
+				client.getSession().write((new ObjControllerMessage(0x0000000B, new ShowFlyText(client.getParent().getObjectID(), getObjectID(), stf, outOfBand, scale, color, displayType))).serialize());
+			}
+		}
 	}
 	
 	public void playEffectObject(String effectFile, String commandString) {

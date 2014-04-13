@@ -686,17 +686,17 @@ public class NGECore {
 		try {
 	
 			for(int minutes = 15; minutes > 1; minutes--) {
-					simulationService.notifyAllClients(new ChatSystemMessage("The server will be shutting down soon. Please find a safe place to logout. (" + minutes + " minutes left)", (byte) 0 ).serialize());
+					chatService.broadcastGalaxy("The server will be shutting down soon. Please find a safe place to logout. (" + minutes + " minutes left)");
 					Thread.sleep(60000);
 			}
 			setGalaxyStatus(3);
-			simulationService.notifyAllClients(new ChatSystemMessage("The server will be shutting down soon. Please find a safe place to logout. (" + 1 + " minutes left)", (byte) 0 ).serialize());
+			chatService.broadcastGalaxy("The server will be shutting down soon. Please find a safe place to logout. (" + 1 + " minutes left)");
 			Thread.sleep(30000);
-			simulationService.notifyAllClients(new ChatSystemMessage("You will be disconnected in 30 seconds so the server can perform a final save before shutting down.  Please find a safe place to logout now.", (byte) 0 ).serialize());
+			chatService.broadcastGalaxy("You will be disconnected in 30 seconds so the server can perform a final save before shutting down.  Please find a safe place to logout now.");
 			Thread.sleep(20000);
-			simulationService.notifyAllClients(new ChatSystemMessage("You will be disconnected in 10 seconds so the server can perform a final save before shutting down.  Please find a safe place to logout now.", (byte) 0 ).serialize());
+			chatService.broadcastGalaxy("You will be disconnected in 10 seconds so the server can perform a final save before shutting down.  Please find a safe place to logout now.");
 			Thread.sleep(10000);
-			simulationService.notifyAllClients(new ChatSystemMessage("You will now be disconnected so the server can perform a final save before shutting down.", (byte) 0 ).serialize());
+			chatService.broadcastGalaxy("You will now be disconnected so the server can perform a final save before shutting down.");
 			
 			synchronized(getActiveConnectionsMap()) {
 				for(Client client : getActiveConnectionsMap().values()) {

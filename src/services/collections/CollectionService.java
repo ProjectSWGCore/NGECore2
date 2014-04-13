@@ -30,11 +30,11 @@ import org.python.core.Py;
 import org.python.core.PyObject;
 
 import resources.common.FileUtilities;
+import resources.common.OutOfBand;
+import resources.datatables.DisplayType;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
-
 import main.NGECore;
-
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.resources.scene.Point3D;
@@ -311,7 +311,7 @@ public class CollectionService implements INetworkDispatch {
 							player.setCollections(collections.toByteArray());
 							
 							if (!hidden && !noMessage) {
-								creature.sendSystemMessage("collection_n", collection, 0, 0);
+								creature.sendSystemMessage(OutOfBand.ProsePackage("@collection_n:" + collection), DisplayType.Broadcast);
 							}
 							
 							if (!music.equals("")) {

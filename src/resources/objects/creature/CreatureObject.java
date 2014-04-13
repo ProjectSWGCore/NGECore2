@@ -39,6 +39,7 @@ import protocol.swg.UpdatePVPStatusMessage;
 import protocol.swg.chat.ChatSystemMessage;
 import protocol.swg.objectControllerObjects.Animation;
 import protocol.swg.objectControllerObjects.Posture;
+import protocol.swg.objectControllerObjects.StartTask;
 
 import com.sleepycat.je.Environment;
 import com.sleepycat.je.Transaction;
@@ -48,11 +49,13 @@ import com.sleepycat.persist.model.NotPersistent;
 import main.NGECore;
 import engine.clients.Client;
 import resources.common.Cooldown;
+import resources.common.OutOfBand;
 import resources.objects.Buff;
 import resources.objects.DamageOverTime;
 import resources.objects.SWGList;
 import resources.objects.SWGMap;
 import resources.objects.SkillMod;
+import engine.resources.common.CRC;
 import engine.resources.objects.IPersistent;
 import engine.resources.objects.MissionCriticalObject;
 import engine.resources.objects.SWGObject;
@@ -61,6 +64,7 @@ import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
+import services.command.BaseSWGCommand;
 
 @Entity(version=6)
 public class CreatureObject extends TangibleObject implements IPersistent {
@@ -1113,18 +1117,17 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 
 	public void sendSystemMessage(String message, byte displayType) {
-		
-		if(getClient() != null && getClient().getSession() != null) {
-			ChatSystemMessage systemMsg = new ChatSystemMessage(message, displayType);
-			getClient().getSession().write(systemMsg.serialize());
-		}
-		
+		sendSystemMessage(message, new OutOfBand(), displayType);
 	}
 	
-	public void sendSystemMessage(String stfFilename, String stfName, int stat, int displayType) {
+	public void sendSystemMessage(OutOfBand outOfBand, byte displayType) {
+		sendSystemMessage("", outOfBand, displayType);
+	}
+	
+	public void sendSystemMessage(String message, OutOfBand outOfBand, byte displayType) {
 		
 		if(getClient() != null && getClient().getSession() != null) {
-			ChatSystemMessage systemMsg = new ChatSystemMessage(stfFilename, stfName, stat, (byte) displayType);
+			ChatSystemMessage systemMsg = new ChatSystemMessage(message, outOfBand, displayType);
 			getClient().getSession().write(systemMsg.serialize());
 		}
 		
@@ -1740,16 +1743,17 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			if (System.currentTimeMillis() < cooldowns.get(cooldownGroup)) {
 				return true;
 			} else {
-				removeCooldown(cooldownGroup);
+				cooldowns.remove(cooldownGroup);
 			}
 		}
 		
 		return false;
 	}
 	
-	public boolean removeCooldown(String cooldownGroup) {
-		if (cooldowns.containsKey(cooldownGroup)) {
-			cooldowns.remove(cooldownGroup);
+	public boolean removeCooldown(int actionCounter, BaseSWGCommand command) {
+		if (cooldowns.containsKey(command.getCooldownGroup())) {
+			cooldowns.remove(command.getCooldownGroup());
+			getClient().getSession().write(new ObjControllerMessage(0x0B, new StartTask(actionCounter, getObjectID(), command.getCommandCRC(), CRC.StringtoCRC(command.getCooldownGroup()), -1)).serialize());
 			return true;
 		}
 		
@@ -1765,7 +1769,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			if (System.currentTimeMillis() < cooldowns.get(cooldownGroup)) {
 				return (long) (cooldowns.get(cooldownGroup) - System.currentTimeMillis());
 			} else {
-				removeCooldown(cooldownGroup);
+				cooldowns.remove(cooldownGroup);
 			}
 		}
 		

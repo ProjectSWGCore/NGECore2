@@ -19,41 +19,17 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package protocol.swg.chat;
+package resources.datatables;
 
-import java.nio.ByteOrder;
-
-import org.apache.mina.core.buffer.IoBuffer;
-
-import protocol.swg.SWGMessage;
-import resources.common.Opcodes;
-import resources.common.OutOfBand;
-
-public class ChatSystemMessage extends SWGMessage {
+public class DisplayType {
 	
-	private String message;
-	private byte displayType;
-	private OutOfBand outOfBand;
-	
-	public ChatSystemMessage(String message, OutOfBand outOfBand, byte displayType) {
-		this.message = message;
-		this.displayType = displayType;
-		this.outOfBand = outOfBand;
-	}
-	
-	public void deserialize(IoBuffer data) {
-		
-	}
-	
-	public IoBuffer serialize() {
-		IoBuffer outOfBandBuffer = outOfBand.serialize();
-		IoBuffer result = IoBuffer.allocate(7 + getUnicodeString(message).length + outOfBandBuffer.array().length).order(ByteOrder.LITTLE_ENDIAN);
-		result.putShort((short) 2);
-		result.putInt(Opcodes.ChatSystemMessage);
-		result.put(displayType);
-		result.put(getUnicodeString(message));
-		result.put(outOfBandBuffer.array());
-		return result.flip();
-	}
+	public static byte Broadcast = 0; // Level up.  combatspam/skill_up
+	//public static byte Screen = 1; // Screen? XP gain
+	public static byte Chat = 2;
+	//public static byte Overhead = 3; // Flytext? Seen on ent duration
+	//public static byte Combat = 4; // CombatSpam?
+	//public static byte Combat = 5; // Seen in combat flytext
+	//public static byte Combat = 11; // Seen when blocking
 	
 }
+

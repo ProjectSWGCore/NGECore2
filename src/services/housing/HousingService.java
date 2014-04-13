@@ -456,7 +456,8 @@ public class HousingService implements INetworkDispatch {
 		Vector<TangibleObject> itemList = building.getItemsList();
 
 		for (int i=0;i<itemList.size();i++){
-			window.addListBoxMenuItem("#"+(i+1)+": " + itemList.get(i).getTemplate(), i);
+			String itemName = (itemList.get(i).getCustomName() != null) ? itemList.get(i).getCustomName() : "@" + itemList.get(i).getStfFilename() + ":" + itemList.get(i).getStfName();
+			window.addListBoxMenuItem(itemName, i);
 		}		
 
 		window.setProperty("btnOk:visible", "True");
@@ -738,12 +739,6 @@ public class HousingService implements INetworkDispatch {
 		}
 		
 	}
-	
-	public void addItemToHouseItemList(TangibleObject item, SWGObject container){
-		BuildingObject building = (BuildingObject) container.getContainer();
-		building.getItemsList().add(item);
-	}
-	
 	
 	public String fetchPrivacyString(TangibleObject object){
 		final BuildingObject building = (BuildingObject) object.getAttachment("housing_parentstruct");

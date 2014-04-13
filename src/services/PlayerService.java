@@ -61,9 +61,12 @@ import protocol.swg.objectControllerObjects.ShowLootBox;
 import resources.common.FileUtilities;
 import resources.common.ObjControllerOpcodes;
 import resources.common.Opcodes;
+import resources.common.OutOfBand;
+import resources.common.ProsePackage;
 import resources.common.RGB;
 import resources.common.SpawnPoint;
 import resources.common.StringUtilities;
+import resources.datatables.DisplayType;
 import resources.datatables.PlayerFlags;
 import resources.datatables.Professions;
 import resources.guild.Guild;
@@ -807,7 +810,7 @@ public class PlayerService implements INetworkDispatch {
 			creature.setLevel((short) level);
 			core.scriptService.callScript("scripts/collections/", "master_" + player.getProfession(), "addMasterBadge", core, creature);
 			
-			creature.showFlyText("cbt_spam", "skill_up", (float) 2.5, new RGB(154, 205, 50), 0);
+			creature.showFlyText(OutOfBand.ProsePackage("@cbt_spam:skill_up"), 2.5f, new RGB(154, 205, 50), 0, true);
 			creature.playEffectObject("clienteffect/skill_granted.cef", "");
 			creature.playMusic("sound/music_acq_bountyhunter.snd");
 		} catch (InstantiationException | IllegalAccessException e) {
@@ -846,7 +849,7 @@ public class PlayerService implements INetworkDispatch {
 				
 				// 1. Add the experience.
 				if (experience > 0 && !creature.isStationary()) {
-					creature.showFlyText("base_player", "prose_flytext_xp", "", experience, (float) 2.5, new RGB(180, 60, 240), 1);
+					creature.showFlyText(OutOfBand.ProsePackage("@base_player:prose_flytext_xp", experience), 2.5f, new RGB(180, 60, 240), 1, true);
 				}
 				
 				String xpType = ((player.getProfession().contains("entertainer")) ? "entertainer" : ((player.getProfession().contains("trader")) ? "crafting" : "combat_general"));
@@ -881,49 +884,49 @@ public class PlayerService implements INetworkDispatch {
 								
 								if (luck >= 1) {
 									core.skillModService.addSkillMod(creature, "luck", (int) luck);
-									creature.sendSystemMessage("spam", "level_up_stat_gain_0", (int) luck, 0);
+									creature.sendSystemMessage(OutOfBand.ProsePackage("@spam:level_up_stat_gain_0", (int) luck), DisplayType.Broadcast);
 								}
 								
 								if (precision >= 1) {
 									core.skillModService.addSkillMod(creature, "precision", (int) precision);
-									creature.sendSystemMessage("spam", "level_up_stat_gain_1", (int) precision, 0);
+									creature.sendSystemMessage(OutOfBand.ProsePackage("@spam:level_up_stat_gain_1", (int) precision), DisplayType.Broadcast);
 								}
 								
 								if (strength >= 1) {
 									core.skillModService.addSkillMod(creature, "strength", (int) strength);
-									creature.sendSystemMessage("spam", "level_up_stat_gain_2", (int) strength, 0);
+									creature.sendSystemMessage(OutOfBand.ProsePackage("@spam:level_up_stat_gain_2", (int) strength), DisplayType.Broadcast);
 								}
 								
 								if (constitution >= 1) {
 									core.skillModService.addSkillMod(creature, "constitution", (int) constitution);
-									creature.sendSystemMessage("spam", "level_up_stat_gain_3", (int) constitution, 0);
+									creature.sendSystemMessage(OutOfBand.ProsePackage("@spam:level_up_stat_gain_3", (int) constitution), DisplayType.Broadcast);
 								}
 								
 								if (stamina >= 1) {
 									core.skillModService.addSkillMod(creature, "stamina", (int) stamina);
-									creature.sendSystemMessage("spam", "level_up_stat_gain_4", (int) stamina, 0);
+									creature.sendSystemMessage(OutOfBand.ProsePackage("@spam:level_up_stat_gain_4", (int) stamina), DisplayType.Broadcast);
 								}
 								
 								if (agility >= 1) {
 									core.skillModService.addSkillMod(creature, "agility", (int) agility);
-									creature.sendSystemMessage("spam", "level_up_stat_gain_5", (int) agility, 0);
+									creature.sendSystemMessage(OutOfBand.ProsePackage("@spam:level_up_stat_gain_5", (int) agility), DisplayType.Broadcast);
 								}
 								
 								if (health >= 1) {
 									creature.setMaxHealth((creature.getMaxHealth() + (int) health + (healthGranted - creature.getGrantedHealth())));
 									creature.setHealth(creature.getMaxHealth());
-									creature.sendSystemMessage("spam", "level_up_stat_gain_6", (((int) health) + (((int) constitution) * 8) + (((int) stamina) * 2)), 0);
+									creature.sendSystemMessage(OutOfBand.ProsePackage("@spam:level_up_stat_gain_6", (((int) health) + (((int) constitution) * 8) + (((int) stamina) * 2))), DisplayType.Broadcast);
 								}
 								
 								if (action >= 1) {
 									creature.setMaxAction((creature.getMaxAction() + (int) action));
 									creature.setAction(creature.getMaxAction());
-									creature.sendSystemMessage("spam", "level_up_stat_gain_7", (((int) action) + (((int) stamina) * 8) + (((int) constitution) * 2)), 0);
+									creature.sendSystemMessage(OutOfBand.ProsePackage("@spam:level_up_stat_gain_7", (((int) action) + (((int) stamina) * 8) + (((int) constitution) * 2))), DisplayType.Broadcast);
 								}
 								
 								creature.setGrantedHealth(((Integer) experienceTable.getObject(i, 4)));
 								// -> Expertise point added automatically by client
-								creature.showFlyText("cbt_spam", "level_up", (float) 2.5, new RGB(100, 149, 237), 0);
+								creature.showFlyText(OutOfBand.ProsePackage("@cbt_spam:level_up"), 2.5f, new RGB(100, 149, 237), 0, true);
 								
 								// 4. Adds roadmap rewards
 								int level = creature.getLevel();
@@ -946,7 +949,7 @@ public class PlayerService implements INetworkDispatch {
 											}
 										}
 										
-										creature.showFlyText("cbt_spam", "skill_up", (float) 2.5, new RGB(154, 205, 50), 0);
+										creature.showFlyText(OutOfBand.ProsePackage("@cbt_spam:skill_up"), 2.5f, new RGB(154, 205, 50), 0, true);
 										creature.playEffectObject("clienteffect/skill_granted.cef", "");
 										creature.playMusic("sound/music_acq_bountyhunter.snd");
 										core.skillService.addSkill(creature, roadmapSkillName);

@@ -36,6 +36,7 @@ public class NpcConversationMessage extends ObjControllerObject {
 	public NpcConversationMessage(long objectId, OutOfBand outOfBand) {
 		this.objectId = objectId;
 		this.outOfBand = outOfBand;
+		outOfBand.setHeaderBytes(2);
 	}
 
 	@Override
@@ -47,12 +48,10 @@ public class NpcConversationMessage extends ObjControllerObject {
 	public IoBuffer serialize() {
 		IoBuffer outOfBandBuffer = outOfBand.serialize();
 		IoBuffer buffer = IoBuffer.allocate(16 + outOfBandBuffer.array().length).order(ByteOrder.LITTLE_ENDIAN);
-		
 		buffer.putInt(ObjControllerMessage.CONVERSATION_MESSAGE);
 		buffer.putLong(objectId);
 		buffer.putInt(0);
 		buffer.put(outOfBandBuffer.array());
-		System.out.println(buffer.getInt(16));
 		return buffer.flip();
 	}
 
