@@ -397,8 +397,7 @@ public class ObjectService implements INetworkDispatch {
 			
 			float positionY = core.terrainService.getHeight(planet.getID(), position.x, position.z)-1f;
 			Point3D newpoint = new Point3D(position.x,positionY,position.z);			
-			object = new HarvesterObject(objectID, planet, Template, newpoint, orientation);
-			core.harvesterService.addHarvester(object);		
+			object = new HarvesterObject(objectID, planet, Template, newpoint, orientation);	
 			
 		} else {
 			return null;			
