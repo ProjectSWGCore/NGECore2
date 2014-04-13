@@ -332,6 +332,10 @@ public class SimulationService implements INetworkDispatch {
 				}
 				
 				CreatureObject object = (CreatureObject) client.getParent();
+				
+				if (object.mounted)
+					object=object.getMountedVehicle();
+				
 				Point3D newPos;
 				Point3D oldPos;
 				synchronized(object.getMutex()) {

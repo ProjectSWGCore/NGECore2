@@ -1149,7 +1149,8 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer.putLong(ownerId);
 		int size = buffer.position();
 		buffer.flip();
-		buffer = createDelta("CREO", (byte) 3, (short) 1, (short) 0x0D, buffer, size + 4);
+		//buffer = createDelta("CREO", (byte) 3, (short) 1, (short) 0x0D, buffer, size + 4); 0F,12 doesnt crash
+		buffer = createDelta("CREO", (byte) 3, (short) 1, (short) 0x0F, buffer, size + 4); // checked from 0xA up to 0x1F
 		return buffer;
 	}
 	
