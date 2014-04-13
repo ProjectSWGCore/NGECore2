@@ -292,20 +292,35 @@ public class DevService implements INetworkDispatch {
 						return;
 						
 					case 33:
-						WeaponObject heavy = (WeaponObject) core.objectService.createObject("object/weapon/ranged/heavy/shared_som_lava_cannon_generic.iff", planet);
-						heavy.setIntAttribute("required_combat_level", 90);
+						WeaponObject heavy1 = (WeaponObject) core.objectService.createObject("object/weapon/ranged/heavy/shared_som_lava_cannon_generic.iff", planet);
+						heavy1.setIntAttribute("required_combat_level", 90);
 						
-						heavy.setStringAttribute("class_required", "Commando");
-						heavy.setDamageType("kinetic");
-						heavy.setMinDamage(700);
-						heavy.setMaxDamage(1400);
-						heavy.setMaxRange(64);
-						heavy.setAttackSpeed(1);
-						heavy.setElementalType("heat");
-						heavy.setElementalDamage(200);
-						heavy.setWeaponType(12);
+						heavy1.setStringAttribute("class_required", "Commando");
+						heavy1.setDamageType("energy");
+						heavy1.setMinDamage(700);
+						heavy1.setMaxDamage(1400);
+						heavy1.setMaxRange(64);
+						heavy1.setAttackSpeed(1);
+						heavy1.setElementalType("heat");
+						heavy1.setElementalDamage(200);
+						heavy1.setWeaponType(12);
 						
-						inventory.add(heavy);
+						inventory.add(heavy1);
+						
+						WeaponObject heavy2 = (WeaponObject) core.objectService.createObject("object/weapon/ranged/heavy/shared_som_republic_flamer.iff", planet);
+						heavy2.setIntAttribute("required_combat_level", 88);
+						
+						heavy2.setStringAttribute("class_required", "Commando");
+						heavy2.setDamageType("energy");
+						heavy2.setMinDamage(148);
+						heavy2.setMaxDamage(295);
+						heavy2.setMaxRange(20);
+						heavy2.setAttackSpeed((float) 0.25);
+						heavy2.setElementalType("heat");
+						heavy2.setElementalDamage(28);
+						heavy2.setWeaponType(13);
+						
+						inventory.add(heavy2);
 						return;
 					case 40:
 						TangibleObject ring = (TangibleObject) core.objectService.createObject("object/tangible/wearables/ring/shared_ring_s01.iff", planet);
@@ -322,45 +337,15 @@ public class DevService implements INetworkDispatch {
 						inventory.add(backpack);
 						return;
 					case 42:
-						TangibleObject heroismBand = (TangibleObject) core.objectService.createObject("object/tangible/wearables/ring/shared_ring_s01.iff", planet);
-						heroismBand.setStfFilename("static_item_n");
-						heroismBand.setStfName("item_band_set_hero_01_01");
-						heroismBand.setStringAttribute("@set_bonus:piece_bonus_count_3", "@set_bonus:set_bonus_hero_1");
-						heroismBand.setStringAttribute("@set_bonus:piece_bonus_count_4", "@set_bonus:set_bonus_hero_2");
-						heroismBand.setStringAttribute("@set_bonus:piece_bonus_count_5", "@set_bonus:set_bonus_hero_3");
-						heroismBand.setAttachment("setBonus", "set_bonus_hero");
+						TangibleObject heroismBand = (TangibleObject) core.objectService.createObject("object/tangible/wearables/ring/shared_ring_s04.iff", planet, "item_band_set_hero_01_01");
 						
-						TangibleObject heroismRing = (TangibleObject) core.objectService.createObject("object/tangible/wearables/ring/shared_ring_s01.iff", planet);
-						heroismRing.setStfFilename("static_item_n");
-						heroismRing.setStfName("item_ring_set_hero_01_01");
-						heroismRing.setStringAttribute("@set_bonus:piece_bonus_count_3", "@set_bonus:set_bonus_hero_1");
-						heroismRing.setStringAttribute("@set_bonus:piece_bonus_count_4", "@set_bonus:set_bonus_hero_2");
-						heroismRing.setStringAttribute("@set_bonus:piece_bonus_count_5", "@set_bonus:set_bonus_hero_3");
-						heroismRing.setAttachment("setBonus", "set_bonus_hero");
+						TangibleObject heroismRing = (TangibleObject) core.objectService.createObject("object/tangible/wearables/ring/shared_ring_s02.iff", planet, "item_ring_set_hero_01_01");
 						
-						TangibleObject heroismNecklace = (TangibleObject) core.objectService.createObject("object/tangible/wearables/necklace/shared_necklace_s01.iff", planet);
-						heroismNecklace.setStfFilename("static_item_n");
-						heroismNecklace.setStfName("item_necklace_set_hero_01_01");
-						heroismNecklace.setStringAttribute("@set_bonus:piece_bonus_count_3", "@set_bonus:set_bonus_hero_1");
-						heroismNecklace.setStringAttribute("@set_bonus:piece_bonus_count_4", "@set_bonus:set_bonus_hero_2");
-						heroismNecklace.setStringAttribute("@set_bonus:piece_bonus_count_5", "@set_bonus:set_bonus_hero_3");
-						heroismNecklace.setAttachment("setBonus", "set_bonus_hero");
+						TangibleObject heroismNecklace = (TangibleObject) core.objectService.createObject("object/tangible/wearables/necklace/shared_necklace_s10.iff", planet, "item_necklace_set_hero_01_01");
 						
-						TangibleObject heroismBraceletRight = (TangibleObject) core.objectService.createObject("object/tangible/wearables/bracelet/shared_bracelet_s02_r.iff", planet);
-						heroismBraceletRight.setStfFilename("static_item_n");
-						heroismBraceletRight.setStfName("item_bracelet_r_set_hero_01_01");
-						heroismBraceletRight.setStringAttribute("@set_bonus:piece_bonus_count_3", "@set_bonus:set_bonus_hero_1");
-						heroismBraceletRight.setStringAttribute("@set_bonus:piece_bonus_count_4", "@set_bonus:set_bonus_hero_2");
-						heroismBraceletRight.setStringAttribute("@set_bonus:piece_bonus_count_5", "@set_bonus:set_bonus_hero_3");
-						heroismBraceletRight.setAttachment("setBonus", "set_bonus_hero");
+						TangibleObject heroismBraceletRight = (TangibleObject) core.objectService.createObject("object/tangible/wearables/bracelet/shared_bracelet_s03_r.iff", planet, "item_bracelet_r_set_hero_01_01");
 						
-						TangibleObject heroismBraceletLeft = (TangibleObject) core.objectService.createObject("object/tangible/wearables/bracelet/shared_bracelet_s02_l.iff", planet);
-						heroismBraceletLeft.setStfFilename("static_item_n");
-						heroismBraceletLeft.setStfName("item_bracelet_l_set_hero_01_01");
-						heroismBraceletLeft.setStringAttribute("@set_bonus:piece_bonus_count_3", "@set_bonus:set_bonus_hero_1");
-						heroismBraceletLeft.setStringAttribute("@set_bonus:piece_bonus_count_4", "@set_bonus:set_bonus_hero_2");
-						heroismBraceletLeft.setStringAttribute("@set_bonus:piece_bonus_count_5", "@set_bonus:set_bonus_hero_3");
-						heroismBraceletLeft.setAttachment("setBonus", "set_bonus_hero");
+						TangibleObject heroismBraceletLeft = (TangibleObject) core.objectService.createObject("object/tangible/wearables/bracelet/shared_bracelet_s03_l.iff", planet, "item_bracelet_l_set_hero_01_01");
 						
 						inventory.add(heroismBand);
 						inventory.add(heroismRing);
