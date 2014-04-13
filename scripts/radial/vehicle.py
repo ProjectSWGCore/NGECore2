@@ -1,6 +1,5 @@
 from resources.common import RadialOptions
-from resources.common import RadialOptions
-from services.ai import Vehicles
+
 import sys
 
 def createRadial(core, owner, target, radials):

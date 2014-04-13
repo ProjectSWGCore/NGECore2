@@ -34,6 +34,7 @@ import org.apache.mina.core.buffer.IoBuffer;
 
 import protocol.swg.ObjControllerMessage;
 import protocol.swg.PlayMusicMessage;
+import protocol.swg.UpdateContainmentMessage;
 import protocol.swg.UpdatePostureMessage;
 import protocol.swg.UpdatePVPStatusMessage;
 import protocol.swg.chat.ChatSystemMessage;
@@ -50,6 +51,7 @@ import main.NGECore;
 import engine.clients.Client;
 import resources.common.Cooldown;
 import resources.common.OutOfBand;
+import resources.datatables.Options;
 import resources.objects.Buff;
 import resources.objects.DamageOverTime;
 import resources.objects.SWGList;
@@ -66,7 +68,7 @@ import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import services.command.BaseSWGCommand;
 
-@Entity(version=6)
+@Entity(version=7)
 public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	@NotPersistent
@@ -185,6 +187,9 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private TangibleObject conversingNpc;
 	@NotPersistent
 	private ConcurrentHashMap<String, Long> cooldowns = new ConcurrentHashMap<String, Long>();
+	
+	public boolean mounted = false;
+	public CreatureObject mountedVehicle;
 	
 	public CreatureObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
 		super(objectID, planet, Template, position, orientation);
@@ -1779,6 +1784,61 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	public PlayerObject getPlayerObject()
 	{
 		return (PlayerObject) this.getSlottedObject("ghost");
+	}
+	
+	public boolean isMounted() {
+		return mounted;
+	}
+
+	public void setMounted(boolean mounted) {
+		this.mounted = mounted;
+	}
+
+	public CreatureObject getMountedVehicle() {
+		return mountedVehicle;
+	}
+
+	public void setMountedVehicle(CreatureObject mountedVehicle) {
+		this.mountedVehicle = mountedVehicle;
+	}
+	
+	public void mount(CreatureObject owner) {
+		synchronized(objectMutex) {
+			if ((this.getOptionsBitmask() & Options.MOUNT) == Options.MOUNT){
+				UpdateContainmentMessage updateContainmentMessage= new UpdateContainmentMessage(owner.getObjectID(), this.getObjectID(), -1);
+				owner.getClient().getSession().write(updateContainmentMessage.serialize());
+				owner.setParent(this);	
+			}
+		}
+	}
+	
+	public void unmount(CreatureObject owner) {
+		synchronized(objectMutex) {
+			if ((this.getOptionsBitmask() & Options.MOUNT) == Options.MOUNT){
+				UpdateContainmentMessage updateContainmentMessage= new UpdateContainmentMessage(owner.getObjectID(), this.getObjectID(), -1);
+				owner.getClient().getSession().write(updateContainmentMessage.serialize());
+			}
+		}
+	}
+	
+	public void initMount(CreatureObject owner) {
+		synchronized(objectMutex) {
+			this.ownerId = owner.getObjectID();
+			setStateBitmask(0x10000000);
+			owner.setParent(this);
+			owner.getClient().getSession().write(messageBuilder.buildOwnerIdDelta(ownerId));
+			owner.setMountedVehicle(this);
+			this.setOwnerId(owner.getObjectID());
+						//this.add(owner); // NPE at engine.resources.objects.SWGObject.getCorrectArrangementId(kd:844)
+			this.mount(owner);
+						//			setStateBitmask(28);
+						//			owner.setStateBitmask(27);		
+			owner.setStateBitmask(0x8000000);
+			this.setPosture((byte)10);
+			
+			//this.sendBaselines(owner.getClient());
+			
+		}
 	}
 	
 	//public float getCooldown(String cooldownGroup) {

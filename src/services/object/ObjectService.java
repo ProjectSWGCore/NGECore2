@@ -428,24 +428,32 @@ public class ObjectService implements INetworkDispatch {
 		if (Template.startsWith("object/creature/") || Template.startsWith("object/mobile/")) {
 			if (Template.startsWith("object/mobile/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.ATTACKABLE);
-			} else if (Template.startsWith("object/mobile/beast_master/")) {
+			}
+			if (Template.startsWith("object/mobile/beast_master/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.NONE);
-			} else if (Template.startsWith("object/mobile/vendor/")) {
+			}
+			if (Template.startsWith("object/mobile/vendor/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.INVULNERABLE | Options.USABLE);
-			} else if (Template.startsWith("object/mobile/vehicle/")) {
+			}
+			if (Template.startsWith("object/mobile/vehicle/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.ATTACKABLE | Options.MOUNT);
-				System.err.println("Options.MOUNT");
-			} else if (Template.startsWith("object/mobile/hologram/")) {
+			}
+			if (Template.startsWith("object/mobile/hologram/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.INVULNERABLE);
-			} else if (Template.startsWith("object/creature/npc/theme_park/")) {
+			}
+			if (Template.startsWith("object/creature/npc/theme_park/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.INVULNERABLE);
-			} else if (Template.startsWith("object/creature/npc/general/")) {
+			}
+			if (Template.startsWith("object/creature/npc/general/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.INVULNERABLE | Options.CONVERSABLE);
-			}  else if (Template.startsWith("object/creature/droid/crafted/")) {
+			}
+			if (Template.startsWith("object/creature/droid/crafted/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.NONE);
-			} else if (Template.startsWith("object/creature/droid/")) {
+			}
+			if (Template.startsWith("object/creature/droid/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.ATTACKABLE | Options.INVULNERABLE);
-			} else if (Template.startsWith("object/creature/player/")) {
+			}
+			if (Template.startsWith("object/creature/player/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.ATTACKABLE);
 			}
 		} else if (object instanceof TangibleObject) {

@@ -82,6 +82,8 @@ public class TangibleObject extends SWGObject {
 	private boolean looted = false;
 	private boolean lootLock = false;
 	
+	private String serialNumber;
+	
 	@NotPersistent
 	private TangibleObject killer = null;
 	
@@ -468,6 +470,14 @@ public class TangibleObject extends SWGObject {
 
 	public void setLootLock(boolean lootLock) {
 		this.lootLock = lootLock;
+	}
+	
+	public String getSerialNumber() {
+		return serialNumber;
+	}
+
+	public void setSerialNumber(String serialNumber) {
+		this.serialNumber = serialNumber;
 	}
 	
 	
