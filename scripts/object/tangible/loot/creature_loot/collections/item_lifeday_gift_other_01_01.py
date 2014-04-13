@@ -6,5 +6,5 @@ def setup(core, object):
 	object.setCustomName('Life Day Gift Box For A Friend')
 	object.setIntAttribute('volume', 1)
 	object.setIntAttribute('tier', 2)
-	object.setAttachment('radial_filename', 'lifeday_gift')
+	object.setAttachment('radial_filename', 'holidays/lifeday/lifeday_gift')
 	return
