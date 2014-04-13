@@ -8,7 +8,7 @@ def addTemplate(core):
 	templates.add('object/mobile/shared_kaadu.iff')
 	mobileTemplate.setCreatureName('kaadu')
 	mobileTemplate.setTemplates(templates)
-	mobileTemplate.setLevel(10)
+	mobileTemplate.setLevel(14)
 	attacks = Vector()
 	mobileTemplate.setDefaultAttack('defaultCreatureAttack')
 	mobileTemplate.setAttacks(attacks)
