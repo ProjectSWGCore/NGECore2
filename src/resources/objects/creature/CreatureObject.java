@@ -83,7 +83,6 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 
 	// CREO 3
 	private byte posture = 0;
-	private int factionStatus = 0;
 	private float height;
 	private int battleFatigue = 0;
 	private long stateBitmask = 0;
@@ -474,13 +473,8 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		notifyObservers(messageBuilder.buildFactionDelta(faction), true);
 		//updatePvpStatus();
 	}
-
-	public int getFactionStatus() {
-		synchronized(objectMutex) {
-			return factionStatus;
-		}
-	}
-
+	
+	@Override
 	public void setFactionStatus(int factionStatus) {
 		synchronized(objectMutex) {
 			this.factionStatus = factionStatus;
@@ -489,7 +483,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		notifyObservers(messageBuilder.buildFactionStatusDelta(factionStatus), true);
 		//updatePvpStatus();
 	}
-
+	
 	public float getHeight() {
 		synchronized(objectMutex) {
 			return height;

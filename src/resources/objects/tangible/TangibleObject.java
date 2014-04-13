@@ -68,6 +68,7 @@ public class TangibleObject extends SWGObject {
 	private int maxDamage = 1000;
 	private boolean staticObject = true;
 	protected String faction = ""; // Says you're "Imperial Special Forces" if it's 0 for some reason
+	protected int factionStatus = 0;
 	@NotPersistent
 	private Vector<TangibleObject> defendersList = new Vector<TangibleObject>();	// unused in packets but useful for the server
 	@NotPersistent
@@ -311,7 +312,19 @@ public class TangibleObject extends SWGObject {
 		
 		updatePvpStatus();
 	}
-
+	
+	public int getFactionStatus() {
+		synchronized(objectMutex) {
+			return factionStatus;
+		}
+	}
+	
+	public void setFactionStatus(int factionStatus) {
+		synchronized(objectMutex) {
+			this.factionStatus = factionStatus;
+		}
+	}
+	
 	public Vector<TangibleObject> getDefendersList() {
 	    synchronized(objectMutex) {
     			return defendersList;
