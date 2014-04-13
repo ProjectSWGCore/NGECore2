@@ -98,14 +98,17 @@ import main.NGECore;
 import resources.objects.Delta;
 import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
+import resources.objects.craft.DraftSchematic;
 import resources.objects.creature.CreatureObject;
 import resources.objects.deed.Harvester_Deed;
 import resources.objects.deed.Player_House_Deed;
+import resources.objects.factorycrate.FactoryCrateObject;
 import resources.objects.group.GroupObject;
 import resources.objects.guild.GuildObject;
 import resources.objects.harvester.HarvesterObject;
 import resources.objects.installation.InstallationObject;
 import resources.objects.intangible.IntangibleObject;
+import resources.objects.manufacture.ManufactureSchematicObject;
 import resources.objects.mission.MissionObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.resource.GalacticResource;
@@ -384,6 +387,18 @@ public class ObjectService implements INetworkDispatch {
 		} else if(Template.startsWith("object/resource_container")) {
 			
 			object = new ResourceContainerObject(objectID, planet, Template, position, orientation);
+			
+		} else if(Template.startsWith("object/factory/shared_factory_crate")) {
+			
+			object = new FactoryCrateObject(objectID, planet, Template, position, orientation);
+			
+		} else if(Template.startsWith("object/draft_schematic")) {
+			
+			object = new DraftSchematic(objectID, planet, Template, position, orientation);
+			
+		} else if(Template.startsWith("object/manufacture_schematic")) {
+			
+			object = new ManufactureSchematicObject(objectID, planet, Template, position, orientation);
 			
 		} else if(Template.startsWith("object/installation/mining_ore/construction")) {
 			
