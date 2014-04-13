@@ -21,6 +21,7 @@
  ******************************************************************************/
 package services.resources;
 
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -34,11 +35,16 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.mina.core.buffer.IoBuffer;
+import org.apache.mina.core.session.IoSession;
+
 import protocol.swg.EnterStructurePlacementModeMessage;
 import protocol.swg.SceneCreateObjectByCrc;
 import protocol.swg.SceneDestroyObject;
 import protocol.swg.SceneEndBaselines;
+import protocol.swg.objectControllerObjects.CommandEnqueue;
 import main.NGECore;
+import engine.clients.Client;
 import engine.resources.common.CRC;
 import engine.resources.container.Traverser;
 import engine.resources.objects.SWGObject;
@@ -46,6 +52,7 @@ import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
+import resources.common.ObjControllerOpcodes;
 import resources.objects.creature.CreatureObject;
 import resources.objects.deed.Harvester_Deed;
 import resources.objects.harvester.HarvesterMessageBuilder;
@@ -92,6 +99,42 @@ public class HarvesterService implements INetworkDispatch {
 	@Override
 	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> swgOpcodes, Map<Integer, INetworkRemoteEvent> objControllerOpcodes) {
 		
+		objControllerOpcodes.put(ObjControllerOpcodes.RESOURCE_EMPTY_HOPPER, new INetworkRemoteEvent() {
+			
+			@Override
+			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
+				data.order(ByteOrder.LITTLE_ENDIAN);
+				Client client = core.getClient(session);
+				
+//				StringBuilder sb = new StringBuilder();
+//			    for (byte b : data.array()) {
+//			        sb.append(String.format("%02X ", b));
+//			    }
+//			    System.out.println(sb.toString());
+			    
+			    /*
+			    05 00 46 5E CE 80 83 00   00 00 ED 00 00 00 3E 45 
+			    04 00 00 00 00 00 00 00   00 00 3E 45 04 00 00 00 
+			    00 00 90 52 05 00 00 00   00 00 D7 35 05 00 00 00 
+			    00 00 01 00 00 00 00 07			    
+			    */
+			    
+			    long playerId = data.getLong(); // 3E 45 04 00 00 00 00 00
+			    data.getInt();   // 00 00 00 00
+			    data.getLong(); // 3E 45 04 00 00 00 00 00
+			    long harvesterId = data.getLong(); // 1E 55 05 00 00 00 00 00
+			    //long containerId = data.getLong(); // 1E 55 05 00 00 00 00 00  	Resources ID 
+			    long resourceId = data.getLong(); // 1E 55 05 00 00 00 00 00  	Resources ID
+			    int stackCount = data.getInt();   // Stack count
+			    byte actionMode = data.get();     // 0 for retrieving, 1 for discarding 
+			    byte updateCount = data.get();     // updateCount
+			    
+				CreatureObject actor = (CreatureObject) client.getParent();
+				SWGObject target = core.objectService.getObject(harvesterId);
+				
+				handleEmptyHopper(actor, target, harvesterId, resourceId, stackCount, actionMode, updateCount);
+			}
+		});
 		
 	}
 
