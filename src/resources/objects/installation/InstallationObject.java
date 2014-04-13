@@ -22,7 +22,6 @@
 package resources.objects.installation;
 
 import com.sleepycat.persist.model.Entity;
-import com.sleepycat.persist.model.Persistent;
 
 import engine.clients.Client;
 import engine.resources.scene.Planet;

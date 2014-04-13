@@ -42,7 +42,6 @@ import protocol.swg.EnterStructurePlacementModeMessage;
 import protocol.swg.SceneCreateObjectByCrc;
 import protocol.swg.SceneDestroyObject;
 import protocol.swg.SceneEndBaselines;
-import protocol.swg.objectControllerObjects.CommandEnqueue;
 import main.NGECore;
 import engine.clients.Client;
 import engine.resources.common.CRC;
@@ -243,7 +242,6 @@ public class HarvesterService implements INetworkDispatch {
 		returnList.add("List.lstList:SelectedRow");
 		
 		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, new SUICallback() {
-			@SuppressWarnings("unchecked")
 			@Override
 			public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
 				core.suiService.closeSUIWindow(owner, 0);
@@ -290,7 +288,6 @@ public class HarvesterService implements INetworkDispatch {
 		returnList.add("transaction.txtInputFrom:Text");
 		returnList.add("transaction.txtInputTo:Text");
 		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, new SUICallback() {
-			@SuppressWarnings("unchecked")
 			@Override
 			public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
 				CreatureObject crafter = (CreatureObject)owner;
@@ -305,7 +302,6 @@ public class HarvesterService implements INetworkDispatch {
 			}					
 		});		
 		window.addHandler(1, "", Trigger.TRIGGER_CANCEL, returnList, new SUICallback() {
-			@SuppressWarnings("unchecked")
 			@Override
 			public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
 				CreatureObject crafter = (CreatureObject)owner;
@@ -322,7 +318,6 @@ public class HarvesterService implements INetworkDispatch {
 		returnList.add("txtInput:LocalText");	
 		final TangibleObject outerSurveyTool = target;
 		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, new SUICallback() {
-			@SuppressWarnings("unchecked")
 			@Override
 			public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
 				core.harvesterService.handleSetName((CreatureObject)owner, (TangibleObject)outerSurveyTool,returnList.get(0));
@@ -370,7 +365,6 @@ public class HarvesterService implements INetworkDispatch {
 		Vector<String> returnList = new Vector<String>();
 		returnList.add("List.lstList:SelectedRow");	
 		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, new SUICallback() {
-			@SuppressWarnings("unchecked")
 			@Override
 			public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
 				core.suiService.closeSUIWindow(owner, 0);
@@ -378,7 +372,6 @@ public class HarvesterService implements INetworkDispatch {
 			}					
 		});		
 		window.addHandler(1, "", Trigger.TRIGGER_CANCEL, returnList, new SUICallback() {
-			@SuppressWarnings("unchecked")
 			@Override
 			public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
 				core.suiService.closeSUIWindow(owner, 0);
@@ -409,7 +402,6 @@ public class HarvesterService implements INetworkDispatch {
 			returnList.add("txtInput:LocalText");
 			
 			window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, new SUICallback() {
-				@SuppressWarnings("unchecked")
 				@Override
 				public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
 					CreatureObject crafter = (CreatureObject)owner;
@@ -450,7 +442,6 @@ public class HarvesterService implements INetworkDispatch {
 				}					
 			});		
 			window.addHandler(1, "", Trigger.TRIGGER_CANCEL, returnList, new SUICallback() {
-				@SuppressWarnings("unchecked")
 				@Override
 				public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
 					core.suiService.closeSUIWindow(owner, 0);
@@ -510,7 +501,6 @@ public class HarvesterService implements INetworkDispatch {
 		returnList.add("transaction.txtInputFrom:Text");
 		returnList.add("transaction.txtInputTo:Text");
 		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, new SUICallback() {
-			@SuppressWarnings("unchecked")
 			@Override
 			public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
 				CreatureObject crafter = (CreatureObject)owner;
@@ -522,7 +512,6 @@ public class HarvesterService implements INetworkDispatch {
 			}					
 		});		
 		window.addHandler(1, "", Trigger.TRIGGER_CANCEL, returnList, new SUICallback() {
-			@SuppressWarnings("unchecked")
 			@Override
 			public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
 				core.suiService.closeSUIWindow(owner, 0);

@@ -37,19 +37,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import main.NGECore;
 import protocol.swg.EnterStructurePlacementModeMessage;
-import protocol.swg.SceneCreateObjectByCrc;
-import protocol.swg.SceneDestroyObject;
 import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
-import resources.objects.deed.Harvester_Deed;
 import resources.objects.deed.Player_House_Deed;
-import resources.objects.harvester.HarvesterObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import services.sui.SUIWindow;
 import services.sui.SUIWindow.SUICallback;
 import services.sui.SUIWindow.Trigger;
-import engine.resources.common.CRC;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
@@ -217,7 +212,6 @@ public class HousingService implements INetworkDispatch {
 		Vector<String> returnList = new Vector<String>();
 		returnList.add("List.lstList:SelectedRow");	
 		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, new SUICallback() {
-			@SuppressWarnings("unchecked")
 			@Override
 			public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
 				core.suiService.closeSUIWindow(owner, 0);
@@ -225,7 +219,6 @@ public class HousingService implements INetworkDispatch {
 			}					
 		});		
 		window.addHandler(1, "", Trigger.TRIGGER_CANCEL, returnList, new SUICallback() {
-			@SuppressWarnings("unchecked")
 			@Override
 			public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
 				core.suiService.closeSUIWindow(owner, 0);
@@ -255,7 +248,6 @@ public class HousingService implements INetworkDispatch {
 		returnList.add("txtInput:LocalText");
 		
 		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, new SUICallback() {
-			@SuppressWarnings("unchecked")
 			@Override
 			public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
 				CreatureObject crafter = (CreatureObject)owner;
@@ -294,7 +286,6 @@ public class HousingService implements INetworkDispatch {
 			}					
 		});		
 		window.addHandler(1, "", Trigger.TRIGGER_CANCEL, returnList, new SUICallback() {
-			@SuppressWarnings("unchecked")
 			@Override
 			public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
 				core.suiService.closeSUIWindow(owner, 0);
@@ -341,7 +332,6 @@ public class HousingService implements INetworkDispatch {
 		returnList.add("transaction.txtInputFrom:Text");
 		returnList.add("transaction.txtInputTo:Text");
 		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, new SUICallback() {
-			@SuppressWarnings("unchecked")
 			@Override
 			public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
 				CreatureObject crafter = (CreatureObject)owner;
@@ -355,7 +345,6 @@ public class HousingService implements INetworkDispatch {
 			}					
 		});		
 		window.addHandler(1, "", Trigger.TRIGGER_CANCEL, returnList, new SUICallback() {
-			@SuppressWarnings("unchecked")
 			@Override
 			public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
 				core.suiService.closeSUIWindow(owner, 0);
@@ -370,7 +359,6 @@ public class HousingService implements INetworkDispatch {
 		returnList.add("txtInput:LocalText");	
 		final TangibleObject outerSurveyTool = target;
 		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, new SUICallback() {
-			@SuppressWarnings("unchecked")
 			@Override
 			public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
 				core.housingService.handleSetName((CreatureObject)owner, (TangibleObject)outerSurveyTool,returnList.get(0));
@@ -429,7 +417,6 @@ public class HousingService implements INetworkDispatch {
 		returnList.add("List.lstList:SelectedRow");
 		
 		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, new SUICallback() {
-			@SuppressWarnings("unchecked")
 			@Override
 			public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
 				core.suiService.closeSUIWindow(owner, 0);

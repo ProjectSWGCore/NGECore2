@@ -659,7 +659,7 @@ public class ObjectService implements INetworkDispatch {
 		return core.getCreatureODB().get(new Long(objectId), Long.class, CreatureObject.class);
 	}
 	
-	private long generateObjectID() {
+	public long generateObjectID() {
 		/*Random random = new Random();
 		
 		long objectID = random.nextInt();
