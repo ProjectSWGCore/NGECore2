@@ -15,19 +15,6 @@ def createRadial(core, owner, target, radials):
 	
 def handleSelection(core, owner, target, option):
 	if target:
-<<<<<<< HEAD
-		if option == 21 or option == 40:
-			#owner.setPosture(16)
-			owner.setMounted(1)
-			#owner.setParent(target)
-			target.initMount(owner)	
-			#target.add(owner)
-			#target.setOwner(owner)
-			#Vehicles.testbike(owner,target)
-			
-			#target.unmount(owner)
-			#core.objectService.useObject(owner, target)
-=======
 		if option == 208:
 			if not owner.isMounted():
 				owner.setMounted(1)
@@ -35,7 +22,6 @@ def handleSelection(core, owner, target, option):
 			else:
 				target.unmount(owner)
 			
->>>>>>> upstream/master
 		if option == 60:
 			if owner.isMounted(): vehicleObject.unmount(owner)
 			core.objectService.destroyObject(target)
