@@ -619,40 +619,10 @@ public class CommandService implements INetworkDispatch  {
 			    int slotNumber = data.getInt(); 
 			    int option = data.getInt();
 			    byte sequence = data.get();
-				core.craftingService.handleCraftFillSlot(playerId, ingredientId, slotNumber, option, sequence);
+//core.craftingService.handleCraftFillSlot(playerId, ingredientId, slotNumber, option, sequence);
 			}
+		});	
 
-		});
-		
-		/*
-		NGE break by cAble 
-
-		05 00 #Operand
-		46 5E CE 80 #ObjCon
-		83 00 00 00 
-		07 01 00 00 #CraftFillSlot
-		00 2E E9 E9 31 00 00 00 
-		00 00 00 00 #unknown
-		16 A5 C8 50 32 00 00 00 #ObjectID for Ingredient
-		01 00 00 00 #Slot01
-		00 00 00 00 #Option
-		85 #sequence
-		
-		
-		
-		05 00 #Operand
-		46 5E CE 80 #ObjCon
-		83 00 00 00 
-		07 01 00 00 #CraftFillSlot
-		00 2E E9 E9 31 00 00 00 #CharacterID
-		00 00 00 00 #Unknown
-		9D 3F EB F9 3A 00 00 00 #ObjectID for Ingredient
-		02 00 00 00 #Slot02
-		00 00 00 00 #Option
-		86 #Sequence
-		 */
-			
-		
 		objControllerOpcodes.put(ObjControllerOpcodes.CRAFT_EMPTYSLOT, new INetworkRemoteEvent() {
 
 			@Override
@@ -670,25 +640,12 @@ public class CommandService implements INetworkDispatch  {
 				CreatureObject actor = (CreatureObject) client.getParent();
 				SWGObject target = core.objectService.getObject(commandEnqueue.getTargetID());
 				
-//				System.out.println("CRAFTEMPTY");
-//				StringBuilder sb = new StringBuilder();
-//			    for (byte b : data.array()) {
-//			        sb.append(String.format("%02X ", b));
-//			    }
-//			    System.out.println(sb.toString());
-
-			    
-//			    05 00 46 5E CE 80 83 00   00 00 08 01 00 00 B4 A1 
-//			    0B 00 00 00 00 00 00 00   00 00 01 00 00 00 B7 A1 
-//			    0B 00 00 00 00 00 02 00   00 00 00 00 00 00 00 00 
-//			    00 00 00 00 00 00 00 00   00 00 00 00 
-
 			    long playerId = data.getLong(); 
 			    data.getInt();   // 00 00 00 00
 			    int slotNumber = data.getInt(); 
 			    long ingredientId = data.getLong(); 			    
 			    byte sequence = data.get();		
-				core.craftingService.handleCraftEmptySlot(playerId, ingredientId, slotNumber, sequence);
+//core.craftingService.handleCraftEmptySlot(playerId, ingredientId, slotNumber, sequence);
 			}
 
 		});	
@@ -703,12 +660,6 @@ public class CommandService implements INetworkDispatch  {
 					System.out.println("NULL Client");
 					return;
 				}
-
-//				StringBuilder sb = new StringBuilder();
-//			    for (byte b : data.array()) {
-//			        sb.append(String.format("%02X ", b));
-//			    }
-//			    System.out.println(sb.toString());
 
 			    long playerId = data.getLong(); 
 			    data.getInt();   // 00 00 00 00 UTF-16LE
@@ -736,7 +687,7 @@ public class CommandService implements INetworkDispatch  {
 					int customizationValue = data.getInt(); 
 				}
 
-				core.craftingService.handleCraftCustomization(playerId,enteredName,modelNumber,schematicQuantity,customizationList);
+//core.craftingService.handleCraftCustomization(playerId,enteredName,modelNumber,schematicQuantity,customizationList);
 			}
 
 		});
