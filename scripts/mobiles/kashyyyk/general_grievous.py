@@ -7,7 +7,7 @@ def addTemplate(core):
 	templates.add('object/mobile/ep3/shared_general_grievous.iff')
 	mobileTemplate.setCreatureName('general_grievous')
 	mobileTemplate.setTemplates(templates)
-	mobileTemplate.setLevel(59)
+	mobileTemplate.setLevel(80)
 	attacks = Vector()
 	mobileTemplate.setDefaultAttack('defaultCreatureAttack')
 	mobileTemplate.setAttacks(attacks)
