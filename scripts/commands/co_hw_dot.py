@@ -18,7 +18,7 @@ def run(core, actor, target, commandString):
 	elementalType = weapon.getElementalType()
 	commandName = ''
 	
-	if elementalType == '@obj_attr_n:elemental_heat':
+	if elementalType == 'heat':
 		if actor.getLevel() >= 58:
 			commandName = 'co_hw_dot_fire_1'
 		if actor.getLevel() >= 60:
@@ -29,7 +29,7 @@ def run(core, actor, target, commandString):
 			commandName = 'co_hw_dot_fire_4'
 		if actor.getLevel() >= 90:
 			commandName = 'co_hw_dot_fire_5'
-	elif elementalType == '@obj_attr_n:elemental_cold':
+	elif elementalType == 'cold':
 		if actor.getLevel() >= 58:
 			commandName = 'co_hw_dot_cold_1'
 		if actor.getLevel() >= 60:
@@ -40,7 +40,7 @@ def run(core, actor, target, commandString):
 			commandName = 'co_hw_dot_cold_4'
 		if actor.getLevel() >= 90:
 			commandName = 'co_hw_dot_cold_5'
-	elif elementalType == '@obj_attr_n:elemental_acid':
+	elif elementalType == 'acid':
 		if actor.getLevel() >= 58:
 			commandName = 'co_hw_dot_acid_1'
 		if actor.getLevel() >= 60:
@@ -51,7 +51,7 @@ def run(core, actor, target, commandString):
 			commandName = 'co_hw_dot_acid_4'
 		if actor.getLevel() >= 90:
 			commandName = 'co_hw_dot_acid_5'
-	elif elementalType == '@obj_attr_n:elemental_electricity':
+	elif elementalType == 'electricity':
 		if actor.getLevel() >= 58:
 			commandName = 'co_hw_dot_electrical_1'
 		if actor.getLevel() >= 60:
@@ -62,7 +62,7 @@ def run(core, actor, target, commandString):
 			commandName = 'co_hw_dot_electrical_4'
 		if actor.getLevel() >= 90:
 			commandName = 'co_hw_dot_electrical_5'
-	elif elementalType == '@obj_attr_n:elemental_energy':
+	elif elementalType == 'energy':
 		if actor.getLevel() >= 58:
 			commandName = 'co_hw_dot_energy_1'
 		if actor.getLevel() >= 60:
@@ -73,7 +73,7 @@ def run(core, actor, target, commandString):
 			commandName = 'co_hw_dot_energy_4'
 		if actor.getLevel() >= 90:
 			commandName = 'co_hw_dot_energy_5'
-	elif elementalType =='@obj_attr_n:elemental_kinetic':
+	elif elementalType =='kinetic':
 		if actor.getLevel() >= 58:
 			commandName = 'co_hw_dot_kinetic_1'
 		if actor.getLevel() >= 60:

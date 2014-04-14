@@ -763,6 +763,15 @@ public class SimulationService implements INetworkDispatch {
 				core.combatService.handleEndDuel(object, opponent, true);
 			}
 		}
+		System.out.print(object.getAttachment("activeVehicleID"));
+		
+		if(object.getAttachment("activeVehicleID") != null) 
+		{
+			if(object.isMounted()) object.getMountedVehicle().unmount(object);
+			long vehicleID = ((java.math.BigInteger) object.getAttachment("activeVehicleID")).longValue();
+			core.objectService.destroyObject(vehicleID);
+			object.setAttachment("activeVehicleID", null);	
+		}
 		
 		/*
 		object.createTransaction(core.getCreatureODB().getEnvironment());

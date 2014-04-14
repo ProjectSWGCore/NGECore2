@@ -43,5 +43,16 @@ public class ObjControllerOpcodes {
 	public static final int NPC_CONVERSATION_OPTIONS = 0xE0000000;
 	public static final int SET_PROFESSION_TEMPLATE = 0x5C040000;
 	public static final int RESOURCE_EMPTY_HOPPER = 0xED000000;
+	public static final int DRAFT_SCHEMATICS = 0x0102;
+	public static final int DRAFT_SLOTS = 0x0103;
+	public static final int CRAFT_EXPERIMENT = 0x0106;
+	public static final int CRAFT_FILLSLOT = 0x7010000;
+	public static final int CRAFT_EMPTYSLOT = 0x8010000;
+	public static final int CRAFT_ACKNOWLEDGE = 0x010C;
+	public static final int CRAFT_CUSTOMIZATION = 0x5a010000;
+	public static final int NEXT_CRAFTING_STAGE_RESULT = 0x01BE;
+	public static final int DRAFT_SLOTS_QUERY_RESPONSE = 0x01BF;
+	public static final int RESOURCE_WEIGHTS = 0x0207;
+
 	
 }

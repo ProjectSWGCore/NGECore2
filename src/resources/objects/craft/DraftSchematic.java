@@ -19,25 +19,28 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package resources.objects.installation;
+package resources.objects.craft;
 
-import com.sleepycat.persist.model.Entity;
-
+import com.sleepycat.persist.model.Persistent;
 import engine.clients.Client;
+import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
-import resources.objects.tangible.TangibleObject;
 
-@Entity(version=0)
-public class InstallationObject extends TangibleObject {
+@Persistent
+public class DraftSchematic extends SWGObject {
 	
-	public InstallationObject(long objectID, Planet planet, String template, Point3D position, Quaternion orientation){
-		super(objectID, planet, template, position, orientation);		
-	}	
 	
+	public DraftSchematic(long objectID, Planet planet, String template, Point3D position, Quaternion orientation){
+		super(objectID, planet, position, orientation, template);
+	}
+
 	@Override
-	public void sendBaselines(Client destination) {
+	public void sendBaselines(Client arg0) {
+		// TODO Auto-generated method stub
 		
 	}
+	
+	
 }

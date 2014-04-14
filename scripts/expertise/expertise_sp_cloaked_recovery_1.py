@@ -1,15 +1,15 @@
 import sys
 
 def addAbilities(core, actor, player):
-	if actor.getLevel() >= 26:
+	if actor.getLevel() >= 10:
 		actor.addAbility("sp_cloaked_recovery_0")
-	if actor.getLevel() >= 34:
+	if actor.getLevel() >= 28:
 		actor.addAbility("sp_cloaked_recovery_1")
-	if actor.getLevel() >= 48:
+	if actor.getLevel() >= 54:
 		actor.addAbility("sp_cloaked_recovery_2")
-	if actor.getLevel() >= 62:
+	if actor.getLevel() >= 70:
 		actor.addAbility("sp_cloaked_recovery_3")
-	if actor.getLevel() >= 76:
+	if actor.getLevel() >= 86:
 		actor.addAbility("sp_cloaked_recovery_4")
 	return
 

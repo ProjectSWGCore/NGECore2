@@ -1799,18 +1799,26 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		this.mountedVehicle = mountedVehicle;
 	}
 	
+	public boolean canMount(CreatureObject vehicle)
+	{
+		if(vehicle.getOwnerId() == this.getObjectId()) return true;	
+		return false;
+	}
+	
 	public void mount(CreatureObject owner) {
 		boolean remove = false;
-		synchronized(objectMutex) {
-			if ((this.getOptionsBitmask() & Options.MOUNT) == Options.MOUNT){
+		synchronized(objectMutex)
+		{
+			if ((this.getOptionsBitmask() & Options.MOUNT) == Options.MOUNT)
+			{
 				remove = true;
 				_add(owner);
 				UpdateContainmentMessage updateContainmentMessage = new UpdateContainmentMessage(owner.getObjectID(), this.getObjectID(), 4);
 				notifyObservers(updateContainmentMessage, true);
 			}
 		}
-		if(remove)
-			NGECore.getInstance().simulationService.remove(owner, owner.getWorldPosition().x, owner.getWorldPosition().z, false);
+		
+		if(remove) NGECore.getInstance().simulationService.remove(owner, owner.getWorldPosition().x, owner.getWorldPosition().z, false);
 	}
 	
 	public void unmount(CreatureObject owner) {
@@ -1835,19 +1843,13 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	public void initMount(CreatureObject owner) {
 		synchronized(objectMutex) {
-			this.ownerId = owner.getObjectID();
 			setStateBitmask(0x10000000);
 			owner.setMountedVehicle(this);
-			this.setOwnerId(owner.getObjectID());
-						//this.add(owner); // NPE at engine.resources.objects.SWGObject.getCorrectArrangementId(kd:844)
+
 			this.mount(owner);
-						//			setStateBitmask(28);
-						//			owner.setStateBitmask(27);		
+	
 			owner.setStateBitmask(0x8000000);
 			this.setPosture((byte)10);
-			
-			//this.sendBaselines(owner.getClient());
-			
 		}
 	}
 	
