@@ -291,7 +291,6 @@ public class LootService implements INetworkDispatch {
     		}
     		handleStats(droppedItem, itemStats);
     	}
-    	
     	if (customizationValues!=null)
     		setCustomization(droppedItem, itemName);
     	
@@ -416,8 +415,13 @@ public class LootService implements INetworkDispatch {
 		// This must be considered for the python scripts as well
 		// So basically every item needs to have loot-related data in their py scripts as well
 		
-		if (droppedItem instanceof WeaponObject){
+		droppedItem.setTemplate("object/weapon/ranged/rifle/shared_rifle_cdef.iff");
+		if (droppedItem.getTemplate().contains("/weapon")){
+			System.out.println("Wep template rec");
+			
+			//droppedItem.setStringAttribute("cat_wpn_damage.wpn_elemental_type", "ENERGY");
 			WeaponObject weaponObject = (WeaponObject) droppedItem;
+			droppedItem.setMaxDamage(1000);
 			for (int i=0;i<itemStats.size()%3;i++){
 				String statName = itemStats.get(i);
 				String minValue = itemStats.get(i+1);
@@ -434,12 +438,14 @@ public class LootService implements INetworkDispatch {
 		if (lootedObject instanceof CreatureObject){
 			CreatureObject lootedCreature = (CreatureObject) lootedObject;
 			int creatureCL = lootedCreature.getLevel();
-			if (creatureCL==0)
+			if (creatureCL<=0)
 				creatureCL=1;
 			//creatureCL = 90;
 			int maximalCredits = (int)Math.floor(4*creatureCL + creatureCL*creatureCL*4/100); 
 			int minimalCredits = (int)Math.floor(creatureCL*2 + maximalCredits/2); 
-			int spanOfCredits  = maximalCredits - minimalCredits;			
+			int spanOfCredits  = maximalCredits - minimalCredits;
+			if (spanOfCredits<=0)
+				spanOfCredits=1;
 			lootedCredits = minimalCredits + new Random().nextInt(spanOfCredits);
 			requester.setCashCredits(requester.getCashCredits()+lootedCredits);
 			requester.sendSystemMessage("You looted " + lootedCredits + " credits.", (byte)1); 
