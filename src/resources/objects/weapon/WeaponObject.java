@@ -124,7 +124,7 @@ public class WeaponObject extends TangibleObject {
 	}
 	
 	public String getDamageType() {
-		return getStringAttribute("cat_wpn_damage.wpn_damage_type");
+		return getStringAttribute("cat_wpn_damage.wpn_damage_type").replace("@obj_attr_n:armor_eff_", "");
 	}
 	
 	public void setDamageType(String damageType) {
