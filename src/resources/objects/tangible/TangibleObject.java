@@ -39,6 +39,7 @@ import protocol.swg.UpdatePVPStatusMessage;
 import protocol.swg.objectControllerObjects.ShowFlyText;
 import resources.common.OutOfBand;
 import resources.common.RGB;
+import resources.datatables.Options;
 import resources.objects.creature.CreatureObject;
 import resources.objects.loot.LootGroup;
 import resources.visitors.IDManagerVisitor;
@@ -489,6 +490,7 @@ public class TangibleObject extends SWGObject {
 
 	public void setSerialNumber(String serialNumber) {
 		setStringAttribute("serial_number", serialNumber);
+		setOptions(Options.SERIAL, true);
 	}
 	
 	@Override
