@@ -18,3 +18,13 @@ def customizationAttributes():
 def customizationValues():
 
 	return []
+
+def itemStats():
+
+	stats = ['mindamage','12','27']
+	stats += ['maxdamage','29','61']
+	stats += ['attackspeed','5.1','3.6']
+	stats += ['maxrange','0','64']
+	stats += ['damagetype','Energy','Energy']
+	
+	return stats 
