@@ -66,6 +66,7 @@ public class TangibleObject extends SWGObject {
 	private List<Integer> componentCustomizations = new ArrayList<Integer>();
 	private Map<String, Byte> customizationVariables = new HashMap<String, Byte>();
 	protected int optionsBitmask = 0;
+	private int uses = 0;
 	private int maxDamage = 1000;
 	private boolean staticObject = true;
 	protected String faction = ""; // Says you're "Imperial Special Forces" if it's 0 for some reason
@@ -117,6 +118,15 @@ public class TangibleObject extends SWGObject {
 
 	public void setIncapTimer(int incapTimer) {
 		this.incapTimer = incapTimer;
+	}
+	
+	public int getUses() {
+		return uses;
+	}
+	
+	public void setUses(int uses) {
+		this.uses = uses;
+		setIntAttribute("uses", uses);
 	}
 
 	public synchronized int getConditionDamage() {
