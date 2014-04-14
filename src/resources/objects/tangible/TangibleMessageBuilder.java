@@ -161,6 +161,49 @@ public class TangibleMessageBuilder extends ObjectMessageBuilder {
 		return buffer;
 	}
 	
+	public IoBuffer buildDelta3() {
+		IoBuffer buffer = bufferPool.allocate(2, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.setAutoExpand(true);
+		buffer.putShort((short)5);
+		buffer.putInt(0x12862153);
+		buffer.putLong(getObject().getObjectID());
+		buffer.putInt(0x54414E4F);
+		buffer.put((byte)3);
+		buffer.putInt(8);//buffer.putInt(8+6);
+		
+		buffer.putShort((short) 2);
+		buffer.putShort((short)8);
+		buffer.put((byte)0);
+		buffer.putShort((short) 0x21);
+		buffer.put((byte)0);
+		
+//		buffer.putShort((short) 0);
+//		buffer.putFloat(4.0F); 
+		
+		int size = buffer.position();
+		buffer.flip();
+		return IoBuffer.allocate(size).put(buffer.array(), 0, size).flip();		
+	}
+
+	public IoBuffer buildAssemblyDelta3() {
+		IoBuffer buffer = bufferPool.allocate(2, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.setAutoExpand(true);
+		buffer.putShort((short)5);
+		buffer.putInt(0x12862153);
+		buffer.putLong(getObject().getObjectID());
+		buffer.putInt(0x54414E4F);
+		buffer.put((byte)3);
+		buffer.putInt(8);//buffer.putInt(8+6);
+		
+		buffer.putShort((short) 1);
+		buffer.putShort((short)0x0B);
+		buffer.putInt(0x000003E8); // ?
+		
+		int size = buffer.position();
+		buffer.flip();
+		return IoBuffer.allocate(size).put(buffer.array(), 0, size).flip();		
+	}
+	
 	@Override
 	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
 		// TODO Auto-generated method stub

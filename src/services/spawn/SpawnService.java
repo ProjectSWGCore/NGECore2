@@ -47,7 +47,6 @@ import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 import services.ai.AIActor;
 import services.ai.LairActor;
-import engine.resources.container.CreatureContainerPermissions;
 import engine.resources.container.StaticContainerPermissions;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
