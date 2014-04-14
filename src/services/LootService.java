@@ -32,6 +32,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributeView;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +44,7 @@ import resources.objects.group.GroupObject;
 import resources.objects.loot.LootGroup;
 import resources.objects.loot.LootRollSession;
 import resources.objects.tangible.TangibleObject;
+import resources.objects.weapon.WeaponObject;
 import main.NGECore;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
@@ -249,6 +251,7 @@ public class LootService implements INetworkDispatch {
 		int stackCount = 1;
 		Vector<String> customizationAttributes = null;
 		Vector<Integer> customizationValues = null;
+		Vector<String> itemStats = null;
 				
 		if(core.scriptService.getMethod(itemPath,"","itemTemplate")==null){
 			String errorMessage = "Loot item  '" + itemName + "'  has no template function assigned in its script. Please contact Charon about this issue.";
@@ -271,15 +274,31 @@ public class LootService implements INetworkDispatch {
 		if(core.scriptService.getMethod(itemPath,"","customizationValues")!=null)
 			customizationValues = (Vector<Integer>)core.scriptService.fetchIntegerVector(itemPath,"customizationValues");
 		
+		if(core.scriptService.getMethod(itemPath,"","itemStats")!=null)
+			itemStats = (Vector<String>)core.scriptService.fetchStringVector(itemPath,"itemStats");
+		
 		System.out.println("itemTemplate " + itemTemplate);
 		
 		TangibleObject droppedItem = createDroppedItem(itemTemplate,lootRollSession.getSessionPlanet());
     	
 		droppedItem.setAttachment("LootItemName", itemName);
-    	handleCustomDropName(droppedItem,customName);
-    	handleStats(droppedItem);
-    	setCustomization(droppedItem, itemName);
-    	handleSpecialItems(droppedItem,itemName);
+    	
+		if (customName!=null)
+			handleCustomDropName(droppedItem, customName);
+    	
+    	if (itemStats!=null){
+    		if (itemStats.size()%3!=0){
+    			String errorMessage = "Loot item  '" + itemName + "'  has a wrong number of itemstats. Please contact Charon about this issue.";
+    			lootRollSession.addErrorMessage(errorMessage);
+    			return;
+    		}
+    		handleStats(droppedItem, itemStats);
+    	}
+    	
+    	if (customizationValues!=null)
+    		setCustomization(droppedItem, itemName);
+    	
+    	handleSpecialItems(droppedItem, itemName);
 		
 		lootRollSession.addDroppedItem(droppedItem);
 	}	
@@ -395,12 +414,20 @@ public class LootService implements INetworkDispatch {
 		}	
 	}
 	
-	private void handleStats(TangibleObject droppedItem) {
+	private void handleStats(TangibleObject droppedItem, Vector<String> itemStats) {
 		// ToDo: Min,Max for weapons , Dots on weapons etc.
 		// This must be considered for the python scripts as well
 		// So basically every item needs to have loot-related data in their py scripts as well
 		
-		
+		if (droppedItem instanceof WeaponObject){
+			WeaponObject weaponObject = (WeaponObject) droppedItem;
+			for (int i=0;i<itemStats.size()%3;i++){
+				String statName = itemStats.get(i);
+				String minValue = itemStats.get(i+1);
+				String maxValue = itemStats.get(i+2);
+				setWeaponStat(weaponObject, statName, minValue, maxValue);
+			}
+		}	
 	}	
 	
 	private void handleCreditDrop(CreatureObject requester,TangibleObject lootedObject){
@@ -410,6 +437,8 @@ public class LootService implements INetworkDispatch {
 		if (lootedObject instanceof CreatureObject){
 			CreatureObject lootedCreature = (CreatureObject) lootedObject;
 			int creatureCL = lootedCreature.getLevel();
+			if (creatureCL==0)
+				creatureCL=1;
 			//creatureCL = 90;
 			int maximalCredits = (int)Math.floor(4*creatureCL + creatureCL*creatureCL*4/100); 
 			int minimalCredits = (int)Math.floor(creatureCL*2 + maximalCredits/2); 
@@ -518,4 +547,80 @@ public class LootService implements INetworkDispatch {
 		droppedItem.getAttributes().put("@obj_attr_n:crystal_quality", qualityString);	
 		droppedItem.setAttachment("radial_filename", "tunable");
 	}	
+	
+	private void setWeaponStat(WeaponObject weapon, String statName, String minValue, String maxValue){
+		
+		if (statName.equals("mindamage")){		
+			int minimalValue = (int) Integer.parseInt(minValue);
+			int maximalValue = (int) Integer.parseInt(maxValue);
+			int randomValue  = minimalValue + new Random().nextInt(maximalValue-minimalValue);
+			weapon.setMinDamage(randomValue);
+		}
+		
+		if (statName.equals("maxdamage")){
+			int minimalValue = (int) Integer.parseInt(minValue);
+			int maximalValue = (int) Integer.parseInt(maxValue);
+			int randomValue  = minimalValue + new Random().nextInt(maximalValue-minimalValue);
+			weapon.setMaxDamage(randomValue);
+		}
+		
+		if (statName.equals("attackspeed")){
+			float minimalValue = (float) Float.parseFloat(minValue);
+			float maximalValue = (float) Float.parseFloat(maxValue);
+			float randomValue  = minimalValue + new Random().nextFloat()*(maximalValue-minimalValue);
+			weapon.setAttackSpeed(randomValue);
+		}
+		
+		if (statName.equals("maxrange")){
+			float minimalValue = (float) Float.parseFloat(minValue);
+			float maximalValue = (float) Float.parseFloat(maxValue);
+			float randomValue  = minimalValue + new Random().nextFloat()*(maximalValue-minimalValue);
+			weapon.setMaxRange(randomValue);
+		}
+		
+		if (statName.equals("elemdamage")){
+			int minimalValue = (int) Integer.parseInt(minValue);
+			int maximalValue = (int) Integer.parseInt(maxValue);
+			int randomValue  = minimalValue + new Random().nextInt(maximalValue-minimalValue);
+			weapon.setElementalDamage(randomValue);
+		}
+		
+		if (statName.equals("elemtype")){
+			String result = "";
+			if (minValue.length()==0)
+				if (maxValue.length()==0)
+					result = "Error";
+			
+			if (minValue.length()>0)
+				result = minValue;
+			if (maxValue.length()>0)
+				result = maxValue;
+			
+			weapon.setElementalType(result);
+		}
+		
+		if (statName.equals("damagetype")){
+			String result = "";
+			if (minValue.length()==0)
+				if (maxValue.length()==0)
+					result = "Error";
+			
+			if (minValue.length()>0)
+				result = minValue;
+			if (maxValue.length()>0)
+				result = maxValue;
+			
+			weapon.setDamageType(result);
+		}
+	}
+	
+	private void setArmorStat(SWGObject armor, String statName, String minValue, String maxValue){
+		// Armor not yet implemented
+//		if (statName.equals("armor")){		
+//			int minimalValue = (int) Integer.parseInt(minValue);
+//			int maximalValue = (int) Integer.parseInt(maxValue);
+//			int randomValue  = minimalValue + new Random().nextInt(maximalValue-minimalValue);
+//			armor.setArmor(randomValue);
+//		}
+	}
 }	
