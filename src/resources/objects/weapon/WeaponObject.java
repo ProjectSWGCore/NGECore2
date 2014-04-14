@@ -31,7 +31,7 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent(version=0)
+@Persistent(version=1)
 public class WeaponObject extends TangibleObject {
 	
 	// TODO: Thread safety
@@ -39,53 +39,24 @@ public class WeaponObject extends TangibleObject {
 	@NotPersistent
 	private WeaponMessageBuilder messageBuilder;
 	
-	private float attackSpeed = 1;
-	private float maxRange;
-	
 	public WeaponObject(long objectID, Planet planet, String template) {
 		super(objectID, planet, template, new Point3D(0, 0, 0), new Quaternion(1, 0, 1, 0));
 		messageBuilder = new WeaponMessageBuilder(this);
 		if (this.getClass().getSimpleName().equals("WeaponObject")) setIntAttribute("volume", 1);
-		calculateRange();
-		calculateAttackSpeed();
+		setStringAttribute("cat_wpn_damage.damage", "0-0");
 	}
 
 	public WeaponObject(long objectID, Planet planet, String template, Point3D position, Quaternion orientation) {
 		super(objectID, planet, template, position, orientation);
 		messageBuilder = new WeaponMessageBuilder(this);
 		if (this.getClass().getSimpleName().equals("WeaponObject")) setIntAttribute("volume", 1);
-		calculateRange();
-		calculateAttackSpeed();
+		setStringAttribute("cat_wpn_damage.damage", "0-0");
 	}
 
 	
 	public WeaponObject() {
 		super();
 		messageBuilder = new WeaponMessageBuilder(this);
-		//calculateRange();
-	}
-	
-	private void calculateRange() {
-
-		int weaponType = getWeaponType();
-		
-		switch(weaponType) {
-			
-			case 0: maxRange = 64; break;
-			case 1: maxRange = 50; break;
-			case 2: maxRange = 35; break;
-			case 12: maxRange = 64; break;
-			case 4: maxRange = 5; break;
-			case 5: maxRange = 5; break;
-			case 6: maxRange = 5; break;
-			case 7: maxRange = 5; break;
-			case 8: maxRange = 64; break;
-			case 9: maxRange = 5; break;
-			case 10: maxRange = 5; break;
-			case 11: maxRange = 5; break;
-		
-		}
-		
 	}
 
 	public int getIncapTimer() {
@@ -118,7 +89,9 @@ public class WeaponObject extends TangibleObject {
 	}
 
 	public void setMaxDamage(int maxDamage) {
+			
 		setStringAttribute("cat_wpn_damage.damage", String.valueOf(getMinDamage()) + "-" + String.valueOf(maxDamage));
+		setIntAttribute("cat_wpn_damage.dps", getDamagePerSecond());
 	}
 	
 	public int getMinDamage() {
@@ -126,7 +99,9 @@ public class WeaponObject extends TangibleObject {
 	}
 
 	public void setMinDamage(int minDamage) {
+			
 		setStringAttribute("cat_wpn_damage.damage", String.valueOf(minDamage) + "-" + String.valueOf(getMaxDamage()));
+		setIntAttribute("cat_wpn_damage.dps", getDamagePerSecond());
 	}
 	
 	public int getElementalDamage() {
@@ -135,14 +110,17 @@ public class WeaponObject extends TangibleObject {
 
 	public void setElementalDamage(int elementalDamage) {
 		setIntAttribute("cat_wpn_damage.wpn_elemental_value", elementalDamage);
+		setIntAttribute("cat_wpn_damage.dps", getDamagePerSecond());
 	}
 
 	public String getElementalType() {
-		return getStringAttribute("cat_wpn_damage.wpn_elemental_type");
+		if (getStringAttribute("cat_wpn_damage.wpn_elemental_type") != null )
+			return getStringAttribute("cat_wpn_damage.wpn_elemental_type").replace("@obj_attr_n:elemental_", "");
+		return null;
 	}
 	
 	public void setElementalType(String elementalType) {
-		setStringAttribute("cat_wpn_damage.wpn_elemental_type", elementalType);
+		setStringAttribute("cat_wpn_damage.wpn_elemental_type", "@obj_attr_n:elemental_" + elementalType);
 	}
 	
 	public String getDamageType() {
@@ -150,43 +128,26 @@ public class WeaponObject extends TangibleObject {
 	}
 	
 	public void setDamageType(String damageType) {
-		setStringAttribute("cat_wpn_damage.wpn_damage_type", damageType);
+		setStringAttribute("cat_wpn_damage.wpn_damage_type", "@obj_attr_n:armor_eff_" + damageType);
 	}
 	
 	public int getDamagePerSecond() {
-		if (getElementalType() != null)
+		if(getAttributes().containsKey("cat_wpn_damage.damage") && getAttributes().containsKey("cat_wpn_damage.wpn_attack_speed")) {
+
+			if (getElementalType() != null )
 				return (int) (((getMaxDamage() + getElementalDamage()  + getMinDamage() + getElementalDamage()) / 2 + getElementalDamage()) * (1 / getAttackSpeed()));
-		else
-			return (int) (((getMaxDamage() + getMinDamage()) / 2 ) * (1 / getAttackSpeed()));
+			else
+				return (int) (((getMaxDamage() + getMinDamage()) / 2 ) * (1 / getAttackSpeed()));
+		} else
+				return 0;
 	}
 
 	public int getWeaponType() {
-		
-		int weaponType = -1;
-		
-		String template = getTemplate();
-		
-		if(template == null)
-			return weaponType;
-		
-		if(template.contains("rifle")) weaponType = 0;
-		if(template.contains("carbine")) weaponType = 1;
-		if(template.contains("pistol")) weaponType = 2;
-		if(template.contains("heavy")) weaponType = 12;
-		if(template.contains("sword") || template.contains("baton")) weaponType = 4;
-		if(template.contains("2h_sword") || template.contains("axe")) weaponType = 5;
-		if(template.contains("unarmed")) weaponType = 6;
-		if(template.contains("polearm") || template.contains("lance")) weaponType = 7;
-		if(template.contains("thrown")) weaponType = 8;
-		if(template.contains("lightsaber_one_handed")) weaponType = 9;
-		if(template.contains("lightsaber_two_handed")) weaponType = 10;
-		if(template.contains("lightsaber_polearm")) weaponType = 11;
-
-		if(weaponType == -1)
-			weaponType = 6;
-		
-		return weaponType;
-
+		return Integer.parseInt(getStringAttribute("cat_wpn_damage.wpn_category").replace("@obj_attr_n:wpn_category_", ""));
+	}
+	
+	public void setWeaponType(int weaponType) {
+		setStringAttribute("cat_wpn_damage.wpn_category", "@obj_attr_n:wpn_category_" + weaponType);
 	}
 
 	@Override
@@ -204,11 +165,15 @@ public class WeaponObject extends TangibleObject {
 	}
 
 	public float getAttackSpeed() {
-		return attackSpeed;
+		return getFloatAttribute("cat_wpn_damage.wpn_attack_speed");
 	}
 
 	public void setAttackSpeed(float attackSpeed) {
-		this.attackSpeed = attackSpeed;
+		if((int) attackSpeed != attackSpeed)
+			setFloatAttribute("cat_wpn_damage.wpn_attack_speed", attackSpeed);
+		else
+			setIntAttribute("cat_wpn_damage.wpn_attack_speed", (int) attackSpeed);
+		
 	}
 	
 	public WeaponMessageBuilder getMessageBuilder() {
@@ -216,11 +181,14 @@ public class WeaponObject extends TangibleObject {
 	}
 
 	public float getMaxRange() {
-		return maxRange;
+		return Float.parseFloat(getStringAttribute("cat_wpn_damage.wpn_range").replace("0-", "").replace("m", ""));
 	}
 
 	public void setMaxRange(float maxRange) {
-		this.maxRange = maxRange;
+		if((int) maxRange != maxRange)
+			setStringAttribute("cat_wpn_damage.wpn_range", "0-" + String.valueOf(maxRange) + "m");
+		else
+			setStringAttribute("cat_wpn_damage.wpn_range", "0-" + String.valueOf((int) maxRange) + "m");
 	}
 
 	public boolean isMelee() {
@@ -244,29 +212,5 @@ public class WeaponObject extends TangibleObject {
 		return false;
 		
 	}
-	
-	private void calculateAttackSpeed() {
-		
-		int weaponType = getWeaponType();
-		
-		switch(weaponType) {
-			
-			case 0: attackSpeed = 0.8f; break;
-			case 1: attackSpeed = 0.6f; break;
-			case 2: attackSpeed = 0.4f; break;
-			case 12: attackSpeed = 1; break;
-			case 4: attackSpeed = 1; break;
-			case 5: attackSpeed = 1; break;
-			case 6: attackSpeed = 1; break;
-			case 7: attackSpeed = 1; break;
-			case 8: attackSpeed = 1; break;
-			case 9: attackSpeed = 1; break;
-			case 10: attackSpeed = 1; break;
-			case 11: attackSpeed = 1; break;
-		
-		}
-		
-	}
-
 
 }
