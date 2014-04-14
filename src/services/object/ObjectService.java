@@ -88,6 +88,8 @@ import engine.resources.container.Traverser;
 import engine.resources.container.WorldCellPermissions;
 import engine.resources.container.WorldPermissions;
 import engine.resources.database.DatabaseConnection;
+import engine.resources.database.ObjectDatabase;
+import engine.resources.objects.IPersistent;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -116,6 +118,7 @@ import resources.objects.tangible.TangibleObject;
 import resources.objects.tool.SurveyTool;
 import resources.objects.waypoint.WaypointObject;
 import resources.objects.weapon.WeaponObject;
+import services.bazaar.AuctionItem;
 
 @SuppressWarnings("unused")
 
@@ -1183,6 +1186,18 @@ public class ObjectService implements INetworkDispatch {
 		});
 		
 		return count.get();
+	}
+	
+	public void persistObject(IPersistent object, Class keyClass, Class valueClass, ObjectDatabase odb) {
+		object.createTransaction(odb.getEnvironment());
+		core.getAuctionODB().put(object, keyClass, valueClass, object.getTransaction());
+		object.getTransaction().commitSync();
+	}
+	
+	public void deletePersistentObject(IPersistent object, Class keyClass, Class valueClass, ObjectDatabase odb, Object key) {
+		object.createTransaction(odb.getEnvironment());
+		core.getAuctionODB().delete(key, keyClass, valueClass, object.getTransaction());
+		object.getTransaction().commitSync();
 	}
 	
 }

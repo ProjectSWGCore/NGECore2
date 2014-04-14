@@ -28,13 +28,16 @@ import protocol.swg.SWGMessage;
 public class BidAuctionMessage extends SWGMessage {
 
 	private long auctionId;
+	private long vendorId;
 	private int myPrice;
 	private int proxyPrice;
+	
 
 	@Override
 	public void deserialize(IoBuffer data) {
 		data.skip(6);
 		setAuctionId(data.getLong());
+		setVendorId(data.getLong());
 		setMyPrice(data.getInt());
 		setProxyPrice(data.getInt());
 	}
@@ -67,6 +70,14 @@ public class BidAuctionMessage extends SWGMessage {
 
 	public void setProxyPrice(int proxyPrice) {
 		this.proxyPrice = proxyPrice;
+	}
+
+	public long getVendorId() {
+		return vendorId;
+	}
+
+	public void setVendorId(long vendorId) {
+		this.vendorId = vendorId;
 	}
 
 }

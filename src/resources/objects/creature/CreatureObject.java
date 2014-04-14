@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.atomic.LongAdder;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
@@ -1848,6 +1849,14 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			//this.sendBaselines(owner.getClient());
 			
 		}
+	}
+	
+	public int getInventoryItemCount() {
+		if(getSlottedObject("inventory") == null)
+			return 0;
+		LongAdder adder = new LongAdder();
+		getSlottedObject("inventory").viewChildren(this, true, true, (obj) -> adder.increment());
+		return adder.intValue();
 	}
 	
 	//public float getCooldown(String cooldownGroup) {
