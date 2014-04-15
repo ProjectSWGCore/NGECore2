@@ -5,7 +5,7 @@ def itemTemplate():
 
 def customItemName():
 
-	return ''
+	return 'Adjusted CDEF Rifle'
 	
 def customItemStackCount():
 
@@ -18,13 +18,18 @@ def customizationAttributes():
 def customizationValues():
 
 	return []
+	
+def requiredCL():
+
+	return 10
 
 def itemStats():
 
-	stats = ['mindamage','500','600']
-	stats += ['maxdamage','900','1120']
+	stats = ['mindamage','12','27']
+	stats += ['maxdamage','48','95']
 	stats += ['attackspeed','1.0','1.0']
 	stats += ['maxrange','0','64']
-	stats += ['damagetype','Energy','Energy']
+	stats += ['damagetype','energy','energy']
+	stats += ['weapontype','0','0']
 	
 	return stats 

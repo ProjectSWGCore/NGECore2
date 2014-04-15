@@ -6,8 +6,8 @@ def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
 	mobileTemplate.setCreatureName('tusken_raider')
-	mobileTemplate.setLevel(90)
-	mobileTemplate.setDifficulty(0)
+	mobileTemplate.setLevel(10)
+	mobileTemplate.setDifficulty(1)
 	mobileTemplate.setAttackRange(24)
 	
 	templates = Vector()
@@ -18,7 +18,6 @@ def addTemplate(core):
 	weaponTemplates.add('object/weapon/ranged/rifle/shared_rifle_tusken.iff')
 	mobileTemplate.setWeaponTemplates(weaponTemplates)
 
-	
 	attacks = Vector()
 	mobileTemplate.setDefaultAttack('rangedShot')
 	mobileTemplate.setAttacks(attacks)
