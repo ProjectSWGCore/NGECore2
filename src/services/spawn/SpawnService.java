@@ -110,8 +110,31 @@ public class SpawnService {
 			creature.setLevel(level);
 		else
 			creature.setLevel(mobileTemplate.getLevel());		
-		WeaponObject defaultWeapon = (mobileTemplate.getWeaponTemplates().size() > 0) ?  (WeaponObject) core.objectService.createObject(mobileTemplate.getWeaponTemplates().get(new Random().nextInt(mobileTemplate.getWeaponTemplates().size())), creature.getPlanet()) : (WeaponObject) core.objectService.createObject("object/weapon/creature/shared_creature_default_weapon.iff", creature.getPlanet());
-		//defaultWeapon.setAttackSpeed(2);
+		
+		//WeaponObject defaultWeapon = (mobileTemplate.getWeaponTemplates().size() > 0) ?  (WeaponObject) core.objectService.createObject(mobileTemplate.getWeaponTemplates().get(new Random().nextInt(mobileTemplate.getWeaponTemplates().size())), creature.getPlanet()) : (WeaponObject) core.objectService.createObject("object/weapon/creature/shared_creature_default_weapon.iff", creature.getPlanet());
+		
+		WeaponObject defaultWeapon = null;
+		Vector<WeaponTemplate> weaponTemplates = mobileTemplate.getWeaponTemplateVector();
+		if (weaponTemplates.size()==0){
+			defaultWeapon =  (WeaponObject) core.objectService.createObject("object/weapon/creature/shared_creature_default_weapon.iff", creature.getPlanet());
+			defaultWeapon.setAttackSpeed(1.0F);
+			defaultWeapon.setWeaponType(6);
+		} else {
+			int rnd = new Random().nextInt(weaponTemplates.size());
+			defaultWeapon =  (WeaponObject) core.objectService.createObject(weaponTemplates.get(rnd).getTemplate(), creature.getPlanet());
+			defaultWeapon.setAttackSpeed(weaponTemplates.get(rnd).getAttackSpeed());
+			defaultWeapon.setWeaponType(weaponTemplates.get(rnd).getWeaponType());
+		}
+			
+		
+		// QA
+		if (mobileTemplate.getAttackSpeed()==0)
+			System.err.println("Error in mobile spawn template for " + mobileTemplate.getCreatureName() + ". Missing attackspeed parameter");
+		if (mobileTemplate.getAttackRange()==0)
+			System.err.println("Error in mobile spawn template for " + mobileTemplate.getCreatureName() + ". Missing attackrange parameter");
+					
+		defaultWeapon.setAttackSpeed(mobileTemplate.getAttackSpeed());
+		defaultWeapon.setWeaponType(mobileTemplate.getWeaponType());
 		defaultWeapon.setDamageType("@obj_attr_n:armor_eff_kinetic");
 		defaultWeapon.setStringAttribute("cat_wpn_damage.damage", "0-0");
 		if(mobileTemplate.getAttackRange() > 0)
