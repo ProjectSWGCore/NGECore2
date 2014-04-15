@@ -174,6 +174,7 @@ public class WeaponObject extends TangibleObject {
 		else
 			setIntAttribute("cat_wpn_damage.wpn_attack_speed", (int) attackSpeed);
 		
+		setIntAttribute("cat_wpn_damage.dps", getDamagePerSecond());
 	}
 	
 	public WeaponMessageBuilder getMessageBuilder() {
