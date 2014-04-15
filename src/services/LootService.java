@@ -245,7 +245,12 @@ public class LootService implements INetworkDispatch {
 
 		String customName = "";
 		String itemTemplate = "";
+		Vector<String> itemTemplates = null;
 		int stackCount = 1;
+		int biolink = 0;
+		int requiredCL = 1;
+		String requiredProfession = "";
+		String requiredFaction = "";
 		Vector<String> customizationAttributes = null;
 		Vector<Integer> customizationValues = null;
 		Vector<String> itemStats = null;
@@ -256,7 +261,18 @@ public class LootService implements INetworkDispatch {
 			return;
 		}
 		
-		itemTemplate = (String)core.scriptService.fetchString(itemPath,"itemTemplate");
+		//itemTemplate = (String)core.scriptService.fetchString(itemPath,"itemTemplate");
+	
+		itemTemplates = (Vector<String>)core.scriptService.fetchStringVector(itemPath,"itemTemplate"); 
+		if (itemTemplates.size()==1)
+			itemTemplate = itemTemplates.get(0);
+		if (itemTemplates.size()>1){
+			itemTemplate = itemTemplates.get(new Random().nextInt(itemTemplates.size()-1));
+		}
+			
+		
+		
+		
 		
 		// only consider the following variables, if they are in the python-script file
 		if(core.scriptService.getMethod(itemPath,"","customItemName")!=null) 
@@ -274,6 +290,19 @@ public class LootService implements INetworkDispatch {
 		if(core.scriptService.getMethod(itemPath,"","itemStats")!=null)
 			itemStats = (Vector<String>)core.scriptService.fetchStringVector(itemPath,"itemStats");
 		
+		if(core.scriptService.getMethod(itemPath,"","biolink")!=null)
+			biolink = (Integer)core.scriptService.fetchInteger(itemPath,"biolink");
+		
+		if(core.scriptService.getMethod(itemPath,"","requiredCL")!=null)
+			requiredCL = (Integer)core.scriptService.fetchInteger(itemPath,"requiredCL");
+
+		if(core.scriptService.getMethod(itemPath,"","requiredProfession")!=null)
+			requiredProfession = (String)core.scriptService.fetchString(itemPath,"requiredProfession");
+		
+		if(core.scriptService.getMethod(itemPath,"","requiredFaction")!=null)
+			requiredFaction = (String)core.scriptService.fetchString(itemPath,"requiredFaction");
+		
+				
 		System.out.println("itemTemplate " + itemTemplate);
 		
 		TangibleObject droppedItem = createDroppedItem(itemTemplate,lootRollSession.getSessionPlanet());
@@ -296,6 +325,18 @@ public class LootService implements INetworkDispatch {
     	
     	handleSpecialItems(droppedItem, itemName);
 		
+    	if (requiredCL>1){
+    		droppedItem.setIntAttribute("required_combat_level", requiredCL);
+    	}
+    	
+    	if (requiredProfession.length()>0){
+    		droppedItem.setStringAttribute("required_profession", requiredProfession);
+    	}
+    	
+    	if (requiredFaction.length()>0){
+    		droppedItem.setStringAttribute("required_faction", requiredFaction);
+    	}
+    	
 		lootRollSession.addDroppedItem(droppedItem);
 	}	
 	
@@ -411,24 +452,25 @@ public class LootService implements INetworkDispatch {
 	}
 	
 	private void handleStats(TangibleObject droppedItem, Vector<String> itemStats) {
-		// ToDo: Min,Max for weapons , Dots on weapons etc.
-		// This must be considered for the python scripts as well
-		// So basically every item needs to have loot-related data in their py scripts as well
 		
-		droppedItem.setTemplate("object/weapon/ranged/rifle/shared_rifle_cdef.iff");
 		if (droppedItem.getTemplate().contains("/weapon")){
-			System.out.println("Wep template rec");
-			
-			//droppedItem.setStringAttribute("cat_wpn_damage.wpn_elemental_type", "ENERGY");
 			WeaponObject weaponObject = (WeaponObject) droppedItem;
-			droppedItem.setMaxDamage(1000);
-			for (int i=0;i<itemStats.size()%3;i++){
-				String statName = itemStats.get(i);
-				String minValue = itemStats.get(i+1);
-				String maxValue = itemStats.get(i+2);
+			for (int i=0;i<itemStats.size()/3;i++){
+				String statName = itemStats.get(3*i);
+				String minValue = itemStats.get(3*i+1);
+				String maxValue = itemStats.get(3*i+2);
 				setWeaponStat(weaponObject, statName, minValue, maxValue);
 			}
-		}	
+		}
+		
+		if (droppedItem.getTemplate().contains("/armor")){
+			for (int i=0;i<itemStats.size()/3;i++){
+				String statName = itemStats.get(3*i);
+				String minValue = itemStats.get(3*i+1);
+				String maxValue = itemStats.get(3*i+2);
+				setArmorStat(droppedItem, statName, minValue, maxValue);
+			}
+		}			
 	}	
 	
 	private void handleCreditDrop(CreatureObject requester,TangibleObject lootedObject){
@@ -553,6 +595,13 @@ public class LootService implements INetworkDispatch {
 	
 	private void setWeaponStat(WeaponObject weapon, String statName, String minValue, String maxValue){
 		
+		// weapon.setConditionDamage(100); shows 1000/926 ??!!
+		
+		if (statName.equals("attackspeed")){
+			float value = (float) Float.parseFloat(minValue);
+			weapon.setAttackSpeed(value);
+		}
+		
 		if (statName.equals("mindamage")){		
 			int minimalValue = (int) Integer.parseInt(minValue);
 			int maximalValue = (int) Integer.parseInt(maxValue);
@@ -566,19 +615,10 @@ public class LootService implements INetworkDispatch {
 			int randomValue  = minimalValue + new Random().nextInt(maximalValue-minimalValue);
 			weapon.setMaxDamage(randomValue);
 		}
-		
-		if (statName.equals("attackspeed")){
-			float minimalValue = (float) Float.parseFloat(minValue);
-			float maximalValue = (float) Float.parseFloat(maxValue);
-			float randomValue  = minimalValue + new Random().nextFloat()*(maximalValue-minimalValue);
-			weapon.setAttackSpeed(randomValue);
-		}
-		
+	
 		if (statName.equals("maxrange")){
-			float minimalValue = (float) Float.parseFloat(minValue);
-			float maximalValue = (float) Float.parseFloat(maxValue);
-			float randomValue  = minimalValue + new Random().nextFloat()*(maximalValue-minimalValue);
-			weapon.setMaxRange(randomValue);
+			float value = (float) Float.parseFloat(maxValue);
+			weapon.setMaxRange(value);
 		}
 		
 		if (statName.equals("elemdamage")){
@@ -615,6 +655,11 @@ public class LootService implements INetworkDispatch {
 			
 			weapon.setDamageType(result);
 		}
+		
+		if (statName.equals("weapontype")){
+			weapon.setWeaponType((int) Integer.parseInt(minValue));
+		}
+
 	}
 	
 	private void setArmorStat(SWGObject armor, String statName, String minValue, String maxValue){
@@ -626,4 +671,21 @@ public class LootService implements INetworkDispatch {
 //			armor.setArmor(randomValue);
 //		}
 	}
+	
+	/*
+	1377	wpn_category_0	Rifle
+	1378	wpn_category_1	Carbine
+	1379	wpn_category_10	Two Handed Lightsaber
+	1380	wpn_category_11	Lightsaber Polearm
+	1381	wpn_category_12	Free Targeting Heavy Weapon
+	1382	wpn_category_13	Directional Heavy Weapon
+	1383	wpn_category_2	Pistol
+	1384	wpn_category_3	Heavy Weapon
+	1385	wpn_category_4	One-Handed Melee
+	1386	wpn_category_5	Two-Handed Melee
+	1387	wpn_category_6	Unarmed
+	1388	wpn_category_7	Polearm
+	1389	wpn_category_8	Thrown
+	1390	wpn_category_9	One Handed Lightsaber
+	 */
 }	
