@@ -26,22 +26,26 @@ import com.sleepycat.je.Transaction;
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.PrimaryKey;
-import engine.resources.objects.IPersistent;
 
-@Entity(version=0)
-public class AuctionItem implements IPersistent {
+import engine.resources.objects.IPersistent;
+import engine.resources.objects.SWGObject;
+
+@Entity(version=1)
+public class AuctionItem implements IPersistent, Comparable<AuctionItem> {
 	
 	@PrimaryKey
 	private long objectId;
+	private SWGObject item;
 	private long ownerId;
 	private long vendorId;
 	private long buyerId;
 	private long offerToId;
 	private int itemType;
 	private String ownerName;
-	private String bidderName;
+	private String bidderName = "";
 	private String itemName;
 	private String itemDescription;
+	private String planet;
 	private int price;
 	private int proxyBid;
 	private boolean auction;
@@ -66,8 +70,9 @@ public class AuctionItem implements IPersistent {
 		
 	}
 
-	public AuctionItem(long objectId, long ownerId) {
-		this.objectId = objectId;
+	public AuctionItem(SWGObject item, long ownerId) {
+		this.item = item;
+		this.objectId = item.getObjectID();
 		this.ownerId = ownerId;
 	}
 
@@ -259,6 +264,32 @@ public class AuctionItem implements IPersistent {
 	@Override
 	public Transaction getTransaction() {
 		return txn;
+	}
+
+	public SWGObject getItem() {
+		return item;
+	}
+
+	public void setItem(SWGObject item) {
+		this.item = item;
+	}
+
+	public String getPlanet() {
+		return planet;
+	}
+
+	public void setPlanet(String planet) {
+		this.planet = planet;
+	}
+
+	@Override
+	public int compareTo(AuctionItem other) {
+		if(getExpireTime() < other.getExpireTime())
+			return -1;
+		else if(getExpireTime() > other.getExpireTime())
+			return 1;
+		else
+			return 0;
 	}
 	
 }

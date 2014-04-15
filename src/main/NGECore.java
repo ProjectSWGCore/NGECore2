@@ -627,6 +627,9 @@ public class NGECore {
 		return resourceHistoryODB;
 	}
 	
+	public ObjectDatabase getAuctionODB() {
+		return auctionODB;
+	}
 	
 	public int getActiveClients() {
 		int connections = 0;
