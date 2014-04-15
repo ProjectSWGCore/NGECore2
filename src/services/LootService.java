@@ -320,8 +320,10 @@ public class LootService implements INetworkDispatch {
     		}
     		handleStats(droppedItem, itemStats);
     	}
-    	if (customizationValues!=null)
-    		setCustomization(droppedItem, itemName);
+//    	if (customizationValues!=null)
+//    		setCustomization(droppedItem, itemName);
+    	
+    	setCustomization(droppedItem, itemName); // for now
     	
     	handleSpecialItems(droppedItem, itemName);
 		
@@ -663,13 +665,50 @@ public class LootService implements INetworkDispatch {
 	}
 	
 	private void setArmorStat(SWGObject armor, String statName, String minValue, String maxValue){
-		// Armor not yet implemented
-//		if (statName.equals("armor")){		
-//			int minimalValue = (int) Integer.parseInt(minValue);
-//			int maximalValue = (int) Integer.parseInt(maxValue);
-//			int randomValue  = minimalValue + new Random().nextInt(maximalValue-minimalValue);
-//			armor.setArmor(randomValue);
-//		}
+		// Armor is not represented with its own class,
+		// so we gotta create the attributes here
+		
+		if (statName.equals("armor_efficiency_kinetic")){	
+			int minimalValue = (int) Integer.parseInt(minValue);
+			int maximalValue = (int) Integer.parseInt(maxValue);
+			int randomValue  = minimalValue + new Random().nextInt(maximalValue-minimalValue);
+			armor.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", randomValue);
+		}
+		
+		if (statName.equals("armor_efficiency_energy")){	
+			int minimalValue = (int) Integer.parseInt(minValue);
+			int maximalValue = (int) Integer.parseInt(maxValue);
+			int randomValue  = minimalValue + new Random().nextInt(maximalValue-minimalValue);
+			armor.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", randomValue);
+		}
+		
+		if (statName.equals("special_protection_heat")){	
+			int minimalValue = (int) Integer.parseInt(minValue);
+			int maximalValue = (int) Integer.parseInt(maxValue);
+			int randomValue  = minimalValue + new Random().nextInt(maximalValue-minimalValue);
+			armor.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", randomValue);
+		}
+		
+		if (statName.equals("special_protection_cold")){	
+			int minimalValue = (int) Integer.parseInt(minValue);
+			int maximalValue = (int) Integer.parseInt(maxValue);
+			int randomValue  = minimalValue + new Random().nextInt(maximalValue-minimalValue);
+			armor.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", randomValue);
+		}
+		
+		if (statName.equals("special_protection_acid")){	
+			int minimalValue = (int) Integer.parseInt(minValue);
+			int maximalValue = (int) Integer.parseInt(maxValue);
+			int randomValue  = minimalValue + new Random().nextInt(maximalValue-minimalValue);
+			armor.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", randomValue);
+		}
+		
+		if (statName.equals("special_protection_electricity")){	
+			int minimalValue = (int) Integer.parseInt(minValue);
+			int maximalValue = (int) Integer.parseInt(maxValue);
+			int randomValue  = minimalValue + new Random().nextInt(maximalValue-minimalValue);
+			armor.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", randomValue);
+		}
 	}
 	
 	/*

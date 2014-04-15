@@ -1,5 +1,6 @@
 import sys
 from services.spawn import MobileTemplate
+from services.spawn import WeaponTemplate
 from java.util import Vector
 
 def addTemplate(core):
@@ -15,8 +16,9 @@ def addTemplate(core):
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
-	weaponTemplates.add('object/weapon/ranged/rifle/shared_rifle_tusken.iff')
-	mobileTemplate.setWeaponTemplates(weaponTemplates)
+	weapontemplate = WeaponTemplate('object/weapon/ranged/rifle/shared_rifle_tusken.iff', 0, 1.0)
+	weaponTemplates.add(weapontemplate)
+	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 
 	attacks = Vector()
 	mobileTemplate.setDefaultAttack('rangedShot')
