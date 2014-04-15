@@ -59,5 +59,10 @@ public class CancelLiveAuctionResponseMessage extends SWGMessage {
 		result.put((byte) 0); // unk
 		return result.flip();
 	}
+	
+	public void setStatus(int status) {
+		this.status = status;
+	}
+
 
 }
