@@ -210,7 +210,7 @@ public class NGECore {
 	private ObjectDatabase resourceRootsODB;
 	private ObjectDatabase resourceHistoryODB;
 	
-	public static boolean PACKET_DEBUG = false;
+	public static boolean PACKET_DEBUG = true;
 
 
 
