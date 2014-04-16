@@ -21,20 +21,32 @@
  ******************************************************************************/
 package resources.datatables;
 
-public class WeaponType {
+import org.apache.commons.collections.BidiMap;
+import org.apache.commons.collections.bidimap.DualHashBidiMap;
+
+public final class Elemental {
 	
-	public static final int RIFLE = 0;
-	public static final int CARBINE = 1;
-	public static final int PISTOL = 2;
-	public static final int ONEHANDEDMELEE = 4;
-	public static final int TWOHANDEDMELEE = 5;
-	public static final int UNARMED = 6;
-	public static final int POLEARMMELEE = 7;
-	public static final int THROWN = 8;
-	public static final int ONEHANDEDSABER = 9;
-	public static final int TWOHANDEDSABER = 10;
-	public static final int POLEARMSABER = 11;
-	public static final int HEAVYWEAPON = 12;
-	public static final int FLAMETHROWER = 13;
+	
+	static BidiMap map = new DualHashBidiMap();
+	
+	static {
+		map.put("kinetic", 1);
+		map.put("energy", 2);
+		map.put("blast", 4);
+		map.put("stun", 8);
+		map.put("heat", 32);
+		map.put("cold", 64);
+		map.put("acid", 128);
+		map.put("electricity", 256);
+	}
+	
+
+	public static int getElementalNum(String elementalName) {
+		return (int) map.get(elementalName);
+	}
+	
+	public static String getElementalName(int elementalNum) {
+		return (String) map.getKey(elementalNum);
+	}	
 	
 }
