@@ -26,39 +26,45 @@ import java.nio.ByteOrder;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.buffer.SimpleBufferAllocator;
 
+import engine.resources.scene.Point3D;
+import engine.resources.scene.Quaternion;
+
 public class PlayClientEffectObjectTransformMessage extends SWGMessage {
 
 	private long objectId;
 	private String effectFile;
 	private String commandString;
+	private Point3D effectorPosition; 
+	private Quaternion effectorOrientation;
 	public SimpleBufferAllocator bufferPool = new SimpleBufferAllocator();
 
-	public PlayClientEffectObjectTransformMessage(String effectFile, long objectId, String commandString) {
+	public PlayClientEffectObjectTransformMessage(String effectFile, long objectId, String commandString, Point3D effectorPosition, Quaternion effectorOrientation) {
 		
 		this.effectFile = effectFile;
 		this.objectId = objectId;
 		this.commandString = commandString;
+		this.effectorPosition = effectorPosition;
+		this.effectorOrientation = effectorOrientation;
 	}
 	
 	@Override
 	public IoBuffer serialize() {
 		
 		IoBuffer result = bufferPool.allocate(100, false).order(ByteOrder.LITTLE_ENDIAN);
-		result.setAutoExpand(true);
+		result.setAutoExpand(true);	
 		result.putShort((short) 5);
 		result.putInt(0x4F5E09B6);
-		result.put(getAsciiString(effectFile));
-		
-		result.putFloat(0);          // qw
-		result.putFloat(0);          // qx
-		result.putFloat(0);          // qy
-		result.putFloat(0x3F800000); // qz
-		result.putInt(0);            // pos.x
-		result.putInt(0x3FAAF824);   // pos.y
-		result.putInt(0);            // pos.z
+		result.put(getAsciiString(effectFile));		
+		result.putFloat(effectorOrientation.w); // qw
+		result.putFloat(effectorOrientation.x); // qx
+		result.putFloat(effectorOrientation.y); // qy
+		result.putFloat(effectorOrientation.z); // qz		
+		result.putFloat(effectorPosition.x);    // pos.x
+		result.putFloat(effectorPosition.y);    // pos.y
+		result.putFloat(effectorPosition.z);    // pos.z
 		result.putLong(objectId);
 		result.put(getAsciiString(commandString));
-		
+				
 		int size = result.position();
 		result.flip();
 		result = bufferPool.allocate(size, false).put(result.array(), 0, size);

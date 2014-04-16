@@ -27,7 +27,7 @@ def itemStats():
 
 	stats = ['mindamage','12','27']
 	stats += ['maxdamage','48','95']
-	stats += ['attackspeed','1.0','1.0']
+	stats += ['attackspeed','0.8','0.8']
 	stats += ['maxrange','0','64']
 	stats += ['damagetype','energy','energy']
 	stats += ['weapontype','0','0']

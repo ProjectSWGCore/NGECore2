@@ -12,6 +12,19 @@ def run(core, actor, target, commandString):
         actorContainer = actor.getContainer()
         
         if container == None: return
+
+        if target.getTemplate() == 'object/tangible/item/shared_loot_cash.iff':
+            core.lootService.handleCreditPickUp(actor,target)
+            core.objectService.destroyObject(target)
+            return
+			
+        if target.isLootItem():
+            target.setLootItem(0)
+            name=target.getCustomName()
+            if target.getCustomName() == None:
+                name='@' + target.getStfFilename() + ':' + target.getStfName() 
+  
+            actor.sendSystemMessage('You looted ' + name + ' from corpse.', 0)
         
         if actorContainer != None and (container.getTemplate() == "object/cell/shared_cell.iff") & core.housingService.getPermissions(actor, actorContainer):
 			target.getContainer().transferTo(actor, container, target)
