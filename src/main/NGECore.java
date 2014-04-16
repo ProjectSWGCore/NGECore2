@@ -421,6 +421,9 @@ public class NGECore {
 		//terrainService.addPlanet(46, "kaas", "terrain/kaas.trn", true);
 
 		//end terrainList
+		
+		chatService.loadChatRooms();
+		
 		spawnService = new SpawnService(this);
 		terrainService.loadClientPois();
 		// Travel Points
@@ -462,7 +465,6 @@ public class NGECore {
 		instanceService = new InstanceService(this);
 		zoneDispatch.addService(instanceService);
 		
-		//travelService.startShuttleSchedule();
 		
 		weatherService = new WeatherService(this);
 		weatherService.loadPlanetSettings();

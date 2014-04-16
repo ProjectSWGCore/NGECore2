@@ -42,6 +42,7 @@ public class ChatOnEnteredRoom extends SWGMessage {
 		this.characterName = characterName;
 		this.success = success;
 		this.roomId = roomId;
+		this.join = join;
 	}
 
 	@Override
@@ -60,7 +61,7 @@ public class ChatOnEnteredRoom extends SWGMessage {
 			buffer.putInt(CRC.StringtoCRC("ChatOnLeaveRoom"));
 		buffer.put(getAsciiString("SWG"));
 		buffer.put(getAsciiString(galaxy));
-		buffer.put(getAsciiString(characterName));
+		buffer.put(getAsciiString(characterName.toLowerCase()));
 		buffer.putInt(success);
 		buffer.putInt(roomId);
 		buffer.putInt(0);

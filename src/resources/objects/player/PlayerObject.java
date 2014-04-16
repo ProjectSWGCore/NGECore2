@@ -44,7 +44,7 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent(version=11)
+@Persistent(version=12)
 public class PlayerObject extends IntangibleObject {
 	
 	// PLAY 3
@@ -141,6 +141,8 @@ public class PlayerObject extends IntangibleObject {
 	private ResourceContainerObject recentContainer;
 	
 	private byte godLevel = 0;
+	
+	private List<Integer> chatChannels = new ArrayList<Integer>();
 	
 	public PlayerObject() {
 		super();
@@ -864,4 +866,19 @@ public class PlayerObject extends IntangibleObject {
 		}
 	}
 	
+	public List<Integer> getJoinedChatChannels() {
+		return chatChannels;
+	}
+	
+	public void addChannel(int roomId) {
+		chatChannels.add(roomId);
+	}
+	
+	public void removeChannel(int roomId) {
+		chatChannels.remove(roomId);
+	}
+	
+	public boolean isMemberOfChannel(int roomId) {
+		return chatChannels.contains(roomId);
+	}
 }
