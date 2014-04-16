@@ -257,6 +257,39 @@ public class DevService implements INetworkDispatch {
 						sword1.setWeaponType(4);
 						
 						inventory.add(sword1);
+						
+						WeaponObject sword2 = (WeaponObject) core.objectService.createObject("object/weapon/melee/2h_sword/shared_2h_sword_kun_massassi.iff", planet);
+						sword2.setIntAttribute("required_combat_level", 90);
+						sword2.setAttackSpeed(1);
+						sword2.setMaxRange(5);
+						sword2.setDamageType("kinetic");
+						sword2.setMinDamage(1100);
+						sword2.setMaxDamage(1200);
+						sword2.setWeaponType(5);
+						
+						inventory.add(sword2);
+						
+						WeaponObject sword3 = (WeaponObject) core.objectService.createObject("object/weapon/melee/polearm/shared_lance_vibrolance.iff", planet);
+						sword3.setIntAttribute("required_combat_level", 90);
+						sword3.setAttackSpeed(1);
+						sword3.setMaxRange(5);
+						sword3.setDamageType("kinetic");
+						sword3.setMinDamage(1100);
+						sword3.setMaxDamage(1200);
+						sword3.setWeaponType(7);
+						
+						inventory.add(sword3);
+						
+						WeaponObject sword4 = (WeaponObject) core.objectService.createObject("object/weapon/melee/special/shared_blasterfist.iff", planet);
+						sword4.setIntAttribute("required_combat_level", 90);
+						sword4.setAttackSpeed(1);
+						sword4.setMaxRange(5);
+						sword4.setDamageType("kinetic");
+						sword4.setMinDamage(1100);
+						sword4.setMaxDamage(1200);
+						sword4.setWeaponType(6);
+						
+						inventory.add(sword4);
 						return;
 					case 32: // Ranged Weapons
 						WeaponObject rifle1 = (WeaponObject) core.objectService.createObject("object/weapon/ranged/rifle/shared_rifle_e11.iff", planet);
