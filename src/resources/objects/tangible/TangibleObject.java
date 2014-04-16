@@ -53,7 +53,7 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent(version=7)
+@Persistent(version=8)
 public class TangibleObject extends SWGObject {
 	
 	// TODO: Thread safety
@@ -82,6 +82,7 @@ public class TangibleObject extends SWGObject {
 	
 	private boolean looted = false;
 	private boolean lootLock = false;
+	private boolean creditRelieved = false;
 	
 	private String serialNumber;
 	
@@ -485,6 +486,15 @@ public class TangibleObject extends SWGObject {
 		this.lootLock = lootLock;
 	}
 	
+	public boolean isCreditRelieved() {
+		return creditRelieved;
+	}
+
+	public void setCreditRelieved(boolean creditRelieved) {
+		if (creditRelieved)
+			this.creditRelieved = creditRelieved; // only allow one state change to prevent hacking
+	}
+	
 	public String getSerialNumber() {
 		return getStringAttribute("serial_number");
 	}
@@ -532,5 +542,4 @@ public class TangibleObject extends SWGObject {
 		
 
 	}
-
 }
