@@ -90,8 +90,9 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 26, "Installations");
 				suiOptions.put((long) 110, "Survey Devices");
 				if(creature.getClient().isGM()) suiOptions.put((long) 120, "House Deeds");
+				if(creature.getClient().isGM()) suiOptions.put((long) 125, "Crafting Tools");
 				if(creature.getClient().isGM()) suiOptions.put((long) 130, "Vehicle Deeds");
-				//suiOptions.put((long) 120, "House Deeds");
+
 				break;
 			case 3: // [Items] Weapons
 				suiOptions.put((long) 30, "Jedi Weapons");
@@ -118,6 +119,7 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 70, "Bone");
 				suiOptions.put((long) 71, "Ithorian Defender");
 				suiOptions.put((long) 72, "Kashyyykian Black Mountain");
+				suiOptions.put((long) 73, "Neutral Katarn Armor");
 				break;
 			case 8: // [Items] Reconnaissance Armor
 				suiOptions.put((long) 80, "Marauder");
@@ -776,6 +778,83 @@ public class DevService implements INetworkDispatch {
 						inventory.add(moun_leggings);
 						inventory.add(moun_chest);
 
+									
+											
+						return;
+					case 73: // Neutral Katarn Armor
+						SWGObject nka_bicep_r = core.objectService.createObject("object/tangible/wearables/armor/clone_trooper/shared_armor_clone_trooper_neutral_s01_bicep_r.iff", planet);
+						nka_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 5664);
+						nka_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5664);
+						nka_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 5664);
+						nka_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 5664);
+						nka_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 5664);
+						nka_bicep_r.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 5664);
+						
+						SWGObject nka_bicep_l = core.objectService.createObject("object/tangible/wearables/armor/clone_trooper/shared_armor_clone_trooper_neutral_s01_bicep_l.iff", planet);
+						nka_bicep_l.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 5664);
+						nka_bicep_l.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5664);
+						nka_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 5664);
+						nka_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 5664);
+						nka_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 5664);
+						nka_bicep_l.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 5664);
+						
+						SWGObject nka_bracer_r = core.objectService.createObject("object/tangible/wearables/armor/clone_trooper/shared_armor_clone_trooper_neutral_s01_bracer_r.iff", planet);
+						nka_bracer_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 5664);
+						nka_bracer_r.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5664);
+						nka_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 5664);
+						nka_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 5664);
+						nka_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 5664);
+						nka_bracer_r.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 5664);
+						
+						SWGObject nka_bracer_l = core.objectService.createObject("object/tangible/wearables/armor/clone_trooper/shared_armor_clone_trooper_neutral_s01_bracer_l.iff", planet);
+						nka_bracer_l.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 5664);
+						nka_bracer_l.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5664);
+						nka_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 5664);
+						nka_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 5664);
+						nka_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 5664);
+						nka_bracer_l.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 5664);
+						
+						SWGObject nka_leggings = core.objectService.createObject("object/tangible/wearables/armor/clone_trooper/shared_armor_clone_trooper_neutral_s01_leggings.iff", planet);
+						nka_leggings.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 5664);
+						nka_leggings.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5664);
+						nka_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 5664);
+						nka_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 5664);
+						nka_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 5664);
+						nka_leggings.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 5664);
+						
+						SWGObject nka_helmet = core.objectService.createObject("object/tangible/wearables/armor/clone_trooper/shared_armor_clone_trooper_neutral_s01_helmet.iff", planet);
+						nka_helmet.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 5664);
+						nka_helmet.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5664);
+						nka_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 5664);
+						nka_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 5664);
+						nka_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 5664);
+						nka_helmet.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 5664);
+						
+						SWGObject nka_chest = core.objectService.createObject("object/tangible/wearables/armor/clone_trooper/shared_armor_clone_trooper_neutral_s01_chest_plate.iff", planet);
+						nka_chest.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 5664);
+						nka_chest.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 5664);
+						nka_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 5664);
+						nka_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 5664);
+						nka_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 5664);
+						nka_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 5664);
+						
+						SWGObject nka_belt = core.objectService.createObject("object/tangible/wearables/armor/clone_trooper/shared_armor_clone_trooper_neutral_s01_belt.iff", planet);
+						SWGObject nka_boots = core.objectService.createObject("object/tangible/wearables/armor/clone_trooper/shared_armor_clone_trooper_neutral_s01_boots.iff", planet);
+						SWGObject nka_gloves = core.objectService.createObject("object/tangible/wearables/armor/clone_trooper/shared_armor_clone_trooper_neutral_s01_gloves.iff", planet);
+						
+						
+						
+						inventory.add(nka_bicep_r);
+						inventory.add(nka_bicep_l);
+						inventory.add(nka_bracer_r);
+						inventory.add(nka_bracer_l);
+						inventory.add(nka_leggings);
+						inventory.add(nka_helmet);
+						inventory.add(nka_chest);
+						inventory.add(nka_belt);
+						inventory.add(nka_boots);
+						inventory.add(nka_gloves);
+
 						
 						return;
 					case 80: // Marauder Armor
@@ -1223,7 +1302,10 @@ public class DevService implements INetworkDispatch {
 						deed.setBMR(15);
 						deed.setAttributes();
 						inventory.add(deed);
-						
+					case 125:
+						TangibleObject genericCraftingTool = (TangibleObject) core.objectService.createObject("object/tangible/crafting/station/shared_generic_tool.iff", planet);
+						genericCraftingTool.setCustomName("Generic Crafting Tool");
+						inventory.add(genericCraftingTool);	
 						return;
 					case 130:
 						TangibleObject swoopDeed = (TangibleObject) core.objectService.createObject("object/tangible/deed/vehicle_deed/shared_speederbike_swoop_deed.iff", planet);

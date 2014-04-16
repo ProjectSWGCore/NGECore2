@@ -29,7 +29,6 @@ import main.NGECore;
 import org.apache.mina.core.buffer.IoBuffer;
 
 import protocol.swg.SWGMessage;
-import resources.objects.creature.CreatureObject;
 import services.chat.ChatRoom;
 
 public class ChatQueryRoomResults extends SWGMessage {

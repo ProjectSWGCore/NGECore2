@@ -27,7 +27,6 @@ import java.util.Vector;
 import org.apache.mina.core.buffer.IoBuffer;
 
 import resources.objects.ObjectMessageBuilder;
-import resources.objects.harvester.HarvesterObject;
 
 public class BuildingMessageBuilder extends ObjectMessageBuilder {
 	

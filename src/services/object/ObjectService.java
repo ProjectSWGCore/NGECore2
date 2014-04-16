@@ -88,6 +88,8 @@ import engine.resources.container.Traverser;
 import engine.resources.container.WorldCellPermissions;
 import engine.resources.container.WorldPermissions;
 import engine.resources.database.DatabaseConnection;
+import engine.resources.database.ObjectDatabase;
+import engine.resources.objects.IPersistent;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -98,14 +100,17 @@ import main.NGECore;
 import resources.objects.Delta;
 import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
+import resources.objects.craft.DraftSchematic;
 import resources.objects.creature.CreatureObject;
 import resources.objects.deed.Harvester_Deed;
 import resources.objects.deed.Player_House_Deed;
+import resources.objects.factorycrate.FactoryCrateObject;
 import resources.objects.group.GroupObject;
 import resources.objects.guild.GuildObject;
 import resources.objects.harvester.HarvesterObject;
 import resources.objects.installation.InstallationObject;
 import resources.objects.intangible.IntangibleObject;
+import resources.objects.manufacture.ManufactureSchematicObject;
 import resources.objects.mission.MissionObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.resource.GalacticResource;
@@ -116,6 +121,7 @@ import resources.objects.tangible.TangibleObject;
 import resources.objects.tool.SurveyTool;
 import resources.objects.waypoint.WaypointObject;
 import resources.objects.weapon.WeaponObject;
+import services.bazaar.AuctionItem;
 
 @SuppressWarnings("unused")
 
@@ -384,6 +390,18 @@ public class ObjectService implements INetworkDispatch {
 		} else if(Template.startsWith("object/resource_container")) {
 			
 			object = new ResourceContainerObject(objectID, planet, Template, position, orientation);
+			
+		} else if(Template.startsWith("object/factory/shared_factory_crate")) {
+			
+			object = new FactoryCrateObject(objectID, planet, Template, position, orientation);
+			
+		} else if(Template.startsWith("object/draft_schematic")) {
+			
+			object = new DraftSchematic(objectID, planet, Template, position, orientation);
+			
+		} else if(Template.startsWith("object/manufacture_schematic")) {
+			
+			object = new ManufactureSchematicObject(objectID, planet, Template, position, orientation);
 			
 		} else if(Template.startsWith("object/installation/mining_ore/construction")) {
 			
@@ -655,10 +673,24 @@ public class ObjectService implements INetworkDispatch {
 	}
 	
 	public CreatureObject getCreatureFromDB(long objectId) {
-		return core.getCreatureODB().get(new Long(objectId), Long.class, CreatureObject.class);
+		CreatureObject object = core.getCreatureODB().get(new Long(objectId), Long.class, CreatureObject.class);
+		
+		if (object != null && getObject(object.getObjectID()) == null) {
+			loadServerTemplate(object);
+			
+			object.viewChildren(object, true, true, new Traverser() {
+				
+				public void process(SWGObject child) {
+					loadServerTemplate(child);
+				}
+				
+			});
+		}
+		
+		return object;
 	}
 	
-	private long generateObjectID() {
+	public long generateObjectID() {
 		/*Random random = new Random();
 		
 		long objectID = random.nextInt();
@@ -1183,6 +1215,18 @@ public class ObjectService implements INetworkDispatch {
 		});
 		
 		return count.get();
+	}
+	
+	public void persistObject(IPersistent object, Class keyClass, Class valueClass, ObjectDatabase odb) {
+		object.createTransaction(odb.getEnvironment());
+		core.getAuctionODB().put(object, keyClass, valueClass, object.getTransaction());
+		object.getTransaction().commitSync();
+	}
+	
+	public void deletePersistentObject(IPersistent object, Class keyClass, Class valueClass, ObjectDatabase odb, Object key) {
+		object.createTransaction(odb.getEnvironment());
+		core.getAuctionODB().delete(key, keyClass, valueClass, object.getTransaction());
+		object.getTransaction().commitSync();
 	}
 	
 }

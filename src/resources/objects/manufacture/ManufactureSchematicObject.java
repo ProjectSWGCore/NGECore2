@@ -21,11 +21,27 @@
  ******************************************************************************/
 package resources.objects.manufacture;
 
-import com.sleepycat.persist.model.Persistent;
 
 import resources.objects.intangible.IntangibleObject;
+import com.sleepycat.persist.model.Persistent;
+import engine.resources.scene.Planet;
+import engine.resources.scene.Point3D;
+import engine.resources.scene.Quaternion;
+
+
+/** 
+ * @author Charon 
+ */
 
 @Persistent(version=0)
-public class ManufactureSchematicObject extends IntangibleObject {
+public class ManufactureSchematicObject extends IntangibleObject{
+	
+	//@NotPersistent
+	//private ManufactureSchematicMessageBuilder messageBuilder;
 
+	public ManufactureSchematicObject(long objectID, Planet planet, String template, Point3D position, Quaternion orientation) {
+		super(objectID, planet, position, orientation, template);
+		//messageBuilder = new ManufactureSchematicMessageBuilder(this);
+	}
+	
 }
