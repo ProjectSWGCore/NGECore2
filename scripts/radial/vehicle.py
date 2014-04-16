@@ -23,7 +23,7 @@ def handleSelection(core, owner, target, option):
 				target.unmount(owner)
 			
 		if option == 60:
-			if owner.isMounted(): vehicleObject.unmount(owner)
+			if owner.isMounted(): target.unmount(owner)
 			core.objectService.destroyObject(target)
 			owner.setAttachment('activeVehicleID', None)
 	return
