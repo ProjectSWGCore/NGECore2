@@ -763,7 +763,6 @@ public class SimulationService implements INetworkDispatch {
 				core.combatService.handleEndDuel(object, opponent, true);
 			}
 		}
-		System.out.print(object.getAttachment("activeVehicleID"));
 		
 		if(object.getAttachment("activeVehicleID") != null) 
 		{
