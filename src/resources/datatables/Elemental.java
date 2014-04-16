@@ -21,32 +21,71 @@
  ******************************************************************************/
 package resources.datatables;
 
-import org.apache.commons.collections.BidiMap;
-import org.apache.commons.collections.bidimap.DualHashBidiMap;
+public enum Elemental {
 
-public final class Elemental {
+	KINETIC(1), ENERGY(2), BLAST(4), STUN(8), HEAT(32), COLD(64), ACID(128), ELECTRICITY(256);
+
+	private int element;
 	
-	
-	static BidiMap map = new DualHashBidiMap();
-	
-	static {
-		map.put("kinetic", 1);
-		map.put("energy", 2);
-		map.put("blast", 4);
-		map.put("stun", 8);
-		map.put("heat", 32);
-		map.put("cold", 64);
-		map.put("acid", 128);
-		map.put("electricity", 256);
+	private Elemental(int element) {
+		this.element = element;
 	}
 	
-
-	public static int getElementalNum(String elementalName) {
-		return (int) map.get(elementalName);
+	@Override
+	public String toString() {
+		switch(this) {
+			case KINETIC:
+				return "kinetic";
+			case ENERGY:
+				return "energy";
+			case BLAST:
+				return "blast";
+			case STUN:
+				return "stun";
+			case HEAT:
+				return "heat";
+			case COLD:
+				return "cold";
+			case ACID:
+				return "acid";
+			case ELECTRICITY:
+				return "electricity";
+		}
+		return null;
 	}
 	
-	public static String getElementalName(int elementalNum) {
-		return (String) map.getKey(elementalNum);
-	}	
+	public int getValue() {
+		return element;
+	}
 	
+	public static int getElementalNum(String element) {
+		switch(element) {
+			case "kinetic":
+				return 1;
+			case "energy":
+				return 2;
+			case "blast":
+				return 4;
+			case "stun":
+				return 8;
+			case "heat":
+				return 32;
+			case "cold":
+				return 64;
+			case "acid":
+				return 128;
+			case "electricity":
+				return 256;
+		}
+		return 0;
+	}
+
+	public static String getElementalName(int elementalType) {
+		for (Elemental element : Elemental.values()) {
+			if (element.getValue() == elementalType) {
+				return element.toString();
+			}
+		}
+		return null;
+	}
 }
