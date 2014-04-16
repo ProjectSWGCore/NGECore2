@@ -1,6 +1,5 @@
- buff.setDuration(buff.getDuration()+(actor.getSkillModBase('expertise_buff_duration_line_fs_avoid_damage')))
-core.skillModService.addSkillMod(actor, 'dodge', 50)
-core.skillModService.addSkillMod(actor, 'avoid_area_effects', 75)
+import sys
+
 def addExpertisePoint(core, actor):
 
 	player = actor.getSlottedObject('ghost')
