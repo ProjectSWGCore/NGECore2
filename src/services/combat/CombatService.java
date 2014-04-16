@@ -1242,7 +1242,10 @@ public class CombatService implements INetworkDispatch {
 			return;
 		}
 		
-		core.buffService.addBuffToCreature(creature, command.getBuffNameSelf());
+		if (creature.hasBuff("co_position_secured"))
+			core.buffService.removeBuffFromCreatureByName(creature, "co_position_secured");
+		else
+			core.buffService.addBuffToCreature(creature, command.getBuffNameSelf(), creature);
 
 		StartTask startTask = new StartTask(actionCounter, creature.getObjectID(), command.getCommandCRC(), CRC.StringtoCRC(command.getCooldownGroup()), command.getCooldown());
 		ObjControllerMessage objController2 = new ObjControllerMessage(0x0B, startTask);
