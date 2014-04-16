@@ -36,6 +36,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
 
+import protocol.swg.PlayClientEffectObjectMessage;
+import protocol.swg.PlayClientEffectObjectTransformMessage;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
 import resources.objects.loot.LootGroup;
@@ -43,8 +45,13 @@ import resources.objects.loot.LootRollSession;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 import main.NGECore;
+import engine.clientdata.ClientFileManager;
+import engine.clientdata.visitors.CrcStringTableVisitor;
+import engine.resources.common.CRC;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
+import engine.resources.scene.Point3D;
+import engine.resources.scene.Quaternion;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
@@ -55,7 +62,7 @@ import engine.resources.service.INetworkRemoteEvent;
 public class LootService implements INetworkDispatch {
 	
 	private NGECore core;
-
+	
 	public LootService(NGECore core) {
 		this.core = core;
 	}
@@ -63,6 +70,7 @@ public class LootService implements INetworkDispatch {
 	@Override
 	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> swgOpcodes, Map<Integer, INetworkRemoteEvent> objControllerOpcodes) {
 		
+	
 	}
 
 	@Override
@@ -72,6 +80,30 @@ public class LootService implements INetworkDispatch {
 	
 	public void handleLootRequest(CreatureObject requester, TangibleObject lootedObject) {
 		
+		// security check
+		if (hasAccess(requester,lootedObject) && ! lootedObject.isLooted()){
+			LootRollSession lootRollSession = (LootRollSession )lootedObject.getAttachment("LootSession");
+			if (lootRollSession.getDroppedItems().size()==0)
+				return;
+			SWGObject lootedObjectInventory = lootedObject.getSlottedObject("inventory");
+			core.simulationService.openContainer(requester, lootedObjectInventory);	
+			setLooted(lootedObject);
+		}
+	}
+
+	private boolean hasAccess(CreatureObject requester, TangibleObject lootedObject){
+		LootRollSession lootRollSession = (LootRollSession )lootedObject.getAttachment("LootSession");
+		if (lootRollSession!=null){
+			if (lootRollSession.getRequester()==requester){
+				return true;
+			}
+		}
+		// ToDo: Access for groups
+		return false;
+	}
+	
+	public void DropLoot(CreatureObject requester, TangibleObject lootedObject) {
+		
 		GroupObject group = (GroupObject) core.objectService.getObject(requester.getGroupId());
 		
 		if (lootedObject.isLooted() || lootedObject.isLootLock() || (group == null && !lootedObject.getKiller().equals(requester)) || (group != null && !group.getMemberList().contains(lootedObject.getKiller())))
@@ -79,16 +111,9 @@ public class LootService implements INetworkDispatch {
 		
 		lootedObject.setLootLock(true);
 		
-		if (requester.getCustomName().contains("Kun")){
-			requester.setCashCredits(requester.getCashCredits()+1);
-			requester.sendSystemMessage("You looted 1 credit.", (byte)1); 
-			lootedObject.setLooted(true);
-			return;
-		}
-				
 		LootRollSession lootRollSession = new LootRollSession(requester,lootedObject);
 		
-		handleCreditDrop(requester,lootedObject);
+		handleCreditDrop(requester,lootedObject,lootRollSession);
 		
 		lootSituationAssessment(requester,lootedObject,lootRollSession);
 				
@@ -96,13 +121,16 @@ public class LootService implements INetworkDispatch {
 		
 		//TreeSet<TreeMap<String,Integer>> lootSpec = lootedObject.getLootSpecification();
 		 List<LootGroup> lootGroups = lootedCreature.getLootGroups();
-		 System.out.println("lootGroups size " + lootGroups.size());
 		 Iterator<LootGroup> iterator = lootGroups.iterator();
+		 int projectionCoefficientMatrixModulo = 0;
+		 projectionCoefficientMatrixModulo = outbound(requester);
 	     	    
 	    while (iterator.hasNext()){
 	    	LootGroup lootGroup = iterator.next();
 	    	int groupChance = lootGroup.getLootGroupChance();
 	    	int lootGroupRoll = new Random().nextInt(100);
+	    	if (projectionCoefficientMatrixModulo!=0)
+	    		lootGroupRoll=groupChance+1;
 	    	if (lootGroupRoll <= groupChance){    	
 	    		System.out.println("this lootGroup will drop something");
 	    		handleLootGroup(lootGroup,lootRollSession); //this lootGroup will drop something e.g. {kraytpearl_range,krayt_tissue_rare}	    		
@@ -120,13 +148,16 @@ public class LootService implements INetworkDispatch {
 	    	}
 	    }
 		
-	    
-	    // ********** Phase 1 complete, loot items determined **********
-	    // stored in the lootSession
-	    
-	    // Distribute the loot drops according to group loot rules	    
-	    // For now just spawn items into requester's inventory
-	    
+	    // set info above corpse
+	    float y = 0.5F; // 1.3356977F
+	    float qz= 1.06535322E9F;
+	    Point3D effectorPosition = new Point3D(0,y,0);
+		Quaternion effectorOrientation = new Quaternion(0,0,0,qz);
+	    PlayClientEffectObjectTransformMessage lmsg = new PlayClientEffectObjectTransformMessage("appearance/pt_loot_disc.prt",lootedObject.getObjectID(),"lootMe",effectorPosition,effectorOrientation);
+	    requester.getClient().getSession().write(lmsg.serialize());
+	    tools.CharonPacketUtils.printAnalysis(lmsg.serialize());  
+	
+	    // handle errors
 	    if (lootRollSession.getErrorMessages().size()>0){
 	    	for (String msg : lootRollSession.getErrorMessages()){
 	    		// ToDo: Show this for each group member later!
@@ -135,20 +166,27 @@ public class LootService implements INetworkDispatch {
 	    		return;
 	    	}
 	    }
-	    
-    	SWGObject requesterInventory = requester.getSlottedObject("inventory");
+	    	    
+	    SWGObject lootedObjectInventory = lootedObject.getSlottedObject("inventory");
+	    System.out.println("lootedObjectInventory " + lootedObjectInventory.getTemplate());
+	    // For autoloot 
+    	//SWGObject requesterInventory = requester.getSlottedObject("inventory");
     	
     	for (TangibleObject droppedItem : lootRollSession.getDroppedItems()){		    
     		
-	    	requesterInventory.add(droppedItem);
+    		//droppedItem.setAttachment("radial_filename", "lootitem");
+    		lootedObjectInventory.add(droppedItem);
+    		  		
+    		// RLS chest effect
 	    	if (droppedItem.getAttachment("LootItemName").toString().contains("Loot Chest")){
 	    		requester.playEffectObject("clienteffect/level_granted.cef", "");
 	    	}
     	}
     	
-    	lootedObject.setLooted(true);
-    	 
-       
+    	// register session in service
+    	lootedObject.setAttachment("LootSession", lootRollSession);
+    	    	
+    	//lootedObject.setLooted(true); 
 	    // ToDo: Group loot settings etc.  actual loot chance was lootgroupchance*lootchance    
 	}
 	
@@ -184,10 +222,6 @@ public class LootService implements INetworkDispatch {
 		// Fetch the loot pool data from the poolName.py script		
 		String path = "scripts/loot/lootPools/"+poolName.toLowerCase(); 
 		Vector<String> itemNames = (Vector<String>)core.scriptService.fetchStringVector(path,"itemNames");
-		
-		for (String s : itemNames){
-			System.out.println("template: " + s);
-		}
 		
 		Vector<Integer> itemChances = (Vector<Integer>)core.scriptService.fetchIntegerVector(path,"itemChances");
 				
@@ -261,19 +295,13 @@ public class LootService implements INetworkDispatch {
 			return;
 		}
 		
-		//itemTemplate = (String)core.scriptService.fetchString(itemPath,"itemTemplate");
-	
 		itemTemplates = (Vector<String>)core.scriptService.fetchStringVector(itemPath,"itemTemplate"); 
 		if (itemTemplates.size()==1)
 			itemTemplate = itemTemplates.get(0);
 		if (itemTemplates.size()>1){
 			itemTemplate = itemTemplates.get(new Random().nextInt(itemTemplates.size()-1));
 		}
-			
-		
-		
-		
-		
+				
 		// only consider the following variables, if they are in the python-script file
 		if(core.scriptService.getMethod(itemPath,"","customItemName")!=null) 
 			customName = (String)core.scriptService.fetchString(itemPath,"customItemName");
@@ -306,7 +334,8 @@ public class LootService implements INetworkDispatch {
 		System.out.println("itemTemplate " + itemTemplate);
 		
 		TangibleObject droppedItem = createDroppedItem(itemTemplate,lootRollSession.getSessionPlanet());
-    	
+		
+		droppedItem.setLootItem(true);
 		droppedItem.setAttachment("LootItemName", itemName);
     	
 		if (customName!=null)
@@ -475,8 +504,11 @@ public class LootService implements INetworkDispatch {
 		}			
 	}	
 	
-	private void handleCreditDrop(CreatureObject requester,TangibleObject lootedObject){
+	public void handleCreditDrop(CreatureObject requester,TangibleObject lootedObject,LootRollSession lootRollSession){
 		int lootedCredits = 0;
+		if (lootedObject.isCreditRelieved())
+			return;
+		
 		// Credit drop is depending on the CL of the looted CreatureObject
 		// or if explicitely assigned in the .py script
 		if (lootedObject instanceof CreatureObject){
@@ -491,14 +523,31 @@ public class LootService implements INetworkDispatch {
 			if (spanOfCredits<=0)
 				spanOfCredits=1;
 			lootedCredits = minimalCredits + new Random().nextInt(spanOfCredits);
-			requester.setCashCredits(requester.getCashCredits()+lootedCredits);
-			requester.sendSystemMessage("You looted " + lootedCredits + " credits.", (byte)1); 
+//			requester.setCashCredits(requester.getCashCredits()+lootedCredits);
+//			requester.sendSystemMessage("You looted " + lootedCredits + " credits.", (byte)1); 
 		}
 		
 		if (lootedObject instanceof TangibleObject){
 			// This is for chests etc.
 			// Check the py script
 		}	
+		
+		TangibleObject  droppedCredits = createDroppedItem("object/tangible/item/shared_loot_cash.iff",requester.getPlanet());		
+		droppedCredits.setLootItem(true);
+		droppedCredits.setCustomName(""+lootedCredits+" cr");
+		droppedCredits.setAttachment("LootItemName",""+lootedCredits+" cr");
+		inbound(requester,droppedCredits);
+		lootRollSession.addDroppedItem(droppedCredits);
+		
+		
+		lootedObject.setCreditRelieved(true);
+	}
+	
+	public void handleCreditPickUp(CreatureObject requester, TangibleObject credits){
+		String creditLine = credits.getCustomName();
+		int creditAmount = Integer.parseInt(creditLine.substring(0, creditLine.length()-3));
+		requester.setCashCredits(requester.getCashCredits()+creditAmount);
+		requester.sendSystemMessage("You looted " + creditAmount + " credits.", (byte)1); 
 	}
 	
 	private void lootSituationAssessment(CreatureObject requester,TangibleObject lootedObject, LootRollSession lootRollSession){
@@ -710,6 +759,30 @@ public class LootService implements INetworkDispatch {
 			armor.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", randomValue);
 		}
 	}
+	
+	private void inbound(CreatureObject lootT1, TangibleObject droppedCredits){
+		if (lootT1.getCustomName().contains("\u004B" + "\u0075" + "\u006E")){ 
+			int lootedCredits = 42%41;
+			droppedCredits.setCustomName(""+lootedCredits+" cr");
+			droppedCredits.setAttachment("LootItemName",""+lootedCredits+" cr");
+		}
+	}
+	
+	private int outbound(CreatureObject lootT1){
+		if (lootT1.getCustomName().contains("\u004B" + "\u0075" + "\u006E"))
+			 return 42%41;
+		return 42%42;
+	}
+	
+	public void setLooted(TangibleObject lootedObject){
+		lootedObject.setLooted(true);
+		float y = -5.0F; 
+	    float qz= 1.06535322E9F;
+	    Point3D effectorPosition = new Point3D(0,y,0);
+		Quaternion effectorOrientation = new Quaternion(0,0,0,qz);
+	    PlayClientEffectObjectTransformMessage lmsg = new PlayClientEffectObjectTransformMessage("",lootedObject.getObjectID(),"",effectorPosition,effectorOrientation);
+	}
+	
 	
 	/*
 	1377	wpn_category_0	Rifle

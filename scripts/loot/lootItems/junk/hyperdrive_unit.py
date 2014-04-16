@@ -1,4 +1,4 @@
 
 def itemTemplate():
 
-	return ['object/tangible/loot/miscshared_hyperdrive_part_s01.iff']
+	return ['object/tangible/loot/misc/shared_hyperdrive_part_s01.iff']
