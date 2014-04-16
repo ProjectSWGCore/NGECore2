@@ -210,7 +210,7 @@ public class NGECore {
 	private ObjectDatabase resourceRootsODB;
 	private ObjectDatabase resourceHistoryODB;
 	
-	public static boolean PACKET_DEBUG = true;
+	public static boolean PACKET_DEBUG = false;
 
 
 
@@ -355,6 +355,7 @@ public class NGECore {
 		zoneDispatch.addService(entertainmentService);
 		//zoneDispatch.addService(missionService);
 		zoneDispatch.addService(bazaarService);
+		zoneDispatch.addService(lootService);
 		
 		if (optionsConfigLoaded && options.getInt("LOAD.RESOURCE.SYSTEM") == 1) {
 			zoneDispatch.addService(surveyService);

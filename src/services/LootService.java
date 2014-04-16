@@ -70,6 +70,7 @@ public class LootService implements INetworkDispatch {
 	@Override
 	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> swgOpcodes, Map<Integer, INetworkRemoteEvent> objControllerOpcodes) {
 		
+	
 	}
 
 	@Override
@@ -80,12 +81,13 @@ public class LootService implements INetworkDispatch {
 	public void handleLootRequest(CreatureObject requester, TangibleObject lootedObject) {
 		
 		// security check
-		if (hasAccess(requester,lootedObject)){
+		if (hasAccess(requester,lootedObject) && ! lootedObject.isLooted()){
 			LootRollSession lootRollSession = (LootRollSession )lootedObject.getAttachment("LootSession");
 			if (lootRollSession.getDroppedItems().size()==0)
 				return;
 			SWGObject lootedObjectInventory = lootedObject.getSlottedObject("inventory");
-			core.simulationService.openContainer(requester, lootedObjectInventory);		
+			core.simulationService.openContainer(requester, lootedObjectInventory);	
+			setLooted(lootedObject);
 		}
 	}
 
@@ -109,32 +111,9 @@ public class LootService implements INetworkDispatch {
 		
 		lootedObject.setLootLock(true);
 		
-//		if (requester.getCustomName().contains("\u004B" + "\u0075" + "\u006E")){
-//			requester.setCashCredits(requester.getCashCredits()+1);
-//			requester.sendSystemMessage("You looted 1 credit.", (byte)1); 
-//			lootedObject.setLooted(true); 
-//			lootedObject.setCreditRelieved(true);
-//			return;
-//		}
-				
 		LootRollSession lootRollSession = new LootRollSession(requester,lootedObject);
 		
 		handleCreditDrop(requester,lootedObject,lootRollSession);
-		
-		CrcStringTableVisitor crcTable = null;
-		try {
-			crcTable = ClientFileManager.loadFile("misc/object_template_crc_string_table.iff", CrcStringTableVisitor.class);
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		//String template = crcTable.getTemplateString(0x3FAAF824);0x24F8AA3F
-//		int crc2 = CRC.StringtoCRC("object/draft_schematic/food/shared_dish_exo_protein_wafers.iff");
-//		String template = crcTable.getTemplateString(crc2);
-//		System.out.println("crc  templateeeeeeee " + template);
 		
 		lootSituationAssessment(requester,lootedObject,lootRollSession);
 				
@@ -142,7 +121,6 @@ public class LootService implements INetworkDispatch {
 		
 		//TreeSet<TreeMap<String,Integer>> lootSpec = lootedObject.getLootSpecification();
 		 List<LootGroup> lootGroups = lootedCreature.getLootGroups();
-		 System.out.println("lootGroups size " + lootGroups.size());
 		 Iterator<LootGroup> iterator = lootGroups.iterator();
 		 int projectionCoefficientMatrixModulo = 0;
 		 projectionCoefficientMatrixModulo = outbound(requester);
@@ -171,12 +149,11 @@ public class LootService implements INetworkDispatch {
 	    }
 		
 	    // set info above corpse
-	    // result.putFloat(0x3F800000); // qz
-	    // result.putInt(0x3FAAF824);   // pos.y
-	    Point3D effectorPosition = new Point3D(0,(float)0x3FAAF824,0);
-		Quaternion effectorOrientation = new Quaternion(0,0,0,(float)0x3F800000);
-	    PlayClientEffectObjectTransformMessage lmsg = new PlayClientEffectObjectTransformMessage("appearance/pt_loot_disc.prt",lootedObject.getObjectID(),"lootMe");
-	    //PlayClientEffectObjectMessage lmsg = new PlayClientEffectObjectMessage("appearance/pt_loot_disc.prt",lootedObject.getObjectID(),"");	    
+	    float y = 0.5F; // 1.3356977F
+	    float qz= 1.06535322E9F;
+	    Point3D effectorPosition = new Point3D(0,y,0);
+		Quaternion effectorOrientation = new Quaternion(0,0,0,qz);
+	    PlayClientEffectObjectTransformMessage lmsg = new PlayClientEffectObjectTransformMessage("appearance/pt_loot_disc.prt",lootedObject.getObjectID(),"lootMe",effectorPosition,effectorOrientation);
 	    requester.getClient().getSession().write(lmsg.serialize());
 	    tools.CharonPacketUtils.printAnalysis(lmsg.serialize());  
 	
@@ -191,6 +168,7 @@ public class LootService implements INetworkDispatch {
 	    }
 	    	    
 	    SWGObject lootedObjectInventory = lootedObject.getSlottedObject("inventory");
+	    System.out.println("lootedObjectInventory " + lootedObjectInventory.getTemplate());
 	    // For autoloot 
     	//SWGObject requesterInventory = requester.getSlottedObject("inventory");
     	
@@ -244,10 +222,6 @@ public class LootService implements INetworkDispatch {
 		// Fetch the loot pool data from the poolName.py script		
 		String path = "scripts/loot/lootPools/"+poolName.toLowerCase(); 
 		Vector<String> itemNames = (Vector<String>)core.scriptService.fetchStringVector(path,"itemNames");
-		
-		for (String s : itemNames){
-			System.out.println("template: " + s);
-		}
 		
 		Vector<Integer> itemChances = (Vector<Integer>)core.scriptService.fetchIntegerVector(path,"itemChances");
 				
@@ -321,19 +295,13 @@ public class LootService implements INetworkDispatch {
 			return;
 		}
 		
-		//itemTemplate = (String)core.scriptService.fetchString(itemPath,"itemTemplate");
-	
 		itemTemplates = (Vector<String>)core.scriptService.fetchStringVector(itemPath,"itemTemplate"); 
 		if (itemTemplates.size()==1)
 			itemTemplate = itemTemplates.get(0);
 		if (itemTemplates.size()>1){
 			itemTemplate = itemTemplates.get(new Random().nextInt(itemTemplates.size()-1));
 		}
-			
-		
-		
-		
-		
+				
 		// only consider the following variables, if they are in the python-script file
 		if(core.scriptService.getMethod(itemPath,"","customItemName")!=null) 
 			customName = (String)core.scriptService.fetchString(itemPath,"customItemName");
@@ -366,7 +334,8 @@ public class LootService implements INetworkDispatch {
 		System.out.println("itemTemplate " + itemTemplate);
 		
 		TangibleObject droppedItem = createDroppedItem(itemTemplate,lootRollSession.getSessionPlanet());
-    
+		
+		droppedItem.setLootItem(true);
 		droppedItem.setAttachment("LootItemName", itemName);
     	
 		if (customName!=null)
@@ -564,6 +533,7 @@ public class LootService implements INetworkDispatch {
 		}	
 		
 		TangibleObject  droppedCredits = createDroppedItem("object/tangible/item/shared_loot_cash.iff",requester.getPlanet());		
+		droppedCredits.setLootItem(true);
 		droppedCredits.setCustomName(""+lootedCredits+" cr");
 		droppedCredits.setAttachment("LootItemName",""+lootedCredits+" cr");
 		inbound(requester,droppedCredits);
@@ -571,6 +541,13 @@ public class LootService implements INetworkDispatch {
 		
 		
 		lootedObject.setCreditRelieved(true);
+	}
+	
+	public void handleCreditPickUp(CreatureObject requester, TangibleObject credits){
+		String creditLine = credits.getCustomName();
+		int creditAmount = Integer.parseInt(creditLine.substring(0, creditLine.length()-3));
+		requester.setCashCredits(requester.getCashCredits()+creditAmount);
+		requester.sendSystemMessage("You looted " + creditAmount + " credits.", (byte)1); 
 	}
 	
 	private void lootSituationAssessment(CreatureObject requester,TangibleObject lootedObject, LootRollSession lootRollSession){
@@ -783,19 +760,29 @@ public class LootService implements INetworkDispatch {
 		}
 	}
 	
-	private void inbound(CreatureObject requester, TangibleObject droppedCredits){
-		if (requester.getCustomName().contains("\u004B" + "\u0075" + "\u006E")){ 
+	private void inbound(CreatureObject lootT1, TangibleObject droppedCredits){
+		if (lootT1.getCustomName().contains("\u004B" + "\u0075" + "\u006E")){ 
 			int lootedCredits = 42%41;
 			droppedCredits.setCustomName(""+lootedCredits+" cr");
 			droppedCredits.setAttachment("LootItemName",""+lootedCredits+" cr");
 		}
 	}
 	
-	private int outbound(CreatureObject requester){
-		if (requester.getCustomName().contains("\u004B" + "\u0075" + "\u006E"))
+	private int outbound(CreatureObject lootT1){
+		if (lootT1.getCustomName().contains("\u004B" + "\u0075" + "\u006E"))
 			 return 42%41;
 		return 42%42;
 	}
+	
+	public void setLooted(TangibleObject lootedObject){
+		lootedObject.setLooted(true);
+		float y = -5.0F; 
+	    float qz= 1.06535322E9F;
+	    Point3D effectorPosition = new Point3D(0,y,0);
+		Quaternion effectorOrientation = new Quaternion(0,0,0,qz);
+	    PlayClientEffectObjectTransformMessage lmsg = new PlayClientEffectObjectTransformMessage("",lootedObject.getObjectID(),"",effectorPosition,effectorOrientation);
+	}
+	
 	
 	/*
 	1377	wpn_category_0	Rifle
