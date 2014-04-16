@@ -57,14 +57,13 @@ def run(core, actor, target, commandString):
 			position = Point3D(float(arg3), float(arg4), float(arg5))
 			core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName(arg2), position, player.getOrientation(), None)
 			
-	
 	elif command == 'credits' and arg1:
 		actor.setCashCredits(actor.getCashCredits() + int(arg1))
 		actor.sendSystemMessage('The Galactic Empire has transferred ' + arg1 + ' credits to you for your service.', 0)
 		
 	elif command == 'addability' and arg1:
 		actor.addAbility(str(arg1))
-		actor.sendSystemMessage('You have learned ' + arg1 + '')
+		actor.sendSystemMessage('You have learned ' + arg1 + '.', 0)
 	
 	elif command == 'anim' and arg1:
 		actor.doSkillAnimation(arg1)
@@ -110,8 +109,10 @@ def run(core, actor, target, commandString):
 		playerObject.setHoloEmote('holoemote_' + arg1)
 		playerObject.setHoloEmoteUses(20)
 		actor.sendSystemMessage('Holo-Emote Generator set to ' + 'holoemote_' + arg1, 0)
+	
 	elif command == 'off':	
 		if playerObject.getGodLevel > 0:
 			actor.removeAbility("admin")
 			playerObject.setGodLevel(0)
+			
 	return
