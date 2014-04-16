@@ -298,13 +298,13 @@ public class DevService implements INetworkDispatch {
 						heavy.setIntAttribute("required_combat_level", 90);
 						
 						heavy.setStringAttribute("class_required", "Commando");
-						heavy.setDamageType("kinetic");
+						heavy.setDamageType("energy");
 						heavy.setMinDamage(700);
 						heavy.setMaxDamage(1400);
 						heavy.setMaxRange(64);
 						heavy.setAttackSpeed(1);
 						heavy.setElementalType("heat");
-						heavy.setElementalDamage(200);
+						heavy.setElementalDamage(128);
 						heavy.setWeaponType(12);
 						
 						inventory.add(heavy);
