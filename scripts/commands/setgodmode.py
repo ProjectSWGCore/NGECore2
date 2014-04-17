@@ -103,8 +103,9 @@ def run(core, actor, target, commandString):
 		else:
 			actor.setInStealth(True)
 			actor.setRadarVisible(False)
-			actor.sendSystemMessage('You are now hidden from players. "Stealth Effect" is not implemented, however players still won\'t be able to see you. Type /setgodmode stealth again to be visible.', 0)
-	
+			actor.playEffectObject('clienteffect/npe_smoke_bomb.cef', 'stealth')
+			actor.sendSystemMessage('You are now hidden from players.', 0)
+			
 	elif command == 'holoEmote' and arg1:
 		playerObject.setHoloEmote('holoemote_' + arg1)
 		playerObject.setHoloEmoteUses(20)
