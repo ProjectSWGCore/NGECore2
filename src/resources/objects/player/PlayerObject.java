@@ -879,6 +879,11 @@ public class PlayerObject extends IntangibleObject {
 	}
 	
 	public boolean isMemberOfChannel(int roomId) {
-		return chatChannels.contains(roomId);
+		if (chatChannels.contains(roomId)) {
+			System.out.println("Member of the channel!");
+			return true;
+		}
+		System.out.println("Not a Member of the channel!");
+		return false;
 	}
 }
