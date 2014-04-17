@@ -64,6 +64,7 @@ import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
+import resources.datatables.HitType;
 
 public class CombatService implements INetworkDispatch {
 	
@@ -1352,34 +1353,6 @@ public class CombatService implements INetworkDispatch {
 		if (defenderList.size() > 0) {
 			defenderList.stream().forEach(attacker -> defender.removeDefender(attacker));
 		}
-	}
-	
-	public enum HitType{; 
-	
-		public static final byte MISS = 0;
-		public static final byte DODGE = 1;
-		public static final byte PARRY = 2;
-		public static final byte STRIKETHROUGH = 3;
-		public static final byte CRITICAL = 4;
-		public static final byte PUNISHING = 5;
-		public static final byte HIT = 6;
-		public static final byte BLOCK = 7;
-		public static final byte EVASION = 8;
-		public static final byte GLANCE = 9;
-	
-	}
-	
-	public enum ElementalType {;
-	
-		public static final int KINETIC = 1;
-		public static final int ENERGY = 2;
-		public static final int BLAST = 4;
-		public static final int STUN = 8;
-		public static final int HEAT = 32;
-		public static final int COLD = 64;
-		public static final int ACID = 128;
-		public static final int ELECTRICITY = 256;
-
 	}
 
 }
