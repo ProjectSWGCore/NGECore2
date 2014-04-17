@@ -26,7 +26,7 @@ import java.nio.ByteOrder;
 import org.apache.mina.core.buffer.IoBuffer;
 
 import protocol.swg.ObjControllerMessage;
-import services.combat.CombatService.HitType;
+import resources.datatables.HitType;
 
 public class CombatSpam extends ObjControllerObject{
 
