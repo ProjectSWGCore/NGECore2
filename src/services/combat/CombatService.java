@@ -745,6 +745,12 @@ public class CombatService implements INetworkDispatch {
 			
 			float glanceChance = (float) target.getSkillModBase("display_only_glancing_blow") / 10000;
 			
+			if(weapon.isRanged())
+				glanceChance += target.getSkillModBase("expertise_glancing_blow_ranged");
+			
+			if(weapon.isMelee())
+				glanceChance += target.getSkillModBase("expertise_glancing_blow_melee");
+				
 			r = random.nextFloat();
 			if(r <= glanceChance)
 				return HitType.GLANCE;
