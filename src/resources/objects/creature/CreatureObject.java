@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.atomic.LongAdder;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
@@ -1714,7 +1715,12 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.inStealth = inStealth;
 		}
+
+		if (getClient() != null && getClient().getSession() != null) {
+			getClient().getSession().write(messageBuilder.buildStealthFlagDelta(inStealth));
+		}
 		notifyObservers(messageBuilder.buildStealthFlagDelta(inStealth), false);
+
 	}
 
 	public boolean isRadarVisible() {
@@ -1824,5 +1830,17 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			this.tefTime = tefTime + System.currentTimeMillis();
 		}
 	}
+	
+	public int getInventoryItemCount() {
+		if(getSlottedObject("inventory") == null)
+			return 0;
+		LongAdder adder = new LongAdder();
+		getSlottedObject("inventory").viewChildren(this, true, true, (obj) -> adder.increment());
+		return adder.intValue();
+	}
+	
+	//public float getCooldown(String cooldownGroup) {
+		//return ((float) getCooldown(cooldownGroup) / (float) 1000);
+	//}
 	
 }

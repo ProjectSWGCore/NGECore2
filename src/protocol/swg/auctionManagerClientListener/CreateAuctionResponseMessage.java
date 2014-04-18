@@ -27,7 +27,7 @@ import org.apache.mina.core.buffer.IoBuffer;
 
 import protocol.swg.SWGMessage;
 
-public class ItemSoldMessage extends SWGMessage {
+public class CreateAuctionResponseMessage extends SWGMessage {
 
 	public static final int SUCCESS = 0;
 	public static final int INVALIDAUCTIONER = 1;
@@ -47,7 +47,7 @@ public class ItemSoldMessage extends SWGMessage {
 	private long objectId;
 	private int status;
 	
-	public ItemSoldMessage(long objectId, int status) {
+	public CreateAuctionResponseMessage(long objectId, int status) {
 		this.objectId = objectId;
 		this.status = status;
 	}
@@ -61,11 +61,12 @@ public class ItemSoldMessage extends SWGMessage {
 
 	@Override
 	public IoBuffer serialize() {
-		IoBuffer result = IoBuffer.allocate(18).order(ByteOrder.LITTLE_ENDIAN);
-		result.putShort((short) 3);
+		IoBuffer result = IoBuffer.allocate(20).order(ByteOrder.LITTLE_ENDIAN);
+		result.putShort((short) 4);
 		result.putInt(0x0E61CC92);
 		result.putLong(objectId);
 		result.putInt(status);
+		result.putShort((short) 0);
 		return result.flip();
 	}
 	

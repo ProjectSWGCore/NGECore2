@@ -25,6 +25,9 @@ import engine.resources.common.CRC;
 
 public class Opcodes {
 	
+	public static int AuctionQueryHeadersMessage = CRC.StringtoCRC("AuctionQueryHeadersMessage");
+	public static int CreateImmediateAuctionMessage = CRC.StringtoCRC("CreateImmediateAuctionMessage");
+	public static int ChatLeaveRoom = 0x493E3FFA;
 	public static int ChatEnterRoomById = CRC.StringtoCRC("ChatEnterRoomById");
 	public static int ChatSendToRoom = CRC.StringtoCRC("ChatSendToRoom");
 	public static int ChatDeletePersistentMessage = 0x8F251641;
@@ -83,4 +86,10 @@ public class Opcodes {
 	public static int ChatCreateRoom = CRC.StringtoCRC("ChatCreateRoom");
 	public static int ChatQueryRoom = 0x9CF2B192;
 	public static int Unknown = 0x173B91C2; // packet sent to server on every character load-in
+	public static int GetAuctionDetails = CRC.StringtoCRC("GetAuctionDetails");
+	public static int CancelLiveAuctionMessage = CRC.StringtoCRC("CancelLiveAuctionMessage");
+	public static int BidAuctionMessage = CRC.StringtoCRC("BidAuctionMessage");
+	public static int RetrieveAuctionItemMessage = CRC.StringtoCRC("RetrieveAuctionItemMessage");
+
+
 }

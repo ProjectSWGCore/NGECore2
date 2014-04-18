@@ -85,6 +85,7 @@ import resources.datatables.Options;
 import resources.datatables.PlayerFlags;
 import resources.datatables.Posture;
 import services.ai.LairActor;
+import services.chat.ChatRoom;
 import toxi.geom.Line3D;
 import toxi.geom.Ray3D;
 import toxi.geom.Vec3D;
@@ -844,6 +845,18 @@ public class SimulationService implements INetworkDispatch {
 		
 		if(object.getPosture() == Posture.Dead)
 			core.playerService.sendCloningWindow(object, false);
+		
+		ChatRoom zoneRoom = core.chatService.getChatRoomByAddress("SWG." + core.getGalaxyName() + "." + object.getPlanet().getName() + ".Planet");
+		if (zoneRoom != null) {
+			String chatName = object.getCustomName().toLowerCase();
+			
+			if (chatName.contains(" "))
+				chatName = chatName.split(" ")[0];
+
+			if (!zoneRoom.getUserList().contains(chatName)) {
+				core.chatService.joinChatRoom(chatName, zoneRoom.getRoomId(), true);
+			}
+		}
 		
 	}
 		

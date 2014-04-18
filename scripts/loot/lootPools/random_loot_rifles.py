@@ -1,7 +1,7 @@
 
 def itemNames():
 	
-	return ['shared_rifle_cdef']
+	return ['adjusted_cdef_rifle']
 	
 def itemChances():
 	return [100]

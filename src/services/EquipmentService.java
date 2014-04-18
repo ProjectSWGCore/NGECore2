@@ -278,14 +278,8 @@ public class EquipmentService implements INetworkDispatch {
 	
 	private int getWeaponCriticalChance(CreatureObject actor, SWGObject item) {
 		int weaponCriticalChance = 0;
-		String weaponCriticalSkillMod = (core.scriptService.getMethod("scripts/equipment/", "weapon_critical", item.getStringAttribute("cat_wpn_damage.wpn_category")).__call__().asString());
-		
-		if(weaponCriticalSkillMod.contains(" "))
-			weaponCriticalSkillMod.replace(" ", "");
-		
-		if(weaponCriticalSkillMod.contains("-"))
-			weaponCriticalSkillMod.replace("-", "");		
-		
+		String weaponCriticalSkillMod = (core.scriptService.getMethod("scripts/equipment/", "weapon_critical", "weap_" + item.getStringAttribute("cat_wpn_damage.wpn_category").replace("@obj_attr_n:wpn_category_", "")).__call__().asString());
+	
 		if(actor.getSkillMod(weaponCriticalSkillMod) != null)
 			weaponCriticalChance = actor.getSkillModBase(weaponCriticalSkillMod);
 		

@@ -35,5 +35,6 @@ def handleChange(core, creature, set):
 	
 	if wornItems == 2:
 		core.buffService.addBuffToCreature(creature, "set_bonus_jedi_robe_1", creature)
+		creature.sendSystemMessage('@set_bonus:set_bonus_jedi_robe_1_sys', 0)
 	else:
 		core.buffService.removeBuffFromCreatureByName(creature, "set_bonus_jedi_robe_1")
