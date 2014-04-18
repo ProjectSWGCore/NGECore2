@@ -878,7 +878,8 @@ public class PlayerObject extends IntangibleObject {
 	}
 	
 	public void removeChannel(int roomId) {
-		chatChannels.remove(roomId);
+		if (chatChannels.contains(roomId))
+			chatChannels.remove(roomId);
 	}
 	
 	public boolean isMemberOfChannel(int roomId) {
