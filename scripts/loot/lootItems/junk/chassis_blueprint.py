@@ -6,3 +6,15 @@ def itemTemplate():
 def customItemName():
 
 	return 'Chassis Blueprint'
+
+def stackable():
+
+	return 1
+	
+def junkDealerPrice():
+
+	return 21
+	
+def junkType():
+
+	return 0

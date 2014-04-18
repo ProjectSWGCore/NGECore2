@@ -54,7 +54,7 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent(version=10)
+@Persistent(version=11)
 public class TangibleObject extends SWGObject {
 	
 	// TODO: Thread safety
@@ -90,6 +90,13 @@ public class TangibleObject extends SWGObject {
 	private boolean creditRelieved = false;	
 	@NotPersistent
 	private boolean lootItem = false;
+	
+	private boolean stackable = false;
+	private int stackCount = 1;
+	private boolean noSell = false;
+	private byte junkType = -1;
+	private int junkDealerPrice = 0;
+	
 	
 	private String serialNumber;
 	
@@ -516,6 +523,46 @@ public class TangibleObject extends SWGObject {
 
 	public void setLootItem(boolean lootItem) {
 		this.lootItem = lootItem;
+	}
+	
+	public boolean isStackable() {
+		return stackable;
+	}
+
+	public void setStackable(boolean stackable) {
+		this.stackable = stackable;
+	}
+	
+	public int getStackCount() {
+		return stackCount;
+	}
+
+	public void setStackCount(int stackCount) {
+		this.stackCount = stackCount;
+	}
+	
+	public boolean isNoSell() {
+		return noSell;
+	}
+
+	public void setNoSell(boolean noSell) {
+		this.noSell = noSell;
+	}
+	
+	public byte getJunkType() {
+		return junkType;
+	}
+
+	public void setJunkType(byte junkType) {
+		this.junkType = junkType;
+	}
+
+	public int getJunkDealerPrice() {
+		return junkDealerPrice;
+	}
+
+	public void setJunkDealerPrice(int junkDealerPrice) {
+		this.junkDealerPrice = junkDealerPrice;
 	}
 	
 	public boolean isCreditRelieved() {
