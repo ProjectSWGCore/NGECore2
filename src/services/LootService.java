@@ -29,8 +29,10 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -42,12 +44,14 @@ import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
 import resources.objects.loot.LootGroup;
 import resources.objects.loot.LootRollSession;
+import resources.objects.resource.ResourceContainerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 import main.NGECore;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.CrcStringTableVisitor;
 import engine.resources.common.CRC;
+import engine.resources.container.Traverser;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -62,6 +66,7 @@ import engine.resources.service.INetworkRemoteEvent;
 public class LootService implements INetworkDispatch {
 	
 	private NGECore core;
+	private static int prepInvCnt = 0;
 	
 	public LootService(NGECore core) {
 		this.core = core;
@@ -781,6 +786,189 @@ public class LootService implements INetworkDispatch {
 	    Point3D effectorPosition = new Point3D(0,y,0);
 		Quaternion effectorOrientation = new Quaternion(0,0,0,qz);
 	    PlayClientEffectObjectTransformMessage lmsg = new PlayClientEffectObjectTransformMessage("",lootedObject.getObjectID(),"",effectorPosition,effectorOrientation);
+	}
+	
+	
+	// ********* Junk-dealer related *********
+	
+	public Vector<SWGObject> getSellableInventoryItems(CreatureObject actor){
+		TangibleObject playerInventory = (TangibleObject) actor.getSlottedObject("inventory");
+		final Vector<SWGObject> sellableItems = new Vector<SWGObject>();
+		playerInventory.viewChildren(actor, false, false, new Traverser() {
+			@Override
+			public void process(SWGObject obj) {
+				String itemTemplate = obj.getTemplate();
+				if (itemTemplate.contains("loot/")){					
+					sellableItems.add(obj);
+					}	
+				}
+		});
+		System.err.println("sellableItems " + sellableItems.size());
+		return sellableItems;
+	}
+	
+	public void addToSoldHistory(CreatureObject actor, TangibleObject item){
+		
+	}
+	
+	public boolean haveBusinessHistory(CreatureObject actor, CreatureObject dealer){
+		return true;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Vector<TangibleObject> getBuyHistory(CreatureObject actor, CreatureObject dealer){			
+		LinkedHashMap<Long,TangibleObject[]> businessHistory = (LinkedHashMap<Long,TangibleObject[]> )dealer.getAttachment("BusinessHistory");		
+		if (businessHistory==null){
+			businessHistory = new LinkedHashMap<Long,TangibleObject[]>();	
+			dealer.setAttachment("BusinessHistory",businessHistory);		
+		}
+		
+		TangibleObject[] actorsBuyHistory = businessHistory.get(actor.getObjectID());
+		if (actorsBuyHistory==null)
+			return new Vector<TangibleObject>();
+		
+		Vector<TangibleObject> actorHistory = new Vector<TangibleObject>();
+		for (TangibleObject item : actorsBuyHistory){
+			if (item!=null)
+				actorHistory.add(item);
+		}
+		return actorHistory;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public boolean addToBuyHistory(CreatureObject actor, CreatureObject dealer, TangibleObject item){			
+		LinkedHashMap<Long,TangibleObject[]> businessHistory = (LinkedHashMap<Long,TangibleObject[]> )dealer.getAttachment("BusinessHistory");		
+		if (businessHistory==null){
+			System.out.println("businessHistory==null");
+			businessHistory = new LinkedHashMap<Long,TangibleObject[]>();		
+			dealer.setAttachment("BusinessHistory",businessHistory);		
+		}
+		System.out.println("abusinessHistory.size " + businessHistory.size());
+		TangibleObject[] actorsBuyHistory = businessHistory.get(actor.getObjectID());
+		if (actorsBuyHistory==null){
+			System.out.println("actorsBuyHistory==null");
+			actorsBuyHistory = new TangibleObject[10];
+			actorsBuyHistory[0] = item;
+		} else {
+			// Check Array for zeros
+			int lastObject=0;
+			for (int i=0;i<actorsBuyHistory.length;i++){
+				if (actorsBuyHistory[i]!=null)
+					lastObject=i;
+			}
+			if (lastObject==actorsBuyHistory.length-1){
+				//>>shift right and add
+				for (int i = 8; i >= 0; i--) {                
+					actorsBuyHistory[i+1] = actorsBuyHistory[i];
+				}
+				actorsBuyHistory[0] = item;
+			} else {
+				actorsBuyHistory[lastObject+1] = item;
+			}	
+		}		
+		businessHistory.put(actor.getObjectID(),actorsBuyHistory);
+		dealer.setAttachment("BusinessHistory",businessHistory);			
+		printArrayElements(actorsBuyHistory);
+		return true;
+	}
+	
+	public boolean removeBoughtBackItemFromHistory(CreatureObject actor, CreatureObject dealer, TangibleObject item){
+		if (item==null)
+			return false; // Player has hit the button without selecting an item
+		LinkedHashMap<Long,TangibleObject[]> businessHistory = (LinkedHashMap<Long,TangibleObject[]> )dealer.getAttachment("BusinessHistory");		
+		if (businessHistory==null){
+			return false; // something went seriously wrong. At this point the dealer should have a history	
+		}
+		TangibleObject[] actorsBuyHistory = businessHistory.get(actor.getObjectID());
+		if (actorsBuyHistory==null)
+			return false; // Player has no history entry
+		// Find the element index
+		int index = -1;
+		for (int i=0;i<10;i++){
+			if (actorsBuyHistory[i]!=null){
+				if (item.getObjectID()==actorsBuyHistory[i].getObjectID()){
+					index = i;
+				}
+			}
+		}
+		
+		if (index==-1)
+			return false;
+		
+		// SHift everything to the right of the found index to the left
+		for (int i = index; i < 9; i++) {                
+			actorsBuyHistory[i] = actorsBuyHistory[i+1]; // 0 1 2 3 4 5 6 7 8 9
+		}
+		if (index!=-1)
+			actorsBuyHistory[9]=null;
+		
+		businessHistory.put(actor.getObjectID(),actorsBuyHistory);
+		dealer.setAttachment("BusinessHistory",businessHistory);	
+		printArrayElements(actorsBuyHistory);
+		return true;
+	}
+	
+	
+	// util method
+	private void printArrayElements(TangibleObject[] array){
+		System.out.print("Array [");
+		for (int i=0;i<array.length;i++){
+			if (array[i]!=null){
+			//System.out.print(array[i].getObjectID() + ", ");
+			System.out.print(array[i].getCustomName() + ", ");
+			}
+		}
+		System.out.print("]");
+	}
+	
+	public void prepInv(CreatureObject player){
+		if (prepInvCnt>0)
+			return;
+		prepInvCnt++;
+		SWGObject playerInventory = player.getSlottedObject("inventory");
+		TangibleObject item1 = (TangibleObject)core.objectService.createObject("object/tangible/loot/npc_loot/shared_impulse_detector_01_generic.iff", player.getPlanet());
+		item1.setCustomName("Impulse Detector");
+		playerInventory.add(item1);
+		
+		TangibleObject item2 = (TangibleObject)core.objectService.createObject("object/tangible/loot/misc/shared_damaged_datapad.iff", player.getPlanet());
+		item2.setCustomName("Damaged Datapad");
+		playerInventory.add(item2);
+		
+		TangibleObject item3 = (TangibleObject)core.objectService.createObject("object/tangible/loot/npc_loot/shared_software_module_generic.iff", player.getPlanet());
+		item3.setCustomName("Software Module");
+		playerInventory.add(item3);
+		
+		TangibleObject item4 = (TangibleObject)core.objectService.createObject("object/tangible/loot/npc_loot/shared_survival_equipment_generic.iff", player.getPlanet());
+		item4.setCustomName("Survival Gear");
+		playerInventory.add(item4);
+		
+		TangibleObject item5 = (TangibleObject)core.objectService.createObject("object/tangible/loot/npc_loot/shared_shield_module_generic.iff", player.getPlanet());
+		item5.setCustomName("Shield Module");
+		playerInventory.add(item5);
+		
+		TangibleObject item6 = (TangibleObject)core.objectService.createObject("object/tangible/loot/npc_loot/shared_firework_generic.iff", player.getPlanet());
+		item6.setCustomName("Explosive Dud");
+		playerInventory.add(item6);
+		
+		TangibleObject item7 = (TangibleObject)core.objectService.createObject("object/tangible/loot/npc_loot/shared_launcher_tube_generic.iff", player.getPlanet());
+		item7.setCustomName("Launcher Tube");
+		playerInventory.add(item7);
+		
+		TangibleObject item8 = (TangibleObject)core.objectService.createObject("object/tangible/loot/npc_loot/shared_red_wiring_generic.iff", player.getPlanet());
+		item8.setCustomName("Red Wiring");
+		playerInventory.add(item8);
+		
+		TangibleObject item9 = (TangibleObject)core.objectService.createObject("object/tangible/loot/npc_loot/shared_laser_trap_generic.iff", player.getPlanet());
+		item9.setCustomName("Laser Trap");
+		playerInventory.add(item9);
+		
+		TangibleObject item10 = (TangibleObject)core.objectService.createObject("object/tangible/loot/npc_loot/shared_comlink_civilian_generic.iff", player.getPlanet());
+		item10.setCustomName("Comlink");
+		playerInventory.add(item10);
+		
+		TangibleObject item11 = (TangibleObject)core.objectService.createObject("object/tangible/loot/npc_loot/shared_armor_repair_device_generic.iff", player.getPlanet());
+		item11.setCustomName("Armor Repair Device");
+		playerInventory.add(item11);
 	}
 	
 	
