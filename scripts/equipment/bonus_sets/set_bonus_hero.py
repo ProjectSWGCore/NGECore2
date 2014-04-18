@@ -18,10 +18,13 @@ def handleChange(core, creature, set):
 	
 	if wornItems == 3:
 		core.buffService.addBuffToCreature(creature, "set_bonus_hero_1", creature)
+		creature.sendSystemMessage('@set_bonus:set_bonus_hero_1_sys', 0)
 	elif wornItems == 4:
 		core.buffService.addBuffToCreature(creature, "set_bonus_hero_2", creature)
+		creature.sendSystemMessage('@set_bonus:set_bonus_hero_2_sys', 0)
 	elif wornItems == 5:
 		core.buffService.addBuffToCreature(creature, "set_bonus_hero_3", creature)
+		creature.sendSystemMessage('@set_bonus:set_bonus_hero_3_sys', 0)
 	else:
 		core.buffService.removeBuffFromCreatureByName(creature, "set_bonus_hero_1")
 		core.buffService.removeBuffFromCreatureByName(creature, "set_bonus_hero_2")

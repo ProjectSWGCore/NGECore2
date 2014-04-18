@@ -12,9 +12,6 @@ def run(core, actor, target, commandString):
 	if not weapon:
 		return
 		
-	if not weapon.getWeaponType() == 12:
-		return
-		
 	elementalType = weapon.getElementalType()
 	commandName = ''
 	

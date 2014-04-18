@@ -27,6 +27,7 @@ public class Opcodes {
 	
 	public static int AuctionQueryHeadersMessage = CRC.StringtoCRC("AuctionQueryHeadersMessage");
 	public static int CreateImmediateAuctionMessage = CRC.StringtoCRC("CreateImmediateAuctionMessage");
+	public static int ChatLeaveRoom = 0x493E3FFA;
 	public static int ChatEnterRoomById = CRC.StringtoCRC("ChatEnterRoomById");
 	public static int ChatSendToRoom = CRC.StringtoCRC("ChatSendToRoom");
 	public static int ChatDeletePersistentMessage = 0x8F251641;

@@ -53,7 +53,7 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent(version=7)
+@Persistent(version=9)
 public class TangibleObject extends SWGObject {
 	
 	// TODO: Thread safety
@@ -80,8 +80,14 @@ public class TangibleObject extends SWGObject {
 	//private TreeSet<TreeMap<String,Integer>> lootSpecification = new TreeSet<TreeMap<String,Integer>>();
 	private List<LootGroup> lootGroups = new ArrayList<LootGroup>();
 	
-	private boolean looted = false;
-	private boolean lootLock = false;
+	@NotPersistent
+	private boolean looted = false; // These 4 should not need to be persisted, since a looted corpse will get wiped with server restart	
+	@NotPersistent
+	private boolean lootLock = false;	
+	@NotPersistent
+	private boolean creditRelieved = false;	
+	@NotPersistent
+	private boolean lootItem = false;
 	
 	private String serialNumber;
 	
@@ -485,6 +491,23 @@ public class TangibleObject extends SWGObject {
 		this.lootLock = lootLock;
 	}
 	
+	public boolean isLootItem() {
+		return lootItem;
+	}
+
+	public void setLootItem(boolean lootItem) {
+		this.lootItem = lootItem;
+	}
+	
+	public boolean isCreditRelieved() {
+		return creditRelieved;
+	}
+
+	public void setCreditRelieved(boolean creditRelieved) {
+		if (creditRelieved)
+			this.creditRelieved = creditRelieved; // only allow one state change to prevent hacking
+	}
+	
 	public String getSerialNumber() {
 		return getStringAttribute("serial_number");
 	}
@@ -532,5 +555,4 @@ public class TangibleObject extends SWGObject {
 		
 
 	}
-
 }

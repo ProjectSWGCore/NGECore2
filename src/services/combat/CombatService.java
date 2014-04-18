@@ -41,7 +41,9 @@ import protocol.swg.objectControllerObjects.CombatSpam;
 import protocol.swg.objectControllerObjects.CommandEnqueueRemove;
 import protocol.swg.objectControllerObjects.StartTask;
 import resources.common.FileUtilities;
+import resources.datatables.Elemental;
 import resources.datatables.Posture;
+import resources.datatables.WeaponType;
 import resources.objects.Buff;
 import resources.objects.DamageOverTime;
 import resources.objects.creature.CreatureObject;
@@ -68,7 +70,7 @@ public class CombatService implements INetworkDispatch {
 	private NGECore core;
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private CombatEvents events = new CombatEvents();
-
+    
 	public CombatService(NGECore core) {
 		this.core = core;
 		CombatCommands.registerCommands(core);
@@ -381,7 +383,7 @@ public class CombatService implements INetworkDispatch {
 			sendCombatPackets(attacker, target, weapon, command, actionCounter, damage, armorAbsorbed, hitType);
 		
 			if(hitType != HitType.MISS && hitType != HitType.DODGE && hitType != HitType.PARRY && command.getBuffNameTarget().length() > 0) {
-				core.buffService.addBuffToCreature(target, command.getBuffNameTarget());
+				core.buffService.addBuffToCreature(target, command.getBuffNameTarget(), attacker);
 			}
 			if(command.getDotIntensity() > 0) {
 				addDotToCreature(attacker, target, command, target.getBuffByName(command.getBuffNameTarget()));
@@ -395,7 +397,7 @@ public class CombatService implements INetworkDispatch {
 		}
 		
 		if(command.getAddedDamage() == 0 && command.getPercentFromWeapon() == 0 && command.getBuffNameTarget().length() > 0)
-			core.buffService.addBuffToCreature(target, command.getBuffNameTarget());
+			core.buffService.addBuffToCreature(target, command.getBuffNameTarget(), attacker);
 		
 		sendCombatPackets(attacker, target, weapon, command, actionCounter, damage, 0, HitType.HIT);
 		
@@ -450,40 +452,23 @@ public class CombatService implements INetworkDispatch {
 
 	private float getArmorReduction(CreatureObject attacker, CreatureObject target, WeaponObject weapon, CombatCommand command, byte hitType) {
 		
-		int elementalType = 1;
+		String elementalName = "";
 		
 		if(command.getPercentFromWeapon() > 0) {
 			
 			// TODO: elemental mitigation and damage
+		
+			elementalName = weapon.getDamageType();
 			
-			if(weapon.getStringAttribute("cat_wpn_damage.wpn_damage_type").equals("@obj_attr_n:armor_eff_kinetic"))
-				elementalType = ElementalType.KINETIC;
-			else if(weapon.getStringAttribute("cat_wpn_damage.wpn_damage_type").equals("@obj_attr_n:armor_eff_energy"))
-				elementalType = ElementalType.ENERGY;
-
 		} else {
 			
-			elementalType = command.getElementalType();
-
+			elementalName = Elemental.getElementalName(command.getElementalType());
+			
 		}
 		
 		int baseArmor = 0;
 		
-		switch(elementalType) {
-		
-			case ElementalType.KINETIC:
-				baseArmor = target.getSkillModBase("kinetic");
-			case ElementalType.ENERGY:
-				baseArmor = target.getSkillModBase("energy");
-			case ElementalType.HEAT:
-				baseArmor = target.getSkillModBase("heat");
-			case ElementalType.COLD:
-				baseArmor = target.getSkillModBase("cold");
-			case ElementalType.ACID:
-				baseArmor = target.getSkillModBase("acid");
-			case ElementalType.ELECTRICITY:
-				baseArmor = target.getSkillModBase("electricity");
-		}
+		baseArmor = target.getSkillModBase(elementalName);
 		
 		if(target.getSkillMod("expertise_innate_reduction_all_player") != null)
 			baseArmor *= (100 - target.getSkillModBase("expertise_innate_reduction_all_player")) / 100;
@@ -1242,7 +1227,10 @@ public class CombatService implements INetworkDispatch {
 			return;
 		}
 		
-		core.buffService.addBuffToCreature(creature, command.getBuffNameSelf());
+		if (creature.hasBuff("co_position_secured"))
+			core.buffService.removeBuffFromCreatureByName(creature, "co_position_secured");
+		else
+			core.buffService.addBuffToCreature(creature, command.getBuffNameSelf(), creature);
 
 		StartTask startTask = new StartTask(actionCounter, creature.getObjectID(), command.getCommandCRC(), CRC.StringtoCRC(command.getCooldownGroup()), command.getCooldown());
 		ObjControllerMessage objController2 = new ObjControllerMessage(0x0B, startTask);
@@ -1325,24 +1313,10 @@ public class CombatService implements INetworkDispatch {
 		int weaponType = weapon.getWeaponType();
 		int actionReduction;
 		
-		switch(weaponType) {
-			
-			case 0: actionReduction = attacker.getSkillModBase("expertise_action_weapon_0");
-			case 1: actionReduction = attacker.getSkillModBase("expertise_action_weapon_1");
-			case 2: actionReduction = attacker.getSkillModBase("expertise_action_weapon_2");
-			case 4: actionReduction = attacker.getSkillModBase("expertise_action_weapon_4");
-			case 5: actionReduction = attacker.getSkillModBase("expertise_action_weapon_5");
-			case 6: actionReduction = attacker.getSkillModBase("expertise_action_weapon_6");
-			case 7: actionReduction = attacker.getSkillModBase("expertise_action_weapon_7");
-			case 8: actionReduction = attacker.getSkillModBase("expertise_action_weapon_8");
-			case 9: actionReduction = attacker.getSkillModBase("expertise_action_weapon_9");
-			case 10: actionReduction = attacker.getSkillModBase("expertise_action_weapon_10");
-			case 11: actionReduction = attacker.getSkillModBase("expertise_action_weapon_11");
-			case 12: actionReduction = attacker.getSkillModBase("expertise_action_weapon_3");
-			
-			default: actionReduction = 0;
-		
-		}
+		if(weaponType == WeaponType.HEAVYWEAPON || weaponType == WeaponType.FLAMETHROWER)
+			actionReduction = attacker.getSkillModBase("expertise_action_weapon_3");
+		else
+			actionReduction = attacker.getSkillModBase("expertise_action_weapon_" + Integer.toString(weaponType));
 		
 		actionReduction += attacker.getSkillModBase("expertise_action_all");
 		
@@ -1355,24 +1329,16 @@ public class CombatService implements INetworkDispatch {
 		int weaponType = weapon.getWeaponType();
 		int weaponDmgIncrease;
 		
-		switch(weaponType) {
-			
-			case 0: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_0");
-			case 1: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_1");
-			case 2: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_2");
-			case 4: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_4");
-			case 5: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_5");
-			case 6: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_6");
-			case 7: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_7");
-			case 8: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_8");
-			case 9: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_9");
-			case 10: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_10");
-			case 11: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_11");
-			case 12: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_3");
-			
-			default: weaponDmgIncrease = 0;
+		if(weaponType == WeaponType.HEAVYWEAPON || weaponType == WeaponType.FLAMETHROWER)
+			weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_3");
+		else
+			weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_" + Integer.toString(weaponType));
 		
-		}
+		if(weapon.isRanged())
+			weaponDmgIncrease += attacker.getSkillModBase("expertise_damage_ranged");
+		
+		if(weapon.isMelee())
+			weaponDmgIncrease += attacker.getSkillModBase("expertise_damage_melee");
 		
 		weaponDmgIncrease += attacker.getSkillModBase("expertise_damage_all");
 
@@ -1415,7 +1381,5 @@ public class CombatService implements INetworkDispatch {
 		public static final int ELECTRICITY = 256;
 
 	}
-
-	
 
 }

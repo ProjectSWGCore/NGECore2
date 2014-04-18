@@ -21,6 +21,7 @@
  ******************************************************************************/
 package resources.objects.weapon;
 
+import resources.datatables.WeaponType;
 import resources.objects.tangible.TangibleObject;
 
 import com.sleepycat.persist.model.NotPersistent;
@@ -124,7 +125,7 @@ public class WeaponObject extends TangibleObject {
 	}
 	
 	public String getDamageType() {
-		return getStringAttribute("cat_wpn_damage.wpn_damage_type");
+		return getStringAttribute("cat_wpn_damage.wpn_damage_type").replace("@obj_attr_n:armor_eff_", "");
 	}
 	
 	public void setDamageType(String damageType) {
@@ -174,6 +175,7 @@ public class WeaponObject extends TangibleObject {
 		else
 			setIntAttribute("cat_wpn_damage.wpn_attack_speed", (int) attackSpeed);
 		
+		setIntAttribute("cat_wpn_damage.dps", getDamagePerSecond());
 	}
 	
 	public WeaponMessageBuilder getMessageBuilder() {
@@ -195,7 +197,7 @@ public class WeaponObject extends TangibleObject {
 		
 		int weaponType = getWeaponType();
 		
-		if(weaponType == 4 || weaponType == 5 || weaponType == 6 || weaponType == 7 || weaponType == 9 || weaponType == 10 || weaponType == 11)
+		if(weaponType == WeaponType.ONEHANDEDMELEE || weaponType == WeaponType.TWOHANDEDMELEE || weaponType == WeaponType.UNARMED || weaponType == WeaponType.POLEARMMELEE || weaponType == WeaponType.ONEHANDEDSABER || weaponType == WeaponType.TWOHANDEDSABER || weaponType == WeaponType.POLEARMSABER)
 			return true;
 		
 		return false;
@@ -206,7 +208,7 @@ public class WeaponObject extends TangibleObject {
 		
 		int weaponType = getWeaponType();
 		
-		if(weaponType == 0 || weaponType == 1 || weaponType == 2 || weaponType == 3)
+		if(weaponType == WeaponType.RIFLE || weaponType == WeaponType.CARBINE || weaponType == WeaponType.PISTOL || weaponType == WeaponType.FLAMETHROWER || weaponType == WeaponType.HEAVYWEAPON)
 			return true;
 		
 		return false;
