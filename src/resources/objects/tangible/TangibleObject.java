@@ -54,7 +54,7 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent(version=6)
+@Persistent(version=7)
 public class TangibleObject extends SWGObject {
 	
 	// TODO: Thread safety
@@ -261,6 +261,14 @@ public class TangibleObject extends SWGObject {
 					getClient().getSession().write(new UpdatePVPStatusMessage(observer.getParent().getObjectID(), NGECore.getInstance().factionService.calculatePvpStatus((CreatureObject) this, (CreatureObject) observer.getParent()), getFaction()).serialize());
 			}
 
+		}
+		
+		if (getClient() != null) {
+			CreatureObject companion = NGECore.getInstance().mountService.getCompanion((CreatureObject) this);
+			
+			if (companion != null) {
+				companion.updatePvpStatus();
+			}
 		}
 	}
 	

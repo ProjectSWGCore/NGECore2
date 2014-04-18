@@ -719,7 +719,15 @@ public class ObjectService implements INetworkDispatch {
 			return;
 		}
 		
-		if (object.getIntAttribute("reuse_time") > 0) {
+		int reuse_time;
+		
+		try {
+			reuse_time = object.getIntAttribute("reuse_time");
+		} catch (NumberFormatException e) {
+			reuse_time = 0;
+		}
+		
+		if (reuse_time > 0) {
 			try {
 				DatatableVisitor visitor = ClientFileManager.loadFile("datatables/timer/template_command_mapping.iff", DatatableVisitor.class);
 				
@@ -745,7 +753,7 @@ public class ObjectService implements INetworkDispatch {
 								return;
 							}
 							
-							creature.addCooldown(cooldownGroup, object.getIntAttribute("reuse_item"));
+							creature.addCooldown(cooldownGroup, object.getIntAttribute("reuse_time"));
 						}
 						
 						break;

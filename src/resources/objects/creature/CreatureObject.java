@@ -34,7 +34,6 @@ import org.apache.mina.core.buffer.IoBuffer;
 
 import protocol.swg.ObjControllerMessage;
 import protocol.swg.PlayMusicMessage;
-import protocol.swg.UpdateContainmentMessage;
 import protocol.swg.UpdatePostureMessage;
 import protocol.swg.UpdatePVPStatusMessage;
 import protocol.swg.chat.ChatSystemMessage;
@@ -51,7 +50,6 @@ import main.NGECore;
 import engine.clients.Client;
 import resources.common.Cooldown;
 import resources.common.OutOfBand;
-import resources.datatables.Options;
 import resources.objects.Buff;
 import resources.objects.DamageOverTime;
 import resources.objects.SWGList;
@@ -68,7 +66,7 @@ import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import services.command.BaseSWGCommand;
 
-@Entity(version=8)
+@Entity(version=9)
 public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	@NotPersistent
@@ -130,7 +128,9 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private boolean performanceType = false;
 	private boolean acceptBandflourishes = true;
 	private boolean groupDance = true;
+	@NotPersistent
 	private CreatureObject performanceWatchee;
+	@NotPersistent
 	private CreatureObject performanceListenee;
 	@NotPersistent
 	private Vector<CreatureObject> performanceAudience = new Vector<CreatureObject>();
@@ -186,10 +186,8 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private TangibleObject conversingNpc;
 	@NotPersistent
 	private ConcurrentHashMap<String, Long> cooldowns = new ConcurrentHashMap<String, Long>();
-	
-	public boolean mounted = false;
 	@NotPersistent
-	public CreatureObject mountedVehicle;
+	private long tefTime = System.currentTimeMillis();
 	
 	public CreatureObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
 		super(objectID, planet, Template, position, orientation);
@@ -371,7 +369,6 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 
 	public void setPosture(byte posture) {
-
 		synchronized(objectMutex) {
 			if (this.posture == 0x09) {
 				stopPerformance();
@@ -390,16 +387,13 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void startPerformance() {
-		
-		getClient().getSession().write(messageBuilder.buildStartPerformance(true));
-		
+		setStationary(true);
 	}
 	
 	public void stopPerformance() {
-
 		String type = "";
+		
 		synchronized(objectMutex) {
-			
 			// Some reason this prevents the animation for playing an instrument when stopping (unless that's what "" does)
 			setCurrentAnimation(getCurrentAnimation());
 			
@@ -407,17 +401,16 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			setPerformanceId(0,true);
 			
 			type = (performanceType) ? "dance" : "music";
+			
 			if (entertainerExperience != null) {
 				entertainerExperience.cancel(true);
 				entertainerExperience = null;
 			}
 		}
 		
-	    sendSystemMessage("@performance:" + type  + "_stop_self",(byte)0);
+		sendSystemMessage("@performance:" + type  + "_stop_self",(byte)0);
 	    stopAudience();
-
-		getClient().getSession().write(messageBuilder.buildStartPerformance(false));
-
+		setStationary(false);
 	}
 	
 	public void stopAudience() {
@@ -472,7 +465,13 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 		
 		notifyObservers(messageBuilder.buildFactionDelta(faction), true);
-		//updatePvpStatus();
+		
+
+		CreatureObject companion = NGECore.getInstance().mountService.getCompanion(this);
+		
+		if (companion != null) {
+			companion.setFaction(faction);
+		}
 	}
 	
 	@Override
@@ -482,7 +481,12 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 		
 		notifyObservers(messageBuilder.buildFactionStatusDelta(factionStatus), true);
-		//updatePvpStatus();
+		
+		CreatureObject companion = NGECore.getInstance().mountService.getCompanion(this);
+		
+		if (companion != null) {
+			companion.setFactionStatus(factionStatus);
+		}
 	}
 	
 	public float getHeight() {
@@ -530,7 +534,25 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		notifyObservers(stateDelta, true);
 
 	}
-
+	
+	public void setState(long state, boolean add) {
+		synchronized(objectMutex) {
+			if (state != 0) {
+				if (add) {
+					stateBitmask = (stateBitmask | state);
+				} else {
+					stateBitmask = (stateBitmask & ~state);
+				}
+			}
+		}
+	}
+	
+	public boolean getState(long state) {
+		synchronized(objectMutex) {
+			return ((stateBitmask & state) == state);
+		}
+	}
+	
 	public long getOwnerId() {
 		synchronized(objectMutex) {
 			return ownerId;
@@ -541,6 +563,9 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.ownerId = ownerId;
 		}
+		
+		setStringAttribute("owner", NGECore.getInstance().objectService.getObject(ownerId).getCustomName());
+		
 		notifyObservers(messageBuilder.buildOwnerIdDelta(ownerId), true);
 	}
 
@@ -1715,6 +1740,8 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.stationary = stationary;
 		}
+		
+		notifyObservers(messageBuilder.buildStartPerformance(stationary), true);
 	}
 
 	public TangibleObject getConversingNpc() {
@@ -1782,78 +1809,20 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		return (PlayerObject) this.getSlottedObject("ghost");
 	}
 	
-	public boolean isMounted() {
-		return mounted;
-	}
-
-	public void setMounted(boolean mounted) {
-		this.mounted = mounted;
-	}
-
-	public CreatureObject getMountedVehicle() {
-		return mountedVehicle;
-	}
-
-	public void setMountedVehicle(CreatureObject mountedVehicle) {
-		this.mountedVehicle = mountedVehicle;
-	}
-	
-	public boolean canMount(CreatureObject vehicle)
-	{
-		if(vehicle.getOwnerId() == this.getObjectId()) return true;	
-		return false;
-	}
-	
-	public void mount(CreatureObject owner) {
-		boolean remove = false;
-		synchronized(objectMutex)
-		{
-			if ((this.getOptionsBitmask() & Options.MOUNT) == Options.MOUNT)
-			{
-				remove = true;
-				_add(owner);
-				UpdateContainmentMessage updateContainmentMessage = new UpdateContainmentMessage(owner.getObjectID(), this.getObjectID(), 4);
-				notifyObservers(updateContainmentMessage, true);
-			}
-		}
-		
-		if(remove) NGECore.getInstance().simulationService.remove(owner, owner.getWorldPosition().x, owner.getWorldPosition().z, false);
-	}
-	
-	public void unmount(CreatureObject owner) {
-		boolean add = false;
-		synchronized(objectMutex) {
-			if ((this.getOptionsBitmask() & Options.MOUNT) == Options.MOUNT){
-				add = true;
-				_remove(owner);
-				UpdateContainmentMessage updateContainmentMessage = new UpdateContainmentMessage(owner.getObjectID(), 0, -1);
-				notifyObservers(updateContainmentMessage, true);
-			}
-		}
-		if(add) {
-			owner.setMounted(false);
-			owner.setMountedVehicle(null);
-			owner.setStateBitmask(0);
-			owner.setPosture((byte) 0);
-			NGECore.getInstance().simulationService.add(owner, getWorldPosition().x, getWorldPosition().z, false);
-			NGECore.getInstance().simulationService.teleport(owner, getWorldPosition(), getOrientation(), 0);
-		}
-	}
-	
-	public void initMount(CreatureObject owner) {
-		synchronized(objectMutex) {
-			setStateBitmask(0x10000000);
-			owner.setMountedVehicle(this);
-
-			this.mount(owner);
-	
-			owner.setStateBitmask(0x8000000);
-			this.setPosture((byte)10);
-		}
-	}
-	
 	//public float getCooldown(String cooldownGroup) {
 		//return ((float) getCooldown(cooldownGroup) / (float) 1000);
 	//}
+	
+	public long getTefTime() {
+		synchronized(objectMutex) {
+			return (((tefTime - System.currentTimeMillis()) > 0) ? (tefTime - System.currentTimeMillis()) : 0);
+		}
+	}
+	
+	public void setTefTime(long tefTime) {
+		synchronized(objectMutex) {
+			this.tefTime = tefTime + System.currentTimeMillis();
+		}
+	}
 	
 }

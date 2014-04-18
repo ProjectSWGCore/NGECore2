@@ -142,6 +142,9 @@ public class PlayerObject extends IntangibleObject {
 	
 	private byte godLevel = 0;
 	
+	@NotPersistent
+	private boolean callingCompanion = false;
+	
 	public PlayerObject() {
 		super();
 		messageBuilder = new PlayerMessageBuilder(this);
@@ -862,6 +865,14 @@ public class PlayerObject extends IntangibleObject {
 		if (getContainer() != null) {
 			getContainer().getClient().getSession().write(messageBuilder.buildGodLevelDelta((byte) godLevel));
 		}
+	}
+	
+	public boolean isCallingCompanion() {
+		return callingCompanion;
+	}
+	
+	public void setCallingCompanion(boolean callingCompanion) {
+		this.callingCompanion = callingCompanion;
 	}
 	
 }
