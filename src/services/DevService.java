@@ -1204,6 +1204,12 @@ public class DevService implements INetworkDispatch {
 						deed.setAttributes();
 						inventory.add(deed);
 						
+						templateString="object/tangible/deed/player_house_deed/shared_generic_house_small_style_02_deed.iff";
+						deed = (Player_House_Deed)core.objectService.createObject(templateString, planet);
+						deed.setBMR(15);
+						deed.setAttributes();
+						inventory.add(deed);
+						
 						return;
 					case 130:
 						TangibleObject swoopDeed = (TangibleObject) core.objectService.createObject("object/tangible/deed/vehicle_deed/shared_speederbike_swoop_deed.iff", planet);
