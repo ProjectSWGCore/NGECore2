@@ -449,6 +449,7 @@ public class PlayerService implements INetworkDispatch {
 		
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void sendCloningWindow(CreatureObject creature, final boolean pvpDeath) {
 		
 		//if(creature.getPosture() != 14)
