@@ -968,6 +968,8 @@ public class ChatService implements INetworkDispatch {
 				roomPlayer.getClient().getSession().write(leaveRoom.serialize());
 			}
 		});
+		
+		((PlayerObject) player.getSlottedObject("ghost")).removeChannel(roomId);
 	}
 	
 	public void sendChatRoomMessage(CreatureObject sender, int roomId, int msgId, String message) {
