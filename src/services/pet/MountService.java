@@ -156,11 +156,6 @@ public class MountService implements INetworkDispatch {
 			return;
 		}
 		
-		if (actor.isInStealth()) {
-			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:no_mount_stealth"), DisplayType.Broadcast);
-			return;
-		}
-		
 		if (pcd.getStringAttribute("required_faction") != null && pcd.getStringAttribute("required_faction").length() > 0) {
 			if (!actor.getFaction().equals(pcd.getStringAttribute("required_faction"))) {
 				actor.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:officer_faction"), DisplayType.Broadcast);
@@ -259,8 +254,6 @@ public class MountService implements INetworkDispatch {
 		});
 		
 		player.setCallingCompanion(false);
-		
-		System.out.println("Got to end");
 	}
 	
 	private void callMount(CreatureObject actor, SWGObject pcd, PlayerObject player, CreatureObject mount) {
@@ -395,6 +388,14 @@ public class MountService implements INetworkDispatch {
 	}
 	
 	public void mount(CreatureObject rider, CreatureObject mount) {
+		if (rider == null) {
+			return;
+		}
+		
+		if (mount == null) {
+			return;
+		}
+		
 		// FIXME like above, movement skillmod should be used instead of creo4 vars and never be 0, otherwise it thinks we are always rooted
 		//if (rider.getSkillModBase("movement") == 0) {
 			//rider.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:cant_mount_rooted"), DisplayType.Broadcast);
@@ -415,14 +416,22 @@ public class MountService implements INetworkDispatch {
 			return;
 		}
 		
-		mount._add(rider);
+		if (rider.isInStealth()) {
+			rider.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:no_mount_stealth"), DisplayType.Broadcast);
+			return;
+		}
+		
+		rider.setStateBitmask(rider.getStateBitmask() | 0x8000000);
+		rider.setPosture((mount.getTemplate().contains("vehicle")) ? Posture.DrivingVehicle : Posture.RidingCreature);
+		
+		synchronized(mount.getMutex()) {
+			mount._add(rider);
+		}
+		
 		mount.setStateBitmask(mount.getStateBitmask() | 0x10000000);
 		//mount.setState(State.MountedCreature, true);
 		mount.notifyObservers(new UpdateContainmentMessage(rider.getObjectID(), mount.getObjectID(), 4), true);
 		//rider.setState(State.RidingMount, true);
-		rider.setStateBitmask(rider.getStateBitmask() | 0x8000000);
-		//rider.setPosture((mount.getTemplate().contains("vehicle")) ? Posture.DrivingVehicle : Posture.RidingCreature);
-		rider.setPosture((byte) 11);
 		core.simulationService.remove(rider, rider.getWorldPosition().x, rider.getWorldPosition().z, false);
 	}
 	
@@ -658,7 +667,7 @@ public class MountService implements INetworkDispatch {
 			return;
 		}
 		
-		if (owner.getTefTime() > 0){
+		if (owner.getTefTime() > 0) {
 			owner.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:prose_cant_store_yet", owner.getTefTime()), DisplayType.Broadcast);
 			return;
 		}
@@ -689,39 +698,37 @@ public class MountService implements INetworkDispatch {
 	}
 	
 	public void storeAll(CreatureObject actor) {
-		while (getCompanion(actor) != null) {
-			store(actor, getCompanion(actor));
-		}
-		
-		/*
 		if (actor == null) {
 			return;
 		}
 		
-		SWGObject datapad = actor.getSlottedObject("datapad");
-		
-		if (datapad == null) {
-			return;
-		}
-		
-		datapad.viewChildren(actor, false, false, new Traverser() {
+		while (getCompanion(actor) != null) {
+			SWGObject mount = getCompanion(actor);
 			
-			public void process(SWGObject pcd) {
-				if (pcd.getAttachment("companionId") != null) {
-					if (pcd.getSlottedObject("inventory") != null) {
-						LongAdder adder = new LongAdder();
-						pcd.getSlottedObject("inventory").viewChildren(actor, false, false, (obj) -> adder.increment());
-						
-						if (adder.intValue() == 0) {
-							long companionId = (pcd.getAttachment("companionId") == null) ? 0L : (Long) pcd.getAttachment("companionId");
-							store(actor, (CreatureObject) core.objectService.getObject(companionId));
+			SWGObject datapad = actor.getSlottedObject("datapad");
+			
+			if (datapad == null) {
+				return;
+			}
+			
+			datapad.viewChildren(actor, false, false, new Traverser() {
+				
+				public void process(SWGObject pcd) {
+					if (pcd.getAttachment("companionId") != null && mount.getObjectID() == ((Long) pcd.getAttachment("companionId"))) {
+						if (pcd.getSlottedObject("inventory") != null) {
+							LongAdder adder = new LongAdder();
+							pcd.getSlottedObject("inventory").viewChildren(actor, false, false, (obj) -> adder.increment());
+							
+							if (adder.intValue() == 0) {
+								core.simulationService.remove(mount, mount.getWorldPosition().x, mount.getWorldPosition().z, true);
+								pcd.getSlottedObject("inventory").add(mount);
+							}
 						}
 					}
 				}
-			}
-			
-		});
-		*/
+				
+			});
+		}
 	}
 	
 	public void destroy(CreatureObject destroyer, SWGObject pcd) {
