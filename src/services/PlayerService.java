@@ -604,7 +604,7 @@ public class PlayerService implements INetworkDispatch {
 			//core.equipmentService.unequip(creature, equipment);
 		//}
 		
-		for (Buff buff : creature.getBuffList()) {
+		for (Buff buff : creature.getBuffList().get().toArray(new Buff[] { })) {
 			if (buff.isRemoveOnRespec()) {
 				core.buffService.removeBuffFromCreature(creature, buff);
 			}
