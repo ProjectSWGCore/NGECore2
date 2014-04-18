@@ -1,4 +1,5 @@
 import sys
+from resources.datatables import WeaponType
 
 def setup(core, object):
 	object.setAttackSpeed(1)
@@ -6,6 +7,6 @@ def setup(core, object):
 	object.setMinDamage(50)
 	object.setMaxDamage(100)
 	object.setMaxRange(5)
-	object.setWeaponType(6)
+	object.setWeaponType(WeaponType.UNARMED)
 	
 	return

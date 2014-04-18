@@ -57,6 +57,7 @@ import resources.common.collidables.AbstractCollidable;
 import resources.datatables.PlayerFlags;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
+import services.chat.ChatRoom;
 
 @SuppressWarnings("unused")
 
@@ -239,6 +240,14 @@ public class ConnectionService implements INetworkDispatch {
 			}
 			
 			core.chatService.playerStatusChange(objectShortName, (byte) 0);
+			
+			for (Integer roomId : ghost.getJoinedChatChannels()) {
+				ChatRoom room = core.chatService.getChatRoom(roomId.intValue());
+				
+				if (room != null) { core.chatService.leaveChatRoom(object, roomId.intValue()); } 
+				// work-around for any channels that may have been deleted, or only spawn on server startup, that were added to the joined channels
+				else { ghost.removeChannel(roomId); } 
+			}
 		}
 				
 		long parentId = object.getParentId();
@@ -260,6 +269,7 @@ public class ConnectionService implements INetworkDispatch {
 				observerClient.getParent().makeUnaware(object);
 			}
 		}*/
+		
 		ghost.toggleFlag(PlayerFlags.LD);
 		
 		object.setPerformanceListenee(null);
