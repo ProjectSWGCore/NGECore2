@@ -1,7 +1,7 @@
 
 def itemNames():
 	
-	return ['colorCrystal']
+	return ['jedi_relic_1']
 
 def itemChances():
 
