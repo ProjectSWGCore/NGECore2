@@ -13,7 +13,7 @@ coreRef = 0
 junkDealerRef = 0
 
 def startConversation(core, actor, npc):
-	core.lootService.prepInv(actor)
+	#core.lootService.prepInv(actor)
 	global coreRef
 	global junkDealerRef
 	global sellItemListRef
@@ -43,7 +43,7 @@ def startConversation(core, actor, npc):
 	options.add(option2)
 	options.add(option3)
 	
-	if core.lootService.getBuyHistory(actor,npc)!=None: 
+	if len(core.lootService.getBuyHistory(actor,npc))!= 0:
 		prose5 = ProsePackage('conversation/junk_dealer_generic', 's_43')
 		outOfBand5 = OutOfBand()
 		outOfBand5.addProsePackage(prose5)
@@ -54,10 +54,17 @@ def startConversation(core, actor, npc):
 	return
 	
 def handleFirstScreen(core, actor, npc, selection):
-
+	
+	convSvc = core.conversationService
+	
 	if selection == 0:
 		# sell items
 		
+		prose = ProsePackage('conversation/junk_dealer_generic', 's_84a67771')
+		outOfBand = OutOfBand()
+		outOfBand.addProsePackage(prose)
+		convSvc.sendConversationMessage(actor, npc, outOfBand)
+			
 		sellItemListRef = core.lootService.getSellableInventoryItems(actor)
 		
 		if len(sellItemListRef) == 0:
@@ -68,12 +75,9 @@ def handleFirstScreen(core, actor, npc, selection):
 		window = core.suiService.createSUIWindow('Script.listBox', actor, npc, 0)
 		window.setProperty('bg.caption.lblTitle:Text', '@loot_dealer:sell_title')
 		window.setProperty('Prompt.lblPrompt:Text', '@loot_dealer:sell_prompt')
-	
-		
-		
+			
 		for item in sellItemListRef:
 			window.addListBoxMenuItem(item.getCustomName(), 0);
-			actor.sendSystemMessage('ddf ' + item.getCustomName(), 1)
 				
 		window.setProperty('btnOther:visible', 'True')
 		window.setProperty('btnCancel:visible', 'True')
@@ -106,7 +110,7 @@ def handleFirstScreen(core, actor, npc, selection):
 				nameString = '[*No Sell*]' + item.getCustomName()
 				window.addListBoxMenuItem(nameString, 0)
 			else:
-				nameString = '[*Sell*]' + item.getCustomName()
+				nameString = '[Sellable]' + item.getCustomName()
 				window.addListBoxMenuItem(nameString, 0)
 				
 		window.setProperty('btnOther:visible', 'True')
@@ -125,10 +129,25 @@ def handleFirstScreen(core, actor, npc, selection):
 		window.addHandler(2, '',11, returnList, noSellWindowCallBack)		
 		core.suiService.openSUIWindow(window);
 		return
-		
+	
+	if selection == 2:
+		lootKitScreen1(core, actor, npc)
+	
+	
 	if selection == 3:
 		# buy back
-
+		
+		buyHistory = coreRef.lootService.getBuyHistory(actor,npc)
+		if len(buyHistory) == 0:
+			actor.sendSystemMessage('@loot_dealer:no_buy_back_items_found', 1)
+			startConversation(coreRef,actor,npc)
+			return
+		
+		prose = ProsePackage('conversation/junk_dealer_generic', 's_44')
+		outOfBand = OutOfBand()
+		outOfBand.addProsePackage(prose)
+		convSvc.sendConversationMessage(actor, npc, outOfBand)
+		
 		window = core.suiService.createSUIWindow('Script.listBox', actor, npc, 0)
 		window.setProperty('bg.caption.lblTitle:Text', '@loot_dealer:buy_back_title')
 		window.setProperty('Prompt.lblPrompt:Text', '@loot_dealer:buy_back_prompt')
@@ -137,8 +156,13 @@ def handleFirstScreen(core, actor, npc, selection):
 		if buyHistory==None:
 			return
 		
+		
+		
 		for item in buyHistory:
-			nameString = '[%s' % 100  + ']' + item.getCustomName() #%item.getJunkDealerPrice()
+			junkDealerPrice = item.getJunkDealerPrice()
+			if junkDealerPrice == 0:
+				junkDealerPrice = 20
+			nameString = '[%s' % junkDealerPrice  + ']' + item.getCustomName() #%
 			window.addListBoxMenuItem(nameString, 0)
 				
 		window.setProperty('btnOther:visible', 'True')
@@ -177,16 +201,13 @@ def handleResetScreen(core, actor, npc, selection):
 	return
 	
 def endConversation(core, actor, npc):
-	core.conversationService.sendStopConversation(actor, npc, 'conversation/junk_dealer_generic', 's_38')
+	core.conversationService.sendStopConversation(actor, npc, 'conversation/junk_dealer_generic', 's_4bd9d15e')
 	return
 	
 	
 def sellWindowCallBack(owner, window, eventType, returnList):
 	
-	if returnList.get(0) == 0:
-		owner.sendSystemMessage("huh?", 1)
-		#startConversation(coreRef,owner,junkDealerRef)
-		return
+	sellItemListRef = coreRef.lootService.getSellableInventoryItems(owner)
 	
 	#sell
 	if eventType == 0:
@@ -204,33 +225,33 @@ def sellWindowCallBack(owner, window, eventType, returnList):
 		inventory = owner.getSlottedObject('inventory')		
 		
 		
-		junkPrice = 20
-		owner.setCashCredits(owner.getCashCredits()+junkPrice);
+		junkDealerPrice = sellItem.getJunkDealerPrice()
+		if junkDealerPrice == 0:
+			junkDealerPrice = 20
+		owner.setCashCredits(owner.getCashCredits()+junkDealerPrice)
 		
 		# add item to 10-item junk dealer history
 		coreRef.lootService.addToBuyHistory(owner,junkDealerRef,sellItem)
 		
-		#You sell %TT for %DI credits.
-		owner.sendSystemMessage("sold "+sellItem.getCustomName(), 1)
-		#owner.sendSystemMessage(ProsePackage("@junk_dealer:prose_sold_junk", "TT", sellItem.getCustomName()), 0)
+		owner.sendSystemMessage(OutOfBand.ProsePackage("@junk_dealer:prose_sold_junk", "TT", sellItem.getCustomName(),junkDealerPrice), 0)
 		
 		inventory.remove(sellItem)
 		
-		coreRef.suiService.closeSUIWindow(owner,window.getWindowId());
+		coreRef.suiService.closeSUIWindow(owner,window.getWindowId())
 		handleFirstScreen(coreRef, owner, junkDealerRef, 0)
 		return
 	
 	#cancel
 	if eventType == 1:
 		owner.sendSystemMessage("cancel ", 1)
-		#coreRef.suiService.closeSUIWindow(window,window.getWindowId());
-		#startConversation(coreRef,owner,junkDealerRef)
+		coreRef.suiService.closeSUIWindow(owner,window.getWindowId())
+		startConversation(coreRef,owner,junkDealerRef)
 		return
 	
 	#examine
 	if eventType == 2:
 		owner.sendSystemMessage("examine ", 1)
-		#coreRef.suiService.closeSUIWindow(window,window.getWindowId());
+		#coreRef.suiService.closeSUIWindow(window,window.getWindowId())
 		#startConversation(coreRef,owner,junkDealerRef)
 		#owner.sendSystemMessage('Examine', 0)
 		return
@@ -252,7 +273,7 @@ def noSellWindowCallBack(owner, window, eventType, returnList):
 		else:
 			toggleItem.setNoSell(1)
 		
-		#core.suiService.closeSUIWindow(window);
+		#core.suiService.closeSUIWindow(window)
 		handleFirstScreen(coreRef, owner, junkDealerRef, 1)
 		return
 	
@@ -273,6 +294,8 @@ def noSellWindowCallBack(owner, window, eventType, returnList):
 		
 def buyBackWindowCallBack(owner, window, eventType, returnList):
 	
+	convSvc = coreRef.conversationService
+	
 	if returnList.get(0) == 0:
 		startConversation(coreRef,owner,junkDealerRef)
 		return
@@ -283,6 +306,8 @@ def buyBackWindowCallBack(owner, window, eventType, returnList):
 		buyHistory = coreRef.lootService.getBuyHistory(owner,junkDealerRef)
 		if len(buyHistory) == 0:
 			owner.sendSystemMessage('@loot_dealer:no_buy_back_items_found', 1)
+			startConversation(coreRef,owner,junkDealerRef)
+			return
 		
 		buyBackItem = buyHistory.get(index)
 		
@@ -290,12 +315,24 @@ def buyBackWindowCallBack(owner, window, eventType, returnList):
 			owner.sendSystemMessage('@loot_dealer:no_buy_back_items_found', 0)
 			startConversation(coreRef,owner,junkDealerRef)
 			return
+		
+		if owner.getInventoryItemCount() >= 80:
+			prose = ProsePackage('conversation/junk_dealer_generic', 's_47')
+			outOfBand = OutOfBand()
+			outOfBand.addProsePackage(prose)
+			convSvc.sendConversationMessage(owner, junkDealerRef, outOfBand)
+			return
 			
-		junkPrice = 20
-		if owner.getCashCredits()>=junkPrice and owner.getInventoryItemCount() < 80:			
-			owner.setCashCredits(owner.getCashCredits()-junkPrice)			
+		junkDealerPrice = buyBackItem.getJunkDealerPrice()
+		if junkDealerPrice == 0:
+			junkDealerPrice = 20
+		owner.setCashCredits(owner.getCashCredits()+junkDealerPrice)
+		
+		if owner.getCashCredits()>=junkDealerPrice:			
+			owner.setCashCredits(owner.getCashCredits()-junkDealerPrice)			
 			inventory = owner.getSlottedObject('inventory')							
 			inventory.add(buyBackItem)
+			owner.sendSystemMessage('You buy back ' + buyBackItem.getCustomName() + ' for %s' % junkDealerPrice + ' credits.', 0)
 			# remove from junk dealer history
 			coreRef.lootService.removeBoughtBackItemFromHistory(owner,junkDealerRef,buyBackItem)
 		else:
@@ -307,7 +344,7 @@ def buyBackWindowCallBack(owner, window, eventType, returnList):
 	
 	#cancel
 	if eventType == 1:
-		owner.sendSystemMessage('Cancle', 0)
+		owner.sendSystemMessage('Cancel', 0)
 		sellItem = returnList.get(0)
 		startConversation(coreRef,owner,junkDealerRef)
 		return
@@ -319,5 +356,217 @@ def buyBackWindowCallBack(owner, window, eventType, returnList):
 		startConversation(coreRef,owner,junkDealerRef)
 		owner.sendSystemMessage('Examine', 0)
 		return
-		
+
+def handleLootScreenSelection1(core, actor, npc, selection):
 	
+	convSvc = core.conversationService	
+	if selection == 0:
+		lootKitScreen1(core, actor, npc)
+	
+	return	
+	
+def handleLootScreenSelection2(core, actor, npc, selection):
+	
+	convSvc = core.conversationService	
+	if selection == 0:
+		lootKitScreen2(core, actor, npc)
+	
+	return
+	
+def handleLootScreenSelection3(core, actor, npc, selection):
+	
+	convSvc = core.conversationService	
+	if selection == 0:
+		lootKitScreen3(core, actor, npc)
+	
+	return
+	
+def handleLootScreenSelection4(core, actor, npc, selection):
+	
+	convSvc = core.conversationService	
+	if selection == 0:
+		lootKitScreen4(core, actor, npc)
+	
+	return
+	
+def handleLootScreenSelection5(core, actor, npc, selection):
+	
+	convSvc = core.conversationService	
+	if selection == 0:
+		lootKitScreen5a(core, actor, npc)
+		
+	if selection == 1:
+		lootKitScreen5b(core, actor, npc)
+	
+	return
+	
+def handleLootScreenSelection6(core, actor, npc, selection):
+	
+	convSvc = core.conversationService	
+	prose = ProsePackage('conversation/junk_dealer_generic', 's_14efaaa2')
+	outOfBand = OutOfBand()
+	outOfBand.addProsePackage(prose)
+	convSvc.sendConversationMessage(actor, npc, outOfBand)
+	if selection == 0:
+		template = 'object/tangible/loot/collectible/kits/shared_orange_rug_kit.iff'
+		addLootKit(core, actor, npc,template)
+		
+	if selection == 1:
+		template = 'object/tangible/loot/collectible/kits/shared_blue_rug_kit.iff'
+		addLootKit(core, actor, npc,template)
+	
+	if selection == 2:
+		template = 'object/tangible/loot/collectible/kits/shared_gong_kit.iff'
+		addLootKit(core, actor, npc,template)
+		
+	if selection == 3:
+		template = 'object/tangible/loot/collectible/kits/shared_light_table_kit.iff'
+		addLootKit(core, actor, npc,template)
+		
+	if selection == 4:
+		template = 'object/tangible/loot/collectible/kits/shared_sculpture_kit.iff'
+		addLootKit(core, actor, npc,template)
+	
+	return
+	
+def addLootKit(core, actor, npc,template):
+
+	kit = core.objectService.createObject(template, actor.getPlanet())
+	inventory = actor.getSlottedObject('inventory')							
+	inventory.add(kit)
+	return
+	
+def lootKitScreen1(core, actor, npc):
+	
+	convSvc = core.conversationService
+	prose = ProsePackage('conversation/junk_dealer_generic', 's_d9e6b751')
+	outOfBand = OutOfBand()
+	outOfBand.addProsePackage(prose)
+	convSvc.sendConversationMessage(actor, npc, outOfBand)
+
+	prose2 = ProsePackage('conversation/junk_dealer_generic', 's_6d53d062')
+	outOfBand2 = OutOfBand()
+	outOfBand2.addProsePackage(prose2)
+	
+	option1 = ConversationOption(outOfBand2, 0)
+		
+	options = Vector()
+	options.add(option1)
+	
+	convSvc.sendConversationOptions(actor, npc, options, handleLootScreenSelection2)
+
+	return
+	
+def lootKitScreen2(core, actor, npc):
+	
+	convSvc = core.conversationService
+	prose = ProsePackage('conversation/junk_dealer_generic', 's_e29f48dc')
+	outOfBand = OutOfBand()
+	outOfBand.addProsePackage(prose)
+	convSvc.sendConversationMessage(actor, npc, outOfBand)
+	
+	prose2 = ProsePackage('conversation/junk_dealer_generic', 's_324b9b0f')
+	outOfBand2 = OutOfBand()
+	outOfBand2.addProsePackage(prose2)
+	
+	option1 = ConversationOption(outOfBand2, 0)
+		
+	options = Vector()
+	options.add(option1)
+	
+	convSvc.sendConversationOptions(actor, npc, options, handleLootScreenSelection3)
+	
+	return
+	
+def lootKitScreen3(core, actor, npc):
+	
+	convSvc = core.conversationService
+	prose = ProsePackage('conversation/junk_dealer_generic', 's_12fe83a6')
+	outOfBand = OutOfBand()
+	outOfBand.addProsePackage(prose)
+	convSvc.sendConversationMessage(actor, npc, outOfBand)
+
+	prose2 = ProsePackage('conversation/junk_dealer_generic', 's_e1a103e5')
+	outOfBand2 = OutOfBand()
+	outOfBand2.addProsePackage(prose2)
+	
+	option1 = ConversationOption(outOfBand2, 0)
+		
+	options = Vector()
+	options.add(option1)
+	
+	convSvc.sendConversationOptions(actor, npc, options, handleLootScreenSelection4)
+	
+	return
+	
+def lootKitScreen4(core, actor, npc):
+	
+	convSvc = core.conversationService
+	prose = ProsePackage('conversation/junk_dealer_generic', 's_4d65752')
+	outOfBand = OutOfBand()
+	outOfBand.addProsePackage(prose)
+	convSvc.sendConversationMessage(actor, npc, outOfBand)
+
+	prose2 = ProsePackage('conversation/junk_dealer_generic', 's_d347bee3')
+	outOfBand2 = OutOfBand()
+	outOfBand2.addProsePackage(prose2)
+	prose3 = ProsePackage('conversation/junk_dealer_generic', 's_b60b73f8')
+	outOfBand3 = OutOfBand()
+	outOfBand3.addProsePackage(prose3)
+	
+	option1 = ConversationOption(outOfBand2, 0)
+	option2 = ConversationOption(outOfBand3, 0)
+		
+	options = Vector()
+	options.add(option1)
+	options.add(option2)
+	
+	convSvc.sendConversationOptions(actor, npc, options, handleLootScreenSelection5)
+	
+	return
+	
+def lootKitScreen5a(core, actor, npc):
+	
+	convSvc = core.conversationService
+	prose = ProsePackage('conversation/junk_dealer_generic', 's_3fc7eb45')
+	outOfBand = OutOfBand()
+	outOfBand.addProsePackage(prose)
+	convSvc.sendConversationMessage(actor, npc, outOfBand)
+
+	prose2 = ProsePackage('conversation/junk_dealer_generic', 's_ee977dee')
+	outOfBand2 = OutOfBand()
+	outOfBand2.addProsePackage(prose2)
+	prose3 = ProsePackage('conversation/junk_dealer_generic', 's_8f39769')
+	outOfBand3 = OutOfBand()
+	outOfBand3.addProsePackage(prose3)
+	prose4 = ProsePackage('conversation/junk_dealer_generic', 's_fe657cdd')
+	outOfBand4 = OutOfBand()
+	outOfBand4.addProsePackage(prose4)
+	prose5 = ProsePackage('conversation/junk_dealer_generic', 's_9ede4b84')
+	outOfBand5 = OutOfBand()
+	outOfBand5.addProsePackage(prose5)
+	prose6 = ProsePackage('conversation/junk_dealer_generic', 's_87c5851b')
+	outOfBand6 = OutOfBand()
+	outOfBand6.addProsePackage(prose6)
+	
+	option1 = ConversationOption(outOfBand2, 0)
+	option2 = ConversationOption(outOfBand3, 0)
+	option3 = ConversationOption(outOfBand4, 0)
+	option4 = ConversationOption(outOfBand5, 0)
+	option5 = ConversationOption(outOfBand6, 0)
+		
+	options = Vector()
+	options.add(option1)
+	options.add(option2)
+	options.add(option3)
+	options.add(option4)
+	options.add(option5)
+	
+	convSvc.sendConversationOptions(actor, npc, options, handleLootScreenSelection6)
+	
+	return
+	
+def lootKitScreen5b(core, actor, npc):
+	
+	startConversation(core,actor,npc)
+	return

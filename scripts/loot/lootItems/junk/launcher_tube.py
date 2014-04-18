@@ -6,3 +6,15 @@ def itemTemplate():
 def customItemName():
 
 	return 'Launcher Tube'
+	
+def stackable():
+
+	return 1
+	
+def junkDealerPrice():
+
+	return 16
+	
+def junkType():
+
+	return 0

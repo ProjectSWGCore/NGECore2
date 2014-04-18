@@ -29,28 +29,20 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
-
-import protocol.swg.PlayClientEffectObjectMessage;
 import protocol.swg.PlayClientEffectObjectTransformMessage;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
 import resources.objects.loot.LootGroup;
 import resources.objects.loot.LootRollSession;
-import resources.objects.resource.ResourceContainerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 import main.NGECore;
-import engine.clientdata.ClientFileManager;
-import engine.clientdata.visitors.CrcStringTableVisitor;
-import engine.resources.common.CRC;
 import engine.resources.container.Traverser;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
@@ -92,7 +84,7 @@ public class LootService implements INetworkDispatch {
 				return;
 			SWGObject lootedObjectInventory = lootedObject.getSlottedObject("inventory");
 			core.simulationService.openContainer(requester, lootedObjectInventory);	
-			setLooted(lootedObject);
+			setLooted(requester,lootedObject);
 		}
 	}
 
@@ -250,6 +242,7 @@ public class LootService implements INetworkDispatch {
 	    }
 	}
 	
+	@SuppressWarnings("unused")
 	private void handleLootPoolItems(String itemName,LootRollSession lootRollSession){
 
 		List<String> subfolders = new ArrayList<String>(); // Consider all sub-folders		
@@ -288,6 +281,9 @@ public class LootService implements INetworkDispatch {
 		int stackCount = 1;
 		int biolink = 0;
 		int requiredCL = 1;
+		int stackable = -1;
+		int junkDealerPrice = 0;
+		byte junkType = -1;
 		String requiredProfession = "";
 		String requiredFaction = "";
 		Vector<String> customizationAttributes = null;
@@ -335,7 +331,15 @@ public class LootService implements INetworkDispatch {
 		if(core.scriptService.getMethod(itemPath,"","requiredFaction")!=null)
 			requiredFaction = (String)core.scriptService.fetchString(itemPath,"requiredFaction");
 		
-				
+		if(core.scriptService.getMethod(itemPath,"","stackable")!=null)
+			stackable =  (Integer)core.scriptService.fetchInteger(itemPath,"stackable");
+		
+		if(core.scriptService.getMethod(itemPath,"","junkDealerPrice")!=null)
+			junkDealerPrice =  (Integer)core.scriptService.fetchInteger(itemPath,"junkDealerPrice");
+		
+		if(core.scriptService.getMethod(itemPath,"","junkType")!=null)
+			junkType =  (byte)core.scriptService.fetchInteger(itemPath,"junkType");
+		
 		System.out.println("itemTemplate " + itemTemplate);
 		
 		TangibleObject droppedItem = createDroppedItem(itemTemplate,lootRollSession.getSessionPlanet());
@@ -345,6 +349,21 @@ public class LootService implements INetworkDispatch {
     	
 		if (customName!=null)
 			handleCustomDropName(droppedItem, customName);
+		
+		if (stackable!=-1){
+			if(stackable==1)
+				droppedItem.setStackable(true);
+			else
+				droppedItem.setStackable(false);
+    	}	
+		
+		if (junkDealerPrice!=0){
+    		droppedItem.setJunkDealerPrice(junkDealerPrice);
+    	}
+		
+		if (junkType!=-1){
+    		droppedItem.setJunkType(junkType);
+    	}
     	
     	if (itemStats!=null){
     		if (itemStats.size()%3!=0){
@@ -372,6 +391,7 @@ public class LootService implements INetworkDispatch {
     	if (requiredFaction.length()>0){
     		droppedItem.setStringAttribute("required_faction", requiredFaction);
     	}
+    	
     	
 		lootRollSession.addDroppedItem(droppedItem);
 	}	
@@ -779,13 +799,14 @@ public class LootService implements INetworkDispatch {
 		return 42%42;
 	}
 	
-	public void setLooted(TangibleObject lootedObject){
+	public void setLooted(TangibleObject lootedObject,TangibleObject requester){
 		lootedObject.setLooted(true);
 		float y = -5.0F; 
 	    float qz= 1.06535322E9F;
 	    Point3D effectorPosition = new Point3D(0,y,0);
 		Quaternion effectorOrientation = new Quaternion(0,0,0,qz);
 	    PlayClientEffectObjectTransformMessage lmsg = new PlayClientEffectObjectTransformMessage("",lootedObject.getObjectID(),"",effectorPosition,effectorOrientation);
+	    //((CreatureObject) requester).getClient().getSession().write(lmsg.serialize());
 	}
 	
 	
@@ -798,12 +819,14 @@ public class LootService implements INetworkDispatch {
 			@Override
 			public void process(SWGObject obj) {
 				String itemTemplate = obj.getTemplate();
-				if (itemTemplate.contains("loot/")){					
-					sellableItems.add(obj);
-					}	
-				}
+				TangibleObject tano = (TangibleObject) obj;
+				if (tano.getCustomName()!=null){
+					if (itemTemplate.contains("loot/")){
+						sellableItems.add(obj);
+						}	
+					}
+			}
 		});
-		System.err.println("sellableItems " + sellableItems.size());
 		return sellableItems;
 	}
 	
@@ -839,14 +862,12 @@ public class LootService implements INetworkDispatch {
 	public boolean addToBuyHistory(CreatureObject actor, CreatureObject dealer, TangibleObject item){			
 		LinkedHashMap<Long,TangibleObject[]> businessHistory = (LinkedHashMap<Long,TangibleObject[]> )dealer.getAttachment("BusinessHistory");		
 		if (businessHistory==null){
-			System.out.println("businessHistory==null");
 			businessHistory = new LinkedHashMap<Long,TangibleObject[]>();		
 			dealer.setAttachment("BusinessHistory",businessHistory);		
 		}
-		System.out.println("abusinessHistory.size " + businessHistory.size());
+
 		TangibleObject[] actorsBuyHistory = businessHistory.get(actor.getObjectID());
 		if (actorsBuyHistory==null){
-			System.out.println("actorsBuyHistory==null");
 			actorsBuyHistory = new TangibleObject[10];
 			actorsBuyHistory[0] = item;
 		} else {
@@ -868,10 +889,11 @@ public class LootService implements INetworkDispatch {
 		}		
 		businessHistory.put(actor.getObjectID(),actorsBuyHistory);
 		dealer.setAttachment("BusinessHistory",businessHistory);			
-		printArrayElements(actorsBuyHistory);
+		//printArrayElements(actorsBuyHistory);
 		return true;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public boolean removeBoughtBackItemFromHistory(CreatureObject actor, CreatureObject dealer, TangibleObject item){
 		if (item==null)
 			return false; // Player has hit the button without selecting an item
@@ -895,7 +917,7 @@ public class LootService implements INetworkDispatch {
 		if (index==-1)
 			return false;
 		
-		// SHift everything to the right of the found index to the left
+		// Shift everything to the right of the found index to the left
 		for (int i = index; i < 9; i++) {                
 			actorsBuyHistory[i] = actorsBuyHistory[i+1]; // 0 1 2 3 4 5 6 7 8 9
 		}
@@ -904,12 +926,13 @@ public class LootService implements INetworkDispatch {
 		
 		businessHistory.put(actor.getObjectID(),actorsBuyHistory);
 		dealer.setAttachment("BusinessHistory",businessHistory);	
-		printArrayElements(actorsBuyHistory);
+		//printArrayElements(actorsBuyHistory);
 		return true;
 	}
 	
 	
 	// util method
+	@SuppressWarnings("unused")
 	private void printArrayElements(TangibleObject[] array){
 		System.out.print("Array [");
 		for (int i=0;i<array.length;i++){
