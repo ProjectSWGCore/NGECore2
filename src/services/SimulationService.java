@@ -80,6 +80,8 @@ import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.common.*;
 import resources.common.collidables.AbstractCollidable;
+import resources.datatables.DisplayType;
+import resources.datatables.Options;
 import resources.datatables.PlayerFlags;
 import resources.datatables.Posture;
 import services.ai.LairActor;
@@ -334,8 +336,9 @@ public class SimulationService implements INetworkDispatch {
 				
 				CreatureObject object = (CreatureObject) client.getParent();
 				
-				if (object.mounted)
-					object=object.getMountedVehicle();
+				if (core.mountService.isMounted(object)) {
+					object = (CreatureObject) object.getContainer();
+				}
 				
 				Point3D newPos;
 				Point3D oldPos;
@@ -433,7 +436,13 @@ public class SimulationService implements INetworkDispatch {
 					System.out.println("NULL Object");
 					return;
 				}
+				
 				CreatureObject object = (CreatureObject) client.getParent();
+				
+				if (core.mountService.isMounted(object)) {
+					object.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:cant_mount"), DisplayType.Broadcast);
+					core.mountService.dismount(object, (CreatureObject) object.getContainer());
+				}
 				
 				Point3D newPos = new Point3D(dataTransform.getXPosition(), dataTransform.getYPosition(), dataTransform.getZPosition());
 				if(Float.isNaN(newPos.x) || Float.isNaN(newPos.y) || Float.isNaN(newPos.z))
@@ -748,6 +757,7 @@ public class SimulationService implements INetworkDispatch {
 			return;
 
 		final CreatureObject object = (CreatureObject) client.getParent();
+		SWGObject container = object.getContainer();
 		PlayerObject ghost = (PlayerObject) object.getSlottedObject("ghost");
 		
 		if(object.getAttachment("proposer") != null)
@@ -765,13 +775,11 @@ public class SimulationService implements INetworkDispatch {
 			}
 		}
 		
-		if(object.getAttachment("activeVehicleID") != null) 
-		{
-			if(object.isMounted()) object.getMountedVehicle().unmount(object);
-			long vehicleID = ((java.math.BigInteger) object.getAttachment("activeVehicleID")).longValue();
-			core.objectService.destroyObject(vehicleID);
-			object.setAttachment("activeVehicleID", null);	
+		if (core.mountService.isMounted(object)) {
+			core.mountService.dismount(object, (CreatureObject) container);
 		}
+		
+		core.mountService.storeAll(object);
 		
 		/*
 		object.createTransaction(core.getCreatureODB().getEnvironment());

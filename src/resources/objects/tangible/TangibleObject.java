@@ -39,6 +39,7 @@ import protocol.swg.UpdatePVPStatusMessage;
 import protocol.swg.objectControllerObjects.ShowFlyText;
 import resources.common.OutOfBand;
 import resources.common.RGB;
+import resources.datatables.Options;
 import resources.objects.creature.CreatureObject;
 import resources.objects.loot.LootGroup;
 import resources.visitors.IDManagerVisitor;
@@ -65,6 +66,7 @@ public class TangibleObject extends SWGObject {
 	private List<Integer> componentCustomizations = new ArrayList<Integer>();
 	private Map<String, Byte> customizationVariables = new HashMap<String, Byte>();
 	protected int optionsBitmask = 0;
+	private int uses = 0;
 	private int maxDamage = 1000;
 	private boolean staticObject = true;
 	protected String faction = ""; // Says you're "Imperial Special Forces" if it's 0 for some reason
@@ -131,6 +133,15 @@ public class TangibleObject extends SWGObject {
 
 	public void setIncapTimer(int incapTimer) {
 		this.incapTimer = incapTimer;
+	}
+	
+	public int getUses() {
+		return uses;
+	}
+	
+	public void setUses(int uses) {
+		this.uses = uses;
+		setIntAttribute("uses", uses);
 	}
 
 	public synchronized int getConditionDamage() {
@@ -265,6 +276,14 @@ public class TangibleObject extends SWGObject {
 					getClient().getSession().write(new UpdatePVPStatusMessage(observer.getParent().getObjectID(), NGECore.getInstance().factionService.calculatePvpStatus((CreatureObject) this, (CreatureObject) observer.getParent()), getFaction()).serialize());
 			}
 
+		}
+		
+		if (getClient() != null) {
+			CreatureObject companion = NGECore.getInstance().mountService.getCompanion((CreatureObject) this);
+			
+			if (companion != null) {
+				companion.updatePvpStatus();
+			}
 		}
 	}
 	
@@ -561,6 +580,7 @@ public class TangibleObject extends SWGObject {
 
 	public void setSerialNumber(String serialNumber) {
 		setStringAttribute("serial_number", serialNumber);
+		setOptions(Options.SERIAL, true);
 	}
 	
 	public void sendDelta3(Client destination) {

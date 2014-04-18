@@ -1,5 +1,5 @@
 import sys
 
 def setup(core, object):
-	object.setAttachment('radial_filename', 'travel_ticket')
+	object.setAttachment('radial_filename', 'item/travel_ticket')
 	return
