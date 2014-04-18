@@ -122,6 +122,7 @@ import resources.objects.tool.SurveyTool;
 import resources.objects.waypoint.WaypointObject;
 import resources.objects.weapon.WeaponObject;
 import services.bazaar.AuctionItem;
+import services.chat.ChatRoom;
 
 @SuppressWarnings("unused")
 
@@ -922,6 +923,14 @@ public class ObjectService implements INetworkDispatch {
 								client.getSession().write(onlineNotifyStatus.serialize());
 							}
 						}
+					}
+					
+					for (Integer roomId : ghost.getJoinedChatChannels()) {
+						ChatRoom room = core.chatService.getChatRoom(roomId);
+						
+						if (room != null) { core.chatService.joinChatRoom(objectShortName, roomId); } 
+						// work-around for any channels that may have been deleted, or only spawn on server startup, that were added to the joined channels
+						else { ghost.removeChannel(roomId); }
 					}
 				}
 				

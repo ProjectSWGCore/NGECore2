@@ -28,7 +28,7 @@ import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.PrimaryKey;
 
-@Entity
+@Entity(version=1)
 public class ChatRoom {
 	private String creator; // creator of the room (first name only, lowercase)
 	private String description; // title
@@ -44,6 +44,7 @@ public class ChatRoom {
 	private boolean moderatorsOnly;
 	private boolean privateRoom;
 	private boolean visible;
+	private boolean childrenAllowed;
 	private String owner; // current owner of the room (first name only lowercase)
 
 	public String getCreator() {
@@ -144,5 +145,13 @@ public class ChatRoom {
 	
 	public boolean hasBan(String user) {
 		return banList.contains(user.toLowerCase());
+	}
+
+	public boolean isChildrenAllowed() {
+		return childrenAllowed;
+	}
+
+	public void setChildrenAllowed(boolean childrenAllowed) {
+		this.childrenAllowed = childrenAllowed;
 	}
 }

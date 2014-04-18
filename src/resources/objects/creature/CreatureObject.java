@@ -1690,7 +1690,12 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.inStealth = inStealth;
 		}
+
+		if (getClient() != null && getClient().getSession() != null) {
+			getClient().getSession().write(messageBuilder.buildStealthFlagDelta(inStealth));
+		}
 		notifyObservers(messageBuilder.buildStealthFlagDelta(inStealth), false);
+
 	}
 
 	public boolean isRadarVisible() {

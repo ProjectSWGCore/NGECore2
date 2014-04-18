@@ -23,18 +23,18 @@ package resources.datatables;
 
 public class WeaponType {
 	
-	public static int RIFLE = 0;
-	public static int CARBINE = 1;
-	public static int PISTOL = 2;
-	public static int ONEHANDEDMELEE = 4;
-	public static int TWOHANDEDMELEE = 5;
-	public static int UNARMED = 6;
-	public static int POLEARMMELEE = 7;
-	public static int THROWN = 8;
-	public static int ONEHANDEDSABER = 9;
-	public static int TWOHANDEDSABER = 10;
-	public static int POLEARMSABER = 11;
-	public static int HEAVYWEAPON = 12;
-	public static int FLAMETHROWER = 13;
+	public static final int RIFLE = 0;
+	public static final int CARBINE = 1;
+	public static final int PISTOL = 2;
+	public static final int ONEHANDEDMELEE = 4;
+	public static final int TWOHANDEDMELEE = 5;
+	public static final int UNARMED = 6;
+	public static final int POLEARMMELEE = 7;
+	public static final int THROWN = 8;
+	public static final int ONEHANDEDSABER = 9;
+	public static final int TWOHANDEDSABER = 10;
+	public static final int POLEARMSABER = 11;
+	public static final int HEAVYWEAPON = 12;
+	public static final int FLAMETHROWER = 13;
 	
 }
