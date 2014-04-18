@@ -5,7 +5,7 @@ def itemTemplate():
 
 def customItemName():
 
-	return ''
+	return 'Gaderiffi Baton'
 	
 def customItemStackCount():
 
