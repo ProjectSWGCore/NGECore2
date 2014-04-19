@@ -5,7 +5,7 @@ def itemTemplate():
 
 def customItemName():
 
-	return ''
+	return 'Composite Armor Bracer Left'
 	
 def customItemStackCount():
 

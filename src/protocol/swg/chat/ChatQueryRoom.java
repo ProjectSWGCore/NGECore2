@@ -31,25 +31,32 @@ import org.apache.mina.core.buffer.IoBuffer;
 import protocol.swg.SWGMessage;
 import services.chat.ChatRoom;
 
-public class ChatQueryRoomResults extends SWGMessage {
+public class ChatQueryRoom extends SWGMessage {
 
 	private ChatRoom room;
+	private String roomAddress;
 	private int requestId;
 	
-	public ChatQueryRoomResults(ChatRoom room, int requestId) {
+	public ChatQueryRoom() { }
+	public ChatQueryRoom(ChatRoom room, int requestId) {
 		this.room = room;
 		this.requestId = requestId;
 	}
 	
 	@Override
 	public void deserialize(IoBuffer data) {
+		data.getShort();
+		data.getInt();
+		requestId = data.getInt();
+		roomAddress = getAsciiString(data);
 	}
 
 	@Override
 	public IoBuffer serialize() {
 		String server = NGECore.getInstance().getGalaxyName();
 		IoBuffer buffer = IoBuffer.allocate(100).order(ByteOrder.LITTLE_ENDIAN);
-		
+		buffer.setAutoExpand(true);
+
 		buffer.putShort((short) 7);
 		buffer.putInt(0xC4DE864E);
 		
@@ -108,5 +115,16 @@ public class ChatQueryRoomResults extends SWGMessage {
 		buffer.putInt(0); // user list
 		return buffer.flip();
 	}
-
+	public String getRoomAddress() {
+		return roomAddress;
+	}
+	public void setRoomAddress(String roomAddress) {
+		this.roomAddress = roomAddress;
+	}
+	public int getRequestId() {
+		return requestId;
+	}
+	public void setRequestId(int requestId) {
+		this.requestId = requestId;
+	}
 }

@@ -6,3 +6,15 @@ def itemTemplate():
 def customItemName():
 
 	return 'Comlink'
+	
+def stackable():
+
+	return 1
+	
+def junkDealerPrice():
+
+	return 15
+	
+def junkType():
+
+	return 0
