@@ -26,6 +26,7 @@ import java.nio.ByteOrder;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Calendar;
 import java.util.Map;
 
 import main.NGECore;
@@ -33,6 +34,10 @@ import main.NGECore;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 
+
+
+import engine.clientdata.ClientFileManager;
+import engine.clientdata.visitors.DatatableVisitor;
 import engine.clients.Client;
 import engine.resources.common.CRC;
 import engine.resources.container.CreatureContainerPermissions;
@@ -60,6 +65,7 @@ import resources.objects.mission.MissionObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
+import resources.visitors.ProfessionTemplateVisitor;
 
 @SuppressWarnings("unused")
 
@@ -191,7 +197,16 @@ public class CharacterService implements INetworkDispatch {
 			
 			
 		});
+		
+		swgOpcodes.put(Opcodes.LagReport, new INetworkRemoteEvent() {
 
+			@Override
+			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
+
+			}
+			
+		});
+		
 		swgOpcodes.put(Opcodes.ClientCreateCharacter, new INetworkRemoteEvent() {
 
 			@Override
@@ -250,6 +265,12 @@ public class CharacterService implements INetworkDispatch {
 				if (stamina >= 1) core.skillModService.addSkillMod(object, "stamina", (int) stamina);
 				if (agility >= 1) core.skillModService.addSkillMod(object, "agility", (int) agility);
 
+				core.skillModService.addSkillMod(object, "language_basic_comprehend", 100);
+				core.skillModService.addSkillMod(object, "language_basic_speak", 100);
+				core.skillModService.addSkillMod(object, "creature_harvesting", 25);
+				core.skillModService.addSkillMod(object, "language_wookiee_comprehend", 100);
+				
+				
 				object.createTransaction(core.getCreatureODB().getEnvironment());
 				
 				PlayerObject player = (PlayerObject) core.objectService.createObject("object/player/shared_player.iff", object.getPlanet());
@@ -267,16 +288,21 @@ public class CharacterService implements INetworkDispatch {
 					object.addObjectToEquipList(hair);
 				}
 				
+				player.setBornDate((int) System.currentTimeMillis());
+
 				TangibleObject inventory = (TangibleObject) core.objectService.createObject("object/tangible/inventory/shared_character_inventory.iff", object.getPlanet());
 				inventory.setContainerPermissions(CreatureContainerPermissions.CREATURE_CONTAINER_PERMISSIONS);
 				TangibleObject appInventory = (TangibleObject) core.objectService.createObject("object/tangible/inventory/shared_appearance_inventory.iff", object.getPlanet());
 				appInventory.setContainerPermissions(CreaturePermissions.CREATURE_PERMISSIONS);
 				TangibleObject datapad = (TangibleObject) core.objectService.createObject("object/tangible/datapad/shared_character_datapad.iff", object.getPlanet());
 				datapad.setContainerPermissions(CreatureContainerPermissions.CREATURE_CONTAINER_PERMISSIONS);
+				datapad.setStaticObject(false);
 				TangibleObject bank = (TangibleObject) core.objectService.createObject("object/tangible/bank/shared_character_bank.iff", object.getPlanet());
 				bank.setContainerPermissions(CreatureContainerPermissions.CREATURE_CONTAINER_PERMISSIONS);
+				bank.setStaticObject(false);
 				TangibleObject missionBag = (TangibleObject) core.objectService.createObject("object/tangible/mission_bag/shared_mission_bag.iff", object.getPlanet());
 				missionBag.setContainerPermissions(CreatureContainerPermissions.CREATURE_CONTAINER_PERMISSIONS);
+				missionBag.setStaticObject(false);
 				
 				object._add(inventory);
 				object._add(appInventory);
@@ -291,6 +317,13 @@ public class CharacterService implements INetworkDispatch {
 					Console.println("Added empty mission " + missionsAdded);
 				}*/
 				
+				// TODO: Race abilities
+				if (client.isGM())
+					object.addAbility("admin");
+				
+				object.addAbility("startDance");
+				object.addAbility("startDance+Basic");
+				
 				object.addObjectToEquipList(datapad);
 				object.addObjectToEquipList(inventory);
 				object.addObjectToEquipList(bank);
@@ -300,17 +333,12 @@ public class CharacterService implements INetworkDispatch {
 				core.missionService.createDefaultMissions(object);
 				
 				WeaponObject defaultWeapon = (WeaponObject) core.objectService.createObject("object/weapon/creature/shared_creature_default_weapon.iff", object.getPlanet());
-				defaultWeapon.setDamageType("@obj_attr_n:armor_eff_kinetic");
-				defaultWeapon.setStringAttribute("cat_wpn_damage.damage", "0-0");
-				defaultWeapon.setMaxDamage(100);
-				defaultWeapon.setMinDamage(50);
-				
 				object.addObjectToEquipList(defaultWeapon);
-
 				object._add(defaultWeapon);
 				object.setWeaponId(defaultWeapon.getObjectID());
-				core.scriptService.callScript("scripts/", "starterclothing", "CreateStarterClothing", core, object, clientCreateCharacter.getStarterProfession(), clientCreateCharacter.getRaceTemplate());
-				core.scriptService.callScript("scripts/", "CreateStartingCharacter", "demo", core, object);
+				
+				createStarterClothing(object, sharedRaceTemplate, clientCreateCharacter.getStarterProfession());
+				//core.scriptService.callScript("scripts/", "demo", "CreateStartingCharacter", core, object);
 				
 				core.getCreatureODB().put(object, Long.class, CreatureObject.class, object.getTransaction());
 				// might not need to commit transaction but better safe than sorry
@@ -332,8 +360,25 @@ public class CharacterService implements INetworkDispatch {
 				session.write(core.loginService.getLoginCluster().serialize());
 				session.write(core.loginService.getLoginClusterStatus(client).serialize());
 				
-				session.write(success.serialize());	
-				session.write((new ClientMfdStatusUpdateMessage((float) 2, "/GroundHUD.MFDStatus.vsp.role.targetLevel")).serialize());
+				session.write(success.serialize());
+			}
+			
+		});
+		
+		swgOpcodes.put(Opcodes.NewbieTutorialResponse, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
+				
+			}
+			
+		});
+		
+		swgOpcodes.put(Opcodes.SetJediSlotInfo, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
+				
 			}
 			
 		});
@@ -492,5 +537,119 @@ public class CharacterService implements INetworkDispatch {
 		}
 		return false;
 	}
+	
+	/**
+	 * Checks the database if a player with the given first name exists
+	 * and returns the objectID of that player.
+	 * @param name : String
+	 * @return objectID : long
+	 */
+	public long getPlayerOID(String name) {
+		if (!name.equals("")) {
+			long oid = 0L;
+			try {
+				PreparedStatement ps = databaseConnection.preparedStatement("SELECT * FROM characters WHERE \"firstName\"=?");
+				ps.setString(1, name);
+				ResultSet resultSet = ps.executeQuery();
+				while (resultSet.next()) {	
+					oid = resultSet.getLong("id");
+				}
+				return oid;
+			} 
+			
+			catch (SQLException e) { e.printStackTrace(); }
+		}
+		return 0L;
+	}
+	
+	/**
+	 * Delivers the first name of a player
+	 * @param oid : long
+	 * @return firstName : String
+	 */
+	public String getPlayerFirstName(long oid) {
+					
+			String name = "";
+			try {
+				PreparedStatement ps = databaseConnection.preparedStatement("SELECT * FROM characters WHERE \"id\"=?");
+				ps.setLong(1, oid);
+				ResultSet resultSet = ps.executeQuery();
+				while (resultSet.next()) {				 
+					name = resultSet.getString("firstName");
+					if (!name.equals("")) {
+						if (name.contains(" ")) {
+							name = name.split(" ")[0];
+						}
+						name = name.toLowerCase();
 
+				}
+				return name;
+			} 
+			
+			} catch (SQLException e) { e.printStackTrace(); }
+
+		return "";
+	}
+	
+	/**
+	 * Checks the database for if the object ID of the player exists.
+	 * @param objectId Object ID to check for in the database
+	 * @return Returns True if the player exists
+	 */
+	public boolean playerExists(long objectId) {
+
+		try {
+			PreparedStatement ps = databaseConnection.preparedStatement("SELECT id FROM characters WHERE id=?");
+			ps.setLong(1, objectId);
+			ResultSet resultSet = ps.executeQuery();
+			
+			boolean isDuplicate = resultSet.next();
+			resultSet.getStatement().close();
+			if (isDuplicate) { return true; }
+			else { return false; }
+		} 
+		
+		catch (SQLException e) { e.printStackTrace(); }
+		return false;
+	}
+
+	/**
+	 * Checks the database for the Account ID associated with the Object ID.
+	 * Intended for GM use only!
+	 * @param objectId Object ID of the player, used to obtain the Account ID.
+	 * @return Returns Account ID
+	 */
+	public int getAccountId(long objectId) {
+		try {
+			PreparedStatement ps = databaseConnection.preparedStatement("SELECT * FROM characters WHERE id=?");
+			ps.setLong(1, objectId);
+			ResultSet resultSet = ps.executeQuery();
+			resultSet.next();
+			return resultSet.getInt("accountId");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
+
+	private void createStarterClothing(CreatureObject creature, String raceTemplate, String profession) {
+		try {
+			ProfessionTemplateVisitor visitor = ClientFileManager.loadFile("creation/profession_defaults_" + profession + ".iff", ProfessionTemplateVisitor.class);
+			TangibleObject inventory = (TangibleObject) creature.getSlottedObject("inventory");
+
+			if (inventory == null)
+				return;
+
+			for(String item : visitor.getItems(raceTemplate)) {
+				TangibleObject createdItem = (TangibleObject) core.objectService.createObject(item, creature.getPlanet());
+
+				if (createdItem == null)
+					return;
+
+				creature._add(createdItem);
+				creature.addObjectToEquipList(createdItem);
+			}
+		} 
+		catch (InstantiationException | IllegalAccessException e) { e.printStackTrace();}
+	}
 }

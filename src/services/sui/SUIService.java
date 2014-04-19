@@ -23,7 +23,6 @@ package services.sui;
 
 import java.nio.ByteOrder;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,12 +42,15 @@ import protocol.swg.SUIForceClosePageMessage;
 import protocol.swg.SUIUpdatePageMessage;
 import protocol.swg.objectControllerObjects.ObjectMenuRequest;
 import protocol.swg.objectControllerObjects.ObjectMenuResponse;
-
+import resources.common.FileUtilities;
 import resources.common.ObjControllerOpcodes;
 import resources.common.Opcodes;
 import resources.common.RadialOptions;
+import resources.objects.creature.CreatureObject;
+import resources.objects.harvester.HarvesterObject;
+import resources.objects.loot.LootRollSession;
 import services.sui.SUIWindow.SUICallback;
-
+import services.sui.SUIWindow.Trigger;
 import engine.clients.Client;
 import engine.resources.objects.SWGObject;
 import engine.resources.service.INetworkDispatch;
@@ -81,6 +83,54 @@ public class SUIService implements INetworkDispatch {
 	
 				if(target == null || owner == null)
 					return;
+				
+				if (target instanceof HarvesterObject){
+					HarvesterObject harvester = (HarvesterObject) target;
+					Vector<String> admins = harvester.getAdminList();
+					Vector<String> hoppers = harvester.getHopperList();
+					CreatureObject creature = (CreatureObject) core.objectService.getObject(harvester.getOwner());
+					if (creature == owner && !admins.contains(owner.getCustomName())){
+						admins.add(owner.getCustomName());
+					}
+					
+					if (! admins.contains(owner.getCustomName()) && ! hoppers.contains(owner.getCustomName())){
+						return; // Completely unauthorized				
+					}
+					
+					if (! admins.contains(owner.getCustomName()) && hoppers.contains(owner.getCustomName())){
+						 // authorized for hopper
+						// change radialOptions to hopper access
+						core.scriptService.callScript("scripts/radial/", "harvesterHopper", "createRadial", core, owner, target, request.getRadialOptions());
+						sendRadial(owner, target, request.getRadialOptions(), request.getRadialCount());
+						return;
+					}
+				}
+				
+				if (target instanceof CreatureObject){
+					CreatureObject creature = (CreatureObject) target;
+					if (!creature.isPlayer() && creature.isLootLock()){
+						LootRollSession lootRollSession = (LootRollSession )creature.getAttachment("LootSession");
+						if (lootRollSession!=null) {
+							if (lootRollSession.getRequester()!=owner){
+	
+								// ToDo: RADIALS MUST BE DISABLED HERE FOR THE CORPSE, BUT HOW?
+								core.scriptService.callScript("scripts/radial/", "npc/noloot", "createRadial", core, owner, target, request.getRadialOptions());
+								sendRadial(owner, target, request.getRadialOptions(), request.getRadialCount());
+								return;
+							}
+						}
+					}					
+				}
+				
+				if(target.getGrandparent() != null && target.getGrandparent().getAttachment("structureAdmins") != null)
+				{
+					if(core.housingService.getPermissions(owner, target.getContainer()) && !getRadialFilename(target).equals("structure_management_terminal"))
+					{
+						core.scriptService.callScript("scripts/radial/", "moveable", "createRadial", core, owner, target, request.getRadialOptions());
+						sendRadial(owner, target, request.getRadialOptions(), request.getRadialCount());
+						return;
+					}
+				}
 				
 				core.scriptService.callScript("scripts/radial/", getRadialFilename(target), "createRadial", core, owner, target, request.getRadialOptions());
 				if(getRadialFilename(target).equals("default"))
@@ -169,12 +219,26 @@ public class SUIService implements INetworkDispatch {
 	}
 	
 	public String getRadialFilename(SWGObject object) {
+		String serverTemplate = ("scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", "") + object.getTemplate().split("shared_" , 2)[1] + ".py");
+		String radialFilename = "default";
 		
-		if(object.getAttachment("radial_filename") != null)
-			return (String) object.getAttachment("radial_filename");
-		else 
-			return "default";
+		if (FileUtilities.doesFileExist(serverTemplate)) {
+			PyObject method = core.scriptService.getMethod("scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", ""), object.getTemplate().split("shared_" , 2)[1].replace(".iff", ""), "getRadialFilename");
+			
+			if (method != null && method.isCallable()) {
+				radialFilename = method.__call__().asString();
+				
+				if (radialFilename == null || radialFilename.equals("")) {
+					radialFilename = "default";
+				}
+			}
+		}
 		
+		if (radialFilename.equals("default") && object.getAttachment("radial_filename") != null) {
+			radialFilename = (String) object.getAttachment("radial_filename");
+		}
+		
+		return radialFilename;
 	}
 	
 	public void sendRadial(SWGObject owner, SWGObject target, Vector<RadialOptions> radialOptions, byte radialCount) {
@@ -243,19 +307,7 @@ public class SUIService implements INetworkDispatch {
 		
 		window.clearDataSource("List.dataList");
 		
-		//int index = 0;
-		
-		for(Entry<Long, String> e : cloneData.entrySet()) {
-			
-			/*window.addDataItem("List.dataList:Name", String.valueOf(index));
-			
-			window.setProperty("List.dataList." + index + ":Text", string);
-
-			++index;*/
-			
-			window.addListBoxMenuItem(e.getValue(), e.getKey());
-			
-		}
+		cloneData.entrySet().forEach(e -> window.addListBoxMenuItem(e.getValue(), e.getKey()));
 		
 		return window;
 		
@@ -316,6 +368,34 @@ public class SUIService implements INetworkDispatch {
 			window.setProperty("btnOk:Text", "@ok");
 			window.setProperty("cmbInput:visible", "False");
 		}
+		return window;
+	}
+	
+	/**
+	 * Creates an Input Box SUIWindow and adds a handler that will return text inputed into text box with the callback as the specified PyObject.
+	 * @param PyObject Definition that will be run when user clicks on "OK"
+	 * @return SUIWindow
+	 * @author Waverunner
+	 */
+	public SUIWindow createInputBox(int type, String title, String promptText, SWGObject owner, SWGObject rangeObject, float maxDistance, PyObject handleFunc) {
+		SUIWindow window = createInputBox(type, title, promptText, owner, rangeObject, maxDistance);
+		Vector<String> returnParams = new Vector<String>();
+		returnParams.add("txtInput:LocalText");
+		window.addHandler(0, "", Trigger.TRIGGER_OK, returnParams, handleFunc);
+		return window;
+	}
+	
+	/**
+	 * Creates an Input Box SUIWindow and adds a handler that will return text inputed into text box with the callback as the specified PyObject.
+	 * @param SUICallback Callback that will be ran when user clicks on "OK"
+	 * @return SUIWindow
+	 * @author Waverunner
+	 */
+	public SUIWindow createInputBox(int type, String title, String promptText, SWGObject owner, SWGObject rangeObject, float maxDistance, SUICallback handleFunc) {
+		SUIWindow window = createInputBox(type, title, promptText, owner, rangeObject, maxDistance);
+		Vector<String> returnParams = new Vector<String>();
+		returnParams.add("txtInput:LocalText");
+		window.addHandler(0, "", Trigger.TRIGGER_OK, returnParams, handleFunc);
 		return window;
 	}
 	

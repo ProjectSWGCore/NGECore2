@@ -26,12 +26,33 @@ public class ObjControllerOpcodes {
 	public static final int DATA_TRANSFORM = 0x71000000;
 	public static final int DATA_TRANSFORM_WITH_PARENT = 0xF1000000;
 	public static final int COMMAND_QUEUE_ENQUEUE = 0x16010000;
-	public static final int HOVER_TARGET = 0x26010000; // lookAtTarget
-	public static final int TARGET_UPDATE = 0xC5040000; // intendedTarget
+	public static final int COMMAND_QUEUE_REMOVE = 0x17010000;
+	public static final int lookAtTarget = 0x26010000;
+	public static final int intendedTarget = 0xC5040000;
 	public static final int OBJECT_MENU_REQUEST = 0x46010000;
 	public static final int SECURE_TRADE = 0x15010000;
 	public static final int BUFF_BUILDER_CHANGE = 0x5A020000;
+	public static final int BUFF_BUILDER_END = 0x5B020000;
 	public static final int MISSION_LIST_REQUEST = 0xF5000000;
 	public static final int ChangeRoleIconChoice = 0x4D040000;
+	public static final int IMAGE_DESIGN_CHANGE = 0x38020000;
+	public static final int IMAGE_DESIGN_END = 0x39020000;
+	public static final int NPC_CONVERSATION_MESSAGE = 0xDF000000;
+	public static final int START_NPC_CONVERSATION = 0xDD000000;
+	public static final int STOP_NPC_CONVERSATION = 0xDE000000;
+	public static final int NPC_CONVERSATION_OPTIONS = 0xE0000000;
+	public static final int SET_PROFESSION_TEMPLATE = 0x5C040000;
+	public static final int RESOURCE_EMPTY_HOPPER = 0xED000000;
+	public static final int DRAFT_SCHEMATICS = 0x0102;
+	public static final int DRAFT_SLOTS = 0x0103;
+	public static final int CRAFT_EXPERIMENT = 0x0106;
+	public static final int CRAFT_FILLSLOT = 0x7010000;
+	public static final int CRAFT_EMPTYSLOT = 0x8010000;
+	public static final int CRAFT_ACKNOWLEDGE = 0x010C;
+	public static final int CRAFT_CUSTOMIZATION = 0x5a010000;
+	public static final int NEXT_CRAFTING_STAGE_RESULT = 0x01BE;
+	public static final int DRAFT_SLOTS_QUERY_RESPONSE = 0x01BF;
+	public static final int RESOURCE_WEIGHTS = 0x0207;
+
 	
 }

@@ -29,7 +29,10 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import resources.objects.intangible.IntangibleObject;
+import resources.objects.resource.ResourceContainerObject;
+import resources.objects.tool.SurveyTool;
 import resources.objects.waypoint.WaypointObject;
+import resources.objects.creature.CreatureObject;
 
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
@@ -41,7 +44,7 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent(version=3)
+@Persistent(version=13)
 public class PlayerObject extends IntangibleObject {
 	
 	// PLAY 3
@@ -52,11 +55,13 @@ public class PlayerObject extends IntangibleObject {
 	private List<Integer> flagsList = new ArrayList<Integer>();
 	private List<Integer> profileList = new ArrayList<Integer>();
 	private List<String> titleList = new ArrayList<String>();
-	private int bornDate = 0;
+	private long bornDate = 0;
 	private int totalPlayTime = 0;
 	private byte[] collections = new byte[] { };
 	private int highestSetBit = 0;
 	private int flagBitmask = 0;
+	private boolean showHelmet = true;
+	private boolean showBackpack = true;
 	
 	// PLAY 6
 	
@@ -116,6 +121,13 @@ public class PlayerObject extends IntangibleObject {
 	
 	private int jediState = 0; 			// unused in NGE
 	
+	private String biography = "";
+	private String spouse;
+	private String holoEmote;
+	private int holoEmoteUses;
+	
+	private int lotsRemaining = 10;
+	
 	@NotPersistent
 	private PlayerMessageBuilder messageBuilder;
 	
@@ -123,6 +135,17 @@ public class PlayerObject extends IntangibleObject {
 	private long lastPlayTimeUpdate = System.currentTimeMillis();
 	
 	private Map<String, Integer> factionStandingMap = new TreeMap<String, Integer>();
+	
+	private WaypointObject lastSurveyWaypoint;
+	private SurveyTool lastUsedSurveyTool;
+	private ResourceContainerObject recentContainer;
+	
+	private byte godLevel = 0;
+	
+	private List<Integer> chatChannels = new ArrayList<Integer>();
+	
+	@NotPersistent
+	private boolean callingCompanion = false;
 	
 	public PlayerObject() {
 		super();
@@ -173,13 +196,13 @@ public class PlayerObject extends IntangibleObject {
 		return profileList;
 	}
 
-	public int getBornDate() {
+	public long getBornDate() {
 		synchronized(objectMutex) {
 			return bornDate;
 		}
 	}
 
-	public void setBornDate(int bornDate) {
+	public void setBornDate(long bornDate) {
 		synchronized(objectMutex) {
 			this.bornDate = bornDate;
 		}
@@ -195,7 +218,8 @@ public class PlayerObject extends IntangibleObject {
 		synchronized(objectMutex) {
 			this.totalPlayTime = totalPlayTime;
 		}
-		notifyObservers(messageBuilder.buildTotalPlayTimeDelta(totalPlayTime), true);
+		//notifyObservers(messageBuilder.buildTotalPlayTimeDelta(totalPlayTime), true);
+		getContainer().getClient().getSession().write(messageBuilder.buildTotalPlayTimeDelta(totalPlayTime));
 	}
 
 	public String getHome() {
@@ -227,11 +251,15 @@ public class PlayerObject extends IntangibleObject {
 		synchronized(objectMutex) {
 			xpExists = xpList.containsKey(type);
 			xpList.put(type, amount);
+			//Console.println("Put " + type + " exp of " + amount + " in the map.");
+			//Console.println("Map is now: " + xpList.get(type).intValue());
 		}
 		
 		if (getContainer() != null && getContainer().getClient() != null && getContainer().getClient().getSession() != null) {
 			getContainer().getClient().getSession().write(messageBuilder.buildXPListDelta(type, amount, xpExists));
+			((CreatureObject) getContainer()).setXpBarValue(amount);
 		}
+		
 	}
 	
 	public int getXpListUpdateCounter() {
@@ -340,6 +368,9 @@ public class PlayerObject extends IntangibleObject {
 	public void setProfessionWheelPosition(String professionWheelPosition) {
 		synchronized(objectMutex) {
 			this.professionWheelPosition = professionWheelPosition;
+		}
+		if (getContainer() != null && getContainer().getClient() != null && getContainer().getClient().getSession() != null) {
+			getContainer().getClient().getSession().write(messageBuilder.buildProfessionWheelPositionDelta(professionWheelPosition));
 		}
 	}
 
@@ -596,13 +627,12 @@ public class PlayerObject extends IntangibleObject {
 		
 		if(destination == null || destination.getSession() == null)
 			return;
-		
-		//if(destination.getParent().getObjectID() == getParentId()) {				// only send to self
-			destination.getSession().write(messageBuilder.buildBaseline3());
-			destination.getSession().write(messageBuilder.buildBaseline6());
+		destination.getSession().write(messageBuilder.buildBaseline3());
+		destination.getSession().write(messageBuilder.buildBaseline6());
+		if(destination.getParent().getObjectID() == getParentId()) {				// only send to self
 			destination.getSession().write(messageBuilder.buildBaseline8());
 			destination.getSession().write(messageBuilder.buildBaseline9());
-		//}
+		}
 
 
 	}
@@ -664,6 +694,28 @@ public class PlayerObject extends IntangibleObject {
 		}
 	}
 	
+	public String getBiography() {
+		return biography;
+	}
+
+	public void setBiography(String biography) {
+		synchronized(objectMutex) {
+			this.biography = biography;
+		}
+	}
+
+	public String getSpouseName() {
+		synchronized(objectMutex) {
+			return spouse;
+		}
+	}
+
+	public void setSpouseName(String spouse) {
+		synchronized(objectMutex) {
+			this.spouse = spouse;
+		}
+	}
+
 	public int getFlagBitmask() {
 		synchronized(objectMutex) {
 			return flagBitmask;
@@ -705,6 +757,146 @@ public class PlayerObject extends IntangibleObject {
 		synchronized(objectMutex) {
 			return ((flagBitmask & flags) == flags);
 		}
+	}
+
+	public String getHoloEmote() {
+		return holoEmote;
+	}
+
+	public void setHoloEmote(String holoEmote) {
+		this.holoEmote = holoEmote;
+	}
+
+	public int getHoloEmoteUses() {
+		return holoEmoteUses;
+	}
+
+	public void setHoloEmoteUses(int holoEmoteUses) {
+		this.holoEmoteUses = holoEmoteUses;
+	}
+
+	public boolean isShowHelmet() {
+		return showHelmet;
+	}
+
+	public void setShowHelmet(boolean showHelmet) {
+		synchronized(objectMutex) {
+			this.showHelmet = showHelmet;
+		}
+		
+		if (getContainer() != null) {
+			getContainer().getClient().getSession().write(messageBuilder.buildShowHelmetDelta(showHelmet));
+		}
+	}
+
+	public boolean isShowBackpack() {
+		return showBackpack;
+	}
+
+	public void setShowBackpack(boolean showBackpack) {
+		synchronized(objectMutex) {
+			this.showBackpack = showBackpack;
+		}
+		
+		if (getContainer() != null) {
+			getContainer().getClient().getSession().write(messageBuilder.buildShowBackpackDelta(showBackpack));
+		}
+	}
+	
+	public WaypointObject getLastSurveyWaypoint() {
+		return lastSurveyWaypoint;
+	}
+
+	public void setLastSurveyWaypoint(WaypointObject lastSurveyWaypoint) {
+		this.lastSurveyWaypoint = lastSurveyWaypoint;
+	}
+	
+	public SurveyTool getLastUsedSurveyTool() {
+		synchronized(objectMutex) {
+			return this.lastUsedSurveyTool;
+		}
+	}
+	
+	public void setLastUsedSurveyTool(SurveyTool surveyTool) {
+		synchronized(objectMutex) {
+			this.lastUsedSurveyTool = surveyTool;
+		}
+	}
+
+	public ResourceContainerObject getRecentContainer() {
+		return recentContainer;
+	}
+
+	public void setRecentContainer(ResourceContainerObject recentContainer) {
+		this.recentContainer = recentContainer;
+	}
+	
+	public void setLotsRemaining(int amount)
+	{
+		this.lotsRemaining = amount;
+	}
+	
+	public boolean addLots(int amount)
+	{
+		this.lotsRemaining += amount;
+		return true;
+	}
+	
+	public boolean deductLots(int amount)
+	{
+		if(this.lotsRemaining - amount >= 0)
+		{
+			this.lotsRemaining -= amount;
+			return true;
+		}
+		return false;
+	}
+	
+	public int getLotsRemaining()
+	{
+		return this.lotsRemaining;
+	}
+	
+	public byte getGodLevel() {
+		return godLevel;
+	}
+	
+	public void setGodLevel(int godLevel) {
+		this.godLevel = (byte) godLevel;
+		
+		if (getContainer() != null) {
+			getContainer().getClient().getSession().write(messageBuilder.buildGodLevelDelta((byte) godLevel));
+		}
+	}
+	
+	public List<Integer> getJoinedChatChannels() {
+		return chatChannels;
+	}
+	
+	public void addChannel(int roomId) {
+		chatChannels.add(roomId);
+	}
+	
+	public void removeChannel(int roomId) {
+		if (chatChannels.contains(roomId))
+			chatChannels.remove(roomId);
+	}
+	
+	public boolean isMemberOfChannel(int roomId) {
+		if (chatChannels.contains(roomId)) {
+			System.out.println("Member of the channel!");
+			return true;
+		}
+		System.out.println("Not a Member of the channel!");
+		return false;
+	}
+	
+	public boolean isCallingCompanion() {
+		return callingCompanion;
+	}
+	
+	public void setCallingCompanion(boolean callingCompanion) {
+		this.callingCompanion = callingCompanion;
 	}
 	
 }

@@ -25,12 +25,14 @@ import java.nio.ByteOrder;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import main.NGECore;
@@ -45,7 +47,6 @@ import protocol.swg.ConnectionServerLagResponse;
 import protocol.swg.GalaxyLoopTimesResponse;
 import protocol.swg.GameServerLagResponse;
 import protocol.swg.HeartBeatMessage;
-
 import engine.clients.Client;
 import engine.resources.database.DatabaseConnection;
 import engine.resources.scene.Point3D;
@@ -56,6 +57,7 @@ import resources.common.collidables.AbstractCollidable;
 import resources.datatables.PlayerFlags;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
+import services.chat.ChatRoom;
 
 @SuppressWarnings("unused")
 
@@ -64,7 +66,7 @@ public class ConnectionService implements INetworkDispatch {
 	private NGECore core;
 	private DatabaseConnection databaseConnection;
 	private DatabaseConnection databaseConnection2;
-	
+	private int maxNumberOfCharacters;
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
 	public ConnectionService(final NGECore core) {
@@ -72,6 +74,7 @@ public class ConnectionService implements INetworkDispatch {
 		this.core = core;
 		this.databaseConnection = core.getDatabase1();
 		this.databaseConnection2 = core.getDatabase2();
+		this.maxNumberOfCharacters = core.getConfig().getInt("MAXNUMBEROFCHARACTERS");
 		
 		scheduler.scheduleAtFixedRate(new Runnable() {
 			
@@ -79,8 +82,8 @@ public class ConnectionService implements INetworkDispatch {
 				synchronized(core.getActiveConnectionsMap()) {
 					for(Client c : core.getActiveConnectionsMap().values()) {
 						if(c.getParent() != null) {
-							if ((System.currentTimeMillis() - c.getSession().getLastReadTime()) > 300000 && c.getSession().getAttribute("disconnectTask") == null) {
-								disconnect(c.getSession());
+							if ((System.currentTimeMillis() - c.getSession().getLastReadTime()) > 300000) {
+								disconnect(c);
 							}
 						}
 					}
@@ -125,7 +128,7 @@ public class ConnectionService implements INetworkDispatch {
 		            	client.setSessionKey(clientIdMsg.getSessionKey());
 		            	client.setGM(core.loginService.checkForGmPermission((int) resultSet.getLong("accountId")));
 		            	AccountFeatureBits accountFeatureBits = new AccountFeatureBits();
-		            	ClientPermissionsMessage clientPermissionsMessage = new ClientPermissionsMessage(2 - core.characterService.getNumberOfCharacters((int) resultSet.getLong("accountId")));
+		            	ClientPermissionsMessage clientPermissionsMessage = new ClientPermissionsMessage(maxNumberOfCharacters - core.characterService.getNumberOfCharacters((int) resultSet.getLong("accountId")));
 		            	session.write(new HeartBeatMessage().serialize());
 		            	session.write(accountFeatureBits.serialize());
 		            	session.write(clientPermissionsMessage.serialize());
@@ -172,41 +175,61 @@ public class ConnectionService implements INetworkDispatch {
 			}
 			
 		});
+		
+		swgOpcodes.put(Opcodes.ConnectPlayerMessage, new INetworkRemoteEvent() {
 
+			@Override
+			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
+				//ConnectPlayerResponseMessage
+			}
+			
+		});
 		
 	}
 	
-	public void disconnect(IoSession session) {
-		Client client = core.getClient(session);
-
-		if(client == null)
-			return;
-		
-		if(client.getParent() == null)
+	public void disconnect(Client client) {
+		//Client client = core.getClient(session);
+		IoSession session = client.getSession();
+		if(session == null || client.getParent() == null)
 			return;
 		
 		CreatureObject object = (CreatureObject) client.getParent();
+		
 		object.setInviteCounter(0);
 		object.setInviteSenderId(0);
 		object.setInviteSenderName("");
-		core.groupService.handleGroupDisband(object);
+		
+		if(object.getAttachment("inspireDuration") != null)
+			object.setAttachment("inspireDuration", null);
+		
+		if(object.getPerformanceListenee() != null) {
+			object.getPerformanceListenee().removeSpectator(object);
+			object.setPerformanceListenee(null);
+		}
+		
+		if(object.getPerformanceWatchee() != null) {
+			object.getPerformanceWatchee().removeSpectator(object);
+			object.setPerformanceWatchee(null);
+		}
+		
+		core.groupService.handleGroupDisband(object, false);
+		
+		if (core.instanceService.isInInstance(object)) {
+			core.instanceService.remove(core.instanceService.getActiveInstance(object), object);
+		}
+		
 		object.setClient(null);
+		
 		PlayerObject ghost = (PlayerObject) object.getSlottedObject("ghost");
 		
 		if(ghost == null)
 			return;
 		
-		if(object.getGroupId() != 0)
-			core.groupService.handleGroupDisband(object);
-		
 		Point3D objectPos = object.getWorldPosition();
 		
 		List<AbstractCollidable> collidables = core.simulationService.getCollidables(object.getPlanet(), objectPos.x, objectPos.z, 512);
 
-		for(AbstractCollidable collidable : collidables) {
-			collidables.remove(object);
-		}
-		
+		collidables.forEach(c -> c.removeCollidedObject(object));		
 		
 		if (ghost != null) {
 			String objectShortName = object.getCustomName();
@@ -217,31 +240,47 @@ public class ConnectionService implements INetworkDispatch {
 			}
 			
 			core.chatService.playerStatusChange(objectShortName, (byte) 0);
+			
+			for (Integer roomId : ghost.getJoinedChatChannels()) {
+				ChatRoom room = core.chatService.getChatRoom(roomId.intValue());
+				
+				if (room != null) { core.chatService.leaveChatRoom(object, roomId.intValue()); } 
+				// work-around for any channels that may have been deleted, or only spawn on server startup, that were added to the joined channels
+				else { ghost.removeChannel(roomId); } 
+			}
 		}
 				
 		long parentId = object.getParentId();
 		
-		if(object.getContainer() == null) {
+		/*if(object.getContainer() == null) {
 			boolean remove = core.simulationService.remove(object, object.getPosition().x, object.getPosition().z);
 			if(remove)
 				System.out.println("Successful quadtree remove");
 		} else {
 			object.getContainer()._remove(object);
 			object.setParentId(parentId);
-		}
+		}*/
 
 		
-		HashSet<Client> oldObservers = new HashSet<Client>(object.getObservers());
+		/*HashSet<Client> oldObservers = new HashSet<Client>(object.getObservers());
 		for(Iterator<Client> it = oldObservers.iterator(); it.hasNext();) {
 			Client observerClient = it.next();
 			if(observerClient.getParent() != null && !(observerClient.getSession() == session)) {
 				observerClient.getParent().makeUnaware(object);
 			}
-		}
+		}*/
+		
 		ghost.toggleFlag(PlayerFlags.LD);
 		
+		object.setPerformanceListenee(null);
+		object.setPerformanceWatchee(null);
 		object.setAttachment("disconnectTask", null);
-		object.setAttachment("buffWorkshop", null);
+		
+		List<ScheduledFuture<?>> schedulers = core.playerService.getSchedulers().get(object.getObjectID());
+		schedulers.forEach(s -> s.cancel(true));
+		schedulers.clear();
+		core.playerService.getSchedulers().remove(object.getObjectID());
+		
 		object.createTransaction(core.getCreatureODB().getEnvironment());
 		core.getCreatureODB().put(object, Long.class, CreatureObject.class, object.getTransaction());
 		object.getTransaction().commitSync();

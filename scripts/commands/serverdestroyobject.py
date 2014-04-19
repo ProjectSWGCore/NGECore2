@@ -22,7 +22,7 @@ def run(core, actor, target, commandString):
 		Console.println("Doesn't have permission!")
 		return
 	
-	parent.remove(target)
+	#parent.remove(target)
 	core.objectService.destroyObject(target)
 	return
 	

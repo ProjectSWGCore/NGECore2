@@ -23,10 +23,9 @@ def run(core, actor, target, commandString):
 		actor.setStateBitmask(32768)
 		actor.setTurnRadius(0)
 		return
-
+	# sit w/o chair
 	actor.setPosture(8)
 	actor.setSpeedMultiplierBase(0)
 	actor.setTurnRadius(0)
-
 	return
 	

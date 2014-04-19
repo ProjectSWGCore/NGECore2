@@ -30,7 +30,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import resources.common.FileUtilities;
 import resources.common.collidables.CollidableCircle;
-import resources.objects.building.BuildingObject;
 
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
@@ -186,28 +185,25 @@ public class TerrainService {
 		for(final Planet planet : planets) {
 			
 			if(planet.getSnapshotVisitor() != null) {
-				Thread thread = new Thread(new Runnable() {
+				Thread thread = new Thread(() -> {
 
-					@Override
-					public void run() {
-						Config config = new Config();
-						config.setFilePath("options.cfg");
-						boolean loaded = config.loadConfigFile();
-						
-						if (loaded && config.getInt("LOAD.SNAPSHOT_OBJECTS") > 0) {
-							try {							
-								core.objectService.loadSnapshotObjects(planet);
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
+					Config config = new Config();
+					config.setFilePath("options.cfg");
+					boolean loaded = config.loadConfigFile();
+					
+					if (loaded && config.getInt("LOAD.SNAPSHOT_OBJECTS") > 0) {
+						try {							
+							core.objectService.loadSnapshotObjects(planet);
+						} catch (Exception e) {
+							e.printStackTrace();
 						}
-						
-						if (loaded && config.getInt("LOAD.BUILDOUT_OBJECTS") > 0) {
-							try {							
-								core.objectService.loadBuildoutObjects(planet);
-							} catch (InstantiationException | IllegalAccessException e) {
-								e.printStackTrace();
-							}
+					}
+					
+					if (loaded && config.getInt("LOAD.BUILDOUT_OBJECTS") > 0) {
+						try {							
+							core.objectService.loadBuildoutObjects(planet);
+						} catch (InstantiationException | IllegalAccessException e) {
+							e.printStackTrace();
 						}
 					}
 					
@@ -221,31 +217,45 @@ public class TerrainService {
 		// wait for threads to finish loading
 		for(Planet planet : planets) {
 			try {
-				threadMap.get(planet).join();
+				if(threadMap.get(planet) != null)
+					threadMap.get(planet).join();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
 		
-		synchronized(core.objectService.getObjectList()) {
+		/*synchronized(core.objectService.getObjectList()) {
 		
 			for(SWGObject object : core.objectService.getObjectList().values()) {
 				
-				if(!(object instanceof BuildingObject))
+				if(!(object instanceof BuildingObject) || object.isInSnapshot())
 					continue;
 				
 				BuildingObject building = (BuildingObject) object;
-				
+				final Set<CreatureObject> creatures = new HashSet<CreatureObject>();
+				building.viewChildren(building, true, true, new Traverser() {
+
+					@Override
+					public void process(SWGObject obj) {
+						if(obj instanceof CreatureObject)
+							creatures.add((CreatureObject) obj);
+					}
+					
+				});
+				for(CreatureObject creature : creatures) {
+					long parentId = creature.getParentId();
+					creature.getContainer().remove(creature);
+					creature.setParentId(parentId);
+				}
 				if(building.getTransaction() == null)
 					continue;
-				
 				building.createTransaction(core.getBuildingODB().getEnvironment());
 				core.getBuildingODB().put(building, Long.class, BuildingObject.class, building.getTransaction());
 				building.getTransaction().commitSync();
 				
 			}
 			
-		}
+		}*/
 		
 	}
 	
@@ -264,6 +274,15 @@ public class TerrainService {
 		
 		return true;
 		
+	}
+
+	public boolean isWater(int planetId, Point3D worldPosition) {
+		if(getPlanetByID(planetId) == null)
+			return false;
+		
+		Planet planet = getPlanetByID(planetId);
+
+		return planet.getTerrainVisitor().isWater(worldPosition.x, worldPosition.z);
 	}
 	
 	

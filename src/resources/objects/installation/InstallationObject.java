@@ -21,11 +21,23 @@
  ******************************************************************************/
 package resources.objects.installation;
 
-import com.sleepycat.persist.model.Persistent;
+import com.sleepycat.persist.model.Entity;
 
+import engine.clients.Client;
+import engine.resources.scene.Planet;
+import engine.resources.scene.Point3D;
+import engine.resources.scene.Quaternion;
 import resources.objects.tangible.TangibleObject;
 
-@Persistent(version=0)
+@Entity(version=0)
 public class InstallationObject extends TangibleObject {
-
+	
+	public InstallationObject(long objectID, Planet planet, String template, Point3D position, Quaternion orientation){
+		super(objectID, planet, template, position, orientation);		
+	}	
+	
+	@Override
+	public void sendBaselines(Client destination) {
+		
+	}
 }

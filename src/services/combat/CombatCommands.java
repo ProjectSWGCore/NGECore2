@@ -29,6 +29,8 @@ public class CombatCommands {
 		
 		// Auto Attacks
 		
+		core.commandService.registerCombatCommand("creatureRangedAttack");
+		core.commandService.registerCombatCommand("creatureMeleeAttack").setDefaultAnimations(new String[] { "creature_attack_light" });
 		core.commandService.registerCombatCommand("rangedshotrifle");
 		core.commandService.registerCombatCommand("rangedshotpistol");
 		core.commandService.registerCombatCommand("rangedshotlightrifle");
@@ -130,6 +132,7 @@ public class CombatCommands {
 		core.commandService.registerCombatCommand("bh_sh_1");
 		core.commandService.registerCombatCommand("bh_sh_2");
 		core.commandService.registerCombatCommand("bh_sh_3");
+		core.commandService.registerCommand("bh_shields_1");
 		
 		// Jedi
 		

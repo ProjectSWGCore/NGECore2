@@ -24,11 +24,18 @@ package resources.objects;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Spliterator;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
 
 import org.apache.mina.core.buffer.IoBuffer;
+import org.python.google.common.collect.Lists;
 
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
@@ -383,6 +390,52 @@ public class SWGList<E> implements List<E> {
 		for (byte[] queued : data) buffer.put(queued);
 		
 		messageBuilder.sendListDelta(viewType, updateType, buffer);
+	}
+
+	@Override
+	public boolean removeIf(Predicate<? super E> filter) {
+		return false;
+	}
+	
+	public List<E> reverseGet()
+	{     
+	    return Lists.reverse(list);
+	}
+
+	@Override
+	public Stream<E> stream() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Stream<E> parallelStream() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void forEach(Consumer<? super E> action) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void replaceAll(UnaryOperator<E> operator) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void sort(Comparator<? super E> c) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public Spliterator<E> spliterator() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }

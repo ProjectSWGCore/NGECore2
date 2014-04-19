@@ -21,28 +21,42 @@
  ******************************************************************************/
 package services.ai.states;
 
+import services.ai.AIActor;
+
 public class RetreatState extends AIState {
 
 	@Override
-	public byte onEnter() {
-		// TODO Auto-generated method stub
-		return 0;
+	public byte onEnter(AIActor actor) {
+		/*synchronized(actor.getDamageMap()) {
+			for(CreatureObject defender : actor.getDamageMap().keySet()) {
+				actor.removeDefender(defender);
+			}
+		}*/
+		actor.setFollowObject(null);
+		actor.scheduleMovement();
+		return StateResult.UNFINISHED;
 	}
 
 	@Override
-	public byte onExit() {
+	public byte onExit(AIActor actor) {
 		// TODO Auto-generated method stub
-		return 0;
+		return StateResult.FINISHED;
 	}
 
 	@Override
-	public byte move() {
-		// TODO Auto-generated method stub
-		return 0;
+	public byte move(AIActor actor) {
+		actor.setNextPosition(actor.getSpawnPosition());
+		doMove(actor);
+		if(actor.getCreature().getWorldPosition().getDistance(actor.getSpawnPosition()) > 3) {
+			actor.scheduleMovement();
+		} else {
+			return StateResult.IDLE;
+		}
+		return StateResult.UNFINISHED;
 	}
 
 	@Override
-	public byte recover() {
+	public byte recover(AIActor actor) {
 		// TODO Auto-generated method stub
 		return 0;
 	}

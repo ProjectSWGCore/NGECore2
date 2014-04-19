@@ -36,16 +36,14 @@ import resources.objects.creature.CreatureObject;
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
 
-import engine.clientdata.ClientFileManager;
-import engine.clientdata.visitors.DatatableVisitor;
 import engine.resources.common.CRC;
 
-@Persistent(version=8)
+@Persistent(version=10)
 public class Buff implements IDelta {
 	
 	@NotPersistent
 	private SimpleBufferAllocator bufferPool = new SimpleBufferAllocator();
-	private String group1;
+	private String group1, group2;
 	private int priority;
 	private float duration;
 	private String buffName;
@@ -69,12 +67,43 @@ public class Buff implements IDelta {
 	private ScheduledFuture<?> removalTask;
 	private int stacks = 1;
 	private long groupBufferId;
+	private int buffCRC;
 	
-	public Buff(String buffName, long ownerId) {
+	public Buff(Buff baseBuff, long ownerId) {
+		this.buffName = baseBuff.getBuffName();
+		this.buffCRC = baseBuff.getBuffCRC();
+		this.group1 = baseBuff.getGroup1();
+		this.group2 = baseBuff.getGroup2();
+		this.priority = baseBuff.getPriority();
+		this.duration = baseBuff.getDuration();
+		this.effect1Name = baseBuff.getEffect1Name();
+		this.effect1Value = baseBuff.getEffect1Value();
+		this.effect2Name = baseBuff.getEffect2Name();
+		this.effect2Value = baseBuff.getEffect2Value();
+		this.effect3Name = baseBuff.getEffect3Name();
+		this.effect3Value = baseBuff.getEffect3Value();
+		this.effect4Name = baseBuff.getEffect4Name();
+		this.effect4Value = baseBuff.getEffect4Value();
+		this.effect5Name = baseBuff.getEffect5Name();
+		this.effect5Value = baseBuff.getEffect5Value();
+		this.callback = baseBuff.getCallback();
+		this.particleEffect = baseBuff.getParticleEffect();
+		this.isDebuff = baseBuff.isDebuff();
+		this.removeOnDeath = baseBuff.isRemoveOnDeath();
+		this.isRemovableByPlayer = baseBuff.isRemovableByPlayer();
+		this.maxStacks = baseBuff.getMaxStacks();
+		this.isPersistent = baseBuff.isPersistent();
+		this.removeOnRespec = baseBuff.isRemoveOnRespec();
+		this.aiRemoveOnEndCombat = baseBuff.isAiRemoveOnEndCombat();
+		this.decayOnPvPDeath = baseBuff.isDecayOnPvPDeath();
+	}
+	
+	/*public Buff(String buffName, long ownerId) {
 		
 		this.buffName = buffName;
 		this.ownerId = ownerId;
-		
+		this.buffCRC = CRC.StringtoCRC(buffName);
+
 		DatatableVisitor visitor;
 		
 		try {
@@ -86,6 +115,7 @@ public class Buff implements IDelta {
 				if(((String) visitor.getObject(i, 0)).equalsIgnoreCase(buffName)) {
 					
 					group1 = (String) visitor.getObject(i, 1);
+					group2 = (String) visitor.getObject(i, 2);
 					priority = (int) visitor.getObject(i, 4);
 					duration = (Float) visitor.getObject(i, 6);
 					effect1Name = (String) visitor.getObject(i, 7);
@@ -116,12 +146,8 @@ public class Buff implements IDelta {
 		} catch (InstantiationException | IllegalAccessException e) {
 			e.printStackTrace();
 		}
-		
-		
+	}*/
 
-		
-	}
-	
 	public Buff() { }
 
 	@Override
@@ -156,7 +182,7 @@ public class Buff implements IDelta {
 		this.group1 = group1;
 	}
  
-	public float getPriority() {
+	public int getPriority() {
 		return priority;
 	}
 	
@@ -429,7 +455,7 @@ public class Buff implements IDelta {
 	}
 	
 	public boolean isGroupBuff() {
-		return effect1Name.equals("group");
+		return effect1Name == null ? false : effect1Name.equals("group");
 	}
 
 	public long getGroupBufferId() {
@@ -438,6 +464,22 @@ public class Buff implements IDelta {
 
 	public void setGroupBufferId(long groupBufferId) {
 		this.groupBufferId = groupBufferId;
+	}
+
+	public String getGroup2() {
+		return group2;
+	}
+
+	public void setGroup2(String group2) {
+		this.group2 = group2;
+	}
+
+	public int getBuffCRC() {
+		return buffCRC;
+	}
+	
+	public void setBuffCRC(int buffCRC) {
+		this.buffCRC = buffCRC;
 	}
 
 }

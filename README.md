@@ -12,8 +12,8 @@ The Engine(NGEngine) is a closed source library and is only licensed for use wit
 Requirements for Building the Core:
 ======== 
 
-- JDK 7
-- An IDE like Eclipse Juno
+- JDK 8
+- A Java 8 compatible IDE like Eclipse Kepler (https://wiki.eclipse.org/JDT/Eclipse_Java_8_Support_For_Kepler)
 - A valid Star Wars Galaxies Installation with the final patch
 - Postgresql server (www.postgresql.org)
 - TRE Explorer(http://forum.modsource.org/index.php?PHPSESSID=bf02fd8244123807f4716c1686abb59f&action=dlattach;topic=33.0;attach=49)

@@ -28,9 +28,8 @@ import java.util.Map;
 import resources.objects.Buff;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
-
+import services.chat.ChatRoom;
 import main.NGECore;
-
 import engine.clients.Client;
 import engine.resources.objects.SWGObject;
 import engine.resources.service.INetworkDispatch;
@@ -153,8 +152,14 @@ public class GroupService implements INetworkDispatch {
 			invited.setGroupId(group.getObjectID());
 			addGroupBuffsToMember(group, leader);
 			addGroupBuffsToMember(group, invited);
-			return;
 			
+			core.chatService.createChatRoom("", "group." + group.getObjectID(), leader.getCustomName(), false);
+			ChatRoom groupChat = core.chatService.createChatRoom("", "group." + group.getObjectID() + ".GroupChat", leader.getCustomName(), false);
+			group.setChatRoomId(groupChat.getRoomId());
+			groupChat.setVisible(false);
+			core.chatService.joinChatRoom(leader.getCustomName(), groupChat.getRoomId());
+			core.chatService.joinChatRoom(invited.getCustomName(), groupChat.getRoomId());
+			return;
 		}
 		
 		GroupObject group = (GroupObject) core.objectService.getObject(leader.getGroupId());
@@ -166,6 +171,7 @@ public class GroupService implements INetworkDispatch {
 			invited.setGroupId(group.getObjectID());	
 			invited.sendSystemMessage("@group:joined_self", (byte) 0);
 			addGroupBuffsToMember(group, invited);
+			core.chatService.joinChatRoom(invited.getCustomName(), group.getChatRoomId(), true);
 			
 		} else if(group.getMemberList().size() >= 8) {
 			
@@ -187,9 +193,8 @@ public class GroupService implements INetworkDispatch {
 		for(SWGObject otherMember : group.getMemberList()) {
 			if(otherMember != member) {
 				for(Buff buff : ((CreatureObject) otherMember).getBuffList().get()) {
-					if(buff.isGroupBuff()) {
-						Buff newBuff = core.buffService.doAddBuff(member, buff.getBuffName());
-						newBuff.setGroupBufferId(buff.getGroupBufferId());
+					if(buff.isGroupBuff() && otherMember.getPlanet() == member.getPlanet() && otherMember.getPosition().getDistance2D(member.getWorldPosition()) <= 80) {
+						core.buffService.addBuffToCreature((CreatureObject) otherMember, buff.getBuffName(), member);
 					}
 				}
 				return;
@@ -206,7 +211,7 @@ public class GroupService implements INetworkDispatch {
 		}
 	}
 	
-	public void handleGroupDisband(CreatureObject creature) {
+	public void handleGroupDisband(CreatureObject creature, boolean destroy) {
 		
 		if(creature.getGroupId() == 0)
 			return;
@@ -220,7 +225,7 @@ public class GroupService implements INetworkDispatch {
 		
 		List<SWGObject> memberList = new ArrayList<SWGObject>(group.getMemberList());
 		
-		if(group.getGroupLeader() != creature && group.getMemberList().size() > 2) {
+		if(group.getGroupLeader() != creature || !destroy || memberList.size() > 2) {
 			
 			group.removeMember(creature);
 			creature.setInviteCounter(creature.getInviteCounter() + 1);
@@ -229,17 +234,19 @@ public class GroupService implements INetworkDispatch {
 			creature.updateGroupInviteInfo();
 			creature.setGroupId(0);
 			creature.makeUnaware(group);
+			core.chatService.leaveChatRoom(creature, group.getChatRoomId());
 			creature.sendSystemMessage("You have left the group.", (byte) 0);
 
 			for(SWGObject member : memberList) {
-				
 				CreatureObject creature2 = (CreatureObject) member;
 				creature2.sendSystemMessage(creature.getCustomName() + " has left the group.", (byte) 0);
-				
 			}
 			
 			removeGroupBuffs(creature);
 			
+			if (group.getMemberList().size() == 0) // ensure that there are no empty groups just incase..
+				core.objectService.destroyObject(group.getObjectID());
+
 		} else {
 			
 			for(SWGObject member : memberList) {
@@ -251,22 +258,21 @@ public class GroupService implements INetworkDispatch {
 				creature2.setInviteSenderName("");
 				creature2.updateGroupInviteInfo();
 				creature2.setGroupId(0);
-				
+
 				creature2.makeUnaware(group);
 				
+				core.chatService.leaveChatRoom(creature2, group.getChatRoomId());
 				creature2.sendSystemMessage("The group has been disbanded.", (byte) 0);
 				
 				removeGroupBuffs((CreatureObject) member);
 				
 			}
-			
+			core.chatService.getChatRooms().remove(group.getChatRoomId());
 			core.objectService.destroyObject(group.getObjectID());
-			
 		}
-		
 	}
-
-
 	
-
+	public void handleGroupDisband(CreatureObject creature) {
+		handleGroupDisband(creature, true);
+	}
 }

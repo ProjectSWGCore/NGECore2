@@ -1,11 +1,12 @@
 import sys
 
 def setup(core, actor, buff):
-	core.skillModService.addSkillMod(actor, 'movement', float(-0.5))
-	
+	return
+
+def add(core, actor, buff):
+	core.skillModService.deductSkillMod(actor, 'movement', 5)
 	return
 	
-def removeBuff(core, actor, buff):
-	core.skillModService.deductSkillMod(actor, 'movement', float(-0.5))
+def remove(core, actor, buff):
+	core.skillModService.addSkillMod(actor, 'movement', 5)
 	return
-	

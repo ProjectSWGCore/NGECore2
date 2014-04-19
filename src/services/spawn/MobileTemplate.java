@@ -21,6 +21,173 @@
  ******************************************************************************/
 package services.spawn;
 
-public class MobileTemplate {
+import java.util.Vector;
 
+import resources.datatables.Options;
+import resources.datatables.PvpStatus;
+
+public class MobileTemplate {
+	
+	private Vector<String> templates;
+	private int optionBitmask = Options.ATTACKABLE;
+	private int pvpBitmask = PvpStatus.Attackable;
+	private short level;
+	private Vector<String> attacks;
+	private String defaultAttack;
+	private int minDamage = 0;
+	private int maxDamage = 0;
+	private float attackSpeed = 0;
+	private int weaponType = 0;
+	private int difficulty = 0;
+	private int health, action;
+	private String creatureName;
+	private float scale = 1;
+	// this is a custom attack Range setting to use for large mobs like krayts
+	private int attackRange;
+	private Vector<String> weaponTemplates = new Vector<String>();
+	private Vector<WeaponTemplate> weaponTemplateVector = new Vector<WeaponTemplate>();
+
+	public Vector<String> getTemplates() {
+		return templates;
+	}
+
+	public void setTemplates(Vector<String> templates) {
+		this.templates = templates;
+	}
+
+	public int getOptionBitmask() {
+		return optionBitmask;
+	}
+
+	public void setOptionBitmask(int optionBitmask) {
+		this.optionBitmask = optionBitmask;
+	}
+
+	public int getPvpBitmask() {
+		return pvpBitmask;
+	}
+
+	public void setPvpBitmask(int pvpBitmask) {
+		this.pvpBitmask = pvpBitmask;
+	}
+
+	public short getLevel() {
+		return level;
+	}
+
+	public void setLevel(short level) {
+		this.level = level;
+	}
+
+	public Vector<String> getAttacks() {
+		return attacks;
+	}
+
+	public void setAttacks(Vector<String> attacks) {
+		this.attacks = attacks;
+	}
+
+	public int getMinDamage() {
+		return minDamage;
+	}
+
+	public void setMinDamage(int minDamage) {
+		this.minDamage = minDamage;
+	}
+
+	public int getMaxDamage() {
+		return maxDamage;
+	}
+
+	public void setMaxDamage(int maxDamage) {
+		this.maxDamage = maxDamage;
+	}
+
+	public int getDifficulty() {
+		return difficulty;
+	}
+
+	public void setDifficulty(int difficulty) {
+		this.difficulty = difficulty;
+	}
+
+	public int getHealth() {
+		return health;
+	}
+
+	public void setHealth(int health) {
+		this.health = health;
+	}
+
+	public int getAction() {
+		return action;
+	}
+
+	public void setAction(int action) {
+		this.action = action;
+	}
+
+	public String getDefaultAttack() {
+		return defaultAttack;
+	}
+
+	public void setDefaultAttack(String defaultAttack) {
+		this.defaultAttack = defaultAttack;
+	}
+
+	public String getCreatureName() {
+		return creatureName;
+	}
+
+	public void setCreatureName(String creatureName) {
+		this.creatureName = creatureName;
+	}
+
+	public float getScale() {
+		return scale;
+	}
+
+	public void setScale(float scale) {
+		this.scale = scale;
+	}
+
+	public int getAttackRange() {
+		return attackRange;
+	}
+
+	public void setAttackRange(int attackRange) {
+		this.attackRange = attackRange;
+	}
+	
+	public Vector<String> getWeaponTemplates() {
+		return weaponTemplates;
+	}
+
+	public void setWeaponTemplates(Vector<String> weaponTemplates) {
+		this.weaponTemplates = weaponTemplates;
+	}
+
+	public float getAttackSpeed() {
+		return attackSpeed;
+	}
+
+	public void setAttackSpeed(float attackSpeed) {
+		this.attackSpeed = attackSpeed;
+	}
+
+	public int getWeaponType() {
+		return weaponType;
+	}
+
+	public void setWeaponType(int weaponType) {
+		this.weaponType = weaponType;
+	}
+
+	public Vector<WeaponTemplate> getWeaponTemplateVector() {
+		return weaponTemplateVector;
+	}
+
+	public void setWeaponTemplateVector(Vector<WeaponTemplate> weaponTemplateVector) {
+		this.weaponTemplateVector = weaponTemplateVector;
+	}
 }

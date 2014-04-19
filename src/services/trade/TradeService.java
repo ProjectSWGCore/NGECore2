@@ -25,6 +25,7 @@ import resources.objects.creature.CreatureObject;
 import engine.clients.Client;
 import engine.resources.container.AllPermissions;
 import engine.resources.container.CreatureContainerPermissions;
+import engine.resources.container.CreaturePermissions;
 import engine.resources.objects.SWGObject;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
@@ -98,10 +99,13 @@ public class TradeService implements INetworkDispatch{
 					
 					// creates a new trade session for the user who sent the request. It's given the objectID 
 					// that the player wants to trade with.
-					senderClient.getSession().setAttribute("tradeSession", recieverID);
-					
-					recieverObject.sendSystemMessage(senderObject.getCustomName() + " wants to trade with you.", (byte) 0);		
-
+					if (senderObject.getCombatFlag() == 0 && recieverObject.getCombatFlag() == 0) {
+						senderClient.getSession().setAttribute("tradeSession", recieverID);
+						
+						recieverObject.sendSystemMessage(senderObject.getCustomName() + " wants to trade with you.", (byte) 0);		
+					} else {
+						senderObject.sendSystemMessage("You can't send a trade request while you or your target is in combat.", (byte) 0);
+					}
 				}
 			}
 			
@@ -202,14 +206,13 @@ public class TradeService implements INetworkDispatch{
 				}
 				
 				else {
-					if(objectToTrade.getAttributes().toString().contains("no_trade")) {
+					if(objectToTrade.getAttributes().containsKey("no_trade") || !objectToTrade.getPermissions().canRemove(client.getParent(), objectToTrade.getContainer()) || (objectToTrade.getContainer() instanceof CreatureObject)) {
 						return;
 					}
 					
 					addItemForTrade(objectToTrade, tradingWithClient);
-					System.out.println("Trading item: " + objectToTrade.getCustomName() + " detail: " + objectToTrade.getDetailFilename());
-					
-					System.out.println("tradingObjectTable: " + tradingObjectsTable.toString());
+					//System.out.println("Trading item: " + objectToTrade.getCustomName() + " detail: " + objectToTrade.getDetailFilename());
+
 					tradee.makeAware(objectToTrade);
 					AddItemMessage tradeeResponse = new AddItemMessage();
 					tradeeResponse.setTradeObjectID(tradeItemID);
@@ -314,20 +317,6 @@ public class TradeService implements INetworkDispatch{
 			}
 			
 		});
-		// not used, but just in case.... VerifyTradeMessage is sent instead when a user
-		// hits the Accept button. Can use this as an additional check if need to.
-		swgOpcodes.put(TradeOpcodes.BeginVerificationMessage, new INetworkRemoteEvent() {
-
-			@Override
-			public void handlePacket(IoSession session, IoBuffer buffer) throws Exception {
-				System.out.println("Got BeginVerificationMessage");
-				Client client = core.getClient(session);
-				client.getSession().setAttribute("tradeSessionIsVerified");
-				System.out.println("Verified client");
-
-			}
-			
-		});
 		
 		swgOpcodes.put(TradeOpcodes.VerifyTradeMessage, new INetworkRemoteEvent() {
 
@@ -341,7 +330,7 @@ public class TradeService implements INetworkDispatch{
 				
 				CreatureObject tradePartner = (CreatureObject) core.objectService.getObject(tradingWithClient);
 				CreatureObject actingTrader = (CreatureObject) client.getParent();
-				CreatureObject tradePartnerContainer = (CreatureObject) tradePartner.getContainer();
+				SWGObject tradePartnerContainer = tradePartner.getContainer();
 				
 				SWGObject tradePartnerInventory = tradePartner.getSlottedObject("inventory");
 				SWGObject actingTraderInventory = actingTrader.getSlottedObject("inventory");
@@ -405,12 +394,7 @@ public class TradeService implements INetworkDispatch{
 						actingTrader.setCashCredits(tradePartnerCredits - moneyToGive);
 						tradePartner.setCashCredits(tradePartnerCredits + moneyToGive);
 					}
-					
-					
-					System.out.println("Finished trading items/credits");
-					
 					cleanTradeSession(client, tradePartner.getClient());
-					
 				}
 				
 			}

@@ -21,30 +21,40 @@
  ******************************************************************************/
 package resources.objects.tangible;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import main.NGECore;
 import protocol.swg.ObjControllerMessage;
 import protocol.swg.PlayClientEffectObjectMessage;
 import protocol.swg.StopClientEffectObjectByLabel;
 import protocol.swg.UpdatePVPStatusMessage;
 import protocol.swg.objectControllerObjects.ShowFlyText;
-
+import resources.common.OutOfBand;
 import resources.common.RGB;
+import resources.datatables.Options;
 import resources.objects.creature.CreatureObject;
+import resources.objects.loot.LootGroup;
+import resources.visitors.IDManagerVisitor;
 
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
 
+import engine.clientdata.ClientFileManager;
 import engine.clients.Client;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent(version=0)
+@Persistent(version=11)
 public class TangibleObject extends SWGObject {
 	
 	// TODO: Thread safety
@@ -54,10 +64,13 @@ public class TangibleObject extends SWGObject {
 	protected int pvpBitmask = 0;
 	protected byte[] customization;
 	private List<Integer> componentCustomizations = new ArrayList<Integer>();
+	private Map<String, Byte> customizationVariables = new HashMap<String, Byte>();
 	protected int optionsBitmask = 0;
+	private int uses = 0;
 	private int maxDamage = 1000;
 	private boolean staticObject = true;
-	protected String faction = "neutral"; // Says you're "Imperial Special Forces" if it's 0 for some reason
+	protected String faction = ""; // Says you're "Imperial Special Forces" if it's 0 for some reason
+	protected int factionStatus = 0;
 	@NotPersistent
 	private Vector<TangibleObject> defendersList = new Vector<TangibleObject>();	// unused in packets but useful for the server
 	@NotPersistent
@@ -65,6 +78,27 @@ public class TangibleObject extends SWGObject {
 	
 	private int respawnTime = 0;
 	private Point3D spawnCoordinates = new Point3D(0, 0, 0);
+	
+	//private TreeSet<TreeMap<String,Integer>> lootSpecification = new TreeSet<TreeMap<String,Integer>>();
+	private List<LootGroup> lootGroups = new ArrayList<LootGroup>();
+	
+	@NotPersistent
+	private boolean looted = false; // These 4 should not need to be persisted, since a looted corpse will get wiped with server restart	
+	@NotPersistent
+	private boolean lootLock = false;	
+	@NotPersistent
+	private boolean creditRelieved = false;	
+	@NotPersistent
+	private boolean lootItem = false;
+	
+	private boolean stackable = false;
+	private int stackCount = 1;
+	private boolean noSell = false;
+	private byte junkType = -1;
+	private int junkDealerPrice = 0;
+	
+	
+	private String serialNumber;
 	
 	@NotPersistent
 	private TangibleObject killer = null;
@@ -86,6 +120,12 @@ public class TangibleObject extends SWGObject {
 		super();
 		messageBuilder = new TangibleMessageBuilder(this);
 	}
+	
+	public void setCustomName2(String customName) {
+		setCustomName(customName);
+		
+		notifyObservers(messageBuilder.buildCustomNameDelta(customName), true);
+	}
 
 	public int getIncapTimer() {
 		return incapTimer;
@@ -93,6 +133,15 @@ public class TangibleObject extends SWGObject {
 
 	public void setIncapTimer(int incapTimer) {
 		this.incapTimer = incapTimer;
+	}
+	
+	public int getUses() {
+		return uses;
+	}
+	
+	public void setUses(int uses) {
+		this.uses = uses;
+		setIntAttribute("uses", uses);
 	}
 
 	public synchronized int getConditionDamage() {
@@ -116,7 +165,11 @@ public class TangibleObject extends SWGObject {
 	}
 
 	public void setCustomization(byte[] customization) {
-		this.customization = customization;
+		synchronized(objectMutex) {
+			this.customization = customization;
+		}
+		
+		notifyObservers(messageBuilder.buildCustomizationDelta(customization), false);
 	}
 
 	public List<Integer> getComponentCustomizations() {
@@ -207,6 +260,75 @@ public class TangibleObject extends SWGObject {
 				}
 			}
 		}
+
+		//updatePvpStatus();
+	}
+	
+	public void updatePvpStatus() {
+		HashSet<Client> observers = new HashSet<Client>(getObservers());
+		
+		for (Iterator<Client> it = observers.iterator(); it.hasNext();) {
+			Client observer = it.next();
+			
+			if (observer.getParent() != null) {
+				observer.getSession().write(new UpdatePVPStatusMessage(this.getObjectID(), NGECore.getInstance().factionService.calculatePvpStatus((CreatureObject) observer.getParent(), this), getFaction()).serialize());
+				if(getClient() != null)
+					getClient().getSession().write(new UpdatePVPStatusMessage(observer.getParent().getObjectID(), NGECore.getInstance().factionService.calculatePvpStatus((CreatureObject) this, (CreatureObject) observer.getParent()), getFaction()).serialize());
+			}
+
+		}
+		
+		if (getClient() != null) {
+			CreatureObject companion = NGECore.getInstance().mountService.getCompanion((CreatureObject) this);
+			
+			if (companion != null) {
+				companion.updatePvpStatus();
+			}
+		}
+	}
+	
+	public void setCustomizationVariable(String type, byte value)
+	{
+		if(customizationVariables.containsKey(type)) customizationVariables.replace(type, value);
+		else customizationVariables.put(type, value);
+		
+		buildCustomizationBytes();
+	}
+	
+	public void removeCustomizationVariable(String type)
+	{
+		if(customizationVariables.containsKey(type)) 
+		{
+			customizationVariables.remove(type);
+			buildCustomizationBytes();
+		}
+	}
+	
+	private void buildCustomizationBytes()
+	{
+		//if(customizationVariables.size() == 0) customization = { 0x00 };
+		
+		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+		try
+		{
+			IDManagerVisitor visitor = ClientFileManager.loadFile("customization/customization_id_manager.iff", IDManagerVisitor.class);	
+			
+			stream.write((byte)0x02); // Unk
+			stream.write((byte)customizationVariables.size()); // Number of customization attributes
+			
+			for(String type : customizationVariables.keySet())
+			{
+				stream.write(visitor.getAttributeIndex(type)); // Index of palette type within "customization/customization_id_manager.iff"
+				stream.write(customizationVariables.get(type)); // Value/Index within palette
+				
+				// Seperator/Footer
+				stream.write((byte) 0xC3);
+				stream.write((byte) 0xBF);
+				stream.write((byte) 0x03);
+			}
+			customization = stream.toByteArray();
+		}
+		catch (Exception e) { e.printStackTrace(); }	
 	}
 	
 	public String getFaction() {
@@ -219,14 +341,30 @@ public class TangibleObject extends SWGObject {
 		synchronized(objectMutex) {
 			this.faction = faction;
 		}
+		
+		updatePvpStatus();
 	}
-
+	
+	public int getFactionStatus() {
+		synchronized(objectMutex) {
+			return factionStatus;
+		}
+	}
+	
+	public void setFactionStatus(int factionStatus) {
+		synchronized(objectMutex) {
+			this.factionStatus = factionStatus;
+		}
+	}
+	
 	public Vector<TangibleObject> getDefendersList() {
-		return defendersList;
+	    synchronized(objectMutex) {
+    			return defendersList;
+    	    }	
 	}
 	
 	public void addDefender(TangibleObject defender) {
-		
+				
 		defendersList.add(defender);
 		
 		if(this instanceof CreatureObject) {
@@ -285,32 +423,39 @@ public class TangibleObject extends SWGObject {
 			
 			return getPvPBitmask() == 1 || getPvPBitmask() == 2;
 			
-		}
+		} else if(attacker.getSlottedObject("ghost") == null)
+			return true;
 
 		return getPvPBitmask() == 1 || getPvPBitmask() == 2;
 	}
 	
-	public void showFlyText(String stfFile, String stfString, float scale, RGB color, int displayType) {
-		Set<Client> observers = getObservers();
-		
-		if (getClient() != null) {
-			getClient().getSession().write((new ObjControllerMessage(0x0000000B, new ShowFlyText(getObjectID(), getObjectID(), stfFile, stfString, scale, color, displayType))).serialize());
-		}
-		
-		for (Client client : observers) {
-			client.getSession().write((new ObjControllerMessage(0x0000000B, new ShowFlyText(client.getParent().getObjectID(), getObjectID(), stfFile, stfString, scale, color, displayType))).serialize());
-		}
+	public void showFlyText(OutOfBand outOfBand, float scale, RGB color, int displayType, boolean notifyObservers) {
+		showFlyText("", outOfBand, scale, color, displayType, notifyObservers);
 	}
 	
-	public void showFlyText(String stfFile, String stfString, String customText, int xp, float scale, RGB color, int displayType) {
-		Set<Client> observers = getObservers();
-		
-		if (getClient() != null) {
-			getClient().getSession().write((new ObjControllerMessage(0x0000000B, new ShowFlyText(getObjectID(), getObjectID(), 56, 1, 1, -1, stfFile, stfString, customText, xp, scale, color, displayType))).serialize());
+	public void showFlyText(String stf, float scale, RGB color, int displayType, boolean notifyObservers) {
+		showFlyText(stf, new OutOfBand(), scale, color, displayType, notifyObservers);
+	}
+	
+	public void showFlyText(String stf, OutOfBand outOfBand, float scale, RGB color, int displayType, boolean notifyObservers) {
+		if (outOfBand == null) {
+			outOfBand = new OutOfBand();
 		}
 		
-		for (Client client : observers) {
-			client.getSession().write((new ObjControllerMessage(0x0000000B, new ShowFlyText(client.getParent().getObjectID(), getObjectID(), 56, 1, 1, -1, stfFile, stfString, customText, xp, scale, color, displayType))).serialize());
+		if (color == null) {
+			color = new RGB(255, 255, 255);
+		}
+		
+		if (getClient() != null) {
+			getClient().getSession().write((new ObjControllerMessage(0x0000000B, new ShowFlyText(getObjectID(), getObjectID(), stf, outOfBand, scale, color, displayType))).serialize());
+		}
+		
+		if (notifyObservers) {
+			Set<Client> observers = getObservers();
+			
+			for (Client client : observers) {
+				client.getSession().write((new ObjControllerMessage(0x0000000B, new ShowFlyText(client.getParent().getObjectID(), getObjectID(), stf, outOfBand, scale, color, displayType))).serialize());
+			}
 		}
 	}
 	
@@ -346,6 +491,114 @@ public class TangibleObject extends SWGObject {
 		}
 	}
 	
+	public List<LootGroup> getLootGroups() {
+		return lootGroups;
+	}
+
+	public void addToLootGroups(String[] lootPoolNames, int[] lootPoolChances, int lootGroupChance) {
+		System.out.println("lootPoolNames[0] " + lootPoolNames[0]);
+		LootGroup lootGroup = new LootGroup(lootPoolNames, lootPoolChances, lootGroupChance);
+		this.lootGroups.add(lootGroup);
+	}
+	
+	public boolean isLooted() {
+		return looted;
+	}
+
+	public void setLooted(boolean looted) {
+		this.looted = looted;
+	}
+	
+	public boolean isLootLock() {
+		return lootLock;
+	}
+
+	public void setLootLock(boolean lootLock) {
+		this.lootLock = lootLock;
+	}
+	
+	public boolean isLootItem() {
+		return lootItem;
+	}
+
+	public void setLootItem(boolean lootItem) {
+		this.lootItem = lootItem;
+	}
+	
+	public boolean isStackable() {
+		return stackable;
+	}
+
+	public void setStackable(boolean stackable) {
+		this.stackable = stackable;
+	}
+	
+	public int getStackCount() {
+		return stackCount;
+	}
+
+	public void setStackCount(int stackCount) {
+		this.stackCount = stackCount;
+	}
+	
+	public boolean isNoSell() {
+		return noSell;
+	}
+
+	public void setNoSell(boolean noSell) {
+		this.noSell = noSell;
+	}
+	
+	public byte getJunkType() {
+		return junkType;
+	}
+
+	public void setJunkType(byte junkType) {
+		this.junkType = junkType;
+	}
+
+	public int getJunkDealerPrice() {
+		return junkDealerPrice;
+	}
+
+	public void setJunkDealerPrice(int junkDealerPrice) {
+		this.junkDealerPrice = junkDealerPrice;
+	}
+	
+	public boolean isCreditRelieved() {
+		return creditRelieved;
+	}
+
+	public void setCreditRelieved(boolean creditRelieved) {
+		if (creditRelieved)
+			this.creditRelieved = creditRelieved; // only allow one state change to prevent hacking
+	}
+	
+	public String getSerialNumber() {
+		return getStringAttribute("serial_number");
+	}
+
+	public void setSerialNumber(String serialNumber) {
+		setStringAttribute("serial_number", serialNumber);
+		setOptions(Options.SERIAL, true);
+	}
+	
+	public void sendDelta3(Client destination) {
+		destination.getSession().write(messageBuilder.buildDelta3());
+		//tools.CharonPacketUtils.printAnalysis(messageBuilder.buildDelta3(),"TANO3 Delta");
+	}
+	
+	public void sendAssemblyDelta3(Client destination) {
+		destination.getSession().write(messageBuilder.buildAssemblyDelta3());
+		//tools.CharonPacketUtils.printAnalysis(messageBuilder.buildAssemblyDelta3(),"TANO3 Assembly Delta");
+	}
+	
+	public void sendCustomizationDelta3(Client destination, String enteredName){
+		destination.getSession().write(messageBuilder.buildCustomNameDelta(enteredName));
+		//tools.CharonPacketUtils.printAnalysis(messageBuilder.buildCustomNameDelta(enteredName),"TANO3 Customization Delta");
+	}	
+	
+	
 	@Override
 	public void sendBaselines(Client destination) {
 
@@ -357,8 +610,8 @@ public class TangibleObject extends SWGObject {
 		
 		destination.getSession().write(messageBuilder.buildBaseline3());
 		destination.getSession().write(messageBuilder.buildBaseline6());
-		//destination.getSession().write(messageBuilder.buildBaseline8());
-		//destination.getSession().write(messageBuilder.buildBaseline9());
+		destination.getSession().write(messageBuilder.buildBaseline8());
+		destination.getSession().write(messageBuilder.buildBaseline9());
 		
 		if(getPvPBitmask() != 0) {
 			UpdatePVPStatusMessage upvpm = new UpdatePVPStatusMessage(getObjectID());
@@ -369,5 +622,4 @@ public class TangibleObject extends SWGObject {
 		
 
 	}
-	
 }

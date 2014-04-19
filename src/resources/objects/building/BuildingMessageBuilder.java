@@ -22,7 +22,10 @@
 package resources.objects.building;
 
 import java.nio.ByteOrder;
+import java.util.Vector;
+
 import org.apache.mina.core.buffer.IoBuffer;
+
 import resources.objects.ObjectMessageBuilder;
 
 public class BuildingMessageBuilder extends ObjectMessageBuilder {
@@ -107,7 +110,7 @@ public class BuildingMessageBuilder extends ObjectMessageBuilder {
 		int size = buffer.position();
 		buffer = IoBuffer.allocate(size).put(buffer.array(), 0, size);
 		buffer.flip();
-		buffer = createBaseline("TANO", (byte) 8, buffer, size);
+		buffer = createBaseline("BUIO", (byte) 8, buffer, size);
 		
 		return buffer;
 	}
@@ -118,9 +121,29 @@ public class BuildingMessageBuilder extends ObjectMessageBuilder {
 		int size = buffer.position();
 		buffer = IoBuffer.allocate(size).put(buffer.array(), 0, size);
 		buffer.flip();
-		buffer = createBaseline("TANO", (byte) 9, buffer, size);
+		buffer = createBaseline("BUIO", (byte) 9, buffer, size);
 		
 		return buffer;
+	}
+	
+	public IoBuffer buildPermissionListCreate(Vector<String> permissionList, String listName) {
+		IoBuffer buffer = IoBuffer.allocate(10).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.setAutoExpand(true);
+		int listSize = permissionList.size();
+		buffer.putShort((short)4);
+		buffer.putInt(0x52F364B8);
+		buffer.putInt(listSize);
+		for (String name : permissionList){
+			buffer.put(getUnicodeString(name));
+		}
+		//buffer.putInt(0x61);
+		buffer.putInt(0);
+		//buffer.putShort((short)0);
+		buffer.put(getUnicodeString(listName));
+		int size = buffer.position();
+		buffer.flip();
+		tools.CharonPacketUtils.printAnalysis(IoBuffer.allocate(size).put(buffer.array(), 0, size).flip());
+		return IoBuffer.allocate(size).put(buffer.array(), 0, size).flip();		
 	}
 
 	

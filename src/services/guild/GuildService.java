@@ -26,9 +26,7 @@ import java.util.Map;
 import resources.guild.Guild;
 import resources.objects.SWGList;
 import resources.objects.guild.GuildObject;
-
 import main.NGECore;
-
 import engine.resources.objects.SWGObject;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
@@ -55,7 +53,17 @@ public class GuildService implements INetworkDispatch {
 	}
 	
 	public Guild createGuild(String abbreviation, String name, SWGObject leader) {
-		int id = ((object.getGuildList().get(object.getGuildList().size()).getId()) + 1);
+		
+		if (leader == null)
+			return null;
+
+		int id = 0;
+		if (object.getGuildList().size() < 1) {
+			id = 0;
+		} else {
+			id = ((object.getGuildList().get(object.getGuildList().size()).getId() + 1));
+		}
+		
 		Guild guild = new Guild(id, abbreviation, name, leader);
 		
 		object.getGuildList().add(guild);

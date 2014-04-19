@@ -31,6 +31,11 @@ def run(core, actor, target, commandString):
 				actor.setFaction('')
 				actor.sendSystemMessage('@faction_recruiter:resign_complete', 0)
 			
+			if commandString == 'neutral' or commandString == 'resign':
+				time.sleep(1)
+				actor.setFaction('')
+				actor.sendSystemMessage('@faction_recruiter:resign_complete', 0)
+				return
 			
 			time.sleep(1)
 			actor.setFaction(commandString)
@@ -42,31 +47,32 @@ def run(core, actor, target, commandString):
 	
 	if factionStatus == FactionStatus.OnLeave:
 		actor.sendSystemMessage('@faction_recruiter:on_leave_to_covert', 0)
-		actor.setPvpStatus(PvpStatus.GoingCovert, True)
+		#actor.setPvpStatus(PvpStatus.GoingCovert, True)
 		time.sleep(1)
 		actor.setFactionStatus(FactionStatus.Combatant)
-		actor.setPvpStatus(PvpStatus.GoingCovert, False)
-		actor.setPvpStatus(PvpStatus.Enemy, True)
+		#actor.setPvpStatus(PvpStatus.GoingCovert, False)
 		actor.sendSystemMessage('@faction_recruiter:covert_complete', 0)
+		actor.updatePvpStatus()
 		return
 	
 	if factionStatus == FactionStatus.Combatant:
 		actor.sendSystemMessage('@faction_recruiter:covert_to_overt', 0)
-		actor.setPvpStatus(PvpStatus.GoingOvert, True)
+		#actor.setPvpStatus(PvpStatus.GoingOvert, True)
 		time.sleep(30)
 		actor.setFactionStatus(FactionStatus.SpecialForces)
-		actor.setPvpStatus(PvpStatus.GoingOvert, False)
-		actor.setPvpStatus(PvpStatus.Overt | PvpStatus.Attackable | PvpStatus.Aggressive, True)
+		#actor.setPvpStatus(PvpStatus.GoingOvert, False)
 		actor.sendSystemMessage('@faction_recruiter:overt_complete', 0)
+		actor.updatePvpStatus()
 		return
 	
 	if factionStatus == FactionStatus.SpecialForces:
 		actor.sendSystemMessage('@faction_recruiter:overt_to_covert', 0)
-		actor.setPvpStatus(PvpStatus.GoingCovert, True)
+		#actor.setPvpStatus(PvpStatus.GoingCovert, True)
 		time.sleep(300)
 		actor.setFactionStatus(FactionStatus.Combatant)
-		actor.setPvpStatus(PvpStatus.GoingCovert | PvpStatus.Overt | PvpStatus.Attackable | PvpStatus.Aggressive, False)
+		#actor.setPvpStatus(PvpStatus.GoingCovert, False)
 		actor.sendSystemMessage('@faction_recruiter:covert_complete', 0)
+		actor.updatePvpStatus()
 		return
 	
 	return

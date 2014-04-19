@@ -37,7 +37,6 @@ import protocol.swg.FactionResponseMessage;
 import resources.common.FileUtilities;
 import resources.common.Opcodes;
 import resources.datatables.FactionStatus;
-import resources.datatables.Options;
 import resources.datatables.PvpStatus;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
@@ -198,19 +197,42 @@ public class FactionService implements INetworkDispatch {
 	 * This should be used instead of getPvPBitmask where possible, but
 	 * should not be used in setPvPBitmask.
 	 */
-	public int calculatePvpStatus(CreatureObject player, TangibleObject target) {
+	/*public int calculatePvpStatus(CreatureObject player, TangibleObject target) {
 		PlayerObject ghost = (PlayerObject) player.getSlottedObject("ghost");
 		
 		int pvpBitmask = target.getPvPBitmask();
 		
+		// Seefo: Casting target to type CreatureObject as temporary fix.  I am unsure whether or not we want to put a factionStatus member inside of TangibleObject.
+		if (((CreatureObject) target).getFactionStatus() == FactionStatus.Combatant) {
+			pvpBitmask |= PvpStatus.Enemy;
+		}
+		
+		if (((CreatureObject) target).getFactionStatus() == FactionStatus.SpecialForces) {
+			pvpBitmask |= PvpStatus.Overt;
+			
+			if (target.getSlottedObject("ghost") != null) {
+				pvpBitmask |= PvpStatus.Enemy;
+			}
+		}
+		
 		if (target.getSlottedObject("ghost") != null) {
 			pvpBitmask |= PvpStatus.Player;
 			
-			if (player.getFactionStatus() == FactionStatus.SpecialForces &&
-			((CreatureObject) target).getFactionStatus() == FactionStatus.SpecialForces) {
+			if ((!player.getFaction().equals(target.getFaction()) &&
+			player.getFactionStatus() == FactionStatus.SpecialForces &&
+			((CreatureObject) target).getFactionStatus() == FactionStatus.SpecialForces) ||
+			core.combatService.areInDuel(player, (CreatureObject) target)) {
 				pvpBitmask |= (PvpStatus.Attackable | PvpStatus.Aggressive);
 			}
 			
+			if (core.combatService.areInDuel(player, (CreatureObject) target)) {
+				//pvpBitmask |= PvpStatus.Dueling;
+			}
+			
+			return pvpBitmask;
+		}
+		
+		if (player.getFaction().equals(target.getFaction())) {
 			return pvpBitmask;
 		}
 		
@@ -231,6 +253,27 @@ public class FactionService implements INetworkDispatch {
 		}
 		
 		return pvpBitmask;
+	}*/
+	
+	// temp fix until calculatePvpStatus is fixed
+	public int calculatePvpStatus(CreatureObject player, TangibleObject target) {
+		
+		if(target.getSlottedObject("ghost") != null) {
+			
+			if(!player.getFaction().equals(target.getFaction()) && player.getFactionStatus() == FactionStatus.SpecialForces && ((CreatureObject) target).getFactionStatus() == FactionStatus.SpecialForces)
+				return 55;
+			else if(core.combatService.areInDuel(player, (CreatureObject) target))
+				return 55;
+			else
+				return 0x14;
+						
+		} else {
+			if(target.getAttachment("AI") != null)
+				return PvpStatus.Attackable;
+			else
+				return 0;
+		}
+		
 	}
 	
 	public Map<String, Integer> getFactionMap() {

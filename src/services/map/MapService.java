@@ -105,7 +105,7 @@ public class MapService implements INetworkDispatch {
 	public void addPlanet(Planet planet) {
 		locationMap.put(planet, new Vector<MapLocation>());
 		
-		core.scriptService.callScript("scripts/", "addLocations", "static_map_locations", core, planet);
+		core.scriptService.callScript("scripts/", "static_map_locations", "addLocations", core, planet);
 	}
 	
 	public void addLocation(Planet planet, String name, float x, float y, byte category, byte subcategory, byte active) {
@@ -116,6 +116,9 @@ public class MapService implements INetworkDispatch {
 	}
 	
 	public String getClosestCityName(SWGObject object) {
+		
+		if(object.getPlanet() == null)
+			object.setPlanet(core.terrainService.getPlanetByID(object.getPlanetId()));
 		
 		Vector<MapLocation> locations = locationMap.get(object.getPlanet());
 		float closestDistance = Float.MAX_VALUE;
