@@ -26,6 +26,7 @@ import java.nio.ByteBuffer;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
+import engine.resources.common.Utilities;
 import protocol.swg.SWGMessage;
 
 public class CreateAuctionMessage extends SWGMessage {
@@ -40,10 +41,7 @@ public class CreateAuctionMessage extends SWGMessage {
 	@Override
 	public void deserialize(IoBuffer data) {
 		data.skip(6);
-		setObjectId(data.getLong());
-		setVendorId(data.getLong());
-		setPrice(data.getInt());
-		setDuration(data.getInt()); // in minutes
+		setObjectId(data.getLong());		
 		int size = data.getInt();
 		try {
 			setDescription(new String(ByteBuffer.allocate(size * 2).put(data.array(), data.position(), size * 2).array(), "UTF-16LE"));
@@ -51,6 +49,10 @@ public class CreateAuctionMessage extends SWGMessage {
 			e.printStackTrace();
 		}
 		data.position(data.position() + size * 2);
+
+		setVendorId(data.getLong());
+		setPrice(data.getInt());
+		setDuration(data.getInt()); // in minutes
 		setPremium(data.get());
 	}
 
@@ -100,8 +102,10 @@ public class CreateAuctionMessage extends SWGMessage {
 		this.description = description;
 	}
 
-	public byte getPremium() {
-		return premium;
+	public boolean getPremium() {
+		if(premium == 1)
+			return true;
+		return false;
 	}
 
 	public void setPremium(byte premium) {

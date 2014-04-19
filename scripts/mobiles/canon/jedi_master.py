@@ -1,5 +1,6 @@
 import sys
 from services.spawn import MobileTemplate
+from services.spawn import WeaponTemplate
 from java.util import Vector
 
 def addTemplate(core):
@@ -9,6 +10,8 @@ def addTemplate(core):
 	mobileTemplate.setLevel(90)
 	mobileTemplate.setDifficulty(2)
 	mobileTemplate.setAttackRange(6)
+	mobileTemplate.setAttackSpeed(1.0)
+	mobileTemplate.setWeaponType(9)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_dark_jedi_master_female_twk_01.iff')
@@ -22,10 +25,13 @@ def addTemplate(core):
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
-	weaponTemplates.add('object/weapon/melee/sword/crafted_saber/shared_sword_lightsaber_one_handed_gen5.iff')
-	weaponTemplates.add('object/weapon/melee/2h_sword/crafted_saber/shared_sword_lightsaber_two_handed_gen5.iff')
-	weaponTemplates.add('object/weapon/melee/polearm/crafted_saber/shared_sword_lightsaber_polearm_gen5.iff')
-	mobileTemplate.setWeaponTemplates(weaponTemplates)
+	weapontemplate = WeaponTemplate('object/weapon/melee/sword/crafted_saber/shared_sword_lightsaber_one_handed_gen5.iff', 9, 1.0)
+	weaponTemplates.add(weapontemplate)
+	weapontemplate = WeaponTemplate('object/weapon/melee/2h_sword/crafted_saber/shared_sword_lightsaber_two_handed_gen5.iff', 10, 1.0)
+	weaponTemplates.add(weapontemplate)
+	weapontemplate = WeaponTemplate('object/weapon/melee/polearm/crafted_saber/shared_sword_lightsaber_polearm_gen5.iff', 11, 1.0)
+	weaponTemplates.add(weapontemplate)	
+	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
 	mobileTemplate.setDefaultAttack('saberHit')

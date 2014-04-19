@@ -1,7 +1,7 @@
 import sys
 
 def setup(core, object):
-	object.setAttachment('radial_filename', 'generator')
+	object.setAttachment('radial_filename', 'structure/generator')
 	object.setHarvester_type(5)
 	object.setMaintenanceCost(30)
 	object.setGenerator(1)

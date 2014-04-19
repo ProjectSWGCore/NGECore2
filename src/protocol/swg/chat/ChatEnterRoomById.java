@@ -29,6 +29,7 @@ public class ChatEnterRoomById extends SWGMessage {
 
 	private int roomId;
 	private int requestId;
+	private String roomName;
 
 	public ChatEnterRoomById() { }
 	
@@ -39,7 +40,7 @@ public class ChatEnterRoomById extends SWGMessage {
 		
 		this.requestId = data.getInt();
 		this.roomId = data.getInt();
-		// getAsciiString(data); // name of the room but don't need it since we have id.
+		this.roomName = getAsciiString(data);
 	}
 
 	@Override
@@ -54,5 +55,8 @@ public class ChatEnterRoomById extends SWGMessage {
 	public int getRoomId() {
 		return roomId;
 	}
-
+	
+	public String getRoomname() {
+		return roomName;
+	}
 }

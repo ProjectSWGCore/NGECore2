@@ -66,6 +66,14 @@ public class ObjControllerMessage extends SWGMessage {
 	public static final int STOP_CONVERSATION = 0x00DE;
 	public static final int CONVERSATION_MESSAGE = 0x00DF;
 	public static final int CONVERSATION_OPTIONS = 0x00E0;
+	public static final int DRAFT_SCHEMATICS = 0x0102;
+	public static final int DRAFT_SLOTS = 0x0103;
+	public static final int CRAFT_EXPERIMENT = 0x0106;
+	public static final int CRAFT_ACKNOWLEDGE = 0x010C;
+	public static final int CRAFT_CUSTOMIZATION = 0x015A;
+	public static final int NEXT_CRAFTING_STAGE_RESULT = 0x01BE;
+	public static final int DRAFT_SLOTS_QUERY_RESPONSE = 0x01BF;
+	public static final int RESOURCE_WEIGHTS = 0x0207;
 
 	public ObjControllerMessage() { 
 		

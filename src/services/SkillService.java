@@ -167,8 +167,6 @@ public class SkillService implements INetworkDispatch {
 								creature.addAbility(ability);
 							}
 							
-							// When leveling, add all new unadded expertise abilities
-							// It's up to the script to not add abilities that are already added
 							for (String expertiseName : creature.getSkills()) {
 								if (expertiseName.startsWith("expertise")) {
 									if (FileUtilities.doesFileExist("scripts/expertise/" + expertiseName + ".py")) {

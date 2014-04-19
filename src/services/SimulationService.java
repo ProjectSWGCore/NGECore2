@@ -80,9 +80,12 @@ import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.common.*;
 import resources.common.collidables.AbstractCollidable;
+import resources.datatables.DisplayType;
+import resources.datatables.Options;
 import resources.datatables.PlayerFlags;
 import resources.datatables.Posture;
 import services.ai.LairActor;
+import services.chat.ChatRoom;
 import toxi.geom.Line3D;
 import toxi.geom.Ray3D;
 import toxi.geom.Vec3D;
@@ -219,7 +222,7 @@ public class SimulationService implements INetworkDispatch {
 		object.setIsInQuadtree(true);
 		boolean success = quadTrees.get(object.getPlanet().getName()).put(x, y, object);
 		if(success) {
-			Vector<SWGObject> childObjects = (Vector<SWGObject>) object.getAttachment("childObjects");
+			@SuppressWarnings("unchecked") Vector<SWGObject> childObjects = (Vector<SWGObject>) object.getAttachment("childObjects");
 			if(childObjects != null) {
 				addChildObjects(object, childObjects);
 				object.setAttachment("childObjects", null);
@@ -333,8 +336,9 @@ public class SimulationService implements INetworkDispatch {
 				
 				CreatureObject object = (CreatureObject) client.getParent();
 				
-				if (object.mounted)
-					object=object.getMountedVehicle();
+				if (core.mountService.isMounted(object)) {
+					object = (CreatureObject) object.getContainer();
+				}
 				
 				Point3D newPos;
 				Point3D oldPos;
@@ -368,7 +372,7 @@ public class SimulationService implements INetworkDispatch {
 	
 				List<SWGObject> newAwareObjects = get(object.getPlanet(), newPos.x, newPos.z, 512);
 				ArrayList<SWGObject> oldAwareObjects = new ArrayList<SWGObject>(object.getAwareObjects());
-				Collection<SWGObject> updateAwareObjects = CollectionUtils.intersection(oldAwareObjects, newAwareObjects);
+				@SuppressWarnings("unchecked") Collection<SWGObject> updateAwareObjects = CollectionUtils.intersection(oldAwareObjects, newAwareObjects);
 				object.notifyObservers(utm, false);
 
 				for(int i = 0; i < oldAwareObjects.size(); i++) {
@@ -432,7 +436,13 @@ public class SimulationService implements INetworkDispatch {
 					System.out.println("NULL Object");
 					return;
 				}
+				
 				CreatureObject object = (CreatureObject) client.getParent();
+				
+				if (core.mountService.isMounted(object)) {
+					object.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:cant_mount"), DisplayType.Broadcast);
+					core.mountService.dismount(object, (CreatureObject) object.getContainer());
+				}
 				
 				Point3D newPos = new Point3D(dataTransform.getXPosition(), dataTransform.getYPosition(), dataTransform.getZPosition());
 				if(Float.isNaN(newPos.x) || Float.isNaN(newPos.y) || Float.isNaN(newPos.z))
@@ -555,7 +565,7 @@ public class SimulationService implements INetworkDispatch {
 
 			List<SWGObject> newAwareObjects = get(object.getPlanet(), newPosition.x, newPosition.z, 512);
 			ArrayList<SWGObject> oldAwareObjects = new ArrayList<SWGObject>(object.getAwareObjects());
-			Collection<SWGObject> updateAwareObjects = CollectionUtils.intersection(oldAwareObjects, newAwareObjects);
+			@SuppressWarnings("unchecked") Collection<SWGObject> updateAwareObjects = CollectionUtils.intersection(oldAwareObjects, newAwareObjects);
 			object.notifyObservers(utm, false);
 
 			for(int i = 0; i < oldAwareObjects.size(); i++) {
@@ -747,6 +757,7 @@ public class SimulationService implements INetworkDispatch {
 			return;
 
 		final CreatureObject object = (CreatureObject) client.getParent();
+		SWGObject container = object.getContainer();
 		PlayerObject ghost = (PlayerObject) object.getSlottedObject("ghost");
 		
 		if(object.getAttachment("proposer") != null)
@@ -763,6 +774,12 @@ public class SimulationService implements INetworkDispatch {
 				core.combatService.handleEndDuel(object, opponent, true);
 			}
 		}
+		
+		if (core.mountService.isMounted(object)) {
+			core.mountService.dismount(object, (CreatureObject) container);
+		}
+		
+		core.mountService.storeAll(object);
 		
 		/*
 		object.createTransaction(core.getCreatureODB().getEnvironment());
@@ -828,6 +845,18 @@ public class SimulationService implements INetworkDispatch {
 		
 		if(object.getPosture() == Posture.Dead)
 			core.playerService.sendCloningWindow(object, false);
+		
+		ChatRoom zoneRoom = core.chatService.getChatRoomByAddress("SWG." + core.getGalaxyName() + "." + object.getPlanet().getName() + ".Planet");
+		if (zoneRoom != null) {
+			String chatName = object.getCustomName().toLowerCase();
+			
+			if (chatName.contains(" "))
+				chatName = chatName.split(" ")[0];
+
+			if (!zoneRoom.getUserList().contains(chatName)) {
+				core.chatService.joinChatRoom(chatName, zoneRoom.getRoomId(), true);
+			}
+		}
 		
 	}
 		

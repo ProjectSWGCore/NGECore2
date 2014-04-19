@@ -29,7 +29,6 @@ import org.apache.mina.core.buffer.IoBuffer;
 import engine.resources.objects.SWGObject;
 
 import resources.objects.ObjectMessageBuilder;
-import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.resource.GalacticResource;
 import resources.objects.resource.ResourceContainerObject;

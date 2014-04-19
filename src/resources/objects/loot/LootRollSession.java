@@ -39,6 +39,7 @@ public class LootRollSession {
 	private String SessionID; // leaderName-SystemTime
 	private boolean sessionValid;
 	private GroupObject playerGroup; 
+	private CreatureObject requester;
 	private List<TangibleObject> droppedItems;
 	private Planet sessionPlanet;
 	private List<String> errorMessages; 
@@ -80,6 +81,7 @@ public class LootRollSession {
 		droppedItems = new ArrayList<TangibleObject>();
 		errorMessages = new ArrayList<String>();
 		sessionPlanet = requester.getPlanet();
+		this.requester = requester;
 		allowRareLoot = false;
 	}
 
@@ -149,5 +151,13 @@ public class LootRollSession {
 
 	public void setSessionValid(boolean sessionValid) {
 		this.sessionValid = sessionValid;
+	}
+
+	public CreatureObject getRequester() {
+		return requester;
+	}
+
+	public void setRequester(CreatureObject requester) {
+		this.requester = requester;
 	}
 }

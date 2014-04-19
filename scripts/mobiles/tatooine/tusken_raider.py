@@ -1,13 +1,14 @@
 import sys
 from services.spawn import MobileTemplate
+from services.spawn import WeaponTemplate
 from java.util import Vector
 
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
 	mobileTemplate.setCreatureName('tusken_raider')
-	mobileTemplate.setLevel(90)
-	mobileTemplate.setDifficulty(0)
+	mobileTemplate.setLevel(10)
+	mobileTemplate.setDifficulty(1)
 	mobileTemplate.setAttackRange(24)
 	
 	templates = Vector()
@@ -15,10 +16,10 @@ def addTemplate(core):
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
-	weaponTemplates.add('object/weapon/ranged/rifle/shared_rifle_tusken.iff')
-	mobileTemplate.setWeaponTemplates(weaponTemplates)
+	weapontemplate = WeaponTemplate('object/weapon/ranged/rifle/shared_rifle_tusken.iff', 0, 1.0)
+	weaponTemplates.add(weapontemplate)
+	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 
-	
 	attacks = Vector()
 	mobileTemplate.setDefaultAttack('rangedShot')
 	mobileTemplate.setAttacks(attacks)

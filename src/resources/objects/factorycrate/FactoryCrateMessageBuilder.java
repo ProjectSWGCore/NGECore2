@@ -21,6 +21,156 @@
  ******************************************************************************/
 package resources.objects.factorycrate;
 
-public class FactoryCrateMessageBuilder {
+import java.nio.ByteOrder;
 
+import org.apache.mina.core.buffer.IoBuffer;
+
+import resources.objects.ObjectMessageBuilder;
+import resources.objects.resource.GalacticResource;
+import resources.objects.resource.ResourceContainerObject;
+
+/** 
+ * @author Charon 
+ */
+
+public class FactoryCrateMessageBuilder extends ObjectMessageBuilder{
+	
+	public FactoryCrateMessageBuilder(FactoryCrateObject factoryCrateObject) {
+		setObject(factoryCrateObject);
+	}
+	
+	
+	public IoBuffer buildBaseline3() {
+		FactoryCrateObject factoryCrateObject = (FactoryCrateObject) object;
+		IoBuffer buffer = IoBuffer.allocate(10).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.setAutoExpand(true);		
+
+		buffer.putShort((short)0x0D);
+		buffer.putFloat(1.0f);	//op0
+		buffer.put(getAsciiString("factory_n")); 
+		buffer.putInt(0);		
+		buffer.put(getAsciiString("food_crate"));
+		
+		if (factoryCrateObject.getCustomName().length()>0)
+			buffer.put(getUnicodeString(factoryCrateObject.getCustomName()));
+		else
+			buffer.putInt(0);
+		
+		buffer.putInt(1); 
+		buffer.putShort((short)0); 
+		
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		
+		buffer.putInt(0x2100); // optionsbitmask
+		buffer.putInt((int)factoryCrateObject.getQuantity());   // Quantity // op9
+		buffer.putInt(0);
+		buffer.putInt(0x64);  // condition maybe
+
+		buffer.put((byte)1); 
+	
+		int size = buffer.position();
+		buffer = bufferPool.allocate(size, false).put(buffer.array(), 0, size);
+
+		buffer.flip();
+		buffer = createBaseline("TYCF", (byte) 3, buffer, size);
+		
+		return buffer;	
+		
+//		01 00 00 00 
+//		00 00 
+//		00 00 00 00 
+//		00 00 00 00 
+//		00 00 00 00 
+//		00 00 00 00 
+//		00 21 00 00 
+//		2A 00 00 00 
+//		00 00 00 00 
+//		64 00 00 00 
+//		01     
+		
+	}
+	
+	public IoBuffer buildBaseline6() {
+		FactoryCrateObject factoryCrateObject = (FactoryCrateObject) object;
+		IoBuffer buffer = IoBuffer.allocate(10).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.setAutoExpand(true);
+				
+		buffer.putShort((short)6);
+		buffer.putInt(3);
+				
+		buffer.putInt(0);
+		buffer.putInt(0);
+		
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+
+		buffer.put((byte)0);
+
+		int size = buffer.position();
+		buffer = bufferPool.allocate(size, false).put(buffer.array(), 0, size);
+
+		buffer.flip();
+		buffer = createBaseline("TYCF", (byte) 6, buffer, size);
+		
+		return buffer;		
+	}
+	
+
+	public IoBuffer buildBaseline8() {
+		IoBuffer buffer = IoBuffer.allocate(10).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.setAutoExpand(true);		
+		buffer.putShort((short)0);		
+		int size = buffer.position();
+		buffer = bufferPool.allocate(size, false).put(buffer.array(), 0, size);
+		buffer.flip();
+		buffer = createBaseline("RCNO", (byte) 8, buffer, size);	
+		return buffer;
+	}
+		
+	public IoBuffer buildBaseline9() {
+		IoBuffer buffer = IoBuffer.allocate(10).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.setAutoExpand(true);		
+		buffer.putShort((short)0);
+		int size = buffer.position();
+		buffer = bufferPool.allocate(size, false).put(buffer.array(), 0, size);
+		buffer.flip();
+		buffer = createBaseline("TYCF", (byte) 9, buffer, size);	
+		return buffer;	
+	}
+	
+	public IoBuffer buildDelta3() {
+		FactoryCrateObject factoryCrateObject = (FactoryCrateObject) object;
+		IoBuffer buffer = IoBuffer.allocate(10).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.setAutoExpand(true);		
+		
+		buffer.putInt(factoryCrateObject.getQuantity());
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("TYCF", (byte) 3, (short) 1, (short) 9, buffer, size + 4); 
+		
+		return buffer;	
+	}
+	
+	@Override
+	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	
+	@Override
+	public void sendBaselines() {
+		// TODO Auto-generated method stub
+		
+	}
 }

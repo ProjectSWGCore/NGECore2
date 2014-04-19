@@ -117,6 +117,9 @@ public class MapService implements INetworkDispatch {
 	
 	public String getClosestCityName(SWGObject object) {
 		
+		if(object.getPlanet() == null)
+			object.setPlanet(core.terrainService.getPlanetByID(object.getPlanetId()));
+		
 		Vector<MapLocation> locations = locationMap.get(object.getPlanet());
 		float closestDistance = Float.MAX_VALUE;
 		String closestName = "";

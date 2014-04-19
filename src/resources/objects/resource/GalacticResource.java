@@ -152,7 +152,7 @@ public class GalacticResource extends SWGObject implements IPersistent {
 		this.name = name;
 		this.fileName = fileName;
 		this.category = category;
-		this.type = type;
+		//this.type = type;
 		long range = 1234567L;
 		Random r = new Random();
 		this.id = (long)(r.nextDouble()*range);

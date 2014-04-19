@@ -48,6 +48,7 @@ import resources.common.Opcodes;
 import resources.common.RadialOptions;
 import resources.objects.creature.CreatureObject;
 import resources.objects.harvester.HarvesterObject;
+import resources.objects.loot.LootRollSession;
 import services.sui.SUIWindow.SUICallback;
 import services.sui.SUIWindow.Trigger;
 import engine.clients.Client;
@@ -103,6 +104,22 @@ public class SUIService implements INetworkDispatch {
 						sendRadial(owner, target, request.getRadialOptions(), request.getRadialCount());
 						return;
 					}
+				}
+				
+				if (target instanceof CreatureObject){
+					CreatureObject creature = (CreatureObject) target;
+					if (!creature.isPlayer() && creature.isLootLock()){
+						LootRollSession lootRollSession = (LootRollSession )creature.getAttachment("LootSession");
+						if (lootRollSession!=null) {
+							if (lootRollSession.getRequester()!=owner){
+	
+								// ToDo: RADIALS MUST BE DISABLED HERE FOR THE CORPSE, BUT HOW?
+								core.scriptService.callScript("scripts/radial/", "npc/noloot", "createRadial", core, owner, target, request.getRadialOptions());
+								sendRadial(owner, target, request.getRadialOptions(), request.getRadialCount());
+								return;
+							}
+						}
+					}					
 				}
 				
 				if(target.getGrandparent() != null && target.getGrandparent().getAttachment("structureAdmins") != null)

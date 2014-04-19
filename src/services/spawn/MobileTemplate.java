@@ -36,6 +36,8 @@ public class MobileTemplate {
 	private String defaultAttack;
 	private int minDamage = 0;
 	private int maxDamage = 0;
+	private float attackSpeed = 0;
+	private int weaponType = 0;
 	private int difficulty = 0;
 	private int health, action;
 	private String creatureName;
@@ -43,6 +45,7 @@ public class MobileTemplate {
 	// this is a custom attack Range setting to use for large mobs like krayts
 	private int attackRange;
 	private Vector<String> weaponTemplates = new Vector<String>();
+	private Vector<WeaponTemplate> weaponTemplateVector = new Vector<WeaponTemplate>();
 
 	public Vector<String> getTemplates() {
 		return templates;
@@ -162,5 +165,29 @@ public class MobileTemplate {
 
 	public void setWeaponTemplates(Vector<String> weaponTemplates) {
 		this.weaponTemplates = weaponTemplates;
+	}
+
+	public float getAttackSpeed() {
+		return attackSpeed;
+	}
+
+	public void setAttackSpeed(float attackSpeed) {
+		this.attackSpeed = attackSpeed;
+	}
+
+	public int getWeaponType() {
+		return weaponType;
+	}
+
+	public void setWeaponType(int weaponType) {
+		this.weaponType = weaponType;
+	}
+
+	public Vector<WeaponTemplate> getWeaponTemplateVector() {
+		return weaponTemplateVector;
+	}
+
+	public void setWeaponTemplateVector(Vector<WeaponTemplate> weaponTemplateVector) {
+		this.weaponTemplateVector = weaponTemplateVector;
 	}
 }

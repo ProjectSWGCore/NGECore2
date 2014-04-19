@@ -36,6 +36,7 @@ import resources.common.Console;
 import resources.common.FileUtilities;
 import resources.common.Opcodes;
 import resources.common.SpawnPoint;
+import resources.datatables.WeaponType;
 import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.deed.Harvester_Deed;
@@ -43,6 +44,7 @@ import resources.objects.deed.Player_House_Deed;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.tool.SurveyTool;
+import resources.objects.weapon.WeaponObject;
 import services.sui.SUIWindow;
 import services.sui.SUIService.ListBoxType;
 import services.sui.SUIWindow.SUICallback;
@@ -89,13 +91,15 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 26, "Installations");
 				suiOptions.put((long) 110, "Survey Devices");
 				if(creature.getClient().isGM()) suiOptions.put((long) 120, "House Deeds");
+				if(creature.getClient().isGM()) suiOptions.put((long) 125, "Crafting Tools");
 				if(creature.getClient().isGM()) suiOptions.put((long) 130, "Vehicle Deeds");
-				//suiOptions.put((long) 120, "House Deeds");
+
 				break;
 			case 3: // [Items] Weapons
 				suiOptions.put((long) 30, "Jedi Weapons");
 				suiOptions.put((long) 31, "Melee Weapons");
 				suiOptions.put((long) 32, "Ranged Weapons");
+				suiOptions.put((long) 33, "Heavy Weapons");
 				break;
 			case 4: // [Items] Misc Items
 				suiOptions.put((long) 40, "Unity Ring");
@@ -202,26 +206,35 @@ public class DevService implements INetworkDispatch {
 						
 					// [Items] Weapons
 					case 30: // Jedi Weapons
-						TangibleObject lightsaber1 = (TangibleObject) core.objectService.createObject("object/weapon/melee/sword/crafted_saber/shared_sword_lightsaber_one_handed_gen5.iff", planet);
+						WeaponObject lightsaber1 = (WeaponObject) core.objectService.createObject("object/weapon/melee/sword/crafted_saber/shared_sword_lightsaber_one_handed_gen5.iff", planet);
 						lightsaber1.setIntAttribute("required_combat_level", 90);
-						lightsaber1.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 1);
 						lightsaber1.setStringAttribute("class_required", "Jedi");
-						lightsaber1.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
-						lightsaber1.setStringAttribute("cat_wpn_damage.damage", "689-1379");
+						lightsaber1.setAttackSpeed(1);
+						lightsaber1.setDamageType("energy");
+						lightsaber1.setMaxRange(5);
+						lightsaber1.setMinDamage(689);
+						lightsaber1.setMaxDamage(1379);
+						lightsaber1.setWeaponType(WeaponType.ONEHANDEDSABER);
 						
-						TangibleObject lightsaber2 = (TangibleObject) core.objectService.createObject("object/weapon/melee/2h_sword/crafted_saber/shared_sword_lightsaber_two_handed_gen5.iff", planet);
+						WeaponObject lightsaber2 = (WeaponObject) core.objectService.createObject("object/weapon/melee/2h_sword/crafted_saber/shared_sword_lightsaber_two_handed_gen5.iff", planet);
 						lightsaber2.setIntAttribute("required_combat_level", 90);
-						lightsaber2.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 1);
 						lightsaber2.setStringAttribute("class_required", "Jedi");
-						lightsaber2.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
-						lightsaber2.setStringAttribute("cat_wpn_damage.damage", "689-1379");
+						lightsaber2.setAttackSpeed(1);
+						lightsaber2.setDamageType("energy");
+						lightsaber2.setMaxRange(5);
+						lightsaber2.setMinDamage(689);
+						lightsaber2.setMaxDamage(1379);
+						lightsaber2.setWeaponType(WeaponType.TWOHANDEDSABER);
 						
-						TangibleObject lightsaber3 = (TangibleObject) core.objectService.createObject("object/weapon/melee/polearm/crafted_saber/shared_sword_lightsaber_polearm_gen5.iff", planet);
+						WeaponObject lightsaber3 = (WeaponObject) core.objectService.createObject("object/weapon/melee/polearm/crafted_saber/shared_sword_lightsaber_polearm_gen5.iff", planet);
 						lightsaber3.setIntAttribute("required_combat_level", 90);
-						lightsaber3.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 1);
 						lightsaber3.setStringAttribute("class_required", "Jedi");
-						lightsaber3.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
-						lightsaber3.setStringAttribute("cat_wpn_damage.damage", "689-1379");
+						lightsaber3.setAttackSpeed(1);
+						lightsaber3.setDamageType("energy");
+						lightsaber3.setMaxRange(5);
+						lightsaber3.setMinDamage(689);
+						lightsaber3.setMaxDamage(1379);
+						lightsaber3.setWeaponType(WeaponType.POLEARMSABER);
 						
 						Random random = new Random();
 						
@@ -234,43 +247,82 @@ public class DevService implements INetworkDispatch {
 						inventory.add(lightsaber3);
 						return;
 					case 31: // Melee Weapons
-						SWGObject sword1 = core.objectService.createObject("object/weapon/melee/sword/shared_sword_01.iff", planet);
+						WeaponObject sword1 = (WeaponObject) core.objectService.createObject("object/weapon/melee/sword/shared_sword_01.iff", planet);
 						sword1.setIntAttribute("required_combat_level", 90);
-						sword1.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 1);
-						sword1.setStringAttribute("class_required", "None");
-						sword1.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
-						sword1.setStringAttribute("cat_wpn_damage.damage", "1100-1200");
+						sword1.setAttackSpeed(1);
+						sword1.setMaxRange(5);
+						sword1.setDamageType("kinetic");
+						sword1.setMinDamage(1100);
+						sword1.setMaxDamage(1200);
+						sword1.setWeaponType(WeaponType.ONEHANDEDMELEE);
 						
 						inventory.add(sword1);
 						return;
 					case 32: // Ranged Weapons
-						SWGObject rifle1 = core.objectService.createObject("object/weapon/ranged/rifle/shared_rifle_e11.iff", planet);
+						WeaponObject rifle1 = (WeaponObject) core.objectService.createObject("object/weapon/ranged/rifle/shared_rifle_e11.iff", planet);
 						rifle1.setIntAttribute("required_combat_level", 90);
-						rifle1.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", (float) 0.8);
-						rifle1.setStringAttribute("class_required", "None");
-						rifle1.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
-						rifle1.setStringAttribute("cat_wpn_damage.damage", "800-1250");
+						rifle1.setAttackSpeed((float) 0.8);
+						rifle1.setMaxRange(64);
+						rifle1.setDamageType("energy");
+						rifle1.setMinDamage(800);
+						rifle1.setMaxDamage(1250);
+						rifle1.setWeaponType(WeaponType.RIFLE);
 						
 						inventory.add(rifle1);
 						
-						SWGObject pistol = core.objectService.createObject("object/weapon/ranged/pistol/shared_pistol_cdef.iff", planet);
+						WeaponObject carbine1 = (WeaponObject) core.objectService.createObject("object/weapon/ranged/carbine/shared_carbine_cdef.iff", planet);
+						carbine1.setIntAttribute("required_combat_level", 90);
+						carbine1.setAttackSpeed((float) 0.6);
+						carbine1.setMaxRange(50);
+						carbine1.setDamageType("energy");
+						carbine1.setMinDamage(600);
+						carbine1.setMaxDamage(937);
+						carbine1.setWeaponType(WeaponType.CARBINE);
+						
+						inventory.add(carbine1);
+						
+						WeaponObject pistol = (WeaponObject) core.objectService.createObject("object/weapon/ranged/pistol/shared_pistol_cdef.iff", planet);
 						pistol.setIntAttribute("required_combat_level", 90);
-						pistol.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", (float) 0.4);
-						pistol.setStringAttribute("class_required", "None");
-						pistol.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
-						pistol.setStringAttribute("cat_wpn_damage.damage", "400-559");
+						pistol.setAttackSpeed((float) 0.4);
+						pistol.setMaxRange(35);
+						pistol.setDamageType("energy");
+						pistol.setMinDamage(400);
+						pistol.setMaxDamage(625);
+						pistol.setWeaponType(WeaponType.PISTOL);
 						
 						inventory.add(pistol);
+						return;
 						
-						/* == Disabled until Elemental Damage is implemented. ==
-						SWGObject heavy = core.objectService.createObject("object/weapon/ranged/heavy/shared_som_lava_cannon_generic.iff", planet);
-						heavy.setIntAttribute("required_combat_level", 90);
-						heavy.setFloatAttribute("cat_wpn_damage.wpn_attack_speed", 1);
-						heavy.setStringAttribute("class_required", "Commando");
-						heavy.setStringAttribute("cat_wpn_damage.wpn_damage_type", "Energy");
-						heavy.setStringAttribute("cat_wpn_damage.damage", "700-1400");
+					case 33:
+						WeaponObject heavy1 = (WeaponObject) core.objectService.createObject("object/weapon/ranged/heavy/shared_som_lava_cannon_generic.iff", planet);
+						heavy1.setIntAttribute("required_combat_level", 90);
 						
-						inventory.add(heavy);*/
+						heavy1.setStringAttribute("class_required", "Commando");
+						heavy1.setDamageType("energy");
+						heavy1.setMinDamage(700);
+						heavy1.setMaxDamage(1400);
+						heavy1.setMaxRange(64);
+						heavy1.setAttackSpeed(1);
+						heavy1.setElementalType("heat");
+						heavy1.setElementalDamage(200);
+						heavy1.setWeaponType(WeaponType.HEAVYWEAPON);
+						
+						inventory.add(heavy1);
+						
+						WeaponObject heavy2 = (WeaponObject) core.objectService.createObject("object/weapon/ranged/heavy/shared_som_republic_flamer.iff", planet);
+						heavy2.setIntAttribute("required_combat_level", 88);
+						
+						heavy2.setStringAttribute("class_required", "Commando");
+						heavy2.setDamageType("energy");
+						heavy2.setMinDamage(148);
+						heavy2.setMaxDamage(295);
+						heavy2.setMaxRange(20);
+						heavy2.setAttackSpeed((float) 0.25);
+						heavy2.setElementalType("heat");
+						heavy2.setElementalDamage(28);
+						heavy2.setWeaponType(WeaponType.FLAMETHROWER);
+						
+						inventory.add(heavy2);
 						return;
 					case 40:
 						TangibleObject ring = (TangibleObject) core.objectService.createObject("object/tangible/wearables/ring/shared_ring_s01.iff", planet);
@@ -287,45 +339,15 @@ public class DevService implements INetworkDispatch {
 						inventory.add(backpack);
 						return;
 					case 42:
-						TangibleObject heroismBand = (TangibleObject) core.objectService.createObject("object/tangible/wearables/ring/shared_ring_s01.iff", planet);
-						heroismBand.setStfFilename("static_item_n");
-						heroismBand.setStfName("item_band_set_hero_01_01");
-						heroismBand.setStringAttribute("@set_bonus:piece_bonus_count_3", "@set_bonus:set_bonus_hero_1");
-						heroismBand.setStringAttribute("@set_bonus:piece_bonus_count_4", "@set_bonus:set_bonus_hero_2");
-						heroismBand.setStringAttribute("@set_bonus:piece_bonus_count_5", "@set_bonus:set_bonus_hero_3");
-						heroismBand.setAttachment("setBonus", "set_bonus_hero");
+						TangibleObject heroismBand = (TangibleObject) core.objectService.createObject("object/tangible/wearables/ring/shared_ring_s04.iff", planet, "item_band_set_hero_01_01");
 						
-						TangibleObject heroismRing = (TangibleObject) core.objectService.createObject("object/tangible/wearables/ring/shared_ring_s01.iff", planet);
-						heroismRing.setStfFilename("static_item_n");
-						heroismRing.setStfName("item_ring_set_hero_01_01");
-						heroismRing.setStringAttribute("@set_bonus:piece_bonus_count_3", "@set_bonus:set_bonus_hero_1");
-						heroismRing.setStringAttribute("@set_bonus:piece_bonus_count_4", "@set_bonus:set_bonus_hero_2");
-						heroismRing.setStringAttribute("@set_bonus:piece_bonus_count_5", "@set_bonus:set_bonus_hero_3");
-						heroismRing.setAttachment("setBonus", "set_bonus_hero");
+						TangibleObject heroismRing = (TangibleObject) core.objectService.createObject("object/tangible/wearables/ring/shared_ring_s02.iff", planet, "item_ring_set_hero_01_01");
 						
-						TangibleObject heroismNecklace = (TangibleObject) core.objectService.createObject("object/tangible/wearables/necklace/shared_necklace_s01.iff", planet);
-						heroismNecklace.setStfFilename("static_item_n");
-						heroismNecklace.setStfName("item_necklace_set_hero_01_01");
-						heroismNecklace.setStringAttribute("@set_bonus:piece_bonus_count_3", "@set_bonus:set_bonus_hero_1");
-						heroismNecklace.setStringAttribute("@set_bonus:piece_bonus_count_4", "@set_bonus:set_bonus_hero_2");
-						heroismNecklace.setStringAttribute("@set_bonus:piece_bonus_count_5", "@set_bonus:set_bonus_hero_3");
-						heroismNecklace.setAttachment("setBonus", "set_bonus_hero");
+						TangibleObject heroismNecklace = (TangibleObject) core.objectService.createObject("object/tangible/wearables/necklace/shared_necklace_s10.iff", planet, "item_necklace_set_hero_01_01");
 						
-						TangibleObject heroismBraceletRight = (TangibleObject) core.objectService.createObject("object/tangible/wearables/bracelet/shared_bracelet_s02_r.iff", planet);
-						heroismBraceletRight.setStfFilename("static_item_n");
-						heroismBraceletRight.setStfName("item_bracelet_r_set_hero_01_01");
-						heroismBraceletRight.setStringAttribute("@set_bonus:piece_bonus_count_3", "@set_bonus:set_bonus_hero_1");
-						heroismBraceletRight.setStringAttribute("@set_bonus:piece_bonus_count_4", "@set_bonus:set_bonus_hero_2");
-						heroismBraceletRight.setStringAttribute("@set_bonus:piece_bonus_count_5", "@set_bonus:set_bonus_hero_3");
-						heroismBraceletRight.setAttachment("setBonus", "set_bonus_hero");
+						TangibleObject heroismBraceletRight = (TangibleObject) core.objectService.createObject("object/tangible/wearables/bracelet/shared_bracelet_s03_r.iff", planet, "item_bracelet_r_set_hero_01_01");
 						
-						TangibleObject heroismBraceletLeft = (TangibleObject) core.objectService.createObject("object/tangible/wearables/bracelet/shared_bracelet_s02_l.iff", planet);
-						heroismBraceletLeft.setStfFilename("static_item_n");
-						heroismBraceletLeft.setStfName("item_bracelet_l_set_hero_01_01");
-						heroismBraceletLeft.setStringAttribute("@set_bonus:piece_bonus_count_3", "@set_bonus:set_bonus_hero_1");
-						heroismBraceletLeft.setStringAttribute("@set_bonus:piece_bonus_count_4", "@set_bonus:set_bonus_hero_2");
-						heroismBraceletLeft.setStringAttribute("@set_bonus:piece_bonus_count_5", "@set_bonus:set_bonus_hero_3");
-						heroismBraceletLeft.setAttachment("setBonus", "set_bonus_hero");
+						TangibleObject heroismBraceletLeft = (TangibleObject) core.objectService.createObject("object/tangible/wearables/bracelet/shared_bracelet_s03_l.iff", planet, "item_bracelet_l_set_hero_01_01");
 						
 						inventory.add(heroismBand);
 						inventory.add(heroismRing);
@@ -1204,6 +1226,16 @@ public class DevService implements INetworkDispatch {
 						deed.setAttributes();
 						inventory.add(deed);
 						
+						templateString="object/tangible/deed/player_house_deed/shared_generic_house_small_style_02_deed.iff";
+						deed = (Player_House_Deed)core.objectService.createObject(templateString, planet);
+						deed.setBMR(15);
+						deed.setAttributes();
+						inventory.add(deed);
+						
+					case 125:
+						TangibleObject genericCraftingTool = (TangibleObject) core.objectService.createObject("object/tangible/crafting/station/shared_generic_tool.iff", planet);
+						genericCraftingTool.setCustomName("Generic Crafting Tool");
+						inventory.add(genericCraftingTool);	
 						return;
 					case 130:
 						TangibleObject swoopDeed = (TangibleObject) core.objectService.createObject("object/tangible/deed/vehicle_deed/shared_speederbike_swoop_deed.iff", planet);

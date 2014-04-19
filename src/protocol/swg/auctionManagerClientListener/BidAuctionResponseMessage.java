@@ -62,5 +62,10 @@ public class BidAuctionResponseMessage extends SWGMessage {
 		result.putInt(status);
 		return result.flip();
 	}
+	
+	public void setStatus(int status) {
+		this.status = status;
+	}
+
 
 }

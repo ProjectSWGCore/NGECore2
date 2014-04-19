@@ -88,6 +88,9 @@ public class BuffService implements INetworkDispatch {
 		}*/
 
 		Buff buff = buffMap.get(buffName);
+		
+		if(buff == null) return false;
+		
 		if(buff.isGroupBuff()) {
 			addGroupBuff(buffer, buffName, buffer);
 			return true;

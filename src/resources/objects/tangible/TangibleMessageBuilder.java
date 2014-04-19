@@ -51,7 +51,7 @@ public class TangibleMessageBuilder extends ObjectMessageBuilder {
 			buffer.put(getUnicodeString(object.getCustomName()));
 		buffer.putInt(object.getVolume());
 		buffer.putInt(0);
-		buffer.putInt(0); // faction vars
+		buffer.putInt(tangible.getFactionStatus()); // faction vars
 		
 		if(tangible.getCustomization() == null || tangible.getCustomization().length <= 0)
 			buffer.putShort((short) 0);
@@ -67,7 +67,7 @@ public class TangibleMessageBuilder extends ObjectMessageBuilder {
 		if(tangible.getOptionsBitmask() == 0)
 			tangible.setOptionsBitmask(0x100);
 		buffer.putInt(tangible.getOptionsBitmask());
-		buffer.putInt(0); // number of item uses
+		buffer.putInt(tangible.getUses()); // number of item uses
 		buffer.putInt(tangible.getConditionDamage());
 		buffer.putInt(tangible.getMaxDamage());
 		buffer.put((byte) (tangible.isStaticObject() ? 1 : 0));
@@ -159,6 +159,49 @@ public class TangibleMessageBuilder extends ObjectMessageBuilder {
 		buffer.flip();
 		buffer = createDelta("TANO", (byte) 3, (short) 1, (short) 6, buffer, size + 4);
 		return buffer;
+	}
+	
+	public IoBuffer buildDelta3() {
+		IoBuffer buffer = bufferPool.allocate(2, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.setAutoExpand(true);
+		buffer.putShort((short)5);
+		buffer.putInt(0x12862153);
+		buffer.putLong(getObject().getObjectID());
+		buffer.putInt(0x54414E4F);
+		buffer.put((byte)3);
+		buffer.putInt(8);//buffer.putInt(8+6);
+		
+		buffer.putShort((short) 2);
+		buffer.putShort((short)8);
+		buffer.put((byte)0);
+		buffer.putShort((short) 0x21);
+		buffer.put((byte)0);
+		
+//		buffer.putShort((short) 0);
+//		buffer.putFloat(4.0F); 
+		
+		int size = buffer.position();
+		buffer.flip();
+		return IoBuffer.allocate(size).put(buffer.array(), 0, size).flip();		
+	}
+
+	public IoBuffer buildAssemblyDelta3() {
+		IoBuffer buffer = bufferPool.allocate(2, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.setAutoExpand(true);
+		buffer.putShort((short)5);
+		buffer.putInt(0x12862153);
+		buffer.putLong(getObject().getObjectID());
+		buffer.putInt(0x54414E4F);
+		buffer.put((byte)3);
+		buffer.putInt(8);//buffer.putInt(8+6);
+		
+		buffer.putShort((short) 1);
+		buffer.putShort((short)0x0B);
+		buffer.putInt(0x000003E8); // ?
+		
+		int size = buffer.position();
+		buffer.flip();
+		return IoBuffer.allocate(size).put(buffer.array(), 0, size).flip();		
 	}
 	
 	@Override

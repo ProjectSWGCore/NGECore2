@@ -23,6 +23,8 @@ package resources.objects.tool;
 
 import java.util.Vector;
 
+import main.NGECore;
+
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
 
@@ -41,32 +43,32 @@ import resources.objects.tangible.TangibleObject;
 @Persistent(version=0)
 public class SurveyTool extends TangibleObject{
 	
-	private byte toolType;
-	private GalacticResource surveyResource;
-	private CreatureObject user;
-	private Long tanoID;
-	private byte SurveyRangeSetting;
+	private byte toolType=0;
+	private long surveyResourceID;
+	private long userID=0;
+	private Long tanoID=0L;
+	private byte SurveyRangeSetting=0;
 	
 	@NotPersistent
-	private String surveyEffectString;
+	private String surveyEffectString="";
 	@NotPersistent
-	private String sampleEffectString;
+	private String sampleEffectString="";
 	@NotPersistent
-	private boolean currentlySurveying;
+	private boolean currentlySurveying=false;
 	@NotPersistent
-	private boolean currentlySampling;
+	private boolean currentlySampling=false;
 	@NotPersistent
-	private boolean currentlyCoolingDown;
+	private boolean currentlyCoolingDown=false;
 	@NotPersistent
-	private boolean exceptionalState;
+	private boolean exceptionalState=false;
 	@NotPersistent
-	private boolean recoveryMode;
+	private boolean recoveryMode=false;
 	@NotPersistent
-	private Long lastSurveyTime;
+	private Long lastSurveyTime=0L;
 	@NotPersistent
-	private Long lastSampleTime;
+	private Long lastSampleTime=0L;
 	@NotPersistent
-	private Long recoveryTime;
+	private Long recoveryTime=10L;
 	
 	public static byte MineralSurveyDevice	           = 1;
 	public static byte ChemicalSurveyDevice	           = 2;
@@ -234,12 +236,12 @@ public class SurveyTool extends TangibleObject{
 		return this.lastSampleTime;
 	}
 	
-	public void setSurveyResource(GalacticResource surveyResource){
-		this.surveyResource = surveyResource;
+	public void setSurveyResourceID(long surveyResourceID){
+		this.surveyResourceID = surveyResourceID;
 	}
 	
-	public GalacticResource getSurveyResource(){
-		return this.surveyResource;
+	public long getSurveyResourceID(){
+		return this.surveyResourceID;
 	}
 
 	public boolean getCurrentlyCoolingDown() {
@@ -258,12 +260,12 @@ public class SurveyTool extends TangibleObject{
 		this.recoveryTime = recoveryTime;
 	}
 
-	public CreatureObject getUser() {
-		return user;
+	public long getUserID() {
+		return userID;
 	}
 
-	public void setUser(CreatureObject user) {
-		this.user = user;
+	public void setUserID(long userID) {
+		this.userID = userID;
 	}
 
 	public Long getTanoID() {
@@ -324,9 +326,12 @@ public class SurveyTool extends TangibleObject{
 		}
 
 		float differential = surveyRadius / (float) divisor;
-		GalacticResource resourceToSurvey = this.getSurveyResource();			
-		Vector<ResourceConcentration> concentrationMap = resourceToSurvey.buildConcentrationsCollection(this.getUser().getPosition(),resourceToSurvey, surveyRadius, differential, this.getUser().getPlanetId());		
-		this.getSurveyResource().constructSurveyMapMessage(this.getUser(), concentrationMap, surveyRadius);
+		GalacticResource resourceToSurvey = (GalacticResource) NGECore.getInstance().objectService.getObject(this.getSurveyResourceID());
+		CreatureObject user = (CreatureObject) NGECore.getInstance().objectService.getObject(this.getUserID());
+		if (resourceToSurvey==null || user==null)
+			return;
+		Vector<ResourceConcentration> concentrationMap = resourceToSurvey.buildConcentrationsCollection(user.getPosition(),resourceToSurvey, surveyRadius, differential, user.getPlanetId());		
+		resourceToSurvey.constructSurveyMapMessage(user, concentrationMap, surveyRadius);
 		//this.getUser().sendSystemMessage("Distance to nearest Deposit : " + this.getSurveyResource().getHelperMinDist(), (byte) 0);
 	}
 }

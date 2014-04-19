@@ -63,7 +63,7 @@ public class AuctionQueryHeadersMessage extends SWGMessage {
 		setMinPrice(data.getInt());
 		setMaxPrice(data.getInt());
 		setIncludeEntranceFee(data.get());
-		data.skip(5); // unk
+		data.skip(6); // unk
 		setVendorId(data.getLong());
 		setVendorFlag(data.get());
 		setOffset(data.getShort());

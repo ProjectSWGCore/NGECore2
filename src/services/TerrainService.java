@@ -175,12 +175,6 @@ public class TerrainService {
 		core.mapService.addPlanet(planet);
 		noBuildAreas.put(planet, new ArrayList<CollidableCircle>());
 		loadClientRegions(planet);
-		
-		core.chatService.createChatRoom("", name, "system", true);
-		core.chatService.createChatRoom("public chat for this planet, cannot create rooms here", name + ".Planet", "SYSTEM", true);
-		core.chatService.createChatRoom("system messages for this planet, cannot create rooms here", name + ".system", "SYSTEM", true);
-		
-		System.out.println("Created chat rooms for " + name);
 	}
 
 	

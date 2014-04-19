@@ -21,6 +21,7 @@
  ******************************************************************************/
 package services;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
@@ -81,6 +82,9 @@ public class SurveyService implements INetworkDispatch {
 			// All tools sampling
 			SurveyTool removeTool=null;
 			for (SurveyTool surveyTool : activeSurveyTools){
+				if (surveyTool==null)
+					continue;
+				CreatureObject user = (CreatureObject) NGECore.getInstance().objectService.getObject(surveyTool.getUserID());
 				if (surveyTool.getCurrentlySurveying()){
 					// Check if survey process has finished
 					if (System.currentTimeMillis()>surveyTool.getLastSurveyTime()+3000){					
@@ -104,19 +108,21 @@ public class SurveyService implements INetworkDispatch {
 						surveyTool.setCurrentlyCoolingDown(false);
 						continueSampling(surveyTool);
 					}
-					if (surveyTool.getUser().getPosture()!=1){
+					if (user.getPosture()!=1){
 						surveyTool.setExceptionalState(false);
 						surveyTool.setCurrentlySampling(false);
 						removeTool = surveyTool;
-						if (surveyTool.getUser().getPosture()==0)
-							surveyTool.getUser().sendSystemMessage("You stand up", (byte) 0);
+						if (user.getPosture()==0)
+							user.sendSystemMessage("You stand up", (byte) 0);
 						
-						surveyTool.getUser().sendSystemMessage("@survey:sample_cancel", (byte) 0);
+						user.sendSystemMessage("@survey:sample_cancel", (byte) 0);
 					}
 				}
 			}
 			if (removeTool!=null)
 				activeSurveyTools.remove(removeTool); // remove after notification
+			
+			activeSurveyTools.removeAll(Collections.singleton(null));
 		}	
 	}
 	
@@ -124,9 +130,9 @@ public class SurveyService implements INetworkDispatch {
 		
 		if (surveyTool.isExceptionalState())
 			return;
-		CreatureObject crafter = surveyTool.getUser();			
+		CreatureObject crafter = (CreatureObject) NGECore.getInstance().objectService.getObject(surveyTool.getUserID());		
 		PlayerObject player = (PlayerObject) crafter.getSlottedObject("ghost");	
-		GalacticResource sampleResource = surveyTool.getSurveyResource();
+		GalacticResource sampleResource = (GalacticResource) NGECore.getInstance().objectService.getObject(surveyTool.getSurveyResourceID());
 		int stackCount = 0;
 		boolean gamblingwon = false;
 		//ResourceContainerObject container = player.getRecentContainer();
@@ -267,7 +273,7 @@ public class SurveyService implements INetworkDispatch {
 		if (surveyTool.getToolType()==-1)		
 			return; // Survey tool type was not recognized
 		
-		surveyTool.setUser(crafter);
+		surveyTool.setUserID(crafter.getObjectID());
 		surveyTool.setRecoveryTime(10000L);
 		PlayerObject player = (PlayerObject) crafter.getSlottedObject("ghost");	
 		player.setLastUsedSurveyTool(surveyTool);
@@ -302,7 +308,7 @@ public class SurveyService implements INetworkDispatch {
 		
 		surveyTool.setCurrentlySurveying(true);
 		surveyTool.setLastSurveyTime(System.currentTimeMillis());
-		surveyTool.setSurveyResource(resource);
+		surveyTool.setSurveyResourceID(resource.getObjectID());
 					
 		String effectFile = surveyTool.getSurveyEffectString();		
 		PlayClientEffectLocMessage cEffMsg = new PlayClientEffectLocMessage(effectFile,crafter.getPlanet().getName(),crafter.getPosition());
@@ -343,7 +349,7 @@ public class SurveyService implements INetworkDispatch {
 		}
 		
 		surveyTool.setCurrentlyCoolingDown(false);
-		GalacticResource sampleResource = surveyTool.getSurveyResource();
+		GalacticResource sampleResource = (GalacticResource) NGECore.getInstance().objectService.getObject(surveyTool.getSurveyResourceID());
 		if(surveyTool==null || sampleResource==null) { // QA
 			crafter.sendSystemMessage("You must survey for a resource before you can sample it.", (byte) 0);
 			surveyTool.setExceptionalState(false);
@@ -415,7 +421,7 @@ public class SurveyService implements INetworkDispatch {
 	public void continueSampling(SurveyTool surveyTool){
 		
 		surveyTool.setCurrentlyCoolingDown(false);
-		CreatureObject crafter = surveyTool.getUser();
+		CreatureObject crafter = (CreatureObject) NGECore.getInstance().objectService.getObject(surveyTool.getUserID());
 		PlayerObject player = (PlayerObject) crafter.getSlottedObject("ghost");	
 		if (crafter.getPosture()!=1){
 			crafter.sendSystemMessage("@survey:sample_cancel", (byte) 0);
@@ -432,7 +438,7 @@ public class SurveyService implements INetworkDispatch {
 			return;
 		}
 					
-		GalacticResource sampleResource = surveyTool.getSurveyResource();
+		GalacticResource sampleResource = (GalacticResource) NGECore.getInstance().objectService.getObject(surveyTool.getSurveyResourceID());
 		float localConcentration = sampleResource.deliverConcentrationForSurvey(crafter.getPlanetId(), crafter.getPosition().x, crafter.getPosition().z);
 		//float localConcentration = 1.0F;
 		if (localConcentration > 0.1) {

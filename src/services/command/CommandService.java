@@ -21,6 +21,7 @@
  ******************************************************************************/
 package services.command;
 
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteOrder;
 import java.util.Map;
 import java.util.Vector;
@@ -583,6 +584,132 @@ public class CommandService implements INetworkDispatch  {
 			}
 			
 		});
+		
+		objControllerOpcodes.put(ObjControllerOpcodes.CRAFT_FILLSLOT, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
+				
+				data.order(ByteOrder.LITTLE_ENDIAN);
+				Client client = core.getClient(session);
+
+				if(client == null) {
+					System.out.println("NULL Client");
+					return;
+				}
+
+				CommandEnqueue commandEnqueue = new CommandEnqueue();						
+				CreatureObject actor = (CreatureObject) client.getParent();
+				SWGObject target = core.objectService.getObject(commandEnqueue.getTargetID());
+								
+//				StringBuilder sb = new StringBuilder();
+//			    for (byte b : data.array()) {
+//			        sb.append(String.format("%02X ", b));
+//			    }
+//			    System.out.println(sb.toString());
+			
+//			    05 00 46 5E CE 80 83 00   00 00 07 01 00 00 72 14 
+//			    09 00 00 00 00 00 00 00   00 00 04 2A 09 00 00 00 
+//			    00 00 01 00 00 00 00 00   00 00 04 00 00 00 00 00 
+//			    00 00 00 00 00 00 00 00   00 00 00 00 
+			    
+			    long playerId = data.getLong(); 
+			    data.getInt();   // 00 00 00 00
+			    long ingredientId = data.getLong(); 
+			    int slotNumber = data.getInt(); 
+			    int option = data.getInt();
+			    byte sequence = data.get();
+//core.craftingService.handleCraftFillSlot(playerId, ingredientId, slotNumber, option, sequence);
+			}
+		});	
+
+		objControllerOpcodes.put(ObjControllerOpcodes.CRAFT_EMPTYSLOT, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
+				
+				data.order(ByteOrder.LITTLE_ENDIAN);
+				Client client = core.getClient(session);
+
+				if(client == null) {
+					System.out.println("NULL Client");
+					return;
+				}
+
+				CommandEnqueue commandEnqueue = new CommandEnqueue();						
+				CreatureObject actor = (CreatureObject) client.getParent();
+				SWGObject target = core.objectService.getObject(commandEnqueue.getTargetID());
+				
+			    long playerId = data.getLong(); 
+			    data.getInt();   // 00 00 00 00
+			    int slotNumber = data.getInt(); 
+			    long ingredientId = data.getLong(); 			    
+			    byte sequence = data.get();		
+//core.craftingService.handleCraftEmptySlot(playerId, ingredientId, slotNumber, sequence);
+			}
+
+		});	
+		
+		
+		objControllerOpcodes.put(ObjControllerOpcodes.CRAFT_CUSTOMIZATION, new INetworkRemoteEvent() {
+			@Override
+			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
+				data.order(ByteOrder.LITTLE_ENDIAN);
+				Client client = core.getClient(session);
+				if(client == null) {
+					System.out.println("NULL Client");
+					return;
+				}
+
+			    long playerId = data.getLong(); 
+			    data.getInt();   // 00 00 00 00 UTF-16LE
+			    
+			    String enteredName = "";
+			    int length = 2*data.order(ByteOrder.LITTLE_ENDIAN).getInt();				
+				int bufferPosition = data.position();				
+				try
+				{				
+					enteredName = new String(data.array(), bufferPosition, length, "UTF-16LE");					
+				}
+				catch (UnsupportedEncodingException e)
+				{					
+					System.err.println("UnsupportedEncodingException while reading crafting customization name ");
+				}
+
+			    System.err.println("enteredName " + enteredName);
+			    data.position(bufferPosition + length);
+			    
+			    byte modelNumber = data.get();
+				int schematicQuantity  = data.getInt(); 
+				byte customizationList = data.get();
+				for (int i=0;i<(int)customizationList;i++){
+					int customizationSlot = data.getInt(); 
+					int customizationValue = data.getInt(); 
+				}
+
+//core.craftingService.handleCraftCustomization(playerId,enteredName,modelNumber,schematicQuantity,customizationList);
+			}
+
+		});
+		
+//		05 00 46 5E CE 80 83 00   00 00 5A 01 00 00 75 59
+//		0F 00 00 00 00 00 00 00   00 00 1D 00 00 00 63 00 
+//		72 00 61 00 66 00 74 00   69 00 6E 00 67 00 3A 00 
+//		5B 00 65 00 78 00 6F 00   5F 00 70 00 72 00 6F 00 
+//		74 00 65 00 69 00 6E 00   5F 00 77 00 61 00 66 00 
+//		65 00 72 00 73 00 5D 00   FF E8 03 00 00 00 00 00 
+//		00 00 00 00 00 00 00 00   00 00 00 00 00 00 00 00 
+//		00 00 00 00 00 00 00 00   00 00 00 00 
+		
+//		USTRING:	CustomName
+//		BYTE:		ModelNumber
+//		INT:		SchematicQuantity
+//		BYTE:		CustomizationList
+//		{
+//		  INT:		CustomizationSlot
+//		  INT:		CustomizationValue
+//		}
+	
 		
 	}
 	

@@ -449,6 +449,7 @@ public class PlayerService implements INetworkDispatch {
 		
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void sendCloningWindow(CreatureObject creature, final boolean pvpDeath) {
 		
 		//if(creature.getPosture() != 14)
@@ -537,7 +538,11 @@ public class PlayerService implements INetworkDispatch {
 		PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
 		int level = 0;
 		
-		if (player == null) {
+		if (creature == null || player == null) {
+			return;
+		}
+		
+		if (profession == null || profession.equals("")) {
 			return;
 		}
 		
@@ -562,6 +567,7 @@ public class PlayerService implements INetworkDispatch {
 		}
 		
 		grantLevel(creature, level);
+		
 		player.setProfessionIcon(Professions.get(profession));
 	}
 	
@@ -598,7 +604,11 @@ public class PlayerService implements INetworkDispatch {
 			//core.equipmentService.unequip(creature, equipment);
 		//}
 		
-		core.buffService.clearBuffs(creature);
+		for (Buff buff : creature.getBuffList().get().toArray(new Buff[] { })) {
+			if (buff.isRemoveOnRespec()) {
+				core.buffService.removeBuffFromCreature(creature, buff);
+			}
+		}
 		
 		try {
 			String[] skills;

@@ -21,9 +21,13 @@
  ******************************************************************************/
 package protocol.swg.chat;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+
 import org.apache.mina.core.buffer.IoBuffer;
 
 import protocol.swg.SWGMessage;
+import resources.common.StringUtilities;
 
 public class ChatSendToRoom extends SWGMessage {
 	
@@ -35,10 +39,18 @@ public class ChatSendToRoom extends SWGMessage {
 	
 	@Override
 	public void deserialize(IoBuffer data) {
-		setMessage(getUnicodeString(data));
-		data.getInt();
-		setRoomId(data.getInt());
-		setMsgId(data.getInt());
+		try {
+			data.getShort();
+			data.getInt();
+			int size = data.getInt();
+			message = new String(ByteBuffer.allocate(size * 2).put(data.array(), data.position(), size * 2).array(), "UTF-16LE");
+			data.position(data.position() + size * 2);
+			data.getInt();
+			setRoomId(data.getInt());
+			setMsgId(data.getInt());
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override

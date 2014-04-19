@@ -1,21 +1,20 @@
 
 def itemTemplate():
 
-	return 'object/tangible/loot/npc_loot/shared_worklight_generic.iff'
-
+	return ['object/tangible/loot/npc_loot/shared_worklight_generic.iff']
+	
 def customItemName():
 
-	return ''
+	return 'Generic Worklight'
 	
-def customItemStackCount():
+def stackable():
 
 	return 1
 	
-def customizationAttributes():
+def junkDealerPrice():
 
-	return []
+	return 10
 	
-def customizationValues():
+def junkType():
 
-	return []
-
+	return 0

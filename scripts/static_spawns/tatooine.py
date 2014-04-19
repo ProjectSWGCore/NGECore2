@@ -11,7 +11,12 @@ def addPlanetSpawns(core, planet):
 	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_character_builder.iff', 'tatooine', long(0), float(3525), float(4), float(-4801), float(0.70), float(0.71))
 	#object = stcSvc.spawnObject('object/mobile/shared_respec_seller_f_1.iff', 'tatooine', long(0), float(3533.14), float(5), float(-4788.86), float(-0.3327), float(0.9288))
 	#object.setOptionsBitmask(264)
-
+	
+	junkdealer = stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_01.iff', 'tatooine', long(0), float(3525), float(4), float(-4804), float(0.70), float(0.71))
+	junkdealer.setOptionsBitmask(264)
+	junkdealer.setCustomName('a Junk Dealer')
+	junkdealer.setAttachment('radial_filename', 'conversation');
+	junkdealer.setAttachment('conversationFile','junk_dealer')
 	
 	return
 	

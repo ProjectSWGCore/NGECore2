@@ -21,12 +21,23 @@
  ******************************************************************************/
 package protocol.swg.auctionManagerClientListener;
 
+import java.nio.ByteOrder;
+
 import org.apache.mina.core.buffer.IoBuffer;
 
+import engine.resources.objects.SWGObject;
 import protocol.swg.SWGMessage;
+import resources.objects.tangible.TangibleObject;
+import services.bazaar.AuctionItem;
 
 public class GetAuctionDetailsResponse extends SWGMessage {
 
+	private AuctionItem target;
+
+	public GetAuctionDetailsResponse(AuctionItem target) {
+		this.target = target;
+	}
+	
 	@Override
 	public void deserialize(IoBuffer data) {
 		// TODO Auto-generated method stub
@@ -35,8 +46,30 @@ public class GetAuctionDetailsResponse extends SWGMessage {
 
 	@Override
 	public IoBuffer serialize() {
-		// TODO Auto-generated method stub
-		return null;
+		final IoBuffer result = IoBuffer.allocate(100).order(ByteOrder.LITTLE_ENDIAN);
+		result.setAutoExpand(true);
+		
+		result.putShort((short) 2);
+		result.putInt(0xFE0E644B);
+		result.putLong(target.getObjectId());
+		result.put(getUnicodeString(target.getItemDescription()));
+		result.putInt(target.getItem().getAttributes().size());
+		target.getItem().getAttributes().forEach((key, value) -> {
+			result.put(getAsciiString(key));
+			result.put(getUnicodeString(value));
+		});
+		result.put(getAsciiString(target.getItem().getTemplate()));
+		if(((TangibleObject) target.getItem()).getCustomization() != null) {
+			result.putShort((short) ((TangibleObject) target.getItem()).getCustomization().length);
+			result.put(((TangibleObject) target.getItem()).getCustomization());
+		} else
+			result.putShort((short) 0);
+			
+		
+		int size = result.position();
+		IoBuffer result2 = IoBuffer.allocate(size).put(result.array(), 0, size);
+
+		return result2.flip();
 	}
 
 }

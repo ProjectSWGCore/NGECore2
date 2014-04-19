@@ -9,7 +9,11 @@ def createRadial(core, owner, target, radials):
 	
 def handleSelection(core, owner, target, option):
 	if option == 36 and target:
+		#core.lootService.handleLootRequest(owner,target)
 		core.lootService.handleLootRequest(owner,target)
+		#lootedObjectInventory = target.getSlottedObject("inventory")
+		#core.simulationService.openContainer(owner, lootedObjectInventory)
+		#core.lootService.handleCreditDrop(owner, lootedObjectInventory)
 	if option == 15 and target:
 		core.objectService.destroyObject(target)
 	return
