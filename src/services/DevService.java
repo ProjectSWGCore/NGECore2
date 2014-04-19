@@ -1238,6 +1238,37 @@ public class DevService implements INetworkDispatch {
 						deed.setAttributes();
 						inventory.add(deed);
 						
+						templateString="object/tangible/deed/player_house_deed/shared_generic_house_small_style_02_floor_02_deed.iff";
+						deed = (Player_House_Deed)core.objectService.createObject(templateString, planet);
+						deed.setBMR(15);
+						deed.setAttributes();
+						inventory.add(deed);
+						
+						
+						templateString="object/tangible/deed/player_house_deed/shared_corellia_house_small_deed.iff";
+						deed = (Player_House_Deed)core.objectService.createObject(templateString, planet);
+						deed.setBMR(15);
+						deed.setAttributes();
+						inventory.add(deed);
+						
+						templateString="object/tangible/deed/player_house_deed/shared_corellia_house_small_floor_02_deed.iff";
+						deed = (Player_House_Deed)core.objectService.createObject(templateString, planet);
+						deed.setBMR(15);
+						deed.setAttributes();
+						inventory.add(deed);
+						
+						templateString="object/tangible/deed/player_house_deed/shared_corellia_house_small_style_02_deed.iff";
+						deed = (Player_House_Deed)core.objectService.createObject(templateString, planet);
+						deed.setBMR(15);
+						deed.setAttributes();
+						inventory.add(deed);
+						
+						templateString="object/tangible/deed/player_house_deed/shared_corellia_house_small_style_02_floor_02_deed.iff";
+						deed = (Player_House_Deed)core.objectService.createObject(templateString, planet);
+						deed.setBMR(15);
+						deed.setAttributes();
+						inventory.add(deed);
+											
 					case 125:
 						TangibleObject genericCraftingTool = (TangibleObject) core.objectService.createObject("object/tangible/crafting/station/shared_generic_tool.iff", planet);
 						genericCraftingTool.setCustomName("Generic Crafting Tool");
