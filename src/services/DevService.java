@@ -340,14 +340,25 @@ public class DevService implements INetworkDispatch {
 						return;
 					case 42:
 						TangibleObject heroismBand = (TangibleObject) core.objectService.createObject("object/tangible/wearables/ring/shared_ring_s04.iff", planet, "item_band_set_hero_01_01");
-						
+						heroismBand.setIntAttribute("cat_stat_mod_bonus.@stat_n:luck_modified", 30);
+						heroismBand.setIntAttribute("cat_stat_mod_bonus.@stat_n:precision_modified", 30);
+						heroismBand.setIntAttribute("cat_stat_mod_bonus.@stat_n:strength_modified", 30);
 						TangibleObject heroismRing = (TangibleObject) core.objectService.createObject("object/tangible/wearables/ring/shared_ring_s02.iff", planet, "item_ring_set_hero_01_01");
-						
+						heroismRing.setIntAttribute("cat_stat_mod_bonus.@stat_n:luck_modified", 30);
+						heroismRing.setIntAttribute("cat_stat_mod_bonus.@stat_n:precision_modified", 30);
+						heroismRing.setIntAttribute("cat_stat_mod_bonus.@stat_n:strength_modified", 30);
 						TangibleObject heroismNecklace = (TangibleObject) core.objectService.createObject("object/tangible/wearables/necklace/shared_necklace_s10.iff", planet, "item_necklace_set_hero_01_01");
-						
+						heroismNecklace.setIntAttribute("cat_stat_mod_bonus.@stat_n:luck_modified", 30);
+						heroismNecklace.setIntAttribute("cat_stat_mod_bonus.@stat_n:precision_modified", 30);
+						heroismNecklace.setIntAttribute("cat_stat_mod_bonus.@stat_n:strength_modified", 30);
 						TangibleObject heroismBraceletRight = (TangibleObject) core.objectService.createObject("object/tangible/wearables/bracelet/shared_bracelet_s03_r.iff", planet, "item_bracelet_r_set_hero_01_01");
-						
+						heroismBraceletRight.setIntAttribute("cat_stat_mod_bonus.@stat_n:luck_modified", 30);
+						heroismBraceletRight.setIntAttribute("cat_stat_mod_bonus.@stat_n:precision_modified", 30);
+						heroismBraceletRight.setIntAttribute("cat_stat_mod_bonus.@stat_n:strength_modified", 30);
 						TangibleObject heroismBraceletLeft = (TangibleObject) core.objectService.createObject("object/tangible/wearables/bracelet/shared_bracelet_s03_l.iff", planet, "item_bracelet_l_set_hero_01_01");
+						heroismBraceletLeft.setIntAttribute("cat_stat_mod_bonus.@stat_n:luck_modified", 30);
+						heroismBraceletLeft.setIntAttribute("cat_stat_mod_bonus.@stat_n:precision_modified", 30);
+						heroismBraceletLeft.setIntAttribute("cat_stat_mod_bonus.@stat_n:strength_modified", 30);
 						
 						inventory.add(heroismBand);
 						inventory.add(heroismRing);
