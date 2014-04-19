@@ -89,6 +89,7 @@ public class SpatialChat extends ObjControllerObject {
 		result.putShort(chatType);
 		result.putShort(moodId);
 		result.put(languageId);
+		result.putInt(0);
 		result.put(outOfBandBuffer.array());
 		return result.flip();
 	}
