@@ -41,6 +41,7 @@ import protocol.swg.objectControllerObjects.CombatSpam;
 import protocol.swg.objectControllerObjects.CommandEnqueueRemove;
 import protocol.swg.objectControllerObjects.StartTask;
 import resources.common.FileUtilities;
+import resources.datatables.Options;
 import resources.datatables.Elemental;
 import resources.datatables.Posture;
 import resources.datatables.WeaponType;
@@ -281,6 +282,11 @@ public class CombatService implements INetworkDispatch {
 	
 	private void applyDamage(CreatureObject attacker, TangibleObject target, int damage) {
 		target.setConditionDamage(target.getConditionDamage() + damage);
+		
+		if (target.getOption(Options.MOUNT)) {
+			core.mountService.damage((CreatureObject) target);
+		}
+		
 		DamageTaken event = events.new DamageTaken();
 		event.attacker = attacker;
 		event.damage = damage;

@@ -44,7 +44,7 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent(version=12)
+@Persistent(version=13)
 public class PlayerObject extends IntangibleObject {
 	
 	// PLAY 3
@@ -143,6 +143,9 @@ public class PlayerObject extends IntangibleObject {
 	private byte godLevel = 0;
 	
 	private List<Integer> chatChannels = new ArrayList<Integer>();
+	
+	@NotPersistent
+	private boolean callingCompanion = false;
 	
 	public PlayerObject() {
 		super();
@@ -875,7 +878,8 @@ public class PlayerObject extends IntangibleObject {
 	}
 	
 	public void removeChannel(int roomId) {
-		chatChannels.remove(roomId);
+		if (chatChannels.contains(roomId))
+			chatChannels.remove(roomId);
 	}
 	
 	public boolean isMemberOfChannel(int roomId) {
@@ -886,4 +890,13 @@ public class PlayerObject extends IntangibleObject {
 		System.out.println("Not a Member of the channel!");
 		return false;
 	}
+	
+	public boolean isCallingCompanion() {
+		return callingCompanion;
+	}
+	
+	public void setCallingCompanion(boolean callingCompanion) {
+		this.callingCompanion = callingCompanion;
+	}
+	
 }

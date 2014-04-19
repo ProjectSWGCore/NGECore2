@@ -5,4 +5,4 @@ def itemTemplate():
 
 def customItemName():
 
-	return ''
+	return 'Tusken Raider Dress'
