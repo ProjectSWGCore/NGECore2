@@ -146,7 +146,7 @@ public class ChatService implements INetworkDispatch {
 					continue;
 				}
 				
-				String message = interpret(chatMessage, languageId, (CreatureObject) client.getParent());
+				String message = chatMessage;
 				SpatialChat spatialChat = new SpatialChat(client.getParent().getObjectId(), speaker.getObjectID(), targetId, message, chatType, moodId, languageId, outOfBand);
 				objControllerMessage = new ObjControllerMessage(0x0B, spatialChat);
 				client.getSession().write(objControllerMessage.serialize());
@@ -1009,7 +1009,7 @@ public class ChatService implements INetworkDispatch {
 	/*
 	 * Language interpretation.
 	 * Converts messages into a language if the receiver can't comprehend it
-	 * */
+	 */
 	public String interpret(String message, int languageId, CreatureObject receiver) {
 		try {
 			DatatableVisitor visitor = ClientFileManager.loadFile("datatables/game_language/game_language.iff", DatatableVisitor.class);
