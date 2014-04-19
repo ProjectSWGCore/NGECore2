@@ -37,6 +37,8 @@ import org.apache.mina.core.session.IoSession;
 import com.sleepycat.je.Transaction;
 import com.sleepycat.persist.EntityCursor;
 
+import engine.clientdata.ClientFileManager;
+import engine.clientdata.visitors.DatatableVisitor;
 import engine.clients.Client;
 import engine.resources.config.Config;
 import engine.resources.config.DefaultConfig;
@@ -107,49 +109,49 @@ public class ChatService implements INetworkDispatch {
 
 	}
 	
-	public void handleSpatialChat(SWGObject speaker, SWGObject target, String chatMessage, short chatType, short moodId) {
-		
+	/*
+	 * This gets used by NPCs as well (random shouts, mustafar miners, etc).
+	 */
+	public void spatialChat(SWGObject speaker, SWGObject target, String chatMessage, short chatType, short moodId, int languageId, OutOfBand outOfBand) {
 		long targetId;
 		
-		if(target == null)
+		if (target == null) {
 			targetId = 0;
-		else
+		} else {
 			targetId = target.getObjectID();
+		}
 		
-		//System.out.println(chatMessage);
-		//System.out.println(chatType);
-		//System.out.println(moodId);
-
-		SpatialChat spatialChat = new SpatialChat(speaker.getObjectID(), targetId, chatMessage, chatType, moodId);
-		ObjControllerMessage objControllerMessage = new ObjControllerMessage(0x0B, spatialChat);
+		ObjControllerMessage objControllerMessage = new ObjControllerMessage(0x0B, new SpatialChat(speaker.getObjectId(), speaker.getObjectID(), targetId, chatMessage, chatType, moodId, languageId, outOfBand));
 		
 		Client speakerClient = speaker.getClient();
 		
-		if(speakerClient == null || speakerClient.getSession() == null)
+		if (speakerClient == null || speakerClient.getSession() == null) {
 			return;
-			
+		}
+		
 		speakerClient.getSession().write(objControllerMessage.serialize());
 		
-		if(speaker.getObservers().isEmpty())
+		if (speaker.getObservers().isEmpty()) {
 			return;
+		}
 		
 		HashSet<Client> observers = new HashSet<Client>(speaker.getObservers());
 		
 		Point3D position = speaker.getPosition();
 		
-		for(Client client : observers) {
+		for (Client client : observers) {
 			float distance = client.getParent().getPosition().getDistance2D(position);
-			if(client != null && client.getSession() != null && distance <= 80) {
-				
-				if(((PlayerObject)client.getParent().getSlottedObject("ghost")).getIgnoreList().contains(speaker.getCustomName().toLowerCase().split(" ")[0]))
+			if (client != null && client.getSession() != null && distance <= 80) {
+				if (((PlayerObject) client.getParent().getSlottedObject("ghost")).getIgnoreList().contains(speaker.getCustomName().toLowerCase().split(" ")[0])) {
 					continue;
+				}
 				
-				spatialChat.setDestinationId(client.getParent().getObjectID());
-				ObjControllerMessage objControllerMessage2 = new ObjControllerMessage(0x0B, spatialChat);
-				client.getSession().write(objControllerMessage2.serialize());
+				String message = interpret(chatMessage, languageId, (CreatureObject) client.getParent());
+				SpatialChat spatialChat = new SpatialChat(client.getParent().getObjectId(), speaker.getObjectID(), targetId, message, chatType, moodId, languageId, outOfBand);
+				objControllerMessage = new ObjControllerMessage(0x0B, spatialChat);
+				client.getSession().write(objControllerMessage.serialize());
 			}
 		}
-
 	}
 	
 	public void handleEmote(SWGObject speaker, SWGObject target, short emoteId) {
@@ -1003,4 +1005,38 @@ public class ChatService implements INetworkDispatch {
 	public ConcurrentHashMap<Integer, ChatRoom> getChatRooms() {
 		return chatRooms;
 	}
+	
+	/*
+	 * Language interpretation.
+	 * Converts messages into a language if the receiver can't comprehend it
+	 * */
+	public String interpret(String message, int languageId, CreatureObject receiver) {
+		try {
+			DatatableVisitor visitor = ClientFileManager.loadFile("datatables/game_language/game_language.iff", DatatableVisitor.class);
+			
+			if (visitor.getObject(0, 0) == null) {
+				return message;
+			}
+			
+			String comprehendSkillMod = (String) visitor.getObject(languageId, 1);
+			
+			if (receiver.getSkillModBase(comprehendSkillMod) > 0) {
+				return message;
+			}
+			
+			for (int l = 3; l < 29; l++) {
+				String letter = ((String) visitor.getObject(0, l));
+				String replacement = ((String) visitor.getObject(languageId, l));
+				
+				if (replacement.length() > 0) {
+					message = message.replace(letter, replacement);
+				}	
+			}
+		} catch (InstantiationException | IllegalAccessException e) {
+			e.printStackTrace();
+		}
+		
+		return message;
+	}
+	
 }
