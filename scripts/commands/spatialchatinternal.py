@@ -9,6 +9,7 @@ def run(core, actor, target, commandString):
 	chatMsg = parsedMsg[5]
 	chatType = int(parsedMsg[1])
 	moodId = int(parsedMsg[2])
-	chatService.handleSpatialChat(actor, target, chatMsg, chatType, moodId)
+	languageId = int(parsedMsg[4])
+	chatService.spatialChat(actor, target, chatMsg, chatType, moodId, languageId, None)
 	return
 	

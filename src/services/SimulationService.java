@@ -222,7 +222,7 @@ public class SimulationService implements INetworkDispatch {
 		object.setIsInQuadtree(true);
 		boolean success = quadTrees.get(object.getPlanet().getName()).put(x, y, object);
 		if(success) {
-			Vector<SWGObject> childObjects = (Vector<SWGObject>) object.getAttachment("childObjects");
+			@SuppressWarnings("unchecked") Vector<SWGObject> childObjects = (Vector<SWGObject>) object.getAttachment("childObjects");
 			if(childObjects != null) {
 				addChildObjects(object, childObjects);
 				object.setAttachment("childObjects", null);
@@ -372,7 +372,7 @@ public class SimulationService implements INetworkDispatch {
 	
 				List<SWGObject> newAwareObjects = get(object.getPlanet(), newPos.x, newPos.z, 512);
 				ArrayList<SWGObject> oldAwareObjects = new ArrayList<SWGObject>(object.getAwareObjects());
-				Collection<SWGObject> updateAwareObjects = CollectionUtils.intersection(oldAwareObjects, newAwareObjects);
+				@SuppressWarnings("unchecked") Collection<SWGObject> updateAwareObjects = CollectionUtils.intersection(oldAwareObjects, newAwareObjects);
 				object.notifyObservers(utm, false);
 
 				for(int i = 0; i < oldAwareObjects.size(); i++) {
@@ -565,7 +565,7 @@ public class SimulationService implements INetworkDispatch {
 
 			List<SWGObject> newAwareObjects = get(object.getPlanet(), newPosition.x, newPosition.z, 512);
 			ArrayList<SWGObject> oldAwareObjects = new ArrayList<SWGObject>(object.getAwareObjects());
-			Collection<SWGObject> updateAwareObjects = CollectionUtils.intersection(oldAwareObjects, newAwareObjects);
+			@SuppressWarnings("unchecked") Collection<SWGObject> updateAwareObjects = CollectionUtils.intersection(oldAwareObjects, newAwareObjects);
 			object.notifyObservers(utm, false);
 
 			for(int i = 0; i < oldAwareObjects.size(); i++) {

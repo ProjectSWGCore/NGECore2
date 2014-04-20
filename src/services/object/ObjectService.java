@@ -1042,6 +1042,7 @@ public class ObjectService implements INetworkDispatch {
 	 * @param position The position as an offset to the parent object.
 	 * @param orientation The orientation as an offset to the parent object.
 	 */
+	@SuppressWarnings("unchecked")
 	public SWGObject createChildObject(SWGObject parent, String template, Point3D position, Quaternion orientation, int cellNumber) {
 		
 		if(cellNumber == -1) {
@@ -1276,13 +1277,13 @@ public class ObjectService implements INetworkDispatch {
 		return count.get();
 	}
 	
-	public void persistObject(IPersistent object, Class keyClass, Class valueClass, ObjectDatabase odb) {
+	public void persistObject(IPersistent object, Class<?> keyClass, Class<?> valueClass, ObjectDatabase odb) {
 		object.createTransaction(odb.getEnvironment());
 		core.getAuctionODB().put(object, keyClass, valueClass, object.getTransaction());
 		object.getTransaction().commitSync();
 	}
 	
-	public void deletePersistentObject(IPersistent object, Class keyClass, Class valueClass, ObjectDatabase odb, Object key) {
+	public void deletePersistentObject(IPersistent object, Class<?> keyClass, Class<?> valueClass, ObjectDatabase odb, Object key) {
 		object.createTransaction(odb.getEnvironment());
 		core.getAuctionODB().delete(key, keyClass, valueClass, object.getTransaction());
 		object.getTransaction().commitSync();

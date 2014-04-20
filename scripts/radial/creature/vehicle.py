@@ -19,13 +19,13 @@ def handleSelection(core, owner, target, option):
 	
 	if target:
 		if option == 21:
-			if mntSvc.isMounted(actor):
-				mntSvc.mount(actor, target)
+			if mntSvc.isMounted(owner):
+				mntSvc.mount(owner, target)
 			else:
-				mntSvc.unmount(actor, target)
+				mntSvc.unmount(owner, target)
 		elif option == 60:
-			mntSvc.store(actor, target)
+			mntSvc.store(owner, target)
 		elif option == 114:
-			mntSvc.repair(actor, target)
+			mntSvc.repair(owner, target)
 	return
 
