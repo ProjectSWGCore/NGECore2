@@ -1,8 +1,6 @@
 import sys
 
 def setup(core, object):
-	object.setAttachment('radial_filename', 'ring/unity')
-	object.setAttachment('objType', 'ring')
 	object.setStfFilename('static_item_n')
 	object.setStfName('item_bracelet_l_set_hero_01_01')
 	object.setDetailFilename('static_item_d')
