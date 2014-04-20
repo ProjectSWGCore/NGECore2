@@ -22,11 +22,14 @@
 package resources.common;
 
 import java.util.Random;
+
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
 import main.NGECore;
+import resources.datatables.Options;
 import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
+import services.ai.AIActor;
 
 /** 
  * @author Charon 
@@ -152,9 +155,9 @@ public class Forager {
 			if (chosenObject>6)
 				adversaryRoll=999;
 			
-			if (adversaryRoll<100) {
+			if (adversaryRoll<14) {
 				int adversaryTypeRoll = new Random().nextInt(100);
-				if (adversaryTypeRoll<100){
+				if (adversaryTypeRoll<50){
 					// wormie
 					spawnWormie(forager);
 				} else {
@@ -247,14 +250,63 @@ public class Forager {
 		wormie.setCustomName(name);
 		wormie.setCustomName2(name);
 		wormie.setLevel(forager.getLevel());
+		wormie.setOptions(Options.AGGRESSIVE, true);
+		wormie.setOptions(Options.ATTACKABLE, true);
+		AIActor actor = (AIActor) wormie.getAttachment("AI");
+		actor.addDefender(forager);		
 	}
 	
 	public void spawnGoon(CreatureObject forager){
+		System.out.println("GOON");
 		int level = forager.getLevel();
 		String name = "";		
 		Point3D wormiePosition = SpawnPoint.getRandomPosition(forager.getPosition(), 1, 6, forager.getPlanetId());
 		CreatureObject goon = NGECore.getInstance().spawnService.spawnCreature("forage_goon", forager.getPlanet().getName(), 0L, wormiePosition.x, wormiePosition.y, wormiePosition.z, (short)level);
+		// thief wookie criminal scavenger @forage_enemy:bark_thief
+		String barkString = "";
+	
+		switch (goon.getTemplate()) {
 		
+		case "object/mobile/shared_dressed_criminal_assassin_human_female_01.iff":
+				name = "A criminal";
+				barkString = "@forage_enemy:bark_criminal";
+				break;
+				
+		case "object/mobile/shared_dressed_criminal_assassin_human_male_01.iff":
+				name = "A Scavenger";
+				barkString = "@forage_enemy:bark_scavenger";
+				break;
+				
+		case "object/mobile/shared_twilek_male.iff":
+				name = "A Thief";
+				barkString = "@forage_enemy:bark_thief";
+				break;
+				
+		case "object/mobile/shared_dressed_binayre_pirate_zabrak_male_01.iff":
+				name = "A Pirate";
+				barkString = "@forage_enemy:bark_thief";
+				break;
+				
+		case "object/mobile/shared_dressed_borvos_thug.iff":
+				name = "A Thug";
+				barkString = "@forage_enemy:bark_criminal";
+				break;
+				
+		case "object/mobile/shared_wookiee_male.iff":
+				name = "A Thug";
+				barkString = "@forage_enemy:bark_wookiee";
+				break;
+				
+		}
+		goon.setCustomName(name);
+		goon.setCustomName2(name);
+		goon.setLevel(forager.getLevel());
+		goon.setOptions(Options.AGGRESSIVE, true);
+		goon.setOptions(Options.ATTACKABLE, true);
+		AIActor actor = (AIActor) goon.getAttachment("AI");
+		actor.addDefender(forager);
+		NGECore.getInstance().chatService.spatialChat(goon, forager, barkString, short chatType, short moodId, int languageId, OutOfBand outOfBand);
+			long targetId;
 	}
 
 }
