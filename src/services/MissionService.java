@@ -99,55 +99,10 @@ public class MissionService implements INetworkDispatch {
 		});
 	}
 	
-	@SuppressWarnings("unused")
 	private void populateMissions(final SWGObject player, int type) {
 		CreatureObject creature = (CreatureObject) player;
-		TangibleObject missionBag = (TangibleObject) creature.getSlottedObject("mission_bag");
-		
-		final AtomicInteger deCount = new AtomicInteger();
-		final AtomicInteger dCount = new AtomicInteger();
-		//createDefaultMissions(creature);
-		missionBag.viewChildren(creature, true, false, new Traverser() {
 
-			@Override
-			public void process(SWGObject child) {
-				MissionObject mission = (MissionObject) child;
-				if (deCount.get() < 5) {
-					mission.setMissionType("destroy");
-					mission.setMissionStart(200, 0, 200, "tatooine");
-					deCount.getAndIncrement();
-					Console.println("Destroy missions: " + String.valueOf(deCount.get()));
-				}
-				else if (dCount.get() < 5) {
-					mission.setMissionType("deliver");
-					mission.setMissionStart(0, 0, 0, "tatooine");
-					dCount.getAndIncrement();
-					Console.println("Deliver missions: " + String.valueOf(dCount.get()));
-				} else {
-					return;
-				}
-				mission.setCreditReward(1337);
-				mission.setCreator("Waverunner");
-				mission.setMissionLevel(5);
-				mission.setMissionDescription("mission/mission_destroy_neutral_hard_creature_tatooine", "m17d");
-				mission.setMissionTitle("mission/mission_destroy_neutral_hard_creature_tatooine", "m17t");
-				mission.setMissionDestination(400, 0, 400, "tatooine");
-				mission.setMissionTemplateObject(CRC.StringtoCRC("object/tangible/lair/base/shared_objective_power_generator.iff"));
-				mission.setMissionTargetName("@lair_n:tatooine_giant_worrt_lair_neutral_medium");
-				mission.setRepeatCount(1);
-				/*WaypointObject wp = new WaypointObject();
-				wp.setName("@mission/mission_destroy_neutral_hard_creature_tatooine:m17t");
-				wp.setColor(WaypointObject.ORANGE);
-				wp.setPosition(new Point3D(10, 10, 10));
-				wp.setCellId(0);
-				wp.setPlanet(core.terrainService.getPlanetByName("tatooine"));*/
-				mission.sendMissionDelta();
-				
-			}
-			
-		});
-		
-		//Console.println("Sent deltas");
+		debugMissionDelta(creature);
 	}
 	
 	// May want to create a map for the server with needed info
@@ -172,33 +127,57 @@ public class MissionService implements INetworkDispatch {
 		return 0;
 	}
 	
-	public void createDefaultMissions(CreatureObject player) {
-		for(int missionsAdded = 0; missionsAdded <= 10; missionsAdded++) {
-			MissionObject mission = (MissionObject) core.objectService.createObject("object/mission/shared_mission_object.iff", player.getPlanet());
-			
-			mission.setMissionLevel(0);
-			mission.setMissionStart(0, 0, 0, null);
-			mission.setCreator("");
-			mission.setCreditReward(0);
-			
-			mission.setMissionDestination(0, 0, 0, null);
-			
-			//mission.setMissionTemplateObject(missionTemplateObject);
-			mission.setMissionDescription("", "");
-			mission.setMissionTitle("", "");
-			
-			mission.setMissionType("destroy"); // 0x19C9FAC1
-			
-			mission.setMissionTargetName("");
+	public void debugMissionDelta(CreatureObject creature) {
+		TangibleObject missionBag = (TangibleObject) creature.getSlottedObject("mission_bag");
+		final AtomicInteger count = new AtomicInteger();
+		final AtomicInteger deCount = new AtomicInteger();
+		final AtomicInteger dCount = new AtomicInteger();
+		
+		count.getAndSet(1);
+		missionBag.viewChildren(creature, true, false, new Traverser() {
 
-			TangibleObject missionBag = (TangibleObject) player.getSlottedObject("mission_bag");
-			missionBag._add(mission);
-
-			Console.println("Added mission " + missionsAdded);
-		}
-		Console.println("Successfully created default missions");
+			@Override
+			public void process(SWGObject child) {
+				
+				//if (count.get() > 1)
+					//return;
+				
+				if (child instanceof MissionObject == true) {
+					System.out.println(count.get() + " is a MissionObject");
+				} else {
+					System.out.println(count.get() + " is not a MissionObject!!");
+				}
+					
+				MissionObject mission = (MissionObject) child;
+				if (deCount.get() < 5) {
+					mission.setMissionType("destroy");
+					deCount.getAndIncrement();
+					Console.println("Destroy missions: " + String.valueOf(deCount.get()));
+				}
+				else if (dCount.get() < 5) {
+					mission.setMissionType("deliver");
+					dCount.getAndIncrement();
+					Console.println("Deliver missions: " + String.valueOf(dCount.get()));
+				} else {
+					return;
+				}
+				
+				mission.setMissionDescription("mission/mission_deliver_neutral_easy", "m9d");
+				mission.setMissionLevel(1);
+				mission.setMissionStart((float) 3377.148, (float) -4753.221, (float) 0, "tatooine");
+				mission.setCreator("Waverunner");
+				mission.setCreditReward(69);
+				mission.setMissionDestination((float) 3447.129, (float) -5070.057, (float) 0, "tatooine");
+				mission.setMissionTemplateObject(CRC.StringtoCRC("object/tangible/mission/shared_mission_datadisk.iff"));
+				mission.setMissionTitle("mission/mission_deliver_neutral_easy", "m9t");
+				mission.setRepeatCount(1);
+				
+				//mission.sendMissionDelta();
+				System.out.println("Object: " + count.getAndIncrement());
+			}
+			
+		});
 	}
-	
 	@Override
 	public void shutdown() {
 

@@ -310,12 +310,11 @@ public class CharacterService implements INetworkDispatch {
 				object._add(bank);
 				object._add(missionBag);
 				
-				/*for(int missionsAdded = 0; missionsAdded < 12; missionsAdded++) {
+				for(int missionsAdded = 1; missionsAdded <= 10; missionsAdded++) {
 					MissionObject mission = (MissionObject) core.objectService.createObject("object/mission/shared_mission_object.iff", object.getPlanet());
 
 					missionBag._add(mission);
-					Console.println("Added empty mission " + missionsAdded);
-				}*/
+				}
 				
 				// TODO: Race abilities
 				if (client.isGM())
@@ -329,8 +328,6 @@ public class CharacterService implements INetworkDispatch {
 				object.addObjectToEquipList(bank);
 				object.addObjectToEquipList(missionBag);
 				object.addObjectToEquipList(appInventory);
-				
-				core.missionService.createDefaultMissions(object);
 				
 				WeaponObject defaultWeapon = (WeaponObject) core.objectService.createObject("object/weapon/creature/shared_creature_default_weapon.iff", object.getPlanet());
 				object.addObjectToEquipList(defaultWeapon);

@@ -42,46 +42,47 @@ public class MissionMessageBuilder extends ObjectMessageBuilder {
 		IoBuffer buffer = IoBuffer.allocate(100, false).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.setAutoExpand(true);
 		
-		buffer.putShort((short) 17);
+		buffer.putShort((short) 16);
 		
-		buffer.putFloat(1); // mission complexity ??
-		buffer.put(getAsciiString("mission/mission_object"));
+		buffer.putFloat(object.getComplexity()); // mission complexity ??
+
+		buffer.put(getAsciiString(object.getStfFilename()));
 		buffer.putInt(0);
-		buffer.put(getAsciiString("destroy_mission"));
+		buffer.put(getAsciiString(object.getStfName()));
 
 		if (mission.getCustomName() == null) { buffer.putInt(0); } 
 		else { buffer.put(getUnicodeString(mission.getCustomName())); }
 
-		buffer.putInt(0); // volume
+		buffer.putInt(object.getVolume()); // volume
+		
 		buffer.putInt(0); // unused
+		
 		buffer.putInt(mission.getMissionLevel());
 		
 		buffer.putFloat(mission.getMissionStartX());
 		buffer.putFloat(mission.getMissionStartZ()); // missionStartZ
 		buffer.putFloat(mission.getMissionStartY());
-		
 		buffer.putLong(0); // Start Object ID
-		
-		if (mission.getMissionStartPlanet() == null) {
+		if (mission.getMissionStartPlanet() == null)
 			buffer.putInt(0);
-		} else {
+		else
 			buffer.putInt(CRC.StringtoCRC(mission.getMissionStartPlanet()));
-		}
-	
-		buffer.put(getUnicodeString(mission.getCreator()));
+		
+		if (mission.getCreator() != null)
+			buffer.put(getUnicodeString(mission.getCreator()));
+		else
+			buffer.putInt(0);
+
 		buffer.putInt(mission.getCreditReward());
 		
 		buffer.putFloat(mission.getMissionDestinationX());
 		buffer.putFloat(mission.getMissionDestinationZ());
 		buffer.putFloat(mission.getMissionDestinationY());
-		
 		buffer.putLong(0); // Destination Object ID
-		
-		if (mission.getMissionDestinationPlanet() == null) {
+		if (mission.getMissionDestinationPlanet() == null)
 			buffer.putInt(0);
-		} else {
+		else
 			buffer.putInt(CRC.StringtoCRC(mission.getMissionDestinationPlanet()));
-		}
 		
 		buffer.putInt(mission.getMissionTemplateObject());
 
@@ -95,11 +96,10 @@ public class MissionMessageBuilder extends ObjectMessageBuilder {
 		
 		buffer.putInt(0); // refresh counter
 		
-		if(mission.getMissionType() == null) {
+		if(mission.getMissionType() == null)
 			buffer.putInt(0);
-		} else {
+		else
 			buffer.putInt(CRC.StringtoCRC(mission.getMissionType()));
-		}
 
 		buffer.put(getAsciiString(mission.getMissionTargetName()));
 		
@@ -178,7 +178,7 @@ public class MissionMessageBuilder extends ObjectMessageBuilder {
 		
 		return buffer;
 	}
-/*	
+
 	public IoBuffer buildStfDelta(String stfFile, String stfName) {
 		
 		IoBuffer buffer = IoBuffer.allocate(4 + stfFile.length() + stfName.length(), false).order(ByteOrder.LITTLE_ENDIAN);
@@ -231,9 +231,9 @@ public class MissionMessageBuilder extends ObjectMessageBuilder {
 	
 	public IoBuffer buildCreatorNameDelta(String creator) {
 
-		IoBuffer buffer = IoBuffer.allocate(4 + creator.length(), false).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer buffer = IoBuffer.allocate(4 + (creator.length() * 2), false).order(ByteOrder.LITTLE_ENDIAN);
 		
-		buffer.put(getAsciiString(creator));
+		buffer.put(getUnicodeString(creator));
 		
 		int size = buffer.position();
 		buffer.flip();
@@ -278,11 +278,11 @@ public class MissionMessageBuilder extends ObjectMessageBuilder {
 		return buffer;
 	}
 	
-	public IoBuffer buildTargetObjectIffDelta(String template) {
+	public IoBuffer buildTargetObjectIffDelta(int template) {
 
 		IoBuffer buffer = IoBuffer.allocate(4, false).order(ByteOrder.LITTLE_ENDIAN);
 		
-		buffer.putInt(CRC.StringtoCRC(template));
+		buffer.putInt(template);
 		
 		int size = buffer.position();
 		buffer.flip();
@@ -359,66 +359,7 @@ public class MissionMessageBuilder extends ObjectMessageBuilder {
 		
 		return buffer;
 	}
-*/	
-	@SuppressWarnings("unused")
-	public IoBuffer buildMissionDelta() {
-		IoBuffer buffer = IoBuffer.allocate(500, false).order(ByteOrder.LITTLE_ENDIAN);
-		buffer.isAutoExpand();
-		buffer.isAutoShrink();
-		
-		MissionObject mission = (MissionObject) object;
-		
-		buffer.putShort((short) 11);
-		buffer.put(getAsciiString(mission.getMissionDescription()));
-		buffer.putInt(0);
-		buffer.put(getAsciiString(mission.getMissionDescId()));
-		
-		buffer.putShort((short) 5);
-		buffer.putInt(mission.getMissionLevel());
-		
-		buffer.putShort((short) 7);
-		buffer.put(getUnicodeString(mission.getCreator()));
-		
-		buffer.putShort((short) 8);
-		buffer.putInt(mission.getCreditReward());
-		
-		buffer.putShort((short) 9);
-		buffer.putFloat(mission.getMissionDestinationX());
-		buffer.putFloat(mission.getMissionDestinationZ());
-		buffer.putFloat(mission.getMissionDestinationY());
-		buffer.putLong(0);
-		buffer.putInt(CRC.StringtoCRC(mission.getMissionDestinationPlanet()));
-		
-		buffer.putShort((short) 10);
-		buffer.putInt(mission.getMissionTemplateObject());
-		
-		buffer.putShort((short) 12);
-		buffer.put(getAsciiString(mission.getMissionTitle()));
-		buffer.putInt(0);
-		buffer.put(getAsciiString(mission.getMissionTitleId()));
-		
-		buffer.putShort((short) 13);
-		buffer.putInt(mission.getMissionRepeatCounter());
-		
-		buffer.putShort((short) 14);
-		buffer.putInt(CRC.StringtoCRC(mission.getMissionType()));
-		
-		buffer.putShort((short) 15);
-		buffer.put(getAsciiString(mission.getMissionTargetName()));
-		
-		buffer.putShort((short) 6);
-		buffer.putFloat(mission.getMissionStartX());
-		buffer.putFloat(mission.getMissionStartZ());
-		buffer.putFloat(mission.getMissionStartY());
-		buffer.putLong(0); // Start Object ID
-		buffer.putInt(CRC.StringtoCRC(mission.getMissionStartPlanet()));
-		
-		int size = buffer.position();
-		buffer.flip();
-		buffer = createDelta("MISO", (byte) 3, (short) 8, buffer, size + 4);
-		Console.println("MISO3 Delta: " + StringUtilities.bytesToHex(buffer.array()));
-		return buffer;
-	}
+
 	@Override
 	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
 		
