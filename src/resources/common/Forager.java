@@ -460,16 +460,16 @@ public class Forager {
 		
 		// PROFESSION BRACELETS  HOUSE FURNITURE  WEARABLE BACKPACKS
 		String[] lootPoolNames = new String[]{"profession_bracelets_"+levelRange,"house_furniture","wearable_backpacks"};
-		int[] lootPoolChances  = new int[]{50,25,25};
+		int[] lootPoolChances  = new int[]{60,30,10};
 		int lootGroupChance = 80;
 		treasureContainer.addToLootGroups(lootPoolNames, lootPoolChances, lootGroupChance);
 		
 		// WEAPONSMITH COMPONENTS JEDI COMPONENTS GEM COLLECTION ITEMS TREASURE HUNTER COLLECTION ITEMS
-		
-		// CONSUMABLE BUFF ITEMS
-//	    Flask of Elba Water
-//	    Flask of Naris-bud Tea
-//	    Small flask of Nerfmilk 
+		lootPoolNames = new String[]{"weaponsmith_components","jedi_components","gem_collection_items","treasure_hunter_collection_items"};
+		lootPoolChances  = new int[]{15,25,30,30};
+		lootGroupChance = 80;
+		treasureContainer.addToLootGroups(lootPoolNames, lootPoolChances, lootGroupChance);
+
 		
 		// COMMON LOOTS: 
 //		Looted non-wearable Bounty Hunter armor pieces (Used to make Mandalorian armor at the Death Watch Bunker)
@@ -480,11 +480,17 @@ public class Forager {
 //		Advanced Power Stim (CL80)
 //		Loot kits adhesives
 //		Various Schematics 
+		lootPoolNames = new String[]{"bh_armor_for_mando","advanced_stims_80","loot_kits_adhesives","various_schematics"};
+		lootPoolChances  = new int[]{15,25,30,30};
+		lootGroupChance = 80;
+		treasureContainer.addToLootGroups(lootPoolNames, lootPoolChances, lootGroupChance);
+		
+		
+		//GEM COLLECTION ITEMS  CONSUMABLE BUFF ITEMS
 		
 		// VERY RARE BUFF ITEMS
-		lootPoolNames = new String[]{"Rare Nova Crystal"," Rare Rol Stone","Rare Power Gem",
-				                     " Rare Corusca Gem","Rare Sasho Gem","Rare Ankarres Sapphire "};
-		lootPoolChances  = new int[]{17,17,17,17,17,15};
+		lootPoolNames = new String[]{"rare_buff_items"};
+		lootPoolChances  = new int[]{100};
 		lootGroupChance = 1;
 		treasureContainer.addToLootGroups(lootPoolNames, lootPoolChances, lootGroupChance);
 		
