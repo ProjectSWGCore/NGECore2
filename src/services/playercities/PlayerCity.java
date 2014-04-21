@@ -23,6 +23,9 @@ package services.playercities;
 
 import java.util.Vector;
 
+import resources.objects.creature.CreatureObject;
+import main.NGECore;
+import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
 
 /** 
@@ -31,26 +34,34 @@ import engine.resources.scene.Point3D;
 
 public class PlayerCity {
 	
-	public static int OUTPOST    = 0; 
-	public static int VILLAGE    = 1; 
-	public static int TOWNSHIP   = 2; 
-	public static int CITY       = 3; 
-	public static int METROPOLIS = 4; 
+	public static int DESERTED   = 0;
+	public static int OUTPOST    = 1; 
+	public static int VILLAGE    = 2; 
+	public static int TOWNSHIP   = 3; 
+	public static int CITY       = 4; 
+	public static int METROPOLIS = 5; 
 	
-	public static int CLONING_LAB            = 0; 
-	public static int DNA_LABORATORY         = 1; 
-	public static int ENCORE_PERFORMANCE     = 2; 
-	public static int ENTERTAINMENT_DISTRICT = 3; 
-	public static int IMPROVED_JOB_MARKET    = 4; 
-	public static int MANUFACTURING_CENTER   = 5; 
-	public static int MEDICAL_CENTER         = 6; 
-	public static int RESEARCH_CENTER        = 7; 
-	public static int SAMPLE_RICH            = 8; 
+	public static int CLONING_LAB            = 1; 
+	public static int DNA_LABORATORY         = 2; 
+	public static int ENCORE_PERFORMANCE     = 3; 
+	public static int ENTERTAINMENT_DISTRICT = 4; 
+	public static int IMPROVED_JOB_MARKET    = 5; 
+	public static int MANUFACTURING_CENTER   = 6; 
+	public static int MEDICAL_CENTER         = 7; 
+	public static int RESEARCH_CENTER        = 8; 
+	public static int SAMPLE_RICH            = 9; 
+	
+	public static int BANK              = 1; 
+	public static int CLONING_FACILITY  = 2; 
+	public static int GARAGE            = 3; 
+	public static int MEDIUM_GARDEN     = 4; 
+	public static int LARGE_GARDEN      = 5;
+	public static int SHUTTLEPORT       = 6;
 	
 	
 	private Point3D cityCenterPosition = new Point3D(0,0,0);
 	private int cityRadius = 0;
-	private int rank = 0;
+	private int cityRank = 0;
 	private int specialisation = -1;
 	private long mayorID = 0L;
 	private int cityTreasury = 0;
@@ -59,22 +70,31 @@ public class PlayerCity {
 	private long nextElectionDate = 0L; 
 	private long nextCityUpdate = 0L; 
 	private long foundationTime = 0L;
+	private int tax = 0;
+	private boolean founded = false;
+	
+	private final long cityUpdateSpan = 7*86400*1000;
+	private final long legislationPeriod = 21*86400*1000;
 	
 	private Vector<Long> placedStructures = new Vector<Long>();
 	private Vector<Long> citizens = new Vector<Long>();
-	private Vector<Long> electionChallengers = new Vector<Long>();
+	private Vector<Long> electionCandidates = new Vector<Long>();
 	private Vector<Byte> electionVotes = new Vector<Byte>();
 	private Vector<Long> cityBanList = new Vector<Long>();
 	private Vector<Long> militiaList = new Vector<Long>();
 	private Vector<Long> foundersList = new Vector<Long>();
 	
-	public PlayerCity(){
+	public PlayerCity(){}
+	
+	public PlayerCity(CreatureObject founder){
 		
-		setFoundationTime(System.currentTimeMillis());
+		setCityCenterPosition(founder.getPosition());
 		setCityRadius(150);
+		setFoundationTime(System.currentTimeMillis());		
 		setMaintenanceFee(1);
-		setNextCityUpdate(foundationTime+7*86400*1000);
-		setNextElectionDate(foundationTime+21*86400*1000);
+		setNextCityUpdate(foundationTime+cityUpdateSpan);
+		setNextElectionDate(foundationTime+legislationPeriod);
+		citizens.add(founder.getObjectID());		
 	}
 	
 	public void handleGrantZoning() {
@@ -90,11 +110,99 @@ public class PlayerCity {
 	}
 	
 	public void processElection() {
-		
+				
+		long winnerID = mayorID;
+		mayorID = winnerID;
+		electionVotes.clear();
+		electionCandidates.clear();
+		electionCandidates.add(mayorID);
+		setNextElectionDate(System.currentTimeMillis()+legislationPeriod);
 	}
 	
 	public void processCityUpdate() {
+		// has something changed?
+		int censusResult = citizens.size();
+		if (censusResult<5){			
+			setRank(DESERTED); // City is technically not a city anymore
+			setCityRadius(0);
+		}
 		
+		if (censusResult>=5 && censusResult<10){
+			setRank(OUTPOST);	
+			setCityRadius(150);
+		}
+		
+		if (censusResult>=10 && censusResult<15){
+			setRank(VILLAGE);		
+			setCityRadius(200);
+		}
+		
+		if (censusResult>=15 && censusResult<30){
+			setRank(TOWNSHIP);
+			setCityRadius(300);
+		}
+		
+		if (censusResult>=30 && censusResult<40){
+			setRank(CITY);		
+			setCityRadius(400);
+		}
+		
+		if (censusResult>=40){
+			setRank(METROPOLIS);	
+			setCityRadius(450);
+		}
+		
+		// collect taxes
+		for (long citizen : citizens){
+			CreatureObject citizenObject = (CreatureObject) NGECore.getInstance().objectService.getObject(citizen);
+			citizenObject.setBankCredits(citizenObject.getBankCredits()-tax);
+			cityTreasury += tax;
+			// ToDo: Handle tax evaders etc.
+		}
+		
+		demolishHighRankStructures();
+		setNextCityUpdate(System.currentTimeMillis()+cityUpdateSpan);
+	}
+	
+	public void demolishHighRankStructures() {
+		// Check if there are any structures in the city
+		// that require a higher rank than the current one
+		synchronized(placedStructures){
+			Vector<SWGObject> wreckingBall = new Vector<SWGObject>();
+			for (long structureID : placedStructures){
+				SWGObject structure = NGECore.getInstance().objectService.getObject(structureID);
+				int structureCode = (int) structure.getAttachment("CityStructureCode");
+				
+				if (structureCode==BANK && cityRank<2){				
+					wreckingBall.add(structure);
+				}
+				
+				if (structureCode==CLONING_FACILITY && cityRank<3){				
+					wreckingBall.add(structure);
+				}
+				
+				if (structureCode==GARAGE && cityRank<2){				
+					wreckingBall.add(structure);
+				}
+				
+				if (structureCode==MEDIUM_GARDEN && cityRank<2){				
+					wreckingBall.add(structure);
+				}
+				
+				if (structureCode==LARGE_GARDEN && cityRank<3){				
+					wreckingBall.add(structure);
+				}
+				
+				if (structureCode==SHUTTLEPORT && cityRank<4){				
+					wreckingBall.add(structure);
+				}						
+			}
+			
+			for (SWGObject wreck : wreckingBall){
+				placedStructures.remove(wreck.getObjectID());
+				NGECore.getInstance().objectService.destroyObject(wreck.getObjectID());
+			}			
+		}		
 	}
 	
 	public boolean checkFoundationSuccess() {
@@ -107,7 +215,7 @@ public class PlayerCity {
 				founderCitizenCount++;
 		}
 		if (founderCitizenCount==founders.size())
-				return true;
+				return true; // All founders are citizens now
 		
 		return false;
 	}
@@ -124,12 +232,12 @@ public class PlayerCity {
 		
 	}
 
-	public int getRank() {
-		return rank;
+	public int getCityRank() {
+		return cityRank;
 	}
 
-	public void setRank(int rank) {
-		this.rank = rank;
+	public void setRank(int cityRank) {
+		this.cityRank = cityRank;
 	}
 
 	public int getSpecialisation() {
@@ -173,19 +281,39 @@ public class PlayerCity {
 	}
 
 	public Vector<Long> getPlacedStructures() {
-		return placedStructures;
+		synchronized(placedStructures){
+			return placedStructures;
+		}
 	}
 
 	public void setPlacedStructures(Vector<Long> placedStructures) {
-		this.placedStructures = placedStructures;
+		synchronized(placedStructures){
+			this.placedStructures = placedStructures;
+		}
 	}
 
 	public Vector<Long> getCitizens() {
-		return citizens;
+		synchronized(citizens){
+			return citizens;
+		}
 	}
 
 	public void setCitizens(Vector<Long> citizens) {
-		this.citizens = citizens;
+		synchronized(citizens){
+			this.citizens = citizens;
+		}
+	}
+	
+	public void addCitizen(long citizen) {
+		synchronized(citizens){
+			this.citizens.add(citizen);
+		}
+	}
+	
+	public void removeCitizen(long citizen) {
+		synchronized(citizens){
+			this.citizens.remove(citizen);
+		}
 	}
 
 	public long getNextElectionDate() {
@@ -196,12 +324,12 @@ public class PlayerCity {
 		this.nextElectionDate = nextElectionDate;
 	}
 
-	public Vector<Long> getElectionChallengers() {
-		return electionChallengers;
+	public Vector<Long> getElectionCandidates() {
+		return electionCandidates;
 	}
 
-	public void setElectionChallengers(Vector<Long> electionChallengers) {
-		this.electionChallengers = electionChallengers;
+	public void setElectionCandidates(Vector<Long> electionCandidates) {
+		this.electionCandidates = electionCandidates;
 	}
 
 	public long getNextCityUpdate() {
@@ -271,6 +399,14 @@ public class PlayerCity {
 
 	public void setFoundationTime(long foundationTime) {
 		this.foundationTime = foundationTime;
+	}
+
+	public boolean isFounded() {
+		return founded;
+	}
+
+	public void setFounded(boolean founded) {
+		this.founded = founded;
 	}
 
 }
