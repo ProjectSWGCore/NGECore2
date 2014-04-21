@@ -6,3 +6,15 @@ def itemTemplate():
 def customItemName():
 
 	return 'ID Chip'
+
+def stackable():
+
+	return 1
+	
+def junkDealerPrice():
+
+	return 14
+	
+def junkType():
+
+	return 0

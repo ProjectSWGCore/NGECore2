@@ -1,4 +1,3 @@
-from main import NGECore
 import sys
 
 def setup():

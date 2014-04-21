@@ -121,7 +121,10 @@ import resources.objects.tangible.TangibleObject;
 import resources.objects.tool.SurveyTool;
 import resources.objects.waypoint.WaypointObject;
 import resources.objects.weapon.WeaponObject;
+import services.command.BaseSWGCommand;
+import services.command.CombatCommand;
 import services.bazaar.AuctionItem;
+import services.chat.ChatRoom;
 
 @SuppressWarnings("unused")
 
@@ -731,21 +734,69 @@ public class ObjectService implements INetworkDispatch {
 	}
 	
 	public void useObject(CreatureObject creature, SWGObject object) {
-		if (object == null) {
+		if (creature == null || object == null) {
 			return;
 		}
 		
-		if(object.getStringAttribute("proc_name") != null)
-		{
-			if(object.getAttachment("tempUseCount") != null) 
-			{
-				int useCount = (int)object.getAttachment("tempUseCount"); // Seefo: Placeholder until delta for stack count/use count
+		int reuse_time;
+		
+		try {
+			reuse_time = object.getIntAttribute("reuse_time");
+		} catch (NumberFormatException e) {
+			reuse_time = 0;
+		}
+		
+		if (reuse_time > 0) {
+			try {
+				DatatableVisitor visitor = ClientFileManager.loadFile("datatables/timer/template_command_mapping.iff", DatatableVisitor.class);
 				
-				if((useCount - 1) == 0) destroyObject(object);
-				else object.setAttachment("tempUseCount", useCount--);
+				for (int i = 0; i < visitor.getRowCount(); i++) {
+					if (visitor.getObject(i, 0) != null && ((String) (visitor.getObject(i, 0))).equalsIgnoreCase(object.getTemplate())) {
+						String commandName = (String) visitor.getObject(i, 1);
+						String cooldownGroup = (String) visitor.getObject(i, 2);
+						String animation = (String) visitor.getObject(i, 3);
+						
+						if (commandName.length() > 0) {
+							BaseSWGCommand command = core.commandService.getCommandByName(commandName);
+							
+							if (command instanceof CombatCommand && animation.length() > 0) {
+								((CombatCommand) command).setDefaultAnimations(new String[] { animation });
+							}
+							
+							if (core.commandService.callCommand(creature, object, command, 0, "")) {
+								core.commandService.removeCommand(creature, 0, command);
+								return;
+							}
+						} else if (cooldownGroup.length() > 0) {
+							if (creature.hasCooldown(cooldownGroup)) {
+								return;
+							}
+							
+							creature.addCooldown(cooldownGroup, object.getIntAttribute("reuse_time"));
+						}
+						
+						break;
+					}
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
+		}
+		
+		if (object instanceof TangibleObject) {
+			TangibleObject item = (TangibleObject) object;
+			int uses = item.getUses();
 			
-			// Seefo: We need to add cool downs for buff items
+			if (uses > 0)  {
+				item.setUses(uses--);
+				
+				if (item.getUses() == 0) {
+					destroyObject(object);
+				}
+			}
+		}
+		
+		if (object.getStringAttribute("proc_name") != null) {
 			core.buffService.addBuffToCreature(creature, object.getStringAttribute("proc_name").replace("@ui_buff:", ""), creature);
 		}
 		
@@ -923,6 +974,14 @@ public class ObjectService implements INetworkDispatch {
 							}
 						}
 					}
+					
+					for (Integer roomId : ghost.getJoinedChatChannels()) {
+						ChatRoom room = core.chatService.getChatRoom(roomId);
+						
+						if (room != null) { core.chatService.joinChatRoom(objectShortName, roomId); } 
+						// work-around for any channels that may have been deleted, or only spawn on server startup, that were added to the joined channels
+						else { ghost.removeChannel(roomId); }
+					}
 				}
 				
 				if(!core.getConfig().getString("MOTD").equals(""))
@@ -983,6 +1042,7 @@ public class ObjectService implements INetworkDispatch {
 	 * @param position The position as an offset to the parent object.
 	 * @param orientation The orientation as an offset to the parent object.
 	 */
+	@SuppressWarnings("unchecked")
 	public SWGObject createChildObject(SWGObject parent, String template, Point3D position, Quaternion orientation, int cellNumber) {
 		
 		if(cellNumber == -1) {
@@ -1217,13 +1277,13 @@ public class ObjectService implements INetworkDispatch {
 		return count.get();
 	}
 	
-	public void persistObject(IPersistent object, Class keyClass, Class valueClass, ObjectDatabase odb) {
+	public void persistObject(IPersistent object, Class<?> keyClass, Class<?> valueClass, ObjectDatabase odb) {
 		object.createTransaction(odb.getEnvironment());
 		core.getAuctionODB().put(object, keyClass, valueClass, object.getTransaction());
 		object.getTransaction().commitSync();
 	}
 	
-	public void deletePersistentObject(IPersistent object, Class keyClass, Class valueClass, ObjectDatabase odb, Object key) {
+	public void deletePersistentObject(IPersistent object, Class<?> keyClass, Class<?> valueClass, ObjectDatabase odb, Object key) {
 		object.createTransaction(odb.getEnvironment());
 		core.getAuctionODB().delete(key, keyClass, valueClass, object.getTransaction());
 		object.getTransaction().commitSync();

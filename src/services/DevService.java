@@ -36,6 +36,7 @@ import resources.common.Console;
 import resources.common.FileUtilities;
 import resources.common.Opcodes;
 import resources.common.SpawnPoint;
+import resources.datatables.WeaponType;
 import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.deed.Harvester_Deed;
@@ -213,7 +214,7 @@ public class DevService implements INetworkDispatch {
 						lightsaber1.setMaxRange(5);
 						lightsaber1.setMinDamage(689);
 						lightsaber1.setMaxDamage(1379);
-						lightsaber1.setWeaponType(9);
+						lightsaber1.setWeaponType(WeaponType.ONEHANDEDSABER);
 						
 						WeaponObject lightsaber2 = (WeaponObject) core.objectService.createObject("object/weapon/melee/2h_sword/crafted_saber/shared_sword_lightsaber_two_handed_gen5.iff", planet);
 						lightsaber2.setIntAttribute("required_combat_level", 90);
@@ -223,7 +224,7 @@ public class DevService implements INetworkDispatch {
 						lightsaber2.setMaxRange(5);
 						lightsaber2.setMinDamage(689);
 						lightsaber2.setMaxDamage(1379);
-						lightsaber2.setWeaponType(10);
+						lightsaber2.setWeaponType(WeaponType.TWOHANDEDSABER);
 						
 						WeaponObject lightsaber3 = (WeaponObject) core.objectService.createObject("object/weapon/melee/polearm/crafted_saber/shared_sword_lightsaber_polearm_gen5.iff", planet);
 						lightsaber3.setIntAttribute("required_combat_level", 90);
@@ -233,7 +234,7 @@ public class DevService implements INetworkDispatch {
 						lightsaber3.setMaxRange(5);
 						lightsaber3.setMinDamage(689);
 						lightsaber3.setMaxDamage(1379);
-						lightsaber3.setWeaponType(11);
+						lightsaber3.setWeaponType(WeaponType.POLEARMSABER);
 						
 						Random random = new Random();
 						
@@ -253,7 +254,7 @@ public class DevService implements INetworkDispatch {
 						sword1.setDamageType("kinetic");
 						sword1.setMinDamage(1100);
 						sword1.setMaxDamage(1200);
-						sword1.setWeaponType(4);
+						sword1.setWeaponType(WeaponType.ONEHANDEDMELEE);
 						
 						inventory.add(sword1);
 						return;
@@ -265,7 +266,7 @@ public class DevService implements INetworkDispatch {
 						rifle1.setDamageType("energy");
 						rifle1.setMinDamage(800);
 						rifle1.setMaxDamage(1250);
-						rifle1.setWeaponType(0);
+						rifle1.setWeaponType(WeaponType.RIFLE);
 						
 						inventory.add(rifle1);
 						
@@ -276,7 +277,7 @@ public class DevService implements INetworkDispatch {
 						carbine1.setDamageType("energy");
 						carbine1.setMinDamage(600);
 						carbine1.setMaxDamage(937);
-						carbine1.setWeaponType(1);
+						carbine1.setWeaponType(WeaponType.CARBINE);
 						
 						inventory.add(carbine1);
 						
@@ -287,7 +288,7 @@ public class DevService implements INetworkDispatch {
 						pistol.setDamageType("energy");
 						pistol.setMinDamage(400);
 						pistol.setMaxDamage(625);
-						pistol.setWeaponType(2);
+						pistol.setWeaponType(WeaponType.PISTOL);
 						
 						inventory.add(pistol);
 						return;
@@ -304,7 +305,7 @@ public class DevService implements INetworkDispatch {
 						heavy1.setAttackSpeed(1);
 						heavy1.setElementalType("heat");
 						heavy1.setElementalDamage(200);
-						heavy1.setWeaponType(12);
+						heavy1.setWeaponType(WeaponType.HEAVYWEAPON);
 						
 						inventory.add(heavy1);
 						
@@ -319,7 +320,7 @@ public class DevService implements INetworkDispatch {
 						heavy2.setAttackSpeed((float) 0.25);
 						heavy2.setElementalType("heat");
 						heavy2.setElementalDamage(28);
-						heavy2.setWeaponType(13);
+						heavy2.setWeaponType(WeaponType.FLAMETHROWER);
 						
 						inventory.add(heavy2);
 						return;
@@ -1224,6 +1225,8 @@ public class DevService implements INetworkDispatch {
 						deed.setBMR(15);
 						deed.setAttributes();
 						inventory.add(deed);
+						
+						break;				
 					case 125:
 						TangibleObject genericCraftingTool = (TangibleObject) core.objectService.createObject("object/tangible/crafting/station/shared_generic_tool.iff", planet);
 						genericCraftingTool.setCustomName("Generic Crafting Tool");
