@@ -28,6 +28,7 @@ import com.sleepycat.persist.model.Persistent;
 
 import resources.objects.intangible.IntangibleObject;
 import resources.objects.waypoint.WaypointObject;
+import services.mission.MissionObjective;
 import engine.clients.Client;
 import engine.resources.objects.IPersistent;
 import engine.resources.scene.Planet;
@@ -57,7 +58,7 @@ public class MissionObject extends IntangibleObject implements IPersistent {
 	private String type = "";
 	private int missionTemplateObject = 0;
 	private WaypointObject attachedWaypoint;
-	
+	private MissionObjective objective;
 
 	@NotPersistent
 	MissionMessageBuilder messageBuilder = new MissionMessageBuilder(this);
@@ -304,6 +305,18 @@ public class MissionObject extends IntangibleObject implements IPersistent {
 		if (getGrandparent() != null && getGrandparent().getClient() != null && getGrandparent().getClient().getSession() != null) {
 			getGrandparent().getClient().getSession().write(messageBuilder.buildMissionTypeDelta(missionType));
 
+		}
+	}
+
+	public MissionObjective getObjective() {
+		synchronized(objectMutex) {
+			return objective;
+		}
+	}
+
+	public void setObjective(MissionObjective objective) {
+		synchronized(objectMutex) {
+			this.objective = objective;
 		}
 	}
 
