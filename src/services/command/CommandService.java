@@ -295,7 +295,16 @@ public class CommandService implements INetworkDispatch  {
 			}
 		}
 		
-		processCommand(actor, target, command, actionCounter, commandArgs);
+		if(command instanceof CombatCommand) {
+			try {
+				processCommand(actor, target, (BaseSWGCommand) command.clone(), actionCounter, commandArgs);
+			} catch (CloneNotSupportedException e) {
+				e.printStackTrace();
+			}
+		}
+		else
+			processCommand(actor, target, command, actionCounter, commandArgs);
+			
 		
 		return true;
 	}
