@@ -114,10 +114,10 @@ public class LootService implements INetworkDispatch {
 		
 		lootSituationAssessment(requester,lootedObject,lootRollSession);
 				
-		CreatureObject lootedCreature = (CreatureObject) lootedObject;
+		//CreatureObject lootedCreature = (CreatureObject) lootedObject;
 		
 		//TreeSet<TreeMap<String,Integer>> lootSpec = lootedObject.getLootSpecification();
-		 List<LootGroup> lootGroups = lootedCreature.getLootGroups();
+		 List<LootGroup> lootGroups = lootedObject.getLootGroups();
 		 Iterator<LootGroup> iterator = lootGroups.iterator();
 		 int projectionCoefficientMatrixModulo = 0;
 		 projectionCoefficientMatrixModulo = outbound(requester);
@@ -146,14 +146,17 @@ public class LootService implements INetworkDispatch {
 	    }
 		
 	    // set info above corpse
-	    float y = 0.5F; // 1.3356977F
-	    float qz= 1.06535322E9F;
-	    Point3D effectorPosition = new Point3D(0,y,0);
-		Quaternion effectorOrientation = new Quaternion(0,0,0,qz);
-	    PlayClientEffectObjectTransformMessage lmsg = new PlayClientEffectObjectTransformMessage("appearance/pt_loot_disc.prt",lootedObject.getObjectID(),"lootMe",effectorPosition,effectorOrientation);
-	    requester.getClient().getSession().write(lmsg.serialize());
-	    tools.CharonPacketUtils.printAnalysis(lmsg.serialize());  
-	
+	    
+	    if (lootedObject instanceof CreatureObject){
+		    float y = 0.5F; // 1.3356977F
+		    float qz= 1.06535322E9F;
+		    Point3D effectorPosition = new Point3D(0,y,0);
+			Quaternion effectorOrientation = new Quaternion(0,0,0,qz);
+		    PlayClientEffectObjectTransformMessage lmsg = new PlayClientEffectObjectTransformMessage("appearance/pt_loot_disc.prt",lootedObject.getObjectID(),"lootMe",effectorPosition,effectorOrientation);
+		    requester.getClient().getSession().write(lmsg.serialize());
+		    tools.CharonPacketUtils.printAnalysis(lmsg.serialize());  
+	    }
+	    
 	    // handle errors
 	    if (lootRollSession.getErrorMessages().size()>0){
 	    	for (String msg : lootRollSession.getErrorMessages()){

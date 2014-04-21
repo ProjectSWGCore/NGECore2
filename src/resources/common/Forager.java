@@ -21,13 +21,19 @@
  ******************************************************************************/
 package resources.common;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
+import java.util.Vector;
 
 import engine.resources.objects.SWGObject;
+import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import main.NGECore;
 import resources.datatables.Options;
 import resources.objects.creature.CreatureObject;
+import resources.objects.group.GroupObject;
+import resources.objects.loot.LootGroup;
 import resources.objects.tangible.TangibleObject;
 import services.ai.AIActor;
 
@@ -43,9 +49,10 @@ public class Forager {
 	public static final int GRUB_BAIT            = 3;
 	public static final int WORM_BAIT            = 4;
 	public static final int MYSTERIOUS_DATA_DISC = 5;
-	// consider foraged food food/foraged
 	
+	private int[] mapPlanetIDs = new int[]{6,7,8};
 	
+	// consider foraged food food/foraged	
 	// tangible/item/treasure_map/shared_relic_buff_s01.iff
 	
 	public Forager(){
@@ -64,7 +71,7 @@ public class Forager {
 		int randomForageRoll       = new Random().nextInt(100);
 		int randomForageObjectRoll = new Random().nextInt(100);
 		int remainder = 0; 
-		int forageResultChance = 50;
+		int forageResultChance = 100;
 		int kommerkenBonus = 0;
 
 		int[] forageChances  = new int[]{10,10,25,25,25,5}; 
@@ -97,7 +104,9 @@ public class Forager {
 				chosenObject = 6;
 				forager.sendSystemMessage("@skl_use:sys_forage_noroom",(byte) 0);				
 			}
-
+			
+			chosenObject = 5;
+			
 			forager.sendSystemMessage("chosenObject " + chosenObject,(byte) 0);
 			switch (chosenObject) {
 				
@@ -137,12 +146,18 @@ public class Forager {
 										      foragedObject = (TangibleObject) NGECore.getInstance().objectService.createObject(template, forager.getPlanet());
 										      foragedObject.setCustomName(getLevelDependentMapName(forager.getLevel()));
 										      foragedObject.setAttachment("MapLevel", forager.getLevel());
+										      foragedObject.setAttachment("MapSTFName", getLevelDependentSTFName(forager.getLevel()));										      
+										      int mapPlanetID = new Random().nextInt(mapPlanetIDs.length-1);
+										      foragedObject.setAttachment("MapPlanet", mapPlanetIDs[mapPlanetID]);
+										      System.out.println("mapPlanetID " + mapPlanetIDs[mapPlanetID]);
+										      //foragedObject.setAttachment("radial_filename", "object/treasuremap");
+										      foragedObject.setAttachment("radial_filename", "object/treasuremapExtract");
 										      foragerInventory.add(foragedObject);
-										      forager.sendSystemMessage("",(byte) 0);
+										      forager.sendSystemMessage("",(byte) 0);										      										   
 										      break;
 										      
 				default: break;
-				
+				///object/tangible/treasure_map/shared_treasure_map_base.iff  shared_treasure_map_quest.iff
 			}
 			
 			if (chosenObject<6)
@@ -155,9 +170,11 @@ public class Forager {
 			if (chosenObject>6)
 				adversaryRoll=999;
 			
-			if (adversaryRoll<14) {
+			adversaryRoll=999;
+			
+			if (adversaryRoll<100) { // 14
 				int adversaryTypeRoll = new Random().nextInt(100);
-				if (adversaryTypeRoll<50){
+				if (adversaryTypeRoll<1){
 					// wormie
 					spawnWormie(forager);
 				} else {
@@ -196,6 +213,30 @@ public class Forager {
 		return "";
 	}
 	
+	private String getLevelDependentSTFName(int level){
+		if (level>=1 && level<=10)
+			return "treasure_guard_adventurer";
+		if (level>=11 && level<=20)
+			return "treasure_guard_villager";
+		if (level>=21 && level<=30)
+			return "treasure_guard_trader";
+		if (level>=31 && level<=40)
+			return "treasure_guard_bounty_hunter";
+		if (level>=41 && level<=50)
+			return "treasure_guard_droid";
+		if (level>=51 && level<=60)
+			return "treasure_guard_padawan";
+		if (level>=61 && level<=70)
+			return "treasure_guard_jedi";
+		if (level>=71 && level<=80)
+			return "treasure_guard_jedi_elder";
+		if (level>=81 && level<=90)
+			return "treasure_guard_jedi_elite";
+		return "";
+	}
+	
+	
+	
 	
 	
 	
@@ -204,7 +245,6 @@ public class Forager {
 		String name = "";		
 		Point3D wormiePosition = SpawnPoint.getRandomPosition(forager.getPosition(), 1, 6, forager.getPlanetId());
 		CreatureObject wormie = NGECore.getInstance().spawnService.spawnCreature("forage_worm", forager.getPlanet().getName(), 0L, wormiePosition.x, wormiePosition.y, wormiePosition.z, (short)level);
-		
 		switch (wormie.getTemplate()) {
 		
 		case "object/mobile/shared_col_forage_aggravated_worm.iff":
@@ -269,35 +309,37 @@ public class Forager {
 		
 		case "object/mobile/shared_dressed_criminal_assassin_human_female_01.iff":
 				name = "A criminal";
-				barkString = "@forage_enemy:bark_criminal";
+				barkString = "bark_criminal";
 				break;
 				
 		case "object/mobile/shared_dressed_criminal_assassin_human_male_01.iff":
 				name = "A Scavenger";
-				barkString = "@forage_enemy:bark_scavenger";
+				barkString = "bark_scavenger";
 				break;
 				
 		case "object/mobile/shared_twilek_male.iff":
 				name = "A Thief";
-				barkString = "@forage_enemy:bark_thief";
+				barkString = "bark_thief";
 				break;
 				
 		case "object/mobile/shared_dressed_binayre_pirate_zabrak_male_01.iff":
 				name = "A Pirate";
-				barkString = "@forage_enemy:bark_thief";
+				barkString = "bark_thief";
 				break;
 				
 		case "object/mobile/shared_dressed_borvos_thug.iff":
 				name = "A Thug";
-				barkString = "@forage_enemy:bark_criminal";
+				barkString = "bark_criminal";
 				break;
 				
 		case "object/mobile/shared_wookiee_male.iff":
 				name = "A Thug";
-				barkString = "@forage_enemy:bark_wookiee";
+				barkString = "bark_wookiee";
 				break;
 				
 		}
+		
+		goon.addObserver(forager);
 		goon.setCustomName(name);
 		goon.setCustomName2(name);
 		goon.setLevel(forager.getLevel());
@@ -305,8 +347,153 @@ public class Forager {
 		goon.setOptions(Options.ATTACKABLE, true);
 		AIActor actor = (AIActor) goon.getAttachment("AI");
 		actor.addDefender(forager);
-		NGECore.getInstance().chatService.spatialChat(goon, forager, barkString, short chatType, short moodId, int languageId, OutOfBand outOfBand);
-			long targetId;
+		forager.sendSystemMessage("@foraging/forage_enemy:" + barkString,(byte) 0);
+		//OutOfBand oob = new OutOfBand(new ProsePackage("@foraging/forage_enemy",barkString));
+		OutOfBand oob = new OutOfBand(new ProsePackage("@jawa_trader","cant_understand"));	
+		forager.sendSystemMessage("@jawa_trader:cant_understand",(byte) 0);
+		NGECore.getInstance().chatService.spatialChat(goon, forager, "", (short)0x0, (short)0x0, 1, oob);
+	}
+	
+	public void handleGuardSpawn(CreatureObject owner, TangibleObject map){
+		
+		short spawnLevel = (short) map.getAttachment("MapLevel");
+		//Point3D exactTreasureLocation = (Point3D) map.getAttachment("MapExactLocation");
+		Point3D exactTreasureLocation = owner.getPosition();
+		
+		GroupObject extractorGroup = (GroupObject) NGECore.getInstance().objectService.getObject(owner.getGroupId());
+		int extractorGroupSize = 1;
+		if (extractorGroup!=null)
+			extractorGroupSize = extractorGroup.getMemberList().size();
+		
+		int guardSpawnNumber = 2 + extractorGroupSize;
+		Vector<CreatureObject> guardList = new Vector<CreatureObject>();
+		for (int i=0;i<guardSpawnNumber;i++){
+			guardList.add(spawnGuard(exactTreasureLocation,owner,map,(short)(spawnLevel+2-80)));
+		}
+		
+		//spawn boss if group size is sufficient
+		if (extractorGroupSize==8){
+			int bossRoll = new Random().nextInt(100);
+			if (bossRoll<70){
+				guardList.add(spawnBoss(exactTreasureLocation,owner,map,(short)(spawnLevel+2)));
+				owner.sendSystemMessage("Spawn Boss",(byte)0);
+			}
+		}
+
+		// spawn treasure container
+		TangibleObject treasureContainer = (TangibleObject) NGECore.getInstance().staticService.spawnObject("object/tangible/container/drum/shared_treasure_drum.iff", owner.getPlanet().getName(), 0L, exactTreasureLocation.x, exactTreasureLocation.y, exactTreasureLocation.z, 0.70F, 0.71F);		
+		treasureContainer.setAttachment("radial_filename", "object/treasureContainer");
+		treasureContainer.setAttachment("TreasureExtractorID", owner.getObjectID());
+		treasureContainer.setAttachment("TreasureGuards",guardList);
+		//configureTreasureLoot(treasureContainer,owner,spawnLevel);
+		//NGECore.getInstance().lootService.DropLoot(owner, treasureContainer);
+		
+		owner.sendSystemMessage("@treasure_map/treasure_map:sys_time_limit",(byte)0);		
+		
+		
+		// all down: owner.sendSystemMessage("@treasure_map/treasure_map:unlock_chest",(byte)0);		
+	}
+	
+	public CreatureObject spawnGuard(Point3D exactTreasureLocation, CreatureObject owner, TangibleObject map, short spawnLevel){
+		
+		String name = "";	
+//		System.out.println("exactTreasureLocation.x + " +exactTreasureLocation.x);
+//		System.out.println("exactTreasureLocation.y + " +exactTreasureLocation.y);
+//		System.out.println("exactTreasureLocation.z + " +exactTreasureLocation.z);
+			
+		Point3D guardPosition = SpawnPoint.getRandomPosition(exactTreasureLocation, 5, 12, owner.getPlanetId());
+		CreatureObject guard = NGECore.getInstance().spawnService.spawnCreature("treasure_guard", owner.getPlanet().getName(), 0L, guardPosition.x, guardPosition.y, guardPosition.z, spawnLevel);
+		
+		String barkString = "";
+		name = "Treasure Protector";
+		
+		guard.addObserver(owner); // ToDo: add any players in aggro range!!!
+		guard.setCustomName(name);
+		guard.setCustomName2(name);
+		guard.setLevel(owner.getLevel());
+		guard.setOptions(Options.AGGRESSIVE, true);
+		guard.setOptions(Options.ATTACKABLE, true);
+		AIActor actor = (AIActor) guard.getAttachment("AI");
+		actor.addDefender(owner);
+		
+		barkString = "bark_"+map.getAttachment("MapSTFName");										      		
+		owner.sendSystemMessage("@treasure_map/treasure_map:" + barkString,(byte) 0);
+		OutOfBand oob = new OutOfBand(new ProsePackage("@treasure_map/treasure_map",barkString));	
+		NGECore.getInstance().chatService.spatialChat(guard, owner, "", (short)0x0, (short)0x0, 1, oob);
+		return guard;
+	}
+	
+	public CreatureObject spawnBoss(Point3D exactTreasureLocation, CreatureObject owner, TangibleObject map, short spawnLevel){
+		
+		Point3D treasureLocation = resources.common.SpawnPoint.getRandomPosition(exactTreasureLocation, 1, 10, owner.getPlanetId());
+		return new CreatureObject();
+	}
+	
+	@SuppressWarnings("unchecked")
+	public int countAliveGuards(SWGObject treasureContainer){
+		Vector<CreatureObject> guardList = (Vector<CreatureObject>) treasureContainer.getAttachment("TreasureGuards");
+		int aliveCount = 0;
+		for (CreatureObject guard:guardList){
+			if (guard.getPosture()!=14 && guard.getPosture()!=15)
+				aliveCount++;
+		}
+		return aliveCount;
+	}
+	
+	
+	
+	public void configureTreasureLoot(TangibleObject treasureContainer, CreatureObject owner, short spawnLevel){
+		List<LootGroup> lootgroups = new ArrayList<LootGroup>();
+		
+		String levelRange = "61";
+
+		if (spawnLevel>60 && spawnLevel<=70){
+			levelRange = "61";
+		}
+		if (spawnLevel>70 && spawnLevel<=80){
+			levelRange = "75";
+		}
+		if (spawnLevel>80 && spawnLevel<=90){
+			levelRange = "85";
+		}
+		
+		
+		// PROFESSION BRACELETS  HOUSE FURNITURE  WEARABLE BACKPACKS
+		String[] lootPoolNames = new String[]{"profession_bracelets_"+levelRange,"house_furniture","wearable_backpacks"};
+		int[] lootPoolChances  = new int[]{50,25,25};
+		int lootGroupChance = 80;
+		treasureContainer.addToLootGroups(lootPoolNames, lootPoolChances, lootGroupChance);
+		
+		// WEAPONSMITH COMPONENTS JEDI COMPONENTS GEM COLLECTION ITEMS TREASURE HUNTER COLLECTION ITEMS
+		
+		// CONSUMABLE BUFF ITEMS
+//	    Flask of Elba Water
+//	    Flask of Naris-bud Tea
+//	    Small flask of Nerfmilk 
+		
+		// COMMON LOOTS: 
+//		Looted non-wearable Bounty Hunter armor pieces (Used to make Mandalorian armor at the Death Watch Bunker)
+//		Looted clothing (usually 20+)
+//		Looted armors (usually 20+)
+//		Looted weapons (700-800 DPS(Sometimes less, now includes the Nak'tra Crystal Rifle))
+//		Advanced Agility Stim (CL80)
+//		Advanced Power Stim (CL80)
+//		Loot kits adhesives
+//		Various Schematics 
+		
+		// VERY RARE BUFF ITEMS
+		lootPoolNames = new String[]{"Rare Nova Crystal"," Rare Rol Stone","Rare Power Gem",
+				                     " Rare Corusca Gem","Rare Sasho Gem","Rare Ankarres Sapphire "};
+		lootPoolChances  = new int[]{17,17,17,17,17,15};
+		lootGroupChance = 1;
+		treasureContainer.addToLootGroups(lootPoolNames, lootPoolChances, lootGroupChance);
+		
+		// EXTRA
+		lootPoolNames = new String[]{"Mysterious Data Disk"};
+		lootPoolChances  = new int[]{100};
+		lootGroupChance = 50;
+		treasureContainer.addToLootGroups(lootPoolNames, lootPoolChances, lootGroupChance);
+		
 	}
 
 }

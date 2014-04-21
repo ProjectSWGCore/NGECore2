@@ -8,7 +8,7 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('forage_goon')
 	mobileTemplate.setLevel(1)
-	mobileTemplate.setDifficulty(2)
+	mobileTemplate.setDifficulty(1)
 	mobileTemplate.setAttackRange(6)
 	mobileTemplate.setAttackSpeed(1.0)
 	

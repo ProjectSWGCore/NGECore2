@@ -9,6 +9,10 @@ def addTemplate(core):
 	mobileTemplate.setCreatureName('womprat')
 	mobileTemplate.setTemplates(templates)
 	mobileTemplate.setLevel(5)
+	mobileTemplate.setAttackRange(3)
+	mobileTemplate.setAttackSpeed(1.0)
+	mobileTemplate.setWeaponType(6)
+	
 	attacks = Vector()
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
