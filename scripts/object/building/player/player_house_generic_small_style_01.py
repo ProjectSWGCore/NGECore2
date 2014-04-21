@@ -6,6 +6,6 @@ def setup(core, object):
 	object.setAttachment("structureSign", sign)
 	
 	structureterminal = core.objectService.createChildObject(object, 'object/tangible/terminal/shared_terminal_player_structure.iff', -5, 0.74, -1.81, 0.707107, -0.707107, 1)
-	#structureterminal.setAttachment('radial_filename', 'structure/structure_management_terminal')
+	#structureterminal.setAttachment('radial_filename', 'structure_management_terminal')
 	structureterminal.setAttachment('housing_parentstruct', object)
 	return
