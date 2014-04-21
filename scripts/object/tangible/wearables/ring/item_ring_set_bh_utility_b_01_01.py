@@ -3,6 +3,8 @@ import sys
 def setup(core, object):
 	object.setAttachment('radial_filename', 'ring/unity')
 	object.setAttachment('objType', 'ring')
+	object.setAttachment('radial_filename', 'ring/unity')
+	object.setAttachment('objType', 'ring')
 	object.setStfFilename('static_item_n')
 	object.setStfName('item_ring_set_bh_utility_b_01_01')
 	object.setDetailFilename('static_item_d')
