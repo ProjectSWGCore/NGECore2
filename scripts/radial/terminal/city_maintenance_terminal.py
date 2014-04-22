@@ -20,9 +20,10 @@ def createRadial(core, owner, target, radials):
 	radials.add(RadialOptions(2,  219, 0, '@city/city:treasury_taxes'))
 	radials.add(RadialOptions(2,  221, 0, '@city/city:treasury_withdraw'))
 	radials.add(RadialOptions(2,  225, 0, '@city/city:city_specializations'))	
-	
-	radials.add(RadialOptions(3, 121, 0, '@city/city:citizens'))	
-	radials.add(RadialOptions(3, 123, 0, '@city/city:citizens'))
+	radials.add(RadialOptions(2,  228, 0, '@city/city:align'))	
+	radials.add(RadialOptions(3, 121, 0, '@city/city:non_citizen_city_status'))	
+	radials.add(RadialOptions(3, 122, 0, '@city/city:rank_info_t'))
+	radials.add(RadialOptions(3, 123, 0, '@city/city:citizen_list_t'))
 
 	return
 	
@@ -55,9 +56,9 @@ def handleSelection(core, owner, target, option):
 		if owner is not None:
 			core.housingService.handleListAllItems(owner,target)	
 			return
-	if option == 175:
+	if option == 219:
 		if owner is not None:
-			core.housingService.handleDeleteAllItems(owner,target)	
+			handleAdjustTaxes(core, owner, target, option)
 			return
 	if option == 225:
 		if owner is not None:
@@ -69,7 +70,11 @@ def handleSelection(core, owner, target, option):
 			return
 	if option == 121:
 		if owner is not None:
-			handleCitizenList(core, owner, target, option)
+			handleCityInfo(core, owner, target, option)
+			return
+	if option == 122:
+		if owner is not None:
+			handleCityRankInfo(core, owner, target, option)
 			return
 	if option == 123:
 		if owner is not None:
@@ -77,7 +82,7 @@ def handleSelection(core, owner, target, option):
 			return
 	
 def handleSetCityName(core, owner, target, option):	
-	window = core.suiService.createInputBox(2,'@player_structure:structure_status','@player_structure:structure_name_prompt', owner, target, 0)
+	window = core.suiService.createInputBox(2,'@city/city:city_name_new_t','@city/city:city_name_new_d', owner, target, 0)
 	returnList = Vector()
 	returnList.add('txtInput:LocalText')
 	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, setnameCallBack)
@@ -93,21 +98,166 @@ def setnameCallBack(owner, window, eventType, returnList):
 	owner.sendSystemMessage('@city/city:name_changed', 0)		
 	return
 	
-def handleTaxes(core, owner, target, option):	
-	window = core.suiService.createInputBox(2,'@player_structure:structure_status','@player_structure:structure_name_prompt', owner, target, 0)
+	
+def handleAdjustTaxes(core, owner, target, option):	
+	
+	window = core.suiService.createSUIWindow('Script.listBox', owner, target, 0);
+	window.setProperty('bg.caption.lblTitle:Text', '@city/city:adjust_taxes_t')
+	window.setProperty('Prompt.lblPrompt:Text', '@city/city:adjust_taxes_d')	
+
+	window.addListBoxMenuItem('@city/city:set_tax_t_income',0)
+	window.addListBoxMenuItem('@city/city:set_tax_t_property',1)
+	window.addListBoxMenuItem('@city/city:set_tax_t_sales',2)
+	window.addListBoxMenuItem('@city/city:set_tax_t_travel',3)
+	window.addListBoxMenuItem('@city/city:set_tax_t_garage',4)
+
+	window.setProperty('btnOk:visible', 'True')
+	window.setProperty('btnCancel:visible', 'True')
+	window.setProperty('btnOk:Text', '@ok')
+	window.setProperty('btnCancel:Text', '@cancel')
+	
 	returnList = Vector()
-	returnList.add('txtInput:LocalText')
-	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, setnameCallBack)
-	window.addHandler(1, '', Trigger.TRIGGER_CANCEL, returnList, setnameCallBack)	
+	returnList.add('List.lstList:SelectedRow')			
+	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, setAdjustTaxesCallBack)
+	window.addHandler(1, '', Trigger.TRIGGER_CANCEL, returnList, setSpecializationCancelCallBack)	
 	core.suiService.openSUIWindow(window);
 	return
 	
-def setTaxesCallBack(owner, window, eventType, returnList):
+def setAdjustTaxesCallBack(owner, window, eventType, returnList):
 	if returnList.size()==0:
+		owner.sendSystemMessage('NULL', 0)	
 		return
-	playerCity = main.NGECore.getInstance().playerCityService.getPlayerCity(owner)	
-	playerCity.setCityName(returnList.get(0))
-	owner.sendSystemMessage('@city/city:name_changed', 0)		
+		
+	if returnList.get(0)=='0':
+		handleSetIncomeTax(owner)
+		return
+	if returnList.get(0)=='1':
+		handleSetPropertyTax(owner)
+		return
+	if returnList.get(0)=='2':
+		handleSetSalesTax(owner)
+		return
+	if returnList.get(0)=='3':
+		handleSetTravelTax(owner)
+		return
+	if returnList.get(0)=='4':
+		handleSetGarageTax(owner)
+		return
+	
+	return
+	
+def handleSetIncomeTax(owner):
+
+	playerCity = main.NGECore.getInstance().playerCityService.getPlayerCity(owner)
+	window = main.NGECore.getInstance().suiService.createInputBox(2,'@city/city:set_tax_t_income','@city/city:set_tax_d_income \n \n @city/city:income_tax_prompt : %s' % playerCity.getIncomeTax(), owner, owner, 0)
+	returnList = Vector()
+	returnList.add('txtInput:LocalText')
+	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, handleSetIncomeTaxCallBack)
+	window.addHandler(1, '', Trigger.TRIGGER_CANCEL, returnList, setSpecializationCancelCallBack)	
+	main.NGECore.getInstance().suiService.openSUIWindow(window);
+	return
+	
+def handleSetIncomeTaxCallBack(owner, window, eventType, returnList):
+	if int(returnList.get(0))>2000 or int(returnList.get(0))<0:
+		owner.sendSystemMessage('Income tax value is out of range of accepteable values.', 0)	
+		handleSetIncomeTax(owner)
+		return
+		
+	playerCity = main.NGECore.getInstance().playerCityService.getPlayerCity(owner)
+	playerCity.setIncomeTax(int(returnList.get(0)))
+	owner.sendSystemMessage('@city/city:set_income_tax', 0)	
+	return
+	
+def handleSetSalesTax(owner):
+
+	playerCity = main.NGECore.getInstance().playerCityService.getPlayerCity(owner)
+	window = main.NGECore.getInstance().suiService.createInputBox(2,'@city/city:set_tax_t_sales','@city/city:set_tax_d_sales \n \n @city/city:sales_tax_prompt : %s' % playerCity.getSalesTax(), owner, owner, 0)
+	returnList = Vector()
+	returnList.add('txtInput:LocalText')
+	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, handleSetSalesTaxCallBack)
+	window.addHandler(1, '', Trigger.TRIGGER_CANCEL, returnList, setSpecializationCancelCallBack)	
+	main.NGECore.getInstance().suiService.openSUIWindow(window);
+	return
+	
+def handleSetSalesTaxCallBack(owner, window, eventType, returnList):
+	if int(returnList.get(0))>20 or int(returnList.get(0))<0:
+		owner.sendSystemMessage('Sales tax value is out of range of accepteable values.', 0)	
+		handleSetSalesTax(owner)
+		return
+		
+	playerCity = main.NGECore.getInstance().playerCityService.getPlayerCity(owner)
+	playerCity.setIncomeTax(int(returnList.get(0)))
+	owner.sendSystemMessage('@city/city:set_sales_tax', 0)	
+	return
+	
+def handleSetPropertyTax(owner):
+
+	playerCity = main.NGECore.getInstance().playerCityService.getPlayerCity(owner)
+	window = main.NGECore.getInstance().suiService.createInputBox(2,'@city/city:set_tax_t_property','@city/city:set_tax_d_property \n \n @city/city:property_tax_prompt : %s' % playerCity.getPropertyTax(), owner, owner, 0)
+	returnList = Vector()
+	returnList.add('txtInput:LocalText')
+	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, handleSetPropertyTaxCallBack)
+	window.addHandler(1, '', Trigger.TRIGGER_CANCEL, returnList, setSpecializationCancelCallBack)	
+	main.NGECore.getInstance().suiService.openSUIWindow(window);
+	return
+	
+def handleSetPropertyTaxCallBack(owner, window, eventType, returnList):
+	if int(returnList.get(0))>50 or int(returnList.get(0))<0:
+		owner.sendSystemMessage('Property tax value is out of range of accepteable values.', 0)	
+		handleSetPropertyTax(owner)
+		return
+		
+	playerCity = main.NGECore.getInstance().playerCityService.getPlayerCity(owner)
+	playerCity.setIncomeTax(int(returnList.get(0)))
+	owner.sendSystemMessage('@city/city:set_property_tax', 0)	
+	return
+	
+def handleSetTravelTax(owner):
+	
+	playerCity = main.NGECore.getInstance().playerCityService.getPlayerCity(owner)
+	if playerCity.hasShuttlePort()==0:
+		owner.sendSystemMessage('@city/city:no_shuttleport', 0)	
+		return
+		
+	window = main.NGECore.getInstance().suiService.createInputBox(2,'@city/city:set_tax_t_travel','@city/city:set_tax_d_travel \n \n @city/city:travel_tax_prompt : %s' % playerCity.getTravelTax(), owner, owner, 0)
+	returnList = Vector()
+	returnList.add('txtInput:LocalText')
+	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, handleSetTravelTaxCallBack)
+	window.addHandler(1, '', Trigger.TRIGGER_CANCEL, returnList, setSpecializationCancelCallBack)	
+	main.NGECore.getInstance().suiService.openSUIWindow(window);
+	return
+	
+def handleSetTravelTaxCallBack(owner, window, eventType, returnList):
+	if int(returnList.get(0))>500 or int(returnList.get(0))<1:
+		owner.sendSystemMessage('Travel tax value is out of range of accepteable values.', 0)	
+		handleSetIncomeTax(owner)
+		return
+		
+	playerCity = main.NGECore.getInstance().playerCityService.getPlayerCity(owner)
+	playerCity.setTravelTax(int(returnList.get(0)))
+	owner.sendSystemMessage('@city/city:set_travel_fee', 0)	
+	return
+	
+def handleSetGarageTax(owner):
+
+	playerCity = main.NGECore.getInstance().playerCityService.getPlayerCity(owner)
+	window = main.NGECore.getInstance().suiService.createInputBox(2,'@city/city:set_tax_t_garage','@city/city:set_tax_d_garage \n\n @city/city:garage_tax : %s' % playerCity.getGarageTax(), owner, owner, 0)
+	returnList = Vector()
+	returnList.add('txtInput:LocalText')
+	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, handleSetGarageTaxCallBack)
+	window.addHandler(1, '', Trigger.TRIGGER_CANCEL, returnList, setSpecializationCancelCallBack)	
+	main.NGECore.getInstance().suiService.openSUIWindow(window);
+	return
+	
+def handleSetGarageTaxCallBack(owner, window, eventType, returnList):
+	if int(returnList.get(0))>500 or int(returnList.get(0))<1:
+		owner.sendSystemMessage('Garage tax value is out of range of accepteable values.', 0)	
+		handleSetIncomeTax(owner)
+		return
+		
+	playerCity = main.NGECore.getInstance().playerCityService.getPlayerCity(owner)
+	playerCity.setGarageTax(int(returnList.get(0)))
+	owner.sendSystemMessage('@city/city:set_garage_tax', 0)	
 	return
 	
 def handleWithdrawal(core, owner, target, option):	
@@ -188,6 +338,38 @@ def setCitizenListCallBack(owner, window, eventType, returnList):
 	#handle waypoint creation to citizen's house	
 	return
 	
+def handleCityRankInfo(core, owner, target, option):	
+	window = core.suiService.createSUIWindow('Script.listBox', owner, target, 0);
+	window.setProperty('bg.caption.lblTitle:Text', '@city/city:rank_info_t')
+	window.setProperty('Prompt.lblPrompt:Text', '@city/city:rank_info_d')	
+	
+	playerCity = main.NGECore.getInstance().playerCityService.getPlayerCity(owner)	
+	
+	window.addListBoxMenuItem('City : ' + playerCity.getCityName(),0)
+	window.addListBoxMenuItem('@city/city:radius_prompt : %s' % playerCity.getCityRadius(),1)
+	window.addListBoxMenuItem('@city/city:city_rank_prompt : @city/city:rank' + str(playerCity.getRank()),2)
+	window.addListBoxMenuItem('@city/city:reg_citizen_prompt : %s' % len(playerCity.getCitizens()),3)
+	if playerCity.getRank()>=3 and playerCity.getSpecialization()>-1:
+		window.addListBoxMenuItem('@city/city:specialization_prompt : @city/city:' + playerCity.getSpecializationSTFNamesAsList().get(playerCity.getSpecialization()),4)
+		
+	
+	window.setProperty('btnOk:visible', 'True')
+	window.setProperty('btnCancel:visible', 'True')
+	window.setProperty('btnOk:Text', '@ok')
+	window.setProperty('btnCancel:Text', '@cancel')
+	window.setProperty('btnCancel:Text', '@cancel')
+	playerCity = main.NGECore.getInstance().playerCityService.getPlayerCity(owner)	
+	returnList = Vector()
+	returnList.add('txtInput:LocalText')			
+	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, setCityInfoCallBack)
+	window.addHandler(1, '', Trigger.TRIGGER_CANCEL, returnList, setCitizenListCallBack)	
+	core.suiService.openSUIWindow(window);
+	return
+	
+def setCityInfoCallBack(owner, window, eventType, returnList):
+	#handle waypoint creation to citizen's house	
+	return
+	
 def handleRegisterMap(core, owner, target, option):	
 	
 	playerCity = main.NGECore.getInstance().playerCityService.getPlayerCity(owner)
@@ -212,19 +394,28 @@ def setRegisterMapCallBack(owner, window, eventType, returnList):
 	return
 	
 def handleSpecialization(core, owner, target, option):	
+	
+	playerCity = main.NGECore.getInstance().playerCityService.getPlayerCity(owner)
+	#if playerCity.getCityRank()<3:
+		#owner.sendSystemMessage('@city/city:no_rank_spec', 0)
+		#return
+
 	window = core.suiService.createSUIWindow('Script.listBox', owner, target, 0);
 	window.setProperty('bg.caption.lblTitle:Text', '@city/city:city_specs_t')
 	window.setProperty('Prompt.lblPrompt:Text', '@city/city:city_specs_d')	
 
-	window.addListBoxMenuItem('Cloning Lab',0)
-	window.addListBoxMenuItem('DNA Laboratory',1)
-	window.addListBoxMenuItem('Encore Performance',2)
-	window.addListBoxMenuItem('Entertainment District',3)
-	window.addListBoxMenuItem('Improved Job Market',4)
-	window.addListBoxMenuItem('Manufacturing Center',5)
-	window.addListBoxMenuItem('Medical Center',6)
-	window.addListBoxMenuItem('Research Center',7)
-	window.addListBoxMenuItem('Sample Rich',8)
+	window.addListBoxMenuItem('@city/city:city_spec_cloning',0)
+	window.addListBoxMenuItem('@city/city:city_spec_bm_incubator',1)
+	window.addListBoxMenuItem('@city/city:city_spec_storyteller',2)
+	window.addListBoxMenuItem('@city/city:city_spec_entertainer',3)
+	window.addListBoxMenuItem('@city/city:city_spec_missions',4)
+	window.addListBoxMenuItem('@city/city:city_spec_industry',5)
+	window.addListBoxMenuItem('@city/city:city_spec_doctor',6)
+	window.addListBoxMenuItem('@city/city:city_spec_research',7)
+	window.addListBoxMenuItem('@city/city:city_spec_sample_rich',8)
+	window.addListBoxMenuItem('@city/city:city_spec_master_manufacturing',9)
+	window.addListBoxMenuItem('@city/city:city_spec_master_healing',10)
+	window.addListBoxMenuItem('@city/city:city_spec_stronghold',11)
 
 	window.setProperty('btnOk:visible', 'True')
 	window.setProperty('btnCancel:visible', 'True')
@@ -234,8 +425,11 @@ def handleSpecialization(core, owner, target, option):
 	returnList = Vector()
 	returnList.add('List.lstList:SelectedRow')			
 	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, setSpecializationCallBack)
-	window.addHandler(1, '', Trigger.TRIGGER_CANCEL, returnList, setSpecializationCallBack)	
+	window.addHandler(1, '', Trigger.TRIGGER_CANCEL, returnList, setSpecializationCancelCallBack)	
 	core.suiService.openSUIWindow(window);
+	return
+
+def setSpecializationCancelCallBack(owner, window, eventType, returnList):
 	return
 	
 def setSpecializationCallBack(owner, window, eventType, returnList):
@@ -285,7 +479,7 @@ def showCloning(owner):
 	returnList = Vector()  
 	returnList.add('txtInput:LocalText')
 	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, handleCloningCallback)
-	window.addHandler(1, '', Trigger.TRIGGER_CANCEL, returnList, handleCloningCallback)	
+	window.addHandler(1, '', Trigger.TRIGGER_CANCEL, returnList, setSpecializationCancelCallBack)	
 	main.NGECore.getInstance().suiService.openSUIWindow(window);
 	return
 	
@@ -306,7 +500,7 @@ def showDNA(owner):
 	returnList = Vector()  
 	returnList.add('txtInput:LocalText')
 	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, handleDNACallback)
-	window.addHandler(1, '', Trigger.TRIGGER_CANCEL, returnList, handleDNACallback)	
+	window.addHandler(1, '', Trigger.TRIGGER_CANCEL, returnList, setSpecializationCancelCallBack)	
 	main.NGECore.getInstance().suiService.openSUIWindow(window);
 	return
 	
@@ -327,7 +521,7 @@ def showEncore(owner):
 	returnList = Vector()  
 	returnList.add('txtInput:LocalText')
 	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, handleEncoreCallback)
-	window.addHandler(1, '', Trigger.TRIGGER_CANCEL, returnList, handleEncoreCallback)	
+	window.addHandler(1, '', Trigger.TRIGGER_CANCEL, returnList, setSpecializationCancelCallBack)	
 	main.NGECore.getInstance().suiService.openSUIWindow(window);
 	return
 	
@@ -349,7 +543,7 @@ def showEntertainment(owner):
 	returnList = Vector()  
 	returnList.add('txtInput:LocalText')
 	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, handleEntertainmentCallback)
-	window.addHandler(1, '', Trigger.TRIGGER_CANCEL, returnList, handleEntertainmentCallback)	
+	window.addHandler(1, '', Trigger.TRIGGER_CANCEL, returnList, setSpecializationCancelCallBack)	
 	main.NGECore.getInstance().suiService.openSUIWindow(window);
 	return
 	
@@ -370,7 +564,7 @@ def showImproved(owner):
 	returnList = Vector()  
 	returnList.add('txtInput:LocalText')
 	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, handleImprovedCallback)
-	window.addHandler(1, '', Trigger.TRIGGER_CANCEL, returnList, handleImprovedCallback)	
+	window.addHandler(1, '', Trigger.TRIGGER_CANCEL, returnList, setSpecializationCancelCallBack)	
 	main.NGECore.getInstance().suiService.openSUIWindow(window);
 	return
 	
@@ -391,7 +585,7 @@ def showManufacturing(owner):
 	returnList = Vector()  
 	returnList.add('txtInput:LocalText')
 	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, handleManufacturingCallback)
-	window.addHandler(1, '', Trigger.TRIGGER_CANCEL, returnList, handleManufacturingCallback)	
+	window.addHandler(1, '', Trigger.TRIGGER_CANCEL, returnList, setSpecializationCancelCallBack)	
 	main.NGECore.getInstance().suiService.openSUIWindow(window);
 	return
 	
@@ -412,7 +606,7 @@ def showMedical(owner):
 	returnList = Vector()  
 	returnList.add('txtInput:LocalText')
 	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, handleMedicalCallback)
-	window.addHandler(1, '', Trigger.TRIGGER_CANCEL, returnList, handleMedicalCallback)	
+	window.addHandler(1, '', Trigger.TRIGGER_CANCEL, returnList, setSpecializationCancelCallBack)	
 	main.NGECore.getInstance().suiService.openSUIWindow(window);
 	return
 	
@@ -433,7 +627,7 @@ def showResearch(owner):
 	returnList = Vector()  
 	returnList.add('txtInput:LocalText')
 	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, handleResearchCallback)
-	window.addHandler(1, '', Trigger.TRIGGER_CANCEL, returnList, handleResearchCallback)	
+	window.addHandler(1, '', Trigger.TRIGGER_CANCEL, returnList, setSpecializationCancelCallBack)	
 	main.NGECore.getInstance().suiService.openSUIWindow(window);
 	return
 	
@@ -454,7 +648,7 @@ def showSample(owner):
 	returnList = Vector()  
 	returnList.add('txtInput:LocalText')
 	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, handleSampleCallback)
-	window.addHandler(1, '', Trigger.TRIGGER_CANCEL, returnList, handleSampleCallback)	
+	window.addHandler(1, '', Trigger.TRIGGER_CANCEL, returnList, setSpecializationCancelCallBack)	
 	main.NGECore.getInstance().suiService.openSUIWindow(window);
 	return
 	
@@ -463,7 +657,7 @@ def handleSampleCallback(owner, window, eventType, returnList):
 	owner.setAttachment('ChosenCitySpec',9)
 	showSpecConfirmWindow(owner)
 	return
-	
+
 def showSpecConfirmWindow(owner):
 	window = main.NGECore.getInstance().suiService.createSUIWindow('Script.messageBox', owner, owner, 0)
 	window.setProperty('bg.caption.lblTitle:Text', '@city/city:confirm_spec_t')
