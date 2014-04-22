@@ -59,6 +59,8 @@ public class PlayerCity {
 	public static int SHUTTLEPORT       = 6;
 	
 	
+	private String cityName = "";
+	private int cityID = -1;
 	private Point3D cityCenterPosition = new Point3D(0,0,0);
 	private int cityRadius = 0;
 	private int cityRank = 0;
@@ -86,7 +88,7 @@ public class PlayerCity {
 	
 	public PlayerCity(){}
 	
-	public PlayerCity(CreatureObject founder){
+	public PlayerCity(CreatureObject founder, int cityID){
 		
 		setCityCenterPosition(founder.getPosition());
 		setCityRadius(150);
@@ -94,7 +96,8 @@ public class PlayerCity {
 		setMaintenanceFee(1);
 		setNextCityUpdate(foundationTime+cityUpdateSpan);
 		setNextElectionDate(foundationTime+legislationPeriod);
-		citizens.add(founder.getObjectID());		
+		citizens.add(founder.getObjectID());
+		this.cityID = cityID;
 	}
 	
 	public void handleGrantZoning() {
@@ -121,6 +124,7 @@ public class PlayerCity {
 	
 	public void processCityUpdate() {
 		// has something changed?
+		System.out.println("processCityUpdate");
 		int censusResult = citizens.size();
 		if (censusResult<5){			
 			setRank(DESERTED); // City is technically not a city anymore
@@ -246,6 +250,7 @@ public class PlayerCity {
 
 	public void setSpecialisation(int specialisation) {
 		this.specialisation = specialisation;
+		sendSpecUpdateMail(specialisation);
 	}
 
 	public long getMayorID() {
@@ -408,5 +413,28 @@ public class PlayerCity {
 	public void setFounded(boolean founded) {
 		this.founded = founded;
 	}
+
+	public String getCityName() {
+		return cityName;
+	}
+
+	public void setCityName(String cityName) {
+		this.cityName = cityName;
+	}
+
+	public int getCityID() {
+		return cityID;
+	}
+
+	public void setCityID(int cityID) {
+		this.cityID = cityID;
+	}
+	
+	public void sendSpecUpdateMail(int cityID) {
+		this.cityID = cityID;
+		// city_version_update_subject_4
+		// city_version_update_body_4
+	}
+	
 
 }
