@@ -36,6 +36,8 @@ import resources.datatables.StateStatus;
 import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
+import engine.clientdata.ClientFileManager;
+import engine.clientdata.visitors.DatatableVisitor;
 import engine.resources.container.Traverser;
 import engine.resources.objects.SWGObject;
 import engine.resources.service.INetworkDispatch;
@@ -176,6 +178,8 @@ public class MountService implements INetworkDispatch {
 			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:cant_call"), DisplayType.Broadcast);
 			return;
 		}
+		
+		mount.setAttachment("pcdAppearanceFilename", pcd.getTemplateData().getAttribute("appearanceFilename"));
 		
 		mount.setFaction(actor.getFaction());
 		mount.setFactionStatus(actor.getFactionStatus());
@@ -581,6 +585,22 @@ public class MountService implements INetworkDispatch {
 		if (rider.getGroupId() == 0 || rider.getGroupId() != owner.getGroupId()) {
 			return false;
 		}
+		
+		try
+		{
+			DatatableVisitor visitor = ClientFileManager.loadFile("datatables/mount/saddle_appearance_map.iff", DatatableVisitor.class);
+			for(int i = 0; i < visitor.getRowCount(); i++)
+			{
+				if(visitor.getObject(i, 2).equals(mount.getAttachment("pcdAppearanceFilename")))  // saddle_appearance_name
+				{
+					if(passengers < (int) visitor.getObject(i, 1)) return true; // saddle_capacity
+					break;
+				}
+			}
+		}
+		catch (Exception e) { e.printStackTrace(); }
+		
+		if(passengers > 0) return false;
 		
 		return true;
 	}
