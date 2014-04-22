@@ -19,33 +19,44 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package services.mission;
+package protocol.swg.objectControllerObjects;
 
-import com.sleepycat.persist.model.Persistent;
+import org.apache.mina.core.buffer.IoBuffer;
 
-import resources.objects.mission.MissionObject;
+public class MissionAcceptRequest extends ObjControllerObject {
 
-@Persistent
-public abstract class MissionObjective {
+	private long missionObjId;
+	private long terminalObjId;
 	
-	protected long startTime;
-	protected boolean activated;
-	protected MissionObject parent;
+	public MissionAcceptRequest() { }
 	
-	public MissionObjective() { }
-	
-	public MissionObjective(MissionObject parent) {
-		this.startTime = System.currentTimeMillis();
-		this.activated = false;
-		this.parent = parent;
+	@Override
+	public void deserialize(IoBuffer data) {
+		data.getLong();
+		data.getInt();
+		setMissionObjId(data.getLong());
+		setTerminalObjId(data.getLong());
 	}
-	
-	public abstract void activate();
-	public abstract void complete();
-	public abstract void drop();
 
-	public long getStartTime() { return startTime; }
-	public boolean isActivated() { return activated; }
-	public void setActive(boolean isActive) { this.activated = isActive; }
-	public MissionObject getParent() { return parent; }
+	@Override
+	public IoBuffer serialize() {
+		return null;
+	}
+
+	public long getMissionObjId() {
+		return missionObjId;
+	}
+
+	public void setMissionObjId(long misssionObjId) {
+		this.missionObjId = misssionObjId;
+	}
+
+	public long getTerminalObjId() {
+		return terminalObjId;
+	}
+
+	public void setTerminalObjId(long terminalObjId) {
+		this.terminalObjId = terminalObjId;
+	}
+
 }

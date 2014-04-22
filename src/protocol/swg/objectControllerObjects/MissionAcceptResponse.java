@@ -19,33 +19,22 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package services.mission;
+package protocol.swg.objectControllerObjects;
 
-import com.sleepycat.persist.model.Persistent;
+import org.apache.mina.core.buffer.IoBuffer;
 
-import resources.objects.mission.MissionObject;
+public class MissionAcceptResponse extends ObjControllerObject {
 
-@Persistent
-public abstract class MissionObjective {
-	
-	protected long startTime;
-	protected boolean activated;
-	protected MissionObject parent;
-	
-	public MissionObjective() { }
-	
-	public MissionObjective(MissionObject parent) {
-		this.startTime = System.currentTimeMillis();
-		this.activated = false;
-		this.parent = parent;
+	@Override
+	public void deserialize(IoBuffer data) {
+		// TODO Auto-generated method stub
+
 	}
-	
-	public abstract void activate();
-	public abstract void complete();
-	public abstract void drop();
 
-	public long getStartTime() { return startTime; }
-	public boolean isActivated() { return activated; }
-	public void setActive(boolean isActive) { this.activated = isActive; }
-	public MissionObject getParent() { return parent; }
+	@Override
+	public IoBuffer serialize() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

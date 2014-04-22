@@ -38,12 +38,8 @@ import engine.resources.scene.Quaternion;
 @Persistent(version=0)
 public class MissionObject extends IntangibleObject implements IPersistent {
 
-	private float destX = 0;
-	private float destY = 0;
-	private float destZ = 0;
-	private float startX = 0;
-	private float startY = 0;
-	private float startZ = 0;
+	private Point3D destination;
+	private Point3D startLocation;
 	private String startPlanet = "";
 	private int difficultyLevel = 0; // Difficulty level displayed in details
 	private String destinationPlanet = "";
@@ -72,66 +68,6 @@ public class MissionObject extends IntangibleObject implements IPersistent {
 	
 	public MissionObject(long objectID, Planet planet, String template) {
 		super(objectID, planet, new Point3D(0, 0, 0), new Quaternion(1, 0, 0, 0), template);
-	}
-
-	public float getMissionStartX() {
-		synchronized(objectMutex) {
-			return startX;
-		}
-	}
-
-	public float getMissionStartY() {
-		synchronized(objectMutex) {
-			return startY;
-		}
-	}
-
-	public float getMissionStartZ() {
-		synchronized(objectMutex) {
-			return startZ;
-		}
-	}
-
-	public void setMissionStart(float x, float y, float z, String planet) {
-		synchronized(objectMutex) {
-			this.startZ = z;
-			this.startX = x;
-			this.startY = y;
-			this.startPlanet = planet;
-		}
-		if (getGrandparent() != null && getGrandparent().getClient() != null && getGrandparent().getClient().getSession() != null) {
-			getGrandparent().getClient().getSession().write(messageBuilder.buildStartLocationDelta(x, z, y, planet));
-		}
-	}
-
-	public float getMissionDestinationX() {
-		synchronized(objectMutex) {
-			return destX;
-		}
-	}
-
-	public float getMissionDestinationY() {
-		synchronized(objectMutex) {
-			return destY;
-		}
-	}
-
-	public float getMissionDestinationZ() {
-		synchronized(objectMutex) {
-			return destZ;
-		}
-	}
-
-	public void setMissionDestination(float x, float y, float z, String planet) {
-		synchronized(objectMutex) {
-			this.destZ = z;
-			this.destY = y;
-			this.destZ = z;
-			this.destinationPlanet = planet;
-		}
-		if (getGrandparent() != null && getGrandparent().getClient() != null && getGrandparent().getClient().getSession() != null) {
-			getGrandparent().getClient().getSession().write(messageBuilder.buildDestinationDelta(x, z, y, planet));
-		}
 	}
 
 	public String getMissionDestinationPlanet() {
@@ -304,7 +240,6 @@ public class MissionObject extends IntangibleObject implements IPersistent {
 		}
 		if (getGrandparent() != null && getGrandparent().getClient() != null && getGrandparent().getClient().getSession() != null) {
 			getGrandparent().getClient().getSession().write(messageBuilder.buildMissionTypeDelta(missionType));
-
 		}
 	}
 
@@ -317,6 +252,40 @@ public class MissionObject extends IntangibleObject implements IPersistent {
 	public void setObjective(MissionObjective objective) {
 		synchronized(objectMutex) {
 			this.objective = objective;
+		}
+	}
+
+	public Point3D getStartLocation() {
+		synchronized(objectMutex) {
+			return startLocation;
+		}
+	}
+	
+	public Point3D getDestination() {
+		synchronized(objectMutex) {
+			return destination;
+		}
+	}
+
+	public void setStartLocation(Point3D startLocation, String planet) {
+		synchronized(objectMutex) {
+			this.startLocation = startLocation;
+			this.startPlanet = planet;
+		}
+		
+		if (getGrandparent() != null && getGrandparent().getClient() != null && getGrandparent().getClient().getSession() != null) {
+			getGrandparent().getClient().getSession().write(messageBuilder.buildStartLocationDelta(startLocation.x, startLocation.z, planet));
+		}
+	}
+	
+	public void setDestination(Point3D destination, String planet) {
+		synchronized(objectMutex) {
+			this.destination = destination;
+			this.destinationPlanet = planet;
+		}
+		
+		if (getGrandparent() != null && getGrandparent().getClient() != null && getGrandparent().getClient().getSession() != null) {
+			getGrandparent().getClient().getSession().write(messageBuilder.buildDestinationDelta(destination.x, destination.z, planet));
 		}
 	}
 

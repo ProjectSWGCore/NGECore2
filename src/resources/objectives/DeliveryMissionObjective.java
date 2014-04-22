@@ -37,6 +37,7 @@ public class DeliveryMissionObjective extends MissionObjective {
 
 	@Override
 	public void activate() {
+		setActive(true);
 	}
 
 	@Override

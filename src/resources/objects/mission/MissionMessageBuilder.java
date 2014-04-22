@@ -59,9 +59,15 @@ public class MissionMessageBuilder extends ObjectMessageBuilder {
 		
 		buffer.putInt(mission.getMissionLevel());
 		
-		buffer.putFloat(mission.getMissionStartX());
-		buffer.putFloat(mission.getMissionStartZ()); // missionStartZ
-		buffer.putFloat(mission.getMissionStartY());
+		if (mission.getStartLocation() != null) {
+			buffer.putFloat(mission.getStartLocation().x);
+			buffer.putFloat(0);
+			buffer.putFloat(mission.getStartLocation().z);
+		} else {
+			buffer.putFloat(0);
+			buffer.putFloat(0);
+			buffer.putFloat(0);
+		}
 		buffer.putLong(0); // Start Object ID
 		if (mission.getMissionStartPlanet() == null)
 			buffer.putInt(0);
@@ -75,9 +81,15 @@ public class MissionMessageBuilder extends ObjectMessageBuilder {
 
 		buffer.putInt(mission.getCreditReward());
 		
-		buffer.putFloat(mission.getMissionDestinationX());
-		buffer.putFloat(mission.getMissionDestinationZ());
-		buffer.putFloat(mission.getMissionDestinationY());
+		if (mission.getDestination() != null) {
+			buffer.putFloat(mission.getDestination().x);
+			buffer.putFloat(0);
+			buffer.putFloat(mission.getDestination().z);
+		} else {
+			buffer.putFloat(0);
+			buffer.putFloat(0);
+			buffer.putFloat(0);
+		}
 		buffer.putLong(0); // Destination Object ID
 		if (mission.getMissionDestinationPlanet() == null)
 			buffer.putInt(0);
@@ -207,13 +219,13 @@ public class MissionMessageBuilder extends ObjectMessageBuilder {
 		return buffer;
 	}
 	
-	public IoBuffer buildStartLocationDelta(float x, float z, float y, String planet) {
+	public IoBuffer buildStartLocationDelta(float x, float z, String planet) {
 
 		IoBuffer buffer = IoBuffer.allocate(24, false).order(ByteOrder.LITTLE_ENDIAN);
 		
 		buffer.putFloat(x);
+		buffer.putFloat(0);
 		buffer.putFloat(z);
-		buffer.putFloat(y);
 
 		buffer.putLong(0);
 		
@@ -224,7 +236,7 @@ public class MissionMessageBuilder extends ObjectMessageBuilder {
 		}
 		int size = buffer.position();
 		buffer.flip();
-		buffer = createDelta("MISO", (byte) 3, (short) 1, (short) 0x06, buffer, size + 4);
+		buffer = createDelta("MISO", (byte) 3, (short) 1, (short) 0x09, buffer, size + 4);
 		
 		return buffer;
 	}
@@ -255,13 +267,13 @@ public class MissionMessageBuilder extends ObjectMessageBuilder {
 		return buffer;
 	}
 	
-	public IoBuffer buildDestinationDelta(float x, float z, float y, String planet) {
+	public IoBuffer buildDestinationDelta(float x, float z, String planet) {
 
 		IoBuffer buffer = IoBuffer.allocate(24, false).order(ByteOrder.LITTLE_ENDIAN);
 		
 		buffer.putFloat(x);
+		buffer.putFloat(0);
 		buffer.putFloat(z);
-		buffer.putFloat(y);
 		
 		buffer.putLong(0); // Destination Object ID
 		
@@ -273,7 +285,7 @@ public class MissionMessageBuilder extends ObjectMessageBuilder {
 		
 		int size = buffer.position();
 		buffer.flip();
-		buffer = createDelta("MISO", (byte) 3, (short) 1, (short) 0x09, buffer, size + 4);
+		buffer = createDelta("MISO", (byte) 3, (short) 1, (short) 0x06, buffer, size + 4);
 		
 		return buffer;
 	}
