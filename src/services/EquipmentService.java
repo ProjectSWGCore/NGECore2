@@ -82,8 +82,19 @@ public class EquipmentService implements INetworkDispatch {
 		}
 
 		if (item.getStringAttribute("class_required") != null) {
+			String classRequired = item.getStringAttribute("class_required");
 			String profession = ((PlayerObject) actor.getSlottedObject("ghost")).getProfession();
-			if (item.getStringAttribute("class_required").contentEquals(core.playerService.getFormalProfessionName(profession)) || item.getStringAttribute("class_required").contentEquals("None"))
+			
+			if (classRequired.contains(",")) {
+				String[] classes = classRequired.split(",");
+				
+				for (int i = 0; i < classes.length; i++) {
+					if (classes[i].contains(core.playerService.getFormalProfessionName(profession))) {
+						return true;
+					}
+				}
+			}
+			if (classRequired.contentEquals(core.playerService.getFormalProfessionName(profession)) || classRequired.contentEquals("None"))
 				result = true;
 			else
 				return false;
