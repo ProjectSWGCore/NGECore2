@@ -1226,6 +1226,12 @@ public class DevService implements INetworkDispatch {
 <<<<<<< HEAD
 						inventory.add(deed);
 						
+						templateString="object/tangible/deed/city_deed/shared_cityhall_tatooine_deed.iff";
+						deed = (Player_House_Deed)core.objectService.createObject(templateString, planet);
+						deed.setBMR(15);
+						deed.setAttributes();
+						inventory.add(deed);
+						
 						break;				
 =======
 						inventory.add(deed);	

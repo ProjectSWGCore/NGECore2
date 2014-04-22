@@ -42,6 +42,7 @@ import resources.objects.creature.CreatureObject;
 import resources.objects.deed.Player_House_Deed;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
+import services.playercities.PlayerCity;
 import services.sui.SUIWindow;
 import services.sui.SUIWindow.SUICallback;
 import services.sui.SUIWindow.Trigger;
@@ -132,6 +133,13 @@ public class HousingService implements INetworkDispatch {
 		building.setDeedTemplate(deed.getTemplate());
 		building.setBMR(playerHourseDeed.getBMR());
 		building.setConditionDamage(100);
+		
+		if (structureTemplate.contains("cityhall")){
+			PlayerCity newCity = core.playerCityService.addNewPlayerCity(actor); 
+			building.setAttachment("structureCity", newCity.getCityID());
+			actor.setAttachment("residentCity", newCity.getCityID());
+		}
+		
 		
 		// Save structure to DB
 		//building.createTransaction(core.getBuildingODB().getEnvironment());

@@ -25,5 +25,9 @@ def setup(core, object):
 	city_vote_terminal = core.objectService.createChildObject(object, 'object/tangible/terminal/shared_terminal_city_vote.iff', Point3D(float(0), float(1.85), float(-8.5)), Quaternion(float(1), float(1), float(1), float(0)),3)
 >>>>>>> upstream/master
 	#cityterminal.setAttachment('housing_parentstruct', object)
+	cityterminal.setAttachment('radial_filename', 'terminal/city_maintenance_terminal')
+	
+	sign = core.objectService.createChildObject(object, 'object/tangible/sign/player/shared_house_address.iff', -7.39, 2.36, 2, -1, 0, -1)
+	object.setAttachment("structureSign", sign)
 	
 	return
