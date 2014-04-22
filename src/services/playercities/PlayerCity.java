@@ -21,8 +21,11 @@
  ******************************************************************************/
 package services.playercities;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Vector;
 
+import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
 import main.NGECore;
 import engine.resources.objects.SWGObject;
@@ -34,29 +37,45 @@ import engine.resources.scene.Point3D;
 
 public class PlayerCity {
 	
-	public static int DESERTED   = 0;
-	public static int OUTPOST    = 1; 
-	public static int VILLAGE    = 2; 
-	public static int TOWNSHIP   = 3; 
-	public static int CITY       = 4; 
-	public static int METROPOLIS = 5; 
+	public static final int DESERTED   = 0;
+	public static final int OUTPOST    = 1; 
+	public static final int VILLAGE    = 2; 
+	public static final int TOWNSHIP   = 3; 
+	public static final int CITY       = 4; 
+	public static final int METROPOLIS = 5; 
 	
-	public static int CLONING_LAB            = 1; 
-	public static int DNA_LABORATORY         = 2; 
-	public static int ENCORE_PERFORMANCE     = 3; 
-	public static int ENTERTAINMENT_DISTRICT = 4; 
-	public static int IMPROVED_JOB_MARKET    = 5; 
-	public static int MANUFACTURING_CENTER   = 6; 
-	public static int MEDICAL_CENTER         = 7; 
-	public static int RESEARCH_CENTER        = 8; 
-	public static int SAMPLE_RICH            = 9; 
+	public static final int CLONE_LAB              = 1; 
+	public static final int DNA_LABORATORY         = 2; 
+	public static final int ENCORE_PERFORMANCE     = 3; 
+	public static final int ENTERTAINMENT_DISTRICT = 4; 
+	public static final int IMPROVED_JOB_MARKET    = 5; 
+	public static final int MANUFACTURING_CENTER   = 6; 
+	public static final int MEDICAL_CENTER         = 7; 
+	public static final int RESEARCH_CENTER        = 8; 
+	public static final int SAMPLE_RICH            = 9;
+	public static final int INDUSTRIAL_SOCIETY     = 10; 
+	public static final int SCIENTIFIC_SOCIETY     = 11;
+	public static final int STRONGHOLD             = 12;
 	
-	public static int BANK              = 1; 
-	public static int CLONING_FACILITY  = 2; 
-	public static int GARAGE            = 3; 
-	public static int MEDIUM_GARDEN     = 4; 
-	public static int LARGE_GARDEN      = 5;
-	public static int SHUTTLEPORT       = 6;
+	public static final String[] specialisationSTFNames = new String[]{"city_spec_cloning",
+																       "city_spec_bm_incubator",
+																       "city_spec_storyteller",
+																       "city_spec_entertainer",
+																       "city_spec_missions",
+																       "city_spec_industry",
+																       "city_spec_doctor",
+																       "city_spec_research",
+																       "city_spec_sample_rich",
+																       "city_spec_master_manufacturing",
+																       "city_spec_master_healing",
+																 	   "city_spec_stronghold"};
+	
+	public static final int BANK              = 1; 
+	public static final int CLONING_FACILITY  = 2; 
+	public static final int GARAGE            = 3; 
+	public static final int MEDIUM_GARDEN     = 4; 
+	public static final int LARGE_GARDEN      = 5;
+	public static final int SHUTTLEPORT       = 6;
 	
 	
 	private String cityName = "";
@@ -64,7 +83,7 @@ public class PlayerCity {
 	private Point3D cityCenterPosition = new Point3D(0,0,0);
 	private int cityRadius = 0;
 	private int cityRank = 0;
-	private int specialisation = -1;
+	private int specialization = -1;
 	private long mayorID = 0L;
 	private int cityTreasury = 0;
 	private int maintenanceFee = 0;
@@ -72,8 +91,15 @@ public class PlayerCity {
 	private long nextElectionDate = 0L; 
 	private long nextCityUpdate = 0L; 
 	private long foundationTime = 0L;
-	private int tax = 0;
+	private int incomeTax = 0;
+	private int propertyTax  = 0;
+	private int salesTax = 0;
+	private int travelTax = 0;
+	private int garageTax = 0;
 	private boolean founded = false;
+	private boolean shuttlePort = false;
+	private boolean registered = false;
+	private boolean zoningEnabled = false;
 	
 	private final long cityUpdateSpan = 7*86400*1000;
 	private final long legislationPeriod = 21*86400*1000;
@@ -113,7 +139,7 @@ public class PlayerCity {
 	}
 	
 	public void processElection() {
-				
+		// ToDo: handle everything		
 		long winnerID = mayorID;
 		mayorID = winnerID;
 		electionVotes.clear();
@@ -126,6 +152,7 @@ public class PlayerCity {
 		// has something changed?
 		System.out.println("processCityUpdate");
 		int censusResult = citizens.size();
+		// ToDo: Consider 1 rank per update changes
 		if (censusResult<5){			
 			setRank(DESERTED); // City is technically not a city anymore
 			setCityRadius(0);
@@ -159,9 +186,21 @@ public class PlayerCity {
 		// collect taxes
 		for (long citizen : citizens){
 			CreatureObject citizenObject = (CreatureObject) NGECore.getInstance().objectService.getObject(citizen);
-			citizenObject.setBankCredits(citizenObject.getBankCredits()-tax);
-			cityTreasury += tax;
+			
 			// ToDo: Handle tax evaders etc.
+			int incomeTax = getIncomeTax();
+			citizenObject.setBankCredits(citizenObject.getBankCredits()-incomeTax);
+			cityTreasury += incomeTax;
+			
+			int propertyTaxRate = getPropertyTax()/100;
+			Vector<BuildingObject> allStructuresOfCitizen = new Vector<BuildingObject>(); // Collect the structures 
+			int cumulatedPropertyTax = 0;
+			for (BuildingObject structure : allStructuresOfCitizen){
+				cumulatedPropertyTax += propertyTaxRate*structure.getBMR();
+			}
+			
+			citizenObject.setBankCredits(citizenObject.getBankCredits()-cumulatedPropertyTax);
+			cityTreasury += cumulatedPropertyTax;			
 		}
 		
 		demolishHighRankStructures();
@@ -236,7 +275,7 @@ public class PlayerCity {
 		
 	}
 
-	public int getCityRank() {
+	public int getRank() {
 		return cityRank;
 	}
 
@@ -244,13 +283,13 @@ public class PlayerCity {
 		this.cityRank = cityRank;
 	}
 
-	public int getSpecialisation() {
-		return specialisation;
+	public int getSpecialization() {
+		return specialization;
 	}
-
-	public void setSpecialisation(int specialisation) {
-		this.specialisation = specialisation;
-		sendSpecUpdateMail(specialisation);
+	
+	public void setSpecialization(int specialization) {
+		this.specialization = specialization;
+		sendSpecUpdateMail(specialization);
 	}
 
 	public long getMayorID() {
@@ -420,6 +459,7 @@ public class PlayerCity {
 
 	public void setCityName(String cityName) {
 		this.cityName = cityName;
+		sendNameChangeMail(cityName);
 	}
 
 	public int getCityID() {
@@ -431,10 +471,83 @@ public class PlayerCity {
 	}
 	
 	public void sendSpecUpdateMail(int cityID) {
-		this.cityID = cityID;
 		// city_version_update_subject_4
 		// city_version_update_body_4
 	}
 	
+	public void sendNameChangeMail(String name) {		
+		
+	}
 
+	public int getIncomeTax() {
+		return incomeTax;
+	}
+
+	public void setIncomeTax(int incomeTax) {
+		this.incomeTax = incomeTax;
+	}
+
+	public int getPropertyTax() {
+		return propertyTax;
+	}
+
+	public void setPropertyTax(int propertyTax) {
+		this.propertyTax = propertyTax;
+	}
+
+	public int getSalesTax() {
+		return salesTax;
+	}
+
+	public void setSalesTax(int salesTax) {
+		this.salesTax = salesTax;
+	}
+
+	public int getTravelTax() {
+		return travelTax;
+	}
+
+	public void setTravelTax(int travelTax) {
+		this.travelTax = travelTax;
+	}
+
+	public int getGarageTax() {
+		return garageTax;
+	}
+
+	public void setGarageTax(int garageTax) {
+		this.garageTax = garageTax;
+	}
+
+	public boolean hasShuttlePort() {
+		return shuttlePort;
+	}
+
+	public void setShuttlePort(boolean shuttlePort) {
+		this.shuttlePort = shuttlePort;
+	}
+
+	public boolean isRegistered() {
+		return registered;
+	}
+
+	public void setRegistered(boolean registered) {
+		this.registered = registered;
+	}
+
+	public boolean isZoningEnabled() {
+		return zoningEnabled;
+	}
+
+	public void setZoningEnabled(boolean zoningEnabled) {
+		this.zoningEnabled = zoningEnabled;
+	}
+
+	public static String[] getSpecialisationSTFNames() {
+		return specialisationSTFNames;
+	}
+	
+	public List<String> getSpecializationSTFNamesAsList() {
+		return Arrays.asList(specialisationSTFNames);
+	}
 }
