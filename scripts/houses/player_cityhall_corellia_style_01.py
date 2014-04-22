@@ -6,9 +6,8 @@ def setup(core):
 	houseTemplate = HouseTemplate("object/tangible/deed/city_deed/shared_cityhall_corellia_deed.iff", "object/building/player/city/shared_cityhall_corellia.iff", 5)
 	
 	houseTemplate.addBuildingSign("object/tangible/sign/player/shared_house_address.iff", Point3D(1, 2, 3))
-	houseTemplate.addPlaceablePlanet("naboo")
-	houseTemplate.addPlaceablePlanet("rori")
-	houseTemplate.addPlaceablePlanet("dantooine")
+	houseTemplate.addPlaceablePlanet("corellia")
+	houseTemplate.addPlaceablePlanet("talus")
 	houseTemplate.setDefaultItemLimit(400)
 	
 	core.housingService.addHousingTemplate(houseTemplate)
