@@ -11,7 +11,7 @@ def setup(core, object):
 	#structureterminal.setAttachment('radial_filename', 'structure_management_terminal')
 	structureterminal.setAttachment('housing_parentstruct', object)
 	
-	cityterminal = core.objectService.createChildObject(object, 'object/tangible/terminal/shared_terminal_city.iff', Point3D(float(18), float(2), float(-9)), Quaternion(float(1), float(1), float(1), float(0)),5)
+	cityterminal = core.objectService.createChildObject(object, 'object/tangible/terminal/shared_terminal_city.iff', Point3D(float(16), float(2), float(-9)), Quaternion(float(1), float(1), float(1), float(0)),5)
 	#cityterminal.setAttachment('housing_parentstruct', object)
 	
 	city_vote_terminal = core.objectService.createChildObject(object, 'object/tangible/terminal/shared_terminal_city_vote.iff', Point3D(float(0), float(1.85), float(-8.5)), Quaternion(float(1), float(1), float(1), float(0)),3)
