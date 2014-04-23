@@ -8,6 +8,8 @@ def addTemplate(core):
 	templates.add('object/mobile/shared_kreetle.iff')
 	mobileTemplate.setCreatureName('kreetle')
 	mobileTemplate.setTemplates(templates)
+	mobileTemplate.setAttackRange(5)
+	mobileTemplate.setAttackSpeed(5)
 	mobileTemplate.setLevel(5)
 	attacks = Vector()
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')

@@ -8,6 +8,8 @@ def addTemplate(core):
 	templates.add('object/mobile/shared_womp_rat.iff')
 	mobileTemplate.setCreatureName('womprat')
 	mobileTemplate.setTemplates(templates)
+	mobileTemplate.setAttackRange(5)
+	mobileTemplate.setAttackSpeed(5)
 	mobileTemplate.setLevel(5)
 	attacks = Vector()
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
