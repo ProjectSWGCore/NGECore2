@@ -21,12 +21,17 @@
  ******************************************************************************/
 package services.playercities;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Vector;
 
 import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
+import resources.objects.waypoint.WaypointObject;
+import services.chat.Mail;
+import services.chat.WaypointAttachment;
 import main.NGECore;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
@@ -254,7 +259,8 @@ public class PlayerCity {
 		Vector<Long> citizenList = getCitizens();
 		int founderCitizenCount = 0;
 		for (long founderId : founders){
-			if (citizenList.contains(founderId))
+			CreatureObject citizenObject = (CreatureObject) NGECore.getInstance().objectService.getObject(founderId);
+			if (citizenList.contains(founderId) && (long)citizenObject.getAttachment("residentCity")==this.getCityID())
 				founderCitizenCount++;
 		}
 		if (founderCitizenCount==founders.size())
@@ -335,6 +341,12 @@ public class PlayerCity {
 			this.placedStructures = placedStructures;
 		}
 	}
+	
+	public void addNewStructure(long newStructure) {
+		synchronized(placedStructures){
+			this.placedStructures.add(newStructure);
+		}
+	}
 
 	public Vector<Long> getCitizens() {
 		synchronized(citizens){
@@ -352,6 +364,9 @@ public class PlayerCity {
 		synchronized(citizens){
 			this.citizens.add(citizen);
 		}
+		CreatureObject citizenObject = (CreatureObject) NGECore.getInstance().objectService.getObject(citizen);
+		sendNewCitizenMailAll(citizenObject);
+		sendNewCitizenMail(citizenObject);		
 	}
 	
 	public void removeCitizen(long citizen) {
@@ -470,15 +485,6 @@ public class PlayerCity {
 		this.cityID = cityID;
 	}
 	
-	public void sendSpecUpdateMail(int cityID) {
-		// city_version_update_subject_4
-		// city_version_update_body_4
-	}
-	
-	public void sendNameChangeMail(String name) {		
-		
-	}
-
 	public int getIncomeTax() {
 		return incomeTax;
 	}
@@ -550,4 +556,109 @@ public class PlayerCity {
 	public List<String> getSpecializationSTFNamesAsList() {
 		return Arrays.asList(specialisationSTFNames);
 	}
+	
+	public void sendSpecUpdateMail(int cityID) {
+		// city_version_update_subject_4
+		// city_version_update_body_4
+		Vector<Long> citizenList = getCitizens();
+		for (long citizen : citizenList){
+			CreatureObject citizenObject = (CreatureObject) NGECore.getInstance().objectService.getObject(citizen);
+			Mail actorMail = new Mail();
+	        actorMail.setMailId(NGECore.getInstance().chatService.generateMailId());
+	        actorMail.setRecieverId(citizen);
+	        actorMail.setStatus(Mail.NEW);
+	        actorMail.setTimeStamp((int) (new Date().getTime() / 1000));
+	        actorMail.setMessage("@city/city:city_version_update_body_4");
+	        actorMail.setSubject("@city/city:city_version_update_subject_4");
+	        actorMail.setSenderName("City " + this.cityName);
+	        
+//	        List<WaypointAttachment> attachments = new ArrayList<WaypointAttachment>(); 
+//	        WaypointAttachment attachment = new WaypointAttachment();
+//			attachment.active = false;
+//			attachments.add(attachment);
+//			attachment.cellID = constructionWaypoint.getCellId();
+//			attachment.color = (byte)1;
+//			attachment.name = "City";
+//			attachment.planetCRC = engine.resources.common.CRC.StringtoCRC(citizenObject.getPlanet().getName());
+//			attachment.positionX = object.getPosition().x;
+//			attachment.positionY = 0;
+//			attachment.positionZ = object.getPosition().z;
+//			actorMail.setAttachments(attachments);
+	        
+	        NGECore.getInstance().chatService.storePersistentMessage(actorMail);
+//	        if (newCitizen.getClient()!=null)
+//	        	NGECore.getInstance().chatService.sendPersistentMessageHeader(newCitizen.getClient(), actorMail);
+
+		}
+	}
+	
+	public void sendNameChangeMail(String name) {		
+		
+	}
+	
+	public void sendNewCitizenMailAll(CreatureObject newCitizen) {		
+
+		Vector<Long> citizenList = getCitizens();
+		for (long citizen : citizenList){
+			CreatureObject citizenObject = (CreatureObject) NGECore.getInstance().objectService.getObject(citizen);
+			Mail actorMail = new Mail();
+	        actorMail.setMailId(NGECore.getInstance().chatService.generateMailId());
+	        actorMail.setRecieverId(citizen);
+	        actorMail.setStatus(Mail.NEW);
+	        actorMail.setTimeStamp((int) (new Date().getTime() / 1000));
+	        actorMail.setMessage("@city/city:new_city_citizen_body");
+	        actorMail.setSubject("@city/city:new_city_citizen_subject");
+	        actorMail.setSenderName("City " + this.cityName);
+	        
+	        List<WaypointAttachment> attachments = new ArrayList<WaypointAttachment>(); 
+	        WaypointObject constructionWaypoint = (WaypointObject)NGECore.getInstance().objectService.createObject("object/waypoint/shared_world_waypoint_blue.iff", citizenObject.getPlanet(), citizenObject.getPosition().x, 0 ,citizenObject.getPosition().z);
+	        WaypointAttachment attachment = new WaypointAttachment();
+			attachment.active = false;		
+			attachment.cellID = constructionWaypoint.getCellId();
+			attachment.color = (byte)1;
+			attachment.name = "City";
+			attachment.planetCRC = engine.resources.common.CRC.StringtoCRC(citizenObject.getPlanet().getName());
+			attachment.positionX = citizenObject.getPosition().x;
+			attachment.positionY = 0;
+			attachment.positionZ = citizenObject.getPosition().z;
+			attachments.add(attachment);
+			actorMail.setAttachments(attachments);
+	        
+	        NGECore.getInstance().chatService.storePersistentMessage(actorMail);
+	        if (newCitizen.getClient()!=null)
+	        	NGECore.getInstance().chatService.sendPersistentMessageHeader(newCitizen.getClient(), actorMail);
+
+		}
+	}
+	
+	public void sendNewCitizenMail(CreatureObject citizen) {		
+
+		Mail actorMail = new Mail();
+        actorMail.setMailId(NGECore.getInstance().chatService.generateMailId());
+        actorMail.setRecieverId(citizen.getObjectID());
+        actorMail.setStatus(Mail.NEW);
+        actorMail.setTimeStamp((int) (new Date().getTime() / 1000));
+        actorMail.setMessage("@city/city:new_city_citizen_other_body");
+        actorMail.setSubject("@city/city:new_city_citizen_other_subject");
+        actorMail.setSenderName("City " + this.cityName);
+        
+        List<WaypointAttachment> attachments = new ArrayList<WaypointAttachment>(); 
+        WaypointObject constructionWaypoint = (WaypointObject)NGECore.getInstance().objectService.createObject("object/waypoint/shared_world_waypoint_blue.iff", citizen.getPlanet(), citizen.getPosition().x, 0 ,citizen.getPosition().z);
+        WaypointAttachment attachment = new WaypointAttachment();
+		attachment.active = false;		
+		attachment.cellID = constructionWaypoint.getCellId();
+		attachment.color = (byte)1;
+		attachment.name = "City";
+		attachment.planetCRC = engine.resources.common.CRC.StringtoCRC(citizen.getPlanet().getName());
+		attachment.positionX = citizen.getPosition().x;
+		attachment.positionY = 0;
+		attachment.positionZ = citizen.getPosition().z;
+		attachments.add(attachment);
+		actorMail.setAttachments(attachments);
+
+		
+        NGECore.getInstance().chatService.storePersistentMessage(actorMail);
+        NGECore.getInstance().chatService.sendPersistentMessageHeader(citizen.getClient(), actorMail);
+	}
+
 }

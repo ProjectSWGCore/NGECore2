@@ -70,7 +70,7 @@ def handleSelection(core, owner, target, option):
 			return
 	if option == 121:
 		if owner is not None:
-			handleCityInfo(core, owner, target, option)
+			handleCityRankInfo(core, owner, target, option)
 			return
 	if option == 122:
 		if owner is not None:
@@ -100,6 +100,11 @@ def setnameCallBack(owner, window, eventType, returnList):
 	
 	
 def handleAdjustTaxes(core, owner, target, option):	
+	
+	playerCity = main.NGECore.getInstance().playerCityService.getPlayerCity(owner)
+	if playerCity.getRank()<2:
+		owner.sendSystemMessage('@city/city:no_rank_taxes', 0)
+		return
 	
 	window = core.suiService.createSUIWindow('Script.listBox', owner, target, 0);
 	window.setProperty('bg.caption.lblTitle:Text', '@city/city:adjust_taxes_t')
@@ -373,7 +378,7 @@ def setCityInfoCallBack(owner, window, eventType, returnList):
 def handleRegisterMap(core, owner, target, option):	
 	
 	playerCity = main.NGECore.getInstance().playerCityService.getPlayerCity(owner)
-	if playerCity.getCityRank()<3:
+	if playerCity.getRank()<3:
 		owner.sendSystemMessage('@city/city:cant_register_rank', 0)
 		return
 		
@@ -396,9 +401,9 @@ def setRegisterMapCallBack(owner, window, eventType, returnList):
 def handleSpecialization(core, owner, target, option):	
 	
 	playerCity = main.NGECore.getInstance().playerCityService.getPlayerCity(owner)
-	#if playerCity.getCityRank()<3:
-		#owner.sendSystemMessage('@city/city:no_rank_spec', 0)
-		#return
+	if playerCity.getRank()<3:
+		owner.sendSystemMessage('@city/city:no_rank_spec', 0)
+		return
 
 	window = core.suiService.createSUIWindow('Script.listBox', owner, target, 0);
 	window.setProperty('bg.caption.lblTitle:Text', '@city/city:city_specs_t')

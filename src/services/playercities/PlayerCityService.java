@@ -90,6 +90,19 @@ public class PlayerCityService implements INetworkDispatch {
 		return newCity;
 	}
 	
+	public PlayerCity getCityObjectIsIn(SWGObject object) {
+		PlayerCity foundCity = null;
+		synchronized(playerCities){
+			for (PlayerCity city : playerCities){
+				int radius = city.getCityRadius();
+				if (object.getPosition().getDistance2D(city.getCityCenterPosition())<radius){
+					foundCity = city;
+				}				
+			}
+		}
+		return foundCity;
+	}
+	
 	public PlayerCity getPlayerCity(CreatureObject citizen) {
 		PlayerCity foundCity = null;
 		synchronized(playerCities){
@@ -102,6 +115,8 @@ public class PlayerCityService implements INetworkDispatch {
 		}
 		return foundCity;
 	}
+	
+	
 	
 	public void newCitySUI1(CreatureObject citizen, final PlayerCity newCity) {		
 		final SUIWindow window = core.suiService.createSUIWindow("Script.messageBox", citizen, citizen, 0);
