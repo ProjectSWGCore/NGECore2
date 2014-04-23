@@ -660,5 +660,40 @@ public class PlayerCity {
         NGECore.getInstance().chatService.storePersistentMessage(actorMail);
         NGECore.getInstance().chatService.sendPersistentMessageHeader(citizen.getClient(), actorMail);
 	}
+	
+	public void sendCitizenLeftMailAll(CreatureObject newCitizen) {		
+
+		Vector<Long> citizenList = getCitizens();
+		for (long citizen : citizenList){
+			CreatureObject citizenObject = (CreatureObject) NGECore.getInstance().objectService.getObject(citizen);
+			Mail actorMail = new Mail();
+	        actorMail.setMailId(NGECore.getInstance().chatService.generateMailId());
+	        actorMail.setRecieverId(citizen);
+	        actorMail.setStatus(Mail.NEW);
+	        actorMail.setTimeStamp((int) (new Date().getTime() / 1000));
+	        actorMail.setMessage("@city/city:lost_citizen_body");
+	        actorMail.setSubject("@city/city:lost_citizen_subject");
+	        actorMail.setSenderName("City " + this.cityName);
+	        
+	        List<WaypointAttachment> attachments = new ArrayList<WaypointAttachment>(); 
+	        WaypointObject constructionWaypoint = (WaypointObject)NGECore.getInstance().objectService.createObject("object/waypoint/shared_world_waypoint_blue.iff", citizenObject.getPlanet(), citizenObject.getPosition().x, 0 ,citizenObject.getPosition().z);
+	        WaypointAttachment attachment = new WaypointAttachment();
+			attachment.active = false;		
+			attachment.cellID = constructionWaypoint.getCellId();
+			attachment.color = (byte)1;
+			attachment.name = "City";
+			attachment.planetCRC = engine.resources.common.CRC.StringtoCRC(citizenObject.getPlanet().getName());
+			attachment.positionX = citizenObject.getPosition().x;
+			attachment.positionY = 0;
+			attachment.positionZ = citizenObject.getPosition().z;
+			attachments.add(attachment);
+			actorMail.setAttachments(attachments);
+	        
+	        NGECore.getInstance().chatService.storePersistentMessage(actorMail);
+	        if (newCitizen.getClient()!=null)
+	        	NGECore.getInstance().chatService.sendPersistentMessageHeader(newCitizen.getClient(), actorMail);
+
+		}
+	}
 
 }
