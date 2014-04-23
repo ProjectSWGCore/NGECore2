@@ -3,7 +3,11 @@ from services.housing import HouseTemplate
 from engine.resources.scene import Point3D
 
 def setup(core):
+<<<<<<< HEAD
 	houseTemplate = HouseTemplate("object/tangible/deed/city_deed/shared_cityhall_tatooine_deed.iff", "object/building/player/city/shared_cityhall_tatooine.iff", 5)
+=======
+	houseTemplate = HouseTemplate("object/tangible/deed/city_deed/shared_cityhall_tatooine_deed.iff", "object/building/player/city/shared_cityhall_tatooine.iff", 0)
+>>>>>>> upstream/master
 	
 	houseTemplate.addBuildingSign("object/tangible/sign/player/shared_house_address.iff", Point3D(1, 2, 3))
 	houseTemplate.addPlaceablePlanet("tatooine")
