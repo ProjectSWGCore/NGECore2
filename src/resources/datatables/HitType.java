@@ -21,24 +21,15 @@
  ******************************************************************************/
 package resources.datatables;
 
-public class Posture {
-	
-	// Posture.iff
-	public static final byte Invalid = -1;
-	public static final byte Upright = 0;
-	public static final byte Crouched = 1;
-	public static final byte Prone = 2;
-	public static final byte Sneaking = 3;
-	public static final byte Blocking = 4;
-	public static final byte Climbing = 5;
-	public static final byte Flying = 6;
-	public static final byte LyingDown = 7;
-	public static final byte Sitting = 8;
-	public static final byte SkillAnimating = 9;
-	public static final byte DrivingVehicle = 10;
-	public static final byte RidingCreature = 11;
-	public static final byte KnockedDown = 12;
-	public static final byte Incapacitated = 13;
-	public static final byte Dead = 14;
-	
+public class HitType {
+	public static final byte MISS = 0;
+	public static final byte DODGE = 1;
+	public static final byte PARRY = 2;
+	public static final byte STRIKETHROUGH = 3;
+	public static final byte CRITICAL = 4;
+	public static final byte PUNISHING = 5;
+	public static final byte HIT = 6;
+	public static final byte BLOCK = 7;
+	public static final byte EVASION = 8;
+	public static final byte GLANCE = 9;
 }

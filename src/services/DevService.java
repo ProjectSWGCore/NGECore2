@@ -1211,11 +1211,10 @@ public class DevService implements INetworkDispatch {
 						deed1.setBER(15);
 						deed1.setAttributes();
 						inventory.add(deed1);
-		
-						break;
+						return;
 					case 112:
 						core.resourceService.spawnSpecificResourceContainer("Radioactive", player, 100000);
-						break;	
+						return;	
 					case 120:
 //						SWGObject houseDeed = core.objectService.createObject("object/tangible/deed/player_house_deed/shared_generic_house_small_deed.iff", planet);
 //						inventory.add(houseDeed);
@@ -1224,6 +1223,7 @@ public class DevService implements INetworkDispatch {
 						Player_House_Deed deed = (Player_House_Deed)core.objectService.createObject(templateString, planet);
 						deed.setBMR(15);
 						deed.setAttributes();
+<<<<<<< HEAD
 						inventory.add(deed);
 						
 						templateString="object/tangible/deed/city_deed/shared_cityhall_tatooine_deed.iff";
@@ -1233,6 +1233,10 @@ public class DevService implements INetworkDispatch {
 						inventory.add(deed);
 						
 						break;				
+=======
+						inventory.add(deed);	
+						return;				
+>>>>>>> upstream/master
 					case 125:
 						TangibleObject genericCraftingTool = (TangibleObject) core.objectService.createObject("object/tangible/crafting/station/shared_generic_tool.iff", planet);
 						genericCraftingTool.setCustomName("Generic Crafting Tool");
@@ -1240,7 +1244,9 @@ public class DevService implements INetworkDispatch {
 						return;
 					case 130:
 						TangibleObject swoopDeed = (TangibleObject) core.objectService.createObject("object/tangible/deed/vehicle_deed/shared_speederbike_swoop_deed.iff", planet);
+						TangibleObject av21deed = (TangibleObject) core.objectService.createObject("object/tangible/deed/vehicle_deed/shared_landspeeder_av21_deed.iff", planet);
 						inventory.add(swoopDeed);
+						inventory.add(av21deed);
 						return;
 				}
 			}	
