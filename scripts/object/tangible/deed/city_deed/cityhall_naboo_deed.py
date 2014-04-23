@@ -5,7 +5,7 @@ def setup(core, object):
 	object.setConstructorTemplate('object/building/player/shared_construction_structure.iff')
 	object.setStructureTemplate('object/tangible/deed/city_deed/shared_cityhall_naboo_deed.iff')
 	#object.setLotRequirement(5)
-	#object.setBMR(100)
+	object.setBMR(308)
 	return
 
 def use(core, actor, object):
