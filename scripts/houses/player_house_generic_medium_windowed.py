@@ -5,7 +5,7 @@ from engine.resources.scene import Point3D
 def setup(core):
 	houseTemplate = HouseTemplate("object/tangible/deed/player_house_deed/shared_generic_house_medium_windowed_deed.iff", "object/building/player/shared_player_house_generic_medium_windowed.iff", 2)
 	
-	houseTemplate.addBuildingSign("object/tangible/sign/player/shared_house_address.iff", Point3D(1, 2, 3))
+	houseTemplate.addBuildingSign("object/tangible/sign/player/shared_house_address.iff", Point3D(float(5.5), float(2.26), float(7.8))) 
 	houseTemplate.addPlaceablePlanet("tatooine")
 	houseTemplate.addPlaceablePlanet("corellia")
 	houseTemplate.addPlaceablePlanet("naboo")

@@ -5,14 +5,11 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	templates = Vector()
-	templates.add('object/mobile/shared_kreetle.iff')
-	mobileTemplate.setCreatureName('kreetle')
+	templates.add('object/mobile/shared_bantha_hue.iff')
+	mobileTemplate.setCreatureName('bantha')
 	mobileTemplate.setTemplates(templates)
-	mobileTemplate.setAttackRange(5)
-	mobileTemplate.setAttackSpeed(5)
-	mobileTemplate.setLevel(5)
+	mobileTemplate.setLevel(14)
 	attacks = Vector()
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
-	core.spawnService.addMobileTemplate('kreetle', mobileTemplate)
-	
+	core.spawnService.addMobileTemplate('bantha', mobileTemplate)

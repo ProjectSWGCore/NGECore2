@@ -3,9 +3,9 @@ from services.housing import HouseTemplate
 from engine.resources.scene import Point3D
 
 def setup(core):
-	houseTemplate = HouseTemplate("object/tangible/deed/guild_deed/shared_corellia_guild_deed.iff", "object/building/player/shared_player_guildhall_corellia_style_01.iff", 5)
+	houseTemplate = HouseTemplate("object/tangible/deed/city_deed/shared_cityhall_corellia_deed.iff", "object/building/player/city/shared_cityhall_corellia.iff", 0)
 	
-	houseTemplate.addBuildingSign("object/tangible/sign/player/shared_house_address.iff", Point3D(float(6), float(3), float(18.4))) 
+	houseTemplate.addBuildingSign("object/tangible/sign/player/shared_house_address.iff", Point3D(1, 2, 3))
 	houseTemplate.addPlaceablePlanet("corellia")
 	houseTemplate.addPlaceablePlanet("talus")
 	houseTemplate.setDefaultItemLimit(400)
