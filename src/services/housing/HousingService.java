@@ -42,6 +42,7 @@ import resources.objects.creature.CreatureObject;
 import resources.objects.deed.Player_House_Deed;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
+import services.playercities.PlayerCity;
 import services.sui.SUIWindow;
 import services.sui.SUIWindow.SUICallback;
 import services.sui.SUIWindow.Trigger;
@@ -118,7 +119,9 @@ public class HousingService implements INetworkDispatch {
 		// Name the sign
 		TangibleObject sign = (TangibleObject) building.getAttachment("structureSign");	
 		String playerFirstName = actor.getCustomName().split(" ")[0];
-		sign.setCustomName2(playerFirstName + "'s House");
+		
+		if (sign !=null)
+			sign.setCustomName2(playerFirstName + "'s House");
 		//building.add(sign);
 
 		core.objectService.destroyObject(deed);
@@ -132,6 +135,27 @@ public class HousingService implements INetworkDispatch {
 		building.setDeedTemplate(deed.getTemplate());
 		building.setBMR(playerHourseDeed.getBMR());
 		building.setConditionDamage(100);
+		
+		if (structureTemplate.contains("cityhall")){
+			PlayerCity newCity = core.playerCityService.addNewPlayerCity(actor); 
+			building.setAttachment("structureCity", newCity.getCityID());
+			actor.setAttachment("residentCity", newCity.getCityID());
+		}
+		
+		// Check for city founders joining a new city
+		PlayerCity cityActorIsIn = core.playerCityService.getCityObjectIsIn(actor);
+		
+		actor.setAttachment("Has24HZoningFor",cityActorIsIn.getCityID()); // for testing
+		
+		int cityActorHasZoning = (int)actor.getAttachment("Has24HZoningFor");
+		if (cityActorIsIn!=null && cityActorHasZoning==cityActorIsIn.getCityID()){
+			if (! cityActorIsIn.getCitizens().contains(actor.getObjectID())){
+				building.setAttachment("structureCity", cityActorIsIn.getCityID());
+				// actor.setAttachment("residentCity", cityActorIsIn.getCityID()); He must do it manually
+				cityActorIsIn.addCitizen(actor.getObjectID());
+				cityActorIsIn.addNewStructure(building.getObjectID());
+			}
+		}
 		
 		// Save structure to DB
 		//building.createTransaction(core.getBuildingODB().getEnvironment());
@@ -428,6 +452,8 @@ public class HousingService implements INetworkDispatch {
 	public void declareResidency(SWGObject owner, TangibleObject target) {
 		final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
 		building.setResidency((CreatureObject)owner);
+		PlayerCity cityActorIsIn = core.playerCityService.getCityObjectIsIn(owner);
+		owner.setAttachment("residentCity", cityActorIsIn.getCityID());
 		//owner.setResidence();
 	}
 	
