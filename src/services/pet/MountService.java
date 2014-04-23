@@ -529,13 +529,28 @@ public class MountService implements INetworkDispatch {
 		return actor.getContainer() == mount;
 	}
 	
+	public int getPassengerCount(CreatureObject mount)
+	{
+		mount.setAttachment("passengers", 0);
+		
+		mount.viewChildren(mount, false, false, new Traverser() 
+		{	
+			public void process(SWGObject passenger)
+			{
+				if (passenger instanceof CreatureObject) mount.setAttachment("passengers", (int) mount.getAttachment("passengers") + 1);
+			}
+		});
+		
+		return (int)mount.getAttachment("passengers");
+	}
+	
 	public boolean canMount(CreatureObject rider, CreatureObject mount) {
 		if (mount == null) {
 			return false;
 		}
 		
 		if (!mount.getOption(Options.MOUNT)) {
-			return false;
+		//	return false;
 		}
 		
 		if (isMounted(rider)) {
@@ -556,7 +571,7 @@ public class MountService implements INetworkDispatch {
 		int passengers = 0;
 		
 		if (mount.getAttachment("passengers") != null){
-			passengers = (Integer) mount.getAttachment("passengers");
+			passengers = getPassengerCount(mount);
 		}
 		
 		int passengerSlot = 0;
@@ -569,7 +584,7 @@ public class MountService implements INetworkDispatch {
 		}
 		
 		if (passengerSlot == 0) {
-			return false;
+		//	return false;
 		}
 		
 		CreatureObject owner = (CreatureObject) NGECore.getInstance().objectService.getObject(mount.getOwnerId());
