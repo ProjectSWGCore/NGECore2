@@ -6,8 +6,7 @@ def createRadial(core, owner, target, radials):
 	
 	radials.add(RadialOptions(0, 7, 1, ''))
 	if core.mountService.canMount(owner, target):
-		radials.add(RadialOptions(1, 40, 3, '@pet/pet_menu:menu_enter_exit'))
-	radials.add(RadialOptions(0, 21, 1, ''))
+		radials.add(RadialOptions(0, 40, 3, '@pet/pet_menu:menu_enter_exit'))
 	if target.getOwnerId() == owner.getObjectID():
 		radials.add(RadialOptions(0, 60, 3, '@pet/pet_menu:menu_store'))
 	if core.mountService.canRepair(owner, target):
@@ -18,14 +17,14 @@ def handleSelection(core, owner, target, option):
 	mntSvc = core.mountService
 	
 	if target:
-		if option == 21:
-			if mntSvc.isMounted(actor):
-				mntSvc.mount(actor, target)
+		if option == 40:
+			if mntSvc.isMounted(owner):
+				mntSvc.dismount(owner, target)
 			else:
-				mntSvc.unmount(actor, target)
+				mntSvc.mount(owner, target)
 		elif option == 60:
-			mntSvc.store(actor, target)
+			mntSvc.store(owner, target)
 		elif option == 114:
-			mntSvc.repair(actor, target)
+			mntSvc.repair(owner, target)
 	return
 
