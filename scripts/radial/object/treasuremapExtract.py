@@ -16,12 +16,12 @@ def createRadial(core, owner, target, radials):
 	return
 	
 def handleSelection(core, owner, target, option):
-	if option == 21 and target:
-		owner.sendSystemMessage('TreasuremapExtract radial',0)
+	if option == 21 and target and owner:
 		exactLoc = target.getAttachment('MapExactLocation')
 		
-		#if owner.getPosition().getDistance2D(exactLoc)<20:
-		if owner.getPosition().getDistance2D(owner.getPosition())<20:
+		#if owner.getPosition().getDistance2D(owner.getPosition())<20:
+		if owner.getPosition().getDistance2D(exactLoc)<20:
+		
 			target.setAttachment('radial_filename', 'object/usable')
 			owner.sendSystemMessage('@treasure_map/treasure_map:sys_dist_here',0)
 			#spawn guards

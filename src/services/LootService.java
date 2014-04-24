@@ -101,7 +101,15 @@ public class LootService implements INetworkDispatch {
 	
 	public void DropLoot(CreatureObject requester, TangibleObject lootedObject) {
 		
-		GroupObject group = (GroupObject) core.objectService.getObject(requester.getGroupId());
+		if (requester==null || lootedObject==null)
+			return; //QA
+		
+		GroupObject group = null;
+		if(requester.getGroupId()!=0)
+			group = (GroupObject) core.objectService.getObject(requester.getGroupId());
+		
+		if (lootedObject.getKiller()==null)
+			lootedObject.setKiller(requester);
 		
 		if (lootedObject.isLooted() || lootedObject.isLootLock() || (group == null && !lootedObject.getKiller().equals(requester)) || (group != null && !group.getMemberList().contains(lootedObject.getKiller())))
 			return;
@@ -124,8 +132,8 @@ public class LootService implements INetworkDispatch {
 	     	    
 	    while (iterator.hasNext()){
 	    	LootGroup lootGroup = iterator.next();
-	    	int groupChance = lootGroup.getLootGroupChance();
-	    	int lootGroupRoll = new Random().nextInt(100);
+	    	double groupChance = lootGroup.getLootGroupChance();
+	    	double lootGroupRoll = new Random().nextDouble()*100;
 	    	if (projectionCoefficientMatrixModulo!=0)
 	    		lootGroupRoll=groupChance+1;
 	    	if (lootGroupRoll <= groupChance){    	
@@ -168,7 +176,9 @@ public class LootService implements INetworkDispatch {
 	    }
 	    	    
 	    SWGObject lootedObjectInventory = lootedObject.getSlottedObject("inventory");
-	    System.out.println("lootedObjectInventory " + lootedObjectInventory.getTemplate());
+	    if (lootedObjectInventory==null || lootedObject.getTemplate().startsWith("object/tangible/container/drum/shared_treasure_drum.iff"))
+	    	lootedObjectInventory = lootedObject; // In case we don't know what we are dealing with
+	   
 	    // For autoloot 
     	//SWGObject requesterInventory = requester.getSlottedObject("inventory");
     	
@@ -193,7 +203,7 @@ public class LootService implements INetworkDispatch {
 	
 	private void handleLootGroup(LootGroup lootGroup,LootRollSession lootRollSession){
 		
-		int[] lootPoolChances = lootGroup.getLootPoolChances();
+		double[] lootPoolChances = lootGroup.getLootPoolChances();
 		String[] lootPoolNames = lootGroup.getLootPoolNames();
 		if (lootPoolChances==null || lootPoolNames==null){
 			System.err.println("Lootpools are null!");
@@ -204,8 +214,8 @@ public class LootService implements INetworkDispatch {
 			return;
 		}
 		
-		int randomItemFromGroup = new Random().nextInt(100);
-		int remainder = 0; // [10,20,30,34,5,1] 
+		double randomItemFromGroup = new Random().nextDouble()*100;
+		double remainder = 0; // [10,20,30,34,5,1] 
 		
 		for(int i=0;i<lootPoolChances.length;i++) {
 			remainder += lootPoolChances[i]; 
@@ -218,20 +228,21 @@ public class LootService implements INetworkDispatch {
 	}
 		
 	private void handleLootPool(String poolName,LootRollSession lootRollSession){
-
+		System.err.println("poolName.toLowerCase() " + poolName.toLowerCase());
 		// Fetch the loot pool data from the poolName.py script		
 		String path = "scripts/loot/lootPools/"+poolName.toLowerCase(); 
 		Vector<String> itemNames = (Vector<String>)core.scriptService.fetchStringVector(path,"itemNames");
 		
-		Vector<Integer> itemChances = (Vector<Integer>)core.scriptService.fetchIntegerVector(path,"itemChances");
+		Vector<Double> itemChances = (Vector<Double>)core.scriptService.fetchDoubleVector(path,"itemChances");
 				
-		int randomItemFromPool = new Random().nextInt(100);
+		double randomItemFromPool = new Random().nextDouble()*100;
 		int remainder = 0; // [10,20,30,34,5,1]
 		
 		for (int i=0;i<itemNames.size();i++){
 			remainder += itemChances.get(i); 
 			if (randomItemFromPool<=remainder){
 				// this element has been chosen e.g. kraytpearl_flawless
+				//System.err.println("CHOSEN ITEM " + itemNames.get(i));
 				handleLootPoolItems(itemNames.get(i), lootRollSession);
 				break;
 			}						
@@ -399,7 +410,7 @@ public class LootService implements INetworkDispatch {
     	}
     	
     	if (requiredProfession.length()>0){
-    		droppedItem.setStringAttribute("required_profession", requiredProfession);
+    		droppedItem.setStringAttribute("class_required", requiredProfession);
     	}
     	
     	if (requiredFaction.length()>0){
@@ -577,6 +588,29 @@ public class LootService implements INetworkDispatch {
 		if (lootedObject instanceof TangibleObject){
 			// This is for chests etc.
 			// Check the py script
+			
+			// Treasure chest
+			if (lootedObject.getTemplate().equals("object/tangible/container/drum/shared_treasure_drum.iff")){
+				GroupObject group = null;
+				if(requester.getGroupId()!=0)
+					group = (GroupObject) core.objectService.getObject(requester.getGroupId());
+				int creditGroupMultiplier = 1;
+				if (group!=null)
+					creditGroupMultiplier = group.getMemberList().size();
+				
+				int creatureCL = (int)lootedObject.getAttachment("ChestLevel");
+				
+				if (creatureCL<=0)
+					creatureCL=1;
+				//creatureCL = 90;
+				int maximalCredits = (int)Math.floor(4*creatureCL + creatureCL*creatureCL*4/100); 
+				int minimalCredits = (int)Math.floor(creatureCL*2 + maximalCredits/2); 
+				int spanOfCredits  = maximalCredits - minimalCredits;
+				if (spanOfCredits<=0)
+					spanOfCredits=1;
+				
+				lootedCredits = creditGroupMultiplier * (minimalCredits + new Random().nextInt(spanOfCredits));
+			}
 		}	
 		
 		TangibleObject  droppedCredits = createDroppedItem("object/tangible/item/shared_loot_cash.iff",requester.getPlanet());		
@@ -648,7 +682,7 @@ public class LootService implements INetworkDispatch {
 		droppedItem.getAttributes().put("@obj_attr_n:condition", "100/100");
 		droppedItem.getAttributes().put("@obj_attr_n:crystal_owner", "\\#D1F56F UNTUNED \\#FFFFFF ");		
 		droppedItem.getAttributes().put("@obj_attr_n:crystal_quality", qualityString);	
-		droppedItem.setAttachment("radial_filename", "tunable");
+		droppedItem.setAttachment("radial_filename", "item/tunable");
 	}
 	
 	private void handlePowerCrystal(TangibleObject droppedItem) {
@@ -688,7 +722,7 @@ public class LootService implements INetworkDispatch {
 		droppedItem.getAttributes().put("@obj_attr_n:condition", "100/100");
 		droppedItem.getAttributes().put("@obj_attr_n:crystal_owner", "\\#D1F56F UNTUNED \\#FFFFFF ");
 		droppedItem.getAttributes().put("@obj_attr_n:crystal_quality", qualityString);	
-		droppedItem.setAttachment("radial_filename", "tunable");
+		droppedItem.setAttachment("radial_filename", "item/tunable");
 	}	
 	
 	private void setWeaponStat(WeaponObject weapon, String statName, String minValue, String maxValue){

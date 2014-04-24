@@ -16,8 +16,7 @@ def createRadial(core, owner, target, radials):
 	
 def handleSelection(core, owner, target, option):
 	if option == 21 and target:
-		owner.sendSystemMessage('TreasuremapRead radial',0)
-		
+			
 		planetID = target.getAttachment('MapPlanet')
 		if planetID!=owner.getPlanetId():
 			owner.sendSystemMessage('@treasure_map/treasure_map:wrong_planet',0)

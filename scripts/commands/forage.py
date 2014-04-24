@@ -43,7 +43,6 @@ def run(core, actor, target, commandString):
 	oldposition = actor.getAttachment('PostForagePosition')
 	if actor.getPosition().getDistance2D(oldposition)<5:
 				
-		System.out.println("actor.getPosition().getDistance2D(oldposition) " + actor.getPosition().getDistance2D(oldposition));
 		actor.sendSystemMessage("@skl_use:sys_forage_empty", 0);
 		return
 		

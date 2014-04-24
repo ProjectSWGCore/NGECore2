@@ -29,8 +29,10 @@ import java.util.Vector;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
+import engine.resources.scene.Quaternion;
 import main.NGECore;
 import resources.datatables.Options;
+import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
 import resources.objects.loot.LootGroup;
@@ -105,7 +107,9 @@ public class Forager {
 				forager.sendSystemMessage("@skl_use:sys_forage_noroom",(byte) 0);				
 			}
 			
-			chosenObject = 5;
+			// chosenObject = 5; // To test TMs
+			if(forager.getClient().isGM()) // Always yield a TM for testing
+				chosenObject = 5;
 			
 			forager.sendSystemMessage("chosenObject " + chosenObject,(byte) 0);
 			switch (chosenObject) {
@@ -150,8 +154,8 @@ public class Forager {
 										      int mapPlanetID = new Random().nextInt(mapPlanetIDs.length-1);
 										      foragedObject.setAttachment("MapPlanet", mapPlanetIDs[mapPlanetID]);
 										      System.out.println("mapPlanetID " + mapPlanetIDs[mapPlanetID]);
-										      //foragedObject.setAttachment("radial_filename", "object/treasuremap");
-										      foragedObject.setAttachment("radial_filename", "object/treasuremapExtract");
+										      foragedObject.setAttachment("radial_filename", "object/treasuremap");
+										      //foragedObject.setAttachment("radial_filename", "object/treasuremapExtract");
 										      foragerInventory.add(foragedObject);
 										      forager.sendSystemMessage("",(byte) 0);										      										   
 										      break;
@@ -170,11 +174,11 @@ public class Forager {
 			if (chosenObject>6)
 				adversaryRoll=999;
 			
-			adversaryRoll=999;
+			// adversaryRoll=999; // To test TMs
 			
-			if (adversaryRoll<100) { // 14
+			if (adversaryRoll<14) { // 14 100 // To test TMs
 				int adversaryTypeRoll = new Random().nextInt(100);
-				if (adversaryTypeRoll<1){
+				if (adversaryTypeRoll<50){
 					// wormie
 					spawnWormie(forager);
 				} else {
@@ -355,12 +359,15 @@ public class Forager {
 	}
 	
 	public void handleGuardSpawn(CreatureObject owner, TangibleObject map){
-		
+		System.err.println("handleGuardSpawn");
 		short spawnLevel = (short) map.getAttachment("MapLevel");
 		//Point3D exactTreasureLocation = (Point3D) map.getAttachment("MapExactLocation");
 		Point3D exactTreasureLocation = owner.getPosition();
 		
-		GroupObject extractorGroup = (GroupObject) NGECore.getInstance().objectService.getObject(owner.getGroupId());
+		GroupObject extractorGroup = null;
+		if (owner.getGroupId()!=0)
+			extractorGroup = (GroupObject) NGECore.getInstance().objectService.getObject(owner.getGroupId());
+		
 		int extractorGroupSize = 1;
 		if (extractorGroup!=null)
 			extractorGroupSize = extractorGroup.getMemberList().size();
@@ -381,12 +388,17 @@ public class Forager {
 		}
 
 		// spawn treasure container
-		TangibleObject treasureContainer = (TangibleObject) NGECore.getInstance().staticService.spawnObject("object/tangible/container/drum/shared_treasure_drum.iff", owner.getPlanet().getName(), 0L, exactTreasureLocation.x, exactTreasureLocation.y, exactTreasureLocation.z, 0.70F, 0.71F);		
+		TangibleObject treasureContainer = (TangibleObject) NGECore.getInstance().staticService.spawnObject("object/tangible/container/drum/shared_treasure_drum.iff", owner.getPlanet().getName(), 0L, exactTreasureLocation.x, exactTreasureLocation.y, exactTreasureLocation.z, 0.70F, 0.71F);	
+				
+//		CreatureObject treasureContainer = (CreatureObject) NGECore.getInstance().objectService.createObject("object/tangible/container/drum/shared_treasure_drum.iff", 0, owner.getPlanet(), exactTreasureLocation, owner.getOrientation());
+//		NGECore.getInstance().simulationService.add(treasureContainer, exactTreasureLocation.x, exactTreasureLocation.z, true);
+		
 		treasureContainer.setAttachment("radial_filename", "object/treasureContainer");
 		treasureContainer.setAttachment("TreasureExtractorID", owner.getObjectID());
 		treasureContainer.setAttachment("TreasureGuards",guardList);
-		//configureTreasureLoot(treasureContainer,owner,spawnLevel);
-		//NGECore.getInstance().lootService.DropLoot(owner, treasureContainer);
+		treasureContainer.setAttachment("ChestLevel",new Integer(spawnLevel));
+		configureTreasureLoot(treasureContainer,owner,spawnLevel);
+		NGECore.getInstance().lootService.DropLoot(owner, treasureContainer);
 		
 		owner.sendSystemMessage("@treasure_map/treasure_map:sys_time_limit",(byte)0);		
 		
@@ -459,17 +471,20 @@ public class Forager {
 		
 		
 		// PROFESSION BRACELETS  HOUSE FURNITURE  WEARABLE BACKPACKS
-		String[] lootPoolNames = new String[]{"profession_bracelets_"+levelRange,"house_furniture","wearable_backpacks"};
-		int[] lootPoolChances  = new int[]{60,30,10};
-		int lootGroupChance = 80;
+//		String[] lootPoolNames = new String[]{"profession_bracelets_"+levelRange,"house_furniture","wearable_backpacks"};
+//		double[] lootPoolChances  = new double[]{60,30,10};
+		String[] lootPoolNames = new String[]{"profession_bracelets_"+levelRange};
+		double[] lootPoolChances  = new double[]{100};
+		double lootGroupChance = 80;
 		treasureContainer.addToLootGroups(lootPoolNames, lootPoolChances, lootGroupChance);
 		
 		// WEAPONSMITH COMPONENTS JEDI COMPONENTS GEM COLLECTION ITEMS TREASURE HUNTER COLLECTION ITEMS
-		lootPoolNames = new String[]{"weaponsmith_components","jedi_components","gem_collection_items","treasure_hunter_collection_items"};
-		lootPoolChances  = new int[]{15,25,30,30};
+		//lootPoolNames = new String[]{"weaponsmith_components","jedi_components","gem_collection_items","treasure_hunter_collection_items"};
+		//lootPoolChances  = new double[]{15,25,30,30};
+		lootPoolNames = new String[]{"jedi_components_treasure"};
+		lootPoolChances  = new double[]{100};
 		lootGroupChance = 80;
 		treasureContainer.addToLootGroups(lootPoolNames, lootPoolChances, lootGroupChance);
-
 		
 		// COMMON LOOTS: 
 //		Looted non-wearable Bounty Hunter armor pieces (Used to make Mandalorian armor at the Death Watch Bunker)
@@ -480,23 +495,23 @@ public class Forager {
 //		Advanced Power Stim (CL80)
 //		Loot kits adhesives
 //		Various Schematics 
-		lootPoolNames = new String[]{"bh_armor_for_mando","advanced_stims_80","loot_kits_adhesives","various_schematics"};
-		lootPoolChances  = new int[]{15,25,30,30};
-		lootGroupChance = 80;
-		treasureContainer.addToLootGroups(lootPoolNames, lootPoolChances, lootGroupChance);
-		
+//	lootPoolNames = new String[]{"bh_armor_for_mando","advanced_stims_80","loot_kits_adhesives","various_schematics"};
+//	lootPoolChances  = new double[]{15,25,30,30};
+//	lootGroupChance = 80;
+//	treasureContainer.addToLootGroups(lootPoolNames, lootPoolChances, lootGroupChance);
+//	
 		
 		//GEM COLLECTION ITEMS  CONSUMABLE BUFF ITEMS
 		
 		// VERY RARE BUFF ITEMS
 		lootPoolNames = new String[]{"rare_buff_items"};
-		lootPoolChances  = new int[]{100};
-		lootGroupChance = 1;
+		lootPoolChances  = new double[]{100};
+		lootGroupChance = 0.1;
 		treasureContainer.addToLootGroups(lootPoolNames, lootPoolChances, lootGroupChance);
 		
 		// EXTRA
-		lootPoolNames = new String[]{"Mysterious Data Disk"};
-		lootPoolChances  = new int[]{100};
+		lootPoolNames = new String[]{"treasure_extra"};
+		lootPoolChances  = new double[]{100};
 		lootGroupChance = 50;
 		treasureContainer.addToLootGroups(lootPoolNames, lootPoolChances, lootGroupChance);
 		

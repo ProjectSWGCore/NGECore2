@@ -16,7 +16,7 @@ def createRadial(core, owner, target, radials):
 	
 def handleSelection(core, owner, target, option):
 	if option == 21 and target:
-		owner.sendSystemMessage('Treasuremap radial',0)
+		
 		mapPlanet = target.getAttachment('MapPlanet')
 		planet = core.terrainService.getPlanetByID(mapPlanet)
 		if planet==None:

@@ -1,7 +1,7 @@
 
 def itemTemplate():
 
-	return ['object/tangible/wearables/armor/composite/shared_armor_composite_bicep_l.iff']
+	return ['object/tangible/wearables/bracelet/shared_bracelet_s02_r.iff']
 
 def customItemName():
 
