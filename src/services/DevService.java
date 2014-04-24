@@ -1223,14 +1223,15 @@ public class DevService implements INetworkDispatch {
 						Player_House_Deed deed = (Player_House_Deed)core.objectService.createObject(templateString, planet);
 						deed.setBMR(15);
 						deed.setAttributes();
-<<<<<<< HEAD
-						inventory.add(deed);
-						
-						break;				
-=======
 						inventory.add(deed);	
-						return;				
->>>>>>> upstream/master
+														
+						templateString="object/tangible/deed/city_deed/shared_cityhall_tatooine_deed.iff";
+						deed = (Player_House_Deed)core.objectService.createObject(templateString, planet);
+						deed.setBMR(15);
+						deed.setAttributes();
+						inventory.add(deed);	
+						return;	
+						
 					case 125:
 						TangibleObject genericCraftingTool = (TangibleObject) core.objectService.createObject("object/tangible/crafting/station/shared_generic_tool.iff", planet);
 						genericCraftingTool.setCustomName("Generic Crafting Tool");
