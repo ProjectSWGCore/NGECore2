@@ -25,12 +25,13 @@ import com.sleepycat.persist.model.Persistent;
 
 import resources.objects.mission.MissionObject;
 
-@Persistent
+@Persistent(version=0)
 public abstract class MissionObjective {
 	
 	protected long startTime;
 	protected boolean activated;
 	protected MissionObject parent;
+	private int objectivePhase;
 	
 	public MissionObjective() { }
 	
@@ -38,14 +39,21 @@ public abstract class MissionObjective {
 		this.startTime = System.currentTimeMillis();
 		this.activated = false;
 		this.parent = parent;
+		this.objectivePhase = 0;
 	}
 	
 	public abstract void activate();
 	public abstract void complete();
 	public abstract void drop();
+	public abstract void update();
 
 	public long getStartTime() { return startTime; }
+	
 	public boolean isActivated() { return activated; }
 	public void setActive(boolean isActive) { this.activated = isActive; }
-	public MissionObject getParent() { return parent; }
+	
+	public MissionObject getMissionObject() { return parent; }
+	
+	public int getObjectivePhase() { return objectivePhase; }
+	public void setObjectivePhase(int phase) { this.objectivePhase = phase; }
 }

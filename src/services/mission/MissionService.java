@@ -35,9 +35,11 @@ import main.NGECore;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 
+import protocol.swg.ObjControllerMessage;
 import protocol.swg.objectControllerObjects.MissionAcceptRequest;
 import protocol.swg.objectControllerObjects.MissionAcceptResponse;
 import protocol.swg.objectControllerObjects.MissionListRequest;
+import protocol.swg.objectControllerObjects.ObjControllerObject;
 import resources.common.Console;
 import resources.common.SpawnPoint;
 import resources.common.ObjControllerOpcodes;
@@ -45,6 +47,7 @@ import resources.objectives.DeliveryMissionObjective;
 import resources.objects.creature.CreatureObject;
 import resources.objects.mission.MissionObject;
 import resources.objects.tangible.TangibleObject;
+import resources.objects.waypoint.WaypointObject;
 import engine.clientdata.StfTable;
 import engine.clients.Client;
 import engine.resources.common.CRC;
@@ -142,11 +145,13 @@ public class MissionService implements INetworkDispatch {
 					return;
 				
 				if (handleMissionAccept(creature, mission)) {
-					//MissionAcceptResponse response = new MissionAcceptResponse();
-					//session.write(response.serialize());
+					MissionAcceptResponse response = new MissionAcceptResponse(object.getObjectId(), mission.getObjectId(), request.getTerminalType(), (byte) 1);
+					object.getClient().getSession().write(new ObjControllerMessage(0x0B, response).serialize());
+				} else {
+					MissionAcceptResponse response = new MissionAcceptResponse(object.getObjectId(), mission.getObjectId(), request.getTerminalType(), (byte) 0);
+					object.getClient().getSession().write(new ObjControllerMessage(0x0B, response).serialize());
 				}
 			}
-
 		});
 	}
 
@@ -283,21 +288,18 @@ public class MissionService implements INetworkDispatch {
 		if (hasBountyMission.get() && mission.getMissionType().equals("bounty")) // Can only have 1 bounty mission
 			return false;
 		
-		System.out.println("Player has " + missionCount.get() + " missions.");
-		
 		if (missionCount.get() == 2) {
 			creature.sendSystemMessage("@mission/mission_generic:too_many_missions", (byte) 0);
 			return false;
 		}
-		if (missionBag.transferTo(creature, datapad, mission)) {
-			createMissionObjective(creature, mission);
-			return true;
-		} else { return false; }
+		missionBag.transferTo(creature, datapad, mission);
+		createMissionObjective(creature, mission);
+		return true;
 	}
 	
 	private void createMissionObjective(CreatureObject creature, MissionObject mission) {
 		String type = mission.getMissionType();
-		
+		System.out.println("Type: " + type);
 		switch(type) {
 
 			case "deliver":
@@ -306,6 +308,7 @@ public class MissionService implements INetworkDispatch {
 				mission.setObjective(objective);
 				
 				objective.activate();
+				System.out.println("Went here!");
 				break;
 			
 			default:
@@ -319,10 +322,10 @@ public class MissionService implements INetworkDispatch {
 		String[] difficulties = { "easy", "medium", "hard" };
 
 		String missionStf = "mission/mission_deliver_neutral_" + difficulties[ran.nextInt(difficulties.length)];
-		int strId = getRandomStringEntry(missionStf);
-		
-		mission.setMissionDescription(missionStf, "m" + String.valueOf(strId) + "d");
-		mission.setMissionTitle(missionStf, "m" + String.valueOf(strId) + "t");
+
+		mission.setMissionId(getRandomStringEntry(missionStf));
+		mission.setMissionDescription(missionStf);
+		mission.setMissionTitle(missionStf);
 		
 		mission.setCreator(nameGenerator.compose(2) + " " + nameGenerator.compose(3));
 		
@@ -334,10 +337,17 @@ public class MissionService implements INetworkDispatch {
 		mission.setStartLocation(startLocation, player.getPlanet().name);
 		mission.setDestination(destination, player.getPlanet().name);
 		
-		mission.setCreditReward((int) (50 * ((player.getWorldPosition().getDistance2D(destination) / 10))));
+		mission.setCreditReward((int) (50 * ((startLocation.getDistance2D(destination) / 10))));
 		
 		mission.setMissionTemplateObject(CRC.StringtoCRC("object/tangible/mission/shared_mission_datadisk.iff"));
 		mission.setMissionTargetName("Datadisk");
+		
+		WaypointObject waypoint = (WaypointObject) core.objectService.createObject("object/waypoint/shared_waypoint.iff", player.getPlanet());
+		if (waypoint == null)
+			return;
+		
+		waypoint.setColor(WaypointObject.ORANGE);
+		
 	}
 	
 	private void randomDestroyMission(SWGObject player, MissionObject mission) {

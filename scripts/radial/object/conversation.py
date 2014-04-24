@@ -9,7 +9,6 @@ def createRadial(core, owner, target, radials):
 	
 def handleSelection(core, owner, target, option):
 	if option == 26 and target:
-		print 'test'
 		core.conversationService.handleStartConversation(owner, target)
 	return
 	

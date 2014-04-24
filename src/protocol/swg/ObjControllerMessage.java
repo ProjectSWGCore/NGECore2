@@ -74,6 +74,7 @@ public class ObjControllerMessage extends SWGMessage {
 	public static final int NEXT_CRAFTING_STAGE_RESULT = 0x01BE;
 	public static final int DRAFT_SLOTS_QUERY_RESPONSE = 0x01BF;
 	public static final int RESOURCE_WEIGHTS = 0x0207;
+	public static final int MISSION_ACCEPT_RESPONSE = 0x00FA;
 
 	public ObjControllerMessage() { 
 		

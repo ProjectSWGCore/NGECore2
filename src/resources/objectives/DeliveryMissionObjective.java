@@ -21,23 +21,53 @@
  ******************************************************************************/
 package resources.objectives;
 
+import engine.resources.objects.SWGObject;
+import engine.resources.scene.Point3D;
+import main.NGECore;
+import resources.objects.creature.CreatureObject;
 import resources.objects.mission.MissionObject;
 import resources.objects.tangible.TangibleObject;
+import resources.objects.waypoint.WaypointObject;
 import services.mission.MissionObjective;
 
 public class DeliveryMissionObjective extends MissionObjective {
 
 	private TangibleObject deliveryObject;
-	private int objectivePhase;
-
+	private NGECore core = NGECore.getInstance();
+	
 	public DeliveryMissionObjective(MissionObject parent) {
 		super(parent);
-		this.objectivePhase = 0;
 	}
 
 	@Override
 	public void activate() {
+
+		if (isActivated())
+			return;
+		
+		String template = "object/mobile/shared_dressed_commoner_tatooine_sullustan_male_06.iff";
+		Point3D startLoc = parent.getStartLocation();
+
+		CreatureObject missionGiver = (CreatureObject) core.staticService.spawnObject(template, parent.getPlanet().name, 0, startLoc.x, startLoc.y, startLoc.z, 0, 1);
+		missionGiver.setAttachment("conversationFile", "missions/deliver");
+		missionGiver.setAttachment("radial_filename", "object/conversation");
+		missionGiver.setAttachment("assignedMission", getMissionObject());
+		missionGiver.setOptionsBitmask(264);
+		
+		if (getObjectivePhase() == 0) {
+			WaypointObject waypoint = (WaypointObject) core.objectService.createObject("object/waypoint/shared_waypoint.iff", parent.getPlanet());
+			waypoint.setPosition(startLoc);
+			waypoint.setName("@mission/" + parent.getMissionTitle() + ":" + parent.getMissionId());
+			waypoint.setColor(WaypointObject.ORANGE);
+			waypoint.setActive(true);
+			getMissionObject().setAttachedWaypoint(waypoint);
+		}
+
 		setActive(true);
+	}
+
+	@Override
+	public void update() {
 	}
 
 	@Override
@@ -47,8 +77,30 @@ public class DeliveryMissionObjective extends MissionObjective {
 	@Override
 	public void drop() {
 	}
+	
+	public boolean createDeliveryItem() {
 
+		SWGObject player = getMissionObject().getGrandparent();
+		
+		if (player == null)
+			return false;
+		
+		TangibleObject inventory = (TangibleObject) player.getSlottedObject("inventory");
+		
+		if (inventory == null)
+			return false;
+		
+		TangibleObject deliveryObject = (TangibleObject) core.objectService.createObject("object/tangible/mission/shared_mission_datadisk.iff", getMissionObject().getGrandparent().getPlanet());
+		
+		if (deliveryObject != null && inventory.add(deliveryObject)) {
+			setDeliveryObject(deliveryObject);
+			return true;
+		}
+		else 
+			return false;
+	}
+	
 	public TangibleObject getDeliveryObject() { return deliveryObject; }
-
-	public int getObjectivePhase() { return objectivePhase; }
+	
+	public void setDeliveryObject(TangibleObject object) { this.deliveryObject = object; }
 }

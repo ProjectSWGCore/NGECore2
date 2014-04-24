@@ -21,20 +21,43 @@
  ******************************************************************************/
 package protocol.swg.objectControllerObjects;
 
+import java.nio.ByteOrder;
+
 import org.apache.mina.core.buffer.IoBuffer;
+
+import protocol.swg.ObjControllerMessage;
 
 public class MissionAcceptResponse extends ObjControllerObject {
 
+	private long objectId;
+	private long missionObjId;
+	private byte terminalType;
+	private byte flag;
+	
+	public MissionAcceptResponse(long objectId, long missionObjId, byte terminalType, byte flag) {
+		this.objectId = objectId;
+		this.missionObjId = missionObjId;
+		this.terminalType = terminalType;
+		this.flag = flag;
+	}
+	
 	@Override
 	public void deserialize(IoBuffer data) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public IoBuffer serialize() {
-		// TODO Auto-generated method stub
-		return null;
+		IoBuffer buffer = IoBuffer.allocate(27).order(ByteOrder.LITTLE_ENDIAN);
+		
+		buffer.putInt(ObjControllerMessage.MISSION_ACCEPT_RESPONSE);
+		buffer.putLong(objectId);
+		buffer.putInt(0);
+		
+		buffer.putLong(missionObjId);
+		buffer.put(flag);
+		buffer.put(terminalType);
+		
+		return buffer.flip();
 	}
 
 }

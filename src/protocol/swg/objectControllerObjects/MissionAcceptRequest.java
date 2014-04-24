@@ -27,7 +27,8 @@ public class MissionAcceptRequest extends ObjControllerObject {
 
 	private long missionObjId;
 	private long terminalObjId;
-	
+	private byte terminalType;
+
 	public MissionAcceptRequest() { }
 	
 	@Override
@@ -36,6 +37,7 @@ public class MissionAcceptRequest extends ObjControllerObject {
 		data.getInt();
 		setMissionObjId(data.getLong());
 		setTerminalObjId(data.getLong());
+		setTerminalType(data.get());
 	}
 
 	@Override
@@ -58,5 +60,12 @@ public class MissionAcceptRequest extends ObjControllerObject {
 	public void setTerminalObjId(long terminalObjId) {
 		this.terminalObjId = terminalObjId;
 	}
-
+	
+	public void setTerminalType(byte terminalType) {
+		this.terminalType = terminalType;
+	}
+	
+	public byte getTerminalType() {
+		return terminalType;
+	}
 }
