@@ -292,6 +292,7 @@ public class LootService implements INetworkDispatch {
 		Vector<String> customizationAttributes = null;
 		Vector<Integer> customizationValues = null;
 		Vector<String> itemStats = null;
+		Vector<String> itemSkillMods = null;
 				
 		if(core.scriptService.getMethod(itemPath,"","itemTemplate")==null){
 			String errorMessage = "Loot item  '" + itemName + "'  has no template function assigned in its script. Please contact Charon about this issue.";
@@ -322,6 +323,9 @@ public class LootService implements INetworkDispatch {
 		if(core.scriptService.getMethod(itemPath,"","itemStats")!=null)
 			itemStats = (Vector<String>)core.scriptService.fetchStringVector(itemPath,"itemStats");
 		
+		if(core.scriptService.getMethod(itemPath,"","itemStats")!=null)
+			itemSkillMods = (Vector<String>)core.scriptService.fetchStringVector(itemPath,"itemSkillMods");
+			
 		if(core.scriptService.getMethod(itemPath,"","biolink")!=null)
 			biolink = (Integer)core.scriptService.fetchInteger(itemPath,"biolink");
 		
@@ -376,6 +380,13 @@ public class LootService implements INetworkDispatch {
     		}
     		handleStats(droppedItem, itemStats);
     	}
+    	
+    	if (itemSkillMods!=null){
+    		handleSkillMods(droppedItem, itemSkillMods);
+    	}
+    	
+    	
+    	
 //    	if (customizationValues!=null)
 //    		setCustomization(droppedItem, itemName);
     	
@@ -530,6 +541,14 @@ public class LootService implements INetworkDispatch {
 				setArmorStat(droppedItem, statName, minValue, maxValue);
 			}
 		}			
+	}	
+	
+	private void handleSkillMods(TangibleObject droppedItem, Vector<String> skillMods) {		
+		for (int i=0;i<skillMods.size()/2;i++){
+			String skillMod = skillMods.get(2*i);
+			String skillModValue = skillMods.get(2*i+1);
+			droppedItem.setIntAttribute(skillMod, Integer.parseInt(skillModValue));
+		}		
 	}	
 	
 	public void handleCreditDrop(CreatureObject requester,TangibleObject lootedObject,LootRollSession lootRollSession){
