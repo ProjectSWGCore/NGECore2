@@ -54,7 +54,7 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent(version=11)
+@Persistent(version=12)
 public class TangibleObject extends SWGObject {
 	
 	// TODO: Thread safety
@@ -495,7 +495,7 @@ public class TangibleObject extends SWGObject {
 		return lootGroups;
 	}
 
-	public void addToLootGroups(String[] lootPoolNames, int[] lootPoolChances, int lootGroupChance) {
+	public void addToLootGroups(String[] lootPoolNames, double[] lootPoolChances, double lootGroupChance) {
 		System.out.println("lootPoolNames[0] " + lootPoolNames[0]);
 		LootGroup lootGroup = new LootGroup(lootPoolNames, lootPoolChances, lootGroupChance);
 		this.lootGroups.add(lootGroup);

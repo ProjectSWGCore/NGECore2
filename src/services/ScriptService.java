@@ -140,4 +140,14 @@ public class ScriptService {
 		return vector;
 	}
 	
+	public Vector<Double> fetchDoubleVector(String path, String method) {
+		Vector<Double> vector = new Vector<Double>();
+		PyObject result = core.scriptService.callScript(path, "", method);
+		Iterable<PyObject> comp = (Iterable<PyObject>)result.asIterable();
+		for (Iterator<PyObject> temp = comp.iterator(); temp.hasNext();){
+			vector.add(temp.next().asDouble());
+		}
+		return vector;
+	}
+	
 }
