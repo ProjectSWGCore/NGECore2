@@ -393,37 +393,31 @@ public class MountService implements INetworkDispatch {
 	}
 	
 	public void mount(CreatureObject rider, CreatureObject mount) {
-		// FIXME like above, movement skillmod should be used instead of creo4 vars and never be 0, otherwise it thinks we are always rooted
-		//if (rider.getSkillModBase("movement") == 0) {
-		//rider.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:cant_mount_rooted"), DisplayType.Broadcast);
-		//return;
-		//}
+		// Check if mount may be mounted // This is already checked in canMount
 		
-		// Check if mount may be mounted
-		if (rider == null)
-		{
+		if (rider == null) {
 			return;
 		}
-		if (mount == null)
-		{
+		
+		if (mount == null) {
 			return;
 		}
-		if (!mount.getOption(Options.MOUNT)) 
-		{
+		
+		if (!mount.getOption(Options.MOUNT)) {
 			return;
 		}
-		if (mount.getOption(Options.DISABLED)) 
-		{
+		
+		if (mount.getOption(Options.DISABLED))  {
 			rider.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:cant_mount_veh_disabled"), DisplayType.Broadcast);
 			return;
 		}
-		if (rider.isInStealth()) 
-		{
+		
+		if (rider.isInStealth()) {
 			rider.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:no_mount_stealth"), DisplayType.Broadcast);
 			return;
 		}
-		if (!canMount(rider, mount)) 
-		{
+		
+		if (!canMount(rider, mount)) {
 			rider.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:cant_mount"), DisplayType.Broadcast);
 			return;
 		}
@@ -432,12 +426,10 @@ public class MountService implements INetworkDispatch {
 		mount._add(rider);
 		
 		// Set mount states and stuff
-		mount.setStateBitmask(mount.getStateBitmask() | State.MountedCreature);
 		mount.setState(State.MountedCreature, true);
 		mount.setPosture(Posture.DrivingVehicle);
 		
 		// Set rider states and stuff
-		rider.setStateBitmask(rider.getStateBitmask() | State.RidingMount);
 		rider.setState(StateStatus.RidingMount, true);
 			
 		// Notify observers and update quadtree
@@ -524,35 +516,11 @@ public class MountService implements INetworkDispatch {
 			return false;
 		}
 		
-		if(mount.getSlottedObject("rider") == rider) return true;
-		
-		if(mount.getAttachment("passenger") == null) return false;
-		
-		for(int i = 1; i < (int) mount.getAttachment("passenger"); i++)
-		{
-			if (mount.getSlottedObject("rider" + i) != rider) return true;
-		}
-		
-		return false;
+		return true;
 	}
 	
 	public boolean isMounted(SWGObject actor, CreatureObject mount) {
 		return actor.getContainer() == mount;
-	}
-	
-	public int getPassengerCount(CreatureObject mount)
-	{
-		mount.setAttachment("passengers", 0);
-		
-		mount.viewChildren(mount, false, false, new Traverser() 
-		{	
-			public void process(SWGObject passenger)
-			{
-				if (passenger instanceof CreatureObject) mount.setAttachment("passengers", (int) mount.getAttachment("passengers") + 1);
-			}
-		});
-		
-		return (int)mount.getAttachment("passengers");
 	}
 	
 	public boolean canMount(CreatureObject rider, CreatureObject mount) {
@@ -561,7 +529,7 @@ public class MountService implements INetworkDispatch {
 		}
 		
 		if (!mount.getOption(Options.MOUNT)) {
-		//	return false;
+			return false;
 		}
 		
 		if (isMounted(rider)) {
@@ -579,23 +547,28 @@ public class MountService implements INetworkDispatch {
 			return false;
 		}
 		
-		int passengers = 0;
+		// Check if there are any passenger slots left
 		
-		if (mount.getAttachment("passengers") != null){
-			passengers = getPassengerCount(mount);
-		}
+		LongAdder adder = new LongAdder();
 		
-		int passengerSlot = 0;
+		mount.getSlottedObject("inventory").viewChildren(owner, false, false, (obj) -> adder.increment());
 		
-		for (int i = 1; i <= passengers; i++) {
-			if (mount.getSlottedObject("rider" + i) == null) {
-				passengerSlot = i;
-				break;
+		int passengers = adder.intValue();
+		
+		try {
+			DatatableVisitor visitor = ClientFileManager.loadFile("datatables/mount/saddle_appearance_map.iff", DatatableVisitor.class);
+			
+			for (int i = 0; i < visitor.getRowCount(); i++) {
+				if (visitor.getObject(i, 2).equals(mount.getAttachment("pcdAppearanceFilename"))) { // saddle_appearance_filename
+					if (passengers >= (int) visitor.getObject(i, 1)) { // saddle_capacity
+						return false;
+					}
+					
+					break;
+				}
 			}
-		}
-		
-		if (passengerSlot == 0) {
-		//	return false;
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		
 		CreatureObject owner = (CreatureObject) NGECore.getInstance().objectService.getObject(mount.getOwnerId());
@@ -612,50 +585,31 @@ public class MountService implements INetworkDispatch {
 			return false;
 		}
 		
-		try
-		{
-			DatatableVisitor visitor = ClientFileManager.loadFile("datatables/mount/saddle_appearance_map.iff", DatatableVisitor.class);
-			for(int i = 0; i < visitor.getRowCount(); i++)
-			{
-				if(visitor.getObject(i, 2).equals(mount.getAttachment("pcdAppearanceFilename")))  // saddle_appearance_name
-				{
-					if(passengers < (int) visitor.getObject(i, 1)) return true; // saddle_capacity
-					break;
-				}
-			}
-		}
-		catch (Exception e) { e.printStackTrace(); }
-		
-		if(passengers > 0) return false;
-		
 		return true;
 	}
 	
 	public void dismount(CreatureObject rider, CreatureObject mount) {
+		// Check if mount is currently mounted // Not necessary since nobody'll be dismounted if so
 		
-		// Check if mount is currently mounted
-		if (rider == null || mount == null) 
-		{
+		if (rider == null || mount == null) {
 			return;
 		}
-		if (!isMounted(rider)) 
-		{
+		
+		if (!isMounted(rider)) {
 			return;
-		}	
-		if (!mount.getOption(Options.MOUNT)) 
-		{
+		}
+		
+		if (!mount.getOption(Options.MOUNT)) {
 			return;
 		}
 		
 		// Dismount all passengers
-		
-		if (rider.getObjectID() == mount.getOwnerId())
-		{
+		if (rider.getObjectID() == mount.getOwnerId()) {
 			CreatureObject owner = rider;
-			mount.viewChildren(owner, false, false, new Traverser()
-			{
-				public void process(SWGObject passenger)
-				{
+			
+			mount.viewChildren(owner, false, false, new Traverser() {
+				
+				public void process(SWGObject passenger) {
 					if (passenger != owner) dismount(rider, mount);
 				}
 				
@@ -666,25 +620,23 @@ public class MountService implements INetworkDispatch {
 		mount._remove(rider);
 
 		// Set mount states and stuff
-		if (rider.getObjectID() == mount.getOwnerId())
-		{
-			mount.setStateBitmask(0);
+		if (rider.getObjectID() == mount.getOwnerId()) {
+			//mount.setStateBitmask(0);
 			mount.setState(State.MountedCreature, false);
 		}
 		
 		// Set rider states and stuff
-		rider.setStateBitmask(0);
+		//rider.setStateBitmask(0);
 		rider.setState(StateStatus.RidingMount, false);
-		rider.setPosture((byte) 0);
-					
+		rider.setPosture(Posture.Upright);
+			
 		// Update observers and quadtree
 		mount.notifyObservers(new UpdateContainmentMessage(rider.getObjectID(), 0, -1), true);
 		core.simulationService.teleport(rider, mount.getWorldPosition(), mount.getOrientation(), 0);
 		core.simulationService.add(rider, mount.getWorldPosition().x, mount.getWorldPosition().z, false);
 		
 		// Store mount if it's a creature
-		if (!mount.getTemplate().contains("vehicle") && rider.getObjectID() == mount.getOwnerId()) 
-		{
+		if (!mount.getTemplate().contains("vehicle") && rider.getObjectID() == mount.getOwnerId()) {
 			store(rider, mount);
 		}
 	}
