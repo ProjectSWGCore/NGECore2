@@ -10765,7 +10765,7 @@ public class ResourceService implements INetworkDispatch {
 			return 0; 
 		}  
 		int skillMod=crafter.getSkillModBase("surveying");
-		crafter.addSkillMod("surveying",100);
+		core.skillModService.addSkillMod(crafter, "surveying",100);
 		skillMod=(int)(Math.round(crafter.getSkillMod("surveying").getModifier()));
 		skillMod=35; // TEST!
 		float concentration=sampleResource.deliverConcentrationForSurvey(crafter.getPlanetId(), crafter.getPosition().x, crafter.getPosition().z); 

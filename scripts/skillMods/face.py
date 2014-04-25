@@ -1,10 +1,8 @@
 import sys
 
-# Only for entertainers?
-def add(core, actor, name, base):
-    actor.addSkillMod(name, base)
-    return
-    
-def deduct(core, actor, name, base):
-    actor.deductSkillMod(name, base)
-    return
+def add(core, actor, skillMod, divisor):
+	return
+
+def deduct(core, actor, skillMod, divisor):
+	return
+	

@@ -607,41 +607,14 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		return ((skillMod == null) ? 0 : skillMod.getBase());
 	}
 	
-	public void addSkillMod(String name, int base) {
-		SkillMod mod;
-		
-		if (getSkillMod(name) == null) {
-			mod = new SkillMod();
-			mod.setBase(base);
-			mod.setName(name);
-			mod.setModifier(0);
-		} else {
-			mod = getSkillMod(name);
-			mod.setBase(mod.getBase() + base);
-		}
-		
-		skillMods.put(name, mod);
+	public int getSkillModModifier(String name) {
+		SkillMod skillMod = getSkillMod(name);
+		return ((skillMod == null) ? 0 : skillMod.getModifier());
 	}
 	
-	public void deductSkillMod(String name, int base) {
-		if (getSkillMod(name) == null) {
-			return;
-		}
-		
-		SkillMod mod = getSkillMod(name);
-		mod.setBase(mod.getBase() - base);
-		
-		if (mod.getBase() <= 0) {
-			removeSkillMod(mod);
-		} else {
-			skillMods.put(name, mod);
-		}
-	}
-	
-	public void removeSkillMod(SkillMod mod) {
-		if (mod != null) {
-			skillMods.remove(mod.getName());
-		}
+	public float getSkillModValue(String name, int divisor) {
+		SkillMod skillMod = getSkillMod(name);
+		return ((skillMod == null) ? 0.0f : skillMod.getValue(divisor));
 	}
 	
 	public float getSpeedMultiplierBase() {

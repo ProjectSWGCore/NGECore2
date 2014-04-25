@@ -21,56 +21,89 @@
  ******************************************************************************/
 package resources.objects;
 
+import java.util.Map;
+
 import org.apache.mina.core.buffer.IoBuffer;
 
 import com.sleepycat.persist.model.Persistent;
 
-@Persistent(version=1)
+@Persistent(version=0)
 public class SkillMod extends Delta {
-
-	private int base;
-	private float modifier;
-	private String name;
-
-	public SkillMod() {
-	}
 	
-	public SkillMod(String name, int base, int modifier) {
-		this.name = name;
+	private int base;
+	private int modifier;
+	
+	public SkillMod(int base, int modifier) {
 		this.base = base;
 		this.modifier = modifier;
+	}
+	
+	public SkillMod() {
+		
 	}
 	
 	public int getBase() {
-		return base;
+		synchronized(objectMutex) {
+			return base;
+		}
 	}
-
+	
 	public void setBase(int base) {
-		this.base = base;
+		synchronized(objectMutex) {
+			this.base = base;
+		}
 	}
-
-	public float getModifier() {
-		return modifier;
+	
+	public void addBase(int base) {
+		synchronized(objectMutex) {
+			this.base += base;
+		}
 	}
-
-	public void setModifier(float modifier) {
-		this.modifier = modifier;
+	
+	public void deductBase(int base) {
+		synchronized(objectMutex) {
+			this.base -= base;
+		}
 	}
-
-	public String getName() {
-		return name;
+	
+	public int getModifier() {
+		synchronized(objectMutex) {
+			return modifier;
+		}
 	}
-
-	public void setName(String name) {
-		this.name = name;
+	
+	public void setModifier(int modifier) {
+		synchronized(objectMutex) {
+			this.modifier = modifier;
+		}
+	}
+	
+	public void addModifier(int modifier) {
+		synchronized(objectMutex) {
+			this.modifier += modifier;
+		}
+	}
+	
+	public void deductModifier(int modifier) {
+		synchronized(objectMutex) {
+			this.modifier -= modifier;
+		}
+	}
+	
+	public float getValue(int divisor) {
+		synchronized(objectMutex) {
+			return ((divisor < 1) ? ((float) base) : ((float) base / (float) divisor));
+		}
 	}
 	
 	@Override
 	public byte[] getBytes() {
-		IoBuffer buffer = createBuffer(8);
-		buffer.putInt(base);
-		buffer.putInt((int) modifier);
-		return buffer.array();
+		synchronized(objectMutex) {
+			IoBuffer buffer = createBuffer(8);
+			buffer.putInt(base);
+			buffer.putInt(modifier);
+			return buffer.array();
+		}
 	}
-
+	
 }

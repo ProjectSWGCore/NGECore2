@@ -154,7 +154,7 @@ public class EquipmentService implements INetworkDispatch {
 		
 		if(equipping)
 		{
-			if(item.getStringAttribute("cat_wpn_damage.wpn_category") != null) creature.addSkillMod("display_only_critical", getWeaponCriticalChance(creature, item));
+			if(item.getStringAttribute("cat_wpn_damage.wpn_category") != null) core.skillModService.addSkillMod(creature, "display_only_critical", getWeaponCriticalChance(creature, item));
 			if(item.getStringAttribute("proc_name") != null) core.buffService.addBuffToCreature(creature, item.getStringAttribute("proc_name").replace("@ui_buff:", ""), creature);
 			
 			for(Entry<String, Object> e : attributes.entrySet()) 
@@ -182,7 +182,7 @@ public class EquipmentService implements INetworkDispatch {
 		}
 		else
 		{
-			if(item.getStringAttribute("cat_wpn_damage.wpn_category") != null) creature.deductSkillMod("display_only_critical", getWeaponCriticalChance(creature, item));
+			if(item.getStringAttribute("cat_wpn_damage.wpn_category") != null) core.skillModService.deductSkillMod(creature, "display_only_critical", getWeaponCriticalChance(creature, item));
 			if(item.getStringAttribute("proc_name") != null) core.buffService.removeBuffFromCreatureByName(creature, item.getStringAttribute("proc_name").replace("@ui_buff:", ""));
 			
 			for(Entry<String, Object> e : attributes.entrySet())
