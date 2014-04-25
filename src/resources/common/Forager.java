@@ -91,7 +91,7 @@ public class Forager {
 //		if (forager.gotThePig(pig)){
 //			forageChances = forageChances3;
 //}
-		forager.sendSystemMessage("randomForageRoll " + randomForageRoll,(byte) 0);
+		//forager.sendSystemMessage("randomForageRoll " + randomForageRoll,(byte) 0);
 		if (randomForageRoll<forageResultChance+kommerkenBonus) {
 		
 			for(int i=0;i<forageChances.length;i++) {
@@ -111,7 +111,7 @@ public class Forager {
 			if(forager.getClient().isGM()) // Always yield a TM for testing
 				chosenObject = 5;
 			
-			forager.sendSystemMessage("chosenObject " + chosenObject,(byte) 0);
+			//forager.sendSystemMessage("chosenObject " + chosenObject,(byte) 0);
 			switch (chosenObject) {
 				
 				case LYASE_ENZYME:    String template = "object/tangible/loot/beast/shared_enzyme_2.iff"; 
@@ -153,7 +153,7 @@ public class Forager {
 										      foragedObject.setAttachment("MapSTFName", getLevelDependentSTFName(forager.getLevel()));										      
 										      int mapPlanetID = new Random().nextInt(mapPlanetIDs.length-1);
 										      foragedObject.setAttachment("MapPlanet", mapPlanetIDs[mapPlanetID]);
-										      System.out.println("mapPlanetID " + mapPlanetIDs[mapPlanetID]);
+										      //System.out.println("mapPlanetID " + mapPlanetIDs[mapPlanetID]);
 										      foragedObject.setAttachment("radial_filename", "object/treasuremap");
 										      //foragedObject.setAttachment("radial_filename", "object/treasuremapExtract");
 										      foragerInventory.add(foragedObject);
