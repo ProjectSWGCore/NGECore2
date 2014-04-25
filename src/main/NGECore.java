@@ -441,8 +441,8 @@ public class NGECore {
 		objectService.loadBuildings();
 		
 		if (optionsConfigLoaded && options.getInt("LOAD.RESOURCE.SYSTEM") > 0) {
-			objectService.loadResourceRoots();
-			objectService.loadResources();
+			resourceService.loadResourceRoots();
+			resourceService.loadResources();
 		}
 		
 		terrainService.loadSnapShotObjects();
