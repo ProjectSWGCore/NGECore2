@@ -338,7 +338,13 @@ public class ObjectService implements INetworkDispatch {
 			
 			object = new Player_House_Deed(objectID, planet, Template, position, orientation);
 			
-		} else if(Template.startsWith("object/tangible")) {
+		} 
+//		else if(Template.startsWith("object/tangible/container/drum/shared_treasure_drum.iff")) {
+//			
+//			object = new CreatureObject(objectID, planet, position, orientation, Template);			
+//		
+//		} 
+		else if(Template.startsWith("object/tangible")) {
 			
 			object = new TangibleObject(objectID, planet, Template, position, orientation);
 

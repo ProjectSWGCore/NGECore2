@@ -125,11 +125,15 @@ public class ChatService implements INetworkDispatch {
 		
 		Client speakerClient = speaker.getClient();
 		
-		if (speakerClient == null || speakerClient.getSession() == null) {
-			return;
+//		if (speakerClient == null || speakerClient.getSession() == null) {
+//			return;
+//		}
+		
+		if (speakerClient != null) {
+			if (speakerClient.getSession() != null)
+				speakerClient.getSession().write(objControllerMessage.serialize());
 		}
 		
-		speakerClient.getSession().write(objControllerMessage.serialize());
 		
 		if (speaker.getObservers().isEmpty()) {
 			return;
@@ -150,6 +154,7 @@ public class ChatService implements INetworkDispatch {
 				SpatialChat spatialChat = new SpatialChat(client.getParent().getObjectId(), speaker.getObjectID(), targetId, message, chatType, moodId, languageId, outOfBand);
 				objControllerMessage = new ObjControllerMessage(0x0B, spatialChat);
 				client.getSession().write(objControllerMessage.serialize());
+				tools.CharonPacketUtils.printAnalysis(objControllerMessage.serialize());
 			}
 		}
 	}

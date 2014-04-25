@@ -86,6 +86,7 @@ import services.map.MapService;
 import services.object.ObjectService;
 import services.object.UpdateService;
 import services.pet.MountService;
+import services.playercities.PlayerCityService;
 import services.resources.HarvesterService;
 import services.resources.ResourceService;
 import services.retro.RetroService;
@@ -183,6 +184,7 @@ public class NGECore {
 	public LootService lootService;
 	public HarvesterService harvesterService;
 	public MountService mountService;
+	public PlayerCityService playerCityService;
 
 	
 	// Login Server
@@ -305,6 +307,7 @@ public class NGECore {
 		lootService = new LootService(this);
 		harvesterService = new HarvesterService(this);
 		mountService = new MountService(this);
+		playerCityService = new PlayerCityService(this);
 		
 		if (config.keyExists("JYTHONCONSOLE.PORT")) {
 			int jythonPort = config.getInt("JYTHONCONSOLE.PORT");
@@ -360,6 +363,7 @@ public class NGECore {
 		zoneDispatch.addService(bazaarService);
 		zoneDispatch.addService(lootService);
 		zoneDispatch.addService(mountService);
+		zoneDispatch.addService(playerCityService);
 		
 		if (optionsConfigLoaded && options.getInt("LOAD.RESOURCE.SYSTEM") == 1) {
 			zoneDispatch.addService(surveyService);

@@ -31,20 +31,20 @@ import com.sleepycat.persist.model.Persistent;
 public class LootGroup {
 	
 	private String[] lootPoolNames;
-	private int[] lootPoolChances; 
-	private int lootGroupChance;
+	private double[] lootPoolChances; 
+	private double lootGroupChance;
 	
 	public LootGroup(){
 		
 	}
 	
-	public LootGroup(String[] lootPoolNames, int[] lootPoolChances, int lootGroupChance){
+	public LootGroup(String[] lootPoolNames, double[] lootPoolChances, double lootGroupChance){
 		this.lootPoolNames   = lootPoolNames;
 		this.lootPoolChances = lootPoolChances;
 		this.lootGroupChance = lootGroupChance;
 	}
 		
-	public void addLootData(String[] lootPoolNames, int[] lootPoolChances, int lootGroupChance){
+	public void addLootData(String[] lootPoolNames, double[] lootPoolChances, double lootGroupChance){
 		this.lootPoolNames   = lootPoolNames;
 		this.lootPoolChances = lootPoolChances;
 		this.lootGroupChance = lootGroupChance;
@@ -54,11 +54,11 @@ public class LootGroup {
 		return lootPoolNames;
 	}
 	
-	public int[] getLootPoolChances() {
+	public double[] getLootPoolChances() {
 		return lootPoolChances;
 	}
 	
-	public int getLootGroupChance() {
+	public double getLootGroupChance() {
 		return lootGroupChance;
 	}
 }
