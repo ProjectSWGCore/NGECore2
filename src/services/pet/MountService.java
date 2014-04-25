@@ -623,12 +623,12 @@ public class MountService implements INetworkDispatch {
 
 		// Set mount states and stuff
 		if (rider.getObjectID() == mount.getOwnerId()) {
-			mount.setStateBitmask(getOptionsBitmask() & ~State.MountedCreature);
+			mount.setStateBitmask(mount.getOptionsBitmask() & ~State.MountedCreature);
 			mount.setState(State.MountedCreature, false);
 		}
 		
 		// Set rider states and stuff
-		rider.setStateBitmask(getOptionsBitmask() & ~State.RidingMount);
+		rider.setStateBitmask(rider.getOptionsBitmask() & ~State.RidingMount);
 		rider.setState(State.RidingMount, false);
 		rider.setPosture(Posture.Upright);
 			
