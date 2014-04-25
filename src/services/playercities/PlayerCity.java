@@ -129,6 +129,7 @@ public class PlayerCity {
 		setNextElectionDate(foundationTime+legislationPeriod);
 		citizens.add(founder.getObjectID());
 		this.cityID = cityID;
+		setMayorID(founder.getObjectID());
 	}
 	
 	public void handleGrantZoning() {
@@ -263,8 +264,10 @@ public class PlayerCity {
 			if (citizenList.contains(founderId) && (long)citizenObject.getAttachment("residentCity")==this.getCityID())
 				founderCitizenCount++;
 		}
-		if (founderCitizenCount==founders.size())
-				return true; // All founders are citizens now
+		if (founderCitizenCount==founders.size()){
+			return true; // All founders are citizens now
+				
+		}
 		
 		return false;
 	}
@@ -475,6 +478,7 @@ public class PlayerCity {
 	public void setCityName(String cityName) {
 		this.cityName = cityName;
 		sendNameChangeMail(cityName);
+		return;
 	}
 
 	public int getCityID() {
@@ -547,6 +551,20 @@ public class PlayerCity {
 
 	public void setZoningEnabled(boolean zoningEnabled) {
 		this.zoningEnabled = zoningEnabled;
+	}
+	
+	public boolean isMilitiaMember(long actor){
+		if (getMilitiaList().contains(actor))
+			return true;
+		
+		return false;
+	}
+	
+	public boolean hasCitizen(long actor){
+		if (getCitizens().contains(actor))
+			return true;
+		
+		return false;
 	}
 
 	public static String[] getSpecialisationSTFNames() {

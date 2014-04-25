@@ -22,6 +22,7 @@
 package services.housing;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
 import java.nio.file.Files;
@@ -85,6 +86,10 @@ public class HousingService implements INetworkDispatch {
 		HouseTemplate houseTemplate = housingTemplates.get(deed.getTemplate());
 		Player_House_Deed playerHourseDeed = (Player_House_Deed)core.objectService.getObject(deed.getObjectID());
 		int structureLotCost = houseTemplate.getLotCost();
+		
+		if (deed.getTemplate().contains("cityhall"))
+			structureLotCost = 0;
+		
 		String structureTemplate = houseTemplate.getBuildingTemplate();
 		
 		if(!houseTemplate.canBePlacedOn(actor.getPlanet().getName()))
@@ -112,9 +117,54 @@ public class HousingService implements INetworkDispatch {
 		
 		float positionY = core.terrainService.getHeight(actor.getPlanetId(), positionX, positionZ) + 2f;
 		
-		// Create the building
+		boolean canBuild = true;
+		
+		// Check for city founders joining a new city
+		PlayerCity cityActorIsIn = core.playerCityService.getCityObjectIsIn(actor);
+		
+		if (cityActorIsIn != null){
+			// Actor is inside the bounds of a city, so zoning must be checked
+			//actor.setAttachment("Has24HZoningFor",cityActorIsIn.getCityID()); // for testing
+			//actor.setAttachment("Has24HZoningUntil",System.currentTimeMillis()+1000000); // for testing
+			if (actor.getAttachment("Has24HZoningFor")==null || actor.getAttachment("Has24HZoningFor")==null)
+				return;
+			int cityActorHasZoning = (int)actor.getAttachment("Has24HZoningFor");
+			BigInteger zoningUntilBI = (BigInteger) actor.getAttachment("Has24HZoningUntil");
+			long zoningUntil = zoningUntilBI.longValue();
+			if (cityActorHasZoning==cityActorIsIn.getCityID() && System.currentTimeMillis()<zoningUntil){
+				if (! cityActorIsIn.getCitizens().contains(actor.getObjectID())){
+					// Create the building
+					canBuild = true;
+				}
+			} else {
+				// Player has no zoning rights
+				canBuild = false;
+				if (cityActorHasZoning!=cityActorIsIn.getCityID()){
+					actor.sendSystemMessage("@city/city:city_invalid_subject",(byte) 0);
+					return;
+				}
+				
+				actor.sendSystemMessage("@city/city:city_invalid_subject",(byte) 0);
+				return;			
+			}
+		
+		} else {
+			//System.out.println("cityActorIsIn null");
+		}
+			
+		if (!canBuild)
+			return;
+		
 		BuildingObject building = (BuildingObject) core.objectService.createObject(structureTemplate, 0, actor.getPlanet(), new Point3D(positionX, positionY, positionZ), quaternion);
 		core.simulationService.add(building, building.getPosition().x, building.getPosition().z, true);
+		
+		if (cityActorIsIn != null){
+			building.setAttachment("structureCity", cityActorIsIn.getCityID());
+			// actor.setAttachment("residentCity", cityActorIsIn.getCityID()); He must do it manually
+			//cityActorIsIn.addCitizen(actor.getObjectID());
+			//cityActorIsIn.addNewStructure(building.getObjectID());
+		}
+		
 		
 		// Name the sign
 		TangibleObject sign = (TangibleObject) building.getAttachment("structureSign");	
@@ -142,20 +192,7 @@ public class HousingService implements INetworkDispatch {
 			actor.setAttachment("residentCity", newCity.getCityID());
 		}
 		
-		// Check for city founders joining a new city
-		PlayerCity cityActorIsIn = core.playerCityService.getCityObjectIsIn(actor);
 		
-		actor.setAttachment("Has24HZoningFor",cityActorIsIn.getCityID()); // for testing
-		
-		int cityActorHasZoning = (int)actor.getAttachment("Has24HZoningFor");
-		if (cityActorIsIn!=null && cityActorHasZoning==cityActorIsIn.getCityID()){
-			if (! cityActorIsIn.getCitizens().contains(actor.getObjectID())){
-				building.setAttachment("structureCity", cityActorIsIn.getCityID());
-				// actor.setAttachment("residentCity", cityActorIsIn.getCityID()); He must do it manually
-				cityActorIsIn.addCitizen(actor.getObjectID());
-				cityActorIsIn.addNewStructure(building.getObjectID());
-			}
-		}
 		
 		// Save structure to DB
 		//building.createTransaction(core.getBuildingODB().getEnvironment());
@@ -453,8 +490,16 @@ public class HousingService implements INetworkDispatch {
 		final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
 		building.setResidency((CreatureObject)owner);
 		PlayerCity cityActorIsIn = core.playerCityService.getCityObjectIsIn(owner);
-		owner.setAttachment("residentCity", cityActorIsIn.getCityID());
-		//owner.setResidence();
+		if (cityActorIsIn==null)
+			((CreatureObject)owner).sendSystemMessage("Serious error City object is null", (byte) 0);
+		
+		if (cityActorIsIn!=null)
+			if (! cityActorIsIn.hasCitizen(owner.getObjectID())){
+				owner.setAttachment("residentCity", cityActorIsIn.getCityID());
+				building.setAttachment("structureCity", cityActorIsIn.getCityID());
+				cityActorIsIn.addCitizen(owner.getObjectID());
+				cityActorIsIn.addNewStructure(building.getObjectID());
+			}
 	}
 	
 	public void handleListAllItems(SWGObject owner, TangibleObject target) {

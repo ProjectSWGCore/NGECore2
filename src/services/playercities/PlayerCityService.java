@@ -27,10 +27,6 @@ import java.util.Vector;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
-import resources.common.OutOfBand;
-import resources.common.RGB;
-import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
 import services.sui.SUIWindow;
 import services.sui.SUIWindow.SUICallback;
@@ -39,6 +35,10 @@ import engine.resources.objects.SWGObject;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import main.NGECore;
+
+/** 
+ * @author Charon 
+ */
 
 public class PlayerCityService implements INetworkDispatch {
 	
@@ -95,7 +95,8 @@ public class PlayerCityService implements INetworkDispatch {
 		synchronized(playerCities){
 			for (PlayerCity city : playerCities){
 				int radius = city.getCityRadius();
-				if (object.getPosition().getDistance2D(city.getCityCenterPosition())<radius){
+				float distance = object.getWorldPosition().getDistance2D(city.getCityCenterPosition());
+				if (distance<radius){
 					foundCity = city;
 				}				
 			}
@@ -119,6 +120,26 @@ public class PlayerCityService implements INetworkDispatch {
 	
 	
 	public void newCitySUI1(CreatureObject citizen, final PlayerCity newCity) {		
+		final SUIWindow window = core.suiService.createInputBox(2,"@city/city:city_name_t","@city/city:city_name_d", citizen, citizen, 0);		
+		core.suiService.openSUIWindow(window);				
+		Vector<String> returnList = new Vector<String>();		
+		returnList.add("txtInput:LocalText");	
+		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, new SUICallback() {
+			@Override
+			public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
+				if (returnList.size()==0)
+					return;
+				PlayerCity playerCity = main.NGECore.getInstance().playerCityService.getPlayerCity((CreatureObject) owner);	
+				playerCity.setCityName(returnList.get(0));
+				//owner.sendSystemMessage("@city/city:name_changed", 0);
+				core.suiService.closeSUIWindow(owner, 0);
+				newCitySUI2((CreatureObject) owner, playerCity);
+			}					
+		});		
+		core.suiService.openSUIWindow(window);
+	}
+	
+	public void newCitySUI2(CreatureObject citizen, final PlayerCity newCity) {		
 		final SUIWindow window = core.suiService.createSUIWindow("Script.messageBox", citizen, citizen, 0);
 		window.setProperty("bg.caption.lblTitle:Text", "@city/city:rank0");
 		window.setProperty("Prompt.lblPrompt:Text", "@city/city:new_city_body");		
@@ -135,6 +156,7 @@ public class PlayerCityService implements INetworkDispatch {
 		});		
 		core.suiService.openSUIWindow(window);
 	}
+	
 
 	@Override
 	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> arg0,
