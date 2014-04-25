@@ -25,6 +25,8 @@ import java.nio.ByteOrder;
 
 
 
+import java.util.Map.Entry;
+
 import org.apache.mina.core.buffer.IoBuffer;
 
 import com.sleepycat.persist.model.Persistent;
@@ -160,10 +162,10 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		
 		buffer.putInt(creature.getSkillMods().size());
 		buffer.putInt(creature.getSkillMods().getUpdateCounter());
-		for (SkillMod skillMod : creature.getSkillMods().values()) {
+		for (Entry<String, SkillMod> skillMod : creature.getSkillMods().entrySet()) {
 			buffer.put((byte) 0);
-			buffer.put(getAsciiString(skillMod.getName()));
-			buffer.put(skillMod.getBytes());
+			buffer.put(getAsciiString(skillMod.getKey()));
+			buffer.put(skillMod.getValue().getBytes());
 		}
 		
 		buffer.putFloat(creature.getSpeedMultiplierBase());
