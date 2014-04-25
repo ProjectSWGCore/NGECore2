@@ -61,7 +61,6 @@ import services.housing.HousingService;
 import services.InstanceService;
 import services.LoginService;
 import services.LootService;
-import services.MissionService;
 import services.PlayerService;
 import services.ScriptService;
 import services.SimulationService;
@@ -83,6 +82,7 @@ import services.gcw.GCWService;
 import services.guild.GuildService;
 import services.LoginService;
 import services.map.MapService;
+import services.mission.MissionService;
 import services.object.ObjectService;
 import services.object.UpdateService;
 import services.pet.MountService;
@@ -173,7 +173,7 @@ public class NGECore {
 	public WeatherService weatherService;
 	public SpawnService spawnService;
 	public AIService aiService;
-	//public MissionService missionService;
+	public MissionService missionService;
 	public InstanceService instanceService;
 	public DevService devService;
 	public SurveyService surveyService;
@@ -322,7 +322,7 @@ public class NGECore {
 		}
 		spawnService = new SpawnService(this);
 		aiService = new AIService(this);
-		//missionService = new MissionService(this);
+		missionService = new MissionService(this);
 		
 		if (optionsConfigLoaded && options.getInt("LOAD.RESOURCE.SYSTEM") == 1) {
 			surveyService = new SurveyService(this);
@@ -359,7 +359,7 @@ public class NGECore {
 		zoneDispatch.addService(playerService);
 		zoneDispatch.addService(buffService);
 		zoneDispatch.addService(entertainmentService);
-		//zoneDispatch.addService(missionService);
+		zoneDispatch.addService(missionService);
 		zoneDispatch.addService(bazaarService);
 		zoneDispatch.addService(lootService);
 		zoneDispatch.addService(mountService);
