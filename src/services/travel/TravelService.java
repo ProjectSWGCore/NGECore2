@@ -320,7 +320,7 @@ public class TravelService implements INetworkDispatch {
 	public void doTransport(SWGObject actor, TravelPoint tp) {
 		
 		Planet planet = core.terrainService.getPlanetByName(tp.getPlanetName());
-		Point3D spawnLocation = SpawnPoint.getRandomPosition(tp.getShuttle().getPosition(), 5, 20, actor.getPlanetId());
+		Point3D spawnLocation = SpawnPoint.getRandomPosition(tp.getLocation(), 5, 20, actor.getPlanetId());
 		core.simulationService.transferToPlanet(actor, planet, spawnLocation, new Quaternion(0, 0, 0, 0), null);
 		
 	}
