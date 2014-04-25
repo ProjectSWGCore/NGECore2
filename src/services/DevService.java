@@ -1230,8 +1230,9 @@ public class DevService implements INetworkDispatch {
 						deed.setBMR(15);
 						deed.setAttributes();
 						inventory.add(deed);	
+					
 						return;	
-						
+												
 					case 125:
 						TangibleObject genericCraftingTool = (TangibleObject) core.objectService.createObject("object/tangible/crafting/station/shared_generic_tool.iff", planet);
 						genericCraftingTool.setCustomName("Generic Crafting Tool");

@@ -426,11 +426,13 @@ public class MountService implements INetworkDispatch {
 		mount._add(rider);
 		
 		// Set mount states and stuff
+		mount.setStateBitmask(mount.getStateBitmask() | State.MountedCreature);
 		mount.setState(State.MountedCreature, true);
-		mount.setPosture(Posture.DrivingVehicle);
+		rider.setPosture((mount.getTemplate().contains("vehicle")) ? Posture.DrivingVehicle : Posture.RidingCreature);
 		
 		// Set rider states and stuff
-		rider.setState(StateStatus.RidingMount, true);
+		rider.setStateBitmask(rider.getStateBitmask() | State.RidingMount);
+		rider.setState(State.RidingMount, true);
 			
 		// Notify observers and update quadtree
 		mount.notifyObservers(new UpdateContainmentMessage(rider.getObjectID(), mount.getObjectID(), 4), true);
@@ -551,7 +553,7 @@ public class MountService implements INetworkDispatch {
 		
 		LongAdder adder = new LongAdder();
 		
-		mount.getSlottedObject("inventory").viewChildren(owner, false, false, (obj) -> adder.increment());
+		mount.getSlottedObject("inventory").viewChildren(mount, false, false, (obj) -> adder.increment());
 		
 		int passengers = adder.intValue();
 		
@@ -621,13 +623,13 @@ public class MountService implements INetworkDispatch {
 
 		// Set mount states and stuff
 		if (rider.getObjectID() == mount.getOwnerId()) {
-			//mount.setStateBitmask(0);
+			mount.setStateBitmask(mount.getOptionsBitmask() & ~State.MountedCreature);
 			mount.setState(State.MountedCreature, false);
 		}
 		
 		// Set rider states and stuff
-		//rider.setStateBitmask(0);
-		rider.setState(StateStatus.RidingMount, false);
+		rider.setStateBitmask(rider.getOptionsBitmask() & ~State.RidingMount);
+		rider.setState(State.RidingMount, false);
 		rider.setPosture(Posture.Upright);
 			
 		// Update observers and quadtree

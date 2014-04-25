@@ -1,10 +1,8 @@
 import sys
 
-def add(core, actor, name, base):
-	actor.addSkillMod(name, base)
+def add(core, actor, skillMod, value):
 	return
-	
-def deduct(core, actor, name, base):
-	actor.deductSkillMod(name, base)
+
+def deduct(core, actor, skillMod, value):
 	return
-	
+		

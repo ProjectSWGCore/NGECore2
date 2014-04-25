@@ -334,11 +334,17 @@ public class ObjectService implements INetworkDispatch {
 			
 			object = new Harvester_Deed(objectID, planet, Template, position, orientation);
 			
-		} else if(Template.startsWith("object/tangible/deed/player_house_deed") || Template.startsWith("object/tangible/deed/guild_deed") || Template.startsWith("object/tangible/deed/city_deed")) {
+		} else if(Template.startsWith("object/tangible/deed/player_house_deed") || Template.startsWith("object/tangible/deed/guild_deed") || Template.startsWith("object/tangible/deed/city_deed") || Template.startsWith("object/tangible/tcg")) {
 			
 			object = new Player_House_Deed(objectID, planet, Template, position, orientation);
 			
-		} else if(Template.startsWith("object/tangible")) {
+		} 
+//		else if(Template.startsWith("object/tangible/container/drum/shared_treasure_drum.iff")) {
+//			
+//			object = new CreatureObject(objectID, planet, position, orientation, Template);			
+//		
+//		} 
+		else if(Template.startsWith("object/tangible")) {
 			
 			object = new TangibleObject(objectID, planet, Template, position, orientation);
 
@@ -446,34 +452,25 @@ public class ObjectService implements INetworkDispatch {
 		// Any such settings can be completely reset with setOptionsBitmask
 		// in scripts and modified with setOptions(Options.X, true/false)
 		if (Template.startsWith("object/creature/") || Template.startsWith("object/mobile/")) {
-			if (Template.startsWith("object/mobile/")) {
-				((CreatureObject) object).setOptionsBitmask(Options.ATTACKABLE);
-			}
 			if (Template.startsWith("object/mobile/beast_master/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.NONE);
-			}
-			if (Template.startsWith("object/mobile/vendor/")) {
+			} else if (Template.startsWith("object/mobile/vendor/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.INVULNERABLE | Options.USABLE);
-			}
-			if (Template.startsWith("object/mobile/vehicle/")) {
+			} else if (Template.startsWith("object/mobile/vehicle/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.ATTACKABLE | Options.MOUNT);
-			}
-			if (Template.startsWith("object/mobile/hologram/")) {
+			} else if (Template.startsWith("object/mobile/hologram/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.INVULNERABLE);
-			}
-			if (Template.startsWith("object/creature/npc/theme_park/")) {
+			} else if (Template.startsWith("object/mobile/")) {
+				((CreatureObject) object).setOptionsBitmask(Options.ATTACKABLE);
+			} else if (Template.startsWith("object/creature/npc/theme_park/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.INVULNERABLE);
-			}
-			if (Template.startsWith("object/creature/npc/general/")) {
+			} else if (Template.startsWith("object/creature/npc/general/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.INVULNERABLE | Options.CONVERSABLE);
-			}
-			if (Template.startsWith("object/creature/droid/crafted/")) {
+			} else if (Template.startsWith("object/creature/droid/crafted/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.NONE);
-			}
-			if (Template.startsWith("object/creature/droid/")) {
+			} else if (Template.startsWith("object/creature/droid/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.ATTACKABLE | Options.INVULNERABLE);
-			}
-			if (Template.startsWith("object/creature/player/")) {
+			} else if (Template.startsWith("object/creature/player/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.ATTACKABLE);
 			}
 		} else if (object instanceof TangibleObject) {

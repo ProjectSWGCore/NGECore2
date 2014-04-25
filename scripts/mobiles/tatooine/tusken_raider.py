@@ -10,6 +10,7 @@ def addTemplate(core):
 	mobileTemplate.setLevel(10)
 	mobileTemplate.setDifficulty(1)
 	mobileTemplate.setAttackRange(24)
+	mobileTemplate.setAttackSpeed(1.0)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_tusken_raider.iff')
