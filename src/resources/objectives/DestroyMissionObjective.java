@@ -19,41 +19,39 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package services.mission;
-
-import com.sleepycat.persist.model.Persistent;
+package resources.objectives;
 
 import resources.objects.mission.MissionObject;
+import services.mission.MissionObjective;
 
-@Persistent(version=0)
-public abstract class MissionObjective {
-	
-	protected long startTime;
-	protected boolean activated;
-	protected MissionObject parent;
-	private int objectivePhase;
-	
-	public MissionObjective() { }
-	
-	public MissionObjective(MissionObject parent) {
-		this.startTime = System.currentTimeMillis();
-		this.activated = false;
-		this.parent = parent;
-		this.objectivePhase = 0;
+public class DestroyMissionObjective extends MissionObjective {
+
+	public DestroyMissionObjective(MissionObject parent) {
+		super(parent);
 	}
-	
-	public abstract void activate();
-	public abstract void complete();
-	public abstract void abort();
-	public abstract void update();
 
-	public long getStartTime() { return startTime; }
-	
-	public boolean isActivated() { return activated; }
-	public void setActive(boolean isActive) { this.activated = isActive; }
-	
-	public MissionObject getMissionObject() { return parent; }
-	
-	public int getObjectivePhase() { return objectivePhase; }
-	public void setObjectivePhase(int phase) { this.objectivePhase = phase; }
+	@Override
+	public void activate() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void complete() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void abort() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void update() {
+		// TODO Auto-generated method stub
+
+	}
+
 }

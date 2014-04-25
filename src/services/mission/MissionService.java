@@ -36,14 +36,14 @@ import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 
 import protocol.swg.ObjControllerMessage;
+import protocol.swg.objectControllerObjects.MissionAbort;
 import protocol.swg.objectControllerObjects.MissionAcceptRequest;
 import protocol.swg.objectControllerObjects.MissionAcceptResponse;
 import protocol.swg.objectControllerObjects.MissionListRequest;
-import protocol.swg.objectControllerObjects.ObjControllerObject;
-import resources.common.Console;
 import resources.common.SpawnPoint;
 import resources.common.ObjControllerOpcodes;
 import resources.objectives.DeliveryMissionObjective;
+import resources.objectives.DestroyMissionObjective;
 import resources.objects.creature.CreatureObject;
 import resources.objects.mission.MissionObject;
 import resources.objects.tangible.TangibleObject;
@@ -77,6 +77,38 @@ public class MissionService implements INetworkDispatch {
 
 	@Override
 	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> swgOpcodes, Map<Integer, INetworkRemoteEvent> objControllerOpcodes) {
+		
+		objControllerOpcodes.put(ObjControllerOpcodes.MISSION_ABORT, new INetworkRemoteEvent() {
+
+			@Override
+			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
+				Client client = core.getClient(session);
+
+				if(client == null || client.getSession() == null)
+					return;
+
+				CreatureObject creature = (CreatureObject) client.getParent();
+
+				if(creature == null)
+					return;
+				
+				data.order(ByteOrder.LITTLE_ENDIAN);
+				MissionAbort abort = new MissionAbort();
+				abort.deserialize(data);
+				
+				MissionObject mission = (MissionObject) core.objectService.getObject(abort.getMissionId());
+				
+				if (mission == null)
+					return;
+				
+				if (mission.getGrandparent().getObjectId() != creature.getObjectId())
+					return;
+				
+				handleMissionAbort(creature, mission);
+			}
+			
+		});
+		
 		objControllerOpcodes.put(ObjControllerOpcodes.MISSION_LIST_REQUEST, new INetworkRemoteEvent() {
 
 			@Override
@@ -112,7 +144,7 @@ public class MissionService implements INetworkDispatch {
 				} else if (terminalType == TerminalType.ARTISAN) {
 
 				} else {
-					Console.println("ERROR: Unsupported terminal " + terminal.getObjectId());
+					//Console.println("ERROR: Unsupported terminal " + terminal.getObjectId());
 				}
 			}
 			
@@ -155,6 +187,15 @@ public class MissionService implements INetworkDispatch {
 		});
 	}
 
+	public void handleMissionAbort(CreatureObject creature, MissionObject mission) {
+		MissionObjective objective = mission.getObjective();
+		
+		if (objective != null)
+			objective.abort();
+		
+		core.objectService.destroyObject(mission.getObjectId());
+	}
+
 	private void loadMissionEntryCounts() {
 		File missionFolder = new File("./clientdata/string/en/mission");
 		File[] missionFiles = missionFolder.listFiles();
@@ -177,7 +218,7 @@ public class MissionService implements INetworkDispatch {
 						}
 					}
 					if (gotCount == false) {
-						System.out.println("!NO ENTRY COUNT FOR " + missionStf);
+						//System.out.println("!NO ENTRY COUNT FOR " + missionStf);
 						continue;
 					}
 				} catch (Exception e) { e.printStackTrace(); }
@@ -192,7 +233,7 @@ public class MissionService implements INetworkDispatch {
 		int ranEntryNum = 1;
 		
 		if (entryCounts.get(missionStf) != null) { ranEntryNum = ran.nextInt(entryCounts.get(missionStf)); } 
-		else { System.out.println(missionStf + " was not found in entryCount and is using entry #1"); }
+		//else { System.out.println(missionStf + " was not found in entryCount and is using entry #1"); }
 		
 		if (ranEntryNum == 0)
 			return 1;
@@ -298,19 +339,23 @@ public class MissionService implements INetworkDispatch {
 	}
 	
 	private void createMissionObjective(CreatureObject creature, MissionObject mission) {
-		String type = mission.getMissionType();
-		System.out.println("Type: " + type);
-		switch(type) {
+		switch(mission.getMissionType()) {
 
 			case "deliver":
-				DeliveryMissionObjective objective = new DeliveryMissionObjective(mission);
+				DeliveryMissionObjective deliveryObjective = new DeliveryMissionObjective(mission);
 				
-				mission.setObjective(objective);
+				mission.setObjective(deliveryObjective);
 				
-				objective.activate();
-				System.out.println("Went here!");
+				deliveryObjective.activate();
 				break;
 			
+			case "destroy":
+				DestroyMissionObjective destroyObjective = new DestroyMissionObjective(mission);
+				
+				mission.setObjective(destroyObjective);
+				
+				destroyObjective.activate();
+				break;
 			default:
 				break;
 		}
@@ -331,13 +376,14 @@ public class MissionService implements INetworkDispatch {
 		
 		mission.setMissionLevel(5);
 		
+		// TODO: Use pre-defined commoner locations
 		Point3D startLocation = SpawnPoint.getRandomPosition(player.getPosition(), (float) 50, (float) 300, player.getPlanetId());
 		Point3D destination = SpawnPoint.getRandomPosition(startLocation, (float) 50, (float) 500, player.getPlanetId());
 		
 		mission.setStartLocation(startLocation, player.getPlanet().name);
 		mission.setDestination(destination, player.getPlanet().name);
 		
-		mission.setCreditReward((int) (50 * ((startLocation.getDistance2D(destination) / 10))));
+		mission.setCreditReward((int) (50 + ((startLocation.getDistance2D(destination) / 10))));
 		
 		mission.setMissionTemplateObject(CRC.StringtoCRC("object/tangible/mission/shared_mission_datadisk.iff"));
 		mission.setMissionTargetName("Datadisk");
@@ -357,6 +403,7 @@ public class MissionService implements INetworkDispatch {
 	private void randomBountyMission(SWGObject player, MissionObject mission) {
 		
 	}
+	
 	public enum TerminalType {;
 		public static final int GENERIC = 1;
 		public static final int BOUNTYHUNTER = 2;

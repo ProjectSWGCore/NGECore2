@@ -251,10 +251,28 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			getClient().getSession().write(messageBuilder.buildBankCreditsDelta(bankCredits));
 		}
 	}
+	
+	public void addBankCredits(int amountToAdd) {
+		synchronized(objectMutex) {
+			this.bankCredits += amountToAdd;
+		}
+		if(getClient() != null && getClient().getSession() != null) {
+			getClient().getSession().write(messageBuilder.buildBankCreditsDelta(bankCredits));
+		}
+	}
 
 	public int getCashCredits() {
 		synchronized(objectMutex) {
 			return cashCredits;
+		}
+	}
+	
+	public void addCashCredits(int amountToAdd) {
+		synchronized(objectMutex) {
+			this.cashCredits += amountToAdd;
+		}
+		if(getClient() != null && getClient().getSession() != null) {
+			getClient().getSession().write(messageBuilder.buildCashCreditsDelta(cashCredits));
 		}
 	}
 

@@ -4,7 +4,12 @@ from resources.objectives import DeliveryMissionObjective
 import sys
 
 def startConversation(core, actor, npc):
-	mission = npc.getAttachment('assignedMission')
+	missionId = npc.getAttachment('assignedMission')
+	
+	if missionId is None:
+		return
+	
+	mission = core.objectService.getObject(missionId)
 	
 	if mission is None:
 		return
@@ -12,21 +17,54 @@ def startConversation(core, actor, npc):
 	objective = mission.getObjective()
 
 	if mission.getGrandparent().getObjectId() != actor.getObjectId() or objective is None:
-		core.conversationService.sendStopConversation(actor, npc, 'conversation/respecseller', 's_38')
+		core.conversationService.sendStopConversation(actor, npc, 'mission/mission_generic', 'npc_job_request_no_job')
 		return
 
 	if objective.getObjectivePhase() == 0:
-		handleFirstDeliveryStage(core, actor, npc, objective, mission)
+		handlePickupStage(core, actor, npc, objective, mission)
 		return
 	
-	#convSvc.sendConversationMessage(actor, npc, OutOfBand(ProsePackage(mission.getMissionDescription(), 'm' + str(mission.getMissionId()) + 'p')))
+	elif objective.getObjectivePhase() == 1:
+		handleDeliveryStage(core, actor, npc, objective, mission)
+		return
+	
+	elif objective.getObjectivePhase() == 2:
+		handleCompletionStage(core, actor, npc, objective, mission)
+		return
 	return
 
 def endConversation(core, actor, npc):
+	core.conversationService.sendStopConversation(actor, npc, 'mission/mission_generic', 'npc_job_request_no_job')
 	return
 
-def handleFirstDeliveryStage(core, actor, npc, objective, mission):
+def handlePickupStage(core, actor, npc, objective, mission):
+	
+	if objective.getMissionGiver().getObjectId() != npc.getObjectId():
+		endConversation(core, actor, npc)
+		return
+	
 	core.conversationService.sendStopConversation(actor, npc, mission.getMissionDescription(), 'm' + str(mission.getMissionId()) + 'p')
 	objective.createDeliveryItem()
-	objective.setObjectivePhase(1)
+	objective.update()
+	return
+
+def handleDeliveryStage(core, actor, npc, objective, mission):
+	
+	if objective.getDropOffNpc().getObjectId() != npc.getObjectId():
+		endConversation(core, actor, npc)
+		return
+	
+	core.conversationService.sendStopConversation(actor, npc, mission.getMissionDescription(), 'm' + str(mission.getMissionId()) + 'r')
+	core.objectService.destroyObject(objective.getDeliveryObject())
+	objective.update()
+	return
+
+def handleCompletionStage(core, actor, npc, objective, mission):
+	
+	if objective.getMissionGiver().getObjectId() != npc.getObjectId():
+		endConversation(core, actor, npc)
+		return
+	
+	core.conversationService.sendStopConversation(actor, npc, mission.getMissionDescription(), 'm' + str(mission.getMissionId()) + 's')
+	objective.complete()
 	return

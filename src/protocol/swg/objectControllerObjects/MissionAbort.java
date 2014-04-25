@@ -19,41 +19,43 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package services.mission;
+package protocol.swg.objectControllerObjects;
 
-import com.sleepycat.persist.model.Persistent;
+import java.nio.ByteOrder;
 
-import resources.objects.mission.MissionObject;
+import org.apache.mina.core.buffer.IoBuffer;
 
-@Persistent(version=0)
-public abstract class MissionObjective {
-	
-	protected long startTime;
-	protected boolean activated;
-	protected MissionObject parent;
-	private int objectivePhase;
-	
-	public MissionObjective() { }
-	
-	public MissionObjective(MissionObject parent) {
-		this.startTime = System.currentTimeMillis();
-		this.activated = false;
-		this.parent = parent;
-		this.objectivePhase = 0;
+import protocol.swg.ObjControllerMessage;
+
+public class MissionAbort extends ObjControllerObject {
+	private long characterId;
+	private long missionId;
+
+	public MissionAbort() { }
+
+	@Override
+	public void deserialize(IoBuffer data) {
+		setCharacterId(data.getLong());
+		data.getInt();
+		setMissionId(data.getLong());
+	}
+
+	@Override
+	public IoBuffer serialize() {
+		IoBuffer buffer = IoBuffer.allocate(32).order(ByteOrder.LITTLE_ENDIAN);
+		
+		buffer.putInt(ObjControllerMessage.MISSION_ABORT_RESPONSE);
+		buffer.putLong(characterId);
+		buffer.putInt(0);
+		buffer.putLong(missionId);
+		return null;
 	}
 	
-	public abstract void activate();
-	public abstract void complete();
-	public abstract void abort();
-	public abstract void update();
+	public long getMissionId() { return missionId; }
 
-	public long getStartTime() { return startTime; }
-	
-	public boolean isActivated() { return activated; }
-	public void setActive(boolean isActive) { this.activated = isActive; }
-	
-	public MissionObject getMissionObject() { return parent; }
-	
-	public int getObjectivePhase() { return objectivePhase; }
-	public void setObjectivePhase(int phase) { this.objectivePhase = phase; }
+	public void setMissionId(long missionId) { this.missionId = missionId; }
+
+	public long getCharacterId() { return characterId; }
+
+	public void setCharacterId(long characterId) { this.characterId = characterId; }
 }
