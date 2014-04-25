@@ -334,7 +334,7 @@ public class ObjectService implements INetworkDispatch {
 			
 			object = new Harvester_Deed(objectID, planet, Template, position, orientation);
 			
-		} else if(Template.startsWith("object/tangible/deed/player_house_deed") || Template.startsWith("object/tangible/deed/guild_deed") || Template.startsWith("object/tangible/deed/city_deed")) {
+		} else if(Template.startsWith("object/tangible/deed/player_house_deed") || Template.startsWith("object/tangible/deed/guild_deed") || Template.startsWith("object/tangible/deed/city_deed") || Template.startsWith("object/tangible/tcg")) {
 			
 			object = new Player_House_Deed(objectID, planet, Template, position, orientation);
 			
