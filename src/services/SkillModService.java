@@ -109,6 +109,10 @@ public class SkillModService implements INetworkDispatch {
 		return creature.getSkillModValue(name, divisor);
 	}
 	
+	public void deductSkillMod(CreatureObject creature, String name, SkillMod skillMod) {
+		deductSkillMod(creature, name, skillMod.getBase(), skillMod.getModifier());
+	}
+	
 	public void deductSkillMod(CreatureObject creature, String name, int base) {
 		deductSkillMod(creature, name, base, 0);
 	}	
