@@ -551,7 +551,7 @@ public class MountService implements INetworkDispatch {
 		
 		LongAdder adder = new LongAdder();
 		
-		mount.getSlottedObject("inventory").viewChildren(owner, false, false, (obj) -> adder.increment());
+		mount.getSlottedObject("inventory").viewChildren(mount, false, false, (obj) -> adder.increment());
 		
 		int passengers = adder.intValue();
 		
