@@ -1,7 +1,7 @@
 
 def itemTemplate():
 
-	return ['object/tangible/wearables/armor/composite/shared_armor_composite_bicep_l.iff']
+	return ['object/tangible/loot/creature_loot/collections/shared_purple_rnd_cut_gem_style1.iff']
 
 def customItemName():
 
