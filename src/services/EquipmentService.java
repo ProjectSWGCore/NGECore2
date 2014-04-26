@@ -82,8 +82,19 @@ public class EquipmentService implements INetworkDispatch {
 		}
 
 		if (item.getStringAttribute("class_required") != null) {
+			String classRequired = item.getStringAttribute("class_required");
 			String profession = ((PlayerObject) actor.getSlottedObject("ghost")).getProfession();
-			if (item.getStringAttribute("class_required").contentEquals(core.playerService.getFormalProfessionName(profession)) || item.getStringAttribute("class_required").contentEquals("None"))
+			
+			if (classRequired.contains(",")) {
+				String[] classes = classRequired.split(",");
+				
+				for (int i = 0; i < classes.length; i++) {
+					if (classes[i].contains(core.playerService.getFormalProfessionName(profession))) {
+						return true;
+					}
+				}
+			}
+			if (classRequired.contentEquals(core.playerService.getFormalProfessionName(profession)) || classRequired.contentEquals("None"))
 				result = true;
 			else
 				return false;
@@ -154,7 +165,7 @@ public class EquipmentService implements INetworkDispatch {
 		
 		if(equipping)
 		{
-			if(item.getStringAttribute("cat_wpn_damage.wpn_category") != null) creature.addSkillMod("display_only_critical", getWeaponCriticalChance(creature, item));
+			if(item.getStringAttribute("cat_wpn_damage.wpn_category") != null) core.skillModService.addSkillMod(creature, "display_only_critical", getWeaponCriticalChance(creature, item));
 			if(item.getStringAttribute("proc_name") != null) core.buffService.addBuffToCreature(creature, item.getStringAttribute("proc_name").replace("@ui_buff:", ""), creature);
 			
 			for(Entry<String, Object> e : attributes.entrySet()) 
@@ -182,7 +193,7 @@ public class EquipmentService implements INetworkDispatch {
 		}
 		else
 		{
-			if(item.getStringAttribute("cat_wpn_damage.wpn_category") != null) creature.deductSkillMod("display_only_critical", getWeaponCriticalChance(creature, item));
+			if(item.getStringAttribute("cat_wpn_damage.wpn_category") != null) core.skillModService.deductSkillMod(creature, "display_only_critical", getWeaponCriticalChance(creature, item));
 			if(item.getStringAttribute("proc_name") != null) core.buffService.removeBuffFromCreatureByName(creature, item.getStringAttribute("proc_name").replace("@ui_buff:", ""));
 			
 			for(Entry<String, Object> e : attributes.entrySet())
