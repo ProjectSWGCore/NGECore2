@@ -29,7 +29,7 @@ def addTemplate(core):
 	weaponTemplates = Vector()
 	weapontemplate = WeaponTemplate('object/weapon/melee/unarmed/shared_unarmed_default.iff', 6, 1.0)
 	weaponTemplates.add(weapontemplate)
-	#mobileTemplate.setWeaponTemplateVector(weaponTemplates)
+	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')

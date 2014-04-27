@@ -1,16 +1,29 @@
 import sys
 from services.spawn import MobileTemplate
+from services.spawn import WeaponTemplate
 from java.util import Vector
 
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
+	
+	mobileTemplate.setCreatureName('durni')
+	mobileTemplate.setLevel(4)
+	mobileTemplate.setDifficulty(0)
+	mobileTemplate.setAttackRange(5)
+	mobileTemplate.setAttackSpeed(1.0)
+	mobileTemplate.setWeaponType(6)
+	
 	templates = Vector()
 	templates.add('object/mobile/shared_durni.iff')
-	mobileTemplate.setCreatureName('durni')
 	mobileTemplate.setTemplates(templates)
-	mobileTemplate.setLevel(4)
+	
+	weaponTemplates = Vector()
+	weapontemplate = WeaponTemplate('object/weapon/melee/unarmed/shared_unarmed_default.iff', 6, 1.0)
+	weaponTemplates.add(weapontemplate)
+	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
+
 	attacks = Vector()
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
-	core.spawnService.addMobileTemplate('durni', mobileTemplate)
 	
+	core.spawnService.addMobileTemplate('durni', mobileTemplate)
