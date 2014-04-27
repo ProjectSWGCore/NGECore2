@@ -284,6 +284,57 @@ def handleSecondScreen(core, actor, npc, selection):
 			return
 		return
 	elif actor.getFaction() == 'imperial' and actor.getFactionStatus() == FactionStatus.OnLeave:
+		if selection == 0:
+			actor.setFactionStatus(FactionStatus.Combatant)
+			core.conversationService.sendStopConversation(actor, npc, 'conversation/faction_recruiter_imperial', 's_300')
+			return
+		
+		if selection == 1:
+			prose = ProsePackage('conversation/faction_recruiter_imperial', 's_64')
+			outOfBand = OutOfBand()
+			outOfBand.addProsePackage(prose)
+			convSvc.sendConversationMessage(actor, npc, outOfBand)
+			prose2 = ProsePackage('conversation/faction_recruiter_imperial', 's_66')
+			outOfBand2 = OutOfBand()
+			outOfBand2.addProsePackage(prose2)
+			prose3 = ProsePackage('conversation/faction_recruiter_imperial', 's_302')
+			outOfBand3 = OutOfBand()
+			outOfBand3.addProsePackage(prose3)
+			option1 = ConversationOption(outOfBand2, 0)
+			option2 = ConversationOption(outOfBand3, 1)
+
+	
+			
+			options = Vector()
+			options.add(option1)
+			options.add(option2)
+
+	
+			convSvc.sendConversationOptions(actor, npc, options, handleFourthScreen)
+			return
+		if selection == 2:
+			prose = ProsePackage('conversation/faction_recruiter_imperial', 's_90')
+			outOfBand = OutOfBand()
+			outOfBand.addProsePackage(prose)
+			convSvc.sendConversationMessage(actor, npc, outOfBand)
+			prose2 = ProsePackage('conversation/faction_recruiter_imperial', 's_92')
+			outOfBand2 = OutOfBand()
+			outOfBand2.addProsePackage(prose2)
+			prose3 = ProsePackage('conversation/faction_recruiter_imperial', 's_96')
+			outOfBand3 = OutOfBand()
+			outOfBand3.addProsePackage(prose3)
+			option1 = ConversationOption(outOfBand2, 0)
+			option2 = ConversationOption(outOfBand3, 1)
+
+	
+			
+			options = Vector()
+			options.add(option1)
+			options.add(option2)
+
+	
+			convSvc.sendConversationOptions(actor, npc, options, handleThirdScreen)
+			return
 		return	
 	elif actor.getFaction() == 'imperial' and actor.getFactionStatus() == FactionStatus.Combatant or actor.getFactionStatus() == FactionStatus.SpecialForces:
 		if selection == 0:
@@ -326,6 +377,16 @@ def handleThirdScreen(core, actor, npc, selection):
 	if selection == 1:
 		core.conversationService.sendStopConversation(actor, npc, 'conversation/faction_recruiter_imperial', 's_98')
 		return	
+	return
+	
+def handleFourthScreen(core, actor, npc, selection):
+	if selection == 0:
+		actor.setFactionStatus(FactionStatus.SpecialForces)
+		core.conversationService.sendStopConversation(actor, npc, 'conversation/faction_recruiter_imperial', 's_68')
+		return
+	if selection == 1:
+		core.conversationService.sendStopConversation(actor, npc, 'conversation/faction_recruiter_imperial', 's_72')
+		return
 	return
 
 def endConversation(core, actor, npc):
