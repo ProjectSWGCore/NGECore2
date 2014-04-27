@@ -10,7 +10,7 @@ def addTemplate(core):
 	mobileTemplate.setLevel(1)
 	mobileTemplate.setDifficulty(1)
 	mobileTemplate.setAttackRange(6)
-	mobileTemplate.setAttackSpeed(1.0)
+	mobileTemplate.setAttackSpeed(3.0)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_criminal_assassin_human_female_01.iff')
@@ -32,7 +32,7 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
-	mobileTemplate.setDefaultAttack('rangedshot')
+	mobileTemplate.setDefaultAttack('rangedShot')
 	mobileTemplate.setAttacks(attacks)
 	
 	core.spawnService.addMobileTemplate('forage_goon', mobileTemplate)
