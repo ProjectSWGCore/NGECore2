@@ -1,6 +1,5 @@
 import sys
 
 def addSpawnArea(core):
-	core.spawnService.addLairSpawnArea('tatooine_starter', 3400, -4775, 2048, 'tatooine')
-	
-	
+	core.spawnService.addLairSpawnArea('tatooine_starter', 3730, -4655, 1024, 'tatooine')
+	return
