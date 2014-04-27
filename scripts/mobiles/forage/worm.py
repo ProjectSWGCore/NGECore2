@@ -10,7 +10,7 @@ def addTemplate(core):
 	mobileTemplate.setLevel(1)
 	mobileTemplate.setDifficulty(1)
 	mobileTemplate.setAttackRange(6)
-	mobileTemplate.setAttackSpeed(3.0)
+	mobileTemplate.setAttackSpeed(1.0)
 	mobileTemplate.setWeaponType(6)
 	
 	templates = Vector()
