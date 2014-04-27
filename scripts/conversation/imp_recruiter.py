@@ -24,7 +24,10 @@ def startConversation(core, actor, npc):
 	faction = actor.getFaction()
 	factionStatus = actor.getFactionStatus()
 	
-	if actor.getFaction() != 'rebel' and actor.getFaction() != 'imperial':
+	if actor.getPvpStatus(PvpStatus.GoingOvert) or actor.getPvpStatus(PvpStatus.GoingCovert):
+		core.conversationService.sendStopConversation(actor, npc, 'conversation/faction_recruiter_imperial', 's_444')
+		return	
+	elif actor.getFaction() != 'rebel' and actor.getFaction() != 'imperial':
 		prose = ProsePackage('conversation/faction_recruiter_imperial', 's_414')
 		outOfBand = OutOfBand()
 		outOfBand.addProsePackage(prose)
@@ -35,23 +38,17 @@ def startConversation(core, actor, npc):
 		prose3 = ProsePackage('conversation/faction_recruiter_imperial', 's_85')
 		outOfBand3 = OutOfBand()
 		outOfBand3.addProsePackage(prose3)
-		prose4 = ProsePackage('conversation/faction_recruiter_imperial', 's_70')
-		outOfBand4 = OutOfBand()
-		outOfBand4.addProsePackage(prose4)
 		option1 = ConversationOption(outOfBand2, 0)
 		option2 = ConversationOption(outOfBand3, 1)
-		option3 = ConversationOption(outOfBand4, 1)
 
 		
 		options = Vector()
 		options.add(option1)
 		options.add(option2)
-		options.add(option3)
 
 		convSvc.sendConversationOptions(actor, npc, options, handleFirstScreen)
 		return
-		
-	if actor.getFaction == 'imperial' and actor.getFactionstatus == FactionStatus.OnLeave:
+	elif actor.getFaction() == 'imperial' and actor.getFactionStatus() == FactionStatus.OnLeave:
 		prose = ProsePackage('conversation/faction_recruiter_imperial', 's_80')
 		outOfBand = OutOfBand()
 		outOfBand.addProsePackage(prose)
@@ -68,14 +65,50 @@ def startConversation(core, actor, npc):
 		option1 = ConversationOption(outOfBand2, 0)
 		option2 = ConversationOption(outOfBand3, 1)
 		option3 = ConversationOption(outOfBand4, 1)
-		return
+
 		
-	if actor.getFaction() == 'rebel':
-		prose = ProsePackage('conversation/faction_recruiter_imperial', 's_306')
+		options = Vector()
+		options.add(option1)
+		options.add(option2)
+		options.add(option3)
+
+		convSvc.sendConversationOptions(actor, npc, options, handleFirstScreen)		
+		return
+	elif actor.getFaction() == 'imperial' and actor.getFactionStatus() == FactionStatus.Combatant or actor.getFactionStatus() == FactionStatus.SpecialForces:
+		prose = ProsePackage('conversation/faction_recruiter_imperial', 's_310')
 		outOfBand = OutOfBand()
 		outOfBand.addProsePackage(prose)
 		convSvc.sendConversationMessage(actor, npc, outOfBand)
+		prose2 = ProsePackage('conversation/faction_recruiter_imperial', 's_49')
+		outOfBand2 = OutOfBand()
+		outOfBand2.addProsePackage(prose2)
+		prose3 = ProsePackage('conversation/faction_recruiter_imperial', 's_88')
+		outOfBand3 = OutOfBand()
+		outOfBand3.addProsePackage(prose3)
+		prose4 = ProsePackage('conversation/faction_recruiter_imperial', 's_410')
+		outOfBand4 = OutOfBand()
+		outOfBand4.addProsePackage(prose4)
+		prose5 = ProsePackage('conversation/faction_recruiter_imperial', 's_324')
+		outOfBand5 = OutOfBand()
+		outOfBand5.addProsePackage(prose5)
+		option1 = ConversationOption(outOfBand2, 0)
+		option2 = ConversationOption(outOfBand3, 1)
+		option3 = ConversationOption(outOfBand4, 1)
+		option4 = ConversationOption(outOfBand5, 1)
+		
+		options = Vector()
+		options.add(option1)
+		options.add(option2)
+		options.add(option3)
+		options.add(option4)
+		convSvc.sendConversationOptions(actor, npc, options, handleFirstScreen)	
+		
 		return
+	elif actor.getFaction() == 'rebel':
+		npc.setCurrentAnimation('all_b_emt_backhand')
+		core.conversationService.sendStopConversation(actor, npc, 'conversation/faction_recruiter_imperial', 's_308')
+		return
+	return
 
 def handleFirstScreen(core, actor, npc, selection):
 	
@@ -89,7 +122,7 @@ def handleFirstScreen(core, actor, npc, selection):
 			prose2 = ProsePackage('conversation/faction_recruiter_imperial', 's_434')
 			outOfBand2 = OutOfBand()
 			outOfBand2.addProsePackage(prose2)
-			prose3 = ProsePackage('conversation/faction_recruiter_imperial', 's_55')
+			prose3 = ProsePackage('conversation/faction_recruiter_imperial', 's_440')
 			outOfBand3 = OutOfBand()
 			outOfBand3.addProsePackage(prose3)
 			option1 = ConversationOption(outOfBand2, 0)
@@ -108,40 +141,193 @@ def handleFirstScreen(core, actor, npc, selection):
 			return
 		
 		if selection == 2:
-			convSvc.sendConversationOptions(actor, npc, options, endConversation)	
+			core.conversationService.sendStopConversation(actor, npc, 'conversation/faction_recruiter_imperial', 's_442')	
 			return
 		return
+	elif actor.getFaction() == 'imperial' and actor.getFactionStatus() == FactionStatus.OnLeave:
+		if selection == 0:
+			prose = ProsePackage('conversation/faction_recruiter_imperial', 's_50')
+			outOfBand = OutOfBand()
+			outOfBand.addProsePackage(prose)
+			convSvc.sendConversationMessage(actor, npc, outOfBand)
+			prose2 = ProsePackage('conversation/faction_recruiter_imperial', 's_97')
+			outOfBand2 = OutOfBand()
+			outOfBand2.addProsePackage(prose2)
+			prose3 = ProsePackage('conversation/faction_recruiter_imperial', 's_93')
+			outOfBand3 = OutOfBand()
+			outOfBand3.addProsePackage(prose3)
+			prose4 = ProsePackage('conversation/faction_recruiter_imperial', 's_88')
+			outOfBand4 = OutOfBand()
+			outOfBand4.addProsePackage(prose4)
+			prose5 = ProsePackage('conversation/faction_recruiter_imperial', 's_55')
+			outOfBand5 = OutOfBand()
+			outOfBand5.addProsePackage(prose5)
+			option1 = ConversationOption(outOfBand2, 0)
+			option2 = ConversationOption(outOfBand3, 1)
+			option3 = ConversationOption(outOfBand4, 1)
+			option4 = ConversationOption(outOfBand5, 1)
 	
+			
+			options = Vector()
+			options.add(option1)
+			options.add(option2)
+			options.add(option3)
+			options.add(option4)
 	
+			convSvc.sendConversationOptions(actor, npc, options, handleSecondScreen)
+			return
+			
+		if selection == 1:
+			percent = core.guildService.getGuildObject().getCurrentServerGCWTotalPercentMap().get(actor.getPlanet().getName()).getPercent().intValue()
+			outOfBand = OutOfBand()
+			prose1 = ProsePackage("conversation/faction_recruiter_imperial", 's_412',0,"percent,@conversation/faction_recruiter_imperial:s_412", "TO", str(100 - percent))
+			outOfBand.addProsePackage(prose1)
+			convSvc.sendConversationMessage(actor, npc, outOfBand)
+			return
+		
+		if selection == 2:
+			return
+		return
+	elif actor.getFaction() == 'imperial' and actor.getFactionStatus() == FactionStatus.Combatant or actor.getFactionStatus() == FactionStatus.SpecialForces:
+	
+		if selection == 0:
+			prose = ProsePackage('conversation/faction_recruiter_imperial', 's_50')
+			outOfBand = OutOfBand()
+			outOfBand.addProsePackage(prose)
+			convSvc.sendConversationMessage(actor, npc, outOfBand)
+			prose2 = ProsePackage('conversation/faction_recruiter_imperial', 's_97')
+			outOfBand2 = OutOfBand()
+			outOfBand2.addProsePackage(prose2)
+			prose3 = ProsePackage('conversation/faction_recruiter_imperial', 's_93')
+			outOfBand3 = OutOfBand()
+			outOfBand3.addProsePackage(prose3)
+			prose4 = ProsePackage('conversation/faction_recruiter_imperial', 's_88')
+			outOfBand4 = OutOfBand()
+			outOfBand4.addProsePackage(prose4)
+			prose5 = ProsePackage('conversation/faction_recruiter_imperial', 's_55')
+			outOfBand5 = OutOfBand()
+			outOfBand5.addProsePackage(prose5)
+			option1 = ConversationOption(outOfBand2, 0)
+			option2 = ConversationOption(outOfBand3, 1)
+			option3 = ConversationOption(outOfBand4, 1)
+			option4 = ConversationOption(outOfBand5, 1)
+	
+			
+			options = Vector()
+			options.add(option1)
+			options.add(option2)
+			options.add(option3)
+			options.add(option4)
+	
+			convSvc.sendConversationOptions(actor, npc, options, handleSecondScreen)
+			return
+
+		if selection == 1:
+			percent = core.guildService.getGuildObject().getCurrentServerGCWTotalPercentMap().get(actor.getPlanet().getName()).getPercent().intValue()
+			outOfBand = OutOfBand()
+			OutOfBand.addProsePackage("@conversation/faction_recruiter_imperial:s_412", percent, "TO", str(100 - percent))
+			OutOfBand.addProsePackage("@conversation/faction_recruiter_imperial:s_412", percent, "DI", str(100 - percent))
+			convSvc.sendConversationMessage(actor, npc, outOfBand)
+			return
+
+		if selection == 2:
+			prose = ProsePackage('conversation/faction_recruiter_imperial', 's_90')
+			outOfBand = OutOfBand()
+			outOfBand.addProsePackage(prose)
+			convSvc.sendConversationMessage(actor, npc, outOfBand)
+			prose2 = ProsePackage('conversation/faction_recruiter_imperial', 's_92')
+			outOfBand2 = OutOfBand()
+			outOfBand2.addProsePackage(prose2)
+			prose3 = ProsePackage('conversation/faction_recruiter_imperial', 's_96')
+			outOfBand3 = OutOfBand()
+			outOfBand3.addProsePackage(prose3)
+			option1 = ConversationOption(outOfBand2, 0)
+			option2 = ConversationOption(outOfBand3, 1)
+	
+			
+			options = Vector()
+			options.add(option1)
+			options.add(option2)
+	
+			convSvc.sendConversationOptions(actor, npc, options, handleSecondScreen)
+			return
+		return
+
+			
 def handleSecondScreen(core, actor, npc, selection):
 	convSvc = core.conversationService
 	
 	
+	if actor.getFaction() != 'rebel' and actor.getFaction() != 'imperial':
+		if selection == 0:
+			actor.setFaction('imperial')
+			actor.setFactionStatus(FactionStatus.OnLeave)
 	
-	if selection == 0:
-		actor.setFaction('imperial')
-		prose = ProsePackage('conversation/faction_recruiter_imperial', 's_116')
-		outOfBand = OutOfBand()
-		outOfBand.addProsePackage(prose)
-		convSvc.sendConversationMessage(actor, npc, outOfBand)
-		prose2 = ProsePackage('conversation/faction_recruiter_imperial', 's_117')
-		outOfBand2 = OutOfBand()
-		outOfBand2.addProsePackage(prose2)
-		option1 = ConversationOption(outOfBand2, 0)
+			prose = ProsePackage('conversation/faction_recruiter_imperial', 's_116')
+			outOfBand = OutOfBand()
+			outOfBand.addProsePackage(prose)
+			convSvc.sendConversationMessage(actor, npc, outOfBand)
+			prose2 = ProsePackage('conversation/faction_recruiter_imperial', 's_438')
+			outOfBand2 = OutOfBand()
+			outOfBand2.addProsePackage(prose2)
+			option1 = ConversationOption(outOfBand2, 0)
+	
+			
+			options = Vector()
+			options.add(option1)
+	
+	
+			core.conversationService.sendStopConversation(actor, npc, 'conversation/faction_recruiter_imperial', 's_100')	
+			return
+		if selection ==1:
+			core.conversationService.sendStopConversation(actor, npc, 'conversation/faction_recruiter_imperial', 's_442')	
+			return
+		return
+	elif actor.getFaction() == 'imperial' and actor.getFactionStatus() == FactionStatus.OnLeave:
+		return	
+	elif actor.getFaction() == 'imperial' and actor.getFactionStatus() == FactionStatus.Combatant or actor.getFactionStatus() == FactionStatus.SpecialForces:
+		if selection == 0:
+			return
+		if selection == 1:
+			return
+		if selection == 2:
+			prose = ProsePackage('conversation/faction_recruiter_imperial', 's_90')
+			outOfBand = OutOfBand()
+			outOfBand.addProsePackage(prose)
+			convSvc.sendConversationMessage(actor, npc, outOfBand)
+			prose2 = ProsePackage('conversation/faction_recruiter_imperial', 's_92')
+			outOfBand2 = OutOfBand()
+			outOfBand2.addProsePackage(prose2)
+			prose3 = ProsePackage('conversation/faction_recruiter_imperial', 's_96')
+			outOfBand3 = OutOfBand()
+			outOfBand3.addProsePackage(prose3)
+			option1 = ConversationOption(outOfBand2, 0)
+			option2 = ConversationOption(outOfBand3, 1)
 
-		
-		options = Vector()
-		options.add(option1)
+	
+			
+			options = Vector()
+			options.add(option1)
+			options.add(option2)
 
-
-		convSvc.sendConversationOptions(actor, npc, options, endConversation)
+	
+			convSvc.sendConversationOptions(actor, npc, options, handleThirdScreen)
+			return
+		if selection == 3:
+			return
 		return
 		
+def handleThirdScreen(core, actor, npc, selection):
+	if selection == 0:
+		core.conversationService.sendStopConversation(actor, npc, 'conversation/faction_recruiter_imperial', 's_94')	
+		actor.setFaction('neutral')
+		return
 	
+	if selection == 1:
+		core.conversationService.sendStopConversation(actor, npc, 'conversation/faction_recruiter_imperial', 's_98')
+		return	
+	return
+
 def endConversation(core, actor, npc):
-	if actor.getFaction() == 'rebel':
-		npc.playEffectObject('all_b_emt_backhand', '')
-		core.conversationService.sendStopConversation(actor, npc, 'conversation/faction_recruiter_imperial', 's_308')
-	else:
-		core.conversationService.sendStopConversation(actor, npc, 'conversation/faction_recruiter_imperial', 's_100')
+	core.conversationService.sendStopConversation(actor, npc, 'conversation/faction_recruiter_imperial', 's_304')
 	return
