@@ -26,4 +26,4 @@ def addTemplate(core):
 	mobileTemplate.setAttacks(attacks)
 	
 	core.spawnService.addMobileTemplate('tusken_raider', mobileTemplate)
-	
+	return
