@@ -14,7 +14,7 @@ def addTemplate(core):
 	mobileTemplate.setAttackSpeed(1.0)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_krayt_dragon.iff')
+	templates.add('object/mobile/shared_juvenile_canyon_krayt.iff')
 	mobileTemplate.setTemplates(templates)
 
 	weaponTemplates = Vector()

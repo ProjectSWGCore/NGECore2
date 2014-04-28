@@ -14,7 +14,7 @@ def addTemplate(core):
 	mobileTemplate.setAttackSpeed(1.0)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_squill.iff')
+	templates.add('object/mobile/shared_mountain_squill.iff')
 	mobileTemplate.setTemplates(templates)
 
 	weaponTemplates = Vector()
