@@ -21,8 +21,11 @@
  ******************************************************************************/
 package services.mission;
 
+import main.NGECore;
+
 import com.sleepycat.persist.model.Persistent;
 
+import resources.objects.creature.CreatureObject;
 import resources.objects.mission.MissionObject;
 
 @Persistent(version=0)
@@ -42,10 +45,10 @@ public abstract class MissionObjective {
 		this.objectivePhase = 0;
 	}
 	
-	public abstract void activate();
-	public abstract void complete();
-	public abstract void abort();
-	public abstract void update();
+	public abstract void activate(NGECore core, CreatureObject player);
+	public abstract void complete(NGECore core, CreatureObject player);
+	public abstract void abort(NGECore core, CreatureObject player);
+	public abstract void update(NGECore core, CreatureObject player);
 
 	public long getStartTime() { return startTime; }
 	

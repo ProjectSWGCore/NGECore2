@@ -58,6 +58,7 @@ import protocol.swg.ShowHelmet;
 import protocol.swg.objectControllerObjects.ChangeRoleIconChoice;
 import protocol.swg.objectControllerObjects.ShowFlyText;
 import protocol.swg.objectControllerObjects.ShowLootBox;
+import resources.common.BountyListItem;
 import resources.common.FileUtilities;
 import resources.common.ObjControllerOpcodes;
 import resources.common.Opcodes;
@@ -78,6 +79,7 @@ import resources.objects.player.PlayerMessageBuilder;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.waypoint.WaypointObject;
+import services.sui.SUIService.InputBoxType;
 import services.sui.SUIService.ListBoxType;
 import services.sui.SUIWindow;
 import services.sui.SUIWindow.Trigger;
@@ -1250,6 +1252,26 @@ public class PlayerService implements INetworkDispatch {
 			}
 		});
 		core.suiService.openSUIWindow(ringWindow);
+	}
+	
+	public void sendSetBountyWindow(final CreatureObject victim, final CreatureObject attacker) {
+		final SUIWindow bountyWindow = core.suiService.createInputBox(InputBoxType.INPUT_BOX_OK_CANCEL, "@bounty_hunter:setbounty_title", "@bounty_hunter:setbounty_prompt1 " + attacker.getCustomName() + "?" + "\n@bounty_hunter:setbounty_prompt2 " + victim.getBankCredits() + victim.getCashCredits(), 
+				victim, null, (float) 10, new SUICallback() {
+
+			@Override
+			public void process(SWGObject owner, int eventType, Vector<String> returnList) {
+				if (eventType == 0 && returnList.get(0) != null) {
+					if (core.missionService.getBountyListItem(attacker.getObjectId()) != null) {
+						BountyListItem currentBounty = core.missionService.getBountyListItem(attacker.getObjectId());
+						currentBounty.addBounty(Integer.parseInt(returnList.get(0)));
+					} else {
+						core.missionService.createNewBounty(attacker, Integer.parseInt(returnList.get(0)));
+					}
+				}
+			}
+			
+		});
+		core.suiService.openSUIWindow(bountyWindow);
 	}
 	
 	public String getFormalProfessionName(String template) {

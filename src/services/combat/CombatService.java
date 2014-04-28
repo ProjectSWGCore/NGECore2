@@ -991,6 +991,8 @@ public class CombatService implements INetworkDispatch {
 		if(target.getDuelList().contains(attacker)) handleEndDuel(target, attacker, false);
 		
 		core.playerService.sendCloningWindow(target, attacker.getSlottedObject("ghost") != null);
+		//if (attacker.getSlottedObject("ghost") != null)
+			//core.playerService.sendSetBountyWindow(target, attacker);
 	}
 	
 	public boolean areInDuel(CreatureObject creature1, CreatureObject creature2) {

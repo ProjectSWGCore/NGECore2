@@ -21,40 +21,60 @@
  ******************************************************************************/
 package resources.objectives;
 
+import java.util.Random;
+
+import engine.resources.scene.Point3D;
 import main.NGECore;
+import resources.common.BountyListItem;
 import resources.objects.creature.CreatureObject;
 import resources.objects.mission.MissionObject;
 import services.mission.MissionObjective;
 
-public class DestroyMissionObjective extends MissionObjective {
+public class BountyMissionObjective extends MissionObjective {
 
-	public DestroyMissionObjective(MissionObject parent) {
+	private Point3D lastKnownLocation;
+	private long markObjId;
+
+	public BountyMissionObjective(MissionObject parent) {
 		super(parent);
 	}
-
+	
 	@Override
 	public void activate(NGECore core, CreatureObject player) {
-		// TODO Auto-generated method stub
+		if (isActivated())
+			return;
+		
+		BountyListItem bountyTarget = core.missionService.getBountyListItem(getMissionObject().getBountyObjId());
+		
+		setMarkObjId(bountyTarget.getObjectId());
+		
+		// TODO: Change this to a comm message.
+		player.sendSystemMessage("@mission/mission_bounty_informant:target_hard_" + Integer.toString(new Random().nextInt(5)), (byte) 0);
+		
 		
 	}
 
 	@Override
 	public void complete(NGECore core, CreatureObject player) {
-		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void abort(NGECore core, CreatureObject player) {
-		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void update(NGECore core, CreatureObject player) {
-		// TODO Auto-generated method stub
-		
+
 	}
 
+	public Point3D getLastKnownLocation() { return lastKnownLocation; }
+
+	public void setLastKnownLocation(Point3D lastKnownLocation) { this.lastKnownLocation = lastKnownLocation; }
+
+	public long getMarkObjId() { return markObjId; }
+
+	public void setMarkObjId(long markObjId) { this.markObjId = markObjId; }
 
 }

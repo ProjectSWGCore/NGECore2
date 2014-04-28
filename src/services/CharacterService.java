@@ -323,6 +323,8 @@ public class CharacterService implements INetworkDispatch {
 				object.addAbility("startDance");
 				object.addAbility("startDance+Basic");
 				
+				object.setFaction("neutral");
+				
 				object.addObjectToEquipList(datapad);
 				object.addObjectToEquipList(inventory);
 				object.addObjectToEquipList(bank);
