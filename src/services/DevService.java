@@ -93,6 +93,7 @@ public class DevService implements INetworkDispatch {
 				if(creature.getClient().isGM()) suiOptions.put((long) 120, "House Deeds");
 				if(creature.getClient().isGM()) suiOptions.put((long) 125, "Crafting Tools");
 				if(creature.getClient().isGM()) suiOptions.put((long) 130, "Vehicle Deeds");
+				if(creature.getClient().isGM()) suiOptions.put((long) 121, "Sandbox City");
 
 				break;
 			case 3: // [Items] Weapons
@@ -1232,6 +1233,11 @@ public class DevService implements INetworkDispatch {
 						inventory.add(deed);	
 					
 						return;	
+						
+					case 121:
+						NGECore.getInstance().playerCityService.buildSandboxTestCity(player);
+					
+						return;	
 												
 					case 125:
 						TangibleObject genericCraftingTool = (TangibleObject) core.objectService.createObject("object/tangible/crafting/station/shared_generic_tool.iff", planet);
@@ -1244,6 +1250,8 @@ public class DevService implements INetworkDispatch {
 						inventory.add(swoopDeed);
 						inventory.add(av21deed);
 						return;
+						
+						
 				}
 			}	
 		});

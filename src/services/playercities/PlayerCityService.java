@@ -27,11 +27,15 @@ import java.util.Vector;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
+import resources.objects.tangible.TangibleObject;
 import services.sui.SUIWindow;
 import services.sui.SUIWindow.SUICallback;
 import services.sui.SUIWindow.Trigger;
 import engine.resources.objects.SWGObject;
+import engine.resources.scene.Point3D;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import main.NGECore;
@@ -155,6 +159,85 @@ public class PlayerCityService implements INetworkDispatch {
 			}					
 		});		
 		core.suiService.openSUIWindow(window);
+	}
+	
+	public void buildSandboxTestCity(CreatureObject founder) {		
+		
+		
+		float positionX = 2170.0F;
+		float positionY = 1.0F;
+		float positionZ = -4659.0F;
+		
+		String structureTemplate = "object/building/player/city/shared_cityhall_tatooine.iff";
+		
+		BuildingObject cityHall = (BuildingObject) core.objectService.createObject(structureTemplate, 0, founder.getPlanet(), new Point3D(positionX, positionY, positionZ), founder.getOrientation());
+		core.simulationService.add(cityHall, cityHall.getPosition().x, cityHall.getPosition().z, true);
+		
+		SWGObject sign = core.objectService.createChildObject((SWGObject)cityHall, "object/tangible/sign/player/shared_house_address.iff", -7.39F, 2.36F, 2, -1, 0, -1);
+		cityHall.setAttachment("structureSign", sign);
+		
+		PlayerCity sandboxCity = null;
+		synchronized(playerCities){
+			sandboxCity = new PlayerCity(founder,cityID++);
+			sandboxCity.setCityName("Sandbox City");
+			playerCities.add(sandboxCity);
+		}
+	
+		cityHall.setAttachment("structureCity", sandboxCity.getCityID());
+		founder.setAttachment("residentCity", sandboxCity.getCityID());
+		// Name the sign
+//		TangibleObject sign = (TangibleObject) cityHall.getAttachment("structureSign");	
+//		String playerFirstName = founder.getCustomName().split(" ")[0];
+//		
+//		if (sign !=null)
+//			sign.setCustomName2(playerFirstName + "'s House");
+		
+
+				
+		// Structure management
+		Vector<Long> admins = new Vector<>();
+		admins.add(founder.getObjectID());
+		
+		cityHall.setAttachment("structureOwner", founder.getObjectID());
+		cityHall.setAttachment("structureAdmins", admins);
+		cityHall.setDeedTemplate("object/tangible/deed/city_deed/shared_cityhall_tatooine_deed.iff");
+		cityHall.setBMR(325);
+		cityHall.setConditionDamage(100);
+		
+		
+		positionY = core.terrainService.getHeight(founder.getPlanetId(), positionX, positionZ)+ 2f;
+		founder.setPosition(new Point3D(positionX+100,positionY,positionZ));
+		core.simulationService.teleport(founder, new Point3D(positionX,positionY,positionZ+150), founder.getOrientation(), 0);
+		
+		TangibleObject swoopDeed = (TangibleObject) core.objectService.createObject("object/tangible/deed/vehicle_deed/shared_speederbike_swoop_deed.iff", founder.getPlanet());
+		SWGObject inventory = founder.getSlottedObject("inventory");
+		inventory.add(swoopDeed);
+	
+		
+		//structureTemplate = "object/building/player/city/shared_shuttleport_tatooine.iff";
+		structureTemplate = "object/building/tatooine/shared_shuttleport_tatooine.iff";
+		positionX = 2170.0F;
+		positionY = 1.0F;
+		positionZ = -4559.0F;
+		
+		//StructureObject shuttlePort = (StructureObject) core.objectService.createObject(structureTemplate, 0, founder.getPlanet(), new Point3D(positionX, positionY, positionZ), founder.getOrientation());
+		BuildingObject shuttlePort = (BuildingObject) core.objectService.createObject(structureTemplate, 0, founder.getPlanet(), new Point3D(positionX, positionY, positionZ), founder.getOrientation());
+		//shuttlePort.setAttachment("cellsSorted", new Boolean(true));
+		//"bigSpawnRange"
+		
+		core.simulationService.add(shuttlePort, shuttlePort.getPosition().x, shuttlePort.getPosition().z, true);
+//		sign = core.objectService.createChildObject((SWGObject)shuttlePort, "object/tangible/sign/player/shared_house_address.iff", -7.39F, 2.36F, 2, -1, 0, -1);
+//		shuttlePort.setAttachment("structureSign", sign);
+		
+		// Structure management
+		admins = new Vector<>();
+		admins.add(founder.getObjectID());
+		
+		shuttlePort.setAttachment("structureOwner", founder.getObjectID());
+		shuttlePort.setAttachment("structureAdmins", admins);
+		shuttlePort.setDeedTemplate("object/tangible/deed/city_deed/shared_cityhall_tatooine_deed.iff");
+		shuttlePort.setBMR(12);
+		shuttlePort.setConditionDamage(100);
 	}
 	
 
