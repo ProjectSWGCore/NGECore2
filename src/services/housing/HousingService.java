@@ -39,8 +39,8 @@ import main.NGECore;
 import protocol.swg.EnterStructurePlacementModeMessage;
 import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
-import resources.objects.deed.Player_House_Deed;
 import resources.objects.player.PlayerObject;
+import resources.objects.tangible.Player_House_Deed;
 import resources.objects.tangible.TangibleObject;
 import services.sui.SUIWindow;
 import services.sui.SUIWindow.SUICallback;
@@ -134,9 +134,9 @@ public class HousingService implements INetworkDispatch {
 		building.setConditionDamage(100);
 		
 		// Save structure to DB
-		//building.createTransaction(core.getBuildingODB().getEnvironment());
-		//core.getBuildingODB().put(building, Long.class, BuildingObject.class, building.getTransaction());
-		//building.getTransaction().commitSync();
+		/*building.createTransaction(core.getBuildingODB().getEnvironment());
+		core.getBuildingODB().put(building, Long.class, BuildingObject.class, building.getTransaction());
+		building.getTransaction().commitSync();*/
 	}
 	
 	@SuppressWarnings("unchecked")

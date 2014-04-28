@@ -19,16 +19,18 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package resources.objects.deed;
+package resources.objects.tangible;
+
+import com.sleepycat.persist.model.Persistent;
 
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
-import resources.objects.tangible.TangibleObject;
 
 /** 
  * @author Charon 
  */
+@Persistent(version=0)
 public class Deed extends TangibleObject {
 	
 	public Deed(long objectID, Planet planet, String template, Point3D position, Quaternion orientation){
