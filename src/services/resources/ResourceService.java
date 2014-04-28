@@ -34,6 +34,9 @@ import com.sleepycat.persist.EntityCursor;
 import main.NGECore;
 import engine.resources.common.CRC;
 import engine.resources.objects.SWGObject;
+import engine.resources.scene.Planet;
+import engine.resources.scene.Point3D;
+import engine.resources.scene.Quaternion;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import resources.objects.creature.CreatureObject;
@@ -128,6 +131,97 @@ public class ResourceService implements INetworkDispatch {
 	
 	//"Cold Res","Cond","Decay Res","Heat Res","Malle","Shock Res","Unit Tough","Entangle Res","Pot E","OQ","Flavor"
 	
+	// loads the resource roots at server start
+	public void loadResourceRoots() {
+		EntityCursor<ResourceRoot> cursor = core.getResourceRootsODB().getCursor(Integer.class, ResourceRoot.class);
+		Iterator<ResourceRoot> it = cursor.iterator();
+		int loadedResourceRootsCounter = 0;
+		System.out.println("Loading resource roots...");
+		while(it.hasNext()) {
+			final ResourceRoot resourceRoot = it.next();
+			System.err.println("resourceRoot loaded ID: " + resourceRoot.getResourceRootID() + " " + resourceRoot.getResourceFileName());
+			core.resourceService.add_resourceRoot(resourceRoot);
+			loadedResourceRootsCounter++;
+		}
+		
+		if (loadedResourceRootsCounter==0){
+			//big bang will take care of it
+		}
+		//System.err.println("loadedResourceRootsCounter " + loadedResourceRootsCounter);
+		cursor.close();
+		System.out.println("Finished loading resource roots.");
+	}
+	
+	// loads the currently spawned resources at server start
+	public void loadResources() {
+		EntityCursor<GalacticResource> cursor = core.getResourcesODB().getCursor(Long.class, GalacticResource.class);
+		Iterator<GalacticResource> it = cursor.iterator();
+		int loadedResourceCounter = 0;
+		System.out.println("Loading resources...");
+		while(it.hasNext()) {
+			final GalacticResource resource = it.next();
+			System.err.println("resource " + resource.getName() + " rootID " + resource.getResourceRootID());
+			core.objectService.getObjectList().put(resource.getId(), resource); 
+			
+			// re-reference ResourceRoot
+			int resourceRootID = resource.getResourceRootID();
+			ResourceRoot resourceRoot = core.resourceService.retrieveResourceRootReference(resourceRootID);
+			resource.setResourceRoot(resourceRoot);
+			
+			// recreate the collections
+			core.resourceService.addSpawnedResource(resource);  
+			byte pool = resource.getPoolNumber();
+			switch (pool){
+				case 1:
+					core.resourceService.add_spawnedResourcesPool1(resource);
+					break;
+				case 2:
+					core.resourceService.add_spawnedResourcesPool2(resource);
+					break;
+				case 3:
+					core.resourceService.add_spawnedResourcesPool3(resource);
+					break;
+				case 4:
+					core.resourceService.add_spawnedResourcesPool4(resource);
+					break;
+				default:
+					System.err.println("Loaded resource " + resource.getName() + " has no valid pool value!");
+					resource.setPoolNumber((byte)4); // Make it a pool 4
+			}
+			
+			loadedResourceCounter++;
+		}
+		
+		if (loadedResourceCounter==0){
+			core.resourceService.kickOffBigBang(); // spawn resources initially once
+		}
+		
+		cursor.close();
+		System.out.println("Finished loading resources.");
+	}
+	
+	public SWGObject createResource() {
+		SWGObject object = null;	
+		Planet planet = core.terrainService.getPlanetByID(1);
+		Point3D position = new Point3D(0,0,0);
+		Quaternion orientation = new Quaternion(1,1,1,1);
+		String Template = "object/resource_container/base/shared_base_resource_container.iff";
+		boolean isSnapshot = false;
+
+		long objectID = core.objectService.generateObjectID();
+		
+		object = new GalacticResource(objectID, planet, position, orientation, Template);
+		
+		object.setPlanetId(planet.getID());
+		
+		object.setAttachment("customServerTemplate", Template);
+		
+		object.setisInSnapshot(isSnapshot);
+				
+		core.objectService.getObjectList().put(objectID, object);
+		
+		return object;
+	}
 	
 	public void createCollections(){
 
@@ -10765,7 +10859,7 @@ public class ResourceService implements INetworkDispatch {
 			return 0; 
 		}  
 		int skillMod=crafter.getSkillModBase("surveying");
-		crafter.addSkillMod("surveying",100);
+		core.skillModService.addSkillMod(crafter, "surveying",100);
 		skillMod=(int)(Math.round(crafter.getSkillMod("surveying").getModifier()));
 		skillMod=35; // TEST!
 		float concentration=sampleResource.deliverConcentrationForSurvey(crafter.getPlanetId(), crafter.getPosition().x, crafter.getPosition().z); 
@@ -11083,7 +11177,7 @@ public class ResourceService implements INetworkDispatch {
 		
 	public GalacticResource spawnResourcePool1(ResourceRoot root){
 
-		GalacticResource resource = (GalacticResource) core.objectService.createResource();
+		GalacticResource resource = (GalacticResource) createResource();
 		try {		
 			resource.setResourceRoot(root);
 			resource.setPoolNumber((byte)1);
@@ -11112,7 +11206,7 @@ public class ResourceService implements INetworkDispatch {
 	
 	public GalacticResource spawnResourcePool2(ResourceRoot root){		
 
-		GalacticResource resource = (GalacticResource) core.objectService.createResource();
+		GalacticResource resource = (GalacticResource) createResource();
 		try {
 			resource.setResourceRoot(root);
 			resource.setPoolNumber((byte)2);
@@ -11141,7 +11235,7 @@ public class ResourceService implements INetworkDispatch {
 	
 	public GalacticResource spawnResourcePool3(ResourceRoot root){		
 
-		GalacticResource resource = (GalacticResource) core.objectService.createResource();
+		GalacticResource resource = (GalacticResource) createResource();
 		try {
 			resource.setResourceRoot(root);
 			resource.setPoolNumber((byte)3);
@@ -11170,7 +11264,7 @@ public class ResourceService implements INetworkDispatch {
 	
 	public GalacticResource spawnResourcePool4(ResourceRoot root,int planetID){	
 
-		GalacticResource resource = (GalacticResource) core.objectService.createResource();
+		GalacticResource resource = (GalacticResource) createResource();
 		try {
 			resource.setResourceRoot(root);
 			resource.setPoolNumber((byte)4);

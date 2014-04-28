@@ -1,14 +1,12 @@
 import sys
 
-def add(core, actor, name, base):
-	actor.addSkillMod(name, base)
-	actor.setMaxHealth(actor.getMaxHealth() + base * 2)
-	actor.setMaxAction(actor.getMaxAction() + base * 8)
+def add(core, actor, skillMod, divisor):
+	actor.setMaxHealth(actor.getMaxHealth() + skillMod.getBase() * 2)
+	actor.setMaxAction(actor.getMaxAction() + skillMod.getBase() * 8)
 	return
-	
-def deduct(core, actor, name, base):
-	actor.deductSkillMod(name, base)
-	actor.setMaxHealth(actor.getMaxHealth() - base * 2)
-	actor.setMaxAction(actor.getMaxAction() - base * 8)
+
+def deduct(core, actor, skillMod, divisor):
+	actor.setMaxHealth(actor.getMaxHealth() - skillMod.getBase() * 2)
+	actor.setMaxAction(actor.getMaxAction() - skillMod.getBase() * 8)
 	return
 	

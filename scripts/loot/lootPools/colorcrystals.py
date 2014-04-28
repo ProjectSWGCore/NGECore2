@@ -5,4 +5,4 @@ def itemNames():
 
 def itemChances():
 
-	return [70]
+	return [100]

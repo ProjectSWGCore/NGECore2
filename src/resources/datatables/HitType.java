@@ -19,12 +19,17 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package resources.common;
+package resources.datatables;
 
-public class TerminalType {
-	public static int MISSION_GENERIC = 1;
-	public static int MISSION_BOUNTYHUNTER = 2;
-	public static int MISSION_ENTERTAINER = 3;
-	public static int MISSION_ARTISAN  = 4;
-	public static int MISSION_EXPLORER = 5;
+public class HitType {
+	public static final byte MISS = 0;
+	public static final byte DODGE = 1;
+	public static final byte PARRY = 2;
+	public static final byte STRIKETHROUGH = 3;
+	public static final byte CRITICAL = 4;
+	public static final byte PUNISHING = 5;
+	public static final byte HIT = 6;
+	public static final byte BLOCK = 7;
+	public static final byte EVASION = 8;
+	public static final byte GLANCE = 9;
 }
