@@ -6,7 +6,7 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('juvenile canyon krayt dragon')
+	mobileTemplate.setCreatureName('juvenile_canyon_krayt')
 	mobileTemplate.setLevel(82)
 	mobileTemplate.setDifficulty(2)
 	mobileTemplate.setAttackRange(12)
@@ -14,7 +14,7 @@ def addTemplate(core):
 	mobileTemplate.setAttackSpeed(1.0)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_krayt_dragon.iff')
+	templates.add('object/mobile/shared_juvenile_canyon_krayt.iff')
 	mobileTemplate.setTemplates(templates)
 
 	weaponTemplates = Vector()

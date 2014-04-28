@@ -6,15 +6,15 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('greater desert womprat')
+	mobileTemplate.setCreatureName('greater_desert_womprat')
 	mobileTemplate.setLevel(12)
 	mobileTemplate.setDifficulty(0)
-	mobileTemplate.setAttackRange(5)
+	mobileTemplate.setAttackRange(15)
 	mobileTemplate.setWeaponType(6)
 	mobileTemplate.setAttackSpeed(1.0)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_womp_rat.iff')
+	templates.add('object/mobile/shared_greater_desert_womp_rat.iff')
 	mobileTemplate.setTemplates(templates)
 
 	weaponTemplates = Vector()
@@ -23,7 +23,7 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
-	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
+	mobileTemplate.setDefaultAttack('creatureRangedAttack')
 	mobileTemplate.setAttacks(attacks)
 	
 	core.spawnService.addMobileTemplate('greater_desert_womprat', mobileTemplate)

@@ -6,7 +6,7 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('variegated womprat')
+	mobileTemplate.setCreatureName('variegated_womprat')
 	mobileTemplate.setLevel(12)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
@@ -14,7 +14,7 @@ def addTemplate(core):
 	mobileTemplate.setAttackSpeed(1.0)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_womp_rat.iff')
+	templates.add('object/mobile/shared_variegated_womp_rat.iff')
 	mobileTemplate.setTemplates(templates)
 
 	weaponTemplates = Vector()

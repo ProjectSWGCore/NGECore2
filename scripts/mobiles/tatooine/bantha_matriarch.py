@@ -14,7 +14,7 @@ def addTemplate(core):
 	mobileTemplate.setAttackSpeed(1.0)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_bantha_hue.iff')
+	templates.add('object/mobile/shared_matriarch_bantha.iff')
 	mobileTemplate.setTemplates(templates)
 
 	weaponTemplates = Vector()
