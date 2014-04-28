@@ -6,9 +6,9 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('dewback')
-	mobileTemplate.setLevel(17)
-	mobileTemplate.setDifficulty(0)
+	mobileTemplate.setCreatureName('enraged mountain dewback')
+	mobileTemplate.setLevel(22)
+	mobileTemplate.setDifficulty(1)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setWeaponType(6)
 	mobileTemplate.setAttackSpeed(1.0)
@@ -26,5 +26,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('dewback', mobileTemplate)
+	core.spawnService.addMobileTemplate('enraged_mountain_dewback', mobileTemplate)
 	return

@@ -6,15 +6,15 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('dewback')
-	mobileTemplate.setLevel(17)
+	mobileTemplate.setCreatureName('cave beetle')
+	mobileTemplate.setLevel(5)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setWeaponType(6)
 	mobileTemplate.setAttackSpeed(1.0)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_dewback.iff')
+	templates.add('object/mobile/shared_rock_beetle.iff')
 	mobileTemplate.setTemplates(templates)
 
 	weaponTemplates = Vector()
@@ -26,5 +26,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('dewback', mobileTemplate)
+	core.spawnService.addMobileTemplate('cave_beetle', mobileTemplate)
 	return
