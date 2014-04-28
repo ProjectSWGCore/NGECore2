@@ -1231,6 +1231,7 @@ public class DevService implements INetworkDispatch {
 						deed.setBMR(15);
 						deed.setAttributes();
 						inventory.add(deed);	
+						
 					
 						return;	
 						

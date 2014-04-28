@@ -74,8 +74,10 @@ public class HousingService implements INetworkDispatch {
 		}
 		
 		if(housingTemplates.containsKey(deed.getTemplate()))
-		{
+		{			
 			HouseTemplate houseTemplate = housingTemplates.get(deed.getTemplate());
+			System.out.println("DEED FOUND " + houseTemplate.getBuildingTemplate());
+			System.out.println("DEED TEMP " + deed.getTemplate());
 			EnterStructurePlacementModeMessage packet = new EnterStructurePlacementModeMessage(deed, houseTemplate.getBuildingTemplate());	
 			actor.getClient().getSession().write(packet.serialize());
 		}
@@ -89,6 +91,7 @@ public class HousingService implements INetworkDispatch {
 		
 		if (deed.getTemplate().contains("cityhall"))
 			structureLotCost = 0;
+		
 		
 		String structureTemplate = houseTemplate.getBuildingTemplate();
 		
@@ -126,6 +129,20 @@ public class HousingService implements INetworkDispatch {
 			// Actor is inside the bounds of a city, so zoning must be checked
 			//actor.setAttachment("Has24HZoningFor",cityActorIsIn.getCityID()); // for testing
 			//actor.setAttachment("Has24HZoningUntil",System.currentTimeMillis()+1000000); // for testing
+			
+			
+			if (deed.getTemplate().contains("shuttleport")){
+				
+				if (actor.getObjectID()!=cityActorIsIn.getMayorID())
+					actor.sendSystemMessage("You must be the mayor of this city to place the structure.", (byte) 0);
+				
+				if (cityActorIsIn.getRank()<0){
+					actor.sendSystemMessage("@city/city:rank_req", (byte) 0);
+					return;
+				}
+					
+			}
+			
 			if (actor.getAttachment("Has24HZoningFor")==null || actor.getAttachment("Has24HZoningFor")==null)
 				return;
 			int cityActorHasZoning = (int)actor.getAttachment("Has24HZoningFor");
