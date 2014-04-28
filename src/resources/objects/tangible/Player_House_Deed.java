@@ -19,7 +19,7 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package resources.objects.deed;
+package resources.objects.tangible;
 import com.sleepycat.persist.model.Persistent;
 
 import engine.resources.scene.Planet;
@@ -27,38 +27,24 @@ import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
 /** 
+ * @author Seefo 
  * @author Charon 
  */
+
 @Persistent(version=0)
-public class Harvester_Deed extends Deed {
+public class Player_House_Deed extends Deed {
 	
 	private String name;
 	private String structureTemplate;
 	private String constructorTemplate;
-	private int outputHopperCapacity=0;
-	private int BER=0;
 	private int BMR=0;
 	private int surplusMaintenance=0;
-	private int surplusPower=0;
 	private int lotRequirement;
-	
-	
-	public Harvester_Deed(long objectID, Planet planet, String template, Point3D position, Quaternion orientation){
+		
+	public Player_House_Deed(long objectID, Planet planet, String template, Point3D position, Quaternion orientation){
 		super(objectID, planet, template, position, orientation);
 	}
 	
-	public int getOutputHopperCapacity() {
-		return outputHopperCapacity;
-	}
-	public void setOutputHopperCapacity(int outputHopperCapacity) {
-		this.outputHopperCapacity = outputHopperCapacity;
-	}
-	public int getBER() {
-		return BER;
-	}
-	public void setBER(int bER) {
-		this.BER = bER;
-	}
 	public String getName() {
 		return name;
 	}
@@ -96,26 +82,12 @@ public class Harvester_Deed extends Deed {
 		this.surplusMaintenance = surplusMaintenance;
 	}
 	
-	public int getSurplusPower() {
-		return surplusPower;
-	}
-
-	public void setSurplusPower(int surplusPower) {
-		this.surplusPower = surplusPower;
-	}
-	
-	
 	public void setAttributes() {
 		this.getAttributes().put("@obj_attr_n:volume", "1");
 		this.getAttributes().put("@obj_attr_n:examine_maintenance_rate", ""+this.getBMR() + "/hour");
 		if (this.getSurplusMaintenance()>0)
 			this.getAttributes().put("@obj_attr_n:examine_maintenance", ""+this.getSurplusMaintenance());	
-		
-		//this.getAttributes().put("@obj_attr_n:energy_maintenance", "0");
-		if (this.getSurplusPower()>0)
-			this.getAttributes().put("@obj_attr_n:examine_power", ""+this.getSurplusPower());		
-		
-		this.getAttributes().put("@obj_attr_n:examine_hoppersize", ""+this.getOutputHopperCapacity());
-		this.getAttributes().put("@obj_attr_n:examine_extractionrate", ""+this.getBER());
+			
+
 	}
 }

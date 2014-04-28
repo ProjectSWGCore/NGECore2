@@ -471,6 +471,7 @@ public class BazaarService implements INetworkDispatch {
 		else if(item.getItem() instanceof IntangibleObject) 
 			player.getSlottedObject("datapad").add(item.getItem());
 		
+		core.objectService.getObjectList().put(item.getObjectId(), item.getItem());
 		removeAuctionItem(item);
 		player.getClient().getSession().write(response.serialize());
 
