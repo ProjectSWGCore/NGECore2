@@ -9,12 +9,12 @@ def addTemplate(core):
 	mobileTemplate.setCreatureName('dragonet')
 	mobileTemplate.setLevel(24)
 	mobileTemplate.setDifficulty(0)
-	mobileTemplate.setAttackRange(5)
+	mobileTemplate.setAttackRange(15)
 	mobileTemplate.setWeaponType(6)
 	mobileTemplate.setAttackSpeed(1.0)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_dragonet.iff')
+	templates.add('object/mobile/shared_dune_lizard.iff')
 	mobileTemplate.setTemplates(templates)
 
 	weaponTemplates = Vector()

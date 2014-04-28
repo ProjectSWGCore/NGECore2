@@ -9,7 +9,7 @@ def addTemplate(core):
 	mobileTemplate.setCreatureName('bocatt')
 	mobileTemplate.setLevel(17)
 	mobileTemplate.setDifficulty(0)
-	mobileTemplate.setAttackRange(5)
+	mobileTemplate.setAttackRange(15)
 	mobileTemplate.setWeaponType(6)
 	mobileTemplate.setAttackSpeed(1.0)
 	

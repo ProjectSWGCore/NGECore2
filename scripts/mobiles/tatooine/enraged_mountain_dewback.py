@@ -6,7 +6,7 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('enraged mountain dewback')
+	mobileTemplate.setCreatureName('elite_mountain_dewback')
 	mobileTemplate.setLevel(22)
 	mobileTemplate.setDifficulty(1)
 	mobileTemplate.setAttackRange(5)
