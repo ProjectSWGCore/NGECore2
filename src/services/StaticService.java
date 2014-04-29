@@ -69,6 +69,10 @@ public class StaticService implements INetworkDispatch {
 		return spawnObject(template, planetName, cellId, x, y, z, qW, 0, qY, 0);
 	}
 	
+	public SWGObject spawnObject(String template, String planetName, SWGObject cell, float x, float y, float z, float qW, float qX, float qY, float qZ) {
+		return spawnObject(template, planetName, ((cell == null) ? 0L : cell.getObjectID()), x, y, z, qW, qX, qY, qZ);
+	}
+	
 	public SWGObject spawnObject(String template, String planetName, long cellId, float x, float y, float z, float qW, float qX, float qY, float qZ) {
 		Planet planet = core.terrainService.getPlanetByName(planetName);
 		
@@ -80,11 +84,11 @@ public class StaticService implements INetworkDispatch {
 		long buildingId = 0;
 		int cellNumber = 0;
 		
-		SWGObject container = core.objectService.getObject(cellId);
+		SWGObject cell = core.objectService.getObject(cellId);
 		
-		if (container != null && container.getContainer() != null && container.getContainer() instanceof BuildingObject) {
-			buildingId = container.getContainer().getObjectId();
-			cellNumber = ((BuildingObject) container.getContainer()).getCellNumberByObjectId(cellId);
+		if (cell != null && cell.getContainer() != null && cell.getContainer() instanceof BuildingObject) {
+			buildingId = cell.getContainer().getObjectId();
+			cellNumber = ((BuildingObject) cell.getContainer()).getCellNumberByObjectId(cellId);
 		}
 		
 		long objectId = core.objectService.getDOId(planetName, template, 0, buildingId, cellNumber, x, y, z);
@@ -109,14 +113,12 @@ public class StaticService implements INetworkDispatch {
 				System.err.println("StaticService: Quadtree insert failed for: " + template);
 			}
 		} else {
-			SWGObject parent = core.objectService.getObject(cellId);
-			
-			if (parent == null) {
+			if (cell == null) {
 				System.err.println("StaticService: Cell not found");
 				return object;
 			}
 			
-			parent.add(object);
+			cell.add(object);
 		}
 		
 		return object;
