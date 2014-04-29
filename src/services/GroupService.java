@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import resources.objects.Buff;
+import resources.buffs.Buff;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
 import services.chat.ChatRoom;

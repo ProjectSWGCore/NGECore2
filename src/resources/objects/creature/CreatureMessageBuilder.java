@@ -22,7 +22,6 @@
 package resources.objects.creature;
 
 import java.nio.ByteOrder;
-
 import java.util.Map.Entry;
 
 import org.apache.mina.core.buffer.IoBuffer;
@@ -30,13 +29,13 @@ import org.apache.mina.core.buffer.IoBuffer;
 import com.sleepycat.persist.model.Persistent;
 
 import engine.resources.common.CRC;
-import resources.objects.Buff;
+import resources.buffs.Buff;
 import resources.objects.ObjectMessageBuilder;
-import resources.objects.SkillMod;
 import engine.resources.objects.SWGObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
+import resources.skills.SkillMod;
 
 @Persistent
 public class CreatureMessageBuilder extends ObjectMessageBuilder {

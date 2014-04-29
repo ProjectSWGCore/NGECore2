@@ -49,13 +49,12 @@ import com.sleepycat.persist.model.NotPersistent;
 
 import main.NGECore;
 import engine.clients.Client;
+import resources.buffs.Buff;
+import resources.buffs.DamageOverTime;
 import resources.common.Cooldown;
 import resources.common.OutOfBand;
-import resources.objects.Buff;
-import resources.objects.DamageOverTime;
 import resources.objects.SWGList;
 import resources.objects.SWGMap;
-import resources.objects.SkillMod;
 import engine.resources.common.CRC;
 import engine.resources.objects.IPersistent;
 import engine.resources.objects.MissionCriticalObject;
@@ -65,6 +64,7 @@ import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
+import resources.skills.SkillMod;
 import services.command.BaseSWGCommand;
 
 @Entity(version=9)

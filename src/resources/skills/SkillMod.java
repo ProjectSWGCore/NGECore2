@@ -19,9 +19,11 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package resources.objects;
+package resources.skills;
 
 import org.apache.mina.core.buffer.IoBuffer;
+
+import resources.objects.Delta;
 
 import com.sleepycat.persist.model.Persistent;
 
