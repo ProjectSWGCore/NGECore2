@@ -77,24 +77,19 @@ public class StaticService implements INetworkDispatch {
 			return null;
 		}
 		
+		long buildingId = 0;
 		int cellNumber = 0;
 		
 		SWGObject container = core.objectService.getObject(cellId);
 		
 		if (container != null && container.getContainer() != null && container.getContainer() instanceof BuildingObject) {
+			buildingId = container.getContainer().getObjectId();
 			cellNumber = ((BuildingObject) container.getContainer()).getCellNumberByObjectId(cellId);
 		}
 		
-		long objectId = core.objectService.getDOId(planetName, template, 0, cellId, cellNumber, x, y, z);
+		long objectId = core.objectService.getDOId(planetName, template, 0, buildingId, cellNumber, x, y, z);
 		
-		SWGObject object;
-		
-		// Temp fix while objects with custom ids don't appear to spawn despite there being no errors...
-		if (template.contains("character_builder")) {
-			object = core.objectService.createObject(template, 0, planet, new Point3D(x, y, z), new Quaternion(qW, qX, qY, qZ));
-		} else {
-			object = core.objectService.createObject(template, objectId, planet, new Point3D(x, y, z), new Quaternion(qW, qX, qY, qZ));
-		}
+		SWGObject object = core.objectService.createObject(template, objectId, planet, new Point3D(x, y, z), new Quaternion(qW, qX, qY, qZ), null, true, true);
 		
 		if (object == null) {
 			System.err.println("Static object is null with id " + objectId + " and template " + template + ".");

@@ -221,7 +221,9 @@ public class ObjectService implements INetworkDispatch {
 		} catch (InstantiationException | IllegalAccessException e) {
 			e.printStackTrace();
 		}
+		
 		boolean isSnapshot = false;
+		
 		if(objectID == 0)
 			objectID = generateObjectID();
 		else
@@ -336,17 +338,10 @@ public class ObjectService implements INetworkDispatch {
 		object.setAttachment("customServerTemplate", customServerTemplate);
 		
 		object.setisInSnapshot(isSnapshot);
+		
 		if(!core.getObjectIdODB().contains(objectID, Long.class, ObjectId.class)) {
 			core.getObjectIdODB().put(new ObjectId(objectID), Long.class, ObjectId.class);
 		}
-		if(loadServerTemplate)
-			loadServerTemplate(object);		
-		else {
-			final SWGObject pointer = object;
-			loadServerTemplateTasks.add(() -> loadServerTemplate(pointer));
-		}
-		
-		objectList.put(objectID, object);
 		
 		// Set Options - easier to set them across the board here
 		// because we'll be spawning them despite most of them being unscripted.
@@ -381,6 +376,15 @@ public class ObjectService implements INetworkDispatch {
 				((TangibleObject) object).setOptionsBitmask(Options.INVULNERABLE | Options.USABLE);
 			}
 		}
+		
+		if(loadServerTemplate)
+			loadServerTemplate(object);		
+		else {
+			final SWGObject pointer = object;
+			loadServerTemplateTasks.add(() -> loadServerTemplate(pointer));
+		}
+		
+		objectList.put(objectID, object);
 		
 		return object;
 	}
@@ -633,11 +637,11 @@ public class ObjectService implements INetworkDispatch {
 
 	}
 	
-	public long getDOId(String planet, String template, int type, long cellId, int cellNumber, float x1, float y, float z1) {
-		SWGObject container = getObject(cellId);
+	public long getDOId(String planet, String template, int type, long containerId, int cellNumber, float x1, float y, float z1) {
+		SWGObject container = getObject(containerId);
 		float x = ((container == null) ? x1 : container.getPosition().x + x1);
 		float z = ((container == null) ? z1 : container.getPosition().z + z1);
-		String key = "" + CRC.StringtoCRC(planet) + CRC.StringtoCRC(template) + type + cellId + cellNumber + x + y + z;
+		String key = "" + CRC.StringtoCRC(planet) + CRC.StringtoCRC(template) + type + containerId + cellNumber + x + y + z;
 		
 		long objectId = 0;
 		
