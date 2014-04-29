@@ -69,11 +69,7 @@ public class StaticService implements INetworkDispatch {
 		return spawnObject(template, planetName, cellId, x, y, z, qW, 0, qY, 0);
 	}
 	
-	public SWGObject spawnObject(String template, long objectId, String planetName, long cellId, float x, float y, float z, float qY, float qW) {
-		return spawnObject(template, objectId, planetName, cellId, x, y, z, qW, 0, qY, 0);
-	}
-	
-	public SWGObject spawnObject(String template, long objectId, String planetName, long cellId, float x, float y, float z, float qW, float qX, float qY, float qZ) {
+	public SWGObject spawnObject(String template, String planetName, long cellId, float x, float y, float z, float qW, float qX, float qY, float qZ) {
 		Planet planet = core.terrainService.getPlanetByName(planetName);
 		
 		if (planet == null) {
@@ -89,7 +85,7 @@ public class StaticService implements INetworkDispatch {
 			cellNumber = ((BuildingObject) container.getContainer()).getCellNumberByObjectId(cellId);
 		}
 		
-		//long objectId = core.objectService.getDOId(planetName, template, 0, cellId, cellNumber, x, y, z);  TODO:  Make this work right!
+		long objectId = core.objectService.getDOId(planetName, template, 0, cellId, cellNumber, x, y, z);
 		
 		SWGObject object;
 		
