@@ -114,7 +114,10 @@ def run(core, actor, target, commandString):
 			playerObject.setGodLevel(0)
 	
 	elif command == 'setBounty' and arg1:
-		core.missionService.createNewBounty(actor, int(arg1))
+		if not core.missionService.addToExistingBounty(actor, int(arg1)):
+			core.missionService.createNewBounty(actor, int(arg1))
+		
+		actor.sendSystemMessage('Your bounty has been set to an additional ' + str(arg1) + ' credits.', 0)
 		return
 	
 	return

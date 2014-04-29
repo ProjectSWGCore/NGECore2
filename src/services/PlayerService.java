@@ -1255,18 +1255,21 @@ public class PlayerService implements INetworkDispatch {
 	}
 	
 	public void sendSetBountyWindow(final CreatureObject victim, final CreatureObject attacker) {
-		final SUIWindow bountyWindow = core.suiService.createInputBox(InputBoxType.INPUT_BOX_OK_CANCEL, "@bounty_hunter:setbounty_title", "@bounty_hunter:setbounty_prompt1 " + attacker.getCustomName() + "?" + "\n@bounty_hunter:setbounty_prompt2 " + victim.getBankCredits() + victim.getCashCredits(), 
+		SUIWindow bountyWindow = core.suiService.createInputBox(InputBoxType.INPUT_BOX_OK_CANCEL, "@bounty_hunter:setbounty_title", "@bounty_hunter:setbounty_prompt1 " + attacker.getCustomName() + "?" + "\n@bounty_hunter:setbounty_prompt2 " + victim.getBankCredits(), 
 				victim, null, (float) 10, new SUICallback() {
 
 			@Override
 			public void process(SWGObject owner, int eventType, Vector<String> returnList) {
 				if (eventType == 0 && returnList.get(0) != null) {
-					if (core.missionService.getBountyListItem(attacker.getObjectId()) != null) {
-						BountyListItem currentBounty = core.missionService.getBountyListItem(attacker.getObjectId());
-						currentBounty.addBounty(Integer.parseInt(returnList.get(0)));
-					} else {
-						core.missionService.createNewBounty(attacker, Integer.parseInt(returnList.get(0)));
-					}
+					int bounty = Integer.parseInt(returnList.get(0));
+					
+					if (bounty > victim.getBankCredits())
+						return;
+
+					if (!core.missionService.addToExistingBounty(attacker, bounty))
+						core.missionService.createNewBounty(attacker, bounty);
+
+					victim.setBankCredits(victim.getBankCredits() - bounty);
 				}
 			}
 			

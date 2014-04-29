@@ -29,6 +29,7 @@ import com.sleepycat.persist.model.PrimaryKey;
 
 @Entity
 public class BountyListItem {
+
 	@PrimaryKey
 	private long objectId;
 	private int creditReward;
@@ -84,7 +85,7 @@ public class BountyListItem {
 	}
 	
 	public void addBounty(int amountToAdd) {
-		this.creditReward =+ amountToAdd;
+		this.creditReward += amountToAdd;
 	}
 
 	public List<Long> getAssignedHunters() {
@@ -95,11 +96,11 @@ public class BountyListItem {
 		this.assignedHunters = assignedHunters;
 	}
 	
-	public boolean addBountyHunter(long objectId) {
-		return assignedHunters.add(objectId);
+	public void addBountyHunter(long objectId) {
+		assignedHunters.add(objectId);
 	}
 	
-	public boolean removeBountyHunter(long objectId) {
-		return assignedHunters.remove(objectId);
+	public void removeBountyHunter(long objectId) {
+		assignedHunters.remove(objectId);
 	}
 }

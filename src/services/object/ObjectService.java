@@ -913,6 +913,10 @@ public class ObjectService implements INetworkDispatch {
 				if(!core.getConfig().getString("MOTD").equals(""))
 					creature.sendSystemMessage(core.getConfig().getString("MOTD"), (byte) 2);
 				
+				BountyListItem bounty = core.getBountiesODB().get(creature.getObjectId(), Long.class, BountyListItem.class);
+				if (bounty != null)
+					core.missionService.getBountyList().add(bounty);
+				
 				core.playerService.postZoneIn(creature);
 			}
 			
