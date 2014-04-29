@@ -102,8 +102,6 @@ import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
 import resources.objects.craft.DraftSchematic;
 import resources.objects.creature.CreatureObject;
-import resources.objects.deed.Harvester_Deed;
-import resources.objects.deed.Player_House_Deed;
 import resources.objects.factorycrate.FactoryCrateObject;
 import resources.objects.group.GroupObject;
 import resources.objects.guild.GuildObject;
@@ -241,15 +239,7 @@ public class ObjectService implements INetworkDispatch {
 			
 			object = new SurveyTool(objectID, planet, Template, position, orientation);
 			
-		} else if(Template.startsWith("object/tangible/deed/harvester_deed") || Template.startsWith("object/tangible/deed/generator_deed")) {
-			
-			object = new Harvester_Deed(objectID, planet, Template, position, orientation);
-			
-		} else if(Template.startsWith("object/tangible/deed/player_house_deed") || Template.startsWith("object/tangible/deed/guild_deed") || Template.startsWith("object/tangible/deed/city_deed") || Template.startsWith("object/tangible/tcg")) {
-			
-			object = new Player_House_Deed(objectID, planet, Template, position, orientation);
-			
-		} 
+		}
 //		else if(Template.startsWith("object/tangible/container/drum/shared_treasure_drum.iff")) {
 //			
 //			object = new CreatureObject(objectID, planet, position, orientation, Template);			
