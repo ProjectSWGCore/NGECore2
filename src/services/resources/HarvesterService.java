@@ -61,6 +61,7 @@ import resources.objects.player.PlayerObject;
 import resources.objects.resource.GalacticResource;
 import resources.objects.resource.ResourceContainerObject;
 import resources.objects.resource.ResourceRoot;
+import resources.objects.tangible.Harvester_Deed;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.waypoint.WaypointObject;
 import services.chat.Mail;

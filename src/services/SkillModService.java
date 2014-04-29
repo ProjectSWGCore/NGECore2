@@ -127,7 +127,7 @@ public class SkillModService implements INetworkDispatch {
 		synchronized(creature.getMutex()) {
 			SkillMod skillMod = creature.getSkillMods().get(name);
 			
-			if (skillMod == null || base <= 0 || modifier <= 0) {
+			if (skillMod == null || (base <= 0 && modifier <= 0)) {
 				return;
 			} else {
 				skillMod.deductBase(base);

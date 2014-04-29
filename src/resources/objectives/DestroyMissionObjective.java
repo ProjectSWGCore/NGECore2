@@ -21,6 +21,8 @@
  ******************************************************************************/
 package resources.objectives;
 
+import main.NGECore;
+import resources.objects.creature.CreatureObject;
 import resources.objects.mission.MissionObject;
 import services.mission.MissionObjective;
 
@@ -31,27 +33,28 @@ public class DestroyMissionObjective extends MissionObjective {
 	}
 
 	@Override
-	public void activate() {
+	public void activate(NGECore core, CreatureObject player) {
 		// TODO Auto-generated method stub
-
+		
 	}
 
 	@Override
-	public void complete() {
+	public void complete(NGECore core, CreatureObject player) {
 		// TODO Auto-generated method stub
-
+		
 	}
 
 	@Override
-	public void abort() {
+	public void abort(NGECore core, CreatureObject player) {
 		// TODO Auto-generated method stub
-
+		
 	}
 
 	@Override
-	public void update() {
+	public void update(NGECore core, CreatureObject player) {
 		// TODO Auto-generated method stub
-
+		
 	}
+
 
 }

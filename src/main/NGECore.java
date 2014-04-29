@@ -213,6 +213,7 @@ public class NGECore {
 	private ObjectDatabase resourcesODB;
 	private ObjectDatabase resourceRootsODB;
 	private ObjectDatabase resourceHistoryODB;
+	private ObjectDatabase bountiesODB;
 	
 	public static boolean PACKET_DEBUG = false;
 
@@ -274,6 +275,7 @@ public class NGECore {
 		resourceRootsODB = new ObjectDatabase("resourceroots", true, false, true);
 		resourceHistoryODB = new ObjectDatabase("resourcehistory", true, false, true);
 		auctionODB = new ObjectDatabase("auction", true, false, true);
+		bountiesODB = new ObjectDatabase("bounties", true, false, true);
 		
 		// Services
 		loginService = new LoginService(this);
@@ -626,6 +628,10 @@ public class NGECore {
 		return chatRoomODB;
 	}
 	
+	public ObjectDatabase getBountiesODB() {
+		return bountiesODB;
+	}
+
 	public ObjectDatabase getResourcesODB() {
 		return resourcesODB;
 	}

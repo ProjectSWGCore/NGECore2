@@ -26,6 +26,7 @@ import java.nio.ByteBuffer;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
+import engine.resources.common.Utilities;
 import protocol.swg.SWGMessage;
 
 public class CreateImmediateAuctionMessage extends SWGMessage {
@@ -100,8 +101,10 @@ public class CreateImmediateAuctionMessage extends SWGMessage {
 		this.description = description;
 	}
 
-	public byte getPremium() {
-		return premium;
+	public boolean getPremium() {
+		if(premium == 1)
+			return true;
+		return false;
 	}
 
 	public void setPremium(byte premium) {
