@@ -28,9 +28,7 @@ import java.util.Map;
 import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
-
 import main.NGECore;
-
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -72,26 +70,39 @@ public class StaticService implements INetworkDispatch {
 	}
 	
 	public SWGObject spawnObject(String template, String planetName, long cellId, float x, float y, float z, float qW, float qX, float qY, float qZ) {
-		return spawnObject(template, 0, planetName, cellId, x, y, z, qW, qX, qY, qZ);
-	}
-	
-	public SWGObject spawnObject(String template, long objectId, String planetName, long cellId, float x, float y, float z, float qW, float qX, float qY, float qZ) {
 		Planet planet = core.terrainService.getPlanetByName(planetName);
 		
 		if (planet == null) {
-			System.out.println("StaticService: Can't spawn static object because planet is null.");
+			System.err.println("StaticService: Can't spawn static object because planet is null.");
 			return null;
 		}
 		
-		SWGObject object = core.objectService.createObject(template, objectId, planet, new Point3D(x, y, z), new Quaternion(qW, qX, qY, qZ));
+		int cellNumber = 0;
+		
+		SWGObject container = core.objectService.getObject(cellId);
+		
+		if (container != null && container.getContainer() != null && container.getContainer() instanceof BuildingObject) {
+			cellNumber = ((BuildingObject) container.getContainer()).getCellNumberByObjectId(cellId);
+		}
+		
+		long objectId = core.objectService.getDOId(planetName, template, 0, cellId, cellNumber, x, y, z);
+		
+		SWGObject object;
+		
+		// Temp fix while objects with custom ids don't appear to spawn despite there being no errors...
+		if (template.contains("character_builder")) {
+			object = core.objectService.createObject(template, 0, planet, new Point3D(x, y, z), new Quaternion(qW, qX, qY, qZ));
+		} else {
+			object = core.objectService.createObject(template, objectId, planet, new Point3D(x, y, z), new Quaternion(qW, qX, qY, qZ));
+		}
 		
 		if (object == null) {
-			System.out.println("Static object is null with id " + objectId + " and template " + template + ".");
+			System.err.println("Static object is null with id " + objectId + " and template " + template + ".");
 			return null;
 		}
 		
 		if (objectId != 0 && object.getObjectID() != objectId) {
-			System.out.println("StaticService: ObjectId " + objectId + " was taken for object with template " + object.getTemplate() + ".  Replacement: " + object.getObjectID());
+			System.err.println("StaticService: ObjectId " + objectId + " was taken for object with template " + object.getTemplate() + ".  Replacement: " + object.getObjectID());
 		}
 		
 		if (object instanceof CreatureObject) {
@@ -99,16 +110,14 @@ public class StaticService implements INetworkDispatch {
 		}
 		
 		if (cellId == 0) {
-			boolean add = core.simulationService.add(object, (float) x, (float) z, true);
-			
-			if (!add) {
-				System.out.println("StaticService: Quadtree insert failed for: " + template);
+			if (!core.simulationService.add(object, (float) x, (float) z, true)) {
+				System.err.println("StaticService: Quadtree insert failed for: " + template);
 			}
 		} else {
 			SWGObject parent = core.objectService.getObject(cellId);
 			
 			if (parent == null) {
-				System.out.println("StaticService: Cell not found");
+				System.err.println("StaticService: Cell not found");
 				return object;
 			}
 			
@@ -128,8 +137,8 @@ public class StaticService implements INetworkDispatch {
 					cloners.add(obj);
 			}
 		}
-		return cloners;
 		
+		return cloners;
 	}
 	
 	@Override
