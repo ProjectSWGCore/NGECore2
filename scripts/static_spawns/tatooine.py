@@ -13,10 +13,6 @@ def addPlanetSpawns(core, planet):
 	#object.setOptionsBitmask(264)
 	
 	junkdealer = stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_01.iff', 'tatooine', long(0), float(3525), float(4), float(-4804), float(0.70), float(0.71))
-	junkdealer.setOptionsBitmask(264)
-	junkdealer.setCustomName('a Junk Dealer')
-	junkdealer.setAttachment('radial_filename', 'object/conversation');
-	junkdealer.setAttachment('conversationFile','junk_dealer')
 	
 	return
 	
