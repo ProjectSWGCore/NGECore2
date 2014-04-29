@@ -189,6 +189,8 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private ConcurrentHashMap<String, Long> cooldowns = new ConcurrentHashMap<String, Long>();
 	@NotPersistent
 	private long tefTime = System.currentTimeMillis();
+	@NotPersistent
+	private SWGObject useTarget;
 	
 	public CreatureObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
 		super(objectID, planet, Template, position, orientation);
@@ -985,6 +987,18 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 		
 		notifyObservers(messageBuilder.buildIntendedTargetDelta(intendedTarget), true);
+	}
+	
+	public SWGObject getUseTarget() {
+		synchronized(objectMutex) {
+			return useTarget;
+		}
+	}
+	
+	public void setUseTarget(SWGObject useTarget) {
+		synchronized(objectMutex) {
+			this.useTarget = useTarget;
+		}
 	}
 	
 	public long getTargetId() {
