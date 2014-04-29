@@ -633,6 +633,26 @@ public class ObjectService implements INetworkDispatch {
 
 	}
 	
+	public long getDOId(String planet, String template, int type, long cellId, int cellNumber, float x1, float y, float z1) {
+		SWGObject container = getObject(cellId);
+		float x = ((container == null) ? x1 : container.getPosition().x + x1);
+		float z = ((container == null) ? z1 : container.getPosition().z + z1);
+		String key = "" + CRC.StringtoCRC(planet) + CRC.StringtoCRC(template) + type + cellId + cellNumber + x + y + z;
+		
+		long objectId = 0;
+		
+		if (core.getDuplicateIdODB().contains(key, String.class, DuplicateId.class)) {
+			objectId = core.getDuplicateIdODB().get(key, String.class, DuplicateId.class).getObjectId();
+		} else {
+			objectId = generateObjectID();
+			Transaction txn = core.getDuplicateIdODB().getEnvironment().beginTransaction(null, null);
+			core.getDuplicateIdODB().put(new DuplicateId(key, objectId), String.class, DuplicateId.class, txn);
+			txn.commitSync();
+		}
+		
+		return objectId;
+	}
+	
 	public void useObject(CreatureObject creature, SWGObject object) {
 		if (creature == null || object == null) {
 			return;
@@ -1073,11 +1093,14 @@ public class ObjectService implements INetworkDispatch {
 				if (duplicate.containsKey(containerId)) {
 					containerId = duplicate.get(containerId);
 				}
+				
 				String planetName = planet.getName();
+				
+				// TODO needs to a way to work for mustafar and kashyyyk which both have instances
 				if (objectId != 0 && getObject(objectId) != null && (planetName.contains("dungeon") || planetName.contains("adventure"))) {
 					SWGObject container = getObject(containerId);
-					int x = ((int) (px + ((container == null) ? x1 : container.getPosition().x)));
-					int z = ((int) (pz + ((container == null) ? z1 : container.getPosition().z)));
+					float x = (px + ((container == null) ? x1 : container.getPosition().x));
+					float z = (pz + ((container == null) ? z1 : container.getPosition().z));
 					String key = "" + CRC.StringtoCRC(planet.getName()) + CRC.StringtoCRC(template) + type + containerId + cellIndex + x + py + z;
 					long newObjectId = 0;
 					
