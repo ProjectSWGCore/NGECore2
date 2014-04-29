@@ -12,7 +12,7 @@ def run(core, actor, target, commandString):
 	if deed == actor:
 		deed = actor.getUseTarget()
 	
-	if deed.getTemplate().startswith('object/tangible/deed/harvester_deed') is True:
+	if deed.getTemplate().startswith('object/tangible/deed/harvester_deed') is True or deed.getTemplate().startswith('object/tangible/deed/generator_deed') is True:
 		core.harvesterService.handlePlaceStructureCommand(actor, target, commandString)
 		return
 	

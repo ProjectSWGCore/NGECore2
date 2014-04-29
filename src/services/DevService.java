@@ -40,8 +40,6 @@ import resources.datatables.WeaponType;
 import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
-import resources.objects.tangible.Harvester_Deed;
-import resources.objects.tangible.Player_House_Deed;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.tool.SurveyTool;
 import resources.objects.weapon.WeaponObject;

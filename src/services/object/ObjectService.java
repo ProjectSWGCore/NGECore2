@@ -115,8 +115,6 @@ import resources.objects.resource.GalacticResource;
 import resources.objects.resource.ResourceContainerObject;
 import resources.objects.resource.ResourceRoot;
 import resources.objects.staticobject.StaticObject;
-import resources.objects.tangible.Harvester_Deed;
-import resources.objects.tangible.Player_House_Deed;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.tool.SurveyTool;
 import resources.objects.waypoint.WaypointObject;
