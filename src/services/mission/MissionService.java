@@ -37,6 +37,7 @@ import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 
 import com.sleepycat.je.Transaction;
+import com.sleepycat.persist.EntityCursor;
 
 import protocol.swg.ObjControllerMessage;
 import protocol.swg.objectControllerObjects.MissionAbort;
@@ -83,6 +84,8 @@ public class MissionService implements INetworkDispatch {
 		loadMissionEntryCounts();
 		
 		bountiesODB = core.getBountiesODB();
+		
+		cleanupBounties(); // delete any characters from the bounties odb if they no longer exist.
 	}
 
 	@Override
@@ -239,7 +242,7 @@ public class MissionService implements INetworkDispatch {
 				missionStrings++;
 			}
 		}
-		System.out.println("Loaded " + missionStrings + " mission entry counts.");
+		//System.out.println("Loaded " + missionStrings + " mission entry counts.");
 	}
 	
 	
@@ -282,7 +285,8 @@ public class MissionService implements INetworkDispatch {
 						randomDeliveryMission(player, mission);
 					
 					else if (type == TerminalType.BOUNTY)
-						randomBountyMission(player, mission);
+						//randomBountyMission(player, mission);
+						return;
 					
 					else if (type == TerminalType.ARTISAN)
 						return;
@@ -519,32 +523,63 @@ public class MissionService implements INetworkDispatch {
 		
 		BountyListItem bounty = new BountyListItem(bountyTarget.getObjectId(), reward, core.playerService.getFormalProfessionName(player.getProfession()), bountyTarget.getFaction(), bountyTarget.getCustomName());
 		
+		Transaction txn = bountiesODB.getEnvironment().beginTransaction(null, null);
+		bountiesODB.put(bounty, Long.class, BountyListItem.class, txn);
+		txn.commitSync();
+		
 		bountyList.add(bounty);
-		
-		//Transaction txn = bountiesODB.getEnvironment().beginTransaction(null, null);
-		//bountiesODB.put(bounty, Long.class, BountyListItem.class, txn);
-		//txn.commitSync();
-		
-		//System.out.println("Put in bounty for " + bounty.getName() + " with amount " + reward);
-		
+
+		//System.out.println("Created bounty of " + reward + " to " + bounty.getName());
 		return bounty;
 	}
 	
 	public boolean addToExistingBounty(CreatureObject bountyTarget, int amountToAdd) {
-		PlayerObject player = (PlayerObject) bountyTarget.getSlottedObject("ghost");
-		if (player == null)
-			return false;
-		
+
 		BountyListItem bounty = getBountyListItem(bountyTarget.getObjectId());
 		
 		if (bounty == null)
 			return false;
 		
-		//Transaction txn = bountiesODB.getEnvironment().beginTransaction(null, null);
-		//bountiesODB.get(bounty, Long.class, BountyListItem.class);
-		//txn.commitSync();
+		bounty.addBounty(amountToAdd);
+
+		Transaction txn = bountiesODB.getEnvironment().beginTransaction(null, null);
+		bountiesODB.put(bounty, Long.class, BountyListItem.class, txn);
+		txn.commitSync();
 		
+		//System.out.println("Added bounty of " + amountToAdd + " to " + bounty.getName());
 		return true;
+	}
+	
+	public boolean removeBounty(CreatureObject bountyTarget, boolean listRemove) {
+		Transaction txn = bountiesODB.getEnvironment().beginTransaction(null, null);
+		
+		if (listRemove)
+			bountyList.remove(bountiesODB.get(bountyTarget.getObjectId(), Long.class, BountyListItem.class));
+		
+		bountiesODB.delete(bountyTarget.getObjectId(), Long.class, BountyListItem.class, txn);
+		txn.commitSync();
+		return true;
+	}
+	
+	public boolean removeBounty(CreatureObject bountyTarget) {
+		return removeBounty(bountyTarget, true);
+	}
+	
+	private void cleanupBounties() {
+		AtomicInteger bountyCount = new AtomicInteger();
+		Transaction txn = bountiesODB.getEnvironment().beginTransaction(null, null);
+		EntityCursor<BountyListItem> bountyCursor = bountiesODB.getEntityStore().getPrimaryIndex(Long.class, BountyListItem.class).entities(txn, null);
+		bountyCursor.forEach(bounty -> {
+			if (!core.characterService.playerExists(bounty.getObjectId())) {
+				bountyCursor.delete();
+				bountyCount.getAndIncrement();
+			}
+		});
+		bountyCursor.close();
+		txn.commitSync();
+		
+		if (bountyCount.get() != 0)
+			System.out.println("Removed " + bountyCount.get() + " bounties.");
 	}
 	
 	@Override
