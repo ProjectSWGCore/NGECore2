@@ -142,7 +142,7 @@ public class CollectionService implements INetworkDispatch {
 							int bits = 0;
 							boolean noScriptOnModify = false;
 							boolean clearOnComplete = false;
-							boolean noMessage = true;
+							boolean noMessage = false;
 							boolean grantIfPreReqMet = true;
 							boolean buddyCollection = false;
 							int numAltTitles = 0;
@@ -311,7 +311,7 @@ public class CollectionService implements INetworkDispatch {
 							player.setCollections(collections.toByteArray());
 							
 							if (!hidden && !noMessage) {
-								creature.sendSystemMessage(OutOfBand.ProsePackage("@collection_n:" + collection), DisplayType.Broadcast);
+								creature.sendSystemMessage(OutOfBand.ProsePackage("@collection_n:" + collection, "TU", slotName, "TO", collectionName), DisplayType.Broadcast);
 							}
 							
 							if (!music.equals("")) {
