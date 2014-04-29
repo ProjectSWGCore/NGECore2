@@ -944,19 +944,19 @@ public class HarvesterService implements INetworkDispatch {
 		quaternion = resources.common.MathUtilities.rotateQuaternion(quaternion, (float)((Math.PI/2) * dir), new Point3D(0, 1, 0));
 		InstallationObject installation = (InstallationObject) core.objectService.createObject(constructorTemplate, 0, actor.getPlanet(), new Point3D(posX, positionY, posZ), quaternion);		
 		
-		if (usedDeed.getAttributes().containsKey("examine_extractionrate")) {
+		if (!usedDeed.getAttributes().containsKey("examine_extractionrate")) {
 			usedDeed.setIntAttribute("examine_extractionrate", 0);
 		}
 		
-		if (usedDeed.getAttributes().containsKey("examine_hoppersize")) {
+		if (!usedDeed.getAttributes().containsKey("examine_hoppersize")) {
 			usedDeed.setIntAttribute("examine_hoppersize", 0);
 		}
 		
-		if (usedDeed.getAttributes().containsKey("examine_maintenance")) {
+		if (!usedDeed.getAttributes().containsKey("examine_maintenance")) {
 			usedDeed.setIntAttribute("examine_maintenance", 0);
 		}
 		
-		if (usedDeed.getAttributes().containsKey("examine_power")) {
+		if (!usedDeed.getAttributes().containsKey("examine_power")) {
 			usedDeed.setIntAttribute("examine_power", 0);
 		}
 		

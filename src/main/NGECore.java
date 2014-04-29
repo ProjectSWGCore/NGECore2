@@ -363,6 +363,7 @@ public class NGECore {
 		zoneDispatch.addService(bazaarService);
 		zoneDispatch.addService(lootService);
 		zoneDispatch.addService(mountService);
+		zoneDispatch.addService(housingService);
 		zoneDispatch.addService(playerCityService);
 		
 		if (optionsConfigLoaded && options.getInt("LOAD.RESOURCE.SYSTEM") == 1) {
@@ -482,7 +483,6 @@ public class NGECore {
 		spawnService.loadLairGroups();
 		spawnService.loadSpawnAreas();
 		
-		housingService.loadHousingTemplates();
 		equipmentService.loadBonusSets();
 		
 		retroService.run();

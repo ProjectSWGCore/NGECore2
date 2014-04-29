@@ -11,10 +11,10 @@ def createRadial(core, owner, target, radials):
 	
 def handleSelection(core, owner, target, option):
 	if option == 21 and target:
+		core.objectService.useObject(owner, target)
 		core.harvesterService.enterStructurePlacementMode(owner, target)
 	if option == 61 and target:
 		object5 = core.harvesterService.constructionSite(owner, target)
-		core.objectService.useObject(owner, target)
 	if option == 15 and target:
 		core.objectService.destroyObject(target)
 	return

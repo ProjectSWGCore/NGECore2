@@ -638,6 +638,8 @@ public class ObjectService implements INetworkDispatch {
 			return;
 		}
 		
+		creature.setUseTarget(object);
+		
 		int reuse_time;
 		
 		try {
