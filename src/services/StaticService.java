@@ -114,8 +114,10 @@ public class StaticService implements INetworkDispatch {
 		if (object instanceof BuildingObject) {
 			BuildingObject building = (BuildingObject) object;
 			
-			if (building.getCells().size() == 0) {
-				String portalLayoutFilename = (String) building.getTemplateData().getAttribute("portalLayoutFilename");
+			Map<String, Object> attributes = building.getTemplateData().getAttributes();
+			
+			if (building.getCells().size() == 0 && attributes.containsKey("portalLayoutFilename") && ((String) attributes.get("portalLayoutFilename")).length() > 0) {
+				String portalLayoutFilename = (String) attributes.get("portalLayoutFilename");
 				
 				try {
 					PortalVisitor portal = ClientFileManager.loadFile(portalLayoutFilename, PortalVisitor.class);
