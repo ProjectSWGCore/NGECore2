@@ -33,7 +33,6 @@ import resources.datatables.DisplayType;
 import resources.datatables.Options;
 import resources.datatables.Posture;
 import resources.datatables.State;
-import resources.datatables.StateStatus;
 import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
@@ -437,6 +436,8 @@ public class MountService implements INetworkDispatch {
 		// Notify observers and update quadtree
 		mount.notifyObservers(new UpdateContainmentMessage(rider.getObjectID(), mount.getObjectID(), 4), true);
 		core.simulationService.remove(rider, rider.getWorldPosition().x, rider.getWorldPosition().z, false);
+		
+		core.buffService.addBuffToCreature(rider, "vehicle_passenger", mount);
 	}
 	
 	public CreatureObject getMount(SWGObject pcd) {
@@ -636,6 +637,8 @@ public class MountService implements INetworkDispatch {
 		mount.notifyObservers(new UpdateContainmentMessage(rider.getObjectID(), 0, -1), true);
 		core.simulationService.teleport(rider, mount.getWorldPosition(), mount.getOrientation(), 0);
 		core.simulationService.add(rider, mount.getWorldPosition().x, mount.getWorldPosition().z, false);
+		
+		core.buffService.removeBuffFromCreature(rider, rider.getBuffByName("vehicle_passenger"));
 		
 		// Store mount if it's a creature
 		if (!mount.getTemplate().contains("vehicle") && rider.getObjectID() == mount.getOwnerId()) {
