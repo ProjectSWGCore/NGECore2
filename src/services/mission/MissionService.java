@@ -513,7 +513,7 @@ public class MissionService implements INetworkDispatch {
 		return null;
 	}
 	
-	public BountyListItem createNewBounty(CreatureObject bountyTarget, int reward) {
+	public BountyListItem createNewBounty(CreatureObject bountyTarget, long placer, int reward) {
 		PlayerObject player = (PlayerObject) bountyTarget.getSlottedObject("ghost");
 		if (player == null)
 			return null;
@@ -522,6 +522,9 @@ public class MissionService implements INetworkDispatch {
 			return null;
 		
 		BountyListItem bounty = new BountyListItem(bountyTarget.getObjectId(), reward, core.playerService.getFormalProfessionName(player.getProfession()), bountyTarget.getFaction(), bountyTarget.getCustomName());
+		
+		if (placer != 0)
+			bounty.getBountyPlacers().add(placer);
 		
 		Transaction txn = bountiesODB.getEnvironment().beginTransaction(null, null);
 		bountiesODB.put(bounty, Long.class, BountyListItem.class, txn);
@@ -533,7 +536,7 @@ public class MissionService implements INetworkDispatch {
 		return bounty;
 	}
 	
-	public boolean addToExistingBounty(CreatureObject bountyTarget, int amountToAdd) {
+	public boolean addToExistingBounty(CreatureObject bountyTarget, long placer, int amountToAdd) {
 
 		BountyListItem bounty = getBountyListItem(bountyTarget.getObjectId());
 		
@@ -541,6 +544,9 @@ public class MissionService implements INetworkDispatch {
 			return false;
 		
 		bounty.addBounty(amountToAdd);
+		
+		if (placer != 0)
+			bounty.getBountyPlacers().add(placer);
 
 		Transaction txn = bountiesODB.getEnvironment().beginTransaction(null, null);
 		bountiesODB.put(bounty, Long.class, BountyListItem.class, txn);
