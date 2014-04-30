@@ -236,11 +236,11 @@ public class PlayerCityService implements INetworkDispatch {
 		positionY = core.terrainService.getHeight(founder.getPlanetId(), positionX, positionZ);
 		
 		//StructureObject shuttlePort = (StructureObject) core.objectService.createObject(structureTemplate, 0, founder.getPlanet(), new Point3D(positionX, positionY, positionZ), founder.getOrientation());
-		BuildingObject shuttlePort = (BuildingObject) core.objectService.createObject(structureTemplate, 0, founder.getPlanet(), new Point3D(positionX, positionY, positionZ), founder.getOrientation());
+		//BuildingObject shuttlePort = (BuildingObject) core.objectService.createObject(structureTemplate, 0, founder.getPlanet(), new Point3D(positionX, positionY, positionZ), founder.getOrientation());
 		//shuttlePort.setAttachment("cellsSorted", new Boolean(true));
 		//"bigSpawnRange"
 		
-		core.simulationService.add(shuttlePort, shuttlePort.getPosition().x, shuttlePort.getPosition().z, true);
+		//core.simulationService.add(shuttlePort, shuttlePort.getPosition().x, shuttlePort.getPosition().z, true);
 //		sign = core.objectService.createChildObject((SWGObject)shuttlePort, "object/tangible/sign/player/shared_house_address.iff", -7.39F, 2.36F, 2, -1, 0, -1);
 //		shuttlePort.setAttachment("structureSign", sign);
 		
@@ -248,11 +248,11 @@ public class PlayerCityService implements INetworkDispatch {
 		admins = new Vector<>();
 		admins.add(founder.getObjectID());
 		
-		shuttlePort.setAttachment("structureOwner", founder.getObjectID());
-		shuttlePort.setAttachment("structureAdmins", admins);
-		shuttlePort.setDeedTemplate("object/tangible/deed/city_deed/shared_cityhall_tatooine_deed.iff");
-		shuttlePort.setBMR(12);
-		shuttlePort.setConditionDamage(100);
+//		shuttlePort.setAttachment("structureOwner", founder.getObjectID());
+//		shuttlePort.setAttachment("structureAdmins", admins);
+//		shuttlePort.setDeedTemplate("object/tangible/deed/city_deed/shared_cityhall_tatooine_deed.iff");
+//		shuttlePort.setBMR(12);
+//		shuttlePort.setConditionDamage(100);
 		
 		sandboxCityBuilt = true;
 	}
