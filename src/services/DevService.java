@@ -91,7 +91,6 @@ public class DevService implements INetworkDispatch {
 				if(creature.getClient().isGM()) suiOptions.put((long) 120, "House Deeds");
 				if(creature.getClient().isGM()) suiOptions.put((long) 125, "Crafting Tools");
 				if(creature.getClient().isGM()) suiOptions.put((long) 130, "Vehicle Deeds");
-				if(creature.getClient().isGM()) suiOptions.put((long) 121, "Sandbox City");
 
 				break;
 			case 3: // [Items] Weapons
@@ -1167,29 +1166,6 @@ public class DevService implements INetworkDispatch {
 					case 120:
 //						SWGObject houseDeed = core.objectService.createObject("object/tangible/deed/player_house_deed/shared_generic_house_small_deed.iff", planet);
 //						inventory.add(houseDeed);
-<<<<<<< HEAD
-											
-						templateString="object/tangible/deed/player_house_deed/shared_generic_house_small_deed.iff";
-						Player_House_Deed deed = (Player_House_Deed)core.objectService.createObject(templateString, planet);
-						deed.setBMR(15);
-						deed.setAttributes();
-						inventory.add(deed);	
-														
-						templateString="object/tangible/deed/city_deed/shared_cityhall_tatooine_deed.iff";
-						deed = (Player_House_Deed)core.objectService.createObject(templateString, planet);
-						deed.setBMR(15);
-						deed.setAttributes();
-						inventory.add(deed);	
-						
-					
-						return;	
-						
-					case 121:
-						NGECore.getInstance().playerCityService.buildSandboxTestCity(player);
-					
-						return;	
-												
-=======
 						
 						TangibleObject deed = (TangibleObject) core.objectService.createObject("object/tangible/deed/player_house_deed/shared_generic_house_small_deed.iff", planet);
 						deed.setIntAttribute("examine_maintenance_rate", 15);
@@ -1200,7 +1176,6 @@ public class DevService implements INetworkDispatch {
 						inventory.add(deed);
 						
 						return;
->>>>>>> origin/master
 					case 125:
 						TangibleObject genericCraftingTool = (TangibleObject) core.objectService.createObject("object/tangible/crafting/station/shared_generic_tool.iff", planet);
 						genericCraftingTool.setCustomName("Generic Crafting Tool");
@@ -1212,8 +1187,6 @@ public class DevService implements INetworkDispatch {
 						inventory.add(swoopDeed);
 						inventory.add(av21deed);
 						return;
-						
-						
 				}
 			}	
 		});
