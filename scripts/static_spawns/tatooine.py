@@ -23,6 +23,9 @@ def addPlanetSpawns(core, planet):
 	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_01.iff', 'tatooine', long(0), float(3525), float(4), float(-4804), float(0.70), float(0.71))
 
 	#stcSvc.spawnObject('object/mobile/shared_3po_protocol_droid_red.iff', 'tatooine', long(26582), float(-14.3), float(2.0), float(47.4), float(0.70), float(0.71))
+		
+	impRecruiter = stcSvc.spawnObject('object/mobile/shared_dressed_imperial_officer_f.iff', 'tatooine', long(1280132), float(-6), float(1), float(9.2), float(0.70), float(0.71))	
+	impRecruiter.setOptionsBitmask(264)
 	
 	return
 	
