@@ -35,11 +35,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
+
 import protocol.swg.PlayClientEffectObjectTransformMessage;
+import resources.loot.LootGroup;
+import resources.loot.LootRollSession;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
-import resources.objects.loot.LootGroup;
-import resources.objects.loot.LootRollSession;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 import main.NGECore;

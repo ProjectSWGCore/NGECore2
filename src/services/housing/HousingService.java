@@ -40,7 +40,6 @@ import protocol.swg.EnterStructurePlacementModeMessage;
 import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
-import resources.objects.tangible.Player_House_Deed;
 import resources.objects.tangible.TangibleObject;
 import services.playercities.PlayerCity;
 import services.sui.SUIWindow;
@@ -56,52 +55,60 @@ public class HousingService implements INetworkDispatch {
 	
 	private NGECore core;
 	private Map<String, HouseTemplate> housingTemplates = new ConcurrentHashMap<String, HouseTemplate>();
-
+	private Map<String, String> houseToDeed = new ConcurrentHashMap<String, String>();
+	
 	public HousingService(NGECore core) {
 		this.core = core;
-		core.commandService.registerCommand("placestructure");
-		core.commandService.registerCommand("movefurniture");
-		core.commandService.registerCommand("rotatefurniture");
+		
+	    Path p = Paths.get("scripts/houses/");
+	    
+	    FileVisitor<Path> fv = new SimpleFileVisitor<Path>() {
+	        @Override
+	        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+	        	core.scriptService.callScript("scripts/houses/", file.getFileName().toString().replace(".py", ""), "setup", housingTemplates);
+	        	return FileVisitResult.CONTINUE;
+	        }
+	    };
+	    
+        try {
+			Files.walkFileTree(p, fv);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+        
+        housingTemplates.values().forEach((houseTemplate) -> houseToDeed.put(houseTemplate.getBuildingTemplate(), houseTemplate.getDeedTemplate()));
 	}
 	
-	public void enterStructureMode(CreatureObject actor, TangibleObject deed)
-	{	
-		if(!actor.getClient().isGM() && !core.terrainService.canBuildAtPosition(actor, actor.getWorldPosition().x, actor.getWorldPosition().z))
-		{
+	public void enterStructureMode(CreatureObject actor, TangibleObject deed) {	
+		if (!actor.getClient().isGM() && !core.terrainService.canBuildAtPosition(actor, actor.getWorldPosition().x, actor.getWorldPosition().z)) {
 			actor.sendSystemMessage("You may not place a structure here.", (byte) 0); // should probably load this from an stf
 			return;
 		}
 		
-		if(housingTemplates.containsKey(deed.getTemplate()))
-		{
+		if (housingTemplates.containsKey(deed.getTemplate())) {
 			HouseTemplate houseTemplate = housingTemplates.get(deed.getTemplate());
 			EnterStructurePlacementModeMessage packet = new EnterStructurePlacementModeMessage(deed, houseTemplate.getBuildingTemplate());	
 			actor.getClient().getSession().write(packet.serialize());
 		}
 	}
 	
-	public void placeStructure(final CreatureObject actor, TangibleObject deed, float positionX, float positionZ, float rotation)
-	{
+	public void placeStructure(final CreatureObject actor, TangibleObject deed, float positionX, float positionZ, float rotation) {
 		HouseTemplate houseTemplate = housingTemplates.get(deed.getTemplate());
-		Player_House_Deed playerHourseDeed = (Player_House_Deed)core.objectService.getObject(deed.getObjectID());
 		int structureLotCost = houseTemplate.getLotCost();
 		String structureTemplate = houseTemplate.getBuildingTemplate();
 		
-		if(!houseTemplate.canBePlacedOn(actor.getPlanet().getName()))
-		{
+		if (!houseTemplate.canBePlacedOn(actor.getPlanet().getName())) {
 			actor.sendSystemMessage("You may not place this structure on this planet.", (byte) 0); // should probably load this from an stf
 			return;
 		}
 		
-		if(!actor.getClient().isGM() && !core.terrainService.canBuildAtPosition(actor, positionX, positionZ))
-		{
+		if(!actor.getClient().isGM() && !core.terrainService.canBuildAtPosition(actor, positionX, positionZ)) {
 			actor.sendSystemMessage("You may not place a structure here.", (byte) 0); // should probably load this from an stf
 			return;
 		}
 		
 		// Lot stuff
-		if(!actor.getPlayerObject().deductLots(structureLotCost))
-		{
+		if (!actor.getPlayerObject().deductLots(structureLotCost)) {
 			actor.sendSystemMessage("You do not have enough available lots to place this structure.", (byte) 0); // should probably load this from an stf
 			return;
 		}
@@ -120,10 +127,12 @@ public class HousingService implements INetworkDispatch {
 		TangibleObject sign = (TangibleObject) building.getAttachment("structureSign");	
 		String playerFirstName = actor.getCustomName().split(" ")[0];
 		
-		if (sign !=null)
+		if (sign != null) {
 			sign.setCustomName2(playerFirstName + "'s House");
+		}
+		
 		//building.add(sign);
-
+		
 		core.objectService.destroyObject(deed);
 		
 		// Structure management
@@ -133,8 +142,8 @@ public class HousingService implements INetworkDispatch {
 		building.setAttachment("structureOwner", actor.getObjectID());
 		building.setAttachment("structureAdmins", admins);
 		building.setDeedTemplate(deed.getTemplate());
-		building.setBMR(playerHourseDeed.getBMR());
-		building.setConditionDamage(100);
+		building.setMaintenanceAmount(houseTemplate.getBaseMaintenanceRate());
+		building.setConditionDamage(100); // Ouch
 		
 		if (structureTemplate.contains("cityhall")){
 			PlayerCity newCity = core.playerCityService.addNewPlayerCity(actor); 
@@ -164,39 +173,18 @@ public class HousingService implements INetworkDispatch {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public boolean getPermissions(SWGObject player, SWGObject container)
-	{
-		if(((Vector<Long>) container.getContainer().getAttachment("structureAdmins")).contains(player.getObjectID())) return true;
-		return false;	
-	}
+	public boolean getPermissions(SWGObject player, SWGObject container) {
+		if (((Vector<Long>) container.getContainer().getAttachment("structureAdmins")).contains(player.getObjectID())) {
+			return true;
+		}
 		
-	public void addHousingTemplate(HouseTemplate houseTemplate)
-	{
-		housingTemplates.put(houseTemplate.getDeedTemplate(), houseTemplate);
-	}
-	
-	public void loadHousingTemplates() {
-	    Path p = Paths.get("scripts/houses/");
-	    FileVisitor<Path> fv = new SimpleFileVisitor<Path>() 
-	    {
-	        @Override
-	        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
-	        {
-	        	System.out.println("Loading housing template " + file.getFileName());
-	        	core.scriptService.callScript("scripts/houses/", file.getFileName().toString().replace(".py", ""), "setup", core);
-	        	return FileVisitResult.CONTINUE;
-	        }
-	    };
-        try 
-        {
-			Files.walkFileTree(p, fv);
-		} 
-        catch (IOException e) { e.printStackTrace(); }
+		return false;	
 	}
 	
 	public void createDestroySUIPage(final SWGObject owner, final TangibleObject target) {
 		
-		final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
+		final BuildingObject building = (BuildingObject) target.getGrandparent();
+		//final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
 		//final BuildingObject building = (BuildingObject) core.objectService.getObject(target.getParentId());
 		// harvester.getStfFilename(); installation_n .getTemplate();
 		
@@ -253,7 +241,8 @@ public class HousingService implements INetworkDispatch {
 	
 	public void createCodeWindow(SWGObject owner, TangibleObject target) {
 		
-		final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
+		final BuildingObject building = (BuildingObject) target.getGrandparent();
+		//final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
 		//final BuildingObject building = (BuildingObject)target;
 		Random rnd = new Random();
 		final int confirmCode = 100000 + rnd.nextInt(900000);
@@ -279,26 +268,27 @@ public class HousingService implements INetworkDispatch {
 				if (returnList.get(0).equals(""+confirmCode)){
 					// handle creation of correct deed in player inventory
 					PlayerObject player = (PlayerObject) crafter.getSlottedObject("ghost");	
-					String deedTemplate = building.getDeedTemplate(); 
-	
-					Player_House_Deed deed = (Player_House_Deed)core.objectService.createObject(deedTemplate, owner.getPlanet());
-					if(player.getLotsRemaining()+deed.getLotRequirement()>10){
+					HouseTemplate houseTemplate = housingTemplates.get(houseToDeed.get(building.getTemplate()));
+					
+					TangibleObject deed = (TangibleObject) core.objectService.createObject(houseTemplate.getDeedTemplate(), owner.getPlanet());
+					
+					if (player.getLotsRemaining() + houseTemplate.getLotCost() > 10){
 						// Something went wrong or hacking attempt
 						crafter.sendSystemMessage("Structure can't be redeeded. Maximum lot count exceeded.",(byte)1);
 						return;
 					}
-							
-					deed.setStructureTemplate(building.getTemplate());					
-					deed.setSurplusMaintenance((int)building.getMaintenanceAmount());					
-					deed.setAttributes();
+					
+					deed.setIntAttribute("@obj_attr_n:examine_maintenance_rate", houseTemplate.getBaseMaintenanceRate());
+					deed.setIntAttribute("@obj_attr_n:examine_maintenance", (int) building.getMaintenanceAmount());
 					
 					core.objectService.destroyObject(building.getObjectID());
  
 					SWGObject ownerInventory = owner.getSlottedObject("inventory");
 					ownerInventory.add(deed);
 					
-					if(player.getLotsRemaining()+deed.getLotRequirement()<=10)
-						player.setLotsRemaining(player.getLotsRemaining()+deed.getLotRequirement());
+					if (player.getLotsRemaining() + houseTemplate.getLotCost() <= 10) {
+						player.setLotsRemaining(player.getLotsRemaining() + houseTemplate.getLotCost());
+					}
 					
 					crafter.sendSystemMessage("@player_structure:processing_destruction",(byte)1);
 					crafter.sendSystemMessage("@player_structure:deed_reclaimed",(byte)1);
@@ -320,7 +310,8 @@ public class HousingService implements INetworkDispatch {
 	
 	public void createPayMaintenanceSUIPage(SWGObject owner, TangibleObject target) {
 		CreatureObject creature = (CreatureObject) owner;
-		final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
+		final BuildingObject building = (BuildingObject) target.getGrandparent();
+		//final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
 		final SUIWindow window = core.suiService.createSUIWindow("Script.transfer", owner, target, 10);
 		window.setProperty("bg.caption.lblTitle:Text", "@player_structure:select_amount");
 		window.setProperty("Prompt.lblPrompt:Text", "@player_structure:select_maint_amount" +
@@ -398,7 +389,8 @@ public class HousingService implements INetworkDispatch {
 	}
 	
 	public void createStatusSUIPage(SWGObject owner, TangibleObject target) {
-		final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
+		final BuildingObject building = (BuildingObject) target.getGrandparent();
+		//final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
 		String displayname = "@installation_n:"+building.getStfName();
 		if (building.getCustomName()!=null)
 			displayname = building.getCustomName();
@@ -450,7 +442,8 @@ public class HousingService implements INetworkDispatch {
 	}
 	
 	public void declareResidency(SWGObject owner, TangibleObject target) {
-		final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
+		final BuildingObject building = (BuildingObject) target.getGrandparent();
+		//final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
 		building.setResidency((CreatureObject)owner);
 		PlayerCity cityActorIsIn = core.playerCityService.getCityObjectIsIn(owner);
 		owner.setAttachment("residentCity", cityActorIsIn.getCityID());
@@ -458,7 +451,8 @@ public class HousingService implements INetworkDispatch {
 	}
 	
 	public void handleListAllItems(SWGObject owner, TangibleObject target) {
-		final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
+		final BuildingObject building = (BuildingObject) target.getGrandparent();
+		//final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
 		String displayname = "@installation_n:"+building.getStfName();
 		if (building.getCustomName()!=null)
 			displayname = building.getCustomName();
@@ -491,15 +485,17 @@ public class HousingService implements INetworkDispatch {
 	}
 	
 	public void handleDeleteAllItems(SWGObject owner, TangibleObject target) {
-		final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
+		final BuildingObject building = (BuildingObject) target.getGrandparent();
+		//final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
 		//building.getItemsList().clear();
 		// confirmation needed
 		confirmDeleteAllItems(owner, target);
 	}
 	
 	public void confirmDeleteAllItems(SWGObject owner, TangibleObject target) {
-		
-		final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
+
+		final BuildingObject building = (BuildingObject) target.getGrandparent();
+		//final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
 		
 		Random rnd = new Random();
 		final int confirmCode = 100000 + rnd.nextInt(900000);
@@ -570,7 +566,8 @@ public class HousingService implements INetworkDispatch {
 	}
 	
 	public void handleFindLostItems(SWGObject owner, TangibleObject target) {
-		final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
+		final BuildingObject building = (BuildingObject) target.getGrandparent();
+		//final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
 		String displayname = "@installation_n:"+building.getStfName();
 		if (building.getCustomName()!=null)
 			displayname = building.getCustomName();
@@ -620,7 +617,8 @@ public class HousingService implements INetworkDispatch {
 		core.staticService.spawnObject("object/tangible/terminal/shared_terminal_player_structure.iff", "tatooine", 0L, 3525.0F, 4.0F, -4800.0F, 0.70F, 0.71F);
 		// I assume that childobject does not get a radial somehow
 		
-		final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
+		final BuildingObject building = (BuildingObject) target.getGrandparent();
+		//final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
 		final SUIWindow window = core.suiService.createInputBox(2,"@player_structure:structure_status","@player_structure:structure_name_prompt", owner, target, 0);
 		window.setProperty("bg.caption.lblTitle:Text", "@player_structure:find_items_search_keyword_title");
 		window.setProperty("Prompt.lblPrompt:Text", "@player_structure:find_items_search_keyword_prompt");
@@ -666,7 +664,8 @@ public class HousingService implements INetworkDispatch {
 	}
 	
 	public void displayFoundItems(SWGObject owner, TangibleObject target, Vector<TangibleObject> foundItems) {
-		final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
+		final BuildingObject building = (BuildingObject) target.getGrandparent();
+		//final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
 		final SUIWindow window = core.suiService.createSUIWindow("Script.listBox", owner, target, 0);
 		window.setProperty("bg.caption.lblTitle:Text", "@player_structure:find_items_search_keyword_title");
 		window.setProperty("Prompt.lblPrompt:Text", "@player_structure:find_items_search_list_prompt");
@@ -707,13 +706,15 @@ public class HousingService implements INetworkDispatch {
 	}
 	
 	public void handlePermissionEntry(CreatureObject owner, TangibleObject target) {
-		final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
+		final BuildingObject building = (BuildingObject) target.getGrandparent();
+		//final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
 		String listName = "ENTRY";
 		building.setPermissionEntry(listName,owner);
 	}
 	
 	public void handlePermissionBan(CreatureObject owner, TangibleObject target) {
-		final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
+		final BuildingObject building = (BuildingObject) target.getGrandparent();
+		//final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
 		String listName = "BAN";
 		building.setPermissionBan(listName,owner);
 	}
@@ -754,8 +755,9 @@ public class HousingService implements INetworkDispatch {
 	}
 	
 	public String fetchPrivacyString(TangibleObject object){
-		final BuildingObject building = (BuildingObject) object.getAttachment("housing_parentstruct");
-		return building.getPrivacyString();
+		//final BuildingObject building = (BuildingObject) object.getAttachment("housing_parentstruct");
+		//return building.getPrivacyString();
+		return ((BuildingObject) object.getGrandparent()).getPrivacyString();
 	}
 	
 	

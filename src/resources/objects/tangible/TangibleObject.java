@@ -40,8 +40,8 @@ import protocol.swg.objectControllerObjects.ShowFlyText;
 import resources.common.OutOfBand;
 import resources.common.RGB;
 import resources.datatables.Options;
+import resources.loot.LootGroup;
 import resources.objects.creature.CreatureObject;
-import resources.objects.loot.LootGroup;
 import resources.visitors.IDManagerVisitor;
 
 import com.sleepycat.persist.model.NotPersistent;
@@ -54,7 +54,7 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent(version=12)
+@Persistent(version=13)
 public class TangibleObject extends SWGObject {
 	
 	// TODO: Thread safety

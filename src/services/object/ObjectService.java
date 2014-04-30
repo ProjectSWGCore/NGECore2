@@ -115,8 +115,6 @@ import resources.objects.resource.GalacticResource;
 import resources.objects.resource.ResourceContainerObject;
 import resources.objects.resource.ResourceRoot;
 import resources.objects.staticobject.StaticObject;
-import resources.objects.tangible.Harvester_Deed;
-import resources.objects.tangible.Player_House_Deed;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.tool.SurveyTool;
 import resources.objects.waypoint.WaypointObject;
@@ -223,7 +221,9 @@ public class ObjectService implements INetworkDispatch {
 		} catch (InstantiationException | IllegalAccessException e) {
 			e.printStackTrace();
 		}
+		
 		boolean isSnapshot = false;
+		
 		if(objectID == 0)
 			objectID = generateObjectID();
 		else
@@ -241,15 +241,7 @@ public class ObjectService implements INetworkDispatch {
 			
 			object = new SurveyTool(objectID, planet, Template, position, orientation);
 			
-		} else if(Template.startsWith("object/tangible/deed/harvester_deed") || Template.startsWith("object/tangible/deed/generator_deed")) {
-			
-			object = new Harvester_Deed(objectID, planet, Template, position, orientation);
-			
-		} else if(Template.startsWith("object/tangible/deed/player_house_deed") || Template.startsWith("object/tangible/deed/guild_deed") || Template.startsWith("object/tangible/deed/city_deed") || Template.startsWith("object/tangible/tcg/series3/shared_structure_deed_sith_meditation_room_deed.iff") || Template.startsWith("object/tangible/tcg/series5/shared_structure_deed_player_house_atat.iff") || Template.startsWith("object/tangible/tcg/series5/shared_structure_deed_player_house_hangar.iff") || Template.startsWith("object/tangible/tcg/series3/shared_structure_deed_jedi_meditation_room_deed.iff") || Template.startsWith("object/tangible/saga_system/rewards/shared_structure_deed_player_house_sandcrawler.iff")) {
-			
-			object = new Player_House_Deed(objectID, planet, Template, position, orientation);
-			
-		} 
+		}
 //		else if(Template.startsWith("object/tangible/container/drum/shared_treasure_drum.iff")) {
 //			
 //			object = new CreatureObject(objectID, planet, position, orientation, Template);			
@@ -346,17 +338,10 @@ public class ObjectService implements INetworkDispatch {
 		object.setAttachment("customServerTemplate", customServerTemplate);
 		
 		object.setisInSnapshot(isSnapshot);
+		
 		if(!core.getObjectIdODB().contains(objectID, Long.class, ObjectId.class)) {
 			core.getObjectIdODB().put(new ObjectId(objectID), Long.class, ObjectId.class);
 		}
-		if(loadServerTemplate)
-			loadServerTemplate(object);		
-		else {
-			final SWGObject pointer = object;
-			loadServerTemplateTasks.add(() -> loadServerTemplate(pointer));
-		}
-		
-		objectList.put(objectID, object);
 		
 		// Set Options - easier to set them across the board here
 		// because we'll be spawning them despite most of them being unscripted.
@@ -391,6 +376,15 @@ public class ObjectService implements INetworkDispatch {
 				((TangibleObject) object).setOptionsBitmask(Options.INVULNERABLE | Options.USABLE);
 			}
 		}
+		
+		if(loadServerTemplate)
+			loadServerTemplate(object);		
+		else {
+			final SWGObject pointer = object;
+			loadServerTemplateTasks.add(() -> loadServerTemplate(pointer));
+		}
+		
+		objectList.put(objectID, object);
 		
 		return object;
 	}
@@ -643,10 +637,32 @@ public class ObjectService implements INetworkDispatch {
 
 	}
 	
+	public long getDOId(String planet, String template, int type, long containerId, int cellNumber, float x1, float y, float z1) {
+		SWGObject container = getObject(containerId);
+		float x = ((container == null) ? x1 : container.getPosition().x + x1);
+		float z = ((container == null) ? z1 : container.getPosition().z + z1);
+		String key = "" + CRC.StringtoCRC(planet) + CRC.StringtoCRC(template) + type + containerId + cellNumber + x + y + z;
+		
+		long objectId = 0;
+		
+		if (core.getDuplicateIdODB().contains(key, String.class, DuplicateId.class)) {
+			objectId = core.getDuplicateIdODB().get(key, String.class, DuplicateId.class).getObjectId();
+		} else {
+			objectId = generateObjectID();
+			Transaction txn = core.getDuplicateIdODB().getEnvironment().beginTransaction(null, null);
+			core.getDuplicateIdODB().put(new DuplicateId(key, objectId), String.class, DuplicateId.class, txn);
+			txn.commitSync();
+		}
+		
+		return objectId;
+	}
+	
 	public void useObject(CreatureObject creature, SWGObject object) {
 		if (creature == null || object == null) {
 			return;
 		}
+		
+		creature.setUseTarget(object);
 		
 		int reuse_time;
 		
@@ -897,6 +913,10 @@ public class ObjectService implements INetworkDispatch {
 				if(!core.getConfig().getString("MOTD").equals(""))
 					creature.sendSystemMessage(core.getConfig().getString("MOTD"), (byte) 2);
 				
+				BountyListItem bounty = core.getBountiesODB().get(creature.getObjectId(), Long.class, BountyListItem.class);
+				if (bounty != null)
+					core.missionService.getBountyList().add(bounty);
+				
 				core.playerService.postZoneIn(creature);
 			}
 			
@@ -1081,11 +1101,14 @@ public class ObjectService implements INetworkDispatch {
 				if (duplicate.containsKey(containerId)) {
 					containerId = duplicate.get(containerId);
 				}
+				
 				String planetName = planet.getName();
+				
+				// TODO needs to a way to work for mustafar and kashyyyk which both have instances
 				if (objectId != 0 && getObject(objectId) != null && (planetName.contains("dungeon") || planetName.contains("adventure"))) {
 					SWGObject container = getObject(containerId);
-					int x = ((int) (px + ((container == null) ? x1 : container.getPosition().x)));
-					int z = ((int) (pz + ((container == null) ? z1 : container.getPosition().z)));
+					float x = (px + ((container == null) ? x1 : container.getPosition().x));
+					float z = (pz + ((container == null) ? z1 : container.getPosition().z));
 					String key = "" + CRC.StringtoCRC(planet.getName()) + CRC.StringtoCRC(template) + type + containerId + cellIndex + x + py + z;
 					long newObjectId = 0;
 					

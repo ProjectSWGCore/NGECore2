@@ -58,6 +58,8 @@ import protocol.swg.ShowHelmet;
 import protocol.swg.objectControllerObjects.ChangeRoleIconChoice;
 import protocol.swg.objectControllerObjects.ShowFlyText;
 import protocol.swg.objectControllerObjects.ShowLootBox;
+import resources.buffs.Buff;
+import resources.common.BountyListItem;
 import resources.common.FileUtilities;
 import resources.common.ObjControllerOpcodes;
 import resources.common.Opcodes;
@@ -70,7 +72,6 @@ import resources.datatables.DisplayType;
 import resources.datatables.PlayerFlags;
 import resources.datatables.Professions;
 import resources.guild.Guild;
-import resources.objects.Buff;
 import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
@@ -78,6 +79,7 @@ import resources.objects.player.PlayerMessageBuilder;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.waypoint.WaypointObject;
+import services.sui.SUIService.InputBoxType;
 import services.sui.SUIService.ListBoxType;
 import services.sui.SUIWindow;
 import services.sui.SUIWindow.Trigger;
@@ -1250,6 +1252,29 @@ public class PlayerService implements INetworkDispatch {
 			}
 		});
 		core.suiService.openSUIWindow(ringWindow);
+	}
+	
+	public void sendSetBountyWindow(final CreatureObject victim, final CreatureObject attacker) {
+		SUIWindow bountyWindow = core.suiService.createInputBox(InputBoxType.INPUT_BOX_OK_CANCEL, "@bounty_hunter:setbounty_title", "@bounty_hunter:setbounty_prompt1 " + attacker.getCustomName() + "?" + "\n@bounty_hunter:setbounty_prompt2 " + victim.getBankCredits(), 
+				victim, null, (float) 10, new SUICallback() {
+
+			@Override
+			public void process(SWGObject owner, int eventType, Vector<String> returnList) {
+				if (eventType == 0 && returnList.get(0) != null) {
+					int bounty = Integer.parseInt(returnList.get(0));
+					
+					if (bounty > victim.getBankCredits())
+						return;
+
+					if (!core.missionService.addToExistingBounty(attacker, bounty))
+						core.missionService.createNewBounty(attacker, bounty);
+
+					victim.setBankCredits(victim.getBankCredits() - bounty);
+				}
+			}
+			
+		});
+		core.suiService.openSUIWindow(bountyWindow);
 	}
 	
 	public String getFormalProfessionName(String template) {

@@ -16,24 +16,59 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * 
- * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
+ * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine.
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package resources.objects.tangible;
+package resources.buffs;
 
 import com.sleepycat.persist.model.Persistent;
 
-import engine.resources.scene.Planet;
-import engine.resources.scene.Point3D;
-import engine.resources.scene.Quaternion;
+@Persistent
+public class BuffItem {
+	private int affectAmount;
+	private int entertainerBonus;
+	private int invested;
+	private String skillName;
 
-/** 
- * @author Charon 
- */
-@Persistent(version=0)
-public class Deed extends TangibleObject {
-	
-	public Deed(long objectID, Planet planet, String template, Point3D position, Quaternion orientation){
-		super(objectID, planet, template, position, orientation);
+	public BuffItem() {
+
+	}
+
+	public BuffItem(String skillName, int invested, int entBonus) {
+		this.skillName = skillName;
+		this.invested = invested;
+		this.entertainerBonus = entBonus;
+	}
+
+	public int getAffectAmount() {
+		return affectAmount;
+	}
+
+	public int getEntertainerBonus() {
+		return entertainerBonus;
+	}
+
+	public int getInvested() {
+		return invested;
+	}
+
+	public String getSkillName() {
+		return skillName;
+	}
+
+	public void setAffectAmount(int amount) {
+		this.affectAmount = amount;
+	}
+
+	public void setEntertainerBonus(int entertainerBonus) {
+		this.entertainerBonus = entertainerBonus;
+	}
+
+	public void setInvested(int invested) {
+		this.invested = invested;
+	}
+
+	public void setSkillName(String skillName) {
+		this.skillName = skillName;
 	}
 }

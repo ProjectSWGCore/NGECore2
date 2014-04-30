@@ -6,7 +6,7 @@ import java.util.Vector;
 import org.apache.mina.core.buffer.IoBuffer;
 
 import protocol.swg.ObjControllerMessage;
-import resources.objects.BuffItem;
+import resources.buffs.BuffItem;
 
 public class BuffBuilderChangeMessage extends ObjControllerObject {
 

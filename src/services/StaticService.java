@@ -26,11 +26,12 @@ import java.util.List;
 import java.util.Map;
 
 import resources.objects.building.BuildingObject;
+import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
-
 import main.NGECore;
-
+import engine.clientdata.ClientFileManager;
+import engine.clientdata.visitors.PortalVisitor;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -71,48 +72,79 @@ public class StaticService implements INetworkDispatch {
 		return spawnObject(template, planetName, cellId, x, y, z, qW, 0, qY, 0);
 	}
 	
-	public SWGObject spawnObject(String template, String planetName, long cellId, float x, float y, float z, float qW, float qX, float qY, float qZ) {
-		return spawnObject(template, 0, planetName, cellId, x, y, z, qW, qX, qY, qZ);
+	public SWGObject spawnObject(String template, String planetName, SWGObject cell, float x, float y, float z, float qW, float qX, float qY, float qZ) {
+		return spawnObject(template, planetName, ((cell == null) ? 0L : cell.getObjectID()), x, y, z, qW, qX, qY, qZ);
 	}
 	
-	public SWGObject spawnObject(String template, long objectId, String planetName, long cellId, float x, float y, float z, float qW, float qX, float qY, float qZ) {
+	public SWGObject spawnObject(String template, String planetName, long cellId, float x, float y, float z, float qW, float qX, float qY, float qZ) {
 		Planet planet = core.terrainService.getPlanetByName(planetName);
 		
 		if (planet == null) {
-			System.out.println("StaticService: Can't spawn static object because planet is null.");
+			System.err.println("StaticService: Can't spawn static object because planet is null.");
 			return null;
 		}
 		
-		SWGObject object = core.objectService.createObject(template, objectId, planet, new Point3D(x, y, z), new Quaternion(qW, qX, qY, qZ));
+		long buildingId = 0;
+		int cellNumber = 0;
+		
+		SWGObject cell = core.objectService.getObject(cellId);
+		
+		if (cell != null && cell.getContainer() != null && cell.getContainer() instanceof BuildingObject) {
+			buildingId = cell.getContainer().getObjectId();
+			cellNumber = ((BuildingObject) cell.getContainer()).getCellNumberByObjectId(cellId);
+		}
+		
+		long objectId = core.objectService.getDOId(planetName, template, 0, buildingId, cellNumber, x, y, z);
+		
+		SWGObject object = core.objectService.createObject(template, objectId, planet, new Point3D(x, y, z), new Quaternion(qW, qX, qY, qZ), null, true, true);
 		
 		if (object == null) {
-			System.out.println("Static object is null with id " + objectId + " and template " + template + ".");
+			System.err.println("Static object is null with id " + objectId + " and template " + template + ".");
 			return null;
 		}
 		
 		if (objectId != 0 && object.getObjectID() != objectId) {
-			System.out.println("StaticService: ObjectId " + objectId + " was taken for object with template " + object.getTemplate() + ".  Replacement: " + object.getObjectID());
+			System.err.println("StaticService: ObjectId " + objectId + " was taken for object with template " + object.getTemplate() + ".  Replacement: " + object.getObjectID());
 		}
 		
 		if (object instanceof CreatureObject) {
 			((CreatureObject) object).setStaticNPC(true);
 		}
 		
-		if (cellId == 0) {
-			boolean add = core.simulationService.add(object, (float) x, (float) z, true);
+		if (object instanceof BuildingObject) {
+			BuildingObject building = (BuildingObject) object;
 			
-			if (!add) {
-				System.out.println("StaticService: Quadtree insert failed for: " + template);
+			Map<String, Object> attributes = building.getTemplateData().getAttributes();
+			
+			if (building.getCells().size() == 0 && attributes.containsKey("portalLayoutFilename") && ((String) attributes.get("portalLayoutFilename")).length() > 0) {
+				String portalLayoutFilename = (String) attributes.get("portalLayoutFilename");
+				
+				try {
+					PortalVisitor portal = ClientFileManager.loadFile(portalLayoutFilename, PortalVisitor.class);
+					
+					for (int i = 1; i <= portal.cellCount; i++) {
+						long cellObjectId = core.objectService.getDOId(planetName, "object/cell/shared_cell.iff", 0, object.getObjectID(), i, x, y, z);
+						CellObject childCell = (CellObject) core.objectService.createObject("object/cell/shared_cell.iff", cellObjectId, core.terrainService.getPlanetByName(planetName), new Point3D(0, 0, 0), new Quaternion(1, 0, 0, 0), null, true, true);
+						childCell.setCellNumber(i);
+						building.add(childCell);
+					}
+				} catch (InstantiationException | IllegalAccessException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		if (cellId == 0) {
+			if (!core.simulationService.add(object, (float) x, (float) z, true)) {
+				System.err.println("StaticService: Quadtree insert failed for: " + template);
 			}
 		} else {
-			SWGObject parent = core.objectService.getObject(cellId);
-			
-			if (parent == null) {
-				System.out.println("StaticService: Cell not found");
+			if (cell == null) {
+				System.err.println("StaticService: Cell not found");
 				return object;
 			}
 			
-			parent.add(object);
+			cell.add(object);
 		}
 		
 		return object;
@@ -128,8 +160,8 @@ public class StaticService implements INetworkDispatch {
 					cloners.add(obj);
 			}
 		}
-		return cloners;
 		
+		return cloners;
 	}
 	
 	@Override

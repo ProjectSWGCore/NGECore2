@@ -6,7 +6,7 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('sewer worrt')
+	mobileTemplate.setCreatureName('sewer_worrt')
 	mobileTemplate.setLevel(5)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
@@ -14,7 +14,7 @@ def addTemplate(core):
 	mobileTemplate.setAttackSpeed(1.0)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_minor_worrt.iff')
+	templates.add('object/mobile/shared_worrt.iff')
 	mobileTemplate.setTemplates(templates)
 
 	weaponTemplates = Vector()

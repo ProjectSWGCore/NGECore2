@@ -19,15 +19,46 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package resources.objects.loot;
+package resources.loot;
+
+import com.sleepycat.persist.model.Persistent;
 
 /** 
  * @author Charon 
  */
 
-public class LootPool {
+@Persistent(version=0)
+public class LootGroup {
 	
-	public LootPool(){
+	private String[] lootPoolNames;
+	private double[] lootPoolChances; 
+	private double lootGroupChance;
+	
+	public LootGroup(){
 		
+	}
+	
+	public LootGroup(String[] lootPoolNames, double[] lootPoolChances, double lootGroupChance){
+		this.lootPoolNames   = lootPoolNames;
+		this.lootPoolChances = lootPoolChances;
+		this.lootGroupChance = lootGroupChance;
+	}
+		
+	public void addLootData(String[] lootPoolNames, double[] lootPoolChances, double lootGroupChance){
+		this.lootPoolNames   = lootPoolNames;
+		this.lootPoolChances = lootPoolChances;
+		this.lootGroupChance = lootGroupChance;
+	}
+	
+	public String[] getLootPoolNames() {
+		return lootPoolNames;
+	}
+	
+	public double[] getLootPoolChances() {
+		return lootPoolChances;
+	}
+	
+	public double getLootGroupChance() {
+		return lootGroupChance;
 	}
 }

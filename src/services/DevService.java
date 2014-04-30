@@ -40,8 +40,6 @@ import resources.datatables.WeaponType;
 import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
-import resources.objects.tangible.Harvester_Deed;
-import resources.objects.tangible.Player_House_Deed;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.tool.SurveyTool;
 import resources.objects.weapon.WeaponObject;
@@ -1027,190 +1025,140 @@ public class DevService implements INetworkDispatch {
 						inventory.add(solarSurveyTool);
 						return;
 					case 111:
+						SWGObject deed1;
+						
 						// Minerals
-						String templateString="object/tangible/deed/harvester_deed/shared_harvester_ore_s1_deed.iff";
-						Harvester_Deed deed1 = (Harvester_Deed)core.objectService.createObject(templateString, planet);
-						deed1.setOutputHopperCapacity(27344);
-						deed1.setBER(5);
-						deed1.setAttributes();
+						deed1 = core.objectService.createObject("object/tangible/deed/harvester_deed/shared_harvester_ore_s1_deed.iff", planet);
+						deed1.setIntAttribute("examine_hoppersize", 27344);
+						deed1.setIntAttribute("examine_maintenance_rate", 5);
 						inventory.add(deed1);
 						
-						templateString="object/tangible/deed/harvester_deed/shared_harvester_ore_s2_deed.iff";
-						deed1 = (Harvester_Deed)core.objectService.createObject(templateString, planet);
-						deed1.setOutputHopperCapacity(27344);
-						deed1.setBER(11);
-						deed1.setAttributes();
+						deed1 = core.objectService.createObject("object/tangible/deed/harvester_deed/shared_harvester_ore_s2_deed.iff", planet);
+						deed1.setIntAttribute("examine_hoppersize", 27344);
+						deed1.setIntAttribute("examine_maintenance_rate", 11);
 						inventory.add(deed1);
 						
-						templateString="object/tangible/deed/harvester_deed/shared_harvester_ore_heavy_deed.iff";
-						deed1 = (Harvester_Deed)core.objectService.createObject(templateString, planet);
-						deed1.setOutputHopperCapacity(135400);
-						deed1.setBER(14);
-						deed1.setAttributes();
+						deed1 = core.objectService.createObject("object/tangible/deed/harvester_deed/shared_harvester_ore_heavy_deed.iff", planet);
+						deed1.setIntAttribute("examine_hoppersize", 135400);
+						deed1.setIntAttribute("examine_maintenance_rate", 14);
 						inventory.add(deed1);
 						
-						templateString="object/tangible/deed/harvester_deed/shared_harvester_ore_deed_elite.iff";
-						deed1 = (Harvester_Deed)core.objectService.createObject(templateString, planet);
-						deed1.setOutputHopperCapacity(250000);
-						deed1.setBER(44);
-						deed1.setAttributes();
+						deed1 = core.objectService.createObject("object/tangible/deed/harvester_deed/shared_harvester_ore_deed_elite.iff", planet);
+						deed1.setIntAttribute("examine_hoppersize", 250000);
+						deed1.setIntAttribute("examine_maintenance_rate", 44);
 						inventory.add(deed1);
-						
 						
 						// Chemicals
-						templateString="object/tangible/deed/harvester_deed/shared_harvester_liquid_deed.iff";
-						deed1 = (Harvester_Deed)core.objectService.createObject(templateString, planet);
-						deed1.setOutputHopperCapacity(27344);
-						deed1.setBER(5);
-						deed1.setAttributes();
+						deed1 = core.objectService.createObject("object/tangible/deed/harvester_deed/shared_harvester_liquid_deed.iff", planet);
+						deed1.setIntAttribute("examine_hoppersize", 27344);
+						deed1.setIntAttribute("examine_maintenance_rate", 5);
 						inventory.add(deed1);
 						
-						templateString="object/tangible/deed/harvester_deed/shared_harvester_liquid_deed_medium.iff";
-						deed1 = (Harvester_Deed)core.objectService.createObject(templateString, planet);
-						deed1.setOutputHopperCapacity(27344);
-						deed1.setBER(11);
-						deed1.setAttributes();
+						deed1 = core.objectService.createObject("object/tangible/deed/harvester_deed/shared_harvester_liquid_deed_medium.iff", planet);
+						deed1.setIntAttribute("examine_hoppersize", 27344);
+						deed1.setIntAttribute("examine_maintenance_rate", 11);
 						inventory.add(deed1);
 						
-						templateString="object/tangible/deed/harvester_deed/shared_harvester_liquid_deed_heavy.iff";
-						deed1 = (Harvester_Deed)core.objectService.createObject(templateString, planet);
-						deed1.setOutputHopperCapacity(135400);
-						deed1.setBER(14);
-						deed1.setAttributes();
+						deed1 = core.objectService.createObject("object/tangible/deed/harvester_deed/shared_harvester_liquid_deed_heavy.iff", planet);
+						deed1.setIntAttribute("examine_hoppersize", 135400);
+						deed1.setIntAttribute("examine_maintenance_rate", 14);
 						inventory.add(deed1);
 						
-						templateString="object/tangible/deed/harvester_deed/shared_harvester_liquid_deed_elite.iff";
-						deed1 = (Harvester_Deed)core.objectService.createObject(templateString, planet);
-						deed1.setOutputHopperCapacity(250000);
-						deed1.setBER(44);
-						deed1.setAttributes();
+						deed1 = core.objectService.createObject("object/tangible/deed/harvester_deed/shared_harvester_liquid_deed_elite.iff", planet);
+						deed1.setIntAttribute("examine_hoppersize", 250000);
+						deed1.setIntAttribute("examine_maintenance_rate", 44);
 						inventory.add(deed1);
-						
 						
 						// Flora
-						templateString="object/tangible/deed/harvester_deed/shared_harvester_flora_deed.iff";
-						deed1 = (Harvester_Deed)core.objectService.createObject(templateString, planet);
-						deed1.setOutputHopperCapacity(27344);
-						deed1.setBER(5);
-						deed1.setAttributes();
+						deed1 = core.objectService.createObject("object/tangible/deed/harvester_deed/shared_harvester_flora_deed.iff", planet);
+						deed1.setIntAttribute("examine_hoppersize", 27344);
+						deed1.setIntAttribute("examine_maintenance_rate", 5);
 						inventory.add(deed1);
 						
-						templateString="object/tangible/deed/harvester_deed/shared_harvester_flora_deed_medium.iff";
-						deed1 = (Harvester_Deed)core.objectService.createObject(templateString, planet);
-						deed1.setOutputHopperCapacity(27344);
-						deed1.setBER(11);
-						deed1.setAttributes();
+						deed1 = core.objectService.createObject("object/tangible/deed/harvester_deed/shared_harvester_flora_deed_medium.iff", planet);
+						deed1.setIntAttribute("examine_hoppersize", 27344);
+						deed1.setIntAttribute("examine_maintenance_rate", 11);
 						inventory.add(deed1);
 						
-						templateString="object/tangible/deed/harvester_deed/shared_harvester_flora_deed_heavy.iff";
-						deed1 = (Harvester_Deed)core.objectService.createObject(templateString, planet);
-						deed1.setOutputHopperCapacity(135400);
-						deed1.setBER(14);
-						deed1.setAttributes();
+						deed1 = core.objectService.createObject("object/tangible/deed/harvester_deed/shared_harvester_flora_deed_heavy.iff", planet);
+						deed1.setIntAttribute("examine_hoppersize", 135400);
+						deed1.setIntAttribute("examine_maintenance_rate", 14);
 						inventory.add(deed1);
 						
-						templateString="object/tangible/deed/harvester_deed/shared_harvester_flora_deed_elite.iff";
-						deed1 = (Harvester_Deed)core.objectService.createObject(templateString, planet);
-						deed1.setOutputHopperCapacity(250000);
-						deed1.setBER(44);
-						deed1.setAttributes();
+						deed1 = core.objectService.createObject("object/tangible/deed/harvester_deed/shared_harvester_flora_deed_elite.iff", planet);
+						deed1.setIntAttribute("examine_hoppersize", 250000);
+						deed1.setIntAttribute("examine_maintenance_rate", 44);
 						inventory.add(deed1);
 						
 						
 						// Gas
-						templateString="object/tangible/deed/harvester_deed/shared_harvester_gas_deed.iff";
-						deed1 = (Harvester_Deed)core.objectService.createObject(templateString, planet);
-						deed1.setOutputHopperCapacity(27344);
-						deed1.setBER(5);
-						deed1.setAttributes();
+						deed1 = core.objectService.createObject("object/tangible/deed/harvester_deed/shared_harvester_gas_deed.iff", planet);
+						deed1.setIntAttribute("examine_hoppersize", 27344);
+						deed1.setIntAttribute("examine_maintenance_rate", 5);
 						inventory.add(deed1);
 						
-						templateString="object/tangible/deed/harvester_deed/shared_harvester_gas_deed_medium.iff";
-						deed1 = (Harvester_Deed)core.objectService.createObject(templateString, planet);
-						deed1.setOutputHopperCapacity(27344);
-						deed1.setBER(11);
-						deed1.setAttributes();
+						deed1 = core.objectService.createObject("object/tangible/deed/harvester_deed/shared_harvester_gas_deed_medium.iff", planet);
+						deed1.setIntAttribute("examine_hoppersize", 27344);
+						deed1.setIntAttribute("examine_maintenance_rate", 11);
 						inventory.add(deed1);
 						
-						templateString="object/tangible/deed/harvester_deed/shared_harvester_gas_deed_heavy.iff";
-						deed1 = (Harvester_Deed)core.objectService.createObject(templateString, planet);
-						deed1.setOutputHopperCapacity(135400);
-						deed1.setBER(14);
-						deed1.setAttributes();
+						deed1 = core.objectService.createObject("object/tangible/deed/harvester_deed/shared_harvester_gas_deed_heavy.iff", planet);
+						deed1.setIntAttribute("examine_hoppersize", 135400);
+						deed1.setIntAttribute("examine_maintenance_rate", 14);
 						inventory.add(deed1);
 						
-						templateString="object/tangible/deed/harvester_deed/shared_harvester_gas_deed_elite.iff";
-						deed1 = (Harvester_Deed)core.objectService.createObject(templateString, planet);
-						deed1.setOutputHopperCapacity(250000);
-						deed1.setBER(44);
-						deed1.setAttributes();
+						deed1 = core.objectService.createObject("object/tangible/deed/harvester_deed/shared_harvester_gas_deed_elite.iff", planet);
+						deed1.setIntAttribute("examine_hoppersize", 250000);
+						deed1.setIntAttribute("examine_maintenance_rate", 44);
 						inventory.add(deed1);
-						
 						
 						// Water
-						templateString="object/tangible/deed/harvester_deed/shared_harvester_moisture_deed.iff";
-						deed1 = (Harvester_Deed)core.objectService.createObject(templateString, planet);
-						deed1.setOutputHopperCapacity(27344);
-						deed1.setBER(5);
-						deed1.setAttributes();
+						deed1 = core.objectService.createObject("object/tangible/deed/harvester_deed/shared_harvester_moisture_deed.iff", planet);
+						deed1.setIntAttribute("examine_hoppersize", 27344);
+						deed1.setIntAttribute("examine_maintenance_rate", 5);
 						inventory.add(deed1);
 						
-						templateString="object/tangible/deed/harvester_deed/shared_harvester_moisture_deed_medium.iff";
-						deed1 = (Harvester_Deed)core.objectService.createObject(templateString, planet);
-						deed1.setOutputHopperCapacity(27344);
-						deed1.setBER(11);
-						deed1.setAttributes();
+						deed1 = core.objectService.createObject("object/tangible/deed/harvester_deed/shared_harvester_moisture_deed_medium.iff", planet);
+						deed1.setIntAttribute("examine_hoppersize", 27344);
+						deed1.setIntAttribute("examine_maintenance_rate", 11);
 						inventory.add(deed1);
 						
-						templateString="object/tangible/deed/harvester_deed/shared_harvester_moisture_deed_heavy.iff";
-						deed1 = (Harvester_Deed)core.objectService.createObject(templateString, planet);
-						deed1.setOutputHopperCapacity(135400);
-						deed1.setBER(14);
-						deed1.setAttributes();
+						deed1 = core.objectService.createObject("object/tangible/deed/harvester_deed/shared_harvester_moisture_deed_heavy.iff", planet);
+						deed1.setIntAttribute("examine_hoppersize", 135400);
+						deed1.setIntAttribute("examine_maintenance_rate", 14);
 						inventory.add(deed1);
 						
-						templateString="object/tangible/deed/harvester_deed/shared_harvester_moisture_deed_elite.iff";
-						deed1 = (Harvester_Deed)core.objectService.createObject(templateString, planet);
-						deed1.setOutputHopperCapacity(250000);
-						deed1.setBER(44);
-						deed1.setAttributes();
+						deed1 = core.objectService.createObject("object/tangible/deed/harvester_deed/shared_harvester_moisture_deed_elite.iff", planet);
+						deed1.setIntAttribute("examine_hoppersize", 250000);
+						deed1.setIntAttribute("examine_maintenance_rate", 44);
 						inventory.add(deed1);
-						
 						
 						// Generators
-						templateString="object/tangible/deed/generator_deed/shared_generator_fusion_deed.iff";
-						deed1 = (Harvester_Deed)core.objectService.createObject(templateString, planet);
-						deed1.setOutputHopperCapacity(250000);
-						deed1.setBER(19);
-						deed1.setAttributes();
+						deed1 = core.objectService.createObject("object/tangible/deed/generator_deed/shared_generator_fusion_deed.iff", planet);
+						deed1.setIntAttribute("examine_hoppersize", 250000);
+						deed1.setIntAttribute("examine_maintenance_rate", 19);
 						inventory.add(deed1);
 						
-						templateString="object/tangible/deed/generator_deed/shared_generator_wind_deed.iff";
-						deed1 = (Harvester_Deed)core.objectService.createObject(templateString, planet);
-						deed1.setOutputHopperCapacity(250000);
-						deed1.setBER(10);
-						deed1.setAttributes();
+						deed1 = core.objectService.createObject("object/tangible/deed/generator_deed/shared_generator_wind_deed.iff", planet);
+						deed1.setIntAttribute("examine_hoppersize", 250000);
+						deed1.setIntAttribute("examine_maintenance_rate", 10);
 						inventory.add(deed1);
 						
-						templateString="object/tangible/deed/generator_deed/shared_generator_solar_deed.iff";
-						deed1 = (Harvester_Deed)core.objectService.createObject(templateString, planet);
-						deed1.setOutputHopperCapacity(250000);
-						deed1.setBER(15);
-						deed1.setAttributes();
+						deed1 = core.objectService.createObject("object/tangible/deed/generator_deed/shared_generator_solar_deed.iff", planet);
+						deed1.setIntAttribute("examine_hoppersize", 250000);
+						deed1.setIntAttribute("examine_maintenance_rate", 15);
 						inventory.add(deed1);
 						
-//						templateString="object/tangible/deed/generator_deed/shared_generator_photo_bio_deed.iff";
-//						deed1 = (Harvester_Deed)core.objectService.createObject(templateString, planet);
-//						deed1.setOutputHopperCapacity(250000);
-//						deed1.setBER(19);
+//						deed1 = core.objectService.createObject("object/tangible/deed/generator_deed/shared_generator_photo_bio_deed.iff", planet);
+//						deed1.setIntAttribute("examine_hoppersize", 250000);
+//						deed1.setIntAttribute("examine_maintenance_rate", 19);
 //						inventory.add(deed1);
 						
-						templateString="object/tangible/deed/generator_deed/shared_generator_geothermal_deed.iff";
-						deed1 = (Harvester_Deed)core.objectService.createObject(templateString, planet);
-						deed1.setOutputHopperCapacity(250000);
-						deed1.setBER(15);
-						deed1.setAttributes();
+						deed1 = core.objectService.createObject("object/tangible/deed/generator_deed/shared_generator_geothermal_deed.iff", planet);
+						deed1.setIntAttribute("examine_hoppersize", 250000);
+						deed1.setIntAttribute("examine_maintenance_rate", 15);
 						inventory.add(deed1);
+						
 						return;
 					case 112:
 						core.resourceService.spawnSpecificResourceContainer("Radioactive", player, 100000);
@@ -1218,21 +1166,16 @@ public class DevService implements INetworkDispatch {
 					case 120:
 //						SWGObject houseDeed = core.objectService.createObject("object/tangible/deed/player_house_deed/shared_generic_house_small_deed.iff", planet);
 //						inventory.add(houseDeed);
-											
-						templateString="object/tangible/deed/player_house_deed/shared_generic_house_small_deed.iff";
-						Player_House_Deed deed = (Player_House_Deed)core.objectService.createObject(templateString, planet);
-						deed.setBMR(15);
-						deed.setAttributes();
-						inventory.add(deed);	
-														
-						templateString="object/tangible/deed/city_deed/shared_cityhall_tatooine_deed.iff";
-						deed = (Player_House_Deed)core.objectService.createObject(templateString, planet);
-						deed.setBMR(15);
-						deed.setAttributes();
-						inventory.add(deed);	
-					
-						return;	
-												
+						
+						TangibleObject deed = (TangibleObject) core.objectService.createObject("object/tangible/deed/player_house_deed/shared_generic_house_small_deed.iff", planet);
+						deed.setIntAttribute("examine_maintenance_rate", 15);
+						inventory.add(deed);
+						
+						deed = (TangibleObject) core.objectService.createObject("object/tangible/deed/city_deed/shared_cityhall_tatooine_deed.iff", planet);
+						deed.setIntAttribute("examine_maintenance_rate", 15);
+						inventory.add(deed);
+						
+						return;
 					case 125:
 						TangibleObject genericCraftingTool = (TangibleObject) core.objectService.createObject("object/tangible/crafting/station/shared_generic_tool.iff", planet);
 						genericCraftingTool.setCustomName("Generic Crafting Tool");
