@@ -213,6 +213,7 @@ public class NGECore {
 	private ObjectDatabase resourcesODB;
 	private ObjectDatabase resourceRootsODB;
 	private ObjectDatabase resourceHistoryODB;
+	private ObjectDatabase bountiesODB;
 	
 	public static boolean PACKET_DEBUG = false;
 
@@ -274,6 +275,7 @@ public class NGECore {
 		resourceRootsODB = new ObjectDatabase("resourceroots", true, false, true);
 		resourceHistoryODB = new ObjectDatabase("resourcehistory", true, false, true);
 		auctionODB = new ObjectDatabase("auction", true, false, true);
+		bountiesODB = new ObjectDatabase("bounties", true, false, true);
 		
 		// Services
 		loginService = new LoginService(this);
@@ -363,6 +365,7 @@ public class NGECore {
 		zoneDispatch.addService(bazaarService);
 		zoneDispatch.addService(lootService);
 		zoneDispatch.addService(mountService);
+		zoneDispatch.addService(housingService);
 		zoneDispatch.addService(playerCityService);
 		
 		if (optionsConfigLoaded && options.getInt("LOAD.RESOURCE.SYSTEM") == 1) {
@@ -482,7 +485,6 @@ public class NGECore {
 		spawnService.loadLairGroups();
 		spawnService.loadSpawnAreas();
 		
-		housingService.loadHousingTemplates();
 		equipmentService.loadBonusSets();
 		
 		retroService.run();
@@ -626,6 +628,10 @@ public class NGECore {
 		return chatRoomODB;
 	}
 	
+	public ObjectDatabase getBountiesODB() {
+		return bountiesODB;
+	}
+
 	public ObjectDatabase getResourcesODB() {
 		return resourcesODB;
 	}

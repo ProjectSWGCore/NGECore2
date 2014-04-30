@@ -25,8 +25,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import resources.common.FileUtilities;
-import resources.objects.SkillMod;
 import resources.objects.creature.CreatureObject;
+import resources.skills.SkillMod;
 import main.NGECore;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
@@ -127,7 +127,7 @@ public class SkillModService implements INetworkDispatch {
 		synchronized(creature.getMutex()) {
 			SkillMod skillMod = creature.getSkillMods().get(name);
 			
-			if (skillMod == null || base <= 0 || modifier <= 0) {
+			if (skillMod == null || (base <= 0 && modifier <= 0)) {
 				return;
 			} else {
 				skillMod.deductBase(base);

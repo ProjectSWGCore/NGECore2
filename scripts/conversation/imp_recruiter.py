@@ -199,10 +199,7 @@ def handleFirstScreen(core, actor, npc, selection):
 			
 		if selection == 1:
 			percent = core.guildService.getGuildObject().getCurrentServerGCWTotalPercentMap().get(actor.getPlanet().getName()).getPercent().intValue()
-			outOfBand = OutOfBand()
-			prose1 = ProsePackage("conversation/faction_recruiter_imperial", 's_412',0,"percent,@conversation/faction_recruiter_imperial:s_412", "TO", str(100 - percent))
-			outOfBand.addProsePackage(prose1)
-			convSvc.sendConversationMessage(actor, npc, outOfBand)
+			convSvc.sendConversationMessage(actor, npc, OutOfBand.ProsePackage("@conversation/faction_recruiter_imperial:s_412", percent, "TO", str(100 - percent)))
 			return
 		
 		if selection == 2:

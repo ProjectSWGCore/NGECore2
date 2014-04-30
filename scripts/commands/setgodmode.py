@@ -99,11 +99,9 @@ def run(core, actor, target, commandString):
 		if (actor.isInStealth()):
 			actor.setInStealth(False)
 			actor.setRadarVisible(True)
-			actor.sendSystemMessage('You are now visible to other players.', 0)
 		else:
 			actor.setInStealth(True)
 			actor.setRadarVisible(False)
-			actor.sendSystemMessage('You are now hidden from players. "Stealth Effect" is not implemented, however players still won\'t be able to see you. Type /setgodmode stealth again to be visible.', 0)
 	
 	elif command == 'holoEmote' and arg1:
 		playerObject.setHoloEmote('holoemote_' + arg1)
@@ -114,5 +112,12 @@ def run(core, actor, target, commandString):
 		if playerObject.getGodLevel > 0:
 			actor.removeAbility("admin")
 			playerObject.setGodLevel(0)
-			
+	
+	elif command == 'setBounty' and arg1:
+		if not core.missionService.addToExistingBounty(actor, int(arg1)):
+			core.missionService.createNewBounty(actor, int(arg1))
+		
+		actor.sendSystemMessage('Your bounty has been set to an additional ' + str(arg1) + ' credits.', 0)
+		return
+	
 	return

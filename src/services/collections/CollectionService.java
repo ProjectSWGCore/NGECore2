@@ -142,7 +142,7 @@ public class CollectionService implements INetworkDispatch {
 							int bits = 0;
 							boolean noScriptOnModify = false;
 							boolean clearOnComplete = false;
-							boolean noMessage = true;
+							boolean noMessage = false;
 							boolean grantIfPreReqMet = true;
 							boolean buddyCollection = false;
 							int numAltTitles = 0;
@@ -308,13 +308,21 @@ public class CollectionService implements INetworkDispatch {
 								collections.set(beginSlotId);
 							}
 							
-							player.setCollections(collections.toByteArray());
-							
-							if (!hidden && !noMessage) {
-								creature.sendSystemMessage(OutOfBand.ProsePackage("@collection_n:" + collection), DisplayType.Broadcast);
+							if (hidden && !(getCollection(creature, collectionName) > 0)) {
+								creature.sendSystemMessage(OutOfBand.ProsePackage("@collection:player_hidden_slot_added", "TO", collectionName), DisplayType.Broadcast);
 							}
 							
-							if (!music.equals("")) {
+							player.setCollections(collections.toByteArray());
+							
+							if (!noMessage) {
+								if (!bookName.equals("crafting_book")) {
+									creature.sendSystemMessage(OutOfBand.ProsePackage("@collection:player_slot_added", "TU", slotName, "TO", collectionName), DisplayType.Broadcast);
+								} else {
+									creature.sendSystemMessage(OutOfBand.ProsePackage("@collection:player_slot_increment", "TU", slotName, "TO", collectionName), DisplayType.Broadcast);
+								}
+							}
+							
+							if (!music.equals("") && !music.equalsIgnoreCase("none")) {
 								creature.playMusic(music);
 							}
 							
@@ -346,7 +354,9 @@ public class CollectionService implements INetworkDispatch {
 								}
 							}
 							
-							if (!isComplete(creature, collectionName)) {
+							if (isComplete(creature, collectionName)) {
+								creature.sendSystemMessage(OutOfBand.ProsePackage("@collection:player_collection_complete", "TO", collectionName), DisplayType.Broadcast);
+								
 								if (!noReward) {
 									if (FileUtilities.doesFileExist("scripts/collections/" + collectionName + ".py")) {
 										PyObject method = core.scriptService.getMethod("scripts/collections/", collectionName, "complete");
@@ -364,6 +374,7 @@ public class CollectionService implements INetworkDispatch {
 								if (trackServerFirst) {
 									if (core.guildService.getGuildObject().addServerFirst(collectionName, new ServerFirst(creature.getCustomName(), creature.getObjectId(), collectionName, System.currentTimeMillis()))) {
 										addCollection(creature, "bdg_server_first_01");
+										creature.sendSystemMessage(OutOfBand.ProsePackage("@collection:player_server_first", "TT", core.getGalaxyName(), "TO", collectionName), DisplayType.Broadcast);
 									}
 								}
 								
@@ -733,6 +744,10 @@ public class CollectionService implements INetworkDispatch {
 								
 								if (player.getTitleList().contains(slotName)) {
 									player.getTitleList().remove(slotName);
+								}
+								
+								if (collection.equals(collectionName)) {
+									creature.sendSystemMessage(OutOfBand.ProsePackage("@collection:player_collection_reset", "TO", collectionName), DisplayType.Broadcast);
 								}
 								
 								continue;

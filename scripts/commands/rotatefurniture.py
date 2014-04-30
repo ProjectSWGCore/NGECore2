@@ -3,7 +3,7 @@ from engine.resources.scene import Point3D
 
 def setup():
 	return
-	
+
 def run(core, actor, target, commandString):
 	tarObj = core.objectService.getObject(actor.getTargetId())
 	
@@ -20,10 +20,8 @@ def run(core, actor, target, commandString):
 		elif parsedMsg[0] == "roll":
 			core.simulationService.transform(tarObj, float(parsedMsg[1]), Point3D(0, 0, 1)) # this is messed up ???
 			return
-			
 	elif container.getTemplate() == "object/cell/shared_cell.iff":
 		actor.sendSystemMessage("You do not have permission to access that container!", 0)
 		return
-    
-	return
 	
+	return
