@@ -270,7 +270,7 @@ public class ConnectionService implements INetworkDispatch {
 			}
 		}*/
 		
-		core.missionService.getBountyList().remove(core.getBountiesODB().get(object.getObjectId(), Long.class, BountyListItem.class));
+		core.missionService.getBountyList().remove(core.getBountiesODB().get(object.getObjectId()));
 		
 		ghost.toggleFlag(PlayerFlags.LD);
 		

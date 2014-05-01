@@ -24,6 +24,8 @@ package services.mission;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
@@ -59,6 +61,7 @@ import engine.clients.Client;
 import engine.resources.common.CRC;
 import engine.resources.common.NameGen;
 import engine.resources.container.Traverser;
+import engine.resources.database.ODBCursor;
 import engine.resources.database.ObjectDatabase;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
@@ -526,9 +529,7 @@ public class MissionService implements INetworkDispatch {
 		if (placer != 0)
 			bounty.getBountyPlacers().add(placer);
 		
-		Transaction txn = bountiesODB.getEnvironment().beginTransaction(null, null);
-		bountiesODB.put(bounty, Long.class, BountyListItem.class, txn);
-		txn.commitSync();
+		bountiesODB.put(bounty.getObjectId(), bounty);
 		
 		bountyList.add(bounty);
 
@@ -548,9 +549,7 @@ public class MissionService implements INetworkDispatch {
 		if (placer != 0)
 			bounty.getBountyPlacers().add(placer);
 
-		Transaction txn = bountiesODB.getEnvironment().beginTransaction(null, null);
-		bountiesODB.put(bounty, Long.class, BountyListItem.class, txn);
-		txn.commitSync();
+		bountiesODB.put(bounty.getObjectId(), bounty);
 		
 		//System.out.println("Added bounty of " + amountToAdd + " to " + bounty.getName());
 		return true;
@@ -560,9 +559,9 @@ public class MissionService implements INetworkDispatch {
 		Transaction txn = bountiesODB.getEnvironment().beginTransaction(null, null);
 		
 		if (listRemove)
-			bountyList.remove(bountiesODB.get(bountyTarget.getObjectId(), Long.class, BountyListItem.class));
+			bountyList.remove(bountiesODB.get(bountyTarget.getObjectId()));
 		
-		bountiesODB.delete(bountyTarget.getObjectId(), Long.class, BountyListItem.class, txn);
+		bountiesODB.remove(bountyTarget.getObjectId());
 		txn.commitSync();
 		return true;
 	}
@@ -572,20 +571,17 @@ public class MissionService implements INetworkDispatch {
 	}
 	
 	private void cleanupBounties() {
-		AtomicInteger bountyCount = new AtomicInteger();
-		Transaction txn = bountiesODB.getEnvironment().beginTransaction(null, null);
-		EntityCursor<BountyListItem> bountyCursor = bountiesODB.getEntityStore().getPrimaryIndex(Long.class, BountyListItem.class).entities(txn, null);
-		bountyCursor.forEach(bounty -> {
+		List<BountyListItem> bounties = new ArrayList<BountyListItem>();
+		ODBCursor cursor = bountiesODB.getCursor();
+		while(cursor.hasNext()) {
+			BountyListItem bounty = (BountyListItem) cursor.next();
 			if (!core.characterService.playerExists(bounty.getObjectId())) {
-				bountyCursor.delete();
-				bountyCount.getAndIncrement();
+				bounties.add(bounty);	
 			}
-		});
-		bountyCursor.close();
-		txn.commitSync();
-		
-		if (bountyCount.get() != 0)
-			System.out.println("Removed " + bountyCount.get() + " bounties.");
+		}
+		bounties.stream().mapToLong(b -> b.getObjectId()).forEach(bountiesODB::remove);
+		if (bounties.size() != 0)
+			System.out.println("Removed " + bounties.size() + " bounties.");
 	}
 	
 	@Override

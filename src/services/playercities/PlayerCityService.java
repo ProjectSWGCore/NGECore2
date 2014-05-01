@@ -30,7 +30,6 @@ import java.util.concurrent.TimeUnit;
 
 import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
-import resources.objects.deed.Player_House_Deed;
 import resources.objects.tangible.TangibleObject;
 import services.sui.SUIWindow;
 import services.sui.SUIWindow.SUICallback;

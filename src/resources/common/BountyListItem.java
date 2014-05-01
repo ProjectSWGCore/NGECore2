@@ -21,6 +21,7 @@
  ******************************************************************************/
 package resources.common;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,8 +29,9 @@ import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 
 @Entity(version=1)
-public class BountyListItem {
+public class BountyListItem implements Serializable {
 
+	private static final long serialVersionUID = 1L;
 	@PrimaryKey
 	private long objectId;
 	private int creditReward;
