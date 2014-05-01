@@ -39,7 +39,6 @@ import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 
 import com.sleepycat.je.Transaction;
-import com.sleepycat.persist.EntityCursor;
 
 import protocol.swg.ObjControllerMessage;
 import protocol.swg.objectControllerObjects.MissionAbort;
@@ -156,9 +155,9 @@ public class MissionService implements INetworkDispatch {
 				} else if (terminalType == TerminalType.BOUNTY) {
 					if (!object.hasSkill("class_bountyhunter_phase1_novice")) {
 						object.sendSystemMessage("@mission/mission_generic:not_bounty_hunter_terminal", (byte) 0);
-					} else {
+					} /*else {
 						handleMissionListRequest(core.objectService.getObject(request.getObjectId()), request.getTickCount(), TerminalType.BOUNTY);
-					}
+					}*/
 				} else if (terminalType == TerminalType.ENTERTAINER) {
 
 				} else if (terminalType == TerminalType.ARTISAN) {
@@ -208,9 +207,13 @@ public class MissionService implements INetworkDispatch {
 	}
 
 	public void handleMissionAbort(CreatureObject creature, MissionObject mission) {
+		handleMissionAbort(creature, mission, false);
+	}
+	
+	public void handleMissionAbort(CreatureObject creature, MissionObject mission, boolean silent) {
 		MissionObjective objective = mission.getObjective();
 		
-		if (objective != null)
+		if (objective != null && !silent)
 			objective.abort(core, creature);
 		
 		core.objectService.destroyObject(mission.getObjectId());
@@ -220,7 +223,7 @@ public class MissionService implements INetworkDispatch {
 		File missionFolder = new File("./clientdata/string/en/mission");
 		File[] missionFiles = missionFolder.listFiles();
 		
-		int missionStrings = 0;
+		//int missionStrings = 0;
 		for (int i = 0; i < missionFiles.length; i++) {
 			if (missionFiles[i].getName().contains("_easy") || missionFiles[i].getName().contains("_medium") || missionFiles[i].getName().contains("_hard")) {
 
@@ -242,7 +245,7 @@ public class MissionService implements INetworkDispatch {
 						continue;
 					}
 				} catch (Exception e) { e.printStackTrace(); }
-				missionStrings++;
+				//missionStrings++;
 			}
 		}
 		//System.out.println("Loaded " + missionStrings + " mission entry counts.");
@@ -282,14 +285,13 @@ public class MissionService implements INetworkDispatch {
 				
 				MissionObject mission = (MissionObject) obj;
 				
-				if (typeOneCount.get() < 4) {
+				if (typeOneCount.get() < 5) {
 					
 					if (type == TerminalType.GENERIC)
 						randomDeliveryMission(player, mission);
 					
 					else if (type == TerminalType.BOUNTY)
-						//randomBountyMission(player, mission);
-						return;
+						randomBountyMission(player, mission);
 					
 					else if (type == TerminalType.ARTISAN)
 						return;
@@ -300,7 +302,7 @@ public class MissionService implements INetworkDispatch {
 					mission.setRepeatCount(requestCounter);
 					typeOneCount.incrementAndGet();
 					
-				} else if (typeTwoCount.get() < 4) {
+				} else if (typeTwoCount.get() < 5) {
 					
 					if (type == TerminalType.GENERIC)
 						return;
@@ -443,7 +445,7 @@ public class MissionService implements INetworkDispatch {
 			}
 		}
 		
-		if (bountyTarget == null)
+		if (bountyTarget == null || bountyTarget.getAssignedHunters().contains(player.getObjectId()))
 			return;
 
 		mission.setMissionType("bounty");
@@ -451,17 +453,20 @@ public class MissionService implements INetworkDispatch {
 		String missionStf = "mission/mission_bounty_jedi";
 		
 		if (!bountyTarget.getProfession().equals("")) { // TODO: Smuggler mission checks.
-			if (bountyTarget.getFaction().equals("neutral")) {
+			if (bountyTarget.getFaction().equals("neutral")) { 	// There were no neutral bounty missions. Remove this when done testing.
 				mission.setMissionTargetName("@mission/mission_bounty_jedi:neutral_jedi");
 				mission.setMissionId(3);
+				mission.setCreator("Corporate Sector Authority");
 			}
 			else if (bountyTarget.getFaction().equals("rebel")) {
-				mission.setMissionTargetName("@mission/mission_bounty_jedi:rebel_jedi");
+				mission.setMissionTargetName("Rebel Bounty");
 				mission.setMissionId(2);
+				mission.setCreator("The Galactic Empire");
 			}
 			else if (bountyTarget.getFaction().equals("imperial")) {
-				mission.setMissionTargetName("@mission/mission_bounty_jedi:imperial_jedi");
+				mission.setMissionTargetName("Imperial Bounty");
 				mission.setMissionId(1);
+				mission.setCreator("The Alliance");
 			}
 			mission.setMissionTitle(missionStf);
 			mission.setMissionDescription(missionStf);
@@ -480,7 +485,7 @@ public class MissionService implements INetworkDispatch {
 			mission.setMissionDescription(missionStf, "s");
 		}
 		
-		mission.setMissionLevel(90);
+		mission.setMissionLevel(new Random().nextInt(100 - 95) + 95);
 		
 		mission.setCreditReward(bountyTarget.getCreditReward());
 		
@@ -537,16 +542,16 @@ public class MissionService implements INetworkDispatch {
 		return bounty;
 	}
 	
-	public boolean addToExistingBounty(CreatureObject bountyTarget, long placer, int amountToAdd) {
+	public boolean addToExistingBounty(long bountyTarget, long placer, int amountToAdd) {
 
-		BountyListItem bounty = getBountyListItem(bountyTarget.getObjectId());
+		BountyListItem bounty = getBountyListItem(bountyTarget);
 		
 		if (bounty == null)
 			return false;
 		
 		bounty.addBounty(amountToAdd);
 		
-		if (placer != 0)
+		if (placer != 0 && !bounty.getBountyPlacers().contains(placer))
 			bounty.getBountyPlacers().add(placer);
 
 		bountiesODB.put(bounty.getObjectId(), bounty);
@@ -555,18 +560,18 @@ public class MissionService implements INetworkDispatch {
 		return true;
 	}
 	
-	public boolean removeBounty(CreatureObject bountyTarget, boolean listRemove) {
+	public boolean removeBounty(long bountyTarget, boolean listRemove) {
 		Transaction txn = bountiesODB.getEnvironment().beginTransaction(null, null);
 		
 		if (listRemove)
-			bountyList.remove(bountiesODB.get(bountyTarget.getObjectId()));
+			bountyList.remove(bountiesODB.get(bountyTarget));
 		
-		bountiesODB.remove(bountyTarget.getObjectId());
+		bountiesODB.remove(bountyTarget);
 		txn.commitSync();
 		return true;
 	}
 	
-	public boolean removeBounty(CreatureObject bountyTarget) {
+	public boolean removeBounty(long bountyTarget) {
 		return removeBounty(bountyTarget, true);
 	}
 	
@@ -576,7 +581,7 @@ public class MissionService implements INetworkDispatch {
 		while(cursor.hasNext()) {
 			BountyListItem bounty = (BountyListItem) cursor.next();
 			if (!core.characterService.playerExists(bounty.getObjectId())) {
-				bounties.add(bounty);	
+				bounties.add(bounty);
 			}
 		}
 		bounties.stream().mapToLong(b -> b.getObjectId()).forEach(bountiesODB::remove);

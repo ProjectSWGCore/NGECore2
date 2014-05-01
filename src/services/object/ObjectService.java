@@ -98,6 +98,7 @@ import engine.resources.scene.Quaternion;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import main.NGECore;
+import resources.objectives.BountyMissionObjective;
 import resources.objects.Delta;
 import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
@@ -899,6 +900,21 @@ public class ObjectService implements INetworkDispatch {
 				BountyListItem bounty = (BountyListItem) core.getBountiesODB().get(creature.getObjectId());
 				if (bounty != null)
 					core.missionService.getBountyList().add(bounty);
+				
+				if (creature.getSlottedObject("datapad") != null) {
+					creature.getSlottedObject("datapad").viewChildren(creature, true, false, new Traverser() {
+
+						@Override
+						public void process(SWGObject obj) {
+							if (obj instanceof MissionObject) {
+								MissionObject mission = (MissionObject) obj;
+								if (mission.getMissionType().equals("bounty")) {
+									((BountyMissionObjective) mission.getObjective()).checkBountyActiveStatus(core);
+								}
+							}
+						}
+					});
+				}
 				
 				core.playerService.postZoneIn(creature);
 			}
