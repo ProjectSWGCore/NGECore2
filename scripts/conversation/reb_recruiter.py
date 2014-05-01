@@ -315,7 +315,7 @@ def handleSecondScreen(core, actor, npc, selection):
 	
 	if actor.getFaction() != 'rebel' and actor.getFaction() != 'imperial':
 		if selection == 0:
-			actor.setFaction('imperial')
+			actor.setFaction('rebel')
 			actor.setFactionStatus(FactionStatus.OnLeave)
 	
 			prose = ProsePackage('conversation/faction_recruiter_rebel', 's_99')
