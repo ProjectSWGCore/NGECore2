@@ -69,6 +69,7 @@ import resources.common.RGB;
 import resources.common.SpawnPoint;
 import resources.common.StringUtilities;
 import resources.datatables.DisplayType;
+import resources.datatables.Options;
 import resources.datatables.PlayerFlags;
 import resources.datatables.Professions;
 import resources.guild.Guild;
@@ -116,15 +117,41 @@ public class PlayerService implements INetworkDispatch {
 	}
 	
 	public void postZoneIn(final CreatureObject creature) {
-		
 		if(schedulers.get(creature.getObjectID()) != null)
 			return;
+		
 		List<ScheduledFuture<?>> scheduleList = new ArrayList<ScheduledFuture<?>>();
+		
 		scheduleList.add(scheduler.scheduleAtFixedRate(() -> {
 			ServerTimeMessage time = new ServerTimeMessage(core.getGalacticTime() / 1000);
 			IoBuffer packet = time.serialize();
 			creature.getClient().getSession().write(packet);
 		}, 5, 45, TimeUnit.SECONDS));
+		
+		scheduleList.add(scheduler.scheduleAtFixedRate(() -> {
+			if (creature.isInStealth() && !creature.getOption(Options.INVULNERABLE) && ((PlayerObject) creature.getSlottedObject("ghost")).getGodLevel() == 0) {
+				List<SWGObject> objects = core.simulationService.get(creature.getPlanet(), creature.getPosition().x, creature.getPosition().z, 64);
+				
+				for (SWGObject object : objects) {
+					if (object == null) {
+						continue;
+					}
+					
+					if (!(object instanceof CreatureObject)) {
+						continue;
+					}
+					
+					CreatureObject observer = (CreatureObject) object;
+					
+					int camoflauge = creature.getSkillModBase("camoflauge") - observer.getSkillModBase("detectcamo");
+					camoflauge -= (64 - creature.getPosition().getDistance(observer.getPosition()));
+					
+					if (new Random(camoflauge).nextInt() == camoflauge) {
+						creature.setInStealth(false);
+					}
+				}
+			}
+		}, 15, 15, TimeUnit.SECONDS));
 		
 		scheduleList.add(scheduler.scheduleAtFixedRate(() -> {
 			PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
@@ -147,6 +174,7 @@ public class PlayerService implements INetworkDispatch {
 				creature.setHealth(creature.getHealth() + (36 + creature.getLevel() * 4));
 		}, 0, 1000, TimeUnit.MILLISECONDS));
 		schedulers.put(creature.getObjectID(), scheduleList);
+		
 		/*final PlayerObject ghost = (PlayerObject) creature.getSlottedObject("ghost");
 		scheduler.schedule(new Runnable() {
 
@@ -159,7 +187,6 @@ public class PlayerService implements INetworkDispatch {
 			}
 			
 		}, 1, TimeUnit.SECONDS);*/
-
 	}
 
 	@Override
