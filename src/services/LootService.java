@@ -217,9 +217,13 @@ public class LootService implements INetworkDispatch {
 		
 		double randomItemFromGroup = new Random().nextDouble()*100;
 		double remainder = 0; // [10,20,30,34,5,1] 
+		double span = 100/lootPoolNames.length;
 		
 		for(int i=0;i<lootPoolChances.length;i++) {
-			remainder += lootPoolChances[i]; 
+			if (lootPoolChances[0]!=-1.0)
+				remainder += lootPoolChances[i];
+			else 
+				remainder += span;
 	    	if (randomItemFromGroup <= remainder){ 		
 	    		System.out.println("this loot pool will drop something"); // e.g. kraytpearl_range
 	    		handleLootPool(lootPoolNames[i],lootRollSession); // This loot pool will drop something	
@@ -238,9 +242,13 @@ public class LootService implements INetworkDispatch {
 				
 		double randomItemFromPool = new Random().nextDouble()*100;
 		int remainder = 0; // [10,20,30,34,5,1]
+		double span = 100/itemNames.size();
 		
 		for (int i=0;i<itemNames.size();i++){
-			remainder += itemChances.get(i); 
+			if (itemChances.get(0)!=-1.0)
+				remainder += itemChances.get(i); 
+			else
+				remainder += span; 
 			if (randomItemFromPool<=remainder){
 				// this element has been chosen e.g. kraytpearl_flawless
 				//System.err.println("CHOSEN ITEM " + itemNames.get(i));
