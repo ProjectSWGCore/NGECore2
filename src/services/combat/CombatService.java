@@ -292,6 +292,8 @@ public class CombatService implements INetworkDispatch {
 		event.attacker = attacker;
 		event.damage = damage;
 		target.getEventBus().publish(event);
+		
+		attacker.setTefTime(300000);
 	}
 
 	private void doAreaCombat(CreatureObject attacker, CreatureObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {
