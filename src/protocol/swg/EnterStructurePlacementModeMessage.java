@@ -39,6 +39,7 @@ public class EnterStructurePlacementModeMessage extends SWGMessage {
 	public EnterStructurePlacementModeMessage(SWGObject deed, String structureTemplate) {
 		this.deed = deed;
 		this.structureTemplate = structureTemplate;
+		deed.setAttachment("structureTemplate", structureTemplate);
 	}
 	
 	@Override
@@ -49,15 +50,10 @@ public class EnterStructurePlacementModeMessage extends SWGMessage {
 	@Override
 	public IoBuffer serialize() {
 		IoBuffer result = IoBuffer.allocate(16 + structureTemplate.length()).order(ByteOrder.LITTLE_ENDIAN);
-		
 		result.putShort((short) 3);
 		result.putInt(0xE8A54DC1);
-		
 		result.putLong(deed.getObjectID());
-		
-		deed.setAttachment("structureTemplate", structureTemplate);
 		result.put(getAsciiString(structureTemplate));
-		
 		return result.flip();
 	}
 

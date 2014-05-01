@@ -45,6 +45,7 @@ import com.sleepycat.persist.EntityCursor;
 
 import protocol.swg.chat.ChatSystemMessage;
 import net.engio.mbassy.bus.config.BusConfiguration;
+import resources.common.BountyListItem;
 import resources.common.RadialOptions;
 import resources.common.ThreadMonitor;
 import resources.objects.creature.CreatureObject;
@@ -221,6 +222,7 @@ public class NGECore {
 	private ObjectDatabase resourceRootsODB;
 	private ObjectDatabase resourceHistoryODB;
 	private ObjectDatabase swgObjectODB;
+	private ObjectDatabase bountiesODB;
 	
 	public static boolean PACKET_DEBUG = false;
 
@@ -272,16 +274,16 @@ public class NGECore {
 		
 		setGalaxyStatus(1);
 		swgObjectODB = new ObjectDatabase("swgobjects", true, true, true, SWGObject.class);
-
 		mailODB = new ObjectDatabase("mails", true, true, true, Mail.class);
 		guildODB = new ObjectDatabase("guild", true, true, true, GuildObject.class);
-		objectIdODB = new ObjectDatabase("oids", true, true, false, ObjectId.class);
+		objectIdODB = new ObjectDatabase("oids", true, true, true, ObjectId.class);
 		duplicateIdODB = new ObjectDatabase("doids", true, true, true, DuplicateId.class);
 		chatRoomODB = new ObjectDatabase("chatRooms", true, true, true, ChatRoom.class);
 		resourcesODB = new ObjectDatabase("resources", true, true, true, GalacticResource.class);
 		resourceRootsODB = new ObjectDatabase("resourceroots", true, true, true, ResourceRoot.class);
 		resourceHistoryODB = new ObjectDatabase("resourcehistory", true, true, true, GalacticResource.class);
 		auctionODB = new ObjectDatabase("auction", true, true, true, AuctionItem.class);
+		bountiesODB = new ObjectDatabase("bounties", true, true, true, BountyListItem.class);
 		
 		// Services
 		loginService = new LoginService(this);
@@ -371,6 +373,7 @@ public class NGECore {
 		zoneDispatch.addService(bazaarService);
 		zoneDispatch.addService(lootService);
 		zoneDispatch.addService(mountService);
+		zoneDispatch.addService(housingService);
 		zoneDispatch.addService(playerCityService);
 		
 		if (optionsConfigLoaded && options.getInt("LOAD.RESOURCE.SYSTEM") == 1) {
@@ -491,7 +494,6 @@ public class NGECore {
 		spawnService.loadDynamicGroups();;
 		spawnService.loadSpawnAreas();
 		
-		housingService.loadHousingTemplates();
 		equipmentService.loadBonusSets();
 		
 		retroService.run();
@@ -628,6 +630,10 @@ public class NGECore {
 		return chatRoomODB;
 	}
 	
+	public ObjectDatabase getBountiesODB() {
+		return bountiesODB;
+	}
+
 	public ObjectDatabase getResourcesODB() {
 		return resourcesODB;
 	}

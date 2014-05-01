@@ -63,15 +63,15 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 	private short maximumStorageCapacity=0;
 	private Vector<Long> entryList = new Vector<Long>(); // Preferably the OIDs should be stored, because of name changes
 	private Vector<Long> banList = new Vector<Long>();
-
-	public BuildingObject() {
-		super();
+	
+	public BuildingObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
+		super(objectID, planet, Template, position, orientation);
 		messageBuilder = new BuildingMessageBuilder(this);
 		this.setConditionDamage(100);
 	}
-
-	public BuildingObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
-		super(objectID, planet, Template, position, orientation);
+	
+	public BuildingObject() {
+		super();
 		messageBuilder = new BuildingMessageBuilder(this);
 		this.setConditionDamage(100);
 	}
@@ -89,6 +89,18 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 		
 		return ref.get();
 		
+	}
+	
+	public int getCellNumberByObjectId(long objectId) {
+		Vector<CellObject> cells = getCells();
+		
+		for (CellObject cell : cells) {
+			if (cell.getObjectID() == objectId) {
+				return cell.getCellNumber();
+			}
+		}
+		
+		return 0;
 	}
 	
 	public float getMaintenanceAmount() {

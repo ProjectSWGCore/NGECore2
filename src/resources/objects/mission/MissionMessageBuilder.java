@@ -304,13 +304,13 @@ public class MissionMessageBuilder extends ObjectMessageBuilder {
 		return buffer;
 	}
 	
-	public IoBuffer buildMissionDescriptionDelta(String desc, int id) {
+	public IoBuffer buildMissionDescriptionDelta(String desc, int id, String additionalParam) {
 		
-		IoBuffer buffer = IoBuffer.allocate(12 + desc.length(), false).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer buffer = IoBuffer.allocate(13 + desc.length() + additionalParam.length(), false).order(ByteOrder.LITTLE_ENDIAN);
 		
 		buffer.put(getAsciiString(desc));
 		buffer.putInt(0);
-		buffer.put(getAsciiString("m" + id + "d"));
+		buffer.put(getAsciiString("m" + id + "d" + additionalParam));
 		
 		int size = buffer.position();
 		buffer.flip();
@@ -318,14 +318,14 @@ public class MissionMessageBuilder extends ObjectMessageBuilder {
 		
 		return buffer;
 	}
-	
-	public IoBuffer buildMissionTitleDelta(String title, int id) {
 
-		IoBuffer buffer = IoBuffer.allocate(12 + title.length(), false).order(ByteOrder.LITTLE_ENDIAN);
+	public IoBuffer buildMissionTitleDelta(String title, int id, String additionalParam) {
+
+		IoBuffer buffer = IoBuffer.allocate(12 + title.length() + additionalParam.length(), false).order(ByteOrder.LITTLE_ENDIAN);
 		
 		buffer.put(getAsciiString(title));
 		buffer.putInt(0);
-		buffer.put(getAsciiString("m" + id + "t"));
+		buffer.put(getAsciiString("m" + id + "t" + additionalParam));
 		
 		int size = buffer.position();
 		buffer.flip();

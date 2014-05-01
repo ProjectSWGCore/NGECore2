@@ -28,6 +28,7 @@ import com.sleepycat.je.Transaction;
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
 
+import resources.common.BountyListItem;
 import resources.objects.intangible.IntangibleObject;
 import resources.objects.waypoint.WaypointObject;
 import services.mission.MissionObjective;
@@ -56,8 +57,11 @@ public class MissionObject extends IntangibleObject implements Serializable {
 	private String type = "";
 	private int missionTemplateObject = 0;
 	private WaypointObject attachedWaypoint;
+	
+	// Server variables
 	private MissionObjective objective;
-
+	private long bountyObjId;
+	
 	@NotPersistent
 	private transient MissionMessageBuilder messageBuilder = new MissionMessageBuilder(this);
 		
@@ -148,11 +152,15 @@ public class MissionObject extends IntangibleObject implements Serializable {
 	}
 
 	public void setMissionDescription(String missionDescription) {
+		setMissionDescription(missionDescription, "");
+	}
+	
+	public void setMissionDescription(String missionDescription, String additionalParam) {
 		synchronized(objectMutex) {
 			this.description = missionDescription;
 		}
 		if (getGrandparent() != null && getGrandparent().getClient() != null && getGrandparent().getClient().getSession() != null) {
-			getGrandparent().getClient().getSession().write(messageBuilder.buildMissionDescriptionDelta(missionDescription, missionId));
+			getGrandparent().getClient().getSession().write(messageBuilder.buildMissionDescriptionDelta(missionDescription, missionId, additionalParam));
 		}
 	}
 
@@ -163,11 +171,15 @@ public class MissionObject extends IntangibleObject implements Serializable {
 	}
 
 	public void setMissionTitle(String missionTitle) {
+		setMissionTitle(missionTitle, "");
+	}
+
+	public void setMissionTitle(String missionTitle, String additionalParam) {
 		synchronized(objectMutex) {
 			this.title = missionTitle;
 		}
 		if (getGrandparent() != null && getGrandparent().getClient() != null && getGrandparent().getClient().getSession() != null) {
-			getGrandparent().getClient().getSession().write(messageBuilder.buildMissionTitleDelta(missionTitle, missionId));
+			getGrandparent().getClient().getSession().write(messageBuilder.buildMissionTitleDelta(missionTitle, missionId, additionalParam));
 		}
 	}
 
@@ -284,6 +296,14 @@ public class MissionObject extends IntangibleObject implements Serializable {
 
 	public void setMissionId(int missionId) {
 		this.missionId = missionId;
+	}
+
+	public long getBountyObjId() {
+		return bountyObjId;
+	}
+
+	public void setBountyObjId(long bountyObjId) {
+		this.bountyObjId = bountyObjId;
 	}
 
 	@Override

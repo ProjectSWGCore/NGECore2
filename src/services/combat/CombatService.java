@@ -40,13 +40,13 @@ import protocol.swg.objectControllerObjects.CombatAction;
 import protocol.swg.objectControllerObjects.CombatSpam;
 import protocol.swg.objectControllerObjects.CommandEnqueueRemove;
 import protocol.swg.objectControllerObjects.StartTask;
+import resources.buffs.Buff;
+import resources.buffs.DamageOverTime;
 import resources.common.FileUtilities;
 import resources.datatables.Options;
 import resources.datatables.Elemental;
 import resources.datatables.Posture;
 import resources.datatables.WeaponType;
-import resources.objects.Buff;
-import resources.objects.DamageOverTime;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
@@ -988,7 +988,10 @@ public class CombatService implements INetworkDispatch {
 		target.setSpeedMultiplierBase(0);
 		target.setTurnRadius(0);
 		
-		if(target.getDuelList().contains(attacker)) handleEndDuel(target, attacker, false);
+		if(!target.getDuelList().contains(attacker) && attacker.getSlottedObject("ghost") != null) 
+			core.playerService.sendSetBountyWindow(target, attacker);
+		else 
+			handleEndDuel(target, attacker, false);
 		
 		core.playerService.sendCloningWindow(target, attacker.getSlottedObject("ghost") != null);
 	}
