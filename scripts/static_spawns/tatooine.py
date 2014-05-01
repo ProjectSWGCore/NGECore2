@@ -30,6 +30,37 @@ def addPlanetSpawns(core, planet):
 	rebRecruiter = stcSvc.spawnObject('object/mobile/shared_dressed_rebel_recruiter_human_female_01.iff', 'tatooine', long(1082887), float(-30.5), float(-0.5), float(6.2), float(0.70), float(0.71))	
 	rebRecruiter.setOptionsBitmask(264)
 	
+	#Legacy Mos Eisley
+	Gendra = stcSvc.spawnObject('object/mobile/shared_dressed_gendra.iff', 'tatooine', long(0), float(3308), float(5), float(-4785), float(0.70), float(0.71))	
+	Gendra.setOptionsBitmask(264)
+	
+	Niko = stcSvc.spawnObject('object/mobile/shared_dressed_tatooine_opening_dunir.iff', 'tatooine', long(0), float(3521), float(5), float(-4684), float(0.70), float(0.71))	
+	Niko.setOptionsBitmask(264)
+	
+	Dunir = stcSvc.spawnObject('object/mobile/shared_dressed_tatooine_opening_niko.iff', 'tatooine', long(0),float(3506), float(5), float(-4795), float(0.70), float(0.71))	
+	Dunir.setOptionsBitmask(264)
+	
+	Reimos = stcSvc.spawnObject('object/mobile/shared_dressed_tatooine_opening_reimos.iff', 'tatooine', long(0), float(3619), float(5), float(-4711), float(0.70), float(0.71))	
+	Reimos.setOptionsBitmask(264)
+	
+	Toggi = stcSvc.spawnObject('object/mobile/shared_dressed_tatooine_opening_toggi.iff', 'tatooine', long(0), float(2740), float(8), float(-4550), float(0.70), float(0.71))	
+	Toggi.setOptionsBitmask(264)
+	
+	Mayor = stcSvc.spawnObject('object/mobile/shared_dressed_mayor_mikdanyell_guhrantt.iff', 'tatooine', long(1279960), float(-0.0), float(2.5), float(7.1), float(0.70), float(0.71))	
+	Mayor.setOptionsBitmask(264)
+		
+	#Other Quests
+	Byxle = stcSvc.spawnObject('object/mobile/shared_dressed_tatooine_opening_toggi.iff', 'tatooine', long(0), float(3365), float(5), float(-4639), float(0.70), float(0.71))	
+	Byxle.setOptionsBitmask(264)
+	
+	#Space Trainer 
+	
+	#Privateer
+	Dravis = stcSvc.spawnObject('object/mobile/shared_space_privateer_tier1_tatooine.iff', 'tatooine', long(1082886), float(-21.2), float(-0.9), float(25.6), float(0.70), float(0.71))	
+	Dravis.setOptionsBitmask(264)
+	
+	Reimos = stcSvc.spawnObject('object/mobile/shared_dressed_tatooine_opening_reimos.iff', 'tatooine', long(1082887), float(-26.3), float(-0.5), float(9), float(0.70), float(0.71))	
+	Reimos.setOptionsBitmask(264)
 	
 	return
 	
