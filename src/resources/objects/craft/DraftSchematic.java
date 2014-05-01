@@ -23,6 +23,8 @@ package resources.objects.craft;
 
 import java.io.Serializable;
 
+import resources.objects.building.BuildingMessageBuilder;
+
 import com.sleepycat.persist.model.Persistent;
 
 import engine.clients.Client;
@@ -45,6 +47,12 @@ public class DraftSchematic extends SWGObject implements Serializable {
 		// TODO Auto-generated method stub
 		
 	}
+	
+	@Override
+	public void initAfterDBLoad() {
+		super.init();
+	}
+
 	
 	
 }

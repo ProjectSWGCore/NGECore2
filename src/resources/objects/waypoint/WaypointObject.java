@@ -24,6 +24,7 @@ package resources.objects.waypoint;
 import java.io.Serializable;
 
 import resources.objects.intangible.IntangibleObject;
+import resources.objects.tangible.TangibleMessageBuilder;
 
 import com.sleepycat.persist.model.Persistent;
 
@@ -56,6 +57,11 @@ public class WaypointObject extends IntangibleObject implements Serializable {
 
 	public WaypointObject(long objectID, Planet planet, Point3D position) { 
 		super(objectID, planet, position, new Quaternion(0, 0, 0, 1), "object/waypoint/shared_waypoint.iff");
+	}
+	
+	@Override
+	public void initAfterDBLoad() {
+		super.init();
 	}
 	
 	public int getCellId() {

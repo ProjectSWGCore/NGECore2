@@ -23,6 +23,8 @@ package resources.objects.universe;
 
 import java.io.Serializable;
 
+import resources.objects.tangible.TangibleMessageBuilder;
+
 import com.sleepycat.persist.model.Persistent;
 
 import engine.clients.Client;
@@ -42,6 +44,11 @@ public class UniverseObject extends SWGObject implements Serializable {
 	
 	public UniverseObject() {
 		super();
+	}
+	
+	@Override
+	public void initAfterDBLoad() {
+		super.init();
 	}
 
 	@Override

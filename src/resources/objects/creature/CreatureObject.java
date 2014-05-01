@@ -63,6 +63,7 @@ import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
+import resources.objects.building.BuildingMessageBuilder;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.skills.SkillMod;
@@ -210,6 +211,12 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		messageBuilder = new CreatureMessageBuilder(this);
 	}
 	
+	@Override
+	public void initAfterDBLoad() {
+		super.init();
+		messageBuilder = new CreatureMessageBuilder(this);
+	}
+
 	private void loadTemplateData() {
 		
 		/*if(getTemplateData().getAttribute("scale") != null)

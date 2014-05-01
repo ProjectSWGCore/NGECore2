@@ -24,6 +24,7 @@ package resources.objects.weapon;
 import java.io.Serializable;
 
 import resources.datatables.WeaponType;
+import resources.objects.tangible.TangibleMessageBuilder;
 import resources.objects.tangible.TangibleObject;
 
 import com.sleepycat.persist.model.NotPersistent;
@@ -57,10 +58,15 @@ public class WeaponObject extends TangibleObject implements Serializable {
 		if (this.getClass().getSimpleName().equals("WeaponObject")) setIntAttribute("volume", 1);
 		setStringAttribute("cat_wpn_damage.damage", "0-0");
 	}
-
 	
 	public WeaponObject() {
 		super();
+		messageBuilder = new WeaponMessageBuilder(this);
+	}
+	
+	@Override
+	public void initAfterDBLoad() {
+		super.init();
 		messageBuilder = new WeaponMessageBuilder(this);
 	}
 

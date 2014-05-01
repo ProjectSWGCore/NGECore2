@@ -84,5 +84,11 @@ public class CellObject extends SWGObject implements Serializable {
 		
 	}
 
+	@Override
+	public void initAfterDBLoad() {
+		super.init();
+		messageBuilder = new CellMessageBuilder(this);
+	}
+
 
 }

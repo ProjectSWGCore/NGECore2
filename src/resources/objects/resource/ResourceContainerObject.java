@@ -35,6 +35,7 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 import resources.objects.creature.CreatureObject;
+import resources.objects.player.PlayerMessageBuilder;
 import resources.objects.tangible.TangibleObject;
 
 /** 
@@ -143,11 +144,18 @@ public class ResourceContainerObject extends TangibleObject implements Serializa
 		
 	}
 	
+	
 	public ResourceContainerObject(long objectID, Planet planet, String template, Point3D position, Quaternion orientation){
 		super(objectID, planet, template, position, orientation);
 		messageBuilder = new ResourceContainerMessageBuilder(this);
 		this.setAttachment("radial_filename", "resourceContainer");
-		}
+	}
+	
+	@Override
+	public void initAfterDBLoad() {
+		super.init();
+		messageBuilder = new ResourceContainerMessageBuilder(this);
+	}
 			
 	public void initializeStats(GalacticResource resource){
 		this.setResourceName(resource.getName());

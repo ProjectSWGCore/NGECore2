@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import main.NGECore;
+import resources.objects.cell.CellMessageBuilder;
 import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
 
@@ -262,6 +263,12 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 				cells.add((CellObject) obj);
 		});
 		return cells;
+	}
+	
+	@Override
+	public void initAfterDBLoad() {
+		super.init();
+		messageBuilder = new BuildingMessageBuilder(this);
 	}
 	
 }

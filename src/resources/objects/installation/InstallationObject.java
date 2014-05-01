@@ -29,6 +29,7 @@ import engine.clients.Client;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
+import resources.objects.cell.CellMessageBuilder;
 import resources.objects.tangible.TangibleObject;
 
 @Entity(version=0)
@@ -44,4 +45,10 @@ public class InstallationObject extends TangibleObject implements Serializable {
 	public void sendBaselines(Client destination) {
 		
 	}
+	
+	@Override
+	public void initAfterDBLoad() {
+		super.init();
+	}
+
 }

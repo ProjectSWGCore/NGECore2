@@ -29,6 +29,7 @@ import java.util.Vector;
 import main.NGECore;
 import protocol.swg.SurveyMapUpdateMessage;
 import resources.objects.creature.CreatureObject;
+import resources.objects.player.PlayerMessageBuilder;
 import resources.objects.player.PlayerObject;
 import resources.objects.waypoint.WaypointObject;
 
@@ -132,7 +133,7 @@ public class GalacticResource extends SWGObject implements Serializable {
 								// due to the DPL entity reference restriction
 	
 	@NotPersistent
-	private double minDist = 99999.0;
+	private transient double minDist = 99999.0;
 	
 	
 	public GalacticResource(){	
@@ -146,6 +147,10 @@ public class GalacticResource extends SWGObject implements Serializable {
 
 	public GalacticResource(long id){	
 		this.id = id;
+	}
+	
+	@Override
+	public void initAfterDBLoad() {
 	}
 	
 	public GalacticResource(String name, String fileName, String category){

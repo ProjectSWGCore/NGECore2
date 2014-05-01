@@ -36,6 +36,7 @@ import resources.guild.Guild;
 import resources.objects.SWGList;
 import resources.objects.SWGMap;
 import resources.objects.SWGMultiMap;
+import resources.objects.cell.CellMessageBuilder;
 import resources.objects.universe.UniverseObject;
 import services.collections.ServerFirst;
 
@@ -89,6 +90,13 @@ public class GuildObject extends UniverseObject implements Serializable {
 		super(objectID, planet, position, orientation, Template);
 		this.core = core;
 	}
+	
+	@Override
+	public void initAfterDBLoad() {
+		super.init();
+		messageBuilder = new GuildMessageBuilder(this);
+	}
+
 	
 	public float getComplexity() {
 		synchronized(objectMutex) {

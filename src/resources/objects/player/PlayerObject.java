@@ -33,6 +33,7 @@ import resources.objects.intangible.IntangibleObject;
 import resources.objects.resource.ResourceContainerObject;
 import resources.objects.tool.SurveyTool;
 import resources.objects.waypoint.WaypointObject;
+import resources.objects.cell.CellMessageBuilder;
 import resources.objects.creature.CreatureObject;
 
 import com.sleepycat.persist.model.NotPersistent;
@@ -156,6 +157,12 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	
 	public PlayerObject(long objectID, Planet planet) {
 		super(objectID, planet, new Point3D(0, 0, 0), new Quaternion(1, 0, 0, 0), "object/player/shared_player.iff");
+		messageBuilder = new PlayerMessageBuilder(this);
+	}
+	
+	@Override
+	public void initAfterDBLoad() {
+		super.init();
 		messageBuilder = new PlayerMessageBuilder(this);
 	}
 

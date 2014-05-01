@@ -33,6 +33,7 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 import resources.objects.creature.CreatureObject;
+import resources.objects.guild.GuildMessageBuilder;
 import resources.objects.installation.InstallationMessageBuilder;
 import resources.objects.installation.InstallationObject;
 import resources.objects.resource.GalacticResource;
@@ -130,6 +131,13 @@ public class HarvesterObject extends InstallationObject implements Serializable 
 	
 	public int getBER() {
 		return BER;
+	}
+	
+	@Override
+	public void initAfterDBLoad() {
+		super.init();
+		messageBuilder = new HarvesterMessageBuilder(this);
+		installationMessageBuilder = new InstallationMessageBuilder((InstallationObject)this);
 	}
 
 	

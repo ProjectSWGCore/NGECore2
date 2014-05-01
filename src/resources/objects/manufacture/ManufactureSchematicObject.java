@@ -24,6 +24,7 @@ package resources.objects.manufacture;
 
 import java.io.Serializable;
 
+import resources.objects.cell.CellMessageBuilder;
 import resources.objects.intangible.IntangibleObject;
 
 import com.sleepycat.persist.model.Persistent;
@@ -48,5 +49,12 @@ public class ManufactureSchematicObject extends IntangibleObject implements Seri
 		super(objectID, planet, position, orientation, template);
 		//messageBuilder = new ManufactureSchematicMessageBuilder(this);
 	}
+	
+	@Override
+	public void initAfterDBLoad() {
+		super.init();
+		//messageBuilder = new ManufactureSchematicMessageBuilder(this);
+	}
+
 	
 }

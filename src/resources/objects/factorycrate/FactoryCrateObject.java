@@ -41,6 +41,7 @@ import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
+import resources.objects.creature.CreatureMessageBuilder;
 import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
 
@@ -65,6 +66,13 @@ public class FactoryCrateObject extends TangibleObject implements Serializable {
 	public FactoryCrateObject() { 
 		
 	}
+	
+	@Override
+	public void initAfterDBLoad() {
+		super.init();
+		messageBuilder = new FactoryCrateMessageBuilder(this);
+	}
+
 	
 	public FactoryCrateObject(long objectID, Planet planet, String template, Point3D position, Quaternion orientation) { 
 		super(objectID, planet, template, position, orientation);

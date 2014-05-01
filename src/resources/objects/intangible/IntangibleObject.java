@@ -23,6 +23,8 @@ package resources.objects.intangible;
 
 import java.io.Serializable;
 
+import resources.objects.cell.CellMessageBuilder;
+
 import com.sleepycat.persist.model.Persistent;
 
 import engine.clients.Client;
@@ -44,6 +46,11 @@ public class IntangibleObject extends SWGObject implements Serializable {
 
 	public IntangibleObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
 		super(objectID, planet, position, orientation, Template);
+	}
+
+	@Override
+	public void initAfterDBLoad() {
+		super.init();
 	}
 
 	public int getGenericInt() {
