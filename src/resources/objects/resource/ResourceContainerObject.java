@@ -22,6 +22,8 @@
 package resources.objects.resource;
 
 
+import java.io.Serializable;
+
 import main.NGECore;
 
 import com.sleepycat.persist.model.NotPersistent;
@@ -40,8 +42,9 @@ import resources.objects.tangible.TangibleObject;
  */
 
 @Persistent(version=0)
-public class ResourceContainerObject extends TangibleObject {
+public class ResourceContainerObject extends TangibleObject implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	// Unique ID
 	private long containerID;
 	
@@ -131,10 +134,10 @@ public class ResourceContainerObject extends TangibleObject {
 	*/
 	
 	@NotPersistent
-	public static int maximalStackCapacity = 100000;
+	public transient static int maximalStackCapacity = 100000;
 	
 	@NotPersistent
-	private ResourceContainerMessageBuilder messageBuilder;
+	private transient ResourceContainerMessageBuilder messageBuilder;
 	
 	public ResourceContainerObject(){
 		

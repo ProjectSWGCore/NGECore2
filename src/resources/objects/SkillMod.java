@@ -21,13 +21,17 @@
  ******************************************************************************/
 package resources.objects;
 
+import java.io.Serializable;
+
 import org.apache.mina.core.buffer.IoBuffer;
 
 import com.sleepycat.persist.model.Persistent;
 
 @Persistent(version=0)
-public class SkillMod extends Delta {
+public class SkillMod extends Delta implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
+
 	private int base;
 	private int modifier;
 	

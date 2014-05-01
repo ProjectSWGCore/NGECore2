@@ -21,6 +21,8 @@
  ******************************************************************************/
 package resources.objects.staticobject;
 
+import java.io.Serializable;
+
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
 
@@ -31,10 +33,11 @@ import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
 @Persistent(version=0)
-public class StaticObject extends SWGObject {
+public class StaticObject extends SWGObject implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	@NotPersistent
-	private StaticMessageBuilder messageBuilder;
+	private transient StaticMessageBuilder messageBuilder;
 
 	public StaticObject() {
 		super();

@@ -21,6 +21,7 @@
  ******************************************************************************/
 package resources.objects.harvester;
 
+import java.io.Serializable;
 import java.util.Vector;
 
 import main.NGECore;
@@ -42,8 +43,10 @@ import resources.objects.resource.ResourceContainerObject;
  */
 
 @Persistent(version=0)
-public class HarvesterObject extends InstallationObject {
+public class HarvesterObject extends InstallationObject implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
+
 	private HarvesterMessageBuilder messageBuilder;
 	private InstallationMessageBuilder installationMessageBuilder;
 	

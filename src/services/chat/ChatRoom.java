@@ -21,7 +21,9 @@
  ******************************************************************************/
 package services.chat;
 
+import java.io.Serializable;
 import java.util.Vector;
+
 
 
 import com.sleepycat.persist.model.Entity;
@@ -29,7 +31,9 @@ import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.PrimaryKey;
 
 @Entity(version=1)
-public class ChatRoom {
+public class ChatRoom implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
 	private String creator; // creator of the room (first name only, lowercase)
 	private String description; // title
 	@PrimaryKey
@@ -39,7 +43,7 @@ public class ChatRoom {
 	private Vector<String> moderatorList = new Vector<String>();
 	private Vector<String> banList = new Vector<String>();
 	@NotPersistent
-	private Vector<String> userList = new Vector<String>(); // current users
+	private transient Vector<String> userList = new Vector<String>(); // current users
 
 	private boolean moderatorsOnly;
 	private boolean privateRoom;

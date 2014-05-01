@@ -21,6 +21,8 @@
  ******************************************************************************/
 package resources.objects.intangible;
 
+import java.io.Serializable;
+
 import com.sleepycat.persist.model.Persistent;
 
 import engine.clients.Client;
@@ -30,8 +32,10 @@ import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
 @Persistent(version=0)
-public class IntangibleObject extends SWGObject {
+public class IntangibleObject extends SWGObject implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
+
 	private int genericInt;
 	
 	public IntangibleObject() { 

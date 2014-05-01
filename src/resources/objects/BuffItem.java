@@ -21,10 +21,14 @@
  ******************************************************************************/
 package resources.objects;
 
+import java.io.Serializable;
+
 import com.sleepycat.persist.model.Persistent;
 
 @Persistent
-public class BuffItem {
+public class BuffItem implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
 	private int affectAmount;
 	private int entertainerBonus;
 	private int invested;

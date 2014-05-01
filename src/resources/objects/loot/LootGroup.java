@@ -21,6 +21,8 @@
  ******************************************************************************/
 package resources.objects.loot;
 
+import java.io.Serializable;
+
 import com.sleepycat.persist.model.Persistent;
 
 /** 
@@ -28,8 +30,10 @@ import com.sleepycat.persist.model.Persistent;
  */
 
 @Persistent(version=0)
-public class LootGroup {
+public class LootGroup implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
+
 	private String[] lootPoolNames;
 	private double[] lootPoolChances; 
 	private double lootGroupChance;

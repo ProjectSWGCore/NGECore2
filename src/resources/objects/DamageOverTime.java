@@ -21,20 +21,22 @@
  ******************************************************************************/
 package resources.objects;
 
+import java.io.Serializable;
 import java.util.concurrent.ScheduledFuture;
 
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
 
 @Persistent(version=1)
-public class DamageOverTime {
+public class DamageOverTime implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	private Buff buff;
 	private String type;
 	private int duration;
 	private int intensity;
 	@NotPersistent
-	private ScheduledFuture<?> task;
+	private transient ScheduledFuture<?> task;
 	private long startTime;
 	private String commandName;
 
