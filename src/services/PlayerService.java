@@ -124,7 +124,7 @@ public class PlayerService implements INetworkDispatch {
 			ServerTimeMessage time = new ServerTimeMessage(core.getGalacticTime() / 1000);
 			IoBuffer packet = time.serialize();
 			creature.getClient().getSession().write(packet);
-		}, 45, 45, TimeUnit.SECONDS));
+		}, 5, 45, TimeUnit.SECONDS));
 		
 		scheduleList.add(scheduler.scheduleAtFixedRate(() -> {
 			PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
