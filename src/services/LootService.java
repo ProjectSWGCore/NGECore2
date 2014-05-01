@@ -81,18 +81,25 @@ public class LootService implements INetworkDispatch {
 		// security check
 		if (hasAccess(requester,lootedObject) && ! lootedObject.isLooted()){
 			LootRollSession lootRollSession = (LootRollSession )lootedObject.getAttachment("LootSession");
-			if (lootRollSession.getDroppedItems().size()==0)
-				return;
+			if (lootRollSession.getDroppedItems().size()==0){
+				System.err.println("lootRollSession.getDroppedItems().size()==0");
+				return;			
+			}
 			SWGObject lootedObjectInventory = lootedObject.getSlottedObject("inventory");
 			core.simulationService.openContainer(requester, lootedObjectInventory);	
 			setLooted(requester,lootedObject);
 		}
+		System.err.println("NO ACCESS lootedObject.isLooted(): " + lootedObject.isLooted());
+		System.err.println("NO ACCESS hasAccess(requester,lootedObject): " + hasAccess(requester,lootedObject));
 	}
 
 	private boolean hasAccess(CreatureObject requester, TangibleObject lootedObject){
 		LootRollSession lootRollSession = (LootRollSession )lootedObject.getAttachment("LootSession");
+		if (lootRollSession==null)
+			System.err.println("LootSession null: " + lootRollSession);
 		if (lootRollSession!=null){
-			if (lootRollSession.getRequester()==requester){
+			if (lootRollSession.getRequester()==requester && lootedObject.isLooted()){
+				System.err.println("lootRollSession.getRequester()==requester: " + (lootRollSession.getRequester()==requester));
 				return true;
 			}
 		}
@@ -118,6 +125,7 @@ public class LootService implements INetworkDispatch {
 		lootedObject.setLootLock(true);
 		
 		LootRollSession lootRollSession = new LootRollSession(requester,lootedObject);
+		lootedObject.setAttachment("LootSession", lootRollSession); // preliminarily register session already here
 		
 		handleCreditDrop(requester,lootedObject,lootRollSession);
 		
@@ -144,18 +152,18 @@ public class LootService implements INetworkDispatch {
 	    }
 	    
 	    // Rare Loot System Stage (Is in place for all looted creatures)
-	    if (lootRollSession.isAllowRareLoot()){
-	    	int randomRareLoot = new Random().nextInt(100);
-	    	int chanceRequirement = 1; 
-	    	if (lootRollSession.isIncreasedRLSChance())
-	    		chanceRequirement+=3; // RLS chance is at 4% for groupsize >= 4
-	    	if (randomRareLoot <= chanceRequirement){ 
-	    		handleRareLootChest(lootRollSession);
-	    	}
-	    }
+//if (lootRollSession.isAllowRareLoot()){
+//	int randomRareLoot = new Random().nextInt(100);
+//	int chanceRequirement = 1; 
+//	if (lootRollSession.isIncreasedRLSChance())
+//		chanceRequirement+=3; // RLS chance is at 4% for groupsize >= 4
+//	if (randomRareLoot <= chanceRequirement){ 
+//		handleRareLootChest(lootRollSession);
+//	}
+//}
 		
 	    // set info above corpse
-	    
+	    System.out.println("lootedObject instanceof CreatureObject " + (lootedObject instanceof CreatureObject));
 	    if (lootedObject instanceof CreatureObject){
 		    float y = 0.5F; // 1.3356977F
 		    float qz= 1.06535322E9F;
@@ -182,7 +190,7 @@ public class LootService implements INetworkDispatch {
 	   
 	    // For autoloot 
     	//SWGObject requesterInventory = requester.getSlottedObject("inventory");
-    	
+	    System.out.println("lootRollSession.getDroppedItems() " + (lootRollSession.getDroppedItems()));
     	for (TangibleObject droppedItem : lootRollSession.getDroppedItems()){		    
     		
     		//droppedItem.setAttachment("radial_filename", "lootitem");
@@ -219,6 +227,8 @@ public class LootService implements INetworkDispatch {
 		double remainder = 0; // [10,20,30,34,5,1] 
 		double span = 100/lootPoolNames.length;
 		
+		boolean test = false;
+		
 		for(int i=0;i<lootPoolChances.length;i++) {
 			if (lootPoolChances[0]!=-1.0)
 				remainder += lootPoolChances[i];
@@ -227,9 +237,12 @@ public class LootService implements INetworkDispatch {
 	    	if (randomItemFromGroup <= remainder){ 		
 	    		System.out.println("this loot pool will drop something"); // e.g. kraytpearl_range
 	    		handleLootPool(lootPoolNames[i],lootRollSession); // This loot pool will drop something	
+	    		test = true;
 	    		break;
 	    	}			 
 		}
+		if (!test)
+			System.err.println("SOMETHING WENT WRONG!");
 	}
 		
 	private void handleLootPool(String poolName,LootRollSession lootRollSession){
@@ -367,6 +380,7 @@ public class LootService implements INetworkDispatch {
 		if(core.scriptService.getMethod(itemPath,"","junkType")!=null)
 			junkType =  (byte)core.scriptService.fetchInteger(itemPath,"junkType");
 		
+			
 		System.out.println("itemTemplate " + itemTemplate);
 		
 		TangibleObject droppedItem = createDroppedItem(itemTemplate,lootRollSession.getSessionPlanet());
@@ -374,6 +388,10 @@ public class LootService implements INetworkDispatch {
 		droppedItem.setLootItem(true);
 		droppedItem.setAttachment("LootItemName", itemName);
     	
+		if(core.scriptService.getMethod(itemPath,"","randomStatJewelry")!=null){
+			customName = setRandomStatsJewelry(droppedItem, lootRollSession);
+		}
+		
 		if (customName!=null)
 			handleCustomDropName(droppedItem, customName);
 		
@@ -428,6 +446,7 @@ public class LootService implements INetworkDispatch {
     	
     	
 		lootRollSession.addDroppedItem(droppedItem);
+		System.err.println("END REACHED");
 	}	
 	
 	private void handleCustomDropName(TangibleObject droppedItem,String customName) {
@@ -872,6 +891,221 @@ public class LootService implements INetworkDispatch {
 		Quaternion effectorOrientation = new Quaternion(0,0,0,qz);
 	    PlayClientEffectObjectTransformMessage lmsg = new PlayClientEffectObjectTransformMessage("",lootedObject.getObjectID(),"",effectorPosition,effectorOrientation);
 	    //((CreatureObject) requester).getClient().getSession().write(lmsg.serialize());
+	}
+	
+	private String setRandomStatsJewelry(TangibleObject droppedItem, LootRollSession lootRollSession){
+		
+		//determine number of stats #20 yt
+		int statNumber = 1;
+		int levelOfDrop = 0;
+	    int difficultyLevel = 1;
+	    
+		if (levelOfDrop>70 && levelOfDrop<90 && difficultyLevel==1)
+			statNumber = 2;
+		
+		if (levelOfDrop>=90 && difficultyLevel==1)
+			statNumber = 2;
+			int statRoll = new Random().nextInt(100);
+			if (statRoll<30)
+				statNumber = 3;
+		
+		if (levelOfDrop>=90 && difficultyLevel>=2){
+			statNumber = 2;
+			statRoll = new Random().nextInt(100);
+			if (statRoll<8)
+				statNumber = 4;
+			else if (statRoll<50)
+				statNumber = 3;				
+		}
+		
+		int primaryAttribute = new Random().nextInt(6); // 0-6
+		int maxValue = 25;
+		droppedItem.setIntAttribute(getAttributeSTF(primaryAttribute), getStatValue(maxValue));
+		maxValue -= 2; //secondary attributes must have less maxValue
+		String prefix = getJewelryPrefix(droppedItem);
+		String suffix = getJewelrySuffix(primaryAttribute, statNumber);
+		String itemName = prefix + suffix;
+		Vector<Integer> alreadyUsedStats = new Vector<Integer>();
+		alreadyUsedStats.add(primaryAttribute);
+		int attribute = primaryAttribute;
+		
+		
+		for (int i=0;i<statNumber-1;i++){
+			while (alreadyUsedStats.contains(attribute)) {
+				attribute = new Random().nextInt(6);
+				if (! alreadyUsedStats.contains(attribute)){
+					droppedItem.setIntAttribute(getAttributeSTF(attribute), getStatValue(maxValue));
+					alreadyUsedStats.add(attribute);
+				}
+			}
+		}
+		return itemName;
+	}
+	
+	private int getStatValue(int maxValue){
+		return 1 + new Random().nextInt(maxValue-1);
+		
+	}
+	
+	private String getAttributeSTF(int attribute){
+		String attributeSTF = "";
+		switch (attribute) {
+			case 0: attributeSTF = "cat_stat_mod_bonus.@stat_n:agility_modified";
+					break;
+			case 1: attributeSTF = "cat_stat_mod_bonus.@stat_n:constitution_modified";
+					break;
+			case 2: attributeSTF = "cat_stat_mod_bonus.@stat_n:luck_modified";
+					break;
+			case 3: attributeSTF = "cat_stat_mod_bonus.@stat_n:precision_modified";
+					break;
+			case 4: attributeSTF = "cat_stat_mod_bonus.@stat_n:stamina_modified";
+					break;
+			case 5: attributeSTF = "cat_stat_mod_bonus.@stat_n:strength_modified";
+					break;
+			case 6: attributeSTF = "cat_stat_mod_bonus.@stat_n:camouflage";
+					break;
+		
+		}		
+		return attributeSTF;		
+	}
+	
+	private String getJewelryPrefix(TangibleObject droppedItem){
+		String prefix = "";
+		if (droppedItem.getTemplate().contains("bracelet")){			
+			if (droppedItem.getTemplate().contains("shared_bracelet_s02"))
+				prefix="Metal Band";
+			if (droppedItem.getTemplate().contains("shared_bracelet_s03"))
+				prefix="Golden Bracelet";
+			if (droppedItem.getTemplate().contains("shared_bracelet_s04"))
+				prefix="Golden Symbol";
+			if (droppedItem.getTemplate().contains("shared_bracelet_s05"))
+				prefix="Bangles";
+			if (droppedItem.getTemplate().contains("shared_bracelet_s06"))
+				prefix="Metal Bracelet ";
+		    		    
+		}
+		
+		if (droppedItem.getTemplate().contains("necklace")){
+			if (droppedItem.getTemplate().contains("shared_necklace_s01"))
+				prefix="Plated Necklace";
+			if (droppedItem.getTemplate().contains("shared_necklace_s02"))
+				prefix="Stately Necklace";
+			if (droppedItem.getTemplate().contains("shared_necklace_s03"))
+				prefix="Crested Neckpiece";
+			if (droppedItem.getTemplate().contains("shared_necklace_s04"))
+				prefix="Gemstone Crest";
+			if (droppedItem.getTemplate().contains("shared_necklace_s05"))
+				prefix="Immense Gemstone Necklace";
+			if (droppedItem.getTemplate().contains("shared_necklace_s06"))
+				prefix="Metal Necklace";
+			if (droppedItem.getTemplate().contains("shared_necklace_s07"))
+				prefix="Emerald Pendant";
+			if (droppedItem.getTemplate().contains("shared_necklace_s08"))
+				prefix="Large Pendant";
+			if (droppedItem.getTemplate().contains("shared_necklace_s09"))
+				prefix="Silver Pendant";
+			if (droppedItem.getTemplate().contains("shared_necklace_s10"))
+				prefix="Heavy Crystal Symbol";
+			if (droppedItem.getTemplate().contains("shared_necklace_s11"))
+				prefix="Striped Pendant";	
+			if (droppedItem.getTemplate().contains("shared_necklace_s12"))
+				prefix="Elegant Gemstone Necklace";	
+			
+		}
+		
+		if (droppedItem.getTemplate().contains("ring")){
+			if (droppedItem.getTemplate().contains("shared_ring_s01"))
+				prefix="Band";
+			if (droppedItem.getTemplate().contains("shared_ring_s02"))
+				prefix="Signet";
+			if (droppedItem.getTemplate().contains("shared_ring_s03"))
+				prefix="Ring";
+			if (droppedItem.getTemplate().contains("shared_ring_s04"))
+				prefix="Fingerband";
+		}
+			
+		return prefix;
+	}
+	
+	private String getJewelrySuffix(int primaryAttribute, int statNumber){
+		String suffix = "";
+		
+		if (statNumber==1){
+			switch (primaryAttribute) {
+				case 0: suffix=" of Quickness";
+						break;
+				case 1: suffix=" of Health";
+						break;
+				case 2: suffix=" of Luck";
+						break;
+				case 3: suffix=" of Marksmanship";
+						break;
+				case 4: suffix=" of Stamina";
+						break;
+				case 5: suffix=" of Brawling";
+						break;
+				case 6: suffix=" of the Dire Cat";
+						break;
+			}
+		}
+		
+		if (statNumber==2){
+			switch (primaryAttribute) {
+				case 0: suffix=" of the Rill";
+						break;
+				case 1: suffix=" of the Bantha";
+						break;
+				case 2: suffix=" of the Gambler";
+						break;
+				case 3: suffix=" of the Mercenary";
+						break;
+				case 4: suffix=" of the Squill";
+						break;
+				case 5: suffix=" of the Janta";
+						break;
+				case 6: suffix=" of the Gurrcat";
+						break;
+			}
+		}
+		
+		if (statNumber==3){
+			switch (primaryAttribute) {
+				case 0: suffix=" of the Varactyl";
+						break;
+				case 1: suffix=" of the Torton";
+						break;
+				case 2: suffix=" of the Daredevil";
+						break;
+				case 3: suffix=" of the Veteran";
+						break;
+				case 4: suffix=" of the Tusken";
+						break;
+				case 5: suffix=" of the Rancor";
+						break;
+				case 6: suffix=" of the Bocatt";
+						break;
+			}
+		}
+		
+		if (statNumber==4){
+			switch (primaryAttribute) {
+				case 0: suffix=" of the Acklay";
+						break;
+				case 1: suffix=" of the Hutts";
+						break;
+				case 2: suffix=" of Destiny";
+						break;
+				case 3: suffix=" of Bounty Hunters";
+						break;
+				case 4: suffix=" of the Assassin";
+						break;
+				case 5: suffix=" of the Jedi";
+						break;
+				case 6: suffix=" of the Sand Panther";
+						break;
+			}
+		}
+		return suffix;
 	}
 	
 	
