@@ -1292,7 +1292,7 @@ public class PlayerService implements INetworkDispatch {
 						victim.setCashCredits(0);
 					} else { victim.setBankCredits(victim.getBankCredits() - bounty); }
 					
-					if (!core.missionService.addToExistingBounty(attacker, victim.getObjectId(), bounty))
+					if (!core.missionService.addToExistingBounty(attacker.getObjectId(), victim.getObjectId(), bounty))
 						core.missionService.createNewBounty(attacker, victim.getObjectId(), bounty);
 				}
 			}

@@ -40,6 +40,7 @@ public class BountyListItem implements Serializable {
 	private String name;
 	private List<Long> assignedHunters;
 	private List<Long> bountyPlacers;
+	private int failedAttempts;
 
 	public BountyListItem() { }
 	
@@ -91,6 +92,10 @@ public class BountyListItem implements Serializable {
 	public void addBounty(int amountToAdd) {
 		this.creditReward += amountToAdd;
 	}
+	
+	public void deductBounty(int amountToDeduct) {
+		this.creditReward = this.creditReward - amountToDeduct;
+	}
 
 	public List<Long> getAssignedHunters() {
 		return assignedHunters;
@@ -114,5 +119,17 @@ public class BountyListItem implements Serializable {
 
 	public void setBountyPlacers(List<Long> bountyPlacers) {
 		this.bountyPlacers = bountyPlacers;
+	}
+
+	public int getFailedAttempts() {
+		return failedAttempts;
+	}
+
+	public void setFailedAttempts(int failedAttempts) {
+		this.failedAttempts = failedAttempts;
+	}
+	
+	public void incrementFailedAttempts() {
+		this.failedAttempts += 1;
 	}
 }
