@@ -21,7 +21,9 @@
  ******************************************************************************/
 package services.chat;
 
+import java.util.ArrayList;
 import java.util.List;
+
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 
@@ -36,7 +38,7 @@ public class Mail {
 	private String message;
 	private byte status;
 	private int timeStamp;
-	private List<WaypointAttachment> attachments;
+	private List<WaypointAttachment> attachments = new ArrayList<WaypointAttachment>();
 	
 	public static final byte NEW = 0x4E;
 	public static final byte READ = 0x52;

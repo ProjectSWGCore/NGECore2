@@ -26,9 +26,12 @@ import java.util.List;
 import java.util.Map;
 
 import resources.objects.building.BuildingObject;
+import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
 import main.NGECore;
+import engine.clientdata.ClientFileManager;
+import engine.clientdata.visitors.PortalVisitor;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -106,6 +109,29 @@ public class StaticService implements INetworkDispatch {
 		
 		if (object instanceof CreatureObject) {
 			((CreatureObject) object).setStaticNPC(true);
+		}
+		
+		if (object instanceof BuildingObject) {
+			BuildingObject building = (BuildingObject) object;
+			
+			Map<String, Object> attributes = building.getTemplateData().getAttributes();
+			
+			if (building.getCells().size() == 0 && attributes.containsKey("portalLayoutFilename") && ((String) attributes.get("portalLayoutFilename")).length() > 0) {
+				String portalLayoutFilename = (String) attributes.get("portalLayoutFilename");
+				
+				try {
+					PortalVisitor portal = ClientFileManager.loadFile(portalLayoutFilename, PortalVisitor.class);
+					
+					for (int i = 1; i <= portal.cellCount; i++) {
+						long cellObjectId = core.objectService.getDOId(planetName, "object/cell/shared_cell.iff", 0, object.getObjectID(), i, x, y, z);
+						CellObject childCell = (CellObject) core.objectService.createObject("object/cell/shared_cell.iff", cellObjectId, core.terrainService.getPlanetByName(planetName), new Point3D(0, 0, 0), new Quaternion(1, 0, 0, 0), null, true, true);
+						childCell.setCellNumber(i);
+						building.add(childCell);
+					}
+				} catch (InstantiationException | IllegalAccessException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		
 		if (cellId == 0) {

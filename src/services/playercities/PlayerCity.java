@@ -42,7 +42,7 @@ import engine.resources.scene.Point3D;
 
 public class PlayerCity {
 	
-	public static final int DESERTED   = 0;
+	public static final int NEWCITY    = 0;
 	public static final int OUTPOST    = 1; 
 	public static final int VILLAGE    = 2; 
 	public static final int TOWNSHIP   = 3; 
@@ -106,8 +106,11 @@ public class PlayerCity {
 	private boolean registered = false;
 	private boolean zoningEnabled = false;
 	
-	private final long cityUpdateSpan = 7*86400*1000;
-	private final long legislationPeriod = 21*86400*1000;
+	//private final long cityUpdateSpan = 7*86400*1000;
+	private final long cityUpdateSpan = 100*1000;
+	
+	//private final long legislationPeriod = 21*86400*1000;
+	private final long legislationPeriod = 100*1000;
 	
 	private Vector<Long> placedStructures = new Vector<Long>();
 	private Vector<Long> citizens = new Vector<Long>();
@@ -129,6 +132,7 @@ public class PlayerCity {
 		setNextElectionDate(foundationTime+legislationPeriod);
 		citizens.add(founder.getObjectID());
 		this.cityID = cityID;
+		setMayorID(founder.getObjectID());
 	}
 	
 	public void handleGrantZoning() {
@@ -156,36 +160,67 @@ public class PlayerCity {
 	public void processCityUpdate() {
 		// has something changed?
 		System.out.println("processCityUpdate");
-		int censusResult = citizens.size();
-		// ToDo: Consider 1 rank per update changes
-		if (censusResult<5){			
-			setRank(DESERTED); // City is technically not a city anymore
-			setCityRadius(0);
-		}
+		int censusResult = citizens.size();		
+		int currentRank = getRank();
 		
-		if (censusResult>=5 && censusResult<10){
-			setRank(OUTPOST);	
-			setCityRadius(150);
-		}
+		switch (currentRank) {
+			case NEWCITY : if (censusResult>=5){
+								setRank(++currentRank); // Expand to Outpost
+								sendCityExpandMailAll();
+							}
+							
+							if (censusResult<5){
+								// kill city
+							}
+							break;
+							
+			case OUTPOST : if (censusResult>=10){
+								setRank(++currentRank); // Expand to Village
+								sendCityExpandMailAll();
+							}
+							if (censusResult<5){
+								setRank(--currentRank); // Contract to Deserted
+								sendCityContractMailAll();
+							}
+							break;
+							
+			case VILLAGE : if (censusResult>=15){
+								setRank(++currentRank); // Expand to Township
+								sendCityExpandMailAll();
+							}
+							if (censusResult<10){
+								setRank(--currentRank); // Contract to Outpost
+								sendCityContractMailAll();
+							}
+							break;
+							
+			case TOWNSHIP : if (censusResult>=30){
+								setRank(++currentRank); // Expand to City
+								sendCityExpandMailAll();
+							}
+							if (censusResult<15){
+								setRank(--currentRank); // Contract to Village
+								sendCityContractMailAll();
+							}
+							break;
+							
+			case CITY     : if (censusResult>=40){
+								setRank(++currentRank); // Expand to Metropolis
+								sendCityExpandMailAll();
+							}
+							if (censusResult<15){
+								setRank(--currentRank); // Contract to Township
+								sendCityContractMailAll();
+							}
+							break;
+							
+			case METROPOLIS : if (censusResult<40){
+								  setRank(--currentRank); // Contract to City
+								  sendCityContractMailAll();
+							  }
+							  break;
+						
 		
-		if (censusResult>=10 && censusResult<15){
-			setRank(VILLAGE);		
-			setCityRadius(200);
-		}
-		
-		if (censusResult>=15 && censusResult<30){
-			setRank(TOWNSHIP);
-			setCityRadius(300);
-		}
-		
-		if (censusResult>=30 && censusResult<40){
-			setRank(CITY);		
-			setCityRadius(400);
-		}
-		
-		if (censusResult>=40){
-			setRank(METROPOLIS);	
-			setCityRadius(450);
 		}
 		
 		// collect taxes
@@ -210,6 +245,10 @@ public class PlayerCity {
 		
 		demolishHighRankStructures();
 		setNextCityUpdate(System.currentTimeMillis()+cityUpdateSpan);
+	}
+	
+	public void cityFixUp(){
+		
 	}
 	
 	public void demolishHighRankStructures() {
@@ -263,8 +302,10 @@ public class PlayerCity {
 			if (citizenList.contains(founderId) && (long)citizenObject.getAttachment("residentCity")==this.getCityID())
 				founderCitizenCount++;
 		}
-		if (founderCitizenCount==founders.size())
-				return true; // All founders are citizens now
+		if (founderCitizenCount==founders.size()){
+			return true; // All founders are citizens now
+				
+		}
 		
 		return false;
 	}
@@ -475,6 +516,7 @@ public class PlayerCity {
 	public void setCityName(String cityName) {
 		this.cityName = cityName;
 		sendNameChangeMail(cityName);
+		return;
 	}
 
 	public int getCityID() {
@@ -547,6 +589,20 @@ public class PlayerCity {
 
 	public void setZoningEnabled(boolean zoningEnabled) {
 		this.zoningEnabled = zoningEnabled;
+	}
+	
+	public boolean isMilitiaMember(long actor){
+		if (getMilitiaList().contains(actor))
+			return true;
+		
+		return false;
+	}
+	
+	public boolean hasCitizen(long actor){
+		if (getCitizens().contains(actor))
+			return true;
+		
+		return false;
 	}
 
 	public static String[] getSpecialisationSTFNames() {
@@ -695,5 +751,95 @@ public class PlayerCity {
 
 		}
 	}
+	
+	public void sendCityExpandMailAll() {		
 
+		Vector<Long> citizenList = getCitizens();
+		for (long citizen : citizenList){
+			CreatureObject citizenObject = (CreatureObject) NGECore.getInstance().objectService.getObject(citizen);
+			Mail actorMail = new Mail();
+	        actorMail.setMailId(NGECore.getInstance().chatService.generateMailId());
+	        actorMail.setRecieverId(citizen);
+	        actorMail.setStatus(Mail.NEW);
+	        actorMail.setTimeStamp((int) (new Date().getTime() / 1000));
+	        actorMail.setMessage("@city/city:city_expand_body");
+	        actorMail.setSubject("@city/city:city_expand_subject");
+	        actorMail.setSenderName("City " + this.cityName);
+	        
+	        List<WaypointAttachment> attachments = new ArrayList<WaypointAttachment>(); 
+	        WaypointObject constructionWaypoint = (WaypointObject)NGECore.getInstance().objectService.createObject("object/waypoint/shared_world_waypoint_blue.iff", citizenObject.getPlanet(), citizenObject.getPosition().x, 0 ,citizenObject.getPosition().z);
+	        WaypointAttachment attachment = new WaypointAttachment();
+			attachment.active = false;		
+			attachment.cellID = constructionWaypoint.getCellId();
+			attachment.color = (byte)1;
+			attachment.name = "City";
+			attachment.planetCRC = engine.resources.common.CRC.StringtoCRC(citizenObject.getPlanet().getName());
+			attachment.positionX = citizenObject.getPosition().x;
+			attachment.positionY = 0;
+			attachment.positionZ = citizenObject.getPosition().z;
+			attachments.add(attachment);
+			actorMail.setAttachments(attachments);
+	        
+	        NGECore.getInstance().chatService.storePersistentMessage(actorMail);
+	  
+		}
+	}
+	
+	public void sendCityContractMailAll() {		
+
+		Vector<Long> citizenList = getCitizens();
+		for (long citizen : citizenList){
+			CreatureObject citizenObject = (CreatureObject) NGECore.getInstance().objectService.getObject(citizen);
+			Mail actorMail = new Mail();
+	        actorMail.setMailId(NGECore.getInstance().chatService.generateMailId());
+	        actorMail.setRecieverId(citizen);
+	        actorMail.setStatus(Mail.NEW);
+	        actorMail.setTimeStamp((int) (new Date().getTime() / 1000));
+	        actorMail.setMessage("@city/city:city_contract_body");
+	        actorMail.setSubject("@city/city:city_contract_subject");
+	        actorMail.setSenderName("City " + this.cityName);
+	        
+	        List<WaypointAttachment> attachments = new ArrayList<WaypointAttachment>(); 
+	        WaypointObject constructionWaypoint = (WaypointObject)NGECore.getInstance().objectService.createObject("object/waypoint/shared_world_waypoint_blue.iff", citizenObject.getPlanet(), citizenObject.getPosition().x, 0 ,citizenObject.getPosition().z);
+	        WaypointAttachment attachment = new WaypointAttachment();
+			attachment.active = false;		
+			attachment.cellID = constructionWaypoint.getCellId();
+			attachment.color = (byte)1;
+			attachment.name = "City";
+			attachment.planetCRC = engine.resources.common.CRC.StringtoCRC(citizenObject.getPlanet().getName());
+			attachment.positionX = citizenObject.getPosition().x;
+			attachment.positionY = 0;
+			attachment.positionZ = citizenObject.getPosition().z;
+			attachments.add(attachment);
+			actorMail.setAttachments(attachments);
+	        
+	        NGECore.getInstance().chatService.storePersistentMessage(actorMail);
+		}
+	}
+	
+	
+	
+	
+	// Test method to be deleted later
+	public void Add10MoreCitizens() {	
+		synchronized(citizens){
+			for (int i=0;i<10;i++){			
+				this.citizens.add(this.getMayorID());
+			}
+			
+		}
+	}
+	
+	
+	// Test method to be deleted later
+	public void Deduct10Citizens() {	
+		int citizenCount = this.getCitizens().size();
+		synchronized(citizens){
+			this.citizens.clear();
+			
+			for (int i=0;i<citizenCount-10;i++){			
+				this.citizens.add(this.getMayorID());
+			}
+		}		
+	}
 }

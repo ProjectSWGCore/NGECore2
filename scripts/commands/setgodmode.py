@@ -113,8 +113,8 @@ def run(core, actor, target, commandString):
 			actor.removeAbility("admin")
 			playerObject.setGodLevel(0)
 	
-	elif command == 'setBounty' and arg1:
-		core.missionService.createNewBounty(actor, int(arg1))
+	elif command == 'setBounty':
+		core.playerService.sendSetBountyWindow(actor, actor)
 		return
 	
 	return

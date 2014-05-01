@@ -24,6 +24,10 @@ def createRadial(core, owner, target, radials):
 	radials.add(RadialOptions(3, 121, 0, '@city/city:non_citizen_city_status'))	
 	radials.add(RadialOptions(3, 122, 0, '@city/city:rank_info_t'))
 	radials.add(RadialOptions(3, 123, 0, '@city/city:citizen_list_t'))
+	radials.add(RadialOptions(3, 230, 0, '@city/city:revoke_citizenship'))
+	
+	radials.add(RadialOptions(3, 231, 0, 'Add 10 citizens'))
+	radials.add(RadialOptions(3, 232, 0, 'Deduct 10 citizens'))
 
 	return
 	
@@ -80,14 +84,26 @@ def handleSelection(core, owner, target, option):
 		if owner is not None:
 			handleCitizenList(core, owner, target, option)
 			return
-	
-def handleSetCityName(core, owner, target, option):	
-	window = core.suiService.createInputBox(2,'@city/city:city_name_new_t','@city/city:city_name_new_d', owner, target, 0)
-	returnList = Vector()
-	returnList.add('txtInput:LocalText')
-	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, setnameCallBack)
-	window.addHandler(1, '', Trigger.TRIGGER_CANCEL, returnList, setnameCallBack)	
-	core.suiService.openSUIWindow(window);
+			
+	if option == 231:
+		if owner is not None:
+			handle10Add(core, owner, target, option)
+			return
+			
+	if option == 232:
+		if owner is not None:
+			handle10Deduct(core, owner, target, option)
+			return
+
+def handle10Add(core, owner, target, option):	
+	playerCity = main.NGECore.getInstance().playerCityService.getPlayerCity(owner)
+	playerCity.Add10MoreCitizens()
+	return
+
+			
+def handle10Deduct(core, owner, target, option):	
+	playerCity = main.NGECore.getInstance().playerCityService.getPlayerCity(owner)
+	playerCity.Deduct10Citizens()
 	return
 	
 def setnameCallBack(owner, window, eventType, returnList):

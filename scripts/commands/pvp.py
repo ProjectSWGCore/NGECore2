@@ -17,7 +17,8 @@ def run(core, actor, target, commandString):
 	
 	if commandString != '' and commandString != faction:
 		if commandString == 'rebel' or commandString == 'imperial' or commandString == 'neutral':
-			actor.sendSystemMessage('@faction_recruiter:sui_resig_complete_in_5', 0)
+			if faction != 'neutral':
+				actor.sendSystemMessage('@faction_recruiter:sui_resig_complete_in_5', 0)
 			
 			if actor.getFactionStatus() == FactionStatus.SpecialForces:
 				actor.setPvpStatus(PvpStatus.GoingCovert, True)
