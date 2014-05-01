@@ -1195,7 +1195,7 @@ public class SimulationService implements INetworkDispatch {
 		
 		float height = (float) (creature.getHeight()/* - 0.3*/);
 		
-		if(creature.getPosture() == 2 || creature.getPosture() == 13)
+		if(creature.getPosture() == 2 || creature.getPosture() == 13 || creature.getPosture() == 14)
 			height = 0.3f;
 		else if(creature.getPosture() == 1)
 			height /= 2.f;

@@ -77,7 +77,7 @@ public class LootService implements INetworkDispatch {
 	}
 	
 	public void handleLootRequest(CreatureObject requester, TangibleObject lootedObject) {
-		
+		System.out.println("handleLootRequest ");
 		// security check
 		if (hasAccess(requester,lootedObject) && ! lootedObject.isLooted()){
 			LootRollSession lootRollSession = (LootRollSession )lootedObject.getAttachment("LootSession");
@@ -98,7 +98,7 @@ public class LootService implements INetworkDispatch {
 		if (lootRollSession==null)
 			System.err.println("LootSession null: " + lootRollSession);
 		if (lootRollSession!=null){
-			if (lootRollSession.getRequester()==requester && lootedObject.isLooted()){
+			if (lootRollSession.getRequester()==requester){
 				System.err.println("lootRollSession.getRequester()==requester: " + (lootRollSession.getRequester()==requester));
 				return true;
 			}
@@ -897,7 +897,7 @@ public class LootService implements INetworkDispatch {
 		
 		//determine number of stats #20 yt
 		int statNumber = 1;
-		int levelOfDrop = 0;
+		int levelOfDrop = lootRollSession.getLootedObjectLevel();
 	    int difficultyLevel = 1;
 	    
 		if (levelOfDrop>70 && levelOfDrop<90 && difficultyLevel==1)
@@ -919,9 +919,11 @@ public class LootService implements INetworkDispatch {
 		}
 		
 		int primaryAttribute = new Random().nextInt(6); // 0-6
-		int maxValue = 25;
-		droppedItem.setIntAttribute(getAttributeSTF(primaryAttribute), getStatValue(maxValue));
+		int maxValue = (int) (levelOfDrop*25/90);
+		int minValue = (int) (0.75*maxValue);
+		droppedItem.setIntAttribute(getAttributeSTF(primaryAttribute), getStatValue(minValue,maxValue));
 		maxValue -= 2; //secondary attributes must have less maxValue
+		minValue = (int) (0.75*maxValue);
 		String prefix = getJewelryPrefix(droppedItem);
 		String suffix = getJewelrySuffix(primaryAttribute, statNumber);
 		String itemName = prefix + suffix;
@@ -934,7 +936,7 @@ public class LootService implements INetworkDispatch {
 			while (alreadyUsedStats.contains(attribute)) {
 				attribute = new Random().nextInt(6);
 				if (! alreadyUsedStats.contains(attribute)){
-					droppedItem.setIntAttribute(getAttributeSTF(attribute), getStatValue(maxValue));
+					droppedItem.setIntAttribute(getAttributeSTF(attribute), getStatValue(minValue,maxValue));
 					alreadyUsedStats.add(attribute);
 				}
 			}
@@ -942,8 +944,8 @@ public class LootService implements INetworkDispatch {
 		return itemName;
 	}
 	
-	private int getStatValue(int maxValue){
-		return 1 + new Random().nextInt(maxValue-1);
+	private int getStatValue(int minValue, int maxValue){
+		return minValue + new Random().nextInt(maxValue-minValue);
 		
 	}
 	

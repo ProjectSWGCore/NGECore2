@@ -46,11 +46,13 @@ public class LootRollSession {
 	private int sessionLootMode; 
 	private boolean allowRareLoot;
 	private boolean increasedRLSChance;
+	private int lootedObjectLevel=0;
 	
 	public LootRollSession(){	
 	}
 	
 	public LootRollSession(CreatureObject requester, TangibleObject lootedObject){
+		
 		long requesterGroupId = requester.getGroupId();
 		if (requesterGroupId>0){
 			this.playerGroup = (GroupObject) NGECore.getInstance().objectService.getObject(requesterGroupId);
@@ -62,6 +64,7 @@ public class LootRollSession {
 		
 		if (lootedObject instanceof CreatureObject){
 			CreatureObject lootedCreature = (CreatureObject)lootedObject;
+			lootedObjectLevel = lootedCreature.getLevel();
 			// Exclude rare loot depending on creature level
 			// For groups maybe average CL?
 			if (requester.getLevel()-lootedCreature.getLevel()<=6){
@@ -159,5 +162,13 @@ public class LootRollSession {
 
 	public void setRequester(CreatureObject requester) {
 		this.requester = requester;
+	}
+
+	public int getLootedObjectLevel() {
+		return lootedObjectLevel;
+	}
+
+	public void setLootedObjectLevel(int lootedObjectLevel) {
+		this.lootedObjectLevel = lootedObjectLevel;
 	}
 }

@@ -62,6 +62,7 @@ odb/resourceroots/je.info.*
 odb/resources/je.info.*
 odb/auction/je.info.*
 odb/bounties/je.info.*
+odb/swgobjects/je.info.*
 
 # External tool builders
 .externalToolBuilders/
