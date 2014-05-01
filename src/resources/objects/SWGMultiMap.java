@@ -21,6 +21,7 @@
  ******************************************************************************/
 package resources.objects;
 
+import java.io.Serializable;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -46,16 +47,17 @@ import com.sleepycat.persist.model.Persistent;
 @SuppressWarnings("unused")
 
 @Persistent
-public class SWGMultiMap<K, V> implements Multimap<K, V> {
+public class SWGMultiMap<K, V> implements Multimap<K, V>, Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	private Multimap<K, V> map = ArrayListMultimap.create();
 	@NotPersistent
-	private int updateCounter = 0;
+	private transient int updateCounter = 0;
 	private ObjectMessageBuilder messageBuilder;
 	private byte viewType;
 	private short updateType;
 	@NotPersistent
-	protected final Object objectMutex = new Object();
+	protected transient final Object objectMutex = new Object();
 	
 	public SWGMultiMap() { }
 	

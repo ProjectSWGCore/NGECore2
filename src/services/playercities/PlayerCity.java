@@ -21,6 +21,7 @@
  ******************************************************************************/
 package services.playercities;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -40,8 +41,10 @@ import engine.resources.scene.Point3D;
  * @author Charon 
  */
 
-public class PlayerCity {
+public class PlayerCity implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
+
 	public static final int DESERTED   = 0;
 	public static final int OUTPOST    = 1; 
 	public static final int VILLAGE    = 2; 

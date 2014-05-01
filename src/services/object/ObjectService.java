@@ -88,6 +88,7 @@ import engine.resources.container.Traverser;
 import engine.resources.container.WorldCellPermissions;
 import engine.resources.container.WorldPermissions;
 import engine.resources.database.DatabaseConnection;
+import engine.resources.database.ODBCursor;
 import engine.resources.database.ObjectDatabase;
 import engine.resources.objects.IPersistent;
 import engine.resources.objects.SWGObject;
@@ -147,7 +148,6 @@ public class ObjectService implements INetworkDispatch {
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
 		    public void run() {
-		    	core.getObjectIdODB().getEnvironment().flushLog(true);
 		    	synchronized(objectList) {
 		    		for(SWGObject obj : objectList.values()) {
 		    			
@@ -157,6 +157,8 @@ public class ObjectService implements INetworkDispatch {
 		    			
 		    		}
 		    	}
+		    	core.bazaarService.saveAllItems();
+		    	core.closeODBs();
 		    }
 		});
 		
@@ -175,25 +177,20 @@ public class ObjectService implements INetworkDispatch {
 	}
 	
 	public void loadBuildings() {
-		EntityCursor<BuildingObject> cursor = core.getBuildingODB().getCursor(Long.class, BuildingObject.class);
-		
-		Iterator<BuildingObject> it = cursor.iterator();
-		
-		while(it.hasNext()) {
-			final BuildingObject building = it.next();
+		ODBCursor cursor = core.getSWGObjectODB().getCursor();
+				
+		while(cursor.hasNext()) {
+			final SWGObject building = (SWGObject) cursor.next();
+			if(!(building instanceof BuildingObject))
+				continue;
 			objectList.put(building.getObjectID(), building);
 			Planet planet = core.terrainService.getPlanetByID(building.getPlanetId());
 			building.setPlanet(planet);
-			building.viewChildren(building, true, true, new Traverser() {
-
-				@Override
-				public void process(SWGObject object) {
-					objectList.put(object.getObjectID(), object);
-					if(object.getParentId() != 0 && object.getContainer() == null)
-						object.setParent(building);
-					object.getContainerInfo(object.getTemplate());
-				}
-				
+			building.viewChildren(building, true, true, (object) -> {
+				objectList.put(object.getObjectID(), object);
+				if(object.getParentId() != 0 && object.getContainer() == null)
+					object.setParent(building);
+				object.getContainerInfo(object.getTemplate());
 			});
 		}
 		
@@ -346,8 +343,8 @@ public class ObjectService implements INetworkDispatch {
 		object.setAttachment("customServerTemplate", customServerTemplate);
 		
 		object.setisInSnapshot(isSnapshot);
-		if(!core.getObjectIdODB().contains(objectID, Long.class, ObjectId.class)) {
-			core.getObjectIdODB().put(new ObjectId(objectID), Long.class, ObjectId.class);
+		if(!core.getObjectIdODB().contains(objectID)) {
+			core.getObjectIdODB().put(objectID, new ObjectId(objectID));
 		}
 		if(loadServerTemplate)
 			loadServerTemplate(object);		
@@ -546,13 +543,11 @@ public class ObjectService implements INetworkDispatch {
 			
 		}
 		
-		EntityCursor<CreatureObject> cursor = core.getCreatureODB().getCursor(Long.class, CreatureObject.class);
+		ODBCursor cursor = core.getSWGObjectODB().getCursor();
 		
-		Iterator<CreatureObject> it = cursor.iterator();
-		
-		while(it.hasNext()) {
-			if(it.next().getCustomName().equals(customName))
-				return it.next();
+		while(cursor.hasNext()) {
+			if(((SWGObject) cursor.next()).getCustomName().equals(customName))
+				return (SWGObject) cursor.next();
 		}
 
 		return null;
@@ -572,13 +567,11 @@ public class ObjectService implements INetworkDispatch {
 			
 		}
 		
-		EntityCursor<CreatureObject> cursor = core.getCreatureODB().getCursor(Long.class, CreatureObject.class);
+		ODBCursor cursor = core.getSWGObjectODB().getCursor();
 		
-		Iterator<CreatureObject> it = cursor.iterator();
-		
-		while(it.hasNext()) {
-			if(it.next().getCustomName().startsWith(customName))
-				return it.next();
+		while(cursor.hasNext()) {
+			if(((SWGObject) cursor.next()).getCustomName().startsWith(customName))
+				return (SWGObject) cursor.next();
 		}
 
 		return null;
@@ -586,21 +579,15 @@ public class ObjectService implements INetworkDispatch {
 	}
 	
 	public CreatureObject getCreatureFromDB(long objectId) {
-		CreatureObject object = core.getCreatureODB().get(new Long(objectId), Long.class, CreatureObject.class);
-		
+		SWGObject object = (SWGObject) core.getSWGObjectODB().get(objectId);
+		if(!(object instanceof CreatureObject))
+			return null;
 		if (object != null && getObject(object.getObjectID()) == null) {
 			loadServerTemplate(object);
-			
-			object.viewChildren(object, true, true, new Traverser() {
-				
-				public void process(SWGObject child) {
-					loadServerTemplate(child);
-				}
-				
-			});
+			object.viewChildren(object, true, true, (child) -> loadServerTemplate(child));
 		}
 		
-		return object;
+		return (CreatureObject) object;
 	}
 	
 	public long generateObjectID() {
@@ -633,7 +620,7 @@ public class ObjectService implements INetworkDispatch {
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
-			if(getObject(newId) != null || core.getObjectIdODB().contains(newId, Long.class, ObjectId.class))
+			if(getObject(newId) != null || core.getObjectIdODB().contains(newId))
 				found = false;
 			else
 				found = true;		
@@ -1089,13 +1076,11 @@ public class ObjectService implements INetworkDispatch {
 					String key = "" + CRC.StringtoCRC(planet.getName()) + CRC.StringtoCRC(template) + type + containerId + cellIndex + x + py + z;
 					long newObjectId = 0;
 					
-					if (core.getDuplicateIdODB().contains(key, String.class, DuplicateId.class)) {
-						newObjectId = core.getDuplicateIdODB().get(key, String.class, DuplicateId.class).getObjectId();
+					if (core.getDuplicateIdODB().contains(key)) {
+						newObjectId = ((DuplicateId) core.getDuplicateIdODB().get(key)).getObjectId();
 					} else {
 						newObjectId = generateObjectID();
-						Transaction txn = core.getDuplicateIdODB().getEnvironment().beginTransaction(null, null);
-						core.getDuplicateIdODB().put(new DuplicateId(key, newObjectId), String.class, DuplicateId.class, txn);
-						txn.commitSync();
+						core.getDuplicateIdODB().put(key, new DuplicateId(key, newObjectId));
 					}
 					
 					duplicate.put(objectId, newObjectId);
@@ -1106,7 +1091,7 @@ public class ObjectService implements INetworkDispatch {
 				SWGObject object;
 				if(objectId != 0 && containerId == 0) {					
 					if(portalCRC != 0) {
-						if (core.getBuildingODB().contains(objectId, Long.class, BuildingObject.class) && !duplicate.containsValue(objectId))
+						if (core.getSWGObjectODB().contains(objectId) && !duplicate.containsValue(objectId))
 							continue;
 						containers.add(objectId);
 						object = createObject(template, objectId, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, true, false);
@@ -1158,9 +1143,7 @@ public class ObjectService implements INetworkDispatch {
 		}
 
 		for(BuildingObject building : persistentBuildings) {
-			building.createTransaction(core.getBuildingODB().getEnvironment());
-			core.getBuildingODB().put(building, Long.class, BuildingObject.class, building.getTransaction());
-			building.getTransaction().commitSync();
+			core.getSWGObjectODB().put(building.getObjectID(), building);
 			destroyObject(building);
 		}
 		
@@ -1187,16 +1170,12 @@ public class ObjectService implements INetworkDispatch {
 		return count.get();
 	}
 	
-	public void persistObject(IPersistent object, Class<?> keyClass, Class<?> valueClass, ObjectDatabase odb) {
-		object.createTransaction(odb.getEnvironment());
-		core.getAuctionODB().put(object, keyClass, valueClass, object.getTransaction());
-		object.getTransaction().commitSync();
+	public void persistObject(long key, Object value, ObjectDatabase odb) {
+		odb.put(key, value);
 	}
 	
-	public void deletePersistentObject(IPersistent object, Class<?> keyClass, Class<?> valueClass, ObjectDatabase odb, Object key) {
-		object.createTransaction(odb.getEnvironment());
-		core.getAuctionODB().delete(key, keyClass, valueClass, object.getTransaction());
-		object.getTransaction().commitSync();
+	public void deletePersistentObject(long key, ObjectDatabase odb) {
+		odb.remove(key);
 	}
 	
 }

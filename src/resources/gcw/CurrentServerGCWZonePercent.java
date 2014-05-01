@@ -21,6 +21,7 @@
  ******************************************************************************/
 package resources.gcw;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.MathContext;
 
@@ -29,12 +30,12 @@ import org.apache.mina.core.buffer.IoBuffer;
 import com.sleepycat.persist.model.Persistent;
 
 import engine.resources.scene.Point2D;
-
 import resources.objects.Delta;
 
 @Persistent(version=0)
-public class CurrentServerGCWZonePercent extends Delta implements Cloneable {
+public class CurrentServerGCWZonePercent extends Delta implements Cloneable, Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	private Point2D position;
 	private float radius = 0;
 	private BigDecimal weight;

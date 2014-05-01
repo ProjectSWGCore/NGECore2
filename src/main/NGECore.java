@@ -48,6 +48,9 @@ import net.engio.mbassy.bus.config.BusConfiguration;
 import resources.common.RadialOptions;
 import resources.common.ThreadMonitor;
 import resources.objects.creature.CreatureObject;
+import resources.objects.guild.GuildObject;
+import resources.objects.resource.GalacticResource;
+import resources.objects.resource.ResourceRoot;
 import services.AttributeService;
 import services.BuffService;
 import services.CharacterService;
@@ -71,8 +74,11 @@ import services.SurveyService;
 import services.TerrainService;
 import services.WeatherService;
 import services.ai.AIService;
+import services.bazaar.AuctionItem;
 import services.bazaar.BazaarService;
+import services.chat.ChatRoom;
 import services.chat.ChatService;
+import services.chat.Mail;
 import services.collections.CollectionService;
 import services.combat.CombatService;
 import services.command.CombatCommand;
@@ -83,6 +89,8 @@ import services.guild.GuildService;
 import services.LoginService;
 import services.map.MapService;
 import services.mission.MissionService;
+import services.object.DuplicateId;
+import services.object.ObjectId;
 import services.object.ObjectService;
 import services.object.UpdateService;
 import services.pet.MountService;
@@ -110,6 +118,7 @@ import engine.resources.config.Config;
 import engine.resources.config.DefaultConfig;
 import engine.resources.container.Traverser;
 import engine.resources.database.DatabaseConnection;
+import engine.resources.database.ODBCursor;
 import engine.resources.database.ObjectDatabase;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
@@ -199,7 +208,6 @@ public class NGECore {
 	public InteractiveJythonAcceptor jythonAcceptor;
 	private InteractiveJythonServer jythonServer;
 
-	private ObjectDatabase creatureODB;
 	private ObjectDatabase mailODB;
 	private ObjectDatabase guildODB;
 	private ObjectDatabase objectIdODB;
@@ -208,11 +216,11 @@ public class NGECore {
 	
 	private BusConfiguration eventBusConfig = BusConfiguration.Default(1, new ThreadPoolExecutor(1, 4, 1, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>()));
 
-	private ObjectDatabase buildingODB;
 	private ObjectDatabase auctionODB;
 	private ObjectDatabase resourcesODB;
 	private ObjectDatabase resourceRootsODB;
 	private ObjectDatabase resourceHistoryODB;
+	private ObjectDatabase swgObjectODB;
 	
 	public static boolean PACKET_DEBUG = false;
 
@@ -263,17 +271,17 @@ public class NGECore {
 		}
 		
 		setGalaxyStatus(1);
-		creatureODB = new ObjectDatabase("creature", true, false, true);
-		buildingODB = new ObjectDatabase("building", true, false, true);
-		mailODB = new ObjectDatabase("mails", true, false, true);
-		guildODB = new ObjectDatabase("guild", true, false, true);
-		objectIdODB = new ObjectDatabase("oids", true, false, false);
-		duplicateIdODB = new ObjectDatabase("doids", true, false, true);
-		chatRoomODB = new ObjectDatabase("chatRooms", true, false, true);
-		resourcesODB = new ObjectDatabase("resources", true, false, true);
-		resourceRootsODB = new ObjectDatabase("resourceroots", true, false, true);
-		resourceHistoryODB = new ObjectDatabase("resourcehistory", true, false, true);
-		auctionODB = new ObjectDatabase("auction", true, false, true);
+		swgObjectODB = new ObjectDatabase("swgobjects", true, true, true, SWGObject.class);
+
+		mailODB = new ObjectDatabase("mails", true, true, true, Mail.class);
+		guildODB = new ObjectDatabase("guild", true, true, true, GuildObject.class);
+		objectIdODB = new ObjectDatabase("oids", true, true, false, ObjectId.class);
+		duplicateIdODB = new ObjectDatabase("doids", true, true, true, DuplicateId.class);
+		chatRoomODB = new ObjectDatabase("chatRooms", true, true, true, ChatRoom.class);
+		resourcesODB = new ObjectDatabase("resources", true, true, true, GalacticResource.class);
+		resourceRootsODB = new ObjectDatabase("resourceroots", true, true, true, ResourceRoot.class);
+		resourceHistoryODB = new ObjectDatabase("resourcehistory", true, true, true, GalacticResource.class);
+		auctionODB = new ObjectDatabase("auction", true, true, true, AuctionItem.class);
 		
 		// Services
 		loginService = new LoginService(this);
@@ -480,6 +488,7 @@ public class NGECore {
 		spawnService.loadMobileTemplates();
 		spawnService.loadLairTemplates();
 		spawnService.loadLairGroups();
+		spawnService.loadDynamicGroups();;
 		spawnService.loadSpawnAreas();
 		
 		housingService.loadHousingTemplates();
@@ -495,24 +504,21 @@ public class NGECore {
 	}
 
 	private void cleanupCreatureODB() {
-		EntityCursor<CreatureObject> cursor = creatureODB.getCursor(Long.class, CreatureObject.class);
+		ODBCursor cursor = swgObjectODB.getCursor();
 		
-		Iterator<CreatureObject> it = cursor.iterator();
 		List<CreatureObject> deletedObjects = new ArrayList<CreatureObject>();
 		
-		while(it.hasNext()) {
-			CreatureObject creature = it.next();
-			if(!characterService.playerExists(creature.getObjectID()))
-				deletedObjects.add(creature);
+		while(cursor.hasNext()) {
+			SWGObject creature = (SWGObject) cursor.next();
+			if(!characterService.playerExists(creature.getObjectID()) && creature instanceof CreatureObject)
+				deletedObjects.add((CreatureObject) creature);
 		}
-		
 		cursor.close();
 		
-		Transaction txn = creatureODB.getEnvironment().beginTransaction(null, null);
 		for(CreatureObject creature : deletedObjects) {
-			creatureODB.delete(creature.getObjectID(), Long.class, CreatureObject.class, txn);
+			swgObjectODB.remove(creature.getObjectID());
 		}
-		txn.commitSync();
+		
 		System.out.println("Deleted " + deletedObjects.size() + " creatures.");
 	}
 
@@ -598,8 +604,8 @@ public class NGECore {
 		return databaseConnection2;
 	}
 	
-	public ObjectDatabase getCreatureODB() {
-		return creatureODB;
+	public ObjectDatabase getSWGObjectODB() {
+		return swgObjectODB;
 	}
 	
 	public ObjectDatabase getMailODB() {
@@ -609,11 +615,7 @@ public class NGECore {
 	public ObjectDatabase getGuildODB() {
 		return guildODB;
 	}
-	
-	public ObjectDatabase getBuildingODB() {
-		return buildingODB;
-	}
-	
+		
 	public ObjectDatabase getObjectIdODB() {
 		return objectIdODB;
 	}
@@ -736,6 +738,19 @@ public class NGECore {
 
 	public long getGalacticTime() {
 		return System.currentTimeMillis() - galacticTime;
+	}
+
+	public void closeODBs() {
+		swgObjectODB.close();
+		mailODB.close();
+		guildODB.close();
+		chatRoomODB.close();
+		resourcesODB.close();
+		resourceRootsODB.close();
+		resourceHistoryODB.close();
+		objectIdODB.close();
+		duplicateIdODB.close();
+		auctionODB.close();
 	}
 
 	

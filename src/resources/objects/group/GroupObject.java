@@ -21,10 +21,10 @@
  ******************************************************************************/
 package resources.objects.group;
 
+import java.io.Serializable;
 import java.util.Vector;
 
 import resources.objects.universe.UniverseObject;
-
 import engine.clients.Client;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;

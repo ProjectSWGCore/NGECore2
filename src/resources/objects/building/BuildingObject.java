@@ -21,6 +21,7 @@
  ******************************************************************************/
 package resources.objects.building;
 
+import java.io.Serializable;
 import java.util.Vector;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -44,12 +45,13 @@ import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
 @Entity(version=6)
-public class BuildingObject extends TangibleObject implements IPersistent {
+public class BuildingObject extends TangibleObject implements IPersistent, Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	@NotPersistent
-	private BuildingMessageBuilder messageBuilder;
+	private transient BuildingMessageBuilder messageBuilder;
 	@NotPersistent
-	private Transaction txn;
+	private transient Transaction txn;
 	
 	private float maintenanceAmount = 0;
 	private int BMR = 0;

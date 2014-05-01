@@ -21,6 +21,8 @@
  ******************************************************************************/
 package resources.objects.installation;
 
+import java.io.Serializable;
+
 import com.sleepycat.persist.model.Entity;
 
 import engine.clients.Client;
@@ -30,8 +32,10 @@ import engine.resources.scene.Quaternion;
 import resources.objects.tangible.TangibleObject;
 
 @Entity(version=0)
-public class InstallationObject extends TangibleObject {
+public class InstallationObject extends TangibleObject implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
+
 	public InstallationObject(long objectID, Planet planet, String template, Point3D position, Quaternion orientation){
 		super(objectID, planet, template, position, orientation);		
 	}	

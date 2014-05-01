@@ -21,12 +21,16 @@
  ******************************************************************************/
 package services.object;
 
+import java.io.Serializable;
+
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 
 @Entity
-public class ObjectId {
+public class ObjectId implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
+
 	@PrimaryKey
 	public long objectId;
 	

@@ -21,6 +21,7 @@
  ******************************************************************************/
 package resources.objects.resource;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Random;
 import java.util.Vector;
@@ -48,10 +49,9 @@ import engine.resources.scene.Quaternion;
  */
 
 @Entity(version=0)
-public class GalacticResource extends SWGObject implements IPersistent {
+public class GalacticResource extends SWGObject implements Serializable {
 	
-	@NotPersistent
-	private Transaction txn;
+	private static final long serialVersionUID = 1L;
 	
 	private String name;
 	private String fileName;
@@ -63,30 +63,30 @@ public class GalacticResource extends SWGObject implements IPersistent {
 
 	
 	@NotPersistent
-	public static final int INT_COLDRESISTANCE     = 0;
+	public transient static final int INT_COLDRESISTANCE     = 0;
 	@NotPersistent
-	public static final int INT_CONDUCTIVITY       = 1;
+	public transient static final int INT_CONDUCTIVITY       = 1;
 	@NotPersistent
-	public static final int INT_DECAYRESISTANCE    = 2;
+	public transient static final int INT_DECAYRESISTANCE    = 2;
 	@NotPersistent
-	public static final int INT_HEATRESISTANCE     = 3;
+	public transient static final int INT_HEATRESISTANCE     = 3;
 	@NotPersistent
-	public static final int INT_MALLEABILITY       = 4;
+	public transient static final int INT_MALLEABILITY       = 4;
 	@NotPersistent
-	public static final int INT_SHOCKRESISTANCE    = 5;
+	public transient static final int INT_SHOCKRESISTANCE    = 5;
 	@NotPersistent
-	public static final int INT_UNITTOUGHNESS      = 6;
+	public transient static final int INT_UNITTOUGHNESS      = 6;
 	@NotPersistent
-	public static final int INT_ENTANGLERESISTANCE = 7;
+	public transient static final int INT_ENTANGLERESISTANCE = 7;
 	@NotPersistent
-	public static final int INT_POTENTIALENERGY    = 8;
+	public transient static final int INT_POTENTIALENERGY    = 8;
 	@NotPersistent
-	public static final int INT_OVERALLQUALITY     = 9;
+	public transient static final int INT_OVERALLQUALITY     = 9;
 	@NotPersistent
-	public static final int INT_FLAVOR             = 10;
+	public transient static final int INT_FLAVOR             = 10;
 	
 	@NotPersistent
-	public static final String[] statNamesLookup = {"Cold Resistance",
+	public transient static final String[] statNamesLookup = {"Cold Resistance",
 		                                            "Conductivity",
 		                                            "Decay Resistance",
 		                                            "Heat Resistance",
@@ -117,16 +117,16 @@ public class GalacticResource extends SWGObject implements IPersistent {
 	short[] resourceStats = new short[11];
 	
 	@NotPersistent
-	private static int RES_CAT_HI   = 1;  // Up to 99%, easy to find spots over 90%
+	private transient static int RES_CAT_HI   = 1;  // Up to 99%, easy to find spots over 90%
 	@NotPersistent
-	private static int RES_CAT_MID  = 2;  // Up to 90%, often have to settle at around 80%
+	private transient static int RES_CAT_MID  = 2;  // Up to 90%, often have to settle at around 80%
 	@NotPersistent
-	private static int RES_CAT_LO   = 3;  // Up to 70%, often have to settle around 60%
+	private transient static int RES_CAT_LO   = 3;  // Up to 70%, often have to settle around 60%
 	@NotPersistent
-	private static int RES_CAT_CRE  = 4;  // Creature resource
+	private transient static int RES_CAT_CRE  = 4;  // Creature resource
 	
 	@NotPersistent // Direct Persistence Layer entity reference restriction
-	private ResourceRoot resourceRoot;
+	private transient ResourceRoot resourceRoot;
 	
 	private int resourceRootID; // This is for re-referencing the resourceRoot in the reloaded resourceRoot collection
 								// due to the DPL entity reference restriction
@@ -633,13 +633,6 @@ public class GalacticResource extends SWGObject implements IPersistent {
 		"zau"};
 
 	
-	@Override
-	public void createTransaction(Environment env) { txn = env.beginTransaction(null, null);}
-
-
-	@Override
-	public Transaction getTransaction() { return txn; }
-
 	@Override
 	public void sendBaselines(Client arg0) {
 	}

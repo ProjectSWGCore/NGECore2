@@ -21,11 +21,15 @@
  ******************************************************************************/
 package services.chat;
 
+import java.io.Serializable;
+
 import com.sleepycat.persist.model.Persistent;
 
 @Persistent
-public class WaypointAttachment	 {
+public class WaypointAttachment	implements Serializable {
 	
+	  private static final long serialVersionUID = 1L;
+
 	  public WaypointAttachment() { }
 	
 	  public long cellID;

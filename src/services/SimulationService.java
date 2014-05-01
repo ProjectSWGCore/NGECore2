@@ -53,6 +53,7 @@ import engine.resources.common.Event;
 import engine.resources.common.Mesh3DTriangle;
 import engine.resources.common.Ray;
 import engine.resources.container.Traverser;
+import engine.resources.database.ODBCursor;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -186,13 +187,11 @@ public class SimulationService implements INetworkDispatch {
 	}
 	
 	public void insertPersistentBuildings() {
-		EntityCursor<BuildingObject> cursor = core.getBuildingODB().getCursor(Long.class, BuildingObject.class);
+		ODBCursor cursor = core.getSWGObjectODB().getCursor();
 		
-		Iterator<BuildingObject> it = cursor.iterator();
-		
-		while(it.hasNext()) {
-			final BuildingObject building = (BuildingObject) core.objectService.getObject(it.next().getObjectID());
-			if(building == null)
+		while(cursor.hasNext()) {
+			SWGObject building = core.objectService.getObject(((SWGObject) cursor.next()).getObjectID());
+			if(building == null || !(building instanceof BuildingObject))
 				continue;
 			if(building.getAttachment("hasLoadedServerTemplate") == null)
 				core.objectService.loadServerTemplate(building);

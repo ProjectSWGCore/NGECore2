@@ -33,6 +33,7 @@ import com.sleepycat.persist.EntityCursor;
 
 import main.NGECore;
 import engine.resources.common.CRC;
+import engine.resources.database.ODBCursor;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -114,9 +115,8 @@ public class ResourceService implements INetworkDispatch {
 //			createCollections2();
 //			createCollections3();
 //		} else {
-			EntityCursor<ResourceRoot> cursor = core.getResourceRootsODB().getCursor(Integer.class, ResourceRoot.class);
-			Iterator<ResourceRoot> it = cursor.iterator();		
-			if(!it.hasNext()) {
+			ODBCursor cursor = core.getResourceRootsODB().getCursor();
+			if(!cursor.hasNext()) {
 				createCollections();
 				createCollections2();
 				createCollections3();
@@ -133,12 +133,11 @@ public class ResourceService implements INetworkDispatch {
 	
 	// loads the resource roots at server start
 	public void loadResourceRoots() {
-		EntityCursor<ResourceRoot> cursor = core.getResourceRootsODB().getCursor(Integer.class, ResourceRoot.class);
-		Iterator<ResourceRoot> it = cursor.iterator();
+		ODBCursor cursor = core.getResourceRootsODB().getCursor();
 		int loadedResourceRootsCounter = 0;
 		System.out.println("Loading resource roots...");
-		while(it.hasNext()) {
-			final ResourceRoot resourceRoot = it.next();
+		while(cursor.hasNext()) {
+			final ResourceRoot resourceRoot = (ResourceRoot) cursor.next();
 			System.err.println("resourceRoot loaded ID: " + resourceRoot.getResourceRootID() + " " + resourceRoot.getResourceFileName());
 			core.resourceService.add_resourceRoot(resourceRoot);
 			loadedResourceRootsCounter++;
@@ -154,12 +153,11 @@ public class ResourceService implements INetworkDispatch {
 	
 	// loads the currently spawned resources at server start
 	public void loadResources() {
-		EntityCursor<GalacticResource> cursor = core.getResourcesODB().getCursor(Long.class, GalacticResource.class);
-		Iterator<GalacticResource> it = cursor.iterator();
+		ODBCursor cursor = core.getResourcesODB().getCursor();
 		int loadedResourceCounter = 0;
 		System.out.println("Loading resources...");
-		while(it.hasNext()) {
-			final GalacticResource resource = it.next();
+		while(cursor.hasNext()) {
+			final GalacticResource resource = (GalacticResource) cursor.next();
 			System.err.println("resource " + resource.getName() + " rootID " + resource.getResourceRootID());
 			core.objectService.getObjectList().put(resource.getId(), resource); 
 			
@@ -10800,9 +10798,7 @@ public class ResourceService implements INetworkDispatch {
 		for (int i=0;i<indices;i++){
 			ResourceRoot persistRoot = resourceRootTable.get(new Integer(i));
 			System.err.println("Persisting Root with ID " + persistRoot.getResourceRootID() +" " + persistRoot.getResourceFileName());
-			persistRoot.createTransaction(core.getResourceRootsODB().getEnvironment());
-			core.getResourceRootsODB().put(persistRoot, Integer.class, ResourceRoot.class, persistRoot.getTransaction());
-			persistRoot.getTransaction().commitSync();		
+			core.getResourceRootsODB().put((long) persistRoot.getResourceRootID(), persistRoot);
 		}
 		
 
@@ -11183,15 +11179,11 @@ public class ResourceService implements INetworkDispatch {
 			resource.setPoolNumber((byte)1);
 			resource.initializeNewGalaxyResource(completeResourceNameHistory);
 			
-			resource.createTransaction(core.getResourcesODB().getEnvironment());
-			core.getResourcesODB().put(resource, Long.class, GalacticResource.class, resource.getTransaction());
-			resource.getTransaction().commitSync();
+			core.getResourcesODB().put(resource.getObjectID(), resource);
 			
 			if (enableResourceHistory){
 				GalacticResource historicResource = resource.convertToHistoricResource();
-				historicResource.createTransaction(core.getResourceHistoryODB().getEnvironment());
-				core.getResourceHistoryODB().put(historicResource, Long.class, GalacticResource.class, historicResource.getTransaction());
-				historicResource.getTransaction().commitSync();
+				core.getResourceHistoryODB().put(historicResource.getObjectID(), historicResource);
 			}
 			
 			completeResourceNameHistory.add(resource.getName());
@@ -11212,15 +11204,11 @@ public class ResourceService implements INetworkDispatch {
 			resource.setPoolNumber((byte)2);
 			resource.initializeNewGalaxyResource(completeResourceNameHistory);
 			
-			resource.createTransaction(core.getResourcesODB().getEnvironment());
-			core.getResourcesODB().put(resource, Long.class, GalacticResource.class, resource.getTransaction());
-			resource.getTransaction().commitSync();
+			core.getResourcesODB().put(resource.getObjectID(), resource);
 			
 			if (enableResourceHistory){
 				GalacticResource historicResource = resource.convertToHistoricResource();
-				historicResource.createTransaction(core.getResourceHistoryODB().getEnvironment());
-				core.getResourceHistoryODB().put(historicResource, Long.class, GalacticResource.class, historicResource.getTransaction());
-				historicResource.getTransaction().commitSync();
+				core.getResourceHistoryODB().put(historicResource.getObjectID(), historicResource);
 			}
 				
 			completeResourceNameHistory.add(resource.getName());
@@ -11241,15 +11229,11 @@ public class ResourceService implements INetworkDispatch {
 			resource.setPoolNumber((byte)3);
 			resource.initializeNewGalaxyResource(completeResourceNameHistory);
 			
-			resource.createTransaction(core.getResourcesODB().getEnvironment());
-			core.getResourcesODB().put(resource, Long.class, GalacticResource.class, resource.getTransaction());
-			resource.getTransaction().commitSync();
+			core.getResourcesODB().put(resource.getObjectID(), resource);
 			
 			if (enableResourceHistory){
 				GalacticResource historicResource = resource.convertToHistoricResource();
-				historicResource.createTransaction(core.getResourceHistoryODB().getEnvironment());
-				core.getResourceHistoryODB().put(historicResource, Long.class, GalacticResource.class, historicResource.getTransaction());
-				historicResource.getTransaction().commitSync();
+				core.getResourceHistoryODB().put(historicResource.getObjectID(), historicResource);
 			}
 				
 			completeResourceNameHistory.add(resource.getName());
@@ -11271,15 +11255,11 @@ public class ResourceService implements INetworkDispatch {
 			resource.setPlanetID(planetID);
 			resource.initializeNewGalaxyResource(completeResourceNameHistory);
 			
-			resource.createTransaction(core.getResourcesODB().getEnvironment());
-			core.getResourcesODB().put(resource, Long.class, GalacticResource.class, resource.getTransaction());
-			resource.getTransaction().commitSync();
+			core.getResourcesODB().put(resource.getObjectID(), resource);
 			
 			if (enableResourceHistory){
 				GalacticResource historicResource = resource.convertToHistoricResource();
-				historicResource.createTransaction(core.getResourceHistoryODB().getEnvironment());
-				core.getResourceHistoryODB().put(historicResource, Long.class, GalacticResource.class, historicResource.getTransaction());
-				historicResource.getTransaction().commitSync();
+				core.getResourceHistoryODB().put(historicResource.getObjectID(), historicResource);
 			}
 			
 			completeResourceNameHistory.add(resource.getName());

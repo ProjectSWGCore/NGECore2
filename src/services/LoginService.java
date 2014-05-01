@@ -206,7 +206,7 @@ public class LoginService implements INetworkDispatch{
                 				core.objectService.destroyObject(object);
                 			}
                 			
-                			core.getCreatureODB().delete(new Long(packet.getcharId()), Long.class, CreatureObject.class);
+            				core.getSWGObjectODB().remove(object.getObjectID());
                 			DeleteCharacterReplyMessage reply = new DeleteCharacterReplyMessage(0);
                 			session.write(reply.serialize());
                 		}

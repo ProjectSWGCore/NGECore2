@@ -21,6 +21,7 @@
  ******************************************************************************/
 package resources.objects;
 
+import java.io.Serializable;
 import java.nio.ByteOrder;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
@@ -39,10 +40,11 @@ import com.sleepycat.persist.model.Persistent;
 import engine.resources.common.CRC;
 
 @Persistent(version=10)
-public class Buff implements IDelta {
+public class Buff implements IDelta, Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	@NotPersistent
-	private SimpleBufferAllocator bufferPool = new SimpleBufferAllocator();
+	private transient SimpleBufferAllocator bufferPool = new SimpleBufferAllocator();
 	private String group1, group2;
 	private int priority;
 	private float duration;
@@ -64,7 +66,7 @@ public class Buff implements IDelta {
 	private int totalPlayTime;
 	private byte decayCounter = 0;
 	@NotPersistent
-	private ScheduledFuture<?> removalTask;
+	private transient ScheduledFuture<?> removalTask;
 	private int stacks = 1;
 	private long groupBufferId;
 	private int buffCRC;

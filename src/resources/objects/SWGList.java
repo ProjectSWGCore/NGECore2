@@ -21,6 +21,7 @@
  ******************************************************************************/
 package resources.objects;
 
+import java.io.Serializable;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -43,16 +44,17 @@ import com.sleepycat.persist.model.Persistent;
 /* A SWGList element MUST implement IDelta, or it will refuse to work with it */
 
 @Persistent
-public class SWGList<E> implements List<E> {
+public class SWGList<E> implements List<E>, Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	private List<E> list = new ArrayList<E>();
 	@NotPersistent
-	private int updateCounter = 1;
+	private transient int updateCounter = 1;
 	private ObjectMessageBuilder messageBuilder;
 	private byte viewType;
 	private short updateType;
 	@NotPersistent
-	protected final Object objectMutex = new Object();
+	protected transient final Object objectMutex = new Object();
 	
 	public SWGList() { }
 	

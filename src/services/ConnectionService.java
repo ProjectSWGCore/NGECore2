@@ -281,9 +281,7 @@ public class ConnectionService implements INetworkDispatch {
 		schedulers.clear();
 		core.playerService.getSchedulers().remove(object.getObjectID());
 		
-		object.createTransaction(core.getCreatureODB().getEnvironment());
-		core.getCreatureODB().put(object, Long.class, CreatureObject.class, object.getTransaction());
-		object.getTransaction().commitSync();
+		core.getSWGObjectODB().put(object.getObjectID(), object);
 		core.objectService.destroyObject(object);
 		
 	}

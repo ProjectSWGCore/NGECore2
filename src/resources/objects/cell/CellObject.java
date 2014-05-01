@@ -21,10 +21,13 @@
  ******************************************************************************/
 package resources.objects.cell;
 
+import java.io.Serializable;
+
 import protocol.swg.UpdateCellPermissionMessage;
 
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
+
 import engine.clients.Client;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
@@ -32,11 +35,12 @@ import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
 @Persistent(version=0)
-public class CellObject extends SWGObject {
+public class CellObject extends SWGObject implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	private int cellNumber = 0;
 	@NotPersistent
-	private CellMessageBuilder messageBuilder;
+	private transient CellMessageBuilder messageBuilder;
 	
 	public CellObject() { 
 		super();
