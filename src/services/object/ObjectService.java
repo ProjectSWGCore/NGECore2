@@ -524,6 +524,9 @@ public class ObjectService implements INetworkDispatch {
 	}
 	
 	public SWGObject getObjectByCustomName(String customName) {
+		if (customName == null) {
+			return null;
+		}
 		
 		synchronized(objectList) {
 			
@@ -538,16 +541,22 @@ public class ObjectService implements INetworkDispatch {
 		
 		ODBCursor cursor = core.getSWGObjectODB().getCursor();
 		
-		while(cursor.hasNext()) {
-			if(((SWGObject) cursor.next()).getCustomName().equals(customName))
-				return (SWGObject) cursor.next();
+		while (cursor.hasNext()) {
+			SWGObject object = (SWGObject) cursor.next();
+			
+			if (object != null && object.getCustomName() != null && customName.length() > 0 && object.getCustomName().equals(customName)) {
+				return object;
+			}
 		}
-
+		
 		return null;
-
 	}
 	
 	public SWGObject getObjectByFirstName(String customName) {
+		if (customName == null) {
+			return null;
+		}
+		
 		synchronized(objectList) {
 			for(SWGObject obj : objectList.values()) {
 				if(obj.getCustomName() == null)
