@@ -545,7 +545,11 @@ public class ObjectService implements INetworkDispatch {
 		while (cursor.hasNext()) {
 			SWGObject object = (SWGObject) cursor.next();
 			
-			if (object != null && object.getCustomName() != null && customName.length() > 0 && object.getCustomName().equals(customName)) {
+			if (object == null) {
+				continue;
+			}
+			
+			if (object.getCustomName() != null && customName.length() > 0 && object.getCustomName().equals(customName)) {
 				return object;
 			}
 		}
@@ -572,6 +576,7 @@ public class ObjectService implements INetworkDispatch {
 		
 		while (cursor.hasNext()) {
 			SWGObject object = (SWGObject) cursor.next();
+<<<<<<< HEAD
 						
 			if (object == null) {
 				continue;
@@ -579,6 +584,15 @@ public class ObjectService implements INetworkDispatch {
 
 			if (object.getCustomName() != null && customName.length() > 0 && object.getCustomName().startsWith(customName)) {
 			return object;
+=======
+			
+			if (object == null) {
+				continue;
+			}
+			
+			if (object.getCustomName() != null && customName.length() > 0 && object.getCustomName().startsWith(customName)) {
+				return object;
+>>>>>>> origin/master
 			}
 		}
 		
