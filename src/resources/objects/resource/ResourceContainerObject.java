@@ -21,7 +21,6 @@
  ******************************************************************************/
 package resources.objects.resource;
 
-
 import java.io.Serializable;
 
 import main.NGECore;
@@ -34,8 +33,8 @@ import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
+import resources.objects.ObjectMessageBuilder;
 import resources.objects.creature.CreatureObject;
-import resources.objects.player.PlayerMessageBuilder;
 import resources.objects.tangible.TangibleObject;
 
 /** 
@@ -559,4 +558,9 @@ public class ResourceContainerObject extends TangibleObject implements Serializa
 		
 		destination.getSession().write(messageBuilder.buildDelta3());
 	}
+	
+	public ObjectMessageBuilder getMessageBuilder() {
+		return messageBuilder;
+	}
+	
 }

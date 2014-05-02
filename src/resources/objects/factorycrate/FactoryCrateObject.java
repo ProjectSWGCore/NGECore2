@@ -30,7 +30,6 @@ import protocol.swg.SceneCreateObjectByCrc;
 import protocol.swg.SceneDestroyObject;
 import protocol.swg.SceneEndBaselines;
 import protocol.swg.UpdateContainmentMessage;
-import protocol.swg.UpdatePVPStatusMessage;
 
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
@@ -41,7 +40,7 @@ import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
-import resources.objects.creature.CreatureMessageBuilder;
+import resources.objects.ObjectMessageBuilder;
 import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
 
@@ -276,4 +275,9 @@ public class FactoryCrateObject extends TangibleObject implements Serializable {
 		this.getAttributes().put("@obj_attr_n:factory_count", ""+this.getQuantity());
 		//services.CharonPacketUtils.printAnalysis(messageBuilder.buildDelta3(),"FCYT3 Delta");
 	}
+	
+	public ObjectMessageBuilder getMessageBuilder() {
+		return messageBuilder;
+	}
+	
 }

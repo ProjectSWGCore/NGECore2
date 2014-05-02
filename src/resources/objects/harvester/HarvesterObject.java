@@ -32,8 +32,8 @@ import engine.clients.Client;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
+import resources.objects.ObjectMessageBuilder;
 import resources.objects.creature.CreatureObject;
-import resources.objects.guild.GuildMessageBuilder;
 import resources.objects.installation.InstallationMessageBuilder;
 import resources.objects.installation.InstallationObject;
 import resources.objects.resource.GalacticResource;
@@ -48,8 +48,8 @@ public class HarvesterObject extends InstallationObject implements Serializable 
 	
 	private static final long serialVersionUID = 1L;
 
-	private HarvesterMessageBuilder messageBuilder;
-	private InstallationMessageBuilder installationMessageBuilder;
+	private transient HarvesterMessageBuilder messageBuilder;
+	private transient InstallationMessageBuilder installationMessageBuilder;
 	
 	public final static byte HARVESTER_TYPE_MINERAL  = 0;
 	public final static byte HARVESTER_TYPE_CHEMICAL = 1;
@@ -419,4 +419,9 @@ public class HarvesterObject extends InstallationObject implements Serializable 
 		//destination.getSession().write(installationMessageBuilder.buildBaseline9());
 		
 	}
+	
+	public ObjectMessageBuilder getMessageBuilder() {
+		return messageBuilder;
+	}
+	
 }

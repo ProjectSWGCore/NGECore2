@@ -29,11 +29,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import resources.objects.ObjectMessageBuilder;
 import resources.objects.intangible.IntangibleObject;
 import resources.objects.resource.ResourceContainerObject;
 import resources.objects.tool.SurveyTool;
 import resources.objects.waypoint.WaypointObject;
-import resources.objects.cell.CellMessageBuilder;
 import resources.objects.creature.CreatureObject;
 
 import com.sleepycat.persist.model.NotPersistent;
@@ -906,6 +906,10 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	
 	public void setCallingCompanion(boolean callingCompanion) {
 		this.callingCompanion = callingCompanion;
+	}
+	
+	public ObjectMessageBuilder getMessageBuilder() {
+		return messageBuilder;
 	}
 	
 }

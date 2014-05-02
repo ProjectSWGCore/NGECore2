@@ -22,7 +22,7 @@
 package resources.objects;
 
 import java.io.Serializable;
-import java.nio.ByteOrder;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -35,11 +35,15 @@ import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
+import main.NGECore;
+
 import org.apache.mina.core.buffer.IoBuffer;
 import org.python.google.common.collect.Lists;
 
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
+
+import engine.resources.objects.SWGObject;
 
 /* A SWGList element MUST implement IDelta, or it will refuse to work with it */
 
@@ -50,7 +54,8 @@ public class SWGList<E> implements List<E>, Serializable {
 	private List<E> list = new ArrayList<E>();
 	@NotPersistent
 	private transient int updateCounter = 1;
-	private ObjectMessageBuilder messageBuilder;
+	private long objectId;
+	private transient ObjectMessageBuilder messageBuilder;
 	private byte viewType;
 	private short updateType;
 	@NotPersistent
@@ -58,8 +63,8 @@ public class SWGList<E> implements List<E>, Serializable {
 	
 	public SWGList() { }
 	
-	public SWGList(ObjectMessageBuilder messageBuilder, int viewType, int updateType) {
-		this.messageBuilder = messageBuilder;
+	public SWGList(long objectId, int viewType, int updateType) {
+		this.objectId = objectId;
 		this.viewType = (byte) viewType;
 		this.updateType = (short) updateType;
 	}
@@ -296,7 +301,7 @@ public class SWGList<E> implements List<E>, Serializable {
 			if (!list.isEmpty()) {
 				for (E element : list) {
 					if (element instanceof IDelta) {
-						IoBuffer buffer = messageBuilder.bufferPool.allocate((newListData.length + ((IDelta) element).getBytes().length), false).order(ByteOrder.LITTLE_ENDIAN);
+						IoBuffer buffer = Delta.createBuffer((newListData.length + ((IDelta) element).getBytes().length));
 						buffer.put(newListData);
 						buffer.put(((IDelta) element).getBytes());
 						newListData = buffer.array();
@@ -361,7 +366,7 @@ public class SWGList<E> implements List<E>, Serializable {
 			return new byte[] { };
 		}
 		
-		IoBuffer buffer = messageBuilder.bufferPool.allocate((size), false).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer buffer = Delta.createBuffer(size);
 		buffer.put((byte) type);
 		if (useIndex) buffer.putShort((short) index);
 		if (useData) buffer.put(data);
@@ -372,7 +377,18 @@ public class SWGList<E> implements List<E>, Serializable {
 	}
 	
 	private void queue(byte[] data) {
-		IoBuffer buffer = messageBuilder.bufferPool.allocate((data.length + 8), false).order(ByteOrder.LITTLE_ENDIAN);
+		if (messageBuilder == null) {
+			try {
+				SWGObject object = NGECore.getInstance().objectService.getObject(objectId);
+				this.messageBuilder = (ObjectMessageBuilder) object.getClass().getMethod("getMessageBuilder", new Class[] {}).invoke(object, new Object[] { });
+			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+				e.printStackTrace();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		IoBuffer buffer = Delta.createBuffer((data.length + 8));
 		buffer.putInt(1);
 		buffer.putInt(updateCounter);
 		buffer.put(data);
@@ -386,7 +402,18 @@ public class SWGList<E> implements List<E>, Serializable {
 			size += queued.length;
 		}
 		
-		IoBuffer buffer = messageBuilder.bufferPool.allocate((size + 8), false).order(ByteOrder.LITTLE_ENDIAN);
+		if (messageBuilder == null) {
+			try {
+				SWGObject object = NGECore.getInstance().objectService.getObject(objectId);
+				this.messageBuilder = (ObjectMessageBuilder) object.getClass().getMethod("getMessageBuilder", new Class[] {}).invoke(object, new Object[] { });
+			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+				e.printStackTrace();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		IoBuffer buffer = Delta.createBuffer((size + 8));
 		buffer.putInt(data.size());
 		buffer.putInt(updateCounter);
 		for (byte[] queued : data) buffer.put(queued);

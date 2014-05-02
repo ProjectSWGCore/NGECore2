@@ -24,7 +24,6 @@ package resources.objects.waypoint;
 import java.io.Serializable;
 
 import resources.objects.intangible.IntangibleObject;
-import resources.objects.tangible.TangibleMessageBuilder;
 
 import com.sleepycat.persist.model.Persistent;
 
@@ -37,7 +36,7 @@ import engine.resources.scene.Quaternion;
 public class WaypointObject extends IntangibleObject implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
-
+	
 	private int cellId; // ???
 	private long locationNetworkId;
 	private int planetCRC;

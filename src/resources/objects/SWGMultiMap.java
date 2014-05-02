@@ -22,6 +22,7 @@
 package resources.objects;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,6 +32,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
+
+import main.NGECore;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.python.google.common.collect.ArrayListMultimap;
@@ -44,6 +47,8 @@ import resources.common.StringUtilities;
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
 
+import engine.resources.objects.SWGObject;
+
 @SuppressWarnings("unused")
 
 @Persistent
@@ -53,7 +58,8 @@ public class SWGMultiMap<K, V> implements Multimap<K, V>, Serializable {
 	private Multimap<K, V> map = ArrayListMultimap.create();
 	@NotPersistent
 	private transient int updateCounter = 0;
-	private ObjectMessageBuilder messageBuilder;
+	private long objectId;
+	private transient ObjectMessageBuilder messageBuilder;
 	private byte viewType;
 	private short updateType;
 	@NotPersistent
@@ -61,14 +67,15 @@ public class SWGMultiMap<K, V> implements Multimap<K, V>, Serializable {
 	
 	public SWGMultiMap() { }
 	
-	public SWGMultiMap(ObjectMessageBuilder messageBuilder, int viewType, int updateType) {
-		this.messageBuilder = messageBuilder;
+	public SWGMultiMap(long objectId, int viewType, int updateType) {
+		this.objectId = objectId;
 		this.viewType = (byte) viewType;
 		this.updateType = (short) updateType;
 	}
 	
 	public SWGMultiMap(Multimap<K, V> m) {
 		if (m instanceof SWGMultiMap) {
+			this.objectId = ((SWGMultiMap<K, V>) m).objectId;
 			this.messageBuilder = ((SWGMultiMap<K, V>) m).messageBuilder;
 			this.viewType = ((SWGMultiMap<K, V>) m).viewType;
 			this.updateType = ((SWGMultiMap<K, V>) m).updateType;
@@ -298,7 +305,7 @@ public class SWGMultiMap<K, V> implements Multimap<K, V>, Serializable {
 		
 		int size = 1 + ((useIndex) ? (2 + index.toString().getBytes().length) : 0) + ((useData) ? data.length : 0);
 		
-		IoBuffer buffer = messageBuilder.bufferPool.allocate((size), false).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer buffer = Delta.createBuffer(size);
 		buffer.put((byte) type);
 		if (useIndex) {
 			if (index instanceof String) {
@@ -325,7 +332,18 @@ public class SWGMultiMap<K, V> implements Multimap<K, V>, Serializable {
 	}
 	
 	private void queue(byte[] data) {
-		IoBuffer buffer = messageBuilder.bufferPool.allocate((data.length + 8), false).order(ByteOrder.LITTLE_ENDIAN);
+		if (messageBuilder == null) {
+			try {
+				SWGObject object = NGECore.getInstance().objectService.getObject(objectId);
+				this.messageBuilder = (ObjectMessageBuilder) object.getClass().getMethod("getMessageBuilder", new Class[] {}).invoke(object, new Object[] { });
+			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+				e.printStackTrace();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		IoBuffer buffer = Delta.createBuffer((data.length + 8));
 		buffer.putInt(1);
 		buffer.putInt(updateCounter);
 		buffer.put(data);
@@ -339,7 +357,18 @@ public class SWGMultiMap<K, V> implements Multimap<K, V>, Serializable {
 			size += queued.length;
 		}
 		
-		IoBuffer buffer = messageBuilder.bufferPool.allocate((size + 8), false).order(ByteOrder.LITTLE_ENDIAN);
+		if (messageBuilder == null) {
+			try {
+				SWGObject object = NGECore.getInstance().objectService.getObject(objectId);
+				this.messageBuilder = (ObjectMessageBuilder) object.getClass().getMethod("getMessageBuilder", new Class[] {}).invoke(object, new Object[] { });
+			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+				e.printStackTrace();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		IoBuffer buffer = Delta.createBuffer((size + 8));
 		buffer.putInt(data.size());
 		buffer.putInt(updateCounter);
 		for (byte[] queued : data) buffer.put(queued);

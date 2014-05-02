@@ -21,10 +21,9 @@
  ******************************************************************************/
 package resources.objects.manufacture;
 
-
 import java.io.Serializable;
 
-import resources.objects.cell.CellMessageBuilder;
+import resources.objects.ObjectMessageBuilder;
 import resources.objects.intangible.IntangibleObject;
 
 import com.sleepycat.persist.model.Persistent;
@@ -42,19 +41,21 @@ import engine.resources.scene.Quaternion;
 public class ManufactureSchematicObject extends IntangibleObject implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
-	//@NotPersistent
-	//private ManufactureSchematicMessageBuilder messageBuilder;
+	private transient ManufactureSchematicMessageBuilder messageBuilder;
 
 	public ManufactureSchematicObject(long objectID, Planet planet, String template, Point3D position, Quaternion orientation) {
 		super(objectID, planet, position, orientation, template);
-		//messageBuilder = new ManufactureSchematicMessageBuilder(this);
+		messageBuilder = new ManufactureSchematicMessageBuilder(this);
 	}
 	
 	@Override
 	public void initAfterDBLoad() {
 		super.init();
-		//messageBuilder = new ManufactureSchematicMessageBuilder(this);
+		messageBuilder = new ManufactureSchematicMessageBuilder(this);
 	}
-
+	
+	public ObjectMessageBuilder getMessageBuilder() {
+		return messageBuilder;
+	}
 	
 }

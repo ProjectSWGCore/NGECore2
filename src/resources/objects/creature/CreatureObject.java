@@ -43,8 +43,6 @@ import protocol.swg.objectControllerObjects.Animation;
 import protocol.swg.objectControllerObjects.Posture;
 import protocol.swg.objectControllerObjects.StartTask;
 
-import com.sleepycat.je.Environment;
-import com.sleepycat.je.Transaction;
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.NotPersistent;
 
@@ -54,16 +52,15 @@ import resources.buffs.Buff;
 import resources.buffs.DamageOverTime;
 import resources.common.Cooldown;
 import resources.common.OutOfBand;
+import resources.objects.ObjectMessageBuilder;
 import resources.objects.SWGList;
 import resources.objects.SWGMap;
 import engine.resources.common.CRC;
-import engine.resources.objects.IPersistent;
 import engine.resources.objects.MissionCriticalObject;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
-import resources.objects.building.BuildingMessageBuilder;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.skills.SkillMod;
@@ -80,7 +77,7 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	private List<String> skills;
 	@NotPersistent
 	private transient int skillsUpdateCounter = 0;
-
+	
 	// CREO 3
 	private byte posture = 0;
 	private float height;
@@ -103,12 +100,11 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	private SWGList<String> abilities;
 	private int abilitiesUpdateCounter = 0;
 	private int xpBarValue = 0;
-
+	
 	private SWGList<MissionCriticalObject> missionCriticalObjects;
 	@NotPersistent
 	private transient int missionCriticalObjectsUpdateCounter = 0;
-
-
+	
 	// CREO6
 	private byte combatFlag = 0;
 	private short level = -1;
@@ -198,12 +194,12 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		messageBuilder = new CreatureMessageBuilder(this);
 		loadTemplateData();
 		skills = new ArrayList<String>();
-		skillMods = new SWGMap<String, SkillMod>(messageBuilder, 4, 3);
-		abilities = new SWGList<String>(messageBuilder, 4, 14);
-		missionCriticalObjects = new SWGList<MissionCriticalObject>(messageBuilder, 4, 13);
-		equipmentList = new SWGList<SWGObject>(messageBuilder, 6, 0x17);
-		buffList = new SWGList<Buff>(messageBuilder, 6, 0x1A);
-		appearanceEquipmentList = new SWGList<SWGObject>(messageBuilder, 6, 0x1F);
+		skillMods = new SWGMap<String, SkillMod>(getObjectID(), 4, 3);
+		abilities = new SWGList<String>(getObjectID(), 4, 14);
+		missionCriticalObjects = new SWGList<MissionCriticalObject>(getObjectID(), 4, 13);
+		equipmentList = new SWGList<SWGObject>(getObjectID(), 6, 0x17);
+		buffList = new SWGList<Buff>(getObjectID(), 6, 0x1A);
+		appearanceEquipmentList = new SWGList<SWGObject>(getObjectID(), 6, 0x1F);
 	}
 	
 	public CreatureObject() {
@@ -1850,5 +1846,9 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	//public float getCooldown(String cooldownGroup) {
 		//return ((float) getCooldown(cooldownGroup) / (float) 1000);
 	//}
+	
+	public ObjectMessageBuilder getMessageBuilder() {
+		return messageBuilder;
+	}
 	
 }

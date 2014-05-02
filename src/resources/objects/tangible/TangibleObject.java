@@ -42,8 +42,8 @@ import resources.common.OutOfBand;
 import resources.common.RGB;
 import resources.datatables.Options;
 import resources.loot.LootGroup;
+import resources.objects.ObjectMessageBuilder;
 import resources.objects.creature.CreatureObject;
-import resources.objects.staticobject.StaticMessageBuilder;
 import resources.visitors.IDManagerVisitor;
 
 import com.sleepycat.persist.model.NotPersistent;
@@ -631,4 +631,9 @@ public class TangibleObject extends SWGObject implements Serializable {
 		
 
 	}
+	
+	public ObjectMessageBuilder getMessageBuilder() {
+		return messageBuilder;
+	}
+	
 }
