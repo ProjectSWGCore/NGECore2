@@ -23,6 +23,7 @@ package services.object;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.nio.ByteOrder;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -571,9 +572,13 @@ public class ObjectService implements INetworkDispatch {
 		
 		while (cursor.hasNext()) {
 			SWGObject object = (SWGObject) cursor.next();
-			
-			if (object != null && object.getCustomName() != null && customName.length() > 0 && object.getCustomName().startsWith(customName)) {
-				return object;
+						
+			if (object == null) {
+				continue;
+			}
+
+			if (object.getCustomName() != null && customName.length() > 0 && object.getCustomName().startsWith(customName)) {
+			return object;
 			}
 		}
 		

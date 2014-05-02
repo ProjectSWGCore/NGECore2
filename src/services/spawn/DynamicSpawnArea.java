@@ -52,7 +52,7 @@ public class DynamicSpawnArea extends SpawnArea {
 	@Override
 	@Handler
 	public void onEnter(EnterEvent event) {
-		System.err.println("We got a spawn!!!!!!!!!!!!!");
+
 		SWGObject object = event.object;
 		
 		if(object == null || !(object instanceof CreatureObject))
@@ -65,8 +65,13 @@ public class DynamicSpawnArea extends SpawnArea {
 		
 		creature.getEventBus().subscribe(this);
 		// spawn some creatures
-		for(int i = 0; i < 5; i++)
-			spawnCreature(creature);
+		if (spawnGroup.getGroupMemberNumber()==-1){
+			for(int i = 0; i < 5; i++)
+				spawnCreature(creature);
+		} else {
+			for(int i = 0; i < spawnGroup.getGroupMemberNumber(); i++) // A group with a specified number of members
+				spawnCreatureMember(creature, i);
+		}
 
 	}
 
@@ -108,7 +113,7 @@ public class DynamicSpawnArea extends SpawnArea {
 
 
 	private void spawnCreature(CreatureObject creature) {
-		
+
 		NGECore core = NGECore.getInstance();
 		
 		Iterator<CreatureObject> it = mobiles.iterator();
@@ -119,7 +124,7 @@ public class DynamicSpawnArea extends SpawnArea {
 		
 		if(mobiles.size() >= spawnGroup.getMaxSpawns())
 			return;
-		
+
 		boolean foundPos = false;
 		int tries = 0;
 		Point3D randomPosition = null;
@@ -136,10 +141,12 @@ public class DynamicSpawnArea extends SpawnArea {
 			float height = terrainSvc.getHeight(getPlanet().getID(), randomPosition.x, randomPosition.z);
 			randomPosition.y = height;
 			
-			for(CreatureObject mobile : mobiles) {
-				if(mobile.getWorldPosition().getDistance(randomPosition) > spawnGroup.getMinSpawnDistance())
-					foundPos = true;
-			}
+			if (mobiles.size()>0){ // Fix, mobiles must be filled first, before doing this check
+				for(CreatureObject mobile : mobiles) {
+					if(mobile.getWorldPosition().getDistance(randomPosition) > spawnGroup.getMinSpawnDistance())
+						foundPos = true;
+				}
+			} else {foundPos = true;}
 			
 			if(!terrainSvc.canBuildAtPosition(creature, randomPosition.x, randomPosition.z))
 				foundPos = false;
@@ -153,8 +160,64 @@ public class DynamicSpawnArea extends SpawnArea {
 		
 		String mobileTemplate = spawnGroup.getMobiles().get(random.nextInt(spawnGroup.getMobiles().size()));
 		CreatureObject spawnedCreature = core.spawnService.spawnCreature(mobileTemplate, getPlanet().getName(), 0, randomPosition.x, randomPosition.y, randomPosition.z);
-		if(spawnedCreature != null)
+		if(spawnedCreature != null){
 			mobiles.add(spawnedCreature);
+		}
+		
+	}
+	
+	
+	private void spawnCreatureMember(CreatureObject creature, int spawnIndex) {
+
+		NGECore core = NGECore.getInstance();
+		
+		Iterator<CreatureObject> it = mobiles.iterator();
+		it.forEachRemaining(mobile -> {
+			if(mobile.getPosture() == Posture.Dead)
+				it.remove();
+		});
+		
+		if(mobiles.size() >= spawnGroup.getMaxSpawns())
+			return;
+		
+		short memberCL = (spawnGroup.getMembersCL().get(spawnIndex)).shortValue(); 
+
+		boolean foundPos = false;
+		int tries = 0;
+		Point3D randomPosition = null;
+		
+		while(!foundPos && ++tries < 10) {
+		
+			randomPosition = getRandomPosition(creature.getWorldPosition(), spawnGroup.getMinSpawnDistance(), spawnGroup.getMaxSpawnDistance());
+			
+			if(randomPosition == null)
+				return;
+			
+			TerrainService terrainSvc = core.terrainService;
+			
+			float height = terrainSvc.getHeight(getPlanet().getID(), randomPosition.x, randomPosition.z);
+			randomPosition.y = height;
+			
+			if (mobiles.size()>0){ // Fix, mobiles must be filled first, before doing this check
+				for(CreatureObject mobile : mobiles) {
+					if(mobile.getWorldPosition().getDistance(randomPosition) > spawnGroup.getMinSpawnDistance())
+						foundPos = true;
+				}
+			} else {foundPos = true;}
+			
+			if(!terrainSvc.canBuildAtPosition(creature, randomPosition.x, randomPosition.z))
+				foundPos = false;
+
+		}
+		
+		if(!foundPos)
+			return;
+		
+		String mobileTemplate = spawnGroup.getMobiles().get(spawnIndex);
+		CreatureObject spawnedCreature = core.spawnService.spawnCreature(mobileTemplate, getPlanet().getName(), 0, randomPosition.x, randomPosition.y, randomPosition.z, memberCL);
+		if(spawnedCreature != null){
+			mobiles.add(spawnedCreature);
+		}
 		
 	}
 

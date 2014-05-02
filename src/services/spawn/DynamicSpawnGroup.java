@@ -29,6 +29,9 @@ public class DynamicSpawnGroup {
 	private String name;
 	private int maxSpawns;
 	private int minSpawnDistance;
+	private int maxSpawnDistance;
+	private int groupMemberNumber = -1;
+	private Vector<Integer> membersCL;
 
 	public Vector<String> getMobiles() {
 		return mobiles;
@@ -60,6 +63,30 @@ public class DynamicSpawnGroup {
 
 	public void setMinSpawnDistance(int minSpawnDistance) {
 		this.minSpawnDistance = minSpawnDistance;
+	}
+
+	public int getGroupMemberNumber() {
+		return groupMemberNumber;
+	}
+
+	public void setGroupMemberNumber(int groupMemberNumber) {
+		this.groupMemberNumber = groupMemberNumber;
+	}
+
+	public int getMaxSpawnDistance() {
+		return maxSpawnDistance;
+	}
+
+	public void setMaxSpawnDistance(int maxSpawnDistance) {
+		this.maxSpawnDistance = maxSpawnDistance;
+	}
+
+	public Vector<Integer> getMembersCL() {
+		return membersCL;
+	}
+
+	public void setMembersCL(Vector<Integer> membersCL) {
+		this.membersCL = membersCL;
 	}
 	
 }
