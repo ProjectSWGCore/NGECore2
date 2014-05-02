@@ -1282,25 +1282,51 @@ public class PlayerService implements INetworkDispatch {
 	}
 	
 	public void sendSetBountyWindow(final CreatureObject victim, final CreatureObject attacker) {
-		SUIWindow bountyWindow = core.suiService.createInputBox(InputBoxType.INPUT_BOX_OK_CANCEL, "@bounty_hunter:setbounty_title", "@bounty_hunter:setbounty_prompt1 " + attacker.getCustomName() + "?" + "\n@bounty_hunter:setbounty_prompt2 " + victim.getBankCredits(), 
-				victim, null, (float) 10, new SUICallback() {
+		SUIWindow bountyWindow = core.suiService.createInputBox(InputBoxType.INPUT_BOX_OK_CANCEL, "@bounty_hunter:setbounty_title", "@bounty_hunter:setbounty_prompt1 " + attacker.getCustomName() + "?" + "\n@bounty_hunter:setbounty_prompt2 " 
+				+ String.valueOf(victim.getBankCredits() + victim.getCashCredits()), victim, null, (float) 10, new SUICallback() {
 
 			@Override
 			public void process(SWGObject owner, int eventType, Vector<String> returnList) {
 				if (eventType == 0 && returnList.get(0) != null) {
 					int bounty = Integer.parseInt(returnList.get(0));
+					int totalFunds = victim.getBankCredits() + victim.getCashCredits();
 					
-					if (bounty > victim.getBankCredits())
+					if (bounty > totalFunds) {
+						victim.sendSystemMessage("@bounty_hunter:setbounty_too_much", DisplayType.Broadcast);
+						sendSetBountyWindow(victim, attacker);
 						return;
-
-					if (!core.missionService.addToExistingBounty(attacker, bounty))
-						core.missionService.createNewBounty(attacker, bounty);
-
-					victim.setBankCredits(victim.getBankCredits() - bounty);
+					}
+					
+					if (bounty < 20000) {
+						victim.sendSystemMessage("@bounty_hunter:setbounty_too_little", DisplayType.Broadcast);
+						sendSetBountyWindow(victim, attacker);
+						return;
+					} else if (bounty > 1000000) {
+						victim.sendSystemMessage("@bounty_hunter:setbounty_cap", DisplayType.Broadcast);
+						bounty = 1000000;
+					}
+					
+					// Try removing bounty amount from the bank first then cash. Remove amount accordingly if bank/cash is less than placed bounty.
+					if (bounty > victim.getBankCredits()) {
+						int difference = bounty - victim.getBankCredits();
+						
+						victim.setCashCredits(victim.getCashCredits() - difference);
+						victim.setBankCredits(0);
+					} else if (bounty > victim.getCashCredits()) {
+						int difference = bounty - victim.getCashCredits();
+						
+						victim.setBankCredits(victim.getBankCredits() - difference);
+						victim.setCashCredits(0);
+					} else { victim.setBankCredits(victim.getBankCredits() - bounty); }
+					
+					if (!core.missionService.addToExistingBounty(attacker.getObjectId(), victim.getObjectId(), bounty))
+						core.missionService.createNewBounty(attacker, victim.getObjectId(), bounty);
 				}
 			}
 			
 		});
+		bountyWindow.setProperty("txtInput:NumericInteger", "true");
+		bountyWindow.setProperty("txtInput:MaxLength", "7");
 		core.suiService.openSUIWindow(bountyWindow);
 	}
 	

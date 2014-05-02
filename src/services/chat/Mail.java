@@ -21,13 +21,18 @@
  ******************************************************************************/
 package services.chat;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
+
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 
 @Entity(version=1)
-public class Mail {
+public class Mail implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
+
 	@PrimaryKey
 	private int mailId;
 	private String senderName;
@@ -36,7 +41,7 @@ public class Mail {
 	private String message;
 	private byte status;
 	private int timeStamp;
-	private List<WaypointAttachment> attachments;
+	private List<WaypointAttachment> attachments = new ArrayList<WaypointAttachment>();
 	
 	public static final byte NEW = 0x4E;
 	public static final byte READ = 0x52;

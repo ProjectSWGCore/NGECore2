@@ -21,6 +21,7 @@
  ******************************************************************************/
 package resources.objects;
 
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -33,12 +34,13 @@ import com.sleepycat.persist.model.Persistent;
 import resources.common.StringUtilities;
 
 @Persistent
-public abstract class Delta implements IDelta {
+public abstract class Delta implements IDelta, Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	@NotPersistent
-	protected final Object objectMutex = new Object();
+	protected transient final Object objectMutex = new Object();
 	@NotPersistent
-	private static SimpleBufferAllocator bufferPool = new SimpleBufferAllocator();
+	private transient static SimpleBufferAllocator bufferPool = new SimpleBufferAllocator();
 	
 	public Delta() {
 		

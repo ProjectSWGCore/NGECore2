@@ -21,15 +21,17 @@
  ******************************************************************************/
 package resources.common;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 
-@Entity
-public class BountyListItem {
+@Entity(version=1)
+public class BountyListItem implements Serializable {
 
+	private static final long serialVersionUID = 1L;
 	@PrimaryKey
 	private long objectId;
 	private int creditReward;
@@ -37,7 +39,9 @@ public class BountyListItem {
 	private String faction;
 	private String name;
 	private List<Long> assignedHunters;
-	
+	private List<Long> bountyPlacers;
+	private int failedAttempts;
+
 	public BountyListItem() { }
 	
 	public BountyListItem(long objectId, int creditReward, String profession, String faction, String name) {
@@ -47,6 +51,7 @@ public class BountyListItem {
 		this.faction = faction;
 		this.setName(name);
 		this.setAssignedHunters(new ArrayList<Long>(3));
+		this.setBountyPlacers(new ArrayList<Long>());
 	}
 	
 	public long getObjectId() {
@@ -87,6 +92,10 @@ public class BountyListItem {
 	public void addBounty(int amountToAdd) {
 		this.creditReward += amountToAdd;
 	}
+	
+	public void deductBounty(int amountToDeduct) {
+		this.creditReward = this.creditReward - amountToDeduct;
+	}
 
 	public List<Long> getAssignedHunters() {
 		return assignedHunters;
@@ -102,5 +111,25 @@ public class BountyListItem {
 	
 	public void removeBountyHunter(long objectId) {
 		assignedHunters.remove(objectId);
+	}
+
+	public List<Long> getBountyPlacers() {
+		return bountyPlacers;
+	}
+
+	public void setBountyPlacers(List<Long> bountyPlacers) {
+		this.bountyPlacers = bountyPlacers;
+	}
+
+	public int getFailedAttempts() {
+		return failedAttempts;
+	}
+
+	public void setFailedAttempts(int failedAttempts) {
+		this.failedAttempts = failedAttempts;
+	}
+	
+	public void incrementFailedAttempts() {
+		this.failedAttempts += 1;
 	}
 }

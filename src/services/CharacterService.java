@@ -269,10 +269,7 @@ public class CharacterService implements INetworkDispatch {
 				core.skillModService.addSkillMod(object, "language_basic_speak", 100);
 				core.skillModService.addSkillMod(object, "creature_harvesting", 25);
 				core.skillModService.addSkillMod(object, "language_wookiee_comprehend", 100);
-				
-				
-				object.createTransaction(core.getCreatureODB().getEnvironment());
-				
+								
 				PlayerObject player = (PlayerObject) core.objectService.createObject("object/player/shared_player.iff", object.getPlanet());
 				object._add(player);
 				core.skillService.addSkill(object, "species_" + object.getStfName());
@@ -334,9 +331,7 @@ public class CharacterService implements INetworkDispatch {
 				createStarterClothing(object, sharedRaceTemplate, clientCreateCharacter.getStarterProfession());
 				//core.scriptService.callScript("scripts/", "demo", "CreateStartingCharacter", core, object);
 				
-				core.getCreatureODB().put(object, Long.class, CreatureObject.class, object.getTransaction());
-				// might not need to commit transaction but better safe than sorry
-				object.getTransaction().commitSync();
+				core.getSWGObjectODB().put(object.getObjectID(), object);
 
 				PreparedStatement ps = databaseConnection.preparedStatement("INSERT INTO characters (id, \"firstName\", \"lastName\", \"accountId\", \"galaxyId\", \"statusId\", appearance, gmflag) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 				ps.setLong(1, object.getObjectID());

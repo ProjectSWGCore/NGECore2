@@ -21,6 +21,7 @@
  ******************************************************************************/
 package resources.objects.creature;
 
+import java.io.Serializable;
 import java.lang.System;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -62,23 +63,23 @@ import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
+import resources.objects.building.BuildingMessageBuilder;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.skills.SkillMod;
 import services.command.BaseSWGCommand;
 
 @Entity(version=9)
-public class CreatureObject extends TangibleObject implements IPersistent {
+public class CreatureObject extends TangibleObject implements Serializable {
 	
-	@NotPersistent
-	private Transaction txn;
+	private static final long serialVersionUID = 1L;
 	
 	// CREO 1
 	private int bankCredits = 0;
 	private int cashCredits = 0;
 	private List<String> skills;
 	@NotPersistent
-	private int skillsUpdateCounter = 0;
+	private transient int skillsUpdateCounter = 0;
 
 	// CREO 3
 	private byte posture = 0;
@@ -105,7 +106,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 
 	private SWGList<MissionCriticalObject> missionCriticalObjects;
 	@NotPersistent
-	private int missionCriticalObjectsUpdateCounter = 0;
+	private transient int missionCriticalObjectsUpdateCounter = 0;
 
 
 	// CREO6
@@ -130,30 +131,30 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private boolean acceptBandflourishes = true;
 	private boolean groupDance = true;
 	@NotPersistent
-	private CreatureObject performanceWatchee;
+	private transient CreatureObject performanceWatchee;
 	@NotPersistent
-	private CreatureObject performanceListenee;
+	private transient CreatureObject performanceListenee;
 	@NotPersistent
-	private Vector<CreatureObject> performanceAudience = new Vector<CreatureObject>();
+	private transient Vector<CreatureObject> performanceAudience = new Vector<CreatureObject>();
 	private int health = 1000;
 	private int action = 300;
 	@NotPersistent
-	private int HAMListCounter = 0;
+	private transient int HAMListCounter = 0;
 	private int maxHealth = 1000;
 	private int maxAction = 300;
 	@NotPersistent
-	private int maxHAMListCounter = 0;
+	private transient int maxHAMListCounter = 0;
 
 	private SWGList<SWGObject> equipmentList;
 	@NotPersistent
-	private int equipmentListUpdateCounter = 0;
+	private transient int equipmentListUpdateCounter = 0;
 	private SWGList<Buff> buffList  = new SWGList<Buff>();
 	@NotPersistent
-	private int buffListUpdateCounter = 0;
+	private transient int buffListUpdateCounter = 0;
 	private byte difficulty = 0;
 	private SWGList<SWGObject> appearanceEquipmentList;
 	@NotPersistent
-	private int appearanceEquipmentListUpdateCounter = 0;
+	private transient int appearanceEquipmentListUpdateCounter = 0;
 	
 	private boolean inStealth = false;
 	private boolean radarVisible = true; // radar
@@ -161,36 +162,36 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	// non-baseline vars
 	@NotPersistent
-	private List<CreatureObject> duelList = Collections.synchronizedList(new ArrayList<CreatureObject>());
+	private transient List<CreatureObject> duelList = Collections.synchronizedList(new ArrayList<CreatureObject>());
 	@NotPersistent
-	private CreatureMessageBuilder messageBuilder;
+	private transient CreatureMessageBuilder messageBuilder;
 	private SWGList<DamageOverTime> dotList = new SWGList<DamageOverTime>();
 	@NotPersistent
-	private ScheduledFuture<?> incapTask;
+	private transient ScheduledFuture<?> incapTask;
 	@NotPersistent
-	private ScheduledFuture<?> entertainerExperience;
+	private transient ScheduledFuture<?> entertainerExperience;
 	@NotPersistent
-	private ScheduledFuture<?> inspirationTick;
+	private transient ScheduledFuture<?> inspirationTick;
 	
 	@NotPersistent
-	private ScheduledFuture<?> spectatorTask;
+	private transient ScheduledFuture<?> spectatorTask;
 	
 	private boolean staticNPC = false; // temp
 	@NotPersistent
-	private int flourishCount = 0;
+	private transient int flourishCount = 0;
 	@NotPersistent
-	private boolean performingEffect;
+	private transient boolean performingEffect;
 	@NotPersistent
-	private boolean performingFlourish;
+	private transient boolean performingFlourish;
 	private int coverCharge;
 	@NotPersistent
-	private TangibleObject conversingNpc;
+	private transient TangibleObject conversingNpc;
 	@NotPersistent
-	private ConcurrentHashMap<String, Long> cooldowns = new ConcurrentHashMap<String, Long>();
+	private transient ConcurrentHashMap<String, Long> cooldowns = new ConcurrentHashMap<String, Long>();
 	@NotPersistent
-	private long tefTime = System.currentTimeMillis();
+	private transient long tefTime = System.currentTimeMillis();
 	@NotPersistent
-	private SWGObject useTarget;
+	private transient SWGObject useTarget;
 	
 	public CreatureObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
 		super(objectID, planet, Template, position, orientation);
@@ -210,6 +211,12 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		messageBuilder = new CreatureMessageBuilder(this);
 	}
 	
+	@Override
+	public void initAfterDBLoad() {
+		super.init();
+		messageBuilder = new CreatureMessageBuilder(this);
+	}
+
 	private void loadTemplateData() {
 		
 		/*if(getTemplateData().getAttribute("scale") != null)
@@ -228,10 +235,6 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		
 		notifyObservers(messageBuilder.buildCustomNameDelta(customName), true);
 	}
-	
-	public Transaction getTransaction() { return txn; }
-	
-	public void createTransaction(Environment env) { txn = env.beginTransaction(null, null); }
 
 	public int getBankCredits() {
 		synchronized(objectMutex) {

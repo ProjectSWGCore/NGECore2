@@ -38,6 +38,7 @@ import com.sleepycat.persist.EntityCursor;
 
 import main.NGECore;
 import engine.clients.Client;
+import engine.resources.database.ODBCursor;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -81,16 +82,18 @@ public class BazaarService implements INetworkDispatch {
 	public BazaarService(NGECore core) {
 		this.core = core;
 		loadAuctionItems();
-		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-			System.out.println("Saving auction items...");
-			auctionItems.forEach(item -> core.objectService.persistObject(item, Long.class, AuctionItem.class, core.getAuctionODB()));
-		}));
+	}
+	
+	public void saveAllItems() {
+		System.out.println("Saving auction items...");
+		auctionItems.forEach(item -> core.objectService.persistObject(item.getObjectId(), item, core.getAuctionODB()));
 	}
 
 	private void loadAuctionItems() {
-		EntityCursor<AuctionItem> cursor = core.getAuctionODB().getCursor(Long.class, AuctionItem.class);
-		Iterator<AuctionItem> it = cursor.iterator();
-		it.forEachRemaining(this::addAuctionItem);
+		ODBCursor cursor = core.getAuctionODB().getCursor();
+		while(cursor.hasNext()) {
+			addAuctionItem((AuctionItem) cursor.next());
+		}
 		cursor.close();
 	}
 
@@ -412,7 +415,7 @@ public class BazaarService implements INetworkDispatch {
 		if(seller == null) {
 			seller = core.objectService.getCreatureFromDB(item.getOwnerId());
 			seller.setBankCredits(seller.getBankCredits() + item.getPrice());
-			core.objectService.persistObject(seller, Long.class, CreatureObject.class, core.getAuctionODB());
+			core.objectService.persistObject(seller.getObjectID(), seller, core.getSWGObjectODB());
 		}
 		
 	}
@@ -752,8 +755,8 @@ public class BazaarService implements INetworkDispatch {
 		if(commodityLimit.get(auctionItem.getOwnerId()) != null)
 			commodityNumber = commodityLimit.get(auctionItem.getOwnerId());
 		commodityLimit.put(auctionItem.getOwnerId(), commodityNumber + 1);
-		if(!core.getAuctionODB().contains(auctionItem.getObjectId(), Long.class, AuctionItem.class)) {
-			core.objectService.persistObject(auctionItem, Long.class, AuctionItem.class, core.getAuctionODB());
+		if(!core.getAuctionODB().contains(auctionItem.getObjectId())) {
+			core.objectService.persistObject(auctionItem.getObjectId(), auctionItem, core.getAuctionODB());
 		}
 	}
 	
@@ -763,7 +766,7 @@ public class BazaarService implements INetworkDispatch {
 		if(commodityLimit.get(auctionItem.getOwnerId()) != null)
 			commodityNumber = commodityLimit.get(auctionItem.getOwnerId());
 		commodityLimit.put(auctionItem.getOwnerId(), commodityNumber - 1);
-		core.objectService.deletePersistentObject(auctionItem, Long.class, AuctionItem.class, core.getAuctionODB(), auctionItem.getObjectId());
+		core.objectService.deletePersistentObject(auctionItem.getObjectId(), core.getAuctionODB());
 	}
 	
 }

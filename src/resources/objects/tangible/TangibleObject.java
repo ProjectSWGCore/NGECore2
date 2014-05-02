@@ -22,6 +22,7 @@
 package resources.objects.tangible;
 
 import java.io.ByteArrayOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -42,6 +43,7 @@ import resources.common.RGB;
 import resources.datatables.Options;
 import resources.loot.LootGroup;
 import resources.objects.creature.CreatureObject;
+import resources.objects.staticobject.StaticMessageBuilder;
 import resources.visitors.IDManagerVisitor;
 
 import com.sleepycat.persist.model.NotPersistent;
@@ -54,9 +56,10 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent(version=13)
-public class TangibleObject extends SWGObject {
+@Persistent(version=12)
+public class TangibleObject extends SWGObject implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	// TODO: Thread safety
 	
 	protected int incapTimer = 10;
@@ -72,9 +75,9 @@ public class TangibleObject extends SWGObject {
 	protected String faction = ""; // Says you're "Imperial Special Forces" if it's 0 for some reason
 	protected int factionStatus = 0;
 	@NotPersistent
-	private Vector<TangibleObject> defendersList = new Vector<TangibleObject>();	// unused in packets but useful for the server
+	private transient Vector<TangibleObject> defendersList = new Vector<TangibleObject>();	// unused in packets but useful for the server
 	@NotPersistent
-	private TangibleMessageBuilder messageBuilder;
+	private transient TangibleMessageBuilder messageBuilder;
 	
 	private int respawnTime = 0;
 	private Point3D spawnCoordinates = new Point3D(0, 0, 0);
@@ -83,13 +86,13 @@ public class TangibleObject extends SWGObject {
 	private List<LootGroup> lootGroups = new ArrayList<LootGroup>();
 	
 	@NotPersistent
-	private boolean looted = false; // These 4 should not need to be persisted, since a looted corpse will get wiped with server restart	
+	private transient boolean looted = false; // These 4 should not need to be persisted, since a looted corpse will get wiped with server restart	
 	@NotPersistent
-	private boolean lootLock = false;	
+	private transient boolean lootLock = false;	
 	@NotPersistent
-	private boolean creditRelieved = false;	
+	private transient boolean creditRelieved = false;	
 	@NotPersistent
-	private boolean lootItem = false;
+	private transient boolean lootItem = false;
 	
 	private boolean stackable = false;
 	private int stackCount = 1;
@@ -101,7 +104,7 @@ public class TangibleObject extends SWGObject {
 	private String serialNumber;
 	
 	@NotPersistent
-	private TangibleObject killer = null;
+	private transient TangibleObject killer = null;
 	
 	public TangibleObject(long objectID, Planet planet, String template) {
 		super(objectID, planet, new Point3D(0, 0, 0), new Quaternion(1, 0, 1, 0), template);
@@ -118,6 +121,12 @@ public class TangibleObject extends SWGObject {
 	
 	public TangibleObject() {
 		super();
+		messageBuilder = new TangibleMessageBuilder(this);
+	}
+	
+	@Override
+	public void initAfterDBLoad() {
+		super.init();
 		messageBuilder = new TangibleMessageBuilder(this);
 	}
 	

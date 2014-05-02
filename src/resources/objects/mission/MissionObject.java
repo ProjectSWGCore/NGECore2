@@ -21,12 +21,15 @@
  ******************************************************************************/
 package resources.objects.mission;
 
+import java.io.Serializable;
+
 import com.sleepycat.je.Environment;
 import com.sleepycat.je.Transaction;
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
 
 import resources.common.BountyListItem;
+import resources.objects.cell.CellMessageBuilder;
 import resources.objects.intangible.IntangibleObject;
 import resources.objects.waypoint.WaypointObject;
 import services.mission.MissionObjective;
@@ -37,8 +40,9 @@ import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
 @Persistent(version=1)
-public class MissionObject extends IntangibleObject implements IPersistent {
-
+public class MissionObject extends IntangibleObject implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
 	private Point3D destination;
 	private Point3D startLocation;
 	private String startPlanet = "";
@@ -60,11 +64,8 @@ public class MissionObject extends IntangibleObject implements IPersistent {
 	private long bountyObjId;
 	
 	@NotPersistent
-	MissionMessageBuilder messageBuilder = new MissionMessageBuilder(this);
-	
-	@NotPersistent
-	private Transaction txn;
-	
+	private transient MissionMessageBuilder messageBuilder = new MissionMessageBuilder(this);
+		
 	public MissionObject() {
 		super();
 	}
@@ -77,6 +78,12 @@ public class MissionObject extends IntangibleObject implements IPersistent {
 		synchronized(objectMutex) {
 			return destinationPlanet;
 		}
+	}
+	
+	@Override
+	public void initAfterDBLoad() {
+		super.init();
+		messageBuilder = new MissionMessageBuilder(this);
 	}
 
 	public int getMissionLevel() {
@@ -304,14 +311,6 @@ public class MissionObject extends IntangibleObject implements IPersistent {
 
 	public void setBountyObjId(long bountyObjId) {
 		this.bountyObjId = bountyObjId;
-	}
-
-	public Transaction getTransaction() {
-		return txn;
-	}
-	
-	public void createTransaction(Environment env) {
-		txn = env.beginTransaction(null, null);
 	}
 
 	@Override

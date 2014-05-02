@@ -21,6 +21,7 @@
  ******************************************************************************/
 package resources.objects.guild;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -28,7 +29,6 @@ import java.util.TreeMap;
 import org.apache.mina.core.buffer.IoBuffer;
 
 import main.NGECore;
-
 import resources.gcw.CurrentServerGCWZoneHistory;
 import resources.gcw.CurrentServerGCWZonePercent;
 import resources.gcw.OtherServerGCWZonePercent;
@@ -36,6 +36,7 @@ import resources.guild.Guild;
 import resources.objects.SWGList;
 import resources.objects.SWGMap;
 import resources.objects.SWGMultiMap;
+import resources.objects.cell.CellMessageBuilder;
 import resources.objects.universe.UniverseObject;
 import services.collections.ServerFirst;
 
@@ -51,16 +52,15 @@ import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
 @Entity(version=1)
-public class GuildObject extends UniverseObject implements IPersistent {
+public class GuildObject extends UniverseObject implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	protected NGECore core;
 	@NotPersistent
-	private GuildMessageBuilder messageBuilder = new GuildMessageBuilder(this);
+	private transient GuildMessageBuilder messageBuilder = new GuildMessageBuilder(this);
 	
 	private Map<String, ServerFirst> serverFirst = new HashMap<String, ServerFirst>();
 	private Map<String, Map<String, CurrentServerGCWZonePercent>> zoneMap = new TreeMap<String, Map<String, CurrentServerGCWZonePercent>>();
-	@NotPersistent
-	private Transaction txn;
 	
 	private long nextInstanceId = 0;
 	
@@ -90,6 +90,13 @@ public class GuildObject extends UniverseObject implements IPersistent {
 		super(objectID, planet, position, orientation, Template);
 		this.core = core;
 	}
+	
+	@Override
+	public void initAfterDBLoad() {
+		super.init();
+		messageBuilder = new GuildMessageBuilder(this);
+	}
+
 	
 	public float getComplexity() {
 		synchronized(objectMutex) {
@@ -302,12 +309,5 @@ public class GuildObject extends UniverseObject implements IPersistent {
 		}
 	}
 	
-	public Transaction getTransaction() {
-		return txn;
-	}
-	
-	public void createTransaction(Environment env) {
-		txn = env.beginTransaction(null, null);
-	}
 	
 }

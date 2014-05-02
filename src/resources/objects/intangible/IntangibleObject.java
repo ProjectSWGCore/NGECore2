@@ -21,6 +21,10 @@
  ******************************************************************************/
 package resources.objects.intangible;
 
+import java.io.Serializable;
+
+import resources.objects.cell.CellMessageBuilder;
+
 import com.sleepycat.persist.model.Persistent;
 
 import engine.clients.Client;
@@ -30,8 +34,10 @@ import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
 @Persistent(version=0)
-public class IntangibleObject extends SWGObject {
+public class IntangibleObject extends SWGObject implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
+
 	private int genericInt;
 	
 	public IntangibleObject() { 
@@ -40,6 +46,11 @@ public class IntangibleObject extends SWGObject {
 
 	public IntangibleObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
 		super(objectID, planet, position, orientation, Template);
+	}
+
+	@Override
+	public void initAfterDBLoad() {
+		super.init();
 	}
 
 	public int getGenericInt() {

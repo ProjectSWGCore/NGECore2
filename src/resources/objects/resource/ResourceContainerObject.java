@@ -22,6 +22,8 @@
 package resources.objects.resource;
 
 
+import java.io.Serializable;
+
 import main.NGECore;
 
 import com.sleepycat.persist.model.NotPersistent;
@@ -33,6 +35,7 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 import resources.objects.creature.CreatureObject;
+import resources.objects.player.PlayerMessageBuilder;
 import resources.objects.tangible.TangibleObject;
 
 /** 
@@ -40,8 +43,9 @@ import resources.objects.tangible.TangibleObject;
  */
 
 @Persistent(version=0)
-public class ResourceContainerObject extends TangibleObject {
+public class ResourceContainerObject extends TangibleObject implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	// Unique ID
 	private long containerID;
 	
@@ -131,20 +135,27 @@ public class ResourceContainerObject extends TangibleObject {
 	*/
 	
 	@NotPersistent
-	public static int maximalStackCapacity = 100000;
+	public transient static int maximalStackCapacity = 100000;
 	
 	@NotPersistent
-	private ResourceContainerMessageBuilder messageBuilder;
+	private transient ResourceContainerMessageBuilder messageBuilder;
 	
 	public ResourceContainerObject(){
 		
 	}
 	
+	
 	public ResourceContainerObject(long objectID, Planet planet, String template, Point3D position, Quaternion orientation){
 		super(objectID, planet, template, position, orientation);
 		messageBuilder = new ResourceContainerMessageBuilder(this);
 		this.setAttachment("radial_filename", "resourceContainer");
-		}
+	}
+	
+	@Override
+	public void initAfterDBLoad() {
+		super.init();
+		messageBuilder = new ResourceContainerMessageBuilder(this);
+	}
 			
 	public void initializeStats(GalacticResource resource){
 		this.setResourceName(resource.getName());

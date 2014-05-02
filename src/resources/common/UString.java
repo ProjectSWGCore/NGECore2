@@ -21,6 +21,7 @@
  ******************************************************************************/
 package resources.common;
 
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 
 import com.sleepycat.persist.model.Persistent;
@@ -28,8 +29,9 @@ import com.sleepycat.persist.model.Persistent;
 import resources.objects.Delta;
 
 @Persistent
-public final class UString extends Delta {
+public final class UString extends Delta implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	private String string;
 	
 	public UString() {

@@ -270,7 +270,7 @@ public class ConnectionService implements INetworkDispatch {
 			}
 		}*/
 		
-		core.missionService.getBountyList().remove(core.getBountiesODB().get(object.getObjectId(), Long.class, BountyListItem.class));
+		core.missionService.getBountyList().remove(core.getBountiesODB().get(object.getObjectId()));
 		
 		ghost.toggleFlag(PlayerFlags.LD);
 		
@@ -283,9 +283,7 @@ public class ConnectionService implements INetworkDispatch {
 		schedulers.clear();
 		core.playerService.getSchedulers().remove(object.getObjectID());
 		
-		object.createTransaction(core.getCreatureODB().getEnvironment());
-		core.getCreatureODB().put(object, Long.class, CreatureObject.class, object.getTransaction());
-		object.getTransaction().commitSync();
+		core.getSWGObjectODB().put(object.getObjectID(), object);
 		core.objectService.destroyObject(object);
 		
 	}

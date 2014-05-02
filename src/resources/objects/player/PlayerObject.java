@@ -21,6 +21,7 @@
  ******************************************************************************/
 package resources.objects.player;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashMap;
@@ -32,6 +33,7 @@ import resources.objects.intangible.IntangibleObject;
 import resources.objects.resource.ResourceContainerObject;
 import resources.objects.tool.SurveyTool;
 import resources.objects.waypoint.WaypointObject;
+import resources.objects.cell.CellMessageBuilder;
 import resources.objects.creature.CreatureObject;
 
 import com.sleepycat.persist.model.NotPersistent;
@@ -45,8 +47,9 @@ import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
 @Persistent(version=13)
-public class PlayerObject extends IntangibleObject {
+public class PlayerObject extends IntangibleObject implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	// PLAY 3
 	
 	private String title;
@@ -71,11 +74,11 @@ public class PlayerObject extends IntangibleObject {
 	
 	private Map<String, Integer> xpList = new HashMap<String, Integer>();
 	@NotPersistent
-	private int xpListUpdateCounter = 0;
+	private transient int xpListUpdateCounter = 0;
 
 	private List<WaypointObject> waypoints = new ArrayList<WaypointObject>();
 	@NotPersistent
-	private int waypointListUpdateCounter = 0;
+	private transient int waypointListUpdateCounter = 0;
 
 	private int currentForcePower = 0;	// unused in NGE
 	private int maxForcePower = 0;		// unused in NGE
@@ -85,7 +88,7 @@ public class PlayerObject extends IntangibleObject {
 	
 	private List<Quest> questJournal = new ArrayList<Quest>();
 	@NotPersistent
-	private int questJournalUpdateCounter = 0;
+	private transient int questJournalUpdateCounter = 0;
 
 	private String professionWheelPosition;
 	
@@ -97,17 +100,17 @@ public class PlayerObject extends IntangibleObject {
 	
 	private List<DraftSchematic> draftSchematicList = new ArrayList<DraftSchematic>();
 	@NotPersistent
-	private int draftSchematicListUpdateCounter = 0;
+	private transient int draftSchematicListUpdateCounter = 0;
 
 	private int experimentationPoints = 0;
 	private int accomplishmentCounter = 0;
 	
 	private List<String> friendList = new ArrayList<String>();
 	@NotPersistent
-	private int friendListUpdateCounter = 0;
+	private transient int friendListUpdateCounter = 0;
 	private List<String> ignoreList = new ArrayList<String>();
 	@NotPersistent
-	private int ignoreListUpdateCounter = 0;
+	private transient int ignoreListUpdateCounter = 0;
 	
 	private int languageId = 0;			// unused in NGE
 	private int currentStomach = 0;		// unused in NGE
@@ -129,10 +132,10 @@ public class PlayerObject extends IntangibleObject {
 	private int lotsRemaining = 10;
 	
 	@NotPersistent
-	private PlayerMessageBuilder messageBuilder;
+	private transient PlayerMessageBuilder messageBuilder;
 	
 	@NotPersistent
-	private long lastPlayTimeUpdate = System.currentTimeMillis();
+	private transient long lastPlayTimeUpdate = System.currentTimeMillis();
 	
 	private Map<String, Integer> factionStandingMap = new TreeMap<String, Integer>();
 	
@@ -145,7 +148,7 @@ public class PlayerObject extends IntangibleObject {
 	private List<Integer> chatChannels = new ArrayList<Integer>();
 	
 	@NotPersistent
-	private boolean callingCompanion = false;
+	private transient boolean callingCompanion = false;
 	
 	public PlayerObject() {
 		super();
@@ -154,6 +157,12 @@ public class PlayerObject extends IntangibleObject {
 	
 	public PlayerObject(long objectID, Planet planet) {
 		super(objectID, planet, new Point3D(0, 0, 0), new Quaternion(1, 0, 0, 0), "object/player/shared_player.iff");
+		messageBuilder = new PlayerMessageBuilder(this);
+	}
+	
+	@Override
+	public void initAfterDBLoad() {
+		super.init();
 		messageBuilder = new PlayerMessageBuilder(this);
 	}
 

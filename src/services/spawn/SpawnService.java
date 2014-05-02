@@ -61,6 +61,7 @@ public class SpawnService {
 	private Map<String, LairGroupTemplate> lairGroupTemplates = new ConcurrentHashMap<String, LairGroupTemplate>();
 	private Map<String, LairTemplate> lairTemplates = new ConcurrentHashMap<String, LairTemplate>();
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
+	private Map<String, DynamicSpawnGroup> dynamicGroupTemplates = new ConcurrentHashMap<String, DynamicSpawnGroup>();
 
 	public SpawnService(NGECore core) {
 		this.core = core;
@@ -304,6 +305,26 @@ public class SpawnService {
 		}
 	}
 	
+	public void loadDynamicGroups() {
+	    Path p = Paths.get("scripts/mobiles/dynamicgroups");
+	    FileVisitor<Path> fv = new SimpleFileVisitor<Path>() {
+	        @Override
+	        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+	        	core.scriptService.callScript("scripts/mobiles/dynamicgroups/", file.getFileName().toString().replace(".py", ""), "addDynamicGroup", core);
+	        	return FileVisitResult.CONTINUE;
+	        }
+	    };
+        try {
+			Files.walkFileTree(p, fv);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void addDynamicGroup(String name, DynamicSpawnGroup dynamicSpawnGroup) {
+		dynamicGroupTemplates.put(name, dynamicSpawnGroup);
+	}
+	
 	public void addLairGroup(String name, Vector<LairSpawnTemplate> lairSpawnTemplates) {
 		lairGroupTemplates.put(name, new LairGroupTemplate(name, lairSpawnTemplates));
 	}
@@ -334,6 +355,18 @@ public class SpawnService {
 		spawnAreas.get(planet).add(lairSpawnArea);
 		core.simulationService.addCollidable(collidableCircle, x, z);
 	}
+	
+	public void addDynamicSpawnArea(String dynamicGroup, float x, float z, float radius, String planetName) {
+		DynamicSpawnGroup dynamicGroupTemplate = dynamicGroupTemplates .get(dynamicGroup);
+		Planet planet = core.terrainService.getPlanetByName(planetName);
+		if(dynamicGroupTemplate == null || planet == null)
+			return;
+		CollidableCircle collidableCircle = new CollidableCircle(new Point3D(x, 0, z), radius, planet);
+		DynamicSpawnArea dynamicSpawnArea = new DynamicSpawnArea(planet, collidableCircle, dynamicGroupTemplate);
+		spawnAreas.get(planet).add(dynamicSpawnArea);
+		core.simulationService.addCollidable(collidableCircle, x, z);
+	}
+
 
 	
 }
