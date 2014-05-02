@@ -252,7 +252,8 @@ public class SpawnService {
 	    FileVisitor<Path> fv = new SimpleFileVisitor<Path>() {
 	        @Override
 	        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-	        	if(!file.toString().contains("lairs") && !file.toString().contains("spawnareas") && !file.toString().contains("lairgroups"))
+	        	if(!file.toString().contains("lairs") && !file.toString().contains("spawnareas") 
+	        	   && !file.toString().contains("lairgroups") && !file.toString().contains("dynamicgroups"))
 	        		core.scriptService.callScript(file.toString().replace(file.getFileName().toString(), ""), file.getFileName().toString().replace(".py", ""), "addTemplate", core);
 	        	return FileVisitResult.CONTINUE;
 	        }

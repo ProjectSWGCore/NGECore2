@@ -52,7 +52,7 @@ public class DynamicSpawnArea extends SpawnArea {
 	@Override
 	@Handler
 	public void onEnter(EnterEvent event) {
-		
+		System.err.println("We got a spawn!!!!!!!!!!!!!");
 		SWGObject object = event.object;
 		
 		if(object == null || !(object instanceof CreatureObject))
