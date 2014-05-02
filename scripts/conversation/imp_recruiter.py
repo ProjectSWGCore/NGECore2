@@ -546,7 +546,7 @@ def handleSecondScreen(core, actor, npc, selection):
 def handleThirdScreen(core, actor, npc, selection):
 	if selection == 0:
 		core.conversationService.sendStopConversation(actor, npc, 'conversation/faction_recruiter_imperial', 's_94')	
-		actor.setFaction('neutral')
+		actor.setFaction('')
 		return
 	
 	if selection == 1:
