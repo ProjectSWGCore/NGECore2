@@ -317,13 +317,8 @@ public class CharacterService implements INetworkDispatch {
 				}
 				
 				// TODO: Race abilities
-				if (client.isGM())
-					object.addAbility("admin");
-				
 				object.addAbility("startDance");
 				object.addAbility("startDance+Basic");
-				
-				object.setFaction("neutral");
 				
 				object.addObjectToEquipList(datapad);
 				object.addObjectToEquipList(inventory);
