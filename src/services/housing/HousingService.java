@@ -154,15 +154,17 @@ public class HousingService implements INetworkDispatch {
 		// Check for city founders joining a new city
 		PlayerCity cityActorIsIn = core.playerCityService.getCityObjectIsIn(actor);
 		
-		actor.setAttachment("Has24HZoningFor",cityActorIsIn.getCityID()); // for testing
-		
-		int cityActorHasZoning = (int)actor.getAttachment("Has24HZoningFor");
-		if (cityActorIsIn!=null && cityActorHasZoning==cityActorIsIn.getCityID()){
-			if (! cityActorIsIn.getCitizens().contains(actor.getObjectID())){
-				building.setAttachment("structureCity", cityActorIsIn.getCityID());
-				// actor.setAttachment("residentCity", cityActorIsIn.getCityID()); He must do it manually
-				cityActorIsIn.addCitizen(actor.getObjectID());
-				cityActorIsIn.addNewStructure(building.getObjectID());
+		if (cityActorIsIn!=null){
+			actor.setAttachment("Has24HZoningFor",cityActorIsIn.getCityID()); // for testing
+			
+			int cityActorHasZoning = (int)actor.getAttachment("Has24HZoningFor");
+			if (cityActorIsIn!=null && cityActorHasZoning==cityActorIsIn.getCityID()){
+				if (! cityActorIsIn.getCitizens().contains(actor.getObjectID())){
+					building.setAttachment("structureCity", cityActorIsIn.getCityID());
+					// actor.setAttachment("residentCity", cityActorIsIn.getCityID()); He must do it manually
+					cityActorIsIn.addCitizen(actor.getObjectID());
+					cityActorIsIn.addNewStructure(building.getObjectID());
+				}
 			}
 		}
 		
