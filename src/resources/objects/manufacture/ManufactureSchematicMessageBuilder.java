@@ -19,43 +19,28 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package resources.objects.craft;
+package resources.objects.manufacture;
 
-import java.io.Serializable;
+import org.apache.mina.core.buffer.IoBuffer;
 
 import resources.objects.ObjectMessageBuilder;
 
-import com.sleepycat.persist.model.Persistent;
-
-import engine.clients.Client;
-import engine.resources.objects.SWGObject;
-import engine.resources.scene.Planet;
-import engine.resources.scene.Point3D;
-import engine.resources.scene.Quaternion;
-
-@Persistent
-public class DraftSchematic extends SWGObject implements Serializable {
+public class ManufactureSchematicMessageBuilder extends ObjectMessageBuilder {
 	
-	private static final long serialVersionUID = 1L;
-	private transient ObjectMessageBuilder messageBuilder = null;
-
-	public DraftSchematic(long objectID, Planet planet, String template, Point3D position, Quaternion orientation){
-		super(objectID, planet, position, orientation, template);
+	public ManufactureSchematicMessageBuilder(ManufactureSchematicObject object) {
+		setObject(object);
 	}
-
+	
 	@Override
-	public void sendBaselines(Client arg0) {
+	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
 		// TODO Auto-generated method stub
 		
 	}
-	
+
 	@Override
-	public void initAfterDBLoad() {
-		super.init();
-	}
-	
-	public ObjectMessageBuilder getMessageBuilder() {
-		return messageBuilder;
+	public void sendBaselines() {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }

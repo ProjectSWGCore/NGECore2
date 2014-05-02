@@ -35,7 +35,6 @@ import engine.resources.scene.Quaternion;
 import resources.objects.creature.CreatureObject;
 import resources.objects.resource.GalacticResource;
 import resources.objects.resource.ResourceConcentration;
-import resources.objects.tangible.TangibleMessageBuilder;
 import resources.objects.tangible.TangibleObject;
 
 /** 

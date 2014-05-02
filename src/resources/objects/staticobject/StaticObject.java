@@ -23,7 +23,7 @@ package resources.objects.staticobject;
 
 import java.io.Serializable;
 
-import resources.objects.resource.ResourceContainerMessageBuilder;
+import resources.objects.ObjectMessageBuilder;
 
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
@@ -71,5 +71,9 @@ public class StaticObject extends SWGObject implements Serializable {
 		super.init();
 		messageBuilder = new StaticMessageBuilder(this);
 	}
-
+	
+	public ObjectMessageBuilder getMessageBuilder() {
+		return messageBuilder;
+	}
+	
 }

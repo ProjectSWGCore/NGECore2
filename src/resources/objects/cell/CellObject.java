@@ -24,6 +24,7 @@ package resources.objects.cell;
 import java.io.Serializable;
 
 import protocol.swg.UpdateCellPermissionMessage;
+import resources.objects.ObjectMessageBuilder;
 
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
@@ -89,6 +90,9 @@ public class CellObject extends SWGObject implements Serializable {
 		super.init();
 		messageBuilder = new CellMessageBuilder(this);
 	}
-
-
+	
+	public ObjectMessageBuilder getMessageBuilder() {
+		return messageBuilder;
+	}
+	
 }

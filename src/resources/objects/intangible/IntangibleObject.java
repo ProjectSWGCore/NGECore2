@@ -23,7 +23,7 @@ package resources.objects.intangible;
 
 import java.io.Serializable;
 
-import resources.objects.cell.CellMessageBuilder;
+import resources.objects.ObjectMessageBuilder;
 
 import com.sleepycat.persist.model.Persistent;
 
@@ -37,20 +37,23 @@ import engine.resources.scene.Quaternion;
 public class IntangibleObject extends SWGObject implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
-
+	private transient IntangibleMessageBuilder messageBuilder;
 	private int genericInt;
 	
 	public IntangibleObject() { 
 		super();
+		messageBuilder = new IntangibleMessageBuilder(this);
 	}
 
 	public IntangibleObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
 		super(objectID, planet, position, orientation, Template);
+		messageBuilder = new IntangibleMessageBuilder(this);
 	}
 
 	@Override
 	public void initAfterDBLoad() {
 		super.init();
+		messageBuilder = new IntangibleMessageBuilder(this);
 	}
 
 	public int getGenericInt() {
@@ -70,5 +73,9 @@ public class IntangibleObject extends SWGObject implements Serializable {
 		// TODO Auto-generated method stub
 		
 	}
-
+	
+	public ObjectMessageBuilder getMessageBuilder() {
+		return messageBuilder;
+	}
+	
 }

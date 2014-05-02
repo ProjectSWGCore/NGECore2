@@ -21,12 +21,10 @@
  ******************************************************************************/
 package resources.objects;
 
-import java.io.Serializable;
-
 import com.sleepycat.persist.model.Persistent;
 
 @Persistent
-public interface IDelta  {
+public interface IDelta {
 	
 	public byte[] getBytes();
 	

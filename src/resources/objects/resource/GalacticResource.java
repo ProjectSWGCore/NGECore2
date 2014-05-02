@@ -29,17 +29,13 @@ import java.util.Vector;
 import main.NGECore;
 import protocol.swg.SurveyMapUpdateMessage;
 import resources.objects.creature.CreatureObject;
-import resources.objects.player.PlayerMessageBuilder;
 import resources.objects.player.PlayerObject;
 import resources.objects.waypoint.WaypointObject;
 
-import com.sleepycat.je.Environment;
-import com.sleepycat.je.Transaction;
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.NotPersistent;
 
 import engine.clients.Client;
-import engine.resources.objects.IPersistent;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;

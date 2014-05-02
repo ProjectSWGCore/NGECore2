@@ -24,7 +24,7 @@ package resources.objects.weapon;
 import java.io.Serializable;
 
 import resources.datatables.WeaponType;
-import resources.objects.tangible.TangibleMessageBuilder;
+import resources.objects.ObjectMessageBuilder;
 import resources.objects.tangible.TangibleObject;
 
 import com.sleepycat.persist.model.NotPersistent;
@@ -224,5 +224,4 @@ public class WeaponObject extends TangibleObject implements Serializable {
 		return false;
 		
 	}
-
 }

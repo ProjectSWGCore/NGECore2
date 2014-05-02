@@ -23,18 +23,14 @@ package resources.objects.mission;
 
 import java.io.Serializable;
 
-import com.sleepycat.je.Environment;
-import com.sleepycat.je.Transaction;
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
 
-import resources.common.BountyListItem;
-import resources.objects.cell.CellMessageBuilder;
+import resources.objects.ObjectMessageBuilder;
 import resources.objects.intangible.IntangibleObject;
 import resources.objects.waypoint.WaypointObject;
 import services.mission.MissionObjective;
 import engine.clients.Client;
-import engine.resources.objects.IPersistent;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
@@ -326,5 +322,9 @@ public class MissionObject extends IntangibleObject implements Serializable {
 		destination.getSession().write(messageBuilder.buildBaseline8());
 		destination.getSession().write(messageBuilder.buildBaseline9());
 	}
-
+	
+	public ObjectMessageBuilder getMessageBuilder() {
+		return messageBuilder;
+	}
+	
 }
