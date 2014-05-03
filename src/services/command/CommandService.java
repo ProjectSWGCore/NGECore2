@@ -91,9 +91,9 @@ public class CommandService implements INetworkDispatch  {
 			return false;
 		}
 		
-		WeaponObject weapon = (WeaponObject) core.objectService.getObject(actor.getWeaponId());
+		TangibleObject weapon = (TangibleObject) core.objectService.getObject(actor.getWeaponId());
 		
-		if (weapon != null && weapon.getWeaponType() == command.getInvalidWeapon()) {
+		if (weapon != null && weapon instanceof WeaponObject && ((WeaponObject) weapon).getWeaponType() == command.getInvalidWeapon()) {
 			return false;
 		}
 		
