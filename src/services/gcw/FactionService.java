@@ -273,7 +273,7 @@ public class FactionService implements INetworkDispatch {
 			pvpBitmask |= PvpStatus.TEF;
 		}
 		
-		if (target.getFaction().equals(object.getFaction())) {
+		if (target.getFaction().length() > 0 && target.getFaction().equals(object.getFaction())) {
 			return pvpBitmask;
 		}
 		
