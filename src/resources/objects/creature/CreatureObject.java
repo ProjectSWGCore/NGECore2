@@ -210,6 +210,10 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	@Override
 	public void initAfterDBLoad() {
 		super.init();
+		duelList = Collections.synchronizedList(new ArrayList<CreatureObject>());
+		cooldowns = new ConcurrentHashMap<String, Long>();
+		performanceAudience = new Vector<CreatureObject>();
+		tefTime = System.currentTimeMillis();
 		messageBuilder = new CreatureMessageBuilder(this);
 	}
 
