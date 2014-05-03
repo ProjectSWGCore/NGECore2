@@ -147,6 +147,7 @@ public class GalacticResource extends SWGObject implements Serializable {
 	
 	@Override
 	public void initAfterDBLoad() {
+		init();
 	}
 	
 	public GalacticResource(String name, String fileName, String category){

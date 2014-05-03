@@ -163,6 +163,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	@Override
 	public void initAfterDBLoad() {
 		super.init();
+		lastPlayTimeUpdate = System.currentTimeMillis();
 		messageBuilder = new PlayerMessageBuilder(this);
 	}
 

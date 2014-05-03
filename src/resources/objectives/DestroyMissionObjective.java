@@ -28,6 +28,8 @@ import services.mission.MissionObjective;
 
 public class DestroyMissionObjective extends MissionObjective {
 
+	private static final long serialVersionUID = 1L;
+
 	public DestroyMissionObjective(MissionObject parent) {
 		super(parent);
 	}

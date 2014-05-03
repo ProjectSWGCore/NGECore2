@@ -33,6 +33,8 @@ import services.mission.MissionObjective;
 
 public class DeliveryMissionObjective extends MissionObjective {
 
+	private static final long serialVersionUID = 1L;
+
 	private TangibleObject deliveryObject;
 	private CreatureObject missionGiver;
 	private CreatureObject dropOffNpc;

@@ -180,7 +180,7 @@ public class ObjectService implements INetworkDispatch {
 				
 		while(cursor.hasNext()) {
 			final SWGObject building = (SWGObject) cursor.next();
-			if(!(building instanceof BuildingObject))
+			if(!(building instanceof BuildingObject) || building == null)
 				continue;
 			objectList.put(building.getObjectID(), building);
 			Planet planet = core.terrainService.getPlanetByID(building.getPlanetId());
@@ -563,6 +563,8 @@ public class ObjectService implements INetworkDispatch {
 		
 		synchronized(objectList) {
 			for(SWGObject obj : objectList.values()) {
+				if(obj == null)
+					continue;
 				if(obj.getCustomName() == null)
 					continue;
 				if(obj.getCustomName().startsWith(customName))
@@ -584,7 +586,7 @@ public class ObjectService implements INetworkDispatch {
 				return object;
 			}
 		}
-		
+		cursor.close();
 		return null;
 	}
 	
@@ -914,9 +916,8 @@ public class ObjectService implements INetworkDispatch {
 				if(!core.getConfig().getString("MOTD").equals(""))
 					creature.sendSystemMessage(core.getConfig().getString("MOTD"), (byte) 2);
 				
-				BountyListItem bounty = (BountyListItem) core.getBountiesODB().get(creature.getObjectID());
-				if (bounty != null)
-					core.missionService.getBountyList().add(bounty);
+				if (core.getBountiesODB().contains(creature.getObjectId()))
+					core.missionService.getBountyList().add((BountyListItem) core.getBountiesODB().get(creature.getObjectId()));
 				
 				if (creature.getSlottedObject("datapad") != null) {
 					creature.getSlottedObject("datapad").viewChildren(creature, true, false, new Traverser() {

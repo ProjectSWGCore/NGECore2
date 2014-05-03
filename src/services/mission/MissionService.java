@@ -153,11 +153,8 @@ public class MissionService implements INetworkDispatch {
 				if (terminalType == TerminalType.GENERIC) {
 					handleMissionListRequest(core.objectService.getObject(request.getObjectId()), request.getTickCount(), TerminalType.GENERIC);
 				} else if (terminalType == TerminalType.BOUNTY) {
-					if (!object.hasSkill("class_bountyhunter_phase1_novice")) {
-						object.sendSystemMessage("@mission/mission_generic:not_bounty_hunter_terminal", (byte) 0);
-					} /*else {
-						handleMissionListRequest(core.objectService.getObject(request.getObjectId()), request.getTickCount(), TerminalType.BOUNTY);
-					}*/
+					if (!object.hasSkill("class_bountyhunter_phase1_novice")) { object.sendSystemMessage("@mission/mission_generic:not_bounty_hunter_terminal", (byte) 0); } 
+					else { handleMissionListRequest(core.objectService.getObject(request.getObjectId()), request.getTickCount(), TerminalType.BOUNTY); }
 				} else if (terminalType == TerminalType.ENTERTAINER) {
 
 				} else if (terminalType == TerminalType.ARTISAN) {

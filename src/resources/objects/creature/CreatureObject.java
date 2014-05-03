@@ -210,6 +210,10 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	@Override
 	public void initAfterDBLoad() {
 		super.init();
+		duelList = Collections.synchronizedList(new ArrayList<CreatureObject>());
+		cooldowns = new ConcurrentHashMap<String, Long>();
+		performanceAudience = new Vector<CreatureObject>();
+		tefTime = System.currentTimeMillis();
 		messageBuilder = new CreatureMessageBuilder(this);
 	}
 
@@ -559,12 +563,14 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		synchronized(objectMutex) {
 			if (state != 0) {
 				if (add) {
-					stateBitmask = (stateBitmask | state);
+					state = (stateBitmask | state);
 				} else {
-					stateBitmask = (stateBitmask & ~state);
+					state = (stateBitmask & ~state);
 				}
 			}
 		}
+		
+		notifyObservers(messageBuilder.buildStateDelta(state), true);
 	}
 	
 	public boolean getState(long state) {
