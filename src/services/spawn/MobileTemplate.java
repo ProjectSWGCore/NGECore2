@@ -32,6 +32,8 @@ public class MobileTemplate {
 	private int optionBitmask = Options.ATTACKABLE;
 	private int pvpBitmask = PvpStatus.Attackable;
 	private short level;
+	private short minLevel;
+	private short maxLevel;
 	private Vector<String> attacks;
 	private String defaultAttack;
 	private int minDamage = 0;
@@ -46,6 +48,9 @@ public class MobileTemplate {
 	private int attackRange;
 	private Vector<String> weaponTemplates = new Vector<String>();
 	private Vector<WeaponTemplate> weaponTemplateVector = new Vector<WeaponTemplate>();
+	private int minSpawnDistance = 0;
+	private int maxSpawnDistance = 0;
+	private boolean deathblow = false;
 
 	public Vector<String> getTemplates() {
 		return templates;
@@ -189,5 +194,45 @@ public class MobileTemplate {
 
 	public void setWeaponTemplateVector(Vector<WeaponTemplate> weaponTemplateVector) {
 		this.weaponTemplateVector = weaponTemplateVector;
+	}
+
+	public int getMinSpawnDistance() {
+		return minSpawnDistance;
+	}
+
+	public void setMinSpawnDistance(int minSpawnDistance) {
+		this.minSpawnDistance = minSpawnDistance;
+	}
+
+	public int getMaxSpawnDistance() {
+		return maxSpawnDistance;
+	}
+
+	public void setMaxSpawnDistance(int maxSpawnDistance) {
+		this.maxSpawnDistance = maxSpawnDistance;
+	}
+
+	public short getMinLevel() {
+		return minLevel;
+	}
+
+	public void setMinLevel(short minLevel) {
+		this.minLevel = minLevel;
+	}
+
+	public short getMaxLevel() {
+		return maxLevel;
+	}
+
+	public void setMaxLevel(short maxLevel) {
+		this.maxLevel = maxLevel;
+	}
+
+	public boolean isDeathblow() {
+		return deathblow;
+	}
+
+	public void setDeathblow(boolean deathblow) {
+		this.deathblow = deathblow;
 	}
 }

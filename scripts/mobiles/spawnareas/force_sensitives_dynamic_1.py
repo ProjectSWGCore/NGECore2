@@ -1,5 +1,5 @@
 import sys
 
 def addSpawnArea(core):
-	core.spawnService.addDynamicSpawnArea('force_sensitives_wild_1', 3860, -4784, 2048, 'tatooine')
+	core.spawnService.addDynamicSpawnArea('force_sensitives_wild_1', 4083, 5780, 2048, 'dantooine')
 	return
