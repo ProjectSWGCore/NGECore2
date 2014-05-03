@@ -92,6 +92,7 @@ public class DevService implements INetworkDispatch {
 				if(creature.getClient().isGM()) suiOptions.put((long) 125, "Crafting Tools");
 				if(creature.getClient().isGM()) suiOptions.put((long) 130, "Vehicle Deeds");
 				if(creature.getClient().isGM()) suiOptions.put((long) 121, "Sandbox City");
+				if(creature.getPlayerObject().getProfession().equals("bounty_hunter_1a")) suiOptions.put((long) 122, "Tracking Droids");
 
 				break;
 			case 3: // [Items] Weapons
@@ -1179,8 +1180,19 @@ public class DevService implements INetworkDispatch {
 						return;
 					
 					case 121:
-						NGECore.getInstance().playerCityService.buildSandboxTestCity(player);
-					
+						core.playerCityService.buildSandboxTestCity(player);
+						return;
+
+					case 122:
+						TangibleObject arakydDroids = (TangibleObject) core.objectService.createObject("object/tangible/mission/shared_mission_bounty_droid_probot.iff", planet);
+						//arakydDroids.setStackable(true);
+						//arakydDroids.setStackCount(10);
+						inventory.add(arakydDroids);
+						
+						TangibleObject seekerDroids = (TangibleObject) core.objectService.createObject("object/tangible/mission/shared_mission_bounty_droid_seeker.iff", planet);
+						inventory.add(seekerDroids);
+						return;
+
 					case 125:
 						TangibleObject genericCraftingTool = (TangibleObject) core.objectService.createObject("object/tangible/crafting/station/shared_generic_tool.iff", planet);
 						genericCraftingTool.setCustomName("Generic Crafting Tool");

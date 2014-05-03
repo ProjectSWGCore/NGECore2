@@ -25,15 +25,20 @@ import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import protocol.swg.CommPlayerMessage;
+import protocol.swg.PlayClientEffectLocMessage;
+import engine.resources.common.CRC;
 import engine.resources.container.Traverser;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
+import engine.resources.scene.Quaternion;
 import main.NGECore;
 import resources.common.BountyListItem;
 import resources.common.OutOfBand;
 import resources.common.ProsePackage;
+import resources.common.SpawnPoint;
 import resources.datatables.DisplayType;
 import resources.objects.creature.CreatureObject;
 import resources.objects.mission.MissionObject;
@@ -43,15 +48,27 @@ import services.mission.MissionObjective;
 
 public class BountyMissionObjective extends MissionObjective {
 
+	private static final long serialVersionUID = 1L;
+
 	private Point3D lastKnownLocation;
 	private String lastKnownPlanet;
-	private ScheduledFuture<?> locationUpdater;
+	private ScheduledFuture<?> seekerUpdates;
+	private ScheduledFuture<?> probeSummonTask;
 	private long markObjId;
 	
 	private boolean seekerActive = false;
 	private String seekerPlanet = "";
 	private boolean arakydActive = false;
-
+	
+	private Point3D arakydLandingLocation;
+	
+	////// Droids in the world - Set Posture to 8 to launch them. //////
+	// Seeker Droids: object/creature/npc/droid/crafted/shared_probe_droid_advanced.iff
+	// Arakyd Droids: object/creature/npc/droid/shared_imperial_probot_bounty.iff
+	
+	///// Inventory form /////
+	// Seeker Droids: object/tangible/mission/shared_mission_bounty_droid_seeker.iff
+	// Arakyd Droids: object/tangible/mission/shared_mission_bounty_droid_probot.iff
 	public BountyMissionObjective(MissionObject parent) {
 		super(parent);
 	}
@@ -90,6 +107,9 @@ public class BountyMissionObjective extends MissionObjective {
 		} //Could also be: object/mobile/shared_bounty_guild_bounty_check.iff || object/mobile/shared_bounty_check_fugitive_x.iff
 		
 		player.getClient().getSession().write(comm.serialize());
+		
+		player.setAttachment("bountyMissionId", getMissionObject().getObjectId());
+		
 	}
 
 	@Override
@@ -111,16 +131,20 @@ public class BountyMissionObjective extends MissionObjective {
 		clearActiveMissions(core, bounty);
 		
 		core.missionService.removeBounty(markObjId);
+		player.setAttachment("bountyMissionId", 0);
 	}
 
 	@Override
 	public void abort(NGECore core, CreatureObject player) {
+		cancelLocationUpdates();
+		
 		BountyListItem bounty = core.missionService.getBountyListItem(markObjId);
 		
 		if (bounty == null)
 			return;
 		
 		bounty.removeBountyHunter(player.getObjectId());
+		player.setAttachment("bountyMissionId", 0);
 	}
 
 	@Override
@@ -182,51 +206,147 @@ public class BountyMissionObjective extends MissionObjective {
 		}
 	}
 	
-	public void beginSeekerUpdates(NGECore core) {
+	public void handleProbeDroidSummon(NGECore core, final CreatureObject actor) {
+		
+		actor.sendSystemMessage("@mission/mission_generic:probe_droid_launch_prep", DisplayType.Broadcast);
+		AtomicInteger countDown = new AtomicInteger();
+		
+		ScheduledFuture<?> summon = Executors.newScheduledThreadPool(1).scheduleAtFixedRate(new Runnable() {
+
+			@Override
+			public void run() {
+				switch(countDown.incrementAndGet()) {
+					case 15:
+						actor.sendSystemMessage("@mission/mission_generic:probe_droid_arrival_5", DisplayType.Broadcast);
+						break;
+					case 16:
+						actor.sendSystemMessage("@mission/mission_generic:probe_droid_arrival_4", DisplayType.Broadcast);
+						break;
+					case 17:
+						actor.sendSystemMessage("@mission/mission_generic:probe_droid_arrival_3", DisplayType.Broadcast);
+						break;
+					case 18:
+						actor.sendSystemMessage("@mission/mission_generic:probe_droid_arrival_2", DisplayType.Broadcast);
+						break;
+					case 19:
+						actor.sendSystemMessage("@mission/mission_generic:probe_droid_arrival_1", DisplayType.Broadcast);
+						arakydLandingLocation = SpawnPoint.getRandomPosition(actor.getPosition(), 50, 120, actor.getPlanetId());
+						PlayClientEffectLocMessage effectMsg = new PlayClientEffectLocMessage("clienteffect/probot_delivery.cef", actor.getPlanet().getName(), arakydLandingLocation);
+						actor.getClient().getSession().write(effectMsg.serialize());
+						break;
+					case 20:
+						break;
+					case 23:
+						Quaternion ori = actor.getOrientation();
+						
+						CreatureObject probe = (CreatureObject) NGECore.getInstance().staticService.spawnObject("object/creature/npc/droid/shared_imperial_probot_bounty.iff", 
+								actor.getPlanet().getName(), 0, arakydLandingLocation.x, arakydLandingLocation.y, arakydLandingLocation.z, ori.y, ori.w);
+						
+						// TODO: Move probe to the player.
+						
+						probe.setAttachment("probotRequester", actor.getObjectID());
+						probe.setAttachment("attachedMission", getMissionObject().getObjectID());
+						actor.sendSystemMessage("@mission/mission_generic:probe_droid_arrival", DisplayType.Broadcast);
+						probeSummonTask.cancel(false);
+						break;
+				}
+			}
+		}, 1, 1, TimeUnit.SECONDS);
+		
+		probeSummonTask = summon;
+		
+	}
+	
+	public void beginSeekerUpdates(NGECore core, CreatureObject actor) {
 		
 		if (!seekerActive) {
 			setSeekerActive(true);
-			setSeekerPlanet(getMissionObject().getGrandparent().getPlanet().getName());
+			setSeekerPlanet(actor.getPlanet().getName());
 			
-			ScheduledFuture<?> updates = Executors.newScheduledThreadPool(1).scheduleAtFixedRate(new Runnable() {
+			AtomicInteger updates = new AtomicInteger();
+			ScheduledFuture<?> updater = Executors.newScheduledThreadPool(1).scheduleAtFixedRate(new Runnable() {
 
 						@Override
 						public void run() {
-							
+
 							MissionObject mission = getMissionObject();
 							SWGObject target = core.objectService.getObject(markObjId);
-							CreatureObject player = (CreatureObject) mission.getGrandparent();
-
+							
 							if (target == null) {
-								player.sendSystemMessage("@mission/mission_generic:player_target_inactive", DisplayType.Broadcast);
+								actor.sendSystemMessage("@mission/mission_generic:player_target_inactive", DisplayType.Broadcast);
 								cancelLocationUpdates();
 								return;
 							} else if (target.getPlanet().getName() != getSeekerPlanet()) {
-								player.sendSystemMessage("@mission/mission_generic:target_not_on_planet", DisplayType.Broadcast);
+								actor.sendSystemMessage("@mission/mission_generic:target_not_on_planet", DisplayType.Broadcast);
 								cancelLocationUpdates();
 								return;
 							} else {
-								WaypointObject missionWp = mission.getAttachedWaypoint();
-
-								if (missionWp == null) {
-									player.sendSystemMessage("@mission/mission_generic:target_not_found_1", DisplayType.Broadcast);
+								
+								if (updates.get() >= 5) {
+									actor.sendSystemMessage("@mission/mission_generic:target_track_lost", DisplayType.Broadcast);
 									cancelLocationUpdates();
 									return;
 								}
-								missionWp.setPosition(target.getWorldPosition());
+								
+								WaypointObject missionWp = mission.getAttachedWaypoint();
 
-								mission.setAttachedWaypoint(missionWp);
-								player.sendSystemMessage("@mission/mission_generic:target_location_updated_ground", DisplayType.Broadcast);
+								if (missionWp == null) {
+									WaypointObject waypoint = (WaypointObject) NGECore.getInstance().objectService.createObject("object/waypoint/shared_waypoint.iff", target.getPlanet(), 
+											target.getWorldPosition().x, target.getWorldPosition().z, target.getWorldPosition().y);
+									waypoint.setActive(true);
+									waypoint.setColor(WaypointObject.ORANGE);
+									waypoint.setName(getMissionObject().getMissionTargetName());
+									waypoint.setPlanetCRC(CRC.StringtoCRC(target.getPlanet().getName()));
+									waypoint.setStringAttribute("", "");
+									getMissionObject().setAttachedWaypoint(waypoint);
+									actor.sendSystemMessage("@mission/mission_generic:target_location_updated_ground", DisplayType.Broadcast);
+								} else {
+									missionWp.setPosition(target.getWorldPosition());
+									mission.setAttachedWaypoint(missionWp);
+									actor.sendSystemMessage("@mission/mission_generic:target_location_updated_ground", DisplayType.Broadcast);
+								}
+								updates.getAndIncrement();
 							}
 						}
 					}, 60, 15, TimeUnit.SECONDS);
 			
-			setLocationUpdater(updates);
+			seekerUpdates = updater;
 		}
 	}
 	
+	public void beginArakydUpdate(final CreatureObject actor) {
+		arakydActive = true;
+		Executors.newScheduledThreadPool(1).schedule(() -> {
+
+			int number = new Random().nextInt(100);
+			
+			// Effectively a 16% chance of failing. The failure type is calculated by subtracting 10 from the number received.
+			if (number <= 16 && number != 0) { actor.sendSystemMessage("@mission/mission_generic:target_not_found_" + String.valueOf(10 - number), (byte) 0); return; }
+			
+			SWGObject target = NGECore.getInstance().objectService.getObject(markObjId);
+			if (target == null) { actor.sendSystemMessage("@mission/mission_generic:player_target_inactive", DisplayType.Broadcast); }
+			
+			WaypointObject waypoint = (WaypointObject) NGECore.getInstance().objectService.createObject("object/waypoint/shared_waypoint.iff", target.getPlanet(), 
+					target.getWorldPosition().x, target.getWorldPosition().z, target.getWorldPosition().y);
+			waypoint.setActive(true);
+			waypoint.setColor(WaypointObject.ORANGE);
+			waypoint.setName(getMissionObject().getMissionTargetName());
+			waypoint.setPlanetCRC(CRC.StringtoCRC(target.getPlanet().getName()));
+			waypoint.setStringAttribute("", "");
+			getMissionObject().setAttachedWaypoint(waypoint);
+			
+			actor.sendSystemMessage("@mission/mission_generic:target_location_updated_ground", DisplayType.Broadcast);
+			actor.sendSystemMessage("@mission/mission_generic:target_located_" + target.getPlanet().getName(), DisplayType.Broadcast);
+
+		}, 180, TimeUnit.SECONDS);
+	}
+	
 	public void cancelLocationUpdates() {
-		getLocationUpdater().cancel(true);
+		if (seekerUpdates != null)
+			seekerUpdates.cancel(true);
+		if (probeSummonTask != null)
+			probeSummonTask.cancel(true);
+		
 		setSeekerActive(false);
 		setSeekerPlanet("");
 		setArakydActive(false);
@@ -243,10 +363,6 @@ public class BountyMissionObjective extends MissionObjective {
 	public String getLastKnownPlanet() { return lastKnownPlanet; }
 
 	public void setLastKnownPlanet(String lastKnownPlanet) { this.lastKnownPlanet = lastKnownPlanet; }
-
-	public ScheduledFuture<?> getLocationUpdater() { return locationUpdater; }
-
-	public void setLocationUpdater(ScheduledFuture<?> locationUpdater) { this.locationUpdater = locationUpdater; }
 
 	public boolean isSeekerActive() { return seekerActive; }
 
