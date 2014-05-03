@@ -51,7 +51,10 @@ public class MobileTemplate {
 	private int minSpawnDistance = 0;
 	private int maxSpawnDistance = 0;
 	private boolean deathblow = false;
-
+	private String socialGroup; // see prima guide 
+	private int assistRange; // use prima guide for ranges
+	private boolean isStalker = false;
+	
 	public Vector<String> getTemplates() {
 		return templates;
 	}
@@ -234,5 +237,29 @@ public class MobileTemplate {
 
 	public void setDeathblow(boolean deathblow) {
 		this.deathblow = deathblow;
+	}
+
+	public String getSocialGroup() {
+		return socialGroup;
+	}
+
+	public void setSocialGroup(String socialGroup) {
+		this.socialGroup = socialGroup;
+	}
+
+	public int getAssistRange() {
+		return assistRange;
+	}
+
+	public void setAssistRange(int assistRange) {
+		this.assistRange = assistRange;
+	}
+
+	public boolean isStalker() {
+		return isStalker;
+	}
+
+	public void setStalker(boolean isStalker) {
+		this.isStalker = isStalker;
 	}
 }
