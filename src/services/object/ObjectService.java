@@ -563,6 +563,8 @@ public class ObjectService implements INetworkDispatch {
 		
 		synchronized(objectList) {
 			for(SWGObject obj : objectList.values()) {
+				if(obj == null)
+					continue;
 				if(obj.getCustomName() == null)
 					continue;
 				if(obj.getCustomName().startsWith(customName))
@@ -584,7 +586,7 @@ public class ObjectService implements INetworkDispatch {
 				return object;
 			}
 		}
-		
+		cursor.close();
 		return null;
 	}
 	
