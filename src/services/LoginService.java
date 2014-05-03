@@ -26,6 +26,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -42,7 +43,6 @@ import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import engine.resources.service.LocalDbLoginProvider;
 import engine.resources.service.VBLoginProvider;
-
 import protocol.swg.CharacterCreationDisabled;
 import protocol.swg.ClientUIErrorMessage;
 import protocol.swg.DeleteCharacterMessage;
@@ -56,7 +56,6 @@ import protocol.swg.ServerNowEpochTime;
 import protocol.swg.StationIdHasJediSlot;
 import resources.common.*;
 import resources.datatables.PlayerFlags;
-
 import resources.objects.creature.CreatureObject;
 
 @SuppressWarnings("unused")
@@ -206,7 +205,12 @@ public class LoginService implements INetworkDispatch{
                 				core.objectService.destroyObject(object);
                 			}
                 			
-            				core.getSWGObjectODB().remove(object.getObjectID());
+            				try {
+            					core.getSWGObjectODB().remove(object.getObjectID());
+            				} catch (Exception e) {
+            					
+            				}
+            				
                 			DeleteCharacterReplyMessage reply = new DeleteCharacterReplyMessage(0);
                 			session.write(reply.serialize());
                 		}
@@ -224,7 +228,16 @@ public class LoginService implements INetworkDispatch{
 	}
 	
 	public boolean checkForGmPermission(int id) {
+		try {
+			if (core.getConfig().getInt("ADMIN") > 0) {
+				return true;
+			}
+		} catch (Exception e) {
+			
+		}
+		
 		PreparedStatement preparedStatement;
+		
 		try {
 			preparedStatement = databaseConnection1.preparedStatement("SELECT * FROM accounts WHERE id=" + id + "");
 			ResultSet resultSet = preparedStatement.executeQuery();
@@ -233,6 +246,7 @@ public class LoginService implements INetworkDispatch{
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+		
 		return false;
 	}
 	

@@ -31,7 +31,6 @@ import java.util.Vector;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 
-import protocol.swg.ExpertiseRequestMessage;
 import resources.common.Console;
 import resources.common.FileUtilities;
 import resources.common.Opcodes;
@@ -79,7 +78,6 @@ public class DevService implements INetworkDispatch {
 			case 1: // Character
 				suiOptions.put((long) 10, "Set combat level to 90");
 				suiOptions.put((long) 11, "Give 100,000 credits");
-				suiOptions.put((long) 12, "Reset expertise");
 				break;
 			case 2: // Items
 				suiOptions.put((long) 20, "Armor");
@@ -92,6 +90,7 @@ public class DevService implements INetworkDispatch {
 				if(creature.getClient().isGM()) suiOptions.put((long) 125, "Crafting Tools");
 				if(creature.getClient().isGM()) suiOptions.put((long) 130, "Vehicle Deeds");
 				if(creature.getClient().isGM()) suiOptions.put((long) 121, "Sandbox City");
+				if(creature.getClient().isGM()) suiOptions.put((long) 122, "Jedi Ruins");
 
 				break;
 			case 3: // [Items] Weapons
@@ -171,18 +170,7 @@ public class DevService implements INetworkDispatch {
 					case 11: // Give 100,000 credits
 						player.setCashCredits(player.getCashCredits() + 100000);
 						return;
-					case 12: // Reset expertise
-					    // Seefo->Light: I commented out the below line because it gave us an error and didn't properly remove the skill, could you try the method SWGList.reverseGet that I added?
-					    //player.getSkills().get().stream().filter(s -> s.contains("expertise")).forEach(s -> core.skillService.removeSkill(creature, s));
-					    
-					    // Using this for now
-					    for(int i = creature.getSkills().size() - 1; i >= 0; i-- )
-						{
-						    String skill = creature.getSkills().get(i);
-						    if(skill.contains("expertise")) core.skillService.removeSkill(player, skill);
-						}
-					    return;
-						
+					
 					// Items
 					case 20: // Armor
 						sendCharacterBuilderSUI(player, 5);
@@ -1180,6 +1168,10 @@ public class DevService implements INetworkDispatch {
 					
 					case 121:
 						NGECore.getInstance().playerCityService.buildSandboxTestCity(player);
+						
+					case 122:
+						Point3D position = new Point3D(4086,15,5554);
+						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("dantooine"), position, player.getOrientation(), null);
 					
 					case 125:
 						TangibleObject genericCraftingTool = (TangibleObject) core.objectService.createObject("object/tangible/crafting/station/shared_generic_tool.iff", planet);
