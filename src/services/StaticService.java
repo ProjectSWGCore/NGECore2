@@ -21,10 +21,19 @@
  ******************************************************************************/
 package services;
 
+import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import resources.common.FileUtilities;
 import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
@@ -55,17 +64,34 @@ public class StaticService implements INetworkDispatch {
 			}
 		}
 		
-		spawnObjects("rori");
-		spawnObjects("naboo");
-		spawnObjects("tatooine");
-		spawnObjects("lok");
-		//spawnObjects("kaas");    // Keep commented out unless you possess the latest build of Kaas!
-	}
-	
-	public void spawnObjects(String planetName) {
-		Planet planet = (Planet) core.terrainService.getPlanetByName(planetName);
-		core.scriptService.callScript("scripts/static_spawns/", planet.getName(), "addPlanetSpawns", core, planet);
-		System.out.println("Loaded static objects for " + planet.getName());
+		for (Planet planet : core.terrainService.getPlanetList()) {
+			if (FileUtilities.doesFileExist("scripts/static_spawns/" + planet.getName())) {
+				Path p = Paths.get("scripts/static_spawns/" + planet.getName());
+				
+				FileVisitor<Path> fv = new SimpleFileVisitor<Path>() {
+					@Override
+					public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+						if (file.getFileName().toString().endsWith(".py")) {
+							core.scriptService.callScript("scripts/static_spawns/" + planet.getName() + "/", file.getFileName().toString().replace(".py", ""), "addPlanetSpawns", core, planet);
+						}
+						
+						return FileVisitResult.CONTINUE;
+					}
+				};
+				
+				try {
+					Files.walkFileTree(p, fv);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			
+			if (FileUtilities.doesFileExist("scripts/static_spawns/" + planet.getName() + ".py")) {
+				core.scriptService.callScript("scripts/static_spawns/", planet.getName(), "addPlanetSpawns", core, planet);
+			}
+			
+			System.out.println("Loaded static objects for " + planet.getName());
+		}
 	}
 	
 	public SWGObject spawnObject(String template, String planetName, long cellId, float x, float y, float z, float qY, float qW) {
@@ -111,7 +137,9 @@ public class StaticService implements INetworkDispatch {
 			((CreatureObject) object).setStaticNPC(true);
 		}
 		
-		if (object instanceof BuildingObject) {
+		boolean checkCells = false; // shouldn't be needed; for debugging
+		
+		if (object instanceof BuildingObject && checkCells) {
 			BuildingObject building = (BuildingObject) object;
 			
 			Map<String, Object> attributes = building.getTemplateData().getAttributes();
