@@ -8,13 +8,15 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('dark_force_crystal_hunter')
 	mobileTemplate.setLevel(90)
+	mobileTemplate.setMinLevel(60)
+	mobileTemplate.setMaxLevel(69)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(6)
 	mobileTemplate.setAttackSpeed(1.0)
 	mobileTemplate.setWeaponType(9)
 	mobileTemplate.setMinSpawnDistance(2)
 	mobileTemplate.setMaxSpawnDistance(4)
-	mobileTemplate.setDeathblow(False)
+	mobileTemplate.setDeathblow(True)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_dark_force_crystal_hunter.iff')

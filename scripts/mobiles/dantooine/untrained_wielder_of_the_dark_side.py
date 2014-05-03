@@ -8,12 +8,14 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('untrained_wielder_of_the_dark_side')
 	mobileTemplate.setLevel(90)
+	mobileTemplate.setMinLevel(61)
+	mobileTemplate.setMaxLevel(70)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(6)
 	mobileTemplate.setAttackSpeed(1.0)
 	mobileTemplate.setWeaponType(9)
-	mobileTemplate.setMinSpawnDistance(2)
-	mobileTemplate.setMaxSpawnDistance(4)
+	mobileTemplate.setMinSpawnDistance(4)
+	mobileTemplate.setMaxSpawnDistance(6)
 	mobileTemplate.setDeathblow(False)
 	
 	templates = Vector()

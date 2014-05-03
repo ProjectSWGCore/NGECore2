@@ -368,12 +368,31 @@ public class SpawnService {
 	}
 	
 	public void addDynamicSpawnArea(String dynamicGroup, float x, float z, float radius, String planetName) {
-		DynamicSpawnGroup dynamicGroupTemplate = dynamicGroupTemplates .get(dynamicGroup);
+		DynamicSpawnGroup dynamicGroupTemplate = dynamicGroupTemplates.get(dynamicGroup);
 		Planet planet = core.terrainService.getPlanetByName(planetName);
 		if(dynamicGroupTemplate == null || planet == null)
 			return;
 		CollidableCircle collidableCircle = new CollidableCircle(new Point3D(x, 0, z), radius, planet);
 		DynamicSpawnArea dynamicSpawnArea = new DynamicSpawnArea(planet, collidableCircle, dynamicGroupTemplate);
+		spawnAreas.get(planet).add(dynamicSpawnArea);
+		core.simulationService.addCollidable(collidableCircle, x, z);
+	}
+	
+	public void addDynamicSpawnArea(Vector<String> dynamicGroups, float x, float z, float radius, String planetName) {
+		Vector<DynamicSpawnGroup> dynamicSpawnGroups = new Vector<DynamicSpawnGroup>();
+		for (String template : dynamicGroups){
+			if (dynamicGroupTemplates.get(template)==null){
+				System.err.println("Dynamic Group template " + template +" not found in spawnservice collection!");	
+				return;
+			}
+			dynamicSpawnGroups.add(dynamicGroupTemplates.get(template));
+		}
+		
+		Planet planet = core.terrainService.getPlanetByName(planetName);
+		if(dynamicSpawnGroups == null || dynamicSpawnGroups.size() == 0 || planet == null)
+			return;
+		CollidableCircle collidableCircle = new CollidableCircle(new Point3D(x, 0, z), radius, planet);
+		DynamicSpawnArea dynamicSpawnArea = new DynamicSpawnArea(planet, collidableCircle, dynamicSpawnGroups);
 		spawnAreas.get(planet).add(dynamicSpawnArea);
 		core.simulationService.addCollidable(collidableCircle, x, z);
 	}

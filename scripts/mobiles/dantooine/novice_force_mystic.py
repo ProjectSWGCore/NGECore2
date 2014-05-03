@@ -7,13 +7,13 @@ def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
 	mobileTemplate.setCreatureName('novice_force_mystic')
-	mobileTemplate.setLevel(90)
+	mobileTemplate.setLevel(63)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(6)
 	mobileTemplate.setAttackSpeed(1.0)
 	mobileTemplate.setWeaponType(9)
-	mobileTemplate.setMinSpawnDistance(2)
-	mobileTemplate.setMaxSpawnDistance(4)
+	mobileTemplate.setMinSpawnDistance(4)
+	mobileTemplate.setMaxSpawnDistance(7)
 	mobileTemplate.setDeathblow(False)
 	
 	templates = Vector()

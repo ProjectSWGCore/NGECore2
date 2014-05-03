@@ -21,6 +21,7 @@
  ******************************************************************************/
 package services.spawn;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Random;
 import java.util.Vector;
@@ -42,11 +43,17 @@ import engine.resources.scene.Point3D;
 public class DynamicSpawnArea extends SpawnArea {
 
 	private DynamicSpawnGroup spawnGroup;
+	private Vector<DynamicSpawnGroup> spawnGroups;
 	private Vector<CreatureObject> mobiles = new Vector<CreatureObject>();
 	
 	public DynamicSpawnArea(Planet planet, AbstractCollidable area, DynamicSpawnGroup spawnGroup) {
 		super(planet, area);
 		this.spawnGroup = spawnGroup;
+	}
+	
+	public DynamicSpawnArea(Planet planet, AbstractCollidable area, Vector<DynamicSpawnGroup> spawnGroups) {
+		super(planet, area);
+		this.spawnGroups = spawnGroups;
 	}
 
 	@Override
@@ -65,13 +72,31 @@ public class DynamicSpawnArea extends SpawnArea {
 		
 		creature.getEventBus().subscribe(this);
 		// spawn some creatures
-		if (spawnGroup.getGroupMembersNumber()==0){
-			for(int i = 0; i < 5; i++)
-				spawnCreature(creature);
+		if (spawnGroups==null){
+			if (spawnGroup.getGroupMembersNumber()==-1){
+				for(int i = 0; i < 5; i++)
+					spawnCreature(creature);
+			} else {
+				Vector<CreatureObject> groupMembers = new Vector<CreatureObject>();
+				Point3D randomGroupPosition = getRandomPosition(creature.getWorldPosition(), 32, 100);
+				for(int i = 0; i < spawnGroup.getGroupMembersNumber(); i++) {// A group with a specified number of members
+					CreatureObject spawnedCreature = spawnCreatureMember(creature, groupMembers, randomGroupPosition, i);
+					if (spawnedCreature!=null)
+						groupMembers.add(spawnedCreature);
+				}
+			}
 		} else {
+			// select randomly one of the spawngroups -> minimizes number of collidables for areas with multiple different NPC groups
+			// One spawnarea -> many NPC groups
+			int index = new Random().nextInt(spawnGroups.size());
+			this.spawnGroup = spawnGroups.get(index);
 			Vector<CreatureObject> groupMembers = new Vector<CreatureObject>();
-			for(int i = 0; i < spawnGroup.getGroupMembersNumber(); i++) {// A group with a specified number of members
-				CreatureObject spawnedCreature = spawnCreatureMember(creature, groupMembers, i);
+			Point3D randomGroupPosition = getRandomPosition(creature.getWorldPosition(), 32, 100);
+			int spawnCount = spawnGroup.getGroupMembersNumber();
+			if (spawnCount<0)
+				spawnCount = Math.abs(spawnCount) + new Random().nextInt(spawnGroup.getMobiles().size()-Math.abs(spawnCount));
+			for(int i = 0; i < spawnCount; i++) {// A group with a specified or random number of members
+				CreatureObject spawnedCreature = spawnCreatureMember(creature, groupMembers, randomGroupPosition, i);
 				if (spawnedCreature!=null)
 					groupMembers.add(spawnedCreature);
 			}
@@ -109,15 +134,33 @@ public class DynamicSpawnArea extends SpawnArea {
 		
 		if(creature.getSlottedObject("ghost") == null)
 			return;
-		
-		if (spawnGroup.getGroupMembersNumber()==0){
-			if(new Random().nextFloat() <= 0.25)
-				spawnCreature(creature);
-		} else
-		{
+
+		if (spawnGroups==null){
+			if (spawnGroup.getGroupMembersNumber()==-1){
+				if(new Random().nextFloat() <= 0.25)
+					spawnCreature(creature);
+			} else
+			{
+				Vector<CreatureObject> groupMembers = new Vector<CreatureObject>();
+				Point3D randomGroupPosition = getRandomPosition(creature.getWorldPosition(), 32, 100);
+				for(int i = 0; i < spawnGroup.getGroupMembersNumber(); i++) {// A group with a specified number of members
+					CreatureObject spawnedCreature = spawnCreatureMember(creature, groupMembers, randomGroupPosition, i);
+					if (spawnedCreature!=null)
+						groupMembers.add(spawnedCreature);
+				}
+			}
+		} else {
+			// select randomly one of the spawngroups -> minimizes number of collidables for areas with multiple different NPC groups
+			// One spawnarea -> many NPC groups
+			int index = new Random().nextInt(spawnGroups.size());
+			this.spawnGroup = spawnGroups.get(index);
 			Vector<CreatureObject> groupMembers = new Vector<CreatureObject>();
-			for(int i = 0; i < spawnGroup.getGroupMembersNumber(); i++) {// A group with a specified number of members
-				CreatureObject spawnedCreature = spawnCreatureMember(creature, groupMembers, i);
+			Point3D randomGroupPosition = getRandomPosition(creature.getWorldPosition(), 32, 100);
+			int spawnCount = spawnGroup.getGroupMembersNumber();
+			if (spawnCount<0)
+				spawnCount = Math.abs(spawnCount) + new Random().nextInt(spawnGroup.getMobiles().size()-Math.abs(spawnCount));
+			for(int i = 0; i < spawnCount; i++) {// A group with a specified or random number of members
+				CreatureObject spawnedCreature = spawnCreatureMember(creature, groupMembers, randomGroupPosition, i);
 				if (spawnedCreature!=null)
 					groupMembers.add(spawnedCreature);
 			}
@@ -130,11 +173,19 @@ public class DynamicSpawnArea extends SpawnArea {
 
 		NGECore core = NGECore.getInstance();
 		
-		Iterator<CreatureObject> it = mobiles.iterator();
-		it.forEachRemaining(mobile -> {
-			if(mobile.getPosture() == Posture.Dead)
-				it.remove();
-		});
+//		Iterator<CreatureObject> it = mobiles.iterator(); // This stops further execution of this method for some reason
+//		it.forEachRemaining(mobile -> {
+//			if(mobile.getPosture() == Posture.Dead)
+//				it.remove();
+//		});
+		
+		mobiles.removeAll(Collections.singleton(null));
+		Vector<CreatureObject> removers = new Vector<CreatureObject>();
+		for (CreatureObject ob : mobiles){
+			if (ob.getPosture() == Posture.Dead)
+				removers.add(ob);
+		}
+		mobiles.removeAll(removers);
 		
 		if(mobiles.size() >= spawnGroup.getMaxSpawns())
 			return;
@@ -181,39 +232,45 @@ public class DynamicSpawnArea extends SpawnArea {
 	}
 	
 	
-	private CreatureObject spawnCreatureMember(CreatureObject creature, Vector<CreatureObject> groupMembers, int spawnIndex) {
-		System.out.println("spawnCreatureMember");
+	private CreatureObject spawnCreatureMember(CreatureObject creature, Vector<CreatureObject> groupMembers, Point3D randomGroupPosition, int spawnIndex) {
+
 		NGECore core = NGECore.getInstance();
 		
-		Iterator<CreatureObject> it = mobiles.iterator();
-		it.forEachRemaining(mobile -> {
-			if(mobile.getPosture() == Posture.Dead)
-				it.remove();
-		});
-		
+//		Iterator<CreatureObject> it = mobiles.iterator(); // This stops further execution of this method for some reason
+//		it.forEachRemaining(mobile -> {
+//			if(mobile.getPosture() == Posture.Dead)
+//				it.remove();
+//		});
+				
+		mobiles.removeAll(Collections.singleton(null));
+		Vector<CreatureObject> removers = new Vector<CreatureObject>();
+		for (CreatureObject ob : mobiles){
+			if (ob.getPosture() == Posture.Dead)
+				removers.add(ob);
+		}
+		mobiles.removeAll(removers);
+				
 //		if(mobiles.size() >= spawnGroup.getMaxSpawns())
 //			return;
-
+				
 		boolean foundPos = false;
 		int tries = 0;
 		Point3D randomPosition = null;
 		String template = spawnGroup.getMobiles().get(spawnIndex);
 		MobileTemplate mobileTemplate = NGECore.getInstance().spawnService.getMobileTemplate(template);
-		if (mobileTemplate==null)
+		if (mobileTemplate==null){
+			System.out.println("mobileTemplate==null");
 			return null;
-		
-		
-		for (CreatureObject cr : groupMembers){
-			System.out.println("cr " + cr.getTemplate());
 		}
-		
 		
 		while(!foundPos && ++tries < 30) {
 		
-			randomPosition = getRandomPosition(creature.getWorldPosition(), mobileTemplate.getMinSpawnDistance(), mobileTemplate.getMaxSpawnDistance());
+			randomPosition = getRandomPosition(randomGroupPosition, mobileTemplate.getMinSpawnDistance(), mobileTemplate.getMaxSpawnDistance());
 			
-			if(randomPosition == null)
+			if(randomPosition == null){
+				System.out.println("randomPosition == null");
 				return null;
+			}
 			
 			TerrainService terrainSvc = core.terrainService;
 			
@@ -224,7 +281,7 @@ public class DynamicSpawnArea extends SpawnArea {
 				boolean minDistViolated = false;
 				for(CreatureObject mobile : mobiles) {
 					if(mobile.getWorldPosition().getDistance(randomPosition) < spawnGroup.getMinSpawnDistance() && ! groupMembers.contains(mobile)){
-						minDistViolated = true;
+						minDistViolated = true; // Distance to other nearby groups
 					}
 				}
 				if (minDistViolated)
@@ -238,8 +295,9 @@ public class DynamicSpawnArea extends SpawnArea {
 
 		}
 		
-		if(!foundPos)
+		if(!foundPos){
 			return null;
+		}
 		
 		
 		CreatureObject spawnedCreature = core.spawnService.spawnCreature(template, getPlanet().getName(), 0, randomPosition.x, randomPosition.y, randomPosition.z);
@@ -247,8 +305,6 @@ public class DynamicSpawnArea extends SpawnArea {
 			mobiles.add(spawnedCreature);
 		}
 
-		return spawnedCreature;
-		
+		return spawnedCreature;		
 	}
-
 }

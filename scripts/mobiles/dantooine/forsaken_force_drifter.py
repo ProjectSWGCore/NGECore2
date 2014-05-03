@@ -7,13 +7,13 @@ def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
 	mobileTemplate.setCreatureName('eow_forsaken_force_drifter')
-	mobileTemplate.setLevel(90)
+	mobileTemplate.setLevel(74)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(6)
 	mobileTemplate.setAttackSpeed(1.0)
 	mobileTemplate.setWeaponType(9)
-	mobileTemplate.setMinSpawnDistance(2)
-	mobileTemplate.setMaxSpawnDistance(4)
+	mobileTemplate.setMinSpawnDistance(3)
+	mobileTemplate.setMaxSpawnDistance(6)
 	mobileTemplate.setDeathblow(False)
 	
 	templates = Vector()

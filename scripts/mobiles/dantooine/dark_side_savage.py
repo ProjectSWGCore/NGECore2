@@ -7,7 +7,7 @@ def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
 	mobileTemplate.setCreatureName('eow_dark_side_savage')
-	mobileTemplate.setLevel(90)
+	mobileTemplate.setLevel(85)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(6)
 	mobileTemplate.setAttackSpeed(1.0)

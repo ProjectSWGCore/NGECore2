@@ -6,14 +6,16 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('Force_sensitive_Renegade')
+	mobileTemplate.setCreatureName('force_sensitive_renegade')
 	mobileTemplate.setLevel(90)
+	mobileTemplate.setMinLevel(61)
+	mobileTemplate.setMaxLevel(69)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(6)
 	mobileTemplate.setAttackSpeed(1.0)
 	mobileTemplate.setWeaponType(9)
-	mobileTemplate.setMinSpawnDistance(2)
-	mobileTemplate.setMaxSpawnDistance(4)
+	mobileTemplate.setMinSpawnDistance(4)
+	mobileTemplate.setMaxSpawnDistance(7)
 	mobileTemplate.setDeathblow(False)
 	
 	templates = Vector()

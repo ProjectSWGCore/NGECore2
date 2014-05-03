@@ -10,6 +10,6 @@ def addDynamicGroup(core):
 	dynamicGroup.setMobiles(mobileTemplates)
 	dynamicGroup.setName('tuskens_wild_1')
 	dynamicGroup.setMaxSpawns(20)
-	dynamicGroup.setMinSpawnDistance(2)
+	dynamicGroup.setMinSpawnDistance(25)
 	core.spawnService.addDynamicGroup('tuskens_wild_1', dynamicGroup)
 	return
