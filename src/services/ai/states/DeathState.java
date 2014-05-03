@@ -32,7 +32,8 @@ public class DeathState extends AIState {
 	public byte onEnter(AIActor actor) {
 		NGECore.getInstance().aiService.awardExperience(actor);
 		actor.getCreature().setAttachment("radial_filename", "npc/corpse");
-		NGECore.getInstance().lootService.DropLoot((CreatureObject)(actor.getCreature().getKiller()),(TangibleObject)(actor.getCreature()));
+		System.out.println("DEATH STATE!!!!");
+		NGECore.getInstance().lootService.DropLoot((CreatureObject)(actor.getCreature().getKiller()),(TangibleObject)(actor.getCreature()));		
 		actor.scheduleDespawn();
 		return 0;
 	}

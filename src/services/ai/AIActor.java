@@ -229,7 +229,8 @@ public class AIActor {
 	}
 	
 	public void doStateAction(byte result) {
-		
+		CreatureObject creature = this.getCreature();
+		System.out.println("AI creature.getPosture() " + creature.getPosture() + " result " + result + " getCurrentState " + getCurrentState().getClass().getName());
 		switch(result) {
 		
 			case StateResult.DEAD:

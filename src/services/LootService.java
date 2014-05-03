@@ -87,6 +87,8 @@ public class LootService implements INetworkDispatch {
 			}
 			SWGObject lootedObjectInventory = lootedObject.getSlottedObject("inventory");
 			core.simulationService.openContainer(requester, lootedObjectInventory);	
+			System.err.println("core.simulationService.openContainer " + lootedObject.getTemplate() );
+			System.err.println("core.simulationService.openContainer " + lootedObjectInventory.getTemplate());
 			setLooted(requester,lootedObject);
 		}
 		System.err.println("NO ACCESS lootedObject.isLooted(): " + lootedObject.isLooted());
@@ -898,32 +900,70 @@ public class LootService implements INetworkDispatch {
 		//determine number of stats #20 yt
 		int statNumber = 1;
 		int levelOfDrop = lootRollSession.getLootedObjectLevel();
-	    int difficultyLevel = 1;
+	    int difficultyLevel = lootRollSession.getLootedObjectDifficulty(); // better for calculation
+	    //difficultyLevel++; // better for calculation
 	    
-		if (levelOfDrop>70 && levelOfDrop<90 && difficultyLevel==1)
-			statNumber = 2;
+//		if (levelOfDrop>70 && levelOfDrop<90 && difficultyLevel==1)
+//			statNumber = 2;
+//		
+//		if (levelOfDrop>=90 && difficultyLevel==1)
+//			statNumber = 2;
+//			int statRoll = new Random().nextInt(100);
+//			if (statRoll<30)
+//				statNumber = 3;
+//		
+//		if (levelOfDrop>=90 && difficultyLevel>=2){
+//			statNumber = 2;
+//			statRoll = new Random().nextInt(100);
+//			if (statRoll<8)
+//				statNumber = 4;
+//			else if (statRoll<50)
+//				statNumber = 3;				
+//		}
+	    
+	    int statRoll = new Random().nextInt(100);
+	    int difficultyBonus = 0;
+	    
+	    // stage 1
+	    if (difficultyLevel==1)
+	    	difficultyBonus = 60;
+	    if (difficultyLevel>=2)
+	    	difficultyBonus = 75;
+	    	
+	    if (statRoll<20+difficultyBonus)  // diff 3 95%  diff 2 70  diff1 20
+	    	statNumber++;
+	    
+	    // stage 2
+	    difficultyBonus = 0;
+	    if (difficultyLevel==1)
+	    	difficultyBonus = 20;
+	    if (difficultyLevel>=2)
+	    	difficultyBonus = 60;
+	    
+	    if (statRoll<10+difficultyBonus)  // diff 3 70%  diff 2 30  diff1 10 
+	    	statNumber++;
+	    
+	    // stage 3
+	    difficultyBonus = 0;
+	    if (difficultyLevel==1)
+	    	difficultyBonus = 3;
+	    if (difficultyLevel>=2)
+	    	difficultyBonus = 5;
+	    
+	    if (statRoll<1+difficultyBonus) 
+	    	statNumber++;
 		
-		if (levelOfDrop>=90 && difficultyLevel==1)
-			statNumber = 2;
-			int statRoll = new Random().nextInt(100);
-			if (statRoll<30)
-				statNumber = 3;
-		
-		if (levelOfDrop>=90 && difficultyLevel>=2){
-			statNumber = 2;
-			statRoll = new Random().nextInt(100);
-			if (statRoll<8)
-				statNumber = 4;
-			else if (statRoll<50)
-				statNumber = 3;				
-		}
 		
 		int primaryAttribute = new Random().nextInt(6); // 0-6
 		int maxValue = (int) (levelOfDrop*25/90);
 		int minValue = (int) (0.75*maxValue);
+		minValue = Math.max(1, minValue);
+		maxValue = Math.max(2, maxValue);
 		droppedItem.setIntAttribute(getAttributeSTF(primaryAttribute), getStatValue(minValue,maxValue));
 		maxValue -= 2; //secondary attributes must have less maxValue
 		minValue = (int) (0.75*maxValue);
+		minValue = Math.max(1, minValue);
+		maxValue = Math.max(2, maxValue);
 		String prefix = getJewelryPrefix(droppedItem);
 		String suffix = getJewelrySuffix(primaryAttribute, statNumber);
 		String itemName = prefix + suffix;

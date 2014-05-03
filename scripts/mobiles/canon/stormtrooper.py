@@ -8,7 +8,7 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('stormtrooper')
 	mobileTemplate.setLevel(90)
-	mobileTemplate.setDifficulty(0)
+	mobileTemplate.setDifficulty(2)
 	mobileTemplate.setAttackRange(24)
 	mobileTemplate.setAttackSpeed(1.0)
 	mobileTemplate.setWeaponType(0)

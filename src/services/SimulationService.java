@@ -916,9 +916,15 @@ public class SimulationService implements INetworkDispatch {
 		
 		if(container.getPermissions().canView(requester, container)) {
 			OpenedContainerMessage opm = new OpenedContainerMessage(container.getObjectID());
+			if (!(container instanceof CreatureObject))
+				System.out.println("(!(container instanceof CreatureObject)");
+			
+				
 			if(requester.getClient() != null && requester.getClient().getSession() != null && !(container instanceof CreatureObject))
 				requester.getClient().getSession().write(opm.serialize());
-		}
+			else
+				System.out.println("NOT SENT");
+		} else {System.out.println("NO VIEW PERMISSION");}
 		
 	}
 	
@@ -982,6 +988,10 @@ public class SimulationService implements INetworkDispatch {
 		
 		float heightOrigin = 1.f;
 		float heightDirection = 1.f;
+		
+		if (obj2.getTemplate().equals("object/tangible/inventory/shared_character_inventory.iff")){
+			obj2 = obj2.getContainer(); // LOS message fix on corpse
+		}
 		
 		if(obj1 instanceof CreatureObject)
 			heightOrigin = getHeightOrigin((CreatureObject) obj1);
@@ -1196,7 +1206,7 @@ public class SimulationService implements INetworkDispatch {
 		float height = (float) (creature.getHeight()/* - 0.3*/);
 		
 		if(creature.getPosture() == 2 || creature.getPosture() == 13 || creature.getPosture() == 14)
-			height = 0.3f;
+			height = 0.45f;
 		else if(creature.getPosture() == 1)
 			height /= 2.f;
 		
