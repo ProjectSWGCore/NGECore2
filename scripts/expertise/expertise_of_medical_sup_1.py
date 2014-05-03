@@ -1,17 +1,17 @@
 import sys
 
 def addAbilities(core, actor, player):
-	if actor.getLevel() >= 10:
+	if actor.getLevel() >= 18:
 		actor.addAbility("of_medical_sup_1")
-	if actor.getLevel() >= 34:
+	if actor.getLevel() >= 30:
 		actor.addAbility("of_medical_sup_2")
-	if actor.getLevel() >= 48:
+	if actor.getLevel() >= 44:
 		actor.addAbility("of_medical_sup_3")
-	if actor.getLevel() >= 62:
+	if actor.getLevel() >= 58:
 		actor.addAbility("of_medical_sup_4")
-	if actor.getLevel() >= 76:
+	if actor.getLevel() >= 72:
 		actor.addAbility("of_medical_sup_5")
-	if actor.getLevel() >= 90:
+	if actor.getLevel() >= 86:
 		actor.addAbility("of_medical_sup_6")
 	return
 
