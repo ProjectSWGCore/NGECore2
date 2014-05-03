@@ -180,7 +180,7 @@ public class ObjectService implements INetworkDispatch {
 				
 		while(cursor.hasNext()) {
 			final SWGObject building = (SWGObject) cursor.next();
-			if(!(building instanceof BuildingObject))
+			if(!(building instanceof BuildingObject) || building == null)
 				continue;
 			objectList.put(building.getObjectID(), building);
 			Planet planet = core.terrainService.getPlanetByID(building.getPlanetId());
