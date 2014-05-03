@@ -86,12 +86,13 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 23, "Jedi Items");
 				suiOptions.put((long) 26, "Installations");
 				suiOptions.put((long) 110, "Survey Devices");
+				if(creature.getPlayerObject().getProfession().equals("bounty_hunter_1a")) suiOptions.put((long) 123, "Tracking Droids");
 				if(creature.getClient().isGM()) suiOptions.put((long) 120, "House Deeds");
 				if(creature.getClient().isGM()) suiOptions.put((long) 125, "Crafting Tools");
 				if(creature.getClient().isGM()) suiOptions.put((long) 130, "Vehicle Deeds");
 				if(creature.getClient().isGM()) suiOptions.put((long) 121, "Sandbox City");
 				if(creature.getClient().isGM()) suiOptions.put((long) 122, "Jedi Ruins");
-
+				
 				break;
 			case 3: // [Items] Weapons
 				suiOptions.put((long) 30, "Jedi Weapons");
@@ -1173,6 +1174,19 @@ public class DevService implements INetworkDispatch {
 						Point3D position = new Point3D(4086,15,5554);
 						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("dantooine"), position, player.getOrientation(), null);
 					
+						core.playerCityService.buildSandboxTestCity(player);
+						return;
+
+					case 123:
+						TangibleObject arakydDroids = (TangibleObject) core.objectService.createObject("object/tangible/mission/shared_mission_bounty_droid_probot.iff", planet);
+						//arakydDroids.setStackable(true);
+						//arakydDroids.setStackCount(10);
+						inventory.add(arakydDroids);
+						
+						TangibleObject seekerDroids = (TangibleObject) core.objectService.createObject("object/tangible/mission/shared_mission_bounty_droid_seeker.iff", planet);
+						inventory.add(seekerDroids);
+						return;
+
 					case 125:
 						TangibleObject genericCraftingTool = (TangibleObject) core.objectService.createObject("object/tangible/crafting/station/shared_generic_tool.iff", planet);
 						genericCraftingTool.setCustomName("Generic Crafting Tool");
