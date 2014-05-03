@@ -559,12 +559,14 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		synchronized(objectMutex) {
 			if (state != 0) {
 				if (add) {
-					stateBitmask = (stateBitmask | state);
+					state = (stateBitmask | state);
 				} else {
-					stateBitmask = (stateBitmask & ~state);
+					state = (stateBitmask & ~state);
 				}
 			}
 		}
+		
+		notifyObservers(messageBuilder.buildStateDelta(state), true);
 	}
 	
 	public boolean getState(long state) {

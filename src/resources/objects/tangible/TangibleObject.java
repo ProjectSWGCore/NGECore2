@@ -41,6 +41,7 @@ import protocol.swg.objectControllerObjects.ShowFlyText;
 import resources.common.OutOfBand;
 import resources.common.RGB;
 import resources.datatables.Options;
+import resources.datatables.PvpStatus;
 import resources.loot.LootGroup;
 import resources.objects.ObjectMessageBuilder;
 import resources.objects.creature.CreatureObject;
@@ -399,7 +400,10 @@ public class TangibleObject extends SWGObject implements Serializable {
 	}
 	
 	public boolean isAttackableBy(CreatureObject attacker) {
+		int pvpStatus = NGECore.getInstance().factionService.calculatePvpStatus(attacker, this);
+		return (((pvpStatus & PvpStatus.Attackable) == PvpStatus.Attackable) || ((pvpStatus & PvpStatus.Aggressive) == PvpStatus.Aggressive));
 		
+		/*
 		CreatureObject creature;
 		
 		if(this instanceof CreatureObject) {
@@ -436,6 +440,7 @@ public class TangibleObject extends SWGObject implements Serializable {
 			return true;
 
 		return getPvPBitmask() == 1 || getPvPBitmask() == 2;
+		*/
 	}
 	
 	public void showFlyText(OutOfBand outOfBand, float scale, RGB color, int displayType, boolean notifyObservers) {
