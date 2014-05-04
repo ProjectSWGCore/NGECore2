@@ -17,6 +17,10 @@ def setup(core, object):
 	lootGroupChance_3 = 12
 	object.addToLootGroups(lootPoolNames_3,lootPoolChances_3,lootGroupChance_3)
 	
+	lootPoolNames_4 = ['random_stat_jewelry']
+	lootPoolChances_4 = [100]
+	lootGroupChance_4 = 8
+	object.addToLootGroups(lootPoolNames_4,lootPoolChances_4,lootGroupChance_4)
 	
 	
 	return 
