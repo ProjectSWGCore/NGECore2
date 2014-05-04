@@ -66,5 +66,5 @@ def handleCompletionStage(core, actor, npc, objective, mission):
 		return
 	
 	core.conversationService.sendStopConversation(actor, npc, mission.getMissionDescription(), 'm' + str(mission.getMissionId()) + 's')
-	objective.complete(core, actor)
+	core.missionService.handleMissionComplete(actor, mission)
 	return
