@@ -126,7 +126,7 @@ public class PlayerService implements INetworkDispatch {
 			ServerTimeMessage time = new ServerTimeMessage(core.getGalacticTime() / 1000);
 			IoBuffer packet = time.serialize();
 			creature.getClient().getSession().write(packet);
-		}, 5, 45, TimeUnit.SECONDS));
+		}, 45, 45, TimeUnit.SECONDS));
 		
 		scheduleList.add(scheduler.scheduleAtFixedRate(() -> {
 			if (creature.isInStealth() && !creature.getOption(Options.INVULNERABLE) && ((PlayerObject) creature.getSlottedObject("ghost")).getGodLevel() == 0) {

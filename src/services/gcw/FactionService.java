@@ -296,7 +296,7 @@ public class FactionService implements INetworkDispatch {
 		pvpBitmask |= ref.get();
 		
 		if (target instanceof CreatureObject && ((CreatureObject) target).getTefTime() > 0) {
-			pvpBitmask |= PvpStatus.TEF;
+			//pvpBitmask |= PvpStatus.TEF;
 		}
 		
 		if (target.getFaction().length() > 0 && target.getFaction().equals(object.getFaction())) {
