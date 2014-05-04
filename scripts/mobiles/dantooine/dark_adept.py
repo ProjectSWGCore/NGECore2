@@ -17,6 +17,8 @@ def addTemplate(core):
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(True)
+	mobileTemplate.setSocialGroup('dark jedi')
+	mobileTemplate.setAssistRange(12)
 	
 	
 	templates = Vector()
