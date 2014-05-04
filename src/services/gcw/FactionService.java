@@ -24,6 +24,9 @@ package services.gcw;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import main.NGECore;
@@ -36,6 +39,7 @@ import org.python.core.PyObject;
 import protocol.swg.FactionResponseMessage;
 import resources.common.FileUtilities;
 import resources.common.Opcodes;
+import resources.datatables.DisplayType;
 import resources.datatables.FactionStatus;
 import resources.datatables.Options;
 import resources.datatables.PvpStatus;
@@ -54,6 +58,8 @@ public class FactionService implements INetworkDispatch {
 	private NGECore core;
 	
 	private Map<String, Integer> factionMap = new TreeMap<String, Integer>();
+	
+	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	
 	public FactionService(NGECore core) {
 		this.core = core;
@@ -121,6 +127,26 @@ public class FactionService implements INetworkDispatch {
 		}
 		
 		player.modifyFactionStanding(faction, -factionStanding);
+	}
+	
+	public void delegateFactionPoints(CreatureObject actor, CreatureObject target, String faction, int points) {
+		if (actor == null || actor.getSlottedObject("ghost") == null) {
+			return;
+		}
+		
+		if (target == null || actor.getSlottedObject("ghost") == null) {
+			return;
+		}
+		
+		if (!isFaction(faction)) {
+			return;
+		}
+		
+		if (points <= 0) {
+			return;
+		}
+		
+		
 	}
 	
 	public boolean isFaction(String faction) {
@@ -350,6 +376,100 @@ public class FactionService implements INetworkDispatch {
 		
 	}
 	*/
+	
+	public void changeFactionStatus(CreatureObject actor, int factionStatus) {
+		long time = 1;
+		String message = "";
+		
+		if (factionStatus == actor.getFactionStatus()) {
+			return;
+		}
+		
+		if (actor.getPvPBitmask() == PvpStatus.GoingCovert) {
+			actor.sendSystemMessage("@faction_recruiter:pvp_status_changing", DisplayType.Broadcast);
+			return;
+		}
+		
+		if (actor.getPvPBitmask() == PvpStatus.GoingOvert) {
+			actor.sendSystemMessage("@faction_recruiter:pvp_status_changing", DisplayType.Broadcast);
+			return;
+		}
+		
+		switch (factionStatus) {
+			case FactionStatus.OnLeave:
+				actor.setPvpStatus(PvpStatus.GoingCovert, true);
+				actor.updatePvpStatus();
+				time = 300;
+				message = "on_leave_complete";
+				break;
+			case FactionStatus.Combatant:
+				actor.setPvpStatus(PvpStatus.GoingCovert, true);
+				actor.updatePvpStatus();
+				
+				switch (actor.getFactionStatus()) {
+					case FactionStatus.OnLeave:
+						actor.sendSystemMessage("@faction_recruiter:on_leave_to_covert", DisplayType.Broadcast);
+						time = 30;
+						break;
+					case FactionStatus.SpecialForces:
+						actor.sendSystemMessage("@faction_recruiter:overt_to_covert", DisplayType.Broadcast);
+						time = 300;
+						break;
+				}
+				
+				message = "covert_complete";
+				break;
+			case FactionStatus.SpecialForces:
+				actor.sendSystemMessage("@faction_recruiter:covert_to_overt", DisplayType.Broadcast);
+				actor.setPvpStatus(PvpStatus.GoingOvert, true);
+				time = 30;
+				message = "overt_complete";
+				break;
+		}
+		
+		final String finalMessage = message;
+		
+		scheduler.schedule(() -> {
+			actor.setPvPBitmask(0);
+			actor.setFactionStatus(factionStatus);
+			actor.updatePvpStatus();
+			actor.sendSystemMessage("@faction_recruiter:" + finalMessage, DisplayType.Broadcast);
+		}, time, TimeUnit.SECONDS);
+	}
+	
+	public void resign(CreatureObject actor) {
+		if (actor.getPvPBitmask() == PvpStatus.GoingCovert) {
+			actor.sendSystemMessage("@faction_recruiter:pvp_status_changing", DisplayType.Broadcast);
+			return;
+		}
+		
+		if (actor.getPvPBitmask() == PvpStatus.GoingOvert) {
+			actor.sendSystemMessage("@faction_recruiter:pvp_status_changing", DisplayType.Broadcast);
+			return;
+		}
+		
+		if (actor.getFactionStatus() == FactionStatus.OnLeave) {
+			actor.sendSystemMessage("@faction_recruiter:resign_on_leave", DisplayType.Broadcast);
+			return;
+		}
+		
+		long time = 1;
+		
+		if (actor.getFactionStatus() == FactionStatus.SpecialForces) {
+			actor.sendSystemMessage("@faction_recruiter:sui_resig_complete_in_5", DisplayType.Broadcast);
+			actor.setPvpStatus(PvpStatus.GoingCovert, true);
+			actor.updatePvpStatus();
+			time = 300;
+		}
+		
+		scheduler.schedule(() -> {
+			actor.setPvPBitmask(0);
+			actor.setFactionStatus(FactionStatus.OnLeave);
+			actor.setFaction("");
+			actor.updatePvpStatus();
+			actor.sendSystemMessage("@faction_recruiter:resign_complete", DisplayType.Broadcast);
+		}, time, TimeUnit.SECONDS);
+	}
 	
 	public Map<String, Integer> getFactionMap() {
 		return factionMap;
