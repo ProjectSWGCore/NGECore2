@@ -279,8 +279,10 @@ public class ConnectionService implements INetworkDispatch {
 		object.setAttachment("disconnectTask", null);
 		
 		List<ScheduledFuture<?>> schedulers = core.playerService.getSchedulers().get(object.getObjectID());
-		schedulers.forEach(s -> s.cancel(true));
-		schedulers.clear();
+		if(schedulers != null) {
+			schedulers.forEach(s -> s.cancel(true));
+			schedulers.clear();
+		}
 		core.playerService.getSchedulers().remove(object.getObjectID());
 		
 		core.getSWGObjectODB().put(object.getObjectID(), object);
