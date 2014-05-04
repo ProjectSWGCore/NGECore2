@@ -87,7 +87,7 @@ public class StaticService implements INetworkDispatch {
 			}
 			
 			if (FileUtilities.doesFileExist("scripts/static_spawns/" + planet.getName() + ".py")) {
-				core.scriptService.callScript("scripts/static_spawns/", planet.getName(), "addPlanetSpawns", core, planet);
+				//core.scriptService.callScript("scripts/static_spawns/", planet.getName(), "addPlanetSpawns", core, planet);
 			}
 			
 			System.out.println("Loaded static objects for " + planet.getName());
@@ -168,7 +168,7 @@ public class StaticService implements INetworkDispatch {
 			}
 		} else {
 			if (cell == null) {
-				System.err.println("StaticService: Cell not found");
+				System.err.println("StaticService: Cell not found for: " + template);
 				return object;
 			}
 			
