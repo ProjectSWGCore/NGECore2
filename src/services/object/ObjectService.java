@@ -806,26 +806,18 @@ public class ObjectService implements INetworkDispatch {
 				
 				objectList.put(creature.getObjectID(), creature);
 				
-				creature.viewChildren(creature, true, true, new Traverser() {
-
-					@Override
-					public void process(SWGObject object) {
-						objectList.put(object.getObjectID(), object);
-					}
-					
+				creature.viewChildren(creature, true, true, (object) -> {
+					objectList.put(object.getObjectID(), object);
 				});
 				
-				creature.viewChildren(creature, true, true, new Traverser() {
-
-					@Override
-					public void process(SWGObject object) {
-						if(object.getParentId() != 0 && object.getContainer() == null)
-							object.setParent(getObject(object.getParentId()));
-						object.getContainerInfo(object.getTemplate());
-						if(getObject(object.getObjectID()) == null)
-							objectList.put(object.getObjectID(), object);
-					}
-					
+				creature.viewChildren(creature, true, true, (object) -> {
+					if(object.getMutex() == null)
+						object.init();
+					if(object.getParentId() != 0 && object.getContainer() == null)
+						object.setParent(getObject(object.getParentId()));
+					object.getContainerInfo(object.getTemplate());
+					if(getObject(object.getObjectID()) == null)
+						objectList.put(object.getObjectID(), object);					
 				});
 
 				if(creature.getParentId() != 0) {

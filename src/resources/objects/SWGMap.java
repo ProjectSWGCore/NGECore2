@@ -60,7 +60,7 @@ public class SWGMap<K, V> implements Map<K, V>, Serializable {
 	private byte viewType;
 	private short updateType;
 	@NotPersistent
-	protected transient final Object objectMutex = new Object();
+	protected transient Object objectMutex = new Object();
 	
 	public SWGMap() { }
 	
@@ -78,6 +78,10 @@ public class SWGMap<K, V> implements Map<K, V>, Serializable {
 			this.updateType = ((SWGMap<K, V>) m).updateType;
 			map.putAll(m);
 		}
+	}
+	
+	public void init() {
+		objectMutex = new Object();
 	}
 	
 	public void clear() {
@@ -305,8 +309,7 @@ public class SWGMap<K, V> implements Map<K, V>, Serializable {
 
 	@Override
 	public void forEach(BiConsumer<? super K, ? super V> action) {
-		// TODO Auto-generated method stub
-		
+		map.forEach(action);
 	}
 
 	@Override

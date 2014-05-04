@@ -63,7 +63,7 @@ public class SWGMultiMap<K, V> implements Multimap<K, V>, Serializable {
 	private byte viewType;
 	private short updateType;
 	@NotPersistent
-	protected transient final Object objectMutex = new Object();
+	protected transient Object objectMutex = new Object();
 	
 	public SWGMultiMap() { }
 	
@@ -81,6 +81,10 @@ public class SWGMultiMap<K, V> implements Multimap<K, V>, Serializable {
 			this.updateType = ((SWGMultiMap<K, V>) m).updateType;
 			map.putAll(m);
 		}
+	}
+	
+	public void init() {
+		objectMutex = new Object();
 	}
 	
 	public Map<K, Collection<V>> asMap() {

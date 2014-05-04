@@ -38,6 +38,7 @@ import resources.objects.installation.InstallationMessageBuilder;
 import resources.objects.installation.InstallationObject;
 import resources.objects.resource.GalacticResource;
 import resources.objects.resource.ResourceContainerObject;
+import resources.objects.tangible.TangibleObject;
 
 /** 
  * @author Charon 
@@ -138,6 +139,10 @@ public class HarvesterObject extends InstallationObject implements Serializable 
 		super.init();
 		messageBuilder = new HarvesterMessageBuilder(this);
 		installationMessageBuilder = new InstallationMessageBuilder((InstallationObject)this);
+		outputHopperContent.forEach(ResourceContainerObject::initAfterDBLoad);
+		if(selectedHarvestResource != null)
+			selectedHarvestResource.initAfterDBLoad();
+		defendersList = new Vector<TangibleObject>();
 	}
 
 	

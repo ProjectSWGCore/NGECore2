@@ -260,6 +260,7 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 	public void initAfterDBLoad() {
 		super.init();
 		messageBuilder = new BuildingMessageBuilder(this);
+		defendersList = new Vector<TangibleObject>();
 	}
 	
 	public ObjectMessageBuilder getMessageBuilder() {

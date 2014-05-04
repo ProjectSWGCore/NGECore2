@@ -22,6 +22,7 @@
 package resources.objects.weapon;
 
 import java.io.Serializable;
+import java.util.Vector;
 
 import resources.datatables.WeaponType;
 import resources.objects.tangible.TangibleObject;
@@ -67,6 +68,7 @@ public class WeaponObject extends TangibleObject implements Serializable {
 	public void initAfterDBLoad() {
 		super.init();
 		messageBuilder = new WeaponMessageBuilder(this);
+		defendersList = new Vector<TangibleObject>();
 	}
 
 	public int getIncapTimer() {

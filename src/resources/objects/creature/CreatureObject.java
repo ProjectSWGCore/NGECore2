@@ -210,11 +210,19 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	@Override
 	public void initAfterDBLoad() {
 		super.init();
+		defendersList = new Vector<TangibleObject>();
 		duelList = Collections.synchronizedList(new ArrayList<CreatureObject>());
 		cooldowns = new ConcurrentHashMap<String, Long>();
 		performanceAudience = new Vector<CreatureObject>();
 		messageBuilder = new CreatureMessageBuilder(this);
-		
+		dotList.init();
+		buffList.init();
+		equipmentList.init();
+		appearanceEquipmentList.init();
+		missionCriticalObjects.init();
+		abilities.init();
+		skillMods.init();
+		skillMods.forEach((name, skillMod) -> skillMod.init());
 	}
 
 	private void loadTemplateData() {
@@ -1073,9 +1081,7 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	}
 
 	public SWGList<Long> getEquipmentList() {
-	    synchronized(objectMutex) {
 		return equipmentList;
-	    }
 	}
 
 	public SWGList<Buff> getBuffList() {
