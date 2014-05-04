@@ -608,7 +608,10 @@ public class PlayerService implements INetworkDispatch {
 		
 		try
 		{
-        		for (SWGObject equipment : new ArrayList<SWGObject>(creature.getEquipmentList())) {
+        		for (Long equipmentId : new ArrayList<Long>(creature.getEquipmentList())) {
+        			
+        			SWGObject equipment = core.objectService.getObject(equipmentId);
+        			
         			if (equipment == null) {
         				continue;
         			}
@@ -1270,8 +1273,9 @@ public class PlayerService implements INetworkDispatch {
 				actor.sendSystemMessage("@unity:decline", (byte) 0);
 				proposer.sendSystemMessage("@unity:declined", (byte) 0);
 				actor.setAttachment("proposer", null);
-				for(SWGObject obj : proposer.getEquipmentList()) {
-					if(obj.getAttachment("unity") != null) {
+				for(Long objId : proposer.getEquipmentList()) {
+					SWGObject obj = core.objectService.getObject(objId);
+					if(obj != null && obj.getAttachment("unity") != null) {
 						obj.setAttachment("unity", null);
 						break;
 					}

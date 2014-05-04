@@ -24,6 +24,8 @@ package resources.objects.creature;
 import java.nio.ByteOrder;
 import java.util.Map.Entry;
 
+import main.NGECore;
+
 import org.apache.mina.core.buffer.IoBuffer;
 
 import com.sleepycat.persist.model.Persistent;
@@ -304,7 +306,14 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 			buffer.putInt(creature.getEquipmentList().size());
 			buffer.putInt(creature.getEquipmentListUpdateCounter());
 			
-			for(SWGObject obj : creature.getEquipmentList().get()) {
+			for(Long objId : creature.getEquipmentList().get()) {
+				
+				SWGObject obj = NGECore.getInstance().objectService.getObject(objId);
+				
+				if(obj == null) {
+					System.err.println("Cant find obj for obj id in equip list!!!");
+					continue;
+				}
 				
 				if(obj instanceof TangibleObject && !(obj instanceof WeaponObject)) {
 					TangibleObject tangible = (TangibleObject) obj;
@@ -409,7 +418,14 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 			buffer.putInt(creature.getAppearanceEquipmentList().size());
 			buffer.putInt(creature.getAppearanceEquipmentListUpdateCounter());
 			
-			for(SWGObject obj : creature.getAppearanceEquipmentList().get()) {
+			for(Long objId : creature.getAppearanceEquipmentList().get()) {
+				
+				SWGObject obj = NGECore.getInstance().objectService.getObject(objId);
+				
+				if(obj == null) {
+					System.err.println("Cant find obj for obj id in equip list!!!");
+					continue;
+				}
 				
 				if(obj instanceof TangibleObject) {
 					TangibleObject tangible = (TangibleObject) obj;

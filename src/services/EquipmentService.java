@@ -232,8 +232,11 @@ public class EquipmentService implements INetworkDispatch {
 		int wornArmourPieces = 0, forceProtection = 0;
 		Map<String, Float> protection = new TreeMap<String, Float>();
 		
-		for(SWGObject item : new ArrayList<SWGObject>(creature.getEquipmentList()))
+		for(Long itemId : new ArrayList<Long>(creature.getEquipmentList()))
 		{
+			SWGObject item = core.objectService.getObject(itemId);
+			if(item == null)
+				continue;
 			Map<String, Object> attributes = new TreeMap<String, Object>(item.getAttributes());
 			boolean incPieceCount = false;
 			

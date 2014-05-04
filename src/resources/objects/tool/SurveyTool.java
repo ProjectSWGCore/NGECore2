@@ -90,6 +90,8 @@ public class SurveyTool extends TangibleObject implements Serializable {
 	public void initAfterDBLoad() {
 		super.init();
 		this.exceptionalState = false;
+		surveyEffectString = "";
+		sampleEffectString = "";
 	}
 	
 	public SurveyTool(long objectID, Planet planet, String template, Point3D position, Quaternion orientation){
