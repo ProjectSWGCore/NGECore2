@@ -168,7 +168,7 @@ public class StaticService implements INetworkDispatch {
 			}
 		} else {
 			if (cell == null) {
-				System.err.println("StaticService: Cell not found for: " + template);
+				System.err.println("StaticService: Cell not found");
 				return object;
 			}
 			
