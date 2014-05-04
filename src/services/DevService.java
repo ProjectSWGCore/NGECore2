@@ -92,7 +92,6 @@ public class DevService implements INetworkDispatch {
 				if(creature.getClient().isGM()) suiOptions.put((long) 130, "Vehicle Deeds");
 				if(creature.getClient().isGM()) suiOptions.put((long) 121, "Sandbox City");
 				if(creature.getClient().isGM()) suiOptions.put((long) 122, "Jedi Ruins");
-				
 				break;
 			case 3: // [Items] Weapons
 				suiOptions.put((long) 30, "Jedi Weapons");
@@ -166,8 +165,7 @@ public class DevService implements INetworkDispatch {
 					
 					// Character
 					case 10: // Set combat level to 90
-						core.playerService.grantLevel(player, 90); // Commented out until fixed
-					    //core.playerService.giveExperience(player, 999999999);
+						core.playerService.grantLevel(player, 90);
 						return;
 					case 11: // Give 100,000 credits
 						player.setCashCredits(player.getCashCredits() + 100000);
@@ -235,6 +233,7 @@ public class DevService implements INetworkDispatch {
 						inventory.add(lightsaber2);
 						inventory.add(lightsaber3);
 						return;
+					
 					case 31: // Melee Weapons
 						WeaponObject sword1 = (WeaponObject) core.objectService.createObject("object/weapon/melee/sword/shared_sword_01.iff", planet);
 						sword1.setIntAttribute("required_combat_level", 90);
@@ -247,6 +246,7 @@ public class DevService implements INetworkDispatch {
 						
 						inventory.add(sword1);
 						return;
+				
 					case 32: // Ranged Weapons
 						WeaponObject rifle1 = (WeaponObject) core.objectService.createObject("object/weapon/ranged/rifle/shared_rifle_e11.iff", planet);
 						rifle1.setIntAttribute("required_combat_level", 90);
@@ -257,8 +257,6 @@ public class DevService implements INetworkDispatch {
 						rifle1.setMaxDamage(1250);
 						rifle1.setWeaponType(WeaponType.RIFLE);
 						
-						// inventory.add(rifle1);
-						
 						WeaponObject carbine1 = (WeaponObject) core.objectService.createObject("object/weapon/ranged/carbine/shared_carbine_cdef.iff", planet);
 						carbine1.setIntAttribute("required_combat_level", 90);
 						carbine1.setAttackSpeed((float) 0.6);
@@ -268,24 +266,24 @@ public class DevService implements INetworkDispatch {
 						carbine1.setMaxDamage(937);
 						carbine1.setWeaponType(WeaponType.CARBINE);
 						
+						WeaponObject pistol1 = (WeaponObject) core.objectService.createObject("object/weapon/ranged/pistol/shared_pistol_cdef.iff", planet);
+						pistol1.setIntAttribute("required_combat_level", 90);
+						pistol1.setAttackSpeed((float) 0.4);
+						pistol1.setMaxRange(35);
+						pistol1.setDamageType("energy");
+						pistol1.setMinDamage(400);
+						pistol1.setMaxDamage(625);
+						pistol1.setWeaponType(WeaponType.PISTOL);
+						
+						inventory.add(pistol1);
+						// inventory.add(rifle1);
 						inventory.add(carbine1);
-						
-						WeaponObject pistol = (WeaponObject) core.objectService.createObject("object/weapon/ranged/pistol/shared_pistol_cdef.iff", planet);
-						pistol.setIntAttribute("required_combat_level", 90);
-						pistol.setAttackSpeed((float) 0.4);
-						pistol.setMaxRange(35);
-						pistol.setDamageType("energy");
-						pistol.setMinDamage(400);
-						pistol.setMaxDamage(625);
-						pistol.setWeaponType(WeaponType.PISTOL);
-						
-						inventory.add(pistol);
 						return;
 						
-					case 33:
+					case 33: // Heavy Weapons
 						WeaponObject heavy1 = (WeaponObject) core.objectService.createObject("object/weapon/ranged/heavy/shared_som_lava_cannon_generic.iff", planet);
-						heavy1.setIntAttribute("required_combat_level", 90);
 						
+						heavy1.setIntAttribute("required_combat_level", 90);
 						heavy1.setStringAttribute("class_required", "Commando");
 						heavy1.setDamageType("energy");
 						heavy1.setMinDamage(700);
@@ -296,11 +294,8 @@ public class DevService implements INetworkDispatch {
 						heavy1.setElementalDamage(200);
 						heavy1.setWeaponType(WeaponType.HEAVYWEAPON);
 						
-						inventory.add(heavy1);
-						
 						WeaponObject heavy2 = (WeaponObject) core.objectService.createObject("object/weapon/ranged/heavy/shared_som_republic_flamer.iff", planet);
 						heavy2.setIntAttribute("required_combat_level", 88);
-						
 						heavy2.setStringAttribute("class_required", "Commando");
 						heavy2.setDamageType("energy");
 						heavy2.setMinDamage(148);
@@ -311,13 +306,18 @@ public class DevService implements INetworkDispatch {
 						heavy2.setElementalDamage(28);
 						heavy2.setWeaponType(WeaponType.FLAMETHROWER);
 						
+						inventory.add(heavy1);
 						inventory.add(heavy2);
 						return;
-					case 40:
+					
+					case 40: // Unity Ring
 						TangibleObject ring = (TangibleObject) core.objectService.createObject("object/tangible/wearables/ring/shared_ring_s01.iff", planet);
 						ring.setCustomName("Unity Ring");
+						
 						inventory.add(ring);
-					case 41:
+						return;
+					
+					case 41: // Krayt Skull Backpack
 						TangibleObject backpack = (TangibleObject) core.objectService.createObject("object/tangible/wearables/backpack/shared_backpack_krayt_skull.iff", planet);
 						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:agility_modified", 25);
 						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:constitution_modified", 30);
@@ -325,17 +325,15 @@ public class DevService implements INetworkDispatch {
 						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:precision_modified", 35);
 						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:stamina_modified", 30);
 						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:strength_modified", 35);
+						
 						inventory.add(backpack);
 						return;
-					case 42:
+					
+					case 42: // Heroism Set
 						TangibleObject heroismBand = (TangibleObject) core.objectService.createObject("object/tangible/wearables/ring/shared_ring_s04.iff", planet, "item_band_set_hero_01_01");
-						
 						TangibleObject heroismRing = (TangibleObject) core.objectService.createObject("object/tangible/wearables/ring/shared_ring_s02.iff", planet, "item_ring_set_hero_01_01");
-						
 						TangibleObject heroismNecklace = (TangibleObject) core.objectService.createObject("object/tangible/wearables/necklace/shared_necklace_s10.iff", planet, "item_necklace_set_hero_01_01");
-						
 						TangibleObject heroismBraceletRight = (TangibleObject) core.objectService.createObject("object/tangible/wearables/bracelet/shared_bracelet_s03_r.iff", planet, "item_bracelet_r_set_hero_01_01");
-						
 						TangibleObject heroismBraceletLeft = (TangibleObject) core.objectService.createObject("object/tangible/wearables/bracelet/shared_bracelet_s03_l.iff", planet, "item_bracelet_l_set_hero_01_01");
 						
 						inventory.add(heroismBand);
@@ -344,21 +342,27 @@ public class DevService implements INetworkDispatch {
 						inventory.add(heroismBraceletRight);
 						inventory.add(heroismBraceletLeft);
 						return;
-					case 43:
+					
+					case 43: // Breath of Heaven
 						TangibleObject drink = (TangibleObject) core.objectService.createObject("object/tangible/food/crafted/shared_drink_breath_of_heaven.iff", planet);
-						drink.setFloatAttribute("cat_stat_mod_bonus.@stat_n:constitution_modified", 100);
+						drink.setFloatAttribute("cat_stat_mod_bonus.@stat_n:constitution_modified", 80);
 						drink.setFloatAttribute("cat_stat_mod_bonus.@stat_n:dodge", 3);
+						
 						inventory.add(drink);
 						return;
+					
 					case 50: // [Items] Assault Armor
 						sendCharacterBuilderSUI(player, 6);
 						return;
+						
 					case 51: // [Items] Battle Armor
 						sendCharacterBuilderSUI(player, 7);
 						return;
+						
 					case 52: // [Items] Reconnaissance Armor
 						sendCharacterBuilderSUI(player, 8);
 						return;
+					
 					case 60: // Composite Armor
 						SWGObject comp_bicep_r = core.objectService.createObject("object/tangible/wearables/armor/composite/shared_armor_composite_bicep_r.iff", planet);
 						comp_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
@@ -419,8 +423,6 @@ public class DevService implements INetworkDispatch {
 						SWGObject comp_boots = core.objectService.createObject("object/tangible/wearables/armor/composite/shared_armor_composite_boots.iff", planet);
 						SWGObject comp_gloves = core.objectService.createObject("object/tangible/wearables/armor/composite/shared_armor_composite_gloves.iff", planet);
 						
-						
-						
 						inventory.add(comp_bicep_r);
 						inventory.add(comp_bicep_l);
 						inventory.add(comp_bracer_r);
@@ -430,9 +432,8 @@ public class DevService implements INetworkDispatch {
 						inventory.add(comp_chest);
 						inventory.add(comp_boots);
 						inventory.add(comp_gloves);
-
-						
 						return;
+					
 					case 61: // Ithorian Sentinel
 						SWGObject sent_bicep_r = core.objectService.createObject("object/tangible/wearables/armor/ithorian_sentinel/shared_ith_armor_s03_bicep_r.iff", planet);
 						sent_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
@@ -493,8 +494,6 @@ public class DevService implements INetworkDispatch {
 						SWGObject sent_boots = core.objectService.createObject("object/tangible/wearables/armor/ithorian_sentinel/shared_ith_armor_s03_boots.iff", planet);
 						SWGObject sent_gloves = core.objectService.createObject("object/tangible/wearables/armor/ithorian_sentinel/shared_ith_armor_s03_gloves.iff", planet);
 						
-						
-						
 						inventory.add(sent_bicep_r);
 						inventory.add(sent_bicep_l);
 						inventory.add(sent_bracer_r);
@@ -504,9 +503,8 @@ public class DevService implements INetworkDispatch {
 						inventory.add(sent_chest);
 						inventory.add(sent_boots);
 						inventory.add(sent_gloves);
-
-						
 						return;
+					
 					case 62: // Kashyyykian Hunting
 						SWGObject hunt_bicep_r = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_hunting/shared_armor_kashyyykian_hunting_bicep_r.iff", planet);
 						hunt_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 7000);
@@ -556,17 +554,14 @@ public class DevService implements INetworkDispatch {
 						hunt_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
 						hunt_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
 						
-						
-						
 						inventory.add(hunt_bicep_r);
 						inventory.add(hunt_bicep_l);
 						inventory.add(hunt_bracer_r);
 						inventory.add(hunt_bracer_l);
 						inventory.add(hunt_leggings);
 						inventory.add(hunt_chest);
-
-						
 						return;
+					
 					case 70: // Bone Armor
 						SWGObject bone_bicep_r = core.objectService.createObject("object/tangible/wearables/armor/bone/shared_armor_bone_s01_bicep_r.iff", planet);
 						bone_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 6000);
@@ -627,8 +622,6 @@ public class DevService implements INetworkDispatch {
 						SWGObject bone_boots = core.objectService.createObject("object/tangible/wearables/armor/bone/shared_armor_bone_s01_boots.iff", planet);
 						SWGObject bone_gloves = core.objectService.createObject("object/tangible/wearables/armor/bone/shared_armor_bone_s01_gloves.iff", planet);
 						
-						
-						
 						inventory.add(bone_bicep_r);
 						inventory.add(bone_bicep_l);
 						inventory.add(bone_bracer_r);
@@ -638,9 +631,8 @@ public class DevService implements INetworkDispatch {
 						inventory.add(bone_chest);
 						inventory.add(bone_boots);
 						inventory.add(bone_gloves);
-
-						
 						return;
+						
 					case 71: // Ithorian Defender
 						SWGObject def_bicep_r = core.objectService.createObject("object/tangible/wearables/armor/ithorian_defender/shared_ith_armor_s01_bicep_r.iff", planet);
 						def_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 6000);
@@ -701,8 +693,6 @@ public class DevService implements INetworkDispatch {
 						SWGObject def_boots = core.objectService.createObject("object/tangible/wearables/armor/ithorian_defender/shared_ith_armor_s01_boots.iff", planet);
 						SWGObject def_gloves = core.objectService.createObject("object/tangible/wearables/armor/ithorian_defender/shared_ith_armor_s01_gloves.iff", planet);
 						
-						
-						
 						inventory.add(def_bicep_r);
 						inventory.add(def_bicep_l);
 						inventory.add(def_bracer_r);
@@ -712,9 +702,8 @@ public class DevService implements INetworkDispatch {
 						inventory.add(def_chest);
 						inventory.add(def_boots);
 						inventory.add(def_gloves);
-
-						
 						return;
+						
 					case 72: // Kashyyykian Black Mountain
 						SWGObject moun_bicep_r = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_black_mtn/shared_armor_kashyyykian_black_mtn_bicep_r.iff", planet);
 						moun_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 6000);
@@ -764,17 +753,14 @@ public class DevService implements INetworkDispatch {
 						moun_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
 						moun_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);
 						
-						
-						
 						inventory.add(moun_bicep_r);
 						inventory.add(moun_bicep_l);
 						inventory.add(moun_bracer_r);
 						inventory.add(moun_bracer_l);
 						inventory.add(moun_leggings);
 						inventory.add(moun_chest);
-
-						
 						return;
+						
 					case 80: // Marauder Armor
 						SWGObject mar_bicep_r = core.objectService.createObject("object/tangible/wearables/armor/marauder/shared_armor_marauder_s02_bicep_r.iff", planet);
 						mar_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 5000);
@@ -835,8 +821,6 @@ public class DevService implements INetworkDispatch {
 						SWGObject mar_boots = core.objectService.createObject("object/tangible/wearables/armor/marauder/shared_armor_marauder_s02_boots.iff", planet);
 						SWGObject mar_gloves = core.objectService.createObject("object/tangible/wearables/armor/marauder/shared_armor_marauder_s02_gloves.iff", planet);
 						
-						
-						
 						inventory.add(mar_bicep_r);
 						inventory.add(mar_bicep_l);
 						inventory.add(mar_bracer_r);
@@ -846,9 +830,8 @@ public class DevService implements INetworkDispatch {
 						inventory.add(mar_chest);
 						inventory.add(mar_boots);
 						inventory.add(mar_gloves);
-
-						
 						return;
+					
 					case 81: // Ithorian Guardian
 						SWGObject gau_bicep_r = core.objectService.createObject("object/tangible/wearables/armor/ithorian_guardian/shared_ith_armor_s02_bicep_r.iff", planet);
 						gau_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 5000);
@@ -909,8 +892,6 @@ public class DevService implements INetworkDispatch {
 						SWGObject gau_boots = core.objectService.createObject("object/tangible/wearables/armor/ithorian_guardian/shared_ith_armor_s02_boots.iff", planet);
 						SWGObject gau_gloves = core.objectService.createObject("object/tangible/wearables/armor/ithorian_guardian/shared_ith_armor_s02_gloves.iff", planet);
 						
-						
-						
 						inventory.add(gau_bicep_r);
 						inventory.add(gau_bicep_l);
 						inventory.add(gau_bracer_r);
@@ -920,9 +901,8 @@ public class DevService implements INetworkDispatch {
 						inventory.add(gau_chest);
 						inventory.add(gau_boots);
 						inventory.add(gau_gloves);
-
-						
 						return;
+						
 					case 82: // Kashyyykian Ceremonial
 						SWGObject cer_bicep_r = core.objectService.createObject("object/tangible/wearables/armor/kashyyykian_ceremonial/shared_armor_kashyyykian_ceremonial_bicep_r.iff", planet);
 						cer_bicep_r.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 5000);
@@ -972,59 +952,61 @@ public class DevService implements INetworkDispatch {
 						cer_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 6000);
 						cer_chest.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 6000);				
 						
-						
-						
 						inventory.add(cer_bicep_r);
 						inventory.add(cer_bicep_l);
 						inventory.add(cer_bracer_r);
 						inventory.add(cer_bracer_l);
 						inventory.add(cer_leggings);
 						inventory.add(cer_chest);
-						
 						return;
 						
-					case 90: // (Light) Jedi Robe
+					case 90: // [Jedi Items] Light Jedi Robe
 						inventory.add(core.objectService.createObject("object/tangible/wearables/robe/shared_robe_jedi_light_s03.iff", planet));
 						return;
-					case 91: // (Dark) Jedi Robe
+						
+					case 91: // [Jedi Items] Dark Jedi Robe
 						inventory.add(core.objectService.createObject("object/tangible/wearables/robe/shared_robe_jedi_dark_s03.iff", planet));
 						return;
-					case 92: // Belt of Master Bodo Baas
+						
+					case 92: // [Jedi Items] Belt of Master Bodo Baas
 						inventory.add(core.objectService.createObject("object/tangible/wearables/backpack/shared_fannypack_s01.iff", planet));
 						return;
-					case 110:
+						
+					case 110: // Survey Tools
 						SurveyTool mineralSurveyTool = (SurveyTool) core.objectService.createObject("object/tangible/survey_tool/shared_survey_tool_mineral.iff", planet);
 						mineralSurveyTool.setCustomName("Mineral Survey Device");
-						inventory.add(mineralSurveyTool);
 						
 						SurveyTool chemicalSurveyTool = (SurveyTool) core.objectService.createObject("object/tangible/survey_tool/shared_survey_tool_inorganic.iff", planet);
 						chemicalSurveyTool.setCustomName("Chemical Survey Device");
-						inventory.add(chemicalSurveyTool);
 						
 						SurveyTool floraSurveyTool = (SurveyTool) core.objectService.createObject("object/tangible/survey_tool/shared_survey_tool_lumber.iff", planet);
 						floraSurveyTool.setCustomName("Flora Survey Device");
-						inventory.add(floraSurveyTool);
-
+						
 						SurveyTool gasSurveyTool = (SurveyTool) core.objectService.createObject("object/tangible/survey_tool/shared_survey_tool_gas.iff", planet);
 						gasSurveyTool.setCustomName("Gas Survey Device");
-						inventory.add(gasSurveyTool);
-
+						
 						SurveyTool waterSurveyTool = (SurveyTool) core.objectService.createObject("object/tangible/survey_tool/shared_survey_tool_moisture.iff", planet);
 						waterSurveyTool.setCustomName("Water Survey Device");
-						inventory.add(waterSurveyTool);
-
+						
 						SurveyTool windSurveyTool = (SurveyTool) core.objectService.createObject("object/tangible/survey_tool/shared_survey_tool_wind.iff", planet);
 						windSurveyTool.setCustomName("Wind Survey Device");
-						inventory.add(windSurveyTool);
-
+						
 						SurveyTool solarSurveyTool = (SurveyTool) core.objectService.createObject("object/tangible/survey_tool/shared_survey_tool_solar.iff", planet);
 						solarSurveyTool.setCustomName("Solar Survey Device");
+						
+						inventory.add(mineralSurveyTool);
+						inventory.add(chemicalSurveyTool);
+						inventory.add(floraSurveyTool);
+						inventory.add(gasSurveyTool);
+						inventory.add(waterSurveyTool);
+						inventory.add(windSurveyTool);
 						inventory.add(solarSurveyTool);
 						return;
+						
 					case 111:
 						SWGObject deed1;
 						
-						// Minerals
+						// Mineral Harvesters
 						deed1 = core.objectService.createObject("object/tangible/deed/harvester_deed/shared_harvester_ore_s1_deed.iff", planet);
 						deed1.setIntAttribute("examine_hoppersize", 27344);
 						deed1.setIntAttribute("examine_maintenance_rate", 5);
@@ -1045,7 +1027,7 @@ public class DevService implements INetworkDispatch {
 						deed1.setIntAttribute("examine_maintenance_rate", 44);
 						inventory.add(deed1);
 						
-						// Chemicals
+						// Chemical Harvesters
 						deed1 = core.objectService.createObject("object/tangible/deed/harvester_deed/shared_harvester_liquid_deed.iff", planet);
 						deed1.setIntAttribute("examine_hoppersize", 27344);
 						deed1.setIntAttribute("examine_maintenance_rate", 5);
@@ -1066,7 +1048,7 @@ public class DevService implements INetworkDispatch {
 						deed1.setIntAttribute("examine_maintenance_rate", 44);
 						inventory.add(deed1);
 						
-						// Flora
+						// Flora Harvesters
 						deed1 = core.objectService.createObject("object/tangible/deed/harvester_deed/shared_harvester_flora_deed.iff", planet);
 						deed1.setIntAttribute("examine_hoppersize", 27344);
 						deed1.setIntAttribute("examine_maintenance_rate", 5);
@@ -1088,7 +1070,7 @@ public class DevService implements INetworkDispatch {
 						inventory.add(deed1);
 						
 						
-						// Gas
+						// Gas Harvesters
 						deed1 = core.objectService.createObject("object/tangible/deed/harvester_deed/shared_harvester_gas_deed.iff", planet);
 						deed1.setIntAttribute("examine_hoppersize", 27344);
 						deed1.setIntAttribute("examine_maintenance_rate", 5);
@@ -1109,7 +1091,7 @@ public class DevService implements INetworkDispatch {
 						deed1.setIntAttribute("examine_maintenance_rate", 44);
 						inventory.add(deed1);
 						
-						// Water
+						// Water Harvesters
 						deed1 = core.objectService.createObject("object/tangible/deed/harvester_deed/shared_harvester_moisture_deed.iff", planet);
 						deed1.setIntAttribute("examine_hoppersize", 27344);
 						deed1.setIntAttribute("examine_maintenance_rate", 5);
@@ -1154,14 +1136,16 @@ public class DevService implements INetworkDispatch {
 						deed1 = core.objectService.createObject("object/tangible/deed/generator_deed/shared_generator_geothermal_deed.iff", planet);
 						deed1.setIntAttribute("examine_hoppersize", 250000);
 						deed1.setIntAttribute("examine_maintenance_rate", 15);
-						inventory.add(deed1);
 						
+						inventory.add(deed1);
 						return;
+					
 					case 112:
 						core.resourceService.spawnSpecificResourceContainer("Radioactive", player, 100000);
 						return;	
-					case 120:
-//						SWGObject houseDeed = core.objectService.createObject("object/tangible/deed/player_house_deed/shared_generic_house_small_deed.iff", planet);
+					
+					case 120: // Building Deeds
+						SWGObject houseDeed = core.objectService.createObject("object/tangible/deed/player_house_deed/shared_generic_house_small_deed.iff", planet);
 //						inventory.add(houseDeed);
 						
 						TangibleObject deed = (TangibleObject) core.objectService.createObject("object/tangible/deed/player_house_deed/shared_generic_house_small_deed.iff", planet);
@@ -1183,24 +1167,25 @@ public class DevService implements INetworkDispatch {
 						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("dantooine"), position, player.getOrientation(), null);
 						return;
 
-					case 123:
+					case 123: // Bounty Hunter Tracking Droids
 						TangibleObject arakydDroids = (TangibleObject) core.objectService.createObject("object/tangible/mission/shared_mission_bounty_droid_probot.iff", planet);
-						//arakydDroids.setStackable(true);
-						//arakydDroids.setStackCount(10);
-						inventory.add(arakydDroids);
+						arakydDroids.setStackable(true);
+						arakydDroids.setStackCount(10);
+						// inventory.add(arakydDroids);
 						
 						TangibleObject seekerDroids = (TangibleObject) core.objectService.createObject("object/tangible/mission/shared_mission_bounty_droid_seeker.iff", planet);
 						inventory.add(seekerDroids);
 						return;
 
-					case 125:
+					case 125: // Generic Crafting Tool
 						TangibleObject genericCraftingTool = (TangibleObject) core.objectService.createObject("object/tangible/crafting/station/shared_generic_tool.iff", planet);
 						genericCraftingTool.setCustomName("Generic Crafting Tool");
 						inventory.add(genericCraftingTool);	
 						return;
-					case 130:
+					case 130: // Vehicle Deeds
 						TangibleObject swoopDeed = (TangibleObject) core.objectService.createObject("object/tangible/deed/vehicle_deed/shared_speederbike_swoop_deed.iff", planet);
 						TangibleObject av21deed = (TangibleObject) core.objectService.createObject("object/tangible/deed/vehicle_deed/shared_landspeeder_av21_deed.iff", planet);
+						
 						inventory.add(swoopDeed);
 						inventory.add(av21deed);
 						return;
