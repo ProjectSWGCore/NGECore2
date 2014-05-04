@@ -55,6 +55,12 @@ public class ProsePackage {
 		stf.setStfName(stfLabel);
 	}
 	
+	public ProsePackage(String stfFile, String stfLabel, String ttCustomString) {
+		stf.setStfFilename(stfFile);
+		stf.setStfName(stfLabel);
+		this.ttCustomString = ttCustomString;
+	}
+	
 	public ProsePackage(String stfFile, String stfLabel, long tuObjectId, String tuStfFile, String tuStfLabel, String tuCustomString) {
 		stf.setStfFilename(stfFile);
 		stf.setStfName(stfLabel);

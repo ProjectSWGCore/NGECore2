@@ -128,6 +128,7 @@ public class TangibleObject extends SWGObject implements Serializable {
 	@Override
 	public void initAfterDBLoad() {
 		super.init();
+		defendersList = new Vector<TangibleObject>();
 		messageBuilder = new TangibleMessageBuilder(this);
 	}
 	

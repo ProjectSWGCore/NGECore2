@@ -197,6 +197,7 @@ public class SpawnService {
 
 		AIActor actor = new AIActor(creature, creature.getPosition(), scheduler);
 		creature.setAttachment("AI", actor);
+		creature.setAttachment("radial_filename", "npc/mobile");
 		actor.setMobileTemplate(mobileTemplate);
 		
 	

@@ -185,7 +185,7 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	@NotPersistent
 	private transient ConcurrentHashMap<String, Long> cooldowns = new ConcurrentHashMap<String, Long>();
 	@NotPersistent
-	private transient long tefTime = System.currentTimeMillis();
+	private transient long tefTime = 0;
 	@NotPersistent
 	private transient SWGObject useTarget;
 	
@@ -213,7 +213,6 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		duelList = Collections.synchronizedList(new ArrayList<CreatureObject>());
 		cooldowns = new ConcurrentHashMap<String, Long>();
 		performanceAudience = new Vector<CreatureObject>();
-		tefTime = System.currentTimeMillis();
 		messageBuilder = new CreatureMessageBuilder(this);
 	}
 

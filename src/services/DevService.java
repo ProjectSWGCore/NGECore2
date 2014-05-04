@@ -86,12 +86,13 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 23, "Jedi Items");
 				suiOptions.put((long) 26, "Installations");
 				suiOptions.put((long) 110, "Survey Devices");
+				if(creature.getPlayerObject().getProfession().equals("bounty_hunter_1a")) suiOptions.put((long) 123, "Tracking Droids");
 				if(creature.getClient().isGM()) suiOptions.put((long) 120, "House Deeds");
 				if(creature.getClient().isGM()) suiOptions.put((long) 125, "Crafting Tools");
 				if(creature.getClient().isGM()) suiOptions.put((long) 130, "Vehicle Deeds");
 				if(creature.getClient().isGM()) suiOptions.put((long) 121, "Sandbox City");
 				if(creature.getClient().isGM()) suiOptions.put((long) 122, "Jedi Ruins");
-
+				
 				break;
 			case 3: // [Items] Weapons
 				suiOptions.put((long) 30, "Jedi Weapons");
@@ -103,6 +104,7 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 40, "Unity Ring");
 				suiOptions.put((long) 41, "Tusken Rucksack");
 				suiOptions.put((long) 42, "Heroism Jewlery Set");
+				suiOptions.put((long) 43, "Breath of Heaven");
 				break;
 			case 5: // [Items] Armor
 				suiOptions.put((long) 50, "Assault Armor");
@@ -341,6 +343,12 @@ public class DevService implements INetworkDispatch {
 						inventory.add(heroismNecklace);
 						inventory.add(heroismBraceletRight);
 						inventory.add(heroismBraceletLeft);
+						return;
+					case 43:
+						TangibleObject drink = (TangibleObject) core.objectService.createObject("object/tangible/food/crafted/shared_drink_breath_of_heaven.iff", planet);
+						drink.setFloatAttribute("cat_stat_mod_bonus.@stat_n:constitution_modified", 100);
+						drink.setFloatAttribute("cat_stat_mod_bonus.@stat_n:dodge", 3);
+						inventory.add(drink);
 						return;
 					case 50: // [Items] Assault Armor
 						sendCharacterBuilderSUI(player, 6);
@@ -1168,11 +1176,23 @@ public class DevService implements INetworkDispatch {
 					
 					case 121:
 						NGECore.getInstance().playerCityService.buildSandboxTestCity(player);
+						return;
 						
 					case 122:
 						Point3D position = new Point3D(4086,15,5554);
 						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("dantooine"), position, player.getOrientation(), null);
-					
+						return;
+
+					case 123:
+						TangibleObject arakydDroids = (TangibleObject) core.objectService.createObject("object/tangible/mission/shared_mission_bounty_droid_probot.iff", planet);
+						//arakydDroids.setStackable(true);
+						//arakydDroids.setStackCount(10);
+						inventory.add(arakydDroids);
+						
+						TangibleObject seekerDroids = (TangibleObject) core.objectService.createObject("object/tangible/mission/shared_mission_bounty_droid_seeker.iff", planet);
+						inventory.add(seekerDroids);
+						return;
+
 					case 125:
 						TangibleObject genericCraftingTool = (TangibleObject) core.objectService.createObject("object/tangible/crafting/station/shared_generic_tool.iff", planet);
 						genericCraftingTool.setCustomName("Generic Crafting Tool");
