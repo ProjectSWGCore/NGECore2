@@ -94,7 +94,7 @@ public class BountyMissionObjective extends MissionObjective {
 		String message = "@mission/mission_bounty_informant:target_hard_" + Integer.toString(new Random().nextInt(4) + 1);
 		
 		CommPlayerMessage comm = new CommPlayerMessage(player.getObjectId(), new OutOfBand(new ProsePackage(message)));
-		comm.setTime(5000);
+		comm.setTime(2000);
 		switch (bountyTarget.getFaction()) {
 			case "neutral":
 				comm.setModel("object/mobile/shared_dressed_assassin_mission_giver_0" + Integer.toString(new Random().nextInt(2) + 1) + ".iff");

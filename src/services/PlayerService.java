@@ -1306,6 +1306,13 @@ public class PlayerService implements INetworkDispatch {
 						bounty = 1000000;
 					}
 					
+					if (core.getBountiesODB().contains(attacker.getObjectID())) {
+						if (((BountyListItem) core.getBountiesODB().get(attacker.getObjectID())).getCreditReward() >= 20000000) {
+							victim.sendSystemMessage("@bounty_hunter:max_bounty", DisplayType.Broadcast);
+							return;
+						}
+					}
+					
 					// Try removing bounty amount from the bank first then cash. Remove amount accordingly if bank/cash is less than placed bounty.
 					if (bounty > victim.getBankCredits()) {
 						int difference = bounty - victim.getBankCredits();
@@ -1321,12 +1328,15 @@ public class PlayerService implements INetworkDispatch {
 					
 					if (!core.missionService.addToExistingBounty(attacker.getObjectId(), victim.getObjectId(), bounty))
 						core.missionService.createNewBounty(attacker, victim.getObjectId(), bounty);
+					
+					victim.sendSystemMessage("You have placed a bounty for " + bounty + " credits on the head of " + attacker.getCustomName(), (byte) 0);
 				}
 			}
 			
 		});
 		bountyWindow.setProperty("txtInput:NumericInteger", "true");
 		bountyWindow.setProperty("txtInput:MaxLength", "7");
+		bountyWindow.setProperty("inputBox:Size", "306,306");
 		core.suiService.openSUIWindow(bountyWindow);
 	}
 	
