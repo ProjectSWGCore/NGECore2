@@ -262,16 +262,14 @@ def addPlanetSpawns(core, planet):
 	noble4.setOptionsBitmask(256)
 	
 	byxlePedette = stcSvc.spawnObject('object/mobile/shared_dressed_tatooine_opening_byxle.iff', 'tatooine', long(0), float(3365), float(5), float(-4639), float(0.99), float(0.12)) 
-	byxlePedette.setCustomName2('Byxle Pedette')
-	byxlePedette.setOptionsBitmask(256)
+	byxlePedette.setOptionsBitmask(264)
 	
 	errikDarksider = stcSvc.spawnObject('object/mobile/shared_dressed_herald_tatooine_01.iff', 'tatooine', long(0), float(3381), float(4.6), float(-4498), float(0.91), float(0.40)) 
 	errikDarksider.setCustomName2('Errik Darksider')
 	errikDarksider.setOptionsBitmask(256)
 	
 	gendra = stcSvc.spawnObject('object/mobile/shared_dressed_gendra.iff', 'tatooine', long(0), float(3308), float(5.6), float(-4785), float(0.84), float(0.53)) 
-	gendra.setCustomName2('Gendra')
-	gendra.setOptionsBitmask(256)
+	gendra.setOptionsBitmask(264)
 	
 	lurval = stcSvc.spawnObject('object/mobile/shared_lurval.iff', 'tatooine', long(0), float(3387), float(5), float(-4791), float(-0.4), float(0.91)) 
 	lurval.setCustomName2('Lurval')
@@ -292,8 +290,7 @@ def addPlanetSpawns(core, planet):
 	vourk.setOptionsBitmask(256)
 	
 	mayor = stcSvc.spawnObject('object/mobile/shared_dressed_mayor_mikdanyell_guhrantt.iff', 'tatooine', long(1279960), float(1.2), float(2.5), float(5.4), float(0), float(0))
-	mayor.setCustomName2('Mayor Mikdanyell Guh\'rantt')
-	mayor.setOptionsBitmask(256)
+	mayor.setOptionsBitmask(264)
 	
 	enthaKandela = stcSvc.spawnObject('object/mobile/shared_dressed_entha_kandela.iff', 'tatooine', long(0), float(3511), float(5.0), float(-4785), float(0.70), float(0.71))
 	enthaKandela.setCustomName2('Entha Kandela')
@@ -308,15 +305,20 @@ def addPlanetSpawns(core, planet):
 	peawpRdawc.setOptionsBitmask(256)
 	
 	nikoBrehe = stcSvc.spawnObject('object/mobile/shared_dressed_tatooine_opening_niko.iff', 'tatooine', long(0), float(3506.7), float(5.0), float(-4795.8), float(0.70), float(0.71))
-	nikoBrehe.setCustomName2('Niko Brehe')
-	nikoBrehe.setOptionsBitmask(256)
+	nikoBrehe.setOptionsBitmask(264)
 	
 	dunir = stcSvc.spawnObject('object/mobile/shared_dressed_tatooine_opening_dunir.iff', 'tatooine', long(0), float(3520.7), float(5.0), float(-4683.7), float(0.99), float(-0.08))
-	dunir.setCustomName2('Dunir')
-	dunir.setOptionsBitmask(256)
+	dunir.setOptionsBitmask(264)
 	
 	#Eisley Ship Controller
 	stcSvc.spawnObject('object/mobile/shared_distant_ship_controller.iff', 'tatooine', long(0), float(3542.3), float(5.0), float(-4826.0), float(0.42), float(0.91))
 	
+	#recruiters
+	impRecruiter = stcSvc.spawnObject('object/mobile/shared_dressed_imperial_officer_f.iff', 'tatooine', long(1280132), float(-6), float(1), float(9.2), float(0.70), float(0.71))	
+	impRecruiter.setOptionsBitmask(264)
+	
+	rebRecruiter = stcSvc.spawnObject('object/mobile/shared_dressed_rebel_recruiter_human_female_01.iff', 'tatooine', long(1082887), float(-30.5), float(-0.5), float(6.2), float(0.70), float(0.71))	
+	rebRecruiter.setOptionsBitmask(264)
+
 	return
 	
