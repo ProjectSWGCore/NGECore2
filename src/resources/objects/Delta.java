@@ -38,12 +38,16 @@ public abstract class Delta implements IDelta, Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	@NotPersistent
-	protected transient final Object objectMutex = new Object();
+	protected transient Object objectMutex = new Object();
 	@NotPersistent
 	private transient static SimpleBufferAllocator bufferPool = new SimpleBufferAllocator();
 	
 	public Delta() {
 		
+	}
+	
+	public void init() {
+		objectMutex = new Object();
 	}
 	
 	protected String getAsciiString(ByteBuffer buffer) {

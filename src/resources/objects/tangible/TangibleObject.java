@@ -76,7 +76,7 @@ public class TangibleObject extends SWGObject implements Serializable {
 	protected String faction = ""; // Says you're "Imperial Special Forces" if it's 0 for some reason
 	protected int factionStatus = 0;
 	@NotPersistent
-	private transient Vector<TangibleObject> defendersList = new Vector<TangibleObject>();	// unused in packets but useful for the server
+	protected transient Vector<TangibleObject> defendersList = new Vector<TangibleObject>();	// unused in packets but useful for the server
 	@NotPersistent
 	private transient TangibleMessageBuilder messageBuilder;
 	
@@ -100,7 +100,6 @@ public class TangibleObject extends SWGObject implements Serializable {
 	private boolean noSell = false;
 	private byte junkType = -1;
 	private int junkDealerPrice = 0;
-	
 	
 	private String serialNumber;
 	
@@ -128,6 +127,7 @@ public class TangibleObject extends SWGObject implements Serializable {
 	@Override
 	public void initAfterDBLoad() {
 		super.init();
+		defendersList = new Vector<TangibleObject>();
 		messageBuilder = new TangibleMessageBuilder(this);
 	}
 	

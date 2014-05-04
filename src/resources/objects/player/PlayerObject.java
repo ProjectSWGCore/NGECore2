@@ -167,6 +167,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		super.init();
 		lastPlayTimeUpdate = System.currentTimeMillis();
 		messageBuilder = new PlayerMessageBuilder(this);
+		waypoints.forEach(WaypointObject::initAfterDBLoad);
 	}
 
 	public String getTitle() {

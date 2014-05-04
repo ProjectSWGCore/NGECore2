@@ -70,7 +70,7 @@ public class SpawnService {
 		}
 	}	
 	
-	public CreatureObject spawnCreature(String template, String planetName, long cellId, float x, float y, float z, float qW, float qX, float qY, float qZ, short level) {
+	public CreatureObject spawnCreature(String template, long objectId, String planetName, long cellId, float x, float y, float z, float qW, float qX, float qY, float qZ, short level) {
 		
 		Planet planet = core.terrainService.getPlanetByName(planetName);
 		MobileTemplate mobileTemplate = mobileTemplates.get(template);
@@ -85,7 +85,7 @@ public class SpawnService {
 				return null;
 		}
 		
-		CreatureObject creature = (CreatureObject) core.objectService.createObject(mobileTemplate.getTemplates().get(new Random().nextInt(mobileTemplate.getTemplates().size())), 0, planet, new Point3D(x, y, z), new Quaternion(qW, qX, qY, qZ));
+		CreatureObject creature = (CreatureObject) core.objectService.createObject(mobileTemplate.getTemplates().get(new Random().nextInt(mobileTemplate.getTemplates().size())), objectId, planet, new Point3D(x, y, z), new Quaternion(qW, qX, qY, qZ));
 		
 		if(creature == null)
 			return null;
@@ -197,6 +197,7 @@ public class SpawnService {
 
 		AIActor actor = new AIActor(creature, creature.getPosition(), scheduler);
 		creature.setAttachment("AI", actor);
+		creature.setAttachment("radial_filename", "npc/mobile");
 		actor.setMobileTemplate(mobileTemplate);
 		
 	
@@ -208,6 +209,10 @@ public class SpawnService {
 			cell.add(creature);
 		}
 		return creature;
+	}
+	
+	public CreatureObject spawnCreature(String template, String planetName, long cellId, float x, float y, float z, float qW, float qX, float qY, float qZ, short level) {
+		return spawnCreature(template, 0L, planetName, cellId, x, y, z, qW, qX, qY, qZ, level);
 	}
 	
 	public CreatureObject spawnCreature(String mobileTemplate, String planetName, long cellId, float x, float y, float z, float qW, float qX, float qY, float qZ, int level) {

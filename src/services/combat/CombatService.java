@@ -1012,12 +1012,12 @@ public class CombatService implements INetworkDispatch {
 					targetProse.setDiInteger(mission.getCreditReward());
 					target.sendSystemMessage(new OutOfBand(targetProse), (byte) 0);
 					
-					ProsePackage attackerProse = new ProsePackage("bounty_hunter", "bounty_success_hunter", attacker.getCustomName());
+					ProsePackage attackerProse = new ProsePackage("bounty_hunter", "bounty_success_hunter", target.getCustomName());
 					attackerProse.setToCustomString("their"); // should be his or her: http://youtu.be/BqeDQQSETJI?t=2m19s
 					attackerProse.setDiInteger(mission.getCreditReward());
 					attacker.sendSystemMessage(new OutOfBand(attackerProse), (byte) 0);
 					
-					core.missionService.handleMissionAbort(target, mission);
+					core.missionService.handleMissionComplete(attacker, mission);
 				}
 			}
 			

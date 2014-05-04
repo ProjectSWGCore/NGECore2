@@ -92,6 +92,13 @@ public class GuildObject extends UniverseObject implements Serializable {
 	public void initAfterDBLoad() {
 		super.init();
 		messageBuilder = new GuildMessageBuilder(this);
+		guildList.init();
+		currentServerGCWZonePercentMap.init();
+		currentServerGCWTotalPercentMap.init();
+		currentServerGCWZoneHistoryMap.init();
+		currentServerGCWTotalHistoryMap.init();
+		otherServerGCWZonePercentMap.init();
+		otherServerGCWTotalPercentMap.init();
 	}
 
 	

@@ -126,7 +126,7 @@ public class PlayerService implements INetworkDispatch {
 			ServerTimeMessage time = new ServerTimeMessage(core.getGalacticTime() / 1000);
 			IoBuffer packet = time.serialize();
 			creature.getClient().getSession().write(packet);
-		}, 5, 45, TimeUnit.SECONDS));
+		}, 45, 45, TimeUnit.SECONDS));
 		
 		scheduleList.add(scheduler.scheduleAtFixedRate(() -> {
 			if (creature.isInStealth() && !creature.getOption(Options.INVULNERABLE) && ((PlayerObject) creature.getSlottedObject("ghost")).getGodLevel() == 0) {
@@ -608,7 +608,10 @@ public class PlayerService implements INetworkDispatch {
 		
 		try
 		{
-        		for (SWGObject equipment : new ArrayList<SWGObject>(creature.getEquipmentList())) {
+        		for (Long equipmentId : new ArrayList<Long>(creature.getEquipmentList())) {
+        			
+        			SWGObject equipment = core.objectService.getObject(equipmentId);
+        			
         			if (equipment == null) {
         				continue;
         			}
@@ -1270,8 +1273,9 @@ public class PlayerService implements INetworkDispatch {
 				actor.sendSystemMessage("@unity:decline", (byte) 0);
 				proposer.sendSystemMessage("@unity:declined", (byte) 0);
 				actor.setAttachment("proposer", null);
-				for(SWGObject obj : proposer.getEquipmentList()) {
-					if(obj.getAttachment("unity") != null) {
+				for(Long objId : proposer.getEquipmentList()) {
+					SWGObject obj = core.objectService.getObject(objId);
+					if(obj != null && obj.getAttachment("unity") != null) {
 						obj.setAttachment("unity", null);
 						break;
 					}
@@ -1306,6 +1310,13 @@ public class PlayerService implements INetworkDispatch {
 						bounty = 1000000;
 					}
 					
+					if (core.getBountiesODB().contains(attacker.getObjectID())) {
+						if (((BountyListItem) core.getBountiesODB().get(attacker.getObjectID())).getCreditReward() >= 20000000) {
+							victim.sendSystemMessage("@bounty_hunter:max_bounty", DisplayType.Broadcast);
+							return;
+						}
+					}
+					
 					// Try removing bounty amount from the bank first then cash. Remove amount accordingly if bank/cash is less than placed bounty.
 					if (bounty > victim.getBankCredits()) {
 						int difference = bounty - victim.getBankCredits();
@@ -1321,12 +1332,15 @@ public class PlayerService implements INetworkDispatch {
 					
 					if (!core.missionService.addToExistingBounty(attacker.getObjectId(), victim.getObjectId(), bounty))
 						core.missionService.createNewBounty(attacker, victim.getObjectId(), bounty);
+					
+					victim.sendSystemMessage("You have placed a bounty for " + bounty + " credits on the head of " + attacker.getCustomName(), (byte) 0);
 				}
 			}
 			
 		});
 		bountyWindow.setProperty("txtInput:NumericInteger", "true");
 		bountyWindow.setProperty("txtInput:MaxLength", "7");
+		bountyWindow.setProperty("inputBox:Size", "306,306");
 		core.suiService.openSUIWindow(bountyWindow);
 	}
 	

@@ -320,6 +320,15 @@ public class MissionService implements INetworkDispatch {
 		});
 	}
 	
+	public void handleMissionComplete(CreatureObject creature, MissionObject mission) {
+		MissionObjective objective = mission.getObjective();
+		
+		if (objective == null)
+			return;
+		
+		objective.complete(core, creature);
+	}
+	
 	private boolean handleMissionAccept(CreatureObject creature, MissionObject mission) {
 		SWGObject missionBag = creature.getSlottedObject("mission_bag");
 		
@@ -432,11 +441,14 @@ public class MissionService implements INetworkDispatch {
 		
 		if (bountyList.size() > 0) {
 			boolean gotBounty = false;
-			while (!gotBounty) {
+			int attempts = 0;
+			while (!gotBounty && attempts < 5) {
 				bountyTarget = getRandomBounty();
 
-				if (bountyTarget == null || bountyTarget.getAssignedHunters().size() >= 3 || bountyTarget.getCreditReward() < 20000)
+				if (bountyTarget == null || bountyTarget.getAssignedHunters().size() >= 3 || bountyTarget.getCreditReward() < 20000 || bountyTarget.getObjectId() == player.getObjectId()) {
+					attempts++;
 					continue;
+				}
 				else
 					gotBounty = true;
 			}
@@ -558,13 +570,9 @@ public class MissionService implements INetworkDispatch {
 	}
 	
 	public boolean removeBounty(long bountyTarget, boolean listRemove) {
-		Transaction txn = bountiesODB.getEnvironment().beginTransaction(null, null);
-		
 		if (listRemove)
 			bountyList.remove(bountiesODB.get(bountyTarget));
-		
 		bountiesODB.remove(bountyTarget);
-		txn.commitSync();
 		return true;
 	}
 	
