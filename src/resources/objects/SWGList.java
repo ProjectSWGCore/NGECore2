@@ -59,7 +59,7 @@ public class SWGList<E> implements List<E>, Serializable {
 	private byte viewType;
 	private short updateType;
 	@NotPersistent
-	protected transient final Object objectMutex = new Object();
+	protected transient Object objectMutex = new Object();
 	
 	public SWGList() { }
 	
@@ -67,6 +67,11 @@ public class SWGList<E> implements List<E>, Serializable {
 		this.objectId = objectId;
 		this.viewType = (byte) viewType;
 		this.updateType = (short) updateType;
+	}
+	
+	public void init() {
+		objectMutex = new Object();
+		updateCounter = 1;
 	}
 	
 	@Override
@@ -420,7 +425,7 @@ public class SWGList<E> implements List<E>, Serializable {
 		
 		messageBuilder.sendListDelta(viewType, updateType, buffer);
 	}
-
+	
 	@Override
 	public boolean removeIf(Predicate<? super E> filter) {
 		return false;
@@ -433,20 +438,17 @@ public class SWGList<E> implements List<E>, Serializable {
 
 	@Override
 	public Stream<E> stream() {
-		// TODO Auto-generated method stub
-		return null;
+		return list.stream();
 	}
 
 	@Override
 	public Stream<E> parallelStream() {
-		// TODO Auto-generated method stub
-		return null;
+		return list.parallelStream();
 	}
 
 	@Override
 	public void forEach(Consumer<? super E> action) {
-		// TODO Auto-generated method stub
-		
+		list.forEach(action);
 	}
 
 	@Override

@@ -22,6 +22,7 @@
 package resources.objects.installation;
 
 import java.io.Serializable;
+import java.util.Vector;
 
 import com.sleepycat.persist.model.Entity;
 
@@ -52,6 +53,7 @@ public class InstallationObject extends TangibleObject implements Serializable {
 	public void initAfterDBLoad() {
 		super.init();
 		messageBuilder = new InstallationMessageBuilder(this);
+		defendersList = new Vector<TangibleObject>();
 	}
 	
 	public ObjectMessageBuilder getMessageBuilder() {
