@@ -101,7 +101,6 @@ public class TangibleObject extends SWGObject implements Serializable {
 	private byte junkType = -1;
 	private int junkDealerPrice = 0;
 	
-	
 	private String serialNumber;
 	
 	@NotPersistent

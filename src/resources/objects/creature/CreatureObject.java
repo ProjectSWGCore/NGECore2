@@ -172,7 +172,6 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	@NotPersistent
 	private transient ScheduledFuture<?> spectatorTask;
 	
-	private boolean staticNPC = false; // temp
 	@NotPersistent
 	private transient int flourishCount = 0;
 	@NotPersistent
@@ -1486,14 +1485,6 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	
 	public void playMusic(String sndFile, long targetId, int repetitions, boolean flag) {
 		getClient().getSession().write(new PlayMusicMessage(sndFile, targetId, 1, false));
-	}
-	
-	public boolean getStaticNPC() {
-		return staticNPC;
-	}
-	
-	public boolean setStaticNPC(boolean staticNPC) {
-		return this.staticNPC = staticNPC;
 	}
 	
 	public boolean getGroupDance() {
