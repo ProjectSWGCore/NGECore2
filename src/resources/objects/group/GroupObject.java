@@ -23,8 +23,8 @@ package resources.objects.group;
 
 import java.util.Vector;
 
+import resources.objects.ObjectMessageBuilder;
 import resources.objects.universe.UniverseObject;
-
 import engine.clients.Client;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
@@ -38,7 +38,7 @@ public class GroupObject extends UniverseObject {
 	private SWGObject lootMaster;
 	private short groupLevel;
 	private int lootMode;
-	private GroupMessageBuilder messageBuilder;
+	private transient GroupMessageBuilder messageBuilder;
 	private int chatRoomId;
 	
 	public static int FREE_FOR_ALL  = 0;
@@ -165,4 +165,9 @@ public class GroupObject extends UniverseObject {
 		destination.getSession().write(messageBuilder.buildBaseline6());
 		
 	}
+	
+	public ObjectMessageBuilder getMessageBuilder() {
+		return messageBuilder;
+	}
+	
 }

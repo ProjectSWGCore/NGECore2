@@ -21,6 +21,7 @@
  ******************************************************************************/
 package resources.common;
 
+import java.io.Serializable;
 import java.nio.ByteOrder;
 
 import org.apache.mina.core.buffer.IoBuffer;
@@ -30,8 +31,9 @@ import com.sleepycat.persist.model.Persistent;
 import resources.objects.Delta;
 
 @Persistent
-public final class AString extends Delta {
+public final class AString extends Delta implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	private String string;
 	
 	public AString() {

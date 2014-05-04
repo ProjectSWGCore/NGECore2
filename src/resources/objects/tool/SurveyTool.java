@@ -21,6 +21,7 @@
  ******************************************************************************/
 package resources.objects.tool;
 
+import java.io.Serializable;
 import java.util.Vector;
 
 import main.NGECore;
@@ -41,8 +42,9 @@ import resources.objects.tangible.TangibleObject;
  */
 
 @Persistent(version=0)
-public class SurveyTool extends TangibleObject{
+public class SurveyTool extends TangibleObject implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	private byte toolType=0;
 	private long surveyResourceID;
 	private long userID=0;
@@ -50,25 +52,25 @@ public class SurveyTool extends TangibleObject{
 	private byte SurveyRangeSetting=0;
 	
 	@NotPersistent
-	private String surveyEffectString="";
+	private transient String surveyEffectString="";
 	@NotPersistent
-	private String sampleEffectString="";
+	private transient String sampleEffectString="";
 	@NotPersistent
-	private boolean currentlySurveying=false;
+	private transient boolean currentlySurveying=false;
 	@NotPersistent
-	private boolean currentlySampling=false;
+	private transient boolean currentlySampling=false;
 	@NotPersistent
-	private boolean currentlyCoolingDown=false;
+	private transient boolean currentlyCoolingDown=false;
 	@NotPersistent
-	private boolean exceptionalState=false;
+	private transient boolean exceptionalState=false;
 	@NotPersistent
-	private boolean recoveryMode=false;
+	private transient boolean recoveryMode=false;
 	@NotPersistent
-	private Long lastSurveyTime=0L;
+	private transient Long lastSurveyTime=0L;
 	@NotPersistent
-	private Long lastSampleTime=0L;
+	private transient Long lastSampleTime=0L;
 	@NotPersistent
-	private Long recoveryTime=10L;
+	private transient Long recoveryTime=10L;
 	
 	public static byte MineralSurveyDevice	           = 1;
 	public static byte ChemicalSurveyDevice	           = 2;
@@ -81,6 +83,12 @@ public class SurveyTool extends TangibleObject{
 
 	public SurveyTool() {
 		super();
+		this.exceptionalState = false;
+	}
+	
+	@Override
+	public void initAfterDBLoad() {
+		super.init();
 		this.exceptionalState = false;
 	}
 	

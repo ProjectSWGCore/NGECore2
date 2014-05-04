@@ -32,6 +32,6 @@ public class PvpStatus {
 	public static int Enemy = 32;
 	public static int GoingOvert = 64;
 	public static int GoingCovert = 128;
-	public static int Dueling = 256;
+	public static int Self = 256;
 	
 }

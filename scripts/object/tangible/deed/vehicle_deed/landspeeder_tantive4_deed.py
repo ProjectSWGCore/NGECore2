@@ -1,7 +1,7 @@
 import sys
 
 def setup(core, object):
-	object.setAttachment('radial_filename', 'vehicleDeed')
+	object.setAttachment('radial_filename', 'deeds/vehicleDeed')
 	return
 
 def use(core, actor, object):

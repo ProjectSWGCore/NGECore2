@@ -21,11 +21,13 @@
  ******************************************************************************/
 package resources.objects.building;
 
+import java.io.Serializable;
 import java.util.Vector;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import main.NGECore;
+import resources.objects.ObjectMessageBuilder;
 import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
 
@@ -44,12 +46,13 @@ import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
 @Entity(version=6)
-public class BuildingObject extends TangibleObject implements IPersistent {
+public class BuildingObject extends TangibleObject implements IPersistent, Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	@NotPersistent
-	private BuildingMessageBuilder messageBuilder;
+	private transient BuildingMessageBuilder messageBuilder;
 	@NotPersistent
-	private Transaction txn;
+	private transient Transaction txn;
 	
 	private float maintenanceAmount = 0;
 	private int BMR = 0;
@@ -260,6 +263,16 @@ public class BuildingObject extends TangibleObject implements IPersistent {
 				cells.add((CellObject) obj);
 		});
 		return cells;
+	}
+	
+	@Override
+	public void initAfterDBLoad() {
+		super.init();
+		messageBuilder = new BuildingMessageBuilder(this);
+	}
+	
+	public ObjectMessageBuilder getMessageBuilder() {
+		return messageBuilder;
 	}
 	
 }
