@@ -923,16 +923,10 @@ public class SimulationService implements INetworkDispatch {
 		
 		if(container.getPermissions().canView(requester, container)) {
 			OpenedContainerMessage opm = new OpenedContainerMessage(container.getObjectID());
-			if (!(container instanceof CreatureObject))
-				System.out.println("(!(container instanceof CreatureObject)");
-			
-				
-			if(requester.getClient() != null && requester.getClient().getSession() != null && !(container instanceof CreatureObject))
+			if(requester.getClient() != null && requester.getClient().getSession() != null && !(container instanceof CreatureObject)){
 				requester.getClient().getSession().write(opm.serialize());
-			else
-				System.out.println("NOT SENT");
-		} else {System.out.println("NO VIEW PERMISSION");}
-		
+			}
+		}	
 	}
 	
 	public void transform(TangibleObject obj, Point3D position)

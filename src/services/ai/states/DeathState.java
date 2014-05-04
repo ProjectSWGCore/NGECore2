@@ -21,7 +21,10 @@
  ******************************************************************************/
 package services.ai.states;
 
+import java.util.Vector;
+
 import main.NGECore;
+import resources.common.RadialOptions;
 import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
 import services.ai.AIActor;
@@ -32,8 +35,8 @@ public class DeathState extends AIState {
 	public byte onEnter(AIActor actor) {
 		NGECore.getInstance().aiService.awardExperience(actor);
 		actor.getCreature().setAttachment("radial_filename", "npc/corpse");
-		System.out.println("DEATH STATE!!!!");
-		NGECore.getInstance().lootService.DropLoot((CreatureObject)(actor.getCreature().getKiller()),(TangibleObject)(actor.getCreature()));		
+		//NGECore.getInstance().scriptService.callScript("scripts/radial/npc/corpse", "", "createRadial", NGECore.getInstance(), actor.getCreature().getKiller(), actor.getCreature(), new Vector<RadialOptions>());
+		NGECore.getInstance().lootService.DropLoot((CreatureObject)(actor.getCreature().getKiller()),(TangibleObject)(actor.getCreature()));			
 		actor.scheduleDespawn();
 		return 0;
 	}

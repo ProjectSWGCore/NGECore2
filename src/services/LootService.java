@@ -25,9 +25,14 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.DirectoryStream.Filter;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.FileSystems;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -35,6 +40,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
+
+import org.apache.commons.lang3.ArrayUtils;
 
 import protocol.swg.PlayClientEffectObjectTransformMessage;
 import resources.loot.LootGroup;
@@ -87,12 +94,8 @@ public class LootService implements INetworkDispatch {
 			}
 			SWGObject lootedObjectInventory = lootedObject.getSlottedObject("inventory");
 			core.simulationService.openContainer(requester, lootedObjectInventory);	
-			System.err.println("core.simulationService.openContainer " + lootedObject.getTemplate() );
-			System.err.println("core.simulationService.openContainer " + lootedObjectInventory.getTemplate());
 			setLooted(requester,lootedObject);
 		}
-		System.err.println("NO ACCESS lootedObject.isLooted(): " + lootedObject.isLooted());
-		System.err.println("NO ACCESS hasAccess(requester,lootedObject): " + hasAccess(requester,lootedObject));
 	}
 
 	private boolean hasAccess(CreatureObject requester, TangibleObject lootedObject){
@@ -101,7 +104,6 @@ public class LootService implements INetworkDispatch {
 			System.err.println("LootSession null: " + lootRollSession);
 		if (lootRollSession!=null){
 			if (lootRollSession.getRequester()==requester){
-				System.err.println("lootRollSession.getRequester()==requester: " + (lootRollSession.getRequester()==requester));
 				return true;
 			}
 		}
@@ -151,7 +153,9 @@ public class LootService implements INetworkDispatch {
 	    		System.out.println("this lootGroup will drop something");
 	    		handleLootGroup(lootGroup,lootRollSession); //this lootGroup will drop something e.g. {kraytpearl_range,krayt_tissue_rare}	    		
 	    	}		
+	    	System.out.println("While Loop Stuck check");
 	    }
+	    System.out.println("Past while ");
 	    
 	    // Rare Loot System Stage (Is in place for all looted creatures)
 //if (lootRollSession.isAllowRareLoot()){
@@ -256,9 +260,9 @@ public class LootService implements INetworkDispatch {
 		Vector<Double> itemChances = (Vector<Double>)core.scriptService.fetchDoubleVector(path,"itemChances");
 				
 		double randomItemFromPool = new Random().nextDouble()*100;
-		int remainder = 0; // [10,20,30,34,5,1]
-		double span = 100/itemNames.size();
-		
+		double remainder = 0.0; // [10,20,30,34,5,1]
+		double span = 100.0/(double)itemNames.size();
+
 		for (int i=0;i<itemNames.size();i++){
 			if (itemChances.get(0)!=-1.0)
 				remainder += itemChances.get(i); 
@@ -267,8 +271,9 @@ public class LootService implements INetworkDispatch {
 			if (randomItemFromPool<=remainder){
 				// this element has been chosen e.g. kraytpearl_flawless
 				//System.err.println("CHOSEN ITEM " + itemNames.get(i));
-				handleLootPoolItems(itemNames.get(i), lootRollSession);
-				break;
+				handleLootPoolItems(itemNames.get(i), lootRollSession);				
+				//break;
+				return;
 			}						
 		}
 	}	
@@ -282,34 +287,34 @@ public class LootService implements INetworkDispatch {
 	
 	@SuppressWarnings("unused")
 	private void handleLootPoolItems(String itemName,LootRollSession lootRollSession){
-
-		List<String> subfolders = new ArrayList<String>(); // Consider all sub-folders		
-		try (DirectoryStream<Path> ds = Files.newDirectoryStream(FileSystems.getDefault().getPath("scripts/loot/lootItems/"), new DirectoriesFilter())) {
-		        for (Path p : ds) {
-		        	subfolders.add(p.getFileName().toString());
-		        }
-		    } catch (IOException e) {
-		    	lootRollSession.addErrorMessage("File system check caused an error. Please contact Charon about this issue.");
-	        	return;
-		    }
-
-		String itemPath = "scripts/loot/lootItems/"+itemName.toLowerCase()+".py";
-		File file = new File(itemPath);
-		if (!file.isFile()){
-			for (String subfolderName : subfolders){
-				itemPath = "scripts/loot/lootItems/"+ subfolderName +"/"+itemName.toLowerCase()+".py"; 
-				File subfile = new File(itemPath);
-				if (subfile.isFile())
-					break;			
-			}
+		
+		final Vector<String> foundPath = new Vector<String>(); 
+		Path p = Paths.get("scripts/loot/lootItems/");
+	    FileVisitor<Path> fv = new SimpleFileVisitor<Path>() {
+	        @Override
+	        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+	        	String actualFileName = file.getFileName().toString();
+	        	actualFileName = actualFileName.substring(0, actualFileName.length()-3);
+	        	if (actualFileName.equals(itemName.toLowerCase())){
+	        		foundPath.add(file.toString());
+	        	} 	        	
+	        	return FileVisitResult.CONTINUE;
+	        }
+	    };
+        try {
+			Files.walkFileTree(p, fv);
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-
-		File checkfile = new File(itemPath);
-		if (!checkfile.isFile()){
+		
+		
+		if (foundPath.size()==0){
 			String errorMessage = "Loot item  '" + itemName + "'  not found in file system. Please contact Charon about this issue.";
 			lootRollSession.addErrorMessage(errorMessage);
 			return;
-		}
+			
+		}		
+		String itemPath = foundPath.get(0);
 		
 		itemPath = itemPath.substring(0, itemPath.length()-3); // remove the file type
 
@@ -358,7 +363,7 @@ public class LootService implements INetworkDispatch {
 		if(core.scriptService.getMethod(itemPath,"","itemStats")!=null)
 			itemStats = (Vector<String>)core.scriptService.fetchStringVector(itemPath,"itemStats");
 		
-		if(core.scriptService.getMethod(itemPath,"","itemStats")!=null)
+		if(core.scriptService.getMethod(itemPath,"","itemSkillMods")!=null)
 			itemSkillMods = (Vector<String>)core.scriptService.fetchStringVector(itemPath,"itemSkillMods");
 			
 		if(core.scriptService.getMethod(itemPath,"","biolink")!=null)
@@ -448,7 +453,7 @@ public class LootService implements INetworkDispatch {
     	
     	
 		lootRollSession.addDroppedItem(droppedItem);
-		System.err.println("END REACHED");
+		System.out.println("END REACHED");
 	}	
 	
 	private void handleCustomDropName(TangibleObject droppedItem,String customName) {
@@ -954,7 +959,7 @@ public class LootService implements INetworkDispatch {
 	    	statNumber++;
 		
 		
-		int primaryAttribute = new Random().nextInt(6); // 0-6
+		int primaryAttribute = new Random().nextInt(7); // 0-6
 		int maxValue = (int) (levelOfDrop*25/90);
 		int minValue = (int) (0.75*maxValue);
 		minValue = Math.max(1, minValue);
@@ -972,15 +977,27 @@ public class LootService implements INetworkDispatch {
 		int attribute = primaryAttribute;
 		
 		
+//		for (int i=0;i<statNumber-1;i++){
+//			while (alreadyUsedStats.contains(attribute)) {
+//				attribute = new Random().nextInt(6);
+//				if (! alreadyUsedStats.contains(attribute)){
+//					droppedItem.setIntAttribute(getAttributeSTF(attribute), getStatValue(minValue,maxValue));
+//					alreadyUsedStats.add(attribute);
+//				}
+//			}
+//		}
+		
+		List<Integer> statList = new ArrayList<Integer>();
+		for (int i=0;i<7;i++)
+			statList.add(i);
+		statList.remove(primaryAttribute);
+		
 		for (int i=0;i<statNumber-1;i++){
-			while (alreadyUsedStats.contains(attribute)) {
-				attribute = new Random().nextInt(6);
-				if (! alreadyUsedStats.contains(attribute)){
-					droppedItem.setIntAttribute(getAttributeSTF(attribute), getStatValue(minValue,maxValue));
-					alreadyUsedStats.add(attribute);
-				}
-			}
+			int attributeIndex = new Random().nextInt(statList.size());
+			droppedItem.setIntAttribute(getAttributeSTF(statList.get(attributeIndex)), getStatValue(minValue,maxValue));
+			statList.remove(attributeIndex);
 		}
+		
 		return itemName;
 	}
 	

@@ -2,12 +2,14 @@ from resources.common import RadialOptions
 import sys
 
 def createRadial(core, owner, target, radials):
+	#owner.sendSystemMessage('Correct Loot Radial created', 0)
 	radials.clear()	
 	radials.add(RadialOptions(0, 36, 0, 'Loot'))
 	
 	return
 	
 def handleSelection(core, owner, target, option):
+	#owner.sendSystemMessage('Correct Loot Radial called', 0)
 	if option == 36 and target:
 		#core.lootService.handleLootRequest(owner,target)
 		core.lootService.handleLootRequest(owner,target)
