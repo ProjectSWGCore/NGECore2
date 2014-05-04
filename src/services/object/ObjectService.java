@@ -35,6 +35,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -54,13 +55,11 @@ import org.python.core.Py;
 import org.python.core.PyObject;
 
 import com.sleepycat.je.Transaction;
+import com.sleepycat.je.TransactionConfig;
 import com.sleepycat.persist.EntityCursor;
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 
-import protocol.swg.ChatFriendsListUpdate;
-import protocol.swg.ChatOnChangeFriendStatus;
-import protocol.swg.ChatOnGetFriendsList;
 import protocol.swg.CmdSceneReady;
 import protocol.swg.CmdStartScene;
 import protocol.swg.HeartBeatMessage;
@@ -69,6 +68,14 @@ import protocol.swg.ParametersMessage;
 import protocol.swg.SelectCharacter;
 import protocol.swg.ServerTimeMessage;
 import protocol.swg.UnkByteFlag;
+import protocol.swg.chat.ChatFriendsListUpdate;
+import protocol.swg.chat.ChatOnChangeFriendStatus;
+import protocol.swg.chat.ChatOnConnectAvatar;
+import protocol.swg.chat.ChatOnGetFriendsList;
+import protocol.swg.chat.ChatRoomList;
+import protocol.swg.chat.ChatServerStatus;
+import protocol.swg.objectControllerObjects.ShowFlyText;
+import protocol.swg.chat.VoiceChatStatus;
 import protocol.swg.objectControllerObjects.UiPlayEffect;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.CrcStringTableVisitor;
@@ -81,6 +88,9 @@ import engine.resources.container.Traverser;
 import engine.resources.container.WorldCellPermissions;
 import engine.resources.container.WorldPermissions;
 import engine.resources.database.DatabaseConnection;
+import engine.resources.database.ODBCursor;
+import engine.resources.database.ObjectDatabase;
+import engine.resources.objects.IPersistent;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -88,18 +98,33 @@ import engine.resources.scene.Quaternion;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import main.NGECore;
+import resources.objectives.BountyMissionObjective;
 import resources.objects.Delta;
 import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
+import resources.objects.craft.DraftSchematic;
 import resources.objects.creature.CreatureObject;
+import resources.objects.factorycrate.FactoryCrateObject;
 import resources.objects.group.GroupObject;
 import resources.objects.guild.GuildObject;
+import resources.objects.harvester.HarvesterObject;
+import resources.objects.installation.InstallationObject;
+import resources.objects.intangible.IntangibleObject;
+import resources.objects.manufacture.ManufactureSchematicObject;
 import resources.objects.mission.MissionObject;
 import resources.objects.player.PlayerObject;
+import resources.objects.resource.GalacticResource;
+import resources.objects.resource.ResourceContainerObject;
+import resources.objects.resource.ResourceRoot;
 import resources.objects.staticobject.StaticObject;
 import resources.objects.tangible.TangibleObject;
+import resources.objects.tool.SurveyTool;
 import resources.objects.waypoint.WaypointObject;
 import resources.objects.weapon.WeaponObject;
+import services.command.BaseSWGCommand;
+import services.command.CombatCommand;
+import services.bazaar.AuctionItem;
+import services.chat.ChatRoom;
 
 @SuppressWarnings("unused")
 
@@ -118,10 +143,10 @@ public class ObjectService implements INetworkDispatch {
 	public ObjectService(final NGECore core) {
 		this.core = core;
 		databaseConnection = core.getDatabase1();
+		
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
 		    public void run() {
-		    	core.getObjectIdODB().getEnvironment().flushLog(true);
 		    	synchronized(objectList) {
 		    		for(SWGObject obj : objectList.values()) {
 		    			
@@ -131,10 +156,12 @@ public class ObjectService implements INetworkDispatch {
 		    			
 		    		}
 		    	}
+		    	core.bazaarService.saveAllItems();
+		    	core.closeODBs();
 		    }
 		});
-		long highestId;
 		
+		long highestId;
 
 		try {
 			PreparedStatement ps = databaseConnection.preparedStatement("SELECT id FROM highestid WHERE id=(SELECT max(id) FROM highestid)");
@@ -149,35 +176,29 @@ public class ObjectService implements INetworkDispatch {
 	}
 	
 	public void loadBuildings() {
-		EntityCursor<BuildingObject> cursor = core.getBuildingODB().getCursor(Long.class, BuildingObject.class);
-		
-		Iterator<BuildingObject> it = cursor.iterator();
-		
-		while(it.hasNext()) {
-			final BuildingObject building = it.next();
+		ODBCursor cursor = core.getSWGObjectODB().getCursor();
+				
+		while(cursor.hasNext()) {
+			final SWGObject building = (SWGObject) cursor.next();
+			if(!(building instanceof BuildingObject) || building == null)
+				continue;
 			objectList.put(building.getObjectID(), building);
 			Planet planet = core.terrainService.getPlanetByID(building.getPlanetId());
 			building.setPlanet(planet);
-			building.viewChildren(building, true, true, new Traverser() {
-
-				@Override
-				public void process(SWGObject object) {
-					objectList.put(object.getObjectID(), object);
-					if(object.getParentId() != 0 && object.getContainer() == null)
-						object.setParent(building);
-					object.getContainerInfo(object.getTemplate());
-				}
-				
-			});	
+			building.viewChildren(building, true, true, (object) -> {
+				objectList.put(object.getObjectID(), object);
+				if(object.getParentId() != 0 && object.getContainer() == null)
+					object.setParent(building);
+				object.getContainerInfo(object.getTemplate());
+			});
 		}
-
+		
+		cursor.close();
 	}
 	
 	public void loadServerTemplates() {
 		System.out.println("Loading server templates...");
-		for(Runnable r : loadServerTemplateTasks) {
-			r.run();
-		}
+		loadServerTemplateTasks.forEach(Runnable::run);
 		loadServerTemplateTasks.clear();
 		System.out.println("Finished loading server templates...");
 	}
@@ -198,7 +219,9 @@ public class ObjectService implements INetworkDispatch {
 		} catch (InstantiationException | IllegalAccessException e) {
 			e.printStackTrace();
 		}
+		
 		boolean isSnapshot = false;
+		
 		if(objectID == 0)
 			objectID = generateObjectID();
 		else
@@ -212,11 +235,25 @@ public class ObjectService implements INetworkDispatch {
 			
 			object = new PlayerObject(objectID, planet);
 			
-		} else if(Template.startsWith("object/tangible")) {
+		} else if(Template.startsWith("object/tangible/survey_tool")) {
+			
+			object = new SurveyTool(objectID, planet, Template, position, orientation);
+			
+		}
+//		else if(Template.startsWith("object/tangible/container/drum/shared_treasure_drum.iff")) {
+//			
+//			object = new CreatureObject(objectID, planet, position, orientation, Template);			
+//		
+//		} 
+		else if(Template.startsWith("object/tangible")) {
 			
 			object = new TangibleObject(objectID, planet, Template, position, orientation);
 
-		} else if(Template.startsWith("object/weapon")) {
+		} else if(Template.startsWith("object/intangible")) {
+			
+			object = new IntangibleObject(objectID, planet, position, orientation,Template);
+
+		}else if(Template.startsWith("object/weapon")) {
 			
 			object = new WeaponObject(objectID, planet, Template, position, orientation);
 
@@ -260,10 +297,38 @@ public class ObjectService implements INetworkDispatch {
 			
 			object = new MissionObject(objectID, planet, Template);
 			
+		} else if(Template.startsWith("object/resource_container")) {
+			
+			object = new ResourceContainerObject(objectID, planet, Template, position, orientation);
+			
+		} else if(Template.startsWith("object/factory/shared_factory_crate")) {
+			
+			object = new FactoryCrateObject(objectID, planet, Template, position, orientation);
+			
+		} else if(Template.startsWith("object/draft_schematic")) {
+			
+			object = new DraftSchematic(objectID, planet, Template, position, orientation);
+			
+		} else if(Template.startsWith("object/manufacture_schematic")) {
+			
+			object = new ManufactureSchematicObject(objectID, planet, Template, position, orientation);
+			
+		} else if(Template.startsWith("object/installation/mining_ore/construction")) {
+			
+			float positionY = core.terrainService.getHeight(planet.getID(), position.x, position.z)-1f;
+			Point3D newpoint = new Point3D(position.x,positionY,position.z);				
+			object = new InstallationObject(objectID, planet, Template, newpoint, orientation);
+			
+		} else if(Template.startsWith("object/installation/mining_ore") || Template.startsWith("object/installation/mining_liquid") ||
+				  Template.startsWith("object/installation/mining_gas") || Template.startsWith("object/installation/mining_organic") || 
+				  Template.startsWith("object/installation/generators")) {
+			
+			float positionY = core.terrainService.getHeight(planet.getID(), position.x, position.z)-1f;
+			Point3D newpoint = new Point3D(position.x,positionY,position.z);			
+			object = new HarvesterObject(objectID, planet, Template, newpoint, orientation);	
+			
 		} else {
-			
-			return null;
-			
+			return null;			
 		}
 		
 		object.setPlanetId(planet.getID());
@@ -271,26 +336,15 @@ public class ObjectService implements INetworkDispatch {
 		object.setAttachment("customServerTemplate", customServerTemplate);
 		
 		object.setisInSnapshot(isSnapshot);
-		if(!core.getObjectIdODB().contains(objectID, Long.class, ObjectId.class)) {
-			core.getObjectIdODB().put(new ObjectId(objectID), Long.class, ObjectId.class);
-		}
-		if(loadServerTemplate)
-			loadServerTemplate(object);		
-		else {
-			final SWGObject pointer = object;
-			loadServerTemplateTasks.add(() -> loadServerTemplate(pointer));
-		}
-		
-		objectList.put(objectID, object);
+		if(!core.getObjectIdODB().contains(objectID))
+			core.getObjectIdODB().put(objectID, new ObjectId(objectID));
 		
 		// Set Options - easier to set them across the board here
 		// because we'll be spawning them despite most of them being unscripted.
 		// Any such settings can be completely reset with setOptionsBitmask
 		// in scripts and modified with setOptions(Options.X, true/false)
 		if (Template.startsWith("object/creature/") || Template.startsWith("object/mobile/")) {
-			if (Template.startsWith("object/mobile/")) {
-				((CreatureObject) object).setOptionsBitmask(Options.ATTACKABLE);
-			} else if (Template.startsWith("object/mobile/beast_master/")) {
+			if (Template.startsWith("object/mobile/beast_master/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.NONE);
 			} else if (Template.startsWith("object/mobile/vendor/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.INVULNERABLE | Options.USABLE);
@@ -298,11 +352,13 @@ public class ObjectService implements INetworkDispatch {
 				((CreatureObject) object).setOptionsBitmask(Options.ATTACKABLE | Options.MOUNT);
 			} else if (Template.startsWith("object/mobile/hologram/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.INVULNERABLE);
+			} else if (Template.startsWith("object/mobile/")) {
+				((CreatureObject) object).setOptionsBitmask(Options.ATTACKABLE);
 			} else if (Template.startsWith("object/creature/npc/theme_park/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.INVULNERABLE);
 			} else if (Template.startsWith("object/creature/npc/general/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.INVULNERABLE | Options.CONVERSABLE);
-			}  else if (Template.startsWith("object/creature/droid/crafted/")) {
+			} else if (Template.startsWith("object/creature/droid/crafted/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.NONE);
 			} else if (Template.startsWith("object/creature/droid/")) {
 				((CreatureObject) object).setOptionsBitmask(Options.ATTACKABLE | Options.INVULNERABLE);
@@ -316,6 +372,15 @@ public class ObjectService implements INetworkDispatch {
 				((TangibleObject) object).setOptionsBitmask(Options.INVULNERABLE | Options.USABLE);
 			}
 		}
+		
+		if(loadServerTemplate)
+			loadServerTemplate(object);		
+		else {
+			final SWGObject pointer = object;
+			loadServerTemplateTasks.add(() -> loadServerTemplate(pointer));
+		}
+		
+		objectList.put(objectID, object);
 		
 		return object;
 	}
@@ -374,7 +439,9 @@ public class ObjectService implements INetworkDispatch {
 		return objectList.get(objectID);
 	}
 	
-	public Map<Long, SWGObject> getObjectList() { return objectList; }
+	public Map<Long, SWGObject> getObjectList() {
+		return objectList;
+	}
 	
 	public void destroyObject(final SWGObject object, int seconds) {
 		scheduler.schedule(new Runnable() {
@@ -457,6 +524,9 @@ public class ObjectService implements INetworkDispatch {
 	}
 	
 	public SWGObject getObjectByCustomName(String customName) {
+		if (customName == null) {
+			return null;
+		}
 		
 		synchronized(objectList) {
 			
@@ -469,24 +539,70 @@ public class ObjectService implements INetworkDispatch {
 			
 		}
 		
-		EntityCursor<CreatureObject> cursor = core.getCreatureODB().getCursor(Long.class, CreatureObject.class);
+		ODBCursor cursor = core.getSWGObjectODB().getCursor();
 		
-		Iterator<CreatureObject> it = cursor.iterator();
-		
-		while(it.hasNext()) {
-			if(it.next().getCustomName().equals(customName))
-				return it.next();
+		while (cursor.hasNext()) {
+			SWGObject object = (SWGObject) cursor.next();
+			
+			if (object == null) {
+				continue;
+			}
+			
+			if (object.getCustomName() != null && customName.length() > 0 && object.getCustomName().equals(customName)) {
+				return object;
+			}
 		}
-
+		
 		return null;
-
+	}
+	
+	public SWGObject getObjectByFirstName(String customName) {
+		if (customName == null) {
+			return null;
+		}
+		
+		synchronized(objectList) {
+			for(SWGObject obj : objectList.values()) {
+				if(obj == null)
+					continue;
+				if(obj.getCustomName() == null)
+					continue;
+				if(obj.getCustomName().startsWith(customName))
+					return obj;
+			}
+			
+		}
+		
+		ODBCursor cursor = core.getSWGObjectODB().getCursor();
+		
+		while (cursor.hasNext()) {
+			SWGObject object = (SWGObject) cursor.next();
+			
+			if (object == null) {
+				continue;
+			}
+			
+			if (object.getCustomName() != null && customName.length() > 0 && object.getCustomName().startsWith(customName)) {
+				return object;
+			}
+		}
+		cursor.close();
+		return null;
 	}
 	
 	public CreatureObject getCreatureFromDB(long objectId) {
-		return core.getCreatureODB().get(new Long(objectId), Long.class, CreatureObject.class);
+		SWGObject object = (SWGObject) core.getSWGObjectODB().get(objectId);
+		if(!(object instanceof CreatureObject))
+			return null;
+		if (object != null && getObject(object.getObjectID()) == null) {
+			loadServerTemplate(object);
+			object.viewChildren(object, true, true, (child) -> loadServerTemplate(child));
+		}
+		
+		return (CreatureObject) object;
 	}
 	
-	private long generateObjectID() {
+	public long generateObjectID() {
 		/*Random random = new Random();
 		
 		long objectID = random.nextInt();
@@ -516,7 +632,7 @@ public class ObjectService implements INetworkDispatch {
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
-			if(getObject(newId) != null || core.getObjectIdODB().contains(newId, Long.class, ObjectId.class))
+			if(getObject(newId) != null || core.getObjectIdODB().contains(newId))
 				found = false;
 			else
 				found = true;		
@@ -526,9 +642,89 @@ public class ObjectService implements INetworkDispatch {
 
 	}
 	
+	public long getDOId(String planet, String template, int type, long containerId, int cellNumber, float x1, float y, float z1) {
+		SWGObject container = getObject(containerId);
+		float x = ((container == null) ? x1 : container.getPosition().x + x1);
+		float z = ((container == null) ? z1 : container.getPosition().z + z1);
+		String key = "" + CRC.StringtoCRC(planet) + CRC.StringtoCRC(template) + type + containerId + cellNumber + x + y + z;
+		
+		long objectId = 0;
+		
+		if (core.getDuplicateIdODB().contains(key)) {
+			objectId = ((DuplicateId) core.getDuplicateIdODB().get(key)).getObjectId();
+		} else {
+			objectId = generateObjectID();
+			core.getDuplicateIdODB().put(key, new DuplicateId(key, objectId));
+		}
+		
+		return objectId;
+	}
+	
 	public void useObject(CreatureObject creature, SWGObject object) {
-		if (object == null) {
+		if (creature == null || object == null) {
 			return;
+		}
+		
+		creature.setUseTarget(object);
+		
+		int reuse_time;
+		
+		try {
+			reuse_time = object.getIntAttribute("reuse_time");
+		} catch (NumberFormatException e) {
+			reuse_time = 0;
+		}
+		
+		try {
+			DatatableVisitor visitor = ClientFileManager.loadFile("datatables/timer/template_command_mapping.iff", DatatableVisitor.class);
+			
+			for (int i = 0; i < visitor.getRowCount(); i++) {
+				if (visitor.getObject(i, 0) != null && ((String) (visitor.getObject(i, 0))).equalsIgnoreCase(object.getTemplate())) {
+					String commandName = (String) visitor.getObject(i, 1);
+					String cooldownGroup = (String) visitor.getObject(i, 2);
+					String animation = (String) visitor.getObject(i, 3);
+					
+					if (commandName.length() > 0) {
+						BaseSWGCommand command = core.commandService.getCommandByName(commandName);
+						
+						if (command instanceof CombatCommand && animation.length() > 0) {
+							((CombatCommand) command).setDefaultAnimations(new String[] { animation });
+						}
+						
+						if (core.commandService.callCommand(creature, object, command, 0, "")) {
+							core.commandService.removeCommand(creature, 0, command);
+							return;
+						}
+					} else if (cooldownGroup.length() > 0) {
+						if (creature.hasCooldown(cooldownGroup)) {
+							return;
+						}
+						
+						creature.addCooldown(cooldownGroup, object.getIntAttribute("reuse_time"));
+					}
+					
+					break;
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		if (object instanceof TangibleObject) {
+			TangibleObject item = (TangibleObject) object;
+			int uses = item.getUses();
+			
+			if (uses > 0)  {
+				item.setUses(uses--);
+				
+				if (item.getUses() == 0) {
+					destroyObject(object);
+				}
+			}
+		}
+		
+		if (object.getStringAttribute("proc_name") != null) {
+			core.buffService.addBuffToCreature(creature, object.getStringAttribute("proc_name").replace("@ui_buff:", ""), creature);
 		}
 		
 		String filePath = "scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", "") + object.getTemplate().split("shared_" , 2)[1].replace(".iff", "") + ".py";
@@ -580,9 +776,13 @@ public class ObjectService implements INetworkDispatch {
 					
 				} else {
 					
+					if (!(getObject(objectId) instanceof CreatureObject))
+						return;
+
 					creature = (CreatureObject) getObject(objectId);
 					if(creature.getAttachment("disconnectTask") != null && creature.getClient() != null && !creature.getClient().getSession().isClosing())
 						return;
+					
 
 				}
 				
@@ -606,27 +806,19 @@ public class ObjectService implements INetworkDispatch {
 				
 				objectList.put(creature.getObjectID(), creature);
 				
-				creature.viewChildren(creature, true, true, new Traverser() {
-
-					@Override
-					public void process(SWGObject object) {
-						objectList.put(object.getObjectID(), object);
-					}
-					
+				creature.viewChildren(creature, true, true, (object) -> {
+					objectList.put(object.getObjectID(), object);
 				});
 				
-				creature.viewChildren(creature, true, true, new Traverser() {
-
-					@Override
-					public void process(SWGObject object) {
-						if(object.getParentId() != 0 && object.getContainer() == null)
-							object.setParent(getObject(object.getParentId()));
-						object.getContainerInfo(object.getTemplate());
-						if(getObject(object.getObjectID()) == null)
-							objectList.put(object.getObjectID(), object);
-					}
-					
-				});				
+				creature.viewChildren(creature, true, true, (object) -> {
+					if(object.getMutex() == null)
+						object.initAfterDBLoad();
+					if(object.getParentId() != 0 && object.getContainer() == null)
+						object.setParent(getObject(object.getParentId()));
+					object.getContainerInfo(object.getTemplate());
+					if(getObject(object.getObjectID()) == null)
+						objectList.put(object.getObjectID(), object);					
+				});
 
 				if(creature.getParentId() != 0) {
 					SWGObject parent = getObject(creature.getParentId());
@@ -652,13 +844,23 @@ public class ObjectService implements INetworkDispatch {
 				CmdStartScene startScene = new CmdStartScene((byte) 0, objectId, creature.getPlanet().getPath(), creature.getTemplate(), position.x, position.y, position.z, core.getGalacticTime(), 0);
 				session.write(startScene.serialize());
 				
+				ChatServerStatus chatServerStatus = new ChatServerStatus();
+				client.getSession().write(chatServerStatus.serialize());
+				
+				VoiceChatStatus voiceStatus = new VoiceChatStatus();
+				client.getSession().write(voiceStatus.serialize());
+				
 				ParametersMessage parameters = new ParametersMessage();
 				session.write(parameters.serialize());
 				
-				creature.makeAware(core.guildService.getGuildObject());				
+				ChatOnConnectAvatar chatConnect = new ChatOnConnectAvatar();
+				creature.getClient().getSession().write(chatConnect.serialize());
+				
+				creature.makeAware(core.guildService.getGuildObject());
 				core.chatService.loadMailHeaders(client);
 				
 				core.simulationService.handleZoneIn(client);
+				
 				creature.makeAware(creature);
 				
 				//ChatOnGetFriendsList friendsListMessage = new ChatOnGetFriendsList(ghost);
@@ -691,10 +893,36 @@ public class ObjectService implements INetworkDispatch {
 							}
 						}
 					}
+					
+					for (Integer roomId : ghost.getJoinedChatChannels()) {
+						ChatRoom room = core.chatService.getChatRoom(roomId);
+						
+						if (room != null) { core.chatService.joinChatRoom(objectShortName, roomId); } 
+						// work-around for any channels that may have been deleted, or only spawn on server startup, that were added to the joined channels
+						else { ghost.removeChannel(roomId); }
+					}
 				}
 				
 				if(!core.getConfig().getString("MOTD").equals(""))
 					creature.sendSystemMessage(core.getConfig().getString("MOTD"), (byte) 2);
+				
+				if (core.getBountiesODB().contains(creature.getObjectId()))
+					core.missionService.getBountyList().add((BountyListItem) core.getBountiesODB().get(creature.getObjectId()));
+				
+				if (creature.getSlottedObject("datapad") != null) {
+					creature.getSlottedObject("datapad").viewChildren(creature, true, false, new Traverser() {
+
+						@Override
+						public void process(SWGObject obj) {
+							if (obj instanceof MissionObject) {
+								MissionObject mission = (MissionObject) obj;
+								if (mission.getMissionType().equals("bounty")) {
+									((BountyMissionObjective) mission.getObjective()).checkBountyActiveStatus(core);
+								}
+							}
+						}
+					});
+				}
 				
 				core.playerService.postZoneIn(creature);
 			}
@@ -751,7 +979,8 @@ public class ObjectService implements INetworkDispatch {
 	 * @param position The position as an offset to the parent object.
 	 * @param orientation The orientation as an offset to the parent object.
 	 */
-	public void createChildObject(SWGObject parent, String template, Point3D position, Quaternion orientation, int cellNumber) {
+	@SuppressWarnings("unchecked")
+	public SWGObject createChildObject(SWGObject parent, String template, Point3D position, Quaternion orientation, int cellNumber) {
 		
 		if(cellNumber == -1) {
 		
@@ -781,15 +1010,15 @@ public class ObjectService implements INetworkDispatch {
 			child.setAttachment("cellNumber", cellNumber);
 		
 		//core.simulationService.add(child, x, z);
-		
+		return child;
 	}
 	
-	public void createChildObject(SWGObject parent, String template, float x, float y, float z, float qy, float qw) {
-		createChildObject(parent, template, new Point3D(x, y, z), new Quaternion(qw, 0, qy, 0), -1);
+	public SWGObject createChildObject(SWGObject parent, String template, float x, float y, float z, float qy, float qw) {
+		return createChildObject(parent, template, new Point3D(x, y, z), new Quaternion(qw, 0, qy, 0), -1);
 	}
 	
-	public void createChildObject(SWGObject parent, String template, float x, float y, float z, float qy, float qw, int cellNumber) {
-		createChildObject(parent, template, new Point3D(x, y, z), new Quaternion(qw, 0, qy, 0), cellNumber);
+	public SWGObject createChildObject(SWGObject parent, String template, float x, float y, float z, float qy, float qw, int cellNumber) {
+		return createChildObject(parent, template, new Point3D(x, y, z), new Quaternion(qw, 0, qy, 0), cellNumber);
 	}
 	
 	public void loadBuildoutObjects(Planet planet) throws InstantiationException, IllegalAccessException {
@@ -812,7 +1041,7 @@ public class ObjectService implements INetworkDispatch {
 		CrcStringTableVisitor crcTable = ClientFileManager.loadFile("misc/object_template_crc_string_table.iff", CrcStringTableVisitor.class);
 		List<BuildingObject> persistentBuildings = new ArrayList<BuildingObject>();
 		Map<Long, Long> duplicate = new HashMap<Long, Long>();
-		
+
 		for (int i = 0; i < buildoutTable.getRowCount(); i++) {
 			
 			String template;
@@ -880,30 +1109,33 @@ public class ObjectService implements INetworkDispatch {
 					containerId = duplicate.get(containerId);
 				}
 				
-				if (objectId != 0 && getObject(objectId) != null) {
+				String planetName = planet.getName();
+				
+				// TODO needs to a way to work for mustafar and kashyyyk which both have instances
+				if (objectId != 0 && getObject(objectId) != null && (planetName.contains("dungeon") || planetName.contains("adventure"))) {
 					SWGObject container = getObject(containerId);
-					int x = ((int) (px + ((container == null) ? x1 : container.getPosition().x)));
-					int z = ((int) (pz + ((container == null) ? z1 : container.getPosition().z)));
+					float x = (px + ((container == null) ? x1 : container.getPosition().x));
+					float z = (pz + ((container == null) ? z1 : container.getPosition().z));
 					String key = "" + CRC.StringtoCRC(planet.getName()) + CRC.StringtoCRC(template) + type + containerId + cellIndex + x + py + z;
 					long newObjectId = 0;
 					
-					if (core.getDuplicateIdODB().contains(key, String.class, DuplicateId.class)) {
-						newObjectId = core.getDuplicateIdODB().get(key, String.class, DuplicateId.class).getObjectId();
+					if (core.getDuplicateIdODB().contains(key)) {
+						newObjectId = ((DuplicateId) core.getDuplicateIdODB().get(key)).getObjectId();
 					} else {
 						newObjectId = generateObjectID();
-						Transaction txn = core.getDuplicateIdODB().getEnvironment().beginTransaction(null, null);
-						core.getDuplicateIdODB().put(new DuplicateId(key, newObjectId), String.class, DuplicateId.class, txn);
-						txn.commitSync();
+						core.getDuplicateIdODB().put(key, new DuplicateId(key, newObjectId));
 					}
 					
 					duplicate.put(objectId, newObjectId);
 					objectId = newObjectId;
 				}
-				
+
 				List<Long> containers = new ArrayList<Long>();
 				SWGObject object;
 				if(objectId != 0 && containerId == 0) {					
 					if(portalCRC != 0) {
+						if (core.getSWGObjectODB().contains(objectId) && !duplicate.containsValue(objectId))
+							continue;
 						containers.add(objectId);
 						object = createObject(template, objectId, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, true, false);
 						object.setAttachment("childObjects", null);
@@ -913,14 +1145,14 @@ public class ObjectService implements INetworkDispatch {
 							((BuildingObject) object).getTransaction().commitSync();
 						}*/
 					} else {
-						object = createObject(template, objectId, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, false, false);
+						object = createObject(template, 0, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, false, false);
 					}
 					if(object == null)
 						continue;
 					object.setContainerPermissions(WorldPermissions.WORLD_PERMISSIONS);
 					if(radius > 256)
 						object.setAttachment("bigSpawnRange", new Boolean(true));
-					if (!duplicate.containsValue(objectId) && object instanceof BuildingObject)
+					if (!duplicate.containsValue(objectId) && object instanceof BuildingObject && portalCRC != 0)
 						persistentBuildings.add((BuildingObject) object);
 				} else if(containerId != 0) {
 					object = createObject(template, 0, planet, new Point3D(px, py, pz), new Quaternion(qw, qx, qy, qz), null, false, false);
@@ -954,9 +1186,8 @@ public class ObjectService implements INetworkDispatch {
 		}
 
 		for(BuildingObject building : persistentBuildings) {
-			building.createTransaction(core.getBuildingODB().getEnvironment());
-			core.getBuildingODB().put(building, Long.class, BuildingObject.class, building.getTransaction());
-			building.getTransaction().commitSync();
+			core.getSWGObjectODB().put(building.getObjectID(), building);
+			destroyObject(building);
 		}
 		
 	}
@@ -980,6 +1211,14 @@ public class ObjectService implements INetworkDispatch {
 		});
 		
 		return count.get();
+	}
+	
+	public void persistObject(long key, Object value, ObjectDatabase odb) {
+		odb.put(key, value);
+	}
+	
+	public void deletePersistentObject(long key, ObjectDatabase odb) {
+		odb.remove(key);
 	}
 	
 }

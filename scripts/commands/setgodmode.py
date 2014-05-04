@@ -1,10 +1,7 @@
 import sys
 from engine.resources.scene import Point3D
-from protocol.swg import CommPlayerMessage
-from protocol.swg.objectControllerObjects import ShowLootBox
 from protocol.swg import ObjControllerMessage
 from engine.resources.objects import SWGObject
-from jarray import array
 
 def setup():
     return
@@ -26,9 +23,18 @@ def run(core, actor, target, commandString):
 		arg3 = commandArgs[3]
 	if len(commandArgs) > 4:
 		arg4 = commandArgs[4]
+	if len(commandArgs) > 5:
+		arg5 = commandArgs[5]
 	
 	if not command:
 		return
+	
+	if actor.getClient().isGM() is False:
+		return
+	
+	if playerObject.getGodLevel() == 0:
+		actor.addAbility("admin")
+		playerObject.setGodLevel(50)
 	
 	if command == 'giveExperience' and arg1:
 		core.playerService.giveExperience(actor, int(arg1))
@@ -44,14 +50,20 @@ def run(core, actor, target, commandString):
 	elif command == 'teleport' and arg2 and arg3 and arg4:
 		position = Point3D(float(arg2), float(arg3), float(arg4))
 		core.simulationService.transferToPlanet(actor, core.terrainService.getPlanetByName(arg1), position, actor.getOrientation(), None)
-		
+	
+	elif command == 'teleportplayer' and arg1 and arg2 and arg3 and arg4 and arg5:
+		player = core.chatService.getObjectByFirstName(arg1)
+		if player:
+			position = Point3D(float(arg3), float(arg4), float(arg5))
+			core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName(arg2), position, player.getOrientation(), None)
+			
 	elif command == 'credits' and arg1:
 		actor.setCashCredits(actor.getCashCredits() + int(arg1))
 		actor.sendSystemMessage('The Galactic Empire has transferred ' + arg1 + ' credits to you for your service.', 0)
 		
 	elif command == 'addability' and arg1:
 		actor.addAbility(str(arg1))
-		actor.sendSystemMessage('You have learned ' + arg1 + '')
+		actor.sendSystemMessage('You have learned ' + arg1 + '.', 0)
 	
 	elif command == 'anim' and arg1:
 		actor.doSkillAnimation(arg1)
@@ -59,25 +71,11 @@ def run(core, actor, target, commandString):
 	
 	elif command == 'changeBio' and arg1:
 		actor.getSlottedObject('ghost').setBiography(arg1)
-	
-	elif command == 'rewardMe':
-		testObject = core.objectService.createObject('object/weapon/ranged/rifle/shared_rifle_t21.iff', actor.getPlanet())
-		testObject.setCustomName('Crush4r')
-		testObject.setStringAttribute('crafter', 'Wavescrub')
-		dGun = core.objectService.createObject('object/weapon/ranged/rifle/shared_rifle_tc22_blaster.iff', actor.getPlanet())
-		dGun.setCustomName('Supertoms Gun')
-		dGun.setStringAttribute('crafter', 'Wavescrub')
-		core.playerService.giveItems(actor, testObject, dGun)
-		return
-		
-	elif command == 'comm':
-		comm = CommPlayerMessage(actor.getObjectId())
-		actor.getClient().getSession().write(comm.serialize())
 		
 	elif command == 'spawn' and arg1 and arg2:
 		pos = actor.getWorldPosition()
+		core.spawnService.spawnCreature(arg1, actor.getPlanet().getName(), 0, pos.x, pos.y, pos.z, 1, 0, 1, 0, int(arg2))
 		
-		core.spawnService.spawnCreature(arg1, actor.getPlanet().getName(), 0, pos.x, pos.y, pos.z, 1, 0, 1, 0, int(arg2))			
 	elif command == 'instance' and arg1:
 		core.instanceService.queue(arg1, actor)	
 		
@@ -89,5 +87,34 @@ def run(core, actor, target, commandString):
 		
 	elif command == 'id':
 		actor.sendSystemMessage('Your id is: ' + str(actor.getObjectId()), 0)
-
+	
+	elif command == 'cust' and arg1 and arg2 and arg3:
+		obj = core.objectService.getObject(long(arg1))
+		obj.setCustomizationVariable(str(arg2), int(arg3))
+		
+	elif command == 'buff' and arg1:
+		core.buffService.addBuffToCreature(actor, str(arg1), actor)
+	
+	elif command == 'stealth':
+		if (actor.isInStealth()):
+			actor.setInStealth(False)
+			actor.setRadarVisible(True)
+		else:
+			actor.setInStealth(True)
+			actor.setRadarVisible(False)
+	
+	elif command == 'holoEmote' and arg1:
+		playerObject.setHoloEmote('holoemote_' + arg1)
+		playerObject.setHoloEmoteUses(20)
+		actor.sendSystemMessage('Holo-Emote Generator set to ' + 'holoemote_' + arg1, 0)
+	
+	elif command == 'off':	
+		if playerObject.getGodLevel > 0:
+			actor.removeAbility("admin")
+			playerObject.setGodLevel(0)
+	
+	elif command == 'setBounty':
+		core.playerService.sendSetBountyWindow(actor, actor)
+		return
+	
 	return

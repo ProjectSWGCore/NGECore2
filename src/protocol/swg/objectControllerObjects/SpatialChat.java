@@ -26,12 +26,12 @@ import java.nio.ByteOrder;
 import org.apache.mina.core.buffer.IoBuffer;
 
 import protocol.swg.ObjControllerMessage;
+import resources.common.OutOfBand;
 
 @SuppressWarnings("unused")
-
 public class SpatialChat extends ObjControllerObject {
 	
-	private long audienceId;
+	private long destinationId;
 	private long sourceId;
 	private long targetId;
 	private String chatMessage;
@@ -40,15 +40,19 @@ public class SpatialChat extends ObjControllerObject {
 	private short balloonType = 1;
 	private short chatType;
 	private short moodId;
+	private byte languageId = 1;
+	private OutOfBand outOfBand;
 	
-	public SpatialChat(long sourceId, long targetId, String chatMessage, short chatType, short moodId) {
+	public SpatialChat(long destinationId, long sourceId, long targetId, String chatMessage, short chatType, short moodId, int languageId, OutOfBand outOfBand) {
 		try {
-			this.audienceId = sourceId;
+			this.destinationId = destinationId;
 			this.sourceId = sourceId;
 			this.targetId = targetId;
 			this.chatMessage = chatMessage;
 			this.chatType = chatType;
 			this.moodId = moodId;
+			this.languageId = (byte) languageId;
+			this.outOfBand = ((outOfBand == null) ? new OutOfBand() : outOfBand);
 
 			/*String[] chatMessageParse = chatMessage.split(" ", 6);
 			
@@ -62,19 +66,20 @@ public class SpatialChat extends ObjControllerObject {
 		}
 	}
 	
-	public void setDestinationId(long audienceId) {
-		this.audienceId = audienceId;
+	public void setDestinationId(long destinationId) {
+		this.destinationId = destinationId;
 	}
-		
+	
 	public void deserialize(IoBuffer data) {
 		
 	}
 	
 	public IoBuffer serialize() {
-		IoBuffer result = IoBuffer.allocate(55 + chatMessage.length() * 2).order(ByteOrder.LITTLE_ENDIAN);
-		
+		outOfBand.setHeaderBytes(2);
+		IoBuffer outOfBandBuffer = outOfBand.serialize();
+		IoBuffer result = IoBuffer.allocate(51 + (chatMessage.length() * 2) + outOfBandBuffer.array().length).order(ByteOrder.LITTLE_ENDIAN);
 		result.putInt(ObjControllerMessage.SPACIAL_CHAT);
-		result.putLong(audienceId);
+		result.putLong(destinationId);
 		result.putInt(0);
 		result.putLong(sourceId);
 		result.putLong(targetId);
@@ -83,11 +88,9 @@ public class SpatialChat extends ObjControllerObject {
 		result.putShort((short) 0x32);
 		result.putShort(chatType);
 		result.putShort(moodId);
-		result.put((byte) 1);
-		
+		result.put(languageId);
 		result.putInt(0);
-		result.putInt(0);
-		
+		result.put(outOfBandBuffer.array());
 		return result.flip();
 	}
 	

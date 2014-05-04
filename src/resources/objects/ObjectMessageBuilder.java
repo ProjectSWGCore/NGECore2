@@ -42,7 +42,7 @@ public abstract class ObjectMessageBuilder {
 	public SWGObject object;
 	@NotPersistent
 	public SimpleBufferAllocator bufferPool = new SimpleBufferAllocator();
-		
+	
 	public IoBuffer createBaseline(String objectType, byte viewType, IoBuffer data, int size) {
 		IoBuffer buffer = bufferPool.allocate(23 + size, false).order(ByteOrder.LITTLE_ENDIAN);
 		

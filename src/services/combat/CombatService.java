@@ -36,16 +36,22 @@ import org.apache.mina.core.session.IoSession;
 
 import protocol.swg.ObjControllerMessage;
 import protocol.swg.PlayClientEffectLocMessage;
-import protocol.swg.UpdatePVPStatusMessage;
 import protocol.swg.objectControllerObjects.CombatAction;
 import protocol.swg.objectControllerObjects.CombatSpam;
 import protocol.swg.objectControllerObjects.CommandEnqueueRemove;
 import protocol.swg.objectControllerObjects.StartTask;
+import resources.buffs.Buff;
+import resources.buffs.DamageOverTime;
 import resources.common.FileUtilities;
+import resources.common.OutOfBand;
+import resources.common.ProsePackage;
+import resources.datatables.Options;
+import resources.datatables.Elemental;
 import resources.datatables.Posture;
-import resources.objects.Buff;
-import resources.objects.DamageOverTime;
+import resources.datatables.WeaponType;
+import resources.objectives.BountyMissionObjective;
 import resources.objects.creature.CreatureObject;
+import resources.objects.mission.MissionObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.waypoint.WaypointObject;
@@ -63,13 +69,14 @@ import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
+import resources.datatables.HitType;
 
 public class CombatService implements INetworkDispatch {
 	
 	private NGECore core;
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private CombatEvents events = new CombatEvents();
-
+    
 	public CombatService(NGECore core) {
 		this.core = core;
 		CombatCommands.registerCommands(core);
@@ -191,9 +198,19 @@ public class CombatService implements INetworkDispatch {
 				{
 					defender.removeDefender(creature);
 					creature.removeDefender(defender);
-				}	
+				}
+				
+				if(((CreatureObject) target).getPlayerObject() == null) target.setKiller(attacker);
 			}
-		}	
+		}
+		else if(target instanceof TangibleObject)
+		{
+			if(target.getConditionDamage() == target.getMaxDamage()) 
+			{
+				for(TangibleObject defender : target.getDefendersList()) defender.removeDefender(target);
+				core.objectService.destroyObject(target);
+			}
+		}
 	}
 
 	private void doAreaCombat(CreatureObject attacker, TangibleObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {
@@ -264,16 +281,23 @@ public class CombatService implements INetworkDispatch {
 		sendCombatPackets(attacker, target, weapon, command, actionCounter, damage, 0, HitType.HIT);
 	
 		if(FileUtilities.doesFileExist("scripts/commands/combat/" + command.getCommandName() + ".py"))
-			core.scriptService.callScript("scripts/commands/combat/", command.getCommandName(), "run", core, attacker, target, null);
+			core.scriptService.callScript("scripts/commands/combat/", command.getCommandName(), "run", core, attacker, target, damage);
 
 	}
 	
 	private void applyDamage(CreatureObject attacker, TangibleObject target, int damage) {
 		target.setConditionDamage(target.getConditionDamage() + damage);
+		
+		if (target.getOption(Options.MOUNT)) {
+			core.mountService.damage((CreatureObject) target);
+		}
+		
 		DamageTaken event = events.new DamageTaken();
 		event.attacker = attacker;
 		event.damage = damage;
 		target.getEventBus().publish(event);
+		
+		attacker.setTefTime(300000);
 	}
 
 	private void doAreaCombat(CreatureObject attacker, CreatureObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {
@@ -372,21 +396,21 @@ public class CombatService implements INetworkDispatch {
 			sendCombatPackets(attacker, target, weapon, command, actionCounter, damage, armorAbsorbed, hitType);
 		
 			if(hitType != HitType.MISS && hitType != HitType.DODGE && hitType != HitType.PARRY && command.getBuffNameTarget().length() > 0) {
-				core.buffService.addBuffToCreature(target, command.getBuffNameTarget());
+				core.buffService.addBuffToCreature(target, command.getBuffNameTarget(), attacker);
 			}
 			if(command.getDotIntensity() > 0) {
 				addDotToCreature(attacker, target, command, target.getBuffByName(command.getBuffNameTarget()));
 			}
 	
 			if(FileUtilities.doesFileExist("scripts/commands/combat/" + command.getCommandName() + ".py"))
-				core.scriptService.callScript("scripts/commands/combat/", command.getCommandName(), "run", core, attacker, target, null);
+				core.scriptService.callScript("scripts/commands/combat/", command.getCommandName(), "run", core, attacker, target, damage);
 
 			return;
 			
 		}
 		
 		if(command.getAddedDamage() == 0 && command.getPercentFromWeapon() == 0 && command.getBuffNameTarget().length() > 0)
-			core.buffService.addBuffToCreature(target, command.getBuffNameTarget());
+			core.buffService.addBuffToCreature(target, command.getBuffNameTarget(), attacker);
 		
 		sendCombatPackets(attacker, target, weapon, command, actionCounter, damage, 0, HitType.HIT);
 		
@@ -441,40 +465,23 @@ public class CombatService implements INetworkDispatch {
 
 	private float getArmorReduction(CreatureObject attacker, CreatureObject target, WeaponObject weapon, CombatCommand command, byte hitType) {
 		
-		int elementalType = 1;
+		String elementalName = "";
 		
 		if(command.getPercentFromWeapon() > 0) {
 			
 			// TODO: elemental mitigation and damage
+		
+			elementalName = weapon.getDamageType();
 			
-			if(weapon.getStringAttribute("cat_wpn_damage.wpn_damage_type").equals("@obj_attr_n:armor_eff_kinetic"))
-				elementalType = ElementalType.KINETIC;
-			else if(weapon.getStringAttribute("cat_wpn_damage.wpn_damage_type").equals("@obj_attr_n:armor_eff_energy"))
-				elementalType = ElementalType.ENERGY;
-
 		} else {
 			
-			elementalType = command.getElementalType();
-
+			elementalName = Elemental.getElementalName(command.getElementalType());
+			
 		}
 		
 		int baseArmor = 0;
 		
-		switch(elementalType) {
-		
-			case ElementalType.KINETIC:
-				baseArmor = target.getSkillModBase("kinetic");
-			case ElementalType.ENERGY:
-				baseArmor = target.getSkillModBase("energy");
-			case ElementalType.HEAT:
-				baseArmor = target.getSkillModBase("heat");
-			case ElementalType.COLD:
-				baseArmor = target.getSkillModBase("cold");
-			case ElementalType.ACID:
-				baseArmor = target.getSkillModBase("acid");
-			case ElementalType.ELECTRICITY:
-				baseArmor = target.getSkillModBase("electricity");
-		}
+		baseArmor = target.getSkillModBase(elementalName);
 		
 		if(target.getSkillMod("expertise_innate_reduction_all_player") != null)
 			baseArmor *= (100 - target.getSkillModBase("expertise_innate_reduction_all_player")) / 100;
@@ -750,6 +757,12 @@ public class CombatService implements INetworkDispatch {
 			
 			float glanceChance = (float) target.getSkillModBase("display_only_glancing_blow") / 10000;
 			
+			if(weapon.isRanged())
+				glanceChance += target.getSkillModBase("expertise_glancing_blow_ranged");
+			
+			if(weapon.isMelee())
+				glanceChance += target.getSkillModBase("expertise_glancing_blow_melee");
+				
 			r = random.nextFloat();
 			if(r <= glanceChance)
 				return HitType.GLANCE;
@@ -791,8 +804,10 @@ public class CombatService implements INetworkDispatch {
 			}, target.getIncapTimer(), TimeUnit.SECONDS);
 			target.setIncapTask(incapTask);
 			core.buffService.addBuffToCreature(target, "incapWeaken", target);
-			if(target.getSlottedObject("ghost") != null)
-				attacker.sendSystemMessage("You incapacitate " + target.getCustomName() + ".", (byte) 0);
+			if(target.getSlottedObject("ghost") != null) {
+				target.sendSystemMessage(new OutOfBand(new ProsePackage("base_player", "prose_victim_incap", attacker.getCustomName())), (byte) 0);
+				attacker.sendSystemMessage(new OutOfBand(new ProsePackage("base_player", "prose_target_incap", target.getCustomName())), (byte) 0);
+			}
 			return;
 		} else if(target.getHealth() - damage <= 0 && target.getAttachment("AI") != null) {
 			synchronized(target.getMutex()) {
@@ -812,6 +827,13 @@ public class CombatService implements INetworkDispatch {
 		target.getEventBus().publish(event);
 	}
 	
+	public void doDrainHeal(CreatureObject receiver, int drainAmount) {
+		synchronized(receiver.getMutex()) {
+			receiver.setHealth(receiver.getHealth() + drainAmount);
+		}
+		
+	}	
+	
 	private boolean isInConeAngle(CreatureObject attacker, SWGObject target, int coneLength, int coneWidth, float directionX, float directionZ) {
 		
 		float radius = coneWidth / 2;
@@ -830,7 +852,7 @@ public class CombatService implements INetworkDispatch {
 		
 		return true;
 				
-	}
+	}	
 	
 	public boolean attemptHeal(CreatureObject healer, CreatureObject target) {
 		
@@ -846,6 +868,8 @@ public class CombatService implements INetworkDispatch {
 		if (areInDuel(healer, target)) {
 			return false;
 		}
+		
+		if(target.getAttachment("AI") != null) return false;
 		
 		if(healer.getFaction().equals(target.getFaction())) {
 			
@@ -965,12 +989,50 @@ public class CombatService implements INetworkDispatch {
 		target.stopIncapTask();
 		target.setIncapTask(null);
 		target.setPosture((byte) 14);
-		attacker.sendSystemMessage("You have killed " + target.getCustomName() + ".", (byte) 0);
-		target.sendSystemMessage("@base_player:victim_dead", (byte) 0);
+		
+		if (target.getSlottedObject("ghost") != null && attacker.getSlottedObject("ghost") != null) {
+			boolean bountyWindow = true;
+			if (target.getPlayerObject().getBountyMissionId() != 0) {
+				MissionObject mission = (MissionObject) core.objectService.getObject(target.getPlayerObject().getBountyMissionId());
+				if (mission != null && mission.getBountyObjId() == attacker.getObjectId()) {
+					bountyWindow = false;
+					target.sendSystemMessage(new OutOfBand(new ProsePackage("bounty_hunter", "bounty_failed_hunter", attacker.getCustomName())), (byte) 0);
+					
+					ProsePackage pp = new ProsePackage("bounty_hunter", "bounty_failed_target", attacker.getCustomName());
+					pp.setToCustomString("their");
+					attacker.sendSystemMessage(new OutOfBand(pp), (byte) 0);
+					
+					core.missionService.handleMissionAbort(target, mission);
+				}
+			} else if (attacker.getPlayerObject().getBountyMissionId() != 0) {
+				MissionObject mission = (MissionObject) core.objectService.getObject(attacker.getPlayerObject().getBountyMissionId());
+				if (mission != null && mission.getBountyObjId() == target.getObjectId()) {
+					bountyWindow = false;
+					ProsePackage targetProse = new ProsePackage("bounty_hunter", "bounty_success_target", attacker.getCustomName());
+					targetProse.setDiInteger(mission.getCreditReward());
+					target.sendSystemMessage(new OutOfBand(targetProse), (byte) 0);
+					
+					ProsePackage attackerProse = new ProsePackage("bounty_hunter", "bounty_success_hunter", target.getCustomName());
+					attackerProse.setToCustomString("their"); // should be his or her: http://youtu.be/BqeDQQSETJI?t=2m19s
+					attackerProse.setDiInteger(mission.getCreditReward());
+					attacker.sendSystemMessage(new OutOfBand(attackerProse), (byte) 0);
+					
+					core.missionService.handleMissionComplete(attacker, mission);
+				}
+			}
+			
+			if(target.getDuelList().contains(attacker))
+				bountyWindow = false;
+				handleEndDuel(target, attacker, false);
+			
+			if (bountyWindow) core.playerService.sendSetBountyWindow(target, attacker);
+		} else { attacker.sendSystemMessage("You have killed " + target.getCustomName() + ".", (byte) 0); }
+
 		attacker.removeDefender(target);
 		target.removeDefender(attacker);
-		
-		if(target.getDuelList().contains(attacker)) handleEndDuel(target, attacker, false);
+		target.setSpeedMultiplierBase(0);
+		target.setTurnRadius(0);
+		target.sendSystemMessage(new OutOfBand(new ProsePackage("base_player", "prose_victim_dead", attacker.getCustomName())), (byte) 0);
 		
 		core.playerService.sendCloningWindow(target, attacker.getSlottedObject("ghost") != null);
 	}
@@ -997,8 +1059,8 @@ public class CombatService implements INetworkDispatch {
 			requester.getDuelList().add(target);
 			requester.sendSystemMessage("You accept " + target.getCustomName() + "'s challenge.", (byte) 0);
 			target.sendSystemMessage(requester.getCustomName() + " accepts your challenge.", (byte) 0);
-			target.getClient().getSession().write(new UpdatePVPStatusMessage(requester.getObjectID(), 55, requester.getFaction()).serialize());
-			requester.getClient().getSession().write(new UpdatePVPStatusMessage(target.getObjectID(), 55, target.getFaction()).serialize());
+			target.updatePvpStatus();
+			requester.updatePvpStatus();
 			
 		}
 		
@@ -1013,8 +1075,8 @@ public class CombatService implements INetworkDispatch {
 		target.removeDefender(requester);
 		requester.removeDefender(target);
 		
-		target.getClient().getSession().write(new UpdatePVPStatusMessage(requester.getObjectID(), 0x16, requester.getFaction()).serialize());
-		requester.getClient().getSession().write(new UpdatePVPStatusMessage(target.getObjectID(), 0x16, target.getFaction()).serialize());
+		target.updatePvpStatus();
+		requester.updatePvpStatus();
 		
 		if(announce)
 		{
@@ -1032,7 +1094,7 @@ public class CombatService implements INetworkDispatch {
 			success = false;
 		
 		if((command.getAttackType() == 0 || command.getAttackType() == 1 || command.getAttackType() == 3) && !attemptHeal(medic, target))	
-			target = medic;
+			success = false;
 
 		if(!success) {
 			IoSession session = medic.getClient().getSession();
@@ -1222,7 +1284,10 @@ public class CombatService implements INetworkDispatch {
 			return;
 		}
 		
-		core.buffService.addBuffToCreature(creature, command.getBuffNameSelf());
+		if (creature.hasBuff("co_position_secured"))
+			core.buffService.removeBuffFromCreatureByName(creature, "co_position_secured");
+		else
+			core.buffService.addBuffToCreature(creature, command.getBuffNameSelf(), creature);
 
 		StartTask startTask = new StartTask(actionCounter, creature.getObjectID(), command.getCommandCRC(), CRC.StringtoCRC(command.getCooldownGroup()), command.getCooldown());
 		ObjControllerMessage objController2 = new ObjControllerMessage(0x0B, startTask);
@@ -1305,24 +1370,10 @@ public class CombatService implements INetworkDispatch {
 		int weaponType = weapon.getWeaponType();
 		int actionReduction;
 		
-		switch(weaponType) {
-			
-			case 0: actionReduction = attacker.getSkillModBase("expertise_action_weapon_0");
-			case 1: actionReduction = attacker.getSkillModBase("expertise_action_weapon_1");
-			case 2: actionReduction = attacker.getSkillModBase("expertise_action_weapon_2");
-			case 4: actionReduction = attacker.getSkillModBase("expertise_action_weapon_4");
-			case 5: actionReduction = attacker.getSkillModBase("expertise_action_weapon_5");
-			case 6: actionReduction = attacker.getSkillModBase("expertise_action_weapon_6");
-			case 7: actionReduction = attacker.getSkillModBase("expertise_action_weapon_7");
-			case 8: actionReduction = attacker.getSkillModBase("expertise_action_weapon_8");
-			case 9: actionReduction = attacker.getSkillModBase("expertise_action_weapon_9");
-			case 10: actionReduction = attacker.getSkillModBase("expertise_action_weapon_10");
-			case 11: actionReduction = attacker.getSkillModBase("expertise_action_weapon_11");
-			case 12: actionReduction = attacker.getSkillModBase("expertise_action_weapon_3");
-			
-			default: actionReduction = 0;
-		
-		}
+		if(weaponType == WeaponType.HEAVYWEAPON || weaponType == WeaponType.FLAMETHROWER)
+			actionReduction = attacker.getSkillModBase("expertise_action_weapon_3");
+		else
+			actionReduction = attacker.getSkillModBase("expertise_action_weapon_" + Integer.toString(weaponType));
 		
 		actionReduction += attacker.getSkillModBase("expertise_action_all");
 		
@@ -1335,24 +1386,16 @@ public class CombatService implements INetworkDispatch {
 		int weaponType = weapon.getWeaponType();
 		int weaponDmgIncrease;
 		
-		switch(weaponType) {
-			
-			case 0: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_0");
-			case 1: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_1");
-			case 2: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_2");
-			case 4: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_4");
-			case 5: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_5");
-			case 6: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_6");
-			case 7: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_7");
-			case 8: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_8");
-			case 9: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_9");
-			case 10: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_10");
-			case 11: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_11");
-			case 12: weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_3");
-			
-			default: weaponDmgIncrease = 0;
+		if(weaponType == WeaponType.HEAVYWEAPON || weaponType == WeaponType.FLAMETHROWER)
+			weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_3");
+		else
+			weaponDmgIncrease = attacker.getSkillModBase("expertise_damage_weapon_" + Integer.toString(weaponType));
 		
-		}
+		if(weapon.isRanged())
+			weaponDmgIncrease += attacker.getSkillModBase("expertise_damage_ranged");
+		
+		if(weapon.isMelee())
+			weaponDmgIncrease += attacker.getSkillModBase("expertise_damage_melee");
 		
 		weaponDmgIncrease += attacker.getSkillModBase("expertise_damage_all");
 
@@ -1361,34 +1404,11 @@ public class CombatService implements INetworkDispatch {
 		
 	}
 	
-	public enum HitType{; 
-	
-		public static final byte MISS = 0;
-		public static final byte DODGE = 1;
-		public static final byte PARRY = 2;
-		public static final byte STRIKETHROUGH = 3;
-		public static final byte CRITICAL = 4;
-		public static final byte PUNISHING = 5;
-		public static final byte HIT = 6;
-		public static final byte BLOCK = 7;
-		public static final byte EVASION = 8;
-		public static final byte GLANCE = 9;
-	
+	public void endCombat(CreatureObject defender) {
+		Vector<TangibleObject> defenderList = new Vector<TangibleObject>(defender.getDefendersList());
+		if (defenderList.size() > 0) {
+			defenderList.stream().forEach(attacker -> defender.removeDefender(attacker));
+		}
 	}
-	
-	public enum ElementalType {;
-	
-		public static final int KINETIC = 1;
-		public static final int ENERGY = 2;
-		public static final int BLAST = 4;
-		public static final int STUN = 8;
-		public static final int HEAT = 32;
-		public static final int COLD = 64;
-		public static final int ACID = 128;
-		public static final int ELECTRICITY = 256;
-
-	}
-
-	
 
 }

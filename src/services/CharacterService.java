@@ -269,10 +269,7 @@ public class CharacterService implements INetworkDispatch {
 				core.skillModService.addSkillMod(object, "language_basic_speak", 100);
 				core.skillModService.addSkillMod(object, "creature_harvesting", 25);
 				core.skillModService.addSkillMod(object, "language_wookiee_comprehend", 100);
-				
-				
-				object.createTransaction(core.getCreatureODB().getEnvironment());
-				
+								
 				PlayerObject player = (PlayerObject) core.objectService.createObject("object/player/shared_player.iff", object.getPlanet());
 				object._add(player);
 				core.skillService.addSkill(object, "species_" + object.getStfName());
@@ -310,12 +307,15 @@ public class CharacterService implements INetworkDispatch {
 				object._add(bank);
 				object._add(missionBag);
 				
-				/*for(int missionsAdded = 0; missionsAdded < 12; missionsAdded++) {
+				for(int missionsAdded = 1; missionsAdded <= 10; missionsAdded++) {
 					MissionObject mission = (MissionObject) core.objectService.createObject("object/mission/shared_mission_object.iff", object.getPlanet());
 
 					missionBag._add(mission);
-					Console.println("Added empty mission " + missionsAdded);
-				}*/
+				}
+				
+				// TODO: Race abilities
+				object.addAbility("startDance");
+				object.addAbility("startDance+Basic");
 				
 				object.addObjectToEquipList(datapad);
 				object.addObjectToEquipList(inventory);
@@ -324,22 +324,14 @@ public class CharacterService implements INetworkDispatch {
 				object.addObjectToEquipList(appInventory);
 				
 				WeaponObject defaultWeapon = (WeaponObject) core.objectService.createObject("object/weapon/creature/shared_creature_default_weapon.iff", object.getPlanet());
-				defaultWeapon.setDamageType("@obj_attr_n:armor_eff_kinetic");
-				defaultWeapon.setStringAttribute("cat_wpn_damage.damage", "0-0");
-				defaultWeapon.setMaxDamage(100);
-				defaultWeapon.setMinDamage(50);
-				
 				object.addObjectToEquipList(defaultWeapon);
-
 				object._add(defaultWeapon);
 				object.setWeaponId(defaultWeapon.getObjectID());
 				
 				createStarterClothing(object, sharedRaceTemplate, clientCreateCharacter.getStarterProfession());
 				//core.scriptService.callScript("scripts/", "demo", "CreateStartingCharacter", core, object);
 				
-				core.getCreatureODB().put(object, Long.class, CreatureObject.class, object.getTransaction());
-				// might not need to commit transaction but better safe than sorry
-				object.getTransaction().commitSync();
+				core.getSWGObjectODB().put(object.getObjectID(), object);
 
 				PreparedStatement ps = databaseConnection.preparedStatement("INSERT INTO characters (id, \"firstName\", \"lastName\", \"accountId\", \"galaxyId\", \"statusId\", appearance, gmflag) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 				ps.setLong(1, object.getObjectID());
@@ -535,6 +527,100 @@ public class CharacterService implements INetworkDispatch {
 		return false;
 	}
 	
+	/**
+	 * Checks the database if a player with the given first name exists
+	 * and returns the objectID of that player.
+	 * @param name : String
+	 * @return objectID : long
+	 */
+	public long getPlayerOID(String name) {
+		if (!name.equals("")) {
+			long oid = 0L;
+			try {
+				PreparedStatement ps = databaseConnection.preparedStatement("SELECT * FROM characters WHERE \"firstName\"=?");
+				ps.setString(1, name);
+				ResultSet resultSet = ps.executeQuery();
+				while (resultSet.next()) {	
+					oid = resultSet.getLong("id");
+				}
+				return oid;
+			} 
+			
+			catch (SQLException e) { e.printStackTrace(); }
+		}
+		return 0L;
+	}
+	
+	/**
+	 * Delivers the first name of a player
+	 * @param oid : long
+	 * @return firstName : String
+	 */
+	public String getPlayerFirstName(long oid) {
+					
+			String name = "";
+			try {
+				PreparedStatement ps = databaseConnection.preparedStatement("SELECT * FROM characters WHERE \"id\"=?");
+				ps.setLong(1, oid);
+				ResultSet resultSet = ps.executeQuery();
+				while (resultSet.next()) {				 
+					name = resultSet.getString("firstName");
+					if (!name.equals("")) {
+						if (name.contains(" ")) {
+							name = name.split(" ")[0];
+						}
+						name = name.toLowerCase();
+
+				}
+				return name;
+			} 
+			
+			} catch (SQLException e) { e.printStackTrace(); }
+
+		return "";
+	}
+	
+	/**
+	 * Checks the database for if the object ID of the player exists.
+	 * @param objectId Object ID to check for in the database
+	 * @return Returns True if the player exists
+	 */
+	public boolean playerExists(long objectId) {
+
+		try {
+			PreparedStatement ps = databaseConnection.preparedStatement("SELECT id FROM characters WHERE id=?");
+			ps.setLong(1, objectId);
+			ResultSet resultSet = ps.executeQuery();
+			
+			boolean isDuplicate = resultSet.next();
+			resultSet.getStatement().close();
+			if (isDuplicate) { return true; }
+			else { return false; }
+		} 
+		
+		catch (SQLException e) { e.printStackTrace(); }
+		return false;
+	}
+
+	/**
+	 * Checks the database for the Account ID associated with the Object ID.
+	 * Intended for GM use only!
+	 * @param objectId Object ID of the player, used to obtain the Account ID.
+	 * @return Returns Account ID
+	 */
+	public int getAccountId(long objectId) {
+		try {
+			PreparedStatement ps = databaseConnection.preparedStatement("SELECT * FROM characters WHERE id=?");
+			ps.setLong(1, objectId);
+			ResultSet resultSet = ps.executeQuery();
+			resultSet.next();
+			return resultSet.getInt("accountId");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
+
 	private void createStarterClothing(CreatureObject creature, String raceTemplate, String profession) {
 		try {
 			ProfessionTemplateVisitor visitor = ClientFileManager.loadFile("creation/profession_defaults_" + profession + ".iff", ProfessionTemplateVisitor.class);

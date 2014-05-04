@@ -27,8 +27,6 @@ import java.util.Map.Entry;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import engine.resources.common.CRC;
-import resources.common.StringUtilities;
 import resources.objects.ObjectMessageBuilder;
 import resources.objects.waypoint.WaypointObject;
 
@@ -109,12 +107,10 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 		buffer.setAutoExpand(true);
 		buffer.putShort((short) 0x11);
 		buffer.putInt((short) 0x43);
-		
 		buffer.put(getAsciiString("string_id_table"));
-		
-		buffer.put((byte) 0);	// unk
-		buffer.putShort((short) 0);	// unk
-		buffer.putInt(0); // unk
+		buffer.putInt(0); // probably stringId
+		buffer.putShort((short) 0);	// detailedDescription
+		buffer.put(player.getGodLevel());
 		buffer.putInt(0); // unk
 		buffer.putInt(0); // unk
 		buffer.putInt(0); // unk
@@ -655,6 +651,16 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 		
 		buffer = createDelta("PLAY", (byte) 3, (short) 1, (short) 19, buffer, size + 4);
 		return buffer;
+	}
+	
+	public IoBuffer buildGodLevelDelta(byte godLevel) {
+		IoBuffer buffer = bufferPool.allocate(1, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.put(godLevel);
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("PLAY", (byte) 6, (short) 1, (short) 0x02, buffer, size + 4);
+		return buffer;
+		
 	}
 
 	@Override

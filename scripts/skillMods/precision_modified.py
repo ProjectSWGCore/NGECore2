@@ -1,18 +1,16 @@
 import sys
 
-def add(core, actor, name, base):
-	actor.addSkillMod(name, base)
-	actor.addSkillMod('display_only_block', base / 2)
-	actor.addSkillMod('display_only_parry', base / 2)
-	actor.addSkillMod('display_only_critical', base)
-	actor.addSkillMod('display_only_strikethrough', base / 2)
+def add(core, actor, skillMod, divisor):
+	core.skillModService.addSkillMod(actor, 'display_only_block', skillMod.getBase() / 2)
+	core.skillModService.addSkillMod(actor, 'display_only_parry', skillMod.getBase() / 2)
+	core.skillModService.addSkillMod(actor, 'display_only_critical', skillMod.getBase())
+	core.skillModService.addSkillMod(actor, 'display_only_strikethrough', skillMod.getBase() / 2)
 	return
-	
-def deduct(core, actor, name, base):
-	actor.deductSkillMod(name, base)
-	actor.deductSkillMod('display_only_block', base / 2)
-	actor.deductSkillMod('display_only_parry', base / 2)
-	actor.deductSkillMod('display_only_critical', base)
-	actor.deductSkillMod('display_only_strikethrough', base / 2)
+
+def deduct(core, actor, skillMod, divisor):
+	core.skillModService.deductSkillMod(actor, 'display_only_block', skillMod.getBase() / 2)
+	core.skillModService.deductSkillMod(actor, 'display_only_parry', skillMod.getBase() / 2)
+	core.skillModService.deductSkillMod(actor, 'display_only_critical', skillMod.getBase())
+	core.skillModService.deductSkillMod(actor, 'display_only_strikethrough', skillMod.getBase() / 2)
 	return
 	

@@ -23,7 +23,6 @@ package services.guild;
 
 import java.util.Map;
 
-import resources.common.Console;
 import resources.guild.Guild;
 import resources.objects.SWGList;
 import resources.objects.guild.GuildObject;
@@ -50,7 +49,6 @@ public class GuildService implements INetworkDispatch {
 			object = (GuildObject) this.core.objectService.createObject("object/guild/shared_guild_object.iff", core.terrainService.getPlanetList().get(0));
 		}
 		
-		object.createTransaction(core.getGuildODB().getEnvironment());
 	}
 	
 	public Guild createGuild(String abbreviation, String name, SWGObject leader) {

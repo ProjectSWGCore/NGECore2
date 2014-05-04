@@ -26,16 +26,16 @@ import java.nio.ByteOrder;
 import org.apache.mina.core.buffer.IoBuffer;
 
 import protocol.swg.ObjControllerMessage;
-import services.combat.CombatService.HitType;
+import resources.datatables.HitType;
 
 public class CombatSpam extends ObjControllerObject{
 
 	private long attackerId;
 	private long defenderId;
 	private int damage;
-	private String file;
-	private String text;
-	private byte colorFlag;
+	//private String file;
+	//private String text;
+	//private byte colorFlag;
 	private boolean hit = true;
 	private boolean critical = false;
 	private boolean dodge = false;

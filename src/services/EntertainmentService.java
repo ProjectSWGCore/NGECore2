@@ -2,10 +2,8 @@ package services;
 
 import java.nio.ByteOrder;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -19,33 +17,26 @@ import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 
 import protocol.swg.ObjControllerMessage;
-import protocol.swg.OkMessage;
-import protocol.swg.PlayClientEffectObjectMessage;
 import protocol.swg.objectControllerObjects.BuffBuilderChangeMessage;
 import protocol.swg.objectControllerObjects.BuffBuilderEndMessage;
-import protocol.swg.objectControllerObjects.BuffBuilderStartMessage;
 import protocol.swg.objectControllerObjects.ImageDesignMessage;
+import resources.buffs.BuffItem;
 import resources.common.BuffBuilder;
-import resources.common.Console;
 import resources.common.IDAttribute;
 import resources.common.MathUtilities;
 import resources.common.ObjControllerOpcodes;
+import resources.common.OutOfBand;
 import resources.common.Performance;
 import resources.common.PerformanceEffect;
 import resources.common.RGB;
-import resources.common.StringUtilities;
 import resources.datatables.Posture;
-import resources.objects.Buff;
-import resources.objects.BuffItem;
-import resources.objects.SWGList;
-import resources.objects.SkillMod;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
+import resources.skills.SkillMod;
 import resources.visitors.IDManagerVisitor;
 import services.sui.SUIService.InputBoxType;
 import services.sui.SUIWindow;
-import services.sui.SUIWindow.SUICallback;
 import services.sui.SUIWindow.Trigger;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
@@ -65,9 +56,9 @@ public class EntertainmentService implements INetworkDispatch {
 	private ConcurrentHashMap<Integer,Performance> performancesByIndex = new ConcurrentHashMap<Integer,Performance>();
 	private ConcurrentHashMap<Integer,Performance> danceMap = new ConcurrentHashMap<Integer,Performance>();
 	
-	private ConcurrentHashMap<String, Short> designMap = new ConcurrentHashMap<String, Short>();
+	private ConcurrentHashMap<String, Byte> designMap = new ConcurrentHashMap<String, Byte>();
 	
-	private Random ranWorkshop = new Random();
+	//private Random ranWorkshop = new Random();
 	
 	private Map<String, PerformanceEffect> performanceEffects = new ConcurrentHashMap<String, PerformanceEffect>();
 	
@@ -518,7 +509,7 @@ public class EntertainmentService implements INetworkDispatch {
 		core.commandService.registerCommand("startdance");
 		core.commandService.registerCommand("stopdance");
 		core.commandService.registerCommand("watch");
-		//core.commandService.registerCommand("stopwatching"); // SWGList error
+		core.commandService.registerCommand("stopwatching");
 		core.commandService.registerCommand("holoEmote");
 		core.commandService.registerCommand("covercharge");
 		//core.commandService.registerCommand("en_holographic_recall");
@@ -575,7 +566,10 @@ public class EntertainmentService implements INetworkDispatch {
 		//long timeStamp = 0;
 		//if (reciever.getAttachment("buffWorkshopTimestamp") != null)
 			//timeStamp = (long) reciever.getAttachment("buffWorkshopTimestamp");
-
+		
+		if (reciever.hasBuff("buildabuff_inspiration"))
+			core.buffService.removeBuffFromCreature(reciever, reciever.getBuffByName("buildabuff_inspiration"));
+		
 		core.buffService.addBuffToCreature(reciever, "buildabuff_inspiration", buffer);
 		/*if (core.buffService.addBuffToCreature(reciever, "buildabuff_inspiration", buffer) && !rPlayer.getProfession().equals("entertainer_1a")) {
 			if (timeStamp == 0 || (System.currentTimeMillis() - timeStamp > 86400000)) {
@@ -681,13 +675,13 @@ public class EntertainmentService implements INetworkDispatch {
 
 		// visual
 		if (spectator.getPerformanceWatchee() == performer && spectateType)
-			spectator.getPerformanceWatchee().removeAudience(spectator);
+			spectator.getPerformanceWatchee().removeSpectator(spectator);
 		// music
 		else if (spectator.getPerformanceListenee() == performer && !spectateType)
-			spectator.getPerformanceListenee().removeAudience(spectator);
+			spectator.getPerformanceListenee().removeSpectator(spectator);
 
 		spectator.setPerformanceWatchee(performer);
-		performer.addAudience(spectator);
+		performer.addSpectator(spectator);
 		spectator.setMoodAnimation("entertained");
 
 		final ScheduledFuture<?> spectatorTask = scheduler.scheduleAtFixedRate(() -> {
@@ -705,7 +699,7 @@ public class EntertainmentService implements INetworkDispatch {
 							+ " is out of range.", (byte) 0);
 				}
 				spectator.setMoodAnimation("neutral");
-				performer.removeAudience(spectator);
+				performer.removeSpectator(spectator);
 
 				if (spectator.getInspirationTick().cancel(true))
 					spectator.getSpectatorTask().cancel(true);
@@ -749,7 +743,7 @@ public class EntertainmentService implements INetworkDispatch {
 
 		scheduler.schedule(() -> {
 			performer.setFlourishCount(0);
-			performer.setPerformingFlourish(true);
+			performer.setPerformingFlourish(false);
 		}, (long) performance.getLoopDuration(), TimeUnit.SECONDS);
 	}
 	
@@ -828,7 +822,7 @@ public class EntertainmentService implements INetworkDispatch {
 				int hMinutes = MathUtilities.secondsToHourMinutes(duration * 60);
 				int hours = MathUtilities.secondsToWholeHours(duration * 60);
 
-				spectator.showFlyText("spam", "buff_duration_tick_observer", String.valueOf(hours) + " hours , " + hMinutes + " minutes ", 0, (float) 0.66, new RGB(255, 182, 193), 3, 78);
+				spectator.showFlyText(OutOfBand.ProsePackage("@spam:buff_duration_tick_observer", "TO", hours + " hours , " + hMinutes + " minutes "), 0.66f, new RGB(255, 182, 193), 3, false);
 
 				spectator.setAttachment("inspireDuration", duration);
 				//System.out.println("Inspire Duration: " + spectator.getAttachment("inspireDuration") + " on " + spectator.getCustomName());
@@ -932,7 +926,7 @@ public class EntertainmentService implements INetworkDispatch {
 	
 	public String getCustomizationString(int number){
 		synchronized (designMap) {
-			for (Entry<String, Short> entry : designMap.entrySet()) {
+			for (Entry<String, Byte> entry : designMap.entrySet()) {
 				if (entry.getValue().intValue() == number) {
 					return entry.getKey();
 				}
@@ -943,7 +937,7 @@ public class EntertainmentService implements INetworkDispatch {
 	
 	public int getCustomizationValue(String customizationString) {
 		synchronized(designMap){
-			for(Entry<String, Short> entry : designMap.entrySet()) {
+			for(Entry<String, Byte> entry : designMap.entrySet()) {
 				if (entry.getKey().equals(customizationString)) {
 					return entry.getValue().intValue();
 				}

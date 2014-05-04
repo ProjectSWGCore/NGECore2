@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import main.NGECore;
@@ -56,6 +57,7 @@ import resources.common.collidables.AbstractCollidable;
 import resources.datatables.PlayerFlags;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
+import services.chat.ChatRoom;
 
 @SuppressWarnings("unused")
 
@@ -200,17 +202,17 @@ public class ConnectionService implements INetworkDispatch {
 		if(object.getAttachment("inspireDuration") != null)
 			object.setAttachment("inspireDuration", null);
 		
-		if(object.getInspirationTick() != null) {
-			object.getInspirationTick().cancel(true);
-			object.setInspirationTick(null);
+		if(object.getPerformanceListenee() != null) {
+			object.getPerformanceListenee().removeSpectator(object);
+			object.setPerformanceListenee(null);
 		}
 		
-		if(object.getSpectatorTask() != null) {
-			object.getSpectatorTask().cancel(true);
-			object.setSpectatorTask(null);
+		if(object.getPerformanceWatchee() != null) {
+			object.getPerformanceWatchee().removeSpectator(object);
+			object.setPerformanceWatchee(null);
 		}
 		
-		core.groupService.handleGroupDisband(object);
+		core.groupService.handleGroupDisband(object, false);
 		
 		if (core.instanceService.isInInstance(object)) {
 			core.instanceService.remove(core.instanceService.getActiveInstance(object), object);
@@ -238,6 +240,14 @@ public class ConnectionService implements INetworkDispatch {
 			}
 			
 			core.chatService.playerStatusChange(objectShortName, (byte) 0);
+			
+			for (Integer roomId : ghost.getJoinedChatChannels()) {
+				ChatRoom room = core.chatService.getChatRoom(roomId.intValue());
+				
+				if (room != null) { core.chatService.leaveChatRoom(object, roomId.intValue()); } 
+				// work-around for any channels that may have been deleted, or only spawn on server startup, that were added to the joined channels
+				else { ghost.removeChannel(roomId); } 
+			}
 		}
 		
 		long parentId = object.getParentId();
@@ -259,16 +269,23 @@ public class ConnectionService implements INetworkDispatch {
 				observerClient.getParent().makeUnaware(object);
 			}
 		}*/
+		
+		core.missionService.getBountyList().remove(core.getBountiesODB().get(object.getObjectId()));
+		
 		ghost.toggleFlag(PlayerFlags.LD);
 		
 		object.setPerformanceListenee(null);
 		object.setPerformanceWatchee(null);
 		object.setAttachment("disconnectTask", null);
-		object.setAttachment("buffWorkshop", null);
-
-		object.createTransaction(core.getCreatureODB().getEnvironment());
-		core.getCreatureODB().put(object, Long.class, CreatureObject.class, object.getTransaction());
-		object.getTransaction().commitSync();
+		
+		List<ScheduledFuture<?>> schedulers = core.playerService.getSchedulers().get(object.getObjectID());
+		if(schedulers != null) {
+			schedulers.forEach(s -> s.cancel(true));
+			schedulers.clear();
+		}
+		core.playerService.getSchedulers().remove(object.getObjectID());
+		
+		core.getSWGObjectODB().put(object.getObjectID(), object);
 		core.objectService.destroyObject(object);
 		
 	}

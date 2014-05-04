@@ -25,7 +25,6 @@ import java.nio.ByteOrder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -321,7 +320,7 @@ public class TravelService implements INetworkDispatch {
 	public void doTransport(SWGObject actor, TravelPoint tp) {
 		
 		Planet planet = core.terrainService.getPlanetByName(tp.getPlanetName());
-		Point3D spawnLocation = SpawnPoint.getRandomPosition(tp.getShuttle().getPosition(), 5, 20, actor.getPlanetId());
+		Point3D spawnLocation = SpawnPoint.getRandomPosition(tp.getLocation(), 5, 20, actor.getPlanetId());
 		core.simulationService.transferToPlanet(actor, planet, spawnLocation, new Quaternion(0, 0, 0, 0), null);
 		
 	}

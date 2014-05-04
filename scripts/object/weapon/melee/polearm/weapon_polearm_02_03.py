@@ -6,10 +6,11 @@ def setup(core, object):
 	object.setDetailFilename('static_item_d')
 	object.setDetailName('weapon_polearm_02_03')
 	object.setIntAttribute('required_combat_level', 1)
-	object.setFloatAttribute('cat_wpn_damage.wpn_attack_speed', 1)
-	object.setStringAttribute('cat_wpn_damage.wpn_damage_type', 'Kinetic')
-	object.setStringAttribute('cat_wpn_damage.damage', '43-75')
-	object.setStringAttribute('cat_wpn_damage.wpn_range', '0-5m')
-	object.setStringAttribute('cat_wpn_damage.wpn_category', 'Polearm')
-	object.setIntAttribute('cat_wpn_damage.dps', object.getDamagePerSecond())
+	object.setAttackSpeed(1);
+	object.setMaxRange(5);
+	object.setDamageType("kinetic");
+	object.setMinDamage(43);
+	object.setMaxDamage(75);
+	object.setWeaponType(7);
+	return
 	return

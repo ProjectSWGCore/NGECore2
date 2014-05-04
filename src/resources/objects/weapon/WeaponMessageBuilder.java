@@ -26,14 +26,14 @@ import java.nio.ByteOrder;
 import org.apache.mina.core.buffer.IoBuffer;
 
 import resources.objects.ObjectMessageBuilder;
-
+import resources.datatables.Elemental;
 
 public class WeaponMessageBuilder extends ObjectMessageBuilder {
 
 	public WeaponMessageBuilder(WeaponObject weaponObject) {
 		setObject(weaponObject);
 	}
-	
+		
 	public IoBuffer buildBaseline3() {
 		WeaponObject weapon = (WeaponObject) object;
 		IoBuffer buffer = bufferPool.allocate(100, false).order(ByteOrder.LITTLE_ENDIAN);
@@ -68,11 +68,12 @@ public class WeaponMessageBuilder extends ObjectMessageBuilder {
 		buffer.putInt(0);
 		buffer.putFloat(weapon.getMaxRange());
 		buffer.putInt(0);
-
+		if( weapon.getElementalType() != null) // Weapon particle effect
+			buffer.putInt(Elemental.getElementalNum(weapon.getElementalType()));
+		else
+			buffer.putInt(Elemental.getElementalNum(weapon.getDamageType()));
 		buffer.putInt(0);
-		buffer.putInt(0);	// those 2 ints have something to do with particle color
 
-		
 		int size = buffer.position();
 		buffer = bufferPool.allocate(size, false).put(buffer.array(), 0, size);
 

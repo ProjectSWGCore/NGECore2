@@ -1,4 +1,4 @@
-from protocol.swg import ChatOnGetFriendsList
+from protocol.swg.chat import ChatOnGetFriendsList
 import sys
 
 def setup():

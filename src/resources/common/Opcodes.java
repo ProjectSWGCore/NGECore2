@@ -25,6 +25,11 @@ import engine.resources.common.CRC;
 
 public class Opcodes {
 	
+	public static int AuctionQueryHeadersMessage = CRC.StringtoCRC("AuctionQueryHeadersMessage");
+	public static int CreateImmediateAuctionMessage = CRC.StringtoCRC("CreateImmediateAuctionMessage");
+	public static int ChatLeaveRoom = 0x493E3FFA;
+	public static int ChatEnterRoomById = CRC.StringtoCRC("ChatEnterRoomById");
+	public static int ChatSendToRoom = CRC.StringtoCRC("ChatSendToRoom");
 	public static int ChatDeletePersistentMessage = 0x8F251641;
 	public static int ChatInstantMessageToCharacter = 0x84BB21F7;
 	public static int ChatPersistentMessageToServer = 0x25A29FA6;
@@ -32,7 +37,7 @@ public class Opcodes {
 	public static int ChatRequestRoomList = 0x4C3D2CFA;
 	public static int ChatSystemMessage = CRC.StringtoCRC("ChatSystemMessage");
 	public static int ClientOpenContainerMessage = 0x2D2D6EE1;
-	public static int CommodotiesItemTypeListRequest = 0x48F493C5;
+	public static int CommoditiesItemTypeListRequest = 0x48F493C5;
 	public static int CommoditiesResourceTypeListRequest = 0xCB1AE82D;
 	public static int NewbieTutorialResponse = 0xCA88FBAD;
 	public static int CmdSceneReady = 0x43FD1C22;
@@ -43,6 +48,7 @@ public class Opcodes {
 	public static int ClientVerifyAndLockNameRequest = 0x9eb04b9f;
 	public static int DeleteCharacterMessage = 0xE87AD031;
 	public static int GetMapLocationsMessage = 0x1A7AB839;
+	public static int IsVendorOwnerMessage = CRC.StringtoCRC("IsVendorOwnerMessage");
 	public static int LagRequest = 0x31805EE0;
 	public static int LoginClientId = 0x41131F96;
 	public static int ObjControllerMessage = 0x80CE5E46;
@@ -75,6 +81,15 @@ public class Opcodes {
 	public static int CollectionServerFirstListRequest = CRC.StringtoCRC("CollectionServerFirstListRequest");
 	public static int ShowHelmet = CRC.StringtoCRC("ShowHelmet");
 	public static int ShowBackpack = CRC.StringtoCRC("ShowBackpack");
-
+	public static int CreateAuctionMessage = CRC.StringtoCRC("CreateAuctionMessage");
+	public static int ChatOnEnteredRoom = CRC.StringtoCRC("ChatOnEnteredRoom");
+	public static int ChatCreateRoom = CRC.StringtoCRC("ChatCreateRoom");
+	public static int ChatQueryRoom = 0x9CF2B192;
 	public static int Unknown = 0x173B91C2; // packet sent to server on every character load-in
+	public static int GetAuctionDetails = CRC.StringtoCRC("GetAuctionDetails");
+	public static int CancelLiveAuctionMessage = CRC.StringtoCRC("CancelLiveAuctionMessage");
+	public static int BidAuctionMessage = CRC.StringtoCRC("BidAuctionMessage");
+	public static int RetrieveAuctionItemMessage = CRC.StringtoCRC("RetrieveAuctionItemMessage");
+
+
 }

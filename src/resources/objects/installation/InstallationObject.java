@@ -21,11 +21,43 @@
  ******************************************************************************/
 package resources.objects.installation;
 
-import com.sleepycat.persist.model.Persistent;
+import java.io.Serializable;
+import java.util.Vector;
 
+import com.sleepycat.persist.model.Entity;
+
+import engine.clients.Client;
+import engine.resources.scene.Planet;
+import engine.resources.scene.Point3D;
+import engine.resources.scene.Quaternion;
+import resources.objects.ObjectMessageBuilder;
 import resources.objects.tangible.TangibleObject;
 
-@Persistent(version=0)
-public class InstallationObject extends TangibleObject {
+@Entity(version=0)
+public class InstallationObject extends TangibleObject implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
+	private transient InstallationMessageBuilder messageBuilder;
 
+	public InstallationObject(long objectID, Planet planet, String template, Point3D position, Quaternion orientation){
+		super(objectID, planet, template, position, orientation);
+		messageBuilder = new InstallationMessageBuilder(this);
+	}	
+	
+	@Override
+	public void sendBaselines(Client destination) {
+		
+	}
+	
+	@Override
+	public void initAfterDBLoad() {
+		super.init();
+		messageBuilder = new InstallationMessageBuilder(this);
+		defendersList = new Vector<TangibleObject>();
+	}
+	
+	public ObjectMessageBuilder getMessageBuilder() {
+		return messageBuilder;
+	}
+	
 }

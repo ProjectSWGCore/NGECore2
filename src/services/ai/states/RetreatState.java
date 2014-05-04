@@ -21,7 +21,6 @@
  ******************************************************************************/
 package services.ai.states;
 
-import resources.objects.creature.CreatureObject;
 import services.ai.AIActor;
 
 public class RetreatState extends AIState {
@@ -41,15 +40,17 @@ public class RetreatState extends AIState {
 	@Override
 	public byte onExit(AIActor actor) {
 		// TODO Auto-generated method stub
-		return 0;
+		return StateResult.FINISHED;
 	}
 
 	@Override
 	public byte move(AIActor actor) {
 		actor.setNextPosition(actor.getSpawnPosition());
 		doMove(actor);
-		if(actor.getCreature().getWorldPosition().getDistance2D(actor.getSpawnPosition()) > 4) {
+		if(actor.getCreature().getWorldPosition().getDistance(actor.getSpawnPosition()) > 3) {
 			actor.scheduleMovement();
+		} else {
+			return StateResult.IDLE;
 		}
 		return StateResult.UNFINISHED;
 	}

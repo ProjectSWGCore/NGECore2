@@ -21,6 +21,7 @@
  ******************************************************************************/
 package resources.objects.player;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashMap;
@@ -28,8 +29,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import resources.common.Console;
+import resources.objects.ObjectMessageBuilder;
 import resources.objects.intangible.IntangibleObject;
+import resources.objects.resource.ResourceContainerObject;
+import resources.objects.tool.SurveyTool;
 import resources.objects.waypoint.WaypointObject;
 import resources.objects.creature.CreatureObject;
 
@@ -43,9 +46,10 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent(version=8)
-public class PlayerObject extends IntangibleObject {
+@Persistent(version=13)
+public class PlayerObject extends IntangibleObject implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	// PLAY 3
 	
 	private String title;
@@ -70,11 +74,11 @@ public class PlayerObject extends IntangibleObject {
 	
 	private Map<String, Integer> xpList = new HashMap<String, Integer>();
 	@NotPersistent
-	private int xpListUpdateCounter = 0;
+	private transient int xpListUpdateCounter = 0;
 
 	private List<WaypointObject> waypoints = new ArrayList<WaypointObject>();
 	@NotPersistent
-	private int waypointListUpdateCounter = 0;
+	private transient int waypointListUpdateCounter = 0;
 
 	private int currentForcePower = 0;	// unused in NGE
 	private int maxForcePower = 0;		// unused in NGE
@@ -84,7 +88,7 @@ public class PlayerObject extends IntangibleObject {
 	
 	private List<Quest> questJournal = new ArrayList<Quest>();
 	@NotPersistent
-	private int questJournalUpdateCounter = 0;
+	private transient int questJournalUpdateCounter = 0;
 
 	private String professionWheelPosition;
 	
@@ -96,17 +100,17 @@ public class PlayerObject extends IntangibleObject {
 	
 	private List<DraftSchematic> draftSchematicList = new ArrayList<DraftSchematic>();
 	@NotPersistent
-	private int draftSchematicListUpdateCounter = 0;
+	private transient int draftSchematicListUpdateCounter = 0;
 
 	private int experimentationPoints = 0;
 	private int accomplishmentCounter = 0;
 	
 	private List<String> friendList = new ArrayList<String>();
 	@NotPersistent
-	private int friendListUpdateCounter = 0;
+	private transient int friendListUpdateCounter = 0;
 	private List<String> ignoreList = new ArrayList<String>();
 	@NotPersistent
-	private int ignoreListUpdateCounter = 0;
+	private transient int ignoreListUpdateCounter = 0;
 	
 	private int languageId = 0;			// unused in NGE
 	private int currentStomach = 0;		// unused in NGE
@@ -125,13 +129,28 @@ public class PlayerObject extends IntangibleObject {
 	private String holoEmote;
 	private int holoEmoteUses;
 	
-	@NotPersistent
-	private PlayerMessageBuilder messageBuilder;
+	private int lotsRemaining = 10;
 	
 	@NotPersistent
-	private long lastPlayTimeUpdate = System.currentTimeMillis();
+	private transient PlayerMessageBuilder messageBuilder;
+	
+	@NotPersistent
+	private transient long lastPlayTimeUpdate = System.currentTimeMillis();
 	
 	private Map<String, Integer> factionStandingMap = new TreeMap<String, Integer>();
+	
+	private WaypointObject lastSurveyWaypoint;
+	private SurveyTool lastUsedSurveyTool;
+	private ResourceContainerObject recentContainer;
+	
+	private byte godLevel = 0;
+	
+	private List<Integer> chatChannels = new ArrayList<Integer>();
+	
+	@NotPersistent
+	private transient boolean callingCompanion = false;
+	
+	private long bountyMissionId;
 	
 	public PlayerObject() {
 		super();
@@ -141,6 +160,14 @@ public class PlayerObject extends IntangibleObject {
 	public PlayerObject(long objectID, Planet planet) {
 		super(objectID, planet, new Point3D(0, 0, 0), new Quaternion(1, 0, 0, 0), "object/player/shared_player.iff");
 		messageBuilder = new PlayerMessageBuilder(this);
+	}
+	
+	@Override
+	public void initAfterDBLoad() {
+		super.init();
+		lastPlayTimeUpdate = System.currentTimeMillis();
+		messageBuilder = new PlayerMessageBuilder(this);
+		waypoints.forEach(WaypointObject::initAfterDBLoad);
 	}
 
 	public String getTitle() {
@@ -788,4 +815,111 @@ public class PlayerObject extends IntangibleObject {
 			getContainer().getClient().getSession().write(messageBuilder.buildShowBackpackDelta(showBackpack));
 		}
 	}
+	
+	public WaypointObject getLastSurveyWaypoint() {
+		return lastSurveyWaypoint;
+	}
+
+	public void setLastSurveyWaypoint(WaypointObject lastSurveyWaypoint) {
+		this.lastSurveyWaypoint = lastSurveyWaypoint;
+	}
+	
+	public SurveyTool getLastUsedSurveyTool() {
+		synchronized(objectMutex) {
+			return this.lastUsedSurveyTool;
+		}
+	}
+	
+	public void setLastUsedSurveyTool(SurveyTool surveyTool) {
+		synchronized(objectMutex) {
+			this.lastUsedSurveyTool = surveyTool;
+		}
+	}
+
+	public ResourceContainerObject getRecentContainer() {
+		return recentContainer;
+	}
+
+	public void setRecentContainer(ResourceContainerObject recentContainer) {
+		this.recentContainer = recentContainer;
+	}
+	
+	public void setLotsRemaining(int amount)
+	{
+		this.lotsRemaining = amount;
+	}
+	
+	public boolean addLots(int amount)
+	{
+		this.lotsRemaining += amount;
+		return true;
+	}
+	
+	public boolean deductLots(int amount)
+	{
+		if(this.lotsRemaining - amount >= 0)
+		{
+			this.lotsRemaining -= amount;
+			return true;
+		}
+		return false;
+	}
+	
+	public int getLotsRemaining()
+	{
+		return this.lotsRemaining;
+	}
+	
+	public byte getGodLevel() {
+		return godLevel;
+	}
+	
+	public void setGodLevel(int godLevel) {
+		this.godLevel = (byte) godLevel;
+		
+		if (getContainer() != null) {
+			getContainer().getClient().getSession().write(messageBuilder.buildGodLevelDelta((byte) godLevel));
+		}
+	}
+	
+	public List<Integer> getJoinedChatChannels() {
+		return chatChannels;
+	}
+	
+	public void addChannel(int roomId) {
+		chatChannels.add(roomId);
+	}
+	
+	public void removeChannel(int roomId) {
+		if (chatChannels.contains(roomId))
+			chatChannels.remove(roomId);
+	}
+	
+	public boolean isMemberOfChannel(int roomId) {
+		if (chatChannels.contains(roomId)) {
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean isCallingCompanion() {
+		return callingCompanion;
+	}
+	
+	public void setCallingCompanion(boolean callingCompanion) {
+		this.callingCompanion = callingCompanion;
+	}
+	
+	public long getBountyMissionId() {
+		return bountyMissionId;
+	}
+
+	public void setBountyMissionId(long bountyMissionId) {
+		this.bountyMissionId = bountyMissionId;
+	}
+
+	public ObjectMessageBuilder getMessageBuilder() {
+		return messageBuilder;
+	}
+	
 }

@@ -34,10 +34,10 @@ import services.ai.AIActor;
 
 public abstract class AIState {
 
-	public abstract byte onEnter(AIActor actor);
-	public abstract byte onExit(AIActor actor);
-	public abstract byte move(AIActor actor);
-	public abstract byte recover(AIActor actor);
+	public abstract byte onEnter(AIActor actor) throws Exception;
+	public abstract byte onExit(AIActor actor) throws Exception;
+	public abstract byte move(AIActor actor) throws Exception;
+	public abstract byte recover(AIActor actor) throws Exception;
 	
 	public enum StateResult {;
 	
@@ -123,8 +123,8 @@ public abstract class AIState {
 									dx = currentPathPosition.x - oldPosition.x;
 									dz = currentPathPosition.z - oldPosition.z;
 									float deltaDist = (float) Math.sqrt((dx * dx) + (dz * dz));
-									newX = (float) (oldPosition.x + (travelDistance * (dx / deltaDist)));
-									newZ = (float) (oldPosition.z + (travelDistance * (dz / deltaDist)));
+									newX = (float) (oldPosition.x + (speed * (dx / deltaDist)));
+									newZ = (float) (oldPosition.z + (speed * (dz / deltaDist)));
 									
 								} else {
 									newX = currentPathPosition.x;
@@ -134,7 +134,7 @@ public abstract class AIState {
 							}
 							
 							if(cell == null) {
-								float height = core.terrainService.getHeight(creature.getPlanetId(), newX, newX);
+								float height = core.terrainService.getHeight(creature.getPlanetId(), newX, newZ);
 								newY = height;
 							} else {
 								newY = currentPathPosition.y;
@@ -145,7 +145,7 @@ public abstract class AIState {
 				} else {
 					newX = currentPathPosition.x;
 					newZ = currentPathPosition.z;
-					newY = core.terrainService.getHeight(creature.getPlanetId(), newX, newX);
+					newY = core.terrainService.getHeight(creature.getPlanetId(), newX, newZ);			
 				}
 				oldPosition = currentPathPosition;
 			}
@@ -187,7 +187,7 @@ public abstract class AIState {
 		Point3D newPosition = new Point3D();
 		boolean foundNewPos = findNewPosition(actor, speed, maxDistance, newPosition);
 
-		if(!foundNewPos)
+		if(!foundNewPos || (newPosition.x == 0 && newPosition.z == 0))
 			return;
 		
 		Point3D newWorldPos = newPosition.getWorldPosition();
@@ -200,7 +200,7 @@ public abstract class AIState {
         	quaternion.w *= -1;
         }
         
-		core.simulationService.moveObject(creature, newPosition, quaternion, creature.getMovementCounter(), 0, newPosition.getCell());
+		core.simulationService.moveObject(creature, newPosition, quaternion, creature.getMovementCounter(), speed, newPosition.getCell());
 		
 	}
 

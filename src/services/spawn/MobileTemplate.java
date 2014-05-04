@@ -25,7 +25,6 @@ import java.util.Vector;
 
 import resources.datatables.Options;
 import resources.datatables.PvpStatus;
-import resources.objects.weapon.WeaponObject;
 
 public class MobileTemplate {
 	
@@ -33,17 +32,31 @@ public class MobileTemplate {
 	private int optionBitmask = Options.ATTACKABLE;
 	private int pvpBitmask = PvpStatus.Attackable;
 	private short level;
+	private short minLevel;
+	private short maxLevel;
 	private Vector<String> attacks;
 	private String defaultAttack;
 	private int minDamage = 0;
 	private int maxDamage = 0;
+	private float attackSpeed = 0;
+	private int weaponType = 0;
 	private int difficulty = 0;
 	private int health, action;
 	private String creatureName;
 	private float scale = 1;
 	// this is a custom attack Range setting to use for large mobs like krayts
 	private int attackRange;
-
+	private Vector<String> weaponTemplates = new Vector<String>();
+	private Vector<WeaponTemplate> weaponTemplateVector = new Vector<WeaponTemplate>();
+	private int minSpawnDistance = 0;
+	private int maxSpawnDistance = 0;
+	private boolean deathblow = false;
+	private String socialGroup = ""; // see prima guide 
+	private int assistRange; // use prima guide for ranges
+	private boolean isStalker = false;
+	private String meatType, milkType, boneType, hideType;
+	private int meatAmount, milkAmount, boneAmount, hideAmount;
+	
 	public Vector<String> getTemplates() {
 		return templates;
 	}
@@ -155,5 +168,164 @@ public class MobileTemplate {
 	public void setAttackRange(int attackRange) {
 		this.attackRange = attackRange;
 	}
+	
+	public Vector<String> getWeaponTemplates() {
+		return weaponTemplates;
+	}
 
+	public void setWeaponTemplates(Vector<String> weaponTemplates) {
+		this.weaponTemplates = weaponTemplates;
+	}
+
+	public float getAttackSpeed() {
+		return attackSpeed;
+	}
+
+	public void setAttackSpeed(float attackSpeed) {
+		this.attackSpeed = attackSpeed;
+	}
+
+	public int getWeaponType() {
+		return weaponType;
+	}
+
+	public void setWeaponType(int weaponType) {
+		this.weaponType = weaponType;
+	}
+
+	public Vector<WeaponTemplate> getWeaponTemplateVector() {
+		return weaponTemplateVector;
+	}
+
+	public void setWeaponTemplateVector(Vector<WeaponTemplate> weaponTemplateVector) {
+		this.weaponTemplateVector = weaponTemplateVector;
+	}
+
+	public int getMinSpawnDistance() {
+		return minSpawnDistance;
+	}
+
+	public void setMinSpawnDistance(int minSpawnDistance) {
+		this.minSpawnDistance = minSpawnDistance;
+	}
+
+	public int getMaxSpawnDistance() {
+		return maxSpawnDistance;
+	}
+
+	public void setMaxSpawnDistance(int maxSpawnDistance) {
+		this.maxSpawnDistance = maxSpawnDistance;
+	}
+
+	public short getMinLevel() {
+		return minLevel;
+	}
+
+	public void setMinLevel(short minLevel) {
+		this.minLevel = minLevel;
+	}
+
+	public short getMaxLevel() {
+		return maxLevel;
+	}
+
+	public void setMaxLevel(short maxLevel) {
+		this.maxLevel = maxLevel;
+	}
+
+	public boolean isDeathblow() {
+		return deathblow;
+	}
+
+	public void setDeathblow(boolean deathblow) {
+		this.deathblow = deathblow;
+	}
+
+	public String getSocialGroup() {
+		return socialGroup;
+	}
+
+	public void setSocialGroup(String socialGroup) {
+		this.socialGroup = socialGroup;
+	}
+
+	public int getAssistRange() {
+		return assistRange;
+	}
+
+	public void setAssistRange(int assistRange) {
+		this.assistRange = assistRange;
+	}
+
+	public boolean isStalker() {
+		return isStalker;
+	}
+
+	public void setStalker(boolean isStalker) {
+		this.isStalker = isStalker;
+	}
+
+	public String getMeatType() {
+		return meatType;
+	}
+
+	public void setMeatType(String meatType) {
+		this.meatType = meatType;
+	}
+
+	public String getMilkType() {
+		return milkType;
+	}
+
+	public void setMilkType(String milkType) {
+		this.milkType = milkType;
+	}
+
+	public String getBoneType() {
+		return boneType;
+	}
+
+	public void setBoneType(String boneType) {
+		this.boneType = boneType;
+	}
+
+	public String getHideType() {
+		return hideType;
+	}
+
+	public void setHideType(String hideType) {
+		this.hideType = hideType;
+	}
+
+	public int getMeatAmount() {
+		return meatAmount;
+	}
+
+	public void setMeatAmount(int meatAmount) {
+		this.meatAmount = meatAmount;
+	}
+
+	public int getMilkAmount() {
+		return milkAmount;
+	}
+
+	public void setMilkAmount(int milkAmount) {
+		this.milkAmount = milkAmount;
+	}
+
+	public int getBoneAmount() {
+		return boneAmount;
+	}
+
+	public void setBoneAmount(int boneAmount) {
+		this.boneAmount = boneAmount;
+	}
+
+	public int getHideAmount() {
+		return hideAmount;
+	}
+
+	public void setHideAmount(int hideAmount) {
+		this.hideAmount = hideAmount;
+	}
 }

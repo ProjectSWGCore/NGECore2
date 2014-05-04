@@ -38,8 +38,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-import org.python.core.Py;
-
 import resources.common.collidables.CollidableCircle;
 import resources.datatables.Options;
 import resources.datatables.PvpStatus;
@@ -49,7 +47,7 @@ import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 import services.ai.AIActor;
 import services.ai.LairActor;
-import engine.resources.container.CreatureContainerPermissions;
+import engine.resources.container.StaticContainerPermissions;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
@@ -63,6 +61,7 @@ public class SpawnService {
 	private Map<String, LairGroupTemplate> lairGroupTemplates = new ConcurrentHashMap<String, LairGroupTemplate>();
 	private Map<String, LairTemplate> lairTemplates = new ConcurrentHashMap<String, LairTemplate>();
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
+	private Map<String, DynamicSpawnGroup> dynamicGroupTemplates = new ConcurrentHashMap<String, DynamicSpawnGroup>();
 
 	public SpawnService(NGECore core) {
 		this.core = core;
@@ -71,7 +70,7 @@ public class SpawnService {
 		}
 	}	
 	
-	public CreatureObject spawnCreature(String template, String planetName, long cellId, float x, float y, float z, float qW, float qX, float qY, float qZ, short level) {
+	public CreatureObject spawnCreature(String template, long objectId, String planetName, long cellId, float x, float y, float z, float qW, float qX, float qY, float qZ, short level) {
 		
 		Planet planet = core.terrainService.getPlanetByName(planetName);
 		MobileTemplate mobileTemplate = mobileTemplates.get(template);
@@ -86,13 +85,13 @@ public class SpawnService {
 				return null;
 		}
 		
-		CreatureObject creature = (CreatureObject) core.objectService.createObject(mobileTemplate.getTemplates().get(new Random().nextInt(mobileTemplate.getTemplates().size())), 0, planet, new Point3D(x, y, z), new Quaternion(qW, qX, qY, qZ));
+		CreatureObject creature = (CreatureObject) core.objectService.createObject(mobileTemplate.getTemplates().get(new Random().nextInt(mobileTemplate.getTemplates().size())), objectId, planet, new Point3D(x, y, z), new Quaternion(qW, qX, qY, qZ));
 		
 		if(creature == null)
 			return null;
 		
 		TangibleObject inventory = (TangibleObject) core.objectService.createObject("object/tangible/inventory/shared_character_inventory.iff", creature.getPlanet());
-		inventory.setContainerPermissions(CreatureContainerPermissions.CREATURE_CONTAINER_PERMISSIONS);
+		inventory.setContainerPermissions(StaticContainerPermissions.STATIC_CONTAINER_PERMISSIONS);
 
 		
 		/*if(mobileTemplate.getCustomWeapon() != null) {
@@ -108,12 +107,44 @@ public class SpawnService {
 		creature.setHeight(mobileTemplate.getScale());
 		int difficulty = mobileTemplate.getDifficulty();
 		creature.setDifficulty((byte) difficulty);
+
 		if(level != -1)
 			creature.setLevel(level);
-		else
-			creature.setLevel(mobileTemplate.getLevel());		
-		WeaponObject defaultWeapon = (WeaponObject) core.objectService.createObject("object/weapon/creature/shared_creature_default_weapon.iff", creature.getPlanet());
-		defaultWeapon.setAttackSpeed(2);
+		else {
+			creature.setLevel(mobileTemplate.getLevel());	
+			level = mobileTemplate.getLevel();
+		}
+		
+		if (mobileTemplate.getMinLevel()!=0 && mobileTemplate.getMaxLevel()!=0){
+			level = (short) (mobileTemplate.getMinLevel() + (new Random().nextInt(mobileTemplate.getMaxLevel()-mobileTemplate.getMinLevel()))); 
+			creature.setLevel(level);
+		}
+		
+		
+		//WeaponObject defaultWeapon = (mobileTemplate.getWeaponTemplates().size() > 0) ?  (WeaponObject) core.objectService.createObject(mobileTemplate.getWeaponTemplates().get(new Random().nextInt(mobileTemplate.getWeaponTemplates().size())), creature.getPlanet()) : (WeaponObject) core.objectService.createObject("object/weapon/creature/shared_creature_default_weapon.iff", creature.getPlanet());
+		
+		WeaponObject defaultWeapon = null;
+		Vector<WeaponTemplate> weaponTemplates = mobileTemplate.getWeaponTemplateVector();
+		if (weaponTemplates.size()==0){
+			defaultWeapon =  (WeaponObject) core.objectService.createObject("object/weapon/creature/shared_creature_default_weapon.iff", creature.getPlanet());
+			defaultWeapon.setAttackSpeed(1.0F);
+			defaultWeapon.setWeaponType(6);
+		} else {
+			int rnd = new Random().nextInt(weaponTemplates.size());
+			defaultWeapon =  (WeaponObject) core.objectService.createObject(weaponTemplates.get(rnd).getTemplate(), creature.getPlanet());
+			defaultWeapon.setAttackSpeed(weaponTemplates.get(rnd).getAttackSpeed());
+			defaultWeapon.setWeaponType(weaponTemplates.get(rnd).getWeaponType());
+		}
+			
+		
+		// QA
+		if (mobileTemplate.getAttackSpeed()==0)
+			System.err.println("Error in mobile spawn template for " + mobileTemplate.getCreatureName() + ". Missing attackspeed parameter");
+		if (mobileTemplate.getAttackRange()==0)
+			System.err.println("Error in mobile spawn template for " + mobileTemplate.getCreatureName() + ". Missing attackrange parameter");
+					
+		defaultWeapon.setAttackSpeed(mobileTemplate.getAttackSpeed());
+		defaultWeapon.setWeaponType(mobileTemplate.getWeaponType());
 		defaultWeapon.setDamageType("@obj_attr_n:armor_eff_kinetic");
 		defaultWeapon.setStringAttribute("cat_wpn_damage.damage", "0-0");
 		if(mobileTemplate.getAttackRange() > 0)
@@ -150,6 +181,7 @@ public class SpawnService {
 			creature.setMaxAction((int) (400 + level * 134));
 			creature.setAction((int) (400 + level * 134));			
 		} else {
+			System.out.println("HERE");
 			creature.setMaxHealth(customHealth);
 			creature.setHealth(customHealth);
 			creature.setMaxAction((int) (level * 128));
@@ -165,7 +197,9 @@ public class SpawnService {
 
 		AIActor actor = new AIActor(creature, creature.getPosition(), scheduler);
 		creature.setAttachment("AI", actor);
+		creature.setAttachment("radial_filename", "npc/mobile");
 		actor.setMobileTemplate(mobileTemplate);
+		
 	
 		
 		if(cell == null) {
@@ -175,6 +209,10 @@ public class SpawnService {
 			cell.add(creature);
 		}
 		return creature;
+	}
+	
+	public CreatureObject spawnCreature(String template, String planetName, long cellId, float x, float y, float z, float qW, float qX, float qY, float qZ, short level) {
+		return spawnCreature(template, 0L, planetName, cellId, x, y, z, qW, qX, qY, qZ, level);
 	}
 	
 	public CreatureObject spawnCreature(String mobileTemplate, String planetName, long cellId, float x, float y, float z, float qW, float qX, float qY, float qZ, int level) {
@@ -229,7 +267,8 @@ public class SpawnService {
 	    FileVisitor<Path> fv = new SimpleFileVisitor<Path>() {
 	        @Override
 	        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-	        	if(!file.toString().contains("lairs") && !file.toString().contains("spawnareas") && !file.toString().contains("lairgroups"))
+	        	if(!file.toString().contains("lairs") && !file.toString().contains("spawnareas") 
+	        	   && !file.toString().contains("lairgroups") && !file.toString().contains("dynamicgroups"))
 	        		core.scriptService.callScript(file.toString().replace(file.getFileName().toString(), ""), file.getFileName().toString().replace(".py", ""), "addTemplate", core);
 	        	return FileVisitResult.CONTINUE;
 	        }
@@ -282,6 +321,26 @@ public class SpawnService {
 		}
 	}
 	
+	public void loadDynamicGroups() {
+	    Path p = Paths.get("scripts/mobiles/dynamicgroups");
+	    FileVisitor<Path> fv = new SimpleFileVisitor<Path>() {
+	        @Override
+	        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+	        	core.scriptService.callScript("scripts/mobiles/dynamicgroups/", file.getFileName().toString().replace(".py", ""), "addDynamicGroup", core);
+	        	return FileVisitResult.CONTINUE;
+	        }
+	    };
+        try {
+			Files.walkFileTree(p, fv);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void addDynamicGroup(String name, DynamicSpawnGroup dynamicSpawnGroup) {
+		dynamicGroupTemplates.put(name, dynamicSpawnGroup);
+	}
+	
 	public void addLairGroup(String name, Vector<LairSpawnTemplate> lairSpawnTemplates) {
 		lairGroupTemplates.put(name, new LairGroupTemplate(name, lairSpawnTemplates));
 	}
@@ -312,6 +371,43 @@ public class SpawnService {
 		spawnAreas.get(planet).add(lairSpawnArea);
 		core.simulationService.addCollidable(collidableCircle, x, z);
 	}
+	
+	public void addDynamicSpawnArea(String dynamicGroup, float x, float z, float radius, String planetName) {
+		DynamicSpawnGroup dynamicGroupTemplate = dynamicGroupTemplates.get(dynamicGroup);
+		Planet planet = core.terrainService.getPlanetByName(planetName);
+		if(dynamicGroupTemplate == null || planet == null)
+			return;
+		CollidableCircle collidableCircle = new CollidableCircle(new Point3D(x, 0, z), radius, planet);
+		DynamicSpawnArea dynamicSpawnArea = new DynamicSpawnArea(planet, collidableCircle, dynamicGroupTemplate);
+		spawnAreas.get(planet).add(dynamicSpawnArea);
+		core.simulationService.addCollidable(collidableCircle, x, z);
+	}
+	
+	public void addDynamicSpawnArea(Vector<String> dynamicGroups, float x, float z, float radius, String planetName) {
+		Vector<DynamicSpawnGroup> dynamicSpawnGroups = new Vector<DynamicSpawnGroup>();
+		for (String template : dynamicGroups){
+			if (dynamicGroupTemplates.get(template)==null){
+				System.err.println("Dynamic Group template " + template +" not found in spawnservice collection!");	
+				return;
+			}
+			dynamicSpawnGroups.add(dynamicGroupTemplates.get(template));
+		}
+		
+		Planet planet = core.terrainService.getPlanetByName(planetName);
+		if(dynamicSpawnGroups == null || dynamicSpawnGroups.size() == 0 || planet == null)
+			return;
+		CollidableCircle collidableCircle = new CollidableCircle(new Point3D(x, 0, z), radius, planet);
+		DynamicSpawnArea dynamicSpawnArea = new DynamicSpawnArea(planet, collidableCircle, dynamicSpawnGroups);
+		spawnAreas.get(planet).add(dynamicSpawnArea);
+		core.simulationService.addCollidable(collidableCircle, x, z);
+	}
 
+	public Map<String, MobileTemplate> getMobileTemplates() {
+		return mobileTemplates;
+	}
+	
+	public MobileTemplate getMobileTemplate(String template) {
+		return mobileTemplates.get(template);
+	}
 	
 }

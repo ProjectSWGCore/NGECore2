@@ -21,6 +21,8 @@
  ******************************************************************************/
 package services.collections;
 
+import java.io.Serializable;
+
 import org.apache.mina.core.buffer.IoBuffer;
 
 import resources.objects.Delta;
@@ -28,8 +30,10 @@ import resources.objects.Delta;
 import com.sleepycat.persist.model.Persistent;
 
 @Persistent
-public class ServerFirst extends Delta {
+public class ServerFirst extends Delta implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
+
 	private String name;
 	private String collection;
 	private long time;

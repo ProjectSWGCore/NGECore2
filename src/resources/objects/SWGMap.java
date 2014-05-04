@@ -21,6 +21,8 @@
  ******************************************************************************/
 package resources.objects;
 
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,6 +35,8 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import main.NGECore;
+
 import org.apache.mina.core.buffer.IoBuffer;
 
 import resources.common.StringUtilities;
@@ -40,35 +44,44 @@ import resources.common.StringUtilities;
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
 
+import engine.resources.objects.SWGObject;
+
 @SuppressWarnings("unused")
 
 @Persistent
-public class SWGMap<K, V> implements Map<K, V> {
+public class SWGMap<K, V> implements Map<K, V>, Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	private Map<K, V> map = new TreeMap<K, V>();
 	@NotPersistent
-	private int updateCounter = 0;
-	private ObjectMessageBuilder messageBuilder;
+	private transient int updateCounter = 0;
+	long objectId;
+	private transient ObjectMessageBuilder messageBuilder;
 	private byte viewType;
 	private short updateType;
 	@NotPersistent
-	protected final Object objectMutex = new Object();
+	protected transient Object objectMutex = new Object();
 	
 	public SWGMap() { }
 	
-	public SWGMap(ObjectMessageBuilder messageBuilder, int viewType, int updateType) {
-		this.messageBuilder = messageBuilder;
+	public SWGMap(long objectId, int viewType, int updateType) {
+		this.objectId = objectId;
 		this.viewType = (byte) viewType;
 		this.updateType = (short) updateType;
 	}
 	
 	public SWGMap(Map<K, V> m) {
 		if (m instanceof SWGMap) {
+			this.objectId = ((SWGMap<K, V>) m).objectId;
 			this.messageBuilder = ((SWGMap<K, V>) m).messageBuilder;
 			this.viewType = ((SWGMap<K, V>) m).viewType;
 			this.updateType = ((SWGMap<K, V>) m).updateType;
 			map.putAll(m);
 		}
+	}
+	
+	public void init() {
+		objectMutex = new Object();
 	}
 	
 	public void clear() {
@@ -119,7 +132,9 @@ public class SWGMap<K, V> implements Map<K, V> {
 				if (map.containsKey(key)) {
 					V oldValue = map.put(key, value);
 					
-					queue(item(2, (String) key, ((IDelta) value).getBytes(), true, true));
+					if (oldValue != null) {
+						queue(item(2, (String) key, ((IDelta) value).getBytes(), true, true));
+					}
 					
 					return oldValue;
 				} else {
@@ -170,7 +185,9 @@ public class SWGMap<K, V> implements Map<K, V> {
 				key instanceof Integer || key instanceof Float || key instanceof Long) {
 				V value = map.remove(key);
 				
-				queue(item(1, key, ((IDelta) map.get(key)).getBytes(), true, true));
+				if (value != null) {
+					queue(item(1, (String) key, ((IDelta) value).getBytes(), true, true));
+				}
 				
 				return value;
 			}
@@ -210,7 +227,7 @@ public class SWGMap<K, V> implements Map<K, V> {
 		
 		int size = 1 + ((useIndex) ? (2 + index.toString().getBytes().length) : 0) + ((useData) ? data.length : 0);
 
-		IoBuffer buffer = messageBuilder.bufferPool.allocate((size), false).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer buffer = Delta.createBuffer((size));
 		buffer.put((byte) type);
 			if (useIndex) {
 				if (index instanceof String) {
@@ -230,6 +247,7 @@ public class SWGMap<K, V> implements Map<K, V> {
 				}
 			}
 			if (useData) buffer.put(data);
+			buffer.flip();
 				
 			updateCounter++;
 			
@@ -237,10 +255,22 @@ public class SWGMap<K, V> implements Map<K, V> {
 	}
 
 	private void queue(byte[] data) {
-		IoBuffer buffer = messageBuilder.bufferPool.allocate((data.length + 8), false).order(ByteOrder.LITTLE_ENDIAN);
+		if (messageBuilder == null) {
+			try {
+				SWGObject object = NGECore.getInstance().objectService.getObject(objectId);
+				this.messageBuilder = (ObjectMessageBuilder) object.getClass().getMethod("getMessageBuilder", new Class[] {}).invoke(object, new Object[] { });
+			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+				e.printStackTrace();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		IoBuffer buffer = Delta.createBuffer((data.length + 8));
 		buffer.putInt(1);
 		buffer.putInt(updateCounter);
 		buffer.put(data);
+		buffer.flip();
 		messageBuilder.sendListDelta(viewType, updateType, buffer);
 	}
 	
@@ -251,10 +281,22 @@ public class SWGMap<K, V> implements Map<K, V> {
 			size += queued.length;
 		}
 		
-		IoBuffer buffer = messageBuilder.bufferPool.allocate((size + 8), false).order(ByteOrder.LITTLE_ENDIAN);
+		if (messageBuilder == null) {
+			try {
+				SWGObject object = NGECore.getInstance().objectService.getObject(objectId);
+				this.messageBuilder = (ObjectMessageBuilder) object.getClass().getMethod("getMessageBuilder", new Class[] {}).invoke(object, new Object[] { });
+			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+				e.printStackTrace();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		IoBuffer buffer = Delta.createBuffer((size + 8));
 		buffer.putInt(data.size());
 		buffer.putInt(updateCounter);
 		for (byte[] queued : data) buffer.put(queued);
+		buffer.flip();
 		
 		messageBuilder.sendListDelta(viewType, updateType, buffer);
 	}
@@ -267,8 +309,7 @@ public class SWGMap<K, V> implements Map<K, V> {
 
 	@Override
 	public void forEach(BiConsumer<? super K, ? super V> action) {
-		// TODO Auto-generated method stub
-		
+		map.forEach(action);
 	}
 
 	@Override

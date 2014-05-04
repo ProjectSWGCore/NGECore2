@@ -4,22 +4,18 @@ def setup():
     return
    
 def run(core, actor, target, commandString):
- 
-	if commandString.startswith("quart"):
-		print ('commnad: ' + commandString)
-		#cmdArgs = commandString.split(" ")
-		#qY = cmdArgs[1]
-		#qW = cmdArgs[2]
-
-		quaternion = actor.getOrientation()
-		#tp = core.travelService.getTravelPointByName(actor.getPlanet().name, "Mos Eisley Starport")
-		#obj = tp.getShuttle()
-		target.setOrientation(quaternion)
-		print ('Orientation: qY- ' + str(quaternion.y) + ' --- qW- ' + str(quaternion.w))
-		Console.println('Orientation: qY- ' + str(quaternion.y) + ' --- qW- ' + str(quaternion.w))
-		return
-
-	elif commandString.startswith("id"):
-		print ( str(target.getObjectId()))
+	commandArgs = commandString.split(" ")
+	target = core.chatService.getObjectByFirstName(commandArgs[0])
+	
+	if len(commandArgs) > 1:
+		if commandArgs[1].startswith("id"):
+			actor.sendSystemMessage('Player Object ID: ' + target.getObjectId())
+			return
+	
+		elif commandArgs[1].startswith("pid"):
+			actor.sendSystemMessage('Account ID: ' + str(core.characterService.getAccountId(target.getObjectId())), 0)
+			return
+	else:
+		actor.sendSystemMessage('Player Object ID: ' + str(target.getObjectId()) + ' Account ID: ' + str(core.characterService.getAccountId(target.getObjectId())), 0)
 		return
 	return

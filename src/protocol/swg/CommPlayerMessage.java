@@ -25,16 +25,19 @@ import java.nio.ByteOrder;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import resources.common.Console;
-import resources.common.StringUtilities;
 import engine.resources.common.CRC;
+import resources.common.OutOfBand;
 
 public class CommPlayerMessage extends SWGMessage {
 
 	private long objectId;
-	
-	public CommPlayerMessage(long objectId) {
+	private String model;
+	private OutOfBand outOfBand;
+	private int time;
+
+	public CommPlayerMessage(long objectId, OutOfBand outOfBand) {
 		this.objectId = objectId;
+		this.outOfBand = outOfBand;
 	}
 	
 	@Override
@@ -44,56 +47,35 @@ public class CommPlayerMessage extends SWGMessage {
 
 	@Override
 	public IoBuffer serialize() {
-		IoBuffer buffer = IoBuffer.allocate(200).order(ByteOrder.LITTLE_ENDIAN);
-		
+		IoBuffer buffer = IoBuffer.allocate(50).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.setAutoExpand(true);
+
 		buffer.putShort((short) 2);
 		buffer.putInt(0x594AD258);
-		
 		buffer.put((byte) 0); // aurebesh borders on comm, space version? Can cause crashes
-		
 		buffer.putLong(objectId);
-		
-		/*Seen numbers:
-		 * 52 (Starting Station Comms)
-		 * 54 (Tansarii Comms)
-		 * 57 (Supply Drops)
-		 * 58 (Faction Covert->Overt)
-		 * 68 (Imperial stop)
-		 * 
-		 */
-		buffer.putInt(57); // unknown, changes for each comm message (counter?)
-		
-		buffer.putShort((short) 0); // unknonw flag, seems to do nothing
-		buffer.put((byte) 0); // unknown, always 0 except for imperial stop message
-		
-		buffer.putInt(0xFFFFFFFF);
-		
-		buffer.put(getAsciiString("stormtrooper")); // StfFile
-		buffer.putInt(0); // stf spacer
-		buffer.put(getAsciiString("u11")); // StfName
-		
-		buffer.putInt(0); // stf spacer
-		buffer.putLong(0);
-		buffer.putLong(0);
-		buffer.putLong(0);
-		buffer.putLong(0);  // 70 bytes
-		buffer.putLong(0);
-		buffer.putLong(0);
-		buffer.putLong(0);
-		buffer.putLong(0);
-		buffer.put((byte) 0);
-		
+		buffer.put(outOfBand.serialize().array());
 		// Officer Supply Drop: 0x3E894347
 		// Rebel Faction Dude: 0x528CB3D7
-		buffer.putInt(0x528CB3D7); // model crc, can be anything w/o crashing
-		
+		if (model == null)
+			buffer.putInt(0x3E894347);
+		else 
+			buffer.putInt(CRC.StringtoCRC(model));
 		buffer.putInt(0); // sound
-		
 		buffer.putShort((short) 0); // unk
-		buffer.putShort((short) 16576); // comm display time, unsure on how it's calculated
+		if (time == 0)
+			buffer.putShort((short) 16576);
+		else
+			buffer.putShort((short) time);
 		buffer.flip();
-		Console.println("CPM: " + StringUtilities.bytesToHex(buffer.array()));
 		return buffer;
 	}
+	
+	public void setModel(String model) {
+		this.model = model;
+	}
 
+	public void setTime(int time) {
+		this.time = time;
+	}
 }

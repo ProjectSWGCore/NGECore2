@@ -21,48 +21,139 @@
  ******************************************************************************/
 package services;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import resources.common.FileUtilities;
 import resources.objects.creature.CreatureObject;
+import resources.skills.SkillMod;
 import main.NGECore;
+import engine.clientdata.ClientFileManager;
+import engine.clientdata.visitors.DatatableVisitor;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
 public class SkillModService implements INetworkDispatch {
 	
 	private NGECore core;
-
+	private DatatableVisitor visitor;
+	private Map<String, Integer> skillModMap = new HashMap<String, Integer>();
+	
 	public SkillModService(NGECore core) {
 		this.core = core;
+		
+		try {
+			visitor = ClientFileManager.loadFile("datatables/expertise/skill_mod_listing.iff", DatatableVisitor.class);
+			
+			for (int i = 0; i < visitor.getRowCount(); i++) {
+				if (visitor.getObject(i, 0) != null) {
+					skillModMap.put((String) visitor.getObject(i, 0), i);
+				}
+			}
+		} catch (InstantiationException | IllegalAccessException e) {
+			e.printStackTrace();
+		}
 	}
 	
-	public void addSkillMod(CreatureObject creature, String skillMod, int value) {
+	/*
+	 * @description Adds a skillMod.
+	 * @param creature Creature to add to.
+	 * @param name Name of the skillMod
+	 * @param base Base to add to it.
+	 * @param modifier Modifier to add to it.
+	 */
+	public void addSkillMod(CreatureObject creature, String name, int base, int modifier) {
+		int divisor = (skillModMap.get(name) == null) ? 0 : (Integer) visitor.getObject(skillModMap.get(name), 5);
 		
-		if(FileUtilities.doesFileExist("scripts/skillMods/" + skillMod + ".py"))
-			core.scriptService.callScript("scripts/skillMods/", skillMod, "add", core, creature, skillMod, value);
-		else
-			creature.addSkillMod(skillMod, value);
+		if (FileUtilities.doesFileExist("scripts/skillMods/" + name + ".py")) {
+			core.scriptService.callScript("scripts/skillMods/", name, "add", core, creature, new SkillMod(base, modifier), divisor);
+		}
+		
+		synchronized(creature.getMutex()) {
+			SkillMod skillMod = creature.getSkillMods().get(name);
+			
+			if (base > 0 || modifier > 0) {
+				if (skillMod == null) {
+					creature.getSkillMods().put(name, new SkillMod(base, modifier));
+				} else {
+					skillMod.addBase(base);
+					skillMod.addModifier(modifier);
+					creature.getSkillMods().put(name, skillMod);
+				}
+			}
+		}
 	}
 	
-	public void deductSkillMod(CreatureObject creature, String skillMod, int value) {
-		
-		if(FileUtilities.doesFileExist("scripts/skillMods/" + skillMod + ".py"))
-			core.scriptService.callScript("scripts/skillMods/", skillMod, "deduct", core, creature, skillMod, value);
-		else
-			creature.deductSkillMod(skillMod, value);
-
-
+	public void addSkillMod(CreatureObject creature, String name, int base) {
+		addSkillMod(creature, name, base, 0);
 	}
-
+	
+	public void addSkillMod(CreatureObject creature, String name, SkillMod skillMod) {
+		addSkillMod(creature, name, skillMod.getBase(), skillMod.getModifier());
+	}
+	
+	public SkillMod getSkillMod(CreatureObject actor, String name) {
+		return actor.getSkillMods().get(name);
+	}
+	
+	public int getSkillModBase(CreatureObject creature, String name) {
+		return creature.getSkillModBase(name);
+	}
+	
+	public int getSkillModModifier(CreatureObject creature, String name) {
+		return creature.getSkillModModifier(name);
+	}
+	
+	public float getSkillModValue(CreatureObject creature, String name) {
+		int divisor = (skillModMap.get(name) == null) ? 0 : (Integer) visitor.getObject(skillModMap.get(name), 5);
+		return creature.getSkillModValue(name, divisor);
+	}
+	
+	public void deductSkillMod(CreatureObject creature, String name, SkillMod skillMod) {
+		deductSkillMod(creature, name, skillMod.getBase(), skillMod.getModifier());
+	}
+	
+	public void deductSkillMod(CreatureObject creature, String name, int base) {
+		deductSkillMod(creature, name, base, 0);
+	}	
+	
+	public void deductSkillMod(CreatureObject creature, String name, int base, int modifier) {
+		int divisor = (skillModMap.get(name) == null) ? 0 : (Integer) visitor.getObject(skillModMap.get(name), 5);
+		
+		if (FileUtilities.doesFileExist("scripts/skillMods/" + name + ".py")) {
+			core.scriptService.callScript("scripts/skillMods/", name, "deduct", core, creature, new SkillMod(base, modifier), divisor);
+		}
+		
+		synchronized(creature.getMutex()) {
+			SkillMod skillMod = creature.getSkillMods().get(name);
+			
+			if (skillMod == null || (base <= 0 && modifier <= 0)) {
+				return;
+			} else {
+				skillMod.deductBase(base);
+				skillMod.deductModifier(modifier);
+				
+				if (skillMod.getBase() > 0 || skillMod.getModifier() > 0) {
+					creature.getSkillMods().put(name, skillMod);
+				} else {
+					removeSkillMod(creature, name);
+				}
+			}
+		}
+	}
+	
+	public void removeSkillMod(CreatureObject creature, String name) {
+		creature.getSkillMods().remove(name);
+	}
+	
 	@Override
 	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> arg0, Map<Integer, INetworkRemoteEvent> arg1) {
 		
 	}
-
+	
 	@Override
 	public void shutdown() {
 		
 	}
-
+	
 }

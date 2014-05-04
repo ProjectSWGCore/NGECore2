@@ -21,6 +21,7 @@
  ******************************************************************************/
 package resources.objects;
 
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -33,15 +34,20 @@ import com.sleepycat.persist.model.Persistent;
 import resources.common.StringUtilities;
 
 @Persistent
-public abstract class Delta implements IDelta {
+public abstract class Delta implements IDelta, Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	@NotPersistent
-	protected final Object objectMutex = new Object();
+	protected transient Object objectMutex = new Object();
 	@NotPersistent
-	private static SimpleBufferAllocator bufferPool = new SimpleBufferAllocator();
+	private transient static SimpleBufferAllocator bufferPool = new SimpleBufferAllocator();
 	
 	public Delta() {
 		
+	}
+	
+	public void init() {
+		objectMutex = new Object();
 	}
 	
 	protected String getAsciiString(ByteBuffer buffer) {
@@ -65,7 +71,12 @@ public abstract class Delta implements IDelta {
 	}
 	
 	public static IoBuffer createBuffer(int size) {
-		return bufferPool.allocate(size, false).order(ByteOrder.LITTLE_ENDIAN);
+		return IoBuffer.allocate(size, false).order(ByteOrder.LITTLE_ENDIAN);
+	}
+	
+	public static IoBuffer resizeBuffer(IoBuffer buffer) {
+		int size = buffer.position();
+		return buffer == null ? createBuffer(0) : createBuffer(size).put(buffer.flip().array(), 0, size).flip();
 	}
 	
 }

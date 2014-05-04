@@ -21,7 +21,6 @@
  ******************************************************************************/
 package services.combat;
 
-import services.command.CombatCommand;
 import main.NGECore;
 
 public class CombatCommands {
@@ -133,6 +132,7 @@ public class CombatCommands {
 		core.commandService.registerCombatCommand("bh_sh_1");
 		core.commandService.registerCombatCommand("bh_sh_2");
 		core.commandService.registerCombatCommand("bh_sh_3");
+		core.commandService.registerCommand("bh_shields_1");
 		
 		// Jedi
 		

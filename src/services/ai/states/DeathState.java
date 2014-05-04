@@ -22,6 +22,8 @@
 package services.ai.states;
 
 import main.NGECore;
+import resources.objects.creature.CreatureObject;
+import resources.objects.tangible.TangibleObject;
 import services.ai.AIActor;
 
 public class DeathState extends AIState {
@@ -29,6 +31,8 @@ public class DeathState extends AIState {
 	@Override
 	public byte onEnter(AIActor actor) {
 		NGECore.getInstance().aiService.awardExperience(actor);
+		actor.getCreature().setAttachment("radial_filename", "npc/corpse");
+		NGECore.getInstance().lootService.DropLoot((CreatureObject)(actor.getCreature().getKiller()),(TangibleObject)(actor.getCreature()));
 		actor.scheduleDespawn();
 		return 0;
 	}
