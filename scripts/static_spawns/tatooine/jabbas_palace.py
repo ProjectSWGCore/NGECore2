@@ -15,6 +15,8 @@ def addPlanetSpawns(core, planet):
 	
 	# TODO Check all NPCs for personalized scripting, change format.
 	
+	# TODO Verify proper cell IDs once Jabba's Palace is spawning properly again.
+	
 	reelo = stcSvc.spawnObject('object/mobile/shared_reelo_baruk.iff', 'tatooine', long(26560), float(-3.5), float(0.2), float(113.5), float(0), float(0))
 	reelo.setCustomName2('Reelo Baruk')
 	reelo.setOptionsBitmask(264)
