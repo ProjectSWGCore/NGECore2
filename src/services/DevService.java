@@ -1169,12 +1169,11 @@ public class DevService implements INetworkDispatch {
 					
 					case 121:
 						NGECore.getInstance().playerCityService.buildSandboxTestCity(player);
+						return;
 						
 					case 122:
 						Point3D position = new Point3D(4086,15,5554);
 						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("dantooine"), position, player.getOrientation(), null);
-					
-						core.playerCityService.buildSandboxTestCity(player);
 						return;
 
 					case 123:
