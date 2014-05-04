@@ -16,6 +16,7 @@ def addPlanetSpawns(core, planet):
 	# TODO Check all NPCs for personalized scripting, change format.
 	
 	#Cantina Interior
+	
 	wuher = stcSvc.spawnObject('object/mobile/shared_wuher.iff', 'tatooine', long(1082877), float(8.6), float(-0.9), float(0.4), float(0.71), float(0.71))
 	wuher.setCustomName2('Wuher')
 	wuher.setOptionsBitmask(256)
@@ -153,6 +154,11 @@ def addPlanetSpawns(core, planet):
 	#Miscellaneous Building Interiors
 
 	#Outside
+	
+	trainer1 = stcSvc.spawnObject('object/mobile/shared_trainer_beast_master.iff', 'tatooine', long(0), float(3456), float(5.0), float(-4861), float(0), float(0)) 
+	trainer1.setCustomName2('a Beast Trainer')
+	trainer1.setOptionsBitmask(256)
+	
 	businessman2 = stcSvc.spawnObject('object/mobile/shared_dressed_businessman_human_male_01.iff', 'tatooine', long(0), float(3663.3), float(4.0), float(-4738.6), float(0), float(0)) 
 	businessman2.setCustomName2('a Businessman')
 	businessman2.setOptionsBitmask(256)
@@ -316,6 +322,7 @@ def addPlanetSpawns(core, planet):
 	dunir.setOptionsBitmask(256)
 	
 	#Eisley Ship Controller
+	
 	stcSvc.spawnObject('object/mobile/shared_distant_ship_controller.iff', 'tatooine', long(0), float(3542.3), float(5.0), float(-4826.0), float(0.42), float(0.91))
 	
 	return
