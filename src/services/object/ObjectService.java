@@ -675,41 +675,39 @@ public class ObjectService implements INetworkDispatch {
 			reuse_time = 0;
 		}
 		
-		if (reuse_time > 0) {
-			try {
-				DatatableVisitor visitor = ClientFileManager.loadFile("datatables/timer/template_command_mapping.iff", DatatableVisitor.class);
-				
-				for (int i = 0; i < visitor.getRowCount(); i++) {
-					if (visitor.getObject(i, 0) != null && ((String) (visitor.getObject(i, 0))).equalsIgnoreCase(object.getTemplate())) {
-						String commandName = (String) visitor.getObject(i, 1);
-						String cooldownGroup = (String) visitor.getObject(i, 2);
-						String animation = (String) visitor.getObject(i, 3);
+		try {
+			DatatableVisitor visitor = ClientFileManager.loadFile("datatables/timer/template_command_mapping.iff", DatatableVisitor.class);
+			
+			for (int i = 0; i < visitor.getRowCount(); i++) {
+				if (visitor.getObject(i, 0) != null && ((String) (visitor.getObject(i, 0))).equalsIgnoreCase(object.getTemplate())) {
+					String commandName = (String) visitor.getObject(i, 1);
+					String cooldownGroup = (String) visitor.getObject(i, 2);
+					String animation = (String) visitor.getObject(i, 3);
+					
+					if (commandName.length() > 0) {
+						BaseSWGCommand command = core.commandService.getCommandByName(commandName);
 						
-						if (commandName.length() > 0) {
-							BaseSWGCommand command = core.commandService.getCommandByName(commandName);
-							
-							if (command instanceof CombatCommand && animation.length() > 0) {
-								((CombatCommand) command).setDefaultAnimations(new String[] { animation });
-							}
-							
-							if (core.commandService.callCommand(creature, object, command, 0, "")) {
-								core.commandService.removeCommand(creature, 0, command);
-								return;
-							}
-						} else if (cooldownGroup.length() > 0) {
-							if (creature.hasCooldown(cooldownGroup)) {
-								return;
-							}
-							
-							creature.addCooldown(cooldownGroup, object.getIntAttribute("reuse_time"));
+						if (command instanceof CombatCommand && animation.length() > 0) {
+							((CombatCommand) command).setDefaultAnimations(new String[] { animation });
 						}
 						
-						break;
+						if (core.commandService.callCommand(creature, object, command, 0, "")) {
+							core.commandService.removeCommand(creature, 0, command);
+							return;
+						}
+					} else if (cooldownGroup.length() > 0) {
+						if (creature.hasCooldown(cooldownGroup)) {
+							return;
+						}
+						
+						creature.addCooldown(cooldownGroup, object.getIntAttribute("reuse_time"));
 					}
+					
+					break;
 				}
-			} catch (Exception e) {
-				e.printStackTrace();
 			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		
 		if (object instanceof TangibleObject) {
