@@ -15,9 +15,6 @@ def createRadial(core, owner, target, radials):
 	return
 	
 def handleSelection(core, owner, target, option):
-<<<<<<< HEAD
-	#owner.sendSystemMessage('Correct Loot Radial called', 0)
-=======
 
 	if option == 164 and target.getAttachment('AI') and core.resourceService.canHarvest(owner, target):
 		core.resourceService.doHarvest(owner, target, 'meat')
@@ -25,7 +22,6 @@ def handleSelection(core, owner, target, option):
 		core.resourceService.doHarvest(owner, target, 'hide')
 	if option == 166 and target.getAttachment('AI') and core.resourceService.canHarvest(owner, target):
 		core.resourceService.doHarvest(owner, target, 'bone')	
->>>>>>> origin/master
 	if option == 36 and target:
 		#core.lootService.handleLootRequest(owner,target)
 		core.lootService.handleLootRequest(owner,target)
