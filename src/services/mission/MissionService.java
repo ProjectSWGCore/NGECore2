@@ -558,13 +558,9 @@ public class MissionService implements INetworkDispatch {
 	}
 	
 	public boolean removeBounty(long bountyTarget, boolean listRemove) {
-		Transaction txn = bountiesODB.getEnvironment().beginTransaction(null, null);
-		
 		if (listRemove)
 			bountyList.remove(bountiesODB.get(bountyTarget));
-		
 		bountiesODB.remove(bountyTarget);
-		txn.commitSync();
 		return true;
 	}
 	
