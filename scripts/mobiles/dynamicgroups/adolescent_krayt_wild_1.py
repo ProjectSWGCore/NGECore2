@@ -10,7 +10,7 @@ def addDynamicGroup(core):
 	dynamicGroup.setMobiles(mobileTemplates)
 	dynamicGroup.setGroupMembersNumber(1)
 	dynamicGroup.setName('adolescent_krayt_wild_1')
-	dynamicGroup.setMaxSpawns(15)
+	dynamicGroup.setMaxSpawns(1)
 	dynamicGroup.setMinSpawnDistance(150)
 	core.spawnService.addDynamicGroup('adolescent_krayt_wild_1', dynamicGroup)
 	return

@@ -8,7 +8,7 @@ def addDynamicGroup(core):
 	mobileTemplates = Vector()
 	mobileTemplates.add('grand_canyon_krayt_dragon')
 	dynamicGroup.setMobiles(mobileTemplates)
-	dynamicGroup.setGroupMembersNumber(2)
+	dynamicGroup.setGroupMembersNumber(1)
 	dynamicGroup.setName('grand_canyon_krayt_dragon_1')
 	dynamicGroup.setMaxSpawns(1)
 	dynamicGroup.setMinSpawnDistance(60)
