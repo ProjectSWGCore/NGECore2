@@ -29,6 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import protocol.swg.CommPlayerMessage;
 import protocol.swg.PlayClientEffectLocMessage;
+import protocol.swg.UpdatePVPStatusMessage;
 import engine.resources.common.CRC;
 import engine.resources.container.Traverser;
 import engine.resources.objects.SWGObject;
@@ -108,9 +109,15 @@ public class BountyMissionObjective extends MissionObjective {
 		
 		player.getClient().getSession().write(comm.serialize());
 		
-		player.setAttachment("bountyMissionId", getMissionObject().getObjectId());
+		player.getPlayerObject().setBountyMissionId(getMissionObject().getObjectId());
 		
+		/*CreatureObject target = (CreatureObject) core.objectService.getObject(markObjId);
+		if (target != null && target.getPlanetId() == player.getPlanetId()) {
+			UpdatePVPStatusMessage upvpm = new UpdatePVPStatusMessage(player.getObjectID(), core.factionService.calculatePvpStatus(player, target), player.getFaction());
+			player.getClient().getSession().write(upvpm.serialize());
+		}*/
 	}
+
 
 	@Override
 	public void complete(NGECore core, CreatureObject player) {
@@ -131,7 +138,7 @@ public class BountyMissionObjective extends MissionObjective {
 		clearActiveMissions(core, bounty);
 		
 		core.missionService.removeBounty(markObjId);
-		player.setAttachment("bountyMissionId", 0);
+		player.getPlayerObject().setBountyMissionId(0);
 	}
 
 	@Override
@@ -144,7 +151,7 @@ public class BountyMissionObjective extends MissionObjective {
 			return;
 		
 		bounty.removeBountyHunter(player.getObjectId());
-		player.setAttachment("bountyMissionId", 0);
+		player.getPlayerObject().setBountyMissionId(0);
 	}
 
 	@Override

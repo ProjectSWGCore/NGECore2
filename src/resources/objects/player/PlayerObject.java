@@ -150,6 +150,8 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	@NotPersistent
 	private transient boolean callingCompanion = false;
 	
+	private long bountyMissionId;
+	
 	public PlayerObject() {
 		super();
 		messageBuilder = new PlayerMessageBuilder(this);
@@ -894,10 +896,8 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	
 	public boolean isMemberOfChannel(int roomId) {
 		if (chatChannels.contains(roomId)) {
-			System.out.println("Member of the channel!");
 			return true;
 		}
-		System.out.println("Not a Member of the channel!");
 		return false;
 	}
 	
@@ -909,6 +909,14 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		this.callingCompanion = callingCompanion;
 	}
 	
+	public long getBountyMissionId() {
+		return bountyMissionId;
+	}
+
+	public void setBountyMissionId(long bountyMissionId) {
+		this.bountyMissionId = bountyMissionId;
+	}
+
 	public ObjectMessageBuilder getMessageBuilder() {
 		return messageBuilder;
 	}

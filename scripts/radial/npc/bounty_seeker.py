@@ -13,12 +13,12 @@ def createRadial(core, owner, target, radials):
 def handleSelection(core, owner, target, option):
 
 	if option == 136 and target or option == 138 and target:
-		id = owner.getAttachment('bountyMissionId')
+		id = owner.getPlayerObject().getBountyMissionId()
 		if id is None or id == 0:
 			owner.sendSystemMessage('@mission/mission_generic:bounty_no_mission', 0)
 			return
 		
-		mission = core.objectService.getObject(owner.getAttachment('bountyMissionId'))
+		mission = core.objectService.getObject(id)
 		if mission is None:
 			owner.sendSystemMessage('@mission/mission_generic:bounty_no_mission', 0)
 			return
