@@ -104,6 +104,7 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 40, "Unity Ring");
 				suiOptions.put((long) 41, "Tusken Rucksack");
 				suiOptions.put((long) 42, "Heroism Jewlery Set");
+				suiOptions.put((long) 43, "Breath of Heaven");
 				break;
 			case 5: // [Items] Armor
 				suiOptions.put((long) 50, "Assault Armor");
@@ -342,6 +343,12 @@ public class DevService implements INetworkDispatch {
 						inventory.add(heroismNecklace);
 						inventory.add(heroismBraceletRight);
 						inventory.add(heroismBraceletLeft);
+						return;
+					case 43:
+						TangibleObject drink = (TangibleObject) core.objectService.createObject("object/tangible/food/crafted/shared_drink_breath_of_heaven.iff", planet);
+						drink.setFloatAttribute("cat_stat_mod_bonus.@stat_n:constitution_modified", 100);
+						drink.setFloatAttribute("cat_stat_mod_bonus.@stat_n:dodge", 3);
+						inventory.add(drink);
 						return;
 					case 50: // [Items] Assault Armor
 						sendCharacterBuilderSUI(player, 6);
