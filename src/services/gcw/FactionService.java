@@ -252,7 +252,7 @@ public class FactionService implements INetworkDispatch {
 		
 		if (object.getSlottedObject("datapad") != null) {
 			object.getSlottedObject("datapad").viewChildren(object, false, false, (mission) -> {
-				if (((MissionObject) mission).getBountyObjId() == targetId) {
+				if (mission instanceof MissionObject && ((MissionObject) mission).getBountyObjId() == targetId) {
 					ref.set(PvpStatus.Attackable | PvpStatus.Aggressive);
 				}
 			});
@@ -261,7 +261,7 @@ public class FactionService implements INetworkDispatch {
 		if (ghost != null && ghost.getProfession().contains("smuggler") &&
 		target.getSlottedObject("datapad") != null) {
 			target.getSlottedObject("datapad").viewChildren(target, false, false, (mission) -> {
-				if (((MissionObject) mission).getBountyObjId() == object.getObjectID()) {
+				if (mission instanceof MissionObject && ((MissionObject) mission).getBountyObjId() == object.getObjectID()) {
 					ref.set(PvpStatus.Attackable);
 				}
 			});
