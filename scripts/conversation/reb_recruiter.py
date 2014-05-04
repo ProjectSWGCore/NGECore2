@@ -315,7 +315,7 @@ def handleSecondScreen(core, actor, npc, selection):
 	
 	if actor.getFaction() != 'rebel' and actor.getFaction() != 'imperial':
 		if selection == 0:
-			actor.setFaction('imperial')
+			actor.setFaction('rebel')
 			actor.setFactionStatus(FactionStatus.OnLeave)
 	
 			prose = ProsePackage('conversation/faction_recruiter_rebel', 's_99')
@@ -546,7 +546,7 @@ def handleSecondScreen(core, actor, npc, selection):
 def handleThirdScreen(core, actor, npc, selection):
 	if selection == 0:
 		core.conversationService.sendStopConversation(actor, npc, 'conversation/faction_recruiter_rebel', 's_58')	
-		actor.setFaction('neutral')
+		actor.setFaction('')
 		return
 	
 	if selection == 1:

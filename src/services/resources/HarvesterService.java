@@ -54,7 +54,6 @@ import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import resources.common.ObjControllerOpcodes;
 import resources.objects.creature.CreatureObject;
-import resources.objects.deed.Harvester_Deed;
 import resources.objects.harvester.HarvesterMessageBuilder;
 import resources.objects.harvester.HarvesterObject;
 import resources.objects.installation.InstallationObject;
@@ -83,7 +82,7 @@ public class HarvesterService implements INetworkDispatch {
 	private Vector<InstallationObject> allConstructors = new Vector<InstallationObject>();
 	
 	public HarvesterService(NGECore core) {
-		this.core = core;	
+		this.core = core;
 		//core.commandService.registerCommand("permissionlistmodify");
 		//core.commandService.registerCommand("harvesterselectresource");
 		//core.commandService.registerCommand("harvesteractivate");
@@ -439,19 +438,26 @@ public class HarvesterService implements INetworkDispatch {
 						// handle creation of correct deed in player inventory
 						PlayerObject player = (PlayerObject) crafter.getSlottedObject("ghost");	
 						String deedTemplate = harvester.getDeedTemplate(); 
-						Harvester_Deed deed = (Harvester_Deed)core.objectService.createObject(deedTemplate, owner.getPlanet());
-						if(player.getLotsRemaining()+deed.getLotRequirement()>10){
+						TangibleObject deed = (TangibleObject) core.objectService.createObject(deedTemplate, owner.getPlanet());
+						
+						if (player.getLotsRemaining() + (Integer) deed.getAttachment("LotRequirement") > 10) {
 							// Something went wrong or hacking attempt
 							crafter.sendSystemMessage("Structure can't be redeeded. Maximum lot count exceeded.",(byte)1);
 							return;
 						}
 								
-						deed.setStructureTemplate(harvester.getTemplate());
-						deed.setOutputHopperCapacity(harvester.getOutputHopperCapacity());
-						deed.setBER(harvester.getBER());
-						deed.setSurplusMaintenance((int)harvester.getMaintenanceAmount());
-						deed.setSurplusPower((int)harvester.getPowerLevel());
-						deed.setAttributes();
+						deed.setAttachment("StructureTemplate", harvester.getTemplate());
+						
+						if (harvester.getMaintenanceAmount() > 0) {
+							deed.setIntAttribute("examine_maintenance", (int) harvester.getMaintenanceAmount());
+						}
+						
+						if (harvester.getPowerLevel() > 0) {
+							deed.setIntAttribute("examine_power", (int) harvester.getPowerLevel());
+						}
+						
+						deed.setIntAttribute("examine_hoppersize", harvester.getOutputHopperCapacity());
+						deed.setIntAttribute("examine_extractionrate", harvester.getBER());
 						
 						removeHarvester(harvester);
 						core.objectService.destroyObject(harvester.getObjectID());
@@ -459,8 +465,9 @@ public class HarvesterService implements INetworkDispatch {
 						SWGObject crafterInventory = owner.getSlottedObject("inventory");
 						crafterInventory.add(deed);
 						
-						if(player.getLotsRemaining()+deed.getLotRequirement()<=10)
-							player.setLotsRemaining(player.getLotsRemaining()+deed.getLotRequirement());
+						if (player.getLotsRemaining() + (Integer) deed.getAttachment("LotRequirement") <= 10) {
+							player.setLotsRemaining(player.getLotsRemaining() + (Integer) deed.getAttachment("LotRequirement"));
+						}
 						
 						crafter.sendSystemMessage("@player_structure:processing_destruction",(byte)1);
 						crafter.sendSystemMessage("@player_structure:deed_reclaimed",(byte)1);
@@ -651,7 +658,7 @@ public class HarvesterService implements INetworkDispatch {
 		    }
 		    return 0;
 		  }
-		}
+	}
 	
 	public void handlePermissionAdmin(CreatureObject owner, TangibleObject target) {
 		
@@ -927,11 +934,9 @@ public class HarvesterService implements INetworkDispatch {
 		return container;
 	}
 	
-	
-	public void constructionSite(CreatureObject actor,SWGObject target, long objectId, float posX, float posZ, float dir){
-		
-		SWGObject usedDeed = (SWGObject)actor.getAttachment("LastUsedDeed");
-		String constructorTemplate = ((Harvester_Deed)usedDeed).getConstructorTemplate();
+	public void constructionSite(CreatureObject actor, SWGObject target, long objectId, float posX, float posZ, float dir){
+		SWGObject usedDeed = actor.getUseTarget(); //(SWGObject)actor.getAttachment("LastUsedDeed");
+		String constructorTemplate = (String) usedDeed.getAttachment("ConstructorTemplate");
 		//String structureTemplate = "object/installation/mining_ore/construction/shared_construction_mining_ore_harvester_style_1.iff";
 
 		float positionY = core.terrainService.getHeight(actor.getPlanetId(), posX, posZ) + 2f;
@@ -939,33 +944,47 @@ public class HarvesterService implements INetworkDispatch {
 		quaternion = resources.common.MathUtilities.rotateQuaternion(quaternion, (float)((Math.PI/2) * dir), new Point3D(0, 1, 0));
 		InstallationObject installation = (InstallationObject) core.objectService.createObject(constructorTemplate, 0, actor.getPlanet(), new Point3D(posX, positionY, posZ), quaternion);		
 		
+		if (!usedDeed.getAttributes().containsKey("examine_extractionrate")) {
+			usedDeed.setIntAttribute("examine_extractionrate", 0);
+		}
+		
+		if (!usedDeed.getAttributes().containsKey("examine_hoppersize")) {
+			usedDeed.setIntAttribute("examine_hoppersize", 0);
+		}
+		
+		if (!usedDeed.getAttributes().containsKey("examine_maintenance")) {
+			usedDeed.setIntAttribute("examine_maintenance", 0);
+		}
+		
+		if (!usedDeed.getAttributes().containsKey("examine_power")) {
+			usedDeed.setIntAttribute("examine_power", 0);
+		}
 		
 		installation.setAttachment("ConstructionStart", System.currentTimeMillis());
-		installation.setAttachment("Owner", actor);
-		installation.setAttachment("Deed_StructureTemplate", ((Harvester_Deed)usedDeed).getStructureTemplate());
-		installation.setAttachment("Deed_DeedTemplate", ((Harvester_Deed)usedDeed).getTemplate());
-		installation.setAttachment("Deed_BER", ((Harvester_Deed)usedDeed).getBER());		
-		installation.setAttachment("Deed_Capacity", ((Harvester_Deed)usedDeed).getOutputHopperCapacity());
-		installation.setAttachment("Deed_DeedLots", ((Harvester_Deed)usedDeed).getLotRequirement());
-		installation.setAttachment("Deed_SurplusMaintenance", ((Harvester_Deed)usedDeed).getSurplusMaintenance());
-		installation.setAttachment("Deed_SurplusPower", ((Harvester_Deed)usedDeed).getSurplusPower());
+		installation.setAttachment("ownerId", actor.getObjectID());
+		installation.setAttachment("StructureTemplate", usedDeed.getAttachment("StructureTemplate"));
+		installation.setAttachment("Deed_DeedTemplate", usedDeed.getTemplate());
+		installation.setAttachment("Deed_BER", usedDeed.getIntAttribute("examine_extractionrate"));		
+		installation.setAttachment("Deed_Capacity", usedDeed.getIntAttribute("examine_hoppersize"));
+		installation.setAttachment("Deed_DeedLots", usedDeed.getAttachment("LotRequirement"));
+		installation.setAttachment("Deed_SurplusMaintenance", usedDeed.getIntAttribute("examine_maintenance"));
+		installation.setAttachment("Deed_SurplusPower", usedDeed.getIntAttribute("examine_power"));
 		
 		// destroy deed
-		TangibleObject playerInventory = (TangibleObject) actor.getSlottedObject("inventory");
-		playerInventory.remove(usedDeed);
+		core.objectService.destroyObject(usedDeed);
 	
 		core.simulationService.add(installation, posX, posZ, true);
 		
 		PlayerObject player = (PlayerObject) actor.getSlottedObject("ghost");
-		player.setLotsRemaining(player.getLotsRemaining()-(int)((Harvester_Deed)usedDeed).getLotRequirement());
+		player.setLotsRemaining(player.getLotsRemaining() - (int) usedDeed.getAttachment("LotRequirement"));
 		synchronized(allConstructors){
 			allConstructors.add(installation);
 		}
 	}
 	
 	public void placeHarvester(SWGObject object) {	
-		CreatureObject actor = (CreatureObject) object.getAttachment("Owner");
-		String structureTemplate = (String)object.getAttachment("Deed_StructureTemplate");
+		CreatureObject actor = (CreatureObject) NGECore.getInstance().objectService.getObject((Long) object.getAttachment("ownerId"));
+		String structureTemplate = (String) object.getAttachment("StructureTemplate");
 		HarvesterObject harvester = (HarvesterObject) NGECore.getInstance().objectService.createObject(structureTemplate, actor.getPlanet());
 		long objectId = harvester.getObjectID();
 		Vector<String> adminList = harvester.getAdminList();
@@ -1039,7 +1058,7 @@ public class HarvesterService implements INetworkDispatch {
 	}
 	
 	
-	public void enterStructurePlacementMode(SWGObject object, CreatureObject actor){
+	public void enterStructurePlacementMode(CreatureObject actor, SWGObject object){
 
 		if (!actor.getClient().isGM() && !core.terrainService.canBuildAtPosition(actor,actor.getPosition().x,actor.getPosition().z)){
 			actor.sendSystemMessage("@player_structure:not_permitted", (byte) 0);
@@ -1047,13 +1066,12 @@ public class HarvesterService implements INetworkDispatch {
 		}
 		
 		PlayerObject player = (PlayerObject) actor.getSlottedObject("ghost");
-		if (((Harvester_Deed)object).getLotRequirement()>player.getLotsRemaining()){
+		if (((Integer) object.getAttachment("LotRequirement")) > player.getLotsRemaining()){
 			actor.sendSystemMessage("@player_structure:not_enough_lots", (byte) 0);
 			return;
 		}
 		
-		actor.setAttachment("LastUsedDeed", object);
-		String structureTemplate = ((Harvester_Deed)object).getStructureTemplate();
+		String structureTemplate = (String) object.getAttachment("StructureTemplate");
 		//String temp = "object/installation/mining_ore/shared_mining_ore_harvester_style_1.iff";
 		EnterStructurePlacementModeMessage placementMsg = new EnterStructurePlacementModeMessage(actor,structureTemplate);		
 		actor.getClient().getSession().write(placementMsg.serialize()); 
@@ -1085,11 +1103,11 @@ public class HarvesterService implements INetworkDispatch {
 	public void createExampleDeed(CreatureObject actor){
 		
 		String templateString="object/tangible/deed/harvester_deed/shared_harvester_ore_s1_deed.iff";
-		Harvester_Deed deed = (Harvester_Deed)core.objectService.createObject(templateString, actor.getPlanet());
-		deed.setName("Example Harvester Deed");
-		deed.setStructureTemplate("object/installation/mining_ore/shared_mining_ore_harvester_style_1.iff");
-		deed.setOutputHopperCapacity(27344);
-		deed.setBER(15);
+		TangibleObject deed = (TangibleObject) core.objectService.createObject(templateString, actor.getPlanet());
+		deed.setCustomName("Example Harvester Deed");
+		deed.setAttachment("StructureTemplate", "object/installation/mining_ore/shared_mining_ore_harvester_style_1.iff");
+		deed.setIntAttribute("examine_hoppersize", 27344);
+		deed.setIntAttribute("examine_extractionrate", 15);
 		
 		TangibleObject playerInventory = (TangibleObject) actor.getSlottedObject("inventory");
 		playerInventory.add(deed);

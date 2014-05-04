@@ -21,6 +21,10 @@
  ******************************************************************************/
 package resources.objects.universe;
 
+import java.io.Serializable;
+
+import resources.objects.ObjectMessageBuilder;
+
 import com.sleepycat.persist.model.Persistent;
 
 import engine.clients.Client;
@@ -30,7 +34,10 @@ import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
 @Persistent(version=0)
-public class UniverseObject extends SWGObject {
+public class UniverseObject extends SWGObject implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
+	private transient ObjectMessageBuilder messageBuilder = null;
 	
 	public UniverseObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
 		super(objectID, planet, position, orientation, Template);
@@ -39,11 +46,20 @@ public class UniverseObject extends SWGObject {
 	public UniverseObject() {
 		super();
 	}
+	
+	@Override
+	public void initAfterDBLoad() {
+		super.init();
+	}
 
 	@Override
 	public void sendBaselines(Client arg0) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	public ObjectMessageBuilder getMessageBuilder() {
+		return messageBuilder;
 	}
 	
 }

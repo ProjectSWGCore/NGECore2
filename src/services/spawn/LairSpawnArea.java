@@ -79,7 +79,7 @@ public class LairSpawnArea extends SpawnArea {
 		randomPosition.y = height;
 		
 		for(LairActor otherLair : lairs) {
-			if(otherLair.getLairObject().getWorldPosition().getDistance(randomPosition) < 10)
+			if(otherLair.getLairObject().getWorldPosition().getDistance(randomPosition) < 30)
 				return;
 		}
 		

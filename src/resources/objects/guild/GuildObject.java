@@ -21,6 +21,7 @@
  ******************************************************************************/
 package resources.objects.guild;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -28,39 +29,35 @@ import java.util.TreeMap;
 import org.apache.mina.core.buffer.IoBuffer;
 
 import main.NGECore;
-
 import resources.gcw.CurrentServerGCWZoneHistory;
 import resources.gcw.CurrentServerGCWZonePercent;
 import resources.gcw.OtherServerGCWZonePercent;
 import resources.guild.Guild;
+import resources.objects.ObjectMessageBuilder;
 import resources.objects.SWGList;
 import resources.objects.SWGMap;
 import resources.objects.SWGMultiMap;
 import resources.objects.universe.UniverseObject;
 import services.collections.ServerFirst;
 
-import com.sleepycat.je.Environment;
-import com.sleepycat.je.Transaction;
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.NotPersistent;
 
 import engine.clients.Client;
-import engine.resources.objects.IPersistent;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
 @Entity(version=1)
-public class GuildObject extends UniverseObject implements IPersistent {
+public class GuildObject extends UniverseObject implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	protected NGECore core;
 	@NotPersistent
-	private GuildMessageBuilder messageBuilder = new GuildMessageBuilder(this);
+	private transient GuildMessageBuilder messageBuilder = new GuildMessageBuilder(this);
 	
 	private Map<String, ServerFirst> serverFirst = new HashMap<String, ServerFirst>();
 	private Map<String, Map<String, CurrentServerGCWZonePercent>> zoneMap = new TreeMap<String, Map<String, CurrentServerGCWZonePercent>>();
-	@NotPersistent
-	private Transaction txn;
 	
 	private long nextInstanceId = 0;
 	
@@ -71,25 +68,32 @@ public class GuildObject extends UniverseObject implements IPersistent {
 	private String STFName = "";
 	private String customName = "";
 	private int volume = 0;
-	private SWGList<Guild> guildList = new SWGList<Guild>(messageBuilder, 3, 4);
+	private SWGList<Guild> guildList = new SWGList<Guild>(getObjectID(), 3, 4);
 	
 	// GILD 6
 	private int serverId = 0x43;
 	//private String STFName = "string_id_table";
 	private int unknown1 = 0;
 	private short unknown2 = 0;
-	private SWGMap<String, CurrentServerGCWZonePercent> currentServerGCWZonePercentMap = new SWGMap<String, CurrentServerGCWZonePercent>(messageBuilder, 6, 2);
-	private SWGMap<String, CurrentServerGCWZonePercent> currentServerGCWTotalPercentMap = new SWGMap<String, CurrentServerGCWZonePercent>(messageBuilder, 6, 3);
-	private SWGMultiMap<String, CurrentServerGCWZoneHistory> currentServerGCWZoneHistoryMap = new SWGMultiMap<String, CurrentServerGCWZoneHistory>(messageBuilder, 6, 4);
-	private SWGMultiMap<String, CurrentServerGCWZoneHistory> currentServerGCWTotalHistoryMap = new SWGMultiMap<String, CurrentServerGCWZoneHistory>(messageBuilder, 6, 5);
-	private SWGMultiMap<String, OtherServerGCWZonePercent> otherServerGCWZonePercentMap = new SWGMultiMap<String, OtherServerGCWZonePercent>(messageBuilder, 6, 6);
-	private SWGMultiMap<String, OtherServerGCWZonePercent> otherServerGCWTotalPercentMap = new SWGMultiMap<String, OtherServerGCWZonePercent>(messageBuilder, 6, 7);
+	private SWGMap<String, CurrentServerGCWZonePercent> currentServerGCWZonePercentMap = new SWGMap<String, CurrentServerGCWZonePercent>(getObjectID(), 6, 2);
+	private SWGMap<String, CurrentServerGCWZonePercent> currentServerGCWTotalPercentMap = new SWGMap<String, CurrentServerGCWZonePercent>(getObjectID(), 6, 3);
+	private SWGMultiMap<String, CurrentServerGCWZoneHistory> currentServerGCWZoneHistoryMap = new SWGMultiMap<String, CurrentServerGCWZoneHistory>(getObjectID(), 6, 4);
+	private SWGMultiMap<String, CurrentServerGCWZoneHistory> currentServerGCWTotalHistoryMap = new SWGMultiMap<String, CurrentServerGCWZoneHistory>(getObjectID(), 6, 5);
+	private SWGMultiMap<String, OtherServerGCWZonePercent> otherServerGCWZonePercentMap = new SWGMultiMap<String, OtherServerGCWZonePercent>(getObjectID(), 6, 6);
+	private SWGMultiMap<String, OtherServerGCWZonePercent> otherServerGCWTotalPercentMap = new SWGMultiMap<String, OtherServerGCWZonePercent>(getObjectID(), 6, 7);
 	private int unknown3 = 5;
 	
 	public GuildObject(NGECore core, long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
 		super(objectID, planet, position, orientation, Template);
 		this.core = core;
 	}
+	
+	@Override
+	public void initAfterDBLoad() {
+		super.init();
+		messageBuilder = new GuildMessageBuilder(this);
+	}
+
 	
 	public float getComplexity() {
 		synchronized(objectMutex) {
@@ -302,12 +306,8 @@ public class GuildObject extends UniverseObject implements IPersistent {
 		}
 	}
 	
-	public Transaction getTransaction() {
-		return txn;
-	}
-	
-	public void createTransaction(Environment env) {
-		txn = env.beginTransaction(null, null);
+	public ObjectMessageBuilder getMessageBuilder() {
+		return messageBuilder;
 	}
 	
 }

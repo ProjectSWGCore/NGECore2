@@ -21,6 +21,26 @@
  ******************************************************************************/
 package resources.objects.intangible;
 
-public class IntangibleMessageBuilder {
+import org.apache.mina.core.buffer.IoBuffer;
+
+import resources.objects.ObjectMessageBuilder;
+
+public class IntangibleMessageBuilder extends ObjectMessageBuilder {
+	
+	public IntangibleMessageBuilder(IntangibleObject intangibleObject) {
+		setObject(intangibleObject);
+	}
+	
+	@Override
+	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void sendBaselines() {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

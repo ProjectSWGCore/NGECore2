@@ -21,6 +21,8 @@
  ******************************************************************************/
 package resources.objects.waypoint;
 
+import java.io.Serializable;
+
 import resources.objects.intangible.IntangibleObject;
 
 import com.sleepycat.persist.model.Persistent;
@@ -31,7 +33,9 @@ import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
 @Persistent(version=0)
-public class WaypointObject extends IntangibleObject {
+public class WaypointObject extends IntangibleObject implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
 	
 	private int cellId; // ???
 	private long locationNetworkId;
@@ -52,6 +56,11 @@ public class WaypointObject extends IntangibleObject {
 
 	public WaypointObject(long objectID, Planet planet, Point3D position) { 
 		super(objectID, planet, position, new Quaternion(0, 0, 0, 1), "object/waypoint/shared_waypoint.iff");
+	}
+	
+	@Override
+	public void initAfterDBLoad() {
+		super.init();
 	}
 	
 	public int getCellId() {

@@ -33,7 +33,6 @@ import resources.datatables.DisplayType;
 import resources.datatables.Options;
 import resources.datatables.Posture;
 import resources.datatables.State;
-import resources.datatables.StateStatus;
 import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
@@ -184,6 +183,7 @@ public class MountService implements INetworkDispatch {
 		
 		mount.setFaction(actor.getFaction());
 		mount.setFactionStatus(actor.getFactionStatus());
+		mount.setOwnerId(actor.getObjectID());
 		
 		if (pcd.getTemplate().contains("vehicle")) {
 			callVehicle(actor, pcd, player, mount);
@@ -422,21 +422,19 @@ public class MountService implements INetworkDispatch {
 			return;
 		}
 		
-		// Put rider into mount
 		mount._add(rider);
-		
-		// Set mount states and stuff
-		mount.setStateBitmask(mount.getStateBitmask() | State.MountedCreature);
-		mount.setState(State.MountedCreature, true);
-		rider.setPosture((mount.getTemplate().contains("vehicle")) ? Posture.DrivingVehicle : Posture.RidingCreature);
-		
-		// Set rider states and stuff
-		rider.setStateBitmask(rider.getStateBitmask() | State.RidingMount);
-		rider.setState(State.RidingMount, true);
-			
-		// Notify observers and update quadtree
 		mount.notifyObservers(new UpdateContainmentMessage(rider.getObjectID(), mount.getObjectID(), 4), true);
 		core.simulationService.remove(rider, rider.getWorldPosition().x, rider.getWorldPosition().z, false);
+		
+		rider.setState(State.RidingMount, true);
+		mount.setState(State.MountedCreature, true);
+		
+		rider.setPosture((mount.getTemplate().contains("vehicle")) ? Posture.DrivingVehicle : Posture.RidingCreature);
+		//mount.setPosture((mount.getTemplate().contains("vehicle")) ? Posture.DrivingVehicle : Posture.RidingCreature);
+		
+		if (!mount.getSlotNameForObject(rider).equals("rider1")) {
+			core.buffService.addBuffToCreature(rider, "vehicle_passenger", mount);
+		}
 	}
 	
 	public CreatureObject getMount(SWGObject pcd) {
@@ -636,6 +634,9 @@ public class MountService implements INetworkDispatch {
 		mount.notifyObservers(new UpdateContainmentMessage(rider.getObjectID(), 0, -1), true);
 		core.simulationService.teleport(rider, mount.getWorldPosition(), mount.getOrientation(), 0);
 		core.simulationService.add(rider, mount.getWorldPosition().x, mount.getWorldPosition().z, false);
+		
+		core.buffService.clearBuffs(mount);
+		core.buffService.removeBuffFromCreature(rider, rider.getBuffByName("vehicle_passenger"));
 		
 		// Store mount if it's a creature
 		if (!mount.getTemplate().contains("vehicle") && rider.getObjectID() == mount.getOwnerId()) {

@@ -22,6 +22,7 @@ def handleSelection(core, owner, target, option):
 				mntSvc.dismount(owner, target)
 			else:
 				mntSvc.mount(owner, target)
+				core.objectService.useObject(owner, target)
 		elif option == 60:
 			mntSvc.store(owner, target)
 		elif option == 114:

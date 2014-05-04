@@ -34,6 +34,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import main.NGECore;
 
@@ -53,6 +54,7 @@ import engine.resources.common.Event;
 import engine.resources.common.Mesh3DTriangle;
 import engine.resources.common.Ray;
 import engine.resources.container.Traverser;
+import engine.resources.database.ODBCursor;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -186,13 +188,11 @@ public class SimulationService implements INetworkDispatch {
 	}
 	
 	public void insertPersistentBuildings() {
-		EntityCursor<BuildingObject> cursor = core.getBuildingODB().getCursor(Long.class, BuildingObject.class);
+		ODBCursor cursor = core.getSWGObjectODB().getCursor();
 		
-		Iterator<BuildingObject> it = cursor.iterator();
-		
-		while(it.hasNext()) {
-			final BuildingObject building = (BuildingObject) core.objectService.getObject(it.next().getObjectID());
-			if(building == null)
+		while(cursor.hasNext()) {
+			SWGObject building = core.objectService.getObject(((SWGObject) cursor.next()).getObjectID());
+			if(building == null || !(building instanceof BuildingObject))
 				continue;
 			if(building.getAttachment("hasLoadedServerTemplate") == null)
 				core.objectService.loadServerTemplate(building);
@@ -214,22 +214,23 @@ public class SimulationService implements INetworkDispatch {
 		return collidableQuadTrees.get(planet.getName()).get(x, y, range);
 	}
 	
-	public boolean add(SWGObject object, float x, float y) {
-		return add(object, x, y, false);
+	public boolean add(SWGObject object, float x, float z) {
+		return add(object, x, z, false);
 	}
 		
-	public boolean add(SWGObject object, float x, float y, boolean notifyObservers) {
+	public boolean add(SWGObject object, float x, float z, boolean notifyObservers) {
 		object.setIsInQuadtree(true);
-		boolean success = quadTrees.get(object.getPlanet().getName()).put(x, y, object);
+		boolean success = quadTrees.get(object.getPlanet().getName()).put(x, z, object);
 		if(success) {
 			@SuppressWarnings("unchecked") Vector<SWGObject> childObjects = (Vector<SWGObject>) object.getAttachment("childObjects");
 			if(childObjects != null) {
 				addChildObjects(object, childObjects);
 				object.setAttachment("childObjects", null);
 			}
+			
 			if(notifyObservers) {
-				Point3D pos = new Point3D(x, 0, y);
-				Collection<SWGObject> newAwareObjects = get(object.getPlanet(), x, y, 512);
+				Point3D pos = new Point3D(x, 0, z);
+				Collection<SWGObject> newAwareObjects = get(object.getPlanet(), x, z, 512);
 				for(Iterator<SWGObject> it = newAwareObjects.iterator(); it.hasNext();) {
 					SWGObject obj = it.next();
 					if((obj.getAttachment("bigSpawnRange") == null && obj.getWorldPosition().getDistance2D(pos) > 200) || obj == object)
@@ -263,39 +264,39 @@ public class SimulationService implements INetworkDispatch {
 		
 	}
 		
-	public boolean move(SWGObject object, int oldX, int oldY, int newX, int newY) {
-		if(quadTrees.get(object.getPlanet().getName()).remove(oldX, oldY, object)) {
-			return quadTrees.get(object.getPlanet().getName()).put(newX, newY, object);
+	public boolean move(SWGObject object, int oldX, int oldZ, int newX, int newZ) {
+		if(quadTrees.get(object.getPlanet().getName()).remove(oldX, oldZ, object)) {
+			return quadTrees.get(object.getPlanet().getName()).put(newX, newZ, object);
 		}
 			
 		return false;
 	}
 	
-	public boolean move(SWGObject object, float oldX, float oldY, float newX, float newY) {
+	public boolean move(SWGObject object, float oldX, float oldZ, float newX, float newZ) {
 		long startTime = System.nanoTime();
-		if(quadTrees.get(object.getPlanet().getName()).remove(oldX, oldY, object)) {
-			boolean success = quadTrees.get(object.getPlanet().getName()).put(newX, newY, object);
+		if(quadTrees.get(object.getPlanet().getName()).remove(oldX, oldZ, object)) {
+			boolean success = quadTrees.get(object.getPlanet().getName()).put(newX, newZ, object);
 			return success;
 		}
 		System.out.println("Move failed.");
 		return false;
 	}
 		
-	public List<SWGObject> get(Planet planet, float x, float y, int range) {
-		List<SWGObject> list = quadTrees.get(planet.getName()).get((int)x, (int)y, range);
+	public List<SWGObject> get(Planet planet, float x, float z, int range) {
+		List<SWGObject> list = quadTrees.get(planet.getName()).get((int)x, (int)z, range);
 		return list;
 	}
 	
-	public boolean remove(SWGObject object, float x, float y) {
-		return remove(object, x, y, false);
+	public boolean remove(SWGObject object, float x, float z) {
+		return remove(object, x, z, false);
 	}
 		
-	public boolean remove(SWGObject object, float x, float y, boolean notifyObservers) {
+	public boolean remove(SWGObject object, float x, float z, boolean notifyObservers) {
 		if (object == null || !object.isInQuadtree()) {
 			return false;
 		}
 		
-		boolean success = quadTrees.get(object.getPlanet().getName()).remove(x, y, object);
+		boolean success = quadTrees.get(object.getPlanet().getName()).remove(x, z, object);
 		object.setIsInQuadtree(success);
 		if(success && notifyObservers) {
 			HashSet<Client> oldObservers = new HashSet<Client>(object.getObservers());
@@ -763,6 +764,8 @@ public class SimulationService implements INetworkDispatch {
 		if(object.getAttachment("proposer") != null)
 			object.setAttachment("proposer", null);
 		
+		object.setPvPBitmask(0);
+		
 		//session.suspendWrite();
 		final long objectId = object.getObjectID();
 		
@@ -789,10 +792,14 @@ public class SimulationService implements INetworkDispatch {
 		ScheduledFuture<?> disconnectTask = scheduler.schedule(new Runnable() {
 			@Override
 			public void run() {
-				if(core.objectService.getObject(objectId).getAttachment("disconnectTask") != null)
-					core.connectionService.disconnect(client);
+				SWGObject object = core.objectService.getObject(objectId);
+				
+				if (object.getAttachment("disconnectTask") != null) {
+					//core.connectionService.disconnect(client);
+					core.simulationService.remove(object, object.getPosition().x, object.getPosition().z, true);
+				}
 			}
-		}, 1, TimeUnit.MINUTES);
+		}, 120, TimeUnit.SECONDS);
 		core.removeClient(session);
 		
 		object.setAttachment("disconnectTask", disconnectTask);

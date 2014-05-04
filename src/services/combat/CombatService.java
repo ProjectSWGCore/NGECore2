@@ -40,14 +40,18 @@ import protocol.swg.objectControllerObjects.CombatAction;
 import protocol.swg.objectControllerObjects.CombatSpam;
 import protocol.swg.objectControllerObjects.CommandEnqueueRemove;
 import protocol.swg.objectControllerObjects.StartTask;
+import resources.buffs.Buff;
+import resources.buffs.DamageOverTime;
 import resources.common.FileUtilities;
+import resources.common.OutOfBand;
+import resources.common.ProsePackage;
 import resources.datatables.Options;
 import resources.datatables.Elemental;
 import resources.datatables.Posture;
 import resources.datatables.WeaponType;
-import resources.objects.Buff;
-import resources.objects.DamageOverTime;
+import resources.objectives.BountyMissionObjective;
 import resources.objects.creature.CreatureObject;
+import resources.objects.mission.MissionObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.waypoint.WaypointObject;
@@ -292,6 +296,8 @@ public class CombatService implements INetworkDispatch {
 		event.attacker = attacker;
 		event.damage = damage;
 		target.getEventBus().publish(event);
+		
+		attacker.setTefTime(300000);
 	}
 
 	private void doAreaCombat(CreatureObject attacker, CreatureObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {
@@ -798,8 +804,10 @@ public class CombatService implements INetworkDispatch {
 			}, target.getIncapTimer(), TimeUnit.SECONDS);
 			target.setIncapTask(incapTask);
 			core.buffService.addBuffToCreature(target, "incapWeaken", target);
-			if(target.getSlottedObject("ghost") != null)
-				attacker.sendSystemMessage("You incapacitate " + target.getCustomName() + ".", (byte) 0);
+			if(target.getSlottedObject("ghost") != null) {
+				target.sendSystemMessage(new OutOfBand(new ProsePackage("base_player", "prose_victim_incap", attacker.getCustomName())), (byte) 0);
+				attacker.sendSystemMessage(new OutOfBand(new ProsePackage("base_player", "prose_target_incap", target.getCustomName())), (byte) 0);
+			}
 			return;
 		} else if(target.getHealth() - damage <= 0 && target.getAttachment("AI") != null) {
 			synchronized(target.getMutex()) {
@@ -981,14 +989,50 @@ public class CombatService implements INetworkDispatch {
 		target.stopIncapTask();
 		target.setIncapTask(null);
 		target.setPosture((byte) 14);
-		attacker.sendSystemMessage("You have killed " + target.getCustomName() + ".", (byte) 0);
-		target.sendSystemMessage("@base_player:victim_dead", (byte) 0);
+		
+		if (target.getSlottedObject("ghost") != null && attacker.getSlottedObject("ghost") != null) {
+			boolean bountyWindow = true;
+			if (target.getPlayerObject().getBountyMissionId() != 0) {
+				MissionObject mission = (MissionObject) core.objectService.getObject(target.getPlayerObject().getBountyMissionId());
+				if (mission != null && mission.getBountyObjId() == attacker.getObjectId()) {
+					bountyWindow = false;
+					target.sendSystemMessage(new OutOfBand(new ProsePackage("bounty_hunter", "bounty_failed_hunter", attacker.getCustomName())), (byte) 0);
+					
+					ProsePackage pp = new ProsePackage("bounty_hunter", "bounty_failed_target", attacker.getCustomName());
+					pp.setToCustomString("their");
+					attacker.sendSystemMessage(new OutOfBand(pp), (byte) 0);
+					
+					core.missionService.handleMissionAbort(target, mission);
+				}
+			} else if (attacker.getPlayerObject().getBountyMissionId() != 0) {
+				MissionObject mission = (MissionObject) core.objectService.getObject(attacker.getPlayerObject().getBountyMissionId());
+				if (mission != null && mission.getBountyObjId() == target.getObjectId()) {
+					bountyWindow = false;
+					ProsePackage targetProse = new ProsePackage("bounty_hunter", "bounty_success_target", attacker.getCustomName());
+					targetProse.setDiInteger(mission.getCreditReward());
+					target.sendSystemMessage(new OutOfBand(targetProse), (byte) 0);
+					
+					ProsePackage attackerProse = new ProsePackage("bounty_hunter", "bounty_success_hunter", attacker.getCustomName());
+					attackerProse.setToCustomString("their"); // should be his or her: http://youtu.be/BqeDQQSETJI?t=2m19s
+					attackerProse.setDiInteger(mission.getCreditReward());
+					attacker.sendSystemMessage(new OutOfBand(attackerProse), (byte) 0);
+					
+					core.missionService.handleMissionAbort(target, mission);
+				}
+			}
+			
+			if(target.getDuelList().contains(attacker))
+				bountyWindow = false;
+				handleEndDuel(target, attacker, false);
+			
+			if (bountyWindow) core.playerService.sendSetBountyWindow(target, attacker);
+		} else { attacker.sendSystemMessage("You have killed " + target.getCustomName() + ".", (byte) 0); }
+
 		attacker.removeDefender(target);
 		target.removeDefender(attacker);
 		target.setSpeedMultiplierBase(0);
 		target.setTurnRadius(0);
-		
-		if(target.getDuelList().contains(attacker)) handleEndDuel(target, attacker, false);
+		target.sendSystemMessage(new OutOfBand(new ProsePackage("base_player", "prose_victim_dead", attacker.getCustomName())), (byte) 0);
 		
 		core.playerService.sendCloningWindow(target, attacker.getSlottedObject("ghost") != null);
 	}

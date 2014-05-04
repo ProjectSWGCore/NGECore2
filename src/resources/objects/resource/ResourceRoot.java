@@ -21,6 +21,8 @@
  ******************************************************************************/
 package resources.objects.resource;
 
+import java.io.Serializable;
+
 import com.sleepycat.je.Environment;
 import com.sleepycat.je.Transaction;
 import com.sleepycat.persist.model.Entity;
@@ -32,8 +34,9 @@ import com.sleepycat.persist.model.PrimaryKey;
  */
 
 @Entity(version=0)
-public class ResourceRoot {
+public class ResourceRoot implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
 //	Publish 15:
 
 //    - Total: 61, Minimum pool: 15, Random pool: 24 (3 was removed), Fixed pool: 22.
@@ -84,7 +87,7 @@ public class ResourceRoot {
 //    All 38 Organic types for each planet
 	
 	@NotPersistent
-	private Transaction txn;
+	private transient Transaction txn;
 	
 	private static int highestID = 0;
 	

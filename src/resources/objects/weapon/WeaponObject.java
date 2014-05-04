@@ -21,6 +21,8 @@
  ******************************************************************************/
 package resources.objects.weapon;
 
+import java.io.Serializable;
+
 import resources.datatables.WeaponType;
 import resources.objects.tangible.TangibleObject;
 
@@ -33,12 +35,14 @@ import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
 @Persistent(version=1)
-public class WeaponObject extends TangibleObject {
+public class WeaponObject extends TangibleObject implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
+
 	// TODO: Thread safety
 	
 	@NotPersistent
-	private WeaponMessageBuilder messageBuilder;
+	private transient WeaponMessageBuilder messageBuilder;
 	
 	public WeaponObject(long objectID, Planet planet, String template) {
 		super(objectID, planet, template, new Point3D(0, 0, 0), new Quaternion(1, 0, 1, 0));
@@ -53,10 +57,15 @@ public class WeaponObject extends TangibleObject {
 		if (this.getClass().getSimpleName().equals("WeaponObject")) setIntAttribute("volume", 1);
 		setStringAttribute("cat_wpn_damage.damage", "0-0");
 	}
-
 	
 	public WeaponObject() {
 		super();
+		messageBuilder = new WeaponMessageBuilder(this);
+	}
+	
+	@Override
+	public void initAfterDBLoad() {
+		super.init();
 		messageBuilder = new WeaponMessageBuilder(this);
 	}
 
@@ -214,5 +223,4 @@ public class WeaponObject extends TangibleObject {
 		return false;
 		
 	}
-
 }

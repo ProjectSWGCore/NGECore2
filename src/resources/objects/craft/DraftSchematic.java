@@ -21,7 +21,12 @@
  ******************************************************************************/
 package resources.objects.craft;
 
+import java.io.Serializable;
+
+import resources.objects.ObjectMessageBuilder;
+
 import com.sleepycat.persist.model.Persistent;
+
 import engine.clients.Client;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
@@ -29,9 +34,11 @@ import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
 @Persistent
-public class DraftSchematic extends SWGObject {
+public class DraftSchematic extends SWGObject implements Serializable {
 	
-	
+	private static final long serialVersionUID = 1L;
+	private transient ObjectMessageBuilder messageBuilder = null;
+
 	public DraftSchematic(long objectID, Planet planet, String template, Point3D position, Quaternion orientation){
 		super(objectID, planet, position, orientation, template);
 	}
@@ -42,5 +49,13 @@ public class DraftSchematic extends SWGObject {
 		
 	}
 	
+	@Override
+	public void initAfterDBLoad() {
+		super.init();
+	}
+	
+	public ObjectMessageBuilder getMessageBuilder() {
+		return messageBuilder;
+	}
 	
 }

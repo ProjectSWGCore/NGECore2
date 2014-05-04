@@ -1,5 +1,7 @@
 package resources.objects.resource;
 
+import java.io.Serializable;
+
 import com.sleepycat.persist.model.Persistent;
 
 /** 
@@ -7,7 +9,9 @@ import com.sleepycat.persist.model.Persistent;
  */
 
 @Persistent(version=0)
-public class ResourceDeposit {
+public class ResourceDeposit implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
 	private float spawnCoordsX;
 	private float spawnCoordsZ;
 	private float spawnRadius;

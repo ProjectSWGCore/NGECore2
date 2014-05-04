@@ -58,6 +58,8 @@ import protocol.swg.ShowHelmet;
 import protocol.swg.objectControllerObjects.ChangeRoleIconChoice;
 import protocol.swg.objectControllerObjects.ShowFlyText;
 import protocol.swg.objectControllerObjects.ShowLootBox;
+import resources.buffs.Buff;
+import resources.common.BountyListItem;
 import resources.common.FileUtilities;
 import resources.common.ObjControllerOpcodes;
 import resources.common.Opcodes;
@@ -67,10 +69,10 @@ import resources.common.RGB;
 import resources.common.SpawnPoint;
 import resources.common.StringUtilities;
 import resources.datatables.DisplayType;
+import resources.datatables.Options;
 import resources.datatables.PlayerFlags;
 import resources.datatables.Professions;
 import resources.guild.Guild;
-import resources.objects.Buff;
 import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
@@ -78,6 +80,7 @@ import resources.objects.player.PlayerMessageBuilder;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.waypoint.WaypointObject;
+import services.sui.SUIService.InputBoxType;
 import services.sui.SUIService.ListBoxType;
 import services.sui.SUIWindow;
 import services.sui.SUIWindow.Trigger;
@@ -114,15 +117,41 @@ public class PlayerService implements INetworkDispatch {
 	}
 	
 	public void postZoneIn(final CreatureObject creature) {
-		
 		if(schedulers.get(creature.getObjectID()) != null)
 			return;
+		
 		List<ScheduledFuture<?>> scheduleList = new ArrayList<ScheduledFuture<?>>();
+		
 		scheduleList.add(scheduler.scheduleAtFixedRate(() -> {
 			ServerTimeMessage time = new ServerTimeMessage(core.getGalacticTime() / 1000);
 			IoBuffer packet = time.serialize();
 			creature.getClient().getSession().write(packet);
-		}, 45, 45, TimeUnit.SECONDS));
+		}, 5, 45, TimeUnit.SECONDS));
+		
+		scheduleList.add(scheduler.scheduleAtFixedRate(() -> {
+			if (creature.isInStealth() && !creature.getOption(Options.INVULNERABLE) && ((PlayerObject) creature.getSlottedObject("ghost")).getGodLevel() == 0) {
+				List<SWGObject> objects = core.simulationService.get(creature.getPlanet(), creature.getPosition().x, creature.getPosition().z, 64);
+				
+				for (SWGObject object : objects) {
+					if (object == null) {
+						continue;
+					}
+					
+					if (!(object instanceof CreatureObject)) {
+						continue;
+					}
+					
+					CreatureObject observer = (CreatureObject) object;
+					
+					int camoflauge = creature.getSkillModBase("camoflauge") - observer.getSkillModBase("detectcamo");
+					camoflauge -= (64 - creature.getPosition().getDistance(observer.getPosition()));
+					
+					if (new Random(camoflauge).nextInt() == camoflauge) {
+						creature.setInStealth(false);
+					}
+				}
+			}
+		}, 15, 15, TimeUnit.SECONDS));
 		
 		scheduleList.add(scheduler.scheduleAtFixedRate(() -> {
 			PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
@@ -145,6 +174,7 @@ public class PlayerService implements INetworkDispatch {
 				creature.setHealth(creature.getHealth() + (36 + creature.getLevel() * 4));
 		}, 0, 1000, TimeUnit.MILLISECONDS));
 		schedulers.put(creature.getObjectID(), scheduleList);
+		
 		/*final PlayerObject ghost = (PlayerObject) creature.getSlottedObject("ghost");
 		scheduler.schedule(new Runnable() {
 
@@ -157,7 +187,6 @@ public class PlayerService implements INetworkDispatch {
 			}
 			
 		}, 1, TimeUnit.SECONDS);*/
-
 	}
 
 	@Override
@@ -1250,6 +1279,55 @@ public class PlayerService implements INetworkDispatch {
 			}
 		});
 		core.suiService.openSUIWindow(ringWindow);
+	}
+	
+	public void sendSetBountyWindow(final CreatureObject victim, final CreatureObject attacker) {
+		SUIWindow bountyWindow = core.suiService.createInputBox(InputBoxType.INPUT_BOX_OK_CANCEL, "@bounty_hunter:setbounty_title", "@bounty_hunter:setbounty_prompt1 " + attacker.getCustomName() + "?" + "\n@bounty_hunter:setbounty_prompt2 " 
+				+ String.valueOf(victim.getBankCredits() + victim.getCashCredits()), victim, null, (float) 10, new SUICallback() {
+
+			@Override
+			public void process(SWGObject owner, int eventType, Vector<String> returnList) {
+				if (eventType == 0 && returnList.get(0) != null) {
+					int bounty = Integer.parseInt(returnList.get(0));
+					int totalFunds = victim.getBankCredits() + victim.getCashCredits();
+					
+					if (bounty > totalFunds) {
+						victim.sendSystemMessage("@bounty_hunter:setbounty_too_much", DisplayType.Broadcast);
+						sendSetBountyWindow(victim, attacker);
+						return;
+					}
+					
+					if (bounty < 20000) {
+						victim.sendSystemMessage("@bounty_hunter:setbounty_too_little", DisplayType.Broadcast);
+						sendSetBountyWindow(victim, attacker);
+						return;
+					} else if (bounty > 1000000) {
+						victim.sendSystemMessage("@bounty_hunter:setbounty_cap", DisplayType.Broadcast);
+						bounty = 1000000;
+					}
+					
+					// Try removing bounty amount from the bank first then cash. Remove amount accordingly if bank/cash is less than placed bounty.
+					if (bounty > victim.getBankCredits()) {
+						int difference = bounty - victim.getBankCredits();
+						
+						victim.setCashCredits(victim.getCashCredits() - difference);
+						victim.setBankCredits(0);
+					} else if (bounty > victim.getCashCredits()) {
+						int difference = bounty - victim.getCashCredits();
+						
+						victim.setBankCredits(victim.getBankCredits() - difference);
+						victim.setCashCredits(0);
+					} else { victim.setBankCredits(victim.getBankCredits() - bounty); }
+					
+					if (!core.missionService.addToExistingBounty(attacker.getObjectId(), victim.getObjectId(), bounty))
+						core.missionService.createNewBounty(attacker, victim.getObjectId(), bounty);
+				}
+			}
+			
+		});
+		bountyWindow.setProperty("txtInput:NumericInteger", "true");
+		bountyWindow.setProperty("txtInput:MaxLength", "7");
+		core.suiService.openSUIWindow(bountyWindow);
 	}
 	
 	public String getFormalProfessionName(String template) {
