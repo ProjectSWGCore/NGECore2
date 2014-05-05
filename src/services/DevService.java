@@ -92,7 +92,6 @@ public class DevService implements INetworkDispatch {
 				if(creature.getClient().isGM()) suiOptions.put((long) 130, "Vehicle Deeds");
 				if(creature.getClient().isGM()) suiOptions.put((long) 121, "Sandbox City");
 				if(creature.getClient().isGM()) suiOptions.put((long) 122, "Jedi Ruins");
-				
 				break;
 			case 3: // [Items] Weapons
 				suiOptions.put((long) 30, "Jedi Weapons");
@@ -138,7 +137,7 @@ public class DevService implements INetworkDispatch {
 		
 		}
 		
-		final SUIWindow window = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "Character Builder Terminal", "Select the desired option and click OK.", suiOptions, creature, null, 10);
+		final SUIWindow window = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "Character Builder Terminal", "Provided below are items which the developers feel are necessary to complete the current testing objectives. Please select only the items which you require.", suiOptions, creature, null, 10);
 		Vector<String> returnList = new Vector<String>();
 		
 		returnList.add("List.lstList:SelectedRow");
