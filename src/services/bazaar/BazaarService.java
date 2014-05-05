@@ -81,6 +81,7 @@ public class BazaarService implements INetworkDispatch {
 
 	public BazaarService(NGECore core) {
 		this.core = core;
+		core.commandService.registerCommand("createvendor");
 		loadAuctionItems();
 	}
 	

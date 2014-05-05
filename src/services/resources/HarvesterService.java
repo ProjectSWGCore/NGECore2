@@ -47,12 +47,15 @@ import main.NGECore;
 import engine.clients.Client;
 import engine.resources.common.CRC;
 import engine.resources.container.Traverser;
+import engine.resources.database.ODBCursor;
 import engine.resources.objects.SWGObject;
+import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import resources.common.ObjControllerOpcodes;
+import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.harvester.HarvesterMessageBuilder;
 import resources.objects.harvester.HarvesterObject;
@@ -94,6 +97,35 @@ public class HarvesterService implements INetworkDispatch {
 		//generateNoBuildData();
 		scheduleHarvesterService();
 	}
+	
+	public void loadHarvesters() {
+		ODBCursor cursor = core.getSWGObjectODB().getCursor();
+				
+		while(cursor.hasNext()) {
+			final SWGObject harvester = (SWGObject) cursor.next();
+			if(!(harvester instanceof HarvesterObject) || harvester == null)
+				continue;
+			core.objectService.getObjectList().put(harvester.getObjectID(), harvester);
+			Planet planet = core.terrainService.getPlanetByID(harvester.getPlanetId());
+			harvester.setPlanet(planet);
+			harvester.viewChildren(harvester, true, true, (object) -> {
+				core.objectService.getObjectList().put(object.getObjectID(), object);
+				if(object.getParentId() != 0 && object.getContainer() == null)
+					object.setParent(harvester);
+				object.getContainerInfo(object.getTemplate());
+			});
+			allHarvesters.add((HarvesterObject) harvester);
+		}
+		
+		cursor.close();
+	}
+	
+	public void saveHarvesters() {
+		for(HarvesterObject harvester : allHarvesters) {
+			core.objectService.persistObject(harvester.getObjectID(), harvester, core.getSWGObjectODB());
+		}
+	}
+
 	
 	@Override
 	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> swgOpcodes, Map<Integer, INetworkRemoteEvent> objControllerOpcodes) {
@@ -1055,6 +1087,7 @@ public class HarvesterService implements INetworkDispatch {
 		//NGECore.getInstance().chatService.sendPersistentMessage(actor.getClient(), constructionNotificationMail);
 		NGECore.getInstance().chatService.storePersistentMessage(constructionNotificationMail);
 		NGECore.getInstance().chatService.sendPersistentMessageHeader(actor.getClient(), constructionNotificationMail);
+		//core.objectService.persistObject(harvester.getObjectID(), harvester, core.getSWGObjectODB());
 	}
 	
 	

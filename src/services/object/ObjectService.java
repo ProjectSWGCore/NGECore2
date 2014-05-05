@@ -157,6 +157,8 @@ public class ObjectService implements INetworkDispatch {
 		    		}
 		    	}
 		    	core.bazaarService.saveAllItems();
+		    	core.housingService.saveBuildings();
+		    	core.harvesterService.saveHarvesters();
 		    	core.closeODBs();
 		    }
 		});
@@ -239,13 +241,7 @@ public class ObjectService implements INetworkDispatch {
 			
 			object = new SurveyTool(objectID, planet, Template, position, orientation);
 			
-		}
-//		else if(Template.startsWith("object/tangible/container/drum/shared_treasure_drum.iff")) {
-//			
-//			object = new CreatureObject(objectID, planet, position, orientation, Template);			
-//		
-//		} 
-		else if(Template.startsWith("object/tangible")) {
+		} else if(Template.startsWith("object/tangible")) {
 			
 			object = new TangibleObject(objectID, planet, Template, position, orientation);
 
@@ -253,7 +249,7 @@ public class ObjectService implements INetworkDispatch {
 			
 			object = new IntangibleObject(objectID, planet, position, orientation,Template);
 
-		}else if(Template.startsWith("object/weapon")) {
+		} else if(Template.startsWith("object/weapon")) {
 			
 			object = new WeaponObject(objectID, planet, Template, position, orientation);
 
@@ -336,9 +332,10 @@ public class ObjectService implements INetworkDispatch {
 		object.setAttachment("customServerTemplate", customServerTemplate);
 		
 		object.setisInSnapshot(isSnapshot);
-		if(!core.getObjectIdODB().contains(objectID))
-			core.getObjectIdODB().put(objectID, new ObjectId(objectID));
-		
+		synchronized(objectMutex) {
+			if(!core.getObjectIdODB().contains(objectID))
+				core.getObjectIdODB().put(objectID, new ObjectId(objectID));
+		}
 		// Set Options - easier to set them across the board here
 		// because we'll be spawning them despite most of them being unscripted.
 		// Any such settings can be completely reset with setOptionsBitmask
@@ -618,24 +615,22 @@ public class ObjectService implements INetworkDispatch {
 		long newId = 0;
 		boolean found = false;
 		// stack overflow when using recursion
-		while(!found) {
-			synchronized(objectMutex) {
+		synchronized(objectMutex) {
+			while(!found) {
 				newId = highestId.incrementAndGet();
+				PreparedStatement ps2;
+				try {
+					ps2 = databaseConnection.preparedStatement("UPDATE highestid SET id=" + newId + " WHERE id=(SELECT MAX(id) FROM highestid)");
+					ps2.executeUpdate();
+					ps2.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+				if(objectList.containsKey(newId) || core.getObjectIdODB().contains(newId))
+					found = false;
+				else
+					found = true;
 			}
-			
-			PreparedStatement ps2;
-	
-			try {
-				ps2 = databaseConnection.preparedStatement("UPDATE highestid SET id=" + newId + " WHERE id=" + (newId-1));
-				ps2.executeUpdate();
-				ps2.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-			if(getObject(newId) != null || core.getObjectIdODB().contains(newId))
-				found = false;
-			else
-				found = true;		
 		}
 		
 		return newId;		
