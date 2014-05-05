@@ -92,6 +92,7 @@ public class DevService implements INetworkDispatch {
 				if(creature.getClient().isGM()) suiOptions.put((long) 130, "Vehicle Deeds");
 				if(creature.getClient().isGM()) suiOptions.put((long) 121, "Sandbox City");
 				if(creature.getClient().isGM()) suiOptions.put((long) 122, "Jedi Ruins");
+				if(creature.getClient().isGM()) suiOptions.put((long) 153, "Force Crystal Hunter's Cave");
 				
 				break;
 			case 3: // [Items] Weapons
@@ -1180,6 +1181,11 @@ public class DevService implements INetworkDispatch {
 						
 					case 122:
 						Point3D position = new Point3D(4086,15,5554);
+						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("dantooine"), position, player.getOrientation(), null);
+						return;
+						
+					case 153:
+						position = new Point3D(-6222,1,7380);
 						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("dantooine"), position, player.getOrientation(), null);
 						return;
 

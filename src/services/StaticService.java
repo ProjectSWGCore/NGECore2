@@ -32,6 +32,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import resources.common.FileUtilities;
 import resources.objects.building.BuildingObject;
@@ -116,7 +117,7 @@ public class StaticService implements INetworkDispatch {
 		SWGObject object;
 		
 		if (core.spawnService.getMobileTemplate(template) != null) {
-			object = core.spawnService.spawnCreature(template, planetName, cellId, x, y, z, qW, qX, qY, qZ, (short) -1);
+			object = core.spawnService.spawnCreature(core.spawnService.getMobileTemplate(template).getTemplates().get(new Random().nextInt(core.spawnService.getMobileTemplate(template).getTemplates().size())), planetName, cellId, x, y, z, qW, qX, qY, qZ, (short) -1);
 		} else {
 			object = core.objectService.createObject(template, objectId, planet, new Point3D(x, y, z), new Quaternion(qW, qX, qY, qZ), null, true, true);
 		}
