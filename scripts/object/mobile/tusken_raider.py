@@ -7,7 +7,7 @@ def setup(core, object):
 	lootGroupChance_1 = 90
 	object.addToLootGroups(lootPoolNames_1,lootPoolChances_1,lootGroupChance_1)
 	
-	lootPoolNames_2 = ['batons','random_loot_rifles',]
+	lootPoolNames_2 = ['batons','random_loot_rifles']
 	lootPoolChances_2 = [60,40]
 	lootGroupChance_2 = 20
 	object.addToLootGroups(lootPoolNames_2,lootPoolChances_2,lootGroupChance_2)

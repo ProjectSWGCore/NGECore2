@@ -257,7 +257,7 @@ public class DevService implements INetworkDispatch {
 						rifle1.setMaxDamage(1250);
 						rifle1.setWeaponType(WeaponType.RIFLE);
 						
-						inventory.add(rifle1);
+						// inventory.add(rifle1);
 						
 						WeaponObject carbine1 = (WeaponObject) core.objectService.createObject("object/weapon/ranged/carbine/shared_carbine_cdef.iff", planet);
 						carbine1.setIntAttribute("required_combat_level", 90);
