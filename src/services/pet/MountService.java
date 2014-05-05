@@ -429,8 +429,8 @@ public class MountService implements INetworkDispatch {
 		rider.setState(State.RidingMount, true);
 		mount.setState(State.MountedCreature, true);
 		
-		rider.setPosture((mount.getTemplate().contains("vehicle")) ? Posture.DrivingVehicle : Posture.RidingCreature);
-		//mount.setPosture((mount.getTemplate().contains("vehicle")) ? Posture.DrivingVehicle : Posture.RidingCreature);
+		// For some reason SOE decided the mount would need the following posture to be set for the character to have the driving or riding animation.
+		mount.setPosture((mount.getTemplate().contains("vehicle")) ? Posture.DrivingVehicle : Posture.RidingCreature);
 		
 		if (!mount.getSlotNameForObject(rider).equals("rider1")) {
 			core.buffService.addBuffToCreature(rider, "vehicle_passenger", mount);
@@ -551,7 +551,11 @@ public class MountService implements INetworkDispatch {
 		
 		LongAdder adder = new LongAdder();
 		
-		mount.getSlottedObject("inventory").viewChildren(mount, false, false, (obj) -> adder.increment());
+		try
+		{
+			mount.getSlottedObject("inventory").viewChildren(mount, false, false, (obj) -> adder.increment());
+		}
+		catch(Exception ex) { }
 		
 		int passengers = adder.intValue();
 		
@@ -589,8 +593,7 @@ public class MountService implements INetworkDispatch {
 	}
 	
 	public void dismount(CreatureObject rider, CreatureObject mount) {
-		// Check if mount is currently mounted // Not necessary since nobody'll be dismounted if so
-		
+
 		if (rider == null || mount == null) {
 			return;
 		}
@@ -605,12 +608,12 @@ public class MountService implements INetworkDispatch {
 		
 		// Dismount all passengers
 		if (rider.getObjectID() == mount.getOwnerId()) {
-			CreatureObject owner = rider;
 			
-			mount.viewChildren(owner, false, false, new Traverser() {
-				
-				public void process(SWGObject passenger) {
-					if (passenger != owner) dismount(rider, mount);
+			mount.viewChildren(mount, false, false, new Traverser()
+			{
+				public void process(SWGObject passenger)
+				{
+					if (passenger.getObjectId() != mount.getOwnerId()) dismount((CreatureObject) passenger, mount);
 				}
 				
 			});
