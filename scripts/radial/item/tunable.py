@@ -21,13 +21,10 @@ def handleSelection(core, owner, target, option):
 			#owner.sendSystemMessage('You are not attuned enough with the force yet.',1)
 			
 			if target.getAttachment("tunerId") == None or target.getAttachment("tunerId") == 0:
-				
-				if target.getAttributes().get("@obj_attr_n:color") is None:
-					owner.setAttachment("TunableObject", target.getObjectID())
-					handleSUIWindow(core, owner, target, option)
-									
-				
-					
+
+				owner.setAttachment("TunableObject", target.getObjectID())
+				handleSUIWindow(core, owner, target, option)
+										
 			else:
 				owner.sendSystemMessage("You cannot tune this crystal.",1)
 			return
@@ -45,16 +42,18 @@ def handleSUIWindow(core, owner, target, option):
 def handleSUI(owner, window, eventType, returnList):
 
 	if eventType == 0:					
-		time.sleep(3)
+		time.sleep(1)
 		objectID = long(owner.getAttachment("TunableObject"))
 		tunableObject = main.NGECore.getInstance().objectService.getObject(objectID)
+		
 		if tunableObject:
 			tunableObject.getAttributes().put("@obj_attr_n:crystal_owner", owner.getCustomName())
 			tunableObject.setAttachment("tunerId", int(owner.getObjectId()))
-			main.NGECore.getInstance().lootService.tuneProcess(tunableObject)
-			time.sleep(0.5)
+			
+			if tunableObject.getAttributes().get("@obj_attr_n:color") is None:
+				main.NGECore.getInstance().lootService.tuneProcess(tunableObject)
+				time.sleep(0.5)
+			
 			owner.sendSystemMessage('@jedi_spam:crystal_tune_success',1)
-		
-
 	return	
 	
