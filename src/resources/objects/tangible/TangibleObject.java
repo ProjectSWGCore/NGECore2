@@ -686,4 +686,15 @@ public class TangibleObject extends SWGObject implements Serializable {
 		return messageBuilder;
 	}
 	
+	public boolean isFull()
+	{
+		if(getTemplateData().getAttribute("containerVolumeLimit") == null) return false;
+		
+		int containerVolumeLimit = getTemplateData().getAttribute("containerVolumeLimit");
+		
+		if(NGECore.getInstance().objectService.objsInContainer(this, this) >= containerVolumeLimit) return true;
+	
+		return false;
+	}
+	
 }
