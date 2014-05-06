@@ -450,6 +450,7 @@ public class NGECore {
 		simulationService = new SimulationService(this);
 		
 		objectService.loadBuildings();
+		harvesterService.loadHarvesters();
 		
 		if (optionsConfigLoaded && options.getInt("LOAD.RESOURCE.SYSTEM") > 0) {
 			resourceService.loadResourceRoots();

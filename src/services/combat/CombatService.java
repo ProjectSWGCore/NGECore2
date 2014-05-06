@@ -783,10 +783,12 @@ public class CombatService implements INetworkDispatch {
 			}
 			
 			synchronized(target.getMutex()) {
+				if(core.mountService.isMounted(target)) core.mountService.dismount(target, (CreatureObject) target.getContainer());
+				
 				target.setHealth(1);
 				target.setPosture((byte) 13);
 				target.setTurnRadius(0);
-				target.setSpeedMultiplierBase(0);
+				target.setSpeedMultiplierBase(0);		
 			}
 			ScheduledFuture<?> incapTask = scheduler.schedule(() -> {
 				

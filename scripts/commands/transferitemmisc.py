@@ -13,6 +13,10 @@ def run(core, actor, target, commandString):
         
         if container == None: return
 
+        if container.getTemplate().startswith("object/tangible/inventory/shared_lightsaber_inventory") or target.getContainer().getTemplate().startswith("object/tangible/inventory/shared_lightsaber_inventory"):	
+            core.equipmentService.calculateLightsaberAttributes(actor, target, container)
+            return;
+
         if target.getTemplate() == 'object/tangible/item/shared_loot_cash.iff':
             core.lootService.handleCreditPickUp(actor,target)
             core.objectService.destroyObject(target)

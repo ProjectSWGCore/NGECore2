@@ -1,5 +1,5 @@
 import sys
-# Project SWG:   Mos Entha:  Static Spawns
+# Project SWG:   Lars Homestead:  Static Spawns
 # (C)2014 ProjectSWG
 
 

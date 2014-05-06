@@ -41,10 +41,13 @@ import org.python.core.PyObject;
 import resources.datatables.FactionStatus;
 import resources.objects.creature.CreatureObject;
 import main.NGECore;
+import engine.resources.container.Traverser;
 import engine.resources.objects.SWGObject;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import resources.objects.player.PlayerObject;
+import resources.objects.tangible.TangibleObject;
+import resources.objects.weapon.WeaponObject;
 import services.equipment.BonusSetTemplate;
 
 public class EquipmentService implements INetworkDispatch {
@@ -117,6 +120,12 @@ public class EquipmentService implements INetworkDispatch {
 		if(item.getAttachment("unity") != null) 
 		{
 			actor.sendSystemMessage("@unity:cannot_remove_ring", (byte) 0);
+			return false;
+		}
+		
+		if(item.getAttachment("hasColorCrystal") != null && (Boolean) item.getAttachment("hasColorCrystal") == false)
+		{
+			actor.sendSystemMessage("You may not equip a light saber that has no color crystal!", (byte) 0);
 			return false;
 		}
 		
@@ -288,6 +297,90 @@ public class EquipmentService implements INetworkDispatch {
 			core.skillModService.addSkillMod(creature, e.getKey(), forceProtection);
 			if(wornArmourPieces >= 3) core.skillModService.addSkillMod(creature, e.getKey(), (int) e.getValue().floatValue());
 		}
+	}
+	
+	public void calculateLightsaberAttributes(CreatureObject actor, TangibleObject item, SWGObject targetContainer)
+	{
+		WeaponObject lightsaber = null;
+		TangibleObject lightsaberInventory = null;
+		long tunerId = 0;
+		
+		// Get our lightsaber weapon object
+		if(item.getContainer().getTemplate().startsWith("object/tangible/inventory/shared_lightsaber_inventory")) lightsaber = (WeaponObject) item.getGrandparent();
+		else if(targetContainer.getTemplate().startsWith("object/tangible/inventory/shared_lightsaber_inventory")) lightsaber = (WeaponObject) targetContainer.getContainer();
+		lightsaberInventory = (TangibleObject) lightsaber.getSlottedObject("saber_inv");
+		
+		if(lightsaber.getAttachment("weaponBaseDamageMin") == null) lightsaber.setAttachment("weaponBaseDamageMin", lightsaber.getMinDamage());
+		if(lightsaber.getAttachment("weaponBaseDamageMax") == null) lightsaber.setAttachment("weaponBaseDamageMax", lightsaber.getMaxDamage());
+		
+		// Check if item is a lightsaber component
+		if(lightsaber == null) return;
+		if(lightsaberInventory == null) return;
+		if(lightsaber.getContainer() instanceof CreatureObject) return;
+		
+		if(!item.getTemplate().startsWith("object/tangible/component/weapon/lightsaber/")) return;	
+		if(lightsaber.getAttachment("hasColorCrystal") == null) lightsaber.setAttachment("hasColorCrystal", false);
+		if(item.getAttributes().containsKey("@obj_attr_n:color") && (Boolean) lightsaber.getAttachment("hasColorCrystal")) return;
+		
+		// Find our tuner
+		if(item.getAttachment("tunerId") == null) item.setAttachment("tunerId", 0);
+		tunerId = (int) item.getAttachment("tunerId");
+		
+		// Check if player tuned the crystal
+		if(tunerId != actor.getObjectId())
+		{
+			actor.sendSystemMessage("You did not tune this crystal.", (byte) 0);
+			return;
+		}
+		else item.getContainer().transferTo(actor, targetContainer, item);
+	
+		// Calculate attributes
+		lightsaberInventory.viewChildren(lightsaberInventory, false, false, new Traverser()
+		{
+			WeaponObject saber;
+			TangibleObject saberInv;
+			
+			int minDamageBonus = 0;
+			int maxDamageBonus = 0;
+			Boolean hasColorCrystal = false;
+			
+			public void process(SWGObject item)
+			{	
+				saber = (WeaponObject) item.getGrandparent();
+				saberInv = (TangibleObject) saber.getSlottedObject("saber_inv");
+
+				if(item.getAttributes().get("@obj_attr_n:color") != null) // "Blade Color Modification"
+				{
+					int crystalColorIndex = resources.datatables.LightsaberColors.getByName((String) item.getAttributes().get("@obj_attr_n:color"));
+					
+					byte bladeType = crystalColorIndex > 256 ? (byte) (crystalColorIndex % 256) : 0x00;
+					byte bladeColor = crystalColorIndex > 256 ? (byte) 0x00 : (byte) crystalColorIndex;
+					
+					saber.setCustomizationVariable("private/alternate_shader_blade", bladeType);
+					saber.setCustomizationVariable("/private/index_color_blade", bladeColor);
+					
+					// System.out.println("bladeColorName: " + item.getAttributes().get("@obj_attr_n:color"));
+					// System.out.println("bladeColor: " + bladeColor);
+					// System.out.println("bladeType: " + bladeType);
+					// System.out.println();
+					
+					hasColorCrystal = true;
+				}
+				else 
+				{
+					minDamageBonus += Integer.parseInt(item.getAttributes().get("@obj_attr_n:componentbonuslow")); // "Min Damage Modified"
+					maxDamageBonus += Integer.parseInt(item.getAttributes().get("@obj_attr_n:componentbonushigh")); // "Max Damage Modified""
+				}
+				
+				int saberBaseDamageMin = (int) saber.getAttachment("weaponBaseDamageMin");
+				int saberBaseDamageMax = (int) saber.getAttachment("weaponBaseDamageMax");
+				
+				saber.setMinDamage(saberBaseDamageMin + minDamageBonus);
+				saber.setMaxDamage(saberBaseDamageMax + maxDamageBonus);
+				
+				saber.setAttachment("hasColorCrystal", hasColorCrystal);
+			}
+		});
 	}
 	
 	private int getWeaponCriticalChance(CreatureObject actor, SWGObject item) {

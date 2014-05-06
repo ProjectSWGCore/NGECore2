@@ -2,6 +2,7 @@ from resources.common import RadialOptions
 import sys
 
 def createRadial(core, owner, target, radials):
+	#owner.sendSystemMessage('Correct Loot Radial created', 0)
 	radials.clear()	
 	radials.add(RadialOptions(0, 36, 0, 'Loot'))
 	if target.getAttachment('AI') and core.resourceService.canHarvest(owner, target):

@@ -74,6 +74,7 @@ public class DevService implements INetworkDispatch {
 			case 0: // Root
 				suiOptions.put((long) 1, "Character");
 				suiOptions.put((long) 2, "Items");
+				suiOptions.put((long) 3, "Locations");
 				break;
 			case 1: // Character
 				suiOptions.put((long) 10, "Set combat level to 90");
@@ -90,9 +91,7 @@ public class DevService implements INetworkDispatch {
 				if(creature.getClient().isGM()) suiOptions.put((long) 120, "House Deeds");
 				if(creature.getClient().isGM()) suiOptions.put((long) 125, "Crafting Tools");
 				if(creature.getClient().isGM()) suiOptions.put((long) 130, "Vehicle Deeds");
-				if(creature.getClient().isGM()) suiOptions.put((long) 121, "Sandbox City");
-				if(creature.getClient().isGM()) suiOptions.put((long) 122, "Jedi Ruins");
-				
+				if(creature.getClient().isGM()) suiOptions.put((long) 121, "Sandbox City");	
 				break;
 			case 3: // [Items] Weapons
 				suiOptions.put((long) 30, "Jedi Weapons");
@@ -130,10 +129,15 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 90, "(Light) Jedi Robe");
 				suiOptions.put((long) 91, "(Dark) Jedi Robe");
 				suiOptions.put((long) 92, "Belt of Master Bodo Baas");
+				suiOptions.put((long) 93, "Lightsaber Crystals");
 				break;
 			case 10: // [Items] Jedi Items
 				suiOptions.put((long) 111, "Harvesters");
 				suiOptions.put((long) 112, "Energy resources");
+				break;
+			case 11: // Locations
+				suiOptions.put((long) 122, "Teleport to Jedi Ruins");
+				suiOptions.put((long) 124, "Teleport to Mos Eisley");
 				break;
 		
 		}
@@ -162,6 +166,9 @@ public class DevService implements INetworkDispatch {
 						return;
 					case 2: // Items
 						sendCharacterBuilderSUI(player, 2);
+						return; 
+					case 3: // Locations
+						sendCharacterBuilderSUI(player, 11);
 						return; 
 					
 					// Character
@@ -257,7 +264,7 @@ public class DevService implements INetworkDispatch {
 						rifle1.setMaxDamage(1250);
 						rifle1.setWeaponType(WeaponType.RIFLE);
 						
-						inventory.add(rifle1);
+						// inventory.add(rifle1);
 						
 						WeaponObject carbine1 = (WeaponObject) core.objectService.createObject("object/weapon/ranged/carbine/shared_carbine_cdef.iff", planet);
 						carbine1.setIntAttribute("required_combat_level", 90);
@@ -992,6 +999,48 @@ public class DevService implements INetworkDispatch {
 					case 92: // Belt of Master Bodo Baas
 						inventory.add(core.objectService.createObject("object/tangible/wearables/backpack/shared_fannypack_s01.iff", planet));
 						return;
+					case 93: // Lightsaber Crystals
+						TangibleObject kraytPearl = (TangibleObject) core.objectService.createObject("object/tangible/component/weapon/lightsaber/shared_lightsaber_module_krayt_dragon_pearl.iff", planet);
+						kraytPearl.setAttachment("LootItemName", "kraytpearl_flawless");
+						core.lootService.handleSpecialItems(kraytPearl, "kraytpearl");	
+						inventory.add(kraytPearl);
+						
+						TangibleObject kraytPearl2 = (TangibleObject) core.objectService.createObject("object/tangible/component/weapon/lightsaber/shared_lightsaber_module_krayt_dragon_pearl.iff", planet);
+						kraytPearl2.setAttachment("LootItemName", "kraytpearl_flawless");
+						core.lootService.handleSpecialItems(kraytPearl2, "kraytpearl");	
+						inventory.add(kraytPearl2);
+						
+						TangibleObject kraytPearl3 = (TangibleObject) core.objectService.createObject("object/tangible/component/weapon/lightsaber/shared_lightsaber_module_krayt_dragon_pearl.iff", planet);
+						kraytPearl3.setAttachment("LootItemName", "kraytpearl_flawless");
+						core.lootService.handleSpecialItems(kraytPearl3, "kraytpearl");	
+						inventory.add(kraytPearl3);
+						
+						TangibleObject kraytPearl4 = (TangibleObject) core.objectService.createObject("object/tangible/component/weapon/lightsaber/shared_lightsaber_module_krayt_dragon_pearl.iff", planet);
+						kraytPearl4.setAttachment("LootItemName", "kraytpearl_flawless");
+						core.lootService.handleSpecialItems(kraytPearl4, "kraytpearl");	
+						inventory.add(kraytPearl4);
+						
+						TangibleObject kraytPearl5 = (TangibleObject) core.objectService.createObject("object/tangible/component/weapon/lightsaber/shared_lightsaber_module_krayt_dragon_pearl.iff", planet);
+						kraytPearl5.setAttachment("LootItemName", "kraytpearl_flawless");
+						core.lootService.handleSpecialItems(kraytPearl5, "kraytpearl");	
+						inventory.add(kraytPearl5);
+						
+						TangibleObject colorCrystal = (TangibleObject) core.objectService.createObject("object/tangible/component/weapon/lightsaber/shared_lightsaber_module_force_crystal.iff", planet);
+						colorCrystal.getAttributes().put("@obj_attr_n:condition", "100/100");
+						colorCrystal.getAttributes().put("@obj_attr_n:crystal_owner", "\\#D1F56F UNTUNED \\#FFFFFF ");
+						colorCrystal.setAttachment("radial_filename", "item/tunable");
+						core.lootService.setCustomization(colorCrystal, "colorcrystal");
+						inventory.add(colorCrystal);
+						
+						TangibleObject lavaCrystal = (TangibleObject) core.objectService.createObject("object/tangible/component/weapon/lightsaber/shared_lightsaber_module_lava_crystal.iff", planet);
+						lavaCrystal.getAttributes().put("@obj_attr_n:condition", "100/100");
+						lavaCrystal.getAttributes().put("@obj_attr_n:crystal_owner", "\\#D1F56F UNTUNED \\#FFFFFF ");
+						lavaCrystal.getAttributes().put("@obj_attr_n:color", "Lava"); 
+						lavaCrystal.setAttachment("radial_filename", "item/tunable");		
+						inventory.add(lavaCrystal);
+						
+						return;
+						
 					case 110:
 						SurveyTool mineralSurveyTool = (SurveyTool) core.objectService.createObject("object/tangible/survey_tool/shared_survey_tool_mineral.iff", planet);
 						mineralSurveyTool.setCustomName("Mineral Survey Device");
@@ -1179,8 +1228,11 @@ public class DevService implements INetworkDispatch {
 						return;
 						
 					case 122:
-						Point3D position = new Point3D(4086,15,5554);
-						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("dantooine"), position, player.getOrientation(), null);
+						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("dantooine"), new Point3D(4198,9,5210), player.getOrientation(), null);
+						return;
+						
+					case 124:
+						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("tatooine"), new Point3D(3521,4,-4800), player.getOrientation(), null);
 						return;
 
 					case 123:

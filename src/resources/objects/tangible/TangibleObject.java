@@ -297,6 +297,13 @@ public class TangibleObject extends SWGObject implements Serializable {
 		}
 	}
 	
+	public Byte getCustomizationVariable(String type)
+	{
+		if(customizationVariables.containsKey(type)) return customizationVariables.get(type);
+		System.err.println("Error: object doesn't have customization variable " + type);
+		return null;
+	}
+	
 	public void setCustomizationVariable(String type, byte value)
 	{
 		if(customizationVariables.containsKey(type)) customizationVariables.replace(type, value);

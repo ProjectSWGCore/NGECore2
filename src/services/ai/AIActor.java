@@ -273,7 +273,7 @@ public class AIActor {
 	}
 	
 	public void doStateAction(byte result) {
-		
+
 		switch(result) {
 		
 			case StateResult.DEAD:

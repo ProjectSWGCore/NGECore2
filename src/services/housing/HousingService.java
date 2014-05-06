@@ -168,10 +168,15 @@ public class HousingService implements INetworkDispatch {
 			}
 		}
 		
-		// Save structure to DB
-		/*building.createTransaction(core.getBuildingODB().getEnvironment());
-		core.getBuildingODB().put(building, Long.class, BuildingObject.class, building.getTransaction());
-		building.getTransaction().commitSync();*/
+		//core.objectService.persistObject(building.getObjectID(), building, core.getSWGObjectODB());
+		
+	}
+	
+	public void saveBuildings() {
+		core.objectService.getObjectList()
+		.values().stream()
+		.filter(obj -> obj instanceof BuildingObject && obj.getAttachment("structureOwner") != null)
+		.forEach(building -> core.objectService.persistObject(building.getObjectID(), building, core.getSWGObjectODB()));
 	}
 	
 	@SuppressWarnings("unchecked")
