@@ -166,7 +166,7 @@ public class TangibleObject extends SWGObject implements Serializable {
 		else if(conditionDamage > getMaxDamage())
 			conditionDamage = getMaxDamage();
 		this.conditionDamage = conditionDamage;
-		notifyObservers(messageBuilder.buildConditionDamageDelta(conditionDamage), false);
+		notifyObservers(messageBuilder.buildConditionDamageDelta(conditionDamage), true);
 		if (maxDamage > 0) {
 			this.setStringAttribute("condition", (maxDamage + "/" + (maxDamage - conditionDamage)));
 		}
@@ -311,7 +311,7 @@ public class TangibleObject extends SWGObject implements Serializable {
 		if(customizationVariables.containsKey(type)) customizationVariables.replace(type, value);
 		else customizationVariables.put(type, value);
 		
-		buildCustomizationBytes();
+		notifyObservers(messageBuilder.buildCustomizationDelta(getCustomizationBytes()), true);
 	}
 	
 	public void removeCustomizationVariable(String type)
@@ -319,11 +319,11 @@ public class TangibleObject extends SWGObject implements Serializable {
 		if(customizationVariables.containsKey(type)) 
 		{
 			customizationVariables.remove(type);
-			buildCustomizationBytes();
+			notifyObservers(messageBuilder.buildCustomizationDelta(getCustomizationBytes()), true);
 		}
 	}
 	
-	private void buildCustomizationBytes()
+	private byte[] getCustomizationBytes()
 	{
 		//if(customizationVariables.size() == 0) customization = { 0x00 };
 		
@@ -345,9 +345,10 @@ public class TangibleObject extends SWGObject implements Serializable {
 				stream.write((byte) 0xBF);
 				stream.write((byte) 0x03);
 			}
-			customization = stream.toByteArray();
+			return stream.toByteArray();
 		}
-		catch (Exception e) { e.printStackTrace(); }	
+		catch (Exception e) { e.printStackTrace(); }
+		return null;	
 	}
 	
 	public String getFaction() {

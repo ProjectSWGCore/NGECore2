@@ -151,8 +151,9 @@ public class TangibleMessageBuilder extends ObjectMessageBuilder {
 	}
 	
 	public IoBuffer buildCustomizationDelta(byte[] customization) {
-		IoBuffer buffer = bufferPool.allocate(customization.length, false).order(ByteOrder.LITTLE_ENDIAN);
-
+		IoBuffer buffer = bufferPool.allocate(customization.length + 2, false).order(ByteOrder.LITTLE_ENDIAN);
+		
+		buffer.putShort((short) customization.length);
 		buffer.put(customization);
 
 		int size = buffer.position();

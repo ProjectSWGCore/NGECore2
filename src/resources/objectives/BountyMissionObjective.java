@@ -89,7 +89,7 @@ public class BountyMissionObjective extends MissionObjective {
 		
 		bountyTarget.addBountyHunter(player.getObjectId());
 		
-		setMarkObjId(bountyTarget.getObjectId());
+		setMarkObjId(bountyTarget.getObjectID());
 		
 		String message = "@mission/mission_bounty_informant:target_hard_" + Integer.toString(new Random().nextInt(4) + 1);
 		

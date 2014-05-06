@@ -901,8 +901,8 @@ public class ObjectService implements INetworkDispatch {
 				if(!core.getConfig().getString("MOTD").equals(""))
 					creature.sendSystemMessage(core.getConfig().getString("MOTD"), (byte) 2);
 				
-				if (core.getBountiesODB().contains(creature.getObjectId()))
-					core.missionService.getBountyList().add((BountyListItem) core.getBountiesODB().get(creature.getObjectId()));
+				if (core.getBountiesODB().contains(creature.getObjectID()))
+					core.missionService.getBountyMap().put(creature.getObjectID(), (BountyListItem) core.getBountiesODB().get(creature.getObjectID()));
 				
 				if (creature.getSlottedObject("datapad") != null) {
 					creature.getSlottedObject("datapad").viewChildren(creature, true, false, new Traverser() {

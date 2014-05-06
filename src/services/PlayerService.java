@@ -1330,8 +1330,8 @@ public class PlayerService implements INetworkDispatch {
 						victim.setCashCredits(0);
 					} else { victim.setBankCredits(victim.getBankCredits() - bounty); }
 					
-					if (!core.missionService.addToExistingBounty(attacker.getObjectId(), victim.getObjectId(), bounty))
-						core.missionService.createNewBounty(attacker, victim.getObjectId(), bounty);
+					if (!core.missionService.addToExistingBounty(attacker.getObjectID(), victim.getObjectID(), bounty))
+						core.missionService.createNewBounty(attacker, victim.getObjectID(), bounty);
 					
 					victim.sendSystemMessage("You have placed a bounty for " + bounty + " credits on the head of " + attacker.getCustomName(), (byte) 0);
 				}
