@@ -289,7 +289,7 @@ public class BountyMissionObjective extends MissionObjective {
 								return;
 							} else {
 								
-								if (updates.get() >= 5) {
+								if (updates.get() >= 6) {
 									actor.sendSystemMessage("@mission/mission_generic:target_track_lost", DisplayType.Broadcast);
 									cancelLocationUpdates();
 									return;
@@ -306,12 +306,12 @@ public class BountyMissionObjective extends MissionObjective {
 									waypoint.setPlanetCRC(CRC.StringtoCRC(target.getPlanet().getName()));
 									waypoint.setStringAttribute("", "");
 									getMissionObject().setAttachedWaypoint(waypoint);
-									actor.sendSystemMessage("@mission/mission_generic:target_location_updated_ground", DisplayType.Broadcast);
 								} else {
 									missionWp.setPosition(target.getWorldPosition());
 									mission.setAttachedWaypoint(missionWp);
-									actor.sendSystemMessage("@mission/mission_generic:target_location_updated_ground", DisplayType.Broadcast);
 								}
+								actor.sendSystemMessage("@mission/mission_generic:target_location_updated_ground", DisplayType.Broadcast);
+								actor.sendSystemMessage("@mission/mission_generic:target_continue_tracking", DisplayType.Broadcast);
 								updates.getAndIncrement();
 							}
 						}

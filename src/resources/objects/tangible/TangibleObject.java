@@ -179,7 +179,7 @@ public class TangibleObject extends SWGObject implements Serializable {
 			this.customization = customization;
 		}
 		
-		notifyObservers(messageBuilder.buildCustomizationDelta(customization), false);
+		notifyObservers(messageBuilder.buildCustomizationDelta(customization), true);
 	}
 
 	public List<Integer> getComponentCustomizations() {

@@ -585,7 +585,8 @@ public class MissionService implements INetworkDispatch {
 		ODBCursor cursor = bountiesODB.getCursor();
 		while(cursor.hasNext()) {
 			BountyListItem bounty = (BountyListItem) cursor.next();
-			if (!core.characterService.playerExists(bounty.getObjectId())) {
+			
+			if (bounty != null && !core.characterService.playerExists(bounty.getObjectId())) {
 				bounties.add(bounty);
 			}
 		}
