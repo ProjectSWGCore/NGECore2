@@ -78,6 +78,7 @@ import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
+import resources.objects.harvester.HarvesterObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.common.*;
@@ -192,7 +193,7 @@ public class SimulationService implements INetworkDispatch {
 		
 		while(cursor.hasNext()) {
 			SWGObject building = core.objectService.getObject(((SWGObject) cursor.next()).getObjectID());
-			if(building == null || !(building instanceof BuildingObject))
+			if(building == null || (!(building instanceof BuildingObject) && !(building instanceof HarvesterObject)))
 				continue;
 			if(building.getAttachment("hasLoadedServerTemplate") == null)
 				core.objectService.loadServerTemplate(building);

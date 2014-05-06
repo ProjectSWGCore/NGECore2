@@ -24,6 +24,8 @@ def createRadial(core, owner, target, radials):
 	radials.add(RadialOptions(2,  172, 0, 'Pack Up This Building'))
 	radials.add(RadialOptions(3, 121, 0, '@player_structure:permission_enter'))	
 	radials.add(RadialOptions(3, 123, 0, '@player_structure:permission_banned'))
+	if owner.getSkillModBase('manage_vendor') >= 1:
+		radials.add(RadialOptions(2, 130, 0, '@player_structure:create_vendor')) 
 
 	return
 	
@@ -73,5 +75,7 @@ def handleSelection(core, owner, target, option):
 		if owner is not None:
 			core.housingService.handlePermissionBan(owner,target)	
 			return
-	
-	
+	if option == 130:
+		if owner is not None and owner.getSkillModBase('manage_vendor') >= 1:
+			core.commandService.callCommand(owner, 'createvendor', None, '')
+			return
