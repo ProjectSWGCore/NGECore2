@@ -54,6 +54,7 @@ def handleSUI(owner, window, eventType, returnList):
 				main.NGECore.getInstance().lootService.tuneProcess(tunableObject)
 				time.sleep(0.5)
 			
+			tunableObject.setCustomName2( "\\#00FF00" + tunableObject.getTrueName() + " (tuned)")
 			owner.sendSystemMessage('@jedi_spam:crystal_tune_success',1)
 	return	
 	

@@ -884,7 +884,7 @@ public class LootService implements INetworkDispatch {
 //		tunableObject.setIntAttribute("@obj_attr_n:componentbonushigh", finalMaxDmg);
 		tunableObject.setIntAttribute("@obj_attr_n:mindamage", finalMinDmg);
 		tunableObject.setIntAttribute("@obj_attr_n:maxdamage", finalMaxDmg);
-		((TangibleObject) tunableObject).setCustomName2(tunableObjectName + " (tuned)");
+		//((TangibleObject) tunableObject).setCustomName2(tunableObjectName + " (tuned)");
 	}
 	
 	private void setWeaponStat(WeaponObject weapon, String statName, String minValue, String maxValue){
