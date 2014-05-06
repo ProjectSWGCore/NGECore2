@@ -372,8 +372,8 @@ public class EquipmentService implements INetworkDispatch {
 				}
 				else 
 				{
-					minDamageBonus += Integer.parseInt(item.getAttributes().get("@obj_attr_n:componentbonuslow")); // "Min Damage Modified"
-					maxDamageBonus += Integer.parseInt(item.getAttributes().get("@obj_attr_n:componentbonushigh")); // "Max Damage Modified""
+					minDamageBonus += Integer.parseInt(item.getAttributes().get("@obj_attr_n:mindamage")); // "Minimum Damage"
+					maxDamageBonus += Integer.parseInt(item.getAttributes().get("@obj_attr_n:maxdamage")); // "Maximum Damage"
 				}
 				
 				int saberBaseDamageMin = (int) saber.getAttachment("weaponBaseDamageMin");

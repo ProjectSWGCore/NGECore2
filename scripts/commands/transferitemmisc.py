@@ -12,6 +12,10 @@ def run(core, actor, target, commandString):
         actorContainer = actor.getContainer()
         
         if container == None: return
+        
+        if(container.isFull()):
+            actor.sendSystemMessage('That container is full.', 0)
+            return
 
         if container.getTemplate().startswith("object/tangible/inventory/shared_lightsaber_inventory") or target.getContainer().getTemplate().startswith("object/tangible/inventory/shared_lightsaber_inventory"):	
             core.equipmentService.calculateLightsaberAttributes(actor, target, container)
