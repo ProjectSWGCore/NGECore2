@@ -331,7 +331,7 @@ public class EquipmentService implements INetworkDispatch {
 		// Check if player tuned the crystal
 		if(tunerId != actor.getObjectId())
 		{
-			actor.sendSystemMessage("@jedi_spam/saber_crystal_not_owner", (byte) 0);
+			actor.sendSystemMessage("@jedi_spam:saber_crystal_not_owner", (byte) 0);
 			return;
 		}
 		else item.getContainer().transferTo(actor, targetContainer, item);
