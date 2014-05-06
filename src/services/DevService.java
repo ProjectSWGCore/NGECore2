@@ -74,6 +74,7 @@ public class DevService implements INetworkDispatch {
 			case 0: // Root
 				suiOptions.put((long) 1, "Character");
 				suiOptions.put((long) 2, "Items");
+				suiOptions.put((long) 3, "Locations");
 				break;
 			case 1: // Character
 				suiOptions.put((long) 10, "Set combat level to 90");
@@ -90,9 +91,7 @@ public class DevService implements INetworkDispatch {
 				if(creature.getClient().isGM()) suiOptions.put((long) 120, "House Deeds");
 				if(creature.getClient().isGM()) suiOptions.put((long) 125, "Crafting Tools");
 				if(creature.getClient().isGM()) suiOptions.put((long) 130, "Vehicle Deeds");
-				if(creature.getClient().isGM()) suiOptions.put((long) 121, "Sandbox City");
-				if(creature.getClient().isGM()) suiOptions.put((long) 122, "Jedi Ruins");
-				
+				if(creature.getClient().isGM()) suiOptions.put((long) 121, "Sandbox City");	
 				break;
 			case 3: // [Items] Weapons
 				suiOptions.put((long) 30, "Jedi Weapons");
@@ -136,6 +135,10 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 111, "Harvesters");
 				suiOptions.put((long) 112, "Energy resources");
 				break;
+			case 11: // Locations
+				suiOptions.put((long) 122, "Teleport to Jedi Ruins");
+				suiOptions.put((long) 124, "Teleport to Mos Eisley");
+				break;
 		
 		}
 		
@@ -163,6 +166,9 @@ public class DevService implements INetworkDispatch {
 						return;
 					case 2: // Items
 						sendCharacterBuilderSUI(player, 2);
+						return; 
+					case 3: // Locations
+						sendCharacterBuilderSUI(player, 11);
 						return; 
 					
 					// Character
@@ -1222,8 +1228,11 @@ public class DevService implements INetworkDispatch {
 						return;
 						
 					case 122:
-						Point3D position = new Point3D(4086,15,5554);
-						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("dantooine"), position, player.getOrientation(), null);
+						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("dantooine"), new Point3D(4198,9,5210), player.getOrientation(), null);
+						return;
+						
+					case 124:
+						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("tatooine"), new Point3D(3521,4,-4800), player.getOrientation(), null);
 						return;
 
 					case 123:
