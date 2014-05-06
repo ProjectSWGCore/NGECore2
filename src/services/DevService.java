@@ -1025,18 +1025,25 @@ public class DevService implements INetworkDispatch {
 						core.lootService.handleSpecialItems(kraytPearl5, "kraytpearl");	
 						inventory.add(kraytPearl5);
 						
+						TangibleObject kraytPearl6 = (TangibleObject) core.objectService.createObject("object/tangible/component/weapon/lightsaber/shared_lightsaber_module_krayt_dragon_pearl.iff", planet);
+						kraytPearl6.setAttachment("LootItemName", "kraytpearl_premium");
+						core.lootService.handleSpecialItems(kraytPearl6, "kraytpearl");	
+						inventory.add(kraytPearl6);
+						
+						
+						
 						TangibleObject colorCrystal = (TangibleObject) core.objectService.createObject("object/tangible/component/weapon/lightsaber/shared_lightsaber_module_force_crystal.iff", planet);
 						colorCrystal.getAttributes().put("@obj_attr_n:condition", "100/100");
-						colorCrystal.getAttributes().put("@obj_attr_n:crystal_owner", "\\#D1F56F UNTUNED \\#FFFFFF ");
-						colorCrystal.setAttachment("radial_filename", "item/tunable");
+						//colorCrystal.getAttributes().put("@obj_attr_n:crystal_owner", "\\#D1F56F UNTUNED \\#FFFFFF ");
+						//colorCrystal.setAttachment("radial_filename", "item/tunable");
 						core.lootService.setCustomization(colorCrystal, "colorcrystal");
 						inventory.add(colorCrystal);
 						
 						TangibleObject lavaCrystal = (TangibleObject) core.objectService.createObject("object/tangible/component/weapon/lightsaber/shared_lightsaber_module_lava_crystal.iff", planet);
 						lavaCrystal.getAttributes().put("@obj_attr_n:condition", "100/100");
-						lavaCrystal.getAttributes().put("@obj_attr_n:crystal_owner", "\\#D1F56F UNTUNED \\#FFFFFF ");
+						//lavaCrystal.getAttributes().put("@obj_attr_n:crystal_owner", "\\#D1F56F UNTUNED \\#FFFFFF ");
 						lavaCrystal.getAttributes().put("@obj_attr_n:color", "Lava"); 
-						lavaCrystal.setAttachment("radial_filename", "item/tunable");		
+						//lavaCrystal.setAttachment("radial_filename", "item/tunable");		
 						inventory.add(lavaCrystal);
 						
 						return;
