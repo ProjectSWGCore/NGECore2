@@ -542,8 +542,9 @@ public class LootService implements INetworkDispatch {
 			int crystalColor = new Random().nextInt(11);
 			
 			droppedItem.setCustomizationVariable("/private/index_color_1", (byte) crystalColor);
-			//droppedItem.getAttributes().put("@obj_attr_n:color", resources.datatables.LightsaberColors.get(crystalColor));
-			droppedItem.getAttributes().put("@obj_attr_n:color", "@jedi_spam:saber_color_" + crystalColor);
+			droppedItem.getAttributes().put("@obj_attr_n:color", resources.datatables.LightsaberColors.get(crystalColor));
+			//droppedItem.getAttributes().put("@obj_attr_n:color", "@jedi_spam:saber_color_" + crystalColor); // Commented out for now
+			
 		}
 		
 		// Example power crystal
