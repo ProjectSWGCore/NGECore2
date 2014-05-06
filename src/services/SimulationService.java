@@ -953,6 +953,31 @@ public class SimulationService implements INetworkDispatch {
 		transform(object, radians, object.getPosition());
 	}
 	
+	public void faceTarget(SWGObject object, SWGObject target) {
+		float direction = (float) Math.atan2(target.getWorldPosition().x - object.getWorldPosition().x, target.getWorldPosition().z - object.getWorldPosition().z);
+		
+		if (direction < 0) {
+			direction = (float) (2 * Math.PI + direction);
+		}
+		
+		if (Math.abs(direction - object.getRadians()) < 0.05) {
+			return;
+		}
+		
+		Quaternion quaternion = new Quaternion((float) Math.cos(direction / 2), 0, (float) Math.sin(direction / 2), 0);
+        
+		if (quaternion.y < 0.0f && quaternion.w > 0.0f) {
+        	quaternion.y *= -1;
+        	quaternion.w *= -1;
+        }
+		
+		if (object.getContainer() instanceof CellObject) {
+			NGECore.getInstance().simulationService.moveObject(object, object.getPosition(), quaternion, object.getMovementCounter(), 0, (CellObject) object.getContainer());
+		} else {
+			NGECore.getInstance().simulationService.moveObject(object, object.getPosition(), quaternion, object.getMovementCounter(), 0, null);
+		}
+	}
+	
 	public void teleport(SWGObject obj, Point3D position, Quaternion orientation, long cellId) {
 		
 		if(cellId == 0) {
