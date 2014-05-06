@@ -39,20 +39,29 @@ public final class LightsaberColors {
 		map.put("Dark Blue", 5);
 		map.put("Yellow", 6);
 		map.put("Dark Yellow", 7);
-		map.put("Purple", 8);
-		map.put("Dark Purple", 9);
-		
-		map.put("Brown", 10);
-		map.put("Dark Brown", 11);
-		
-		map.put("color 12", 12);
-		map.put("color 13", 13);
-		map.put("color 14", 14);
-		map.put("color 15", 15);
-		map.put("color 16", 16);
-		
-		map.put("Bane's Heart", 17);
-		map.put("Sunrider's Destiny", 25);
+		map.put("Light Purple", 8);
+		map.put("Purple", 9);
+		map.put("Orange", 0x0A);
+		map.put("Browns", 0x0B);
+		map.put("Maul's Vengeance", 0x0C);
+		map.put("Kun's Blood", 0x0D);
+		map.put("Bondara's Folly", 0x0E);
+		map.put("Ulic's Redemption", 0x0F);
+		map.put("Bane's Heart", 10);
+		map.put("Gallia's Intuition", 11);		
+		map.put("Prowess of Plo Koon", 12);
+		map.put("B'Nar's Sacrifice", 13);
+		map.put("Windu's Guile", 14);
+		map.put("Mundi's Response", 15);
+		map.put("Strength of Luminaria", 16);		
+		map.put("Baaa's Wisdom", 17);
+		map.put("Quintessence of Force", 18);
+		map.put("Dawn of Dagobah", 19);
+		map.put("Horn's Future", 0x1A);
+		map.put("Qui-Gon's Devotion", 0x1B);
+		map.put("Kenobi's Legacy", 0x1C);
+		map.put("Sunrider's Destiny", 0x1D);
+		map.put("Kit's Ferocity", 0x1E);
 		
 		// Special crystals that have seperate shaders - the 256 is for a hacky way to set blade type and color without more code
 		map.put("Lava", 256 + 1);
