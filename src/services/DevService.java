@@ -129,9 +129,10 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 90, "(Light) Jedi Robe");
 				suiOptions.put((long) 91, "(Dark) Jedi Robe");
 				suiOptions.put((long) 92, "Belt of Master Bodo Baas");
-				suiOptions.put((long) 93, "Lightsaber Crystals");
+				suiOptions.put((long) 93, "Lightsaber Power Crystals");
+				suiOptions.put((long) 94, "Lightsaber Color Crystals");
 				break;
-			case 10: // [Items] Jedi Items
+			case 10: // [Items] Installations
 				suiOptions.put((long) 111, "Harvesters");
 				suiOptions.put((long) 112, "Energy resources");
 				break;
@@ -139,7 +140,13 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 122, "Teleport to Jedi Ruins");
 				suiOptions.put((long) 124, "Teleport to Mos Eisley");
 				break;
-		
+			case 12: // [Lightsaber Crystals] Color Crystals
+				suiOptions.put((long) 140, "Random Color Crystal");
+				suiOptions.put((long) 141, "Lava Color Crystal");
+				suiOptions.put((long) 142, "Blackwing Color Crystal");
+				suiOptions.put((long) 143, "Permafrost Color Crystal");
+				break;
+
 		}
 		
 		final SUIWindow window = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "Character Builder Terminal", "Select the desired option and click OK.", suiOptions, creature, null, 10);
@@ -231,12 +238,6 @@ public class DevService implements INetworkDispatch {
 						lightsaber3.setMinDamage(689);
 						lightsaber3.setMaxDamage(1379);
 						lightsaber3.setWeaponType(WeaponType.POLEARMSABER);
-						
-						Random random = new Random();
-						
-						lightsaber1.setCustomizationVariable("/private/index_color_blade", (byte) random.nextInt(47));
-						lightsaber2.setCustomizationVariable("/private/index_color_blade", (byte) random.nextInt(47));
-						lightsaber3.setCustomizationVariable("/private/index_color_blade", (byte) random.nextInt(47));
 						
 						inventory.add(lightsaber1);
 						inventory.add(lightsaber2);
@@ -1029,23 +1030,9 @@ public class DevService implements INetworkDispatch {
 						kraytPearl6.setAttachment("LootItemName", "kraytpearl_premium");
 						core.lootService.handleSpecialItems(kraytPearl6, "kraytpearl");	
 						inventory.add(kraytPearl6);
-						
-						
-						
-						TangibleObject colorCrystal = (TangibleObject) core.objectService.createObject("object/tangible/component/weapon/lightsaber/shared_lightsaber_module_force_crystal.iff", planet);
-						colorCrystal.getAttributes().put("@obj_attr_n:condition", "100/100");
-						colorCrystal.getAttributes().put("@obj_attr_n:crystal_owner", "\\#D1F56F UNTUNED \\#FFFFFF ");
-						colorCrystal.setAttachment("radial_filename", "item/tunable");
-						core.lootService.setCustomization(colorCrystal, "colorcrystal");
-						inventory.add(colorCrystal);
-						
-						TangibleObject lavaCrystal = (TangibleObject) core.objectService.createObject("object/tangible/component/weapon/lightsaber/shared_lightsaber_module_lava_crystal.iff", planet);
-						lavaCrystal.getAttributes().put("@obj_attr_n:condition", "100/100");
-						lavaCrystal.getAttributes().put("@obj_attr_n:crystal_owner", "\\#D1F56F UNTUNED \\#FFFFFF ");
-						lavaCrystal.getAttributes().put("@obj_attr_n:color", "Lava"); 
-						lavaCrystal.setAttachment("radial_filename", "item/tunable");		
-						inventory.add(lavaCrystal);
-						
+						return;
+					case 94: // Lightsaber Color Crystals
+						sendCharacterBuilderSUI(player, 12);
 						return;
 						
 					case 110:
@@ -1262,6 +1249,42 @@ public class DevService implements INetworkDispatch {
 						TangibleObject av21deed = (TangibleObject) core.objectService.createObject("object/tangible/deed/vehicle_deed/shared_landspeeder_av21_deed.iff", planet);
 						inventory.add(swoopDeed);
 						inventory.add(av21deed);
+						return;
+						// Lightsaber Color Crystals
+					case 140:
+						TangibleObject colorCrystal = (TangibleObject) core.objectService.createObject("object/tangible/component/weapon/lightsaber/shared_lightsaber_module_force_crystal.iff", planet);
+						colorCrystal.getAttributes().put("@obj_attr_n:condition", "100/100");
+						colorCrystal.getAttributes().put("@obj_attr_n:crystal_owner", "\\#D1F56F UNTUNED \\#FFFFFF ");
+						colorCrystal.setAttachment("radial_filename", "item/tunable");
+						core.lootService.setCustomization(colorCrystal, "colorcrystal");
+						inventory.add(colorCrystal);
+						return;
+					
+					case 141:
+						TangibleObject lavaCrystal = (TangibleObject) core.objectService.createObject("object/tangible/component/weapon/lightsaber/shared_lightsaber_module_lava_crystal.iff", planet);
+						lavaCrystal.getAttributes().put("@obj_attr_n:condition", "100/100");
+						lavaCrystal.getAttributes().put("@obj_attr_n:crystal_owner", "\\#D1F56F UNTUNED \\#FFFFFF ");
+						lavaCrystal.getAttributes().put("@obj_attr_n:color", "Lava"); 
+						lavaCrystal.setAttachment("radial_filename", "item/tunable");		
+						inventory.add(lavaCrystal);
+						return;
+						
+					case 142:
+						TangibleObject blackwingCrystal = (TangibleObject) core.objectService.createObject("object/tangible/component/weapon/lightsaber/shared_lightsaber_module_blackwing_crystal.iff", planet);
+						blackwingCrystal.getAttributes().put("@obj_attr_n:condition", "100/100");
+						blackwingCrystal.getAttributes().put("@obj_attr_n:crystal_owner", "\\#D1F56F UNTUNED \\#FFFFFF ");
+						blackwingCrystal.getAttributes().put("@obj_attr_n:color", "Blackwing"); 
+						blackwingCrystal.setAttachment("radial_filename", "item/tunable");		
+						inventory.add(blackwingCrystal);
+						return;
+						
+					case 143:
+						TangibleObject permafrostCrystal = (TangibleObject) core.objectService.createObject("object/tangible/component/weapon/lightsaber/shared_lightsaber_module_permafrost_crystal.iff", planet);
+						permafrostCrystal.getAttributes().put("@obj_attr_n:condition", "100/100");
+						permafrostCrystal.getAttributes().put("@obj_attr_n:crystal_owner", "\\#D1F56F UNTUNED \\#FFFFFF ");
+						permafrostCrystal.getAttributes().put("@obj_attr_n:color", "Permafrost"); 
+						permafrostCrystal.setAttachment("radial_filename", "item/tunable");		
+						inventory.add(permafrostCrystal);
 						return;
 				}
 			}	
