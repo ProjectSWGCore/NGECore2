@@ -533,12 +533,16 @@ public class LootService implements INetworkDispatch {
 		
 	}
 		
-	private void setCustomization(TangibleObject droppedItem,String itemName) {
+	public void setCustomization(TangibleObject droppedItem,String itemName) {
 		
 		// Example color crystal
 		if (itemName.contains("colorcrystal")) {
 			System.out.println("colorcrystal");
-			droppedItem.setCustomizationVariable("/private/index_color_1", (byte) new Random().nextInt(11));
+			
+			int crystalColor = new Random().nextInt(11);
+			
+			droppedItem.setCustomizationVariable("/private/index_color_1", (byte) crystalColor);
+			droppedItem.getAttributes().put("@obj_attr_n:color", resources.datatables.LightsaberColors.get(crystalColor));
 		}
 		
 		// Example power crystal
@@ -558,7 +562,7 @@ public class LootService implements INetworkDispatch {
 //		}
 	}
 	
-	private void handleSpecialItems(TangibleObject droppedItem,String itemName) {
+	public void handleSpecialItems(TangibleObject droppedItem,String itemName) {
 		if (itemName.contains("kraytpearl")){
 			handleKraytPearl(droppedItem);
 		}

@@ -130,6 +130,7 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 90, "(Light) Jedi Robe");
 				suiOptions.put((long) 91, "(Dark) Jedi Robe");
 				suiOptions.put((long) 92, "Belt of Master Bodo Baas");
+				suiOptions.put((long) 93, "Lightsaber Crystals");
 				break;
 			case 10: // [Items] Jedi Items
 				suiOptions.put((long) 111, "Harvesters");
@@ -992,6 +993,48 @@ public class DevService implements INetworkDispatch {
 					case 92: // Belt of Master Bodo Baas
 						inventory.add(core.objectService.createObject("object/tangible/wearables/backpack/shared_fannypack_s01.iff", planet));
 						return;
+					case 93: // Lightsaber Crystals
+						TangibleObject kraytPearl = (TangibleObject) core.objectService.createObject("object/tangible/component/weapon/lightsaber/shared_lightsaber_module_krayt_dragon_pearl.iff", planet);
+						kraytPearl.setAttachment("LootItemName", "kraytpearl_flawless");
+						core.lootService.handleSpecialItems(kraytPearl, "kraytpearl");	
+						inventory.add(kraytPearl);
+						
+						TangibleObject kraytPearl2 = (TangibleObject) core.objectService.createObject("object/tangible/component/weapon/lightsaber/shared_lightsaber_module_krayt_dragon_pearl.iff", planet);
+						kraytPearl2.setAttachment("LootItemName", "kraytpearl_flawless");
+						core.lootService.handleSpecialItems(kraytPearl2, "kraytpearl");	
+						inventory.add(kraytPearl2);
+						
+						TangibleObject kraytPearl3 = (TangibleObject) core.objectService.createObject("object/tangible/component/weapon/lightsaber/shared_lightsaber_module_krayt_dragon_pearl.iff", planet);
+						kraytPearl3.setAttachment("LootItemName", "kraytpearl_flawless");
+						core.lootService.handleSpecialItems(kraytPearl3, "kraytpearl");	
+						inventory.add(kraytPearl3);
+						
+						TangibleObject kraytPearl4 = (TangibleObject) core.objectService.createObject("object/tangible/component/weapon/lightsaber/shared_lightsaber_module_krayt_dragon_pearl.iff", planet);
+						kraytPearl4.setAttachment("LootItemName", "kraytpearl_flawless");
+						core.lootService.handleSpecialItems(kraytPearl4, "kraytpearl");	
+						inventory.add(kraytPearl4);
+						
+						TangibleObject kraytPearl5 = (TangibleObject) core.objectService.createObject("object/tangible/component/weapon/lightsaber/shared_lightsaber_module_krayt_dragon_pearl.iff", planet);
+						kraytPearl5.setAttachment("LootItemName", "kraytpearl_flawless");
+						core.lootService.handleSpecialItems(kraytPearl5, "kraytpearl");	
+						inventory.add(kraytPearl5);
+						
+						TangibleObject colorCrystal = (TangibleObject) core.objectService.createObject("object/tangible/component/weapon/lightsaber/shared_lightsaber_module_force_crystal.iff", planet);
+						colorCrystal.getAttributes().put("@obj_attr_n:condition", "100/100");
+						colorCrystal.getAttributes().put("@obj_attr_n:crystal_owner", "\\#D1F56F UNTUNED \\#FFFFFF ");
+						colorCrystal.setAttachment("radial_filename", "item/tunable");
+						core.lootService.setCustomization(colorCrystal, "colorcrystal");
+						inventory.add(colorCrystal);
+						
+						TangibleObject lavaCrystal = (TangibleObject) core.objectService.createObject("object/tangible/component/weapon/lightsaber/shared_lightsaber_module_lava_crystal.iff", planet);
+						lavaCrystal.getAttributes().put("@obj_attr_n:condition", "100/100");
+						lavaCrystal.getAttributes().put("@obj_attr_n:crystal_owner", "\\#D1F56F UNTUNED \\#FFFFFF ");
+						lavaCrystal.getAttributes().put("@obj_attr_n:color", "Lava"); 
+						lavaCrystal.setAttachment("radial_filename", "item/tunable");		
+						inventory.add(lavaCrystal);
+						
+						return;
+						
 					case 110:
 						SurveyTool mineralSurveyTool = (SurveyTool) core.objectService.createObject("object/tangible/survey_tool/shared_survey_tool_mineral.iff", planet);
 						mineralSurveyTool.setCustomName("Mineral Survey Device");
