@@ -722,6 +722,7 @@ public class LootService implements INetworkDispatch {
 		droppedItem.getAttributes().put("@obj_attr_n:crystal_owner", "\\#D1F56F UNTUNED \\#FFFFFF ");		
 		droppedItem.getAttributes().put("@obj_attr_n:crystal_quality", qualityString);	
 		droppedItem.setAttachment("radial_filename", "item/tunable");
+		droppedItem.setAttachment("TuneType", "KraytPearl");
 	}
 	
 	private void handlePowerCrystal(TangibleObject droppedItem) {
@@ -762,7 +763,122 @@ public class LootService implements INetworkDispatch {
 		droppedItem.getAttributes().put("@obj_attr_n:crystal_owner", "\\#D1F56F UNTUNED \\#FFFFFF ");
 		droppedItem.getAttributes().put("@obj_attr_n:crystal_quality", qualityString);	
 		droppedItem.setAttachment("radial_filename", "item/tunable");
+		droppedItem.setAttachment("TuneType", "PowerCrystal");
 	}	
+	
+	public void tuneProcess(SWGObject tunableObject){
+		
+		String objectType = (String) tunableObject.getAttachment("LootItemName");
+		if (objectType==null || objectType.length()==0)
+			return;
+		
+		int finalMinDmg = 0;
+		int finalMaxDmg = 0;
+		
+		if (objectType.contains("powercrystal")){
+			switch (objectType) {
+				case "powercrystal_poor":     // Poor - Up to 3/4 damage 
+										      int minValue1 = 1;
+										      int maxValue1 = 3;
+										      finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
+										      finalMaxDmg = finalMinDmg+1;
+										      break;
+				case "powercrystal_fair":     // Fair - Up to 5/6 damage 
+											  minValue1 = 3;
+				                              maxValue1 = 5;				                             
+				                              finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
+				                              finalMaxDmg = finalMinDmg+1;
+										      break;
+				case "powercrystal_good":     // Good - Up to 10/11 damage  
+					                          minValue1 = 6;
+                                              maxValue1 = 10;
+                                              finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
+                                              finalMaxDmg = finalMinDmg+1;
+										      break;
+				case "powercrystal_quality":  // Quality - Up to 12/13 damage  
+					                          minValue1 = 11;
+					                          maxValue1 = 12;
+							                  finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
+							                  finalMaxDmg = finalMinDmg+1;
+										      break;
+				case "powercrystal_select":   // Select - Up to 14/15 damage 
+					                          minValue1 = 13;
+                                              maxValue1 = 14;
+	                                          finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
+	                                          finalMaxDmg = finalMinDmg+1;
+										      break;
+				case "powercrystal_premium":  // Premium - Up to 17/18 damage 
+										      minValue1 = 15;
+							                  maxValue1 = 17;
+							                  finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
+							                  finalMaxDmg = finalMinDmg+1;
+										      break;
+				case "powercrystal_flawless": // Flawless - 20-22 possibly more or less  
+								              finalMinDmg = 20;
+								              finalMaxDmg = 22;
+										      break;
+				case "powercrystal_perfect":  // Perfect - Up to 23/25 damage 
+											  minValue1 = 21;
+									          maxValue1 = 23;
+									          finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
+									          finalMaxDmg = finalMinDmg+1;
+										      break;
+			}
+		}
+		
+		if (objectType.contains("kraytpearl")){
+			switch (objectType) {
+				case "kraytpearl_poor":       // Poor - Up to 3/4 damage 
+										      int minValue1 = 1;
+										      int maxValue1 = 3;
+										      finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
+										      finalMaxDmg = finalMinDmg+1;
+										      break;
+				case "kraytpearl_fair":       // Fair - Up to 5/6 damage  
+											  minValue1 = 3;
+				                              maxValue1 = 5;
+				                              finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
+				                              finalMaxDmg = finalMinDmg+1;
+										      break;
+				case "kraytpearl_good":       // Good - Up to 10/11 damage  
+					                          minValue1 = 6;
+	                                          maxValue1 = 10;
+	                                          finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
+	                                          finalMaxDmg = finalMinDmg+1;
+										      break;
+				case "kraytpearl_quality":    // Quality - Up to 12/13 damage  
+					                          minValue1 = 11;
+					                          maxValue1 = 12;
+							                  finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
+							                  finalMaxDmg = finalMinDmg+1;
+										      break;
+				case "kraytpearl_select":     // Select - Up to 14/15 damage 
+					                          minValue1 = 13;
+	                                          maxValue1 = 14;
+	                                          finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
+	                                          finalMaxDmg = finalMinDmg+1;
+										      break;
+				case "kraytpearl_premium":    // Premium - Up to 18/19 damage 
+										      minValue1 = 15;
+							                  maxValue1 = 17;
+							                  finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
+							                  finalMaxDmg = finalMinDmg+1;
+										      break;
+				case "kraytpearl_flawless":   // Flawless - 19/20 damage   
+								              finalMinDmg = 19;
+								              finalMaxDmg = 20;
+										      break;
+				case "kraytpearl_ancient":    // Ancient - 20/22 damage 
+											  finalMinDmg = 20;
+		                                      finalMaxDmg = 22;
+										      break;
+			}
+		}
+		
+		tunableObject.getAttributes().remove("@obj_attr_n:crystal_quality");	
+		tunableObject.setIntAttribute("@obj_attr_n:componentbonuslow", finalMinDmg);
+		tunableObject.setIntAttribute("@obj_attr_n:componentbonushigh", finalMaxDmg);		
+	}
 	
 	private void setWeaponStat(WeaponObject weapon, String statName, String minValue, String maxValue){
 		
