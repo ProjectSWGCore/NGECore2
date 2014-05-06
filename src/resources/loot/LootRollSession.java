@@ -113,6 +113,10 @@ public class LootRollSession {
 	public Planet getSessionPlanet() {
 		return sessionPlanet;
 	}
+	
+	public void setSessionPlanet(Planet planet) {
+		sessionPlanet = planet;
+	}
 
 	public List<String> getErrorMessages() {
 		return errorMessages;

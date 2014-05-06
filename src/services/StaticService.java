@@ -37,6 +37,7 @@ import java.util.Random;
 import resources.common.FileUtilities;
 import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
+import services.spawn.MobileTemplate;
 import main.NGECore;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.PortalVisitor;
@@ -116,8 +117,11 @@ public class StaticService implements INetworkDispatch {
 		
 		SWGObject object;
 		
-		if (core.spawnService.getMobileTemplate(template) != null) {
-			object = core.spawnService.spawnCreature(core.spawnService.getMobileTemplate(template).getTemplates().get(new Random().nextInt(core.spawnService.getMobileTemplate(template).getTemplates().size())), planetName, cellId, x, y, z, qW, qX, qY, qZ, (short) -1);
+		MobileTemplate mobileTemplate = core.spawnService.getMobileTemplate(template);
+		if (mobileTemplate != null) {
+			System.out.println("SPAWN MOBILE TEMPLATE " + mobileTemplate.getTemplates().get(new Random().nextInt(mobileTemplate.getTemplates().size())));
+			object = core.spawnService.spawnCreature(template, planetName, cellId, x, y, z, qW, qX, qY, qZ, (short) -1);
+			System.out.println("objectid " + object.getObjectID());
 		} else {
 			object = core.objectService.createObject(template, objectId, planet, new Point3D(x, y, z), new Quaternion(qW, qX, qY, qZ), null, true, true);
 		}

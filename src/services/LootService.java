@@ -1167,6 +1167,266 @@ public class LootService implements INetworkDispatch {
 		return suffix;
 	}
 	
+	public void handleContainer(long containerID, String lootPool, String planetName){
+		SWGObject containerObject = core.objectService.getObject(200336);
+		LootRollSession lootRollSession = new LootRollSession();
+		Planet planet = core.terrainService.getPlanetByName(planetName);
+		lootRollSession.setSessionPlanet(planet);
+		lootRollSession.setLootedObjectLevel(70);
+	    lootRollSession.setLootedObjectDifficulty(0);
+		
+	    System.out.println("containerObject " + containerObject.getClass().getName() );
+	    
+	    //handleContainerDrops(containerObject, lootRollSession);	
+	}
+	/*
+	private void handleContainerDrops(SWGObject containerObject, LootRollSession lootRollSession){
+		 List<LootGroup> lootGroups = containerObject.getLootGroups();
+		 Iterator<LootGroup> iterator = lootGroups.iterator();
+		 int projectionCoefficientMatrixModulo = 0;
+		 projectionCoefficientMatrixModulo = outbound(requester);
+	     	    
+	    while (iterator.hasNext()){
+	    	LootGroup lootGroup = iterator.next();
+	    	double groupChance = lootGroup.getLootGroupChance();
+	    	double lootGroupRoll = new Random().nextDouble()*100;
+	    	if (projectionCoefficientMatrixModulo!=0)
+	    		lootGroupRoll=groupChance+1;
+	    	if (lootGroupRoll <= groupChance){    	
+	    		System.out.println("this lootGroup will drop something");
+	    		handleContainerLootGroup(lootGroup,lootRollSession); //this lootGroup will drop something e.g. {kraytpearl_range,krayt_tissue_rare}	    		
+	    	}		
+	    	System.out.println("While Loop Stuck check");
+	    }
+	}
+	
+	private void handleContainerLootGroup(LootGroup lootGroup,LootRollSession lootRollSession){
+		
+		double[] lootPoolChances = lootGroup.getLootPoolChances();
+		String[] lootPoolNames = lootGroup.getLootPoolNames();
+		if (lootPoolChances==null || lootPoolNames==null){
+			System.err.println("Lootpools are null!");
+			return;
+		}
+		if (lootPoolChances.length==0 || lootPoolNames.length==0){
+			System.err.println("No Lootpools in Lootgroup!");
+			return;
+		}
+		
+		double randomItemFromGroup = new Random().nextDouble()*100;
+		double remainder = 0; // [10,20,30,34,5,1] 
+		double span = 100/lootPoolNames.length;
+		
+		boolean test = false;
+		
+		for(int i=0;i<lootPoolChances.length;i++) {
+			if (lootPoolChances[0]!=-1.0)
+				remainder += lootPoolChances[i];
+			else 
+				remainder += span;
+	    	if (randomItemFromGroup <= remainder){ 		
+	    		System.out.println("this loot pool will drop something"); // e.g. kraytpearl_range
+	    		handleContainerLootPool(lootPoolNames[i],lootRollSession); // This loot pool will drop something	
+	    		test = true;
+	    		break;
+	    	}			 
+		}
+		if (!test)
+			System.err.println("SOMETHING WENT WRONG!");
+	}
+	
+	private void handleContainerLootPool(String poolName,LootRollSession lootRollSession){
+		System.err.println("poolName.toLowerCase() " + poolName.toLowerCase());
+		// Fetch the loot pool data from the poolName.py script		
+		String path = "scripts/loot/lootPools/"+poolName.toLowerCase(); 
+		Vector<String> itemNames = (Vector<String>)core.scriptService.fetchStringVector(path,"itemNames");
+		
+		Vector<Double> itemChances = (Vector<Double>)core.scriptService.fetchDoubleVector(path,"itemChances");
+				
+		double randomItemFromPool = new Random().nextDouble()*100;
+		double remainder = 0.0; // [10,20,30,34,5,1]
+		double span = 100.0/(double)itemNames.size();
+
+		for (int i=0;i<itemNames.size();i++){
+			if (itemChances.get(0)!=-1.0)
+				remainder += itemChances.get(i); 
+			else
+				remainder += span; 
+			if (randomItemFromPool<=remainder){
+				// this element has been chosen e.g. kraytpearl_flawless
+				//System.err.println("CHOSEN ITEM " + itemNames.get(i));
+				handleContainerLootPoolItems(itemNames.get(i), lootRollSession);				
+				//break;
+				return;
+			}						
+		}
+	}	
+	
+	private void handleContainerLootPoolItems(String itemName, SWGObject containerObject, LootRollSession lootRollSession){
+		
+		final Vector<String> foundPath = new Vector<String>(); 
+		Path p = Paths.get("scripts/loot/lootItems/");
+	    FileVisitor<Path> fv = new SimpleFileVisitor<Path>() {
+	        @Override
+	        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+	        	String actualFileName = file.getFileName().toString();
+	        	actualFileName = actualFileName.substring(0, actualFileName.length()-3);
+	        	if (actualFileName.equals(itemName.toLowerCase())){
+	        		foundPath.add(file.toString());
+	        	} 	        	
+	        	return FileVisitResult.CONTINUE;
+	        }
+	    };
+        try {
+			Files.walkFileTree(p, fv);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		
+		if (foundPath.size()==0){
+			String errorMessage = "Loot item  '" + itemName + "'  not found in file system. Please contact Charon about this issue.";
+			System.err.println(errorMessage);
+			return;
+			
+		}		
+		String itemPath = foundPath.get(0);
+		
+		itemPath = itemPath.substring(0, itemPath.length()-3); // remove the file type
+
+		String customName = "";
+		String itemTemplate = "";
+		Vector<String> itemTemplates = null;
+		int stackCount = 1;
+		int biolink = 0;
+		int requiredCL = 1;
+		int stackable = -1;
+		int junkDealerPrice = 0;
+		byte junkType = -1;
+		String requiredProfession = "";
+		String requiredFaction = "";
+		Vector<String> customizationAttributes = null;
+		Vector<Integer> customizationValues = null;
+		Vector<String> itemStats = null;
+		Vector<String> itemSkillMods = null;
+				
+		if(core.scriptService.getMethod(itemPath,"","itemTemplate")==null){
+			String errorMessage = "Loot item  '" + itemName + "'  has no template function assigned in its script. Please contact Charon about this issue.";
+			System.err.println(errorMessage);
+			return;
+		}
+		
+		itemTemplates = (Vector<String>)core.scriptService.fetchStringVector(itemPath,"itemTemplate"); 
+		if (itemTemplates.size()==1)
+			itemTemplate = itemTemplates.get(0);
+		if (itemTemplates.size()>1){
+			itemTemplate = itemTemplates.get(new Random().nextInt(itemTemplates.size()-1));
+		}
+				
+		// only consider the following variables, if they are in the python-script file
+		if(core.scriptService.getMethod(itemPath,"","customItemName")!=null) 
+			customName = (String)core.scriptService.fetchString(itemPath,"customItemName");
+		
+		if(core.scriptService.getMethod(itemPath,"","customItemStackCount")!=null)
+			stackCount = (Integer)core.scriptService.fetchInteger(itemPath,"customItemStackCount");
+		
+		if(core.scriptService.getMethod(itemPath,"","customizationAttributes")!=null)
+			customizationAttributes = (Vector<String>)core.scriptService.fetchStringVector(itemPath,"customizationAttributes");
+		
+		if(core.scriptService.getMethod(itemPath,"","customizationValues")!=null)
+			customizationValues = (Vector<Integer>)core.scriptService.fetchIntegerVector(itemPath,"customizationValues");
+		
+		if(core.scriptService.getMethod(itemPath,"","itemStats")!=null)
+			itemStats = (Vector<String>)core.scriptService.fetchStringVector(itemPath,"itemStats");
+		
+		if(core.scriptService.getMethod(itemPath,"","itemSkillMods")!=null)
+			itemSkillMods = (Vector<String>)core.scriptService.fetchStringVector(itemPath,"itemSkillMods");
+			
+		if(core.scriptService.getMethod(itemPath,"","biolink")!=null)
+			biolink = (Integer)core.scriptService.fetchInteger(itemPath,"biolink");
+		
+		if(core.scriptService.getMethod(itemPath,"","requiredCL")!=null)
+			requiredCL = (Integer)core.scriptService.fetchInteger(itemPath,"requiredCL");
+
+		if(core.scriptService.getMethod(itemPath,"","requiredProfession")!=null)
+			requiredProfession = (String)core.scriptService.fetchString(itemPath,"requiredProfession");
+		
+		if(core.scriptService.getMethod(itemPath,"","requiredFaction")!=null)
+			requiredFaction = (String)core.scriptService.fetchString(itemPath,"requiredFaction");
+		
+		if(core.scriptService.getMethod(itemPath,"","stackable")!=null)
+			stackable =  (Integer)core.scriptService.fetchInteger(itemPath,"stackable");
+		
+		if(core.scriptService.getMethod(itemPath,"","junkDealerPrice")!=null)
+			junkDealerPrice =  (Integer)core.scriptService.fetchInteger(itemPath,"junkDealerPrice");
+		
+		if(core.scriptService.getMethod(itemPath,"","junkType")!=null)
+			junkType =  (byte)core.scriptService.fetchInteger(itemPath,"junkType");
+		
+			
+		System.out.println("itemTemplate " + itemTemplate);
+		
+		TangibleObject droppedItem = createDroppedItem(itemTemplate,lootRollSession.getSessionPlanet());
+		
+		droppedItem.setLootItem(true);
+		droppedItem.setAttachment("LootItemName", itemName);
+    	
+		if(core.scriptService.getMethod(itemPath,"","randomStatJewelry")!=null){
+			customName = setRandomStatsJewelry(droppedItem, lootRollSession);
+		}
+		
+		if (customName!=null)
+			handleCustomDropName(droppedItem, customName);
+		
+		if (stackable!=-1){
+			if(stackable==1)
+				droppedItem.setStackable(true);
+			else
+				droppedItem.setStackable(false);
+    	}	
+		
+		if (junkDealerPrice!=0){
+    		droppedItem.setJunkDealerPrice(junkDealerPrice);
+    	}
+		
+		if (junkType!=-1){
+    		droppedItem.setJunkType(junkType);
+    	}
+    	
+    	if (itemStats!=null){
+    		if (itemStats.size()%3!=0){
+    			String errorMessage = "Loot item  '" + itemName + "'  has a wrong number of itemstats. Please contact Charon about this issue.";
+    			System.err.println(errorMessage);
+    			return;
+    		}
+    		handleStats(droppedItem, itemStats);
+    	}
+    	
+    	if (itemSkillMods!=null){
+    		handleSkillMods(droppedItem, itemSkillMods);
+    	}
+
+    	setCustomization(droppedItem, itemName); // for now
+    	
+    	handleSpecialItems(droppedItem, itemName);
+		
+    	if (requiredCL>1){
+    		droppedItem.setIntAttribute("required_combat_level", requiredCL);
+    	}
+    	
+    	if (requiredProfession.length()>0){
+    		droppedItem.setStringAttribute("class_required", requiredProfession);
+    	}
+    	
+    	if (requiredFaction.length()>0){
+    		droppedItem.setStringAttribute("required_faction", requiredFaction);
+    	}
+    	
+    	
+    	containerObject.add(droppedItem);
+
+	}	
+	*/
 	
 	// ********* Junk-dealer related *********
 	
