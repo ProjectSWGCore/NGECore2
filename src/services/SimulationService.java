@@ -947,6 +947,11 @@ public class SimulationService implements INetworkDispatch {
 		teleport(obj, obj.getPosition(), newRotation, obj.getParentId());
 	}
 	
+	public void rotateToFaceTarget(SWGObject object, SWGObject target) {
+		float radians = (float) (((float) Math.atan2(target.getPosition().z - object.getPosition().z, target.getPosition().x - object.getPosition().x)) - object.getRadians());
+		transform(object, radians, object.getPosition());
+	}
+	
 	public void teleport(SWGObject obj, Point3D position, Quaternion orientation, long cellId) {
 		
 		if(cellId == 0) {
