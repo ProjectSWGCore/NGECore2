@@ -512,6 +512,24 @@ public class TangibleObject extends SWGObject implements Serializable {
 		}
 	}
 	
+	// Returns the STF-based name
+	public String getProperName()
+	{
+		return  "@" + getStfFilename() + ":" + getStfName();
+	}
+	
+	// Returns the current, true name of the Object
+	public String getTrueName()
+	{
+		return getCustomName() != null ? getCustomName() : getProperName();
+	}
+	
+	// Returns the STF-based description
+	public String getProperDescription()
+	{
+		return "@" + getDetailFilename() + ":" + getDetailName();
+	}
+	
 	public List<LootGroup> getLootGroups() {
 		return lootGroups;
 	}
