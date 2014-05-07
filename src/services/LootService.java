@@ -44,13 +44,16 @@ import java.util.Vector;
 import org.apache.commons.lang3.ArrayUtils;
 
 import protocol.swg.PlayClientEffectObjectTransformMessage;
+import protocol.swg.SceneCreateObjectByCrc;
 import resources.loot.LootGroup;
 import resources.loot.LootRollSession;
+import resources.objects.Delta;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 import main.NGECore;
+import engine.resources.container.CreatureContainerPermissions;
 import engine.resources.container.Traverser;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
@@ -158,15 +161,15 @@ public class LootService implements INetworkDispatch {
 	    System.out.println("Past while ");
 	    
 	    // Rare Loot System Stage (Is in place for all looted creatures)
-//if (lootRollSession.isAllowRareLoot()){
-//	int randomRareLoot = new Random().nextInt(100);
-//	int chanceRequirement = 1; 
-//	if (lootRollSession.isIncreasedRLSChance())
-//		chanceRequirement+=3; // RLS chance is at 4% for groupsize >= 4
-//	if (randomRareLoot <= chanceRequirement){ 
-//		handleRareLootChest(lootRollSession);
-//	}
-//}
+		if (lootRollSession.isAllowRareLoot()){
+			int randomRareLoot = new Random().nextInt(100);
+			int chanceRequirement = 1; 
+			if (lootRollSession.isIncreasedRLSChance())
+				chanceRequirement+=3; // RLS chance is at 4% for groupsize >= 4
+			if (randomRareLoot <= chanceRequirement){ 
+				handleRareLootChest(lootRollSession);
+			}
+		}
 		
 	    // set info above corpse
 	    System.out.println("lootedObject instanceof CreatureObject " + (lootedObject instanceof CreatureObject));
@@ -1167,40 +1170,41 @@ public class LootService implements INetworkDispatch {
 		return suffix;
 	}
 	
-	public void handleContainer(long containerID, String lootPool, String planetName){
-		SWGObject containerObject = core.objectService.getObject(200336);
+	
+	public void handleContainer(SWGObject actor, int containerID, String lootPool, String planetName){
+		
+		long objectId = containerID +  0xFFFFFFFF;		
+		TangibleObject containerObject = (TangibleObject) core.objectService.getObject(objectId);
 		LootRollSession lootRollSession = new LootRollSession();
 		Planet planet = core.terrainService.getPlanetByName(planetName);
 		lootRollSession.setSessionPlanet(planet);
 		lootRollSession.setLootedObjectLevel(70);
 	    lootRollSession.setLootedObjectDifficulty(0);
 		
-	    System.out.println("containerObject " + containerObject.getClass().getName() );
-	    
-	    //handleContainerDrops(containerObject, lootRollSession);	
+	    if (containerObject==null)
+	    	 System.out.println("containerObject is NULL " );
+	    	
+	    handleContainerDrops(containerObject, lootRollSession);	
 	}
-	/*
-	private void handleContainerDrops(SWGObject containerObject, LootRollSession lootRollSession){
+	
+	private void handleContainerDrops(TangibleObject containerObject, LootRollSession lootRollSession){
 		 List<LootGroup> lootGroups = containerObject.getLootGroups();
 		 Iterator<LootGroup> iterator = lootGroups.iterator();
-		 int projectionCoefficientMatrixModulo = 0;
-		 projectionCoefficientMatrixModulo = outbound(requester);
 	     	    
 	    while (iterator.hasNext()){
 	    	LootGroup lootGroup = iterator.next();
 	    	double groupChance = lootGroup.getLootGroupChance();
 	    	double lootGroupRoll = new Random().nextDouble()*100;
-	    	if (projectionCoefficientMatrixModulo!=0)
-	    		lootGroupRoll=groupChance+1;
+
 	    	if (lootGroupRoll <= groupChance){    	
 	    		System.out.println("this lootGroup will drop something");
-	    		handleContainerLootGroup(lootGroup,lootRollSession); //this lootGroup will drop something e.g. {kraytpearl_range,krayt_tissue_rare}	    		
+	    		handleContainerLootGroup(lootGroup,lootRollSession, containerObject); //this lootGroup will drop something e.g. {kraytpearl_range,krayt_tissue_rare}	    		
 	    	}		
 	    	System.out.println("While Loop Stuck check");
 	    }
 	}
 	
-	private void handleContainerLootGroup(LootGroup lootGroup,LootRollSession lootRollSession){
+	private void handleContainerLootGroup(LootGroup lootGroup,LootRollSession lootRollSession, TangibleObject containerObject){
 		
 		double[] lootPoolChances = lootGroup.getLootPoolChances();
 		String[] lootPoolNames = lootGroup.getLootPoolNames();
@@ -1226,7 +1230,7 @@ public class LootService implements INetworkDispatch {
 				remainder += span;
 	    	if (randomItemFromGroup <= remainder){ 		
 	    		System.out.println("this loot pool will drop something"); // e.g. kraytpearl_range
-	    		handleContainerLootPool(lootPoolNames[i],lootRollSession); // This loot pool will drop something	
+	    		handleContainerLootPool(lootPoolNames[i],lootRollSession, containerObject); // This loot pool will drop something	
 	    		test = true;
 	    		break;
 	    	}			 
@@ -1235,7 +1239,7 @@ public class LootService implements INetworkDispatch {
 			System.err.println("SOMETHING WENT WRONG!");
 	}
 	
-	private void handleContainerLootPool(String poolName,LootRollSession lootRollSession){
+	private void handleContainerLootPool(String poolName,LootRollSession lootRollSession , TangibleObject containerObject){
 		System.err.println("poolName.toLowerCase() " + poolName.toLowerCase());
 		// Fetch the loot pool data from the poolName.py script		
 		String path = "scripts/loot/lootPools/"+poolName.toLowerCase(); 
@@ -1255,14 +1259,14 @@ public class LootService implements INetworkDispatch {
 			if (randomItemFromPool<=remainder){
 				// this element has been chosen e.g. kraytpearl_flawless
 				//System.err.println("CHOSEN ITEM " + itemNames.get(i));
-				handleContainerLootPoolItems(itemNames.get(i), lootRollSession);				
+				handleContainerLootPoolItems(itemNames.get(i), containerObject, lootRollSession);				
 				//break;
 				return;
 			}						
 		}
 	}	
 	
-	private void handleContainerLootPoolItems(String itemName, SWGObject containerObject, LootRollSession lootRollSession){
+	private void handleContainerLootPoolItems(String itemName, TangibleObject containerObject, LootRollSession lootRollSession){
 		
 		final Vector<String> foundPath = new Vector<String>(); 
 		Path p = Paths.get("scripts/loot/lootItems/");
@@ -1421,12 +1425,18 @@ public class LootService implements INetworkDispatch {
     	if (requiredFaction.length()>0){
     		droppedItem.setStringAttribute("required_faction", requiredFaction);
     	}
-    	
-    	
+    
+//    	TangibleObject inventory = (TangibleObject) core.objectService.createObject("object/tangible/inventory/shared_character_inventory.iff", containerObject.getPlanet());
+//		inventory.setContainerPermissions(CreatureContainerPermissions.CREATURE_CONTAINER_PERMISSIONS);
+//		containerObject._add(inventory);
+		
+		//SWGObject containerObjectInventory = containerObject.getSlottedObject("inventory"); //placable_loot_crate_trashpile
     	containerObject.add(droppedItem);
+    	//containerObjectInventory.add(droppedItem);
+    	System.out.println("Added to container " + containerObject.getTemplate());  
 
 	}	
-	*/
+	
 	
 	// ********* Junk-dealer related *********
 	

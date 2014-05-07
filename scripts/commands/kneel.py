@@ -7,7 +7,7 @@ def setup():
 	
 def run(core, actor, target, commandString):
 	
-	actor.sendSystemMessage('CellNumber: ' + str(actor.getContainer().getObjectID()), 0)	
+	#actor.sendSystemMessage('CellNumber: ' + str(actor.getContainer().getObjectID()), 0)	
 	actor.sendSystemMessage('x: ' + str(actor.getPosition().x) , 0)
 	actor.sendSystemMessage('y: ' + str(actor.getPosition().y) , 0)
 	actor.sendSystemMessage('z: ' + str(actor.getPosition().z) , 0)
@@ -29,15 +29,23 @@ def run(core, actor, target, commandString):
 	#hunter11 = stcSvc.spawnObject('dark_force_crystal_hunter', 'dantooine', long(8535487), float(80.34), float(-77.29), float(-92.77), float(-0.2), float(0.97))	
 	#hunter12 = stcSvc.spawnObject('dark_force_crystal_hunter', 'dantooine', long(8535487), float(80.34), float(-77.29), float(-92.77), float(-0.2), float(0.97))
 		
-	#objSvc = core.objectService
-	#lotSvc = core.lootService
-	#magSeal1 = objSvc.getObject(200336);
+	objSvc = core.objectService
+	#magSeal1 = objSvc.getObject(200336-1);
+	magSeal1 = objSvc.getObject(200335);
+	actor.sendSystemMessage('getTemplate: ' + magSeal1.getTemplate() , 0) # 200336
+	lootPoolNames_1 = ['Junk']
+	lootPoolChances_1 = [100]
+	lootGroupChance_1 = 90
+	magSeal1.addToLootGroups(lootPoolNames_1,lootPoolChances_1,lootGroupChance_1)
+	
 	#magSeal1Inv = magSeal1.getSlottedObject("inventory");
 	#lotSvc.getContainerContent()
 	#magSeal1Inv.
 	
+	
+	
 	lotSvc = core.lootService
-	lotSvc.handleContainer(200336,'crystalcave1')
+	lotSvc.handleContainer(actor,200336,'Junk','dantooine')
 	
 	
 	if actor.getPosture() == 13 or actor.getPosture() == 14:
