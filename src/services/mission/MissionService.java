@@ -516,7 +516,7 @@ public class MissionService implements INetworkDispatch {
 		
 		mission.setMissionTemplateObject(CRC.StringtoCRC("object/tangible/mission/shared_mission_bounty_jedi_target.iff"));
 		
-		mission.setBountyObjId(bountyTarget.getObjectID());
+		mission.setBountyMarkId(bountyTarget.getObjectID());
 	}
 	
 	public enum TerminalType {;
