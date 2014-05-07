@@ -45,6 +45,7 @@ import resources.buffs.DamageOverTime;
 import resources.common.FileUtilities;
 import resources.common.OutOfBand;
 import resources.common.ProsePackage;
+import resources.datatables.DisplayType;
 import resources.datatables.Options;
 import resources.datatables.Elemental;
 import resources.datatables.Posture;
@@ -509,7 +510,27 @@ public class CombatService implements INetworkDispatch {
 	}
 
 	private boolean attemptCombat(CreatureObject attacker, TangibleObject target) {
-				
+		
+		if (attacker.isInStealth()) {
+			attacker.setInStealth(false);
+			
+			if (attacker.getPlayerObject() != null && attacker.getPlayerObject().getProfession().equals("spy_1a")) {
+				attacker.setRadarVisible(true);
+			}
+		}
+		
+		if (attacker.getSlottedObject("ghost") != null) {
+			PlayerObject ghost = attacker.getPlayerObject();
+			if (ghost.getBountyMissionId() != 0) {
+				MissionObject mission = (MissionObject) core.objectService.getObject(ghost.getBountyMissionId());
+				if (mission != null && mission.getBountyMarkId() == target.getObjectID()) {
+					target.addDefender(attacker);
+					
+					target.updatePvpStatus();
+				}
+			}
+		}
+		
 		if(target.getDefendersList().contains(attacker) && attacker.getDefendersList().contains(target))
 			return true;
 		
@@ -529,7 +550,7 @@ public class CombatService implements INetworkDispatch {
 		} else {
 			attacker.addDefender(target); // See below comment
 		}
-
+		
 		//attacker.addDefender(target); // Why do we need to add target to defender list twice?
 		
 		return true;
@@ -987,40 +1008,48 @@ public class CombatService implements INetworkDispatch {
 	}
 
 	public void deathblowPlayer(CreatureObject attacker, CreatureObject target) {
-		
 		target.stopIncapTask();
 		target.setIncapTask(null);
 		target.setPosture((byte) 14);
 		
 		if (target.getSlottedObject("ghost") != null && attacker.getSlottedObject("ghost") != null) {
 			boolean bountyWindow = true;
-			if (target.getPlayerObject().getBountyMissionId() != 0) {
-				MissionObject mission = (MissionObject) core.objectService.getObject(target.getPlayerObject().getBountyMissionId());
-				if (mission != null && mission.getBountyObjId() == attacker.getObjectId()) {
-					bountyWindow = false;
-					target.sendSystemMessage(new OutOfBand(new ProsePackage("bounty_hunter", "bounty_failed_hunter", attacker.getCustomName())), (byte) 0);
-					
-					ProsePackage pp = new ProsePackage("bounty_hunter", "bounty_failed_target", attacker.getCustomName());
-					pp.setToCustomString("their");
-					attacker.sendSystemMessage(new OutOfBand(pp), (byte) 0);
-					
-					core.missionService.handleMissionAbort(target, mission);
-				}
-			} else if (attacker.getPlayerObject().getBountyMissionId() != 0) {
+
+			if (attacker.getPlayerObject().getBountyMissionId() != 0) { // Bounty Hunter is deathblowing (attacker)
+				bountyWindow = false;
 				MissionObject mission = (MissionObject) core.objectService.getObject(attacker.getPlayerObject().getBountyMissionId());
-				if (mission != null && mission.getBountyObjId() == target.getObjectId()) {
-					bountyWindow = false;
-					ProsePackage targetProse = new ProsePackage("bounty_hunter", "bounty_success_target", attacker.getCustomName());
-					targetProse.setDiInteger(mission.getCreditReward());
-					target.sendSystemMessage(new OutOfBand(targetProse), (byte) 0);
+				
+				if (mission != null && mission.getBountyMarkId() == target.getObjectID()) {
 					
-					ProsePackage attackerProse = new ProsePackage("bounty_hunter", "bounty_success_hunter", target.getCustomName());
-					attackerProse.setToCustomString("their"); // should be his or her: http://youtu.be/BqeDQQSETJI?t=2m19s
-					attackerProse.setDiInteger(mission.getCreditReward());
-					attacker.sendSystemMessage(new OutOfBand(attackerProse), (byte) 0);
+					ProsePackage attackerPp = new ProsePackage("bounty_hunter", "bounty_success_hunter", target.getCustomName());
+					attackerPp.setToCustomString("his"); // TODO: Genders
+					attackerPp.setDiInteger(mission.getCreditReward());
+					attacker.sendSystemMessage(new OutOfBand(attackerPp), DisplayType.Broadcast);
+					
+					ProsePackage targetPp = new ProsePackage ("bounty_hunter", "bounty_success_hunter", attacker.getCustomName());
+					targetPp.setDiInteger(mission.getCreditReward());
+					target.sendSystemMessage(new OutOfBand(targetPp), DisplayType.Broadcast);
 					
 					core.missionService.handleMissionComplete(attacker, mission);
 				}
+			
+			} else if (target.getPlayerObject().getBountyMissionId() != 0) { // Bounty Hunter is being deathblown (They're the target)
+				bountyWindow = false;
+				MissionObject mission = (MissionObject) core.objectService.getObject(target.getPlayerObject().getBountyMissionId());
+				
+				if (mission != null && mission.getBountyMarkId() == attacker.getObjectID()) {
+					
+					ProsePackage attackerPp = new ProsePackage("bounty_hunter", "bounty_failed_target", target.getCustomName());
+					attackerPp.setToCustomString("his"); // TODO: Genders
+					attackerPp.setDiInteger(mission.getCreditReward());
+					attacker.sendSystemMessage(new OutOfBand(attackerPp), DisplayType.Broadcast);
+					
+					ProsePackage targetPp = new ProsePackage ("bounty_hunter", "bounty_failed_hunter", attacker.getCustomName());
+					target.sendSystemMessage(new OutOfBand(targetPp), DisplayType.Broadcast);
+					
+					core.missionService.handleMissionAbort(target, mission);
+				}
+				
 			}
 			
 			if(target.getDuelList().contains(attacker))

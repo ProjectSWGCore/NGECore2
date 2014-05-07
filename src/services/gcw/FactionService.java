@@ -276,22 +276,20 @@ public class FactionService implements INetworkDispatch {
 		
 		long targetId = target.getObjectID();
 		
-		if (object.getSlottedObject("datapad") != null) {
-			object.getSlottedObject("datapad").viewChildren(object, false, false, (mission) -> {
-				if (mission instanceof MissionObject && ((MissionObject) mission).getBountyObjId() == targetId) {
-					ref.set(PvpStatus.Attackable | PvpStatus.Aggressive);
-				}
-			});
+		if (ghost != null && ghost.getBountyMissionId() != 0) {
+			if (((MissionObject) core.objectService.getObject(ghost.getBountyMissionId())).getBountyMarkId() == targetId) {
+				ref.set(PvpStatus.Attackable | PvpStatus.Aggressive);
+			}
 		}
 		
-		if (ghost != null && ghost.getProfession().contains("smuggler") &&
+		/*if (ghost != null && ghost.getProfession().contains("smuggler") &&
 		target.getSlottedObject("datapad") != null) {
 			target.getSlottedObject("datapad").viewChildren(target, false, false, (mission) -> {
-				if (mission instanceof MissionObject && ((MissionObject) mission).getBountyObjId() == object.getObjectID()) {
+				if (mission instanceof MissionObject && ((MissionObject) mission).getBountyMarkId() == object.getObjectID()) {
 					ref.set(PvpStatus.Attackable);
 				}
 			});
-		}
+		}*/
 		
 		pvpBitmask |= ref.get();
 		
