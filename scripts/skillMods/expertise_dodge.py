@@ -1,9 +1,9 @@
 import sys
 
-def add(core, actor, skillMod, value):
+def add(core, actor, skillMod, divisor):
+	core.skillModService.addSkillMod(actor, 'display_only_dodge', 100 * skillMod.getBase())
 	return
 
-def deduct(core, actor, skillMod, value):
+def deduct(core, actor, skillMod, divisor):
+	core.skillModService.deductSkillMod(actor, 'display_only_dodge', 100 * skillMod.getBase())
 	return
-	
-	
