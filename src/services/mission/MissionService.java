@@ -55,6 +55,8 @@ import resources.objectives.SurveyMissionObjective;
 import resources.objects.creature.CreatureObject;
 import resources.objects.mission.MissionObject;
 import resources.objects.player.PlayerObject;
+import resources.objects.resource.GalacticResource;
+import resources.objects.resource.ResourceRoot;
 import resources.objects.tangible.TangibleObject;
 import engine.clientdata.StfTable;
 import engine.clients.Client;
@@ -159,7 +161,7 @@ public class MissionService implements INetworkDispatch {
 				} else if (terminalType == TerminalType.ENTERTAINER) {
 
 				} else if (terminalType == TerminalType.ARTISAN) {
-
+					handleMissionListRequest(core.objectService.getObject(request.getObjectId()), request.getTickCount(), TerminalType.ARTISAN);
 				} else {
 					//Console.println("ERROR: Unsupported terminal " + terminal.getObjectId());
 				}
@@ -292,7 +294,7 @@ public class MissionService implements INetworkDispatch {
 						randomBountyMission(player, mission);
 					
 					else if (type == TerminalType.ARTISAN)
-						return;
+						randomSurveyMission(player, mission);
 
 					else
 						return;
@@ -302,20 +304,20 @@ public class MissionService implements INetworkDispatch {
 					
 				} else if (typeTwoCount.get() < 5) {
 					
-					if (type == TerminalType.GENERIC)
+					if (type == TerminalType.GENERIC) // destroy
+						return;
+					
+					else if (type == TerminalType.ARTISAN) // crafting
 						return;
 					
 					else if (type == TerminalType.BOUNTY)
-						return;
-					
-					else if (type == TerminalType.ARTISAN)
-						return;
+						randomBountyMission(player, mission);
 					
 					else
 						return;
 					
-					//mission.setRepeatCount(requestCounter);
-					//typeTwoCount.incrementAndGet();
+					mission.setRepeatCount(requestCounter);
+					typeTwoCount.incrementAndGet();
 				}
 			}
 		});
@@ -423,7 +425,59 @@ public class MissionService implements INetworkDispatch {
 				return null;
 		}
 	}
+	private void randomSurveyMission(SWGObject player, MissionObject mission) {
+		
+		byte generalType = (byte) (ran.nextInt(3) == 0 ? 1 : 0);
+		
+		// TODO: Change way of getting resources for planet. Possibly a map, would solve future concurrency problems.
+		Vector<GalacticResource> resources = core.resourceService.getSpawnedResourcesByPlanetAndType(player.getPlanetId(), generalType); 
+		if (resources == null || resources.size() == 0)
+			return;
+		
+		// The level and reward calculations are taken from EMU. Can hardly find anything related to survey missions from NGE.
+		int maxLevel = 50;
+		int minLevel = 50;
+		float surveySkill = core.skillModService.getSkillModValue((CreatureObject) player, "surveying");
+		
+		if (surveySkill > 30) { maxLevel += 10; }
+		if (surveySkill > 50) { maxLevel += 10; }
+		if (surveySkill > 70) { maxLevel += 10; }
+		if (surveySkill > 90) { maxLevel += 10; }
+		if (surveySkill > 100) { maxLevel += 5; } //Max mission level is 95.
+		
+		int randLevel = minLevel + 5 * (new Random().nextInt((maxLevel - minLevel)) / 5);
+		
+		if (randLevel > maxLevel)
+			randLevel = maxLevel;
+		
+		GalacticResource resource = resources.get(ran.nextInt(resources.size() - 1));
+		
+		if (resource == null)
+			return;
+		
+		ResourceRoot family = resource.getResourceRoot();
 
+		mission.setMissionType("survey");
+
+		String missionStf = "mission/mission_npc_survey_neutral_easy";
+
+		mission.setMissionId(getRandomStringEntry(missionStf));
+		mission.setMissionDescription(missionStf);
+		mission.setMissionTitle(missionStf);
+		
+		mission.setCreator(nameGenerator.compose(2) + " " + nameGenerator.compose(3));
+		
+		mission.setMissionLevel(randLevel);
+		
+		mission.setStartLocation(player.getPosition(), player.getPlanet().name);
+		
+		mission.setCreditReward(400 + (randLevel - minLevel) * 20 + ran.nextInt(100));
+		
+		mission.setMissionTemplateObject(CRC.StringtoCRC(ResourceRoot.CONTAINER_TYPE_IFF_SIGNIFIER[family.getContainerType()])); // This should be the resource container obj
+		mission.setMissionTargetName(family.getResourceType());
+		
+	}
+	
 	private void randomDeliveryMission(SWGObject player, MissionObject mission) {
 		mission.setMissionType("deliver");
 		
@@ -468,10 +522,9 @@ public class MissionService implements INetworkDispatch {
 				else
 					gotBounty = true;
 			}
+			if (attempts >= 5 && !gotBounty)
+				return;
 		}
-		
-		if (bountyTarget == null || bountyTarget.getAssignedHunters().contains(player.getObjectId()))
-			return;
 
 		mission.setMissionType("bounty");
 		

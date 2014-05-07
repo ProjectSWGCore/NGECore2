@@ -38,7 +38,7 @@ def getRewards(name):
 	if name == 'item_trader_ring_01_02':
 		return "object/tangible/wearables/ring/shared_ring_s02.iff"
 		
-	if name = 'item_trader_roadmap_jumpsuit_02_02':
+	if name == 'item_trader_roadmap_jumpsuit_02_02':
 		return "object/tangible/wearables/bodysuit/shared_bodysuit_s01.iff"
 	
 	if name == 'weapon_pistol_trader_roadmap_01_02':
