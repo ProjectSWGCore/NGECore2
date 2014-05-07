@@ -144,7 +144,7 @@ public class EquipmentService implements INetworkDispatch {
 		
 		// TODO: bio-link (assign it by objectID with setAttachment and then just display the customName for that objectID).
 		
-		if(!actor.getEquipmentList().contains(item)) 
+		if(!actor.getEquipmentList().contains(item.getObjectId())) 
 		{
 			actor.addObjectToEquipList(item);
 			processItemAtrributes(actor, item, true);
@@ -160,7 +160,7 @@ public class EquipmentService implements INetworkDispatch {
 		if(func != null) func.__call__(Py.java2py(core), Py.java2py(actor), Py.java2py(item));
 
 		
-		if(actor.getEquipmentList().contains(item)) 
+		if(actor.getEquipmentList().contains(item.getObjectId())) 
 		{
 			actor.removeObjectFromEquipList(item);
 			processItemAtrributes(actor, item, false);
