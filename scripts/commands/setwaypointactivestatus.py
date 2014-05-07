@@ -9,6 +9,10 @@ def run(core, actor, target, commandString):
         return
     waypointTarget = core.objectService.getObject(target.getObjectID())
     wp = playerObject.getWaypointFromList(target)
+    
+    if wp is None:
+    	return
+
     if wp.isActive() == True:
         wp.setActive(False)
         playerObject.waypointUpdate(wp)

@@ -79,7 +79,7 @@ public class BountyMissionObjective extends MissionObjective {
 		if (isActivated())
 			return;
 		
-		BountyListItem bountyTarget = core.missionService.getBountyListItem(getMissionObject().getBountyObjId());
+		BountyListItem bountyTarget = core.missionService.getBountyListItem(getMissionObject().getBountyMarkId());
 		
 		if (bountyTarget == null) {
 			core.missionService.handleMissionAbort(player, getMissionObject());
@@ -87,9 +87,9 @@ public class BountyMissionObjective extends MissionObjective {
 			return;
 		}
 		
-		bountyTarget.addBountyHunter(player.getObjectId());
+		bountyTarget.addBountyHunter(player.getObjectID());
 		
-		setMarkObjId(bountyTarget.getObjectId());
+		setMarkObjId(bountyTarget.getObjectID());
 		
 		String message = "@mission/mission_bounty_informant:target_hard_" + Integer.toString(new Random().nextInt(4) + 1);
 		
@@ -111,11 +111,7 @@ public class BountyMissionObjective extends MissionObjective {
 		
 		player.getPlayerObject().setBountyMissionId(getMissionObject().getObjectId());
 		
-		/*CreatureObject target = (CreatureObject) core.objectService.getObject(markObjId);
-		if (target != null && target.getPlanetId() == player.getPlanetId()) {
-			UpdatePVPStatusMessage upvpm = new UpdatePVPStatusMessage(player.getObjectID(), core.factionService.calculatePvpStatus(player, target), player.getFaction());
-			player.getClient().getSession().write(upvpm.serialize());
-		}*/
+		player.updatePvpStatus();
 	}
 
 
@@ -133,12 +129,15 @@ public class BountyMissionObjective extends MissionObjective {
 		else
 			player.addBankCredits(bounty.getCreditReward());
 		
+		bounty.removeBountyHunter(player.getObjectId());
+		
 		notifyBountyPlacers(core, player, bounty);
 		
 		clearActiveMissions(core, bounty);
 		
 		core.missionService.removeBounty(markObjId);
 		player.getPlayerObject().setBountyMissionId(0);
+		player.updatePvpStatus();
 	}
 
 	@Override
@@ -152,6 +151,7 @@ public class BountyMissionObjective extends MissionObjective {
 		
 		bounty.removeBountyHunter(player.getObjectId());
 		player.getPlayerObject().setBountyMissionId(0);
+		player.updatePvpStatus();
 	}
 
 	@Override
@@ -184,6 +184,7 @@ public class BountyMissionObjective extends MissionObjective {
 	
 	public void clearActiveMissions(NGECore core, BountyListItem bounty) {
 		bounty.getAssignedHunters().forEach(id -> {
+			
 			CreatureObject hunter = (CreatureObject) core.objectService.getObject(id);
 			
 			if (hunter != null) {
@@ -204,7 +205,7 @@ public class BountyMissionObjective extends MissionObjective {
 	}
 	
 	public void checkBountyActiveStatus(NGECore core) {
-		BountyListItem bountyTarget = core.missionService.getBountyListItem(getMissionObject().getBountyObjId());
+		BountyListItem bountyTarget = core.missionService.getBountyListItem(getMissionObject().getBountyMarkId());
 		CreatureObject player = (CreatureObject) getMissionObject().getGrandparent();
 
 		if (bountyTarget == null || !bountyTarget.getAssignedHunters().contains(player.getObjectId())) {
@@ -289,7 +290,7 @@ public class BountyMissionObjective extends MissionObjective {
 								return;
 							} else {
 								
-								if (updates.get() >= 5) {
+								if (updates.get() >= 6) {
 									actor.sendSystemMessage("@mission/mission_generic:target_track_lost", DisplayType.Broadcast);
 									cancelLocationUpdates();
 									return;
@@ -306,12 +307,12 @@ public class BountyMissionObjective extends MissionObjective {
 									waypoint.setPlanetCRC(CRC.StringtoCRC(target.getPlanet().getName()));
 									waypoint.setStringAttribute("", "");
 									getMissionObject().setAttachedWaypoint(waypoint);
-									actor.sendSystemMessage("@mission/mission_generic:target_location_updated_ground", DisplayType.Broadcast);
 								} else {
 									missionWp.setPosition(target.getWorldPosition());
 									mission.setAttachedWaypoint(missionWp);
-									actor.sendSystemMessage("@mission/mission_generic:target_location_updated_ground", DisplayType.Broadcast);
 								}
+								actor.sendSystemMessage("@mission/mission_generic:target_location_updated_ground", DisplayType.Broadcast);
+								actor.sendSystemMessage("@mission/mission_generic:target_continue_tracking", DisplayType.Broadcast);
 								updates.getAndIncrement();
 							}
 						}

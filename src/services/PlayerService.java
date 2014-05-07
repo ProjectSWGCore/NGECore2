@@ -1213,7 +1213,7 @@ public class PlayerService implements INetworkDispatch {
 					// need to set a unity attachment.
 					ringList.get(0).setAttachment("unity", (Boolean) true);
 
-					if(!acceptor.getEquipmentList().contains(ringList.get(0)))
+					if(!acceptor.getEquipmentList().contains(ringList.get(0).getObjectId()))
 						core.equipmentService.equip(acceptor, ringList.get(0));
 
 					aGhost.setSpouseName(proposer.getCustomName());
@@ -1248,7 +1248,7 @@ public class PlayerService implements INetworkDispatch {
 				SWGObject selectedRing = core.objectService.getObject(ringWindow.getObjectIdByIndex(index));
 				selectedRing.setAttachment("unity", (Boolean) true);
 
-				if(!actor.getEquipmentList().contains(selectedRing))
+				if(!actor.getEquipmentList().contains(selectedRing.getObjectId()))
 					core.equipmentService.equip(actor, selectedRing);
 
 				PlayerObject aGhost = (PlayerObject) actor.getSlottedObject("ghost");
@@ -1330,8 +1330,8 @@ public class PlayerService implements INetworkDispatch {
 						victim.setCashCredits(0);
 					} else { victim.setBankCredits(victim.getBankCredits() - bounty); }
 					
-					if (!core.missionService.addToExistingBounty(attacker.getObjectId(), victim.getObjectId(), bounty))
-						core.missionService.createNewBounty(attacker, victim.getObjectId(), bounty);
+					if (!core.missionService.addToExistingBounty(attacker.getObjectID(), victim.getObjectID(), bounty))
+						core.missionService.createNewBounty(attacker, victim.getObjectID(), bounty);
 					
 					victim.sendSystemMessage("You have placed a bounty for " + bounty + " credits on the head of " + attacker.getCustomName(), (byte) 0);
 				}

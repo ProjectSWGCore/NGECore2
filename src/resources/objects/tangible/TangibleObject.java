@@ -51,7 +51,9 @@ import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
 
 import engine.clientdata.ClientFileManager;
+import engine.clientdata.StfTable;
 import engine.clients.Client;
+import engine.resources.common.CRC;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -164,7 +166,7 @@ public class TangibleObject extends SWGObject implements Serializable {
 		else if(conditionDamage > getMaxDamage())
 			conditionDamage = getMaxDamage();
 		this.conditionDamage = conditionDamage;
-		notifyObservers(messageBuilder.buildConditionDamageDelta(conditionDamage), false);
+		notifyObservers(messageBuilder.buildConditionDamageDelta(conditionDamage), true);
 		if (maxDamage > 0) {
 			this.setStringAttribute("condition", (maxDamage + "/" + (maxDamage - conditionDamage)));
 		}
@@ -179,7 +181,7 @@ public class TangibleObject extends SWGObject implements Serializable {
 			this.customization = customization;
 		}
 		
-		notifyObservers(messageBuilder.buildCustomizationDelta(customization), false);
+		notifyObservers(messageBuilder.buildCustomizationDelta(customization), true);
 	}
 
 	public List<Integer> getComponentCustomizations() {
@@ -309,7 +311,7 @@ public class TangibleObject extends SWGObject implements Serializable {
 		if(customizationVariables.containsKey(type)) customizationVariables.replace(type, value);
 		else customizationVariables.put(type, value);
 		
-		buildCustomizationBytes();
+		notifyObservers(messageBuilder.buildCustomizationDelta(getCustomizationBytes()), true);
 	}
 	
 	public void removeCustomizationVariable(String type)
@@ -317,11 +319,11 @@ public class TangibleObject extends SWGObject implements Serializable {
 		if(customizationVariables.containsKey(type)) 
 		{
 			customizationVariables.remove(type);
-			buildCustomizationBytes();
+			notifyObservers(messageBuilder.buildCustomizationDelta(getCustomizationBytes()), true);
 		}
 	}
 	
-	private void buildCustomizationBytes()
+	private byte[] getCustomizationBytes()
 	{
 		//if(customizationVariables.size() == 0) customization = { 0x00 };
 		
@@ -343,9 +345,10 @@ public class TangibleObject extends SWGObject implements Serializable {
 				stream.write((byte) 0xBF);
 				stream.write((byte) 0x03);
 			}
-			customization = stream.toByteArray();
+			return stream.toByteArray();
 		}
-		catch (Exception e) { e.printStackTrace(); }	
+		catch (Exception e) { e.printStackTrace(); }
+		return null;	
 	}
 	
 	public String getFaction() {
@@ -512,6 +515,41 @@ public class TangibleObject extends SWGObject implements Serializable {
 		}
 	}
 	
+	// Returns the full STF-based name filepath
+	public String getProperName()
+	{
+		return  "@" + getStfFilename() + ":" + getStfName();
+	}
+	
+	// Returns the STF-based description filepath
+	public String getProperDescription()
+	{
+		return "@" + getDetailFilename() + ":" + getDetailName();
+	}
+	
+	// Returns the current, true name of the Object
+	public String getTrueName()
+	{
+		return getCustomName() != null ? getCustomName() : getTrueStfName();
+	}
+		
+	// Returns the true STF-based name
+	public String getTrueStfName()
+	{
+		String name = null;
+		try
+		{
+			StfTable stf = new StfTable("clientdata/string/en/" + getStfFilename() + ".stf");
+			for (int s = 1; s < stf.getRowCount(); s++) 
+			{		
+				if(stf.getStringById(s).getKey().equals(getStfName())) name = stf.getStringById(s).getValue();
+			}
+        } 
+		catch (Exception e) { }
+		
+		return name;	
+	}
+	
 	public List<LootGroup> getLootGroups() {
 		return lootGroups;
 	}
@@ -646,6 +684,17 @@ public class TangibleObject extends SWGObject implements Serializable {
 	
 	public ObjectMessageBuilder getMessageBuilder() {
 		return messageBuilder;
+	}
+	
+	public boolean isFull()
+	{
+		if(getTemplateData().getAttribute("containerVolumeLimit") == null) return false;
+		
+		int containerVolumeLimit = getTemplateData().getAttribute("containerVolumeLimit");
+		
+		if(NGECore.getInstance().objectService.objsInContainer(this, this) >= containerVolumeLimit) return true;
+	
+		return false;
 	}
 	
 }

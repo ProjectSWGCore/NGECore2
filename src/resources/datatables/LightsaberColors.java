@@ -30,7 +30,7 @@ public final class LightsaberColors {
 
 	static
 	{
-		// I put in the names of the really generic ones... I should be right up until Dark Purple... I'm unsure after Dark Purple.
+		// Basic color crystals with the basic lightsaber shader
 		map.put("Red", 0);
 		map.put("Dark Red", 1);
 		map.put("Light Green", 2);
@@ -39,25 +39,34 @@ public final class LightsaberColors {
 		map.put("Dark Blue", 5);
 		map.put("Yellow", 6);
 		map.put("Dark Yellow", 7);
-		map.put("Purple", 8);
+		map.put("Light Purple", 8);
 		map.put("Dark Purple", 9);
-		
-		map.put("Brown", 10);
-		map.put("Dark Brown", 11);
-		
-		map.put("color 12", 12);
-		map.put("color 13", 13);
-		map.put("color 14", 14);
-		map.put("color 15", 15);
-		map.put("color 16", 16);
-		
-		map.put("Bane's Heart", 17);
-		map.put("Sunrider's Destiny", 25);
+		map.put("Orange", 10);
+		map.put("Brown", 11);
+		map.put("Allya's Exile", 12);
+		map.put("Kun's Blood", 13);
+		map.put("Bondara's Folly", 14);
+		map.put("Ulic's Redemption", 15);
+		map.put("Bane's Heart", 16);
+		map.put("Gallia's Intuition", 17);		
+		map.put("Prowess of Plo Koon", 18);
+		map.put("B'Nar's Sacrifice", 19);
+		map.put("Windu's Guile", 20);
+		map.put("Mundi's Response", 21);
+		map.put("Strength of Luminaria", 22);		
+		map.put("Baaa's Wisdom", 23);
+		map.put("Quintessence of the Force", 24);
+		map.put("Dawn of Dagobah", 25);
+		map.put("Horn's Future", 26);
+		map.put("Allya's Redemption", 27);
+		map.put("Kenobi's Legacy", 28);
+		map.put("Sunrider's Destiny", 29);
+		map.put("Kit's Ferocity", 30);
 		
 		// Special crystals that have seperate shaders - the 256 is for a hacky way to set blade type and color without more code
 		map.put("Lava", 256 + 1);
 		map.put("Permafrost", 256 + 2);
-		map.put("Blackwing", 256 + 3);
+		map.put("Blackwing Bezoar", 256 + 3);
 	}
 	
 	public static int getByName(String colorName)

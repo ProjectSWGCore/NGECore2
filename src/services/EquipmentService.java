@@ -123,6 +123,8 @@ public class EquipmentService implements INetworkDispatch {
 			return false;
 		}
 		
+		if(item.getTemplate().startsWith("object/weapon/") && item.getTemplate().contains("lightsaber") && item.getAttachment("hasColorCrystal") == null) item.setAttachment("hasColorCrystal", false);
+		
 		if(item.getAttachment("hasColorCrystal") != null && (Boolean) item.getAttachment("hasColorCrystal") == false)
 		{
 			actor.sendSystemMessage("You may not equip a light saber that has no color crystal!", (byte) 0);
@@ -142,7 +144,7 @@ public class EquipmentService implements INetworkDispatch {
 		
 		// TODO: bio-link (assign it by objectID with setAttachment and then just display the customName for that objectID).
 		
-		if(!actor.getEquipmentList().contains(item)) 
+		if(!actor.getEquipmentList().contains(item.getObjectId())) 
 		{
 			actor.addObjectToEquipList(item);
 			processItemAtrributes(actor, item, true);
@@ -158,7 +160,7 @@ public class EquipmentService implements INetworkDispatch {
 		if(func != null) func.__call__(Py.java2py(core), Py.java2py(actor), Py.java2py(item));
 
 		
-		if(actor.getEquipmentList().contains(item)) 
+		if(actor.getEquipmentList().contains(item.getObjectId())) 
 		{
 			actor.removeObjectFromEquipList(item);
 			processItemAtrributes(actor, item, false);
@@ -320,7 +322,7 @@ public class EquipmentService implements INetworkDispatch {
 		
 		if(!item.getTemplate().startsWith("object/tangible/component/weapon/lightsaber/")) return;	
 		if(lightsaber.getAttachment("hasColorCrystal") == null) lightsaber.setAttachment("hasColorCrystal", false);
-		if(item.getAttributes().containsKey("@obj_attr_n:color") && (Boolean) lightsaber.getAttachment("hasColorCrystal")) return;
+		if(item.getAttributes().containsKey("@obj_attr_n:color") && (Boolean) lightsaber.getAttachment("hasColorCrystal") && !(targetContainer.getContainer() instanceof CreatureObject)) return;
 		
 		// Find our tuner
 		if(item.getAttachment("tunerId") == null) item.setAttachment("tunerId", 0);
@@ -329,12 +331,14 @@ public class EquipmentService implements INetworkDispatch {
 		// Check if player tuned the crystal
 		if(tunerId != actor.getObjectId())
 		{
-			actor.sendSystemMessage("You did not tune this crystal.", (byte) 0);
+			actor.sendSystemMessage("@jedi_spam:saber_crystal_not_owner", (byte) 0);
 			return;
 		}
 		else item.getContainer().transferTo(actor, targetContainer, item);
 	
 		// Calculate attributes
+		lightsaber.setAttachment("hasColorCrystal", false);
+		
 		lightsaberInventory.viewChildren(lightsaberInventory, false, false, new Traverser()
 		{
 			WeaponObject saber;
@@ -342,7 +346,7 @@ public class EquipmentService implements INetworkDispatch {
 			
 			int minDamageBonus = 0;
 			int maxDamageBonus = 0;
-			Boolean hasColorCrystal = false;
+			Boolean hasColorCrystal = false;		
 			
 			public void process(SWGObject item)
 			{	
@@ -359,17 +363,17 @@ public class EquipmentService implements INetworkDispatch {
 					saber.setCustomizationVariable("private/alternate_shader_blade", bladeType);
 					saber.setCustomizationVariable("/private/index_color_blade", bladeColor);
 					
-					// System.out.println("bladeColorName: " + item.getAttributes().get("@obj_attr_n:color"));
-					// System.out.println("bladeColor: " + bladeColor);
-					// System.out.println("bladeType: " + bladeType);
-					// System.out.println();
+					 // System.out.println("bladeColorName: " + item.getAttributes().get("@obj_attr_n:color"));
+					 // System.out.println("bladeColor: " + bladeColor);
+					 // System.out.println("bladeType: " + bladeType);
+					 // System.out.println();
 					
 					hasColorCrystal = true;
 				}
 				else 
 				{
-					minDamageBonus += Integer.parseInt(item.getAttributes().get("@obj_attr_n:componentbonuslow")); // "Min Damage Modified"
-					maxDamageBonus += Integer.parseInt(item.getAttributes().get("@obj_attr_n:componentbonushigh")); // "Max Damage Modified""
+					minDamageBonus += Integer.parseInt(item.getAttributes().get("@obj_attr_n:mindamage")); // "Minimum Damage"
+					maxDamageBonus += Integer.parseInt(item.getAttributes().get("@obj_attr_n:maxdamage")); // "Maximum Damage"
 				}
 				
 				int saberBaseDamageMin = (int) saber.getAttachment("weaponBaseDamageMin");

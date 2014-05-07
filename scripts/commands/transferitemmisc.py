@@ -12,6 +12,10 @@ def run(core, actor, target, commandString):
         actorContainer = actor.getContainer()
         
         if container == None: return
+        
+        if(container.isFull()):
+            actor.sendSystemMessage('That container is full.', 0)
+            return
 
         if container.getTemplate().startswith("object/tangible/inventory/shared_lightsaber_inventory") or target.getContainer().getTemplate().startswith("object/tangible/inventory/shared_lightsaber_inventory"):	
             core.equipmentService.calculateLightsaberAttributes(actor, target, container)
@@ -24,11 +28,7 @@ def run(core, actor, target, commandString):
 			
         if target.isLootItem():
             target.setLootItem(0)
-            name=target.getCustomName()
-            if target.getCustomName() == None:
-                name='@' + target.getStfFilename() + ':' + target.getStfName() 
-  
-            actor.sendSystemMessage('You looted ' + name + ' from corpse.', 0)
+            actor.sendSystemMessage('You looted ' + target.getTrueName() + ' from corpse.', 0)
         
         if actorContainer != None and (container.getTemplate() == "object/cell/shared_cell.iff") & core.housingService.getPermissions(actor, actorContainer):
 			target.getContainer().transferTo(actor, container, target)

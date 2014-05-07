@@ -51,6 +51,7 @@ import resources.common.ObjControllerOpcodes;
 import resources.objectives.BountyMissionObjective;
 import resources.objectives.DeliveryMissionObjective;
 import resources.objectives.DestroyMissionObjective;
+import resources.objectives.SurveyMissionObjective;
 import resources.objects.creature.CreatureObject;
 import resources.objects.mission.MissionObject;
 import resources.objects.player.PlayerObject;
@@ -73,7 +74,7 @@ public class MissionService implements INetworkDispatch {
 	private NameGen nameGenerator;
 	// Use a HashMap for obtaining number of entries so we aren't using a visitor all the time.
 	private Map<String, Integer> entryCounts = new ConcurrentHashMap<String, Integer>();
-	private Vector<BountyListItem> bountyList = new Vector<BountyListItem>();
+	private Map<Long, BountyListItem> bountyMap = new ConcurrentHashMap<Long, BountyListItem>();
 	private ObjectDatabase bountiesODB;
 	private Random ran = new Random();
 	
@@ -355,13 +356,18 @@ public class MissionService implements INetworkDispatch {
 			}
 		});
 		
-		if (hasBountyMission.get() && mission.getMissionType().equals("bounty")) // Can only have 1 bounty mission
-			return false;
+		if (mission.getMissionType().equals("bounty")) {
+			if (hasBountyMission.get()) {
+				creature.sendSystemMessage("@bounty_hunter:already_have_target", (byte) 0);
+				return false;
+			}
+		}
 		
 		if (missionCount.get() == 2) {
 			creature.sendSystemMessage("@mission/mission_generic:too_many_missions", (byte) 0);
 			return false;
 		}
+		
 		missionBag.transferTo(creature, datapad, mission);
 		createMissionObjective(creature, mission);
 		return true;
@@ -403,6 +409,16 @@ public class MissionService implements INetworkDispatch {
 					bountyObjective.activate(core, creature);
 				
 				return bountyObjective;
+			
+			case "survey":
+				SurveyMissionObjective surveyObjective = new SurveyMissionObjective(mission);
+				
+				mission.setObjective(surveyObjective);
+				
+				if (!silent)
+					surveyObjective.activate(core, creature);
+				
+				return surveyObjective;
 			default:
 				return null;
 		}
@@ -439,13 +455,13 @@ public class MissionService implements INetworkDispatch {
 	private void randomBountyMission(SWGObject player, MissionObject mission) {
 		BountyListItem bountyTarget = null;
 		
-		if (bountyList.size() > 0) {
+		if (bountyMap.size() > 0) {
 			boolean gotBounty = false;
 			int attempts = 0;
 			while (!gotBounty && attempts < 5) {
 				bountyTarget = getRandomBounty();
 
-				if (bountyTarget == null || bountyTarget.getAssignedHunters().size() >= 3 || bountyTarget.getCreditReward() < 20000 || bountyTarget.getObjectId() == player.getObjectId()) {
+				if (bountyTarget == null || bountyTarget.getAssignedHunters().size() >= 3 || bountyTarget.getCreditReward() < 20000 || bountyTarget.getObjectID() == player.getObjectId()) {
 					attempts++;
 					continue;
 				}
@@ -500,7 +516,7 @@ public class MissionService implements INetworkDispatch {
 		
 		mission.setMissionTemplateObject(CRC.StringtoCRC("object/tangible/mission/shared_mission_bounty_jedi_target.iff"));
 		
-		mission.setBountyObjId(bountyTarget.getObjectId());
+		mission.setBountyMarkId(bountyTarget.getObjectID());
 	}
 	
 	public enum TerminalType {;
@@ -511,23 +527,21 @@ public class MissionService implements INetworkDispatch {
 		public static final int EXPLORER = 5;
 	}
 	
-	public Vector<BountyListItem> getBountyList() {
-		return this.bountyList;
+	public Map<Long, BountyListItem> getBountyMap() {
+		return this.bountyMap;
 	}
 	
 	public BountyListItem getRandomBounty() {
-		int bountyListId = ran.nextInt(bountyList.size());
-		
-		return bountyList.get(bountyListId);
+		int bountyListId = ran.nextInt(bountyMap.size());
+		List<Long> bounties = new ArrayList<Long>(bountyMap.keySet());
+
+		return bountyMap.get(bounties.get(bountyListId));
 	}
 	
 	public BountyListItem getBountyListItem(long objectId) {
-		Vector<BountyListItem> bounties = bountyList;
-		for (BountyListItem bounty : bounties) {
-			if (bounty.getObjectId() == objectId)
-				return bounty;
-		}
-		return null;
+		if (bountyMap.containsKey(objectId))
+			return bountyMap.get(objectId);
+		else return null;
 	}
 	
 	public BountyListItem createNewBounty(CreatureObject bountyTarget, long placer, int reward) {
@@ -535,17 +549,17 @@ public class MissionService implements INetworkDispatch {
 		if (player == null)
 			return null;
 		
-		if (getBountyListItem(bountyTarget.getObjectId()) != null)
+		if (getBountyListItem(bountyTarget.getObjectID()) != null)
 			return null;
 		
-		BountyListItem bounty = new BountyListItem(bountyTarget.getObjectId(), reward, core.playerService.getFormalProfessionName(player.getProfession()), bountyTarget.getFaction(), bountyTarget.getCustomName());
+		BountyListItem bounty = new BountyListItem(bountyTarget.getObjectID(), reward, core.playerService.getFormalProfessionName(player.getProfession()), bountyTarget.getFaction(), bountyTarget.getCustomName());
 		
 		if (placer != 0)
 			bounty.getBountyPlacers().add(placer);
 		
-		bountiesODB.put(bounty.getObjectId(), bounty);
+		bountiesODB.put(bountyTarget.getObjectID(), bounty);
 		
-		bountyList.add(bounty);
+		bountyMap.put(bountyTarget.getObjectID(), bounty);
 
 		//System.out.println("Created bounty of " + reward + " to " + bounty.getName());
 		return bounty;
@@ -563,7 +577,7 @@ public class MissionService implements INetworkDispatch {
 		if (placer != 0 && !bounty.getBountyPlacers().contains(placer))
 			bounty.getBountyPlacers().add(placer);
 
-		bountiesODB.put(bounty.getObjectId(), bounty);
+		bountiesODB.put(bounty.getObjectID(), bounty);
 		
 		//System.out.println("Added bounty of " + amountToAdd + " to " + bounty.getName());
 		return true;
@@ -571,7 +585,7 @@ public class MissionService implements INetworkDispatch {
 	
 	public boolean removeBounty(long bountyTarget, boolean listRemove) {
 		if (listRemove)
-			bountyList.remove(bountiesODB.get(bountyTarget));
+			bountyMap.remove(bountiesODB.get(bountyTarget));
 		bountiesODB.remove(bountyTarget);
 		return true;
 	}
@@ -585,11 +599,12 @@ public class MissionService implements INetworkDispatch {
 		ODBCursor cursor = bountiesODB.getCursor();
 		while(cursor.hasNext()) {
 			BountyListItem bounty = (BountyListItem) cursor.next();
-			if (!core.characterService.playerExists(bounty.getObjectId())) {
+			
+			if (bounty != null && !core.characterService.playerExists(bounty.getObjectID())) {
 				bounties.add(bounty);
 			}
 		}
-		bounties.stream().mapToLong(b -> b.getObjectId()).forEach(bountiesODB::remove);
+		bounties.stream().mapToLong(b -> b.getObjectID()).forEach(bountiesODB::remove);
 		if (bounties.size() != 0)
 			System.out.println("Removed " + bounties.size() + " bounties.");
 	}

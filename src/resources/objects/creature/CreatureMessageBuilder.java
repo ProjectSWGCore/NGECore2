@@ -1063,7 +1063,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer.putInt(1);
 		buffer.putInt(creature.getEquipmentListUpdateCounter());
 		buffer.put((byte) 1);
-		buffer.putShort((short) creature.getEquipmentList().indexOf(item));
+		buffer.putShort((short) creature.getEquipmentList().indexOf(item.getObjectId()));
 		if(item.getCustomization() == null || item.getCustomization().length == 0) {
 			buffer.putShort((short) 0);
 		} else {
@@ -1099,7 +1099,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer.putInt(1);
 		buffer.putInt(creature.getEquipmentListUpdateCounter());
 		buffer.put((byte) 0);
-		buffer.putShort((short) creature.getEquipmentList().indexOf(item));
+		buffer.putShort((short) creature.getEquipmentList().indexOf(item.getObjectId()));
 		
 		int size = buffer.position();
 		buffer.flip();
