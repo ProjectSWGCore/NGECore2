@@ -134,7 +134,7 @@ public class EquipmentService implements INetworkDispatch {
 		return result;
 	}
 	
-	public void equip(CreatureObject actor, SWGObject item) 
+	synchronized public void equip(CreatureObject actor, SWGObject item) 
 	{
 		String template = ((item.getAttachment("customServerTemplate") == null) ? item.getTemplate() : (item.getTemplate().split("shared_")[0] + "shared_" + ((String) item.getAttachment("customServerTemplate")) + ".iff"));
 		String serverTemplate = template.replace(".iff", "");
@@ -151,7 +151,7 @@ public class EquipmentService implements INetworkDispatch {
 		}
 }
 
-	public void unequip(CreatureObject actor, SWGObject item) 
+	synchronized public void unequip(CreatureObject actor, SWGObject item) 
 	{
 		String template = ((item.getAttachment("customServerTemplate") == null) ? item.getTemplate() : (item.getTemplate().split("shared_")[0] + "shared_" + ((String) item.getAttachment("customServerTemplate")) + ".iff"));
 		String serverTemplate = template.replace(".iff", "");
