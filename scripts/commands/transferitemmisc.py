@@ -68,11 +68,13 @@ def run(core, actor, target, commandString):
 		
                 oldContainer.transferTo(actor, container, target)
                
+                for object in replacedObjects:
+					core.equipmentService.unequip(actor, object)
+               
                 if actor == container:
                         if target.getTemplate().find('/wearables/') or target.getTemplate().find('/weapon/'):
                                 core.equipmentService.equip(actor, target)
-				for object in replacedObjects:
-					core.equipmentService.unequip(actor, object)
+				
 				#path = 'scripts/' + target.getTemplate().rpartition('/')[0] + '/'        
                                 #module = target.getTemplate().rpartition('/')[2].replace('shared_', '').replace('.iff', '')
                                 #core.scriptService.callScript(path, 'equip', module, core, actor, target)
