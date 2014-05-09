@@ -285,6 +285,17 @@ public class LootService implements INetworkDispatch {
 	    }
 	}
 	
+	public SWGObject generateLootItem(CreatureObject requester, String template)
+	{
+		LootRollSession rollSession = new LootRollSession();
+		rollSession.setSessionPlanet(requester.getPlanet());
+		
+		handleLootPoolItems(template, rollSession);
+		if(rollSession.getDroppedItems().get(0) != null) return rollSession.getDroppedItems().get(0);
+		
+		return null;
+	}
+	
 	@SuppressWarnings("unused")
 	private void handleLootPoolItems(String itemName,LootRollSession lootRollSession){
 		
@@ -399,7 +410,7 @@ public class LootService implements INetworkDispatch {
 			customName = setRandomStatsJewelry(droppedItem, lootRollSession);
 		}
 		
-		if (customName!=null)
+		if (!customName.isEmpty())
 			handleCustomDropName(droppedItem, customName);
 		
 		if (stackable!=-1){
@@ -450,6 +461,9 @@ public class LootService implements INetworkDispatch {
     	if (requiredFaction.length()>0){
     		droppedItem.setStringAttribute("required_faction", requiredFaction);
     	}
+    	
+    	if(core.scriptService.getMethod(itemPath,"","customSetup") != null)
+			core.scriptService.callScript(itemPath, "", "customSetup", droppedItem);
     	
     	
 		lootRollSession.addDroppedItem(droppedItem);
