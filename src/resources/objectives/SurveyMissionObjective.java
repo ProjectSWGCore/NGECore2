@@ -21,7 +21,11 @@
  ******************************************************************************/
 package resources.objectives;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
+import engine.resources.scene.Point3D;
 import main.NGECore;
+import resources.datatables.DisplayType;
 import resources.objects.creature.CreatureObject;
 import resources.objects.mission.MissionObject;
 import services.mission.MissionObjective;
@@ -30,27 +34,50 @@ public class SurveyMissionObjective extends MissionObjective{
 	
 	private static final long serialVersionUID = 1L;
 
+	private String resourceFamily;
+	private Point3D pickupLocation;
+	private String pickupPlanet;
+	private int surveyMissionNum;
+
 	public SurveyMissionObjective(MissionObject parent) {
 		super(parent);
 	}
 
 	@Override
 	public void activate(NGECore core, CreatureObject player) {
-
+		pickupPlanet = player.getPlanet().getName();
+		pickupLocation = player.getPosition();
+		resourceFamily = getMissionObject().getMissionTargetName();
+		
+		// This way will allow 2 survey missions at a time.
+		AtomicInteger number = new AtomicInteger();
+		player.getSlottedObject("datapad").viewChildren(player, true, false, (obj) -> {
+			if (obj instanceof MissionObject && ((MissionObject) obj).getMissionType().equals("survey")) { number.getAndIncrement(); }
+		});
+		player.setAttachment("surveyMission" + Integer.valueOf(number.get()), getMissionObject().getObjectID());
+		surveyMissionNum = number.get();
+		
+		player.sendSystemMessage("@mission/mission_generic:survey_start", DisplayType.Broadcast);
 	}
 
 	@Override
 	public void complete(NGECore core, CreatureObject player) {
-		// TODO Auto-generated method stub
+		player.addBankCredits(getMissionObject().getCreditReward());
+		player.setAttachment("surveyMission" + Integer.valueOf(surveyMissionNum), 0);
 	}
 
 	@Override
 	public void abort(NGECore core, CreatureObject player) {
-		// TODO Auto-generated method stub
+		player.setAttachment("surveyMission" + Integer.valueOf(surveyMissionNum), 0);
 	}
 
 	@Override
 	public void update(NGECore core, CreatureObject player) {
-		// TODO Auto-generated method stub
 	}
+	
+	public String getResourceFamily() { return resourceFamily; }
+
+	public Point3D getPickupLocation() { return pickupLocation; }
+
+	public String getPickupPlanet() { return pickupPlanet; }
 }

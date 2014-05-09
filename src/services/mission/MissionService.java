@@ -38,8 +38,6 @@ import main.NGECore;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 
-import com.sleepycat.je.Transaction;
-
 import protocol.swg.ObjControllerMessage;
 import protocol.swg.objectControllerObjects.MissionAbort;
 import protocol.swg.objectControllerObjects.MissionAcceptRequest;
@@ -153,17 +151,25 @@ public class MissionService implements INetworkDispatch {
 
 				int terminalType = (int) terminal.getAttachment("terminalType");
 				
-				if (terminalType == TerminalType.GENERIC) {
-					handleMissionListRequest(core.objectService.getObject(request.getObjectId()), request.getTickCount(), TerminalType.GENERIC);
-				} else if (terminalType == TerminalType.BOUNTY) {
-					if (!object.hasSkill("class_bountyhunter_phase1_novice")) { object.sendSystemMessage("@mission/mission_generic:not_bounty_hunter_terminal", (byte) 0); } 
-					else { handleMissionListRequest(core.objectService.getObject(request.getObjectId()), request.getTickCount(), TerminalType.BOUNTY); }
-				} else if (terminalType == TerminalType.ENTERTAINER) {
+				switch(terminalType) {
+					case TerminalType.GENERIC:
+						handleMissionListRequest(core.objectService.getObject(request.getObjectId()), request.getTickCount(), TerminalType.GENERIC);
+						break;
+					
+					case TerminalType.BOUNTY:
+						if (!object.hasSkill("class_bountyhunter_phase1_novice")) { object.sendSystemMessage("@mission/mission_generic:not_bounty_hunter_terminal", (byte) 0); } 
+						else { handleMissionListRequest(core.objectService.getObject(request.getObjectId()), request.getTickCount(), TerminalType.BOUNTY); }
+						break;
+					
+					case TerminalType.ARTISAN:
+						//handleMissionListRequest(core.objectService.getObject(request.getObjectId()), request.getTickCount(), TerminalType.ARTISAN);
+						break;
+					
+					case TerminalType.ENTERTAINER:
+						//handleMissionListRequest(core.objectService.getObject(request.getObjectId()), request.getTickCount(), TerminalType.ENTERTAINER);
+						break;
 
-				} else if (terminalType == TerminalType.ARTISAN) {
-					handleMissionListRequest(core.objectService.getObject(request.getObjectId()), request.getTickCount(), TerminalType.ARTISAN);
-				} else {
-					//Console.println("ERROR: Unsupported terminal " + terminal.getObjectId());
+					default: break;
 				}
 			}
 			
@@ -445,7 +451,9 @@ public class MissionService implements INetworkDispatch {
 		if (surveySkill > 90) { maxLevel += 10; }
 		if (surveySkill > 100) { maxLevel += 5; } //Max mission level is 95.
 		
-		int randLevel = minLevel + 5 * (new Random().nextInt((maxLevel - minLevel)) / 5);
+		int randNumber = (maxLevel == minLevel ? 0 : ran.nextInt(maxLevel - minLevel)); // prevent bound error (can't randomize 0)
+
+		int randLevel = minLevel + (5 * randNumber) / 5;
 		
 		if (randLevel > maxLevel)
 			randLevel = maxLevel;
@@ -474,7 +482,7 @@ public class MissionService implements INetworkDispatch {
 		mission.setCreditReward(400 + (randLevel - minLevel) * 20 + ran.nextInt(100));
 		
 		mission.setMissionTemplateObject(CRC.StringtoCRC(ResourceRoot.CONTAINER_TYPE_IFF_SIGNIFIER[family.getContainerType()])); // This should be the resource container obj
-		mission.setMissionTargetName(family.getResourceType());
+		mission.setMissionTargetName(family.getResourceType() + family.getResourceClass());
 		
 	}
 	
@@ -486,7 +494,7 @@ public class MissionService implements INetworkDispatch {
 		String missionStf = "mission/mission_deliver_neutral_" + difficulties[ran.nextInt(difficulties.length)];
 
 		mission.setMissionId(getRandomStringEntry(missionStf));
-		mission.setMissionDescription(missionStf);
+		mission.setMissionDescription(missionStf, "o");
 		mission.setMissionTitle(missionStf);
 		
 		mission.setCreator(nameGenerator.compose(2) + " " + nameGenerator.compose(3));
@@ -500,7 +508,7 @@ public class MissionService implements INetworkDispatch {
 		mission.setStartLocation(startLocation, player.getPlanet().name);
 		mission.setDestination(destination, player.getPlanet().name);
 		
-		mission.setCreditReward((int) (50 + ((startLocation.getDistance2D(destination) / 10))));
+		mission.setCreditReward((int) (200 + ((startLocation.getDistance2D(destination) / 10))));
 		
 		mission.setMissionTemplateObject(CRC.StringtoCRC("object/tangible/mission/shared_mission_datadisk.iff"));
 		mission.setMissionTargetName("Datadisk");
@@ -563,7 +571,7 @@ public class MissionService implements INetworkDispatch {
 			mission.setMissionDescription(missionStf, "s");
 		}
 		
-		mission.setMissionLevel(new Random().nextInt(100 - 95) + 95);
+		mission.setMissionLevel(95 + bountyTarget.getFailedAttempts());
 		
 		mission.setCreditReward(bountyTarget.getCreditReward());
 		
