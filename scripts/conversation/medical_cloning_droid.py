@@ -26,7 +26,7 @@ def startConversation(core, actor, npc):
 		if level <= 10:
 			cloningFee = 100
 		elif level >= 11:
-			cloningFee = (((actor.getLevel() + 15) * actor.getLevel())/2)
+			cloningFee = (((actor.getLevel() + 17) * actor.getLevel())/2)
 		elif level == 90:
 			cloningFee = 5000
 			
@@ -78,7 +78,7 @@ def handleFirstScreen(core, actor, npc, selection):
 		if actor.getLevel() <= 10:
 			cloningFee = 100
 		elif actor.getLevel() >= 11:
-			cloningFee = (((actor.getLevel() + 15) * actor.getLevel())/2)
+			cloningFee = (((actor.getLevel() + 17) * actor.getLevel())/2)
 		elif actor.getLevel() == 90:
 			cloningFee = 5000
 
@@ -100,7 +100,7 @@ def handleSecondScreen(core, actor, npc, selection):
 	if actor.getLevel() <= 10:
 		cloningFee = 100
 	elif actor.getLevel() >= 11:
-		cloningFee = (((actor.getLevel() + 15) * actor.getLevel())/2)
+		cloningFee = (((actor.getLevel() + 17) * actor.getLevel())/2)
 	elif actor.getLevel() == 90:
 		cloningFee = 5000
 	
