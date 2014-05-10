@@ -12,7 +12,7 @@ def setup(core, object):
 	object.setIntAttribute('cat_stat_mod_bonus.@stat_n:strength_modified', 25)
 	object.setIntAttribute('cat_skill_mod_bonus.@stat_n:fast_attack_line_sp_smoke', 1)
 	object.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_duration_line_sp_preparation', 1)
-	object.setIntAttribute('cat_stat_mod_bonus.@stat_n:expertise_cooldown_line_sp_preparation', 6)
+	object.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_cooldown_line_sp_preparation', 6)
 	object.setStringAttribute('@set_bonus:piece_bonus_count_3', '@set_bonus:set_bonus_spy_utility_a_1')
 	object.setStringAttribute('@set_bonus:piece_bonus_count_4', '@set_bonus:set_bonus_spy_utility_a_2')
 	object.setStringAttribute('@set_bonus:piece_bonus_count_5', '@set_bonus:set_bonus_spy_utility_a_3')
