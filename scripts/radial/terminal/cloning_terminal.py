@@ -35,17 +35,26 @@ def handleSelection(core, owner, target, option):
 def handleSUI(owner, window, eventType, returnList):
 
 	if eventType == 0:
+		level = int(owner.getLevel())
+		if level <= 10:
+			cloningFee = 100
+		elif level >= 11:
+			cloningFee = (((owner.getLevel() + 17) * owner.getLevel())/2)
+		elif level == 90:
+			cloningFee = 5000
+		
 		cash = owner.getCashCredits()
 		bank = owner.getBankCredits()
-		if bank < 5000 and cash < 5000:
+		
+		if bank < cloningFee and cash < cloningFee:
 			owner.sendSystemMessage('You lack the credits required to cover the cost of cloning.', 0)
 			return
-		elif bank >= 5000:
-			owner.setBankCredits(bank - 5000)
-		elif cash >= 5000 and bank < 5000:
-			owner.setCashCredits(cash - 5000)
+		elif bank >= cloningFee:
+			owner.setBankCredits(bank - cloningFee)
+		elif cash >= cloningFee and bank < cloningFee:
+			owner.setCashCredits(cash - cloningFee)
 		
-		owner.setAttachment('preDesignatedCloner', window.getRangeObject().getGrandparent().getObjectID())
+		owner.getPlayerObject().setBindLocation(window.getRangeObject().getGrandparent().getObjectID())
 		owner.sendSystemMessage('@base_player:clone_success', 0)
 		
 
