@@ -10,8 +10,19 @@ def createRadial(core, owner, target, radials):
 def handleSelection(core, owner, target, option):
 
 	if option == 21 and target:
+		# REALLY Dirty hack until this can be resolved SWG way !!
+		stra = "Will you pay the %DI credits to clone yourself here?"
+		level = int(owner.getLevel())
+		
+		if level <= 10:
+			cloningFee = 100
+		elif level >= 11:
+			cloningFee = (((owner.getLevel() + 17) * owner.getLevel())/2)
+		elif level == 90:
+			cloningFee = 5000
+	
 		suiSvc = core.suiService
-		suiWindow = suiSvc.createMessageBox(MessageBoxType.MESSAGE_BOX_OK_CANCEL, '@base_player:clone_confirm_title', '@base_player:clone_confirm_prompt', owner, target, 15)
+		suiWindow = suiSvc.createMessageBox(MessageBoxType.MESSAGE_BOX_OK_CANCEL, '@base_player:clone_confirm_title', stra.replace ("%DI" , str(cloningFee)), owner, target, 15)
 		returnParams = Vector()
 		returnParams.add('btnOk:Text')
 		returnParams.add('btnCancel:Text')
@@ -26,13 +37,13 @@ def handleSUI(owner, window, eventType, returnList):
 	if eventType == 0:
 		cash = owner.getCashCredits()
 		bank = owner.getBankCredits()
-		if bank < 1000 and cash < 1000:
+		if bank < 5000 and cash < 5000:
 			owner.sendSystemMessage('You lack the credits required to cover the cost of cloning.', 0)
 			return
-		elif bank > 1000:
-			owner.setBankCredits(bank - 1000)
-		elif cash > 1000 and bank < 1000:
-			owner.setCashCredits(cash - 1000)
+		elif bank >= 5000:
+			owner.setBankCredits(bank - 5000)
+		elif cash >= 5000 and bank < 5000:
+			owner.setCashCredits(cash - 5000)
 		
 		owner.setAttachment('preDesignatedCloner', window.getRangeObject().getGrandparent().getObjectID())
 		owner.sendSystemMessage('@base_player:clone_success', 0)
