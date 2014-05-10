@@ -556,7 +556,10 @@ public class LootService implements INetworkDispatch {
 			int crystalColor = new Random().nextInt(11);
 			
 			droppedItem.setCustomizationVariable("/private/index_color_1", (byte) crystalColor);
+			droppedItem.getAttributes().put("@obj_attr_n:condition", "100/100");
+			droppedItem.getAttributes().put("@obj_attr_n:crystal_owner", "\\#D1F56F UNTUNED \\#FFFFFF ");		
 			droppedItem.getAttributes().put("@obj_attr_n:color", resources.datatables.LightsaberColors.get(crystalColor));
+			droppedItem.setAttachment("radial_filename", "item/tunable");
 			//droppedItem.getAttributes().put("@obj_attr_n:color", "@jedi_spam:saber_color_" + crystalColor); // Commented out for now
 			
 		}
