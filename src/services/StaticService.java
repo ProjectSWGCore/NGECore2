@@ -36,8 +36,6 @@ import java.util.Map;
 import resources.common.FileUtilities;
 import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
-import resources.objects.creature.CreatureObject;
-import resources.objects.tangible.TangibleObject;
 import main.NGECore;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.PortalVisitor;
@@ -57,13 +55,6 @@ public class StaticService implements INetworkDispatch {
 	}
 	
 	public void spawnStatics() {
-		for (SWGObject object : core.objectService.getObjectList().values()) {
-			if (object instanceof CreatureObject && ((CreatureObject) object).getStaticNPC()) {
-				((TangibleObject) object).setRespawnTime(0);
-				core.objectService.destroyObject(object);
-			}
-		}
-		
 		for (Planet planet : core.terrainService.getPlanetList()) {
 			if (FileUtilities.doesFileExist("scripts/static_spawns/" + planet.getName())) {
 				Path p = Paths.get("scripts/static_spawns/" + planet.getName());
@@ -87,7 +78,7 @@ public class StaticService implements INetworkDispatch {
 			}
 			
 			if (FileUtilities.doesFileExist("scripts/static_spawns/" + planet.getName() + ".py")) {
-				core.scriptService.callScript("scripts/static_spawns/", planet.getName(), "addPlanetSpawns", core, planet);
+				//core.scriptService.callScript("scripts/static_spawns/", planet.getName(), "addPlanetSpawns", core, planet);
 			}
 			
 			System.out.println("Loaded static objects for " + planet.getName());
@@ -122,7 +113,13 @@ public class StaticService implements INetworkDispatch {
 		
 		long objectId = core.objectService.getDOId(planetName, template, 0, buildingId, cellNumber, x, y, z);
 		
-		SWGObject object = core.objectService.createObject(template, objectId, planet, new Point3D(x, y, z), new Quaternion(qW, qX, qY, qZ), null, true, true);
+		SWGObject object;
+		
+		if (core.spawnService.getMobileTemplate(template) != null) {
+			object = core.spawnService.spawnCreature(template, planetName, cellId, x, y, z, qW, qX, qY, qZ, (short) -1);
+		} else {
+			object = core.objectService.createObject(template, objectId, planet, new Point3D(x, y, z), new Quaternion(qW, qX, qY, qZ), null, true, true);
+		}
 		
 		if (object == null) {
 			System.err.println("Static object is null with id " + objectId + " and template " + template + ".");
@@ -131,10 +128,6 @@ public class StaticService implements INetworkDispatch {
 		
 		if (objectId != 0 && object.getObjectID() != objectId) {
 			System.err.println("StaticService: ObjectId " + objectId + " was taken for object with template " + object.getTemplate() + ".  Replacement: " + object.getObjectID());
-		}
-		
-		if (object instanceof CreatureObject) {
-			((CreatureObject) object).setStaticNPC(true);
 		}
 		
 		boolean checkCells = false; // shouldn't be needed; for debugging

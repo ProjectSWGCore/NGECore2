@@ -51,9 +51,11 @@ public class MobileTemplate {
 	private int minSpawnDistance = 0;
 	private int maxSpawnDistance = 0;
 	private boolean deathblow = false;
-	private String socialGroup; // see prima guide 
+	private String socialGroup = ""; // see prima guide 
 	private int assistRange; // use prima guide for ranges
 	private boolean isStalker = false;
+	private String meatType, milkType, boneType, hideType;
+	private int meatAmount, milkAmount, boneAmount, hideAmount;
 	
 	public Vector<String> getTemplates() {
 		return templates;
@@ -261,5 +263,69 @@ public class MobileTemplate {
 
 	public void setStalker(boolean isStalker) {
 		this.isStalker = isStalker;
+	}
+
+	public String getMeatType() {
+		return meatType;
+	}
+
+	public void setMeatType(String meatType) {
+		this.meatType = meatType;
+	}
+
+	public String getMilkType() {
+		return milkType;
+	}
+
+	public void setMilkType(String milkType) {
+		this.milkType = milkType;
+	}
+
+	public String getBoneType() {
+		return boneType;
+	}
+
+	public void setBoneType(String boneType) {
+		this.boneType = boneType;
+	}
+
+	public String getHideType() {
+		return hideType;
+	}
+
+	public void setHideType(String hideType) {
+		this.hideType = hideType;
+	}
+
+	public int getMeatAmount() {
+		return meatAmount;
+	}
+
+	public void setMeatAmount(int meatAmount) {
+		this.meatAmount = meatAmount;
+	}
+
+	public int getMilkAmount() {
+		return milkAmount;
+	}
+
+	public void setMilkAmount(int milkAmount) {
+		this.milkAmount = milkAmount;
+	}
+
+	public int getBoneAmount() {
+		return boneAmount;
+	}
+
+	public void setBoneAmount(int boneAmount) {
+		this.boneAmount = boneAmount;
+	}
+
+	public int getHideAmount() {
+		return hideAmount;
+	}
+
+	public void setHideAmount(int hideAmount) {
+		this.hideAmount = hideAmount;
 	}
 }

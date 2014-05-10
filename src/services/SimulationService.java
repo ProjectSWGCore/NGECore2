@@ -78,6 +78,7 @@ import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
+import resources.objects.harvester.HarvesterObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.common.*;
@@ -192,7 +193,7 @@ public class SimulationService implements INetworkDispatch {
 		
 		while(cursor.hasNext()) {
 			SWGObject building = core.objectService.getObject(((SWGObject) cursor.next()).getObjectID());
-			if(building == null || !(building instanceof BuildingObject))
+			if(building == null || (!(building instanceof BuildingObject) && !(building instanceof HarvesterObject)))
 				continue;
 			if(building.getAttachment("hasLoadedServerTemplate") == null)
 				core.objectService.loadServerTemplate(building);
@@ -923,10 +924,10 @@ public class SimulationService implements INetworkDispatch {
 		
 		if(container.getPermissions().canView(requester, container)) {
 			OpenedContainerMessage opm = new OpenedContainerMessage(container.getObjectID());
-			if(requester.getClient() != null && requester.getClient().getSession() != null && !(container instanceof CreatureObject))
+			if(requester.getClient() != null && requester.getClient().getSession() != null && !(container instanceof CreatureObject)){
 				requester.getClient().getSession().write(opm.serialize());
-		}
-		
+			}
+		}	
 	}
 	
 	public void transform(TangibleObject obj, Point3D position)
@@ -945,6 +946,36 @@ public class SimulationService implements INetworkDispatch {
 		Quaternion newRotation = resources.common.MathUtilities.rotateQuaternion(oldRotation, rotation, axis);
 		
 		teleport(obj, obj.getPosition(), newRotation, obj.getParentId());
+	}
+	
+	public void rotateToFaceTarget(SWGObject object, SWGObject target) {
+		float radians = (float) (((float) Math.atan2(target.getPosition().z - object.getPosition().z, target.getPosition().x - object.getPosition().x)) - object.getRadians());
+		transform(object, radians, object.getPosition());
+	}
+	
+	public void faceTarget(SWGObject object, SWGObject target) {
+		float direction = (float) Math.atan2(target.getWorldPosition().x - object.getWorldPosition().x, target.getWorldPosition().z - object.getWorldPosition().z);
+		
+		if (direction < 0) {
+			direction = (float) (2 * Math.PI + direction);
+		}
+		
+		if (Math.abs(direction - object.getRadians()) < 0.05) {
+			return;
+		}
+		
+		Quaternion quaternion = new Quaternion((float) Math.cos(direction / 2), 0, (float) Math.sin(direction / 2), 0);
+        
+		if (quaternion.y < 0.0f && quaternion.w > 0.0f) {
+        	quaternion.y *= -1;
+        	quaternion.w *= -1;
+        }
+		
+		if (object.getContainer() instanceof CellObject) {
+			NGECore.getInstance().simulationService.moveObject(object, object.getPosition(), quaternion, object.getMovementCounter(), 0, (CellObject) object.getContainer());
+		} else {
+			NGECore.getInstance().simulationService.moveObject(object, object.getPosition(), quaternion, object.getMovementCounter(), 0, null);
+		}
 	}
 	
 	public void teleport(SWGObject obj, Point3D position, Quaternion orientation, long cellId) {
@@ -989,6 +1020,10 @@ public class SimulationService implements INetworkDispatch {
 		
 		float heightOrigin = 1.f;
 		float heightDirection = 1.f;
+		
+		if (obj2.getTemplate().equals("object/tangible/inventory/shared_character_inventory.iff")){
+			obj2 = obj2.getContainer(); // LOS message fix on corpse
+		}
 		
 		if(obj1 instanceof CreatureObject)
 			heightOrigin = getHeightOrigin((CreatureObject) obj1);
@@ -1202,8 +1237,8 @@ public class SimulationService implements INetworkDispatch {
 		
 		float height = (float) (creature.getHeight()/* - 0.3*/);
 		
-		if(creature.getPosture() == 2 || creature.getPosture() == 13)
-			height = 0.3f;
+		if(creature.getPosture() == 2 || creature.getPosture() == 13 || creature.getPosture() == 14)
+			height = 0.45f;
 		else if(creature.getPosture() == 1)
 			height /= 2.f;
 		

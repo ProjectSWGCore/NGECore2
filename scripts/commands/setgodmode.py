@@ -116,5 +116,13 @@ def run(core, actor, target, commandString):
 	elif command == 'setBounty':
 		core.playerService.sendSetBountyWindow(actor, actor)
 		return
+		
+	elif command == 'genloot':
+		object = core.lootService.generateLootItem(actor, arg1)
+		
+		inventory = actor.getSlottedObject('inventory')
+		
+		if inventory:
+			inventory.add(object)
 	
 	return

@@ -270,7 +270,7 @@ public class ConnectionService implements INetworkDispatch {
 			}
 		}*/
 		
-		core.missionService.getBountyList().remove(core.getBountiesODB().get(object.getObjectId()));
+		core.missionService.getBountyMap().remove(core.getBountiesODB().get(object.getObjectID()));
 		
 		ghost.toggleFlag(PlayerFlags.LD);
 		
@@ -279,8 +279,10 @@ public class ConnectionService implements INetworkDispatch {
 		object.setAttachment("disconnectTask", null);
 		
 		List<ScheduledFuture<?>> schedulers = core.playerService.getSchedulers().get(object.getObjectID());
-		schedulers.forEach(s -> s.cancel(true));
-		schedulers.clear();
+		if(schedulers != null) {
+			schedulers.forEach(s -> s.cancel(true));
+			schedulers.clear();
+		}
 		core.playerService.getSchedulers().remove(object.getObjectID());
 		
 		core.getSWGObjectODB().put(object.getObjectID(), object);

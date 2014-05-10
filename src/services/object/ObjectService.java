@@ -157,6 +157,8 @@ public class ObjectService implements INetworkDispatch {
 		    		}
 		    	}
 		    	core.bazaarService.saveAllItems();
+		    	core.housingService.saveBuildings();
+		    	core.harvesterService.saveHarvesters();
 		    	core.closeODBs();
 		    }
 		});
@@ -239,13 +241,7 @@ public class ObjectService implements INetworkDispatch {
 			
 			object = new SurveyTool(objectID, planet, Template, position, orientation);
 			
-		}
-//		else if(Template.startsWith("object/tangible/container/drum/shared_treasure_drum.iff")) {
-//			
-//			object = new CreatureObject(objectID, planet, position, orientation, Template);			
-//		
-//		} 
-		else if(Template.startsWith("object/tangible")) {
+		} else if(Template.startsWith("object/tangible")) {
 			
 			object = new TangibleObject(objectID, planet, Template, position, orientation);
 
@@ -253,7 +249,7 @@ public class ObjectService implements INetworkDispatch {
 			
 			object = new IntangibleObject(objectID, planet, position, orientation,Template);
 
-		}else if(Template.startsWith("object/weapon")) {
+		} else if(Template.startsWith("object/weapon")) {
 			
 			object = new WeaponObject(objectID, planet, Template, position, orientation);
 
@@ -336,9 +332,10 @@ public class ObjectService implements INetworkDispatch {
 		object.setAttachment("customServerTemplate", customServerTemplate);
 		
 		object.setisInSnapshot(isSnapshot);
-		if(!core.getObjectIdODB().contains(objectID))
-			core.getObjectIdODB().put(objectID, new ObjectId(objectID));
-		
+		synchronized(objectMutex) {
+			if(!core.getObjectIdODB().contains(objectID))
+				core.getObjectIdODB().put(objectID, new ObjectId(objectID));
+		}
 		// Set Options - easier to set them across the board here
 		// because we'll be spawning them despite most of them being unscripted.
 		// Any such settings can be completely reset with setOptionsBitmask
@@ -618,24 +615,22 @@ public class ObjectService implements INetworkDispatch {
 		long newId = 0;
 		boolean found = false;
 		// stack overflow when using recursion
-		while(!found) {
-			synchronized(objectMutex) {
+		synchronized(objectMutex) {
+			while(!found) {
 				newId = highestId.incrementAndGet();
+				PreparedStatement ps2;
+				try {
+					ps2 = databaseConnection.preparedStatement("UPDATE highestid SET id=" + newId + " WHERE id=(SELECT MAX(id) FROM highestid)");
+					ps2.executeUpdate();
+					ps2.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+				if(objectList.containsKey(newId) || core.getObjectIdODB().contains(newId))
+					found = false;
+				else
+					found = true;
 			}
-			
-			PreparedStatement ps2;
-	
-			try {
-				ps2 = databaseConnection.preparedStatement("UPDATE highestid SET id=" + newId + " WHERE id=" + (newId-1));
-				ps2.executeUpdate();
-				ps2.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-			if(getObject(newId) != null || core.getObjectIdODB().contains(newId))
-				found = false;
-			else
-				found = true;		
 		}
 		
 		return newId;		
@@ -675,41 +670,39 @@ public class ObjectService implements INetworkDispatch {
 			reuse_time = 0;
 		}
 		
-		if (reuse_time > 0) {
-			try {
-				DatatableVisitor visitor = ClientFileManager.loadFile("datatables/timer/template_command_mapping.iff", DatatableVisitor.class);
-				
-				for (int i = 0; i < visitor.getRowCount(); i++) {
-					if (visitor.getObject(i, 0) != null && ((String) (visitor.getObject(i, 0))).equalsIgnoreCase(object.getTemplate())) {
-						String commandName = (String) visitor.getObject(i, 1);
-						String cooldownGroup = (String) visitor.getObject(i, 2);
-						String animation = (String) visitor.getObject(i, 3);
+		try {
+			DatatableVisitor visitor = ClientFileManager.loadFile("datatables/timer/template_command_mapping.iff", DatatableVisitor.class);
+			
+			for (int i = 0; i < visitor.getRowCount(); i++) {
+				if (visitor.getObject(i, 0) != null && ((String) (visitor.getObject(i, 0))).equalsIgnoreCase(object.getTemplate())) {
+					String commandName = (String) visitor.getObject(i, 1);
+					String cooldownGroup = (String) visitor.getObject(i, 2);
+					String animation = (String) visitor.getObject(i, 3);
+					
+					if (commandName.length() > 0) {
+						BaseSWGCommand command = core.commandService.getCommandByName(commandName);
 						
-						if (commandName.length() > 0) {
-							BaseSWGCommand command = core.commandService.getCommandByName(commandName);
-							
-							if (command instanceof CombatCommand && animation.length() > 0) {
-								((CombatCommand) command).setDefaultAnimations(new String[] { animation });
-							}
-							
-							if (core.commandService.callCommand(creature, object, command, 0, "")) {
-								core.commandService.removeCommand(creature, 0, command);
-								return;
-							}
-						} else if (cooldownGroup.length() > 0) {
-							if (creature.hasCooldown(cooldownGroup)) {
-								return;
-							}
-							
-							creature.addCooldown(cooldownGroup, object.getIntAttribute("reuse_time"));
+						if (command instanceof CombatCommand && animation.length() > 0) {
+							((CombatCommand) command).setDefaultAnimations(new String[] { animation });
 						}
 						
-						break;
+						if (core.commandService.callCommand(creature, object, command, 0, "")) {
+							core.commandService.removeCommand(creature, 0, command);
+							return;
+						}
+					} else if (cooldownGroup.length() > 0) {
+						if (creature.hasCooldown(cooldownGroup)) {
+							return;
+						}
+						
+						creature.addCooldown(cooldownGroup, object.getIntAttribute("reuse_time"));
 					}
+					
+					break;
 				}
-			} catch (Exception e) {
-				e.printStackTrace();
 			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		
 		if (object instanceof TangibleObject) {
@@ -808,26 +801,18 @@ public class ObjectService implements INetworkDispatch {
 				
 				objectList.put(creature.getObjectID(), creature);
 				
-				creature.viewChildren(creature, true, true, new Traverser() {
-
-					@Override
-					public void process(SWGObject object) {
-						objectList.put(object.getObjectID(), object);
-					}
-					
+				creature.viewChildren(creature, true, true, (object) -> {
+					objectList.put(object.getObjectID(), object);
 				});
 				
-				creature.viewChildren(creature, true, true, new Traverser() {
-
-					@Override
-					public void process(SWGObject object) {
-						if(object.getParentId() != 0 && object.getContainer() == null)
-							object.setParent(getObject(object.getParentId()));
-						object.getContainerInfo(object.getTemplate());
-						if(getObject(object.getObjectID()) == null)
-							objectList.put(object.getObjectID(), object);
-					}
-					
+				creature.viewChildren(creature, true, true, (object) -> {
+					if(object.getMutex() == null)
+						object.initAfterDBLoad();
+					if(object.getParentId() != 0 && object.getContainer() == null)
+						object.setParent(getObject(object.getParentId()));
+					object.getContainerInfo(object.getTemplate());
+					if(getObject(object.getObjectID()) == null)
+						objectList.put(object.getObjectID(), object);					
 				});
 
 				if(creature.getParentId() != 0) {
@@ -916,8 +901,8 @@ public class ObjectService implements INetworkDispatch {
 				if(!core.getConfig().getString("MOTD").equals(""))
 					creature.sendSystemMessage(core.getConfig().getString("MOTD"), (byte) 2);
 				
-				if (core.getBountiesODB().contains(creature.getObjectId()))
-					core.missionService.getBountyList().add((BountyListItem) core.getBountiesODB().get(creature.getObjectId()));
+				if (core.getBountiesODB().contains(creature.getObjectID()))
+					core.missionService.getBountyMap().put(creature.getObjectID(), (BountyListItem) core.getBountiesODB().get(creature.getObjectID()));
 				
 				if (creature.getSlottedObject("datapad") != null) {
 					creature.getSlottedObject("datapad").viewChildren(creature, true, false, new Traverser() {

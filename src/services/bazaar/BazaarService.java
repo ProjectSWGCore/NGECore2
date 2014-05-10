@@ -81,6 +81,7 @@ public class BazaarService implements INetworkDispatch {
 
 	public BazaarService(NGECore core) {
 		this.core = core;
+		core.commandService.registerCommand("createvendor");
 		loadAuctionItems();
 	}
 	
@@ -94,6 +95,10 @@ public class BazaarService implements INetworkDispatch {
 		while(cursor.hasNext()) {
 			addAuctionItem((AuctionItem) cursor.next());
 		}
+		auctionItems.stream().map(AuctionItem::getItem).forEach(obj -> { 
+			obj.initAfterDBLoad(); 
+			obj.viewChildren(obj, true, true, obj2 -> obj2.initAfterDBLoad());
+		});
 		cursor.close();
 	}
 

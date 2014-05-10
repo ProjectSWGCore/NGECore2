@@ -51,8 +51,6 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 	private static final long serialVersionUID = 1L;
 	@NotPersistent
 	private transient BuildingMessageBuilder messageBuilder;
-	@NotPersistent
-	private transient Transaction txn;
 	
 	private float maintenanceAmount = 0;
 	private int BMR = 0;
@@ -248,13 +246,6 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 		destination.getSession().write(messageBuilder.buildBaseline9());
 
 	}
-
-	public Transaction getTransaction() { return txn; }
-	
-	public void createTransaction(Environment env) { 
-		txn = env.beginTransaction(null, null); 
-		txn.setLockTimeout(500, TimeUnit.MILLISECONDS);
-	}
 	
 	public Vector<CellObject> getCells() {
 		final Vector<CellObject> cells = new Vector<CellObject>();
@@ -269,6 +260,7 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 	public void initAfterDBLoad() {
 		super.init();
 		messageBuilder = new BuildingMessageBuilder(this);
+		defendersList = new Vector<TangibleObject>();
 	}
 	
 	public ObjectMessageBuilder getMessageBuilder() {

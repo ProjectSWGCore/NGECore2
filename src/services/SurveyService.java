@@ -174,7 +174,7 @@ public class SurveyService implements INetworkDispatch {
 						containerObject.initializeStats(sampleResource);
 						containerObject.setProprietor(crafter);
 						SWGObject crafterInventory = crafter.getSlottedObject("inventory");
-						container.setStackCount(stackCount,crafter);
+						containerObject.setStackCount(stackCount,crafter);
 						crafterInventory.add(containerObject);
 						player.setRecentContainer(containerObject);
 					}

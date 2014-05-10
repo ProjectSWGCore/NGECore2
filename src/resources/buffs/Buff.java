@@ -45,7 +45,7 @@ public class Buff implements IDelta, Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	@NotPersistent
-	private transient SimpleBufferAllocator bufferPool = new SimpleBufferAllocator();
+	private transient static SimpleBufferAllocator bufferPool = new SimpleBufferAllocator();
 	private String group1, group2;
 	private int priority;
 	private float duration;

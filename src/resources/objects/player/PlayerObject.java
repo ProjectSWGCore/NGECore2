@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.Vector;
 
 import resources.objects.ObjectMessageBuilder;
 import resources.objects.intangible.IntangibleObject;
@@ -151,6 +152,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	private transient boolean callingCompanion = false;
 	
 	private long bountyMissionId;
+	private Vector<Long> ownedVendors = new Vector<Long>();
 	
 	public PlayerObject() {
 		super();
@@ -167,6 +169,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		super.init();
 		lastPlayTimeUpdate = System.currentTimeMillis();
 		messageBuilder = new PlayerMessageBuilder(this);
+		waypoints.forEach(WaypointObject::initAfterDBLoad);
 	}
 
 	public String getTitle() {
@@ -919,6 +922,22 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 
 	public ObjectMessageBuilder getMessageBuilder() {
 		return messageBuilder;
+	}
+
+	public Vector<Long> getOwnedVendors() {
+		return ownedVendors;
+	}
+
+	public void addVendor(long vendorId) {
+		ownedVendors.add(vendorId);
+	}
+	
+	public void removeVendor(long vendorId) {
+		ownedVendors.remove(vendorId);
+	}
+	
+	public int getAmountOfVendors() {
+		return ownedVendors.size();
 	}
 	
 }

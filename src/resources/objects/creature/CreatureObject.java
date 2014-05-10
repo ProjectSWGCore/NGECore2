@@ -141,14 +141,14 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	@NotPersistent
 	private transient int maxHAMListCounter = 0;
 
-	private SWGList<SWGObject> equipmentList;
+	private SWGList<Long> equipmentList;
 	@NotPersistent
 	private transient int equipmentListUpdateCounter = 0;
 	private SWGList<Buff> buffList  = new SWGList<Buff>();
 	@NotPersistent
 	private transient int buffListUpdateCounter = 0;
 	private byte difficulty = 0;
-	private SWGList<SWGObject> appearanceEquipmentList;
+	private SWGList<Long> appearanceEquipmentList;
 	@NotPersistent
 	private transient int appearanceEquipmentListUpdateCounter = 0;
 	
@@ -172,7 +172,6 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	@NotPersistent
 	private transient ScheduledFuture<?> spectatorTask;
 	
-	private boolean staticNPC = false; // temp
 	@NotPersistent
 	private transient int flourishCount = 0;
 	@NotPersistent
@@ -185,7 +184,7 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	@NotPersistent
 	private transient ConcurrentHashMap<String, Long> cooldowns = new ConcurrentHashMap<String, Long>();
 	@NotPersistent
-	private transient long tefTime = System.currentTimeMillis();
+	private transient long tefTime = 0;
 	@NotPersistent
 	private transient SWGObject useTarget;
 	
@@ -197,9 +196,9 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		skillMods = new SWGMap<String, SkillMod>(getObjectID(), 4, 3);
 		abilities = new SWGList<String>(getObjectID(), 4, 14);
 		missionCriticalObjects = new SWGList<MissionCriticalObject>(getObjectID(), 4, 13);
-		equipmentList = new SWGList<SWGObject>(getObjectID(), 6, 0x17);
+		equipmentList = new SWGList<Long>(getObjectID(), 6, 0x17);
 		buffList = new SWGList<Buff>(getObjectID(), 6, 0x1A);
-		appearanceEquipmentList = new SWGList<SWGObject>(getObjectID(), 6, 0x1F);
+		appearanceEquipmentList = new SWGList<Long>(getObjectID(), 6, 0x1F);
 	}
 	
 	public CreatureObject() {
@@ -210,11 +209,19 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	@Override
 	public void initAfterDBLoad() {
 		super.init();
+		defendersList = new Vector<TangibleObject>();
 		duelList = Collections.synchronizedList(new ArrayList<CreatureObject>());
 		cooldowns = new ConcurrentHashMap<String, Long>();
 		performanceAudience = new Vector<CreatureObject>();
-		tefTime = System.currentTimeMillis();
 		messageBuilder = new CreatureMessageBuilder(this);
+		dotList.init();
+		buffList.init();
+		equipmentList.init();
+		appearanceEquipmentList.init();
+		missionCriticalObjects.init();
+		abilities.init();
+		skillMods.init();
+		skillMods.forEach((name, skillMod) -> skillMod.init());
 	}
 
 	private void loadTemplateData() {
@@ -1072,17 +1079,15 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		this.acceptBandflourishes = acceptBandflourishes;
 	}
 
-	public SWGList<SWGObject> getEquipmentList() {
-	    synchronized(objectMutex) {
+	public SWGList<Long> getEquipmentList() {
 		return equipmentList;
-	    }
 	}
 
 	public SWGList<Buff> getBuffList() {
 		return buffList;
 	}
 
-	public SWGList<SWGObject> getAppearanceEquipmentList() {
+	public SWGList<Long> getAppearanceEquipmentList() {
 		return appearanceEquipmentList;
 	}
 
@@ -1098,33 +1103,33 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	
 	public void addObjectToEquipList(SWGObject object) {
 		if(object instanceof TangibleObject) {
-			equipmentList.get().add(object);
+			equipmentList.get().add(object.getObjectID());
 			setEquipmentListUpdateCounter(getEquipmentListUpdateCounter() + 1);
 			notifyObservers(messageBuilder.buildAddEquipmentDelta((TangibleObject) object), true);
 		}
 	}
 	
 	public void removeObjectFromEquipList(SWGObject object) {
-		if(object instanceof TangibleObject && equipmentList.contains(object)) {
+		if(object instanceof TangibleObject && equipmentList.contains(object.getObjectID())) {
 			setEquipmentListUpdateCounter(getEquipmentListUpdateCounter() + 1);
 			notifyObservers(messageBuilder.buildRemoveEquipmentDelta((TangibleObject) object), true);
-			equipmentList.get().remove(object);
+			equipmentList.get().remove(object.getObjectID());
 		}
 	}
 	
 	public void addObjectToAppearanceEquipList(SWGObject object) {
 		if(object instanceof TangibleObject) {
-			appearanceEquipmentList.get().add(object);
+			appearanceEquipmentList.get().add(object.getObjectID());
 			setAppearanceEquipmentListUpdateCounter(getAppearanceEquipmentListUpdateCounter() + 1);
 			notifyObservers(messageBuilder.buildAddAppearanceEquipmentDelta((TangibleObject) object), true);
 		}
 	}
 	
 	public void removeObjectFromAppearanceEquipList(SWGObject object) {
-		if(object instanceof TangibleObject && appearanceEquipmentList.contains(object)) {
+		if(object instanceof TangibleObject && appearanceEquipmentList.contains(object.getObjectID())) {
 			setAppearanceEquipmentListUpdateCounter(getAppearanceEquipmentListUpdateCounter() + 1);
 			notifyObservers(messageBuilder.buildRemoveAppearanceEquipmentDelta((TangibleObject) object), true);
-			appearanceEquipmentList.get().remove(object);
+			appearanceEquipmentList.get().remove(object.getObjectID());
 		}
 	}
 	
@@ -1486,14 +1491,6 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	
 	public void playMusic(String sndFile, long targetId, int repetitions, boolean flag) {
 		getClient().getSession().write(new PlayMusicMessage(sndFile, targetId, 1, false));
-	}
-	
-	public boolean getStaticNPC() {
-		return staticNPC;
-	}
-	
-	public boolean setStaticNPC(boolean staticNPC) {
-		return this.staticNPC = staticNPC;
 	}
 	
 	public boolean getGroupDance() {

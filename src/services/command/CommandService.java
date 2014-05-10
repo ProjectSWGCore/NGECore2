@@ -47,6 +47,7 @@ import protocol.swg.ObjControllerMessage;
 import protocol.swg.objectControllerObjects.CommandEnqueue;
 import protocol.swg.objectControllerObjects.CommandEnqueueRemove;
 import protocol.swg.objectControllerObjects.StartTask;
+import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
@@ -141,6 +142,11 @@ public class CommandService implements INetworkDispatch  {
 					return false;
 				}
 				
+
+				if (!target.isInQuadtree() && (target.getContainer() == null || !(target.getContainer() instanceof CellObject))) {
+					break;
+				}
+				
 				if (!core.simulationService.checkLineOfSight(actor, target)) {
 					actor.showFlyText("@combat_effects:cant_see", 1.5f, new RGB(72, 209, 204), 1, true);
 					return false;
@@ -168,6 +174,10 @@ public class CommandService implements INetworkDispatch  {
 				
 				if (command.getMaxRangeToTarget() != 0 && actor.getPosition().getDistance(target.getPosition()) > command.getMaxRangeToTarget()) {
 					return false;
+				}
+				
+				if (!target.isInQuadtree() && (target.getContainer() == null || !(target.getContainer() instanceof CellObject))) {
+					break;
 				}
 				
 				if (!core.simulationService.checkLineOfSight(actor, target)) {
@@ -216,6 +226,10 @@ public class CommandService implements INetworkDispatch  {
 				
 				if (command.getMaxRangeToTarget() != 0 && actor.getPosition().getDistance(target.getPosition()) > command.getMaxRangeToTarget()) {
 					return false;
+				}
+				
+				if (!target.isInQuadtree() && (target.getContainer() == null || !(target.getContainer() instanceof CellObject))) {
+					break;
 				}
 				
 				if (!core.simulationService.checkLineOfSight(actor, target)) {

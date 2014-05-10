@@ -80,6 +80,8 @@ public class MissionObject extends IntangibleObject implements Serializable {
 	public void initAfterDBLoad() {
 		super.init();
 		messageBuilder = new MissionMessageBuilder(this);
+		if(attachedWaypoint != null)
+			attachedWaypoint.initAfterDBLoad();
 	}
 
 	public int getMissionLevel() {
@@ -301,11 +303,11 @@ public class MissionObject extends IntangibleObject implements Serializable {
 		this.missionId = missionId;
 	}
 
-	public long getBountyObjId() {
+	public long getBountyMarkId() {
 		return bountyObjId;
 	}
 
-	public void setBountyObjId(long bountyObjId) {
+	public void setBountyMarkId(long bountyObjId) {
 		this.bountyObjId = bountyObjId;
 	}
 

@@ -33,7 +33,7 @@ public class BountyListItem implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	@PrimaryKey
-	private long objectId;
+	private long objectID;
 	private int creditReward;
 	private String profession;
 	private String faction;
@@ -44,8 +44,8 @@ public class BountyListItem implements Serializable {
 
 	public BountyListItem() { }
 	
-	public BountyListItem(long objectId, int creditReward, String profession, String faction, String name) {
-		this.objectId = objectId;
+	public BountyListItem(long objectID, int creditReward, String profession, String faction, String name) {
+		this.objectID = objectID;
 		this.creditReward = creditReward;
 		this.profession = profession;
 		this.faction = faction;
@@ -54,11 +54,11 @@ public class BountyListItem implements Serializable {
 		this.setBountyPlacers(new ArrayList<Long>());
 	}
 	
-	public long getObjectId() {
-		return objectId;
+	public long getObjectID() {
+		return objectID;
 	}
-	public void setObjectId(long objectId) {
-		this.objectId = objectId;
+	public void setObjectID(long objectID) {
+		this.objectID = objectID;
 	}
 	public int getCreditReward() {
 		return creditReward;
