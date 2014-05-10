@@ -836,9 +836,9 @@ public class ObjectService implements INetworkDispatch {
 				
 				core.buffService.clearBuffs(creature);
 
-				CmdStartScene startScene = new CmdStartScene((byte) 0, objectId, creature.getPlanet().getPath(), creature.getTemplate(), position.x, position.y, position.z, core.getGalacticTime(), 0);
+				CmdStartScene startScene = new CmdStartScene((byte) 0, objectId, creature.getPlanet().getPath(), creature.getTemplate(), position.x, position.y, position.z, core.getGalacticTime() / 1000, 0);
 				session.write(startScene.serialize());
-				
+
 				ChatServerStatus chatServerStatus = new ChatServerStatus();
 				client.getSession().write(chatServerStatus.serialize());
 				

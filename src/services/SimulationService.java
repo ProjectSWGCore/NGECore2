@@ -912,7 +912,7 @@ public class SimulationService implements INetworkDispatch {
 		HeartBeatMessage heartBeat = new HeartBeatMessage();
 		session.write(heartBeat.serialize());
 
-		CmdStartScene startScene = new CmdStartScene((byte) 0, object.getObjectID(), object.getPlanet().getPath(), object.getTemplate(), newPos.x, newPos.y, newPos.z, System.currentTimeMillis() / 1000, object.getRadians());
+		CmdStartScene startScene = new CmdStartScene((byte) 0, object.getObjectID(), object.getPlanet().getPath(), object.getTemplate(), newPos.x, newPos.y, newPos.z, core.getGalacticTime() / 1000, object.getRadians());
 		session.write(startScene.serialize());
 		
 		handleZoneIn(client);

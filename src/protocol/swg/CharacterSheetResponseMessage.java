@@ -49,11 +49,11 @@ public class CharacterSheetResponseMessage extends SWGMessage {
 	public IoBuffer serialize() {
 		CreatureObject creature = (CreatureObject) player.getContainer();
 
-		if (creature != null) {
+		if (creature != null && player != null) {
 
 			SWGObject desCloner = null;
-			if (creature.getAttachment("preDesignatedCloner") != null)
-				desCloner = NGECore.getInstance().objectService.getObject((long) creature.getAttachment("preDesignatedCloner"));
+			if (player.getBindLocation() != 0)
+				desCloner = NGECore.getInstance().objectService.getObject(player.getBindLocation());
 
 			String clonerPlanet = "";
 			String spouse = "";
