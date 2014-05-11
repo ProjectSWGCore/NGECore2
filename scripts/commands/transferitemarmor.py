@@ -4,8 +4,10 @@ def setup():
 	return
 	
 def run(core, actor, target, commandString):
-	if core.equipmentService.canEquip(actor, target) is False:
-		actor.sendSystemMessage('@error_message:insufficient_skill', 0)
+	canEquip = core.equipmentService.canEquip(actor, target)
+		
+	if canEquip[0] is False:
+		actor.sendSystemMessage(canEquip[1], 0)
 		return
 		
 
