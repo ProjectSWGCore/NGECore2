@@ -134,10 +134,10 @@ public class TangibleObject extends SWGObject implements Serializable {
 		messageBuilder = new TangibleMessageBuilder(this);
 	}
 	
+	@Deprecated
 	public void setCustomName2(String customName) {
 		setCustomName(customName);
-		
-		notifyObservers(messageBuilder.buildCustomNameDelta(customName), true);
+		System.err.println("setCustomName2 is now deprecated - please use setCustomName");
 	}
 
 	public int getIncapTimer() {

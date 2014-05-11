@@ -32,6 +32,7 @@ import org.python.core.PyObject;
 import resources.common.FileUtilities;
 import resources.common.OutOfBand;
 import resources.datatables.DisplayType;
+import resources.datatables.STF;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import main.NGECore;
@@ -310,16 +311,16 @@ public class CollectionService implements INetworkDispatch {
 							}
 							
 							if (hidden && !(getCollection(creature, collectionName) > 0)) {
-								creature.sendSystemMessage(OutOfBand.ProsePackage("@collection:player_hidden_slot_added", "TO", "@collection_n:" + collectionName), DisplayType.Broadcast);
+								creature.sendSystemMessage(OutOfBand.ProsePackage("@collection:player_hidden_slot_added", "TO", STF.get("@collection_n:" + collectionName)), DisplayType.Broadcast);
 							}
 							
 							player.setCollections(collections.toByteArray());
 							
 							if (!noMessage) {
 								if (!bookName.equals("crafting_book")) {
-									creature.sendSystemMessage(OutOfBand.ProsePackage("@collection:player_slot_added", "TU", "@collection_n:" + slotName, "TO", "@collection_n:" + collectionName), DisplayType.Broadcast);
+									creature.sendSystemMessage(OutOfBand.ProsePackage("@collection:player_slot_added", "TU", STF.get("@collection_n:" + slotName), "TO", STF.get("@collection_n:" + collectionName)), DisplayType.Broadcast);
 								} else {
-									creature.sendSystemMessage(OutOfBand.ProsePackage("@collection:player_slot_increment", "TU", "@collection_n:" + slotName, "TO", "@collection_n:" + collectionName), DisplayType.Broadcast);
+									creature.sendSystemMessage(OutOfBand.ProsePackage("@collection:player_slot_increment", "TU", STF.get("@collection_n:" + slotName), "TO", STF.get("@collection_n:" + collectionName)), DisplayType.Broadcast);
 								}
 							}
 							
@@ -356,7 +357,7 @@ public class CollectionService implements INetworkDispatch {
 							}
 							
 							if (isComplete(creature, collectionName)) {
-								creature.sendSystemMessage(OutOfBand.ProsePackage("@collection:player_collection_complete", "TO", "@collection_n:" + collectionName), DisplayType.Broadcast);
+								creature.sendSystemMessage(OutOfBand.ProsePackage("@collection:player_collection_complete", "TO", STF.get("@collection_n:" + collectionName)), DisplayType.Broadcast);
 								
 								if (!noReward) {
 									try {
@@ -445,7 +446,7 @@ public class CollectionService implements INetworkDispatch {
 								if (trackServerFirst) {
 									if (core.guildService.getGuildObject().addServerFirst(collectionName, new ServerFirst(creature.getCustomName(), creature.getObjectId(), collectionName, System.currentTimeMillis()))) {
 										addCollection(creature, "bdg_server_first_01");
-										creature.sendSystemMessage(OutOfBand.ProsePackage("@collection:player_server_first", "TT", core.getGalaxyName(), "TO", "@collection_n:" + collectionName), DisplayType.Broadcast);
+										creature.sendSystemMessage(OutOfBand.ProsePackage("@collection:player_server_first", "TT", core.getGalaxyName(), "TO", STF.get("@collection_n:" + collectionName)), DisplayType.Broadcast);
 									}
 								}
 								
@@ -818,7 +819,7 @@ public class CollectionService implements INetworkDispatch {
 								}
 								
 								if (collection.equals(collectionName)) {
-									creature.sendSystemMessage(OutOfBand.ProsePackage("@collection:player_collection_reset", "TO", "@collection_n:" + collectionName), DisplayType.Broadcast);
+									creature.sendSystemMessage(OutOfBand.ProsePackage("@collection:player_collection_reset", "TO", STF.get("@collection_n:" + collectionName)), DisplayType.Broadcast);
 								}
 								
 								continue;
