@@ -19,7 +19,7 @@ public class STF
 			StfTable stf = new StfTable("clientdata/string/en/" + stfFile + ".stf");
 			for (int s = 1; s < stf.getRowCount(); s++) 
 			{		
-				if(stf.getStringById(s).getKey().equals(stfKey)) return stf.getStringById(s).getValue();
+				if(stf.getStringById(s).getKey() != null && stf.getStringById(s).getKey().equals(stfKey)) return stf.getStringById(s).getValue();
 			}
         } 
 		catch (Exception e) { }

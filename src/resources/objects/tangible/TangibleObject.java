@@ -43,6 +43,7 @@ import protocol.swg.objectControllerObjects.ShowFlyText;
 import resources.common.OutOfBand;
 import resources.datatables.Options;
 import resources.datatables.PvpStatus;
+import resources.datatables.STF;
 import resources.loot.LootGroup;
 import resources.objects.ObjectMessageBuilder;
 import resources.objects.creature.CreatureObject;
@@ -535,24 +536,13 @@ public class TangibleObject extends SWGObject implements Serializable {
 	// Returns the current, true name of the Object
 	public String getTrueName()
 	{
-		return getCustomName() != null ? getCustomName() : getTrueStfName();
+		return (getCustomName() != null && getCustomName().length() > 0) ? getCustomName() : getTrueStfName();
 	}
 		
 	// Returns the true STF-based name
 	public String getTrueStfName()
 	{
-		String name = null;
-		try
-		{
-			StfTable stf = new StfTable("clientdata/string/en/" + getStfFilename() + ".stf");
-			for (int s = 1; s < stf.getRowCount(); s++) 
-			{		
-				if(stf.getStringById(s).getKey().equals(getStfName())) name = stf.getStringById(s).getValue();
-			}
-        } 
-		catch (Exception e) { }
-		
-		return name;	
+		return STF.get(getProperName());
 	}
 	
 	public List<LootGroup> getLootGroups() {
