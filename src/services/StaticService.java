@@ -116,7 +116,7 @@ public class StaticService implements INetworkDispatch {
 		SWGObject object;
 		
 		if (core.spawnService.getMobileTemplate(template) != null) {
-			object = core.spawnService.spawnCreature(template, planetName, cellId, x, y, z, qW, qX, qY, qZ, (short) -1);
+			object = core.spawnService.spawnCreature(template, objectId, planetName, cellId, x, y, z, qW, qX, qY, qZ, (short) -1);
 		} else {
 			object = core.objectService.createObject(template, objectId, planet, new Point3D(x, y, z), new Quaternion(qW, qX, qY, qZ), null, true, true);
 		}
