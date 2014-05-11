@@ -464,13 +464,13 @@ public class ObjectService implements INetworkDispatch {
 			final Point3D position = object.getPosition();
 			final Quaternion orientation = object.getOrientation();
 			final long cellId = ((object.getContainer() == null) ? 0L : object.getContainer().getObjectID());
-			final short level = ((object instanceof CreatureObject) ? object.getLevel() : (short) 0);
+			final short level = ((object instanceof CreatureObject) ? ((CreatureObject) object).getLevel() : (short) 0);
 			
 			scheduler.schedule(new Runnable() {
 				
 				@Override
 				public void run() {
-					NGECore.getInstance().spawnService(Template, objectId, planet.getName(), cellId, position.x, position.y, position.z, orientation.w, orientation.x, oritentation.y, orientation.z, level);
+					NGECore.getInstance().spawnService.spawnCreature(Template, objectId, planet.getName(), cellId, position.x, position.y, position.z, orientation.w, orientation.x, orientation.y, orientation.z, level);
 				}
 				
 			}, ((AIActor) object.getAttachment("AI")).getMobileTemplate().getRespawnTime(), TimeUnit.SECONDS);
