@@ -19,55 +19,68 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package resources.common;
+package resources.craft;
 
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 
-import com.sleepycat.persist.model.Persistent;
+import org.apache.mina.core.buffer.IoBuffer;
 
-import resources.objects.Delta;
+import engine.resources.objects.Delta;
 
-@Persistent
-public final class UString extends Delta implements Serializable {
+public class DraftSchematic extends Delta implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
-	private String string;
 	
-	public UString() {
-		string = "";
+	private int serverSchematicCrc = 0;
+	private int schematicCrc = 0;
+	private int amount = 1;
+	
+	public DraftSchematic(int serverSchematicCrc, int schematicCrc, int amount) {
+		this.serverSchematicCrc = serverSchematicCrc;
+		this.schematicCrc = schematicCrc;
+		this.amount = amount;
 	}
 	
-	public UString(String string) {
-		this.string = ((string == null) ? "" : string);
+	public DraftSchematic(int serverSchematicCrc, int schematicCrc) {
+		this.serverSchematicCrc = serverSchematicCrc;
+		this.schematicCrc = schematicCrc;
 	}
 	
-	public String get() {
+	public DraftSchematic() {
+		
+	}
+	
+	public int getServerSchematicCrc() {
 		synchronized(objectMutex) {
-			return string;
+			return serverSchematicCrc;
 		}
 	}
 	
-	public void set(String string) {
+	public int getSchematicCrc() {
 		synchronized(objectMutex) {
-			this.string = string;
+			return schematicCrc;
 		}
 	}
 	
-	public int length() {
+	public int getAmount() {
 		synchronized(objectMutex) {
-			return string.length();
+			return amount;
+		}
+	}
+	
+	public void setAmount(int amount) {
+		synchronized(objectMutex) {
+			this.amount = amount;
 		}
 	}
 	
 	public byte[] getBytes() {
 		synchronized(objectMutex) {
-			try {
-				return createBuffer(4 + (string.length() * 2)).putInt(string.length()).put(string.getBytes("UTF-16LE")).flip().array();
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-				return new byte[] { 0x00, 0x00, 0x00, 0x00 };
-			}
+			IoBuffer buffer = createBuffer(12);
+			buffer.putInt(serverSchematicCrc);
+			buffer.putInt(schematicCrc);
+			buffer.putInt(amount);
+			return buffer.array();
 		}
 	}
 	

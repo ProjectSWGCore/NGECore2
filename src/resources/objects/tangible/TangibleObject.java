@@ -32,6 +32,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import org.apache.mina.core.buffer.IoBuffer;
+
 import main.NGECore;
 import protocol.swg.ObjControllerMessage;
 import protocol.swg.PlayClientEffectObjectMessage;
@@ -39,21 +41,20 @@ import protocol.swg.StopClientEffectObjectByLabel;
 import protocol.swg.UpdatePVPStatusMessage;
 import protocol.swg.objectControllerObjects.ShowFlyText;
 import resources.common.OutOfBand;
-import resources.common.RGB;
 import resources.datatables.Options;
 import resources.datatables.PvpStatus;
 import resources.loot.LootGroup;
 import resources.objects.ObjectMessageBuilder;
 import resources.objects.creature.CreatureObject;
-import resources.visitors.IDManagerVisitor;
 
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
 
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.StfTable;
+import engine.clientdata.visitors.IDManagerVisitor;
 import engine.clients.Client;
-import engine.resources.common.CRC;
+import engine.resources.common.RGB;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -695,6 +696,12 @@ public class TangibleObject extends SWGObject implements Serializable {
 		if(NGECore.getInstance().objectService.objsInContainer(this, this) >= containerVolumeLimit) return true;
 	
 		return false;
+	}
+	
+	@Override
+	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }

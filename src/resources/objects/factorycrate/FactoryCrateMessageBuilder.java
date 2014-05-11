@@ -22,23 +22,22 @@
 package resources.objects.factorycrate;
 
 import java.nio.ByteOrder;
+import java.util.Map;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import resources.objects.ObjectMessageBuilder;
-import resources.objects.resource.GalacticResource;
-import resources.objects.resource.ResourceContainerObject;
+import engine.resources.objects.Builder;
+import resources.objects.tangible.TangibleMessageBuilder;
 
-/** 
- * @author Charon 
- */
-
-public class FactoryCrateMessageBuilder extends ObjectMessageBuilder{
+public class FactoryCrateMessageBuilder extends TangibleMessageBuilder{
 	
-	public FactoryCrateMessageBuilder(FactoryCrateObject factoryCrateObject) {
-		setObject(factoryCrateObject);
+	public FactoryCrateMessageBuilder(FactoryCrateObject object) {
+		super(object);
 	}
 	
+	public FactoryCrateMessageBuilder() {
+		super();
+	}
 	
 	public IoBuffer buildBaseline3() {
 		FactoryCrateObject factoryCrateObject = (FactoryCrateObject) object;
@@ -162,15 +161,23 @@ public class FactoryCrateMessageBuilder extends ObjectMessageBuilder{
 	}
 	
 	@Override
-	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
-		// TODO Auto-generated method stub
-		
+	public void buildBaseline3(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline3(deltaBuilders, deltaBuilders);
 	}
-
 	
 	@Override
-	public void sendBaselines() {
-		// TODO Auto-generated method stub
-		
+	public void buildBaseline6(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline6(deltaBuilders, deltaBuilders);
 	}
+	
+	@Override
+	public void buildBaseline8(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline8(deltaBuilders, deltaBuilders);
+	}
+	
+	@Override
+	public void buildBaseline9(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline9(deltaBuilders, deltaBuilders);
+	}
+	
 }

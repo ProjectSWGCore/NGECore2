@@ -22,22 +22,26 @@
 package resources.objects.guild;
 
 import java.nio.ByteOrder;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import engine.clients.Client;
-
+import engine.resources.objects.Builder;
 import resources.gcw.CurrentServerGCWZoneHistory;
 import resources.gcw.CurrentServerGCWZonePercent;
 import resources.gcw.OtherServerGCWZonePercent;
 import resources.guild.Guild;
-import resources.objects.ObjectMessageBuilder;
+import resources.objects.universe.UniverseMessageBuilder;
 
-public class GuildMessageBuilder extends ObjectMessageBuilder {
+public class GuildMessageBuilder extends UniverseMessageBuilder {
 	
-	public GuildMessageBuilder(GuildObject guildObject) {
-		setObject(guildObject);
+	public GuildMessageBuilder(GuildObject object) {
+		super(object);
+	}
+	
+	public GuildMessageBuilder() {
+		super();
 	}
 	
 	public IoBuffer buildBaseline3() {
@@ -216,55 +220,13 @@ public class GuildMessageBuilder extends ObjectMessageBuilder {
 	}
 	
 	@Override
-	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
-		
-		switch (viewType) {
-			case 3:
-			{
-				switch (updateType) {
-					case 4:
-					{
-						buffer = createDelta("GILD", (byte) 3, (short) 1, (short) 4, buffer.flip(), buffer.array().length + 4);
-			
-						for (Client client : ((GuildObject) object).core.getActiveConnectionsMap().values()) {
-							client.getSession().write(buffer);
-						}
-							
-						break;
-					}
-				}
-			}
-			case 6:
-			{
-				switch (updateType) {
-					case 2:
-					case 3:
-					case 4:
-					case 5:
-					case 6:
-					case 7:
-					{
-						buffer = createDelta("GILD", (byte) 6, (short) 1, (short) updateType, buffer.flip(), buffer.array().length + 4);
-						
-						for (Client client : ((GuildObject) object).core.getActiveConnectionsMap().values()) {
-							client.getSession().write(buffer);
-						}
-						
-						break;
-					}
-					default:
-					{
-						return;
-					}
-				}
-			}
-		}
+	public void buildBaseline3(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline3(baselineBuilders, deltaBuilders);
 	}
-		
+	
 	@Override
-	public void sendBaselines() {
-		// TODO Auto-generated method stub
-		
+	public void buildBaseline6(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline6(baselineBuilders, deltaBuilders);
 	}
 	
 }

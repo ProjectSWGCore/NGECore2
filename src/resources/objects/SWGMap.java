@@ -22,15 +22,12 @@
 package resources.objects;
 
 import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -39,41 +36,42 @@ import main.NGECore;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import resources.common.StringUtilities;
-
-import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
 
+import engine.resources.objects.Baseline;
+import engine.resources.objects.Delta;
+import engine.resources.objects.IDelta;
 import engine.resources.objects.SWGObject;
 
-@SuppressWarnings("unused")
+/* A SWGMap element should extend Delta or implement IDelta */
 
 @Persistent
 public class SWGMap<K, V> implements Map<K, V>, Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	private Map<K, V> map = new TreeMap<K, V>();
-	@NotPersistent
 	private transient int updateCounter = 0;
-	long objectId;
-	private transient ObjectMessageBuilder messageBuilder;
+	private long objectId;
 	private byte viewType;
 	private short updateType;
-	@NotPersistent
+	private boolean addByte;
 	protected transient Object objectMutex = new Object();
+	private transient SWGObject object;
 	
 	public SWGMap() { }
 	
-	public SWGMap(long objectId, int viewType, int updateType) {
-		this.objectId = objectId;
+	public SWGMap(SWGObject object, int viewType, int updateType, boolean addByte) {
+		this.objectId = object.getObjectID();
 		this.viewType = (byte) viewType;
 		this.updateType = (short) updateType;
+		this.addByte = addByte;
+		this.object = object;
 	}
 	
 	public SWGMap(Map<K, V> m) {
 		if (m instanceof SWGMap) {
 			this.objectId = ((SWGMap<K, V>) m).objectId;
-			this.messageBuilder = ((SWGMap<K, V>) m).messageBuilder;
+			this.object = ((SWGMap<K, V>) m).object;
 			this.viewType = ((SWGMap<K, V>) m).viewType;
 			this.updateType = ((SWGMap<K, V>) m).updateType;
 			map.putAll(m);
@@ -82,10 +80,30 @@ public class SWGMap<K, V> implements Map<K, V>, Serializable {
 	
 	public void init() {
 		objectMutex = new Object();
+		updateCounter = 0;
+		object = NGECore.getInstance().objectService.getObject(objectId);
 	}
 	
 	public void clear() {
 		throw new UnsupportedOperationException();
+	}
+	
+	public V computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction) {
+		synchronized(objectMutex) {
+			return map.computeIfAbsent(key, mappingFunction);
+		}
+	}
+	
+	public V computeIfPresent(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+		synchronized(objectMutex) {
+			return map.computeIfPresent(key, remappingFunction);
+		}
+	}
+	
+	public V compute(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+		synchronized(objectMutex) {
+			return map.compute(key, remappingFunction);
+		}
 	}
 	
 	public boolean containsKey(Object key) {
@@ -106,9 +124,19 @@ public class SWGMap<K, V> implements Map<K, V>, Serializable {
 		}
 	}
 	
+	public void forEach(BiConsumer<? super K, ? super V> action) {
+		map.forEach(action);
+	}
+	
 	public V get(Object key) {
 		synchronized(objectMutex) {
 			return map.get(key);
+		}
+	}
+	
+	public V getOrDefault(Object key, V defaultValue) {
+		synchronized(objectMutex) {
+			return map.getOrDefault(key, defaultValue);
 		}
 	}
 	
@@ -124,23 +152,26 @@ public class SWGMap<K, V> implements Map<K, V>, Serializable {
 		}
 	}
 	
+	public V merge(K key, V value, BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
+		System.err.println("SWGMap::merge: Not implemented.");
+		return null;
+	}
+	
 	public V put(K key, V value) {
 		synchronized(objectMutex) {
-			if ((key instanceof String || key instanceof Byte || key instanceof Short ||
-				key instanceof Integer || key instanceof Float ||key instanceof Long) &&
-				value instanceof IDelta) {
+			if (valid(key) && valid(value)) {
 				if (map.containsKey(key)) {
 					V oldValue = map.put(key, value);
 					
 					if (oldValue != null) {
-						queue(item(2, (String) key, ((IDelta) value).getBytes(), true, true));
+						queue(item(2, key, Baseline.toBytes(value), true, true));
 					}
 					
 					return oldValue;
 				} else {
 					V oldValue = map.put(key, value);
 					
-					queue(item(0, (String) key, ((IDelta) value).getBytes(), true, true));
+					queue(item(0, key, Baseline.toBytes(value), true, true));
 					
 					return oldValue;
 				}
@@ -158,16 +189,14 @@ public class SWGMap<K, V> implements Map<K, V>, Serializable {
 				K key = entry.getKey();
 				V value = entry.getValue();
 				
-				if (key instanceof String || key instanceof Byte || key instanceof Short ||
-					key instanceof Integer || key instanceof Float || key instanceof Long ||
-					value instanceof IDelta) {
+				if (valid(key) && valid(value)) {
 					if (map.containsKey(key)) {
 						if (map.put(key, value) != null) {
-							buffer.add(item(2, (String) key, ((IDelta) value).getBytes(), true, true));
+							buffer.add(item(2, key, Baseline.toBytes(value), true, true));
 						}
 					} else {
 						if (map.put(key, value) != null) {
-							buffer.add(item(0, (String) key, ((IDelta) value).getBytes(), true, true));
+							buffer.add(item(0, key, Baseline.toBytes(value), true, true));
 						}
 					}
 				}
@@ -179,14 +208,21 @@ public class SWGMap<K, V> implements Map<K, V>, Serializable {
 		}
 	}
 	
+	public V putIfAbsent(K key, V value) {
+		if (!map.containsKey(key)) {
+			return put(key, value);
+		}
+		
+		return null;
+	}
+	
 	public V remove(Object key) {
 		synchronized(objectMutex) {
-			if (key instanceof String || key instanceof Byte || key instanceof Short ||
-				key instanceof Integer || key instanceof Float || key instanceof Long) {
+			if (valid(key)) {
 				V value = map.remove(key);
 				
 				if (value != null) {
-					queue(item(1, (String) key, ((IDelta) value).getBytes(), true, true));
+					queue(item(1, key, Baseline.toBytes(value), true, true));
 				}
 				
 				return value;
@@ -194,6 +230,47 @@ public class SWGMap<K, V> implements Map<K, V>, Serializable {
 			
 			return null;
 		}
+	}
+	
+	public boolean remove(Object key, Object value) {
+		synchronized(objectMutex) {
+			if (valid(key) && valid(value)) {
+				boolean removed = map.remove(key, value);
+				
+				if (removed) {
+					queue(item(1, key, Baseline.toBytes(value), true, true));
+				}
+				
+				return removed;
+			}
+			
+			return false;
+		}
+	}
+	
+	public V replace(K key, V value) {
+		synchronized(objectMutex) {
+			if (map.containsKey(key)) {
+				return put(key, value);
+			}
+			
+			return null;
+		}
+	}
+	
+	public boolean replace(K key, V oldValue, V newValue) {
+		synchronized(objectMutex) {
+			if (map.containsKey(key) && map.containsValue(oldValue)) {
+				put(key, newValue);
+				return true;
+			}
+			
+			return false;
+		}
+	}
+	
+	public void replaceAll(BiFunction<? super K, ? super V, ? extends V> function) {
+		System.err.println("SWGMap::replaceAll: Not implemented.");
 	}
 	
 	public int size() {
@@ -218,60 +295,71 @@ public class SWGMap<K, V> implements Map<K, V>, Serializable {
 		return objectMutex;
 	}
 	
+	public byte[] getBytes() {
+		synchronized(objectMutex) {
+			byte[] objects = { };
+			int size = 0;
+			
+			for (Entry<?, ?> entry : map.entrySet()) {
+				byte[] key = Baseline.toBytes(entry.getKey());
+				byte[] value = Baseline.toBytes(entry.getValue());
+				size += ((addByte) ? 1 : 0) + key.length + value.length;
+				
+				IoBuffer buffer = Baseline.createBuffer(size);
+				buffer.put(objects);
+				if (addByte) buffer.put((byte) 0);
+				buffer.put(key);
+				buffer.put(value);
+				buffer.flip();
+				
+				objects = buffer.array();
+			}
+			
+			IoBuffer buffer = Baseline.createBuffer(8 + size);
+			buffer.putInt(map.size());
+			buffer.putInt(updateCounter);
+			buffer.put(objects);
+			buffer.flip();
+			
+			return buffer.array();
+		}
+	}
+	
+	private boolean valid(Object o) {
+		if (o instanceof String || o instanceof Byte || o instanceof Short ||
+		o instanceof Integer || o instanceof Float || o instanceof Long ||
+		o instanceof IDelta) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
 	private byte[] item(int type, Object index, byte[] data, boolean useIndex, boolean useData) {
-		if (useIndex && !(index instanceof Byte) && !(index instanceof Short)
-			&& !(index instanceof Integer) && !(index instanceof Float)
-			&& !(index instanceof Long) && !(index instanceof String)) {
+		if (useIndex && ((index instanceof IDelta) && !valid(index))) {
 			throw new IllegalArgumentException();
 		}
 		
-		int size = 1 + ((useIndex) ? (2 + index.toString().getBytes().length) : 0) + ((useData) ? data.length : 0);
-
-		IoBuffer buffer = Delta.createBuffer((size));
-		buffer.put((byte) type);
-			if (useIndex) {
-				if (index instanceof String) {
-					buffer.put(StringUtilities.getAsciiString((String) index));
-				} else if (index instanceof Byte) {
-					buffer.put(((Byte) index).byteValue());
-				} else if (index instanceof Short) {
-					buffer.putShort(((Short) index).shortValue());
-				} else if (index instanceof Integer) {
-					buffer.putInt(((Integer) index).intValue());
-				} else if (index instanceof Float) {
-					buffer.putFloat(((Float) index).floatValue());
-				} else if (index instanceof Long) {
-					buffer.putLong(((Long) index).longValue());
-				} else {
-					throw new IllegalArgumentException();
-				}
-			}
-			if (useData) buffer.put(data);
-			buffer.flip();
-				
-			updateCounter++;
-			
-			return buffer.array();
-	}
-
-	private void queue(byte[] data) {
-		if (messageBuilder == null) {
-			try {
-				SWGObject object = NGECore.getInstance().objectService.getObject(objectId);
-				this.messageBuilder = (ObjectMessageBuilder) object.getClass().getMethod("getMessageBuilder", new Class[] {}).invoke(object, new Object[] { });
-			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-				e.printStackTrace();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
+		int size = 1 + ((useIndex) ? (Baseline.toBytes(index).length) : 0) + ((useData) ? data.length : 0);
 		
-		IoBuffer buffer = Delta.createBuffer((data.length + 8));
+		IoBuffer buffer = Delta.createBuffer(size);
+		buffer.put((byte) type);
+		if (useIndex) buffer.put(Baseline.toBytes(index));
+		if (useData) buffer.put(data);
+		buffer.flip();
+		
+		updateCounter++;
+		
+		return buffer.array();
+	}
+	
+	private void queue(byte[] data) {
+		IoBuffer buffer = Delta.createBuffer(data.length + 8);
 		buffer.putInt(1);
 		buffer.putInt(updateCounter);
 		buffer.put(data);
 		buffer.flip();
-		messageBuilder.sendListDelta(viewType, updateType, buffer);
+		object.sendListDelta(viewType, updateType, buffer);
 	}
 	
 	private void queue(List<byte[]> data) {
@@ -281,94 +369,13 @@ public class SWGMap<K, V> implements Map<K, V>, Serializable {
 			size += queued.length;
 		}
 		
-		if (messageBuilder == null) {
-			try {
-				SWGObject object = NGECore.getInstance().objectService.getObject(objectId);
-				this.messageBuilder = (ObjectMessageBuilder) object.getClass().getMethod("getMessageBuilder", new Class[] {}).invoke(object, new Object[] { });
-			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-				e.printStackTrace();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		
 		IoBuffer buffer = Delta.createBuffer((size + 8));
 		buffer.putInt(data.size());
 		buffer.putInt(updateCounter);
 		for (byte[] queued : data) buffer.put(queued);
 		buffer.flip();
 		
-		messageBuilder.sendListDelta(viewType, updateType, buffer);
-	}
-
-	@Override
-	public V getOrDefault(Object key, V defaultValue) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void forEach(BiConsumer<? super K, ? super V> action) {
-		map.forEach(action);
-	}
-
-	@Override
-	public void replaceAll(
-			BiFunction<? super K, ? super V, ? extends V> function) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public V putIfAbsent(K key, V value) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean remove(Object key, Object value) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean replace(K key, V oldValue, V newValue) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public V replace(K key, V value) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public V computeIfAbsent(K key,
-			Function<? super K, ? extends V> mappingFunction) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public V computeIfPresent(K key,
-			BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public V compute(K key,
-			BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public V merge(K key, V value,
-			BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
-		// TODO Auto-generated method stub
-		return null;
+		object.sendListDelta(viewType, updateType, buffer);
 	}
 	
 }

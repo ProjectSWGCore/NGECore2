@@ -52,6 +52,7 @@ import engine.clientdata.visitors.PortalVisitor.Cell;
 import engine.clients.Client;
 import engine.resources.common.Event;
 import engine.resources.common.Mesh3DTriangle;
+import engine.resources.common.RGB;
 import engine.resources.common.Ray;
 import engine.resources.container.Traverser;
 import engine.resources.database.ODBCursor;

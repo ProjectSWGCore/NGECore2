@@ -22,16 +22,21 @@
 package resources.objects.tangible;
 
 import java.nio.ByteOrder;
+import java.util.Map;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
 import resources.objects.ObjectMessageBuilder;
-
+import engine.resources.objects.Builder;
 
 public class TangibleMessageBuilder extends ObjectMessageBuilder {
 	
-	public TangibleMessageBuilder(TangibleObject tangible) {
-		setObject(tangible);
+	public TangibleMessageBuilder(TangibleObject object) {
+		setObject(object);
+	}
+	
+	public TangibleMessageBuilder() {
+		super();
 	}
 	
 	public IoBuffer buildBaseline3() {
@@ -206,15 +211,23 @@ public class TangibleMessageBuilder extends ObjectMessageBuilder {
 	}
 	
 	@Override
-	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
-		// TODO Auto-generated method stub
-		
+	public void buildBaseline3(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline3(baselineBuilders, deltaBuilders);
 	}
 	
 	@Override
-	public void sendBaselines() {
-		// TODO Auto-generated method stub
-		
+	public void buildBaseline6(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline6(baselineBuilders, deltaBuilders);
+	}
+	
+	@Override
+	public void buildBaseline8(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline8(baselineBuilders, deltaBuilders);
+	}
+	
+	@Override
+	public void buildBaseline9(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline9(baselineBuilders, deltaBuilders);
 	}
 	
 }

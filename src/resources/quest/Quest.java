@@ -19,53 +19,22 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package resources.common;
+package resources.quest;
 
 import java.io.Serializable;
-import java.nio.ByteOrder;
 
-import org.apache.mina.core.buffer.IoBuffer;
+import engine.resources.objects.Delta;
 
-import com.sleepycat.persist.model.Persistent;
-
-import resources.objects.Delta;
-
-@Persistent
-public final class AString extends Delta implements Serializable {
+public class Quest extends Delta implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
-	private String string;
 	
-	public AString() {
-		string = "";
-	}
-	
-	public AString(String string) {
-		this.string = ((string == null) ? "" : string);
-	}
-	
-	public String get() {
-		synchronized(objectMutex) {
-			return string;
-		}
-	}
-	
-	public void set(String string) {
-		synchronized(objectMutex) {
-			this.string = string;
-		}
-	}
-	
-	public short length() {
-		synchronized(objectMutex) {
-			return (short) string.length();
-		}
+	public Quest() {
+		
 	}
 	
 	public byte[] getBytes() {
-		synchronized(objectMutex) {
-			return IoBuffer.allocate(2 + string.length(), false).order(ByteOrder.LITTLE_ENDIAN).putShort((short) string.length()).put(string.getBytes()).flip().array();
-		}
+		return new byte[] { };
 	}
 	
 }

@@ -22,16 +22,23 @@
 package resources.objects.group;
 
 import java.nio.ByteOrder;
+import java.util.Map;
+
 import org.apache.mina.core.buffer.IoBuffer;
+
+import engine.resources.objects.Builder;
 import engine.resources.objects.SWGObject;
-import resources.objects.ObjectMessageBuilder;
+import resources.objects.universe.UniverseMessageBuilder;
 
-public class GroupMessageBuilder extends ObjectMessageBuilder {
+public class GroupMessageBuilder extends UniverseMessageBuilder {
 	
-	public GroupMessageBuilder(GroupObject groupObject) {
-		setObject(groupObject);
+	public GroupMessageBuilder(GroupObject object) {
+		super(object);
 	}
-
+	
+	public GroupMessageBuilder() {
+		super();
+	}
 	
 	public IoBuffer buildBaseline3() {
 		
@@ -178,18 +185,15 @@ public class GroupMessageBuilder extends ObjectMessageBuilder {
 		return buffer = createDelta("GRUP", (byte) 6, (short) 1, (short) 2, buffer, size + 4);
 		
 	}
-
-
+	
 	@Override
-	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
-		// TODO Auto-generated method stub
-		
+	public void buildBaseline3(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline3(baselineBuilders, deltaBuilders);
 	}
-
+	
 	@Override
-	public void sendBaselines() {
-		// TODO Auto-generated method stub
-		
+	public void buildBaseline6(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline6(baselineBuilders, deltaBuilders);
 	}
-
+	
 }

@@ -68,19 +68,19 @@ public class GuildObject extends UniverseObject implements Serializable {
 	private String STFName = "";
 	private String customName = "";
 	private int volume = 0;
-	private SWGList<Guild> guildList = new SWGList<Guild>(getObjectID(), 3, 4);
+	private SWGList<Guild> guildList = new SWGList<Guild>(this, 3, 4, false);
 	
 	// GILD 6
 	private int serverId = 0x43;
 	//private String STFName = "string_id_table";
 	private int unknown1 = 0;
 	private short unknown2 = 0;
-	private SWGMap<String, CurrentServerGCWZonePercent> currentServerGCWZonePercentMap = new SWGMap<String, CurrentServerGCWZonePercent>(getObjectID(), 6, 2);
-	private SWGMap<String, CurrentServerGCWZonePercent> currentServerGCWTotalPercentMap = new SWGMap<String, CurrentServerGCWZonePercent>(getObjectID(), 6, 3);
-	private SWGMultiMap<String, CurrentServerGCWZoneHistory> currentServerGCWZoneHistoryMap = new SWGMultiMap<String, CurrentServerGCWZoneHistory>(getObjectID(), 6, 4);
-	private SWGMultiMap<String, CurrentServerGCWZoneHistory> currentServerGCWTotalHistoryMap = new SWGMultiMap<String, CurrentServerGCWZoneHistory>(getObjectID(), 6, 5);
-	private SWGMultiMap<String, OtherServerGCWZonePercent> otherServerGCWZonePercentMap = new SWGMultiMap<String, OtherServerGCWZonePercent>(getObjectID(), 6, 6);
-	private SWGMultiMap<String, OtherServerGCWZonePercent> otherServerGCWTotalPercentMap = new SWGMultiMap<String, OtherServerGCWZonePercent>(getObjectID(), 6, 7);
+	private SWGMap<String, CurrentServerGCWZonePercent> currentServerGCWZonePercentMap = new SWGMap<String, CurrentServerGCWZonePercent>(this, 6, 2, true);
+	private SWGMap<String, CurrentServerGCWZonePercent> currentServerGCWTotalPercentMap = new SWGMap<String, CurrentServerGCWZonePercent>(this, 6, 3, true);
+	private SWGMultiMap<String, CurrentServerGCWZoneHistory> currentServerGCWZoneHistoryMap = new SWGMultiMap<String, CurrentServerGCWZoneHistory>(this, 6, 4, true);
+	private SWGMultiMap<String, CurrentServerGCWZoneHistory> currentServerGCWTotalHistoryMap = new SWGMultiMap<String, CurrentServerGCWZoneHistory>(this, 6, 5, true);
+	private SWGMultiMap<String, OtherServerGCWZonePercent> otherServerGCWZonePercentMap = new SWGMultiMap<String, OtherServerGCWZonePercent>(this, 6, 6, true);
+	private SWGMultiMap<String, OtherServerGCWZonePercent> otherServerGCWTotalPercentMap = new SWGMultiMap<String, OtherServerGCWZonePercent>(this, 6, 7, true);
 	private int unknown3 = 5;
 	
 	public GuildObject(NGECore core, long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
@@ -315,6 +315,52 @@ public class GuildObject extends UniverseObject implements Serializable {
 	
 	public ObjectMessageBuilder getMessageBuilder() {
 		return messageBuilder;
+	}
+	
+	@Override
+	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
+		
+		switch (viewType) {
+			case 3:
+			{
+				switch (updateType) {
+					case 4:
+					{
+						buffer = messageBuilder.createDelta("GILD", (byte) 3, (short) 1, (short) 4, buffer.flip(), buffer.array().length + 4);
+			
+						for (Client client : core.getActiveConnectionsMap().values()) {
+							client.getSession().write(buffer);
+						}
+							
+						break;
+					}
+				}
+			}
+			case 6:
+			{
+				switch (updateType) {
+					case 2:
+					case 3:
+					case 4:
+					case 5:
+					case 6:
+					case 7:
+					{
+						buffer = messageBuilder.createDelta("GILD", (byte) 6, (short) 1, (short) updateType, buffer.flip(), buffer.array().length + 4);
+						
+						for (Client client : core.getActiveConnectionsMap().values()) {
+							client.getSession().write(buffer);
+						}
+						
+						break;
+					}
+					default:
+					{
+						return;
+					}
+				}
+			}
+		}
 	}
 	
 }

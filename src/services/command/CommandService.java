@@ -38,6 +38,7 @@ import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.clients.Client;
 import engine.resources.common.CRC;
+import engine.resources.common.RGB;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
 import engine.resources.service.INetworkDispatch;

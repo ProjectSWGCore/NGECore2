@@ -225,10 +225,6 @@ public class NGECore {
 	private ObjectDatabase bountiesODB;
 	
 	public static boolean PACKET_DEBUG = false;
-
-
-
-
 	
 	public NGECore() {
 		
