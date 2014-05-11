@@ -488,15 +488,15 @@ public class PlayerService implements INetworkDispatch {
 		
 		SWGObject preDesignatedCloner = null;
 		
-		if(creature.getAttachment("preDesignatedCloner") != null) {
-			preDesignatedCloner = core.objectService.getObject((long) creature.getAttachment("preDesignatedCloner"));
+		if(creature.getPlayerObject().getBindLocation() != 0) {
+			preDesignatedCloner = core.objectService.getObject((long) creature.getPlayerObject().getBindLocation());
 			if(preDesignatedCloner != null) 
-				cloneData.put(preDesignatedCloner.getObjectID(), core.mapService.getClosestCityName(preDesignatedCloner) /*+ " (" + String.valueOf(position.getDistance2D(cloner.getPosition())) + "m)"*/);
+				cloneData.put(preDesignatedCloner.getObjectID(), "@base_player:clone_location_registered_select_begin " + core.mapService.getClosestCityName(preDesignatedCloner) + " @base_player:clone_location_registered_select_end");
 		}
 		final long preDesignatedObjectId = (preDesignatedCloner != null) ? preDesignatedCloner.getObjectID() : 0;
 		cloners.stream().filter(c -> c.getObjectID() != preDesignatedObjectId).forEach(c -> cloneData.put(c.getObjectID(), core.mapService.getClosestCityName(c)));
 		
-		final SUIWindow window = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "@base_player:revive_title", "Select the desired option and click OK.", 
+		final SUIWindow window = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "@base_player:revive_title", "@base_player:clone_prompt_header", 
 				cloneData, creature, null, 0);
 		Vector<String> returnList = new Vector<String>();
 		returnList.add("List.lstList:SelectedRow");
@@ -553,7 +553,7 @@ public class PlayerService implements INetworkDispatch {
 		}
 		
 		creature.setFactionStatus(0);
-		core.buffService.addBuffToCreature(creature, "cloning_sickness");
+		core.buffService.addBuffToCreature(creature, "cloning_sickness", creature);
 		
 	}
 	

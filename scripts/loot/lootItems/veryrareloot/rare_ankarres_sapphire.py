@@ -15,3 +15,5 @@ def requiredCL():
 	
 	return 80
 
+def customSetup(object):
+	object.setCustomName2("Success!")

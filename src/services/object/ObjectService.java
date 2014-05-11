@@ -121,6 +121,7 @@ import resources.objects.tangible.TangibleObject;
 import resources.objects.tool.SurveyTool;
 import resources.objects.waypoint.WaypointObject;
 import resources.objects.weapon.WeaponObject;
+import services.ai.AIActor;
 import services.command.BaseSWGCommand;
 import services.command.CombatCommand;
 import services.bazaar.AuctionItem;
@@ -456,22 +457,23 @@ public class ObjectService implements INetworkDispatch {
 			return;
 		}
 		
-		if (object instanceof TangibleObject &&
-		((TangibleObject) object).getRespawnTime() > 0) {
+		if (object.getAttachment("AI") != null && ((AIActor) object.getAttachment("AI")).getMobileTemplate().getRespawnTime() > 0) {
 			final long objectId = object.getObjectID();
 			final String Template = object.getTemplate();
 			final Planet planet = object.getPlanet();
 			final Point3D position = object.getPosition();
 			final Quaternion orientation = object.getOrientation();
+			final long cellId = ((object.getContainer() == null) ? 0L : object.getContainer().getObjectID());
+			final short level = ((object instanceof CreatureObject) ? object.getLevel() : (short) 0);
 			
 			scheduler.schedule(new Runnable() {
 				
 				@Override
 				public void run() {
-					createObject(Template, objectId, planet, position, orientation);
+					NGECore.getInstance().spawnService(Template, objectId, planet.getName(), cellId, position.x, position.y, position.z, orientation.w, orientation.x, oritentation.y, orientation.z, level);
 				}
 				
-			}, ((TangibleObject) object).getRespawnTime(), TimeUnit.SECONDS);
+			}, ((AIActor) object.getAttachment("AI")).getMobileTemplate().getRespawnTime(), TimeUnit.SECONDS);
 		}
 		
 		String filePath = "scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", "") + object.getTemplate().split("shared_" , 2)[1].replace(".iff", "") + ".py";
@@ -836,9 +838,9 @@ public class ObjectService implements INetworkDispatch {
 				
 				core.buffService.clearBuffs(creature);
 
-				CmdStartScene startScene = new CmdStartScene((byte) 0, objectId, creature.getPlanet().getPath(), creature.getTemplate(), position.x, position.y, position.z, core.getGalacticTime(), 0);
+				CmdStartScene startScene = new CmdStartScene((byte) 0, objectId, creature.getPlanet().getPath(), creature.getTemplate(), position.x, position.y, position.z, core.getGalacticTime() / 1000, 0);
 				session.write(startScene.serialize());
-				
+
 				ChatServerStatus chatServerStatus = new ChatServerStatus();
 				client.getSession().write(chatServerStatus.serialize());
 				

@@ -14,7 +14,7 @@ def run(core, actor, target, commandString):
         if container == None: return
         
         if(container.isFull()):
-            actor.sendSystemMessage('That container is full.', 0)
+            actor.sendSystemMessage('@container_error_message:container03', 0)
             return
 
         if container.getTemplate().startswith("object/tangible/inventory/shared_lightsaber_inventory") or target.getContainer().getTemplate().startswith("object/tangible/inventory/shared_lightsaber_inventory"):	
@@ -43,8 +43,10 @@ def run(core, actor, target, commandString):
             actor.sendSystemMessage("You do not have permission to access that container!", 0)
             return
 
-        if core.equipmentService.canEquip(actor, target) is False:
-            actor.sendSystemMessage('@error_message:insufficient_skill', 0)
+        canEquip = core.equipmentService.canEquip(actor, target)
+		
+        if canEquip[0] is False:
+            actor.sendSystemMessage(canEquip[1], 0)
             return
 			
 			
@@ -68,11 +70,13 @@ def run(core, actor, target, commandString):
 		
                 oldContainer.transferTo(actor, container, target)
                
+                for object in replacedObjects:
+					core.equipmentService.unequip(actor, object)
+               
                 if actor == container:
                         if target.getTemplate().find('/wearables/') or target.getTemplate().find('/weapon/'):
                                 core.equipmentService.equip(actor, target)
-				for object in replacedObjects:
-					core.equipmentService.unequip(actor, object)
+				
 				#path = 'scripts/' + target.getTemplate().rpartition('/')[0] + '/'        
                                 #module = target.getTemplate().rpartition('/')[2].replace('shared_', '').replace('.iff', '')
                                 #core.scriptService.callScript(path, 'equip', module, core, actor, target)

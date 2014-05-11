@@ -56,6 +56,7 @@ public class MobileTemplate {
 	private boolean isStalker = false;
 	private String meatType, milkType, boneType, hideType;
 	private int meatAmount, milkAmount, boneAmount, hideAmount;
+	private int respawnTime = 0;
 	
 	public Vector<String> getTemplates() {
 		return templates;
@@ -328,4 +329,13 @@ public class MobileTemplate {
 	public void setHideAmount(int hideAmount) {
 		this.hideAmount = hideAmount;
 	}
+	
+	public int getRespawnTime() {
+		return respawnTime;
+	}
+	
+	public void setRespawnTime(int respawnTime) {
+		this.respawnTime = respawnTime;
+	}
+	
 }

@@ -425,9 +425,9 @@ public class CollectionService implements INetworkDispatch {
 												}
 											}
 										}
-							        } catch (Exception e) {
-							                e.printStackTrace();
-							        }
+									} catch (Exception e) {
+										e.printStackTrace();
+									}
 									
 									if (FileUtilities.doesFileExist("scripts/collections/" + collectionName + ".py")) {
 										PyObject method = core.scriptService.getMethod("scripts/collections/", collectionName, "complete");

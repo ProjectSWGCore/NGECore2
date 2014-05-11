@@ -153,6 +153,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	
 	private long bountyMissionId;
 	private Vector<Long> ownedVendors = new Vector<Long>();
+	private long bindLocation;
 	
 	public PlayerObject() {
 		super();
@@ -938,6 +939,18 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	
 	public int getAmountOfVendors() {
 		return ownedVendors.size();
+	}
+
+	public long getBindLocation() {
+		synchronized(objectMutex) {
+			return bindLocation;
+		}
+	}
+
+	public void setBindLocation(long bindLocation) {
+		synchronized(objectMutex) {
+			this.bindLocation = bindLocation;
+		}
 	}
 	
 }

@@ -312,7 +312,9 @@ public class TangibleObject extends SWGObject implements Serializable {
 		if(customizationVariables.containsKey(type)) customizationVariables.replace(type, value);
 		else customizationVariables.put(type, value);
 		
-		notifyObservers(messageBuilder.buildCustomizationDelta(getCustomizationBytes()), true);
+		byte[] customizationBytes = getCustomizationBytes();
+		customization = customizationBytes;
+		notifyObservers(messageBuilder.buildCustomizationDelta(customizationBytes), true);
 	}
 	
 	public void removeCustomizationVariable(String type)
@@ -320,7 +322,9 @@ public class TangibleObject extends SWGObject implements Serializable {
 		if(customizationVariables.containsKey(type)) 
 		{
 			customizationVariables.remove(type);
-			notifyObservers(messageBuilder.buildCustomizationDelta(getCustomizationBytes()), true);
+			byte[] customizationBytes = getCustomizationBytes();
+			customization = customizationBytes;
+			notifyObservers(messageBuilder.buildCustomizationDelta(customizationBytes), true);
 		}
 	}
 	

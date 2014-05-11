@@ -314,6 +314,7 @@ public class NGECore {
 		harvesterService = new HarvesterService(this);
 		mountService = new MountService(this);
 		playerCityService = new PlayerCityService(this);
+		staticService = new StaticService(this);
 		
 		if (config.keyExists("JYTHONCONSOLE.PORT")) {
 			int jythonPort = config.getInt("JYTHONCONSOLE.PORT");
@@ -371,6 +372,7 @@ public class NGECore {
 		zoneDispatch.addService(mountService);
 		zoneDispatch.addService(housingService);
 		zoneDispatch.addService(playerCityService);
+		zoneDispatch.addService(staticService);
 		
 		if (optionsConfigLoaded && options.getInt("LOAD.RESOURCE.SYSTEM") == 1) {
 			zoneDispatch.addService(surveyService);
@@ -379,7 +381,7 @@ public class NGECore {
 		
 		zoneServer = new MINAServer(zoneDispatch, config.getInt("ZONE.PORT"));
 		zoneServer.start();
-		staticService = new StaticService(this);
+		
 		//Start terrainList
 		// Original Planets
 		terrainService.addPlanet(1, "tatooine", "terrain/tatooine.trn", true);
@@ -460,10 +462,6 @@ public class NGECore {
 		// Zone services that need to be loaded after the above
 		zoneDispatch.addService(simulationService);
 		
-		
-		// Static Spawns
-		staticService.spawnStatics();
-		
 		guildService = new GuildService(this);
 		zoneDispatch.addService(guildService);
 		
@@ -481,7 +479,6 @@ public class NGECore {
 		instanceService = new InstanceService(this);
 		zoneDispatch.addService(instanceService);
 		
-		
 		weatherService = new WeatherService(this);
 		weatherService.loadPlanetSettings();
 		
@@ -490,6 +487,8 @@ public class NGECore {
 		spawnService.loadLairGroups();
 		spawnService.loadDynamicGroups();;
 		spawnService.loadSpawnAreas();
+		
+		staticService.spawnStatics();
 		
 		equipmentService.loadBonusSets();
 		
