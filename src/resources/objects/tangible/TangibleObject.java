@@ -697,6 +697,8 @@ public class TangibleObject extends SWGObject implements Serializable {
 		
 		int containerVolumeLimit = (int)getTemplateData().getAttribute("containerVolumeLimit") >> 8; // Shifting because it seems to be returning an extra byte before it should
 		
+		if(containerVolumeLimit == 0) return false;
+			
 		if(NGECore.getInstance().objectService.objsInContainer(this, this) >= containerVolumeLimit) return true;
 	
 		return false;
