@@ -9,7 +9,7 @@ def addTemplate(core):
 	mobileTemplate.setCreatureName('city_sewer_swamprat')
 	mobileTemplate.setLevel(4)
 	mobileTemplate.setMinLevel(4)
-	mobileTemplate.setMaxLevel(4)
+	mobileTemplate.setMaxLevel(5)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(4)
 	mobileTemplate.setAttackSpeed(1.0)
