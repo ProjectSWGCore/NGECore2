@@ -21,12 +21,14 @@
  ******************************************************************************/
 package services.spawn;
 
+import java.util.List;
 import java.util.Vector;
 
 import resources.datatables.Options;
 import resources.datatables.PvpStatus;
+import resources.loot.LootGroup;
 
-public class MobileTemplate {
+public class MobileTemplate implements Cloneable {
 	
 	private Vector<String> templates;
 	private int optionBitmask = Options.ATTACKABLE;
@@ -57,6 +59,8 @@ public class MobileTemplate {
 	private String meatType, milkType, boneType, hideType;
 	private int meatAmount, milkAmount, boneAmount, hideAmount;
 	private int respawnTime = 0;
+	private List<LootGroup> lootGroups;
+
 	
 	public Vector<String> getTemplates() {
 		return templates;
@@ -336,6 +340,24 @@ public class MobileTemplate {
 	
 	public void setRespawnTime(int respawnTime) {
 		this.respawnTime = respawnTime;
+	}
+
+	public List<LootGroup> getLootGroups() {
+		return lootGroups;
+	}
+
+	public void setLootGroups(List<LootGroup> lootGroups) {
+		this.lootGroups = lootGroups;
+	}
+	
+	public void addToLootGroups(String[] lootPoolNames, double[] lootPoolChances, double lootGroupChance) {
+		//System.out.println("lootPoolNames[0] " + lootPoolNames[0]);
+		LootGroup lootGroup = new LootGroup(lootPoolNames, lootPoolChances, lootGroupChance);
+		this.lootGroups.add(lootGroup);
+	}
+	
+	public Object clone() throws CloneNotSupportedException {
+    	return super.clone();
 	}
 	
 }

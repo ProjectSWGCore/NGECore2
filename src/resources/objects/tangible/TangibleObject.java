@@ -84,7 +84,7 @@ public class TangibleObject extends SWGObject implements Serializable {
 	private transient TangibleMessageBuilder messageBuilder;
 	
 	//private TreeSet<TreeMap<String,Integer>> lootSpecification = new TreeSet<TreeMap<String,Integer>>();
-	private List<LootGroup> lootGroups = new ArrayList<LootGroup>();
+	private transient List<LootGroup> lootGroups = new ArrayList<LootGroup>();
 	
 	@NotPersistent
 	private transient boolean looted = false; // These 4 should not need to be persisted, since a looted corpse will get wiped with server restart	
@@ -507,12 +507,21 @@ public class TangibleObject extends SWGObject implements Serializable {
 	public List<LootGroup> getLootGroups() {
 		return lootGroups;
 	}
+	
+	public void setLootGroups(List<LootGroup> lootGroups) {
+		this.lootGroups = lootGroups;
+	}
 
 	public void addToLootGroups(String[] lootPoolNames, double[] lootPoolChances, double lootGroupChance) {
-		System.out.println("lootPoolNames[0] " + lootPoolNames[0]);
+		//System.out.println("lootPoolNames[0] " + lootPoolNames[0]);
 		LootGroup lootGroup = new LootGroup(lootPoolNames, lootPoolChances, lootGroupChance);
 		this.lootGroups.add(lootGroup);
 	}
+	
+	public void addToLootGroups(LootGroup lootGroup) {
+		this.lootGroups.add(lootGroup);
+	}
+
 	
 	public boolean isLooted() {
 		return looted;
