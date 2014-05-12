@@ -89,6 +89,18 @@ public class CharacterService implements INetworkDispatch {
 		}
 	}
 	
+	public boolean checkName(String name, Client client) {
+		// TODO: check for dev names, profane names, iconic names etc
+		try {
+			if(checkForDuplicateName(name, client.getAccountId()) || !name.matches(allowedCharsRegex))
+				return false;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return true;
+	}
+	
 	@Override
 	public void insertOpcodes(Map<Integer,INetworkRemoteEvent> swgOpcodes, Map<Integer,INetworkRemoteEvent> objControllerOpcodes) {
 
