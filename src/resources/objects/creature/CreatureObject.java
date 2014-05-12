@@ -212,14 +212,13 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		cooldowns = new ConcurrentHashMap<String, Long>();
 		performanceAudience = new Vector<CreatureObject>();
 		messageBuilder = new CreatureMessageBuilder(this);
-		dotList.init();
-		buffList.init();
-		equipmentList.init();
-		appearanceEquipmentList.init();
-		missionCriticalObjects.init();
-		abilities.init();
-		skillMods.init();
-		skillMods.forEach((name, skillMod) -> skillMod.init());
+		dotList.init(this);
+		buffList.init(this);
+		equipmentList.init(this);
+		appearanceEquipmentList.init(this);
+		missionCriticalObjects.init(this);
+		abilities.init(this);
+		skillMods.init(this);
 	}
 
 	private void loadTemplateData() {
@@ -1553,20 +1552,6 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		}
 		if(getClient() != null)
 			getClient().getSession().write(messageBuilder.buildListenToId(performanceListenee.getObjectId()));
-	}
-
-
-	
-	@Override
-	public void setPvPBitmask(int pvpBitmask) {
-		super.setPvPBitmask(pvpBitmask);
-		notifyObservers(new UpdatePVPStatusMessage(getObjectID(), getPvPBitmask(), getFaction()), false);
-	}
-	
-	@Override
-	public void setPvpStatus(int pvpBitmask, boolean add) {
-		super.setPvpStatus(pvpBitmask, add);
-		notifyObservers(new UpdatePVPStatusMessage(getObjectID(), getPvPBitmask(), getFaction()), false);
 	}
 	
 	public byte getDifficulty() {

@@ -35,8 +35,6 @@ import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
-import main.NGECore;
-
 import org.apache.mina.core.buffer.IoBuffer;
 import org.python.google.common.collect.Lists;
 
@@ -53,7 +51,6 @@ public class SWGList<E> implements List<E>, Serializable {
 	
 	private List<E> list = new CopyOnWriteArrayList<E>();
 	private transient int updateCounter = 0;
-	private long objectId;
 	private byte viewType;
 	private short updateType;
 	private boolean addByte;
@@ -63,17 +60,26 @@ public class SWGList<E> implements List<E>, Serializable {
 	public SWGList() { }
 	
 	public SWGList(SWGObject object, int viewType, int updateType, boolean addByte) {
-		this.objectId = object.getObjectID();
 		this.viewType = (byte) viewType;
 		this.updateType = (short) updateType;
 		this.addByte = addByte;
 		this.object = object;
 	}
 	
-	public void init() {
+	public void init(SWGObject object) {
 		objectMutex = new Object();
 		updateCounter = 0;
-		object = NGECore.getInstance().objectService.getObject(objectId);
+		this.object = object;
+		
+		for (Object item : list) {				
+			try {
+				if (item instanceof IDelta) {
+					item.getClass().getMethod("init", new Class[] {}).invoke(item, new Object[] { });
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	public boolean add(E e) {

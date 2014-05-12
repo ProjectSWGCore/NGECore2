@@ -51,7 +51,6 @@ import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
 
 import engine.clientdata.ClientFileManager;
-import engine.clientdata.StfTable;
 import engine.clientdata.visitors.IDManagerVisitor;
 import engine.clients.Client;
 import engine.resources.common.RGB;
@@ -82,9 +81,6 @@ public class TangibleObject extends SWGObject implements Serializable {
 	protected transient Vector<TangibleObject> defendersList = new Vector<TangibleObject>();	// unused in packets but useful for the server
 	@NotPersistent
 	private transient TangibleMessageBuilder messageBuilder;
-	
-	private int respawnTime = 0;
-	private Point3D spawnCoordinates = new Point3D(0, 0, 0);
 	
 	//private TreeSet<TreeMap<String,Integer>> lootSpecification = new TreeSet<TreeMap<String,Integer>>();
 	private List<LootGroup> lootGroups = new ArrayList<LootGroup>();
@@ -118,7 +114,6 @@ public class TangibleObject extends SWGObject implements Serializable {
 	public TangibleObject(long objectID, Planet planet, String template, Point3D position, Quaternion orientation) {
 		super(objectID, planet, position, orientation, template);
 		messageBuilder = new TangibleMessageBuilder(this);
-		spawnCoordinates = position.clone();
 		if (this.getClass().getSimpleName().equals("TangibleObject")) setIntAttribute("volume", 1);
 	}
 	
@@ -136,8 +131,6 @@ public class TangibleObject extends SWGObject implements Serializable {
 	
 	public void setCustomName2(String customName) {
 		setCustomName(customName);
-		
-		notifyObservers(messageBuilder.buildCustomNameDelta(customName), true);
 	}
 
 	public int getIncapTimer() {
@@ -496,18 +489,6 @@ public class TangibleObject extends SWGObject implements Serializable {
 		notifyObservers(new StopClientEffectObjectByLabel(getObjectID(), commandString), true);
 	}
 	
-	public int getRespawnTime() {
-		synchronized(objectMutex) {
-			return respawnTime;
-		}
-	}
-	
-	public void setRespawnTime(int respawnTime) {
-		synchronized(objectMutex) {
-			this.respawnTime = respawnTime;
-		}
-	}
-	
 	public TangibleObject getKiller() {
 		synchronized(objectMutex) {
 			return killer;
@@ -518,41 +499,6 @@ public class TangibleObject extends SWGObject implements Serializable {
 		synchronized(objectMutex) {
 			this.killer = killer;
 		}
-	}
-	
-	// Returns the full STF-based name filepath
-	public String getProperName()
-	{
-		return  "@" + getStfFilename() + ":" + getStfName();
-	}
-	
-	// Returns the STF-based description filepath
-	public String getProperDescription()
-	{
-		return "@" + getDetailFilename() + ":" + getDetailName();
-	}
-	
-	// Returns the current, true name of the Object
-	public String getTrueName()
-	{
-		return getCustomName() != null ? getCustomName() : getTrueStfName();
-	}
-		
-	// Returns the true STF-based name
-	public String getTrueStfName()
-	{
-		String name = null;
-		try
-		{
-			StfTable stf = new StfTable("clientdata/string/en/" + getStfFilename() + ".stf");
-			for (int s = 1; s < stf.getRowCount(); s++) 
-			{		
-				if(stf.getStringById(s).getKey().equals(getStfName())) name = stf.getStringById(s).getValue();
-			}
-        } 
-		catch (Exception e) { }
-		
-		return name;	
 	}
 	
 	public List<LootGroup> getLootGroups() {

@@ -124,8 +124,8 @@ public class IntangibleObject extends SWGObject implements Serializable {
 			
 			// FIXME Check if destination has view permissions to this
 			if (this.getContainer() == destination.getParent() || this.getGrandparent() == destination.getParent()) {
-				destination.getSession().write(getBaseline(8).getBaseline()); getBaseline(9); // Temp fix due to minor mistake in engine
-				destination.getSession().write(baseline9.getBaseline());
+				destination.getSession().write(getBaseline(8).getBaseline());
+				destination.getSession().write(getBaseline(9).getBaseline());
 			}
 		}
 	}

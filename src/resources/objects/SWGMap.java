@@ -32,8 +32,6 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import main.NGECore;
-
 import org.apache.mina.core.buffer.IoBuffer;
 
 import com.sleepycat.persist.model.Persistent;
@@ -51,7 +49,6 @@ public class SWGMap<K, V> implements Map<K, V>, Serializable {
 	private static final long serialVersionUID = 1L;
 	private Map<K, V> map = new TreeMap<K, V>();
 	private transient int updateCounter = 0;
-	private long objectId;
 	private byte viewType;
 	private short updateType;
 	private boolean addByte;
@@ -61,7 +58,6 @@ public class SWGMap<K, V> implements Map<K, V>, Serializable {
 	public SWGMap() { }
 	
 	public SWGMap(SWGObject object, int viewType, int updateType, boolean addByte) {
-		this.objectId = object.getObjectID();
 		this.viewType = (byte) viewType;
 		this.updateType = (short) updateType;
 		this.addByte = addByte;
@@ -70,7 +66,6 @@ public class SWGMap<K, V> implements Map<K, V>, Serializable {
 	
 	public SWGMap(Map<K, V> m) {
 		if (m instanceof SWGMap) {
-			this.objectId = ((SWGMap<K, V>) m).objectId;
 			this.object = ((SWGMap<K, V>) m).object;
 			this.viewType = ((SWGMap<K, V>) m).viewType;
 			this.updateType = ((SWGMap<K, V>) m).updateType;
@@ -78,10 +73,20 @@ public class SWGMap<K, V> implements Map<K, V>, Serializable {
 		}
 	}
 	
-	public void init() {
+	public void init(SWGObject object) {
 		objectMutex = new Object();
 		updateCounter = 0;
-		object = NGECore.getInstance().objectService.getObject(objectId);
+		this.object = object;
+		
+		for (Object item : map.values()) {				
+			try {
+				if (item instanceof IDelta) {
+					item.getClass().getMethod("init", new Class[] {}).invoke(item, new Object[] { });
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	public void clear() {

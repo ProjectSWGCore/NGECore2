@@ -29,8 +29,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import main.NGECore;
-
 import org.apache.mina.core.buffer.IoBuffer;
 import org.python.google.common.collect.ArrayListMultimap;
 import org.python.google.common.collect.Multimap;
@@ -46,7 +44,6 @@ public class SWGMultiMap<K, V> implements Multimap<K, V>, Serializable {
 	private static final long serialVersionUID = 1L;
 	private Multimap<K, V> map = ArrayListMultimap.create();
 	private transient int updateCounter = 0;
-	private long objectId;
 	private byte viewType;
 	private short updateType;
 	private boolean addByte;
@@ -56,7 +53,6 @@ public class SWGMultiMap<K, V> implements Multimap<K, V>, Serializable {
 	public SWGMultiMap() { }
 	
 	public SWGMultiMap(SWGObject object, int viewType, int updateType, boolean addByte) {
-		this.objectId = object.getObjectId();
 		this.viewType = (byte) viewType;
 		this.updateType = (short) updateType;
 		this.addByte = addByte;
@@ -65,7 +61,6 @@ public class SWGMultiMap<K, V> implements Multimap<K, V>, Serializable {
 	
 	public SWGMultiMap(Multimap<K, V> m) {
 		if (m instanceof SWGMultiMap) {
-			this.objectId = ((SWGMultiMap<K, V>) m).objectId;
 			this.object = ((SWGMultiMap<K, V>) m).object;
 			this.viewType = ((SWGMultiMap<K, V>) m).viewType;
 			this.updateType = ((SWGMultiMap<K, V>) m).updateType;
@@ -73,9 +68,20 @@ public class SWGMultiMap<K, V> implements Multimap<K, V>, Serializable {
 		}
 	}
 	
-	public void init() {
+	public void init(SWGObject object) {
 		objectMutex = new Object();
-		object = NGECore.getInstance().objectService.getObject(objectId);
+		updateCounter = 0;
+		this.object = object;
+		
+		for (Object item : map.values()) {				
+			try {
+				if (item instanceof IDelta) {
+					item.getClass().getMethod("init", new Class[] {}).invoke(item, new Object[] { });
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public Map<K, Collection<V>> asMap() {
