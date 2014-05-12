@@ -447,8 +447,6 @@ public class NGECore {
 		travelService.loadTravelPoints();
 		simulationService = new SimulationService(this);
 		
-		objectService.loadBuildings();
-		harvesterService.loadHarvesters();
 		
 		if (optionsConfigLoaded && options.getInt("LOAD.RESOURCE.SYSTEM") > 0) {
 			resourceService.loadResourceRoots();
@@ -456,7 +454,10 @@ public class NGECore {
 		}
 		
 		terrainService.loadSnapShotObjects();
-		objectService.loadServerTemplates();
+		objectService.loadServerTemplates();		
+		objectService.loadBuildings();
+		harvesterService.loadHarvesters();
+
 		simulationService.insertSnapShotObjects();
 		simulationService.insertPersistentBuildings();
 		// Zone services that need to be loaded after the above
