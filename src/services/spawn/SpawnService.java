@@ -100,6 +100,9 @@ public class SpawnService {
 			creature.setWeaponId(mobileTemplate.getCustomWeapon().getObjectID());
 		}*/
 		
+		if(mobileTemplate.getLootGroups() != null)
+			creature.setLootGroups(mobileTemplate.getLootGroups());
+		
 		creature.setOptionsBitmask(mobileTemplate.getOptionBitmask());
 		creature.setPvPBitmask(mobileTemplate.getPvpBitmask());
 		creature.setStfFilename("mob/creature_names"); // TODO: set other STFs for NPCs other than creatures
