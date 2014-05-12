@@ -81,6 +81,7 @@ public class BazaarService implements INetworkDispatch {
 
 	public BazaarService(NGECore core) {
 		this.core = core;
+		core.commandService.registerCommand("createvendor");
 		loadAuctionItems();
 	}
 	
@@ -141,9 +142,11 @@ public class BazaarService implements INetworkDispatch {
 			SWGObject terminal = core.objectService.getObject(terminalId);
 			if(terminal == null)
 				return;
+			int permission = 2;
+			if(terminal.getAttachment("isVendor") != null && (Boolean) terminal.getAttachment("isVendor"))
+				permission = (long) terminal.getAttachment("vendorOwner") == player.getObjectID() ? 0 : 1;
 			Point3D pos = terminal.getWorldPosition();
-			session.write(new IsVendorOwnerResponseMessage(2, 0, terminalId, getVendorUID((TangibleObject) terminal)).serialize());
-			
+			session.write(new IsVendorOwnerResponseMessage(permission, 0, terminalId, getVendorUID((TangibleObject) terminal)).serialize());
 			
 		});
 		

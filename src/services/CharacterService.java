@@ -34,10 +34,9 @@ import main.NGECore;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 
-
-
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
+import engine.clientdata.visitors.ProfessionTemplateVisitor;
 import engine.clients.Client;
 import engine.resources.common.CRC;
 import engine.resources.container.CreatureContainerPermissions;
@@ -65,7 +64,6 @@ import resources.objects.mission.MissionObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
-import resources.visitors.ProfessionTemplateVisitor;
 
 @SuppressWarnings("unused")
 
@@ -87,6 +85,18 @@ public class CharacterService implements INetworkDispatch {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public boolean checkName(String name, Client client) {
+		// TODO: check for dev names, profane names, iconic names etc
+		try {
+			if(checkForDuplicateName(name, client.getAccountId()) || !name.matches(allowedCharsRegex))
+				return false;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return true;
 	}
 	
 	@Override

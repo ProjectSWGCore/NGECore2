@@ -288,6 +288,17 @@ public class LootService implements INetworkDispatch {
 	    }
 	}
 	
+	public SWGObject generateLootItem(CreatureObject requester, String template)
+	{
+		LootRollSession rollSession = new LootRollSession();
+		rollSession.setSessionPlanet(requester.getPlanet());
+		
+		handleLootPoolItems(template, rollSession);
+		if(rollSession.getDroppedItems().get(0) != null) return rollSession.getDroppedItems().get(0);
+		
+		return null;
+	}
+	
 	@SuppressWarnings("unused")
 	private void handleLootPoolItems(String itemName,LootRollSession lootRollSession){
 		
@@ -402,7 +413,7 @@ public class LootService implements INetworkDispatch {
 			customName = setRandomStatsJewelry(droppedItem, lootRollSession);
 		}
 		
-		if (customName!=null)
+		if (!customName.isEmpty())
 			handleCustomDropName(droppedItem, customName);
 		
 		if (stackable!=-1){
@@ -453,6 +464,9 @@ public class LootService implements INetworkDispatch {
     	if (requiredFaction.length()>0){
     		droppedItem.setStringAttribute("required_faction", requiredFaction);
     	}
+    	
+    	if(core.scriptService.getMethod(itemPath,"","customSetup") != null)
+			core.scriptService.callScript(itemPath, "", "customSetup", droppedItem);
     	
     	
 		lootRollSession.addDroppedItem(droppedItem);
@@ -536,12 +550,21 @@ public class LootService implements INetworkDispatch {
 		
 	}
 		
-	private void setCustomization(TangibleObject droppedItem,String itemName) {
+	public void setCustomization(TangibleObject droppedItem,String itemName) {
 		
 		// Example color crystal
 		if (itemName.contains("colorcrystal")) {
 			System.out.println("colorcrystal");
-			droppedItem.setCustomizationVariable("/private/index_color_1", (byte) new Random().nextInt(11));
+			
+			int crystalColor = new Random().nextInt(11);
+			
+			droppedItem.setCustomizationVariable("/private/index_color_1", (byte) crystalColor);
+			droppedItem.getAttributes().put("@obj_attr_n:condition", "100/100");
+			droppedItem.getAttributes().put("@obj_attr_n:crystal_owner", "\\#D1F56F UNTUNED \\#FFFFFF ");		
+			droppedItem.getAttributes().put("@obj_attr_n:color", resources.datatables.LightsaberColors.get(crystalColor));
+			droppedItem.setAttachment("radial_filename", "item/tunable");
+			//droppedItem.getAttributes().put("@obj_attr_n:color", "@jedi_spam:saber_color_" + crystalColor); // Commented out for now
+			
 		}
 		
 		// Example power crystal
@@ -561,7 +584,7 @@ public class LootService implements INetworkDispatch {
 //		}
 	}
 	
-	private void handleSpecialItems(TangibleObject droppedItem,String itemName) {
+	public void handleSpecialItems(TangibleObject droppedItem,String itemName) {
 		if (itemName.contains("kraytpearl")){
 			handleKraytPearl(droppedItem);
 		}
@@ -693,25 +716,25 @@ public class LootService implements INetworkDispatch {
 			droppedItem.setDetailName("item_junk_imitation_pearl_01_01");
 			return;
 		case "kraytpearl_poor": 
-			qualityString="Poor";
+			qualityString="@jedi_spam:crystal_quality_0";
 			break;
 		case "kraytpearl_fair": 
-			qualityString="Fair";
+			qualityString="@jedi_spam:crystal_quality_1";
 			break;
 		case "kraytpearl_good": 
-			qualityString="Good";
+			qualityString="@jedi_spam:crystal_quality_2";
 			break;
 		case "kraytpearl_quality": 
-			qualityString="Quality";
+			qualityString="@jedi_spam:crystal_quality_3";
 			break;
 		case "kraytpearl_select": 
-			qualityString="Select";
+			qualityString="@jedi_spam:crystal_quality_4";
 			break;
 		case "kraytpearl_premium": 
-			qualityString="Premium";
+			qualityString="@jedi_spam:crystal_quality_5";
 			break;
 		case "kraytpearl_flawless": 
-			qualityString="Flawless";
+			qualityString="@jedi_spam:crystal_quality_6";
 			break;
 		default:
 			qualityString="Undetermined";
@@ -721,6 +744,7 @@ public class LootService implements INetworkDispatch {
 		droppedItem.getAttributes().put("@obj_attr_n:crystal_owner", "\\#D1F56F UNTUNED \\#FFFFFF ");		
 		droppedItem.getAttributes().put("@obj_attr_n:crystal_quality", qualityString);	
 		droppedItem.setAttachment("radial_filename", "item/tunable");
+		droppedItem.setAttachment("TuneType", "KraytPearl");
 	}
 	
 	private void handlePowerCrystal(TangibleObject droppedItem) {
@@ -730,28 +754,28 @@ public class LootService implements INetworkDispatch {
 		switch (itemName) {
 		
 		case "powercrystal_poor": 
-			qualityString="Poor";
+			qualityString="@jedi_spam:crystal_quality_0";
 			break;
 		case "powercrystal_fair": 
-			qualityString="Fair";
+			qualityString="@jedi_spam:crystal_quality_1";
 			break;
 		case "powercrystal_good": 
-			qualityString="Good";
+			qualityString="@jedi_spam:crystal_quality_2";
 			break;
 		case "powercrystal_quality": 
-			qualityString="Quality";
+			qualityString="@jedi_spam:crystal_quality_3";
 			break;
 		case "powercrystal_select": 
-			qualityString="Select";
+			qualityString="@jedi_spam:crystal_quality_4";
 			break;
 		case "powercrystal_premium": 
-			qualityString="Premium";
+			qualityString="@jedi_spam:crystal_quality_5";
 			break;
 		case "powercrystal_flawless": 
-			qualityString="Flawless";
+			qualityString="@jedi_spam:crystal_quality_6";
 			break;
 		case "powercrystal_perfect": 
-			qualityString="Perfect";
+			qualityString="@jedi_spam:crystal_quality_7";
 			break;
 		default:
 			qualityString="Undetermined";
@@ -761,7 +785,128 @@ public class LootService implements INetworkDispatch {
 		droppedItem.getAttributes().put("@obj_attr_n:crystal_owner", "\\#D1F56F UNTUNED \\#FFFFFF ");
 		droppedItem.getAttributes().put("@obj_attr_n:crystal_quality", qualityString);	
 		droppedItem.setAttachment("radial_filename", "item/tunable");
+		droppedItem.setAttachment("TuneType", "PowerCrystal");
 	}	
+	
+	public void tuneProcess(SWGObject tunableObject){
+		
+		String objectType = (String) tunableObject.getAttachment("LootItemName");
+		if (objectType==null || objectType.length()==0)
+			return;
+		
+		int finalMinDmg = 0;
+		int finalMaxDmg = 0;
+		String tunableObjectName = "";
+		
+		if (objectType.contains("powercrystal")){
+			tunableObjectName = "Power Crystal";
+			switch (objectType) {
+				case "powercrystal_poor":     // Poor - Up to 3/4 damage 
+										      int minValue1 = 1;
+										      int maxValue1 = 3;
+										      finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
+										      finalMaxDmg = finalMinDmg+1;
+										      break;
+				case "powercrystal_fair":     // Fair - Up to 5/6 damage 
+											  minValue1 = 3;
+				                              maxValue1 = 5;				                             
+				                              finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
+				                              finalMaxDmg = finalMinDmg+1;
+										      break;
+				case "powercrystal_good":     // Good - Up to 10/11 damage  
+					                          minValue1 = 6;
+                                              maxValue1 = 10;
+                                              finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
+                                              finalMaxDmg = finalMinDmg+1;
+										      break;
+				case "powercrystal_quality":  // Quality - Up to 12/13 damage  
+					                          minValue1 = 11;
+					                          maxValue1 = 12;
+							                  finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
+							                  finalMaxDmg = finalMinDmg+1;
+										      break;
+				case "powercrystal_select":   // Select - Up to 14/15 damage 
+					                          minValue1 = 13;
+                                              maxValue1 = 14;
+	                                          finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
+	                                          finalMaxDmg = finalMinDmg+1;
+										      break;
+				case "powercrystal_premium":  // Premium - Up to 17/18 damage 
+										      minValue1 = 15;
+							                  maxValue1 = 17;
+							                  finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
+							                  finalMaxDmg = finalMinDmg+1;
+										      break;
+				case "powercrystal_flawless": // Flawless - 20-22 possibly more or less  
+								              finalMinDmg = 20;
+								              finalMaxDmg = 22;
+										      break;
+				case "powercrystal_perfect":  // Perfect - Up to 23/25 damage 
+											  minValue1 = 21;
+									          maxValue1 = 23;
+									          finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
+									          finalMaxDmg = finalMinDmg+1;
+										      break;
+			}
+		}
+		
+		if (objectType.contains("kraytpearl")){
+			tunableObjectName = "Krayt Dragon Pearl";
+			switch (objectType) {
+				case "kraytpearl_poor":       // Poor - Up to 3/4 damage 
+										      int minValue1 = 1;
+										      int maxValue1 = 3;
+										      finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
+										      finalMaxDmg = finalMinDmg+1;
+										      break;
+				case "kraytpearl_fair":       // Fair - Up to 5/6 damage  
+											  minValue1 = 3;
+				                              maxValue1 = 5;
+				                              finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
+				                              finalMaxDmg = finalMinDmg+1;
+										      break;
+				case "kraytpearl_good":       // Good - Up to 10/11 damage  
+					                          minValue1 = 6;
+	                                          maxValue1 = 10;
+	                                          finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
+	                                          finalMaxDmg = finalMinDmg+1;
+										      break;
+				case "kraytpearl_quality":    // Quality - Up to 12/13 damage  
+					                          minValue1 = 11;
+					                          maxValue1 = 12;
+							                  finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
+							                  finalMaxDmg = finalMinDmg+1;
+										      break;
+				case "kraytpearl_select":     // Select - Up to 14/15 damage 
+					                          minValue1 = 13;
+	                                          maxValue1 = 14;
+	                                          finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
+	                                          finalMaxDmg = finalMinDmg+1;
+										      break;
+				case "kraytpearl_premium":    // Premium - Up to 18/19 damage 
+										      minValue1 = 15;
+							                  maxValue1 = 17;
+							                  finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
+							                  finalMaxDmg = finalMinDmg+1;
+										      break;
+				case "kraytpearl_flawless":   // Flawless - 19/20 damage   
+								              finalMinDmg = 19;
+								              finalMaxDmg = 20;
+										      break;
+				case "kraytpearl_ancient":    // Ancient - 20/22 damage 
+											  finalMinDmg = 20;
+		                                      finalMaxDmg = 22;
+										      break;
+			}
+		}
+		
+		tunableObject.getAttributes().remove("@obj_attr_n:crystal_quality");	
+//		tunableObject.setIntAttribute("@obj_attr_n:componentbonuslow", finalMinDmg);
+//		tunableObject.setIntAttribute("@obj_attr_n:componentbonushigh", finalMaxDmg);
+		tunableObject.setIntAttribute("@obj_attr_n:mindamage", finalMinDmg);
+		tunableObject.setIntAttribute("@obj_attr_n:maxdamage", finalMaxDmg);
+		//((TangibleObject) tunableObject).setCustomName2(tunableObjectName + " (tuned)");
+	}
 	
 	private void setWeaponStat(WeaponObject weapon, String statName, String minValue, String maxValue){
 		

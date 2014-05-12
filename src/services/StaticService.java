@@ -32,11 +32,11 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import resources.common.FileUtilities;
 import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
+import services.ai.AIActor;
 import services.spawn.MobileTemplate;
 import main.NGECore;
 import engine.clientdata.ClientFileManager;
@@ -96,6 +96,11 @@ public class StaticService implements INetworkDispatch {
 	}
 	
 	public SWGObject spawnObject(String template, String planetName, long cellId, float x, float y, float z, float qW, float qX, float qY, float qZ) {
+		return spawnObject(template, planetName, cellId, x, y, z, qW, qX, qY, qZ, -1);
+	}
+
+	
+	public SWGObject spawnObject(String template, String planetName, long cellId, float x, float y, float z, float qW, float qX, float qY, float qZ, int respawnTime) {
 		Planet planet = core.terrainService.getPlanetByName(planetName);
 		
 		if (planet == null) {
@@ -115,13 +120,22 @@ public class StaticService implements INetworkDispatch {
 		
 		long objectId = core.objectService.getDOId(planetName, template, 0, buildingId, cellNumber, x, y, z);
 		
-		SWGObject object;
-		
+		SWGObject object = null;
 		MobileTemplate mobileTemplate = core.spawnService.getMobileTemplate(template);
+		
 		if (mobileTemplate != null) {
-			System.out.println("SPAWN MOBILE TEMPLATE " + mobileTemplate.getTemplates().get(new Random().nextInt(mobileTemplate.getTemplates().size())));
-			object = core.spawnService.spawnCreature(template, planetName, cellId, x, y, z, qW, qX, qY, qZ, (short) -1);
-			System.out.println("objectid " + object.getObjectID());
+			if(respawnTime > 0) {
+				try {
+					MobileTemplate clone = (MobileTemplate) mobileTemplate.clone();
+					object = core.spawnService.spawnCreature(template, objectId, planetName, cellId, x, y, z, qW, qX, qY, qZ, (short) -1);
+					clone.setRespawnTime(respawnTime);
+					((AIActor) object.getAttachment("AI")).setMobileTemplate(clone);
+				} catch (CloneNotSupportedException e) {
+					e.printStackTrace();
+				}
+			} else {
+				object = core.spawnService.spawnCreature(template, objectId, planetName, cellId, x, y, z, qW, qX, qY, qZ, (short) -1);
+			}
 		} else {
 			object = core.objectService.createObject(template, objectId, planet, new Point3D(x, y, z), new Quaternion(qW, qX, qY, qZ), null, true, true);
 		}

@@ -44,10 +44,6 @@ import resources.objects.ObjectMessageBuilder;
 import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
 
-/** 
- * @author Charon 
- */
-
 @Persistent(version=0)
 public class FactoryCrateObject extends TangibleObject implements Serializable {
 	

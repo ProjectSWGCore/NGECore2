@@ -19,42 +19,18 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package resources.common;
+package resources.objects.universe;
 
-import java.util.concurrent.ScheduledFuture;
+import resources.objects.ObjectMessageBuilder;
 
-public class Cooldown {
-	private long startTimestamp;
-	private long endTimestamp;
+public class UniverseMessageBuilder extends ObjectMessageBuilder {
 	
-	private ScheduledFuture<?> removalTask;
-
-	public Cooldown(long end) {
-		startTimestamp = System.currentTimeMillis();
-		endTimestamp = startTimestamp + end;
+	public UniverseMessageBuilder(UniverseObject object) {
+		super(object);
 	}
-
-	public long getStartTimestamp() {
-		return startTimestamp;
+	
+	public UniverseMessageBuilder() {
+		super();
 	}
-
-	public void setStartTimestamp(long startTimestamp) {
-		this.startTimestamp = startTimestamp;
-	}
-
-	public long getEndTimestamp() {
-		return endTimestamp;
-	}
-
-	public void setEndTimestamp(long endTimestamp) {
-		this.endTimestamp = endTimestamp;
-	}
-
-	public ScheduledFuture<?> getRemovalTask() {
-		return removalTask;
-	}
-
-	public void setRemovalTask(ScheduledFuture<?> removalTask) {
-		this.removalTask = removalTask;
-	}
+	
 }

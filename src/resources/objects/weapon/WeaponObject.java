@@ -28,14 +28,12 @@ import resources.datatables.WeaponType;
 import resources.objects.tangible.TangibleObject;
 
 import com.sleepycat.persist.model.NotPersistent;
-import com.sleepycat.persist.model.Persistent;
 
 import engine.clients.Client;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent(version=1)
 public class WeaponObject extends TangibleObject implements Serializable {
 	
 	private static final long serialVersionUID = 1L;

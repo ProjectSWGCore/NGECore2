@@ -303,11 +303,11 @@ public class MissionObject extends IntangibleObject implements Serializable {
 		this.missionId = missionId;
 	}
 
-	public long getBountyObjId() {
+	public long getBountyMarkId() {
 		return bountyObjId;
 	}
 
-	public void setBountyObjId(long bountyObjId) {
+	public void setBountyMarkId(long bountyObjId) {
 		this.bountyObjId = bountyObjId;
 	}
 

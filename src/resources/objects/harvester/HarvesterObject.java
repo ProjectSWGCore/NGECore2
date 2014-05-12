@@ -40,10 +40,6 @@ import resources.objects.resource.GalacticResource;
 import resources.objects.resource.ResourceContainerObject;
 import resources.objects.tangible.TangibleObject;
 
-/** 
- * @author Charon 
- */
-
 @Persistent(version=0)
 public class HarvesterObject extends InstallationObject implements Serializable {
 	
@@ -121,7 +117,6 @@ public class HarvesterObject extends InstallationObject implements Serializable 
 	private String deedTemplate;
 	
 	private int specRate;
-
 	
 	public HarvesterObject(long objectID, Planet planet, String template, Point3D position, Quaternion orientation){
 		super(objectID, planet, template, position, orientation);

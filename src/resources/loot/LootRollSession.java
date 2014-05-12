@@ -49,7 +49,10 @@ public class LootRollSession {
 	private int lootedObjectLevel=0;
 	private int lootedObjectDifficulty=0;
 	
-	public LootRollSession(){	
+	public LootRollSession()
+	{
+		droppedItems = new ArrayList<TangibleObject>();
+		errorMessages = new ArrayList<String>();
 	}
 	
 	public LootRollSession(CreatureObject requester, TangibleObject lootedObject){
@@ -114,8 +117,9 @@ public class LootRollSession {
 		return sessionPlanet;
 	}
 	
-	public void setSessionPlanet(Planet planet) {
-		sessionPlanet = planet;
+	public void setSessionPlanet(Planet planet)
+	{
+		this.sessionPlanet = planet;
 	}
 
 	public List<String> getErrorMessages() {

@@ -25,9 +25,7 @@ import java.io.Serializable;
 import java.util.concurrent.ScheduledFuture;
 
 import com.sleepycat.persist.model.NotPersistent;
-import com.sleepycat.persist.model.Persistent;
 
-@Persistent(version=1)
 public class DamageOverTime implements Serializable {
 	
 	private static final long serialVersionUID = 1L;

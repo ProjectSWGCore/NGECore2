@@ -21,26 +21,39 @@
  ******************************************************************************/
 package resources.objects.intangible;
 
-import org.apache.mina.core.buffer.IoBuffer;
+import java.util.Map;
 
 import resources.objects.ObjectMessageBuilder;
+import engine.resources.objects.Builder;
 
 public class IntangibleMessageBuilder extends ObjectMessageBuilder {
 	
-	public IntangibleMessageBuilder(IntangibleObject intangibleObject) {
-		setObject(intangibleObject);
+	public IntangibleMessageBuilder(IntangibleObject object) {
+		super(object);
+	}
+	
+	public IntangibleMessageBuilder() {
+		super();
 	}
 	
 	@Override
-	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
-		// TODO Auto-generated method stub
-		
+	public void buildBaseline3(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline3(baselineBuilders, deltaBuilders);
 	}
-
+	
 	@Override
-	public void sendBaselines() {
-		// TODO Auto-generated method stub
-		
+	public void buildBaseline6(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline6(baselineBuilders, deltaBuilders);
 	}
-
+	
+	@Override
+	public void buildBaseline8(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline8(baselineBuilders, deltaBuilders);
+	}
+	
+	@Override
+	public void buildBaseline9(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline9(baselineBuilders, deltaBuilders);
+	}
+	
 }

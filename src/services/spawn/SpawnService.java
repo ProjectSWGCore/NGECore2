@@ -85,7 +85,7 @@ public class SpawnService {
 				return null;
 		}
 		
-		CreatureObject creature = (CreatureObject) core.objectService.createObject(mobileTemplate.getTemplates().get(new Random().nextInt(mobileTemplate.getTemplates().size())), objectId, planet, new Point3D(x, y, z), new Quaternion(qW, qX, qY, qZ));
+		CreatureObject creature = (CreatureObject) core.objectService.createObject(mobileTemplate.getTemplates().get(new Random().nextInt(mobileTemplate.getTemplates().size())), objectId, planet, new Point3D(x, y, z), new Quaternion(qW, qX, qY, qZ), null, (objectId > 0), true);
 		
 		if(creature == null)
 			return null;
@@ -99,6 +99,9 @@ public class SpawnService {
 			creature.add(mobileTemplate.getCustomWeapon());
 			creature.setWeaponId(mobileTemplate.getCustomWeapon().getObjectID());
 		}*/
+		
+		if(mobileTemplate.getLootGroups() != null)
+			creature.setLootGroups(mobileTemplate.getLootGroups());
 		
 		creature.setOptionsBitmask(mobileTemplate.getOptionBitmask());
 		creature.setPvPBitmask(mobileTemplate.getPvpBitmask());

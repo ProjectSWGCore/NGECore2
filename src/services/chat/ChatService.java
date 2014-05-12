@@ -708,6 +708,8 @@ public class ChatService implements INetworkDispatch {
 		
 		while(cursor.hasNext()) {
 			Mail mail = (Mail) cursor.next();
+			if(mail == null)
+				continue;
 			if(mail.getRecieverId() == obj.getObjectID()) {
 				sendPersistentMessageHeader(client, mail);
 			}

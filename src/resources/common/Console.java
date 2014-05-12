@@ -24,12 +24,15 @@ package resources.common;
 import java.util.Calendar;
 
 public class Console {
+	
 	public static void println(String string) {
 		Calendar cal = Calendar.getInstance();
 		System.out.println(cal.getTime() + ": " + string);
 	}
+	
 	public static void print(String string) {
 		Calendar cal = Calendar.getInstance();
 		System.out.print(cal.getTime() + ": " + string);
 	}
+	
 }

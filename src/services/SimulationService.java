@@ -52,6 +52,7 @@ import engine.clientdata.visitors.PortalVisitor.Cell;
 import engine.clients.Client;
 import engine.resources.common.Event;
 import engine.resources.common.Mesh3DTriangle;
+import engine.resources.common.RGB;
 import engine.resources.common.Ray;
 import engine.resources.container.Traverser;
 import engine.resources.database.ODBCursor;
@@ -78,6 +79,7 @@ import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
+import resources.objects.harvester.HarvesterObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.common.*;
@@ -192,7 +194,7 @@ public class SimulationService implements INetworkDispatch {
 		
 		while(cursor.hasNext()) {
 			SWGObject building = core.objectService.getObject(((SWGObject) cursor.next()).getObjectID());
-			if(building == null || !(building instanceof BuildingObject))
+			if(building == null || (!(building instanceof BuildingObject) && !(building instanceof HarvesterObject)))
 				continue;
 			if(building.getAttachment("hasLoadedServerTemplate") == null)
 				core.objectService.loadServerTemplate(building);
@@ -764,8 +766,6 @@ public class SimulationService implements INetworkDispatch {
 		if(object.getAttachment("proposer") != null)
 			object.setAttachment("proposer", null);
 		
-		object.setPvPBitmask(0);
-		
 		//session.suspendWrite();
 		final long objectId = object.getObjectID();
 		
@@ -911,7 +911,7 @@ public class SimulationService implements INetworkDispatch {
 		HeartBeatMessage heartBeat = new HeartBeatMessage();
 		session.write(heartBeat.serialize());
 
-		CmdStartScene startScene = new CmdStartScene((byte) 0, object.getObjectID(), object.getPlanet().getPath(), object.getTemplate(), newPos.x, newPos.y, newPos.z, System.currentTimeMillis() / 1000, object.getRadians());
+		CmdStartScene startScene = new CmdStartScene((byte) 0, object.getObjectID(), object.getPlanet().getPath(), object.getTemplate(), newPos.x, newPos.y, newPos.z, core.getGalacticTime() / 1000, object.getRadians());
 		session.write(startScene.serialize());
 		
 		handleZoneIn(client);
@@ -945,6 +945,36 @@ public class SimulationService implements INetworkDispatch {
 		Quaternion newRotation = resources.common.MathUtilities.rotateQuaternion(oldRotation, rotation, axis);
 		
 		teleport(obj, obj.getPosition(), newRotation, obj.getParentId());
+	}
+	
+	public void rotateToFaceTarget(SWGObject object, SWGObject target) {
+		float radians = (float) (((float) Math.atan2(target.getPosition().z - object.getPosition().z, target.getPosition().x - object.getPosition().x)) - object.getRadians());
+		transform(object, radians, object.getPosition());
+	}
+	
+	public void faceTarget(SWGObject object, SWGObject target) {
+		float direction = (float) Math.atan2(target.getWorldPosition().x - object.getWorldPosition().x, target.getWorldPosition().z - object.getWorldPosition().z);
+		
+		if (direction < 0) {
+			direction = (float) (2 * Math.PI + direction);
+		}
+		
+		if (Math.abs(direction - object.getRadians()) < 0.05) {
+			return;
+		}
+		
+		Quaternion quaternion = new Quaternion((float) Math.cos(direction / 2), 0, (float) Math.sin(direction / 2), 0);
+        
+		if (quaternion.y < 0.0f && quaternion.w > 0.0f) {
+        	quaternion.y *= -1;
+        	quaternion.w *= -1;
+        }
+		
+		if (object.getContainer() instanceof CellObject) {
+			NGECore.getInstance().simulationService.moveObject(object, object.getPosition(), quaternion, object.getMovementCounter(), 0, (CellObject) object.getContainer());
+		} else {
+			NGECore.getInstance().simulationService.moveObject(object, object.getPosition(), quaternion, object.getMovementCounter(), 0, null);
+		}
 	}
 	
 	public void teleport(SWGObject obj, Point3D position, Quaternion orientation, long cellId) {

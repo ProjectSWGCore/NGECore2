@@ -128,7 +128,7 @@ public class HousingService implements INetworkDispatch {
 		String playerFirstName = actor.getCustomName().split(" ")[0];
 		
 		if (sign != null) {
-			sign.setCustomName2(playerFirstName + "'s House");
+			sign.setCustomName(playerFirstName + "'s House");
 		}
 		
 		//building.add(sign);
@@ -168,10 +168,15 @@ public class HousingService implements INetworkDispatch {
 			}
 		}
 		
-		// Save structure to DB
-		/*building.createTransaction(core.getBuildingODB().getEnvironment());
-		core.getBuildingODB().put(building, Long.class, BuildingObject.class, building.getTransaction());
-		building.getTransaction().commitSync();*/
+		core.objectService.persistObject(building.getObjectID(), building, core.getSWGObjectODB());
+		
+	}
+	
+	public void saveBuildings() {
+		core.objectService.getObjectList()
+		.values().stream()
+		.filter(obj -> obj instanceof BuildingObject && obj.getAttachment("structureOwner") != null)
+		.forEach(building -> core.objectService.persistObject(building.getObjectID(), building, core.getSWGObjectODB()));
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -465,7 +470,7 @@ public class HousingService implements INetworkDispatch {
 		Vector<TangibleObject> itemList = building.getItemsList();
 
 		for (int i=0;i<itemList.size();i++){
-			String itemName = (itemList.get(i).getCustomName() != null) ? itemList.get(i).getCustomName() : "@" + itemList.get(i).getStfFilename() + ":" + itemList.get(i).getStfName();
+			String itemName = itemList.get(i).getObjectName().getStfValue();
 			window.addListBoxMenuItem(itemName, i);
 		}		
 

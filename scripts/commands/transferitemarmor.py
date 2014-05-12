@@ -4,15 +4,18 @@ def setup():
 	return
 	
 def run(core, actor, target, commandString):
-	if core.equipmentService.canEquip(actor, target) is False:
-		actor.sendSystemMessage('@error_message:insufficient_skill', 0)
-		return
-		
 
 	parsedMsg = commandString.split(' ', 3)
 	objService = core.objectService
 	containerID = long(parsedMsg[1])
 	container = objService.getObject(containerID)
+	
+	canEquip = core.equipmentService.canEquip(actor, target)
+		
+	if canEquip[0] is False and container == actor:
+		actor.sendSystemMessage(canEquip[1], 0)
+		return
+	
 	if target and container and target.getContainer():
 		oldContainer = target.getContainer()
 		if container == oldContainer:
