@@ -573,12 +573,13 @@ public class PlayerService implements INetworkDispatch {
 			return;
 		}
 		
-		player.setProfession(profession);
-
 		String xpType = ((profession.contains("entertainer")) ? "entertainer" : ((profession.contains("trader")) ? "crafting" : "combat_general"));
-			
 		int experience = player.getXp(xpType);
 		
+		resetLevel(creature); // Clears old profession abilities
+		
+		player.setProfession(profession);
+
 		try {
 			experienceTable = ClientFileManager.loadFile("datatables/player/player_level.iff", DatatableVisitor.class);
 			
