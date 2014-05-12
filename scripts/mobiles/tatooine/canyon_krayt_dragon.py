@@ -18,8 +18,15 @@ def addTemplate(core):
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(True)
 	mobileTemplate.setScale(0.8)
-
-	
+	mobileTemplate.setMeatType("Carnivore Meat")
+	mobileTemplate.setMeatAmount(1250)
+	mobileTemplate.setHideType("Bristley Hide")
+	mobileTemplate.setBoneAmount(750)	
+	mobileTemplate.setBoneType("Animal Bones")
+	mobileTemplate.setHideAmount(675)
+	mobileTemplate.setSocialGroup("krayt drago")
+	mobileTemplate.setAssistRange(36)
+	mobileTemplate.setStalker(True)	
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_canyon_krayt_dragon.iff')
