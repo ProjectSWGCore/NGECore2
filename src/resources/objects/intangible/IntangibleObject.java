@@ -80,17 +80,13 @@ public class IntangibleObject extends SWGObject implements Serializable {
 	}
 	
 	public int getGenericInt() {
-		synchronized(objectMutex) {
-			return (int) getBaseline(3).get("genericInt");
-		}
+		return (int) getBaseline(3).get("genericInt");
 	}
 	
 	public void setGenericInt(int genericInt) {
 		IoBuffer buffer;
 		
-		synchronized(objectMutex) {
-			buffer = getBaseline(3).set("genericInt", genericInt);
-		}
+		buffer = getBaseline(3).set("genericInt", genericInt);
 		
 		notifyClients(buffer, true);
 	}
