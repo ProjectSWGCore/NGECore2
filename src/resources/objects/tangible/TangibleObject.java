@@ -43,6 +43,7 @@ import protocol.swg.objectControllerObjects.ShowFlyText;
 import resources.common.OutOfBand;
 import resources.datatables.Options;
 import resources.datatables.PvpStatus;
+import resources.datatables.STF;
 import resources.loot.LootGroup;
 import resources.objects.ObjectMessageBuilder;
 import resources.objects.creature.CreatureObject;
@@ -129,8 +130,10 @@ public class TangibleObject extends SWGObject implements Serializable {
 		messageBuilder = new TangibleMessageBuilder(this);
 	}
 	
+	@Deprecated
 	public void setCustomName2(String customName) {
 		setCustomName(customName);
+		System.err.println("setCustomName2 is now deprecated - please use setCustomName");
 	}
 
 	public int getIncapTimer() {
@@ -641,8 +644,10 @@ public class TangibleObject extends SWGObject implements Serializable {
 	{
 		if(getTemplateData().getAttribute("containerVolumeLimit") == null) return false;
 		
-		int containerVolumeLimit = getTemplateData().getAttribute("containerVolumeLimit");
+		int containerVolumeLimit = (int)getTemplateData().getAttribute("containerVolumeLimit") >> 8; // Shifting because it seems to be returning an extra byte before it should
 		
+		if(containerVolumeLimit == 0) return false;
+			
 		if(NGECore.getInstance().objectService.objsInContainer(this, this) >= containerVolumeLimit) return true;
 	
 		return false;

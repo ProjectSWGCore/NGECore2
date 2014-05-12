@@ -45,7 +45,7 @@ def run(core, actor, target, commandString):
 
         canEquip = core.equipmentService.canEquip(actor, target)
 		
-        if canEquip[0] is False:
+        if canEquip[0] is False and container == actor:
             actor.sendSystemMessage(canEquip[1], 0)
             return
 			

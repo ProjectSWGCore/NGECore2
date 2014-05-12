@@ -121,6 +121,7 @@ import resources.objects.tangible.TangibleObject;
 import resources.objects.tool.SurveyTool;
 import resources.objects.waypoint.WaypointObject;
 import resources.objects.weapon.WeaponObject;
+import services.EquipmentService;
 import services.ai.AIActor;
 import services.command.BaseSWGCommand;
 import services.command.CombatCommand;
@@ -457,7 +458,7 @@ public class ObjectService implements INetworkDispatch {
 			return;
 		}
 		
-		if (object.getAttachment("AI") != null && ((AIActor) object.getAttachment("AI")).getMobileTemplate().getRespawnTime() > 0) {
+		if (object.getAttachment("AI") != null && object.getAttachment("AI") instanceof AIActor && ((AIActor) object.getAttachment("AI")).getMobileTemplate().getRespawnTime() > 0) {
 			final long objectId = object.getObjectID();
 			final String Template = object.getTemplate();
 			final Planet planet = object.getPlanet();
@@ -501,6 +502,8 @@ public class ObjectService implements INetworkDispatch {
 
 		if(parent != null) {
 			if(parent instanceof CreatureObject) {
+				core.equipmentService.unequip((CreatureObject) parent, object);
+				
 				((CreatureObject) parent).removeObjectFromEquipList(object);
 				((CreatureObject) parent).removeObjectFromAppearanceEquipList(object);
 			}
