@@ -26,8 +26,7 @@ def addTemplate(core):
 	mobileTemplate.setBoneAmount(250)
 	mobileTemplate.setSocialGroup("bantha")
 	mobileTemplate.setAssistRange(0)
-	mobileTemplate.setStalker(False)Bones')
-	mobileTemplate.setBoneAmount(250)
+	mobileTemplate.setStalker(False)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_bantha_hue.iff')

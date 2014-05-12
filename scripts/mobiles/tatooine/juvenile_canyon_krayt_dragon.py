@@ -9,7 +9,7 @@ def addTemplate(core):
 	mobileTemplate.setCreatureName('juvenile_canyon_krayt')
 	mobileTemplate.setLevel(82)
 	mobileTemplate.setMinLevel(78)
-	mobileTemplate.setMaxLevel(82)
+	mobileTemplate.setMaxLevel(83)
 	mobileTemplate.setDifficulty(2)
 	mobileTemplate.setAttackRange(12)
 	mobileTemplate.setAttackSpeed(1.0)
@@ -17,7 +17,16 @@ def addTemplate(core):
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(True)
-	mobileTemplate.setScale(0.5)
+	mobileTemplate.setScale(2.6)
+	mobileTemplate.setMeatType("Carnivore Meat")
+	mobileTemplate.setMeatAmount(750)
+	mobileTemplate.setHideType("Bristly Hide")
+	mobileTemplate.setBoneAmount(500)	
+	mobileTemplate.setBoneType("Animal Bones")
+	mobileTemplate.setHideAmount(410)
+	mobileTemplate.setSocialGroup("krayt dragon")
+	mobileTemplate.setAssistRange(24)
+	mobileTemplate.setStalker(False)	
 
 	
 	

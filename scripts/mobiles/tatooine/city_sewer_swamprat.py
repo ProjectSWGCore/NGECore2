@@ -27,8 +27,6 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("womprat")
 	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(False)	
-
-	
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_womp_rat.iff')
