@@ -84,11 +84,7 @@ public class IntangibleObject extends SWGObject implements Serializable {
 	}
 	
 	public void setGenericInt(int genericInt) {
-		IoBuffer buffer;
-		
-		buffer = getBaseline(3).set("genericInt", genericInt);
-		
-		notifyClients(buffer, true);
+		notifyClients(getBaseline(3).set("genericInt", genericInt), true);
 	}
 	
 	public void incrementGenericInt(int increase) {
