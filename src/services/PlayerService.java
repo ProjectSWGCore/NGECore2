@@ -576,7 +576,27 @@ public class PlayerService implements INetworkDispatch {
 		String xpType = ((profession.contains("entertainer")) ? "entertainer" : ((profession.contains("trader")) ? "crafting" : "combat_general"));
 		int experience = player.getXp(xpType);
 		
-		resetLevel(creature); // Clears old profession abilities
+		// Remove old profession abilties - resetLevel wont due because resetLevel grants basic specials for level 1
+		try 
+		{
+			String[] skills;
+			
+			DatatableVisitor skillTemplate = ClientFileManager.loadFile("datatables/skill_template/skill_template.iff", DatatableVisitor.class);
+			
+			for (int s = 0; s < skillTemplate.getRowCount(); s++) 
+			{
+				if (skillTemplate.getObject(s, 0) != null) {
+					if (((String) skillTemplate.getObject(s, 0)).equals(player.getProfession())) 
+					{
+						skills = ((String) skillTemplate.getObject(s, 4)).split(",");
+						for (String skill : skills) core.skillService.removeSkill(creature, skill);
+
+						break;
+					}
+				}
+			}
+		}  catch (InstantiationException | IllegalAccessException e) { e.printStackTrace(); }
+		core.skillService.resetExpertise(creature);
 		
 		player.setProfession(profession);
 
