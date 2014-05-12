@@ -766,8 +766,6 @@ public class SimulationService implements INetworkDispatch {
 		if(object.getAttachment("proposer") != null)
 			object.setAttachment("proposer", null);
 		
-		object.setPvPBitmask(0);
-		
 		//session.suspendWrite();
 		final long objectId = object.getObjectID();
 		
