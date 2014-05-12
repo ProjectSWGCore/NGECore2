@@ -24,7 +24,7 @@ def addTemplate(core):
 	mobileTemplate.setBoneAmount(750)	
 	mobileTemplate.setBoneType("Animal Bones")
 	mobileTemplate.setHideAmount(675)
-	mobileTemplate.setSocialGroup("krayt drago")
+	mobileTemplate.setSocialGroup("krayt dragon")
 	mobileTemplate.setAssistRange(36)
 	mobileTemplate.setStalker(True)	
 	
