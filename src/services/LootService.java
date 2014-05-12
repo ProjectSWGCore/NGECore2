@@ -47,7 +47,6 @@ import protocol.swg.PlayClientEffectObjectTransformMessage;
 import protocol.swg.SceneCreateObjectByCrc;
 import resources.loot.LootGroup;
 import resources.loot.LootRollSession;
-import resources.objects.Delta;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
 import resources.objects.tangible.TangibleObject;

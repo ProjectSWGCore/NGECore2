@@ -91,7 +91,6 @@ public class DevService implements INetworkDispatch {
 				if(creature.getClient().isGM()) suiOptions.put((long) 120, "House Deeds");
 				if(creature.getClient().isGM()) suiOptions.put((long) 125, "Crafting Tools");
 				if(creature.getClient().isGM()) suiOptions.put((long) 130, "Vehicle Deeds");
-				if(creature.getClient().isGM()) suiOptions.put((long) 121, "Sandbox City");	
 				break;
 			case 3: // [Items] Weapons
 				suiOptions.put((long) 30, "Jedi Weapons");
@@ -138,6 +137,8 @@ public class DevService implements INetworkDispatch {
 			case 11: // Locations
 				suiOptions.put((long) 122, "Teleport to Jedi Ruins");
 				suiOptions.put((long) 124, "Teleport to Mos Eisley");
+				suiOptions.put((long) 153, "Teleport to Force Crystal Hunter's Cave");
+				suiOptions.put((long) 121, "Teleport to Sandbox City");	
 				break;
 		
 		}
@@ -1262,6 +1263,10 @@ public class DevService implements INetworkDispatch {
 						TangibleObject av21deed = (TangibleObject) core.objectService.createObject("object/tangible/deed/vehicle_deed/shared_landspeeder_av21_deed.iff", planet);
 						inventory.add(swoopDeed);
 						inventory.add(av21deed);
+						return;
+					case 153:
+						Point3D position = new Point3D(-6222,1,7380);
+						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("dantooine"), position, player.getOrientation(), null);
 						return;
 				}
 			}	
