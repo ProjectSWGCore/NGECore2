@@ -470,8 +470,7 @@ public class HousingService implements INetworkDispatch {
 		Vector<TangibleObject> itemList = building.getItemsList();
 
 		for (int i=0;i<itemList.size();i++){
-			//String itemName = itemList.get(i).getObjectName().getStfValue();
-			String itemName = ""; // Temp solution to engine bug
+			String itemName = itemList.get(i).getObjectName().getStfValue();
 			window.addListBoxMenuItem(itemName, i);
 		}		
 
