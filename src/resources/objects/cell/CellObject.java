@@ -23,6 +23,8 @@ package resources.objects.cell;
 
 import java.io.Serializable;
 
+import org.apache.mina.core.buffer.IoBuffer;
+
 import protocol.swg.UpdateCellPermissionMessage;
 import resources.objects.ObjectMessageBuilder;
 
@@ -93,6 +95,12 @@ public class CellObject extends SWGObject implements Serializable {
 	
 	public ObjectMessageBuilder getMessageBuilder() {
 		return messageBuilder;
+	}
+	
+	@Override
+	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }

@@ -26,12 +26,9 @@ import java.util.List;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import com.sleepycat.persist.model.Persistent;
-
-import resources.objects.Delta;
+import engine.resources.objects.Delta;
 import engine.resources.objects.SWGObject;
 
-@Persistent(version=0)
 public class Guild extends Delta implements Serializable {
 	
 	private static final long serialVersionUID = 1L;

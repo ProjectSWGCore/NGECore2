@@ -22,34 +22,33 @@
 package resources.objects.creature;
 
 import java.nio.ByteOrder;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import main.NGECore;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import com.sleepycat.persist.model.Persistent;
-
 import engine.resources.common.CRC;
 import resources.buffs.Buff;
-import resources.objects.ObjectMessageBuilder;
+import engine.resources.objects.Builder;
 import engine.resources.objects.SWGObject;
 import resources.objects.player.PlayerObject;
+import resources.objects.tangible.TangibleMessageBuilder;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 import resources.skills.SkillMod;
 
-@Persistent
-public class CreatureMessageBuilder extends ObjectMessageBuilder {
-
-	public CreatureMessageBuilder() { }
+public class CreatureMessageBuilder extends TangibleMessageBuilder {
 	
-	public CreatureMessageBuilder(CreatureObject creatureObject) {
-
-		setObject(creatureObject);
-
+	public CreatureMessageBuilder(CreatureObject object) {
+		super(object);
 	}
-
+	
+	public CreatureMessageBuilder() {
+		super();
+	}
+	
 	public IoBuffer buildBaseline1() {
 		CreatureObject creature = (CreatureObject) object;
 		IoBuffer buffer = bufferPool.allocate(26, false).order(ByteOrder.LITTLE_ENDIAN);
@@ -1063,7 +1062,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer.putInt(1);
 		buffer.putInt(creature.getEquipmentListUpdateCounter());
 		buffer.put((byte) 1);
-		buffer.putShort((short) creature.getEquipmentList().indexOf(item));
+		buffer.putShort((short) creature.getEquipmentList().indexOf(item.getObjectId()));
 		if(item.getCustomization() == null || item.getCustomization().length == 0) {
 			buffer.putShort((short) 0);
 		} else {
@@ -1099,7 +1098,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer.putInt(1);
 		buffer.putInt(creature.getEquipmentListUpdateCounter());
 		buffer.put((byte) 0);
-		buffer.putShort((short) creature.getEquipmentList().indexOf(item));
+		buffer.putShort((short) creature.getEquipmentList().indexOf(item.getObjectId()));
 		
 		int size = buffer.position();
 		buffer.flip();
@@ -1192,36 +1191,35 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x1E, buffer, size + 4);
 		return buffer;
 	}
-
-	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
-		switch (viewType) {
-			case 4: {
-				switch (updateType) {
-					case 3: { 
-						buffer = createDelta("CREO", (byte) 4, (short) 1, (byte) 3, buffer, buffer.array().length + 4);
-						
-						if (object.getClient() != null && object.getClient().getSession() != null) {
-							object.getClient().getSession().write(buffer);
-						}
-						
-						break;
-					}
-				}
-			}
-			case 1:
-			case 3:
-			case 6:
-			case 8:
-			case 9:
-			default: {
-				return;
-			}
-		}
+	
+	@Override
+	public void buildBaseline1(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline1(baselineBuilders, deltaBuilders);
 	}
 	
 	@Override
-	public void sendBaselines() {
-		
+	public void buildBaseline3(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline3(baselineBuilders, deltaBuilders);
+	}
+	
+	@Override
+	public void buildBaseline4(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline4(baselineBuilders, deltaBuilders);
+	}
+	
+	@Override
+	public void buildBaseline6(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline6(baselineBuilders, deltaBuilders);
+	}
+	
+	@Override
+	public void buildBaseline8(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline8(baselineBuilders, deltaBuilders);
+	}
+	
+	@Override
+	public void buildBaseline9(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline9(baselineBuilders, deltaBuilders);
 	}
 	
 }

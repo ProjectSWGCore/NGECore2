@@ -27,13 +27,10 @@ import java.util.Random;
 import java.util.Vector;
 
 import engine.resources.objects.SWGObject;
-import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
-import engine.resources.scene.Quaternion;
 import main.NGECore;
 import resources.datatables.Options;
 import resources.loot.LootGroup;
-import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
 import resources.objects.tangible.TangibleObject;

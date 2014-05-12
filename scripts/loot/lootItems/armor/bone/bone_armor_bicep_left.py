@@ -3,9 +3,9 @@ def itemTemplate():
 
 	return ['object/tangible/wearables/armor/bone/shared_armor_bone_s01_bicep_l.iff']
 
-def customItemName():
+#def customItemName():
 
-	return 'Bone Armor Bicep Left'
+#	return 'Bone Armor Bicep Left'
 	
 def customItemStackCount():
 

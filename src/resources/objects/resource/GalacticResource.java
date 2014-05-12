@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.Vector;
 
+import org.apache.mina.core.buffer.IoBuffer;
+
 import main.NGECore;
 import protocol.swg.SurveyMapUpdateMessage;
 import resources.objects.creature.CreatureObject;
@@ -675,4 +677,11 @@ public class GalacticResource extends SWGObject implements Serializable {
 		
 		return historicResource;
 	}
+	
+	@Override
+	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
+		// TODO Auto-generated method stub
+		
+	}
+	
 }

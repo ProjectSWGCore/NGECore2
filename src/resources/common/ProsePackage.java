@@ -21,6 +21,8 @@
  ******************************************************************************/
 package resources.common;
 
+import engine.resources.common.Stf;
+
 public class ProsePackage {
 	
 	/*

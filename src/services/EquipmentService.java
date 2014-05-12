@@ -41,10 +41,13 @@ import org.python.core.PyObject;
 import resources.datatables.FactionStatus;
 import resources.objects.creature.CreatureObject;
 import main.NGECore;
+import engine.resources.container.Traverser;
 import engine.resources.objects.SWGObject;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import resources.objects.player.PlayerObject;
+import resources.objects.tangible.TangibleObject;
+import resources.objects.weapon.WeaponObject;
 import services.equipment.BonusSetTemplate;
 
 public class EquipmentService implements INetworkDispatch {
@@ -66,64 +69,95 @@ public class EquipmentService implements INetworkDispatch {
 
 	}
 	
-	public boolean canEquip(CreatureObject actor, SWGObject item) {
+	
+	/*
+	 	Returns an array;
+	 	[0] = boolean, whether or not the item may be equipped;
+	 	[1] = string, in case of failure, why
+	 */
+	public Object[] canEquip(CreatureObject actor, SWGObject item) {
 		// TODO: Species restrictions
 		// TODO: Gender restrictions
 		
 		boolean result = true;
+		String message = "";
 		
-		if (item == null)
-			return false;
+		if (item == null) 
+		{
+			result = false;
+			message = "null_item";		
+			return new Object[] { result, message };
+		}
 		
 		if (item.getAttributes().toString().contains("cat_armor"))
 		{
-			if (actor.hasAbility("wear_all_armor")) result = true; // Change to "wear_all_armor" ability instead of lvl 22		
-			else return false;
+			if (actor.hasAbility("wear_all_armor")) result = true;
+			else 
+			{
+				result = false;
+				message = "@error_message:insufficient_skill"; // I am unsure if this is the right message
+				return new Object[] { result, message };
+			}
 		}
 
-		if (item.getStringAttribute("class_required") != null) {
+		if (item.getStringAttribute("class_required") != null) 
+		{
 			String classRequired = item.getStringAttribute("class_required");
 			String profession = ((PlayerObject) actor.getSlottedObject("ghost")).getProfession();
 			
-			if (classRequired.contains(",")) {
-				String[] classes = classRequired.split(",");
-				
-				for (int i = 0; i < classes.length; i++) {
-					if (classes[i].contains(core.playerService.getFormalProfessionName(profession))) {
-						return true;
-					}
-				}
+			if (classRequired.contains(core.playerService.getFormalProfessionName(profession)) || classRequired.equals("None")) result = true;
+			else 
+			{
+				result = false;
+				message = "@error_message:insufficient_skill"; // I am unsure if this is the right message
+				return new Object[] { result, message };
 			}
-			if (classRequired.contentEquals(core.playerService.getFormalProfessionName(profession)) || classRequired.contentEquals("None"))
-				result = true;
-			else
-				return false;
 		}
 		
 		if (item.getStringAttribute("faction_restriction") != null) 
-			if (item.getStringAttribute("faction_restriction").toLowerCase().contentEquals(actor.getFaction()) && actor.getFactionStatus() >= FactionStatus.Combatant)
-				result = true;
-			else
-				return false;			
+		{
+			if (item.getStringAttribute("faction_restriction").toLowerCase().contentEquals(actor.getFaction()) && actor.getFactionStatus() >= FactionStatus.Combatant) result = true;
+			else 
+			{
+				result = false;
+				message = "@faction_recruiter:must_be_faction_member_use"; // will have to somehow manage prose %TO for faction name
+				return new Object[] { result, message };
+			}
+		}
 		
 		if (item.getAttributes().containsKey("required_combat_level"))
 		{
-			if (actor.getLevel() >= item.getIntAttribute("required_combat_level"))
-				result = true;
-			else
-				return false;
+			if (actor.getLevel() >= item.getIntAttribute("required_combat_level")) result = true;
+			else 
+			{
+				result = false;
+				message = "@error_message:insufficient_skill"; // I am unsure if this is the right message
+				return new Object[] { result, message };
+			}
 		}
 		
 		if(item.getAttachment("unity") != null) 
 		{
-			actor.sendSystemMessage("@unity:cannot_remove_ring", (byte) 0);
-			return false;
+			result = false;
+			message = "@unity:cannot_remove_ring";
+			return new Object[] { result, message };
 		}
 		
-		return result;
+		if(item.getTemplate().startsWith("object/weapon/") && item.getTemplate().contains("lightsaber") && item.getAttachment("hasColorCrystal") == null) item.setAttachment("hasColorCrystal", false);
+		
+		if(item.getAttachment("hasColorCrystal") != null && (Boolean) item.getAttachment("hasColorCrystal") == false)
+		{
+			result = false;
+			message = "@jedi_spam:lightsaber_no_color";
+			return new Object[] { result, message };
+		}
+		
+		result = true;
+		message = "success";
+		return new Object[] { result, message };
 	}
 	
-	public void equip(CreatureObject actor, SWGObject item) 
+	synchronized public void equip(CreatureObject actor, SWGObject item) 
 	{
 		String template = ((item.getAttachment("customServerTemplate") == null) ? item.getTemplate() : (item.getTemplate().split("shared_")[0] + "shared_" + ((String) item.getAttachment("customServerTemplate")) + ".iff"));
 		String serverTemplate = template.replace(".iff", "");
@@ -133,14 +167,14 @@ public class EquipmentService implements INetworkDispatch {
 		
 		// TODO: bio-link (assign it by objectID with setAttachment and then just display the customName for that objectID).
 		
-		if(!actor.getEquipmentList().contains(item)) 
+		if(!actor.getEquipmentList().contains(item.getObjectId())) 
 		{
 			actor.addObjectToEquipList(item);
 			processItemAtrributes(actor, item, true);
 		}
 }
 
-	public void unequip(CreatureObject actor, SWGObject item) 
+	synchronized public void unequip(CreatureObject actor, SWGObject item) 
 	{
 		String template = ((item.getAttachment("customServerTemplate") == null) ? item.getTemplate() : (item.getTemplate().split("shared_")[0] + "shared_" + ((String) item.getAttachment("customServerTemplate")) + ".iff"));
 		String serverTemplate = template.replace(".iff", "");
@@ -149,7 +183,7 @@ public class EquipmentService implements INetworkDispatch {
 		if(func != null) func.__call__(Py.java2py(core), Py.java2py(actor), Py.java2py(item));
 
 		
-		if(actor.getEquipmentList().contains(item)) 
+		if(actor.getEquipmentList().contains(item.getObjectId())) 
 		{
 			actor.removeObjectFromEquipList(item);
 			processItemAtrributes(actor, item, false);
@@ -288,6 +322,109 @@ public class EquipmentService implements INetworkDispatch {
 			core.skillModService.addSkillMod(creature, e.getKey(), forceProtection);
 			if(wornArmourPieces >= 3) core.skillModService.addSkillMod(creature, e.getKey(), (int) e.getValue().floatValue());
 		}
+	}
+	
+	public void calculateLightsaberAttributes(CreatureObject actor, TangibleObject item, SWGObject targetContainer)
+	{
+		WeaponObject lightsaber = null;
+		TangibleObject lightsaberInventory = null;
+		long tunerId = 0;
+		
+		// Get our lightsaber weapon object
+		if(item.getContainer().getTemplate().startsWith("object/tangible/inventory/shared_lightsaber_inventory")) lightsaber = (WeaponObject) item.getGrandparent();
+		else if(targetContainer.getTemplate().startsWith("object/tangible/inventory/shared_lightsaber_inventory")) lightsaber = (WeaponObject) targetContainer.getContainer();
+		lightsaberInventory = (TangibleObject) lightsaber.getSlottedObject("saber_inv");
+		
+		if(lightsaber.getAttachment("weaponBaseDamageMin") == null) lightsaber.setAttachment("weaponBaseDamageMin", lightsaber.getMinDamage());
+		if(lightsaber.getAttachment("weaponBaseDamageMax") == null) lightsaber.setAttachment("weaponBaseDamageMax", lightsaber.getMaxDamage());
+		
+		// Check if item is a lightsaber component
+		if(lightsaber == null) return;
+		if(lightsaberInventory == null) return;
+		if(lightsaber.getContainer() instanceof CreatureObject)
+		{
+			actor.sendSystemMessage("@jedi_spam:saber_not_while_equpped", (byte) 0);
+			return;
+		}
+		
+		if(!item.getTemplate().startsWith("object/tangible/component/weapon/lightsaber/"))
+		{
+			actor.sendSystemMessage("@jedi_spam:saber_not_crystal", (byte) 0);
+			return;
+		}
+		if(lightsaber.getAttachment("hasColorCrystal") == null) lightsaber.setAttachment("hasColorCrystal", false);
+		if(item.getAttributes().containsKey("@obj_attr_n:color") && (Boolean) lightsaber.getAttachment("hasColorCrystal") && !(targetContainer.getContainer() instanceof CreatureObject)) 
+		{
+			actor.sendSystemMessage("@jedi_spam:saber_already_has_color", (byte) 0); 
+			return;
+		}
+		
+		// Find our tuner
+		if(item.getAttachment("tunerId") == null) item.setAttachment("tunerId", 0);
+		tunerId = (int) item.getAttachment("tunerId");
+		
+		// Check if player tuned the crystal
+		if(tunerId == 0)
+		{
+			actor.sendSystemMessage("@jedi_spam:saber_crystal_not_tuned", (byte) 0);
+			return;
+		}
+		if(tunerId != actor.getObjectId())
+		{
+			actor.sendSystemMessage("@jedi_spam:saber_crystal_not_owner", (byte) 0);
+			return;
+		}
+		else item.getContainer().transferTo(actor, targetContainer, item);
+	
+		// Calculate attributes
+		lightsaber.setAttachment("hasColorCrystal", false);
+		
+		lightsaberInventory.viewChildren(lightsaberInventory, false, false, new Traverser()
+		{
+			WeaponObject saber;
+			TangibleObject saberInv;
+			
+			int minDamageBonus = 0;
+			int maxDamageBonus = 0;
+			Boolean hasColorCrystal = false;		
+			
+			public void process(SWGObject item)
+			{	
+				saber = (WeaponObject) item.getGrandparent();
+				saberInv = (TangibleObject) saber.getSlottedObject("saber_inv");
+
+				if(item.getAttributes().get("@obj_attr_n:color") != null) // "Blade Color Modification"
+				{
+					int crystalColorIndex = resources.datatables.LightsaberColors.getByName((String) item.getAttributes().get("@obj_attr_n:color"));
+					
+					byte bladeType = crystalColorIndex > 256 ? (byte) (crystalColorIndex % 256) : 0x00;
+					byte bladeColor = crystalColorIndex > 256 ? (byte) 0x00 : (byte) crystalColorIndex;
+					
+					saber.setCustomizationVariable("private/alternate_shader_blade", bladeType);
+					saber.setCustomizationVariable("/private/index_color_blade", bladeColor);
+					
+					 // System.out.println("bladeColorName: " + item.getAttributes().get("@obj_attr_n:color"));
+					 // System.out.println("bladeColor: " + bladeColor);
+					 // System.out.println("bladeType: " + bladeType);
+					 // System.out.println();
+					
+					hasColorCrystal = true;
+				}
+				else 
+				{
+					minDamageBonus += Integer.parseInt(item.getAttributes().get("@obj_attr_n:mindamage")); // "Minimum Damage"
+					maxDamageBonus += Integer.parseInt(item.getAttributes().get("@obj_attr_n:maxdamage")); // "Maximum Damage"
+				}
+				
+				int saberBaseDamageMin = (int) saber.getAttachment("weaponBaseDamageMin");
+				int saberBaseDamageMax = (int) saber.getAttachment("weaponBaseDamageMax");
+				
+				saber.setMinDamage(saberBaseDamageMin + minDamageBonus);
+				saber.setMaxDamage(saberBaseDamageMax + maxDamageBonus);
+				
+				saber.setAttachment("hasColorCrystal", hasColorCrystal);
+			}
+		});
 	}
 	
 	private int getWeaponCriticalChance(CreatureObject actor, SWGObject item) {

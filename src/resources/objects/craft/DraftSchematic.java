@@ -23,6 +23,8 @@ package resources.objects.craft;
 
 import java.io.Serializable;
 
+import org.apache.mina.core.buffer.IoBuffer;
+
 import resources.objects.ObjectMessageBuilder;
 
 import com.sleepycat.persist.model.Persistent;
@@ -56,6 +58,12 @@ public class DraftSchematic extends SWGObject implements Serializable {
 	
 	public ObjectMessageBuilder getMessageBuilder() {
 		return messageBuilder;
+	}
+	
+	@Override
+	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }

@@ -460,6 +460,14 @@ public class PlayerCity implements Serializable {
 		electionVotes.add(vote);
 	}
 	
+	public void addToTreasury(int amountToAdd) {
+		cityTreasury += amountToAdd;
+	}
+	
+	public void removeFromTreasury(int amountToDeduct) {
+		cityTreasury -= amountToDeduct;
+	}
+	
 	// Stalinesque method :D
 	public void setElectionVotes(Vector<Byte> electionVotes) {
 		this.electionVotes = electionVotes;

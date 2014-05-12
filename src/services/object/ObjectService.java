@@ -90,6 +90,7 @@ import engine.resources.container.WorldPermissions;
 import engine.resources.database.DatabaseConnection;
 import engine.resources.database.ODBCursor;
 import engine.resources.database.ObjectDatabase;
+import engine.resources.objects.Delta;
 import engine.resources.objects.IPersistent;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
@@ -99,7 +100,6 @@ import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import main.NGECore;
 import resources.objectives.BountyMissionObjective;
-import resources.objects.Delta;
 import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
 import resources.objects.craft.DraftSchematic;
@@ -121,6 +121,8 @@ import resources.objects.tangible.TangibleObject;
 import resources.objects.tool.SurveyTool;
 import resources.objects.waypoint.WaypointObject;
 import resources.objects.weapon.WeaponObject;
+import services.EquipmentService;
+import services.ai.AIActor;
 import services.command.BaseSWGCommand;
 import services.command.CombatCommand;
 import services.bazaar.AuctionItem;
@@ -456,22 +458,23 @@ public class ObjectService implements INetworkDispatch {
 			return;
 		}
 		
-		if (object instanceof TangibleObject &&
-		((TangibleObject) object).getRespawnTime() > 0) {
+		if (object.getAttachment("AI") != null && object.getAttachment("AI") instanceof AIActor && ((AIActor) object.getAttachment("AI")).getMobileTemplate().getRespawnTime() > 0) {
 			final long objectId = object.getObjectID();
 			final String Template = object.getTemplate();
 			final Planet planet = object.getPlanet();
 			final Point3D position = object.getPosition();
 			final Quaternion orientation = object.getOrientation();
+			final long cellId = ((object.getContainer() == null) ? 0L : object.getContainer().getObjectID());
+			final short level = ((object instanceof CreatureObject) ? ((CreatureObject) object).getLevel() : (short) 0);
 			
 			scheduler.schedule(new Runnable() {
 				
 				@Override
 				public void run() {
-					createObject(Template, objectId, planet, position, orientation);
+					NGECore.getInstance().spawnService.spawnCreature(Template, objectId, planet.getName(), cellId, position.x, position.y, position.z, orientation.w, orientation.x, orientation.y, orientation.z, level);
 				}
 				
-			}, ((TangibleObject) object).getRespawnTime(), TimeUnit.SECONDS);
+			}, ((AIActor) object.getAttachment("AI")).getMobileTemplate().getRespawnTime(), TimeUnit.SECONDS);
 		}
 		
 		String filePath = "scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", "") + object.getTemplate().split("shared_" , 2)[1].replace(".iff", "") + ".py";
@@ -499,6 +502,8 @@ public class ObjectService implements INetworkDispatch {
 
 		if(parent != null) {
 			if(parent instanceof CreatureObject) {
+				core.equipmentService.unequip((CreatureObject) parent, object);
+				
 				((CreatureObject) parent).removeObjectFromEquipList(object);
 				((CreatureObject) parent).removeObjectFromAppearanceEquipList(object);
 			}
@@ -836,9 +841,9 @@ public class ObjectService implements INetworkDispatch {
 				
 				core.buffService.clearBuffs(creature);
 
-				CmdStartScene startScene = new CmdStartScene((byte) 0, objectId, creature.getPlanet().getPath(), creature.getTemplate(), position.x, position.y, position.z, core.getGalacticTime(), 0);
+				CmdStartScene startScene = new CmdStartScene((byte) 0, objectId, creature.getPlanet().getPath(), creature.getTemplate(), position.x, position.y, position.z, core.getGalacticTime() / 1000, 0);
 				session.write(startScene.serialize());
-				
+
 				ChatServerStatus chatServerStatus = new ChatServerStatus();
 				client.getSession().write(chatServerStatus.serialize());
 				
@@ -901,8 +906,8 @@ public class ObjectService implements INetworkDispatch {
 				if(!core.getConfig().getString("MOTD").equals(""))
 					creature.sendSystemMessage(core.getConfig().getString("MOTD"), (byte) 2);
 				
-				if (core.getBountiesODB().contains(creature.getObjectId()))
-					core.missionService.getBountyList().add((BountyListItem) core.getBountiesODB().get(creature.getObjectId()));
+				if (core.getBountiesODB().contains(creature.getObjectID()))
+					core.missionService.getBountyMap().put(creature.getObjectID(), (BountyListItem) core.getBountiesODB().get(creature.getObjectID()));
 				
 				if (creature.getSlottedObject("datapad") != null) {
 					creature.getSlottedObject("datapad").viewChildren(creature, true, false, new Traverser() {

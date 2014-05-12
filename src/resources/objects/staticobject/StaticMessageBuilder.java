@@ -22,17 +22,22 @@
 package resources.objects.staticobject;
 
 import java.nio.ByteOrder;
+import java.util.Map;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
 import resources.objects.ObjectMessageBuilder;
+import engine.resources.objects.Builder;
 
 public class StaticMessageBuilder extends ObjectMessageBuilder {
 	
-	public StaticMessageBuilder(StaticObject staticObject) {
-		setObject(staticObject);
+	public StaticMessageBuilder(StaticObject object) {
+		super(object);
 	}
-
+	
+	public StaticMessageBuilder() {
+		super();
+	}
 	
 	public IoBuffer buildBaseline3() {
 
@@ -79,18 +84,15 @@ public class StaticMessageBuilder extends ObjectMessageBuilder {
 		
 		return buffer;
 	}
-
+	
 	@Override
-	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
-		// TODO Auto-generated method stub
-		
+	public void buildBaseline3(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline3(baselineBuilders, deltaBuilders);
 	}
-
+	
 	@Override
-	public void sendBaselines() {
-		// TODO Auto-generated method stub
-		
+	public void buildBaseline6(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline6(baselineBuilders, deltaBuilders);
 	}
-
-
+	
 }

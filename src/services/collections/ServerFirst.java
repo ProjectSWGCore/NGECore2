@@ -25,9 +25,9 @@ import java.io.Serializable;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import resources.objects.Delta;
-
 import com.sleepycat.persist.model.Persistent;
+
+import engine.resources.objects.Delta;
 
 @Persistent
 public class ServerFirst extends Delta implements Serializable {

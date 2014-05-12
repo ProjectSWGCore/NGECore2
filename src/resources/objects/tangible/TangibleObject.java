@@ -32,6 +32,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import org.apache.mina.core.buffer.IoBuffer;
+
 import main.NGECore;
 import protocol.swg.ObjControllerMessage;
 import protocol.swg.PlayClientEffectObjectMessage;
@@ -39,19 +41,20 @@ import protocol.swg.StopClientEffectObjectByLabel;
 import protocol.swg.UpdatePVPStatusMessage;
 import protocol.swg.objectControllerObjects.ShowFlyText;
 import resources.common.OutOfBand;
-import resources.common.RGB;
 import resources.datatables.Options;
 import resources.datatables.PvpStatus;
+import resources.datatables.STF;
 import resources.loot.LootGroup;
 import resources.objects.ObjectMessageBuilder;
 import resources.objects.creature.CreatureObject;
-import resources.visitors.IDManagerVisitor;
 
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
 
 import engine.clientdata.ClientFileManager;
+import engine.clientdata.visitors.IDManagerVisitor;
 import engine.clients.Client;
+import engine.resources.common.RGB;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -79,9 +82,6 @@ public class TangibleObject extends SWGObject implements Serializable {
 	protected transient Vector<TangibleObject> defendersList = new Vector<TangibleObject>();	// unused in packets but useful for the server
 	@NotPersistent
 	private transient TangibleMessageBuilder messageBuilder;
-	
-	private int respawnTime = 0;
-	private Point3D spawnCoordinates = new Point3D(0, 0, 0);
 	
 	//private TreeSet<TreeMap<String,Integer>> lootSpecification = new TreeSet<TreeMap<String,Integer>>();
 	private List<LootGroup> lootGroups = new ArrayList<LootGroup>();
@@ -115,7 +115,6 @@ public class TangibleObject extends SWGObject implements Serializable {
 	public TangibleObject(long objectID, Planet planet, String template, Point3D position, Quaternion orientation) {
 		super(objectID, planet, position, orientation, template);
 		messageBuilder = new TangibleMessageBuilder(this);
-		spawnCoordinates = position.clone();
 		if (this.getClass().getSimpleName().equals("TangibleObject")) setIntAttribute("volume", 1);
 	}
 	
@@ -131,10 +130,10 @@ public class TangibleObject extends SWGObject implements Serializable {
 		messageBuilder = new TangibleMessageBuilder(this);
 	}
 	
+	@Deprecated
 	public void setCustomName2(String customName) {
 		setCustomName(customName);
-		
-		notifyObservers(messageBuilder.buildCustomNameDelta(customName), true);
+		System.err.println("setCustomName2 is now deprecated - please use setCustomName");
 	}
 
 	public int getIncapTimer() {
@@ -164,7 +163,7 @@ public class TangibleObject extends SWGObject implements Serializable {
 		else if(conditionDamage > getMaxDamage())
 			conditionDamage = getMaxDamage();
 		this.conditionDamage = conditionDamage;
-		notifyObservers(messageBuilder.buildConditionDamageDelta(conditionDamage), false);
+		notifyObservers(messageBuilder.buildConditionDamageDelta(conditionDamage), true);
 		if (maxDamage > 0) {
 			this.setStringAttribute("condition", (maxDamage + "/" + (maxDamage - conditionDamage)));
 		}
@@ -179,7 +178,7 @@ public class TangibleObject extends SWGObject implements Serializable {
 			this.customization = customization;
 		}
 		
-		notifyObservers(messageBuilder.buildCustomizationDelta(customization), false);
+		notifyObservers(messageBuilder.buildCustomizationDelta(customization), true);
 	}
 
 	public List<Integer> getComponentCustomizations() {
@@ -297,12 +296,21 @@ public class TangibleObject extends SWGObject implements Serializable {
 		}
 	}
 	
+	public Byte getCustomizationVariable(String type)
+	{
+		if(customizationVariables.containsKey(type)) return customizationVariables.get(type);
+		System.err.println("Error: object doesn't have customization variable " + type);
+		return null;
+	}
+	
 	public void setCustomizationVariable(String type, byte value)
 	{
 		if(customizationVariables.containsKey(type)) customizationVariables.replace(type, value);
 		else customizationVariables.put(type, value);
 		
-		buildCustomizationBytes();
+		byte[] customizationBytes = getCustomizationBytes();
+		customization = customizationBytes;
+		notifyObservers(messageBuilder.buildCustomizationDelta(customizationBytes), true);
 	}
 	
 	public void removeCustomizationVariable(String type)
@@ -310,11 +318,13 @@ public class TangibleObject extends SWGObject implements Serializable {
 		if(customizationVariables.containsKey(type)) 
 		{
 			customizationVariables.remove(type);
-			buildCustomizationBytes();
+			byte[] customizationBytes = getCustomizationBytes();
+			customization = customizationBytes;
+			notifyObservers(messageBuilder.buildCustomizationDelta(customizationBytes), true);
 		}
 	}
 	
-	private void buildCustomizationBytes()
+	private byte[] getCustomizationBytes()
 	{
 		//if(customizationVariables.size() == 0) customization = { 0x00 };
 		
@@ -336,9 +346,10 @@ public class TangibleObject extends SWGObject implements Serializable {
 				stream.write((byte) 0xBF);
 				stream.write((byte) 0x03);
 			}
-			customization = stream.toByteArray();
+			return stream.toByteArray();
 		}
-		catch (Exception e) { e.printStackTrace(); }	
+		catch (Exception e) { e.printStackTrace(); }
+		return null;	
 	}
 	
 	public String getFaction() {
@@ -479,18 +490,6 @@ public class TangibleObject extends SWGObject implements Serializable {
 	
 	public void stopEffectObject(String commandString) {
 		notifyObservers(new StopClientEffectObjectByLabel(getObjectID(), commandString), true);
-	}
-	
-	public int getRespawnTime() {
-		synchronized(objectMutex) {
-			return respawnTime;
-		}
-	}
-	
-	public void setRespawnTime(int respawnTime) {
-		synchronized(objectMutex) {
-			this.respawnTime = respawnTime;
-		}
 	}
 	
 	public TangibleObject getKiller() {
@@ -639,6 +638,25 @@ public class TangibleObject extends SWGObject implements Serializable {
 	
 	public ObjectMessageBuilder getMessageBuilder() {
 		return messageBuilder;
+	}
+	
+	public boolean isFull()
+	{
+		if(getTemplateData().getAttribute("containerVolumeLimit") == null) return false;
+		
+		int containerVolumeLimit = (int)getTemplateData().getAttribute("containerVolumeLimit") >> 8; // Shifting because it seems to be returning an extra byte before it should
+		
+		if(containerVolumeLimit == 0) return false;
+			
+		if(NGECore.getInstance().objectService.objsInContainer(this, this) >= containerVolumeLimit) return true;
+	
+		return false;
+	}
+	
+	@Override
+	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }

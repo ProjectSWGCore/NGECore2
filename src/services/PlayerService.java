@@ -65,9 +65,7 @@ import resources.common.ObjControllerOpcodes;
 import resources.common.Opcodes;
 import resources.common.OutOfBand;
 import resources.common.ProsePackage;
-import resources.common.RGB;
 import resources.common.SpawnPoint;
-import resources.common.StringUtilities;
 import resources.datatables.DisplayType;
 import resources.datatables.Options;
 import resources.datatables.PlayerFlags;
@@ -91,8 +89,8 @@ import engine.clientdata.visitors.CrcStringTableVisitor;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.clients.Client;
 import engine.resources.common.CRC;
+import engine.resources.common.RGB;
 import engine.resources.container.Traverser;
-import engine.resources.objects.DraftSchematic;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
@@ -490,15 +488,15 @@ public class PlayerService implements INetworkDispatch {
 		
 		SWGObject preDesignatedCloner = null;
 		
-		if(creature.getAttachment("preDesignatedCloner") != null) {
-			preDesignatedCloner = core.objectService.getObject((long) creature.getAttachment("preDesignatedCloner"));
+		if(creature.getPlayerObject().getBindLocation() != 0) {
+			preDesignatedCloner = core.objectService.getObject((long) creature.getPlayerObject().getBindLocation());
 			if(preDesignatedCloner != null) 
-				cloneData.put(preDesignatedCloner.getObjectID(), core.mapService.getClosestCityName(preDesignatedCloner) /*+ " (" + String.valueOf(position.getDistance2D(cloner.getPosition())) + "m)"*/);
+				cloneData.put(preDesignatedCloner.getObjectID(), "@base_player:clone_location_registered_select_begin " + core.mapService.getClosestCityName(preDesignatedCloner) + " @base_player:clone_location_registered_select_end");
 		}
 		final long preDesignatedObjectId = (preDesignatedCloner != null) ? preDesignatedCloner.getObjectID() : 0;
 		cloners.stream().filter(c -> c.getObjectID() != preDesignatedObjectId).forEach(c -> cloneData.put(c.getObjectID(), core.mapService.getClosestCityName(c)));
 		
-		final SUIWindow window = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "@base_player:revive_title", "Select the desired option and click OK.", 
+		final SUIWindow window = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "@base_player:revive_title", "@base_player:clone_prompt_header", 
 				cloneData, creature, null, 0);
 		Vector<String> returnList = new Vector<String>();
 		returnList.add("List.lstList:SelectedRow");
@@ -555,7 +553,7 @@ public class PlayerService implements INetworkDispatch {
 		}
 		
 		creature.setFactionStatus(0);
-		core.buffService.addBuffToCreature(creature, "cloning_sickness");
+		core.buffService.addBuffToCreature(creature, "cloning_sickness", creature);
 		
 	}
 	
@@ -575,12 +573,33 @@ public class PlayerService implements INetworkDispatch {
 			return;
 		}
 		
-		player.setProfession(profession);
-
 		String xpType = ((profession.contains("entertainer")) ? "entertainer" : ((profession.contains("trader")) ? "crafting" : "combat_general"));
-			
 		int experience = player.getXp(xpType);
 		
+		// Remove old profession abilties - resetLevel wont due because resetLevel grants basic specials for level 1
+		try 
+		{
+			String[] skills;
+			
+			DatatableVisitor skillTemplate = ClientFileManager.loadFile("datatables/skill_template/skill_template.iff", DatatableVisitor.class);
+			
+			for (int s = 0; s < skillTemplate.getRowCount(); s++) 
+			{
+				if (skillTemplate.getObject(s, 0) != null) {
+					if (((String) skillTemplate.getObject(s, 0)).equals(player.getProfession())) 
+					{
+						skills = ((String) skillTemplate.getObject(s, 4)).split(",");
+						for (String skill : skills) core.skillService.removeSkill(creature, skill);
+
+						break;
+					}
+				}
+			}
+		}  catch (InstantiationException | IllegalAccessException e) { e.printStackTrace(); }
+		core.skillService.resetExpertise(creature);
+		
+		player.setProfession(profession);
+
 		try {
 			experienceTable = ClientFileManager.loadFile("datatables/player/player_level.iff", DatatableVisitor.class);
 			
@@ -1213,7 +1232,7 @@ public class PlayerService implements INetworkDispatch {
 					// need to set a unity attachment.
 					ringList.get(0).setAttachment("unity", (Boolean) true);
 
-					if(!acceptor.getEquipmentList().contains(ringList.get(0)))
+					if(!acceptor.getEquipmentList().contains(ringList.get(0).getObjectId()))
 						core.equipmentService.equip(acceptor, ringList.get(0));
 
 					aGhost.setSpouseName(proposer.getCustomName());
@@ -1248,7 +1267,7 @@ public class PlayerService implements INetworkDispatch {
 				SWGObject selectedRing = core.objectService.getObject(ringWindow.getObjectIdByIndex(index));
 				selectedRing.setAttachment("unity", (Boolean) true);
 
-				if(!actor.getEquipmentList().contains(selectedRing))
+				if(!actor.getEquipmentList().contains(selectedRing.getObjectId()))
 					core.equipmentService.equip(actor, selectedRing);
 
 				PlayerObject aGhost = (PlayerObject) actor.getSlottedObject("ghost");
@@ -1330,8 +1349,8 @@ public class PlayerService implements INetworkDispatch {
 						victim.setCashCredits(0);
 					} else { victim.setBankCredits(victim.getBankCredits() - bounty); }
 					
-					if (!core.missionService.addToExistingBounty(attacker.getObjectId(), victim.getObjectId(), bounty))
-						core.missionService.createNewBounty(attacker, victim.getObjectId(), bounty);
+					if (!core.missionService.addToExistingBounty(attacker.getObjectID(), victim.getObjectID(), bounty))
+						core.missionService.createNewBounty(attacker, victim.getObjectID(), bounty);
 					
 					victim.sendSystemMessage("You have placed a bounty for " + bounty + " credits on the head of " + attacker.getCustomName(), (byte) 0);
 				}
