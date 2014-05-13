@@ -169,7 +169,6 @@ public class HousingService implements INetworkDispatch {
 		}
 		
 		core.objectService.persistObject(building.getObjectID(), building, core.getSWGObjectODB());
-		core.getSWGObjectODB().getEnvironment().sync();
 		
 	}
 	
