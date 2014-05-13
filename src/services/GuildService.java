@@ -19,7 +19,7 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package services.guild;
+package services;
 
 import java.util.Map;
 
@@ -55,15 +55,9 @@ public class GuildService implements INetworkDispatch {
 		
 		if (leader == null)
 			return null;
-
-		int id = 0;
-		if (object.getGuildList().size() < 1) {
-			id = 0;
-		} else {
-			id = ((object.getGuildList().get(object.getGuildList().size()).getId() + 1));
-		}
 		
-		Guild guild = new Guild(id, abbreviation, name, leader);
+		int listSize = object.getGuildList().size();
+		Guild guild = new Guild((listSize == 0 ? 1 : (object.getGuildList().get(listSize).getId()) + 1), abbreviation, name, leader);
 		
 		object.getGuildList().add(guild);
 		

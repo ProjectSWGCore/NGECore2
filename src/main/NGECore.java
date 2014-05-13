@@ -86,7 +86,7 @@ import services.command.CombatCommand;
 import services.command.CommandService;
 import services.gcw.FactionService;
 import services.gcw.GCWService;
-import services.guild.GuildService;
+import services.GuildService;
 import services.LoginService;
 import services.map.MapService;
 import services.mission.MissionService;
