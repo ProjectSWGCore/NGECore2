@@ -18,6 +18,7 @@ def addTemplate(core):
 	mobileTemplate.setMaxSpawnDistance(5)
 	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setSocialGroup('remnants of kun')
+	mobileTemplate.setRespawnTime(300)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_force_sensitive_crypt_crawler.iff')

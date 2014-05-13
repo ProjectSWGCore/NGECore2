@@ -19,6 +19,7 @@ def addTemplate(core):
 	mobileTemplate.setDeathblow(True)
 	mobileTemplate.setSocialGroup('dark jedi')
 	mobileTemplate.setAssistRange(12)
+	mobileTemplate.setRespawnTime(300)
 	
 	
 	templates = Vector()

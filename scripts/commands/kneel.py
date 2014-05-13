@@ -45,7 +45,7 @@ def run(core, actor, target, commandString):
 	
 	
 	lotSvc = core.lootService
-	lotSvc.handleContainer(actor,200336,'Junk','dantooine')
+	lotSvc.handleContainer(actor,200335,'Junk','dantooine')
 	
 	
 	if actor.getPosture() == 13 or actor.getPosture() == 14:

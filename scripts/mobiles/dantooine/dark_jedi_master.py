@@ -17,6 +17,7 @@ def addTemplate(core):
 	mobileTemplate.setDeathblow(True)
 	mobileTemplate.setSocialGroup('dark jedi')
 	mobileTemplate.setAssistRange(12)
+	mobileTemplate.setRespawnTime(300)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_dark_jedi_master_female_twk_01.iff')
