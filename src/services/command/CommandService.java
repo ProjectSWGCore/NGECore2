@@ -164,6 +164,11 @@ public class CommandService implements INetworkDispatch  {
 						if (target == actor) {
 							target = null;
 						}
+						
+						// It's possible they use c cmdString to indicate if it should always be on self
+						if (name.contains("c")) {
+							//target = actor;
+						}
 					}
 					
 					break;
