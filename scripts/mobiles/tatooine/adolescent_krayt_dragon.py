@@ -18,7 +18,15 @@ def addTemplate(core):
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(True)
 	mobileTemplate.setScale(0.5)
-
+	mobileTemplate.setMeatType("Carnivore Meat")
+	mobileTemplate.setMeatAmount(1700)
+	mobileTemplate.setHideType("Bristly Hide")
+	mobileTemplate.setHideAmount(950)
+	mobileTemplate.setBoneType("Animal Bones")
+	mobileTemplate.setBoneAmount(905)
+	mobileTemplate.setSocialGroup("krayt dragon")
+	mobileTemplate.setAssistRange(6)
+	mobileTemplate.setStalker(False)
 	
 	
 	templates = Vector()

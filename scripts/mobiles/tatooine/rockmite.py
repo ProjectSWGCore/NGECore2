@@ -8,17 +8,23 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('rockmite')
 	mobileTemplate.setLevel(8)
-	mobileTemplate.setMinLevel(8)
+	mobileTemplate.setMinLevel(7)
 	mobileTemplate.setMaxLevel(9)
 	mobileTemplate.setDifficulty(0)
-	mobileTemplate.setAttackRange(4)
+	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)
 	mobileTemplate.setWeaponType(6)
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(1)
-
+	mobileTemplate.setMeatType("Insect Meat")
+	mobileTemplate.setMeatAmount(3)
+	mobileTemplate.setHideType("Scaley Hide")
+	mobileTemplate.setHideAmount(4)	
+	mobileTemplate.setSocialGroup("rockmite")
+	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setStalker(False)	
 	
 	
 	templates = Vector()
