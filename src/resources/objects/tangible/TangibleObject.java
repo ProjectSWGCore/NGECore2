@@ -43,7 +43,6 @@ import protocol.swg.objectControllerObjects.ShowFlyText;
 import resources.common.OutOfBand;
 import resources.datatables.Options;
 import resources.datatables.PvpStatus;
-import resources.datatables.STF;
 import resources.loot.LootGroup;
 import resources.objects.ObjectMessageBuilder;
 import resources.objects.creature.CreatureObject;

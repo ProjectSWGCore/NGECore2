@@ -21,8 +21,6 @@
  ******************************************************************************/
 package services.gcw;
 
-import java.util.Vector;
-
 import net.engio.mbassy.listener.Handler;
 import resources.common.collidables.AbstractCollidable;
 import resources.common.collidables.AbstractCollidable.EnterEvent;
