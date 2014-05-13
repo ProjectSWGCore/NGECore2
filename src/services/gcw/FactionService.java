@@ -259,7 +259,7 @@ public class FactionService implements INetworkDispatch {
 		}
 		
 		// Everything below assumes target is potentially attackable.
-		if (!target.getOption(Options.ATTACKABLE)) {
+		if (!target.getOption(Options.ATTACKABLE) || target.getOption(Options.INVULNERABLE)) {
 			return pvpBitmask;
 		}
 		
