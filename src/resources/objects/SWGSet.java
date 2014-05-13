@@ -75,7 +75,7 @@ public class SWGSet<E> implements Set<E>, Serializable {
 		for (Object item : set) {				
 			try {
 				if (item instanceof IDelta) {
-					item.getClass().getMethod("init", new Class[] {}).invoke(item, new Object[] { });
+					item.getClass().getMethod("init", new Class[] { SWGObject.class }).invoke(item, new Object[] { object });
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
