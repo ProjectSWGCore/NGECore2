@@ -24,7 +24,7 @@ package services;
 import java.util.Map;
 
 import resources.guild.Guild;
-import resources.objects.SWGList;
+import resources.objects.SWGSet;
 import resources.objects.guild.GuildObject;
 import main.NGECore;
 import engine.resources.objects.SWGObject;
@@ -57,7 +57,7 @@ public class GuildService implements INetworkDispatch {
 			return null;
 		
 		int listSize = object.getGuildList().size();
-		Guild guild = new Guild((listSize == 0 ? 1 : (object.getGuildList().get(listSize).getId()) + 1), abbreviation, name, leader);
+		Guild guild = new Guild((listSize == 0 ? 1 : listSize + 1), abbreviation, name, leader);
 		
 		object.getGuildList().add(guild);
 		
@@ -68,38 +68,20 @@ public class GuildService implements INetworkDispatch {
 		return object;
 	}
 	
-	public SWGList<Guild> getGuildList() {
+	public SWGSet<Guild> getGuildList() {
 		return object.getGuildList();
 	}
 	
 	public Guild getGuildById(int id) {
-		for (int i = 0; i < object.getGuildList().size(); i++) {
-			if (object.getGuildList().get(i).getId() == id) {
-				return object.getGuildList().get(i);
-			}
-		}
-		
-		return null;
+		return object.getGuildList().stream().filter(g -> g.getId() == id).findFirst().get();
 	}
 
 	public Guild getGuildByAbbreviation(String abbreviation) {
-		for (int i = 0; i < object.getGuildList().size(); i++) {
-			if (object.getGuildList().get(i).getAbbreviation().equals(abbreviation)) {
-				return object.getGuildList().get(i);
-			}
-		}
-		
-		return null;
+		return object.getGuildList().stream().filter(g -> g.getAbbreviation().equals(abbreviation)).findFirst().get();
 	}
 	
 	public Guild getGuildByName(String name) {
-		for (int i = 0; i < object.getGuildList().size(); i++) {
-			if (object.getGuildList().get(i).getName().equals(name)) {
-				return object.getGuildList().get(i);
-			}
-		}
-		
-		return null;
+		return object.getGuildList().stream().filter(g -> g.getName().equals(name)).findFirst().get();
 	}
 	
 	public boolean removeGuild(int id) {

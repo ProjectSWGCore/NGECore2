@@ -30,7 +30,7 @@ import org.apache.mina.core.buffer.IoBuffer;
 import engine.resources.objects.Delta;
 import engine.resources.objects.SWGObject;
 
-public class Guild extends Delta implements Serializable {
+public class Guild extends Delta implements Serializable, Comparable<Guild> {
 	
 	private static final long serialVersionUID = 1L;
 	private int id;
@@ -127,6 +127,11 @@ public class Guild extends Delta implements Serializable {
 			buffer.put(getAsciiString(getString()));
 			return buffer.array();
 		}
+	}
+
+	@Override
+	public int compareTo(Guild guild) {
+		return ((Integer) id).compareTo(guild.getId());
 	}
 
 }

@@ -95,8 +95,8 @@ public class GuildObject extends UniverseObject implements Serializable {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public SWGList<Guild> getGuildList() {
-		return (SWGList<Guild>) getBaseline(3).get("guildList");
+	public SWGSet<Guild> getGuildList() {
+		return (SWGSet<Guild>) getBaseline(3).get("guildList");
 	}
 	
 	@SuppressWarnings("unchecked")

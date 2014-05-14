@@ -60,6 +60,7 @@ import protocol.swg.ClientVerifyAndLockNameResponse;
 import protocol.swg.CreateCharacterSuccess;
 import protocol.swg.HeartBeatMessage;
 import resources.objects.creature.CreatureObject;
+import resources.objects.intangible.IntangibleObject;
 import resources.objects.mission.MissionObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
@@ -337,6 +338,9 @@ public class CharacterService implements INetworkDispatch {
 				object.addObjectToEquipList(defaultWeapon);
 				object._add(defaultWeapon);
 				object.setWeaponId(defaultWeapon.getObjectID());
+				
+				IntangibleObject pda = (IntangibleObject) core.objectService.createObject("object/intangible/data_item/shared_guild_stone.iff", object.getPlanet());
+				datapad.add(pda);
 				
 				createStarterClothing(object, sharedRaceTemplate, clientCreateCharacter.getStarterProfession());
 				//core.scriptService.callScript("scripts/", "demo", "CreateStartingCharacter", core, object);
