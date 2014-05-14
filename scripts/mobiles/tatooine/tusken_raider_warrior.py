@@ -18,8 +18,9 @@ def addTemplate(core):
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(1)
-
-	
+	mobileTemplate.setSocialGroup("tusken raider")
+	mobileTemplate.setAssistRange(4)
+	mobileTemplate.setStalker(False)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_tusken_raider.iff')
@@ -31,7 +32,7 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
-	mobileTemplate.setDefaultAttack('creatureRangedAttack')
+	mobileTemplate.setDefaultAttack('rangedshotrifle')
 	mobileTemplate.setAttacks(attacks)
 	
 	core.spawnService.addMobileTemplate('tusken_warrior', mobileTemplate)
