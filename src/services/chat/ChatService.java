@@ -941,6 +941,7 @@ public class ChatService implements INetworkDispatch {
 			}
 			
 			room.addUser(user.toLowerCase());
+			((CreatureObject) player).getPlayerObject().addChannel(roomId);
 			return true;
 		}
 		return false;
@@ -999,10 +1000,6 @@ public class ChatService implements INetworkDispatch {
 				player.getClient().getSession().write(roomMessage.serialize());
 			}
 		});
-	}
-	
-	public void handleGroupChat(SWGObject sender, String message) {
-		
 	}
 	
 	public ConcurrentHashMap<Integer, ChatRoom> getChatRooms() {
