@@ -27,7 +27,6 @@ import java.util.Map;
 import org.apache.mina.core.buffer.IoBuffer;
 
 import engine.resources.objects.Builder;
-import resources.objects.harvester.HarvesterObject;
 import resources.objects.tangible.TangibleMessageBuilder;
 
 public class InstallationMessageBuilder extends TangibleMessageBuilder{
@@ -174,8 +173,8 @@ public class InstallationMessageBuilder extends TangibleMessageBuilder{
 	
 	public IoBuffer constructINSO7Var1(InstallationObject installationObject,long selectedResource) {
 		IoBuffer buffer = bufferPool.allocate(10, false).order(ByteOrder.LITTLE_ENDIAN);
-		int hopperContentsSize = ((HarvesterObject)installationObject).getOutputHopperContent().size()+1;
-		byte updateCounter = ((HarvesterObject)installationObject).getUpdateCount();
+		//int hopperContentsSize = ((HarvesterObject)installationObject).getOutputHopperContent().size()+1;
+		//byte updateCounter = ((HarvesterObject)installationObject).getUpdateCount();
 		
 		buffer.setAutoExpand(true);
 		buffer.putShort((short)2); // buffer.putShort((short)updateCounter);

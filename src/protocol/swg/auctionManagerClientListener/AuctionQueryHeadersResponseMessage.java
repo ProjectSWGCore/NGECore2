@@ -22,15 +22,10 @@
 package protocol.swg.auctionManagerClientListener;
 
 import java.nio.ByteOrder;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.Vector;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import engine.resources.common.CRC;
 import protocol.swg.SWGMessage;
 import services.bazaar.AuctionItem;
 

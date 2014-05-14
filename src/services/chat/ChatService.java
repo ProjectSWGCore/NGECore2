@@ -34,9 +34,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 
-import com.sleepycat.je.Transaction;
-import com.sleepycat.persist.EntityCursor;
-
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.clients.Client;

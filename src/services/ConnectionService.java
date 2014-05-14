@@ -195,8 +195,6 @@ public class ConnectionService implements INetworkDispatch {
 		
 		CreatureObject object = (CreatureObject) client.getParent();
 		
-		object.setPvPBitmask(0);
-		
 		object.setInviteCounter(0);
 		object.setInviteSenderId(0);
 		object.setInviteSenderName("");

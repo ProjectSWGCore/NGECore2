@@ -22,7 +22,6 @@
 package services.spawn;
 
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.Random;
 import java.util.Vector;
 
@@ -35,7 +34,6 @@ import resources.common.collidables.AbstractCollidable.ExitEvent;
 import resources.objects.creature.CreatureObject;
 import services.TerrainService;
 import services.SimulationService.MoveEvent;
-import services.ai.LairActor;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;

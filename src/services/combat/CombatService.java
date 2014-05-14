@@ -50,7 +50,6 @@ import resources.datatables.Options;
 import resources.datatables.Elemental;
 import resources.datatables.Posture;
 import resources.datatables.WeaponType;
-import resources.objectives.BountyMissionObjective;
 import resources.objects.creature.CreatureObject;
 import resources.objects.mission.MissionObject;
 import resources.objects.player.PlayerObject;
@@ -206,7 +205,7 @@ public class CombatService implements INetworkDispatch {
 		}
 		else if(target instanceof TangibleObject)
 		{
-			if(target.getConditionDamage() == target.getMaxDamage()) 
+			if(target.getConditionDamage() == target.getMaximumCondition()) 
 			{
 				for(TangibleObject defender : target.getDefendersList()) defender.removeDefender(target);
 				core.objectService.destroyObject(target);

@@ -138,7 +138,7 @@ public class MountService implements INetworkDispatch {
 			return;
 		}
 		
-		if (actor.getCombatFlag() == 1) {
+		if (actor.isInCombat()) {
 			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:cannot_call_in_combat"), DisplayType.Broadcast);
 			return;
 		}
@@ -284,7 +284,7 @@ public class MountService implements INetworkDispatch {
 			return;
 		}
 		
-		if (mount.getConditionDamage() >= mount.getMaxDamage()) {
+		if (mount.getConditionDamage() >= mount.getMaximumCondition()) {
 			disable(mount);
 		}
 	}

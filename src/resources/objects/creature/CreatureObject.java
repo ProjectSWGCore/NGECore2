@@ -104,7 +104,6 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	private transient int missionCriticalObjectsUpdateCounter = 0;
 	
 	// CREO6
-	private byte combatFlag = 0;
 	private short level = -1;
 	private int grantedHealth = 0;
 	private String currentAnimation;

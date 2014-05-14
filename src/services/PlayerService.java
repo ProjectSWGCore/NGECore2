@@ -160,7 +160,7 @@ public class PlayerService implements INetworkDispatch {
 		
 		scheduleList.add(scheduler.scheduleAtFixedRate(() -> {
 			if(creature.getAction() < creature.getMaxAction() && creature.getPosture() != 14) {
-				if(creature.getCombatFlag() == 0)
+				if(!creature.isInCombat())
 					creature.setAction(creature.getAction() + (15 + creature.getLevel() * 5));
 				else
 					creature.setAction(creature.getAction() + ((15 + creature.getLevel() * 5) / 2));
@@ -168,7 +168,7 @@ public class PlayerService implements INetworkDispatch {
 		}, 0, 1000, TimeUnit.MILLISECONDS));
 
 		scheduleList.add(scheduler.scheduleAtFixedRate(() -> {
-			if(creature.getHealth() < creature.getMaxHealth() && creature.getCombatFlag() == 0 && creature.getPosture() != 13 && creature.getPosture() != 14)
+			if(creature.getHealth() < creature.getMaxHealth() && !creature.isInCombat() && creature.getPosture() != 13 && creature.getPosture() != 14)
 				creature.setHealth(creature.getHealth() + (36 + creature.getLevel() * 4));
 		}, 0, 1000, TimeUnit.MILLISECONDS));
 		schedulers.put(creature.getObjectID(), scheduleList);

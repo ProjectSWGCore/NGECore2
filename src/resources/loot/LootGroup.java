@@ -23,8 +23,6 @@ package resources.loot;
 
 import java.io.Serializable;
 
-import com.sleepycat.persist.model.Persistent;
-
 /** 
  * @author Charon 
  */
