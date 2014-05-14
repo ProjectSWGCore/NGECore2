@@ -6,32 +6,33 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('bomarr_monk_abbot')
-	mobileTemplate.setLevel(2)
-	mobileTemplate.setDifficulty(0)
-	mobileTemplate.setAttackRange(5)
+	mobileTemplate.setCreatureName('elite_weequay_zealot')
+	mobileTemplate.setLevel(17)
+	mobileTemplate.setDifficulty(1)
+	mobileTemplate.setAttackRange(12)
 	mobileTemplate.setAttackSpeed(1.0)
-	mobileTemplate.setWeaponType(6)
+	mobileTemplate.setWeaponType(1)
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(1)
-	mobileTemplate.setSocialGroup("spiderdroid")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setSocialGroup("swoop")
+	mobileTemplate.setAssistRange(8)
 	mobileTemplate.setStalker(False)
 	
+	
 	templates = Vector()
-	templates.add('object/mobile/shared_bomarr_spider_monk_droid.iff')
+	templates.add('object/mobile/shared_dressed_tatooine_weequay_zealot.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
-	weapontemplate = WeaponTemplate('object/weapon/melee/unarmed/shared_unarmed_default.iff', 6, 1.0)
+	weapontemplate = WeaponTemplate('object/weapon/ranged/carbine/shared_carbine_cdef.iff', 1, 1.0)
 	weaponTemplates.add(weapontemplate)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
-	mobileTemplate.setDefaultAttack('meleehit')
+	mobileTemplate.setDefaultAttack('rangedshot')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('bomarr_monk_abbot', mobileTemplate)
+	core.spawnService.addMobileTemplate('elite_weequay_zealot', mobileTemplate)
 	return

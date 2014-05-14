@@ -30,7 +30,7 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
-	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
+	mobileTemplate.setDefaultAttack('meleehit')
 	mobileTemplate.setAttacks(attacks)
 	
 	core.spawnService.addMobileTemplate('bomarr_monk_initiate', mobileTemplate)
