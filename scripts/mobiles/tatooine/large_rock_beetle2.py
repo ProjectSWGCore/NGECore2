@@ -16,7 +16,7 @@ def addTemplate(core):
 	mobileTemplate.setWeaponType(6)
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
-	mobileTemplate.setDeathblow(False)
+	mobileTemplate.setDeathblow(True)
 	mobileTemplate.setScale(1)
 	mobileTemplate.setMeatType("Insect Meat")
 	mobileTemplate.setMeatAmount(10)

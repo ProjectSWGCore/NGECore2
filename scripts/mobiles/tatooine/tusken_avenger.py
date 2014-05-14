@@ -14,7 +14,7 @@ def addTemplate(core):
 	mobileTemplate.setWeaponType(0)
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
-	mobileTemplate.setDeathblow(False)
+	mobileTemplate.setDeathblow(True)
 	mobileTemplate.setScale(1)
 	mobileTemplate.setSocialGroup("tusken raider")
 	mobileTemplate.setAssistRange(6)

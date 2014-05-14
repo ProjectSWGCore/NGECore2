@@ -14,7 +14,7 @@ def addTemplate(core):
 	mobileTemplate.setWeaponType(2)
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
-	mobileTemplate.setDeathblow(False)
+	mobileTemplate.setDeathblow(True)
 	mobileTemplate.setScale(1)
 	mobileTemplate.setSocialGroup("jabba")
 	mobileTemplate.setAssistRange(4)
