@@ -21,6 +21,7 @@
  ******************************************************************************/
 package main;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -255,6 +256,21 @@ public class NGECore {
 		Config options = new Config();
 		options.setFilePath("options.cfg");
 		boolean optionsConfigLoaded = options.loadConfigFile();
+		
+		if (optionsConfigLoaded && options.getInt("CLEAN.ODB.FOLDERS") > 0) {
+			File baseFolder = new File("./odb");
+			
+			if (baseFolder.isDirectory()) {
+				for (File odbFolder : baseFolder.listFiles()) {
+					if (odbFolder.isDirectory()) {
+						for (File file : odbFolder.listFiles()) {
+							if (!file.isDirectory() && !file.getName().equals("placeholder.txt")) { file.delete(); }
+						}
+					}
+				}
+			}
+			System.out.println("Cleaned ODB Folders.");
+		}
 		
 		// Database
 		databaseConnection = new DatabaseConnection();
