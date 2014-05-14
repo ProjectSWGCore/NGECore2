@@ -187,7 +187,7 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	private transient SWGObject useTarget;
 	
 	public CreatureObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
-		super(objectID, planet, Template, position, orientation);
+		super(objectID, planet, position, orientation, Template);
 		messageBuilder = new CreatureMessageBuilder(this);
 		loadTemplateData();
 		skills = new ArrayList<String>();
@@ -234,12 +234,6 @@ public class CreatureObject extends TangibleObject implements Serializable {
 
 	}
 	
-	public void setCustomName2(String customName) {
-		setCustomName(customName);
-		
-		notifyObservers(messageBuilder.buildCustomNameDelta(customName), true);
-	}
-
 	public int getBankCredits() {
 		synchronized(objectMutex) {
 			return bankCredits;
@@ -349,25 +343,6 @@ public class CreatureObject extends TangibleObject implements Serializable {
 			getClient().getSession().write(messageBuilder.buildRemoveSkillDelta(skill));
 		}
 		
-	}
-	
-	@Override
-	public int getOptionsBitmask() {
-		synchronized(objectMutex) {
-			return optionsBitmask;
-		}
-	}
-	
-	@Override
-	public void setOptionsBitmask(int optionBitmask) {
-		synchronized(objectMutex) {
-			this.optionsBitmask = optionBitmask;
-		}
-		
-		IoBuffer optionDelta = messageBuilder.buildOptionMaskDelta(optionBitmask);
-		
-		notifyObservers(optionDelta, true);
-
 	}
 	
 	public void setOptions(int options, boolean add) {
@@ -485,15 +460,9 @@ public class CreatureObject extends TangibleObject implements Serializable {
 			this.inspirationTick = inspirationTick;
 		}
 	}
-
-	@Override
+	
 	public void setFaction(String faction) {
-		synchronized(objectMutex) {
-			this.faction = faction;
-		}
-		
-		notifyObservers(messageBuilder.buildFactionDelta(faction), true);
-		
+		super.setFaction(faction);
 
 		CreatureObject companion = NGECore.getInstance().mountService.getCompanion(this);
 		
@@ -502,13 +471,8 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		}
 	}
 	
-	@Override
 	public void setFactionStatus(int factionStatus) {
-		synchronized(objectMutex) {
-			this.factionStatus = factionStatus;
-		}
-		
-		notifyObservers(messageBuilder.buildFactionStatusDelta(factionStatus), true);
+		super.setFactionStatus(factionStatus);
 		
 		CreatureObject companion = NGECore.getInstance().mountService.getCompanion(this);
 		
@@ -812,21 +776,6 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		return missionCriticalObjects;
 	}
 	
-	public byte getCombatFlag() {
-		synchronized(objectMutex) {
-			return combatFlag;
-		}
-	}
-
-	public void setCombatFlag(byte combatFlag) {
-		synchronized(objectMutex) {
-			this.combatFlag = combatFlag;
-		}
-		IoBuffer combatDelta = messageBuilder.buildCombatFlagDelta(combatFlag);
-		
-		notifyObservers(combatDelta, true);
-	}
-
 	public short getLevel() {
 		synchronized(objectMutex) {
 			return level;

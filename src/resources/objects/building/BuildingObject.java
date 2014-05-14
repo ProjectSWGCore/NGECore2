@@ -59,7 +59,7 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 	private Vector<Long> banList = new Vector<Long>();
 	
 	public BuildingObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
-		super(objectID, planet, Template, position, orientation);
+		super(objectID, planet, position, orientation, Template);
 		messageBuilder = new BuildingMessageBuilder(this);
 		this.setConditionDamage(100);
 	}
