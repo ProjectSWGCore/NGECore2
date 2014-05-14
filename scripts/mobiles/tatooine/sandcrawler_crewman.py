@@ -6,7 +6,7 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('jawa_thief')
+	mobileTemplate.setCreatureName('legacy_jawa_grunt')
 	mobileTemplate.setLevel(16)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(12)
@@ -33,5 +33,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('rangedshotpistol')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('jawa_thief', mobileTemplate)
+	core.spawnService.addMobileTemplate('sandcrawler_crewman', mobileTemplate)
 	return

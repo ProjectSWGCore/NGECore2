@@ -6,8 +6,8 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('jawa_thief')
-	mobileTemplate.setLevel(16)
+	mobileTemplate.setCreatureName('mission_scavenger')
+	mobileTemplate.setLevel(4)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(12)
 	mobileTemplate.setAttackSpeed(1.0)
@@ -16,12 +16,12 @@ def addTemplate(core):
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(1)
-	mobileTemplate.setSocialGroup("jawa")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setSocialGroup("thug")
+	mobileTemplate.setAssistRange(4)
 	mobileTemplate.setStalker(False)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_jawa.iff')
+	templates.add('object/mobile/shared_dressed_tatooine_scavenger.iff')
 	mobileTemplate.setTemplates(templates)
 
 	weaponTemplates = Vector()
@@ -33,5 +33,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('rangedshotpistol')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('jawa_thief', mobileTemplate)
+	core.spawnService.addMobileTemplate('scavenger', mobileTemplate)
 	return

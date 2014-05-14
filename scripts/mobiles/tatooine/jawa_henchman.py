@@ -16,7 +16,7 @@ def addTemplate(core):
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(1)
-	mobileTemplate.setSocialGroup("jabba")
+	mobileTemplate.setSocialGroup("jawa")
 	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(True)
 	

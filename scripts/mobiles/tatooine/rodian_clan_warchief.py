@@ -6,32 +6,32 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('jawa_thief')
-	mobileTemplate.setLevel(16)
+	mobileTemplate.setCreatureName('mission_rodian_clan_warchief')
+	mobileTemplate.setLevel(15)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(12)
 	mobileTemplate.setAttackSpeed(1.0)
-	mobileTemplate.setWeaponType(2)
+	mobileTemplate.setWeaponType(1)
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(1)
-	mobileTemplate.setSocialGroup("jawa")
+	mobileTemplate.setSocialGroup("rodian")
 	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(False)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_jawa.iff')
+	templates.add('object/mobile/shared_dressed_tatooine_rodian_clan_warchief.iff')
 	mobileTemplate.setTemplates(templates)
 
 	weaponTemplates = Vector()
-	weapontemplate = WeaponTemplate('object/weapon/ranged/pistol/shared_pistol_cdef.iff', 2, 1.0)
+	weapontemplate = WeaponTemplate('object/weapon/ranged/carbine/shared_carbine_cdef.iff', 1, 1.0)
 	weaponTemplates.add(weapontemplate)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
-	mobileTemplate.setDefaultAttack('rangedshotpistol')
+	mobileTemplate.setDefaultAttack('rangedshot')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('jawa_thief', mobileTemplate)
+	core.spawnService.addMobileTemplate('rodian_clan_warchief', mobileTemplate)
 	return
