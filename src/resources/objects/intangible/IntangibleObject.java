@@ -41,7 +41,6 @@ public class IntangibleObject extends SWGObject implements Serializable {
 	
 	public IntangibleObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
 		super(objectID, planet, position, orientation, Template);
-		messageBuilder = new IntangibleMessageBuilder(this);
 	}
 	
 	public IntangibleObject() { 
@@ -50,7 +49,6 @@ public class IntangibleObject extends SWGObject implements Serializable {
 	
 	public void initAfterDBLoad() {
 		super.init();
-		messageBuilder = new IntangibleMessageBuilder(this);
 	}
 	
 	public Baseline getOtherVariables() {

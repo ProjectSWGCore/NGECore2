@@ -48,7 +48,6 @@ import resources.objects.ObjectMessageBuilder;
 import resources.objects.SWGList;
 import resources.objects.SWGSet;
 import resources.objects.creature.CreatureObject;
-
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.IDManagerVisitor;
 import engine.clients.Client;
@@ -83,27 +82,23 @@ public class TangibleObject extends SWGObject implements Serializable {
 	
 	public TangibleObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String template) {
 		super(objectID, planet, position, orientation, template);
-		messageBuilder = new TangibleMessageBuilder(this);
 		if (this.getClass().getSimpleName().equals("TangibleObject")) setIntAttribute("volume", 1);
 		otherVariables = getOtherVariables(); // FIXME temp
 	}
 	
 	public TangibleObject(long objectID, Planet planet, String template) {
 		super(objectID, planet, new Point3D(0, 0, 0), new Quaternion(1, 0, 1, 0), template);
-		messageBuilder = new TangibleMessageBuilder(this);
 		if (this.getClass().getSimpleName().equals("TangibleObject")) setIntAttribute("volume", 1);
 		otherVariables = getOtherVariables(); // FIXME temp
 	}
 	
 	public TangibleObject() {
 		super();
-		messageBuilder = new TangibleMessageBuilder(this);
 	}
 	
 	public void initAfterDBLoad() {
 		super.init();
 		defendersList = new Vector<TangibleObject>();
-		messageBuilder = new TangibleMessageBuilder(this);
 	}
 	
 	public Baseline getOtherVariables() {
@@ -140,11 +135,13 @@ public class TangibleObject extends SWGObject implements Serializable {
 		return baseline;
 	}
 	
+	@Override
 	public Baseline getBaseline8() {
 		Baseline baseline = super.getBaseline8();
 		return baseline;
 	}
 	
+	@Override
 	public Baseline getBaseline9() {
 		Baseline baseline = super.getBaseline9();
 		return baseline;
@@ -168,7 +165,7 @@ public class TangibleObject extends SWGObject implements Serializable {
 	}
 	
 	public byte[] getCustomization() {
-		return (byte[]) baseline3.get("customization");
+		return (byte[]) getBaseline(3).get("customization");
 	}
 	
 	public void setCustomization(byte[] customization) {

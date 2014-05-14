@@ -1138,6 +1138,7 @@ public class ObjectService implements INetworkDispatch {
 						containers.add(objectId);
 						object = createObject(template, objectId, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, true, false);
 						object.setAttachment("childObjects", null);
+						
 						/*if (!duplicate.containsValue(objectId)) {
 							((BuildingObject) object).createTransaction(core.getBuildingODB().getEnvironment());
 							core.getBuildingODB().put((BuildingObject) object, Long.class, BuildingObject.class, ((BuildingObject) object).getTransaction());
@@ -1174,6 +1175,10 @@ public class ObjectService implements INetworkDispatch {
 				} else {
 					object = createObject(template, 0, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, false, false);
 					object.setContainerPermissions(WorldPermissions.WORLD_PERMISSIONS);
+				}
+				
+				if (object != null && object instanceof TangibleObject && !(object instanceof CreatureObject)) {
+					((TangibleObject) object).setStaticObject(true);
 				}
 				
 				//System.out.println("Spawning: " + template + " at: X:" + object.getPosition().x + " Y: " + object.getPosition().y + " Z: " + object.getPosition().z);

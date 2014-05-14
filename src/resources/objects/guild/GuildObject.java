@@ -37,6 +37,7 @@ import resources.objects.ObjectMessageBuilder;
 import resources.objects.SWGList;
 import resources.objects.SWGMap;
 import resources.objects.SWGMultiMap;
+import resources.objects.SWGSet;
 import resources.objects.universe.UniverseObject;
 import services.collections.ServerFirst;
 import engine.clients.Client;
@@ -62,7 +63,6 @@ public class GuildObject extends UniverseObject implements Serializable {
 	
 	public void initAfterDBLoad() {
 		super.init();
-		messageBuilder = new GuildMessageBuilder(this);
 	}
 	
 	@Override
@@ -77,7 +77,7 @@ public class GuildObject extends UniverseObject implements Serializable {
 	@Override
 	public Baseline getBaseline3() {
 		Baseline baseline = super.getBaseline3();
-		baseline.put("guildList", new SWGList<Guild>(this, 3, 4, false));
+		baseline.put("guildList", new SWGSet<Guild>(this, 3, 4, false));
 		return baseline;
 	}
 	
