@@ -6,8 +6,8 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('bomarr_monk_abbot')
-	mobileTemplate.setLevel(2)
+	mobileTemplate.setCreatureName('sirad_far')
+	mobileTemplate.setLevel(20)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)
@@ -16,12 +16,12 @@ def addTemplate(core):
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(1)
-	mobileTemplate.setSocialGroup("spiderdroid")
+	mobileTemplate.setSocialGroup("jabba")
 	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(False)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_bomarr_spider_monk_droid.iff')
+	templates.add('object/mobile/shared_sirad_far.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
@@ -33,5 +33,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('meleehit')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('bomarr_monk_abbot', mobileTemplate)
+	core.spawnService.addMobileTemplate('sirad_far', mobileTemplate)
 	return
