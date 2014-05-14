@@ -6,7 +6,7 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('tusken_guard')
+	mobileTemplate.setCreatureName('heroic_tusken_raid_leader')
 	mobileTemplate.setLevel(31)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(12)
@@ -34,5 +34,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('rangedshotrifle')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('tusken_guard', mobileTemplate)
+	core.spawnService.addMobileTemplate('tusken_raid_leader', mobileTemplate)
 	return

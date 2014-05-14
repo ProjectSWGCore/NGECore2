@@ -6,19 +6,19 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('tusken_guard')
-	mobileTemplate.setLevel(31)
+	mobileTemplate.setCreatureName('tusken_raider_wildman')
+	mobileTemplate.setLevel(14)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(12)
 	mobileTemplate.setAttackSpeed(1.0)
 	mobileTemplate.setWeaponType(0)
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
-	mobileTemplate.setDeathblow(True)
+	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(1)
 	mobileTemplate.setSocialGroup("tusken raider")
 	mobileTemplate.setAssistRange(6)
-	mobileTemplate.setStalker(True)
+	mobileTemplate.setStalker(False)
 	
 	
 	templates = Vector()
@@ -34,5 +34,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('rangedshotrifle')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('tusken_guard', mobileTemplate)
+	core.spawnService.addMobileTemplate('tusken_outrider', mobileTemplate)
 	return
