@@ -23,19 +23,25 @@ package resources.objects.player;
 
 import java.nio.ByteOrder;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import resources.objects.ObjectMessageBuilder;
+import engine.resources.objects.Builder;
+import resources.objects.intangible.IntangibleMessageBuilder;
 import resources.objects.waypoint.WaypointObject;
 
-public class PlayerMessageBuilder extends ObjectMessageBuilder {
+public class PlayerMessageBuilder extends IntangibleMessageBuilder {
 	
-	public PlayerMessageBuilder(PlayerObject playerObject) {
-		setObject(playerObject);
+	public PlayerMessageBuilder(PlayerObject object) {
+		super(object);
 	}
-
+	
+	public PlayerMessageBuilder() {
+		super();
+	}
+	
 	public IoBuffer buildBaseline3() {
 		
 		PlayerObject player = (PlayerObject) object;
@@ -662,17 +668,23 @@ public class PlayerMessageBuilder extends ObjectMessageBuilder {
 		return buffer;
 		
 	}
-
+	
 	@Override
-	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
-		// TODO Auto-generated method stub
-		
+	public void buildBaseline3(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline3(baselineBuilders, deltaBuilders);
 	}
-
+	
 	@Override
-	public void sendBaselines() {
-		// TODO Auto-generated method stub
-		
+	public void buildBaseline6(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline6(baselineBuilders, deltaBuilders);
 	}
-
+	
+	public void buildBaseline8(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline8(baselineBuilders, deltaBuilders);
+	}
+	
+	public void buildBaseline9(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline9(baselineBuilders, deltaBuilders);
+	}
+	
 }

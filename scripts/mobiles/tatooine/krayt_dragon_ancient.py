@@ -8,7 +8,7 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('krayt_dragon_ancient')
 	mobileTemplate.setLevel(90)
-	mobileTemplate.setMinLevel(90)
+	mobileTemplate.setMinLevel(89)
 	mobileTemplate.setMaxLevel(90)
 	mobileTemplate.setDifficulty(2)
 	mobileTemplate.setAttackRange(12)
@@ -18,6 +18,15 @@ def addTemplate(core):
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(True)
 	mobileTemplate.setScale(2.8)
+	mobileTemplate.setMeatType("Carnivore Meat")
+	mobileTemplate.setMeatAmount(1700)
+	mobileTemplate.setHideType("Bristly Hide")
+	mobileTemplate.setBoneAmount(950)	
+	mobileTemplate.setBoneType("Animal Bones")
+	mobileTemplate.setHideAmount(905)
+	mobileTemplate.setSocialGroup("krayt dragon")
+	mobileTemplate.setAssistRange(36)
+	mobileTemplate.setStalker(True)	
 
 	
 	

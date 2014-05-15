@@ -23,17 +23,12 @@ package resources.objects.building;
 
 import java.io.Serializable;
 import java.util.Vector;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import main.NGECore;
 import resources.objects.ObjectMessageBuilder;
 import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
-
-import com.sleepycat.je.Environment;
-import com.sleepycat.je.Transaction;
-
 import resources.objects.tangible.TangibleObject;
 
 import com.sleepycat.persist.model.Entity;
@@ -64,7 +59,7 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 	private Vector<Long> banList = new Vector<Long>();
 	
 	public BuildingObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
-		super(objectID, planet, Template, position, orientation);
+		super(objectID, planet, position, orientation, Template);
 		messageBuilder = new BuildingMessageBuilder(this);
 		this.setConditionDamage(100);
 	}

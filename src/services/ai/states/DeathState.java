@@ -21,10 +21,7 @@
  ******************************************************************************/
 package services.ai.states;
 
-import java.util.Vector;
-
 import main.NGECore;
-import resources.common.RadialOptions;
 import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
 import services.ai.AIActor;

@@ -21,6 +21,7 @@
  ******************************************************************************/
 package main;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -86,7 +87,7 @@ import services.command.CombatCommand;
 import services.command.CommandService;
 import services.gcw.FactionService;
 import services.gcw.GCWService;
-import services.guild.GuildService;
+import services.GuildService;
 import services.LoginService;
 import services.map.MapService;
 import services.mission.MissionService;
@@ -225,10 +226,6 @@ public class NGECore {
 	private ObjectDatabase bountiesODB;
 	
 	public static boolean PACKET_DEBUG = false;
-
-
-
-
 	
 	public NGECore() {
 		
@@ -259,6 +256,21 @@ public class NGECore {
 		Config options = new Config();
 		options.setFilePath("options.cfg");
 		boolean optionsConfigLoaded = options.loadConfigFile();
+		
+		if (optionsConfigLoaded && options.getInt("CLEAN.ODB.FOLDERS") > 0) {
+			File baseFolder = new File("./odb");
+			
+			if (baseFolder.isDirectory()) {
+				for (File odbFolder : baseFolder.listFiles()) {
+					if (odbFolder.isDirectory()) {
+						for (File file : odbFolder.listFiles()) {
+							if (!file.isDirectory() && !file.getName().equals("placeholder.txt")) { file.delete(); }
+						}
+					}
+				}
+			}
+			System.out.println("Cleaned ODB Folders.");
+		}
 		
 		// Database
 		databaseConnection = new DatabaseConnection();
@@ -318,6 +330,7 @@ public class NGECore {
 		harvesterService = new HarvesterService(this);
 		mountService = new MountService(this);
 		playerCityService = new PlayerCityService(this);
+		staticService = new StaticService(this);
 		
 		if (config.keyExists("JYTHONCONSOLE.PORT")) {
 			int jythonPort = config.getInt("JYTHONCONSOLE.PORT");
@@ -375,6 +388,7 @@ public class NGECore {
 		zoneDispatch.addService(mountService);
 		zoneDispatch.addService(housingService);
 		zoneDispatch.addService(playerCityService);
+		zoneDispatch.addService(staticService);
 		
 		if (optionsConfigLoaded && options.getInt("LOAD.RESOURCE.SYSTEM") == 1) {
 			zoneDispatch.addService(surveyService);
@@ -383,7 +397,7 @@ public class NGECore {
 		
 		zoneServer = new MINAServer(zoneDispatch, config.getInt("ZONE.PORT"));
 		zoneServer.start();
-		staticService = new StaticService(this);
+		
 		//Start terrainList
 		// Original Planets
 		terrainService.addPlanet(1, "tatooine", "terrain/tatooine.trn", true);
@@ -449,8 +463,6 @@ public class NGECore {
 		travelService.loadTravelPoints();
 		simulationService = new SimulationService(this);
 		
-		objectService.loadBuildings();
-		harvesterService.loadHarvesters();
 		
 		if (optionsConfigLoaded && options.getInt("LOAD.RESOURCE.SYSTEM") > 0) {
 			resourceService.loadResourceRoots();
@@ -458,15 +470,14 @@ public class NGECore {
 		}
 		
 		terrainService.loadSnapShotObjects();
-		objectService.loadServerTemplates();
+		objectService.loadServerTemplates();		
+		objectService.loadBuildings();
+		harvesterService.loadHarvesters();
+
 		simulationService.insertSnapShotObjects();
 		simulationService.insertPersistentBuildings();
 		// Zone services that need to be loaded after the above
 		zoneDispatch.addService(simulationService);
-		
-		
-		// Static Spawns
-		staticService.spawnStatics();
 		
 		guildService = new GuildService(this);
 		zoneDispatch.addService(guildService);
@@ -485,7 +496,6 @@ public class NGECore {
 		instanceService = new InstanceService(this);
 		zoneDispatch.addService(instanceService);
 		
-		
 		weatherService = new WeatherService(this);
 		weatherService.loadPlanetSettings();
 		
@@ -494,6 +504,8 @@ public class NGECore {
 		spawnService.loadLairGroups();
 		spawnService.loadDynamicGroups();;
 		spawnService.loadSpawnAreas();
+		
+		staticService.spawnStatics();
 		
 		equipmentService.loadBonusSets();
 		

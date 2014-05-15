@@ -29,7 +29,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import protocol.swg.CommPlayerMessage;
 import protocol.swg.PlayClientEffectLocMessage;
-import protocol.swg.UpdatePVPStatusMessage;
 import engine.resources.common.CRC;
 import engine.resources.container.Traverser;
 import engine.resources.objects.SWGObject;

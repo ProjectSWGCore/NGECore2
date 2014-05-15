@@ -4,9 +4,7 @@ def setup():
 	return
 	
 def run(core, actor, target, commandString):
-	if core.equipmentService.canEquip(actor, target) is False:
-		actor.sendSystemMessage('@error_message:insufficient_skill', 0)
-		return	
+	
 		
 
 	parsedMsg = commandString.split(' ', 3)
@@ -18,6 +16,12 @@ def run(core, actor, target, commandString):
 		if container == oldContainer:
                         print 'Error: New container is same as old container.'
                         return;
+
+		canEquip = core.equipmentService.canEquip(actor, target)
+		
+		if canEquip[0] is False and container == actor:
+			actor.sendSystemMessage(canEquip[1], 0)
+			return
 
 		replacedObject = None
 		slotName = None

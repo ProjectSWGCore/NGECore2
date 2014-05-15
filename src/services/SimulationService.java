@@ -52,6 +52,7 @@ import engine.clientdata.visitors.PortalVisitor.Cell;
 import engine.clients.Client;
 import engine.resources.common.Event;
 import engine.resources.common.Mesh3DTriangle;
+import engine.resources.common.RGB;
 import engine.resources.common.Ray;
 import engine.resources.container.Traverser;
 import engine.resources.database.ODBCursor;
@@ -765,8 +766,6 @@ public class SimulationService implements INetworkDispatch {
 		if(object.getAttachment("proposer") != null)
 			object.setAttachment("proposer", null);
 		
-		object.setPvPBitmask(0);
-		
 		//session.suspendWrite();
 		final long objectId = object.getObjectID();
 		
@@ -912,7 +911,7 @@ public class SimulationService implements INetworkDispatch {
 		HeartBeatMessage heartBeat = new HeartBeatMessage();
 		session.write(heartBeat.serialize());
 
-		CmdStartScene startScene = new CmdStartScene((byte) 0, object.getObjectID(), object.getPlanet().getPath(), object.getTemplate(), newPos.x, newPos.y, newPos.z, System.currentTimeMillis() / 1000, object.getRadians());
+		CmdStartScene startScene = new CmdStartScene((byte) 0, object.getObjectID(), object.getPlanet().getPath(), object.getTemplate(), newPos.x, newPos.y, newPos.z, core.getGalacticTime() / 1000, object.getRadians());
 		session.write(startScene.serialize());
 		
 		handleZoneIn(client);

@@ -50,7 +50,6 @@ import resources.datatables.Options;
 import resources.datatables.Elemental;
 import resources.datatables.Posture;
 import resources.datatables.WeaponType;
-import resources.objectives.BountyMissionObjective;
 import resources.objects.creature.CreatureObject;
 import resources.objects.mission.MissionObject;
 import resources.objects.player.PlayerObject;
@@ -206,7 +205,7 @@ public class CombatService implements INetworkDispatch {
 		}
 		else if(target instanceof TangibleObject)
 		{
-			if(target.getConditionDamage() == target.getMaxDamage()) 
+			if(target.getConditionDamage() == target.getMaximumCondition()) 
 			{
 				for(TangibleObject defender : target.getDefendersList()) defender.removeDefender(target);
 				core.objectService.destroyObject(target);
@@ -827,10 +826,10 @@ public class CombatService implements INetworkDispatch {
 			}, target.getIncapTimer(), TimeUnit.SECONDS);
 			target.setIncapTask(incapTask);
 			core.buffService.addBuffToCreature(target, "incapWeaken", target);
-			if(target.getSlottedObject("ghost") != null) {
+			if(target.getSlottedObject("ghost") != null && attacker.getSlottedObject("ghost") != null) {
 				target.sendSystemMessage(new OutOfBand(new ProsePackage("base_player", "prose_victim_incap", attacker.getCustomName())), (byte) 0);
 				attacker.sendSystemMessage(new OutOfBand(new ProsePackage("base_player", "prose_target_incap", target.getCustomName())), (byte) 0);
-			}
+			} else {target.sendSystemMessage(new OutOfBand(new ProsePackage("base_player", "prose_victim_incap", "@" + attacker.getStfFilename() + ":" + attacker.getStfName())), (byte) 0); }
 			return;
 		} else if(target.getHealth() - damage <= 0 && target.getAttachment("AI") != null) {
 			synchronized(target.getMutex()) {
@@ -1063,7 +1062,11 @@ public class CombatService implements INetworkDispatch {
 		target.removeDefender(attacker);
 		target.setSpeedMultiplierBase(0);
 		target.setTurnRadius(0);
-		target.sendSystemMessage(new OutOfBand(new ProsePackage("base_player", "prose_victim_dead", attacker.getCustomName())), (byte) 0);
+		
+		if (attacker.getSlottedObject("ghost") != null)
+			target.sendSystemMessage(new OutOfBand(new ProsePackage("base_player", "prose_victim_dead", attacker.getCustomName())), (byte) 0);
+		else
+			target.sendSystemMessage(new OutOfBand(new ProsePackage("base_player", "prose_victim_dead", "@" + attacker.getStfFilename() + ":" + attacker.getStfName())), (byte) 0);
 		
 		core.playerService.sendCloningWindow(target, attacker.getSlottedObject("ghost") != null);
 	}

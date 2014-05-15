@@ -27,13 +27,10 @@ import java.util.Random;
 import java.util.Vector;
 
 import engine.resources.objects.SWGObject;
-import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
-import engine.resources.scene.Quaternion;
 import main.NGECore;
 import resources.datatables.Options;
 import resources.loot.LootGroup;
-import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
 import resources.objects.tangible.TangibleObject;
@@ -292,7 +289,6 @@ public class Forager {
 				break;
 		}
 		wormie.setCustomName(name);
-		wormie.setCustomName2(name);
 		wormie.setLevel(forager.getLevel());
 		wormie.setOptions(Options.AGGRESSIVE, true);
 		wormie.setOptions(Options.ATTACKABLE, true);
@@ -345,7 +341,6 @@ public class Forager {
 		
 		goon.addObserver(forager);
 		goon.setCustomName(name);
-		goon.setCustomName2(name);
 		goon.setLevel(forager.getLevel());
 		goon.setOptions(Options.AGGRESSIVE, true);
 		goon.setOptions(Options.ATTACKABLE, true);
@@ -421,7 +416,6 @@ public class Forager {
 		
 		guard.addObserver(owner); // ToDo: add any players in aggro range!!!
 		guard.setCustomName(name);
-		guard.setCustomName2(name);
 		guard.setLevel(owner.getLevel());
 		guard.setOptions(Options.AGGRESSIVE, true);
 		guard.setOptions(Options.ATTACKABLE, true);
@@ -437,8 +431,8 @@ public class Forager {
 	
 	public CreatureObject spawnBoss(Point3D exactTreasureLocation, CreatureObject owner, TangibleObject map, short spawnLevel){
 		
-		Point3D treasureLocation = resources.common.SpawnPoint.getRandomPosition(exactTreasureLocation, 1, 10, owner.getPlanetId());
-		return new CreatureObject();
+		//Point3D treasureLocation = resources.common.SpawnPoint.getRandomPosition(exactTreasureLocation, 1, 10, owner.getPlanetId());
+		return new CreatureObject(); // FIXME on paper this looks bad
 	}
 	
 	@SuppressWarnings("unchecked")

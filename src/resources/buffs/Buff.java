@@ -32,15 +32,14 @@ import main.NGECore;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.buffer.SimpleBufferAllocator;
 
-import resources.objects.IDelta;
 import resources.objects.creature.CreatureObject;
 
 import com.sleepycat.persist.model.NotPersistent;
-import com.sleepycat.persist.model.Persistent;
 
 import engine.resources.common.CRC;
+import engine.resources.objects.IDelta;
+import engine.resources.objects.SWGObject;
 
-@Persistent(version=10)
 public class Buff implements IDelta, Serializable {
 	
 	private static final long serialVersionUID = 1L;
@@ -152,7 +151,13 @@ public class Buff implements IDelta, Serializable {
 	}*/
 
 	public Buff() { }
-
+	
+	@Override
+	public void init(SWGObject object) {
+		// TODO Auto-generated method stub
+		
+	}
+	
 	@Override
 	public byte[] getBytes() {
 		
@@ -484,5 +489,5 @@ public class Buff implements IDelta, Serializable {
 	public void setBuffCRC(int buffCRC) {
 		this.buffCRC = buffCRC;
 	}
-
+	
 }

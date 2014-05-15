@@ -24,10 +24,10 @@ package resources.common;
 import java.nio.ByteOrder;
 import java.util.Vector;
 
-import resources.common.StringUtilities;
-import resources.objects.Delta;
-
 import org.apache.mina.core.buffer.IoBuffer;
+
+import engine.resources.common.StringUtilities;
+import engine.resources.objects.Delta;
 
 public class OutOfBand {
 	

@@ -133,6 +133,12 @@ public class SUIService implements INetworkDispatch {
 					//System.out.println("SUI target is NOT creatureobject " + target.getTemplate());
 				}
 				
+				if(target.getAttachment("isVendor") != null && (Boolean) target.getAttachment("isVendor") && ((CreatureObject) owner).getPlayerObject().getOwnedVendors().contains(target.getObjectID())) {
+					core.scriptService.callScript("scripts/radial/", "terminal/vendor", "createRadial", core, owner, target, request.getRadialOptions());
+					sendRadial(owner, target, request.getRadialOptions(), request.getRadialCount());
+					return;
+				}
+				
 				if(target.getGrandparent() != null && target.getGrandparent().getAttachment("structureAdmins") != null)
 				{
 					if(core.housingService.getPermissions(owner, target.getContainer()) && !getRadialFilename(target).equals("structure/structure_management_terminal"))
@@ -318,7 +324,7 @@ public class SUIService implements INetworkDispatch {
 		
 		window.clearDataSource("List.dataList");
 		
-		cloneData.entrySet().forEach(e -> window.addListBoxMenuItem(e.getValue(), e.getKey()));
+		cloneData.entrySet().forEach(e -> window.addListBoxMenuItem(e.getValue(), (long) e.getKey()));
 		
 		return window;
 		

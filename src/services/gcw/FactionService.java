@@ -246,11 +246,11 @@ public class FactionService implements INetworkDispatch {
 			target = (TangibleObject) core.objectService.getObject(((CreatureObject) target).getOwnerId());
 		}
 		
-		if ((target.getPvPBitmask() & PvpStatus.GoingCovert) == PvpStatus.GoingCovert) {
+		if ((target.getPvpBitmask() & PvpStatus.GoingCovert) == PvpStatus.GoingCovert) {
 			pvpBitmask |= PvpStatus.GoingCovert;
 		}
 		
-		if ((target.getPvPBitmask() & PvpStatus.GoingOvert) == PvpStatus.GoingOvert) {
+		if ((target.getPvpBitmask() & PvpStatus.GoingOvert) == PvpStatus.GoingOvert) {
 			pvpBitmask |= PvpStatus.GoingOvert;
 		}
 		
@@ -259,7 +259,7 @@ public class FactionService implements INetworkDispatch {
 		}
 		
 		// Everything below assumes target is potentially attackable.
-		if (!target.getOption(Options.ATTACKABLE)) {
+		if (!target.getOption(Options.ATTACKABLE) || target.getOption(Options.INVULNERABLE)) {
 			return pvpBitmask;
 		}
 		
@@ -383,12 +383,12 @@ public class FactionService implements INetworkDispatch {
 			return;
 		}
 		
-		if (actor.getPvPBitmask() == PvpStatus.GoingCovert) {
+		if (actor.getPvpBitmask() == PvpStatus.GoingCovert) {
 			actor.sendSystemMessage("@faction_recruiter:pvp_status_changing", DisplayType.Broadcast);
 			return;
 		}
 		
-		if (actor.getPvPBitmask() == PvpStatus.GoingOvert) {
+		if (actor.getPvpBitmask() == PvpStatus.GoingOvert) {
 			actor.sendSystemMessage("@faction_recruiter:pvp_status_changing", DisplayType.Broadcast);
 			return;
 		}
@@ -428,7 +428,7 @@ public class FactionService implements INetworkDispatch {
 		final String finalMessage = message;
 		
 		scheduler.schedule(() -> {
-			actor.setPvPBitmask(0);
+			actor.setPvpBitmask(0);
 			actor.setFactionStatus(factionStatus);
 			actor.updatePvpStatus();
 			actor.sendSystemMessage("@faction_recruiter:" + finalMessage, DisplayType.Broadcast);
@@ -436,12 +436,12 @@ public class FactionService implements INetworkDispatch {
 	}
 	
 	public void resign(CreatureObject actor) {
-		if (actor.getPvPBitmask() == PvpStatus.GoingCovert) {
+		if (actor.getPvpBitmask() == PvpStatus.GoingCovert) {
 			actor.sendSystemMessage("@faction_recruiter:pvp_status_changing", DisplayType.Broadcast);
 			return;
 		}
 		
-		if (actor.getPvPBitmask() == PvpStatus.GoingOvert) {
+		if (actor.getPvpBitmask() == PvpStatus.GoingOvert) {
 			actor.sendSystemMessage("@faction_recruiter:pvp_status_changing", DisplayType.Broadcast);
 			return;
 		}
@@ -461,7 +461,7 @@ public class FactionService implements INetworkDispatch {
 		}
 		
 		scheduler.schedule(() -> {
-			actor.setPvPBitmask(0);
+			actor.setPvpBitmask(0);
 			actor.setFactionStatus(FactionStatus.OnLeave);
 			actor.setFaction("");
 			actor.updatePvpStatus();

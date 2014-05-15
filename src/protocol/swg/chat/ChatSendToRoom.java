@@ -27,7 +27,6 @@ import java.nio.ByteBuffer;
 import org.apache.mina.core.buffer.IoBuffer;
 
 import protocol.swg.SWGMessage;
-import resources.common.StringUtilities;
 
 public class ChatSendToRoom extends SWGMessage {
 	

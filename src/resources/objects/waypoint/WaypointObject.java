@@ -25,14 +25,11 @@ import java.io.Serializable;
 
 import resources.objects.intangible.IntangibleObject;
 
-import com.sleepycat.persist.model.Persistent;
-
 import engine.clients.Client;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent(version=0)
 public class WaypointObject extends IntangibleObject implements Serializable {
 	
 	private static final long serialVersionUID = 1L;

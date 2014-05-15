@@ -85,7 +85,7 @@ public class SpawnService {
 				return null;
 		}
 		
-		CreatureObject creature = (CreatureObject) core.objectService.createObject(mobileTemplate.getTemplates().get(new Random().nextInt(mobileTemplate.getTemplates().size())), objectId, planet, new Point3D(x, y, z), new Quaternion(qW, qX, qY, qZ));
+		CreatureObject creature = (CreatureObject) core.objectService.createObject(mobileTemplate.getTemplates().get(new Random().nextInt(mobileTemplate.getTemplates().size())), objectId, planet, new Point3D(x, y, z), new Quaternion(qW, qX, qY, qZ), null, (objectId > 0), true);
 		
 		if(creature == null)
 			return null;
@@ -100,8 +100,11 @@ public class SpawnService {
 			creature.setWeaponId(mobileTemplate.getCustomWeapon().getObjectID());
 		}*/
 		
+		if(mobileTemplate.getLootGroups() != null)
+			creature.setLootGroups(mobileTemplate.getLootGroups());
+		
 		creature.setOptionsBitmask(mobileTemplate.getOptionBitmask());
-		creature.setPvPBitmask(mobileTemplate.getPvpBitmask());
+		creature.setPvpBitmask(mobileTemplate.getPvpBitmask());
 		creature.setStfFilename("mob/creature_names"); // TODO: set other STFs for NPCs other than creatures
 		creature.setStfName(mobileTemplate.getCreatureName());
 		creature.setHeight(mobileTemplate.getScale());
@@ -249,8 +252,8 @@ public class SpawnService {
 			return null;
 		
 		lairObject.setOptionsBitmask(Options.ATTACKABLE);
-		lairObject.setPvPBitmask(PvpStatus.Attackable);
-		lairObject.setMaxDamage(1000 * level);
+		lairObject.setPvpBitmask(PvpStatus.Attackable);
+		lairObject.setMaximumCondition(1000 * level);
 		
 		LairActor lairActor = new LairActor(lairObject, lairTemplate.getMobileName(), 10, level);
 		lairObject.setAttachment("AI", lairActor);

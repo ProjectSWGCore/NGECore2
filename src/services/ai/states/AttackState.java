@@ -37,7 +37,7 @@ public class AttackState extends AIState {
 		CreatureObject creature = actor.getCreature();
 		if(creature.getPosture() == 14)
 			return StateResult.DEAD;
-		if(creature.getCombatFlag() == 0 || creature.getDefendersList().size() == 0 || actor.getFollowObject() == null)
+		if(!creature.isInCombat() || creature.getDefendersList().size() == 0 || actor.getFollowObject() == null)
 			return StateResult.FINISHED;
 		actor.scheduleMovement();
 		actor.scheduleRecovery();
@@ -115,7 +115,7 @@ public class AttackState extends AIState {
 		NGECore core = NGECore.getInstance();
 		if(creature.getPosture() == 14)
 			return StateResult.DEAD;
-		if(creature.getCombatFlag() == 0 || creature.getDefendersList().size() == 0 || actor.getFollowObject() == null)
+		if(!creature.isInCombat() || creature.getDefendersList().size() == 0 || actor.getFollowObject() == null)
 		{
 			creature.setLookAtTarget(0);
 			creature.setIntendedTarget(0);

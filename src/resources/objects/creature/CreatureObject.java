@@ -50,13 +50,11 @@ import main.NGECore;
 import engine.clients.Client;
 import resources.buffs.Buff;
 import resources.buffs.DamageOverTime;
-import resources.common.Cooldown;
 import resources.common.OutOfBand;
 import resources.objects.ObjectMessageBuilder;
 import resources.objects.SWGList;
 import resources.objects.SWGMap;
 import engine.resources.common.CRC;
-import engine.resources.objects.MissionCriticalObject;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -101,12 +99,11 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	private int abilitiesUpdateCounter = 0;
 	private int xpBarValue = 0;
 	
-	private SWGList<MissionCriticalObject> missionCriticalObjects;
+	private SWGMap<Long, Long> missionCriticalObjects;
 	@NotPersistent
 	private transient int missionCriticalObjectsUpdateCounter = 0;
 	
 	// CREO6
-	private byte combatFlag = 0;
 	private short level = -1;
 	private int grantedHealth = 0;
 	private String currentAnimation;
@@ -189,16 +186,16 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	private transient SWGObject useTarget;
 	
 	public CreatureObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
-		super(objectID, planet, Template, position, orientation);
+		super(objectID, planet, position, orientation, Template);
 		messageBuilder = new CreatureMessageBuilder(this);
 		loadTemplateData();
 		skills = new ArrayList<String>();
-		skillMods = new SWGMap<String, SkillMod>(getObjectID(), 4, 3);
-		abilities = new SWGList<String>(getObjectID(), 4, 14);
-		missionCriticalObjects = new SWGList<MissionCriticalObject>(getObjectID(), 4, 13);
-		equipmentList = new SWGList<Long>(getObjectID(), 6, 0x17);
-		buffList = new SWGList<Buff>(getObjectID(), 6, 0x1A);
-		appearanceEquipmentList = new SWGList<Long>(getObjectID(), 6, 0x1F);
+		skillMods = new SWGMap<String, SkillMod>(this, 4, 3, true);
+		abilities = new SWGList<String>(this, 4, 14, true);
+		missionCriticalObjects = new SWGMap<Long, Long>(this, 4, 13, false);
+		equipmentList = new SWGList<Long>(this, 6, 23, false);
+		buffList = new SWGList<Buff>(this, 6, 26, false);
+		appearanceEquipmentList = new SWGList<Long>(this, 6, 31, false);
 	}
 	
 	public CreatureObject() {
@@ -214,14 +211,13 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		cooldowns = new ConcurrentHashMap<String, Long>();
 		performanceAudience = new Vector<CreatureObject>();
 		messageBuilder = new CreatureMessageBuilder(this);
-		dotList.init();
-		buffList.init();
-		equipmentList.init();
-		appearanceEquipmentList.init();
-		missionCriticalObjects.init();
-		abilities.init();
-		skillMods.init();
-		skillMods.forEach((name, skillMod) -> skillMod.init());
+		dotList.init(this);
+		buffList.init(this);
+		equipmentList.init(this);
+		appearanceEquipmentList.init(this);
+		missionCriticalObjects.init(this);
+		abilities.init(this);
+		skillMods.init(this);
 	}
 
 	private void loadTemplateData() {
@@ -237,12 +233,6 @@ public class CreatureObject extends TangibleObject implements Serializable {
 
 	}
 	
-	public void setCustomName2(String customName) {
-		setCustomName(customName);
-		
-		notifyObservers(messageBuilder.buildCustomNameDelta(customName), true);
-	}
-
 	public int getBankCredits() {
 		synchronized(objectMutex) {
 			return bankCredits;
@@ -352,25 +342,6 @@ public class CreatureObject extends TangibleObject implements Serializable {
 			getClient().getSession().write(messageBuilder.buildRemoveSkillDelta(skill));
 		}
 		
-	}
-	
-	@Override
-	public int getOptionsBitmask() {
-		synchronized(objectMutex) {
-			return optionsBitmask;
-		}
-	}
-	
-	@Override
-	public void setOptionsBitmask(int optionBitmask) {
-		synchronized(objectMutex) {
-			this.optionsBitmask = optionBitmask;
-		}
-		
-		IoBuffer optionDelta = messageBuilder.buildOptionMaskDelta(optionBitmask);
-		
-		notifyObservers(optionDelta, true);
-
 	}
 	
 	public void setOptions(int options, boolean add) {
@@ -488,15 +459,9 @@ public class CreatureObject extends TangibleObject implements Serializable {
 			this.inspirationTick = inspirationTick;
 		}
 	}
-
-	@Override
+	
 	public void setFaction(String faction) {
-		synchronized(objectMutex) {
-			this.faction = faction;
-		}
-		
-		notifyObservers(messageBuilder.buildFactionDelta(faction), true);
-		
+		super.setFaction(faction);
 
 		CreatureObject companion = NGECore.getInstance().mountService.getCompanion(this);
 		
@@ -505,13 +470,8 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		}
 	}
 	
-	@Override
 	public void setFactionStatus(int factionStatus) {
-		synchronized(objectMutex) {
-			this.factionStatus = factionStatus;
-		}
-		
-		notifyObservers(messageBuilder.buildFactionStatusDelta(factionStatus), true);
+		super.setFactionStatus(factionStatus);
 		
 		CreatureObject companion = NGECore.getInstance().mountService.getCompanion(this);
 		
@@ -810,27 +770,11 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		}
 		
 	}
-
-
-	public SWGList<MissionCriticalObject> getMissionCriticalObjects() {
+	
+	public SWGMap<Long, Long> getMissionCriticalObjects() {
 		return missionCriticalObjects;
 	}
-
-	public byte getCombatFlag() {
-		synchronized(objectMutex) {
-			return combatFlag;
-		}
-	}
-
-	public void setCombatFlag(byte combatFlag) {
-		synchronized(objectMutex) {
-			this.combatFlag = combatFlag;
-		}
-		IoBuffer combatDelta = messageBuilder.buildCombatFlagDelta(combatFlag);
-		
-		notifyObservers(combatDelta, true);
-	}
-
+	
 	public short getLevel() {
 		synchronized(objectMutex) {
 			return level;
@@ -971,6 +915,10 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		synchronized(objectMutex) {
 			this.guildId = guildId;
 		}
+		
+		IoBuffer guildIdDelta = messageBuilder.buildGuildIdDelta(guildId);
+		
+		notifyObservers(guildIdDelta, true);
 	}
 	
 	public long getLookAtTarget() {
@@ -1490,7 +1438,7 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	}
 	
 	public void playMusic(String sndFile, long targetId, int repetitions, boolean flag) {
-		getClient().getSession().write(new PlayMusicMessage(sndFile, targetId, 1, false));
+		getClient().getSession().write(new PlayMusicMessage(sndFile, targetId, 1, false).serialize());
 	}
 	
 	public boolean getGroupDance() {
@@ -1556,20 +1504,6 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		}
 		if(getClient() != null)
 			getClient().getSession().write(messageBuilder.buildListenToId(performanceListenee.getObjectId()));
-	}
-
-
-	
-	@Override
-	public void setPvPBitmask(int pvpBitmask) {
-		super.setPvPBitmask(pvpBitmask);
-		notifyObservers(new UpdatePVPStatusMessage(getObjectID(), getPvPBitmask(), getFaction()), false);
-	}
-	
-	@Override
-	public void setPvpStatus(int pvpBitmask, boolean add) {
-		super.setPvpStatus(pvpBitmask, add);
-		notifyObservers(new UpdatePVPStatusMessage(getObjectID(), getPvPBitmask(), getFaction()), false);
 	}
 	
 	public byte getDifficulty() {
@@ -1801,10 +1735,6 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		return false;
 	}
 	
-	public Cooldown getCooldown(String cooldownGroup) {
-		return new Cooldown(getRemainingCooldown(cooldownGroup));
-	}
-	
 	public long getRemainingCooldown(String cooldownGroup) {
 		if (cooldowns.containsKey(cooldownGroup)) {
 			if (System.currentTimeMillis() < cooldowns.get(cooldownGroup)) {
@@ -1846,12 +1776,34 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		return adder.intValue();
 	}
 	
-	//public float getCooldown(String cooldownGroup) {
-		//return ((float) getCooldown(cooldownGroup) / (float) 1000);
-	//}
-	
 	public ObjectMessageBuilder getMessageBuilder() {
 		return messageBuilder;
+	}
+	
+	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
+		switch (viewType) {
+			case 4: {
+				switch (updateType) {
+					case 3: { 
+						buffer = messageBuilder.createDelta("CREO", (byte) 4, (short) 1, (byte) 3, buffer, buffer.array().length + 4);
+						
+						if (getClient() != null && getClient().getSession() != null) {
+							getClient().getSession().write(buffer);
+						}
+						
+						break;
+					}
+				}
+			}
+			case 1:
+			case 3:
+			case 6:
+			case 8:
+			case 9:
+			default: {
+				return;
+			}
+		}
 	}
 	
 }

@@ -30,19 +30,19 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
 
+import resources.craft.DraftSchematic;
 import resources.objects.ObjectMessageBuilder;
 import resources.objects.intangible.IntangibleObject;
 import resources.objects.resource.ResourceContainerObject;
 import resources.objects.tool.SurveyTool;
 import resources.objects.waypoint.WaypointObject;
 import resources.objects.creature.CreatureObject;
+import resources.quest.Quest;
 
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
 
 import engine.clients.Client;
-import engine.resources.objects.DraftSchematic;
-import engine.resources.objects.Quest;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
@@ -153,6 +153,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	
 	private long bountyMissionId;
 	private Vector<Long> ownedVendors = new Vector<Long>();
+	private long bindLocation;
 	
 	public PlayerObject() {
 		super();
@@ -938,6 +939,18 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	
 	public int getAmountOfVendors() {
 		return ownedVendors.size();
+	}
+
+	public long getBindLocation() {
+		synchronized(objectMutex) {
+			return bindLocation;
+		}
+	}
+
+	public void setBindLocation(long bindLocation) {
+		synchronized(objectMutex) {
+			this.bindLocation = bindLocation;
+		}
 	}
 	
 }

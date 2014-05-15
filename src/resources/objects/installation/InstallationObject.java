@@ -39,8 +39,8 @@ public class InstallationObject extends TangibleObject implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private transient InstallationMessageBuilder messageBuilder;
 
-	public InstallationObject(long objectID, Planet planet, String template, Point3D position, Quaternion orientation){
-		super(objectID, planet, template, position, orientation);
+	public InstallationObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String template) {
+		super(objectID, planet, position, orientation, template);
 		messageBuilder = new InstallationMessageBuilder(this);
 	}	
 	

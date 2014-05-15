@@ -128,7 +128,7 @@ public class HousingService implements INetworkDispatch {
 		String playerFirstName = actor.getCustomName().split(" ")[0];
 		
 		if (sign != null) {
-			sign.setCustomName2(playerFirstName + "'s House");
+			sign.setCustomName(playerFirstName + "'s House");
 		}
 		
 		//building.add(sign);
@@ -168,7 +168,7 @@ public class HousingService implements INetworkDispatch {
 			}
 		}
 		
-		//core.objectService.persistObject(building.getObjectID(), building, core.getSWGObjectODB());
+		core.objectService.persistObject(building.getObjectID(), building, core.getSWGObjectODB());
 		
 	}
 	
@@ -470,7 +470,7 @@ public class HousingService implements INetworkDispatch {
 		Vector<TangibleObject> itemList = building.getItemsList();
 
 		for (int i=0;i<itemList.size();i++){
-			String itemName = itemList.get(i).getTrueName();
+			String itemName = itemList.get(i).getObjectName().getStfValue();
 			window.addListBoxMenuItem(itemName, i);
 		}		
 

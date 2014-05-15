@@ -38,6 +38,7 @@ import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.clients.Client;
 import engine.resources.common.CRC;
+import engine.resources.common.RGB;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
 import engine.resources.service.INetworkDispatch;
@@ -56,7 +57,7 @@ public class CommandService implements INetworkDispatch  {
 	
 	private Vector<BaseSWGCommand> commandLookup = new Vector<BaseSWGCommand>();
 	private ConcurrentHashMap<Integer, Integer> aliases = new ConcurrentHashMap<Integer, Integer>();
-	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+	@SuppressWarnings("unused") private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	private NGECore core;
 	
 	public CommandService(NGECore core) {
@@ -162,6 +163,11 @@ public class CommandService implements INetworkDispatch  {
 						
 						if (target == actor) {
 							target = null;
+						}
+						
+						// It's possible they use c cmdString to indicate if it should always be on self
+						if (name.contains("c")) {
+							//target = actor;
 						}
 					}
 					
@@ -551,6 +557,7 @@ public class CommandService implements INetworkDispatch  {
 	}
 	
 	@Override
+	@SuppressWarnings("unused")
 	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> swgOpcodes, Map<Integer, INetworkRemoteEvent> objControllerOpcodes) {
 		
 		objControllerOpcodes.put(ObjControllerOpcodes.COMMAND_QUEUE_ENQUEUE, new INetworkRemoteEvent() {
