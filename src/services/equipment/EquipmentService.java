@@ -19,7 +19,7 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package services;
+package services.equipment;
 
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -48,7 +48,6 @@ import engine.resources.service.INetworkRemoteEvent;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
-import services.equipment.BonusSetTemplate;
 
 public class EquipmentService implements INetworkDispatch {
 	

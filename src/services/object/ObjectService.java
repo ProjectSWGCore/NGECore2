@@ -121,12 +121,12 @@ import resources.objects.tangible.TangibleObject;
 import resources.objects.tool.SurveyTool;
 import resources.objects.waypoint.WaypointObject;
 import resources.objects.weapon.WeaponObject;
-import services.EquipmentService;
 import services.ai.AIActor;
 import services.command.BaseSWGCommand;
 import services.command.CombatCommand;
 import services.bazaar.AuctionItem;
 import services.chat.ChatRoom;
+import services.equipment.EquipmentService;
 
 @SuppressWarnings("unused")
 public class ObjectService implements INetworkDispatch {
