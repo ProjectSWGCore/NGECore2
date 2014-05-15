@@ -34,14 +34,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 
-import com.sleepycat.je.Transaction;
-import com.sleepycat.persist.EntityCursor;
-
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.clients.Client;
 import engine.resources.config.Config;
 import engine.resources.config.DefaultConfig;
+import engine.resources.database.ODBCursor;
 import engine.resources.database.ObjectDatabase;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
@@ -317,7 +315,7 @@ public class ChatService implements INetworkDispatch {
 					return;
 				
 				SWGObject obj = client.getParent();
-				Mail mail = mailODB.get(new Integer(packet.getMailId()), Integer.class, Mail.class);
+				Mail mail = (Mail) mailODB.get((long) packet.getMailId());
 				
 				if(obj == null || mail == null)
 					return;
@@ -352,7 +350,7 @@ public class ChatService implements INetworkDispatch {
 					return;
 				
 				SWGObject obj = client.getParent();
-				Mail mail = mailODB.get(new Integer(packet.getMailId()), Integer.class, Mail.class);
+				Mail mail = (Mail) mailODB.get((long) packet.getMailId());
 				
 				if(obj == null || mail == null)
 					return;
@@ -689,15 +687,11 @@ public class ChatService implements INetworkDispatch {
 
 	
 	public void storePersistentMessage(Mail mail) {
-		Transaction txn = mailODB.getEnvironment().beginTransaction(null, null);
-		mailODB.put(mail, Integer.class, Mail.class, txn);
-		txn.commitSync();
+		mailODB.put((long) mail.getMailId(), mail);
 	}
 	
 	public void deletePersistentMessage(Mail mail) {
-		Transaction txn = mailODB.getEnvironment().beginTransaction(null, null);
-		mailODB.delete(new Integer(mail.getMailId()), Integer.class, Mail.class, txn);
-		txn.commitSync();
+		mailODB.remove((long) mail.getMailId());
 	}
 	
 	public void loadMailHeaders(Client client) {
@@ -707,14 +701,18 @@ public class ChatService implements INetworkDispatch {
 		if(obj == null || client.getSession() == null)
 			return;
 		
-		EntityCursor<Mail> cursor = mailODB.getCursor(Integer.class, Mail.class);
+		ODBCursor cursor = mailODB.getCursor();
 		
-		for(Mail mail : cursor) {
-			
+		while(cursor.hasNext()) {
+			Mail mail = (Mail) cursor.next();
+			if(mail == null)
+				continue;
 			if(mail.getRecieverId() == obj.getObjectID()) {
 				sendPersistentMessageHeader(client, mail);
 			}
+
 		}
+		
 		cursor.close();
 	}
 
@@ -747,7 +745,7 @@ public class ChatService implements INetworkDispatch {
 		
 		int id = rand.nextInt();
 		
-		if(mailODB.contains(new Integer(id), Integer.class, Mail.class))
+		if(mailODB.contains((long) id))
 			return generateMailId();
 		else
 			return id;
@@ -755,7 +753,7 @@ public class ChatService implements INetworkDispatch {
 	
 	public Mail getMailById(int mailId) {
 		
-		Mail mail = mailODB.get(new Integer(mailId), Integer.class, Mail.class);
+		Mail mail = (Mail) mailODB.get((long) mailId);
 		return mail;
 		
 	}
@@ -776,7 +774,7 @@ public class ChatService implements INetworkDispatch {
 		Random rand = new Random();
 		int id = rand.nextInt();
 		
-		if (chatRoomsODB.contains(new Integer(id), Integer.class, ChatRoom.class))
+		if (chatRoomsODB.contains((long) id))
 			return generateChatRoomId();
 		else
 			return id;
@@ -819,11 +817,13 @@ public class ChatService implements INetworkDispatch {
 		createChatRoom("Politician chat for this galaxy", "Politician", "system", true);
 		//createChatRoom("Pilot chat for this galaxy", "Pilot", "system", true);
 		
-		EntityCursor<ChatRoom> cursor = chatRoomsODB.getCursor(Integer.class, ChatRoom.class);
-		cursor.forEach(room -> {
+		ODBCursor cursor = chatRoomsODB.getCursor();
+		
+		while(cursor.hasNext()) {
+			ChatRoom room = (ChatRoom) cursor.next();
 			if (!chatRooms.containsValue(room))
 				chatRooms.put(room.getRoomId(), room);
-		});
+		}
 		cursor.close();
 		
 		List<Planet> planets = core.terrainService.getPlanetList();
@@ -891,9 +891,7 @@ public class ChatService implements INetworkDispatch {
 		chatRooms.put(room.getRoomId(), room);
 		
 		if(store){
-			Transaction txn = chatRoomsODB.getEnvironment().beginTransaction(null, null);
-			chatRoomsODB.put(room, Integer.class, ChatRoom.class, txn);
-			txn.commitSync();
+			chatRoomsODB.put((long) room.getRoomId(), room);
 		}
 		
 		//Console.println("Created room " + address + " with ID " + room.getRoomId());
@@ -943,6 +941,7 @@ public class ChatService implements INetworkDispatch {
 			}
 			
 			room.addUser(user.toLowerCase());
+			((CreatureObject) player).getPlayerObject().addChannel(roomId);
 			return true;
 		}
 		return false;
@@ -1001,10 +1000,6 @@ public class ChatService implements INetworkDispatch {
 				player.getClient().getSession().write(roomMessage.serialize());
 			}
 		});
-	}
-	
-	public void handleGroupChat(SWGObject sender, String message) {
-		
 	}
 	
 	public ConcurrentHashMap<Integer, ChatRoom> getChatRooms() {

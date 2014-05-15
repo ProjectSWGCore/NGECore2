@@ -21,23 +21,24 @@
  ******************************************************************************/
 package resources.objects.mission;
 
-import com.sleepycat.je.Environment;
-import com.sleepycat.je.Transaction;
+import java.io.Serializable;
+
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
 
+import resources.objects.ObjectMessageBuilder;
 import resources.objects.intangible.IntangibleObject;
 import resources.objects.waypoint.WaypointObject;
 import services.mission.MissionObjective;
 import engine.clients.Client;
-import engine.resources.objects.IPersistent;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
 @Persistent(version=1)
-public class MissionObject extends IntangibleObject implements IPersistent {
-
+public class MissionObject extends IntangibleObject implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
 	private Point3D destination;
 	private Point3D startLocation;
 	private String startPlanet = "";
@@ -53,14 +54,14 @@ public class MissionObject extends IntangibleObject implements IPersistent {
 	private String type = "";
 	private int missionTemplateObject = 0;
 	private WaypointObject attachedWaypoint;
+	
+	// Server variables
 	private MissionObjective objective;
-
-	@NotPersistent
-	MissionMessageBuilder messageBuilder = new MissionMessageBuilder(this);
+	private long bountyObjId;
 	
 	@NotPersistent
-	private Transaction txn;
-	
+	private transient MissionMessageBuilder messageBuilder = new MissionMessageBuilder(this);
+		
 	public MissionObject() {
 		super();
 	}
@@ -73,6 +74,14 @@ public class MissionObject extends IntangibleObject implements IPersistent {
 		synchronized(objectMutex) {
 			return destinationPlanet;
 		}
+	}
+	
+	@Override
+	public void initAfterDBLoad() {
+		super.init();
+		messageBuilder = new MissionMessageBuilder(this);
+		if(attachedWaypoint != null)
+			attachedWaypoint.initAfterDBLoad();
 	}
 
 	public int getMissionLevel() {
@@ -148,11 +157,15 @@ public class MissionObject extends IntangibleObject implements IPersistent {
 	}
 
 	public void setMissionDescription(String missionDescription) {
+		setMissionDescription(missionDescription, "");
+	}
+	
+	public void setMissionDescription(String missionDescription, String additionalParam) {
 		synchronized(objectMutex) {
 			this.description = missionDescription;
 		}
 		if (getGrandparent() != null && getGrandparent().getClient() != null && getGrandparent().getClient().getSession() != null) {
-			getGrandparent().getClient().getSession().write(messageBuilder.buildMissionDescriptionDelta(missionDescription, missionId));
+			getGrandparent().getClient().getSession().write(messageBuilder.buildMissionDescriptionDelta(missionDescription, missionId, additionalParam));
 		}
 	}
 
@@ -163,11 +176,15 @@ public class MissionObject extends IntangibleObject implements IPersistent {
 	}
 
 	public void setMissionTitle(String missionTitle) {
+		setMissionTitle(missionTitle, "");
+	}
+
+	public void setMissionTitle(String missionTitle, String additionalParam) {
 		synchronized(objectMutex) {
 			this.title = missionTitle;
 		}
 		if (getGrandparent() != null && getGrandparent().getClient() != null && getGrandparent().getClient().getSession() != null) {
-			getGrandparent().getClient().getSession().write(messageBuilder.buildMissionTitleDelta(missionTitle, missionId));
+			getGrandparent().getClient().getSession().write(messageBuilder.buildMissionTitleDelta(missionTitle, missionId, additionalParam));
 		}
 	}
 
@@ -286,12 +303,12 @@ public class MissionObject extends IntangibleObject implements IPersistent {
 		this.missionId = missionId;
 	}
 
-	public Transaction getTransaction() {
-		return txn;
+	public long getBountyMarkId() {
+		return bountyObjId;
 	}
-	
-	public void createTransaction(Environment env) {
-		txn = env.beginTransaction(null, null);
+
+	public void setBountyMarkId(long bountyObjId) {
+		this.bountyObjId = bountyObjId;
 	}
 
 	@Override
@@ -307,5 +324,9 @@ public class MissionObject extends IntangibleObject implements IPersistent {
 		destination.getSession().write(messageBuilder.buildBaseline8());
 		destination.getSession().write(messageBuilder.buildBaseline9());
 	}
-
+	
+	public ObjectMessageBuilder getMessageBuilder() {
+		return messageBuilder;
+	}
+	
 }

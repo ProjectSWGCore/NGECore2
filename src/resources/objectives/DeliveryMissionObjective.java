@@ -21,7 +21,6 @@
  ******************************************************************************/
 package resources.objectives;
 
-import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
 import main.NGECore;
 import resources.common.OutOfBand;
@@ -34,17 +33,18 @@ import services.mission.MissionObjective;
 
 public class DeliveryMissionObjective extends MissionObjective {
 
+	private static final long serialVersionUID = 1L;
+
 	private TangibleObject deliveryObject;
 	private CreatureObject missionGiver;
 	private CreatureObject dropOffNpc;
-	private NGECore core = NGECore.getInstance();
 	
 	public DeliveryMissionObjective(MissionObject parent) {
 		super(parent);
 	}
 
 	@Override
-	public void activate() {
+	public void activate(NGECore core, CreatureObject player) {
 
 		if (isActivated())
 			return;
@@ -97,25 +97,21 @@ public class DeliveryMissionObjective extends MissionObjective {
 	}
 
 	@Override
-	public void complete() {
-		CreatureObject completer = (CreatureObject) getMissionObject().getGrandparent();
-		
-		if (completer == null)
-			return;
-		
+	public void complete(NGECore core, CreatureObject player) {
+
 		int reward = getMissionObject().getCreditReward();
 		
-		completer.addBankCredits(reward);
+		player.addBankCredits(reward);
 		
-		completer.sendSystemMessage(new OutOfBand(new ProsePackage("@mission/mission_generic:success_w_amount", reward)), (byte) 0);
+		player.sendSystemMessage(new OutOfBand(new ProsePackage("@mission/mission_generic:success_w_amount", reward)), (byte) 0);
 		
-		abort();
+		abort(core, player);
 		
 		core.objectService.destroyObject(getMissionObject());
 	}
 
 	@Override
-	public void abort() {
+	public void abort(NGECore core, CreatureObject player) {
 		if (deliveryObject != null)
 			core.objectService.destroyObject(deliveryObject.getObjectId());
 		
@@ -127,7 +123,7 @@ public class DeliveryMissionObjective extends MissionObjective {
 	}
 	
 	@Override
-	public void update() {
+	public void update(NGECore core, CreatureObject player) {
 		
 		setObjectivePhase(getObjectivePhase() + 1);
 
@@ -154,10 +150,8 @@ public class DeliveryMissionObjective extends MissionObjective {
 		}
 	}
 	
-	public boolean createDeliveryItem() {
+	public boolean createDeliveryItem(NGECore core, CreatureObject player) {
 
-		SWGObject player = getMissionObject().getGrandparent();
-		
 		if (player == null)
 			return false;
 		

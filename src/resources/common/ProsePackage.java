@@ -21,6 +21,8 @@
  ******************************************************************************/
 package resources.common;
 
+import engine.resources.common.Stf;
+
 public class ProsePackage {
 	
 	/*
@@ -53,6 +55,12 @@ public class ProsePackage {
 	public ProsePackage(String stfFile, String stfLabel) {
 		stf.setStfFilename(stfFile);
 		stf.setStfName(stfLabel);
+	}
+	
+	public ProsePackage(String stfFile, String stfLabel, String ttCustomString) {
+		stf.setStfFilename(stfFile);
+		stf.setStfName(stfLabel);
+		this.ttCustomString = ttCustomString;
 	}
 	
 	public ProsePackage(String stfFile, String stfLabel, long tuObjectId, String tuStfFile, String tuStfLabel, String tuCustomString) {

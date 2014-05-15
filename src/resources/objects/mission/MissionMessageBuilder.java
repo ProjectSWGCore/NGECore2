@@ -22,22 +22,26 @@
 package resources.objects.mission;
 
 import java.nio.ByteOrder;
+import java.util.Map;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
 import engine.resources.common.CRC;
+import engine.resources.objects.Builder;
 import engine.resources.scene.Point3D;
-import resources.common.Console;
-import resources.common.StringUtilities;
-import resources.objects.ObjectMessageBuilder;
+import resources.objects.intangible.IntangibleMessageBuilder;
 import resources.objects.waypoint.WaypointObject;
 
-public class MissionMessageBuilder extends ObjectMessageBuilder {
-
-	public MissionMessageBuilder(MissionObject missionObject) {
-		setObject(missionObject);
+public class MissionMessageBuilder extends IntangibleMessageBuilder {
+	
+	public MissionMessageBuilder(MissionObject object) {
+		super(object);
 	}
-
+	
+	public MissionMessageBuilder() {
+		super();
+	}
+	
 	public IoBuffer buildBaseline3() {
 		MissionObject mission = (MissionObject) object;
 		IoBuffer buffer = IoBuffer.allocate(100, false).order(ByteOrder.LITTLE_ENDIAN);
@@ -304,13 +308,13 @@ public class MissionMessageBuilder extends ObjectMessageBuilder {
 		return buffer;
 	}
 	
-	public IoBuffer buildMissionDescriptionDelta(String desc, int id) {
+	public IoBuffer buildMissionDescriptionDelta(String desc, int id, String additionalParam) {
 		
-		IoBuffer buffer = IoBuffer.allocate(12 + desc.length(), false).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer buffer = IoBuffer.allocate(13 + desc.length() + additionalParam.length(), false).order(ByteOrder.LITTLE_ENDIAN);
 		
 		buffer.put(getAsciiString(desc));
 		buffer.putInt(0);
-		buffer.put(getAsciiString("m" + id + "d"));
+		buffer.put(getAsciiString("m" + id + "d" + additionalParam));
 		
 		int size = buffer.position();
 		buffer.flip();
@@ -318,14 +322,14 @@ public class MissionMessageBuilder extends ObjectMessageBuilder {
 		
 		return buffer;
 	}
-	
-	public IoBuffer buildMissionTitleDelta(String title, int id) {
 
-		IoBuffer buffer = IoBuffer.allocate(12 + title.length(), false).order(ByteOrder.LITTLE_ENDIAN);
+	public IoBuffer buildMissionTitleDelta(String title, int id, String additionalParam) {
+
+		IoBuffer buffer = IoBuffer.allocate(12 + title.length() + additionalParam.length(), false).order(ByteOrder.LITTLE_ENDIAN);
 		
 		buffer.put(getAsciiString(title));
 		buffer.putInt(0);
-		buffer.put(getAsciiString("m" + id + "t"));
+		buffer.put(getAsciiString("m" + id + "t" + additionalParam));
 		
 		int size = buffer.position();
 		buffer.flip();
@@ -394,15 +398,25 @@ public class MissionMessageBuilder extends ObjectMessageBuilder {
 		
 		return buffer;
 	}
-
+	
 	@Override
-	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
-		
+	public void buildBaseline3(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline3(baselineBuilders, deltaBuilders);
 	}
-
+	
 	@Override
-	public void sendBaselines() {
-		
+	public void buildBaseline6(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline6(baselineBuilders, deltaBuilders);
 	}
-
+	
+	@Override
+	public void buildBaseline8(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline8(baselineBuilders, deltaBuilders);
+	}
+	
+	@Override
+	public void buildBaseline9(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline9(baselineBuilders, deltaBuilders);
+	}
+	
 }

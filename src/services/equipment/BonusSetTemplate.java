@@ -55,8 +55,11 @@ public class BonusSetTemplate
 	public int getWornTemplateCount(CreatureObject creature)
 	{
 		int wornItems = 0;
-		for (SWGObject item : creature.getEquipmentList().get())
+		for (Long itemId : creature.getEquipmentList().get())
 		{
+			SWGObject item = NGECore.getInstance().objectService.getObject(itemId);
+			if(item == null)
+				continue;
 			if(requiredWornItems.contains(item.getTemplate()) || requiredWornItems.contains(item.getStfName())) wornItems++;
 		}
 		return wornItems;

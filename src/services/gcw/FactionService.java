@@ -24,6 +24,10 @@ package services.gcw;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import main.NGECore;
 
@@ -33,15 +37,16 @@ import org.python.core.Py;
 import org.python.core.PyObject;
 
 import protocol.swg.FactionResponseMessage;
-
 import resources.common.FileUtilities;
 import resources.common.Opcodes;
+import resources.datatables.DisplayType;
 import resources.datatables.FactionStatus;
+import resources.datatables.Options;
 import resources.datatables.PvpStatus;
 import resources.objects.creature.CreatureObject;
+import resources.objects.mission.MissionObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
-
 import engine.clientdata.StfTable;
 import engine.clients.Client;
 import engine.resources.common.CRC;
@@ -53,6 +58,8 @@ public class FactionService implements INetworkDispatch {
 	private NGECore core;
 	
 	private Map<String, Integer> factionMap = new TreeMap<String, Integer>();
+	
+	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	
 	public FactionService(NGECore core) {
 		this.core = core;
@@ -122,6 +129,26 @@ public class FactionService implements INetworkDispatch {
 		player.modifyFactionStanding(faction, -factionStanding);
 	}
 	
+	public void delegateFactionPoints(CreatureObject actor, CreatureObject target, String faction, int points) {
+		if (actor == null || actor.getSlottedObject("ghost") == null) {
+			return;
+		}
+		
+		if (target == null || actor.getSlottedObject("ghost") == null) {
+			return;
+		}
+		
+		if (!isFaction(faction)) {
+			return;
+		}
+		
+		if (points <= 0) {
+			return;
+		}
+		
+		
+	}
+	
 	public boolean isFaction(String faction) {
 		if (factionMap.containsKey(faction)) {
 			return true;
@@ -131,27 +158,27 @@ public class FactionService implements INetworkDispatch {
 	}
 	
 	/*
-	 * Returns true if creature2 is an ally of creature1
+	 * Returns true if target is an ally of object
 	 * 
 	 * Will be useful for NPC AI, so they know who to help and who to be indifferent to.
 	 */
-	public boolean isFactionAlly(CreatureObject creature1, CreatureObject creature2) {
-		if (creature1 == null || creature2 == null) {
+	public boolean isFactionAlly(TangibleObject object, TangibleObject target) {
+		if (object == null || target == null) {
 			return false;
 		}
 		
-		String faction1 = creature1.getFaction();
-		String faction2 = creature2.getFaction();
+		String objectFaction = object.getFaction();
+		String targetFaction = target.getFaction();
 		
-		if (!isFaction(faction1) || !isFaction(faction2)) {
+		if (!isFaction(objectFaction) || !isFaction(targetFaction)) {
 			return false;
 		}
 		
-		if (FileUtilities.doesFileExist("scripts/faction/" + faction1 + ".py")) {
-			PyObject method = core.scriptService.getMethod("scripts/faction/", faction1, "isAlly");
+		if (FileUtilities.doesFileExist("scripts/faction/" + objectFaction + ".py")) {
+			PyObject method = core.scriptService.getMethod("scripts/faction/", objectFaction, "isAlly");
 			
 			if (method != null && method.isCallable()) {
-				return ((method.__call__(Py.java2py(faction2)).asInt() == 1) ? true : false);
+				return ((method.__call__(Py.java2py(targetFaction)).asInt() == 1) ? true : false);
 			}
 		}
 		
@@ -159,27 +186,27 @@ public class FactionService implements INetworkDispatch {
 	}
 	
 	/*
-	 * Returns true if creature2 is an enemy of creature1
+	 * Returns true if target is an enemy of object
 	 * 
 	 * Will be useful for NPC AI, so they know who to attack and who to be indifferent to.
 	 */
-	public boolean isFactionEnemy(CreatureObject creature1, CreatureObject creature2) {
-		if (creature1 == null || creature2 == null) {
+	public boolean isFactionEnemy(TangibleObject object, TangibleObject target) {
+		if (object == null || target == null) {
 			return false;
 		}
 		
-		String faction1 = creature1.getFaction();
-		String faction2 = creature2.getFaction();
+		String objectFaction = object.getFaction();
+		String targetFaction = target.getFaction();
 		
-		if (!isFaction(faction1) || !isFaction(faction2)) {
+		if (!isFaction(objectFaction) || !isFaction(targetFaction)) {
 			return false;
 		}
 		
-		if (FileUtilities.doesFileExist("scripts/faction/" + faction1 + ".py")) {
-			PyObject method = core.scriptService.getMethod("scripts/faction/", faction1, "isEnemy");
+		if (FileUtilities.doesFileExist("scripts/faction/" + objectFaction + ".py")) {
+			PyObject method = core.scriptService.getMethod("scripts/faction/", objectFaction, "isEnemy");
 			
 			if (method != null && method.isCallable()) {
-				return ((method.__call__(Py.java2py(faction2)).asInt() == 1) ? true : false);
+				return ((method.__call__(Py.java2py(targetFaction)).asInt() == 1) ? true : false);
 			}
 		}
 		
@@ -196,66 +223,137 @@ public class FactionService implements INetworkDispatch {
 	 * 
 	 * This should be used instead of getPvPBitmask where possible, but
 	 * should not be used in setPvPBitmask.
+	 * 
+	 * *** Updated this so it calculates if even a tangible object
+	 * should see something as attackable (so it works for npcs and turrets).
+	 * 
+	 * Also takes into account bounty targets and if it's a pet.
 	 */
-	/*public int calculatePvpStatus(CreatureObject player, TangibleObject target) {
-		PlayerObject ghost = (PlayerObject) player.getSlottedObject("ghost");
+	public int calculatePvpStatus(TangibleObject object, TangibleObject target) {
+		PlayerObject ghost = (PlayerObject) object.getSlottedObject("ghost");
 		
-		int pvpBitmask = target.getPvPBitmask();
+		int pvpBitmask = 0;
 		
-		// Seefo: Casting target to type CreatureObject as temporary fix.  I am unsure whether or not we want to put a factionStatus member inside of TangibleObject.
-		if (((CreatureObject) target).getFactionStatus() == FactionStatus.Combatant) {
-			pvpBitmask |= PvpStatus.Enemy;
-		}
-		
-		if (((CreatureObject) target).getFactionStatus() == FactionStatus.SpecialForces) {
-			pvpBitmask |= PvpStatus.Overt;
-			
-			if (target.getSlottedObject("ghost") != null) {
-				pvpBitmask |= PvpStatus.Enemy;
-			}
+		if (object == target) {
+			pvpBitmask |= PvpStatus.Self;
 		}
 		
 		if (target.getSlottedObject("ghost") != null) {
 			pvpBitmask |= PvpStatus.Player;
-			
-			if ((!player.getFaction().equals(target.getFaction()) &&
-			player.getFactionStatus() == FactionStatus.SpecialForces &&
-			((CreatureObject) target).getFactionStatus() == FactionStatus.SpecialForces) ||
-			core.combatService.areInDuel(player, (CreatureObject) target)) {
-				pvpBitmask |= (PvpStatus.Attackable | PvpStatus.Aggressive);
-			}
-			
-			if (core.combatService.areInDuel(player, (CreatureObject) target)) {
-				//pvpBitmask |= PvpStatus.Dueling;
-			}
-			
+		}
+		
+		if (target instanceof CreatureObject && ((CreatureObject) target).getOwnerId() > 0) {
+			target = (TangibleObject) core.objectService.getObject(((CreatureObject) target).getOwnerId());
+		}
+		
+		if ((target.getPvpBitmask() & PvpStatus.GoingCovert) == PvpStatus.GoingCovert) {
+			pvpBitmask |= PvpStatus.GoingCovert;
+		}
+		
+		if ((target.getPvpBitmask() & PvpStatus.GoingOvert) == PvpStatus.GoingOvert) {
+			pvpBitmask |= PvpStatus.GoingOvert;
+		}
+		
+		if (target.getFactionStatus() == FactionStatus.SpecialForces) {
+			pvpBitmask |= PvpStatus.Overt;
+		}
+		
+		// Everything below assumes target is potentially attackable.
+		if (!target.getOption(Options.ATTACKABLE) || target.getOption(Options.INVULNERABLE)) {
 			return pvpBitmask;
 		}
 		
-		if (player.getFaction().equals(target.getFaction())) {
+		if (ghost != null && target.getSlottedObject("ghost") != null &&
+		core.combatService.areInDuel((CreatureObject) object, (CreatureObject) target)) {
+			pvpBitmask |= (PvpStatus.Attackable | PvpStatus.Aggressive);
+		}
+		
+		if (object.getDefendersList().contains(target)) {
+			pvpBitmask |= (PvpStatus.Attackable | PvpStatus.Aggressive);
+		}
+		
+		AtomicReference<Integer> ref = new AtomicReference<Integer>(0);
+		
+		long targetId = target.getObjectID();
+		
+		if (ghost != null && ghost.getBountyMissionId() != 0) {
+			if (((MissionObject) core.objectService.getObject(ghost.getBountyMissionId())).getBountyMarkId() == targetId) {
+				ref.set(PvpStatus.Attackable | PvpStatus.Aggressive);
+			}
+		}
+		
+		/*if (ghost != null && ghost.getProfession().contains("smuggler") &&
+		target.getSlottedObject("datapad") != null) {
+			target.getSlottedObject("datapad").viewChildren(target, false, false, (mission) -> {
+				if (mission instanceof MissionObject && ((MissionObject) mission).getBountyMarkId() == object.getObjectID()) {
+					ref.set(PvpStatus.Attackable);
+				}
+			});
+		}*/
+		
+		pvpBitmask |= ref.get();
+		
+		if (target instanceof CreatureObject && ((CreatureObject) target).getTefTime() > 0) {
+			//pvpBitmask |= PvpStatus.TEF;
+		}
+		
+		if (target.getFaction().length() > 0 && target.getFaction().equals(object.getFaction())) {
 			return pvpBitmask;
 		}
 		
-		if (target.getOption(Options.ATTACKABLE)) {
+		if (target.getSlottedObject("ghost") == null && target.getFactionStatus() == FactionStatus.OnLeave) {
 			pvpBitmask |= PvpStatus.Attackable;
 		}
 		
 		if (target.getOption(Options.AGGRESSIVE)) {
 			pvpBitmask |= PvpStatus.Aggressive;
-		} else {
-			Integer factionStanding = ghost.getFactionStandingMap().get(target.getFaction());
-			
-			if (factionStanding != null) {
-				if (((TangibleObject) target).getOption(Options.ATTACKABLE) && factionStanding < 0) {
-					pvpBitmask |= PvpStatus.Aggressive;
+		}
+		
+		if (object.getFactionStatus() == FactionStatus.OnLeave) {
+			return pvpBitmask;
+		}
+		
+		if (target.getFactionStatus() >= FactionStatus.Combatant) {
+			if (ghost != null) {
+				if (target.getSlottedObject("ghost") == null) {
+					pvpBitmask |= PvpStatus.Enemy;
+					
+					Integer factionStanding = ghost.getFactionStandingMap().get(target.getFaction());
+					
+					if (factionStanding != null) {
+						if (factionStanding < 0) {
+							pvpBitmask |= PvpStatus.Aggressive;
+						} else {
+							pvpBitmask |= PvpStatus.Attackable;
+						}
+					} else {
+						pvpBitmask |= PvpStatus.Attackable;
+					}
+					
+					return pvpBitmask;
+				}
+			} else {
+				if (isFactionEnemy(object, target)) {
+					pvpBitmask |= PvpStatus.Attackable | PvpStatus.Enemy;
+				}
+				
+				if (isFactionEnemy(target, object)) {
+					pvpBitmask |= PvpStatus.Aggressive | PvpStatus.Enemy;
 				}
 			}
 		}
 		
+		if (target.getFactionStatus() == FactionStatus.SpecialForces) {
+			if (object.getFactionStatus() == FactionStatus.SpecialForces) {
+				pvpBitmask |= (PvpStatus.Attackable | PvpStatus.Aggressive | PvpStatus.Enemy);
+			}
+		}
+		
 		return pvpBitmask;
-	}*/
+	}
 	
 	// temp fix until calculatePvpStatus is fixed
+	/*
 	public int calculatePvpStatus(CreatureObject player, TangibleObject target) {
 		
 		if(target.getSlottedObject("ghost") != null) {
@@ -274,6 +372,101 @@ public class FactionService implements INetworkDispatch {
 				return 0;
 		}
 		
+	}
+	*/
+	
+	public void changeFactionStatus(CreatureObject actor, int factionStatus) {
+		long time = 1;
+		String message = "";
+		
+		if (factionStatus == actor.getFactionStatus()) {
+			return;
+		}
+		
+		if (actor.getPvpBitmask() == PvpStatus.GoingCovert) {
+			actor.sendSystemMessage("@faction_recruiter:pvp_status_changing", DisplayType.Broadcast);
+			return;
+		}
+		
+		if (actor.getPvpBitmask() == PvpStatus.GoingOvert) {
+			actor.sendSystemMessage("@faction_recruiter:pvp_status_changing", DisplayType.Broadcast);
+			return;
+		}
+		
+		switch (factionStatus) {
+			case FactionStatus.OnLeave:
+				actor.setPvpStatus(PvpStatus.GoingCovert, true);
+				actor.updatePvpStatus();
+				time = 300;
+				message = "on_leave_complete";
+				break;
+			case FactionStatus.Combatant:
+				actor.setPvpStatus(PvpStatus.GoingCovert, true);
+				actor.updatePvpStatus();
+				
+				switch (actor.getFactionStatus()) {
+					case FactionStatus.OnLeave:
+						actor.sendSystemMessage("@faction_recruiter:on_leave_to_covert", DisplayType.Broadcast);
+						time = 30;
+						break;
+					case FactionStatus.SpecialForces:
+						actor.sendSystemMessage("@faction_recruiter:overt_to_covert", DisplayType.Broadcast);
+						time = 300;
+						break;
+				}
+				
+				message = "covert_complete";
+				break;
+			case FactionStatus.SpecialForces:
+				actor.sendSystemMessage("@faction_recruiter:covert_to_overt", DisplayType.Broadcast);
+				actor.setPvpStatus(PvpStatus.GoingOvert, true);
+				time = 30;
+				message = "overt_complete";
+				break;
+		}
+		
+		final String finalMessage = message;
+		
+		scheduler.schedule(() -> {
+			actor.setPvpBitmask(0);
+			actor.setFactionStatus(factionStatus);
+			actor.updatePvpStatus();
+			actor.sendSystemMessage("@faction_recruiter:" + finalMessage, DisplayType.Broadcast);
+		}, time, TimeUnit.SECONDS);
+	}
+	
+	public void resign(CreatureObject actor) {
+		if (actor.getPvpBitmask() == PvpStatus.GoingCovert) {
+			actor.sendSystemMessage("@faction_recruiter:pvp_status_changing", DisplayType.Broadcast);
+			return;
+		}
+		
+		if (actor.getPvpBitmask() == PvpStatus.GoingOvert) {
+			actor.sendSystemMessage("@faction_recruiter:pvp_status_changing", DisplayType.Broadcast);
+			return;
+		}
+		
+		if (actor.getFactionStatus() == FactionStatus.OnLeave) {
+			actor.sendSystemMessage("@faction_recruiter:resign_on_leave", DisplayType.Broadcast);
+			return;
+		}
+		
+		long time = 1;
+		
+		if (actor.getFactionStatus() == FactionStatus.SpecialForces) {
+			actor.sendSystemMessage("@faction_recruiter:sui_resig_complete_in_5", DisplayType.Broadcast);
+			actor.setPvpStatus(PvpStatus.GoingCovert, true);
+			actor.updatePvpStatus();
+			time = 300;
+		}
+		
+		scheduler.schedule(() -> {
+			actor.setPvpBitmask(0);
+			actor.setFactionStatus(FactionStatus.OnLeave);
+			actor.setFaction("");
+			actor.updatePvpStatus();
+			actor.sendSystemMessage("@faction_recruiter:resign_complete", DisplayType.Broadcast);
+		}, time, TimeUnit.SECONDS);
 	}
 	
 	public Map<String, Integer> getFactionMap() {

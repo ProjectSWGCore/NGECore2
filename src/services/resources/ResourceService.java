@@ -22,28 +22,28 @@
 package services.resources;
 
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-
-import com.sleepycat.persist.EntityCursor;
+import java.util.concurrent.TimeUnit;
 
 import main.NGECore;
-import engine.resources.common.CRC;
+import engine.resources.database.ODBCursor;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
+import resources.datatables.MilkState;
 import resources.objects.creature.CreatureObject;
 import resources.objects.harvester.HarvesterObject;
 import resources.objects.resource.GalacticResource;
 import resources.objects.resource.ResourceContainerObject;
 import resources.objects.resource.ResourceRoot;
+import services.ai.AIActor;
 
 /** 
  * @author Charon 
@@ -114,15 +114,15 @@ public class ResourceService implements INetworkDispatch {
 //			createCollections2();
 //			createCollections3();
 //		} else {
-			EntityCursor<ResourceRoot> cursor = core.getResourceRootsODB().getCursor(Integer.class, ResourceRoot.class);
-			Iterator<ResourceRoot> it = cursor.iterator();		
-			if(!it.hasNext()) {
+			ODBCursor cursor = core.getResourceRootsODB().getCursor();
+			if(!cursor.hasNext()) {
 				createCollections();
 				createCollections2();
 				createCollections3();
 			}
 //		}
-			
+		core.commandService.registerCommand("harvestcorpse");
+		core.commandService.registerCommand("milkcreature");
 		core.commandService.registerCommand("resourcecontainersplit");
 		core.commandService.registerCommand("resourcecontainertransfer");			
 		core.commandService.registerCommand("factorycratesplit");	
@@ -133,12 +133,11 @@ public class ResourceService implements INetworkDispatch {
 	
 	// loads the resource roots at server start
 	public void loadResourceRoots() {
-		EntityCursor<ResourceRoot> cursor = core.getResourceRootsODB().getCursor(Integer.class, ResourceRoot.class);
-		Iterator<ResourceRoot> it = cursor.iterator();
+		ODBCursor cursor = core.getResourceRootsODB().getCursor();
 		int loadedResourceRootsCounter = 0;
 		System.out.println("Loading resource roots...");
-		while(it.hasNext()) {
-			final ResourceRoot resourceRoot = it.next();
+		while(cursor.hasNext()) {
+			final ResourceRoot resourceRoot = (ResourceRoot) cursor.next();
 			System.err.println("resourceRoot loaded ID: " + resourceRoot.getResourceRootID() + " " + resourceRoot.getResourceFileName());
 			core.resourceService.add_resourceRoot(resourceRoot);
 			loadedResourceRootsCounter++;
@@ -154,12 +153,11 @@ public class ResourceService implements INetworkDispatch {
 	
 	// loads the currently spawned resources at server start
 	public void loadResources() {
-		EntityCursor<GalacticResource> cursor = core.getResourcesODB().getCursor(Long.class, GalacticResource.class);
-		Iterator<GalacticResource> it = cursor.iterator();
+		ODBCursor cursor = core.getResourcesODB().getCursor();
 		int loadedResourceCounter = 0;
 		System.out.println("Loading resources...");
-		while(it.hasNext()) {
-			final GalacticResource resource = it.next();
+		while(cursor.hasNext()) {
+			final GalacticResource resource = (GalacticResource) cursor.next();
 			System.err.println("resource " + resource.getName() + " rootID " + resource.getResourceRootID());
 			core.objectService.getObjectList().put(resource.getId(), resource); 
 			
@@ -7246,7 +7244,7 @@ public class ResourceService implements INetworkDispatch {
 		
 		resourceRoot = new ResourceRoot();
 		resourceRoot.setResourceFileName("meat_carnivore_corellia");
-		resourceRoot.setResourceClass("Canivore Meat");
+		resourceRoot.setResourceClass("Carnivore Meat");
 		resourceRoot.setResourceType("Corellian"); 
 		resourceRoot.setgeneralType((byte) GalacticResource.GENERAL_MEAT);
 		resourceRoot.setContainerType((byte) ResourceRoot.CONTAINER_TYPE_ORGANIC_FOOD);
@@ -7262,7 +7260,7 @@ public class ResourceService implements INetworkDispatch {
 		
 		resourceRoot = new ResourceRoot();
 		resourceRoot.setResourceFileName("meat_carnivore_dantooine");
-		resourceRoot.setResourceClass("Canivore Meat");
+		resourceRoot.setResourceClass("Carnivore Meat");
 		resourceRoot.setResourceType("Dantooine"); 
 		resourceRoot.setgeneralType((byte) GalacticResource.GENERAL_MEAT);
 		resourceRoot.setContainerType((byte) ResourceRoot.CONTAINER_TYPE_ORGANIC_FOOD);
@@ -7277,7 +7275,7 @@ public class ResourceService implements INetworkDispatch {
 		
 		resourceRoot = new ResourceRoot();
 		resourceRoot.setResourceFileName("meat_carnivore_dathomir");
-		resourceRoot.setResourceClass("Canivore Meat");
+		resourceRoot.setResourceClass("Carnivore Meat");
 		resourceRoot.setResourceType("Dathomirian"); 
 		resourceRoot.setgeneralType((byte) GalacticResource.GENERAL_MEAT);
 		resourceRoot.setContainerType((byte) ResourceRoot.CONTAINER_TYPE_ORGANIC_FOOD);
@@ -7292,7 +7290,7 @@ public class ResourceService implements INetworkDispatch {
 		
 		resourceRoot = new ResourceRoot();
 		resourceRoot.setResourceFileName("meat_carnivore_endor");
-		resourceRoot.setResourceClass("Canivore Meat");
+		resourceRoot.setResourceClass("Carnivore Meat");
 		resourceRoot.setResourceType("Endorian"); 
 		resourceRoot.setgeneralType((byte) GalacticResource.GENERAL_MEAT);
 		resourceRoot.setContainerType((byte) ResourceRoot.CONTAINER_TYPE_ORGANIC_FOOD);
@@ -7307,7 +7305,7 @@ public class ResourceService implements INetworkDispatch {
 		
 		resourceRoot = new ResourceRoot();
 		resourceRoot.setResourceFileName("meat_carnivore_lok");
-		resourceRoot.setResourceClass("Canivore Meat");
+		resourceRoot.setResourceClass("Carnivore Meat");
 		resourceRoot.setResourceType("Lokian"); 
 		resourceRoot.setgeneralType((byte) GalacticResource.GENERAL_MEAT);
 		resourceRoot.setContainerType((byte) ResourceRoot.CONTAINER_TYPE_ORGANIC_FOOD);
@@ -7322,7 +7320,7 @@ public class ResourceService implements INetworkDispatch {
 		
 		resourceRoot = new ResourceRoot();
 		resourceRoot.setResourceFileName("meat_carnivore_naboo");
-		resourceRoot.setResourceClass("Canivore Meat");
+		resourceRoot.setResourceClass("Carnivore Meat");
 		resourceRoot.setResourceType("Nabooian"); 
 		resourceRoot.setgeneralType((byte) GalacticResource.GENERAL_MEAT);
 		resourceRoot.setContainerType((byte) ResourceRoot.CONTAINER_TYPE_ORGANIC_FOOD);
@@ -7337,7 +7335,7 @@ public class ResourceService implements INetworkDispatch {
 		
 		resourceRoot = new ResourceRoot();
 		resourceRoot.setResourceFileName("meat_carnivore_rori");
-		resourceRoot.setResourceClass("Canivore Meat");
+		resourceRoot.setResourceClass("Carnivore Meat");
 		resourceRoot.setResourceType("Rori"); 
 		resourceRoot.setgeneralType((byte) GalacticResource.GENERAL_MEAT);
 		resourceRoot.setContainerType((byte) ResourceRoot.CONTAINER_TYPE_ORGANIC_FOOD);
@@ -7352,7 +7350,7 @@ public class ResourceService implements INetworkDispatch {
 		
 		resourceRoot = new ResourceRoot();
 		resourceRoot.setResourceFileName("meat_carnivore_talus");
-		resourceRoot.setResourceClass("Canivore Meat");
+		resourceRoot.setResourceClass("Carnivore Meat");
 		resourceRoot.setResourceType("Talusian"); 
 		resourceRoot.setgeneralType((byte) GalacticResource.GENERAL_MEAT);
 		resourceRoot.setContainerType((byte) ResourceRoot.CONTAINER_TYPE_ORGANIC_FOOD);
@@ -7367,7 +7365,7 @@ public class ResourceService implements INetworkDispatch {
 		
 		resourceRoot = new ResourceRoot();
 		resourceRoot.setResourceFileName("meat_carnivore_tatooine");
-		resourceRoot.setResourceClass("Canivore Meat");
+		resourceRoot.setResourceClass("Carnivore Meat");
 		resourceRoot.setResourceType("Tatooinian"); 
 		resourceRoot.setgeneralType((byte) GalacticResource.GENERAL_MEAT);
 		resourceRoot.setContainerType((byte) ResourceRoot.CONTAINER_TYPE_ORGANIC_FOOD);
@@ -7382,7 +7380,7 @@ public class ResourceService implements INetworkDispatch {
 		
 		resourceRoot = new ResourceRoot();
 		resourceRoot.setResourceFileName("meat_carnivore_yavin4");
-		resourceRoot.setResourceClass("Canivore Meat");
+		resourceRoot.setResourceClass("Carnivore Meat");
 		resourceRoot.setResourceType("Yavinian"); 
 		resourceRoot.setgeneralType((byte) GalacticResource.GENERAL_MEAT);
 		resourceRoot.setContainerType((byte) ResourceRoot.CONTAINER_TYPE_ORGANIC_FOOD);
@@ -9326,7 +9324,7 @@ public class ResourceService implements INetworkDispatch {
 		
 		resourceRoot = new ResourceRoot();
 		resourceRoot.setResourceFileName("meat_carnivore_kashyyyk");
-		resourceRoot.setResourceClass("Herbivore Meat");
+		resourceRoot.setResourceClass("Carnivore Meat");
 		resourceRoot.setResourceType("Kashyyykian");
 		resourceRoot.setgeneralType((byte) GalacticResource.GENERAL_MEAT);
 		resourceRoot.setContainerType((byte) ResourceRoot.CONTAINER_TYPE_ORGANIC_FOOD);
@@ -10800,9 +10798,7 @@ public class ResourceService implements INetworkDispatch {
 		for (int i=0;i<indices;i++){
 			ResourceRoot persistRoot = resourceRootTable.get(new Integer(i));
 			System.err.println("Persisting Root with ID " + persistRoot.getResourceRootID() +" " + persistRoot.getResourceFileName());
-			persistRoot.createTransaction(core.getResourceRootsODB().getEnvironment());
-			core.getResourceRootsODB().put(persistRoot, Integer.class, ResourceRoot.class, persistRoot.getTransaction());
-			persistRoot.getTransaction().commitSync();		
+			core.getResourceRootsODB().put((long) persistRoot.getResourceRootID(), persistRoot);
 		}
 		
 
@@ -11183,15 +11179,11 @@ public class ResourceService implements INetworkDispatch {
 			resource.setPoolNumber((byte)1);
 			resource.initializeNewGalaxyResource(completeResourceNameHistory);
 			
-			resource.createTransaction(core.getResourcesODB().getEnvironment());
-			core.getResourcesODB().put(resource, Long.class, GalacticResource.class, resource.getTransaction());
-			resource.getTransaction().commitSync();
+			core.getResourcesODB().put(resource.getObjectID(), resource);
 			
 			if (enableResourceHistory){
 				GalacticResource historicResource = resource.convertToHistoricResource();
-				historicResource.createTransaction(core.getResourceHistoryODB().getEnvironment());
-				core.getResourceHistoryODB().put(historicResource, Long.class, GalacticResource.class, historicResource.getTransaction());
-				historicResource.getTransaction().commitSync();
+				core.getResourceHistoryODB().put(historicResource.getObjectID(), historicResource);
 			}
 			
 			completeResourceNameHistory.add(resource.getName());
@@ -11212,15 +11204,11 @@ public class ResourceService implements INetworkDispatch {
 			resource.setPoolNumber((byte)2);
 			resource.initializeNewGalaxyResource(completeResourceNameHistory);
 			
-			resource.createTransaction(core.getResourcesODB().getEnvironment());
-			core.getResourcesODB().put(resource, Long.class, GalacticResource.class, resource.getTransaction());
-			resource.getTransaction().commitSync();
+			core.getResourcesODB().put(resource.getObjectID(), resource);
 			
 			if (enableResourceHistory){
 				GalacticResource historicResource = resource.convertToHistoricResource();
-				historicResource.createTransaction(core.getResourceHistoryODB().getEnvironment());
-				core.getResourceHistoryODB().put(historicResource, Long.class, GalacticResource.class, historicResource.getTransaction());
-				historicResource.getTransaction().commitSync();
+				core.getResourceHistoryODB().put(historicResource.getObjectID(), historicResource);
 			}
 				
 			completeResourceNameHistory.add(resource.getName());
@@ -11241,15 +11229,11 @@ public class ResourceService implements INetworkDispatch {
 			resource.setPoolNumber((byte)3);
 			resource.initializeNewGalaxyResource(completeResourceNameHistory);
 			
-			resource.createTransaction(core.getResourcesODB().getEnvironment());
-			core.getResourcesODB().put(resource, Long.class, GalacticResource.class, resource.getTransaction());
-			resource.getTransaction().commitSync();
+			core.getResourcesODB().put(resource.getObjectID(), resource);
 			
 			if (enableResourceHistory){
 				GalacticResource historicResource = resource.convertToHistoricResource();
-				historicResource.createTransaction(core.getResourceHistoryODB().getEnvironment());
-				core.getResourceHistoryODB().put(historicResource, Long.class, GalacticResource.class, historicResource.getTransaction());
-				historicResource.getTransaction().commitSync();
+				core.getResourceHistoryODB().put(historicResource.getObjectID(), historicResource);
 			}
 				
 			completeResourceNameHistory.add(resource.getName());
@@ -11271,15 +11255,11 @@ public class ResourceService implements INetworkDispatch {
 			resource.setPlanetID(planetID);
 			resource.initializeNewGalaxyResource(completeResourceNameHistory);
 			
-			resource.createTransaction(core.getResourcesODB().getEnvironment());
-			core.getResourcesODB().put(resource, Long.class, GalacticResource.class, resource.getTransaction());
-			resource.getTransaction().commitSync();
+			core.getResourcesODB().put(resource.getObjectID(), resource);
 			
 			if (enableResourceHistory){
 				GalacticResource historicResource = resource.convertToHistoricResource();
-				historicResource.createTransaction(core.getResourceHistoryODB().getEnvironment());
-				core.getResourceHistoryODB().put(historicResource, Long.class, GalacticResource.class, historicResource.getTransaction());
-				historicResource.getTransaction().commitSync();
+				core.getResourceHistoryODB().put(historicResource.getObjectID(), historicResource);
 			}
 			
 			completeResourceNameHistory.add(resource.getName());
@@ -11449,28 +11429,214 @@ public class ResourceService implements INetworkDispatch {
 	}
 	
 	// Utility method to quickly spawn resource containers into the inventory
-		public ResourceContainerObject spawnSpecificResourceContainer(String spawnType, CreatureObject crafter,int stackCount){	
-			ResourceContainerObject containerObject = null;
-			for (GalacticResource sampleResource : allSpawnedResources){
-				if (sampleResource.getResourceRoot().getResourceClass().contains(spawnType)){
-					String resourceContainerIFF = ResourceRoot.CONTAINER_TYPE_IFF_SIGNIFIER[sampleResource.getResourceRoot().getContainerType()];           		  				
-    				containerObject = (ResourceContainerObject) core.objectService.createObject(resourceContainerIFF, crafter.getPlanet());  				
-    				containerObject.setProprietor(crafter);
-    				containerObject.setStackCount(stackCount,false);
-    				//int stackCount = core.resourceService.getResourceSampleQuantity(crafter, sampleResource); 
-    				containerObject.initializeStats(sampleResource);            		          		
-            		int resCRC = CRC.StringtoCRC(resourceContainerIFF);
-    				containerObject.setIffFileName(resourceContainerIFF);             		
-    				long objectId = containerObject.getObjectID();  					
-    				SWGObject crafterInventory = crafter.getSlottedObject("inventory");        				   					
-    				crafterInventory.add(containerObject);
-    				return containerObject;
-				}
+	public ResourceContainerObject spawnSpecificResourceContainer(String spawnType, CreatureObject crafter,int stackCount){	
+		ResourceContainerObject containerObject = null;
+		for (GalacticResource sampleResource : allSpawnedResources){
+			if (sampleResource.getResourceRoot().getResourceClass().contains(spawnType)){
+				String resourceContainerIFF = ResourceRoot.CONTAINER_TYPE_IFF_SIGNIFIER[sampleResource.getResourceRoot().getContainerType()];           		  				
+				containerObject = (ResourceContainerObject) core.objectService.createObject(resourceContainerIFF, crafter.getPlanet());  				
+				containerObject.setProprietor(crafter);
+				containerObject.setStackCount(stackCount,false);
+				//int stackCount = core.resourceService.getResourceSampleQuantity(crafter, sampleResource); 
+				containerObject.initializeStats(sampleResource);
+				containerObject.setIffFileName(resourceContainerIFF);
+				SWGObject crafterInventory = crafter.getSlottedObject("inventory");
+				crafterInventory.add(containerObject);
+				return containerObject;
 			}
-			return containerObject;
+		}
+		return containerObject;
+	}
+	
+	public void giveResource(CreatureObject actor, GalacticResource res, int amount) {
+		
+		ResourceContainerObject foundContainer = core.surveyService.findResourceContainerInInventory(actor, res);
+
+		if(foundContainer != null && amount < ResourceContainerObject.maximalStackCapacity - foundContainer.getStackCount()) {
+			foundContainer.setStackCount(foundContainer.getStackCount() + amount, actor);
+		} else {
+			SWGObject inventory = actor.getSlottedObject("inventory");   
+			String resourceContainerIFF = ResourceRoot.CONTAINER_TYPE_IFF_SIGNIFIER[res.getResourceRoot().getContainerType()];           		  				
+			ResourceContainerObject containerObject = (ResourceContainerObject) core.objectService.createObject(resourceContainerIFF, actor.getPlanet());
+			containerObject.initializeStats(res);
+			containerObject.setProprietor(actor);
+			containerObject.setStackCount(amount, actor);
+			inventory.add(containerObject);
 		}
 		
-		public Vector<String> getCompleteResourceNameHistory() {
-			return completeResourceNameHistory;
+	}
+		
+	public boolean canMilk(CreatureObject actor, CreatureObject target) {
+		
+		if(target.getPosture() == 14 || !actor.inRange(target.getWorldPosition(), 5) || actor.isInCombat() || target.isInCombat())
+			return false;
+		
+		AIActor ai = (AIActor) target.getAttachment("AI");
+		
+		if(ai.getMobileTemplate().getMilkAmount() <= 0 || ai.getMobileTemplate().getMilkType() == null || ai.getMilkState() == MilkState.MILKED || ai.getMilkState() == MilkState.MILKINGINPROGRESS)
+			return false;
+				
+		return true;
+		
+	}
+	
+	public boolean canHarvest(CreatureObject actor, CreatureObject target) {
+		
+		if(target.getPosture() != 14)
+			return false;
+		
+		AIActor ai = (AIActor) target.getAttachment("AI");
+		
+		if(ai.getMobileTemplate().getMeatAmount() <= 0 && ai.getMobileTemplate().getBoneAmount() <= 0 && ai.getMobileTemplate().getHideAmount() <= 0)
+			return false;
+		
+		if(target.getKiller() != actor && !(actor.getGroupId() == target.getGroupId() && actor.getGroupId() != 0))
+			return false;
+		
+		return true;
+
+	}
+	
+	public void doHarvest(CreatureObject actor, CreatureObject target, String type) {
+		
+		AIActor ai = (AIActor) target.getAttachment("AI");
+
+		if(!actor.inRange(target.getWorldPosition(), 7)) {
+			actor.sendSystemMessage("You are too far away to harvest the creature.", (byte) 0);
+			return;
 		}
+		
+		if(ai.hasBeenHarvested()) {
+			actor.sendSystemMessage("@skl_use:nothing_to_harvest", (byte) 0);
+			return;
+		}
+		
+		ai.setHasBeenHarvested(true);
+		
+		String resType = "";
+		int resAmount = 0;
+
+		switch(type) {
+		
+			case "hide":
+				resType = ai.getMobileTemplate().getHideType();
+				resAmount = ai.getMobileTemplate().getHideAmount();
+				break;
+			case "meat":
+				resType = ai.getMobileTemplate().getMeatType();
+				resAmount = ai.getMobileTemplate().getMeatAmount();
+				break;
+			case "bone":
+				resType = ai.getMobileTemplate().getBoneType();
+				resAmount = ai.getMobileTemplate().getBoneAmount();
+				break;
+		
+		}
+		
+		resAmount += (resAmount * (actor.getSkillModBase("creature_harvesting") / 100));
+		GalacticResource res = grabResourceByClass(resType, target.getPlanetId());
+		
+		if(res == null) {
+			actor.sendSystemMessage("@skl_use:nothing_to_harvest", (byte) 0);
+			ai.setHasBeenHarvested(false);
+			return;
+		}
+		
+		float density = res.deliverConcentrationForSurvey(target.getPlanetId(), target.getWorldPosition().x, target.getWorldPosition().z);
+		
+		if(density >= 0.8f) {
+			resAmount *= 1.25f;
+		} else if(density >= 0.6f) {
+			resAmount *= 1.f;
+		} else if(density >= 0.4f) {
+			resAmount *= 0.75f;
+		} else {
+			resAmount *= 0.5f;
+		}
+
+		giveResource(actor, res, resAmount);
+		actor.sendSystemMessage("@skl_use:corpse_harvest_success", (byte) 0);
+
+	}
+	
+	public void doMilk(CreatureObject actor, CreatureObject target) {
+		
+		AIActor ai = (AIActor) target.getAttachment("AI");
+		ai.setMilkState(MilkState.MILKINGINPROGRESS);
+		actor.sendSystemMessage("@skl_use:milk_begin", (byte) 0);
+				
+		scheduler.schedule(() -> {
+			
+			if(actor.getInventoryItemCount() >= 80) {
+				actor.sendSystemMessage("@skl_use:milk_inventory_full", (byte) 0);
+				ai.setMilkState(MilkState.NOTYETMILKED);
+				return;
+			}
+			
+			if(target.getPosture() == 14) {
+				actor.sendSystemMessage("@skl_use:milk_cant_milk_the_dead", (byte) 0);
+				ai.setMilkState(MilkState.NOTYETMILKED);
+				return;
+			}
+			
+			if(!actor.inRange(target.getWorldPosition(), 5)) {
+				actor.sendSystemMessage("@skl_use:milk_too_far", (byte) 0);
+				ai.setMilkState(MilkState.NOTYETMILKED);
+				return;
+			}
+			
+			if(actor.isInCombat()) {
+				actor.sendSystemMessage("@skl_use:milk_combat", (byte) 0);
+				ai.setMilkState(MilkState.NOTYETMILKED);
+				return;
+			}
+			
+			if(new Random().nextFloat() <= 0.05f) {
+				actor.sendSystemMessage("@skl_use:milk_not_hidden", (byte) 0);
+				ai.setMilkState(MilkState.NOTYETMILKED);
+				ai.addDefender(actor);
+				return;
+			}
+			
+			giveMilk(actor, target);
+			
+		}, 10000, TimeUnit.MILLISECONDS);
+		
+	}
+
+	public void giveMilk(CreatureObject actor, CreatureObject target) {
+		
+		AIActor ai = (AIActor) target.getAttachment("AI");
+		String milkType = ai.getMobileTemplate().getMilkType();
+		int milkAmount = ai.getMobileTemplate().getMilkAmount();
+		
+		GalacticResource res = grabResourceByClass(milkType, target.getPlanetId());
+		
+		if(res == null) {
+			actor.sendSystemMessage("Can't find milk resource.", (byte) 0);
+			ai.setMilkState(MilkState.NOTYETMILKED);
+			return;
+		}
+		
+		float density = res.deliverConcentrationForSurvey(target.getPlanetId(), target.getWorldPosition().x, target.getWorldPosition().z);
+		
+		if(density >= 0.8f) {
+			milkAmount *= 1.25f;
+		} else if(density >= 0.6f) {
+			milkAmount *= 1.f;
+		} else if(density >= 0.4f) {
+			milkAmount *= 0.75f;
+		} else {
+			milkAmount *= 0.5f;
+		}
+		
+		giveResource(actor, res, milkAmount);
+		ai.setMilkState(MilkState.MILKED);
+		actor.sendSystemMessage("@skl_use:milk_success", (byte) 0);
+
+	}
+		
+	public Vector<String> getCompleteResourceNameHistory() {
+		return completeResourceNameHistory;
+	}
 }

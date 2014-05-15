@@ -21,11 +21,26 @@
  ******************************************************************************/
 package resources.objects.ship;
 
+import java.io.Serializable;
+
 import com.sleepycat.persist.model.Persistent;
 
+import resources.objects.ObjectMessageBuilder;
 import resources.objects.tangible.TangibleObject;
 
 @Persistent(version=0)
-public class ShipObject extends TangibleObject {
-
+public class ShipObject extends TangibleObject implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
+	private transient ObjectMessageBuilder messageBuilder = null;
+	
+	@Override
+	public void initAfterDBLoad() {
+		super.init();
+	}
+	
+	public ObjectMessageBuilder getMessageBuilder() {
+		return messageBuilder;
+	}
+	
 }

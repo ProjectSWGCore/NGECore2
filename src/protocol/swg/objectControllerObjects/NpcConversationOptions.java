@@ -26,9 +26,9 @@ import java.util.Vector;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
+import engine.resources.objects.Delta;
 import protocol.swg.ObjControllerMessage;
 import resources.common.ConversationOption;
-import resources.objects.Delta;
 
 public class NpcConversationOptions extends ObjControllerObject {
 	

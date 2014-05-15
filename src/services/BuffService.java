@@ -31,9 +31,9 @@ import java.util.concurrent.TimeUnit;
 import org.python.core.Py;
 import org.python.core.PyObject;
 
+import resources.buffs.Buff;
+import resources.buffs.DamageOverTime;
 import resources.common.FileUtilities;
-import resources.objects.Buff;
-import resources.objects.DamageOverTime;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
 import resources.objects.player.PlayerObject;

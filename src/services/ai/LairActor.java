@@ -87,7 +87,7 @@ public class LairActor {
 			return;
 		
 		int currentCondition = lairObject.getConditionDamage();
-		int maxCondition = lairObject.getMaxDamage();
+		int maxCondition = lairObject.getMaximumCondition();
 		
 		switch(spawnWave) {
 			// TODO: play damage effect
@@ -146,7 +146,7 @@ public class LairActor {
 		int healAmount = 0;
 		
 		for(AIActor ai : creatures) {
-			healAmount += lairObject.getMaxDamage() / 100;
+			healAmount += lairObject.getMaximumCondition() / 100;
 		}
 		
 		lairObject.setConditionDamage(lairObject.getConditionDamage() - healAmount);

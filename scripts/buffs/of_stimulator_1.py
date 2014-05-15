@@ -9,4 +9,5 @@ def add(core, actor, buff):
 	
 def remove(core, actor, buff):
 	core.skillModService.deductSkillMod(actor, 'debuff_purge', 2)
+	
 	return

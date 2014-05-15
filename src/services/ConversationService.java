@@ -57,6 +57,8 @@ public class ConversationService implements INetworkDispatch {
 		if(player.getConversingNpc() != null && player.getConversingNpc() != npc)
 			handleEndConversation(player, player.getConversingNpc());
 		
+		core.simulationService.faceTarget(npc, player);
+		
 		player.setConversingNpc(npc);
 		sendStartConversation(player, npc);
 		core.scriptService.callScript("scripts/conversation/", (String) npc.getAttachment("conversationFile"), "startConversation", core, player, npc);

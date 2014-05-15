@@ -22,16 +22,22 @@
 package resources.objects.building;
 
 import java.nio.ByteOrder;
+import java.util.Map;
 import java.util.Vector;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import resources.objects.ObjectMessageBuilder;
+import engine.resources.objects.Builder;
+import resources.objects.tangible.TangibleMessageBuilder;
 
-public class BuildingMessageBuilder extends ObjectMessageBuilder {
+public class BuildingMessageBuilder extends TangibleMessageBuilder {
 	
-	public BuildingMessageBuilder(BuildingObject buildingObject) {
-		setObject(buildingObject);
+	public BuildingMessageBuilder(BuildingObject object) {
+		super(object);
+	}
+	
+	public BuildingMessageBuilder() {
+		super();
 	}
 	
 	public IoBuffer buildBaseline3() {
@@ -145,17 +151,25 @@ public class BuildingMessageBuilder extends ObjectMessageBuilder {
 		tools.CharonPacketUtils.printAnalysis(IoBuffer.allocate(size).put(buffer.array(), 0, size).flip());
 		return IoBuffer.allocate(size).put(buffer.array(), 0, size).flip();		
 	}
-
 	
 	@Override
-	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
-		// TODO Auto-generated method stub
-		
+	public void buildBaseline3(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline3(deltaBuilders, deltaBuilders);
 	}
-
+	
 	@Override
-	public void sendBaselines() {
-		
+	public void buildBaseline6(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline6(deltaBuilders, deltaBuilders);
 	}
-
+	
+	@Override
+	public void buildBaseline8(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline8(deltaBuilders, deltaBuilders);
+	}
+	
+	@Override
+	public void buildBaseline9(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline9(deltaBuilders, deltaBuilders);
+	}
+	
 }

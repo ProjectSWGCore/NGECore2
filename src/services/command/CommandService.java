@@ -38,6 +38,7 @@ import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.clients.Client;
 import engine.resources.common.CRC;
+import engine.resources.common.RGB;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
 import engine.resources.service.INetworkDispatch;
@@ -47,6 +48,7 @@ import protocol.swg.ObjControllerMessage;
 import protocol.swg.objectControllerObjects.CommandEnqueue;
 import protocol.swg.objectControllerObjects.CommandEnqueueRemove;
 import protocol.swg.objectControllerObjects.StartTask;
+import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
@@ -55,7 +57,7 @@ public class CommandService implements INetworkDispatch  {
 	
 	private Vector<BaseSWGCommand> commandLookup = new Vector<BaseSWGCommand>();
 	private ConcurrentHashMap<Integer, Integer> aliases = new ConcurrentHashMap<Integer, Integer>();
-	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+	@SuppressWarnings("unused") private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	private NGECore core;
 	
 	public CommandService(NGECore core) {
@@ -91,9 +93,9 @@ public class CommandService implements INetworkDispatch  {
 			return false;
 		}
 		
-		WeaponObject weapon = (WeaponObject) core.objectService.getObject(actor.getWeaponId());
+		TangibleObject weapon = (TangibleObject) core.objectService.getObject(actor.getWeaponId());
 		
-		if (weapon != null && weapon.getWeaponType() == command.getInvalidWeapon()) {
+		if (weapon != null && weapon instanceof WeaponObject && ((WeaponObject) weapon).getWeaponType() == command.getInvalidWeapon()) {
 			return false;
 		}
 		
@@ -141,6 +143,11 @@ public class CommandService implements INetworkDispatch  {
 					return false;
 				}
 				
+
+				if (!target.isInQuadtree() && (target.getContainer() == null || !(target.getContainer() instanceof CellObject))) {
+					break;
+				}
+				
 				if (!core.simulationService.checkLineOfSight(actor, target)) {
 					actor.showFlyText("@combat_effects:cant_see", 1.5f, new RGB(72, 209, 204), 1, true);
 					return false;
@@ -157,6 +164,11 @@ public class CommandService implements INetworkDispatch  {
 						if (target == actor) {
 							target = null;
 						}
+						
+						// It's possible they use c cmdString to indicate if it should always be on self
+						if (name.contains("c")) {
+							//target = actor;
+						}
 					}
 					
 					break;
@@ -168,6 +180,10 @@ public class CommandService implements INetworkDispatch  {
 				
 				if (command.getMaxRangeToTarget() != 0 && actor.getPosition().getDistance(target.getPosition()) > command.getMaxRangeToTarget()) {
 					return false;
+				}
+				
+				if (!target.isInQuadtree() && (target.getContainer() == null || !(target.getContainer() instanceof CellObject))) {
+					break;
 				}
 				
 				if (!core.simulationService.checkLineOfSight(actor, target)) {
@@ -216,6 +232,10 @@ public class CommandService implements INetworkDispatch  {
 				
 				if (command.getMaxRangeToTarget() != 0 && actor.getPosition().getDistance(target.getPosition()) > command.getMaxRangeToTarget()) {
 					return false;
+				}
+				
+				if (!target.isInQuadtree() && (target.getContainer() == null || !(target.getContainer() instanceof CellObject))) {
+					break;
 				}
 				
 				if (!core.simulationService.checkLineOfSight(actor, target)) {
@@ -537,6 +557,7 @@ public class CommandService implements INetworkDispatch  {
 	}
 	
 	@Override
+	@SuppressWarnings("unused")
 	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> swgOpcodes, Map<Integer, INetworkRemoteEvent> objControllerOpcodes) {
 		
 		objControllerOpcodes.put(ObjControllerOpcodes.COMMAND_QUEUE_ENQUEUE, new INetworkRemoteEvent() {

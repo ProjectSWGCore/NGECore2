@@ -21,17 +21,14 @@
  ******************************************************************************/
 package resources.objects.building;
 
+import java.io.Serializable;
 import java.util.Vector;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import main.NGECore;
+import resources.objects.ObjectMessageBuilder;
 import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
-
-import com.sleepycat.je.Environment;
-import com.sleepycat.je.Transaction;
-
 import resources.objects.tangible.TangibleObject;
 
 import com.sleepycat.persist.model.Entity;
@@ -44,12 +41,11 @@ import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
 @Entity(version=6)
-public class BuildingObject extends TangibleObject implements IPersistent {
+public class BuildingObject extends TangibleObject implements IPersistent, Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	@NotPersistent
-	private BuildingMessageBuilder messageBuilder;
-	@NotPersistent
-	private Transaction txn;
+	private transient BuildingMessageBuilder messageBuilder;
 	
 	private float maintenanceAmount = 0;
 	private int BMR = 0;
@@ -61,15 +57,15 @@ public class BuildingObject extends TangibleObject implements IPersistent {
 	private short maximumStorageCapacity=0;
 	private Vector<Long> entryList = new Vector<Long>(); // Preferably the OIDs should be stored, because of name changes
 	private Vector<Long> banList = new Vector<Long>();
-
-	public BuildingObject() {
-		super();
+	
+	public BuildingObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
+		super(objectID, planet, position, orientation, Template);
 		messageBuilder = new BuildingMessageBuilder(this);
 		this.setConditionDamage(100);
 	}
-
-	public BuildingObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
-		super(objectID, planet, Template, position, orientation);
+	
+	public BuildingObject() {
+		super();
 		messageBuilder = new BuildingMessageBuilder(this);
 		this.setConditionDamage(100);
 	}
@@ -87,6 +83,18 @@ public class BuildingObject extends TangibleObject implements IPersistent {
 		
 		return ref.get();
 		
+	}
+	
+	public int getCellNumberByObjectId(long objectId) {
+		Vector<CellObject> cells = getCells();
+		
+		for (CellObject cell : cells) {
+			if (cell.getObjectID() == objectId) {
+				return cell.getCellNumber();
+			}
+		}
+		
+		return 0;
 	}
 	
 	public float getMaintenanceAmount() {
@@ -233,13 +241,6 @@ public class BuildingObject extends TangibleObject implements IPersistent {
 		destination.getSession().write(messageBuilder.buildBaseline9());
 
 	}
-
-	public Transaction getTransaction() { return txn; }
-	
-	public void createTransaction(Environment env) { 
-		txn = env.beginTransaction(null, null); 
-		txn.setLockTimeout(500, TimeUnit.MILLISECONDS);
-	}
 	
 	public Vector<CellObject> getCells() {
 		final Vector<CellObject> cells = new Vector<CellObject>();
@@ -248,6 +249,17 @@ public class BuildingObject extends TangibleObject implements IPersistent {
 				cells.add((CellObject) obj);
 		});
 		return cells;
+	}
+	
+	@Override
+	public void initAfterDBLoad() {
+		super.init();
+		messageBuilder = new BuildingMessageBuilder(this);
+		defendersList = new Vector<TangibleObject>();
+	}
+	
+	public ObjectMessageBuilder getMessageBuilder() {
+		return messageBuilder;
 	}
 	
 }

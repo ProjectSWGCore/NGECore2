@@ -17,7 +17,8 @@ def run(core, actor, target, commandString):
 	
 	if commandString != '' and commandString != faction:
 		if commandString == 'rebel' or commandString == 'imperial' or commandString == 'neutral':
-			actor.sendSystemMessage('@faction_recruiter:sui_resig_complete_in_5', 0)
+			if faction != 'neutral':
+				actor.sendSystemMessage('@faction_recruiter:sui_resig_complete_in_5', 0)
 			
 			if actor.getFactionStatus() == FactionStatus.SpecialForces:
 				actor.setPvpStatus(PvpStatus.GoingCovert, True)
@@ -47,30 +48,30 @@ def run(core, actor, target, commandString):
 	
 	if factionStatus == FactionStatus.OnLeave:
 		actor.sendSystemMessage('@faction_recruiter:on_leave_to_covert', 0)
-		#actor.setPvpStatus(PvpStatus.GoingCovert, True)
+		actor.setPvpStatus(PvpStatus.GoingCovert, True)
 		time.sleep(1)
 		actor.setFactionStatus(FactionStatus.Combatant)
-		#actor.setPvpStatus(PvpStatus.GoingCovert, False)
+		actor.setPvpStatus(PvpStatus.GoingCovert, False)
 		actor.sendSystemMessage('@faction_recruiter:covert_complete', 0)
 		actor.updatePvpStatus()
 		return
 	
 	if factionStatus == FactionStatus.Combatant:
 		actor.sendSystemMessage('@faction_recruiter:covert_to_overt', 0)
-		#actor.setPvpStatus(PvpStatus.GoingOvert, True)
+		actor.setPvpStatus(PvpStatus.GoingOvert, True)
 		time.sleep(30)
 		actor.setFactionStatus(FactionStatus.SpecialForces)
-		#actor.setPvpStatus(PvpStatus.GoingOvert, False)
+		actor.setPvpStatus(PvpStatus.GoingOvert, False)
 		actor.sendSystemMessage('@faction_recruiter:overt_complete', 0)
 		actor.updatePvpStatus()
 		return
 	
 	if factionStatus == FactionStatus.SpecialForces:
 		actor.sendSystemMessage('@faction_recruiter:overt_to_covert', 0)
-		#actor.setPvpStatus(PvpStatus.GoingCovert, True)
+		actor.setPvpStatus(PvpStatus.GoingCovert, True)
 		time.sleep(300)
 		actor.setFactionStatus(FactionStatus.Combatant)
-		#actor.setPvpStatus(PvpStatus.GoingCovert, False)
+		actor.setPvpStatus(PvpStatus.GoingCovert, False)
 		actor.sendSystemMessage('@faction_recruiter:covert_complete', 0)
 		actor.updatePvpStatus()
 		return

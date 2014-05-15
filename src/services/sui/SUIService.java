@@ -46,9 +46,9 @@ import resources.common.FileUtilities;
 import resources.common.ObjControllerOpcodes;
 import resources.common.Opcodes;
 import resources.common.RadialOptions;
+import resources.loot.LootRollSession;
 import resources.objects.creature.CreatureObject;
 import resources.objects.harvester.HarvesterObject;
-import resources.objects.loot.LootRollSession;
 import services.sui.SUIWindow.SUICallback;
 import services.sui.SUIWindow.Trigger;
 import engine.clients.Client;
@@ -77,7 +77,7 @@ public class SUIService implements INetworkDispatch {
 
 				ObjectMenuRequest request = new ObjectMenuRequest();
 				request.deserialize(data);
-
+	
 				SWGObject target = core.objectService.getObject(request.getTargetId());
 				SWGObject owner = core.objectService.getObject(request.getCharacterId());
 	
@@ -107,6 +107,7 @@ public class SUIService implements INetworkDispatch {
 				}
 				
 				if (target instanceof CreatureObject){
+					//System.out.println("SUI target is creatureobject");
 					CreatureObject creature = (CreatureObject) target;
 					if (!creature.isPlayer() && creature.isLootLock()){
 						LootRollSession lootRollSession = (LootRollSession )creature.getAttachment("LootSession");
@@ -114,12 +115,28 @@ public class SUIService implements INetworkDispatch {
 							if (lootRollSession.getRequester()!=owner){
 	
 								// ToDo: RADIALS MUST BE DISABLED HERE FOR THE CORPSE, BUT HOW?
-								core.scriptService.callScript("scripts/radial/", "npc/noloot", "createRadial", core, owner, target, request.getRadialOptions());
+								target.setAttachment("radial_filename", "npc/noloot");
+								core.scriptService.callScript("scripts/radial/npc/noloot", "", "createRadial", core, owner, target, request.getRadialOptions());
 								sendRadial(owner, target, request.getRadialOptions(), request.getRadialCount());
+								return;
+							} else {
+								// Note: Bugged NPC corpses never make it through here, they are not sent from client at all it seems
+								target.setAttachment("radial_filename", "npc/corpse");
+								core.scriptService.callScript("scripts/radial/npc/corpse", "", "createRadial", core, owner, target, request.getRadialOptions());
+								sendRadial(owner, target, request.getRadialOptions(), request.getRadialCount());
+								//((CreatureObject)owner).sendSystemMessage("Radial set from suiservice", (byte)0);
 								return;
 							}
 						}
 					}					
+				} else {
+					//System.out.println("SUI target is NOT creatureobject " + target.getTemplate());
+				}
+				
+				if(target.getAttachment("isVendor") != null && (Boolean) target.getAttachment("isVendor") && ((CreatureObject) owner).getPlayerObject().getOwnedVendors().contains(target.getObjectID())) {
+					core.scriptService.callScript("scripts/radial/", "terminal/vendor", "createRadial", core, owner, target, request.getRadialOptions());
+					sendRadial(owner, target, request.getRadialOptions(), request.getRadialCount());
+					return;
 				}
 				
 				if(target.getGrandparent() != null && target.getGrandparent().getAttachment("structureAdmins") != null)
@@ -307,7 +324,7 @@ public class SUIService implements INetworkDispatch {
 		
 		window.clearDataSource("List.dataList");
 		
-		cloneData.entrySet().forEach(e -> window.addListBoxMenuItem(e.getValue(), e.getKey()));
+		cloneData.entrySet().forEach(e -> window.addListBoxMenuItem(e.getValue(), (long) e.getKey()));
 		
 		return window;
 		

@@ -27,9 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-
 import org.apache.commons.lang3.text.WordUtils;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
@@ -52,6 +49,7 @@ import resources.common.Opcodes;
 import resources.common.SpawnPoint;
 import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
+import services.playercities.PlayerCity;
 import services.sui.SUIService.ListBoxType;
 import services.sui.SUIService.MessageBoxType;
 import services.sui.SUIWindow.SUICallback;
@@ -63,7 +61,6 @@ public class TravelService implements INetworkDispatch {
 	private NGECore core;
 	private Map<Planet, Vector<TravelPoint>> travelMap = new ConcurrentHashMap<Planet, Vector<TravelPoint>>();
 	private Map<Planet, Map<String, Integer>> fareMap = new ConcurrentHashMap<Planet, Map<String, Integer>>();
-	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	
 	public TravelService(NGECore core) {
 		this.core = core;
@@ -255,9 +252,13 @@ public class TravelService implements INetworkDispatch {
 	public void purchaseTravelTicket(SWGObject player, String departurePlanet, String departureLoc, String arrivalPlanet, String arrivalLoc, String roundTrip) {
 		CreatureObject creatureObj = (CreatureObject) player;
 		int fare = fareMap.get(player.getPlanet()).get(arrivalPlanet);
+		int tax = 0;
 		if (roundTrip.equals("1")) {
 			fare += fareMap.get(player.getPlanet()).get(arrivalPlanet);
 		}
+		PlayerCity city = core.playerCityService.getCityObjectIsIn(player);
+		if (city != null && city.getTravelTax() != 0) { tax = city.getTravelTax(); fare += tax;}
+		
 		int playerBankCredits = creatureObj.getBankCredits();
 		if (playerBankCredits < fare) {
 			int cashDifference = fare - playerBankCredits;
@@ -271,9 +272,12 @@ public class TravelService implements INetworkDispatch {
 			
 			creatureObj.setBankCredits(0);
 			creatureObj.setCashCredits(creatureObj.getCashCredits() - cashDifference);
+			
 		} else {
 			creatureObj.setBankCredits(playerBankCredits - fare);
+			
 		}
+		if (tax != 0) { city.addToTreasury(tax);}
 		
 		if (roundTrip.equals("1")) {
 			SWGObject tripTicket = createTravelTicket(arrivalPlanet, arrivalLoc, departurePlanet, departureLoc);

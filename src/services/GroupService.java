@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import resources.objects.Buff;
+import resources.buffs.Buff;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
 import services.chat.ChatRoom;
@@ -146,6 +146,12 @@ public class GroupService implements INetworkDispatch {
 			group.setGroupLeader(leader);
 			group.getMemberList().add(leader);
 			group.getMemberList().add(invited);
+			
+			if (invited.getLevel() > leader.getLevel())
+				group.setGroupLevel(invited.getLevel());
+			else
+				group.setGroupLevel(leader.getLevel());
+
 			leader.makeAware(group);
 			leader.setGroupId(group.getObjectID());
 			invited.makeAware(group);
@@ -170,6 +176,10 @@ public class GroupService implements INetworkDispatch {
 			invited.makeAware(group);
 			invited.setGroupId(group.getObjectID());	
 			invited.sendSystemMessage("@group:joined_self", (byte) 0);
+			
+			if (group.getGroupLevel() < invited.getLevel())
+				group.setGroupLevel(invited.getLevel());
+			
 			addGroupBuffsToMember(group, invited);
 			core.chatService.joinChatRoom(invited.getCustomName(), group.getChatRoomId(), true);
 			

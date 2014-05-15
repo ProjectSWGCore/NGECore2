@@ -21,32 +21,36 @@
  ******************************************************************************/
 package resources.objects.player;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.Vector;
 
+import resources.craft.DraftSchematic;
+import resources.objects.ObjectMessageBuilder;
 import resources.objects.intangible.IntangibleObject;
 import resources.objects.resource.ResourceContainerObject;
 import resources.objects.tool.SurveyTool;
 import resources.objects.waypoint.WaypointObject;
 import resources.objects.creature.CreatureObject;
+import resources.quest.Quest;
 
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
 
 import engine.clients.Client;
-import engine.resources.objects.DraftSchematic;
-import engine.resources.objects.Quest;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
 @Persistent(version=13)
-public class PlayerObject extends IntangibleObject {
+public class PlayerObject extends IntangibleObject implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	// PLAY 3
 	
 	private String title;
@@ -71,11 +75,11 @@ public class PlayerObject extends IntangibleObject {
 	
 	private Map<String, Integer> xpList = new HashMap<String, Integer>();
 	@NotPersistent
-	private int xpListUpdateCounter = 0;
+	private transient int xpListUpdateCounter = 0;
 
 	private List<WaypointObject> waypoints = new ArrayList<WaypointObject>();
 	@NotPersistent
-	private int waypointListUpdateCounter = 0;
+	private transient int waypointListUpdateCounter = 0;
 
 	private int currentForcePower = 0;	// unused in NGE
 	private int maxForcePower = 0;		// unused in NGE
@@ -85,7 +89,7 @@ public class PlayerObject extends IntangibleObject {
 	
 	private List<Quest> questJournal = new ArrayList<Quest>();
 	@NotPersistent
-	private int questJournalUpdateCounter = 0;
+	private transient int questJournalUpdateCounter = 0;
 
 	private String professionWheelPosition;
 	
@@ -97,17 +101,17 @@ public class PlayerObject extends IntangibleObject {
 	
 	private List<DraftSchematic> draftSchematicList = new ArrayList<DraftSchematic>();
 	@NotPersistent
-	private int draftSchematicListUpdateCounter = 0;
+	private transient int draftSchematicListUpdateCounter = 0;
 
 	private int experimentationPoints = 0;
 	private int accomplishmentCounter = 0;
 	
 	private List<String> friendList = new ArrayList<String>();
 	@NotPersistent
-	private int friendListUpdateCounter = 0;
+	private transient int friendListUpdateCounter = 0;
 	private List<String> ignoreList = new ArrayList<String>();
 	@NotPersistent
-	private int ignoreListUpdateCounter = 0;
+	private transient int ignoreListUpdateCounter = 0;
 	
 	private int languageId = 0;			// unused in NGE
 	private int currentStomach = 0;		// unused in NGE
@@ -129,10 +133,10 @@ public class PlayerObject extends IntangibleObject {
 	private int lotsRemaining = 10;
 	
 	@NotPersistent
-	private PlayerMessageBuilder messageBuilder;
+	private transient PlayerMessageBuilder messageBuilder;
 	
 	@NotPersistent
-	private long lastPlayTimeUpdate = System.currentTimeMillis();
+	private transient long lastPlayTimeUpdate = System.currentTimeMillis();
 	
 	private Map<String, Integer> factionStandingMap = new TreeMap<String, Integer>();
 	
@@ -145,7 +149,11 @@ public class PlayerObject extends IntangibleObject {
 	private List<Integer> chatChannels = new ArrayList<Integer>();
 	
 	@NotPersistent
-	private boolean callingCompanion = false;
+	private transient boolean callingCompanion = false;
+	
+	private long bountyMissionId;
+	private Vector<Long> ownedVendors = new Vector<Long>();
+	private long bindLocation;
 	
 	public PlayerObject() {
 		super();
@@ -155,6 +163,14 @@ public class PlayerObject extends IntangibleObject {
 	public PlayerObject(long objectID, Planet planet) {
 		super(objectID, planet, new Point3D(0, 0, 0), new Quaternion(1, 0, 0, 0), "object/player/shared_player.iff");
 		messageBuilder = new PlayerMessageBuilder(this);
+	}
+	
+	@Override
+	public void initAfterDBLoad() {
+		super.init();
+		lastPlayTimeUpdate = System.currentTimeMillis();
+		messageBuilder = new PlayerMessageBuilder(this);
+		waypoints.forEach(WaypointObject::initAfterDBLoad);
 	}
 
 	public String getTitle() {
@@ -884,10 +900,8 @@ public class PlayerObject extends IntangibleObject {
 	
 	public boolean isMemberOfChannel(int roomId) {
 		if (chatChannels.contains(roomId)) {
-			System.out.println("Member of the channel!");
 			return true;
 		}
-		System.out.println("Not a Member of the channel!");
 		return false;
 	}
 	
@@ -897,6 +911,46 @@ public class PlayerObject extends IntangibleObject {
 	
 	public void setCallingCompanion(boolean callingCompanion) {
 		this.callingCompanion = callingCompanion;
+	}
+	
+	public long getBountyMissionId() {
+		return bountyMissionId;
+	}
+
+	public void setBountyMissionId(long bountyMissionId) {
+		this.bountyMissionId = bountyMissionId;
+	}
+
+	public ObjectMessageBuilder getMessageBuilder() {
+		return messageBuilder;
+	}
+
+	public Vector<Long> getOwnedVendors() {
+		return ownedVendors;
+	}
+
+	public void addVendor(long vendorId) {
+		ownedVendors.add(vendorId);
+	}
+	
+	public void removeVendor(long vendorId) {
+		ownedVendors.remove(vendorId);
+	}
+	
+	public int getAmountOfVendors() {
+		return ownedVendors.size();
+	}
+
+	public long getBindLocation() {
+		synchronized(objectMutex) {
+			return bindLocation;
+		}
+	}
+
+	public void setBindLocation(long bindLocation) {
+		synchronized(objectMutex) {
+			this.bindLocation = bindLocation;
+		}
 	}
 	
 }

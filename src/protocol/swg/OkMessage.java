@@ -4,7 +4,7 @@ import java.nio.ByteOrder;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import resources.common.StringUtilities;
+import engine.resources.common.StringUtilities;
 
 public class OkMessage extends SWGMessage {
 

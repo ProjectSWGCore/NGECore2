@@ -2,8 +2,8 @@ import sys
 
 def setup(core, object):
 	object.setAttachment('radial_filename', 'deeds/harvesterDeed')
-	object.setConstructorTemplate('object/installation/mining_ore/construction/shared_construction_mining_ore_harvester_style_heavy.iff')
-	object.setStructureTemplate('object/installation/mining_ore/shared_mining_ore_harvester_heavy.iff')
-	object.setLotRequirement(1)
-	object.setBMR(90)
+	object.setAttachment('ConstructorTemplate', 'object/installation/mining_ore/construction/shared_construction_mining_ore_harvester_style_heavy.iff')
+	object.setAttachment('StructureTemplate', 'object/installation/mining_ore/shared_mining_ore_harvester_heavy.iff')
+	object.setAttachment('LotRequirement', 1)
+	object.setIntAttribute('examine_maintenance_rate', 90)
 	return

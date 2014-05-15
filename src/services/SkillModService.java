@@ -25,8 +25,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import resources.common.FileUtilities;
-import resources.objects.SkillMod;
 import resources.objects.creature.CreatureObject;
+import resources.skills.SkillMod;
 import main.NGECore;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;

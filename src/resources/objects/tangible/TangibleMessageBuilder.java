@@ -21,199 +21,39 @@
  ******************************************************************************/
 package resources.objects.tangible;
 
-import java.nio.ByteOrder;
-
-import org.apache.mina.core.buffer.IoBuffer;
+import java.util.Map;
 
 import resources.objects.ObjectMessageBuilder;
-
+import engine.resources.objects.Builder;
 
 public class TangibleMessageBuilder extends ObjectMessageBuilder {
 	
-	public TangibleMessageBuilder(TangibleObject tangible) {
-		setObject(tangible);
+	public TangibleMessageBuilder(TangibleObject object) {
+		setObject(object);
 	}
 	
-	public IoBuffer buildBaseline3() {
-		TangibleObject tangible = (TangibleObject) object;
-		IoBuffer buffer = bufferPool.allocate(100, false).order(ByteOrder.LITTLE_ENDIAN);
-		buffer.setAutoExpand(true);
-		
-		buffer.putShort((short) 0x0D);
-		buffer.putFloat(object.getComplexity());
-		buffer.put(getAsciiString(object.getStfFilename()));
-		buffer.putInt(0);
-		buffer.put(getAsciiString(object.getStfName()));
-		
-		if(object.getCustomName() == null || object.getCustomName().length() < 1)
-			buffer.putInt(0);
-		else
-			buffer.put(getUnicodeString(object.getCustomName()));
-		buffer.putInt(object.getVolume());
-		buffer.putInt(0);
-		buffer.putInt(tangible.getFactionStatus()); // faction vars
-		
-		if(tangible.getCustomization() == null || tangible.getCustomization().length <= 0)
-			buffer.putShort((short) 0);
-		else {
-			buffer.putShort((short) tangible.getCustomization().length);
-			buffer.put(tangible.getCustomization());
-		}
-		
-		buffer.putInt(0);
-		buffer.putInt(0); 
-		
-		//buffer.putInt(0); 
-		if(tangible.getOptionsBitmask() == 0)
-			tangible.setOptionsBitmask(0x100);
-		buffer.putInt(tangible.getOptionsBitmask());
-		buffer.putInt(tangible.getUses()); // number of item uses
-		buffer.putInt(tangible.getConditionDamage());
-		buffer.putInt(tangible.getMaxDamage());
-		buffer.put((byte) (tangible.isStaticObject() ? 1 : 0));
-		
-		int size = buffer.position();
-		buffer = bufferPool.allocate(size, false).put(buffer.array(), 0, size);
-
-		buffer.flip();
-		buffer = createBaseline("TANO", (byte) 3, buffer, size);
-		
-		return buffer;
-	}
-	
-	public IoBuffer buildBaseline6() {
-		TangibleObject tangible = (TangibleObject) object;
-		IoBuffer buffer = bufferPool.allocate(100, false).order(ByteOrder.LITTLE_ENDIAN);
-		buffer.setAutoExpand(true);
-		buffer.putShort((short) 8);
-		buffer.putInt(0x43);
-		buffer.put(getAsciiString(tangible.getDetailFilename()));
-		buffer.putInt(0);
-		buffer.put(getAsciiString(tangible.getDetailName()));
-		buffer.putLong(0);
-		buffer.putLong(0);
-		buffer.putLong(0); // unks
-		buffer.putLong(0);
-		buffer.putInt(0);
-		buffer.put((byte) 0);
-		
-		int size = buffer.position();
-		buffer = bufferPool.allocate(size, false).put(buffer.array(), 0, size);
-
-		buffer.flip();
-		buffer = createBaseline("TANO", (byte) 6, buffer, size);
-		
-		return buffer;
-	}
-
-	public IoBuffer buildBaseline8() {
-		IoBuffer buffer = bufferPool.allocate(2, false).order(ByteOrder.LITTLE_ENDIAN);
-		buffer.putShort((short) 0);
-		int size = buffer.position();
-		buffer = IoBuffer.allocate(size).put(buffer.array(), 0, size);
-		buffer.flip();
-		buffer = createBaseline("TANO", (byte) 8, buffer, size);
-		
-		return buffer;
-	}
-	
-	public IoBuffer buildBaseline9() {
-		IoBuffer buffer = bufferPool.allocate(2, false).order(ByteOrder.LITTLE_ENDIAN);
-		buffer.putShort((short) 0);
-		int size = buffer.position();
-		buffer = IoBuffer.allocate(size).put(buffer.array(), 0, size);
-		buffer.flip();
-		buffer = createBaseline("TANO", (byte) 9, buffer, size);
-		
-		return buffer;
-	}
-	
-	public IoBuffer buildConditionDamageDelta(int conditionDamage) {
-		
-		IoBuffer buffer = bufferPool.allocate(4, false).order(ByteOrder.LITTLE_ENDIAN);
-		buffer.putInt(conditionDamage);
-		int size = buffer.position();
-		buffer.flip();
-		buffer = createDelta("TANO", (byte) 3, (short) 1, (short) 0x0A, buffer, size + 4);
-		
-		return buffer;
-
-	}
-	
-	public IoBuffer buildCustomNameDelta(String customName) {
-		IoBuffer buffer = bufferPool.allocate(getUnicodeString(customName).length, false).order(ByteOrder.LITTLE_ENDIAN);
-		buffer.put(getUnicodeString(customName));
-		int size = buffer.position();
-		buffer.flip();
-		buffer = createDelta("TANO", (byte) 3, (short) 1, (short) 2, buffer, size + 4);
-		return buffer;
-		
-	}
-	
-	public IoBuffer buildCustomizationDelta(byte[] customization) {
-		IoBuffer buffer = bufferPool.allocate(customization.length, false).order(ByteOrder.LITTLE_ENDIAN);
-
-		buffer.put(customization);
-
-		int size = buffer.position();
-		buffer.flip();
-		buffer = createDelta("TANO", (byte) 3, (short) 1, (short) 6, buffer, size + 4);
-		return buffer;
-	}
-	
-	public IoBuffer buildDelta3() {
-		IoBuffer buffer = bufferPool.allocate(2, false).order(ByteOrder.LITTLE_ENDIAN);
-		buffer.setAutoExpand(true);
-		buffer.putShort((short)5);
-		buffer.putInt(0x12862153);
-		buffer.putLong(getObject().getObjectID());
-		buffer.putInt(0x54414E4F);
-		buffer.put((byte)3);
-		buffer.putInt(8);//buffer.putInt(8+6);
-		
-		buffer.putShort((short) 2);
-		buffer.putShort((short)8);
-		buffer.put((byte)0);
-		buffer.putShort((short) 0x21);
-		buffer.put((byte)0);
-		
-//		buffer.putShort((short) 0);
-//		buffer.putFloat(4.0F); 
-		
-		int size = buffer.position();
-		buffer.flip();
-		return IoBuffer.allocate(size).put(buffer.array(), 0, size).flip();		
-	}
-
-	public IoBuffer buildAssemblyDelta3() {
-		IoBuffer buffer = bufferPool.allocate(2, false).order(ByteOrder.LITTLE_ENDIAN);
-		buffer.setAutoExpand(true);
-		buffer.putShort((short)5);
-		buffer.putInt(0x12862153);
-		buffer.putLong(getObject().getObjectID());
-		buffer.putInt(0x54414E4F);
-		buffer.put((byte)3);
-		buffer.putInt(8);//buffer.putInt(8+6);
-		
-		buffer.putShort((short) 1);
-		buffer.putShort((short)0x0B);
-		buffer.putInt(0x000003E8); // ?
-		
-		int size = buffer.position();
-		buffer.flip();
-		return IoBuffer.allocate(size).put(buffer.array(), 0, size).flip();		
+	public TangibleMessageBuilder() {
+		super();
 	}
 	
 	@Override
-	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
-		// TODO Auto-generated method stub
-		
+	public void buildBaseline3(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline3(baselineBuilders, deltaBuilders);
 	}
 	
 	@Override
-	public void sendBaselines() {
-		// TODO Auto-generated method stub
-		
+	public void buildBaseline6(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline6(baselineBuilders, deltaBuilders);
+	}
+	
+	@Override
+	public void buildBaseline8(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline8(baselineBuilders, deltaBuilders);
+	}
+	
+	@Override
+	public void buildBaseline9(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline9(baselineBuilders, deltaBuilders);
 	}
 	
 }

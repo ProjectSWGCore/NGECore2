@@ -100,8 +100,10 @@ public class CreateImmediateAuctionMessage extends SWGMessage {
 		this.description = description;
 	}
 
-	public byte getPremium() {
-		return premium;
+	public boolean getPremium() {
+		if(premium == 1)
+			return true;
+		return false;
 	}
 
 	public void setPremium(byte premium) {

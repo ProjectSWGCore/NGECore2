@@ -21,13 +21,15 @@
  ******************************************************************************/
 package services;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.DirectoryStream;
 import java.nio.file.DirectoryStream.Filter;
-import java.nio.file.FileSystems;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -35,11 +37,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
+
 import protocol.swg.PlayClientEffectObjectTransformMessage;
+import resources.loot.LootGroup;
+import resources.loot.LootRollSession;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
-import resources.objects.loot.LootGroup;
-import resources.objects.loot.LootRollSession;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 import main.NGECore;
@@ -76,12 +79,14 @@ public class LootService implements INetworkDispatch {
 	}
 	
 	public void handleLootRequest(CreatureObject requester, TangibleObject lootedObject) {
-		
+		System.out.println("handleLootRequest ");
 		// security check
 		if (hasAccess(requester,lootedObject) && ! lootedObject.isLooted()){
 			LootRollSession lootRollSession = (LootRollSession )lootedObject.getAttachment("LootSession");
-			if (lootRollSession.getDroppedItems().size()==0)
-				return;
+			if (lootRollSession.getDroppedItems().size()==0){
+				System.err.println("lootRollSession.getDroppedItems().size()==0");
+				return;			
+			}
 			SWGObject lootedObjectInventory = lootedObject.getSlottedObject("inventory");
 			core.simulationService.openContainer(requester, lootedObjectInventory);	
 			setLooted(requester,lootedObject);
@@ -90,6 +95,8 @@ public class LootService implements INetworkDispatch {
 
 	private boolean hasAccess(CreatureObject requester, TangibleObject lootedObject){
 		LootRollSession lootRollSession = (LootRollSession )lootedObject.getAttachment("LootSession");
+		if (lootRollSession==null)
+			System.err.println("LootSession null: " + lootRollSession);
 		if (lootRollSession!=null){
 			if (lootRollSession.getRequester()==requester){
 				return true;
@@ -117,6 +124,7 @@ public class LootService implements INetworkDispatch {
 		lootedObject.setLootLock(true);
 		
 		LootRollSession lootRollSession = new LootRollSession(requester,lootedObject);
+		lootedObject.setAttachment("LootSession", lootRollSession); // preliminarily register session already here
 		
 		handleCreditDrop(requester,lootedObject,lootRollSession);
 		
@@ -140,21 +148,23 @@ public class LootService implements INetworkDispatch {
 	    		System.out.println("this lootGroup will drop something");
 	    		handleLootGroup(lootGroup,lootRollSession); //this lootGroup will drop something e.g. {kraytpearl_range,krayt_tissue_rare}	    		
 	    	}		
+	    	System.out.println("While Loop Stuck check");
 	    }
+	    System.out.println("Past while ");
 	    
 	    // Rare Loot System Stage (Is in place for all looted creatures)
-	    if (lootRollSession.isAllowRareLoot()){
-	    	int randomRareLoot = new Random().nextInt(100);
-	    	int chanceRequirement = 1; 
-	    	if (lootRollSession.isIncreasedRLSChance())
-	    		chanceRequirement+=3; // RLS chance is at 4% for groupsize >= 4
-	    	if (randomRareLoot <= chanceRequirement){ 
-	    		handleRareLootChest(lootRollSession);
-	    	}
-	    }
+//if (lootRollSession.isAllowRareLoot()){
+//	int randomRareLoot = new Random().nextInt(100);
+//	int chanceRequirement = 1; 
+//	if (lootRollSession.isIncreasedRLSChance())
+//		chanceRequirement+=3; // RLS chance is at 4% for groupsize >= 4
+//	if (randomRareLoot <= chanceRequirement){ 
+//		handleRareLootChest(lootRollSession);
+//	}
+//}
 		
 	    // set info above corpse
-	    
+	    System.out.println("lootedObject instanceof CreatureObject " + (lootedObject instanceof CreatureObject));
 	    if (lootedObject instanceof CreatureObject){
 		    float y = 0.5F; // 1.3356977F
 		    float qz= 1.06535322E9F;
@@ -181,7 +191,7 @@ public class LootService implements INetworkDispatch {
 	   
 	    // For autoloot 
     	//SWGObject requesterInventory = requester.getSlottedObject("inventory");
-    	
+	    System.out.println("lootRollSession.getDroppedItems() " + (lootRollSession.getDroppedItems()));
     	for (TangibleObject droppedItem : lootRollSession.getDroppedItems()){		    
     		
     		//droppedItem.setAttachment("radial_filename", "lootitem");
@@ -216,15 +226,24 @@ public class LootService implements INetworkDispatch {
 		
 		double randomItemFromGroup = new Random().nextDouble()*100;
 		double remainder = 0; // [10,20,30,34,5,1] 
+		double span = 100/lootPoolNames.length;
+		
+		boolean test = false;
 		
 		for(int i=0;i<lootPoolChances.length;i++) {
-			remainder += lootPoolChances[i]; 
+			if (lootPoolChances[0]!=-1.0)
+				remainder += lootPoolChances[i];
+			else 
+				remainder += span;
 	    	if (randomItemFromGroup <= remainder){ 		
 	    		System.out.println("this loot pool will drop something"); // e.g. kraytpearl_range
 	    		handleLootPool(lootPoolNames[i],lootRollSession); // This loot pool will drop something	
+	    		test = true;
 	    		break;
 	    	}			 
 		}
+		if (!test)
+			System.err.println("SOMETHING WENT WRONG!");
 	}
 		
 	private void handleLootPool(String poolName,LootRollSession lootRollSession){
@@ -236,15 +255,20 @@ public class LootService implements INetworkDispatch {
 		Vector<Double> itemChances = (Vector<Double>)core.scriptService.fetchDoubleVector(path,"itemChances");
 				
 		double randomItemFromPool = new Random().nextDouble()*100;
-		int remainder = 0; // [10,20,30,34,5,1]
-		
+		double remainder = 0.0; // [10,20,30,34,5,1]
+		double span = 100.0/(double)itemNames.size();
+
 		for (int i=0;i<itemNames.size();i++){
-			remainder += itemChances.get(i); 
+			if (itemChances.get(0)!=-1.0)
+				remainder += itemChances.get(i); 
+			else
+				remainder += span; 
 			if (randomItemFromPool<=remainder){
 				// this element has been chosen e.g. kraytpearl_flawless
 				//System.err.println("CHOSEN ITEM " + itemNames.get(i));
-				handleLootPoolItems(itemNames.get(i), lootRollSession);
-				break;
+				handleLootPoolItems(itemNames.get(i), lootRollSession);				
+				//break;
+				return;
 			}						
 		}
 	}	
@@ -256,36 +280,47 @@ public class LootService implements INetworkDispatch {
 	    }
 	}
 	
+	public SWGObject generateLootItem(CreatureObject requester, String template)
+	{
+		LootRollSession rollSession = new LootRollSession();
+		rollSession.setSessionPlanet(requester.getPlanet());
+		
+		handleLootPoolItems(template, rollSession);
+		if(rollSession.getDroppedItems().get(0) != null) return rollSession.getDroppedItems().get(0);
+		
+		return null;
+	}
+	
 	@SuppressWarnings("unused")
 	private void handleLootPoolItems(String itemName,LootRollSession lootRollSession){
-
-		List<String> subfolders = new ArrayList<String>(); // Consider all sub-folders		
-		try (DirectoryStream<Path> ds = Files.newDirectoryStream(FileSystems.getDefault().getPath("scripts/loot/lootItems/"), new DirectoriesFilter())) {
-		        for (Path p : ds) {
-		        	subfolders.add(p.getFileName().toString());
-		        }
-		    } catch (IOException e) {
-		    	lootRollSession.addErrorMessage("File system check caused an error. Please contact Charon about this issue.");
-	        	return;
-		    }
-
-		String itemPath = "scripts/loot/lootItems/"+itemName.toLowerCase()+".py";
-		File file = new File(itemPath);
-		if (!file.isFile()){
-			for (String subfolderName : subfolders){
-				itemPath = "scripts/loot/lootItems/"+ subfolderName +"/"+itemName.toLowerCase()+".py"; 
-				File subfile = new File(itemPath);
-				if (subfile.isFile())
-					break;			
-			}
+		
+		final Vector<String> foundPath = new Vector<String>(); 
+		Path p = Paths.get("scripts/loot/lootItems/");
+	    FileVisitor<Path> fv = new SimpleFileVisitor<Path>() {
+	        @Override
+	        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+	        	String actualFileName = file.getFileName().toString();
+	        	actualFileName = actualFileName.substring(0, actualFileName.length()-3);
+	        	if (actualFileName.equals(itemName.toLowerCase())){
+	        		foundPath.add(file.toString());
+	        	} 	        	
+	        	return FileVisitResult.CONTINUE;
+	        }
+	    };
+        try {
+			Files.walkFileTree(p, fv);
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-
-		File checkfile = new File(itemPath);
-		if (!checkfile.isFile()){
+		
+		
+		if (foundPath.size()==0){
 			String errorMessage = "Loot item  '" + itemName + "'  not found in file system. Please contact Charon about this issue.";
 			lootRollSession.addErrorMessage(errorMessage);
 			return;
-		}
+			
+		}		
+		String itemPath = foundPath.get(0);
 		
 		itemPath = itemPath.substring(0, itemPath.length()-3); // remove the file type
 
@@ -334,7 +369,7 @@ public class LootService implements INetworkDispatch {
 		if(core.scriptService.getMethod(itemPath,"","itemStats")!=null)
 			itemStats = (Vector<String>)core.scriptService.fetchStringVector(itemPath,"itemStats");
 		
-		if(core.scriptService.getMethod(itemPath,"","itemStats")!=null)
+		if(core.scriptService.getMethod(itemPath,"","itemSkillMods")!=null)
 			itemSkillMods = (Vector<String>)core.scriptService.fetchStringVector(itemPath,"itemSkillMods");
 			
 		if(core.scriptService.getMethod(itemPath,"","biolink")!=null)
@@ -358,6 +393,7 @@ public class LootService implements INetworkDispatch {
 		if(core.scriptService.getMethod(itemPath,"","junkType")!=null)
 			junkType =  (byte)core.scriptService.fetchInteger(itemPath,"junkType");
 		
+			
 		System.out.println("itemTemplate " + itemTemplate);
 		
 		TangibleObject droppedItem = createDroppedItem(itemTemplate,lootRollSession.getSessionPlanet());
@@ -365,7 +401,11 @@ public class LootService implements INetworkDispatch {
 		droppedItem.setLootItem(true);
 		droppedItem.setAttachment("LootItemName", itemName);
     	
-		if (customName!=null)
+		if(core.scriptService.getMethod(itemPath,"","randomStatJewelry")!=null){
+			customName = setRandomStatsJewelry(droppedItem, lootRollSession);
+		}
+		
+		if (!customName.isEmpty())
 			handleCustomDropName(droppedItem, customName);
 		
 		if (stackable!=-1){
@@ -417,8 +457,12 @@ public class LootService implements INetworkDispatch {
     		droppedItem.setStringAttribute("required_faction", requiredFaction);
     	}
     	
+    	if(core.scriptService.getMethod(itemPath,"","customSetup") != null)
+			core.scriptService.callScript(itemPath, "", "customSetup", droppedItem);
+    	
     	
 		lootRollSession.addDroppedItem(droppedItem);
+		System.out.println("END REACHED");
 	}	
 	
 	private void handleCustomDropName(TangibleObject droppedItem,String customName) {
@@ -498,12 +542,21 @@ public class LootService implements INetworkDispatch {
 		
 	}
 		
-	private void setCustomization(TangibleObject droppedItem,String itemName) {
+	public void setCustomization(TangibleObject droppedItem,String itemName) {
 		
 		// Example color crystal
 		if (itemName.contains("colorcrystal")) {
 			System.out.println("colorcrystal");
-			droppedItem.setCustomizationVariable("/private/index_color_1", (byte) new Random().nextInt(11));
+			
+			int crystalColor = new Random().nextInt(11);
+			
+			droppedItem.setCustomizationVariable("/private/index_color_1", (byte) crystalColor);
+			droppedItem.getAttributes().put("@obj_attr_n:condition", "100/100");
+			droppedItem.getAttributes().put("@obj_attr_n:crystal_owner", "\\#D1F56F UNTUNED \\#FFFFFF ");		
+			droppedItem.getAttributes().put("@obj_attr_n:color", resources.datatables.LightsaberColors.get(crystalColor));
+			droppedItem.setAttachment("radial_filename", "item/tunable");
+			//droppedItem.getAttributes().put("@obj_attr_n:color", "@jedi_spam:saber_color_" + crystalColor); // Commented out for now
+			
 		}
 		
 		// Example power crystal
@@ -523,7 +576,7 @@ public class LootService implements INetworkDispatch {
 //		}
 	}
 	
-	private void handleSpecialItems(TangibleObject droppedItem,String itemName) {
+	public void handleSpecialItems(TangibleObject droppedItem,String itemName) {
 		if (itemName.contains("kraytpearl")){
 			handleKraytPearl(droppedItem);
 		}
@@ -655,25 +708,25 @@ public class LootService implements INetworkDispatch {
 			droppedItem.setDetailName("item_junk_imitation_pearl_01_01");
 			return;
 		case "kraytpearl_poor": 
-			qualityString="Poor";
+			qualityString="@jedi_spam:crystal_quality_0";
 			break;
 		case "kraytpearl_fair": 
-			qualityString="Fair";
+			qualityString="@jedi_spam:crystal_quality_1";
 			break;
 		case "kraytpearl_good": 
-			qualityString="Good";
+			qualityString="@jedi_spam:crystal_quality_2";
 			break;
 		case "kraytpearl_quality": 
-			qualityString="Quality";
+			qualityString="@jedi_spam:crystal_quality_3";
 			break;
 		case "kraytpearl_select": 
-			qualityString="Select";
+			qualityString="@jedi_spam:crystal_quality_4";
 			break;
 		case "kraytpearl_premium": 
-			qualityString="Premium";
+			qualityString="@jedi_spam:crystal_quality_5";
 			break;
 		case "kraytpearl_flawless": 
-			qualityString="Flawless";
+			qualityString="@jedi_spam:crystal_quality_6";
 			break;
 		default:
 			qualityString="Undetermined";
@@ -683,6 +736,7 @@ public class LootService implements INetworkDispatch {
 		droppedItem.getAttributes().put("@obj_attr_n:crystal_owner", "\\#D1F56F UNTUNED \\#FFFFFF ");		
 		droppedItem.getAttributes().put("@obj_attr_n:crystal_quality", qualityString);	
 		droppedItem.setAttachment("radial_filename", "item/tunable");
+		droppedItem.setAttachment("TuneType", "KraytPearl");
 	}
 	
 	private void handlePowerCrystal(TangibleObject droppedItem) {
@@ -692,28 +746,28 @@ public class LootService implements INetworkDispatch {
 		switch (itemName) {
 		
 		case "powercrystal_poor": 
-			qualityString="Poor";
+			qualityString="@jedi_spam:crystal_quality_0";
 			break;
 		case "powercrystal_fair": 
-			qualityString="Fair";
+			qualityString="@jedi_spam:crystal_quality_1";
 			break;
 		case "powercrystal_good": 
-			qualityString="Good";
+			qualityString="@jedi_spam:crystal_quality_2";
 			break;
 		case "powercrystal_quality": 
-			qualityString="Quality";
+			qualityString="@jedi_spam:crystal_quality_3";
 			break;
 		case "powercrystal_select": 
-			qualityString="Select";
+			qualityString="@jedi_spam:crystal_quality_4";
 			break;
 		case "powercrystal_premium": 
-			qualityString="Premium";
+			qualityString="@jedi_spam:crystal_quality_5";
 			break;
 		case "powercrystal_flawless": 
-			qualityString="Flawless";
+			qualityString="@jedi_spam:crystal_quality_6";
 			break;
 		case "powercrystal_perfect": 
-			qualityString="Perfect";
+			qualityString="@jedi_spam:crystal_quality_7";
 			break;
 		default:
 			qualityString="Undetermined";
@@ -723,7 +777,128 @@ public class LootService implements INetworkDispatch {
 		droppedItem.getAttributes().put("@obj_attr_n:crystal_owner", "\\#D1F56F UNTUNED \\#FFFFFF ");
 		droppedItem.getAttributes().put("@obj_attr_n:crystal_quality", qualityString);	
 		droppedItem.setAttachment("radial_filename", "item/tunable");
+		droppedItem.setAttachment("TuneType", "PowerCrystal");
 	}	
+	
+	public void tuneProcess(SWGObject tunableObject){
+		
+		String objectType = (String) tunableObject.getAttachment("LootItemName");
+		if (objectType==null || objectType.length()==0)
+			return;
+		
+		int finalMinDmg = 0;
+		int finalMaxDmg = 0;
+		@SuppressWarnings("unused") String tunableObjectName = "";
+		
+		if (objectType.contains("powercrystal")){
+			tunableObjectName = "Power Crystal";
+			switch (objectType) {
+				case "powercrystal_poor":     // Poor - Up to 3/4 damage 
+										      int minValue1 = 1;
+										      int maxValue1 = 3;
+										      finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
+										      finalMaxDmg = finalMinDmg+1;
+										      break;
+				case "powercrystal_fair":     // Fair - Up to 5/6 damage 
+											  minValue1 = 3;
+				                              maxValue1 = 5;				                             
+				                              finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
+				                              finalMaxDmg = finalMinDmg+1;
+										      break;
+				case "powercrystal_good":     // Good - Up to 10/11 damage  
+					                          minValue1 = 6;
+                                              maxValue1 = 10;
+                                              finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
+                                              finalMaxDmg = finalMinDmg+1;
+										      break;
+				case "powercrystal_quality":  // Quality - Up to 12/13 damage  
+					                          minValue1 = 11;
+					                          maxValue1 = 12;
+							                  finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
+							                  finalMaxDmg = finalMinDmg+1;
+										      break;
+				case "powercrystal_select":   // Select - Up to 14/15 damage 
+					                          minValue1 = 13;
+                                              maxValue1 = 14;
+	                                          finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
+	                                          finalMaxDmg = finalMinDmg+1;
+										      break;
+				case "powercrystal_premium":  // Premium - Up to 17/18 damage 
+										      minValue1 = 15;
+							                  maxValue1 = 17;
+							                  finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
+							                  finalMaxDmg = finalMinDmg+1;
+										      break;
+				case "powercrystal_flawless": // Flawless - 20-22 possibly more or less  
+								              finalMinDmg = 20;
+								              finalMaxDmg = 22;
+										      break;
+				case "powercrystal_perfect":  // Perfect - Up to 23/25 damage 
+											  minValue1 = 21;
+									          maxValue1 = 23;
+									          finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
+									          finalMaxDmg = finalMinDmg+1;
+										      break;
+			}
+		}
+		
+		if (objectType.contains("kraytpearl")){
+			tunableObjectName = "Krayt Dragon Pearl";
+			switch (objectType) {
+				case "kraytpearl_poor":       // Poor - Up to 3/4 damage 
+										      int minValue1 = 1;
+										      int maxValue1 = 3;
+										      finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
+										      finalMaxDmg = finalMinDmg+1;
+										      break;
+				case "kraytpearl_fair":       // Fair - Up to 5/6 damage  
+											  minValue1 = 3;
+				                              maxValue1 = 5;
+				                              finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
+				                              finalMaxDmg = finalMinDmg+1;
+										      break;
+				case "kraytpearl_good":       // Good - Up to 10/11 damage  
+					                          minValue1 = 6;
+	                                          maxValue1 = 10;
+	                                          finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
+	                                          finalMaxDmg = finalMinDmg+1;
+										      break;
+				case "kraytpearl_quality":    // Quality - Up to 12/13 damage  
+					                          minValue1 = 11;
+					                          maxValue1 = 12;
+							                  finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
+							                  finalMaxDmg = finalMinDmg+1;
+										      break;
+				case "kraytpearl_select":     // Select - Up to 14/15 damage 
+					                          minValue1 = 13;
+	                                          maxValue1 = 14;
+	                                          finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
+	                                          finalMaxDmg = finalMinDmg+1;
+										      break;
+				case "kraytpearl_premium":    // Premium - Up to 18/19 damage 
+										      minValue1 = 15;
+							                  maxValue1 = 17;
+							                  finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
+							                  finalMaxDmg = finalMinDmg+1;
+										      break;
+				case "kraytpearl_flawless":   // Flawless - 19/20 damage   
+								              finalMinDmg = 19;
+								              finalMaxDmg = 20;
+										      break;
+				case "kraytpearl_ancient":    // Ancient - 20/22 damage 
+											  finalMinDmg = 20;
+		                                      finalMaxDmg = 22;
+										      break;
+			}
+		}
+		
+		tunableObject.getAttributes().remove("@obj_attr_n:crystal_quality");	
+//		tunableObject.setIntAttribute("@obj_attr_n:componentbonuslow", finalMinDmg);
+//		tunableObject.setIntAttribute("@obj_attr_n:componentbonushigh", finalMaxDmg);
+		tunableObject.setIntAttribute("@obj_attr_n:mindamage", finalMinDmg);
+		tunableObject.setIntAttribute("@obj_attr_n:maxdamage", finalMaxDmg);
+		//((TangibleObject) tunableObject).setCustomName2(tunableObjectName + " (tuned)");
+	}
 	
 	private void setWeaponStat(WeaponObject weapon, String statName, String minValue, String maxValue){
 		
@@ -861,8 +1036,275 @@ public class LootService implements INetworkDispatch {
 	    float qz= 1.06535322E9F;
 	    Point3D effectorPosition = new Point3D(0,y,0);
 		Quaternion effectorOrientation = new Quaternion(0,0,0,qz);
-	    PlayClientEffectObjectTransformMessage lmsg = new PlayClientEffectObjectTransformMessage("",lootedObject.getObjectID(),"",effectorPosition,effectorOrientation);
+	    //PlayClientEffectObjectTransformMessage lmsg = new PlayClientEffectObjectTransformMessage("",lootedObject.getObjectID(),"",effectorPosition,effectorOrientation);
 	    //((CreatureObject) requester).getClient().getSession().write(lmsg.serialize());
+	}
+	
+	private String setRandomStatsJewelry(TangibleObject droppedItem, LootRollSession lootRollSession){
+		
+		//determine number of stats #20 yt
+		int statNumber = 1;
+		int levelOfDrop = lootRollSession.getLootedObjectLevel();
+	    int difficultyLevel = lootRollSession.getLootedObjectDifficulty(); // better for calculation
+	    //difficultyLevel++; // better for calculation
+	    
+//		if (levelOfDrop>70 && levelOfDrop<90 && difficultyLevel==1)
+//			statNumber = 2;
+//		
+//		if (levelOfDrop>=90 && difficultyLevel==1)
+//			statNumber = 2;
+//			int statRoll = new Random().nextInt(100);
+//			if (statRoll<30)
+//				statNumber = 3;
+//		
+//		if (levelOfDrop>=90 && difficultyLevel>=2){
+//			statNumber = 2;
+//			statRoll = new Random().nextInt(100);
+//			if (statRoll<8)
+//				statNumber = 4;
+//			else if (statRoll<50)
+//				statNumber = 3;				
+//		}
+	    
+	    int statRoll = new Random().nextInt(100);
+	    int difficultyBonus = 0;
+	    
+	    // stage 1
+	    if (difficultyLevel==1)
+	    	difficultyBonus = 60;
+	    if (difficultyLevel>=2)
+	    	difficultyBonus = 75;
+	    	
+	    if (statRoll<20+difficultyBonus)  // diff 3 95%  diff 2 70  diff1 20
+	    	statNumber++;
+	    
+	    // stage 2
+	    difficultyBonus = 0;
+	    if (difficultyLevel==1)
+	    	difficultyBonus = 20;
+	    if (difficultyLevel>=2)
+	    	difficultyBonus = 60;
+	    
+	    if (statRoll<10+difficultyBonus)  // diff 3 70%  diff 2 30  diff1 10 
+	    	statNumber++;
+	    
+	    // stage 3
+	    difficultyBonus = 0;
+	    if (difficultyLevel==1)
+	    	difficultyBonus = 3;
+	    if (difficultyLevel>=2)
+	    	difficultyBonus = 5;
+	    
+	    if (statRoll<1+difficultyBonus) 
+	    	statNumber++;
+		
+		
+		int primaryAttribute = new Random().nextInt(7); // 0-6
+		int maxValue = (int) (levelOfDrop*25/90);
+		int minValue = (int) (0.75*maxValue);
+		minValue = Math.max(1, minValue);
+		maxValue = Math.max(2, maxValue);
+		droppedItem.setIntAttribute(getAttributeSTF(primaryAttribute), getStatValue(minValue,maxValue));
+		maxValue -= 2; //secondary attributes must have less maxValue
+		minValue = (int) (0.75*maxValue);
+		minValue = Math.max(1, minValue);
+		maxValue = Math.max(2, maxValue);
+		String prefix = getJewelryPrefix(droppedItem);
+		String suffix = getJewelrySuffix(primaryAttribute, statNumber);
+		String itemName = prefix + suffix;
+		Vector<Integer> alreadyUsedStats = new Vector<Integer>();
+		alreadyUsedStats.add(primaryAttribute);
+		int attribute = primaryAttribute;
+		
+		
+//		for (int i=0;i<statNumber-1;i++){
+//			while (alreadyUsedStats.contains(attribute)) {
+//				attribute = new Random().nextInt(6);
+//				if (! alreadyUsedStats.contains(attribute)){
+//					droppedItem.setIntAttribute(getAttributeSTF(attribute), getStatValue(minValue,maxValue));
+//					alreadyUsedStats.add(attribute);
+//				}
+//			}
+//		}
+		
+		List<Integer> statList = new ArrayList<Integer>();
+		for (int i=0;i<7;i++)
+			statList.add(i);
+		statList.remove(primaryAttribute);
+		
+		for (int i=0;i<statNumber-1;i++){
+			int attributeIndex = new Random().nextInt(statList.size());
+			droppedItem.setIntAttribute(getAttributeSTF(statList.get(attributeIndex)), getStatValue(minValue,maxValue));
+			statList.remove(attributeIndex);
+		}
+		
+		return itemName;
+	}
+	
+	private int getStatValue(int minValue, int maxValue){
+		return minValue + new Random().nextInt(maxValue-minValue);
+		
+	}
+	
+	private String getAttributeSTF(int attribute){
+		String attributeSTF = "";
+		switch (attribute) {
+			case 0: attributeSTF = "cat_stat_mod_bonus.@stat_n:agility_modified";
+					break;
+			case 1: attributeSTF = "cat_stat_mod_bonus.@stat_n:constitution_modified";
+					break;
+			case 2: attributeSTF = "cat_stat_mod_bonus.@stat_n:luck_modified";
+					break;
+			case 3: attributeSTF = "cat_stat_mod_bonus.@stat_n:precision_modified";
+					break;
+			case 4: attributeSTF = "cat_stat_mod_bonus.@stat_n:stamina_modified";
+					break;
+			case 5: attributeSTF = "cat_stat_mod_bonus.@stat_n:strength_modified";
+					break;
+			case 6: attributeSTF = "cat_stat_mod_bonus.@stat_n:camouflage";
+					break;
+		
+		}		
+		return attributeSTF;		
+	}
+	
+	private String getJewelryPrefix(TangibleObject droppedItem){
+		String prefix = "";
+		if (droppedItem.getTemplate().contains("bracelet")){			
+			if (droppedItem.getTemplate().contains("shared_bracelet_s02"))
+				prefix="Metal Band";
+			if (droppedItem.getTemplate().contains("shared_bracelet_s03"))
+				prefix="Golden Bracelet";
+			if (droppedItem.getTemplate().contains("shared_bracelet_s04"))
+				prefix="Golden Symbol";
+			if (droppedItem.getTemplate().contains("shared_bracelet_s05"))
+				prefix="Bangles";
+			if (droppedItem.getTemplate().contains("shared_bracelet_s06"))
+				prefix="Metal Bracelet ";
+		    		    
+		}
+		
+		if (droppedItem.getTemplate().contains("necklace")){
+			if (droppedItem.getTemplate().contains("shared_necklace_s01"))
+				prefix="Plated Necklace";
+			if (droppedItem.getTemplate().contains("shared_necklace_s02"))
+				prefix="Stately Necklace";
+			if (droppedItem.getTemplate().contains("shared_necklace_s03"))
+				prefix="Crested Neckpiece";
+			if (droppedItem.getTemplate().contains("shared_necklace_s04"))
+				prefix="Gemstone Crest";
+			if (droppedItem.getTemplate().contains("shared_necklace_s05"))
+				prefix="Immense Gemstone Necklace";
+			if (droppedItem.getTemplate().contains("shared_necklace_s06"))
+				prefix="Metal Necklace";
+			if (droppedItem.getTemplate().contains("shared_necklace_s07"))
+				prefix="Emerald Pendant";
+			if (droppedItem.getTemplate().contains("shared_necklace_s08"))
+				prefix="Large Pendant";
+			if (droppedItem.getTemplate().contains("shared_necklace_s09"))
+				prefix="Silver Pendant";
+			if (droppedItem.getTemplate().contains("shared_necklace_s10"))
+				prefix="Heavy Crystal Symbol";
+			if (droppedItem.getTemplate().contains("shared_necklace_s11"))
+				prefix="Striped Pendant";	
+			if (droppedItem.getTemplate().contains("shared_necklace_s12"))
+				prefix="Elegant Gemstone Necklace";	
+			
+		}
+		
+		if (droppedItem.getTemplate().contains("ring")){
+			if (droppedItem.getTemplate().contains("shared_ring_s01"))
+				prefix="Band";
+			if (droppedItem.getTemplate().contains("shared_ring_s02"))
+				prefix="Signet";
+			if (droppedItem.getTemplate().contains("shared_ring_s03"))
+				prefix="Ring";
+			if (droppedItem.getTemplate().contains("shared_ring_s04"))
+				prefix="Fingerband";
+		}
+			
+		return prefix;
+	}
+	
+	private String getJewelrySuffix(int primaryAttribute, int statNumber){
+		String suffix = "";
+		
+		if (statNumber==1){
+			switch (primaryAttribute) {
+				case 0: suffix=" of Quickness";
+						break;
+				case 1: suffix=" of Health";
+						break;
+				case 2: suffix=" of Luck";
+						break;
+				case 3: suffix=" of Marksmanship";
+						break;
+				case 4: suffix=" of Stamina";
+						break;
+				case 5: suffix=" of Brawling";
+						break;
+				case 6: suffix=" of the Dire Cat";
+						break;
+			}
+		}
+		
+		if (statNumber==2){
+			switch (primaryAttribute) {
+				case 0: suffix=" of the Rill";
+						break;
+				case 1: suffix=" of the Bantha";
+						break;
+				case 2: suffix=" of the Gambler";
+						break;
+				case 3: suffix=" of the Mercenary";
+						break;
+				case 4: suffix=" of the Squill";
+						break;
+				case 5: suffix=" of the Janta";
+						break;
+				case 6: suffix=" of the Gurrcat";
+						break;
+			}
+		}
+		
+		if (statNumber==3){
+			switch (primaryAttribute) {
+				case 0: suffix=" of the Varactyl";
+						break;
+				case 1: suffix=" of the Torton";
+						break;
+				case 2: suffix=" of the Daredevil";
+						break;
+				case 3: suffix=" of the Veteran";
+						break;
+				case 4: suffix=" of the Tusken";
+						break;
+				case 5: suffix=" of the Rancor";
+						break;
+				case 6: suffix=" of the Bocatt";
+						break;
+			}
+		}
+		
+		if (statNumber==4){
+			switch (primaryAttribute) {
+				case 0: suffix=" of the Acklay";
+						break;
+				case 1: suffix=" of the Hutts";
+						break;
+				case 2: suffix=" of Destiny";
+						break;
+				case 3: suffix=" of Bounty Hunters";
+						break;
+				case 4: suffix=" of the Assassin";
+						break;
+				case 5: suffix=" of the Jedi";
+						break;
+				case 6: suffix=" of the Sand Panther";
+						break;
+			}
+		}
+		return suffix;
 	}
 	
 	

@@ -22,24 +22,26 @@
 package resources.objects.harvester;
 
 import java.nio.ByteOrder;
+import java.util.Map;
 import java.util.Vector;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
+import engine.resources.objects.Builder;
 import engine.resources.objects.SWGObject;
-
-import resources.objects.ObjectMessageBuilder;
 import resources.objects.creature.CreatureObject;
 import resources.objects.resource.GalacticResource;
 import resources.objects.resource.ResourceContainerObject;
+import resources.objects.tangible.TangibleMessageBuilder;
 
-/** 
- * @author Charon 
- */
-public class HarvesterMessageBuilder extends ObjectMessageBuilder{
+public class HarvesterMessageBuilder extends TangibleMessageBuilder {
 	
-	public HarvesterMessageBuilder(HarvesterObject harvesterObject) {
-		setObject(harvesterObject);
+	public HarvesterMessageBuilder(HarvesterObject object) {
+		super(object);
+	}
+	
+	public HarvesterMessageBuilder() {
+		super();
 	}
 	
 	public IoBuffer buildBaseline3() {
@@ -166,9 +168,9 @@ public class HarvesterMessageBuilder extends ObjectMessageBuilder{
 		
 		Vector<ResourceContainerObject> outputHopperContent = harvester.getOutputHopperContent();
 		int hopperContentSize = outputHopperContent.size();
-		int iHopperList = 1;
+		//int iHopperList = 1;
 		if (hopperContentSize==0) {
-			iHopperList = 0;
+			//iHopperList = 0;
 		}
 		//int sizeP =  30 + 15*hopperContentSize; 
 		int sizeP =  30-2-4-4;
@@ -193,12 +195,12 @@ public class HarvesterMessageBuilder extends ObjectMessageBuilder{
 //		buffer.putInt(iHopperList);
 //		buffer.putInt(harvester.getResourceUpdateCount());
 		int sumOfHopper = 0;		
-		int i = 0;
+		//int i = 0;
         sumOfHopper = 0; 
         Vector<ResourceContainerObject> outputHopper = harvester.getOutputHopperContent();
         for (ResourceContainerObject cont : outputHopper){
         	sumOfHopper += cont.getStackCount();
-            i++;
+            //i++;
         }
 						
 		buffer.putShort((short)0x0A);
@@ -430,9 +432,9 @@ public class HarvesterMessageBuilder extends ObjectMessageBuilder{
 	
 	public IoBuffer buildHINO7ActivateDelta2(HarvesterObject harvester) {
 
-        int iHopperList = 0;
+        //int iHopperList = 0;
         if (harvester.getOutputHopperContent().size() >= 1) {
-            iHopperList = 1;
+            //iHopperList = 1;
         }
         
         IoBuffer buffer = IoBuffer.allocate(10).order(ByteOrder.LITTLE_ENDIAN);
@@ -461,9 +463,9 @@ public class HarvesterMessageBuilder extends ObjectMessageBuilder{
 
 	public IoBuffer buildHINO7ActivateDelta2old(HarvesterObject harvester) {
 
-        int iHopperList = 0;
+        //int iHopperList = 0;
         if (harvester.getOutputHopperContent().size() >= 1) {
-            iHopperList = 1;
+            //iHopperList = 1;
         }
         
         IoBuffer buffer = IoBuffer.allocate(10).order(ByteOrder.LITTLE_ENDIAN);
@@ -812,15 +814,24 @@ public class HarvesterMessageBuilder extends ObjectMessageBuilder{
 		return IoBuffer.allocate(size).put(buffer.array(), 0, size).flip();	
 	}
 	
+	@Override
+	public void buildBaseline3(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline3(deltaBuilders, deltaBuilders);
+	}
 	
 	@Override
-	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
-		// TODO Auto-generated method stub
-		
+	public void buildBaseline6(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline6(deltaBuilders, deltaBuilders);
 	}
-
+	
 	@Override
-	public void sendBaselines() {
-		
+	public void buildBaseline8(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline8(deltaBuilders, deltaBuilders);
 	}
+	
+	@Override
+	public void buildBaseline9(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline9(deltaBuilders, deltaBuilders);
+	}
+	
 }

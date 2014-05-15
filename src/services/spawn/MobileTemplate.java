@@ -21,17 +21,21 @@
  ******************************************************************************/
 package services.spawn;
 
+import java.util.List;
 import java.util.Vector;
 
 import resources.datatables.Options;
 import resources.datatables.PvpStatus;
+import resources.loot.LootGroup;
 
-public class MobileTemplate {
+public class MobileTemplate implements Cloneable {
 	
 	private Vector<String> templates;
 	private int optionBitmask = Options.ATTACKABLE;
 	private int pvpBitmask = PvpStatus.Attackable;
 	private short level;
+	private short minLevel;
+	private short maxLevel;
 	private Vector<String> attacks;
 	private String defaultAttack;
 	private int minDamage = 0;
@@ -46,7 +50,18 @@ public class MobileTemplate {
 	private int attackRange;
 	private Vector<String> weaponTemplates = new Vector<String>();
 	private Vector<WeaponTemplate> weaponTemplateVector = new Vector<WeaponTemplate>();
+	private int minSpawnDistance = 0;
+	private int maxSpawnDistance = 0;
+	private boolean deathblow = false;
+	private String socialGroup = ""; // see prima guide 
+	private int assistRange; // use prima guide for ranges
+	private boolean isStalker = false;
+	private String meatType, milkType, boneType, hideType;
+	private int meatAmount, milkAmount, boneAmount, hideAmount;
+	private int respawnTime = 0;
+	private List<LootGroup> lootGroups;
 
+	
 	public Vector<String> getTemplates() {
 		return templates;
 	}
@@ -190,4 +205,159 @@ public class MobileTemplate {
 	public void setWeaponTemplateVector(Vector<WeaponTemplate> weaponTemplateVector) {
 		this.weaponTemplateVector = weaponTemplateVector;
 	}
+
+	public int getMinSpawnDistance() {
+		return minSpawnDistance;
+	}
+
+	public void setMinSpawnDistance(int minSpawnDistance) {
+		this.minSpawnDistance = minSpawnDistance;
+	}
+
+	public int getMaxSpawnDistance() {
+		return maxSpawnDistance;
+	}
+
+	public void setMaxSpawnDistance(int maxSpawnDistance) {
+		this.maxSpawnDistance = maxSpawnDistance;
+	}
+
+	public short getMinLevel() {
+		return minLevel;
+	}
+
+	public void setMinLevel(short minLevel) {
+		this.minLevel = minLevel;
+	}
+
+	public short getMaxLevel() {
+		return maxLevel;
+	}
+
+	public void setMaxLevel(short maxLevel) {
+		this.maxLevel = maxLevel;
+	}
+
+	public boolean isDeathblow() {
+		return deathblow;
+	}
+
+	public void setDeathblow(boolean deathblow) {
+		this.deathblow = deathblow;
+	}
+
+	public String getSocialGroup() {
+		return socialGroup;
+	}
+
+	public void setSocialGroup(String socialGroup) {
+		this.socialGroup = socialGroup;
+	}
+
+	public int getAssistRange() {
+		return assistRange;
+	}
+
+	public void setAssistRange(int assistRange) {
+		this.assistRange = assistRange;
+	}
+
+	public boolean isStalker() {
+		return isStalker;
+	}
+
+	public void setStalker(boolean isStalker) {
+		this.isStalker = isStalker;
+	}
+
+	public String getMeatType() {
+		return meatType;
+	}
+
+	public void setMeatType(String meatType) {
+		this.meatType = meatType;
+	}
+
+	public String getMilkType() {
+		return milkType;
+	}
+
+	public void setMilkType(String milkType) {
+		this.milkType = milkType;
+	}
+
+	public String getBoneType() {
+		return boneType;
+	}
+
+	public void setBoneType(String boneType) {
+		this.boneType = boneType;
+	}
+
+	public String getHideType() {
+		return hideType;
+	}
+
+	public void setHideType(String hideType) {
+		this.hideType = hideType;
+	}
+
+	public int getMeatAmount() {
+		return meatAmount;
+	}
+
+	public void setMeatAmount(int meatAmount) {
+		this.meatAmount = meatAmount;
+	}
+
+	public int getMilkAmount() {
+		return milkAmount;
+	}
+
+	public void setMilkAmount(int milkAmount) {
+		this.milkAmount = milkAmount;
+	}
+
+	public int getBoneAmount() {
+		return boneAmount;
+	}
+
+	public void setBoneAmount(int boneAmount) {
+		this.boneAmount = boneAmount;
+	}
+
+	public int getHideAmount() {
+		return hideAmount;
+	}
+
+	public void setHideAmount(int hideAmount) {
+		this.hideAmount = hideAmount;
+	}
+	
+	public int getRespawnTime() {
+		return respawnTime;
+	}
+	
+	public void setRespawnTime(int respawnTime) {
+		this.respawnTime = respawnTime;
+	}
+
+	public List<LootGroup> getLootGroups() {
+		return lootGroups;
+	}
+
+	public void setLootGroups(List<LootGroup> lootGroups) {
+		this.lootGroups = lootGroups;
+	}
+	
+	public void addToLootGroups(String[] lootPoolNames, double[] lootPoolChances, double lootGroupChance) {
+		//System.out.println("lootPoolNames[0] " + lootPoolNames[0]);
+		LootGroup lootGroup = new LootGroup(lootPoolNames, lootPoolChances, lootGroupChance);
+		this.lootGroups.add(lootGroup);
+	}
+	
+	public Object clone() throws CloneNotSupportedException {
+    	return super.clone();
+	}
+	
 }
