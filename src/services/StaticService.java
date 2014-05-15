@@ -121,6 +121,7 @@ public class StaticService implements INetworkDispatch {
 		long objectId = core.objectService.getDOId(planetName, template, 0, buildingId, cellNumber, x, y, z);
 		
 		SWGObject object = null;
+		
 		MobileTemplate mobileTemplate = core.spawnService.getMobileTemplate(template);
 		
 		if (mobileTemplate != null) {
@@ -147,6 +148,10 @@ public class StaticService implements INetworkDispatch {
 		
 		if (objectId != 0 && object.getObjectID() != objectId) {
 			System.err.println("StaticService: ObjectId " + objectId + " was taken for object with template " + object.getTemplate() + ".  Replacement: " + object.getObjectID());
+		}
+		
+		if (mobileTemplate != null) {
+			return object;
 		}
 		
 		boolean checkCells = false; // shouldn't be needed; for debugging
