@@ -10,7 +10,7 @@ def addTemplate(core):
 	attacks.add('bm_slash_3')
 	mobileTemplates.setAttacks(attacks)
 	templates = Vector()
-	templates.add('object/mobile/shared_torton.iff')
+	templates.add('object/mobile/shared_bearded_jax.iff')
 	mobileTemplate.setCreatureName('bearded jax')
 	mobileTemplate.setTemplates(templates)
 	mobileTemplate.setLevel(24)
