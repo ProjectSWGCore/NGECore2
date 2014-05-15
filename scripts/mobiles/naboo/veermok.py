@@ -4,10 +4,11 @@ from java.util import Vector
 
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
-	templates = Vector()
-	attacks.add('bm_dampen_pain_2')
-	attacks.add('bm_stomp_2')
+	attacks = Vector()
+	add.attack('bm_dampen_pain_2')
+	add.attack('bm_stomp_2')
 	mobileTemplates.setAttacks(attacks)
+	templates = Vector()
 	templates.add('object/mobile/shared_veermok_hue.iff')
 	mobileTemplate.setCreatureName('veermok')
 	mobileTemplate.setTemplates(templates)

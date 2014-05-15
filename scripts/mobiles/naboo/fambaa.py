@@ -4,6 +4,7 @@ from java.util import Vector
 
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
+	attacks = Vector()
 	add.attack('bm_dampen_pain_2')
 	add.attack('bm_shaken_2')
 	add.attack('bm_stomp_2')
