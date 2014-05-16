@@ -1,7 +1,7 @@
 import sys
 
 def setup(core, actor, target, command):
-	core.buffService.addBuffToCreature(target, 'of_deadeye_debuff')
+	core.buffService.addBuffToCreature(target, 'of_deadeye_debuff', actor)
 	return
 	
 def preRun(core, actor, target, command):

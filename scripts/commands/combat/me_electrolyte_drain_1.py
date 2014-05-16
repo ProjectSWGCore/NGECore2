@@ -1,7 +1,7 @@
 import sys
 
 def setup(core, actor, target, command):
-	core.buffService.addBuffToCreature(target, 'me_electrolyte_drain_1')
+	core.buffService.addBuffToCreature(target, 'me_electrolyte_drain_1', actor)
 	return
 	
 def preRun(core, actor, target, command):
