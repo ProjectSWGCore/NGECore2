@@ -39,6 +39,9 @@ def addTemplate(core):
 	
 	attacks = Vector()
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
+	attacks.add('bm_charge_2')
+	attacks.add('bm_dampen_pain_2')
+	attacks.add('bm_slash_2')
 	mobileTemplate.setAttacks(attacks)
 	
 	core.spawnService.addMobileTemplate('desert_razorback', mobileTemplate)

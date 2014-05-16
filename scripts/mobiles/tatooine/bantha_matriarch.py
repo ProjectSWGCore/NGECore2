@@ -24,6 +24,8 @@ def addTemplate(core):
 	mobileTemplate.setBoneAmount(365)	
 	mobileTemplate.setBoneType("Animal Bones")
 	mobileTemplate.setHideAmount(320)
+	mobileTemplate.setMilkType("Wild Milk")
+	mobileTemplate.setMilkAmount(220)
 	mobileTemplate.setSocialGroup("bantha")
 	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(False)
@@ -39,6 +41,10 @@ def addTemplate(core):
 	
 	attacks = Vector()
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
+	attacks.add('bm_bite_1')
+	attacks.add('bm_charge_1')
+	attacks.add('bm_dampen_pain_1')
+	attacks.add('bm_stomp_1')
 	mobileTemplate.setAttacks(attacks)
 	
 	core.spawnService.addMobileTemplate('bantha_matriarch', mobileTemplate)

@@ -39,6 +39,10 @@ def addTemplate(core):
 	
 	attacks = Vector()
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
+	attacks.add('bm_bite_1')
+	attacks.add('bm_dampen_pain_1')
+	attacks.add('bm_charge_1')
+	attacks.add('bm_stomp_1')
 	mobileTemplate.setAttacks(attacks)
 	
 	core.spawnService.addMobileTemplate('dewback', mobileTemplate)

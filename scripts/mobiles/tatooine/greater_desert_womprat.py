@@ -39,6 +39,9 @@ def addTemplate(core):
 	
 	attacks = Vector()
 	mobileTemplate.setDefaultAttack('creatureRangedAttack')
+	attacks.add('bm_bite_1')
+	attacks.add('bm_bolster_armor_1')
+	attacks.add('bm_enfeeble_1')
 	mobileTemplate.setAttacks(attacks)
 	
 	core.spawnService.addMobileTemplate('greater_desert_womprat', mobileTemplate)
