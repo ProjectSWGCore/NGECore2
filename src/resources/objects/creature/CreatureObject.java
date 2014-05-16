@@ -915,6 +915,10 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		synchronized(objectMutex) {
 			this.guildId = guildId;
 		}
+		
+		IoBuffer guildIdDelta = messageBuilder.buildGuildIdDelta(guildId);
+		
+		notifyObservers(guildIdDelta, true);
 	}
 	
 	public long getLookAtTarget() {
