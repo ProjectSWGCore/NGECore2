@@ -24,8 +24,6 @@ def addTemplate(core):
 	mobileTemplate.setBoneAmount(225)	
 	mobileTemplate.setBoneType("Animal Bone")
 	mobileTemplate.setHideAmount(125)
-	mobileTemplate.setMilkType("Wild Milk")
-	mobileTemplate.setMilkAmount(90)
 	mobileTemplate.setSocialGroup("eopie")
 	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(False)	
@@ -41,9 +39,6 @@ def addTemplate(core):
 	
 	attacks = Vector()
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
-	attacks.add('bm_bite_2')
-	attacks.add('bm_kick_2')
-	attacks.add('bm_spit_2')
 	mobileTemplate.setAttacks(attacks)
 	
 	core.spawnService.addMobileTemplate('desert_eopie', mobileTemplate)

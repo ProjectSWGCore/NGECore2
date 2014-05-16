@@ -39,7 +39,6 @@ def addTemplate(core):
 	
 	attacks = Vector()
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
-	attacks.add('bm_wing_buffet_1')
 	mobileTemplate.setAttacks(attacks)
 	
 	core.spawnService.addMobileTemplate('tatooine_mynock', mobileTemplate)

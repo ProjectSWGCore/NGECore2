@@ -39,9 +39,6 @@ def addTemplate(core):
 	
 	attacks = Vector()
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
-	attacks.add('bm_bite_2')
-	attacks.add('bm_defensive_2')
-	attacks.add('bm_damage_disease_2')
 	mobileTemplate.setAttacks(attacks)
 	
 	core.spawnService.addMobileTemplate('mountain_squill_guardian', mobileTemplate)

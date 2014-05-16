@@ -39,10 +39,6 @@ def addTemplate(core):
 	
 	attacks = Vector()
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
-	attacks.add('bm_bite_1')
-	attacks.add('bm_bolster_armor_1')
-	attacks.add('bm_charge_1')
-	attacks.add('bm_stomp_1')
 	mobileTemplate.setAttacks(attacks)
 	
 	core.spawnService.addMobileTemplate('ronto', mobileTemplate)

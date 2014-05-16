@@ -39,9 +39,6 @@ def addTemplate(core):
 	
 	attacks = Vector()
 	mobileTemplate.setDefaultAttack('creatureRangedAttack')
-	attacks.add('bm_bite_2')
-	attacks.add('bm_damage_poison_1')
-	attacks.add('bm_spit_2')
 	mobileTemplate.setAttacks(attacks)
 	
 	core.spawnService.addMobileTemplate('mountain_worrt', mobileTemplate)

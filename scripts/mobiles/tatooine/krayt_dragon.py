@@ -39,10 +39,6 @@ def addTemplate(core):
 	
 	attacks = Vector()
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
-	attacks.add('bm_bite_5')
-	attacks.add('bm_bolster_armor_5')
-	attacks.add('bm_damage_disease_5')
-	attacks.add('bm_enfeeble_5')
 	mobileTemplate.setAttacks(attacks)
 	
 	core.spawnService.addMobileTemplate('krayt_dragon', mobileTemplate)

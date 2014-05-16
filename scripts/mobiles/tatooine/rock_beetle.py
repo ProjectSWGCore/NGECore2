@@ -37,9 +37,6 @@ def addTemplate(core):
 	
 	attacks = Vector()
 	mobileTemplate.setDefaultAttack('creatureRangedAttack')
-	attacks.add('bm_bite_2')
-	attacks.add('bm_bolster_armor_2')
-	attacks.add('bm_enfeeble_2')
 	mobileTemplate.setAttacks(attacks)
 	
 	core.spawnService.addMobileTemplate('rock_beetle', mobileTemplate)

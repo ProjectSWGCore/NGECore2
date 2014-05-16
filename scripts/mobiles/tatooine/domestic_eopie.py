@@ -24,8 +24,6 @@ def addTemplate(core):
 	mobileTemplate.setBoneAmount(260)	
 	mobileTemplate.setBoneType("Animal Bone")
 	mobileTemplate.setHideAmount(190)
-	mobileTemplate.setMilkType("Domesticated Milk")
-	mobileTemplate.setMilkAmount(110)
 	mobileTemplate.setSocialGroup("eopie")
 	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(False)	

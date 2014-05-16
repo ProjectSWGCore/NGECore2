@@ -24,8 +24,6 @@ def addTemplate(core):
 	mobileTemplate.setBoneAmount(100)	
 	mobileTemplate.setBoneType("Animal Bone")
 	mobileTemplate.setHideAmount(100)
-	mobileTemplate.setMilkType("Wild Milk")
-	mobileTemplate.setMilkAmount(60)
 	mobileTemplate.setSocialGroup("cu pa")
 	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(False)	
@@ -41,8 +39,6 @@ def addTemplate(core):
 	
 	attacks = Vector()
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
-	attacks.add('bm_bite_1')
-	attacks.add('bm_hamstring_1')
 	mobileTemplate.setAttacks(attacks)
 	
 	core.spawnService.addMobileTemplate('cu_pa', mobileTemplate)

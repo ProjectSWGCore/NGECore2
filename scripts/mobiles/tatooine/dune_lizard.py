@@ -39,10 +39,6 @@ def addTemplate(core):
 	
 	attacks = Vector()
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
-	attacks.add('bm_bite_2')
-	attacks.add('bm_bolster_armor_2')
-	attacks.add('bm_damage_disease_2')
-	attacks.add('bm_enfeeable_2')
 	mobileTemplate.setAttacks(attacks)
 	
 	core.spawnService.addMobileTemplate('dune_lizard', mobileTemplate)
