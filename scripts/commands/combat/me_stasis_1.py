@@ -1,7 +1,7 @@
 import sys
 
 def setup(core, actor, target, command):
-	command.setBuffNameTarget('me_stasis_1')
+	core.buffService.addBuffToCreature(actor, 'me_stasis_1', actor)
 	return
 	
 def preRun(core, actor, target, command):
