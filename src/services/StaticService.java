@@ -115,7 +115,7 @@ public class StaticService implements INetworkDispatch {
 		
 		if (cellId != 0 && cell == null) {
 			System.err.println("CellId invalid for template " + template);
-			return;
+			return null;
 		}
 		
 		if (cell != null && cell.getContainer() != null && cell.getContainer() instanceof BuildingObject) {
