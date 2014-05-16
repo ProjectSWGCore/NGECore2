@@ -19,7 +19,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("shinn mugger")
 	mobileTemplate.setAssistRange(5)
 	mobileTemplate.setStalker(False)
-	mobileTemplate.setOptionBitmask(192)
+	mobileTemplate.setOptionsBitmask(192)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_mugger.iff')

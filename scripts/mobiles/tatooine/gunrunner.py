@@ -19,7 +19,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("gunrunner")
 	mobileTemplate.setAssistRange(4)
 	mobileTemplate.setStalker(False)	
-	mobileTemplate.setOptionBitmask(192)
+	mobileTemplate.setOptionsBitmask(192)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_tatooine_gunrunner.iff')
