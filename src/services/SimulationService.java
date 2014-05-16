@@ -460,6 +460,8 @@ public class SimulationService implements INetworkDispatch {
 					remove(object, oldPos.x, oldPos.z);
 					if(object.getContainer() != null)
 						object.getContainer()._remove(object);
+					else if (object.getClient().isGM() && parent.getContainer() != null)
+						object.sendSystemMessage("BuildingId: Dec: " + parent.getContainer().getObjectID() + " / Hex: " + Long.toHexString(parent.getContainer().getObjectID()), DisplayType.Broadcast);
 					parent._add(object);
 				}
 				object.setPosition(newPos);
