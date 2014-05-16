@@ -147,6 +147,28 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 		return ref.get();
 	}
 	
+	public CellObject getCellByCellName(String cellName) {
+		Map<String, Object> attributes = getTemplateData().getAttributes();
+		
+		if (attributes.containsKey("portalLayoutFilename") && ((String) attributes.get("portalLayoutFilename")).length() > 0) {
+			String portalLayoutFilename = (String) attributes.get("portalLayoutFilename");
+			
+			try {
+				PortalVisitor portal = ClientFileManager.loadFile(portalLayoutFilename, PortalVisitor.class);
+				
+				for (int i = 1; i <= portal.cellCount; i++) {
+					if (cellName.equals(portal.cells.get(i).name)) {
+						return getCellByCellNumber(i);
+					}
+				}
+			} catch (InstantiationException | IllegalAccessException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return null;
+	}
+	
 	public int getCellNumberByObjectId(long objectId) {
 		Vector<CellObject> cells = getCells();
 		
