@@ -39,6 +39,7 @@ import engine.resources.service.INetworkRemoteEvent;
 import resources.common.Opcodes;
 import resources.common.OutOfBand;
 import resources.common.ProsePackage;
+import resources.datatables.DisplayType;
 import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.intangible.IntangibleObject;
@@ -674,14 +675,12 @@ public class BazaarService implements INetworkDispatch {
 		core.objectService.destroyObject(item);
 		
 		if(vendor.getTemplate().contains("terminal_bazaar")) {
-			ProsePackage prose = new ProsePackage("base_player", "sale_fee");
 			int salesFee = SALES_FEE;
 			if(premium) 
 				salesFee *= 5;
 			
 			player.setBankCredits(player.getBankCredits() - salesFee);
-			prose.setDiInteger(salesFee);
-			player.sendSystemMessage(new OutOfBand(prose), (byte) 0);
+			player.sendSystemMessage(OutOfBand.ProsePackage("@base_player:sale_fee", salesFee), DisplayType.Broadcast);
 		}
 		
 		if(auction) {

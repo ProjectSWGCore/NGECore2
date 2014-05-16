@@ -29,6 +29,7 @@ import java.util.Vector;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
 import main.NGECore;
+import resources.datatables.DisplayType;
 import resources.datatables.Options;
 import resources.loot.LootGroup;
 import resources.objects.creature.CreatureObject;
@@ -346,10 +347,10 @@ public class Forager {
 		goon.setOptions(Options.ATTACKABLE, true);
 		AIActor actor = (AIActor) goon.getAttachment("AI");
 		actor.addDefender(forager);
-		forager.sendSystemMessage("@foraging/forage_enemy:" + barkString,(byte) 0);
-		//OutOfBand oob = new OutOfBand(new ProsePackage("@foraging/forage_enemy",barkString));
-		OutOfBand oob = new OutOfBand(new ProsePackage("@jawa_trader","cant_understand"));	
-		forager.sendSystemMessage("@jawa_trader:cant_understand",(byte) 0);
+		forager.sendSystemMessage("@foraging/forage_enemy:" + barkString, DisplayType.Broadcast);
+		//OutOfBand oob = OutOfBand.ProsePackage("@foraging/forage_enemy:" + barkString));
+		OutOfBand oob = OutOfBand.ProsePackage("@jawa_trader:cant_understand");
+		forager.sendSystemMessage("@jawa_trader:cant_understand", DisplayType.Broadcast);
 		NGECore.getInstance().chatService.spatialChat(goon, forager, "", (short)0x0, (short)0x0, 1, oob);
 	}
 	
@@ -423,8 +424,8 @@ public class Forager {
 		actor.addDefender(owner);
 		
 		barkString = "bark_"+map.getAttachment("MapSTFName");										      		
-		owner.sendSystemMessage("@treasure_map/treasure_map:" + barkString,(byte) 0);
-		OutOfBand oob = new OutOfBand(new ProsePackage("@treasure_map/treasure_map",barkString));	
+		owner.sendSystemMessage("@treasure_map/treasure_map:" + barkString, DisplayType.Broadcast);
+		OutOfBand oob = OutOfBand.ProsePackage("@treasure_map/treasure_map:" + barkString);	
 		NGECore.getInstance().chatService.spatialChat(guard, owner, "", (short)0x0, (short)0x0, 1, oob);
 		return guard;
 	}
