@@ -4,7 +4,6 @@ from java.util import Vector
 
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
-	attacks = Vector()
 	mobileTemplates.setAttacks(attacks)
 	templates = Vector()
 	templates.add('object/mobile/shared_fambaa.iff')
