@@ -45,6 +45,7 @@ import resources.buffs.DamageOverTime;
 import resources.common.FileUtilities;
 import resources.common.OutOfBand;
 import resources.datatables.DisplayType;
+import resources.datatables.FactionStatus;
 import resources.datatables.Options;
 import resources.datatables.Elemental;
 import resources.datatables.Posture;
@@ -242,7 +243,7 @@ public class CombatService implements INetworkDispatch {
 			if(!(obj instanceof TangibleObject) || obj == attacker)
 				continue;
 			
-			if(obj instanceof CreatureObject && (((CreatureObject) obj).getPosture() == 13 || ((CreatureObject) obj).getPosture() == 14))
+			if(obj instanceof CreatureObject && (((CreatureObject) obj).getPosture() == Posture.Incapacitated || ((CreatureObject) obj).getPosture() == Posture.Dead))
 				continue;
 
 			if(command.getAttackType() == 0 && !isInConeAngle(attacker, obj, (int) command.getConeLength(), (int) command.getConeWidth(), dirX, dirZ))
@@ -316,7 +317,7 @@ public class CombatService implements INetworkDispatch {
 			if(!(obj instanceof TangibleObject) || obj == attacker)
 				continue;
 			
-			if(obj instanceof CreatureObject && (((CreatureObject) obj).getPosture() == 13 || ((CreatureObject) obj).getPosture() == 14))
+			if(obj instanceof CreatureObject && (((CreatureObject) obj).getPosture() == Posture.Incapacitated || ((CreatureObject) obj).getPosture() == Posture.Dead))
 				continue;
 
 			if(command.getAttackType() == 0 && !isInConeAngle(attacker, obj, (int) command.getConeLength(), (int) command.getConeWidth(), dirX, dirZ))
@@ -805,7 +806,7 @@ public class CombatService implements INetworkDispatch {
 				if(core.mountService.isMounted(target)) core.mountService.dismount(target, (CreatureObject) target.getContainer());
 				
 				target.setHealth(1);
-				target.setPosture((byte) 13);
+				target.setPosture(Posture.Incapacitated);
 				target.setTurnRadius(0);
 				target.setSpeedMultiplierBase(0);		
 			}
@@ -816,7 +817,7 @@ public class CombatService implements INetworkDispatch {
 					if(target.getPosture() != 13)
 						return;
 					
-					target.setPosture((byte) 0);
+					target.setPosture(Posture.Upright);
 					target.setTurnRadius(1);
 					target.setSpeedMultiplierBase(1);
 				
@@ -833,7 +834,7 @@ public class CombatService implements INetworkDispatch {
 		} else if(target.getHealth() - damage <= 0 && target.getAttachment("AI") != null) {
 			synchronized(target.getMutex()) {
 				target.setHealth(0);
-				target.setPosture((byte) 14);
+				target.setPosture(Posture.Dead);
 			}
 			attacker.removeDefender(target);
 			target.removeDefender(attacker);
@@ -901,7 +902,7 @@ public class CombatService implements INetworkDispatch {
 			
 		} else {
 			
-			if(target.getFactionStatus() == 0)
+			if(target.getFactionStatus() == FactionStatus.OnLeave)
 				return true;
 			
 			return false;
@@ -990,7 +991,7 @@ public class CombatService implements INetworkDispatch {
 			if(!(obj instanceof CreatureObject))
 				continue;
 			
-			if(obj instanceof CreatureObject && (((CreatureObject) obj).getPosture() == 14))
+			if(obj instanceof CreatureObject && (((CreatureObject) obj).getPosture() == Posture.Dead))
 				continue;
 			
 			if(!core.simulationService.checkLineOfSight(target, obj))
@@ -1008,7 +1009,7 @@ public class CombatService implements INetworkDispatch {
 	public void deathblowPlayer(CreatureObject attacker, CreatureObject target) {
 		target.stopIncapTask();
 		target.setIncapTask(null);
-		target.setPosture((byte) 14);
+		target.setPosture(Posture.Dead);
 		
 		if (target.getSlottedObject("ghost") != null && attacker.getSlottedObject("ghost") != null) {
 			boolean bountyWindow = true;
@@ -1149,11 +1150,11 @@ public class CombatService implements INetworkDispatch {
 				
 				CreatureObject creature = (CreatureObject) owner;
 				
-				if(eventType != 0 || creature.getPosture() != 14)
+				if(eventType != 0 || creature.getPosture() != Posture.Dead)
 					return;
 				
 				synchronized(creature.getMutex()) {
-					creature.setPosture((byte) 0);
+					creature.setPosture(Posture.Upright);
 					creature.setTurnRadius(1);
 					creature.setSpeedMultiplierBase(1);
 					creature.setHealth(creature.getHealth() + 4000);
@@ -1178,7 +1179,7 @@ public class CombatService implements INetworkDispatch {
 			if(!(obj instanceof CreatureObject))
 				continue;
 			
-			if(obj instanceof CreatureObject && (((CreatureObject) obj).getPosture() != 14))
+			if(obj instanceof CreatureObject && (((CreatureObject) obj).getPosture() != Posture.Dead))
 				continue;
 			
 			if(!attemptHeal(medic, (CreatureObject) obj))
@@ -1247,29 +1248,21 @@ public class CombatService implements INetworkDispatch {
 			return;
 		
 		if(target.getSkillMod("expertise_dot_absorption_all") != null)
-			damage *= (1 - target.getSkillMod("expertise_dot_absorption_all").getBase() / 100);
+			damage *= (1 - target.getSkillModBase("expertise_dot_absorption_all") / 100);
 		
 		switch(dot.getType()) {
 		
-			case "acid":
-				baseArmor = target.getSkillMod("acid").getBase();
-			case "heat":
-				baseArmor = target.getSkillMod("heat").getBase();
-			case "cold":
-				baseArmor = target.getSkillMod("cold").getBase();
-			case "electricity":
-				baseArmor = target.getSkillMod("electricity").getBase();
-			case "energy":
-				baseArmor = target.getSkillMod("energy").getBase();
 			case "kinetic":
-				baseArmor = target.getSkillMod("electricity").getBase();
+				baseArmor = target.getSkillModBase("electricity");	// Is this a mistake or is it legitimate?
 			case "poison":
-				baseArmor = target.getSkillMod("acid").getBase();
+				baseArmor = target.getSkillModBase("acid");
 			case "disease":	// disease damages action in nge
 				baseArmor = 0;
 			case "bleeding":	// elemental type unknown
 			case "fire":
-				baseArmor = target.getSkillMod("heat").getBase();
+				baseArmor = target.getSkillModBase("heat");
+			default:
+				baseArmor = target.getSkillModBase(dot.getType());
 				
 		}
 		
