@@ -193,7 +193,9 @@ public class SimulationService implements INetworkDispatch {
 		ODBCursor cursor = core.getSWGObjectODB().getCursor();
 		
 		while(cursor.hasNext()) {
-			SWGObject building = core.objectService.getObject(((SWGObject) cursor.next()).getObjectID());
+			Object next = cursor.next();
+			if (next == null) continue;
+			SWGObject building = core.objectService.getObject(((SWGObject) next).getObjectID());
 			if(building == null || (!(building instanceof BuildingObject) && !(building instanceof HarvesterObject)))
 				continue;
 			if(building.getAttachment("hasLoadedServerTemplate") == null)
