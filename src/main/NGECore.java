@@ -524,7 +524,9 @@ public class NGECore {
 		List<CreatureObject> deletedObjects = new ArrayList<CreatureObject>();
 		
 		while(cursor.hasNext()) {
-			SWGObject creature = (SWGObject) cursor.next();
+			Object next = cursor.next();
+			if (next == null) continue;
+			SWGObject creature = (SWGObject) next;
 			if(!characterService.playerExists(creature.getObjectID()) && creature instanceof CreatureObject)
 				deletedObjects.add((CreatureObject) creature);
 		}
