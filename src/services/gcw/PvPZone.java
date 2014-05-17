@@ -21,16 +21,24 @@
  ******************************************************************************/
 package services.gcw;
 
+import main.NGECore;
 import net.engio.mbassy.listener.Handler;
 import resources.common.collidables.AbstractCollidable;
 import resources.common.collidables.AbstractCollidable.EnterEvent;
 import resources.common.collidables.AbstractCollidable.ExitEvent;
+import resources.datatables.FactionStatus;
+import resources.datatables.PvpStatus;
+import resources.objects.creature.CreatureObject;
+import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
+import engine.resources.scene.Point3D;
 
 public class PvPZone {
 	
 	private Planet planet;
 	private AbstractCollidable area;
+	private NGECore core = NGECore.getInstance();
+
 	
 	public PvPZone(Planet planet, AbstractCollidable area) {
 		this.planet = planet;
@@ -54,14 +62,51 @@ public class PvPZone {
 		this.area = area;
 	}
 	
+	public void warpBack(CreatureObject actor) {
+		if (core.mountService.isMounted(actor)) {
+			actor = (CreatureObject) actor.getContainer();
+		}
+		core.simulationService.teleport(actor, (Point3D) actor.getAttachment("lastValidPosition"), actor.getOrientation(), actor.getParentId());
+	}
+	
 	@Handler
 	public void onEnter(EnterEvent event) {
+		
+		CreatureObject actor = (CreatureObject) event.object;
+		
+		if(!actor.getFaction().equals("rebel") && !actor.getFaction().equals("imperial")) {
+			actor.sendSystemMessage("@gcw:pvp_advanced_region_not_allowed", (byte) 0);
+			warpBack(actor);
+			return;
+		}
+		
+		if(actor.getLevel() < 75) {
+			actor.sendSystemMessage("@gcw:pvp_advanced_region_level_low", (byte) 0);
+			warpBack(actor);
+			return;
+		}
+		
+		if(actor.getPvpStatus(PvpStatus.GoingCovert) || actor.getPvpStatus(PvpStatus.GoingOvert)) {
+			actor.setPvpStatus(PvpStatus.GoingCovert, false);
+			actor.setPvpStatus(PvpStatus.GoingOvert, false);
+			actor.sendSystemMessage("@gcw:pvp_advanced_region_faction_type_change_cancel", (byte) 0);
+		}
+		
+		actor.setFactionStatus(FactionStatus.SpecialForces);
+		actor.updatePvpStatus();
+		actor.sendSystemMessage("@gcw:pvp_advanced_region_entered", (byte) 0);
 		
 	}
 	
 	@Handler
 	public void onExit(ExitEvent event) {
 		
+		CreatureObject actor = (CreatureObject) event.object;
+
+		actor.setFactionStatus(FactionStatus.OnLeave);
+		actor.updatePvpStatus();
+		actor.sendSystemMessage("@gcw:pvp_advanced_region_exited", (byte) 0);
+
 	}
 
 

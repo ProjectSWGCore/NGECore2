@@ -405,6 +405,7 @@ public class SimulationService implements INetworkDispatch {
 				}
 				
 				checkForCollidables(object);
+				object.setAttachment("lastValidPosition", object.getPosition());
 				MoveEvent event = new MoveEvent();
 				event.object = object;
 				object.getEventBus().publish(event);
@@ -470,6 +471,7 @@ public class SimulationService implements INetworkDispatch {
 				object.notifyObservers(utm, false);
 				
 				checkForCollidables(object);
+				object.setAttachment("lastValidPosition", object.getPosition());
 
 			}
 				
