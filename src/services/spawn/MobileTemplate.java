@@ -31,7 +31,7 @@ import resources.loot.LootGroup;
 public class MobileTemplate implements Cloneable {
 	
 	private Vector<String> templates;
-	private int optionBitmask = Options.ATTACKABLE;
+	private int optionsBitmask = Options.ATTACKABLE;
 	private int pvpBitmask = PvpStatus.Attackable;
 	private short level;
 	private short minLevel;
@@ -70,12 +70,12 @@ public class MobileTemplate implements Cloneable {
 		this.templates = templates;
 	}
 
-	public int getOptionBitmask() {
-		return optionBitmask;
+	public int getOptionsBitmask() {
+		return optionsBitmask;
 	}
 
-	public void setOptionBitmask(int optionBitmask) {
-		this.optionBitmask = optionBitmask;
+	public void setOptionsBitmask(int optionsBitmask) {
+		this.optionsBitmask = optionsBitmask;
 	}
 
 	public int getPvpBitmask() {

@@ -95,8 +95,8 @@ public class SurveyTool extends TangibleObject implements Serializable {
 		defendersList = new Vector<TangibleObject>();
 	}
 	
-	public SurveyTool(long objectID, Planet planet, String template, Point3D position, Quaternion orientation){
-		super(objectID, planet, template, position, orientation);
+	public SurveyTool(long objectID, Planet planet, Point3D position, Quaternion orientation, String template) {
+		super(objectID, planet, position, orientation, template);
 		surveyEffectString = "";
 		sampleEffectString = "";
 		this.tanoID = objectID; 

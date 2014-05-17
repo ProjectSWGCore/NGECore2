@@ -21,12 +21,9 @@
  ******************************************************************************/
 package services;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.DirectoryStream;
 import java.nio.file.DirectoryStream.Filter;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
 import java.nio.file.Files;
@@ -40,8 +37,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
-
-import org.apache.commons.lang3.ArrayUtils;
 
 import protocol.swg.PlayClientEffectObjectTransformMessage;
 import resources.loot.LootGroup;
@@ -793,7 +788,7 @@ public class LootService implements INetworkDispatch {
 		
 		int finalMinDmg = 0;
 		int finalMaxDmg = 0;
-		String tunableObjectName = "";
+		@SuppressWarnings("unused") String tunableObjectName = "";
 		
 		if (objectType.contains("powercrystal")){
 			tunableObjectName = "Power Crystal";
@@ -1041,7 +1036,7 @@ public class LootService implements INetworkDispatch {
 	    float qz= 1.06535322E9F;
 	    Point3D effectorPosition = new Point3D(0,y,0);
 		Quaternion effectorOrientation = new Quaternion(0,0,0,qz);
-	    PlayClientEffectObjectTransformMessage lmsg = new PlayClientEffectObjectTransformMessage("",lootedObject.getObjectID(),"",effectorPosition,effectorOrientation);
+	    //PlayClientEffectObjectTransformMessage lmsg = new PlayClientEffectObjectTransformMessage("",lootedObject.getObjectID(),"",effectorPosition,effectorOrientation);
 	    //((CreatureObject) requester).getClient().getSession().write(lmsg.serialize());
 	}
 	

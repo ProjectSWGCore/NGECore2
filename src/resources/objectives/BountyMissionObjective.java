@@ -37,7 +37,6 @@ import engine.resources.scene.Quaternion;
 import main.NGECore;
 import resources.common.BountyListItem;
 import resources.common.OutOfBand;
-import resources.common.ProsePackage;
 import resources.common.SpawnPoint;
 import resources.datatables.DisplayType;
 import resources.objects.creature.CreatureObject;
@@ -92,7 +91,7 @@ public class BountyMissionObjective extends MissionObjective {
 		
 		String message = "@mission/mission_bounty_informant:target_hard_" + Integer.toString(new Random().nextInt(4) + 1);
 		
-		CommPlayerMessage comm = new CommPlayerMessage(player.getObjectId(), new OutOfBand(new ProsePackage(message)));
+		CommPlayerMessage comm = new CommPlayerMessage(player.getObjectId(), OutOfBand.ProsePackage(message));
 		comm.setTime(2000);
 		switch (bountyTarget.getFaction()) {
 			case "neutral":
@@ -187,7 +186,7 @@ public class BountyMissionObjective extends MissionObjective {
 			CreatureObject hunter = (CreatureObject) core.objectService.getObject(id);
 			
 			if (hunter != null) {
-				hunter.sendSystemMessage(new OutOfBand(new ProsePackage("@bounty_hunter:bounty_failed_hunter", "TT", getMissionObject().getGrandparent().getObjectId())), DisplayType.Broadcast);
+				hunter.sendSystemMessage(OutOfBand.ProsePackage("@bounty_hunter:bounty_failed_hunter", "TT", getMissionObject().getGrandparent().getObjectId()), DisplayType.Broadcast);
 				hunter.getSlottedObject("datapad").viewChildren(hunter, true, false, new Traverser() {
 					@Override
 					public void process(SWGObject item) {

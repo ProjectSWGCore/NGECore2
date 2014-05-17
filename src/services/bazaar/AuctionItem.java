@@ -23,13 +23,9 @@ package services.bazaar;
 
 import java.io.Serializable;
 
-import com.sleepycat.je.Environment;
-import com.sleepycat.je.Transaction;
 import com.sleepycat.persist.model.Entity;
-import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.PrimaryKey;
 
-import engine.resources.objects.IPersistent;
 import engine.resources.objects.SWGObject;
 
 @Entity(version=1)

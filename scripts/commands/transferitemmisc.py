@@ -28,7 +28,7 @@ def run(core, actor, target, commandString):
 			
         if target.isLootItem():
             target.setLootItem(0)
-            actor.sendSystemMessage('You looted ' + target.getTrueName() + ' from corpse.', 0)
+            actor.sendSystemMessage('You looted ' + target.getStf().getStfValue() + ' from corpse.', 0)
         
         if actorContainer != None and (container.getTemplate() == "object/cell/shared_cell.iff") & core.housingService.getPermissions(actor, actorContainer):
 			target.getContainer().transferTo(actor, container, target)

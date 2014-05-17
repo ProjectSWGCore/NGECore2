@@ -55,7 +55,6 @@ import engine.resources.scene.Quaternion;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import resources.common.ObjControllerOpcodes;
-import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.harvester.HarvesterMessageBuilder;
 import resources.objects.harvester.HarvesterObject;
@@ -363,8 +362,7 @@ public class HarvesterService implements INetworkDispatch {
 		});		
 		window.addHandler(1, "", Trigger.TRIGGER_CANCEL, returnList, new SUICallback() {
 			@Override
-			public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
-				CreatureObject crafter = (CreatureObject)owner;
+			public void process(SWGObject owner, int eventType, Vector<String> returnList) {
 				core.suiService.closeSUIWindow(owner, 0);
 			}					
 		});		
@@ -853,11 +851,9 @@ public class HarvesterService implements INetworkDispatch {
 			ResourceContainerObject containerObject = (ResourceContainerObject) core.objectService.createObject(resourceContainerIFF, owner.getPlanet());
 			containerObject.initializeStats(sampleResource);
 			containerObject.setProprietor(owner);
-			containerObject.setStackCount(stackcount,owner);			
-			int resCRC = CRC.StringtoCRC(resourceContainerIFF);
+			containerObject.setStackCount(stackcount,owner);
 			containerObject.setIffFileName(resourceContainerIFF);
 			
-			long objectId = containerObject.getObjectID();										
 			SWGObject crafterInventory = owner.getSlottedObject("inventory");
 			
 //			SceneCreateObjectByCrc createObjectMsg = new SceneCreateObjectByCrc(objectId, owner.getOrientation().x, owner.getOrientation().y, owner.getOrientation().z, owner.getOrientation().w, owner.getPosition().x, owner.getPosition().y, owner.getPosition().z, resCRC, (byte) 0);
@@ -1018,7 +1014,6 @@ public class HarvesterService implements INetworkDispatch {
 		CreatureObject actor = (CreatureObject) NGECore.getInstance().objectService.getObject((Long) object.getAttachment("ownerId"));
 		String structureTemplate = (String) object.getAttachment("StructureTemplate");
 		HarvesterObject harvester = (HarvesterObject) NGECore.getInstance().objectService.createObject(structureTemplate, actor.getPlanet());
-		long objectId = harvester.getObjectID();
 		Vector<String> adminList = harvester.getAdminList();
 		//String[] fullName = ((CreatureObject)actor).getCustomName().split(" ");
 		adminList.add(actor.getCustomName());

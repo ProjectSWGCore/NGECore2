@@ -168,9 +168,9 @@ public class HarvesterMessageBuilder extends TangibleMessageBuilder {
 		
 		Vector<ResourceContainerObject> outputHopperContent = harvester.getOutputHopperContent();
 		int hopperContentSize = outputHopperContent.size();
-		int iHopperList = 1;
+		//int iHopperList = 1;
 		if (hopperContentSize==0) {
-			iHopperList = 0;
+			//iHopperList = 0;
 		}
 		//int sizeP =  30 + 15*hopperContentSize; 
 		int sizeP =  30-2-4-4;
@@ -195,12 +195,12 @@ public class HarvesterMessageBuilder extends TangibleMessageBuilder {
 //		buffer.putInt(iHopperList);
 //		buffer.putInt(harvester.getResourceUpdateCount());
 		int sumOfHopper = 0;		
-		int i = 0;
+		//int i = 0;
         sumOfHopper = 0; 
         Vector<ResourceContainerObject> outputHopper = harvester.getOutputHopperContent();
         for (ResourceContainerObject cont : outputHopper){
         	sumOfHopper += cont.getStackCount();
-            i++;
+            //i++;
         }
 						
 		buffer.putShort((short)0x0A);
@@ -432,9 +432,9 @@ public class HarvesterMessageBuilder extends TangibleMessageBuilder {
 	
 	public IoBuffer buildHINO7ActivateDelta2(HarvesterObject harvester) {
 
-        int iHopperList = 0;
+        //int iHopperList = 0;
         if (harvester.getOutputHopperContent().size() >= 1) {
-            iHopperList = 1;
+            //iHopperList = 1;
         }
         
         IoBuffer buffer = IoBuffer.allocate(10).order(ByteOrder.LITTLE_ENDIAN);
@@ -463,9 +463,9 @@ public class HarvesterMessageBuilder extends TangibleMessageBuilder {
 
 	public IoBuffer buildHINO7ActivateDelta2old(HarvesterObject harvester) {
 
-        int iHopperList = 0;
+        //int iHopperList = 0;
         if (harvester.getOutputHopperContent().size() >= 1) {
-            iHopperList = 1;
+            //iHopperList = 1;
         }
         
         IoBuffer buffer = IoBuffer.allocate(10).order(ByteOrder.LITTLE_ENDIAN);

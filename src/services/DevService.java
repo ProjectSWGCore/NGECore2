@@ -88,10 +88,14 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 26, "Installations");
 				suiOptions.put((long) 110, "Survey Devices");
 				if(creature.getPlayerObject().getProfession().equals("bounty_hunter_1a")) suiOptions.put((long) 123, "Tracking Droids");
-				if(creature.getClient().isGM()) suiOptions.put((long) 120, "House Deeds");
-				if(creature.getClient().isGM()) suiOptions.put((long) 125, "Crafting Tools");
-				if(creature.getClient().isGM()) suiOptions.put((long) 130, "Vehicle Deeds");
-				if(creature.getClient().isGM()) suiOptions.put((long) 121, "Sandbox City");	
+				if (creature.getClient().isGM()) {
+					suiOptions.put((long) 120, "House Deeds");
+					suiOptions.put((long) 125, "Crafting Tools");
+					suiOptions.put((long) 130, "Vehicle Deeds");
+					suiOptions.put((long) 121, "Sandbox City");	
+					suiOptions.put((long) 140, "Guild Registry Device (PDA)");
+				}
+
 				break;
 			case 3: // [Items] Weapons
 				suiOptions.put((long) 30, "Jedi Weapons");
@@ -1262,6 +1266,11 @@ public class DevService implements INetworkDispatch {
 						TangibleObject av21deed = (TangibleObject) core.objectService.createObject("object/tangible/deed/vehicle_deed/shared_landspeeder_av21_deed.iff", planet);
 						inventory.add(swoopDeed);
 						inventory.add(av21deed);
+						return;
+					
+					case 140:
+						TangibleObject guildRegistry = (TangibleObject) core.objectService.createObject("object/tangible/furniture/technical/shared_guild_registry_initial.iff", planet);
+						inventory.add(guildRegistry);
 						return;
 				}
 			}	

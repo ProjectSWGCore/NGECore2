@@ -50,28 +50,6 @@ public class ProsePackage {
 	private int diInteger = 0;
 	private float dfFloat = 0;
 	
-	// TODO: Add more constructors
-	
-	public ProsePackage(String stfFile, String stfLabel) {
-		stf.setStfFilename(stfFile);
-		stf.setStfName(stfLabel);
-	}
-	
-	public ProsePackage(String stfFile, String stfLabel, String ttCustomString) {
-		stf.setStfFilename(stfFile);
-		stf.setStfName(stfLabel);
-		this.ttCustomString = ttCustomString;
-	}
-	
-	public ProsePackage(String stfFile, String stfLabel, long tuObjectId, String tuStfFile, String tuStfLabel, String tuCustomString) {
-		stf.setStfFilename(stfFile);
-		stf.setStfName(stfLabel);
-		this.tuObjectId = tuObjectId;
-		tuStf.setStfFilename(tuStfFile);
-		tuStf.setStfName(tuStfLabel);
-		this.tuCustomString = tuCustomString;
-	}
-	
 	/*
 	 * Any parameters can be entered.
 	 * 

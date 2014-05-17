@@ -44,13 +44,11 @@ import resources.buffs.Buff;
 import resources.buffs.DamageOverTime;
 import resources.common.FileUtilities;
 import resources.common.OutOfBand;
-import resources.common.ProsePackage;
 import resources.datatables.DisplayType;
 import resources.datatables.Options;
 import resources.datatables.Elemental;
 import resources.datatables.Posture;
 import resources.datatables.WeaponType;
-import resources.objectives.BountyMissionObjective;
 import resources.objects.creature.CreatureObject;
 import resources.objects.mission.MissionObject;
 import resources.objects.player.PlayerObject;
@@ -206,7 +204,7 @@ public class CombatService implements INetworkDispatch {
 		}
 		else if(target instanceof TangibleObject)
 		{
-			if(target.getConditionDamage() == target.getMaxDamage()) 
+			if(target.getConditionDamage() == target.getMaximumCondition()) 
 			{
 				for(TangibleObject defender : target.getDefendersList()) defender.removeDefender(target);
 				core.objectService.destroyObject(target);
@@ -828,9 +826,9 @@ public class CombatService implements INetworkDispatch {
 			target.setIncapTask(incapTask);
 			core.buffService.addBuffToCreature(target, "incapWeaken", target);
 			if(target.getSlottedObject("ghost") != null && attacker.getSlottedObject("ghost") != null) {
-				target.sendSystemMessage(new OutOfBand(new ProsePackage("base_player", "prose_victim_incap", attacker.getCustomName())), (byte) 0);
-				attacker.sendSystemMessage(new OutOfBand(new ProsePackage("base_player", "prose_target_incap", target.getCustomName())), (byte) 0);
-			} else {target.sendSystemMessage(new OutOfBand(new ProsePackage("base_player", "prose_victim_incap", "@" + attacker.getStfFilename() + ":" + attacker.getStfName())), (byte) 0); }
+				target.sendSystemMessage(OutOfBand.ProsePackage("@base_player:prose_victim_incap", "TT", attacker.getCustomName()), DisplayType.Broadcast);
+				attacker.sendSystemMessage(OutOfBand.ProsePackage("@base_player:prose_target_incap", "TT", target.getCustomName()), DisplayType.Broadcast);
+			} else {target.sendSystemMessage(OutOfBand.ProsePackage("@base_player:prose_victim_incap", "TT", "@" + attacker.getStfFilename() + ":" + attacker.getStfName()), DisplayType.Broadcast); }
 			return;
 		} else if(target.getHealth() - damage <= 0 && target.getAttachment("AI") != null) {
 			synchronized(target.getMutex()) {
@@ -1021,14 +1019,9 @@ public class CombatService implements INetworkDispatch {
 				
 				if (mission != null && mission.getBountyMarkId() == target.getObjectID()) {
 					
-					ProsePackage attackerPp = new ProsePackage("bounty_hunter", "bounty_success_hunter", target.getCustomName());
-					attackerPp.setToCustomString("his"); // TODO: Genders
-					attackerPp.setDiInteger(mission.getCreditReward());
-					attacker.sendSystemMessage(new OutOfBand(attackerPp), DisplayType.Broadcast);
+					attacker.sendSystemMessage(OutOfBand.ProsePackage("@bounty_hunter:bounty_success_hunter", mission.getCreditReward(), "TT", target.getCustomName(), "TO", target.getObjectID()), DisplayType.Broadcast);
 					
-					ProsePackage targetPp = new ProsePackage ("bounty_hunter", "bounty_success_hunter", attacker.getCustomName());
-					targetPp.setDiInteger(mission.getCreditReward());
-					target.sendSystemMessage(new OutOfBand(targetPp), DisplayType.Broadcast);
+					target.sendSystemMessage(OutOfBand.ProsePackage("@bounty_hunter:bounty_success_hunter", mission.getCreditReward(), "TT", attacker.getCustomName()), DisplayType.Broadcast);
 					
 					core.missionService.handleMissionComplete(attacker, mission);
 				}
@@ -1039,13 +1032,9 @@ public class CombatService implements INetworkDispatch {
 				
 				if (mission != null && mission.getBountyMarkId() == attacker.getObjectID()) {
 					
-					ProsePackage attackerPp = new ProsePackage("bounty_hunter", "bounty_failed_target", target.getCustomName());
-					attackerPp.setToCustomString("his"); // TODO: Genders
-					attackerPp.setDiInteger(mission.getCreditReward());
-					attacker.sendSystemMessage(new OutOfBand(attackerPp), DisplayType.Broadcast);
+					attacker.sendSystemMessage(OutOfBand.ProsePackage("@bounty_hunter:bounty_failed_target", mission.getCreditReward(), "TT", target.getCustomName(), "TO", target.getObjectID()), DisplayType.Broadcast);
 					
-					ProsePackage targetPp = new ProsePackage ("bounty_hunter", "bounty_failed_hunter", attacker.getCustomName());
-					target.sendSystemMessage(new OutOfBand(targetPp), DisplayType.Broadcast);
+					target.sendSystemMessage(OutOfBand.ProsePackage("@bounty_hunter:bounty_failed_hunter", "TT", attacker.getCustomName()), DisplayType.Broadcast);
 					
 					core.missionService.handleMissionAbort(target, mission);
 				}
@@ -1065,9 +1054,9 @@ public class CombatService implements INetworkDispatch {
 		target.setTurnRadius(0);
 		
 		if (attacker.getSlottedObject("ghost") != null)
-			target.sendSystemMessage(new OutOfBand(new ProsePackage("base_player", "prose_victim_dead", attacker.getCustomName())), (byte) 0);
+			target.sendSystemMessage(OutOfBand.ProsePackage("@base_player:prose_victim_dead", "TT", attacker.getCustomName()), DisplayType.Broadcast);
 		else
-			target.sendSystemMessage(new OutOfBand(new ProsePackage("base_player", "prose_victim_dead", "@" + attacker.getStfFilename() + ":" + attacker.getStfName())), (byte) 0);
+			target.sendSystemMessage(OutOfBand.ProsePackage("@base_player:prose_victim_dead", "TT", "@" + attacker.getStfFilename() + ":" + attacker.getStfName()), DisplayType.Broadcast);
 		
 		core.playerService.sendCloningWindow(target, attacker.getSlottedObject("ghost") != null);
 	}

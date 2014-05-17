@@ -21,10 +21,7 @@
  ******************************************************************************/
 package resources.objects.staticobject;
 
-import java.nio.ByteOrder;
 import java.util.Map;
-
-import org.apache.mina.core.buffer.IoBuffer;
 
 import resources.objects.ObjectMessageBuilder;
 import engine.resources.objects.Builder;
@@ -37,52 +34,6 @@ public class StaticMessageBuilder extends ObjectMessageBuilder {
 	
 	public StaticMessageBuilder() {
 		super();
-	}
-	
-	public IoBuffer buildBaseline3() {
-
-		IoBuffer buffer = bufferPool.allocate(100, false).order(ByteOrder.LITTLE_ENDIAN);
-		buffer.setAutoExpand(true);
-		
-		buffer.putShort((short) 4);
-		buffer.putInt(0);
-		//buffer.putShort((short) 0);
-
-		buffer.put(getAsciiString(object.getStfFilename()));
-		buffer.putInt(0);
-		//buffer.putShort((short) 0);
-		buffer.put(getAsciiString(object.getStfName()));
-		buffer.putInt(0);
-		buffer.putInt(0xFF);
-				
-		int size = buffer.position();
-		buffer = bufferPool.allocate(size, false).put(buffer.array(), 0, size);
-
-		buffer.flip();
-		buffer = createBaseline("STAO", (byte) 3, buffer, size);
-		
-		return buffer;
-	}
-	
-	public IoBuffer buildBaseline6() {
-
-		IoBuffer buffer = bufferPool.allocate(100, false).order(ByteOrder.LITTLE_ENDIAN);
-		buffer.setAutoExpand(true);
-		buffer.putShort((short) 2);
-		buffer.putInt(0x43);
-		//buffer.putShort((short) 0);
-		buffer.put(getAsciiString(object.getDetailFilename()));
-		buffer.putInt(0);
-		buffer.put(getAsciiString(object.getDetailName()));
-	//	buffer.putShort((short) 0);
-		
-		int size = buffer.position();
-		buffer = bufferPool.allocate(size, false).put(buffer.array(), 0, size);
-
-		buffer.flip();
-		buffer = createBaseline("STAO", (byte) 6, buffer, size);
-		
-		return buffer;
 	}
 	
 	@Override

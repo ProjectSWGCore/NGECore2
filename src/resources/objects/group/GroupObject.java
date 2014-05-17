@@ -32,6 +32,7 @@ import engine.resources.scene.Quaternion;
 
 public class GroupObject extends UniverseObject {
 	
+	private static final long serialVersionUID = 1L;
 	private Vector<SWGObject> memberList = new Vector<SWGObject>();
 	private int memberListUpdateCounter;
 	private SWGObject groupLeader;
