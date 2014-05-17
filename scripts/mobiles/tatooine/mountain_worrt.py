@@ -27,6 +27,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("mountain worrt")
 	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(False)	
+	mobileTemplate.setOptionsBitmask(192)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_worrt.iff')

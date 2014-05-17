@@ -27,7 +27,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("variegated womprat")
 	mobileTemplate.setAssistRange(6)
 	mobileTemplate.setStalker(False)
-	
+	mobileTemplate.setOptionsBitmask(192)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_variegated_womp_rat.iff')
