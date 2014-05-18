@@ -19,15 +19,12 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package resources.objects.tool;
+package resources.harvest;
 
 import java.io.Serializable;
 import java.util.Vector;
 
 import main.NGECore;
-
-import com.sleepycat.persist.model.NotPersistent;
-import com.sleepycat.persist.model.Persistent;
 
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -40,8 +37,6 @@ import resources.objects.tangible.TangibleObject;
 /** 
  * @author Charon 
  */
-
-@Persistent(version=0)
 public class SurveyTool extends TangibleObject implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
@@ -51,25 +46,15 @@ public class SurveyTool extends TangibleObject implements Serializable {
 	private Long tanoID=0L;
 	private byte SurveyRangeSetting=0;
 	
-	@NotPersistent
 	private transient String surveyEffectString="";
-	@NotPersistent
 	private transient String sampleEffectString="";
-	@NotPersistent
 	private transient boolean currentlySurveying=false;
-	@NotPersistent
 	private transient boolean currentlySampling=false;
-	@NotPersistent
 	private transient boolean currentlyCoolingDown=false;
-	@NotPersistent
 	private transient boolean exceptionalState=false;
-	@NotPersistent
 	private transient boolean recoveryMode=false;
-	@NotPersistent
 	private transient Long lastSurveyTime=0L;
-	@NotPersistent
 	private transient Long lastSampleTime=0L;
-	@NotPersistent
 	private transient Long recoveryTime=10L;
 	
 	public static byte MineralSurveyDevice	           = 1;

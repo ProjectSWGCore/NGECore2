@@ -34,7 +34,6 @@ import resources.gcw.CurrentServerGCWZonePercent;
 import resources.gcw.OtherServerGCWZonePercent;
 import resources.guild.Guild;
 import resources.objects.ObjectMessageBuilder;
-import resources.objects.SWGList;
 import resources.objects.SWGMap;
 import resources.objects.SWGMultiMap;
 import resources.objects.SWGSet;
