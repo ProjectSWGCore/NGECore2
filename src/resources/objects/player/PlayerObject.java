@@ -993,6 +993,8 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 				if (getContainer() != null) {
 					getContainer().notifyObservers(getBaseline(viewType).createDelta(updateType, buffer.array()), true);
 				}
+				
+				break;
 			default:
 				if (getContainer() != null && getContainer().getClient() != null) {
 					getContainer().getClient().getSession().write(getBaseline(viewType).createDelta(updateType, buffer.array()));
