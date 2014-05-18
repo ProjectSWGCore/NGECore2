@@ -97,6 +97,7 @@ public class GCWService implements INetworkDispatch {
 				try {
 					core.scriptService.callScript("scripts/", "gcwzones", "addZones", core);
 					core.scriptService.callScript("scripts/", "pvpzones", "addZones", core);
+					updateNextUpdateTime();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -308,6 +309,8 @@ public class GCWService implements INetworkDispatch {
 			@Override public void run() { gcwUpdate(); }
 			
 			private void gcwUpdate() {
+				long nextUpdateTime = calculateNextUpdateTime();
+				
 				ODBCursor cursor = core.getSWGObjectODB().getCursor();
 				
 				while (cursor.hasNext()) {
@@ -349,12 +352,12 @@ public class GCWService implements INetworkDispatch {
 						if (creature.getFaction().equals("imperial") && player.getCurrentRank() > player.getHighestImperialRank()) {
 							player.setHighestImperialRank(player.getCurrentRank());
 						}
+						
+						player.setNextUpdateTime((int) nextUpdateTime);
 					}
 				}
 				
 				cursor.close();
-				
-				calculateNextUpdateTime();
 			}
 			
 		}, (calculateNextUpdateTime() - System.currentTimeMillis()), 604800000, TimeUnit.MILLISECONDS);
@@ -617,8 +620,10 @@ public class GCWService implements INetworkDispatch {
 		c.set(Calendar.SECOND, 0);
 		c.set(Calendar.MILLISECOND, 0);
 		
-		long nextUpdateTime = c.getTimeInMillis();
-		
+		return c.getTimeInMillis();
+	}
+	
+	public void updateNextUpdateTime() {
 		ODBCursor cursor = core.getSWGObjectODB().getCursor();
 		
 		while (cursor.hasNext()) {
@@ -644,12 +649,10 @@ public class GCWService implements INetworkDispatch {
 			
 			PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
 			
-			player.setNextUpdateTime((int) nextUpdateTime);
+			player.setNextUpdateTime((int) calculateNextUpdateTime());
 		}
 		
 		cursor.close();
-		
-		return nextUpdateTime;
 	}
 	
 	public long calculateResetTime() {

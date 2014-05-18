@@ -32,9 +32,12 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
 
+import main.NGECore;
+
 import org.apache.mina.core.buffer.IoBuffer;
 
 import resources.craft.DraftSchematic;
+import resources.datatables.Citizenship;
 import resources.datatables.Professions;
 import resources.gcw.RegionDefender;
 import resources.harvest.SurveyTool;
@@ -135,9 +138,9 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		baseline.put("rankProgress", (float) 0);
 		baseline.put("highestRebelRank", 0);
 		baseline.put("highestImperialRank", 0);
-		baseline.put("nextUpdateTime", 0);
+		baseline.put("nextUpdateTime", NGECore.getInstance().gcwService.calculateNextUpdateTime());
 		baseline.put("home", "");
-		baseline.put("citizenship", (byte) 0); // See datatables.Citizenship
+		baseline.put("citizenship", Citizenship.Homeless);
 		baseline.put("cityRegionDefender", new RegionDefender());
 		baseline.put("guildRegionDefender", new RegionDefender());
 		baseline.put("12", 0); // General?
@@ -400,9 +403,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	}
 	
 	public int getHighestSetBit() {
-		synchronized(objectMutex) {
-			return ((BitSet) getBaseline(3).get("collections")).length();
-		}
+		return ((BitSet) getBaseline(3).get("collections")).length();
 	}
 	
 	public boolean isShowingHelmet() {
