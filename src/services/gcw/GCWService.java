@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -42,20 +43,20 @@ import org.python.google.common.collect.Multimap;
 import protocol.swg.GcwGroupsRsp;
 import protocol.swg.GcwRegionsReq;
 import protocol.swg.GcwRegionsRsp;
-
 import resources.common.Opcodes;
+import resources.common.collidables.CollidableCircle;
 import resources.datatables.FactionStatus;
 import resources.gcw.CurrentServerGCWZoneHistory;
 import resources.gcw.CurrentServerGCWZonePercent;
 import resources.gcw.OtherServerGCWZonePercent;
 import resources.objects.creature.CreatureObject;
 import resources.objects.guild.GuildObject;
-
 import main.NGECore;
-
 import engine.clients.Client;
 import engine.resources.objects.SWGObject;
+import engine.resources.scene.Planet;
 import engine.resources.scene.Point2D;
+import engine.resources.scene.Point3D;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
@@ -64,7 +65,7 @@ public class GCWService implements INetworkDispatch {
 	private NGECore core;
 	private GuildObject object;
 	private Map<String, Map<String, CurrentServerGCWZonePercent>> zoneMap() { return object.getZoneMap(); }
-	
+	private Map<Planet, List<PvPZone>> pvpZones = new ConcurrentHashMap<Planet, List<PvPZone>>();
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	
 	protected final Object objectMutex = new Object();
@@ -79,6 +80,7 @@ public class GCWService implements INetworkDispatch {
 			private void afterInitialisation() {
 				try {
 					core.scriptService.callScript("scripts/", "gcwzones", "addZones", core);
+					core.scriptService.callScript("scripts/", "pvpzones", "addZones", core);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -419,6 +421,25 @@ public class GCWService implements INetworkDispatch {
 			
 		});
 		
+	}
+	
+	public void addPvPZone(String planetName, float x, float z, float radius) {
+		Planet planet = core.terrainService.getPlanetByName(planetName);
+		if(planet == null)
+			return;
+		if(pvpZones.get(planet) == null)
+			pvpZones.put(planet, new ArrayList<PvPZone>());
+		CollidableCircle area = new CollidableCircle(new Point3D(x, 0, z), radius, planet);
+		PvPZone zone = new PvPZone(planet, area);
+		pvpZones.get(planet).add(zone);
+		core.simulationService.addCollidable(area, x, z);
+	}
+	
+	public boolean isInPvpZone(CreatureObject actor) {
+		List<PvPZone> zones = pvpZones.get(actor.getPlanet());
+		if(zones == null)
+			return false;
+		return zones.stream().anyMatch(z -> z.getArea().doesCollide(actor));
 	}
 	
 	@Override
