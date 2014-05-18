@@ -27,6 +27,8 @@ import java.util.Vector;
 
 import resources.datatables.Options;
 import resources.datatables.PvpStatus;
+import resources.datatables.Factions;
+import resources.datatables.FactionStatus;
 import resources.loot.LootGroup;
 
 public class MobileTemplate implements Cloneable {
@@ -34,6 +36,8 @@ public class MobileTemplate implements Cloneable {
 	private Vector<String> templates;
 	private int optionsBitmask = Options.ATTACKABLE;
 	private int pvpBitmask = PvpStatus.Attackable;
+	private int factionstatus = FactionStatus.Combatant;
+	private String faction =  "";
 	private short level;
 	private short minLevel;
 	private short maxLevel;
@@ -83,6 +87,22 @@ public class MobileTemplate implements Cloneable {
 		return pvpBitmask;
 	}
 
+	public String getFaction(){
+		return faction;
+	}
+	
+	public void setFaction(String faction){
+		this.faction = faction;
+	}
+	
+	public int getFactionStatus(){
+		return factionstatus;
+	}
+	
+	public void setFactionStatus(int factionstatus){
+		this.factionstatus = factionstatus;
+	}	
+	
 	public void setPvpBitmask(int pvpBitmask) {
 		this.pvpBitmask = pvpBitmask;
 	}

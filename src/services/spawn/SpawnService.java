@@ -104,6 +104,8 @@ public class SpawnService {
 			creature.setLootGroups(mobileTemplate.getLootGroups());
 		
 		creature.setOptionsBitmask(mobileTemplate.getOptionsBitmask());
+		creature.setFaction(mobileTemplate.getFaction());
+		creature.setFactionStatus(mobileTemplate.getFactionStatus());
 		creature.setPvpBitmask(mobileTemplate.getPvpBitmask());
 		creature.setStfFilename("mob/creature_names"); // TODO: set other STFs for NPCs other than creatures
 		creature.setStfName(mobileTemplate.getCreatureName());
