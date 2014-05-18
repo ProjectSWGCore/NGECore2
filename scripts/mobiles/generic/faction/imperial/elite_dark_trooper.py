@@ -19,8 +19,8 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("imperial")
 	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(False)
-	#mobileTemplate.setOptionsBitmask(192)
-	mobileTemplate.setOptionsBitmask(0) # TEMP until pvpstatus is useable for npcs!
+	mobileTemplate.setFaction("imperial")
+	mobileTemplate.setFactionStatus(1)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dark_trooper.iff')

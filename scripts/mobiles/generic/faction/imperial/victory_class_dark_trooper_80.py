@@ -6,16 +6,16 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('crackdown_elite_dark_trooper')
-	mobileTemplate.setLevel(64)
-	mobileTemplate.setDifficulty(0)
+	mobileTemplate.setCreatureName('crackdown_dark_trooper')
+	mobileTemplate.setLevel(80)
+	mobileTemplate.setDifficulty(1)
 	mobileTemplate.setAttackRange(15)
 	mobileTemplate.setAttackSpeed(1.0)
 	mobileTemplate.setWeaponType(1)
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)
-	mobileTemplate.setScale(1)
+	mobileTemplate.setScale(1.1)
 	mobileTemplate.setSocialGroup("imperial")
 	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(False)
@@ -35,5 +35,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('rangedshot')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('exogen_dark_trooper', mobileTemplate)
+	core.spawnService.addMobileTemplate('vic_dark_trooper_80', mobileTemplate)
 	return
