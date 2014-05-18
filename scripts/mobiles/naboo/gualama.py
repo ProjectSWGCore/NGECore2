@@ -6,9 +6,9 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 
-	mobileTemplate.setCreatureName('vir vur')
-	mobileTemplate.setLevel(37)
-	mobileTemplate.setMinLevel(37)
+	mobileTemplate.setCreatureName('gualama')
+	mobileTemplate.setLevel(39)
+	mobileTemplate.setMinLevel(39)
 	mobileTemplate.setMaxLevel(40)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
@@ -18,16 +18,18 @@ def addTemplate(core):
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(1)
-	mobileTemplate.setMeatType("Avian Meat")
-	mobileTemplate.setMeatAmount(10)
+	mobileTemplate.setMeatType("Wild Meat")
+	mobileTemplate.setMeatAmount(200)
+	mobileTemplate.setHideType("Wooly Hide")
+	mobileTemplate.setHideAmount(150)
 	mobileTemplate.setBoneType("Mammal Bones")
-	mobileTemplate.setBoneAmount(4)
-	mobileTemplate.setSocialGroup("vir vur")
+	mobileTemplate.setBoneAmount(90)
+	mobileTemplate.setSocialGroup("gualama")
 	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(False)
 
 	templates = Vector()
-	templates.add('object/mobile/shared_vir_vur_hue.iff')
+	templates.add('object/mobile/shared_gualama_hue.iff')
 	mobileTemplate.setTemplates(templates)
 
 	weaponTemplates = Vector()
@@ -39,5 +41,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 
-	core.spawnService.addMobileTemplate('vir_vur', mobileTemplate)
+	core.spawnService.addMobileTemplate('gualama', mobileTemplate)
 	return
