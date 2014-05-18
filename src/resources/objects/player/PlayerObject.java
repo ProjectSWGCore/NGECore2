@@ -138,7 +138,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		baseline.put("rankProgress", (float) 0);
 		baseline.put("highestRebelRank", 0);
 		baseline.put("highestImperialRank", 0);
-		baseline.put("nextUpdateTime", NGECore.getInstance().gcwService.calculateNextUpdateTime());
+		baseline.put("nextUpdateTime", (int) NGECore.getInstance().gcwService.calculateNextUpdateTime());
 		baseline.put("home", "");
 		baseline.put("citizenship", Citizenship.Homeless);
 		baseline.put("cityRegionDefender", new RegionDefender());
