@@ -63,6 +63,8 @@ public class FactionService implements INetworkDispatch {
 	
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	
+	private DatatableVisitor pvpFactions;
+	
 	public FactionService(NGECore core) {
 		this.core = core;
 		
@@ -76,6 +78,8 @@ public class FactionService implements INetworkDispatch {
 					factionMap.put(faction, CRC.StringtoCRC(faction));
 				}
 			}
+			
+			pvpFactions = ClientFileManager.loadFile("datatables/player/pvp_factions.iff", DatatableVisitor.class);
         } catch (Exception e) {
                 e.printStackTrace();
         }
@@ -360,17 +364,15 @@ public class FactionService implements INetworkDispatch {
 		}
 		
 		try {
-			DatatableVisitor PvpFactions = ClientFileManager.loadFile("datatables/player/pvp_factions.iff", DatatableVisitor.class);
-			
-			for (int i = 0; i < PvpFactions.getRowCount(); i++) {
-				if (PvpFactions.getObject(i, 0) != null) {
-					if (((String) PvpFactions.getObject(i, 0)).equals(faction)) {
+			for (int i = 0; i < pvpFactions.getRowCount(); i++) {
+				if (pvpFactions.getObject(i, 0) != null) {
+					if (((String) pvpFactions.getObject(i, 0)).equals(faction)) {
 						return true;
 					}
 				}
 			}
 			
-		} catch (InstantiationException | IllegalAccessException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		

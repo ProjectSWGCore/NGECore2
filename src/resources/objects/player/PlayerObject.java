@@ -22,17 +22,12 @@
 package resources.objects.player;
 
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.BitSet;
-import java.util.Calendar;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
-
-import main.NGECore;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
@@ -115,7 +110,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		profileFlagsList.add(0);
 		baseline.put("profileFlagsList", profileFlagsList);
 		baseline.put("title", "");
-		baseline.put("bornDate", Integer.parseInt(new SimpleDateFormat("yyyymmdd", Locale.ENGLISH).format(Calendar.getInstance().getTime())));
+		baseline.put("bornDate", (int) (System.currentTimeMillis() / 1000L)); //Integer.parseInt(new SimpleDateFormat("yyyymmdd", Locale.ENGLISH).format(Calendar.getInstance().getTime())));
 		baseline.put("totalPlayTime", 0);
 		baseline.put("professionIcon", 0);
 		baseline.put("profession", "trader_1a");
@@ -138,7 +133,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		baseline.put("rankProgress", (float) 0);
 		baseline.put("highestRebelRank", 0);
 		baseline.put("highestImperialRank", 0);
-		baseline.put("nextUpdateTime", NGECore.getInstance().gcwService.calculateNextUpdateTime());
+		baseline.put("nextUpdateTime", 0);
 		baseline.put("home", "");
 		baseline.put("citizenship", Citizenship.Homeless);
 		baseline.put("cityRegionDefender", new RegionDefender());
@@ -199,7 +194,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		baseline.put("27", (byte) 0); // Changed from 6 bytes to 9
 		baseline.put("28", (long) 0); // Seen as 856
 		baseline.put("29", (long) 0); // Seen as 8559
-		baseline.put("residenceTime", 0); // Date format of some sort.  Seen as Saturday 28th May 2011
+		baseline.put("residenceTime", 0); // Assumption.  Date format of some sort.  Seen as Saturday 28th May 2011
 		return baseline;
 	}
 	
