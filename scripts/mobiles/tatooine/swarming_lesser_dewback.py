@@ -27,6 +27,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("dewback")
 	mobileTemplate.setAssistRange(10)
 	mobileTemplate.setStalker(True)
+	mobileTemplate.setOptionsBitmask(192)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_swarming_lesser_dewback.iff')

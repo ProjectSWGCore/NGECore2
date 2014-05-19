@@ -88,7 +88,7 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 	@Override
 	public Baseline getOtherVariables() {
 		Baseline baseline = super.getOtherVariables();
-		baseline.put("maintainanceAmount", (float) 0);
+		baseline.put("maintenanceAmount", (float) 0);
 		baseline.put("baseMaintenanceRate", 0);
 		baseline.put("deedTemplate", "");
 		baseline.put("residency", false);

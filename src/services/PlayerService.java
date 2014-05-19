@@ -924,6 +924,7 @@ public class PlayerService implements INetworkDispatch {
 			}
 			
 			player.setXp(xpType, experience);
+			creature.setXpBarValue(experience);
 			
 			// 2. See if they need to level up.
 			for (int i = 0; i < experienceTable.getRowCount(); i++) {

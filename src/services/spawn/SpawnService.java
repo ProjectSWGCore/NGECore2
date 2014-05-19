@@ -100,7 +100,7 @@ public class SpawnService {
 			creature.setWeaponId(mobileTemplate.getCustomWeapon().getObjectID());
 		}*/
 		
-		if(mobileTemplate.getLootGroups() != null)
+		if(mobileTemplate.getLootGroups() != null && !mobileTemplate.getLootGroups().isEmpty())
 			creature.setLootGroups(mobileTemplate.getLootGroups());
 		
 		creature.setOptionsBitmask(mobileTemplate.getOptionsBitmask());
@@ -118,7 +118,7 @@ public class SpawnService {
 			level = mobileTemplate.getLevel();
 		}
 		
-		if (mobileTemplate.getMinLevel()!=0 && mobileTemplate.getMaxLevel()!=0){
+		if (mobileTemplate.getMinLevel()!=0 && mobileTemplate.getMaxLevel()!=0 && level == -1){
 			level = (short) (mobileTemplate.getMinLevel() + (new Random().nextInt(mobileTemplate.getMaxLevel()-mobileTemplate.getMinLevel()))); 
 			creature.setLevel(level);
 		}

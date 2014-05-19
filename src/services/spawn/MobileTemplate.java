@@ -21,6 +21,7 @@
  ******************************************************************************/
 package services.spawn;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -59,7 +60,7 @@ public class MobileTemplate implements Cloneable {
 	private String meatType, milkType, boneType, hideType;
 	private int meatAmount, milkAmount, boneAmount, hideAmount;
 	private int respawnTime = 0;
-	private List<LootGroup> lootGroups;
+	private List<LootGroup> lootGroups = new ArrayList<LootGroup>();
 
 	
 	public Vector<String> getTemplates() {

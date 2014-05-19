@@ -27,8 +27,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("krayt dragon")
 	mobileTemplate.setAssistRange(36)
 	mobileTemplate.setStalker(True)	
-
-	
+	mobileTemplate.setOptionsBitmask(192)	
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_krayt_dragon.iff')

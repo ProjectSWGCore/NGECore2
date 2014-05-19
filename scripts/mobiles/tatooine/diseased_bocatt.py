@@ -27,6 +27,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("bocatt")
 	mobileTemplate.setAssistRange(10)
 	mobileTemplate.setStalker(True)	
+	mobileTemplate.setOptionsBitmask(192)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_bocatt.iff')

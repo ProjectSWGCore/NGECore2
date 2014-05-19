@@ -25,11 +25,14 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -42,28 +45,42 @@ import org.python.google.common.collect.Multimap;
 import protocol.swg.GcwGroupsRsp;
 import protocol.swg.GcwRegionsReq;
 import protocol.swg.GcwRegionsRsp;
-
 import resources.common.Opcodes;
+import resources.common.OutOfBand;
+import resources.common.collidables.CollidableCircle;
+import resources.datatables.DisplayType;
 import resources.datatables.FactionStatus;
+import resources.datatables.GcwType;
 import resources.gcw.CurrentServerGCWZoneHistory;
 import resources.gcw.CurrentServerGCWZonePercent;
 import resources.gcw.OtherServerGCWZonePercent;
 import resources.objects.creature.CreatureObject;
 import resources.objects.guild.GuildObject;
-
+import resources.objects.player.PlayerObject;
 import main.NGECore;
-
 import engine.clients.Client;
+import engine.resources.database.ODBCursor;
 import engine.resources.objects.SWGObject;
+import engine.resources.scene.Planet;
 import engine.resources.scene.Point2D;
+import engine.resources.scene.Point3D;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
 public class GCWService implements INetworkDispatch {
 	
 	private NGECore core;
+	
 	private GuildObject object;
+	
+	private static final int[] MOD2 = { 10250, 7250, 7250, 6750, 6750, 6750, 6750, 6750, 6750, 6750, 6750, 6750 };
+	private static final int[] DECAY1 = { 0, 0, 0, 0, 0, 0, 2727, 2744, 2769, 2799, 2823, 2857 };
+	private static final int[] DECAY2 = { 0, 0, 0, 0, 0, 0, 6000, 6500, 7200, 8200, 9600, 12000 };
+	private static final int[] CONST2 = { 0, 0, 0, 0, 0, 0, 12200, 12200, 12900, 14100, 16200, 18700 };
+	private static final int[] CONST4 = { 0, 0, 0, 0, 0, 0, 1950, 3550, 5600, 7800, 9350, 11100 };
+	
 	private Map<String, Map<String, CurrentServerGCWZonePercent>> zoneMap() { return object.getZoneMap(); }
+	private Map<Planet, List<PvPZone>> pvpZones = new ConcurrentHashMap<Planet, List<PvPZone>>();
 	
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	
@@ -79,6 +96,8 @@ public class GCWService implements INetworkDispatch {
 			private void afterInitialisation() {
 				try {
 					core.scriptService.callScript("scripts/", "gcwzones", "addZones", core);
+					core.scriptService.callScript("scripts/", "pvpzones", "addZones", core);
+					updateNextUpdateTime();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -285,6 +304,63 @@ public class GCWService implements INetworkDispatch {
 				}
 			}
 		}, 2, 2, TimeUnit.DAYS);
+		
+		scheduler.scheduleAtFixedRate(new Runnable() {
+			@Override public void run() { gcwUpdate(); }
+			
+			private void gcwUpdate() {
+				long nextUpdateTime = calculateNextUpdateTime();
+				
+				ODBCursor cursor = core.getSWGObjectODB().getCursor();
+				
+				while (cursor.hasNext()) {
+					SWGObject object = (SWGObject) cursor.next();
+					
+					if (object == null) {
+						continue;
+					}
+					
+					if (core.objectService.getObject(object.getObjectID()) == null) {
+						object = core.objectService.getObject(object.getObjectID());
+					}
+					
+					if (!(object instanceof CreatureObject)) {
+						continue;
+					}
+					
+					CreatureObject creature = (CreatureObject) object;
+					
+					if (creature.getSlottedObject("ghost") == null) {
+						continue;
+					}
+					
+					PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
+					
+					// TODO update statistics
+					
+					if (core.factionService.isPvpFaction(creature.getFaction())) {
+						updateGcwRank(creature);
+						player.addLifetimeGcwPoints(player.getGcwPoints());
+						player.addLifetimePvpKills(player.getPvpKills());
+						player.resetGcwPoints();
+						player.resetPvpKills();
+						
+						if (creature.getFaction().equals("rebel") && player.getCurrentRank() > player.getHighestRebelRank()) {
+							player.setHighestRebelRank(player.getCurrentRank());
+						}
+						
+						if (creature.getFaction().equals("imperial") && player.getCurrentRank() > player.getHighestImperialRank()) {
+							player.setHighestImperialRank(player.getCurrentRank());
+						}
+						
+						player.setNextUpdateTime((int) nextUpdateTime);
+					}
+				}
+				
+				cursor.close();
+			}
+			
+		}, (calculateNextUpdateTime() - System.currentTimeMillis()), 604800000, TimeUnit.MILLISECONDS);
 	}
 	
 	public void addZone(String planet, String zone, float x, float z, float radius, int weight, int type) {
@@ -365,6 +441,118 @@ public class GCWService implements INetworkDispatch {
 		}
 	}
 	
+	public void addGcwPoints(CreatureObject actor, int gcwPoints, byte gcwType) {
+		if (actor == null) {
+			return;
+		}
+		
+		if (!core.factionService.isPvpFaction(actor.getFaction())) {
+			return;
+		}
+		
+		if (actor.getSlottedObject("ghost") == null) {
+			return;
+		}
+		
+		PlayerObject player = (PlayerObject) actor.getSlottedObject("ghost");
+		
+		String planet = actor.getPlanet().getName();
+		
+		String prefix = ((planet.startsWith("space")) ? (planet + "_space") : planet);
+		
+		switch (gcwType) {
+			case GcwType.Enemy:
+				adjustZone(planet, prefix + "_pve", actor.getFaction(), gcwPoints);
+				actor.sendSystemMessage(OutOfBand.ProsePackage("@gcw:gcw_rank_generic_point_grant", gcwPoints), DisplayType.Broadcast);
+				break;
+			case GcwType.Player:
+				adjustZone(planet, prefix + "_pvp", actor.getFaction(), gcwPoints);
+				//actor.sendSystemMessage(OutOfBand.ProsePackage("@gcw:gcw_rank_pvp_kill_point_grant", gcwPoints), DisplayType.Broadcast); // Put this msg after this function is used rather than inside function
+				break;
+		}
+		
+		String zone = getCurrentGcwRegion(actor);
+		
+		if (zone != null) {
+			adjustZone(planet, zone, actor.getFaction(), gcwPoints);
+		}
+		
+		player.setGcwPoints(player.getGcwPoints() + gcwPoints);
+	}
+	
+	/* Ported from javascript.
+	 * Written for us by Hendrik of http://swg.activeframe.de.
+	 */
+	private double helper(int points, int rank) {
+		int faktor = points / (MOD2[rank-1] - 250 * rank);
+		int rt = points / (1 + faktor) - DECAY1[rank-1];
+		
+		if (rank >= 7) {
+			if (points > DECAY2[rank-1] && rt > 0) {
+				rt = rt * (((17 - rank) / (14 - rank)) + (CONST2[rank-1] / (points - CONST4[rank-1])));
+			}
+		}
+		
+		return Math.floor(rt);
+	}
+	
+	/* Ported from javascript.
+	 * Written for us by Hendrik of http://swg.activeframe.de.
+	 */
+	public void updateGcwRank(CreatureObject actor) {
+		if (actor == null) {
+			return;
+		}
+		
+		if (actor.getFaction().length() == 0) {
+			return;
+		}
+		
+		if (actor.getSlottedObject("ghost") == null) {
+			return;
+		}
+		
+		PlayerObject player = (PlayerObject) actor.getSlottedObject("ghost");
+		
+		int oldrank = player.getCurrentRank();
+		int oldprogress = (int) ((player.getRankProgress() > 100) ? 100 : player.getRankProgress());
+		int oldpoints = player.getGcwPoints();
+		int newrank = oldrank;
+		int newprogress = oldprogress;
+		int oldranktotal = 0;
+		int oldrankprogress = 0;
+		int newranktotal = 0;
+		int newrankprogress = 0;
+		
+		oldrankprogress = oldprogress * 50;
+		oldranktotal = 5000 * (oldrank - 1) + oldrankprogress;
+		
+		newprogress = (int) helper(oldpoints, oldrank);
+		
+		if (newprogress < -2000) {
+			newprogress = -2000;
+		}
+		
+		newranktotal = oldranktotal + newprogress;
+		
+		if (oldrank == 7 && newprogress < 0 && newranktotal < 30000) {
+			newranktotal = 29999;
+		}
+		
+		newrank = (int) (Math.floor(newranktotal / 5000) + 1);
+		
+		if (newrank > 12) {
+			newrank = 12;
+			newranktotal = 12 * 5000 - 1;
+		}
+		
+		newrankprogress = newranktotal - (newrank - 1) * 5000;
+		newprogress = newrankprogress * 100 / 5000;
+		
+		player.setCurrentRank(newrank);
+		player.setRankProgress((float) Math.floor(newprogress));
+	}
+	
 	public List<SWGObject> getSFPlayers() {
 		List<SWGObject> flagged = new ArrayList<SWGObject>();
 		
@@ -386,6 +574,108 @@ public class GCWService implements INetworkDispatch {
 		}
 
 		return flagged;
+	}
+	
+	public String getCurrentGcwRegion(CreatureObject actor) {
+		try {
+			String planet = actor.getPlanet().getName();
+			
+			if (zoneMap().containsKey(planet)) {
+				for (String zoneName : zoneMap().get(planet).keySet()) {
+					CurrentServerGCWZonePercent zone = zoneMap().get(planet).get(zoneName).clone();
+					
+					if (zone.getRadius() > 0) {
+						List<SWGObject> objects = core.simulationService.get(core.terrainService.getPlanetByName(planet), zone.getPosition().x, zone.getPosition().z, (int) zone.getRadius());
+						
+						if (objects.contains(actor)) {
+							return zoneName;
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+			return null;
+		}
+		
+		return null;
+	}
+	
+	public long calculateNextUpdateTime() {
+		Calendar c = Calendar.getInstance();
+		Date now = new Date();
+		
+		c.setTime(now);
+		
+		int weekday = c.get(Calendar.DAY_OF_WEEK);
+		
+		if (weekday != Calendar.THURSDAY) {
+			int days = ((Calendar.WEDNESDAY - weekday + 2) % 7);
+			c.add(Calendar.DAY_OF_YEAR, days);
+		} else if (c.get(Calendar.HOUR_OF_DAY) >= 7) {
+			c.add(Calendar.DAY_OF_YEAR, 7);
+		}
+		
+		c.set(Calendar.HOUR_OF_DAY, 7);
+		c.set(Calendar.MINUTE, 0);
+		c.set(Calendar.SECOND, 0);
+		c.set(Calendar.MILLISECOND, 0);
+		
+		return c.getTimeInMillis();
+	}
+	
+	public void updateNextUpdateTime() {
+		ODBCursor cursor = core.getSWGObjectODB().getCursor();
+		
+		while (cursor.hasNext()) {
+			SWGObject object = (SWGObject) cursor.next();
+			
+			if (object == null) {
+				continue;
+			}
+			
+			if (core.objectService.getObject(object.getObjectID()) == null) {
+				object = core.objectService.getObject(object.getObjectID());
+			}
+			
+			if (!(object instanceof CreatureObject)) {
+				continue;
+			}
+			
+			CreatureObject creature = (CreatureObject) object;
+			
+			if (creature.getSlottedObject("ghost") == null) {
+				continue;
+			}
+			
+			PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
+			
+			player.setNextUpdateTime((int) calculateNextUpdateTime());
+		}
+		
+		cursor.close();
+	}
+	
+	public long calculateResetTime() {
+		Calendar c = Calendar.getInstance();
+		Date now = new Date();
+		
+		c.setTime(now);
+		
+		int weekday = c.get(Calendar.DAY_OF_WEEK);
+		
+		if (weekday != Calendar.THURSDAY) {
+			int days = ((Calendar.WEDNESDAY - weekday + 2) % 7);
+			c.add(Calendar.DAY_OF_YEAR, days);
+		} else if (c.get(Calendar.HOUR_OF_DAY) >= 7) {
+			c.add(Calendar.DAY_OF_YEAR, 7);
+		}
+		
+		c.set(Calendar.HOUR_OF_DAY, 7);
+		c.set(Calendar.MINUTE, 0);
+		c.set(Calendar.SECOND, 0);
+		c.set(Calendar.MILLISECOND, 0);
+		
+		return c.getTimeInMillis();
 	}
 	
 	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> swgOpcodes, Map<Integer, INetworkRemoteEvent> objControllerOpcodes) {
@@ -419,6 +709,25 @@ public class GCWService implements INetworkDispatch {
 			
 		});
 		
+	}
+	
+	public void addPvPZone(String planetName, float x, float z, float radius) {
+		Planet planet = core.terrainService.getPlanetByName(planetName);
+		if(planet == null)
+			return;
+		if(pvpZones.get(planet) == null)
+			pvpZones.put(planet, new ArrayList<PvPZone>());
+		CollidableCircle area = new CollidableCircle(new Point3D(x, 0, z), radius, planet);
+		PvPZone zone = new PvPZone(planet, area);
+		pvpZones.get(planet).add(zone);
+		core.simulationService.addCollidable(area, x, z);
+	}
+	
+	public boolean isInPvpZone(CreatureObject actor) {
+		List<PvPZone> zones = pvpZones.get(actor.getPlanet());
+		if(zones == null)
+			return false;
+		return zones.stream().anyMatch(z -> z.getArea().doesCollide(actor));
 	}
 	
 	@Override
