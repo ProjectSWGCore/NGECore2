@@ -29,7 +29,6 @@ import resources.common.collidables.AbstractCollidable.ExitEvent;
 import resources.datatables.FactionStatus;
 import resources.datatables.PvpStatus;
 import resources.objects.creature.CreatureObject;
-import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 

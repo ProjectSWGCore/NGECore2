@@ -48,6 +48,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import resources.common.*;
 import resources.datatables.Options;
 import resources.datatables.PlayerFlags;
+import resources.harvest.SurveyTool;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
@@ -118,7 +119,6 @@ import resources.objects.resource.ResourceContainerObject;
 import resources.objects.resource.ResourceRoot;
 import resources.objects.staticobject.StaticObject;
 import resources.objects.tangible.TangibleObject;
-import resources.objects.tool.SurveyTool;
 import resources.objects.waypoint.WaypointObject;
 import resources.objects.weapon.WeaponObject;
 import services.ai.AIActor;

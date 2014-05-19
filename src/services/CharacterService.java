@@ -287,6 +287,7 @@ public class CharacterService implements INetworkDispatch {
 				player.setProfession(clientCreateCharacter.getProfession());
 				player.setProfessionIcon(Professions.get(clientCreateCharacter.getProfession()));
 				player.setProfessionWheelPosition(clientCreateCharacter.getProfessionWheelPosition());
+				player.setNextUpdateTime(core.gcwService.calculateNextUpdateTime() + player.getBornDate());
 				if(clientCreateCharacter.getHairObject().length() > 0) {
 					String sharedHairTemplate = clientCreateCharacter.getHairObject().replace("/hair_", "/shared_hair_");
 					TangibleObject hair = (TangibleObject) core.objectService.createObject(sharedHairTemplate, object.getPlanet());
@@ -296,8 +297,6 @@ public class CharacterService implements INetworkDispatch {
 					object.addObjectToEquipList(hair);
 				}
 				
-				player.setBornDate((int) System.currentTimeMillis());
-
 				TangibleObject inventory = (TangibleObject) core.objectService.createObject("object/tangible/inventory/shared_character_inventory.iff", object.getPlanet());
 				inventory.setContainerPermissions(CreatureContainerPermissions.CREATURE_CONTAINER_PERMISSIONS);
 				TangibleObject appInventory = (TangibleObject) core.objectService.createObject("object/tangible/inventory/shared_appearance_inventory.iff", object.getPlanet());
