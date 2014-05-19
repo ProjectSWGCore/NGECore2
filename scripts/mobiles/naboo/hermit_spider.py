@@ -23,6 +23,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("hermit spider")
 	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(True)
+	mobileTemplate.setOptionsBitmask(192)
 
 	templates = Vector()
 	templates.add('object/mobile/shared_hermit_spider_hue.iff')
