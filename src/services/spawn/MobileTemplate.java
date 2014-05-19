@@ -36,7 +36,7 @@ public class MobileTemplate implements Cloneable {
 	private Vector<String> templates;
 	private int optionsBitmask = Options.ATTACKABLE;
 	private int pvpBitmask = PvpStatus.Attackable;
-	private int factionstatus = FactionStatus.Combatant;
+	private int factionstatus = FactionStatus.OnLeave;
 	private String faction =  "";
 	private short level;
 	private short minLevel;
