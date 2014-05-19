@@ -1,7 +1,7 @@
 import sys
 
 def setup(core, actor, target, command):
-	core.buffService.addBuffToCreature(target, 'en_void_dance_buff_1')
+	core.buffService.addBuffToCreature(target, 'en_void_dance_buff_1', actor)
 	return
 	
 def preRun(core, actor, target, command):

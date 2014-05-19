@@ -23,8 +23,8 @@ package resources.objects.group;
 
 import java.util.Vector;
 
+import resources.objects.ObjectMessageBuilder;
 import resources.objects.universe.UniverseObject;
-
 import engine.clients.Client;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
@@ -32,13 +32,14 @@ import engine.resources.scene.Quaternion;
 
 public class GroupObject extends UniverseObject {
 	
+	private static final long serialVersionUID = 1L;
 	private Vector<SWGObject> memberList = new Vector<SWGObject>();
 	private int memberListUpdateCounter;
 	private SWGObject groupLeader;
 	private SWGObject lootMaster;
 	private short groupLevel;
 	private int lootMode;
-	private GroupMessageBuilder messageBuilder;
+	private transient GroupMessageBuilder messageBuilder;
 	private int chatRoomId;
 	
 	public static int FREE_FOR_ALL  = 0;
@@ -165,4 +166,9 @@ public class GroupObject extends UniverseObject {
 		destination.getSession().write(messageBuilder.buildBaseline6());
 		
 	}
+	
+	public ObjectMessageBuilder getMessageBuilder() {
+		return messageBuilder;
+	}
+	
 }

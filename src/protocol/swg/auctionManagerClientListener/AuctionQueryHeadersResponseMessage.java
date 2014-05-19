@@ -22,15 +22,10 @@
 package protocol.swg.auctionManagerClientListener;
 
 import java.nio.ByteOrder;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.Vector;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import engine.resources.common.CRC;
 import protocol.swg.SWGMessage;
 import services.bazaar.AuctionItem;
 
@@ -103,7 +98,27 @@ public class AuctionQueryHeadersResponseMessage extends SWGMessage {
 			result.putInt((int) ((item.getExpireTime() - System.currentTimeMillis()) / 1000));
 			result.putInt(item.getPrice());
 			result.putShort((short) 0);
+			result.putLong(item.getOwnerId());
+			result.put((byte) (item.isAuction() ? 0 : 1));
+			result.putLong(0);
 			result.put((byte) 0);
+			result.putInt(2); // unk
+			result.putInt(0);
+			result.putShort((short) 0);
+			result.putInt(item.getItemType());
+
+			//result.putInt(0x400C); // category bitmask?
+			result.putInt(0);
+			int options = 0;
+			
+			if(item.getOwnerId() == playerId && (item.getStatus() == AuctionItem.OFFERED || item.getStatus() == AuctionItem.FORSALE)) 
+				options |= 0x800;
+			
+			result.putInt(item.getAuctionOptions() | options);
+			result.putInt(0);
+			
+			
+			/*result.put((byte) 0);
 			result.putInt(CRC.StringtoCRC(item.getItem().getTemplate()));
 			result.putShort((short) 0);
 			result.put((byte) 0);
@@ -117,7 +132,7 @@ public class AuctionQueryHeadersResponseMessage extends SWGMessage {
 			result.putInt(item.getItemType());
 			result.putInt(0);
 			result.putInt(0);
-			result.putInt(0);
+			result.putInt(0);*/
 
 /*
 			result.put((byte) (item.isAuction() ? 0 : 1));

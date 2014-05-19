@@ -23,9 +23,6 @@ package protocol.swg.objectControllerObjects;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import resources.common.Console;
-import resources.common.StringUtilities;
-
 public class MissionListRequest extends ObjControllerObject {
 
 	private long objectId;
@@ -34,7 +31,7 @@ public class MissionListRequest extends ObjControllerObject {
 	
 	@Override
 	public void deserialize(IoBuffer data) {
-		Console.println("MissionListRequest: " + StringUtilities.bytesToHex(data.array()));
+		//Console.println("MissionListRequest: " + StringUtilities.bytesToHex(data.array()));
 		setObjectId(data.getLong());
 		data.getInt(); // unk
 		data.get(); // unk byte

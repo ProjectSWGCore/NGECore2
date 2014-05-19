@@ -21,18 +21,18 @@
  ******************************************************************************/
 package services.bazaar;
 
-import com.sleepycat.je.Environment;
-import com.sleepycat.je.Transaction;
+import java.io.Serializable;
+
 import com.sleepycat.persist.model.Entity;
-import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.PrimaryKey;
 
-import engine.resources.objects.IPersistent;
 import engine.resources.objects.SWGObject;
 
 @Entity(version=1)
-public class AuctionItem implements IPersistent, Comparable<AuctionItem> {
+public class AuctionItem implements Comparable<AuctionItem>, Serializable {
 	
+	private static final long serialVersionUID = 1L;
+
 	@PrimaryKey
 	private long objectId;
 	private SWGObject item;
@@ -62,10 +62,7 @@ public class AuctionItem implements IPersistent, Comparable<AuctionItem> {
 	public final static int EXPIRED = 4;
 	public final static int OFFERED = 5;
 	public final static int RETRIEVED = 6;	
-	
-	@NotPersistent
-	private Transaction txn;
-	
+		
 	public AuctionItem() {
 		
 	}
@@ -254,16 +251,6 @@ public class AuctionItem implements IPersistent, Comparable<AuctionItem> {
 
 	public void setAuctionOptions(int auctionOptions) {
 		this.auctionOptions = auctionOptions;
-	}
-
-	@Override
-	public void createTransaction(Environment env) {
-		txn = env.beginTransaction(null, null);
-	}
-
-	@Override
-	public Transaction getTransaction() {
-		return txn;
 	}
 
 	public SWGObject getItem() {

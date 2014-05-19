@@ -1,7 +1,7 @@
 import sys
 
 def setup(core, actor, target, command):
-	core.buffService.addBuffToCreature(target, 'en_debuff_thrill_2')
+	core.buffService.addBuffToCreature(target, 'en_debuff_thrill_2', actor)
 	return
 	
 def preRun(core, actor, target, command):

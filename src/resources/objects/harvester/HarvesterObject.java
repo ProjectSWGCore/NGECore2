@@ -21,6 +21,7 @@
  ******************************************************************************/
 package resources.objects.harvester;
 
+import java.io.Serializable;
 import java.util.Vector;
 
 import main.NGECore;
@@ -31,21 +32,21 @@ import engine.clients.Client;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
+import resources.objects.ObjectMessageBuilder;
 import resources.objects.creature.CreatureObject;
 import resources.objects.installation.InstallationMessageBuilder;
 import resources.objects.installation.InstallationObject;
 import resources.objects.resource.GalacticResource;
 import resources.objects.resource.ResourceContainerObject;
-
-/** 
- * @author Charon 
- */
+import resources.objects.tangible.TangibleObject;
 
 @Persistent(version=0)
-public class HarvesterObject extends InstallationObject {
+public class HarvesterObject extends InstallationObject implements Serializable {
 	
-	private HarvesterMessageBuilder messageBuilder;
-	private InstallationMessageBuilder installationMessageBuilder;
+	private static final long serialVersionUID = 1L;
+
+	private transient HarvesterMessageBuilder messageBuilder;
+	private transient InstallationMessageBuilder installationMessageBuilder;
 	
 	public final static byte HARVESTER_TYPE_MINERAL  = 0;
 	public final static byte HARVESTER_TYPE_CHEMICAL = 1;
@@ -116,10 +117,9 @@ public class HarvesterObject extends InstallationObject {
 	private String deedTemplate;
 	
 	private int specRate;
-
 	
-	public HarvesterObject(long objectID, Planet planet, String template, Point3D position, Quaternion orientation){
-		super(objectID, planet, template, position, orientation);
+	public HarvesterObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String template) {
+		super(objectID, planet, position, orientation, template);
 		this.setConditionDamage(100);
 		messageBuilder = new HarvesterMessageBuilder(this);
 		installationMessageBuilder = new InstallationMessageBuilder((InstallationObject)this);
@@ -127,6 +127,17 @@ public class HarvesterObject extends InstallationObject {
 	
 	public int getBER() {
 		return BER;
+	}
+	
+	@Override
+	public void initAfterDBLoad() {
+		super.init();
+		messageBuilder = new HarvesterMessageBuilder(this);
+		installationMessageBuilder = new InstallationMessageBuilder((InstallationObject)this);
+		outputHopperContent.forEach(ResourceContainerObject::initAfterDBLoad);
+		if(selectedHarvestResource != null)
+			selectedHarvestResource.initAfterDBLoad();
+		defendersList = new Vector<TangibleObject>();
 	}
 
 	
@@ -408,4 +419,9 @@ public class HarvesterObject extends InstallationObject {
 		//destination.getSession().write(installationMessageBuilder.buildBaseline9());
 		
 	}
+	
+	public ObjectMessageBuilder getMessageBuilder() {
+		return messageBuilder;
+	}
+	
 }

@@ -31,9 +31,9 @@ import java.util.concurrent.TimeUnit;
 import org.python.core.Py;
 import org.python.core.PyObject;
 
+import resources.buffs.Buff;
+import resources.buffs.DamageOverTime;
 import resources.common.FileUtilities;
-import resources.objects.Buff;
-import resources.objects.DamageOverTime;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
 import resources.objects.player.PlayerObject;
@@ -149,15 +149,15 @@ public class BuffService implements INetworkDispatch {
                 }
         }	
 			
-        if(FileUtilities.doesFileExist("scripts/buffs/" + buffName + ".py")) core.scriptService.callScript("scripts/buffs/", buffName, "add", core, target, buff);
+/*        if(FileUtilities.doesFileExist("scripts/buffs/" + buffName + ".py")) core.scriptService.callScript("scripts/buffs/", buffName, "add", core, target, buff);
         else
-        {
+        { */
         	if(buff.getEffect1Name().length() > 0) core.skillModService.addSkillMod(target, buff.getEffect1Name(), (int) buff.getEffect1Value());
         	if(buff.getEffect2Name().length() > 0) core.skillModService.addSkillMod(target, buff.getEffect2Name(), (int) buff.getEffect2Value());
         	if(buff.getEffect3Name().length() > 0) core.skillModService.addSkillMod(target, buff.getEffect3Name(), (int) buff.getEffect3Value());
         	if(buff.getEffect4Name().length() > 0) core.skillModService.addSkillMod(target, buff.getEffect4Name(), (int) buff.getEffect4Value());
         	if(buff.getEffect5Name().length() > 0) core.skillModService.addSkillMod(target, buff.getEffect5Name(), (int) buff.getEffect5Value());
-        }
+//		}
 		
 		target.addBuff(buff);
 		
@@ -216,15 +216,16 @@ public class BuffService implements INetworkDispatch {
         	 dot.getTask().cancel(true);
         	 creature.removeDot(dot);
          }
-         if(FileUtilities.doesFileExist("scripts/buffs/" + buff.getBuffName() + ".py")) core.scriptService.callScript("scripts/buffs/", buff.getBuffName(), "remove", core, creature, buff);
+         
+/*         if(FileUtilities.doesFileExist("scripts/buffs/" + buff.getBuffName() + ".py")) core.scriptService.callScript("scripts/buffs/", buff.getBuffName(), "remove", core, creature, buff);
          else
-         {
+         {*/
          	if(buff.getEffect1Name().length() > 0) core.skillModService.deductSkillMod(creature, buff.getEffect1Name(), (int) buff.getEffect1Value());
          	if(buff.getEffect2Name().length() > 0) core.skillModService.deductSkillMod(creature, buff.getEffect2Name(), (int) buff.getEffect2Value());
          	if(buff.getEffect1Name().length() > 0) core.skillModService.deductSkillMod(creature, buff.getEffect3Name(), (int) buff.getEffect3Value());
          	if(buff.getEffect1Name().length() > 0) core.skillModService.deductSkillMod(creature, buff.getEffect4Name(), (int) buff.getEffect4Value());
          	if(buff.getEffect1Name().length() > 0) core.skillModService.deductSkillMod(creature, buff.getEffect5Name(), (int) buff.getEffect5Value());
-         }
+//         }
          	
          if (!buff.getCallback().equals("none") && !buff.getCallback().equals("")) {
         	 if (FileUtilities.doesFileExist("scripts/buffs/" + buff.getBuffName() +  ".py")) {

@@ -34,10 +34,9 @@ import main.NGECore;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 
-
-
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
+import engine.clientdata.visitors.ProfessionTemplateVisitor;
 import engine.clients.Client;
 import engine.resources.common.CRC;
 import engine.resources.container.CreatureContainerPermissions;
@@ -61,11 +60,11 @@ import protocol.swg.ClientVerifyAndLockNameResponse;
 import protocol.swg.CreateCharacterSuccess;
 import protocol.swg.HeartBeatMessage;
 import resources.objects.creature.CreatureObject;
+import resources.objects.intangible.IntangibleObject;
 import resources.objects.mission.MissionObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
-import resources.visitors.ProfessionTemplateVisitor;
 
 @SuppressWarnings("unused")
 
@@ -87,6 +86,18 @@ public class CharacterService implements INetworkDispatch {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public boolean checkName(String name, Client client) {
+		// TODO: check for dev names, profane names, iconic names etc
+		try {
+			if(checkForDuplicateName(name, client.getAccountId()) || !name.matches(allowedCharsRegex))
+				return false;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return true;
 	}
 	
 	@Override
@@ -269,16 +280,14 @@ public class CharacterService implements INetworkDispatch {
 				core.skillModService.addSkillMod(object, "language_basic_speak", 100);
 				core.skillModService.addSkillMod(object, "creature_harvesting", 25);
 				core.skillModService.addSkillMod(object, "language_wookiee_comprehend", 100);
-				
-				
-				object.createTransaction(core.getCreatureODB().getEnvironment());
-				
+								
 				PlayerObject player = (PlayerObject) core.objectService.createObject("object/player/shared_player.iff", object.getPlanet());
 				object._add(player);
 				core.skillService.addSkill(object, "species_" + object.getStfName());
 				player.setProfession(clientCreateCharacter.getProfession());
 				player.setProfessionIcon(Professions.get(clientCreateCharacter.getProfession()));
 				player.setProfessionWheelPosition(clientCreateCharacter.getProfessionWheelPosition());
+				player.setNextUpdateTime(core.gcwService.calculateNextUpdateTime() + player.getBornDate());
 				if(clientCreateCharacter.getHairObject().length() > 0) {
 					String sharedHairTemplate = clientCreateCharacter.getHairObject().replace("/hair_", "/shared_hair_");
 					TangibleObject hair = (TangibleObject) core.objectService.createObject(sharedHairTemplate, object.getPlanet());
@@ -288,8 +297,6 @@ public class CharacterService implements INetworkDispatch {
 					object.addObjectToEquipList(hair);
 				}
 				
-				player.setBornDate((int) System.currentTimeMillis());
-
 				TangibleObject inventory = (TangibleObject) core.objectService.createObject("object/tangible/inventory/shared_character_inventory.iff", object.getPlanet());
 				inventory.setContainerPermissions(CreatureContainerPermissions.CREATURE_CONTAINER_PERMISSIONS);
 				TangibleObject appInventory = (TangibleObject) core.objectService.createObject("object/tangible/inventory/shared_appearance_inventory.iff", object.getPlanet());
@@ -310,17 +317,13 @@ public class CharacterService implements INetworkDispatch {
 				object._add(bank);
 				object._add(missionBag);
 				
-				/*for(int missionsAdded = 0; missionsAdded < 12; missionsAdded++) {
+				for(int missionsAdded = 1; missionsAdded <= 10; missionsAdded++) {
 					MissionObject mission = (MissionObject) core.objectService.createObject("object/mission/shared_mission_object.iff", object.getPlanet());
 
 					missionBag._add(mission);
-					Console.println("Added empty mission " + missionsAdded);
-				}*/
+				}
 				
 				// TODO: Race abilities
-				if (client.isGM())
-					object.addAbility("admin");
-				
 				object.addAbility("startDance");
 				object.addAbility("startDance+Basic");
 				
@@ -335,12 +338,13 @@ public class CharacterService implements INetworkDispatch {
 				object._add(defaultWeapon);
 				object.setWeaponId(defaultWeapon.getObjectID());
 				
+				IntangibleObject pda = (IntangibleObject) core.objectService.createObject("object/intangible/data_item/shared_guild_stone.iff", object.getPlanet());
+				datapad.add(pda);
+				
 				createStarterClothing(object, sharedRaceTemplate, clientCreateCharacter.getStarterProfession());
 				//core.scriptService.callScript("scripts/", "demo", "CreateStartingCharacter", core, object);
 				
-				core.getCreatureODB().put(object, Long.class, CreatureObject.class, object.getTransaction());
-				// might not need to commit transaction but better safe than sorry
-				object.getTransaction().commitSync();
+				core.getSWGObjectODB().put(object.getObjectID(), object);
 
 				PreparedStatement ps = databaseConnection.preparedStatement("INSERT INTO characters (id, \"firstName\", \"lastName\", \"accountId\", \"galaxyId\", \"statusId\", appearance, gmflag) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 				ps.setLong(1, object.getObjectID());

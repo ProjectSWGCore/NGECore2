@@ -279,7 +279,7 @@ def noSellWindowCallBack(owner, window, eventType, returnList):
 	
 	#cancel
 	if eventType == 1:
-		owner.sendSystemMessage('Cancle', 0)
+		owner.sendSystemMessage('Cancel', 0)
 		sellItem = returnList.get(0)
 		startConversation(coreRef,owner,junkDealerRef)
 		return

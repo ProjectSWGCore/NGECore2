@@ -1,12 +1,14 @@
 package resources.objects.resource;
 
+import java.io.Serializable;
 import java.util.List;
 
 import com.sleepycat.persist.model.Persistent;
 
 @Persistent(version=0)
-public class PlanetDeposits {
+public class PlanetDeposits implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	private int planetId;
 	private List<ResourceDeposit> depositList;
 	

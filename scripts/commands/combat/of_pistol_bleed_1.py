@@ -1,7 +1,7 @@
 import sys
 
 def setup(core, actor, target, command):
-	command.setBuffNameTarget('of_pistol_bleed')
+	core.buffService.addBuffToCreature(target, 'of_pistol_bleed', actor)
 	return
 	
 def preRun(core, actor, target, command):

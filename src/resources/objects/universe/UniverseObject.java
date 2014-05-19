@@ -21,16 +21,23 @@
  ******************************************************************************/
 package resources.objects.universe;
 
-import com.sleepycat.persist.model.Persistent;
+import java.io.Serializable;
+
+import org.apache.mina.core.buffer.IoBuffer;
+
+import resources.objects.ObjectMessageBuilder;
 
 import engine.clients.Client;
+import engine.resources.objects.Baseline;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent(version=0)
-public class UniverseObject extends SWGObject {
+public class UniverseObject extends SWGObject implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
+	private transient UniverseMessageBuilder messageBuilder = null;
 	
 	public UniverseObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
 		super(objectID, planet, position, orientation, Template);
@@ -39,10 +46,41 @@ public class UniverseObject extends SWGObject {
 	public UniverseObject() {
 		super();
 	}
-
+	
 	@Override
-	public void sendBaselines(Client arg0) {
-		// TODO Auto-generated method stub
+	public void initAfterDBLoad() {
+		super.init();
+	}
+	
+	@Override
+	public Baseline getOtherVariables() {
+		Baseline baseline = super.getOtherVariables();
+		return baseline;
+	}
+	
+	@Override
+	public void notifyClients(IoBuffer buffer, boolean notifySelf) {
+		notifyObservers(buffer, false);
+	}
+	
+	@Override
+	public ObjectMessageBuilder getMessageBuilder() {
+		synchronized(objectMutex) {
+			if (messageBuilder == null) {
+				messageBuilder = new UniverseMessageBuilder(this);
+			}
+			
+			return messageBuilder;
+		}
+	}
+	
+	@Override
+	public void sendBaselines(Client destination) {
+		
+	}
+	
+	@Override
+	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
 		
 	}
 	

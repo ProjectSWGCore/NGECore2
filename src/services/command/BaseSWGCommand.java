@@ -214,9 +214,9 @@ public class BaseSWGCommand implements Cloneable {
 		this.commandCRC = commandCRC;
 	}
 	
-    	public Object clone() throws CloneNotSupportedException {
-        	return super.clone();
-    	}
+	public Object clone() throws CloneNotSupportedException {
+    	return super.clone();
+	}
     	
 	public boolean isGmCommand() {
 		return (godLevel > 0);

@@ -18,7 +18,7 @@ def run(core, actor, target, commandString):
 	if not combatSvc.applySpecialCost(actor, weapon, CombatCommand('me_stasis_self_1')):	
 		return
 
-	core.buffService.addBuffToCreature(actor, 'me_stasis_self_1')
+	core.buffService.addBuffToCreature(actor, 'me_stasis_self_1', actor)
 	
 	return
 	

@@ -21,15 +21,15 @@
  ******************************************************************************/
 package resources.gcw;
 
+import java.io.Serializable;
+
 import org.apache.mina.core.buffer.IoBuffer;
 
-import com.sleepycat.persist.model.Persistent;
+import engine.resources.objects.Delta;
 
-import resources.objects.Delta;
-
-@Persistent(version=0)
-public class OtherServerGCWZonePercent extends Delta implements Cloneable {
+public class OtherServerGCWZonePercent extends Delta implements Cloneable, Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	private String zone = "";
 	private int percent = 50;
 

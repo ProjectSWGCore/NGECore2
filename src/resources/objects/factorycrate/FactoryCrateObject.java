@@ -21,16 +21,15 @@
  ******************************************************************************/
 package resources.objects.factorycrate;
 
+import java.io.Serializable;
 import java.util.Map;
 import java.util.Vector;
 
 import main.NGECore;
-
 import protocol.swg.SceneCreateObjectByCrc;
 import protocol.swg.SceneDestroyObject;
 import protocol.swg.SceneEndBaselines;
 import protocol.swg.UpdateContainmentMessage;
-import protocol.swg.UpdatePVPStatusMessage;
 
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
@@ -41,17 +40,15 @@ import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
-
+import resources.objects.ObjectMessageBuilder;
 import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
 
-/** 
- * @author Charon 
- */
-
 @Persistent(version=0)
-public class FactoryCrateObject extends TangibleObject {
+public class FactoryCrateObject extends TangibleObject implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
+
 	private Vector<TangibleObject> contents;	
 	private byte capacity; 
 	private byte contentObjectQuantity;
@@ -59,14 +56,21 @@ public class FactoryCrateObject extends TangibleObject {
 	private TangibleObject contentObjectType;
 	
 	@NotPersistent
-	private FactoryCrateMessageBuilder messageBuilder;
+	private transient FactoryCrateMessageBuilder messageBuilder;
 	
 	public FactoryCrateObject() { 
 		
 	}
 	
-	public FactoryCrateObject(long objectID, Planet planet, String template, Point3D position, Quaternion orientation) { 
-		super(objectID, planet, template, position, orientation);
+	@Override
+	public void initAfterDBLoad() {
+		super.init();
+		messageBuilder = new FactoryCrateMessageBuilder(this);
+	}
+
+	
+	public FactoryCrateObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String template) { 
+		super(objectID, planet, position, orientation, template);
 		this.messageBuilder = new FactoryCrateMessageBuilder(this);
 		this.contents = new Vector<TangibleObject>();
 		this.contentObjectQuantity = 0;
@@ -267,4 +271,9 @@ public class FactoryCrateObject extends TangibleObject {
 		this.getAttributes().put("@obj_attr_n:factory_count", ""+this.getQuantity());
 		//services.CharonPacketUtils.printAnalysis(messageBuilder.buildDelta3(),"FCYT3 Delta");
 	}
+	
+	public ObjectMessageBuilder getMessageBuilder() {
+		return messageBuilder;
+	}
+	
 }

@@ -26,12 +26,14 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Vector;
 
+import resources.datatables.Difficulty;
+import resources.datatables.FactionStatus;
+import resources.datatables.GcwType;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
 import resources.objects.player.PlayerObject;
-
+import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
-
 import main.NGECore;
 
 public class AIService {
@@ -109,5 +111,55 @@ public class AIService {
 		return baseXP;
 		
 	}
-
+	
+	public void awardGcw(AIActor actor) {
+		CreatureObject npc = actor.getCreature();
+		
+		if (core.factionService.isPvpFaction(npc.getFaction())) {
+			int gcwPoints = 5;
+			
+			if (npc.getDifficulty() == Difficulty.ELITE) {
+				gcwPoints *= 2;
+			}
+			
+			if (npc.getDifficulty() == Difficulty.BOSS) {
+				gcwPoints *= 5;
+			}
+			
+			//gcwPoints = actor.getMobileTemplate().getGcwPoints(); // We might want to make this get set in mobile templates if it was different for different npcs ie. assault squads.
+			
+			for (CreatureObject player : actor.getDamageMap().keySet()) {
+				if (player.getGroupId() == 0) {
+					if (player.getFaction().length() > 0 && player.getFactionStatus() > FactionStatus.OnLeave) {
+						if ((npc.getLevel() / player.getLevel() * 100) < 86) {
+							continue;
+						}
+						
+						core.gcwService.addGcwPoints(player, gcwPoints, GcwType.Enemy);
+					}
+				} else {
+					for (SWGObject object : ((GroupObject) core.objectService.getObject(player.getGroupId())).getMemberList()) {
+						CreatureObject member = (CreatureObject) object;
+						
+						if (member == null) {
+							continue;
+						}
+						
+						if (npc.getPlanet().getName().equals(member.getPlanet().getName()) && npc.getPosition().getDistance(member.getPosition()) > 300) {
+							continue;
+						}
+						
+						if ((npc.getLevel() / member.getLevel() * 100) < 86) {
+							continue;
+						}
+						
+						if (member.getFaction().length() > 0 && member.getFactionStatus() > FactionStatus.OnLeave) {
+							core.gcwService.addGcwPoints(member, gcwPoints, GcwType.Enemy);
+						}
+					}
+				}
+			}
+		}
+	}
+	
 }

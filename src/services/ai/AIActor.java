@@ -25,13 +25,16 @@ import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import main.NGECore;
 import net.engio.mbassy.listener.Handler;
+import engine.clients.Client;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
+import resources.datatables.Options;
 import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
@@ -43,6 +46,7 @@ import services.ai.states.IdleState;
 import services.ai.states.RetreatState;
 import services.combat.CombatEvents.DamageTaken;
 import services.spawn.MobileTemplate;
+import java.util.Random;
 
 public class AIActor {
 	
@@ -56,13 +60,39 @@ public class AIActor {
 	private Map<CreatureObject, Integer> damageMap = new ConcurrentHashMap<CreatureObject, Integer>();
 	private volatile boolean hasReachedPosition;
 	private long lastAttackTimestamp;
-	
+	private ScheduledFuture<?> regenTask;
+	private ScheduledFuture<?> aggroCheckTask;
+	private boolean isStalking = false;
+	private byte milkState = 0;
+	private boolean hasBeenHarvested = false;
+
 	public AIActor(CreatureObject creature, Point3D spawnPosition, ScheduledExecutorService scheduler) {
 		this.creature = creature;
 		this.spawnPosition = spawnPosition;
 		this.scheduler = scheduler;
 		creature.getEventBus().subscribe(this);
 		this.currentState = new IdleState();
+		regenTask = scheduler.scheduleAtFixedRate(() -> {
+			if(creature.getHealth() < creature.getMaxHealth() && !creature.isInCombat() && creature.getPosture() != 13 && creature.getPosture() != 14)
+				creature.setHealth(creature.getHealth() + (36 + creature.getLevel() * 4));
+		}, 0, 1000, TimeUnit.MILLISECONDS);
+		if(creature.getOption(Options.AGGRESSIVE)) {
+			aggroCheckTask = scheduler.scheduleAtFixedRate(() -> {
+				if(creature == null || creature.getObservers().isEmpty() || creature.isInCombat() || isStalking)
+					return;
+				creature.getObservers().stream().map(Client::getParent).filter(obj -> obj.inRange(creature.getWorldPosition(), 10)).forEach((obj) -> {
+					if(new Random().nextFloat() <= 0.33 || creature.isInCombat() || isStalking) {
+						/*if(mobileTemplate.isStalker()) {
+							setFollowObject((CreatureObject) obj);
+							setCurrentState(new StalkState());
+						} else */
+							addDefender((CreatureObject) obj);	
+							
+					}
+				});
+			}, 0, 5000, TimeUnit.MILLISECONDS);
+
+		}
 	}
 
 	public CreatureObject getCreature() {
@@ -80,12 +110,25 @@ public class AIActor {
 	public void setSpawnPosition(Point3D spawnPosition) {
 		this.spawnPosition = spawnPosition;
 	}
-		
+	
 	public void addDefender(CreatureObject defender) {
+		addDefender(defender, false);
+	}
+
+		
+	public void addDefender(CreatureObject defender, boolean isAssisting) {
 		creature.addDefender(defender);
 		if(followObject == null)
 			setFollowObject(defender);
 		setCurrentState(new AttackState());
+		if(!isAssisting) {
+			NGECore.getInstance().simulationService.get(creature.getPlanet(), creature.getWorldPosition().x, creature.getWorldPosition().z, 30).stream().filter((obj) -> 
+				obj instanceof CreatureObject && 
+				obj.getAttachment("AI") != null && 
+				((AIActor) obj.getAttachment("AI")).getMobileTemplate().getSocialGroup().equals(getMobileTemplate().getSocialGroup()) &&
+				obj.inRange(creature.getWorldPosition(), ((AIActor) obj.getAttachment("AI")).getMobileTemplate().getAssistRange())
+			).forEach((obj) -> ((AIActor) obj.getAttachment("AI")).addDefender(defender, true));
+		}
 	}
 	
 	public void removeDefender(CreatureObject defender) {
@@ -229,7 +272,7 @@ public class AIActor {
 	}
 	
 	public void doStateAction(byte result) {
-		
+
 		switch(result) {
 		
 			case StateResult.DEAD:
@@ -249,12 +292,54 @@ public class AIActor {
 	public void scheduleDespawn() {
 		scheduler.schedule(() -> {
 			
+			aggroCheckTask.cancel(true);
+			regenTask.cancel(true);
 			damageMap.clear();
 			followObject = null;
 			creature.setAttachment("AI", null);
 			NGECore.getInstance().objectService.destroyObject(creature);
 			
 		}, 30000, TimeUnit.MILLISECONDS);
+	}
+
+	public ScheduledFuture<?> getRegenTask() {
+		return regenTask;
+	}
+
+	public void setRegenTask(ScheduledFuture<?> regenTask) {
+		this.regenTask = regenTask;
+	}
+
+	public boolean isStalking() {
+		return isStalking;
+	}
+
+	public void setStalking(boolean isStalking) {
+		this.isStalking = isStalking;
+	}
+
+	public byte getMilkState() {
+		synchronized(creature.getMutex()) {
+			return milkState;
+		}
+	}
+
+	public void setMilkState(byte milkState) {
+		synchronized(creature.getMutex()) {
+			this.milkState = milkState;
+		}
+	}
+
+	public boolean hasBeenHarvested() {
+		synchronized(creature.getMutex()) {
+			return hasBeenHarvested;
+		}
+	}
+
+	public void setHasBeenHarvested(boolean hasBeenHarvested) {
+		synchronized(creature.getMutex()) {
+			this.hasBeenHarvested = hasBeenHarvested;
+		}
 	}
 	
 }

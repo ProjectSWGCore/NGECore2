@@ -1,12 +1,10 @@
 import sys
 
-def add(core, actor, name, base):
-	actor.addSkillMod('energy', base)
-	actor.addSkillMod(name, base)
+def add(core, actor, skillMod, divisor):
+	core.skillModService.addSkillMod(actor, 'energy', skillMod)
 	return
-	
-def deduct(core, actor, name, base):
-	actor.deductSkillMod('energy', base)
-	actor.deductSkillMod(name, base)
+
+def deduct(core, actor, skillMod, divisor):
+	core.skillModService.deductSkillMod(actor, 'energy', skillMod)
 	return
 	

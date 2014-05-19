@@ -1,22 +1,20 @@
 import sys
 
-def add(core, actor, name, base):
-	actor.addSkillMod('energy', base)
-	actor.addSkillMod('kinetic', base)
-	actor.addSkillMod('acid', base)
-	actor.addSkillMod('heat', base)
-	actor.addSkillMod('cold', base)
-	actor.addSkillMod('electricity', base)
-	actor.addSkillMod(name, base)
+def add(core, actor, skillMod, divisor):
+	core.skillModService.addSkillMod(actor, 'energy', skillMod)
+	core.skillModService.addSkillMod(actor, 'kinetic', skillMod)
+	core.skillModService.addSkillMod(actor, 'acid', skillMod)
+	core.skillModService.addSkillMod(actor, 'heat', skillMod)
+	core.skillModService.addSkillMod(actor, 'cold', skillMod)
+	core.skillModService.addSkillMod(actor, 'electricity', skillMod)
 	return
-	
-def deduct(core, actor, name, base):
-	actor.deductSkillMod('energy', base)
-	actor.deductSkillMod('kinetic', base)
-	actor.deductSkillMod('acid', base)
-	actor.deductSkillMod('heat', base)
-	actor.deductSkillMod('cold', base)
-	actor.deductSkillMod('electricity', base)
-	actor.deductSkillMod(name, base)
+
+def deduct(core, actor, skillMod, divisor):
+	core.skillModService.deductSkillMod(actor, 'energy', skillMod)
+	core.skillModService.deductSkillMod(actor, 'kinetic', skillMod)
+	core.skillModService.deductSkillMod(actor, 'acid', skillMod)
+	core.skillModService.deductSkillMod(actor, 'heat', skillMod)
+	core.skillModService.deductSkillMod(actor, 'cold', skillMod)
+	core.skillModService.deductSkillMod(actor, 'electricity', skillMod)
 	return
 	
