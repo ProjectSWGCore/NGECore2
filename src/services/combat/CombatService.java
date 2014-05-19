@@ -22,9 +22,11 @@
 package services.combat;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -46,6 +48,7 @@ import resources.common.FileUtilities;
 import resources.common.OutOfBand;
 import resources.datatables.DisplayType;
 import resources.datatables.FactionStatus;
+import resources.datatables.GcwType;
 import resources.datatables.Options;
 import resources.datatables.Elemental;
 import resources.datatables.Posture;
@@ -803,7 +806,9 @@ public class CombatService implements INetworkDispatch {
 			}
 			
 			synchronized(target.getMutex()) {
-				if(core.mountService.isMounted(target)) core.mountService.dismount(target, (CreatureObject) target.getContainer());
+				if (core.mountService.isMounted(target)) {
+					core.mountService.dismount(target, (CreatureObject) target.getContainer());
+				}
 				
 				target.setHealth(1);
 				target.setPosture(Posture.Incapacitated);
@@ -1026,7 +1031,6 @@ public class CombatService implements INetworkDispatch {
 					
 					core.missionService.handleMissionComplete(attacker, mission);
 				}
-			
 			} else if (target.getPlayerObject().getBountyMissionId() != 0) { // Bounty Hunter is being deathblown (They're the target)
 				bountyWindow = false;
 				MissionObject mission = (MissionObject) core.objectService.getObject(target.getPlayerObject().getBountyMissionId());
@@ -1039,16 +1043,22 @@ public class CombatService implements INetworkDispatch {
 					
 					core.missionService.handleMissionAbort(target, mission);
 				}
-				
 			}
 			
-			if(target.getDuelList().contains(attacker))
+			if (target.getDuelList().contains(attacker)) {
 				bountyWindow = false;
 				handleEndDuel(target, attacker, false);
+			} else {
+				awardGcw(attacker, target);
+			}
 			
-			if (bountyWindow) core.playerService.sendSetBountyWindow(target, attacker);
-		} else { attacker.sendSystemMessage("You have killed " + target.getCustomName() + ".", (byte) 0); }
-
+			if (bountyWindow) {
+				core.playerService.sendSetBountyWindow(target, attacker);
+			}
+		} else {
+			attacker.sendSystemMessage("You have killed " + ((target.getCustomName() == null) ? target.getObjectName().getStfValue() : target.getCustomName()) + ".", DisplayType.Broadcast);
+		}
+		
 		attacker.removeDefender(target);
 		target.removeDefender(attacker);
 		target.setSpeedMultiplierBase(0);
@@ -1427,5 +1437,55 @@ public class CombatService implements INetworkDispatch {
 			defenderList.stream().forEach(attacker -> defender.removeDefender(attacker));
 		}
 	}
-
+	
+	public void awardGcw(CreatureObject actor, CreatureObject target) {
+		try {
+			if (actor.getSlottedObject("ghost") == null || target.getSlottedObject("ghost") == null) {
+				return;
+			}
+			
+			PlayerObject targetPlayer = (PlayerObject) target.getSlottedObject("ghost");
+			
+			if (!core.factionService.isFactionEnemy(actor, target) && target.isAttackableBy(actor)) {
+				return;
+			}
+			
+			Set<CreatureObject> inRange = new HashSet<CreatureObject>();
+			
+			inRange.add(actor);
+			
+			actor.getObservers().stream().forEach(observer -> inRange.add((CreatureObject) observer.getParent()));
+			
+			for (CreatureObject rangedPlayer : inRange) {
+				if (!(rangedPlayer.getFaction().equals(actor.getFaction()) && target.isAttackableBy(rangedPlayer))){
+					continue;
+				}
+				
+				if (!((rangedPlayer.getLevel() / target.getLevel() * 100) < 70)) {
+					continue;
+				}
+				
+				if (rangedPlayer.getSlottedObject("ghost") == null) {
+					continue;
+				}
+				
+				PlayerObject player = (PlayerObject) rangedPlayer.getSlottedObject("ghost");
+				
+				float gcwPoints = 37.5f;
+				
+				gcwPoints *= targetPlayer.getCurrentRank();
+				
+				float decay = (((float) player.getPvpKills()) / 100f * gcwPoints);
+				
+				gcwPoints = (((gcwPoints - decay) < 0) ? 0 : (gcwPoints - decay));
+				
+				core.gcwService.addGcwPoints(rangedPlayer, (int) gcwPoints, GcwType.Player);
+				
+				actor.sendSystemMessage(OutOfBand.ProsePackage("@gcw:gcw_rank_pvp_kill_point_grant", (int) gcwPoints, "TT", target.getCustomName()), DisplayType.Broadcast);
+			}
+		} catch (Exception e) {
+			
+		}
+	}
+	
 }
