@@ -18,6 +18,7 @@ def addTemplate(core):
 	mobileTemplate.setScale(1.3)
 	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(True)
+	mobileTemplate.setOptionsBitmask(192)
 	
 	
 	templates = Vector()
@@ -33,5 +34,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('saberHit')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('emperors_hand', mobileTemplate)
+	core.spawnService.addMobileTemplate('restuss_emperors_hand', mobileTemplate)
 	return
