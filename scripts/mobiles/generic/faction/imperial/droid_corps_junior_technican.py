@@ -6,28 +6,28 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('crackdown_imperial_noncom_hard')
-	mobileTemplate.setLevel(77)
-	mobileTemplate.setDifficulty(1)
+	mobileTemplate.setCreatureName('imperial_probot_handler')
+	mobileTemplate.setLevel(15)
+	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(15)
 	mobileTemplate.setAttackSpeed(1.0)
-	mobileTemplate.setWeaponType(1)
+	mobileTemplate.setWeaponType(2)
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(1)
 	mobileTemplate.setSocialGroup("imperial")
 	mobileTemplate.setAssistRange(0)
-	mobileTemplate.setStalker(False)
+	mobileTemplate.setStalker(True)
 	mobileTemplate.setFaction("imperial")
 	mobileTemplate.setFactionStatus(1)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_dressed_stormtrooper_white_black.iff')
+	templates.add('object/mobile/shared_dressed_imperial_mechanic_nils_cridmeen.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
-	weapontemplate = WeaponTemplate('object/weapon/ranged/carbine/shared_carbine_e11.iff', 1, 1.0)
+	weapontemplate = WeaponTemplate('object/weapon/ranged/pistol/shared_pistol_striker.iff', 2, 1.0)
 	weaponTemplates.add(weapontemplate)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
@@ -35,5 +35,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('rangedshot')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('battle-shocked_imp_noncom_77', mobileTemplate)
+	core.spawnService.addMobileTemplate('droid_corps_junior_technican', mobileTemplate)
 	return
