@@ -248,7 +248,7 @@ public class SWGSet<E> implements Set<E>, Serializable {
 	}
 	
 	private byte[] item(int type, Object index, byte[] data, boolean useIndex, boolean useData) {
-		if (useIndex && ((index instanceof IDelta) || !valid(index))) {
+		if (useIndex && !valid(index)) {
 			throw new IllegalArgumentException();
 		}
 		
