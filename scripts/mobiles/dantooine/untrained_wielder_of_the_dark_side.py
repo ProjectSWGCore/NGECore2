@@ -19,6 +19,7 @@ def addTemplate(core):
 	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setSocialGroup('remnants of kun')
 	mobileTemplate.setAssistRange(12)
+	mobileTemplate.setRespawnTime(300)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_untrained_wielder_of_the_darkside.iff')

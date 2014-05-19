@@ -142,6 +142,9 @@ public class DevService implements INetworkDispatch {
 			case 11: // Locations
 				suiOptions.put((long) 122, "Teleport to Jedi Ruins");
 				suiOptions.put((long) 124, "Teleport to Mos Eisley");
+				if (creature.getClient().isGM()) {
+					suiOptions.put((long) 164, "Teleport to Mining Outpost");
+				}
 				break;
 		
 		}
@@ -1244,6 +1247,10 @@ public class DevService implements INetworkDispatch {
 						
 					case 124:
 						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("tatooine"), new Point3D(3521,4,-4800), player.getOrientation(), null);
+						return;
+						
+					case 164:
+						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("dantooine"), new Point3D(-284,18,2853), player.getOrientation(), null);
 						return;
 
 					case 123:

@@ -18,6 +18,7 @@ def addTemplate(core):
 	mobileTemplate.setMaxSpawnDistance(7)
 	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setSocialGroup('force renegade')
+	mobileTemplate.setRespawnTime(300)
 	
 	
 	templates = Vector()
