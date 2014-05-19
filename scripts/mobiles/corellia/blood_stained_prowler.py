@@ -5,7 +5,7 @@ from java.util import Vector
 
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
-
+	
 	mobileTemplate.setCreatureName('blood-stained prowler')
 	mobileTemplate.setLevel(21)
 	mobileTemplate.setMinLevel(21)

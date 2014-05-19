@@ -5,7 +5,7 @@ from java.util import Vector
 
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
-
+	
 	mobileTemplate.setCreatureName('blurrg pup')
 	mobileTemplate.setLevel(62)
 	mobileTemplate.setMinLevel(62)
@@ -21,19 +21,19 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("blurrg")
 	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(False)
-
+	
 	templates = Vector()
 	templates.add('object/mobile/shared_blurrg_hue.iff')
 	mobileTemplate.setTemplates(templates)
-
+	
 	weaponTemplates = Vector()
 	weapontemplate = WeaponTemplate('object/weapon/melee/unarmed/shared_unarmed_default.iff', 6, 1.0)
 	weaponTemplates.add(weapontemplate)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
-
+	
 	attacks = Vector()
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
-
+	
 	core.spawnService.addMobileTemplate('blurrg_pup', mobileTemplate)
 	return

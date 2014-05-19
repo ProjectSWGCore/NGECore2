@@ -5,7 +5,7 @@ from java.util import Vector
 
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
-
+	
 	mobileTemplate.setCreatureName('angler hatchling')
 	mobileTemplate.setLevel(71)
 	mobileTemplate.setMinLevel(71)
@@ -23,19 +23,19 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("angler")
 	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(True)
-
+	
 	templates = Vector()
 	templates.add('object/mobile/shared_angler_hue.iff')
 	mobileTemplate.setTemplates(templates)
-
+	
 	weaponTemplates = Vector()
 	weapontemplate = WeaponTemplate('object/weapon/melee/unarmed/shared_unarmed_default.iff', 6, 1.0)
 	weaponTemplates.add(weapontemplate)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
-
+	
 	attacks = Vector()
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
-
+	
 	core.spawnService.addMobileTemplate('angler_hatchling', mobileTemplate)
 	return

@@ -5,7 +5,7 @@ from java.util import Vector
 
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
-
+	
 	mobileTemplate.setCreatureName('blood drenched merek king')
 	mobileTemplate.setLevel(64)
 	mobileTemplate.setMinLevel(64)
@@ -24,19 +24,19 @@ def addTemplate(core):
 	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setStalker(True)
 	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE)
-
+	
 	templates = Vector()
 	templates.add('object/mobile/shared_merek_hue.iff')
 	mobileTemplate.setTemplates(templates)
-
+	
 	weaponTemplates = Vector()
 	weapontemplate = WeaponTemplate('object/weapon/melee/unarmed/shared_unarmed_default.iff', 6, 1.0)
 	weaponTemplates.add(weapontemplate)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
-
+	
 	attacks = Vector()
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
-
+	
 	core.spawnService.addMobileTemplate('blood_drenched_merek_king', mobileTemplate)
 	return
