@@ -133,7 +133,7 @@ public class Guild extends Delta implements Serializable, Comparable<Guild> {
 		}
 	}
 
-	public List<Long> getSponsors() {
+	public List<Long> getSponsers() {
 		return sponsors;
 	}
 
