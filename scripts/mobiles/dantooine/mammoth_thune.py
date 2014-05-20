@@ -23,7 +23,8 @@ def addTemplate(core):
 	mobileTemplate.setHideAmount(0)
 	mobileTemplate.setSocialGroup("thune")
 	mobileTemplate.setAssistRange(12)
-	mobileTemplate.setStalker(False)	
+	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(192)	
 
 	templates = Vector()
 	templates.add('object/mobile/shared_thune_hue.iff')

@@ -24,6 +24,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("thune")
 	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setStalker(False)	
+	mobileTemplate.setOptionsBitmask(192)
 
 	templates = Vector()
 	templates.add('object/mobile/shared_thune_grassland_guardian.iff')

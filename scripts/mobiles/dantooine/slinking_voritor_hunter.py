@@ -23,7 +23,8 @@ def addTemplate(core):
 	mobileTemplate.setHideAmount(50)
 	mobileTemplate.setSocialGroup("voritor lizard")
 	mobileTemplate.setAssistRange(12)
-	mobileTemplate.setStalker(True)	
+	mobileTemplate.setStalker(True)
+	mobileTemplate.setOptionsBitmask(192)
 
 	templates = Vector()
 	templates.add('object/mobile/shared_slinking_voritor_hunter.iff')

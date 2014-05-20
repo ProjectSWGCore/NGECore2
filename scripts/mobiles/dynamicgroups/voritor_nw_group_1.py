@@ -7,11 +7,11 @@ from services.spawn import MobileTemplate
 def addDynamicGroup(core):
 	dynamicGroup = DynamicSpawnGroup()
 	mobileTemplates = Vector()
-	mobileTemplates.add('graul_mauler')
+	mobileTemplates.add('voritor_dasher')
 	dynamicGroup.setMobiles(mobileTemplates)
 	dynamicGroup.setGroupMembersNumber(-3)
 	dynamicGroup.setName('graul_mauler_nw_group_1')
 	dynamicGroup.setMaxSpawns(-1)
 	dynamicGroup.setMinSpawnDistance(150)
-	core.spawnService.addDynamicGroup('graul_mauler_nw_group_1', dynamicGroup)
+	core.spawnService.addDynamicGroup('voritor_nw_group_1', dynamicGroup)
 	return

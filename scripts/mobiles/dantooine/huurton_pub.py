@@ -24,6 +24,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("huurton")
 	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setStalker(True)	
+	mobileTemplate.setOptionsBitmask(192)
 
 	templates = Vector()
 	templates.add('object/mobile/shared_huurton_pup.iff')

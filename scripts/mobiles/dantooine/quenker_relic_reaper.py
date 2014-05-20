@@ -23,7 +23,8 @@ def addTemplate(core):
 	mobileTemplate.setHideAmount(15)
 	mobileTemplate.setSocialGroup("quenker")
 	mobileTemplate.setAssistRange(12)
-	mobileTemplate.setStalker(False)	
+	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(192)
 
 	templates = Vector()
 	templates.add('object/mobile/shared_quenker_relic_reaper.iff')

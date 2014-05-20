@@ -10,7 +10,7 @@ def addDynamicGroup(core):
 	mobileTemplates.add('bol')
 	mobileTemplates.add('bol_pack_runner')
 	dynamicGroup.setMobiles(mobileTemplates)
-	dynamicGroup.setGroupMembersNumber(-3)
+	dynamicGroup.setGroupMembersNumber(2)
 	dynamicGroup.setName('bol_group_1')
 	dynamicGroup.setMaxSpawns(-1)
 	dynamicGroup.setMinSpawnDistance(150)

@@ -7,7 +7,7 @@ def addTemplate(core):
 	mobileTemplate = MobileTemplate()	
 	mobileTemplate.setCreatureName('horned_voritor_jungle_lizard')
 	mobileTemplate.setLevel(73)
-	mobileTemplate.setDifficulty(1)
+	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)
 	mobileTemplate.setWeaponType(6)
@@ -24,6 +24,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("voritor lizard")
 	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setStalker(True)	
+	mobileTemplate.setOptionsBitmask(192)
 
 	templates = Vector()
 	templates.add('object/mobile/shared_voritor_lizard.iff')

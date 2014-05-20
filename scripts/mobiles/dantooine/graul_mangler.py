@@ -24,9 +24,10 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("graul")
 	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setStalker(False)	
+	mobileTemplate.setOptionsBitmask(192)
 
 	templates = Vector()
-	templates.add('object/mobile/shared_slinking_voritor_hunter.iff')
+	templates.add('object/mobile/shared_graul.iff')
 	mobileTemplate.setTemplates(templates)
 
 	weaponTemplates = Vector()

@@ -5,7 +5,7 @@ from java.util import Vector
 
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()	
-	mobileTemplate.setCreatureName('huurton')
+	mobileTemplate.setCreatureName('huurton_howler')
 	mobileTemplate.setLevel(65)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
@@ -23,7 +23,8 @@ def addTemplate(core):
 	mobileTemplate.setHideAmount(15)
 	mobileTemplate.setSocialGroup("huurton")
 	mobileTemplate.setAssistRange(12)
-	mobileTemplate.setStalker(False)	
+	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(192)
 
 	templates = Vector()
 	templates.add('object/mobile/shared_huurton.iff')
@@ -38,5 +39,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('huurton', mobileTemplate)
+	core.spawnService.addMobileTemplate('huurton_howler', mobileTemplate)
 	return
