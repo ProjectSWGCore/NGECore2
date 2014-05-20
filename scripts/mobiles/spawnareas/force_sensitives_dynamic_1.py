@@ -1,3 +1,4 @@
+# Spawn Area file created with PSWG Planetary Spawn Tool
 import sys
 from java.util import Vector
 
@@ -5,5 +6,5 @@ def addSpawnArea(core):
 	dynamicGroups = Vector()
 	dynamicGroups.add('force_sensitives_wild_1')
 	dynamicGroups.add('dark_jedi_wild_1')
-	core.spawnService.addDynamicSpawnArea(dynamicGroups, 4083, 5780, 2048, 'dantooine')
+	core.spawnService.addDynamicSpawnArea(dynamicGroups, 5233, 4722, 2580, 'dantooine')
 	return
