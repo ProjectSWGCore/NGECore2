@@ -6,9 +6,9 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('crackdown_stormtrooper_bombardier_hard')
-	mobileTemplate.setLevel(89)
-	mobileTemplate.setDifficulty(1)
+	mobileTemplate.setCreatureName('crackdown_stormtrooper_bombardier')
+	mobileTemplate.setLevel(25)
+	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(15)
 	mobileTemplate.setAttackSpeed(1.0)
 	mobileTemplate.setWeaponType(1)
@@ -35,5 +35,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('rangedshot')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('imp_bombardier_89', mobileTemplate)
+	core.spawnService.addMobileTemplate('imp_bombardier_25', mobileTemplate)
 	return
