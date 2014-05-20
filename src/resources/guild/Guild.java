@@ -34,11 +34,14 @@ public class Guild extends Delta implements Serializable, Comparable<Guild> {
 	
 	private static final long serialVersionUID = 1L;
 	private int id;
+	private int chatRoomId;
 	private String abbreviation;
 	private String name;
 	private long leader;
 	private String leaderName;
 	private List<Long> members = new ArrayList<Long>();
+	private List<Long> sponsors = new ArrayList<Long>();
+	private List<Long> sponsoredPlayers = new ArrayList<Long>();
 	
 	public Guild(int id, String abbreviation, String name, SWGObject leader) {
 		this.id = id;
@@ -46,7 +49,8 @@ public class Guild extends Delta implements Serializable, Comparable<Guild> {
 		this.name = name;
 		this.leader = leader.getObjectID();
 		this.leaderName = leader.getCustomName();
-		this.members.add(leader.getObjectID());
+		//this.members.add(leader.getObjectID());
+		//this.sponsors.add(leader.getObjectID());
 	}
 	
 	public Guild() {
@@ -65,6 +69,14 @@ public class Guild extends Delta implements Serializable, Comparable<Guild> {
 		}
 	}
 	
+	public int getChatRoomId() {
+		return chatRoomId;
+	}
+
+	public void setChatRoomId(int chatRoomId) {
+		this.chatRoomId = chatRoomId;
+	}
+
 	public String getAbbreviation() {
 		synchronized(objectMutex) {
 			return abbreviation;
@@ -119,6 +131,22 @@ public class Guild extends Delta implements Serializable, Comparable<Guild> {
 		synchronized(objectMutex) {
 			this.leaderName = leaderName;
 		}
+	}
+
+	public List<Long> getSponsors() {
+		return sponsors;
+	}
+
+	public void setSponsors(List<Long> sponsors) {
+		this.sponsors = sponsors;
+	}
+
+	public List<Long> getSponsoredPlayers() {
+		return sponsoredPlayers;
+	}
+
+	public void setSponsoredPlayers(List<Long> sponsoredPlayers) {
+		this.sponsoredPlayers = sponsoredPlayers;
 	}
 
 	public byte[] getBytes() {
