@@ -23,7 +23,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("arachne")
 	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(False)
-	mobileTemplate.SetBitmask(Options.AGGRESSIVE)
+	mobileTemplate.setOptionsBitmask(192)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_arachne_hue.iff')

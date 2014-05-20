@@ -10,7 +10,7 @@ def addTemplate(core):
 	mobileTemplate.setLevel(79)
 	mobileTemplate.setMinLevel(79)
 	mobileTemplate.setMaxLevel(80)
-	mobileTemplate.setDifficulty(Difficulty.BOSS)
+	mobileTemplate.setDifficulty(2)
 	mobileTemplate.setAttackRange(12)
 	mobileTemplate.setAttackSpeed(1.0)
 	mobileTemplate.setWeaponType(6)
@@ -25,7 +25,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("kimogila")
 	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setStalker(False)
-	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE)
+	mobileTemplate.setOptionsBitmask(192)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_kimogila_hue.iff')

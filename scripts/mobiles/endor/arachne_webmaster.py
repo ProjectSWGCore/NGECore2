@@ -10,7 +10,7 @@ def addTemplate(core):
 	mobileTemplate.setLevel(62)
 	mobileTemplate.setMinLevel(62)
 	mobileTemplate.setMaxLevel(62)
-	mobileTemplate.setDifficulty(Difficulty.NORMAL)
+	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)
 	mobileTemplate.setWeaponType(6)
@@ -23,7 +23,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("arachne")
 	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setStalker(True)
-	mobileTemplate.SetOptionsBitmask(Options.AGGRESSIVE)
+	mobileTemplate.setOptionsBitmask(192)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_arachne_hue.iff')

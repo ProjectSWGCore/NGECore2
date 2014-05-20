@@ -23,7 +23,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("merek")
 	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(True)
-	mobileTemplate.setOptionsBitmask(options.AGGRESSIVE)
+	mobileTemplate.setOptionsBitmask(192)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_merek_hue.iff')

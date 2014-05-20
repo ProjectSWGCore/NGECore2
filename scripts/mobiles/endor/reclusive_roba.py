@@ -6,27 +6,24 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('merek death's head')
-	mobileTemplate.setLevel(64)
-	mobileTemplate.setMinLevel(64)
-	mobileTemplate.setMaxLevel(64)
+	mobileTemplate.setCreatureName('reclusive roba')
+	mobileTemplate.setLevel(62)
+	mobileTemplate.setMinLevel(62)
+	mobileTemplate.setMaxLevel(62)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)
 	mobileTemplate.setWeaponType(6)
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
-	mobileTemplate.setDeathblow(True)
+	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(1)
-	mobileTemplate.setHideType("Leathery Hide")
-	mobileTemplate.setHideAmount(45)
-	mobileTemplate.setSocialGroup("merek")
-	mobileTemplate.setAssistRange(12)
+	mobileTemplate.setSocialGroup("roba")
+	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(False)
-	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_merek_hue.iff')
+	templates.add('object/mobile/shared_roba_hue.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
@@ -38,5 +35,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('merek_death's_head', mobileTemplate)
+	core.spawnService.addMobileTemplate('reclusive_roba', mobileTemplate)
 	return

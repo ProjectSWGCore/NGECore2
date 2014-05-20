@@ -21,7 +21,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("blurrg")
 	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setStalker(True)
-	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE)
+	mobileTemplate.setOptionsBitmask(192)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_blurrg_hue.iff')

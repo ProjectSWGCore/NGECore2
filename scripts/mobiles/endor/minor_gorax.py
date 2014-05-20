@@ -18,10 +18,10 @@ def addTemplate(core):
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(True)
 	mobileTemplate.setScale(.75)
-	mobileTemplate.setSocialGroup("gorax(")")
+	mobileTemplate.setSocialGroup("gorax")
 	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setStalker(False)
-	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE)
+	mobileTemplate.setOptionsBitmask(192)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_gorax_hue.iff')

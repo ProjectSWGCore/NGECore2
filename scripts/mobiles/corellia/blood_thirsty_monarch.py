@@ -25,7 +25,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("corellian butterfly")
 	mobileTemplate.setAssistRange(6)
 	mobileTemplate.setStalker(True)
-	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE)
+	mobileTemplate.setOptionsBitmask(192)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_corellian_butterfly_hue.iff')

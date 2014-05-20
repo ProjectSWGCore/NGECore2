@@ -27,7 +27,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("rancor")
 	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setStalker(False)
-	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE)
+	mobileTemplate.setOptionsBitmask(192)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_rancor_hue.iff')

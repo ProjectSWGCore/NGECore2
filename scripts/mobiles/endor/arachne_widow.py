@@ -23,7 +23,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("arachne")
 	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setStalker(True)
-	mobileTemplate.SetOptionsBitmask(Options.AGGRESSIVE)
+	mobileTemplate.setOptionsBitmask(192)
 	
 	
 	templates = Vector()
