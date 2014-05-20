@@ -258,6 +258,10 @@ public class SpawnService {
 		lairObject.setMaximumCondition(1000 * level);
 		
 		LairActor lairActor = new LairActor(lairObject, lairTemplate.getMobileName(), 10, level);
+		
+		if (lairTemplate.getMobiles()!=null)
+			lairActor = new LairActor(lairObject, lairTemplate.getMobiles(), 10, level);
+		
 		lairObject.setAttachment("AI", lairActor);
 		
 		core.simulationService.add(lairObject, position.x, position.z, true);
@@ -308,6 +312,10 @@ public class SpawnService {
 	
 	public void addLairTemplate(String name, String mobile, int mobileLimit, String lairCRC) {
 		lairTemplates.put(name, new LairTemplate(name, mobile, mobileLimit, lairCRC));
+	}
+	
+	public void addLairTemplate(String name, Vector<String> mobiles, int mobileLimit, String lairCRC) {
+		lairTemplates.put(name, new LairTemplate(name, mobiles, mobileLimit, lairCRC));
 	}
 	
 	public void loadLairGroups() {
