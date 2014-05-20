@@ -682,6 +682,16 @@ public class CreatureMessageBuilder extends TangibleMessageBuilder {
 
 	}
 	
+	public IoBuffer buildGuildIdDelta(int guildId) {
+		IoBuffer buffer = bufferPool.allocate(4, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putInt(guildId);
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x0F, buffer, size + 4);
+		
+		return buffer;
+	}
+	
 	public IoBuffer buildGroupInviteDelta(long inviteSenderId, String inviteSenderName, long inviteCounter) {
 		
 		IoBuffer buffer = bufferPool.allocate(18 + inviteSenderName.length(), false).order(ByteOrder.LITTLE_ENDIAN);

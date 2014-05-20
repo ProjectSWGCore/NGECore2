@@ -22,7 +22,6 @@
 package services.resources;
 
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
@@ -30,10 +29,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import com.sleepycat.persist.EntityCursor;
-
 import main.NGECore;
-import engine.resources.common.CRC;
 import engine.resources.database.ODBCursor;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
@@ -41,8 +37,6 @@ import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
-import resources.common.OutOfBand;
-import resources.common.ProsePackage;
 import resources.datatables.MilkState;
 import resources.objects.creature.CreatureObject;
 import resources.objects.harvester.HarvesterObject;
@@ -11444,11 +11438,9 @@ public class ResourceService implements INetworkDispatch {
 				containerObject.setProprietor(crafter);
 				containerObject.setStackCount(stackCount,false);
 				//int stackCount = core.resourceService.getResourceSampleQuantity(crafter, sampleResource); 
-				containerObject.initializeStats(sampleResource);            		          		
-        		int resCRC = CRC.StringtoCRC(resourceContainerIFF);
-				containerObject.setIffFileName(resourceContainerIFF);             		
-				long objectId = containerObject.getObjectID();  					
-				SWGObject crafterInventory = crafter.getSlottedObject("inventory");        				   					
+				containerObject.initializeStats(sampleResource);
+				containerObject.setIffFileName(resourceContainerIFF);
+				SWGObject crafterInventory = crafter.getSlottedObject("inventory");
 				crafterInventory.add(containerObject);
 				return containerObject;
 			}
@@ -11476,7 +11468,7 @@ public class ResourceService implements INetworkDispatch {
 		
 	public boolean canMilk(CreatureObject actor, CreatureObject target) {
 		
-		if(target.getPosture() == 14 || !actor.inRange(target.getWorldPosition(), 5) || actor.getCombatFlag() == 1 || target.getCombatFlag() == 1)
+		if(target.getPosture() == 14 || !actor.inRange(target.getWorldPosition(), 5) || actor.isInCombat() || target.isInCombat())
 			return false;
 		
 		AIActor ai = (AIActor) target.getAttachment("AI");
@@ -11593,7 +11585,7 @@ public class ResourceService implements INetworkDispatch {
 				return;
 			}
 			
-			if(actor.getCombatFlag() == 1) {
+			if(actor.isInCombat()) {
 				actor.sendSystemMessage("@skl_use:milk_combat", (byte) 0);
 				ai.setMilkState(MilkState.NOTYETMILKED);
 				return;

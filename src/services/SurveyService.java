@@ -31,13 +31,13 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import protocol.swg.PlayClientEffectLocMessage;
+import resources.harvest.SurveyTool;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.resource.GalacticResource;
 import resources.objects.resource.ResourceContainerObject;
 import resources.objects.resource.ResourceRoot;
 import resources.objects.tangible.TangibleObject;
-import resources.objects.tool.SurveyTool;
 import services.sui.SUIWindow;
 import services.sui.SUIWindow.SUICallback;
 import services.sui.SUIWindow.Trigger;
@@ -338,7 +338,7 @@ public class SurveyService implements INetworkDispatch {
 		if (crafter.getPosture()==13)
 			return; // QA
 		
-		if (crafter.getCombatFlag()!=0){ // QA
+		if (crafter.isInCombat()){ // QA
 			crafter.sendSystemMessage("@survey:sample_cancel_attack", (byte) 0);
 			return;
 		}
@@ -422,7 +422,7 @@ public class SurveyService implements INetworkDispatch {
 		
 		surveyTool.setCurrentlyCoolingDown(false);
 		CreatureObject crafter = (CreatureObject) NGECore.getInstance().objectService.getObject(surveyTool.getUserID());
-		PlayerObject player = (PlayerObject) crafter.getSlottedObject("ghost");	
+		
 		if (crafter.getPosture()!=1){
 			crafter.sendSystemMessage("@survey:sample_cancel", (byte) 0);
 			surveyTool.setExceptionalState(false);
@@ -433,7 +433,7 @@ public class SurveyService implements INetworkDispatch {
 		if (crafter.getPosture()==13)
 			return;
 		
-		if (crafter.getCombatFlag()!=0){
+		if (crafter.isInCombat()){
 			crafter.sendSystemMessage("@survey:sample_cancel_attack", (byte) 0);
 			return;
 		}
@@ -665,7 +665,6 @@ public class SurveyService implements INetworkDispatch {
 	
 		Vector<String> returnList = new Vector<String>();
 		returnList.add("List.lstList:SelectedRow");
-		final SurveyTool outerSurveyTool = (SurveyTool)target;
 		
 		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, new SUICallback() {
 			@Override

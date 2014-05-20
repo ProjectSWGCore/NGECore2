@@ -28,6 +28,7 @@ import org.apache.mina.core.buffer.IoBuffer;
 import protocol.swg.ObjControllerMessage;
 import resources.datatables.HitType;
 
+@SuppressWarnings("unused")
 public class CombatSpam extends ObjControllerObject{
 
 	private long attackerId;

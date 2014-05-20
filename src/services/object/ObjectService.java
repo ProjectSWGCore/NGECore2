@@ -48,6 +48,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import resources.common.*;
 import resources.datatables.Options;
 import resources.datatables.PlayerFlags;
+import resources.harvest.SurveyTool;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
@@ -118,18 +119,16 @@ import resources.objects.resource.ResourceContainerObject;
 import resources.objects.resource.ResourceRoot;
 import resources.objects.staticobject.StaticObject;
 import resources.objects.tangible.TangibleObject;
-import resources.objects.tool.SurveyTool;
 import resources.objects.waypoint.WaypointObject;
 import resources.objects.weapon.WeaponObject;
-import services.EquipmentService;
 import services.ai.AIActor;
 import services.command.BaseSWGCommand;
 import services.command.CombatCommand;
 import services.bazaar.AuctionItem;
 import services.chat.ChatRoom;
+import services.equipment.EquipmentService;
 
 @SuppressWarnings("unused")
-
 public class ObjectService implements INetworkDispatch {
 
 	private Map<Long, SWGObject> objectList = new ConcurrentHashMap<Long, SWGObject>();
@@ -241,11 +240,11 @@ public class ObjectService implements INetworkDispatch {
 			
 		} else if(Template.startsWith("object/tangible/survey_tool")) {
 			
-			object = new SurveyTool(objectID, planet, Template, position, orientation);
+			object = new SurveyTool(objectID, planet, position, orientation, Template);
 			
 		} else if(Template.startsWith("object/tangible")) {
 			
-			object = new TangibleObject(objectID, planet, Template, position, orientation);
+			object = new TangibleObject(objectID, planet, position, orientation, Template);
 
 		} else if(Template.startsWith("object/intangible")) {
 			
@@ -253,7 +252,7 @@ public class ObjectService implements INetworkDispatch {
 
 		} else if(Template.startsWith("object/weapon")) {
 			
-			object = new WeaponObject(objectID, planet, Template, position, orientation);
+			object = new WeaponObject(objectID, planet, position, orientation, Template);
 
 		} else if(Template.startsWith("object/building") || Template.startsWith("object/static/worldbuilding/structures") || Template.startsWith("object/static/structure")){
 			
@@ -297,11 +296,11 @@ public class ObjectService implements INetworkDispatch {
 			
 		} else if(Template.startsWith("object/resource_container")) {
 			
-			object = new ResourceContainerObject(objectID, planet, Template, position, orientation);
+			object = new ResourceContainerObject(objectID, planet, position, orientation, Template);
 			
 		} else if(Template.startsWith("object/factory/shared_factory_crate")) {
 			
-			object = new FactoryCrateObject(objectID, planet, Template, position, orientation);
+			object = new FactoryCrateObject(objectID, planet, position, orientation, Template);
 			
 		} else if(Template.startsWith("object/draft_schematic")) {
 			
@@ -315,7 +314,7 @@ public class ObjectService implements INetworkDispatch {
 			
 			float positionY = core.terrainService.getHeight(planet.getID(), position.x, position.z)-1f;
 			Point3D newpoint = new Point3D(position.x,positionY,position.z);				
-			object = new InstallationObject(objectID, planet, Template, newpoint, orientation);
+			object = new InstallationObject(objectID, planet, newpoint, orientation, Template);
 			
 		} else if(Template.startsWith("object/installation/mining_ore") || Template.startsWith("object/installation/mining_liquid") ||
 				  Template.startsWith("object/installation/mining_gas") || Template.startsWith("object/installation/mining_organic") || 
@@ -323,7 +322,7 @@ public class ObjectService implements INetworkDispatch {
 			
 			float positionY = core.terrainService.getHeight(planet.getID(), position.x, position.z)-1f;
 			Point3D newpoint = new Point3D(position.x,positionY,position.z);			
-			object = new HarvesterObject(objectID, planet, Template, newpoint, orientation);	
+			object = new HarvesterObject(objectID, planet, newpoint, orientation, Template);	
 			
 		} else {
 			return null;			
@@ -1139,6 +1138,7 @@ public class ObjectService implements INetworkDispatch {
 						containers.add(objectId);
 						object = createObject(template, objectId, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, true, false);
 						object.setAttachment("childObjects", null);
+						
 						/*if (!duplicate.containsValue(objectId)) {
 							((BuildingObject) object).createTransaction(core.getBuildingODB().getEnvironment());
 							core.getBuildingODB().put((BuildingObject) object, Long.class, BuildingObject.class, ((BuildingObject) object).getTransaction());
@@ -1175,6 +1175,10 @@ public class ObjectService implements INetworkDispatch {
 				} else {
 					object = createObject(template, 0, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, false, false);
 					object.setContainerPermissions(WorldPermissions.WORLD_PERMISSIONS);
+				}
+				
+				if (object != null && object instanceof TangibleObject && !(object instanceof CreatureObject)) {
+					((TangibleObject) object).setStaticObject(true);
 				}
 				
 				//System.out.println("Spawning: " + template + " at: X:" + object.getPosition().x + " Y: " + object.getPosition().y + " Z: " + object.getPosition().z);

@@ -44,14 +44,14 @@ public class WeaponObject extends TangibleObject implements Serializable {
 	private transient WeaponMessageBuilder messageBuilder;
 	
 	public WeaponObject(long objectID, Planet planet, String template) {
-		super(objectID, planet, template, new Point3D(0, 0, 0), new Quaternion(1, 0, 1, 0));
+		super(objectID, planet, new Point3D(0, 0, 0), new Quaternion(1, 0, 1, 0), template);
 		messageBuilder = new WeaponMessageBuilder(this);
 		if (this.getClass().getSimpleName().equals("WeaponObject")) setIntAttribute("volume", 1);
 		setStringAttribute("cat_wpn_damage.damage", "0-0");
 	}
 
-	public WeaponObject(long objectID, Planet planet, String template, Point3D position, Quaternion orientation) {
-		super(objectID, planet, template, position, orientation);
+	public WeaponObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String template) {
+		super(objectID, planet, position, orientation, template);
 		messageBuilder = new WeaponMessageBuilder(this);
 		if (this.getClass().getSimpleName().equals("WeaponObject")) setIntAttribute("volume", 1);
 		setStringAttribute("cat_wpn_damage.damage", "0-0");
@@ -68,38 +68,12 @@ public class WeaponObject extends TangibleObject implements Serializable {
 		messageBuilder = new WeaponMessageBuilder(this);
 		defendersList = new Vector<TangibleObject>();
 	}
-
-	public int getIncapTimer() {
-		return incapTimer;
-	}
-
-	public void setIncapTimer(int incapTimer) {
-		this.incapTimer = incapTimer;
-	}
-
-
-	public byte[] getCustomization() {
-		return customization;
-	}
-
-	public void setCustomization(byte[] customization) {
-		this.customization = customization;
-	}
-
-	public int getOptionsBitmask() {
-		return optionsBitmask;
-	}
-
-	public void setOptionsBitmask(int optionsBitmask) {
-		this.optionsBitmask = optionsBitmask;
-	}
-
+	
 	public int getMaxDamage() {
 		return Integer.parseInt(getStringAttribute("cat_wpn_damage.damage").split("-")[1]);
 	}
-
+	
 	public void setMaxDamage(int maxDamage) {
-			
 		setStringAttribute("cat_wpn_damage.damage", String.valueOf(getMinDamage()) + "-" + String.valueOf(maxDamage));
 		setIntAttribute("cat_wpn_damage.dps", getDamagePerSecond());
 	}

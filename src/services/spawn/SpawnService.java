@@ -100,11 +100,13 @@ public class SpawnService {
 			creature.setWeaponId(mobileTemplate.getCustomWeapon().getObjectID());
 		}*/
 		
-		if(mobileTemplate.getLootGroups() != null)
+		if(mobileTemplate.getLootGroups() != null && !mobileTemplate.getLootGroups().isEmpty())
 			creature.setLootGroups(mobileTemplate.getLootGroups());
 		
-		creature.setOptionsBitmask(mobileTemplate.getOptionBitmask());
-		creature.setPvPBitmask(mobileTemplate.getPvpBitmask());
+		creature.setOptionsBitmask(mobileTemplate.getOptionsBitmask());
+		creature.setFaction(mobileTemplate.getFaction());
+		creature.setFactionStatus(mobileTemplate.getFactionStatus());
+		creature.setPvpBitmask(mobileTemplate.getPvpBitmask());
 		creature.setStfFilename("mob/creature_names"); // TODO: set other STFs for NPCs other than creatures
 		creature.setStfName(mobileTemplate.getCreatureName());
 		creature.setHeight(mobileTemplate.getScale());
@@ -118,7 +120,7 @@ public class SpawnService {
 			level = mobileTemplate.getLevel();
 		}
 		
-		if (mobileTemplate.getMinLevel()!=0 && mobileTemplate.getMaxLevel()!=0){
+		if (mobileTemplate.getMinLevel()!=0 && mobileTemplate.getMaxLevel()!=0 && level == -1){
 			level = (short) (mobileTemplate.getMinLevel() + (new Random().nextInt(mobileTemplate.getMaxLevel()-mobileTemplate.getMinLevel()))); 
 			creature.setLevel(level);
 		}
@@ -252,10 +254,14 @@ public class SpawnService {
 			return null;
 		
 		lairObject.setOptionsBitmask(Options.ATTACKABLE);
-		lairObject.setPvPBitmask(PvpStatus.Attackable);
-		lairObject.setMaxDamage(1000 * level);
+		lairObject.setPvpBitmask(PvpStatus.Attackable);
+		lairObject.setMaximumCondition(1000 * level);
 		
 		LairActor lairActor = new LairActor(lairObject, lairTemplate.getMobileName(), 10, level);
+		
+		if (lairTemplate.getMobiles()!=null)
+			lairActor = new LairActor(lairObject, lairTemplate.getMobiles(), 10, level);
+		
 		lairObject.setAttachment("AI", lairActor);
 		
 		core.simulationService.add(lairObject, position.x, position.z, true);
@@ -306,6 +312,10 @@ public class SpawnService {
 	
 	public void addLairTemplate(String name, String mobile, int mobileLimit, String lairCRC) {
 		lairTemplates.put(name, new LairTemplate(name, mobile, mobileLimit, lairCRC));
+	}
+	
+	public void addLairTemplate(String name, Vector<String> mobiles, int mobileLimit, String lairCRC) {
+		lairTemplates.put(name, new LairTemplate(name, mobiles, mobileLimit, lairCRC));
 	}
 	
 	public void loadLairGroups() {

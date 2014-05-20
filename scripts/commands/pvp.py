@@ -14,6 +14,9 @@ def run(core, actor, target, commandString):
 	if actor.getPvpStatus(PvpStatus.GoingOvert) or actor.getPvpStatus(PvpStatus.GoingCovert):
 		actor.sendSystemMessage('@faction_recruiter:pvp_status_changing', 0)
 		return
+	if core.gcwService.isInPvpZone(actor):
+		actor.sendSystemMessage('@gcw:pvp_advanced_region_cannot_go_covert', 0)
+		return
 	
 	if commandString != '' and commandString != faction:
 		if commandString == 'rebel' or commandString == 'imperial' or commandString == 'neutral':
@@ -60,6 +63,8 @@ def run(core, actor, target, commandString):
 		actor.sendSystemMessage('@faction_recruiter:covert_to_overt', 0)
 		actor.setPvpStatus(PvpStatus.GoingOvert, True)
 		time.sleep(30)
+		if core.gcwService.isInPvpZone(actor):
+			return
 		actor.setFactionStatus(FactionStatus.SpecialForces)
 		actor.setPvpStatus(PvpStatus.GoingOvert, False)
 		actor.sendSystemMessage('@faction_recruiter:overt_complete', 0)
@@ -70,6 +75,8 @@ def run(core, actor, target, commandString):
 		actor.sendSystemMessage('@faction_recruiter:overt_to_covert', 0)
 		actor.setPvpStatus(PvpStatus.GoingCovert, True)
 		time.sleep(300)
+		if core.gcwService.isInPvpZone(actor):
+			return
 		actor.setFactionStatus(FactionStatus.Combatant)
 		actor.setPvpStatus(PvpStatus.GoingCovert, False)
 		actor.sendSystemMessage('@faction_recruiter:covert_complete', 0)

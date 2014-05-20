@@ -74,7 +74,7 @@ public class SWGList<E> implements List<E>, Serializable {
 		for (Object item : list) {				
 			try {
 				if (item instanceof IDelta) {
-					item.getClass().getMethod("init", new Class[] {}).invoke(item, new Object[] { });
+					item.getClass().getMethod("init", new Class[] { SWGObject.class }).invoke(item, new Object[] { object });
 				}
 			} catch (Exception e) {
 				e.printStackTrace();

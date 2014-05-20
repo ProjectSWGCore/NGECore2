@@ -193,7 +193,9 @@ public class SimulationService implements INetworkDispatch {
 		ODBCursor cursor = core.getSWGObjectODB().getCursor();
 		
 		while(cursor.hasNext()) {
-			SWGObject building = core.objectService.getObject(((SWGObject) cursor.next()).getObjectID());
+			Object next = cursor.next();
+			if (next == null) continue;
+			SWGObject building = core.objectService.getObject(((SWGObject) next).getObjectID());
 			if(building == null || (!(building instanceof BuildingObject) && !(building instanceof HarvesterObject)))
 				continue;
 			if(building.getAttachment("hasLoadedServerTemplate") == null)
@@ -405,6 +407,7 @@ public class SimulationService implements INetworkDispatch {
 				}
 				
 				checkForCollidables(object);
+				object.setAttachment("lastValidPosition", object.getPosition());
 				MoveEvent event = new MoveEvent();
 				event.object = object;
 				object.getEventBus().publish(event);
@@ -460,6 +463,8 @@ public class SimulationService implements INetworkDispatch {
 					remove(object, oldPos.x, oldPos.z);
 					if(object.getContainer() != null)
 						object.getContainer()._remove(object);
+					else if (object.getClient().isGM() && parent.getContainer() != null)
+						object.sendSystemMessage("BuildingId: Dec: " + parent.getContainer().getObjectID() + " / Hex: " + Long.toHexString(parent.getContainer().getObjectID()), DisplayType.Broadcast);
 					parent._add(object);
 				}
 				object.setPosition(newPos);
@@ -468,6 +473,7 @@ public class SimulationService implements INetworkDispatch {
 				object.notifyObservers(utm, false);
 				
 				checkForCollidables(object);
+				object.setAttachment("lastValidPosition", object.getPosition());
 
 			}
 				

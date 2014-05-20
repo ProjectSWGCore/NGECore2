@@ -22,7 +22,6 @@
 package services.ai.states;
 
 import services.ai.AIActor;
-import services.ai.states.AIState.StateResult;
 
 public class StalkState extends AIState {
 

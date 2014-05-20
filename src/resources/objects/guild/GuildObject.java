@@ -34,257 +34,114 @@ import resources.gcw.CurrentServerGCWZonePercent;
 import resources.gcw.OtherServerGCWZonePercent;
 import resources.guild.Guild;
 import resources.objects.ObjectMessageBuilder;
-import resources.objects.SWGList;
 import resources.objects.SWGMap;
 import resources.objects.SWGMultiMap;
+import resources.objects.SWGSet;
 import resources.objects.universe.UniverseObject;
 import services.collections.ServerFirst;
-
-import com.sleepycat.persist.model.Entity;
-import com.sleepycat.persist.model.NotPersistent;
-
 import engine.clients.Client;
+import engine.resources.objects.Baseline;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Entity(version=1)
 public class GuildObject extends UniverseObject implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
-	protected NGECore core;
-	@NotPersistent
+	
 	private transient GuildMessageBuilder messageBuilder = new GuildMessageBuilder(this);
-	
-	private Map<String, ServerFirst> serverFirst = new HashMap<String, ServerFirst>();
-	private Map<String, Map<String, CurrentServerGCWZonePercent>> zoneMap = new TreeMap<String, Map<String, CurrentServerGCWZonePercent>>();
-	
-	private long nextInstanceId = 0;
-	
-	// GILD 3
-	private float complexity = 0x803F0F00;
-	private String STFFile = "string_id_table";
-	private int STFSpacer = 0;
-	private String STFName = "";
-	private String customName = "";
-	private int volume = 0;
-	private SWGList<Guild> guildList = new SWGList<Guild>(this, 3, 4, false);
-	
-	// GILD 6
-	private int serverId = 0x43;
-	//private String STFName = "string_id_table";
-	private int unknown1 = 0;
-	private short unknown2 = 0;
-	private SWGMap<String, CurrentServerGCWZonePercent> currentServerGCWZonePercentMap = new SWGMap<String, CurrentServerGCWZonePercent>(this, 6, 2, true);
-	private SWGMap<String, CurrentServerGCWZonePercent> currentServerGCWTotalPercentMap = new SWGMap<String, CurrentServerGCWZonePercent>(this, 6, 3, true);
-	private SWGMultiMap<String, CurrentServerGCWZoneHistory> currentServerGCWZoneHistoryMap = new SWGMultiMap<String, CurrentServerGCWZoneHistory>(this, 6, 4, true);
-	private SWGMultiMap<String, CurrentServerGCWZoneHistory> currentServerGCWTotalHistoryMap = new SWGMultiMap<String, CurrentServerGCWZoneHistory>(this, 6, 5, true);
-	private SWGMultiMap<String, OtherServerGCWZonePercent> otherServerGCWZonePercentMap = new SWGMultiMap<String, OtherServerGCWZonePercent>(this, 6, 6, true);
-	private SWGMultiMap<String, OtherServerGCWZonePercent> otherServerGCWTotalPercentMap = new SWGMultiMap<String, OtherServerGCWZonePercent>(this, 6, 7, true);
-	private int unknown3 = 5;
 	
 	public GuildObject(NGECore core, long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
 		super(objectID, planet, position, orientation, Template);
-		this.core = core;
+		otherVariables = getOtherVariables(); // FIXME temp
+	}
+	
+	public GuildObject() {
+		super();
+	}
+	
+	public void initAfterDBLoad() {
+		super.init();
 	}
 	
 	@Override
-	public void initAfterDBLoad() {
-		super.init();
-		messageBuilder = new GuildMessageBuilder(this);
-		guildList.init(this);
-		currentServerGCWZonePercentMap.init(this);
-		currentServerGCWTotalPercentMap.init(this);
-		currentServerGCWZoneHistoryMap.init(this);
-		currentServerGCWTotalHistoryMap.init(this);
-		otherServerGCWZonePercentMap.init(this);
-		otherServerGCWTotalPercentMap.init(this);
+	public Baseline getOtherVariables() {
+		Baseline baseline = super.getOtherVariables();
+		baseline.put("nextInstanceId", (long) 0);
+		baseline.put("zoneMap", new TreeMap<String, Map<String, CurrentServerGCWZonePercent>>());
+		baseline.put("serverFirst", new HashMap<String, ServerFirst>());
+		return baseline;
 	}
 	
-	public float getComplexity() {
-		synchronized(objectMutex) {
-			return complexity;
-		}
+	@Override
+	public Baseline getBaseline3() {
+		Baseline baseline = super.getBaseline3();
+		baseline.put("guildList", new SWGSet<Guild>(this, 3, 4, false));
+		return baseline;
 	}
 	
-	public void setComplexity(float complexity) {
-		synchronized(objectMutex) {
-			this.complexity = complexity;
-		}
-		
-		notifyAll(messageBuilder.buildComplexity(complexity));
+	@Override
+	public Baseline getBaseline6() {
+		Baseline baseline = super.getBaseline6();
+		baseline.put("currentServerGCWZonePercentMap", new SWGMap<String, CurrentServerGCWZonePercent>(this, 6, 2, true));
+		baseline.put("currentServerGCWTotalPercentMap", new SWGMap<String, CurrentServerGCWZonePercent>(this, 6, 3, true));
+		baseline.put("currentServerGCWZoneHistoryMap", new SWGMultiMap<String, CurrentServerGCWZoneHistory>(this, 6, 4, true));
+		baseline.put("currentServerGCWTotalHistoryMap", new SWGMultiMap<String, CurrentServerGCWZoneHistory>(this, 6, 5, true));
+		baseline.put("otherServerGCWZonePercentMap", new SWGMultiMap<String, OtherServerGCWZonePercent>(this, 6, 6, true));
+		baseline.put("otherServerGCWTotalPercentMap", new SWGMultiMap<String, OtherServerGCWZonePercent>(this, 6, 7, true));
+		baseline.put("8", 5);
+		return baseline;
 	}
 	
-	public String getSTFFile() {
-		synchronized(objectMutex) {
-			return STFFile;
-		}
+	@SuppressWarnings("unchecked")
+	public SWGSet<Guild> getGuildList() {
+		return (SWGSet<Guild>) getBaseline(3).get("guildList");
 	}
 	
-	public void setSTFFile(String STFFile) {
-		synchronized(objectMutex) {
-			this.STFFile = STFFile;
-		}
-		
-		notifyAll(messageBuilder.buildSTF(STFFile, STFSpacer, STFName));
-	}
-	
-	public int getSTFSpacer() {
-		synchronized(objectMutex) {
-			return STFSpacer;
-		}
-	}
-	
-	public void setSTFSpacer(int STFSpacer) {
-		synchronized(objectMutex) {
-			this.STFSpacer = STFSpacer;
-		}
-		
-		notifyAll(messageBuilder.buildSTF(STFFile, STFSpacer, STFName));
-	}
-	
-	public String getSTFName() {
-		synchronized(objectMutex) {
-			return STFName;
-		}
-	}
-	
-	public void setSTFName(String STFName) {
-		synchronized(objectMutex) {
-			this.STFName = STFName;
-		}
-		
-		notifyAll(messageBuilder.buildSTF(STFFile, STFSpacer, STFName));
-	}
-	
-	public String getCustomName() {
-		synchronized(objectMutex) {
-			return customName;
-		}
-	}
-	
-	public void setCustomName(String customName) {
-		synchronized(objectMutex) {
-			this.customName = customName;
-		}
-		
-		notifyAll(messageBuilder.buildCustomName(customName));
-	}
-	
-	public int getVolume() {
-		synchronized(objectMutex) {
-			return volume;
-		}
-	}
-	
-	public void setVolume(int volume) {
-		synchronized(objectMutex) {
-			this.volume = volume;
-		}
-		
-		notifyAll(messageBuilder.buildVolume(volume));
-	}
-	
-	public SWGList<Guild> getGuildList() {
-		return guildList;
-	}
-	
-	public int getServerId() {
-		synchronized(objectMutex) {
-			return serverId;
-		}
-	}
-	
-	public void setServerId(int serverId) {
-		synchronized(objectMutex) {
-			this.serverId = serverId;
-		}
-		
-		notifyAll(messageBuilder.buildServerId(serverId));
-	}
-	
-	public int getUnknown1() {
-		synchronized(objectMutex) {
-			return unknown1;
-		}
-	}
-	
-	public void setUnknown1(int unknown1) {
-		synchronized(objectMutex) {
-			this.unknown1 = unknown1;
-		}
-		
-		notifyAll(messageBuilder.buildUnknowns(unknown1, unknown2));
-	}
-	
-	public short getUnknown2() {
-		synchronized(objectMutex) {
-			return unknown2;
-		}
-	}
-	
-	public void setUnknown2(short unknown2) {
-		synchronized(objectMutex) {
-			this.unknown2 = unknown2;
-		}
-		
-		notifyAll(messageBuilder.buildUnknowns(unknown1, unknown2));
-	}
-	
+	@SuppressWarnings("unchecked")
 	public SWGMap<String, CurrentServerGCWZonePercent> getCurrentServerGCWZonePercentMap() {
-		return currentServerGCWZonePercentMap;
+		return (SWGMap<String, CurrentServerGCWZonePercent>) getBaseline(6).get("currentServerGCWZonePercentMap");
 	}
 	
+	@SuppressWarnings("unchecked")
 	public SWGMap<String, CurrentServerGCWZonePercent> getCurrentServerGCWTotalPercentMap() {
-		return currentServerGCWTotalPercentMap;
+		return (SWGMap<String, CurrentServerGCWZonePercent>) getBaseline(6).get("currentServerGCWTotalPercentMap");
 	}
 	
+	@SuppressWarnings("unchecked")
 	public SWGMultiMap<String, CurrentServerGCWZoneHistory> getCurrentServerGCWZoneHistoryMap() {
-		return currentServerGCWZoneHistoryMap;
+		return (SWGMultiMap<String, CurrentServerGCWZoneHistory>) getBaseline(6).get("currentServerGCWZoneHistoryMap");
 	}
 	
+	@SuppressWarnings("unchecked")
 	public SWGMultiMap<String, CurrentServerGCWZoneHistory> getCurrentServerGCWTotalHistoryMap() {
-		return currentServerGCWTotalHistoryMap;
+		return (SWGMultiMap<String, CurrentServerGCWZoneHistory>) getBaseline(6).get("currentServerGCWTotalHistoryMap");
 	}
 	
+	@SuppressWarnings("unchecked")
 	public SWGMultiMap<String, OtherServerGCWZonePercent> getOtherServerGCWZonePercentMap() {
-		return otherServerGCWZonePercentMap;
+		return (SWGMultiMap<String, OtherServerGCWZonePercent>) getBaseline(6).get("otherServerGCWZonePercentMap");
 	}
 	
+	@SuppressWarnings("unchecked")
 	public SWGMultiMap<String, OtherServerGCWZonePercent> getOtherServerGCWTotalPercentMap() {
-		return otherServerGCWTotalPercentMap;
+		return (SWGMultiMap<String, OtherServerGCWZonePercent>) getBaseline(6).get("otherServerGCWTotalPercentMap");
 	}
 	
-	public int getUnknown3() {
-		synchronized(objectMutex) {
-			return unknown3;
-		}
-	}
-	
-	public void setUnknown3(int unknown3) {
-		synchronized(objectMutex) {
-			this.unknown3 = unknown3;
-		}
-		
-		notifyAll(messageBuilder.buildUnknown3(unknown3));
-	}
-	
+	@SuppressWarnings("unchecked")
 	public Map<String, Map<String, CurrentServerGCWZonePercent>> getZoneMap() {
-		synchronized(objectMutex) {
-			return zoneMap;
-		}
+		return (Map<String, Map<String, CurrentServerGCWZonePercent>>) otherVariables.get("zoneMap");
 	}
 	
+	@SuppressWarnings("unchecked")
 	public Map<String, ServerFirst> getServerFirst() {
-		synchronized(objectMutex) {
-			return serverFirst;
-		}
+		return (Map<String, ServerFirst>) otherVariables.get("serverFirst");
 	}
 	
 	public boolean addServerFirst(String collectionName, ServerFirst player) {
 		synchronized(objectMutex) {
-			if (!serverFirst.containsKey(collectionName)) {
-				serverFirst.put(collectionName, player);
+			if (!getServerFirst().containsKey(collectionName)) {
+				getServerFirst().put(collectionName, player);
 				return true;
 			}
 			
@@ -292,74 +149,40 @@ public class GuildObject extends UniverseObject implements Serializable {
 		}
 	}
 	
-	public synchronized long getNextInstanceId() {
-		long ret = nextInstanceId;
-		nextInstanceId++;
-		return ret;
+	public long getNextInstanceId() {
+		synchronized(objectMutex) {
+			otherVariables.set("nextInstanceId", (long) (((long) otherVariables.get("nextInstanceId")) + 1L));
+			return (long) otherVariables.get("nextInstanceId");
+		}
+	}
+	
+	@Override
+	public void notifyClients(IoBuffer buffer, boolean notifySelf) {
+		notifyObservers(buffer, false);
+	}
+	
+	@Override
+	public ObjectMessageBuilder getMessageBuilder() {
+		synchronized(objectMutex) {
+			if (messageBuilder == null) {
+				messageBuilder = new GuildMessageBuilder(this);
+			}
+			
+			return messageBuilder;
+		}
 	}
 	
 	@Override
 	public void sendBaselines(Client destination) {
-		destination.getSession().write(messageBuilder.buildBaseline3());
-		destination.getSession().write(messageBuilder.buildBaseline6());
-	}
-	
-	private void notifyAll(IoBuffer buffer) {
-		synchronized(core.getActiveConnectionsMap()) {
-			for (Client client : core.getActiveConnectionsMap().values()) {
-				client.getSession().write(buffer);
-			}
+		if (destination != null && destination.getSession() != null) {
+			destination.getSession().write(getBaseline(3).getBaseline());
+			destination.getSession().write(getBaseline(6).getBaseline());
 		}
-	}
-	
-	public ObjectMessageBuilder getMessageBuilder() {
-		return messageBuilder;
 	}
 	
 	@Override
 	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
-		
-		switch (viewType) {
-			case 3:
-			{
-				switch (updateType) {
-					case 4:
-					{
-						buffer = messageBuilder.createDelta("GILD", (byte) 3, (short) 1, (short) 4, buffer.flip(), buffer.array().length + 4);
-			
-						for (Client client : core.getActiveConnectionsMap().values()) {
-							client.getSession().write(buffer);
-						}
-							
-						break;
-					}
-				}
-			}
-			case 6:
-			{
-				switch (updateType) {
-					case 2:
-					case 3:
-					case 4:
-					case 5:
-					case 6:
-					case 7:
-					{
-						buffer = messageBuilder.createDelta("GILD", (byte) 6, (short) 1, (short) updateType, buffer.flip(), buffer.array().length + 4);
-						
-						for (Client client : core.getActiveConnectionsMap().values()) {
-							client.getSession().write(buffer);
-						}
-						
-						break;
-					}
-					default:
-					{
-						return;
-					}
-				}
-			}
-		}
+		notifyClients(getBaseline(viewType).createDelta(updateType, buffer.array()), false);
 	}
 	
 }

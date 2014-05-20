@@ -32,13 +32,13 @@ import org.python.core.PyObject;
 import resources.common.FileUtilities;
 import resources.common.OutOfBand;
 import resources.datatables.DisplayType;
-import resources.datatables.STF;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import main.NGECore;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.StfTable;
 import engine.clientdata.visitors.DatatableVisitor;
+import engine.resources.common.Stf;
 import engine.resources.scene.Point3D;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
@@ -311,16 +311,16 @@ public class CollectionService implements INetworkDispatch {
 							}
 							
 							if (hidden && !(getCollection(creature, collectionName) > 0)) {
-								creature.sendSystemMessage(OutOfBand.ProsePackage("@collection:player_hidden_slot_added", "TO", STF.get("@collection_n:" + collectionName).replace(":", " -")), DisplayType.Broadcast);
+								creature.sendSystemMessage(OutOfBand.ProsePackage("@collection:player_hidden_slot_added", "TO", new Stf("@collection_n:" + collectionName).getStfValue()), DisplayType.Broadcast);
 							}
 							
 							player.setCollections(collections.toByteArray());
 							
 							if (!noMessage) {
 								if (!bookName.equals("crafting_book")) {
-									creature.sendSystemMessage(OutOfBand.ProsePackage("@collection:player_slot_added", "TU", STF.get("@collection_n:" + slotName).replace(":", " -"), "TO", STF.get("@collection_n:" + collectionName).replace(":", " -")), DisplayType.Broadcast);
+									creature.sendSystemMessage(OutOfBand.ProsePackage("@collection:player_slot_added", "TU", new Stf("@collection_n:" + slotName).getStfValue(), "TO", new Stf("@collection_n:" + collectionName).getStfValue()), DisplayType.Broadcast);
 								} else {
-									creature.sendSystemMessage(OutOfBand.ProsePackage("@collection:player_slot_increment", "TU", STF.get("@collection_n:" + slotName).replace(":", " -"), "TO", STF.get("@collection_n:" + collectionName).replace(":", " -")), DisplayType.Broadcast);
+									creature.sendSystemMessage(OutOfBand.ProsePackage("@collection:player_slot_increment", "TU", new Stf("@collection_n:" + slotName).getStfValue(), "TO", new Stf("@collection_n:" + collectionName).getStfValue()), DisplayType.Broadcast);
 								}
 							}
 							
@@ -357,7 +357,7 @@ public class CollectionService implements INetworkDispatch {
 							}
 							
 							if (isComplete(creature, collectionName)) {
-								creature.sendSystemMessage(OutOfBand.ProsePackage("@collection:player_collection_complete", "TO", STF.get("@collection_n:" + collectionName).replace(":", " -")), DisplayType.Broadcast);
+								creature.sendSystemMessage(OutOfBand.ProsePackage("@collection:player_collection_complete", "TO", new Stf("@collection_n:" + collectionName).getStfValue()), DisplayType.Broadcast);
 								
 								if (!noReward) {
 									try {
@@ -446,7 +446,7 @@ public class CollectionService implements INetworkDispatch {
 								if (trackServerFirst) {
 									if (core.guildService.getGuildObject().addServerFirst(collectionName, new ServerFirst(creature.getCustomName(), creature.getObjectId(), collectionName, System.currentTimeMillis()))) {
 										addCollection(creature, "bdg_server_first_01");
-										creature.sendSystemMessage(OutOfBand.ProsePackage("@collection:player_server_first", "TT", core.getGalaxyName(), "TO", STF.get("@collection_n:" + collectionName).replace(":", " -")), DisplayType.Broadcast);
+										creature.sendSystemMessage(OutOfBand.ProsePackage("@collection:player_server_first", "TT", core.getGalaxyName(), "TO", new Stf("@collection_n:" + collectionName).getStfValue()), DisplayType.Broadcast);
 									}
 								}
 								
@@ -819,7 +819,7 @@ public class CollectionService implements INetworkDispatch {
 								}
 								
 								if (collection.equals(collectionName)) {
-									creature.sendSystemMessage(OutOfBand.ProsePackage("@collection:player_collection_reset", "TO", STF.get("@collection_n:" + collectionName).replace(":", " -")), DisplayType.Broadcast);
+									creature.sendSystemMessage(OutOfBand.ProsePackage("@collection:player_collection_reset", "TO", new Stf("@collection_n:" + collectionName).getStfValue()), DisplayType.Broadcast);
 								}
 								
 								continue;

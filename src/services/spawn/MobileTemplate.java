@@ -21,18 +21,23 @@
  ******************************************************************************/
 package services.spawn;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
 import resources.datatables.Options;
 import resources.datatables.PvpStatus;
+import resources.datatables.Factions;
+import resources.datatables.FactionStatus;
 import resources.loot.LootGroup;
 
 public class MobileTemplate implements Cloneable {
 	
 	private Vector<String> templates;
-	private int optionBitmask = Options.ATTACKABLE;
+	private int optionsBitmask = Options.ATTACKABLE;
 	private int pvpBitmask = PvpStatus.Attackable;
+	private int factionstatus = FactionStatus.OnLeave;
+	private String faction =  "";
 	private short level;
 	private short minLevel;
 	private short maxLevel;
@@ -59,7 +64,7 @@ public class MobileTemplate implements Cloneable {
 	private String meatType, milkType, boneType, hideType;
 	private int meatAmount, milkAmount, boneAmount, hideAmount;
 	private int respawnTime = 0;
-	private List<LootGroup> lootGroups;
+	private List<LootGroup> lootGroups = new ArrayList<LootGroup>();
 
 	
 	public Vector<String> getTemplates() {
@@ -70,18 +75,34 @@ public class MobileTemplate implements Cloneable {
 		this.templates = templates;
 	}
 
-	public int getOptionBitmask() {
-		return optionBitmask;
+	public int getOptionsBitmask() {
+		return optionsBitmask;
 	}
 
-	public void setOptionBitmask(int optionBitmask) {
-		this.optionBitmask = optionBitmask;
+	public void setOptionsBitmask(int optionsBitmask) {
+		this.optionsBitmask = optionsBitmask;
 	}
 
 	public int getPvpBitmask() {
 		return pvpBitmask;
 	}
 
+	public String getFaction(){
+		return faction;
+	}
+	
+	public void setFaction(String faction){
+		this.faction = faction;
+	}
+	
+	public int getFactionStatus(){
+		return factionstatus;
+	}
+	
+	public void setFactionStatus(int factionstatus){
+		this.factionstatus = factionstatus;
+	}	
+	
 	public void setPvpBitmask(int pvpBitmask) {
 		this.pvpBitmask = pvpBitmask;
 	}

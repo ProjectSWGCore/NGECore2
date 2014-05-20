@@ -90,7 +90,11 @@ public class LairSpawnArea extends SpawnArea {
 				
 		LairSpawnTemplate lairSpawn = lairTemplates.get(random.nextInt(lairTemplates.size()));
 		
-		int level = random.nextInt((int) (lairSpawn.getMaxLevel() - lairSpawn.getMinLevel()) + 1) + lairSpawn.getMinLevel();
+		int level = -1; // If level equals -1 then the mobile template CL will be used!
+		if (lairSpawn.getMinLevel() != -1 && lairSpawn.getMaxLevel()!=-1)
+			level = random.nextInt((int) (lairSpawn.getMaxLevel() - lairSpawn.getMinLevel()) + 1) + lairSpawn.getMinLevel();
+		
+		
 		
 		LairActor lairActor = core.spawnService.spawnLair(lairSpawn.getLairTemplate(), getPlanet(), randomPosition, (short) level);
 		if(lairActor == null)

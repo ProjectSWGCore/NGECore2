@@ -98,7 +98,10 @@ public class StaticService implements INetworkDispatch {
 	public SWGObject spawnObject(String template, String planetName, long cellId, float x, float y, float z, float qW, float qX, float qY, float qZ) {
 		return spawnObject(template, planetName, cellId, x, y, z, qW, qX, qY, qZ, -1);
 	}
-
+	
+	public SWGObject spawnObject(String template, String planetName, SWGObject cell, float x, float y, float z, float qW, float qX, float qY, float qZ, int respawnTime) {
+		return spawnObject(template, planetName, ((cell == null) ? 0L : cell.getObjectID()), x, y, z, qW, qX, qY, qZ, respawnTime);
+	}
 	
 	public SWGObject spawnObject(String template, String planetName, long cellId, float x, float y, float z, float qW, float qX, float qY, float qZ, int respawnTime) {
 		Planet planet = core.terrainService.getPlanetByName(planetName);
@@ -113,6 +116,11 @@ public class StaticService implements INetworkDispatch {
 		
 		SWGObject cell = core.objectService.getObject(cellId);
 		
+		if (cellId != 0 && cell == null) {
+			System.err.println("CellId invalid for template " + template);
+			return null;
+		}
+		
 		if (cell != null && cell.getContainer() != null && cell.getContainer() instanceof BuildingObject) {
 			buildingId = cell.getContainer().getObjectId();
 			cellNumber = ((BuildingObject) cell.getContainer()).getCellNumberByObjectId(cellId);
@@ -121,6 +129,7 @@ public class StaticService implements INetworkDispatch {
 		long objectId = core.objectService.getDOId(planetName, template, 0, buildingId, cellNumber, x, y, z);
 		
 		SWGObject object = null;
+		
 		MobileTemplate mobileTemplate = core.spawnService.getMobileTemplate(template);
 		
 		if (mobileTemplate != null) {
@@ -147,6 +156,10 @@ public class StaticService implements INetworkDispatch {
 		
 		if (objectId != 0 && object.getObjectID() != objectId) {
 			System.err.println("StaticService: ObjectId " + objectId + " was taken for object with template " + object.getTemplate() + ".  Replacement: " + object.getObjectID());
+		}
+		
+		if (mobileTemplate != null) {
+			return object;
 		}
 		
 		boolean checkCells = false; // shouldn't be needed; for debugging

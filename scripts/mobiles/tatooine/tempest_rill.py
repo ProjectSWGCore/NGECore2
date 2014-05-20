@@ -11,13 +11,22 @@ def addTemplate(core):
 	mobileTemplate.setMinLevel(8)
 	mobileTemplate.setMaxLevel(10)
 	mobileTemplate.setDifficulty(0)
-	mobileTemplate.setAttackRange(4)
+	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)
 	mobileTemplate.setWeaponType(6)
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(1)
+	mobileTemplate.setMeatType("Carnivore Meat")
+	mobileTemplate.setMeatAmount(35)
+	mobileTemplate.setHideType("Bristly Hide")
+	mobileTemplate.setBoneAmount(20)	
+	mobileTemplate.setBoneType("Animal Bone")
+	mobileTemplate.setHideAmount(15)
+	mobileTemplate.setSocialGroup("rill")
+	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setStalker(False)
 
 	
 	
