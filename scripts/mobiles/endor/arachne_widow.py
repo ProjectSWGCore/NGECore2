@@ -27,7 +27,7 @@ def addTemplate(core):
 	
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_arachne_hue.iff')
+	templates.add('object/mobile/shared_arachne.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()

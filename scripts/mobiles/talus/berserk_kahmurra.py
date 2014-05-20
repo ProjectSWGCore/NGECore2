@@ -29,7 +29,7 @@ def addTemplate(core):
 	mobileTemplate.setStalker(False)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_kahmurra_hue.iff')
+	templates.add('object/mobile/shared_kahmurra.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()

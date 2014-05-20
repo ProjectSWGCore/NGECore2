@@ -30,7 +30,7 @@ def addTemplate(core):
 	mobileTemplate.setOptionsBitmask(192)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_gackle_hue.iff')
+	templates.add('object/mobile/shared_gackle.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()

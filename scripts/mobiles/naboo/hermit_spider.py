@@ -26,7 +26,7 @@ def addTemplate(core):
 	mobileTemplate.setOptionsBitmask(192)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_hermit_spider_hue.iff')
+	templates.add('object/mobile/shared_hermit_spider.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
