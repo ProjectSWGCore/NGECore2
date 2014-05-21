@@ -8,5 +8,5 @@ def addSpawnArea(core):
 	dynamicGroups.add('huurton_group_1')
 	dynamicGroups.add('bol_group_1')
 	dynamicGroups.add('quenker_group_south_1')
-	core.spawnService.addDynamicSpawnArea(dynamicGroups, 1710, 3739, 1208, 'dantooine')
+	core.spawnService.addDynamicSpawnArea(dynamicGroups, 778, 4280, 1187, 'dantooine')
 	return

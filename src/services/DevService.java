@@ -147,6 +147,8 @@ public class DevService implements INetworkDispatch {
 					suiOptions.put((long) 165, "Teleport to Spawn Area #1");
 					suiOptions.put((long) 166, "Teleport to Imperial Op");
 					suiOptions.put((long) 167, "Teleport to Rebel Base ");
+					suiOptions.put((long) 153, "Teleport to Force Crystal Hunter's Cave");
+					suiOptions.put((long) 121, "Teleport to Sandbox City");	
 				}
 				break;
 		
@@ -1263,6 +1265,10 @@ public class DevService implements INetworkDispatch {
 					case 166:
 						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("dantooine"), new Point3D(-4211,18,-2349), player.getOrientation(), null);
 						return;
+						
+					case 167:
+						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("dantooine"), new Point3D(-4211,18,-2349), player.getOrientation(), null);
+						return;
 
 					case 123:
 						TangibleObject arakydDroids = (TangibleObject) core.objectService.createObject("object/tangible/mission/shared_mission_bounty_droid_probot.iff", planet);
@@ -1290,6 +1296,10 @@ public class DevService implements INetworkDispatch {
 						TangibleObject guildRegistry = (TangibleObject) core.objectService.createObject("object/tangible/furniture/technical/shared_guild_registry_initial.iff", planet);
 						inventory.add(guildRegistry);
 						return;
+						
+					case 153:
+						Point3D position = new Point3D(-6222,1,7380);
+						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("dantooine"), position, player.getOrientation(), null);
 				}
 			}	
 		});

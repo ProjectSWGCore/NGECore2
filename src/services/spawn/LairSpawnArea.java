@@ -29,6 +29,7 @@ import net.engio.mbassy.listener.Handler;
 import resources.common.collidables.AbstractCollidable;
 import resources.common.collidables.AbstractCollidable.EnterEvent;
 import resources.common.collidables.AbstractCollidable.ExitEvent;
+import resources.datatables.Options;
 import resources.objects.creature.CreatureObject;
 import services.SimulationService.MoveEvent;
 import services.TerrainService;
@@ -115,7 +116,7 @@ public class LairSpawnArea extends SpawnArea {
 		
 		CreatureObject creature = (CreatureObject) object;
 		
-		if(creature.getSlottedObject("ghost") == null)
+		if(creature.getSlottedObject("ghost") == null && !creature.getOption(Options.MOUNT))
 			return;
 		
 		spawnLair(creature);
@@ -134,7 +135,7 @@ public class LairSpawnArea extends SpawnArea {
 		
 		CreatureObject creature = (CreatureObject) object;
 		
-		if(creature.getSlottedObject("ghost") == null)
+		if(creature.getSlottedObject("ghost") == null && !creature.getOption(Options.MOUNT))
 			return;
 
 		creature.getEventBus().unsubscribe(this);
@@ -146,12 +147,15 @@ public class LairSpawnArea extends SpawnArea {
 		
 		SWGObject object = event.object;
 		
-		if(object == null || !(object instanceof CreatureObject) || object.getContainer() != null)
+		//if(object == null || !(object instanceof CreatureObject) || object.getContainer() != null)
+		//	return;
+		
+		if(object == null || !(object instanceof CreatureObject))
 			return;
 		
 		CreatureObject creature = (CreatureObject) object;
 		
-		if(creature.getSlottedObject("ghost") == null)
+		if(creature.getSlottedObject("ghost") == null && !creature.getOption(Options.MOUNT))
 			return;
 		
 		if(new Random().nextFloat() <= 0.05)

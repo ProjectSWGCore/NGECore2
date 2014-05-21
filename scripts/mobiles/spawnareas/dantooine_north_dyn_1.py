@@ -7,5 +7,5 @@ def addSpawnArea(core):
 	dynamicGroups.add('force_sensitives_wild_1')
 	dynamicGroups.add('graul_mauler_nw_group_1')
 	dynamicGroups.add('voritors_wild_1')
-	core.spawnService.addDynamicSpawnArea(dynamicGroups, 891, 6135, 1986, 'dantooine')
+	core.spawnService.addDynamicSpawnArea(dynamicGroups, 61, 6615, 1966, 'dantooine')
 	return

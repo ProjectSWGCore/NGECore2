@@ -116,8 +116,12 @@ public class SpawnService {
 		if(level != -1)
 			creature.setLevel(level);
 		else {
-			creature.setLevel(mobileTemplate.getLevel());	
-			level = mobileTemplate.getLevel();
+			if (mobileTemplate.getLevel()!=0){
+				level = mobileTemplate.getLevel();
+				creature.setLevel(level);
+			} else {
+				level = -1;
+			}
 		}
 		
 		if (mobileTemplate.getMinLevel()!=0 && mobileTemplate.getMaxLevel()!=0 && level == -1){
