@@ -60,6 +60,7 @@ import protocol.swg.ClientVerifyAndLockNameResponse;
 import protocol.swg.CreateCharacterSuccess;
 import protocol.swg.HeartBeatMessage;
 import resources.objects.creature.CreatureObject;
+import resources.objects.intangible.IntangibleObject;
 import resources.objects.mission.MissionObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
@@ -286,6 +287,7 @@ public class CharacterService implements INetworkDispatch {
 				player.setProfession(clientCreateCharacter.getProfession());
 				player.setProfessionIcon(Professions.get(clientCreateCharacter.getProfession()));
 				player.setProfessionWheelPosition(clientCreateCharacter.getProfessionWheelPosition());
+				player.setNextUpdateTime(core.gcwService.calculateNextUpdateTime() + player.getBornDate());
 				if(clientCreateCharacter.getHairObject().length() > 0) {
 					String sharedHairTemplate = clientCreateCharacter.getHairObject().replace("/hair_", "/shared_hair_");
 					TangibleObject hair = (TangibleObject) core.objectService.createObject(sharedHairTemplate, object.getPlanet());
@@ -295,8 +297,6 @@ public class CharacterService implements INetworkDispatch {
 					object.addObjectToEquipList(hair);
 				}
 				
-				player.setBornDate((int) System.currentTimeMillis());
-
 				TangibleObject inventory = (TangibleObject) core.objectService.createObject("object/tangible/inventory/shared_character_inventory.iff", object.getPlanet());
 				inventory.setContainerPermissions(CreatureContainerPermissions.CREATURE_CONTAINER_PERMISSIONS);
 				TangibleObject appInventory = (TangibleObject) core.objectService.createObject("object/tangible/inventory/shared_appearance_inventory.iff", object.getPlanet());
@@ -337,6 +337,9 @@ public class CharacterService implements INetworkDispatch {
 				object.addObjectToEquipList(defaultWeapon);
 				object._add(defaultWeapon);
 				object.setWeaponId(defaultWeapon.getObjectID());
+				
+				IntangibleObject pda = (IntangibleObject) core.objectService.createObject("object/intangible/data_item/shared_guild_stone.iff", object.getPlanet());
+				datapad.add(pda);
 				
 				createStarterClothing(object, sharedRaceTemplate, clientCreateCharacter.getStarterProfession());
 				//core.scriptService.callScript("scripts/", "demo", "CreateStartingCharacter", core, object);

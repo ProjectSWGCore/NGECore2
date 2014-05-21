@@ -22,10 +22,10 @@
 package services.spawn;
 
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.Random;
 import java.util.Vector;
 
+import resources.datatables.Options;
 import resources.datatables.Posture;
 import main.NGECore;
 import net.engio.mbassy.listener.Handler;
@@ -35,7 +35,6 @@ import resources.common.collidables.AbstractCollidable.ExitEvent;
 import resources.objects.creature.CreatureObject;
 import services.TerrainService;
 import services.SimulationService.MoveEvent;
-import services.ai.LairActor;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -61,13 +60,15 @@ public class DynamicSpawnArea extends SpawnArea {
 	public void onEnter(EnterEvent event) {
 
 		SWGObject object = event.object;
-		
+		// ToDo: Mounted players must be handled too
+		//System.out.println("Entering object " + object.getClass().getName());
 		if(object == null || !(object instanceof CreatureObject))
 			return;
 		
+		
 		CreatureObject creature = (CreatureObject) object;
 		
-		if(creature.getSlottedObject("ghost") == null)
+		if(creature.getSlottedObject("ghost") == null && !creature.getOption(Options.MOUNT))
 			return;
 		
 		creature.getEventBus().subscribe(this);
@@ -93,8 +94,14 @@ public class DynamicSpawnArea extends SpawnArea {
 			Vector<CreatureObject> groupMembers = new Vector<CreatureObject>();
 			Point3D randomGroupPosition = getRandomPosition(creature.getWorldPosition(), 32, 100);
 			int spawnCount = spawnGroup.getGroupMembersNumber();
-			if (spawnCount<0)
-				spawnCount = Math.abs(spawnCount) + new Random().nextInt(spawnGroup.getMobiles().size()-Math.abs(spawnCount));
+			if (spawnCount<0){
+				int spawnCount2 = 1;
+				if (Math.abs(spawnCount)<spawnGroup.getMobiles().size())
+					spawnCount2 = Math.abs(spawnCount) + new Random().nextInt(spawnGroup.getMobiles().size()-Math.abs(spawnCount));
+				else
+					spawnCount2 = Math.abs(spawnCount);
+				spawnCount = Math.max(Math.abs(spawnCount), spawnCount2);
+			}
 			for(int i = 0; i < spawnCount; i++) {// A group with a specified or random number of members
 				CreatureObject spawnedCreature = spawnCreatureMember(creature, groupMembers, randomGroupPosition, i);
 				if (spawnedCreature!=null)
@@ -115,7 +122,7 @@ public class DynamicSpawnArea extends SpawnArea {
 		
 		CreatureObject creature = (CreatureObject) object;
 		
-		if(creature.getSlottedObject("ghost") == null)
+		if(creature.getSlottedObject("ghost") == null && !creature.getOption(Options.MOUNT))
 			return;
 
 		creature.getEventBus().unsubscribe(this);
@@ -127,12 +134,15 @@ public class DynamicSpawnArea extends SpawnArea {
 		
 		SWGObject object = event.object;
 		
-		if(object == null || !(object instanceof CreatureObject) || object.getContainer() != null)
+		//if(object == null || !(object instanceof CreatureObject) || object.getContainer() != null)
+		//	return;
+		// Mounts should not be excluded to trigger spawns as it was on live also
+		if(object == null || !(object instanceof CreatureObject))
 			return;
 		
 		CreatureObject creature = (CreatureObject) object;
-		
-		if(creature.getSlottedObject("ghost") == null)
+		//System.out.println("MOUNT " + creature.getOption(Options.MOUNT) + " name " + creature.getTemplate());
+		if(creature.getSlottedObject("ghost") == null && !creature.getOption(Options.MOUNT))
 			return;
 
 		if (spawnGroups==null){
@@ -154,15 +164,24 @@ public class DynamicSpawnArea extends SpawnArea {
 			// One spawnarea -> many NPC groups
 			int index = new Random().nextInt(spawnGroups.size());
 			this.spawnGroup = spawnGroups.get(index);
+			
 			Vector<CreatureObject> groupMembers = new Vector<CreatureObject>();
-			Point3D randomGroupPosition = getRandomPosition(creature.getWorldPosition(), 32, 100);
+			//Point3D randomGroupPosition = getRandomPosition(creature.getWorldPosition(), 32, 100);
+			Point3D randomGroupPosition = getRandomPosition(creature.getWorldPosition(), 32, spawnGroup.getMinSpawnDistance()+10);
 			int spawnCount = spawnGroup.getGroupMembersNumber();
-			if (spawnCount<0)
-				spawnCount = Math.abs(spawnCount) + new Random().nextInt(spawnGroup.getMobiles().size()-Math.abs(spawnCount));
+			if (spawnCount<0){
+				int spawnCount2 = 1;
+				if (Math.abs(spawnCount)<spawnGroup.getMobiles().size())
+					spawnCount2 = Math.abs(spawnCount) + new Random().nextInt(spawnGroup.getMobiles().size()-Math.abs(spawnCount));
+				else
+					spawnCount2 = Math.abs(spawnCount);
+				spawnCount = Math.max(Math.abs(spawnCount), spawnCount2);
+			}
+			
 			for(int i = 0; i < spawnCount; i++) {// A group with a specified or random number of members
 				CreatureObject spawnedCreature = spawnCreatureMember(creature, groupMembers, randomGroupPosition, i);
 				if (spawnedCreature!=null)
-					groupMembers.add(spawnedCreature);
+					groupMembers.add(spawnedCreature);				
 			}
 		}
 		
@@ -259,7 +278,7 @@ public class DynamicSpawnArea extends SpawnArea {
 		String template = spawnGroup.getMobiles().get(spawnIndex);
 		MobileTemplate mobileTemplate = NGECore.getInstance().spawnService.getMobileTemplate(template);
 		if (mobileTemplate==null){
-			System.out.println("mobileTemplate==null");
+			System.out.println("mobileTemplate==null for template " + template);
 			return null;
 		}
 		
@@ -282,6 +301,7 @@ public class DynamicSpawnArea extends SpawnArea {
 				for(CreatureObject mobile : mobiles) {
 					if(mobile.getWorldPosition().getDistance(randomPosition) < spawnGroup.getMinSpawnDistance() && ! groupMembers.contains(mobile)){
 						minDistViolated = true; // Distance to other nearby groups
+						//System.out.println("minDistViolated " + mobile.getWorldPosition().getDistance(randomPosition) + "mobile: " + mobile.getTemplate());
 					}
 				}
 				if (minDistViolated)
@@ -296,13 +316,18 @@ public class DynamicSpawnArea extends SpawnArea {
 		}
 		
 		if(!foundPos){
+			System.out.println("mobileTemplate pos not found " + mobileTemplate.getCreatureName());
 			return null;
 		}
-		
+		System.out.println("mobileTemplate pos found " + mobileTemplate.getCreatureName());
 		
 		CreatureObject spawnedCreature = core.spawnService.spawnCreature(template, getPlanet().getName(), 0, randomPosition.x, randomPosition.y, randomPosition.z);
 		if(spawnedCreature != null){
 			mobiles.add(spawnedCreature);
+			System.err.println("Creature ADDED " + spawnedCreature.getTemplate());
+		} else 
+		{
+			System.out.println("Creature not spawned" + template);
 		}
 
 		return spawnedCreature;		

@@ -22,6 +22,7 @@
 package resources.guild;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.mina.core.buffer.IoBuffer;
@@ -29,21 +30,27 @@ import org.apache.mina.core.buffer.IoBuffer;
 import engine.resources.objects.Delta;
 import engine.resources.objects.SWGObject;
 
-public class Guild extends Delta implements Serializable {
+public class Guild extends Delta implements Serializable, Comparable<Guild> {
 	
 	private static final long serialVersionUID = 1L;
 	private int id;
+	private int chatRoomId;
 	private String abbreviation;
 	private String name;
-	private SWGObject leader;
-	private List<SWGObject> members;
+	private long leader;
+	private String leaderName;
+	private List<Long> members = new ArrayList<Long>();
+	private List<Long> sponsors = new ArrayList<Long>();
+	private List<Long> sponsoredPlayers = new ArrayList<Long>();
 	
 	public Guild(int id, String abbreviation, String name, SWGObject leader) {
 		this.id = id;
 		this.abbreviation = abbreviation;
 		this.name = name;
-		this.leader = leader;
-		this.members.add(leader);
+		this.leader = leader.getObjectID();
+		this.leaderName = leader.getCustomName();
+		//this.members.add(leader.getObjectID());
+		//this.sponsors.add(leader.getObjectID());
 	}
 	
 	public Guild() {
@@ -62,6 +69,14 @@ public class Guild extends Delta implements Serializable {
 		}
 	}
 	
+	public int getChatRoomId() {
+		return chatRoomId;
+	}
+
+	public void setChatRoomId(int chatRoomId) {
+		this.chatRoomId = chatRoomId;
+	}
+
 	public String getAbbreviation() {
 		synchronized(objectMutex) {
 			return abbreviation;
@@ -90,20 +105,48 @@ public class Guild extends Delta implements Serializable {
 		return (Integer.toString(getId()) + ":" + getAbbreviation());
 	}
 	
-	public SWGObject getLeader() {
+	public long getLeader() {
 		synchronized(objectMutex) {
 			return leader;
 		}
 	}
 	
-	public void setLeader(SWGObject leader) {
+	public void setLeader(long leader) {
 		synchronized(objectMutex) {
 			this.leader = leader;
 		}
 	}
 	
-	public List<SWGObject> getMembers() {
+	public List<Long> getMembers() {
 		return members;
+	}
+
+	public String getLeaderName() {
+		synchronized(objectMutex) {
+			return leaderName;
+		}
+	}
+
+	public void setLeaderName(String leaderName) {
+		synchronized(objectMutex) {
+			this.leaderName = leaderName;
+		}
+	}
+
+	public List<Long> getSponsers() {
+		return sponsors;
+	}
+
+	public void setSponsors(List<Long> sponsors) {
+		this.sponsors = sponsors;
+	}
+
+	public List<Long> getSponsoredPlayers() {
+		return sponsoredPlayers;
+	}
+
+	public void setSponsoredPlayers(List<Long> sponsoredPlayers) {
+		this.sponsoredPlayers = sponsoredPlayers;
 	}
 
 	public byte[] getBytes() {
@@ -112,6 +155,11 @@ public class Guild extends Delta implements Serializable {
 			buffer.put(getAsciiString(getString()));
 			return buffer.array();
 		}
+	}
+
+	@Override
+	public int compareTo(Guild guild) {
+		return ((Integer) id).compareTo(guild.getId());
 	}
 
 }

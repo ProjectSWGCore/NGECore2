@@ -47,7 +47,9 @@ import resources.objects.creature.CreatureObject;
 import resources.objects.mission.MissionObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
+import engine.clientdata.ClientFileManager;
 import engine.clientdata.StfTable;
+import engine.clientdata.visitors.DatatableVisitor;
 import engine.clients.Client;
 import engine.resources.common.CRC;
 import engine.resources.service.INetworkDispatch;
@@ -60,6 +62,8 @@ public class FactionService implements INetworkDispatch {
 	private Map<String, Integer> factionMap = new TreeMap<String, Integer>();
 	
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+	
+	private DatatableVisitor pvpFactions;
 	
 	public FactionService(NGECore core) {
 		this.core = core;
@@ -74,6 +78,8 @@ public class FactionService implements INetworkDispatch {
 					factionMap.put(faction, CRC.StringtoCRC(faction));
 				}
 			}
+			
+			pvpFactions = ClientFileManager.loadFile("datatables/player/pvp_factions.iff", DatatableVisitor.class);
         } catch (Exception e) {
                 e.printStackTrace();
         }
@@ -246,11 +252,11 @@ public class FactionService implements INetworkDispatch {
 			target = (TangibleObject) core.objectService.getObject(((CreatureObject) target).getOwnerId());
 		}
 		
-		if ((target.getPvPBitmask() & PvpStatus.GoingCovert) == PvpStatus.GoingCovert) {
+		if ((target.getPvpBitmask() & PvpStatus.GoingCovert) == PvpStatus.GoingCovert) {
 			pvpBitmask |= PvpStatus.GoingCovert;
 		}
 		
-		if ((target.getPvPBitmask() & PvpStatus.GoingOvert) == PvpStatus.GoingOvert) {
+		if ((target.getPvpBitmask() & PvpStatus.GoingOvert) == PvpStatus.GoingOvert) {
 			pvpBitmask |= PvpStatus.GoingOvert;
 		}
 		
@@ -259,7 +265,7 @@ public class FactionService implements INetworkDispatch {
 		}
 		
 		// Everything below assumes target is potentially attackable.
-		if (!target.getOption(Options.ATTACKABLE)) {
+		if (!target.getOption(Options.ATTACKABLE) || target.getOption(Options.INVULNERABLE)) {
 			return pvpBitmask;
 		}
 		
@@ -352,28 +358,56 @@ public class FactionService implements INetworkDispatch {
 		return pvpBitmask;
 	}
 	
-	// temp fix until calculatePvpStatus is fixed
-	/*
-	public int calculatePvpStatus(CreatureObject player, TangibleObject target) {
-		
-		if(target.getSlottedObject("ghost") != null) {
-			
-			if(!player.getFaction().equals(target.getFaction()) && player.getFactionStatus() == FactionStatus.SpecialForces && ((CreatureObject) target).getFactionStatus() == FactionStatus.SpecialForces)
-				return 55;
-			else if(core.combatService.areInDuel(player, (CreatureObject) target))
-				return 55;
-			else
-				return 0x14;
-						
-		} else {
-			if(target.getAttachment("AI") != null)
-				return PvpStatus.Attackable;
-			else
-				return 0;
+	public boolean isPvpFaction(String faction) {
+		if (!isFaction(faction)) {
+			return false;
 		}
 		
+		try {
+			for (int i = 0; i < pvpFactions.getRowCount(); i++) {
+				if (pvpFactions.getObject(i, 0) != null) {
+					if (((String) pvpFactions.getObject(i, 0)).equals(faction)) {
+						return true;
+					}
+				}
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return false;
 	}
-	*/
+	
+	public void join(CreatureObject actor, String faction) {
+		if (actor.getPvpBitmask() == PvpStatus.GoingCovert) {
+			actor.sendSystemMessage("@faction_recruiter:pvp_status_changing", DisplayType.Broadcast);
+			return;
+		}
+		
+		if (actor.getPvpBitmask() == PvpStatus.GoingOvert) {
+			actor.sendSystemMessage("@faction_recruiter:pvp_status_changing", DisplayType.Broadcast);
+			return;
+		}
+		
+		if (actor.getFaction().length() > 0) {
+			actor.sendSystemMessage("@faction_recruiter:resign_on_leave", DisplayType.Broadcast);
+			return;
+		}
+		
+		scheduler.schedule(() -> {
+			actor.setFaction(faction);
+			actor.setFactionStatus(FactionStatus.Combatant);
+			actor.setPvpBitmask(0);
+			PlayerObject player = ((PlayerObject) actor.getSlottedObject("ghost"));
+			if (player != null) {
+				player.resetGcwPoints();
+				player.resetPvpKills();
+				player.setCurrentRank(1);
+			}
+			actor.updatePvpStatus();
+		}, 1, TimeUnit.SECONDS);
+	}
 	
 	public void changeFactionStatus(CreatureObject actor, int factionStatus) {
 		long time = 1;
@@ -383,12 +417,12 @@ public class FactionService implements INetworkDispatch {
 			return;
 		}
 		
-		if (actor.getPvPBitmask() == PvpStatus.GoingCovert) {
+		if (actor.getPvpBitmask() == PvpStatus.GoingCovert) {
 			actor.sendSystemMessage("@faction_recruiter:pvp_status_changing", DisplayType.Broadcast);
 			return;
 		}
 		
-		if (actor.getPvPBitmask() == PvpStatus.GoingOvert) {
+		if (actor.getPvpBitmask() == PvpStatus.GoingOvert) {
 			actor.sendSystemMessage("@faction_recruiter:pvp_status_changing", DisplayType.Broadcast);
 			return;
 		}
@@ -428,7 +462,7 @@ public class FactionService implements INetworkDispatch {
 		final String finalMessage = message;
 		
 		scheduler.schedule(() -> {
-			actor.setPvPBitmask(0);
+			actor.setPvpBitmask(0);
 			actor.setFactionStatus(factionStatus);
 			actor.updatePvpStatus();
 			actor.sendSystemMessage("@faction_recruiter:" + finalMessage, DisplayType.Broadcast);
@@ -436,12 +470,12 @@ public class FactionService implements INetworkDispatch {
 	}
 	
 	public void resign(CreatureObject actor) {
-		if (actor.getPvPBitmask() == PvpStatus.GoingCovert) {
+		if (actor.getPvpBitmask() == PvpStatus.GoingCovert) {
 			actor.sendSystemMessage("@faction_recruiter:pvp_status_changing", DisplayType.Broadcast);
 			return;
 		}
 		
-		if (actor.getPvPBitmask() == PvpStatus.GoingOvert) {
+		if (actor.getPvpBitmask() == PvpStatus.GoingOvert) {
 			actor.sendSystemMessage("@faction_recruiter:pvp_status_changing", DisplayType.Broadcast);
 			return;
 		}
@@ -461,9 +495,15 @@ public class FactionService implements INetworkDispatch {
 		}
 		
 		scheduler.schedule(() -> {
-			actor.setPvPBitmask(0);
+			actor.setPvpBitmask(0);
 			actor.setFactionStatus(FactionStatus.OnLeave);
 			actor.setFaction("");
+			PlayerObject player = ((PlayerObject) actor.getSlottedObject("ghost"));
+			if (player != null) {
+				player.resetGcwPoints();
+				player.resetPvpKills();
+				player.setCurrentRank(0);
+			}
 			actor.updatePvpStatus();
 			actor.sendSystemMessage("@faction_recruiter:resign_complete", DisplayType.Broadcast);
 		}, time, TimeUnit.SECONDS);

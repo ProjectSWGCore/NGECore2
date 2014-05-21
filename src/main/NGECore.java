@@ -21,6 +21,7 @@
  ******************************************************************************/
 package main;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -59,7 +60,6 @@ import services.ConnectionService;
 import services.ConversationService;
 import services.DevService;
 import services.EntertainmentService;
-import services.EquipmentService;
 import services.GroupService;
 import services.housing.HousingService;
 import services.InstanceService;
@@ -84,9 +84,10 @@ import services.collections.CollectionService;
 import services.combat.CombatService;
 import services.command.CombatCommand;
 import services.command.CommandService;
+import services.equipment.EquipmentService;
 import services.gcw.FactionService;
 import services.gcw.GCWService;
-import services.guild.GuildService;
+import services.GuildService;
 import services.LoginService;
 import services.map.MapService;
 import services.mission.MissionService;
@@ -255,6 +256,21 @@ public class NGECore {
 		Config options = new Config();
 		options.setFilePath("options.cfg");
 		boolean optionsConfigLoaded = options.loadConfigFile();
+		
+		if (optionsConfigLoaded && options.getInt("CLEAN.ODB.FOLDERS") > 0) {
+			File baseFolder = new File("./odb");
+			
+			if (baseFolder.isDirectory()) {
+				for (File odbFolder : baseFolder.listFiles()) {
+					if (odbFolder.isDirectory()) {
+						for (File file : odbFolder.listFiles()) {
+							if (!file.isDirectory() && !file.getName().equals("placeholder.txt")) { file.delete(); }
+						}
+					}
+				}
+			}
+			System.out.println("Cleaned ODB Folders.");
+		}
 		
 		// Database
 		databaseConnection = new DatabaseConnection();
@@ -508,7 +524,9 @@ public class NGECore {
 		List<CreatureObject> deletedObjects = new ArrayList<CreatureObject>();
 		
 		while(cursor.hasNext()) {
-			SWGObject creature = (SWGObject) cursor.next();
+			Object next = cursor.next();
+			if (next == null) continue;
+			SWGObject creature = (SWGObject) next;
 			if(!characterService.playerExists(creature.getObjectID()) && creature instanceof CreatureObject)
 				deletedObjects.add((CreatureObject) creature);
 		}

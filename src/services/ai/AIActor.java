@@ -44,7 +44,6 @@ import services.ai.states.AttackState;
 import services.ai.states.DeathState;
 import services.ai.states.IdleState;
 import services.ai.states.RetreatState;
-import services.ai.states.StalkState;
 import services.combat.CombatEvents.DamageTaken;
 import services.spawn.MobileTemplate;
 import java.util.Random;
@@ -74,15 +73,15 @@ public class AIActor {
 		creature.getEventBus().subscribe(this);
 		this.currentState = new IdleState();
 		regenTask = scheduler.scheduleAtFixedRate(() -> {
-			if(creature.getHealth() < creature.getMaxHealth() && creature.getCombatFlag() == 0 && creature.getPosture() != 13 && creature.getPosture() != 14)
+			if(creature.getHealth() < creature.getMaxHealth() && !creature.isInCombat() && creature.getPosture() != 13 && creature.getPosture() != 14)
 				creature.setHealth(creature.getHealth() + (36 + creature.getLevel() * 4));
 		}, 0, 1000, TimeUnit.MILLISECONDS);
 		if(creature.getOption(Options.AGGRESSIVE)) {
 			aggroCheckTask = scheduler.scheduleAtFixedRate(() -> {
-				if(creature == null || creature.getObservers().isEmpty() || creature.getCombatFlag() != 0 || isStalking)
+				if(creature == null || creature.getObservers().isEmpty() || creature.isInCombat() || isStalking)
 					return;
 				creature.getObservers().stream().map(Client::getParent).filter(obj -> obj.inRange(creature.getWorldPosition(), 10)).forEach((obj) -> {
-					if(new Random().nextFloat() <= 0.33 || creature.getCombatFlag() != 0 || isStalking) {
+					if(new Random().nextFloat() <= 0.33 || creature.isInCombat() || isStalking) {
 						/*if(mobileTemplate.isStalker()) {
 							setFollowObject((CreatureObject) obj);
 							setCurrentState(new StalkState());

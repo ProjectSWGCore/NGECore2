@@ -24,7 +24,7 @@ package resources.objectives;
 import engine.resources.scene.Point3D;
 import main.NGECore;
 import resources.common.OutOfBand;
-import resources.common.ProsePackage;
+import resources.datatables.DisplayType;
 import resources.objects.creature.CreatureObject;
 import resources.objects.mission.MissionObject;
 import resources.objects.tangible.TangibleObject;
@@ -103,7 +103,7 @@ public class DeliveryMissionObjective extends MissionObjective {
 		
 		player.addBankCredits(reward);
 		
-		player.sendSystemMessage(new OutOfBand(new ProsePackage("@mission/mission_generic:success_w_amount", reward)), (byte) 0);
+		player.sendSystemMessage(OutOfBand.ProsePackage("@mission/mission_generic:success_w_amount", reward), DisplayType.Broadcast);
 		
 		abort(core, player);
 		

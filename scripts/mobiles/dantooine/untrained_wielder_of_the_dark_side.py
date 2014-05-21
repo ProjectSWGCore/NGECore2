@@ -7,7 +7,6 @@ def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
 	mobileTemplate.setCreatureName('untrained_wielder_of_the_dark_side')
-	mobileTemplate.setLevel(90)
 	mobileTemplate.setMinLevel(61)
 	mobileTemplate.setMaxLevel(70)
 	mobileTemplate.setDifficulty(0)
@@ -19,6 +18,7 @@ def addTemplate(core):
 	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setSocialGroup('remnants of kun')
 	mobileTemplate.setAssistRange(12)
+	mobileTemplate.setRespawnTime(300)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_untrained_wielder_of_the_darkside.iff')

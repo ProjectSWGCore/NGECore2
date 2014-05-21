@@ -193,7 +193,9 @@ public class SimulationService implements INetworkDispatch {
 		ODBCursor cursor = core.getSWGObjectODB().getCursor();
 		
 		while(cursor.hasNext()) {
-			SWGObject building = core.objectService.getObject(((SWGObject) cursor.next()).getObjectID());
+			Object next = cursor.next();
+			if (next == null) continue;
+			SWGObject building = core.objectService.getObject(((SWGObject) next).getObjectID());
 			if(building == null || (!(building instanceof BuildingObject) && !(building instanceof HarvesterObject)))
 				continue;
 			if(building.getAttachment("hasLoadedServerTemplate") == null)
@@ -337,6 +339,8 @@ public class SimulationService implements INetworkDispatch {
 					return;
 				}
 				
+				CreatureObject creature = (CreatureObject) client.getParent();
+				
 				CreatureObject object = (CreatureObject) client.getParent();
 				
 				if (core.mountService.isMounted(object)) {
@@ -356,8 +360,11 @@ public class SimulationService implements INetworkDispatch {
 						move(object, oldPos.x, oldPos.z, newPos.x, newPos.z);
 					Quaternion newOrientation = new Quaternion(dataTransform.getWOrientation(), dataTransform.getXOrientation(), dataTransform.getYOrientation(), dataTransform.getZOrientation());
 					object.setPosition(newPos);
+					creature.setPosition(newPos);
 					object.setOrientation(newOrientation);
+					creature.setOrientation(newOrientation);
 					object.setMovementCounter(dataTransform.getMovementCounter());
+					creature.setMovementCounter(dataTransform.getMovementCounter());
 				}
 				if(object.getContainer() != null) {
 					object.getContainer()._remove(object);
@@ -398,13 +405,30 @@ public class SimulationService implements INetworkDispatch {
 					if(!updateAwareObjects.contains(obj) && obj != object && !object.getAwareObjects().contains(obj) &&  obj.getContainer() != object && obj.isInQuadtree()) {						
 						if(obj.getAttachment("bigSpawnRange") == null && obj.getWorldPosition().getDistance2D(newPos) > 200)
 							continue;						
-						object.makeAware(obj);
-						if(obj.getClient() != null)
-							obj.makeAware(object);
+						//object.makeAware(obj);
+						
+						if (object.getOption(Options.MOUNT)){
+							CreatureObject owner = (CreatureObject) core.objectService.getObject(object.getOwnerId());
+							owner.makeAware(obj);
+						}
+						else {
+							object.makeAware(obj);
+						}
+						
+						if(obj.getClient() != null){
+							if (object.getOption(Options.MOUNT)){
+								CreatureObject owner = (CreatureObject) core.objectService.getObject(object.getOwnerId());
+								obj.makeAware(owner);
+							}
+							else {
+								obj.makeAware(object);
+							}
+						}
 					}
 				}
 				
 				checkForCollidables(object);
+				object.setAttachment("lastValidPosition", object.getPosition());
 				MoveEvent event = new MoveEvent();
 				event.object = object;
 				object.getEventBus().publish(event);
@@ -460,6 +484,8 @@ public class SimulationService implements INetworkDispatch {
 					remove(object, oldPos.x, oldPos.z);
 					if(object.getContainer() != null)
 						object.getContainer()._remove(object);
+					else if (object.getClient().isGM() && parent.getContainer() != null)
+						object.sendSystemMessage("BuildingId: Dec: " + parent.getContainer().getObjectID() + " / Hex: " + Long.toHexString(parent.getContainer().getObjectID()), DisplayType.Broadcast);
 					parent._add(object);
 				}
 				object.setPosition(newPos);
@@ -468,6 +494,7 @@ public class SimulationService implements INetworkDispatch {
 				object.notifyObservers(utm, false);
 				
 				checkForCollidables(object);
+				object.setAttachment("lastValidPosition", object.getPosition());
 
 			}
 				

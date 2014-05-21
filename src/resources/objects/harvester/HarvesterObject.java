@@ -118,8 +118,8 @@ public class HarvesterObject extends InstallationObject implements Serializable 
 	
 	private int specRate;
 	
-	public HarvesterObject(long objectID, Planet planet, String template, Point3D position, Quaternion orientation){
-		super(objectID, planet, template, position, orientation);
+	public HarvesterObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String template) {
+		super(objectID, planet, position, orientation, template);
 		this.setConditionDamage(100);
 		messageBuilder = new HarvesterMessageBuilder(this);
 		installationMessageBuilder = new InstallationMessageBuilder((InstallationObject)this);

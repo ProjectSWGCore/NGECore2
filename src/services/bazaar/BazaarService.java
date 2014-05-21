@@ -22,24 +22,14 @@
 package services.bazaar;
 
 import java.nio.ByteOrder;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-
-import com.sleepycat.je.Transaction;
-import com.sleepycat.persist.EntityCursor;
-
 import main.NGECore;
 import engine.clients.Client;
 import engine.resources.database.ODBCursor;
@@ -50,7 +40,7 @@ import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import resources.common.Opcodes;
 import resources.common.OutOfBand;
-import resources.common.ProsePackage;
+import resources.datatables.DisplayType;
 import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.intangible.IntangibleObject;
@@ -690,14 +680,12 @@ public class BazaarService implements INetworkDispatch {
 		core.objectService.destroyObject(item);
 		
 		if(vendor.getTemplate().contains("terminal_bazaar")) {
-			ProsePackage prose = new ProsePackage("base_player", "sale_fee");
 			int salesFee = SALES_FEE;
 			if(premium) 
 				salesFee *= 5;
 			
 			player.setBankCredits(player.getBankCredits() - salesFee);
-			prose.setDiInteger(salesFee);
-			player.sendSystemMessage(new OutOfBand(prose), (byte) 0);
+			player.sendSystemMessage(OutOfBand.ProsePackage("@base_player:sale_fee", salesFee), DisplayType.Broadcast);
 		}
 		
 		if(auction) {

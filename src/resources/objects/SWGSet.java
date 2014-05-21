@@ -75,7 +75,7 @@ public class SWGSet<E> implements Set<E>, Serializable {
 		for (Object item : set) {				
 			try {
 				if (item instanceof IDelta) {
-					item.getClass().getMethod("init", new Class[] {}).invoke(item, new Object[] { });
+					item.getClass().getMethod("init", new Class[] { SWGObject.class }).invoke(item, new Object[] { object });
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -248,11 +248,11 @@ public class SWGSet<E> implements Set<E>, Serializable {
 	}
 	
 	private byte[] item(int type, Object index, byte[] data, boolean useIndex, boolean useData) {
-		if (useIndex && ((index instanceof IDelta) || !valid(index))) {
+		if (useIndex && !valid(index)) {
 			throw new IllegalArgumentException();
 		}
 		
-		int size = 1 + ((useIndex) ? (2 + Baseline.toBytes(index).length) : 0) + ((useData) ? data.length : 0);
+		int size = 1 + ((useIndex) ? Baseline.toBytes(index).length : 0) + ((useData) ? data.length : 0);
 		
 		IoBuffer buffer = Delta.createBuffer(size);
 		buffer.put((byte) type);

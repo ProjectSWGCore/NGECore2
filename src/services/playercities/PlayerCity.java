@@ -630,7 +630,7 @@ public class PlayerCity implements Serializable {
 		// city_version_update_body_4
 		Vector<Long> citizenList = getCitizens();
 		for (long citizen : citizenList){
-			CreatureObject citizenObject = (CreatureObject) NGECore.getInstance().objectService.getObject(citizen);
+//			CreatureObject citizenObject = (CreatureObject) NGECore.getInstance().objectService.getObject(citizen);
 			Mail actorMail = new Mail();
 	        actorMail.setMailId(NGECore.getInstance().chatService.generateMailId());
 	        actorMail.setRecieverId(citizen);

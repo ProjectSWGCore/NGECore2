@@ -34,9 +34,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 
-import com.sleepycat.je.Transaction;
-import com.sleepycat.persist.EntityCursor;
-
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.clients.Client;
@@ -944,6 +941,7 @@ public class ChatService implements INetworkDispatch {
 			}
 			
 			room.addUser(user.toLowerCase());
+			((CreatureObject) player).getPlayerObject().addChannel(roomId);
 			return true;
 		}
 		return false;
@@ -1002,10 +1000,6 @@ public class ChatService implements INetworkDispatch {
 				player.getClient().getSession().write(roomMessage.serialize());
 			}
 		});
-	}
-	
-	public void handleGroupChat(SWGObject sender, String message) {
-		
 	}
 	
 	public ConcurrentHashMap<Integer, ChatRoom> getChatRooms() {

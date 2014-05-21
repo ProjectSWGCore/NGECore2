@@ -69,8 +69,8 @@ public class FactoryCrateObject extends TangibleObject implements Serializable {
 	}
 
 	
-	public FactoryCrateObject(long objectID, Planet planet, String template, Point3D position, Quaternion orientation) { 
-		super(objectID, planet, template, position, orientation);
+	public FactoryCrateObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String template) { 
+		super(objectID, planet, position, orientation, template);
 		this.messageBuilder = new FactoryCrateMessageBuilder(this);
 		this.contents = new Vector<TangibleObject>();
 		this.contentObjectQuantity = 0;

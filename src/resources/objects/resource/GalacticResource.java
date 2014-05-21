@@ -231,7 +231,7 @@ public class GalacticResource extends SWGObject implements Serializable {
 	public void generateResourceStats(){
 		// Generate the stats randomly, considering the caps	
 		for (int k=0;k<resourceRoot.getResourceMinCaps().length; k++) {
-			short result = 0;
+			//short result = 0;
 			short randomStatValue = 0;
 			if ((resourceRoot.getResourceMaxCaps()[k]-resourceRoot.getResourceMinCaps()[k])>0)
 				randomStatValue = (short) (resourceRoot.getResourceMinCaps()[k] + new Random().nextInt(resourceRoot.getResourceMaxCaps()[k]-resourceRoot.getResourceMinCaps()[k]));

@@ -7,7 +7,7 @@ def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
 	mobileTemplate.setCreatureName('krayt_dragon_grand')
-	mobileTemplate.setLevel(88)
+	mobileTemplate.setLevel(87)
 	mobileTemplate.setMinLevel(80)
 	mobileTemplate.setMaxLevel(89)
 	mobileTemplate.setDifficulty(2)
@@ -18,8 +18,16 @@ def addTemplate(core):
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(True)
 	mobileTemplate.setScale(2.6)
-
-	
+	mobileTemplate.setMeatType("Carnivore Meat")
+	mobileTemplate.setMeatAmount(1700)
+	mobileTemplate.setHideType("Bristly Hide")
+	mobileTemplate.setBoneAmount(950)	
+	mobileTemplate.setBoneType("Animal Bones")
+	mobileTemplate.setHideAmount(905)
+	mobileTemplate.setSocialGroup("krayt dragon")
+	mobileTemplate.setAssistRange(24)
+	mobileTemplate.setStalker(True)	
+	mobileTemplate.setOptionsBitmask(192)	
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_canyon_krayt_dragon.iff')

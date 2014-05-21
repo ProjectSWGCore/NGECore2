@@ -38,6 +38,7 @@ import com.sleepycat.persist.model.NotPersistent;
 
 import engine.resources.common.CRC;
 import engine.resources.objects.IDelta;
+import engine.resources.objects.SWGObject;
 
 public class Buff implements IDelta, Serializable {
 	
@@ -150,7 +151,13 @@ public class Buff implements IDelta, Serializable {
 	}*/
 
 	public Buff() { }
-
+	
+	@Override
+	public void init(SWGObject object) {
+		// TODO Auto-generated method stub
+		
+	}
+	
 	@Override
 	public byte[] getBytes() {
 		
@@ -482,5 +489,5 @@ public class Buff implements IDelta, Serializable {
 	public void setBuffCRC(int buffCRC) {
 		this.buffCRC = buffCRC;
 	}
-
+	
 }

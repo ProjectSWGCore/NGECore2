@@ -195,8 +195,6 @@ public class ConnectionService implements INetworkDispatch {
 		
 		CreatureObject object = (CreatureObject) client.getParent();
 		
-		object.setPvPBitmask(0);
-		
 		object.setInviteCounter(0);
 		object.setInviteSenderId(0);
 		object.setInviteSenderName("");
@@ -272,7 +270,9 @@ public class ConnectionService implements INetworkDispatch {
 			}
 		}*/
 		
-		core.missionService.getBountyMap().remove(core.getBountiesODB().get(object.getObjectID()));
+		if (core.getBountiesODB().contains(object.getObjectID())) {
+			core.missionService.getBountyMap().remove(core.getBountiesODB().get(object.getObjectID()));
+		}
 		
 		ghost.toggleFlag(PlayerFlags.LD);
 		
