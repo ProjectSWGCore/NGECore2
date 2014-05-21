@@ -6,7 +6,7 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('blistmok_crystal_charger')
+	mobileTemplate.setCreatureName('som_crystal_flats_blistmok_crystal_stalker')
 	mobileTemplate.setLevel(72)
 	mobileTemplate.setMinLevel(72)
 	mobileTemplate.setMaxLevel(72)
@@ -40,5 +40,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('blistmok_crystal_charger', mobileTemplate)
+	core.spawnService.addMobileTemplate('blistmok_crystal_stalker', mobileTemplate)
 	return
