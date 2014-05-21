@@ -5,8 +5,8 @@ from java.util import Vector
 
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()	
-	mobileTemplate.setCreatureName('clipped fynock')
-	mobileTemplate.setLevel(36)
+	mobileTemplate.setCreatureName('dung mite')
+	mobileTemplate.setLevel(42)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)
@@ -15,18 +15,16 @@ def addTemplate(core):
 	mobileTemplate.setMaxSpawnDistance(10)
 	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(1)
-	mobileTemplate.setMeatType("Avian Meat")
-	mobileTemplate.setMeatAmount(20)
-	mobileTemplate.setHideType("Leathery Hide")
-	mobileTemplate.setBoneAmount(30)	
-	mobileTemplate.setBoneType("Avian Bone")
-	mobileTemplate.setHideAmount(7)
-	mobileTemplate.setSocialGroup("fynock")
+	mobileTemplate.setMeatType("Insect Meat")
+	mobileTemplate.setMeatAmount(9)
+	mobileTemplate.setHideType("Scaley Hide")
+	mobileTemplate.setBoneAmount(9)	
+	mobileTemplate.setSocialGroup("decay mite")
 	mobileTemplate.setAssistRange(6)
 	mobileTemplate.setStalker(False)	
 
 	templates = Vector()
-	templates.add('object/mobile/shared_fynock.iff')
+	templates.add('object/mobile/shared_bark_mite_hue.iff')
 	mobileTemplate.setTemplates(templates)
 
 	weaponTemplates = Vector()
@@ -38,5 +36,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 
-	core.spawnService.addMobileTemplate('clipped_fynock', mobileTemplate)
+	core.spawnService.addMobileTemplate('dung_mite', mobileTemplate)
 	return
