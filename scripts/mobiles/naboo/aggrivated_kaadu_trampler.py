@@ -6,7 +6,7 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('aggrivated kaadu trampler')
+	mobileTemplate.setCreatureName('aggrivated_kaadu_trampler')
 	mobileTemplate.setLevel(15)
 	mobileTemplate.setMinLevel(15)
 	mobileTemplate.setMaxLevel(17)
@@ -27,6 +27,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("kaadu")
 	mobileTemplate.setAssistRange(6)
 	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(192)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_kaadu.iff')

@@ -6,7 +6,7 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('diminutive bounding jax')
+	mobileTemplate.setCreatureName('diminutive_bounding_jax')
 	mobileTemplate.setLevel(25)
 	mobileTemplate.setMinLevel(25)
 	mobileTemplate.setMaxLevel(25)
