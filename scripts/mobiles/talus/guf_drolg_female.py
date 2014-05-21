@@ -6,9 +6,9 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('guf drolg')
-	mobileTemplate.setLevel(42)
-	mobileTemplate.setMinLevel(42)
+	mobileTemplate.setCreatureName('guf drolg female')
+	mobileTemplate.setLevel(43)
+	mobileTemplate.setMinLevel(43)
 	mobileTemplate.setMaxLevel(43)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
@@ -17,17 +17,16 @@ def addTemplate(core):
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)
-	mobileTemplate.setScale(1)
+	mobileTemplate.setScale(.9)
 	mobileTemplate.setMeatType("Reptile Meat")
-	mobileTemplate.setMeatAmount(350)
+	mobileTemplate.setMeatAmount(325)
 	mobileTemplate.setHideType("Leathery Hide")
-	mobileTemplate.setHideAmount(275)
+	mobileTemplate.setHideAmount(265)
 	mobileTemplate.setBoneType("Mammal Bones")
-	mobileTemplate.setBoneAmount(200)
+	mobileTemplate.setBoneAmount(190)
 	mobileTemplate.setSocialGroup("guf drolg")
 	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(True)
-	mobileTemplate.setOptionsBitmask(192)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_guf_drolg.iff')
@@ -42,5 +41,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('guf_drolg', mobileTemplate)
+	core.spawnService.addMobileTemplate('guf_drolg_female', mobileTemplate)
 	return

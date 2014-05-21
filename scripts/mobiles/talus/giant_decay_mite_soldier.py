@@ -6,10 +6,8 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('guf drolg')
-	mobileTemplate.setLevel(42)
-	mobileTemplate.setMinLevel(42)
-	mobileTemplate.setMaxLevel(43)
+	mobileTemplate.setCreatureName('giant decay mite soldier')
+	mobileTemplate.setLevel(15)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)
@@ -17,20 +15,16 @@ def addTemplate(core):
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)
-	mobileTemplate.setScale(1)
-	mobileTemplate.setMeatType("Reptile Meat")
-	mobileTemplate.setMeatAmount(350)
-	mobileTemplate.setHideType("Leathery Hide")
-	mobileTemplate.setHideAmount(275)
-	mobileTemplate.setBoneType("Mammal Bones")
-	mobileTemplate.setBoneAmount(200)
-	mobileTemplate.setSocialGroup("guf drolg")
-	mobileTemplate.setAssistRange(0)
-	mobileTemplate.setStalker(True)
+	mobileTemplate.setScale(1.5)
+	mobileTemplate.setMeatType("Insect Meat")
+	mobileTemplate.setMeatAmount(18)
+	mobileTemplate.setSocialGroup("decay mite")
+	mobileTemplate.setAssistRange(4)
+	mobileTemplate.setStalker(False)
 	mobileTemplate.setOptionsBitmask(192)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_guf_drolg.iff')
+	templates.add('object/mobile/shared_bark_mite_hue.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
@@ -42,5 +36,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('guf_drolg', mobileTemplate)
+	core.spawnService.addMobileTemplate('giant_decay_mite_soldier', mobileTemplate)
 	return

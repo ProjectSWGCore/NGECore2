@@ -6,10 +6,10 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('guf drolg')
-	mobileTemplate.setLevel(42)
-	mobileTemplate.setMinLevel(42)
-	mobileTemplate.setMaxLevel(43)
+	mobileTemplate.setCreatureName('brood X arachne')
+	mobileTemplate.setLevel(45)
+	mobileTemplate.setMinLevel(45)
+	mobileTemplate.setMaxLevel(45)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)
@@ -17,20 +17,14 @@ def addTemplate(core):
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)
-	mobileTemplate.setScale(1)
-	mobileTemplate.setMeatType("Reptile Meat")
-	mobileTemplate.setMeatAmount(350)
-	mobileTemplate.setHideType("Leathery Hide")
-	mobileTemplate.setHideAmount(275)
-	mobileTemplate.setBoneType("Mammal Bones")
-	mobileTemplate.setBoneAmount(200)
-	mobileTemplate.setSocialGroup("guf drolg")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setScale(2)
+	mobileTemplate.setSocialGroup("brood arachne")
+	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setStalker(True)
 	mobileTemplate.setOptionsBitmask(192)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_guf_drolg.iff')
+	templates.add('object/mobile/shared_angler_hue.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
@@ -42,5 +36,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('guf_drolg', mobileTemplate)
+	core.spawnService.addMobileTemplate('brood_x_arachne', mobileTemplate)
 	return

@@ -6,9 +6,9 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('guf drolg')
-	mobileTemplate.setLevel(42)
-	mobileTemplate.setMinLevel(42)
+	mobileTemplate.setCreatureName('savage guf drolg')
+	mobileTemplate.setLevel(43)
+	mobileTemplate.setMinLevel(43)
 	mobileTemplate.setMaxLevel(43)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
@@ -19,13 +19,13 @@ def addTemplate(core):
 	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(1)
 	mobileTemplate.setMeatType("Reptile Meat")
-	mobileTemplate.setMeatAmount(350)
+	mobileTemplate.setMeatAmount(550)
 	mobileTemplate.setHideType("Leathery Hide")
-	mobileTemplate.setHideAmount(275)
+	mobileTemplate.setHideAmount(460)
 	mobileTemplate.setBoneType("Mammal Bones")
-	mobileTemplate.setBoneAmount(200)
+	mobileTemplate.setBoneAmount(320)
 	mobileTemplate.setSocialGroup("guf drolg")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setAssistRange(6)
 	mobileTemplate.setStalker(True)
 	mobileTemplate.setOptionsBitmask(192)
 	
@@ -42,5 +42,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('guf_drolg', mobileTemplate)
+	core.spawnService.addMobileTemplate('savage_guf_drolg', mobileTemplate)
 	return
