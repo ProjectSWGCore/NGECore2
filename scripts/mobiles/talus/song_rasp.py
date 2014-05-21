@@ -4,42 +4,37 @@ from services.spawn import WeaponTemplate
 from java.util import Vector
 
 def addTemplate(core):
-	mobileTemplate = MobileTemplate()
-	
-	mobileTemplate.setCreatureName('kaadu')
-	mobileTemplate.setLevel(8)
-	mobileTemplate.setMinLevel(8)
-	mobileTemplate.setMaxLevel(12)
+	mobileTemplate = MobileTemplate()	
+	mobileTemplate.setCreatureName('song rasp')
+	mobileTemplate.setLevel(37)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)
 	mobileTemplate.setWeaponType(6)
-	mobileTemplate.setMinSpawnDistance(4)
-	mobileTemplate.setMaxSpawnDistance(8)
+	mobileTemplate.setMinSpawnDistance(5)
+	mobileTemplate.setMaxSpawnDistance(10)
 	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(1)
 	mobileTemplate.setMeatType("Avian Meat")
-	mobileTemplate.setMeatAmount(120)
-	mobileTemplate.setHideType("Leathery Hide")
-	mobileTemplate.setHideAmount(85)
-	mobileTemplate.setBoneType("Avian Bones")
-	mobileTemplate.setBoneAmount(70)
-	mobileTemplate.setSocialGroup("kaadu")
+	mobileTemplate.setMeatAmount(10)	
+	mobileTemplate.setBoneType("Avian Bone")
+	mobileTemplate.setHideAmount(3)
+	mobileTemplate.setSocialGroup("rasp")
 	mobileTemplate.setAssistRange(0)
-	mobileTemplate.setStalker(False)
-	
+	mobileTemplate.setStalker(False)	
+
 	templates = Vector()
-	templates.add('object/mobile/shared_kaadu.iff')
+	templates.add('object/mobile/shared_horned_rasp_hue.iff')
 	mobileTemplate.setTemplates(templates)
-	
+
 	weaponTemplates = Vector()
 	weapontemplate = WeaponTemplate('object/weapon/melee/unarmed/shared_unarmed_default.iff', 6, 1.0)
 	weaponTemplates.add(weapontemplate)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
-	
+
 	attacks = Vector()
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
-	
-	core.spawnService.addMobileTemplate('kaadu', mobileTemplate)
+
+	core.spawnService.addMobileTemplate('song_rasp', mobileTemplate)
 	return

@@ -6,10 +6,10 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('kaadu')
-	mobileTemplate.setLevel(8)
-	mobileTemplate.setMinLevel(8)
-	mobileTemplate.setMaxLevel(12)
+	mobileTemplate.setCreatureName('bone angler')
+	mobileTemplate.setLevel(68)
+	mobileTemplate.setMinLevel(68)
+	mobileTemplate.setMaxLevel(68)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)
@@ -18,18 +18,14 @@ def addTemplate(core):
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(1)
-	mobileTemplate.setMeatType("Avian Meat")
-	mobileTemplate.setMeatAmount(120)
-	mobileTemplate.setHideType("Leathery Hide")
-	mobileTemplate.setHideAmount(85)
-	mobileTemplate.setBoneType("Avian Bones")
-	mobileTemplate.setBoneAmount(70)
-	mobileTemplate.setSocialGroup("kaadu")
+	mobileTemplate.setMeatType("Insect Meat")
+	mobileTemplate.setMeatAmount(4)
+	mobileTemplate.setSocialGroup("angler")
 	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(False)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_kaadu.iff')
+	templates.add('object/mobile/shared_angler.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
@@ -41,5 +37,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('kaadu', mobileTemplate)
+	core.spawnService.addMobileTemplate('bone_angler', mobileTemplate)
 	return

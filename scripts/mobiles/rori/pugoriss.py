@@ -6,10 +6,10 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('kaadu')
-	mobileTemplate.setLevel(8)
-	mobileTemplate.setMinLevel(8)
-	mobileTemplate.setMaxLevel(12)
+	mobileTemplate.setCreatureName('pugoriss')
+	mobileTemplate.setLevel(42)
+	mobileTemplate.setMinLevel(42)
+	mobileTemplate.setMaxLevel(45)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)
@@ -18,18 +18,18 @@ def addTemplate(core):
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(1)
-	mobileTemplate.setMeatType("Avian Meat")
-	mobileTemplate.setMeatAmount(120)
+	mobileTemplate.setMeatType("Carnivore Meat")
+	mobileTemplate.setMeatAmount(375)
 	mobileTemplate.setHideType("Leathery Hide")
-	mobileTemplate.setHideAmount(85)
-	mobileTemplate.setBoneType("Avian Bones")
-	mobileTemplate.setBoneAmount(70)
-	mobileTemplate.setSocialGroup("kaadu")
+	mobileTemplate.setHideAmount(425)
+	mobileTemplate.setBoneType("Mammal Bones")
+	mobileTemplate.setBoneAmount(375)
+	mobileTemplate.setSocialGroup("pugoriss")
 	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(False)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_kaadu.iff')
+	templates.add('object/mobile/shared_pugoriss.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
@@ -41,5 +41,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('kaadu', mobileTemplate)
+	core.spawnService.addMobileTemplate('pugoriss', mobileTemplate)
 	return

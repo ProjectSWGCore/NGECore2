@@ -6,10 +6,10 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('kaadu')
-	mobileTemplate.setLevel(8)
-	mobileTemplate.setMinLevel(8)
-	mobileTemplate.setMaxLevel(12)
+	mobileTemplate.setCreatureName('lice-ridden remmer queen')
+	mobileTemplate.setLevel(60)
+	mobileTemplate.setMinLevel(60)
+	mobileTemplate.setMaxLevel(60)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)
@@ -17,19 +17,14 @@ def addTemplate(core):
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)
-	mobileTemplate.setScale(1)
-	mobileTemplate.setMeatType("Avian Meat")
-	mobileTemplate.setMeatAmount(120)
-	mobileTemplate.setHideType("Leathery Hide")
-	mobileTemplate.setHideAmount(85)
-	mobileTemplate.setBoneType("Avian Bones")
-	mobileTemplate.setBoneAmount(70)
-	mobileTemplate.setSocialGroup("kaadu")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setScale(1.2)
+	mobileTemplate.setSocialGroup("remmer")
+	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(192)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_kaadu.iff')
+	templates.add('object/mobile/shared_remmer.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
@@ -38,8 +33,8 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
-	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
+	mobileTemplate.setDefaultAttack('creatureSpitAttack')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('kaadu', mobileTemplate)
+	core.spawnService.addMobileTemplate('lice_ridden_remmer_queen', mobileTemplate)
 	return

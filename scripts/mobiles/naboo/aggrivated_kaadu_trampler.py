@@ -6,10 +6,10 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('kaadu')
-	mobileTemplate.setLevel(8)
-	mobileTemplate.setMinLevel(8)
-	mobileTemplate.setMaxLevel(12)
+	mobileTemplate.setCreatureName('aggrivated kaadu trampler')
+	mobileTemplate.setLevel(15)
+	mobileTemplate.setMinLevel(15)
+	mobileTemplate.setMaxLevel(17)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)
@@ -25,7 +25,7 @@ def addTemplate(core):
 	mobileTemplate.setBoneType("Avian Bones")
 	mobileTemplate.setBoneAmount(70)
 	mobileTemplate.setSocialGroup("kaadu")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setAssistRange(6)
 	mobileTemplate.setStalker(False)
 	
 	templates = Vector()
@@ -41,5 +41,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('kaadu', mobileTemplate)
+	core.spawnService.addMobileTemplate('aggrivated_kaadu_trampler', mobileTemplate)
 	return
