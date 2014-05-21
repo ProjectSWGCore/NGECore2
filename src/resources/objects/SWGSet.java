@@ -252,7 +252,7 @@ public class SWGSet<E> implements Set<E>, Serializable {
 			throw new IllegalArgumentException();
 		}
 		
-		int size = 1 + ((useIndex) ? (2 + Baseline.toBytes(index).length) : 0) + ((useData) ? data.length : 0);
+		int size = 1 + ((useIndex) ? Baseline.toBytes(index).length : 0) + ((useData) ? data.length : 0);
 		
 		IoBuffer buffer = Delta.createBuffer(size);
 		buffer.put((byte) type);

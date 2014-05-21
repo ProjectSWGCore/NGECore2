@@ -25,7 +25,10 @@ import java.util.Map;
 
 import resources.guild.Guild;
 import resources.objects.SWGSet;
+import resources.objects.creature.CreatureObject;
 import resources.objects.guild.GuildObject;
+import resources.objects.player.PlayerObject;
+import services.chat.ChatRoom;
 import main.NGECore;
 import engine.resources.objects.SWGObject;
 import engine.resources.service.INetworkDispatch;
@@ -59,9 +62,24 @@ public class GuildService implements INetworkDispatch {
 		int listSize = object.getGuildList().size();
 		Guild guild = new Guild((listSize == 0 ? 1 : listSize + 1), abbreviation, name, leader);
 		
-		object.getGuildList().add(guild);
+		core.chatService.createChatRoom("", "guild." + guild.getId(), leader.getCustomName(), false, true, false);
+		ChatRoom guildChat = core.chatService.createChatRoom("", "guild." + guild.getId() + ".GuildChat", leader.getCustomName(), false, true, false);
+		guild.setChatRoomId(guildChat.getRoomId());
 		
+		object.getGuildList().add(guild);
 		return guild;
+	}
+	
+	public void joinGuild(Guild guild, CreatureObject joinee) {
+		PlayerObject ghost = joinee.getPlayerObject();
+		if (ghost == null)
+			return;
+		
+		guild.getMembers().add(joinee.getObjectID());
+		joinee.setGuildId(guild.getId());
+		
+		core.chatService.joinChatRoom(joinee.getCustomName(), guild.getChatRoomId());
+		// TODO: Send new member guild mail
 	}
 	
 	public GuildObject getGuildObject() {
@@ -88,7 +106,7 @@ public class GuildService implements INetworkDispatch {
 		Guild guild = getGuildById(id);
 		
 		if (guild != null) {
-			object.getGuildList().add(guild);
+			object.getGuildList().remove(guild);
 			return true;
 		}
 		
@@ -99,7 +117,7 @@ public class GuildService implements INetworkDispatch {
 		Guild guild = getGuildByAbbreviation(abbreviation);
 		
 		if (guild != null) {
-			object.getGuildList().add(guild);
+			object.getGuildList().remove(guild);
 			return true;
 		}
 		
