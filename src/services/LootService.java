@@ -1310,7 +1310,7 @@ public class LootService implements INetworkDispatch {
 	}
 	
 	
-	public void handleContainer(SWGObject actor, int containerID, String lootPool, String planetName){
+	public void handleContainer(int containerID, String lootPool, String planetName){
 		
 		long objectId = containerID +  0xFFFFFFFF;		
 		TangibleObject containerObject = (TangibleObject) core.objectService.getObject(objectId);

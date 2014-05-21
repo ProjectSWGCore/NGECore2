@@ -7,7 +7,6 @@ def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
 	mobileTemplate.setCreatureName('force_sensitive_renegade')
-	mobileTemplate.setLevel(90)
 	mobileTemplate.setMinLevel(61)
 	mobileTemplate.setMaxLevel(69)
 	mobileTemplate.setDifficulty(0)

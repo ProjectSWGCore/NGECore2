@@ -17,10 +17,14 @@ def addPlanetSpawns(core, planet):
 	hunter11 = stcSvc.spawnObject('dark_force_crystal_hunter', 'dantooine', long(8535487), float(80.34), float(-77.29), float(-92.77), float(-0.2), float(0.97))	
 	hunter12 = stcSvc.spawnObject('dark_force_crystal_hunter', 'dantooine', long(8535487), float(80.34), float(-77.29), float(-92.77), float(-0.2), float(0.97))
 	objSvc = core.objectService
-	magSeal1 = objSvc.getObject(200335); #(200336-1)
-	lootPoolNames_1 = ['Junk']
-	lootPoolChances_1 = [100]
-	lootGroupChance_1 = 90
-	magSeal1.addToLootGroups(lootPoolNames_1,lootPoolChances_1,lootGroupChance_1)
-	lotSvc = core.lootService
-	lotSvc.handleContainer(actor,200335,'Junk','dantooine')
+	magSeal1 = objSvc.getObject(200335); #(200336-1)	
+	if magSeal1 != None:
+		lootPoolNames_1 = ['Junk']
+		lootPoolChances_1 = [100]
+		lootGroupChance_1 = 90
+		magSeal1.addToLootGroups(lootPoolNames_1,lootPoolChances_1,lootGroupChance_1)
+		lotSvc = core.lootService
+		lotSvc.handleContainer(200335,'Junk','dantooine')
+		
+	return
+	

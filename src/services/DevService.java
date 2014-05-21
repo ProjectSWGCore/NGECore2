@@ -88,11 +88,6 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 26, "Installations");
 				suiOptions.put((long) 110, "Survey Devices");
 				if(creature.getPlayerObject().getProfession().equals("bounty_hunter_1a")) suiOptions.put((long) 123, "Tracking Droids");
-<<<<<<< HEAD
-				if(creature.getClient().isGM()) suiOptions.put((long) 120, "House Deeds");
-				if(creature.getClient().isGM()) suiOptions.put((long) 125, "Crafting Tools");
-				if(creature.getClient().isGM()) suiOptions.put((long) 130, "Vehicle Deeds");
-=======
 				if (creature.getClient().isGM()) {
 					suiOptions.put((long) 120, "House Deeds");
 					suiOptions.put((long) 125, "Crafting Tools");
@@ -101,7 +96,6 @@ public class DevService implements INetworkDispatch {
 					suiOptions.put((long) 140, "Guild Registry Device (PDA)");
 				}
 
->>>>>>> origin/master
 				break;
 			case 3: // [Items] Weapons
 				suiOptions.put((long) 30, "Jedi Weapons");
@@ -148,17 +142,14 @@ public class DevService implements INetworkDispatch {
 			case 11: // Locations
 				suiOptions.put((long) 122, "Teleport to Jedi Ruins");
 				suiOptions.put((long) 124, "Teleport to Mos Eisley");
-<<<<<<< HEAD
-				suiOptions.put((long) 153, "Teleport to Force Crystal Hunter's Cave");
-				suiOptions.put((long) 121, "Teleport to Sandbox City");	
-=======
 				if (creature.getClient().isGM()) {
 					suiOptions.put((long) 164, "Teleport to Mining Outpost");
 					suiOptions.put((long) 165, "Teleport to Spawn Area #1");
 					suiOptions.put((long) 166, "Teleport to Imperial Op");
 					suiOptions.put((long) 167, "Teleport to Rebel Base ");
+					suiOptions.put((long) 153, "Teleport to Force Crystal Hunter's Cave");
+					suiOptions.put((long) 121, "Teleport to Sandbox City");	
 				}
->>>>>>> origin/master
 				break;
 		
 		}
@@ -1274,6 +1265,10 @@ public class DevService implements INetworkDispatch {
 					case 166:
 						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("dantooine"), new Point3D(-4211,18,-2349), player.getOrientation(), null);
 						return;
+						
+					case 167:
+						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("dantooine"), new Point3D(-4211,18,-2349), player.getOrientation(), null);
+						return;
 
 					case 123:
 						TangibleObject arakydDroids = (TangibleObject) core.objectService.createObject("object/tangible/mission/shared_mission_bounty_droid_probot.iff", planet);
@@ -1296,17 +1291,15 @@ public class DevService implements INetworkDispatch {
 						inventory.add(swoopDeed);
 						inventory.add(av21deed);
 						return;
-<<<<<<< HEAD
-					case 153:
-						Point3D position = new Point3D(-6222,1,7380);
-						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("dantooine"), position, player.getOrientation(), null);
-=======
 					
 					case 140:
 						TangibleObject guildRegistry = (TangibleObject) core.objectService.createObject("object/tangible/furniture/technical/shared_guild_registry_initial.iff", planet);
 						inventory.add(guildRegistry);
->>>>>>> origin/master
 						return;
+						
+					case 153:
+						Point3D position = new Point3D(-6222,1,7380);
+						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("dantooine"), position, player.getOrientation(), null);
 				}
 			}	
 		});

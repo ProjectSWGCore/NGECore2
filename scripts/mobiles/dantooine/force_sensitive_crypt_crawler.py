@@ -7,7 +7,6 @@ def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
 	mobileTemplate.setCreatureName('eow_force_sensitive_crypt_crawler')
-	mobileTemplate.setLevel(90)
 	mobileTemplate.setMinLevel(60)
 	mobileTemplate.setMaxLevel(70)
 	mobileTemplate.setDifficulty(0)
