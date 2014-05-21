@@ -23,12 +23,12 @@ def addPlanetSpawns(core, planet):
 	stcSvc.spawnObject('canyon_krayt_dragon', 'tatooine', long(0), float(6564.1), float(87.7), float(4484.8), float(0), float(0), float(0), float(0), 1800)	
 	stcSvc.spawnObject('canyon_krayt_dragon', 'tatooine', long(0), float(7523.5), float(4.5), float(4655.5), float(0), float(0), float(0), float(0), 1800)	
 	
-	stcSvc.spawnObject('juveline_canyon_krayt_dragon', 'tatooine', long(0), float(7233.2), float(30.1), float(4487.1), float(0), float(0), float(0), float(0), 1500)	
-	stcSvc.spawnObject('juveline_canyon_krayt_dragon', 'tatooine', long(0), float(7172.2), float(22.5), float(4441.1), float(0), float(0), float(0), float(0), 1500)	
-	stcSvc.spawnObject('juveline_canyon_krayt_dragon', 'tatooine', long(0), float(7043.2), float(22.1), float(4344.1), float(0), float(0), float(0), float(0), 1500)	
-	stcSvc.spawnObject('juveline_canyon_krayt_dragon', 'tatooine', long(0), float(6877.8), float(45.5), float(4237.0), float(0), float(0), float(0), float(0), 1500)	
-	stcSvc.spawnObject('juveline_canyon_krayt_dragon', 'tatooine', long(0), float(6575.9), float(92.5), float(4487.7), float(0), float(0), float(0), float(0), 1500)	
-	stcSvc.spawnObject('juveline_canyon_krayt_dragon', 'tatooine', long(0), float(7513.2), float(4.1), float(4656.1), float(0), float(0), float(0), float(0), 1500)	
+	stcSvc.spawnObject('juvenile_canyon_krayt_dragon', 'tatooine', long(0), float(7233.2), float(30.1), float(4487.1), float(0), float(0), float(0), float(0), 1500)	
+	stcSvc.spawnObject('juvenile_canyon_krayt_dragon', 'tatooine', long(0), float(7172.2), float(22.5), float(4441.1), float(0), float(0), float(0), float(0), 1500)	
+	stcSvc.spawnObject('juvenile_canyon_krayt_dragon', 'tatooine', long(0), float(7043.2), float(22.1), float(4344.1), float(0), float(0), float(0), float(0), 1500)	
+	stcSvc.spawnObject('juvenile_canyon_krayt_dragon', 'tatooine', long(0), float(6877.8), float(45.5), float(4237.0), float(0), float(0), float(0), float(0), 1500)	
+	stcSvc.spawnObject('juvenile_canyon_krayt_dragon', 'tatooine', long(0), float(6575.9), float(92.5), float(4487.7), float(0), float(0), float(0), float(0), 1500)	
+	stcSvc.spawnObject('juvenile_canyon_krayt_dragon', 'tatooine', long(0), float(7513.2), float(4.1), float(4656.1), float(0), float(0), float(0), float(0), 1500)	
 	
 	# giant canyon
 	
@@ -44,8 +44,8 @@ def addPlanetSpawns(core, planet):
 	
 	# ancient
 	
-	stcSvc.spawnObject('ancient_krayt_dragon', 'tatooine', long(0), float(6836.5), float(25.2), float(4321.8), float(0), float(0), float(0), float(0), 1800)	
-	stcSvc.spawnObject('ancient_krayt_dragon', 'tatooine', long(0), float(7491.3), float(8.2), float(4484.8), float(0), float(0), float(0), float(0), 1800)	
+	stcSvc.spawnObject('krayt_dragon_ancient', 'tatooine', long(0), float(6836.5), float(25.2), float(4321.8), float(0), float(0), float(0), float(0), 1800)	
+	stcSvc.spawnObject('krayt_dragon_ancient', 'tatooine', long(0), float(7491.3), float(8.2), float(4484.8), float(0), float(0), float(0), float(0), 1800)	
 
 	# adolescent
 	stcSvc.spawnObject('adolescent_krayt_dragon', 'tatooine', long(0), float(7525.1), float(28.2), float(4387.5), float(0), float(0), float(0), float(0), 1500)	

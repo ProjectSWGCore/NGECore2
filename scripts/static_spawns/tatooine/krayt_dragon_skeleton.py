@@ -17,7 +17,7 @@ def addPlanetSpawns(core, planet):
 	
 	# -6205, 5054
 	stcSvc.spawnObject('canyon_krayt_dragon', 'tatooine', long(0), float(-6216.0), float(30.8), float(5033.9), float(0), float(0), float(0), float(0), 1800)	
-	stcSvc.spawnObject('juveline_canyon_krayt_dragon', 'tatooine', long(0), float(6213.8), float(31.1), float(5021.3), float(0), float(0), float(0), float(0), 1500)	
+	stcSvc.spawnObject('juvenile_canyon_krayt_dragon', 'tatooine', long(0), float(6213.8), float(31.1), float(5021.3), float(0), float(0), float(0), float(0), 1500)	
 	
 	# giant canyon krayt
 	stcSvc.spawnObject('giant_canyon_krayt_dragon', 'tatooine', long(0), float(5728.5), float(56.6), float(3784.7), float(0), float(0), float(0), float(0), 1800)	
