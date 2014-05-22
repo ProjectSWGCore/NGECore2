@@ -35,6 +35,7 @@ import resources.common.collidables.AbstractCollidable.ExitEvent;
 import resources.objects.creature.CreatureObject;
 import services.TerrainService;
 import services.SimulationService.MoveEvent;
+import services.ai.LairActor;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -44,6 +45,8 @@ public class MixedSpawnArea extends SpawnArea {
 	private SpawnGroup spawnGroup;
 	private Vector<SpawnGroup> spawnGroups;
 	private Vector<CreatureObject> mobiles = new Vector<CreatureObject>();
+	private Vector<LairActor> lairs = new Vector<LairActor>();
+	private long lastSpawnTime = 0;
 	
 	public MixedSpawnArea(Planet planet, AbstractCollidable area, SpawnGroup spawnGroup) {
 		super(planet, area);
@@ -89,26 +92,43 @@ public class MixedSpawnArea extends SpawnArea {
 		} else {
 			// select randomly one of the spawngroups -> minimizes number of collidables for areas with multiple different NPC groups
 			// One spawnarea -> many NPC groups
+
+			
 			int index = new Random().nextInt(spawnGroups.size());
 			this.spawnGroup = spawnGroups.get(index);
-			Vector<CreatureObject> groupMembers = new Vector<CreatureObject>();
-			Point3D randomGroupPosition = getRandomPosition(creature.getWorldPosition(), 32, 100);
-			int spawnCount = spawnGroup.getGroupMembersNumber();
-			if (spawnCount<0){
-				int spawnCount2 = 1;
-				if (Math.abs(spawnCount)<spawnGroup.getMobiles().size())
-					spawnCount2 = Math.abs(spawnCount) + new Random().nextInt(spawnGroup.getMobiles().size()-Math.abs(spawnCount));
-				else
-					spawnCount2 = Math.abs(spawnCount);
-				spawnCount = Math.max(Math.abs(spawnCount), spawnCount2);
+			if (this.spawnGroup instanceof DynamicSpawnGroup){
+				Vector<CreatureObject> groupMembers = new Vector<CreatureObject>();
+				Point3D randomGroupPosition = getRandomPosition(creature.getWorldPosition(), 32, 100);
+				int spawnCount = spawnGroup.getGroupMembersNumber();
+				if (spawnCount<0){
+					int spawnCount2 = 1;
+					if (Math.abs(spawnCount)<spawnGroup.getMobiles().size())
+						spawnCount2 = Math.abs(spawnCount) + new Random().nextInt(spawnGroup.getMobiles().size()-Math.abs(spawnCount));
+					else
+						spawnCount2 = Math.abs(spawnCount);
+					spawnCount = Math.max(Math.abs(spawnCount), spawnCount2);
+				}
+				for(int i = 0; i < spawnCount; i++) {// A group with a specified or random number of members
+					CreatureObject spawnedCreature = spawnCreatureMember(creature, groupMembers, randomGroupPosition, i);
+					if (spawnedCreature!=null)
+						groupMembers.add(spawnedCreature);
+				}
 			}
-			for(int i = 0; i < spawnCount; i++) {// A group with a specified or random number of members
-				CreatureObject spawnedCreature = spawnCreatureMember(creature, groupMembers, randomGroupPosition, i);
-				if (spawnedCreature!=null)
-					groupMembers.add(spawnedCreature);
+			if (this.spawnGroup instanceof LairGroupTemplate){
+				object = event.object;
+				
+				if(object == null || !(object instanceof CreatureObject))
+					return;
+				
+				creature = (CreatureObject) object;
+				
+				if(creature.getSlottedObject("ghost") == null && !creature.getOption(Options.MOUNT))
+					return;
+				
+				spawnLair(creature);
+				creature.getEventBus().subscribe(this);
 			}
 		}
-
 	}
 
 	@Override
@@ -164,27 +184,44 @@ public class MixedSpawnArea extends SpawnArea {
 			// One spawnarea -> many NPC groups
 			int index = new Random().nextInt(spawnGroups.size());
 			this.spawnGroup = spawnGroups.get(index);
-			
-			Vector<CreatureObject> groupMembers = new Vector<CreatureObject>();
-			//Point3D randomGroupPosition = getRandomPosition(creature.getWorldPosition(), 32, 100);
-			Point3D randomGroupPosition = getRandomPosition(creature.getWorldPosition(), 32, spawnGroup.getMinSpawnDistance()+10);
-			int spawnCount = spawnGroup.getGroupMembersNumber();
-			if (spawnCount<0){
-				int spawnCount2 = 1;
-				if (Math.abs(spawnCount)<spawnGroup.getMobiles().size())
-					spawnCount2 = Math.abs(spawnCount) + new Random().nextInt(spawnGroup.getMobiles().size()-Math.abs(spawnCount));
-				else
-					spawnCount2 = Math.abs(spawnCount);
-				spawnCount = Math.max(Math.abs(spawnCount), spawnCount2);
+			if (this.spawnGroup instanceof DynamicSpawnGroup){
+				Vector<CreatureObject> groupMembers = new Vector<CreatureObject>();
+				//Point3D randomGroupPosition = getRandomPosition(creature.getWorldPosition(), 32, 100);
+				Point3D randomGroupPosition = getRandomPosition(creature.getWorldPosition(), 32, spawnGroup.getMinSpawnDistance()+10);
+				int spawnCount = spawnGroup.getGroupMembersNumber();
+				if (spawnCount<0){
+					int spawnCount2 = 1;
+					if (Math.abs(spawnCount)<spawnGroup.getMobiles().size())
+						spawnCount2 = Math.abs(spawnCount) + new Random().nextInt(spawnGroup.getMobiles().size()-Math.abs(spawnCount));
+					else
+						spawnCount2 = Math.abs(spawnCount);
+					spawnCount = Math.max(Math.abs(spawnCount), spawnCount2);
+				}
+				
+				for(int i = 0; i < spawnCount; i++) {// A group with a specified or random number of members
+					CreatureObject spawnedCreature = spawnCreatureMember(creature, groupMembers, randomGroupPosition, i);
+					if (spawnedCreature!=null)
+						groupMembers.add(spawnedCreature);				
+				}
 			}
-			
-			for(int i = 0; i < spawnCount; i++) {// A group with a specified or random number of members
-				CreatureObject spawnedCreature = spawnCreatureMember(creature, groupMembers, randomGroupPosition, i);
-				if (spawnedCreature!=null)
-					groupMembers.add(spawnedCreature);				
+			if (this.spawnGroup instanceof LairGroupTemplate){
+				object = event.object;
+				
+				//if(object == null || !(object instanceof CreatureObject) || object.getContainer() != null)
+				//	return;
+				
+				if(object == null || !(object instanceof CreatureObject))
+					return;
+				
+				creature = (CreatureObject) object;
+				
+				if(creature.getSlottedObject("ghost") == null && !creature.getOption(Options.MOUNT))
+					return;
+				
+				if(new Random().nextFloat() <= 0.05)
+					spawnLair(creature);
 			}
-		}
-		
+		}		
 	}
 
 
@@ -304,6 +341,12 @@ public class MixedSpawnArea extends SpawnArea {
 						//System.out.println("minDistViolated " + mobile.getWorldPosition().getDistance(randomPosition) + "mobile: " + mobile.getTemplate());
 					}
 				}
+				for (LairActor actor : lairs){
+					if(actor.getLairObject().getWorldPosition().getDistance(randomPosition) < spawnGroup.getMinSpawnDistance()){
+						minDistViolated = true; // Distance to other nearby lairs!
+						//System.out.println("minDistViolated " + mobile.getWorldPosition().getDistance(randomPosition) + "mobile: " + mobile.getTemplate());
+					}
+				}
 				if (minDistViolated)
 					foundPos = false;
 				else
@@ -332,4 +375,56 @@ public class MixedSpawnArea extends SpawnArea {
 
 		return spawnedCreature;		
 	}
+	
+	// LairSpawnArea class methods
+	public void spawnLair(CreatureObject object) {
+		
+		NGECore core = NGECore.getInstance();
+		
+		LairGroupTemplate lairGroup = (LairGroupTemplate)this.spawnGroup;
+		
+		Vector<LairSpawnTemplate> lairTemplates = lairGroup.getLairSpawnTemplates();
+		
+		if(lairGroup == null || lairTemplates.isEmpty())
+			return;
+		
+		if((System.currentTimeMillis() - lastSpawnTime) < 10000)
+			return;
+			
+		Point3D randomPosition = getRandomPosition(object.getWorldPosition(), 32.f, 200.f);
+		
+		if(randomPosition == null)
+			return;
+		
+		TerrainService terrainSvc = core.terrainService;
+		
+		float height = terrainSvc.getHeight(getPlanet().getID(), randomPosition.x, randomPosition.z);
+		randomPosition.y = height;
+		
+		for(LairActor otherLair : lairs) {
+			if(otherLair.getLairObject().getWorldPosition().getDistance(randomPosition) < 30)
+				return;
+		}
+		
+		if(!terrainSvc.canBuildAtPosition(object, randomPosition.x, randomPosition.z))
+			return;
+		
+		Random random = new Random();
+				
+		LairSpawnTemplate lairSpawn = lairTemplates.get(random.nextInt(lairTemplates.size()));
+		
+		int level = -1; // If level equals -1 then the mobile template CL will be used!
+		if (lairSpawn.getMinLevel() != -1 && lairSpawn.getMaxLevel()!=-1)
+			level = random.nextInt((int) (lairSpawn.getMaxLevel() - lairSpawn.getMinLevel()) + 1) + lairSpawn.getMinLevel();
+		
+		
+		
+		LairActor lairActor = core.spawnService.spawnLair(lairSpawn.getLairTemplate(), getPlanet(), randomPosition, (short) level);
+		if(lairActor == null)
+			return;
+		lairs.add(lairActor);
+		lastSpawnTime = System.currentTimeMillis();
+		
+	}
+	
 }

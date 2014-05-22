@@ -21,10 +21,26 @@
  ******************************************************************************/
 package services.spawn;
 
+import java.util.Vector;
 
+// Making this an abstract class, not having to implement unused methods in either spawn group classes
 public abstract class SpawnGroup {
 	
-	public SpawnGroup() {
-		
+	public SpawnGroup() {}
+	
+	public int getGroupMembersNumber(){
+		return 0;
+	}
+	
+	public Vector<String> getMobiles() {
+		return new Vector<String>();
+	}
+	
+	public int getMinSpawnDistance(){
+		return 0;
+	}
+	
+	public int getMaxSpawns(){
+		return 0;
 	}
 }

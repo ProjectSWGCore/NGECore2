@@ -418,6 +418,28 @@ public class SpawnService {
 		spawnAreas.get(planet).add(dynamicSpawnArea);
 		core.simulationService.addCollidable(collidableCircle, x, z);
 	}
+	
+	public void addMixedSpawnArea(Vector<String> passedGroups, float x, float z, float radius, String planetName) {
+		Vector<SpawnGroup> mixedSpawnGroups = new Vector<SpawnGroup>();
+		for (String template : passedGroups){
+			if (dynamicGroupTemplates.get(template)!=null){
+				mixedSpawnGroups.add(dynamicGroupTemplates.get(template));
+			}
+			if (lairGroupTemplates.get(template)!=null){
+				mixedSpawnGroups.add(lairGroupTemplates.get(template));
+			}			
+			if(dynamicGroupTemplates.get(template) == null && lairGroupTemplates.get(template)==null)
+				return;			
+		}
+				
+		Planet planet = core.terrainService.getPlanetByName(planetName);
+		if(mixedSpawnGroups == null || mixedSpawnGroups.size() == 0 || planet == null)
+			return;
+		CollidableCircle collidableCircle = new CollidableCircle(new Point3D(x, 0, z), radius, planet);
+		MixedSpawnArea dynamicSpawnArea = new MixedSpawnArea(planet, collidableCircle, mixedSpawnGroups);
+		spawnAreas.get(planet).add(dynamicSpawnArea);
+		core.simulationService.addCollidable(collidableCircle, x, z);
+	}
 
 	public Map<String, MobileTemplate> getMobileTemplates() {
 		return mobileTemplates;
