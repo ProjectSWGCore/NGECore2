@@ -397,7 +397,7 @@ public class FactionService implements INetworkDispatch {
 		
 		scheduler.schedule(() -> {
 			actor.setFaction(faction);
-			actor.setFactionStatus(FactionStatus.Combatant);
+			actor.setFactionStatus(FactionStatus.OnLeave);
 			actor.setPvpBitmask(0);
 			PlayerObject player = ((PlayerObject) actor.getSlottedObject("ghost"));
 			if (player != null) {
