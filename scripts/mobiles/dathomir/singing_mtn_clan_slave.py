@@ -6,17 +6,23 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('nightsister_slave')
-	mobileTemplate.setLevel(86)
+	mobileTemplate.setCreatureName('singing_mtn_clan_slave')
+	mobileTemplate.setLevel(79)
 	mobileTemplate.setDifficulty(1)
-	mobileTemplate.setAttackRange(5)
+	mobileTemplate.setAttackRange(6)
 	mobileTemplate.setAttackSpeed(1.0)
+	mobileTemplate.setWeaponType(4)
+	mobileTemplate.setMinSpawnDistance(6)
+	mobileTemplate.setMaxSpawnDistance(10)
+	mobileTemplate.setDeathblow(False)
+	mobileTemplate.setSocialGroup('mountain clan')
+	mobileTemplate.setAssistRange(12)
+	mobileTemplate.setRespawnTime(300)
 	mobileTemplate.setOptionsBitmask(192)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_dressed_dathomir_nightsister_slave.iff')
+	templates.add('object/mobile/shared_dressed_dathomir_sing_mt_clan_slave.iff')
 	mobileTemplate.setTemplates(templates)
-	
 	
 	weaponTemplates = Vector()
 	weapontemplate = WeaponTemplate('object/weapon/melee/unarmed/shared_unarmed_default.iff', 6, 1.0)
@@ -27,6 +33,4 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
-
-	
-	core.spawnService.addMobileTemplate('nightsister_slave', mobileTemplate)
+	core.spawnService.addMobileTemplate('singing_mtn_clan_slave', mobileTemplate)
