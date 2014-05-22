@@ -287,7 +287,7 @@ public class DynamicSpawnArea extends SpawnArea {
 			randomPosition = getRandomPosition(randomGroupPosition, mobileTemplate.getMinSpawnDistance(), mobileTemplate.getMaxSpawnDistance());
 			
 			if(randomPosition == null){
-				System.out.println("randomPosition == null");
+				//System.out.println("randomPosition == null");
 				return null;
 			}
 			
@@ -316,18 +316,18 @@ public class DynamicSpawnArea extends SpawnArea {
 		}
 		
 		if(!foundPos){
-			System.out.println("mobileTemplate pos not found " + mobileTemplate.getCreatureName());
+			//System.out.println("mobileTemplate pos not found " + mobileTemplate.getCreatureName());
 			return null;
 		}
-		System.out.println("mobileTemplate pos found " + mobileTemplate.getCreatureName());
+		//System.out.println("mobileTemplate pos found " + mobileTemplate.getCreatureName());
 		
 		CreatureObject spawnedCreature = core.spawnService.spawnCreature(template, getPlanet().getName(), 0, randomPosition.x, randomPosition.y, randomPosition.z);
 		if(spawnedCreature != null){
 			mobiles.add(spawnedCreature);
-			System.err.println("Creature ADDED " + spawnedCreature.getTemplate());
+			//System.err.println("Creature ADDED " + spawnedCreature.getTemplate());
 		} else 
 		{
-			System.out.println("Creature not spawned" + template);
+			//System.out.println("Creature not spawned" + template);
 		}
 
 		return spawnedCreature;		
