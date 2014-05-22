@@ -35,5 +35,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('rangedshot')
 	mobileTemplate.setAttacks(attacks)
 
-	core.spawnService.addMobileTemplate('binayre_smuggler', mobileTemplate)
+	core.spawnService.addMobileTemplate('binayre_pirate', mobileTemplate)
 	return
