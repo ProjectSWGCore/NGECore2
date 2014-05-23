@@ -45,10 +45,8 @@ public class Guild extends Delta implements Serializable, Comparable<Guild> {
 	private String name;
 	private long leader;
 	private String leaderName;
-	private List<Long> members = new ArrayList<Long>();
-	private List<Long> sponsors = new ArrayList<Long>();
+	private Map<Long, GuildMember> members = new HashMap<Long, GuildMember>();
 	private Map<Long, String> sponsoredPlayers = new HashMap<Long, String>();
-	
 	public Guild(int id, String abbreviation, String name, SWGObject leader) {
 		this.id = id;
 		this.abbreviation = abbreviation;
@@ -59,8 +57,32 @@ public class Guild extends Delta implements Serializable, Comparable<Guild> {
 		//this.sponsors.add(leader.getObjectID());
 	}
 	
-	public Guild() {
-		
+	public Guild() { }
+	
+	public GuildMember addMember(long member) {
+		GuildMember permissions = new GuildMember();
+		members.put(member, permissions);
+		return permissions;
+	}
+	
+	public void sendGuildMail(String sender, String subject, String message) {
+		NGECore core = NGECore.getInstance();
+		Date date = new Date();
+		members.forEach((id, member) -> {
+			Mail guildMail = new Mail();
+            guildMail.setMailId(core.chatService.generateMailId());
+            guildMail.setTimeStamp((int) date.getTime());
+            guildMail.setRecieverId(id);
+            guildMail.setStatus(Mail.NEW);
+            guildMail.setMessage(message);
+            guildMail.setSubject(subject);
+            guildMail.setSenderName(sender);
+            core.chatService.storePersistentMessage(guildMail);
+            
+            if (core.objectService.getObject(id) != null) {
+            	core.chatService.sendPersistentMessageHeader(core.objectService.getObject(id).getClient(), guildMail);
+            }
+		});
 	}
 	
 	public int getId() {
@@ -123,7 +145,7 @@ public class Guild extends Delta implements Serializable, Comparable<Guild> {
 		}
 	}
 	
-	public List<Long> getMembers() {
+	public Map<Long, GuildMember> getMembers() {
 		return members;
 	}
 
@@ -139,14 +161,6 @@ public class Guild extends Delta implements Serializable, Comparable<Guild> {
 		}
 	}
 
-	public List<Long> getSponsers() {
-		return sponsors;
-	}
-
-	public void setSponsors(List<Long> sponsors) {
-		this.sponsors = sponsors;
-	}
-
 	public Map<Long, String> getSponsoredPlayers() {
 		return sponsoredPlayers;
 	}
@@ -155,25 +169,10 @@ public class Guild extends Delta implements Serializable, Comparable<Guild> {
 		this.sponsoredPlayers = sponsoredPlayers;
 	}
 
-	public void sendGuildMail(String sender, String subject, String message) {
-		NGECore core = NGECore.getInstance();
-		Date date = new Date();
-		members.forEach(member -> {
-			Mail guildMail = new Mail();
-            guildMail.setMailId(core.chatService.generateMailId());
-            guildMail.setTimeStamp((int) date.getTime());
-            guildMail.setRecieverId(member);
-            guildMail.setStatus(Mail.NEW);
-            guildMail.setMessage(message);
-            guildMail.setSubject(subject);
-            guildMail.setSenderName(sender);
-            core.chatService.storePersistentMessage(guildMail);
-            
-            if (core.objectService.getObject(member) != null) {
-            	core.chatService.sendPersistentMessageHeader(core.objectService.getObject(member).getClient(), guildMail);
-            }
-		});
+	public GuildMember getMember(long objectID) {
+		return members.get(objectID);
 	}
+	
 	public byte[] getBytes() {
 		synchronized(objectMutex) {
 			IoBuffer buffer = createBuffer((getString().length() + 2));

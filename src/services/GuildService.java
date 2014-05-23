@@ -29,6 +29,7 @@ import java.util.Vector;
 import resources.common.OutOfBand;
 import resources.datatables.DisplayType;
 import resources.guild.Guild;
+import resources.guild.GuildMember;
 import resources.objects.SWGSet;
 import resources.objects.creature.CreatureObject;
 import resources.objects.guild.GuildObject;
@@ -84,12 +85,14 @@ public class GuildService implements INetworkDispatch {
 		return guild;
 	}
 	
-	public void joinGuild(Guild guild, CreatureObject joinee, CreatureObject acceptor) {
+	public GuildMember joinGuild(Guild guild, CreatureObject joinee, CreatureObject acceptor) {
+		GuildMember member = null;
 		PlayerObject ghost = joinee.getPlayerObject();
 		if (ghost == null)
-			return;
+			return member;
 		
-		guild.getMembers().add(joinee.getObjectID());
+		member = guild.addMember(joinee.getObjectID());
+		
 		joinee.setGuildId(guild.getId());
 		
 		guild.getSponsoredPlayers().remove(joinee.getObjectID());
@@ -129,6 +132,11 @@ public class GuildService implements INetworkDispatch {
 				}
 			});
 		}
+		return member;
+	}
+	
+	public void handleGuildPermissionList(CreatureObject actor, Guild guild) {
+
 	}
 	
 	public void handleGuildSponsor(CreatureObject actor) {
@@ -174,7 +182,7 @@ public class GuildService implements INetworkDispatch {
 		    	actor.sendSystemMessage(OutOfBand.ProsePackage("@guild:sponsor_self", "TU", cOwner.getCustomName(), "TT", guild.getName()), DisplayType.Broadcast);
 		    	((CreatureObject)cOwner).sendSystemMessage(OutOfBand.ProsePackage("@guild:sponsor_target", "TT", guild.getName(), "TU", actor.getCustomName()), DisplayType.Broadcast);
 		    	
-		    	guild.sendGuildMail(guild.getName(), "@guildmail:sponsor_subject", new Stf("@guild:sponsor_text").getStfValue().replace("%TU", actor.getCustomName()).replace("%TT", cOwner.getCustomName()));
+				guild.sendGuildMail(guild.getName(), "@guildmail:sponsor_subject", new Stf("@guildmail:sponsor_text").getStfValue().replace("%TU", actor.getCustomName()).replace("%TT", cOwner.getCustomName()));
 	    	});
 	    	core.suiService.openSUIWindow(wndSponsoredConfirm);
 
@@ -259,7 +267,7 @@ public class GuildService implements INetworkDispatch {
 	public void handleGuildDeclineSponsorship(Guild guild, CreatureObject actor, CreatureObject sponsoree) {
 		guild.getSponsoredPlayers().remove(sponsoree.getObjectID());
 		
-		guild.sendGuildMail(guild.getName(), "@guildmail:decline_subject", new Stf("@guildmail:decline_text").getStfValue().replace("%TU", actor.getCustomName()).replace("%TO", sponsoree.getCustomName()));
+		guild.sendGuildMail(guild.getName(), "@guildmail:decline_subject", new Stf("@guildmail:decline_text").getStfValue().replace("%TU", actor.getCustomName()).replace("%TT", sponsoree.getCustomName()));
 		
 		Mail declinedMail = new Mail();
         declinedMail.setMailId(core.chatService.generateMailId());
