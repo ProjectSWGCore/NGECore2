@@ -6,12 +6,12 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('crackdown_imperial_first_lieutenant')
-	mobileTemplate.setLevel(20)
-	mobileTemplate.setDifficulty(0)
+	mobileTemplate.setCreatureName('imperial_inquisitor')
+	mobileTemplate.setLevel(80)
+	mobileTemplate.setDifficulty(1)
 	mobileTemplate.setAttackRange(15)
 	mobileTemplate.setAttackSpeed(1.0)
-	mobileTemplate.setWeaponType(1)
+	mobileTemplate.setWeaponType(4)
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)
@@ -23,11 +23,13 @@ def addTemplate(core):
 	mobileTemplate.setFactionStatus(1)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_dressed_imperial_lieutenant_m.iff')
+	templates.add('object/mobile/shared_dressed_imperial_inquisitor_human_male_01.iff')
+	templates.add('object/mobile/shared_dressed_imperial_inquisitor_human_male_02.iff')
+	templates.add('object/mobile/shared_dressed_imperial_inquisitor_human_male_03.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
-	weapontemplate = WeaponTemplate('object/weapon/ranged/carbine/shared_carbine_e11.iff', 1, 1.0)
+	weapontemplate = WeaponTemplate('object/weapon/melee/baton/shared_baton_stun.iff', 4, 1.0)
 	weaponTemplates.add(weapontemplate)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
@@ -35,5 +37,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('rangedshot')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('imp_fst_lieutenant', mobileTemplate)
+	core.spawnService.addMobileTemplate('imp_inquisitor_80', mobileTemplate)
 	return
