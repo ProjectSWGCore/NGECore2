@@ -40,8 +40,10 @@ def handleGuildCreateName(owner, window, eventType, returnList):
     return
 
 def doGuildCreate(owner, window, eventType, returnList):
+    core = NGECore().getInstance()
     if eventType == 0:
-        guild = NGECore().getInstance().guildService.createGuild(str(returnList.get(0)), str(owner.getAttachment('guildName')), owner)
-        owner.setGuildId(guild.getId())
+        guild = core.guildService.createGuild(str(returnList.get(0)), str(owner.getAttachment('guildName')), owner)
+        core.guildService.joinGuild(guild, owner, None)
+        guild.getSponsers().add(owner.getObjectID())
         return
     return

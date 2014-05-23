@@ -142,6 +142,15 @@ public class DevService implements INetworkDispatch {
 			case 11: // Locations
 				suiOptions.put((long) 122, "Teleport to Jedi Ruins");
 				suiOptions.put((long) 124, "Teleport to Mos Eisley");
+				if (creature.getClient().isGM()) {
+					suiOptions.put((long) 164, "Teleport to Mining Outpost");
+					suiOptions.put((long) 165, "Teleport to Spawn Area #1");
+					suiOptions.put((long) 166, "Teleport to Imperial Op");
+					suiOptions.put((long) 167, "Teleport to Rebel Base ");
+					suiOptions.put((long) 168, "Teleport to NS vs SMC Battle");
+					suiOptions.put((long) 153, "Teleport to Force Crystal Hunter's Cave");
+					suiOptions.put((long) 121, "Teleport to Sandbox City");	
+				}
 				break;
 		
 		}
@@ -1245,6 +1254,26 @@ public class DevService implements INetworkDispatch {
 					case 124:
 						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("tatooine"), new Point3D(3521,4,-4800), player.getOrientation(), null);
 						return;
+						
+					case 164:
+						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("dantooine"), new Point3D(-284,18,2853), player.getOrientation(), null);
+						return;
+						
+					case 165:
+						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("dantooine"), new Point3D(-1586,18,-7688), player.getOrientation(), null);
+						return;
+						
+					case 166:
+						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("dantooine"), new Point3D(-4211,18,-2349), player.getOrientation(), null);
+						return;
+						
+					case 167:
+						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("dantooine"), new Point3D(-4211,18,-2349), player.getOrientation(), null);
+						return;
+						
+					case 168: 
+						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("dathomir"), new Point3D(-2450,18,1521), player.getOrientation(), null);
+						return;
 
 					case 123:
 						TangibleObject arakydDroids = (TangibleObject) core.objectService.createObject("object/tangible/mission/shared_mission_bounty_droid_probot.iff", planet);
@@ -1272,6 +1301,10 @@ public class DevService implements INetworkDispatch {
 						TangibleObject guildRegistry = (TangibleObject) core.objectService.createObject("object/tangible/furniture/technical/shared_guild_registry_initial.iff", planet);
 						inventory.add(guildRegistry);
 						return;
+						
+					case 153:
+						Point3D position = new Point3D(-6222,1,7380);
+						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("dantooine"), position, player.getOrientation(), null);
 				}
 			}	
 		});

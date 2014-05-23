@@ -9,5 +9,5 @@ def run(core, actor, target, commandString):
 	if group is None:
 		return
 	
-	core.chatService.sendChatRoomMessage(actor, group.getChatRoomId(), commandString)
+	core.chatService.sendChatRoomMessage(actor, group.getChatRoomId(), 0, commandString)
 	return
