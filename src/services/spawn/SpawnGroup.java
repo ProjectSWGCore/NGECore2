@@ -23,52 +23,24 @@ package services.spawn;
 
 import java.util.Vector;
 
-public class DynamicSpawnGroup extends SpawnGroup {
-
-	private Vector<String> mobiles;
-	private String name;
-	private int maxSpawns;
-	private int minSpawnDistance;
-	private int groupMembersNumber = -1;
-
-	public Vector<String> getMobiles() {
-		return mobiles;
-	}
-
-	public void setMobiles(Vector<String> mobiles) {
-		this.mobiles = mobiles;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public int getMaxSpawns() {
-		return maxSpawns;
-	}
-
-	public void setMaxSpawns(int maxSpawns) {
-		this.maxSpawns = maxSpawns;
-	}
-
-	public int getMinSpawnDistance() {
-		return minSpawnDistance;
-	}
-
-	public void setMinSpawnDistance(int minSpawnDistance) {
-		this.minSpawnDistance = minSpawnDistance;
-	}
-
-	public int getGroupMembersNumber() {
-		return groupMembersNumber;
-	}
-
-	public void setGroupMembersNumber(int groupMembersNumber) {
-		this.groupMembersNumber = groupMembersNumber;
+// Making this an abstract class, not having to implement unused methods in either spawn group classes
+public abstract class SpawnGroup {
+	
+	public SpawnGroup() {}
+	
+	public int getGroupMembersNumber(){
+		return 0;
 	}
 	
+	public Vector<String> getMobiles() {
+		return new Vector<String>();
+	}
+	
+	public int getMinSpawnDistance(){
+		return 0;
+	}
+	
+	public int getMaxSpawns(){
+		return 0;
+	}
 }
