@@ -43,7 +43,7 @@ def doGuildCreate(owner, window, eventType, returnList):
     core = NGECore().getInstance()
     if eventType == 0:
         guild = core.guildService.createGuild(str(returnList.get(0)), str(owner.getAttachment('guildName')), owner)
-        core.guildService.joinGuild(guild, owner)
+        core.guildService.joinGuild(guild, owner, None)
         guild.getSponsers().add(owner.getObjectID())
         return
     return

@@ -9,28 +9,30 @@ def createRadial(core, owner, target, radials):
     #radials.clear()
     
     if owner.getGuildId() != 0:
+
     	guild = core.guildService.getGuildById(owner.getGuildId())
     	
     	if guild is None:
     		return
     	
-        radials.add(RadialOptions(0, RadialOptions.serverGuildGuildManagement, 3, '@guild:menu_guild_management'))
-        radials.add(RadialOptions(0, RadialOptions.serverGuildMemberManagement, 3, '@guild:menu_member_management'))
-    	
-        #Guild Management
-        radials.add(RadialOptions(0, RadialOptions.serverGuildInfo, 3, '@guild:menu_info'))
-        
-        #Member Management
-        
-        # Leader options
-        #if guild.getLeader() == owner.getObjectID():
-		    #Guild Management
-            #radials.add(RadialOptions(3, RadialOptions.serverGuildDisband, 3, '@guild:menu_disband'))
-            #radials.add(RadialOptions(3, 69, 3, '@guild:menu_leader_change'))
-        
-        # Sponsor options
-        #if guild.getSponsors().contains(owner.getObjectID()):
+        radials.add(RadialOptions(0, RadialOptions.serverGuildGuildManagement, 3, '@guild:menu_guild_management')) # Guild Management
+        radials.add(RadialOptions(0, RadialOptions.serverGuildMemberManagement, 3, '@guild:menu_member_management')) # Member Management
 
+        # Guild Management
+        radials.add(RadialOptions(0, RadialOptions.serverGuildInfo, 3, '@guild:menu_info')) # Guild Information
+        
+        # Member Management
+        
+        # - Sponsor options
+        if guild.getSponsers().contains(owner.getObjectID()):
+            radials.add(RadialOptions(4, RadialOptions.serverGuildSponsor, 3, '@guild:menu_sponsor')) # Sponsor for Membership
+
+            if guild.getSponsoredPlayers().size() > 0:
+                radials.add(RadialOptions(4, RadialOptions.serverGuildSponsored, 3, '@guild:menu_sponsored')) # Sponsored for Membership
+        
+        
+        return
+    
     return
     
 def handleSelection(core, owner, target, option):
@@ -46,5 +48,13 @@ def handleSelection(core, owner, target, option):
                             "Guild Members: " + str(guild.getMembers().size())
         wndGuildInfo = core.suiService.createMessageBox(core.suiService.MessageBoxType.MESSAGE_BOX_OK, '@guild:info_title', guildInfoPrompt, owner, target, 10)
         core.suiService.openSUIWindow(wndGuildInfo)
+        return
+    
+    elif option == RadialOptions.serverGuildSponsor:
+        core.guildService.handleGuildSponsor(owner)
+        return
+    
+    elif option == RadialOptions.serverGuildSponsored:
+        core.guildService.handleManageSponsoredPlayers(owner)
         return
     return
