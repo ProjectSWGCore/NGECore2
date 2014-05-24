@@ -6,8 +6,8 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('imperial_major')
-	mobileTemplate.setLevel(21)
+	mobileTemplate.setCreatureName('veteran_imperial_major')
+	mobileTemplate.setLevel(55)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(15)
 	mobileTemplate.setAttackSpeed(1.0)
@@ -35,5 +35,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('rangedshot')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('imp_major', mobileTemplate)
+	core.spawnService.addMobileTemplate('vet_imp_major', mobileTemplate)
 	return

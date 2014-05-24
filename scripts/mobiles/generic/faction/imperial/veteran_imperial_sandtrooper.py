@@ -6,8 +6,8 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('imperial_major')
-	mobileTemplate.setLevel(21)
+	mobileTemplate.setCreatureName('veteran_sand_trooper')
+	mobileTemplate.setLevel(49)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(15)
 	mobileTemplate.setAttackSpeed(1.0)
@@ -23,7 +23,7 @@ def addTemplate(core):
 	mobileTemplate.setFactionStatus(1)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_dressed_imperial_major_m.iff')
+	templates.add('object/mobile/shared_dressed_stormtrooper_sandtrooper_m.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
@@ -35,5 +35,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('rangedshot')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('imp_major', mobileTemplate)
+	core.spawnService.addMobileTemplate('vet_sand_trooper', mobileTemplate)
 	return
