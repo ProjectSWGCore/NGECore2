@@ -6,9 +6,9 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('crackdown_dark_trooper')
-	mobileTemplate.setLevel(32)
-	mobileTemplate.setDifficulty(0)
+	mobileTemplate.setCreatureName('imperial_sharpshooter')
+	mobileTemplate.setLevel(66)
+	mobileTemplate.setDifficulty(1)
 	mobileTemplate.setAttackRange(15)
 	mobileTemplate.setAttackSpeed(1.0)
 	mobileTemplate.setWeaponType(1)
@@ -23,11 +23,11 @@ def addTemplate(core):
 	mobileTemplate.setFactionStatus(1)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_dark_trooper.iff')
+	templates.add('object/mobile/shared_dressed_npe_imperial_officer.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
-	weapontemplate = WeaponTemplate('object/weapon/ranged/carbine/shared_carbine_e11.iff', 1, 1.0)
+	weapontemplate = WeaponTemplate('object/weapon/ranged/rifle/shared_rifle_e11.iff', 1, 1.0)
 	weaponTemplates.add(weapontemplate)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
@@ -35,5 +35,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('rangedshot')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('vic_dark_trooper_32', mobileTemplate)
+	core.spawnService.addMobileTemplate('imp_sharpshooter_66', mobileTemplate)
 	return
