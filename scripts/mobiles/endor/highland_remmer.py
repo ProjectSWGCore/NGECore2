@@ -8,8 +8,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('highland_remmer')
 	mobileTemplate.setLevel(65)
-	mobileTemplate.setMinLevel(65)
-	mobileTemplate.setMaxLevel(65)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(12)
 	mobileTemplate.setAttackSpeed(1.0)

@@ -8,8 +8,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('meager_tortur')
 	mobileTemplate.setLevel(42)
-	mobileTemplate.setMinLevel(42)
-	mobileTemplate.setMaxLevel(42)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)

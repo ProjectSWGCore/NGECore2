@@ -8,8 +8,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('boar_wolf_ravager')
 	mobileTemplate.setLevel(66)
-	mobileTemplate.setMinLevel(66)
-	mobileTemplate.setMaxLevel(66)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)

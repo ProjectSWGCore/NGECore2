@@ -8,8 +8,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('savage_guf_drolg')
 	mobileTemplate.setLevel(43)
-	mobileTemplate.setMinLevel(43)
-	mobileTemplate.setMaxLevel(43)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)

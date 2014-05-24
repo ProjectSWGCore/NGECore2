@@ -8,8 +8,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('rabid_squall')
 	mobileTemplate.setLevel(71)
-	mobileTemplate.setMinLevel(71)
-	mobileTemplate.setMaxLevel(71)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)

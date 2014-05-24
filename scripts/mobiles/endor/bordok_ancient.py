@@ -8,8 +8,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('bordok_ancient')
 	mobileTemplate.setLevel(62)
-	mobileTemplate.setMinLevel(62)
-	mobileTemplate.setMaxLevel(62)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)
