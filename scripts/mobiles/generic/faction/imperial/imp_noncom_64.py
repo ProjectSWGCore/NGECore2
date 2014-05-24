@@ -7,8 +7,8 @@ def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
 	mobileTemplate.setCreatureName('crackdown_imperial_noncom')
-	mobileTemplate.setLevel(14)
-	mobileTemplate.setDifficulty(0)
+	mobileTemplate.setLevel(64)
+	mobileTemplate.setDifficulty(1)
 	mobileTemplate.setAttackRange(15)
 	mobileTemplate.setAttackSpeed(1.0)
 	mobileTemplate.setWeaponType(1)
@@ -35,5 +35,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('rangedshot')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('imp_noncom_14', mobileTemplate)
+	core.spawnService.addMobileTemplate('imp_noncom_64', mobileTemplate)
 	return
