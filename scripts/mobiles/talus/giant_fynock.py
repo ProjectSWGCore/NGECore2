@@ -6,10 +6,8 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('giant fynock')
+	mobileTemplate.setCreatureName('giant_fynock')
 	mobileTemplate.setLevel(40)
-	mobileTemplate.setMinLevel(40)
-	mobileTemplate.setMaxLevel(40)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)

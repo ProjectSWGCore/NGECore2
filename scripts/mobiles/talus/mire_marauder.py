@@ -4,8 +4,9 @@ from services.spawn import WeaponTemplate
 from java.util import Vector
 
 def addTemplate(core):
-	mobileTemplate = MobileTemplate()	
-	mobileTemplate.setCreatureName('mire marauder')
+	mobileTemplate = MobileTemplate()
+	
+	mobileTemplate.setCreatureName('mire_marauder')
 	mobileTemplate.setLevel(60)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)

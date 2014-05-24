@@ -6,10 +6,8 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('agrilat rasp')
+	mobileTemplate.setCreatureName('agrilat_plumed_rasp')
 	mobileTemplate.setLevel(34)
-	mobileTemplate.setMinLevel(34)
-	mobileTemplate.setMaxLevel(36)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)
@@ -27,7 +25,7 @@ def addTemplate(core):
 	mobileTemplate.setStalker(False)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_rasp.iff')
+	templates.add('object/mobile/shared_horned_rasp.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()

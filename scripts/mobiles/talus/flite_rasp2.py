@@ -5,7 +5,7 @@ from java.util import Vector
 
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()	
-	mobileTemplate.setCreatureName('flite rasp')
+	mobileTemplate.setCreatureName('flite_rasp')
 	mobileTemplate.setLevel(35)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
@@ -36,5 +36,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 
-	core.spawnService.addMobileTemplate('flite_rasp', mobileTemplate)
+	core.spawnService.addMobileTemplate('flite_rasp2', mobileTemplate)
 	return

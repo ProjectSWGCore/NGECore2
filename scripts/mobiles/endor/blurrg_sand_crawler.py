@@ -6,10 +6,8 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('blurrg sand crawler')
+	mobileTemplate.setCreatureName('blurrg_sand_crawler')
 	mobileTemplate.setLevel(65)
-	mobileTemplate.setMinLevel(65)
-	mobileTemplate.setMaxLevel(65)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)

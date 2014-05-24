@@ -6,10 +6,8 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('blood-stained prowler')
+	mobileTemplate.setCreatureName('wrix_bloodstained_prowler')
 	mobileTemplate.setLevel(21)
-	mobileTemplate.setMinLevel(21)
-	mobileTemplate.setMaxLevel(21)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)

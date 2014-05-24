@@ -6,10 +6,8 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('ravenous roba stalker')
+	mobileTemplate.setCreatureName('ravenous_roba_stalker')
 	mobileTemplate.setLevel(62)
-	mobileTemplate.setMinLevel(62)
-	mobileTemplate.setMaxLevel(62)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)

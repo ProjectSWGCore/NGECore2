@@ -5,11 +5,8 @@ from java.util import Vector
 
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
-	
-	mobileTemplate.setCreatureName('bane back spider')
-	mobileTemplate.setLevel(80)
-	mobileTemplate.setMinLevel(80)
-	mobileTemplate.setMaxLevel(80)
+		
+	mobileTemplate.setCreatureName('bio_engineered_bane_back')		mobileTemplate.setLevel(80)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)

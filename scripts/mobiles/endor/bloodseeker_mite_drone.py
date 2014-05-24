@@ -6,10 +6,8 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('bloodseeker mite drone')
+	mobileTemplate.setCreatureName('bloodseeker_mite_drone')
 	mobileTemplate.setLevel(64)
-	mobileTemplate.setMinLevel(64)
-	mobileTemplate.setMaxLevel(64)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)

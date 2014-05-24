@@ -6,29 +6,25 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('blistmok crystal charger')
-	mobileTemplate.setLevel(72)
-	mobileTemplate.setMinLevel(72)
-	mobileTemplate.setMaxLevel(72)
+	mobileTemplate.setCreatureName('clone_relics__claw_bodyguard_02')
+	mobileTemplate.setLevel(36)
+	mobileTemplate.setMinLevel(36)
+	mobileTemplate.setMaxLevel(36)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)
 	mobileTemplate.setWeaponType(6)
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
-	mobileTemplate.setDeathblow(True)
+	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(1)
-	mobileTemplate.setMeatType("Reptile Meat")
-	mobileTemplate.setMeatAmount(20)
-	mobileTemplate.setHideType("Scaley Hide")
-	mobileTemplate.setHideAmount(24)
-	mobileTemplate.setSocialGroup("blistmok")
-	mobileTemplate.setAssistRange(24)
-	mobileTemplate.setStalker(True)
+	mobileTemplate.setSocialGroup("clone relics claw")
+	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setStalker(False)
 	mobileTemplate.setOptionsBitmask(192)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_blistmok.iff')
+	templates.add('object/mobile/shared_ep3_clone_relics_claw_bodyguard_02.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
@@ -37,8 +33,14 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
-	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
+	mobileTemplate.setDefaultAttack('meleeHit')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('blistmok_crystal_charger', mobileTemplate)
+	lootPoolNames_1 = ['Junk']
+	lootPoolChances_1 = [100]
+	lootGroupChance_1 = 100
+	mobileTemplate.addToLootGroups(lootPoolNames_1,lootPoolChances_1,lootGroupChance_1)
+	
+	
+	core.spawnService.addMobileTemplate('claw_bodyguard', mobileTemplate)
 	return
