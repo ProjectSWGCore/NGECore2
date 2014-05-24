@@ -6,7 +6,7 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('bachelor gualama')
+	mobileTemplate.setCreatureName('bachelor_gualama')
 	mobileTemplate.setLevel(41)
 	mobileTemplate.setMinLevel(41)
 	mobileTemplate.setMaxLevel(41)

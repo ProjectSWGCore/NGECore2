@@ -6,7 +6,7 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('swirl prong pack leader')
+	mobileTemplate.setCreatureName('swirl_prong_pack_leader')
 	mobileTemplate.setLevel(36)
 	mobileTemplate.setMinLevel(36)
 	mobileTemplate.setMaxLevel(36)

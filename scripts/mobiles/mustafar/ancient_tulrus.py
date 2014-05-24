@@ -6,7 +6,7 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('ancient tulrus')
+	mobileTemplate.setCreatureName('som_nesting_grounds_tulrus_ancient')
 	mobileTemplate.setLevel(82)
 	mobileTemplate.setMinLevel(82)
 	mobileTemplate.setMaxLevel(83)
@@ -28,7 +28,7 @@ def addTemplate(core):
 	mobileTemplate.setOptionsBitmask(192)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_bark_mite.iff')
+	templates.add('object/mobile/shared_tulrus.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
