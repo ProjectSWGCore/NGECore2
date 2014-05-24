@@ -132,6 +132,11 @@ public class GuildService implements INetworkDispatch {
 				}
 			});
 		}
+		member.setLevel(joinee.getLevel());
+		if (joinee.getPlayerObject() != null) {
+			member.setProfession(core.playerService.getFormalProfessionName(joinee.getPlayerObject().getProfession()));
+		}
+		
 		return member;
 	}
 	

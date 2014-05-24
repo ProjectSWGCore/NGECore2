@@ -27,6 +27,9 @@ import java.util.Map;
 public class GuildMember {
 	private long objectId;
 	private long joinTime;
+	private String profession;
+	private short level;
+	private String rank;
 	// TODO: These might have to be moved to a new GuildRank class depending on how permissions worked for NGE
 	//this works for now... Lack of NGE Guild Rank guides makes re-creation difficult (Ranks introduced Game Update 8: http://swg.wikia.com/wiki/Game_Update_8)
 	private boolean mailPermission = false;
@@ -131,6 +134,30 @@ public class GuildMember {
 		this.disbandPermission = disbandPermission;
 	}
 	
+	public String getProfession() {
+		return profession;
+	}
+
+	public void setProfession(String profession) {
+		this.profession = profession;
+	}
+
+	public short getLevel() {
+		return level;
+	}
+
+	public void setLevel(short level) {
+		this.level = level;
+	}
+
+	public String getRank() {
+		return rank;
+	}
+
+	public void setRank(String rank) {
+		this.rank = rank;
+	}
+
 	public Map<Long, String> getAllPermissions() {
 		Map<Long, String> permissions = new HashMap<Long, String>();
 		permissions.put((long) 1, "@guild:permission_mail");
