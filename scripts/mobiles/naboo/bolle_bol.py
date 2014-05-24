@@ -6,10 +6,8 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('bolle bol')
+	mobileTemplate.setCreatureName('bolle_bol')
 	mobileTemplate.setLevel(16)
-	mobileTemplate.setMinLevel(16)
-	mobileTemplate.setMaxLevel(16)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)

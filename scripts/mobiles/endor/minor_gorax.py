@@ -6,10 +6,8 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('minor gorax')
+	mobileTemplate.setCreatureName('minor_gorax')
 	mobileTemplate.setLevel(83)
-	mobileTemplate.setMinLevel(83)
-	mobileTemplate.setMaxLevel(83)
 	mobileTemplate.setDifficulty(1)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)

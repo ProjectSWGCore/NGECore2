@@ -5,7 +5,7 @@ from java.util import Vector
 
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()	
-	mobileTemplate.setCreatureName('flite rasp')
+	mobileTemplate.setCreatureName('flite_rasp')
 	mobileTemplate.setLevel(34)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)

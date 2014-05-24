@@ -6,10 +6,8 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('blistmok crystal charger')
+	mobileTemplate.setCreatureName('som_crystal_flats_blistmok_crystal_stalker')
 	mobileTemplate.setLevel(72)
-	mobileTemplate.setMinLevel(72)
-	mobileTemplate.setMaxLevel(72)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)

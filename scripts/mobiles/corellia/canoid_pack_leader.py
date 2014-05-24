@@ -6,10 +6,8 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('canoid pack leader')
+	mobileTemplate.setCreatureName('canoid_pack_leader')
 	mobileTemplate.setLevel(30)
-	mobileTemplate.setMinLevel(30)
-	mobileTemplate.setMaxLevel(30)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)
