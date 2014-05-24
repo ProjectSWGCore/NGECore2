@@ -8,8 +8,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('bageraset_bruiser')
 	mobileTemplate.setLevel(9)
-	mobileTemplate.setMinLevel(9)
-	mobileTemplate.setMaxLevel(9)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)

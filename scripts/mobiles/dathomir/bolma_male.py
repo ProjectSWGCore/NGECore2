@@ -8,8 +8,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('bolma_male')
 	mobileTemplate.setLevel(60)
-	mobileTemplate.setMinLevel(60)
-	mobileTemplate.setMaxLevel(60)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)

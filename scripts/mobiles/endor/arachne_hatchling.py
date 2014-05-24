@@ -8,8 +8,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('arachne_hatchling')
 	mobileTemplate.setLevel(64)
-	mobileTemplate.setMinLevel(64)
-	mobileTemplate.setMaxLevel(65)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)

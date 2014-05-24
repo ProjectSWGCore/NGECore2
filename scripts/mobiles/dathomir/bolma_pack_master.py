@@ -8,8 +8,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('bolma_pack_master')
 	mobileTemplate.setLevel(61)
-	mobileTemplate.setMinLevel(61)
-	mobileTemplate.setMaxLevel(61)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)

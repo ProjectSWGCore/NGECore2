@@ -8,8 +8,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('durni')
 	mobileTemplate.setLevel(25)
-	mobileTemplate.setMinLevel(25)
-	mobileTemplate.setMaxLevel(26)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)

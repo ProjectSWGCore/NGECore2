@@ -8,8 +8,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('carrion_spat_corpsereaver')
 	mobileTemplate.setLevel(10)
-	mobileTemplate.setMinLevel(10)
-	mobileTemplate.setMaxLevel(10)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)
