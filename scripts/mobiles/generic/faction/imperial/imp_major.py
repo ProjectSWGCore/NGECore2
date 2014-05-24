@@ -35,5 +35,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('rangedshot')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('imp_majort', mobileTemplate)
+	core.spawnService.addMobileTemplate('imp_major', mobileTemplate)
 	return
