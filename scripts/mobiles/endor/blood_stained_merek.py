@@ -5,8 +5,8 @@ from java.util import Vector
 
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
-	
-	mobileTemplate.setCreatureName('blood_stained_merek')
+		
+	mobileTemplate.setCreatureName('blood_stained_merek')	
 	mobileTemplate.setLevel(63)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)

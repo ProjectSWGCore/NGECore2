@@ -5,8 +5,8 @@ from java.util import Vector
 
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
-	
-	mobileTemplate.setCreatureName('gurreck_prowler')
+		
+	mobileTemplate.setCreatureName('gurreck_prowler')	
 	mobileTemplate.setLevel(64)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)

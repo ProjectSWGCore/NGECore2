@@ -5,7 +5,7 @@ from java.util import Vector
 
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
-	
+		
 	mobileTemplate.setCreatureName('roba_infuriated_protectorate')
 	mobileTemplate.setLevel(45)
 	mobileTemplate.setDifficulty(0)

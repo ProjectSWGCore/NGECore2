@@ -5,7 +5,7 @@ from java.util import Vector
 
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
-	
+
 	mobileTemplate.setCreatureName('minor_guf_drolg')
 	mobileTemplate.setLevel(36)
 	mobileTemplate.setDifficulty(0)

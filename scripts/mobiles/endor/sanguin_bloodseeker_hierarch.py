@@ -5,7 +5,7 @@ from java.util import Vector
 
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
-	
+		
 	mobileTemplate.setCreatureName('bloodseeker_mite_sanguine_hierarch')
 	mobileTemplate.setLevel(59)
 	mobileTemplate.setDifficulty(0)

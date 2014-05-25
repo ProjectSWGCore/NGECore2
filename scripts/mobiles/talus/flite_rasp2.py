@@ -36,5 +36,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 
-	core.spawnService.addMobileTemplate('flite_rasp', mobileTemplate)
+	core.spawnService.addMobileTemplate('flite_rasp2', mobileTemplate)
 	return

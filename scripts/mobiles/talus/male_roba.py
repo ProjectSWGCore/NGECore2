@@ -4,7 +4,8 @@ from services.spawn import WeaponTemplate
 from java.util import Vector
 
 def addTemplate(core):
-	mobileTemplate = MobileTemplate()	
+	mobileTemplate = MobileTemplate()
+	
 	mobileTemplate.setCreatureName('roba_male')
 	mobileTemplate.setLevel(43)
 	mobileTemplate.setDifficulty(0)

@@ -5,8 +5,8 @@ from java.util import Vector
 
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
-	
-	mobileTemplate.setCreatureName('corellian_butterfly_monarch_bloodthirsty')
+		
+	mobileTemplate.setCreatureName('corellian_butterfly_monarch_bloodthirsty')	
 	mobileTemplate.setLevel(19)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
