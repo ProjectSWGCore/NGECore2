@@ -41,6 +41,7 @@ import services.chat.Mail;
 import services.sui.SUIService.InputBoxType;
 import services.sui.SUIService.ListBoxType;
 import services.sui.SUIService.MessageBoxType;
+import services.sui.SUITableItem;
 import services.sui.SUIWindow;
 import services.sui.SUIWindow.Trigger;
 import main.NGECore;
@@ -132,6 +133,7 @@ public class GuildService implements INetworkDispatch {
 				}
 			});
 		}
+		member.setName(joinee.getCustomName());
 		member.setLevel(joinee.getLevel());
 		if (joinee.getPlayerObject() != null) {
 			member.setProfession(core.playerService.getFormalProfessionName(joinee.getPlayerObject().getProfession()));
@@ -140,8 +142,144 @@ public class GuildService implements INetworkDispatch {
 		return member;
 	}
 	
-	public void handleGuildPermissionList(CreatureObject actor, Guild guild) {
+	public void handleViewPermissionsList(CreatureObject actor, Guild guild) {
+        final SUIWindow window = core.suiService.createSUIWindow("Script.tablePage", actor, null, (float) 0);
+        window.setProperty("bg.caption.lblTitle:Text", "Permissions List");
+        window.setProperty("comp.Prompt:Visible", "False");
+        window.setProperty("btnExport:Visible", "False");
+        window.setProperty("tablePage:Size", "785,434");
+        window.setProperty("comp.TablePage.header:ScrollExtent", "444,30");
+        window.addTableColumn("Name", "text");
+        window.addTableColumn("Mail", "text");
+        window.addTableColumn("Sponsor", "text");
+        window.addTableColumn("Title", "text");
+        window.addTableColumn("Accept", "text");
+        window.addTableColumn("Kick", "text");
+        window.addTableColumn("War", "text");
+        window.addTableColumn("Change Guild Name", "text");
+        window.addTableColumn("Disband", "text");
+        window.addTableColumn("Rank", "text");
+        window.addTableColumn("War Excluded", "text");
+        window.addTableColumn("War Exclusive", "text");
+        
+        Map<Long, GuildMember> members = guild.getMembers();
+        
+        members.entrySet().forEach(e -> {
+        	GuildMember member = e.getValue();
+        	for (SUITableItem column : window.getTableItems()) {
+        		if (column.getItemName().equals("Name")) {
+        			window.addTableCell(member.getName(), e.getKey(), column.getIndex());
+        			continue;
+        		}
+        		else if (member.getPermissions().contains(column.getItemName())) {
+        			window.addTableCell("X", e.getKey(), column.getIndex());
+        			continue;
+        		} else
+        			window.addTableCell("", e.getKey(), column.getIndex());
+        	}
+        });
+        
+		Vector<String> returnList = new Vector<String>();
+		returnList.add("comp.TablePage.table:SelectedRow");
+		
+		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, (owner, eventType, resultList) -> {
 
+			int selectedRow = Integer.parseInt(resultList.get(0));
+			GuildMember selectedMember = guild.getMember(window.getTableObjIdByRow(selectedRow));
+			
+			if (selectedMember == null)
+				return;
+			
+			handleChangeMemberPermissions((CreatureObject) owner, guild, selectedMember, "PermissionsList");
+		});
+        core.suiService.openSUIWindow(window);
+	}
+	public void handleChangeMemberPermissions(CreatureObject actor, Guild guild, GuildMember target) { handleChangeMemberPermissions(actor, guild, target, ""); 
+	}
+	public void handleChangeMemberPermissions(CreatureObject actor, Guild guild, GuildMember target, String source) {
+		GuildMember requester = guild.getMember(actor.getObjectID());
+		
+		if (requester == null)
+			return;
+		
+		final SUIWindow window = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "\\#00FF00\\" + target.getName() + "\\#FFFFFF Guild Member Permissions", 
+				new Stf("@guild:permissions_prompt").getStfValue().replace("%TU", "\\#00FF00\\" + target.getName() + "\\#.\\"), target.getAllPermissions(requester), actor, null, 0);
+		
+		window.setProperty("listBox:Size", "487,316");
+		
+		Vector<String> returnList = new Vector<String>();
+		returnList.add("List.lstList:SelectedRow");
+		
+		if (!source.isEmpty() || !source.equals("")) {
+			window.setProperty("btnOther:Visible", "True");
+			window.setProperty("btnOther:Text", "Back");
+			window.addHandler(1, "", Trigger.TRIGGER_UPDATE, returnList, (owner, eventType, resultList) -> {
+				switch(source) {
+					case "PermissionsList":
+						handleViewPermissionsList(actor, guild);
+						break;
+				}
+			});
+		}
+		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, (owner, eventType, resultList) -> {
+			if (resultList.size() == 0)
+				return;
+			
+			int selectedPermission = (int) (window.getObjectIdByIndex(Integer.parseInt(resultList.get(0))));
+			
+			switch (selectedPermission) {
+				case 1: // Mail
+					if (target.hasMailPermission()) target.setMailPermission(false);
+					else target.setMailPermission(true);
+					break;
+				case 2: // Sponsor
+					if (target.hasSponsorPermission()) target.setSponsorPermission(false);
+					else target.setSponsorPermission(true);
+					break;
+				case 3: // Title
+					if (target.hasTitlePermission()) target.setTitlePermission(false);
+					else target.setTitlePermission(true);
+					break;
+				case 4: // Accept
+					if (target.hasAcceptPermission()) target.setAcceptPermission(false);
+					else target.setAcceptPermission(true);
+					break;
+				case 5: // Kick
+					if (target.hasKickPermission()) target.setKickPermission(false);
+					else target.setKickPermission(true);
+					break;
+				case 6: // War
+					if (target.hasWarPermission()) target.setWarPermission(false);
+					else target.setWarPermission(true);
+					break;
+				case 7: // Change Guild Name
+					if (target.hasChangeNamePermission()) target.setChangeNamePermission(false);
+					else target.setChangeNamePermission(true);
+					break;
+				case 8: // Disband
+					if (target.hasDisbandPermission()) target.setDisbandPermission(false);
+					else target.setDisbandPermission(true);
+					break;
+				case 9: // Rank
+					if (target.hasRankPermission()) target.setRankPermission(false);
+					else target.setRankPermission(true);
+					break;
+				case 10: // War Excluded
+					if (target.isWarExcluded()) target.setWarExcluded(false);
+					else target.setWarExcluded(true);
+					break;
+				case 11: // War Exclusive
+					if (target.isWarExclusive()) target.setWarExclusive(false);
+					else target.setWarExclusive(true);
+					break;
+
+				default: break;
+			}
+			
+			handleChangeMemberPermissions(actor, guild, target, source);
+		});
+		
+		core.suiService.openSUIWindow(window);
 	}
 	
 	public void handleGuildSponsor(CreatureObject actor) {

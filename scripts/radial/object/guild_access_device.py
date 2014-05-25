@@ -28,8 +28,9 @@ def createRadial(core, owner, target, radials):
         # Guild Management
         radials.add(RadialOptions(3, RadialOptions.serverGuildInfo, 3, '@guild:menu_info')) # Guild Information
         #radials.add(RadialOptions(3, RadialOptions.serverGuildEnemies, 3, '@guild:menu_enemies')) # Guild Enemies
-        # TODO: Add Rank List
+        #radials.add(RadialOptions(3, 215, 3, '@guild:menu_rank_list')) # Rank List
         # TODO: Add Rank Summary
+        radials.add(RadialOptions(3, 217, 3, '@guild:menu_permission_list')) # Permissions List
         
         #if member.hasDisbandPermission():
             #radials.add(RadialOptions(3, RadialOptions.serverGuildDisband, 3, '@guild:menu_disband')) # Disband Guild
@@ -71,6 +72,15 @@ def handleSelection(core, owner, target, option):
         core.suiService.openSUIWindow(wndGuildInfo)
         return
     
+    # - Rank List
+    elif option == 215:
+        return
+    
+    # - Permissions List
+    elif option == 217:
+        core.guildService.handleViewPermissionsList(owner, guild)
+        return
+    
     # Member Management
     
     # - Guild Members
@@ -85,11 +95,6 @@ def handleSelection(core, owner, target, option):
     # - Sponsored for Membership
     elif option == RadialOptions.serverGuildSponsored:
         core.guildService.handleManageSponsoredPlayers(owner)
-        return
-    
-    # - Permission List
-    elif option == RadialOptions.serverTerminalPermissions:
-        core.guildService.handleGuildPermissionList()
         return
     
     # - Transfer PA Leadership

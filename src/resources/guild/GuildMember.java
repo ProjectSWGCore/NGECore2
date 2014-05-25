@@ -23,6 +23,7 @@ package resources.guild;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Vector;
 
 public class GuildMember {
 	private long objectId;
@@ -30,8 +31,11 @@ public class GuildMember {
 	private String profession;
 	private short level;
 	private String rank;
+	private String name;
 	// TODO: These might have to be moved to a new GuildRank class depending on how permissions worked for NGE
 	//this works for now... Lack of NGE Guild Rank guides makes re-creation difficult (Ranks introduced Game Update 8: http://swg.wikia.com/wiki/Game_Update_8)
+	
+	private Vector<String> permissions = new Vector<String>();
 	private boolean mailPermission = false;
 	private boolean sponsorPermission = false;
 	private boolean titlePermission = false;
@@ -40,6 +44,10 @@ public class GuildMember {
 	private boolean warPermission = false;
 	private boolean changeNamePermission = false;
 	private boolean disbandPermission = false;
+	private boolean rankPermission = false;
+	
+	private boolean warExcluded = false;
+	private boolean warExclusive = false;
 	
 	public GuildMember() { }
 	
@@ -49,25 +57,27 @@ public class GuildMember {
 	}
 	
 	public void removeAllPermissions() {
-		this.mailPermission = false;
-		this.sponsorPermission = false;
-		this.titlePermission = false;
-		this.kickPermission = false;
-		this.acceptPermission = false;
-		this.warPermission = false;
-		this.changeNamePermission = false;
-		this.disbandPermission = false;
+		setMailPermission(false);
+		setSponsorPermission(false);
+		setTitlePermission(false);
+		setKickPermission(false);
+		setAcceptPermission(false);
+		setWarPermission(false);
+		setChangeNamePermission(false);
+		setDisbandPermission(false);
+		setRankPermission(false);
 	}
 	
 	public void giveAllPermissions() {
-		this.mailPermission = true;
-		this.sponsorPermission = true;
-		this.titlePermission = true;
-		this.kickPermission = true;
-		this.acceptPermission = true;
-		this.warPermission = true;
-		this.changeNamePermission = true;
-		this.disbandPermission = true;
+		setMailPermission(true);
+		setSponsorPermission(true);
+		setTitlePermission(true);
+		setKickPermission(true);
+		setAcceptPermission(true);
+		setWarPermission(true);
+		setChangeNamePermission(true);
+		setDisbandPermission(true);
+		setRankPermission(true);
 	}
 	
 	public long getObjectId() {
@@ -88,6 +98,11 @@ public class GuildMember {
 		return mailPermission;
 	}
 	public void setMailPermission(boolean mailPermission) {
+		if (mailPermission)
+			permissions.add("Mail");
+		else
+			permissions.remove("Mail");
+		
 		this.mailPermission = mailPermission;
 	}
 	
@@ -95,45 +110,116 @@ public class GuildMember {
 		return sponsorPermission;
 	}
 	public void setSponsorPermission(boolean sponsorPermission) {
+		if (sponsorPermission)
+			permissions.add("Sponsor");
+		else
+			permissions.remove("Sponsor");
+		
 		this.sponsorPermission = sponsorPermission;
 	}
 	public boolean hasTitlePermission() {
 		return titlePermission;
 	}
 	public void setTitlePermission(boolean titlePermission) {
+		if (titlePermission)
+			permissions.add("Title");
+		else
+			permissions.remove("Title");
+		
 		this.titlePermission = titlePermission;
 	}
 	public boolean hasKickPermission() {
 		return kickPermission;
 	}
 	public void setKickPermission(boolean kickPermission) {
+		if (kickPermission)
+			permissions.add("Kick");
+		else
+			permissions.remove("Kick");
+		
 		this.kickPermission = kickPermission;
 	}
 	public boolean hasAcceptPermission() {
 		return acceptPermission;
 	}
 	public void setAcceptPermission(boolean acceptPermission) {
+		if (acceptPermission)
+			permissions.add("Accept");
+		else
+			permissions.remove("Accept");
+		
 		this.acceptPermission = acceptPermission;
 	}
 	public boolean hasWarPermission() {
 		return warPermission;
 	}
 	public void setWarPermission(boolean warPermission) {
+		if (warPermission)
+			permissions.add("War");
+		else
+			permissions.remove("War");
+		
 		this.warPermission = warPermission;
 	}
 	public boolean hasChangeNamePermission() {
 		return changeNamePermission;
 	}
 	public void setChangeNamePermission(boolean changeNamePermission) {
+		if (changeNamePermission)
+			permissions.add("Change Guild Name");
+		else
+			permissions.remove("Change Guild Name");
+		
 		this.changeNamePermission = changeNamePermission;
 	}
 	public boolean hasDisbandPermission() {
 		return disbandPermission;
 	}
 	public void setDisbandPermission(boolean disbandPermission) {
+		if (disbandPermission)
+			permissions.add("Disband");
+		else
+			permissions.remove("Disband");
+		
 		this.disbandPermission = disbandPermission;
 	}
 	
+	public boolean hasRankPermission() {
+		return rankPermission;
+	}
+
+	public void setRankPermission(boolean rankPermission) {
+		if (rankPermission)
+			permissions.add("Rank");
+		else
+			permissions.remove("Rank");
+		this.rankPermission = rankPermission;
+	}
+
+	public boolean isWarExcluded() {
+		return warExcluded;
+	}
+
+	public void setWarExcluded(boolean warExcluded) {
+		if (warExcluded)
+			permissions.add("War Excluded");
+		else
+			permissions.remove("War Excluded");
+		this.warExcluded = warExcluded;
+	}
+
+	public boolean isWarExclusive() {
+		return warExclusive;
+	}
+
+	public void setWarExclusive(boolean warExclusive) {
+		if (warExclusive)
+			permissions.add("War Exclusive");
+		else
+			permissions.remove("War Exclusive");
+		this.warExclusive = warExclusive;
+	}
+
 	public String getProfession() {
 		return profession;
 	}
@@ -158,57 +244,80 @@ public class GuildMember {
 		this.rank = rank;
 	}
 
-	public Map<Long, String> getAllPermissions() {
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public Map<Long, String> getAllPermissions(GuildMember requester) {
 		Map<Long, String> permissions = new HashMap<Long, String>();
-		permissions.put((long) 1, "@guild:permission_mail");
-		permissions.put((long) 3, "@guild:permission_sponsor");
-		permissions.put((long) 5, "@guild:permission_title");
-		permissions.put((long) 7, "@guild:permission_accept");
-		permissions.put((long) 9, "@guild:permission_kick");
-		permissions.put((long) 11, "@guild:permission_war");
-		permissions.put((long) 13, "@guild:permission_namechange");
-		permissions.put((long) 15, "@guild:permission_disband");
 		
-		
-		if (hasMailPermission())
-			permissions.put((long) 2, "@guild:permission_mail_yes");
-		else
-			permissions.put((long) 2, "@guild:permission_mail_no");
-		
-		if (hasSponsorPermission())
-			permissions.put((long) 4, "@guild:permission_sponsor_yes");
-		else
-			permissions.put((long) 4, "@guild:permission_sponsor_no");
-		
-		if (hasTitlePermission())
-			permissions.put((long) 6, "@guild:permission_title_yes");
-		else
-			permissions.put((long) 6, "@guild:permission_title_no");
-		
-		if (hasAcceptPermission())
-			permissions.put((long) 8, "@guild:permission_accept_yes");
-		else
-			permissions.put((long) 8, "@guild:permission_accept_no");
-		
-		if (hasKickPermission())
-			permissions.put((long) 10, "@guild:permission_kick_yes");
-		else
-			permissions.put((long) 10, "@guild:permission_kick_no");
-		
-		if (hasWarPermission())
-			permissions.put((long) 12, "@guild:permission_war_yes");
-		else
-			permissions.put((long) 12, "@guild:permission_war_no");
-		
-		if (hasChangeNamePermission())
-			permissions.put((long) 14, "@guild:permission_namechange_yes");
-		else
-			permissions.put((long) 14, "@guild:permission_namechange_no");
-		
-		if (hasDisbandPermission())
-			permissions.put((long) 16, "@guild:permission_disband_yes");
-		else
-			permissions.put((long) 16, "@guild:permission_disband_no");
+		// Only allows requester to change permissions that they have (Ex. Can't change sponsor permission on a member if they don't have that permission)
+		// War Excluded and War Exclusive did not follow that rule
+		if (requester.getObjectId() != getObjectId()) {
+			if (requester.hasMailPermission()) {
+				if (hasMailPermission()) permissions.put((long) 1, "@guild:permission_mail_yes");
+				else permissions.put((long) 1, "@guild:permission_mail_no");
+			}
+
+			if (requester.hasSponsorPermission()) {
+				if (hasSponsorPermission()) permissions.put((long) 2, "@guild:permission_sponsor_yes");
+				else permissions.put((long) 2, "@guild:permission_sponsor_no");
+			}
+
+			if (requester.hasTitlePermission()) {
+				if (hasTitlePermission()) permissions.put((long) 3, "@guild:permission_title_yes");
+				else permissions.put((long) 3, "@guild:permission_title_no");
+			}
+
+			if (requester.hasAcceptPermission()) {
+				if (hasAcceptPermission()) permissions.put((long) 4, "@guild:permission_accept_yes");
+				else permissions.put((long) 4, "@guild:permission_accept_no");
+			}
+
+			if (requester.hasKickPermission()) {
+				if (hasKickPermission()) permissions.put((long) 5, "@guild:permission_kick_yes");
+				else permissions.put((long) 5, "@guild:permission_kick_no");
+			}
+
+			if (requester.hasWarPermission()) {
+				if (hasWarPermission()) permissions.put((long) 6, "@guild:permission_war_yes");
+				else permissions.put((long) 6, "@guild:permission_war_no");
+			}
+
+			if (requester.hasChangeNamePermission()) {
+				if (hasChangeNamePermission()) permissions.put((long) 7, "@guild:permission_namechange_yes");
+				else permissions.put((long) 7, "@guild:permission_namechange_no");
+			}
+
+			if (requester.hasDisbandPermission()) {
+				if (hasDisbandPermission()) permissions.put((long) 8, "@guild:permission_disband_yes");
+				else permissions.put((long) 8, "@guild:permission_disband_no");
+			}
+
+			if (requester.hasRankPermission()) {
+				if (hasRankPermission()) permissions.put((long) 9, "@guild:permission_rank_yes");
+				else permissions.put((long) 9, "@guild:permission_rank_no");
+			}
+		}
+		if (requester.hasWarPermission() || (requester.getObjectId() == getObjectId())) {
+			if (isWarExcluded()) permissions.put((long) 10, "+ War Excluded");
+			else permissions.put((long) 10, "- War Excluded");
+
+			if (isWarExclusive()) permissions.put((long) 11, "+ War Exclusive");
+			else permissions.put((long) 11, "- War Exclusive");
+		}
 		return permissions;
+	}
+
+	public Vector<String> getPermissions() {
+		return permissions;
+	}
+
+	public void setPermissions(Vector<String> permissions) {
+		this.permissions = permissions;
 	}
 }

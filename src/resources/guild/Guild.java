@@ -60,7 +60,7 @@ public class Guild extends Delta implements Serializable, Comparable<Guild> {
 	public Guild() { }
 	
 	public GuildMember addMember(long objID) {
-		GuildMember member = new GuildMember();
+		GuildMember member = new GuildMember(objID);
 		members.put(objID, member);
 		return member;
 	}

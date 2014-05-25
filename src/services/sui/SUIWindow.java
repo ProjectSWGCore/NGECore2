@@ -192,13 +192,15 @@ public class SUIWindow {
         tableItems.add(item);
 	}
 	
-	public void addTableRow(String itemName) {
+	public void addTableCell(String cellName, long cellObjId, int columnIndex) {
+
         tableItems.forEach(column -> {
-        	int index = column.getIndex();
-        	SUITableItem item = new SUITableItem(itemName, index);
-        	addDataItem("comp.TablePage.dataTable." + index + ":Name", "data" + index);
-        	setProperty("comp.TablePage.dataTable." + index + ".data" + index + ":Value", itemName);
-        	column.getChildren().add(item);
+        	if (column.getIndex() == columnIndex) {
+        		SUITableCell cell = new SUITableCell(cellName, cellObjId, column.getCells().size());
+        		addDataItem("comp.TablePage.dataTable." + columnIndex + ":Name", "data" + cell.getCellId());
+        		setProperty("comp.TablePage.dataTable." + columnIndex + ".data" + cell.getCellId() + ":Value", cellName);
+        		column.getCells().add(cell);
+        	}
         });
 	}
 	
@@ -269,6 +271,22 @@ public class SUIWindow {
 			return item.getObjectId();
 		
 		return 0;
+	}
+	
+	public long getTableObjIdByRow(int row) {
+		SUITableItem item = getTableItems().get(0);
+		
+		if (item != null)
+			return item.getCells().get(row).getObjectId();
+		return 0;
+	}
+	
+	public Vector<SUITableItem> getTableItems() {
+		return tableItems;
+	}
+
+	public void setTableItems(Vector<SUITableItem> tableItems) {
+		this.tableItems = tableItems;
 	}
 
 	public enum Trigger {;

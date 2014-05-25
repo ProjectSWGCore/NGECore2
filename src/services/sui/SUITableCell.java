@@ -21,38 +21,38 @@
  ******************************************************************************/
 package services.sui;
 
-import java.util.Vector;
-
-public class SUITableItem {
-	private Vector<SUITableCell> cells = new Vector<SUITableCell>();
-	private String itemName;
-	private int index;
+public class SUITableCell {
+	private String name;
+	private long objectId;
+	private int cellId;
 	
-	public SUITableItem() { }
-	
-	public SUITableItem(String itemName, int index) {
-		this.itemName = itemName;
-		this.setIndex(index);
-	}
-	
-	public Vector<SUITableCell> getCells() {
-		return cells;
-	}
-	public void setCells(Vector<SUITableCell> cells) {
-		this.cells = cells;
-	}
-	public String getItemName() {
-		return itemName;
-	}
-	public void setItemName(String itemName) {
-		this.itemName = itemName;
+	public SUITableCell(String name, long objectId, int cellId) {
+		this.name = name;
+		this.objectId = objectId;
+		this.cellId = cellId;
 	}
 
-	public int getIndex() {
-		return index;
+	public String getName() {
+		return name;
 	}
 
-	public void setIndex(int index) {
-		this.index = index;
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public long getObjectId() {
+		return objectId;
+	}
+
+	public void setObjectId(long objectId) {
+		this.objectId = objectId;
+	}
+
+	public int getCellId() {
+		return cellId;
+	}
+
+	public void setCellId(int cellId) {
+		this.cellId = cellId;
 	}
 }
