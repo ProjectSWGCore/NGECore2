@@ -893,10 +893,10 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	}
 	
 	public void addChannel(int roomId) {
-		getJoinedChatChannels().add(roomId);
+		getJoinedChatChannels().add((Integer) roomId);
 	}
 	
-	public void removeChannel(int roomId) {
+	public void removeChannel(Integer roomId) {
 		if (getJoinedChatChannels().contains(roomId)) {
 			getJoinedChatChannels().remove(roomId);
 		}

@@ -92,8 +92,7 @@ public class DevService implements INetworkDispatch {
 					suiOptions.put((long) 120, "House Deeds");
 					suiOptions.put((long) 125, "Crafting Tools");
 					suiOptions.put((long) 130, "Vehicle Deeds");
-					suiOptions.put((long) 121, "Sandbox City");	
-					suiOptions.put((long) 140, "Guild Registry Device (PDA)");
+					suiOptions.put((long) 121, "Sandbox City");
 				}
 
 				break;
@@ -108,6 +107,7 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 41, "Tusken Rucksack");
 				suiOptions.put((long) 42, "Heroism Jewlery Set");
 				suiOptions.put((long) 43, "Breath of Heaven");
+				suiOptions.put((long) 140, "Guild Registry Device (PDA)");
 				break;
 			case 5: // [Items] Armor
 				suiOptions.put((long) 50, "Assault Armor");

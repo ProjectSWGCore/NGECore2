@@ -26,6 +26,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
+import protocol.swg.chat.ChatOnSendRoomMessage;
+import protocol.swg.chat.ChatRoomMessage;
 import resources.common.OutOfBand;
 import resources.datatables.DisplayType;
 import resources.guild.Guild;
@@ -70,7 +72,7 @@ public class GuildService implements INetworkDispatch {
 		
 	}
 	
-	public Guild createGuild(String abbreviation, String name, SWGObject leader) {
+	public Guild createGuild(String abbreviation, String name, CreatureObject leader) {
 		
 		if (leader == null)
 			return null;
@@ -83,6 +85,9 @@ public class GuildService implements INetworkDispatch {
 		guild.setChatRoomId(guildChat.getRoomId());
 		
 		object.getGuildList().add(guild);
+		
+		GuildMember member = joinGuild(guild, leader, null);
+		member.giveAllPermissions();
 		return guild;
 	}
 	
@@ -142,6 +147,44 @@ public class GuildService implements INetworkDispatch {
 		return member;
 	}
 	
+	public void handleCreateGuildName(CreatureObject actor, SWGObject creationSource) {
+		if (actor.getGuildId() != 0) { actor.sendSystemMessage("@guild:create_fail_in_guild", DisplayType.Broadcast); return; }
+		
+		SUIWindow window = core.suiService.createInputBox(InputBoxType.INPUT_BOX_OK_CANCEL, "@guild:create_name_title", "@guild:create_name_prompt", actor, null, 0, 
+				(owner, eventType, returnList) -> { 
+					String guildName = returnList.get(0); // TODO: Character checks
+					
+					if (guildName.length() > 24) { actor.sendSystemMessage("@guild:create_fail_name_bad_length", DisplayType.Broadcast); handleCreateGuildName(actor, creationSource); return;}
+					if (getGuildByName(guildName) != null) { actor.sendSystemMessage("@guild:create_fail_name_in_use", DisplayType.Broadcast); handleCreateGuildName(actor, creationSource); return;}
+					
+					handleCreateGuildAbbrev(actor, guildName, creationSource);
+				});
+        window.setProperty("txtInput:MaxLength", "24");
+        window.setProperty("txtInput:NumericInteger", "False");
+        
+        core.suiService.openSUIWindow(window);
+	}
+	
+	public void handleCreateGuildAbbrev(CreatureObject actor, String guildName, SWGObject creationSource) {
+		SUIWindow window = core.suiService.createInputBox(InputBoxType.INPUT_BOX_OK_CANCEL, "@guild:create_abbrev_title", "@guild:create_abbrev_prompt", actor, null, 0,
+				(owner, eventType, returnList) -> {
+					String abbrev = returnList.get(0); // TODO: Character checks
+
+					if (abbrev.length() > 5) { actor.sendSystemMessage("@guild:create_fail_abbrev_bad_length", DisplayType.Broadcast); handleCreateGuildAbbrev(actor, guildName, creationSource); return;}
+					if (getGuildByAbbreviation(abbrev) != null) { actor.sendSystemMessage("@guild:create_fail_abbrev_in_use", DisplayType.Broadcast); handleCreateGuildAbbrev(actor, guildName, creationSource); return;}
+					
+					Guild guild = createGuild(abbrev, guildName, actor);
+					if (guild != null && creationSource != null && creationSource.getTemplate().equals("object/tangible/furniture/technical/shared_guild_registry_initial.iff")) { 
+						core.objectService.destroyObject(creationSource);
+					}
+				});
+		
+    	window.setProperty("txtInput:MaxLength", "4");
+    	window.setProperty("txtInput:NumericInteger", "False");
+    	
+    	core.suiService.openSUIWindow(window);
+	}
+	
 	public void handleViewPermissionsList(CreatureObject actor, Guild guild) {
         final SUIWindow window = core.suiService.createSUIWindow("Script.tablePage", actor, null, (float) 0);
         window.setProperty("bg.caption.lblTitle:Text", "Permissions List");
@@ -194,8 +237,9 @@ public class GuildService implements INetworkDispatch {
 		});
         core.suiService.openSUIWindow(window);
 	}
-	public void handleChangeMemberPermissions(CreatureObject actor, Guild guild, GuildMember target) { handleChangeMemberPermissions(actor, guild, target, ""); 
-	}
+	
+	public void handleChangeMemberPermissions(CreatureObject actor, Guild guild, GuildMember target) { handleChangeMemberPermissions(actor, guild, target, ""); }
+	
 	public void handleChangeMemberPermissions(CreatureObject actor, Guild guild, GuildMember target, String source) {
 		GuildMember requester = guild.getMember(actor.getObjectID());
 		
@@ -210,17 +254,17 @@ public class GuildService implements INetworkDispatch {
 		Vector<String> returnList = new Vector<String>();
 		returnList.add("List.lstList:SelectedRow");
 		
-		if (!source.isEmpty() || !source.equals("")) {
+		/*if (!source.isEmpty() || !source.equals("")) {
 			window.setProperty("btnOther:Visible", "True");
 			window.setProperty("btnOther:Text", "Back");
-			window.addHandler(1, "", Trigger.TRIGGER_UPDATE, returnList, (owner, eventType, resultList) -> {
+			window.addHandler(1, "btnOther", Trigger.TRIGGER_OK, returnList, (owner, eventType, resultList) -> {
 				switch(source) {
 					case "PermissionsList":
 						handleViewPermissionsList(actor, guild);
 						break;
 				}
 			});
-		}
+		}*/
 		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, (owner, eventType, resultList) -> {
 			if (resultList.size() == 0)
 				return;
@@ -282,7 +326,92 @@ public class GuildService implements INetworkDispatch {
 		core.suiService.openSUIWindow(window);
 	}
 	
-	public void handleGuildSponsor(CreatureObject actor) {
+	public void handleChangeGuildMotd(CreatureObject actor, Guild guild) {
+		SUIWindow window = core.suiService.createInputBox(InputBoxType.INPUT_BOX_OK_CANCEL, "@guild:menu_member_motd", "@guild:prompt_member_motd_message", actor, null, 0, 
+				(owner, eventType, resultList) -> {
+					String newMotd = resultList.get(0);
+					
+					guild.setMotd(newMotd);
+					
+					actor.sendSystemMessage("Guild Message of the Day set to \"" + newMotd + "\".", DisplayType.Broadcast);
+				});
+		
+		window.setProperty("inputBox:Size", "506,430");
+		core.suiService.openSUIWindow(window);
+	}
+	
+	public void handleViewGuildMembers(CreatureObject actor, Guild guild) {
+        final SUIWindow window = core.suiService.createSUIWindow("Script.tablePage", actor, null, (float) 0);
+        window.setProperty("bg.caption.lblTitle:Text", "@guild:members_title");
+        window.setProperty("comp.Prompt.lblPrompt:Text", "@guild:members_prompt");
+        //if (actingMember.getAllPermissions(actingMember).size() > 2) window.setProperty("comp.Prompt.lblPrompt:Text", "@guild:members_show_prompt");
+        window.setProperty("tablePage:Size", "785,634");
+        // window.setProperty("comp.TablePage.table:columsizedatasource", "dsColSizes");
+        window.setProperty("comp.TablePage.header:ScrollExtent", "444,30");
+        window.addTableColumn("@guild:table_title_level", "text");
+        window.addTableColumn("@guild:table_title_name", "text");
+        window.addTableColumn("@guild:table_title_profession", "text");
+        window.addTableColumn("@guild:table_title_rank", "text");
+        window.addTableColumn("@guild:table_title_status", "text");
+        window.addTableColumn("@guild:table_title_title", "text");
+        window.addTableColumn("@guild:table_title_war_excluded", "text");
+        window.addTableColumn("@guild:table_title_war_included", "text");
+        
+        Map<Long, GuildMember> members = guild.getMembers();
+        members.entrySet().forEach(e -> {
+        	GuildMember member = e.getValue();
+        	for (SUITableItem column : window.getTableItems()) {
+        		switch(column.getItemName()) {
+        			case "@guild:table_title_level":
+            			window.addTableCell(String.valueOf(member.getLevel()), e.getKey(), column.getIndex());
+            			continue;
+        			case "@guild:table_title_name":
+            			window.addTableCell(member.getName(), e.getKey(), column.getIndex());
+        				continue;
+        			case "@guild:table_title_profession":
+            			window.addTableCell(member.getProfession(), e.getKey(), column.getIndex());
+        				continue;
+        			case "@guild:table_title_rank":
+            			window.addTableCell(member.getRank(), e.getKey(), column.getIndex());
+        				continue;
+        			case "@guild:table_title_status":
+            			//window.addTableCell(member.getStatus(), e.getKey(), column.getIndex());
+        				continue;
+        			case "@guild:table_title_war_excluded":
+        				if (member.isWarExcluded()) window.addTableCell("X", e.getKey(), column.getIndex());
+        				else window.addTableCell("", e.getKey(), column.getIndex());
+        				continue;
+        			case "@guild:table_title_war_included":
+        				if (member.isWarExclusive()) window.addTableCell("X", e.getKey(), column.getIndex());
+        				else window.addTableCell("", e.getKey(), column.getIndex());
+        				continue;
+        		}
+        	}
+        });
+        
+		Vector<String> returnList = new Vector<String>();
+		returnList.add("comp.TablePage.table:SelectedRow");
+		
+		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, (owner, eventType, resultList) -> {
+
+			long objectId = window.getTableObjIdByRow(Integer.parseInt(resultList.get(0)));
+			
+			if (objectId == 0)
+				return;
+			
+			GuildMember selectedMember = guild.getMember(objectId);
+			
+			if (selectedMember == null)
+				return;
+			
+			//handleMemberOptions((CreatureObject) owner, guild, selectedMember);
+		});
+		
+		core.suiService.openSUIWindow(window);
+	}
+	
+	
+	public void handleGuildSponsorWindow(CreatureObject actor) {
 	    SUIWindow wndSponsorPlayer = core.suiService.createInputBox(InputBoxType.INPUT_BOX_OK_CANCEL, "@guild:sponsor_title", "@guild:sponsor_prompt", actor, null, (float) 10, (sponsor, eventType, returnList) -> {
 	        
 	    	if (eventType != 0)
@@ -322,16 +451,50 @@ public class GuildService implements INetworkDispatch {
 		    	
 		    	guild.getSponsoredPlayers().put(cOwner.getObjectID(), cOwner.getCustomName());
 		    	
-		    	actor.sendSystemMessage(OutOfBand.ProsePackage("@guild:sponsor_self", "TU", cOwner.getCustomName(), "TT", guild.getName()), DisplayType.Broadcast);
 		    	((CreatureObject)cOwner).sendSystemMessage(OutOfBand.ProsePackage("@guild:sponsor_target", "TT", guild.getName(), "TU", actor.getCustomName()), DisplayType.Broadcast);
 		    	
 				guild.sendGuildMail(guild.getName(), "@guildmail:sponsor_subject", new Stf("@guildmail:sponsor_text").getStfValue().replace("%TU", actor.getCustomName()).replace("%TT", cOwner.getCustomName()));
 	    	});
 	    	core.suiService.openSUIWindow(wndSponsoredConfirm);
+	    	
+	    	actor.sendSystemMessage(OutOfBand.ProsePackage("@guild:sponsor_self", "TU", pSponsored.getCustomName(), "TT", invitingGuild.getName()), DisplayType.Broadcast);
 
 	    });
 	    core.suiService.openSUIWindow(wndSponsorPlayer);
 	}
+	
+	
+	public void handleGuildDisband(CreatureObject actor, Guild guild) {
+		
+		Map<Long, GuildMember> members = guild.getMembers();
+		
+		members.entrySet().forEach(e -> {
+			CreatureObject target = core.objectService.getCreatureFromDB(e.getKey());
+			
+			if (target != null) {
+
+				target.setGuildId(0);
+
+				// Update association device
+				TangibleObject datapad = (TangibleObject) target.getSlottedObject("datapad");
+				
+				if (datapad != null) {
+					datapad.viewChildren(target, true, false, (obj) -> {
+						if (obj instanceof IntangibleObject && obj.getTemplate().equals("object/intangible/data_item/shared_guild_stone.iff")) {
+							obj.setStringAttribute("guild_name", null);
+							obj.setStringAttribute("guild_abbrev", null);
+							obj.setStringAttribute("guild_leader", null);
+						}
+					});
+				}
+			}
+		});
+		
+		guild.sendGuildMail(guild.getName(), "@guildmail:disband_subject", new Stf("@guildmail:disband_text").getStfValue().replace("%TU", actor.getCustomName()));
+
+		removeGuild(guild.getId());
+	}
+	
 	
 	public void handleManageSponsoredPlayers(CreatureObject actor) {
 		Guild guild = getGuildById(actor.getGuildId());
@@ -426,6 +589,89 @@ public class GuildService implements INetworkDispatch {
         	core.chatService.sendPersistentMessageHeader(sponsoree.getClient(), declinedMail);
 	}
 	
+	
+	public void showKickConfirmWindow(CreatureObject actor, CreatureObject target, Guild guild) {
+		
+		if (target.getObjectID() == guild.getLeader() && target.getObjectID() == actor.getObjectID()) {
+			actor.sendSystemMessage("@guild:leave_fail_leader_tried_to_leave", DisplayType.Broadcast);
+			return;
+		} else if (target.getObjectID() == guild.getLeader()) {
+			actor.sendSystemMessage("@guild:guild_no_permission_operation", DisplayType.Broadcast);
+			return;
+		}
+		
+		SUIWindow kickPrompt = core.suiService.createMessageBox(MessageBoxType.MESSAGE_BOX_YES_NO, "@guild:kick_title", 
+				new Stf("@guild:kick_prompt").getStfValue().replace("%TU", target.getCustomName()), actor, null, 0);
+		
+		kickPrompt.addHandler(0, "", Trigger.TRIGGER_OK, new Vector<String>(), (owner, eventType, resultList) -> {
+			leaveGuild(actor, target, guild);
+		});
+		
+		core.suiService.openSUIWindow(kickPrompt);
+	}
+
+	public void showDisbandConfirmWindow(CreatureObject actor, Guild guild) {
+		
+		if (!guild.getMember(actor.getObjectID()).hasDisbandPermission() && actor.getObjectID() != guild.getLeader()) {
+			actor.sendSystemMessage("@guild:guild_no_permission_operation", DisplayType.Broadcast);
+			return;
+		}
+		
+		SUIWindow disbandConfirm = core.suiService.createMessageBox(MessageBoxType.MESSAGE_BOX_YES_NO, "@guild:disband_title", "@guild:disband_prompt", actor, null, 0);
+		disbandConfirm.addHandler(0, "", Trigger.TRIGGER_OK, new Vector<String>(), (owner, eventType, resultList) -> {
+			handleGuildDisband(actor, guild);
+		});
+		core.suiService.openSUIWindow(disbandConfirm);
+	}
+	
+	
+	public void leaveGuild(CreatureObject actor, CreatureObject target, Guild guild) {
+		GuildMember actingMember = guild.getMember(actor.getObjectID());
+		
+		if (actingMember == null)
+			return;
+		
+		if ((!actingMember.hasKickPermission() && actor != target) || (target.getObjectID() == guild.getLeader() && target.getObjectID() != actor.getObjectID())) {
+			actor.sendSystemMessage("@guild:guild_no_permission_operation", DisplayType.Broadcast);
+			return;
+		}
+		
+		if (actor.getObjectID() != target.getObjectID()) {
+
+			guild.sendGuildMail(guild.getName(), "@guildmail:kick_subject", new Stf("@guildmail:kick_text").getStfValue().replace("%TU", actor.getCustomName()).replace("%TT", target.getCustomName()));
+			
+			actor.sendSystemMessage(OutOfBand.ProsePackage("@guild:kick_self", "TU", target.getCustomName(), "TT", guild.getName()), DisplayType.Broadcast);
+			
+			if (target.isInQuadtree())
+				target.sendSystemMessage(OutOfBand.ProsePackage("@guild:kick_target", "TU", actor.getCustomName(), "TT", guild.getName()), DisplayType.Broadcast);
+
+		} else {
+			if (target.getObjectID() == guild.getLeader()) {
+				actor.sendSystemMessage("@guild:leave_fail_leader_tried_to_leave", DisplayType.Broadcast);
+				return;
+			} else {
+				guild.sendGuildMail(guild.getName(), "@guildmail:leave_subject", new Stf("@guildmail:leave_text").getStfValue().replace("%TU", actor.getCustomName()));
+				actor.sendSystemMessage(OutOfBand.ProsePackage("@guild:leave_self", "TU", guild.getName()), DisplayType.Broadcast);
+			}
+		}
+		guild.getMembers().remove(target.getObjectID());
+		target.setGuildId(0);
+		core.chatService.leaveChatRoom(target, guild.getChatRoomId());
+		// Update association device
+		TangibleObject datapad = (TangibleObject) target.getSlottedObject("datapad");
+		
+		if (datapad != null) {
+			datapad.viewChildren(target, true, false, (obj) -> {
+				if (obj instanceof IntangibleObject && obj.getTemplate().equals("object/intangible/data_item/shared_guild_stone.iff")) {
+					obj.setStringAttribute("guild_name", null);
+					obj.setStringAttribute("guild_abbrev", null);
+					obj.setStringAttribute("guild_leader", null);
+				}
+			});
+		}
+	}
+	
+	
 	public void sendMailToGuild(String sender, String subject, String message, int guildId) {
 		Guild guild = getGuildById(guildId);
 		
@@ -435,39 +681,57 @@ public class GuildService implements INetworkDispatch {
 		guild.sendGuildMail(sender, subject, message);
 	}
 	
+	public void sendGuildMotd(CreatureObject target, Guild guild) {
+		if (guild == null || guild.getMotd().isEmpty())
+			return;
+		
+		ChatRoom room = core.chatService.getChatRoom(guild.getChatRoomId());
+		
+		if (room == null)
+			return;
+		
+		ChatRoomMessage roomMessage = new ChatRoomMessage(guild.getChatRoomId(), "Message of the Day", guild.getMotd());
+		target.getClient().getSession().write(roomMessage.serialize());
+	}
+	
+	
 	public GuildObject getGuildObject() {
 		return object;
 	}
+	
 	
 	public SWGSet<Guild> getGuildList() {
 		return object.getGuildList();
 	}
 	
 	public Guild getGuildById(int id) {
-		return object.getGuildList().stream().filter(g -> g.getId() == id).findFirst().get();
-	}
-
-	public Guild getGuildByAbbreviation(String abbreviation) {
-		return object.getGuildList().stream().filter(g -> g.getAbbreviation().equals(abbreviation)).findFirst().get();
+		for (Guild guild : object.getGuildList()) {
+			if (guild.getId() == id)
+				return guild;
+		}
+		return null;
 	}
 	
+
+	public Guild getGuildByAbbreviation(String abbreviation) {
+		for (Guild guild : object.getGuildList()) {
+			if (guild.getAbbreviation().equals(abbreviation))
+				return guild;
+		}
+		return null;
+	}
+	
+	
 	public Guild getGuildByName(String name) {
-		return object.getGuildList().stream().filter(g -> g.getName().equals(name)).findFirst().get();
+		for (Guild guild : object.getGuildList()) {
+			if (guild.getName().equals(name)) 
+				return guild;
+		}
+		return null; 
 	}
 	
 	public boolean removeGuild(int id) {
 		Guild guild = getGuildById(id);
-		
-		if (guild != null) {
-			object.getGuildList().remove(guild);
-			return true;
-		}
-		
-		return false;
-	}
-	
-	public boolean removeGuild(String abbreviation) {
-		Guild guild = getGuildByAbbreviation(abbreviation);
 		
 		if (guild != null) {
 			object.getGuildList().remove(guild);

@@ -25,27 +25,26 @@ def createRadial(core, owner, target, radials):
         radials.add(RadialOptions(0, RadialOptions.serverGuildGuildManagement, 3, '@guild:menu_guild_management')) # Guild Management
         radials.add(RadialOptions(0, RadialOptions.serverGuildMemberManagement, 3, '@guild:menu_member_management')) # Member Management
 
-        # Guild Management
+        #### Guild Management ####
         radials.add(RadialOptions(3, RadialOptions.serverGuildInfo, 3, '@guild:menu_info')) # Guild Information
         #radials.add(RadialOptions(3, RadialOptions.serverGuildEnemies, 3, '@guild:menu_enemies')) # Guild Enemies
         #radials.add(RadialOptions(3, 215, 3, '@guild:menu_rank_list')) # Rank List
         # TODO: Add Rank Summary
         radials.add(RadialOptions(3, 217, 3, '@guild:menu_permission_list')) # Permissions List
         
-        #if member.hasDisbandPermission():
-            #radials.add(RadialOptions(3, RadialOptions.serverGuildDisband, 3, '@guild:menu_disband')) # Disband Guild
+        if member.hasDisbandPermission():
+            radials.add(RadialOptions(3, RadialOptions.serverGuildDisband, 3, '@guild:menu_disband')) # Disband Guild
         #if member.hasChangeNamePermission():
             #radials.add(RadialOptions(3, RadialOptions.serverGuildNameChange, 3, '@guild:menu_namechange'))
-        #if owner.getObjectID() == guild.getLeader():
-            #radials.add(RadialOptions(4, RadialOptions.serverTerminalPermissions, 3, '@guild:menu_permission_list')) # Permission List
         
-        # Member Management
-        #radials.add(RadialOptions(4, RadialOptions.serverGuildMembers, 3, '@guild:menu_members')) # Guild Members
+        #### Member Management ####
+        radials.add(RadialOptions(4, RadialOptions.serverGuildMembers, 3, '@guild:menu_members')) # Guild Members
         if member.hasSponsorPermission():
             radials.add(RadialOptions(4, RadialOptions.serverGuildSponsor, 3, '@guild:menu_sponsor')) # Sponsor for Membership
         if member.hasAcceptPermission() and guild.getSponsoredPlayers().size() > 0:
             radials.add(RadialOptions(4, RadialOptions.serverGuildSponsored, 3, '@guild:menu_sponsored')) # Sponsored for Membership
-        #if owner.getObjectID() == guild.getLeader():
+        if owner.getObjectID() == guild.getLeader():
+        	radials.add(RadialOptions(4, 218, 3, '@guild:menu_member_motd')) # Create a Guild Message
             #radials.add(RadialOptions(4, 69, 3, '@guild:menu_leader_change')) # Transfer PA Leadership
         return
     
@@ -57,7 +56,7 @@ def handleSelection(core, owner, target, option):
     if guild is None:
         return
     
-    # Guild Management
+    #### Guild Management ####
     
     # - Guild Info
     if option == RadialOptions.serverGuildInfo:
@@ -81,15 +80,20 @@ def handleSelection(core, owner, target, option):
         core.guildService.handleViewPermissionsList(owner, guild)
         return
     
-    # Member Management
+    elif option == RadialOptions.serverGuildDisband:
+    	core.guildService.showDisbandConfirmWindow(owner, guild)
+    	return
+    
+    #### Member Management ####
     
     # - Guild Members
     elif option == RadialOptions.serverGuildMembers:
+    	core.guildService.handleViewGuildMembers(owner, guild)
         return
     
     # - Sponsor for Membership
     elif option == RadialOptions.serverGuildSponsor:
-        core.guildService.handleGuildSponsor(owner)
+        core.guildService.handleGuildSponsorWindow(owner)
         return
     
     # - Sponsored for Membership
@@ -101,4 +105,7 @@ def handleSelection(core, owner, target, option):
     elif option == 69:
         return
     
+    elif option == 218:
+    	core.guildService.handleChangeGuildMotd(owner, guild)
+    	return
     return
