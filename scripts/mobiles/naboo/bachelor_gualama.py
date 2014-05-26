@@ -8,8 +8,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('bachelor_gualama')
 	mobileTemplate.setLevel(41)
-	mobileTemplate.setMinLevel(41)
-	mobileTemplate.setMaxLevel(41)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)

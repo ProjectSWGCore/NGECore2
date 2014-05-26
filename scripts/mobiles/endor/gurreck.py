@@ -8,8 +8,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('gurreck')
 	mobileTemplate.setLevel(63)
-	mobileTemplate.setMinLevel(63)
-	mobileTemplate.setMaxLevel(63)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)

@@ -5,11 +5,9 @@ from java.util import Vector
 
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
-	
-	mobileTemplate.setCreatureName('diminutive_bounding_jax')
+		
+	mobileTemplate.setCreatureName('jax_bounding_dwarf')		
 	mobileTemplate.setLevel(25)
-	mobileTemplate.setMinLevel(25)
-	mobileTemplate.setMaxLevel(25)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)

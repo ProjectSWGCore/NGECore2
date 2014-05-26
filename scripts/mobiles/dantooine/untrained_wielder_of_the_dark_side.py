@@ -7,7 +7,6 @@ def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
 	mobileTemplate.setCreatureName('untrained_wielder_of_the_dark_side')
-	mobileTemplate.setLevel(90)
 	mobileTemplate.setMinLevel(61)
 	mobileTemplate.setMaxLevel(70)
 	mobileTemplate.setDifficulty(0)

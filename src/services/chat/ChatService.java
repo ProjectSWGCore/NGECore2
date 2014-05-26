@@ -262,7 +262,7 @@ public class ChatService implements INetworkDispatch {
 				
 				if(sender == null)
 					return;
-
+				// TODO: Recipient handling for values: citizens, group, guild, guild ranks (ace, boot, admiral, etc.) - Nulls at this point atm
 				SWGObject recipient = getObjectByFirstName(packet.getRecipient());
 				
 				PlayerObject recipientGhost = (PlayerObject) recipient.getSlottedObject("ghost");

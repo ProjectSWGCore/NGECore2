@@ -339,6 +339,8 @@ public class SimulationService implements INetworkDispatch {
 					return;
 				}
 				
+				CreatureObject creature = (CreatureObject) client.getParent();
+				
 				CreatureObject object = (CreatureObject) client.getParent();
 				
 				if (core.mountService.isMounted(object)) {
@@ -358,8 +360,11 @@ public class SimulationService implements INetworkDispatch {
 						move(object, oldPos.x, oldPos.z, newPos.x, newPos.z);
 					Quaternion newOrientation = new Quaternion(dataTransform.getWOrientation(), dataTransform.getXOrientation(), dataTransform.getYOrientation(), dataTransform.getZOrientation());
 					object.setPosition(newPos);
+					creature.setPosition(newPos);
 					object.setOrientation(newOrientation);
+					creature.setOrientation(newOrientation);
 					object.setMovementCounter(dataTransform.getMovementCounter());
+					creature.setMovementCounter(dataTransform.getMovementCounter());
 				}
 				if(object.getContainer() != null) {
 					object.getContainer()._remove(object);
@@ -400,9 +405,25 @@ public class SimulationService implements INetworkDispatch {
 					if(!updateAwareObjects.contains(obj) && obj != object && !object.getAwareObjects().contains(obj) &&  obj.getContainer() != object && obj.isInQuadtree()) {						
 						if(obj.getAttachment("bigSpawnRange") == null && obj.getWorldPosition().getDistance2D(newPos) > 200)
 							continue;						
-						object.makeAware(obj);
-						if(obj.getClient() != null)
-							obj.makeAware(object);
+						//object.makeAware(obj);
+						
+						if (object.getOption(Options.MOUNT)){
+							CreatureObject owner = (CreatureObject) core.objectService.getObject(object.getOwnerId());
+							owner.makeAware(obj);
+						}
+						else {
+							object.makeAware(obj);
+						}
+						
+						if(obj.getClient() != null){
+							if (object.getOption(Options.MOUNT)){
+								CreatureObject owner = (CreatureObject) core.objectService.getObject(object.getOwnerId());
+								obj.makeAware(owner);
+							}
+							else {
+								obj.makeAware(object);
+							}
+						}
 					}
 				}
 				

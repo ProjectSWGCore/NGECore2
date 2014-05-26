@@ -27,7 +27,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
-
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import main.NGECore;
 import engine.clients.Client;
 import engine.resources.database.ODBCursor;
@@ -65,6 +67,7 @@ public class BazaarService implements INetworkDispatch {
 	private NGECore core;
 	private Set<AuctionItem> auctionItems = new ConcurrentSkipListSet<AuctionItem>();
 	private ConcurrentHashMap<Long, Integer> commodityLimit = new ConcurrentHashMap<Long, Integer>();
+	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	private final static int COMMODITY_LIMIT = 25;
 	private final static int MAX_BAZAAR_SALE_PRICE = 10000000;
 	private final static int SALES_FEE = 20;
@@ -135,8 +138,11 @@ public class BazaarService implements INetworkDispatch {
 			if(terminal == null)
 				return;
 			int permission = 2;
-			if(terminal.getAttachment("isVendor") != null && (Boolean) terminal.getAttachment("isVendor"))
+			if(terminal.getAttachment("isVendor") != null && (Boolean) terminal.getAttachment("isVendor")) {
+				if(!((Boolean) terminal.getAttachment("initialized")))
+					return;
 				permission = (long) terminal.getAttachment("vendorOwner") == player.getObjectID() ? 0 : 1;
+			}
 			Point3D pos = terminal.getWorldPosition();
 			session.write(new IsVendorOwnerResponseMessage(permission, 0, terminalId, getVendorUID((TangibleObject) terminal)).serialize());
 			
@@ -764,6 +770,21 @@ public class BazaarService implements INetworkDispatch {
 			commodityNumber = commodityLimit.get(auctionItem.getOwnerId());
 		commodityLimit.put(auctionItem.getOwnerId(), commodityNumber - 1);
 		core.objectService.deletePersistentObject(auctionItem.getObjectId(), core.getAuctionODB());
+	}
+	
+	public void startVendorUpdateTask(CreatureObject owner, SWGObject vendor) {
+		
+		scheduler.scheduleAtFixedRate(() -> {
+			if(vendor == null || !((Boolean) vendor.getAttachment("initialized")))
+				return;
+			
+			float maintenanceRate = 15;
+			if((Boolean) vendor.getAttachment("onMap"))
+				maintenanceRate += 6;
+			vendor.setAttachment("maintenanceAmount", (Integer) vendor.getAttachment("maintenanceAmount") - maintenanceRate);
+			// TODO add vendor delete after x days
+		}, 1, 1, TimeUnit.HOURS);
+		
 	}
 	
 }

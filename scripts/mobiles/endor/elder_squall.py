@@ -8,8 +8,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('elder_squall')
 	mobileTemplate.setLevel(72)
-	mobileTemplate.setMinLevel(72)
-	mobileTemplate.setMaxLevel(72)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)

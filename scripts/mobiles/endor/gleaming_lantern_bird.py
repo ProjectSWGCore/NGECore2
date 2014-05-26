@@ -8,8 +8,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('gleaming_lantern_bird')
 	mobileTemplate.setLevel(61)
-	mobileTemplate.setMinLevel(61)
-	mobileTemplate.setMaxLevel(61)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)

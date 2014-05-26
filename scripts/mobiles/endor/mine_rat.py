@@ -8,8 +8,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('death_watch_quenker')
 	mobileTemplate.setLevel(83)
-	mobileTemplate.setMinLevel(83)
-	mobileTemplate.setMaxLevel(83)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)

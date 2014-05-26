@@ -8,8 +8,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('swirl_prong_pack_leader')
 	mobileTemplate.setLevel(36)
-	mobileTemplate.setMinLevel(36)
-	mobileTemplate.setMaxLevel(36)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)

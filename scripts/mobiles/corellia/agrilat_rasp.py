@@ -8,8 +8,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('agrilat_plumed_rasp')
 	mobileTemplate.setLevel(34)
-	mobileTemplate.setMinLevel(34)
-	mobileTemplate.setMaxLevel(36)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)
