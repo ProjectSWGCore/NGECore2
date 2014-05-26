@@ -8,8 +8,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('carnivorous_nuna')
 	mobileTemplate.setLevel(13)
-	mobileTemplate.setMinLevel(13)
-	mobileTemplate.setMaxLevel(13)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)

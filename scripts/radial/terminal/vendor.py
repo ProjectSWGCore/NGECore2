@@ -13,7 +13,7 @@ def createRadial(core, owner, target, radials):
 	radials.add(RadialOptions(3, 53, 1, ''))
 	radials.add(RadialOptions(3, 54, 1, ''))
 
-	if not owner.getPlayerObject().getOwnedVendors().contains(target.getObjectID())
+	if not owner.getPlayerObject().getOwnedVendors().contains(target.getObjectID()):
 		return
 	radials.add(RadialOptions(0, 112, 3, '@player_structure:vendor_control'))
 	if target.getAttachment('initialized') == False:
@@ -35,5 +35,18 @@ def createRadial(core, owner, target, radials):
 	return
 	
 def handleSelection(core, owner, target, option):
+
+	if not owner.getPlayerObject().getOwnedVendors().contains(target.getObjectID()):
+		return
+		
+	if target.getAttachment('initialized') == False:
+		if option == 118:
+			owner.sendSystemMessage('@player_structure:vendor_initialized', 0)
+			vendor.setAttachment('initialized', True)
+			core.bazaarService.startVendorUpdateTask(owner, target)
+	else:
+		
+		
+
 	return
 	

@@ -8,8 +8,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('talus_nashal_brood2a_arachne')
 	mobileTemplate.setLevel(43)
-	mobileTemplate.setMinLevel(43)
-	mobileTemplate.setMaxLevel(43)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(12)
 	mobileTemplate.setAttackSpeed(1.0)

@@ -200,10 +200,20 @@ public class TerrainService {
 					}
 					
 					if (loaded && config.getInt("LOAD.BUILDOUT_OBJECTS") > 0) {
-						try {							
-							core.objectService.loadBuildoutObjects(planet);
-						} catch (InstantiationException | IllegalAccessException e) {
-							e.printStackTrace();
+						if (! config.keyExists("LOAD.BUILDOUT_ONLY_FOR")){
+							try {							
+								core.objectService.loadBuildoutObjects(planet);
+							} catch (InstantiationException | IllegalAccessException e) {
+								e.printStackTrace();
+							}
+						} else {
+							if (planet.getName().equals(config.getString("LOAD.BUILDOUT_ONLY_FOR"))){
+								try {							
+									core.objectService.loadBuildoutObjects(planet);
+								} catch (InstantiationException | IllegalAccessException e) {
+									e.printStackTrace();
+								}
+							}
 						}
 					}
 					

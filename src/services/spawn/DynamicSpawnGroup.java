@@ -23,7 +23,7 @@ package services.spawn;
 
 import java.util.Vector;
 
-public class DynamicSpawnGroup {
+public class DynamicSpawnGroup extends SpawnGroup {
 
 	private Vector<String> mobiles;
 	private String name;

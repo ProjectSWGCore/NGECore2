@@ -15,7 +15,7 @@ def addTemplate(core):
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(True)
-	mobileTemplate.setScale(1.3)
+	mobileTemplate.setScale(1)
 	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(True)
 	mobileTemplate.setOptionsBitmask(192)

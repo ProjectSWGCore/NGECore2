@@ -8,8 +8,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('som_nesting_grounds_jundak_bloated')
 	mobileTemplate.setLevel(84)
-	mobileTemplate.setMinLevel(84)
-	mobileTemplate.setMaxLevel(84)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)

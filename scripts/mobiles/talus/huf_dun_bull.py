@@ -8,8 +8,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('huf_dun_bull')
 	mobileTemplate.setLevel(48)
-	mobileTemplate.setMinLevel(48)
-	mobileTemplate.setMaxLevel(48)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)

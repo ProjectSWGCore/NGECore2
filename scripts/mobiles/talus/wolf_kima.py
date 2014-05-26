@@ -8,8 +8,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('wolf_kima')
 	mobileTemplate.setLevel(45)
-	mobileTemplate.setMinLevel(45)
-	mobileTemplate.setMaxLevel(45)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)

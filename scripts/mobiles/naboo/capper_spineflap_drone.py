@@ -8,8 +8,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('capper_spineflap_drone')
 	mobileTemplate.setLevel(2)
-	mobileTemplate.setMinLevel(2)
-	mobileTemplate.setMaxLevel(2)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)

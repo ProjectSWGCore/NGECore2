@@ -8,8 +8,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('bolle_bol_bark_biter')
 	mobileTemplate.setLevel(65)
-	mobileTemplate.setMinLevel(65)
-	mobileTemplate.setMaxLevel(65)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)
