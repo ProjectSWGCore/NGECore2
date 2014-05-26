@@ -1277,11 +1277,13 @@ public class DevService implements INetworkDispatch {
 
 					case 123:
 						TangibleObject arakydDroids = (TangibleObject) core.objectService.createObject("object/tangible/mission/shared_mission_bounty_droid_probot.iff", planet);
-						//arakydDroids.setStackable(true);
-						//arakydDroids.setStackCount(10);
+						arakydDroids.setStackable(true);
+						arakydDroids.setUses(20);
 						inventory.add(arakydDroids);
 						
 						TangibleObject seekerDroids = (TangibleObject) core.objectService.createObject("object/tangible/mission/shared_mission_bounty_droid_seeker.iff", planet);
+						seekerDroids.setStackable(true);
+						seekerDroids.setUses(20);
 						inventory.add(seekerDroids);
 						return;
 

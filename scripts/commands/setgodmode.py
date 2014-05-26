@@ -114,6 +114,9 @@ def run(core, actor, target, commandString):
 			playerObject.setGodLevel(0)
 	
 	elif command == 'setBounty':
+		if actor.getFaction() == "":
+			actor.sendSystemMessage('You must be aligned in order to place a bounty on yourself.', 0)
+			return
 		core.playerService.sendSetBountyWindow(actor, actor)
 		return
 		

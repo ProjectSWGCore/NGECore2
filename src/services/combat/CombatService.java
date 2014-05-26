@@ -1027,7 +1027,7 @@ public class CombatService implements INetworkDispatch {
 					
 					attacker.sendSystemMessage(OutOfBand.ProsePackage("@bounty_hunter:bounty_success_hunter", mission.getCreditReward(), "TT", target.getCustomName(), "TO", target.getObjectID()), DisplayType.Broadcast);
 					
-					target.sendSystemMessage(OutOfBand.ProsePackage("@bounty_hunter:bounty_success_hunter", mission.getCreditReward(), "TT", attacker.getCustomName()), DisplayType.Broadcast);
+					target.sendSystemMessage(OutOfBand.ProsePackage("@bounty_hunter:bounty_success_target", mission.getCreditReward(), "TT", attacker.getCustomName()), DisplayType.Broadcast);
 					
 					core.missionService.handleMissionComplete(attacker, mission);
 				}

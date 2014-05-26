@@ -216,6 +216,12 @@ public class MissionService implements INetworkDispatch {
 		handleMissionAbort(creature, mission, false);
 	}
 	
+	/**
+	 * Aborts the target mission for the specified player. If silent is true then MissionObjective.abort is not called.
+	 * @param creature Target player used in MissionObjective.abort
+	 * @param mission Mission to abort
+	 * @param silent If true, called the MissionObjective.abort() method, otherwise it simply destroys the mission (false)
+	 */
 	public void handleMissionAbort(CreatureObject creature, MissionObject mission, boolean silent) {
 		MissionObjective objective = mission.getObjective();
 		
@@ -263,7 +269,8 @@ public class MissionService implements INetworkDispatch {
 		
 		if (entryCounts.get(missionStf) != null) { ranEntryNum = ran.nextInt(entryCounts.get(missionStf)); } 
 		//else { System.out.println(missionStf + " was not found in entryCount and is using entry #1"); }
-		
+		if (missionStf.equals("mission/mission_deliver_neutral_hard") && ranEntryNum == 1) // m1s value is "mission_success_mail", so dont even use the mission
+			return 2;
 		if (ranEntryNum == 0)
 			return 1;
 		else
@@ -468,10 +475,10 @@ public class MissionService implements INetworkDispatch {
 		mission.setMissionType("survey");
 
 		String missionStf = "mission/mission_npc_survey_neutral_easy";
-
+		mission.setMissionStf(missionStf);
 		mission.setMissionId(getRandomStringEntry(missionStf));
-		mission.setMissionDescription(missionStf);
-		mission.setMissionTitle(missionStf);
+		mission.setMissionDescription("m" + mission.getMissionId() + "d");
+		mission.setMissionTitle("m" + mission.getMissionId() + "t");
 		
 		mission.setCreator(nameGenerator.compose(2) + " " + nameGenerator.compose(3));
 		
@@ -492,10 +499,10 @@ public class MissionService implements INetworkDispatch {
 		String[] difficulties = { "easy", "medium", "hard" };
 
 		String missionStf = "mission/mission_deliver_neutral_" + difficulties[ran.nextInt(difficulties.length)];
-
+		mission.setMissionStf(missionStf);
 		mission.setMissionId(getRandomStringEntry(missionStf));
-		mission.setMissionDescription(missionStf, "o");
-		mission.setMissionTitle(missionStf);
+		mission.setMissionDescription("m" + mission.getMissionId() + "d");
+		mission.setMissionTitle("m" + mission.getMissionId() + "t");
 		
 		mission.setCreator(nameGenerator.compose(2) + " " + nameGenerator.compose(3));
 		
@@ -533,29 +540,26 @@ public class MissionService implements INetworkDispatch {
 			if (attempts >= 5 && !gotBounty)
 				return;
 		}
-
+		if (bountyTarget == null)
+			return;
+		
 		mission.setMissionType("bounty");
 		
 		String missionStf = "mission/mission_bounty_jedi";
 		
+		mission.setMissionStf(missionStf);
 		if (!bountyTarget.getProfession().equals("")) { // TODO: Smuggler mission checks.
-			if (bountyTarget.getFaction().equals("neutral")) { 	// There were no neutral bounty missions. Remove this when done testing.
-				mission.setMissionTargetName("@mission/mission_bounty_jedi:neutral_jedi");
-				mission.setMissionId(3);
-				mission.setCreator("Corporate Sector Authority");
-			}
-			else if (bountyTarget.getFaction().equals("rebel")) {
+			if (bountyTarget.getFaction().equals("rebel")) {
 				mission.setMissionTargetName("Rebel Bounty");
 				mission.setMissionId(2);
 				mission.setCreator("The Galactic Empire");
-			}
-			else if (bountyTarget.getFaction().equals("imperial")) {
+			} else if (bountyTarget.getFaction().equals("imperial")) {
 				mission.setMissionTargetName("Imperial Bounty");
 				mission.setMissionId(1);
 				mission.setCreator("The Alliance");
 			}
-			mission.setMissionTitle(missionStf);
-			mission.setMissionDescription(missionStf);
+			mission.setMissionTitle("m" + mission.getMissionId() + "t");
+			mission.setMissionDescription("m" + mission.getMissionId() + "d");
 		} else {
 			// TODO: Dead code, but place-holder for implementation of smuggler missions.
 			if (bountyTarget.getFaction().equals("neutral")) {
@@ -567,8 +571,8 @@ public class MissionService implements INetworkDispatch {
 			else if (bountyTarget.getFaction().equals("imperial")) {
 				mission.setMissionId(1);
 			}
-			mission.setMissionTitle(missionStf, "s");
-			mission.setMissionDescription(missionStf, "s");
+			mission.setMissionTitle("m" + mission.getMissionId() + "ts");
+			mission.setMissionDescription("m" + mission.getMissionId() + "ds");
 		}
 		
 		mission.setMissionLevel(95 + bountyTarget.getFailedAttempts());
@@ -646,7 +650,7 @@ public class MissionService implements INetworkDispatch {
 	
 	public boolean removeBounty(long bountyTarget, boolean listRemove) {
 		if (listRemove)
-			bountyMap.remove(bountiesODB.get(bountyTarget));
+			bountyMap.remove(bountyTarget);
 		bountiesODB.remove(bountyTarget);
 		return true;
 	}
