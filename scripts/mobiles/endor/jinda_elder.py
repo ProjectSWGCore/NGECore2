@@ -11,7 +11,7 @@ def addTemplate(core):
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)
-	mobileTemplate.setWeaponType(4)
+	mobileTemplate.setWeaponType(6)
 	mobileTemplate.setMinSpawnDistance(3)
 	mobileTemplate.setMaxSpawnDistance(5)
 	mobileTemplate.setDeathblow(False)
@@ -27,7 +27,7 @@ def addTemplate(core):
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
-	weapontemplate = WeaponTemplate('object/weapon/melee/unarmed/shared_unarmed_default.iff', 4, 1.0)
+	weapontemplate = WeaponTemplate('object/weapon/melee/unarmed/shared_unarmed_default.iff', 6, 1.0)
 	weaponTemplates.add(weapontemplate)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	

@@ -11,7 +11,7 @@ def addTemplate(core):
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(15)
 	mobileTemplate.setAttackSpeed(1.0)
-	mobileTemplate.setWeaponType(4)
+	mobileTemplate.setWeaponType(6)
 	mobileTemplate.setMinSpawnDistance(3)
 	mobileTemplate.setMaxSpawnDistance(5)
 	mobileTemplate.setDeathblow(False)
