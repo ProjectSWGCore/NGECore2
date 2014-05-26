@@ -31,13 +31,13 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import protocol.swg.PlayClientEffectLocMessage;
+import resources.harvest.SurveyTool;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.resource.GalacticResource;
 import resources.objects.resource.ResourceContainerObject;
 import resources.objects.resource.ResourceRoot;
 import resources.objects.tangible.TangibleObject;
-import resources.objects.tool.SurveyTool;
 import services.sui.SUIWindow;
 import services.sui.SUIWindow.SUICallback;
 import services.sui.SUIWindow.Trigger;

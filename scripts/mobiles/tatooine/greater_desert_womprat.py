@@ -27,6 +27,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("womprat")
 	mobileTemplate.setAssistRange(6)
 	mobileTemplate.setStalker(True)
+	mobileTemplate.setOptionsBitmask(192)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_greater_desert_womp_rat.iff')

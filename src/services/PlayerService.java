@@ -873,7 +873,8 @@ public class PlayerService implements INetworkDispatch {
 			
 			creature.getClient().getSession().write((new ClientMfdStatusUpdateMessage((float) ((level >= 90) ? 90 : (level + 1)), "/GroundHUD.MFDStatus.vsp.role.targetLevel")).serialize());
 			creature.setLevel((short) level);
-			core.scriptService.callScript("scripts/collections/", "master_" + player.getProfession(), "addMasterBadge", core, creature);
+			if (level == 90)
+				core.scriptService.callScript("scripts/collections/", "profession_master", player.getProfession(), core, creature);
 			
 			creature.showFlyText(OutOfBand.ProsePackage("@cbt_spam:skill_up"), 2.5f, new RGB(154, 205, 50), 0, true);
 			creature.playEffectObject("clienteffect/skill_granted.cef", "");
@@ -923,6 +924,7 @@ public class PlayerService implements INetworkDispatch {
 			}
 			
 			player.setXp(xpType, experience);
+			creature.setXpBarValue(experience);
 			
 			// 2. See if they need to level up.
 			for (int i = 0; i < experienceTable.getRowCount(); i++) {

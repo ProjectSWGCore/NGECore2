@@ -27,6 +27,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("ronto")
 	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(192)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_ronto.iff')

@@ -27,6 +27,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("gorg")
 	mobileTemplate.setAssistRange(10)
 	mobileTemplate.setStalker(False)	
+	mobileTemplate.setOptionsBitmask(192)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_gorg.iff')

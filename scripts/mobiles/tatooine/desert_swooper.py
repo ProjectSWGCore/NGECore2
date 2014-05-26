@@ -19,7 +19,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("swoop")
 	mobileTemplate.setAssistRange(4)
 	mobileTemplate.setStalker(False)
-	
+	mobileTemplate.setOptionsBitmask(192)	
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_tatooine_desert_swooper.iff')
@@ -34,5 +34,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('rangedshot')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('desert_swoop', mobileTemplate)
+	core.spawnService.addMobileTemplate('desert_swooper', mobileTemplate)
 	return

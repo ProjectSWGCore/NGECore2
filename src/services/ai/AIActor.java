@@ -122,7 +122,7 @@ public class AIActor {
 			setFollowObject(defender);
 		setCurrentState(new AttackState());
 		if(!isAssisting) {
-			NGECore.getInstance().simulationService.get(creature.getPlanet(), creature.getWorldPosition().x, creature.getWorldPosition().z, 30).stream().filter((obj) -> 
+			NGECore.getInstance().simulationService.get(creature.getPlanet(), creature.getWorldPosition().x, creature.getWorldPosition().z, 38).stream().filter((obj) -> 
 				obj instanceof CreatureObject && 
 				obj.getAttachment("AI") != null && 
 				((AIActor) obj.getAttachment("AI")).getMobileTemplate().getSocialGroup().equals(getMobileTemplate().getSocialGroup()) &&

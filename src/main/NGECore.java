@@ -60,7 +60,6 @@ import services.ConnectionService;
 import services.ConversationService;
 import services.DevService;
 import services.EntertainmentService;
-import services.EquipmentService;
 import services.GroupService;
 import services.housing.HousingService;
 import services.InstanceService;
@@ -85,6 +84,7 @@ import services.collections.CollectionService;
 import services.combat.CombatService;
 import services.command.CombatCommand;
 import services.command.CommandService;
+import services.equipment.EquipmentService;
 import services.gcw.FactionService;
 import services.gcw.GCWService;
 import services.GuildService;
@@ -524,7 +524,9 @@ public class NGECore {
 		List<CreatureObject> deletedObjects = new ArrayList<CreatureObject>();
 		
 		while(cursor.hasNext()) {
-			SWGObject creature = (SWGObject) cursor.next();
+			Object next = cursor.next();
+			if (next == null) continue;
+			SWGObject creature = (SWGObject) next;
 			if(!characterService.playerExists(creature.getObjectID()) && creature instanceof CreatureObject)
 				deletedObjects.add((CreatureObject) creature);
 		}

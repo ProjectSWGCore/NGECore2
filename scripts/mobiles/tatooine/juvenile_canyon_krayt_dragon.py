@@ -11,13 +11,13 @@ def addTemplate(core):
 	mobileTemplate.setMinLevel(78)
 	mobileTemplate.setMaxLevel(83)
 	mobileTemplate.setDifficulty(2)
-	mobileTemplate.setAttackRange(12)
+	mobileTemplate.setAttackRange(10)
 	mobileTemplate.setAttackSpeed(1.0)
 	mobileTemplate.setWeaponType(6)
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(True)
-	mobileTemplate.setScale(2.6)
+	mobileTemplate.setScale(0.55)
 	mobileTemplate.setMeatType("Carnivore Meat")
 	mobileTemplate.setMeatAmount(750)
 	mobileTemplate.setHideType("Bristly Hide")
@@ -27,8 +27,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("krayt dragon")
 	mobileTemplate.setAssistRange(24)
 	mobileTemplate.setStalker(False)	
-
-	
+	mobileTemplate.setOptionsBitmask(192)	
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_krayt_dragon.iff')

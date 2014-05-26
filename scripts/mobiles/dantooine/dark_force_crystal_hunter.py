@@ -7,7 +7,6 @@ def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
 	mobileTemplate.setCreatureName('dark_force_crystal_hunter')
-	mobileTemplate.setLevel(90)
 	mobileTemplate.setMinLevel(60)
 	mobileTemplate.setMaxLevel(69)
 	mobileTemplate.setDifficulty(0)
@@ -19,6 +18,7 @@ def addTemplate(core):
 	mobileTemplate.setDeathblow(True)
 	mobileTemplate.setSocialGroup('remnants of kun')
 	mobileTemplate.setAssistRange(12)
+	mobileTemplate.setRespawnTime(300)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_dark_force_crystal_hunter.iff')

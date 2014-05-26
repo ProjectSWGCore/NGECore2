@@ -22,9 +22,11 @@
 package services.combat;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -44,8 +46,9 @@ import resources.buffs.Buff;
 import resources.buffs.DamageOverTime;
 import resources.common.FileUtilities;
 import resources.common.OutOfBand;
-import resources.common.ProsePackage;
 import resources.datatables.DisplayType;
+import resources.datatables.FactionStatus;
+import resources.datatables.GcwType;
 import resources.datatables.Options;
 import resources.datatables.Elemental;
 import resources.datatables.Posture;
@@ -243,7 +246,7 @@ public class CombatService implements INetworkDispatch {
 			if(!(obj instanceof TangibleObject) || obj == attacker)
 				continue;
 			
-			if(obj instanceof CreatureObject && (((CreatureObject) obj).getPosture() == 13 || ((CreatureObject) obj).getPosture() == 14))
+			if(obj instanceof CreatureObject && (((CreatureObject) obj).getPosture() == Posture.Incapacitated || ((CreatureObject) obj).getPosture() == Posture.Dead))
 				continue;
 
 			if(command.getAttackType() == 0 && !isInConeAngle(attacker, obj, (int) command.getConeLength(), (int) command.getConeWidth(), dirX, dirZ))
@@ -317,7 +320,7 @@ public class CombatService implements INetworkDispatch {
 			if(!(obj instanceof TangibleObject) || obj == attacker)
 				continue;
 			
-			if(obj instanceof CreatureObject && (((CreatureObject) obj).getPosture() == 13 || ((CreatureObject) obj).getPosture() == 14))
+			if(obj instanceof CreatureObject && (((CreatureObject) obj).getPosture() == Posture.Incapacitated || ((CreatureObject) obj).getPosture() == Posture.Dead))
 				continue;
 
 			if(command.getAttackType() == 0 && !isInConeAngle(attacker, obj, (int) command.getConeLength(), (int) command.getConeWidth(), dirX, dirZ))
@@ -803,10 +806,12 @@ public class CombatService implements INetworkDispatch {
 			}
 			
 			synchronized(target.getMutex()) {
-				if(core.mountService.isMounted(target)) core.mountService.dismount(target, (CreatureObject) target.getContainer());
+				if (core.mountService.isMounted(target)) {
+					core.mountService.dismount(target, (CreatureObject) target.getContainer());
+				}
 				
 				target.setHealth(1);
-				target.setPosture((byte) 13);
+				target.setPosture(Posture.Incapacitated);
 				target.setTurnRadius(0);
 				target.setSpeedMultiplierBase(0);		
 			}
@@ -817,7 +822,7 @@ public class CombatService implements INetworkDispatch {
 					if(target.getPosture() != 13)
 						return;
 					
-					target.setPosture((byte) 0);
+					target.setPosture(Posture.Upright);
 					target.setTurnRadius(1);
 					target.setSpeedMultiplierBase(1);
 				
@@ -827,14 +832,14 @@ public class CombatService implements INetworkDispatch {
 			target.setIncapTask(incapTask);
 			core.buffService.addBuffToCreature(target, "incapWeaken", target);
 			if(target.getSlottedObject("ghost") != null && attacker.getSlottedObject("ghost") != null) {
-				target.sendSystemMessage(new OutOfBand(new ProsePackage("base_player", "prose_victim_incap", attacker.getCustomName())), (byte) 0);
-				attacker.sendSystemMessage(new OutOfBand(new ProsePackage("base_player", "prose_target_incap", target.getCustomName())), (byte) 0);
-			} else {target.sendSystemMessage(new OutOfBand(new ProsePackage("base_player", "prose_victim_incap", "@" + attacker.getStfFilename() + ":" + attacker.getStfName())), (byte) 0); }
+				target.sendSystemMessage(OutOfBand.ProsePackage("@base_player:prose_victim_incap", "TT", attacker.getCustomName()), DisplayType.Broadcast);
+				attacker.sendSystemMessage(OutOfBand.ProsePackage("@base_player:prose_target_incap", "TT", target.getCustomName()), DisplayType.Broadcast);
+			} else {target.sendSystemMessage(OutOfBand.ProsePackage("@base_player:prose_victim_incap", "TT", "@" + attacker.getStfFilename() + ":" + attacker.getStfName()), DisplayType.Broadcast); }
 			return;
 		} else if(target.getHealth() - damage <= 0 && target.getAttachment("AI") != null) {
 			synchronized(target.getMutex()) {
 				target.setHealth(0);
-				target.setPosture((byte) 14);
+				target.setPosture(Posture.Dead);
 			}
 			attacker.removeDefender(target);
 			target.removeDefender(attacker);
@@ -902,7 +907,7 @@ public class CombatService implements INetworkDispatch {
 			
 		} else {
 			
-			if(target.getFactionStatus() == 0)
+			if(target.getFactionStatus() == FactionStatus.OnLeave)
 				return true;
 			
 			return false;
@@ -991,7 +996,7 @@ public class CombatService implements INetworkDispatch {
 			if(!(obj instanceof CreatureObject))
 				continue;
 			
-			if(obj instanceof CreatureObject && (((CreatureObject) obj).getPosture() == 14))
+			if(obj instanceof CreatureObject && (((CreatureObject) obj).getPosture() == Posture.Dead))
 				continue;
 			
 			if(!core.simulationService.checkLineOfSight(target, obj))
@@ -1009,7 +1014,7 @@ public class CombatService implements INetworkDispatch {
 	public void deathblowPlayer(CreatureObject attacker, CreatureObject target) {
 		target.stopIncapTask();
 		target.setIncapTask(null);
-		target.setPosture((byte) 14);
+		target.setPosture(Posture.Dead);
 		
 		if (target.getSlottedObject("ghost") != null && attacker.getSlottedObject("ghost") != null) {
 			boolean bountyWindow = true;
@@ -1020,53 +1025,49 @@ public class CombatService implements INetworkDispatch {
 				
 				if (mission != null && mission.getBountyMarkId() == target.getObjectID()) {
 					
-					ProsePackage attackerPp = new ProsePackage("bounty_hunter", "bounty_success_hunter", target.getCustomName());
-					attackerPp.setToCustomString("his"); // TODO: Genders
-					attackerPp.setDiInteger(mission.getCreditReward());
-					attacker.sendSystemMessage(new OutOfBand(attackerPp), DisplayType.Broadcast);
+					attacker.sendSystemMessage(OutOfBand.ProsePackage("@bounty_hunter:bounty_success_hunter", mission.getCreditReward(), "TT", target.getCustomName(), "TO", target.getObjectID()), DisplayType.Broadcast);
 					
-					ProsePackage targetPp = new ProsePackage ("bounty_hunter", "bounty_success_hunter", attacker.getCustomName());
-					targetPp.setDiInteger(mission.getCreditReward());
-					target.sendSystemMessage(new OutOfBand(targetPp), DisplayType.Broadcast);
+					target.sendSystemMessage(OutOfBand.ProsePackage("@bounty_hunter:bounty_success_hunter", mission.getCreditReward(), "TT", attacker.getCustomName()), DisplayType.Broadcast);
 					
 					core.missionService.handleMissionComplete(attacker, mission);
 				}
-			
 			} else if (target.getPlayerObject().getBountyMissionId() != 0) { // Bounty Hunter is being deathblown (They're the target)
 				bountyWindow = false;
 				MissionObject mission = (MissionObject) core.objectService.getObject(target.getPlayerObject().getBountyMissionId());
 				
 				if (mission != null && mission.getBountyMarkId() == attacker.getObjectID()) {
 					
-					ProsePackage attackerPp = new ProsePackage("bounty_hunter", "bounty_failed_target", target.getCustomName());
-					attackerPp.setToCustomString("his"); // TODO: Genders
-					attackerPp.setDiInteger(mission.getCreditReward());
-					attacker.sendSystemMessage(new OutOfBand(attackerPp), DisplayType.Broadcast);
+					attacker.sendSystemMessage(OutOfBand.ProsePackage("@bounty_hunter:bounty_failed_target", mission.getCreditReward(), "TT", target.getCustomName(), "TO", target.getObjectID()), DisplayType.Broadcast);
 					
-					ProsePackage targetPp = new ProsePackage ("bounty_hunter", "bounty_failed_hunter", attacker.getCustomName());
-					target.sendSystemMessage(new OutOfBand(targetPp), DisplayType.Broadcast);
+					target.sendSystemMessage(OutOfBand.ProsePackage("@bounty_hunter:bounty_failed_hunter", "TT", attacker.getCustomName()), DisplayType.Broadcast);
 					
 					core.missionService.handleMissionAbort(target, mission);
 				}
-				
 			}
 			
-			if(target.getDuelList().contains(attacker))
+			if (target.getDuelList().contains(attacker)) {
 				bountyWindow = false;
 				handleEndDuel(target, attacker, false);
+			} else {
+				awardGcw(attacker, target);
+			}
 			
-			if (bountyWindow) core.playerService.sendSetBountyWindow(target, attacker);
-		} else { attacker.sendSystemMessage("You have killed " + target.getCustomName() + ".", (byte) 0); }
-
+			if (bountyWindow) {
+				core.playerService.sendSetBountyWindow(target, attacker);
+			}
+		} else {
+			attacker.sendSystemMessage("You have killed " + ((target.getCustomName() == null) ? target.getObjectName().getStfValue() : target.getCustomName()) + ".", DisplayType.Broadcast);
+		}
+		
 		attacker.removeDefender(target);
 		target.removeDefender(attacker);
 		target.setSpeedMultiplierBase(0);
 		target.setTurnRadius(0);
 		
 		if (attacker.getSlottedObject("ghost") != null)
-			target.sendSystemMessage(new OutOfBand(new ProsePackage("base_player", "prose_victim_dead", attacker.getCustomName())), (byte) 0);
+			target.sendSystemMessage(OutOfBand.ProsePackage("@base_player:prose_victim_dead", "TT", attacker.getCustomName()), DisplayType.Broadcast);
 		else
-			target.sendSystemMessage(new OutOfBand(new ProsePackage("base_player", "prose_victim_dead", "@" + attacker.getStfFilename() + ":" + attacker.getStfName())), (byte) 0);
+			target.sendSystemMessage(OutOfBand.ProsePackage("@base_player:prose_victim_dead", "TT", "@" + attacker.getStfFilename() + ":" + attacker.getStfName()), DisplayType.Broadcast);
 		
 		core.playerService.sendCloningWindow(target, attacker.getSlottedObject("ghost") != null);
 	}
@@ -1159,11 +1160,11 @@ public class CombatService implements INetworkDispatch {
 				
 				CreatureObject creature = (CreatureObject) owner;
 				
-				if(eventType != 0 || creature.getPosture() != 14)
+				if(eventType != 0 || creature.getPosture() != Posture.Dead)
 					return;
 				
 				synchronized(creature.getMutex()) {
-					creature.setPosture((byte) 0);
+					creature.setPosture(Posture.Upright);
 					creature.setTurnRadius(1);
 					creature.setSpeedMultiplierBase(1);
 					creature.setHealth(creature.getHealth() + 4000);
@@ -1188,7 +1189,7 @@ public class CombatService implements INetworkDispatch {
 			if(!(obj instanceof CreatureObject))
 				continue;
 			
-			if(obj instanceof CreatureObject && (((CreatureObject) obj).getPosture() != 14))
+			if(obj instanceof CreatureObject && (((CreatureObject) obj).getPosture() != Posture.Dead))
 				continue;
 			
 			if(!attemptHeal(medic, (CreatureObject) obj))
@@ -1257,29 +1258,21 @@ public class CombatService implements INetworkDispatch {
 			return;
 		
 		if(target.getSkillMod("expertise_dot_absorption_all") != null)
-			damage *= (1 - target.getSkillMod("expertise_dot_absorption_all").getBase() / 100);
+			damage *= (1 - target.getSkillModBase("expertise_dot_absorption_all") / 100);
 		
 		switch(dot.getType()) {
 		
-			case "acid":
-				baseArmor = target.getSkillMod("acid").getBase();
-			case "heat":
-				baseArmor = target.getSkillMod("heat").getBase();
-			case "cold":
-				baseArmor = target.getSkillMod("cold").getBase();
-			case "electricity":
-				baseArmor = target.getSkillMod("electricity").getBase();
-			case "energy":
-				baseArmor = target.getSkillMod("energy").getBase();
 			case "kinetic":
-				baseArmor = target.getSkillMod("electricity").getBase();
+				baseArmor = target.getSkillModBase("electricity");	// Is this a mistake or is it legitimate?
 			case "poison":
-				baseArmor = target.getSkillMod("acid").getBase();
+				baseArmor = target.getSkillModBase("acid");
 			case "disease":	// disease damages action in nge
 				baseArmor = 0;
 			case "bleeding":	// elemental type unknown
 			case "fire":
-				baseArmor = target.getSkillMod("heat").getBase();
+				baseArmor = target.getSkillModBase("heat");
+			default:
+				baseArmor = target.getSkillModBase(dot.getType());
 				
 		}
 		
@@ -1444,5 +1437,55 @@ public class CombatService implements INetworkDispatch {
 			defenderList.stream().forEach(attacker -> defender.removeDefender(attacker));
 		}
 	}
-
+	
+	public void awardGcw(CreatureObject actor, CreatureObject target) {
+		try {
+			if (actor.getSlottedObject("ghost") == null || target.getSlottedObject("ghost") == null) {
+				return;
+			}
+			
+			PlayerObject targetPlayer = (PlayerObject) target.getSlottedObject("ghost");
+			
+			if (!core.factionService.isFactionEnemy(actor, target) && target.isAttackableBy(actor)) {
+				return;
+			}
+			
+			Set<CreatureObject> inRange = new HashSet<CreatureObject>();
+			
+			inRange.add(actor);
+			
+			actor.getObservers().stream().forEach(observer -> inRange.add((CreatureObject) observer.getParent()));
+			
+			for (CreatureObject rangedPlayer : inRange) {
+				if (!(rangedPlayer.getFaction().equals(actor.getFaction()) && target.isAttackableBy(rangedPlayer))){
+					continue;
+				}
+				
+				if (!((rangedPlayer.getLevel() / target.getLevel() * 100) < 70)) {
+					continue;
+				}
+				
+				if (rangedPlayer.getSlottedObject("ghost") == null) {
+					continue;
+				}
+				
+				PlayerObject player = (PlayerObject) rangedPlayer.getSlottedObject("ghost");
+				
+				float gcwPoints = 37.5f;
+				
+				gcwPoints *= targetPlayer.getCurrentRank();
+				
+				float decay = (((float) player.getPvpKills()) / 100f * gcwPoints);
+				
+				gcwPoints = (((gcwPoints - decay) < 0) ? 0 : (gcwPoints - decay));
+				
+				core.gcwService.addGcwPoints(rangedPlayer, (int) gcwPoints, GcwType.Player);
+				
+				actor.sendSystemMessage(OutOfBand.ProsePackage("@gcw:gcw_rank_pvp_kill_point_grant", (int) gcwPoints, "TT", target.getCustomName()), DisplayType.Broadcast);
+			}
+		} catch (Exception e) {
+			
+		}
+	}
+	
 }

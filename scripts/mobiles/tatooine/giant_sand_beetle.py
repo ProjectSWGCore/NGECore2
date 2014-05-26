@@ -25,6 +25,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("giant sand beetle")
 	mobileTemplate.setAssistRange(10)
 	mobileTemplate.setStalker(False)	
+	mobileTemplate.setOptionsBitmask(192)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_giant_sand_beetle.iff')

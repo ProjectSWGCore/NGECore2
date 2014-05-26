@@ -16,6 +16,7 @@ def addTemplate(core):
 	mobileTemplate.setMaxSpawnDistance(4)
 	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setSocialGroup('remnants of kun')
+	mobileTemplate.setRespawnTime(300)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_dark_side_savage.iff')

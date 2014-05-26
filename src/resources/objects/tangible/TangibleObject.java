@@ -83,13 +83,13 @@ public class TangibleObject extends SWGObject implements Serializable {
 	public TangibleObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String template) {
 		super(objectID, planet, position, orientation, template);
 		if (this.getClass().getSimpleName().equals("TangibleObject")) setIntAttribute("volume", 1);
-		otherVariables = getOtherVariables(); // FIXME temp
+		getBaseline(3).set("volume", 1);
 	}
 	
 	public TangibleObject(long objectID, Planet planet, String template) {
 		super(objectID, planet, new Point3D(0, 0, 0), new Quaternion(1, 0, 1, 0), template);
 		if (this.getClass().getSimpleName().equals("TangibleObject")) setIntAttribute("volume", 1);
-		otherVariables = getOtherVariables(); // FIXME temp
+		getBaseline(3).set("volume", 1);
 	}
 	
 	public TangibleObject() {

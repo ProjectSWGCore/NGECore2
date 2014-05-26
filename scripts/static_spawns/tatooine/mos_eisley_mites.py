@@ -15,13 +15,13 @@ def addPlanetSpawns(core, planet):
 	
 	
 	# Mound Mites
-	mound_mite1 = stcSvc.spawnObject('mound_mite', 'tatooine', long(0), float(3785), float(65), float(-5057), float(0), float(0), float(0), float(0), 30)	
-	mound_mite11 = stcSvc.spawnObject('mound_mite', 'tatooine', long(0), float(3775), float(65), float(-5067), float(0), float(0), float(0), float(0), 30)	
-	mound_mite12 = stcSvc.spawnObject('mound_mite', 'tatooine', long(0), float(3765), float(65), float(-5077), float(0), float(0), float(0), float(0), 30)	
-	mound_mite13 = stcSvc.spawnObject('mound_mite', 'tatooine', long(0), float(3795), float(65), float(-5047), float(0), float(0), float(0), float(0), 30)	
-	mound_mite14 = stcSvc.spawnObject('mound_mite', 'tatooine', long(0), float(3805), float(65), float(-5037), float(0), float(0), float(0), float(0), 30)	
-	mound_mite15 = stcSvc.spawnObject('mound_mite', 'tatooine', long(0), float(3780), float(65), float(-5050), float(0), float(0), float(0), float(0), 30)	
-	mound_mite16 = stcSvc.spawnObject('mound_mite', 'tatooine', long(0), float(3790), float(65), float(-5040), float(0), float(0), float(0), float(0), 30)	
+	mound_mite1 = stcSvc.spawnObject('mound_mite', 'tatooine', long(0), float(3785), float(57), float(-5057), float(0), float(0), float(0), float(0), 30)	
+	mound_mite11 = stcSvc.spawnObject('mound_mite', 'tatooine', long(0), float(3775), float(55), float(-5067), float(0), float(0), float(0), float(0), 30)	
+	mound_mite12 = stcSvc.spawnObject('mound_mite', 'tatooine', long(0), float(3765), float(53), float(-5077), float(0), float(0), float(0), float(0), 30)	
+	mound_mite13 = stcSvc.spawnObject('mound_mite', 'tatooine', long(0), float(3795), float(56), float(-5047), float(0), float(0), float(0), float(0), 30)	
+	mound_mite14 = stcSvc.spawnObject('mound_mite', 'tatooine', long(0), float(3805), float(53), float(-5037), float(0), float(0), float(0), float(0), 30)	
+	mound_mite15 = stcSvc.spawnObject('mound_mite', 'tatooine', long(0), float(3780), float(58), float(-5050), float(0), float(0), float(0), float(0), 30)	
+	mound_mite16 = stcSvc.spawnObject('mound_mite', 'tatooine', long(0), float(3790), float(55), float(-5040), float(0), float(0), float(0), float(0), 30)	
 	
 	# Mound Mites
 	mound_mite2 = stcSvc.spawnObject('mound_mite', 'tatooine', long(0), float(3560), float(63), float(-4339), float(0), float(0), float(0), float(0), 30)	

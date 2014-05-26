@@ -7,7 +7,6 @@ def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
 	mobileTemplate.setCreatureName('eow_force_sensitive_crypt_crawler')
-	mobileTemplate.setLevel(90)
 	mobileTemplate.setMinLevel(60)
 	mobileTemplate.setMaxLevel(70)
 	mobileTemplate.setDifficulty(0)
@@ -18,6 +17,7 @@ def addTemplate(core):
 	mobileTemplate.setMaxSpawnDistance(5)
 	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setSocialGroup('remnants of kun')
+	mobileTemplate.setRespawnTime(300)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_force_sensitive_crypt_crawler.iff')

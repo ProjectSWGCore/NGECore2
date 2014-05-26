@@ -16,6 +16,7 @@ def addTemplate(core):
 	mobileTemplate.setMaxSpawnDistance(6)
 	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setSocialGroup('force renegade')
+	mobileTemplate.setRespawnTime(300)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_forsaken_force_drifter.iff')

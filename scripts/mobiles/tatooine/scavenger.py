@@ -7,7 +7,7 @@ def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
 	mobileTemplate.setCreatureName('mission_scavenger')
-	mobileTemplate.setLevel(4)
+	mobileTemplate.setLevel(5)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(12)
 	mobileTemplate.setAttackSpeed(1.0)
@@ -19,6 +19,8 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("thug")
 	mobileTemplate.setAssistRange(4)
 	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(192)
+	
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_tatooine_scavenger.iff')

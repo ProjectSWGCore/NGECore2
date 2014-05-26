@@ -9,6 +9,7 @@ def addTemplate(core):
 	mobileTemplate.setLevel(50)
 	mobileTemplate.setDifficulty(1)
 	mobileTemplate.setAttackRange(5)
+	mobileTemplate.setOptionsBitmask(192)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_rancor.iff')

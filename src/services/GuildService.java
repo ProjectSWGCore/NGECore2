@@ -21,15 +21,34 @@
  ******************************************************************************/
 package services;
 
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Vector;
 
+import resources.common.OutOfBand;
+import resources.datatables.DisplayType;
 import resources.guild.Guild;
+import resources.guild.GuildMember;
 import resources.objects.SWGSet;
+import resources.objects.creature.CreatureObject;
 import resources.objects.guild.GuildObject;
+import resources.objects.intangible.IntangibleObject;
+import resources.objects.player.PlayerObject;
+import resources.objects.tangible.TangibleObject;
+import services.chat.ChatRoom;
+import services.chat.Mail;
+import services.sui.SUIService.InputBoxType;
+import services.sui.SUIService.ListBoxType;
+import services.sui.SUIService.MessageBoxType;
+import services.sui.SUITableItem;
+import services.sui.SUIWindow;
+import services.sui.SUIWindow.Trigger;
 import main.NGECore;
 import engine.resources.objects.SWGObject;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
+import engine.resources.common.Stf;
 
 public class GuildService implements INetworkDispatch {
 	
@@ -59,9 +78,361 @@ public class GuildService implements INetworkDispatch {
 		int listSize = object.getGuildList().size();
 		Guild guild = new Guild((listSize == 0 ? 1 : listSize + 1), abbreviation, name, leader);
 		
-		object.getGuildList().add(guild);
+		core.chatService.createChatRoom("", "guild." + guild.getId(), leader.getCustomName(), false, true, false);
+		ChatRoom guildChat = core.chatService.createChatRoom("", "guild." + guild.getId() + ".GuildChat", leader.getCustomName(), false, true, false);
+		guild.setChatRoomId(guildChat.getRoomId());
 		
+		object.getGuildList().add(guild);
 		return guild;
+	}
+	
+	public GuildMember joinGuild(Guild guild, CreatureObject joinee, CreatureObject acceptor) {
+		GuildMember member = null;
+		PlayerObject ghost = joinee.getPlayerObject();
+		if (ghost == null)
+			return member;
+		
+		member = guild.addMember(joinee.getObjectID());
+		
+		joinee.setGuildId(guild.getId());
+		
+		guild.getSponsoredPlayers().remove(joinee.getObjectID());
+		
+		if (joinee.isInQuadtree())
+			core.chatService.joinChatRoom(joinee.getCustomName(), guild.getChatRoomId());
+		else
+			ghost.addChannel(guild.getChatRoomId());
+		
+		// Notify guild & player
+		if (acceptor != null) {
+			guild.sendGuildMail(guild.getName(), "@guildmail:accept_subject", new Stf("@guildmail:accept_text").getStfValue().replace("%TU", acceptor.getCustomName()).replace("%TT", joinee.getCustomName()));
+			
+			Mail acceptedMail = new Mail();
+			acceptedMail.setMailId(core.chatService.generateMailId());
+			acceptedMail.setTimeStamp((int) new Date().getTime());
+			acceptedMail.setRecieverId(joinee.getObjectID());
+			acceptedMail.setStatus(Mail.NEW);
+			acceptedMail.setMessage(new Stf("@guildmail:accept_target_text").getStfValue().replace("%TU", acceptor.getCustomName()).replace("%TT", joinee.getCustomName()));
+			acceptedMail.setSubject("@guildmail:accept_subject");
+			acceptedMail.setSenderName(guild.getName());
+	        core.chatService.storePersistentMessage(acceptedMail);
+	        
+	        if (joinee.isInQuadtree())
+	        	core.chatService.sendPersistentMessageHeader(joinee.getClient(), acceptedMail);
+		}
+		
+		// Update association device to guild stats
+		TangibleObject datapad = (TangibleObject) joinee.getSlottedObject("datapad");
+		
+		if (datapad != null) {
+			datapad.viewChildren(joinee, true, false, (obj) -> {
+				if (obj instanceof IntangibleObject && obj.getTemplate().equals("object/intangible/data_item/shared_guild_stone.iff")) { // shared_guild_stone
+					obj.setStringAttribute("guild_name", guild.getName());
+					obj.setStringAttribute("guild_abbrev", guild.getAbbreviation());
+					obj.setStringAttribute("guild_leader", guild.getLeaderName());
+				}
+			});
+		}
+		member.setName(joinee.getCustomName());
+		member.setLevel(joinee.getLevel());
+		if (joinee.getPlayerObject() != null) {
+			member.setProfession(core.playerService.getFormalProfessionName(joinee.getPlayerObject().getProfession()));
+		}
+		
+		return member;
+	}
+	
+	public void handleViewPermissionsList(CreatureObject actor, Guild guild) {
+        final SUIWindow window = core.suiService.createSUIWindow("Script.tablePage", actor, null, (float) 0);
+        window.setProperty("bg.caption.lblTitle:Text", "Permissions List");
+        window.setProperty("comp.Prompt:Visible", "False");
+        window.setProperty("btnExport:Visible", "False");
+        window.setProperty("tablePage:Size", "785,434");
+        window.setProperty("comp.TablePage.header:ScrollExtent", "444,30");
+        window.addTableColumn("Name", "text");
+        window.addTableColumn("Mail", "text");
+        window.addTableColumn("Sponsor", "text");
+        window.addTableColumn("Title", "text");
+        window.addTableColumn("Accept", "text");
+        window.addTableColumn("Kick", "text");
+        window.addTableColumn("War", "text");
+        window.addTableColumn("Change Guild Name", "text");
+        window.addTableColumn("Disband", "text");
+        window.addTableColumn("Rank", "text");
+        window.addTableColumn("War Excluded", "text");
+        window.addTableColumn("War Exclusive", "text");
+        
+        Map<Long, GuildMember> members = guild.getMembers();
+        
+        members.entrySet().forEach(e -> {
+        	GuildMember member = e.getValue();
+        	for (SUITableItem column : window.getTableItems()) {
+        		if (column.getItemName().equals("Name")) {
+        			window.addTableCell(member.getName(), e.getKey(), column.getIndex());
+        			continue;
+        		}
+        		else if (member.getPermissions().contains(column.getItemName())) {
+        			window.addTableCell("X", e.getKey(), column.getIndex());
+        			continue;
+        		} else
+        			window.addTableCell("", e.getKey(), column.getIndex());
+        	}
+        });
+        
+		Vector<String> returnList = new Vector<String>();
+		returnList.add("comp.TablePage.table:SelectedRow");
+		
+		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, (owner, eventType, resultList) -> {
+
+			int selectedRow = Integer.parseInt(resultList.get(0));
+			GuildMember selectedMember = guild.getMember(window.getTableObjIdByRow(selectedRow));
+			
+			if (selectedMember == null)
+				return;
+			
+			handleChangeMemberPermissions((CreatureObject) owner, guild, selectedMember, "PermissionsList");
+		});
+        core.suiService.openSUIWindow(window);
+	}
+	public void handleChangeMemberPermissions(CreatureObject actor, Guild guild, GuildMember target) { handleChangeMemberPermissions(actor, guild, target, ""); 
+	}
+	public void handleChangeMemberPermissions(CreatureObject actor, Guild guild, GuildMember target, String source) {
+		GuildMember requester = guild.getMember(actor.getObjectID());
+		
+		if (requester == null)
+			return;
+		
+		final SUIWindow window = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "\\#00FF00\\" + target.getName() + "\\#FFFFFF Guild Member Permissions", 
+				new Stf("@guild:permissions_prompt").getStfValue().replace("%TU", "\\#00FF00\\" + target.getName() + "\\#.\\"), target.getAllPermissions(requester), actor, null, 0);
+		
+		window.setProperty("listBox:Size", "487,316");
+		
+		Vector<String> returnList = new Vector<String>();
+		returnList.add("List.lstList:SelectedRow");
+		
+		if (!source.isEmpty() || !source.equals("")) {
+			window.setProperty("btnOther:Visible", "True");
+			window.setProperty("btnOther:Text", "Back");
+			window.addHandler(1, "", Trigger.TRIGGER_UPDATE, returnList, (owner, eventType, resultList) -> {
+				switch(source) {
+					case "PermissionsList":
+						handleViewPermissionsList(actor, guild);
+						break;
+				}
+			});
+		}
+		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, (owner, eventType, resultList) -> {
+			if (resultList.size() == 0)
+				return;
+			
+			int selectedPermission = (int) (window.getObjectIdByIndex(Integer.parseInt(resultList.get(0))));
+			
+			switch (selectedPermission) {
+				case 1: // Mail
+					if (target.hasMailPermission()) target.setMailPermission(false);
+					else target.setMailPermission(true);
+					break;
+				case 2: // Sponsor
+					if (target.hasSponsorPermission()) target.setSponsorPermission(false);
+					else target.setSponsorPermission(true);
+					break;
+				case 3: // Title
+					if (target.hasTitlePermission()) target.setTitlePermission(false);
+					else target.setTitlePermission(true);
+					break;
+				case 4: // Accept
+					if (target.hasAcceptPermission()) target.setAcceptPermission(false);
+					else target.setAcceptPermission(true);
+					break;
+				case 5: // Kick
+					if (target.hasKickPermission()) target.setKickPermission(false);
+					else target.setKickPermission(true);
+					break;
+				case 6: // War
+					if (target.hasWarPermission()) target.setWarPermission(false);
+					else target.setWarPermission(true);
+					break;
+				case 7: // Change Guild Name
+					if (target.hasChangeNamePermission()) target.setChangeNamePermission(false);
+					else target.setChangeNamePermission(true);
+					break;
+				case 8: // Disband
+					if (target.hasDisbandPermission()) target.setDisbandPermission(false);
+					else target.setDisbandPermission(true);
+					break;
+				case 9: // Rank
+					if (target.hasRankPermission()) target.setRankPermission(false);
+					else target.setRankPermission(true);
+					break;
+				case 10: // War Excluded
+					if (target.isWarExcluded()) target.setWarExcluded(false);
+					else target.setWarExcluded(true);
+					break;
+				case 11: // War Exclusive
+					if (target.isWarExclusive()) target.setWarExclusive(false);
+					else target.setWarExclusive(true);
+					break;
+
+				default: break;
+			}
+			
+			handleChangeMemberPermissions(actor, guild, target, source);
+		});
+		
+		core.suiService.openSUIWindow(window);
+	}
+	
+	public void handleGuildSponsor(CreatureObject actor) {
+	    SUIWindow wndSponsorPlayer = core.suiService.createInputBox(InputBoxType.INPUT_BOX_OK_CANCEL, "@guild:sponsor_title", "@guild:sponsor_prompt", actor, null, (float) 10, (sponsor, eventType, returnList) -> {
+	        
+	    	if (eventType != 0)
+	    		return;
+	    	
+	    	String input = returnList.get(0);
+	    	
+	    	if (input.isEmpty())
+	    		return;
+	    	
+	    	SWGObject pSponsored = core.objectService.getObjectByFirstName(input);
+	    	
+	    	if (pSponsored == null || !pSponsored.isInQuadtree()) {
+	    		actor.sendSystemMessage("@guild:sponsor_not_found", DisplayType.Broadcast);
+	    		return;
+	    	}
+	    	
+	    	if (((CreatureObject)pSponsored).getGuildId() != 0) {
+	    		actor.sendSystemMessage(OutOfBand.ProsePackage("@guild:sponsor_already_in_guild", "TU", pSponsored.getCustomName()), DisplayType.Broadcast);
+	    		return;
+	    	}
+	    	
+	    	Guild invitingGuild = core.guildService.getGuildById(actor.getGuildId());
+
+	    	SUIWindow wndSponsoredConfirm = core.suiService.createMessageBox(MessageBoxType.MESSAGE_BOX_YES_NO, "@guild:sponsor_verify_title", 
+	    			new Stf("@guild:sponsor_verify_prompt").getStfValue().replace("%TU", actor.getCustomName()).replace("%TT", invitingGuild.getName()), pSponsored, null, (float) 10);
+	    	
+	    	wndSponsoredConfirm.addHandler(0, "", Trigger.TRIGGER_OK, new Vector<String>(), (cOwner, cEventType, cReturnList) -> {
+	    		
+	    		if (cEventType != 0)
+	    			return;
+
+	    		Guild guild = core.guildService.getGuildById(actor.getGuildId());
+		    	
+		    	if (guild == null)
+		    		return;
+		    	
+		    	guild.getSponsoredPlayers().put(cOwner.getObjectID(), cOwner.getCustomName());
+		    	
+		    	actor.sendSystemMessage(OutOfBand.ProsePackage("@guild:sponsor_self", "TU", cOwner.getCustomName(), "TT", guild.getName()), DisplayType.Broadcast);
+		    	((CreatureObject)cOwner).sendSystemMessage(OutOfBand.ProsePackage("@guild:sponsor_target", "TT", guild.getName(), "TU", actor.getCustomName()), DisplayType.Broadcast);
+		    	
+				guild.sendGuildMail(guild.getName(), "@guildmail:sponsor_subject", new Stf("@guildmail:sponsor_text").getStfValue().replace("%TU", actor.getCustomName()).replace("%TT", cOwner.getCustomName()));
+	    	});
+	    	core.suiService.openSUIWindow(wndSponsoredConfirm);
+
+	    });
+	    core.suiService.openSUIWindow(wndSponsorPlayer);
+	}
+	
+	public void handleManageSponsoredPlayers(CreatureObject actor) {
+		Guild guild = getGuildById(actor.getGuildId());
+		
+		
+		if (guild == null)
+			return;
+		
+		Map<Long, String> sponsorships = guild.getSponsoredPlayers();
+		
+		SUIWindow wndSponsoredPlayers = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "@guild:sponsored_title", "@guild:sponsored_prompt", sponsorships, actor, null, 0);
+		
+		Vector<String> returnList = new Vector<String>();
+		returnList.add("List.lstList:SelectedRow");
+		
+		wndSponsoredPlayers.addHandler(0, "", Trigger.TRIGGER_OK, returnList, (owner, eventType, resultList) -> {
+			int index = Integer.parseInt(resultList.get(0));
+			long objectId = wndSponsoredPlayers.getObjectIdByIndex(index);
+			
+			if(objectId == 0)
+				return;
+			
+			SWGObject sponsoredPlayer = core.objectService.getObject(objectId);
+			
+			if (sponsoredPlayer == null) {
+				sponsoredPlayer = core.objectService.getCreatureFromDB(objectId);
+				
+				if (sponsoredPlayer == null) {
+					guild.getSponsoredPlayers().remove(objectId);
+					return;
+				}
+			}
+			final SWGObject finalSponseredPlayer = sponsoredPlayer;
+
+			Map<Long, String> options = new HashMap<Long, String>();
+			options.put((long) 0, "Accept");
+			options.put((long) 1, "Decline");
+			options.put((long) 2, "Cancel");
+			SUIWindow sponsorOptions = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "@guild:sponsored_options_title", 
+					new Stf("@guild:sponsored_options_prompt").getStfValue().replace("%TU", sponsoredPlayer.getCustomName()), options, owner, null, 0);
+			
+			Vector<String> returnList2 = new Vector<String>();
+			returnList2.add("List.lstList:SelectedRow");
+			
+			sponsorOptions.addHandler(0, "", Trigger.TRIGGER_OK, returnList2, (owner2, eventType2, resultList2) -> {
+				int selectedOption = Integer.parseInt(resultList2.get(0));
+				
+				Guild gOwner = getGuildById(((CreatureObject)owner2).getGuildId());
+				CreatureObject sponsoredCreo = (CreatureObject) finalSponseredPlayer;
+				
+				switch(selectedOption) {
+					case 0: // Accept
+
+						if (sponsoredCreo.isInQuadtree())
+							sponsoredCreo.sendSystemMessage(OutOfBand.ProsePackage("@guild:sponsor_accept", "TU", owner2.getCustomName()), DisplayType.Broadcast);
+						
+						joinGuild(gOwner, sponsoredCreo, (CreatureObject) owner2);
+						break;
+					case 1: // Decline
+						sponsoredCreo.sendSystemMessage(OutOfBand.ProsePackage("@guild:sponsor_decline", "TU", owner2.getCustomName()), DisplayType.Broadcast);
+						
+						handleGuildDeclineSponsorship(gOwner, (CreatureObject) owner2, sponsoredCreo);
+						break;
+					case 2: // Cancel
+						break;
+					default:
+						break;
+				}
+			});
+			
+			core.suiService.openSUIWindow(sponsorOptions);
+		});
+		core.suiService.openSUIWindow(wndSponsoredPlayers);
+	}
+	
+	public void handleGuildDeclineSponsorship(Guild guild, CreatureObject actor, CreatureObject sponsoree) {
+		guild.getSponsoredPlayers().remove(sponsoree.getObjectID());
+		
+		guild.sendGuildMail(guild.getName(), "@guildmail:decline_subject", new Stf("@guildmail:decline_text").getStfValue().replace("%TU", actor.getCustomName()).replace("%TT", sponsoree.getCustomName()));
+		
+		Mail declinedMail = new Mail();
+        declinedMail.setMailId(core.chatService.generateMailId());
+        declinedMail.setTimeStamp((int) new Date().getTime());
+        declinedMail.setRecieverId(sponsoree.getObjectID());
+        declinedMail.setStatus(Mail.NEW);
+        declinedMail.setMessage(new Stf("@guildmail:decline_target_text").getStfValue().replace("%TU", actor.getCustomName()).replace("%TT", guild.getName()));
+        declinedMail.setSubject("@guildmail:decline_subject");
+        declinedMail.setSenderName(guild.getName());
+        core.chatService.storePersistentMessage(declinedMail);
+        
+        if (sponsoree.isInQuadtree())
+        	core.chatService.sendPersistentMessageHeader(sponsoree.getClient(), declinedMail);
+	}
+	
+	public void sendMailToGuild(String sender, String subject, String message, int guildId) {
+		Guild guild = getGuildById(guildId);
+		
+		if (guild == null)
+			return;
+		
+		guild.sendGuildMail(sender, subject, message);
 	}
 	
 	public GuildObject getGuildObject() {
@@ -88,7 +459,7 @@ public class GuildService implements INetworkDispatch {
 		Guild guild = getGuildById(id);
 		
 		if (guild != null) {
-			object.getGuildList().add(guild);
+			object.getGuildList().remove(guild);
 			return true;
 		}
 		
@@ -99,7 +470,7 @@ public class GuildService implements INetworkDispatch {
 		Guild guild = getGuildByAbbreviation(abbreviation);
 		
 		if (guild != null) {
-			object.getGuildList().add(guild);
+			object.getGuildList().remove(guild);
 			return true;
 		}
 		

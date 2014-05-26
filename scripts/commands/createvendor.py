@@ -158,6 +158,8 @@ def handleVendorName(actor, window, eventType, returnList):
 		
 	actor.setAttachment('selectedVendorTemplate', None)
 	vendor.setAttachment('isVendor', True)
+	vendor.setAttachment('onMap', True)	
+	vendor.setAttachment('maintenanceAmount', 0)
 	vendor.setAttachment('vendorOwner', actor.getObjectID())
 	vendor.setAttachment('initialized', False)
 	vendor.setAttachment('vendorSearchEnabled', False)

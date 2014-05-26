@@ -19,7 +19,8 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("niko thug")
 	mobileTemplate.setAssistRange(4)
 	mobileTemplate.setStalker(False)
-	
+	mobileTemplate.setOptionsBitmask(192)
+		
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_criminal_swooper_human_female_01.iff')
 	templates.add('object/mobile/shared_dressed_criminal_swooper_human_male_01.iff')
