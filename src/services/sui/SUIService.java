@@ -133,7 +133,7 @@ public class SUIService implements INetworkDispatch {
 					//System.out.println("SUI target is NOT creatureobject " + target.getTemplate());
 				}
 				
-				if(target.getAttachment("isVendor") != null && (Boolean) target.getAttachment("isVendor") && ((CreatureObject) owner).getPlayerObject().getOwnedVendors().contains(target.getObjectID())) {
+				if(target.getAttachment("isVendor") != null && (Boolean) target.getAttachment("isVendor") && (long) target.getAttachment("vendorOwner") == owner.getObjectID()) {
 					core.scriptService.callScript("scripts/radial/", "terminal/vendor", "createRadial", core, owner, target, request.getRadialOptions());
 					sendRadial(owner, target, request.getRadialOptions(), request.getRadialCount());
 					return;
@@ -180,6 +180,11 @@ public class SUIService implements INetworkDispatch {
 				if(target == null || owner == null)
 					return;
 				
+				if(target.getAttachment("isVendor") != null && (Boolean) target.getAttachment("isVendor") && (long) target.getAttachment("vendorOwner") == owner.getObjectID()) {
+					core.scriptService.callScript("scripts/radial/", "terminal/vendor", "handleSelection", core, owner, target, objMenuSelect.getSelection());
+					return;
+				}
+
 				core.scriptService.callScript("scripts/radial/", getRadialFilename(target), "handleSelection", core, owner, target, objMenuSelect.getSelection());
 
 			}

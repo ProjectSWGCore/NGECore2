@@ -160,7 +160,7 @@ def handleVendorName(actor, window, eventType, returnList):
 	vendor.setAttachment('isVendor', True)
 	vendor.setAttachment('onMap', True)	
 	vendor.setAttachment('maintenanceAmount', 0)
-	vendor.setAttachment('vendorOwner', actor.getObjectID())
+	vendor.setAttachment('vendorOwner', Long(actor.getObjectID()))
 	vendor.setAttachment('initialized', False)
 	vendor.setAttachment('vendorSearchEnabled', False)
 	vendor.setCustomName('Vendor: ' + name)
