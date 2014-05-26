@@ -22,9 +22,9 @@ def addTemplate(core):
 	mobileTemplate.setOptionsBitmask(192)
 
 	templates = Vector()
-	templates.add('object/mobile/shared_dressed_marauder_male_01.iff')
-	templates.add('object/mobile/shared_dressed_marauder_male_02.iff')
-	templates.add('object/mobile/shared_dressed_marauder_male_02.iff')
+	templates.add('object/mobile/shared_marauder_male_01.iff')
+	templates.add('object/mobile/shared_marauder_male_02.iff')
+	templates.add('object/mobile/shared_marauder_male_02.iff')
 	mobileTemplate.setTemplates(templates)
 
 	weaponTemplates = Vector()

@@ -6,8 +6,8 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('enraged_donkuwah')
-	mobileTemplate.setLevel(79)
+	mobileTemplate.setCreatureName('tainted_korga_dark_shaman')
+	mobileTemplate.setLevel(76)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)
@@ -15,20 +15,18 @@ def addTemplate(core):
 	mobileTemplate.setMinSpawnDistance(3)
 	mobileTemplate.setMaxSpawnDistance(5)
 	mobileTemplate.setDeathblow(True)
-	mobileTemplate.setSocialGroup('donkuwah tribe')
-	mobileTemplate.setAssistRange(1)
+	mobileTemplate.setSocialGroup('korga tribe')
+	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setOptionsBitmask(192)
 	
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_jinda_male.iff')
-	templates.add('object/mobile/shared_jinda_female.iff')
+	templates.add('object/mobile/shared_dulok_male.iff')
+	templates.add('object/mobile/shared_dulok_female.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
-	weapontemplate = WeaponTemplate('object/weapon/melee/knife/shared_knife_janta.iff', 4, 1.0)
-	weaponTemplates.add(weapontemplate)
-	weapontemplate = WeaponTemplate('object/weapon/melee/polearm/shared_lance_staff_janta.iff', 7, 1.0)
+	weapontemplate = WeaponTemplate('object/weapon/melee/unarmed/shared_unarmed_default.iff', 4, 1.0)
 	weaponTemplates.add(weapontemplate)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
@@ -46,5 +44,5 @@ def addTemplate(core):
 	lootGroupChance_2 = 35
 	mobileTemplate.addToLootGroups(lootPoolNames_2,lootPoolChances_2,lootGroupChance_2)
 	
-	core.spawnService.addMobileTemplate('enraged_donkuwah', mobileTemplate)
+	core.spawnService.addMobileTemplate('tainted_korga_dark_shaman', mobileTemplate)
 	return
