@@ -18,7 +18,9 @@ def addTemplate(core):
 	mobileTemplate.setScale(1)
 	mobileTemplate.setSocialGroup('panshee tribe')
 	mobileTemplate.setAssistRange(1)
-	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(128)
+	mobileTemplate.setStalker(True)
+	
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_ewok_f_01.iff')

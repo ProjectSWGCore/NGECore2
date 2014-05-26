@@ -24,7 +24,9 @@ def addTemplate(core):
 	mobileTemplate.setBoneAmount(35)
 	mobileTemplate.setSocialGroup("hanadak")
 	mobileTemplate.setAssistRange(12)
-	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(128)
+	mobileTemplate.setStalker(True)
+	
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_hanadak.iff')

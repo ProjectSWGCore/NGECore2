@@ -17,7 +17,8 @@ def addTemplate(core):
 	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setSocialGroup('gondula tribe')
 	mobileTemplate.setAssistRange(1)
-	
+	mobileTemplate.setOptionsBitmask(128)
+	mobileTemplate.setStalker(True)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_ewok_f_01.iff')

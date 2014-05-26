@@ -17,7 +17,8 @@ def addTemplate(core):
 	mobileTemplate.setDeathblow(True)
 	mobileTemplate.setSocialGroup('jinda tribe')
 	mobileTemplate.setAssistRange(1)
-	
+	mobileTemplate.setStalker(True)
+	mobileTemplate.setOptionsBitmask(128)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_jinda_male.iff')

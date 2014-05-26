@@ -18,6 +18,8 @@ def addTemplate(core):
 	mobileTemplate.setScale(.5)
 	mobileTemplate.setSocialGroup('korga tribe')
 	mobileTemplate.setAssistRange(12)
+	mobileTemplate.setOptionsBitmask(128)
+	mobileTemplate.setStalker(False)
 	
 	
 	templates = Vector()

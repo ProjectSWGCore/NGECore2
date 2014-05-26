@@ -21,6 +21,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("self")
 	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(128)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_merek.iff')

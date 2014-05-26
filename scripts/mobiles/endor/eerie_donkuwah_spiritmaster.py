@@ -17,7 +17,8 @@ def addTemplate(core):
 	mobileTemplate.setDeathblow(True)
 	mobileTemplate.setSocialGroup('donkuwah tribe')
 	mobileTemplate.setAssistRange(12)
-	mobileTemplate.setOptionsBitmask(192)
+	mobileTemplate.setOptionsBitmask(128)
+	mobileTemplate.setStalker(True)
 	
 	
 	templates = Vector()

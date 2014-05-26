@@ -18,6 +18,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup('dulok outpost')
 	mobileTemplate.setAssistRange(1)
 	mobileTemplate.setOptionsBitmask(192)
+	mobileTemplate.setStalker(True)
 	
 	
 	templates = Vector()

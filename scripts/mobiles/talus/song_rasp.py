@@ -21,7 +21,8 @@ def addTemplate(core):
 	mobileTemplate.setHideAmount(3)
 	mobileTemplate.setSocialGroup("rasp")
 	mobileTemplate.setAssistRange(0)
-	mobileTemplate.setStalker(False)	
+	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(128)	
 
 	templates = Vector()
 	templates.add('object/mobile/shared_horned_rasp_hue.iff')

@@ -18,7 +18,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup('pubam tribe')
 	mobileTemplate.setAssistRange(1)
 	mobileTemplate.setOptionsBitmask(192)
-	
+	mobileTemplate.setStalker(True)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dulok_male.iff')

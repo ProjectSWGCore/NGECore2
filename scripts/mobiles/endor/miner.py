@@ -19,6 +19,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("death watch")
 	mobileTemplate.setAssistRange(1)
 	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(128)
 
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_mand_miner_aqualish.iff')

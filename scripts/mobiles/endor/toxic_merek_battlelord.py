@@ -22,7 +22,7 @@ def addTemplate(core):
 	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setStalker(False)
 	mobileTemplate.setOptionsBitmask(192)
-	
+		
 	templates = Vector()
 	templates.add('object/mobile/shared_merek.iff')
 	mobileTemplate.setTemplates(templates)

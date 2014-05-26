@@ -18,6 +18,8 @@ def addTemplate(core):
 	mobileTemplate.setScale(.5)
 	mobileTemplate.setSocialGroup('panshee tribe')
 	mobileTemplate.setAssistRange(1)
+	mobileTemplate.setOptionsBitmask(128)
+	mobileTemplate.setStalker(True)
 	
 	
 	templates = Vector()
