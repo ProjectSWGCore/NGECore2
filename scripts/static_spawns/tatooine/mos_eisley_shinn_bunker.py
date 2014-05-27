@@ -46,14 +46,14 @@ def addPlanetSpawns(core, planet):
 	shinn_guard2 = stcSvc.spawnObject('shinn_guard', 'tatooine', Building.getCellByCellNumber(long(4)), float(3.8), float(-3.3), float(4.8), float(0), float(0), float(0), float(0), 30)
 	shinn_guard3 = stcSvc.spawnObject('shinn_guard', 'tatooine', Building.getCellByCellNumber(long(5)), float(-4.4), float(-10.3), float(-6.1), float(0), float(0), float(0), float(0), 30)
 	shinn_guard4 = stcSvc.spawnObject('shinn_guard', 'tatooine', Building.getCellByCellNumber(long(7)), float(5.3), float(-13.8), float(6.6), float(0), float(0), float(0), float(0), 30)
-	shinn_guard5 = stcSvc.spawnObject('shinn_guard', 'tatooine', Building.getCellByCellNumber(long(7), float(-2.1), float(-13.8), float(6.8), float(0), float(0), float(0), float(0), 30)
-	shinn_guard6 = stcSvc.spawnObject('shinn_guard', 'tatooine', Building.getCellByCellNumber(long(7), float(-6.8), float(-13.8), float(6.7), float(0), float(0), float(0), float(0), 30)
-	shinn_guard7 = stcSvc.spawnObject('shinn_guard', 'tatooine', Building.getCellByCellNumber(long(8), float(1.5), float(-20.8), float(-3.5), float(0), float(0), float(0), float(0), 30)	
-	shinn_guard8 = stcSvc.spawnObject('shinn_guard', 'tatooine', Building.getCellByCellNumber(long(9), float(-1.0), float(-20.7), float(11.0), float(0), float(0), float(0), float(0), 30)
-	shinn_guard9 = stcSvc.spawnObject('shinn_guard', 'tatooine', Building.getCellByCellNumber(long(9), float(3.6), float(-20.7), float(11.4), float(0), float(0), float(0), float(0), 30)
-	shinn_guard10 = stcSvc.spawnObject('shinn_guard', 'tatooine', Building.getCellByCellNumber(long(9), float(1.6), float(-20.7), float(4.7), float(0), float(0), float(0), float(0), 30)
-	shinn_guard11 = stcSvc.spawnObject('shinn_guard', 'tatooine', Building.getCellByCellNumber(long(10), float(-1.6), float(-20.8), float(23.4), float(0), float(0), float(0), float(0), 30)
-	shinn_guard12 = stcSvc.spawnObject('shinn_guard', 'tatooine', Building.getCellByCellNumber(long(10), float(4.6), float(-20.8), float(23.4), float(0), float(0), float(0), float(0), 30)
+	shinn_guard5 = stcSvc.spawnObject('shinn_guard', 'tatooine', Building.getCellByCellNumber(long(7)), float(-2.1), float(-13.8), float(6.8), float(0), float(0), float(0), float(0), 30)
+	shinn_guard6 = stcSvc.spawnObject('shinn_guard', 'tatooine', Building.getCellByCellNumber(long(7)), float(-6.8), float(-13.8), float(6.7), float(0), float(0), float(0), float(0), 30)
+	shinn_guard7 = stcSvc.spawnObject('shinn_guard', 'tatooine', Building.getCellByCellNumber(long(8)), float(1.5), float(-20.8), float(-3.5), float(0), float(0), float(0), float(0), 30)	
+	shinn_guard8 = stcSvc.spawnObject('shinn_guard', 'tatooine', Building.getCellByCellNumber(long(9)), float(-1.0), float(-20.7), float(11.0), float(0), float(0), float(0), float(0), 30)
+	shinn_guard9 = stcSvc.spawnObject('shinn_guard', 'tatooine', Building.getCellByCellNumber(long(9)), float(3.6), float(-20.7), float(11.4), float(0), float(0), float(0), float(0), 30)
+	shinn_guard10 = stcSvc.spawnObject('shinn_guard', 'tatooine', Building.getCellByCellNumber(long(9)), float(1.6), float(-20.7), float(4.7), float(0), float(0), float(0), float(0), 30)
+	shinn_guard11 = stcSvc.spawnObject('shinn_guard', 'tatooine', Building.getCellByCellNumber(long(10)), float(-1.6), float(-20.8), float(23.4), float(0), float(0), float(0), float(0), 30)
+	shinn_guard12 = stcSvc.spawnObject('shinn_guard', 'tatooine', Building.getCellByCellNumber(long(10)), float(4.6), float(-20.8), float(23.4), float(0), float(0), float(0), float(0), 30)
 
 	#temp until cellbycellname is fixed 
 	
