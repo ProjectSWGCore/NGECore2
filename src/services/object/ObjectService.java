@@ -249,9 +249,11 @@ public class ObjectService implements INetworkDispatch {
 			object = new TangibleObject(objectID, planet, position, orientation, Template);
 
 		} else if(Template.startsWith("object/intangible")) {
+			if (Template.equals("object/intangible/buy_back/shared_buy_back_container.iff")) // Container sends TANO baselines but is in intangible folder.. lolsoe.
+				object = new TangibleObject(objectID, planet, position, orientation, Template);
+			else
+				object = new IntangibleObject(objectID, planet, position, orientation,Template);
 			
-			object = new IntangibleObject(objectID, planet, position, orientation,Template);
-
 		} else if(Template.startsWith("object/weapon")) {
 			
 			object = new WeaponObject(objectID, planet, position, orientation, Template);
