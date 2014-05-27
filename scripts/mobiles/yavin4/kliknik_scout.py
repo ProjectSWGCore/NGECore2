@@ -6,23 +6,27 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('talus_nashal_brood10_arachne')
-	mobileTemplate.setLevel(45)
+	mobileTemplate.setCreatureName('kliknik_scout')
+	mobileTemplate.setLevel(77)
 	mobileTemplate.setDifficulty(0)
-	mobileTemplate.setAttackRange(5)
+	mobileTemplate.setAttackRange(12)
 	mobileTemplate.setAttackSpeed(1.0)
 	mobileTemplate.setWeaponType(6)
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)
-	mobileTemplate.setScale(2)
-	mobileTemplate.setSocialGroup("brood arachne")
+	mobileTemplate.setScale(1)
+	mobileTemplate.setMeatType("Carnivore Meat")
+	mobileTemplate.setMeatAmount(6)
+	mobileTemplate.setHideType("Scaley Hide")
+	mobileTemplate.setHideAmount(4)
+	mobileTemplate.setSocialGroup("kliknik")
 	mobileTemplate.setAssistRange(12)
-	mobileTemplate.setStalker(True)
+	mobileTemplate.setStalker(False)
 	mobileTemplate.setOptionsBitmask(192)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_razor_angler_hue.iff')
+	templates.add('object/mobile/shared_kliknik_hue.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
@@ -31,8 +35,8 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
-	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
+	mobileTemplate.setDefaultAttack('creatureRangedAttack')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('brood_x_arachne', mobileTemplate)
+	core.spawnService.addMobileTemplate('kliknik_scout', mobileTemplate)
 	return

@@ -6,8 +6,8 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('talus_nashal_brood10_arachne')
-	mobileTemplate.setLevel(45)
+	mobileTemplate.setCreatureName('feral_mutant_gackle_stalker')			
+	mobileTemplate.setLevel(62)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)
@@ -15,14 +15,20 @@ def addTemplate(core):
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)
-	mobileTemplate.setScale(2)
-	mobileTemplate.setSocialGroup("brood arachne")
+	mobileTemplate.setScale(1)
+	mobileTemplate.setMeatType("Avian Meat")
+	mobileTemplate.setMeatAmount(9)
+	mobileTemplate.setHideType("Leathery Hide")
+	mobileTemplate.setHideAmount(9)
+	mobileTemplate.setBoneType("Avian Bones")
+	mobileTemplate.setBoneAmount(9)
+	mobileTemplate.setSocialGroup("gacklebat")
 	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setStalker(True)
 	mobileTemplate.setOptionsBitmask(192)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_razor_angler_hue.iff')
+	templates.add('object/mobile/shared_gackle_bat_hue.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
@@ -34,5 +40,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('brood_x_arachne', mobileTemplate)
+	core.spawnService.addMobileTemplate('feral_mutant_gackle_stalker', mobileTemplate)
 	return

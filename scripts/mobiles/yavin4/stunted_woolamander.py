@@ -6,8 +6,8 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('talus_nashal_brood10_arachne')
-	mobileTemplate.setLevel(45)
+	mobileTemplate.setCreatureName('stunted_woolamander')			
+	mobileTemplate.setLevel(74)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)
@@ -15,14 +15,18 @@ def addTemplate(core):
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)
-	mobileTemplate.setScale(2)
-	mobileTemplate.setSocialGroup("brood arachne")
+	mobileTemplate.setScale(1)
+	mobileTemplate.setHideType("Wooly Hide")
+	mobileTemplate.setHideAmount(20)
+	mobileTemplate.setBoneType("Mammal Bones")
+	mobileTemplate.setBoneAmount(20)
+	mobileTemplate.setSocialGroup("woolamander")
 	mobileTemplate.setAssistRange(12)
-	mobileTemplate.setStalker(True)
+	mobileTemplate.setStalker(False)
 	mobileTemplate.setOptionsBitmask(192)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_razor_angler_hue.iff')
+	templates.add('object/mobile/shared_woolamander.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
@@ -34,5 +38,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('brood_x_arachne', mobileTemplate)
+	core.spawnService.addMobileTemplate('stunted_woolamander', mobileTemplate)
 	return

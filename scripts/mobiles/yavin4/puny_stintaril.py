@@ -6,8 +6,8 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('talus_nashal_brood10_arachne')
-	mobileTemplate.setLevel(45)
+	mobileTemplate.setCreatureName('puny_stintaril')			
+	mobileTemplate.setLevel(61)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)
@@ -15,14 +15,20 @@ def addTemplate(core):
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)
-	mobileTemplate.setScale(2)
-	mobileTemplate.setSocialGroup("brood arachne")
+	mobileTemplate.setScale(1)
+	mobileTemplate.setMeatType("Carnivore Meat")
+	mobileTemplate.setMeatAmount(2)
+	mobileTemplate.setHideType("Bristley Hide")
+	mobileTemplate.setHideAmount(1)
+	mobileTemplate.setBoneType("Mammal Bones")
+	mobileTemplate.setBoneAmount(1)
+	mobileTemplate.setSocialGroup("stintaril")
 	mobileTemplate.setAssistRange(12)
-	mobileTemplate.setStalker(True)
-	mobileTemplate.setOptionsBitmask(192)
+	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(128)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_razor_angler_hue.iff')
+	templates.add('object/mobile/shared_puny_stintaril.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
@@ -34,5 +40,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('brood_x_arachne', mobileTemplate)
+	core.spawnService.addMobileTemplate('puny_stintaril', mobileTemplate)
 	return
