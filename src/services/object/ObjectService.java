@@ -897,7 +897,8 @@ public class ObjectService implements INetworkDispatch {
 						}
 					}
 					
-					for (Integer roomId : ghost.getJoinedChatChannels()) {
+					List<Integer> joinedChannels = ghost.getJoinedChatChannels();
+					for (Integer roomId : joinedChannels) {
 						ChatRoom room = core.chatService.getChatRoom(roomId);
 						
 						if (room != null) { core.chatService.joinChatRoom(objectShortName, roomId); } 

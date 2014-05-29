@@ -70,13 +70,14 @@ public class GuildObject extends UniverseObject implements Serializable {
 		baseline.put("nextInstanceId", (long) 0);
 		baseline.put("zoneMap", new TreeMap<String, Map<String, CurrentServerGCWZonePercent>>());
 		baseline.put("serverFirst", new HashMap<String, ServerFirst>());
+		baseline.put("guilds", new TreeMap<Integer, Guild>());
 		return baseline;
 	}
 	
 	@Override
 	public Baseline getBaseline3() {
 		Baseline baseline = super.getBaseline3();
-		baseline.put("guildList", new SWGSet<Guild>(this, 3, 4, false));
+		baseline.put("guildList", new SWGSet<String>(this, 3, 4, false));
 		return baseline;
 	}
 	
@@ -94,8 +95,8 @@ public class GuildObject extends UniverseObject implements Serializable {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public SWGSet<Guild> getGuildList() {
-		return (SWGSet<Guild>) getBaseline(3).get("guildList");
+	public SWGSet<String> getGuildList() {
+		return (SWGSet<String>) getBaseline(3).get("guildList");
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -153,6 +154,13 @@ public class GuildObject extends UniverseObject implements Serializable {
 		synchronized(objectMutex) {
 			otherVariables.set("nextInstanceId", (long) (((long) otherVariables.get("nextInstanceId")) + 1L));
 			return (long) otherVariables.get("nextInstanceId");
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	public TreeMap<Integer, Guild> getGuilds() {
+		synchronized(objectMutex) {
+			return (TreeMap<Integer, Guild>) otherVariables.get("guilds");
 		}
 	}
 	
