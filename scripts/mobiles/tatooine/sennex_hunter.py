@@ -42,7 +42,7 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
-	mobileTemplate.setDefaultAttack('rangedshotrifle')
+	mobileTemplate.setDefaultAttack('rangedShotrifle')
 	mobileTemplate.setAttacks(attacks)
 	
 	core.spawnService.addMobileTemplate('sennex_hunter', mobileTemplate)
