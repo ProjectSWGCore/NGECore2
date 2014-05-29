@@ -119,7 +119,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		baseline.put("lifetimeGcwPoints", (long) 0);
 		baseline.put("lifetimePvpKills", 0);
 		baseline.put("collections", new BitSet()); 
-		baseline.put("17", new SWGList<Byte>(this, 3, 17, false)); // Misc ints (2 ints in tutorial, 5 bytes other times...)
+		baseline.put("guildRanks", new BitSet());  //"17", new SWGList<Byte>(this, 3, 17, false)); // Misc ints (2 ints in tutorial, 5 bytes other times...)
 		baseline.put("showHelmet", true);
 		baseline.put("showBackpack", true);
 		return baseline;
@@ -399,6 +399,16 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	
 	public int getHighestSetBit() {
 		return ((BitSet) getBaseline(3).get("collections")).length();
+	}
+	
+	public boolean getGuildRank(int slotIndex) {
+		return ((BitSet) getBaseline(3).get("guildRanks")).get(slotIndex);
+	}
+	
+	public void toggleGuildRank(int slotIndex) {
+		BitSet guildRanks = (BitSet) getBaseline(3).get("guildRanks");
+		guildRanks.set(slotIndex, !guildRanks.get(slotIndex));
+		getBaseline(3).set("guildRanks", guildRanks);
 	}
 	
 	public boolean isShowingHelmet() {

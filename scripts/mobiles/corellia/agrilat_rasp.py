@@ -25,7 +25,7 @@ def addTemplate(core):
 	mobileTemplate.setStalker(False)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_horned_rasp.iff')
+	templates.add('object/mobile/shared_plumed_rasp.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
