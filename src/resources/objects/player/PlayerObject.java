@@ -401,6 +401,10 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		return ((BitSet) getBaseline(3).get("collections")).length();
 	}
 	
+	public boolean getGuildRank(int slotIndex) {
+		return ((BitSet) getBaseline(3).get("guildRanks")).get(slotIndex);
+	}
+	
 	public void toggleGuildRank(int slotIndex) {
 		BitSet guildRanks = (BitSet) getBaseline(3).get("guildRanks");
 		guildRanks.set(slotIndex, !guildRanks.get(slotIndex));
