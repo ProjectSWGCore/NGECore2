@@ -31,22 +31,33 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import protocol.swg.PlayClientEffectObjectTransformMessage;
 import protocol.swg.SceneCreateObjectByCrc;
+import resources.common.OutOfBand;
+import resources.datatables.DisplayType;
 import resources.loot.LootGroup;
 import resources.loot.LootRollSession;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
+import resources.objects.intangible.IntangibleObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
+import services.sui.SUIService.ListBoxType;
+import services.sui.SUIService.MessageBoxType;
+import services.sui.SUIWindow;
+import services.sui.SUIWindow.SUICallback;
+import services.sui.SUIWindow.Trigger;
 import main.NGECore;
+import engine.resources.common.Stf;
 import engine.resources.container.CreatureContainerPermissions;
 import engine.resources.container.Traverser;
 import engine.resources.objects.SWGObject;
@@ -212,6 +223,252 @@ public class LootService implements INetworkDispatch {
 	    // ToDo: Group loot settings etc.  actual loot chance was lootgroupchance*lootchance    
 	}
 	
+	public void handleJunkDealerSellWindow(CreatureObject actor, SWGObject junkDealer, Vector<SWGObject> sellableItems) {
+		
+		if (sellableItems.size() == 0) {
+			SUIWindow notInterestedWindow = core.suiService.createMessageBox(MessageBoxType.MESSAGE_BOX_OK, "@loot_dealer:sell_title", "@loot_dealer:no_items", actor, junkDealer, (float) 10);
+			core.suiService.openSUIWindow(notInterestedWindow);
+			return;
+		}
+		
+		Map<Long, String> itemsToSell = new HashMap<Long, String>();
+		sellableItems.forEach(obj -> {
+			if (!((TangibleObject)obj).isNoSell()) {
+				int price = ((TangibleObject) obj).getJunkDealerPrice();
+				if (((TangibleObject) obj).getUses() > 0) { price = price * ((TangibleObject) obj).getUses(); }
+				
+				itemsToSell.put(obj.getObjectID(), "[" + price + "] " + obj.getCustomName());
+			}
+		});
+		
+		if (itemsToSell.size() == 0) { // Every item is in the sellable's vector, however only items the player is offering gets put in list.
+			SUIWindow notInterestedWindow = core.suiService.createMessageBox(MessageBoxType.MESSAGE_BOX_OK, "@loot_dealer:sell_title", "@loot_dealer:no_items", actor, junkDealer, (float) 10);
+			core.suiService.openSUIWindow(notInterestedWindow);
+			return;
+		}
+		
+		final SUIWindow window = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "@loot_dealer:sell_title", "@loot_dealer:sell_prompt", itemsToSell, actor, junkDealer, (float) 10);
+		
+		window.setProperty("btnOther:Visible", "True");
+		window.setProperty("btnOther:Text", "@loot_dealer:examine");
+		window.setProperty("btnOk:Text", "@loot_dealer:btn_sell");
+		
+		Vector<String> returnList = new Vector<String>();
+		returnList.add("List.lstList:SelectedRow");
+		
+		SUICallback windowCallback = ((owner, eventType, resultList) -> {
+			switch(eventType) {
+				case 0: // Sell
+					TangibleObject itemToSell = null;
+					int index = Integer.parseInt(resultList.get(0));
+					long sellItemId = window.getObjectIdByIndex(index);
+					
+					if(sellItemId == 0 || core.objectService.getObject(sellItemId) == null)
+						return;
+					
+					itemToSell = (TangibleObject) core.objectService.getObject(sellItemId);
+					
+					int price = itemToSell.getJunkDealerPrice();
+					
+					if (price == 0)
+						price = 20;
+					
+					if (itemToSell.getUses() > 0)
+						price *= itemToSell.getUses();
+					
+					TangibleObject inventory = (TangibleObject) actor.getSlottedObject("inventory");
+					
+					if (inventory == null)
+						return;
+					
+					addToBuyBack(actor, itemToSell);
+					
+					actor.addCashCredits(price);
+					actor.sendSystemMessage(OutOfBand.ProsePackage("@junk_dealer:prose_sold_junk", "TT", itemToSell.getCustomName(), "DI", price), DisplayType.Broadcast);
+					
+					inventory.remove(itemToSell);
+					
+					core.suiService.closeSUIWindow(actor, window.getWindowId());
+					handleJunkDealerSellWindow(actor, junkDealer, getSellableInventoryItems(actor));
+					break;
+				case 1: // Cancel
+					core.suiService.closeSUIWindow(actor, window.getWindowId());
+					break;
+				case 2: // TODO: Show Examine Window for objects - Junk Dealer (/examine command?)
+					break;
+			}
+		});
+		
+		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, windowCallback);
+		window.addHandler(1, "", Trigger.TRIGGER_CANCEL, returnList, windowCallback);
+		window.addHandler(2, "", Trigger.TRIGGER_UPDATE, returnList, windowCallback);
+
+		core.suiService.openSUIWindow(window);
+	
+	}
+	
+	public void handleJunkDealerBuyBackWindow(CreatureObject actor, SWGObject junkDealer) {
+		
+		TangibleObject bbContainer = (TangibleObject) core.objectService.getObject((long) actor.getAttachment("buy_back"));
+		Map<Long, String> soldItems = new HashMap<Long, String>();
+		bbContainer.viewChildren(actor, false, false, (obj) -> {
+			int price = ((TangibleObject) obj).getJunkDealerPrice();
+			if (((TangibleObject) obj).getUses() > 0) { price = price * ((TangibleObject) obj).getUses(); }
+			
+			soldItems.put(obj.getObjectID(), "[" + price + "] " + obj.getCustomName());
+		});
+		
+		final SUIWindow window = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "@loot_dealer:buy_back_title", "@loot_dealer:buy_back_prompt", soldItems, actor, junkDealer, (float) 10);
+		window.setProperty("btnOther:Visible", "True");
+		window.setProperty("btnOther:Text", "@loot_dealer:examine");
+		window.setProperty("btnOk:Text", "@loot_dealer:btn_buy_back");
+		
+		Vector<String> returnList = new Vector<String>();
+		returnList.add("List.lstList:SelectedRow");
+		
+		SUICallback windowCallback = ((owner, eventType, resultList) -> {
+			switch(eventType) {
+				case 0: // Buy Back
+					TangibleObject retrieveItem = null;
+					int index = Integer.parseInt(resultList.get(0));
+					long retrieveItemId = window.getObjectIdByIndex(index);
+					
+					if(retrieveItemId == 0 || core.objectService.getObject(retrieveItemId) == null) {
+						actor.sendSystemMessage("@loot_dealer:no_buy_back_items_found", DisplayType.Broadcast);
+						return;
+					}
+					
+					retrieveItem = (TangibleObject) core.objectService.getObject(retrieveItemId);
+					
+					if (actor.getInventoryItemCount() >= 80) {
+						actor.sendSystemMessage("@loot_dealer:no_space_in_inventory", DisplayType.Broadcast);
+						return;
+					}
+
+					TangibleObject inventory = (TangibleObject) actor.getSlottedObject("inventory");
+					
+					if (inventory == null)
+						return;
+					
+					int value = retrieveItem.getJunkDealerPrice();
+					
+					if (retrieveItem.getUses() > 0)
+						value *= retrieveItem.getUses();
+					
+					if (actor.getCashCredits() < value) {
+						actor.sendSystemMessage(OutOfBand.ProsePackage("@loot_dealer:prose_no_buy_back", "TT", retrieveItem.getCustomName()), DisplayType.Broadcast);
+						return;
+					}
+					
+					actor.deductCashCredits(value);
+
+					actor.sendSystemMessage(OutOfBand.ProsePackage("@base_player:prose_pay_success", "DI", value, "TT", "a Junk Dealer"), DisplayType.Broadcast);
+
+					bbContainer.transferTo(actor, inventory, retrieveItem);
+					actor.sendSystemMessage(OutOfBand.ProsePackage("@loot_dealer:prose_buy_back_junk", "DI", value, "TT", retrieveItem.getCustomName()), DisplayType.Broadcast);
+					
+					core.suiService.closeSUIWindow(actor, window.getWindowId());
+					
+					handleJunkDealerBuyBackWindow(actor, junkDealer);
+					break;
+				case 1: // Cancel
+					break;
+				case 2: // TODO: Show Examine Window for objects - Junk Dealer (/examine command?)
+					break;
+			}
+		});
+		
+		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, windowCallback);
+		window.addHandler(1, "", Trigger.TRIGGER_CANCEL, returnList, windowCallback);
+		window.addHandler(2, "", Trigger.TRIGGER_UPDATE, returnList, windowCallback);
+		core.suiService.openSUIWindow(window);
+	}
+	
+	public void handleJunkDealerMarkItems(CreatureObject actor, SWGObject junkDealer) {
+
+		Vector<SWGObject> sellableItems = getSellableInventoryItems(actor);
+		
+		if (sellableItems.size() == 0) {
+			SUIWindow notFoundWindow = core.suiService.createMessageBox(MessageBoxType.MESSAGE_BOX_OK, 
+					"@loot_dealer:junk_not_found_title", "@loot_dealer:junk_not_found_description", actor, junkDealer, (float) 10);
+			core.suiService.openSUIWindow(notFoundWindow);
+			return;
+		}
+		
+		Map<Long, String> markableItems = new HashMap<Long, String>();
+		sellableItems.forEach(obj -> {
+			if (((TangibleObject) obj).isNoSell()) markableItems.put(obj.getObjectID(), "[ *No Sell* ] " + obj.getCustomName());	 
+			else markableItems.put(obj.getObjectID(), "[ Sellable ] " + obj.getCustomName());
+		});
+		
+		final SUIWindow window = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "@loot_dealer:junk_no_sell_title", "@loot_dealer:junk_no_sell_description", 
+				markableItems, actor, junkDealer, (float) 10);
+		
+		window.setProperty("btnOther:visible", "True");
+		window.setProperty("btnOther:Text", "@loot_dealer:examine");
+		window.setProperty("btnOk:Text", "@loot_dealer:junk_no_sell_button");
+		
+		Vector<String> returnList = new Vector<String>();
+		returnList.add("List.lstList:SelectedRow");
+		
+		SUICallback windowCallback = ((owner, eventType, resultList) -> {
+			switch(eventType) {
+				case 0:
+					TangibleObject markItem = null;
+					int index = Integer.parseInt(resultList.get(0));
+					long markItemId = window.getObjectIdByIndex(index);
+					
+					if(markItemId == 0 || core.objectService.getObject(markItemId) == null)
+						return;
+					
+					markItem = (TangibleObject) core.objectService.getObject(markItemId);
+					
+					if (markItem.isNoSell()) markItem.setNoSell(false);
+					else markItem.setNoSell(true);
+					
+					core.suiService.closeSUIWindow(actor, window.getWindowId());
+					handleJunkDealerMarkItems(actor, junkDealer);
+					break;
+				case 1: // Cancel
+					break;
+				case 2: // TODO: Show Examine Window for objects - Junk Dealer (/examine command?)
+					break;
+			}
+		});
+		
+		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, windowCallback);
+		window.addHandler(1, "", Trigger.TRIGGER_CANCEL, returnList, windowCallback);
+		window.addHandler(2, "", Trigger.TRIGGER_UPDATE, returnList, windowCallback);
+		
+		core.suiService.openSUIWindow(window);
+	}
+
+	public void addToBuyBack(CreatureObject actor, TangibleObject item) {
+		if (actor.getAttachment("buy_back") == null)
+			createBuyBackDevice(actor);
+		
+		TangibleObject buyBackContainer = (TangibleObject) core.objectService.getObject((long) actor.getAttachment("buy_back"));
+		
+		if (buyBackContainer == null) {
+			createBuyBackDevice(actor);
+			addToBuyBack(actor, item);
+			return;
+		}
+		
+		buyBackContainer.transferTo(actor, buyBackContainer, item);
+
+		final AtomicInteger count = new AtomicInteger();
+		
+		buyBackContainer.viewChildren(actor, false, true, new Traverser() {
+
+			@Override
+			public void process(SWGObject child) {
+				if (count.incrementAndGet() >= 11) {
+					core.objectService.destroyObject(child); // This obj should be the last added object (top-down), so it's safe to remove it.
+				}
+			}
+		});
+	}
 	
 	private void handleLootGroup(LootGroup lootGroup,LootRollSession lootRollSession){
 		
@@ -1605,59 +1862,21 @@ public class LootService implements INetworkDispatch {
 		return true;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public Vector<TangibleObject> getBuyHistory(CreatureObject actor, CreatureObject dealer){			
-		LinkedHashMap<Long,TangibleObject[]> businessHistory = (LinkedHashMap<Long,TangibleObject[]> )dealer.getAttachment("BusinessHistory");		
-		if (businessHistory==null){
-			businessHistory = new LinkedHashMap<Long,TangibleObject[]>();	
-			dealer.setAttachment("BusinessHistory",businessHistory);		
-		}
+	public void createBuyBackDevice(CreatureObject actor) {
+		TangibleObject datapad = (TangibleObject) actor.getSlottedObject("datapad");
+		if (datapad == null)
+			return;
 		
-		TangibleObject[] actorsBuyHistory = businessHistory.get(actor.getObjectID());
-		if (actorsBuyHistory==null)
-			return new Vector<TangibleObject>();
+		IntangibleObject device = (IntangibleObject) core.objectService.createObject("object/intangible/buy_back/shared_buy_back_control_device.iff", actor.getPlanet());
+		datapad.add(device);
 		
-		Vector<TangibleObject> actorHistory = new Vector<TangibleObject>();
-		for (TangibleObject item : actorsBuyHistory){
-			if (item!=null)
-				actorHistory.add(item);
-		}
-		return actorHistory;
-	}
-	
-	@SuppressWarnings("unchecked")
-	public boolean addToBuyHistory(CreatureObject actor, CreatureObject dealer, TangibleObject item){			
-		LinkedHashMap<Long,TangibleObject[]> businessHistory = (LinkedHashMap<Long,TangibleObject[]> )dealer.getAttachment("BusinessHistory");		
-		if (businessHistory==null){
-			businessHistory = new LinkedHashMap<Long,TangibleObject[]>();		
-			dealer.setAttachment("BusinessHistory",businessHistory);		
-		}
+		TangibleObject container = (TangibleObject) core.objectService.createObject("object/intangible/buy_back/shared_buy_back_container.iff", actor.getPlanet());
+		container.setStaticObject(false);
+		container.setContainerPermissions(CreatureContainerPermissions.CREATURE_CONTAINER_PERMISSIONS);
 
-		TangibleObject[] actorsBuyHistory = businessHistory.get(actor.getObjectID());
-		if (actorsBuyHistory==null){
-			actorsBuyHistory = new TangibleObject[10];
-			actorsBuyHistory[0] = item;
-		} else {
-			// Check Array for zeros
-			int lastObject=0;
-			for (int i=0;i<actorsBuyHistory.length;i++){
-				if (actorsBuyHistory[i]!=null)
-					lastObject=i;
-			}
-			if (lastObject==actorsBuyHistory.length-1){
-				//>>shift right and add
-				for (int i = 8; i >= 0; i--) {                
-					actorsBuyHistory[i+1] = actorsBuyHistory[i];
-				}
-				actorsBuyHistory[0] = item;
-			} else {
-				actorsBuyHistory[lastObject+1] = item;
-			}	
-		}		
-		businessHistory.put(actor.getObjectID(),actorsBuyHistory);
-		dealer.setAttachment("BusinessHistory",businessHistory);			
-		//printArrayElements(actorsBuyHistory);
-		return true;
+		device.add(container);
+		
+		actor.setAttachment("buy_back", container.getObjectID()); // We can use device.getSlottedObject("inventory"), but this way we won't have to traverse..
 	}
 	
 	@SuppressWarnings("unchecked")

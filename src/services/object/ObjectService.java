@@ -46,8 +46,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import resources.common.*;
+import resources.datatables.DisplayType;
 import resources.datatables.Options;
 import resources.datatables.PlayerFlags;
+import resources.guild.Guild;
 import resources.harvest.SurveyTool;
 
 import org.apache.mina.core.buffer.IoBuffer;
@@ -247,9 +249,11 @@ public class ObjectService implements INetworkDispatch {
 			object = new TangibleObject(objectID, planet, position, orientation, Template);
 
 		} else if(Template.startsWith("object/intangible")) {
+			if (Template.equals("object/intangible/buy_back/shared_buy_back_container.iff")) // Container sends TANO baselines but is in intangible folder.. lolsoe.
+				object = new TangibleObject(objectID, planet, position, orientation, Template);
+			else
+				object = new IntangibleObject(objectID, planet, position, orientation,Template);
 			
-			object = new IntangibleObject(objectID, planet, position, orientation,Template);
-
 		} else if(Template.startsWith("object/weapon")) {
 			
 			object = new WeaponObject(objectID, planet, position, orientation, Template);
@@ -902,8 +906,15 @@ public class ObjectService implements INetworkDispatch {
 					}
 				}
 				
-				if(!core.getConfig().getString("MOTD").equals(""))
-					creature.sendSystemMessage(core.getConfig().getString("MOTD"), (byte) 2);
+				creature.sendSystemMessage(core.getMotd(), DisplayType.Chat);
+				
+				if (creature.getGuildId() != 0) {
+					Guild guild = core.guildService.getGuildById(creature.getGuildId());
+					
+					if (guild != null && guild.getMembers().containsKey(creature.getObjectID())) {
+						core.guildService.sendGuildMotd(creature, guild);
+					}
+				}
 				
 				if (core.getBountiesODB().contains(creature.getObjectID()))
 					core.missionService.getBountyMap().put(creature.getObjectID(), (BountyListItem) core.getBountiesODB().get(creature.getObjectID()));

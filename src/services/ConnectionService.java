@@ -241,13 +241,6 @@ public class ConnectionService implements INetworkDispatch {
 			
 			core.chatService.playerStatusChange(objectShortName, (byte) 0);
 			
-			for (Integer roomId : ghost.getJoinedChatChannels()) {
-				ChatRoom room = core.chatService.getChatRoom(roomId.intValue());
-				
-				if (room != null) { core.chatService.leaveChatRoom(object, roomId.intValue()); } 
-				// work-around for any channels that may have been deleted, or only spawn on server startup, that were added to the joined channels
-				else { ghost.removeChannel(roomId); } 
-			}
 		}
 				
 		long parentId = object.getParentId();

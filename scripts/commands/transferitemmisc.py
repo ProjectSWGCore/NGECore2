@@ -13,7 +13,7 @@ def run(core, actor, target, commandString):
         
         if container == None: return
         
-        if(container.isFull()):
+        if not 'cell' in container.getTemplate() and container.isFull():
             actor.sendSystemMessage('@container_error_message:container03', 0)
             return
 

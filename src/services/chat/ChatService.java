@@ -48,6 +48,7 @@ import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import resources.common.*;
 import resources.datatables.DisplayType;
+import resources.guild.Guild;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import protocol.swg.AddIgnoreMessage;
@@ -262,9 +263,31 @@ public class ChatService implements INetworkDispatch {
 				
 				if(sender == null)
 					return;
-				// TODO: Recipient handling for values: citizens, group, guild, guild ranks (ace, boot, admiral, etc.) - Nulls at this point atm
-				SWGObject recipient = getObjectByFirstName(packet.getRecipient());
+				// TODO: Recipient handling for values: citizens, group, guild ranks (ace, boot, admiral, etc.)
 				
+				if (packet.getRecipient().equals("guild")) {
+					Guild guild = core.guildService.getGuildById(((CreatureObject) sender).getGuildId());
+					if (guild == null || !guild.getMembers().containsKey(sender.getObjectID())) {
+						ChatOnSendPersistentMessage response = new ChatOnSendPersistentMessage(4, packet.getCounter());
+						session.write(response.serialize());
+						return;
+					}
+					
+					if (!guild.getMember(sender.getObjectID()).hasMailPermission()) {
+						((CreatureObject) sender).sendSystemMessage("@guild:generic_fail_no_permission", (byte) 0);
+						ChatOnSendPersistentMessage response = new ChatOnSendPersistentMessage(4, packet.getCounter());
+						session.write(response.serialize());
+						return;
+					}
+					guild.sendGuildMail(sender.getCustomName(), packet.getSubject(), packet.getMessage());
+					
+					ChatOnSendPersistentMessage response = new ChatOnSendPersistentMessage(0, packet.getCounter());
+					session.write(response.serialize());
+					return;
+				}
+				
+				SWGObject recipient = getObjectByFirstName(packet.getRecipient());
+
 				PlayerObject recipientGhost = (PlayerObject) recipient.getSlottedObject("ghost");
 				
 				if (recipientGhost.getIgnoreList().contains(sender.getCustomName().toLowerCase())) 
@@ -941,7 +964,9 @@ public class ChatService implements INetworkDispatch {
 			}
 			
 			room.addUser(user.toLowerCase());
-			((CreatureObject) player).getPlayerObject().addChannel(roomId);
+			if (!((CreatureObject) player).getPlayerObject().isMemberOfChannel(roomId)) {
+				((CreatureObject) player).getPlayerObject().addChannel(roomId);
+			}
 			return true;
 		}
 		return false;
@@ -975,7 +1000,7 @@ public class ChatService implements INetworkDispatch {
 			}
 		});
 		
-		((PlayerObject) player.getSlottedObject("ghost")).removeChannel(roomId);
+		((PlayerObject) player.getSlottedObject("ghost")).removeChannel((Integer) roomId);
 	}
 	
 	public void sendChatRoomMessage(CreatureObject sender, int roomId, int msgId, String message) {

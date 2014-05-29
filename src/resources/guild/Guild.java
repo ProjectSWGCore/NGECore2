@@ -22,10 +22,8 @@
 package resources.guild;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import main.NGECore;
@@ -47,20 +45,20 @@ public class Guild extends Delta implements Serializable, Comparable<Guild> {
 	private String leaderName;
 	private Map<Long, GuildMember> members = new HashMap<Long, GuildMember>();
 	private Map<Long, String> sponsoredPlayers = new HashMap<Long, String>();
+	private String motd;
+	
 	public Guild(int id, String abbreviation, String name, SWGObject leader) {
 		this.id = id;
 		this.abbreviation = abbreviation;
 		this.name = name;
 		this.leader = leader.getObjectID();
 		this.leaderName = leader.getCustomName();
-		//this.members.add(leader.getObjectID());
-		//this.sponsors.add(leader.getObjectID());
 	}
 	
 	public Guild() { }
 	
 	public GuildMember addMember(long objID) {
-		GuildMember member = new GuildMember();
+		GuildMember member = new GuildMember(objID);
 		members.put(objID, member);
 		return member;
 	}
@@ -145,6 +143,14 @@ public class Guild extends Delta implements Serializable, Comparable<Guild> {
 		}
 	}
 	
+	public String getMotd() {
+		return motd;
+	}
+
+	public void setMotd(String motd) {
+		this.motd = motd;
+	}
+
 	public Map<Long, GuildMember> getMembers() {
 		return members;
 	}

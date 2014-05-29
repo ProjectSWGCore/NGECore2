@@ -21,7 +21,10 @@
  ******************************************************************************/
 package main;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -140,7 +143,7 @@ public class NGECore {
 	private static NGECore instance;
 	
 	private Config config = null;
-
+	private String motd = "";
 	private volatile boolean isShuttingDown = false;
 	private long galacticTime = System.currentTimeMillis();
 	
@@ -272,6 +275,12 @@ public class NGECore {
 			System.out.println("Cleaned ODB Folders.");
 		}
 		
+		try(BufferedReader br = new BufferedReader(new FileReader("./motd.txt"))) {
+			for(String line; (line = br.readLine()) != null;) {
+				motd += line;
+			}
+		} catch (IOException e1) { e1.printStackTrace(); }
+
 		// Database
 		databaseConnection = new DatabaseConnection();
 		databaseConnection.connect(config.getString("DB.URL"), config.getString("DB.NAME"), config.getString("DB.USER"), config.getString("DB.PASS"), "postgresql");
@@ -774,6 +783,12 @@ public class NGECore {
 		auctionODB.close();
 	}
 
-	
+	public String getMotd() {
+		return motd;
+	}
+
+	public void setMotd(String motd) {
+		this.motd = motd;
+	}
 }
 

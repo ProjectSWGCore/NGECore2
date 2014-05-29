@@ -811,6 +811,13 @@ public class SimulationService implements INetworkDispatch {
 		
 		core.mountService.storeAll(object);
 		
+		/*for (Integer roomId : ghost.getJoinedChatChannels()) { // TODO: Fix Concurrency error
+			ChatRoom room = core.chatService.getChatRoom(roomId.intValue());
+			
+			if (room != null) { core.chatService.leaveChatRoom(object, roomId.intValue()); } 
+			// work-around for any channels that may have been deleted, or only spawn on server startup, that were added to the joined channels
+			else { ghost.removeChannel(roomId); } 
+		}*/
 		/*
 		object.createTransaction(core.getCreatureODB().getEnvironment());
 		core.getCreatureODB().put(object, Long.class, CreatureObject.class, object.getTransaction());
