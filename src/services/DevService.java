@@ -93,6 +93,7 @@ public class DevService implements INetworkDispatch {
 					suiOptions.put((long) 125, "Crafting Tools");
 					suiOptions.put((long) 130, "Vehicle Deeds");
 					suiOptions.put((long) 121, "Sandbox City");
+					suiOptions.put((long) 177, "REing");
 				}
 
 				break;
@@ -1307,6 +1308,13 @@ public class DevService implements INetworkDispatch {
 					case 153:
 						Point3D position = new Point3D(-6222,1,7380);
 						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("dantooine"), position, player.getOrientation(), null);
+						
+					case 177:
+						// "object/draft_schematic/item/shared_item_reverse_engineering_tool.iff"
+						TangibleObject REingTool = (TangibleObject) core.objectService.createObject("object/tangible/container/loot/shared_reverse_engineer_tool.iff", planet);						
+						REingTool.setCustomName("Reverse Engineering Tool");
+						inventory.add(REingTool);	
+						return;
 				}
 			}	
 		});
