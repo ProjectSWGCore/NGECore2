@@ -51,8 +51,6 @@ def addTemplate(core):
 	weaponTemplates = Vector()
 	weapontemplate = WeaponTemplate('object/weapon/melee/unarmed/shared_unarmed_default.iff', 6, 1.0)
 	weaponTemplates.add(weapontemplate)
-	weapontemplate = WeaponTemplate('object/weapon/melee/polearm/shared_lance_staff_janta.iff', 6, 1.0)
-	weaponTemplates.add(weapontemplate)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
