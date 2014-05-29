@@ -32,7 +32,6 @@ def addTemplate(core):
 
 	attacks = Vector()
 	mobileTemplate.setDefaultAttack('rangedShot')
-	attacks.add('meleeHit')
 	mobileTemplate.setAttacks(attacks)
 	
 	core.spawnService.addMobileTemplate('heroic_mos_eisley_police_officer', mobileTemplate)

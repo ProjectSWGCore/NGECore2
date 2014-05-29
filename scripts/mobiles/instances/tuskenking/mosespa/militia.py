@@ -6,9 +6,9 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('heroic_tusken_kav_goldor')
+	mobileTemplate.setCreatureName('heroic_tusken_mos_espa_militia')
 	mobileTemplate.setLevel(90)
-	mobileTemplate.setDifficulty(2)
+	mobileTemplate.setDifficulty(1)
 	mobileTemplate.setAttackRange(12)
 	mobileTemplate.setAttackSpeed(1.0)
 	mobileTemplate.setWeaponType(2)
@@ -22,7 +22,8 @@ def addTemplate(core):
 	mobileTemplate.setOptionsBitmask(128)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_heroic_tusken_kav_golder.iff')
+	templates.add('object/mobile/shared_dressed_tatooine_militiaman.iff')
+	
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
@@ -34,5 +35,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('rangedShot')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('heroic_kav_golder', mobileTemplate)
+	core.spawnService.addMobileTemplate('heroic_tusken_mos_espa_militia', mobileTemplate)
 	return

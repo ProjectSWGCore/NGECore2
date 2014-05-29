@@ -6,9 +6,9 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('heroic_tusken_kav_goldor')
+	mobileTemplate.setCreatureName('heroic_tusken_flight_crew')
 	mobileTemplate.setLevel(90)
-	mobileTemplate.setDifficulty(2)
+	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(12)
 	mobileTemplate.setAttackSpeed(1.0)
 	mobileTemplate.setWeaponType(2)
@@ -22,7 +22,12 @@ def addTemplate(core):
 	mobileTemplate.setOptionsBitmask(128)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_heroic_tusken_kav_golder.iff')
+	templates.add('object/mobile/shared_miner_pilot.iff')
+	templates.add('object/mobile/shared_space_newbie_generic_pilot_male_01.iff')
+	templates.add('object/mobile/shared_dressed_royal_pilot_human_male_01.iff')
+	templates.add('object/mobile/shared_dressed_royal_pilot_human_female_01.iff')
+	templates.add('object/mobile/shared_dressed_bth_spynet_pilot_f_01.iff')
+	templates.add('object/mobile/shared_dressed_bth_spynet_pilot_m_02.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
@@ -34,5 +39,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('rangedShot')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('heroic_kav_golder', mobileTemplate)
+	core.spawnService.addMobileTemplate('heroic_tusken_flight_crew', mobileTemplate)
 	return

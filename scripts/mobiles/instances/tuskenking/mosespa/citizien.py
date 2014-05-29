@@ -99,8 +99,7 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 
 	attacks = Vector()
-	mobileTemplate.setDefaultAttack('rangedShot')
-	attacks.add('meleeHit')
+	mobileTemplate.setDefaultAttack('meleeHit')
 	mobileTemplate.setAttacks(attacks)
 	
 	core.spawnService.addMobileTemplate('heroic_mos_espa_citizen', mobileTemplate)
