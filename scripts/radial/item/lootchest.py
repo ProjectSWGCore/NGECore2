@@ -8,6 +8,9 @@ def createRadial(core, owner, target, radials):
 	
 def handleSelection(core, owner, target, option):
 	if option == 21 and target:
-		owner.sendSystemMessage('RLS chest content system not yet implemented.',1)
+		#core.simulationService.openContainer(owner, target.getSlottedObject("inventory"))
+		#core.simulationService.openContainer(owner, target.getSlottedObject('default'))
+		core.simulationService.openContainer(owner, target)
+	
 	return
 	

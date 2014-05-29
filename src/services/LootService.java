@@ -47,6 +47,9 @@ import resources.objects.group.GroupObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 import main.NGECore;
+import engine.clientdata.ClientFileManager;
+import engine.clientdata.visitors.SlotArrangementVisitor;
+import engine.resources.container.AllPermissions;
 import engine.resources.container.CreatureContainerPermissions;
 import engine.resources.container.Traverser;
 import engine.resources.objects.SWGObject;
@@ -154,15 +157,23 @@ public class LootService implements INetworkDispatch {
 	    }
 	    System.out.println("Past while ");
 	    
-	    // Rare Loot System Stage (Is in place for all looted creatures)
-		if (lootRollSession.isAllowRareLoot()){
+	    // Rare Loot System Stage (Is in place for all looted creatures with 6 CL difference)
+		//if (lootRollSession.isAllowRareLoot()){
+		if (true){
 			int randomRareLoot = new Random().nextInt(100);
 			int chanceRequirement = 1; 
+			if (lootRollSession.getLootedObjectDifficulty()==1)
+				chanceRequirement+=2;
+			if (lootRollSession.getLootedObjectDifficulty()==2)
+				chanceRequirement+=3;			
 			if (lootRollSession.isIncreasedRLSChance())
-				chanceRequirement+=3; // RLS chance is at 4% for groupsize >= 4
+				chanceRequirement+=3; 
 			if (randomRareLoot <= chanceRequirement){ 
 				handleRareLootChest(lootRollSession);
 			}
+			
+			// to test:
+			handleRareLootChest(lootRollSession);
 		}
 		
 	    // set info above corpse
@@ -197,6 +208,7 @@ public class LootService implements INetworkDispatch {
     	for (TangibleObject droppedItem : lootRollSession.getDroppedItems()){		    
     		
     		//droppedItem.setAttachment("radial_filename", "lootitem");
+    		//if (! droppedItem.getTemplate().contains("shared_rare_loot_chest"))
     		lootedObjectInventory.add(droppedItem);
     		  		
     		// RLS chest effect
@@ -503,7 +515,7 @@ public class LootService implements INetworkDispatch {
 			droppedItem.setDetailName("rare_loot_chest_3_d");
 			droppedItem.setAttachment("LootItemName", itemName);
 			droppedItem.getAttributes().put("@obj_attr_n:rare_loot_category", "\\#D1F56F Rare Item \\#FFFFFF ");
-			fillLegendaryChest(droppedItem);
+			fillLegendaryChest(droppedItem, lootRollSession);
 			
 		} else if (exceptionalRoll<10+chancemodifier){
 			String itemTemplate="object/tangible/item/shared_rare_loot_chest_2.iff";
@@ -515,7 +527,7 @@ public class LootService implements INetworkDispatch {
 			droppedItem.setDetailName("rare_loot_chest_2_d");
 			droppedItem.setAttachment("LootItemName", itemName);
 			droppedItem.getAttributes().put("@obj_attr_n:rare_loot_category", "\\#D1F56F Rare Item \\#FFFFFF ");
-			fillExceptionalChest(droppedItem);
+			fillExceptionalChest(droppedItem, lootRollSession);
 		} else {
 			String itemTemplate="object/tangible/item/shared_rare_loot_chest_1.iff";
 			droppedItem = createDroppedItem(itemTemplate,lootRollSession.getSessionPlanet());
@@ -526,21 +538,301 @@ public class LootService implements INetworkDispatch {
 			droppedItem.setDetailName("rare_loot_chest_1_d");
 			droppedItem.setAttachment("LootItemName", itemName);
 			droppedItem.getAttributes().put("@obj_attr_n:rare_loot_category", "\\#D1F56F Rare Item \\#FFFFFF ");
-			fillRareChest(droppedItem);
+			fillRareChest(droppedItem, lootRollSession);
 		}
 
 		lootRollSession.addDroppedItem(droppedItem);
 	}
 	
-	private void fillLegendaryChest(TangibleObject droppedItem){
+	private void fillLegendaryChest(TangibleObject chest, LootRollSession lootRollSession){
 		
 	}
 	
-	private void fillExceptionalChest(TangibleObject droppedItem){
+	private void fillExceptionalChest(TangibleObject chest, LootRollSession lootRollSession){
 		
 	}
 
-	private void fillRareChest(TangibleObject droppedItem){
+	private void fillRareChest(TangibleObject chest, LootRollSession lootRollSession){
+		System.out.println("FILL RARE LOOT CHEST");
+		List<LootGroup> lootGroups = new ArrayList<LootGroup>();
+		String[] lootPoolNames = new String[]{"Junk"};
+		double[] lootPoolChances = new double[]{100};
+		int lootGroupChance = 100;
+		LootGroup singleLootGroup = new LootGroup(lootPoolNames, lootPoolChances, lootGroupChance);
+		lootGroups.add(singleLootGroup);
+		Iterator<LootGroup> iterator = lootGroups.iterator();
+		 
+	    while (iterator.hasNext()){
+	    	LootGroup lootGroup = iterator.next();
+	    	double groupChance = lootGroup.getLootGroupChance();
+	    	double lootGroupRoll = new Random().nextDouble()*100;
+	    	if (lootGroupRoll <= groupChance){    	
+	    		fillChest2(lootGroup, lootRollSession, chest);     		
+	    	}		
+	    }
+	}
+	
+	private void fillChest2(LootGroup lootGroup, LootRollSession lootRollSession, TangibleObject chest){
+		
+		double[] lootPoolChances = lootGroup.getLootPoolChances();
+		String[] lootPoolNames = lootGroup.getLootPoolNames();
+		if (lootPoolChances==null || lootPoolNames==null){
+			System.err.println("Lootpools are null!");
+			return;
+		}
+		if (lootPoolChances.length==0 || lootPoolNames.length==0){
+			System.err.println("No Lootpools in Lootgroup!");
+			return;
+		}
+		
+		double randomItemFromGroup = new Random().nextDouble()*100;
+		double remainder = 0; // [10,20,30,34,5,1] 
+		double span = 100/lootPoolNames.length;
+		
+		boolean test = false;
+		
+		for(int i=0;i<lootPoolChances.length;i++) {
+			if (lootPoolChances[0]!=-1.0)
+				remainder += lootPoolChances[i];
+			else 
+				remainder += span;
+	    	if (randomItemFromGroup <= remainder){ 		
+	    		System.out.println("this loot pool will drop something"); // e.g. kraytpearl_range
+	    		fillChest3(lootPoolNames[i], lootRollSession, chest); // This loot pool will drop something	
+	    		test = true;
+	    		break;
+	    	}			 
+		}
+		if (!test)
+			System.err.println("SOMETHING WENT WRONG!");
+	}
+		
+	private void fillChest3(String poolName, LootRollSession lootRollSession, TangibleObject chest){
+		System.err.println("poolName.toLowerCase() " + poolName.toLowerCase());
+		// Fetch the loot pool data from the poolName.py script		
+		String path = "scripts/loot/lootPools/"+poolName.toLowerCase(); 
+		Vector<String> itemNames = (Vector<String>)core.scriptService.fetchStringVector(path,"itemNames");
+		
+		Vector<Double> itemChances = (Vector<Double>)core.scriptService.fetchDoubleVector(path,"itemChances");
+				
+		double randomItemFromPool = new Random().nextDouble()*100;
+		double remainder = 0.0; // [10,20,30,34,5,1]
+		double span = 100.0/(double)itemNames.size();
+
+		for (int i=0;i<itemNames.size();i++){
+			if (itemChances.get(0)!=-1.0)
+				remainder += itemChances.get(i); 
+			else
+				remainder += span; 
+			if (randomItemFromPool<=remainder){
+				fillChest4(itemNames.get(i), lootRollSession, chest);				
+				//break;
+				return;
+			}						
+		}
+	}
+	
+	
+	
+	private void fillChest4(String itemName, LootRollSession lootRollSession, TangibleObject chest){
+		final Vector<String> foundPath = new Vector<String>(); 
+		Path p = Paths.get("scripts/loot/lootItems/");
+	    FileVisitor<Path> fv = new SimpleFileVisitor<Path>() {
+	        @Override
+	        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+	        	String actualFileName = file.getFileName().toString();
+	        	actualFileName = actualFileName.substring(0, actualFileName.length()-3);
+	        	if (actualFileName.equals(itemName.toLowerCase())){
+	        		foundPath.add(file.toString());
+	        	} 	        	
+	        	return FileVisitResult.CONTINUE;
+	        }
+	    };
+        try {
+			Files.walkFileTree(p, fv);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		
+		if (foundPath.size()==0){
+			String errorMessage = "Loot item  '" + itemName + "'  not found in file system. Please contact Charon about this issue.";
+			return;
+			
+		}		
+		String itemPath = foundPath.get(0);
+		
+		itemPath = itemPath.substring(0, itemPath.length()-3); // remove the file type
+
+		String customName = "";
+		String itemTemplate = "";
+		Vector<String> itemTemplates = null;
+		int stackCount = 1;
+		int biolink = 0;
+		int requiredCL = 1;
+		int stackable = -1;
+		int junkDealerPrice = 0;
+		byte junkType = -1;
+		String requiredProfession = "";
+		String requiredFaction = "";
+		Vector<String> customizationAttributes = null;
+		Vector<Integer> customizationValues = null;
+		Vector<String> itemStats = null;
+		Vector<String> itemSkillMods = null;
+				
+		if(core.scriptService.getMethod(itemPath,"","itemTemplate")==null){
+			String errorMessage = "Loot item  '" + itemName + "'  has no template function assigned in its script. Please contact Charon about this issue.";
+			return;
+		}
+		
+		itemTemplates = (Vector<String>)core.scriptService.fetchStringVector(itemPath,"itemTemplate"); 
+		if (itemTemplates.size()==1)
+			itemTemplate = itemTemplates.get(0);
+		if (itemTemplates.size()>1){
+			itemTemplate = itemTemplates.get(new Random().nextInt(itemTemplates.size()-1));
+		}
+				
+		// only consider the following variables, if they are in the python-script file
+		if(core.scriptService.getMethod(itemPath,"","customItemName")!=null) 
+			customName = (String)core.scriptService.fetchString(itemPath,"customItemName");
+		
+		if(core.scriptService.getMethod(itemPath,"","customItemStackCount")!=null)
+			stackCount = (Integer)core.scriptService.fetchInteger(itemPath,"customItemStackCount");
+		
+		if(core.scriptService.getMethod(itemPath,"","customizationAttributes")!=null)
+			customizationAttributes = (Vector<String>)core.scriptService.fetchStringVector(itemPath,"customizationAttributes");
+		
+		if(core.scriptService.getMethod(itemPath,"","customizationValues")!=null)
+			customizationValues = (Vector<Integer>)core.scriptService.fetchIntegerVector(itemPath,"customizationValues");
+		
+		if(core.scriptService.getMethod(itemPath,"","itemStats")!=null)
+			itemStats = (Vector<String>)core.scriptService.fetchStringVector(itemPath,"itemStats");
+		
+		if(core.scriptService.getMethod(itemPath,"","itemSkillMods")!=null)
+			itemSkillMods = (Vector<String>)core.scriptService.fetchStringVector(itemPath,"itemSkillMods");
+			
+		if(core.scriptService.getMethod(itemPath,"","biolink")!=null)
+			biolink = (Integer)core.scriptService.fetchInteger(itemPath,"biolink");
+		
+		if(core.scriptService.getMethod(itemPath,"","requiredCL")!=null)
+			requiredCL = (Integer)core.scriptService.fetchInteger(itemPath,"requiredCL");
+
+		if(core.scriptService.getMethod(itemPath,"","requiredProfession")!=null)
+			requiredProfession = (String)core.scriptService.fetchString(itemPath,"requiredProfession");
+		
+		if(core.scriptService.getMethod(itemPath,"","requiredFaction")!=null)
+			requiredFaction = (String)core.scriptService.fetchString(itemPath,"requiredFaction");
+		
+		if(core.scriptService.getMethod(itemPath,"","stackable")!=null)
+			stackable =  (Integer)core.scriptService.fetchInteger(itemPath,"stackable");
+		
+		if(core.scriptService.getMethod(itemPath,"","junkDealerPrice")!=null)
+			junkDealerPrice =  (Integer)core.scriptService.fetchInteger(itemPath,"junkDealerPrice");
+		
+		if(core.scriptService.getMethod(itemPath,"","junkType")!=null)
+			junkType =  (byte)core.scriptService.fetchInteger(itemPath,"junkType");
+		
+			
+		System.out.println("itemTemplate " + itemTemplate);
+		
+		TangibleObject droppedItem = createDroppedItem(itemTemplate,lootRollSession.getSessionPlanet());
+		
+		droppedItem.setLootItem(true);
+		droppedItem.setAttachment("LootItemName", itemName);
+    	
+		
+		if (!customName.isEmpty())
+			handleCustomDropName(droppedItem, customName);
+		
+		if (stackable!=-1){
+			if(stackable==1)
+				droppedItem.setStackable(true);
+			else
+				droppedItem.setStackable(false);
+    	}	
+		
+		if (junkDealerPrice!=0){
+    		droppedItem.setJunkDealerPrice(junkDealerPrice);
+    	}
+		
+		if (junkType!=-1){
+    		droppedItem.setJunkType(junkType);
+    	}
+    	
+    	if (itemStats!=null){
+    		if (itemStats.size()%3!=0){
+    			String errorMessage = "Loot item  '" + itemName + "'  has a wrong number of itemstats. Please contact Charon about this issue.";
+    			return;
+    		}
+    		handleStats(droppedItem, itemStats);
+    	}
+    	
+    	if (itemSkillMods!=null){
+    		handleSkillMods(droppedItem, itemSkillMods);
+    	}
+    	 	
+    	setCustomization(droppedItem, itemName); // for now
+    	
+    	handleSpecialItems(droppedItem, itemName);
+		
+    	if (requiredCL>1){
+    		droppedItem.setIntAttribute("required_combat_level", requiredCL);
+    	}
+    	
+    	if (requiredProfession.length()>0){
+    		droppedItem.setStringAttribute("class_required", requiredProfession);
+    	}
+    	
+    	if (requiredFaction.length()>0){
+    		droppedItem.setStringAttribute("required_faction", requiredFaction);
+    	}
+    	
+    	if(core.scriptService.getMethod(itemPath,"","customSetup") != null)
+			core.scriptService.callScript(itemPath, "", "customSetup", droppedItem);
+    	
+    	
+    	
+    	chest.add(droppedItem);
+    	
+    	SlotArrangementVisitor slotArrangement = null;
+    	try {
+			slotArrangement = ClientFileManager.loadFile((String)chest.getTemplateData().getAttribute("arrangementDescriptorFilename"), SlotArrangementVisitor.class);
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	
+    	System.err.println("slotArrangement " + slotArrangement);
+    	String slotDescriptorFilename = (String)chest.getTemplateData().getAttribute("slotDescriptorFilename");
+    	//System.err.println("slotDescriptorFilename " + slotDescriptorFilename);
+    	System.err.println("chest.getPermissions() " + chest.getPermissions());
+    	System.err.println("chest.getSlotNameForObject(droppedItem) " + chest.getSlotNameForObject(droppedItem));
+    	
+    	
+		//chest.add(droppedItem);
+    	//TangibleObject inventory = (TangibleObject) core.objectService.createObject("object/tangible/inventory/shared_character_inventory.iff", lootRollSession.getSessionPlanet());
+		//inventory.setContainerPermissions(AllPermissions.ALL_PERMISSIONS);
+		//inventory.add(droppedItem);
+		//chest.add(inventory);
+		    
+    	//TangibleObject newChest = (TangibleObject)core.staticService.spawnObject("object/tangible/item/shared_rare_loot_chest_1.iff", "tatooine", 0L, 3527.0F, 4.0F, -4801.0F, 0.70F, 0.71F);
+   	
+    	//newChest.add(droppedItem);
+		//chest.setPosition(lootRollSession.getRequester().getPosition());
+		
+		//inventory.add(droppedItem);
+		//chest.getSlottedObject("inventory").add(droppedItem);
+		System.out.println("droppedItem added to chest!!! " + droppedItem.getTemplate());
+		System.out.println("droppedItem.getParentId() " + droppedItem.getParentId());
+		System.out.println("chest.getobjectID " + chest.getObjectID());
+		
+		
+	}
+	
+	public void handleChestItem(String itemName, TangibleObject chest){
 		
 	}
 		
