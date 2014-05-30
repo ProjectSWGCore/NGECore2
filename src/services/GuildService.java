@@ -415,11 +415,7 @@ public class GuildService implements INetworkDispatch {
 		SUIWindow window = core.suiService.createInputBox(InputBoxType.INPUT_BOX_OK_CANCEL, "@guild:menu_member_motd", "@guild:prompt_member_motd_message", actor, null, 0, 
 				(owner, eventType, resultList) -> {
 					String newMotd = resultList.get(0);
-					
 
-					//newMotd.replace("\\", "\\\\");
-
-					System.out.println("Set MOTD to: " + newMotd);
 					guild.setMotd(newMotd);
 					
 					actor.sendSystemMessage("Guild Message of the Day set to: " + newMotd, DisplayType.Broadcast);

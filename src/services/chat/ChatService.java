@@ -222,6 +222,9 @@ public class ChatService implements INetworkDispatch {
 				
 				SWGObject recipient = getObjectByFirstName(firstName);				
 				
+				if (recipient == null)
+					return;
+				
 				PlayerObject recipientGhost = (PlayerObject) recipient.getSlottedObject("ghost");
 				
 				if (recipientGhost.getIgnoreList().contains(sender.getCustomName().toLowerCase())) 
