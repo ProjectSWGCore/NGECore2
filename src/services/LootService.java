@@ -515,7 +515,7 @@ public class LootService implements INetworkDispatch {
 			droppedItem.setDetailName("rare_loot_chest_3_d");
 			droppedItem.setAttachment("LootItemName", itemName);
 			droppedItem.getAttributes().put("@obj_attr_n:rare_loot_category", "\\#D1F56F Rare Item \\#FFFFFF ");
-			fillLegendaryChest(droppedItem, lootRollSession);
+			//fillLegendaryChest(droppedItem, lootRollSession);
 			
 		} else if (exceptionalRoll<10+chancemodifier){
 			String itemTemplate="object/tangible/item/shared_rare_loot_chest_2.iff";
@@ -527,7 +527,7 @@ public class LootService implements INetworkDispatch {
 			droppedItem.setDetailName("rare_loot_chest_2_d");
 			droppedItem.setAttachment("LootItemName", itemName);
 			droppedItem.getAttributes().put("@obj_attr_n:rare_loot_category", "\\#D1F56F Rare Item \\#FFFFFF ");
-			fillExceptionalChest(droppedItem, lootRollSession);
+			//fillExceptionalChest(droppedItem, lootRollSession);
 		} else {
 			String itemTemplate="object/tangible/item/shared_rare_loot_chest_1.iff";
 			droppedItem = createDroppedItem(itemTemplate,lootRollSession.getSessionPlanet());
@@ -538,41 +538,107 @@ public class LootService implements INetworkDispatch {
 			droppedItem.setDetailName("rare_loot_chest_1_d");
 			droppedItem.setAttachment("LootItemName", itemName);
 			droppedItem.getAttributes().put("@obj_attr_n:rare_loot_category", "\\#D1F56F Rare Item \\#FFFFFF ");
-			fillRareChest(droppedItem, lootRollSession);
+			//fillRareChest(droppedItem, lootRollSession);
 		}
 
 		lootRollSession.addDroppedItem(droppedItem);
 	}
 	
-	private void fillLegendaryChest(TangibleObject chest, LootRollSession lootRollSession){
-		
+	public void fillrarelootchest(CreatureObject owner, TangibleObject chest){
+		if (chest.getTemplate().contains("object/tangible/item/shared_rare_loot_chest_1.iff")){
+			fillRareChest(owner, chest);
+		}
+		if (chest.getTemplate().contains("object/tangible/item/shared_rare_loot_chest_2.iff")){
+			fillLegendaryChest(owner, chest);
+		}
+		if (chest.getTemplate().contains("object/tangible/item/shared_rare_loot_chest_3.iff")){
+			fillExceptionalChest(owner, chest);
+		}
+		SWGObject inventory = owner.getSlottedObject("inventory");
+    	inventory.remove(chest);
+    	core.objectService.destroyObject(chest.getObjectID());
 	}
 	
-	private void fillExceptionalChest(TangibleObject chest, LootRollSession lootRollSession){
+	private void fillLegendaryChest(CreatureObject owner, TangibleObject chest){
+		int itemNumber = 2;
+		int quantityModifierChance = new Random().nextInt(100);
+		if (quantityModifierChance>25 && quantityModifierChance<50)
+			itemNumber = 1;
+		if (quantityModifierChance<25)
+			itemNumber = 3;
 		
-	}
-
-	private void fillRareChest(TangibleObject chest, LootRollSession lootRollSession){
-		System.out.println("FILL RARE LOOT CHEST");
 		List<LootGroup> lootGroups = new ArrayList<LootGroup>();
-		String[] lootPoolNames = new String[]{"Junk"};
-		double[] lootPoolChances = new double[]{100};
-		int lootGroupChance = 100;
-		LootGroup singleLootGroup = new LootGroup(lootPoolNames, lootPoolChances, lootGroupChance);
-		lootGroups.add(singleLootGroup);
+		for (int i=0;i<itemNumber;i++){				
+			String[] lootPoolNames = new String[]{"legendarytable"};
+			double[] lootPoolChances = new double[]{100};
+			int lootGroupChance = 100;
+			LootGroup singleLootGroup = new LootGroup(lootPoolNames, lootPoolChances, lootGroupChance);
+			lootGroups.add(singleLootGroup);			
+		}
+		
+		
 		Iterator<LootGroup> iterator = lootGroups.iterator();
 		 
 	    while (iterator.hasNext()){
-	    	LootGroup lootGroup = iterator.next();
-	    	double groupChance = lootGroup.getLootGroupChance();
-	    	double lootGroupRoll = new Random().nextDouble()*100;
-	    	if (lootGroupRoll <= groupChance){    	
-	    		fillChest2(lootGroup, lootRollSession, chest);     		
-	    	}		
+	    	LootGroup lootGroup = iterator.next();	    	
+	    	fillChest2(lootGroup, owner, chest);     			    			
 	    }
 	}
 	
-	private void fillChest2(LootGroup lootGroup, LootRollSession lootRollSession, TangibleObject chest){
+	private void fillExceptionalChest(CreatureObject owner, TangibleObject chest){
+		int itemNumber = 2;
+		int quantityModifierChance = new Random().nextInt(100);
+		if (quantityModifierChance>25 && quantityModifierChance<50)
+			itemNumber = 1;
+		if (quantityModifierChance<25)
+			itemNumber = 3;
+		
+		List<LootGroup> lootGroups = new ArrayList<LootGroup>();
+		for (int i=0;i<itemNumber;i++){				
+			String[] lootPoolNames = new String[]{"exceptionaltable"};
+			double[] lootPoolChances = new double[]{100};
+			int lootGroupChance = 100;
+			LootGroup singleLootGroup = new LootGroup(lootPoolNames, lootPoolChances, lootGroupChance);
+			lootGroups.add(singleLootGroup);			
+		}
+		
+		
+		Iterator<LootGroup> iterator = lootGroups.iterator();
+		 
+	    while (iterator.hasNext()){
+	    	LootGroup lootGroup = iterator.next();	    	
+	    	fillChest2(lootGroup, owner, chest);     			    			
+	    }
+	}
+
+	private void fillRareChest(CreatureObject owner, TangibleObject chest){
+		
+		int itemNumber = 1;
+		int quantityModifierChance = new Random().nextInt(100);
+		if (quantityModifierChance>15 && quantityModifierChance<50)
+			itemNumber = 2;
+		if (quantityModifierChance<15)
+			itemNumber = 3;
+		
+		List<LootGroup> lootGroups = new ArrayList<LootGroup>();
+		for (int i=0;i<itemNumber;i++){				
+			String[] lootPoolNames = new String[]{"raretable"};
+			double[] lootPoolChances = new double[]{100};
+			int lootGroupChance = 100;
+			LootGroup singleLootGroup = new LootGroup(lootPoolNames, lootPoolChances, lootGroupChance);
+			lootGroups.add(singleLootGroup);			
+		}
+		
+		
+		Iterator<LootGroup> iterator = lootGroups.iterator();
+		 
+	    while (iterator.hasNext()){
+	    	LootGroup lootGroup = iterator.next();	    	
+	    	fillChest2(lootGroup, owner, chest);     			    			
+	    }
+	}
+	
+	private void fillChest2(LootGroup lootGroup, CreatureObject owner, TangibleObject chest){
 		
 		double[] lootPoolChances = lootGroup.getLootPoolChances();
 		String[] lootPoolNames = lootGroup.getLootPoolNames();
@@ -598,7 +664,7 @@ public class LootService implements INetworkDispatch {
 				remainder += span;
 	    	if (randomItemFromGroup <= remainder){ 		
 	    		System.out.println("this loot pool will drop something"); // e.g. kraytpearl_range
-	    		fillChest3(lootPoolNames[i], lootRollSession, chest); // This loot pool will drop something	
+	    		fillChest3(lootPoolNames[i], owner, chest); // This loot pool will drop something	
 	    		test = true;
 	    		break;
 	    	}			 
@@ -607,10 +673,10 @@ public class LootService implements INetworkDispatch {
 			System.err.println("SOMETHING WENT WRONG!");
 	}
 		
-	private void fillChest3(String poolName, LootRollSession lootRollSession, TangibleObject chest){
+	private void fillChest3(String poolName, CreatureObject owner, TangibleObject chest){
 		System.err.println("poolName.toLowerCase() " + poolName.toLowerCase());
 		// Fetch the loot pool data from the poolName.py script		
-		String path = "scripts/loot/lootPools/"+poolName.toLowerCase(); 
+		String path = "scripts/loot/rarelootchestcontents/"+poolName.toLowerCase(); 
 		Vector<String> itemNames = (Vector<String>)core.scriptService.fetchStringVector(path,"itemNames");
 		
 		Vector<Double> itemChances = (Vector<Double>)core.scriptService.fetchDoubleVector(path,"itemChances");
@@ -625,7 +691,7 @@ public class LootService implements INetworkDispatch {
 			else
 				remainder += span; 
 			if (randomItemFromPool<=remainder){
-				fillChest4(itemNames.get(i), lootRollSession, chest);				
+				fillChest4(itemNames.get(i), owner, chest);				
 				//break;
 				return;
 			}						
@@ -634,7 +700,7 @@ public class LootService implements INetworkDispatch {
 	
 	
 	
-	private void fillChest4(String itemName, LootRollSession lootRollSession, TangibleObject chest){
+	private void fillChest4(String itemName, CreatureObject owner, TangibleObject chest){
 		final Vector<String> foundPath = new Vector<String>(); 
 		Path p = Paths.get("scripts/loot/lootItems/");
 	    FileVisitor<Path> fv = new SimpleFileVisitor<Path>() {
@@ -735,7 +801,7 @@ public class LootService implements INetworkDispatch {
 			
 		System.out.println("itemTemplate " + itemTemplate);
 		
-		TangibleObject droppedItem = createDroppedItem(itemTemplate,lootRollSession.getSessionPlanet());
+		TangibleObject droppedItem = createDroppedItem(itemTemplate,owner.getPlanet());
 		
 		droppedItem.setLootItem(true);
 		droppedItem.setAttachment("LootItemName", itemName);
@@ -791,45 +857,9 @@ public class LootService implements INetworkDispatch {
 			core.scriptService.callScript(itemPath, "", "customSetup", droppedItem);
     	
     	
+    	SWGObject inventory = owner.getSlottedObject("inventory");
+    	inventory.add(droppedItem);
     	
-    	chest.add(droppedItem);
-    	
-    	SlotArrangementVisitor slotArrangement = null;
-    	try {
-			slotArrangement = ClientFileManager.loadFile((String)chest.getTemplateData().getAttribute("arrangementDescriptorFilename"), SlotArrangementVisitor.class);
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-    	
-    	System.err.println("slotArrangement " + slotArrangement);
-    	String slotDescriptorFilename = (String)chest.getTemplateData().getAttribute("slotDescriptorFilename");
-    	//System.err.println("slotDescriptorFilename " + slotDescriptorFilename);
-    	System.err.println("chest.getPermissions() " + chest.getPermissions());
-    	System.err.println("chest.getSlotNameForObject(droppedItem) " + chest.getSlotNameForObject(droppedItem));
-    	
-    	
-		//chest.add(droppedItem);
-    	//TangibleObject inventory = (TangibleObject) core.objectService.createObject("object/tangible/inventory/shared_character_inventory.iff", lootRollSession.getSessionPlanet());
-		//inventory.setContainerPermissions(AllPermissions.ALL_PERMISSIONS);
-		//inventory.add(droppedItem);
-		//chest.add(inventory);
-		    
-    	//TangibleObject newChest = (TangibleObject)core.staticService.spawnObject("object/tangible/item/shared_rare_loot_chest_1.iff", "tatooine", 0L, 3527.0F, 4.0F, -4801.0F, 0.70F, 0.71F);
-   	
-    	//newChest.add(droppedItem);
-		//chest.setPosition(lootRollSession.getRequester().getPosition());
-		
-		//inventory.add(droppedItem);
-		//chest.getSlottedObject("inventory").add(droppedItem);
-		System.out.println("droppedItem added to chest!!! " + droppedItem.getTemplate());
-		System.out.println("droppedItem.getParentId() " + droppedItem.getParentId());
-		System.out.println("chest.getobjectID " + chest.getObjectID());
-		
-		
 	}
 	
 	public void handleChestItem(String itemName, TangibleObject chest){

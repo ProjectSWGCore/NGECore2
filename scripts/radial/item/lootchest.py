@@ -8,9 +8,7 @@ def createRadial(core, owner, target, radials):
 	
 def handleSelection(core, owner, target, option):
 	if option == 21 and target:
-		#core.simulationService.openContainer(owner, target.getSlottedObject("inventory"))
-		#core.simulationService.openContainer(owner, target.getSlottedObject('default'))
-		core.simulationService.openContainer(owner, target)
+		core.lootService.fillrarelootchest(owner, target)
 	
 	return
 	
