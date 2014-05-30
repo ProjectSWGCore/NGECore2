@@ -141,8 +141,9 @@ def addPlanetSpawns(core, planet):
 	#City Hall Interior
 	
 	#Lucky Despot Interior    TODO:  Check Cell IDs for Spawned NPCS inside once Lucky Despot is spawning properly again.
+	building = core.objectService.getObject(long(-466404040703447347)) 
 	
-	hansolo1 = stcSvc.spawnObject('object/mobile/shared_han_solo.iff', 'tatooine', long(26949), float(32.3), float(7.0), float(1.6), float(0), float(0)) 
+	hansolo1 = stcSvc.spawnObject('object/mobile/shared_han_solo.iff', 'tatooine', building.getCellByCellNumber(9), float(32.3), float(7.0), float(1.6), float(0), float(0), float(0), float(0)) 
 	#hansolo1.setCustomName2('Han Solo')
 	#hansolo1.setOptionsBitmask(256)
 	
