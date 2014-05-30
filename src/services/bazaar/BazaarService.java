@@ -736,7 +736,12 @@ public class BazaarService implements INetworkDispatch {
 		
 		if(vendor.getTemplate().contains("terminal_bazaar"))
 			auctionItem.setOnBazaar(true);
-		
+		else {
+			if(!((long) vendor.getAttachment("vendorOwner") == player.getObjectID())) {
+				auctionItem.setOfferToId((long) vendor.getAttachment("owner"));
+				auctionItem.setStatus(AuctionItem.OFFERED);
+			}
+		}
 		addAuctionItem(auctionItem);
 		
 		return auctionItem;
