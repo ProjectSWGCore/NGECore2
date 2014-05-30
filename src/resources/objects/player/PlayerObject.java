@@ -411,6 +411,12 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		getBaseline(3).set("guildRanks", guildRanks);
 	}
 	
+	public void clearGuildRanks() {
+		BitSet guildRanks = (BitSet) getBaseline(3).get("guildRanks");
+		guildRanks.clear();
+		getBaseline(3).set("guildRanks", guildRanks);
+	}
+	
 	public boolean isShowingHelmet() {
 		return (boolean) getBaseline(3).get("showHelmet");
 	}
