@@ -484,7 +484,7 @@ public class SimulationService implements INetworkDispatch {
 					remove(object, oldPos.x, oldPos.z);
 					if(object.getContainer() != null)
 						object.getContainer()._remove(object);
-					else if (object.getClient().isGM() && parent.getContainer() != null)
+					if (object.getClient().isGM() && parent != null && parent instanceof CellObject && parent.getContainer() != null)
 						object.sendSystemMessage("BuildingId Hex: " + Long.toHexString(parent.getContainer().getObjectID()) + " CellNumber: " + ((CellObject) parent).getCellNumber(), DisplayType.Broadcast);
 					parent._add(object);
 				}
