@@ -113,7 +113,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		baseline.put("bornDate", (int) (System.currentTimeMillis() / 1000L)); //Integer.parseInt(new SimpleDateFormat("yyyymmdd", Locale.ENGLISH).format(Calendar.getInstance().getTime())));
 		baseline.put("totalPlayTime", 0);
 		baseline.put("professionIcon", 0);
-		baseline.put("profession", "trader_1a");
+		baseline.put("profession", "trader_0a");
 		baseline.put("gcwPoints", 0);
 		baseline.put("pvpKills", 0);
 		baseline.put("lifetimeGcwPoints", (long) 0);
