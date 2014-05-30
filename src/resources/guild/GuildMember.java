@@ -32,6 +32,7 @@ public class GuildMember {
 	private short level;
 	private String rank = "";
 	private String name = "";
+	private String title = "";
 	// TODO: These might have to be moved to a new GuildRank class depending on how permissions worked for NGE
 	//this works for now... Lack of NGE Guild Rank guides makes re-creation difficult (Ranks introduced Game Update 8: http://swg.wikia.com/wiki/Game_Update_8)
 	
@@ -242,6 +243,14 @@ public class GuildMember {
 
 	public void setRank(String rank) {
 		this.rank = rank;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
 	}
 
 	public String getName() {

@@ -18,8 +18,9 @@ def addTemplate(core):
 	mobileTemplate.setScale(1)
 	mobileTemplate.setSocialGroup("bandit")
 	mobileTemplate.setAssistRange(6)
-	mobileTemplate.setStalker(False)
-
+	mobileTemplate.setStalker(True)
+	mobileTemplate.setOptionsBitmask(128)
+	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_black_sun_thug.iff')
 	mobileTemplate.setTemplates(templates)
@@ -30,7 +31,7 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 
 	attacks = Vector()
-	mobileTemplate.setDefaultAttack('rangedshot')
+	mobileTemplate.setDefaultAttack('rangedShot')
 	mobileTemplate.setAttacks(attacks)
 	
 	lootPoolNames_1 = ['Junk']

@@ -15,42 +15,26 @@ def startConversation(core, actor, npc):
 		return
 	
 	if probotRequester.getObjectId() != actor.getObjectId():
-		prose = ProsePackage('conversation/bounty_probot', 's_6')
-		outOfBand = OutOfBand()
-		outOfBand.addProsePackage(prose)
-		convSvc.sendConversationMessage(actor, npc, outOfBand)
+		convSvc.sendConversationMessage(actor, npc, OutOfBand.ProsePackage('@conversation/bounty_probot:s_6'))
 		return
 	
 	mission = core.objectService.getObject(long(npc.getAttachment('attachedMission')))
 	
 	if mission is None:
-		prose = ProsePackage('conversation/bounty_probot', 's_4')
-		outOfBand = OutOfBand()
-		outOfBand.addProsePackage(prose)
-		convSvc.sendConversationMessage(actor, npc, prose)
+		convSvc.sendConversationMessage(actor, npc, OutOfBand.ProsePackage('@conversation/bounty_probot:s_4'))
 		return
 	
 	objective = mission.getObjective()
 	
 	if objective is None:
-		prose = ProsePackage('conversation/bounty_probot', 's_4')
-		outOfBand = OutOfBand()
-		outOfBand.addProsePackage(prose)
-		convSvc.sendConversationMessage(actor, npc, prose)
+		convSvc.sendConversationMessage(actor, npc, OutOfBand.ProsePackage('@conversation/bounty_probot:s_4'))
 		return
 	
-	prose = ProsePackage('conversation/bounty_probot', 's_5')
-	outOfBand = OutOfBand()
-	outOfBand.addProsePackage(prose)
-	convSvc.sendConversationMessage(actor, npc, outOfBand)
+	convSvc.sendConversationMessage(actor, npc, OutOfBand.ProsePackage('@conversation/bounty_probot:s_5'))
 	
 	options = Vector()
-	optionProse = ProsePackage('conversation/bounty_probot', 's_8')
-	optionOOB = OutOfBand()
-	optionOOB.addProsePackage(optionProse)
-	options.add(ConversationOption(optionOOB, 0))
+	options.add(ConversationOption(OutOfBand.ProsePackage('@conversation/bounty_probot:s_8'), 0))
 	convSvc.sendConversationOptions(actor, npc, options, handleBioTransmit)
-	
 	return
 
 def handleBioTransmit(core, actor, npc, selection):

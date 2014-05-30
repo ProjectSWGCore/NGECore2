@@ -8,8 +8,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('kaadu_aggrivated_trampler')
 	mobileTemplate.setLevel(15)
-	mobileTemplate.setMinLevel(15)
-	mobileTemplate.setMaxLevel(17)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
 	mobileTemplate.setAttackSpeed(1.0)

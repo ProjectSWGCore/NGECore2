@@ -18,7 +18,7 @@ def addTemplate(core):
 	mobileTemplate.setScale(1)
 	mobileTemplate.setSocialGroup("binayre")
 	mobileTemplate.setAssistRange(6)
-	mobileTemplate.setStalker(False)
+	mobileTemplate.setStalker(True)
 	mobileTemplate.setOptionsBitmask(192)
 
 	templates = Vector()
@@ -32,7 +32,7 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 
 	attacks = Vector()
-	mobileTemplate.setDefaultAttack('rangedshot')
+	mobileTemplate.setDefaultAttack('rangedShot')
 	mobileTemplate.setAttacks(attacks)
 
 	lootPoolNames_1 = ['Junk']

@@ -262,7 +262,7 @@ public class TangibleObject extends SWGObject implements Serializable {
 	
 	public void setUses(int uses) {
 		notifyClients(getBaseline(3).set("uses", uses), true);
-		setIntAttribute("uses", uses);
+		setIntAttribute("count", uses);
 	}
 	
 	public int getIncapTimer() {

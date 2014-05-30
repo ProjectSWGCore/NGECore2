@@ -811,10 +811,11 @@ public class SimulationService implements INetworkDispatch {
 		
 		core.mountService.storeAll(object);
 		
-		for (Integer roomId : ghost.getJoinedChatChannels()) {
+		List<Integer> joinedChannels = ghost.getJoinedChatChannels();
+		for (Integer roomId : joinedChannels) {
 			ChatRoom room = core.chatService.getChatRoom(roomId.intValue());
 			
-			if (room != null) { core.chatService.leaveChatRoom(object, roomId.intValue()); } 
+			if (room != null) { core.chatService.leaveChatRoom(object, roomId.intValue(), false); } 
 			// work-around for any channels that may have been deleted, or only spawn on server startup, that were added to the joined channels
 			else { ghost.removeChannel(roomId); } 
 		}

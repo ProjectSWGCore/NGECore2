@@ -25,6 +25,11 @@ def handleSelection(core, owner, target, option):
 		if not core.terrainService.canBuildAtPosition(owner, owner.getPosition().x, owner.getPosition().z):
 			owner.sendSystemMessage('@mission/mission_generic:probe_droid_bad_location', 0)
 			return
+		
+		if target.getUses() == 0:
+			core.objectService.destroyObject(target)
+		else:
+			target.setUses(target.getUses() - 1)
 
 		mission.getObjective().handleProbeDroidSummon(core, owner)
 	return
