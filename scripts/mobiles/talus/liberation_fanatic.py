@@ -18,7 +18,9 @@ def addTemplate(core):
 	mobileTemplate.setScale(1)
 	mobileTemplate.setSocialGroup("liberation party")
 	mobileTemplate.setAssistRange(6)
-	mobileTemplate.setStalker(False)
+	mobileTemplate.setStalker(True)
+	mobileTemplate.setOptionsBitmask(128)
+	
 
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_liberation_fanatic_bith_female_01.iff')

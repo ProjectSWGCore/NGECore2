@@ -18,7 +18,9 @@ def addTemplate(core):
 	mobileTemplate.setScale(1)
 	mobileTemplate.setSocialGroup("bandit")
 	mobileTemplate.setAssistRange(6)
-	mobileTemplate.setStalker(False)
+	mobileTemplate.setStalker(True)
+	mobileTemplate.setOptionsBitmask(128)
+	
 
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_black_sun_henchman.iff')

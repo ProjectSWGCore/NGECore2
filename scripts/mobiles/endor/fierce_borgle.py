@@ -22,7 +22,7 @@ def addTemplate(core):
 	mobileTemplate.setBoneAmount(5)
 	mobileTemplate.setSocialGroup("borgle")
 	mobileTemplate.setAssistRange(12)
-	mobileTemplate.setStalker(False)
+	mobileTemplate.setStalker(True)
 	mobileTemplate.setOptionsBitmask(192)
 	
 	templates = Vector()

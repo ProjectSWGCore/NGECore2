@@ -18,7 +18,8 @@ def addTemplate(core):
 	mobileTemplate.setScale(1)
 	mobileTemplate.setSocialGroup("sif")
 	mobileTemplate.setAssistRange(6)
-	mobileTemplate.setStalker(False)
+	mobileTemplate.setStalker(True)
+	mobileTemplate.setOptionsBitmask(128)
 
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_talus_sif_mercenary_trand_02.iff')

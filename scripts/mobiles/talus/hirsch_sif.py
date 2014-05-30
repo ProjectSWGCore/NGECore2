@@ -20,6 +20,7 @@ def addTemplate(core):
 	mobileTemplate.setAssistRange(6)
 	mobileTemplate.setStalker(True)
 	mobileTemplate.setOptionsBitmask(192)
+	mobileTemplate.setOptionsBitmask(128)
 
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_hirsch_sif.iff')

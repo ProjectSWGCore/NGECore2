@@ -22,7 +22,8 @@ def addTemplate(core):
 	mobileTemplate.setBoneAmount(8)
 	mobileTemplate.setSocialGroup("squall")
 	mobileTemplate.setAssistRange(0)
-	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(128)
+	mobileTemplate.setStalker(True)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_squall.iff')

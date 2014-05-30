@@ -6,7 +6,7 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('mine_rat')
+	mobileTemplate.setCreatureName('death_watch_quenker')
 	mobileTemplate.setLevel(83)
 	mobileTemplate.setDifficulty(0)
 	mobileTemplate.setAttackRange(5)
@@ -19,9 +19,10 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("death watch")
 	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(128)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_womprat.iff')
+	templates.add('object/mobile/shared_barbed_quenker.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()

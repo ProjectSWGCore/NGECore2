@@ -18,6 +18,7 @@ def addTemplate(core):
 	mobileTemplate.setScale(1)
 	mobileTemplate.setSocialGroup("swirl prong")
 	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setOptionsBitmask(128)
 	mobileTemplate.setStalker(False)
 	
 	templates = Vector()
