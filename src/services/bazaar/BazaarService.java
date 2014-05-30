@@ -91,8 +91,9 @@ public class BazaarService implements INetworkDispatch {
 			addAuctionItem((AuctionItem) cursor.next());
 		}
 		auctionItems.stream().map(AuctionItem::getItem).forEach(obj -> { 
+			obj.initializeBaselines();
 			obj.initAfterDBLoad(); 
-			obj.viewChildren(obj, true, true, obj2 -> obj2.initAfterDBLoad());
+			obj.viewChildren(obj, true, true, obj2 -> { obj2.initializeBaselines(); obj2.initAfterDBLoad(); });
 		});
 		cursor.close();
 	}

@@ -196,6 +196,12 @@ public class ObjectService implements INetworkDispatch {
 					object.setParent(building);
 				object.getContainerInfo(object.getTemplate());
 			});
+			SWGObject sign = (SWGObject) building.getAttachment("sign");
+			if(sign != null) {
+				sign.initializeBaselines();
+				sign.initAfterDBLoad();
+				objectList.put(sign.getObjectID(), sign);
+			}
 		}
 		
 		cursor.close();

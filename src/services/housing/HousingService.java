@@ -139,6 +139,7 @@ public class HousingService implements INetworkDispatch {
 		Vector<Long> admins = new Vector<>();
 		admins.add(actor.getObjectID());
 		
+		building.setAttachment("sign", sign); // meh workaround
 		building.setAttachment("structureOwner", actor.getObjectID());
 		building.setAttachment("structureAdmins", admins);
 		building.setDeedTemplate(deed.getTemplate());
