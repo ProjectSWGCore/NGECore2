@@ -40,6 +40,7 @@ import java.util.Vector;
 
 import protocol.swg.PlayClientEffectObjectTransformMessage;
 import protocol.swg.SceneCreateObjectByCrc;
+import resources.objects.craft.DraftSchematic;
 import resources.loot.LootGroup;
 import resources.loot.LootRollSession;
 import resources.objects.creature.CreatureObject;
@@ -150,18 +151,18 @@ public class LootService implements INetworkDispatch {
 	    	if (projectionCoefficientMatrixModulo!=0)
 	    		lootGroupRoll=groupChance+1;
 	    	if (lootGroupRoll <= groupChance){    	
-	    		System.out.println("this lootGroup will drop something");
+	    		//System.out.println("this lootGroup will drop something");
 	    		handleLootGroup(lootGroup,lootRollSession); //this lootGroup will drop something e.g. {kraytpearl_range,krayt_tissue_rare}	    		
-	    	}		
-	    	System.out.println("While Loop Stuck check");
+	    	}			    	
 	    }
-	    System.out.println("Past while ");
+	    
 	    
 	    // Rare Loot System Stage (Is in place for all looted creatures with 6 CL difference)
 		//if (lootRollSession.isAllowRareLoot()){
 		if (true){
 			int randomRareLoot = new Random().nextInt(100);
 			int chanceRequirement = 1; 
+			chanceRequirement = 10; // This is for a test period to lift chest drop chance a bit
 			if (lootRollSession.getLootedObjectDifficulty()==1)
 				chanceRequirement+=2;
 			if (lootRollSession.getLootedObjectDifficulty()==2)
@@ -173,11 +174,11 @@ public class LootService implements INetworkDispatch {
 			}
 			
 			// to test:
-			handleRareLootChest(lootRollSession);
+			//handleRareLootChest(lootRollSession);
 		}
 		
 	    // set info above corpse
-	    System.out.println("lootedObject instanceof CreatureObject " + (lootedObject instanceof CreatureObject));
+	    //System.out.println("lootedObject instanceof CreatureObject " + (lootedObject instanceof CreatureObject));
 	    if (lootedObject instanceof CreatureObject){
 		    float y = 0.5F; // 1.3356977F
 		    float qz= 1.06535322E9F;
@@ -495,6 +496,12 @@ public class LootService implements INetworkDispatch {
     	return droppedItem;
 	}
 	
+	private DraftSchematic createDroppedSchematic(String template,Planet planet){
+		DraftSchematic droppedItem = (DraftSchematic) core.objectService.createObject(template, planet);				
+    	System.out.println("droppedItem " + droppedItem);
+    	return droppedItem;
+	}
+	
 	private void handleRareLootChest(LootRollSession lootRollSession){
 		
 		TangibleObject droppedItem = null;
@@ -504,6 +511,9 @@ public class LootService implements INetworkDispatch {
 		int chancemodifier = 0;
 		if (lootRollSession.isIncreasedRLSChance())
 			chancemodifier += 15;
+		
+		//legendaryRoll=500; // For TEST
+		//exceptionalRoll = 5;
 		
 		if (legendaryRoll<2+chancemodifier){ 
 			String itemTemplate="object/tangible/item/shared_rare_loot_chest_3.iff";
@@ -549,10 +559,10 @@ public class LootService implements INetworkDispatch {
 			fillRareChest(owner, chest);
 		}
 		if (chest.getTemplate().contains("object/tangible/item/shared_rare_loot_chest_2.iff")){
-			fillLegendaryChest(owner, chest);
+			fillExceptionalChest(owner, chest);
 		}
 		if (chest.getTemplate().contains("object/tangible/item/shared_rare_loot_chest_3.iff")){
-			fillExceptionalChest(owner, chest);
+			fillLegendaryChest(owner, chest);
 		}
 		SWGObject inventory = owner.getSlottedObject("inventory");
     	inventory.remove(chest);
@@ -801,64 +811,80 @@ public class LootService implements INetworkDispatch {
 			
 		System.out.println("itemTemplate " + itemTemplate);
 		
-		TangibleObject droppedItem = createDroppedItem(itemTemplate,owner.getPlanet());
+		TangibleObject droppedItem = null;
 		
-		droppedItem.setLootItem(true);
-		droppedItem.setAttachment("LootItemName", itemName);
-    	
+		if (! itemTemplate.contains("schematic")){
 		
-		if (!customName.isEmpty())
-			handleCustomDropName(droppedItem, customName);
+			droppedItem = createDroppedItem(itemTemplate,owner.getPlanet());
 		
-		if (stackable!=-1){
-			if(stackable==1)
-				droppedItem.setStackable(true);
-			else
-				droppedItem.setStackable(false);
-    	}	
-		
-		if (junkDealerPrice!=0){
-    		droppedItem.setJunkDealerPrice(junkDealerPrice);
-    	}
-		
-		if (junkType!=-1){
-    		droppedItem.setJunkType(junkType);
-    	}
-    	
-    	if (itemStats!=null){
-    		if (itemStats.size()%3!=0){
-    			String errorMessage = "Loot item  '" + itemName + "'  has a wrong number of itemstats. Please contact Charon about this issue.";
-    			return;
-    		}
-    		handleStats(droppedItem, itemStats);
-    	}
-    	
-    	if (itemSkillMods!=null){
-    		handleSkillMods(droppedItem, itemSkillMods);
-    	}
-    	 	
-    	setCustomization(droppedItem, itemName); // for now
-    	
-    	handleSpecialItems(droppedItem, itemName);
-		
-    	if (requiredCL>1){
-    		droppedItem.setIntAttribute("required_combat_level", requiredCL);
-    	}
-    	
-    	if (requiredProfession.length()>0){
-    		droppedItem.setStringAttribute("class_required", requiredProfession);
-    	}
-    	
-    	if (requiredFaction.length()>0){
-    		droppedItem.setStringAttribute("required_faction", requiredFaction);
-    	}
-    	
-    	if(core.scriptService.getMethod(itemPath,"","customSetup") != null)
-			core.scriptService.callScript(itemPath, "", "customSetup", droppedItem);
-    	
-    	
-    	SWGObject inventory = owner.getSlottedObject("inventory");
-    	inventory.add(droppedItem);
+			droppedItem.setLootItem(true);
+			droppedItem.setAttachment("LootItemName", itemName);
+	    	
+			
+			if (!customName.isEmpty())
+				handleCustomDropName(droppedItem, customName);
+			
+			if (stackable!=-1){
+				if(stackable==1)
+					droppedItem.setStackable(true);
+				else
+					droppedItem.setStackable(false);
+	    	}	
+			
+			if (junkDealerPrice!=0){
+	    		droppedItem.setJunkDealerPrice(junkDealerPrice);
+	    	}
+			
+			if (junkType!=-1){
+	    		droppedItem.setJunkType(junkType);
+	    	}
+	    	
+	    	if (itemStats!=null){
+	    		if (itemStats.size()%3!=0){
+	    			String errorMessage = "Loot item  '" + itemName + "'  has a wrong number of itemstats. Please contact Charon about this issue.";
+	    			return;
+	    		}
+	    		handleStats(droppedItem, itemStats);
+	    	}
+	    	
+	    	if (itemSkillMods!=null){
+	    		handleSkillMods(droppedItem, itemSkillMods);
+	    	}
+	    	 	
+	    	setCustomization(droppedItem, itemName); // for now
+	    	
+	    	handleSpecialItems(droppedItem, itemName);
+			
+	    	if (requiredCL>1){
+	    		droppedItem.setIntAttribute("required_combat_level", requiredCL);
+	    	}
+	    	
+	    	if (requiredProfession.length()>0){
+	    		droppedItem.setStringAttribute("class_required", requiredProfession);
+	    	}
+	    	
+	    	if (requiredFaction.length()>0){
+	    		droppedItem.setStringAttribute("required_faction", requiredFaction);
+	    	}
+	    	
+	    	if(core.scriptService.getMethod(itemPath,"","customSetup") != null)
+				core.scriptService.callScript(itemPath, "", "customSetup", droppedItem);
+	    	
+	    	
+	    	droppedItem.getAttributes().put("@obj_attr_n:rare_loot_category", "\\#D1F56F Rare Item \\#FFFFFF ");
+	    	SWGObject inventory = owner.getSlottedObject("inventory");
+	    	inventory.add(droppedItem);
+	    	System.out.println("ACTUAL DROP " + droppedItem.getTemplate());
+		} else
+		{
+			DraftSchematic droppedSchematic  = createDroppedSchematic(itemTemplate,owner.getPlanet());
+			if (droppedSchematic!=null){
+				droppedItem.getAttributes().put("@obj_attr_n:rare_loot_category", "\\#D1F56F Rare Item \\#FFFFFF ");
+		    	SWGObject inventory = owner.getSlottedObject("inventory");
+		    	inventory.add(droppedItem);
+		    	System.out.println("ACTUAL DROP " + droppedItem.getTemplate());
+			}
+		}
     	
 	}
 	
@@ -1255,7 +1281,9 @@ public class LootService implements INetworkDispatch {
 		if (statName.equals("elemdamage")){
 			int minimalValue = (int) Integer.parseInt(minValue);
 			int maximalValue = (int) Integer.parseInt(maxValue);
-			int randomValue  = minimalValue + new Random().nextInt(maximalValue-minimalValue);
+			int randomValue  = minimalValue;
+			if (minimalValue<maximalValue)
+				randomValue  = minimalValue + new Random().nextInt(maximalValue-minimalValue);
 			weapon.setElementalDamage(randomValue);
 		}
 		
