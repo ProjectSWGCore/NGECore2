@@ -845,7 +845,7 @@ public class SimulationService implements INetworkDispatch {
 				
 				if (object.getAttachment("disconnectTask") != null) {
 					try {
-						core.combatService.endCombat(object);
+						core.combatService.endCombat((CreatureObject) object);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
