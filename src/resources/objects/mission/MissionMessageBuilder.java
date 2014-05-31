@@ -103,13 +103,13 @@ public class MissionMessageBuilder extends IntangibleMessageBuilder {
 		
 		buffer.putInt(mission.getMissionTemplateObject());
 
+		buffer.put(getAsciiString(mission.getMissionStf()));
+		buffer.putInt(0);
 		buffer.put(getAsciiString(mission.getMissionDescription()));
-		buffer.putInt(0);
-		buffer.put(getAsciiString("m" + mission.getMissionId() + "d"));
 		
-		buffer.put(getAsciiString(mission.getMissionTitle()));
+		buffer.put(getAsciiString(mission.getMissionStf()));
 		buffer.putInt(0);
-		buffer.put(getAsciiString("m" + mission.getMissionId() + "t"));
+		buffer.put(getAsciiString(mission.getMissionTitle()));
 		
 		buffer.putInt(0); // refresh counter
 		
@@ -308,13 +308,13 @@ public class MissionMessageBuilder extends IntangibleMessageBuilder {
 		return buffer;
 	}
 	
-	public IoBuffer buildMissionDescriptionDelta(String desc, int id, String additionalParam) {
+	public IoBuffer buildMissionDescriptionDelta(String stfFile, String descId) {
 		
-		IoBuffer buffer = IoBuffer.allocate(13 + desc.length() + additionalParam.length(), false).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer buffer = IoBuffer.allocate(13 + stfFile.length() + descId.length(), false).order(ByteOrder.LITTLE_ENDIAN);
 		
-		buffer.put(getAsciiString(desc));
+		buffer.put(getAsciiString(stfFile));
 		buffer.putInt(0);
-		buffer.put(getAsciiString("m" + id + "d" + additionalParam));
+		buffer.put(getAsciiString(descId));
 		
 		int size = buffer.position();
 		buffer.flip();
@@ -323,13 +323,13 @@ public class MissionMessageBuilder extends IntangibleMessageBuilder {
 		return buffer;
 	}
 
-	public IoBuffer buildMissionTitleDelta(String title, int id, String additionalParam) {
+	public IoBuffer buildMissionTitleDelta(String stfFile, String titleId) {
 
-		IoBuffer buffer = IoBuffer.allocate(12 + title.length() + additionalParam.length(), false).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer buffer = IoBuffer.allocate(12 + stfFile.length() + titleId.length(), false).order(ByteOrder.LITTLE_ENDIAN);
 		
-		buffer.put(getAsciiString(title));
+		buffer.put(getAsciiString(stfFile));
 		buffer.putInt(0);
-		buffer.put(getAsciiString("m" + id + "t" + additionalParam));
+		buffer.put(getAsciiString(titleId));
 		
 		int size = buffer.position();
 		buffer.flip();

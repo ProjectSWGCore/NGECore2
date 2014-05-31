@@ -24,7 +24,7 @@ def addTemplate(core):
 	mobileTemplate.setHideAmount(1350)
 	mobileTemplate.setSocialGroup("kimogila")
 	mobileTemplate.setAssistRange(12)
-	mobileTemplate.setStalker(False)
+	mobileTemplate.setStalker(True)
 	mobileTemplate.setOptionsBitmask(192)
 	
 	templates = Vector()

@@ -20,6 +20,7 @@ def addTemplate(core):
 	mobileTemplate.setAssistRange(6)
 	mobileTemplate.setStalker(True)
 	mobileTemplate.setOptionsBitmask(192)
+	mobileTemplate.setOptionsBitmask(128)
 
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_hirsch_sif.iff')
@@ -31,7 +32,7 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 
 	attacks = Vector()
-	mobileTemplate.setDefaultAttack('rangedshot')
+	mobileTemplate.setDefaultAttack('rangedShot')
 	mobileTemplate.setAttacks(attacks)
 
 	core.spawnService.addMobileTemplate('hirsch_sif', mobileTemplate)

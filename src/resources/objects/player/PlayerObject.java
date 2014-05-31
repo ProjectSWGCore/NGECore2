@@ -113,13 +113,13 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		baseline.put("bornDate", (int) (System.currentTimeMillis() / 1000L)); //Integer.parseInt(new SimpleDateFormat("yyyymmdd", Locale.ENGLISH).format(Calendar.getInstance().getTime())));
 		baseline.put("totalPlayTime", 0);
 		baseline.put("professionIcon", 0);
-		baseline.put("profession", "trader_1a");
+		baseline.put("profession", "trader_0a");
 		baseline.put("gcwPoints", 0);
 		baseline.put("pvpKills", 0);
 		baseline.put("lifetimeGcwPoints", (long) 0);
 		baseline.put("lifetimePvpKills", 0);
 		baseline.put("collections", new BitSet()); 
-		baseline.put("17", new SWGList<Byte>(this, 3, 17, false)); // Misc ints (2 ints in tutorial, 5 bytes other times...)
+		baseline.put("guildRanks", new BitSet());  //"17", new SWGList<Byte>(this, 3, 17, false)); // Misc ints (2 ints in tutorial, 5 bytes other times...)
 		baseline.put("showHelmet", true);
 		baseline.put("showBackpack", true);
 		return baseline;
@@ -399,6 +399,22 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	
 	public int getHighestSetBit() {
 		return ((BitSet) getBaseline(3).get("collections")).length();
+	}
+	
+	public boolean getGuildRank(int slotIndex) {
+		return ((BitSet) getBaseline(3).get("guildRanks")).get(slotIndex);
+	}
+	
+	public void toggleGuildRank(int slotIndex) {
+		BitSet guildRanks = (BitSet) getBaseline(3).get("guildRanks");
+		guildRanks.set(slotIndex, !guildRanks.get(slotIndex));
+		getBaseline(3).set("guildRanks", guildRanks);
+	}
+	
+	public void clearGuildRanks() {
+		BitSet guildRanks = (BitSet) getBaseline(3).get("guildRanks");
+		guildRanks.clear();
+		getBaseline(3).set("guildRanks", guildRanks);
 	}
 	
 	public boolean isShowingHelmet() {
@@ -893,10 +909,10 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	}
 	
 	public void addChannel(int roomId) {
-		getJoinedChatChannels().add(roomId);
+		getJoinedChatChannels().add((Integer) roomId);
 	}
 	
-	public void removeChannel(int roomId) {
+	public void removeChannel(Integer roomId) {
 		if (getJoinedChatChannels().contains(roomId)) {
 			getJoinedChatChannels().remove(roomId);
 		}

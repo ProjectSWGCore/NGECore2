@@ -25,6 +25,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("guf drolg")
 	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(128)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_guf_drolg.iff')

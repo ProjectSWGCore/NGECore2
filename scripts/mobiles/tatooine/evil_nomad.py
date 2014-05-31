@@ -32,7 +32,7 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
-	mobileTemplate.setDefaultAttack('rangedshotpistol')
+	mobileTemplate.setDefaultAttack('rangedShotpistol')
 	mobileTemplate.setDefaultAttack('meleehit')
 	mobileTemplate.setAttacks(attacks)
 	

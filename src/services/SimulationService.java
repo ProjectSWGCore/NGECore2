@@ -484,8 +484,8 @@ public class SimulationService implements INetworkDispatch {
 					remove(object, oldPos.x, oldPos.z);
 					if(object.getContainer() != null)
 						object.getContainer()._remove(object);
-					else if (object.getClient().isGM() && parent.getContainer() != null)
-						object.sendSystemMessage("BuildingId: Dec: " + parent.getContainer().getObjectID() + " / Hex: " + Long.toHexString(parent.getContainer().getObjectID()), DisplayType.Broadcast);
+					if (object.getClient().isGM() && parent != null && parent instanceof CellObject && parent.getContainer() != null)
+						object.sendSystemMessage("BuildingId Hex: " + Long.toHexString(parent.getContainer().getObjectID()) + " CellNumber: " + ((CellObject) parent).getCellNumber(), DisplayType.Broadcast);
 					parent._add(object);
 				}
 				object.setPosition(newPos);
@@ -793,23 +793,45 @@ public class SimulationService implements INetworkDispatch {
 		if(object.getAttachment("proposer") != null)
 			object.setAttachment("proposer", null);
 		
-		//session.suspendWrite();
 		final long objectId = object.getObjectID();
 		
 		if(!ghost.isSet(PlayerFlags.LD))
 			ghost.toggleFlag(PlayerFlags.LD);
 		
-		for (CreatureObject opponent : new ArrayList<CreatureObject>(object.getDuelList())) {
-			if (opponent != null) {
-				core.combatService.handleEndDuel(object, opponent, true);
+		try {
+			for (CreatureObject opponent : new ArrayList<CreatureObject>(object.getDuelList())) {
+				if (opponent != null) {
+					core.combatService.handleEndDuel(object, opponent, true);
+				}
 			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		
-		if (core.mountService.isMounted(object)) {
-			core.mountService.dismount(object, (CreatureObject) container);
+		try {
+			if (core.mountService.isMounted(object)) {
+				core.mountService.dismount(object, (CreatureObject) container);
+			}
+			
+			core.mountService.storeAll(object);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		
-		core.mountService.storeAll(object);
+		try {
+			for (Integer roomId : ghost.getJoinedChatChannels()) {
+				ChatRoom room = core.chatService.getChatRoom(roomId.intValue());
+				
+				if (room != null) {
+					core.chatService.leaveChatRoom(object, roomId.intValue(), false);
+				} else {
+					// work-around for any channels that may have been deleted, or only spawn on server startup, that were added to the joined channels
+					ghost.removeChannel(roomId);
+				} 
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
 		/*
 		object.createTransaction(core.getCreatureODB().getEnvironment());
@@ -822,15 +844,40 @@ public class SimulationService implements INetworkDispatch {
 				SWGObject object = core.objectService.getObject(objectId);
 				
 				if (object.getAttachment("disconnectTask") != null) {
-					//core.connectionService.disconnect(client);
+					try {
+						core.combatService.endCombat(object);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					
 					core.simulationService.remove(object, object.getPosition().x, object.getPosition().z, true);
+					
+					/*
+					try {
+						Thread.sleep(900000)
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					
+					// If connectionService fails for some reason, this will call disconnect again after 15 mins.
+					// This should never actually be needed though:
+					
+					try {
+						if (object != null && object.getAttachment("disconnectTask") != null && client != null) {
+							core.connectionService.disconnect(client);
+						}
+					} catch (Exception e) {
+						System.err.println("ConnectionService:disconnect(): Error disconnecting client.");
+						e.printStackTrace();
+					}
+					*/
 				}
 			}
 		}, 120, TimeUnit.SECONDS);
+		
 		core.removeClient(session);
 		
 		object.setAttachment("disconnectTask", disconnectTask);
-		core.combatService.endCombat(object); // temp fix for ending combat on disconnect
 
 	}
 

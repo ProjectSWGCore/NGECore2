@@ -193,6 +193,9 @@ public class LoginService implements INetworkDispatch{
                 		if(!resultSet) {
                 			CreatureObject object = (CreatureObject) core.objectService.getObject(packet.getcharId());
                 			
+                			if (object == null)
+                				object = (CreatureObject) core.objectService.getCreatureFromDB(packet.getcharId());
+                			
                 			if (object != null) {
                 				if (object.isInQuadtree() && object.getClient() != null) {
                 					core.connectionService.disconnect(object.getClient());
@@ -200,7 +203,16 @@ public class LoginService implements INetworkDispatch{
                 				
                 				if (object.isInQuadtree()) {
                 					core.simulationService.remove(object, object.getPosition().x, object.getPosition().z, true);
+                					if (core.missionService.getBountyListItem(object.getObjectID()) != null) {
+                						core.missionService.removeBounty(object.getObjectID(), true);
+                					}
+                				} else {
+                					if (core.getBountiesODB().contains(object.getObjectID())) 
+                						core.getBountiesODB().remove(object.getObjectID());
                 				}
+                				
+                				if (object.getGuildId() != 0)
+                					core.guildService.getGuildById(object.getGuildId()).getMembers().remove(object.getObjectID());
                 				
                 				core.objectService.destroyObject(object);
                 			}
@@ -208,7 +220,10 @@ public class LoginService implements INetworkDispatch{
             				try {
             					core.getSWGObjectODB().remove(object.getObjectID());
             				} catch (Exception e) {
-            					
+                    			DeleteCharacterReplyMessage reply = new DeleteCharacterReplyMessage(1);
+                    			session.write(reply.serialize());
+                    			preparedStatement.close();
+                    			return;
             				}
             				
                 			DeleteCharacterReplyMessage reply = new DeleteCharacterReplyMessage(0);

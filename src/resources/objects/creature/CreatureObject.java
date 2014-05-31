@@ -278,6 +278,15 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		}
 	}
 
+	public void deductCashCredits(int amountToDeduct) {
+		synchronized(objectMutex) {
+			this.cashCredits -= amountToDeduct;
+		}
+		if(getClient() != null && getClient().getSession() != null) {
+			getClient().getSession().write(messageBuilder.buildCashCreditsDelta(cashCredits));
+		}
+	}
+	
 	public void setCashCredits(int cashCredits) {
 		synchronized(objectMutex) {
 			this.cashCredits = cashCredits;
@@ -1805,5 +1814,4 @@ public class CreatureObject extends TangibleObject implements Serializable {
 			}
 		}
 	}
-	
 }

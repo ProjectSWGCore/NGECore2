@@ -91,8 +91,9 @@ public class BazaarService implements INetworkDispatch {
 			addAuctionItem((AuctionItem) cursor.next());
 		}
 		auctionItems.stream().map(AuctionItem::getItem).forEach(obj -> { 
+			obj.initializeBaselines();
 			obj.initAfterDBLoad(); 
-			obj.viewChildren(obj, true, true, obj2 -> obj2.initAfterDBLoad());
+			obj.viewChildren(obj, true, true, obj2 -> { obj2.initializeBaselines(); obj2.initAfterDBLoad(); });
 		});
 		cursor.close();
 	}
@@ -542,7 +543,7 @@ public class BazaarService implements INetworkDispatch {
 			
 				// Auctions
 				case 2:
-					if(item.getStatus() == AuctionItem.FORSALE) {
+					if(item.getStatus() == AuctionItem.FORSALE && item.isOnBazaar()) {
 						if((category & 255) != 0 && item.getItemType() == category) {
 							if(displayedItems >= offset)
 								response.addItem(item);
@@ -584,8 +585,29 @@ public class BazaarService implements INetworkDispatch {
 					if(item.getStatus() == AuctionItem.OFFERED && player.getObjectID() == item.getOfferToId())
 						response.addItem(item);						
 					break;
-				// Vendor search TODO later
+				// Vendor search
 				case 7:
+					if(item.getStatus() == AuctionItem.FORSALE && !item.isOnBazaar()) {
+						if(vendor.getObjectID() != item.getVendorId() && (core.objectService.getObject(item.getVendorId()) == null || (Boolean) core.objectService.getObject(item.getVendorId()).getAttachment("vendorSearchEnabled")))
+							break;
+						if((category & 255) != 0 && item.getItemType() == category) {
+							if(displayedItems >= offset)
+								response.addItem(item);
+							displayedItems++;
+						} else if((item.getItemType() & category) != 0) {
+							if(displayedItems >= offset) 
+								response.addItem(item);
+							displayedItems++;
+						} else if(item.getItemType() < 256 && category == 8192) {
+							if(displayedItems >= offset) 
+								response.addItem(item);
+							displayedItems++;
+						} else if(category == 0) {
+							if(displayedItems >= offset) 
+								response.addItem(item);
+							displayedItems++;
+						}
+					}
 					break;
 				// Stock
 				case 8:
@@ -715,7 +737,12 @@ public class BazaarService implements INetworkDispatch {
 		
 		if(vendor.getTemplate().contains("terminal_bazaar"))
 			auctionItem.setOnBazaar(true);
-		
+		else {
+			if(!((long) vendor.getAttachment("vendorOwner") == player.getObjectID())) {
+				auctionItem.setOfferToId((long) vendor.getAttachment("owner"));
+				auctionItem.setStatus(AuctionItem.OFFERED);
+			}
+		}
 		addAuctionItem(auctionItem);
 		
 		return auctionItem;
@@ -753,6 +780,8 @@ public class BazaarService implements INetworkDispatch {
 	}
 	
 	public void addAuctionItem(AuctionItem auctionItem) {
+		if(auctionItem == null)
+			return;
 		auctionItems.add(auctionItem);
 		int commodityNumber = 0;
 		if(commodityLimit.get(auctionItem.getOwnerId()) != null)
@@ -785,6 +814,10 @@ public class BazaarService implements INetworkDispatch {
 			// TODO add vendor delete after x days
 		}, 1, 1, TimeUnit.HOURS);
 		
+	}
+	
+	public int getNumberOfItemsForSale(long vendorId) {
+		return (int) auctionItems.parallelStream().filter(i -> i.getVendorId() == vendorId).count();
 	}
 	
 }

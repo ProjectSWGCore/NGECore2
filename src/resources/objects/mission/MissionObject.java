@@ -51,6 +51,7 @@ public class MissionObject extends IntangibleObject implements Serializable {
 	private String title = "";
 	private String missionTargetName = ""; // Target object I guess?
 	private int missionId = 0;
+	private String missionStf = "";
 	private String type = "";
 	private int missionTemplateObject = 0;
 	private WaypointObject attachedWaypoint;
@@ -157,15 +158,11 @@ public class MissionObject extends IntangibleObject implements Serializable {
 	}
 
 	public void setMissionDescription(String missionDescription) {
-		setMissionDescription(missionDescription, "");
-	}
-	
-	public void setMissionDescription(String missionDescription, String additionalParam) {
 		synchronized(objectMutex) {
 			this.description = missionDescription;
 		}
 		if (getGrandparent() != null && getGrandparent().getClient() != null && getGrandparent().getClient().getSession() != null) {
-			getGrandparent().getClient().getSession().write(messageBuilder.buildMissionDescriptionDelta(missionDescription, missionId, additionalParam));
+			getGrandparent().getClient().getSession().write(messageBuilder.buildMissionDescriptionDelta(missionStf, missionDescription));
 		}
 	}
 
@@ -176,15 +173,11 @@ public class MissionObject extends IntangibleObject implements Serializable {
 	}
 
 	public void setMissionTitle(String missionTitle) {
-		setMissionTitle(missionTitle, "");
-	}
-
-	public void setMissionTitle(String missionTitle, String additionalParam) {
 		synchronized(objectMutex) {
 			this.title = missionTitle;
 		}
 		if (getGrandparent() != null && getGrandparent().getClient() != null && getGrandparent().getClient().getSession() != null) {
-			getGrandparent().getClient().getSession().write(messageBuilder.buildMissionTitleDelta(missionTitle, missionId, additionalParam));
+			getGrandparent().getClient().getSession().write(messageBuilder.buildMissionTitleDelta(missionStf, missionTitle));
 		}
 	}
 
@@ -309,6 +302,14 @@ public class MissionObject extends IntangibleObject implements Serializable {
 
 	public void setBountyMarkId(long bountyObjId) {
 		this.bountyObjId = bountyObjId;
+	}
+
+	public String getMissionStf() {
+		return missionStf;
+	}
+
+	public void setMissionStf(String missionStf) {
+		this.missionStf = missionStf;
 	}
 
 	@Override
