@@ -714,7 +714,7 @@ public class ObjectService implements INetworkDispatch {
 						creature.addCooldown(cooldownGroup, object.getIntAttribute("reuse_time"));
 					}
 					
-					templateFound = true;
+					foundTemplate = true;
 					
 					break;
 				}
