@@ -711,7 +711,7 @@ public class ObjectService implements INetworkDispatch {
 							return;
 						}
 						
-						creature.addCooldown(cooldownGroup, object.getIntAttribute("reuse_time"));
+						creature.addCooldown(cooldownGroup, reuse_time);
 					}
 					
 					foundTemplate = true;
@@ -720,12 +720,12 @@ public class ObjectService implements INetworkDispatch {
 				}
 			}
 			
-			if (!foundTemplate) {
+			if (!foundTemplate && reuse_time > 0) {
 				if (creature.hasCooldown(object.getTemplate())) {
 					return;
 				}
 				
-				creature.addCooldown(object.getTemplate(), object.getIntAttribute("reuse_time"));
+				creature.addCooldown(object.getTemplate(), reuse_time);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
