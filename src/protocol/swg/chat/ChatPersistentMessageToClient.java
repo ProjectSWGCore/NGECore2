@@ -91,6 +91,9 @@ public class ChatPersistentMessageToClient extends SWGMessage {
 			
 			for(WaypointAttachment attachment : attachments) {
 				
+				result.putShort((short) 0);
+				result.put((byte) 4);
+				result.putInt(0xFFFFFFFD);
 				result.putInt(0);
 				result.putFloat(attachment.positionX);
 				result.putFloat(attachment.positionY);
@@ -101,6 +104,7 @@ public class ChatPersistentMessageToClient extends SWGMessage {
 				result.putLong(attachment.cellID);
 				result.put(attachment.color);
 				result.put((byte) (attachment.active ? 1 : 0));
+				result.put((byte) 0);
 				
 			}
 			
@@ -110,7 +114,7 @@ public class ChatPersistentMessageToClient extends SWGMessage {
 		
 		result.put(status);
 		result.putInt(timestamp);
-		result.putInt(0);
+		//result.putInt(0);
 		
 		int size = result.position();
 		result = IoBuffer.allocate(size).put(result.array(), 0, size);
