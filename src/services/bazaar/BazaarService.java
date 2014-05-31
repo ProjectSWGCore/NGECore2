@@ -780,6 +780,8 @@ public class BazaarService implements INetworkDispatch {
 	}
 	
 	public void addAuctionItem(AuctionItem auctionItem) {
+		if(auctionItem == null)
+			return;
 		auctionItems.add(auctionItem);
 		int commodityNumber = 0;
 		if(commodityLimit.get(auctionItem.getOwnerId()) != null)

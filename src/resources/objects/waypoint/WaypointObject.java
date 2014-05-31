@@ -158,9 +158,8 @@ public class WaypointObject extends IntangibleObject implements Serializable, ID
 
 	@Override
 	public byte[] getBytes() {
-		IoBuffer buffer = bufferPool.allocate(50 + name.length() * 2, false).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer buffer = bufferPool.allocate(42 + name.length() * 2, false).order(ByteOrder.LITTLE_ENDIAN);
 		
-		buffer.putLong(getObjectID());
 		buffer.putInt(getCellId());
 
 		buffer.putFloat(getPosition().x);
