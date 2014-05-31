@@ -687,6 +687,8 @@ public class ObjectService implements INetworkDispatch {
 		try {
 			DatatableVisitor visitor = ClientFileManager.loadFile("datatables/timer/template_command_mapping.iff", DatatableVisitor.class);
 			
+			boolean foundTemplate = false;
+			
 			for (int i = 0; i < visitor.getRowCount(); i++) {
 				if (visitor.getObject(i, 0) != null && ((String) (visitor.getObject(i, 0))).equalsIgnoreCase(object.getTemplate())) {
 					String commandName = (String) visitor.getObject(i, 1);
@@ -712,8 +714,18 @@ public class ObjectService implements INetworkDispatch {
 						creature.addCooldown(cooldownGroup, object.getIntAttribute("reuse_time"));
 					}
 					
+					templateFound = true;
+					
 					break;
 				}
+			}
+			
+			if (!foundTemplate) {
+				if (creature.hasCooldown(object.getTemplate())) {
+					return;
+				}
+				
+				creature.addCooldown(object.getTemplate(), object.getIntAttribute("reuse_time"));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
