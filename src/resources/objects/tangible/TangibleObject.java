@@ -172,7 +172,7 @@ public class TangibleObject extends SWGObject implements Serializable {
 		notifyClients(getBaseline(3).set("customization", customization), true);
 	}
 	
-	public SWGList<Integer> getComponentCustomizations() {
+	public SWGSet<Integer> getComponentCustomizations() {
 		return (SWGSet<Integer>) getBaseline(3).get("componentCustomizations");
 	}
 	
