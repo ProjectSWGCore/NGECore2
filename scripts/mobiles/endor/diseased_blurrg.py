@@ -18,7 +18,7 @@ def addTemplate(core):
 	mobileTemplate.setScale(1)
 	mobileTemplate.setSocialGroup("self")
 	mobileTemplate.setAssistRange(12)
-	mobileTemplate.setStalker(False)
+	mobileTemplate.setStalker(True)
 	mobileTemplate.setOptionsBitmask(192)
 	
 	templates = Vector()

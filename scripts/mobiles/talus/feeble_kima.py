@@ -23,7 +23,9 @@ def addTemplate(core):
 	mobileTemplate.setHideAmount(5)
 	mobileTemplate.setSocialGroup("kima")
 	mobileTemplate.setAssistRange(0)
-	mobileTemplate.setStalker(False)	
+	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(128)
+	
 
 	templates = Vector()
 	templates.add('object/mobile/shared_kima.iff')

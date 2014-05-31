@@ -325,7 +325,7 @@ public class CharacterService implements INetworkDispatch {
 				
 				// TODO: Race abilities
 				object.addAbility("startDance");
-				object.addAbility("startDance+Basic");
+				object.addAbility("startDance+basic");
 				
 				object.addObjectToEquipList(datapad);
 				object.addObjectToEquipList(inventory);

@@ -222,6 +222,9 @@ public class ChatService implements INetworkDispatch {
 				
 				SWGObject recipient = getObjectByFirstName(firstName);				
 				
+				if (recipient == null)
+					return;
+				
 				PlayerObject recipientGhost = (PlayerObject) recipient.getSlottedObject("ghost");
 				
 				if (recipientGhost.getIgnoreList().contains(sender.getCustomName().toLowerCase())) 
@@ -530,7 +533,7 @@ public class ChatService implements INetworkDispatch {
 			
 			ChatRoom room = getChatRoomByAddress(sentPacket.getChannelAddress());
 			
-			leaveChatRoom((CreatureObject) obj, room.getRoomId());
+			leaveChatRoom((CreatureObject) obj, room.getRoomId(), true);
 			
 		});
 	}
@@ -976,7 +979,7 @@ public class ChatService implements INetworkDispatch {
 		return joinChatRoom(user, roomId, false);
 	}
 	
-	public void leaveChatRoom(CreatureObject player, int roomId) {
+	public void leaveChatRoom(CreatureObject player, int roomId, boolean removeFromList) {
 		
 		ChatRoom room = getChatRoom(roomId);
 		if (room == null)
@@ -1000,7 +1003,8 @@ public class ChatService implements INetworkDispatch {
 			}
 		});
 		
-		((PlayerObject) player.getSlottedObject("ghost")).removeChannel((Integer) roomId);
+		if (removeFromList)
+			((PlayerObject) player.getSlottedObject("ghost")).removeChannel((Integer) roomId);
 	}
 	
 	public void sendChatRoomMessage(CreatureObject sender, int roomId, int msgId, String message) {
@@ -1013,6 +1017,9 @@ public class ChatService implements INetworkDispatch {
 		
 		if (senderName.contains(" "))
 			senderName = senderName.split(" ")[0];
+		
+		if (message.startsWith("\\#"))
+			message = " " + message;
 		
 		ChatOnSendRoomMessage onSend = new ChatOnSendRoomMessage(0, msgId);
 		sender.getClient().getSession().write(onSend.serialize());

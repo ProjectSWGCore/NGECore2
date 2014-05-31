@@ -22,7 +22,8 @@ def addTemplate(core):
 	mobileTemplate.setBoneAmount(180)
 	mobileTemplate.setSocialGroup("bolle bol")
 	mobileTemplate.setAssistRange(0)
-	mobileTemplate.setStalker(False)
+	mobileTemplate.setStalker(True)
+	mobileTemplate.setOptionsBitmask(128)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_bolle_bol.iff')

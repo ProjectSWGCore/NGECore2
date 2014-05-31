@@ -484,8 +484,8 @@ public class SimulationService implements INetworkDispatch {
 					remove(object, oldPos.x, oldPos.z);
 					if(object.getContainer() != null)
 						object.getContainer()._remove(object);
-					else if (object.getClient().isGM() && parent.getContainer() != null)
-						object.sendSystemMessage("BuildingId: Dec: " + parent.getContainer().getObjectID() + " / Hex: " + Long.toHexString(parent.getContainer().getObjectID()), DisplayType.Broadcast);
+					if (object.getClient().isGM() && parent != null && parent instanceof CellObject && parent.getContainer() != null)
+						object.sendSystemMessage("BuildingId Hex: " + Long.toHexString(parent.getContainer().getObjectID()) + " CellNumber: " + ((CellObject) parent).getCellNumber(), DisplayType.Broadcast);
 					parent._add(object);
 				}
 				object.setPosition(newPos);
@@ -811,13 +811,14 @@ public class SimulationService implements INetworkDispatch {
 		
 		core.mountService.storeAll(object);
 		
-		/*for (Integer roomId : ghost.getJoinedChatChannels()) { // TODO: Fix Concurrency error
+		List<Integer> joinedChannels = ghost.getJoinedChatChannels();
+		for (Integer roomId : joinedChannels) {
 			ChatRoom room = core.chatService.getChatRoom(roomId.intValue());
 			
-			if (room != null) { core.chatService.leaveChatRoom(object, roomId.intValue()); } 
+			if (room != null) { core.chatService.leaveChatRoom(object, roomId.intValue(), false); } 
 			// work-around for any channels that may have been deleted, or only spawn on server startup, that were added to the joined channels
 			else { ghost.removeChannel(roomId); } 
-		}*/
+		}
 		/*
 		object.createTransaction(core.getCreatureODB().getEnvironment());
 		core.getCreatureODB().put(object, Long.class, CreatureObject.class, object.getTransaction());

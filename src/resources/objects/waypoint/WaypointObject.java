@@ -22,15 +22,21 @@
 package resources.objects.waypoint;
 
 import java.io.Serializable;
+import java.nio.ByteOrder;
+
+import org.apache.mina.core.buffer.IoBuffer;
+import org.apache.mina.core.buffer.SimpleBufferAllocator;
 
 import resources.objects.intangible.IntangibleObject;
-
 import engine.clients.Client;
+import engine.resources.common.StringUtilities;
+import engine.resources.objects.IDelta;
+import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-public class WaypointObject extends IntangibleObject implements Serializable {
+public class WaypointObject extends IntangibleObject implements Serializable, IDelta {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -40,6 +46,7 @@ public class WaypointObject extends IntangibleObject implements Serializable {
 	private String name;
 	private byte color;
 	private boolean isActive;
+	private transient static SimpleBufferAllocator bufferPool = new SimpleBufferAllocator();
 	
 	public static final byte BLUE = 1;
 	public static final byte GREEN = 2;
@@ -145,6 +152,40 @@ public class WaypointObject extends IntangibleObject implements Serializable {
 
 	@Override
 	public void sendBaselines(Client client) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public byte[] getBytes() {
+		IoBuffer buffer = bufferPool.allocate(50 + name.length() * 2, false).order(ByteOrder.LITTLE_ENDIAN);
+		
+		buffer.putLong(getObjectID());
+		buffer.putInt(getCellId());
+
+		buffer.putFloat(getPosition().x);
+		buffer.putFloat(getPosition().y);
+		buffer.putFloat(getPosition().z);
+
+		buffer.putLong(0); // networklocationId
+		buffer.putInt(getPlanetCRC());
+
+		buffer.put(StringUtilities.getUnicodeString(getName()));
+		buffer.putLong(getObjectID());
+
+		buffer.put((byte) getColor());
+
+		if (isActive()) 
+			buffer.put((byte) 1);
+		else 
+			buffer.put((byte) 0);
+		
+		return buffer.flip().array();
+
+	}
+
+	@Override
+	public void init(SWGObject arg0) {
 		// TODO Auto-generated method stub
 		
 	}

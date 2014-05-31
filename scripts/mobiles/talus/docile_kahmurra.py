@@ -23,7 +23,8 @@ def addTemplate(core):
 	mobileTemplate.setHideAmount(32)
 	mobileTemplate.setSocialGroup("self")
 	mobileTemplate.setAssistRange(6)
-	mobileTemplate.setStalker(False)	
+	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(128)	
 
 	templates = Vector()
 	templates.add('object/mobile/shared_kahmurra.iff')

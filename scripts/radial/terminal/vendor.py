@@ -8,35 +8,36 @@ import sys
 
 def createRadial(core, owner, target, radials):
 	radials.clear()	
-	#radials.add(RadialOptions(0, 11, 1, ''))
-	#radials.add(RadialOptions(0, 55, 0, ''))
-	#radials.add(RadialOptions(2, 56, 1, ''))
-	#radials.add(RadialOptions(2, 57, 1, ''))
-	#radials.add(RadialOptions(2, 58, 1, ''))
-	#radials.add(RadialOptions(2, 59, 1, ''))
-	#radials.add(RadialOptions(0, 52, 0, ''))
-	#radials.add(RadialOptions(3, 53, 1, ''))
-	#radials.add(RadialOptions(3, 54, 1, ''))
-	
+	radials.add(RadialOptions(0, 7, 1, ''))
+	radials.add(RadialOptions(0, 11, 1, ''))
 	if not long(target.getAttachment('vendorOwner')) == owner.getObjectID():
 		return
-
+	radials.add(RadialOptions(0, 55, 0, ''))
+	radials.add(RadialOptions(0, 52, 0, ''))
 	radials.add(RadialOptions(0, 112, 3, '@player_structure:vendor_control'))
+	radials.add(RadialOptions(3, 56, 1, ''))
+	radials.add(RadialOptions(3, 57, 1, ''))
+	radials.add(RadialOptions(3, 58, 1, ''))
+	radials.add(RadialOptions(3, 59, 1, ''))
+	radials.add(RadialOptions(4, 53, 1, ''))
+	radials.add(RadialOptions(4, 54, 1, ''))
+	
+
 	if target.getAttachment('initialized') == False:
-		radials.add(RadialOptions(1, 118, 3, '@player_structure:vendor_init'))
+		radials.add(RadialOptions(5, 118, 3, '@player_structure:vendor_init'))
 	else:
 		# soe reuses option 118
-		radials.add(RadialOptions(1, 118, 3, '@player_structure:vendor_status'))
-		radials.add(RadialOptions(1, 217, 3, '@player_structure:give_maintenance'))
-		radials.add(RadialOptions(1, 115, 3, '@player_structure:take_maintenance'))
+		radials.add(RadialOptions(5, 118, 3, '@player_structure:vendor_status'))
+		radials.add(RadialOptions(5, 217, 3, '@player_structure:give_maintenance'))
+		radials.add(RadialOptions(5, 115, 3, '@player_structure:take_maintenance'))
 		if owner.getSkillModBase('private_register_vendor') >= 1:
-			radials.add(RadialOptions(1, 116, 3, '@player_structure:register_vendor'))
-		radials.add(RadialOptions(1, 205, 3, '@player_structure:enable_vendor_search'))
-		radials.add(RadialOptions(1, 206, 3, '@player_structure:disable_vendor_search'))
-		radials.add(RadialOptions(1, 121, 3, '@player_structure:customize_vendor'))
+			radials.add(RadialOptions(5, 116, 3, '@player_structure:register_vendor'))
+		radials.add(RadialOptions(5, 205, 3, '@player_structure:enable_vendor_search'))
+		radials.add(RadialOptions(5, 206, 3, '@player_structure:disable_vendor_search'))
+		radials.add(RadialOptions(5, 121, 3, '@player_structure:customize_vendor'))
 		
-	radials.add(RadialOptions(1, 114, 3, '@player_structure:vendor_pack'))		
-	radials.add(RadialOptions(1, 117, 3, '@player_structure:remove_vendor'))	
+	radials.add(RadialOptions(5, 114, 3, '@player_structure:vendor_pack'))		
+	radials.add(RadialOptions(5, 117, 3, '@player_structure:remove_vendor'))	
 	
 	return
 	

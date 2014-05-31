@@ -18,7 +18,8 @@ def addTemplate(core):
 	mobileTemplate.setScale(1)
 	mobileTemplate.setSocialGroup("bageraset")
 	mobileTemplate.setAssistRange(0)
-	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(128)
+	mobileTemplate.setStalker(True)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_roba.iff')

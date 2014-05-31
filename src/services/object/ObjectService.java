@@ -196,6 +196,12 @@ public class ObjectService implements INetworkDispatch {
 					object.setParent(building);
 				object.getContainerInfo(object.getTemplate());
 			});
+			SWGObject sign = (SWGObject) building.getAttachment("sign");
+			if(sign != null) {
+				sign.initializeBaselines();
+				sign.initAfterDBLoad();
+				objectList.put(sign.getObjectID(), sign);
+			}
 		}
 		
 		cursor.close();
@@ -897,7 +903,8 @@ public class ObjectService implements INetworkDispatch {
 						}
 					}
 					
-					for (Integer roomId : ghost.getJoinedChatChannels()) {
+					List<Integer> joinedChannels = ghost.getJoinedChatChannels();
+					for (Integer roomId : joinedChannels) {
 						ChatRoom room = core.chatService.getChatRoom(roomId);
 						
 						if (room != null) { core.chatService.joinChatRoom(objectShortName, roomId); } 
