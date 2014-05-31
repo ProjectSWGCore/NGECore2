@@ -115,7 +115,7 @@ public class TangibleObject extends SWGObject implements Serializable {
 		baseline.put("faction", 0);
 		baseline.put("factionStatus", 0);
 		baseline.put("customization", new byte[] { });
-		baseline.put("componentCustomizations", new SWGList<Integer>(this, 3, 7, false));
+		baseline.put("componentCustomizations", new SWGSet<Integer>(this, 3, 7, false));
 		baseline.put("optionsBitmask", 0);
 		baseline.put("uses", 0);
 		baseline.put("conditionDamage", 0);
