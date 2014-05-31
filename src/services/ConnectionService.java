@@ -200,27 +200,43 @@ public class ConnectionService implements INetworkDispatch {
 		
 		CreatureObject object = (CreatureObject) client.getParent();
 		
-		object.setInviteCounter(0);
-		object.setInviteSenderId(0);
-		object.setInviteSenderName("");
-		
-		if(object.getAttachment("inspireDuration") != null)
-			object.setAttachment("inspireDuration", null);
-		
-		if(object.getPerformanceListenee() != null) {
-			object.getPerformanceListenee().removeSpectator(object);
-			object.setPerformanceListenee(null);
+		try {
+			object.setInviteCounter(0);
+			object.setInviteSenderId(0);
+			object.setInviteSenderName("");
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		
-		if(object.getPerformanceWatchee() != null) {
-			object.getPerformanceWatchee().removeSpectator(object);
-			object.setPerformanceWatchee(null);
+		try {
+			if(object.getAttachment("inspireDuration") != null)
+				object.setAttachment("inspireDuration", null);
+			
+			if(object.getPerformanceListenee() != null) {
+				object.getPerformanceListenee().removeSpectator(object);
+				object.setPerformanceListenee(null);
+			}
+			
+			if(object.getPerformanceWatchee() != null) {
+				object.getPerformanceWatchee().removeSpectator(object);
+				object.setPerformanceWatchee(null);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		
-		core.groupService.handleGroupDisband(object, false);
+		try {
+			core.groupService.handleGroupDisband(object, false);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
-		if (core.instanceService.isInInstance(object)) {
-			core.instanceService.remove(core.instanceService.getActiveInstance(object), object);
+		try {
+			if (core.instanceService.isInInstance(object)) {
+				core.instanceService.remove(core.instanceService.getActiveInstance(object), object);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		
 		object.setClient(null);
@@ -232,20 +248,27 @@ public class ConnectionService implements INetworkDispatch {
 		
 		Point3D objectPos = object.getWorldPosition();
 		
-		List<AbstractCollidable> collidables = core.simulationService.getCollidables(object.getPlanet(), objectPos.x, objectPos.z, 512);
-
-		collidables.forEach(c -> c.removeCollidedObject(object));		
+		try {
+			List<AbstractCollidable> collidables = core.simulationService.getCollidables(object.getPlanet(), objectPos.x, objectPos.z, 512);
+	
+			collidables.forEach(c -> c.removeCollidedObject(object));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
-		if (ghost != null) {
-			String objectShortName = object.getCustomName();
-			
-			if (object.getCustomName().contains(" ")) {
-				String[] splitName = object.getCustomName().toLowerCase().split(" ");
-				objectShortName = splitName[0];
+		try {
+			if (ghost != null) {
+				String objectShortName = object.getCustomName();
+				
+				if (object.getCustomName().contains(" ")) {
+					String[] splitName = object.getCustomName().toLowerCase().split(" ");
+					objectShortName = splitName[0];
+				}
+				
+				core.chatService.playerStatusChange(objectShortName, (byte) 0);
 			}
-			
-			core.chatService.playerStatusChange(objectShortName, (byte) 0);
-			
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 				
 		long parentId = object.getParentId();
@@ -268,8 +291,12 @@ public class ConnectionService implements INetworkDispatch {
 			}
 		}*/
 		
-		if (core.getBountiesODB().contains(object.getObjectID())) {
-			core.missionService.getBountyMap().remove(core.getBountiesODB().get(object.getObjectID()));
+		try {
+			if (core.getBountiesODB().contains(object.getObjectID())) {
+				core.missionService.getBountyMap().remove(core.getBountiesODB().get(object.getObjectID()));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		
 		ghost.toggleFlag(PlayerFlags.LD);
@@ -278,16 +305,23 @@ public class ConnectionService implements INetworkDispatch {
 		object.setPerformanceWatchee(null);
 		object.setAttachment("disconnectTask", null);
 		
-		List<ScheduledFuture<?>> schedulers = core.playerService.getSchedulers().get(object.getObjectID());
-		if(schedulers != null) {
-			schedulers.forEach(s -> s.cancel(true));
-			schedulers.clear();
+		try {
+			List<ScheduledFuture<?>> schedulers = core.playerService.getSchedulers().get(object.getObjectID());
+			if(schedulers != null) {
+				schedulers.forEach(s -> s.cancel(true));
+				schedulers.clear();
+			}
+			core.playerService.getSchedulers().remove(object.getObjectID());
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		core.playerService.getSchedulers().remove(object.getObjectID());
 		
-		core.getSWGObjectODB().put(object.getObjectID(), object);
-		core.objectService.destroyObject(object);
-		
+		try {
+			core.getSWGObjectODB().put(object.getObjectID(), object);
+			core.objectService.destroyObject(object);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 
