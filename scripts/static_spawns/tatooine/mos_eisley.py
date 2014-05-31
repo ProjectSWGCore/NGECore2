@@ -143,9 +143,8 @@ def addPlanetSpawns(core, planet):
 	#Lucky Despot Interior    TODO:  Check Cell IDs for Spawned NPCS inside once Lucky Despot is spawning properly again.
 	building = core.objectService.getObject(long(-466404040703447347)) 
 	
-	hansolo1 = stcSvc.spawnObject('object/mobile/shared_han_solo.iff', 'tatooine', building.getCellByCellNumber(9), float(32.3), float(7.0), float(1.6), float(0), float(0), float(0), float(0)) 
-	#hansolo1.setCustomName2('Han Solo')
-	#hansolo1.setOptionsBitmask(256)
+	#Han solo
+	stcSvc.spawnObject('object/mobile/shared_han_solo.iff', 'tatooine', building.getCellByCellNumber(9), float(32.3), float(7.0), float(1.6), float(0), float(0), float(0), float(0)) 
 	
 	#Medical Center Interior
 	
@@ -314,12 +313,7 @@ def addPlanetSpawns(core, planet):
 	#Eisley Ship Controller
 	stcSvc.spawnObject('object/mobile/shared_distant_ship_controller.iff', 'tatooine', long(0), float(3542.3), float(5.0), float(-4826.0), float(0.42), float(0.91))
 	
-	#recruiters
-	impRecruiter = stcSvc.spawnObject('object/mobile/shared_dressed_imperial_officer_f.iff', 'tatooine', long(1280132), float(-6), float(1), float(9.2), float(0.70), float(0.71))	
-	#impRecruiter.setOptionsBitmask(264)
-	
 
-	
 	#Profession Counselor
 	stcSvc.spawnObject('object/mobile/shared_respec_seller_f_1.iff', 'tatooine', long(0), float(3533.14), float(5), float(-4788.86), float(-0.3327), float(0.9288))
 	
