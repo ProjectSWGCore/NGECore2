@@ -98,19 +98,19 @@ public class AuctionQueryHeadersResponseMessage extends SWGMessage {
 			result.putInt((int) ((item.getExpireTime() - System.currentTimeMillis()) / 1000));
 			result.putInt(item.getPrice());
 			result.putShort((short) getStringIndex(item.getVuid()));
-			result.putInt(0);
+			result.putLong(item.getOwnerId());
+			result.putShort((short) getStringIndex(item.getOwnerName()));
+			/*result.putInt(0);
 			result.put((byte) 0);
 			result.putShort((short) getStringIndex(item.getOwnerName()));
-			result.put((byte) 0);
-			result.put((byte) (item.isAuction() ? 0 : 1));
+			result.put((byte) 0);*/
 			result.putLong(0);
-			result.put((byte) 0);
 			result.putInt(2); // unk
 			result.putInt(0);
 			result.putShort((short) 0);
 			result.putInt(item.getItemType()); // gameObjectType/category bitmask
 
-			result.putInt(0); // gameObjectType/category bitmask
+			result.putInt(0); 
 			int options = 0;
 			
 			if(item.getOwnerId() == playerId && (item.getStatus() == AuctionItem.OFFERED || item.getStatus() == AuctionItem.FORSALE)) 
