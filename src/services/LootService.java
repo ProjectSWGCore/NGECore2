@@ -438,6 +438,10 @@ public class LootService implements INetworkDispatch {
     		droppedItem.setJunkType(junkType);
     	}
     	
+		if (biolink>0){
+    		droppedItem.setStringAttribute("bio_link", "bio_link_pending");
+    	}
+		
     	if (itemStats!=null){
     		if (itemStats.size()%3!=0){
     			String errorMessage = "Loot item  '" + itemName + "'  has a wrong number of itemstats. Please contact Charon about this issue.";
@@ -477,7 +481,6 @@ public class LootService implements INetworkDispatch {
     	
     	
 		lootRollSession.addDroppedItem(droppedItem);
-		System.out.println("END REACHED");
 	}	
 	
 	private void handleCustomDropName(TangibleObject droppedItem,String customName) {
@@ -513,6 +516,7 @@ public class LootService implements INetworkDispatch {
 			chancemodifier += 15;
 		
 		//legendaryRoll=500; // For TEST
+		//legendaryRoll=1; // For TEST
 		//exceptionalRoll = 5;
 		
 		if (legendaryRoll<2+chancemodifier){ 
@@ -555,6 +559,10 @@ public class LootService implements INetworkDispatch {
 	}
 	
 	public void fillrarelootchest(CreatureObject owner, TangibleObject chest){
+		
+		SWGObject inventory = owner.getSlottedObject("inventory");
+    	inventory.remove(chest);
+    			
 		if (chest.getTemplate().contains("object/tangible/item/shared_rare_loot_chest_1.iff")){
 			fillRareChest(owner, chest);
 		}
@@ -563,10 +571,8 @@ public class LootService implements INetworkDispatch {
 		}
 		if (chest.getTemplate().contains("object/tangible/item/shared_rare_loot_chest_3.iff")){
 			fillLegendaryChest(owner, chest);
-		}
-		SWGObject inventory = owner.getSlottedObject("inventory");
-    	inventory.remove(chest);
-    	core.objectService.destroyObject(chest.getObjectID());
+		}		
+		core.objectService.destroyObject(chest.getObjectID());
 	}
 	
 	private void fillLegendaryChest(CreatureObject owner, TangibleObject chest){
@@ -701,7 +707,7 @@ public class LootService implements INetworkDispatch {
 			else
 				remainder += span; 
 			if (randomItemFromPool<=remainder){
-				fillChest4(itemNames.get(i), owner, chest);				
+				fillChest4(itemNames.get(i), owner, chest);			
 				//break;
 				return;
 			}						
@@ -711,6 +717,7 @@ public class LootService implements INetworkDispatch {
 	
 	
 	private void fillChest4(String itemName, CreatureObject owner, TangibleObject chest){
+		
 		final Vector<String> foundPath = new Vector<String>(); 
 		Path p = Paths.get("scripts/loot/lootItems/");
 	    FileVisitor<Path> fv = new SimpleFileVisitor<Path>() {
@@ -746,6 +753,7 @@ public class LootService implements INetworkDispatch {
 		int stackCount = 1;
 		int biolink = 0;
 		int requiredCL = 1;
+		int requiredLevelForEffect = 1;
 		int stackable = -1;
 		int junkDealerPrice = 0;
 		byte junkType = -1;
@@ -753,6 +761,8 @@ public class LootService implements INetworkDispatch {
 		String requiredFaction = "";
 		Vector<String> customizationAttributes = null;
 		Vector<Integer> customizationValues = null;
+		int customColor1 = 0;
+		String lootDescriptor = "";
 		Vector<String> itemStats = null;
 		Vector<String> itemSkillMods = null;
 				
@@ -781,6 +791,12 @@ public class LootService implements INetworkDispatch {
 		if(core.scriptService.getMethod(itemPath,"","customizationValues")!=null)
 			customizationValues = (Vector<Integer>)core.scriptService.fetchIntegerVector(itemPath,"customizationValues");
 		
+		if(core.scriptService.getMethod(itemPath,"","customColor1")!=null)
+			customColor1 = (Integer)core.scriptService.fetchInteger(itemPath,"customColor1");
+		
+		if(core.scriptService.getMethod(itemPath,"","lootDescriptor")!=null) 
+			lootDescriptor = (String)core.scriptService.fetchString(itemPath,"lootDescriptor");
+		
 		if(core.scriptService.getMethod(itemPath,"","itemStats")!=null)
 			itemStats = (Vector<String>)core.scriptService.fetchStringVector(itemPath,"itemStats");
 		
@@ -792,7 +808,10 @@ public class LootService implements INetworkDispatch {
 		
 		if(core.scriptService.getMethod(itemPath,"","requiredCL")!=null)
 			requiredCL = (Integer)core.scriptService.fetchInteger(itemPath,"requiredCL");
-
+		
+		if(core.scriptService.getMethod(itemPath,"","requiredLevelForEffect")!=null)
+			requiredLevelForEffect = (Integer)core.scriptService.fetchInteger(itemPath,"requiredLevelForEffect");
+				
 		if(core.scriptService.getMethod(itemPath,"","requiredProfession")!=null)
 			requiredProfession = (String)core.scriptService.fetchString(itemPath,"requiredProfession");
 		
@@ -819,6 +838,10 @@ public class LootService implements INetworkDispatch {
 		
 			droppedItem.setLootItem(true);
 			droppedItem.setAttachment("LootItemName", itemName);
+			droppedItem.setAttachment("customColor1", customColor1);
+			droppedItem.setAttachment("lootDescriptor", lootDescriptor);
+			droppedItem.setAttachment("customName", customName);
+			
 	    	
 			
 			if (!customName.isEmpty())
@@ -859,12 +882,20 @@ public class LootService implements INetworkDispatch {
 	    		droppedItem.setIntAttribute("required_combat_level", requiredCL);
 	    	}
 	    	
+	    	if (requiredLevelForEffect>1) {
+	    		droppedItem.getAttributes().put("@proc/proc:effect_level", ""+requiredLevelForEffect);
+	    	}
+	    	
 	    	if (requiredProfession.length()>0){
 	    		droppedItem.setStringAttribute("class_required", requiredProfession);
 	    	}
 	    	
 	    	if (requiredFaction.length()>0){
 	    		droppedItem.setStringAttribute("required_faction", requiredFaction);
+	    	}
+	    	
+	    	if (biolink>0){
+	    		droppedItem.setStringAttribute("bio_link", "@obj_attr_n:bio_link_pending");
 	    	}
 	    	
 	    	if(core.scriptService.getMethod(itemPath,"","customSetup") != null)
@@ -915,6 +946,23 @@ public class LootService implements INetworkDispatch {
 			droppedItem.setCustomizationVariable("/private/index_color_1", (byte) 0x21);  //  0x1F
 		}
 		
+		String lootDescriptor = (String)droppedItem.getAttachment("lootDescriptor");
+		if (lootDescriptor==null)
+			lootDescriptor="";
+		if (lootDescriptor.contains("rarecolorcrystal")) {
+			System.out.println("rarecolorcrystal");
+			
+			int saberColor = (Integer)droppedItem.getAttachment("customColor1");
+			if (saberColor==31) // Cunning of Tyranus, which is not in @jedi_spam
+				saberColor=0;
+			
+			droppedItem.setCustomizationVariable("/private/index_color_1", (byte) saberColor);
+			droppedItem.getAttributes().put("@obj_attr_n:condition", "100/100");
+			droppedItem.getAttributes().put("@obj_attr_n:crystal_owner", "\\#D1F56F UNTUNED \\#FFFFFF ");		
+			droppedItem.getAttributes().put("@obj_attr_n:color", resources.datatables.LightsaberColors.get((Integer)droppedItem.getAttachment("customColor1")));
+			droppedItem.setAttachment("radial_filename", "item/tunable");
+		}
+		
 		// More general 
 //		String path = "scripts/loot/lootItems/"+droppedItem.getCustomName().toLowerCase(); 
 //		Vector<String> customizationPaths = (Vector<String>)core.scriptService.fetchStringVector(path,"itemCustomizationPaths");
@@ -937,7 +985,7 @@ public class LootService implements INetworkDispatch {
 	
 	private void handleStats(TangibleObject droppedItem, Vector<String> itemStats) {
 		
-		if (droppedItem.getTemplate().contains("/weapon")){
+		if (droppedItem.getTemplate().contains("object/weapon")){
 			WeaponObject weaponObject = (WeaponObject) droppedItem;
 			for (int i=0;i<itemStats.size()/3;i++){
 				String statName = itemStats.get(3*i);
@@ -955,6 +1003,28 @@ public class LootService implements INetworkDispatch {
 				setArmorStat(droppedItem, statName, minValue, maxValue);
 			}
 		}			
+		
+		String lootDescriptor = (String)droppedItem.getAttachment("lootDescriptor");
+		if (lootDescriptor==null)
+			lootDescriptor="";
+		if (lootDescriptor.contains("rarecolorcrystal")) {
+			for (int i=0;i<itemStats.size()/3;i++){
+				String statName = itemStats.get(3*i);
+				String minValue = itemStats.get(3*i+1);
+				String maxValue = itemStats.get(3*i+2);
+				setCrystalStat(droppedItem, statName, minValue, maxValue);
+			}
+		}	
+		
+		if (lootDescriptor.contains("rarebuffitem")) {
+			for (int i=0;i<itemStats.size()/3;i++){
+				String statName = itemStats.get(3*i);
+				String minValue = itemStats.get(3*i+1);
+				String maxValue = itemStats.get(3*i+2);
+				setBuffItemStat(droppedItem, statName, minValue, maxValue);
+			}
+		}		
+		
 	}	
 	
 	private void handleSkillMods(TangibleObject droppedItem, Vector<String> skillMods) {		
@@ -1321,6 +1391,127 @@ public class LootService implements INetworkDispatch {
 
 	}
 	
+	private void setCrystalStat(TangibleObject crystal, String statName, String minValue, String maxValue){
+		
+		if (statName.equals("elemtype")){
+			String result = "";
+			if (minValue.length()==0)
+				if (maxValue.length()==0)
+					result = "Error";
+			
+			if (minValue.length()>0)
+				result = minValue;
+			if (maxValue.length()>0)
+				result = maxValue;
+			crystal.setAttachment("ElementalType", result);
+		}
+		
+		if (statName.equals("elemdamage")){
+			int minimalValue = (int) Integer.parseInt(minValue);
+			int value  = minimalValue;
+			crystal.setAttachment("ElementalDamage", value);
+		}
+	}
+	
+	private void setBuffItemStat(TangibleObject buffItem, String statName, String minValue, String maxValue){
+		
+		if (statName.equals("buffeffect")){
+			String result = "";
+			if (minValue.length()==0)
+				if (maxValue.length()==0)
+					result = "Error";
+			
+			if (minValue.length()>0)
+				result = minValue;
+			if (maxValue.length()>0)
+				result = maxValue;
+			buffItem.setAttachment("BuffEffect", minValue);
+			buffItem.setAttachment("BuffEffectMagnitude", maxValue);
+		}
+		
+		if (statName.equals("effectname")){
+			String result = minValue;
+			if (minValue.length()==0)
+				if (maxValue.length()==0)
+					result = "Error";
+			buffItem.setAttachment("BuffEffectName", result);
+			buffItem.getAttributes().put("@obj_attr_n:proc_name", result);
+		}
+		
+		if (statName.equals("duration")){
+			int minimalValue = (int) Integer.parseInt(minValue);
+			buffItem.setAttachment("BuffEffectDuration", minimalValue); 
+		}
+		
+		if (statName.equals("cooldown")){	
+			/*
+			String displayString = "";
+			String[] cooldownArr = minValue.split(":"); // 24:00:00 -> HH:MM:SS
+			if (cooldownArr.length==3){
+				String hours = 	cooldownArr[0];
+				String minutes = 	cooldownArr[1];
+				String seconds = 	cooldownArr[2];
+				if (hours.equals("00") || hours.equals("0")){
+					displayString=minutes + " minutes";
+				} else
+				{
+					displayString=hours + " hours, " + minutes + " minutes";
+				}
+			} else
+			{
+				displayString= "Format Error!";
+			}
+			*/
+			String displayString = minValue + " sec";
+			int minimalValue = (int) Integer.parseInt(minValue);
+			buffItem.setAttachment("BuffEffectCoolDown", minimalValue); 
+			buffItem.getAttributes().put("@obj_attr_n:reuse_time", displayString);	
+			buffItem.getAttributes().put("@ui_attrib_mod:timeleft", "0");
+		}
+		
+		// Deal with buff items that have colorcrystal templates or not unique templates , because no py script can be used for them to set the radials
+		
+		// Shard of the Serpent
+		if (buffItem.getCustomName().contains("Serpent")){
+			buffItem.setAttachment("Post_BL_radial_filename", "item/shard_of_the_serpent");
+			buffItem.setAttachment("radial_filename", "item/biolink");
+			buffItem.setStfFilename("static_item_n");
+			buffItem.setStfName("item_tow_buff_crystal_02_03");
+			buffItem.setDetailFilename("static_item_d");
+			buffItem.setDetailName("item_tow_buff_crystal_02_03");				
+			buffItem.setCustomizationVariable("/private/index_color_1", (byte) 3);
+		}
+		// Shard of Ferocity
+		if (buffItem.getCustomName().contains("Ferocity")){
+			buffItem.setAttachment("Post_BL_radial_filename", "item/shard_of_ferocity");
+			buffItem.setAttachment("radial_filename", "item/biolink");
+			buffItem.setStfFilename("static_item_n");
+			buffItem.setStfName("item_tow_crystal_uber_01_05");
+			buffItem.setDetailFilename("static_item_d");
+			buffItem.setDetailName("item_tow_crystal_uber_01_05");
+			buffItem.setCustomizationVariable("/private/index_color_1", (byte) 9);
+
+		}
+		// Shard of Retaliation
+		if (buffItem.getCustomName().contains("Retaliation")){
+			buffItem.setAttachment("Post_BL_radial_filename", "item/shard_of_retaliation");
+			buffItem.setAttachment("radial_filename", "item/biolink");
+			buffItem.setStfFilename("static_item_n");
+			buffItem.setStfName("item_tow_crystal_uber_02_05");
+			buffItem.setDetailFilename("static_item_d");
+			buffItem.setDetailName("item_tow_crystal_uber_02_05");
+		}
+		// Sith Buff Holocron
+		if (buffItem.getCustomName().contains("Sith")){
+			buffItem.setAttachment("Post_BL_radial_filename", "item/sith_buff_holocron");
+			buffItem.setAttachment("radial_filename", "item/biolink");
+			buffItem.setStfFilename("static_item_n");
+			buffItem.setStfName("item_tow_holocron_ab_immune_01_02");
+			buffItem.setDetailFilename("static_item_d");
+			buffItem.setDetailName("item_tow_holocron_ab_immune_01_02");	
+		}		
+	}
+
 	private void setArmorStat(SWGObject armor, String statName, String minValue, String maxValue){
 		// Armor is not represented with its own class,
 		// so we gotta create the attributes here

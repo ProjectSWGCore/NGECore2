@@ -1,4 +1,4 @@
 
 def itemTemplate():
 
-	return ['object/tangible/wearables/base/shared_base_cloak_hooded.iff'] # needs correct iff still
+	return ['object/tangible/wearables/robe/shared_robe_s05_h1.iff'] # needs correct iff still

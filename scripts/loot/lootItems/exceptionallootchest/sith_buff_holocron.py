@@ -6,3 +6,20 @@ def itemTemplate():
 def customItemName():
 
 	return 'Sith Holocron'
+
+def biolink():
+	
+	return 1
+	
+def lootDescriptor():
+
+	return 'rarebuffitem'
+
+def itemStats():
+
+	stats = ['buffeffect','Action','+500']
+	stats +=['effectname','Forbidden Knowledge I','Forbidden Knowledge I']
+	stats +=['duration','180','180']
+	stats +=['cooldown','3600','3600']
+	
+	return stats
