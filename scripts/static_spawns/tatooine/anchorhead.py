@@ -16,9 +16,6 @@ def addPlanetSpawns(core, planet):
 	# TODO Check all NPCs for personalized scripting, change format.
 	
 	# Cantina Interior
-	rebRecruiter = stcSvc.spawnObject('object/mobile/shared_dressed_rebel_recruiter_human_female_01.iff', 'tatooine', long(1213345), float(-2.2), float(0.4), float(-5.4), float(0), float(0))	
-	#rebRecruiter.setOptionsBitmask(264)
-
 	borraSetas = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_tatooine_rodian_female_03.iff', 'tatooine', long(1213345), float(9.8), float(0.4), float(-1.2), float(-0.65), float(0.75))
 	#borraSetas.setCustomName2('Borra Setas')
 	#borraSetas.setOptionsBitmask(256)
