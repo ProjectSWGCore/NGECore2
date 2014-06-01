@@ -34,7 +34,7 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
-	mobileTemplate.setDefaultAttack('rangedshotpistol')
+	mobileTemplate.setDefaultAttack('rangedShotpistol')
 	mobileTemplate.setAttacks(attacks)
 	
 	core.spawnService.addMobileTemplate('swoop_gang_punk', mobileTemplate)

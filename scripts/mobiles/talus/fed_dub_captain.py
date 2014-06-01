@@ -18,7 +18,8 @@ def addTemplate(core):
 	mobileTemplate.setScale(1)
 	mobileTemplate.setSocialGroup("fed dub")
 	mobileTemplate.setAssistRange(0)
-	mobileTemplate.setStalker(False)
+	mobileTemplate.setStalker(True)
+	mobileTemplate.setOptionsBitmask(128)
 
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_fed_dub_captain_twk_male_01.iff')
@@ -31,7 +32,7 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 
 	attacks = Vector()
-	mobileTemplate.setDefaultAttack('rangedshot')
+	mobileTemplate.setDefaultAttack('rangedShot')
 	mobileTemplate.setAttacks(attacks)
 	
 	lootPoolNames_1 = ['Junk']

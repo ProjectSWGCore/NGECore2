@@ -18,7 +18,8 @@ def addTemplate(core):
 	mobileTemplate.setScale(1)
 	mobileTemplate.setSocialGroup("bark mite")
 	mobileTemplate.setAssistRange(12)
-	mobileTemplate.setStalker(True)
+	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(128)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_bark_mite.iff')

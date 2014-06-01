@@ -35,7 +35,7 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
-	mobileTemplate.setDefaultAttack('rangedshot')
+	mobileTemplate.setDefaultAttack('rangedShot')
 	mobileTemplate.setAttacks(attacks)
 	
 	core.spawnService.addMobileTemplate('emperors_hand', mobileTemplate)

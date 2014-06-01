@@ -196,6 +196,12 @@ public class ObjectService implements INetworkDispatch {
 					object.setParent(building);
 				object.getContainerInfo(object.getTemplate());
 			});
+			SWGObject sign = (SWGObject) building.getAttachment("sign");
+			if(sign != null) {
+				sign.initializeBaselines();
+				sign.initAfterDBLoad();
+				objectList.put(sign.getObjectID(), sign);
+			}
 		}
 		
 		cursor.close();
@@ -249,9 +255,11 @@ public class ObjectService implements INetworkDispatch {
 			object = new TangibleObject(objectID, planet, position, orientation, Template);
 
 		} else if(Template.startsWith("object/intangible")) {
+			if (Template.equals("object/intangible/buy_back/shared_buy_back_container.iff")) // Container sends TANO baselines but is in intangible folder.. lolsoe.
+				object = new TangibleObject(objectID, planet, position, orientation, Template);
+			else
+				object = new IntangibleObject(objectID, planet, position, orientation,Template);
 			
-			object = new IntangibleObject(objectID, planet, position, orientation,Template);
-
 		} else if(Template.startsWith("object/weapon")) {
 			
 			object = new WeaponObject(objectID, planet, position, orientation, Template);
@@ -679,6 +687,8 @@ public class ObjectService implements INetworkDispatch {
 		try {
 			DatatableVisitor visitor = ClientFileManager.loadFile("datatables/timer/template_command_mapping.iff", DatatableVisitor.class);
 			
+			boolean foundTemplate = false;
+			
 			for (int i = 0; i < visitor.getRowCount(); i++) {
 				if (visitor.getObject(i, 0) != null && ((String) (visitor.getObject(i, 0))).equalsIgnoreCase(object.getTemplate())) {
 					String commandName = (String) visitor.getObject(i, 1);
@@ -701,11 +711,21 @@ public class ObjectService implements INetworkDispatch {
 							return;
 						}
 						
-						creature.addCooldown(cooldownGroup, object.getIntAttribute("reuse_time"));
+						creature.addCooldown(cooldownGroup, reuse_time);
 					}
+					
+					foundTemplate = true;
 					
 					break;
 				}
+			}
+			
+			if (!foundTemplate && reuse_time > 0) {
+				if (creature.hasCooldown(object.getTemplate())) {
+					return;
+				}
+				
+				creature.addCooldown(object.getTemplate(), reuse_time);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -895,7 +915,8 @@ public class ObjectService implements INetworkDispatch {
 						}
 					}
 					
-					for (Integer roomId : ghost.getJoinedChatChannels()) {
+					List<Integer> joinedChannels = ghost.getJoinedChatChannels();
+					for (Integer roomId : joinedChannels) {
 						ChatRoom room = core.chatService.getChatRoom(roomId);
 						
 						if (room != null) { core.chatService.joinChatRoom(objectShortName, roomId); } 

@@ -21,6 +21,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("angler")
 	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(True)
+	mobileTemplate.setOptionsBitmask(128)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_angler.iff')

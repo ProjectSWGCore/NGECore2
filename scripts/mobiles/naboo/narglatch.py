@@ -26,6 +26,7 @@ def addTemplate(core):
 	mobileTemplate.setBoneAmount(40)
 	mobileTemplate.setSocialGroup("narglatch")
 	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setOptionsBitmask(128)
 	mobileTemplate.setStalker(False)
 	
 	templates = Vector()

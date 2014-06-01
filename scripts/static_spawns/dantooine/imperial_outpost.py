@@ -16,8 +16,6 @@ def addPlanetSpawns(core, planet):
 	corporal1 = stcSvc.spawnObject('eow_fbase_imperial_corporal', 'dantooine', long(0), float(-4228), float(3), float(-2395), float(0.703), float(0.710))
 	corporal2 = stcSvc.spawnObject('eow_fbase_imperial_corporal', 'dantooine', long(0), float(-4230), float(3), float(-2394), float(0.703), float(0.710))
 	
-	recruiter1 = stcSvc.spawnObject('object/mobile/shared_dressed_imperial_officer_f.iff', 'dantooine', long(0), float(-4198), float(3), float(-2411), float(0.819), float(-0.572))
-	
 	atst1 = stcSvc.spawnObject('object/mobile/shared_atst.iff', 'dantooine', long(0), float(-4291), float(3), float(-2433), float(0.819), float(-0.572))
 	atst2 = stcSvc.spawnObject('object/mobile/shared_atst.iff', 'dantooine', long(0), float(-4154), float(3), float(-2383), float(0.264), float(0.964))
 	

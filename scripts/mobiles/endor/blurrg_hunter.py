@@ -19,6 +19,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("blurrg")
 	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(128)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_blurrg.iff')

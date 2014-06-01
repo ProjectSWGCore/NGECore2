@@ -23,7 +23,8 @@ def addTemplate(core):
 	mobileTemplate.setHideAmount(35)
 	mobileTemplate.setSocialGroup("sludge panther")
 	mobileTemplate.setAssistRange(6)
-	mobileTemplate.setStalker(False)	
+	mobileTemplate.setStalker(True)
+	mobileTemplate.setOptionsBitmask(128)	
 
 	templates = Vector()
 	templates.add('object/mobile/shared_sludge_panther.iff')

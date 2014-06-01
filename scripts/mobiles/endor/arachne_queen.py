@@ -20,7 +20,7 @@ def addTemplate(core):
 	mobileTemplate.setMeatAmount(60)
 	mobileTemplate.setSocialGroup("arachne")
 	mobileTemplate.setAssistRange(0)
-	mobileTemplate.setStalker(False)
+	mobileTemplate.setStalker(True)
 	mobileTemplate.setOptionsBitmask(192)
 	
 	templates = Vector()

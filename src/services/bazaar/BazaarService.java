@@ -91,8 +91,9 @@ public class BazaarService implements INetworkDispatch {
 			addAuctionItem((AuctionItem) cursor.next());
 		}
 		auctionItems.stream().map(AuctionItem::getItem).forEach(obj -> { 
+			obj.initializeBaselines();
 			obj.initAfterDBLoad(); 
-			obj.viewChildren(obj, true, true, obj2 -> obj2.initAfterDBLoad());
+			obj.viewChildren(obj, true, true, obj2 -> { obj2.initializeBaselines(); obj2.initAfterDBLoad(); });
 		});
 		cursor.close();
 	}
@@ -736,7 +737,12 @@ public class BazaarService implements INetworkDispatch {
 		
 		if(vendor.getTemplate().contains("terminal_bazaar"))
 			auctionItem.setOnBazaar(true);
-		
+		else {
+			if(!((long) vendor.getAttachment("vendorOwner") == player.getObjectID())) {
+				auctionItem.setOfferToId((long) vendor.getAttachment("owner"));
+				auctionItem.setStatus(AuctionItem.OFFERED);
+			}
+		}
 		addAuctionItem(auctionItem);
 		
 		return auctionItem;
@@ -774,6 +780,8 @@ public class BazaarService implements INetworkDispatch {
 	}
 	
 	public void addAuctionItem(AuctionItem auctionItem) {
+		if(auctionItem == null)
+			return;
 		auctionItems.add(auctionItem);
 		int commodityNumber = 0;
 		if(commodityLimit.get(auctionItem.getOwnerId()) != null)

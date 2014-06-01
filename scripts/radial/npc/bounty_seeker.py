@@ -26,13 +26,18 @@ def handleSelection(core, owner, target, option):
 		if mission.getObjective().isSeekerActive():
 			owner.sendSystemMessage('@mission/mission_generic:bounty_already_tracking', 0)
 			return
+		if target.getUses() == 0:
+			core.objectService.destroyObject(target)
+		else:
+			target.setUses(target.getUses() - 1)
 		pos = SpawnPoint.getRandomPosition(owner.getPosition(), 1, 3, owner.getPlanetId())
 		ori = owner.getOrientation()
 		seeker = core.staticService.spawnObject('object/creature/npc/droid/crafted/shared_probe_droid_advanced.iff', owner.getPlanet().getName(), 0, pos.x, pos.y, pos.z, ori.y, ori.w)
 		time.sleep(3)
 		owner.sendSystemMessage('@mission/mission_generic:seeker_droid_standby', 0)
 		seeker.setPosture(8)
-		time.sleep(7.5)
+		time.sleep(6.5)
+		core.objectService.destroyObject(seeker)
 		mission.getObjective().beginSeekerUpdates(core, owner)
 		return
 	
