@@ -67,6 +67,7 @@ def addPlanetSpawns(core, planet):
 	commoner23.setCustomName2('a Commoner')
 	commoner23.setOptionsBitmask(256)
 	
+	#Junkdealer will be added as soon as i can find coords
 	
 	
 	return

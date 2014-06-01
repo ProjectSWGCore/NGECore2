@@ -7,4 +7,6 @@ def setup(core, object):
 	object.setOptionsBitmask(Options.CONVERSABLE | Options.INVULNERABLE)
 	object.setStfFilename('mob/creature_names')
 	object.setStfName('junk_dealer')
+	
+	core.mapService.addLocation(object.getPlanet(), '@map_loc_cat_n:junkshop', object.getPosition().x, object.getPosition().z, 26, 81, 0)
 	return

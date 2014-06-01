@@ -44,5 +44,9 @@ def addPlanetSpawns(core, planet):
 	Sorna = stcSvc.spawnObject('object/mobile/shared_dressed_tatooine_tosche_sorna.iff', 'tatooine', long(0), float(-135), float(52.0), float(-5331), float(0.36), float(0.93))
 	Sorna.setCustomName2('Sorna')
 	Sorna.setOptionsBitmask(256)
+	
+	#Junk Dealer
+	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_01.iff', 'tatooine', long(0), float(110), float(52), float(-5428), float(0.71), float(0.71))
+
 	return
 	
