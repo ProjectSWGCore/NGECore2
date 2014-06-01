@@ -39,15 +39,11 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import protocol.swg.PlayClientEffectObjectTransformMessage;
 import protocol.swg.SceneCreateObjectByCrc;
-<<<<<<< HEAD
 import resources.objects.craft.DraftSchematic;
-=======
 import resources.common.OutOfBand;
 import resources.datatables.DisplayType;
->>>>>>> origin/master
 import resources.loot.LootGroup;
 import resources.loot.LootRollSession;
 import resources.objects.creature.CreatureObject;
@@ -61,13 +57,10 @@ import services.sui.SUIWindow;
 import services.sui.SUIWindow.SUICallback;
 import services.sui.SUIWindow.Trigger;
 import main.NGECore;
-<<<<<<< HEAD
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.SlotArrangementVisitor;
 import engine.resources.container.AllPermissions;
-=======
 import engine.resources.common.Stf;
->>>>>>> origin/master
 import engine.resources.container.CreatureContainerPermissions;
 import engine.resources.container.Traverser;
 import engine.resources.objects.SWGObject;
