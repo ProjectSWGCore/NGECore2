@@ -8,6 +8,7 @@ def createRadial(core, owner, target, radials):
 	
 def handleSelection(core, owner, target, option):
 	if option == 21 and target:
-		owner.sendSystemMessage('RLS chest content system not yet implemented.',1)
+		core.lootService.fillrarelootchest(owner, target)
+	
 	return
 	

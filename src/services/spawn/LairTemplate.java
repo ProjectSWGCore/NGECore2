@@ -21,11 +21,14 @@
  ******************************************************************************/
 package services.spawn;
 
+import java.util.Vector;
+
 public class LairTemplate {
 	
 	private String name;
 	private String lairCRC;
 	private String mobileName;
+	private Vector<String> mobiles;
 	private int mobileLimit;
 	
 	public LairTemplate(String name, String mobile, int mobileLimit, String lairCRC) {
@@ -34,7 +37,14 @@ public class LairTemplate {
 		this.mobileLimit = mobileLimit;
 		this.lairCRC = lairCRC;
 	}
-
+	
+	public LairTemplate(String name, Vector<String> mobiles, int mobileLimit, String lairCRC) {
+		this.name = name;
+		this.mobiles = mobiles;
+		this.mobileLimit = mobileLimit;
+		this.lairCRC = lairCRC;
+	}
+	
 	public String getLairCRC() {
 		return lairCRC;
 	}
@@ -65,6 +75,14 @@ public class LairTemplate {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public Vector<String> getMobiles() {
+		return mobiles;
+	}
+
+	public void setMobiles(Vector<String> mobiles) {
+		this.mobiles = mobiles;
 	}
 
 }

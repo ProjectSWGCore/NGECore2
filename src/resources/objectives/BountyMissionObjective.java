@@ -134,8 +134,12 @@ public class BountyMissionObjective extends MissionObjective {
 		clearActiveMissions(core, bounty);
 		
 		core.missionService.removeBounty(markObjId);
+
 		player.getPlayerObject().setBountyMissionId(0);
 		player.updatePvpStatus();
+		
+		cancelLocationUpdates();
+		core.missionService.handleMissionAbort(player, getMissionObject(), true); // Do not call abort method
 	}
 
 	@Override

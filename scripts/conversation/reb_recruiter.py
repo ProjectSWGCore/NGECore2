@@ -161,9 +161,8 @@ def handleSecondScreen(core, actor, npc, selection):
 	
 	if actor.getFaction() != 'rebel' and actor.getFaction() != 'imperial':
 		if selection == 0:
-			actor.setFaction('rebel')
-			actor.setFactionStatus(FactionStatus.OnLeave)
-			actor.updatePvpStatus()
+			core.factionService.join(actor, 'rebel')
+			core.factionService.changeFactionStatus(actor, FactionStatus.OnLeave)
 			
 			convSvc.sendConversationMessage(actor, npc, OutOfBand.ProsePackage('@conversation/faction_recruiter_rebel:s_99'))
 			
@@ -205,6 +204,7 @@ def handleSecondScreen(core, actor, npc, selection):
 		return	
 	elif actor.getFaction() == 'rebel' and actor.getFactionStatus() == FactionStatus.Combatant:
 		if selection == 0:
+			core.factionService.changeFactionStatus(actor, FactionStatus.SpecialForces)
 			convSvc.sendConversationMessage(actor, npc, OutOfBand.ProsePackage('@conversation/faction_recruiter_rebel:s_88'))
 			
 			options = Vector()

@@ -245,7 +245,7 @@ public class GroupService implements INetworkDispatch {
 			creature.updateGroupInviteInfo();
 			creature.setGroupId(0);
 			creature.makeUnaware(group);
-			core.chatService.leaveChatRoom(creature, group.getChatRoomId());
+			core.chatService.leaveChatRoom(creature, group.getChatRoomId(), true);
 			creature.sendSystemMessage("@group:removed", (byte) 0);
 
 			for(SWGObject member : memberList) {
@@ -272,7 +272,7 @@ public class GroupService implements INetworkDispatch {
 
 				creature2.makeUnaware(group);
 				
-				core.chatService.leaveChatRoom(creature2, group.getChatRoomId());
+				core.chatService.leaveChatRoom(creature2, group.getChatRoomId(), true);
 				creature.sendSystemMessage("@group:disbanded", (byte) 0);
 				
 				removeGroupBuffs((CreatureObject) member);
@@ -300,7 +300,7 @@ public class GroupService implements INetworkDispatch {
 		creature.updateGroupInviteInfo();
 		creature.setGroupId(0);
 		creature.makeUnaware(group);
-		core.chatService.leaveChatRoom(creature, group.getChatRoomId());
+		core.chatService.leaveChatRoom(creature, group.getChatRoomId(), true);
 		creature.sendSystemMessage("@group:removed", (byte) 0);
 
 		for(SWGObject member : group.getMemberList()) {

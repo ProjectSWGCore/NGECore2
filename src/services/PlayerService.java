@@ -625,6 +625,14 @@ public class PlayerService implements INetworkDispatch {
 		grantLevel(creature, level);
 		
 		player.setProfessionIcon(Professions.get(profession));
+		
+		if (creature.getGuildId() != 0) {
+			Guild guild = core.guildService.getGuildById(creature.getGuildId());
+			
+			if (guild != null && guild.getMembers().containsKey(creature.getObjectID())) {
+				guild.getMember(creature.getObjectID()).setProfession(getFormalProfessionName(profession));
+			}
+		}
 	}
 	
 	/*
@@ -713,6 +721,14 @@ public class PlayerService implements INetworkDispatch {
 		creature.setGrantedHealth(0);
 		
 		creature.setLevel((short) 1);
+		
+		if (creature.getGuildId() != 0) {
+			Guild guild = core.guildService.getGuildById(creature.getGuildId());
+			
+			if (guild != null && guild.getMembers().containsKey(creature.getObjectID())) {
+				guild.getMember(creature.getObjectID()).setLevel((short) 1);
+			}
+		}
 	}
 	
 	/*
@@ -883,6 +899,14 @@ public class PlayerService implements INetworkDispatch {
 			creature.showFlyText(OutOfBand.ProsePackage("@cbt_spam:skill_up"), 2.5f, new RGB(154, 205, 50), 0, true);
 			creature.playEffectObject("clienteffect/skill_granted.cef", "");
 			creature.playMusic("sound/music_acq_bountyhunter.snd");
+			
+			if (creature.getGuildId() != 0) {
+				Guild guild = core.guildService.getGuildById(creature.getGuildId());
+				
+				if (guild != null && guild.getMembers().containsKey(creature.getObjectID())) {
+					guild.getMember(creature.getObjectID()).setLevel((short) level);
+				}
+			}
 		} catch (InstantiationException | IllegalAccessException e) {
 			e.printStackTrace();
 		}

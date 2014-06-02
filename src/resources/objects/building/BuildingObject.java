@@ -41,6 +41,7 @@ import engine.clientdata.visitors.PortalVisitor;
 import engine.clients.Client;
 import engine.resources.objects.Baseline;
 import engine.resources.objects.IPersistent;
+import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
@@ -212,6 +213,9 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 	public void setBuildingName(String buildingName, CreatureObject owner) {
 		setCustomName(buildingName);
 		((CreatureObject) owner).sendSystemMessage("Structure renamed.", DisplayType.Broadcast);
+		SWGObject sign = (SWGObject) getAttachment("sign");
+		if(sign != null)
+			sign.setCustomName(buildingName);
 	}
 	
 	public boolean getResidency(){

@@ -13,6 +13,10 @@ def addPlanetSpawns(core, planet):
 	stcSvc = core.staticService
 	objSvc = core.objectService
 	
+	#Wattos shop
+	building = core.objectService.getObject(long(-466404040703268293)) 
+	
+	
 	# TODO Check all NPCs for personalized scripting, change format.
 	
 	# Cantina Interior
@@ -22,7 +26,7 @@ def addPlanetSpawns(core, planet):
 	
 	#Watto's Shop  ****TODO:  Get Proper cells for Watto's Shop once Buildout structures are spawning as intended again.
 	
-	watto = stcSvc.spawnObject('object/mobile/shared_watto.iff', 'tatooine', long(26670), float(4.7), float(-0.5), float(2.4), float(0.70), float(-0.71))
+	watto = stcSvc.spawnObject('object/mobile/shared_watto.iff', 'tatooine', building.getCellByCellNumber(2), float(4.7), float(-0.5), float(2.4), float(-0.71), float(0), float(0.70), float(0))
 	#watto.setCustomName2('Watto')
 	#watto.setOptionsBitmask(256)
 	
@@ -63,6 +67,9 @@ def addPlanetSpawns(core, planet):
 	commoner23.setCustomName2('a Commoner')
 	commoner23.setOptionsBitmask(256)
 	
+	#Junkdealer will be added as soon as i can find coords
+	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_03.iff', 'tatooine', long(0), float(-3060.50), float(5), float(2181.71), float(0), float(1))
+	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_03.iff', 'tatooine', long(0), float(-2924.53), float(5), float(2173.97), float(0), float(1))
 	
 	
 	return

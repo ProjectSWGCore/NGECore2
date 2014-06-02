@@ -2,7 +2,7 @@ package services.spawn;
 
 import java.util.Vector;
 
-public class LairGroupTemplate {
+public class LairGroupTemplate extends SpawnGroup{
 	
 	private Vector<LairSpawnTemplate> lairSpawnTemplates;
 	private String name;

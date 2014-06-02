@@ -121,5 +121,7 @@ def addPlanetSpawns(core, planet):
 	mackJasper.setCustomName2('Lieutenant Mack Jasper')
 	mackJasper.setOptionsBitmask(256)
 	
+	#Junkdealer will be added as soon as i can find coords
+	
 	
 	return

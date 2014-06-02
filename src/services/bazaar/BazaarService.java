@@ -22,14 +22,22 @@
 package services.bazaar;
 
 import java.nio.ByteOrder;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+
 
 import main.NGECore;
 import engine.clients.Client;
+import engine.resources.common.CRC;
 import engine.resources.database.ODBCursor;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
@@ -65,6 +73,7 @@ public class BazaarService implements INetworkDispatch {
 	private NGECore core;
 	private Set<AuctionItem> auctionItems = new ConcurrentSkipListSet<AuctionItem>();
 	private ConcurrentHashMap<Long, Integer> commodityLimit = new ConcurrentHashMap<Long, Integer>();
+	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	private final static int COMMODITY_LIMIT = 25;
 	private final static int MAX_BAZAAR_SALE_PRICE = 10000000;
 	private final static int SALES_FEE = 20;
@@ -88,8 +97,9 @@ public class BazaarService implements INetworkDispatch {
 			addAuctionItem((AuctionItem) cursor.next());
 		}
 		auctionItems.stream().map(AuctionItem::getItem).forEach(obj -> { 
+			obj.initializeBaselines();
 			obj.initAfterDBLoad(); 
-			obj.viewChildren(obj, true, true, obj2 -> obj2.initAfterDBLoad());
+			obj.viewChildren(obj, true, true, obj2 -> { obj2.initializeBaselines(); obj2.initAfterDBLoad(); });
 		});
 		cursor.close();
 	}
@@ -108,7 +118,16 @@ public class BazaarService implements INetworkDispatch {
 			
 			if (player == null)
 				return;
-						
+			
+			CommoditiesItemTypeListResponse response = new CommoditiesItemTypeListResponse();
+			
+			List<String> insertedItems = new ArrayList<String>();
+			auctionItems.stream().filter(i -> !insertedItems.contains(i.getItem().getObjectName().getStfValue())).forEach(i -> {
+				response.addItem(i);
+				insertedItems.add(i.getItem().getObjectName().getString());
+				System.out.println(i.getItem().getObjectName().getString());
+			});
+			
 			session.write(new CommoditiesItemTypeListResponse().serialize());
 			
 		});
@@ -135,8 +154,11 @@ public class BazaarService implements INetworkDispatch {
 			if(terminal == null)
 				return;
 			int permission = 2;
-			if(terminal.getAttachment("isVendor") != null && (Boolean) terminal.getAttachment("isVendor"))
+			if(terminal.getAttachment("isVendor") != null && (Boolean) terminal.getAttachment("isVendor")) {
+				if(!((Boolean) terminal.getAttachment("initialized")))
+					return;
 				permission = (long) terminal.getAttachment("vendorOwner") == player.getObjectID() ? 0 : 1;
+			}
 			Point3D pos = terminal.getWorldPosition();
 			session.write(new IsVendorOwnerResponseMessage(permission, 0, terminalId, getVendorUID((TangibleObject) terminal)).serialize());
 			
@@ -352,7 +374,7 @@ public class BazaarService implements INetworkDispatch {
 			if(vendor == null)
 				return;
 
-			getItemData(player, vendor, queryHeaders.getRange(), queryHeaders.getScreen(), queryHeaders.getCounter(), queryHeaders.getOffset(), queryHeaders.getItemTypeCRC(), queryHeaders.getMinPrice(), queryHeaders.getMaxPrice());
+			getItemData(player, vendor, queryHeaders.getRange(), queryHeaders.getScreen(), queryHeaders.getCounter(), queryHeaders.getOffset(), queryHeaders.getCategory(), queryHeaders.getMinPrice(), queryHeaders.getMaxPrice());
 			
 		});
 
@@ -524,7 +546,6 @@ public class BazaarService implements INetworkDispatch {
 		int displayedItems = 0;
 		
 		AuctionQueryHeadersResponseMessage response = new AuctionQueryHeadersResponseMessage(player.getObjectID(), screen, counter, offset, false);
-		
 		while(it.hasNext() && displayedItems < offset + 100) {
 			
 			AuctionItem item = it.next();
@@ -536,11 +557,13 @@ public class BazaarService implements INetworkDispatch {
 			
 				// Auctions
 				case 2:
-					if(item.getStatus() == AuctionItem.FORSALE) {
-						if((category & 255) != 0 && item.getItemType() == category) {
-							if(displayedItems >= offset)
-								response.addItem(item);
-							displayedItems++;
+					if(item.getStatus() == AuctionItem.FORSALE && item.isOnBazaar()) {
+						if((category & 255) != 0) {
+							if(item.getItemType() == category) {
+								if(displayedItems >= offset)
+									response.addItem(item);
+								displayedItems++;
+							}
 						} else if((item.getItemType() & category) != 0) {
 							if(displayedItems >= offset) 
 								response.addItem(item);
@@ -578,8 +601,29 @@ public class BazaarService implements INetworkDispatch {
 					if(item.getStatus() == AuctionItem.OFFERED && player.getObjectID() == item.getOfferToId())
 						response.addItem(item);						
 					break;
-				// Vendor search TODO later
+				// Vendor search
 				case 7:
+					if(item.getStatus() == AuctionItem.FORSALE && !item.isOnBazaar()) {
+						if(vendor.getObjectID() != item.getVendorId() && (core.objectService.getObject(item.getVendorId()) == null || (Boolean) core.objectService.getObject(item.getVendorId()).getAttachment("vendorSearchEnabled")))
+							break;
+						if((category & 255) != 0 && item.getItemType() == category) {
+							if(displayedItems >= offset)
+								response.addItem(item);
+							displayedItems++;
+						} else if((item.getItemType() & category) != 0) {
+							if(displayedItems >= offset) 
+								response.addItem(item);
+							displayedItems++;
+						} else if(item.getItemType() < 256 && category == 8192) {
+							if(displayedItems >= offset) 
+								response.addItem(item);
+							displayedItems++;
+						} else if(category == 0) {
+							if(displayedItems >= offset) 
+								response.addItem(item);
+							displayedItems++;
+						}
+					}
 					break;
 				// Stock
 				case 8:
@@ -698,18 +742,24 @@ public class BazaarService implements INetworkDispatch {
 		auctionItem.setItemDescription(description);
 		auctionItem.setPrice(price);
 		auctionItem.setItemType(item.getTemplateData().getAttribute("gameObjectType"));
+		auctionItem.setItemTypeCRC(CRC.StringtoCRC(item.getTemplate().replace("shared_", "")));
 		auctionItem.setStatus(AuctionItem.FORSALE);
 		//auctionItem.setItemName("@" + item.getStfFilename() + ":" + item.getStfName());
-		String name = item.getCustomName() == null ? "@" + item.getStfFilename() + ":" + item.getStfName() : item.getCustomName();
+		String name = item.getCustomName() == null ? item.getObjectName().getStfValue() : item.getCustomName();
 		auctionItem.setItemName(name);
 		auctionItem.setVendorId(vendor.getObjectID());
 		auctionItem.setPlanet(vendor.getPlanet().getName());
 		auctionItem.setVuid(getVendorUID((TangibleObject) vendor));
 		auctionItem.setOwnerName(player.getCustomName());
 		
-		if(vendor.getTemplate().contains("terminal_bazaar"))
+		if(vendor.getAttachment("isVendor") == null)
 			auctionItem.setOnBazaar(true);
-		
+		else {
+			if(!((long) vendor.getAttachment("vendorOwner") == player.getObjectID())) {
+				auctionItem.setOfferToId((long) vendor.getAttachment("owner"));
+				auctionItem.setStatus(AuctionItem.OFFERED);
+			}
+		}
 		addAuctionItem(auctionItem);
 		
 		return auctionItem;
@@ -747,6 +797,8 @@ public class BazaarService implements INetworkDispatch {
 	}
 	
 	public void addAuctionItem(AuctionItem auctionItem) {
+		if(auctionItem == null)
+			return;
 		auctionItems.add(auctionItem);
 		int commodityNumber = 0;
 		if(commodityLimit.get(auctionItem.getOwnerId()) != null)
@@ -764,6 +816,25 @@ public class BazaarService implements INetworkDispatch {
 			commodityNumber = commodityLimit.get(auctionItem.getOwnerId());
 		commodityLimit.put(auctionItem.getOwnerId(), commodityNumber - 1);
 		core.objectService.deletePersistentObject(auctionItem.getObjectId(), core.getAuctionODB());
+	}
+	
+	public void startVendorUpdateTask(CreatureObject owner, SWGObject vendor) {
+		
+		scheduler.scheduleAtFixedRate(() -> {
+			if(vendor == null || !((Boolean) vendor.getAttachment("initialized")))
+				return;
+			
+			float maintenanceRate = 15;
+			if((Boolean) vendor.getAttachment("onMap"))
+				maintenanceRate += 6;
+			vendor.setAttachment("maintenanceAmount", (Integer) vendor.getAttachment("maintenanceAmount") - maintenanceRate);
+			// TODO add vendor delete after x days
+		}, 1, 1, TimeUnit.HOURS);
+		
+	}
+	
+	public int getNumberOfItemsForSale(long vendorId) {
+		return (int) auctionItems.parallelStream().filter(i -> i.getVendorId() == vendorId).count();
 	}
 	
 }

@@ -117,6 +117,7 @@ public class SWGSet<E> implements Set<E>, Serializable {
 	
 	public void clear() {
 		synchronized(objectMutex) {
+			set.clear();
 			queue(item(2, null, null, false, false));
 		}
 	}
@@ -248,11 +249,11 @@ public class SWGSet<E> implements Set<E>, Serializable {
 	}
 	
 	private byte[] item(int type, Object index, byte[] data, boolean useIndex, boolean useData) {
-		if (useIndex && ((index instanceof IDelta) || !valid(index))) {
+		if (useIndex && !valid(index)) {
 			throw new IllegalArgumentException();
 		}
 		
-		int size = 1 + ((useIndex) ? (2 + Baseline.toBytes(index).length) : 0) + ((useData) ? data.length : 0);
+		int size = 1 + ((useIndex) ? Baseline.toBytes(index).length : 0) + ((useData) ? data.length : 0);
 		
 		IoBuffer buffer = Delta.createBuffer(size);
 		buffer.put((byte) type);

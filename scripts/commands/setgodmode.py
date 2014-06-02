@@ -1,6 +1,7 @@
 import sys
 from engine.resources.scene import Point3D
 from protocol.swg import ObjControllerMessage
+from protocol.swg import UnknownAbilityPacket
 from engine.resources.objects import SWGObject
 
 def setup():
@@ -114,6 +115,9 @@ def run(core, actor, target, commandString):
 			playerObject.setGodLevel(0)
 	
 	elif command == 'setBounty':
+		if actor.getFaction() == "":
+			actor.sendSystemMessage('You must be aligned in order to place a bounty on yourself.', 0)
+			return
 		core.playerService.sendSetBountyWindow(actor, actor)
 		return
 		
@@ -125,4 +129,9 @@ def run(core, actor, target, commandString):
 		if inventory:
 			inventory.add(object)
 	
+	elif command == 'unknownAbilityPacket' and arg1:
+		packet = UnknownAbilityPacket(arg1)
+		actor.getClient().getSession().write(packet.serialize())
+		actor.sendSystemMessage('Sent UnknownAbilityPacket for ability ' + arg1, 0)
+		return
 	return

@@ -56,14 +56,7 @@ def addPlanetSpawns(core, planet):
 	rockmite29 = stcSvc.spawnObject('rockmite', 'tatooine', long(0), float(3752), float(5), float(-4659), float(0), float(0), float(0), float(0), 30)	
 	rockmite210 = stcSvc.spawnObject('rockmite', 'tatooine', long(0), float(3769), float(5), float(-4650), float(0), float(0), float(0), float(0), 30)	
 	rockmite211 = stcSvc.spawnObject('rockmite', 'tatooine', long(0), float(3778), float(5), float(-4647), float(0), float(0), float(0), float(0), 30)	
-	rockmite212 = stcSvc.spawnObject('rockmite', 'tatooine', long(0), float(3727), float(5), float(-4647), float(0), float(0), float(0), float(0), 30)	
-	rockmite213 = stcSvc.spawnObject('rockmite', 'tatooine', long(0), float(3742), float(5), float(-4637), float(0), float(0), float(0), float(0), 30)	
-	rockmite214 = stcSvc.spawnObject('rockmite', 'tatooine', long(0), float(3755), float(5), float(-4635), float(0), float(0), float(0), float(0), 30)	
-	rockmite215 = stcSvc.spawnObject('rockmite', 'tatooine', long(0), float(3771), float(5), float(-4660), float(0), float(0), float(0), float(0), 30)	
-	rockmite216 = stcSvc.spawnObject('rockmite', 'tatooine', long(0), float(3785), float(5), float(-4657), float(0), float(0), float(0), float(0), 30)	
-	rockmite217 = stcSvc.spawnObject('rockmite', 'tatooine', long(0), float(3774), float(5), float(-4663), float(0), float(0), float(0), float(0), 30)	
-	rockmite218 = stcSvc.spawnObject('rockmite', 'tatooine', long(0), float(3767), float(5), float(-4672), float(0), float(0), float(0), float(0), 30)	
-	rockmite219 = stcSvc.spawnObject('rockmite', 'tatooine', long(0), float(3754), float(5), float(-4666), float(0), float(0), float(0), float(0), 30)	
-	rockmite220 = stcSvc.spawnObject('rockmite', 'tatooine', long(0), float(3717), float(5), float(-4633), float(0), float(0), float(0), float(0), 30)	
+
+
 	
 	return

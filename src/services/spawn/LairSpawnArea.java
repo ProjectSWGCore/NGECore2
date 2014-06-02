@@ -29,6 +29,7 @@ import net.engio.mbassy.listener.Handler;
 import resources.common.collidables.AbstractCollidable;
 import resources.common.collidables.AbstractCollidable.EnterEvent;
 import resources.common.collidables.AbstractCollidable.ExitEvent;
+import resources.datatables.Options;
 import resources.objects.creature.CreatureObject;
 import services.SimulationService.MoveEvent;
 import services.TerrainService;
@@ -90,7 +91,11 @@ public class LairSpawnArea extends SpawnArea {
 				
 		LairSpawnTemplate lairSpawn = lairTemplates.get(random.nextInt(lairTemplates.size()));
 		
-		int level = random.nextInt((int) (lairSpawn.getMaxLevel() - lairSpawn.getMinLevel()) + 1) + lairSpawn.getMinLevel();
+		int level = -1; // If level equals -1 then the mobile template CL will be used!
+		if (lairSpawn.getMinLevel() != -1 && lairSpawn.getMaxLevel()!=-1)
+			level = random.nextInt((int) (lairSpawn.getMaxLevel() - lairSpawn.getMinLevel()) + 1) + lairSpawn.getMinLevel();
+		
+		
 		
 		LairActor lairActor = core.spawnService.spawnLair(lairSpawn.getLairTemplate(), getPlanet(), randomPosition, (short) level);
 		if(lairActor == null)
@@ -111,7 +116,7 @@ public class LairSpawnArea extends SpawnArea {
 		
 		CreatureObject creature = (CreatureObject) object;
 		
-		if(creature.getSlottedObject("ghost") == null)
+		if(creature.getSlottedObject("ghost") == null && !creature.getOption(Options.MOUNT))
 			return;
 		
 		spawnLair(creature);
@@ -130,7 +135,7 @@ public class LairSpawnArea extends SpawnArea {
 		
 		CreatureObject creature = (CreatureObject) object;
 		
-		if(creature.getSlottedObject("ghost") == null)
+		if(creature.getSlottedObject("ghost") == null && !creature.getOption(Options.MOUNT))
 			return;
 
 		creature.getEventBus().unsubscribe(this);
@@ -142,12 +147,15 @@ public class LairSpawnArea extends SpawnArea {
 		
 		SWGObject object = event.object;
 		
-		if(object == null || !(object instanceof CreatureObject) || object.getContainer() != null)
+		//if(object == null || !(object instanceof CreatureObject) || object.getContainer() != null)
+		//	return;
+		
+		if(object == null || !(object instanceof CreatureObject))
 			return;
 		
 		CreatureObject creature = (CreatureObject) object;
 		
-		if(creature.getSlottedObject("ghost") == null)
+		if(creature.getSlottedObject("ghost") == null && !creature.getOption(Options.MOUNT))
 			return;
 		
 		if(new Random().nextFloat() <= 0.05)
