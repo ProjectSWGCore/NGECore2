@@ -127,6 +127,13 @@ public class PlayerService implements INetworkDispatch {
 		}, 45, 45, TimeUnit.SECONDS));
 		
 		scheduleList.add(scheduler.scheduleAtFixedRate(() -> {
+			PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
+			player.setTotalPlayTime((int) (player.getTotalPlayTime() + ((System.currentTimeMillis() - player.getLastPlayTimeUpdate()) / 1000)));
+			player.setLastPlayTimeUpdate(System.currentTimeMillis());
+			core.collectionService.checkExplorationRegions(creature);
+		}, 30, 30, TimeUnit.SECONDS));
+		
+		scheduleList.add(scheduler.scheduleAtFixedRate(() -> {
 			if (creature.isInStealth() && !creature.getOption(Options.INVULNERABLE) && ((PlayerObject) creature.getSlottedObject("ghost")).getGodLevel() == 0) {
 				List<SWGObject> objects = core.simulationService.get(creature.getPlanet(), creature.getPosition().x, creature.getPosition().z, 64);
 				
@@ -149,14 +156,11 @@ public class PlayerService implements INetworkDispatch {
 					}
 				}
 			}
+			
+			if (creature.getDefendersList().size() == 0 && creature.isInCombat()) {
+				creature.setInCombat(false);
+			}
 		}, 15, 15, TimeUnit.SECONDS));
-		
-		scheduleList.add(scheduler.scheduleAtFixedRate(() -> {
-			PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
-			player.setTotalPlayTime((int) (player.getTotalPlayTime() + ((System.currentTimeMillis() - player.getLastPlayTimeUpdate()) / 1000)));
-			player.setLastPlayTimeUpdate(System.currentTimeMillis());
-			core.collectionService.checkExplorationRegions(creature);
-		}, 30, 30, TimeUnit.SECONDS));
 		
 		scheduleList.add(scheduler.scheduleAtFixedRate(() -> {
 			if(creature.getAction() < creature.getMaxAction() && creature.getPosture() != 14) {
