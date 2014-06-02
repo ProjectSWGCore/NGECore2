@@ -67,6 +67,9 @@ def addPlanetSpawns(core, planet):
 	commoner23.setCustomName2('a Commoner')
 	commoner23.setOptionsBitmask(256)
 	
+	#Junkdealer will be added as soon as i can find coords
+	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_03.iff', 'tatooine', long(0), float(-3060.50), float(5), float(2181.71), float(0), float(1))
+	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_03.iff', 'tatooine', long(0), float(-2924.53), float(5), float(2173.97), float(0), float(1))
 	
 	
 	return

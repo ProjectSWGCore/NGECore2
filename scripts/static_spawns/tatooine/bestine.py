@@ -96,5 +96,12 @@ def addPlanetSpawns(core, planet):
 	#calebKnolar.setCustomName2('Major Caleb Knolar')
 	#calebKnolar.setOptionsBitmask(256)
 	
+	#Junk Dealers
+	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_01.iff', 'tatooine', long(0), float(-1287), float(12), float(-3655), float(0.71), float(0.71))
+	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_01.iff', 'tatooine', long(0), float(-1259), float(12), float(-3673), float(0.71), float(-0.71))
+	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_01.iff', 'tatooine', long(0), float(-1026), float(10), float(-3557), float(0), float(0))
+	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_01.iff', 'tatooine', long(0), float(-1260), float(12), float(-3573), float(0), float(1))
+	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_01.iff', 'tatooine', long(0), float(-1126), float(12), float(-3674), float(0.71), float(-0.71))
+	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_01.iff', 'tatooine', long(0), float(-1118), float(12), float(-3687), float(0), float(0))
 	return
 	
