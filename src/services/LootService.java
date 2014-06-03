@@ -190,13 +190,17 @@ public class LootService implements INetworkDispatch {
 	    // set info above corpse
 	    //System.out.println("lootedObject instanceof CreatureObject " + (lootedObject instanceof CreatureObject));
 	    if (lootedObject instanceof CreatureObject){
-		    float y = 0.5F; // 1.3356977F
-		    float qz= 1.06535322E9F;
-		    Point3D effectorPosition = new Point3D(0,y,0);
-			Quaternion effectorOrientation = new Quaternion(0,0,0,qz);
-		    PlayClientEffectObjectTransformMessage lmsg = new PlayClientEffectObjectTransformMessage("appearance/pt_loot_disc.prt",lootedObject.getObjectID(),"lootMe",effectorPosition,effectorOrientation);
-		    requester.getClient().getSession().write(lmsg.serialize());
-		    tools.CharonPacketUtils.printAnalysis(lmsg.serialize());  
+	    	try {
+			    float y = 0.5F; // 1.3356977F
+			    float qz= 1.06535322E9F;
+			    Point3D effectorPosition = new Point3D(0,y,0);
+				Quaternion effectorOrientation = new Quaternion(0,0,0,qz);
+			    PlayClientEffectObjectTransformMessage lmsg = new PlayClientEffectObjectTransformMessage("appearance/pt_loot_disc.prt",lootedObject.getObjectID(),"lootMe",effectorPosition,effectorOrientation);
+			    requester.getClient().getSession().write(lmsg.serialize());
+			    tools.CharonPacketUtils.printAnalysis(lmsg.serialize());
+	    	} catch (Exception e) {
+	    		e.printStackTrace();
+	    	}
 	    }
 	    
 	    // handle errors
