@@ -21,7 +21,7 @@ def lootDescriptor():
 
 def itemStats():
 
-	stats = ['buffeffect','Constitution','+250']
+	stats =['proc_name','forceCrystalHealth','forceCrystalHealth']
 	stats +=['effectname','Extended Constitution','Extended Constitution']
 	stats +=['duration','10800','10800']
 	stats +=['cooldown','86400','86400']

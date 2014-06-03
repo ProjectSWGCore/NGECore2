@@ -757,7 +757,7 @@ public class LootService implements INetworkDispatch {
 	
 	private DraftSchematic createDroppedSchematic(String template,Planet planet){
 		DraftSchematic droppedItem = (DraftSchematic) core.objectService.createObject(template, planet);				
-    	System.out.println("droppedItem " + droppedItem);
+    	//System.out.println("droppedItem " + droppedItem);
     	return droppedItem;
 	}
 	
@@ -963,7 +963,7 @@ public class LootService implements INetworkDispatch {
 			else
 				remainder += span; 
 			if (randomItemFromPool<=remainder){
-				fillChest4(itemNames.get(i), owner, chest);			
+				fillChest4(itemNames.get(i), owner, chest);
 				//break;
 				return;
 			}						
@@ -1166,10 +1166,10 @@ public class LootService implements INetworkDispatch {
 		{
 			DraftSchematic droppedSchematic  = createDroppedSchematic(itemTemplate,owner.getPlanet());
 			if (droppedSchematic!=null){
-				droppedItem.getAttributes().put("@obj_attr_n:rare_loot_category", "\\#D1F56F Rare Item \\#FFFFFF ");
+				droppedSchematic.getAttributes().put("@obj_attr_n:rare_loot_category", "\\#D1F56F Rare Item \\#FFFFFF ");
 		    	SWGObject inventory = owner.getSlottedObject("inventory");
-		    	inventory.add(droppedItem);
-		    	System.out.println("ACTUAL DROP " + droppedItem.getTemplate());
+		    	inventory.add(droppedSchematic);
+		    	System.out.println("ACTUAL DROP " + droppedSchematic.getTemplate());
 			}
 		}
     	
@@ -1671,20 +1671,6 @@ public class LootService implements INetworkDispatch {
 	
 	private void setBuffItemStat(TangibleObject buffItem, String statName, String minValue, String maxValue){
 		
-		if (statName.equals("buffeffect")){
-			String result = "";
-			if (minValue.length()==0)
-				if (maxValue.length()==0)
-					result = "Error";
-			
-			if (minValue.length()>0)
-				result = minValue;
-			if (maxValue.length()>0)
-				result = maxValue;
-			buffItem.setAttachment("BuffEffect", minValue);
-			buffItem.setAttachment("BuffEffectMagnitude", maxValue);
-		}
-		
 		if (statName.equals("effectname")){
 			String result = minValue;
 			if (minValue.length()==0)
@@ -1693,6 +1679,16 @@ public class LootService implements INetworkDispatch {
 			buffItem.setAttachment("BuffEffectName", result);
 			buffItem.getAttributes().put("@obj_attr_n:proc_name", result);
 		}
+		
+		if (statName.equals("proc_name")){
+			String result = minValue;
+			if (minValue.length()==0)
+				if (maxValue.length()==0)
+					result = "Error";
+			buffItem.setAttachment("BuffProcName", result);
+			buffItem.setStringAttribute("proc_name",result);
+		}
+		
 		
 		if (statName.equals("duration")){
 			int minimalValue = (int) Integer.parseInt(minValue);
@@ -1729,8 +1725,7 @@ public class LootService implements INetworkDispatch {
 		
 		// Shard of the Serpent
 		if (buffItem.getCustomName().contains("Serpent")){
-			buffItem.setAttachment("Post_BL_radial_filename", "item/shard_of_the_serpent");
-			buffItem.setAttachment("radial_filename", "item/biolink");
+			buffItem.setAttachment("radial_filename", "item/item");
 			buffItem.setStfFilename("static_item_n");
 			buffItem.setStfName("item_tow_buff_crystal_02_03");
 			buffItem.setDetailFilename("static_item_d");
@@ -1739,8 +1734,7 @@ public class LootService implements INetworkDispatch {
 		}
 		// Shard of Ferocity
 		if (buffItem.getCustomName().contains("Ferocity")){
-			buffItem.setAttachment("Post_BL_radial_filename", "item/shard_of_ferocity");
-			buffItem.setAttachment("radial_filename", "item/biolink");
+			buffItem.setAttachment("radial_filename", "item/item");
 			buffItem.setStfFilename("static_item_n");
 			buffItem.setStfName("item_tow_crystal_uber_01_05");
 			buffItem.setDetailFilename("static_item_d");
@@ -1750,8 +1744,7 @@ public class LootService implements INetworkDispatch {
 		}
 		// Shard of Retaliation
 		if (buffItem.getCustomName().contains("Retaliation")){
-			buffItem.setAttachment("Post_BL_radial_filename", "item/shard_of_retaliation");
-			buffItem.setAttachment("radial_filename", "item/biolink");
+			buffItem.setAttachment("radial_filename", "item/item");
 			buffItem.setStfFilename("static_item_n");
 			buffItem.setStfName("item_tow_crystal_uber_02_05");
 			buffItem.setDetailFilename("static_item_d");
@@ -1759,8 +1752,7 @@ public class LootService implements INetworkDispatch {
 		}
 		// Sith Buff Holocron
 		if (buffItem.getCustomName().contains("Sith")){
-			buffItem.setAttachment("Post_BL_radial_filename", "item/sith_buff_holocron");
-			buffItem.setAttachment("radial_filename", "item/biolink");
+			buffItem.setAttachment("radial_filename", "item/item");
 			buffItem.setStfFilename("static_item_n");
 			buffItem.setStfName("item_tow_holocron_ab_immune_01_02");
 			buffItem.setDetailFilename("static_item_d");
