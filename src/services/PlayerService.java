@@ -1345,7 +1345,7 @@ public class PlayerService implements INetworkDispatch {
 
 			@Override
 			public void process(SWGObject owner, int eventType, Vector<String> returnList) {
-				if (eventType == 0 && returnList.get(0) != null) {
+				if (eventType == 0 && returnList.size() > 0 && returnList.get(0) != null) {
 					int bounty = Integer.parseInt(returnList.get(0));
 					int totalFunds = victim.getBankCredits() + victim.getCashCredits();
 					
