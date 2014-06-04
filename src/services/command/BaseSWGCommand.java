@@ -50,8 +50,7 @@ public class BaseSWGCommand implements Cloneable {
 	private float cooldown;
 	private float executeTime;
 	private float warmupTime;
-	//private Long[] invalidLocomotions; // Not tracked anywhere
-	private Byte[] invalidPostures;
+	private Byte[] invalidLocomotions;
 	private Long[] invalidStates;
 	
 	public BaseSWGCommand(String commandName) {
@@ -67,8 +66,8 @@ public class BaseSWGCommand implements Cloneable {
 			"command_table", "command_table_ground", "command_table_space" };
 			
 			for (int n = 0; n < tableArray.length; n++) {
+				List<Byte> invalidLocomotions = new ArrayList<Byte>();
 				List<Long> invalidStates = new ArrayList<Long>();
-				List<Byte> invalidPostures = new ArrayList<Byte>();
 				
 				DatatableVisitor visitor2 = ClientFileManager.loadFile("datatables/command/" + tableArray[n] + ".iff", DatatableVisitor.class);
 				
@@ -79,20 +78,11 @@ public class BaseSWGCommand implements Cloneable {
 							
 							characterAbility = (String) visitor2.getObject(i, 7);
 							
-							if (!((Boolean) visitor2.getObject(i, 8-sub))) invalidPostures.add((byte) 0);
-							if (!((Boolean) visitor2.getObject(i, 9-sub))) invalidPostures.add((byte) 3);
-							if (!((Boolean) visitor2.getObject(i, 15-sub))) invalidPostures.add((byte) 2);
-							if (!((Boolean) visitor2.getObject(i, 18-sub))) invalidPostures.add((byte) 5);
-							if (!((Boolean) visitor2.getObject(i, 20-sub))) invalidPostures.add((byte) 6);
-							if (!((Boolean) visitor2.getObject(i, 21-sub))) invalidPostures.add((byte) 7);
-							if (!((Boolean) visitor2.getObject(i, 22-sub))) invalidPostures.add((byte) 8);
-							if (!((Boolean) visitor2.getObject(i, 23-sub))) invalidPostures.add((byte) 9);
-							if (!((Boolean) visitor2.getObject(i, 24-sub))) invalidPostures.add((byte) 10);
-							if (!((Boolean) visitor2.getObject(i, 25-sub))) invalidPostures.add((byte) 11);
-							if (!((Boolean) visitor2.getObject(i, 26-sub))) invalidPostures.add((byte) 12);
-							if (!((Boolean) visitor2.getObject(i, 27-sub))) invalidPostures.add((byte) 13);
-							if (!((Boolean) visitor2.getObject(i, 28-sub))) invalidPostures.add((byte) 14);
-							if (!((Boolean) visitor2.getObject(i, 29-sub))) invalidPostures.add((byte) 4);
+							for (int l = (8 - sub); l <= (29 - sub); l++) {
+								if (!((Boolean) visitor2.getObject(i, l))) {
+									invalidLocomotions.add((byte) (l - (8 - sub)));
+								}
+							}
 							
 							if (tableArray[n].startsWith("client_") || tableArray[n].startsWith("command_table_")) {
 								sub += 1;
@@ -164,7 +154,7 @@ public class BaseSWGCommand implements Cloneable {
 							executeTime = (Float) visitor2.getObject(i, 87-sub);
 							cooldown = (Float) visitor2.getObject(i, 88-sub);
 							
-							this.invalidPostures = invalidPostures.toArray(new Byte[] { });
+							this.invalidLocomotions = invalidLocomotions.toArray(new Byte[] { });
 							this.invalidStates = invalidStates.toArray(new Long[] { });
 							
 							foundCommand = true;
@@ -230,8 +220,8 @@ public class BaseSWGCommand implements Cloneable {
 		this.characterAbility = characterAbility;
 	}
 	
-	public Byte[] getInvalidPostures() {
-		return invalidPostures;
+	public Byte[] getInvalidLocomotions() {
+		return invalidLocomotions;
 	}
 	
 	public Long[] getInvalidStates() {

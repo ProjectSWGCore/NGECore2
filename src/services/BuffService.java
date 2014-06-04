@@ -91,11 +91,14 @@ public class BuffService implements INetworkDispatch {
 		
 		if(buff == null) return false;
 		
+		// Here the necessary checks must be placed to prevent buffs from the same buff group (e.g. Buff D) being stacked!
+		
 		if(buff.isGroupBuff()) {
 			addGroupBuff(buffer, buffName, buffer);
 			return true;
 		} else {
-			doAddBuff(target, buffName, buffer);
+			if (! hasBuff(target,buffName)) // QA, prevent infinite "refreshing" of buff by repeated use
+				doAddBuff(target, buffName, buffer);
 			return true;
 		}
 	}
@@ -288,6 +291,14 @@ public class BuffService implements INetworkDispatch {
 
 		}
 
+	}
+	
+	public boolean hasBuff(final CreatureObject creature, String buffName) {
+
+		for(final Buff buff : creature.getBuffList().get().toArray(new Buff[] { })) {
+			if (buff.getBuffName().contains(buffName)) { return true; }
+		}
+		return false;
 	}
 	
 	public void addGroupBuff(CreatureObject buffer, String buffName) {

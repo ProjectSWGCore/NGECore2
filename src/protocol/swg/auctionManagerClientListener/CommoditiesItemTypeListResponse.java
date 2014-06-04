@@ -22,31 +22,75 @@
 package protocol.swg.auctionManagerClientListener;
 
 import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import main.NGECore;
 
 import org.apache.mina.core.buffer.IoBuffer;
+import org.apache.mina.core.buffer.SimpleBufferAllocator;
 
 import protocol.swg.SWGMessage;
+import services.bazaar.AuctionItem;
 
 public class CommoditiesItemTypeListResponse extends SWGMessage {
+	
+	private Map<Integer, List<AuctionItem>> itemList = new HashMap<Integer, List<AuctionItem>>();
+	private static SimpleBufferAllocator bufferPool = new SimpleBufferAllocator();
+	
+	public void addItem(AuctionItem item) {
+		if(itemList.get(item.getItemType()) == null)
+			itemList.put(item.getItemType(), new ArrayList<AuctionItem>());
+		itemList.get(item.getItemType()).add(item);
+	}
 
 	@Override
 	public void deserialize(IoBuffer data) {
 		// TODO Auto-generated method stub
 		
 	}
+	/**
+	 * Struct of category lists:
+	 * int numberofcategories
+	 * 
+	 * int category
+	 * number of items in category
+	 * 
+	 * int server crc (w/o shared_)
+	 * int category
+	 * astring stf filename
+	 * int spacer
+	 * astring stf name
+	 * 
+	 */
 
 	@Override
 	public IoBuffer serialize() {
-		// TODO: research how categories work
 		String galaxy = NGECore.getInstance().getGalaxyName();
-		IoBuffer result = IoBuffer.allocate(14 + galaxy.length()).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer result = bufferPool.allocate(14 + galaxy.length(), false).order(ByteOrder.LITTLE_ENDIAN);
+		result.setAutoExpand(true);
 		result.putShort((short) 2);
 		result.putInt(0xD4E937FC);
-		result.put(getAsciiString(galaxy + ".0"));
-		result.putInt(0);
-		return result.flip();
+		result.put(getAsciiString(galaxy + "." + Integer.toString(itemList.size())));
+		result.putInt(itemList.size());
+		
+		for(Entry<Integer, List<AuctionItem>> e : itemList.entrySet()) {
+			result.putInt(e.getKey());
+			result.putInt(e.getValue().size());
+			for(AuctionItem item : e.getValue()) {
+				result.putInt(item.getItemTypeCRC());
+				result.putInt(item.getItemType());
+				result.put(item.getItem().getObjectName().getBytes());
+			}
+		}
+		
+		int size = result.position();
+		IoBuffer result2 = IoBuffer.allocate(size).put(result.array(), 0, size);
+
+		return result2.flip();
 	}
 
 }

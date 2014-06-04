@@ -127,6 +127,13 @@ public class PlayerService implements INetworkDispatch {
 		}, 45, 45, TimeUnit.SECONDS));
 		
 		scheduleList.add(scheduler.scheduleAtFixedRate(() -> {
+			PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
+			player.setTotalPlayTime((int) (player.getTotalPlayTime() + ((System.currentTimeMillis() - player.getLastPlayTimeUpdate()) / 1000)));
+			player.setLastPlayTimeUpdate(System.currentTimeMillis());
+			core.collectionService.checkExplorationRegions(creature);
+		}, 30, 30, TimeUnit.SECONDS));
+		
+		scheduleList.add(scheduler.scheduleAtFixedRate(() -> {
 			if (creature.isInStealth() && !creature.getOption(Options.INVULNERABLE) && ((PlayerObject) creature.getSlottedObject("ghost")).getGodLevel() == 0) {
 				List<SWGObject> objects = core.simulationService.get(creature.getPlanet(), creature.getPosition().x, creature.getPosition().z, 64);
 				
@@ -149,14 +156,11 @@ public class PlayerService implements INetworkDispatch {
 					}
 				}
 			}
+			
+			if (creature.getDefendersList().size() == 0 && creature.isInCombat()) {
+				creature.setInCombat(false);
+			}
 		}, 15, 15, TimeUnit.SECONDS));
-		
-		scheduleList.add(scheduler.scheduleAtFixedRate(() -> {
-			PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
-			player.setTotalPlayTime((int) (player.getTotalPlayTime() + ((System.currentTimeMillis() - player.getLastPlayTimeUpdate()) / 1000)));
-			player.setLastPlayTimeUpdate(System.currentTimeMillis());
-			core.collectionService.checkExplorationRegions(creature);
-		}, 30, 30, TimeUnit.SECONDS));
 		
 		scheduleList.add(scheduler.scheduleAtFixedRate(() -> {
 			if(creature.getAction() < creature.getMaxAction() && creature.getPosture() != 14) {
@@ -889,8 +893,10 @@ public class PlayerService implements INetworkDispatch {
 			
 			creature.getClient().getSession().write((new ClientMfdStatusUpdateMessage((float) ((level >= 90) ? 90 : (level + 1)), "/GroundHUD.MFDStatus.vsp.role.targetLevel")).serialize());
 			creature.setLevel((short) level);
-			if (level == 90)
+			
+			if (level == 90) {
 				core.scriptService.callScript("scripts/collections/", "profession_master", player.getProfession(), core, creature);
+			}
 			
 			creature.showFlyText(OutOfBand.ProsePackage("@cbt_spam:skill_up"), 2.5f, new RGB(154, 205, 50), 0, true);
 			creature.playEffectObject("clienteffect/skill_granted.cef", "");
@@ -958,7 +964,10 @@ public class PlayerService implements INetworkDispatch {
 							creature.playEffectObject("clienteffect/level_granted.cef", "");
 							creature.getClient().getSession().write((new ClientMfdStatusUpdateMessage((float) ((creature.getLevel() == 90) ? 90 : (creature.getLevel() + 1)), "/GroundHUD.MFDStatus.vsp.role.targetLevel")).serialize());
 							creature.setLevel(((Integer) experienceTable.getObject(i, 0)).shortValue());
-							core.scriptService.callScript("scripts/collections/", "master_" + player.getProfession(), "addMasterBadge", core, creature);
+							
+							if (creature.getLevel() == 90) {
+								core.scriptService.callScript("scripts/collections/", "profession_master", player.getProfession(), core, creature);
+							}
 							
 							// 3. Add the relevant health/action and expertise points.
 							float luck = (((((float) (core.scriptService.getMethod("scripts/roadmap/", player.getProfession(), "getLuck").__call__().asInt()) + (core.scriptService.getMethod("scripts/roadmap/", creature.getStfName(), "getLuck").__call__().asInt())) / ((float) 90)) * ((float) creature.getLevel())) - ((float) creature.getSkillModBase("luck")));
@@ -1341,7 +1350,7 @@ public class PlayerService implements INetworkDispatch {
 
 			@Override
 			public void process(SWGObject owner, int eventType, Vector<String> returnList) {
-				if (eventType == 0 && returnList.get(0) != null) {
+				if (eventType == 0 && returnList.size() > 0 && returnList.get(0) != null) {
 					int bounty = Integer.parseInt(returnList.get(0));
 					int totalFunds = victim.getBankCredits() + victim.getCashCredits();
 					

@@ -85,6 +85,7 @@ import resources.objects.tangible.TangibleObject;
 import resources.common.*;
 import resources.common.collidables.AbstractCollidable;
 import resources.datatables.DisplayType;
+import resources.datatables.Locomotion;
 import resources.datatables.Options;
 import resources.datatables.PlayerFlags;
 import resources.datatables.Posture;
@@ -341,9 +342,9 @@ public class SimulationService implements INetworkDispatch {
 				
 				CreatureObject creature = (CreatureObject) client.getParent();
 				
-				CreatureObject object = (CreatureObject) client.getParent();
+				CreatureObject object = creature;
 				
-				if (core.mountService.isMounted(object)) {
+				if (core.mountService.isMounted(creature) && creature.getObjectID() == ((CreatureObject) creature.getContainer()).getOwnerId()) {
 					object = (CreatureObject) object.getContainer();
 				}
 				
@@ -366,64 +367,97 @@ public class SimulationService implements INetworkDispatch {
 					object.setMovementCounter(dataTransform.getMovementCounter());
 					creature.setMovementCounter(dataTransform.getMovementCounter());
 				}
+				
+				synchronized(creature.getMutex()) {
+					if (dataTransform.getSpeed() > 0.0f) {
+						switch (creature.getLocomotion()) {
+							case Locomotion.Prone:
+								creature.setLocomotion(Locomotion.Crawling);
+								break;
+							case Locomotion.ClimbingStationary:
+								creature.setLocomotion(Locomotion.Climbing);
+								break;
+							case Locomotion.Standing:
+							case Locomotion.Running:
+							case Locomotion.Walking:
+								if (dataTransform.getSpeed() >= (creature.getRunSpeed() * (creature.getSpeedMultiplierBase() + creature.getSpeedMultiplierMod()))) {
+									creature.setLocomotion(Locomotion.Running);
+								} else {
+									creature.setLocomotion(Locomotion.Walking);
+								}
+								
+								break;
+							case Locomotion.Sneaking:
+							case Locomotion.CrouchSneaking:
+							case Locomotion.CrouchWalking:
+								if (dataTransform.getSpeed() >= (creature.getRunSpeed() * (creature.getSpeedMultiplierBase() + creature.getSpeedMultiplierMod()))) {
+									creature.setLocomotion(Locomotion.CrouchSneaking);
+								} else {
+									creature.setLocomotion(Locomotion.CrouchWalking);
+								}
+								
+								break;
+						}
+					} else {
+						switch (creature.getLocomotion()) {
+							case Locomotion.Crawling:
+								creature.setLocomotion(Locomotion.Prone);
+								break;
+							case Locomotion.Climbing:
+								creature.setLocomotion(Locomotion.ClimbingStationary);
+								break;
+							case Locomotion.Running:
+							case Locomotion.Walking:
+								creature.setLocomotion(Locomotion.Standing);
+								break;
+							case Locomotion.CrouchSneaking:
+							case Locomotion.CrouchWalking:
+								creature.setLocomotion(Locomotion.Sneaking);
+								break;
+						}
+					}
+				}
+				
 				if(object.getContainer() != null) {
 					object.getContainer()._remove(object);
 					add(object, newPos.x, newPos.z);
-				} 
-				
-				
-
+				}
 				
 				//object.setParentId(0);
 				//object.setParent(null);
 			//	System.out.println("Parsed Height: " + core.terrainService.getHeight(object.getPlanetId(), dataTransform.getXPosition(), dataTransform.getZPosition())
 				//		 + " should be: " + dataTransform.getYPosition());
 				UpdateTransformMessage utm = new UpdateTransformMessage(object.getObjectID(), dataTransform.getTransformedX(), dataTransform.getTransformedY(), dataTransform.getTransformedZ(), dataTransform.getMovementCounter(), (byte) dataTransform.getMovementAngle(), dataTransform.getSpeed());
-	
-				List<SWGObject> newAwareObjects = get(object.getPlanet(), newPos.x, newPos.z, 512);
-				ArrayList<SWGObject> oldAwareObjects = new ArrayList<SWGObject>(object.getAwareObjects());
-				@SuppressWarnings("unchecked") Collection<SWGObject> updateAwareObjects = CollectionUtils.intersection(oldAwareObjects, newAwareObjects);
 				object.notifyObservers(utm, false);
-
+				
+				List<SWGObject> newAwareObjects = get(creature.getPlanet(), newPos.x, newPos.z, 512);
+				ArrayList<SWGObject> oldAwareObjects = new ArrayList<SWGObject>(creature.getAwareObjects());
+				@SuppressWarnings("unchecked") Collection<SWGObject> updateAwareObjects = CollectionUtils.intersection(oldAwareObjects, newAwareObjects);
+				
 				for(int i = 0; i < oldAwareObjects.size(); i++) {
 					SWGObject obj = oldAwareObjects.get(i);
-					if(!updateAwareObjects.contains(obj) && obj != object && obj.getWorldPosition().getDistance2D(newPos) > 200 && obj.isInQuadtree() /*&& obj.getParentId() == 0*/) {
+					if(!updateAwareObjects.contains(obj) && obj != creature && obj.getWorldPosition().getDistance2D(newPos) > 200 && obj.isInQuadtree() /*&& obj.getParentId() == 0*/) {
 						if(obj.getAttachment("bigSpawnRange") != null && obj.getWorldPosition().getDistance2D(newPos) < 512)
 							continue;
-						object.makeUnaware(obj);
+						creature.makeUnaware(obj);
 						if(obj.getClient() != null)
-							obj.makeUnaware(object);
-					} else if(obj != object && obj.getWorldPosition().getDistance2D(newPos) > 200 && obj.isInQuadtree() && obj.getAttachment("bigSpawnRange") == null) {
-						object.makeUnaware(obj);
+							obj.makeUnaware(creature);
+					} else if(obj != creature && obj.getWorldPosition().getDistance2D(newPos) > 200 && obj.isInQuadtree() && obj.getAttachment("bigSpawnRange") == null) {
+						creature.makeUnaware(obj);
 						if(obj.getClient() != null)
-							obj.makeUnaware(object);
+							obj.makeUnaware(creature);
 					}
 				}
+				
 				for(int i = 0; i < newAwareObjects.size(); i++) {
 					SWGObject obj = newAwareObjects.get(i);
 					//System.out.println(obj.getTemplate());
-					if(!updateAwareObjects.contains(obj) && obj != object && !object.getAwareObjects().contains(obj) &&  obj.getContainer() != object && obj.isInQuadtree()) {						
+					if(!updateAwareObjects.contains(obj) && obj != creature && !creature.getAwareObjects().contains(obj) &&  obj.getContainer() != creature && obj.isInQuadtree()) {						
 						if(obj.getAttachment("bigSpawnRange") == null && obj.getWorldPosition().getDistance2D(newPos) > 200)
 							continue;						
-						//object.makeAware(obj);
-						
-						if (object.getOption(Options.MOUNT)){
-							CreatureObject owner = (CreatureObject) core.objectService.getObject(object.getOwnerId());
-							owner.makeAware(obj);
-						}
-						else {
-							object.makeAware(obj);
-						}
-						
-						if(obj.getClient() != null){
-							if (object.getOption(Options.MOUNT)){
-								CreatureObject owner = (CreatureObject) core.objectService.getObject(object.getOwnerId());
-								obj.makeAware(owner);
-							}
-							else {
-								obj.makeAware(object);
-							}
-						}
+						creature.makeAware(obj);
+						if(obj.getClient() != null)
+							obj.makeAware(creature);
 					}
 				}
 				
@@ -434,8 +468,7 @@ public class SimulationService implements INetworkDispatch {
 				object.getEventBus().publish(event);
 				
 			}
-				
-				
+			
 		});
 		
 		objControllerOpcodes.put(ObjControllerOpcodes.DATA_TRANSFORM_WITH_PARENT, new INetworkRemoteEvent() {
@@ -476,16 +509,15 @@ public class SimulationService implements INetworkDispatch {
 					return;
 				Point3D oldPos = object.getPosition();
 				Quaternion newOrientation = new Quaternion(dataTransform.getWOrientation(), dataTransform.getXOrientation(), dataTransform.getYOrientation(), dataTransform.getZOrientation());
-
+				
 				UpdateTransformWithParentMessage utm = new UpdateTransformWithParentMessage(object.getObjectID(), dataTransform.getCellId(), dataTransform.getTransformedX(), dataTransform.getTransformedY(), dataTransform.getTransformedZ(), dataTransform.getMovementCounter(), (byte) dataTransform.getMovementAngle(), dataTransform.getSpeed());
-
 				
 				if(object.getContainer() != parent) {
 					remove(object, oldPos.x, oldPos.z);
 					if(object.getContainer() != null)
 						object.getContainer()._remove(object);
 					if (object.getClient().isGM() && parent != null && parent instanceof CellObject && parent.getContainer() != null)
-						object.sendSystemMessage("BuildingId Hex: " + Long.toHexString(parent.getContainer().getObjectID()) + " CellNumber: " + ((CellObject) parent).getCellNumber(), DisplayType.Broadcast);
+						object.sendSystemMessage("BuildingId - Dec: " + parent.getContainer().getObjectID() + " Hex: " + Long.toHexString(parent.getContainer().getObjectID()) + " CellNumber: " + ((CellObject) parent).getCellNumber(), DisplayType.Broadcast);
 					parent._add(object);
 				}
 				object.setPosition(newPos);
@@ -495,10 +527,58 @@ public class SimulationService implements INetworkDispatch {
 				
 				checkForCollidables(object);
 				object.setAttachment("lastValidPosition", object.getPosition());
-
+				
+				synchronized(object.getMutex()) {
+					if (dataTransform.getSpeed() > 0.0f) {
+						switch (object.getLocomotion()) {
+							case Locomotion.Prone:
+								object.setLocomotion(Locomotion.Crawling);
+								break;
+							case Locomotion.ClimbingStationary:
+								object.setLocomotion(Locomotion.Climbing);
+								break;
+							case Locomotion.Standing:
+							case Locomotion.Running:
+							case Locomotion.Walking:
+								if (dataTransform.getSpeed() >= (object.getRunSpeed() * (object.getSpeedMultiplierBase() + object.getSpeedMultiplierMod()))) {
+									object.setLocomotion(Locomotion.Running);
+								} else {
+									object.setLocomotion(Locomotion.Walking);
+								}
+								
+								break;
+							case Locomotion.Sneaking:
+							case Locomotion.CrouchSneaking:
+							case Locomotion.CrouchWalking:
+								if (dataTransform.getSpeed() >= (object.getRunSpeed() * (object.getSpeedMultiplierBase() + object.getSpeedMultiplierMod()))) {
+									object.setLocomotion(Locomotion.CrouchSneaking);
+								} else {
+									object.setLocomotion(Locomotion.CrouchWalking);
+								}
+								
+								break;
+						}
+					} else {
+						switch (object.getLocomotion()) {
+							case Locomotion.Crawling:
+								object.setLocomotion(Locomotion.Prone);
+								break;
+							case Locomotion.Climbing:
+								object.setLocomotion(Locomotion.ClimbingStationary);
+								break;
+							case Locomotion.Running:
+							case Locomotion.Walking:
+								object.setLocomotion(Locomotion.Standing);
+								break;
+							case Locomotion.CrouchSneaking:
+							case Locomotion.CrouchWalking:
+								object.setLocomotion(Locomotion.Sneaking);
+								break;
+						}
+					}
+				}
 			}
-				
-				
+			
 		});
 		
 		swgOpcodes.put(Opcodes.ClientOpenContainerMessage, new INetworkRemoteEvent() {
@@ -767,6 +847,7 @@ public class SimulationService implements INetworkDispatch {
         return new Point3D(x, y, z);
 
 	}
+	
 	/*
 	 * Moved this to ConnectionService which will disconnect them
 	 * from the server if they don't send packets for 5 minutes or more

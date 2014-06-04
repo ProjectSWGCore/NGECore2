@@ -22,7 +22,9 @@
 package services.bazaar;
 
 import java.nio.ByteOrder;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,8 +32,12 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+
+
 import main.NGECore;
 import engine.clients.Client;
+import engine.resources.common.CRC;
 import engine.resources.database.ODBCursor;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
@@ -112,7 +118,16 @@ public class BazaarService implements INetworkDispatch {
 			
 			if (player == null)
 				return;
-						
+			
+			CommoditiesItemTypeListResponse response = new CommoditiesItemTypeListResponse();
+			
+			List<String> insertedItems = new ArrayList<String>();
+			auctionItems.stream().filter(i -> !insertedItems.contains(i.getItem().getObjectName().getStfValue())).forEach(i -> {
+				response.addItem(i);
+				insertedItems.add(i.getItem().getObjectName().getString());
+				System.out.println(i.getItem().getObjectName().getString());
+			});
+			
 			session.write(new CommoditiesItemTypeListResponse().serialize());
 			
 		});
@@ -359,7 +374,7 @@ public class BazaarService implements INetworkDispatch {
 			if(vendor == null)
 				return;
 
-			getItemData(player, vendor, queryHeaders.getRange(), queryHeaders.getScreen(), queryHeaders.getCounter(), queryHeaders.getOffset(), queryHeaders.getItemTypeCRC(), queryHeaders.getMinPrice(), queryHeaders.getMaxPrice());
+			getItemData(player, vendor, queryHeaders.getRange(), queryHeaders.getScreen(), queryHeaders.getCounter(), queryHeaders.getOffset(), queryHeaders.getCategory(), queryHeaders.getMinPrice(), queryHeaders.getMaxPrice());
 			
 		});
 
@@ -531,7 +546,6 @@ public class BazaarService implements INetworkDispatch {
 		int displayedItems = 0;
 		
 		AuctionQueryHeadersResponseMessage response = new AuctionQueryHeadersResponseMessage(player.getObjectID(), screen, counter, offset, false);
-		
 		while(it.hasNext() && displayedItems < offset + 100) {
 			
 			AuctionItem item = it.next();
@@ -544,10 +558,12 @@ public class BazaarService implements INetworkDispatch {
 				// Auctions
 				case 2:
 					if(item.getStatus() == AuctionItem.FORSALE && item.isOnBazaar()) {
-						if((category & 255) != 0 && item.getItemType() == category) {
-							if(displayedItems >= offset)
-								response.addItem(item);
-							displayedItems++;
+						if((category & 255) != 0) {
+							if(item.getItemType() == category) {
+								if(displayedItems >= offset)
+									response.addItem(item);
+								displayedItems++;
+							}
 						} else if((item.getItemType() & category) != 0) {
 							if(displayedItems >= offset) 
 								response.addItem(item);
@@ -726,16 +742,17 @@ public class BazaarService implements INetworkDispatch {
 		auctionItem.setItemDescription(description);
 		auctionItem.setPrice(price);
 		auctionItem.setItemType(item.getTemplateData().getAttribute("gameObjectType"));
+		auctionItem.setItemTypeCRC(CRC.StringtoCRC(item.getTemplate().replace("shared_", "")));
 		auctionItem.setStatus(AuctionItem.FORSALE);
 		//auctionItem.setItemName("@" + item.getStfFilename() + ":" + item.getStfName());
-		String name = item.getCustomName() == null ? "@" + item.getStfFilename() + ":" + item.getStfName() : item.getCustomName();
+		String name = item.getCustomName() == null ? item.getObjectName().getStfValue() : item.getCustomName();
 		auctionItem.setItemName(name);
 		auctionItem.setVendorId(vendor.getObjectID());
 		auctionItem.setPlanet(vendor.getPlanet().getName());
 		auctionItem.setVuid(getVendorUID((TangibleObject) vendor));
 		auctionItem.setOwnerName(player.getCustomName());
 		
-		if(vendor.getTemplate().contains("terminal_bazaar"))
+		if(vendor.getAttachment("isVendor") == null)
 			auctionItem.setOnBazaar(true);
 		else {
 			if(!((long) vendor.getAttachment("vendorOwner") == player.getObjectID())) {
