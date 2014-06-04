@@ -50,13 +50,10 @@ import services.sui.SUIWindow;
 import services.sui.SUIWindow.SUICallback;
 import services.sui.SUIWindow.Trigger;
 import main.NGECore;
-import engine.clientdata.ClientFileManager;
 import engine.clientdata.StfTable;
-import engine.clientdata.visitors.DatatableVisitor;
 import engine.resources.objects.SWGObject;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
-import engine.resources.common.CRC;
 import engine.resources.common.Stf;
 
 public class GuildService implements INetworkDispatch {

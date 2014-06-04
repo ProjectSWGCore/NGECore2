@@ -27,7 +27,6 @@ import java.util.Vector;
 
 import resources.datatables.Options;
 import resources.datatables.PvpStatus;
-import resources.datatables.Factions;
 import resources.datatables.FactionStatus;
 import resources.loot.LootGroup;
 

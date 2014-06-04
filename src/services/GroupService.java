@@ -27,7 +27,6 @@ import java.util.Map;
 
 import resources.buffs.Buff;
 import resources.common.OutOfBand;
-import resources.common.ProsePackage;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
 import services.chat.ChatRoom;
