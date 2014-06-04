@@ -34,7 +34,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
-
 import main.NGECore;
 import protocol.swg.EnterStructurePlacementModeMessage;
 import resources.objects.building.BuildingObject;

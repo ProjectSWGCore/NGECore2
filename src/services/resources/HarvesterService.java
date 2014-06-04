@@ -1078,7 +1078,7 @@ public class HarvesterService implements INetworkDispatch {
 		String message = "Your construction is ready";
 		constructionNotificationMail.setMessage(message);
 		constructionNotificationMail.setStatus(Mail.NEW);
-		constructionNotificationMail.setAttachments(attachments);
+		constructionNotificationMail.setWaypointAttachments(attachments);
 		//NGECore.getInstance().chatService.sendPersistentMessage(actor.getClient(), constructionNotificationMail);
 		NGECore.getInstance().chatService.storePersistentMessage(constructionNotificationMail);
 		NGECore.getInstance().chatService.sendPersistentMessageHeader(actor.getClient(), constructionNotificationMail);

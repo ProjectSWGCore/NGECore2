@@ -21,9 +21,11 @@
  ******************************************************************************/
 package resources.common;
 
+import java.io.Serializable;
+
 import engine.resources.common.Stf;
 
-public class ProsePackage {
+public class ProsePackage implements Serializable {
 	
 	/*
 	 * TU = Text User
@@ -33,6 +35,8 @@ public class ProsePackage {
 	 * DF = Decimal Float
 	 */
 	
+	private static final long serialVersionUID = 1L;
+
 	private Stf stf = new Stf();
 	
 	private long tuObjectId = 0;

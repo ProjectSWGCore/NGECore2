@@ -690,7 +690,7 @@ public class PlayerCity implements Serializable {
 			attachment.positionY = 0;
 			attachment.positionZ = citizenObject.getPosition().z;
 			attachments.add(attachment);
-			actorMail.setAttachments(attachments);
+			actorMail.setWaypointAttachments(attachments);
 	        
 	        NGECore.getInstance().chatService.storePersistentMessage(actorMail);
 	        if (newCitizen.getClient()!=null)
@@ -722,7 +722,7 @@ public class PlayerCity implements Serializable {
 		attachment.positionY = 0;
 		attachment.positionZ = citizen.getPosition().z;
 		attachments.add(attachment);
-		actorMail.setAttachments(attachments);
+		actorMail.setWaypointAttachments(attachments);
 
 		
         NGECore.getInstance().chatService.storePersistentMessage(actorMail);
@@ -755,7 +755,7 @@ public class PlayerCity implements Serializable {
 			attachment.positionY = 0;
 			attachment.positionZ = citizenObject.getPosition().z;
 			attachments.add(attachment);
-			actorMail.setAttachments(attachments);
+			actorMail.setWaypointAttachments(attachments);
 	        
 	        NGECore.getInstance().chatService.storePersistentMessage(actorMail);
 	        if (newCitizen.getClient()!=null)
@@ -790,7 +790,7 @@ public class PlayerCity implements Serializable {
 			attachment.positionY = 0;
 			attachment.positionZ = citizenObject.getPosition().z;
 			attachments.add(attachment);
-			actorMail.setAttachments(attachments);
+			actorMail.setWaypointAttachments(attachments);
 	        
 	        NGECore.getInstance().chatService.storePersistentMessage(actorMail);
 	  
@@ -823,7 +823,7 @@ public class PlayerCity implements Serializable {
 			attachment.positionY = 0;
 			attachment.positionZ = citizenObject.getPosition().z;
 			attachments.add(attachment);
-			actorMail.setAttachments(attachments);
+			actorMail.setWaypointAttachments(attachments);
 	        
 	        NGECore.getInstance().chatService.storePersistentMessage(actorMail);
 		}
