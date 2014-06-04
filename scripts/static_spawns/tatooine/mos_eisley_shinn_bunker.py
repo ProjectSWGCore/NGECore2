@@ -41,7 +41,7 @@ def addPlanetSpawns(core, planet):
 	shinn_guard_o2 = stcSvc.spawnObject('shinn_guard', 'tatooine', long(0), float(3423), float(7), float(-5461), float(0), float(0), float(0), float(0), 30)	
 													
 	# Shinn Guards in Bunker
-	shinn_guard = stcSvc.spawnObject('shinn_guard', 'tatooine', building.getCellByCellName("hall1"), float(-3.3), float(0.3), float(3.6), float(0), float(0), float(0), float(0), 30)
+	shinn_guard = stcSvc.spawnObject('shinn_guard', 'tatooine', building.getCellByCellNumber(long(1)), float(-3.3), float(0.3), float(3.6), float(0), float(0), float(0), float(0), 30)
 	shinn_guard1 = stcSvc.spawnObject('shinn_guard', 'tatooine', building.getCellByCellNumber(long(3)), float(2.9), float(0.3), float(-4.0), float(0), float(0), float(0), float(0), 30)
 	shinn_guard2 = stcSvc.spawnObject('shinn_guard', 'tatooine', building.getCellByCellNumber(long(4)), float(3.8), float(-3.3), float(4.8), float(0), float(0), float(0), float(0), 30)
 	shinn_guard3 = stcSvc.spawnObject('shinn_guard', 'tatooine', building.getCellByCellNumber(long(5)), float(-4.4), float(-10.3), float(-6.1), float(0), float(0), float(0), float(0), 30)
