@@ -33,7 +33,6 @@ import main.NGECore;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.buffer.SimpleBufferAllocator;
 
-import engine.resources.objects.SWGObject;
 import protocol.swg.SWGMessage;
 import services.bazaar.AuctionItem;
 
