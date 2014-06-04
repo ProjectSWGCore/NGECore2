@@ -25,6 +25,7 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
@@ -163,9 +164,15 @@ public class SkillService implements INetworkDispatch {
 								}
 							}
 						} else {
+							Map<String, Integer> abilitiesMap = new TreeMap<String, Integer>();
+							
 							for (String ability : abilities) {
-								creature.addAbility(ability);
+								if (!creature.hasAbility(ability)) {
+									abilitiesMap.put(ability, 1);
+								}
 							}
+							
+							creature.getAbilities().putAll(abilitiesMap);
 							
 							for (String expertiseName : creature.getSkills()) {
 								if (expertiseName.startsWith("expertise")) {
