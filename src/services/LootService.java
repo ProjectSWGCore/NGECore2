@@ -223,9 +223,9 @@ public class LootService implements INetworkDispatch {
     		  		
     		// RLS chest effect
 	    	if (droppedItem.getAttachment("LootItemName").toString().contains("Loot Chest")){
-	    		requester.playEffectObject("clienteffect/level_granted.cef", "");
+	    		requester.playEffectObject("appearance/pt_loot_chest.prt", "");
 	    		if (requester.getClient().isGM()) {
-	    			requester.sendSystemMessage("GM Message: Played leveling effect due to RLC dropping.", DisplayType.Broadcast);
+	    			requester.sendSystemMessage("GM Message: Played rlc effect due to RLC dropping.", DisplayType.Broadcast);
 	    		}
 	    	}
     	}
