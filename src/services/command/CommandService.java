@@ -105,14 +105,12 @@ public class CommandService implements INetworkDispatch  {
 			}
 		}
 		
-		// This SHOULD be invalid locomotions but we don't track these currently.
-		// Postures are the best we can do.
-		for (byte posture : command.getInvalidPostures()) {
-			if (actor.getPosture() == posture) {
-				//return false;
+		for (byte locomotion : command.getInvalidLocomotions()) {
+			if (actor.getLocomotion() == locomotion) {
+				return false;
 			}
 		}
-
+		
 		switch (command.getTargetType()) {
 			case 0: // Target Not Used For This Command
 				break;
