@@ -21,7 +21,7 @@ def lootDescriptor():
 
 def itemStats():
 
-	stats = ['buffeffect','Action','+500']
+	stats =['proc_name','forceCrystalForce','forceCrystalForce']	
 	stats +=['effectname','Extended Action','Extended Action']
 	stats +=['duration','10800','10800']
 	stats +=['cooldown','86400','86400']

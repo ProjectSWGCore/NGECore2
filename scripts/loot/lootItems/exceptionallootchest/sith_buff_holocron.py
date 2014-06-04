@@ -17,7 +17,7 @@ def lootDescriptor():
 
 def itemStats():
 
-	stats = ['buffeffect','Action','+500']
+	stats =['proc_name','towCrystalABImmune','towCrystalABImmune']
 	stats +=['effectname','Forbidden Knowledge I','Forbidden Knowledge I']
 	stats +=['duration','180','180']
 	stats +=['cooldown','3600','3600']
