@@ -185,6 +185,8 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	@NotPersistent
 	private transient SWGObject useTarget;
 	
+	private byte locomotion = 0;
+	
 	public CreatureObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
 		super(objectID, planet, position, orientation, Template);
 		messageBuilder = new CreatureMessageBuilder(this);
@@ -381,20 +383,80 @@ public class CreatureObject extends TangibleObject implements Serializable {
 
 	public void setPosture(byte posture) {
 		synchronized(objectMutex) {
-			if (this.posture == 0x09) {
+			switch (posture) {
+				case resources.datatables.Posture.Invalid:
+					locomotion = -1;
+					break;
+				case resources.datatables.Posture.Upright:
+					locomotion = 0;
+					break;
+				case resources.datatables.Posture.Crouched:
+					locomotion = 4;
+					break;
+				case resources.datatables.Posture.Prone:
+					locomotion = 7;
+					break;
+				case resources.datatables.Posture.Sneaking:
+					locomotion = 1;
+					break;
+				case resources.datatables.Posture.Blocking:
+					locomotion = 21;
+					break;
+				case resources.datatables.Posture.Climbing:
+					locomotion = 9;
+					break;
+				case resources.datatables.Posture.Flying:
+					locomotion = 12;
+					break;
+				case resources.datatables.Posture.LyingDown:
+					locomotion = 13;
+					break;
+				case resources.datatables.Posture.Sitting:
+					locomotion = 14;
+					break;
+				case resources.datatables.Posture.SkillAnimating:
+					locomotion = 15;
+					break;
+				case resources.datatables.Posture.DrivingVehicle:
+					locomotion = 16;
+					break;
+				case resources.datatables.Posture.RidingCreature:
+					locomotion = 17;
+					break;
+				case resources.datatables.Posture.KnockedDown:
+					locomotion = 18;
+					break;
+				case resources.datatables.Posture.Incapacitated:
+					locomotion = 19;
+					break;
+				case resources.datatables.Posture.Dead:
+					locomotion = 20;
+					break;
+			}
+		}
+		
+		synchronized(objectMutex) {
+			if (this.posture == resources.datatables.Posture.SkillAnimating) {
 				stopPerformance();
 			}
-			if(this.posture == posture)
+			
+			if (this.posture == posture) {
 				return;
+			}
+			
 			this.posture = posture;
 		}
-
-		Posture postureUpdate = new Posture(getObjectID(), posture);
-		ObjControllerMessage objController = new ObjControllerMessage(0x1B, postureUpdate);
 		
 		notifyObservers(messageBuilder.buildPostureDelta(posture), true);
-		notifyObservers(objController, true);
-		
+		notifyObservers(new ObjControllerMessage(0x1B, new Posture(getObjectID(), posture)), true);
+	}
+	
+	public byte getLocomotion() {
+		return locomotion;
+	}
+	
+	public void setLocomotion(byte locomotion) {
+		this.locomotion = locomotion;
 	}
 	
 	public void startPerformance() {
