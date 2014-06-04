@@ -172,6 +172,11 @@ public class GroupService implements INetworkDispatch {
 		
 		if(group != null && group.getMemberList().size() < 8) {
 			
+			invited.setInviteCounter(invited.getInviteCounter() + 1);
+			invited.setInviteSenderId(0);
+			invited.setInviteSenderName("");
+			invited.updateGroupInviteInfo();
+			
 			group.addMember(invited);
 			invited.makeAware(group);
 			invited.setGroupId(group.getObjectID());	
