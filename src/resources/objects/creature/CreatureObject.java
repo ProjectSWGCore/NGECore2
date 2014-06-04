@@ -95,8 +95,7 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	private float turnRadius = 1;
 	private float walkSpeed = (float) 1.549;
 	private float waterModPercent = (float) 0.75;
-	private SWGList<String> abilities;
-	private int abilitiesUpdateCounter = 0;
+	private SWGMap<String, Integer> abilities;
 	private int xpBarValue = 0;
 	
 	private SWGMap<Long, Long> missionCriticalObjects;
@@ -193,7 +192,7 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		loadTemplateData();
 		skills = new ArrayList<String>();
 		skillMods = new SWGMap<String, SkillMod>(this, 4, 3, true);
-		abilities = new SWGList<String>(this, 4, 14, true);
+		abilities = new SWGMap<String, Integer>(this, 4, 14, true);
 		missionCriticalObjects = new SWGMap<Long, Long>(this, 4, 13, false);
 		equipmentList = new SWGList<Long>(this, 6, 23, false);
 		buffList = new SWGList<Buff>(this, 6, 26, false);
@@ -786,60 +785,29 @@ public class CreatureObject extends TangibleObject implements Serializable {
 			this.waterModPercent = waterModPercent;
 		}
 	}
-
-	public SWGList<String> getAbilities() {
+	
+	public SWGMap<String, Integer> getAbilities() {
 		return abilities;
 	}
 	
 	public boolean hasAbility(String name) {
-		for (String ability : abilities) {
-			if (ability.equals(name)) {
-				return true;
-			}
-		}
-		
-		return false;
+		return abilities.containsKey(name);
 	}
-
-	public int getAbilitiesUpdateCounter() {
-		synchronized(objectMutex) {
-			return abilitiesUpdateCounter;
-		}
-	}
-
-	public void setAbilitiesUpdateCounter(int abilitiesUpdateCounter) {
-		synchronized(objectMutex) {
-			this.abilitiesUpdateCounter = abilitiesUpdateCounter;
-		}
-	}
-	
 	
 	public void addAbility(String abilityName) {
-		
-		if(abilities.contains(abilityName))
+		if (abilities.containsKey(abilityName)) {
 			return;
-		
-		abilities.add(abilityName);
-		
-		if(getClient() != null) {
-			setAbilitiesUpdateCounter((short) (getAbilitiesUpdateCounter() + 1));
-			getClient().getSession().write(messageBuilder.buildAddAbilityDelta(abilityName));
 		}
-
+		
+		abilities.put(abilityName, 1);
 	}
 	
 	public void removeAbility(String abilityName) {
-		
-		if(!abilities.contains(abilityName))
+		if (!abilities.containsKey(abilityName)) {
 			return;
-		
-		abilities.remove(abilityName);
-		
-		if(getClient() != null) {
-			setAbilitiesUpdateCounter((short) (getAbilitiesUpdateCounter() + 1));
-			getClient().getSession().write(messageBuilder.buildRemoveAbilityDelta(abilityName));
 		}
 		
+		abilities.remove(abilityName);
 	}
 	
 	public SWGMap<Long, Long> getMissionCriticalObjects() {
@@ -1857,6 +1825,15 @@ public class CreatureObject extends TangibleObject implements Serializable {
 				switch (updateType) {
 					case 3: { 
 						buffer = messageBuilder.createDelta("CREO", (byte) 4, (short) 1, (byte) 3, buffer, buffer.array().length + 4);
+						
+						if (getClient() != null && getClient().getSession() != null) {
+							getClient().getSession().write(buffer);
+						}
+						
+						break;
+					}
+					case 14: { 
+						buffer = messageBuilder.createDelta("CREO", (byte) 4, (short) 1, (byte) 14, buffer, buffer.array().length + 4);
 						
 						if (getClient() != null && getClient().getSession() != null) {
 							getClient().getSession().write(buffer);
