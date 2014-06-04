@@ -705,6 +705,7 @@ public class PlayerService implements INetworkDispatch {
 		String xpType = ((player.getProfession().contains("entertainer")) ? "entertainer" : ((player.getProfession().contains("trader")) ? "crafting" : "combat_general"));
 			
 		player.setXp(xpType, 0);
+		creature.setXpBarValue(0);
 		
 		player.setProfessionWheelPosition("");
 		
@@ -759,6 +760,7 @@ public class PlayerService implements INetworkDispatch {
 			String xpType = ((player.getProfession().contains("entertainer")) ? "entertainer" : ((player.getProfession().contains("trader")) ? "crafting" : "combat_general"));
 			
 			player.setXp(xpType, experience);
+			creature.setXpBarValue(experience);
 			
 
 			// 2. Add the relevant health/action and expertise points.
