@@ -95,8 +95,7 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	private float turnRadius = 1;
 	private float walkSpeed = (float) 1.549;
 	private float waterModPercent = (float) 0.75;
-	private SWGList<String> abilities;
-	private int abilitiesUpdateCounter = 0;
+	private SWGMap<String, Integer> abilities;
 	private int xpBarValue = 0;
 	
 	private SWGMap<Long, Long> missionCriticalObjects;
@@ -185,13 +184,15 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	@NotPersistent
 	private transient SWGObject useTarget;
 	
+	private byte locomotion = 0;
+	
 	public CreatureObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
 		super(objectID, planet, position, orientation, Template);
 		messageBuilder = new CreatureMessageBuilder(this);
 		loadTemplateData();
 		skills = new ArrayList<String>();
 		skillMods = new SWGMap<String, SkillMod>(this, 4, 3, true);
-		abilities = new SWGList<String>(this, 4, 14, true);
+		abilities = new SWGMap<String, Integer>(this, 4, 14, true);
 		missionCriticalObjects = new SWGMap<Long, Long>(this, 4, 13, false);
 		equipmentList = new SWGList<Long>(this, 6, 23, false);
 		buffList = new SWGList<Buff>(this, 6, 26, false);
@@ -381,20 +382,80 @@ public class CreatureObject extends TangibleObject implements Serializable {
 
 	public void setPosture(byte posture) {
 		synchronized(objectMutex) {
-			if (this.posture == 0x09) {
+			switch (posture) {
+				case resources.datatables.Posture.Invalid:
+					locomotion = -1;
+					break;
+				case resources.datatables.Posture.Upright:
+					locomotion = 0;
+					break;
+				case resources.datatables.Posture.Crouched:
+					locomotion = 4;
+					break;
+				case resources.datatables.Posture.Prone:
+					locomotion = 7;
+					break;
+				case resources.datatables.Posture.Sneaking:
+					locomotion = 1;
+					break;
+				case resources.datatables.Posture.Blocking:
+					locomotion = 21;
+					break;
+				case resources.datatables.Posture.Climbing:
+					locomotion = 9;
+					break;
+				case resources.datatables.Posture.Flying:
+					locomotion = 12;
+					break;
+				case resources.datatables.Posture.LyingDown:
+					locomotion = 13;
+					break;
+				case resources.datatables.Posture.Sitting:
+					locomotion = 14;
+					break;
+				case resources.datatables.Posture.SkillAnimating:
+					locomotion = 15;
+					break;
+				case resources.datatables.Posture.DrivingVehicle:
+					locomotion = 16;
+					break;
+				case resources.datatables.Posture.RidingCreature:
+					locomotion = 17;
+					break;
+				case resources.datatables.Posture.KnockedDown:
+					locomotion = 18;
+					break;
+				case resources.datatables.Posture.Incapacitated:
+					locomotion = 19;
+					break;
+				case resources.datatables.Posture.Dead:
+					locomotion = 20;
+					break;
+			}
+		}
+		
+		synchronized(objectMutex) {
+			if (this.posture == resources.datatables.Posture.SkillAnimating) {
 				stopPerformance();
 			}
-			if(this.posture == posture)
+			
+			if (this.posture == posture) {
 				return;
+			}
+			
 			this.posture = posture;
 		}
-
-		Posture postureUpdate = new Posture(getObjectID(), posture);
-		ObjControllerMessage objController = new ObjControllerMessage(0x1B, postureUpdate);
 		
 		notifyObservers(messageBuilder.buildPostureDelta(posture), true);
-		notifyObservers(objController, true);
-		
+		notifyObservers(new ObjControllerMessage(0x1B, new Posture(getObjectID(), posture)), true);
+	}
+	
+	public byte getLocomotion() {
+		return locomotion;
+	}
+	
+	public void setLocomotion(byte locomotion) {
+		this.locomotion = locomotion;
 	}
 	
 	public void startPerformance() {
@@ -724,60 +785,29 @@ public class CreatureObject extends TangibleObject implements Serializable {
 			this.waterModPercent = waterModPercent;
 		}
 	}
-
-	public SWGList<String> getAbilities() {
+	
+	public SWGMap<String, Integer> getAbilities() {
 		return abilities;
 	}
 	
 	public boolean hasAbility(String name) {
-		for (String ability : abilities) {
-			if (ability.equals(name)) {
-				return true;
-			}
-		}
-		
-		return false;
+		return abilities.containsKey(name);
 	}
-
-	public int getAbilitiesUpdateCounter() {
-		synchronized(objectMutex) {
-			return abilitiesUpdateCounter;
-		}
-	}
-
-	public void setAbilitiesUpdateCounter(int abilitiesUpdateCounter) {
-		synchronized(objectMutex) {
-			this.abilitiesUpdateCounter = abilitiesUpdateCounter;
-		}
-	}
-	
 	
 	public void addAbility(String abilityName) {
-		
-		if(abilities.contains(abilityName))
+		if (abilities.containsKey(abilityName)) {
 			return;
-		
-		abilities.add(abilityName);
-		
-		if(getClient() != null) {
-			setAbilitiesUpdateCounter((short) (getAbilitiesUpdateCounter() + 1));
-			getClient().getSession().write(messageBuilder.buildAddAbilityDelta(abilityName));
 		}
-
+		
+		abilities.put(abilityName, 1);
 	}
 	
 	public void removeAbility(String abilityName) {
-		
-		if(!abilities.contains(abilityName))
+		if (!abilities.containsKey(abilityName)) {
 			return;
-		
-		abilities.remove(abilityName);
-		
-		if(getClient() != null) {
-			setAbilitiesUpdateCounter((short) (getAbilitiesUpdateCounter() + 1));
-			getClient().getSession().write(messageBuilder.buildRemoveAbilityDelta(abilityName));
 		}
 		
+		abilities.remove(abilityName);
 	}
 	
 	public SWGMap<Long, Long> getMissionCriticalObjects() {
@@ -949,7 +979,7 @@ public class CreatureObject extends TangibleObject implements Serializable {
 			return targetId;
 		}
 	}
-
+	
 	public void setIntendedTarget(long intendedTarget) {
 		synchronized(objectMutex) {
 			this.targetId = intendedTarget;
@@ -1795,6 +1825,15 @@ public class CreatureObject extends TangibleObject implements Serializable {
 				switch (updateType) {
 					case 3: { 
 						buffer = messageBuilder.createDelta("CREO", (byte) 4, (short) 1, (byte) 3, buffer, buffer.array().length + 4);
+						
+						if (getClient() != null && getClient().getSession() != null) {
+							getClient().getSession().write(buffer);
+						}
+						
+						break;
+					}
+					case 14: { 
+						buffer = messageBuilder.createDelta("CREO", (byte) 4, (short) 1, (byte) 14, buffer, buffer.array().length + 4);
 						
 						if (getClient() != null && getClient().getSession() != null) {
 							getClient().getSession().write(buffer);

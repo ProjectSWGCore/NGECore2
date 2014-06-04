@@ -182,11 +182,14 @@ public class HousingService implements INetworkDispatch {
 	
 	@SuppressWarnings("unchecked")
 	public boolean getPermissions(SWGObject player, SWGObject container) {
-		if (((Vector<Long>) container.getContainer().getAttachment("structureAdmins")).contains(player.getObjectID())) {
+		SWGObject structure = container.getContainer();
+		Vector<Long> structureAdmins = (Vector<Long>) structure.getAttachment("structureAdmins");
+		
+		if (structureAdmins != null && structureAdmins.contains(player.getObjectID())) {
 			return true;
 		}
 		
-		return false;	
+		return false;
 	}
 	
 	public void createDestroySUIPage(final SWGObject owner, final TangibleObject target) {
