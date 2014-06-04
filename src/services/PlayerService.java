@@ -893,8 +893,10 @@ public class PlayerService implements INetworkDispatch {
 			
 			creature.getClient().getSession().write((new ClientMfdStatusUpdateMessage((float) ((level >= 90) ? 90 : (level + 1)), "/GroundHUD.MFDStatus.vsp.role.targetLevel")).serialize());
 			creature.setLevel((short) level);
-			if (level == 90)
+			
+			if (level == 90) {
 				core.scriptService.callScript("scripts/collections/", "profession_master", player.getProfession(), core, creature);
+			}
 			
 			creature.showFlyText(OutOfBand.ProsePackage("@cbt_spam:skill_up"), 2.5f, new RGB(154, 205, 50), 0, true);
 			creature.playEffectObject("clienteffect/skill_granted.cef", "");
@@ -962,7 +964,10 @@ public class PlayerService implements INetworkDispatch {
 							creature.playEffectObject("clienteffect/level_granted.cef", "");
 							creature.getClient().getSession().write((new ClientMfdStatusUpdateMessage((float) ((creature.getLevel() == 90) ? 90 : (creature.getLevel() + 1)), "/GroundHUD.MFDStatus.vsp.role.targetLevel")).serialize());
 							creature.setLevel(((Integer) experienceTable.getObject(i, 0)).shortValue());
-							core.scriptService.callScript("scripts/collections/", "master_" + player.getProfession(), "addMasterBadge", core, creature);
+							
+							if (creature.getLevel() == 90) {
+								core.scriptService.callScript("scripts/collections/", "profession_master", player.getProfession(), core, creature);
+							}
 							
 							// 3. Add the relevant health/action and expertise points.
 							float luck = (((((float) (core.scriptService.getMethod("scripts/roadmap/", player.getProfession(), "getLuck").__call__().asInt()) + (core.scriptService.getMethod("scripts/roadmap/", creature.getStfName(), "getLuck").__call__().asInt())) / ((float) 90)) * ((float) creature.getLevel())) - ((float) creature.getSkillModBase("luck")));
