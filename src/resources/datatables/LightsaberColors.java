@@ -62,8 +62,9 @@ public final class LightsaberColors {
 		map.put("Kenobi's Legacy", 28);
 		map.put("Sunrider's Destiny", 29);
 		map.put("Kit's Ferocity", 30);
+		map.put("Cunning of Tyranus", 31);
 		
-		// Special crystals that have seperate shaders - the 256 is for a hacky way to set blade type and color without more code
+		// Special crystals that have seperate shaders - the 256 is for a hacky way to set blade type and color without more code		
 		map.put("Lava", 256 + 1);
 		map.put("Permafrost", 256 + 2);
 		map.put("Blackwing Bezoar", 256 + 3);

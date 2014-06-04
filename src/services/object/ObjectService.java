@@ -129,6 +129,9 @@ import services.command.CombatCommand;
 import services.bazaar.AuctionItem;
 import services.chat.ChatRoom;
 import services.equipment.EquipmentService;
+import services.sui.SUIWindow;
+import services.sui.SUIWindow.SUICallback;
+import services.sui.SUIWindow.Trigger;
 
 @SuppressWarnings("unused")
 public class ObjectService implements INetworkDispatch {
@@ -669,9 +672,52 @@ public class ObjectService implements INetworkDispatch {
 		return objectId;
 	}
 	
-	public void useObject(CreatureObject creature, SWGObject object) {
+	public void useObject(CreatureObject creature, final SWGObject object) {
 		if (creature == null || object == null) {
 			return;
+		}
+		
+		// Bio-Linking
+		String bl = object.getStringAttribute("bio_link");
+		if (bl!=null){
+			if (! object.getContainer().getTemplate().contains("shared_character_inventory")){
+				creature.sendSystemMessage("@base_player:must_biolink_to_use_from_inventory", (byte)1);
+				return;
+			}			
+			if (! bl.contains("@obj_attr_n:bio_link_pending") && ! bl.contains(creature.getCustomName())){
+				creature.sendSystemMessage("@base_player:not_linked_to_holder", (byte)1);
+				return;
+			}
+			if (bl.contains("@obj_attr_n:bio_link_pending")){
+				creature.setAttachment("BioLinkItemCandidate", object.getObjectID());
+				SUIWindow window = core.suiService.createSUIWindow("Script.messageBox", creature, creature, 0);
+				window.setProperty("bg.caption.lblTitle:Text", "@sui:bio_link_item_title");
+				window.setProperty("Prompt.lblPrompt:Text", "@sui:bio_link_item_prompt");		
+				window.setProperty("btnCancel:visible", "True");
+				window.setProperty("btnOk:visible", "True");
+				window.setProperty("btnUpdate:visible", "False");
+				window.setProperty("btnCancel:Text", "@cancel");
+				window.setProperty("btnOk:Text", "@ui_radial:bio_link");						
+				Vector<String> returnList = new Vector<String>();
+				returnList.add("List.lstList:SelectedRow");				
+				window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, new SUICallback() {
+					@Override
+					public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
+						((CreatureObject)owner).sendSystemMessage("@base_player:item_bio_linked", (byte)1);					
+						object.setStringAttribute("bio_link", owner.getCustomName());
+						object.setAttachment("bio_link_PlayerID", owner.getObjectID());
+						return;
+					}					
+				});		
+				window.addHandler(1, "", Trigger.TRIGGER_CANCEL, returnList, new SUICallback() {
+					@Override
+					public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
+						return;
+					}					
+				});	
+				core.suiService.openSUIWindow(window);	
+				return;
+			}
 		}
 		
 		creature.setUseTarget(object);
@@ -711,7 +757,7 @@ public class ObjectService implements INetworkDispatch {
 							return;
 						}
 						
-						creature.addCooldown(cooldownGroup, object.getIntAttribute("reuse_time"));
+						creature.addCooldown(cooldownGroup, reuse_time);
 					}
 					
 					foundTemplate = true;
@@ -720,12 +766,12 @@ public class ObjectService implements INetworkDispatch {
 				}
 			}
 			
-			if (!foundTemplate) {
+			if (!foundTemplate && reuse_time > 0) {
 				if (creature.hasCooldown(object.getTemplate())) {
 					return;
 				}
 				
-				creature.addCooldown(object.getTemplate(), object.getIntAttribute("reuse_time"));
+				creature.addCooldown(object.getTemplate(), reuse_time);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
