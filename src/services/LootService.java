@@ -612,6 +612,7 @@ public class LootService implements INetworkDispatch {
 		Vector<Integer> customizationValues = null;
 		Vector<String> itemStats = null;
 		Vector<String> itemSkillMods = null;
+		Vector<String> STFparams = null;
 				
 		if(core.scriptService.getMethod(itemPath,"","itemTemplate")==null){
 			String errorMessage = "Loot item  '" + itemName + "'  has no template function assigned in its script. Please contact Charon about this issue.";
@@ -666,8 +667,12 @@ public class LootService implements INetworkDispatch {
 		if(core.scriptService.getMethod(itemPath,"","junkType")!=null)
 			junkType =  (byte)core.scriptService.fetchInteger(itemPath,"junkType");
 		
+		if(core.scriptService.getMethod(itemPath,"","STFparams")!=null)
+			STFparams = (Vector<String>)core.scriptService.fetchStringVector(itemPath,"STFparams");
+		
 			
 		System.out.println("itemTemplate " + itemTemplate);
+
 		
 		TangibleObject droppedItem = createDroppedItem(itemTemplate,lootRollSession.getSessionPlanet());
 		
@@ -713,6 +718,10 @@ public class LootService implements INetworkDispatch {
     		handleSkillMods(droppedItem, itemSkillMods);
     	}
     	
+    	if (STFparams!=null){
+    		setSTFParams(droppedItem, STFparams);
+    	}
+    	
     	
     	
 //    	if (customizationValues!=null)
@@ -740,6 +749,21 @@ public class LootService implements INetworkDispatch {
     	
 		lootRollSession.addDroppedItem(droppedItem);
 	}	
+	
+	private void setSTFParams(TangibleObject droppedItem, Vector<String>STFparams){
+		if (STFparams.size()!=4)
+			return;
+		String filename1 = "static_item_n";
+		String filename2 = "static_item_d";
+		filename1 = STFparams.get(0);
+		filename2 = STFparams.get(2);
+		String stfName = STFparams.get(1);
+		String detailName = STFparams.get(3);
+		droppedItem.setStfFilename(filename1);
+		droppedItem.setStfName(stfName);
+		droppedItem.setDetailFilename(filename2);
+		droppedItem.setDetailName(detailName);
+	}
 	
 	private void handleCustomDropName(TangibleObject droppedItem,String customName) {
 //		String customItemName = droppedItem.getCustomName();
@@ -1023,6 +1047,7 @@ public class LootService implements INetworkDispatch {
 		String lootDescriptor = "";
 		Vector<String> itemStats = null;
 		Vector<String> itemSkillMods = null;
+		Vector<String> STFparams = null;
 				
 		if(core.scriptService.getMethod(itemPath,"","itemTemplate")==null){
 			String errorMessage = "Loot item  '" + itemName + "'  has no template function assigned in its script. Please contact Charon about this issue.";
@@ -1085,6 +1110,9 @@ public class LootService implements INetworkDispatch {
 		if(core.scriptService.getMethod(itemPath,"","junkType")!=null)
 			junkType =  (byte)core.scriptService.fetchInteger(itemPath,"junkType");
 		
+		if(core.scriptService.getMethod(itemPath,"","STFparams")!=null)
+			STFparams = (Vector<String>)core.scriptService.fetchStringVector(itemPath,"STFparams");
+		
 			
 		System.out.println("itemTemplate " + itemTemplate);
 		
@@ -1130,6 +1158,10 @@ public class LootService implements INetworkDispatch {
 	    	
 	    	if (itemSkillMods!=null){
 	    		handleSkillMods(droppedItem, itemSkillMods);
+	    	}
+	    	
+	    	if (STFparams!=null){
+	    		setSTFParams(droppedItem, STFparams);
 	    	}
 	    	 	
 	    	setCustomization(droppedItem, itemName); // for now
