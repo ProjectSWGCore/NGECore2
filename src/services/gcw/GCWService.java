@@ -447,6 +447,10 @@ public class GCWService implements INetworkDispatch {
 			return;
 		}
 		
+		if (gcwPoints == 0) {
+			return;
+		}
+		
 		if (!core.factionService.isPvpFaction(actor.getFaction())) {
 			return;
 		}

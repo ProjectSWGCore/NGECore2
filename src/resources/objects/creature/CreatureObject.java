@@ -979,7 +979,7 @@ public class CreatureObject extends TangibleObject implements Serializable {
 			return targetId;
 		}
 	}
-
+	
 	public void setIntendedTarget(long intendedTarget) {
 		synchronized(objectMutex) {
 			this.targetId = intendedTarget;
