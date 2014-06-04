@@ -1,4 +1,5 @@
 
 def itemTemplate():
 
-	return ['object/tangible/furniture/decorative/shared_event_lifeday05_painting_01.iff'] # needs correct iff still
+	return ['object/tangible/painting/shared_painting_food_baking_s01.iff']
+	#return ['object/tangible/painting/shared_painting_food_baking_s02.iff']
