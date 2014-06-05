@@ -184,6 +184,13 @@ public class SUIService implements INetworkDispatch {
 					core.scriptService.callScript("scripts/radial/", "terminal/vendor", "handleSelection", core, owner, target, objMenuSelect.getSelection());
 					return;
 				}
+				
+				if(target.getGrandparent() != null && target.getGrandparent().getAttachment("structureAdmins") != null) {
+					if(core.housingService.getPermissions(owner, target.getContainer()) && !getRadialFilename(target).equals("structure/structure_management_terminal")) {
+						core.scriptService.callScript("scripts/radial/", "structure/moveable", "handleSelection", core, owner, target, objMenuSelect.getSelection());
+						return;
+					}
+				}
 
 				core.scriptService.callScript("scripts/radial/", getRadialFilename(target), "handleSelection", core, owner, target, objMenuSelect.getSelection());
 
