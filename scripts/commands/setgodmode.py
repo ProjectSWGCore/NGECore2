@@ -128,6 +128,10 @@ def run(core, actor, target, commandString):
 		
 		if inventory:
 			inventory.add(object)
+			
+	elif command == 'spawnobj':
+		pos = actor.getPosition()
+		core.staticService.spawnObject(arg1, actor.getPlanet().getName(), 0, pos.x, pos.y, pos.z, 0, 0)
 	
 	elif command == 'unknownAbilityPacket' and arg1:
 		packet = UnknownAbilityPacket(arg1)
