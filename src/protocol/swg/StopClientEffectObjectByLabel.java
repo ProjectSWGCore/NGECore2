@@ -48,7 +48,7 @@ public class StopClientEffectObjectByLabel extends SWGMessage {
 		result.putInt(0xAD6F6B26);
 		result.putLong(objectId);
 		result.put(getAsciiString(commandString));
-		result.put((byte) 1);
+		result.put((byte) 0);
 		
 		return result.flip();
 
