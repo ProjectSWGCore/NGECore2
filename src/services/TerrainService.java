@@ -192,26 +192,30 @@ public class TerrainService {
 					boolean loaded = config.loadConfigFile();
 					
 					if (loaded && config.getInt("LOAD.SNAPSHOT_OBJECTS") > 0) {
-						try {							
-							core.objectService.loadSnapshotObjects(planet);
-						} catch (Exception e) {
-							e.printStackTrace();
+						if (!core.getExcludedDevelopers().contains(System.getProperty("user.name"))){
+							try {							
+								core.objectService.loadSnapshotObjects(planet);
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
 						}
 					}
 					
 					if (loaded && config.getInt("LOAD.BUILDOUT_OBJECTS") > 0) {
-						if (! config.keyExists("LOAD.BUILDOUT_ONLY_FOR")){
-							try {							
-								core.objectService.loadBuildoutObjects(planet);
-							} catch (InstantiationException | IllegalAccessException e) {
-								e.printStackTrace();
-							}
-						} else {
-							if (planet.getName().equals(config.getString("LOAD.BUILDOUT_ONLY_FOR"))){
+						if (!core.getExcludedDevelopers().contains(System.getProperty("user.name"))){
+							if (! config.keyExists("LOAD.BUILDOUT_ONLY_FOR")){
 								try {							
 									core.objectService.loadBuildoutObjects(planet);
 								} catch (InstantiationException | IllegalAccessException e) {
 									e.printStackTrace();
+								}
+							} else {
+								if (planet.getName().equals(config.getString("LOAD.BUILDOUT_ONLY_FOR"))){
+									try {							
+										core.objectService.loadBuildoutObjects(planet);
+									} catch (InstantiationException | IllegalAccessException e) {
+										e.printStackTrace();
+									}
 								}
 							}
 						}
