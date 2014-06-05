@@ -1314,6 +1314,7 @@ public class DevService implements INetworkDispatch {
 						TangibleObject REingTool = (TangibleObject) core.objectService.createObject("object/tangible/container/loot/shared_reverse_engineer_tool.iff", planet);						
 						REingTool.setCustomName("Reverse Engineering Tool");
 						inventory.add(REingTool);	
+						core.lootService.prepInv2(player);
 						return;
 				}
 			}	

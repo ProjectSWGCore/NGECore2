@@ -1980,6 +1980,23 @@ public class LootService implements INetworkDispatch {
 		playerInventory.add(item11);
 	}
 	
+	public void prepInv2(CreatureObject player){
+		SWGObject playerInventory = player.getSlottedObject("inventory");
+		TangibleObject item11 = (TangibleObject)core.objectService.createObject("object/tangible/wearables/armor/composite/shared_armor_composite_bicep_r.iff", player.getPlanet());
+		item11.setCustomName("Composite Armor Right Bicep");	
+	
+		item11.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 6000);		
+		item11.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 4000);
+		item11.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 5000);
+		item11.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 5000);	
+		item11.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 5000);		
+		item11.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 5000);
+	
+		item11.setIntAttribute("cat_stat_mod_bonus.precision", 25);		
+		
+		playerInventory.add(item11);		
+	}
+	
 	
 	/*
 	1377	wpn_category_0	Rifle
