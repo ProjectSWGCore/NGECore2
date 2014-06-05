@@ -15,12 +15,11 @@ def addPlanetSpawns(core, planet):
 	
 	building = core.objectService.getObject(long(-466404040703346823))
 	
-	# TODO Check all NPCs for personalized scripting, change format.
-	
-	# TODO Verify proper cell IDs once Jabba's Palace is spawning properly again.
-	
 	#reelo baruk
 	stcSvc.spawnObject('object/mobile/shared_reelo_baruk.iff', 'tatooine', building.getCellByCellNumber(1), float(-3.5), float(0.2), float(113.5), float(0), float(0), float(0), float(0))
+	
+	#Entry Ambient Sounds		#TODO: Fix object/soundobject spawning
+	#stcSvc.spawnObject('object/soundobject/shared_soundobject_jabba_palace_entrance.iff', 'tatooine', building.getCellByCellNumber(1), float(-3.5), float(0.2), float(113.5), float(0), float(0), float(0), float(0))
 	
 	#ree yees
 	stcSvc.spawnObject('object/mobile/shared_dressed_gran_thug_male_01.iff', 'tatooine', building.getCellByCellNumber(1), float(5.8), float(0.2), float(115.7), float(-0.71), float(0), float(0.7), float(0))
@@ -43,6 +42,9 @@ def addPlanetSpawns(core, planet):
 	#oola
 	stcSvc.spawnObject('object/mobile/shared_oola.iff', 'tatooine', building.getCellByCellNumber(22), float(-10.3), float(2.0), float(43.9), float(-0.71), float(0), float(0.70), float(0))
 
+	#Ambient Sound
+	#stcSvc.spawnObject('object/soundobject/shared_soundobject_jabba_audience_chamber.iff', 'tatooine', building.getCellByCellNumber(22), float(-10.3), float(2.0), float(43.9), float(-0.9), float(0), float(0.42), float(0))
+
 	#Boba Fett
 	stcSvc.spawnObject('object/mobile/shared_boba_fett.iff', 'tatooine', building.getCellByCellNumber(22), float(-1.0), float(3.0), float(33.1), float(0), float(0), float(0), float(0))
 
@@ -57,6 +59,9 @@ def addPlanetSpawns(core, planet):
 	
 	#Max Rebo	
 	stcSvc.spawnObject('object/mobile/shared_max_rebo.iff', 'tatooine', building.getCellByCellNumber(22), float(-1.4), float(3.0), float(26.9), float(-0.9), float(0), float(0.42), float(0))
+
+	#Music
+	#stcSvc.spawnObject('object/soundobject/shared_soundobject_jabba_max_rebo_band.iff', 'tatooine', building.getCellByCellNumber(22), float(-1.4), float(3.0), float(26.9), float(-0.9), float(0), float(0.42), float(0))
 
 	#Droopy Mccool
 	stcSvc.spawnObject('object/mobile/shared_droopy_mccool.iff', 'tatooine', building.getCellByCellNumber(22), float(-3.9), float(3.0), float(26.1), float(-0.9), float(0), float(0.42), float(0))
