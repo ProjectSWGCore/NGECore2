@@ -223,7 +223,9 @@ public class LootService implements INetworkDispatch {
     		  		
     		// RLS chest effect
 	    	if (droppedItem.getAttachment("LootItemName").toString().contains("Loot Chest")){
-	    		requester.playEffectObject("appearance/pt_loot_chest.prt", "");
+	    		requester.playEffectObject("appearance/pt_rare_chest.prt", "");
+	    		
+				requester.playMusic("sound/rare_loot_chest.snd");
 	    		if (requester.getClient().isGM()) {
 	    			requester.sendSystemMessage("GM Message: Played rlc effect due to RLC dropping.", DisplayType.Broadcast);
 	    		}
