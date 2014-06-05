@@ -210,9 +210,8 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 		return getCustomName();
 	}
 	
-	public void setBuildingName(String buildingName, CreatureObject owner) {
+	public void setBuildingName(String buildingName) {
 		setCustomName(buildingName);
-		((CreatureObject) owner).sendSystemMessage("Structure renamed.", DisplayType.Broadcast);
 		SWGObject sign = (SWGObject) getAttachment("sign");
 		if(sign != null)
 			sign.setCustomName(buildingName);
