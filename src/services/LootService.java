@@ -782,8 +782,8 @@ public class LootService implements INetworkDispatch {
     	return droppedItem;
 	}
 	
-	private DraftSchematic createDroppedSchematic(String template,Planet planet){
-		DraftSchematic droppedItem = (DraftSchematic) core.objectService.createObject(template, planet);				
+	private TangibleObject createDroppedSchematic(String template,Planet planet){
+		TangibleObject droppedItem = (TangibleObject) core.objectService.createObject(template, planet);				
     	//System.out.println("droppedItem " + droppedItem);
     	return droppedItem;
 	}
@@ -1204,7 +1204,7 @@ public class LootService implements INetworkDispatch {
 	    	// System.out.println("ACTUAL DROP " + droppedItem.getTemplate());
 		} else
 		{
-			DraftSchematic droppedSchematic  = createDroppedSchematic(itemTemplate,owner.getPlanet());
+			TangibleObject droppedSchematic  = createDroppedSchematic(itemTemplate,owner.getPlanet());
 			if (droppedSchematic!=null){
 				droppedSchematic.getAttributes().put("@obj_attr_n:rare_loot_category", "\\#D1F56F Rare Item \\#FFFFFF ");
 		    	SWGObject inventory = owner.getSlottedObject("inventory");
