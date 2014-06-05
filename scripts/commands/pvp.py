@@ -1,74 +1,86 @@
 from resources.objects.creature import CreatureObject
-from protocol.swg import UpdatePVPStatusMessage
+from resources.datatables import PvpStatus
+from resources.datatables import FactionStatus
 import sys
+import time
 
 def setup():
     return
     
 def run(core, actor, target, commandString):
-    actorFaction = actor.getFaction()
-    actorStatus = actor.getFactionStatus()
-    pvpStatus = UpdatePVPStatusMessage(actor.getObjectId())
-    
-    if commandString == ('imperial') and actorFaction != "imperial":
-        actor.setFaction('imperial')
-        return
-    
-    if commandString == ('rebel') and actorFaction != "rebel":
-        actor.setFaction('rebel')
-        return
-    
-    if commandString == ('neutral') and actorFaction != "neutral":
-        actor.setFaction('neutral')
-        return
-    
-    if actorStatus == 0 and actorFaction == "imperial":
-        actor.setFactionStatus(1)
-        #print ("FactionStatus: " + str(actor.getFactionStatus()))
-        actor.sendSystemMessage('You are no longer On Leave.', 0)
-        return
+	faction = actor.getFaction()
+	factionStatus = actor.getFactionStatus()
 	
-    if actorStatus == 0 and actorFaction == "rebel":
-        actor.setFactionStatus(1)
-        #print ("FactionStatus: " + str(actor.getFactionStatus()))
-        actor.sendSystemMessage('You are no longer On Leave.', 0)
-        return
+	if actor.getPvpStatus(PvpStatus.GoingOvert) or actor.getPvpStatus(PvpStatus.GoingCovert):
+		actor.sendSystemMessage('@faction_recruiter:pvp_status_changing', 0)
+		return
+	if core.gcwService.isInPvpZone(actor):
+		actor.sendSystemMessage('@gcw:pvp_advanced_region_cannot_go_covert', 0)
+		return
 	
-    if actorStatus == 1 and actorFaction == "imperial":
-        actor.setFactionStatus(2)
-        pvpStatus.setFaction(UpdatePVPStatusMessage.factionCRC.Imperial)
-        pvpStatus.setStatus(55)
-        actor.notifyObservers(pvpStatus.serialize(), True)
-        actor.sendSystemMessage('@faction_recruiter:overt_complete', 0)
-        print ("FactionStatus: " + str(actor.getFactionStatus()))
-        return
-    
-    if actorStatus == 1 and actorFaction == "rebel":
-        actor.setFactionStatus(2)
-        pvpStatus.setFaction(UpdatePVPStatusMessage.factionCRC.Rebel)
-        pvpStatus.setStatus(55)
-        actor.notifyObservers(pvpStatus.serialize(), True)
-        actor.sendSystemMessage('@faction_recruiter:overt_complete', 0)
-        print ("FactionStatus: " + str(actor.getFactionStatus()))
-        return
-    
-    if actorStatus == 2 and actorFaction == "imperial":
-        actor.setFactionStatus(1)
-        pvpStatus.setFaction(UpdatePVPStatusMessage.factionCRC.Imperial)
-        pvpStatus.setStatus(16)
-        actor.notifyObservers(pvpStatus.serialize(), True)
-        actor.sendSystemMessage('@faction_recruiter:covert_complete', 0)
-        print ("FactionStatus: " + str(actor.getFactionStatus()))
-        return
-    
-    if actorStatus == 2 and actorFaction == "rebel":
-        actor.setFactionStatus(1)
-        pvpStatus.setFaction(UpdatePVPStatusMessage.factionCRC.Rebel)
-        pvpStatus.setStatus(16)
-        actor.notifyObservers(pvpStatus.serialize(), True)
-        actor.sendSystemMessage('@faction_recruiter:covert_complete', 0)
-        print ("FactionStatus: " + str(actor.getFactionStatus()))
-        return
-    
-    
-    return
+	if commandString != '' and commandString != faction:
+		if commandString == 'rebel' or commandString == 'imperial' or commandString == 'neutral':
+			if faction != 'neutral':
+				actor.sendSystemMessage('@faction_recruiter:sui_resig_complete_in_5', 0)
+			
+			if actor.getFactionStatus() == FactionStatus.SpecialForces:
+				actor.setPvpStatus(PvpStatus.GoingCovert, True)
+				time.sleep(300)
+			
+			actor.setPvpStatus(PvpStatus.GoingCovert | PvpStatus.Overt | PvpStatus.Attackable | PvpStatus.Aggressive | PvpStatus.Enemy, False)
+			actor.setFactionStatus(FactionStatus.OnLeave)
+			
+			if actor.getFaction() != '' and actor.getFaction() != 'neutral':
+				time.sleep(1)
+				actor.setFaction('')
+				actor.sendSystemMessage('@faction_recruiter:resign_complete', 0)
+			
+			if commandString == 'neutral' or commandString == 'resign':
+				time.sleep(1)
+				actor.setFaction('')
+				actor.sendSystemMessage('@faction_recruiter:resign_complete', 0)
+				return
+			
+			time.sleep(1)
+			actor.setFaction(commandString)
+		return
+	
+	if faction == 'neutral' or faction == '':
+		actor.sendSystemMessage('@faction_recruiter:not_aligned', 0)
+		return
+	
+	if factionStatus == FactionStatus.OnLeave:
+		actor.sendSystemMessage('@faction_recruiter:on_leave_to_covert', 0)
+		actor.setPvpStatus(PvpStatus.GoingCovert, True)
+		time.sleep(1)
+		actor.setFactionStatus(FactionStatus.Combatant)
+		actor.setPvpStatus(PvpStatus.GoingCovert, False)
+		actor.sendSystemMessage('@faction_recruiter:covert_complete', 0)
+		actor.updatePvpStatus()
+		return
+	
+	if factionStatus == FactionStatus.Combatant:
+		actor.sendSystemMessage('@faction_recruiter:covert_to_overt', 0)
+		actor.setPvpStatus(PvpStatus.GoingOvert, True)
+		time.sleep(30)
+		if core.gcwService.isInPvpZone(actor):
+			return
+		actor.setFactionStatus(FactionStatus.SpecialForces)
+		actor.setPvpStatus(PvpStatus.GoingOvert, False)
+		actor.sendSystemMessage('@faction_recruiter:overt_complete', 0)
+		actor.updatePvpStatus()
+		return
+	
+	if factionStatus == FactionStatus.SpecialForces:
+		actor.sendSystemMessage('@faction_recruiter:overt_to_covert', 0)
+		actor.setPvpStatus(PvpStatus.GoingCovert, True)
+		time.sleep(300)
+		if core.gcwService.isInPvpZone(actor):
+			return
+		actor.setFactionStatus(FactionStatus.Combatant)
+		actor.setPvpStatus(PvpStatus.GoingCovert, False)
+		actor.sendSystemMessage('@faction_recruiter:covert_complete', 0)
+		actor.updatePvpStatus()
+		return
+	
+	return

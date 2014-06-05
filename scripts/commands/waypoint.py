@@ -22,43 +22,86 @@ def run(core, actor, target, commandString):
         planet = core.terrainService.getPlanetByName(commandArgs[0])
         waypoint = core.objectService.createObject('object/waypoint/shared_waypoint.iff', planet, float(commandArgs[1]), float(commandArgs[2]), float(commandArgs[3]))
         waypoint.setActive(True)
-        waypoint.setColor(colorCheck(core, actor, target, commandString, commandArgs[4]))
+        waypoint.setColor(colorCheck(commandArgs[4]))
         name = commandString.split(" ", 5)
         waypoint.setName(name[5])
         waypoint.setPlanetCRC(crc.StringtoCRC(planet.getName()))
-        actorPlayer.getWaypoints().add(waypoint)
+        waypoint.setStringAttribute('', '') # This simply allows the attributes to display (nothing else has to be done)
         actorPlayer.waypointAdd(waypoint)
-        actor.sendSystemMessage('A waypoint has been created in your datapad at your location.', 0)
+        actor.sendSystemMessage('A waypoint has been created in your datapad at the location.', 0)
         return
     
+
     #/wp X Z Y NAME
-    if isFloat(commandArgs[0]) and isFloat(commandArgs[1]) and isFloat(commandArgs[2]):
+    if len(commandArgs) >= 4 and isFloat(commandArgs[0]) and isFloat(commandArgs[1]) and isFloat(commandArgs[2]):
         waypoint = core.objectService.createObject('object/waypoint/shared_waypoint.iff', actor.getPlanet(), float(commandArgs[0]), float(commandArgs[2]), float(commandArgs[1]))
         waypoint.setActive(True)
         waypoint.setColor(WaypointObject.BLUE)
         name = commandString.split(" ", 3)
         waypoint.setName(name[3])
         waypoint.setPlanetCRC(crc.StringtoCRC(actor.getPlanet().getName()))
-        actorPlayer.getWaypoints().add(waypoint)
+        waypoint.setStringAttribute('', '') # This simply allows the attributes to display (nothing else has to be done)
         actorPlayer.waypointAdd(waypoint)
-        actor.sendSystemMessage('A waypoint has been created in your datapad at your location.', 0)
+        actor.sendSystemMessage('A waypoint has been created in your datapad at the location.', 0)
+        return
+    #/wp X Z Name
+    elif len(commandArgs) >= 3 and isFloat(commandArgs[0]) and isFloat(commandArgs[1]):
+        waypoint = core.objectService.createObject('object/waypoint/shared_waypoint.iff', actor.getPlanet(), float(commandArgs[0]), float(commandArgs[1]), actor.getWorldPosition().y)
+        waypoint.setActive(True)
+        waypoint.setColor(WaypointObject.BLUE)
+        name = commandString.split(" ", 2)
+        waypoint.setName(name[2])
+        waypoint.setPlanetCRC(crc.StringtoCRC(actor.getPlanet().getName()))
+        waypoint.setStringAttribute('', '') # This simply allows the attributes to display (nothing else has to be done)
+        actorPlayer.waypointAdd(waypoint)
+        actor.sendSystemMessage('A waypoint has been created in your datapad at the location.', 0)
+        return
+    #/wp X Z
+    elif len(commandArgs) >= 2 and isFloat(commandArgs[0]) and isFloat(commandArgs[1]):
+        waypoint = core.objectService.createObject('object/waypoint/shared_waypoint.iff', actor.getPlanet(), float(commandArgs[0]), float(commandArgs[1]), actor.getWorldPosition().y)
+        waypoint.setActive(True)
+        waypoint.setColor(WaypointObject.BLUE)
+        waypoint.setName("Waypoint")
+        waypoint.setPlanetCRC(crc.StringtoCRC(actor.getPlanet().getName()))
+        waypoint.setStringAttribute('', '') # This simply allows the attributes to display (nothing else has to be done)
+        actorPlayer.waypointAdd(waypoint)
+        actor.sendSystemMessage('A waypoint has been created in your datapad at the location.', 0)
         return
     
-    #/wp NAME
+    #/wp planet x z y name
+    elif len(commandArgs) >= 3 and isFloat(commandArgs[2]) and isFloat(commandArgs[3]) and isFloat(commandArgs[4]):
+        waypoint = core.objectService.createObject('object/waypoint/shared_waypoint.iff', core.terrainService.getPlanetByName(commandArgs[1]), float(commandArgs[2]), float(commandArgs[4]), float(commandArgs[3]))
+        waypoint.setActive(True)
+        waypoint.setColor(WaypointObject.BLUE)
+        name = commandString.split(" ", 5)
+        if name == "":
+            name = "Waypoint"
+
+        waypoint.setName(name[5])
+        waypoint.setPlanetCRC(crc.StringtoCRC(actor.getPlanet().getName()))
+        waypoint.setStringAttribute('', '') # This simply allows the attributes to display (nothing else has to be done)
+        actorPlayer.waypointAdd(waypoint)
+        actor.sendSystemMessage('A waypoint has been created in your datapad at the location.', 0)
+        return
+    
+    #/wp
     else:
         waypoint = core.objectService.createObject('object/waypoint/shared_waypoint.iff', actor.getPlanet(), actor.getWorldPosition().x, actor.getWorldPosition().z, actor.getWorldPosition().y)
         waypoint.setActive(True)
         waypoint.setColor(WaypointObject.BLUE)
-        waypoint.setName(commandString)
+        if commandString == '':
+        	waypoint.setName(actor.getPlanet().name.capitalize())
+        else:
+        	waypoint.setName(commandString)
         waypoint.setPlanetCRC(crc.StringtoCRC(actor.getPlanet().getName()))
-        actorPlayer.getWaypoints().add(waypoint)
+        waypoint.setStringAttribute('', '') # This simply allows the attributes to display (nothing else has to be done)
         actorPlayer.waypointAdd(waypoint)
         actor.sendSystemMessage('A waypoint has been created in your datapad at your location.', 0)
         return
     
     return
 
-def colorCheck(core, actor, target, commandString, validcolors):
+def colorCheck(validcolors):
     if validcolors == "blue":
         return WaypointObject.BLUE
     if validcolors == "green":

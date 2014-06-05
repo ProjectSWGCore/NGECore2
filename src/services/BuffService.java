@@ -22,34 +22,44 @@
 package services;
 
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import org.python.core.Py;
+import org.python.core.PyObject;
 
+import resources.buffs.Buff;
+import resources.buffs.DamageOverTime;
 import resources.common.FileUtilities;
-import resources.objects.Buff;
-import resources.objects.DamageOverTime;
 import resources.objects.creature.CreatureObject;
+import resources.objects.group.GroupObject;
 import resources.objects.player.PlayerObject;
-
 import main.NGECore;
-
+import engine.clientdata.ClientFileManager;
+import engine.clientdata.visitors.DatatableVisitor;
+import engine.resources.common.CRC;
+import engine.resources.objects.SWGObject;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
 public class BuffService implements INetworkDispatch {
 	
 	private NGECore core;
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-
+	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+	private ConcurrentHashMap<String, Buff> buffMap = new ConcurrentHashMap<String, Buff>();
+	
 	public BuffService(NGECore core) {
 		this.core = core;
+		core.commandService.registerCommand("removeBuff");
+		
+		loadBuffs();
 	}
 
 	@Override
-	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> arg0, Map<Integer, INetworkRemoteEvent> arg1) {
+	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> swgOpcodes, Map<Integer, INetworkRemoteEvent> objControllerOpcodes) {
 		
 	}
 
@@ -58,47 +68,101 @@ public class BuffService implements INetworkDispatch {
 		
 	}
 	
-	public void addBuffToCreature(final CreatureObject creature, String buffName) {		
+	public void addBuffToCreature(CreatureObject creature, String buffName) {
+		try {
+			throw new Exception();
+		} catch (Exception e) {
+			// New system becoming necessary.  Target can be the buffer for abilities that can't buff others.
+			System.out.println("WARNING: New AddBuff Format: target, buffName, buffer");
+			e.printStackTrace();
+		}
+		
+		addBuffToCreature(creature, buffName, creature);
+	}
+	
+	public boolean addBuffToCreature(CreatureObject target, String buffName, CreatureObject buffer) {		
 
 		/*if(!FileUtilities.doesFileExist("scripts/buffs/" + buffName + ".py")) {
 			//System.out.println("Buff script doesnt exist for: " + buffName);
 			return;
 		}*/
+
+		Buff buff = buffMap.get(buffName);
 		
-		final Buff buff = new Buff(buffName, creature.getObjectID());
-		buff.setTotalPlayTime(((PlayerObject) creature.getSlottedObject("ghost")).getTotalPlayTime());
+		if(buff == null) return false;
 		
+		// Here the necessary checks must be placed to prevent buffs from the same buff group (e.g. Buff D) being stacked!
+		
+		if(buff.isGroupBuff()) {
+			addGroupBuff(buffer, buffName, buffer);
+			return true;
+		} else {
+			if (! hasBuff(target,buffName)) // QA, prevent infinite "refreshing" of buff by repeated use
+				doAddBuff(target, buffName, buffer);
+			return true;
+		}
+	}
+		
+	public Buff doAddBuff(final CreatureObject target, String buffName, final CreatureObject buffer) {
+		
+		if (target.getPosition().getDistance(buffer.getPosition()) > 20) {
+			return null;
+		}
+		
+		if (target != buffer && !core.simulationService.checkLineOfSight(buffer, target)) {
+			return null;
+		}
+		
+		final Buff buff = new Buff(buffMap.get(buffName), target.getObjectID());
+		if(target.getSlottedObject("ghost") != null)
+			buff.setTotalPlayTime(((PlayerObject) target.getSlottedObject("ghost")).getTotalPlayTime());
+		else
+			buff.setTotalPlayTime(0);
+			
+        if(FileUtilities.doesFileExist("scripts/buffs/" + buffName + ".py")) core.scriptService.callScript("scripts/buffs/", buffName, "setup", core, buffer, buff);
 	
-            for (final Buff otherBuff : creature.getBuffList()) {
+            for (final Buff otherBuff : target.getBuffList()) {
                 if (buff.getGroup1().equals(otherBuff.getGroup1()))  
                 	if (buff.getPriority() >= otherBuff.getPriority()) {
-                        if (buff.getBuffName().equals(otherBuff.getBuffName())) {
+                        if (buff.getBuffName().equals(otherBuff.getBuffName()))
+                        {
                         	
-                        		if(otherBuff.getStacks() < otherBuff.getMaxStacks()) {
+                        		if(otherBuff.getStacks() < otherBuff.getMaxStacks()) 
+                        		{
                         			
                         			buff.setStacks(otherBuff.getStacks() + 1);
-                        			if(creature.getDotByBuff(otherBuff) != null)	// reset duration when theres a dot stack
-                        				creature.getDotByBuff(otherBuff).setStartTime(buff.getStartTime());
+                        			if(target.getDotByBuff(otherBuff) != null)	// reset duration when theres a dot stack
+                        				target.getDotByBuff(otherBuff).setStartTime(buff.getStartTime());
                         			
+                        		} 
+                        		else 
+                        		{
+                        			buff.setStacks(buff.getMaxStacks());
                         		}
-                        	
-                                if (otherBuff.getRemainingDuration() > buff.getDuration() && otherBuff.getStacks() >= otherBuff.getMaxStacks()) {
-                                        return;
-                                }
+                        		if (buff.getDuration() != -1.0)
+                        			if (otherBuff.getRemainingDuration() > buff.getDuration() && otherBuff.getStacks() >= otherBuff.getMaxStacks())
+                        				return null;
                         }
                        
-                        removeBuffFromCreature(creature, otherBuff);
+                        removeBuffFromCreature(target, otherBuff);
                         break;
                 } else {
                 	System.out.println("buff not added:" + buffName);
-                	return;
+                	return null;
                 }
         }	
 			
-        if(FileUtilities.doesFileExist("scripts/buffs/" + buffName + ".py"))
-        	core.scriptService.callScript("scripts/buffs/", "setup", buffName, core, creature, buff);
+/*        if(FileUtilities.doesFileExist("scripts/buffs/" + buffName + ".py")) core.scriptService.callScript("scripts/buffs/", buffName, "add", core, target, buff);
+        else
+        { */
+        	if(buff.getEffect1Name().length() > 0) core.skillModService.addSkillMod(target, buff.getEffect1Name(), (int) buff.getEffect1Value());
+        	if(buff.getEffect2Name().length() > 0) core.skillModService.addSkillMod(target, buff.getEffect2Name(), (int) buff.getEffect2Value());
+        	if(buff.getEffect3Name().length() > 0) core.skillModService.addSkillMod(target, buff.getEffect3Name(), (int) buff.getEffect3Value());
+        	if(buff.getEffect4Name().length() > 0) core.skillModService.addSkillMod(target, buff.getEffect4Name(), (int) buff.getEffect4Value());
+        	if(buff.getEffect5Name().length() > 0) core.skillModService.addSkillMod(target, buff.getEffect5Name(), (int) buff.getEffect5Value());
+//		}
 		
-		creature.addBuff(buff);
+		target.addBuff(buff);
 		
 		if(buff.getDuration() > 0) {
 			
@@ -107,7 +171,7 @@ public class BuffService implements INetworkDispatch {
 				@Override
 				public void run() {
 					
-					removeBuffFromCreature(creature, buff);
+					removeBuffFromCreature(target, buff);
 					
 				
 				}
@@ -116,12 +180,38 @@ public class BuffService implements INetworkDispatch {
 			
 			buff.setRemovalTask(task);
 			
+		} else if (buff.getGroup2().contains("of_aura") && buffer != null && buffer.getObjectId() != target.getObjectId()) {
+
+			// I'm not sure if all aura effects follow the same rules, so this is simply restricted to officer aura's atm
+			ScheduledFuture<?> task = scheduler.scheduleAtFixedRate(new Runnable() {
+				@Override
+				public void run() {
+					if (buffer == null  || buffer.getClient() == null)
+						removeBuffFromCreature(target, buff);
+
+					if (target.getWorldPosition().getDistance2D(buffer.getWorldPosition()) > 80) {
+						removeBuffFromCreature(target, buff);
+					}
+				}
+			}, 5, 5, TimeUnit.SECONDS);
+			
+			buff.setRemovalTask(task);
 		}
+		
+		for (String effect : buff.getParticleEffect().split(",")) {
+			target.playEffectObject(effect, buff.getBuffName());
+		}
+		
+		if (buffer != null && target.getGroupId() != 0 && target.getGroupId() == buffer.getGroupId()) {
+			buff.setGroupBufferId(buffer.getObjectID());
+		}
+		
+		return buff;
 		
 	} 
 	
+	@SuppressWarnings("unused")
 	public void removeBuffFromCreature(CreatureObject creature, Buff buff) {
-		
 		 if(!creature.getBuffList().contains(buff))
              return;
 		 DamageOverTime dot = creature.getDotByBuff(buff);
@@ -129,40 +219,160 @@ public class BuffService implements INetworkDispatch {
         	 dot.getTask().cancel(true);
         	 creature.removeDot(dot);
          }
-         if(FileUtilities.doesFileExist("scripts/buffs/" + buff.getBuffName() + ".py"))
-        	 core.scriptService.callScript("scripts/buffs/", "removeBuff", buff.getBuffName(), core, creature, buff);
+         
+/*         if(FileUtilities.doesFileExist("scripts/buffs/" + buff.getBuffName() + ".py")) core.scriptService.callScript("scripts/buffs/", buff.getBuffName(), "remove", core, creature, buff);
+         else
+         {*/
+         	if(buff.getEffect1Name().length() > 0) core.skillModService.deductSkillMod(creature, buff.getEffect1Name(), (int) buff.getEffect1Value());
+         	if(buff.getEffect2Name().length() > 0) core.skillModService.deductSkillMod(creature, buff.getEffect2Name(), (int) buff.getEffect2Value());
+         	if(buff.getEffect1Name().length() > 0) core.skillModService.deductSkillMod(creature, buff.getEffect3Name(), (int) buff.getEffect3Value());
+         	if(buff.getEffect1Name().length() > 0) core.skillModService.deductSkillMod(creature, buff.getEffect4Name(), (int) buff.getEffect4Value());
+         	if(buff.getEffect1Name().length() > 0) core.skillModService.deductSkillMod(creature, buff.getEffect5Name(), (int) buff.getEffect5Value());
+//         }
+         	
+         if (!buff.getCallback().equals("none") && !buff.getCallback().equals("")) {
+        	 if (FileUtilities.doesFileExist("scripts/buffs/" + buff.getBuffName() +  ".py")) {
+        		 PyObject method = core.scriptService.getMethod("scripts/buffs/", buff.getBuffName(), buff.getCallback());
+			
+        		 if (method != null && method.isCallable()) {
+        			 method.__call__(Py.java2py(core), Py.java2py(creature), Py.java2py(buff));
+        		 }
+        	 }
+         }
          creature.removeBuff(buff);
          
-		
+        for (String effect : buff.getParticleEffect().split(",")) {
+        	creature.stopEffectObject(buff.getBuffName());
+		}
+        
+        if (buff.getRemovalTask() != null) {
+       	 buff.getRemovalTask().cancel(true);
+       	 buff.setRemovalTask(null);
+        }
 	}
 	
-	public void clearBuffs(final CreatureObject creature) {
+	public void removeBuffFromCreatureByName(CreatureObject creature, String buffName)
+	{
+		removeBuffFromCreature(creature, creature.getBuffByName(buffName));
+	}
+	/*
+	public void clearBuffs(final CreatureObject creature) 
+	{		
+		// This method sucks ass, someone please fix me. indeed, it doesnt even work at all!
+		for(Buff buff : creature.getBuffList().get())
+		{
+			if(buff.getRemainingDuration() > 0 && buff.getDuration() > 0) buff.setRemovalTask(null);
+			removeBuffFromCreature(creature, buff);			
+		}				
 		
-		// copy to array for thread safety
-					
-		for(final Buff buff : creature.getBuffList().get().toArray(new Buff[] { })) {
-				
-			if(buff.getRemainingDuration() > 0 && buff.getDuration() > 0) {
-				ScheduledFuture<?> task = scheduler.schedule(new Runnable() {
+	}
+	*/
+	
+	public void clearBuffs(final CreatureObject creature) {
 
-					@Override
-					public void run() {
-						
-						removeBuffFromCreature(creature, buff);
-						
-					}
-					
-				}, (long) buff.getRemainingDuration(), TimeUnit.SECONDS);
+		// copy to array for thread safety
+
+		for(final Buff buff : creature.getBuffList().get().toArray(new Buff[] { })) {
+
+			if (buff.getGroup1().startsWith("setBonus")) { continue; }
+
+			if(buff.isGroupBuff() && buff.getGroupBufferId() != creature.getObjectID()) {
+				removeBuffFromCreature(creature, buff);
+				continue;
+			}
+
+			if(buff.getRemainingDuration() > 0 && buff.getDuration() > 0) {
+				ScheduledFuture<?> task = scheduler.schedule(() -> removeBuffFromCreature(creature, buff), (long) buff.getRemainingDuration(), TimeUnit.SECONDS);
 				buff.setRemovalTask(task);
 				continue;
 			} else {
 				removeBuffFromCreature(creature, buff);
 			}
-				
+
 		}
-					
+
 	}
 	
-	
+	public boolean hasBuff(final CreatureObject creature, String buffName) {
 
+		for(final Buff buff : creature.getBuffList().get().toArray(new Buff[] { })) {
+			if (buff.getBuffName().contains(buffName)) { return true; }
+		}
+		return false;
+	}
+	
+	public void addGroupBuff(CreatureObject buffer, String buffName) {
+		try {
+			throw new Exception();
+		} catch (Exception e) {
+			// New system becoming necessary.  Target can be the buffer for abilities that can't buff others.
+			System.out.println("WARNING: New GroupAddBuff Format: target, buffName, buffer");
+			e.printStackTrace();
+		}
+		
+		addGroupBuff(buffer, buffName, buffer);
+	}
+	
+	public void addGroupBuff(CreatureObject target, String buffName, CreatureObject buffer) {
+		
+		if(buffer.getGroupId() == 0) {
+			doAddBuff(target, buffName, buffer);
+			return;
+		}
+			
+		GroupObject group = (GroupObject) core.objectService.getObject(buffer.getGroupId());
+		
+		if(group == null) {
+			doAddBuff(target, buffName, buffer);
+			return;
+		}
+		
+		for(SWGObject member : group.getMemberList()) {
+			doAddBuff((CreatureObject) member, buffName, buffer);
+		}
+
+	}
+	
+	private void loadBuffs() {
+		try {
+			DatatableVisitor visitor = ClientFileManager.loadFile("datatables/buff/buff.iff", DatatableVisitor.class);
+			for(int i = 0; i < visitor.getRowCount(); i++) {
+				Buff buff = new Buff();
+				
+				String name = (String) visitor.getObject(i, 0);
+				
+				buff.setBuffName(name);
+				buff.setBuffCRC(CRC.StringtoCRC(name));
+				buff.setGroup1((String) visitor.getObject(i, 1));
+				buff.setGroup2((String) visitor.getObject(i, 2));
+				buff.setPriority((int) visitor.getObject(i, 4));
+				buff.setDuration((Float) visitor.getObject(i, 6));
+				buff.setEffect1Name((String) visitor.getObject(i, 7));
+				buff.setEffect1Value((Float) visitor.getObject(i, 8));
+				buff.setEffect2Name((String) visitor.getObject(i, 9));
+				buff.setEffect2Value((Float) visitor.getObject(i, 10));
+				buff.setEffect3Name((String) visitor.getObject(i, 11));
+				buff.setEffect3Value((Float) visitor.getObject(i, 12));
+				buff.setEffect4Name((String) visitor.getObject(i, 13));
+				buff.setEffect4Value((Float) visitor.getObject(i, 14));
+				buff.setEffect5Name((String) visitor.getObject(i, 15));
+				buff.setEffect5Value((Float) visitor.getObject(i, 16));
+				buff.setCallback((String) visitor.getObject(i, 18));
+				buff.setParticleEffect((String) visitor.getObject(i, 19));
+				buff.setDebuff((Boolean) visitor.getObject(i, 22));
+				buff.setRemoveOnDeath((Integer) visitor.getObject(i, 25) != 0);
+				buff.setRemovableByPlayer((Integer) visitor.getObject(i, 26) != 0);
+				buff.setMaxStacks((Integer) visitor.getObject(i, 28));
+				buff.setPersistent((Integer) visitor.getObject(i, 29) != 0);
+				buff.setRemoveOnRespec((Integer) visitor.getObject(i, 31) != 0);
+				buff.setAiRemoveOnEndCombat((Integer) visitor.getObject(i, 32) != 0);
+				buff.setDecayOnPvPDeath((Integer) visitor.getObject(i, 33) != 0);
+				
+				buffMap.put(name, buff);
+			}
+			
+		} catch (InstantiationException | IllegalAccessException e) {
+			e.printStackTrace();
+		}
+	}
 }

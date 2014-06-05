@@ -21,6 +21,63 @@
  ******************************************************************************/
 package resources.objects.building;
 
-public class BuildingMessageBuilder {
+import java.nio.ByteOrder;
+import java.util.Map;
+import java.util.Vector;
 
+import org.apache.mina.core.buffer.IoBuffer;
+
+import engine.resources.objects.Builder;
+import resources.objects.tangible.TangibleMessageBuilder;
+
+public class BuildingMessageBuilder extends TangibleMessageBuilder {
+	
+	public BuildingMessageBuilder(BuildingObject object) {
+		super(object);
+	}
+	
+	public BuildingMessageBuilder() {
+		super();
+	}
+	
+	@Override
+	public void buildBaseline3(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline3(baselineBuilders, deltaBuilders);
+	}
+	
+	@Override
+	public void buildBaseline6(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline6(baselineBuilders, deltaBuilders);
+	}
+	
+	@Override
+	public void buildBaseline8(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline8(baselineBuilders, deltaBuilders);
+	}
+	
+	@Override
+	public void buildBaseline9(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline9(baselineBuilders, deltaBuilders);
+	}
+	
+	public IoBuffer buildPermissionListCreate(Vector<String> permissionList, String listName) {
+		IoBuffer buffer = IoBuffer.allocate(10).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.setAutoExpand(true);
+		int listSize = permissionList.size();
+		buffer.putShort((short)4);
+		buffer.putInt(0x52F364B8);
+		buffer.putInt(listSize);
+		for (String name : permissionList){
+			buffer.put(getUnicodeString(name));
+		}
+		//buffer.putInt(0x61);
+		buffer.putInt(0);
+		//buffer.putShort((short)0);
+		buffer.put(getUnicodeString(listName));
+		int size = buffer.position();
+		buffer.flip();
+		tools.CharonPacketUtils.printAnalysis(IoBuffer.allocate(size).put(buffer.array(), 0, size).flip());
+		return IoBuffer.allocate(size).put(buffer.array(), 0, size).flip();		
+	}
+	
 }

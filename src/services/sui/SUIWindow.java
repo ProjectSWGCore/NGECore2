@@ -40,6 +40,7 @@ public class SUIWindow {
 	private Map<Integer, PyObject> callbacks = new ConcurrentHashMap<Integer, PyObject>();
 	private Map<Integer, SUICallback> javaCallbacks = new ConcurrentHashMap<Integer, SUICallback>();
 	private Vector<SUIListBoxItem> menuItems = new Vector<SUIListBoxItem>();
+	private Vector<SUITableItem> tableItems = new Vector<SUITableItem>();
 	
 	public SUIWindow(String script, SWGObject owner, int windowId, SWGObject rangeObject, float maxDistance) {
 		
@@ -154,6 +155,21 @@ public class SUIWindow {
 		
 	}
 	
+	public void addTableDataSource(String name, String value) {
+		
+		SUIWindowComponent component = new SUIWindowComponent();
+		component.setType((byte) 8); // using 6 (addDataSource) doesn't allow setting of column titles in tables
+		
+		for(String str : name.split(":")) {
+			component.getNarrowParams().add(str);
+		}
+		
+		component.getWideParams().add(value);
+		
+		components.add(component);
+		
+	}
+	
 	public void addListBoxMenuItem(String itemName, long objectId) {
 		SUIListBoxItem menuItem = new SUIListBoxItem(itemName, objectId);
 		
@@ -164,8 +180,30 @@ public class SUIWindow {
 		
 		menuItems.add(menuItem);
 	}
+	
+	public void addTableColumn(String itemName, String type) {
+		int index = tableItems.size();
+		SUITableItem item = new SUITableItem(itemName, index);
 
+        addTableDataSource("comp.TablePage.dataTable:Name", String.valueOf(index));
+        setProperty("comp.TablePage.dataTable." + index + ":Label", itemName);
+        setProperty("comp.TablePage.dataTable." + index + ":Type", type);
+        
+        tableItems.add(item);
+	}
+	
+	public void addTableCell(String cellName, long cellObjId, int columnIndex) {
 
+        tableItems.forEach(column -> {
+        	if (column.getIndex() == columnIndex) {
+        		SUITableCell cell = new SUITableCell(cellName, cellObjId, column.getCells().size());
+        		addDataItem("comp.TablePage.dataTable." + columnIndex + ":Name", "data" + cell.getCellId());
+        		setProperty("comp.TablePage.dataTable." + columnIndex + ".data" + cell.getCellId() + ":Value", cellName);
+        		column.getCells().add(cell);
+        	}
+        });
+	}
+	
 	public int getWindowId() {
 		return windowId;
 	}
@@ -233,6 +271,22 @@ public class SUIWindow {
 			return item.getObjectId();
 		
 		return 0;
+	}
+	
+	public long getTableObjIdByRow(int row) {
+		SUITableItem item = getTableItems().get(0);
+		
+		if (item != null)
+			return item.getCells().get(row).getObjectId();
+		return 0;
+	}
+	
+	public Vector<SUITableItem> getTableItems() {
+		return tableItems;
+	}
+
+	public void setTableItems(Vector<SUITableItem> tableItems) {
+		this.tableItems = tableItems;
 	}
 
 	public enum Trigger {;

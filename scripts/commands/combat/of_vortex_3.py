@@ -1,8 +1,8 @@
 import sys
 
 def setup(core, actor, target, command):
-	command.setBuffNameTarget('of_vortex_bleed_3')
-	command.setBuffNameTarget('of_vortex_root')
+	core.buffService.addBuffToCreature(target, 'of_vortex_bleed_3', actor)
+	core.buffService.addBuffToCreature(target, 'of_vortex_root', actor)
 	return
 	
 def preRun(core, actor, target, command):

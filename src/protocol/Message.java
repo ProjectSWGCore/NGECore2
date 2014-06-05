@@ -103,6 +103,7 @@ public abstract class Message {
 			
 		}
 		
+     	//TODO: Verify if character position is set correctly after reading a UTF-16 string
 		buffer.position(bufferPosition + length);
 		
 		return result;
@@ -146,8 +147,8 @@ public abstract class Message {
 		return result.array();
 		
 	}
-	
-	
+
+	//FIXME: this is redundant and was also bugged. At some point, get rid of the redundant functions.
 	/**
 	 * Reads the next string in. It gets the length of the
 	 * string from the short/int at the beginning of it
@@ -161,7 +162,7 @@ public abstract class Message {
 			if (charset.equals("US-ASCII") || charset.equals("UTF-8")) {
 				length = bb.getShort();
 			} else {
-				length = bb.getInt();
+				length = bb.getInt() * 2;
 			}
 			if (length > bb.remaining())
 				return "";
@@ -201,4 +202,4 @@ public abstract class Message {
 		return getNextString(buffer, "UTF-16LE");
 	}
 
-}
+} 

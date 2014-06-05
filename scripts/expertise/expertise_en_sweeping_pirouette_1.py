@@ -1,48 +1,20 @@
 import sys
 
-def addExpertisePoint(core, actor):
-
-	player = actor.getSlottedObject('ghost')
-
-	if not player:
-		return
-
-	if not player.getProfession() == 'entertainer_1a':
-		return
-
-	actor.addSkill('expertise_en_sweeping_pirouette_1')
-
-
-	addAbilities(core, actor, player)
-
-	return
-
-def removeExpertisePoint(core, actor):
-
-	player = actor.getSlottedObject('ghost')
-
-	if not player:
-		return
-
-	if not player.getProfession() == 'entertainer_1a':
-		return
-
-	actor.removeSkill('expertise_en_sweeping_pirouette_1')
-
-
-	removeAbilities(core, actor, player)
-
-	return
-
-# this checks what abilities the player gets by level, need to also call this on level-up
 def addAbilities(core, actor, player):
-
-	actor.addAbility('en_sweeping_pirouette_0')
-
+	if actor.getLevel() >= 26:
+		actor.addAbility("en_sweeping_pirouette_0")
+	if actor.getLevel() >= 38:
+		actor.addAbility("en_sweeping_pirouette_1")
+	if actor.getLevel() >= 50:
+		actor.addAbility("en_sweeping_pirouette_2")
+	if actor.getLevel() >= 62:
+		actor.addAbility("en_sweeping_pirouette_3")
+	if actor.getLevel() >= 74:
+		actor.addAbility("en_sweeping_pirouette_4")
+	if actor.getLevel() >= 86:
+		actor.addAbility("en_sweeping_pirouette_5")
 	return
 
 def removeAbilities(core, actor, player):
-
-	actor.removeAbility('en_sweeping_pirouette_0')
-
+	actor.removeAbility("en_sweeping_pirouette_0")
 	return

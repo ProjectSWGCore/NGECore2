@@ -22,16 +22,23 @@
 package resources.objects.group;
 
 import java.nio.ByteOrder;
+import java.util.Map;
+
 import org.apache.mina.core.buffer.IoBuffer;
+
+import engine.resources.objects.Builder;
 import engine.resources.objects.SWGObject;
-import resources.objects.ObjectMessageBuilder;
+import resources.objects.universe.UniverseMessageBuilder;
 
-public class GroupMessageBuilder extends ObjectMessageBuilder {
+public class GroupMessageBuilder extends UniverseMessageBuilder {
 	
-	public GroupMessageBuilder(GroupObject groupObject) {
-		setObject(groupObject);
+	public GroupMessageBuilder(GroupObject object) {
+		super(object);
 	}
-
+	
+	public GroupMessageBuilder() {
+		super();
+	}
 	
 	public IoBuffer buildBaseline3() {
 		
@@ -83,7 +90,7 @@ public class GroupMessageBuilder extends ObjectMessageBuilder {
 		buffer.setAutoExpand(true);
 		
 		buffer.putShort((short) 0x0B); // Obj Operand Count
-		buffer.putInt(0x45);		   
+		buffer.putInt(0x43);		   
 		
 		buffer.put(getAsciiString("string_id_table"));
 		
@@ -147,7 +154,7 @@ public class GroupMessageBuilder extends ObjectMessageBuilder {
 		
 		GroupObject group = (GroupObject) object;
 		
-		IoBuffer buffer = bufferPool.allocate(15, false).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer buffer = bufferPool.allocate(21 + member.getCustomName().length(), false).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.putInt(1);
 		buffer.putInt(group.getMemberListUpdateCounter());
 		
@@ -166,7 +173,7 @@ public class GroupMessageBuilder extends ObjectMessageBuilder {
 		
 		GroupObject group = (GroupObject) object;
 		
-		IoBuffer buffer = bufferPool.allocate(15, false).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer buffer = bufferPool.allocate(11, false).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.putInt(1);
 		buffer.putInt(group.getMemberListUpdateCounter());
 		
@@ -178,18 +185,15 @@ public class GroupMessageBuilder extends ObjectMessageBuilder {
 		return buffer = createDelta("GRUP", (byte) 6, (short) 1, (short) 2, buffer, size + 4);
 		
 	}
-
-
+	
 	@Override
-	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
-		// TODO Auto-generated method stub
-		
+	public void buildBaseline3(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline3(baselineBuilders, deltaBuilders);
 	}
-
+	
 	@Override
-	public void sendBaselines() {
-		// TODO Auto-generated method stub
-		
+	public void buildBaseline6(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline6(baselineBuilders, deltaBuilders);
 	}
-
+	
 }

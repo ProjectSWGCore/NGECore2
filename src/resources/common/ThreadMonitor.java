@@ -21,25 +21,18 @@
  ******************************************************************************/
 package resources.common;
 
-import static java.lang.management.ManagementFactory.THREAD_MXBEAN_NAME;
 import static java.lang.management.ManagementFactory.getThreadMXBean;
-import static java.lang.management.ManagementFactory.newPlatformMXBeanProxy;
 
 import java.io.IOException;
 import java.lang.management.LockInfo;
 import java.lang.management.MonitorInfo;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
-import java.util.concurrent.BrokenBarrierException;
-import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
 import javax.management.MBeanOperationInfo;
 import javax.management.MBeanServerConnection;
-import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 
@@ -141,7 +134,8 @@ public class ThreadMonitor {
 	    }
 	  }
 
-	  private void printMonitorInfo(ThreadInfo ti, MonitorInfo[] monitors) {
+	  @SuppressWarnings("unused")
+	private void printMonitorInfo(ThreadInfo ti, MonitorInfo[] monitors) {
 	    System.out.println(INDENT + "Locked monitors: count = " + monitors.length);
 	    for (MonitorInfo mi : monitors) {
 	      System.out.println(INDENT + "  - " + mi + " locked at ");
@@ -193,7 +187,8 @@ public class ThreadMonitor {
 	    return true;
 	  }
 
-	  private void parseMBeanInfo() throws IOException {
+	  @SuppressWarnings("unused")
+	private void parseMBeanInfo() throws IOException {
 	    try {
 	      MBeanOperationInfo[] mopis = server.getMBeanInfo(objname).getOperations();
 

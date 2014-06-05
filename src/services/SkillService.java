@@ -21,18 +21,35 @@
  ******************************************************************************/
 package services;
 
+import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
+import org.apache.mina.core.buffer.IoBuffer;
+import org.apache.mina.core.session.IoSession;
+import org.python.core.Py;
+import org.python.core.PyObject;
+
+import protocol.swg.ExpertiseRequestMessage;
+import protocol.swg.ObjControllerMessage;
+import protocol.swg.objectControllerObjects.SetProfessionTemplate;
+import protocol.swg.objectControllerObjects.UiPlayEffect;
+import resources.common.Console;
+import resources.common.FileUtilities;
+import resources.common.ObjControllerOpcodes;
+import resources.common.Opcodes;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
-
 import main.NGECore;
-
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
+import engine.clients.Client;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
+@SuppressWarnings("unused")
 public class SkillService implements INetworkDispatch {
 	
 	private NGECore core;
@@ -62,7 +79,7 @@ public class SkillService implements INetworkDispatch {
 						//String parent = ((String) skillTable.getObject(s, 1));
 						//int graphType = ((Integer) skillTable.getObject(s, 2));
 						boolean godOnly = ((Boolean) skillTable.getObject(s, 3));
-						//boolean isTitle = ((Boolean) skillTable.getObject(s, 4));
+						boolean isTitle = ((Boolean) skillTable.getObject(s, 4));
 						boolean isProfession = ((Boolean) skillTable.getObject(s, 5));
 						boolean isHidden = ((Boolean) skillTable.getObject(s, 6));
 						int pointsRequired = ((Integer) skillTable.getObject(s, 8));
@@ -79,11 +96,18 @@ public class SkillService implements INetworkDispatch {
 						String[] schematicsGranted = ((String) skillTable.getObject(s, 23)).split(",");
 						String[] schematicsRevoked = ((String) skillTable.getObject(s, 24)).split(",");
 						
+						boolean speciesSkill = skill.matches("^species.+$");
+						
+						if (isTitle == true) {
+							core.playerService.addPlayerTitle(player, skill);
+						}
+						
 						if (isProfession) {
 							return;
 						}
-						
-						if (godOnly || isHidden) {
+
+						//exempt species skills from being returned -- they're marked godOnly but really meant to be granted
+						if ((!speciesSkill) && (godOnly  || isHidden)) {
 							return;
 						}
 						
@@ -101,7 +125,6 @@ public class SkillService implements INetworkDispatch {
 						
 						for (String skillName : skillsRequired) {
 							if (skillName != "" && !creature.hasSkill(skillName)) {
-								System.out.println("Skill Name: " + skillName);
 								return;
 							}
 						}
@@ -132,8 +155,36 @@ public class SkillService implements INetworkDispatch {
 							}
 						}
 						
-						for (String ability : abilities) {
-							creature.addAbility(ability);
+						if (skill.contains("expertise")) {
+							if (FileUtilities.doesFileExist("scripts/expertise/" + skill + ".py")) {
+								PyObject method = core.scriptService.getMethod("scripts/expertise/", skill, "addAbilities");
+								
+								if (method != null && method.isCallable()) {
+									method.__call__(Py.java2py(core), Py.java2py(creature), Py.java2py(player));
+								}
+							}
+						} else {
+							Map<String, Integer> abilitiesMap = new TreeMap<String, Integer>();
+							
+							for (String ability : abilities) {
+								if (!creature.hasAbility(ability)) {
+									abilitiesMap.put(ability, 1);
+								}
+							}
+							
+							creature.getAbilities().putAll(abilitiesMap);
+							
+							for (String expertiseName : creature.getSkills()) {
+								if (expertiseName.startsWith("expertise")) {
+									if (FileUtilities.doesFileExist("scripts/expertise/" + expertiseName + ".py")) {
+										PyObject method = core.scriptService.getMethod("scripts/expertise/", expertiseName, "addAbilities");
+										
+										if (method != null && method.isCallable()) {
+											method.__call__(Py.java2py(core), Py.java2py(creature), Py.java2py(player));
+										}
+									}
+								}
+							}
 						}
 						
 						for (String skillMod : skillMods) {
@@ -162,8 +213,8 @@ public class SkillService implements INetworkDispatch {
 	public void removeSkill(CreatureObject creature, String skill) {
 		PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
 		DatatableVisitor skillTable;
-		
-		if (creature.getClient() == null) {
+
+		if (player == null) {
 			return;
 		}
 		
@@ -172,7 +223,7 @@ public class SkillService implements INetworkDispatch {
 		}
 		
 		try {
-			skillTable = ClientFileManager.loadFile("datatables/skills/skills.iff", DatatableVisitor.class);
+			skillTable = ClientFileManager.loadFile("datatables/skill/skills.iff", DatatableVisitor.class);
 			
 			for (int s = 0; s < skillTable.getRowCount(); s++) {
 				if (skillTable.getObject(s, 0) != null) {
@@ -180,7 +231,7 @@ public class SkillService implements INetworkDispatch {
 						String parent = ((String) skillTable.getObject(s, 1));
 						//int graphType = ((Integer) skillTable.getObject(s, 2));
 						boolean godOnly = ((Boolean) skillTable.getObject(s, 3));
-						//boolean isTitle = ((Boolean) skillTable.getObject(s, 4));
+						boolean isTitle = ((Boolean) skillTable.getObject(s, 4));
 						boolean isHidden = ((Boolean) skillTable.getObject(s, 6));
 						int pointsRequired = ((Integer) skillTable.getObject(s, 8));
 						String[] abilities = ((String) skillTable.getObject(s, 21)).split(",");
@@ -188,16 +239,31 @@ public class SkillService implements INetworkDispatch {
 						String[] schematicsGranted = ((String) skillTable.getObject(s, 23)).split(",");
 						String[] schematicsRevoked = ((String) skillTable.getObject(s, 24)).split(",");
 						
+						if (isTitle) {
+							core.playerService.removePlayerTitle(player, skill);
+							Console.println("Removed title: " + skill);
+						}
+						
 						if (pointsRequired > 0) {
 							//creature.addExpertisePoints(pointsRequired);
 						}
 						
-						for (String ability : abilities) {
-							creature.removeAbility(ability);
-						}
+						if (skill.contains("expertise")) {
+							if (FileUtilities.doesFileExist("scripts/expertise/" + skill + ".py")) {
+								PyObject method = core.scriptService.getMethod("scripts/expertise/", skill, "removeAbilities");
+								
+								if (method != null && method.isCallable()) {
+									method.__call__(Py.java2py(core), Py.java2py(creature), Py.java2py(player));
+								}
+							}
+						} else {
+							for (String ability : abilities) {
+								creature.removeAbility(ability);
+							}
+						}									
 						
 						for (String skillMod : skillMods) {
-							core.skillModService.deductSkillMod(creature, skillMod.split("=")[0], new Integer(skillMod.split("=")[1]));
+							if(skillMod.split("=").length == 2) core.skillModService.deductSkillMod(creature, skillMod.split("=")[0], new Integer(skillMod.split("=")[1]));
 						}
 						
 						for (String schematic : schematicsGranted) {
@@ -207,6 +273,8 @@ public class SkillService implements INetworkDispatch {
 						for (String schematic : schematicsRevoked) {
 							//player.getDraftSchematicList().add(new DraftSchematic());
 						}
+						
+						creature.removeSkill(skill);
 					}
 				}
 			}
@@ -216,8 +284,138 @@ public class SkillService implements INetworkDispatch {
 	}
 	
 	@Override
-	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> arg0, Map<Integer, INetworkRemoteEvent> arg1) {
+	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> swgOpcodes, Map<Integer, INetworkRemoteEvent> objControllerOpcodes) {
 		
+		swgOpcodes.put(Opcodes.ExpertiseRequestMessage, (session, buffer) -> {
+
+			buffer = buffer.order(ByteOrder.LITTLE_ENDIAN);
+			buffer.position(0);
+			
+			ExpertiseRequestMessage expertise = new ExpertiseRequestMessage();
+			expertise.deserialize(buffer);
+
+			Client client = core.getClient(session);
+			if(client == null) {
+				System.out.println("NULL Client");
+				return;
+			}
+
+			if(client.getParent() == null)
+				return;
+			
+			CreatureObject creature = (CreatureObject) client.getParent();
+			PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
+			
+			if(player == null)
+				return;
+			
+			for(String expertiseName : expertise.getExpertiseSkills()) {
+				if(expertiseName.startsWith("expertise_") && ((caluclateExpertisePoints(creature) - 1) >= 0) && validExpertiseSkill(player, expertiseName)) { // Prevent possible glitches/exploits
+					addSkill(creature, expertiseName);
+				}
+			}
+			
+		});
+		
+		objControllerOpcodes.put(ObjControllerOpcodes.SET_PROFESSION_TEMPLATE, (session, buffer) -> {
+			
+			buffer = buffer.order(ByteOrder.LITTLE_ENDIAN);
+
+			SetProfessionTemplate profTemplate = new SetProfessionTemplate();
+			profTemplate.deserialize(buffer);
+			String profession = profTemplate.getProfession();
+			
+			Client client = core.getClient(session);
+			if(client == null) {
+				System.out.println("NULL Client");
+				return;
+			}
+
+			if(client.getParent() == null)
+				return;
+			
+			CreatureObject creature = (CreatureObject) client.getParent();
+			PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
+			
+			//System.out.println(profession);
+			if(player == null || player.getProfession().equals(profession) || profession == null)
+				return;
+			
+			core.playerService.respec(creature, profession);
+
+		});
+		
+	}
+
+	public int caluclateExpertisePoints(CreatureObject creature)
+	{
+		int expertisePoints = 0;
+		try 
+		{
+			DatatableVisitor table = ClientFileManager.loadFile("datatables/player/player_level.iff", DatatableVisitor.class);		
+			for (int i = 0; i < creature.getLevel(); ++i) expertisePoints += (int) table.getObject(i, 5);
+			for (String skill : creature.getSkills()) if(skill.startsWith("expertise_")) expertisePoints--;
+		}
+		catch (Exception e) { e.printStackTrace(); }	
+		return expertisePoints;
+	}
+	
+	public boolean validExpertiseSkill(PlayerObject player, String skill)
+	{
+		try 
+		{
+			DatatableVisitor table = ClientFileManager.loadFile("datatables/expertise/expertise.iff", DatatableVisitor.class);
+			String profession;
+			
+			switch(player.getProfession())
+			{
+				case "trader_0a":
+					profession = "trader_dom";
+					break;
+					
+				case "trader_0b":
+					profession = "trader_struct";
+					break;
+					
+				case "trader_0c":
+					profession = "trader_mun";
+					break;
+					
+				case "trader_0d":
+					profession = "trader_eng";
+					break;
+						
+				default:
+					profession = player.getProfession().replace("_1a", "");
+					break;
+			}
+
+			for (int s = 0; s < table.getRowCount(); s++) 
+			{	
+				if (table.getObject(s, 0) != null && ((String) table.getObject(s, 0)).equals(skill))
+				{
+					if(((String)table.getObject(s, 7)).equals(profession) || ((String)table.getObject(s, 7)).equals("all")) return true;
+					else return false;
+				}
+			}		
+		}
+		catch (Exception e) { e.printStackTrace(); }
+		return false;
+	}
+	
+	public void resetExpertise(CreatureObject creature) {
+		List<String> skills = new ArrayList<String>(creature.getSkills());
+		skills.stream().filter(s -> s.contains("expertise")).forEach(s -> removeSkill(creature, s));
+		
+		creature.getBuffList().stream().forEach(buff -> creature.removeBuff(buff));
+	}
+	
+	public void sendRespecWindow(CreatureObject creature) {
+		if(creature.getClient() == null)
+			return;
+		UiPlayEffect ui = new UiPlayEffect(creature.getObjectID(), "showMediator=ws_professiontemplateselect");
+		ObjControllerMessage objController = new ObjControllerMessage(0x0B, ui);
+		creature.getClient().getSession().write(objController.serialize());
 	}
 	
 	@Override

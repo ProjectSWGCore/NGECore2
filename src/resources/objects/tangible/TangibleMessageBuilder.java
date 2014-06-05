@@ -21,118 +21,39 @@
  ******************************************************************************/
 package resources.objects.tangible;
 
-import java.nio.ByteOrder;
-
-import org.apache.mina.core.buffer.IoBuffer;
+import java.util.Map;
 
 import resources.objects.ObjectMessageBuilder;
-
+import engine.resources.objects.Builder;
 
 public class TangibleMessageBuilder extends ObjectMessageBuilder {
 	
-	public TangibleMessageBuilder(TangibleObject tangible) {
-		setObject(tangible);
+	public TangibleMessageBuilder(TangibleObject object) {
+		setObject(object);
 	}
 	
-	public IoBuffer buildBaseline3() {
-		TangibleObject tangible = (TangibleObject) object;
-		IoBuffer buffer = bufferPool.allocate(100, false).order(ByteOrder.LITTLE_ENDIAN);
-		buffer.setAutoExpand(true);
-		
-		buffer.putShort((short) 0x0D);
-		buffer.putFloat(object.getComplexity());
-		buffer.put(getAsciiString(object.getStfFilename()));
-		buffer.putInt(0);
-		buffer.put(getAsciiString(object.getStfName()));
-		
-		if(object.getCustomName() == null || object.getCustomName().length() < 1)
-			buffer.putInt(0);
-		else
-			buffer.put(getUnicodeString(object.getCustomName()));
-		buffer.putInt(object.getVolume());
-		buffer.putInt(0);
-		buffer.putInt(0); // unknowns
-		
-		if(tangible.getCustomization() == null || tangible.getCustomization().length < 1)
-			buffer.putShort((short) 0);
-		else {
-			buffer.putShort((short) tangible.getCustomization().length);
-			buffer.put(tangible.getCustomization());
-		}
-		buffer.putInt(tangible.getOptionsBitmask());
-		buffer.putInt(tangible.getIncapTimer());
-		buffer.putInt(tangible.getConditionDamage());
-		buffer.putInt(tangible.getMaxDamage());
-		buffer.putInt(0);
-		buffer.putInt(0x64);
-		buffer.put((byte) (tangible.isStaticObject() ? 1 : 0));
-		
-		int size = buffer.position();
-		buffer = bufferPool.allocate(size, false).put(buffer.array(), 0, size);
-
-		buffer.flip();
-		buffer = createBaseline("TANO", (byte) 3, buffer, size);
-		
-		return buffer;
-	}
-	
-	public IoBuffer buildBaseline6() {
-		TangibleObject tangible = (TangibleObject) object;
-		IoBuffer buffer = bufferPool.allocate(100, false).order(ByteOrder.LITTLE_ENDIAN);
-		buffer.setAutoExpand(true);
-		buffer.putShort((short) 8);
-		buffer.putInt(0x64);
-		buffer.put(getAsciiString(tangible.getDetailFilename()));
-		buffer.putInt(0);
-		buffer.put(getAsciiString(tangible.getDetailName()));
-		buffer.putLong(0);
-		buffer.putLong(0);
-		buffer.putLong(0); // unks
-		buffer.putLong(0);
-		buffer.putInt(0);
-		buffer.put((byte) 0);
-		
-		int size = buffer.position();
-		buffer = bufferPool.allocate(size, false).put(buffer.array(), 0, size);
-
-		buffer.flip();
-		buffer = createBaseline("TANO", (byte) 6, buffer, size);
-		
-		return buffer;
-	}
-
-	public IoBuffer buildBaseline8() {
-		IoBuffer buffer = bufferPool.allocate(2, false).order(ByteOrder.LITTLE_ENDIAN);
-		buffer.putShort((short) 0);
-		int size = buffer.position();
-		buffer = IoBuffer.allocate(size).put(buffer.array(), 0, size);
-		buffer.flip();
-		buffer = createBaseline("TANO", (byte) 8, buffer, size);
-		
-		return buffer;
-	}
-	
-	public IoBuffer buildBaseline9() {
-		IoBuffer buffer = bufferPool.allocate(2, false).order(ByteOrder.LITTLE_ENDIAN);
-		buffer.putShort((short) 0);
-		int size = buffer.position();
-		buffer = IoBuffer.allocate(size).put(buffer.array(), 0, size);
-		buffer.flip();
-		buffer = createBaseline("TANO", (byte) 9, buffer, size);
-		
-		return buffer;
+	public TangibleMessageBuilder() {
+		super();
 	}
 	
 	@Override
-	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
-		// TODO Auto-generated method stub
-		
+	public void buildBaseline3(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline3(baselineBuilders, deltaBuilders);
 	}
 	
 	@Override
-	public void sendBaselines() {
-		// TODO Auto-generated method stub
-		
+	public void buildBaseline6(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline6(baselineBuilders, deltaBuilders);
+	}
+	
+	@Override
+	public void buildBaseline8(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline8(baselineBuilders, deltaBuilders);
+	}
+	
+	@Override
+	public void buildBaseline9(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline9(baselineBuilders, deltaBuilders);
 	}
 	
 }

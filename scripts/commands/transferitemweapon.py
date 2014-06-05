@@ -4,6 +4,9 @@ def setup():
 	return
 	
 def run(core, actor, target, commandString):
+	
+		
+
 	parsedMsg = commandString.split(' ', 3)
 	objService = core.objectService
 	containerID = long(parsedMsg[1])
@@ -14,17 +17,30 @@ def run(core, actor, target, commandString):
                         print 'Error: New container is same as old container.'
                         return;
 
+		canEquip = core.equipmentService.canEquip(actor, target)
+		
+		if canEquip[0] is False and container == actor:
+			actor.sendSystemMessage(canEquip[1], 0)
+			return
+
 		replacedObject = None
 		slotName = None
+		replacedObjects = []
+		slotNames = None
 	        if actor == container:
-			slotName = container.getSlotNameForObject(target)
-			replacedObject = container.getSlottedObject(slotName)
-	       
+			slotNames = container.getSlotNamesForObject(target)
+			for slotName in slotNames:
+				object = container.getSlottedObject(slotName)
+				if not object in replacedObjects and not object == None:
+					replacedObjects.append(object)
+		
                 oldContainer.transferTo(actor, container, target)
                
                 if actor == container:
                         if target.getTemplate().find('/wearables/') or target.getTemplate().find('/weapon/'):
-                                core.equipmentService.equip(actor, target, replacedObject)
+                                core.equipmentService.equip(actor, target)
+				for object in replacedObjects:
+					core.equipmentService.unequip(actor, object)
 				#path = 'scripts/' + target.getTemplate().rpartition('/')[0] + '/'        
                                 #module = target.getTemplate().rpartition('/')[2].replace('shared_', '').replace('.iff', '')
                                 #core.scriptService.callScript(path, 'equip', module, core, actor, target)

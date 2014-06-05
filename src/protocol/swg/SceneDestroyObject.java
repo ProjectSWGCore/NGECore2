@@ -45,6 +45,7 @@ public class SceneDestroyObject extends SWGMessage {
 		result.putInt(0x4D45D504);
 		
 		result.putLong(objectId);
+		result.put((byte) 0); // unk
 		return result.flip();
 	}
 }

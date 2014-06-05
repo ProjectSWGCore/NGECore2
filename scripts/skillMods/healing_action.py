@@ -1,9 +1,9 @@
 import sys
 
-def add(core, actor, name, base):
-	actor.addSkillMod(name, base)
+def add(core, actor, skillMod, divisor):
+	actor.setAction(actor.getAction() + skillMod.getBase())
+	return
+
+def deduct(core, actor, skillMod, divisor):
 	return
 	
-def deduct(core, actor, name, base):
-	actor.deductSkillMod(name, base)
-	return

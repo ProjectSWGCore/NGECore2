@@ -21,21 +21,18 @@
  ******************************************************************************/
 package resources.gcw;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.MathContext;
-import java.nio.ByteOrder;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import com.sleepycat.persist.model.Persistent;
-
+import engine.resources.objects.Delta;
 import engine.resources.scene.Point2D;
 
-import resources.objects.ListObject;
-
-@Persistent
-public class CurrentServerGCWZonePercent extends ListObject implements Cloneable {
+public class CurrentServerGCWZonePercent extends Delta implements Cloneable, Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	private Point2D position;
 	private float radius = 0;
 	private BigDecimal weight;
@@ -51,6 +48,10 @@ public class CurrentServerGCWZonePercent extends ListObject implements Cloneable
 		this.weight = this.weight.divide(new BigDecimal("10000000.0", MathContext.DECIMAL128), MathContext.DECIMAL128);
 		this.type = type;
 		this.percent = new BigDecimal("50.0", MathContext.DECIMAL128);
+	}
+	
+	public CurrentServerGCWZonePercent() {
+		
 	}
 	
 	public Point2D getPosition() {
@@ -148,7 +149,7 @@ public class CurrentServerGCWZonePercent extends ListObject implements Cloneable
 
 	public byte[] getBytes() {
 		synchronized(objectMutex) {
-			IoBuffer buffer = bufferPool.allocate(4, false).order(ByteOrder.LITTLE_ENDIAN);
+			IoBuffer buffer = createBuffer(4);
 			buffer.putInt(percent.intValue());
 			return buffer.array();
 		}

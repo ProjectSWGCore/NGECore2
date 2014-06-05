@@ -45,7 +45,7 @@ public class ServerWeatherMessage extends SWGMessage {
 	}
 
 	public IoBuffer serialize() {
-		IoBuffer result = IoBuffer.allocate(26).order(ByteOrder.LITTLE_ENDIAN);;
+		IoBuffer result = IoBuffer.allocate(22).order(ByteOrder.LITTLE_ENDIAN);
 		
 		result.putShort((short)3);
 		result.putInt(0x486356EA);
@@ -54,6 +54,6 @@ public class ServerWeatherMessage extends SWGMessage {
 		result.putFloat(cloudY);
 		result.putFloat(cloudZ);
 		
-		return result;
+		return result.flip();
 	}
 }

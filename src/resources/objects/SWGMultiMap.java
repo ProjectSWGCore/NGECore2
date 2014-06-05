@@ -21,59 +21,69 @@
  ******************************************************************************/
 package resources.objects;
 
-import java.nio.ByteOrder;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TreeMap;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.python.google.common.collect.ArrayListMultimap;
 import org.python.google.common.collect.Multimap;
 import org.python.google.common.collect.Multiset;
-import org.python.google.common.collect.Ordering;
-import org.python.google.common.collect.TreeMultimap;
 
-import resources.common.StringUtilities;
+import engine.resources.objects.Baseline;
+import engine.resources.objects.Delta;
+import engine.resources.objects.IDelta;
+import engine.resources.objects.SWGObject;
 
-import com.sleepycat.persist.model.NotPersistent;
-import com.sleepycat.persist.model.Persistent;
-
-@SuppressWarnings("unused")
-
-@Persistent
-public class SWGMultiMap<K, V> implements Multimap<K, V> {
+public class SWGMultiMap<K, V> implements Multimap<K, V>, Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	private Multimap<K, V> map = ArrayListMultimap.create();
-	@NotPersistent
-	private int updateCounter = 0;
-	private ObjectMessageBuilder messageBuilder;
+	private transient int updateCounter = 0;
 	private byte viewType;
 	private short updateType;
-	@NotPersistent
-	protected final Object objectMutex = new Object();
+	private boolean addByte;
+	protected transient Object objectMutex = new Object();
+	private transient SWGObject object;
 	
 	public SWGMultiMap() { }
 	
-	public SWGMultiMap(ObjectMessageBuilder messageBuilder, int viewType, int updateType) {
-		this.messageBuilder = messageBuilder;
+	public SWGMultiMap(SWGObject object, int viewType, int updateType, boolean addByte) {
 		this.viewType = (byte) viewType;
 		this.updateType = (short) updateType;
+		this.addByte = addByte;
+		this.object = object;
 	}
 	
 	public SWGMultiMap(Multimap<K, V> m) {
 		if (m instanceof SWGMultiMap) {
-			this.messageBuilder = ((SWGMultiMap<K, V>) m).messageBuilder;
+			this.object = ((SWGMultiMap<K, V>) m).object;
 			this.viewType = ((SWGMultiMap<K, V>) m).viewType;
 			this.updateType = ((SWGMultiMap<K, V>) m).updateType;
 			map.putAll(m);
 		}
 	}
 	
+	public void init(SWGObject object) {
+		objectMutex = new Object();
+		updateCounter = 0;
+		this.object = object;
+		
+		for (Object item : map.values()) {				
+			try {
+				if (item instanceof IDelta) {
+					item.getClass().getMethod("init", new Class[] { SWGObject.class }).invoke(item, new Object[] { object });
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
 	public Map<K, Collection<V>> asMap() {
 		synchronized(objectMutex) {
 			return map.asMap();
@@ -134,11 +144,9 @@ public class SWGMultiMap<K, V> implements Multimap<K, V> {
 	
 	public boolean put(K key, V value) {
 		synchronized(objectMutex) {
-			if (key instanceof String || key instanceof Byte || key instanceof Short ||
-				key instanceof Integer || key instanceof Float || key instanceof Long ||
-				value instanceof IListObject) {
+			if (valid(key) && valid(value)) {
 				if (map.put(key, value)) {
-					queue(item(0, (String) key, ((IListObject) value).getBytes(), true, true));
+					queue(item(0, key, Baseline.toBytes(value), true, true));
 					return true;
 				}
 			}
@@ -149,14 +157,13 @@ public class SWGMultiMap<K, V> implements Multimap<K, V> {
 	
 	public boolean putAll(K key, Iterable<? extends V> values) {
 		synchronized(objectMutex) {
-			if (key instanceof String || key instanceof Byte || key instanceof Short ||
-				key instanceof Integer || key instanceof Float || key instanceof Long) {
+			if (valid(key)) {
 				List<byte[]> buffer = new ArrayList<byte[]>();
 				
 				for (V value : values) {
-					if (value instanceof IListObject) {
+					if (valid(value)) {
 						if (map.put(key, value)) {
-							buffer.add(item(0, (String) key, ((IListObject) value).getBytes(), true, true));
+							buffer.add(item(0, key, Baseline.toBytes(value), true, true));
 						}
 					}
 				}
@@ -179,11 +186,9 @@ public class SWGMultiMap<K, V> implements Multimap<K, V> {
 				K key = entry.getKey();
 				V value = entry.getValue();
 				
-				if (key instanceof String || key instanceof Byte || key instanceof Short ||
-					key instanceof Integer || key instanceof Float || key instanceof Long ||
-					value instanceof IListObject) {
+				if (valid(key) && valid(value)) {
 					if (this.map.put(key, value)) {
-						buffer.add(item(0, (String) key, ((IListObject) value).getBytes(), true, true));
+						buffer.add(item(0, key, Baseline.toBytes(value), true, true));
 					}
 				}
 			}
@@ -197,13 +202,11 @@ public class SWGMultiMap<K, V> implements Multimap<K, V> {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	public boolean remove(Object key, Object value) {
 		synchronized(objectMutex) {
-			if (key instanceof String || key instanceof Byte || key instanceof Short ||
-				key instanceof Integer || key instanceof Float || key instanceof Long) {
+			if (valid(key)) {
 				if (map.remove(key, value)) {
-					queue(item(1, (String) key, ((IListObject) map.get((K) key)).getBytes(), true, true));
+					queue(item(1, key, Baseline.toBytes(value), true, true));
 					
 					return true;
 				}
@@ -216,14 +219,13 @@ public class SWGMultiMap<K, V> implements Multimap<K, V> {
 	@SuppressWarnings("unchecked")
 	public Collection<V> removeAll(Object key) {
 		synchronized(objectMutex) {
-			if (key instanceof String || key instanceof Byte || key instanceof Short ||
-				key instanceof Integer || key instanceof Float || key instanceof Long) {
+			if (valid(key)) {
 				Collection<V> collection = map.get((K) key);
 				List<byte[]> buffer = new ArrayList<byte[]>();
 				
 				for (V value : map.get((K) key)) {
 					if (map.remove(key, value)) {
-						buffer.add(item(1, (String) key, ((IListObject) map.get((K) key)).getBytes(), true, true));
+						buffer.add(item(1, key, Baseline.toBytes(value), true, true));
 					}
 				}
 				
@@ -239,15 +241,14 @@ public class SWGMultiMap<K, V> implements Multimap<K, V> {
 	
 	public Collection<V> replaceValues(K key, Iterable<? extends V> values) {
 		synchronized(objectMutex) {
-			if (key instanceof String || key instanceof Byte || key instanceof Short ||
-				key instanceof Integer || key instanceof Float || key instanceof Long) {
+			if (valid(key)) {
 				if (map.containsKey(key)) {
 					List<byte[]> buffer = new ArrayList<byte[]>();
 					
 					for (V value : values) {
-						if (value instanceof IListObject) {
+						if (valid(value)) {
 							if (!map.get(key).contains(value)) {
-								buffer.add(item(2, (String) key, ((IListObject) value).getBytes(), true, true));
+								buffer.add(item(2, key, Baseline.toBytes(value), true, true));
 							}
 						} else {
 							return null;
@@ -287,6 +288,46 @@ public class SWGMultiMap<K, V> implements Multimap<K, V> {
 		return objectMutex;
 	}
 	
+	public byte[] getBytes() {
+		synchronized(objectMutex) {
+			byte[] objects = { };
+			int size = 0;
+			
+			for (Entry<?, ?> entry : map.entries()) {
+				byte[] key = Baseline.toBytes(entry.getKey());
+				byte[] value = Baseline.toBytes(entry.getValue());
+				size += ((addByte) ? 1 : 0) + key.length + value.length;
+				
+				IoBuffer buffer = Baseline.createBuffer(size);
+				buffer.put(objects);
+				if (addByte) buffer.put((byte) 0);
+				buffer.put(key);
+				buffer.put(value);
+				buffer.flip();
+				
+				objects = buffer.array();
+			}
+			
+			IoBuffer buffer = Baseline.createBuffer(8 + size);
+			buffer.putInt(map.size());
+			buffer.putInt(updateCounter);
+			buffer.put(objects);
+			buffer.flip();
+			
+			return buffer.array();
+		}
+	}
+	
+	private boolean valid(Object o) {
+		if (o instanceof String || o instanceof Byte || o instanceof Short ||
+		o instanceof Integer || o instanceof Float || o instanceof Long ||
+		o instanceof IDelta) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
 	private byte[] item(int type, Object index, byte[] data, boolean useIndex, boolean useData) {
 		if (useIndex && !(index instanceof Byte) && !(index instanceof Short)
 			&& !(index instanceof Integer) && !(index instanceof Float)
@@ -294,28 +335,13 @@ public class SWGMultiMap<K, V> implements Multimap<K, V> {
 			throw new IllegalArgumentException();
 		}
 		
-		int size = 1 + ((useIndex) ? (2 + index.toString().getBytes().length) : 0) + ((useData) ? data.length : 0);
+		int size = 1 + ((useIndex) ? (2 + Baseline.toBytes(index).length) : 0) + ((useData) ? data.length : 0);
 		
-		IoBuffer buffer = messageBuilder.bufferPool.allocate((size), false).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer buffer = Delta.createBuffer(size);
 		buffer.put((byte) type);
-		if (useIndex) {
-			if (index instanceof String) {
-				buffer.put(StringUtilities.getAsciiString((String) index));
-			} else if (index instanceof Byte) {
-				buffer.put(((Byte) index).byteValue());
-			} else if (index instanceof Short) {
-				buffer.putShort(((Short) index).shortValue());
-			} else if (index instanceof Integer) {
-				buffer.putInt(((Integer) index).intValue());
-			} else if (index instanceof Float) {
-				buffer.putFloat(((Float) index).floatValue());
-			} else if (index instanceof Long) {
-				buffer.putLong(((Long) index).longValue());
-			} else {
-				throw new IllegalArgumentException();
-			}
-		}
+		if (useIndex) buffer.put(Baseline.toBytes(index));
 		if (useData) buffer.put(data);
+		buffer.flip();
 		
 		updateCounter++;
 		
@@ -323,11 +349,12 @@ public class SWGMultiMap<K, V> implements Multimap<K, V> {
 	}
 	
 	private void queue(byte[] data) {
-		IoBuffer buffer = messageBuilder.bufferPool.allocate((data.length + 8), false).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer buffer = Delta.createBuffer((data.length + 8));
 		buffer.putInt(1);
 		buffer.putInt(updateCounter);
 		buffer.put(data);
-		messageBuilder.sendListDelta(viewType, updateType, buffer);
+		buffer.flip();
+		object.sendListDelta(viewType, updateType, buffer);
 	}
 	
 	private void queue(List<byte[]> data) {
@@ -337,12 +364,13 @@ public class SWGMultiMap<K, V> implements Multimap<K, V> {
 			size += queued.length;
 		}
 		
-		IoBuffer buffer = messageBuilder.bufferPool.allocate((size + 8), false).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer buffer = Delta.createBuffer((size + 8));
 		buffer.putInt(data.size());
 		buffer.putInt(updateCounter);
 		for (byte[] queued : data) buffer.put(queued);
+		buffer.flip();
 		
-		messageBuilder.sendListDelta(viewType, updateType, buffer);
+		object.sendListDelta(viewType, updateType, buffer);
 	}
 	
 }

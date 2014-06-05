@@ -1,14 +1,10 @@
 import sys
 
-def add(core, actor, name, base):
-	actor.addSkillMod(name, base)
-	actor.getSkillMod(name).setModifier(10)
-	modifier = actor.getSkillMod(name).getModifier()
-	actor.setSpeedMultiplierBase(actor.getSpeedMultiplierBase() + float(float(base) / float(modifier)))
+def add(core, actor, skillMod, divisor):
+	actor.setSpeedMultiplierMod(actor.getSpeedMultiplierMod() + (float(skillMod.getBase()) / float(10)))
 	return
 
-def deduct(core, actor, name, base):
-	modifier = actor.getSkillMod(name).getModifier()
-	actor.setSpeedMultiplierBase(actor.getSpeedMultiplierBase() - float(float(base) / float(modifier)))
-	actor.deductSkillMod(name, base)
+def deduct(core, actor, skillMod, divisor):
+	actor.setSpeedMultiplierMod(actor.getSpeedMultiplierMod() - (float(skillMod.getBase()) / float(10)))
 	return
+	

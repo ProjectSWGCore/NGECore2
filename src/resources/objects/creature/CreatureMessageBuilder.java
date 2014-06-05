@@ -22,33 +22,33 @@
 package resources.objects.creature;
 
 import java.nio.ByteOrder;
+import java.util.Map;
+import java.util.Map.Entry;
 
+import main.NGECore;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import com.sleepycat.persist.model.Persistent;
-
 import engine.resources.common.CRC;
-import resources.objects.Buff;
-import resources.objects.ObjectMessageBuilder;
+import resources.buffs.Buff;
+import engine.resources.objects.Builder;
 import engine.resources.objects.SWGObject;
-import engine.resources.objects.SkillMod;
-
 import resources.objects.player.PlayerObject;
+import resources.objects.tangible.TangibleMessageBuilder;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
+import resources.skills.SkillMod;
 
-@Persistent
-public class CreatureMessageBuilder extends ObjectMessageBuilder {
-
-	public CreatureMessageBuilder() { }
+public class CreatureMessageBuilder extends TangibleMessageBuilder {
 	
-	public CreatureMessageBuilder(CreatureObject creatureObject) {
-
-		setObject(creatureObject);
-
+	public CreatureMessageBuilder(CreatureObject object) {
+		super(object);
 	}
-
+	
+	public CreatureMessageBuilder() {
+		super();
+	}
+	
 	public IoBuffer buildBaseline1() {
 		CreatureObject creature = (CreatureObject) object;
 		IoBuffer buffer = bufferPool.allocate(26, false).order(ByteOrder.LITTLE_ENDIAN);
@@ -58,7 +58,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer.putInt(creature.getCashCredits());
 
 		buffer.putInt(6);	// Base HAM List - so leveling knows the base HAM, before equipment etc
-		buffer.putInt(6);
+		buffer.putInt(0);
 		buffer.putInt(creature.getHealth());
 		buffer.putInt(0);
 		buffer.putInt(creature.getAction());
@@ -72,7 +72,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		} else {
 			buffer.putInt(creature.getSkills().size());	
 			buffer.putInt(creature.getSkillsUpdateCounter());
-			for(String skill : creature.getSkills().get())
+			for(String skill : creature.getSkills())
 				buffer.put(getAsciiString(skill));
 		}
 		int size = buffer.position();
@@ -89,22 +89,26 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		CreatureObject creature = (CreatureObject) object;
 		IoBuffer buffer = bufferPool.allocate(100, false).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.setAutoExpand(true);
+		
+		if(creature.getStfName() == null || creature.getStfFilename() == null) {
+			creature.setStfName("");
+			creature.setStfFilename("");
+		}
 
 		buffer.putShort((short) 19);	// Object Count
+		
+		// BaseObject
 		buffer.putFloat(1);
 		buffer.put(getAsciiString(creature.getStfFilename()));
 		buffer.putInt(0);	
 		buffer.put(getAsciiString(creature.getStfName()));
 		if (creature.getCustomName() == null) { creature.setCustomName(""); }//Not all CreatureObjects have CustomName (Shuttles)
 		buffer.put(getUnicodeString(creature.getCustomName()));
-		buffer.putInt(0x000F4240); // unk
-		String factionCRC = creature.getFaction();
-		if(factionCRC == null)
-			buffer.putInt(0);
-		else if(factionCRC.equals("neutral"))
-			buffer.putInt(0);
-		else
-			buffer.putInt(CRC.StringtoCRC(factionCRC));
+	//	buffer.putInt(0x000F4240); // volume
+		buffer.putInt(1);
+		
+		// TangibleObject
+		buffer.putInt(CRC.StringtoCRC(creature.getFaction()));
 		
 		buffer.putInt(creature.getFactionStatus());
 		
@@ -116,23 +120,26 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 			buffer.putShort((short) customizationData.length);
 			buffer.put(customizationData);
 		}
-		buffer.putInt(1);	
+		//buffer.putInt(1);	
 		buffer.putInt(0);	// TANO Data
 		buffer.putInt(0);	
-		buffer.putInt(0x80); // 0x80 = Player, 0x08 = Quest NPC, 
+		buffer.putInt(creature.getOptionsBitmask()); // 0x80 = Player, 0x08 = Quest NPC, 
+		//buffer.putInt(0x80);
 		buffer.putInt(creature.getIncapTimer());
 		buffer.putInt(0);
 		buffer.putInt(0x3A98);
 		
 		buffer.put((byte) 1);
+		
+		// CreatureObject
+		buffer.put((byte) creature.getPosture());
 		buffer.put((byte) 0);
-		buffer.put((byte) 1);
 
 		buffer.putLong(creature.getOwnerId());
 		
 		float height = creature.getHeight();
-		if (height < 0.7 || height > 1.5)
-			height = 1;
+		//if (height < 0.7 || height > 1.5)
+		//	height = 1;
 		buffer.putFloat(height);
 		buffer.putInt(0); // battle fatigue
 		buffer.putLong(creature.getStateBitmask());
@@ -157,23 +164,21 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer.putInt(0);	// HAM Encumberance List unused in NGE
 		buffer.putInt(0);
 		
-		if(creature.getSkillMods().isEmpty()) {
-			buffer.putInt(0);
-			buffer.putInt(0);
-		} else {
-			buffer.putInt(creature.getSkillMods().size());
-			buffer.putInt(creature.getSkillModsUpdateCounter());
-			
-			for(SkillMod skillMod : creature.getSkillMods().get()) {
-				buffer.put((byte) 0);
-				buffer.put(getAsciiString(skillMod.getSkillModString()));
-				buffer.putInt(skillMod.getBase());
-				buffer.putInt(skillMod.getModifier());
-			}
+		buffer.putInt(creature.getSkillMods().size());
+		buffer.putInt(creature.getSkillMods().getUpdateCounter());
+		for (Entry<String, SkillMod> skillMod : creature.getSkillMods().entrySet()) {
+			buffer.put((byte) 0);
+			buffer.put(getAsciiString(skillMod.getKey()));
+			buffer.put(skillMod.getValue().getBytes());
 		}
+		
 		buffer.putFloat(creature.getSpeedMultiplierBase());
 		buffer.putFloat(creature.getSpeedMultiplierMod());
-		buffer.putLong(0);		// unk
+		
+		if(creature.getPerformanceListenee() != null)
+			buffer.putLong(creature.getPerformanceListenee().getObjectId());
+		else
+			buffer.putLong(0);
 		
 		buffer.putFloat(creature.getRunSpeed());
 		
@@ -186,21 +191,8 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		
 		buffer.putInt(0);	// MissionCritical objects todo later
 		buffer.putInt(0);
-
-		if(creature.getAbilities().isEmpty()) {
-			buffer.putInt(0);	
-			buffer.putInt(creature.getAbilitiesUpdateCounter());
-		} else {
-			buffer.putInt(creature.getAbilities().size());	
-			buffer.putInt(creature.getAbilitiesUpdateCounter());
-
-			for(String ability : creature.getAbilities().get()) {
-				buffer.put((byte) 0);
-				buffer.put(getAsciiString(ability));
-				buffer.putInt(1);
-			}
-		}
-		buffer.putInt(0);	// unk
+		buffer.put(creature.getAbilities().getBytes());
+		buffer.putInt(creature.getXpBarValue());	// xp bar value
 		int size = buffer.position();
 		buffer = bufferPool.allocate(size, false).put(buffer.array(), 0, size);
 
@@ -217,27 +209,32 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		IoBuffer buffer = bufferPool.allocate(100, false).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.setAutoExpand(true);
 		buffer.putShort((short) 0x23);
-		buffer.putInt(0x4E);	
 		
-		buffer.putInt(0);	// defenders list unused in NGE
-		buffer.putInt(0);
+		// BaseObject
+		buffer.putInt(0x43); // serverId
 		
+		buffer.putShort((short) 0); // detaiLStfFilename
+		buffer.putInt(0); // detailStfSpacer
+		buffer.putShort((short) 0); // detailStfName
+		
+		// TangibleObject
 		buffer.put(creature.getCombatFlag());
-
-		buffer.putLong(0);
-		buffer.putLong(0);
-		buffer.putLong(0);	// Vehicle vars or TANO 6 vars TODO: research
-		buffer.putLong(0);
-		buffer.putInt(0);
+		
+		buffer.putLong(0); //Set<Long> cloakViewers (set of objectIds of who can see a cloaked spy)
+		buffer.putInt(0); //Int
+		buffer.putLong(0); //List<Long>
+		buffer.putLong(0); //List<Int>
+		buffer.putLong(0); //List<Unknown>
 		
 		buffer.putShort(creature.getLevel());
-		//buffer.putShort((short) 90);
 		buffer.putInt(creature.getGrantedHealth()); // From player_level.iff.  Ranges from 0-2000 as you level, consistent with that table.
 		
+		//0A
 		if(creature.getCurrentAnimation() == null || creature.getCurrentAnimation().length() == 0) 
 			buffer.putShort((short) 0);
 		else
 			buffer.put(getAsciiString(creature.getCurrentAnimation()));
+		
 		if(creature.getMoodAnimation() == null || creature.getMoodAnimation().length() == 0) 
 			buffer.put(getAsciiString("neutral"));
 		else
@@ -251,22 +248,26 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 			buffer.putShort((short) 0);
 		else
 			buffer.put(getAsciiString(creature.getInviteSenderName()));
-		
+	
 		buffer.putLong(creature.getInviteCounter());
 
 		buffer.putInt(creature.getGuildId());
-		buffer.putLong(creature.getTargetId());
+		
+		buffer.putLong(creature.getLookAtTarget()); // lookAtTarget 0x10
+		buffer.putLong(creature.getIntendedTarget()); // intendedTarget 0x11
 		buffer.put(creature.getMoodId());
 		buffer.putInt(creature.getPerformanceCounter());
-		buffer.putInt(creature.getPerformanceId());
-
-		buffer.putInt(0);	// unks
-		buffer.putInt(0);
+		/*
+		 * minor dilemma: performance ID is needed for XP calculation, but it can't be sent
+		 * in the CREO, otherwise the evul note bubbles appear
+		 */ 
+		buffer.putInt((creature.getPerformanceType()) ? 0 : creature.getPerformanceId());
 		
 		buffer.putInt(6);	// Current HAM
 		buffer.putInt(creature.getHamListCounter());
 
 		buffer.putInt(creature.getHealth());
+		//1A
 		buffer.putInt(0);
 		buffer.putInt(creature.getAction());
 		buffer.putInt(0);
@@ -274,7 +275,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer.putInt(0);
 		
 		buffer.putInt(6);	// Max HAM
-		buffer.putInt(0);
+		buffer.putInt(creature.getMaxHAMListCounter());
 
 		buffer.putInt(creature.getMaxHealth());
 		buffer.putInt(0);
@@ -286,14 +287,21 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		
 		if(creature.getEquipmentList().isEmpty()) {
 			buffer.putInt(0);
-			buffer.putInt(0);
+			buffer.putInt(creature.getEquipmentListUpdateCounter());
 		} else {
 			buffer.putInt(creature.getEquipmentList().size());
-			buffer.putInt(0);
+			buffer.putInt(creature.getEquipmentListUpdateCounter());
 			
-			for(SWGObject obj : creature.getEquipmentList().get()) {
+			for(Long objId : creature.getEquipmentList().get()) {
 				
-				if(obj instanceof TangibleObject) {
+				SWGObject obj = NGECore.getInstance().objectService.getObject(objId);
+				
+				if(obj == null) {
+					System.err.println("Cant find obj for obj id in equip list!!!");
+					continue;
+				}
+				
+				if(obj instanceof TangibleObject && !(obj instanceof WeaponObject)) {
 					TangibleObject tangible = (TangibleObject) obj;
 					if(tangible.getCustomization() == null || tangible.getCustomization().length == 0) {
 						buffer.putShort((short) 0);
@@ -328,9 +336,9 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 
 		}
 		
-		buffer.putShort((short) 0);
+		buffer.putShort((short) 0); // costume
 		//buffer.put(getAsciiString("appearance/gungan_m.sat"));
-		buffer.put((byte) 1);
+		buffer.put((byte) (creature.isInStealth() ? 0 : 1));
 
 		if(creature.getBuffList().isEmpty()) {
 			buffer.putInt(0);	
@@ -350,11 +358,14 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 			PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
 			
 			for(Buff buff : creature.getBuffList().get()) {
-					
-				buff.setTotalPlayTime((int) (player.getTotalPlayTime() + (System.currentTimeMillis() - player.getLastPlayTimeUpdate()) / 1000));
+				
+				if(player != null)
+					buff.setTotalPlayTime((int) (player.getTotalPlayTime() + (System.currentTimeMillis() - player.getLastPlayTimeUpdate()) / 1000));
+				else 
+					buff.setTotalPlayTime(0);
 				buffer.put((byte) 1);
 				buffer.putInt(0);
-				buffer.putInt(CRC.StringtoCRC(buff.getBuffName()));
+				buffer.putInt(CRC.StringtoCRC(buff.getBuffName().toLowerCase()));
 				if(buff.getDuration() > 0) {
 					buffer.putInt((int) (buff.getTotalPlayTime() + buff.getRemainingDuration()));		
 					buffer.putInt(0);
@@ -372,20 +383,35 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 			buffer.putInt(1);
 				
 		}
-				
-		buffer.putShort((short) 0);
-		buffer.putInt(0xFFFFFFFF);
-		buffer.put((byte) 1);
-		buffer.putShort((short) 0);
+		
+		buffer.put((byte) (creature.isStationary() ? 1 : 0)); // if the server accepts transforms from the object
+		buffer.put(creature.getDifficulty());
+		
+		if(creature.isHologram())
+			buffer.putInt(0);
+		else
+			buffer.putInt(0xFFFFFFFF);
+
+		buffer.put((byte) (creature.isRadarVisible() ? 1 : 0));
+		buffer.put((byte) 0); // no effect for 1?
+		buffer.put((byte) 0); // no effect for 1?
+		
 
 		if(creature.getAppearanceEquipmentList().isEmpty()) {
 			buffer.putInt(0);
-			buffer.putInt(0);
+			buffer.putInt(creature.getAppearanceEquipmentListUpdateCounter());
 		} else {
 			buffer.putInt(creature.getAppearanceEquipmentList().size());
-			buffer.putInt(0);
+			buffer.putInt(creature.getAppearanceEquipmentListUpdateCounter());
 			
-			for(SWGObject obj : creature.getAppearanceEquipmentList().get()) {
+			for(Long objId : creature.getAppearanceEquipmentList().get()) {
+				
+				SWGObject obj = NGECore.getInstance().objectService.getObject(objId);
+				
+				if(obj == null) {
+					System.err.println("Cant find obj for obj id in equip list!!!");
+					continue;
+				}
 				
 				if(obj instanceof TangibleObject) {
 					TangibleObject tangible = (TangibleObject) obj;
@@ -406,8 +432,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 			}
 		}
 
-		buffer.putInt(0);
-		buffer.putInt(0);
+		buffer.putLong(0); // unk long
 
 		int size = buffer.position();
 		buffer = bufferPool.allocate(size, false).put(buffer.array(), 0, size);
@@ -541,7 +566,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 
 	}
 
-	public IoBuffer buildSpeedModDelta(float speed) {
+	public IoBuffer buildSpeedModBaseDelta(float speed) {
 		
 		IoBuffer buffer = bufferPool.allocate(4, false).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.putFloat(speed);
@@ -552,6 +577,19 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		return buffer;
 
 	}
+	
+	public IoBuffer buildSpeedModDelta(float speedModifier) {
+		
+		IoBuffer buffer = bufferPool.allocate(4, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putFloat(speedModifier);
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 4, (short) 1, (short) 5, buffer, size + 4);
+		
+		return buffer;
+
+	}
+
 
 	public IoBuffer buildTurnRadiusDelta(float turnRadius) {
 		
@@ -583,6 +621,15 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		int size = buffer.position();
 		buffer.flip();
 		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 9, buffer, size + 4);
+		return buffer;
+	}
+	
+	public IoBuffer buildCurrentAnimationDelta(String currentAnimation) {
+		IoBuffer buffer = bufferPool.allocate(getAsciiString(currentAnimation).length, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.put(getAsciiString(currentAnimation));
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 10, buffer, size + 4);
 		return buffer;
 	}
 	
@@ -622,6 +669,16 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 
 	}
 	
+	public IoBuffer buildGuildIdDelta(int guildId) {
+		IoBuffer buffer = bufferPool.allocate(4, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putInt(guildId);
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x0F, buffer, size + 4);
+		
+		return buffer;
+	}
+	
 	public IoBuffer buildGroupInviteDelta(long inviteSenderId, String inviteSenderName, long inviteCounter) {
 		
 		IoBuffer buffer = bufferPool.allocate(18 + inviteSenderName.length(), false).order(ByteOrder.LITTLE_ENDIAN);
@@ -636,16 +693,22 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 
 	}
 	
-	public IoBuffer buildTargetDelta(long targetId) {
-		
+	public IoBuffer buildLookAtTargetDelta(long targetId) {
 		IoBuffer buffer = bufferPool.allocate(8, false).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.putLong(targetId);
 		int size = buffer.position();
 		buffer.flip();
 		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x10, buffer, size + 4);
-		
 		return buffer;
-
+	}
+	
+	public IoBuffer buildIntendedTargetDelta(long targetId) {
+		IoBuffer buffer = bufferPool.allocate(8, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putLong(targetId);
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x11, buffer, size + 4);
+		return buffer;
 	}
 	
 	public IoBuffer buildHealthDelta(int health) {
@@ -684,7 +747,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		
 		return buffer;
 		
-	}
+	}	
 	
 	public IoBuffer buildMaxHealthDelta(int health) {
 		
@@ -730,7 +793,10 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		IoBuffer buffer = bufferPool.allocate(37, false).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.putInt(1);
 		buffer.putInt(creature.getBuffListCounter());
-		buff.setTotalPlayTime((int) (player.getTotalPlayTime() + (System.currentTimeMillis() - player.getLastPlayTimeUpdate()) / 1000));
+		if(player != null)
+			buff.setTotalPlayTime((int) (player.getTotalPlayTime() + (System.currentTimeMillis() - player.getLastPlayTimeUpdate()) / 1000));
+		else
+			buff.setTotalPlayTime(0);
 		buffer.put((byte) 0);
 		buffer.put(buff.getBytes());
 		int size = buffer.position();
@@ -766,7 +832,10 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		IoBuffer buffer = bufferPool.allocate(37, false).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.putInt(1);
 		buffer.putInt(creature.getBuffListCounter());
-		buff.setTotalPlayTime((int) (player.getTotalPlayTime() + (System.currentTimeMillis() - player.getLastPlayTimeUpdate()) / 1000));
+		if(player != null)
+			buff.setTotalPlayTime((int) (player.getTotalPlayTime() + (System.currentTimeMillis() - player.getLastPlayTimeUpdate()) / 1000));
+		else
+			buff.setTotalPlayTime(0);
 		buffer.put((byte) 2);
 		buffer.put(buff.getBytes());
 		int size = buffer.position();
@@ -789,46 +858,6 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		int size = buffer.position();
 		buffer.flip();
 		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x0E, buffer, size + 4);
-		
-		return buffer;
-
-	}
-	
-	public IoBuffer buildAddSkillModDelta(String name, int base) {
-		
-		CreatureObject creature = (CreatureObject) object;
-		
-		IoBuffer buffer = bufferPool.allocate(19 + name.length(), false).order(ByteOrder.LITTLE_ENDIAN);
-		buffer.putInt(1);
-		buffer.putInt(creature.getSkillModsUpdateCounter());
-		buffer.put((byte) 0);
-		buffer.put(getAsciiString(name));
-		buffer.putInt(base);
-		buffer.putInt(0);
-		
-		int size = buffer.position();
-		buffer.flip();
-		buffer = createDelta("CREO", (byte) 4, (short) 1, (short) 3, buffer, size + 4);
-		
-		return buffer;
-
-	}
-	
-	public IoBuffer buildRemoveSkillModDelta(String name, int base) {
-		
-		CreatureObject creature = (CreatureObject) object;
-		
-		IoBuffer buffer = bufferPool.allocate(19 + name.length(), false).order(ByteOrder.LITTLE_ENDIAN);
-		buffer.putInt(1);
-		buffer.putInt(creature.getSkillModsUpdateCounter());
-		buffer.put((byte) 1);
-		buffer.put(getAsciiString(name));
-		buffer.putInt(base);
-		buffer.putInt(0);
-		
-		int size = buffer.position();
-		buffer.flip();
-		buffer = createDelta("CREO", (byte) 4, (short) 1, (short) 3, buffer, size + 4);
 		
 		return buffer;
 
@@ -865,44 +894,6 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		int size = buffer.position();
 		buffer.flip();
 		buffer = createDelta("CREO", (byte) 1, (short) 1, (short) 3, buffer, size + 4);
-		
-		return buffer;
-
-	}
-	
-	public IoBuffer buildAddAbilityDelta(String name) {
-		
-		CreatureObject creature = (CreatureObject) object;
-		
-		IoBuffer buffer = bufferPool.allocate(15 + name.length(), false).order(ByteOrder.LITTLE_ENDIAN);
-		buffer.putInt(1);
-		buffer.putInt(creature.getAbilitiesUpdateCounter());
-		buffer.put((byte) 0);
-		buffer.put(getAsciiString(name));
-		buffer.putInt(1);
-		
-		int size = buffer.position();
-		buffer.flip();
-		buffer = createDelta("CREO", (byte) 4, (short) 1, (short) 0x0E, buffer, size + 4);
-		
-		return buffer;
-
-	}
-	
-	public IoBuffer buildRemoveAbilityDelta(String name) {
-		
-		CreatureObject creature = (CreatureObject) object;
-		
-		IoBuffer buffer = bufferPool.allocate(15 + name.length(), false).order(ByteOrder.LITTLE_ENDIAN);
-		buffer.putInt(1);
-		buffer.putInt(creature.getAbilitiesUpdateCounter());
-		buffer.put((byte) 1);
-		buffer.put(getAsciiString(name));
-		buffer.putInt(1);
-		
-		int size = buffer.position();
-		buffer.flip();
-		buffer = createDelta("CREO", (byte) 4, (short) 1, (short) 0x0E, buffer, size + 4);
 		
 		return buffer;
 
@@ -956,15 +947,238 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 
 	}
 	
-	@Override
-	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
-		// TODO Auto-generated method stub
+	public IoBuffer buildCustomNameDelta(String customName) {
+		IoBuffer buffer = bufferPool.allocate(getUnicodeString(customName).length, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.put(getUnicodeString(customName));
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 3, (short) 1, (short) 2, buffer, size + 4);
+		return buffer;
 		
 	}
 	
-	@Override
-	public void sendBaselines() {
+	public IoBuffer buildMoodAnimationDelta(String moodAnimation) {
+		IoBuffer buffer = bufferPool.allocate(getAsciiString(moodAnimation).length, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.put(getAsciiString(moodAnimation));
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x0B, buffer, size + 4);
+		return buffer;
 		
+	}
+	
+	public IoBuffer buildListenToId(long creatureObjectId) {
+		IoBuffer buffer = bufferPool.allocate(8, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putLong(creatureObjectId);
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 4, (short) 1, (short) 0x09, buffer, size + 4);
+		return buffer;
+	}
+
+	public IoBuffer buildPerformanceId(int performanceId) {
+		IoBuffer buffer = bufferPool.allocate(4, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putInt(performanceId);
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x14, buffer, size + 4);
+		return buffer;	
+	}
+
+	public IoBuffer buildPerformanceCounter(int performanceCounter) {
+		IoBuffer buffer = bufferPool.allocate(4, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putInt(performanceCounter);
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x13, buffer, size + 4);
+		return buffer;	
+	}
+
+	public IoBuffer buildStartPerformance(boolean doStart) {
+		IoBuffer buffer = bufferPool.allocate(1, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.put((byte) ((doStart) ? 1 : 0));
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x1B, buffer, size + 4);
+		return buffer;	
+	}
+	
+	
+	public IoBuffer buildDifficultyDelta(byte difficulty) {
+		IoBuffer buffer = bufferPool.allocate(1, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.put(difficulty);
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x1C, buffer, size + 4);
+		return buffer;
+	}
+
+	public IoBuffer buildAddEquipmentDelta(TangibleObject item) {
+		
+		CreatureObject creature = (CreatureObject) object;
+		
+		IoBuffer buffer = bufferPool.allocate(496, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putInt(1);
+		buffer.putInt(creature.getEquipmentListUpdateCounter());
+		buffer.put((byte) 1);
+		buffer.putShort((short) creature.getEquipmentList().indexOf(item.getObjectId()));
+		if(item.getCustomization() == null || item.getCustomization().length == 0) {
+			buffer.putShort((short) 0);
+		} else {
+			buffer.putShort((short) item.getCustomization().length);
+			buffer.put(item.getCustomization());
+		}
+		buffer.putInt(item.getArrangementId());
+		buffer.putLong(item.getObjectID());
+		buffer.putInt(CRC.StringtoCRC(item.getTemplate()));
+		if(item instanceof WeaponObject) {
+			WeaponObject weapon = (WeaponObject) item;
+			buffer.put((byte) 1);
+			buffer.put(weapon.getMessageBuilder().buildBaseline3());
+			buffer.put(weapon.getMessageBuilder().buildBaseline6());
+		} else {
+			buffer.put((byte) 0);
+		}
+		
+		int size = buffer.position();
+		buffer = bufferPool.allocate(size, false).put(buffer.array(), 0, size);
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x17, buffer, size + 4);
+		
+		return buffer;
+
+	}
+	
+	public IoBuffer buildRemoveEquipmentDelta(TangibleObject item) {
+		
+		CreatureObject creature = (CreatureObject) object;
+		
+		IoBuffer buffer = bufferPool.allocate(11, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putInt(1);
+		buffer.putInt(creature.getEquipmentListUpdateCounter());
+		buffer.put((byte) 0);
+		buffer.putShort((short) creature.getEquipmentList().indexOf(item.getObjectId()));
+		
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x17, buffer, size + 4);
+		
+		return buffer;
+		
+	}
+	
+	public IoBuffer buildAddAppearanceEquipmentDelta(TangibleObject item) {
+		
+		CreatureObject creature = (CreatureObject) object;
+		
+		IoBuffer buffer = bufferPool.allocate(100, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putInt(1);
+		buffer.putInt(creature.getAppearanceEquipmentListUpdateCounter());
+		buffer.put((byte) 1);
+		buffer.putShort((short) creature.getAppearanceEquipmentList().indexOf(item));
+		if(item.getCustomization() == null || item.getCustomization().length == 0) {
+			buffer.putShort((short) 0);
+		} else {
+			buffer.putShort((short) item.getCustomization().length);
+			buffer.put(item.getCustomization());
+		}
+		buffer.putInt(item.getArrangementId());
+		buffer.putLong(item.getObjectID());
+		buffer.putInt(CRC.StringtoCRC(item.getTemplate()));
+		buffer.put((byte) 0);
+		
+		int size = buffer.position();
+		buffer = bufferPool.allocate(size, false).put(buffer.array(), 0, size);
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x21, buffer, size + 4);
+		
+		return buffer;
+
+	}
+	
+	public IoBuffer buildRemoveAppearanceEquipmentDelta(TangibleObject item) {
+		
+		CreatureObject creature = (CreatureObject) object;
+		
+		IoBuffer buffer = bufferPool.allocate(11, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putInt(1);
+		buffer.putInt(creature.getAppearanceEquipmentListUpdateCounter());
+		buffer.put((byte) 0);
+		buffer.putShort((short) creature.getAppearanceEquipmentList().indexOf(item));
+		
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x21, buffer, size + 4);
+		
+		return buffer;
+		
+	}
+	
+	public IoBuffer buildXPBarDelta(int xpBarValue) {
+		IoBuffer buffer = bufferPool.allocate(4, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putInt(xpBarValue);
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 4, (short) 1, (short) 0x0F, buffer, size + 4);
+		return buffer;	
+	}
+	
+	// TODO: This seems to be somehow related to chairs as well.
+	public IoBuffer buildOwnerIdDelta(long ownerId) {
+		IoBuffer buffer = bufferPool.allocate(8, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putLong(ownerId);
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 3, (short) 1, (short) 0x0F, buffer, size + 4); // This is the correct one
+		return buffer;
+	}
+	
+	public IoBuffer buildStealthFlagDelta(boolean flag) {
+		IoBuffer buffer = bufferPool.allocate(8, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.put((byte) (flag ? 0 : 1));
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x19, buffer, size + 4);
+		return buffer;
+	}
+	
+	public IoBuffer buildRadarVisibleFlagDelta(boolean flag) {
+		IoBuffer buffer = bufferPool.allocate(1, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.put((byte) (flag ? 1 : 0));
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x1E, buffer, size + 4);
+		return buffer;
+	}
+	
+	@Override
+	public void buildBaseline1(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline1(baselineBuilders, deltaBuilders);
+	}
+	
+	@Override
+	public void buildBaseline3(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline3(baselineBuilders, deltaBuilders);
+	}
+	
+	@Override
+	public void buildBaseline4(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline4(baselineBuilders, deltaBuilders);
+	}
+	
+	@Override
+	public void buildBaseline6(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline6(baselineBuilders, deltaBuilders);
+	}
+	
+	@Override
+	public void buildBaseline8(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline8(baselineBuilders, deltaBuilders);
+	}
+	
+	@Override
+	public void buildBaseline9(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline9(baselineBuilders, deltaBuilders);
 	}
 	
 }

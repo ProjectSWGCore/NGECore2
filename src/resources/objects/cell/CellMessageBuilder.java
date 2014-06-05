@@ -21,6 +21,90 @@
  ******************************************************************************/
 package resources.objects.cell;
 
-public class CellMessageBuilder {
+import java.nio.ByteOrder;
+import java.util.Map;
 
+import org.apache.mina.core.buffer.IoBuffer;
+
+import resources.objects.ObjectMessageBuilder;
+import engine.resources.objects.Builder;
+
+public class CellMessageBuilder extends ObjectMessageBuilder {
+	
+	public CellMessageBuilder(CellObject object) {
+		super(object);
+	}
+	
+	public CellMessageBuilder() {
+		super();
+	}
+	
+	public IoBuffer buildBaseline3() {
+
+		CellObject cell = (CellObject) object;
+		IoBuffer buffer = bufferPool.allocate(27, false).order(ByteOrder.LITTLE_ENDIAN);
+		
+		buffer.putShort((short) 6);
+		buffer.putFloat(0);
+		buffer.putShort((short) 0);
+		
+		buffer.putInt(0);
+		buffer.putShort((short) 0);
+		
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.put((byte) 1);
+		buffer.putInt(cell.getCellNumber());
+
+		int size = buffer.position();
+
+		buffer.flip();
+		buffer = createBaseline("SCLT", (byte) 3, buffer, size);
+
+		return buffer;
+
+	}
+	
+	public IoBuffer buildBaseline6() {
+
+		IoBuffer buffer = bufferPool.allocate(30, false).order(ByteOrder.LITTLE_ENDIAN);
+		
+		buffer.putShort((short) 4);
+		buffer.putInt(0x43);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+		buffer.putInt(0);
+
+		int size = buffer.position();
+
+		buffer.flip();
+		buffer = createBaseline("SCLT", (byte) 6, buffer, size);
+
+		return buffer;
+
+	}
+	
+	@Override
+	public void buildBaseline3(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline3(deltaBuilders, deltaBuilders);
+	}
+	
+	@Override
+	public void buildBaseline6(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline6(deltaBuilders, deltaBuilders);
+	}
+	
+	@Override
+	public void buildBaseline8(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline8(deltaBuilders, deltaBuilders);
+	}
+	
+	@Override
+	public void buildBaseline9(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline9(deltaBuilders, deltaBuilders);
+	}
+	
 }

@@ -21,45 +21,107 @@
  ******************************************************************************/
 package resources.objects.intangible;
 
+import java.io.Serializable;
 
+import org.apache.mina.core.buffer.IoBuffer;
 
-import com.sleepycat.persist.model.Persistent;
-
+import resources.objects.ObjectMessageBuilder;
 import engine.clients.Client;
+import engine.resources.objects.Baseline;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent
-public class IntangibleObject extends SWGObject {
+public class IntangibleObject extends SWGObject implements Serializable {
 	
-	private int genericInt;
+	private static final long serialVersionUID = 1L;
+	
+	private transient IntangibleMessageBuilder messageBuilder;
+	
+	public IntangibleObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
+		super(objectID, planet, position, orientation, Template);
+	}
 	
 	public IntangibleObject() { 
 		super();
 	}
-
-	public IntangibleObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
-		super(objectID, planet, position, orientation, Template);
+	
+	public void initAfterDBLoad() {
+		super.init();
 	}
-
+	
+	public Baseline getOtherVariables() {
+		Baseline baseline = super.getOtherVariables();
+		return baseline;
+	}
+	
+	public Baseline getBaseline3() {
+		Baseline baseline = super.getBaseline3();
+		baseline.put("genericInt", 0);
+		return baseline;
+	}
+	
+	public Baseline getBaseline6() {
+		Baseline baseline = super.getBaseline6();
+		return baseline;
+	}
+	
+	public Baseline getBaseline8() {
+		Baseline baseline = super.getBaseline8();
+		return baseline;
+	}
+	
+	public Baseline getBaseline9() {
+		Baseline baseline = super.getBaseline9();
+		return baseline;
+	}
+	
 	public int getGenericInt() {
-		synchronized(objectMutex) {
-			return genericInt;
-		}
+		return (int) getBaseline(3).get("genericInt");
 	}
-
+	
 	public void setGenericInt(int genericInt) {
+		notifyClients(getBaseline(3).set("genericInt", genericInt), true);
+	}
+	
+	public void incrementGenericInt(int increase) {
+		setGenericInt((getGenericInt() + increase));
+	}
+	
+	public void decrementGenericInt(int decrease) {
+		setGenericInt((((getGenericInt() - decrease) < 1) ? 0 : (getGenericInt() - decrease)));
+	}
+	
+	public void notifyClients(IoBuffer buffer, boolean notifySelf) {
+		notifyObservers(buffer, notifySelf);
+	}
+	
+	public ObjectMessageBuilder getMessageBuilder() {
 		synchronized(objectMutex) {
-			this.genericInt = genericInt;
+			if (messageBuilder == null) {
+				messageBuilder = new IntangibleMessageBuilder(this);
+			}
+			
+			return messageBuilder;
 		}
 	}
-
-	@Override
-	public void sendBaselines(Client client) {
-		// TODO Auto-generated method stub
+	
+	public void sendBaselines(Client destination) {
+		if (destination != null && destination.getSession() != null) {
+			destination.getSession().write(getBaseline(3).getBaseline());
+			destination.getSession().write(getBaseline(6).getBaseline());
+			
+			// FIXME Check if destination has view permissions to this
+			if (this.getContainer() == destination.getParent() || this.getGrandparent() == destination.getParent()) {
+				destination.getSession().write(getBaseline(8).getBaseline());
+				destination.getSession().write(getBaseline(9).getBaseline());
+			}
+		}
+	}
+	
+	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
 		
 	}
-
+	
 }

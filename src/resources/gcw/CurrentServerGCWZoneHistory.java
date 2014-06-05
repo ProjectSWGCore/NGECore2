@@ -21,23 +21,25 @@
  ******************************************************************************/
 package resources.gcw;
 
-import java.nio.ByteOrder;
+import java.io.Serializable;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import com.sleepycat.persist.model.Persistent;
+import engine.resources.objects.Delta;
 
-import resources.objects.ListObject;
-
-@Persistent
-public class CurrentServerGCWZoneHistory extends ListObject implements Cloneable {
+public class CurrentServerGCWZoneHistory extends Delta implements Cloneable, Serializable {
 	
+	private static final long serialVersionUID = 1L;
 	private int lastUpdateTime;
 	private int percent;
 	
 	public CurrentServerGCWZoneHistory(CurrentServerGCWZonePercent zone) {
 		this.percent = zone.getPercent().intValue();
 		this.lastUpdateTime = zone.getLastUpdateTime();
+	}
+	
+	public CurrentServerGCWZoneHistory() {
+		
 	}
 	
 	public int getLastUpdateTime() {
@@ -54,7 +56,7 @@ public class CurrentServerGCWZoneHistory extends ListObject implements Cloneable
 	
 	public byte[] getBytes() {
 		synchronized(objectMutex) {
-			IoBuffer buffer = bufferPool.allocate((8), false).order(ByteOrder.LITTLE_ENDIAN);
+			IoBuffer buffer = createBuffer(8);
 			buffer.putInt(lastUpdateTime);
 			buffer.putInt(percent);
 			return buffer.array();

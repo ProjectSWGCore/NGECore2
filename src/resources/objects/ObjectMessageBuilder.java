@@ -24,25 +24,112 @@ package resources.objects;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Map;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.buffer.SimpleBufferAllocator;
 
-import com.sleepycat.persist.model.NotPersistent;
-import com.sleepycat.persist.model.Persistent;
-
 import resources.common.Opcodes;
-
+import engine.resources.common.StringUtilities;
+import engine.resources.objects.Baseline;
+import engine.resources.objects.Builder;
 import engine.resources.objects.SWGObject;
 
-@Persistent
-public abstract class ObjectMessageBuilder {
+public class ObjectMessageBuilder {
 	
+	protected SWGObject object;
 	
-	public SWGObject object;
-	@NotPersistent
-	public SimpleBufferAllocator bufferPool = new SimpleBufferAllocator();
+	public ObjectMessageBuilder(SWGObject object) {
+		this.object = object;
+	}
+	
+	public ObjectMessageBuilder() {
 		
+	}
+	
+	public void buildBaseline1(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		/*
+		baselineBuilders.put(5, new Builder {
+			public byte[] build() {
+				IoBuffer = Baseline.createBuffer(2);
+				buffer.putShort((short) 27);
+				return buffer.array();
+			}
+		});
+		
+		deltaBuilders.put(7, new Builder {
+			public byte[] build() {
+				IoBuffer = Baseline.createBuffer(4);
+				buffer.putInt(27);
+				return buffer.array();
+			}
+		});
+		*/
+	}
+	
+	public void buildBaseline3(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		
+	}
+	
+	public void buildBaseline4(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		
+	}
+	
+	public void buildBaseline6(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		
+	}
+	
+	public void buildBaseline7(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		
+	}
+	
+	public void buildBaseline8(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		
+	}
+	
+	public void buildBaseline9(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		
+	}
+	
+	public IoBuffer createBuffer(int size, boolean autoSize) {
+		return createBuffer(size).setAutoExpand(autoSize);
+	}
+	
+	public IoBuffer createBuffer(int size) {
+		return Baseline.createBuffer(size);
+	}
+	
+	protected byte getBoolean(boolean variable) {
+		return Baseline.getBoolean(variable);
+	}
+	
+	protected String getAsciiString(ByteBuffer buffer) {
+		return StringUtilities.getAsciiString(buffer);
+	}
+	
+	protected String getUnicodeString(ByteBuffer buffer) {
+		return StringUtilities.getUnicodeString(buffer);
+	}
+	
+	protected byte[] getAsciiString(String string) {
+		return StringUtilities.getAsciiString(string);
+	}
+	
+	protected byte[] getUnicodeString(String string) {
+		return StringUtilities.getUnicodeString(string);
+	}
+	
+	// Temporary for compatibility
+	public SimpleBufferAllocator bufferPool = new SimpleBufferAllocator();
+	
+	public SWGObject getObject() {
+		return object;
+	}
+	
+	public void setObject(SWGObject object) {
+		this.object = object;
+	}
+	
 	public IoBuffer createBaseline(String objectType, byte viewType, IoBuffer data, int size) {
 		IoBuffer buffer = bufferPool.allocate(23 + size, false).order(ByteOrder.LITTLE_ENDIAN);
 		
@@ -63,7 +150,7 @@ public abstract class ObjectMessageBuilder {
 	}
 	
 	public IoBuffer createDelta(String objectType, byte viewType, short updateCount, short updateType, IoBuffer data, int size) {
-		IoBuffer buffer = bufferPool.allocate(27 + size, false).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer buffer = bufferPool.allocate(23 + size, false).order(ByteOrder.LITTLE_ENDIAN);
 		
 		buffer.putShort((short) 5);
 		buffer.putInt(Opcodes.DeltasMessage);
@@ -82,42 +169,6 @@ public abstract class ObjectMessageBuilder {
 		
 		return buffer;
 	}
-	
-	public IoBuffer createDelta(String objectType, byte viewType, short updateCount, IoBuffer data, int size) {
-		IoBuffer buffer = bufferPool.allocate(25 + size, false).order(ByteOrder.LITTLE_ENDIAN);
-		
-		buffer.putShort((short) 5);
-		buffer.putInt(Opcodes.DeltasMessage);
-		buffer.putLong(object.getObjectID());
-		try {
-			buffer.put(reverse(objectType).getBytes("US-ASCII"));
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
-		buffer.put(viewType);
-		buffer.putInt(size);
-		buffer.putShort(updateCount);
-		buffer.put(data);
-		buffer.flip();
-		
-		return buffer;
-	}
-	
-	public IoBuffer createDeltaObject(short updateType, IoBuffer data, int size) {
-		IoBuffer buffer = bufferPool.allocate(2 + size, false).order(ByteOrder.LITTLE_ENDIAN);
-		
-		buffer.putShort(updateType);
-		buffer.put(data.array());
-		
-		return buffer;
-	}
-	
-	public SWGObject getObject() { return object; }
-	public void setObject(SWGObject object) { this.object = object; }
-	
-	public abstract void sendListDelta(byte viewType, short updateType, IoBuffer buffer);
-	
-	public abstract void sendBaselines();
 	
 	private String reverse(String reverseString) {
 		
@@ -125,50 +176,5 @@ public abstract class ObjectMessageBuilder {
 	    return reverse(reverseString.substring(1, reverseString.length())) + reverseString.charAt(0);
 	    
 	}
-
-	protected String getAsciiString(ByteBuffer buffer) { return getString(buffer, "US-ASCII"); }
-	protected String getUnicodeString(ByteBuffer buffer) { return getString(buffer, "UTF-16LE"); }
-	protected byte[] getAsciiString(String string) { return getString(string, "US-ASCII"); }
-	protected byte[] getUnicodeString(String string) { return getString(string, "UTF-16LE"); }
 	
-	private String getString(ByteBuffer buffer, String charFormat) {
-		String result;
-		int length;
-		if (charFormat == "UTF-16LE")
-			length = buffer.order(ByteOrder.LITTLE_ENDIAN).getInt();
-		else
-			length = buffer.order(ByteOrder.LITTLE_ENDIAN).getShort();
-		
-		int bufferPosition = buffer.position();
-		try {
-			result = new String(buffer.array(), bufferPosition, length, charFormat);
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-			return "";
-		}
-		buffer.position(bufferPosition + length);
-		
-		return result;
-	}
-	
-	private byte[] getString(String string, String charFormat) {
-		ByteBuffer result;
-		int length = 2 + string.length();
-		if (charFormat == "UTF-16LE") {
-			result = ByteBuffer.allocate(length * 2).order(ByteOrder.LITTLE_ENDIAN);
-			result.putInt(string.length());
-		}
-		else {
-			result = ByteBuffer.allocate(length).order(ByteOrder.LITTLE_ENDIAN);
-			result.putShort((short)string.length());
-		}
-		try {
-			result.put(string.getBytes(charFormat));
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-			return new byte[] { };
-		}
-		return result.array();		
-	}
-
 }

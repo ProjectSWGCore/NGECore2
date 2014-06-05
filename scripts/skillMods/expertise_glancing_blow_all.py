@@ -1,12 +1,10 @@
 import sys
 
-def add(core, actor, name, base):
-	actor.addSkillMod(name, base)
-	core.skillModService.addSkillMod(actor, 'display_only_glancing_blow', 100 * (actor.getSkillModBase('expertise_glancing_blow_all')))
+def add(core, actor, skillMod, divisor):
+	core.skillModService.addSkillMod(actor, 'display_only_glancing_blow', 100 * skillMod.getBase())
 	return
-	
-def deduct(core, actor, name, base):
-	actor.deductSkillMod(name, base)
-	core.skillModService.deductSkillMod(actor, 'display_only_glancing_blow', 100 * (actor.getSkillModBase('expertise_glancing_blow_all')))
+
+def deduct(core, actor, skillMod, divisor):
+	core.skillModService.deductSkillMod(actor, 'display_only_glancing_blow', 100 * skillMod.getBase())
 	return
 	
