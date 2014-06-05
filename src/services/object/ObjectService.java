@@ -205,6 +205,8 @@ public class ObjectService implements INetworkDispatch {
 				sign.initAfterDBLoad();
 				objectList.put(sign.getObjectID(), sign);
 			}
+			if(building.getAttachment("structureOwner") != null && ((BuildingObject) building).getMaintenanceAmount() > 0)
+				core.housingService.startMaintenanceTask((BuildingObject) building);
 		}
 		
 		cursor.close();
