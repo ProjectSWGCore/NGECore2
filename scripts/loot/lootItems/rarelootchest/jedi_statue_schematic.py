@@ -1,4 +1,4 @@
 
 def itemTemplate():
 
-	return ['object/draft_schematic/furniture/shared_must_furniture_jedi_statue.iff'] # needs verification
+	return ['object/tangible/loot/loot_schematic/shared_generic_limited_use.iff'] # needs verification
