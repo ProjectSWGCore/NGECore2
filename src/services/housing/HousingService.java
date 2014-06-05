@@ -165,7 +165,7 @@ public class HousingService implements INetworkDispatch {
 		// Check for city founders joining a new city
 		PlayerCity cityActorIsIn = core.playerCityService.getCityObjectIsIn(actor);
 		
-		if (cityActorIsIn!=null){
+		if (cityActorIsIn!=null) {
 			actor.setAttachment("Has24HZoningFor",cityActorIsIn.getCityID()); // for testing
 			
 			int cityActorHasZoning = (int)actor.getAttachment("Has24HZoningFor");
@@ -188,6 +188,9 @@ public class HousingService implements INetworkDispatch {
 		AtomicReference<ScheduledFuture<?>> ref = new AtomicReference<ScheduledFuture<?>>();
 		ref.set(scheduler.scheduleAtFixedRate(() -> {
 			
+			if(core.objectService.getObject(building.getObjectID()) == null)
+				ref.get().cancel(true);
+				
 			int amount = building.getBMR();
 			boolean needSave = false;
 			CreatureObject owner = (CreatureObject) core.objectService.getObject((long) building.getAttachment("structureOwner"));
