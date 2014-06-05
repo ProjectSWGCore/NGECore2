@@ -19,10 +19,11 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("whitethranta")
 	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(False)
-	
+	mobileTemplate.setOptionsBitmask(192)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_dressed_tatooine_opening_wh_guard.iff')
+	templates.add('object/mobile/shared_warren_scientist_s01.iff')
+	templates.add('object/mobile/shared_warren_scientist_s01.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
