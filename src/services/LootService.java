@@ -39,7 +39,9 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import protocol.swg.PlayClientEffectObjectTransformMessage;
+import protocol.swg.StopClientEffectObjectByLabel;
 import resources.objects.craft.DraftSchematic;
 import resources.common.OutOfBand;
 import resources.datatables.DisplayType;
@@ -214,7 +216,7 @@ public class LootService implements INetworkDispatch {
 	   
 	    // For autoloot 
     	//SWGObject requesterInventory = requester.getSlottedObject("inventory");
-	    System.out.println("lootRollSession.getDroppedItems() " + (lootRollSession.getDroppedItems()));
+	    //System.out.println("lootRollSession.getDroppedItems() " + (lootRollSession.getDroppedItems()));
     	for (TangibleObject droppedItem : lootRollSession.getDroppedItems()){		    
     		
     		//droppedItem.setAttachment("radial_filename", "lootitem");
@@ -223,12 +225,9 @@ public class LootService implements INetworkDispatch {
     		  		
     		// RLS chest effect
 	    	if (droppedItem.getAttachment("LootItemName").toString().contains("Loot Chest")){
+
 	    		requester.playEffectObject("appearance/pt_rare_chest.prt", "");
-	    		
-				requester.playMusic("sound/rare_loot_chest.snd");
-	    		if (requester.getClient().isGM()) {
-	    			requester.sendSystemMessage("GM Message: Played rlc effect due to RLC dropping.", DisplayType.Broadcast);
-	    		}
+	    		requester.playMusic("sound/rare_loot_chest.snd");
 	    	}
     	}
     	
@@ -511,7 +510,7 @@ public class LootService implements INetworkDispatch {
 			else 
 				remainder += span;
 	    	if (randomItemFromGroup <= remainder){ 		
-	    		System.out.println("this loot pool will drop something"); // e.g. kraytpearl_range
+	    		//System.out.println("this loot pool will drop something"); // e.g. kraytpearl_range
 	    		handleLootPool(lootPoolNames[i],lootRollSession); // This loot pool will drop something	
 	    		test = true;
 	    		break;
@@ -522,7 +521,7 @@ public class LootService implements INetworkDispatch {
 	}
 		
 	private void handleLootPool(String poolName,LootRollSession lootRollSession){
-		System.err.println("poolName.toLowerCase() " + poolName.toLowerCase());
+		//System.err.println("poolName.toLowerCase() " + poolName.toLowerCase());
 		// Fetch the loot pool data from the poolName.py script		
 		String path = "scripts/loot/lootPools/"+poolName.toLowerCase(); 
 		Vector<String> itemNames = (Vector<String>)core.scriptService.fetchStringVector(path,"itemNames");
@@ -729,7 +728,7 @@ public class LootService implements INetworkDispatch {
 //    	if (customizationValues!=null)
 //    		setCustomization(droppedItem, itemName);
     	
-    	setCustomization(droppedItem, itemName); // for now
+    	setCustomization(droppedItem, itemName, customizationAttributes, customizationValues); // for now
     	
     	handleSpecialItems(droppedItem, itemName);
 		
@@ -992,6 +991,7 @@ public class LootService implements INetworkDispatch {
 				remainder += span; 
 			if (randomItemFromPool<=remainder){
 				fillChest4(itemNames.get(i), owner, chest);
+				//fillChest4("colorcrystal", owner, chest);
 				//break;
 				return;
 			}						
@@ -1050,6 +1050,7 @@ public class LootService implements INetworkDispatch {
 		Vector<String> itemStats = null;
 		Vector<String> itemSkillMods = null;
 		Vector<String> STFparams = null;
+		Vector<String> addToCollections = null;
 				
 		if(core.scriptService.getMethod(itemPath,"","itemTemplate")==null){
 			String errorMessage = "Loot item  '" + itemName + "'  has no template function assigned in its script. Please contact Charon about this issue.";
@@ -1115,6 +1116,9 @@ public class LootService implements INetworkDispatch {
 		if(core.scriptService.getMethod(itemPath,"","STFparams")!=null)
 			STFparams = (Vector<String>)core.scriptService.fetchStringVector(itemPath,"STFparams");
 		
+		if(core.scriptService.getMethod(itemPath,"","AddToCollections")!=null)
+			addToCollections = (Vector<String>)core.scriptService.fetchStringVector(itemPath,"AddToCollections");
+		
 			
 		System.out.println("itemTemplate " + itemTemplate);
 		
@@ -1166,7 +1170,7 @@ public class LootService implements INetworkDispatch {
 	    		setSTFParams(droppedItem, STFparams);
 	    	}
 	    	 	
-	    	setCustomization(droppedItem, itemName); // for now
+	    	setCustomization(droppedItem, itemName, customizationAttributes, customizationValues); // for now
 	    	
 	    	handleSpecialItems(droppedItem, itemName);
 			
@@ -1197,7 +1201,7 @@ public class LootService implements INetworkDispatch {
 	    	droppedItem.getAttributes().put("@obj_attr_n:rare_loot_category", "\\#D1F56F Rare Item \\#FFFFFF ");
 	    	SWGObject inventory = owner.getSlottedObject("inventory");
 	    	inventory.add(droppedItem);
-	    	System.out.println("ACTUAL DROP " + droppedItem.getTemplate());
+	    	// System.out.println("ACTUAL DROP " + droppedItem.getTemplate());
 		} else
 		{
 			DraftSchematic droppedSchematic  = createDroppedSchematic(itemTemplate,owner.getPlanet());
@@ -1205,7 +1209,7 @@ public class LootService implements INetworkDispatch {
 				droppedSchematic.getAttributes().put("@obj_attr_n:rare_loot_category", "\\#D1F56F Rare Item \\#FFFFFF ");
 		    	SWGObject inventory = owner.getSlottedObject("inventory");
 		    	inventory.add(droppedSchematic);
-		    	System.out.println("ACTUAL DROP " + droppedSchematic.getTemplate());
+		    	//System.out.println("ACTUAL DROP " + droppedSchematic.getTemplate());
 			}
 		}
     	
@@ -1215,20 +1219,28 @@ public class LootService implements INetworkDispatch {
 		
 	}
 		
-	public void setCustomization(TangibleObject droppedItem,String itemName) {
+	public void setCustomization(TangibleObject droppedItem,String itemName, Vector<String> customizationAttributes, Vector<Integer> customizationValues) {
 		
 		// Example color crystal
 		if (itemName.contains("colorcrystal")) {
 			System.out.println("colorcrystal");
 			
-			int crystalColor = new Random().nextInt(11);
-			
-			droppedItem.setCustomizationVariable("/private/index_color_1", (byte) crystalColor);
-			droppedItem.getAttributes().put("@obj_attr_n:condition", "100/100");
-			droppedItem.getAttributes().put("@obj_attr_n:crystal_owner", "\\#D1F56F UNTUNED \\#FFFFFF ");		
-			droppedItem.getAttributes().put("@obj_attr_n:color", resources.datatables.LightsaberColors.get(crystalColor));
-			droppedItem.setAttachment("radial_filename", "item/tunable");
-			//droppedItem.getAttributes().put("@obj_attr_n:color", "@jedi_spam:saber_color_" + crystalColor); // Commented out for now
+			if (customizationAttributes==null){
+				int crystalColor = new Random().nextInt(11);
+				
+				droppedItem.setCustomizationVariable("/private/index_color_1", (byte) crystalColor);
+				droppedItem.getAttributes().put("@obj_attr_n:condition", "100/100");
+				droppedItem.getAttributes().put("@obj_attr_n:crystal_owner", "\\#D1F56F UNTUNED \\#FFFFFF ");		
+				droppedItem.getAttributes().put("@obj_attr_n:color", resources.datatables.LightsaberColors.get(crystalColor));
+				droppedItem.setAttachment("radial_filename", "item/tunable");
+				//droppedItem.getAttributes().put("@obj_attr_n:color", "@jedi_spam:saber_color_" + crystalColor); // Commented out for now
+			} else {
+				for (int i=0; i<customizationAttributes.size();i++){
+					int intValue = customizationValues.get(i);
+					byte value = (byte) intValue;
+					droppedItem.setCustomizationVariable(customizationAttributes.get(i), value); 
+				}
+			}
 			
 		}
 		
@@ -1248,22 +1260,21 @@ public class LootService implements INetworkDispatch {
 			if (saberColor==31) // Cunning of Tyranus, which is not in @jedi_spam
 				saberColor=0;
 			
+			droppedItem.setAttachment("radial_filename", "item/tunable");
 			droppedItem.setCustomizationVariable("/private/index_color_1", (byte) saberColor);
 			droppedItem.getAttributes().put("@obj_attr_n:condition", "100/100");
 			droppedItem.getAttributes().put("@obj_attr_n:crystal_owner", "\\#D1F56F UNTUNED \\#FFFFFF ");		
-			droppedItem.getAttributes().put("@obj_attr_n:color", resources.datatables.LightsaberColors.get((Integer)droppedItem.getAttachment("customColor1")));
-			droppedItem.setAttachment("radial_filename", "item/tunable");
+			droppedItem.getAttributes().put("@obj_attr_n:color", resources.datatables.LightsaberColors.get((Integer)droppedItem.getAttachment("customColor1")));			
 		}
 		
-		// More general 
-//		String path = "scripts/loot/lootItems/"+droppedItem.getCustomName().toLowerCase(); 
-//		Vector<String> customizationPaths = (Vector<String>)core.scriptService.fetchStringVector(path,"itemCustomizationPaths");
-//		Vector<Integer> customizationValues = (Vector<Integer>)core.scriptService.fetchIntegerVector(path,"itemCustomizationValues");
-//		for (int i=0;i<customizationPaths.size();i++){
-//			String attributePath = customizationPaths.get(i);
-//			int attributeValue = customizationValues.get(i);
-//			droppedItem.setCustomizationVariable(attributePath, (byte)attributeValue);
-//		}
+		if (lootDescriptor.contains("customattributes")) {
+			for (int i=0; i<customizationAttributes.size();i++){
+				int intValue = customizationValues.get(i);
+				byte value = (byte) intValue;
+				droppedItem.setCustomizationVariable(customizationAttributes.get(i), value); 
+			}
+		}
+		
 	}
 	
 	public void handleSpecialItems(TangibleObject droppedItem,String itemName) {
@@ -1857,14 +1868,10 @@ public class LootService implements INetworkDispatch {
 		return 42%42;
 	}
 	
-	public void setLooted(TangibleObject lootedObject,TangibleObject requester){
+	public void setLooted(CreatureObject requester,TangibleObject lootedObject){
 		lootedObject.setLooted(true);
-		float y = -5.0F; 
-	    float qz= 1.06535322E9F;
-	    Point3D effectorPosition = new Point3D(0,y,0);
-		Quaternion effectorOrientation = new Quaternion(0,0,0,qz);
-	    //PlayClientEffectObjectTransformMessage lmsg = new PlayClientEffectObjectTransformMessage("",lootedObject.getObjectID(),"",effectorPosition,effectorOrientation);
-	    //((CreatureObject) requester).getClient().getSession().write(lmsg.serialize());
+		StopClientEffectObjectByLabel stopmsg = new StopClientEffectObjectByLabel(lootedObject.getObjectID(),"lootMe");
+		requester.getClient().getSession().write(stopmsg.serialize());
 	}
 	
 	private String setRandomStatsJewelry(TangibleObject droppedItem, LootRollSession lootRollSession){
@@ -2161,10 +2168,10 @@ public class LootService implements INetworkDispatch {
 	    	double lootGroupRoll = new Random().nextDouble()*100;
 
 	    	if (lootGroupRoll <= groupChance){    	
-	    		System.out.println("this lootGroup will drop something");
+	    		//System.out.println("this lootGroup will drop something");
 	    		handleContainerLootGroup(lootGroup,lootRollSession, containerObject); //this lootGroup will drop something e.g. {kraytpearl_range,krayt_tissue_rare}	    		
 	    	}		
-	    	System.out.println("While Loop Stuck check");
+	    	
 	    }
 	}
 	
@@ -2374,7 +2381,7 @@ public class LootService implements INetworkDispatch {
     		handleSkillMods(droppedItem, itemSkillMods);
     	}
 
-    	setCustomization(droppedItem, itemName); // for now
+    	setCustomization(droppedItem, itemName, customizationAttributes, customizationValues); // for now
     	
     	handleSpecialItems(droppedItem, itemName);
 		
