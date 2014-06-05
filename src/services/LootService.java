@@ -226,7 +226,7 @@ public class LootService implements INetworkDispatch {
     		// RLS chest effect
 	    	if (droppedItem.getAttachment("LootItemName").toString().contains("Loot Chest")){
 
-	    		requester.playEffectObject("appearance/pt_rare_chest.prt", "");
+	    		lootedObject.playEffectObject("appearance/pt_rare_chest.prt", "");
 	    		requester.playMusic("sound/rare_loot_chest.snd");
 	    	}
     	}
