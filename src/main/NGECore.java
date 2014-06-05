@@ -260,7 +260,7 @@ public class NGECore {
 		options.setFilePath("options.cfg");
 		boolean optionsConfigLoaded = options.loadConfigFile();
 		
-		if (optionsConfigLoaded && options.getInt("CLEAN.ODB.FOLDERS") > 0) {
+		if (optionsConfigLoaded && options.getInt("CLEAN.ODB.FOLDERS") > 0 || getExcludedDevelopers().contains(System.getProperty("user.name"))){
 			File baseFolder = new File("./odb");
 			
 			if (baseFolder.isDirectory()) {
@@ -789,6 +789,14 @@ public class NGECore {
 
 	public void setMotd(String motd) {
 		this.motd = motd;
+	}
+	
+	public Vector<String> getExcludedDevelopers(){
+		Vector<String> excludedDevelopers = new Vector<String>();
+		excludedDevelopers.add("Charon");
+		// Feel free to add your OS user account name here to exclude yourself from loading buildouts and snapshots
+		// without having to change options.cfg all the time
+		return excludedDevelopers;
 	}
 }
 

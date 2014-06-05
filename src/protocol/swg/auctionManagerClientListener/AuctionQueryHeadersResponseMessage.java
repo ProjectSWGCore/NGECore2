@@ -85,6 +85,7 @@ public class AuctionQueryHeadersResponseMessage extends SWGMessage {
 
 		for(AuctionItem item : itemList) {
 			result.put(getUnicodeString(item.getItemName()));
+			//System.out.println(item.getItemName());
 		}
 		
 		result.putInt(itemList.size());
@@ -96,7 +97,8 @@ public class AuctionQueryHeadersResponseMessage extends SWGMessage {
 			result.put((byte) i);
 			result.putInt(item.getPrice());
 			result.putInt((int) ((item.getExpireTime() - System.currentTimeMillis()) / 1000));
-			result.putInt(item.getPrice());
+			result.putInt(item.getPrice()); // if != price then auction instead of instant sale
+			//result.putInt(0);
 			result.putShort((short) getStringIndex(item.getVuid()));
 			result.putLong(item.getOwnerId());
 			result.putShort((short) getStringIndex(item.getOwnerName()));
@@ -105,7 +107,7 @@ public class AuctionQueryHeadersResponseMessage extends SWGMessage {
 			result.putShort((short) getStringIndex(item.getOwnerName()));
 			result.put((byte) 0);*/
 			result.putLong(0);
-			result.putInt(2); // unk
+			result.putInt(0); // unk seen as 2 mostly, doesnt seem to have any effect
 			result.putInt(0);
 			result.putShort((short) 0);
 			result.putInt(item.getItemType()); // gameObjectType/category bitmask

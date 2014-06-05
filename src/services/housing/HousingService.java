@@ -34,7 +34,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
-
 import main.NGECore;
 import protocol.swg.EnterStructurePlacementModeMessage;
 import resources.objects.building.BuildingObject;
@@ -624,9 +623,6 @@ public class HousingService implements INetworkDispatch {
 	}
 	
 	public void handleSearchForItems(SWGObject owner, TangibleObject target) {
-		// Spawning the structure terminal outside makes it display the correct radial
-		core.staticService.spawnObject("object/tangible/terminal/shared_terminal_player_structure.iff", "tatooine", 0L, 3525.0F, 4.0F, -4800.0F, 0.70F, 0.71F);
-		// I assume that childobject does not get a radial somehow
 		
 		final BuildingObject building = (BuildingObject) target.getGrandparent();
 		//final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");

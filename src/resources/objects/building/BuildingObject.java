@@ -275,10 +275,7 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 			String firstName = NGECore.getInstance().characterService.getPlayerFirstName(oid);
 			entryListFirstNames.add(firstName);
 		}
-		
-		entryListFirstNames.add("Peter");
-		entryListFirstNames.add("Jackson");
-		
+				
 		owner.getClient().getSession().write(messageBuilder.buildPermissionListCreate(entryListFirstNames, name));      				
 	}
 	
@@ -289,38 +286,47 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 			String firstName = NGECore.getInstance().characterService.getPlayerFirstName(oid);
 			banListFirstNames.add(firstName);
 		}
-		
-		banListFirstNames.add("Peter");
-		banListFirstNames.add("Smith");
-		
+				
 		owner.getClient().getSession().write(messageBuilder.buildPermissionListCreate(banListFirstNames, name));      				
 	}
 	
 	public void addPlayerToEntryList(CreatureObject owner, long oid, String firstName){
 		if (!entryList.contains(oid)){
+			SWGObject obj = NGECore.getInstance().objectService.getObject(oid);
 			entryList.add(oid);	
-			owner.sendSystemMessage(OutOfBand.ProsePackage("@player_structure:player_removed", "TO", NGECore.getInstance().objectService.getObject(oid).getCustomName()), DisplayType.Screen);
+			owner.sendSystemMessage(OutOfBand.ProsePackage("@player_structure:player_added", "TO", NGECore.getInstance().objectService.getObject(oid).getCustomName()), DisplayType.Screen);
+			if(getObservers().contains(obj.getClient()))
+				updateCellPermissions(obj);
 		}
 	}
 	
 	public void removePlayerFromEntryList(CreatureObject owner, long oid, String firstName){
 		if (entryList.contains(oid)){
+			SWGObject obj = NGECore.getInstance().objectService.getObject(oid);
 			entryList.remove(oid);
 			owner.sendSystemMessage(OutOfBand.ProsePackage("@player_structure:player_removed", "TO", NGECore.getInstance().objectService.getObject(oid).getCustomName()), DisplayType.Screen);
+			if(getObservers().contains(obj.getClient())) // TODO: eject player
+				updateCellPermissions(obj);		
 		}
 	}
 	
 	public void addPlayerToBanList(CreatureObject owner, long oid, String firstName){
 		if (!banList.contains(oid)){
+			SWGObject obj = NGECore.getInstance().objectService.getObject(oid);
 			banList.add(oid);	
-			owner.sendSystemMessage(OutOfBand.ProsePackage("@player_structure:player_removed", "TO", NGECore.getInstance().objectService.getObject(oid).getCustomName()), DisplayType.Screen);
+			owner.sendSystemMessage(OutOfBand.ProsePackage("@player_structure:player_added", "TO", NGECore.getInstance().objectService.getObject(oid).getCustomName()), DisplayType.Screen);
+			if(getObservers().contains(obj.getClient())) // TODO: eject player
+				updateCellPermissions(obj);
 		}
 	}
 	
 	public void removePlayerFromBanList(CreatureObject owner, long oid, String firstName){
 		if (banList.contains(oid)){
+			SWGObject obj = NGECore.getInstance().objectService.getObject(oid);
 			banList.remove(oid);
 			owner.sendSystemMessage(OutOfBand.ProsePackage("@player_structure:player_removed", "TO", NGECore.getInstance().objectService.getObject(oid).getCustomName()), DisplayType.Screen);
+			if(getObservers().contains(obj.getClient()))
+				updateCellPermissions(obj);		
 		}
 	}
 	
@@ -357,6 +363,16 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 	
 	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
 		super.sendListDelta(viewType, updateType, buffer);
+	}
+	
+	public boolean canEnter(SWGObject object) {
+		return (getPrivacy() == PRIVATE && entryList.contains(object.getObjectID())) || !banList.contains(object.getObjectID());
+	}
+	
+	public void updateCellPermissions(SWGObject obj) {
+		if(obj.getClient() == null)
+			return;
+		viewChildren(this, true, false, (cell) -> ((CellObject) cell).sendPermissionMessage(obj.getClient()));
 	}
 	
 }
