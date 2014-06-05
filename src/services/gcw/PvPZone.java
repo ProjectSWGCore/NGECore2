@@ -65,6 +65,7 @@ public class PvPZone {
 		if (core.mountService.isMounted(actor)) {
 			actor = (CreatureObject) actor.getContainer();
 		}
+		area.getCollisionList().remove(actor);
 		core.simulationService.teleport(actor, (Point3D) actor.getAttachment("lastValidPosition"), actor.getOrientation(), actor.getParentId());
 	}
 	
