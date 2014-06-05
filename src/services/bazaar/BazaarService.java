@@ -457,7 +457,6 @@ public class BazaarService implements INetworkDispatch {
 			return;
 		}
 
-		
 		if(item.getItem() instanceof TangibleObject && player.getInventoryItemCount() >= 80) {
 			response.setStatus(RetrieveAuctionItemResponseMessage.FULLINVENTORY);
 			player.getClient().getSession().write(response.serialize());
@@ -606,10 +605,12 @@ public class BazaarService implements INetworkDispatch {
 					if(item.getStatus() == AuctionItem.FORSALE && !item.isOnBazaar()) {
 						if(vendor.getObjectID() != item.getVendorId() && (core.objectService.getObject(item.getVendorId()) == null || (Boolean) core.objectService.getObject(item.getVendorId()).getAttachment("vendorSearchEnabled")))
 							break;
-						if((category & 255) != 0 && item.getItemType() == category) {
-							if(displayedItems >= offset)
-								response.addItem(item);
-							displayedItems++;
+						if((category & 255) != 0) {
+							if(item.getItemType() == category) {
+								if(displayedItems >= offset)
+									response.addItem(item);
+								displayedItems++;
+							}
 						} else if((item.getItemType() & category) != 0) {
 							if(displayedItems >= offset) 
 								response.addItem(item);

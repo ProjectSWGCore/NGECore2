@@ -62,21 +62,21 @@ public class AIService {
 		
 		Map<CreatureObject, Integer> damageMap = actor.getDamageMap();
 		CreatureObject creature = actor.getCreature();
-		int baseXP = getBaseXP(creature);
+		int baseXp = getBaseXP(creature);
 		for(Entry<CreatureObject, Integer> e : damageMap.entrySet()) {
 			
 			CreatureObject player = e.getKey();
 			PlayerObject ghost = (PlayerObject) player.getSlottedObject("ghost");
 			if(ghost == null)
 				continue;
-			int damage = e.getValue();
+			int damageDealt = e.getValue();
 			
 			short level = (player.getGroupId() == 0) ? player.getLevel() : ((GroupObject) core.objectService.getObject(player.getGroupId())).getGroupLevel();
 			int levelDifference = ((creature.getLevel() >= level) ? 0 : (level - creature.getLevel()));
-			float damagePercent = damage / creature.getMaxHealth();
-			int finalXP = (int) (damagePercent * baseXP);
-			finalXP -= ((levelDifference > 20) ? (finalXP - 1) : (((levelDifference * 5) / 100) * finalXP));	
-			core.playerService.giveExperience(player, finalXP);
+			int damagePercent = ((damageDealt / creature.getMaxHealth()) * 100);
+			int finalXp = (((damagePercent / 100) * baseXp) + (creature.getMaxHealth() / 12));
+			finalXp -= ((levelDifference > 20) ? (finalXp - 1) : (((levelDifference * 5) / 100) * finalXp));	
+			core.playerService.giveExperience(player, finalXp);
 		}
 		
 	}

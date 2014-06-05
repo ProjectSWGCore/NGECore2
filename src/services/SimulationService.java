@@ -85,6 +85,7 @@ import resources.objects.tangible.TangibleObject;
 import resources.common.*;
 import resources.common.collidables.AbstractCollidable;
 import resources.datatables.DisplayType;
+import resources.datatables.Locomotion;
 import resources.datatables.Options;
 import resources.datatables.PlayerFlags;
 import resources.datatables.Posture;
@@ -366,10 +367,61 @@ public class SimulationService implements INetworkDispatch {
 					object.setMovementCounter(dataTransform.getMovementCounter());
 					creature.setMovementCounter(dataTransform.getMovementCounter());
 				}
+				
+				synchronized(creature.getMutex()) {
+					if (dataTransform.getSpeed() > 0.0f) {
+						switch (creature.getLocomotion()) {
+							case Locomotion.Prone:
+								creature.setLocomotion(Locomotion.Crawling);
+								break;
+							case Locomotion.ClimbingStationary:
+								creature.setLocomotion(Locomotion.Climbing);
+								break;
+							case Locomotion.Standing:
+							case Locomotion.Running:
+							case Locomotion.Walking:
+								if (dataTransform.getSpeed() >= (creature.getRunSpeed() * (creature.getSpeedMultiplierBase() + creature.getSpeedMultiplierMod()))) {
+									creature.setLocomotion(Locomotion.Running);
+								} else {
+									creature.setLocomotion(Locomotion.Walking);
+								}
+								
+								break;
+							case Locomotion.Sneaking:
+							case Locomotion.CrouchSneaking:
+							case Locomotion.CrouchWalking:
+								if (dataTransform.getSpeed() >= (creature.getRunSpeed() * (creature.getSpeedMultiplierBase() + creature.getSpeedMultiplierMod()))) {
+									creature.setLocomotion(Locomotion.CrouchSneaking);
+								} else {
+									creature.setLocomotion(Locomotion.CrouchWalking);
+								}
+								
+								break;
+						}
+					} else {
+						switch (creature.getLocomotion()) {
+							case Locomotion.Crawling:
+								creature.setLocomotion(Locomotion.Prone);
+								break;
+							case Locomotion.Climbing:
+								creature.setLocomotion(Locomotion.ClimbingStationary);
+								break;
+							case Locomotion.Running:
+							case Locomotion.Walking:
+								creature.setLocomotion(Locomotion.Standing);
+								break;
+							case Locomotion.CrouchSneaking:
+							case Locomotion.CrouchWalking:
+								creature.setLocomotion(Locomotion.Sneaking);
+								break;
+						}
+					}
+				}
+				
 				if(object.getContainer() != null) {
 					object.getContainer()._remove(object);
 					add(object, newPos.x, newPos.z);
-				} 
+				}
 				
 				//object.setParentId(0);
 				//object.setParent(null);
@@ -457,9 +509,8 @@ public class SimulationService implements INetworkDispatch {
 					return;
 				Point3D oldPos = object.getPosition();
 				Quaternion newOrientation = new Quaternion(dataTransform.getWOrientation(), dataTransform.getXOrientation(), dataTransform.getYOrientation(), dataTransform.getZOrientation());
-
+				
 				UpdateTransformWithParentMessage utm = new UpdateTransformWithParentMessage(object.getObjectID(), dataTransform.getCellId(), dataTransform.getTransformedX(), dataTransform.getTransformedY(), dataTransform.getTransformedZ(), dataTransform.getMovementCounter(), (byte) dataTransform.getMovementAngle(), dataTransform.getSpeed());
-
 				
 				if(object.getContainer() != parent) {
 					remove(object, oldPos.x, oldPos.z);
@@ -476,10 +527,58 @@ public class SimulationService implements INetworkDispatch {
 				
 				checkForCollidables(object);
 				object.setAttachment("lastValidPosition", object.getPosition());
-
+				
+				synchronized(object.getMutex()) {
+					if (dataTransform.getSpeed() > 0.0f) {
+						switch (object.getLocomotion()) {
+							case Locomotion.Prone:
+								object.setLocomotion(Locomotion.Crawling);
+								break;
+							case Locomotion.ClimbingStationary:
+								object.setLocomotion(Locomotion.Climbing);
+								break;
+							case Locomotion.Standing:
+							case Locomotion.Running:
+							case Locomotion.Walking:
+								if (dataTransform.getSpeed() >= (object.getRunSpeed() * (object.getSpeedMultiplierBase() + object.getSpeedMultiplierMod()))) {
+									object.setLocomotion(Locomotion.Running);
+								} else {
+									object.setLocomotion(Locomotion.Walking);
+								}
+								
+								break;
+							case Locomotion.Sneaking:
+							case Locomotion.CrouchSneaking:
+							case Locomotion.CrouchWalking:
+								if (dataTransform.getSpeed() >= (object.getRunSpeed() * (object.getSpeedMultiplierBase() + object.getSpeedMultiplierMod()))) {
+									object.setLocomotion(Locomotion.CrouchSneaking);
+								} else {
+									object.setLocomotion(Locomotion.CrouchWalking);
+								}
+								
+								break;
+						}
+					} else {
+						switch (object.getLocomotion()) {
+							case Locomotion.Crawling:
+								object.setLocomotion(Locomotion.Prone);
+								break;
+							case Locomotion.Climbing:
+								object.setLocomotion(Locomotion.ClimbingStationary);
+								break;
+							case Locomotion.Running:
+							case Locomotion.Walking:
+								object.setLocomotion(Locomotion.Standing);
+								break;
+							case Locomotion.CrouchSneaking:
+							case Locomotion.CrouchWalking:
+								object.setLocomotion(Locomotion.Sneaking);
+								break;
+						}
+					}
+				}
 			}
-				
-				
+			
 		});
 		
 		swgOpcodes.put(Opcodes.ClientOpenContainerMessage, new INetworkRemoteEvent() {

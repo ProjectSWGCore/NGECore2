@@ -46,6 +46,7 @@ import services.ai.states.IdleState;
 import services.ai.states.RetreatState;
 import services.combat.CombatEvents.DamageTaken;
 import services.spawn.MobileTemplate;
+
 import java.util.Random;
 
 public class AIActor {
@@ -289,17 +290,28 @@ public class AIActor {
 		
 	}
 	
-	public void scheduleDespawn() {
-		scheduler.schedule(() -> {
-			
+	public void scheduleDespawn()
+	{	
+		// Sometimes these tasks are null?
+		try
+		{
 			aggroCheckTask.cancel(true);
 			regenTask.cancel(true);
-			damageMap.clear();
-			followObject = null;
-			creature.setAttachment("AI", null);
-			NGECore.getInstance().objectService.destroyObject(creature);
-			
-		}, 30000, TimeUnit.MILLISECONDS);
+		}
+		catch(Exception ex ) { }
+		
+		scheduler.schedule(new Runnable() 
+		{
+			@Override
+			public void run() 
+			{				
+				damageMap.clear();
+				followObject = null;
+				creature.setAttachment("AI", null);
+				NGECore.getInstance().objectService.destroyObject(creature);
+			}
+		
+		}, 2, TimeUnit.MINUTES);
 	}
 
 	public ScheduledFuture<?> getRegenTask() {

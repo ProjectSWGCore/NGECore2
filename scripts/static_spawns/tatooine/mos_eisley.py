@@ -16,134 +16,130 @@ def addPlanetSpawns(core, planet):
 	# TODO Check all NPCs for personalized scripting, change format.
 	
 	#Cantina Interior
-	wuher = stcSvc.spawnObject('object/mobile/shared_wuher.iff', 'tatooine', long(1082877), float(8.6), float(-0.9), float(0.4), float(0.71), float(0.71))
-	#wuher.setCustomName2('Wuher')
-	#wuher.setOptionsBitmask(256)
+	building = core.objectService.getObject(long(1082874)) 
+	wuher = stcSvc.spawnObject('object/mobile/shared_wuher.iff', 'tatooine', building.getCellByCellNumber(3), float(8.6), float(-0.9), float(0.4), float(0), float(0.71), float(0), float(0.71)) 
+	wuher.setCustomName('Wuher')
+	wuher.setOptionsBitmask(256)
 	
-	chadraFanFemale = stcSvc.spawnObject('object/mobile/shared_chadra_fan_female.iff', 'tatooine', long(1082877), float(10.6), float(-0.9), float(-1.5), float(0.42), float(0.90))
-	#chadraFanFemale.setCustomName2('a Chadra Fan Female')
-	#chadraFanFemale.setOptionsBitmask(256)
+	chadraFanFemale = stcSvc.spawnObject('object/mobile/shared_chadra_fan_female.iff', 'tatooine', building.getCellByCellNumber(3), float(10.6), float(-0.9), float(-1.5), float(0), float(0.42), float(0), float(0.90))
+	chadraFanFemale.setCustomName('a Chadra Fan Female')
+	chadraFanFemale.setOptionsBitmask(256)
 	
-	chadraFanMale = stcSvc.spawnObject('object/mobile/shared_chadra_fan_male.iff', 'tatooine', long(1082877), float(10.7), float(-0.9), float(-0.3), float(0.64), float(0.77))
-	#chadraFanMale.setCustomName2('a Chadra Fan Male')
-	#chadraFanMale.setOptionsBitmask(256)
+	chadraFanMale = stcSvc.spawnObject('object/mobile/shared_chadra_fan_male.iff', 'tatooine', building.getCellByCellNumber(3), float(10.7), float(-0.9), float(-0.3), float(0), float(0.64), float(0), float(0.77))
+	chadraFanMale.setCustomName('a Chadra Fan Male')
+	chadraFanMale.setOptionsBitmask(256)
 	
-	muftak = stcSvc.spawnObject('object/mobile/shared_muftak.iff', 'tatooine', long(1082877), float(20.3), float(-0.9), float(4.9), float(0.82), float(0.57)) 
-	#muftak.setCustomName2('Muftak')
-	#muftak.setOptionsBitmask(256)
+	muftak = stcSvc.spawnObject('object/mobile/shared_muftak.iff', 'tatooine', building.getCellByCellNumber(3), float(20.3), float(-0.9), float(4.9), float(0), float(0.82), float(0), float(0.57)) 
+	muftak.setCustomName('Muftak')
+	muftak.setOptionsBitmask(256)
 	
-	chissMale1 = stcSvc.spawnObject('object/mobile/ep3/shared_ep3_etyyy_chiss_poacher_01.iff', 'tatooine', long(1082877), float(1.7), float(-0.9), float(-5.0), float(0.71), float(0.71)) 
-	#chissMale1.setCustomName2('a Chiss Male')
-	#chissMale1.setOptionsBitmask(256)
+	chissMale1 = stcSvc.spawnObject('object/mobile/ep3/shared_ep3_etyyy_chiss_poacher_01.iff', 'tatooine', building.getCellByCellNumber(3), float(1.7), float(-0.9), float(-5.0), float(0), float(0.71), float(0), float(0.71)) 
+	chissMale1.setCustomName('a Chiss Male')
+	chissMale1.setOptionsBitmask(256)
 	
-	chissMale2 = stcSvc.spawnObject('object/mobile/ep3/shared_ep3_etyyy_chiss_poacher_02.iff', 'tatooine', long(1082877), float(3.4), float(-0.9), float(-4.8), float(0), float(0)) 
-	#chissMale2.setCustomName2('a Chiss Male')
-	#chissMale2.setOptionsBitmask(256)
+	chissMale2 = stcSvc.spawnObject('object/mobile/ep3/shared_ep3_etyyy_chiss_poacher_02.iff', 'tatooine', building.getCellByCellNumber(3), float(3.4), float(-0.9), float(-4.8), float(0), float(0), float(0), float(0)) 
+	chissMale2.setCustomName('a Chiss Male')
+	chissMale2.setOptionsBitmask(256)
 	
-	cantinaStorm = stcSvc.spawnObject('object/mobile/shared_stormtrooper.iff', 'tatooine', long(1082877), float(2.9), float(-0.9), float(-6.5), float(0.71), float(0.71)) 
-	#cantinaStorm.setCustomName2('a Stormtrooper')
-	#cantinaStorm.setOptionsBitmask(256)
+	cantinaStorm = stcSvc.spawnObject('object/mobile/shared_stormtrooper.iff', 'tatooine', building.getCellByCellNumber(3), float(2.9), float(-0.9), float(-6.5), float(0), float(0.71), float(0), float(0.71)) 
+	cantinaStorm.setCustomName('a Stormtrooper')
+	cantinaStorm.setOptionsBitmask(256)
 	
-	cantinaStormL = stcSvc.spawnObject('object/mobile/shared_stormtrooper_groupleader.iff', 'tatooine', long(1082877), float(3.6), float(-0.9), float(-7.9), float(0.71), float(0.71)) 
-	#cantinaStormL.setCustomName2('a Stormtrooper Squad Leader')
-	#cantinaStormL.setOptionsBitmask(256)
+	cantinaStormL = stcSvc.spawnObject('object/mobile/shared_stormtrooper_groupleader.iff', 'tatooine', building.getCellByCellNumber(3), float(3.6), float(-0.9), float(-7.9), float(0), float(0.71), float(0), float(0.71)) 
+	cantinaStormL.setCustomName('a Stormtrooper Squad Leader')
+	cantinaStormL.setOptionsBitmask(256)
+			
+	businessman1 = stcSvc.spawnObject('object/mobile/shared_dressed_businessman_human_male_01.iff', 'tatooine', building.getCellByCellNumber(3), float(11.0), float(-0.9), float(2.1), float(0), float(0.38), float(0), float(-0.92)) 
+	businessman1.setCustomName('a Businessman')
+	businessman1.setOptionsBitmask(256)
 	
-	figrinDan = stcSvc.spawnObject('object/mobile/tatooine_npc/shared_figrin_dan.iff', 'tatooine', long(1082880), float(3.7), float(-0.9), float(-14.4), float(0.42), float(0.91)) 
-	#figrinDan.setCustomName2('Figrin D\'an')
-	#figrinDan.setOptionsBitmask(256)
+	commoner1 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_tatooine_aqualish_male_01.iff', 'tatooine', building.getCellByCellNumber(3), float(10.3), float(-0.9), float(2.7), float(0), float(0.82), float(0), float(0.57)) 
+	commoner1.setCustomName('a Commoner')
+	commoner1.setOptionsBitmask(256)
 	
-	techMor = stcSvc.spawnObject('object/mobile/tatooine_npc/shared_figrin_dan.iff', 'tatooine', long(1082880), float(4.0), float(-0.9), float(-17.0), float(0.42), float(0.91)) 
-	#techMor.setCustomName2('Tech M\'or')
-	#techMor.setOptionsBitmask(256)
+	entertainer1 = stcSvc.spawnObject('object/mobile/shared_dressed_entertainer_trainer_twk_female_01.iff', 'tatooine', building.getCellByCellNumber(3), float(9.4), float(-0.9), float(3.9), float(0), float(0.38), float(0), float(-0.92)) 
+	entertainer1.setCustomName('an Entertainer')
+	entertainer1.setOptionsBitmask(256)
 	
-	doikkNats = stcSvc.spawnObject('object/mobile/tatooine_npc/shared_figrin_dan.iff', 'tatooine', long(1082880), float(2.2), float(-0.9), float(-16.4), float(0.42), float(0.91)) 
-	#doikkNats.setCustomName2('Doikk Na\'ts')
-	#doikkNats.setOptionsBitmask(256)
+	noble1 = stcSvc.spawnObject('object/mobile/shared_dressed_noble_trandoshan_male_01.iff', 'tatooine', building.getCellByCellNumber(3), float(8.6), float(-0.9), float(4.8), float(0), float(0.82), float(0), float(0.57)) 
+	noble1.setCustomName('a Noble')
+	noble1.setOptionsBitmask(256)
 	
-	tednDahai = stcSvc.spawnObject('object/mobile/tatooine_npc/shared_figrin_dan.iff', 'tatooine', long(1082880), float(1.3), float(-0.9), float(-15.2), float(0.42), float(0.91)) 
-	#tednDahai.setCustomName2('Tedn Dahai')
-	#tednDahai.setOptionsBitmask(256)
+	commoner2 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_tatooine_trandoshan_female_01.iff', 'tatooine', building.getCellByCellNumber(3), float(4.1), float(-0.9), float(5.7), float(0), float(1), float(0), float(0)) 
+	commoner2.setCustomName('a Commoner')
+	commoner2.setOptionsBitmask(256)
 	
-	nalanCheel = stcSvc.spawnObject('object/mobile/tatooine_npc/shared_figrin_dan.iff', 'tatooine', long(1082880), float(0.5), float(-0.9), float(-17.1), float(0.42), float(0.91)) 
-	#nalanCheel.setCustomName2('Nalan Cheel')
-	#nalanCheel.setOptionsBitmask(256)
+	commoner3 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_naboo_bothan_female_01.iff', 'tatooine', building.getCellByCellNumber(3), float(3.1), float(-0.9), float(5.9), float(0), float(1), float(0), float(0)) 
+	commoner3.setCustomName('a Commoner')
+	commoner3.setOptionsBitmask(256)
 	
-	businessman1 = stcSvc.spawnObject('object/mobile/shared_dressed_businessman_human_male_01.iff', 'tatooine', long(1082877), float(11.0), float(-0.9), float(2.1), float(0.38), float(-0.92)) 
-	#businessman1.setCustomName2('a Businessman')
-	#businessman1.setOptionsBitmask(256)
+	commoner4 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_fat_twilek_male_01.iff', 'tatooine', building.getCellByCellNumber(3), float(1.7), float(-0.9), float(6.0), float(0), float(1), float(0), float(0)) 
+	commoner4.setCustomName('a Commoner')
+	commoner4.setOptionsBitmask(256)
 	
-	commoner1 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_tatooine_aqualish_male_01.iff', 'tatooine', long(1082877), float(10.3), float(-0.9), float(2.7), float(0.82), float(0.57)) 
-	#commoner1.setCustomName2('a Commoner')
-	#commoner1.setOptionsBitmask(256)
+	commoner5 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_naboo_bothan_male_01.iff', 'tatooine', building.getCellByCellNumber(3), float(-0.4), float(-0.9), float(5.9), float(0), float(1), float(0), float(0)) 
+	commoner5.setCustomName('a Commoner')
+	commoner5.setOptionsBitmask(256)
 	
-	entertainer1 = stcSvc.spawnObject('object/mobile/shared_dressed_entertainer_trainer_twk_female_01.iff', 'tatooine', long(1082877), float(9.4), float(-0.9), float(3.9), float(0.38), float(-0.92)) 
-	#entertainer1.setCustomName2('an Entertainer')
-	#entertainer1.setOptionsBitmask(256)
+	commoner6 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_naboo_human_male_05.iff', 'tatooine', building.getCellByCellNumber(3), float(16.0), float(-0.9), float(4.1), float(0), float(0), float(0), float(0)) 
+	commoner6.setCustomName('a Commoner')
+	commoner6.setOptionsBitmask(256)
 	
-	noble1 = stcSvc.spawnObject('object/mobile/shared_dressed_noble_trandoshan_male_01.iff', 'tatooine', long(1082877), float(8.6), float(-0.9), float(4.8), float(0.82), float(0.57)) 
-	#noble1.setCustomName2('a Noble')
-	#noble1.setOptionsBitmask(256)
+	commoner7 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_fat_zabrak_male_01.iff', 'tatooine', building.getCellByCellNumber(3), float(8.8), float(-0.9), float(-6.0), float(0), float(0.98), float(0), float(-0.22)) 
+	commoner7.setCustomName('a Patron')
+	commoner7.setOptionsBitmask(256)
 	
-	commoner2 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_tatooine_trandoshan_female_01.iff', 'tatooine', long(1082877), float(4.1), float(-0.9), float(5.7), float(1), float(0)) 
-	#commoner2.setCustomName2('a Commoner')
-	#commoner2.setOptionsBitmask(256)
+	commoner8 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_naboo_human_male_08.iff', 'tatooine', building.getCellByCellNumber(3), float(6.8), float(-0.9), float(-6.5), float(0), float(0.98), float(0), float(-0.22)) 
+	commoner8.setCustomName('a Patron')
+	commoner8.setOptionsBitmask(256)
 	
-	commoner3 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_naboo_bothan_female_01.iff', 'tatooine', long(1082877), float(3.1), float(-0.9), float(5.9), float(1), float(0)) 
-	#commoner3.setCustomName2('a Commoner')
-	#commoner3.setOptionsBitmask(256)
+	commoner9 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_tatooine_aqualish_male_09.iff', 'tatooine', building.getCellByCellNumber(3), float(1.1), float(-0.9), float(-7.7), float(0), float(0.42), float(0), float(0.91)) 
+	commoner9.setCustomName('a Commoner')
+	commoner9.setOptionsBitmask(256)
 	
-	commoner4 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_fat_twilek_male_01.iff', 'tatooine', long(1082877), float(1.7), float(-0.9), float(6.0), float(1), float(0)) 
-	#commoner4.setCustomName2('a Commoner')
-	#commoner4.setOptionsBitmask(256)
+	commoner10 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_tatooine_nikto_male_04.iff', 'tatooine', building.getCellByCellNumber(3), float(2.1), float(-0.9), float(-8.4), float(0), float(0.42), float(0), float(0.91)) 
+	commoner10.setCustomName('a Commoner')
+	commoner10.setOptionsBitmask(256)
 	
-	commoner5 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_naboo_bothan_male_01.iff', 'tatooine', long(1082877), float(-0.4), float(-0.9), float(5.9), float(1), float(0)) 
-	#commoner5.setCustomName2('a Commoner')
-	#commoner5.setOptionsBitmask(256)
+	anetiaKahryn = stcSvc.spawnObject('object/mobile/shared_dressed_twk_entertainer.iff', 'tatooine', building.getCellByCellNumber(4), float(19.8), float(-0.9), float(-21), float(0), float(-0.03), float(0), float(0.99)) 
+	anetiaKahryn.setCustomName('Anetia Kah\'ryn')
+	anetiaKahryn.setOptionsBitmask(256)
 	
-	commoner6 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_naboo_human_male_05.iff', 'tatooine', long(1082877), float(16.0), float(-0.9), float(4.1), float(0), float(0)) 
-	#commoner6.setCustomName2('a Commoner')
-	#commoner6.setOptionsBitmask(256)
+	figrinDan = stcSvc.spawnObject('object/mobile/tatooine_npc/shared_figrin_dan.iff', 'tatooine', building.getCellByCellNumber(6), float(3.7), float(-0.9), float(-14.4), float(0), float(0.42), float(0), float(0.91)) 
+	figrinDan.setCustomName('Figrin D\'an')
+	figrinDan.setOptionsBitmask(256)
 	
-	commoner7 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_fat_zabrak_male_01.iff', 'tatooine', long(1082877), float(8.8), float(-0.9), float(-6.0), float(0.98), float(-0.22)) 
-	#commoner7.setCustomName2('a Patron')
-	#commoner7.setOptionsBitmask(256)
+	techMor = stcSvc.spawnObject('object/mobile/tatooine_npc/shared_figrin_dan.iff', 'tatooine', building.getCellByCellNumber(6), float(4.0), float(-0.9), float(-17.0), float(0), float(0.42), float(0), float(0.91)) 
+	techMor.setCustomName('Tech M\'or')
+	techMor.setOptionsBitmask(256)
 	
-	commoner8 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_naboo_human_male_08.iff', 'tatooine', long(1082877), float(6.8), float(-0.9), float(-6.5), float(0.98), float(-0.22)) 
-	#commoner8.setCustomName2('a Patron')
-	#commoner8.setOptionsBitmask(256)
+	doikkNats = stcSvc.spawnObject('object/mobile/tatooine_npc/shared_figrin_dan.iff', 'tatooine', building.getCellByCellNumber(6), float(2.2), float(-0.9), float(-16.4), float(0), float(0.42), float(0), float(0.91)) 
+	doikkNats.setCustomName('Doikk Na\'ts')
+	doikkNats.setOptionsBitmask(256)
 	
-	commoner9 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_tatooine_aqualish_male_09.iff', 'tatooine', long(1082877), float(1.1), float(-0.9), float(-7.7), float(0.42), float(0.91)) 
-	#commoner9.setCustomName2('a Commoner')
-	#commoner9.setOptionsBitmask(256)
+	tednDahai = stcSvc.spawnObject('object/mobile/tatooine_npc/shared_figrin_dan.iff', 'tatooine', building.getCellByCellNumber(6), float(1.3), float(-0.9), float(-15.2), float(0), float(0.42), float(0), float(0.91)) 
+	tednDahai.setCustomName('Tedn Dahai')
+	tednDahai.setOptionsBitmask(256)
 	
-	commoner10 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_tatooine_nikto_male_04.iff', 'tatooine', long(1082877), float(2.1), float(-0.9), float(-8.4), float(0.42), float(0.91)) 
-	#commoner10.setCustomName2('a Commoner')
-	#commoner10.setOptionsBitmask(256)
+	nalanCheel = stcSvc.spawnObject('object/mobile/tatooine_npc/shared_figrin_dan.iff', 'tatooine', building.getCellByCellNumber(6), float(0.5), float(-0.9), float(-17.1), float(0), float(0.42), float(0), float(0.91)) 
+	nalanCheel.setCustomName('Nalan Cheel')
+	nalanCheel.setOptionsBitmask(256)
 	
-	anetiaKahryn = stcSvc.spawnObject('object/mobile/shared_dressed_twk_entertainer.iff', 'tatooine', long(1082878), float(19.8), float(-0.9), float(-21), float(-0.03), float(0.99)) 
-	#anetiaKahryn.setCustomName2('Anetia Kah\'ryn')
-	#anetiaKahryn.setOptionsBitmask(256)
-	
-	dravis = stcSvc.spawnObject('object/mobile/shared_space_privateer_tier1_tatooine.iff', 'tatooine', long(1082886), float(-21.7), float(-0.9), float(25.5), float(0.99), float(0.03)) 
+	dravis = stcSvc.spawnObject('object/mobile/shared_space_privateer_tier1_tatooine.iff', 'tatooine', building.getCellByCellNumber(12), float(-21.7), float(-0.9), float(25.5), float(0), float(0.99), float(0), float(0.03)) 
 	#dravis.setCustomName2('Dravis')
 	#dravis.setOptionsBitmask(256)
 	
-	talonKarrde = stcSvc.spawnObject('object/mobile/shared_dressed_talon_karrde.iff', 'tatooine', long(1082887), float(-25.7), float(-0.5), float(8.8), float(0.21), float(0.97)) 
-	#talonKarrde.setCustomName2('Talon Karrde')
-	#talonKarrde.setOptionsBitmask(256)
+	talonKarrde = stcSvc.spawnObject('object/mobile/shared_dressed_talon_karrde.iff', 'tatooine', building.getCellByCellNumber(13), float(-25.7), float(-0.5), float(8.8), float(0), float(0.21), float(0), float(0.97)) 
+	talonKarrde.setCustomName('Talon Karrde')
+	talonKarrde.setOptionsBitmask(256)
 	
 	#Starport Interior
 	
-	bartender1 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_tatooine_nikto_male_04.iff', 'tatooine', long(1106380), float(-59.1), float(2.6), float(39.5), float(0), float(0)) 
-	#bartender1.setCustomName2('a Bartender')
-	#bartender1.setOptionsBitmask(256)
 	
 	#City Hall Interior
 	
 	#Lucky Despot Interior    TODO:  Check Cell IDs for Spawned NPCS inside once Lucky Despot is spawning properly again.
 	building = core.objectService.getObject(long(-466404040703447347)) 
-	
-	#Han solo
 	stcSvc.spawnObject('object/mobile/shared_han_solo.iff', 'tatooine', building.getCellByCellNumber(9), float(32.3), float(7.0), float(1.6), float(0), float(0), float(0), float(0)) 
 	
 	#Medical Center Interior

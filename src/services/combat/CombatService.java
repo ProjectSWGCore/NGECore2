@@ -203,7 +203,20 @@ public class CombatService implements INetworkDispatch {
 					creature.removeDefender(defender);
 				}
 				
-				if(((CreatureObject) target).getPlayerObject() == null) target.setKiller(attacker);
+				if(((CreatureObject) target).getPlayerObject() == null) 
+				{
+					target.setKiller(attacker);
+					
+					scheduler.schedule(new Runnable() 
+					{
+						@Override
+						public void run() 
+						{
+							core.objectService.destroyObject(target);
+						}
+						
+					}, 2, TimeUnit.MINUTES);
+				}
 			}
 		}
 		else if(target instanceof TangibleObject)
