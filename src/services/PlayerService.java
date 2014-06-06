@@ -573,7 +573,7 @@ public class PlayerService implements INetworkDispatch {
 			return;
 		}
 		
-		if (profession == null || profession.equals("")) {
+		if (profession == null || !Professions.isProfession(profession)) {
 			return;
 		}
 		

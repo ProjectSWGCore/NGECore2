@@ -47,4 +47,8 @@ public final class Professions {
 		return map.get(profession);
 	}
 	
+	public static boolean isProfession(String profession) {
+		return map.containsKey(profession);
+	}
+	
 }

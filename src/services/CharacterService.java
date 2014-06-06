@@ -228,6 +228,10 @@ public class CharacterService implements INetworkDispatch {
 				ClientCreateCharacter clientCreateCharacter = new ClientCreateCharacter();
 				clientCreateCharacter.deserialize(data);
 				
+				if (!Professions.isProfession(clientCreateCharacter.getProfession())) {
+					return;
+				}
+				
 				engine.resources.config.Config config = new engine.resources.config.Config();
 				config.setFilePath("nge.cfg");
 				if (!(config.loadConfigFile())) {
