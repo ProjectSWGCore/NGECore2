@@ -555,6 +555,11 @@ public class GCWService implements INetworkDispatch {
 		
 		player.setCurrentRank(newrank);
 		player.setRankProgress((float) Math.floor(newprogress));
+		
+		if (newrank > oldrank)
+			core.scriptService.callScript("scripts/gcw/", "gcwrank_" + actor.getFaction(), "handleRankUp", actor, newrank);
+		else
+			core.scriptService.callScript("scripts/gcw/", "gcwrank_" + actor.getFaction(), "handleRankDown", actor, newrank);
 	}
 	
 	public List<SWGObject> getSFPlayers() {
