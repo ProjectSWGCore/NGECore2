@@ -1,4 +1,5 @@
 import sys
 
 def setup(core, object):
-	return
+	object.setStringAttribute('armor_category', 'Battle')
+	return	
