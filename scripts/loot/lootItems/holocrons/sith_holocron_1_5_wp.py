@@ -14,4 +14,4 @@ def customizationValues():
     
 def STFparams():
 
-	return ['static_item_n','item_collection_sith_holocron_01_01','static_item_d','item_collection_sith_holocron_01_01']
+	return ['static_item_n','item_collection_sith_holocron_02_01','static_item_d','item_collection_sith_holocron_02_01']

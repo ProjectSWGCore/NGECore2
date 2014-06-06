@@ -1,6 +1,7 @@
+
 def itemTemplate():
 
-	return ['object/tangible/loot/creature_loot/collections/shared_sith_holocron_01.iff']
+	return ['object/tangible/loot/creature_loot/collections/shared_jedi_holocron_01.iff']
 
 def lootDescriptor():
 
@@ -14,4 +15,4 @@ def customizationValues():
     
 def STFparams():
 
-	return ['static_item_n','item_collection_sith_holocron_01_01','static_item_d','item_collection_sith_holocron_01_01']
+	return ['static_item_n','item_collection_jedi_holocron_02_03','static_item_d','item_collection_jedi_holocron_02_03']
