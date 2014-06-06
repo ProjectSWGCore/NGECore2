@@ -157,9 +157,9 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 			try {
 				PortalVisitor portal = ClientFileManager.loadFile(portalLayoutFilename, PortalVisitor.class);
 				
-				for (int i = 1; i <= portal.cellCount; i++) {
+				for (int i = 0; i <= portal.cellCount; i++) {
 					if (cellName.equals(portal.cells.get(i).name)) {
-						return getCellByCellNumber(i);
+						return getCellByCellNumber(i + 1);
 					}
 				}
 			} catch (InstantiationException | IllegalAccessException e) {
