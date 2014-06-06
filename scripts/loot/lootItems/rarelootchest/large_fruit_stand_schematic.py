@@ -1,4 +1,4 @@
 
 def itemTemplate():
 
-	return ['object/tangible/event_perk/shared_fruit_stand.iff'] # needs correct iff still
+	return ['object/tangible/loot/loot_schematic/shared_generic_limited_use.iff'] # needs correct iff still

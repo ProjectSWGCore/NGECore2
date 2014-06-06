@@ -91,7 +91,9 @@ public class DevService implements INetworkDispatch {
 				if (creature.getClient().isGM()) {
 					suiOptions.put((long) 120, "House Deeds");
 					suiOptions.put((long) 125, "Crafting Tools");
-					suiOptions.put((long) 130, "Vehicle Deeds");
+				}
+				suiOptions.put((long) 130, "Vehicle Deeds");
+				if (creature.getClient().isGM()) {
 					suiOptions.put((long) 121, "Sandbox City");
 				}
 
@@ -1049,7 +1051,7 @@ public class DevService implements INetworkDispatch {
 						colorCrystal.getAttributes().put("@obj_attr_n:condition", "100/100");
 						colorCrystal.getAttributes().put("@obj_attr_n:crystal_owner", "\\#D1F56F UNTUNED \\#FFFFFF ");
 						colorCrystal.setAttachment("radial_filename", "item/tunable");
-						core.lootService.setCustomization(colorCrystal, "colorcrystal");
+						core.lootService.setCustomization(colorCrystal, "colorcrystal",null,null);
 						inventory.add(colorCrystal);
 						
 						TangibleObject lavaCrystal = (TangibleObject) core.objectService.createObject("object/tangible/component/weapon/lightsaber/shared_lightsaber_module_lava_crystal.iff", planet);

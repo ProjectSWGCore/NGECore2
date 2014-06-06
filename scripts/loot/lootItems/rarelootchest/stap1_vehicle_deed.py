@@ -1,4 +1,4 @@
 
 def itemTemplate():
 
-	return ['object/draft_schematic/vehicle/civilian/shared_speeder_stap.iff'] 
+	return ['object/tangible/deed/vehicle_deed/shared_speeder_stap_deed.iff'] 

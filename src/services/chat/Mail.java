@@ -25,6 +25,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import resources.common.OutOfBand;
+import resources.common.ProsePackage;
+
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 
@@ -42,6 +45,7 @@ public class Mail implements Serializable {
 	private byte status;
 	private int timeStamp;
 	private List<WaypointAttachment> attachments = new ArrayList<WaypointAttachment>();
+	private List<ProsePackage> proseAttachments = new ArrayList<ProsePackage>();
 	
 	public static final byte NEW = 0x4E;
 	public static final byte READ = 0x52;
@@ -122,14 +126,28 @@ public class Mail implements Serializable {
 		this.timeStamp = timeStamp;
 	}
 
-
-	public List<WaypointAttachment> getAttachments() {
+	public List<WaypointAttachment> getWaypointAttachments() {
 		return attachments;
 	}
 
-
-	public void setAttachments(List<WaypointAttachment> attachments) {
+	public void setWaypointAttachments(List<WaypointAttachment> attachments) {
 		this.attachments = attachments;
+	}
+	
+	public void addWaypointAttachment(WaypointAttachment attachment) {
+		attachments.add(attachment);
+	}
+
+	public List<ProsePackage> getProseAttachments() {
+		return proseAttachments;
+	}
+
+	public void setProseAttachments(List<ProsePackage> proseAttachments) {
+		this.proseAttachments = proseAttachments;
+	}
+	
+	public void addProseAttachment(ProsePackage prose) {
+		proseAttachments.add(prose);
 	}
 	
 }

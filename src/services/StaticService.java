@@ -188,7 +188,7 @@ public class StaticService implements INetworkDispatch {
 					
 					for (int i = 1; i <= portal.cellCount; i++) {
 						long cellObjectId = core.objectService.getDOId(planetName, "object/cell/shared_cell.iff", 0, object.getObjectID(), i, x, y, z);
-						CellObject childCell = (CellObject) core.objectService.createObject("object/cell/shared_cell.iff", cellObjectId, core.terrainService.getPlanetByName(planetName), new Point3D(0, 0, 0), new Quaternion(1, 0, 0, 0), null, true, true);
+						CellObject childCell = (CellObject) core.objectService.createObject("object/cell/shared_cell.iff", cellObjectId, core.terrainService.getPlanetByName(planetName), new Point3D(0, 0, 0), new Quaternion(0, 0, 1, 0), null, true, true);
 						childCell.setCellNumber(i);
 						building.add(childCell);
 					}
