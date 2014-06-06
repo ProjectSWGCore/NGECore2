@@ -7,7 +7,7 @@ def setup(core, object):
 	object.setDetailName('armor_medic_roadmap_gloves_02_01')
 	object.setIntAttribute('cat_stat_mod_bonus.@stat_n:constitution_modified', 3)
 	object.setStringAttribute('class_required', 'Medic')
-	object.setStringAttribute('armor_category', 'Reconnaissance')
+	object.setStringAttribute('armor_category', '@obj_attr_n:armor_reconnaissance')
 	object.setIntAttribute('cat_armor_standard_protection.kinetic', 640)
 	object.setIntAttribute('cat_armor_standard_protection.energy', 2640)
 	object.setIntAttribute('cat_armor_special_protection.special_protection_type_heat', 1640)

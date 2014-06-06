@@ -6,5 +6,5 @@ def setup(core, object):
 	object.setDetailFilename('static_item_d')
 	object.setDetailName('armor_commando_roadmap_gloves_02_01')
 	object.setStringAttribute('class_required', 'Commando')
-	object.setStringAttribute('armor_category', 'Assault')
+	object.setStringAttribute('armor_category', '@obj_attr_n:armor_assault')
 	return	
