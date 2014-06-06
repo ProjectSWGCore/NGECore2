@@ -366,7 +366,7 @@ public class FactionService implements INetworkDispatch {
 		try {
 			for (int i = 0; i < pvpFactions.getRowCount(); i++) {
 				if (pvpFactions.getObject(i, 0) != null) {
-					if (((String) pvpFactions.getObject(i, 0)).equals(faction)) {
+					if (((String) pvpFactions.getObject(i, 1)).equals(faction)) {
 						return true;
 					}
 				}
