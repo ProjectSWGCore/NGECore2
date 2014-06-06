@@ -102,7 +102,7 @@ public class LootService implements INetworkDispatch {
 			}
 			SWGObject lootedObjectInventory = lootedObject.getSlottedObject("inventory");
 			core.simulationService.openContainer(requester, lootedObjectInventory);	
-			setLooted(requester,lootedObject);
+			//setLooted(requester,lootedObject);
 		}
 	}
 
@@ -226,7 +226,7 @@ public class LootService implements INetworkDispatch {
     		// RLS chest effect
 	    	if (droppedItem.getAttachment("LootItemName").toString().contains("Loot Chest")){
 
-	    		requester.playEffectObject("appearance/pt_rare_chest.prt", "");
+	    		lootedObject.playEffectObject("appearance/pt_rare_chest.prt", "");
 	    		requester.playMusic("sound/rare_loot_chest.snd");
 	    	}
     	}
@@ -1870,7 +1870,7 @@ public class LootService implements INetworkDispatch {
 	
 	public void setLooted(CreatureObject requester,TangibleObject lootedObject){
 		lootedObject.setLooted(true);
-		StopClientEffectObjectByLabel stopmsg = new StopClientEffectObjectByLabel(lootedObject.getObjectID(),"lootMe");
+		StopClientEffectObjectByLabel stopmsg = new StopClientEffectObjectByLabel(lootedObject.getObjectID(),"lootMe", (byte) 0);
 		requester.getClient().getSession().write(stopmsg.serialize());
 	}
 	
@@ -2553,6 +2553,8 @@ public class LootService implements INetworkDispatch {
 		TangibleObject item11 = (TangibleObject)core.objectService.createObject("object/tangible/loot/npc_loot/shared_armor_repair_device_generic.iff", player.getPlanet());
 		item11.setCustomName("Armor Repair Device");
 		playerInventory.add(item11);
+		
+
 	}
 	
 	

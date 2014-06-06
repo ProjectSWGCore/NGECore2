@@ -34,8 +34,15 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+
 import main.NGECore;
 import protocol.swg.EnterStructurePlacementModeMessage;
+import resources.datatables.DisplayType;
 import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
@@ -55,6 +62,7 @@ public class HousingService implements INetworkDispatch {
 	private NGECore core;
 	private Map<String, HouseTemplate> housingTemplates = new ConcurrentHashMap<String, HouseTemplate>();
 	private Map<String, String> houseToDeed = new ConcurrentHashMap<String, String>();
+	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	
 	public HousingService(NGECore core) {
 		this.core = core;
@@ -139,8 +147,11 @@ public class HousingService implements INetworkDispatch {
 		admins.add(actor.getObjectID());
 		
 		building.setAttachment("sign", sign); // meh workaround
+		building.setAttachment("nextMaintenance", System.currentTimeMillis() + 3600000);
 		building.setAttachment("structureOwner", actor.getObjectID());
 		building.setAttachment("structureAdmins", admins);
+		building.setAttachment("isCondemned", false);
+		building.setAttachment("outstandingMaint", 0);
 		building.setDeedTemplate(deed.getTemplate());
 		building.setMaintenanceAmount(houseTemplate.getBaseMaintenanceRate());
 		building.setConditionDamage(100); // Ouch
@@ -154,7 +165,7 @@ public class HousingService implements INetworkDispatch {
 		// Check for city founders joining a new city
 		PlayerCity cityActorIsIn = core.playerCityService.getCityObjectIsIn(actor);
 		
-		if (cityActorIsIn!=null){
+		if (cityActorIsIn!=null) {
 			actor.setAttachment("Has24HZoningFor",cityActorIsIn.getCityID()); // for testing
 			
 			int cityActorHasZoning = (int)actor.getAttachment("Has24HZoningFor");
@@ -169,6 +180,46 @@ public class HousingService implements INetworkDispatch {
 		}
 		
 		core.objectService.persistObject(building.getObjectID(), building, core.getSWGObjectODB());
+				
+	}
+	
+	public void startMaintenanceTask(BuildingObject building) {
+		
+		AtomicReference<ScheduledFuture<?>> ref = new AtomicReference<ScheduledFuture<?>>();
+		ref.set(scheduler.scheduleAtFixedRate(() -> {
+			
+			if(core.objectService.getObject(building.getObjectID()) == null)
+				ref.get().cancel(true);
+				
+			int amount = building.getBMR();
+			boolean needSave = false;
+			CreatureObject owner = (CreatureObject) core.objectService.getObject((long) building.getAttachment("structureOwner"));
+			if(owner == null) {
+				needSave = true;
+				owner = core.objectService.getCreatureFromDB((long) building.getAttachment("structureOwner"));
+			}
+			if(building.getMaintenanceAmount() >= amount) {
+				building.setMaintenanceAmount(building.getMaintenanceAmount() - amount);
+			} else {
+				if(owner == null)
+					ref.get().cancel(true);
+				if(owner.getBankCredits() >= amount) {
+					owner.setBankCredits(owner.getBankCredits() - amount);
+				} else if(owner.getCashCredits() >= amount) {
+					owner.setCashCredits(owner.getCashCredits() - amount);					
+				} else {
+					if(building.getAttachment("isCondemned") != null && !((boolean) building.getAttachment("isCondemned"))) {
+						building.setAttachment("isCondemned", true);
+						building.setBuildingName(building.getBuildingName() + " \\#FF0000(CONDEMNED)\\#FFFFFF");
+					}
+					building.setAttachment("outstandingMaint", (int) building.getAttachment("outstandingMaint") + amount);
+					// TODO: lock down building, add option to pay outstanding maintenance and uncondemn building
+				}
+			}
+			if(needSave && owner != null)
+				core.objectService.persistObject(owner.getObjectID(), owner, core.getSWGObjectODB());
+			
+		}, (long) building.getAttachment("nextMaintenance") - System.currentTimeMillis(), 3600000, TimeUnit.MILLISECONDS));
 		
 	}
 	
@@ -292,6 +343,8 @@ public class HousingService implements INetworkDispatch {
 					deed.setIntAttribute("@obj_attr_n:examine_maintenance", (int) building.getMaintenanceAmount());
 					
 					core.objectService.destroyObject(building.getObjectID());
+					if(building.getAttachment("sign") != null)
+						core.objectService.destroyObject((SWGObject) building.getAttachment("sign"));
  
 					SWGObject ownerInventory = owner.getSlottedObject("inventory");
 					ownerInventory.add(deed);
@@ -394,8 +447,8 @@ public class HousingService implements INetworkDispatch {
 	}
 	
 	public void handleSetName(CreatureObject owner, TangibleObject target,String name) {
-		
-		((BuildingObject) target).setBuildingName(name,owner);		
+		((BuildingObject) target).setBuildingName(name);	
+		owner.sendSystemMessage("Structure renamed.", DisplayType.Broadcast);
 	}
 	
 	public void createStatusSUIPage(SWGObject owner, TangibleObject target) {
