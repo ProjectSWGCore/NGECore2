@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
@@ -110,7 +111,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		profileFlagsList.add(0);
 		baseline.put("profileFlagsList", profileFlagsList);
 		baseline.put("title", "");
-		baseline.put("bornDate", (int) (System.currentTimeMillis() / 1000L)); //Integer.parseInt(new SimpleDateFormat("yyyymmdd", Locale.ENGLISH).format(Calendar.getInstance().getTime())));
+		baseline.put("bornDate", (int) TimeUnit.DAYS.convert((System.currentTimeMillis() - 978220800000L), TimeUnit.MILLISECONDS));
 		baseline.put("totalPlayTime", 0);
 		baseline.put("professionIcon", 0);
 		baseline.put("profession", "trader_0a");
