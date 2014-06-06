@@ -108,5 +108,9 @@ public abstract class AbstractCollidable {
 	public abstract Point3D getRandomPosition(Point3D origin, float minDistance, float maxDistance);
 	public abstract Point3D getRandomPosition();
 	
+	public Vector<SWGObject> getCollisionList() {
+		return collidedObjects;
+	}
+	
 
 }

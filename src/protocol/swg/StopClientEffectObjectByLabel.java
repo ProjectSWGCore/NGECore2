@@ -33,10 +33,18 @@ public class StopClientEffectObjectByLabel extends SWGMessage {
 	private long objectId;
 	private String effectFile;
 	private String commandString;
+	private byte unknownFlag;
 
 	public StopClientEffectObjectByLabel(long objectId, String commandString) {
 		this.objectId = objectId;
 		this.commandString = commandString;
+		this.unknownFlag = 1;
+	}
+	
+	public StopClientEffectObjectByLabel(long objectId, String commandString, byte unknownFlag) {
+		this.objectId = objectId;
+		this.commandString = commandString;
+		this.unknownFlag = unknownFlag;
 	}
 	
 	@Override
@@ -48,7 +56,7 @@ public class StopClientEffectObjectByLabel extends SWGMessage {
 		result.putInt(0xAD6F6B26);
 		result.putLong(objectId);
 		result.put(getAsciiString(commandString));
-		result.put((byte) 1);
+		result.put(unknownFlag);
 		
 		return result.flip();
 
