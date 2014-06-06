@@ -17,11 +17,9 @@ def createRadial(core, owner, target, radials):
 def handleSelection(core, owner, target, option):
 	if option == 21 and target:
 		if owner is not None:	
-			rlfsm = ResourceListForSurveyMessage(core,target,owner)
-			owner.getClient().getSession().write(rlfsm.serialize())	
+			
 			return
 	if option == 132:
 		if owner is not None:
-			surSvc = core.surveyService
-			surSvc.createSurveyRangeSUIWindow(owner, target)
+			
 			return

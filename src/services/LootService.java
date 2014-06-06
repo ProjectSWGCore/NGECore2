@@ -1992,7 +1992,9 @@ public class LootService implements INetworkDispatch {
 		item11.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 5000);		
 		item11.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 5000);
 	
-		item11.setIntAttribute("cat_stat_mod_bonus.precision", 25);		
+		item11.setIntAttribute("cat_stat_mod_bonus.@stat_n:agility_modified", 25);		
+		item11.setIntAttribute("cat_stat_mod_bonus.@stat_n:constitution_modified", 25);	
+		item11.setIntAttribute("cat_stat_mod_bonus.@stat_n:precision_modified", 25);	
 		
 		playerInventory.add(item11);		
 	}
