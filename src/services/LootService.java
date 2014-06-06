@@ -75,6 +75,8 @@ public class LootService implements INetworkDispatch {
 	
 	private NGECore core;
 	private static int prepInvCnt = 0;
+	String testDropTemplate = null;
+	//String testDropTemplate = "sunriders_destiny";
 	
 	public LootService(NGECore core) {
 		this.core = core;
@@ -170,6 +172,8 @@ public class LootService implements INetworkDispatch {
 			int randomRareLoot = new Random().nextInt(100);
 			int chanceRequirement = 1; 
 			chanceRequirement = 10; // This is for a test period to lift chest drop chance a bit
+			if (testDropTemplate!=null)
+				chanceRequirement = 100;
 			if (lootRollSession.getLootedObjectDifficulty()==1)
 				chanceRequirement+=2;
 			if (lootRollSession.getLootedObjectDifficulty()==2)
@@ -990,7 +994,15 @@ public class LootService implements INetworkDispatch {
 			else
 				remainder += span; 
 			if (randomItemFromPool<=remainder){
-				fillChest4(itemNames.get(i), owner, chest);
+				//fillChest4(itemNames.get(i), owner, chest);
+				
+				if (testDropTemplate!=null)
+					fillChest4(testDropTemplate, owner, chest);
+				else
+					fillChest4(itemNames.get(i), owner, chest);
+					
+				
+				
 				//fillChest4("colorcrystal", owner, chest);
 				//break;
 				return;
@@ -1050,7 +1062,7 @@ public class LootService implements INetworkDispatch {
 		Vector<String> itemStats = null;
 		Vector<String> itemSkillMods = null;
 		Vector<String> STFparams = null;
-		Vector<String> addToCollections = null;
+		String addToCollection = null;
 				
 		if(core.scriptService.getMethod(itemPath,"","itemTemplate")==null){
 			String errorMessage = "Loot item  '" + itemName + "'  has no template function assigned in its script. Please contact Charon about this issue.";
@@ -1116,8 +1128,8 @@ public class LootService implements INetworkDispatch {
 		if(core.scriptService.getMethod(itemPath,"","STFparams")!=null)
 			STFparams = (Vector<String>)core.scriptService.fetchStringVector(itemPath,"STFparams");
 		
-		if(core.scriptService.getMethod(itemPath,"","AddToCollections")!=null)
-			addToCollections = (Vector<String>)core.scriptService.fetchStringVector(itemPath,"AddToCollections");
+		if(core.scriptService.getMethod(itemPath,"","AddToCollection")!=null)
+			addToCollection = (String)core.scriptService.fetchString(itemPath,"AddToCollection");
 		
 			
 		System.out.println("itemTemplate " + itemTemplate);
@@ -1169,6 +1181,12 @@ public class LootService implements INetworkDispatch {
 	    	if (STFparams!=null){
 	    		setSTFParams(droppedItem, STFparams);
 	    	}
+	    	
+	    	if (addToCollection!=null){
+	    		droppedItem.getAttributes().put("@obj_attr_n:collection_name", addToCollection);
+	    		//core.collectionService.addCollection(actor, "new_prof_officer_master")
+	    	}
+	    		    	
 	    	 	
 	    	setCustomization(droppedItem, itemName, customizationAttributes, customizationValues); // for now
 	    	
