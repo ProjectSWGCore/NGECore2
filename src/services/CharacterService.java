@@ -291,7 +291,7 @@ public class CharacterService implements INetworkDispatch {
 				player.setProfession(clientCreateCharacter.getProfession());
 				player.setProfessionIcon(Professions.get(clientCreateCharacter.getProfession()));
 				player.setProfessionWheelPosition(clientCreateCharacter.getProfessionWheelPosition());
-				player.setNextUpdateTime(core.gcwService.calculateNextUpdateTime() + player.getBornDate());
+				player.setNextUpdateTime(core.gcwService.calculateNextUpdateTime());
 				if(clientCreateCharacter.getHairObject().length() > 0) {
 					String sharedHairTemplate = clientCreateCharacter.getHairObject().replace("/hair_", "/shared_hair_");
 					TangibleObject hair = (TangibleObject) core.objectService.createObject(sharedHairTemplate, object.getPlanet());
