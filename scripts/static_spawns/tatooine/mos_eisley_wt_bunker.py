@@ -6,6 +6,7 @@ import sys
 
 from resources.datatables import Options
 from resources.datatables import State
+from resources.datatables import Posture
 
 def addPlanetSpawns(core, planet):
 
@@ -81,6 +82,27 @@ def addPlanetSpawns(core, planet):
 	wt_elite = stcSvc.spawnObject('white_thranta_security_elite', 'tatooine', wt_bunker.getCellByCellNumber(29), float(-137.8), float(-44), float(74.1), float(0), float(0), float(0), float(0), 45)
 	wt_elite1 = stcSvc.spawnObject('white_thranta_security_elite', 'tatooine', wt_bunker.getCellByCellNumber(29), float(-159.3), float(-44), float(85.1), float(0), float(0), float(0), float(0), 45)
 
+	prisoner = stcSvc.spawnObject('object/mobile/shared_bothan_female.iff', 'tatooine', wt_bunker.getCellByCellNumber(21), float(-40.5), float(-12), float(130.8), float(-0.700), float(0), float(0.713), float(0))
+	prisoner.setCustomName('Carkufluv Reoslav\'Kre')
+	prisoner.setOptionsBitmask(256)
 	
+	prisoner1 = stcSvc.spawnObject('object/mobile/shared_dressed_noble_rodian_female_01.iff', 'tatooine', wt_bunker.getCellByCellNumber(21), float(-43), float(-12), float(133.9), float(0.737), float(0), float(-0.676), float(0))
+	prisoner1.setCustomName('Basse Crestinglighter')
+	prisoner1.setOptionsBitmask(256)
+	prisoner1.setPosture(Posture.KnockedDown)
+	
+	prisoner2 = stcSvc.spawnObject('object/mobile/shared_dressed_noble_trandoshan_female_01.iff', 'tatooine', wt_bunker.getCellByCellNumber(21), float(-33.3), float(-12), float(137.9), float(0), float(0), float(1), float(0))
+	prisoner2.setCustomName('Setweoko I\'tvo')
+	prisoner2.setOptionsBitmask(256)
+	prisoner2.setPosture(Posture.KnockedDown)
+	
+	prisoner3 = stcSvc.spawnObject('object/mobile/shared_dressed_fancy_human_female.iff', 'tatooine', wt_bunker.getCellByCellNumber(21), float(-30), float(-12), float(133.1), float(0.713), float(0), float(0.701), float(0))
+	prisoner3.setCustomName('Itzoosko')
+	prisoner3.setOptionsBitmask(256)
+	prisoner3.setPosture(Posture.KnockedDown)
+	
+	prisoner4 = stcSvc.spawnObject('object/mobile/shared_dressed_noble_twilek_female_01.iff', 'tatooine', wt_bunker.getCellByCellNumber(21), float(-36), float(-12), float(129.9), float(0.994), float(0), float(0.105), float(0))
+	prisoner4.setCustomName('Ogavi Stibi')
+	prisoner4.setOptionsBitmask(256)
 	return
 	
