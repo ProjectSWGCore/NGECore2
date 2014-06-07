@@ -3,6 +3,7 @@ import sys
 
 def createRadial(core, owner, target, radials):
 	radials.clear()
+	radials.add(RadialOptions(0, 7, 1, ''))
 	radials.add(RadialOptions(0, 11, 1, ''))
 	
 	radials.add(RadialOptions(0, 55, 0, ''))
