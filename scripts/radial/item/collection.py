@@ -9,7 +9,7 @@ def createRadial(core, owner, target, radials):
 	
 def handleSelection(core, owner, target, option):
 	if option == 21 and target:
-		core.collectionService.addCollection(target.getStfName().rsplit('_n', 1)[0])
+		core.collectionService.addCollection(owner, target.getStfName().rsplit('_n', 1)[0])
 		core.objectService.useObject(owner, target)
 	return
 	
