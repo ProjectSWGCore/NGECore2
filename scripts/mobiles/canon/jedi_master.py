@@ -3,6 +3,7 @@ from services.spawn import MobileTemplate
 from services.spawn import WeaponTemplate
 from resources.datatables import WeaponType
 from resources.datatables import Difficulty
+from resources.datatables import Options
 from java.util import Vector
 
 def addTemplate(core):

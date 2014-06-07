@@ -1,17 +1,19 @@
 import sys
 from services.spawn import MobileTemplate
 from services.spawn import WeaponTemplate
+from resources.datatables import WeaponType
+from resources.datatables import Difficulty
+from resources.datatables import Options
 from java.util import Vector
+
 
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
 	mobileTemplate.setCreatureName('prophet_of_the_dark_side')
 	mobileTemplate.setLevel(80)
-	mobileTemplate.setDifficulty(1)
-	mobileTemplate.setAttackRange(15)
-	mobileTemplate.setAttackSpeed(1.0)
-	mobileTemplate.setWeaponType(9)
+	mobileTemplate.setDifficulty(Difficulty.ELITE)
+
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(True)
@@ -33,8 +35,8 @@ def addTemplate(core):
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
-	weapontemplate = WeaponTemplate('object/weapon/melee/sword/crafted_saber/shared_sword_lightsaber_one_handed_gcw_s01_gen4.iff', 9, 1.0)
-	weapontemplate = WeaponTemplate('object/weapon/melee/sword/crafted_saber/shared_sword_lightsaber_one_handed_gcw_s01_gen5.iff', 9, 1.0)
+	weapontemplate = WeaponTemplate('object/weapon/melee/sword/crafted_saber/shared_sword_lightsaber_one_handed_gcw_s01_gen4.iff', WeaponType.ONEHANDEDSABER, 1.0, 6, 'energy')
+	weapontemplate = WeaponTemplate('object/weapon/melee/sword/crafted_saber/shared_sword_lightsaber_one_handed_gcw_s01_gen5.iff', WeaponType.ONEHANDEDSABER, 1.0, 6, 'energy')
 	weaponTemplates.add(weapontemplate)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
