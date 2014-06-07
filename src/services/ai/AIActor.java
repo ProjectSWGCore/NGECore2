@@ -243,6 +243,12 @@ public class AIActor {
 	}
 	
 	public void faceObject(SWGObject object) {
+		// Null checks due to a null error at: float direction =
+		if (object == null) System.out.println("object is null");
+		if (creature == null) System.out.println("creature is null");
+		if (object.getWorldPosition() == null) System.out.println("object's position is null");
+		if (creature.getWorldPosition() == null) System.out.println("creature's position is null");
+		
 		float direction = (float) Math.atan2(object.getWorldPosition().x - creature.getWorldPosition().x, object.getWorldPosition().z - creature.getWorldPosition().z);
 		if(direction < 0)
 			direction = (float) (2 * Math.PI + direction);
@@ -290,27 +296,29 @@ public class AIActor {
 		
 	}
 	
-	public void scheduleDespawn()
-	{	
+	public void scheduleDespawn() {	
 		// Sometimes these tasks are null?
-		try
-		{
-			aggroCheckTask.cancel(true);
-			regenTask.cancel(true);
-		}
-		catch(Exception ex ) { }
 		
-		scheduler.schedule(new Runnable() 
-		{
+		try {
+			aggroCheckTask.cancel(true);
+		} catch(Exception e) {
+			
+		}
+		
+		try {
+			regenTask.cancel(true);
+		} catch(Exception e) {
+			
+		}
+		
+		scheduler.schedule(new Runnable() {
 			@Override
-			public void run() 
-			{				
+			public void run() {				
 				damageMap.clear();
 				followObject = null;
 				creature.setAttachment("AI", null);
 				NGECore.getInstance().objectService.destroyObject(creature);
 			}
-		
 		}, 2, TimeUnit.MINUTES);
 	}
 

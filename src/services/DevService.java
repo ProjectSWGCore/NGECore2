@@ -91,7 +91,9 @@ public class DevService implements INetworkDispatch {
 				if (creature.getClient().isGM()) {
 					suiOptions.put((long) 120, "House Deeds");
 					suiOptions.put((long) 125, "Crafting Tools");
-					suiOptions.put((long) 130, "Vehicle Deeds");
+				}
+				suiOptions.put((long) 130, "Vehicle Deeds");
+				if (creature.getClient().isGM()) {
 					suiOptions.put((long) 121, "Sandbox City");
 				}
 
