@@ -47,7 +47,7 @@ def getRewards(name):
 	if name == 'weapon_pistol_en_roadmap_01_02':
 		return "object/weapon/ranged/pistol/shared_pistol_striker.iff"
 		
-	if name == 'weapon_vibro_en_roadmap_02_02':
+	if name == 'weapon_vibro_en_roadmap_02_01':
 		return "object/weapon/melee/special/shared_vibroknuckler.iff.iff"
 
 	if name == 'item_entertainer_ring_01_02':
