@@ -70,6 +70,7 @@ import engine.resources.service.INetworkRemoteEvent;
  * @author Charon 
  */
 
+@SuppressWarnings("unused")
 public class LootService implements INetworkDispatch {
 	
 	private NGECore core;
@@ -570,7 +571,6 @@ public class LootService implements INetworkDispatch {
 		return null;
 	}
 	
-	@SuppressWarnings("unused")
 	private void handleLootPoolItems(String itemName,LootRollSession lootRollSession){
 		
 		final Vector<String> foundPath = new Vector<String>(); 
@@ -1638,7 +1638,7 @@ public class LootService implements INetworkDispatch {
 		
 		int finalMinDmg = 0;
 		int finalMaxDmg = 0;
-		@SuppressWarnings("unused") String tunableObjectName = "";
+		String tunableObjectName = "";
 		
 		if (objectType.contains("powercrystal")){
 			tunableObjectName = "Power Crystal";
@@ -2620,7 +2620,6 @@ public class LootService implements INetworkDispatch {
 	
 	
 	// util method
-	@SuppressWarnings("unused")
 	private void printArrayElements(TangibleObject[] array){
 		System.out.print("Array [");
 		for (int i=0;i<array.length;i++){

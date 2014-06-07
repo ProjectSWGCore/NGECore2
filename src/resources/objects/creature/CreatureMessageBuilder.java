@@ -289,7 +289,13 @@ public class CreatureMessageBuilder extends TangibleMessageBuilder {
 			buffer.putInt(0);
 			buffer.putInt(creature.getEquipmentListUpdateCounter());
 		} else {
-			buffer.putInt(creature.getEquipmentList().size());
+			int size = 0;
+			
+			for (Long objId : creature.getEquipmentList().get()) {
+				size += ((NGECore.getInstance().objectService.getObject(objId) == null) ? 0 : 1);
+			}
+			
+			buffer.putInt(size);
 			buffer.putInt(creature.getEquipmentListUpdateCounter());
 			
 			for(Long objId : creature.getEquipmentList().get()) {

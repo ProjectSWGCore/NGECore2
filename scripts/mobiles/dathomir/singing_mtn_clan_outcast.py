@@ -1,31 +1,33 @@
 import sys
 from services.spawn import MobileTemplate
 from services.spawn import WeaponTemplate
+from resources.datatables import WeaponType
+from resources.datatables import Difficulty
+from resources.datatables import Options
 from java.util import Vector
+
 
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
 	mobileTemplate.setCreatureName('singing_mtn_clan_initiate')
 	mobileTemplate.setLevel(76)
-	mobileTemplate.setDifficulty(1)
-	mobileTemplate.setAttackRange(6)
-	mobileTemplate.setAttackSpeed(1.0)
-	mobileTemplate.setWeaponType(4)
+	mobileTemplate.setDifficulty(Difficulty.ELITE)
+
 	mobileTemplate.setMinSpawnDistance(6)
 	mobileTemplate.setMaxSpawnDistance(10)
 	mobileTemplate.setDeathblow(True)
 	mobileTemplate.setSocialGroup('mountain clan')
 	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setRespawnTime(300)
-	mobileTemplate.setOptionsBitmask(192)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_dathomir_sing_mt_clan_outcast.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
-	weapontemplate = WeaponTemplate('object/weapon/melee/polearm/shared_lance_staff_wood_s1.iff', 7, 1.0)
+	weapontemplate = WeaponTemplate('object/weapon/melee/polearm/shared_lance_staff_wood_s1.iff', WeaponType.POLEARMMELEE, 1.0, 6, 'kinetic')
 	weaponTemplates.add(weapontemplate)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
