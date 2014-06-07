@@ -11,8 +11,15 @@ def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
 	mobileTemplate.setCreatureName('nightsister_slave')
-	mobileTemplate.setLevel(86)
+	mobileTemplate.setLevel(78)
 	mobileTemplate.setDifficulty(Difficulty.ELITE)
+	mobileTemplate.setMinSpawnDistance(4)
+	mobileTemplate.setMaxSpawnDistance(8)
+	mobileTemplate.setDeathblow(False)
+	mobileTemplate.setScale(1)
+	mobileTemplate.setSocialGroup("nightsister")
+	mobileTemplate.setAssistRange(12)
+	mobileTemplate.setStalker(False)
 	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)
 	
 	templates = Vector()
