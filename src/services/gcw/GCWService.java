@@ -462,6 +462,10 @@ public class GCWService implements INetworkDispatch {
 		
 		PlayerObject player = (PlayerObject) actor.getSlottedObject("ghost");
 		
+		int gcwBonus = actor.getSkillModBase("flush_with_success");
+		
+		gcwPoints += ((gcwPoints * gcwBonus) / 100);
+		
 		String planet = actor.getPlanet().getName();
 		
 		String prefix = ((planet.startsWith("space")) ? (planet + "_space") : planet);
