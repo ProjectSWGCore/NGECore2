@@ -30,7 +30,7 @@ def itemStats():
 	stats += ['attackspeed','0.6','0.6']
 	stats += ['maxrange','0','50']
 	stats += ['damagetype','energy','energy']
-	stats += ['elemtype','@obj_attr_n:elemental_electricity','@obj_attr_n:elemental_electricity']
+	stats += ['elemtype','elemental_electricity','elemental_electricity']
 	stats += ['elemdamage','23','23']
 	stats += ['weapontype','1','1']
 	
