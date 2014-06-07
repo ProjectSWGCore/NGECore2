@@ -462,6 +462,10 @@ public class GCWService implements INetworkDispatch {
 		
 		PlayerObject player = (PlayerObject) actor.getSlottedObject("ghost");
 		
+		int gcwBonus = actor.getSkillModBase("flush_with_success");
+		
+		gcwPoints += ((gcwPoints * gcwBonus) / 100);
+		
 		String planet = actor.getPlanet().getName();
 		
 		String prefix = ((planet.startsWith("space")) ? (planet + "_space") : planet);
@@ -558,7 +562,7 @@ public class GCWService implements INetworkDispatch {
 		player.setRankProgress((float) Math.floor(newprogress));
 		
 		if (newrank > oldrank) {
-			core.scriptService.callScript("scripts/gcw/", "gcwrank_" + actor.getFaction(), "handleRankUp", actor, newrank);
+			core.scriptService.callScript("scripts/gcw/", "gcwrank_" + actor.getFaction(), "handleRankUp", core, actor, newrank);
 		} else {
 			core.scriptService.callScript("scripts/gcw/", "gcwrank_" + actor.getFaction(), "handleRankDown", actor, newrank);
 		}
