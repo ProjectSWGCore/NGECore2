@@ -1,4 +1,5 @@
 import sys
+from resources.datatables import WeaponType
 
 def setup(core, object):
 	object.setStfFilename('static_item_n')
@@ -10,8 +11,8 @@ def setup(core, object):
 	object.setIntAttribute('cat_stat_mod_bonus.@stat_n:strength_modified', 5)
 	object.setAttackSpeed(1);
 	object.setMaxRange(5);
-	object.setDamageType("kinetic");
+	object.setDamageType('kinetic');
 	object.setMinDamage(190);
 	object.setMaxDamage(375);
-	object.setWeaponType(6);
+	object.setWeaponType(WeaponType.UNARMED);
 	return
