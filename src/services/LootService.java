@@ -1997,6 +1997,37 @@ public class LootService implements INetworkDispatch {
 		item11.setIntAttribute("cat_stat_mod_bonus.@stat_n:precision_modified", 25);	
 		
 		playerInventory.add(item11);		
+		
+		TangibleObject item12 = (TangibleObject)core.objectService.createObject("object/tangible/wearables/shirt/shared_shirt_s07.iff", player.getPlanet());
+		item12.setCustomName("Socketed Shirt");
+		item12.setIntAttribute("@obj_attr_n:sockets", 1);	
+		playerInventory.add(item12);	
+		
+		TangibleObject item13 = (TangibleObject)core.objectService.createObject("object/tangible/component/reverse_engineering/shared_modifier_bit.iff", player.getPlanet());
+		item13.setCustomName("Modifier Bit");
+		playerInventory.add(item13);
+		
+		String powerBitTemplate = "object/tangible/component/reverse_engineering/shared_power_bit.iff";
+		TangibleObject powerBit = (TangibleObject) core.objectService.createObject(powerBitTemplate, player.getPlanet());
+		powerBit.setCustomName("+25 2nd Order Power Bit");
+		powerBit.setAttachment("PowerBitValue", 25);
+		playerInventory.add(powerBit);
+		
+		//TangibleObject item14 = (TangibleObject)core.objectService.createObject("object/draft_schematic/reverse_engineering/shared_skill_attachment_1.iff", player.getPlanet());
+		TangibleObject item14 = (TangibleObject)core.objectService.createObject("object/tangible/powerup/weapon/shared_melee_generic.iff", player.getPlanet());
+		
+		item14.setCustomName("Skill Enhancing Attachment");
+		playerInventory.add(item14);
+		
+		
+		TangibleObject item23 = (TangibleObject)core.objectService.createObject("object/tangible/component/reverse_engineering/shared_modifier_bit.iff", player.getPlanet());
+		item23.setCustomName("Mark X Vocab Module");
+		playerInventory.add(item23);
+		
+		TangibleObject item24 = (TangibleObject)core.objectService.createObject("object/tangible/component/reverse_engineering/shared_modifier_bit.iff", player.getPlanet());
+		item24.setCustomName("Droid Motor (Red)");
+		playerInventory.add(item24);
+		
 	}
 	
 	
