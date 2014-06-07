@@ -101,7 +101,7 @@ def getRewards(name):
 	if name == 'armor_ithorian_roadmap_gloves_02_03':
 		return "object/tangible/wearables/armor/ithorian_sentinel/shared_ith_armor_s03_gloves.iff"				
 
-	if name == 'weapon_pistol_sp_roadmap_01_02':
+	if name == 'weapon_pistol_of_roadmap_01_02':
 		return "object/weapon/ranged/pistol/shared_pistol_dl44.iff"
 
 	if name == 'item_officer_ring_01_02':
