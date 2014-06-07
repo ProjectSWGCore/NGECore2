@@ -2996,10 +2996,10 @@ public class ReverseEngineeringService implements INetworkDispatch {
 			if (piece.getStringAttribute("bio_link")!=null)
 				return;
 
-			if (! piece.getTemplate().contains("armor/") && ! piece.getTemplate().contains("clothing/"))
+			if (! piece.getTemplate().contains("object/tangible/wearables/"))
 				return;
 
-			if (piece.getTemplate().contains("armor/")){
+			if (piece.getTemplate().contains("object/tangible/wearables/")){
 				// Determine how powerful the bit will be
 				
 				int highestStat = getHighestStat(piece);				
@@ -3014,12 +3014,12 @@ public class ReverseEngineeringService implements INetworkDispatch {
 				// Determine the quality factor based on total buffs (RE Chance, Luck etc.)
 				float qualityfactor = 1.0F; // For now it's 1
 				int luck = engineer.getLuck();
-				qualityfactor += 5*luck/100; // luck adds a bit
-				
-				//core.skillModService.addSkillMod(engineer, "expertise_reverse_engineering_bonus", 100, 10);
-				//int re_Chance = engineer.getSkillModBase("expertise_reverse_engineering_bonus");
-				//qualityfactor += 5*re_Chance/100; // re_Chance adds a bit
-								
+				qualityfactor += luck/1000; // around 1200 luck was top
+				qualityfactor = Math.max(1.0F, qualityfactor);
+				int re_Chance = engineer.getSkillModBase("expertise_reverse_engineering_bonus");
+				float re_factor = re_Chance/140 * qualityfactor; // 159 RE-Chance was top
+				qualityfactor = Math.max(re_factor, qualityfactor);
+												
 				powerBitValue = Math.round(highestStat * qualityfactor);
 				
 				if (numberOfStats==1){
@@ -3051,10 +3051,15 @@ public class ReverseEngineeringService implements INetworkDispatch {
 		String pcr = "";
 		String modifierBitNameResult = null;
 		if (reToolContentList.size()==2){
+						
 			TangibleObject piece1 = (TangibleObject) reToolContentList.get(0);
 			TangibleObject piece2 = (TangibleObject) reToolContentList.get(1);
 			//if (! piece1.getTemplate().contains("lootItems/npc_loot/") || piece2.getTemplate().contains("lootItems/npc_loot/"))
 				//return; // No junk loot
+//			if (piece1.getTemplate().contains("modifier_bit") && piece2.getTemplate().contains("power_bit") 
+//					 || piece1.getTemplate().contains("power_bit") && piece2.getTemplate().contains("modifier_bit")){
+//				return; // Fail-safe if someone wants to RE bits
+//			}
 			
 			String modifierBitName = null;
 			for (RE_Combination comb : re_Combinations){
@@ -3117,9 +3122,10 @@ public class ReverseEngineeringService implements INetworkDispatch {
 			if (bit1.getTemplate().contains("modifier_bit") && bit2.getTemplate().contains("power_bit") 
 			 || bit1.getTemplate().contains("power_bit") && bit2.getTemplate().contains("modifier_bit")){
 				
-				int amount = 250; // Needs to be randomized and skillmod-related
-				// PUP = 3 * Power_bit / Modifier_Ratio 
-				
+				int amount = 200 + new Random().nextInt()*50; // Needs to be randomized and skillmod-related
+				int luck = engineer.getLuck();
+				amount = luck/700 * amount; // around 1200 luck was top
+	
 				int powerValue = 1;
 				
 				String effectName = null;
@@ -3140,10 +3146,13 @@ public class ReverseEngineeringService implements INetworkDispatch {
 				if (bit2.getTemplate().contains("power_bit")){
 					powerBitValue = (int) bit2.getAttachment("PowerBitValue");
 				}
-							
-				powerValue = 3*powerBitValue/ratio; // rough
 				
-				System.out.println("effectName " + effectName);
+				int re_Chance = engineer.getSkillModBase("expertise_reverse_engineering_bonus");
+				
+				double X = 1.1; // Magic number
+				
+				//powerValue = 3*powerBitValue/ratio; // rough
+				powerValue = (int) Math.floor( 2 * powerBitValue / ratio * re_Chance / 100 * X ); 
 				
 				// Assuming munition
 				String powerUpLabel = "item_reverse_engineering_powerup_armor_02_01";
@@ -3222,7 +3231,7 @@ public class ReverseEngineeringService implements INetworkDispatch {
 					modifierValue = (int) bit2.getAttachment("PowerBitValue");
 				}
 				
-				modifierValue = modifierValue/ratio;
+				modifierValue = modifierValue/ratio; // int cast truncates
 				
 				// Assuming munition
 				String SEALabel = "socket_gem_armor";

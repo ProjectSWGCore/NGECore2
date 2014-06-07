@@ -1237,4 +1237,35 @@ public class ObjectService implements INetworkDispatch {
 		odb.remove(key);
 	}
 	
+	public void addStackableItem(TangibleObject item, SWGObject container) {
+		// Maybe even better placed inside SWGObject.add(), so whenever an item is added to a container
+		// it will bechecked if it is stackable and if there is already a stack to add it to
+		if (! item.isStackable())
+			container.add(item);
+		final Vector<SWGObject> alikeItemsInContainer = new Vector<SWGObject>();
+		container.viewChildren(container, false, false, new Traverser() {
+			@Override
+			public void process(SWGObject obj) {
+				if (obj.getTemplate().equals(item.getTemplate())){
+					alikeItemsInContainer.add(obj);
+					System.out.println(obj.getTemplate());
+				}
+			}
+		});
+				
+		if (alikeItemsInContainer.size()==0){
+			container.add(item);
+			return;
+		}
+		TangibleObject alikeItem = (TangibleObject)alikeItemsInContainer.get(0);
+		int alikeUses = alikeItem.getUses();
+		int itemUses = item.getUses();
+		if (itemUses==0)
+				itemUses=1;
+		int newUses = alikeUses+itemUses;
+		
+		alikeItem.setUses(newUses);
+		core.objectService.destroyObject(item.getObjectID());		
+	}
+	
 }

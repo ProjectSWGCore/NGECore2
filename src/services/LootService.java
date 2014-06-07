@@ -2003,6 +2003,11 @@ public class LootService implements INetworkDispatch {
 		item12.setIntAttribute("@obj_attr_n:sockets", 1);	
 		playerInventory.add(item12);	
 		
+		TangibleObject item12a = (TangibleObject)core.objectService.createObject("object/tangible/wearables/shirt/shared_shirt_s07.iff", player.getPlanet());
+		item12a.setCustomName("Socketed Shirt");
+		item12a.setIntAttribute("cat_stat_mod_bonus.@stat_n:agility_modified", 18);		
+		playerInventory.add(item12a);	
+		
 		TangibleObject item13 = (TangibleObject)core.objectService.createObject("object/tangible/component/reverse_engineering/shared_modifier_bit.iff", player.getPlanet());
 		item13.setCustomName("Modifier Bit");
 		playerInventory.add(item13);
@@ -2027,6 +2032,19 @@ public class LootService implements INetworkDispatch {
 		TangibleObject item24 = (TangibleObject)core.objectService.createObject("object/tangible/component/reverse_engineering/shared_modifier_bit.iff", player.getPlanet());
 		item24.setCustomName("Droid Motor (Red)");
 		playerInventory.add(item24);
+		
+//		TangibleObject stacker1 = (TangibleObject)core.objectService.createObject("object/tangible/loot/misc/shared_damaged_datapad.iff", player.getPlanet());
+//		stacker1.setCustomName("Damaged Datapad stacker1");
+//		stacker1.setStackable(true);
+//		stacker1.setUses(5);
+//		playerInventory.add(stacker1);
+		
+		TangibleObject stacker2 = (TangibleObject)core.objectService.createObject("object/tangible/loot/misc/shared_damaged_datapad.iff", player.getPlanet());
+		stacker2.setCustomName("Damaged Datapad stacker1");
+		stacker2.setStackable(true);
+		stacker2.setUses(99);
+		 
+		core.objectService.addStackableItem(stacker2,playerInventory);
 		
 	}
 	
