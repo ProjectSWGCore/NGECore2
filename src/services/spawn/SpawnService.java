@@ -132,10 +132,7 @@ public class SpawnService {
 		
 		WeaponObject defaultWeapon = null;
 		Vector<WeaponTemplate> weaponTemplates = mobileTemplate.getWeaponTemplateVector();
-		
-		int rnd = 0;
-		if (weaponTemplates.size() > 0 )
-			rnd = new Random().nextInt(weaponTemplates.size());
+		int rnd = new Random().nextInt(weaponTemplates.size());
 		
 		if (weaponTemplates.size() == 0){
 			defaultWeapon =  (WeaponObject) core.objectService.createObject("object/weapon/creature/shared_creature_default_weapon.iff", creature.getPlanet());
