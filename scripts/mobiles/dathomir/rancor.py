@@ -1,5 +1,9 @@
 import sys
 from services.spawn import MobileTemplate
+from services.spawn import WeaponTemplate
+from resources.datatables import WeaponType
+from resources.datatables import Difficulty
+from resources.datatables import Options
 from java.util import Vector
 
 def addTemplate(core):
@@ -7,9 +11,21 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('rancor')
 	mobileTemplate.setLevel(50)
-	mobileTemplate.setDifficulty(1)
-	mobileTemplate.setAttackRange(5)
-	mobileTemplate.setOptionsBitmask(192)
+	mobileTemplate.setDifficulty(Difficulty.ELITE)
+	mobileTemplate.setMinSpawnDistance(4)
+	mobileTemplate.setMaxSpawnDistance(8)
+	mobileTemplate.setDeathblow(True)
+	mobileTemplate.setScale(1)
+	mobileTemplate.setMeatType("Carnivore Meat")
+	mobileTemplate.setMeatAmount(950)
+	mobileTemplate.setHideType("Leathery Hide")
+	mobileTemplate.setHideAmount(877)
+	mobileTemplate.setBoneType("Mammal Bones")
+	mobileTemplate.setBoneAmount(777)
+	mobileTemplate.setSocialGroup("rancor")
+	mobileTemplate.setAssistRange(24)
+	mobileTemplate.setStalker(True)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_rancor.iff')
