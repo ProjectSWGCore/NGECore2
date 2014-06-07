@@ -676,10 +676,7 @@ public class MountService implements INetworkDispatch {
 		if (isMounted(owner, mount)) {
 			//storer.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:must_dismount"), DisplayType.Broadcast);
 			//return;
-<<<<<<< HEAD
-=======
 			dismount(storer, mount);
->>>>>>> origin/master
 		}
 		
 		if (owner.getTefTime() > 0) {
