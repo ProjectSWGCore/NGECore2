@@ -1,17 +1,19 @@
 import sys
 from services.spawn import MobileTemplate
 from services.spawn import WeaponTemplate
+from resources.datatables import WeaponType
+from resources.datatables import Difficulty
+from resources.datatables import Options
 from java.util import Vector
+
 
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
 	mobileTemplate.setCreatureName('tusken_blood_champion')
 	mobileTemplate.setLevel(32)
-	mobileTemplate.setDifficulty(1)
-	mobileTemplate.setAttackRange(12)
-	mobileTemplate.setAttackSpeed(1.0)
-	mobileTemplate.setWeaponType(0)
+	mobileTemplate.setDifficulty(Difficulty.ELITE)
+
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(True)
@@ -26,7 +28,7 @@ def addTemplate(core):
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
-	weapontemplate = WeaponTemplate('object/weapon/ranged/rifle/shared_rifle_tusken_generic.iff', 0, 1.0)
+	weapontemplate = WeaponTemplate('object/weapon/ranged/rifle/shared_rifle_tusken_generic.iff', WeaponType.RIFLE, 1.0, 24, 'kinetic')
 	weaponTemplates.add(weapontemplate)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
