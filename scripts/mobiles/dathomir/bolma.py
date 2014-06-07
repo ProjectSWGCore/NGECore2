@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('bolma')
 	mobileTemplate.setLevel(55)
-	mobileTemplate.setMinLevel(55)
-	mobileTemplate.setMaxLevel(55)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
