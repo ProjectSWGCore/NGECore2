@@ -1,6 +1,9 @@
 import sys
 from services.spawn import MobileTemplate
 from services.spawn import WeaponTemplate
+from resources.datatables import WeaponType
+from resources.datatables import Difficulty
+from resources.datatables import Options
 from java.util import Vector
 
 def addTemplate(core):
@@ -8,10 +11,7 @@ def addTemplate(core):
 
 	mobileTemplate.setCreatureName('afarathu_cult_zealot')
 	mobileTemplate.setLevel(30)
-	mobileTemplate.setDifficulty(0)
-	mobileTemplate.setAttackRange(15)
-	mobileTemplate.setAttackSpeed(1.0)
-	mobileTemplate.setWeaponType(1)
+	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(True)
@@ -19,7 +19,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("afarathu")
 	mobileTemplate.setAssistRange(6)
 	mobileTemplate.setStalker(True)
-	mobileTemplate.setOptionsBitmask(192)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)
 
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_selonian_m_01.iff')
@@ -49,7 +49,7 @@ def addTemplate(core):
 	mobileTemplate.setTemplates(templates)
 
 	weaponTemplates = Vector()
-	weapontemplate = WeaponTemplate('object/weapon/ranged/carbine/shared_carbine_e11.iff', 1, 1.0)
+	weapontemplate = WeaponTemplate('object/weapon/ranged/carbine/shared_carbine_e11.iff', WeaponType.CARBINE, 1.0, 15, 'energy')
 	weaponTemplates.add(weapontemplate)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 
