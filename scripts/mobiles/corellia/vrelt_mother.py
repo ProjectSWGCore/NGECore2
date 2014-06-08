@@ -22,7 +22,7 @@ def addTemplate(core):
 	mobileTemplate.setMeatAmount(13)
 	mobileTemplate.setHideType("Bristly Hide")
 	mobileTemplate.setHideAmount(13)
-	mobileTemplate.setBoneType("Mammal Bones")
+	mobileTemplate.setBoneType("Animal Bones")
 	mobileTemplate.setBoneAmount(13)
 	mobileTemplate.setSocialGroup("vrelt")
 	mobileTemplate.setAssistRange(0)

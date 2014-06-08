@@ -4,6 +4,7 @@ from services.spawn import WeaponTemplate
 from resources.datatables import WeaponType
 from resources.datatables import Difficulty
 from resources.datatables import Options
+from resources.datatables import FactionStatus
 from java.util import Vector
 
 
@@ -22,7 +23,7 @@ def addTemplate(core):
 	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(False)
 	mobileTemplate.setFaction("imperial")
-	mobileTemplate.setFactionStatus(1)
+	mobileTemplate.setFactionStatus(FactionStatus.Combatant)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_dark_jedi_human_female_01.iff')
