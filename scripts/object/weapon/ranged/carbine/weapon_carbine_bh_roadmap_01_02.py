@@ -14,5 +14,5 @@ def setup(core, object):
 	object.setMaxDamage(218)
 	object.setMaxRange(55)
 	object.setWeaponType(WeaponType.CARBINE)
-	object.setDamageType('kinetic')
+	object.setDamageType('energy')
 	return
