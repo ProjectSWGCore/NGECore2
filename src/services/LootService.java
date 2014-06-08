@@ -2053,6 +2053,31 @@ public class LootService implements INetworkDispatch {
 		item24.setCustomName("Droid Motor (Red)");
 		playerInventory.add(item24);
 		
+		
+		String modifierBitTemplate = "object/tangible/component/reverse_engineering/shared_modifier_bit.iff";
+		TangibleObject modifierBit = (TangibleObject) core.objectService.createObject(modifierBitTemplate, player.getPlanet());
+		modifierBit.setCustomName("Droid Experimentation");
+		modifierBit.setStringAttribute("serial_number", "(WHATEVER)");	
+		modifierBit.setStringAttribute("@crafting:mod_bit_type", "@stat_n:droid_experimentation");
+		modifierBit.setIntAttribute("@crafting:mod_bit_ratio", 4);
+		playerInventory.add(modifierBit);
+		
+		modifierBit = (TangibleObject) core.objectService.createObject(modifierBitTemplate, player.getPlanet());
+		modifierBit.setCustomName("Droid Experimentation");
+		modifierBit.setStringAttribute("serial_number", "(WHATEVER)");	
+		modifierBit.setStringAttribute("@crafting:mod_bit_type", "@stat_n:droid_experimentation");
+		modifierBit.setIntAttribute("@crafting:mod_bit_ratio", 4);
+		playerInventory.add(modifierBit);
+		
+		modifierBit = (TangibleObject) core.objectService.createObject(modifierBitTemplate, player.getPlanet());
+		modifierBit.setCustomName("Droid Experimentation");
+		modifierBit.setStringAttribute("serial_number", "(WHATEVER)");	
+		modifierBit.setStringAttribute("@crafting:mod_bit_type", "@stat_n:droid_experimentation");
+		modifierBit.setIntAttribute("@crafting:mod_bit_ratio", 4);
+		playerInventory.add(modifierBit);
+		
+			
+		
 //		TangibleObject stacker1 = (TangibleObject)core.objectService.createObject("object/tangible/loot/misc/shared_damaged_datapad.iff", player.getPlanet());
 //		stacker1.setCustomName("Damaged Datapad stacker1");
 //		stacker1.setStackable(true);

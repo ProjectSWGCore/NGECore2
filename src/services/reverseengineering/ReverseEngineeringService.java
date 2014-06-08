@@ -3103,6 +3103,10 @@ public class ReverseEngineeringService implements INetworkDispatch {
 	}
 	
 	public void createPowerup(CreatureObject engineer, TangibleObject retool){
+		PlayerObject player = (PlayerObject) engineer.getSlottedObject("ghost");	
+		String profession = player.getProfession();
+		if (profession.equals("trader_0b")) // Structures can't make PUPs
+			return;
 		final Vector<SWGObject> reToolContentList = new Vector<SWGObject>();
 		SWGObject engineerInventory = engineer.getSlottedObject("inventory");
 		retool.viewChildren(engineer, false, false, new Traverser() {
@@ -3160,14 +3164,12 @@ public class ReverseEngineeringService implements INetworkDispatch {
 				String powerUpDescription = "item_reverse_engineering_powerup_armor_02_01";
 				String powerUpTemplate = "object/tangible/powerup/base/shared_armor_base.iff";
 				
-				PlayerObject player = (PlayerObject) engineer.getSlottedObject("ghost");	
-				String profession = player.getProfession();
-				if (profession=="Domestic"){
+				if (profession.equals("trader_0a")){ // Domestic
 					powerUpLabel = "item_reverse_engineering_powerup_clothing_02_01";
 					powerUpDescription = "item_reverse_engineering_powerup_clothing_02_01";
 					powerUpTemplate = "object/tangible/powerup/base/shared_base.iff";
 				}
-				if (profession=="Engineer"){
+				if (profession.equals("trader_0d")){ // Engineer
 					powerUpLabel = "item_reverse_engineering_powerup_weapon_02_01";
 					powerUpDescription = "item_reverse_engineering_powerup_weapon_02_01";
 					powerUpTemplate = "object/tangible/powerup/base/shared_weapon_base.iff";
@@ -3191,6 +3193,11 @@ public class ReverseEngineeringService implements INetworkDispatch {
 	
 	@SuppressWarnings("unchecked")
 	public void createSEA(CreatureObject engineer, TangibleObject retool){
+		PlayerObject player = (PlayerObject) engineer.getSlottedObject("ghost");	
+		String profession = player.getProfession();
+		if (profession.equals("trader_0b")) // Structures can't make SEAs
+			return;
+		
 		final Vector<SWGObject> reToolContentList = new Vector<SWGObject>();
 		SWGObject engineerInventory = engineer.getSlottedObject("inventory");
 		retool.viewChildren(engineer, false, false, new Traverser() {
@@ -3240,14 +3247,13 @@ public class ReverseEngineeringService implements INetworkDispatch {
 				String SEADescription = "socket_gem";
 				String SEATemplate = "object/tangible/gem/shared_clothing.iff";
 				
-				PlayerObject player = (PlayerObject) engineer.getSlottedObject("ghost");	
-				String profession = player.getProfession();
-				if (profession=="Domestic"){
+				
+				if (profession.equals("trader_0a")){
 					SEALabel = "socket_gem_clothing";
 					SEADescription = "socket_gem";
 					SEATemplate = "object/tangible/gem/shared_clothing.iff";
 				}
-				if (profession=="Engineer"){
+				if (profession.equals("trader_0d")){
 					SEALabel = "socket_gem_weapon";
 					SEADescription = "socket_gem";
 					SEATemplate = "object/tangible/gem/shared_clothing.iff";
@@ -3286,6 +3292,7 @@ public class ReverseEngineeringService implements INetworkDispatch {
 			int powerBitOrder = 1;
 			Vector<String> effectNameList = new Vector<String>();
 			Vector<Integer> effectValueList = new Vector<Integer>();
+			String SEASTFName = "";
 			
 			//verify RE tool content requirement
 			List<String> contentVerification = new ArrayList<String>();
@@ -3306,6 +3313,7 @@ public class ReverseEngineeringService implements INetworkDispatch {
 			if (bit1.getTemplate().contains("object/tangible/gem/shared_clothing.iff")){
 				effectNameList = (Vector<String>) bit1.getAttachment("SEAeffectNameList");
 				effectValueList = (Vector<Integer>) bit1.getAttachment("SEAmodifierValueList");
+				SEASTFName = bit1.getStfName();
 				if (effectNameList.size()==3)
 					return;
 				contentVerification.remove("sea");
@@ -3324,6 +3332,7 @@ public class ReverseEngineeringService implements INetworkDispatch {
 			if (bit2.getTemplate().contains("object/tangible/gem/shared_clothing.iff")){
 				effectNameList = (Vector<String>) bit2.getAttachment("SEAeffectNameList");
 				effectValueList = (Vector<Integer>) bit2.getAttachment("SEAmodifierValueList");
+				SEASTFName = bit2.getStfName();
 				if (effectNameList.size()==3)
 					return;
 				contentVerification.remove("sea");
@@ -3342,6 +3351,7 @@ public class ReverseEngineeringService implements INetworkDispatch {
 			if (bit3.getTemplate().contains("object/tangible/gem/shared_clothing.iff")){
 				effectNameList = (Vector<String>) bit3.getAttachment("SEAeffectNameList");
 				effectValueList = (Vector<Integer>) bit3.getAttachment("SEAmodifierValueList");
+				SEASTFName = bit3.getStfName();
 				if (effectNameList.size()==3)
 					return;
 				contentVerification.remove("sea");
@@ -3356,14 +3366,21 @@ public class ReverseEngineeringService implements INetworkDispatch {
 				String SEADescription = "socket_gem";
 				String SEATemplate = "object/tangible/gem/shared_clothing.iff";
 				
-				PlayerObject player = (PlayerObject) engineer.getSlottedObject("ghost");	
-				String profession = player.getProfession();
-				if (profession=="Domestic"){
+				if (profession.equals("trader_0c")){ // QA
+					if (! SEASTFName.equals("socket_gem_armor"))
+						return; // Wrong SEA type inserted
+				}
+								
+				if (profession.equals("trader_0a")){
+					if (! SEASTFName.equals("socket_gem_clothing"))
+						return; // Wrong SEA type inserted
 					SEALabel = "socket_gem_clothing";
 					SEADescription = "socket_gem";
 					SEATemplate = "object/tangible/gem/shared_clothing.iff";
 				}
-				if (profession=="Engineer"){
+				if (profession.equals("trader_0d")){
+					if (! SEASTFName.equals("socket_gem_weapon"))
+						return; // Wrong SEA type inserted
 					SEALabel = "socket_gem_weapon";
 					SEADescription = "socket_gem";
 					SEATemplate = "object/tangible/gem/shared_clothing.iff";
@@ -3373,7 +3390,10 @@ public class ReverseEngineeringService implements INetworkDispatch {
 				core.objectService.destroyObject(bit2.getObjectID());
 				core.objectService.destroyObject(bit3.getObjectID());
 				
-				if (powerBitOrder>effectNameList.size()){ // Only add a stat if the power bit is higher
+				int attachmentUpgrade = engineer.getSkillModBase("expertise_attachment_upgrade");
+				System.out.println("attachmentUpgrade " + attachmentUpgrade);
+				System.out.println("player.getProfession() " + player.getProfession());
+				if (powerBitOrder>effectNameList.size() && attachmentUpgrade>=1){ // Only add a stat if the power bit is higher
 					effectNameList.add(effectName);
 					effectValueList.add(modifierValue);
 				}
@@ -3389,8 +3409,8 @@ public class ReverseEngineeringService implements INetworkDispatch {
 					skillEnhancingAttachment.setIntAttribute(effectNameList.get(i), effectValueList.get(i));	
 				}
 		
-				skillEnhancingAttachment.setAttachment("SEAeffectNameArray", effectNameList);
-				skillEnhancingAttachment.setAttachment("SEAmodifierValueArray", effectValueList);
+				skillEnhancingAttachment.setAttachment("SEAeffectNameList", effectNameList);
+				skillEnhancingAttachment.setAttachment("SEAmodifierValueList", effectValueList);
 				
 				engineerInventory.add(skillEnhancingAttachment);	
 			}			 
