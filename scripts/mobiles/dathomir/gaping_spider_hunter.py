@@ -12,7 +12,7 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('gaping_spider_hunter')
 	mobileTemplate.setLevel(68)
-	mobileTemplate.setDifficulty(Difficulty.Normal)
+	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)

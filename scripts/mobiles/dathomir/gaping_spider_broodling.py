@@ -12,7 +12,7 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('gaping_spider_broodling')
 	mobileTemplate.setLevel(62)
-	mobileTemplate.setDifficulty(Difficulty.Normal)
+	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
