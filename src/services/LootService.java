@@ -76,7 +76,7 @@ public class LootService implements INetworkDispatch {
 	private NGECore core;
 	private static int prepInvCnt = 0;
 	String testDropTemplate = null;
-	//String testDropTemplate = "composite_armor_bracer_left";
+	//String testDropTemplate = "kowakian_cage";
 	
 	public LootService(NGECore core) {
 		this.core = core;
@@ -1762,14 +1762,20 @@ public class LootService implements INetworkDispatch {
 		if (statName.equals("mindamage")){		
 			int minimalValue = (int) Integer.parseInt(minValue);
 			int maximalValue = (int) Integer.parseInt(maxValue);
-			int randomValue  = minimalValue + new Random().nextInt(maximalValue-minimalValue);
+			int extra = 0;
+			if (maximalValue>minimalValue)
+				extra = new Random().nextInt(maximalValue-minimalValue);
+			int randomValue  = minimalValue + extra;
 			weapon.setMinDamage(randomValue);
 		}
 		
 		if (statName.equals("maxdamage")){
 			int minimalValue = (int) Integer.parseInt(minValue);
 			int maximalValue = (int) Integer.parseInt(maxValue);
-			int randomValue  = minimalValue + new Random().nextInt(maximalValue-minimalValue);
+			int extra = 0;
+			if (maximalValue>minimalValue)
+				extra = new Random().nextInt(maximalValue-minimalValue);
+			int randomValue  = minimalValue + extra;
 			weapon.setMaxDamage(randomValue);
 		}
 	
