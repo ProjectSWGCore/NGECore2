@@ -9,8 +9,8 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('rancor')
-	mobileTemplate.setLevel(61)
+	mobileTemplate.setCreatureName('rancor_youth')
+	mobileTemplate.setLevel(60)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
@@ -28,7 +28,7 @@ def addTemplate(core):
 	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_rancor.iff')
+	templates.add('object/mobile/shared_rancor_youth.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	
@@ -36,4 +36,4 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('rancor', mobileTemplate)
+	core.spawnService.addMobileTemplate('rancor_youth', mobileTemplate)

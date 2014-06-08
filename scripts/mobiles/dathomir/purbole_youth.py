@@ -9,26 +9,26 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('rancor')
-	mobileTemplate.setLevel(61)
+	mobileTemplate.setCreatureName('purbole_youth')
+	mobileTemplate.setLevel(64)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
-	mobileTemplate.setDeathblow(True)
+	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(1)
 	mobileTemplate.setMeatType("Carnivore Meat")
-	mobileTemplate.setMeatAmount(950)
-	mobileTemplate.setHideType("Leathery Hide")
-	mobileTemplate.setHideAmount(877)
+	mobileTemplate.setMeatAmount(12)
+	mobileTemplate.setHideType("Bristly Hide")
+	mobileTemplate.setHideAmount(8)
 	mobileTemplate.setBoneType("Animal Bones")
-	mobileTemplate.setBoneAmount(777)
-	mobileTemplate.setSocialGroup("rancor")
-	mobileTemplate.setAssistRange(24)
+	mobileTemplate.setBoneAmount(8)
+	mobileTemplate.setSocialGroup("purbole")
+	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(True)
 	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_rancor.iff')
+	templates.add('object/mobile/shared_purbole_youth.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	
@@ -36,4 +36,4 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('rancor', mobileTemplate)
+	core.spawnService.addMobileTemplate('purbole_youth', mobileTemplate)

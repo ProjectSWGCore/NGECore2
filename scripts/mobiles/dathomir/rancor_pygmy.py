@@ -9,8 +9,8 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('rancor')
-	mobileTemplate.setLevel(61)
+	mobileTemplate.setCreatureName('rancor_pygmy')
+	mobileTemplate.setLevel(50)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
@@ -36,4 +36,4 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('rancor', mobileTemplate)
+	core.spawnService.addMobileTemplate('rancor_pygmy', mobileTemplate)
