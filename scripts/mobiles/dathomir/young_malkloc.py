@@ -9,26 +9,26 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('rhoa_kwi_hunter')
-	mobileTemplate.setLevel(64)
+	mobileTemplate.setCreatureName('young_malkloc')
+	mobileTemplate.setLevel(72)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
-	mobileTemplate.setDeathblow(True)
+	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(1)
-	mobileTemplate.setMeatType("Carnivore Meat")
-	mobileTemplate.setMeatAmount(120)
+	mobileTemplate.setMeatType("Herbivore Meat")
+	mobileTemplate.setMeatAmount(850)
 	mobileTemplate.setHideType("Leathery Hide")
-	mobileTemplate.setHideAmount(86)
+	mobileTemplate.setHideAmount(900)
 	mobileTemplate.setBoneType("Animal Bones")
-	mobileTemplate.setBoneAmount(76)
-	mobileTemplate.setSocialGroup("kwi rhoa")
-	mobileTemplate.setAssistRange(12)
-	mobileTemplate.setStalker(True)
+	mobileTemplate.setBoneAmount(850)
+	mobileTemplate.setSocialGroup("malkloc")
+	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setStalker(False)
 	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_kwi.iff')
+	templates.add('object/mobile/shared_young_malkloc.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	
@@ -36,4 +36,4 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('rhoa_kwi_hunter', mobileTemplate)
+	core.spawnService.addMobileTemplate('young_malkloc', mobileTemplate)
