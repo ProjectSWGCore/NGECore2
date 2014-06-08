@@ -10,30 +10,25 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('nightsister_rancor')
-	mobileTemplate.setLevel(80)
-	mobileTemplate.setDifficulty(Difficulty.ELITE)
+	mobileTemplate.setCreatureName('gaping_spider_recluse_giant_kiin_dray')
+	mobileTemplate.setLevel(83)
+	mobileTemplate.setDifficulty(Difficulty.BOSS)
 
 	mobileTemplate.setMinSpawnDistance(4)
-	mobileTemplate.setMaxSpawnDistance(6)
+	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(True)
 	mobileTemplate.setScale(1)
-	mobileTemplate.setMeatType("Carnivore Meat")
-	mobileTemplate.setMeatAmount(950)
-	mobileTemplate.setHideType("Leathery Hide")
-	mobileTemplate.setHideAmount(878)
-	mobileTemplate.setBoneType("Animal Bones")
-	mobileTemplate.setBoneAmount(778)
-	mobileTemplate.setSocialGroup("nightsister")
-	mobileTemplate.setAssistRange(24)
-	mobileTemplate.setRespawnTime(300)
-	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)
+	mobileTemplate.setMeatType("Insect Meat")
+	mobileTemplate.setMeatAmount(11)
+	mobileTemplate.setSocialGroup("spider nightsister")
+	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setStalker(True)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_rancor.iff')
+	templates.add('object/mobile/shared_gaping_spider_recluse_giant_kiin_dray.iff')
 	mobileTemplate.setTemplates(templates)
-		
+	
 	weaponTemplates = Vector()
 	weapontemplate = WeaponTemplate('object/weapon/melee/unarmed/shared_unarmed_default.iff', WeaponType.UNARMED, 1.0, 6, 'kinetic')
 	weaponTemplates.add(weapontemplate)
@@ -43,4 +38,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('nightsister_rancor', mobileTemplate)
+	core.spawnService.addMobileTemplate('kiin_dray', mobileTemplate)
+	return

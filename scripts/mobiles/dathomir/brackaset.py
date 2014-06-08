@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('brackaset')
 	mobileTemplate.setLevel(66)
-	mobileTemplate.setMinLevel(66)
-	mobileTemplate.setMaxLevel(6)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)

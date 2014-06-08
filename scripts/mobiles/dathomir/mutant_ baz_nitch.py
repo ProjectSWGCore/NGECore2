@@ -10,30 +10,28 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('nightsister_rancor')
-	mobileTemplate.setLevel(80)
-	mobileTemplate.setDifficulty(Difficulty.ELITE)
+	mobileTemplate.setCreatureName('mutant_baz_nitch')
+	mobileTemplate.setLevel(63)
+	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
-	mobileTemplate.setMaxSpawnDistance(6)
+	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(True)
 	mobileTemplate.setScale(1)
-	mobileTemplate.setMeatType("Carnivore Meat")
-	mobileTemplate.setMeatAmount(950)
+	mobileTemplate.setMeatType("Wild Meat")
+	mobileTemplate.setMeatAmount(5)
 	mobileTemplate.setHideType("Leathery Hide")
-	mobileTemplate.setHideAmount(878)
+	mobileTemplate.setHideAmount(2)
 	mobileTemplate.setBoneType("Animal Bones")
-	mobileTemplate.setBoneAmount(778)
-	mobileTemplate.setSocialGroup("nightsister")
-	mobileTemplate.setAssistRange(24)
-	mobileTemplate.setRespawnTime(300)
-	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)
-	mobileTemplate.setStalker(True)
+	mobileTemplate.setBoneAmount(2)
+	mobileTemplate.setSocialGroup("baz nitch")
+	mobileTemplate.setAssistRange(12)
+	mobileTemplate.setStalker(False)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_rancor.iff')
+	templates.add('object/mobile/shared_baz_nitch_hue.iff')
 	mobileTemplate.setTemplates(templates)
-		
+	
 	weaponTemplates = Vector()
 	weapontemplate = WeaponTemplate('object/weapon/melee/unarmed/shared_unarmed_default.iff', WeaponType.UNARMED, 1.0, 6, 'kinetic')
 	weaponTemplates.add(weapontemplate)
@@ -43,4 +41,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('nightsister_rancor', mobileTemplate)
+	core.spawnService.addMobileTemplate('mutant_baz_nitch', mobileTemplate)
+	return

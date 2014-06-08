@@ -10,30 +10,28 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('nightsister_rancor')
-	mobileTemplate.setLevel(80)
-	mobileTemplate.setDifficulty(Difficulty.ELITE)
+	mobileTemplate.setCreatureName('mature_reptilian_flier')
+	mobileTemplate.setLevel(68)
+	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
-	mobileTemplate.setMaxSpawnDistance(6)
-	mobileTemplate.setDeathblow(True)
+	mobileTemplate.setMaxSpawnDistance(8)
+	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(1)
-	mobileTemplate.setMeatType("Carnivore Meat")
-	mobileTemplate.setMeatAmount(950)
+	mobileTemplate.setMeatType("Avian Meat")
+	mobileTemplate.setMeatAmount(130)
 	mobileTemplate.setHideType("Leathery Hide")
-	mobileTemplate.setHideAmount(878)
-	mobileTemplate.setBoneType("Animal Bones")
-	mobileTemplate.setBoneAmount(778)
-	mobileTemplate.setSocialGroup("nightsister")
-	mobileTemplate.setAssistRange(24)
-	mobileTemplate.setRespawnTime(300)
-	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)
-	mobileTemplate.setStalker(True)
+	mobileTemplate.setHideAmount(85)
+	mobileTemplate.setBoneType("Avian Bones")
+	mobileTemplate.setBoneAmount(80)
+	mobileTemplate.setSocialGroup("reptilian flier")
+	mobileTemplate.setAssistRange(12)
+	mobileTemplate.setStalker(False)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_rancor.iff')
+	templates.add('object/mobile/shared_reptilian_flier.iff')
 	mobileTemplate.setTemplates(templates)
-		
+	
 	weaponTemplates = Vector()
 	weapontemplate = WeaponTemplate('object/weapon/melee/unarmed/shared_unarmed_default.iff', WeaponType.UNARMED, 1.0, 6, 'kinetic')
 	weaponTemplates.add(weapontemplate)
@@ -43,4 +41,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('nightsister_rancor', mobileTemplate)
+	core.spawnService.addMobileTemplate('mature_reptilian_flier', mobileTemplate)
+	return
