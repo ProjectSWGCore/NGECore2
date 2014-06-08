@@ -1998,6 +1998,21 @@ public class LootService implements INetworkDispatch {
 		
 		playerInventory.add(item11);		
 		
+		TangibleObject item11a = (TangibleObject)core.objectService.createObject("object/tangible/wearables/armor/composite/shared_armor_composite_bicep_r.iff", player.getPlanet());
+		item11.setCustomName("Composite Armor Right Bicep");	
+	
+		item11a.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 6000);		
+		item11a.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 4000);
+		item11a.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 5000);
+		item11a.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 5000);	
+		item11a.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 5000);		
+		item11a.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 5000);
+	
+		item11a.setIntAttribute("cat_stat_mod_bonus.@stat_n:agility_modified", 25);		
+		item11a.setIntAttribute("cat_stat_mod_bonus.@stat_n:constitution_modified", 25);		
+		playerInventory.add(item11a);		
+		
+		
 		TangibleObject item12 = (TangibleObject)core.objectService.createObject("object/tangible/wearables/shirt/shared_shirt_s07.iff", player.getPlanet());
 		item12.setCustomName("Socketed Shirt");
 		item12.setIntAttribute("@obj_attr_n:sockets", 1);	
@@ -2008,23 +2023,28 @@ public class LootService implements INetworkDispatch {
 		item12a.setIntAttribute("cat_stat_mod_bonus.@stat_n:agility_modified", 18);		
 		playerInventory.add(item12a);	
 		
-		TangibleObject item13 = (TangibleObject)core.objectService.createObject("object/tangible/component/reverse_engineering/shared_modifier_bit.iff", player.getPlanet());
-		item13.setCustomName("Modifier Bit");
-		playerInventory.add(item13);
-		
 		String powerBitTemplate = "object/tangible/component/reverse_engineering/shared_power_bit.iff";
 		TangibleObject powerBit = (TangibleObject) core.objectService.createObject(powerBitTemplate, player.getPlanet());
 		powerBit.setCustomName("+25 2nd Order Power Bit");
 		powerBit.setAttachment("PowerBitValue", 25);
+		powerBit.setAttachment("PowerBitOrder", 2);
 		playerInventory.add(powerBit);
 		
-		//TangibleObject item14 = (TangibleObject)core.objectService.createObject("object/draft_schematic/reverse_engineering/shared_skill_attachment_1.iff", player.getPlanet());
-		TangibleObject item14 = (TangibleObject)core.objectService.createObject("object/tangible/powerup/weapon/shared_melee_generic.iff", player.getPlanet());
 		
-		item14.setCustomName("Skill Enhancing Attachment");
-		playerInventory.add(item14);
+		TangibleObject powerBit2 = (TangibleObject) core.objectService.createObject(powerBitTemplate, player.getPlanet());
+		powerBit2.setCustomName("+25 3nd Order Power Bit");
+		powerBit2.setAttachment("PowerBitValue", 25);
+		powerBit2.setAttachment("PowerBitOrder", 3);
+		playerInventory.add(powerBit2);
 		
-		
+
+		TangibleObject powerBit3 = (TangibleObject) core.objectService.createObject(powerBitTemplate, player.getPlanet());
+		powerBit3.setCustomName("+25 1st Order Power Bit");
+		powerBit3.setAttachment("PowerBitValue", 25);
+		powerBit3.setAttachment("PowerBitOrder", 1);
+		playerInventory.add(powerBit3);
+
+				
 		TangibleObject item23 = (TangibleObject)core.objectService.createObject("object/tangible/component/reverse_engineering/shared_modifier_bit.iff", player.getPlanet());
 		item23.setCustomName("Mark X Vocab Module");
 		playerInventory.add(item23);
@@ -2045,6 +2065,45 @@ public class LootService implements INetworkDispatch {
 		stacker2.setUses(99);
 		 
 		core.objectService.addStackableItem(stacker2,playerInventory);
+		
+		String SEALabel = "socket_gem_armor";
+		String SEADescription = "socket_gem";
+		String SEATemplate = "object/tangible/gem/shared_clothing.iff";
+		TangibleObject skillEnhancingAttachment = (TangibleObject)core.objectService.createObject(SEATemplate, player.getPlanet());
+		skillEnhancingAttachment.setStfFilename("item_n");
+		skillEnhancingAttachment.setStfName(SEALabel);
+		skillEnhancingAttachment.setDetailFilename("item_n");
+		skillEnhancingAttachment.setDetailName(SEADescription);
+		String effectName = "@stat_n:expertise_glancing_blow_ranged";
+		int modifierValue = 5;
+		skillEnhancingAttachment.setIntAttribute(effectName, modifierValue);
+		Vector<String> effectNameList = new Vector<String>();
+		effectNameList.add(effectName);
+		Vector<Integer> effectValueList = new Vector<Integer>();
+		effectValueList.add(modifierValue);
+		skillEnhancingAttachment.setAttachment("SEAeffectNameList", effectNameList);
+		skillEnhancingAttachment.setAttachment("SEAmodifierValueList", effectValueList);
+		playerInventory.add(skillEnhancingAttachment);
+		
+		TangibleObject skillEnhancingAttachment2 = (TangibleObject)core.objectService.createObject(SEATemplate, player.getPlanet());
+		skillEnhancingAttachment2.setStfFilename("item_n");
+		skillEnhancingAttachment2.setStfName(SEALabel);
+		skillEnhancingAttachment2.setDetailFilename("item_n");
+		skillEnhancingAttachment2.setDetailName(SEADescription);
+		effectName = "@stat_n:expertise_action_weapon_5";
+		String effectName2 = "@stat_n:expertise_critical_line_sp_dm";
+		modifierValue = 5;
+		skillEnhancingAttachment2.setIntAttribute(effectName, modifierValue);
+		skillEnhancingAttachment2.setIntAttribute(effectName2, 6);
+		effectNameList = new Vector<String>();
+		effectNameList.add(effectName);
+		effectNameList.add(effectName2);
+		effectValueList = new Vector<Integer>();
+		effectValueList.add(modifierValue);
+		effectValueList.add(6);
+		skillEnhancingAttachment2.setAttachment("SEAeffectNameList", effectNameList);
+		skillEnhancingAttachment2.setAttachment("SEAmodifierValueList", effectValueList);
+		playerInventory.add(skillEnhancingAttachment2);
 		
 	}
 	

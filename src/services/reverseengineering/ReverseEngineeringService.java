@@ -3043,6 +3043,7 @@ public class ReverseEngineeringService implements INetworkDispatch {
 				TangibleObject powerBit = (TangibleObject) core.objectService.createObject(powerBitTemplate, engineer.getPlanet());
 				powerBit.setCustomName("+" + powerBitValue + " " + powerBitOrderString + " Order Power Bit");
 				powerBit.setAttachment("PowerBitValue", powerBitValue);
+				powerBit.setAttachment("PowerBitOrder", powerBitOrder);
 				engineerInventory.add(powerBit);				
 			}				
 		}		
@@ -3188,6 +3189,7 @@ public class ReverseEngineeringService implements INetworkDispatch {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void createSEA(CreatureObject engineer, TangibleObject retool){
 		final Vector<SWGObject> reToolContentList = new Vector<SWGObject>();
 		SWGObject engineerInventory = engineer.getSlottedObject("inventory");
@@ -3236,19 +3238,19 @@ public class ReverseEngineeringService implements INetworkDispatch {
 				// Assuming munition
 				String SEALabel = "socket_gem_armor";
 				String SEADescription = "socket_gem";
-				String SEATemplate = "object/tangible/powerup/base/shared_armor_base.iff";
+				String SEATemplate = "object/tangible/gem/shared_clothing.iff";
 				
 				PlayerObject player = (PlayerObject) engineer.getSlottedObject("ghost");	
 				String profession = player.getProfession();
 				if (profession=="Domestic"){
 					SEALabel = "socket_gem_clothing";
 					SEADescription = "socket_gem";
-					SEATemplate = "object/tangible/powerup/base/shared_base.iff";
+					SEATemplate = "object/tangible/gem/shared_clothing.iff";
 				}
 				if (profession=="Engineer"){
 					SEALabel = "socket_gem_weapon";
 					SEADescription = "socket_gem";
-					SEATemplate = "object/tangible/powerup/base/shared_weapon_base.iff";
+					SEATemplate = "object/tangible/gem/shared_clothing.iff";
 				}
 			
 				core.objectService.destroyObject(bit1.getObjectID());
@@ -3260,7 +3262,136 @@ public class ReverseEngineeringService implements INetworkDispatch {
 				skillEnhancingAttachment.setStfName(SEALabel);
 				skillEnhancingAttachment.setDetailFilename("item_n");
 				skillEnhancingAttachment.setDetailName(SEADescription);
-				skillEnhancingAttachment.setIntAttribute(effectName, modifierValue);		
+				skillEnhancingAttachment.setIntAttribute(effectName, modifierValue);
+				Vector<String> effectNameList = new Vector<String>();
+				effectNameList.add(effectName);
+				Vector<Integer> effectValueList = new Vector<Integer>();
+				effectValueList.add(modifierValue);
+				skillEnhancingAttachment.setAttachment("SEAeffectNameList", effectNameList);
+				skillEnhancingAttachment.setAttachment("SEAmodifierValueList", effectValueList);
+				engineerInventory.add(skillEnhancingAttachment);	
+			}			 
+		}
+		
+		// Multi-stat SEA
+		if (reToolContentList.size()==3){
+			TangibleObject bit1 = (TangibleObject) reToolContentList.get(0);
+			TangibleObject bit2 = (TangibleObject) reToolContentList.get(1);
+			TangibleObject bit3 = (TangibleObject) reToolContentList.get(2);
+			
+			String effectName = "";
+			int ratio = 1;
+			int powermodifierValue = 1;
+			int modifierValue = 1;
+			int powerBitOrder = 1;
+			Vector<String> effectNameList = new Vector<String>();
+			Vector<Integer> effectValueList = new Vector<Integer>();
+			
+			//verify RE tool content requirement
+			List<String> contentVerification = new ArrayList<String>();
+			contentVerification.add("modifier_bit");
+			contentVerification.add("power_bit");
+			contentVerification.add("sea");
+			
+			if (bit1.getTemplate().contains("modifier_bit")){
+				effectName = bit1.getStringAttribute("@crafting:mod_bit_type");
+				ratio = bit1.getIntAttribute("@crafting:mod_bit_ratio");
+				contentVerification.remove("modifier_bit");				
+			}
+			if (bit1.getTemplate().contains("power_bit")){
+				powermodifierValue = (int) bit1.getAttachment("PowerBitValue");
+				powerBitOrder = (int) bit1.getAttachment("PowerBitOrder");
+				contentVerification.remove("power_bit");
+			}
+			if (bit1.getTemplate().contains("object/tangible/gem/shared_clothing.iff")){
+				effectNameList = (Vector<String>) bit1.getAttachment("SEAeffectNameList");
+				effectValueList = (Vector<Integer>) bit1.getAttachment("SEAmodifierValueList");
+				if (effectNameList.size()==3)
+					return;
+				contentVerification.remove("sea");
+			}
+					
+			if (bit2.getTemplate().contains("modifier_bit")){
+				effectName = bit2.getStringAttribute("@crafting:mod_bit_type");
+				ratio = bit2.getIntAttribute("@crafting:mod_bit_ratio");
+				contentVerification.remove("modifier_bit");
+			}
+			if (bit2.getTemplate().contains("power_bit")){
+				powermodifierValue = (int) bit2.getAttachment("PowerBitValue");
+				powerBitOrder = (int) bit2.getAttachment("PowerBitOrder");
+				contentVerification.remove("power_bit");
+			}
+			if (bit2.getTemplate().contains("object/tangible/gem/shared_clothing.iff")){
+				effectNameList = (Vector<String>) bit2.getAttachment("SEAeffectNameList");
+				effectValueList = (Vector<Integer>) bit2.getAttachment("SEAmodifierValueList");
+				if (effectNameList.size()==3)
+					return;
+				contentVerification.remove("sea");
+			}
+			
+			if (bit3.getTemplate().contains("modifier_bit")){
+				effectName = bit3.getStringAttribute("@crafting:mod_bit_type");
+				ratio = bit3.getIntAttribute("@crafting:mod_bit_ratio");
+				contentVerification.remove("modifier_bit");
+			}
+			if (bit3.getTemplate().contains("power_bit")){
+				powermodifierValue = (int) bit3.getAttachment("PowerBitValue");
+				powerBitOrder = (int) bit3.getAttachment("PowerBitOrder");
+				contentVerification.remove("power_bit");
+			}
+			if (bit3.getTemplate().contains("object/tangible/gem/shared_clothing.iff")){
+				effectNameList = (Vector<String>) bit3.getAttachment("SEAeffectNameList");
+				effectValueList = (Vector<Integer>) bit3.getAttachment("SEAmodifierValueList");
+				if (effectNameList.size()==3)
+					return;
+				contentVerification.remove("sea");
+			}
+								
+			if (contentVerification.size()==0){			
+				modifierValue = powermodifierValue;	
+				modifierValue = modifierValue/ratio; // int cast truncates
+				
+				// Assuming munition
+				String SEALabel = "socket_gem_armor";
+				String SEADescription = "socket_gem";
+				String SEATemplate = "object/tangible/gem/shared_clothing.iff";
+				
+				PlayerObject player = (PlayerObject) engineer.getSlottedObject("ghost");	
+				String profession = player.getProfession();
+				if (profession=="Domestic"){
+					SEALabel = "socket_gem_clothing";
+					SEADescription = "socket_gem";
+					SEATemplate = "object/tangible/gem/shared_clothing.iff";
+				}
+				if (profession=="Engineer"){
+					SEALabel = "socket_gem_weapon";
+					SEADescription = "socket_gem";
+					SEATemplate = "object/tangible/gem/shared_clothing.iff";
+				}
+			
+				core.objectService.destroyObject(bit1.getObjectID());
+				core.objectService.destroyObject(bit2.getObjectID());
+				core.objectService.destroyObject(bit3.getObjectID());
+				
+				if (powerBitOrder>effectNameList.size()){ // Only add a stat if the power bit is higher
+					effectNameList.add(effectName);
+					effectValueList.add(modifierValue);
+				}
+
+				TangibleObject skillEnhancingAttachment = (TangibleObject) core.objectService.createObject(SEATemplate, engineer.getPlanet());
+
+				skillEnhancingAttachment.setStfFilename("item_n");
+				skillEnhancingAttachment.setStfName(SEALabel);
+				skillEnhancingAttachment.setDetailFilename("item_n");
+				skillEnhancingAttachment.setDetailName(SEADescription);
+				
+				for (int i=0;i<effectNameList.size();i++){
+					skillEnhancingAttachment.setIntAttribute(effectNameList.get(i), effectValueList.get(i));	
+				}
+		
+				skillEnhancingAttachment.setAttachment("SEAeffectNameArray", effectNameList);
+				skillEnhancingAttachment.setAttachment("SEAmodifierValueArray", effectValueList);
+				
 				engineerInventory.add(skillEnhancingAttachment);	
 			}			 
 		}
