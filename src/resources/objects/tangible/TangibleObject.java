@@ -115,7 +115,7 @@ public class TangibleObject extends SWGObject implements Serializable {
 		baseline.put("faction", 0);
 		baseline.put("factionStatus", 0);
 		baseline.put("customization", new byte[] { });
-		baseline.put("componentCustomizations", new SWGList<Integer>(this, 3, 7, false));
+		baseline.put("componentCustomizations", new SWGSet<Integer>(this, 3, 7, false));
 		baseline.put("optionsBitmask", 0);
 		baseline.put("uses", 0);
 		baseline.put("conditionDamage", 0);
@@ -172,11 +172,12 @@ public class TangibleObject extends SWGObject implements Serializable {
 		notifyClients(getBaseline(3).set("customization", customization), true);
 	}
 	
-	public SWGList<Integer> getComponentCustomizations() {
-		return (SWGList<Integer>) getBaseline(3).get("componentCustomizations");
+	public SWGSet<Integer> getComponentCustomizations() {
+		return (SWGSet<Integer>) getBaseline(3).get("componentCustomizations");
 	}
 	
 	public void setComponentCustomizations(List<Integer> componentCustomizations) {
+		getComponentCustomizations().clear();
 		getComponentCustomizations().addAll(componentCustomizations);
 	}
 	
@@ -569,20 +570,18 @@ public class TangibleObject extends SWGObject implements Serializable {
 	}
 	
 	public boolean isFull() {
-		if (getTemplateData().getAttribute("containerVolumeLimit") == null) {
+		if (getTemplateData().getAttribute("containerVolumeLimit") == null)
 			return false;
-		}
 		
 		int containerVolumeLimit = (int) getTemplateData().getAttribute("containerVolumeLimit") >> 8; // Shifting because it seems to be returning an extra byte before it should
 		
-		if (containerVolumeLimit == 0) {
+		if (containerVolumeLimit == 0 || getTemplate() == "object/tangible/inventory/shared_appearance_inventory.iff") // appearance inventory - issue #755
 			return false;
-		}
+
 		
-		if (NGECore.getInstance().objectService.objsInContainer(this, this) >= containerVolumeLimit) {
+		if (NGECore.getInstance().objectService.objsInContainer(this, this) >= containerVolumeLimit)
 			return true;
-		}
-		
+	
 		return false;
 	}
 	

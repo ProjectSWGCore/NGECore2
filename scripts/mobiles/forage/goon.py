@@ -1,16 +1,19 @@
 import sys
 from services.spawn import MobileTemplate
 from services.spawn import WeaponTemplate
+from resources.datatables import WeaponType
+from resources.datatables import Difficulty
+from resources.datatables import Options
 from java.util import Vector
+
 
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
 	mobileTemplate.setCreatureName('forage_goon')
 	mobileTemplate.setLevel(1)
-	mobileTemplate.setDifficulty(1)
-	mobileTemplate.setAttackRange(6)
-	mobileTemplate.setAttackSpeed(1.0)
+	mobileTemplate.setDifficulty(Difficulty.ELITE)
+
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_criminal_assassin_human_female_01.iff')
@@ -23,16 +26,16 @@ def addTemplate(core):
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
-	weapontemplate = WeaponTemplate('object/weapon/ranged/carbine/shared_carbine_dh17.iff', 1, 0.6)
+	weapontemplate = WeaponTemplate('object/weapon/ranged/carbine/shared_carbine_dh17.iff', WeaponType.CARBINE, 0.6, 15, 'kinetic')
 	weaponTemplates.add(weapontemplate)
-	weapontemplate = WeaponTemplate('object/weapon/ranged/pistol/shared_pistol_dl44.iff', 2, 0.4)
+	weapontemplate = WeaponTemplate('object/weapon/ranged/pistol/shared_pistol_dl44.iff', WeaponType.PISTOL, 0.4, 15, 'kinetic')
 	weaponTemplates.add(weapontemplate)
-	weapontemplate = WeaponTemplate('object/weapon/ranged/rifle/shared_rifle_dlt20a.iff', 0, 0.8)
+	weapontemplate = WeaponTemplate('object/weapon/ranged/rifle/shared_rifle_dlt20a.iff', WeaponType.RIFLE, 0.8, 24, 'kinetic')
 	weaponTemplates.add(weapontemplate)	
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
-	mobileTemplate.setDefaultAttack('rangedshot')
+	mobileTemplate.setDefaultAttack('rangedShot')
 	mobileTemplate.setAttacks(attacks)
 	
 	core.spawnService.addMobileTemplate('forage_goon', mobileTemplate)

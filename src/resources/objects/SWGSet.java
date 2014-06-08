@@ -117,6 +117,7 @@ public class SWGSet<E> implements Set<E>, Serializable {
 	
 	public void clear() {
 		synchronized(objectMutex) {
+			set.clear();
 			queue(item(2, null, null, false, false));
 		}
 	}

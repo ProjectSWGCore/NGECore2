@@ -22,7 +22,10 @@
 package services.bazaar;
 
 import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,8 +33,16 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+
+
+
+
+
+
 import main.NGECore;
 import engine.clients.Client;
+import engine.resources.common.CRC;
 import engine.resources.database.ODBCursor;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
@@ -40,12 +51,15 @@ import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import resources.common.Opcodes;
 import resources.common.OutOfBand;
+import resources.common.ProsePackage;
 import resources.datatables.DisplayType;
 import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.intangible.IntangibleObject;
 import resources.objects.manufacture.ManufactureSchematicObject;
 import resources.objects.tangible.TangibleObject;
+import services.chat.Mail;
+import services.chat.WaypointAttachment;
 import protocol.swg.auctionManagerClientListener.AuctionQueryHeadersMessage;
 import protocol.swg.auctionManagerClientListener.AuctionQueryHeadersResponseMessage;
 import protocol.swg.auctionManagerClientListener.BidAuctionMessage;
@@ -91,8 +105,9 @@ public class BazaarService implements INetworkDispatch {
 			addAuctionItem((AuctionItem) cursor.next());
 		}
 		auctionItems.stream().map(AuctionItem::getItem).forEach(obj -> { 
+			obj.initializeBaselines();
 			obj.initAfterDBLoad(); 
-			obj.viewChildren(obj, true, true, obj2 -> obj2.initAfterDBLoad());
+			obj.viewChildren(obj, true, true, obj2 -> { obj2.initializeBaselines(); obj2.initAfterDBLoad(); });
 		});
 		cursor.close();
 	}
@@ -111,7 +126,16 @@ public class BazaarService implements INetworkDispatch {
 			
 			if (player == null)
 				return;
-						
+			
+			CommoditiesItemTypeListResponse response = new CommoditiesItemTypeListResponse();
+			
+			List<String> insertedItems = new ArrayList<String>();
+			auctionItems.stream().filter(i -> !insertedItems.contains(i.getItem().getObjectName().getStfValue())).forEach(i -> {
+				response.addItem(i);
+				insertedItems.add(i.getItem().getObjectName().getString());
+				System.out.println(i.getItem().getObjectName().getString());
+			});
+			
 			session.write(new CommoditiesItemTypeListResponse().serialize());
 			
 		});
@@ -358,7 +382,7 @@ public class BazaarService implements INetworkDispatch {
 			if(vendor == null)
 				return;
 
-			getItemData(player, vendor, queryHeaders.getRange(), queryHeaders.getScreen(), queryHeaders.getCounter(), queryHeaders.getOffset(), queryHeaders.getItemTypeCRC(), queryHeaders.getMinPrice(), queryHeaders.getMaxPrice());
+			getItemData(player, vendor, queryHeaders.getRange(), queryHeaders.getScreen(), queryHeaders.getCounter(), queryHeaders.getOffset(), queryHeaders.getCategory(), queryHeaders.getMinPrice(), queryHeaders.getMaxPrice());
 			
 		});
 
@@ -406,17 +430,60 @@ public class BazaarService implements INetworkDispatch {
 		else
 			retrieveExpire = timeUntilExpire + VENDOR_EXPIRE;
 
+		CreatureObject seller = (CreatureObject) core.objectService.getObject(item.getOwnerId());
+		
 		item.setStatus(AuctionItem.SOLD);
 		item.setBuyerId(player.getObjectID());
 		item.setExpireTime(retrieveExpire);
 		item.setBidderName(player.getCustomName());
 		player.setBankCredits(player.getBankCredits() - item.getPrice());
 		player.getClient().getSession().write(new BidAuctionResponseMessage(item.getObjectId(), BidAuctionResponseMessage.SUCCESS).serialize());
+				
+		WaypointAttachment waypoint = new WaypointAttachment();
+		waypoint.positionX = vendor.getWorldPosition().x;
+		waypoint.positionZ = vendor.getWorldPosition().z;
+		waypoint.planetCRC = CRC.StringtoCRC(vendor.getPlanet().getName());
+		waypoint.name = vendor.getCustomName() == null ? vendor.getObjectName().getStfValue() : vendor.getCustomName();
 		
-		// TODO send mail with WP
+		Mail sellerMail = new Mail();
+		Mail buyerMail = new Mail();
 		
-		CreatureObject seller = (CreatureObject) core.objectService.getObject(item.getOwnerId());
+		sellerMail.setMailId(NGECore.getInstance().chatService.generateMailId());
+		sellerMail.setMessage("");
+		sellerMail.setRecieverId(item.getOwnerId());
+		sellerMail.setStatus(Mail.NEW);
+		sellerMail.setTimeStamp((int) (new Date().getTime() / 1000));
+		sellerMail.setSenderName("SWG." + core.getGalaxyName() + ".auctioner");
+		if(item.isOnBazaar()) {
+			sellerMail.setSubject("@auction:subject_instant_seller");
+			sellerMail.addProseAttachment(new ProsePackage("@auction:seller_success", "TO", item.getObjectId(), item.getItemName(), "TT", player.getObjectID(), item.getBidderName(), "DI", item.getPrice()));
+		} else {
+			sellerMail.setSubject("@auction:subject_vendor_seller");
+			sellerMail.addProseAttachment(new ProsePackage("@auction:seller_success_vendor", "TO", item.getObjectId(), item.getItemName(), "TT", player.getObjectID(), item.getBidderName(), "DI", item.getPrice()));
+		}
+		sellerMail.addProseAttachment(new ProsePackage("@auction:seller_success_location", "TO", 0, "@planet_n:" + vendor.getPlanet().getName(), "TT", 0, core.mapService.getClosestCityName(vendor)));
+		sellerMail.addWaypointAttachment(waypoint);
+
+		buyerMail.setMailId(NGECore.getInstance().chatService.generateMailId());
+		buyerMail.setMessage("");
+		buyerMail.setRecieverId(player.getObjectID());
+		buyerMail.setStatus(Mail.NEW);
+		buyerMail.setTimeStamp((int) (new Date().getTime() / 1000));
+		buyerMail.setSenderName("SWG." + core.getGalaxyName() + ".auctioner");
+		if(item.isOnBazaar())
+			buyerMail.setSubject("@auction:subject_instant_buyer");
+		else 
+			buyerMail.setSubject("@auction:subject_vendor_buyer");
+		buyerMail.addProseAttachment(new ProsePackage("@auction:buyer_success", "TO", item.getObjectId(), item.getItemName(), "TT", item.getOwnerId(), item.getOwnerName(), "DI", item.getPrice()));
+		buyerMail.addProseAttachment(new ProsePackage("@auction:buyer_success_location", "TO", 0, "@planet_n:" + vendor.getPlanet().getName(), "TT", 0, core.mapService.getClosestCityName(vendor)));
+		buyerMail.addWaypointAttachment(waypoint);
 		
+		core.chatService.storePersistentMessage(buyerMail);
+		core.chatService.storePersistentMessage(sellerMail);
+		core.chatService.sendPersistentMessageHeader(player.getClient(), buyerMail);
+		if(seller != null && seller.getClient() != null)
+			core.chatService.sendPersistentMessageHeader(seller.getClient(), sellerMail);
+				
 		if(seller == null) {
 			seller = core.objectService.getCreatureFromDB(item.getOwnerId());
 			seller.setBankCredits(seller.getBankCredits() + item.getPrice());
@@ -441,7 +508,6 @@ public class BazaarService implements INetworkDispatch {
 			return;
 		}
 
-		
 		if(item.getItem() instanceof TangibleObject && player.getInventoryItemCount() >= 80) {
 			response.setStatus(RetrieveAuctionItemResponseMessage.FULLINVENTORY);
 			player.getClient().getSession().write(response.serialize());
@@ -530,7 +596,6 @@ public class BazaarService implements INetworkDispatch {
 		int displayedItems = 0;
 		
 		AuctionQueryHeadersResponseMessage response = new AuctionQueryHeadersResponseMessage(player.getObjectID(), screen, counter, offset, false);
-		
 		while(it.hasNext() && displayedItems < offset + 100) {
 			
 			AuctionItem item = it.next();
@@ -543,10 +608,12 @@ public class BazaarService implements INetworkDispatch {
 				// Auctions
 				case 2:
 					if(item.getStatus() == AuctionItem.FORSALE && item.isOnBazaar()) {
-						if((category & 255) != 0 && item.getItemType() == category) {
-							if(displayedItems >= offset)
-								response.addItem(item);
-							displayedItems++;
+						if((category & 255) != 0) {
+							if(item.getItemType() == category) {
+								if(displayedItems >= offset)
+									response.addItem(item);
+								displayedItems++;
+							}
 						} else if((item.getItemType() & category) != 0) {
 							if(displayedItems >= offset) 
 								response.addItem(item);
@@ -589,10 +656,12 @@ public class BazaarService implements INetworkDispatch {
 					if(item.getStatus() == AuctionItem.FORSALE && !item.isOnBazaar()) {
 						if(vendor.getObjectID() != item.getVendorId() && (core.objectService.getObject(item.getVendorId()) == null || (Boolean) core.objectService.getObject(item.getVendorId()).getAttachment("vendorSearchEnabled")))
 							break;
-						if((category & 255) != 0 && item.getItemType() == category) {
-							if(displayedItems >= offset)
-								response.addItem(item);
-							displayedItems++;
+						if((category & 255) != 0) {
+							if(item.getItemType() == category) {
+								if(displayedItems >= offset)
+									response.addItem(item);
+								displayedItems++;
+							}
 						} else if((item.getItemType() & category) != 0) {
 							if(displayedItems >= offset) 
 								response.addItem(item);
@@ -725,18 +794,24 @@ public class BazaarService implements INetworkDispatch {
 		auctionItem.setItemDescription(description);
 		auctionItem.setPrice(price);
 		auctionItem.setItemType(item.getTemplateData().getAttribute("gameObjectType"));
+		auctionItem.setItemTypeCRC(CRC.StringtoCRC(item.getTemplate().replace("shared_", "")));
 		auctionItem.setStatus(AuctionItem.FORSALE);
 		//auctionItem.setItemName("@" + item.getStfFilename() + ":" + item.getStfName());
-		String name = item.getCustomName() == null ? "@" + item.getStfFilename() + ":" + item.getStfName() : item.getCustomName();
+		String name = item.getCustomName() == null ? item.getObjectName().getStfValue() : item.getCustomName();
 		auctionItem.setItemName(name);
 		auctionItem.setVendorId(vendor.getObjectID());
 		auctionItem.setPlanet(vendor.getPlanet().getName());
 		auctionItem.setVuid(getVendorUID((TangibleObject) vendor));
 		auctionItem.setOwnerName(player.getCustomName());
 		
-		if(vendor.getTemplate().contains("terminal_bazaar"))
+		if(vendor.getAttachment("isVendor") == null)
 			auctionItem.setOnBazaar(true);
-		
+		else {
+			if(!((long) vendor.getAttachment("vendorOwner") == player.getObjectID())) {
+				auctionItem.setOfferToId((long) vendor.getAttachment("owner"));
+				auctionItem.setStatus(AuctionItem.OFFERED);
+			}
+		}
 		addAuctionItem(auctionItem);
 		
 		return auctionItem;
@@ -774,6 +849,8 @@ public class BazaarService implements INetworkDispatch {
 	}
 	
 	public void addAuctionItem(AuctionItem auctionItem) {
+		if(auctionItem == null)
+			return;
 		auctionItems.add(auctionItem);
 		int commodityNumber = 0;
 		if(commodityLimit.get(auctionItem.getOwnerId()) != null)

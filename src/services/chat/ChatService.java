@@ -222,6 +222,9 @@ public class ChatService implements INetworkDispatch {
 				
 				SWGObject recipient = getObjectByFirstName(firstName);				
 				
+				if (recipient == null)
+					return;
+				
 				PlayerObject recipientGhost = (PlayerObject) recipient.getSlottedObject("ghost");
 				
 				if (recipientGhost.getIgnoreList().contains(sender.getCustomName().toLowerCase())) 
@@ -307,7 +310,7 @@ public class ChatService implements INetworkDispatch {
 					mail.setStatus(Mail.NEW);
 					mail.setSubject(packet.getSubject());
 					mail.setTimeStamp((int) (date.getTime() / 1000));
-					mail.setAttachments(packet.getWaypointAttachments());
+					mail.setWaypointAttachments(packet.getWaypointAttachments());
 					storePersistentMessage(mail);
 					
 					if(recipient.getClient() != null) {
@@ -684,7 +687,7 @@ public class ChatService implements INetworkDispatch {
 		//System.out.println(config.getString("GALAXY_NAME"));
 		
 		ChatPersistentMessageToClient msg = new ChatPersistentMessageToClient(mail.getSenderName(), config.getString("GALAXY_NAME"), mail.getMailId()
-				,(byte) 1, "", mail.getSubject(), mail.getStatus(), mail.getTimeStamp(), mail.getAttachments());
+				,(byte) 1, "", mail.getSubject(), mail.getStatus(), mail.getTimeStamp(), mail.getWaypointAttachments(), mail.getProseAttachments());
 		
 		client.getSession().write(msg.serialize());
 	}
@@ -703,7 +706,7 @@ public class ChatService implements INetworkDispatch {
 		//System.out.println(config.getString("GALAXY_NAME"));
 		
 		ChatPersistentMessageToClient msg = new ChatPersistentMessageToClient(mail.getSenderName(), config.getString("GALAXY_NAME"), mail.getMailId()
-				,(byte) 0, mail.getMessage(), mail.getSubject(), mail.getStatus(), mail.getTimeStamp(), mail.getAttachments());
+				,(byte) 0, mail.getMessage(), mail.getSubject(), mail.getStatus(), mail.getTimeStamp(), mail.getWaypointAttachments(), mail.getProseAttachments());
 		
 		client.getSession().write(msg.serialize());
 	}

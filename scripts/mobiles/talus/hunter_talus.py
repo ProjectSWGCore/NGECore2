@@ -1,17 +1,19 @@
 import sys
 from services.spawn import MobileTemplate
 from services.spawn import WeaponTemplate
+from resources.datatables import WeaponType
+from resources.datatables import Difficulty
+from resources.datatables import Options
 from java.util import Vector
+
 
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 
 	mobileTemplate.setCreatureName('hunter_talus')
 	mobileTemplate.setLevel(17)
-	mobileTemplate.setDifficulty(0)
-	mobileTemplate.setAttackRange(15)
-	mobileTemplate.setAttackSpeed(1.0)
-	mobileTemplate.setWeaponType(1)
+	mobileTemplate.setDifficulty(Difficulty.NORMAL)
+
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)
@@ -19,19 +21,19 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("talus poachers")
 	mobileTemplate.setAssistRange(6)
 	mobileTemplate.setStalker(True)
-	mobileTemplate.setOptionsBitmask(192)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)
 
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_forest_hunter.iff')
 	mobileTemplate.setTemplates(templates)
 
 	weaponTemplates = Vector()
-	weapontemplate = WeaponTemplate('object/weapon/ranged/rifle/shared_rifle_e11.iff', 1, 1.0)
+	weapontemplate = WeaponTemplate('object/weapon/ranged/rifle/shared_rifle_e11.iff', WeaponType.CARBINE, 1.0, 15, 'energy')
 	weaponTemplates.add(weapontemplate)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 
 	attacks = Vector()
-	mobileTemplate.setDefaultAttack('rangedshot')
+	mobileTemplate.setDefaultAttack('rangedShot')
 	mobileTemplate.setAttacks(attacks)
 
 	core.spawnService.addMobileTemplate('hunter_talus', mobileTemplate)

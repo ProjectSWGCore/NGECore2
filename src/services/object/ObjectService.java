@@ -129,6 +129,9 @@ import services.command.CombatCommand;
 import services.bazaar.AuctionItem;
 import services.chat.ChatRoom;
 import services.equipment.EquipmentService;
+import services.sui.SUIWindow;
+import services.sui.SUIWindow.SUICallback;
+import services.sui.SUIWindow.Trigger;
 
 @SuppressWarnings("unused")
 public class ObjectService implements INetworkDispatch {
@@ -196,6 +199,14 @@ public class ObjectService implements INetworkDispatch {
 					object.setParent(building);
 				object.getContainerInfo(object.getTemplate());
 			});
+			SWGObject sign = (SWGObject) building.getAttachment("sign");
+			if(sign != null) {
+				sign.initializeBaselines();
+				sign.initAfterDBLoad();
+				objectList.put(sign.getObjectID(), sign);
+			}
+			if(building.getAttachment("structureOwner") != null && ((BuildingObject) building).getMaintenanceAmount() > 0)
+				core.housingService.startMaintenanceTask((BuildingObject) building);
 		}
 		
 		cursor.close();
@@ -663,9 +674,56 @@ public class ObjectService implements INetworkDispatch {
 		return objectId;
 	}
 	
-	public void useObject(CreatureObject creature, SWGObject object) {
+	public void useObject(CreatureObject creature, final SWGObject object) {
 		if (creature == null || object == null) {
 			return;
+		}
+		
+		String template = ((object.getAttachment("customServerTemplate") == null) ? object.getTemplate() : (object.getTemplate().split("shared_")[0] + "shared_" + ((String) object.getAttachment("customServerTemplate")) + ".iff"));
+		
+		String bl = object.getStringAttribute("bio_link");
+		
+		if (bl != null) {
+			if (!object.getContainer().getTemplate().contains("shared_character_inventory")){
+				creature.sendSystemMessage("@base_player:must_biolink_to_use_from_inventory", DisplayType.Screen);
+				return;
+			}
+			
+			if (!bl.contains("@obj_attr_n:bio_link_pending") && ! bl.contains(creature.getCustomName())){
+				creature.sendSystemMessage("@base_player:not_linked_to_holder", DisplayType.Screen);
+				return;
+			}
+			
+			if (bl.contains("@obj_attr_n:bio_link_pending")){
+				creature.setAttachment("BioLinkItemCandidate", object.getObjectID());
+				SUIWindow window = core.suiService.createSUIWindow("Script.messageBox", creature, creature, 0);
+				window.setProperty("bg.caption.lblTitle:Text", "@sui:bio_link_item_title");
+				window.setProperty("Prompt.lblPrompt:Text", "@sui:bio_link_item_prompt");		
+				window.setProperty("btnCancel:visible", "True");
+				window.setProperty("btnOk:visible", "True");
+				window.setProperty("btnUpdate:visible", "False");
+				window.setProperty("btnCancel:Text", "@cancel");
+				window.setProperty("btnOk:Text", "@ui_radial:bio_link");						
+				Vector<String> returnList = new Vector<String>();
+				returnList.add("List.lstList:SelectedRow");				
+				window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, new SUICallback() {
+					@Override
+					public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
+						((CreatureObject)owner).sendSystemMessage("@base_player:item_bio_linked", (byte) 1);					
+						object.setStringAttribute("bio_link", owner.getCustomName());
+						object.setAttachment("bio_link_PlayerID", owner.getObjectID());
+						return;
+					}					
+				});		
+				window.addHandler(1, "", Trigger.TRIGGER_CANCEL, returnList, new SUICallback() {
+					@Override
+					public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
+						return;
+					}					
+				});	
+				core.suiService.openSUIWindow(window);	
+				return;
+			}
 		}
 		
 		creature.setUseTarget(object);
@@ -680,6 +738,8 @@ public class ObjectService implements INetworkDispatch {
 		
 		try {
 			DatatableVisitor visitor = ClientFileManager.loadFile("datatables/timer/template_command_mapping.iff", DatatableVisitor.class);
+			
+			boolean foundTemplate = false;
 			
 			for (int i = 0; i < visitor.getRowCount(); i++) {
 				if (visitor.getObject(i, 0) != null && ((String) (visitor.getObject(i, 0))).equalsIgnoreCase(object.getTemplate())) {
@@ -703,11 +763,21 @@ public class ObjectService implements INetworkDispatch {
 							return;
 						}
 						
-						creature.addCooldown(cooldownGroup, object.getIntAttribute("reuse_time"));
+						creature.addCooldown(cooldownGroup, reuse_time);
 					}
+					
+					foundTemplate = true;
 					
 					break;
 				}
+			}
+			
+			if (!foundTemplate && reuse_time > 0) {
+				if (creature.hasCooldown(template)) {
+					return;
+				}
+				
+				creature.addCooldown(template, reuse_time);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -730,14 +800,14 @@ public class ObjectService implements INetworkDispatch {
 			core.buffService.addBuffToCreature(creature, object.getStringAttribute("proc_name").replace("@ui_buff:", ""), creature);
 		}
 		
-		String filePath = "scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", "") + object.getTemplate().split("shared_" , 2)[1].replace(".iff", "") + ".py";
+		String filePath = "scripts/" + template.split("shared_" , 2)[0].replace("shared_", "") + template.split("shared_" , 2)[1].replace(".iff", "") + ".py";
 		
 		if (FileUtilities.doesFileExist(filePath)) {
-			filePath = "scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", "");
-			String fileName = object.getTemplate().split("shared_" , 2)[1].replace(".iff", "");
+			filePath = "scripts/" + template.split("shared_" , 2)[0].replace("shared_", "");
+			String fileName = template.split("shared_" , 2)[1].replace(".iff", "");
 			
-			PyObject method1 = core.scriptService.getMethod("scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", ""), object.getTemplate().split("shared_" , 2)[1].replace(".iff", ""), "use");
-			PyObject method2 = core.scriptService.getMethod("scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", ""), object.getTemplate().split("shared_" , 2)[1].replace(".iff", ""), "useObject");
+			PyObject method1 = core.scriptService.getMethod("scripts/" + template.split("shared_" , 2)[0].replace("shared_", ""), template.split("shared_" , 2)[1].replace(".iff", ""), "use");
+			PyObject method2 = core.scriptService.getMethod("scripts/" + template.split("shared_" , 2)[0].replace("shared_", ""), template.split("shared_" , 2)[1].replace(".iff", ""), "useObject");
 			
 			if (method1 != null && method1.isCallable()) {
 				method1.__call__(Py.java2py(core), Py.java2py(creature), Py.java2py(object));

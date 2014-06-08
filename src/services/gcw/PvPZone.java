@@ -65,6 +65,7 @@ public class PvPZone {
 		if (core.mountService.isMounted(actor)) {
 			actor = (CreatureObject) actor.getContainer();
 		}
+		area.getCollisionList().remove(actor);
 		core.simulationService.teleport(actor, (Point3D) actor.getAttachment("lastValidPosition"), actor.getOrientation(), actor.getParentId());
 	}
 	
@@ -73,7 +74,7 @@ public class PvPZone {
 		
 		CreatureObject actor = (CreatureObject) event.object;
 		
-		if(!actor.getFaction().equals("rebel") && !actor.getFaction().equals("imperial")) {
+		if(!core.factionService.isPvpFaction(actor.getFaction()) || actor.getFactionStatus() == FactionStatus.OnLeave) {
 			actor.sendSystemMessage("@gcw:pvp_advanced_region_not_allowed", (byte) 0);
 			warpBack(actor);
 			return;
@@ -86,8 +87,7 @@ public class PvPZone {
 		}
 		
 		if(actor.getPvpStatus(PvpStatus.GoingCovert) || actor.getPvpStatus(PvpStatus.GoingOvert)) {
-			actor.setPvpStatus(PvpStatus.GoingCovert, false);
-			actor.setPvpStatus(PvpStatus.GoingOvert, false);
+			actor.setPvpStatus(PvpStatus.GoingCovert | PvpStatus.GoingOvert, false);
 			actor.sendSystemMessage("@gcw:pvp_advanced_region_faction_type_change_cancel", (byte) 0);
 		}
 		
@@ -101,11 +101,10 @@ public class PvPZone {
 	public void onExit(ExitEvent event) {
 		
 		CreatureObject actor = (CreatureObject) event.object;
-
-		actor.setFactionStatus(FactionStatus.OnLeave);
+		
 		actor.updatePvpStatus();
 		actor.sendSystemMessage("@gcw:pvp_advanced_region_exited", (byte) 0);
-
+		
 	}
 
 

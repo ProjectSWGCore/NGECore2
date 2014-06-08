@@ -1,7 +1,11 @@
 import sys
 from services.spawn import MobileTemplate
 from services.spawn import WeaponTemplate
+from resources.datatables import WeaponType
+from resources.datatables import Difficulty
+from resources.datatables import Options
 from java.util import Vector
+
 
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
@@ -9,10 +13,8 @@ def addTemplate(core):
 	mobileTemplate.setCreatureName('dark_force_crystal_hunter')
 	mobileTemplate.setMinLevel(60)
 	mobileTemplate.setMaxLevel(69)
-	mobileTemplate.setDifficulty(0)
-	mobileTemplate.setAttackRange(6)
-	mobileTemplate.setAttackSpeed(1.0)
-	mobileTemplate.setWeaponType(4)
+	mobileTemplate.setDifficulty(Difficulty.NORMAL)
+
 	mobileTemplate.setMinSpawnDistance(2)
 	mobileTemplate.setMaxSpawnDistance(4)
 	mobileTemplate.setDeathblow(True)
@@ -25,7 +27,7 @@ def addTemplate(core):
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
-	weapontemplate = WeaponTemplate('object/weapon/melee/sword/shared_sword_01.iff', 4, 1.0)
+	weapontemplate = WeaponTemplate('object/weapon/melee/sword/shared_sword_01.iff', WeaponType.ONEHANDEDMELEE, 1.0, 5, 'kinetic')
 	weaponTemplates.add(weapontemplate)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	

@@ -41,6 +41,7 @@ import services.spawn.MobileTemplate;
 import main.NGECore;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.PortalVisitor;
+import engine.resources.config.Config;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -57,6 +58,10 @@ public class StaticService implements INetworkDispatch {
 	}
 	
 	public void spawnStatics() {
+		Config options = new Config();
+		options.setFilePath("options.cfg");
+		final boolean buildoutsDisabled = ((options.loadConfigFile() && options.getInt("LOAD.BUILDOUT_OBJECTS") == 0) ? true : false);
+		
 		for (Planet planet : core.terrainService.getPlanetList()) {
 			if (FileUtilities.doesFileExist("scripts/static_spawns/" + planet.getName())) {
 				Path p = Paths.get("scripts/static_spawns/" + planet.getName());
@@ -65,7 +70,13 @@ public class StaticService implements INetworkDispatch {
 					@Override
 					public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 						if (file.getFileName().toString().endsWith(".py")) {
-							core.scriptService.callScript("scripts/static_spawns/" + planet.getName() + "/", file.getFileName().toString().replace(".py", ""), "addPlanetSpawns", core, planet);
+							try {
+								core.scriptService.callScript("scripts/static_spawns/" + planet.getName() + "/", file.getFileName().toString().replace(".py", ""), "addPlanetSpawns", core, planet);
+							} catch (Exception e) {
+								if (!buildoutsDisabled) {
+									e.printStackTrace();
+								}
+							}
 						}
 						
 						return FileVisitResult.CONTINUE;
@@ -177,7 +188,7 @@ public class StaticService implements INetworkDispatch {
 					
 					for (int i = 1; i <= portal.cellCount; i++) {
 						long cellObjectId = core.objectService.getDOId(planetName, "object/cell/shared_cell.iff", 0, object.getObjectID(), i, x, y, z);
-						CellObject childCell = (CellObject) core.objectService.createObject("object/cell/shared_cell.iff", cellObjectId, core.terrainService.getPlanetByName(planetName), new Point3D(0, 0, 0), new Quaternion(1, 0, 0, 0), null, true, true);
+						CellObject childCell = (CellObject) core.objectService.createObject("object/cell/shared_cell.iff", cellObjectId, core.terrainService.getPlanetByName(planetName), new Point3D(0, 0, 0), new Quaternion(0, 0, 1, 0), null, true, true);
 						childCell.setCellNumber(i);
 						building.add(childCell);
 					}

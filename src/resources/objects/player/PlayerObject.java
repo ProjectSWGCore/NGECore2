@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
@@ -110,10 +111,10 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		profileFlagsList.add(0);
 		baseline.put("profileFlagsList", profileFlagsList);
 		baseline.put("title", "");
-		baseline.put("bornDate", (int) (System.currentTimeMillis() / 1000L)); //Integer.parseInt(new SimpleDateFormat("yyyymmdd", Locale.ENGLISH).format(Calendar.getInstance().getTime())));
+		baseline.put("bornDate", (int) TimeUnit.DAYS.convert((System.currentTimeMillis() - 978220800000L), TimeUnit.MILLISECONDS));
 		baseline.put("totalPlayTime", 0);
 		baseline.put("professionIcon", 0);
-		baseline.put("profession", "trader_1a");
+		baseline.put("profession", "trader_0a");
 		baseline.put("gcwPoints", 0);
 		baseline.put("pvpKills", 0);
 		baseline.put("lifetimeGcwPoints", (long) 0);
@@ -408,6 +409,12 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	public void toggleGuildRank(int slotIndex) {
 		BitSet guildRanks = (BitSet) getBaseline(3).get("guildRanks");
 		guildRanks.set(slotIndex, !guildRanks.get(slotIndex));
+		getBaseline(3).set("guildRanks", guildRanks);
+	}
+	
+	public void clearGuildRanks() {
+		BitSet guildRanks = (BitSet) getBaseline(3).get("guildRanks");
+		guildRanks.clear();
 		getBaseline(3).set("guildRanks", guildRanks);
 	}
 	

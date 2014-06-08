@@ -1,17 +1,19 @@
 import sys
 from services.spawn import MobileTemplate
 from services.spawn import WeaponTemplate
+from resources.datatables import WeaponType
+from resources.datatables import Difficulty
+from resources.datatables import Options
 from java.util import Vector
+
 
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
 	mobileTemplate.setCreatureName('imperial_inquisitor')
 	mobileTemplate.setLevel(80)
-	mobileTemplate.setDifficulty(1)
-	mobileTemplate.setAttackRange(15)
-	mobileTemplate.setAttackSpeed(1.0)
-	mobileTemplate.setWeaponType(4)
+	mobileTemplate.setDifficulty(Difficulty.ELITE)
+
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)
@@ -29,12 +31,12 @@ def addTemplate(core):
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
-	weapontemplate = WeaponTemplate('object/weapon/melee/baton/shared_baton_stun.iff', 4, 1.0)
+	weapontemplate = WeaponTemplate('object/weapon/melee/baton/shared_baton_stun.iff', WeaponType.ONEHANDEDMELEE, 1.0, 5, 'kinetic')
 	weaponTemplates.add(weapontemplate)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
-	mobileTemplate.setDefaultAttack('rangedshot')
+	mobileTemplate.setDefaultAttack('rangedShot')
 	mobileTemplate.setAttacks(attacks)
 	
 	core.spawnService.addMobileTemplate('imp_inquisitor_80', mobileTemplate)
