@@ -3084,8 +3084,17 @@ public class ReverseEngineeringService implements INetworkDispatch {
 				System.err.println("Junkloot combination wrong/not registered yet or Junkloot names don't conform to http://www.nova-inside.com naming convention");
 				return;
 			}
-			core.objectService.destroyObject(piece1.getObjectID());
-			core.objectService.destroyObject(piece2.getObjectID());
+//			core.objectService.destroyObject(piece1.getObjectID());
+//			core.objectService.destroyObject(piece2.getObjectID());
+			int piece1Uses = piece1.getUses()-1;
+			int piece2Uses = piece2.getUses()-1;
+			piece1.setUses(piece1Uses);
+			piece2.setUses(piece2Uses);
+			if (piece1Uses==0)
+				core.objectService.destroyObject(piece1.getObjectID());
+			if (piece2Uses==0)
+				core.objectService.destroyObject(piece2.getObjectID());
+			
 			int pcrIntValue = Integer.parseInt(pcr);
 			String modifierBitTemplate = "object/tangible/component/reverse_engineering/shared_modifier_bit.iff";
 			TangibleObject modifierBit = (TangibleObject) core.objectService.createObject(modifierBitTemplate, engineer.getPlanet());

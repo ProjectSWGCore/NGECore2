@@ -13,8 +13,6 @@ def addPlanetSpawns(core, planet):
 	stcSvc = core.staticService
 	objSvc = core.objectService
 	
-<<<<<<< HEAD
-=======
 	building = core.objectService.getObject(long(-466404038086555772))
 	
 	# Shinn Mugger outisde
@@ -63,7 +61,6 @@ def addPlanetSpawns(core, planet):
 	
 	# Vaigonn Shinn				
 	vaigonn_shinn = stcSvc.spawnObject('vaigon_shinn', 'tatooine', building.getCellByCellNumber(long(10)), float(1.7), float(-20.8), float(29.7), float(-1), float(0), float(0), float(0), 30)
->>>>>>> origin/master
 	
 	return
 	

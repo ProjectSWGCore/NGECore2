@@ -48,7 +48,7 @@ public class FactoryCrateMessageBuilder extends TangibleMessageBuilder{
 		buffer.putFloat(1.0f);	//op0
 		buffer.put(getAsciiString("factory_n")); 
 		buffer.putInt(0);		
-		buffer.put(getAsciiString("food_crate"));
+		buffer.put(getAsciiString(factoryCrateObject.getFactoryCrateType()));
 		
 		if (factoryCrateObject.getCustomName().length()>0)
 			buffer.put(getUnicodeString(factoryCrateObject.getCustomName()));

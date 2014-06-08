@@ -47,6 +47,7 @@ import resources.datatables.DisplayType;
 import resources.loot.LootGroup;
 import resources.loot.LootRollSession;
 import resources.objects.creature.CreatureObject;
+import resources.objects.factorycrate.FactoryCrateObject;
 import resources.objects.group.GroupObject;
 import resources.objects.intangible.IntangibleObject;
 import resources.objects.tangible.TangibleObject;
@@ -2722,10 +2723,27 @@ public class LootService implements INetworkDispatch {
 		playerInventory.add(item11a);		
 		
 		
+		TangibleObject item12aa = (TangibleObject)core.objectService.createObject("object/tangible/wearables/shirt/shared_shirt_s07.iff", player.getPlanet());
+		item12aa.setCustomName("Socketed Shirt");
+		item12aa.setIntAttribute("@obj_attr_n:sockets", 1);	
+		playerInventory.add(item12aa);	
+		
 		TangibleObject item12 = (TangibleObject)core.objectService.createObject("object/tangible/wearables/shirt/shared_shirt_s07.iff", player.getPlanet());
+		
+		item12.setStfFilename("wearables_name");
+		item12.setStfName("shirt_s01");
+		item12.setDetailFilename("wearables_detail");
+		item12.setDetailName("shirt_s01");
 		item12.setCustomName("Socketed Shirt");
-		item12.setIntAttribute("@obj_attr_n:sockets", 1);	
-		playerInventory.add(item12);	
+		
+		item12.setIntAttribute("@obj_attr_n:sockets", 1);		
+		
+		String crateTemplate = "object/factory/shared_factory_crate_clothing.iff";
+		FactoryCrateObject crate1 = (FactoryCrateObject) core.objectService.createObject(crateTemplate, player.getPlanet());
+		crate1.setContentTypeAndQuantity(item12,25, "clothing_factory_crate", "clothing", player.getClient());
+		playerInventory.add(crate1);
+		
+		
 		
 		TangibleObject item12a = (TangibleObject)core.objectService.createObject("object/tangible/wearables/shirt/shared_shirt_s07.iff", player.getPlanet());
 		item12a.setCustomName("Socketed Shirt");
@@ -2762,6 +2780,19 @@ public class LootService implements INetworkDispatch {
 		item24.setCustomName("Droid Motor (Red)");
 		playerInventory.add(item24);
 		
+		TangibleObject item24a = (TangibleObject)core.objectService.createObject("object/tangible/loot/npc_loot/shared_medical_console_generic.iff", player.getPlanet());
+		item24a.setCustomName("Medical Console");
+		item24a.setStackable(true);
+		item24a.setUses(299);		 
+		core.objectService.addStackableItem(item24a,playerInventory);
+		
+		TangibleObject item24b = (TangibleObject)core.objectService.createObject("object/tangible/loot/npc_loot/shared_medical_device_generic.iff", player.getPlanet());
+		item24b.setCustomName("Medical Device");
+		item24b.setStackable(true);
+		item24b.setUses(399);		 
+		core.objectService.addStackableItem(item24b,playerInventory);
+		
+	
 		
 		String modifierBitTemplate = "object/tangible/component/reverse_engineering/shared_modifier_bit.iff";
 		TangibleObject modifierBit = (TangibleObject) core.objectService.createObject(modifierBitTemplate, player.getPlanet());
