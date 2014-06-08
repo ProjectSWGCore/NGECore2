@@ -22,7 +22,7 @@ def addTemplate(core):
 	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setStalker(False)
 	mobileTemplate.setFaction("imperial")
-	mobileTemplate.setFactionStatus(1)
+	mobileTemplate.setFactionStatus(FactionStatus.Combatant)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_battle_droid.iff')
