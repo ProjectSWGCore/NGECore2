@@ -244,7 +244,8 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 	}
 	
 	public void setPrivacy(byte privacy) {
-		otherVariables.set("residency", privacy);
+		otherVariables.set("privacy", privacy);
+		getObservers().stream().map(Client::getParent).forEach(this::updateCellPermissions);
 	}
 	
 	public Vector<TangibleObject> getItemsList() {

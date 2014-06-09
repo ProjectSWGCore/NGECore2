@@ -40,6 +40,14 @@ def handleSelection(core, owner, target, option):
 		if owner is not None:
 			core.housingService.createStatusSUIPage(owner,target)
 			return
+	if option == 125:
+		if owner is not None and owner.getGrandparent():
+			building = owner.getGrandparent()
+			if building.getPrivacy() == 0:
+				building.setPrivacy(1)
+			elif building.getPrivacy() == 1:
+				building.setPrivacy(0)			
+			return
 	if option == 129:
 		if owner is not None:
 			core.housingService.createPayMaintenanceSUIPage(owner,target)
