@@ -1,4 +1,5 @@
 import sys
+from resources.datatables import WeaponType
 
 def setup(core, object):
 	object.setStfFilename('static_item_n')
@@ -7,9 +8,10 @@ def setup(core, object):
 	object.setDetailName('weapon_knife_trader_roadmap_01_02')
 	object.setStringAttribute('class_required', 'Trader')
 	object.setIntAttribute('required_combat_level', 42)
-	object.setFloatAttribute('cat_wpn_damage.wpn_attack_speed', 0)
-	object.setStringAttribute('cat_wpn_damage.damage', '80 - 160')
-	object.setStringAttribute('cat_wpn_damage.wpn_range', '0-5m')
-	object.setStringAttribute('cat_wpn_damage.wpn_category', 'One-Handed Melee')
-	object.setIntAttribute('cat_wpn_damage.dps', object.getDamagePerSecond())
+	object.setAttackSpeed(1)
+	object.setMinDamage(80)
+	object.setMaxDamage(160)
+	object.setMaxRange(5)
+	object.setWeaponType(WeaponType.ONEHANDEDMELEE)
+	object.setDamageType('kinetic')
 	return

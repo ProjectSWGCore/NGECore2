@@ -45,6 +45,8 @@ import protocol.swg.EnterStructurePlacementModeMessage;
 import resources.datatables.DisplayType;
 import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
+import resources.objects.harvester.HarvesterObject;
+import resources.objects.installation.InstallationObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import services.playercities.PlayerCity;
@@ -142,16 +144,13 @@ public class HousingService implements INetworkDispatch {
 		
 		core.objectService.destroyObject(deed);
 		
-		// Structure management
-		Vector<Long> admins = new Vector<>();
-		admins.add(actor.getObjectID());
 		
 		building.setAttachment("sign", sign); // meh workaround
 		building.setAttachment("nextMaintenance", System.currentTimeMillis() + 3600000);
 		building.setAttachment("structureOwner", actor.getObjectID());
-		building.setAttachment("structureAdmins", admins);
 		building.setAttachment("isCondemned", false);
 		building.setAttachment("outstandingMaint", 0);
+		building.addPlayerToAdminList(null, actor.getObjectID(), playerFirstName);
 		building.setDeedTemplate(deed.getTemplate());
 		building.setMaintenanceAmount(houseTemplate.getBaseMaintenanceRate());
 		building.setConditionDamage(100); // Ouch
@@ -233,13 +232,7 @@ public class HousingService implements INetworkDispatch {
 	@SuppressWarnings("unchecked")
 	public boolean getPermissions(SWGObject player, SWGObject container) {
 		SWGObject structure = container.getContainer();
-		Vector<Long> structureAdmins = (Vector<Long>) structure.getAttachment("structureAdmins");
-		
-		if (structureAdmins != null && structureAdmins.contains(player.getObjectID())) {
-			return true;
-		}
-		
-		return false;
+		return ((BuildingObject) structure).isOnAdminList((CreatureObject) player);
 	}
 	
 	public void createDestroySUIPage(final SWGObject owner, final TangibleObject target) {
@@ -768,25 +761,46 @@ public class HousingService implements INetworkDispatch {
 	public void handlePermissionEntry(CreatureObject owner, TangibleObject target) {
 		final BuildingObject building = (BuildingObject) target.getGrandparent();
 		//final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
-		String listName = "ENTRY";
+		String listName = "entry";
 		building.setPermissionEntry(listName,owner);
 	}
 	
 	public void handlePermissionBan(CreatureObject owner, TangibleObject target) {
 		final BuildingObject building = (BuildingObject) target.getGrandparent();
 		//final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
-		String listName = "BAN";
+		String listName = "ban";
 		building.setPermissionBan(listName,owner);
+	}
+	
+	public void handlePermissionAdmin(CreatureObject owner, TangibleObject target) {
+		final BuildingObject building = (BuildingObject) target.getGrandparent();
+		//final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
+		String listName = "admin";
+		building.setPermissionAdmin(listName,owner);
+	}
+
+	
+	public SWGObject getClosestStructureWithAdminRights(CreatureObject actor) {
+		return core.simulationService.get(actor.getPlanet(), actor.getWorldPosition().x, actor.getWorldPosition().z, 20)
+			   .stream().filter(o -> o instanceof BuildingObject || o instanceof InstallationObject)
+			   .filter(o -> {
+				   if(o instanceof BuildingObject)
+					   return ((BuildingObject) o).isOnAdminList(actor);
+				   else if(o instanceof HarvesterObject) {
+					   System.out.println("test");
+					   return ((HarvesterObject) o).isOnAdminList(actor);
+				   }
+				   return false;
+			   }).min((o1, o2) -> (int) (o1.getWorldPosition().getDistance(actor.getWorldPosition()) - o2.getWorldPosition().getDistance(actor.getWorldPosition()))).orElse(null);
 	}
 	
 	public void handlePermissionListModify(CreatureObject owner, SWGObject target, String commandArgs){
 		
 		String[] commandSplit = commandArgs.split(" ");
-		if (commandSplit.length==3){		
-			if (core.characterService.playerExists(commandSplit[2]) && 
-				core.characterService.getPlayerOID(commandSplit[2])>0){
+		if (commandSplit.length >= 3) {	
+			if (core.characterService.playerExists(commandSplit[2]) && core.characterService.getPlayerOID(commandSplit[2]) > 0) {
 				long playerOID = core.characterService.getPlayerOID(commandSplit[2]);
-				if (commandSplit[2].equals("ENTRY")){
+				if (commandSplit[1].equals("entry")) {
 					
 					if (commandSplit[0].equals("add")){
 						((BuildingObject)target).addPlayerToEntryList(owner, playerOID, commandSplit[2]);
@@ -795,13 +809,35 @@ public class HousingService implements INetworkDispatch {
 						((BuildingObject)target).removePlayerFromEntryList(owner, playerOID, commandSplit[2]);
 					}
 				}
-				if (commandSplit[2].equals("BAN")){
+				if (commandSplit[1].equals("ban")) {
+					
+					if (commandSplit[0].equals("add")) {			
+						if(((BuildingObject)target).isOnAdminList((CreatureObject) core.objectService.getObject(playerOID))) {
+							owner.sendSystemMessage("@player_structure:cannot_ban_admin", (byte) 0);
+							return;
+						}
+						((BuildingObject)target).addPlayerToBanList(owner, playerOID, commandSplit[2]);
+						((BuildingObject)target).removePlayerFromEntryList(owner, playerOID, commandSplit[2]);
+					}
+					if (commandSplit[0].equals("remove")) {					
+						((BuildingObject)target).removePlayerFromBanList(owner, playerOID, commandSplit[2]);
+					} 
+				}
+				if (commandSplit[1].equals("admin")) {
 					
 					if (commandSplit[0].equals("add")){					
-						((BuildingObject)target).addPlayerToBanList(owner, playerOID, commandSplit[2]);
+						((BuildingObject)target).addPlayerToAdminList(owner, playerOID, commandSplit[2]);
 					}
-					if (commandSplit[0].equals("remove")){					
-						((BuildingObject)target).removePlayerFromBanList(owner, playerOID, commandSplit[2]);
+					if (commandSplit[0].equals("remove")) {					
+						if(playerOID == (long) target.getAttachment("structureOwner")) {
+							owner.sendSystemMessage("@player_structure:cannot_remove_owner", (byte) 0);
+							return;
+						}
+						else if(playerOID == owner.getObjectID()) {
+							owner.sendSystemMessage("@player_structure:cannot_remove_self", (byte) 0);
+							return;
+						}
+						((BuildingObject)target).removePlayerFromAdminList(owner, playerOID, commandSplit[2]);
 					}
 				}
 			} else {

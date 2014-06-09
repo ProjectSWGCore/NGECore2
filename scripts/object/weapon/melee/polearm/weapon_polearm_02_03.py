@@ -1,4 +1,5 @@
 import sys
+from resources.datatables import WeaponType
 
 def setup(core, object):
 	object.setStfFilename('static_item_n')
@@ -8,9 +9,8 @@ def setup(core, object):
 	object.setIntAttribute('required_combat_level', 1)
 	object.setAttackSpeed(1);
 	object.setMaxRange(5);
-	object.setDamageType("kinetic");
+	object.setDamageType('kinetic');
 	object.setMinDamage(43);
 	object.setMaxDamage(75);
-	object.setWeaponType(7);
-	return
+	object.setWeaponType(WeaponType.POLEARMMELEE);
 	return
