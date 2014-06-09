@@ -25,12 +25,12 @@ def requiredCL():
 
 def itemStats():
 
-	stats = ['mindamage','550','600']
-	stats += ['maxdamage','1250','1300']
+	stats = ['mindamage','600','600']
+	stats += ['maxdamage','1300','1300']
 	stats += ['attackspeed','1.0','1.0']
 	stats += ['maxrange','0','5']
 	stats += ['damagetype','energy','energy']
-	stats += ['elemtype','@obj_attr_n:elemental_electricity','@obj_attr_n:elemental_electricity']
+	stats += ['elemtype','electricity','electricity']
 	stats += ['elemdamage','75','75']
 	stats += ['weapontype','5','5']
 	

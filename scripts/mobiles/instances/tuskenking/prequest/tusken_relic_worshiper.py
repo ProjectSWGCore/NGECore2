@@ -1,17 +1,19 @@
 import sys
 from services.spawn import MobileTemplate
 from services.spawn import WeaponTemplate
+from resources.datatables import WeaponType
+from resources.datatables import Difficulty
+from resources.datatables import Options
 from java.util import Vector
+
 
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
 	mobileTemplate.setCreatureName('feeder_tusken_raider')
 	mobileTemplate.setLevel(85)
-	mobileTemplate.setDifficulty(1)
-	mobileTemplate.setAttackRange(12)
-	mobileTemplate.setAttackSpeed(1.0)
-	mobileTemplate.setWeaponType(0)
+	mobileTemplate.setDifficulty(Difficulty.ELITE)
+
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(True)
@@ -19,15 +21,15 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("heroic tusken")
 	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setStalker(True)
-	mobileTemplate.setOptionsBitmask(192)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_tusken_raider.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
-	weapontemplate = WeaponTemplate('object/weapon/ranged/rifle/shared_rifle_tusken.iff', 0, 1.0)
-	weapontemplate1 = WeaponTemplate('object/weapon/melee/baton/shared_baton_gaderiffi_elite.iff', 4, 1.0)
+	weapontemplate = WeaponTemplate('object/weapon/ranged/rifle/shared_rifle_tusken.iff', WeaponType.RIFLE, 1.0, 24, 'kinetic')
+	weapontemplate1 = WeaponTemplate('object/weapon/melee/baton/shared_baton_gaderiffi_elite.iff', WeaponType.ONEHANDEDMELEE, 1.0, 5, 'kinetic')
 	weaponTemplates.add(weapontemplate)
 	weaponTemplates.add(weapontemplate1)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)

@@ -66,6 +66,10 @@ public abstract class AIState {
 		Vector<Point3D> movementPoints = actor.getMovementPoints();
 		CellObject cell = null;
 		//while(!finished && movementPoints.size() != 0) {
+		
+			if (movementPoints.size() == 0) {
+				return false;
+			}
 			
 			targetPosition = movementPoints.firstElement();
 			Vector<Point3D> path = core.aiService.findPath(creature.getPlanetId(), currentPosition, targetPosition);

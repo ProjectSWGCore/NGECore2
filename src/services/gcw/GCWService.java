@@ -51,6 +51,7 @@ import resources.common.OutOfBand;
 import resources.common.collidables.CollidableCircle;
 import resources.datatables.DisplayType;
 import resources.datatables.FactionStatus;
+import resources.datatables.GcwRank;
 import resources.datatables.GcwType;
 import resources.gcw.CurrentServerGCWZoneHistory;
 import resources.gcw.CurrentServerGCWZonePercent;
@@ -354,7 +355,7 @@ public class GCWService implements INetworkDispatch {
 							player.setHighestImperialRank(player.getCurrentRank());
 						}
 						
-						player.setNextUpdateTime(nextUpdateTime - player.getBornDate());
+						player.setNextUpdateTime(nextUpdateTime);
 					}
 				}
 				
@@ -461,6 +462,10 @@ public class GCWService implements INetworkDispatch {
 		
 		PlayerObject player = (PlayerObject) actor.getSlottedObject("ghost");
 		
+		int gcwBonus = actor.getSkillModBase("flush_with_success");
+		
+		gcwPoints += ((gcwPoints * gcwBonus) / 100);
+		
 		String planet = actor.getPlanet().getName();
 		
 		String prefix = ((planet.startsWith("space")) ? (planet + "_space") : planet);
@@ -539,14 +544,14 @@ public class GCWService implements INetworkDispatch {
 		
 		newranktotal = oldranktotal + newprogress;
 		
-		if (oldrank == 7 && newprogress < 0 && newranktotal < 30000) {
+		if (oldrank == GcwRank.LIEUTENANT && newprogress < 0 && newranktotal < 30000) {
 			newranktotal = 29999;
 		}
 		
 		newrank = (int) (Math.floor(newranktotal / 5000) + 1);
 		
-		if (newrank > 12) {
-			newrank = 12;
+		if (newrank > GcwRank.GENERAL) {
+			newrank = GcwRank.GENERAL;
 			newranktotal = 12 * 5000 - 1;
 		}
 		
@@ -555,6 +560,12 @@ public class GCWService implements INetworkDispatch {
 		
 		player.setCurrentRank(newrank);
 		player.setRankProgress((float) Math.floor(newprogress));
+		
+		if (newrank > oldrank) {
+			core.scriptService.callScript("scripts/gcw/", "gcwrank_" + actor.getFaction(), "handleRankUp", core, actor, newrank);
+		} else {
+			core.scriptService.callScript("scripts/gcw/", "gcwrank_" + actor.getFaction(), "handleRankDown", actor, newrank);
+		}
 	}
 	
 	public List<SWGObject> getSFPlayers() {
@@ -654,7 +665,7 @@ public class GCWService implements INetworkDispatch {
 			
 			PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
 			
-			player.setNextUpdateTime(player.getBornDate() + calculateNextUpdateTime());
+			player.setNextUpdateTime(calculateNextUpdateTime());
 		}
 		
 		cursor.close();

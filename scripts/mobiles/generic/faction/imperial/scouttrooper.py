@@ -1,17 +1,19 @@
 import sys
 from services.spawn import MobileTemplate
 from services.spawn import WeaponTemplate
+from resources.datatables import WeaponType
+from resources.datatables import Difficulty
+from resources.datatables import Options
+from resources.datatables import FactionStatus
 from java.util import Vector
+
 
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
 	mobileTemplate.setCreatureName('mission_scout_trooper')
 	mobileTemplate.setLevel(23)
-	mobileTemplate.setDifficulty(0)
-	mobileTemplate.setAttackRange(15)
-	mobileTemplate.setAttackSpeed(1.0)
-	mobileTemplate.setWeaponType(0)
+	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)
@@ -20,14 +22,14 @@ def addTemplate(core):
 	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(False)
 	mobileTemplate.setFaction("imperial")
-	mobileTemplate.setFactionStatus(1)
+	mobileTemplate.setFactionStatus(FactionStatus.Combatant)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_scout_trooper_white_white.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
-	weapontemplate = WeaponTemplate('object/weapon/ranged/rifle/shared_rifle_e11.iff', 0, 1.0)
+	weapontemplate = WeaponTemplate('object/weapon/ranged/rifle/shared_rifle_e11.iff', WeaponType.RIFLE, 1.0, 20, 'energy')
 	weaponTemplates.add(weapontemplate)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	

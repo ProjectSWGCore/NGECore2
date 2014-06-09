@@ -350,11 +350,21 @@ public class SimulationService implements INetworkDispatch {
 				
 				Point3D newPos;
 				Point3D oldPos;
+				
 				synchronized(object.getMutex()) {
 					newPos = new Point3D(dataTransform.getXPosition(), dataTransform.getYPosition(), dataTransform.getZPosition());
 					if(Float.isNaN(newPos.x) || Float.isNaN(newPos.y) || Float.isNaN(newPos.z)) 
 						return;
 					oldPos = object.getPosition();
+				}
+				
+				if (object instanceof CreatureObject && object.getOption(Options.MOUNT)) {
+					if (!checkLineOfSight(object, newPos)) {
+						newPos = oldPos;
+					}
+				}
+				
+				synchronized(object.getMutex()) {
 					//Collection<Client> oldObservers = object.getObservers();
 					//Collection<Client> newObservers = new HashSet<Client>();
 					if(object.getContainer() == null)
@@ -1151,6 +1161,64 @@ public class SimulationService implements INetworkDispatch {
 			obj.setOrientation(orientation);
 		}
 			
+	}
+	
+	/* Check world line of sight between an object and coordinates, instead of between two objects
+	 * Needed for vehicles.
+	 */
+	public boolean checkLineOfSight(SWGObject object, Point3D position2) {
+		long startTime = System.nanoTime();
+		
+		float heightOrigin = 1.f;
+		float heightDirection = 1.f;
+		
+		if (object instanceof CreatureObject) {
+			heightOrigin = getHeightOrigin((CreatureObject) object);
+		}
+		
+		Point3D position1 = object.getWorldPosition();
+		
+		Point3D origin = new Point3D(position1.x, position1.y + heightOrigin, position1.z);
+		Point3D end = new Point3D(position2.x, position2.y + heightDirection, position2.z);
+		float distance = position1.getDistance2D(position2);
+		
+		List<SWGObject> inRangeObjects = get(object.getPlanet(), position1.x, position1.z, (int) distance);
+		
+		for (SWGObject inRangeObject : inRangeObjects) {
+			if (inRangeObject == object) {
+				continue;
+			}
+			
+			if (object.getTemplateData() != null && object.getTemplateData().getAttribute("collisionActionBlockFlags") != null) {
+				int bit = (Integer) object.getTemplateData().getAttribute("collisionActionBlockFlags") & 255;
+				
+				if (bit == (Integer) object.getTemplateData().getAttribute("collisionActionBlockFlags")) {
+					continue;
+				}
+			}
+			
+			Ray ray = convertRayToModelSpace(origin, end, object);
+			
+			MeshVisitor visitor = object.getMeshVisitor();
+			
+			if (visitor == null) {
+				continue;
+			}
+			
+			List<Mesh3DTriangle> tris = visitor.getTriangles();
+			
+			if (tris.isEmpty()) {
+				continue;
+			}
+			
+			for (Mesh3DTriangle tri : tris) {
+				if (ray.intersectsTriangle(tri, distance) != null) {
+					return false;
+				}
+			}
+		}
+		
+		return true;
 	}
 	
 	public boolean checkLineOfSight(SWGObject obj1, SWGObject obj2) {

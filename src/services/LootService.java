@@ -42,7 +42,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import protocol.swg.PlayClientEffectObjectTransformMessage;
 import protocol.swg.StopClientEffectObjectByLabel;
-import resources.objects.craft.DraftSchematic;
 import resources.common.OutOfBand;
 import resources.datatables.DisplayType;
 import resources.loot.LootGroup;
@@ -71,10 +70,13 @@ import engine.resources.service.INetworkRemoteEvent;
  * @author Charon 
  */
 
+@SuppressWarnings("unused")
 public class LootService implements INetworkDispatch {
 	
 	private NGECore core;
 	private static int prepInvCnt = 0;
+	String testDropTemplate = null;
+	//String testDropTemplate = "kowakian_cage";
 	
 	public LootService(NGECore core) {
 		this.core = core;
@@ -102,7 +104,7 @@ public class LootService implements INetworkDispatch {
 			}
 			SWGObject lootedObjectInventory = lootedObject.getSlottedObject("inventory");
 			core.simulationService.openContainer(requester, lootedObjectInventory);	
-			setLooted(requester,lootedObject);
+			//setLooted(requester,lootedObject);
 		}
 	}
 
@@ -170,6 +172,8 @@ public class LootService implements INetworkDispatch {
 			int randomRareLoot = new Random().nextInt(100);
 			int chanceRequirement = 1; 
 			chanceRequirement = 10; // This is for a test period to lift chest drop chance a bit
+			if (testDropTemplate!=null)
+				chanceRequirement = 100;
 			if (lootRollSession.getLootedObjectDifficulty()==1)
 				chanceRequirement+=2;
 			if (lootRollSession.getLootedObjectDifficulty()==2)
@@ -540,7 +544,8 @@ public class LootService implements INetworkDispatch {
 			if (randomItemFromPool<=remainder){
 				// this element has been chosen e.g. kraytpearl_flawless
 				//System.err.println("CHOSEN ITEM " + itemNames.get(i));
-				handleLootPoolItems(itemNames.get(i), lootRollSession);				
+				handleLootPoolItems(itemNames.get(i), lootRollSession);	
+				//handleLootPoolItems(testDropTemplate, lootRollSession);
 				//break;
 				return;
 			}						
@@ -560,12 +565,12 @@ public class LootService implements INetworkDispatch {
 		rollSession.setSessionPlanet(requester.getPlanet());
 		
 		handleLootPoolItems(template, rollSession);
+		
 		if(rollSession.getDroppedItems().get(0) != null) return rollSession.getDroppedItems().get(0);
 		
 		return null;
 	}
 	
-	@SuppressWarnings("unused")
 	private void handleLootPoolItems(String itemName,LootRollSession lootRollSession){
 		
 		final Vector<String> foundPath = new Vector<String>(); 
@@ -611,9 +616,12 @@ public class LootService implements INetworkDispatch {
 		String requiredFaction = "";
 		Vector<String> customizationAttributes = null;
 		Vector<Integer> customizationValues = null;
+		int customColor1 = 0;
+		String lootDescriptor = "";
 		Vector<String> itemStats = null;
 		Vector<String> itemSkillMods = null;
 		Vector<String> STFparams = null;
+		String addToCollection = null;
 				
 		if(core.scriptService.getMethod(itemPath,"","itemTemplate")==null){
 			String errorMessage = "Loot item  '" + itemName + "'  has no template function assigned in its script. Please contact Charon about this issue.";
@@ -640,6 +648,12 @@ public class LootService implements INetworkDispatch {
 		
 		if(core.scriptService.getMethod(itemPath,"","customizationValues")!=null)
 			customizationValues = (Vector<Integer>)core.scriptService.fetchIntegerVector(itemPath,"customizationValues");
+		
+		if(core.scriptService.getMethod(itemPath,"","customColor1")!=null)
+			customColor1 = (Integer)core.scriptService.fetchInteger(itemPath,"customColor1");
+		
+		if(core.scriptService.getMethod(itemPath,"","lootDescriptor")!=null) 
+			lootDescriptor = (String)core.scriptService.fetchString(itemPath,"lootDescriptor");
 		
 		if(core.scriptService.getMethod(itemPath,"","itemStats")!=null)
 			itemStats = (Vector<String>)core.scriptService.fetchStringVector(itemPath,"itemStats");
@@ -671,6 +685,9 @@ public class LootService implements INetworkDispatch {
 		if(core.scriptService.getMethod(itemPath,"","STFparams")!=null)
 			STFparams = (Vector<String>)core.scriptService.fetchStringVector(itemPath,"STFparams");
 		
+		if(core.scriptService.getMethod(itemPath,"","AddToCollection")!=null)
+			addToCollection = (String)core.scriptService.fetchString(itemPath,"AddToCollection");
+		
 			
 		System.out.println("itemTemplate " + itemTemplate);
 
@@ -679,6 +696,10 @@ public class LootService implements INetworkDispatch {
 		
 		droppedItem.setLootItem(true);
 		droppedItem.setAttachment("LootItemName", itemName);
+		droppedItem.setAttachment("customColor1", customColor1);
+		droppedItem.setAttachment("lootDescriptor", lootDescriptor);
+		droppedItem.setAttachment("customName", customName);
+		
     	
 		if(core.scriptService.getMethod(itemPath,"","randomStatJewelry")!=null){
 			customName = setRandomStatsJewelry(droppedItem, lootRollSession);
@@ -712,7 +733,7 @@ public class LootService implements INetworkDispatch {
     			lootRollSession.addErrorMessage(errorMessage);
     			return;
     		}
-    		handleStats(droppedItem, itemStats);
+    		handleStats(droppedItem, itemStats, lootRollSession);
     	}
     	
     	if (itemSkillMods!=null){
@@ -721,6 +742,12 @@ public class LootService implements INetworkDispatch {
     	
     	if (STFparams!=null){
     		setSTFParams(droppedItem, STFparams);
+    	}
+    	
+    	if (addToCollection!=null){
+    		droppedItem.getAttributes().put("@obj_attr_n:collection_name", "@collection_n:"+addToCollection); 
+    		//droppedItem.getAttributes().put("@obj_attr_n:collection_name", "\\#FFFF00 @collection_n:"+addToCollection + " \\#FFFFFF "); 
+    		//core.collectionService.addCollection(actor, "new_prof_officer_master")
     	}
     	
     	
@@ -990,7 +1017,15 @@ public class LootService implements INetworkDispatch {
 			else
 				remainder += span; 
 			if (randomItemFromPool<=remainder){
-				fillChest4(itemNames.get(i), owner, chest);
+				//fillChest4(itemNames.get(i), owner, chest);
+				
+				if (testDropTemplate!=null)
+					fillChest4(testDropTemplate, owner, chest);
+				else
+					fillChest4(itemNames.get(i), owner, chest);
+					
+				
+				
 				//fillChest4("colorcrystal", owner, chest);
 				//break;
 				return;
@@ -1050,7 +1085,7 @@ public class LootService implements INetworkDispatch {
 		Vector<String> itemStats = null;
 		Vector<String> itemSkillMods = null;
 		Vector<String> STFparams = null;
-		Vector<String> addToCollections = null;
+		String addToCollection = null;
 				
 		if(core.scriptService.getMethod(itemPath,"","itemTemplate")==null){
 			String errorMessage = "Loot item  '" + itemName + "'  has no template function assigned in its script. Please contact Charon about this issue.";
@@ -1116,8 +1151,8 @@ public class LootService implements INetworkDispatch {
 		if(core.scriptService.getMethod(itemPath,"","STFparams")!=null)
 			STFparams = (Vector<String>)core.scriptService.fetchStringVector(itemPath,"STFparams");
 		
-		if(core.scriptService.getMethod(itemPath,"","AddToCollections")!=null)
-			addToCollections = (Vector<String>)core.scriptService.fetchStringVector(itemPath,"AddToCollections");
+		if(core.scriptService.getMethod(itemPath,"","AddToCollection")!=null)
+			addToCollection = (String)core.scriptService.fetchString(itemPath,"AddToCollection");
 		
 			
 		System.out.println("itemTemplate " + itemTemplate);
@@ -1159,7 +1194,7 @@ public class LootService implements INetworkDispatch {
 	    			String errorMessage = "Loot item  '" + itemName + "'  has a wrong number of itemstats. Please contact Charon about this issue.";
 	    			return;
 	    		}
-	    		handleStats(droppedItem, itemStats);
+	    		handleStats(droppedItem, itemStats,null);
 	    	}
 	    	
 	    	if (itemSkillMods!=null){
@@ -1169,6 +1204,13 @@ public class LootService implements INetworkDispatch {
 	    	if (STFparams!=null){
 	    		setSTFParams(droppedItem, STFparams);
 	    	}
+	    	
+	    	if (addToCollection!=null){
+	    		droppedItem.getAttributes().put("@obj_attr_n:collection_name", "@collection_n:"+addToCollection); 
+	    		//droppedItem.getAttributes().put("@obj_attr_n:collection_name", "\\#FFFF00 @collection_n:"+addToCollection + " \\#FFFFFF "); 
+	    		//core.collectionService.addCollection(actor, "new_prof_officer_master")
+	    	}
+	    		    	
 	    	 	
 	    	setCustomization(droppedItem, itemName, customizationAttributes, customizationValues); // for now
 	    	
@@ -1234,6 +1276,10 @@ public class LootService implements INetworkDispatch {
 				droppedItem.getAttributes().put("@obj_attr_n:color", resources.datatables.LightsaberColors.get(crystalColor));
 				droppedItem.setAttachment("radial_filename", "item/tunable");
 				//droppedItem.getAttributes().put("@obj_attr_n:color", "@jedi_spam:saber_color_" + crystalColor); // Commented out for now
+				
+				String[] crystalColorElementalMapping = new String[]{"heat","heat","acid","acid","cold","cold","cold","acid","electricity","electricity","heat","heat"};
+				setCrystalStat(droppedItem, "elemtype", crystalColorElementalMapping[crystalColor],crystalColorElementalMapping[crystalColor]);	
+				setCrystalStat(droppedItem, "elemdamage", "2", "2");
 			} else {
 				for (int i=0; i<customizationAttributes.size();i++){
 					int intValue = customizationValues.get(i);
@@ -1286,7 +1332,7 @@ public class LootService implements INetworkDispatch {
 		}	
 	}
 	
-	private void handleStats(TangibleObject droppedItem, Vector<String> itemStats) {
+	private void handleStats(TangibleObject droppedItem, Vector<String> itemStats, LootRollSession lootRollSession) {
 		
 		if (droppedItem.getTemplate().contains("object/weapon")){
 			WeaponObject weaponObject = (WeaponObject) droppedItem;
@@ -1303,8 +1349,10 @@ public class LootService implements INetworkDispatch {
 				String statName = itemStats.get(3*i);
 				String minValue = itemStats.get(3*i+1);
 				String maxValue = itemStats.get(3*i+2);
-				setArmorStat(droppedItem, statName, minValue, maxValue);
+				setArmorStat(droppedItem, statName, minValue, maxValue);				
 			}
+			if (lootRollSession != null)
+				setRandomAttributes(droppedItem,lootRollSession);
 		}			
 		
 		String lootDescriptor = (String)droppedItem.getAttachment("lootDescriptor");
@@ -1316,6 +1364,7 @@ public class LootService implements INetworkDispatch {
 				String minValue = itemStats.get(3*i+1);
 				String maxValue = itemStats.get(3*i+2);
 				setCrystalStat(droppedItem, statName, minValue, maxValue);
+				return;
 			}
 		}	
 		
@@ -1325,10 +1374,88 @@ public class LootService implements INetworkDispatch {
 				String minValue = itemStats.get(3*i+1);
 				String maxValue = itemStats.get(3*i+2);
 				setBuffItemStat(droppedItem, statName, minValue, maxValue);
+				return;
 			}
-		}		
-		
+		}				
 	}	
+	
+	private void setRandomAttributes(TangibleObject droppedItem, LootRollSession lootRollSession){
+		
+		//determine number of stats #20 yt
+			int statNumber = 1;
+			int levelOfDrop = lootRollSession.getLootedObjectLevel();
+		    int difficultyLevel = lootRollSession.getLootedObjectDifficulty(); // better for calculation
+		    
+		    int statRoll = new Random().nextInt(100);
+		    int difficultyBonus = 0;
+		    
+//		    // stage 1
+//		    if (difficultyLevel==1)
+//		    	difficultyBonus = 60;
+//		    if (difficultyLevel>=2)
+//		    	difficultyBonus = 75;
+//		    	
+//		    if (statRoll<20+difficultyBonus)  // diff 3 95%  diff 2 70  diff1 20
+//		    	statNumber++;
+//		    
+//		    // stage 2
+//		    difficultyBonus = 0;
+//		    if (difficultyLevel==1)
+//		    	difficultyBonus = 20;
+//		    if (difficultyLevel>=2)
+//		    	difficultyBonus = 60;
+//		    
+//		    if (statRoll<10+difficultyBonus)  // diff 3 70%  diff 2 30  diff1 10 
+//		    	statNumber++;
+//		    
+//		    // stage 3
+//		    difficultyBonus = 0;
+//		    if (difficultyLevel==1)
+//		    	difficultyBonus = 3;
+//		    if (difficultyLevel>=2)
+//		    	difficultyBonus = 5;
+//		    
+//		    if (statRoll<1+difficultyBonus) 
+//		    	statNumber++;
+			
+		    if (levelOfDrop>60 && levelOfDrop<=90 && difficultyLevel<1){
+		    	statNumber=2;
+		    }
+		    
+		    if (levelOfDrop>84 && difficultyLevel>=1){
+		    	statNumber=3;
+		    }
+		    
+			
+			int primaryAttribute = new Random().nextInt(7); // 0-6
+			int maxValue = (int) (levelOfDrop*25/90);
+			int minValue = (int) (0.75*maxValue);
+			minValue = Math.max(1, minValue);
+			maxValue = Math.max(2, maxValue);
+			droppedItem.setIntAttribute(getAttributeSTF(primaryAttribute), getStatValue(minValue,maxValue));
+			//maxValue -= 2; //secondary attributes must have less maxValue
+			minValue = (int) (0.75*maxValue);
+			minValue = Math.max(1, minValue);
+			maxValue = Math.max(2, maxValue);
+			String prefix = getJewelryPrefix(droppedItem);
+			String suffix = getJewelrySuffix(primaryAttribute, statNumber);
+			String itemName = prefix + suffix;
+			Vector<Integer> alreadyUsedStats = new Vector<Integer>();
+			alreadyUsedStats.add(primaryAttribute);
+			int attribute = primaryAttribute;
+			
+			List<Integer> statList = new ArrayList<Integer>();
+			for (int i=0;i<7;i++)
+				statList.add(i);
+			statList.remove(primaryAttribute);
+			
+			for (int i=0;i<statNumber-1;i++){
+				int attributeIndex = new Random().nextInt(statList.size());
+				droppedItem.setIntAttribute(getAttributeSTF(statList.get(attributeIndex)), getStatValue(minValue,maxValue));
+				statList.remove(attributeIndex);
+			}
+				
+	}
 	
 	private void handleSkillMods(TangibleObject droppedItem, Vector<String> skillMods) {		
 		for (int i=0;i<skillMods.size()/2;i++){
@@ -1511,7 +1638,7 @@ public class LootService implements INetworkDispatch {
 		
 		int finalMinDmg = 0;
 		int finalMaxDmg = 0;
-		@SuppressWarnings("unused") String tunableObjectName = "";
+		String tunableObjectName = "";
 		
 		if (objectType.contains("powercrystal")){
 			tunableObjectName = "Power Crystal";
@@ -1635,14 +1762,20 @@ public class LootService implements INetworkDispatch {
 		if (statName.equals("mindamage")){		
 			int minimalValue = (int) Integer.parseInt(minValue);
 			int maximalValue = (int) Integer.parseInt(maxValue);
-			int randomValue  = minimalValue + new Random().nextInt(maximalValue-minimalValue);
+			int extra = 0;
+			if (maximalValue>minimalValue)
+				extra = new Random().nextInt(maximalValue-minimalValue);
+			int randomValue  = minimalValue + extra;
 			weapon.setMinDamage(randomValue);
 		}
 		
 		if (statName.equals("maxdamage")){
 			int minimalValue = (int) Integer.parseInt(minValue);
 			int maximalValue = (int) Integer.parseInt(maxValue);
-			int randomValue  = minimalValue + new Random().nextInt(maximalValue-minimalValue);
+			int extra = 0;
+			if (maximalValue>minimalValue)
+				extra = new Random().nextInt(maximalValue-minimalValue);
+			int randomValue  = minimalValue + extra;
 			weapon.setMaxDamage(randomValue);
 		}
 	
@@ -1870,7 +2003,7 @@ public class LootService implements INetworkDispatch {
 	
 	public void setLooted(CreatureObject requester,TangibleObject lootedObject){
 		lootedObject.setLooted(true);
-		StopClientEffectObjectByLabel stopmsg = new StopClientEffectObjectByLabel(lootedObject.getObjectID(),"lootMe");
+		StopClientEffectObjectByLabel stopmsg = new StopClientEffectObjectByLabel(lootedObject.getObjectID(),"lootMe", (byte) 0);
 		requester.getClient().getSession().write(stopmsg.serialize());
 	}
 	
@@ -2374,7 +2507,7 @@ public class LootService implements INetworkDispatch {
     			System.err.println(errorMessage);
     			return;
     		}
-    		handleStats(droppedItem, itemStats);
+    		handleStats(droppedItem, itemStats, lootRollSession);
     	}
     	
     	if (itemSkillMods!=null){
@@ -2493,7 +2626,6 @@ public class LootService implements INetworkDispatch {
 	
 	
 	// util method
-	@SuppressWarnings("unused")
 	private void printArrayElements(TangibleObject[] array){
 		System.out.print("Array [");
 		for (int i=0;i<array.length;i++){
@@ -2553,6 +2685,8 @@ public class LootService implements INetworkDispatch {
 		TangibleObject item11 = (TangibleObject)core.objectService.createObject("object/tangible/loot/npc_loot/shared_armor_repair_device_generic.iff", player.getPlanet());
 		item11.setCustomName("Armor Repair Device");
 		playerInventory.add(item11);
+		
+
 	}
 	
 	
