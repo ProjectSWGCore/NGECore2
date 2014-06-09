@@ -408,10 +408,7 @@ public class HousingService implements INetworkDispatch {
 				CreatureObject crafter = (CreatureObject)owner;
 				crafter.setCashCredits(crafter.getCashCredits() - Integer.parseInt(returnList.get(1)));
 				building.setMaintenanceAmount(building.getMaintenanceAmount()+Float.parseFloat(returnList.get(1)));
-				String displayname = "the structure";
-				if (building.getCustomName()!=null)
-					displayname = building.getCustomName();
-				crafter.sendSystemMessage("You successfully make a payment of " + Integer.parseInt(returnList.get(1)) + " credits to " + displayname + ".", (byte) 0);
+				crafter.sendSystemMessage("You successfully make a payment of " + Integer.parseInt(returnList.get(1)) + " credits to the maintenance pool.", (byte) 0);
 				core.suiService.closeSUIWindow(owner, 0);
 			}					
 		});		
