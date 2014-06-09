@@ -1576,6 +1576,7 @@ public class LootService implements INetworkDispatch {
 			qualityString="@jedi_spam:crystal_quality_5";
 			break;
 		case "kraytpearl_flawless": 
+		case "kraytpearl_ancient": 
 			qualityString="@jedi_spam:crystal_quality_6";
 			break;
 		default:
