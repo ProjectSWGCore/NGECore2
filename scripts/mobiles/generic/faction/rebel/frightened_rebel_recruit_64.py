@@ -10,8 +10,8 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('crackdown_imperial_colonel_hard')
-	mobileTemplate.setLevel(88)
+	mobileTemplate.setCreatureName('crackdown_rebel_recruit')
+	mobileTemplate.setLevel(64)
 	mobileTemplate.setDifficulty(Difficulty.ELITE)
 
 	mobileTemplate.setMinSpawnDistance(4)
@@ -20,17 +20,17 @@ def addTemplate(core):
 	mobileTemplate.setScale(1)
 	mobileTemplate.setSocialGroup("rebel")
 	mobileTemplate.setAssistRange(0)
-	mobileTemplate.setStalker(False)
+	mobileTemplate.setStalker(True)
 	mobileTemplate.setFaction("rebel")
 	mobileTemplate.setFactionStatus(FactionStatus.Combatant)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_dressed_rebel_lieutenant_colonel_human_male_01.iff')
-	templates.add('object/mobile/shared_dressed_rebel_lieutenant_colonel_human_male_02.iff')
-	templates.add('object/mobile/shared_dressed_rebel_lieutenant_colonel_moncal_female_01.iff')
-	templates.add('object/mobile/shared_dressed_rebel_lieutenant_colonel_rodian_female_01.iff')
-	templates.add('object/mobile/shared_dressed_rebel_lieutenant_colonel_rodian_male_01.iff')
-	templates.add('object/mobile/shared_dressed_rebel_lieutenant_colonel_zabrak_male_01.iff')			
+	templates.add('object/mobile/shared_dressed_rebel_crewman_human_female_01.iff')
+	templates.add('object/mobile/shared_dressed_rebel_crewman_human_female_02.iff')
+	templates.add('object/mobile/shared_dressed_rebel_crewman_human_male_01.iff')
+	templates.add('object/mobile/shared_dressed_rebel_crewman_human_male_02.iff')
+	templates.add('object/mobile/shared_dressed_rebel_crewman_human_male_03.iff')
+	templates.add('object/mobile/shared_dressed_rebel_crewman_human_male_04.iff')				
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
@@ -42,5 +42,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('rangedShot')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('decorated_rebel_colonel_88', mobileTemplate)
+	core.spawnService.addMobileTemplate('frightened_Rebel_recruit_64', mobileTemplate)
 	return

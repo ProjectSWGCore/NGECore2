@@ -10,9 +10,9 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('crackdown_imperial_colonel_hard')
-	mobileTemplate.setLevel(88)
-	mobileTemplate.setDifficulty(Difficulty.ELITE)
+	mobileTemplate.setCreatureName('crackdown_rebel_first_lieutenant')
+	mobileTemplate.setLevel(20)
+	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
@@ -25,12 +25,12 @@ def addTemplate(core):
 	mobileTemplate.setFactionStatus(FactionStatus.Combatant)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_dressed_rebel_lieutenant_colonel_human_male_01.iff')
-	templates.add('object/mobile/shared_dressed_rebel_lieutenant_colonel_human_male_02.iff')
-	templates.add('object/mobile/shared_dressed_rebel_lieutenant_colonel_moncal_female_01.iff')
-	templates.add('object/mobile/shared_dressed_rebel_lieutenant_colonel_rodian_female_01.iff')
-	templates.add('object/mobile/shared_dressed_rebel_lieutenant_colonel_rodian_male_01.iff')
-	templates.add('object/mobile/shared_dressed_rebel_lieutenant_colonel_zabrak_male_01.iff')			
+	templates.add('object/mobile/shared_dressed_rebel_first_lieutenant_bothan_male_01.iff')
+	templates.add('object/mobile/shared_dressed_rebel_first_lieutenant_human_female_01.iff')
+	templates.add('object/mobile/shared_dressed_rebel_first_lieutenant_human_male_01.iff')
+	templates.add('object/mobile/shared_dressed_rebel_first_lieutenant_moncal_female_01.iff')
+	templates.add('object/mobile/shared_dressed_rebel_first_lieutenant_moncal_female_02.iff')
+	templates.add('object/mobile/shared_dressed_rebel_first_lieutenant_sullustan_male_01.iff')				
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
@@ -42,5 +42,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('rangedShot')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('decorated_rebel_colonel_88', mobileTemplate)
+	core.spawnService.addMobileTemplate('fatigued_rebel_officer_20', mobileTemplate)
 	return

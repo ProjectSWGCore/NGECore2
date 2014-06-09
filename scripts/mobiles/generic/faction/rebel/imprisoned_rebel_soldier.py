@@ -10,9 +10,9 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('crackdown_imperial_colonel_hard')
-	mobileTemplate.setLevel(88)
-	mobileTemplate.setDifficulty(Difficulty.ELITE)
+	mobileTemplate.setCreatureName('imprisoned_rebel')
+	mobileTemplate.setLevel(11)
+	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
@@ -25,12 +25,12 @@ def addTemplate(core):
 	mobileTemplate.setFactionStatus(FactionStatus.Combatant)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_dressed_rebel_lieutenant_colonel_human_male_01.iff')
-	templates.add('object/mobile/shared_dressed_rebel_lieutenant_colonel_human_male_02.iff')
-	templates.add('object/mobile/shared_dressed_rebel_lieutenant_colonel_moncal_female_01.iff')
-	templates.add('object/mobile/shared_dressed_rebel_lieutenant_colonel_rodian_female_01.iff')
-	templates.add('object/mobile/shared_dressed_rebel_lieutenant_colonel_rodian_male_01.iff')
-	templates.add('object/mobile/shared_dressed_rebel_lieutenant_colonel_zabrak_male_01.iff')			
+	templates.add('object/mobile/shared_dressed_rebel_crewman_human_female_01.iff')
+	templates.add('object/mobile/shared_dressed_rebel_crewman_human_female_02.iff')
+	templates.add('object/mobile/shared_dressed_rebel_crewman_human_male_01.iff')
+	templates.add('object/mobile/shared_dressed_rebel_crewman_human_male_02.iff')
+	templates.add('object/mobile/shared_dressed_rebel_crewman_human_male_03.iff')
+	templates.add('object/mobile/shared_dressed_rebel_crewman_human_male_04.iff')			
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
@@ -42,5 +42,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('rangedShot')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('decorated_rebel_colonel_88', mobileTemplate)
+	core.spawnService.addMobileTemplate('imprisoned_rebel_soldier', mobileTemplate)
 	return

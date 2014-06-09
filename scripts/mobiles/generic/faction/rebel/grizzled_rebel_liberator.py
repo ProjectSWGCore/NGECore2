@@ -10,8 +10,8 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('crackdown_imperial_colonel_hard')
-	mobileTemplate.setLevel(88)
+	mobileTemplate.setCreatureName('fbase_rebel_liberator_extreme')
+	mobileTemplate.setLevel(89)
 	mobileTemplate.setDifficulty(Difficulty.ELITE)
 
 	mobileTemplate.setMinSpawnDistance(4)
@@ -42,5 +42,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('rangedShot')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('decorated_rebel_colonel_88', mobileTemplate)
+	core.spawnService.addMobileTemplate('grizzled_rebel_liberator', mobileTemplate)
 	return
