@@ -10,8 +10,8 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('crackdown_rebel_rifleman_hard')
-	mobileTemplate.setLevel(88)
+	mobileTemplate.setCreatureName('crackdown_rebel_cadet_hard')
+	mobileTemplate.setLevel(85)
 	mobileTemplate.setDifficulty(Difficulty.ELITE)
 
 	mobileTemplate.setMinSpawnDistance(4)
@@ -20,17 +20,17 @@ def addTemplate(core):
 	mobileTemplate.setScale(1)
 	mobileTemplate.setSocialGroup("rebel")
 	mobileTemplate.setAssistRange(0)
-	mobileTemplate.setStalker(False)
+	mobileTemplate.setStalker(True)
 	mobileTemplate.setFaction("rebel")
 	mobileTemplate.setFactionStatus(FactionStatus.Combatant)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_dressed_rebel_trooper_bith_m_01.iff')
-	templates.add('object/mobile/shared_dressed_rebel_trooper_human_female_01.iff')
-	templates.add('object/mobile/shared_dressed_rebel_trooper_human_male_01.iff')
-	templates.add('object/mobile/shared_dressed_rebel_trooper_sullustan_male_01.iff')
-	templates.add('object/mobile/shared_dressed_rebel_trooper_twk_female_01.iff')
-	templates.add('object/mobile/shared_dressed_rebel_trooper_twk_male_01.iff')				
+	templates.add('object/mobile/shared_dressed_rebel_crewman_human_female_01.iff')
+	templates.add('object/mobile/shared_dressed_rebel_crewman_human_female_02.iff')
+	templates.add('object/mobile/shared_dressed_rebel_crewman_human_male_01.iff')
+	templates.add('object/mobile/shared_dressed_rebel_crewman_human_male_02.iff')
+	templates.add('object/mobile/shared_dressed_rebel_crewman_human_male_03.iff')
+	templates.add('object/mobile/shared_dressed_rebel_crewman_human_male_04.iff')				
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
@@ -42,5 +42,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('rangedShot')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('crack_rebel_rifleman_88', mobileTemplate)
+	core.spawnService.addMobileTemplate('experienced_rebel_cadet_85', mobileTemplate)
 	return

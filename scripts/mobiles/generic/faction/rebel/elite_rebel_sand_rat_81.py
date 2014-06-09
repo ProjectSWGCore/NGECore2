@@ -10,8 +10,8 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('crackdown_rebel_rifleman_hard')
-	mobileTemplate.setLevel(88)
+	mobileTemplate.setCreatureName('crackdown_rebel_elite_sand_rat')
+	mobileTemplate.setLevel(81)
 	mobileTemplate.setDifficulty(Difficulty.ELITE)
 
 	mobileTemplate.setMinSpawnDistance(4)
@@ -42,5 +42,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('rangedShot')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('crack_rebel_rifleman_88', mobileTemplate)
+	core.spawnService.addMobileTemplate('elite_rebel_sand_rat_81', mobileTemplate)
 	return

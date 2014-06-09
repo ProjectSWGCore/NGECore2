@@ -10,8 +10,8 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('crackdown_rebel_rifleman_hard')
-	mobileTemplate.setLevel(88)
+	mobileTemplate.setCreatureName('crackdown_imperial_colonel_hard')
+	mobileTemplate.setLevel(50)
 	mobileTemplate.setDifficulty(Difficulty.ELITE)
 
 	mobileTemplate.setMinSpawnDistance(4)
@@ -25,12 +25,12 @@ def addTemplate(core):
 	mobileTemplate.setFactionStatus(FactionStatus.Combatant)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_dressed_rebel_trooper_bith_m_01.iff')
-	templates.add('object/mobile/shared_dressed_rebel_trooper_human_female_01.iff')
-	templates.add('object/mobile/shared_dressed_rebel_trooper_human_male_01.iff')
-	templates.add('object/mobile/shared_dressed_rebel_trooper_sullustan_male_01.iff')
-	templates.add('object/mobile/shared_dressed_rebel_trooper_twk_female_01.iff')
-	templates.add('object/mobile/shared_dressed_rebel_trooper_twk_male_01.iff')				
+	templates.add('object/mobile/shared_dressed_rebel_lieutenant_colonel_human_male_01.iff')
+	templates.add('object/mobile/shared_dressed_rebel_lieutenant_colonel_human_male_02.iff')
+	templates.add('object/mobile/shared_dressed_rebel_lieutenant_colonel_moncal_female_01.iff')
+	templates.add('object/mobile/shared_dressed_rebel_lieutenant_colonel_rodian_female_01.iff')
+	templates.add('object/mobile/shared_dressed_rebel_lieutenant_colonel_rodian_male_01.iff')
+	templates.add('object/mobile/shared_dressed_rebel_lieutenant_colonel_zabrak_male_01.iff')			
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
@@ -39,8 +39,8 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
-	mobileTemplate.setDefaultAttack('rangedShot')
+	mobileTemplate.setDefaultAttack('rangedShotrifle')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('crack_rebel_rifleman_88', mobileTemplate)
+	core.spawnService.addMobileTemplate('decorated_rebel_colonel_50', mobileTemplate)
 	return
