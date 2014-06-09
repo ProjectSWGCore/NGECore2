@@ -7,36 +7,37 @@ from resources.datatables import Options
 from resources.datatables import FactionStatus
 from java.util import Vector
 
-
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('imperial_super_battle_droid')
-	mobileTemplate.setLevel(86)
-	mobileTemplate.setDifficulty(Difficulty.ELITE)
+	mobileTemplate.setCreatureName('alliance_intelligence_case_officer')
+	mobileTemplate.setLevel(11)
+	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(True)
 	mobileTemplate.setScale(1)
-	mobileTemplate.setSocialGroup("imperial")
-	mobileTemplate.setAssistRange(12)
+	mobileTemplate.setSocialGroup("rebel")
+	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(False)
-	mobileTemplate.setFaction("imperial")
+	mobileTemplate.setFaction("rebel")
 	mobileTemplate.setFactionStatus(FactionStatus.Combatant)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_super_battle_droid.iff')
+	templates.add('object/mobile/shared_dressed_creaturehandler_trainer_human_male_01.iff')
+	templates.add('object/mobile/shared_dressed_creaturehandler_trainer_rodian_female_01.iff')
+	templates.add('object/mobile/shared_dressed_creaturehandler_trainer_zabrak_male_01.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
-	weapontemplate = WeaponTemplate('object/weapon/melee/unarmed/shared_unarmed_default.iff', WeaponType.CARBINE, 1.0, 15, 'energy')
+	weapontemplate = WeaponTemplate('object/weapon/ranged/carbine/shared_carbine_e5.iff', WeaponType.CARBINE, 1.0, 15, 'energy')	
 	weaponTemplates.add(weapontemplate)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
-	mobileTemplate.setDefaultAttack('rangedShot')
+	mobileTemplate.setDefaultAttack('rangedShotrifle')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('sbd_imperial', mobileTemplate)
+	core.spawnService.addMobileTemplate('apprentice_creature_handler', mobileTemplate)
 	return
