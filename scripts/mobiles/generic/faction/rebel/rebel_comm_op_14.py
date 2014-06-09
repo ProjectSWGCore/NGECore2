@@ -7,30 +7,30 @@ from resources.datatables import Options
 from resources.datatables import FactionStatus
 from java.util import Vector
 
-
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('imperial_super_battle_droid')
-	mobileTemplate.setLevel(86)
-	mobileTemplate.setDifficulty(Difficulty.ELITE)
+	mobileTemplate.setCreatureName('crackdown_rebel_comm_operator')
+	mobileTemplate.setLevel(14)
+	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
-	mobileTemplate.setDeathblow(True)
+	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(1)
-	mobileTemplate.setSocialGroup("imperial")
-	mobileTemplate.setAssistRange(12)
-	mobileTemplate.setStalker(False)
-	mobileTemplate.setFaction("imperial")
+	mobileTemplate.setSocialGroup("rebel")
+	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setStalker(True)
+	mobileTemplate.setFaction("rebel")
 	mobileTemplate.setFactionStatus(FactionStatus.Combatant)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_super_battle_droid.iff')
+	templates.add('object/mobile/shared_dressed_rebel_communication_female_01.iff')
+	templates.add('object/mobile/shared_dressed_rebel_communication_male_01.iff')				
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
-	weapontemplate = WeaponTemplate('object/weapon/melee/unarmed/shared_unarmed_default.iff', WeaponType.CARBINE, 1.0, 15, 'energy')
+	weapontemplate = WeaponTemplate('object/weapon/ranged/carbine/shared_carbine_e5.iff', WeaponType.CARBINE, 1.0, 15, 'energy')
 	weaponTemplates.add(weapontemplate)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
@@ -38,5 +38,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('rangedShot')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('sbd_imperial', mobileTemplate)
+	core.spawnService.addMobileTemplate('rebel_comm_op_14', mobileTemplate)
 	return
