@@ -10,8 +10,8 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('alliance_intelligence_case_officer')
-	mobileTemplate.setLevel(11)
+	mobileTemplate.setCreatureName('area_coordinator')
+	mobileTemplate.setLevel(13)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
@@ -20,24 +20,27 @@ def addTemplate(core):
 	mobileTemplate.setScale(1)
 	mobileTemplate.setSocialGroup("rebel")
 	mobileTemplate.setAssistRange(0)
-	mobileTemplate.setStalker(True)
+	mobileTemplate.setStalker(False)
 	mobileTemplate.setFaction("rebel")
 	mobileTemplate.setFactionStatus(FactionStatus.Combatant)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_dressed_creaturehandler_trainer_human_male_01.iff')
-	templates.add('object/mobile/shared_dressed_creaturehandler_trainer_rodian_female_01.iff')
-	templates.add('object/mobile/shared_dressed_creaturehandler_trainer_zabrak_male_01.iff')
+	templates.add('object/mobile/shared_dressed_rebel_crewman_human_female_01.iff')
+	templates.add('object/mobile/shared_dressed_rebel_crewman_human_female_02.iff')
+	templates.add('object/mobile/shared_dressed_rebel_crewman_human_male_01.iff')
+	templates.add('object/mobile/shared_dressed_rebel_crewman_human_male_02.iff')
+	templates.add('object/mobile/shared_dressed_rebel_crewman_human_male_03.iff')
+	templates.add('object/mobile/shared_dressed_rebel_crewman_human_male_04.iff')				
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
-	weapontemplate = WeaponTemplate('object/weapon/ranged/carbine/shared_carbine_e5.iff', WeaponType.CARBINE, 1.0, 15, 'energy')	
+	weapontemplate = WeaponTemplate('object/weapon/ranged/carbine/shared_carbine_e5.iff', WeaponType.CARBINE, 1.0, 15, 'energy')
 	weaponTemplates.add(weapontemplate)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
-	mobileTemplate.setDefaultAttack('rangedShotrifle')
+	mobileTemplate.setDefaultAttack('rangedShot')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('apprentice_creature_handler', mobileTemplate)
+	core.spawnService.addMobileTemplate('area_coordinator', mobileTemplate)
 	return
