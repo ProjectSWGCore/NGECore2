@@ -45,7 +45,7 @@ def handleSelection(core, owner, target, option):
 			return
 	if option == 50:
 		if owner is not None:
-			core.housingService.createRenameSUIPage(owner,target)
+			core.housingService.createRenameSUIPage(owner, owner.getGrandparent())
 			return
 	if option == 127:
 		if owner is not None:

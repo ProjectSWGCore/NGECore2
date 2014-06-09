@@ -260,7 +260,7 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 	}
 	
 	public short getMaximumStorageCapacity() {
-		return (byte) otherVariables.get("maximumStorageCapacity");
+		return (short) otherVariables.get("maximumStorageCapacity");
 	}
 	
 	public void setMaximumStorageCapacity(short maximumStorageCapacity) {
