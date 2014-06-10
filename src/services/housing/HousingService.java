@@ -335,9 +335,13 @@ public class HousingService implements INetworkDispatch {
 					deed.setIntAttribute("@obj_attr_n:examine_maintenance_rate", houseTemplate.getBaseMaintenanceRate());
 					deed.setIntAttribute("@obj_attr_n:examine_maintenance", (int) building.getMaintenanceAmount());
 					
-					core.objectService.destroyObject(building.getObjectID());
+					owner.getContainer().remove(owner);
+					
 					if(building.getAttachment("sign") != null)
 						core.objectService.destroyObject((SWGObject) building.getAttachment("sign"));
+					
+					core.objectService.destroyObject(building.getObjectID());
+					
  
 					SWGObject ownerInventory = owner.getSlottedObject("inventory");
 					ownerInventory.add(deed);
