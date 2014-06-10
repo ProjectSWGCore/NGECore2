@@ -247,6 +247,7 @@ public class HousingService implements INetworkDispatch {
 		}
 		
 		String displayname = "@installation_n:"+building.getStfName();
+		final Vector<Integer> noRedeed = new Vector<Integer>();
 		if (building.getCustomName()!=null)
 			displayname = building.getCustomName();
 		final SUIWindow window = core.suiService.createSUIWindow("Script.listBox", owner, target, 0);
@@ -258,16 +259,19 @@ public class HousingService implements INetworkDispatch {
 												    "@player_structure:confirm_destruction_d4 ");
 		if (building.getConditionDamage()<20 && building.getMaintenanceAmount()<3000){
 			window.addListBoxMenuItem("@player_structure:redeed_confirmation \\#BB0000 @player_structure:can_redeed_no_suffix \\#FFFFFF ",1 );
+			noRedeed.add(-1);
 		} else {
 			window.addListBoxMenuItem("@player_structure:redeed_confirmation \\#32CD32 @player_structure:can_redeed_yes_suffix \\#FFFFFF ",1 );
 		}
 		if (building.getConditionDamage()<20){
 			window.addListBoxMenuItem("@player_structure:redeed_condition \\#BB0000 " + building.getConditionDamage() + " \\#FFFFFF ",1 );
+			noRedeed.add(-1);
 		} else {
 			window.addListBoxMenuItem("@player_structure:redeed_condition \\#32CD32 " + building.getConditionDamage() + " \\#FFFFFF ",1 );
 		}
-		if (building.getMaintenanceAmount()<0){
+		if (building.getMaintenanceAmount()<0 || building.getMaintenanceAmount()<800){
 			window.addListBoxMenuItem("@player_structure:redeed_maintenance \\#BB0000 " + (int)building.getMaintenanceAmount() + " \\#FFFFFF ",2 );
+			noRedeed.add(-1);
 		} else {
 			window.addListBoxMenuItem("@player_structure:redeed_maintenance \\#32CD32  " + (int)building.getMaintenanceAmount() + " \\#FFFFFF ",2 );
 		}
@@ -281,7 +285,8 @@ public class HousingService implements INetworkDispatch {
 			@Override
 			public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
 				core.suiService.closeSUIWindow(owner, 0);
-				createCodeWindow(owner, target);
+				if (noRedeed.size()==0 && ((CreatureObject)owner).getBankCredits()>800)
+					createCodeWindow(owner, target);
 			}					
 		});		
 		window.addHandler(1, "", Trigger.TRIGGER_CANCEL, returnList, new SUICallback() {
@@ -302,11 +307,12 @@ public class HousingService implements INetworkDispatch {
 		final int confirmCode = 100000 + rnd.nextInt(900000);
 		final SUIWindow window = core.suiService.createInputBox(2,"@player_structure:structure_status","@player_structure:structure_name_prompt", owner, target, 0);
 		window.setProperty("bg.caption.lblTitle:Text", "@player_structure:confirm_destruction_t");
+	
 		window.setProperty("Prompt.lblPrompt:Text", "@player_structure:your_structure_prefix " +
-													"\\#32CD32 @player_structure:will_redeed_confirm \\#FFFFFF "+
-												    "@player_structure:will_redeed_suffix "  +
-												    "\n \n Code: " + confirmCode);
-		
+												"\\#32CD32 @player_structure:will_redeed_confirm \\#FFFFFF "+
+											    "@player_structure:will_redeed_suffix "  +
+											    "\n \n Code: " + confirmCode);
+
 		window.setProperty("btnOk:visible", "True");
 		window.setProperty("btnCancel:visible", "True");
 		window.setProperty("btnOk:Text", "@yes");
@@ -317,18 +323,18 @@ public class HousingService implements INetworkDispatch {
 		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, new SUICallback() {
 			@Override
 			public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
-				CreatureObject crafter = (CreatureObject)owner;
+				CreatureObject houseOwner = (CreatureObject)owner;
 				core.suiService.closeSUIWindow(owner, 0);
 				if (returnList.get(0).equals(""+confirmCode)){
 					// handle creation of correct deed in player inventory
-					PlayerObject player = (PlayerObject) crafter.getSlottedObject("ghost");	
+					PlayerObject player = (PlayerObject) houseOwner.getSlottedObject("ghost");	
 					HouseTemplate houseTemplate = housingTemplates.get(houseToDeed.get(building.getTemplate()));
 					
 					TangibleObject deed = (TangibleObject) core.objectService.createObject(houseTemplate.getDeedTemplate(), owner.getPlanet());
 					
 					if (player.getLotsRemaining() + houseTemplate.getLotCost() > 10){
 						// Something went wrong or hacking attempt
-						crafter.sendSystemMessage("Structure can't be redeeded. Maximum lot count exceeded.",(byte)1);
+						houseOwner.sendSystemMessage("Structure can't be redeeded. Maximum lot count exceeded.",(byte)1);
 						return;
 					}
 					
@@ -336,6 +342,9 @@ public class HousingService implements INetworkDispatch {
 					deed.setIntAttribute("@obj_attr_n:examine_maintenance", (int) building.getMaintenanceAmount());
 					
 					owner.getContainer().remove(owner);
+					
+					int costs = 800;
+					houseOwner.setBankCredits(houseOwner.getBankCredits()-costs);
 					
 					if(building.getAttachment("sign") != null)
 						core.objectService.destroyObject((SWGObject) building.getAttachment("sign"));
@@ -350,11 +359,12 @@ public class HousingService implements INetworkDispatch {
 						player.setLotsRemaining(player.getLotsRemaining() + houseTemplate.getLotCost());
 					}
 					
-					crafter.sendSystemMessage("@player_structure:processing_destruction",(byte)1);
-					crafter.sendSystemMessage("@player_structure:deed_reclaimed",(byte)1);
+					houseOwner.sendSystemMessage("@player_structure:processing_destruction",(byte)1);
+					houseOwner.sendSystemMessage("@player_structure:deed_reclaimed",(byte)1);
+					
 					
 				} else {
-					crafter.sendSystemMessage("@player_structure:incorrect_destroy_code",(byte)1);
+					houseOwner.sendSystemMessage("@player_structure:incorrect_destroy_code",(byte)1);
 				}
 					
 			}					
