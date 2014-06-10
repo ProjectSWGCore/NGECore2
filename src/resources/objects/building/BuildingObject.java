@@ -223,8 +223,7 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 		return (boolean) otherVariables.get("residency");
 	}
 	
-	public void setResidency(CreatureObject owner){
-		owner.sendSystemMessage("@player_structure:declared_residency", (byte) 1);
+	public void setResidency() {
 		otherVariables.set("residency", true);
 	}
 	
