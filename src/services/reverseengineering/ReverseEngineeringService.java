@@ -3189,7 +3189,7 @@ public class ReverseEngineeringService implements INetworkDispatch {
 				
 				int re_Chance = engineer.getSkillModBase("expertise_reverse_engineering_bonus");
 				
-				double X = 1.1; // Magic number
+				float X = (float) (new Random().nextFloat() * (1.1 - 0.85) + 0.85); // Magic number
 				
 				//powerValue = 3*powerBitValue/ratio; // rough
 				powerValue = (int) Math.floor( 2 * powerBitValue / ratio * re_Chance / 100 * X ); 
