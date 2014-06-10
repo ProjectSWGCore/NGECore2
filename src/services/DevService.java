@@ -95,7 +95,8 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 130, "Vehicle Deeds");
 				if (creature.getClient().isGM()) {
 					suiOptions.put((long) 121, "Sandbox City");
-					suiOptions.put((long) 177, "REing");
+					if(creature.getPlayerObject().getProfession().equals("trader_0a") || creature.getPlayerObject().getProfession().equals("trader_0b") || creature.getPlayerObject().getProfession().equals("trader_0c") || creature.getPlayerObject().getProfession().equals("trader_0d"))
+						suiOptions.put((long) 177, "REing");
 				}
 
 				break;

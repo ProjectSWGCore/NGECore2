@@ -18,8 +18,9 @@ def createRadial(core, owner, target, radials):
 	return
 	
 def handleSelection(core, owner, target, option):
-	#if owner.getPlayerObject().getProfession()!='trader_0a' and owner.getPlayerObject().getProfession()!='trader_0b' and owner.getPlayerObject().getProfession()!='trader_0c' and owner.getPlayerObject().getProfession()!='trader_0d':
-		#return # You lack the skills to use this
+	if owner.getPlayerObject().getProfession()!='trader_0a' and owner.getPlayerObject().getProfession()!='trader_0b' and owner.getPlayerObject().getProfession()!='trader_0c' and owner.getPlayerObject().getProfession()!='trader_0d':
+		owner.sendSystemMessage('@base_player:not_correct_skill', 0)
+		return 
 		
 	if option == 21 and target:
 		if owner is not None:	
@@ -28,19 +29,16 @@ def handleSelection(core, owner, target, option):
 	if option == 132:
 		if owner is not None:
 			core.reverseEngineeringService.reverseEngineer(owner, target)
-			owner.sendSystemMessage('REVERSE ENGINEER', 0)
 			return
 			
 	if option == 133:
 		if owner is not None:
 			core.reverseEngineeringService.createSEA(owner, target)
-			owner.sendSystemMessage('SEA', 0)
 			return
 			
 	if option == 134:
 		if owner is not None:
 			core.reverseEngineeringService.createPowerup(owner, target)
-			owner.sendSystemMessage('POWER UP', 0)
 			return
 			
 	return

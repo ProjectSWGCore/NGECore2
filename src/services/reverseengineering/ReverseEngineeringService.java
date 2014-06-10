@@ -3017,7 +3017,7 @@ public class ReverseEngineeringService implements INetworkDispatch {
 				qualityfactor += luck/1000; // around 1200 luck was top
 				qualityfactor = Math.max(1.0F, qualityfactor);
 				int itemCL = 1;
-				if (piece.getIntAttribute("required_combat_level")!=0)
+				if (piece.getAttributes().get("required_combat_level")!=null)
 					itemCL = piece.getIntAttribute("required_combat_level");
 				float CLFactor = itemCL/85.71F; // item Combat Level adds a small amount too
 				if (CLFactor>1.0F)
