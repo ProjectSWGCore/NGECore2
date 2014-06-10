@@ -274,7 +274,7 @@ public class BuffService implements INetworkDispatch {
 
 		for(final Buff buff : creature.getBuffList().get().toArray(new Buff[] { })) {
 
-			if (buff.getGroup1().startsWith("setBonus")) { continue; }
+			if (buff.getGroup1().startsWith("setBonus") || buff.getRemovalTask() != null) { continue; }
 
 			if(buff.isGroupBuff() && buff.getGroupBufferId() != creature.getObjectID()) {
 				removeBuffFromCreature(creature, buff);

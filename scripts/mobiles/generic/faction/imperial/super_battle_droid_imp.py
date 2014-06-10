@@ -11,7 +11,7 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('imperial_battle_droid')
+	mobileTemplate.setCreatureName('imperial_super_battle_droid')
 	mobileTemplate.setLevel(86)
 	mobileTemplate.setDifficulty(Difficulty.ELITE)
 
@@ -38,5 +38,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('rangedShot')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('sbd_imperials', mobileTemplate)
+	core.spawnService.addMobileTemplate('sbd_imperial', mobileTemplate)
 	return

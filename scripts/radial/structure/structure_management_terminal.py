@@ -22,7 +22,8 @@ def createRadial(core, owner, target, radials):
 	radials.add(RadialOptions(2,  174, 0, '@player_structure:find_items_search_for_house_items'))
 	radials.add(RadialOptions(2,  175, 0, '@player_structure:delete_all_items_title'))	
 	radials.add(RadialOptions(2,  172, 0, 'Pack Up This Building'))
-	radials.add(RadialOptions(3, 121, 0, '@player_structure:permission_enter'))	
+	radials.add(RadialOptions(3, 121, 0, '@player_structure:permission_enter'))
+	radials.add(RadialOptions(3, 122, 0, '@player_structure:permission_admin'))	
 	radials.add(RadialOptions(3, 123, 0, '@player_structure:permission_banned'))
 	if owner.getSkillModBase('manage_vendor') >= 1:
 		radials.add(RadialOptions(2, 130, 0, '@player_structure:create_vendor')) 
@@ -38,6 +39,14 @@ def handleSelection(core, owner, target, option):
 	if option == 124:
 		if owner is not None:
 			core.housingService.createStatusSUIPage(owner,target)
+			return
+	if option == 125:
+		if owner is not None and owner.getGrandparent():
+			building = owner.getGrandparent()
+			if building.getPrivacy() == 0:
+				building.setPrivacy(1)
+			elif building.getPrivacy() == 1:
+				building.setPrivacy(0)			
 			return
 	if option == 129:
 		if owner is not None:
@@ -70,6 +79,10 @@ def handleSelection(core, owner, target, option):
 	if option == 121:
 		if owner is not None:
 			core.housingService.handlePermissionEntry(owner,target)
+			return
+	if option == 122:
+		if owner is not None:
+			core.housingService.handlePermissionAdmin(owner,target)
 			return
 	if option == 123:
 		if owner is not None:
