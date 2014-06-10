@@ -3016,6 +3016,12 @@ public class ReverseEngineeringService implements INetworkDispatch {
 				int luck = engineer.getLuck();
 				qualityfactor += luck/1000; // around 1200 luck was top
 				qualityfactor = Math.max(1.0F, qualityfactor);
+				int itemCL = 1;
+				if (piece.getIntAttribute("required_combat_level")!=0)
+					itemCL = piece.getIntAttribute("required_combat_level");
+				float CLFactor = itemCL/85.71F; // item Combat Level adds a small amount too
+				if (CLFactor>1.0F)
+					qualityfactor += (CLFactor-1.0F);
 				int re_Chance = engineer.getSkillModBase("expertise_reverse_engineering_bonus");
 				float re_factor = re_Chance/140 * qualityfactor; // 159 RE-Chance was top
 				qualityfactor = Math.max(re_factor, qualityfactor);
@@ -3077,13 +3083,14 @@ public class ReverseEngineeringService implements INetworkDispatch {
 			}
 			System.out.println("modifierBitNameResult " + modifierBitNameResult);
 			System.out.println("modifierBitName " + modifierBitName);
-			if (modifierBitNameResult==null)
+			if (modifierBitNameResult==null){
 				return;
+			}
 
 			String skillModName = skillModMapping.get(modifierBitName);
 			System.out.println("skillModName " + skillModName);
 			if (skillModName==null){
-				System.err.println("Junkloot combination wrong/not registered yet or Junkloot names don't conform to http://www.nova-inside.com naming convention");
+				engineer.sendSystemMessage("Junkloot combination wrong/not registered yet or Junkloot names don't conform to http://www.nova-inside.com naming convention",(byte) 0);
 				return;
 			}
 //			core.objectService.destroyObject(piece1.getObjectID());
@@ -3416,6 +3423,10 @@ public class ReverseEngineeringService implements INetworkDispatch {
 					SEADescription = "socket_gem";
 					SEATemplate = "object/tangible/gem/shared_clothing.iff";
 				}
+				
+				// SEA --- this item can have max 3 modifiers; it is not possible to stack the same kind of modifier in one SEA.
+				if (effectNameList.contains(effectName))
+					return;
 			
 				core.objectService.destroyObject(bit1.getObjectID());
 				core.objectService.destroyObject(bit2.getObjectID());
