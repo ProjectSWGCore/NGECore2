@@ -726,6 +726,83 @@ public class ObjectService implements INetworkDispatch {
 			}
 		}
 		
+		// Check if used item was a PUP
+		String powerUpTemplate1 = "object/tangible/powerup/base/shared_armor_base.iff";
+		String powerUpTemplate2 = "object/tangible/powerup/base/shared_base.iff";
+		String powerUpTemplate3 = "object/tangible/powerup/base/shared_weapon_base.iff";			
+		if (object.getTemplate().equals(powerUpTemplate1)){
+			// chestplate
+			
+			String effectName = (String) object.getAttachment("effectName");
+			int powerValue = (int) object.getAttachment("powerValue");
+			
+			Long chestID = (Long) creature.getAttachment("EquippedChest");
+			if (chestID==null)
+				return;
+			
+			TangibleObject chest = (TangibleObject) core.objectService.getObject(chestID);
+			//chest.setIntAttribute(effectName, powerValue);
+			chest.setAttachment("PUPEffectName", effectName);
+			chest.setAttachment("PUPEffectValue", powerValue);
+			
+		}
+		if (object.getTemplate().equals(powerUpTemplate2)){
+			// Shirt
+			
+			String effectName = (String) object.getAttachment("effectName");
+			int powerValue = (int) object.getAttachment("powerValue");
+			
+			Long shirtID = (Long) creature.getAttachment("EquippedShirt");
+			if (shirtID==null)
+				return;
+			
+			TangibleObject shirt = (TangibleObject) core.objectService.getObject(shirtID);
+			//shirt.setIntAttribute(effectName, powerValue);
+			shirt.setAttachment("PUPEffectName", effectName);
+			shirt.setAttachment("PUPEffectValue", powerValue);
+			
+		}
+		if (object.getTemplate().equals(powerUpTemplate3)){
+			// weapon
+			
+			String effectName = (String) object.getAttachment("effectName");
+			int powerValue = (int) object.getAttachment("powerValue");
+			
+			Long weaponID = (Long) creature.getAttachment("EquippedWeapon");
+			if (weaponID==null)
+				return;
+			
+			WeaponObject weapon = (WeaponObject) core.objectService.getObject(weaponID);
+			//weapon.setIntAttribute(effectName, powerValue);
+			weapon.setAttachment("PUPEffectName", effectName);
+			weapon.setAttachment("PUPEffectValue", powerValue);
+
+			List<String> statList = new ArrayList<String>();
+			statList.add("constitution_modified");
+			statList.add("agility_modified");
+			statList.add("precision_modified");
+			statList.add("strength_modified");
+			statList.add("stamina_modified");
+			statList.add("luck_modified");
+			if (statList.contains(effectName)){
+				// Probably this has to be done preferably via the buff service or a new power up service
+				// Problem : Some of the effect names do NOT occur in buff.iff
+				// So Light or Treeku better look into this
+				weapon.setIntAttribute("cat_stat_mod_bonus."+effectName, powerValue);
+				core.skillModService.addSkillMod(creature, "cat_stat_mod_bonus."+effectName, powerValue);
+			} else {
+				// assume skillmod then
+				weapon.setIntAttribute("cat_skill_mod_bonus."+effectName, powerValue);	
+				core.skillModService.addSkillMod(creature, "cat_skill_mod_bonus."+effectName, powerValue);
+			}		
+			
+			int amount = object.getIntAttribute("num_in_stack");
+			if (amount==1)
+				destroyObject(object.getObjectID());
+			else
+				object.setIntAttribute("num_in_stack",amount-1);
+		}
+			
 		creature.setUseTarget(object);
 		
 		int reuse_time;
@@ -1337,5 +1414,4 @@ public class ObjectService implements INetworkDispatch {
 		alikeItem.setUses(newUses);
 		core.objectService.destroyObject(item.getObjectID());		
 	}
-	
 }

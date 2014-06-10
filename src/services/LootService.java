@@ -617,6 +617,7 @@ public class LootService implements INetworkDispatch {
 		String requiredFaction = "";
 		Vector<String> customizationAttributes = null;
 		Vector<Integer> customizationValues = null;
+		Vector<String> reverse_engineering_name = null;
 		int customColor1 = 0;
 		String lootDescriptor = "";
 		Vector<String> itemStats = null;
@@ -649,6 +650,9 @@ public class LootService implements INetworkDispatch {
 		
 		if(core.scriptService.getMethod(itemPath,"","customizationValues")!=null)
 			customizationValues = (Vector<Integer>)core.scriptService.fetchIntegerVector(itemPath,"customizationValues");
+		
+		if(core.scriptService.getMethod(itemPath,"","reverse_engineering_name")!=null)
+			reverse_engineering_name = (Vector<String>)core.scriptService.fetchStringVector(itemPath,"reverse_engineering_name");
 		
 		if(core.scriptService.getMethod(itemPath,"","customColor1")!=null)
 			customColor1 = (Integer)core.scriptService.fetchInteger(itemPath,"customColor1");
@@ -699,6 +703,7 @@ public class LootService implements INetworkDispatch {
 		droppedItem.setAttachment("LootItemName", itemName);
 		droppedItem.setAttachment("customColor1", customColor1);
 		droppedItem.setAttachment("lootDescriptor", lootDescriptor);
+		droppedItem.setAttachment("reverse_engineering_name", reverse_engineering_name);		
 		droppedItem.setAttachment("customName", customName);
 		
     	
@@ -1321,7 +1326,7 @@ public class LootService implements INetworkDispatch {
 				droppedItem.setCustomizationVariable(customizationAttributes.get(i), value); 
 			}
 		}
-		
+
 	}
 	
 	public void handleSpecialItems(TangibleObject droppedItem,String itemName) {
@@ -2735,12 +2740,13 @@ public class LootService implements INetworkDispatch {
 		item12.setDetailFilename("wearables_detail");
 		item12.setDetailName("shirt_s01");
 		item12.setCustomName("Socketed Shirt");
+		item12.getAttributes().put("@obj_attr_n:crafter", "Charon");
 		
 		item12.setIntAttribute("@obj_attr_n:sockets", 1);		
 		
 		String crateTemplate = "object/factory/shared_factory_crate_clothing.iff";
 		FactoryCrateObject crate1 = (FactoryCrateObject) core.objectService.createObject(crateTemplate, player.getPlanet());
-		crate1.setContentTypeAndQuantity(item12,25, "clothing_factory_crate", "clothing", player.getClient());
+		crate1.setContentTypeAndQuantity(item12,25, "clothing_factory_crate", "clothing", player.getClient(),true);
 		playerInventory.add(crate1);
 		
 		
@@ -2764,21 +2770,11 @@ public class LootService implements INetworkDispatch {
 		powerBit2.setAttachment("PowerBitOrder", 3);
 		playerInventory.add(powerBit2);
 		
-
 		TangibleObject powerBit3 = (TangibleObject) core.objectService.createObject(powerBitTemplate, player.getPlanet());
 		powerBit3.setCustomName("+25 1st Order Power Bit");
 		powerBit3.setAttachment("PowerBitValue", 25);
 		powerBit3.setAttachment("PowerBitOrder", 1);
 		playerInventory.add(powerBit3);
-
-				
-		TangibleObject item23 = (TangibleObject)core.objectService.createObject("object/tangible/component/reverse_engineering/shared_modifier_bit.iff", player.getPlanet());
-		item23.setCustomName("Mark X Vocab Module");
-		playerInventory.add(item23);
-		
-		TangibleObject item24 = (TangibleObject)core.objectService.createObject("object/tangible/component/reverse_engineering/shared_modifier_bit.iff", player.getPlanet());
-		item24.setCustomName("Droid Motor (Red)");
-		playerInventory.add(item24);
 		
 		TangibleObject item24a = (TangibleObject)core.objectService.createObject("object/tangible/loot/npc_loot/shared_medical_console_generic.iff", player.getPlanet());
 		item24a.setCustomName("Medical Console");
@@ -2797,40 +2793,25 @@ public class LootService implements INetworkDispatch {
 		String modifierBitTemplate = "object/tangible/component/reverse_engineering/shared_modifier_bit.iff";
 		TangibleObject modifierBit = (TangibleObject) core.objectService.createObject(modifierBitTemplate, player.getPlanet());
 		modifierBit.setCustomName("Droid Experimentation");
-		modifierBit.setStringAttribute("serial_number", "(WHATEVER)");	
+		modifierBit.setStringAttribute("serial_number", core.reverseEngineeringService.createSerialNumber());	
 		modifierBit.setStringAttribute("@crafting:mod_bit_type", "@stat_n:droid_experimentation");
 		modifierBit.setIntAttribute("@crafting:mod_bit_ratio", 4);
 		playerInventory.add(modifierBit);
 		
 		modifierBit = (TangibleObject) core.objectService.createObject(modifierBitTemplate, player.getPlanet());
 		modifierBit.setCustomName("Droid Experimentation");
-		modifierBit.setStringAttribute("serial_number", "(WHATEVER)");	
+		modifierBit.setStringAttribute("serial_number", core.reverseEngineeringService.createSerialNumber());	
 		modifierBit.setStringAttribute("@crafting:mod_bit_type", "@stat_n:droid_experimentation");
 		modifierBit.setIntAttribute("@crafting:mod_bit_ratio", 4);
 		playerInventory.add(modifierBit);
 		
 		modifierBit = (TangibleObject) core.objectService.createObject(modifierBitTemplate, player.getPlanet());
 		modifierBit.setCustomName("Droid Experimentation");
-		modifierBit.setStringAttribute("serial_number", "(WHATEVER)");	
+		modifierBit.setStringAttribute("serial_number", core.reverseEngineeringService.createSerialNumber());	
 		modifierBit.setStringAttribute("@crafting:mod_bit_type", "@stat_n:droid_experimentation");
 		modifierBit.setIntAttribute("@crafting:mod_bit_ratio", 4);
 		playerInventory.add(modifierBit);
-		
 			
-		
-//		TangibleObject stacker1 = (TangibleObject)core.objectService.createObject("object/tangible/loot/misc/shared_damaged_datapad.iff", player.getPlanet());
-//		stacker1.setCustomName("Damaged Datapad stacker1");
-//		stacker1.setStackable(true);
-//		stacker1.setUses(5);
-//		playerInventory.add(stacker1);
-		
-		TangibleObject stacker2 = (TangibleObject)core.objectService.createObject("object/tangible/loot/misc/shared_damaged_datapad.iff", player.getPlanet());
-		stacker2.setCustomName("Damaged Datapad stacker1");
-		stacker2.setStackable(true);
-		stacker2.setUses(99);
-		 
-		core.objectService.addStackableItem(stacker2,playerInventory);
-		
 		String SEALabel = "socket_gem_armor";
 		String SEADescription = "socket_gem";
 		String SEATemplate = "object/tangible/gem/shared_clothing.iff";

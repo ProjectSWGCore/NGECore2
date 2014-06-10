@@ -3063,9 +3063,11 @@ public class ReverseEngineeringService implements INetworkDispatch {
 //			}
 			
 			String modifierBitName = null;
+			String piece1Name = getCorrectJunkName(piece1);
+			String piece2Name = getCorrectJunkName(piece2);
 			for (RE_Combination comb : re_Combinations){
-				if (comb.getIngredient1().contains(piece1.getCustomName()) && comb.getIngredient2().contains(piece2.getCustomName())
-				 || comb.getIngredient1().contains(piece2.getCustomName()) && comb.getIngredient2().contains(piece1.getCustomName())){
+				if (comb.getIngredient1().contains(piece1Name) && comb.getIngredient2().contains(piece2Name)
+				 || comb.getIngredient1().contains(piece2Name) && comb.getIngredient2().contains(piece1Name)){
 					modifierBitNameResult = comb.getResult(); // "Rifle Critical Chance (10)"
 					String[] modNameArr = modifierBitNameResult.split("\\(");
 					modifierBitName = modNameArr[0].replace("\\(", "").trim();
@@ -3107,7 +3109,22 @@ public class ReverseEngineeringService implements INetworkDispatch {
 	}
 	
 	public String createSerialNumber(){
-		String serialNumber = "(123456)";
+		String serialNumber = "(";
+		char ascii;
+		int numberOfSerialDigits=8;
+		int numbersStart=48;
+		int lettersStart=97;
+		for (int k=0;k<numberOfSerialDigits;k++){
+			ascii = (char) new Random().nextInt(34);
+			if (ascii < 9)
+				ascii = (char)(ascii+numbersStart);
+			else {
+				ascii -= 9;
+				ascii =(char)(ascii+lettersStart);
+			}
+			serialNumber += ascii;
+		}
+		serialNumber += ")";
 		return serialNumber;
 	}
 	
@@ -3136,9 +3153,11 @@ public class ReverseEngineeringService implements INetworkDispatch {
 			if (bit1.getTemplate().contains("modifier_bit") && bit2.getTemplate().contains("power_bit") 
 			 || bit1.getTemplate().contains("power_bit") && bit2.getTemplate().contains("modifier_bit")){
 				
-				int amount = 200 + new Random().nextInt()*50; // Needs to be randomized and skillmod-related
+				int amount = 200 + new Random().nextInt(50); // Needs to be randomized and skillmod-related
 				int luck = engineer.getLuck();
-				amount = luck/700 * amount; // around 1200 luck was top
+				float factor = luck/700; 
+				float multiplier = Math.max(1.0F, factor);
+				amount = (int) (multiplier * amount); // around 1200 luck was top
 	
 				int powerValue = 1;
 				
@@ -3194,7 +3213,10 @@ public class ReverseEngineeringService implements INetworkDispatch {
 				powerUp.setDetailFilename("static_item_d");
 				powerUp.setDetailName(powerUpDescription);
 				powerUp.setIntAttribute(effectName, powerValue);	
-				powerUp.setIntAttribute("num_in_stack", amount);					
+				powerUp.setAttachment("effectName",effectName);
+				powerUp.setAttachment("powerValue",powerValue);
+				powerUp.setIntAttribute("num_in_stack", amount);	
+				powerUp.setAttachment("radial_filename", "item/item");
 				engineerInventory.add(powerUp);	
 			}			 
 		}
@@ -3255,8 +3277,7 @@ public class ReverseEngineeringService implements INetworkDispatch {
 				String SEALabel = "socket_gem_armor";
 				String SEADescription = "socket_gem";
 				String SEATemplate = "object/tangible/gem/shared_clothing.iff";
-				
-				
+								
 				if (profession.equals("trader_0a")){
 					SEALabel = "socket_gem_clothing";
 					SEADescription = "socket_gem";
@@ -3284,6 +3305,7 @@ public class ReverseEngineeringService implements INetworkDispatch {
 				effectValueList.add(modifierValue);
 				skillEnhancingAttachment.setAttachment("SEAeffectNameList", effectNameList);
 				skillEnhancingAttachment.setAttachment("SEAmodifierValueList", effectValueList);
+				skillEnhancingAttachment.setAttachment("radial_filename", "item/item");
 				engineerInventory.add(skillEnhancingAttachment);	
 			}			 
 		}
@@ -3420,7 +3442,7 @@ public class ReverseEngineeringService implements INetworkDispatch {
 		
 				skillEnhancingAttachment.setAttachment("SEAeffectNameList", effectNameList);
 				skillEnhancingAttachment.setAttachment("SEAmodifierValueList", effectValueList);
-				
+				skillEnhancingAttachment.setAttachment("radial_filename", "item/item");
 				engineerInventory.add(skillEnhancingAttachment);	
 			}			 
 		}
@@ -3450,6 +3472,26 @@ public class ReverseEngineeringService implements INetworkDispatch {
 			}
 		}
 		return numberOfStats;
+	}
+	
+	private String getCorrectJunkName(TangibleObject piece){
+		String junkName = piece.getCustomName();
+		if (piece.getTemplate().contains("shared_wiring_generic.iff")){
+			String colorCombo = (String)piece.getAttachment("reverse_engineering_name");
+			if (colorCombo!=null)
+				junkName = "Wiring (" + colorCombo + ")";
+		}
+		if (piece.getTemplate().contains("Droid Motor Template")){
+			String colorCombo = (String)piece.getAttachment("reverse_engineering_name");
+			if (colorCombo!=null)
+				junkName = "Droid Motor (" + colorCombo + ")";
+		}
+		if (piece.getTemplate().contains("Droid Battery Template")){
+			String colorCombo = (String)piece.getAttachment("reverse_engineering_name");
+			if (colorCombo!=null)
+				junkName = "Droid Battery (" + colorCombo + ")";
+		}
+		return junkName;
 	}
 	
 	@Override
