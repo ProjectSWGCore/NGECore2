@@ -630,7 +630,9 @@ public class PlayerCity implements Serializable {
 		// city_version_update_body_4
 		Vector<Long> citizenList = getCitizens();
 		for (long citizen : citizenList){
-//			CreatureObject citizenObject = (CreatureObject) NGECore.getInstance().objectService.getObject(citizen);
+			CreatureObject citizenObject = (CreatureObject) NGECore.getInstance().objectService.getObject(citizen);
+			if(citizenObject == null)
+				citizenObject = NGECore.getInstance().objectService.getCreatureFromDB(citizen);
 			Mail actorMail = new Mail();
 	        actorMail.setMailId(NGECore.getInstance().chatService.generateMailId());
 	        actorMail.setRecieverId(citizen);
@@ -638,24 +640,24 @@ public class PlayerCity implements Serializable {
 	        actorMail.setTimeStamp((int) (new Date().getTime() / 1000));
 	        actorMail.setMessage("@city/city:city_version_update_body_4");
 	        actorMail.setSubject("@city/city:city_version_update_subject_4");
-	        actorMail.setSenderName("City " + this.cityName);
-	        
-//	        List<WaypointAttachment> attachments = new ArrayList<WaypointAttachment>(); 
-//	        WaypointAttachment attachment = new WaypointAttachment();
-//			attachment.active = false;
-//			attachments.add(attachment);
-//			attachment.cellID = constructionWaypoint.getCellId();
-//			attachment.color = (byte)1;
-//			attachment.name = "City";
-//			attachment.planetCRC = engine.resources.common.CRC.StringtoCRC(citizenObject.getPlanet().getName());
-//			attachment.positionX = object.getPosition().x;
-//			attachment.positionY = 0;
-//			attachment.positionZ = object.getPosition().z;
-//			actorMail.setAttachments(attachments);
+	        actorMail.setSenderName("City: " + this.cityName);
+	        /*
+	        List<WaypointAttachment> attachments = new ArrayList<WaypointAttachment>(); 
+	        WaypointAttachment attachment = new WaypointAttachment();
+			attachment.active = false;
+			attachments.add(attachment);
+			attachment.cellID = 0;
+			attachment.color = (byte)1;
+			attachment.name = "City";
+			attachment.planetCRC = engine.resources.common.CRC.StringtoCRC(citizenObject.getPlanet().getName());
+			attachment.positionX = object.getPosition().x;
+			attachment.positionY = 0;
+			attachment.positionZ = object.getPosition().z;
+			actorMail.setWaypointAttachments(attachments);*/
 	        
 	        NGECore.getInstance().chatService.storePersistentMessage(actorMail);
-//	        if (newCitizen.getClient()!=null)
-//	        	NGECore.getInstance().chatService.sendPersistentMessageHeader(newCitizen.getClient(), actorMail);
+	        if (citizenObject.getClient()!=null)
+	        	NGECore.getInstance().chatService.sendPersistentMessageHeader(citizenObject.getClient(), actorMail);
 
 		}
 	}
@@ -669,6 +671,8 @@ public class PlayerCity implements Serializable {
 		Vector<Long> citizenList = getCitizens();
 		for (long citizen : citizenList){
 			CreatureObject citizenObject = (CreatureObject) NGECore.getInstance().objectService.getObject(citizen);
+			if(citizenObject == null)
+				citizenObject = NGECore.getInstance().objectService.getCreatureFromDB(citizen);
 			Mail actorMail = new Mail();
 	        actorMail.setMailId(NGECore.getInstance().chatService.generateMailId());
 	        actorMail.setRecieverId(citizen);
@@ -734,6 +738,8 @@ public class PlayerCity implements Serializable {
 		Vector<Long> citizenList = getCitizens();
 		for (long citizen : citizenList){
 			CreatureObject citizenObject = (CreatureObject) NGECore.getInstance().objectService.getObject(citizen);
+			if(citizenObject == null)
+				citizenObject = NGECore.getInstance().objectService.getCreatureFromDB(citizen);
 			Mail actorMail = new Mail();
 	        actorMail.setMailId(NGECore.getInstance().chatService.generateMailId());
 	        actorMail.setRecieverId(citizen);
@@ -769,6 +775,8 @@ public class PlayerCity implements Serializable {
 		Vector<Long> citizenList = getCitizens();
 		for (long citizen : citizenList){
 			CreatureObject citizenObject = (CreatureObject) NGECore.getInstance().objectService.getObject(citizen);
+			if(citizenObject == null)
+				citizenObject = NGECore.getInstance().objectService.getCreatureFromDB(citizen);
 			Mail actorMail = new Mail();
 	        actorMail.setMailId(NGECore.getInstance().chatService.generateMailId());
 	        actorMail.setRecieverId(citizen);
@@ -802,6 +810,8 @@ public class PlayerCity implements Serializable {
 		Vector<Long> citizenList = getCitizens();
 		for (long citizen : citizenList){
 			CreatureObject citizenObject = (CreatureObject) NGECore.getInstance().objectService.getObject(citizen);
+			if(citizenObject == null)
+				citizenObject = NGECore.getInstance().objectService.getCreatureFromDB(citizen);
 			Mail actorMail = new Mail();
 	        actorMail.setMailId(NGECore.getInstance().chatService.generateMailId());
 	        actorMail.setRecieverId(citizen);

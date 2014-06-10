@@ -42,6 +42,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import main.NGECore;
 import protocol.swg.EnterStructurePlacementModeMessage;
+import resources.common.OutOfBand;
+import resources.datatables.Citizenship;
 import resources.datatables.DisplayType;
 import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
@@ -510,11 +512,26 @@ public class HousingService implements INetworkDispatch {
 	
 	public void declareResidency(SWGObject owner, TangibleObject target) {
 		final BuildingObject building = (BuildingObject) target.getGrandparent();
-		//final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
-		building.setResidency((CreatureObject)owner);
-		PlayerCity cityActorIsIn = core.playerCityService.getCityObjectIsIn(owner);
+		if(owner.getObjectID() != (long) building.getAttachment("structureOwner")) {
+			((CreatureObject) owner).sendSystemMessage("@player_structure:declare_must_be_owner", (byte) 0);
+			return;
+		} else if(building.getResidency()) {
+			((CreatureObject) owner).sendSystemMessage("@player_structure:already_residence", (byte) 0);
+			return;
+		}
+		if(System.currentTimeMillis() < (long) owner.getAttachment("residencyCooldown")) {
+			((CreatureObject) owner).sendSystemMessage(OutOfBand.ProsePackage("@player_structure:change_residence_time", "DI", (int) ((long) owner.getAttachment("residencyCooldown") - System.currentTimeMillis()) / 3600000), (byte) 0);
+			return;
+		}
+		building.setResidency();
+		PlayerCity cityActorIsIn = core.playerCityService.getCityObjectIsIn(building);
 		owner.setAttachment("residentCity", cityActorIsIn.getCityID());
-		//owner.setResidence();
+		owner.setAttachment("residencyCooldown", System.currentTimeMillis() + 86400000); // 24 hours
+		((CreatureObject) owner).sendSystemMessage("@player_structure:change_residence", (byte) 0);
+		if(cityActorIsIn != null) {
+			((CreatureObject) owner).getPlayerObject().setHome(cityActorIsIn.getCityName());
+			((CreatureObject) owner).getPlayerObject().setCitizenship(Citizenship.Citizen);
+		}
 	}
 	
 	public void handleListAllItems(SWGObject owner, TangibleObject target) {
