@@ -525,10 +525,11 @@ public class HousingService implements INetworkDispatch {
 		}
 		building.setResidency();
 		PlayerCity cityActorIsIn = core.playerCityService.getCityObjectIsIn(building);
-		owner.setAttachment("residentCity", cityActorIsIn.getCityID());
 		owner.setAttachment("residencyCooldown", System.currentTimeMillis() + 86400000); // 24 hours
+		owner.setAttachment("residentBuilding", building.getObjectID());
 		((CreatureObject) owner).sendSystemMessage("@player_structure:change_residence", (byte) 0);
 		if(cityActorIsIn != null) {
+			owner.setAttachment("residentCity", cityActorIsIn.getCityID());
 			((CreatureObject) owner).getPlayerObject().setHome(cityActorIsIn.getCityName());
 			((CreatureObject) owner).getPlayerObject().setCitizenship(Citizenship.Citizen);
 		}
