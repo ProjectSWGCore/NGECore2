@@ -424,4 +424,13 @@ public class HarvesterObject extends InstallationObject implements Serializable 
 		return messageBuilder;
 	}
 	
+	public boolean isOnHopperList(CreatureObject creature) {
+		return hopperList.contains(creature.getCustomName().split(" ")[0]);
+	}
+	
+	public boolean isOnAdminList(CreatureObject creature) {
+		return adminList.contains(creature.getCustomName().split(" ")[0]);		
+	}
+
+	
 }

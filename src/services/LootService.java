@@ -1582,6 +1582,7 @@ public class LootService implements INetworkDispatch {
 			qualityString="@jedi_spam:crystal_quality_5";
 			break;
 		case "kraytpearl_flawless": 
+		case "kraytpearl_ancient": 
 			qualityString="@jedi_spam:crystal_quality_6";
 			break;
 		default:
@@ -1693,7 +1694,7 @@ public class LootService implements INetworkDispatch {
 											  minValue1 = 21;
 									          maxValue1 = 23;
 									          finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
-									          finalMaxDmg = finalMinDmg+1;
+									          finalMaxDmg = finalMinDmg+2;
 										      break;
 			}
 		}
@@ -1735,15 +1736,17 @@ public class LootService implements INetworkDispatch {
 										      minValue1 = 15;
 							                  maxValue1 = 17;
 							                  finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
-							                  finalMaxDmg = finalMinDmg+1;
+							                  finalMaxDmg = finalMinDmg+2;
 										      break;
 				case "kraytpearl_flawless":   // Flawless - 19/20 damage   
 								              finalMinDmg = 19;
 								              finalMaxDmg = 20;
 										      break;
-				case "kraytpearl_ancient":    // Ancient - 20/22 damage 
-											  finalMinDmg = 20;
-		                                      finalMaxDmg = 22;
+				case "kraytpearl_ancient":    // Ancient - between 20/21 min and 22/23 max damage 
+										      minValue1 = 20;
+											  maxValue1 = 21;
+							                  finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
+							                  finalMaxDmg = finalMinDmg+2;
 										      break;
 			}
 		}

@@ -45,6 +45,7 @@ public class GroupService implements INetworkDispatch {
 		core.commandService.registerCommand("invite");
 		core.commandService.registerCommand("join");
 		core.commandService.registerCommand("disband");
+		core.commandService.registerAlias("leavegroup", "disband");
 		core.commandService.registerCommand("decline");
 		core.commandService.registerCommand("dismissgroupmember");
 	}

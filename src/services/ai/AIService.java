@@ -54,6 +54,8 @@ public class AIService {
 		float z = pointB.z - 1 + new Random().nextFloat();
 		Point3D endPoint = new Point3D(x, core.terrainService.getHeight(planetId, x, z), z);
 		endPoint.setCell(pointB.getCell());
+		if(endPoint.getCell() != null)
+			endPoint.y = pointB.y;
 		path.add(endPoint);
 		return path;
 	}
