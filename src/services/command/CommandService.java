@@ -69,6 +69,7 @@ public class CommandService implements INetworkDispatch  {
 	}
 	
 	public boolean callCommand(CreatureObject actor, SWGObject target, BaseSWGCommand command, int actionCounter, String commandArgs) {
+
 		if (actor == null) {
 			return false;
 		}
@@ -115,10 +116,10 @@ public class CommandService implements INetworkDispatch  {
 			case 0: // Target Not Used For This Command
 				break;
 			case 1: // Other Only (objectId/targetName)
-				if (target == null) {
+				if (target == null || target == actor) {
 					if (commandArgs != null && !commandArgs.equals("")) {
 						String name = commandArgs.split(" ")[0];
-						
+
 						target = core.objectService.getObjectByFirstName(name);
 						
 						if (target == actor) {
@@ -128,7 +129,7 @@ public class CommandService implements INetworkDispatch  {
 					
 					break;
 				}
-				
+
 				if (target == actor) {
 					return false;
 				}

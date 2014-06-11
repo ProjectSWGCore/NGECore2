@@ -22,7 +22,7 @@ def addTemplate(core):
 	mobileTemplate.setAssistRange(24)
 	mobileTemplate.setStalker(False)
 	mobileTemplate.setFaction("rebel")
-	mobileTemplate.setFactionStatus(1)
+	mobileTemplate.setFactionStatus(FactionStatus.Combatant)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_rebel_ris_01.iff')

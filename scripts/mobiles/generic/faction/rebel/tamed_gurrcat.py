@@ -4,6 +4,7 @@ from services.spawn import WeaponTemplate
 from resources.datatables import WeaponType
 from resources.datatables import Difficulty
 from resources.datatables import Options
+from resources.datatables import FactionStatus
 from java.util import Vector
 
 
@@ -22,13 +23,13 @@ def addTemplate(core):
 	mobileTemplate.setMeatAmount(65)
 	mobileTemplate.setHideType("Bristly Hide")
 	mobileTemplate.setHideAmount(35)
-	mobileTemplate.setBoneType("Mammal Bones")
+	mobileTemplate.setBoneType("Animal Bones")
 	mobileTemplate.setBoneAmount(30)
 	mobileTemplate.setSocialGroup("dire cat")
 	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(True)
 	mobileTemplate.setFaction("rebel")
-	mobileTemplate.setFactionStatus(1)
+	mobileTemplate.setFactionStatus(FactionStatus.Combatant)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_gurrcat.iff')

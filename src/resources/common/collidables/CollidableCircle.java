@@ -31,6 +31,7 @@ public class CollidableCircle extends AbstractCollidable {
 	
 	private Point3D center;
 	private float radius;
+	private float radiusSquared;
 	// for bh traps
 	private boolean useYAxis = false;
 	
@@ -54,6 +55,7 @@ public class CollidableCircle extends AbstractCollidable {
 
 	public void setRadius(float radius) {
 		this.radius = radius;
+		this.radiusSquared = radius * radius;
 	}	
 
 	public boolean isUseYAxis() {
@@ -68,18 +70,18 @@ public class CollidableCircle extends AbstractCollidable {
 	public boolean doesCollide(SWGObject obj) {
 		Point3D objectPos = obj.getWorldPosition();
 		if(useYAxis) {
-			return center.getDistance(objectPos) <= radius && objectPos.y == center.y;
+			return (objectPos.x - center.x) * (objectPos.x - center.x) + (objectPos.z - center.z) * (objectPos.z - center.z) <= radiusSquared && objectPos.y <= center.y + 1 && objectPos.y >= center.y - 1;
 		} else {
-			return center.getDistance(objectPos) <= radius;
+			return (objectPos.x - center.x) * (objectPos.x - center.x) + (objectPos.z - center.z) * (objectPos.z - center.z) <= radiusSquared;
 		}
 	}
 
 	@Override
 	public boolean doesCollide(Point3D position) {
 		if(useYAxis) {
-			return center.getDistance(position) <= radius && position.y == center.y;
+			return (position.x - center.x) * (position.x - center.x) + (position.z - center.z) * (position.z - center.z) <= radiusSquared && position.y <= center.y + 1 && position.y >= center.y - 1;
 		} else {
-			return center.getDistance(position) <= radius;
+			return (position.x - center.x) * (position.x - center.x) + (position.z - center.z) * (position.z - center.z) <= radiusSquared;
 		}
 	}
 

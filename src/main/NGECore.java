@@ -103,6 +103,7 @@ import services.playercities.PlayerCityService;
 import services.resources.HarvesterService;
 import services.resources.ResourceService;
 import services.retro.RetroService;
+import services.reverseengineering.ReverseEngineeringService;
 import services.spawn.SpawnService;
 import services.sui.SUIService;
 import services.trade.TradeService;
@@ -199,7 +200,7 @@ public class NGECore {
 	public HarvesterService harvesterService;
 	public MountService mountService;
 	public PlayerCityService playerCityService;
-
+	public ReverseEngineeringService reverseEngineeringService;
 	
 	// Login Server
 	public NetworkDispatch loginDispatch;
@@ -340,6 +341,7 @@ public class NGECore {
 		mountService = new MountService(this);
 		playerCityService = new PlayerCityService(this);
 		staticService = new StaticService(this);
+		reverseEngineeringService = new ReverseEngineeringService(this);
 		
 		if (config.keyExists("JYTHONCONSOLE.PORT")) {
 			int jythonPort = config.getInt("JYTHONCONSOLE.PORT");
@@ -398,6 +400,7 @@ public class NGECore {
 		zoneDispatch.addService(housingService);
 		zoneDispatch.addService(playerCityService);
 		zoneDispatch.addService(staticService);
+		zoneDispatch.addService(reverseEngineeringService);
 		
 		if (optionsConfigLoaded && options.getInt("LOAD.RESOURCE.SYSTEM") == 1) {
 			zoneDispatch.addService(surveyService);

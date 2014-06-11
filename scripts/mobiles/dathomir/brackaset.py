@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('brackaset')
 	mobileTemplate.setLevel(66)
-	mobileTemplate.setMinLevel(66)
-	mobileTemplate.setMaxLevel(6)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
@@ -24,7 +22,7 @@ def addTemplate(core):
 	mobileTemplate.setMeatAmount(100)
 	mobileTemplate.setHideType("Leathery Hide")
 	mobileTemplate.setHideAmount(91)
-	mobileTemplate.setBoneType("Mammal Bones")
+	mobileTemplate.setBoneType("Animal Bones")
 	mobileTemplate.setBoneAmount(81)
 	mobileTemplate.setSocialGroup("brackaset")
 	mobileTemplate.setAssistRange(0)

@@ -552,9 +552,13 @@ public class CharacterService implements INetworkDispatch {
 	 */
 	public long getPlayerOID(String name) {
 		if (!name.equals("")) {
+			if (name.contains(" ")) {
+				name = name.split(" ")[0];
+			}
+			name = name.toLowerCase();
 			long oid = 0L;
 			try {
-				PreparedStatement ps = databaseConnection.preparedStatement("SELECT * FROM characters WHERE \"firstName\"=?");
+				PreparedStatement ps = databaseConnection.preparedStatement("SELECT * FROM characters WHERE LOWER(\"firstName\")=?");
 				ps.setString(1, name);
 				ResultSet resultSet = ps.executeQuery();
 				while (resultSet.next()) {	

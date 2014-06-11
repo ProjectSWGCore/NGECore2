@@ -42,9 +42,13 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import main.NGECore;
 import protocol.swg.EnterStructurePlacementModeMessage;
+import resources.common.OutOfBand;
+import resources.datatables.Citizenship;
 import resources.datatables.DisplayType;
 import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
+import resources.objects.harvester.HarvesterObject;
+import resources.objects.installation.InstallationObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import services.playercities.PlayerCity;
@@ -142,16 +146,13 @@ public class HousingService implements INetworkDispatch {
 		
 		core.objectService.destroyObject(deed);
 		
-		// Structure management
-		Vector<Long> admins = new Vector<>();
-		admins.add(actor.getObjectID());
 		
 		building.setAttachment("sign", sign); // meh workaround
 		building.setAttachment("nextMaintenance", System.currentTimeMillis() + 3600000);
 		building.setAttachment("structureOwner", actor.getObjectID());
-		building.setAttachment("structureAdmins", admins);
 		building.setAttachment("isCondemned", false);
 		building.setAttachment("outstandingMaint", 0);
+		building.addPlayerToAdminList(null, actor.getObjectID(), playerFirstName);
 		building.setDeedTemplate(deed.getTemplate());
 		building.setMaintenanceAmount(houseTemplate.getBaseMaintenanceRate());
 		building.setConditionDamage(100); // Ouch
@@ -233,13 +234,7 @@ public class HousingService implements INetworkDispatch {
 	@SuppressWarnings("unchecked")
 	public boolean getPermissions(SWGObject player, SWGObject container) {
 		SWGObject structure = container.getContainer();
-		Vector<Long> structureAdmins = (Vector<Long>) structure.getAttachment("structureAdmins");
-		
-		if (structureAdmins != null && structureAdmins.contains(player.getObjectID())) {
-			return true;
-		}
-		
-		return false;
+		return ((BuildingObject) structure).isOnAdminList((CreatureObject) player);
 	}
 	
 	public void createDestroySUIPage(final SWGObject owner, final TangibleObject target) {
@@ -254,6 +249,7 @@ public class HousingService implements INetworkDispatch {
 		}
 		
 		String displayname = "@installation_n:"+building.getStfName();
+		final Vector<Integer> noRedeed = new Vector<Integer>();
 		if (building.getCustomName()!=null)
 			displayname = building.getCustomName();
 		final SUIWindow window = core.suiService.createSUIWindow("Script.listBox", owner, target, 0);
@@ -265,16 +261,19 @@ public class HousingService implements INetworkDispatch {
 												    "@player_structure:confirm_destruction_d4 ");
 		if (building.getConditionDamage()<20 && building.getMaintenanceAmount()<3000){
 			window.addListBoxMenuItem("@player_structure:redeed_confirmation \\#BB0000 @player_structure:can_redeed_no_suffix \\#FFFFFF ",1 );
+			noRedeed.add(-1);
 		} else {
 			window.addListBoxMenuItem("@player_structure:redeed_confirmation \\#32CD32 @player_structure:can_redeed_yes_suffix \\#FFFFFF ",1 );
 		}
 		if (building.getConditionDamage()<20){
 			window.addListBoxMenuItem("@player_structure:redeed_condition \\#BB0000 " + building.getConditionDamage() + " \\#FFFFFF ",1 );
+			noRedeed.add(-1);
 		} else {
 			window.addListBoxMenuItem("@player_structure:redeed_condition \\#32CD32 " + building.getConditionDamage() + " \\#FFFFFF ",1 );
 		}
-		if (building.getMaintenanceAmount()<0){
+		if (building.getMaintenanceAmount()<0 || building.getMaintenanceAmount()<800){
 			window.addListBoxMenuItem("@player_structure:redeed_maintenance \\#BB0000 " + (int)building.getMaintenanceAmount() + " \\#FFFFFF ",2 );
+			noRedeed.add(-1);
 		} else {
 			window.addListBoxMenuItem("@player_structure:redeed_maintenance \\#32CD32  " + (int)building.getMaintenanceAmount() + " \\#FFFFFF ",2 );
 		}
@@ -288,7 +287,8 @@ public class HousingService implements INetworkDispatch {
 			@Override
 			public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
 				core.suiService.closeSUIWindow(owner, 0);
-				createCodeWindow(owner, target);
+				if (noRedeed.size()==0 && ((CreatureObject)owner).getBankCredits()>800)
+					createCodeWindow(owner, target);
 			}					
 		});		
 		window.addHandler(1, "", Trigger.TRIGGER_CANCEL, returnList, new SUICallback() {
@@ -309,11 +309,12 @@ public class HousingService implements INetworkDispatch {
 		final int confirmCode = 100000 + rnd.nextInt(900000);
 		final SUIWindow window = core.suiService.createInputBox(2,"@player_structure:structure_status","@player_structure:structure_name_prompt", owner, target, 0);
 		window.setProperty("bg.caption.lblTitle:Text", "@player_structure:confirm_destruction_t");
+	
 		window.setProperty("Prompt.lblPrompt:Text", "@player_structure:your_structure_prefix " +
-													"\\#32CD32 @player_structure:will_redeed_confirm \\#FFFFFF "+
-												    "@player_structure:will_redeed_suffix "  +
-												    "\n \n Code: " + confirmCode);
-		
+												"\\#32CD32 @player_structure:will_redeed_confirm \\#FFFFFF "+
+											    "@player_structure:will_redeed_suffix "  +
+											    "\n \n Code: " + confirmCode);
+
 		window.setProperty("btnOk:visible", "True");
 		window.setProperty("btnCancel:visible", "True");
 		window.setProperty("btnOk:Text", "@yes");
@@ -324,27 +325,35 @@ public class HousingService implements INetworkDispatch {
 		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, new SUICallback() {
 			@Override
 			public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
-				CreatureObject crafter = (CreatureObject)owner;
+				CreatureObject houseOwner = (CreatureObject)owner;
 				core.suiService.closeSUIWindow(owner, 0);
 				if (returnList.get(0).equals(""+confirmCode)){
 					// handle creation of correct deed in player inventory
-					PlayerObject player = (PlayerObject) crafter.getSlottedObject("ghost");	
+					PlayerObject player = (PlayerObject) houseOwner.getSlottedObject("ghost");	
+					PlayerCity city = core.playerCityService.getCityObjectIsIn(building);
 					HouseTemplate houseTemplate = housingTemplates.get(houseToDeed.get(building.getTemplate()));
 					
 					TangibleObject deed = (TangibleObject) core.objectService.createObject(houseTemplate.getDeedTemplate(), owner.getPlanet());
 					
 					if (player.getLotsRemaining() + houseTemplate.getLotCost() > 10){
 						// Something went wrong or hacking attempt
-						crafter.sendSystemMessage("Structure can't be redeeded. Maximum lot count exceeded.",(byte)1);
+						houseOwner.sendSystemMessage("Structure can't be redeeded. Maximum lot count exceeded.",(byte)1);
 						return;
 					}
 					
 					deed.setIntAttribute("@obj_attr_n:examine_maintenance_rate", houseTemplate.getBaseMaintenanceRate());
 					deed.setIntAttribute("@obj_attr_n:examine_maintenance", (int) building.getMaintenanceAmount());
 					
-					core.objectService.destroyObject(building.getObjectID());
+					owner.getContainer().remove(owner);
+					
+					int costs = 800;
+					houseOwner.setBankCredits(houseOwner.getBankCredits()-costs);
+					
 					if(building.getAttachment("sign") != null)
 						core.objectService.destroyObject((SWGObject) building.getAttachment("sign"));
+					
+					core.objectService.destroyObject(building.getObjectID());
+					
  
 					SWGObject ownerInventory = owner.getSlottedObject("inventory");
 					ownerInventory.add(deed);
@@ -353,11 +362,26 @@ public class HousingService implements INetworkDispatch {
 						player.setLotsRemaining(player.getLotsRemaining() + houseTemplate.getLotCost());
 					}
 					
-					crafter.sendSystemMessage("@player_structure:processing_destruction",(byte)1);
-					crafter.sendSystemMessage("@player_structure:deed_reclaimed",(byte)1);
+					if(building.getResidency()) {
+						owner.setAttachment("residentBuilding", null);
+					}
+					
+					if(city != null) {
+						city.removeStructure(building.getObjectID());
+						if(building.getResidency()) {
+							city.removeCitizen(owner.getObjectID());
+							player.setHome("");
+							player.setCitizenship(Citizenship.Homeless);
+							owner.setAttachment("residentCity", null);
+						}
+					}
+					
+					houseOwner.sendSystemMessage("@player_structure:processing_destruction",(byte)1);
+					houseOwner.sendSystemMessage("@player_structure:deed_reclaimed",(byte)1);
+					
 					
 				} else {
-					crafter.sendSystemMessage("@player_structure:incorrect_destroy_code",(byte)1);
+					houseOwner.sendSystemMessage("@player_structure:incorrect_destroy_code",(byte)1);
 				}
 					
 			}					
@@ -415,10 +439,7 @@ public class HousingService implements INetworkDispatch {
 				CreatureObject crafter = (CreatureObject)owner;
 				crafter.setCashCredits(crafter.getCashCredits() - Integer.parseInt(returnList.get(1)));
 				building.setMaintenanceAmount(building.getMaintenanceAmount()+Float.parseFloat(returnList.get(1)));
-				String displayname = "the structure";
-				if (building.getCustomName()!=null)
-					displayname = building.getCustomName();
-				crafter.sendSystemMessage("You successfully make a payment of " + Integer.parseInt(returnList.get(1)) + " credits to " + displayname + ".", (byte) 0);
+				crafter.sendSystemMessage("You successfully make a payment of " + Integer.parseInt(returnList.get(1)) + " credits to the maintenance pool.", (byte) 0);
 				core.suiService.closeSUIWindow(owner, 0);
 			}					
 		});		
@@ -506,11 +527,27 @@ public class HousingService implements INetworkDispatch {
 	
 	public void declareResidency(SWGObject owner, TangibleObject target) {
 		final BuildingObject building = (BuildingObject) target.getGrandparent();
-		//final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
-		building.setResidency((CreatureObject)owner);
-		PlayerCity cityActorIsIn = core.playerCityService.getCityObjectIsIn(owner);
-		owner.setAttachment("residentCity", cityActorIsIn.getCityID());
-		//owner.setResidence();
+		if(owner.getObjectID() != (long) building.getAttachment("structureOwner")) {
+			((CreatureObject) owner).sendSystemMessage("@player_structure:declare_must_be_owner", (byte) 0);
+			return;
+		} else if(building.getResidency()) {
+			((CreatureObject) owner).sendSystemMessage("@player_structure:already_residence", (byte) 0);
+			return;
+		}
+		if(System.currentTimeMillis() < (long) owner.getAttachment("residencyCooldown")) {
+			((CreatureObject) owner).sendSystemMessage(OutOfBand.ProsePackage("@player_structure:change_residence_time", "DI", (int) ((long) owner.getAttachment("residencyCooldown") - System.currentTimeMillis()) / 3600000), (byte) 0);
+			return;
+		}
+		building.setResidency(true);
+		PlayerCity cityActorIsIn = core.playerCityService.getCityObjectIsIn(building);
+		owner.setAttachment("residencyCooldown", System.currentTimeMillis() + 86400000); // 24 hours
+		owner.setAttachment("residentBuilding", building.getObjectID());
+		((CreatureObject) owner).sendSystemMessage("@player_structure:change_residence", (byte) 0);
+		if(cityActorIsIn != null) {
+			owner.setAttachment("residentCity", cityActorIsIn.getCityID());
+			((CreatureObject) owner).getPlayerObject().setHome(cityActorIsIn.getCityName());
+			((CreatureObject) owner).getPlayerObject().setCitizenship(Citizenship.Citizen);
+		}
 	}
 	
 	public void handleListAllItems(SWGObject owner, TangibleObject target) {
@@ -768,25 +805,46 @@ public class HousingService implements INetworkDispatch {
 	public void handlePermissionEntry(CreatureObject owner, TangibleObject target) {
 		final BuildingObject building = (BuildingObject) target.getGrandparent();
 		//final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
-		String listName = "ENTRY";
+		String listName = "entry";
 		building.setPermissionEntry(listName,owner);
 	}
 	
 	public void handlePermissionBan(CreatureObject owner, TangibleObject target) {
 		final BuildingObject building = (BuildingObject) target.getGrandparent();
 		//final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
-		String listName = "BAN";
+		String listName = "ban";
 		building.setPermissionBan(listName,owner);
+	}
+	
+	public void handlePermissionAdmin(CreatureObject owner, TangibleObject target) {
+		final BuildingObject building = (BuildingObject) target.getGrandparent();
+		//final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
+		String listName = "admin";
+		building.setPermissionAdmin(listName,owner);
+	}
+
+	
+	public SWGObject getClosestStructureWithAdminRights(CreatureObject actor) {
+		return core.simulationService.get(actor.getPlanet(), actor.getWorldPosition().x, actor.getWorldPosition().z, 20)
+			   .stream().filter(o -> o instanceof BuildingObject || o instanceof InstallationObject)
+			   .filter(o -> {
+				   if(o instanceof BuildingObject)
+					   return ((BuildingObject) o).isOnAdminList(actor);
+				   else if(o instanceof HarvesterObject) {
+					   System.out.println("test");
+					   return ((HarvesterObject) o).isOnAdminList(actor);
+				   }
+				   return false;
+			   }).min((o1, o2) -> (int) (o1.getWorldPosition().getDistance(actor.getWorldPosition()) - o2.getWorldPosition().getDistance(actor.getWorldPosition()))).orElse(null);
 	}
 	
 	public void handlePermissionListModify(CreatureObject owner, SWGObject target, String commandArgs){
 		
 		String[] commandSplit = commandArgs.split(" ");
-		if (commandSplit.length==3){		
-			if (core.characterService.playerExists(commandSplit[2]) && 
-				core.characterService.getPlayerOID(commandSplit[2])>0){
+		if (commandSplit.length >= 3) {	
+			if (core.characterService.playerExists(commandSplit[2]) && core.characterService.getPlayerOID(commandSplit[2]) > 0) {
 				long playerOID = core.characterService.getPlayerOID(commandSplit[2]);
-				if (commandSplit[2].equals("ENTRY")){
+				if (commandSplit[1].equals("entry")) {
 					
 					if (commandSplit[0].equals("add")){
 						((BuildingObject)target).addPlayerToEntryList(owner, playerOID, commandSplit[2]);
@@ -795,13 +853,35 @@ public class HousingService implements INetworkDispatch {
 						((BuildingObject)target).removePlayerFromEntryList(owner, playerOID, commandSplit[2]);
 					}
 				}
-				if (commandSplit[2].equals("BAN")){
+				if (commandSplit[1].equals("ban")) {
+					
+					if (commandSplit[0].equals("add")) {			
+						if(((BuildingObject)target).isOnAdminList((CreatureObject) core.objectService.getObject(playerOID))) {
+							owner.sendSystemMessage("@player_structure:cannot_ban_admin", (byte) 0);
+							return;
+						}
+						((BuildingObject)target).addPlayerToBanList(owner, playerOID, commandSplit[2]);
+						((BuildingObject)target).removePlayerFromEntryList(owner, playerOID, commandSplit[2]);
+					}
+					if (commandSplit[0].equals("remove")) {					
+						((BuildingObject)target).removePlayerFromBanList(owner, playerOID, commandSplit[2]);
+					} 
+				}
+				if (commandSplit[1].equals("admin")) {
 					
 					if (commandSplit[0].equals("add")){					
-						((BuildingObject)target).addPlayerToBanList(owner, playerOID, commandSplit[2]);
+						((BuildingObject)target).addPlayerToAdminList(owner, playerOID, commandSplit[2]);
 					}
-					if (commandSplit[0].equals("remove")){					
-						((BuildingObject)target).removePlayerFromBanList(owner, playerOID, commandSplit[2]);
+					if (commandSplit[0].equals("remove")) {					
+						if(playerOID == (long) target.getAttachment("structureOwner")) {
+							owner.sendSystemMessage("@player_structure:cannot_remove_owner", (byte) 0);
+							return;
+						}
+						else if(playerOID == owner.getObjectID()) {
+							owner.sendSystemMessage("@player_structure:cannot_remove_self", (byte) 0);
+							return;
+						}
+						((BuildingObject)target).removePlayerFromAdminList(owner, playerOID, commandSplit[2]);
 					}
 				}
 			} else {

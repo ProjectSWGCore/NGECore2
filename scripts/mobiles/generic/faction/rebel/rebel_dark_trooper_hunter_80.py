@@ -10,22 +10,27 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('rebel_battle_droid')
-	mobileTemplate.setLevel(83)
+	mobileTemplate.setCreatureName('crackdown_rebel_heavy_trooper')
+	mobileTemplate.setLevel(80)
 	mobileTemplate.setDifficulty(Difficulty.ELITE)
 
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
-	mobileTemplate.setDeathblow(True)
+	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(1)
-	mobileTemplate.setSocialGroup("imperial")
-	mobileTemplate.setAssistRange(24)
+	mobileTemplate.setSocialGroup("rebel")
+	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(False)
 	mobileTemplate.setFaction("rebel")
-	mobileTemplate.setFactionStatus(1)
+	mobileTemplate.setFactionStatus(FactionStatus.Combatant)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_battle_droid.iff')
+	templates.add('object/mobile/shared_dressed_rebel_trooper_bith_m_01.iff')
+	templates.add('object/mobile/shared_dressed_rebel_trooper_human_female_01.iff')
+	templates.add('object/mobile/shared_dressed_rebel_trooper_human_male_01.iff')
+	templates.add('object/mobile/shared_dressed_rebel_trooper_sullustan_male_01.iff')
+	templates.add('object/mobile/shared_dressed_rebel_trooper_twk_female_01.iff')
+	templates.add('object/mobile/shared_dressed_rebel_trooper_twk_male_01.iff')				
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
@@ -37,5 +42,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('rangedShot')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('battle_droid_rebel', mobileTemplate)
+	core.spawnService.addMobileTemplate('rebel_dark_trooper_hunter_80', mobileTemplate)
 	return
