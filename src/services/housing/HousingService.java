@@ -146,7 +146,6 @@ public class HousingService implements INetworkDispatch {
 		
 		core.objectService.destroyObject(deed);
 		
-		
 		building.setAttachment("sign", sign); // meh workaround
 		building.setAttachment("nextMaintenance", System.currentTimeMillis() + 3600000);
 		building.setAttachment("structureOwner", actor.getObjectID());
@@ -489,22 +488,20 @@ public class HousingService implements INetworkDispatch {
 		owner.sendSystemMessage("Structure renamed.", DisplayType.Broadcast);
 	}
 	
-	public void createStatusSUIPage(SWGObject owner, TangibleObject target) {
+	public void createStatusSUIPage(CreatureObject owner, TangibleObject target) 
+	{
 		final BuildingObject building = (BuildingObject) target.getGrandparent();
-		//final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
+		
 		String displayname = "@installation_n:"+building.getStfName();
-		if (building.getCustomName()!=null)
-			displayname = building.getCustomName();
+		if (building.getCustomName()!=null) displayname = building.getCustomName();
+		
 		final SUIWindow window = core.suiService.createSUIWindow("Script.listBox", owner, target, 0);
 		window.setProperty("bg.caption.lblTitle:Text", "@player_structure:structure_status_t");
 		window.setProperty("Prompt.lblPrompt:Text", "@player_structure:structure_name_prompt" + " " + displayname);
-		String ownerName = owner.getCustomName();
-		if (ownerName.length()>0){
-			String[] helper = ownerName.split(" ");
-			ownerName = helper[0];
-		}
-
+		
+		String ownerName =  core.objectService.getObject((long) building.getAttachment("structureOwner")).getFirstName();
 		String maintenancePool_string = ""+(int)building.getMaintenanceAmount();
+		
 		int hourlyMaintenance = building.getBMR();
 		float totalNumberOfHours = (float)building.getMaintenanceAmount()/hourlyMaintenance;
 		float minuteFraction = ((totalNumberOfHours * 100) % 100) / 100;
@@ -515,10 +512,10 @@ public class HousingService implements INetworkDispatch {
 		maintenancePool_string += " (" + nDays + " days, " + nHours + " hours, " + nMinutes + " minutes)";
 				
 		window.addListBoxMenuItem("@player_structure:owner_prompt" + " " + ownerName, 0);
-		if (building.getPrivacy()==BuildingObject.PRIVATE)
-			window.addListBoxMenuItem("@player_structure:structure_private", 1);
-		else
-			window.addListBoxMenuItem("@player_structure:structure_public", 1);
+		
+		if (building.getPrivacy()==BuildingObject.PRIVATE) window.addListBoxMenuItem("@player_structure:structure_private", 1);
+		else window.addListBoxMenuItem("@player_structure:structure_public", 1);
+		
 		window.addListBoxMenuItem("@player_structure:condition_prompt" + " " + target.getConditionDamage()+"%", 2);	
 		window.addListBoxMenuItem("@player_structure:maintenance_pool_prompt " + maintenancePool_string, 3);	
 		window.addListBoxMenuItem("@player_structure:maintenance_rate_prompt " + building.getBMR() + " cr/h", 4); // @player_structure:credits_per_hour	
@@ -557,7 +554,7 @@ public class HousingService implements INetworkDispatch {
 				return;
 			}
 		}
-		if(System.currentTimeMillis() < (long) owner.getAttachment("residencyCooldown") && cityActorIsIn.getMayorID() != owner.getObjectID()) {
+		if((owner.getAttachment("residencyCooldown") == null || System.currentTimeMillis() < (long) owner.getAttachment("residencyCooldown")) && cityActorIsIn.getMayorID() != owner.getObjectID()) {
 			((CreatureObject) owner).sendSystemMessage(OutOfBand.ProsePackage("@player_structure:change_residence_time", "DI", (int) ((long) owner.getAttachment("residencyCooldown") - System.currentTimeMillis()) / 3600000), (byte) 0);
 			return;
 		}
@@ -621,16 +618,11 @@ public class HousingService implements INetworkDispatch {
 				core.suiService.closeSUIWindow(owner, 0);
 			}					
 		});		
-		core.suiService.openSUIWindow(window);
-
-		
+		core.suiService.openSUIWindow(window);	
 	}
 	
-	public void handleDeleteAllItems(SWGObject owner, TangibleObject target) {
-		final BuildingObject building = (BuildingObject) target.getGrandparent();
-		//final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
-		//building.getItemsList().clear();
-		// confirmation needed
+	public void handleDeleteAllItems(SWGObject owner, TangibleObject target) 
+	{
 		confirmDeleteAllItems(owner, target);
 	}
 	
@@ -676,8 +668,8 @@ public class HousingService implements INetworkDispatch {
 		core.suiService.openSUIWindow(window);
 	}
 	
-	public void confirmDeleteAllItems2ndStage(final CreatureObject ownerC, BuildingObject building) {
-		
+	public void confirmDeleteAllItems2ndStage(final CreatureObject ownerC, BuildingObject building) 
+	{
 		final SUIWindow window = core.suiService.createMessageBox(2,"@player_structure:structure_status","@player_structure:structure_name_prompt", ownerC, building, 0);
 		window.setProperty("bg.caption.lblTitle:Text", "@player_structure:confirm_destruction_t");
 		window.setProperty("Prompt.lblPrompt:Text", "@player_structure:delete_all_items_second_d");

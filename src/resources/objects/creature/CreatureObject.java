@@ -1853,4 +1853,14 @@ public class CreatureObject extends TangibleObject implements Serializable {
 			}
 		}
 	}
+	
+	public String getFirstName()
+	{
+		return getCustomName().split(" ")[0];
+	}
+	
+	public String getLastName()
+	{
+		return getCustomName().split(" ")[1];
+	}
 }
