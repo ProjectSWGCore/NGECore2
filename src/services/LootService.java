@@ -44,6 +44,8 @@ import protocol.swg.PlayClientEffectObjectTransformMessage;
 import protocol.swg.StopClientEffectObjectByLabel;
 import resources.common.OutOfBand;
 import resources.datatables.DisplayType;
+import resources.datatables.Options;
+import resources.datatables.WeaponType;
 import resources.loot.LootGroup;
 import resources.loot.LootRollSession;
 import resources.objects.creature.CreatureObject;
@@ -2853,6 +2855,38 @@ public class LootService implements INetworkDispatch {
 		skillEnhancingAttachment2.setAttachment("SEAeffectNameList", effectNameList);
 		skillEnhancingAttachment2.setAttachment("SEAmodifierValueList", effectValueList);
 		playerInventory.add(skillEnhancingAttachment2);
+		
+		WeaponObject sword1 = (WeaponObject) core.objectService.createObject("object/weapon/melee/sword/shared_sword_01.iff", player.getPlanet());
+		sword1.setIntAttribute("required_combat_level", 90);
+		sword1.setAttackSpeed(1);
+		sword1.setMaxRange(5);
+		sword1.setDamageType("kinetic");
+		sword1.setMinDamage(1100);
+		sword1.setMaxDamage(1200);
+		sword1.setOptions(Options.SOCKETED, true);
+		sword1.setOptions(Options.USABLE, true);
+		sword1.setWeaponType(WeaponType.ONEHANDEDMELEE);
+		playerInventory.add(sword1);
+		System.err.println("MIX " + sword1.getObjectID());
+		
+		
+		String powerUpLabel = "item_reverse_engineering_powerup_weapon_02_01";
+		String powerUpDescription = "item_reverse_engineering_powerup_weapon_02_01";
+		String powerUpTemplate = "object/tangible/powerup/base/shared_weapon_base.iff";
+
+		int powerValue = 12;
+		TangibleObject powerUp = (TangibleObject) core.objectService.createObject(powerUpTemplate, player.getPlanet());
+
+		powerUp.setStfFilename("static_item_n");
+		powerUp.setStfName(powerUpLabel);
+		powerUp.setDetailFilename("static_item_d");
+		powerUp.setDetailName(powerUpDescription);
+		powerUp.setIntAttribute("@stat_n:droid_experimentation", powerValue);	
+		powerUp.setAttachment("effectName","droid_experimentation");
+		powerUp.setAttachment("powerValue",powerValue);
+		powerUp.setIntAttribute("num_in_stack", 250);	
+		powerUp.setAttachment("radial_filename", "item/item");
+		playerInventory.add(powerUp);
 		
 	}
 	
