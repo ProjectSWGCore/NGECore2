@@ -26,11 +26,14 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import resources.common.OutOfBand;
 import resources.common.ProsePackage;
+import resources.datatables.Citizenship;
 import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
@@ -39,6 +42,7 @@ import services.sui.SUIWindow;
 import services.sui.SUIWindow.SUICallback;
 import services.sui.SUIWindow.Trigger;
 import engine.resources.objects.SWGObject;
+import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
@@ -55,16 +59,20 @@ public class PlayerCityService implements INetworkDispatch {
     private Random random = new Random();
     private Vector<PlayerCity> playerCities = new Vector<PlayerCity>();
     private int cityID = 0; // This must be persisted or handled via objectservice somehow
-
+    private Map<String, int[]> cityRankCaps = new ConcurrentHashMap<String, int[]>();
     // static helper variable to be deleted later
     public static boolean sandboxCityBuilt = false;
     
 	public PlayerCityService(NGECore core) {
 		this.core = core;
-		
+		core.scriptService.callScript("scripts/", "cityRankCaps", "addCityRankCaps", core);
 		scheduler.scheduleAtFixedRate(() -> {
 			administratePlayerCities();
 		}, 0, 1, TimeUnit.MINUTES);
+	}
+	
+	public void addCityRankCap(String planetName, int[] caps) {
+		cityRankCaps.put(planetName, caps);
 	}
 
 	public void administratePlayerCities() {
@@ -72,10 +80,10 @@ public class PlayerCityService implements INetworkDispatch {
 			Vector<PlayerCity> unfoundedCities = new Vector<PlayerCity>();
 			for (PlayerCity city : playerCities){
 				
-				if (city.getNextCityUpdate()<=System.currentTimeMillis())
+				if (city.getNextCityUpdate() <= System.currentTimeMillis())
 					city.processCityUpdate();
 				
-				if (city.getNextElectionDate()<=System.currentTimeMillis())
+				if (city.getNextElectionDate() <= System.currentTimeMillis())
 					city.processElection();
 				
 				if (! city.isFounded() && city.getFoundationTime()<=System.currentTimeMillis()-(60*60*24*1000)){
@@ -85,10 +93,16 @@ public class PlayerCityService implements INetworkDispatch {
 			}
 			
 			if (unfoundedCities.size()>0){
-				playerCities.removeAll(unfoundedCities);
+				unfoundedCities.forEach(this::destroyCity);
 			}			
-			playerCities.removeAll(Collections.singleton(null));
 		}
+	}
+	
+	public boolean isRankCapped(Planet planet, int rank) {
+		if(cityRankCaps.get(planet.getName()) == null)
+			return true;
+		int cap = cityRankCaps.get(planet.getName())[rank - 1];
+		return playerCities.stream().filter(c -> c.getPlanetId() == planet.getID()).count() >= cap;
 	}
 	
 	private long generateCityId() {
@@ -103,13 +117,70 @@ public class PlayerCityService implements INetworkDispatch {
 		return id;
 	}
 	
+	private boolean doesCityNameExist(String name) {
+		return playerCities.stream().map(PlayerCity::getCityName).filter(n -> n.equalsIgnoreCase(name)).findFirst().isPresent() || 
+			   core.terrainService.getClientRegions().stream().map(ClientRegion::getName).filter(n -> n.equalsIgnoreCase(name)).findFirst().isPresent();
+	}
+	
+	public void handlePlaceCity(final CreatureObject actor, TangibleObject deed, float positionX, float positionZ, float rotation) {
+		
+		if(!canPlacePlayerCityAtPosition(actor, actor.getPlanet(), new Point3D(positionX, 0, positionZ)))
+			return;
+		
+		if(isRankCapped(actor.getPlanet(), PlayerCity.OUTPOST)) {
+			actor.sendSystemMessage("This Planet can not support any more cities", (byte) 0);
+			return;
+		}
+		
+		if(actor.getPlayerObject().getCitizenship() == Citizenship.Mayor) {
+			actor.sendSystemMessage("@city/city:already_mayor", (byte) 0);
+			return;
+		}
+		
+		final SUIWindow window = core.suiService.createInputBox(2,"@city/city:city_name_t","@city/city:city_name_d", actor, null, 0);		
+		core.suiService.openSUIWindow(window);				
+		Vector<String> returnList = new Vector<String>();		
+		returnList.add("txtInput:LocalText");	
+		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, new SUICallback() {
+			@Override
+			public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
+				if (returnList.size() == 0 || returnList.get(0).length() == 0)
+					return;
+				String name = returnList.get(0);
+				if(!core.characterService.checkName(name, owner.getClient())) {
+					actor.sendSystemMessage("@player_structure:not_valid_name", (byte) 0);
+					return;
+				}
+				if(doesCityNameExist(name)) {
+					actor.sendSystemMessage("@player_structure:cityname_not_unique", (byte) 0);
+					return;
+				}
+				
+				BuildingObject cityHall = core.housingService.placeStructure(actor, deed, positionX, positionZ, rotation);
+				
+				if(cityHall == null) {
+					actor.sendSystemMessage("Error: NULL city hall", (byte) 0);
+					return;
+				}
+				
+				PlayerCity playerCity = addNewPlayerCity(actor, cityHall);
+				cityHall.setAttachment("structureCity", playerCity.getCityID());
+				actor.setAttachment("residentCity", playerCity.getCityID());
+				core.housingService.declareResidency(actor, cityHall);
+				newCitySUI2((CreatureObject) owner, playerCity);
+
+			}					
+		});		
+		core.suiService.openSUIWindow(window);
+
+	}
+	
 	public PlayerCity addNewPlayerCity(CreatureObject founder, BuildingObject cityHall) {
 		PlayerCity newCity = null;
 		synchronized(playerCities){
-			newCity = new PlayerCity(founder,cityID++, cityHall);
+			newCity = new PlayerCity(founder, generateCityId(), cityHall);
 			playerCities.add(newCity);
 		}
-		newCitySUI1(founder,newCity);
 		return newCity;
 	}
 	
@@ -140,7 +211,20 @@ public class PlayerCityService implements INetworkDispatch {
 		return foundCity;
 	}
 	
-	
+	public boolean canPlacePlayerCityAtPosition(CreatureObject actor, Planet planet, Point3D position) {
+		
+		PlayerCity closest = playerCities.stream().min((c1, c2) -> (int) (c1.getCityCenterPosition().getDistance2D(position) - c2.getCityCenterPosition().getDistance2D(position))).orElse(null);
+		if(closest != null && closest.getCityCenterPosition().getDistance2D(position) < 1024) {
+			actor.sendSystemMessage(OutOfBand.ProsePackage("@player_structure:city_too_close", "TO", closest.getCityName()), (byte) 0);
+			return false;
+		}
+		ClientRegion closest2 = core.terrainService.getClientRegionsForPlanet(planet).stream().min((c1, c2) -> (int) (c1.getCenter().getDistance2D(position) - c2.getCenter().getDistance2D(position))).orElse(null);
+		if(closest2 != null && closest2.getCenter().getDistance2D(position) < 1024) {
+			actor.sendSystemMessage(OutOfBand.ProsePackage("@player_structure:city_too_close", "TO", closest2.getName()), (byte) 0);
+			return false;
+		}
+		return true;
+	}
 	
 	public void newCitySUI1(CreatureObject citizen, final PlayerCity newCity) {		
 		final SUIWindow window = core.suiService.createInputBox(2,"@city/city:city_name_t","@city/city:city_name_d", citizen, citizen, 0);		

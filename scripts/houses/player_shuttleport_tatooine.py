@@ -9,5 +9,7 @@ def setup(housingTemplates):
 	houseTemplate.addPlaceablePlanet("tatooine")
 	houseTemplate.setDefaultItemLimit(0)
 	houseTemplate.setBaseMaintenanceRate(2000)
+
+	houseTemplate.setCivicStructure(True)	
 	housingTemplates.put(houseTemplate.getDeedTemplate(), houseTemplate)
 	return

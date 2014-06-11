@@ -103,25 +103,25 @@ public class HousingService implements INetworkDispatch {
 		}
 	}
 	
-	public void placeStructure(final CreatureObject actor, TangibleObject deed, float positionX, float positionZ, float rotation) {
+	public BuildingObject placeStructure(final CreatureObject actor, TangibleObject deed, float positionX, float positionZ, float rotation) {
 		HouseTemplate houseTemplate = housingTemplates.get(deed.getTemplate());
 		int structureLotCost = houseTemplate.getLotCost();
 		String structureTemplate = houseTemplate.getBuildingTemplate();
 		
 		if (!houseTemplate.canBePlacedOn(actor.getPlanet().getName())) {
 			actor.sendSystemMessage("You may not place this structure on this planet.", (byte) 0); // should probably load this from an stf
-			return;
+			return null;
 		}
 		
 		if(!actor.getClient().isGM() && !core.terrainService.canBuildAtPosition(actor, positionX, positionZ)) {
 			actor.sendSystemMessage("You may not place a structure here.", (byte) 0); // should probably load this from an stf
-			return;
+			return null;
 		}
 		
 		// Lot stuff
 		if (!actor.getPlayerObject().deductLots(structureLotCost)) {
 			actor.sendSystemMessage("You do not have enough available lots to place this structure.", (byte) 0); // should probably load this from an stf
-			return;
+			return null;
 		}
 		
 		// Calculate our orientation and height
@@ -151,20 +151,14 @@ public class HousingService implements INetworkDispatch {
 		building.setAttachment("nextMaintenance", System.currentTimeMillis() + 3600000);
 		building.setAttachment("structureOwner", actor.getObjectID());
 		building.setAttachment("isCondemned", false);
+		building.setAttachment("isCivicStructure", houseTemplate.isCivicStructure());
 		building.setAttachment("outstandingMaint", 0);
 		building.addPlayerToAdminList(null, actor.getObjectID(), playerFirstName);
 		building.setDeedTemplate(deed.getTemplate());
 		building.setMaintenanceAmount(houseTemplate.getBaseMaintenanceRate());
 		building.setConditionDamage(100); // Ouch
 		
-		if (structureTemplate.contains("cityhall")){
-			PlayerCity newCity = core.playerCityService.addNewPlayerCity(actor, building); 
-			building.setAttachment("structureCity", newCity.getCityID());
-			building.setAttachment("isCivicStructure", true);
-			actor.setAttachment("residentCity", newCity.getCityID());
-			declareResidency(actor, building);
-		}
-		
+		/*
 		// Check for city founders joining a new city
 		PlayerCity cityActorIsIn = core.playerCityService.getCityObjectIsIn(actor);
 		
@@ -180,10 +174,10 @@ public class HousingService implements INetworkDispatch {
 					cityActorIsIn.addNewStructure(building.getObjectID());
 				}
 			}
-		}
+		}*/
 		
 		core.objectService.persistObject(building.getObjectID(), building, core.getSWGObjectODB());
-				
+		return building;	
 	}
 	
 	public void startMaintenanceTask(BuildingObject building) {

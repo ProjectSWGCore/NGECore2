@@ -30,14 +30,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import resources.common.FileUtilities;
 import resources.common.collidables.CollidableCircle;
-
+import services.playercities.ClientRegion;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.resources.config.Config;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
-
 import main.NGECore;
 
 public class TerrainService {
@@ -45,6 +44,7 @@ public class TerrainService {
 	private NGECore core;
 	private List<Planet> planets = Collections.synchronizedList(new ArrayList<Planet>());
 	private Map<Planet, List<CollidableCircle>> noBuildAreas = new ConcurrentHashMap<Planet, List<CollidableCircle>>();
+	private Map<Planet, List<ClientRegion>> clientRegions = new ConcurrentHashMap<Planet, List<ClientRegion>>();
 
 	public TerrainService(NGECore core) {
 		this.core = core;	
@@ -88,13 +88,15 @@ public class TerrainService {
 			
 			for (int i = 0; i < regionTable.getRowCount(); i++) {
 									
+				String name = (String) regionTable.getObject(i, 0);
 				float x = (Float) regionTable.getObject(i, 1);
 				float z = (Float) regionTable.getObject(i, 2);
 				float radius = (Float) regionTable.getObject(i, 3);
 					
 				CollidableCircle region = new CollidableCircle(new Point3D(x, 0, z), radius, planet);
 				noBuildAreas.get(planet).add(region);
-				
+				ClientRegion clientRegion = new ClientRegion(name, new Point3D(x, 0, z), radius, planet);
+				clientRegions.get(planet).add(clientRegion);
 			}
 
 		} catch (InstantiationException | IllegalAccessException e) {
@@ -174,6 +176,7 @@ public class TerrainService {
 		planets.add(planet);
 		core.mapService.addPlanet(planet);
 		noBuildAreas.put(planet, new ArrayList<CollidableCircle>());
+		clientRegions.put(planet, new ArrayList<ClientRegion>());
 		loadClientRegions(planet);
 	}
 
@@ -299,6 +302,14 @@ public class TerrainService {
 		return planet.getTerrainVisitor().isWater(worldPosition.x, worldPosition.z);
 	}
 	
-	
+	public List<ClientRegion> getClientRegionsForPlanet(Planet planet) {
+		return clientRegions.get(planet);
+	}
+
+	public List<ClientRegion> getClientRegions() {
+		List<ClientRegion> regions = new ArrayList<ClientRegion>();
+		clientRegions.values().forEach(regions::addAll);
+		return regions;
+	}
 
 }

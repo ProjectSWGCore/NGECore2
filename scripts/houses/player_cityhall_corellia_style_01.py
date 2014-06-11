@@ -10,7 +10,7 @@ def setup(housingTemplates):
 	houseTemplate.addPlaceablePlanet("talus")
 	houseTemplate.setDefaultItemLimit(400)
 	houseTemplate.setBaseMaintenanceRate(1000)
-	
+	houseTemplate.setCivicStructure(True)	
 	housingTemplates.put(houseTemplate.getDeedTemplate(), houseTemplate)
 	
 	return

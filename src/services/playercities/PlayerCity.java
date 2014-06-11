@@ -58,8 +58,6 @@ public class PlayerCity implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	public static final int DESERTED   = 0;
-	public static final int NEWCITY    = 0;
 	public static final int OUTPOST    = 1; 
 	public static final int VILLAGE    = 2; 
 	public static final int TOWNSHIP   = 3; 
@@ -75,9 +73,6 @@ public class PlayerCity implements Serializable {
 	public static final int MEDICAL_CENTER         = 7; 
 	public static final int RESEARCH_CENTER        = 8; 
 	public static final int SAMPLE_RICH            = 9;
-	public static final int INDUSTRIAL_SOCIETY     = 10; 
-	public static final int SCIENTIFIC_SOCIETY     = 11;
-	public static final int STRONGHOLD             = 12;
 	
 	public static final String[] specialisationSTFNames = new String[]{"city_spec_cloning",
 																       "city_spec_bm_incubator",
@@ -87,10 +82,7 @@ public class PlayerCity implements Serializable {
 																       "city_spec_industry",
 																       "city_spec_doctor",
 																       "city_spec_research",
-																       "city_spec_sample_rich",
-																       "city_spec_master_manufacturing",
-																       "city_spec_master_healing",
-																 	   "city_spec_stronghold"};
+																       "city_spec_sample_rich"};
 	
 	public static final int BANK              = 1; 
 	public static final int CLONING_FACILITY  = 2; 
@@ -101,6 +93,7 @@ public class PlayerCity implements Serializable {
 	
 	
 	private String cityName = "";
+	private int planetId;
 	private long cityHallId = 0;
 	private long cityID = -1;
 	private Point3D cityCenterPosition = new Point3D(0,0,0);
@@ -141,7 +134,7 @@ public class PlayerCity implements Serializable {
 	
 	public PlayerCity() {}
 	
-	public PlayerCity(CreatureObject founder, int cityID, BuildingObject cityHall) {
+	public PlayerCity(CreatureObject founder, long cityId, BuildingObject cityHall) {
 		setCityCenterPosition(cityHall.getPosition());
 		setCityHallId(cityHall.getObjectID());
 		setCityRadius(150);
@@ -149,13 +142,16 @@ public class PlayerCity implements Serializable {
 		setMaintenanceFee(1);
 		setNextCityUpdate(foundationTime+cityUpdateSpan);
 		setNextElectionDate(foundationTime+legislationPeriod);
-		this.cityID = cityID;
+		this.cityID = cityId;
 		setMayorID(founder.getObjectID());
+		setPlanetId(cityHall.getPlanetId());
 		init();
 	}
 	
 	public void init() {
+		area = new CollidableCircle(getCityCenterPosition(), cityRadius, NGECore.getInstance().terrainService.getPlanetByID(planetId));
 		area.getEventBus().subscribe(this);
+		NGECore.getInstance().simulationService.addCollidable(area, area.getCenter().x, area.getCenter().z);
 	}
 	
 	public void handleGrantZoning() {
@@ -187,7 +183,7 @@ public class PlayerCity implements Serializable {
 		int currentRank = getRank();
 		
 		switch (currentRank) {
-			case NEWCITY : if (censusResult>=5){
+			/*case NEWCITY : if (censusResult>=5){
 								setRank(++currentRank); // Expand to Outpost
 								sendCityExpandMail();
 							}
@@ -195,7 +191,7 @@ public class PlayerCity implements Serializable {
 							if (censusResult<5){
 								// kill city
 							}
-							break;
+							break;*/
 							
 			case OUTPOST : if (censusResult>=10){
 								setRank(++currentRank); // Expand to Village
@@ -268,8 +264,8 @@ public class PlayerCity implements Serializable {
 				core.objectService.persistObject(citizen, citizenObject, core.getSWGObjectODB());
 			cityTreasury += cumulatedPropertyTax;			
 		}
-		calculateAndPayMaintenance();
 		demolishHighRankStructures();
+		calculateAndPayMaintenance();
 		setNextCityUpdate(System.currentTimeMillis()+cityUpdateSpan);
 	}
 	
@@ -344,6 +340,9 @@ public class PlayerCity implements Serializable {
 		int maintAmount = 0;
 		BuildingObject cityHall = (BuildingObject) core.objectService.getObject(cityHallId);
 		int cityHallMaintenance = 1000 + getRank() * 2500;
+		if(registered)
+			cityHallMaintenance += 5000;
+		cityHallMaintenance += getSpecializationMaintenance();
 		maintAmount += deductCivicStructureMaintenance(cityHall, cityHallMaintenance);
 		
 		for(long placedStructures : new Vector<Long>(placedStructures)) {
@@ -353,6 +352,34 @@ public class PlayerCity implements Serializable {
 		}
 
 		sendMaintenanceMail(maintAmount);
+	}
+	
+	private int getSpecializationMaintenance() {
+		
+		switch(specialization) {
+		
+			case CLONE_LAB:
+				return 80000;
+			case DNA_LABORATORY:
+				return 200000;
+			case ENCORE_PERFORMANCE:
+				return 200000;
+			case ENTERTAINMENT_DISTRICT:
+				return 80000;
+			case IMPROVED_JOB_MARKET:
+				return 80000;
+			case MANUFACTURING_CENTER:
+				return 50000;
+			case MEDICAL_CENTER:
+				return 80000;
+			case RESEARCH_CENTER:
+				return 125000;
+			case SAMPLE_RICH:
+				return 70000;
+			default:
+				return 0;
+		}
+		
 	}
 	
 	private int deductCivicStructureMaintenance(BuildingObject civicStructure, int amount) {
@@ -410,6 +437,21 @@ public class PlayerCity implements Serializable {
 
 	public void setRank(int cityRank) {
 		this.cityRank = cityRank;
+		switch(cityRank) {
+		
+			case OUTPOST:
+				setCityRadius(150);				
+			case VILLAGE:
+				setCityRadius(200);				
+			case TOWNSHIP:
+				setCityRadius(300);				
+			case CITY:
+				setCityRadius(400);				
+			case METROPOLIS:
+				setCityRadius(450);				
+			default:
+				setCityRadius(150);
+		}
 	}
 
 	public int getSpecialization() {
@@ -1085,6 +1127,14 @@ public class PlayerCity implements Serializable {
 		if(mayor.getClient() != null)
 			core.chatService.sendPersistentMessageHeader(mayor.getClient(), mail);
 
+	}
+
+	public int getPlanetId() {
+		return planetId;
+	}
+
+	public void setPlanetId(int planetId) {
+		this.planetId = planetId;
 	}
 
 	
