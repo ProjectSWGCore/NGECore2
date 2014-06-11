@@ -41,7 +41,7 @@ public class Mail implements Serializable {
 	private String senderName;
 	private long recieverId;
 	private String subject;
-	private String message;
+	private String message = "";
 	private byte status;
 	private int timeStamp;
 	private List<WaypointAttachment> attachments = new ArrayList<WaypointAttachment>();

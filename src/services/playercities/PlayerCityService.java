@@ -114,8 +114,7 @@ public class PlayerCityService implements INetworkDispatch {
 			return;
 		}
 		
-		final SUIWindow window = core.suiService.createInputBox(2,"@city/city:city_name_t","@city/city:city_name_d", actor, null, 0);		
-		core.suiService.openSUIWindow(window);				
+		final SUIWindow window = core.suiService.createInputBox(2, "@city/city:city_name_t","@city/city:city_name_d", actor, null, 0);		
 		Vector<String> returnList = new Vector<String>();		
 		returnList.add("txtInput:LocalText");	
 		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, new SUICallback() {
@@ -141,6 +140,7 @@ public class PlayerCityService implements INetworkDispatch {
 				}
 				
 				PlayerCity playerCity = addNewPlayerCity(actor, cityHall);
+				playerCity.setCityName(name);
 				PlayerCityService.this.schedulePlayerCityUpdate(playerCity, PlayerCity.newCityGraceSpan);
 				cityHall.setAttachment("structureCity", playerCity.getCityID());
 				actor.setAttachment("residentCity", playerCity.getCityID());
@@ -149,7 +149,7 @@ public class PlayerCityService implements INetworkDispatch {
 
 			}					
 		});		
-		core.suiService.openSUIWindow(window);
+		core.suiService.openSUIWindow(window);				
 
 	}
 	
@@ -372,7 +372,7 @@ public class PlayerCityService implements INetworkDispatch {
 				continue;
 			core.housingService.destroyStructure(civicStructure);
 		}
-
+		core.simulationService.removeCollidable(city.getArea(), city.getArea().getCenter().x, city.getArea().getCenter().z);
 		playerCities.remove(city);
 		
 	}

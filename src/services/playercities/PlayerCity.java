@@ -99,8 +99,8 @@ public class PlayerCity implements Serializable {
 	private long cityID = -1;
 	private Point3D cityCenterPosition = new Point3D(0,0,0);
 	private int cityRadius = 0;
-	private int cityRank = 0;
-	private int specialization = -1;
+	private int cityRank = 1;
+	private int specialization = 0;
 	private long mayorID = 0L;
 	private int cityTreasury = 0;
 	private int maintenanceFee = 0;
@@ -903,23 +903,9 @@ public class PlayerCity implements Serializable {
 	        actorMail.setRecieverId(citizen);
 	        actorMail.setStatus(Mail.NEW);
 	        actorMail.setTimeStamp((int) (new Date().getTime() / 1000));
-	        actorMail.setMessage("@city/city:new_city_citizen_body");
 	        actorMail.setSubject("@city/city:new_city_citizen_subject");
 	        actorMail.setSenderName("City " + this.cityName);
-	        
-	        List<WaypointAttachment> attachments = new ArrayList<WaypointAttachment>(); 
-	        WaypointObject constructionWaypoint = (WaypointObject)NGECore.getInstance().objectService.createObject("object/waypoint/shared_world_waypoint_blue.iff", citizenObject.getPlanet(), citizenObject.getPosition().x, 0 ,citizenObject.getPosition().z);
-	        WaypointAttachment attachment = new WaypointAttachment();
-			attachment.active = false;		
-			attachment.cellID = constructionWaypoint.getCellId();
-			attachment.color = (byte)1;
-			attachment.name = "City";
-			attachment.planetCRC = engine.resources.common.CRC.StringtoCRC(citizenObject.getPlanet().getName());
-			attachment.positionX = citizenObject.getPosition().x;
-			attachment.positionY = 0;
-			attachment.positionZ = citizenObject.getPosition().z;
-			attachments.add(attachment);
-			actorMail.setWaypointAttachments(attachments);
+	        actorMail.addProseAttachment(new ProsePackage("@city/city:new_city_citizen_body", "TT", newCitizen.getCustomName()));
 	        
 	        NGECore.getInstance().chatService.storePersistentMessage(actorMail);
 	        if (newCitizen.getClient()!=null)
@@ -928,34 +914,27 @@ public class PlayerCity implements Serializable {
 		}
 	}
 	
-	public void sendNewCitizenMail(CreatureObject citizen) {		
+	public void sendNewCitizenMail(CreatureObject citizen) {	
+		
+		NGECore core = NGECore.getInstance();
+		CreatureObject mayor = core.objectService.getObject(getMayorID()) == null ? core.objectService.getCreatureFromDB(getMayorID()) : (CreatureObject) core.objectService.getObject(getMayorID());
+		if(mayor == null)
+			return;
 
 		Mail actorMail = new Mail();
-        actorMail.setMailId(NGECore.getInstance().chatService.generateMailId());
+        actorMail.setMailId(core.chatService.generateMailId());
         actorMail.setRecieverId(citizen.getObjectID());
         actorMail.setStatus(Mail.NEW);
         actorMail.setTimeStamp((int) (new Date().getTime() / 1000));
-        actorMail.setMessage("@city/city:new_city_citizen_other_body");
         actorMail.setSubject("@city/city:new_city_citizen_other_subject");
         actorMail.setSenderName("City " + this.cityName);
-        
-        List<WaypointAttachment> attachments = new ArrayList<WaypointAttachment>(); 
-        WaypointObject constructionWaypoint = (WaypointObject)NGECore.getInstance().objectService.createObject("object/waypoint/shared_world_waypoint_blue.iff", citizen.getPlanet(), citizen.getPosition().x, 0 ,citizen.getPosition().z);
-        WaypointAttachment attachment = new WaypointAttachment();
-		attachment.active = false;		
-		attachment.cellID = constructionWaypoint.getCellId();
-		attachment.color = (byte)1;
-		attachment.name = "City";
-		attachment.planetCRC = engine.resources.common.CRC.StringtoCRC(citizen.getPlanet().getName());
-		attachment.positionX = citizen.getPosition().x;
-		attachment.positionY = 0;
-		attachment.positionZ = citizen.getPosition().z;
-		attachments.add(attachment);
-		actorMail.setWaypointAttachments(attachments);
+        actorMail.addProseAttachment(new ProsePackage("@city/city:new_city_citizen_other_body", "TT", mayor.getCustomName(), "TU", cityName));
+      
 
 		
-        NGECore.getInstance().chatService.storePersistentMessage(actorMail);
-        NGECore.getInstance().chatService.sendPersistentMessageHeader(citizen.getClient(), actorMail);
+        core.chatService.storePersistentMessage(actorMail);
+        if (citizen.getClient()!=null)
+        	core.chatService.sendPersistentMessageHeader(citizen.getClient(), actorMail);
 	}
 	
 	public void sendCitizenLeftMailAll(CreatureObject newCitizen) {		
@@ -1084,13 +1063,15 @@ public class PlayerCity implements Serializable {
 	}
 	
 	public String getSpecialisationStfValue() {
+		if(specialization == 0)
+			return "";
 		try {
 			StfTable stf = new StfTable("clientdata/string/en/city/city.stf");
 			
 			for (int s = 1; s < stf.getRowCount(); s++) {
 				String stfKey = stf.getStringById(s).getKey();
 				
-				if (stfKey != null && stfKey != "" && stfKey.equals(specialisationSTFNames[specialization])) {
+				if (stfKey != null && stfKey != "" && stfKey.equals(specialisationSTFNames[specialization - 1])) {
 					return stf.getStringById(s).getValue();
 				}
 			}
