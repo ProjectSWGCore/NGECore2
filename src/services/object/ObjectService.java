@@ -675,6 +675,8 @@ public class ObjectService implements INetworkDispatch {
 	}
 	
 	public void useObject(CreatureObject creature, final SWGObject object) {
+		System.out.println("creature " + creature);
+		System.out.println("object " + object);
 		if (creature == null || object == null) {
 			return;
 		}
@@ -764,37 +766,25 @@ public class ObjectService implements INetworkDispatch {
 		}
 		if (object.getTemplate().equals(powerUpTemplate3)){
 			// weapon
+			SWGObject usedObject = null;
+			if (object.getAttachment("UsedObjectID")!=null){
+				long usedObjectid = (long)object.getAttachment("UsedObjectID");
+				usedObject = core.objectService.getObject(usedObjectid);
+			}
 			
-			String effectName = (String) object.getAttachment("effectName");
-			int powerValue = (int) object.getAttachment("powerValue");
+			creature.setAttachment("LastUsedPUP",object.getObjectID());
 			
-			Long weaponID = (Long) creature.getAttachment("EquippedWeapon");
-			if (weaponID==null)
-				return;
-			
-			WeaponObject weapon = (WeaponObject) core.objectService.getObject(weaponID);
-			//weapon.setIntAttribute(effectName, powerValue);
-			weapon.setAttachment("PUPEffectName", effectName);
-			weapon.setAttachment("PUPEffectValue", powerValue);
+			if (usedObject==null){
+				Long weaponID = (Long) creature.getAttachment("EquippedWeapon");
+				System.out.println("weaponID " + weaponID);
+				if (weaponID==null)
+					return;
+				
+				WeaponObject weapon = (WeaponObject) core.objectService.getObject(weaponID);
+				usedObject = (SWGObject) weapon;
+			}
 
-			List<String> statList = new ArrayList<String>();
-			statList.add("constitution_modified");
-			statList.add("agility_modified");
-			statList.add("precision_modified");
-			statList.add("strength_modified");
-			statList.add("stamina_modified");
-			statList.add("luck_modified");
-			if (statList.contains(effectName)){
-				// Probably this has to be done preferably via the buff service or a new power up service
-				// Problem : Some of the effect names do NOT occur in buff.iff
-				// So Light or Treeku better look into this
-				weapon.setIntAttribute("cat_stat_mod_bonus."+effectName, powerValue);
-				core.skillModService.addSkillMod(creature, "cat_stat_mod_bonus."+effectName, powerValue);
-			} else {
-				// assume skillmod then
-				weapon.setIntAttribute("cat_skill_mod_bonus."+effectName, powerValue);	
-				core.skillModService.addSkillMod(creature, "cat_skill_mod_bonus."+effectName, powerValue);
-			}		
+			core.buffService.addBuffToCreature(creature, "powerup_weapon", creature);
 			
 			int amount = object.getIntAttribute("num_in_stack");
 			if (amount==1)

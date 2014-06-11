@@ -31,6 +31,7 @@ import java.util.Vector;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
+import resources.datatables.Options;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
@@ -3313,6 +3314,8 @@ public class ReverseEngineeringService implements INetworkDispatch {
 				skillEnhancingAttachment.setAttachment("SEAeffectNameList", effectNameList);
 				skillEnhancingAttachment.setAttachment("SEAmodifierValueList", effectValueList);
 				skillEnhancingAttachment.setAttachment("radial_filename", "item/item");
+				//skillEnhancingAttachment.setOptions(Options.SOCKETED, true);
+				skillEnhancingAttachment.setOptions(Options.USABLE, true);
 				engineerInventory.add(skillEnhancingAttachment);	
 			}			 
 		}
@@ -3454,9 +3457,16 @@ public class ReverseEngineeringService implements INetworkDispatch {
 				skillEnhancingAttachment.setAttachment("SEAeffectNameList", effectNameList);
 				skillEnhancingAttachment.setAttachment("SEAmodifierValueList", effectValueList);
 				skillEnhancingAttachment.setAttachment("radial_filename", "item/item");
+				//skillEnhancingAttachment.setOptions(Options.SOCKETED, true);
+				skillEnhancingAttachment.setOptions(Options.USABLE, true);
 				engineerInventory.add(skillEnhancingAttachment);	
 			}			 
 		}
+	}
+	
+	public void applyPowerUp(TangibleObject powerUpObject, long objectID){
+		TangibleObject object = (TangibleObject)core.objectService.getObject(objectID);
+		
 	}
 	
 	public int getHighestStat(TangibleObject piece){
