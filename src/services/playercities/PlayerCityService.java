@@ -65,6 +65,9 @@ public class PlayerCityService implements INetworkDispatch {
     
 	public PlayerCityService(NGECore core) {
 		this.core = core;
+	}
+	
+	public void loadCityRankCaps() {
 		core.scriptService.callScript("scripts/", "cityRankCaps", "addCityRankCaps", core);
 	}
 	

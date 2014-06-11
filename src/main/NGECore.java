@@ -520,7 +520,7 @@ public class NGECore {
 		staticService.spawnStatics();
 		
 		equipmentService.loadBonusSets();
-		
+		playerCityService.loadCityRankCaps();
 		retroService.run();
 		
 		didServerCrash = false;
