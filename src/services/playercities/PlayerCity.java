@@ -28,12 +28,24 @@ import java.util.Date;
 import java.util.List;
 import java.util.Vector;
 
+import net.engio.mbassy.listener.Handler;
+import resources.common.OutOfBand;
+import resources.common.collidables.AbstractCollidable;
+import resources.common.collidables.CollidableCircle;
+import resources.common.collidables.AbstractCollidable.EnterEvent;
+import resources.common.collidables.AbstractCollidable.ExitEvent;
+import resources.datatables.Options;
 import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
+import resources.objects.tangible.TangibleObject;
 import resources.objects.waypoint.WaypointObject;
 import services.chat.Mail;
 import services.chat.WaypointAttachment;
 import main.NGECore;
+import engine.clientdata.ClientFileManager;
+import engine.clientdata.StfTable;
+import engine.clientdata.visitors.DatatableVisitor;
+import engine.resources.common.CRC;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
 
@@ -88,7 +100,8 @@ public class PlayerCity implements Serializable {
 	
 	
 	private String cityName = "";
-	private int cityID = -1;
+	private long cityHallId = 0;
+	private long cityID = -1;
 	private Point3D cityCenterPosition = new Point3D(0,0,0);
 	private int cityRadius = 0;
 	private int cityRank = 0;
@@ -109,7 +122,8 @@ public class PlayerCity implements Serializable {
 	private boolean shuttlePort = false;
 	private boolean registered = false;
 	private boolean zoningEnabled = false;
-	
+	private transient CollidableCircle area;
+
 	//private final long cityUpdateSpan = 7*86400*1000;
 	private final long cityUpdateSpan = 100*1000;
 	
@@ -124,19 +138,23 @@ public class PlayerCity implements Serializable {
 	private Vector<Long> militiaList = new Vector<Long>();
 	private Vector<Long> foundersList = new Vector<Long>();
 	
-	public PlayerCity(){}
+	public PlayerCity() {}
 	
-	public PlayerCity(CreatureObject founder, int cityID){
-		
-		setCityCenterPosition(founder.getPosition());
+	public PlayerCity(CreatureObject founder, int cityID, BuildingObject cityHall) {
+		setCityCenterPosition(cityHall.getPosition());
+		setCityHallId(cityHall.getObjectID());
 		setCityRadius(150);
 		setFoundationTime(System.currentTimeMillis());		
 		setMaintenanceFee(1);
 		setNextCityUpdate(foundationTime+cityUpdateSpan);
 		setNextElectionDate(foundationTime+legislationPeriod);
-		citizens.add(founder.getObjectID());
 		this.cityID = cityID;
 		setMayorID(founder.getObjectID());
+		init();
+	}
+	
+	public void init() {
+		area.getEventBus().subscribe(this);
 	}
 	
 	public void handleGrantZoning() {
@@ -212,7 +230,7 @@ public class PlayerCity implements Serializable {
 								setRank(++currentRank); // Expand to Metropolis
 								sendCityExpandMailAll();
 							}
-							if (censusResult<15){
+							if (censusResult<30){
 								setRank(--currentRank); // Contract to Township
 								sendCityContractMailAll();
 							}
@@ -245,9 +263,11 @@ public class PlayerCity implements Serializable {
 			}
 			
 			citizenObject.setBankCredits(citizenObject.getBankCredits()-cumulatedPropertyTax);
+			if(core.objectService.getObject(citizen) == null) 
+				core.objectService.persistObject(citizen, citizenObject, core.getSWGObjectODB());
 			cityTreasury += cumulatedPropertyTax;			
 		}
-		
+		calculateAndPayMaintenance();
 		demolishHighRankStructures();
 		setNextCityUpdate(System.currentTimeMillis()+cityUpdateSpan);
 	}
@@ -312,14 +332,56 @@ public class PlayerCity implements Serializable {
 		}
 		if (founderCitizenCount==founders.size()){
 			return true; // All founders are citizens now
-				
 		}
 		
 		return false;
 	}
 	
-	public void calculateMaintenance() {
+	public void calculateAndPayMaintenance() {
+		NGECore core = NGECore.getInstance();
+		// 1. Pay City Hall Maintenance
+		BuildingObject cityHall = (BuildingObject) core.objectService.getObject(cityHallId);
+		int cityHallMaintenance = 1000 + getRank() * 2500;
+		deductCivicStructureMaintenance(cityHall, cityHallMaintenance);
 		
+		for(long placedStructures : new Vector<Long>(placedStructures)) {
+			BuildingObject building = (BuildingObject) core.objectService.getObject(placedStructures);
+			if(building != null)
+				deductCivicStructureMaintenance(building, building.getBMR());
+		}
+		
+	}
+	
+	private void deductCivicStructureMaintenance(BuildingObject civicStructure, int amount) {
+		int maintOwed = civicStructure.getOutstandingMaintenance();
+		if(amount > cityTreasury) {
+			int decay = civicStructure.getConditionDamage();
+			int amountToPay = amount - cityTreasury;
+			int nextDecay = (int) (amountToPay / amount * civicStructure.getMaximumCondition() * 0.25f); 
+			civicStructure.setOutstandingMaintenance(maintOwed - amountToPay);
+			civicStructure.setConditionDamage(decay + nextDecay);
+			cityTreasury = 0;
+		} else {
+			cityTreasury -= amount;
+			if(maintOwed > 0) {
+				if(maintOwed > cityTreasury) {
+					int decay = civicStructure.getConditionDamage();
+					if(decay > 0) {
+						civicStructure.setConditionDamage(cityTreasury / (maintOwed / decay));
+						civicStructure.setOutstandingMaintenance(maintOwed - cityTreasury);
+						cityTreasury = 0;
+					}
+				} else {
+					civicStructure.setOutstandingMaintenance(0);
+					cityTreasury -= maintOwed;
+					civicStructure.setConditionDamage(0);
+				}
+			}
+		}
+		if(civicStructure.getConditionDamage() >= civicStructure.getMaximumCondition()) {
+			// Destroy
+		}
+
 	}
 	
 	public void handleBanRequest() {
@@ -536,11 +598,11 @@ public class PlayerCity implements Serializable {
 		return;
 	}
 
-	public int getCityID() {
+	public long getCityID() {
 		return cityID;
 	}
 
-	public void setCityID(int cityID) {
+	public void setCityID(long cityID) {
 		this.cityID = cityID;
 	}
 	
@@ -878,5 +940,89 @@ public class PlayerCity implements Serializable {
 	public void removeStructure(long objectID) {
 		placedStructures.remove(objectID);
 	}
+
+	public CollidableCircle getArea() {
+		return area;
+	}
+
+	public void setArea(CollidableCircle area) {
+		this.area = area;
+	}
+
+	public long getCityHallId() {
+		return cityHallId;
+	}
+
+	public void setCityHallId(long cityHallId) {
+		this.cityHallId = cityHallId;
+	}
+	
+	public String getSpecialisationStfValue() {
+		try {
+			StfTable stf = new StfTable("clientdata/string/en/city/city.stf");
+			
+			for (int s = 1; s < stf.getRowCount(); s++) {
+				String stfKey = stf.getStringById(s).getKey();
+				
+				if (stfKey != null && stfKey != "" && stfKey.equals(specialisationSTFNames[specialization])) {
+					return stf.getStringById(s).getValue();
+				}
+			}
+			
+        } catch (Exception e) {
+                e.printStackTrace();
+        }
+		return "";
+	}
+	
+	public String getCityRankStfValue() {
+		try {
+			StfTable stf = new StfTable("clientdata/string/en/city/city.stf");
+			
+			for (int s = 1; s < stf.getRowCount(); s++) {
+				String stfKey = stf.getStringById(s).getKey();
+				
+				if (stfKey != null && stfKey != "" && stfKey.equals("rank" + String.valueOf(cityRank))) {
+					return stf.getStringById(s).getValue();
+				}
+			}
+			
+        } catch (Exception e) {
+                e.printStackTrace();
+        }
+		return "";
+	}
+
+	
+	@Handler
+	public void onEnter(EnterEvent event) {
+		SWGObject object = event.object;
+		
+		if(object == null || !(object instanceof CreatureObject))
+			return;
+		
+		String rank = getCityRankStfValue();
+		String specialisation = getSpecialisationStfValue();
+		if(specialisation.length() == 0)
+			((CreatureObject) object).sendSystemMessage(OutOfBand.ProsePackage("@city/city:city_enter_city", "TT", getCityName(), "TO", rank), (byte) 0);
+		else
+			((CreatureObject) object).sendSystemMessage(OutOfBand.ProsePackage("@city/city:city_enter_city", "TT", getCityName(), "TO", rank + ", " + specialisation), (byte) 0);
+
+		// TODO: apply specialisation skill mods
+	}
+	
+	@Handler
+	public void onExit(ExitEvent event) {
+		SWGObject object = event.object;
+		
+		if(object == null || !(object instanceof CreatureObject))
+			return;
+
+		((CreatureObject) object).sendSystemMessage(OutOfBand.ProsePackage("@city/city:city_leave_city", "TO", getCityName()), (byte) 0);
+
+		// TODO: remove specialisation skill mods
+
+	}	
+
 	
 }

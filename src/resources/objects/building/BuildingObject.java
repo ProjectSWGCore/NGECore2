@@ -64,7 +64,7 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 		super(objectID, planet, position, orientation, Template);
 		getBaseline(3).set("volume", 255);
 		setOptionsBitmask(Options.INVULNERABLE);
-		setConditionDamage(100);
+		setConditionDamage(0);
 		setMaximumCondition(4320);
 		setStaticObject(true);
 	}
@@ -73,7 +73,7 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 		super();
 		getBaseline(3).set("volume", 255);
 		setOptionsBitmask(Options.INVULNERABLE);
-		setConditionDamage(100);
+		setConditionDamage(0);
 		setMaximumCondition(4320);
 		setStaticObject(true);
 	}
@@ -84,7 +84,7 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 		defendersList = new Vector<TangibleObject>();
 		getBaseline(3).set("volume", 255);
 		setOptionsBitmask(Options.INVULNERABLE);
-		setConditionDamage(100);
+		setConditionDamage(0);
 		setMaximumCondition(4320);
 	}
 	
@@ -92,6 +92,7 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 	public Baseline getOtherVariables() {
 		Baseline baseline = super.getOtherVariables();
 		baseline.put("maintenanceAmount", (float) 0);
+		baseline.put("outstandingMaintenance", (float) 0);
 		baseline.put("baseMaintenanceRate", 0);
 		baseline.put("deedTemplate", "");
 		baseline.put("residency", false);
@@ -192,12 +193,21 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 		otherVariables.set("maintenanceAmount", maintenanceAmount);
 	}
 	
+	public int getOutstandingMaintenance() {
+		return (int) otherVariables.get("outstandingMaintenance");
+	}
+	
+	public void setOutstandingMaintenance(int maintenanceAmount) {
+		otherVariables.set("outstandingMaintenance", maintenanceAmount);
+	}
+
 	public int getBMR() {
 		return (int) otherVariables.get("baseMaintenanceRate");
 	}
 	
 	public void setBMR(int BMR) {
 		otherVariables.set("baseMaintenanceRate", BMR);
+		setMaximumCondition(BMR);
 	}
 	
 	public String getDeedTemplate(){

@@ -9,7 +9,7 @@ def setup(housingTemplates):
 	houseTemplate.addPlaceablePlanet("corellia")
 	houseTemplate.addPlaceablePlanet("talus")
 	houseTemplate.setDefaultItemLimit(400)
-	houseTemplate.setBaseMaintenanceRate(308)
+	houseTemplate.setBaseMaintenanceRate(1000)
 	
 	housingTemplates.put(houseTemplate.getDeedTemplate(), houseTemplate)
 	

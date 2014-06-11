@@ -22,15 +22,19 @@
 package services.playercities;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.Map;
+import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import resources.common.ProsePackage;
 import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
+import services.chat.Mail;
 import services.sui.SUIWindow;
 import services.sui.SUIWindow.SUICallback;
 import services.sui.SUIWindow.Trigger;
@@ -48,7 +52,7 @@ public class PlayerCityService implements INetworkDispatch {
 	
 	private NGECore core;
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-    
+    private Random random = new Random();
     private Vector<PlayerCity> playerCities = new Vector<PlayerCity>();
     private int cityID = 0; // This must be persisted or handled via objectservice somehow
 
@@ -87,10 +91,22 @@ public class PlayerCityService implements INetworkDispatch {
 		}
 	}
 	
-	public PlayerCity addNewPlayerCity(CreatureObject founder) {
+	private long generateCityId() {
+		boolean found = false;
+		long id = 0;
+		while(!found) {
+			id = random.nextLong();
+			final long cityId = id;
+			if(!playerCities.stream().filter(c -> c.getCityID() == cityId).findFirst().isPresent())
+				found = true;
+		}
+		return id;
+	}
+	
+	public PlayerCity addNewPlayerCity(CreatureObject founder, BuildingObject cityHall) {
 		PlayerCity newCity = null;
 		synchronized(playerCities){
-			newCity = new PlayerCity(founder,cityID++);
+			newCity = new PlayerCity(founder,cityID++, cityHall);
 			playerCities.add(newCity);
 		}
 		newCitySUI1(founder,newCity);
@@ -185,7 +201,7 @@ public class PlayerCityService implements INetworkDispatch {
 		
 		PlayerCity sandboxCity = null;
 		synchronized(playerCities){
-			sandboxCity = new PlayerCity(founder,cityID++);
+			sandboxCity = new PlayerCity(founder,cityID++, cityHall);
 			sandboxCity.setCityName("Sandbox City");
 			playerCities.add(sandboxCity);
 		}
@@ -267,6 +283,35 @@ public class PlayerCityService implements INetworkDispatch {
 	@Override
 	public void shutdown() {
 		// TODO Auto-generated method stub
+		
+	}
+
+	public void destroyCity(PlayerCity city) {
+		
+		CreatureObject mayor = core.objectService.getObject(city.getMayorID()) == null ? core.objectService.getCreatureFromDB(city.getMayorID()) : (CreatureObject) core.objectService.getObject(city.getMayorID());
+		if(mayor == null)
+			return;
+
+		Mail mail = new Mail();
+		mail.setMailId(NGECore.getInstance().chatService.generateMailId());
+		mail.setRecieverId(city.getMayorID());
+		mail.setStatus(Mail.NEW);
+		mail.setTimeStamp((int) (new Date().getTime() / 1000));
+		mail.setSubject("@city/city:new_city_fail_subject");
+		mail.setSenderName("@city/city:new_city_from");
+		mail.setMessage("@city/city:new_city_fail_body");
+		
+		if(mayor.getClient() != null)
+			core.chatService.sendPersistentMessageHeader(mayor.getClient(), mail);
+		core.chatService.storePersistentMessage(mail);
+		for(long civicStructureId : new Vector<Long>(city.getPlacedStructures())) {
+			BuildingObject civicStructure = (BuildingObject) core.objectService.getObject(civicStructureId);
+			if(civicStructure == null)
+				continue;
+			core.housingService.destroyStructure(civicStructure);
+		}
+
+		playerCities.remove(city);
 		
 	}	
 }

@@ -58,7 +58,7 @@ def handleSelection(core, owner, target, option):
 			return
 	if option == 127:
 		if owner is not None:
-			core.housingService.declareResidency(owner,target)
+			core.housingService.declareResidency(owner,target.getGrandparent())
 			return
 	if option == 171:
 		if owner is not None:

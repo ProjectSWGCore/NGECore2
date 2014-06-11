@@ -158,15 +158,17 @@ public class HousingService implements INetworkDispatch {
 		building.setConditionDamage(100); // Ouch
 		
 		if (structureTemplate.contains("cityhall")){
-			PlayerCity newCity = core.playerCityService.addNewPlayerCity(actor); 
+			PlayerCity newCity = core.playerCityService.addNewPlayerCity(actor, building); 
 			building.setAttachment("structureCity", newCity.getCityID());
+			building.setAttachment("isCivicStructure", true);
 			actor.setAttachment("residentCity", newCity.getCityID());
+			declareResidency(actor, building);
 		}
 		
 		// Check for city founders joining a new city
 		PlayerCity cityActorIsIn = core.playerCityService.getCityObjectIsIn(actor);
 		
-		if (cityActorIsIn!=null) {
+		if (cityActorIsIn != null) {
 			actor.setAttachment("Has24HZoningFor",cityActorIsIn.getCityID()); // for testing
 			
 			int cityActorHasZoning = (int)actor.getAttachment("Has24HZoningFor");
@@ -185,6 +187,9 @@ public class HousingService implements INetworkDispatch {
 	}
 	
 	public void startMaintenanceTask(BuildingObject building) {
+		
+		if(building.getAttachment("isCivicStructure") != null && (boolean) building.getAttachment("isCivicStructure"))
+			return;
 		
 		AtomicReference<ScheduledFuture<?>> ref = new AtomicReference<ScheduledFuture<?>>();
 		ref.set(scheduler.scheduleAtFixedRate(() -> {
@@ -213,7 +218,7 @@ public class HousingService implements INetworkDispatch {
 						building.setAttachment("isCondemned", true);
 						building.setBuildingName(building.getBuildingName() + " \\#FF0000(CONDEMNED)\\#FFFFFF");
 					}
-					building.setAttachment("outstandingMaint", (int) building.getAttachment("outstandingMaint") + amount);
+					building.setOutstandingMaintenance(building.getOutstandingMaintenance() + amount);
 					// TODO: lock down building, add option to pay outstanding maintenance and uncondemn building
 				}
 			}
@@ -327,10 +332,9 @@ public class HousingService implements INetworkDispatch {
 			public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
 				CreatureObject houseOwner = (CreatureObject)owner;
 				core.suiService.closeSUIWindow(owner, 0);
-				if (returnList.get(0).equals(""+confirmCode)){
+				if (returnList.get(0).equals(""+confirmCode)) {
 					// handle creation of correct deed in player inventory
 					PlayerObject player = (PlayerObject) houseOwner.getSlottedObject("ghost");	
-					PlayerCity city = core.playerCityService.getCityObjectIsIn(building);
 					HouseTemplate houseTemplate = housingTemplates.get(houseToDeed.get(building.getTemplate()));
 					
 					TangibleObject deed = (TangibleObject) core.objectService.createObject(houseTemplate.getDeedTemplate(), owner.getPlanet());
@@ -349,11 +353,8 @@ public class HousingService implements INetworkDispatch {
 					int costs = 800;
 					houseOwner.setBankCredits(houseOwner.getBankCredits()-costs);
 					
-					if(building.getAttachment("sign") != null)
-						core.objectService.destroyObject((SWGObject) building.getAttachment("sign"));
-					
-					core.objectService.destroyObject(building.getObjectID());
-					
+					destroyStructure(building);
+										
  
 					SWGObject ownerInventory = owner.getSlottedObject("inventory");
 					ownerInventory.add(deed);
@@ -361,21 +362,7 @@ public class HousingService implements INetworkDispatch {
 					if (player.getLotsRemaining() + houseTemplate.getLotCost() <= 10) {
 						player.setLotsRemaining(player.getLotsRemaining() + houseTemplate.getLotCost());
 					}
-					
-					if(building.getResidency()) {
-						owner.setAttachment("residentBuilding", null);
-					}
-					
-					if(city != null) {
-						city.removeStructure(building.getObjectID());
-						if(building.getResidency()) {
-							city.removeCitizen(owner.getObjectID());
-							player.setHome("");
-							player.setCitizenship(Citizenship.Homeless);
-							owner.setAttachment("residentCity", null);
-						}
-					}
-					
+										
 					houseOwner.sendSystemMessage("@player_structure:processing_destruction",(byte)1);
 					houseOwner.sendSystemMessage("@player_structure:deed_reclaimed",(byte)1);
 					
@@ -393,6 +380,38 @@ public class HousingService implements INetworkDispatch {
 			}					
 		});		
 		core.suiService.openSUIWindow(window);
+	}
+	
+	public void destroyStructure(BuildingObject building) {
+		
+		PlayerCity city = core.playerCityService.getCityObjectIsIn(building);
+		CreatureObject owner = null;
+		if(building.getAttachment("structureOwner") != null)
+			owner = (CreatureObject) core.objectService.getObject((long) building.getAttachment("structureOwner"));
+		
+		if(building.getAttachment("sign") != null)
+			core.objectService.destroyObject((SWGObject) building.getAttachment("sign"));
+		
+		core.objectService.destroyObject(building.getObjectID());
+		core.objectService.deletePersistentObject(building.getObjectID(), core.getSWGObjectODB());
+		
+		if(building.getResidency())
+			owner.setAttachment("residentBuilding", null);
+		
+		if(city != null) {
+			city.removeStructure(building.getObjectID());
+			if(building.getResidency()) {
+				city.removeCitizen(owner.getObjectID());
+				owner.getPlayerObject().setHome("");
+				owner.getPlayerObject().setCitizenship(Citizenship.Homeless);
+				owner.setAttachment("residentCity", null);
+			}
+			if(building.getTemplate().contains("cityhall")) {
+				// destroy city
+				core.playerCityService.destroyCity(city);
+			}
+		}
+
 	}
 	
 	public void createPayMaintenanceSUIPage(SWGObject owner, TangibleObject target) {
@@ -525,8 +544,7 @@ public class HousingService implements INetworkDispatch {
 		core.suiService.openSUIWindow(window);
 	}
 	
-	public void declareResidency(SWGObject owner, TangibleObject target) {
-		final BuildingObject building = (BuildingObject) target.getGrandparent();
+	public void declareResidency(SWGObject owner, BuildingObject building) {
 		PlayerCity cityActorIsIn = core.playerCityService.getCityObjectIsIn(building);
 		if(owner.getObjectID() != (long) building.getAttachment("structureOwner")) {
 			((CreatureObject) owner).sendSystemMessage("@player_structure:declare_must_be_owner", (byte) 0);
@@ -541,7 +559,7 @@ public class HousingService implements INetworkDispatch {
 				return;
 			}
 		}
-		if(System.currentTimeMillis() < (long) owner.getAttachment("residencyCooldown")) {
+		if(System.currentTimeMillis() < (long) owner.getAttachment("residencyCooldown") && cityActorIsIn.getMayorID() != owner.getObjectID()) {
 			((CreatureObject) owner).sendSystemMessage(OutOfBand.ProsePackage("@player_structure:change_residence_time", "DI", (int) ((long) owner.getAttachment("residencyCooldown") - System.currentTimeMillis()) / 3600000), (byte) 0);
 			return;
 		}
@@ -569,7 +587,10 @@ public class HousingService implements INetworkDispatch {
 			cityActorIsIn.addCitizen(owner.getObjectID());
 			owner.setAttachment("residentCity", cityActorIsIn.getCityID());
 			((CreatureObject) owner).getPlayerObject().setHome(cityActorIsIn.getCityName());
-			((CreatureObject) owner).getPlayerObject().setCitizenship(Citizenship.Citizen);
+			if(cityActorIsIn.getMayorID() == owner.getObjectID())
+				((CreatureObject) owner).getPlayerObject().setCitizenship(Citizenship.Mayor);
+			else
+				((CreatureObject) owner).getPlayerObject().setCitizenship(Citizenship.Citizen);
 		}
 	}
 	
