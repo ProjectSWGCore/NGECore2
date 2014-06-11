@@ -91,6 +91,7 @@ public class PlayerCity implements Serializable {
 	public static final int LARGE_GARDEN      = 5;
 	public static final int SHUTTLEPORT       = 6;
 	
+	public static final int[] citizensPerRank = new int[] { 5, 10, 15, 30, 40 };
 	
 	private String cityName = "";
 	private int planetId;
@@ -118,11 +119,13 @@ public class PlayerCity implements Serializable {
 	private boolean zoningEnabled = false;
 	private transient CollidableCircle area;
 
-	//private final long cityUpdateSpan = 7*86400*1000;
-	private final long cityUpdateSpan = 100*1000;
-	
-	//private final long legislationPeriod = 21*86400*1000;
-	private final long legislationPeriod = 100*1000;
+	//public static final long cityUpdateSpan = 7*86400*1000;
+	public static final long cityUpdateSpan = 100*1000;
+	//public static final long cityUpdateSpan = 86400*1000;
+	public static final long newCityGraceSpan = 100*1000;
+
+	//public static final long legislationPeriod = 21*86400*1000;
+	public static final long legislationPeriod = 100*1000;
 	
 	private Vector<Long> placedStructures = new Vector<Long>();
 	private Vector<Long> citizens = new Vector<Long>();
@@ -178,71 +181,25 @@ public class PlayerCity implements Serializable {
 	
 	public void processCityUpdate() {
 		// has something changed?
-		System.out.println("processCityUpdate");
+		System.out.println("processCityUpdate for " + cityName);
+
+		fixupCitizens();
 		int censusResult = citizens.size();		
 		int currentRank = getRank();
 		
-		switch (currentRank) {
-			/*case NEWCITY : if (censusResult>=5){
-								setRank(++currentRank); // Expand to Outpost
-								sendCityExpandMail();
-							}
-							
-							if (censusResult<5){
-								// kill city
-							}
-							break;*/
-							
-			case OUTPOST : if (censusResult>=10){
-								setRank(++currentRank); // Expand to Village
-								sendCityExpandMail();
-							}
-							if (censusResult<5){
-								setRank(--currentRank); // Contract to Deserted
-								sendCityContractMail();
-							}
-							break;
-							
-			case VILLAGE : if (censusResult>=15){
-								setRank(++currentRank); // Expand to Township
-								sendCityExpandMail();
-							}
-							if (censusResult<10){
-								setRank(--currentRank); // Contract to Outpost
-								sendCityContractMail();
-							}
-							break;
-							
-			case TOWNSHIP : if (censusResult>=30){
-								setRank(++currentRank); // Expand to City
-								sendCityExpandMail();
-							}
-							if (censusResult<15){
-								setRank(--currentRank); // Contract to Village
-								sendCityContractMail();
-							}
-							break;
-							
-			case CITY     : if (censusResult>=40){
-								setRank(++currentRank); // Expand to Metropolis
-								sendCityExpandMail();
-							}
-							if (censusResult<30){
-								setRank(--currentRank); // Contract to Township
-								sendCityContractMail();
-							}
-							break;
-							
-			case METROPOLIS : if (censusResult<40){
-								  setRank(--currentRank); // Contract to City
-								  sendCityContractMail();
-							  }
-							  break;
-						
-		
+		int minCitizen = citizensPerRank[currentRank - 1];
+
+		if(censusResult < minCitizen) {
+			contractCity();
+		} else {
+			if(getRank() != METROPOLIS && citizensPerRank[currentRank] <= censusResult)
+				expandCity();
 		}
+		
 		NGECore core = NGECore.getInstance();
 		// collect taxes
+		if(core.objectService.getObject(cityHallId) == null)
+			return;
 		for (long citizen : citizens) {
 			CreatureObject citizenObject = core.objectService.getObject(citizen) == null ? core.objectService.getCreatureFromDB(citizen) : (CreatureObject) core.objectService.getObject(citizen);
 			if(citizenObject == null)
@@ -266,11 +223,141 @@ public class PlayerCity implements Serializable {
 		}
 		demolishHighRankStructures();
 		calculateAndPayMaintenance();
+		core.playerCityService.schedulePlayerCityUpdate(this, cityUpdateSpan);
 		setNextCityUpdate(System.currentTimeMillis()+cityUpdateSpan);
 	}
 	
-	public void cityFixUp(){
+	public void contractCity() {
 		
+		NGECore core = NGECore.getInstance();
+		int newRank = getRank() - 1;
+		CreatureObject mayor = core.objectService.getObject(getMayorID()) == null ? core.objectService.getCreatureFromDB(getMayorID()) : (CreatureObject) core.objectService.getObject(getMayorID());
+		if(mayor == null)
+			return;
+
+		if(newRank < 1) {
+			core.housingService.destroyStructure((BuildingObject) core.objectService.getObject(cityHallId));
+			return;
+		}
+		
+		// TODO unregister city if rank < 3
+		
+        setRank(newRank);
+        demolishCivicStructuresOutsideRadius();
+        demolishHighRankStructures();
+        sendCityContractMail();
+		fixupCitizens();
+	}
+	
+	private void demolishCivicStructuresOutsideRadius() {
+		NGECore core = NGECore.getInstance();
+		List<SWGObject> remove = new ArrayList<SWGObject>();
+		placedStructures.stream().map(core.objectService::getObject)
+		.filter(o -> o.getAttachment("isCivicStructure") != null && (boolean) o.getAttachment("isCivicStructure"))
+		.filter(o -> !area.doesCollide(o)).forEach(remove::add);
+		remove.forEach(b -> core.housingService.destroyStructure((BuildingObject) b));
+	}
+
+	public void expandCity() {
+		
+		NGECore core = NGECore.getInstance();
+		CreatureObject mayor = core.objectService.getObject(getMayorID()) == null ? core.objectService.getCreatureFromDB(getMayorID()) : (CreatureObject) core.objectService.getObject(getMayorID());
+		if(mayor == null)
+			return;
+
+		if(getRank() == METROPOLIS)
+			return;
+		
+		int newRank = getRank() + 1;
+		setRank(newRank);
+		sendCityExpandMail();
+		fixupCitizens();
+		
+	}
+	
+	// cleanup in case something went wrong
+	public void fixupCitizens() {
+		List<Long> residents = new ArrayList<Long>();
+		List<CreatureObject> added = new ArrayList<CreatureObject>();
+		List<CreatureObject> removed = new ArrayList<CreatureObject>();
+		// TODO: add extra mail for deleted characters
+		
+		NGECore core = NGECore.getInstance();
+		CreatureObject mayor = core.objectService.getObject(getMayorID()) == null ? core.objectService.getCreatureFromDB(getMayorID()) : (CreatureObject) core.objectService.getObject(getMayorID());
+		if(mayor == null)
+			return;
+
+		for (long structureID : new Vector<Long>(placedStructures)) {
+			BuildingObject structure = (BuildingObject) NGECore.getInstance().objectService.getObject(structureID);
+			if(structure == null)
+				return;
+			if(structure.getResidency())
+				residents.add((Long) structure.getAttachment("structureOwner"));
+		}
+		for(long citizenId : new Vector<Long>(citizens)) {
+			if(!residents.contains(citizenId)) {
+				removeCitizen(citizenId, false);
+				CreatureObject citizenObject = core.objectService.getObject(citizenId) == null ? core.objectService.getCreatureFromDB(citizenId) : (CreatureObject) core.objectService.getObject(citizenId);
+				if(citizenObject != null)
+					removed.add(citizenObject);
+			}
+		}
+		for(long residentId : residents) {
+			if(!citizens.contains(residentId)) {
+				addCitizen(residentId, false);
+				CreatureObject citizenObject = core.objectService.getObject(residentId) == null ? core.objectService.getCreatureFromDB(residentId) : (CreatureObject) core.objectService.getObject(residentId);
+				if(citizenObject != null)
+					added.add(citizenObject);
+			}
+		}
+		
+		String addTT = "";
+		for(CreatureObject addedCitizen : added) {
+			if(added.indexOf(addedCitizen) == added.size() - 1)
+				addTT += addedCitizen.getCustomName();
+			else
+				addTT += (addedCitizen.getCustomName() + ", ");
+		}
+		
+		String removedTT = "";
+		for(CreatureObject removedCitizen : removed) {
+			if(removed.indexOf(removedCitizen) == removed.size() - 1)
+				removedTT += removedCitizen.getCustomName();
+			else
+				removedTT += (removedCitizen.getCustomName() + ", ");
+		}
+		
+		if(added.size() > 0) {
+			Mail mail = new Mail();
+			mail.setMailId(core.chatService.generateMailId());
+			mail.setRecieverId(getMayorID());
+			mail.setStatus(Mail.NEW);
+	        mail.setTimeStamp((int) (new Date().getTime() / 1000));
+	        mail.setSubject("@city/city:city_fixup_add_citizens_subject");
+	        mail.setSenderName("@city/city:new_city_from");
+	        mail.addProseAttachment(new ProsePackage("@city/city:city_fixup_add_citizens_body", "TT", addTT));
+	        
+	        core.chatService.storePersistentMessage(mail);
+			if(mayor.getClient() != null)
+				core.chatService.sendPersistentMessageHeader(mayor.getClient(), mail);
+		}
+		
+		if(removed.size() > 0) {
+			Mail mail = new Mail();
+			mail.setMailId(core.chatService.generateMailId());
+			mail.setRecieverId(getMayorID());
+			mail.setStatus(Mail.NEW);
+	        mail.setTimeStamp((int) (new Date().getTime() / 1000));
+	        mail.setSubject("@city/city:city_fixup_remove_citizens_subject");
+	        mail.setSenderName("@city/city:new_city_from");
+	        mail.addProseAttachment(new ProsePackage("@city/city:city_fixup_remove_citizens_body", "TT", removedTT));
+	        
+	        core.chatService.storePersistentMessage(mail);
+			if(mayor.getClient() != null)
+				core.chatService.sendPersistentMessageHeader(mayor.getClient(), mail);
+		}
+
+
 	}
 	
 	public void demolishHighRankStructures() {
@@ -278,7 +365,7 @@ public class PlayerCity implements Serializable {
 		// that require a higher rank than the current one
 		synchronized(placedStructures){
 			Vector<SWGObject> wreckingBall = new Vector<SWGObject>();
-			for (long structureID : placedStructures){
+			for (long structureID : placedStructures) {
 				SWGObject structure = NGECore.getInstance().objectService.getObject(structureID);
 				int structureCode = (int) structure.getAttachment("CityStructureCode");
 				
@@ -526,19 +613,34 @@ public class PlayerCity implements Serializable {
 	}
 	
 	public void addCitizen(long citizen) {
-		citizens.add(citizen);
-		CreatureObject citizenObject = (CreatureObject) NGECore.getInstance().objectService.getObject(citizen);
-		sendNewCitizenMailAll(citizenObject);
-		sendNewCitizenMail(citizenObject);		
+		addCitizen(citizen, true);
 	}
 	
 	public void removeCitizen(long citizen) {
+		removeCitizen(citizen, true);
+	}
+	
+	public void addCitizen(long citizen, boolean sendMail) {
+		citizens.add(citizen);
+		NGECore core = NGECore.getInstance();
+		CreatureObject citizenObject = core.objectService.getObject(citizen) == null ? core.objectService.getCreatureFromDB(citizen) : (CreatureObject) core.objectService.getObject(citizen);
+		if(citizenObject == null)
+			return;
+		if(sendMail) {
+			sendNewCitizenMailAll(citizenObject);
+			sendNewCitizenMail(citizenObject);
+		}
+	}
+	
+	public void removeCitizen(long citizen, boolean sendMail) {
 		citizens.remove(citizen);
 		NGECore core = NGECore.getInstance();
 		CreatureObject citizenObject = core.objectService.getObject(citizen) == null ? core.objectService.getCreatureFromDB(citizen) : (CreatureObject) core.objectService.getObject(citizen);
 		if(citizenObject == null)
 			return;
-		sendCitizenLeftMailAll(citizenObject);
+		if(sendMail) {
+			sendCitizenLeftMailAll(citizenObject);
+		}
 	}
 
 	public long getNextElectionDate() {

@@ -66,36 +66,10 @@ public class PlayerCityService implements INetworkDispatch {
 	public PlayerCityService(NGECore core) {
 		this.core = core;
 		core.scriptService.callScript("scripts/", "cityRankCaps", "addCityRankCaps", core);
-		scheduler.scheduleAtFixedRate(() -> {
-			administratePlayerCities();
-		}, 0, 1, TimeUnit.MINUTES);
 	}
 	
 	public void addCityRankCap(String planetName, int[] caps) {
 		cityRankCaps.put(planetName, caps);
-	}
-
-	public void administratePlayerCities() {
-		synchronized(playerCities){
-			Vector<PlayerCity> unfoundedCities = new Vector<PlayerCity>();
-			for (PlayerCity city : playerCities){
-				
-				if (city.getNextCityUpdate() <= System.currentTimeMillis())
-					city.processCityUpdate();
-				
-				if (city.getNextElectionDate() <= System.currentTimeMillis())
-					city.processElection();
-				
-				if (! city.isFounded() && city.getFoundationTime()<=System.currentTimeMillis()-(60*60*24*1000)){
-					if (! city.checkFoundationSuccess())
-						unfoundedCities.add(city);
-				}
-			}
-			
-			if (unfoundedCities.size()>0){
-				unfoundedCities.forEach(this::destroyCity);
-			}			
-		}
 	}
 	
 	public boolean isRankCapped(Planet planet, int rank) {
@@ -128,7 +102,7 @@ public class PlayerCityService implements INetworkDispatch {
 			return;
 		
 		if(isRankCapped(actor.getPlanet(), PlayerCity.OUTPOST)) {
-			actor.sendSystemMessage("This Planet can not support any more cities", (byte) 0);
+			actor.sendSystemMessage("This Planet can not support any more cities.", (byte) 0);
 			return;
 		}
 		
@@ -164,6 +138,7 @@ public class PlayerCityService implements INetworkDispatch {
 				}
 				
 				PlayerCity playerCity = addNewPlayerCity(actor, cityHall);
+				PlayerCityService.this.schedulePlayerCityUpdate(playerCity, PlayerCity.newCityGraceSpan);
 				cityHall.setAttachment("structureCity", playerCity.getCityID());
 				actor.setAttachment("residentCity", playerCity.getCityID());
 				core.housingService.declareResidency(actor, cityHall);
@@ -397,5 +372,11 @@ public class PlayerCityService implements INetworkDispatch {
 
 		playerCities.remove(city);
 		
+	}
+
+	public void schedulePlayerCityUpdate(PlayerCity playerCity, long time) {
+		scheduler.schedule(() -> {
+			playerCity.processCityUpdate();
+		}, time, TimeUnit.MILLISECONDS);
 	}	
 }
