@@ -330,6 +330,7 @@ public class HousingService implements INetworkDispatch {
 				if (returnList.get(0).equals(""+confirmCode)){
 					// handle creation of correct deed in player inventory
 					PlayerObject player = (PlayerObject) houseOwner.getSlottedObject("ghost");	
+					PlayerCity city = core.playerCityService.getCityObjectIsIn(building);
 					HouseTemplate houseTemplate = housingTemplates.get(houseToDeed.get(building.getTemplate()));
 					
 					TangibleObject deed = (TangibleObject) core.objectService.createObject(houseTemplate.getDeedTemplate(), owner.getPlanet());
@@ -359,6 +360,20 @@ public class HousingService implements INetworkDispatch {
 					
 					if (player.getLotsRemaining() + houseTemplate.getLotCost() <= 10) {
 						player.setLotsRemaining(player.getLotsRemaining() + houseTemplate.getLotCost());
+					}
+					
+					if(building.getResidency()) {
+						owner.setAttachment("residentBuilding", null);
+					}
+					
+					if(city != null) {
+						city.removeStructure(building.getObjectID());
+						if(building.getResidency()) {
+							city.removeCitizen(owner.getObjectID());
+							player.setHome("");
+							player.setCitizenship(Citizenship.Homeless);
+							owner.setAttachment("residentCity", null);
+						}
 					}
 					
 					houseOwner.sendSystemMessage("@player_structure:processing_destruction",(byte)1);
@@ -523,7 +538,7 @@ public class HousingService implements INetworkDispatch {
 			((CreatureObject) owner).sendSystemMessage(OutOfBand.ProsePackage("@player_structure:change_residence_time", "DI", (int) ((long) owner.getAttachment("residencyCooldown") - System.currentTimeMillis()) / 3600000), (byte) 0);
 			return;
 		}
-		building.setResidency();
+		building.setResidency(true);
 		PlayerCity cityActorIsIn = core.playerCityService.getCityObjectIsIn(building);
 		owner.setAttachment("residencyCooldown", System.currentTimeMillis() + 86400000); // 24 hours
 		owner.setAttachment("residentBuilding", building.getObjectID());

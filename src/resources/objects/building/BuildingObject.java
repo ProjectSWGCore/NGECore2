@@ -223,8 +223,8 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 		return (boolean) otherVariables.get("residency");
 	}
 	
-	public void setResidency() {
-		otherVariables.set("residency", true);
+	public void setResidency(boolean flag) {
+		otherVariables.set("residency", flag);
 	}
 	
 	public byte getPrivacy() {
