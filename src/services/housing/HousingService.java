@@ -527,6 +527,7 @@ public class HousingService implements INetworkDispatch {
 	
 	public void declareResidency(SWGObject owner, TangibleObject target) {
 		final BuildingObject building = (BuildingObject) target.getGrandparent();
+		PlayerCity cityActorIsIn = core.playerCityService.getCityObjectIsIn(building);
 		if(owner.getObjectID() != (long) building.getAttachment("structureOwner")) {
 			((CreatureObject) owner).sendSystemMessage("@player_structure:declare_must_be_owner", (byte) 0);
 			return;
@@ -534,16 +535,38 @@ public class HousingService implements INetworkDispatch {
 			((CreatureObject) owner).sendSystemMessage("@player_structure:already_residence", (byte) 0);
 			return;
 		}
+		if(((CreatureObject) owner).getPlayerObject().getCitizenship() == Citizenship.Mayor && !building.getTemplate().contains("cityhall")) { // mayors always have the city hall as their residence and cant change it
+			if(cityActorIsIn == null || cityActorIsIn.getMayorID() != owner.getObjectID()) {
+				((CreatureObject) owner).sendSystemMessage("@city/city:mayor_residence_change", (byte) 0);			
+				return;
+			}
+		}
 		if(System.currentTimeMillis() < (long) owner.getAttachment("residencyCooldown")) {
 			((CreatureObject) owner).sendSystemMessage(OutOfBand.ProsePackage("@player_structure:change_residence_time", "DI", (int) ((long) owner.getAttachment("residencyCooldown") - System.currentTimeMillis()) / 3600000), (byte) 0);
 			return;
 		}
+		BuildingObject oldResidency = null;
+		if(owner.getAttachment("residentBuilding") != null && core.objectService.getObject((long) owner.getAttachment("residentBuilding")) != null) {
+			oldResidency = (BuildingObject) core.objectService.getObject((long) owner.getAttachment("residentBuilding"));
+			oldResidency.setResidency(false);
+			((CreatureObject) owner).sendSystemMessage("@player_structure:change_residence", (byte) 0);
+			PlayerCity oldCity = core.playerCityService.getCityObjectIsIn(oldResidency);
+			if(oldCity != null) {
+				oldCity.removeStructure(oldResidency.getObjectID());
+				oldCity.removeCitizen(owner.getObjectID());
+				((CreatureObject) owner).getPlayerObject().setHome("");
+				((CreatureObject) owner).getPlayerObject().setCitizenship(Citizenship.Homeless);
+				owner.setAttachment("residentCity", null);
+			}
+			((CreatureObject) owner).sendSystemMessage("@player_structure:change_residence", (byte) 0);
+		} else {
+			((CreatureObject) owner).sendSystemMessage("@player_structure:declared_residency", (byte) 0);		
+		}
 		building.setResidency(true);
-		PlayerCity cityActorIsIn = core.playerCityService.getCityObjectIsIn(building);
 		owner.setAttachment("residencyCooldown", System.currentTimeMillis() + 86400000); // 24 hours
 		owner.setAttachment("residentBuilding", building.getObjectID());
-		((CreatureObject) owner).sendSystemMessage("@player_structure:change_residence", (byte) 0);
 		if(cityActorIsIn != null) {
+			cityActorIsIn.addCitizen(owner.getObjectID());
 			owner.setAttachment("residentCity", cityActorIsIn.getCityID());
 			((CreatureObject) owner).getPlayerObject().setHome(cityActorIsIn.getCityName());
 			((CreatureObject) owner).getPlayerObject().setCitizenship(Citizenship.Citizen);
