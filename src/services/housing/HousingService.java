@@ -233,7 +233,11 @@ public class HousingService implements INetworkDispatch {
 		core.objectService.getObjectList()
 		.values().stream()
 		.filter(obj -> obj instanceof BuildingObject && obj.getAttachment("structureOwner") != null)
-		.forEach(building -> core.objectService.persistObject(building.getObjectID(), building, core.getSWGObjectODB()));
+		.forEach(building -> { 
+			if(building.getAttachment("childObjects") != null)
+				((Vector<SWGObject>) building.getAttachment("childObjects")).clear();
+			core.objectService.persistObject(building.getObjectID(), building, core.getSWGObjectODB());
+		});
 	}
 	
 	@SuppressWarnings("unchecked")

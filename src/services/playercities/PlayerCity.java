@@ -30,6 +30,7 @@ import java.util.Vector;
 
 import net.engio.mbassy.listener.Handler;
 import resources.common.OutOfBand;
+import resources.common.ProsePackage;
 import resources.common.collidables.AbstractCollidable;
 import resources.common.collidables.CollidableCircle;
 import resources.common.collidables.AbstractCollidable.EnterEvent;
@@ -188,7 +189,7 @@ public class PlayerCity implements Serializable {
 		switch (currentRank) {
 			case NEWCITY : if (censusResult>=5){
 								setRank(++currentRank); // Expand to Outpost
-								sendCityExpandMailAll();
+								sendCityExpandMail();
 							}
 							
 							if (censusResult<5){
@@ -198,47 +199,47 @@ public class PlayerCity implements Serializable {
 							
 			case OUTPOST : if (censusResult>=10){
 								setRank(++currentRank); // Expand to Village
-								sendCityExpandMailAll();
+								sendCityExpandMail();
 							}
 							if (censusResult<5){
 								setRank(--currentRank); // Contract to Deserted
-								sendCityContractMailAll();
+								sendCityContractMail();
 							}
 							break;
 							
 			case VILLAGE : if (censusResult>=15){
 								setRank(++currentRank); // Expand to Township
-								sendCityExpandMailAll();
+								sendCityExpandMail();
 							}
 							if (censusResult<10){
 								setRank(--currentRank); // Contract to Outpost
-								sendCityContractMailAll();
+								sendCityContractMail();
 							}
 							break;
 							
 			case TOWNSHIP : if (censusResult>=30){
 								setRank(++currentRank); // Expand to City
-								sendCityExpandMailAll();
+								sendCityExpandMail();
 							}
 							if (censusResult<15){
 								setRank(--currentRank); // Contract to Village
-								sendCityContractMailAll();
+								sendCityContractMail();
 							}
 							break;
 							
 			case CITY     : if (censusResult>=40){
 								setRank(++currentRank); // Expand to Metropolis
-								sendCityExpandMailAll();
+								sendCityExpandMail();
 							}
 							if (censusResult<30){
 								setRank(--currentRank); // Contract to Township
-								sendCityContractMailAll();
+								sendCityContractMail();
 							}
 							break;
 							
 			case METROPOLIS : if (censusResult<40){
 								  setRank(--currentRank); // Contract to City
-								  sendCityContractMailAll();
+								  sendCityContractMail();
 							  }
 							  break;
 						
@@ -312,7 +313,7 @@ public class PlayerCity implements Serializable {
 			
 			for (SWGObject wreck : wreckingBall){
 				placedStructures.remove(wreck.getObjectID());
-				NGECore.getInstance().objectService.destroyObject(wreck.getObjectID());
+				NGECore.getInstance().housingService.destroyStructure((BuildingObject) wreck);
 			}			
 		}		
 	}
@@ -340,31 +341,38 @@ public class PlayerCity implements Serializable {
 	public void calculateAndPayMaintenance() {
 		NGECore core = NGECore.getInstance();
 		// 1. Pay City Hall Maintenance
+		int maintAmount = 0;
 		BuildingObject cityHall = (BuildingObject) core.objectService.getObject(cityHallId);
 		int cityHallMaintenance = 1000 + getRank() * 2500;
-		deductCivicStructureMaintenance(cityHall, cityHallMaintenance);
+		maintAmount += deductCivicStructureMaintenance(cityHall, cityHallMaintenance);
 		
 		for(long placedStructures : new Vector<Long>(placedStructures)) {
 			BuildingObject building = (BuildingObject) core.objectService.getObject(placedStructures);
 			if(building != null)
-				deductCivicStructureMaintenance(building, building.getBMR());
+				maintAmount += deductCivicStructureMaintenance(building, building.getBMR());
 		}
-		
+
+		sendMaintenanceMail(maintAmount);
 	}
 	
-	private void deductCivicStructureMaintenance(BuildingObject civicStructure, int amount) {
+	private int deductCivicStructureMaintenance(BuildingObject civicStructure, int amount) {
 		int maintOwed = civicStructure.getOutstandingMaintenance();
+		int amountPaid = 0;
 		if(amount > cityTreasury) {
 			int decay = civicStructure.getConditionDamage();
 			int amountToPay = amount - cityTreasury;
 			int nextDecay = (int) (amountToPay / amount * civicStructure.getMaximumCondition() * 0.25f); 
 			civicStructure.setOutstandingMaintenance(maintOwed - amountToPay);
 			civicStructure.setConditionDamage(decay + nextDecay);
+			amountPaid = cityTreasury;
 			cityTreasury = 0;
+			sendStructureDecayMail(civicStructure, amount);
 		} else {
 			cityTreasury -= amount;
+			amountPaid = amount;
 			if(maintOwed > 0) {
 				if(maintOwed > cityTreasury) {
+					amountPaid = cityTreasury;
 					int decay = civicStructure.getConditionDamage();
 					if(decay > 0) {
 						civicStructure.setConditionDamage(cityTreasury / (maintOwed / decay));
@@ -372,16 +380,20 @@ public class PlayerCity implements Serializable {
 						cityTreasury = 0;
 					}
 				} else {
+					amountPaid += maintOwed;
 					civicStructure.setOutstandingMaintenance(0);
 					cityTreasury -= maintOwed;
 					civicStructure.setConditionDamage(0);
 				}
+				sendStructureDecayRepairMail(civicStructure);
 			}
 		}
 		if(civicStructure.getConditionDamage() >= civicStructure.getMaximumCondition()) {
-			// Destroy
+			placedStructures.remove(civicStructure);
+			NGECore.getInstance().housingService.destroyStructure(civicStructure);
+			sendStructureDecayDestroyMail(civicStructure);
 		}
-
+		return amountPaid;
 	}
 	
 	public void handleBanRequest() {
@@ -840,75 +852,45 @@ public class PlayerCity implements Serializable {
 		}
 	}
 	
-	public void sendCityExpandMailAll() {		
+	public void sendCityExpandMail() {		
 
-		Vector<Long> citizenList = getCitizens();
 		NGECore core = NGECore.getInstance();
-		for (long citizen : citizenList){
-			CreatureObject citizenObject = core.objectService.getObject(citizen) == null ? core.objectService.getCreatureFromDB(citizen) : (CreatureObject) core.objectService.getObject(citizen);
-			if(citizenObject == null)
-				continue;
-			Mail actorMail = new Mail();
-	        actorMail.setMailId(NGECore.getInstance().chatService.generateMailId());
-	        actorMail.setRecieverId(citizen);
-	        actorMail.setStatus(Mail.NEW);
-	        actorMail.setTimeStamp((int) (new Date().getTime() / 1000));
-	        actorMail.setMessage("@city/city:city_expand_body");
-	        actorMail.setSubject("@city/city:city_expand_subject");
-	        actorMail.setSenderName("City " + this.cityName);
-	        
-	        List<WaypointAttachment> attachments = new ArrayList<WaypointAttachment>(); 
-	        WaypointObject constructionWaypoint = (WaypointObject)NGECore.getInstance().objectService.createObject("object/waypoint/shared_world_waypoint_blue.iff", citizenObject.getPlanet(), citizenObject.getPosition().x, 0 ,citizenObject.getPosition().z);
-	        WaypointAttachment attachment = new WaypointAttachment();
-			attachment.active = false;		
-			attachment.cellID = constructionWaypoint.getCellId();
-			attachment.color = (byte)1;
-			attachment.name = "City";
-			attachment.planetCRC = engine.resources.common.CRC.StringtoCRC(citizenObject.getPlanet().getName());
-			attachment.positionX = citizenObject.getPosition().x;
-			attachment.positionY = 0;
-			attachment.positionZ = citizenObject.getPosition().z;
-			attachments.add(attachment);
-			actorMail.setWaypointAttachments(attachments);
-	        
-	        NGECore.getInstance().chatService.storePersistentMessage(actorMail);
-	  
-		}
+		CreatureObject mayor = core.objectService.getObject(getMayorID()) == null ? core.objectService.getCreatureFromDB(getMayorID()) : (CreatureObject) core.objectService.getObject(getMayorID());
+		if(mayor == null)
+			return;
+		Mail mail = new Mail();
+		mail.setMailId(NGECore.getInstance().chatService.generateMailId());
+		mail.setRecieverId(getMayorID());
+		mail.setStatus(Mail.NEW);
+        mail.setTimeStamp((int) (new Date().getTime() / 1000));
+        mail.setSubject("@city/city:city_contract_subject");
+        mail.setSenderName("@city/city:new_city_from");
+        mail.addProseAttachment(new ProsePackage("@city/city:city_expand_body", "TO", cityName, cityRank));
+        
+        core.chatService.storePersistentMessage(mail);
+		if(mayor.getClient() != null)
+			core.chatService.sendPersistentMessageHeader(mayor.getClient(), mail);
 	}
 	
-	public void sendCityContractMailAll() {		
-
-		Vector<Long> citizenList = getCitizens();
+	public void sendCityContractMail() {	
+		
 		NGECore core = NGECore.getInstance();
-		for (long citizen : citizenList){
-			CreatureObject citizenObject = core.objectService.getObject(citizen) == null ? core.objectService.getCreatureFromDB(citizen) : (CreatureObject) core.objectService.getObject(citizen);
-			if(citizenObject == null)
-				continue;
-			Mail actorMail = new Mail();
-	        actorMail.setMailId(NGECore.getInstance().chatService.generateMailId());
-	        actorMail.setRecieverId(citizen);
-	        actorMail.setStatus(Mail.NEW);
-	        actorMail.setTimeStamp((int) (new Date().getTime() / 1000));
-	        actorMail.setMessage("@city/city:city_contract_body");
-	        actorMail.setSubject("@city/city:city_contract_subject");
-	        actorMail.setSenderName("City " + this.cityName);
-	        
-	        List<WaypointAttachment> attachments = new ArrayList<WaypointAttachment>(); 
-	        WaypointObject constructionWaypoint = (WaypointObject)NGECore.getInstance().objectService.createObject("object/waypoint/shared_world_waypoint_blue.iff", citizenObject.getPlanet(), citizenObject.getPosition().x, 0 ,citizenObject.getPosition().z);
-	        WaypointAttachment attachment = new WaypointAttachment();
-			attachment.active = false;		
-			attachment.cellID = constructionWaypoint.getCellId();
-			attachment.color = (byte)1;
-			attachment.name = "City";
-			attachment.planetCRC = engine.resources.common.CRC.StringtoCRC(citizenObject.getPlanet().getName());
-			attachment.positionX = citizenObject.getPosition().x;
-			attachment.positionY = 0;
-			attachment.positionZ = citizenObject.getPosition().z;
-			attachments.add(attachment);
-			actorMail.setWaypointAttachments(attachments);
-	        
-	        NGECore.getInstance().chatService.storePersistentMessage(actorMail);
-		}
+		CreatureObject mayor = core.objectService.getObject(getMayorID()) == null ? core.objectService.getCreatureFromDB(getMayorID()) : (CreatureObject) core.objectService.getObject(getMayorID());
+		if(mayor == null)
+			return;
+		Mail mail = new Mail();
+		mail.setMailId(NGECore.getInstance().chatService.generateMailId());
+		mail.setRecieverId(getMayorID());
+		mail.setStatus(Mail.NEW);
+        mail.setTimeStamp((int) (new Date().getTime() / 1000));
+        mail.setSubject("@city/city:city_contract_subject");
+        mail.setSenderName("@city/city:new_city_from");
+        mail.addProseAttachment(new ProsePackage("@city/city:city_contract_body", "TO", cityName, cityRank));
+        
+        core.chatService.storePersistentMessage(mail);
+		if(mayor.getClient() != null)
+			core.chatService.sendPersistentMessageHeader(mayor.getClient(), mail);
+
 	}
 	
 	
@@ -1023,6 +1005,87 @@ public class PlayerCity implements Serializable {
 		// TODO: remove specialisation skill mods
 
 	}	
+	private void sendMaintenanceMail(int amount) {
+		NGECore core = NGECore.getInstance();
+		CreatureObject mayor = core.objectService.getObject(getMayorID()) == null ? core.objectService.getCreatureFromDB(getMayorID()) : (CreatureObject) core.objectService.getObject(getMayorID());
+		if(mayor == null)
+			return;
+		Mail mail = new Mail();
+		mail.setMailId(NGECore.getInstance().chatService.generateMailId());
+		mail.setRecieverId(getMayorID());
+		mail.setStatus(Mail.NEW);
+        mail.setTimeStamp((int) (new Date().getTime() / 1000));
+        mail.setSubject("@city/city:city_maint_subject");
+        mail.setSenderName("@city/city:treasury_withdraw_from");
+        mail.addProseAttachment(new ProsePackage("@city/city:city_maint_body", "TO", mayor.getObjectID(), amount));
+        
+        core.chatService.storePersistentMessage(mail);
+		if(mayor.getClient() != null)
+			core.chatService.sendPersistentMessageHeader(mayor.getClient(), mail);
+
+	}
+
+	
+	private void sendStructureDecayRepairMail(BuildingObject building) {
+		NGECore core = NGECore.getInstance();
+		CreatureObject mayor = core.objectService.getObject(getMayorID()) == null ? core.objectService.getCreatureFromDB(getMayorID()) : (CreatureObject) core.objectService.getObject(getMayorID());
+		if(mayor == null)
+			return;
+		Mail mail = new Mail();
+		mail.setMailId(NGECore.getInstance().chatService.generateMailId());
+		mail.setRecieverId(getMayorID());
+		mail.setStatus(Mail.NEW);
+        mail.setTimeStamp((int) (new Date().getTime() / 1000));
+        mail.setSubject("@city/city:structure_repaired_subject");
+        mail.setSenderName("@city/city:treasury_withdraw_from");
+        mail.addProseAttachment(new ProsePackage("@city/city:structure_repaired_body", "TO", mayor.getObjectID(), "TT", building.getLookAtText()));
+        
+        core.chatService.storePersistentMessage(mail);
+		if(mayor.getClient() != null)
+			core.chatService.sendPersistentMessageHeader(mayor.getClient(), mail);
+
+	}
+
+	private void sendStructureDecayMail(BuildingObject building, int amount) {
+		NGECore core = NGECore.getInstance();
+		CreatureObject mayor = core.objectService.getObject(getMayorID()) == null ? core.objectService.getCreatureFromDB(getMayorID()) : (CreatureObject) core.objectService.getObject(getMayorID());
+		if(mayor == null)
+			return;
+		Mail mail = new Mail();
+		mail.setMailId(NGECore.getInstance().chatService.generateMailId());
+		mail.setRecieverId(getMayorID());
+		mail.setStatus(Mail.NEW);
+        mail.setTimeStamp((int) (new Date().getTime() / 1000));
+        mail.setSubject("@city/city:structure_damaged_subject");
+        mail.setSenderName("@city/city:treasury_withdraw_from");
+        mail.addProseAttachment(new ProsePackage("@city/city:structure_damaged_body", "TO", mayor.getObjectID(), "TT", building.getObjectName().getString(), amount));
+        
+        core.chatService.storePersistentMessage(mail);
+		if(mayor.getClient() != null)
+			core.chatService.sendPersistentMessageHeader(mayor.getClient(), mail);
+
+	}
+
+	
+	private void sendStructureDecayDestroyMail(BuildingObject building) {
+		NGECore core = NGECore.getInstance();
+		CreatureObject mayor = core.objectService.getObject(getMayorID()) == null ? core.objectService.getCreatureFromDB(getMayorID()) : (CreatureObject) core.objectService.getObject(getMayorID());
+		if(mayor == null)
+			return;
+		Mail mail = new Mail();
+		mail.setMailId(NGECore.getInstance().chatService.generateMailId());
+		mail.setRecieverId(getMayorID());
+		mail.setStatus(Mail.NEW);
+        mail.setTimeStamp((int) (new Date().getTime() / 1000));
+        mail.setSubject("@city/city:structure_destroyed_maint_subject");
+        mail.setSenderName("@city/city:treasury_withdraw_from");
+        mail.addProseAttachment(new ProsePackage("@city/city:structure_destroyed_maint_body", "TO", mayor.getObjectID(), "TT", building.getObjectName().getString()));
+        
+        core.chatService.storePersistentMessage(mail);
+		if(mayor.getClient() != null)
+			core.chatService.sendPersistentMessageHeader(mayor.getClient(), mail);
+
+	}
 
 	
 }

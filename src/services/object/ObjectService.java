@@ -527,6 +527,11 @@ public class ObjectService implements INetworkDispatch {
 		} else {
 			core.simulationService.remove(object, object.getWorldPosition().x, object.getWorldPosition().z, true);
 		}
+		@SuppressWarnings("unchecked") Vector<SWGObject> childObjects = (Vector<SWGObject>) object.getAttachment("childObjects");
+		for(SWGObject child : childObjects) {
+			if(child.getParentId() != 0)
+				destroyObject(child);
+		}
 		
 	}
 	
