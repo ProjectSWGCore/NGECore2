@@ -636,15 +636,9 @@ public class PlayerCity implements Serializable {
 		Vector<Long> citizenList = getCitizens();
 		NGECore core = NGECore.getInstance();
 		for (long citizen : citizenList){
-<<<<<<< HEAD
-			CreatureObject citizenObject = (CreatureObject) NGECore.getInstance().objectService.getObject(citizen);
-			if(citizenObject == null)
-				citizenObject = NGECore.getInstance().objectService.getCreatureFromDB(citizen);
-=======
 			CreatureObject citizenObject = core.objectService.getObject(citizen) == null ? core.objectService.getCreatureFromDB(citizen) : (CreatureObject) core.objectService.getObject(citizen);
 			if(citizenObject == null)
 				continue;
->>>>>>> origin/master
 			Mail actorMail = new Mail();
 	        actorMail.setMailId(NGECore.getInstance().chatService.generateMailId());
 	        actorMail.setRecieverId(citizen);
@@ -683,15 +677,9 @@ public class PlayerCity implements Serializable {
 		Vector<Long> citizenList = getCitizens();
 		NGECore core = NGECore.getInstance();
 		for (long citizen : citizenList){
-<<<<<<< HEAD
-			CreatureObject citizenObject = (CreatureObject) NGECore.getInstance().objectService.getObject(citizen);
-			if(citizenObject == null)
-				citizenObject = NGECore.getInstance().objectService.getCreatureFromDB(citizen);
-=======
 			CreatureObject citizenObject = core.objectService.getObject(citizen) == null ? core.objectService.getCreatureFromDB(citizen) : (CreatureObject) core.objectService.getObject(citizen);
 			if(citizenObject == null)
 				continue;
->>>>>>> origin/master
 			Mail actorMail = new Mail();
 	        actorMail.setMailId(NGECore.getInstance().chatService.generateMailId());
 	        actorMail.setRecieverId(citizen);
@@ -757,15 +745,9 @@ public class PlayerCity implements Serializable {
 		Vector<Long> citizenList = getCitizens();
 		NGECore core = NGECore.getInstance();
 		for (long citizen : citizenList){
-<<<<<<< HEAD
-			CreatureObject citizenObject = (CreatureObject) NGECore.getInstance().objectService.getObject(citizen);
-			if(citizenObject == null)
-				citizenObject = NGECore.getInstance().objectService.getCreatureFromDB(citizen);
-=======
 			CreatureObject citizenObject = core.objectService.getObject(citizen) == null ? core.objectService.getCreatureFromDB(citizen) : (CreatureObject) core.objectService.getObject(citizen);
 			if(citizenObject == null)
 				continue;
->>>>>>> origin/master
 			Mail actorMail = new Mail();
 	        actorMail.setMailId(NGECore.getInstance().chatService.generateMailId());
 	        actorMail.setRecieverId(citizen);
@@ -801,15 +783,9 @@ public class PlayerCity implements Serializable {
 		Vector<Long> citizenList = getCitizens();
 		NGECore core = NGECore.getInstance();
 		for (long citizen : citizenList){
-<<<<<<< HEAD
-			CreatureObject citizenObject = (CreatureObject) NGECore.getInstance().objectService.getObject(citizen);
-			if(citizenObject == null)
-				citizenObject = NGECore.getInstance().objectService.getCreatureFromDB(citizen);
-=======
 			CreatureObject citizenObject = core.objectService.getObject(citizen) == null ? core.objectService.getCreatureFromDB(citizen) : (CreatureObject) core.objectService.getObject(citizen);
 			if(citizenObject == null)
 				continue;
->>>>>>> origin/master
 			Mail actorMail = new Mail();
 	        actorMail.setMailId(NGECore.getInstance().chatService.generateMailId());
 	        actorMail.setRecieverId(citizen);
@@ -843,15 +819,9 @@ public class PlayerCity implements Serializable {
 		Vector<Long> citizenList = getCitizens();
 		NGECore core = NGECore.getInstance();
 		for (long citizen : citizenList){
-<<<<<<< HEAD
-			CreatureObject citizenObject = (CreatureObject) NGECore.getInstance().objectService.getObject(citizen);
-			if(citizenObject == null)
-				citizenObject = NGECore.getInstance().objectService.getCreatureFromDB(citizen);
-=======
 			CreatureObject citizenObject = core.objectService.getObject(citizen) == null ? core.objectService.getCreatureFromDB(citizen) : (CreatureObject) core.objectService.getObject(citizen);
 			if(citizenObject == null)
 				continue;
->>>>>>> origin/master
 			Mail actorMail = new Mail();
 	        actorMail.setMailId(NGECore.getInstance().chatService.generateMailId());
 	        actorMail.setRecieverId(citizen);
