@@ -161,6 +161,7 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 				PortalVisitor portal = ClientFileManager.loadFile(portalLayoutFilename, PortalVisitor.class);
 				
 				for (int i = 0; i <= portal.cellCount; i++) {
+					System.out.println("Cellname: " + portal.cells.get(i).name);
 					if (cellName.equals(portal.cells.get(i).name)) {
 						return getCellByCellNumber(i + 1);
 					}
