@@ -27,7 +27,7 @@ import java.util.List;
 
 import resources.common.OutOfBand;
 import resources.common.ProsePackage;
-
+import engine.resources.common.Stf;
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 
@@ -148,6 +148,10 @@ public class Mail implements Serializable {
 	
 	public void addProseAttachment(ProsePackage prose) {
 		proseAttachments.add(prose);
+	}
+
+	public void init() {
+		proseAttachments.forEach(ProsePackage::init);
 	}
 	
 }

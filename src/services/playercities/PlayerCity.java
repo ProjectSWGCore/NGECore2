@@ -26,7 +26,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.engio.mbassy.listener.Handler;
 import resources.common.OutOfBand;
@@ -129,8 +131,7 @@ public class PlayerCity implements Serializable {
 	
 	private Vector<Long> placedStructures = new Vector<Long>();
 	private Vector<Long> citizens = new Vector<Long>();
-	private Vector<Long> electionCandidates = new Vector<Long>();
-	private Vector<Byte> electionVotes = new Vector<Byte>();
+	private Map<Long, Integer> electionList = new ConcurrentHashMap<Long, Integer>();
 	private Vector<Long> cityBanList = new Vector<Long>();
 	private Vector<Long> militiaList = new Vector<Long>();
 	private Vector<Long> foundersList = new Vector<Long>();
@@ -156,7 +157,7 @@ public class PlayerCity implements Serializable {
 		area.getEventBus().subscribe(this);
 		NGECore.getInstance().simulationService.addCollidable(area, area.getCenter().x, area.getCenter().z);
 	}
-	
+		
 	public void handleGrantZoning() {
 		
 	}
@@ -173,9 +174,6 @@ public class PlayerCity implements Serializable {
 		// ToDo: handle everything		
 		long winnerID = mayorID;
 		mayorID = winnerID;
-		electionVotes.clear();
-		electionCandidates.clear();
-		electionCandidates.add(mayorID);
 		setNextElectionDate(System.currentTimeMillis()+legislationPeriod);
 	}
 	
@@ -271,10 +269,17 @@ public class PlayerCity implements Serializable {
 		int newRank = getRank() + 1;
 		setRank(newRank);
 		sendCityExpandMail();
+		addNewStructures();
 		fixupCitizens();
 		
 	}
 	
+	private void addNewStructures() {
+		NGECore core = NGECore.getInstance();
+		List<SWGObject> objects = core.simulationService.get(core.terrainService.getPlanetByID(planetId), area.getCenter().x, area.getCenter().x, 500);
+		objects.stream().filter(o -> o instanceof BuildingObject && o.getAttachment("structureOwner") != null && area.doesCollide(o)).map(SWGObject::getObjectID).forEach(this::addNewStructure);
+	}
+
 	// cleanup in case something went wrong
 	public void fixupCitizens() {
 		List<Long> residents = new ArrayList<Long>();
@@ -651,14 +656,6 @@ public class PlayerCity implements Serializable {
 		this.nextElectionDate = nextElectionDate;
 	}
 
-	public Vector<Long> getElectionCandidates() {
-		return electionCandidates;
-	}
-
-	public void setElectionCandidates(Vector<Long> electionCandidates) {
-		this.electionCandidates = electionCandidates;
-	}
-
 	public long getNextCityUpdate() {
 		return nextCityUpdate;
 	}
@@ -675,14 +672,6 @@ public class PlayerCity implements Serializable {
 		this.cityBanList = cityBanList;
 	}
 
-	public Vector<Byte> getElectionVotes() {
-		return electionVotes;
-	}
-	
-	public void addToElectionVotes(byte vote) {
-		electionVotes.add(vote);
-	}
-	
 	public void addToTreasury(int amountToAdd) {
 		cityTreasury += amountToAdd;
 	}
@@ -691,11 +680,6 @@ public class PlayerCity implements Serializable {
 		cityTreasury -= amountToDeduct;
 	}
 	
-	// Stalinesque method :D
-	public void setElectionVotes(Vector<Byte> electionVotes) {
-		this.electionVotes = electionVotes;
-	}
-
 	public Point3D getCityCenterPosition() {
 		return cityCenterPosition;
 	}
@@ -905,7 +889,7 @@ public class PlayerCity implements Serializable {
 	        actorMail.setTimeStamp((int) (new Date().getTime() / 1000));
 	        actorMail.setSubject("@city/city:new_city_citizen_subject");
 	        actorMail.setSenderName("City " + this.cityName);
-	        actorMail.addProseAttachment(new ProsePackage("@city/city:new_city_citizen_body", "TT", newCitizen.getCustomName()));
+	        actorMail.addProseAttachment(new ProsePackage("@city/city:new_city_citizen_body", "TO", newCitizen.getCustomName()));
 	        
 	        NGECore.getInstance().chatService.storePersistentMessage(actorMail);
 	        if (newCitizen.getClient()!=null)
@@ -1218,6 +1202,14 @@ public class PlayerCity implements Serializable {
 
 	public void setPlanetId(int planetId) {
 		this.planetId = planetId;
+	}
+
+	public Map<Long, Integer> getElectionList() {
+		return electionList;
+	}
+
+	public void setElectionList(Map<Long, Integer> electionList) {
+		this.electionList = electionList;
 	}
 
 	

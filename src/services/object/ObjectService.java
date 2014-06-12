@@ -165,6 +165,7 @@ public class ObjectService implements INetworkDispatch {
 		    	core.bazaarService.saveAllItems();
 		    	core.housingService.saveBuildings();
 		    	core.harvesterService.saveHarvesters();
+		    	core.playerCityService.saveAllCities();
 		    	core.closeODBs();
 		    }
 		});

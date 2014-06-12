@@ -350,7 +350,7 @@ public class ChatService implements INetworkDispatch {
 					return;
 
 				mail.setStatus(Mail.READ);
-				
+				mail.init();
 				sendPersistentMessage(client, mail);
 				
 				storePersistentMessage(mail);

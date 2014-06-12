@@ -41,6 +41,7 @@ import services.chat.Mail;
 import services.sui.SUIWindow;
 import services.sui.SUIWindow.SUICallback;
 import services.sui.SUIWindow.Trigger;
+import engine.resources.database.ODBCursor;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -73,6 +74,26 @@ public class PlayerCityService implements INetworkDispatch {
 	
 	public void addCityRankCap(String planetName, int[] caps) {
 		cityRankCaps.put(planetName, caps);
+	}
+	
+	public void saveAllCities() {
+		playerCities.forEach(c -> core.objectService.persistObject(c.getCityID(), c, core.getCityODB()));
+	}
+	
+	public void loadCities() {
+		ODBCursor cursor = core.getCityODB().getCursor();
+		while(cursor.hasNext()) {
+			PlayerCity city = (PlayerCity) cursor.next();
+			if(city == null)
+				continue;
+			city.init();
+			playerCities.add(city);
+			if(System.currentTimeMillis() < city.getNextCityUpdate())
+				city.processCityUpdate();
+			else
+				schedulePlayerCityUpdate(city, city.getNextCityUpdate() - System.currentTimeMillis());
+		}
+		cursor.close();
 	}
 	
 	public boolean isRankCapped(Planet planet, int rank) {
@@ -141,10 +162,12 @@ public class PlayerCityService implements INetworkDispatch {
 				
 				PlayerCity playerCity = addNewPlayerCity(actor, cityHall);
 				playerCity.setCityName(name);
+				playerCity.addNewStructure(cityHall.getObjectID());
 				PlayerCityService.this.schedulePlayerCityUpdate(playerCity, PlayerCity.newCityGraceSpan);
 				cityHall.setAttachment("structureCity", playerCity.getCityID());
 				actor.setAttachment("residentCity", playerCity.getCityID());
 				core.housingService.declareResidency(actor, cityHall);
+				core.objectService.persistObject(playerCity.getCityID(), playerCity, core.getCityODB());
 				newCitySUI2((CreatureObject) owner, playerCity);
 
 			}					
@@ -180,7 +203,7 @@ public class PlayerCityService implements INetworkDispatch {
 		PlayerCity foundCity = null;
 		synchronized(playerCities){
 			for (PlayerCity city : playerCities){
-				int id = (int)citizen.getAttachment("residentCity");
+				long id = (long)citizen.getAttachment("residentCity");
 				if (city.getCityID()==id){
 					foundCity = city;
 				}				
@@ -374,6 +397,7 @@ public class PlayerCityService implements INetworkDispatch {
 		}
 		core.simulationService.removeCollidable(city.getArea(), city.getArea().getCenter().x, city.getArea().getCenter().z);
 		playerCities.remove(city);
+		core.objectService.deletePersistentObject(city.getCityID(), core.getCityODB());
 		
 	}
 
