@@ -14,9 +14,9 @@ def setup(core, object):
 	object.setIntAttribute('cat_stat_mod_bonus.@stat_n:strength_modified', 170)
 	object.setIntAttribute('cat_stat_mod_bonus.@stat_n:agility_modified', 170)
 	object.setIntAttribute('cat_stat_mod_bonus.@stat_n:luck_modified', 170)
-	object.setIntAttribute('cat_stat_mod_bonus.@stat_n:expertise_damage_weapon_9', 4)
-	object.setIntAttribute('cat_stat_mod_bonus.@stat_n:expertise_damage_weapon_10', 4)
-	object.setIntAttribute('cat_stat_mod_bonus.@stat_n:expertise_damage_weapon_11', 4)
+	object.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_damage_weapon_9', 4)
+	object.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_damage_weapon_10', 4)
+	object.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_damage_weapon_11', 4)
 	
 	object.setStringAttribute('@set_bonus:piece_bonus_count_2', '@set_bonus:set_bonus_jedi_robe_1')
 	
