@@ -383,6 +383,11 @@ public class MissionService implements INetworkDispatch {
 			return false;
 		}
 		
+		if (mission.getPlanetId() != creature.getPlanetId()) {
+			mission.setPlanet(creature.getPlanet());
+			mission.setPlanetId(creature.getPlanetId());
+		}
+		
 		missionBag.transferTo(creature, datapad, mission);
 		createMissionObjective(creature, mission);
 		return true;

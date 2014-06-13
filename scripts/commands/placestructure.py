@@ -19,7 +19,11 @@ def run(core, actor, target, commandString):
 	positionX = float(cmdArgs[1])
 	positionZ = float(cmdArgs[2])
 	rotation = float(cmdArgs[3])
-	
+
+	if 'cityhall' in deed.getTemplate():
+		core.playerCityService.handlePlaceCity(actor, deed, positionX, positionZ, rotation)
+		return
+
 	core.housingService.placeStructure(actor, deed, positionX, positionZ, rotation)
 	
 	return

@@ -8,5 +8,8 @@ def setup(housingTemplates):
 	houseTemplate.addBuildingSign("object/tangible/sign/player/shared_house_address.iff", Point3D(float(3.5),float(-0.3),float(3.5)))
 	houseTemplate.addPlaceablePlanet("tatooine")
 	houseTemplate.setDefaultItemLimit(0)
+	houseTemplate.setBaseMaintenanceRate(2000)
+
+	houseTemplate.setCivicStructure(True)	
 	housingTemplates.put(houseTemplate.getDeedTemplate(), houseTemplate)
 	return

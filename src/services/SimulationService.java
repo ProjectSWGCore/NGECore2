@@ -230,7 +230,6 @@ public class SimulationService implements INetworkDispatch {
 			@SuppressWarnings("unchecked") Vector<SWGObject> childObjects = (Vector<SWGObject>) object.getAttachment("childObjects");
 			if(childObjects != null) {
 				addChildObjects(object, childObjects);
-				object.setAttachment("childObjects", null);
 			}
 			
 			if(notifyObservers) {

@@ -99,6 +99,7 @@ import services.object.ObjectId;
 import services.object.ObjectService;
 import services.object.UpdateService;
 import services.pet.MountService;
+import services.playercities.PlayerCity;
 import services.playercities.PlayerCityService;
 import services.resources.HarvesterService;
 import services.resources.ResourceService;
@@ -228,6 +229,7 @@ public class NGECore {
 	private ObjectDatabase resourceHistoryODB;
 	private ObjectDatabase swgObjectODB;
 	private ObjectDatabase bountiesODB;
+	private ObjectDatabase cityODB;
 	
 	public static boolean PACKET_DEBUG = false;
 	
@@ -306,6 +308,7 @@ public class NGECore {
 		resourceHistoryODB = new ObjectDatabase("resourcehistory", true, true, true, GalacticResource.class);
 		auctionODB = new ObjectDatabase("auction", true, true, true, AuctionItem.class);
 		bountiesODB = new ObjectDatabase("bounties", true, true, true, BountyListItem.class);
+		cityODB = new ObjectDatabase("cities", true, true, true, PlayerCity.class);
 		
 		// Services
 		loginService = new LoginService(this);
@@ -520,7 +523,8 @@ public class NGECore {
 		staticService.spawnStatics();
 		
 		equipmentService.loadBonusSets();
-		
+		playerCityService.loadCityRankCaps();
+		playerCityService.loadCities();
 		retroService.run();
 		
 		didServerCrash = false;
@@ -676,7 +680,11 @@ public class NGECore {
 	public ObjectDatabase getAuctionODB() {
 		return auctionODB;
 	}
-	
+
+	public ObjectDatabase getCityODB() {
+		return cityODB;
+	}
+
 	public int getActiveClients() {
 		int connections = 0;
 		for (Map.Entry<IoSession, Client> c : clients.entrySet()) {
@@ -784,6 +792,7 @@ public class NGECore {
 		objectIdODB.close();
 		duplicateIdODB.close();
 		auctionODB.close();
+		cityODB.close();
 	}
 
 	public String getMotd() {

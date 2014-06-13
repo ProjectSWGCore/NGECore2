@@ -221,4 +221,11 @@ public class ProsePackage implements Serializable {
 		this.dfFloat = dfFloat;
 	}
 	
+	public void init() {
+		stf.init(null);
+		tuStf.init(null);
+		ttStf.init(null);
+		toStf.init(null);
+	}
+	
 }
