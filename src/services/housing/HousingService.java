@@ -151,6 +151,7 @@ public class HousingService implements INetworkDispatch {
 		building.setAttachment("structureOwner", actor.getObjectID());
 		building.setAttachment("isCondemned", false);
 		building.setAttachment("isCivicStructure", houseTemplate.isCivicStructure());
+		building.setAttachment("civicStructureType", houseTemplate.getCivicStructureType());
 		building.setAttachment("outstandingMaint", 0);
 		building.addPlayerToAdminList(null, actor.getObjectID(), playerFirstName);
 		building.setDeedTemplate(deed.getTemplate());

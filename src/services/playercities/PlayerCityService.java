@@ -38,6 +38,7 @@ import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
 import services.chat.Mail;
+import services.sui.SUIService.InputBoxType;
 import services.sui.SUIWindow;
 import services.sui.SUIWindow.SUICallback;
 import services.sui.SUIWindow.Trigger;
@@ -135,7 +136,8 @@ public class PlayerCityService implements INetworkDispatch {
 			return;
 		}
 		
-		final SUIWindow window = core.suiService.createInputBox(2, "@city/city:city_name_t","@city/city:city_name_d", actor, null, 0);		
+		final SUIWindow window = core.suiService.createInputBox(2, "@city/city:city_name_t","@city/city:city_name_d", actor, null, 0);	
+		window.setProperty("txtInput:MaxLength", "40");
 		Vector<String> returnList = new Vector<String>();		
 		returnList.add("txtInput:LocalText");	
 		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, new SUICallback() {
@@ -144,7 +146,7 @@ public class PlayerCityService implements INetworkDispatch {
 				if (returnList.size() == 0 || returnList.get(0).length() == 0)
 					return;
 				String name = returnList.get(0);
-				if(!core.characterService.checkName(name, owner.getClient())) {
+				if(!core.characterService.checkName(name, owner.getClient(), true)) {
 					actor.sendSystemMessage("@player_structure:not_valid_name", (byte) 0);
 					return;
 				}
@@ -397,13 +399,104 @@ public class PlayerCityService implements INetworkDispatch {
 		}
 		core.simulationService.removeCollidable(city.getArea(), city.getArea().getCenter().x, city.getArea().getCenter().z);
 		playerCities.remove(city);
+		if(city.isRegistered())
+			core.mapService.removeLocation(core.terrainService.getPlanetByID(city.getPlanetId()), city.getCityCenterPosition().x, city.getCityCenterPosition().z, (byte) 17);
 		core.objectService.deletePersistentObject(city.getCityID(), core.getCityODB());
 		
 	}
 
 	public void schedulePlayerCityUpdate(PlayerCity playerCity, long time) {
 		scheduler.schedule(() -> {
-			playerCity.processCityUpdate();
+			try {
+				playerCity.processCityUpdate();
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
 		}, time, TimeUnit.MILLISECONDS);
-	}	
+	}
+	
+	public void handleCityTreasuryWithdrawal(CreatureObject owner) {
+		SUIWindow window = core.suiService.createInputBox(InputBoxType.INPUT_BOX_OK_CANCEL, "@city/city:withdraw_reason_t", "@city/city:withdraw_reason_d", owner, null, 0, (actor, eventType, returnList) -> {
+			String reason = returnList.get(0);
+			if(reason.length() <= 0)
+				return;
+			promptCityTreasuryWithdrawal(owner, reason);
+		});
+		window.setProperty("txtInput:MaxLength", "255");
+		core.suiService.openSUIWindow(window);		
+	}
+	
+	public void promptCityTreasuryWithdrawal(CreatureObject owner, String reason) {
+		PlayerCity playerCity = core.playerCityService.getPlayerCity(owner);
+		SUIWindow window = core.suiService.createSUIWindow("Script.transfer", owner, null, 0);
+		
+		window.setProperty("bg.caption.lblTitle:Text", "@city/city:treasury_withdraw_subject");
+		window.setProperty("Prompt.lblPrompt:Text", "@city/city:treasury_withdraw_prompt");
+				
+		window.setProperty("msgPayMaintenance", "transaction.txtInputFrom");
+		
+		window.setProperty("transaction.lblFrom:Text", "@city/city:treasury_balance_t");
+		window.setProperty("transaction.lblTo:Text", "@city/city:treasury_withdraw");		
+		window.setProperty("transaction.lblFrom", "@city/city:treasury_balance_t");
+		window.setProperty("transaction.lblTo", "@city/city:treasury_withdraw");	
+				
+		window.setProperty("transaction.lblStartingFrom:Text", String.valueOf(playerCity.getCityTreasury()));
+		window.setProperty("transaction.lblStartingTo:Text", "0");
+				
+		window.setProperty("transaction:InputFrom", "555555");
+		window.setProperty("transaction:InputTo", "666666");
+		
+		window.setProperty("transaction:txtInputFrom", String.valueOf(playerCity.getCityTreasury()));
+		window.setProperty("transaction:txtInputTo", "1");
+		window.setProperty("transaction.txtInputFrom:Text", String.valueOf(playerCity.getCityTreasury()));
+		window.setProperty("transaction.txtInputTo:Text", "0");
+		
+		window.setProperty("transaction.ConversionRatioFrom", "1");
+		window.setProperty("transaction.ConversionRatioTo", "0");
+			
+		window.setProperty("btnOk:visible", "True");
+		window.setProperty("btnCancel:visible", "True");
+		window.setProperty("btnOk:Text", "@ok");
+		window.setProperty("btnCancel:Text", "@cancel");				
+
+		Vector<String >returnList = new Vector<String>();
+		returnList.add("transaction.txtInputFrom:Text");
+		returnList.add("transaction.txtInputTo:Text");
+		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, (actor, eventType, inputList) -> {
+			
+			if(inputList.size() < 2)
+				return;
+			
+			if(playerCity.getCityTreasury() <= 0) {
+				owner.sendSystemMessage("@city/city:no_money", (byte) 0);
+				return;
+			}
+			
+			if(playerCity.getCityTreasuryWithdrawalCooldown() > System.currentTimeMillis()) {
+				owner.sendSystemMessage("@city/city:withdraw_daily", (byte) 0);
+				return;
+			}
+				
+			int amount = Integer.parseInt(inputList.get(1));
+			
+			if(amount < 5000 || amount > 150000) {
+				owner.sendSystemMessage("@city/city:withdraw_limits", (byte) 0);
+				return;				
+			}
+			
+			if(amount > playerCity.getCityTreasury()) {
+				owner.sendSystemMessage("@city/city:withdraw_treasury_error", (byte) 0);
+				return;				
+			}
+
+			owner.addBankCredits(amount);
+			playerCity.removeFromTreasury(amount);
+			playerCity.setCityTreasuryWithdrawalCooldown(System.currentTimeMillis() + 86400000); // 24 hours
+			owner.sendSystemMessage(OutOfBand.ProsePackage("@city/city:you_withdraw_from_treasury", amount), (byte) 0);
+			playerCity.sendTreasuryWithdrawalMail(owner, amount, reason);
+			
+		});
+		core.suiService.openSUIWindow(window);
+		
+	}
 }

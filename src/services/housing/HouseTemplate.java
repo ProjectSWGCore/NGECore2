@@ -16,6 +16,7 @@ public class HouseTemplate {
 	private Vector<String> placeablePlanets;
 	private Map<String, Point3D> buildingSigns;
 	private boolean isCivicStructure;
+	private int civicStructureType;
 	
 	public HouseTemplate(String deedTemplate, String buildingTemplate, int lotCost) {
 		this.deedTemplate = deedTemplate;
@@ -85,6 +86,14 @@ public class HouseTemplate {
 
 	public void setCivicStructure(boolean isCivicStructure) {
 		this.isCivicStructure = isCivicStructure;
+	}
+
+	public int getCivicStructureType() {
+		return civicStructureType;
+	}
+
+	public void setCivicStructureType(int civicStructureType) {
+		this.civicStructureType = civicStructureType;
 	}
 	
 }

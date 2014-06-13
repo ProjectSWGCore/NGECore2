@@ -37,6 +37,7 @@ import resources.common.collidables.AbstractCollidable;
 import resources.common.collidables.CollidableCircle;
 import resources.common.collidables.AbstractCollidable.EnterEvent;
 import resources.common.collidables.AbstractCollidable.ExitEvent;
+import resources.datatables.CivicStructures;
 import resources.datatables.Options;
 import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
@@ -86,13 +87,7 @@ public class PlayerCity implements Serializable {
 																       "city_spec_research",
 																       "city_spec_sample_rich"};
 	
-	public static final int BANK              = 1; 
-	public static final int CLONING_FACILITY  = 2; 
-	public static final int GARAGE            = 3; 
-	public static final int MEDIUM_GARDEN     = 4; 
-	public static final int LARGE_GARDEN      = 5;
-	public static final int SHUTTLEPORT       = 6;
-	
+		
 	public static final int[] citizensPerRank = new int[] { 5, 10, 15, 30, 40 };
 	
 	private String cityName = "";
@@ -100,7 +95,7 @@ public class PlayerCity implements Serializable {
 	private long cityHallId = 0;
 	private long cityID = -1;
 	private Point3D cityCenterPosition = new Point3D(0,0,0);
-	private int cityRadius = 0;
+	private int cityRadius = 150;
 	private int cityRank = 1;
 	private int specialization = 0;
 	private long mayorID = 0L;
@@ -120,6 +115,8 @@ public class PlayerCity implements Serializable {
 	private boolean registered = false;
 	private boolean zoningEnabled = false;
 	private transient CollidableCircle area;
+	private long cityNameChangeCooldown;
+	private long cityTreasuryWithdrawalCooldown;
 
 	//public static final long cityUpdateSpan = 7*86400*1000;
 	public static final long cityUpdateSpan = 100*1000;
@@ -141,7 +138,6 @@ public class PlayerCity implements Serializable {
 	public PlayerCity(CreatureObject founder, long cityId, BuildingObject cityHall) {
 		setCityCenterPosition(cityHall.getPosition());
 		setCityHallId(cityHall.getObjectID());
-		setCityRadius(150);
 		setFoundationTime(System.currentTimeMillis());		
 		setMaintenanceFee(1);
 		setNextCityUpdate(foundationTime+cityUpdateSpan);
@@ -156,6 +152,8 @@ public class PlayerCity implements Serializable {
 		area = new CollidableCircle(getCityCenterPosition(), cityRadius, NGECore.getInstance().terrainService.getPlanetByID(planetId));
 		area.getEventBus().subscribe(this);
 		NGECore.getInstance().simulationService.addCollidable(area, area.getCenter().x, area.getCenter().z);
+		if(isRegistered())
+			NGECore.getInstance().mapService.addLocation(NGECore.getInstance().terrainService.getPlanetByID(planetId), getCityName(), area.getCenter().x, area.getCenter().z, (byte) 17, (byte) 0, (byte) 0);
 	}
 		
 	public void handleGrantZoning() {
@@ -168,6 +166,13 @@ public class PlayerCity implements Serializable {
 	
 	public void checkPlacementPermission() {
 		
+	}
+	
+	public int getCivicStructuresCount() {
+		return (int) placedStructures.stream().
+		map(NGECore.getInstance().objectService::getObject).
+		filter(o -> o.getAttachment("civicStructureType") != null && (int) o.getAttachment("civicStructureType") > 0).
+		count();
 	}
 	
 	public void processElection() {
@@ -267,16 +272,20 @@ public class PlayerCity implements Serializable {
 			return;
 		
 		int newRank = getRank() + 1;
-		setRank(newRank);
-		sendCityExpandMail();
-		addNewStructures();
-		fixupCitizens();
+		boolean rankCapped = core.playerCityService.isRankCapped(core.terrainService.getPlanetByID(planetId), newRank);
+		sendCityExpandMail(rankCapped);
+
+		if(!rankCapped) {
+			setRank(newRank);
+			addNewStructures();
+			fixupCitizens();
+		}
 		
 	}
 	
 	private void addNewStructures() {
 		NGECore core = NGECore.getInstance();
-		List<SWGObject> objects = core.simulationService.get(core.terrainService.getPlanetByID(planetId), area.getCenter().x, area.getCenter().x, 500);
+		List<SWGObject> objects = core.simulationService.get(core.terrainService.getPlanetByID(planetId), area.getCenter().x, area.getCenter().z, 500);
 		objects.stream().filter(o -> o instanceof BuildingObject && o.getAttachment("structureOwner") != null && area.doesCollide(o)).map(SWGObject::getObjectID).forEach(this::addNewStructure);
 	}
 
@@ -372,31 +381,11 @@ public class PlayerCity implements Serializable {
 			Vector<SWGObject> wreckingBall = new Vector<SWGObject>();
 			for (long structureID : placedStructures) {
 				SWGObject structure = NGECore.getInstance().objectService.getObject(structureID);
-				int structureCode = (int) structure.getAttachment("CityStructureCode");
-				
-				if (structureCode==BANK && cityRank<2){				
+				if(structure.getAttachment("civicStructureType") == null || (int) structure.getAttachment("civicStructureType") == 0)
+					return;
+				int structureCode = (int) structure.getAttachment("civicStructureType");
+				if(getRank() < CivicStructures.rankRequired[structureCode - 1])
 					wreckingBall.add(structure);
-				}
-				
-				if (structureCode==CLONING_FACILITY && cityRank<3){				
-					wreckingBall.add(structure);
-				}
-				
-				if (structureCode==GARAGE && cityRank<2){				
-					wreckingBall.add(structure);
-				}
-				
-				if (structureCode==MEDIUM_GARDEN && cityRank<2){				
-					wreckingBall.add(structure);
-				}
-				
-				if (structureCode==LARGE_GARDEN && cityRank<3){				
-					wreckingBall.add(structure);
-				}
-				
-				if (structureCode==SHUTTLEPORT && cityRank<4){				
-					wreckingBall.add(structure);
-				}						
 			}
 			
 			for (SWGObject wreck : wreckingBall){
@@ -563,11 +552,11 @@ public class PlayerCity implements Serializable {
 		this.mayorID = mayorID;
 	}
 
-	public int getCityTreasury() {
+	public synchronized int getCityTreasury() {
 		return cityTreasury;
 	}
 
-	public void setCityTreasury(int cityTreasury) {
+	public synchronized void setCityTreasury(int cityTreasury) {
 		this.cityTreasury = cityTreasury;
 	}
 
@@ -672,11 +661,11 @@ public class PlayerCity implements Serializable {
 		this.cityBanList = cityBanList;
 	}
 
-	public void addToTreasury(int amountToAdd) {
+	public synchronized void addToTreasury(int amountToAdd) {
 		cityTreasury += amountToAdd;
 	}
 	
-	public void removeFromTreasury(int amountToDeduct) {
+	public synchronized void removeFromTreasury(int amountToDeduct) {
 		cityTreasury -= amountToDeduct;
 	}
 	
@@ -694,6 +683,7 @@ public class PlayerCity implements Serializable {
 
 	public void setCityRadius(int cityRadius) {
 		this.cityRadius = cityRadius;
+		area.setRadius(cityRadius);
 	}
 
 	public Vector<Long> getMilitiaList() {
@@ -934,32 +924,18 @@ public class PlayerCity implements Serializable {
 	        actorMail.setRecieverId(citizen);
 	        actorMail.setStatus(Mail.NEW);
 	        actorMail.setTimeStamp((int) (new Date().getTime() / 1000));
-	        actorMail.setMessage("@city/city:lost_citizen_body");
 	        actorMail.setSubject("@city/city:lost_citizen_subject");
 	        actorMail.setSenderName("City " + this.cityName);
-	        
-	        List<WaypointAttachment> attachments = new ArrayList<WaypointAttachment>(); 
-	        WaypointObject constructionWaypoint = (WaypointObject)NGECore.getInstance().objectService.createObject("object/waypoint/shared_world_waypoint_blue.iff", citizenObject.getPlanet(), citizenObject.getPosition().x, 0 ,citizenObject.getPosition().z);
-	        WaypointAttachment attachment = new WaypointAttachment();
-			attachment.active = false;		
-			attachment.cellID = constructionWaypoint.getCellId();
-			attachment.color = (byte)1;
-			attachment.name = "City";
-			attachment.planetCRC = engine.resources.common.CRC.StringtoCRC(citizenObject.getPlanet().getName());
-			attachment.positionX = citizenObject.getPosition().x;
-			attachment.positionY = 0;
-			attachment.positionZ = citizenObject.getPosition().z;
-			attachments.add(attachment);
-			actorMail.setWaypointAttachments(attachments);
-	        
+	        actorMail.addProseAttachment(new ProsePackage("@city/city:lost_citizen_body", "TO", newCitizen.getCustomName()));
+	        	        
 	        NGECore.getInstance().chatService.storePersistentMessage(actorMail);
-	        if (newCitizen.getClient()!=null)
-	        	NGECore.getInstance().chatService.sendPersistentMessageHeader(newCitizen.getClient(), actorMail);
+	        if (citizenObject.getClient()!=null)
+	        	NGECore.getInstance().chatService.sendPersistentMessageHeader(citizenObject.getClient(), actorMail);
 
 		}
 	}
 	
-	public void sendCityExpandMail() {		
+	public void sendCityExpandMail(boolean rankCapped) {		
 
 		NGECore core = NGECore.getInstance();
 		CreatureObject mayor = core.objectService.getObject(getMayorID()) == null ? core.objectService.getCreatureFromDB(getMayorID()) : (CreatureObject) core.objectService.getObject(getMayorID());
@@ -970,10 +946,14 @@ public class PlayerCity implements Serializable {
 		mail.setRecieverId(getMayorID());
 		mail.setStatus(Mail.NEW);
         mail.setTimeStamp((int) (new Date().getTime() / 1000));
-        mail.setSubject("@city/city:city_contract_subject");
         mail.setSenderName("@city/city:new_city_from");
-        mail.addProseAttachment(new ProsePackage("@city/city:city_expand_body", "TO", cityName, cityRank));
-        
+        if(rankCapped) {
+	        mail.setSubject("@city/city:city_expand_cap_subject");
+	        mail.addProseAttachment(new ProsePackage("@city/city:city_expand_cap_body", "TO", cityName, cityRank + 1));        	
+        } else {
+	        mail.setSubject("@city/city:city_expand_subject");
+	        mail.addProseAttachment(new ProsePackage("@city/city:city_expand_body", "TO", cityName, cityRank));
+        }
         core.chatService.storePersistentMessage(mail);
 		if(mayor.getClient() != null)
 			core.chatService.sendPersistentMessageHeader(mayor.getClient(), mail);
@@ -1210,6 +1190,50 @@ public class PlayerCity implements Serializable {
 
 	public void setElectionList(Map<Long, Integer> electionList) {
 		this.electionList = electionList;
+	}
+	
+	public int getReqCitizenCountForRank(int rank) {
+		return citizensPerRank[rank - 1];
+	}
+
+	public long getCityNameChangeCooldown() {
+		return cityNameChangeCooldown;
+	}
+
+	public void setCityNameChangeCooldown(long cityNameChangeCooldown) {
+		this.cityNameChangeCooldown = cityNameChangeCooldown;
+	}
+
+	public long getCityTreasuryWithdrawalCooldown() {
+		return cityTreasuryWithdrawalCooldown;
+	}
+
+	public void setCityTreasuryWithdrawalCooldown(long cityTreasuryWithdrawalCooldown) {
+		this.cityTreasuryWithdrawalCooldown = cityTreasuryWithdrawalCooldown;
+	}
+
+	public void sendTreasuryWithdrawalMail(CreatureObject mayor, int amount, String reason) {
+		Vector<Long> citizenList = getCitizens();
+		NGECore core = NGECore.getInstance();
+		for (long citizen : citizenList){
+			CreatureObject citizenObject = core.objectService.getObject(citizen) == null ? core.objectService.getCreatureFromDB(citizen) : (CreatureObject) core.objectService.getObject(citizen);
+			if(citizenObject == null)
+				continue;
+			Mail actorMail = new Mail();
+	        actorMail.setMailId(NGECore.getInstance().chatService.generateMailId());
+	        actorMail.setRecieverId(citizen);
+	        actorMail.setStatus(Mail.NEW);
+	        actorMail.setTimeStamp((int) (new Date().getTime() / 1000));
+	        actorMail.setSubject("@city/city:treasury_withdraw_subject");
+	        actorMail.setSenderName("@city/city:treasury_withdraw_from");
+	        actorMail.addProseAttachment(new ProsePackage("@city/city:treasury_withdraw_body", "TO", mayor.getCustomName(), "TT", reason, amount));
+	        
+	        NGECore.getInstance().chatService.storePersistentMessage(actorMail);
+	        if (citizenObject.getClient() != null)
+	        	NGECore.getInstance().chatService.sendPersistentMessageHeader(citizenObject.getClient(), actorMail);
+
+		}
+
 	}
 
 	
