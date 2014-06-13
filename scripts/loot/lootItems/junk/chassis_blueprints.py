@@ -1,11 +1,11 @@
 
 def itemTemplate():
 
-	return ['object/tangible/loot/generic_usable/shared_chassis_blueprint_usuable.iff']
+	return ['object/tangible/loot/npc_loot/shared_chassis_blueprint_device_generic.iff']
 
 def customItemName():
 
-	return 'Chassis Blueprint'
+	return 'Chassis Blueprints'
 
 def stackable():
 
