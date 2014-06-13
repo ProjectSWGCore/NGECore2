@@ -219,11 +219,3 @@ pip-log.txt
 ## PyCharm
 #############
 .idea
-*.5
-*.4
-*.3
-options.cfg
-*.cfg
-*.1
-*.2
-*.cfg
