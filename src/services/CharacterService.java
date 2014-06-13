@@ -75,6 +75,7 @@ public class CharacterService implements INetworkDispatch {
 	private DatabaseConnection databaseConnection2;
 	private engine.resources.common.NameGen nameGenerator;
 	private static final String allowedCharsRegex = "['-]?[A-Za-z]('[a-zA-Z]|-[a-zA-Z]|[a-zA-Z])*['-]?$";
+	private static final String allowedCharsRegexWithSpace = "['-]?[A-Za-z]('[a-zA-Z]|-[a-zA-Z]|[a-zA-Z]| )*['-]?$";
 
 	public CharacterService(NGECore core) {
 
@@ -89,9 +90,13 @@ public class CharacterService implements INetworkDispatch {
 	}
 	
 	public boolean checkName(String name, Client client) {
+		return checkName(name, client, false);
+	}
+	
+	public boolean checkName(String name, Client client, boolean allowSpaces) {
 		// TODO: check for dev names, profane names, iconic names etc
 		try {
-			if(checkForDuplicateName(name, client.getAccountId()) || !name.matches(allowedCharsRegex))
+			if(checkForDuplicateName(name, client.getAccountId()) || (!allowSpaces && !name.matches(allowedCharsRegex)) || (allowSpaces && !name.matches(allowedCharsRegexWithSpace)))
 				return false;
 		} catch (SQLException e) {
 			e.printStackTrace();

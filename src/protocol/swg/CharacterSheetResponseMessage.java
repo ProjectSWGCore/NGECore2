@@ -27,6 +27,7 @@ import main.NGECore;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
+import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import engine.resources.common.CRC;
@@ -90,16 +91,24 @@ public class CharacterSheetResponseMessage extends SWGMessage {
 			buffer.putFloat(0); // bank y
 			buffer.put(getAsciiString("tatooine"));
 
-			buffer.putFloat(0); // home x
-			buffer.putFloat(0); // home z
-			buffer.putFloat(0); // home y
-			buffer.put(getAsciiString("")); // home planet
+			if(creature.getAttachment("residentBuilding") == null) {
+				buffer.putFloat(0); // home x
+				buffer.putFloat(0); // home z
+				buffer.putFloat(0); // home y
+				buffer.put(getAsciiString("")); // home planet
+			} else {
+				BuildingObject building = (BuildingObject) NGECore.getInstance().objectService.getObject((long) creature.getAttachment("residentBuilding"));
+				buffer.putFloat(building.getPosition().x); // home x
+				buffer.putFloat(building.getPosition().y); // home z
+				buffer.putFloat(building.getPosition().z); // home y
+				buffer.put(getAsciiString(building.getPlanet().getName())); // home planet
+			}
 
-			buffer.put(getAsciiString(""));  // Name of city player resides in
+			buffer.put(getAsciiString(player.getHome()));  // Name of city player resides in
 
 			buffer.put(getUnicodeString(spouse));
 
-			buffer.putInt(creature.getPlayerObject().getLotsRemaining()); // lots remaining
+			buffer.putInt(player.getLotsRemaining()); // lots remaining
 
 			return buffer.flip();
 		}

@@ -44,9 +44,12 @@ import protocol.swg.PlayClientEffectObjectTransformMessage;
 import protocol.swg.StopClientEffectObjectByLabel;
 import resources.common.OutOfBand;
 import resources.datatables.DisplayType;
+import resources.datatables.Options;
+import resources.datatables.WeaponType;
 import resources.loot.LootGroup;
 import resources.loot.LootRollSession;
 import resources.objects.creature.CreatureObject;
+import resources.objects.factorycrate.FactoryCrateObject;
 import resources.objects.group.GroupObject;
 import resources.objects.intangible.IntangibleObject;
 import resources.objects.tangible.TangibleObject;
@@ -616,6 +619,7 @@ public class LootService implements INetworkDispatch {
 		String requiredFaction = "";
 		Vector<String> customizationAttributes = null;
 		Vector<Integer> customizationValues = null;
+		Vector<String> reverse_engineering_name = null;
 		int customColor1 = 0;
 		String lootDescriptor = "";
 		Vector<String> itemStats = null;
@@ -648,6 +652,9 @@ public class LootService implements INetworkDispatch {
 		
 		if(core.scriptService.getMethod(itemPath,"","customizationValues")!=null)
 			customizationValues = (Vector<Integer>)core.scriptService.fetchIntegerVector(itemPath,"customizationValues");
+		
+		if(core.scriptService.getMethod(itemPath,"","reverse_engineering_name")!=null)
+			reverse_engineering_name = (Vector<String>)core.scriptService.fetchStringVector(itemPath,"reverse_engineering_name");
 		
 		if(core.scriptService.getMethod(itemPath,"","customColor1")!=null)
 			customColor1 = (Integer)core.scriptService.fetchInteger(itemPath,"customColor1");
@@ -698,6 +705,7 @@ public class LootService implements INetworkDispatch {
 		droppedItem.setAttachment("LootItemName", itemName);
 		droppedItem.setAttachment("customColor1", customColor1);
 		droppedItem.setAttachment("lootDescriptor", lootDescriptor);
+		droppedItem.setAttachment("reverse_engineering_name", reverse_engineering_name);		
 		droppedItem.setAttachment("customName", customName);
 		
     	
@@ -1320,7 +1328,7 @@ public class LootService implements INetworkDispatch {
 				droppedItem.setCustomizationVariable(customizationAttributes.get(i), value); 
 			}
 		}
-		
+
 	}
 	
 	public void handleSpecialItems(TangibleObject droppedItem,String itemName) {
@@ -1576,6 +1584,7 @@ public class LootService implements INetworkDispatch {
 			qualityString="@jedi_spam:crystal_quality_5";
 			break;
 		case "kraytpearl_flawless": 
+		case "kraytpearl_ancient": 
 			qualityString="@jedi_spam:crystal_quality_6";
 			break;
 		default:
@@ -1687,7 +1696,7 @@ public class LootService implements INetworkDispatch {
 											  minValue1 = 21;
 									          maxValue1 = 23;
 									          finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
-									          finalMaxDmg = finalMinDmg+1;
+									          finalMaxDmg = finalMinDmg+2;
 										      break;
 			}
 		}
@@ -1729,15 +1738,17 @@ public class LootService implements INetworkDispatch {
 										      minValue1 = 15;
 							                  maxValue1 = 17;
 							                  finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
-							                  finalMaxDmg = finalMinDmg+1;
+							                  finalMaxDmg = finalMinDmg+2;
 										      break;
 				case "kraytpearl_flawless":   // Flawless - 19/20 damage   
 								              finalMinDmg = 19;
 								              finalMaxDmg = 20;
 										      break;
-				case "kraytpearl_ancient":    // Ancient - 20/22 damage 
-											  finalMinDmg = 20;
-		                                      finalMaxDmg = 22;
+				case "kraytpearl_ancient":    // Ancient - between 20/21 min and 22/23 max damage 
+										      minValue1 = 20;
+											  maxValue1 = 21;
+							                  finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
+							                  finalMaxDmg = finalMinDmg+2;
 										      break;
 			}
 		}
@@ -2687,6 +2698,196 @@ public class LootService implements INetworkDispatch {
 		playerInventory.add(item11);
 		
 
+	}
+	
+	public void prepInv2(CreatureObject player){
+		SWGObject playerInventory = player.getSlottedObject("inventory");
+		TangibleObject item11 = (TangibleObject)core.objectService.createObject("object/tangible/wearables/armor/composite/shared_armor_composite_bicep_r.iff", player.getPlanet());
+		item11.setCustomName("Composite Armor Right Bicep");	
+	
+		item11.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 6000);		
+		item11.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 4000);
+		item11.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 5000);
+		item11.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 5000);	
+		item11.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 5000);		
+		item11.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 5000);
+	
+		item11.setIntAttribute("cat_stat_mod_bonus.@stat_n:agility_modified", 25);		
+		item11.setIntAttribute("cat_stat_mod_bonus.@stat_n:constitution_modified", 25);	
+		item11.setIntAttribute("cat_stat_mod_bonus.@stat_n:precision_modified", 25);	
+		
+		playerInventory.add(item11);		
+		
+		TangibleObject item11a = (TangibleObject)core.objectService.createObject("object/tangible/wearables/armor/composite/shared_armor_composite_bicep_r.iff", player.getPlanet());
+		item11.setCustomName("Composite Armor Right Bicep");	
+	
+		item11a.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 6000);		
+		item11a.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 4000);
+		item11a.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 5000);
+		item11a.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 5000);	
+		item11a.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 5000);		
+		item11a.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 5000);
+	
+		item11a.setIntAttribute("cat_stat_mod_bonus.@stat_n:agility_modified", 25);		
+		item11a.setIntAttribute("cat_stat_mod_bonus.@stat_n:constitution_modified", 25);		
+		playerInventory.add(item11a);		
+		
+		
+		TangibleObject item12aa = (TangibleObject)core.objectService.createObject("object/tangible/wearables/shirt/shared_shirt_s07.iff", player.getPlanet());
+		item12aa.setCustomName("Socketed Shirt");
+		item12aa.setIntAttribute("@obj_attr_n:sockets", 1);	
+		playerInventory.add(item12aa);	
+		
+		TangibleObject item12 = (TangibleObject)core.objectService.createObject("object/tangible/wearables/shirt/shared_shirt_s07.iff", player.getPlanet());
+		
+		item12.setStfFilename("wearables_name");
+		item12.setStfName("shirt_s01");
+		item12.setDetailFilename("wearables_detail");
+		item12.setDetailName("shirt_s01");
+		item12.setCustomName("Socketed Shirt");
+		item12.getAttributes().put("@obj_attr_n:crafter", "Charon");
+		
+		item12.setIntAttribute("@obj_attr_n:sockets", 1);		
+		
+		String crateTemplate = "object/factory/shared_factory_crate_clothing.iff";
+		FactoryCrateObject crate1 = (FactoryCrateObject) core.objectService.createObject(crateTemplate, player.getPlanet());
+		crate1.setContentTypeAndQuantity(item12,25, "clothing_factory_crate", "clothing", player.getClient(),true);
+		playerInventory.add(crate1);
+		
+		
+		
+		TangibleObject item12a = (TangibleObject)core.objectService.createObject("object/tangible/wearables/shirt/shared_shirt_s07.iff", player.getPlanet());
+		item12a.setCustomName("Socketed Shirt");
+		item12a.setIntAttribute("cat_stat_mod_bonus.@stat_n:agility_modified", 18);		
+		playerInventory.add(item12a);	
+		
+		String powerBitTemplate = "object/tangible/component/reverse_engineering/shared_power_bit.iff";
+		TangibleObject powerBit = (TangibleObject) core.objectService.createObject(powerBitTemplate, player.getPlanet());
+		powerBit.setCustomName("+25 2nd Order Power Bit");
+		powerBit.setAttachment("PowerBitValue", 25);
+		powerBit.setAttachment("PowerBitOrder", 2);
+		playerInventory.add(powerBit);
+		
+		
+		TangibleObject powerBit2 = (TangibleObject) core.objectService.createObject(powerBitTemplate, player.getPlanet());
+		powerBit2.setCustomName("+25 3nd Order Power Bit");
+		powerBit2.setAttachment("PowerBitValue", 25);
+		powerBit2.setAttachment("PowerBitOrder", 3);
+		playerInventory.add(powerBit2);
+		
+		TangibleObject powerBit3 = (TangibleObject) core.objectService.createObject(powerBitTemplate, player.getPlanet());
+		powerBit3.setCustomName("+25 1st Order Power Bit");
+		powerBit3.setAttachment("PowerBitValue", 25);
+		powerBit3.setAttachment("PowerBitOrder", 1);
+		playerInventory.add(powerBit3);
+		
+		TangibleObject item24a = (TangibleObject)core.objectService.createObject("object/tangible/loot/npc_loot/shared_medical_console_generic.iff", player.getPlanet());
+		item24a.setCustomName("Medical Console");
+		item24a.setStackable(true);
+		item24a.setUses(299);		 
+		core.objectService.addStackableItem(item24a,playerInventory);
+		
+		TangibleObject item24b = (TangibleObject)core.objectService.createObject("object/tangible/loot/npc_loot/shared_medical_device_generic.iff", player.getPlanet());
+		item24b.setCustomName("Medical Device");
+		item24b.setStackable(true);
+		item24b.setUses(399);		 
+		core.objectService.addStackableItem(item24b,playerInventory);
+		
+	
+		
+		String modifierBitTemplate = "object/tangible/component/reverse_engineering/shared_modifier_bit.iff";
+		TangibleObject modifierBit = (TangibleObject) core.objectService.createObject(modifierBitTemplate, player.getPlanet());
+		modifierBit.setCustomName("Droid Experimentation");
+		modifierBit.setStringAttribute("serial_number", core.reverseEngineeringService.createSerialNumber());	
+		modifierBit.setStringAttribute("@crafting:mod_bit_type", "@stat_n:droid_experimentation");
+		modifierBit.setIntAttribute("@crafting:mod_bit_ratio", 4);
+		playerInventory.add(modifierBit);
+		
+		modifierBit = (TangibleObject) core.objectService.createObject(modifierBitTemplate, player.getPlanet());
+		modifierBit.setCustomName("Droid Experimentation");
+		modifierBit.setStringAttribute("serial_number", core.reverseEngineeringService.createSerialNumber());	
+		modifierBit.setStringAttribute("@crafting:mod_bit_type", "@stat_n:droid_experimentation");
+		modifierBit.setIntAttribute("@crafting:mod_bit_ratio", 4);
+		playerInventory.add(modifierBit);
+		
+		modifierBit = (TangibleObject) core.objectService.createObject(modifierBitTemplate, player.getPlanet());
+		modifierBit.setCustomName("Droid Experimentation");
+		modifierBit.setStringAttribute("serial_number", core.reverseEngineeringService.createSerialNumber());	
+		modifierBit.setStringAttribute("@crafting:mod_bit_type", "@stat_n:droid_experimentation");
+		modifierBit.setIntAttribute("@crafting:mod_bit_ratio", 4);
+		playerInventory.add(modifierBit);
+			
+		String SEALabel = "socket_gem_armor";
+		String SEADescription = "socket_gem";
+		String SEATemplate = "object/tangible/gem/shared_clothing.iff";
+		TangibleObject skillEnhancingAttachment = (TangibleObject)core.objectService.createObject(SEATemplate, player.getPlanet());
+		skillEnhancingAttachment.setStfFilename("item_n");
+		skillEnhancingAttachment.setStfName(SEALabel);
+		skillEnhancingAttachment.setDetailFilename("item_n");
+		skillEnhancingAttachment.setDetailName(SEADescription);
+		String effectName = "@stat_n:expertise_glancing_blow_ranged";
+		int modifierValue = 5;
+		skillEnhancingAttachment.setIntAttribute(effectName, modifierValue);
+		Vector<String> effectNameList = new Vector<String>();
+		effectNameList.add(effectName);
+		Vector<Integer> effectValueList = new Vector<Integer>();
+		effectValueList.add(modifierValue);
+		skillEnhancingAttachment.setAttachment("SEAeffectNameList", effectNameList);
+		skillEnhancingAttachment.setAttachment("SEAmodifierValueList", effectValueList);
+		playerInventory.add(skillEnhancingAttachment);
+		
+		TangibleObject skillEnhancingAttachment2 = (TangibleObject)core.objectService.createObject(SEATemplate, player.getPlanet());
+		skillEnhancingAttachment2.setStfFilename("item_n");
+		skillEnhancingAttachment2.setStfName(SEALabel);
+		skillEnhancingAttachment2.setDetailFilename("item_n");
+		skillEnhancingAttachment2.setDetailName(SEADescription);
+		effectName = "@stat_n:expertise_action_weapon_5";
+		String effectName2 = "@stat_n:expertise_critical_line_sp_dm";
+		modifierValue = 5;
+		skillEnhancingAttachment2.setIntAttribute(effectName, modifierValue);
+		skillEnhancingAttachment2.setIntAttribute(effectName2, 6);
+		effectNameList = new Vector<String>();
+		effectNameList.add(effectName);
+		effectNameList.add(effectName2);
+		effectValueList = new Vector<Integer>();
+		effectValueList.add(modifierValue);
+		effectValueList.add(6);
+		skillEnhancingAttachment2.setAttachment("SEAeffectNameList", effectNameList);
+		skillEnhancingAttachment2.setAttachment("SEAmodifierValueList", effectValueList);
+		playerInventory.add(skillEnhancingAttachment2);
+		
+		WeaponObject sword1 = (WeaponObject) core.objectService.createObject("object/weapon/melee/sword/shared_sword_01.iff", player.getPlanet());
+		sword1.setIntAttribute("required_combat_level", 90);
+		sword1.setAttackSpeed(1);
+		sword1.setMaxRange(5);
+		sword1.setDamageType("kinetic");
+		sword1.setMinDamage(1100);
+		sword1.setMaxDamage(1200);
+		sword1.setOptions(Options.SOCKETED, true);
+		sword1.setOptions(Options.USABLE, true);
+		sword1.setWeaponType(WeaponType.ONEHANDEDMELEE);
+		playerInventory.add(sword1);
+		System.err.println("MIX " + sword1.getObjectID());
+		
+		
+		String powerUpLabel = "item_reverse_engineering_powerup_weapon_02_01";
+		String powerUpDescription = "item_reverse_engineering_powerup_weapon_02_01";
+		String powerUpTemplate = "object/tangible/powerup/base/shared_weapon_base.iff";
+
+		int powerValue = 12;
+		TangibleObject powerUp = (TangibleObject) core.objectService.createObject(powerUpTemplate, player.getPlanet());
+
+		powerUp.setStfFilename("static_item_n");
+		powerUp.setStfName(powerUpLabel);
+		powerUp.setDetailFilename("static_item_d");
+		powerUp.setDetailName(powerUpDescription);
+		powerUp.setIntAttribute("@stat_n:droid_experimentation", powerValue);	
+		powerUp.setAttachment("effectName","droid_experimentation");
+		powerUp.setAttachment("powerValue",powerValue);
+		powerUp.setIntAttribute("num_in_stack", 250);	
+		powerUp.setAttachment("radial_filename", "item/item");
+		playerInventory.add(powerUp);
+		
 	}
 	
 	
