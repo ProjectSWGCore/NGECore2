@@ -21,6 +21,7 @@
  ******************************************************************************/
 package resources.objectives;
 
+import engine.resources.common.CRC;
 import engine.resources.scene.Point3D;
 import main.NGECore;
 import resources.common.OutOfBand;
@@ -51,8 +52,8 @@ public class DeliveryMissionObjective extends MissionObjective {
 		
 		String template = "object/mobile/shared_dressed_commoner_tatooine_sullustan_male_06.iff";
 		
-		Point3D startLoc = parent.getStartLocation();
-		Point3D destination = parent.getDestination();
+		Point3D startLoc = parent.getStartLocation().getLocation();
+		Point3D destination = parent.getDestinationLocation().getLocation();
 
 		// TODO: Randomize this process.
 		CreatureObject missionGiver = (CreatureObject) core.staticService.spawnObject(template, parent.getPlanet().name, 0, startLoc.x, startLoc.y, startLoc.z, 0, 1);
@@ -78,19 +79,22 @@ public class DeliveryMissionObjective extends MissionObjective {
 		setDropOffNpc(dropOffNpc);
 		
 		if (getObjectivePhase() == 0) {
-			WaypointObject waypoint = (WaypointObject) core.objectService.createObject("object/waypoint/shared_waypoint.iff", parent.getPlanet());
+			WaypointObject waypoint = getMissionObject().getWaypoint();
+			//waypoint.setPlanet(missionGiver.getPlanet());
+			waypoint.setPlanetCRC(CRC.StringtoCRC(missionGiver.getPlanet().name));
 			waypoint.setPosition(startLoc);
-			waypoint.setName("@mission/" + parent.getMissionTitle() + ":" + "m" + parent.getMissionId() + "t");
+			waypoint.setName("@" + parent.getTitle().getStfFilename() + ":" + "m" + parent.getMissionId() + "t");
 			waypoint.setColor(WaypointObject.ORANGE);
 			waypoint.setActive(true);
-			getMissionObject().setAttachedWaypoint(waypoint);
+			getMissionObject().setWaypoint(waypoint);
 		} else if (getObjectivePhase() == 1) {
-			WaypointObject waypoint = (WaypointObject) core.objectService.createObject("object/waypoint/shared_waypoint.iff", parent.getPlanet());
-			waypoint.setPosition(parent.getDestination());
-			waypoint.setName("@mission/" + parent.getMissionTitle() + ":" + "m" + parent.getMissionId() + "t");
+			WaypointObject waypoint = getMissionObject().getWaypoint();
+			waypoint.setPlanetCRC(CRC.StringtoCRC(dropOffNpc.getPlanet().name));
+			waypoint.setPosition(destination);
+			waypoint.setName("@" + parent.getTitle().getStfFilename() + ":" + "m" + parent.getMissionId() + "t");
 			waypoint.setColor(WaypointObject.ORANGE);
 			waypoint.setActive(true);
-			getMissionObject().setAttachedWaypoint(waypoint);
+			getMissionObject().setWaypoint(waypoint);
 		}
 
 		setActive(true);
@@ -130,22 +134,21 @@ public class DeliveryMissionObjective extends MissionObjective {
 		switch(getObjectivePhase()) {
 			case 1:
 				WaypointObject waypoint = (WaypointObject) core.objectService.createObject("object/waypoint/shared_waypoint.iff", parent.getPlanet());
-				waypoint.setPosition(parent.getDestination());
-				waypoint.setName("@mission/" + parent.getMissionTitle() + ":" + "m" + parent.getMissionId() + "t");
+				waypoint.setPosition(parent.getDestinationLocation().getLocation());
+				waypoint.setName("@" + parent.getTitle().getStfFilename() + ":" + "m" + parent.getMissionId() + "t");
 				waypoint.setColor(WaypointObject.ORANGE);
 				waypoint.setActive(true);
-				getMissionObject().setMissionTargetName("Dropoff Location");
-				getMissionObject().setAttachedWaypoint(waypoint);
-				System.out.println("Waypoint set to " + parent.getDestination().x + " and " + parent.getDestination().z);
+				getMissionObject().setTargetName("Dropoff Location");
+				getMissionObject().setWaypoint(waypoint);
 				break;
 			case 2:
 				WaypointObject returnWp = (WaypointObject) core.objectService.createObject("object/waypoint/shared_waypoint.iff", parent.getPlanet());
-				returnWp.setPosition(parent.getStartLocation());
-				returnWp.setName("@mission/" + parent.getMissionTitle() + ":" + "m" + parent.getMissionId() + "t");
+				returnWp.setPosition(parent.getStartLocation().getLocation());
+				returnWp.setName("@" + parent.getTitle().getStfFilename() + ":" + "m" + parent.getMissionId() + "t");
 				returnWp.setColor(WaypointObject.ORANGE);
 				returnWp.setActive(true);
-				getMissionObject().setMissionTargetName("Return");
-				getMissionObject().setAttachedWaypoint(returnWp);
+				getMissionObject().setTargetName("Return");
+				getMissionObject().setWaypoint(returnWp);
 				break;
 		}
 	}
@@ -160,7 +163,7 @@ public class DeliveryMissionObjective extends MissionObjective {
 		if (inventory == null)
 			return false;
 		
-		TangibleObject deliveryObject = (TangibleObject) core.objectService.createObject("object/tangible/mission/shared_mission_datadisk.iff", getMissionObject().getGrandparent().getPlanet());
+		TangibleObject deliveryObject = (TangibleObject) core.objectService.createObject("object/tangible/mission/shared_mission_datadisk.iff", player.getPlanet());
 		
 		if (deliveryObject != null && inventory.add(deliveryObject)) {
 			setDeliveryObject(deliveryObject);

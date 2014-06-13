@@ -298,20 +298,20 @@ public class BountyMissionObjective extends MissionObjective {
 									return;
 								}
 								
-								WaypointObject missionWp = mission.getAttachedWaypoint();
+								WaypointObject missionWp = mission.getWaypoint();
 
-								if (missionWp == null) {
-									WaypointObject waypoint = (WaypointObject) NGECore.getInstance().objectService.createObject("object/waypoint/shared_waypoint.iff", target.getPlanet(), 
-											target.getWorldPosition().x, target.getWorldPosition().z, target.getWorldPosition().y);
+								if (missionWp.getPlanetCRC() != CRC.StringtoCRC(target.getPlanet().name)) {
+									WaypointObject waypoint = (WaypointObject) getMissionObject().getWaypoint();
 									waypoint.setActive(true);
 									waypoint.setColor(WaypointObject.ORANGE);
-									waypoint.setName(getMissionObject().getMissionTargetName());
+									waypoint.setName(getMissionObject().getTargetName());
 									waypoint.setPlanetCRC(CRC.StringtoCRC(target.getPlanet().getName()));
 									waypoint.setStringAttribute("", "");
-									getMissionObject().setAttachedWaypoint(waypoint);
+									getMissionObject().setWaypoint(waypoint);
 								} else {
 									missionWp.setPosition(target.getWorldPosition());
-									mission.setAttachedWaypoint(missionWp);
+									mission.setWaypoint(missionWp);
+									getMissionObject().setWaypoint(missionWp);
 								}
 								actor.sendSystemMessage("@mission/mission_generic:target_location_updated_ground", DisplayType.Broadcast);
 								actor.sendSystemMessage("@mission/mission_generic:target_continue_tracking", DisplayType.Broadcast);
@@ -327,7 +327,7 @@ public class BountyMissionObjective extends MissionObjective {
 	public void beginArakydUpdate(final CreatureObject actor) {
 		arakydActive = true;
 		Executors.newScheduledThreadPool(1).schedule(() -> {
-
+			
 			int number = new Random().nextInt(100);
 			
 			// Effectively a 16% chance of failing. The failure type is calculated by subtracting 10 from the number received.
@@ -340,14 +340,15 @@ public class BountyMissionObjective extends MissionObjective {
 					target.getWorldPosition().x, target.getWorldPosition().z, target.getWorldPosition().y);
 			waypoint.setActive(true);
 			waypoint.setColor(WaypointObject.ORANGE);
-			waypoint.setName(getMissionObject().getMissionTargetName());
+			waypoint.setName(getMissionObject().getTargetName());
 			waypoint.setPlanetCRC(CRC.StringtoCRC(target.getPlanet().getName()));
 			waypoint.setStringAttribute("", "");
-			getMissionObject().setAttachedWaypoint(waypoint);
+			
+			actor.getClient().getSession().write(getMissionObject().getBaseline3().set("waypoint", waypoint));
 			
 			actor.sendSystemMessage("@mission/mission_generic:target_location_updated_ground", DisplayType.Broadcast);
 			actor.sendSystemMessage("@mission/mission_generic:target_located_" + target.getPlanet().getName(), DisplayType.Broadcast);
-
+			
 		}, 180, TimeUnit.SECONDS);
 	}
 	

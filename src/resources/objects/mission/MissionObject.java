@@ -22,45 +22,37 @@
 package resources.objects.mission;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
-import com.sleepycat.persist.model.NotPersistent;
-import com.sleepycat.persist.model.Persistent;
+import org.apache.mina.core.buffer.IoBuffer;
 
-import resources.objects.ObjectMessageBuilder;
+import main.NGECore;
 import resources.objects.intangible.IntangibleObject;
 import resources.objects.waypoint.WaypointObject;
+import services.mission.MissionLocation;
 import services.mission.MissionObjective;
 import engine.clients.Client;
+import engine.resources.common.CRC;
+import engine.resources.common.Stf;
+import engine.resources.common.StringUtilities;
+import engine.resources.common.UString;
+import engine.resources.objects.Baseline;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent(version=1)
 public class MissionObject extends IntangibleObject implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
-	private Point3D destination;
-	private Point3D startLocation;
-	private String startPlanet = "";
-	private int difficultyLevel = 0; // Difficulty level displayed in details
-	private String destinationPlanet = "";
-	private int repeatCount = 0; // increases for each player using the mission; used for redisplaying on mission term too
-	private int reward = 0;
-	private String creator = "";
-	private String description = "";
-	private String title = "";
-	private String missionTargetName = ""; // Target object I guess?
-	private int missionId = 0;
-	private String missionStf = "";
-	private String type = "";
-	private int missionTemplateObject = 0;
-	private WaypointObject attachedWaypoint;
-	
+
 	// Server variables
 	private MissionObjective objective;
 	private long bountyObjId;
+	private String missionType = "";
+	private int missionId;
 	
-	@NotPersistent
 	private transient MissionMessageBuilder messageBuilder = new MissionMessageBuilder(this);
 		
 	public MissionObject() {
@@ -71,221 +63,190 @@ public class MissionObject extends IntangibleObject implements Serializable {
 		super(objectID, planet, new Point3D(0, 0, 0), new Quaternion(1, 0, 0, 0), template);
 	}
 
-	public String getMissionDestinationPlanet() {
-		synchronized(objectMutex) {
-			return destinationPlanet;
-		}
+	public Baseline getBaseline3() {
+		Baseline baseline = super.getBaseline3();
+		baseline.put("difficultyLevel", 0);
+		baseline.put("startLocation", new MissionLocation(new Point3D(0,0,0), 0, "tatooine"));
+		baseline.put("creator", new UString(""));
+		baseline.put("creditReward", 0);
+		baseline.put("destinationLocation", new MissionLocation(new Point3D(0,0,0), 0, "tatooine"));
+		baseline.put("templateObject", 0);
+		baseline.put("description", new Stf("", 0, ""));
+		baseline.put("title", new Stf("", 0, ""));
+		baseline.put("repeatCounter", 0);
+		baseline.put("missionType", 0);
+		baseline.put("targetName", "");
+		
+		WaypointObject wp = (WaypointObject) NGECore.getInstance().objectService.createObject("object/waypoint/base/shared_base_waypoint.iff", getPlanet());
+		wp.setActive(true);
+		baseline.put("waypoint", wp);
+		return baseline;
+	}
+	
+	public Baseline getBaseline6() {
+		Baseline baseline = super.getBaseline6();
+		baseline.put("unk", -1);
+		return baseline;
+	}
+	
+	public Baseline getBaseline8() {
+		Baseline baseline = super.getBaseline8();
+		return baseline;
+	}
+	
+	public Baseline getBaseline9() {
+		Baseline baseline = super.getBaseline9();
+		return baseline;
 	}
 	
 	@Override
 	public void initAfterDBLoad() {
 		super.init();
 		messageBuilder = new MissionMessageBuilder(this);
-		if(attachedWaypoint != null)
-			attachedWaypoint.initAfterDBLoad();
 	}
-
-	public int getMissionLevel() {
-		synchronized(objectMutex) {
-			return difficultyLevel;
-		}
+	
+	public int getDifficultyLevel() {
+		return (int) getBaseline3().get("difficultyLevel");
 	}
-
-	public void setMissionLevel(int missionLevel) {
-		synchronized(objectMutex) {
-			this.difficultyLevel = missionLevel;
-		}
-		if (getGrandparent() != null && getGrandparent().getClient() != null && getGrandparent().getClient().getSession() != null) {
-			getGrandparent().getClient().getSession().write(messageBuilder.buildDifficultyLevelDelta(missionLevel));
+	
+	public void setDifficultyLevel(int level) {
+		if (getGrandparent() != null && getGrandparent().getClient() != null) {
+			getBaseline(3).set("difficultyLevel", level);
 		}
 	}
-
-	public String getMissionStartPlanet() {
-		synchronized(objectMutex) {
-			return startPlanet;
+	
+	public MissionLocation getStartLocation() {
+		return (MissionLocation) getBaseline3().get("startLocation");
+	}
+	
+	public void setStartLocation(Point3D location, long objId, String planet) {
+		if (getGrandparent() != null && getGrandparent().getClient() != null) {
+			MissionLocation startLocation = new MissionLocation(location.clone(), objId, planet);
+			getBaseline(3).set("startLocation", startLocation);
 		}
 	}
-
-	public int getMissionRepeatCounter() {
-		synchronized(objectMutex) {
-			return repeatCount;
-		}
-	}
-
-	public void setRepeatCount(int missionRepeatCounter) {
-		synchronized(objectMutex) {
-			this.repeatCount = missionRepeatCounter;
-		}
-		if (getGrandparent() != null && getGrandparent().getClient() != null && getGrandparent().getClient().getSession() != null) {
-			getGrandparent().getClient().getSession().write(messageBuilder.buildRepeatCounterDelta(missionRepeatCounter));
-		}
-	}
-
-	public int getCreditReward() {
-		synchronized(objectMutex) {
-			return reward;
-		}
-	}
-
-	public void setCreditReward(int missionCredits) {
-		synchronized(objectMutex) {
-			this.reward = missionCredits;
-		}
-		if (getGrandparent() != null && getGrandparent().getClient() != null && getGrandparent().getClient().getSession() != null) {
-			getGrandparent().getClient().getSession().write(messageBuilder.buildCreditsRewardDelta(missionCredits));
-		}
-	}
-
+	
 	public String getCreator() {
-		synchronized(objectMutex) {
-			return creator;
+		return ((UString)getBaseline3().get("creator")).get();
+	}
+	
+	public void setCreator(String creator) {
+		if (getGrandparent() != null && getGrandparent().getClient() != null) {
+			getGrandparent().getClient().getSession().write(getBaseline3().set("creator", new UString(creator)));
 		}
 	}
-
-	public void setCreator(String missionCreator) {
-		synchronized(objectMutex) {
-			this.creator = missionCreator;
-		}
-		if (getGrandparent() != null && getGrandparent().getClient() != null && getGrandparent().getClient().getSession() != null) {
-			getGrandparent().getClient().getSession().write(messageBuilder.buildCreatorNameDelta(missionCreator));
+	
+	public int getCreditReward() {
+		return (int) getBaseline3().get("creditReward");
+	}
+	
+	public void setCreditReward(int credits) {
+		if (getGrandparent() != null && getGrandparent().getClient() != null) {
+			getGrandparent().getClient().getSession().write(getBaseline3().set("creditReward", credits));
 		}
 	}
-
-	public String getMissionDescription() {
-		synchronized(objectMutex) {
-			return description;
+	
+	public MissionLocation getDestinationLocation() {
+		return (MissionLocation) getBaseline3().get("destinationLocation");
+	}
+	
+	public void setDestinationLocation(Point3D location, long objId, String planet) {
+		if (getGrandparent() != null && getGrandparent().getClient() != null) {
+			MissionLocation destinationLocation = new MissionLocation(location.clone(), objId, planet);
+			getGrandparent().getClient().getSession().write(getBaseline3().set("destinationLocation", destinationLocation));
 		}
 	}
-
-	public void setMissionDescription(String missionDescription) {
-		synchronized(objectMutex) {
-			this.description = missionDescription;
-		}
-		if (getGrandparent() != null && getGrandparent().getClient() != null && getGrandparent().getClient().getSession() != null) {
-			getGrandparent().getClient().getSession().write(messageBuilder.buildMissionDescriptionDelta(missionStf, missionDescription));
+	
+	public int getTemplateObject() {
+		return (int) getBaseline3().get("templateObject");
+	}
+	
+	public void setTemplateObject(int objCRC) {
+		if (getGrandparent() != null && getGrandparent().getClient() != null) {
+			getGrandparent().getClient().getSession().write(getBaseline3().set("templateObject", objCRC));
 		}
 	}
-
-	public String getMissionTitle() {
-		synchronized(objectMutex) {
-			return title;
+	
+	public Stf getDescription() {
+		return (Stf) getBaseline3().get("description");
+	}
+	
+	public void setDescription(String description) {
+		if (getGrandparent() != null && getGrandparent().getClient() != null) {
+			getGrandparent().getClient().getSession().write(getBaseline3().set("description", new Stf(description)));
 		}
 	}
-
-	public void setMissionTitle(String missionTitle) {
-		synchronized(objectMutex) {
-			this.title = missionTitle;
-		}
-		if (getGrandparent() != null && getGrandparent().getClient() != null && getGrandparent().getClient().getSession() != null) {
-			getGrandparent().getClient().getSession().write(messageBuilder.buildMissionTitleDelta(missionStf, missionTitle));
+	
+	public Stf getTitle() {
+		return (Stf) getBaseline3().get("title");
+	}
+	
+	public void setTitle(String title) {
+		if (getGrandparent() != null && getGrandparent().getClient() != null) {
+			getGrandparent().getClient().getSession().write(getBaseline3().set("title", new Stf(title)));
 		}
 	}
-
-	public String getMissionTargetName() {
-		synchronized(objectMutex) {
-			return missionTargetName;
+	
+	public int getRepeatCounter() {
+		return (int) getBaseline3().get("repeatCounter");
+	}
+	
+	public void setRepeatCounter(int count) {
+		if (getGrandparent() != null && getGrandparent().getClient() != null) {
+			getGrandparent().getClient().getSession().write(getBaseline3().set("repeatCounter", count));
 		}
 	}
-
-	public void setMissionTargetName(String missionTargetName) {
-		synchronized(objectMutex) {
-			this.missionTargetName = missionTargetName;
-		}
-		if (getGrandparent() != null && getGrandparent().getClient() != null && getGrandparent().getClient().getSession() != null) {
-			getGrandparent().getClient().getSession().write(messageBuilder.buildTargetNameDelta(missionTargetName));
+	
+	public void incrementRepeatCounter() {
+		setRepeatCounter(getRepeatCounter() + 1);
+	}
+	
+	public void decrementRepeatCounter() {
+		int repeatCounter = getRepeatCounter() + 1;
+		setRepeatCounter((repeatCounter < 0) ? 0 : repeatCounter);
+	}
+	
+	public int getMissionTypeCRC() {
+		return (int) getBaseline3().get("missionType");
+	}
+	
+	public void setMissionType(String type) {
+		if (getGrandparent() != null && getGrandparent().getClient() != null) {
+			getGrandparent().getClient().getSession().write(getBaseline3().set("missionType", CRC.StringtoCRC(type)));
+			this.missionType = type;
 		}
 	}
-
-	public WaypointObject getAttachedWaypoint() {
-		synchronized(objectMutex) {
-			return attachedWaypoint;
-		}
-	}
-
-	public void setAttachedWaypoint(WaypointObject waypoint) {
-		synchronized(objectMutex) {
-			this.attachedWaypoint = waypoint;
-		}
-		
-		if (getGrandparent() != null && getGrandparent().getClient() != null && getGrandparent().getClient().getSession() != null) {
-			getGrandparent().getClient().getSession().write(messageBuilder.buildWaypointDelta(waypoint));
-		}
-	}
-
-	public int getMissionTemplateObject() {
-		synchronized(objectMutex) {
-			return missionTemplateObject;
-		}
-	}
-
-	public void setMissionTemplateObject(int missionTemplateObject) {
-		synchronized(objectMutex) {
-			this.missionTemplateObject = missionTemplateObject;
-		}
-		if (getGrandparent() != null && getGrandparent().getClient() != null && getGrandparent().getClient().getSession() != null) {
-			getGrandparent().getClient().getSession().write(messageBuilder.buildTargetObjectIffDelta(missionTemplateObject));
-		}
-	}
-
+	
 	public String getMissionType() {
-		synchronized(objectMutex) {
-			return type;
-		}
+		return missionType;
 	}
-
-	public void setMissionType(String missionType) {
-		synchronized(objectMutex) {
-			this.type = missionType;
-		}
-		if (getGrandparent() != null && getGrandparent().getClient() != null && getGrandparent().getClient().getSession() != null) {
-			getGrandparent().getClient().getSession().write(messageBuilder.buildMissionTypeDelta(missionType));
-		}
+	
+	public String getTargetName() {
+		return (String) getBaseline3().get("targetName");
 	}
-
-	public MissionObjective getObjective() {
-		synchronized(objectMutex) {
-			return objective;
-		}
-	}
-
-	public void setObjective(MissionObjective objective) {
-		synchronized(objectMutex) {
-			this.objective = objective;
-		}
-	}
-
-	public Point3D getStartLocation() {
-		synchronized(objectMutex) {
-			return startLocation;
+	
+	public void setTargetName(String targetName) {
+		if (getGrandparent() != null && getGrandparent().getClient() != null) {
+			getGrandparent().getClient().getSession().write(getBaseline3().set("targetName", targetName));
 		}
 	}
 	
-	public Point3D getDestination() {
-		synchronized(objectMutex) {
-			return destination;
-		}
+	public WaypointObject getWaypoint() {
+		return (WaypointObject) getBaseline3().get("waypoint");
 	}
-
-	public void setStartLocation(Point3D startLocation, String planet) {
-		synchronized(objectMutex) {
-			this.startLocation = startLocation;
-			this.startPlanet = planet;
-		}
-		
-		if (getGrandparent() != null && getGrandparent().getClient() != null && getGrandparent().getClient().getSession() != null) {
-			getGrandparent().getClient().getSession().write(messageBuilder.buildStartLocationDelta(startLocation, planet));
+	
+	public void setWaypoint(WaypointObject waypoint) {
+		if (getGrandparent() != null && getGrandparent().getClient() != null) {
+			getGrandparent().getClient().getSession().write(getBaseline3().set("waypoint", waypoint));
 		}
 	}
 	
-	public void setDestination(Point3D destination, String planet) {
-		synchronized(objectMutex) {
-			this.destination = destination;
-			this.destinationPlanet = planet;
-		}
-		
-		if (getGrandparent() != null && getGrandparent().getClient() != null && getGrandparent().getClient().getSession() != null) {
-			getGrandparent().getClient().getSession().write(messageBuilder.buildDestinationDelta(destination, planet));
-		}
+	public long getBountyMarkId() {
+		return bountyObjId;
+	}
+
+	public void setBountyMarkId(long bountyObjId) {
+		this.bountyObjId = bountyObjId;
 	}
 
 	public int getMissionId() {
@@ -296,38 +257,49 @@ public class MissionObject extends IntangibleObject implements Serializable {
 		this.missionId = missionId;
 	}
 
-	public long getBountyMarkId() {
-		return bountyObjId;
+	public MissionObjective getObjective() {
+		return objective;
 	}
 
-	public void setBountyMarkId(long bountyObjId) {
-		this.bountyObjId = bountyObjId;
-	}
-
-	public String getMissionStf() {
-		return missionStf;
-	}
-
-	public void setMissionStf(String missionStf) {
-		this.missionStf = missionStf;
+	public void setObjective(MissionObjective objective) {
+		this.objective = objective;
 	}
 
 	@Override
 	public void sendBaselines(Client destination) {
-		
-		if(destination == null || destination.getSession() == null) {
-			System.out.println("NULL session");
-			return;
+		if (destination != null && destination.getSession() != null) {
+			destination.getSession().write(getBaseline(3).getBaseline());
+			destination.getSession().write(getBaseline(6).getBaseline());
+			destination.getSession().write(getBaseline(8).getBaseline());
+			destination.getSession().write(getBaseline(9).getBaseline());
 		}
-		
-		destination.getSession().write(messageBuilder.buildBaseline3());
-		destination.getSession().write(messageBuilder.buildBaseline6());
-		destination.getSession().write(messageBuilder.buildBaseline8());
-		destination.getSession().write(messageBuilder.buildBaseline9());
 	}
 	
-	public ObjectMessageBuilder getMessageBuilder() {
-		return messageBuilder;
+	@Override
+	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
+		switch (viewType) {
+			case 1:
+			case 4:
+			case 3:
+			case 6:
+			case 7:
+			case 8:
+			case 9:
+				if (getGrandparent().getClient() != null) {
+					buffer = getBaseline(viewType).createDelta(updateType, buffer.array());
+					getGrandparent().getClient().getSession().write(buffer);
+				}
+			default:
+				return;
+		}
 	}
-	
+
+	public MissionMessageBuilder getMessageBuilder() {
+		synchronized(objectMutex) {
+			if (messageBuilder == null)
+				messageBuilder = new MissionMessageBuilder(this);
+			
+			return messageBuilder;
+		}
+	}
 }
