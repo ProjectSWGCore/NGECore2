@@ -37,7 +37,6 @@ def createRadial(core, owner, target, radials):
 		radials.add(RadialOptions(2, 232, 0, 'Deduct 10 citizens'))
 
 	if city.getMayorID() != owner.getObjectID():
-		print 'here'
 		return
 		
 	radials.add(RadialOptions(0, 216, 0, '@city/city:city_management'))
@@ -130,7 +129,34 @@ def handleSelection(core, owner, target, option):
 		if owner is not None:
 			handleManageMilitia(core, owner, target, option)
 			return
-
+	if option == 230:
+		if owner is not None:
+			handleRevokeCitizenship(core, owner, target, option)
+			return
+			
+def handleRevokeCitizenship(core, owner, target, option):
+	playerCity = core.playerCityService.getPlayerCity(owner)
+	if not playerCity or not playerCity.isCitizen(owner.getObjectID()) or playerCity.getMayorID() == owner.getObjectID():
+		return
+	window = core.suiService.createMessageBox(2, 'revoke_cit_t', 'revoke_cit_d', owner, None, 0)
+	returnList = Vector()
+	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, revokeCitizenship)
+	core.suiService.openSUIWindow(suiWindow)	
+	return
+	
+def revokeCitizenship(owner, window, eventType, returnList):
+	core = main.NGECore.getInstance()
+	playerCity = core.playerCityService.getPlayerCity(owner)
+	if not playerCity or not playerCity.isCitizen(owner.getObjectID()) or playerCity.getMayorID() == owner.getObjectID():
+		return
+	playerCity.removeCitizen(owner.getObjectID())
+	owner.getPlayerObject().setHome('')
+	owner.getPlayerObject().setCitizenship(0)
+	owner.setAttachment('residentCity', None)
+	owner.sendSystemMessage('You have successfully revoked your citizenship.', 0)	
+	owner.sendSystemMessage('@city/city:revoke_citizenship_warning', 0)
+	return
+	
 def handleManageMilitia(core, owner, target, option):
 	playerCity = core.playerCityService.getPlayerCity(owner)
 	if not playerCity:

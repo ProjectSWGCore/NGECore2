@@ -628,6 +628,7 @@ public class PlayerCity implements Serializable {
 	
 	public void removeCitizen(long citizen, boolean sendMail) {
 		citizens.remove(citizen);
+		removeMilitia(citizen);
 		NGECore core = NGECore.getInstance();
 		CreatureObject citizenObject = core.objectService.getObject(citizen) == null ? core.objectService.getCreatureFromDB(citizen) : (CreatureObject) core.objectService.getObject(citizen);
 		if(citizenObject == null)
