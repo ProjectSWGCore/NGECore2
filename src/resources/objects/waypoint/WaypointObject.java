@@ -43,7 +43,7 @@ public class WaypointObject extends IntangibleObject implements Serializable, ID
 	private int cellId; // ???
 	private long locationNetworkId;
 	private int planetCRC;
-	private String name;
+	private String name = "";
 	private byte color;
 	private boolean isActive;
 	private transient static SimpleBufferAllocator bufferPool = new SimpleBufferAllocator();

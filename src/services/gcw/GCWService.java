@@ -562,9 +562,9 @@ public class GCWService implements INetworkDispatch {
 		player.setRankProgress((float) Math.floor(newprogress));
 		
 		if (newrank > oldrank) {
-			core.scriptService.callScript("scripts/gcw/", "gcwrank_" + actor.getFaction(), "handleRankUp", core, actor, newrank);
+			core.scriptService.callScript("scripts/collections/", "gcwrank_" + actor.getFaction(), "handleRankUp", core, actor, newrank);
 		} else {
-			core.scriptService.callScript("scripts/gcw/", "gcwrank_" + actor.getFaction(), "handleRankDown", actor, newrank);
+			core.scriptService.callScript("scripts/collections/", "gcwrank_" + actor.getFaction(), "handleRankDown", actor, newrank);
 		}
 	}
 	
