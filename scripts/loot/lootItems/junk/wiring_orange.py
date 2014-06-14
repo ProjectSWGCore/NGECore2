@@ -1,11 +1,10 @@
-
 def itemTemplate():
 
 	return ['object/tangible/loot/npc_loot/shared_wiring_generic.iff']
 	
 def customItemName():
 
-	return 'Wiring (White)'
+	return 'Wiring (Orange)'
 
 def lootDescriptor():
 
@@ -17,11 +16,11 @@ def customizationAttributes():
 	
 def customizationValues():
 
-	return [1]
+	return [6]
 	
 def reverse_engineering_name():
 
-	return 'White'
+	return 'Orange'
 	
 def stackable():
 
