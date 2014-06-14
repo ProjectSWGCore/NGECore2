@@ -524,7 +524,7 @@ public class MissionService implements INetworkDispatch {
 		
 		mission.setTemplateObject(CRC.StringtoCRC("object/tangible/mission/shared_mission_datadisk.iff"));
 		mission.setTargetName("Datadisk");
-		System.out.println("Sent all deltas for delivery mission. - " + mission.getObjectID());
+
 	}
 	
 	private void randomBountyMission(SWGObject player, MissionObject mission) {
