@@ -52,6 +52,7 @@ public class MissionObject extends IntangibleObject implements Serializable {
 	private long bountyObjId;
 	private String missionType = "";
 	private int missionId;
+	private int repeatCount;
 	
 	private transient MissionMessageBuilder messageBuilder = new MissionMessageBuilder(this);
 		
@@ -111,7 +112,7 @@ public class MissionObject extends IntangibleObject implements Serializable {
 	
 	public void setDifficultyLevel(int level) {
 		if (getGrandparent() != null && getGrandparent().getClient() != null) {
-			getBaseline(3).set("difficultyLevel", level);
+			getGrandparent().getClient().getSession().write(getBaseline(3).set("difficultyLevel", level));
 		}
 	}
 	
@@ -122,7 +123,7 @@ public class MissionObject extends IntangibleObject implements Serializable {
 	public void setStartLocation(Point3D location, long objId, String planet) {
 		if (getGrandparent() != null && getGrandparent().getClient() != null) {
 			MissionLocation startLocation = new MissionLocation(location.clone(), objId, planet);
-			getBaseline(3).set("startLocation", startLocation);
+			getGrandparent().getClient().getSession().write(getBaseline(3).set("startLocation", startLocation));
 		}
 	}
 	
@@ -193,12 +194,13 @@ public class MissionObject extends IntangibleObject implements Serializable {
 	
 	public void setRepeatCounter(int count) {
 		if (getGrandparent() != null && getGrandparent().getClient() != null) {
+			this.repeatCount = count;
 			getGrandparent().getClient().getSession().write(getBaseline3().set("repeatCounter", count));
 		}
 	}
 	
 	public void incrementRepeatCounter() {
-		setRepeatCounter(getRepeatCounter() + 1);
+		setRepeatCounter(this.repeatCount + 1); // temporary fix for getBaseline(3).get("repeatCounter") always being 0.
 	}
 	
 	public void decrementRepeatCounter() {
