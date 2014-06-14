@@ -300,6 +300,7 @@ def handleDepositSUI(owner, window, eventType, returnList):
 	playerCity.addToTreasury(deposit)
 	owner.deductCashCredits(deposit)
 	owner.sendSystemMessage(OutOfBand.ProsePackage('@city/city:deposit_treasury', deposit), 0)
+	playerCity.sendTreasuryDepositMail(owner, deposit)
 	return
 	
 def	handleToggleZoning(core, owner, target, option):

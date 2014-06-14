@@ -1236,6 +1236,25 @@ public class PlayerCity implements Serializable {
 
 	}
 	
+	public void sendTreasuryDepositMail(CreatureObject actor, int amount) {
+		NGECore core = NGECore.getInstance();
+		CreatureObject mayor = core.objectService.getObject(getMayorID()) == null ? core.objectService.getCreatureFromDB(getMayorID()) : (CreatureObject) core.objectService.getObject(getMayorID());
+		if(mayor == null)
+			return;
+		Mail mail = new Mail();
+		mail.setMailId(NGECore.getInstance().chatService.generateMailId());
+		mail.setRecieverId(getMayorID());
+		mail.setStatus(Mail.NEW);
+        mail.setTimeStamp((int) (new Date().getTime() / 1000));
+        mail.setSubject("@city/city:treasury_deposit_subject");
+        mail.setSenderName("@city/city:treasury_deposit_from");
+        mail.addProseAttachment(new ProsePackage("@city/city:treasury_deposit_body", "TO", actor.getCustomName(), amount));
+        
+        core.chatService.storePersistentMessage(mail);
+		if(mayor.getClient() != null)
+			core.chatService.sendPersistentMessageHeader(mayor.getClient(), mail);		
+	}
+	
 	public boolean isCitizen(long citizenId) {
 		return getCitizens().contains(citizenId);
 	}
