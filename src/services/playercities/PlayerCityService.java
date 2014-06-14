@@ -39,6 +39,7 @@ import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
 import services.chat.Mail;
 import services.sui.SUIService.InputBoxType;
+import services.sui.SUIService.MessageBoxType;
 import services.sui.SUIWindow;
 import services.sui.SUIWindow.SUICallback;
 import services.sui.SUIWindow.Trigger;
@@ -459,7 +460,7 @@ public class PlayerCityService implements INetworkDispatch {
 		window.setProperty("btnOk:Text", "@ok");
 		window.setProperty("btnCancel:Text", "@cancel");				
 
-		Vector<String >returnList = new Vector<String>();
+		Vector<String> returnList = new Vector<String>();
 		returnList.add("transaction.txtInputFrom:Text");
 		returnList.add("transaction.txtInputTo:Text");
 		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, (actor, eventType, inputList) -> {
@@ -498,5 +499,24 @@ public class PlayerCityService implements INetworkDispatch {
 		});
 		core.suiService.openSUIWindow(window);
 		
+	}
+	
+	public void handleRemoveMilitia(CreatureObject mayor, long militiaId) {
+		PlayerCity playerCity = core.playerCityService.getPlayerCity(mayor);
+		CreatureObject militia = core.objectService.getObject(militiaId) == null ? core.objectService.getCreatureFromDB(militiaId) : (CreatureObject) core.objectService.getObject(militiaId);
+		if(militia == null)
+			return;
+		
+		SUIWindow window = core.suiService.createMessageBox(MessageBoxType.MESSAGE_BOX_OK_CANCEL, "@city/city:remove_militia_confirm", "@city/city:remove_militia_prefix " + militia.getCustomName() + " @city/city:remove_militia_suffix", mayor, null, 0);
+		window.addHandler(0, "", Trigger.TRIGGER_OK, new Vector<String>(), (actor, eventType, returnList) -> {
+			playerCity.removeMilitia(militiaId);
+			if(militia.getClient() != null)
+				militia.sendSystemMessage("@city/city:removed_militia_target", (byte) 0);
+			mayor.sendSystemMessage("@city/city:removed_militia", (byte) 0);
+			militia.getPlayerObject().setCitizenship(Citizenship.Citizen);
+			if(core.objectService.getObject(militiaId) == null)
+				core.objectService.persistObject(militiaId, militia, core.getSWGObjectODB());
+		});
+		core.suiService.openSUIWindow(window);
 	}
 }

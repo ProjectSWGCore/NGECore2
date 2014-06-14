@@ -636,6 +636,14 @@ public class PlayerCity implements Serializable {
 			sendCitizenLeftMailAll(citizenObject);
 		}
 	}
+	
+	public void addMilitia(long militiaId) {
+		militiaList.add(militiaId);
+	}
+
+	public void removeMilitia(long militiaId) {
+		militiaList.remove(militiaId);
+	}
 
 	public long getNextElectionDate() {
 		return nextElectionDate;
@@ -807,13 +815,6 @@ public class PlayerCity implements Serializable {
 		return false;
 	}
 	
-	public boolean hasCitizen(long actor){
-		if (getCitizens().contains(actor))
-			return true;
-		
-		return false;
-	}
-
 	public static String[] getSpecialisationSTFNames() {
 		return specialisationSTFNames;
 	}
@@ -903,9 +904,7 @@ public class PlayerCity implements Serializable {
         actorMail.setSubject("@city/city:new_city_citizen_other_subject");
         actorMail.setSenderName("City " + this.cityName);
         actorMail.addProseAttachment(new ProsePackage("@city/city:new_city_citizen_other_body", "TT", mayor.getCustomName(), "TU", cityName));
-      
-
-		
+      		
         core.chatService.storePersistentMessage(actorMail);
         if (citizen.getClient()!=null)
         	core.chatService.sendPersistentMessageHeader(citizen.getClient(), actorMail);
@@ -1234,6 +1233,10 @@ public class PlayerCity implements Serializable {
 
 		}
 
+	}
+	
+	public boolean isCitizen(long citizenId) {
+		return getCitizens().contains(citizenId);
 	}
 
 	

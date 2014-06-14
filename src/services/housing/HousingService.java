@@ -396,6 +396,7 @@ public class HousingService implements INetworkDispatch {
 		if(building.getResidency())
 			owner.setAttachment("residentBuilding", null);
 		
+		
 		if(city != null) {
 			city.removeStructure(building.getObjectID());
 			if(building.getResidency()) {
