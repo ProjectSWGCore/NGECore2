@@ -628,6 +628,7 @@ public class PlayerCity implements Serializable {
 	
 	public void removeCitizen(long citizen, boolean sendMail) {
 		citizens.remove(citizen);
+		removeMilitia(citizen);
 		NGECore core = NGECore.getInstance();
 		CreatureObject citizenObject = core.objectService.getObject(citizen) == null ? core.objectService.getCreatureFromDB(citizen) : (CreatureObject) core.objectService.getObject(citizen);
 		if(citizenObject == null)
@@ -635,6 +636,14 @@ public class PlayerCity implements Serializable {
 		if(sendMail) {
 			sendCitizenLeftMailAll(citizenObject);
 		}
+	}
+	
+	public void addMilitia(long militiaId) {
+		militiaList.add(militiaId);
+	}
+
+	public void removeMilitia(long militiaId) {
+		militiaList.remove(militiaId);
 	}
 
 	public long getNextElectionDate() {
@@ -807,13 +816,6 @@ public class PlayerCity implements Serializable {
 		return false;
 	}
 	
-	public boolean hasCitizen(long actor){
-		if (getCitizens().contains(actor))
-			return true;
-		
-		return false;
-	}
-
 	public static String[] getSpecialisationSTFNames() {
 		return specialisationSTFNames;
 	}
@@ -903,9 +905,7 @@ public class PlayerCity implements Serializable {
         actorMail.setSubject("@city/city:new_city_citizen_other_subject");
         actorMail.setSenderName("City " + this.cityName);
         actorMail.addProseAttachment(new ProsePackage("@city/city:new_city_citizen_other_body", "TT", mayor.getCustomName(), "TU", cityName));
-      
-
-		
+      		
         core.chatService.storePersistentMessage(actorMail);
         if (citizen.getClient()!=null)
         	core.chatService.sendPersistentMessageHeader(citizen.getClient(), actorMail);
@@ -1234,6 +1234,33 @@ public class PlayerCity implements Serializable {
 
 		}
 
+	}
+	
+	public void sendTreasuryDepositMail(CreatureObject actor, int amount) {
+		NGECore core = NGECore.getInstance();
+		CreatureObject mayor = core.objectService.getObject(getMayorID()) == null ? core.objectService.getCreatureFromDB(getMayorID()) : (CreatureObject) core.objectService.getObject(getMayorID());
+		if(mayor == null)
+			return;
+		Mail mail = new Mail();
+		mail.setMailId(NGECore.getInstance().chatService.generateMailId());
+		mail.setRecieverId(getMayorID());
+		mail.setStatus(Mail.NEW);
+        mail.setTimeStamp((int) (new Date().getTime() / 1000));
+        mail.setSubject("@city/city:treasury_deposit_subject");
+        mail.setSenderName("@city/city:treasury_deposit_from");
+        mail.addProseAttachment(new ProsePackage("@city/city:treasury_deposit_body", "TO", actor.getCustomName(), amount));
+        
+        core.chatService.storePersistentMessage(mail);
+		if(mayor.getClient() != null)
+			core.chatService.sendPersistentMessageHeader(mayor.getClient(), mail);		
+	}
+	
+	public boolean isCitizen(long citizenId) {
+		return getCitizens().contains(citizenId);
+	}
+	
+	public boolean isCandidate(long candidateId) {
+		return electionList.containsKey(candidateId);
 	}
 
 	

@@ -1,11 +1,11 @@
 
 def itemTemplate():
 
-	return ['object/tangible/loot/npc_loot/shared_hyperdrive_part_generic.iff']
+	return ['object/tangible/loot/npc_loot/shared_frequency_jammed_wire_generic.iff']
 	
 def customItemName():
 
-	return 'Hyperdrive Unit'
+	return 'Frequency Jamming Wired'
 	
 def stackable():
 
@@ -13,7 +13,7 @@ def stackable():
 	
 def junkDealerPrice():
 
-	return 34
+	return 10
 	
 def junkType():
 

@@ -1,11 +1,11 @@
 
 def itemTemplate():
 
-	return ['object/tangible/loot/npc_loot/shared_hyperdrive_part_generic.iff']
+	return ['object/tangible/loot/npc_loot/shared_installation_repair_device_generic.iff']
 	
 def customItemName():
 
-	return 'Hyperdrive Unit'
+	return 'Unpowered Installation Repair Device'
 	
 def stackable():
 

@@ -312,7 +312,7 @@ public class MissionService implements INetworkDispatch {
 					else
 						return;
 					
-					mission.setRepeatCount(requestCounter);
+					mission.incrementRepeatCounter();
 					typeOneCount.incrementAndGet();
 					
 				} else if (typeTwoCount.get() < 5) {
@@ -329,7 +329,7 @@ public class MissionService implements INetworkDispatch {
 					else
 						return;
 					
-					mission.setRepeatCount(requestCounter);
+					mission.incrementRepeatCounter();
 					typeTwoCount.incrementAndGet();
 				}
 			}
@@ -480,21 +480,21 @@ public class MissionService implements INetworkDispatch {
 		mission.setMissionType("survey");
 
 		String missionStf = "mission/mission_npc_survey_neutral_easy";
-		mission.setMissionStf(missionStf);
+
 		mission.setMissionId(getRandomStringEntry(missionStf));
-		mission.setMissionDescription("m" + mission.getMissionId() + "d");
-		mission.setMissionTitle("m" + mission.getMissionId() + "t");
+		mission.setDescription("@" + missionStf + ":" + "m" + mission.getMissionId() + "d");
+		mission.setTitle("@" + missionStf + ":" + "m" + mission.getMissionId() + "t");
 		
 		mission.setCreator(nameGenerator.compose(2) + " " + nameGenerator.compose(3));
 		
-		mission.setMissionLevel(randLevel);
+		mission.setDifficultyLevel(randLevel);
 		
-		mission.setStartLocation(player.getPosition(), player.getPlanet().name);
+		mission.setStartLocation(player.getPosition(), 0, player.getPlanet().name);
 		
 		mission.setCreditReward(400 + (randLevel - minLevel) * 20 + ran.nextInt(100));
 		
-		mission.setMissionTemplateObject(CRC.StringtoCRC(ResourceRoot.CONTAINER_TYPE_IFF_SIGNIFIER[family.getContainerType()])); // This should be the resource container obj
-		mission.setMissionTargetName(family.getResourceType() + family.getResourceClass());
+		mission.setTemplateObject(CRC.StringtoCRC(ResourceRoot.CONTAINER_TYPE_IFF_SIGNIFIER[family.getContainerType()])); // This should be the resource container obj
+		mission.setTargetName(family.getResourceType() + family.getResourceClass());
 		
 	}
 	
@@ -504,26 +504,27 @@ public class MissionService implements INetworkDispatch {
 		String[] difficulties = { "easy", "medium", "hard" };
 
 		String missionStf = "mission/mission_deliver_neutral_" + difficulties[ran.nextInt(difficulties.length)];
-		mission.setMissionStf(missionStf);
+
 		mission.setMissionId(getRandomStringEntry(missionStf));
-		mission.setMissionDescription("m" + mission.getMissionId() + "d");
-		mission.setMissionTitle("m" + mission.getMissionId() + "t");
+		mission.setDescription("@" + missionStf + ":" + "m" + mission.getMissionId() + "d");
+		mission.setTitle("@" + missionStf + ":" + "m" + mission.getMissionId() + "t");
 		
 		mission.setCreator(nameGenerator.compose(2) + " " + nameGenerator.compose(3));
 		
-		mission.setMissionLevel(5);
+		mission.setDifficultyLevel(5);
 		
 		// TODO: Use pre-defined commoner locations
 		Point3D startLocation = SpawnPoint.getRandomPosition(player.getPosition(), (float) 50, (float) 300, player.getPlanetId());
 		Point3D destination = SpawnPoint.getRandomPosition(startLocation, (float) 50, (float) 500, player.getPlanetId());
 		
-		mission.setStartLocation(startLocation, player.getPlanet().name);
-		mission.setDestination(destination, player.getPlanet().name);
+		mission.setStartLocation(startLocation, 0, player.getPlanet().name);
+		mission.setDestinationLocation(destination, 0, player.getPlanet().name);
 		
 		mission.setCreditReward((int) (200 + ((startLocation.getDistance2D(destination) / 10))));
 		
-		mission.setMissionTemplateObject(CRC.StringtoCRC("object/tangible/mission/shared_mission_datadisk.iff"));
-		mission.setMissionTargetName("Datadisk");
+		mission.setTemplateObject(CRC.StringtoCRC("object/tangible/mission/shared_mission_datadisk.iff"));
+		mission.setTargetName("Datadisk");
+
 	}
 	
 	private void randomBountyMission(SWGObject player, MissionObject mission) {
@@ -552,19 +553,18 @@ public class MissionService implements INetworkDispatch {
 		
 		String missionStf = "mission/mission_bounty_jedi";
 		
-		mission.setMissionStf(missionStf);
 		if (!bountyTarget.getProfession().equals("")) { // TODO: Smuggler mission checks.
 			if (bountyTarget.getFaction().equals("rebel")) {
-				mission.setMissionTargetName("Rebel Bounty");
+				mission.setTargetName("Rebel Bounty");
 				mission.setMissionId(2);
 				mission.setCreator("The Galactic Empire");
 			} else if (bountyTarget.getFaction().equals("imperial")) {
-				mission.setMissionTargetName("Imperial Bounty");
+				mission.setTargetName("Imperial Bounty");
 				mission.setMissionId(1);
 				mission.setCreator("The Alliance");
 			}
-			mission.setMissionTitle("m" + mission.getMissionId() + "t");
-			mission.setMissionDescription("m" + mission.getMissionId() + "d");
+			mission.setTitle("@" + missionStf + ":" + "m" + mission.getMissionId() + "t");
+			mission.setDescription("@" + missionStf + ":" + "m" + mission.getMissionId() + "d");
 		} else {
 			// TODO: Dead code, but place-holder for implementation of smuggler missions.
 			if (bountyTarget.getFaction().equals("neutral")) {
@@ -576,17 +576,18 @@ public class MissionService implements INetworkDispatch {
 			else if (bountyTarget.getFaction().equals("imperial")) {
 				mission.setMissionId(1);
 			}
-			mission.setMissionTitle("m" + mission.getMissionId() + "ts");
-			mission.setMissionDescription("m" + mission.getMissionId() + "ds");
+			mission.setTitle("@" + missionStf + ":" + "m" + mission.getMissionId() + "ts");
+			mission.setDescription("@" + missionStf + ":" + "m" + mission.getMissionId() + "ds");
 		}
 		
-		mission.setMissionLevel(95 + bountyTarget.getFailedAttempts());
+		mission.setDifficultyLevel(95 + bountyTarget.getFailedAttempts());
 		
 		mission.setCreditReward(bountyTarget.getCreditReward());
 		
-		mission.setMissionTemplateObject(CRC.StringtoCRC("object/tangible/mission/shared_mission_bounty_jedi_target.iff"));
+		mission.setTemplateObject(CRC.StringtoCRC("object/tangible/mission/shared_mission_bounty_jedi_target.iff"));
 		
 		mission.setBountyMarkId(bountyTarget.getObjectID());
+		
 	}
 	
 	public enum TerminalType {;

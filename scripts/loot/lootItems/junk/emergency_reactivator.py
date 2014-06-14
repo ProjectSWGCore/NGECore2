@@ -1,11 +1,11 @@
 
 def itemTemplate():
 
-	return ['object/tangible/loot/npc_loot/shared_small_motor_generic.iff']
+	return ['object/tangible/loot/npc_loot/shared_elect_module_wires.iff']
 
 def customItemName():
 
-	return 'a Damaged Droid Motivator'
+	return 'Emergency Reactivator'
 
 def stackable():
 

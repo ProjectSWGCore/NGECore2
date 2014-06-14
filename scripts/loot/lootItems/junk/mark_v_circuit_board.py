@@ -1,10 +1,11 @@
+
 def itemTemplate():
 
-	return ['object/tangible/loot/npc_loot/shared_copper_battery_generic.iff']
-
+	return ['object/tangible/loot/npc_loot/shared_circuit_board_generic.iff']
+	
 def customItemName():
 
-	return 'Droid Battery'
+	return 'Mark I Circuit Board'
 	
 def lootDescriptor():
 
@@ -16,21 +17,16 @@ def customizationAttributes():
 	
 def customizationValues():
 
-	return [26]
-
+	return [6]
+	
 def stackable():
 
 	return 1
-
-def reverse_engineering_name():
-
-	return 'Teal'
 	
 def junkDealerPrice():
 
-	return 28
+	return 15
 	
 def junkType():
 
 	return 0
-	

@@ -1,19 +1,19 @@
 
 def itemTemplate():
 
-	return ['object/tangible/loot/npc_loot/shared_rocket_ammo_generic.iff']
+	return ['object/tangible/loot/npc_loot/shared_id_chip_generic.iff']
 	
 def customItemName():
 
-	return 'Explosive Dud'
-	
+	return 'Used ID Chip'
+
 def stackable():
 
 	return 1
 	
 def junkDealerPrice():
 
-	return 10
+	return 14
 	
 def junkType():
 

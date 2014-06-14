@@ -5,6 +5,8 @@ from services.sui.SUIService import MessageBoxType
 from services.sui.SUIWindow import Trigger
 from java.util import Vector
 from java.lang import System
+from java.util import Map
+from java.util import TreeMap
 import main.NGECore
 import sys
 
@@ -35,7 +37,6 @@ def createRadial(core, owner, target, radials):
 		radials.add(RadialOptions(2, 232, 0, 'Deduct 10 citizens'))
 
 	if city.getMayorID() != owner.getObjectID():
-		print 'here'
 		return
 		
 	radials.add(RadialOptions(0, 216, 0, '@city/city:city_management'))
@@ -57,6 +58,7 @@ def createRadial(core, owner, target, radials):
 	radials.add(RadialOptions(3,  228, 0, '@city/city:align'))	
 
 	return
+
 	
 def handleSelection(core, owner, target, option):
 	playerCity = core.playerCityService.getCityObjectIsIn(owner)
@@ -115,6 +117,147 @@ def handleSelection(core, owner, target, option):
 		if owner is not None:
 			handleToggleZoning(core, owner, target, option)
 			return
+	if option == 214:
+		if owner is not None:
+			handleStructureReport(core, owner, target, option)
+			return
+	if option == 215:
+		if owner is not None:
+			handleTreasuryReport(core, owner, target, option)
+			return
+	if option == 218:
+		if owner is not None:
+			handleManageMilitia(core, owner, target, option)
+			return
+	if option == 230:
+		if owner is not None:
+			handleRevokeCitizenship(core, owner, target, option)
+			return
+			
+def handleRevokeCitizenship(core, owner, target, option):
+	playerCity = core.playerCityService.getPlayerCity(owner)
+	if not playerCity or not playerCity.isCitizen(owner.getObjectID()) or playerCity.getMayorID() == owner.getObjectID():
+		return
+	window = core.suiService.createMessageBox(2, 'revoke_cit_t', 'revoke_cit_d', owner, None, 0)
+	returnList = Vector()
+	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, revokeCitizenship)
+	core.suiService.openSUIWindow(suiWindow)	
+	return
+	
+def revokeCitizenship(owner, window, eventType, returnList):
+	core = main.NGECore.getInstance()
+	playerCity = core.playerCityService.getPlayerCity(owner)
+	if not playerCity or not playerCity.isCitizen(owner.getObjectID()) or playerCity.getMayorID() == owner.getObjectID():
+		return
+	playerCity.removeCitizen(owner.getObjectID())
+	owner.getPlayerObject().setHome('')
+	owner.getPlayerObject().setCitizenship(0)
+	owner.setAttachment('residentCity', None)
+	owner.sendSystemMessage('You have successfully revoked your citizenship.', 0)	
+	owner.sendSystemMessage('@city/city:revoke_citizenship_warning', 0)
+	return
+	
+def handleManageMilitia(core, owner, target, option):
+	playerCity = core.playerCityService.getPlayerCity(owner)
+	if not playerCity:
+		return
+	menuItems = TreeMap()
+	menuItems.put(0, '@city/city:militia_new_t')
+	for militiaId in playerCity.getMilitiaList():
+		militia = core.objectService.getObject(militiaId)
+		if not militia:
+			militia = core.objectService.getCreatureFromDB(militiaId)
+		if militia:
+			menuItems.put(militiaId, militia.getCustomName())
+			
+	returnList = Vector()
+	returnList.add('List.lstList:SelectedRow')
+	window = core.suiService.createListBox(1, '@city/city:militia_t', '@city/city:militia_d', menuItems, owner, None, 0)
+	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, handleMilitiaListBox)
+	core.suiService.openSUIWindow(suiWindow)
+	
+	return
+	
+def handleMilitiaListBox(owner, window, eventType, returnList):
+	core = main.NGECore.getInstance()
+	playerCity = core.playerCityService.getPlayerCity(owner)
+	if not playerCity:
+		return
+	index = returnList.get(0)
+	id = window.getObjectIdByIndex(index)
+	if id == 0:
+		handleAddMiltiaPrompt(core, owner)
+	else:
+		core.playerCityService.handleRemoveMilitia(owner, id)
+	return
+		
+def	handleAddMiltiaPrompt(core, owner):
+	playerCity = core.playerCityService.getPlayerCity(owner)
+	if not playerCity:
+		return
+	window = core.suiService.createInputBox(2, '@city/city:militia_new_t', '@city/city:militia_new_d', owner, None, 0)
+	returnList = Vector()
+	returnList.add('txtInput:LocalText')
+	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, handleAddMiltia)
+	core.suiService.openSUIWindow(suiWindow)	
+	return
+	
+def handleAddMiltia(owner, window, eventType, returnList):
+	playerCity = core.playerCityService.getPlayerCity(owner)
+	if not playerCity:
+		return
+	name = returnList.get(0)
+	militiaId = core.characterService.getPlayerOID(name)
+	if militiaId == 0:
+		owner.sendSystemMessage('@city/city:cannot_find_citizen', 0)
+		return
+	if not playerCity.isCitizen(militiaId):
+		owner.sendSystemMessage('@city/city:not_citizen', 0)
+		return
+	if playerCity.isMilitiaMember(militiaId):
+		owner.sendSystemMessage('That player is already a member of the city militia.', 0)
+		return
+	militia = core.objectService.getObject(militiaId)
+	persist = False
+	if not militia:
+		militia = core.objectService.getCreatureFromDB(militiaId)
+		persist = True
+	if not militia:
+		owner.sendSystemMessage('@city/city:cannot_find_citizen', 0)
+		return
+	playerCity.addMilitia(militiaId)
+	if militia.getClient():
+		militia.sendSystemMessage('@city/city:added_militia_target', 0)
+	owner.sendSystemMessage('@city/city:added_militia', 0)
+	militia.getPlayerObject().setCitizenship(2)
+	if persist:
+		core.objectService.persistObject(militiaId, militia, core.getSWGObjectODB())
+	return
+	
+def handleTreasuryReport(core, owner, target, option):
+	playerCity = core.playerCityService.getPlayerCity(owner)
+	if not playerCity:
+		return
+	menuItems = TreeMap()
+	menuItems.put(1, '@city/city:treasury ' + int(playerCity.getCityTreasury()))
+	window = core.suiService.createListBox(1, '@city/city:treasury_balance_t', '@city/city:treasury_balance_d', menuItems, owner, None, 0)
+	core.suiService.openSUIWindow(suiWindow)
+	return
+	
+def handleStructureReport(core, owner, target, option):
+	playerCity = core.playerCityService.getPlayerCity(owner)
+	if not playerCity:
+		return
+	menuItems = TreeMap()
+	i = 0
+	for structureId in playerCity.getPlacedStructures():
+		structure = core.objectService.getObject(structureId)
+		if structure and structure.getAttachment('isCivicStructure') is not None and structure.getAttachment('isCivicStructure') == True:
+			i += 1
+			menuItems.put(i, structure.getLookAtText() + ' - Condition : ' + int((structure.getMaximumCondition() - structure.getConditionDamage()) / structure.getMaximumCondition() * 100) + '%')
+	window = core.suiService.createListBox(1, '@city/city:structure_list_t', '@city/city:structure_list_d', menuItems, owner, None, 0)
+	core.suiService.openSUIWindow(suiWindow)
+	return
 
 
 def handleDeposit(core, owner, target, option):	
@@ -157,6 +300,7 @@ def handleDepositSUI(owner, window, eventType, returnList):
 	playerCity.addToTreasury(deposit)
 	owner.deductCashCredits(deposit)
 	owner.sendSystemMessage(OutOfBand.ProsePackage('@city/city:deposit_treasury', deposit), 0)
+	playerCity.sendTreasuryDepositMail(owner, deposit)
 	return
 	
 def	handleToggleZoning(core, owner, target, option):
@@ -506,7 +650,7 @@ def handleRegisterMap(core, owner, target, option):
 		
 	if playerCity.isRegistered():
 		return
-	
+	playerCity.setRegistered(True)
 	core.mapService.addLocation(owner.getPlanet(), playerCity.getCityName(), playerCity.getCityCenterPosition().x, playerCity.getCityCenterPosition().z, 17, 0, 0)
 	return
 	
@@ -523,18 +667,10 @@ def handleUnregisterMap(core, owner, target, option):
 		
 	if not playerCity.isRegistered():
 		return
-	
+	playerCity.setRegistered(False)	
 	core.mapService.removeLocation(owner.getPlanet(), playerCity.getCityCenterPosition().x, playerCity.getCityCenterPosition().z, 17)
 	return
 
-	
-def setRegisterMapCallBack(owner, window, eventType, returnList):
-	if returnList.size()==0:
-		return
-	playerCity = main.NGECore.getInstance().playerCityService.getPlayerCity(owner)	
-	playerCity.setCityName(returnList.get(0))
-	owner.sendSystemMessage('@city/city:name_changed', 0)		
-	return
 	
 def handleSpecialization(core, owner, target, option):	
 	

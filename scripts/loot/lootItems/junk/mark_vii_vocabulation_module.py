@@ -1,10 +1,11 @@
+
 def itemTemplate():
 
-	return ['object/tangible/loot/npc_loot/shared_copper_battery_generic.iff']
+	return ['object/tangible/loot/npc_loot/shared_software_module_generic.iff']
 
 def customItemName():
 
-	return 'Droid Battery'
+	return 'Mark VII Vocabulation Module'
 	
 def lootDescriptor():
 
@@ -16,15 +17,11 @@ def customizationAttributes():
 	
 def customizationValues():
 
-	return [26]
+	return [0]
 
 def stackable():
 
 	return 1
-
-def reverse_engineering_name():
-
-	return 'Teal'
 	
 def junkDealerPrice():
 

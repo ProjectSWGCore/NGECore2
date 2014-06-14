@@ -1,11 +1,12 @@
+
 def itemTemplate():
 
-	return ['object/tangible/loot/npc_loot/shared_copper_battery_generic.iff']
-
+	return ['object/tangible/loot/npc_loot/shared_small_motor_generic.iff']
+	
 def customItemName():
 
-	return 'Droid Battery'
-	
+	return 'Locomotor'
+
 def lootDescriptor():
 
 	return 'customattributes'
@@ -17,20 +18,15 @@ def customizationAttributes():
 def customizationValues():
 
 	return [26]
-
+		
 def stackable():
 
 	return 1
-
-def reverse_engineering_name():
-
-	return 'Teal'
 	
 def junkDealerPrice():
 
-	return 28
+	return 34
 	
 def junkType():
 
 	return 0
-	

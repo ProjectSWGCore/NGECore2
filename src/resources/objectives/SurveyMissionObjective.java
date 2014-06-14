@@ -47,7 +47,7 @@ public class SurveyMissionObjective extends MissionObjective{
 	public void activate(NGECore core, CreatureObject player) {
 		pickupPlanet = player.getPlanet().getName();
 		pickupLocation = player.getPosition();
-		resourceFamily = getMissionObject().getMissionTargetName();
+		resourceFamily = getMissionObject().getTargetName();
 		
 		// This way will allow 2 survey missions at a time.
 		AtomicInteger number = new AtomicInteger();
