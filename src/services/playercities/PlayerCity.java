@@ -1258,6 +1258,10 @@ public class PlayerCity implements Serializable {
 	public boolean isCitizen(long citizenId) {
 		return getCitizens().contains(citizenId);
 	}
+	
+	public boolean isCandidate(long candidateId) {
+		return electionList.containsKey(candidateId);
+	}
 
 	
 }
