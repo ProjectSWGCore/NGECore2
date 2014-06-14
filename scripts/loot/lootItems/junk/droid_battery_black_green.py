@@ -4,11 +4,15 @@ def itemTemplate():
 
 def customItemName():
 
-	return 'Droid Battery (Black/Green)'
+	return 'Droid Battery'
 
 def stackable():
 
 	return 1
+
+def reverse_engineering_name():
+
+	return 'Black/Green'
 	
 def junkDealerPrice():
 

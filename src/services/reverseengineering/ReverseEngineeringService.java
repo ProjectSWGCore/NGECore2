@@ -3284,7 +3284,7 @@ public class ReverseEngineeringService implements INetworkDispatch {
 				// Assuming munition
 				String SEALabel = "socket_gem_armor";
 				String SEADescription = "socket_gem";
-				String SEATemplate = "object/tangible/gem/shared_clothing.iff";
+				String SEATemplate = "object/tangible/gem/shared_armor.iff";
 								
 				if (profession.equals("trader_0a")){
 					SEALabel = "socket_gem_clothing";
@@ -3294,7 +3294,7 @@ public class ReverseEngineeringService implements INetworkDispatch {
 				if (profession.equals("trader_0d")){
 					SEALabel = "socket_gem_weapon";
 					SEADescription = "socket_gem";
-					SEATemplate = "object/tangible/gem/shared_clothing.iff";
+					SEATemplate = "object/tangible/gem/shared_weapon.iff";
 				}
 			
 				core.objectService.destroyObject(bit1.getObjectID());
@@ -3405,7 +3405,7 @@ public class ReverseEngineeringService implements INetworkDispatch {
 				// Assuming munition
 				String SEALabel = "socket_gem_armor";
 				String SEADescription = "socket_gem";
-				String SEATemplate = "object/tangible/gem/shared_clothing.iff";
+				String SEATemplate = "object/tangible/gem/shared_armor.iff";
 				
 				if (profession.equals("trader_0c")){ // QA
 					if (! SEASTFName.equals("socket_gem_armor"))
@@ -3424,7 +3424,7 @@ public class ReverseEngineeringService implements INetworkDispatch {
 						return; // Wrong SEA type inserted
 					SEALabel = "socket_gem_weapon";
 					SEADescription = "socket_gem";
-					SEATemplate = "object/tangible/gem/shared_clothing.iff";
+					SEATemplate = "object/tangible/gem/shared_weapon.iff";
 				}
 				
 				// SEA --- this item can have max 3 modifiers; it is not possible to stack the same kind of modifier in one SEA.
