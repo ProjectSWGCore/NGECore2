@@ -4,7 +4,7 @@ def itemTemplate():
 
 def customItemName():
 
-	return 'Droid Battery (Teal)'
+	return 'Droid Battery'
 	
 def lootDescriptor():
 
@@ -21,6 +21,10 @@ def customizationValues():
 def stackable():
 
 	return 1
+
+def reverse_engineering_name():
+
+	return 'Teal'
 	
 def junkDealerPrice():
 

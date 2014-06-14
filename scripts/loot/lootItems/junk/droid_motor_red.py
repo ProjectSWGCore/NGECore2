@@ -4,7 +4,7 @@ def itemTemplate():
 	
 def customItemName():
 
-	return 'Droid Motor (Red)'
+	return 'Droid Motor'
 	
 def lootDescriptor():
 
@@ -21,6 +21,10 @@ def customizationValues():
 def stackable():
 
 	return 1
+	
+def reverse_engineering_name():
+
+	return 'Red'
 	
 def junkDealerPrice():
 

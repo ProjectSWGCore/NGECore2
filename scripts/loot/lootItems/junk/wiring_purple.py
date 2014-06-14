@@ -5,7 +5,7 @@ def itemTemplate():
 	
 def customItemName():
 
-	return 'Wiring (Purple)'
+	return 'Wiring'
 
 def lootDescriptor():
 

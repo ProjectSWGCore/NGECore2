@@ -5,11 +5,15 @@ def itemTemplate():
 	
 def customItemName():
 
-	return 'Wiring (Blue)'
+	return 'Wiring'
 	
 def stackable():
 
 	return 1
+	
+def reverse_engineering_name():
+
+	return 'Blue'
 	
 def junkDealerPrice():
 
