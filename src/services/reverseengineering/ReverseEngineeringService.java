@@ -3198,12 +3198,13 @@ public class ReverseEngineeringService implements INetworkDispatch {
 				// Assuming munition
 				String powerUpLabel = "item_reverse_engineering_powerup_armor_02_01";
 				String powerUpDescription = "item_reverse_engineering_powerup_armor_02_01";
-				String powerUpTemplate = "object/tangible/powerup/base/shared_armor_base.iff";
+				String powerUpTemplate = "object/tangible/loot/generic_usable/shared_copper_battery_usuable.iff";
 				
 				if (profession.equals("trader_0a")){ // Domestic
 					powerUpLabel = "item_reverse_engineering_powerup_clothing_02_01";
 					powerUpDescription = "item_reverse_engineering_powerup_clothing_02_01";
-					powerUpTemplate = "object/tangible/powerup/base/shared_base.iff";
+					powerUpTemplate = "object/tangible/loot/generic_usable/shared_chassis_blueprint_usuable.iff";
+		
 				}
 				if (profession.equals("trader_0d")){ // Engineer
 					powerUpLabel = "item_reverse_engineering_powerup_weapon_02_01";
