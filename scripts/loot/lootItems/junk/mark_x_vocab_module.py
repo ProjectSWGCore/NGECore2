@@ -1,36 +1,33 @@
 
 def itemTemplate():
 
-	return ['object/tangible/loot/npc_loot/shared_wiring_generic.iff']
-	
+	return ['object/tangible/loot/npc_loot/shared_software_module_red_generic.iff']
+
 def customItemName():
 
-	return 'Wiring (White)'
-
+	return 'Mark X Vocab Module'
+	
 def lootDescriptor():
 
 	return 'customattributes'
-	
+
 def customizationAttributes():
 
 	return ['/private/index_color_1']
 	
 def customizationValues():
 
-	return [1]
-	
-def reverse_engineering_name():
+	return [0]
 
-	return 'White'
-	
 def stackable():
 
 	return 1
 	
 def junkDealerPrice():
 
-	return 12
+	return 28
 	
 def junkType():
 
 	return 0
+	

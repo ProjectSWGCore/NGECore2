@@ -1,11 +1,10 @@
-
 def itemTemplate():
 
-	return ['object/tangible/loot/npc_loot/shared_small_motor_generic.iff']
+	return ['object/tangible/loot/npc_loot/shared_aero_magnifier_generic.iff']
 
 def customItemName():
 
-	return 'a Damaged Droid Motivator'
+	return 'Outdated Aeromagnifier'
 
 def stackable():
 
@@ -18,4 +17,3 @@ def junkDealerPrice():
 def junkType():
 
 	return 0
-	

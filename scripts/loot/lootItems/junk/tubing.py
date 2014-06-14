@@ -1,21 +1,20 @@
 
 def itemTemplate():
 
-	return ['object/tangible/loot/npc_loot/shared_small_motor_generic.iff']
-
+	return ['object/tangible/loot/npc_loot/shared_tubing_device_generic.iff']
+	
 def customItemName():
 
-	return 'a Damaged Droid Motivator'
-
+	return 'Tubing'
+	
 def stackable():
 
 	return 1
 	
 def junkDealerPrice():
 
-	return 28
+	return 34
 	
 def junkType():
 
 	return 0
-	

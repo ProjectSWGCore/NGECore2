@@ -5,7 +5,7 @@ def itemTemplate():
 	
 def customItemName():
 
-	return 'Wiring (White)'
+	return 'Wiring (Black)'
 
 def lootDescriptor():
 
@@ -17,11 +17,11 @@ def customizationAttributes():
 	
 def customizationValues():
 
-	return [1]
+	return [2]
 	
 def reverse_engineering_name():
 
-	return 'White'
+	return 'Black'
 	
 def stackable():
 
