@@ -104,5 +104,9 @@ def addPlanetSpawns(core, planet):
 	prisoner4 = stcSvc.spawnObject('object/mobile/shared_dressed_noble_twilek_female_01.iff', 'tatooine', wt_bunker.getCellByCellNumber(21), float(-36), float(-12), float(129.9), float(0.994), float(0), float(0.105), float(0))
 	prisoner4.setCustomName('Ogavi Stibi')
 	prisoner4.setOptionsBitmask(256)
+	
+	durr = stcSvc.spawnObject('durr_rodak', 'tatooine', wt_bunker.getCellByCellNumber(29), float(-153.7), float(-44), float(97.8), float(0), float(0), float(0), float(0), 45)
+	
+	brok = stcSvc.spawnObject('brok_ziamzun', 'tatooine', wt_bunker.getCellByCellNumber(32), float(-58.1), float(-44), float(-7.3), float(0), float(0), float(0), float(0), 45)
 	return
 	
