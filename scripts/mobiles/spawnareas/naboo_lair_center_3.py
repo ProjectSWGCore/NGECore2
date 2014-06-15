@@ -2,5 +2,5 @@
 import sys
 
 def addSpawnArea(core):
-	core.spawnService.addLairSpawnArea('naboo_starter', -200, 2200, 800, 'naboo')
+	core.spawnService.addLairSpawnArea('naboo_starter', -2400, 2300, 1200, 'naboo')
 	return
