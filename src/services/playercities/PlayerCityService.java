@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 import java.util.Random;
+import java.util.TreeMap;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -39,6 +40,7 @@ import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
 import services.chat.Mail;
 import services.sui.SUIService.InputBoxType;
+import services.sui.SUIService.ListBoxType;
 import services.sui.SUIService.MessageBoxType;
 import services.sui.SUIWindow;
 import services.sui.SUIWindow.SUICallback;
@@ -519,4 +521,60 @@ public class PlayerCityService implements INetworkDispatch {
 		});
 		core.suiService.openSUIWindow(window);
 	}
+	
+	public void handleViewStandings(CreatureObject actor, PlayerCity city) {
+		SUIWindow window = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "@city/city:mayoral_standings_t", "@city/city:mayoral_standings_d", new TreeMap<Long, String>(), actor, null, 0);
+		long mayorId = city.getMayorID();
+		for(long candidateId : city.getElectionList().keySet()) {
+			CreatureObject candidate = core.objectService.getObject(candidateId) == null ? core.objectService.getCreatureFromDB(candidateId) : (CreatureObject) core.objectService.getObject(candidateId);
+			if(candidate == null)
+				continue;
+			if(candidateId == mayorId)
+				window.addListBoxMenuItem("Incumbent: " + candidate.getCustomName() + " -- Votes: " + String.valueOf(city.getElectionList().get(candidateId)), candidateId);				
+			else
+				window.addListBoxMenuItem("Challenger: " + candidate.getCustomName() + " -- Votes: " + String.valueOf(city.getElectionList().get(candidateId)), candidateId);
+		}
+		core.suiService.openSUIWindow(window);
+	}
+	
+	public void handlePromptVote(CreatureObject actor, PlayerCity city) {
+		
+		if(!city.isCitizen(actor.getObjectID())) {
+			actor.sendSystemMessage("@city/city:vote_noncitizen", (byte) 0);
+			return;
+		}
+		
+		if(city.getElectionList().size() < 1) {
+			actor.sendSystemMessage("@city/city:no_candidates", (byte) 0);
+			return;			
+		}
+		
+		SUIWindow window = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "@city/city:mayoral_vote_t", "@city/city:mayoral_vote_d", new TreeMap<Long, String>(), actor, null, 0);
+		long mayorId = city.getMayorID();
+		for(long candidateId : city.getElectionList().keySet()) {
+			CreatureObject candidate = core.objectService.getObject(candidateId) == null ? core.objectService.getCreatureFromDB(candidateId) : (CreatureObject) core.objectService.getObject(candidateId);
+			if(candidate == null)
+				continue;
+			if(candidateId == mayorId)
+				window.addListBoxMenuItem(candidate.getCustomName() + " (Incumbent)", candidateId);				
+			else
+				window.addListBoxMenuItem(candidate.getCustomName() + " (Challenger)", candidateId);
+		}
+		Vector<String> returnList = new Vector<String>();
+		returnList.add("List.lstList:SelectedRow");
+		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, (owner, eventType, inputList) -> {
+			
+			int index = Integer.parseInt(inputList.get(0));
+			long candidateId = window.getObjectIdByIndex(index);
+			CreatureObject candidate = core.objectService.getObject(candidateId) == null ? core.objectService.getCreatureFromDB(candidateId) : (CreatureObject) core.objectService.getObject(candidateId);
+			if(candidate == null || !city.isCandidate(candidateId))
+				return;
+			city.castVote(actor, candidate);
+			actor.sendSystemMessage(OutOfBand.ProsePackage("@city/city:vote_placed", "TO", candidate.getCustomName()), (byte) 0);
+			
+		});
+		
+	}
+
+
 }
