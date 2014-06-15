@@ -11,7 +11,6 @@ def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
 	mobileTemplate.setCreatureName('desert_demon')
-	mobileTemplate.setLevel(13)
 	mobileTemplate.setMinLevel(13)
 	mobileTemplate.setMaxLevel(14)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
@@ -23,7 +22,8 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("desert demon")
 	mobileTemplate.setAssistRange(4)
 	mobileTemplate.setStalker(False)
-	
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)	
+
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_tatooine_desert_demon.iff')
