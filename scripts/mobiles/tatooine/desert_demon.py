@@ -12,6 +12,8 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('desert_demon')
 	mobileTemplate.setLevel(13)
+	mobileTemplate.setMinLevel(13)
+	mobileTemplate.setMaxLevel(14)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
