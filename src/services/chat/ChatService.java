@@ -990,8 +990,10 @@ public class ChatService implements INetworkDispatch {
 		if (playerName.contains(" "))
 			playerName = playerName.split(" ")[0];
 		
-		ChatOnEnteredRoom leaveRoom = new ChatOnEnteredRoom(playerName, 0, roomId, false);
-		player.getClient().getSession().write(leaveRoom.serialize());
+		if (player != null && player.getClient() != null && player.getClient().getSession() != null) {
+			ChatOnEnteredRoom leaveRoom = new ChatOnEnteredRoom(playerName, 0, roomId, false);
+			player.getClient().getSession().write(leaveRoom.serialize());
+		}
 
 		room.getUserList().remove(playerName);
 		
