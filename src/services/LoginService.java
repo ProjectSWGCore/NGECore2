@@ -44,10 +44,10 @@ import engine.resources.service.INetworkRemoteEvent;
 import engine.resources.service.LocalDbLoginProvider;
 import engine.resources.service.VBLoginProvider;
 import protocol.swg.CharacterCreationDisabled;
-import protocol.swg.ClientUIErrorMessage;
 import protocol.swg.DeleteCharacterMessage;
 import protocol.swg.DeleteCharacterReplyMessage;
 import protocol.swg.EnumerateCharacterId;
+import protocol.swg.ErrorMessage;
 import protocol.swg.LoginClientId;
 import protocol.swg.LoginClientToken;
 import protocol.swg.LoginClusterStatus;
@@ -116,7 +116,7 @@ public class LoginService implements INetworkDispatch{
 							err = "user is banned";
 							break;
 					}
-					ClientUIErrorMessage errMsg = new ClientUIErrorMessage("Invalid Login", err);
+					ErrorMessage errMsg = new ErrorMessage("Invalid Login", err);
 					session.write(errMsg.serialize());
 					Disconnect disconnect = new Disconnect((Integer)session.getAttribute("connectionId"), 6);
 					session.write(disconnect);
