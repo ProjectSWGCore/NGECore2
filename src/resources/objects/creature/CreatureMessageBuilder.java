@@ -263,7 +263,7 @@ public class CreatureMessageBuilder extends TangibleMessageBuilder {
 		 */ 
 		buffer.putInt((creature.getPerformanceType()) ? 0 : creature.getPerformanceId());
 		
-		buffer.putInt(6);	// Current HAM
+		buffer.putInt(6);	// Current HAM // These 6 vars are also known as "attributes", referred to as "attribs"
 		buffer.putInt(creature.getHamListCounter());
 
 		buffer.putInt(creature.getHealth());
@@ -399,7 +399,7 @@ public class CreatureMessageBuilder extends TangibleMessageBuilder {
 			buffer.putInt(0xFFFFFFFF);
 
 		buffer.put((byte) (creature.isRadarVisible() ? 1 : 0));
-		buffer.put((byte) 0); // no effect for 1?
+		buffer.put((byte) 0); // occupyingVehicle (hoth speeder, atat)
 		buffer.put((byte) 0); // no effect for 1?
 		
 

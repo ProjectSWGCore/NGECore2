@@ -139,11 +139,11 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		baseline.put("citizenship", Citizenship.Homeless);
 		baseline.put("cityRegionDefender", new RegionDefender());
 		baseline.put("guildRegionDefender", new RegionDefender());
-		baseline.put("12", 0); // General?
+		baseline.put("12", (long) 0); // General?
 		baseline.put("13", 0); // Guild Rank Title?
-		baseline.put("14", 0); // Citizen Rank Title?
-		baseline.put("15", 0); // All random guesses, always seem to be 0
-		baseline.put("16", 0);
+		baseline.put("14", (short) 0); // Citizen Rank Title? 6 bytes
+		baseline.put("speederElevation", 0);
+		baseline.put("vehicleAttackCommand", ""); 
 		return baseline;
 	}
 	
