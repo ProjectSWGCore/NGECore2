@@ -21,24 +21,9 @@
  ******************************************************************************/
 package resources.datatables;
 
-public class HitType {
+public class CommandType {
 	
-	public static final byte MISS = 0;
-	public static final byte DODGE = 1;
-	public static final byte PARRY = 2;
-	public static final byte STRIKETHROUGH = 3;
-	public static final byte CRITICAL = 4;
-	public static final byte PUNISHING = 5;
-	public static final byte HIT = 6;
-	public static final byte BLOCK = 7;
-	public static final byte EVASION = 8;
-	public static final byte GLANCE = 9;
-	
-	public static final byte ATTACK = -1;
-	public static final byte BUFF = 0;
-	public static final byte DEBUFF = 4;
-	public static final byte HEAL = 5;
-	public static final byte SPLASH = 6;
-	public static final byte REVIVE = 7;
+	public static final byte Attack = 0;
+	public static final byte Ability = 1;
 	
 }
