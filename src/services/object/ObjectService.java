@@ -244,6 +244,18 @@ public class ObjectService implements INetworkDispatch {
 		else
 			isSnapshot = !overrideSnapshot;
 		
+		if (planet == null) {
+			System.err.println("Planet is null in createObject for some reason.");
+			
+			try {
+				throw new Exception();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			planet = core.terrainService.getPlanetByID(0);
+		}
+		
 		if(Template.startsWith("object/creature")) {
 			
 			object = new CreatureObject(objectID, planet, position, orientation, Template);
@@ -344,7 +356,11 @@ public class ObjectService implements INetworkDispatch {
 			return null;			
 		}
 		
-		object.setPlanetId(planet.getID());
+		if (planet != null) {
+			object.setPlanetId(planet.getID());
+		} else {
+			object.setPlanetId(0);
+		}
 		
 		object.setAttachment("customServerTemplate", customServerTemplate);
 		
