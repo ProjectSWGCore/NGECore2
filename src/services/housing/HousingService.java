@@ -234,10 +234,20 @@ public class HousingService implements INetworkDispatch {
 		});
 	}
 	
-	@SuppressWarnings("unchecked")
 	public boolean getPermissions(SWGObject player, SWGObject container) {
+		// Temp fix for null error on return line.
+		if (player == null || container == null || container.getContainer() == null) {
+			return false;
+		}
+		
 		SWGObject structure = container.getContainer();
-		return ((BuildingObject) structure).isOnAdminList((CreatureObject) player);
+		
+		// This could easily be a ShipObject in the future.
+		if (structure instanceof BuildingObject) {
+			return ((BuildingObject) structure).isOnAdminList((CreatureObject) player);
+		} else {
+			return false;
+		}
 	}
 	
 	public void createDestroySUIPage(final SWGObject owner, final TangibleObject target) {
