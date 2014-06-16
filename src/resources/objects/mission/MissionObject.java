@@ -22,9 +22,6 @@
 package resources.objects.mission;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
@@ -36,7 +33,6 @@ import services.mission.MissionObjective;
 import engine.clients.Client;
 import engine.resources.common.CRC;
 import engine.resources.common.Stf;
-import engine.resources.common.StringUtilities;
 import engine.resources.common.UString;
 import engine.resources.objects.Baseline;
 import engine.resources.scene.Planet;
@@ -46,16 +42,9 @@ import engine.resources.scene.Quaternion;
 public class MissionObject extends IntangibleObject implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
-
-	// Server variables
-	private MissionObjective objective;
-	private long bountyObjId;
-	private String missionType = "";
-	private int missionId;
-	private int repeatCount;
 	
 	private transient MissionMessageBuilder messageBuilder = new MissionMessageBuilder(this);
-		
+	
 	public MissionObject() {
 		super();
 	}
@@ -63,7 +52,17 @@ public class MissionObject extends IntangibleObject implements Serializable {
 	public MissionObject(long objectID, Planet planet, String template) {
 		super(objectID, planet, new Point3D(0, 0, 0), new Quaternion(1, 0, 0, 0), template);
 	}
-
+	
+	@Override
+	public Baseline getOtherVariables() {
+		Baseline baseline = super.getOtherVariables();
+		baseline.put("objective", null);
+		baseline.put("bountyMarkId", (long) 0);
+		baseline.put("missionId", 0);
+		baseline.put("missionType", "");
+		return baseline;
+	}
+	
 	public Baseline getBaseline3() {
 		Baseline baseline = super.getBaseline3();
 		baseline.put("difficultyLevel", 0);
@@ -78,7 +77,7 @@ public class MissionObject extends IntangibleObject implements Serializable {
 		baseline.put("missionType", 0);
 		baseline.put("targetName", "");
 		
-		WaypointObject wp = (WaypointObject) NGECore.getInstance().objectService.createObject("object/waypoint/base/shared_base_waypoint.iff", getPlanet());
+		WaypointObject wp = (WaypointObject) NGECore.getInstance().objectService.createObject("object/waypoint/base/shared_base_waypoint.iff", NGECore.getInstance().terrainService.getPlanetByID(0));
 		wp.setActive(true);
 		baseline.put("waypoint", wp);
 		return baseline;
@@ -86,7 +85,7 @@ public class MissionObject extends IntangibleObject implements Serializable {
 	
 	public Baseline getBaseline6() {
 		Baseline baseline = super.getBaseline6();
-		baseline.put("unk", -1);
+		baseline.put("2", -1);
 		return baseline;
 	}
 	
@@ -107,7 +106,7 @@ public class MissionObject extends IntangibleObject implements Serializable {
 	}
 	
 	public int getDifficultyLevel() {
-		return (int) getBaseline3().get("difficultyLevel");
+		return (int) getBaseline(3).get("difficultyLevel");
 	}
 	
 	public void setDifficultyLevel(int level) {
@@ -117,7 +116,7 @@ public class MissionObject extends IntangibleObject implements Serializable {
 	}
 	
 	public MissionLocation getStartLocation() {
-		return (MissionLocation) getBaseline3().get("startLocation");
+		return (MissionLocation) getBaseline(3).get("startLocation");
 	}
 	
 	public void setStartLocation(Point3D location, long objId, String planet) {
@@ -128,145 +127,144 @@ public class MissionObject extends IntangibleObject implements Serializable {
 	}
 	
 	public String getCreator() {
-		return ((UString)getBaseline3().get("creator")).get();
+		return ((UString) getBaseline(3).get("creator")).get();
 	}
 	
 	public void setCreator(String creator) {
 		if (getGrandparent() != null && getGrandparent().getClient() != null) {
-			getGrandparent().getClient().getSession().write(getBaseline3().set("creator", new UString(creator)));
+			getGrandparent().getClient().getSession().write(getBaseline(3).set("creator", new UString(creator)));
 		}
 	}
 	
 	public int getCreditReward() {
-		return (int) getBaseline3().get("creditReward");
+		return (int) getBaseline(3).get("creditReward");
 	}
 	
 	public void setCreditReward(int credits) {
 		if (getGrandparent() != null && getGrandparent().getClient() != null) {
-			getGrandparent().getClient().getSession().write(getBaseline3().set("creditReward", credits));
+			getGrandparent().getClient().getSession().write(getBaseline(3).set("creditReward", credits));
 		}
 	}
 	
 	public MissionLocation getDestinationLocation() {
-		return (MissionLocation) getBaseline3().get("destinationLocation");
+		return (MissionLocation) getBaseline(3).get("destinationLocation");
 	}
 	
 	public void setDestinationLocation(Point3D location, long objId, String planet) {
 		if (getGrandparent() != null && getGrandparent().getClient() != null) {
 			MissionLocation destinationLocation = new MissionLocation(location.clone(), objId, planet);
-			getGrandparent().getClient().getSession().write(getBaseline3().set("destinationLocation", destinationLocation));
+			getGrandparent().getClient().getSession().write(getBaseline(3).set("destinationLocation", destinationLocation));
 		}
 	}
 	
 	public int getTemplateObject() {
-		return (int) getBaseline3().get("templateObject");
+		return (int) getBaseline(3).get("templateObject");
 	}
 	
 	public void setTemplateObject(int objCRC) {
 		if (getGrandparent() != null && getGrandparent().getClient() != null) {
-			getGrandparent().getClient().getSession().write(getBaseline3().set("templateObject", objCRC));
+			getGrandparent().getClient().getSession().write(getBaseline(3).set("templateObject", objCRC));
 		}
 	}
 	
 	public Stf getDescription() {
-		return (Stf) getBaseline3().get("description");
+		return (Stf) getBaseline(3).get("description");
 	}
 	
 	public void setDescription(String description) {
 		if (getGrandparent() != null && getGrandparent().getClient() != null) {
-			getGrandparent().getClient().getSession().write(getBaseline3().set("description", new Stf(description)));
+			getGrandparent().getClient().getSession().write(getBaseline(3).set("description", new Stf(description)));
 		}
 	}
 	
 	public Stf getTitle() {
-		return (Stf) getBaseline3().get("title");
+		return (Stf) getBaseline(3).get("title");
 	}
 	
 	public void setTitle(String title) {
 		if (getGrandparent() != null && getGrandparent().getClient() != null) {
-			getGrandparent().getClient().getSession().write(getBaseline3().set("title", new Stf(title)));
+			getGrandparent().getClient().getSession().write(getBaseline(3).set("title", new Stf(title)));
 		}
 	}
 	
 	public int getRepeatCounter() {
-		return (int) getBaseline3().get("repeatCounter");
+		return (int) getBaseline(3).get("repeatCounter");
 	}
 	
-	public void setRepeatCounter(int count) {
+	public void setRepeatCounter(int repeatCounter) {
 		if (getGrandparent() != null && getGrandparent().getClient() != null) {
-			this.repeatCount = count;
-			getGrandparent().getClient().getSession().write(getBaseline3().set("repeatCounter", count));
+			getGrandparent().getClient().getSession().write(getBaseline(3).set("repeatCounter", repeatCounter));
 		}
 	}
 	
 	public void incrementRepeatCounter() {
-		setRepeatCounter(this.repeatCount + 1); // temporary fix for getBaseline(3).get("repeatCounter") always being 0.
+		setRepeatCounter(getRepeatCounter() + 1);
 	}
 	
 	public void decrementRepeatCounter() {
-		int repeatCounter = getRepeatCounter() + 1;
+		int repeatCounter = getRepeatCounter() - 1;
 		setRepeatCounter((repeatCounter < 0) ? 0 : repeatCounter);
 	}
 	
 	public int getMissionTypeCRC() {
-		return (int) getBaseline3().get("missionType");
-	}
-	
-	public void setMissionType(String type) {
-		if (getGrandparent() != null && getGrandparent().getClient() != null) {
-			getGrandparent().getClient().getSession().write(getBaseline3().set("missionType", CRC.StringtoCRC(type)));
-			this.missionType = type;
-		}
+		return (int) getBaseline(3).get("missionType");
 	}
 	
 	public String getMissionType() {
-		return missionType;
+		return (String) otherVariables.get("missionType");
+	}
+	
+	public void setMissionType(String missionType) {
+		if (getGrandparent() != null && getGrandparent().getClient() != null) {
+			getGrandparent().getClient().getSession().write(getBaseline(3).set("missionType", CRC.StringtoCRC(missionType)));
+			otherVariables.set("missionType", missionType);
+		}
 	}
 	
 	public String getTargetName() {
-		return (String) getBaseline3().get("targetName");
+		return (String) getBaseline(3).get("targetName");
 	}
 	
 	public void setTargetName(String targetName) {
 		if (getGrandparent() != null && getGrandparent().getClient() != null) {
-			getGrandparent().getClient().getSession().write(getBaseline3().set("targetName", targetName));
+			getGrandparent().getClient().getSession().write(getBaseline(3).set("targetName", targetName));
 		}
 	}
 	
 	public WaypointObject getWaypoint() {
-		return (WaypointObject) getBaseline3().get("waypoint");
+		return (WaypointObject) getBaseline(3).get("waypoint");
 	}
 	
 	public void setWaypoint(WaypointObject waypoint) {
 		if (getGrandparent() != null && getGrandparent().getClient() != null) {
-			getGrandparent().getClient().getSession().write(getBaseline3().set("waypoint", waypoint));
+			getGrandparent().getClient().getSession().write(getBaseline(3).set("waypoint", waypoint));
 		}
 	}
 	
-	public long getBountyMarkId() {
-		return bountyObjId;
-	}
-
-	public void setBountyMarkId(long bountyObjId) {
-		this.bountyObjId = bountyObjId;
-	}
-
-	public int getMissionId() {
-		return missionId;
-	}
-
-	public void setMissionId(int missionId) {
-		this.missionId = missionId;
-	}
-
 	public MissionObjective getObjective() {
-		return objective;
+		return (MissionObjective) otherVariables.get("objective");
 	}
-
+	
 	public void setObjective(MissionObjective objective) {
-		this.objective = objective;
+		otherVariables.set("objective", objective);
 	}
-
+	
+	public long getBountyMarkId() {
+		return (long) otherVariables.get("bountyMarkId");
+	}
+	
+	public void setBountyMarkId(long bountyMarkId) {
+		otherVariables.set("bountyMarkId", bountyMarkId);
+	}
+	
+	public int getMissionId() {
+		return (int) otherVariables.get("missionId");
+	}
+	
+	public void setMissionId(int missionId) {
+		otherVariables.set("missionId", missionId);
+	}
+	
 	@Override
 	public void sendBaselines(Client destination) {
 		if (destination != null && destination.getSession() != null) {
@@ -295,7 +293,7 @@ public class MissionObject extends IntangibleObject implements Serializable {
 				return;
 		}
 	}
-
+	
 	public MissionMessageBuilder getMessageBuilder() {
 		synchronized(objectMutex) {
 			if (messageBuilder == null)
@@ -304,4 +302,5 @@ public class MissionObject extends IntangibleObject implements Serializable {
 			return messageBuilder;
 		}
 	}
+	
 }
