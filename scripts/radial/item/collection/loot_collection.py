@@ -8,7 +8,7 @@ def createRadial(core, owner, target, radials):
 	return
 	
 def handleSelection(core, actor, target, option):
-	if option == 21 and target:
+	if option == 21 and target and target.getAttachment('CollectionItemName'):
 		print (target.getAttachment('CollectionItemName'))
 		core.collectionService.addCollection(actor, target.getAttachment('CollectionItemName'))
 		core.objectService.useObject(actor, target)
