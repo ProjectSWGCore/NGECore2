@@ -492,6 +492,9 @@ public class CommandService implements INetworkDispatch  {
 		else
 			weapon = (WeaponObject) core.objectService.getObject(attacker.getWeaponId());
 		
+		if(weapon == null)
+			weapon = (WeaponObject) attacker.getSlottedObject("default_weapon");
+		
 		float maxRange = 0;
 		
 		if(command.getMaxRange() == 0)
