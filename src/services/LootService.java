@@ -626,7 +626,8 @@ public class LootService implements INetworkDispatch {
 		Vector<String> itemSkillMods = null;
 		Vector<String> STFparams = null;
 		String addToCollection = null;
-				
+		String collectionItemName = null;		
+		
 		if(core.scriptService.getMethod(itemPath,"","itemTemplate")==null){
 			String errorMessage = "Loot item  '" + itemName + "'  has no template function assigned in its script. Please contact Charon about this issue.";
 			lootRollSession.addErrorMessage(errorMessage);
@@ -695,6 +696,9 @@ public class LootService implements INetworkDispatch {
 		if(core.scriptService.getMethod(itemPath,"","AddToCollection")!=null)
 			addToCollection = (String)core.scriptService.fetchString(itemPath,"AddToCollection");
 		
+		if(core.scriptService.getMethod(itemPath,"","CollectionItemName")!=null)
+			collectionItemName = (String)core.scriptService.fetchString(itemPath,"CollectionItemName");
+		
 			
 		System.out.println("itemTemplate " + itemTemplate);
 
@@ -707,7 +711,7 @@ public class LootService implements INetworkDispatch {
 		droppedItem.setAttachment("lootDescriptor", lootDescriptor);
 		droppedItem.setAttachment("reverse_engineering_name", reverse_engineering_name);		
 		droppedItem.setAttachment("customName", customName);
-		
+		droppedItem.setAttachment("CollectionItemName", collectionItemName);
     	
 		if(core.scriptService.getMethod(itemPath,"","randomStatJewelry")!=null){
 			customName = setRandomStatsJewelry(droppedItem, lootRollSession);
@@ -756,9 +760,14 @@ public class LootService implements INetworkDispatch {
     		droppedItem.getAttributes().put("@obj_attr_n:collection_name", "@collection_n:"+addToCollection); 
     		//droppedItem.getAttributes().put("@obj_attr_n:collection_name", "\\#FFFF00 @collection_n:"+addToCollection + " \\#FFFFFF "); 
     		//core.collectionService.addCollection(actor, "new_prof_officer_master")
+    		droppedItem.setAttachment("radial_filename", "item/collection/loot_collection");
+    		System.out.println("collection");
     	}
     	
-    	
+    	if (collectionItemName!=null){
+    		droppedItem.setAttachment("CollectionItemName", collectionItemName);
+    		
+    	}
     	
 //    	if (customizationValues!=null)
 //    		setCustomization(droppedItem, itemName);
@@ -1217,7 +1226,9 @@ public class LootService implements INetworkDispatch {
 	    		droppedItem.getAttributes().put("@obj_attr_n:collection_name", "@collection_n:"+addToCollection); 
 	    		//droppedItem.getAttributes().put("@obj_attr_n:collection_name", "\\#FFFF00 @collection_n:"+addToCollection + " \\#FFFFFF "); 
 	    		//core.collectionService.addCollection(actor, "new_prof_officer_master")
+	    		droppedItem.setAttachment("radial_filename", "item/loot_collection");
 	    	}
+	    	
 	    		    	
 	    	 	
 	    	setCustomization(droppedItem, itemName, customizationAttributes, customizationValues); // for now
@@ -1951,6 +1962,7 @@ public class LootService implements INetworkDispatch {
 		}		
 	}
 
+	
 	private void setArmorStat(SWGObject armor, String statName, String minValue, String maxValue){
 		// Armor is not represented with its own class,
 		// so we gotta create the attributes here
