@@ -165,6 +165,7 @@ public class ObjectService implements INetworkDispatch {
 		    	core.bazaarService.saveAllItems();
 		    	core.housingService.saveBuildings();
 		    	core.harvesterService.saveHarvesters();
+		    	core.playerCityService.saveAllCities();
 		    	core.closeODBs();
 		    }
 		});
@@ -527,7 +528,14 @@ public class ObjectService implements INetworkDispatch {
 		} else {
 			core.simulationService.remove(object, object.getWorldPosition().x, object.getWorldPosition().z, true);
 		}
-		
+		@SuppressWarnings("unchecked") Vector<SWGObject> childObjects = (Vector<SWGObject>) object.getAttachment("childObjects");
+		if(childObjects != null)
+		{
+			for(SWGObject child : childObjects) {
+				if(child != null && child.getParentId() != 0)
+					destroyObject(child);
+			}
+		}
 	}
 	
 	public void destroyObject(long objectID) {
@@ -675,6 +683,8 @@ public class ObjectService implements INetworkDispatch {
 	}
 	
 	public void useObject(CreatureObject creature, final SWGObject object) {
+		System.out.println("creature " + creature);
+		System.out.println("object " + object);
 		if (creature == null || object == null) {
 			return;
 		}
@@ -726,6 +736,71 @@ public class ObjectService implements INetworkDispatch {
 			}
 		}
 		
+		// Check if used item was a PUP
+		String powerUpTemplate1 = "object/tangible/powerup/base/shared_armor_base.iff";
+		String powerUpTemplate2 = "object/tangible/powerup/base/shared_base.iff";
+		String powerUpTemplate3 = "object/tangible/powerup/base/shared_weapon_base.iff";			
+		if (object.getTemplate().equals(powerUpTemplate1)){
+			// chestplate
+			
+			String effectName = (String) object.getAttachment("effectName");
+			int powerValue = (int) object.getAttachment("powerValue");
+			
+			Long chestID = (Long) creature.getAttachment("EquippedChest");
+			if (chestID==null)
+				return;
+			
+			TangibleObject chest = (TangibleObject) core.objectService.getObject(chestID);
+			//chest.setIntAttribute(effectName, powerValue);
+			chest.setAttachment("PUPEffectName", effectName);
+			chest.setAttachment("PUPEffectValue", powerValue);
+			
+		}
+		if (object.getTemplate().equals(powerUpTemplate2)){
+			// Shirt
+			
+			String effectName = (String) object.getAttachment("effectName");
+			int powerValue = (int) object.getAttachment("powerValue");
+			
+			Long shirtID = (Long) creature.getAttachment("EquippedShirt");
+			if (shirtID==null)
+				return;
+			
+			TangibleObject shirt = (TangibleObject) core.objectService.getObject(shirtID);
+			//shirt.setIntAttribute(effectName, powerValue);
+			shirt.setAttachment("PUPEffectName", effectName);
+			shirt.setAttachment("PUPEffectValue", powerValue);
+			
+		}
+		if (object.getTemplate().equals(powerUpTemplate3)){
+			// weapon
+			SWGObject usedObject = null;
+			if (object.getAttachment("UsedObjectID")!=null){
+				long usedObjectid = (long)object.getAttachment("UsedObjectID");
+				usedObject = core.objectService.getObject(usedObjectid);
+			}
+			
+			creature.setAttachment("LastUsedPUP",object.getObjectID());
+			
+			if (usedObject==null){
+				Long weaponID = (Long) creature.getAttachment("EquippedWeapon");
+				System.out.println("weaponID " + weaponID);
+				if (weaponID==null)
+					return;
+				
+				WeaponObject weapon = (WeaponObject) core.objectService.getObject(weaponID);
+				usedObject = (SWGObject) weapon;
+			}
+
+			core.buffService.addBuffToCreature(creature, "powerup_weapon", creature);
+			
+			int amount = object.getIntAttribute("num_in_stack");
+			if (amount==1)
+				destroyObject(object.getObjectID());
+			else
+				object.setIntAttribute("num_in_stack",amount-1);
+		}
+			
 		creature.setUseTarget(object);
 		
 		int reuse_time;
@@ -1307,4 +1382,34 @@ public class ObjectService implements INetworkDispatch {
 		odb.remove(key);
 	}
 	
+	public void addStackableItem(TangibleObject item, SWGObject container) {
+		// Maybe even better placed inside SWGObject.add(), so whenever an item is added to a container
+		// it will bechecked if it is stackable and if there is already a stack to add it to
+		if (! item.isStackable())
+			container.add(item);
+		final Vector<SWGObject> alikeItemsInContainer = new Vector<SWGObject>();
+		container.viewChildren(container, false, false, new Traverser() {
+			@Override
+			public void process(SWGObject obj) {
+				if (obj.getTemplate().equals(item.getTemplate())){
+					alikeItemsInContainer.add(obj);
+					System.out.println(obj.getTemplate());
+				}
+			}
+		});
+				
+		if (alikeItemsInContainer.size()==0){
+			container.add(item);
+			return;
+		}
+		TangibleObject alikeItem = (TangibleObject)alikeItemsInContainer.get(0);
+		int alikeUses = alikeItem.getUses();
+		int itemUses = item.getUses();
+		if (itemUses==0)
+				itemUses=1;
+		int newUses = alikeUses+itemUses;
+		
+		alikeItem.setUses(newUses);
+		core.objectService.destroyObject(item.getObjectID());		
+	}
 }

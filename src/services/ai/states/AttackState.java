@@ -133,7 +133,7 @@ public class AttackState extends AIState {
 			actor.scheduleRecovery();
 			return StateResult.UNFINISHED;
 		}
-		if(target.getPosture() == 13 || target.getPosture() == 14) {
+		if(target.getPosture() == 13 || target.getPosture() == 14 || target.isInStealth()) {
 			actor.removeDefender(target);
 			actor.setFollowObject(actor.getHighestDamageDealer());
 			target = actor.getFollowObject();

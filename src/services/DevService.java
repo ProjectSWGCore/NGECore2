@@ -95,6 +95,8 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 130, "Vehicle Deeds");
 				if (creature.getClient().isGM()) {
 					suiOptions.put((long) 121, "Sandbox City");
+					if(creature.getPlayerObject().getProfession().equals("trader_0a") || creature.getPlayerObject().getProfession().equals("trader_0b") || creature.getPlayerObject().getProfession().equals("trader_0c") || creature.getPlayerObject().getProfession().equals("trader_0d"))
+						suiOptions.put((long) 177, "REing");
 				}
 
 				break;
@@ -1309,6 +1311,14 @@ public class DevService implements INetworkDispatch {
 					case 153:
 						Point3D position = new Point3D(-6222,1,7380);
 						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("dantooine"), position, player.getOrientation(), null);
+						
+					case 177:
+						// "object/draft_schematic/item/shared_item_reverse_engineering_tool.iff"
+						TangibleObject REingTool = (TangibleObject) core.objectService.createObject("object/tangible/container/loot/shared_reverse_engineer_tool.iff", planet);						
+						REingTool.setCustomName("Reverse Engineering Tool");
+						inventory.add(REingTool);	
+						core.lootService.prepInv2(player);
+						return;
 				}
 			}	
 		});

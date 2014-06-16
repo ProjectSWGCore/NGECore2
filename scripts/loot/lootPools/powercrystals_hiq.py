@@ -1,6 +1,6 @@
 
 def itemNames():
-	return ['powercrystal_premium','powercrystal_flawless','powercrystal_perfect']
+	return ['powercrystal_select', 'powercrystal_premium', 'powercrystal_flawless']
 	
 def itemChances():
-	return [94,5,1] #= 100%
+	return [75, 20, 5] #= 100%

@@ -230,7 +230,6 @@ public class SimulationService implements INetworkDispatch {
 			@SuppressWarnings("unchecked") Vector<SWGObject> childObjects = (Vector<SWGObject>) object.getAttachment("childObjects");
 			if(childObjects != null) {
 				addChildObjects(object, childObjects);
-				object.setAttachment("childObjects", null);
 			}
 			
 			if(notifyObservers) {
@@ -515,6 +514,7 @@ public class SimulationService implements INetworkDispatch {
 				}
 				
 				Point3D newPos = new Point3D(dataTransform.getXPosition(), dataTransform.getYPosition(), dataTransform.getZPosition());
+				newPos.setCell((CellObject) parent);
 				if(Float.isNaN(newPos.x) || Float.isNaN(newPos.y) || Float.isNaN(newPos.z))
 					return;
 				Point3D oldPos = object.getPosition();

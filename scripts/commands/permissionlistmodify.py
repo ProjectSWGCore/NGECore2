@@ -6,12 +6,13 @@ def setup():
 def run(core, actor, target, commandString):
 	permissionType = 'Undetermined'
 	commandArgs = commandString.split(' ')
-	if len(commandArgs) > 3:
-		permissionType = commandArgs[2]
-	if permissionType=='ENTRY' | permissionType=='BAN':
+	target = core.housingService.getClosestStructureWithAdminRights(actor)
+	if not target:
+		return
+	if target.getTemplate().startswith('object/building'):
 		core.housingService.handlePermissionListModify(actor, target, commandString)
-	if permissionType=='ADMIN' | permissionType=='HOPPER':	
+	elif target.getTemplate().startswith('object/installation'):
 		core.harvesterService.handlePermissionListModify(actor, target, commandString)
-    return
+    	return
 
 	

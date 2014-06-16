@@ -48,6 +48,7 @@ import engine.resources.service.INetworkRemoteEvent;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
+import resources.skills.SkillMod;
 
 public class EquipmentService implements INetworkDispatch {
 	
@@ -196,7 +197,49 @@ public class EquipmentService implements INetworkDispatch {
 		
 		if(equipping)
 		{
-			if(item.getStringAttribute("cat_wpn_damage.wpn_category") != null) core.skillModService.addSkillMod(creature, "display_only_critical", getWeaponCriticalChance(creature, item));
+			if(item.getStringAttribute("cat_wpn_damage.wpn_category") != null) {
+				core.skillModService.addSkillMod(creature, "display_only_critical", getWeaponCriticalChance(creature, item));
+				
+				creature.setAttachment("EquippedWeapon", item.getObjectID());
+				// Check if weapon has power up active
+				if (item.getAttachment("PUPEndTime")!=null){
+					long pupEndTime = (long)item.getAttachment("PUPEndTime");
+					if (pupEndTime>System.currentTimeMillis()){
+						// do nothing let the rest add the mods		
+					} else {
+						// Make sure pup buff icons are cleared
+					}
+				}
+			}
+			
+			if(item.getTemplate().contains("shirt")) {
+				
+				creature.setAttachment("EquippedShirt", item.getObjectID());
+				// Check if shirt has power up active
+				if (item.getAttachment("PUPEndTime")!=null){
+					long pupEndTime = (long)item.getAttachment("PUPEndTime");
+					if (pupEndTime>System.currentTimeMillis()){
+						// do nothing let the rest add the mods		
+					} else {
+						// Make sure pup buff icons are cleared
+					}
+				}
+			}
+			
+			if(item.getTemplate().contains("chest")) {
+				
+				creature.setAttachment("EquippedChest", item.getObjectID());
+				// Check if chest has power up active
+				if (item.getAttachment("PUPEndTime")!=null){
+					long pupEndTime = (long)item.getAttachment("PUPEndTime");
+					if (pupEndTime>System.currentTimeMillis()){
+						// do nothing let the rest add the mods		
+					} else {
+						// Make sure pup buff icons are cleared
+					}
+				}
+			}
+			
 			if(item.getStringAttribute("proc_name") != null) core.buffService.addBuffToCreature(creature, item.getStringAttribute("proc_name").replace("@ui_buff:", ""), creature);
 			
 			for(Entry<String, Object> e : attributes.entrySet()) 
@@ -224,7 +267,19 @@ public class EquipmentService implements INetworkDispatch {
 		}
 		else
 		{
-			if(item.getStringAttribute("cat_wpn_damage.wpn_category") != null) core.skillModService.deductSkillMod(creature, "display_only_critical", getWeaponCriticalChance(creature, item));
+			if(item.getStringAttribute("cat_wpn_damage.wpn_category") != null){
+				core.skillModService.deductSkillMod(creature, "display_only_critical", getWeaponCriticalChance(creature, item));
+				creature.setAttachment("EquippedWeapon", null);
+			}
+			
+			if(item.getTemplate().contains("shirt")) {
+				creature.setAttachment("EquippedShirt", null);
+			}
+			
+			if(item.getTemplate().contains("chest")) {
+				creature.setAttachment("EquippedChest", null);
+			}
+			
 			if(item.getStringAttribute("proc_name") != null) core.buffService.removeBuffFromCreatureByName(creature, item.getStringAttribute("proc_name").replace("@ui_buff:", ""));
 			
 			for(Entry<String, Object> e : attributes.entrySet())

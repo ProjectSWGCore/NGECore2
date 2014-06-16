@@ -99,10 +99,12 @@ import services.object.ObjectId;
 import services.object.ObjectService;
 import services.object.UpdateService;
 import services.pet.MountService;
+import services.playercities.PlayerCity;
 import services.playercities.PlayerCityService;
 import services.resources.HarvesterService;
 import services.resources.ResourceService;
 import services.retro.RetroService;
+import services.reverseengineering.ReverseEngineeringService;
 import services.spawn.SpawnService;
 import services.sui.SUIService;
 import services.trade.TradeService;
@@ -199,7 +201,7 @@ public class NGECore {
 	public HarvesterService harvesterService;
 	public MountService mountService;
 	public PlayerCityService playerCityService;
-
+	public ReverseEngineeringService reverseEngineeringService;
 	
 	// Login Server
 	public NetworkDispatch loginDispatch;
@@ -227,6 +229,7 @@ public class NGECore {
 	private ObjectDatabase resourceHistoryODB;
 	private ObjectDatabase swgObjectODB;
 	private ObjectDatabase bountiesODB;
+	private ObjectDatabase cityODB;
 	
 	public static boolean PACKET_DEBUG = false;
 	
@@ -305,6 +308,7 @@ public class NGECore {
 		resourceHistoryODB = new ObjectDatabase("resourcehistory", true, true, true, GalacticResource.class);
 		auctionODB = new ObjectDatabase("auction", true, true, true, AuctionItem.class);
 		bountiesODB = new ObjectDatabase("bounties", true, true, true, BountyListItem.class);
+		cityODB = new ObjectDatabase("cities", true, true, true, PlayerCity.class);
 		
 		// Services
 		loginService = new LoginService(this);
@@ -340,6 +344,7 @@ public class NGECore {
 		mountService = new MountService(this);
 		playerCityService = new PlayerCityService(this);
 		staticService = new StaticService(this);
+		reverseEngineeringService = new ReverseEngineeringService(this);
 		
 		if (config.keyExists("JYTHONCONSOLE.PORT")) {
 			int jythonPort = config.getInt("JYTHONCONSOLE.PORT");
@@ -398,6 +403,7 @@ public class NGECore {
 		zoneDispatch.addService(housingService);
 		zoneDispatch.addService(playerCityService);
 		zoneDispatch.addService(staticService);
+		zoneDispatch.addService(reverseEngineeringService);
 		
 		if (optionsConfigLoaded && options.getInt("LOAD.RESOURCE.SYSTEM") == 1) {
 			zoneDispatch.addService(surveyService);
@@ -517,7 +523,8 @@ public class NGECore {
 		staticService.spawnStatics();
 		
 		equipmentService.loadBonusSets();
-		
+		playerCityService.loadCityRankCaps();
+		playerCityService.loadCities();
 		retroService.run();
 		
 		didServerCrash = false;
@@ -673,7 +680,11 @@ public class NGECore {
 	public ObjectDatabase getAuctionODB() {
 		return auctionODB;
 	}
-	
+
+	public ObjectDatabase getCityODB() {
+		return cityODB;
+	}
+
 	public int getActiveClients() {
 		int connections = 0;
 		for (Map.Entry<IoSession, Client> c : clients.entrySet()) {
@@ -781,6 +792,7 @@ public class NGECore {
 		objectIdODB.close();
 		duplicateIdODB.close();
 		auctionODB.close();
+		cityODB.close();
 	}
 
 	public String getMotd() {

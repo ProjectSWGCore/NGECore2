@@ -43,7 +43,7 @@ def handlePickupStage(core, actor, npc, objective, mission):
 		endConversation(core, actor, npc)
 		return
 	
-	core.conversationService.sendStopConversation(actor, npc, mission.getMissionDescription(), 'm' + str(mission.getMissionId()) + 'p')
+	core.conversationService.sendStopConversation(actor, npc, mission.getMissionStf(), 'm' + str(mission.getMissionId()) + 'p')
 	objective.createDeliveryItem(core, actor)
 	objective.update(core, actor)
 	return
@@ -54,7 +54,7 @@ def handleDeliveryStage(core, actor, npc, objective, mission):
 		endConversation(core, actor, npc)
 		return
 	
-	core.conversationService.sendStopConversation(actor, npc, mission.getMissionDescription(), 'm' + str(mission.getMissionId()) + 'r')
+	core.conversationService.sendStopConversation(actor, npc, mission.getMissionStf(), 'm' + str(mission.getMissionId()) + 'r')
 	core.objectService.destroyObject(objective.getDeliveryObject())
 	objective.update(core, actor)
 	return
@@ -65,6 +65,6 @@ def handleCompletionStage(core, actor, npc, objective, mission):
 		endConversation(core, actor, npc)
 		return
 	
-	core.conversationService.sendStopConversation(actor, npc, mission.getMissionDescription(), 'm' + str(mission.getMissionId()) + 's')
+	core.conversationService.sendStopConversation(actor, npc, mission.getMissionStf(), 'm' + str(mission.getMissionId()) + 's')
 	core.missionService.handleMissionComplete(actor, mission)
 	return

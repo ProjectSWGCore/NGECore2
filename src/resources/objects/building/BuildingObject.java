@@ -35,6 +35,7 @@ import resources.datatables.Options;
 import resources.objects.ObjectMessageBuilder;
 import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
+import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.PortalVisitor;
@@ -54,6 +55,7 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 	
 	private Vector<Long> entryList = new Vector<Long>();
 	private Vector<Long> banList = new Vector<Long>();
+	private Vector<Long> adminList = new Vector<Long>();
 	
 	public static final byte PRIVATE = (byte) 0;
 	public static final byte PUBLIC = (byte) 1;
@@ -62,7 +64,7 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 		super(objectID, planet, position, orientation, Template);
 		getBaseline(3).set("volume", 255);
 		setOptionsBitmask(Options.INVULNERABLE);
-		setConditionDamage(100);
+		setConditionDamage(0);
 		setMaximumCondition(4320);
 		setStaticObject(true);
 	}
@@ -71,7 +73,7 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 		super();
 		getBaseline(3).set("volume", 255);
 		setOptionsBitmask(Options.INVULNERABLE);
-		setConditionDamage(100);
+		setConditionDamage(0);
 		setMaximumCondition(4320);
 		setStaticObject(true);
 	}
@@ -82,7 +84,7 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 		defendersList = new Vector<TangibleObject>();
 		getBaseline(3).set("volume", 255);
 		setOptionsBitmask(Options.INVULNERABLE);
-		setConditionDamage(100);
+		setConditionDamage(0);
 		setMaximumCondition(4320);
 	}
 	
@@ -90,6 +92,7 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 	public Baseline getOtherVariables() {
 		Baseline baseline = super.getOtherVariables();
 		baseline.put("maintenanceAmount", (float) 0);
+		baseline.put("outstandingMaintenance", 0);
 		baseline.put("baseMaintenanceRate", 0);
 		baseline.put("deedTemplate", "");
 		baseline.put("residency", false);
@@ -158,6 +161,7 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 				PortalVisitor portal = ClientFileManager.loadFile(portalLayoutFilename, PortalVisitor.class);
 				
 				for (int i = 0; i <= portal.cellCount; i++) {
+					System.out.println("Cellname: " + portal.cells.get(i).name);
 					if (cellName.equals(portal.cells.get(i).name)) {
 						return getCellByCellNumber(i + 1);
 					}
@@ -190,12 +194,21 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 		otherVariables.set("maintenanceAmount", maintenanceAmount);
 	}
 	
+	public int getOutstandingMaintenance() {
+		return (int) otherVariables.get("outstandingMaintenance");
+	}
+	
+	public void setOutstandingMaintenance(int maintenanceAmount) {
+		otherVariables.set("outstandingMaintenance", maintenanceAmount);
+	}
+
 	public int getBMR() {
 		return (int) otherVariables.get("baseMaintenanceRate");
 	}
 	
 	public void setBMR(int BMR) {
 		otherVariables.set("baseMaintenanceRate", BMR);
+		setMaximumCondition(BMR);
 	}
 	
 	public String getDeedTemplate(){
@@ -221,9 +234,8 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 		return (boolean) otherVariables.get("residency");
 	}
 	
-	public void setResidency(CreatureObject owner){
-		owner.sendSystemMessage("@player_structure:declared_residency", (byte) 1);
-		otherVariables.set("residency", true);
+	public void setResidency(boolean flag) {
+		otherVariables.set("residency", flag);
 	}
 	
 	public byte getPrivacy() {
@@ -242,7 +254,8 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 	}
 	
 	public void setPrivacy(byte privacy) {
-		otherVariables.set("residency", privacy);
+		otherVariables.set("privacy", privacy);
+		getObservers().stream().map(Client::getParent).forEach(this::updateCellPermissions);
 	}
 	
 	public Vector<TangibleObject> getItemsList() {
@@ -260,7 +273,7 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 	}
 	
 	public short getMaximumStorageCapacity() {
-		return (byte) otherVariables.get("maximumStorageCapacity");
+		return (short) otherVariables.get("maximumStorageCapacity");
 	}
 	
 	public void setMaximumStorageCapacity(short maximumStorageCapacity) {
@@ -288,6 +301,18 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 				
 		owner.getClient().getSession().write(messageBuilder.buildPermissionListCreate(banListFirstNames, name));      				
 	}
+	
+	public void setPermissionAdmin(String name, CreatureObject owner){
+		Vector<String> adminListFirstNames = new Vector<String>();
+		
+		for (long oid : adminList) {
+			String firstName = NGECore.getInstance().characterService.getPlayerFirstName(oid);
+			adminListFirstNames.add(firstName);
+		}
+				
+		owner.getClient().getSession().write(messageBuilder.buildPermissionListCreate(adminListFirstNames, name));      				
+	}
+
 	
 	public void addPlayerToEntryList(CreatureObject owner, long oid, String firstName){
 		if (!entryList.contains(oid)){
@@ -329,6 +354,22 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 		}
 	}
 	
+	public void addPlayerToAdminList(CreatureObject owner, long oid, String firstName){
+		if (!adminList.contains(oid)){
+			adminList.add(oid);
+			if(owner != null)
+				owner.sendSystemMessage(OutOfBand.ProsePackage("@player_structure:player_added", "TO", NGECore.getInstance().objectService.getObject(oid).getCustomName()), DisplayType.Screen);
+		}
+	}
+	
+	public void removePlayerFromAdminList(CreatureObject owner, long oid, String firstName){
+		if (adminList.contains(oid)){
+			adminList.remove(oid);
+			if(owner != null)
+				owner.sendSystemMessage(OutOfBand.ProsePackage("@player_structure:player_removed", "TO", NGECore.getInstance().objectService.getObject(oid).getCustomName()), DisplayType.Screen);
+		}
+	}
+	
 	@Override
 	public void notifyClients(IoBuffer buffer, boolean notifySelf) {
 		notifyObservers(buffer, false);
@@ -365,7 +406,7 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 	}
 	
 	public boolean canEnter(SWGObject object) {
-		return (getPrivacy() == PRIVATE && entryList.contains(object.getObjectID())) || !banList.contains(object.getObjectID());
+		return (getPrivacy() == PRIVATE && (entryList.contains(object.getObjectID()) || adminList.contains(object.getObjectID()))) || !banList.contains(object.getObjectID()) || object.getClient().isGM();
 	}
 	
 	public void updateCellPermissions(SWGObject obj) {
@@ -373,5 +414,18 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 			return;
 		viewChildren(this, true, false, (cell) -> ((CellObject) cell).sendPermissionMessage(obj.getClient()));
 	}
+	
+	public boolean isOnEntryList(CreatureObject creature) {
+		return entryList.contains(creature.getObjectID());
+	}
+	
+	public boolean isOnBanList(CreatureObject creature) {
+		return banList.contains(creature.getObjectID());
+	}
+	
+	public boolean isOnAdminList(CreatureObject creature) {
+		return adminList.contains(creature.getObjectID());		
+	}
+
 	
 }

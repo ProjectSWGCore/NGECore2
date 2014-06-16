@@ -66,6 +66,7 @@ odb/swgobjects/je.info.*
 =======
 odb/auction/je.info.*
 odb/bounties/je.info.*
+odb/cities/je.info.*
 >>>>>>> 12ca3ae66170fcfe09d848a7eea529041b9af5ad
 
 # External tool builders

@@ -17,6 +17,7 @@ def setup(core, object):
 	spawnPoints.add(SpawnPoint(-2.84, -4.79, 0.66, -0.04, 0.99, 4))
 		
 	object.setAttachment('spawnPoints', spawnPoints)
-
+	
+	core.mapService.addLocation(object.getPlanet(), 'Cloning Facility', object.getPosition().x, object.getPosition().z, 5, 0, 0)
 	return
 	

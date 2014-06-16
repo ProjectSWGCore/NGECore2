@@ -44,9 +44,12 @@ import protocol.swg.PlayClientEffectObjectTransformMessage;
 import protocol.swg.StopClientEffectObjectByLabel;
 import resources.common.OutOfBand;
 import resources.datatables.DisplayType;
+import resources.datatables.Options;
+import resources.datatables.WeaponType;
 import resources.loot.LootGroup;
 import resources.loot.LootRollSession;
 import resources.objects.creature.CreatureObject;
+import resources.objects.factorycrate.FactoryCrateObject;
 import resources.objects.group.GroupObject;
 import resources.objects.intangible.IntangibleObject;
 import resources.objects.tangible.TangibleObject;
@@ -75,6 +78,8 @@ public class LootService implements INetworkDispatch {
 	
 	private NGECore core;
 	private static int prepInvCnt = 0;
+	String testDropTemplate = null;
+	//String testDropTemplate = "kowakian_cage";
 	
 	public LootService(NGECore core) {
 		this.core = core;
@@ -170,6 +175,8 @@ public class LootService implements INetworkDispatch {
 			int randomRareLoot = new Random().nextInt(100);
 			int chanceRequirement = 1; 
 			chanceRequirement = 10; // This is for a test period to lift chest drop chance a bit
+			if (testDropTemplate!=null)
+				chanceRequirement = 100;
 			if (lootRollSession.getLootedObjectDifficulty()==1)
 				chanceRequirement+=2;
 			if (lootRollSession.getLootedObjectDifficulty()==2)
@@ -540,7 +547,8 @@ public class LootService implements INetworkDispatch {
 			if (randomItemFromPool<=remainder){
 				// this element has been chosen e.g. kraytpearl_flawless
 				//System.err.println("CHOSEN ITEM " + itemNames.get(i));
-				handleLootPoolItems(itemNames.get(i), lootRollSession);				
+				handleLootPoolItems(itemNames.get(i), lootRollSession);	
+				//handleLootPoolItems(testDropTemplate, lootRollSession);
 				//break;
 				return;
 			}						
@@ -560,6 +568,7 @@ public class LootService implements INetworkDispatch {
 		rollSession.setSessionPlanet(requester.getPlanet());
 		
 		handleLootPoolItems(template, rollSession);
+		
 		if(rollSession.getDroppedItems().get(0) != null) return rollSession.getDroppedItems().get(0);
 		
 		return null;
@@ -610,10 +619,15 @@ public class LootService implements INetworkDispatch {
 		String requiredFaction = "";
 		Vector<String> customizationAttributes = null;
 		Vector<Integer> customizationValues = null;
+		Vector<String> reverse_engineering_name = null;
+		int customColor1 = 0;
+		String lootDescriptor = "";
 		Vector<String> itemStats = null;
 		Vector<String> itemSkillMods = null;
 		Vector<String> STFparams = null;
-				
+		String addToCollection = null;
+		String collectionItemName = null;		
+		
 		if(core.scriptService.getMethod(itemPath,"","itemTemplate")==null){
 			String errorMessage = "Loot item  '" + itemName + "'  has no template function assigned in its script. Please contact Charon about this issue.";
 			lootRollSession.addErrorMessage(errorMessage);
@@ -639,6 +653,15 @@ public class LootService implements INetworkDispatch {
 		
 		if(core.scriptService.getMethod(itemPath,"","customizationValues")!=null)
 			customizationValues = (Vector<Integer>)core.scriptService.fetchIntegerVector(itemPath,"customizationValues");
+		
+		if(core.scriptService.getMethod(itemPath,"","reverse_engineering_name")!=null)
+			reverse_engineering_name = (Vector<String>)core.scriptService.fetchStringVector(itemPath,"reverse_engineering_name");
+		
+		if(core.scriptService.getMethod(itemPath,"","customColor1")!=null)
+			customColor1 = (Integer)core.scriptService.fetchInteger(itemPath,"customColor1");
+		
+		if(core.scriptService.getMethod(itemPath,"","lootDescriptor")!=null) 
+			lootDescriptor = (String)core.scriptService.fetchString(itemPath,"lootDescriptor");
 		
 		if(core.scriptService.getMethod(itemPath,"","itemStats")!=null)
 			itemStats = (Vector<String>)core.scriptService.fetchStringVector(itemPath,"itemStats");
@@ -670,6 +693,12 @@ public class LootService implements INetworkDispatch {
 		if(core.scriptService.getMethod(itemPath,"","STFparams")!=null)
 			STFparams = (Vector<String>)core.scriptService.fetchStringVector(itemPath,"STFparams");
 		
+		if(core.scriptService.getMethod(itemPath,"","AddToCollection")!=null)
+			addToCollection = (String)core.scriptService.fetchString(itemPath,"AddToCollection");
+		
+		if(core.scriptService.getMethod(itemPath,"","CollectionItemName")!=null)
+			collectionItemName = (String)core.scriptService.fetchString(itemPath,"CollectionItemName");
+		
 			
 		System.out.println("itemTemplate " + itemTemplate);
 
@@ -678,6 +707,11 @@ public class LootService implements INetworkDispatch {
 		
 		droppedItem.setLootItem(true);
 		droppedItem.setAttachment("LootItemName", itemName);
+		droppedItem.setAttachment("customColor1", customColor1);
+		droppedItem.setAttachment("lootDescriptor", lootDescriptor);
+		droppedItem.setAttachment("reverse_engineering_name", reverse_engineering_name);		
+		droppedItem.setAttachment("customName", customName);
+		droppedItem.setAttachment("CollectionItemName", collectionItemName);
     	
 		if(core.scriptService.getMethod(itemPath,"","randomStatJewelry")!=null){
 			customName = setRandomStatsJewelry(droppedItem, lootRollSession);
@@ -711,7 +745,7 @@ public class LootService implements INetworkDispatch {
     			lootRollSession.addErrorMessage(errorMessage);
     			return;
     		}
-    		handleStats(droppedItem, itemStats);
+    		handleStats(droppedItem, itemStats, lootRollSession);
     	}
     	
     	if (itemSkillMods!=null){
@@ -722,7 +756,18 @@ public class LootService implements INetworkDispatch {
     		setSTFParams(droppedItem, STFparams);
     	}
     	
+    	if (addToCollection!=null){
+    		droppedItem.getAttributes().put("@obj_attr_n:collection_name", "@collection_n:"+addToCollection); 
+    		//droppedItem.getAttributes().put("@obj_attr_n:collection_name", "\\#FFFF00 @collection_n:"+addToCollection + " \\#FFFFFF "); 
+    		//core.collectionService.addCollection(actor, "new_prof_officer_master")
+    		droppedItem.setAttachment("radial_filename", "item/collection/loot_collection");
+    		System.out.println("collection");
+    	}
     	
+    	if (collectionItemName!=null){
+    		droppedItem.setAttachment("CollectionItemName", collectionItemName);
+    		
+    	}
     	
 //    	if (customizationValues!=null)
 //    		setCustomization(droppedItem, itemName);
@@ -989,7 +1034,15 @@ public class LootService implements INetworkDispatch {
 			else
 				remainder += span; 
 			if (randomItemFromPool<=remainder){
-				fillChest4(itemNames.get(i), owner, chest);
+				//fillChest4(itemNames.get(i), owner, chest);
+				
+				if (testDropTemplate!=null)
+					fillChest4(testDropTemplate, owner, chest);
+				else
+					fillChest4(itemNames.get(i), owner, chest);
+					
+				
+				
 				//fillChest4("colorcrystal", owner, chest);
 				//break;
 				return;
@@ -1049,7 +1102,7 @@ public class LootService implements INetworkDispatch {
 		Vector<String> itemStats = null;
 		Vector<String> itemSkillMods = null;
 		Vector<String> STFparams = null;
-		Vector<String> addToCollections = null;
+		String addToCollection = null;
 				
 		if(core.scriptService.getMethod(itemPath,"","itemTemplate")==null){
 			String errorMessage = "Loot item  '" + itemName + "'  has no template function assigned in its script. Please contact Charon about this issue.";
@@ -1115,8 +1168,8 @@ public class LootService implements INetworkDispatch {
 		if(core.scriptService.getMethod(itemPath,"","STFparams")!=null)
 			STFparams = (Vector<String>)core.scriptService.fetchStringVector(itemPath,"STFparams");
 		
-		if(core.scriptService.getMethod(itemPath,"","AddToCollections")!=null)
-			addToCollections = (Vector<String>)core.scriptService.fetchStringVector(itemPath,"AddToCollections");
+		if(core.scriptService.getMethod(itemPath,"","AddToCollection")!=null)
+			addToCollection = (String)core.scriptService.fetchString(itemPath,"AddToCollection");
 		
 			
 		System.out.println("itemTemplate " + itemTemplate);
@@ -1158,7 +1211,7 @@ public class LootService implements INetworkDispatch {
 	    			String errorMessage = "Loot item  '" + itemName + "'  has a wrong number of itemstats. Please contact Charon about this issue.";
 	    			return;
 	    		}
-	    		handleStats(droppedItem, itemStats);
+	    		handleStats(droppedItem, itemStats,null);
 	    	}
 	    	
 	    	if (itemSkillMods!=null){
@@ -1168,6 +1221,15 @@ public class LootService implements INetworkDispatch {
 	    	if (STFparams!=null){
 	    		setSTFParams(droppedItem, STFparams);
 	    	}
+	    	
+	    	if (addToCollection!=null){
+	    		droppedItem.getAttributes().put("@obj_attr_n:collection_name", "@collection_n:"+addToCollection); 
+	    		//droppedItem.getAttributes().put("@obj_attr_n:collection_name", "\\#FFFF00 @collection_n:"+addToCollection + " \\#FFFFFF "); 
+	    		//core.collectionService.addCollection(actor, "new_prof_officer_master")
+	    		droppedItem.setAttachment("radial_filename", "item/loot_collection");
+	    	}
+	    	
+	    		    	
 	    	 	
 	    	setCustomization(droppedItem, itemName, customizationAttributes, customizationValues); // for now
 	    	
@@ -1233,6 +1295,10 @@ public class LootService implements INetworkDispatch {
 				droppedItem.getAttributes().put("@obj_attr_n:color", resources.datatables.LightsaberColors.get(crystalColor));
 				droppedItem.setAttachment("radial_filename", "item/tunable");
 				//droppedItem.getAttributes().put("@obj_attr_n:color", "@jedi_spam:saber_color_" + crystalColor); // Commented out for now
+				
+				String[] crystalColorElementalMapping = new String[]{"heat","heat","acid","acid","cold","cold","cold","acid","electricity","electricity","heat","heat"};
+				setCrystalStat(droppedItem, "elemtype", crystalColorElementalMapping[crystalColor],crystalColorElementalMapping[crystalColor]);	
+				setCrystalStat(droppedItem, "elemdamage", "2", "2");
 			} else {
 				for (int i=0; i<customizationAttributes.size();i++){
 					int intValue = customizationValues.get(i);
@@ -1273,7 +1339,7 @@ public class LootService implements INetworkDispatch {
 				droppedItem.setCustomizationVariable(customizationAttributes.get(i), value); 
 			}
 		}
-		
+
 	}
 	
 	public void handleSpecialItems(TangibleObject droppedItem,String itemName) {
@@ -1285,7 +1351,7 @@ public class LootService implements INetworkDispatch {
 		}	
 	}
 	
-	private void handleStats(TangibleObject droppedItem, Vector<String> itemStats) {
+	private void handleStats(TangibleObject droppedItem, Vector<String> itemStats, LootRollSession lootRollSession) {
 		
 		if (droppedItem.getTemplate().contains("object/weapon")){
 			WeaponObject weaponObject = (WeaponObject) droppedItem;
@@ -1302,8 +1368,10 @@ public class LootService implements INetworkDispatch {
 				String statName = itemStats.get(3*i);
 				String minValue = itemStats.get(3*i+1);
 				String maxValue = itemStats.get(3*i+2);
-				setArmorStat(droppedItem, statName, minValue, maxValue);
+				setArmorStat(droppedItem, statName, minValue, maxValue);				
 			}
+			if (lootRollSession != null)
+				setRandomAttributes(droppedItem,lootRollSession);
 		}			
 		
 		String lootDescriptor = (String)droppedItem.getAttachment("lootDescriptor");
@@ -1315,6 +1383,7 @@ public class LootService implements INetworkDispatch {
 				String minValue = itemStats.get(3*i+1);
 				String maxValue = itemStats.get(3*i+2);
 				setCrystalStat(droppedItem, statName, minValue, maxValue);
+				return;
 			}
 		}	
 		
@@ -1324,10 +1393,88 @@ public class LootService implements INetworkDispatch {
 				String minValue = itemStats.get(3*i+1);
 				String maxValue = itemStats.get(3*i+2);
 				setBuffItemStat(droppedItem, statName, minValue, maxValue);
+				return;
 			}
-		}		
-		
+		}				
 	}	
+	
+	private void setRandomAttributes(TangibleObject droppedItem, LootRollSession lootRollSession){
+		
+		//determine number of stats #20 yt
+			int statNumber = 1;
+			int levelOfDrop = lootRollSession.getLootedObjectLevel();
+		    int difficultyLevel = lootRollSession.getLootedObjectDifficulty(); // better for calculation
+		    
+		    int statRoll = new Random().nextInt(100);
+		    int difficultyBonus = 0;
+		    
+//		    // stage 1
+//		    if (difficultyLevel==1)
+//		    	difficultyBonus = 60;
+//		    if (difficultyLevel>=2)
+//		    	difficultyBonus = 75;
+//		    	
+//		    if (statRoll<20+difficultyBonus)  // diff 3 95%  diff 2 70  diff1 20
+//		    	statNumber++;
+//		    
+//		    // stage 2
+//		    difficultyBonus = 0;
+//		    if (difficultyLevel==1)
+//		    	difficultyBonus = 20;
+//		    if (difficultyLevel>=2)
+//		    	difficultyBonus = 60;
+//		    
+//		    if (statRoll<10+difficultyBonus)  // diff 3 70%  diff 2 30  diff1 10 
+//		    	statNumber++;
+//		    
+//		    // stage 3
+//		    difficultyBonus = 0;
+//		    if (difficultyLevel==1)
+//		    	difficultyBonus = 3;
+//		    if (difficultyLevel>=2)
+//		    	difficultyBonus = 5;
+//		    
+//		    if (statRoll<1+difficultyBonus) 
+//		    	statNumber++;
+			
+		    if (levelOfDrop>60 && levelOfDrop<=90 && difficultyLevel<1){
+		    	statNumber=2;
+		    }
+		    
+		    if (levelOfDrop>84 && difficultyLevel>=1){
+		    	statNumber=3;
+		    }
+		    
+			
+			int primaryAttribute = new Random().nextInt(7); // 0-6
+			int maxValue = (int) (levelOfDrop*25/90);
+			int minValue = (int) (0.75*maxValue);
+			minValue = Math.max(1, minValue);
+			maxValue = Math.max(2, maxValue);
+			droppedItem.setIntAttribute(getAttributeSTF(primaryAttribute), getStatValue(minValue,maxValue));
+			//maxValue -= 2; //secondary attributes must have less maxValue
+			minValue = (int) (0.75*maxValue);
+			minValue = Math.max(1, minValue);
+			maxValue = Math.max(2, maxValue);
+			String prefix = getJewelryPrefix(droppedItem);
+			String suffix = getJewelrySuffix(primaryAttribute, statNumber);
+			String itemName = prefix + suffix;
+			Vector<Integer> alreadyUsedStats = new Vector<Integer>();
+			alreadyUsedStats.add(primaryAttribute);
+			int attribute = primaryAttribute;
+			
+			List<Integer> statList = new ArrayList<Integer>();
+			for (int i=0;i<7;i++)
+				statList.add(i);
+			statList.remove(primaryAttribute);
+			
+			for (int i=0;i<statNumber-1;i++){
+				int attributeIndex = new Random().nextInt(statList.size());
+				droppedItem.setIntAttribute(getAttributeSTF(statList.get(attributeIndex)), getStatValue(minValue,maxValue));
+				statList.remove(attributeIndex);
+			}
+				
+	}
 	
 	private void handleSkillMods(TangibleObject droppedItem, Vector<String> skillMods) {		
 		for (int i=0;i<skillMods.size()/2;i++){
@@ -1448,6 +1595,7 @@ public class LootService implements INetworkDispatch {
 			qualityString="@jedi_spam:crystal_quality_5";
 			break;
 		case "kraytpearl_flawless": 
+		case "kraytpearl_ancient": 
 			qualityString="@jedi_spam:crystal_quality_6";
 			break;
 		default:
@@ -1559,7 +1707,7 @@ public class LootService implements INetworkDispatch {
 											  minValue1 = 21;
 									          maxValue1 = 23;
 									          finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
-									          finalMaxDmg = finalMinDmg+1;
+									          finalMaxDmg = finalMinDmg+2;
 										      break;
 			}
 		}
@@ -1601,15 +1749,17 @@ public class LootService implements INetworkDispatch {
 										      minValue1 = 15;
 							                  maxValue1 = 17;
 							                  finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
-							                  finalMaxDmg = finalMinDmg+1;
+							                  finalMaxDmg = finalMinDmg+2;
 										      break;
 				case "kraytpearl_flawless":   // Flawless - 19/20 damage   
 								              finalMinDmg = 19;
 								              finalMaxDmg = 20;
 										      break;
-				case "kraytpearl_ancient":    // Ancient - 20/22 damage 
-											  finalMinDmg = 20;
-		                                      finalMaxDmg = 22;
+				case "kraytpearl_ancient":    // Ancient - between 20/21 min and 22/23 max damage 
+										      minValue1 = 20;
+											  maxValue1 = 21;
+							                  finalMinDmg = minValue1+new Random().nextInt(maxValue1+1-minValue1);
+							                  finalMaxDmg = finalMinDmg+2;
 										      break;
 			}
 		}
@@ -1634,14 +1784,20 @@ public class LootService implements INetworkDispatch {
 		if (statName.equals("mindamage")){		
 			int minimalValue = (int) Integer.parseInt(minValue);
 			int maximalValue = (int) Integer.parseInt(maxValue);
-			int randomValue  = minimalValue + new Random().nextInt(maximalValue-minimalValue);
+			int extra = 0;
+			if (maximalValue>minimalValue)
+				extra = new Random().nextInt(maximalValue-minimalValue);
+			int randomValue  = minimalValue + extra;
 			weapon.setMinDamage(randomValue);
 		}
 		
 		if (statName.equals("maxdamage")){
 			int minimalValue = (int) Integer.parseInt(minValue);
 			int maximalValue = (int) Integer.parseInt(maxValue);
-			int randomValue  = minimalValue + new Random().nextInt(maximalValue-minimalValue);
+			int extra = 0;
+			if (maximalValue>minimalValue)
+				extra = new Random().nextInt(maximalValue-minimalValue);
+			int randomValue  = minimalValue + extra;
 			weapon.setMaxDamage(randomValue);
 		}
 	
@@ -1806,6 +1962,7 @@ public class LootService implements INetworkDispatch {
 		}		
 	}
 
+	
 	private void setArmorStat(SWGObject armor, String statName, String minValue, String maxValue){
 		// Armor is not represented with its own class,
 		// so we gotta create the attributes here
@@ -2373,7 +2530,7 @@ public class LootService implements INetworkDispatch {
     			System.err.println(errorMessage);
     			return;
     		}
-    		handleStats(droppedItem, itemStats);
+    		handleStats(droppedItem, itemStats, lootRollSession);
     	}
     	
     	if (itemSkillMods!=null){
@@ -2553,6 +2710,196 @@ public class LootService implements INetworkDispatch {
 		playerInventory.add(item11);
 		
 
+	}
+	
+	public void prepInv2(CreatureObject player){
+		SWGObject playerInventory = player.getSlottedObject("inventory");
+		TangibleObject item11 = (TangibleObject)core.objectService.createObject("object/tangible/wearables/armor/composite/shared_armor_composite_bicep_r.iff", player.getPlanet());
+		item11.setCustomName("Composite Armor Right Bicep");	
+	
+		item11.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 6000);		
+		item11.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 4000);
+		item11.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 5000);
+		item11.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 5000);	
+		item11.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 5000);		
+		item11.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 5000);
+	
+		item11.setIntAttribute("cat_stat_mod_bonus.@stat_n:agility_modified", 25);		
+		item11.setIntAttribute("cat_stat_mod_bonus.@stat_n:constitution_modified", 25);	
+		item11.setIntAttribute("cat_stat_mod_bonus.@stat_n:precision_modified", 25);	
+		
+		playerInventory.add(item11);		
+		
+		TangibleObject item11a = (TangibleObject)core.objectService.createObject("object/tangible/wearables/armor/composite/shared_armor_composite_bicep_r.iff", player.getPlanet());
+		item11.setCustomName("Composite Armor Right Bicep");	
+	
+		item11a.setIntAttribute("cat_armor_standard_protection.armor_eff_kinetic", 6000);		
+		item11a.setIntAttribute("cat_armor_standard_protection.armor_eff_energy", 4000);
+		item11a.setIntAttribute("cat_armor_special_protection.special_protection_type_heat", 5000);
+		item11a.setIntAttribute("cat_armor_special_protection.special_protection_type_cold", 5000);	
+		item11a.setIntAttribute("cat_armor_special_protection.special_protection_type_acid", 5000);		
+		item11a.setIntAttribute("cat_armor_special_protection.special_protection_type_electricity", 5000);
+	
+		item11a.setIntAttribute("cat_stat_mod_bonus.@stat_n:agility_modified", 25);		
+		item11a.setIntAttribute("cat_stat_mod_bonus.@stat_n:constitution_modified", 25);		
+		playerInventory.add(item11a);		
+		
+		
+		TangibleObject item12aa = (TangibleObject)core.objectService.createObject("object/tangible/wearables/shirt/shared_shirt_s07.iff", player.getPlanet());
+		item12aa.setCustomName("Socketed Shirt");
+		item12aa.setIntAttribute("@obj_attr_n:sockets", 1);	
+		playerInventory.add(item12aa);	
+		
+		TangibleObject item12 = (TangibleObject)core.objectService.createObject("object/tangible/wearables/shirt/shared_shirt_s07.iff", player.getPlanet());
+		
+		item12.setStfFilename("wearables_name");
+		item12.setStfName("shirt_s01");
+		item12.setDetailFilename("wearables_detail");
+		item12.setDetailName("shirt_s01");
+		item12.setCustomName("Socketed Shirt");
+		item12.getAttributes().put("@obj_attr_n:crafter", "Charon");
+		
+		item12.setIntAttribute("@obj_attr_n:sockets", 1);		
+		
+		String crateTemplate = "object/factory/shared_factory_crate_clothing.iff";
+		FactoryCrateObject crate1 = (FactoryCrateObject) core.objectService.createObject(crateTemplate, player.getPlanet());
+		crate1.setContentTypeAndQuantity(item12,25, "clothing_factory_crate", "clothing", player.getClient(),true);
+		playerInventory.add(crate1);
+		
+		
+		
+		TangibleObject item12a = (TangibleObject)core.objectService.createObject("object/tangible/wearables/shirt/shared_shirt_s07.iff", player.getPlanet());
+		item12a.setCustomName("Socketed Shirt");
+		item12a.setIntAttribute("cat_stat_mod_bonus.@stat_n:agility_modified", 18);		
+		playerInventory.add(item12a);	
+		
+		String powerBitTemplate = "object/tangible/component/reverse_engineering/shared_power_bit.iff";
+		TangibleObject powerBit = (TangibleObject) core.objectService.createObject(powerBitTemplate, player.getPlanet());
+		powerBit.setCustomName("+25 2nd Order Power Bit");
+		powerBit.setAttachment("PowerBitValue", 25);
+		powerBit.setAttachment("PowerBitOrder", 2);
+		playerInventory.add(powerBit);
+		
+		
+		TangibleObject powerBit2 = (TangibleObject) core.objectService.createObject(powerBitTemplate, player.getPlanet());
+		powerBit2.setCustomName("+25 3nd Order Power Bit");
+		powerBit2.setAttachment("PowerBitValue", 25);
+		powerBit2.setAttachment("PowerBitOrder", 3);
+		playerInventory.add(powerBit2);
+		
+		TangibleObject powerBit3 = (TangibleObject) core.objectService.createObject(powerBitTemplate, player.getPlanet());
+		powerBit3.setCustomName("+25 1st Order Power Bit");
+		powerBit3.setAttachment("PowerBitValue", 25);
+		powerBit3.setAttachment("PowerBitOrder", 1);
+		playerInventory.add(powerBit3);
+		
+		TangibleObject item24a = (TangibleObject)core.objectService.createObject("object/tangible/loot/npc_loot/shared_medical_console_generic.iff", player.getPlanet());
+		item24a.setCustomName("Medical Console");
+		item24a.setStackable(true);
+		item24a.setUses(299);		 
+		core.objectService.addStackableItem(item24a,playerInventory);
+		
+		TangibleObject item24b = (TangibleObject)core.objectService.createObject("object/tangible/loot/npc_loot/shared_medical_device_generic.iff", player.getPlanet());
+		item24b.setCustomName("Medical Device");
+		item24b.setStackable(true);
+		item24b.setUses(399);		 
+		core.objectService.addStackableItem(item24b,playerInventory);
+		
+	
+		
+		String modifierBitTemplate = "object/tangible/component/reverse_engineering/shared_modifier_bit.iff";
+		TangibleObject modifierBit = (TangibleObject) core.objectService.createObject(modifierBitTemplate, player.getPlanet());
+		modifierBit.setCustomName("Droid Experimentation");
+		modifierBit.setStringAttribute("serial_number", core.reverseEngineeringService.createSerialNumber());	
+		modifierBit.setStringAttribute("@crafting:mod_bit_type", "@stat_n:droid_experimentation");
+		modifierBit.setIntAttribute("@crafting:mod_bit_ratio", 4);
+		playerInventory.add(modifierBit);
+		
+		modifierBit = (TangibleObject) core.objectService.createObject(modifierBitTemplate, player.getPlanet());
+		modifierBit.setCustomName("Droid Experimentation");
+		modifierBit.setStringAttribute("serial_number", core.reverseEngineeringService.createSerialNumber());	
+		modifierBit.setStringAttribute("@crafting:mod_bit_type", "@stat_n:droid_experimentation");
+		modifierBit.setIntAttribute("@crafting:mod_bit_ratio", 4);
+		playerInventory.add(modifierBit);
+		
+		modifierBit = (TangibleObject) core.objectService.createObject(modifierBitTemplate, player.getPlanet());
+		modifierBit.setCustomName("Droid Experimentation");
+		modifierBit.setStringAttribute("serial_number", core.reverseEngineeringService.createSerialNumber());	
+		modifierBit.setStringAttribute("@crafting:mod_bit_type", "@stat_n:droid_experimentation");
+		modifierBit.setIntAttribute("@crafting:mod_bit_ratio", 4);
+		playerInventory.add(modifierBit);
+			
+		String SEALabel = "socket_gem_armor";
+		String SEADescription = "socket_gem";
+		String SEATemplate = "object/tangible/gem/shared_clothing.iff";
+		TangibleObject skillEnhancingAttachment = (TangibleObject)core.objectService.createObject(SEATemplate, player.getPlanet());
+		skillEnhancingAttachment.setStfFilename("item_n");
+		skillEnhancingAttachment.setStfName(SEALabel);
+		skillEnhancingAttachment.setDetailFilename("item_n");
+		skillEnhancingAttachment.setDetailName(SEADescription);
+		String effectName = "@stat_n:expertise_glancing_blow_ranged";
+		int modifierValue = 5;
+		skillEnhancingAttachment.setIntAttribute(effectName, modifierValue);
+		Vector<String> effectNameList = new Vector<String>();
+		effectNameList.add(effectName);
+		Vector<Integer> effectValueList = new Vector<Integer>();
+		effectValueList.add(modifierValue);
+		skillEnhancingAttachment.setAttachment("SEAeffectNameList", effectNameList);
+		skillEnhancingAttachment.setAttachment("SEAmodifierValueList", effectValueList);
+		playerInventory.add(skillEnhancingAttachment);
+		
+		TangibleObject skillEnhancingAttachment2 = (TangibleObject)core.objectService.createObject(SEATemplate, player.getPlanet());
+		skillEnhancingAttachment2.setStfFilename("item_n");
+		skillEnhancingAttachment2.setStfName(SEALabel);
+		skillEnhancingAttachment2.setDetailFilename("item_n");
+		skillEnhancingAttachment2.setDetailName(SEADescription);
+		effectName = "@stat_n:expertise_action_weapon_5";
+		String effectName2 = "@stat_n:expertise_critical_line_sp_dm";
+		modifierValue = 5;
+		skillEnhancingAttachment2.setIntAttribute(effectName, modifierValue);
+		skillEnhancingAttachment2.setIntAttribute(effectName2, 6);
+		effectNameList = new Vector<String>();
+		effectNameList.add(effectName);
+		effectNameList.add(effectName2);
+		effectValueList = new Vector<Integer>();
+		effectValueList.add(modifierValue);
+		effectValueList.add(6);
+		skillEnhancingAttachment2.setAttachment("SEAeffectNameList", effectNameList);
+		skillEnhancingAttachment2.setAttachment("SEAmodifierValueList", effectValueList);
+		playerInventory.add(skillEnhancingAttachment2);
+		
+		WeaponObject sword1 = (WeaponObject) core.objectService.createObject("object/weapon/melee/sword/shared_sword_01.iff", player.getPlanet());
+		sword1.setIntAttribute("required_combat_level", 90);
+		sword1.setAttackSpeed(1);
+		sword1.setMaxRange(5);
+		sword1.setDamageType("kinetic");
+		sword1.setMinDamage(1100);
+		sword1.setMaxDamage(1200);
+		sword1.setOptions(Options.SOCKETED, true);
+		sword1.setOptions(Options.USABLE, true);
+		sword1.setWeaponType(WeaponType.ONEHANDEDMELEE);
+		playerInventory.add(sword1);
+		System.err.println("MIX " + sword1.getObjectID());
+		
+		
+		String powerUpLabel = "item_reverse_engineering_powerup_weapon_02_01";
+		String powerUpDescription = "item_reverse_engineering_powerup_weapon_02_01";
+		String powerUpTemplate = "object/tangible/powerup/base/shared_weapon_base.iff";
+
+		int powerValue = 12;
+		TangibleObject powerUp = (TangibleObject) core.objectService.createObject(powerUpTemplate, player.getPlanet());
+
+		powerUp.setStfFilename("static_item_n");
+		powerUp.setStfName(powerUpLabel);
+		powerUp.setDetailFilename("static_item_d");
+		powerUp.setDetailName(powerUpDescription);
+		powerUp.setIntAttribute("@stat_n:droid_experimentation", powerValue);	
+		powerUp.setAttachment("effectName","droid_experimentation");
+		powerUp.setAttachment("powerValue",powerValue);
+		powerUp.setIntAttribute("num_in_stack", 250);	
+		powerUp.setAttachment("radial_filename", "item/item");
+		playerInventory.add(powerUp);
+		
 	}
 	
 	
