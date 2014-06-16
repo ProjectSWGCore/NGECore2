@@ -1,5 +1,5 @@
 import sys
-# Project SWG:   Miners Camp:  Static Spawns
+# Project SWG:   Droid Legs Camp:  Static Spawns
 # (C)2014 ProjectSWG
 
 
