@@ -45,11 +45,15 @@ public class BaselinesMessage extends UnitTest {
 		}
 		
 		try {
-			if (!((Boolean) Class.forName("protocol.unitTests.baselines." + (new StringBuilder(new String(buffer.flip().array(), 14, 4, "US-ASCII"))).reverse().toString() + buffer.skip(18).get()).getMethod("isValid", new Class[] { IoBuffer.class }).invoke(null, new Object[] { buffer.flip() }))) {
+			if (!((Boolean) Class.forName("protocol.unitTests.baselines." + (new StringBuilder(new String(buffer.flip().array(), 14, 4, "US-ASCII"))).reverse().toString() + buffer.skip(18).get()).getMethod("validate", new Class[] { IoBuffer.class }).invoke(null, new Object[] { buffer.flip() }))) {
 				return false;
 			}
+			
+			System.out.println("Passed baseline test.");
 		} catch (Exception e) {
-			return false;
+			System.out.println("Couldn't perform baseline test.");
+			//System.out.println(e.getMessage());
+			//return false;
 		}
 		
 		if (buffer.position() < length) {
