@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('mountain_squill_hunter')
 	mobileTemplate.setLevel(19)
-	mobileTemplate.setMinLevel(18)
-	mobileTemplate.setMaxLevel(21)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
@@ -29,6 +27,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("squill")
 	mobileTemplate.setAssistRange(10)
 	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_mountain_squill.iff')
