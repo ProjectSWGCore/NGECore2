@@ -22,21 +22,21 @@
 package services.mission;
 
 import java.io.Serializable;
+
 import main.NGECore;
 
-import com.sleepycat.persist.model.Persistent;
-
+import engine.resources.objects.Delta;
+import engine.resources.objects.SWGObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.mission.MissionObject;
 
-@Persistent(version=0)
-public abstract class MissionObjective implements Serializable {
+public abstract class MissionObjective extends Delta implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
-
+	
 	protected long startTime;
 	protected boolean activated;
-	protected MissionObject parent;
+	protected transient MissionObject parent;
 	private int objectivePhase;
 	
 	public MissionObjective() { }
@@ -48,11 +48,16 @@ public abstract class MissionObjective implements Serializable {
 		this.objectivePhase = 0;
 	}
 	
+	public void init(SWGObject object) {
+		super.init(object);
+		parent = (MissionObject) object;
+	}
+	
 	public abstract void activate(NGECore core, CreatureObject player);
 	public abstract void complete(NGECore core, CreatureObject player);
 	public abstract void abort(NGECore core, CreatureObject player);
 	public abstract void update(NGECore core, CreatureObject player);
-
+	
 	public long getStartTime() { return startTime; }
 	
 	public boolean isActivated() { return activated; }
@@ -62,4 +67,9 @@ public abstract class MissionObjective implements Serializable {
 	
 	public int getObjectivePhase() { return objectivePhase; }
 	public void setObjectivePhase(int phase) { this.objectivePhase = phase; }
+	
+	public byte[] getBytes() {
+		return new byte[] { };
+	}
+	
 }

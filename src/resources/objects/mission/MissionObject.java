@@ -23,9 +23,11 @@ package resources.objects.mission;
 
 import java.io.Serializable;
 
+import main.NGECore;
+
 import org.apache.mina.core.buffer.IoBuffer;
 
-import main.NGECore;
+import resources.objectives.DefaultMissionObjective;
 import resources.objects.intangible.IntangibleObject;
 import resources.objects.waypoint.WaypointObject;
 import services.mission.MissionLocation;
@@ -56,7 +58,7 @@ public class MissionObject extends IntangibleObject implements Serializable {
 	@Override
 	public Baseline getOtherVariables() {
 		Baseline baseline = super.getOtherVariables();
-		baseline.put("objective", null);
+		baseline.put("objective", new DefaultMissionObjective(this));
 		baseline.put("bountyMarkId", (long) 0);
 		baseline.put("missionId", 0);
 		baseline.put("missionType", "");
@@ -76,10 +78,7 @@ public class MissionObject extends IntangibleObject implements Serializable {
 		baseline.put("repeatCounter", 0);
 		baseline.put("missionType", 0);
 		baseline.put("targetName", "");
-		
-		WaypointObject wp = (WaypointObject) NGECore.getInstance().objectService.createObject("object/waypoint/base/shared_base_waypoint.iff", NGECore.getInstance().terrainService.getPlanetByID(0));
-		wp.setActive(true);
-		baseline.put("waypoint", wp);
+		baseline.put("waypoint", (WaypointObject) NGECore.getInstance().objectService.createObject("object/waypoint/base/shared_base_waypoint.iff", getPlanet()));
 		return baseline;
 	}
 	
