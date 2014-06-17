@@ -48,7 +48,6 @@ import engine.resources.service.INetworkRemoteEvent;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
-import resources.skills.SkillMod;
 
 public class EquipmentService implements INetworkDispatch {
 	

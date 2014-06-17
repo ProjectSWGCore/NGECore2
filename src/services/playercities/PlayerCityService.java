@@ -21,7 +21,6 @@
  ******************************************************************************/
 package services.playercities;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 import java.util.Random;
@@ -33,7 +32,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import resources.common.OutOfBand;
-import resources.common.ProsePackage;
 import resources.datatables.Citizenship;
 import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;

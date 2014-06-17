@@ -26,10 +26,7 @@ import java.util.Map;
 import java.util.Vector;
 
 import main.NGECore;
-import protocol.swg.SceneCreateObjectByCrc;
 import protocol.swg.SceneDestroyObject;
-import protocol.swg.SceneEndBaselines;
-import protocol.swg.UpdateContainmentMessage;
 
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
@@ -42,7 +39,6 @@ import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 import resources.objects.ObjectMessageBuilder;
 import resources.objects.creature.CreatureObject;
-import resources.objects.resource.ResourceContainerObject;
 import resources.objects.tangible.TangibleObject;
 
 @Persistent(version=0)
