@@ -114,6 +114,7 @@ public class PlayerCity implements Serializable {
 	private boolean shuttlePort = false;
 	private boolean registered = false;
 	private boolean zoningEnabled = false;
+	private boolean electionLocked = false; // election is locked in third and final week
 	private transient CollidableCircle area;
 	private long cityNameChangeCooldown;
 	private long cityTreasuryWithdrawalCooldown;
@@ -129,6 +130,7 @@ public class PlayerCity implements Serializable {
 	private Vector<Long> placedStructures = new Vector<Long>();
 	private Vector<Long> citizens = new Vector<Long>();
 	private Map<Long, Integer> electionList = new ConcurrentHashMap<Long, Integer>();
+	private Map<Long, Long> mayoralVotes = new ConcurrentHashMap<Long, Long>(); // Key = voter id Value = candidate id
 	private Vector<Long> cityBanList = new Vector<Long>();
 	private Vector<Long> militiaList = new Vector<Long>();
 	private Vector<Long> foundersList = new Vector<Long>();
@@ -242,9 +244,10 @@ public class PlayerCity implements Serializable {
 			core.housingService.destroyStructure((BuildingObject) core.objectService.getObject(cityHallId));
 			return;
 		}
-		
-		// TODO unregister city if rank < 3
-		
+		if(newRank < 3 && isRegistered()) {
+			setRegistered(false);
+			core.mapService.removeLocation(core.terrainService.getPlanetByID(planetId), getCityCenterPosition().x, getCityCenterPosition().z, (byte) 17);
+		}
         setRank(newRank);
         demolishCivicStructuresOutsideRadius();
         demolishHighRankStructures();
@@ -1261,6 +1264,75 @@ public class PlayerCity implements Serializable {
 	
 	public boolean isCandidate(long candidateId) {
 		return electionList.containsKey(candidateId);
+	}
+
+	public void castVote(CreatureObject actor, CreatureObject candidate) {
+		if(mayoralVotes.get(actor.getObjectID()) == candidate.getObjectID())
+			return;
+		if(mayoralVotes.containsKey(actor.getObjectID()) && electionList.containsKey(mayoralVotes.get(actor.getObjectID())))
+			electionList.put(mayoralVotes.get(actor.getObjectID()), electionList.get(mayoralVotes.get(actor.getObjectID())) - 1);
+		mayoralVotes.put(actor.getObjectID(), candidate.getObjectID());
+		electionList.put(candidate.getObjectID(), electionList.get(candidate.getObjectID()) + 1);
+	}
+
+	public boolean isElectionLocked() {
+		return electionLocked;
+	}
+
+	public void setElectionLocked(boolean electionLocked) {
+		this.electionLocked = electionLocked;
+	}
+	
+	public void sendCandidateRegisteredMail(CreatureObject candidate) {
+		Vector<Long> citizenList = getCitizens();
+		NGECore core = NGECore.getInstance();
+		for (long citizen : citizenList) {
+			if(citizen == candidate.getObjectID())
+				continue;
+			CreatureObject citizenObject = core.objectService.getObject(citizen) == null ? core.objectService.getCreatureFromDB(citizen) : (CreatureObject) core.objectService.getObject(citizen);
+			if(citizenObject == null)
+				continue;
+			Mail actorMail = new Mail();
+	        actorMail.setMailId(NGECore.getInstance().chatService.generateMailId());
+	        actorMail.setRecieverId(citizen);
+	        actorMail.setStatus(Mail.NEW);
+	        actorMail.setTimeStamp((int) (new Date().getTime() / 1000));
+	        actorMail.setSubject("@city/city:registered_citizen_email_subject");
+	        actorMail.setSenderName("@city/city:new_city_from");
+	        actorMail.addProseAttachment(new ProsePackage("@city/city:rceb", "TO", candidate.getCustomName()));
+	        
+	        NGECore.getInstance().chatService.storePersistentMessage(actorMail);
+	        if (citizenObject.getClient() != null)
+	        	NGECore.getInstance().chatService.sendPersistentMessageHeader(citizenObject.getClient(), actorMail);
+
+		}
+
+	}
+
+	public void sendCandidateUnregisteredMail(CreatureObject candidate) {
+		Vector<Long> citizenList = getCitizens();
+		NGECore core = NGECore.getInstance();
+		for (long citizen : citizenList) {
+			if(citizen == candidate.getObjectID())
+				continue;
+			CreatureObject citizenObject = core.objectService.getObject(citizen) == null ? core.objectService.getCreatureFromDB(citizen) : (CreatureObject) core.objectService.getObject(citizen);
+			if(citizenObject == null)
+				continue;
+			Mail actorMail = new Mail();
+	        actorMail.setMailId(NGECore.getInstance().chatService.generateMailId());
+	        actorMail.setRecieverId(citizen);
+	        actorMail.setStatus(Mail.NEW);
+	        actorMail.setTimeStamp((int) (new Date().getTime() / 1000));
+	        actorMail.setSubject("@city/city:unregistered_citizen_email_subject");
+	        actorMail.setSenderName("@city/city:new_city_from");
+	        actorMail.addProseAttachment(new ProsePackage("@city/city:unregistered_citizen_email_body", "TO", candidate.getCustomName()));
+	        
+	        NGECore.getInstance().chatService.storePersistentMessage(actorMail);
+	        if (citizenObject.getClient() != null)
+	        	NGECore.getInstance().chatService.sendPersistentMessageHeader(citizenObject.getClient(), actorMail);
+
+		}
+
 	}
 
 	

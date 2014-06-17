@@ -2,6 +2,10 @@ from resources.common import RadialOptions
 from services.sui.SUIService import MessageBoxType
 from services.sui.SUIWindow import Trigger
 from java.util import Vector
+from java.util import TreeMap
+from java.util import Map
+from java.lang import System
+from java.lang import Long
 import sys
 
 def createRadial(core, owner, target, radials):
@@ -27,25 +31,48 @@ def handleSelection(core, owner, target, option):
 	if not city:
 		return
 	if option == 224 or option == 225:
-		handleViewStandings(core, owner)
+		core.playerCityService.handleViewStandings(owner, city)
 	if option == 226:
-		handlePromptVote(core, owner)
+		core.playerCityService.handlePromptVote(owner, city)
 	if option == 227 and city.isCandidate(owner.getObjectID()):
 		handleUnregister(core, owner)
 	if option == 227 and not city.isCandidate(owner.getObjectID()):
 		handleRegister(core, owner)
 
 	return
-	
-def handleViewStandings(core, owner):
-	return
-	
+		
 def handlePromptVote(core, owner):
 	return
 
 def handleUnregister(core, owner):
+	city = core.playerCityService.getCityObjectIsIn(owner)
+	if not city or not city.isCitizen(owner.getObjectID()):
+		return
+	if city.isElectionLocked():
+		owner.sendSystemMessage('@city/city:registration_locked', 0)
+		return
+	if city.isCandidate(owner.getObjectID()):
+		city.getElectionList().remove(Long(owner.getObjectID()))
+		owner.sendSystemMessage('@city/city:unregistered_race', 0)
+		city.sendCandidateUnregisteredMail(owner)
 	return
 
 def handleRegister(core, owner):
+	city = core.playerCityService.getCityObjectIsIn(owner)
+	if not city:
+		return
+	if not city.isCitizen(owner.getObjectID()):
+		owner.sendSystemMessage('@city/city:register_noncitizen', 0)
+		return
+	if city.isElectionLocked():
+		owner.sendSystemMessage('@city/city:registration_locked', 0)
+		return
+	if owner.getAttachment('registerElectionCooldown') and owner.getAttachment('registerElectionCooldown') > System.currentTimeMillis():
+		owner.sendSystemMessage('@city/city:register_timestamp', 0)
+		return		
+	city.getElectionList().put(Long(owner.getObjectID()), 0)
+	owner.sendSystemMessage('@city/city:register_congrats', 0)	
+	owner.setAttachment('registerElectionCooldown', System.currentTimeMillis() + 86400000)
+	city.sendCandidateRegisteredMail(owner)
 	return
 	

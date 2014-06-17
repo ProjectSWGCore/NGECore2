@@ -5,6 +5,7 @@ from services.sui.SUIService import MessageBoxType
 from services.sui.SUIWindow import Trigger
 from java.util import Vector
 from java.lang import System
+from java.lang import Long
 from java.util import Map
 from java.util import TreeMap
 import main.NGECore
@@ -39,7 +40,6 @@ def createRadial(core, owner, target, radials):
 	if city.getMayorID() != owner.getObjectID():
 		return
 		
-	radials.add(RadialOptions(0, 216, 0, '@city/city:city_management'))
 	#radials.add(RadialOptions(0, 227, 0, '@city/city:remove_trainers'))	not needed for pswg
 	radials.add(RadialOptions(3,  217, 0, '@city/city:city_name_new_t')) 
 	if city.isRegistered():
@@ -162,19 +162,19 @@ def handleManageMilitia(core, owner, target, option):
 	if not playerCity:
 		return
 	menuItems = TreeMap()
-	menuItems.put(0, '@city/city:militia_new_t')
+	menuItems.put(Long(0), '@city/city:militia_new_t')
 	for militiaId in playerCity.getMilitiaList():
 		militia = core.objectService.getObject(militiaId)
 		if not militia:
 			militia = core.objectService.getCreatureFromDB(militiaId)
 		if militia:
-			menuItems.put(militiaId, militia.getCustomName())
+			menuItems.put(Long(militiaId), militia.getCustomName())
 			
 	returnList = Vector()
 	returnList.add('List.lstList:SelectedRow')
 	window = core.suiService.createListBox(1, '@city/city:militia_t', '@city/city:militia_d', menuItems, owner, None, 0)
 	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, handleMilitiaListBox)
-	core.suiService.openSUIWindow(suiWindow)
+	core.suiService.openSUIWindow(window)
 	
 	return
 	
@@ -183,7 +183,7 @@ def handleMilitiaListBox(owner, window, eventType, returnList):
 	playerCity = core.playerCityService.getPlayerCity(owner)
 	if not playerCity:
 		return
-	index = returnList.get(0)
+	index = int(returnList.get(0))
 	id = window.getObjectIdByIndex(index)
 	if id == 0:
 		handleAddMiltiaPrompt(core, owner)
@@ -199,10 +199,11 @@ def	handleAddMiltiaPrompt(core, owner):
 	returnList = Vector()
 	returnList.add('txtInput:LocalText')
 	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, handleAddMiltia)
-	core.suiService.openSUIWindow(suiWindow)	
+	core.suiService.openSUIWindow(window)	
 	return
 	
 def handleAddMiltia(owner, window, eventType, returnList):
+	core = main.NGECore.getInstance()
 	playerCity = core.playerCityService.getPlayerCity(owner)
 	if not playerCity:
 		return
@@ -214,7 +215,7 @@ def handleAddMiltia(owner, window, eventType, returnList):
 	if not playerCity.isCitizen(militiaId):
 		owner.sendSystemMessage('@city/city:not_citizen', 0)
 		return
-	if playerCity.isMilitiaMember(militiaId):
+	if playerCity.isMilitiaMember(militiaId) or militiaId == playerCity.getMayorID():
 		owner.sendSystemMessage('That player is already a member of the city militia.', 0)
 		return
 	militia = core.objectService.getObject(militiaId)
@@ -239,9 +240,9 @@ def handleTreasuryReport(core, owner, target, option):
 	if not playerCity:
 		return
 	menuItems = TreeMap()
-	menuItems.put(1, '@city/city:treasury ' + int(playerCity.getCityTreasury()))
+	menuItems.put(Long(1), '@city/city:treasury ' + str(playerCity.getCityTreasury()))
 	window = core.suiService.createListBox(1, '@city/city:treasury_balance_t', '@city/city:treasury_balance_d', menuItems, owner, None, 0)
-	core.suiService.openSUIWindow(suiWindow)
+	core.suiService.openSUIWindow(window)
 	return
 	
 def handleStructureReport(core, owner, target, option):
@@ -254,9 +255,9 @@ def handleStructureReport(core, owner, target, option):
 		structure = core.objectService.getObject(structureId)
 		if structure and structure.getAttachment('isCivicStructure') is not None and structure.getAttachment('isCivicStructure') == True:
 			i += 1
-			menuItems.put(i, structure.getLookAtText() + ' - Condition : ' + int((structure.getMaximumCondition() - structure.getConditionDamage()) / structure.getMaximumCondition() * 100) + '%')
+			menuItems.put(Long(i), structure.getLookAtText() + ' - Condition : ' + str((structure.getMaximumCondition() - structure.getConditionDamage()) / structure.getMaximumCondition() * 100) + '%')
 	window = core.suiService.createListBox(1, '@city/city:structure_list_t', '@city/city:structure_list_d', menuItems, owner, None, 0)
-	core.suiService.openSUIWindow(suiWindow)
+	core.suiService.openSUIWindow(window)
 	return
 
 
@@ -308,7 +309,7 @@ def	handleToggleZoning(core, owner, target, option):
 	if not playerCity or playerCity.getMayorID() != owner.getObjectID():
 		return
 	
-	playerCity.setZoningEnabled(!playerCity.isZoningEnabled())
+	playerCity.setZoningEnabled(not playerCity.isZoningEnabled())
 	
 	if playerCity.isZoningEnabled():
 		owner.sendSystemMessage('@city/city:zoning_enabled', 0)	
@@ -427,14 +428,15 @@ def handleSetIncomeTax(owner):
 	return
 	
 def handleSetIncomeTaxCallBack(owner, window, eventType, returnList):
-	if int(returnList.get(0))>2000 or int(returnList.get(0))<0:
+	tax = int(returnList.get(0))
+	if tax > 2000 or tax < 0:
 		owner.sendSystemMessage('Income tax value is out of range of accepteable values.', 0)	
 		handleSetIncomeTax(owner)
 		return
 		
 	playerCity = main.NGECore.getInstance().playerCityService.getPlayerCity(owner)
-	playerCity.setIncomeTax(int(returnList.get(0)))
-	owner.sendSystemMessage('@city/city:set_income_tax', 0)	
+	playerCity.setIncomeTax(tax)
+	owner.sendSystemMessage(OutOfBand.ProsePackage('@city/city:set_income_tax', tax), 0)	
 	return
 	
 def handleSetSalesTax(owner):
@@ -449,14 +451,15 @@ def handleSetSalesTax(owner):
 	return
 	
 def handleSetSalesTaxCallBack(owner, window, eventType, returnList):
-	if int(returnList.get(0))>20 or int(returnList.get(0))<0:
+	tax = int(returnList.get(0))
+	if tax > 20 or tax < 0:
 		owner.sendSystemMessage('Sales tax value is out of range of accepteable values.', 0)	
 		handleSetSalesTax(owner)
 		return
 		
 	playerCity = main.NGECore.getInstance().playerCityService.getPlayerCity(owner)
-	playerCity.setIncomeTax(int(returnList.get(0)))
-	owner.sendSystemMessage('@city/city:set_sales_tax', 0)	
+	playerCity.setIncomeTax(tax)
+	owner.sendSystemMessage(OutOfBand.ProsePackage('@city/city:set_sales_tax', tax), 0)	
 	return
 	
 def handleSetPropertyTax(owner):
@@ -471,14 +474,15 @@ def handleSetPropertyTax(owner):
 	return
 	
 def handleSetPropertyTaxCallBack(owner, window, eventType, returnList):
-	if int(returnList.get(0))>50 or int(returnList.get(0))<0:
+	tax = int(returnList.get(0))
+	if tax > 50 or tax < 0:
 		owner.sendSystemMessage('Property tax value is out of range of accepteable values.', 0)	
 		handleSetPropertyTax(owner)
 		return
 		
 	playerCity = main.NGECore.getInstance().playerCityService.getPlayerCity(owner)
-	playerCity.setIncomeTax(int(returnList.get(0)))
-	owner.sendSystemMessage('@city/city:set_property_tax', 0)	
+	playerCity.setIncomeTax(tax)
+	owner.sendSystemMessage(OutOfBand.ProsePackage('@city/city:set_property_tax', tax), 0)	
 	return
 	
 def handleSetTravelTax(owner):
@@ -497,14 +501,15 @@ def handleSetTravelTax(owner):
 	return
 	
 def handleSetTravelTaxCallBack(owner, window, eventType, returnList):
-	if int(returnList.get(0))>500 or int(returnList.get(0))<1:
+	tax = int(returnList.get(0))
+	if tax > 500 or tax < 1:
 		owner.sendSystemMessage('Travel tax value is out of range of accepteable values.', 0)	
 		handleSetIncomeTax(owner)
 		return
 		
 	playerCity = main.NGECore.getInstance().playerCityService.getPlayerCity(owner)
-	playerCity.setTravelTax(int(returnList.get(0)))
-	owner.sendSystemMessage('@city/city:set_travel_fee', 0)	
+	playerCity.setTravelTax(tax)
+	owner.sendSystemMessage(OutOfBand.ProsePackage('@city/city:set_travel_fee', tax), 0)	
 	return
 	
 def handleSetGarageTax(owner):
@@ -519,14 +524,15 @@ def handleSetGarageTax(owner):
 	return
 	
 def handleSetGarageTaxCallBack(owner, window, eventType, returnList):
-	if int(returnList.get(0))>500 or int(returnList.get(0))<1:
+	tax = int(returnList.get(0))
+	if tax > 500 or tax < 1:
 		owner.sendSystemMessage('Garage tax value is out of range of accepteable values.', 0)	
 		handleSetIncomeTax(owner)
 		return
-		
+	
 	playerCity = main.NGECore.getInstance().playerCityService.getPlayerCity(owner)
-	playerCity.setGarageTax(int(returnList.get(0)))
-	owner.sendSystemMessage('@city/city:set_garage_tax', 0)	
+	playerCity.setGarageTax(tax)
+	owner.sendSystemMessage(OutOfBand.ProsePackage('@city/city:set_garage_tax', tax), 0)	
 	return
 	
 def handleWithdrawal(core, owner, target, option):	
@@ -570,7 +576,6 @@ def handleCitizenList(core, owner, target, option):
 	return
 	
 def setCitizenListCallBack(owner, window, eventType, returnList):
-	idx = returnList.get(0)
 	# todo add waypoint
 	return
 	
@@ -952,5 +957,5 @@ def showSpecConfirmWindow(owner):
 def handleSpecConfirmCallback(owner, window, eventType, returnList):
 	playerCity = main.NGECore.getInstance().playerCityService.getPlayerCity(owner)
 	chosenSpec = owner.getAttachment('ChosenCitySpec')
-	playerCity.setSpecialisation(chosenSpec)
+	playerCity.setSpecialization(chosenSpec)
 	return
