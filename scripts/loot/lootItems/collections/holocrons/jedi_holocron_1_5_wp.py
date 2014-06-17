@@ -23,3 +23,7 @@ def AddToCollection():
 def CollectionItemName():
 
 	return 'jedi_holocron_01_01'
+
+def stackable():
+
+	return 1
