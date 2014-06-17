@@ -9,9 +9,10 @@ def createRadial(core, owner, target, radials):
 	
 def handleSelection(core, actor, target, option):
 	if option == 21 and target:
-		print (target.getAttachment('CollectionItemName'))
-		core.collectionService.addCollection(actor, target.getAttachment('CollectionItemName'))
-		core.objectService.useObject(actor, target)
-		#core.objectService.destroyObject(target)
+		if target.getAttachment('CollectionItemName'):
+			print (target.getAttachment('CollectionItemName'))
+			core.collectionService.addCollection(actor, target.getAttachment('CollectionItemName'))
+			core.objectService.useObject(actor, target)
+			#core.objectService.destroyObject(target)
 	return
 	

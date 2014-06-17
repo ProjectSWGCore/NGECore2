@@ -11,7 +11,7 @@ def customizationAttributes():
     return ['/private/index_color_1']
     
 def customizationValues():
-    return [10]  
+    return [7]  
     
 def STFparams():
 
@@ -20,3 +20,11 @@ def STFparams():
 def AddToCollection():
 
 	return 'inv_holocron_collection_02'
+		
+def CollectionItemName():
+
+	return 'jedi_holocron_02_01'
+
+def stackable():
+
+	return 1
