@@ -986,7 +986,10 @@ public class ObjectService implements INetworkDispatch {
 
 				if(creature.getParentId() != 0) {
 					SWGObject parent = getObject(creature.getParentId());
-					System.out.println("Building: " + parent.getContainer().getTemplate());
+					if (parent == null) System.out.println("parentId isn't 0 but getObject(parentId) is null in SelectCharacter");
+					else if (parent.getContainer() == null) System.out.println("parent.getContainer() is null in SelectCharacter");
+					else if (parent.getContainer().getTemplate() == null) System.out.println("parent.getContainer().getTemplate() is null in SelectCharacter");
+					if (parent != null && parent.getContainer() != null && parent.getContainer().getTemplate() != null) System.out.println("Building: " + parent.getContainer().getTemplate());
 					parent._add(creature);
 				}
 
