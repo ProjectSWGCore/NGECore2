@@ -488,7 +488,11 @@ public class ObjectService implements INetworkDispatch {
 			
 			@Override
 			public void run() {
-				destroyObject(object);
+				try {
+					destroyObject(object);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 			
 		}, seconds, TimeUnit.SECONDS);
@@ -512,7 +516,11 @@ public class ObjectService implements INetworkDispatch {
 				
 				@Override
 				public void run() {
-					NGECore.getInstance().spawnService.spawnCreature(Template, objectId, planet.getName(), cellId, position.x, position.y, position.z, orientation.w, orientation.x, orientation.y, orientation.z, level);
+					try {
+						NGECore.getInstance().spawnService.spawnCreature(Template, objectId, planet.getName(), cellId, position.x, position.y, position.z, orientation.w, orientation.x, orientation.y, orientation.z, level);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 				}
 				
 			}, ((AIActor) object.getAttachment("AI")).getMobileTemplate().getRespawnTime(), TimeUnit.SECONDS);

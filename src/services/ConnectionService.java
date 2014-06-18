@@ -79,19 +79,23 @@ public class ConnectionService implements INetworkDispatch {
 		scheduler.scheduleAtFixedRate(new Runnable() {
 			
 			public void run() {
-				synchronized(core.getActiveConnectionsMap()) {
-					for(Client c : core.getActiveConnectionsMap().values()) {
-						if(c.getParent() != null) {
-							if ((System.currentTimeMillis() - c.getSession().getLastReadTime()) > 300000) {
-								try {
-									disconnect(c);
-								} catch (Exception e) {
-									System.err.println("ConnectionService:disconnect(): Error disconnecting client.");
-									e.printStackTrace();
+				try {
+					synchronized(core.getActiveConnectionsMap()) {
+						for(Client c : core.getActiveConnectionsMap().values()) {
+							if(c.getParent() != null) {
+								if ((System.currentTimeMillis() - c.getSession().getLastReadTime()) > 300000) {
+									try {
+										disconnect(c);
+									} catch (Exception e) {
+										System.err.println("ConnectionService:disconnect(): Error disconnecting client.");
+										e.printStackTrace();
+									}
 								}
 							}
 						}
 					}
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
 			

@@ -224,12 +224,16 @@ public class InstanceService implements INetworkDispatch {
 			private Map<String, List<Instance>> instanceMap = reference;
 			
 			public void run() {
-				for (List<Instance> instanceList : instanceMap.values()) {
-					for (Instance instance : instanceList) {
-						if ((instance.isClosed() || !instance.isOpen())) {
-							instanceList.remove(instance);
+				try {
+					for (List<Instance> instanceList : instanceMap.values()) {
+						for (Instance instance : instanceList) {
+							if ((instance.isClosed() || !instance.isOpen())) {
+								instanceList.remove(instance);
+							}
 						}
 					}
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
 			
@@ -276,21 +280,25 @@ public class InstanceService implements INetworkDispatch {
 			
 			instance.setTask(scheduler.scheduleAtFixedRate(new Runnable() {
 				
-				private Instance instance = reference;
-				private boolean sentCloseWarning = false;
-				
-				public void run() {
-					if (instance.getDuration() > 300 && instance.getTimeRemaining() <= 300 && !sentCloseWarning) {
-						instance.getActiveParticipants().stream().forEach(p -> p.sendSystemMessage("@instance:five_minute_warning", (byte) 0));
-						sentCloseWarning = true;
-					}
+				try {
+					private Instance instance = reference;
+					private boolean sentCloseWarning = false;
 					
-					if (!instance.isOpen()) {
-						instance.getActiveParticipants().stream().forEach(p -> p.sendSystemMessage("@instance:instance_time_out", (byte) 0));
-						close(instance);
+					public void run() {
+						if (instance.getDuration() > 300 && instance.getTimeRemaining() <= 300 && !sentCloseWarning) {
+							instance.getActiveParticipants().stream().forEach(p -> p.sendSystemMessage("@instance:five_minute_warning", (byte) 0));
+							sentCloseWarning = true;
+						}
+						
+						if (!instance.isOpen()) {
+							instance.getActiveParticipants().stream().forEach(p -> p.sendSystemMessage("@instance:instance_time_out", (byte) 0));
+							close(instance);
+						}
+						
+						core.scriptService.callScript("scripts/instances/", instance.getName(), "run", core, instance);
 					}
-					
-					core.scriptService.callScript("scripts/instances/", instance.getName(), "run", core, instance);
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
 				
 			}, 1, 1, TimeUnit.MINUTES));
