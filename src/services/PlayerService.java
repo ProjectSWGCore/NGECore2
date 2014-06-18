@@ -121,59 +121,79 @@ public class PlayerService implements INetworkDispatch {
 		List<ScheduledFuture<?>> scheduleList = new ArrayList<ScheduledFuture<?>>();
 		
 		scheduleList.add(scheduler.scheduleAtFixedRate(() -> {
-			ServerTimeMessage time = new ServerTimeMessage(core.getGalacticTime() / 1000);
-			IoBuffer packet = time.serialize();
-			creature.getClient().getSession().write(packet);
+			try {
+				ServerTimeMessage time = new ServerTimeMessage(core.getGalacticTime() / 1000);
+				IoBuffer packet = time.serialize();
+				creature.getClient().getSession().write(packet);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}, 45, 45, TimeUnit.SECONDS));
 		
 		scheduleList.add(scheduler.scheduleAtFixedRate(() -> {
-			PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
-			player.setTotalPlayTime((int) (player.getTotalPlayTime() + ((System.currentTimeMillis() - player.getLastPlayTimeUpdate()) / 1000)));
-			player.setLastPlayTimeUpdate(System.currentTimeMillis());
-			core.collectionService.checkExplorationRegions(creature);
+			try {
+				PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
+				player.setTotalPlayTime((int) (player.getTotalPlayTime() + ((System.currentTimeMillis() - player.getLastPlayTimeUpdate()) / 1000)));
+				player.setLastPlayTimeUpdate(System.currentTimeMillis());
+				core.collectionService.checkExplorationRegions(creature);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}, 30, 30, TimeUnit.SECONDS));
 		
 		scheduleList.add(scheduler.scheduleAtFixedRate(() -> {
-			if (creature.isInStealth() && !creature.getOption(Options.INVULNERABLE) && ((PlayerObject) creature.getSlottedObject("ghost")).getGodLevel() == 0) {
-				List<SWGObject> objects = core.simulationService.get(creature.getPlanet(), creature.getPosition().x, creature.getPosition().z, 64);
-				
-				for (SWGObject object : objects) {
-					if (object == null) {
-						continue;
-					}
+			try {
+				if (creature.isInStealth() && !creature.getOption(Options.INVULNERABLE) && ((PlayerObject) creature.getSlottedObject("ghost")).getGodLevel() == 0) {
+					List<SWGObject> objects = core.simulationService.get(creature.getPlanet(), creature.getPosition().x, creature.getPosition().z, 64);
 					
-					if (!(object instanceof CreatureObject)) {
-						continue;
-					}
-					
-					CreatureObject observer = (CreatureObject) object;
-					
-					int camoflauge = creature.getSkillModBase("camoflauge") - observer.getSkillModBase("detectcamo");
-					camoflauge -= (64 - creature.getPosition().getDistance(observer.getPosition()));
-					
-					if (new Random(camoflauge).nextInt() == camoflauge) {
-						creature.setInStealth(false);
+					for (SWGObject object : objects) {
+						if (object == null) {
+							continue;
+						}
+						
+						if (!(object instanceof CreatureObject)) {
+							continue;
+						}
+						
+						CreatureObject observer = (CreatureObject) object;
+						
+						int camoflauge = creature.getSkillModBase("camoflauge") - observer.getSkillModBase("detectcamo");
+						camoflauge -= (64 - creature.getPosition().getDistance(observer.getPosition()));
+						
+						if (new Random(camoflauge).nextInt() == camoflauge) {
+							creature.setInStealth(false);
+						}
 					}
 				}
-			}
-			
-			if (creature.getDefendersList().size() == 0 && creature.isInCombat()) {
-				creature.setInCombat(false);
+				
+				if (creature.getDefendersList().size() == 0 && creature.isInCombat()) {
+					creature.setInCombat(false);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}, 15, 15, TimeUnit.SECONDS));
 		
 		scheduleList.add(scheduler.scheduleAtFixedRate(() -> {
-			if(creature.getAction() < creature.getMaxAction() && creature.getPosture() != 14) {
-				if(!creature.isInCombat())
-					creature.setAction(creature.getAction() + (15 + creature.getLevel() * 5));
-				else
-					creature.setAction(creature.getAction() + ((15 + creature.getLevel() * 5) / 2));
+			try {
+				if(creature.getAction() < creature.getMaxAction() && creature.getPosture() != 14) {
+					if(!creature.isInCombat())
+						creature.setAction(creature.getAction() + (15 + creature.getLevel() * 5));
+					else
+						creature.setAction(creature.getAction() + ((15 + creature.getLevel() * 5) / 2));
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}, 0, 1000, TimeUnit.MILLISECONDS));
 
 		scheduleList.add(scheduler.scheduleAtFixedRate(() -> {
-			if(creature.getHealth() < creature.getMaxHealth() && !creature.isInCombat() && creature.getPosture() != 13 && creature.getPosture() != 14)
-				creature.setHealth(creature.getHealth() + (36 + creature.getLevel() * 4));
+			try {
+				if(creature.getHealth() < creature.getMaxHealth() && !creature.isInCombat() && creature.getPosture() != 13 && creature.getPosture() != 14)
+					creature.setHealth(creature.getHealth() + (36 + creature.getLevel() * 4));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}, 0, 1000, TimeUnit.MILLISECONDS));
 		schedulers.put(creature.getObjectID(), scheduleList);
 		
@@ -182,10 +202,13 @@ public class PlayerService implements INetworkDispatch {
 
 			@Override
 			public void run() {
-				if (ghost.isSet(PlayerFlags.LD)) {
-					ghost.toggleFlag(PlayerFlags.LD);
+				try {
+					if (ghost.isSet(PlayerFlags.LD)) {
+						ghost.toggleFlag(PlayerFlags.LD);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
-
 			}
 			
 		}, 1, TimeUnit.SECONDS);*/

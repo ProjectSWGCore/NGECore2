@@ -26,6 +26,7 @@ import java.util.Map;
 
 import resources.common.FileUtilities;
 import resources.objects.creature.CreatureObject;
+import resources.objects.player.PlayerObject;
 import resources.skills.SkillMod;
 import main.NGECore;
 import engine.clientdata.ClientFileManager;
@@ -106,7 +107,9 @@ public class SkillModService implements INetworkDispatch {
 	
 	public float getSkillModValue(CreatureObject creature, String name) {
 		int divisor = (skillModMap.get(name) == null) ? 0 : (Integer) visitor.getObject(skillModMap.get(name), 5);
-		return creature.getSkillModValue(name, divisor);
+		boolean percent = (skillModMap.get(name) == null) ? false : (Boolean) visitor.getObject(skillModMap.get(name), 6);
+		String profession = (skillModMap.get(name) == null || creature.getSlottedObject("ghost") == null) ? null : (String) visitor.getObject(skillModMap.get(name), 1);
+		return ((profession == null || !profession.equals(((PlayerObject) creature.getSlottedObject("ghost")).getProfession())) ? 0.0f : creature.getSkillModValue(name, divisor, percent));
 	}
 	
 	public void deductSkillMod(CreatureObject creature, String name, SkillMod skillMod) {
@@ -144,6 +147,14 @@ public class SkillModService implements INetworkDispatch {
 	
 	public void removeSkillMod(CreatureObject creature, String name) {
 		creature.getSkillMods().remove(name);
+	}
+	
+	public DatatableVisitor getVisitor() {
+		return visitor;
+	}
+	
+	public Map<String, Integer> getSkillModMap() {
+		return skillModMap;
 	}
 	
 	@Override

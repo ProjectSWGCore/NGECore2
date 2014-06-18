@@ -28,14 +28,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 import resources.datatables.Options;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
-import services.travel.TravelPoint;
 import engine.resources.container.Traverser;
 import engine.resources.objects.SWGObject;
 import engine.resources.service.INetworkDispatch;

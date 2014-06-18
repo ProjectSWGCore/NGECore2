@@ -22,7 +22,7 @@
 package resources.datatables;
 
 public class StateStatus {
-	// States.iff
+	
 	public static int Invalid = -1;
 	public static int Cover = 0;
 	public static int Combat = 1;
@@ -65,4 +65,5 @@ public class StateStatus {
 	public static int AcidBurned = 38;
 	public static int EnergyBurned = 39;
 	public static int KineticBurned = 40;
+	
 }

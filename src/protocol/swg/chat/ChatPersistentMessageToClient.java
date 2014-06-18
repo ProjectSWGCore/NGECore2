@@ -26,11 +26,9 @@ import java.util.List;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import engine.resources.common.StringUtilities;
 import protocol.swg.SWGMessage;
 import resources.common.ProsePackage;
 import services.chat.WaypointAttachment;
-
 
 public class ChatPersistentMessageToClient extends SWGMessage {
 	

@@ -25,9 +25,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import resources.common.OutOfBand;
 import resources.common.ProsePackage;
-import engine.resources.common.Stf;
 import com.sleepycat.persist.model.Entity;
 import com.sleepycat.persist.model.PrimaryKey;
 

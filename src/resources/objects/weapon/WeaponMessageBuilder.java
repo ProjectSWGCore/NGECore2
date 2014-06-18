@@ -98,12 +98,12 @@ public class WeaponMessageBuilder extends TangibleMessageBuilder {
 		buffer.put(getAsciiString(weapon.getDetailFilename()));
 		buffer.putInt(0);
 		buffer.put(getAsciiString(weapon.getDetailName()));
+		buffer.put((byte) 0);
 		buffer.putLong(0);
+		buffer.putInt(0);
 		buffer.putLong(0);
 		buffer.putLong(0); // unks
 		buffer.putLong(0);
-		buffer.putInt(0);
-		buffer.put((byte) 0);
 		buffer.putInt(weapon.getWeaponType());
 
 		int size = buffer.position();

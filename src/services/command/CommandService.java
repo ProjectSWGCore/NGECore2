@@ -451,6 +451,11 @@ public class CommandService implements INetworkDispatch  {
 	}
 	
 	public void processCombatCommand(CreatureObject attacker, SWGObject target, CombatCommand command, int actionCounter, String commandArgs) {
+		if (target == null) {
+			System.err.println("ProcessCombatCommand: Target is null");
+			return;
+		}
+		
 		if (FileUtilities.doesFileExist("scripts/commands/combat/" + command.getCommandName() + ".py")) {
 			core.scriptService.callScript("scripts/commands/combat/", command.getCommandName(), "setup", core, attacker, target, command);
 		}
@@ -491,6 +496,9 @@ public class CommandService implements INetworkDispatch  {
 			weapon = (WeaponObject) attacker.getSlottedObject("default_weapon");	// use unarmed/default weapon if no weapon is equipped
 		else
 			weapon = (WeaponObject) core.objectService.getObject(attacker.getWeaponId());
+		
+		if(weapon == null)
+			weapon = (WeaponObject) attacker.getSlottedObject("default_weapon");
 		
 		float maxRange = 0;
 		

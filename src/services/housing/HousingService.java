@@ -187,38 +187,40 @@ public class HousingService implements INetworkDispatch {
 		
 		AtomicReference<ScheduledFuture<?>> ref = new AtomicReference<ScheduledFuture<?>>();
 		ref.set(scheduler.scheduleAtFixedRate(() -> {
-			
-			if(core.objectService.getObject(building.getObjectID()) == null)
-				ref.get().cancel(true);
-				
-			int amount = building.getBMR();
-			boolean needSave = false;
-			CreatureObject owner = (CreatureObject) core.objectService.getObject((long) building.getAttachment("structureOwner"));
-			if(owner == null) {
-				needSave = true;
-				owner = core.objectService.getCreatureFromDB((long) building.getAttachment("structureOwner"));
-			}
-			if(building.getMaintenanceAmount() >= amount) {
-				building.setMaintenanceAmount(building.getMaintenanceAmount() - amount);
-			} else {
-				if(owner == null)
+			try {
+				if(core.objectService.getObject(building.getObjectID()) == null)
 					ref.get().cancel(true);
-				if(owner.getBankCredits() >= amount) {
-					owner.setBankCredits(owner.getBankCredits() - amount);
-				} else if(owner.getCashCredits() >= amount) {
-					owner.setCashCredits(owner.getCashCredits() - amount);					
-				} else {
-					if(building.getAttachment("isCondemned") != null && !((boolean) building.getAttachment("isCondemned"))) {
-						building.setAttachment("isCondemned", true);
-						building.setBuildingName(building.getBuildingName() + " \\#FF0000(CONDEMNED)\\#FFFFFF");
-					}
-					building.setOutstandingMaintenance(building.getOutstandingMaintenance() + amount);
-					// TODO: lock down building, add option to pay outstanding maintenance and uncondemn building
+					
+				int amount = building.getBMR();
+				boolean needSave = false;
+				CreatureObject owner = (CreatureObject) core.objectService.getObject((long) building.getAttachment("structureOwner"));
+				if(owner == null) {
+					needSave = true;
+					owner = core.objectService.getCreatureFromDB((long) building.getAttachment("structureOwner"));
 				}
+				if(building.getMaintenanceAmount() >= amount) {
+					building.setMaintenanceAmount(building.getMaintenanceAmount() - amount);
+				} else {
+					if(owner == null)
+						ref.get().cancel(true);
+					if(owner.getBankCredits() >= amount) {
+						owner.setBankCredits(owner.getBankCredits() - amount);
+					} else if(owner.getCashCredits() >= amount) {
+						owner.setCashCredits(owner.getCashCredits() - amount);					
+					} else {
+						if(building.getAttachment("isCondemned") != null && !((boolean) building.getAttachment("isCondemned"))) {
+							building.setAttachment("isCondemned", true);
+							building.setBuildingName(building.getBuildingName() + " \\#FF0000(CONDEMNED)\\#FFFFFF");
+						}
+						building.setOutstandingMaintenance(building.getOutstandingMaintenance() + amount);
+						// TODO: lock down building, add option to pay outstanding maintenance and uncondemn building
+					}
+				}
+				if(needSave && owner != null)
+					core.objectService.persistObject(owner.getObjectID(), owner, core.getSWGObjectODB());
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-			if(needSave && owner != null)
-				core.objectService.persistObject(owner.getObjectID(), owner, core.getSWGObjectODB());
-			
 		}, (long) building.getAttachment("nextMaintenance") - System.currentTimeMillis(), 3600000, TimeUnit.MILLISECONDS));
 		
 	}
@@ -234,10 +236,20 @@ public class HousingService implements INetworkDispatch {
 		});
 	}
 	
-	@SuppressWarnings("unchecked")
 	public boolean getPermissions(SWGObject player, SWGObject container) {
+		// Temp fix for null error on return line.
+		if (player == null || container == null || container.getContainer() == null) {
+			return false;
+		}
+		
 		SWGObject structure = container.getContainer();
-		return ((BuildingObject) structure).isOnAdminList((CreatureObject) player);
+		
+		// This could easily be a ShipObject in the future.
+		if (structure instanceof BuildingObject) {
+			return ((BuildingObject) structure).isOnAdminList((CreatureObject) player);
+		} else {
+			return false;
+		}
 	}
 	
 	public void createDestroySUIPage(final SWGObject owner, final TangibleObject target) {

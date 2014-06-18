@@ -649,22 +649,24 @@ public class EntertainmentService implements INetworkDispatch {
 	
 	public void startPerformanceExperience(final CreatureObject entertainer) {
 		final ScheduledFuture<?> experienceTask = scheduler.scheduleAtFixedRate(() -> {
-		
-			Performance p = performancesByIndex.get(entertainer.getPerformanceId());
-			if (p == null) {
+			try {
+				Performance p = performancesByIndex.get(entertainer.getPerformanceId());
+				if (p == null) {
+					entertainer.setFlourishCount(0);
+					return;
+				}
+				
+				int floXP = p.getFlourishXpMod();
+				int floCount = entertainer.getFlourishCount();
+				
+				//FIXME: this is not an accurate implementation yet. It needs group bonuses and other things.
+				int XP = (int) Math.round( ((floCount > 2) ? 2 : floCount) * floXP * 3.8 );
+				
 				entertainer.setFlourishCount(0);
-				return;
+				core.playerService.giveExperience(entertainer, XP);
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-			
-			int floXP = p.getFlourishXpMod();
-			int floCount = entertainer.getFlourishCount();
-			
-			//FIXME: this is not an accurate implementation yet. It needs group bonuses and other things.
-			int XP = (int) Math.round( ((floCount > 2) ? 2 : floCount) * floXP * 3.8 );
-			
-			entertainer.setFlourishCount(0);
-			core.playerService.giveExperience(entertainer, XP);
-			
 		}, 10000, 10000, TimeUnit.MILLISECONDS);
 		
 		entertainer.setEntertainerExperience(experienceTask);
@@ -685,26 +687,29 @@ public class EntertainmentService implements INetworkDispatch {
 		spectator.setMoodAnimation("entertained");
 
 		final ScheduledFuture<?> spectatorTask = scheduler.scheduleAtFixedRate(() -> {
-			
-			if (spectator.getPosition().getDistance2D(performer.getWorldPosition()) > (float) 70) {
-
-				if(((performer.getPerformanceType()) ? "dance" : "music").equals("dance")) {
-					spectator.setPerformanceWatchee(null);
-					spectator.sendSystemMessage("You stop watching " + performer.getCustomName() + " because " + performer.getCustomName()
-							+ " is out of range.", (byte) 0);
+			try {
+				if (spectator.getPosition().getDistance2D(performer.getWorldPosition()) > (float) 70) {
+	
+					if(((performer.getPerformanceType()) ? "dance" : "music").equals("dance")) {
+						spectator.setPerformanceWatchee(null);
+						spectator.sendSystemMessage("You stop watching " + performer.getCustomName() + " because " + performer.getCustomName()
+								+ " is out of range.", (byte) 0);
+					}
+					else {
+						spectator.setPerformanceListenee(null);
+						spectator.sendSystemMessage("You stop listening to " + performer.getCustomName() + " because " + performer.getCustomName()
+								+ " is out of range.", (byte) 0);
+					}
+					spectator.setMoodAnimation("neutral");
+					performer.removeSpectator(spectator);
+	
+					if (spectator.getInspirationTick().cancel(true))
+						spectator.getSpectatorTask().cancel(true);
+					
 				}
-				else {
-					spectator.setPerformanceListenee(null);
-					spectator.sendSystemMessage("You stop listening to " + performer.getCustomName() + " because " + performer.getCustomName()
-							+ " is out of range.", (byte) 0);
-				}
-				spectator.setMoodAnimation("neutral");
-				performer.removeSpectator(spectator);
-
-				if (spectator.getInspirationTick().cancel(true))
-					spectator.getSpectatorTask().cancel(true);
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-
 		}, 2, 2, TimeUnit.SECONDS);
 
 		spectator.setSpectatorTask(spectatorTask);
@@ -742,8 +747,12 @@ public class EntertainmentService implements INetworkDispatch {
 		performer.doSkillAnimation(anmFlo);
 
 		scheduler.schedule(() -> {
-			performer.setFlourishCount(0);
-			performer.setPerformingFlourish(false);
+			try {
+				performer.setFlourishCount(0);
+				performer.setPerformingFlourish(false);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}, (long) performance.getLoopDuration(), TimeUnit.SECONDS);
 	}
 	
@@ -786,7 +795,11 @@ public class EntertainmentService implements INetworkDispatch {
 			performer.playEffectObject(effect, "");
 		
 		scheduler.schedule(() -> {
-			performer.setPerformingEffect(false);
+			try {
+				performer.setPerformingEffect(false);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}, (long) pEffect.getEffectDuration(), TimeUnit.SECONDS);
 
 		return true;
@@ -796,38 +809,40 @@ public class EntertainmentService implements INetworkDispatch {
 		// http://youtu.be/WqyAde-oC7o?t=11m14s  << Player watching entertainer (Has ring only, no pet, + 15 min ticks)
 		// TODO: Camp/Cantina checks for expertise and duration bonus %. Right now only using basic values.
 		final ScheduledFuture<?> inspirationTick = scheduler.scheduleAtFixedRate(() -> {
-
-			int time = 0; // current buff duration time (minutes)
-			int buffCap = 215; // 5 hours 35 minutes - 2 hours (buff duration increase bonus) << Taken from video, doesn't account for performance bonuses etc.
-
-			if (spectator.getAttachment("inspireDuration") != null)
-				time+= (int) spectator.getAttachment("inspireDuration");
-
-			if (performer.getSkillMod("expertise_en_inspire_buff_duration_increase") != null) {
-				SkillMod durationMod = performer.getSkillMod("expertise_en_inspire_buff_duration_increase");
-				buffCap += durationMod.getBase() + durationMod.getModifier();
-			}
-
-			if (time >= buffCap) {
-				spectator.setAttachment("inspireDuration", buffCap); // incase someone went over cap
-				spectator.getInspirationTick().cancel(true);
-			} else {
-				int entTick = 10;
-				if (performer.getSkillMod("expertise_en_inspire_pulse_duration_increase") != null) {
-					SkillMod pulseMod = performer.getSkillMod("expertise_en_inspire_pulse_duration_increase");
-					entTick += pulseMod.getBase() + pulseMod.getModifier();
+			try {
+				int time = 0; // current buff duration time (minutes)
+				int buffCap = 215; // 5 hours 35 minutes - 2 hours (buff duration increase bonus) << Taken from video, doesn't account for performance bonuses etc.
+	
+				if (spectator.getAttachment("inspireDuration") != null)
+					time+= (int) spectator.getAttachment("inspireDuration");
+	
+				if (performer.getSkillMod("expertise_en_inspire_buff_duration_increase") != null) {
+					SkillMod durationMod = performer.getSkillMod("expertise_en_inspire_buff_duration_increase");
+					buffCap += durationMod.getBase() + durationMod.getModifier();
 				}
-
-				int duration = (time + entTick); // minutes
-				int hMinutes = MathUtilities.secondsToHourMinutes(duration * 60);
-				int hours = MathUtilities.secondsToWholeHours(duration * 60);
-
-				spectator.showFlyText(OutOfBand.ProsePackage("@spam:buff_duration_tick_observer", "TO", hours + " hours , " + hMinutes + " minutes "), 0.66f, new RGB(255, 182, 193), 3, false);
-
-				spectator.setAttachment("inspireDuration", duration);
-				//System.out.println("Inspire Duration: " + spectator.getAttachment("inspireDuration") + " on " + spectator.getCustomName());
+	
+				if (time >= buffCap) {
+					spectator.setAttachment("inspireDuration", buffCap); // incase someone went over cap
+					spectator.getInspirationTick().cancel(true);
+				} else {
+					int entTick = 10;
+					if (performer.getSkillMod("expertise_en_inspire_pulse_duration_increase") != null) {
+						SkillMod pulseMod = performer.getSkillMod("expertise_en_inspire_pulse_duration_increase");
+						entTick += pulseMod.getBase() + pulseMod.getModifier();
+					}
+	
+					int duration = (time + entTick); // minutes
+					int hMinutes = MathUtilities.secondsToHourMinutes(duration * 60);
+					int hours = MathUtilities.secondsToWholeHours(duration * 60);
+	
+					spectator.showFlyText(OutOfBand.ProsePackage("@spam:buff_duration_tick_observer", "TO", hours + " hours , " + hMinutes + " minutes "), 0.66f, new RGB(255, 182, 193), 3, false);
+	
+					spectator.setAttachment("inspireDuration", duration);
+					//System.out.println("Inspire Duration: " + spectator.getAttachment("inspireDuration") + " on " + spectator.getCustomName());
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-			
 		}, 10, 10, TimeUnit.SECONDS);
 		spectator.setInspirationTick(inspirationTick);
 	}

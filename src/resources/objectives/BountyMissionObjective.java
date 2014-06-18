@@ -225,40 +225,44 @@ public class BountyMissionObjective extends MissionObjective {
 
 			@Override
 			public void run() {
-				switch(countDown.incrementAndGet()) {
-					case 15:
-						actor.sendSystemMessage("@mission/mission_generic:probe_droid_arrival_5", DisplayType.Broadcast);
-						break;
-					case 16:
-						actor.sendSystemMessage("@mission/mission_generic:probe_droid_arrival_4", DisplayType.Broadcast);
-						break;
-					case 17:
-						actor.sendSystemMessage("@mission/mission_generic:probe_droid_arrival_3", DisplayType.Broadcast);
-						break;
-					case 18:
-						actor.sendSystemMessage("@mission/mission_generic:probe_droid_arrival_2", DisplayType.Broadcast);
-						break;
-					case 19:
-						actor.sendSystemMessage("@mission/mission_generic:probe_droid_arrival_1", DisplayType.Broadcast);
-						arakydLandingLocation = SpawnPoint.getRandomPosition(actor.getPosition(), 50, 120, actor.getPlanetId());
-						PlayClientEffectLocMessage effectMsg = new PlayClientEffectLocMessage("clienteffect/probot_delivery.cef", actor.getPlanet().getName(), arakydLandingLocation);
-						actor.getClient().getSession().write(effectMsg.serialize());
-						break;
-					case 20:
-						break;
-					case 23:
-						Quaternion ori = actor.getOrientation();
-						
-						CreatureObject probe = (CreatureObject) NGECore.getInstance().staticService.spawnObject("object/creature/npc/droid/shared_imperial_probot_bounty.iff", 
-								actor.getPlanet().getName(), 0, arakydLandingLocation.x, arakydLandingLocation.y, arakydLandingLocation.z, ori.y, ori.w);
-						
-						// TODO: Move probe to the player.
-						
-						probe.setAttachment("probotRequester", actor.getObjectID());
-						probe.setAttachment("attachedMission", getMissionObject().getObjectID());
-						actor.sendSystemMessage("@mission/mission_generic:probe_droid_arrival", DisplayType.Broadcast);
-						probeSummonTask.cancel(false);
-						break;
+				try {
+					switch(countDown.incrementAndGet()) {
+						case 15:
+							actor.sendSystemMessage("@mission/mission_generic:probe_droid_arrival_5", DisplayType.Broadcast);
+							break;
+						case 16:
+							actor.sendSystemMessage("@mission/mission_generic:probe_droid_arrival_4", DisplayType.Broadcast);
+							break;
+						case 17:
+							actor.sendSystemMessage("@mission/mission_generic:probe_droid_arrival_3", DisplayType.Broadcast);
+							break;
+						case 18:
+							actor.sendSystemMessage("@mission/mission_generic:probe_droid_arrival_2", DisplayType.Broadcast);
+							break;
+						case 19:
+							actor.sendSystemMessage("@mission/mission_generic:probe_droid_arrival_1", DisplayType.Broadcast);
+							arakydLandingLocation = SpawnPoint.getRandomPosition(actor.getPosition(), 50, 120, actor.getPlanetId());
+							PlayClientEffectLocMessage effectMsg = new PlayClientEffectLocMessage("clienteffect/probot_delivery.cef", actor.getPlanet().getName(), arakydLandingLocation);
+							actor.getClient().getSession().write(effectMsg.serialize());
+							break;
+						case 20:
+							break;
+						case 23:
+							Quaternion ori = actor.getOrientation();
+							
+							CreatureObject probe = (CreatureObject) NGECore.getInstance().staticService.spawnObject("object/creature/npc/droid/shared_imperial_probot_bounty.iff", 
+									actor.getPlanet().getName(), 0, arakydLandingLocation.x, arakydLandingLocation.y, arakydLandingLocation.z, ori.y, ori.w);
+							
+							// TODO: Move probe to the player.
+							
+							probe.setAttachment("probotRequester", actor.getObjectID());
+							probe.setAttachment("attachedMission", getMissionObject().getObjectID());
+							actor.sendSystemMessage("@mission/mission_generic:probe_droid_arrival", DisplayType.Broadcast);
+							probeSummonTask.cancel(false);
+							break;
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
 		}, 1, 1, TimeUnit.SECONDS);
@@ -278,44 +282,47 @@ public class BountyMissionObjective extends MissionObjective {
 
 						@Override
 						public void run() {
-
-							MissionObject mission = getMissionObject();
-							SWGObject target = core.objectService.getObject(markObjId);
-							
-							if (target == null) {
-								actor.sendSystemMessage("@mission/mission_generic:player_target_inactive", DisplayType.Broadcast);
-								cancelLocationUpdates();
-								return;
-							} else if (target.getPlanet().getName() != getSeekerPlanet()) {
-								actor.sendSystemMessage("@mission/mission_generic:target_not_on_planet", DisplayType.Broadcast);
-								cancelLocationUpdates();
-								return;
-							} else {
+							try {
+								MissionObject mission = getMissionObject();
+								SWGObject target = core.objectService.getObject(markObjId);
 								
-								if (updates.get() >= 6) {
-									actor.sendSystemMessage("@mission/mission_generic:target_track_lost", DisplayType.Broadcast);
+								if (target == null) {
+									actor.sendSystemMessage("@mission/mission_generic:player_target_inactive", DisplayType.Broadcast);
 									cancelLocationUpdates();
 									return;
-								}
-								
-								WaypointObject missionWp = mission.getWaypoint();
-
-								if (missionWp.getPlanetCRC() != CRC.StringtoCRC(target.getPlanet().name)) {
-									WaypointObject waypoint = (WaypointObject) getMissionObject().getWaypoint();
-									waypoint.setActive(true);
-									waypoint.setColor(WaypointObject.ORANGE);
-									waypoint.setName(getMissionObject().getTargetName());
-									waypoint.setPlanetCRC(CRC.StringtoCRC(target.getPlanet().getName()));
-									waypoint.setStringAttribute("", "");
-									getMissionObject().setWaypoint(waypoint);
+								} else if (target.getPlanet().getName() != getSeekerPlanet()) {
+									actor.sendSystemMessage("@mission/mission_generic:target_not_on_planet", DisplayType.Broadcast);
+									cancelLocationUpdates();
+									return;
 								} else {
-									missionWp.setPosition(target.getWorldPosition());
-									mission.setWaypoint(missionWp);
-									getMissionObject().setWaypoint(missionWp);
+									
+									if (updates.get() >= 6) {
+										actor.sendSystemMessage("@mission/mission_generic:target_track_lost", DisplayType.Broadcast);
+										cancelLocationUpdates();
+										return;
+									}
+									
+									WaypointObject missionWp = mission.getWaypoint();
+	
+									if (missionWp.getPlanetCRC() != CRC.StringtoCRC(target.getPlanet().name)) {
+										WaypointObject waypoint = (WaypointObject) getMissionObject().getWaypoint();
+										waypoint.setActive(true);
+										waypoint.setColor(WaypointObject.ORANGE);
+										waypoint.setName(getMissionObject().getTargetName());
+										waypoint.setPlanetCRC(CRC.StringtoCRC(target.getPlanet().getName()));
+										waypoint.setStringAttribute("", "");
+										getMissionObject().setWaypoint(waypoint);
+									} else {
+										missionWp.setPosition(target.getWorldPosition());
+										mission.setWaypoint(missionWp);
+										getMissionObject().setWaypoint(missionWp);
+									}
+									actor.sendSystemMessage("@mission/mission_generic:target_location_updated_ground", DisplayType.Broadcast);
+									actor.sendSystemMessage("@mission/mission_generic:target_continue_tracking", DisplayType.Broadcast);
+									updates.getAndIncrement();
 								}
-								actor.sendSystemMessage("@mission/mission_generic:target_location_updated_ground", DisplayType.Broadcast);
-								actor.sendSystemMessage("@mission/mission_generic:target_continue_tracking", DisplayType.Broadcast);
-								updates.getAndIncrement();
+							} catch (Exception e) {
+								e.printStackTrace();
 							}
 						}
 					}, 60, 15, TimeUnit.SECONDS);
@@ -327,28 +334,30 @@ public class BountyMissionObjective extends MissionObjective {
 	public void beginArakydUpdate(final CreatureObject actor) {
 		arakydActive = true;
 		Executors.newScheduledThreadPool(1).schedule(() -> {
-			
-			int number = new Random().nextInt(100);
-			
-			// Effectively a 16% chance of failing. The failure type is calculated by subtracting 10 from the number received.
-			if (number <= 16 && number != 0) { actor.sendSystemMessage("@mission/mission_generic:target_not_found_" + String.valueOf(10 - number), (byte) 0); return; }
-			
-			SWGObject target = NGECore.getInstance().objectService.getObject(markObjId);
-			if (target == null) { actor.sendSystemMessage("@mission/mission_generic:player_target_inactive", DisplayType.Broadcast); }
-			
-			WaypointObject waypoint = (WaypointObject) NGECore.getInstance().objectService.createObject("object/waypoint/shared_waypoint.iff", target.getPlanet(), 
-					target.getWorldPosition().x, target.getWorldPosition().z, target.getWorldPosition().y);
-			waypoint.setActive(true);
-			waypoint.setColor(WaypointObject.ORANGE);
-			waypoint.setName(getMissionObject().getTargetName());
-			waypoint.setPlanetCRC(CRC.StringtoCRC(target.getPlanet().getName()));
-			waypoint.setStringAttribute("", "");
-			
-			actor.getClient().getSession().write(getMissionObject().getBaseline3().set("waypoint", waypoint));
-			
-			actor.sendSystemMessage("@mission/mission_generic:target_location_updated_ground", DisplayType.Broadcast);
-			actor.sendSystemMessage("@mission/mission_generic:target_located_" + target.getPlanet().getName(), DisplayType.Broadcast);
-			
+			try {
+				int number = new Random().nextInt(100);
+				
+				// Effectively a 16% chance of failing. The failure type is calculated by subtracting 10 from the number received.
+				if (number <= 16 && number != 0) { actor.sendSystemMessage("@mission/mission_generic:target_not_found_" + String.valueOf(10 - number), (byte) 0); return; }
+				
+				SWGObject target = NGECore.getInstance().objectService.getObject(markObjId);
+				if (target == null) { actor.sendSystemMessage("@mission/mission_generic:player_target_inactive", DisplayType.Broadcast); }
+				
+				WaypointObject waypoint = (WaypointObject) NGECore.getInstance().objectService.createObject("object/waypoint/shared_waypoint.iff", target.getPlanet(), 
+						target.getWorldPosition().x, target.getWorldPosition().z, target.getWorldPosition().y);
+				waypoint.setActive(true);
+				waypoint.setColor(WaypointObject.ORANGE);
+				waypoint.setName(getMissionObject().getTargetName());
+				waypoint.setPlanetCRC(CRC.StringtoCRC(target.getPlanet().getName()));
+				waypoint.setStringAttribute("", "");
+				
+				actor.getClient().getSession().write(getMissionObject().getBaseline3().set("waypoint", waypoint));
+				
+				actor.sendSystemMessage("@mission/mission_generic:target_location_updated_ground", DisplayType.Broadcast);
+				actor.sendSystemMessage("@mission/mission_generic:target_located_" + target.getPlanet().getName(), DisplayType.Broadcast);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}, 180, TimeUnit.SECONDS);
 	}
 	

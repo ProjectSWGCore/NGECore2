@@ -444,7 +444,11 @@ public class Buff implements IDelta, Serializable {
 			@Override
 			public void run() {
 				
-				core.buffService.removeBuffFromCreature(owner, Buff.this);
+				try {
+					core.buffService.removeBuffFromCreature(owner, Buff.this);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			
 			}
 			

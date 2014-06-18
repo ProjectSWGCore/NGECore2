@@ -152,15 +152,17 @@ public class CombatService implements INetworkDispatch {
 
 					@Override
 					public void run() {
-						
-						if(command.getDelayAttackParticle().length() > 0)
-							target.notifyObservers(new PlayClientEffectLocMessage(command.getDelayAttackParticle(), target.getPlanet().getName(), target.getWorldPosition()), true);
-
-						if(command.getAttackType() == 1)
-							doSingleTargetCombat(attacker, target, weapon, command, actionCounter);
-						else if(command.getAttackType() == 0 || command.getAttackType() == 2 || command.getAttackType() == 3)
-							doAreaCombat(attacker, targetPos, weapon, command, actionCounter, targetParent);
-						
+						try {
+							if(command.getDelayAttackParticle().length() > 0)
+								target.notifyObservers(new PlayClientEffectLocMessage(command.getDelayAttackParticle(), target.getPlanet().getName(), target.getWorldPosition()), true);
+	
+							if(command.getAttackType() == 1)
+								doSingleTargetCombat(attacker, target, weapon, command, actionCounter);
+							else if(command.getAttackType() == 0 || command.getAttackType() == 2 || command.getAttackType() == 3)
+								doAreaCombat(attacker, targetPos, weapon, command, actionCounter, targetParent);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
 					}
 					
 				}, 0, (long) (command.getDelayAttackInterval() * 1000), TimeUnit.MILLISECONDS);
@@ -169,7 +171,11 @@ public class CombatService implements INetworkDispatch {
 
 					@Override
 					public void run() {
-						task.cancel(true);
+						try {
+							task.cancel(true);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
 					}
 					
 				}, (long) ((command.getDelayAttackInterval() * 1000) * command.getDelayAttackLoops()), TimeUnit.MILLISECONDS);
@@ -212,7 +218,11 @@ public class CombatService implements INetworkDispatch {
 						@Override
 						public void run() 
 						{
-							core.objectService.destroyObject(target);
+							try {
+								core.objectService.destroyObject(target);
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
 						}
 						
 					}, 2, TimeUnit.MINUTES);
@@ -831,14 +841,16 @@ public class CombatService implements INetworkDispatch {
 			ScheduledFuture<?> incapTask = scheduler.schedule(() -> {
 				
 				synchronized(target.getMutex()) {
-
-					if(target.getPosture() != 13)
-						return;
-					
-					target.setPosture(Posture.Upright);
-					target.setTurnRadius(1);
-					target.setSpeedMultiplierBase(1);
-				
+					try {
+						if(target.getPosture() != 13)
+							return;
+						
+						target.setPosture(Posture.Upright);
+						target.setTurnRadius(1);
+						target.setSpeedMultiplierBase(1);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 				}
 			
 			}, target.getIncapTimer(), TimeUnit.SECONDS);
@@ -942,7 +954,7 @@ public class CombatService implements INetworkDispatch {
 		if(success && !applySpecialCost(healer, weapon, command))
 			success = false;
 
-		if(!success) {
+		if(!success && healer.getClient() != null) {
 			IoSession session = healer.getClient().getSession();
 			CommandEnqueueRemove commandRemove = new CommandEnqueueRemove(healer.getObjectId(), actionCounter);
 			session.write(new ObjControllerMessage(0x0B, commandRemove).serialize());
@@ -1242,14 +1254,16 @@ public class CombatService implements INetworkDispatch {
 
 			@Override
 			public void run() {
-
-				if(dot.getRemainingDuration() <= 0) {
-					target.removeDot(dot);
-					dot.getTask().cancel(true);
+				try {
+					if(dot.getRemainingDuration() <= 0) {
+						target.removeDot(dot);
+						dot.getTask().cancel(true);
+					}
+					
+					doDotDamageTick(attacker, target, command, dot);
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
-				
-				doDotDamageTick(attacker, target, command, dot);
-				
 			}
 			
 		}, 10, 2000, TimeUnit.MILLISECONDS);
@@ -1315,7 +1329,7 @@ public class CombatService implements INetworkDispatch {
 		if(!applySpecialCost(creature, weapon, command))
 			success = false;
 		
-		if(!success) {
+		if(!success && creature.getClient() != null) {
 			IoSession session = creature.getClient().getSession();
 			CommandEnqueueRemove commandRemove = new CommandEnqueueRemove(creature.getObjectId(), actionCounter);
 			session.write(new ObjControllerMessage(0x0B, commandRemove).serialize());
@@ -1358,14 +1372,16 @@ public class CombatService implements INetworkDispatch {
 
 			@Override
 			public void run() {
-
-				if(dot.getRemainingDuration() <= 0) {
-					target.removeDot(dot);
-					dot.getTask().cancel(true);
+				try {
+					if(dot.getRemainingDuration() <= 0) {
+						target.removeDot(dot);
+						dot.getTask().cancel(true);
+					}
+					
+					doHealOverTimeTick(healer, target, command, dot);
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
-				
-				doHealOverTimeTick(healer, target, command, dot);
-				
 			}
 
 			
