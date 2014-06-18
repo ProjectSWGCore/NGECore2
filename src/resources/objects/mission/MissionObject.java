@@ -241,7 +241,11 @@ public class MissionObject extends IntangibleObject implements Serializable {
 	}
 	
 	public MissionObjective getObjective() {
-		return (MissionObjective) otherVariables.get("objective");
+		if (otherVariables.get("objective") instanceof DefaultMissionObjective) {
+			return null;
+		} else {
+			return (MissionObjective) otherVariables.get("objective");
+		}
 	}
 	
 	public void setObjective(MissionObjective objective) {
