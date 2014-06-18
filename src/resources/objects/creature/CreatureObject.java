@@ -1042,7 +1042,12 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		synchronized(objectMutex) {
 			this.performanceCounter = performanceCounter;
 		}
-		getClient().getSession().write(messageBuilder.buildPerformanceCounter(performanceCounter));
+		if (getClient() == null) System.err.println("setPerformanceCounter: client is null");
+		else if (getClient().getSession() == null) System.err.println("setPerformanceCounter: session is null");
+		else getClient().getSession().write(messageBuilder.buildPerformanceCounter(performanceCounter));
+		if (getClient() == null || getClient().getSession() == null) {
+			System.out.println("setPerformanceCounter: " + getTemplate());
+		}
 	}
 
 	public int getPerformanceId() {
