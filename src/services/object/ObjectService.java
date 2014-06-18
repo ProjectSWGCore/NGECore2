@@ -466,7 +466,17 @@ public class ObjectService implements INetworkDispatch {
 	}
 	
 	public SWGObject getObject(long objectID) {
-		return objectList.get(objectID);
+		SWGObject object = objectList.get(objectID);
+		
+		if (object == null) {
+			if (objectList.containsKey(objectID)) {
+				System.err.println("getObject(): object is null but objectList contains objectID key");
+			} else {
+				System.err.println("getObject(): object is null");
+			}
+		}
+		
+		return object;
 	}
 	
 	public Map<Long, SWGObject> getObjectList() {
