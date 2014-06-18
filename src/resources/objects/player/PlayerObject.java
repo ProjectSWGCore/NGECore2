@@ -92,6 +92,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		baseline.put("lotsRemaining", 10);
 		baseline.put("holoEmote", "");
 		baseline.put("holoEmoteUses", 0);
+		baseline.put("activeMissions", new ArrayList<Long>()); // TODO: Look at MissionCriticalObject in CREO4, could use that instead of this
 		return baseline;
 	}
 	
@@ -925,6 +926,19 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		}
 		
 		return false;
+	}
+	
+	public void addActiveMission(long missionObjId) {
+		getActiveMissions().add(missionObjId);
+	}
+	
+	public void removeActiveMission(long missionObjId) {
+		getActiveMissions().remove(missionObjId);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<Long> getActiveMissions() {
+		return (List<Long>) otherVariables.get("activeMissions");
 	}
 	
 	public boolean isCallingCompanion() {
