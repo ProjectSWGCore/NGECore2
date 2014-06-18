@@ -950,7 +950,7 @@ public class ObjectService implements INetworkDispatch {
 				}
 				CreatureObject creature = null;
 				if(getObject(objectId) == null) {
-										
+					System.out.println("SelectCharacter: not in object list");
 					creature = getCreatureFromDB(objectId);
 					if(creature == null) {
 						System.out.println("Cant get creature from db");
