@@ -17,7 +17,7 @@ def run(core, actor, target, commandString):
             actor.sendSystemMessage('@container_error_message:container03', 0)
             return
 
-        if container.getTemplate().startswith("object/tangible/inventory/shared_lightsaber_inventory") or target.getContainer().getTemplate().startswith("object/tangible/inventory/shared_lightsaber_inventory"):	
+        if container.getTemplate().startswith("object/tangible/inventory/shared_lightsaber_inventory") or (target and target.getContainer().getTemplate().startswith("object/tangible/inventory/shared_lightsaber_inventory")):	
             core.equipmentService.calculateLightsaberAttributes(actor, target, container)
             return;
 
