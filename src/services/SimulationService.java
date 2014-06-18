@@ -1015,6 +1015,9 @@ public class SimulationService implements INetworkDispatch {
 		
 	public void transferToPlanet(SWGObject object, Planet planet, Point3D newPos, Quaternion newOrientation, SWGObject newParent) {
 		
+		if (planet == null)
+			return;
+		
 		Client client = object.getClient();
 		
 		if(client == null)
