@@ -21,7 +21,9 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("dune stalker")
 	mobileTemplate.setAssistRange(4)
 	mobileTemplate.setStalker(True)
-	
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)	
+
+
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_tatooine_dune_stalker_leader.iff')
 	mobileTemplate.setTemplates(templates)

@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('tusken_raider_18')
 	mobileTemplate.setLevel(19)
-	mobileTemplate.setMinLevel(18)
-	mobileTemplate.setMaxLevel(21)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
@@ -23,6 +21,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("tusken raider")
 	mobileTemplate.setAssistRange(6)
 	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)	
 	
 	
 	templates = Vector()

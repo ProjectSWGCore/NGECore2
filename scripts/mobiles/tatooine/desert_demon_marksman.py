@@ -21,7 +21,8 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("desert demon")
 	mobileTemplate.setAssistRange(4)
 	mobileTemplate.setStalker(True)
-	
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)	
+
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_tatooine_desert_demon_marksman.iff')

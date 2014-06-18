@@ -10,22 +10,28 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('valarian_mechanic')
-	mobileTemplate.setLevel(13)
+	mobileTemplate.setCreatureName('watto_thieves')
+	mobileTemplate.setLevel(16)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(1)
-	mobileTemplate.setSocialGroup("valarian")
-	mobileTemplate.setAssistRange(4)
+	mobileTemplate.setSocialGroup("junk thieves")
+	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(False)
-	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)
-	
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)	
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_dressed_tatooine_valarian_thug.iff')
+	templates.add('object/mobile/shared_human_female.iff')
+	templates.add('object/mobile/shared_human_male.iff')
+	templates.add('object/mobile/shared_zabrak_female.iff')
+	templates.add('object/mobile/shared_zabrak_male.iff')
+	templates.add('object/mobile/shared_rodian_female.iff')
+	templates.add('object/mobile/shared_rodian_male.iff')
+	templates.add('object/mobile/shared_moncal_female.iff')
+	templates.add('object/mobile/shared_moncal_male.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
@@ -34,8 +40,8 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
-	mobileTemplate.setDefaultAttack('rangedShotpistol')
+	mobileTemplate.setDefaultAttack('meleehit')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('valarian_mechanic', mobileTemplate)
+	core.spawnService.addMobileTemplate('slum_thief', mobileTemplate)
 	return
