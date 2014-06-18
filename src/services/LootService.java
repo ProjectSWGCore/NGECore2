@@ -97,7 +97,7 @@ public class LootService implements INetworkDispatch {
 	}
 	
 	public void handleLootRequest(CreatureObject requester, TangibleObject lootedObject) {
-		System.out.println("handleLootRequest ");
+		//System.out.println("handleLootRequest ");
 		// security check
 		if (hasAccess(requester,lootedObject) && ! lootedObject.isLooted()){
 			LootRollSession lootRollSession = (LootRollSession )lootedObject.getAttachment("LootSession");
@@ -698,7 +698,7 @@ public class LootService implements INetworkDispatch {
 			collectionItemName = (String)core.scriptService.fetchString(itemPath,"CollectionItemName");
 		
 			
-		System.out.println("itemTemplate " + itemTemplate);
+		//System.out.println("itemTemplate " + itemTemplate);
 
 		
 		TangibleObject droppedItem = createDroppedItem(itemTemplate,lootRollSession.getSessionPlanet());
@@ -759,7 +759,7 @@ public class LootService implements INetworkDispatch {
     		//droppedItem.getAttributes().put("@obj_attr_n:collection_name", "\\#FFFF00 @collection_n:"+addToCollection + " \\#FFFFFF "); 
     		//core.collectionService.addCollection(actor, "new_prof_officer_master")
     		droppedItem.setAttachment("radial_filename", "item/collection/loot_collection");
-    		System.out.println("collection");
+    		//System.out.println("collection");
     	}
     	
     	if (collectionItemName!=null){
@@ -820,7 +820,7 @@ public class LootService implements INetworkDispatch {
 	
 	private TangibleObject createDroppedItem(String template,Planet planet){
 		TangibleObject droppedItem = (TangibleObject) core.objectService.createObject(template, planet);				
-    	System.out.println("droppedItem " + droppedItem);
+    	//System.out.println("droppedItem " + droppedItem);
     	return droppedItem;
 	}
 	
@@ -1004,7 +1004,7 @@ public class LootService implements INetworkDispatch {
 			else 
 				remainder += span;
 	    	if (randomItemFromGroup <= remainder){ 		
-	    		System.out.println("this loot pool will drop something"); // e.g. kraytpearl_range
+	    		//System.out.println("this loot pool will drop something"); // e.g. kraytpearl_range
 	    		fillChest3(lootPoolNames[i], owner, chest); // This loot pool will drop something	
 	    		test = true;
 	    		break;
@@ -1015,7 +1015,7 @@ public class LootService implements INetworkDispatch {
 	}
 		
 	private void fillChest3(String poolName, CreatureObject owner, TangibleObject chest){
-		System.err.println("poolName.toLowerCase() " + poolName.toLowerCase());
+		//System.err.println("poolName.toLowerCase() " + poolName.toLowerCase());
 		// Fetch the loot pool data from the poolName.py script		
 		String path = "scripts/loot/rarelootchestcontents/"+poolName.toLowerCase(); 
 		Vector<String> itemNames = (Vector<String>)core.scriptService.fetchStringVector(path,"itemNames");
@@ -1170,7 +1170,7 @@ public class LootService implements INetworkDispatch {
 			addToCollection = (String)core.scriptService.fetchString(itemPath,"AddToCollection");
 		
 			
-		System.out.println("itemTemplate " + itemTemplate);
+		//System.out.println("itemTemplate " + itemTemplate);
 		
 		TangibleObject droppedItem = null;
 		
@@ -2354,7 +2354,7 @@ public class LootService implements INetworkDispatch {
 			else 
 				remainder += span;
 	    	if (randomItemFromGroup <= remainder){ 		
-	    		System.out.println("this loot pool will drop something"); // e.g. kraytpearl_range
+	    		//System.out.println("this loot pool will drop something"); // e.g. kraytpearl_range
 	    		handleContainerLootPool(lootPoolNames[i],lootRollSession, containerObject); // This loot pool will drop something	
 	    		test = true;
 	    		break;
