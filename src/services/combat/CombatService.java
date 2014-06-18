@@ -1329,7 +1329,7 @@ public class CombatService implements INetworkDispatch {
 		if(!applySpecialCost(creature, weapon, command))
 			success = false;
 		
-		if(!success) {
+		if(!success && creature.getClient() != null) {
 			IoSession session = creature.getClient().getSession();
 			CommandEnqueueRemove commandRemove = new CommandEnqueueRemove(creature.getObjectId(), actionCounter);
 			session.write(new ObjControllerMessage(0x0B, commandRemove).serialize());
