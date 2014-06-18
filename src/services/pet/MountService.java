@@ -652,6 +652,11 @@ public class MountService implements INetworkDispatch {
 	 * Judging by the fact pcds have inventories and many other things don't.
 	 */
 	public void store(CreatureObject storer, CreatureObject mount) {
+		if (mount == null) {
+			System.err.println("MountService:store(): mount is null; this should never be the case.");
+			return;
+		}
+		
 		if (mount.getContainer() != null) {
 			return;
 		}
