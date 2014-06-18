@@ -279,12 +279,11 @@ public class InstanceService implements INetworkDispatch {
 			final Instance reference = instance;
 			
 			instance.setTask(scheduler.scheduleAtFixedRate(new Runnable() {
+				private Instance instance = reference;
+				private boolean sentCloseWarning = false;
 				
-				try {
-					private Instance instance = reference;
-					private boolean sentCloseWarning = false;
-					
-					public void run() {
+				public void run() {
+					try {
 						if (instance.getDuration() > 300 && instance.getTimeRemaining() <= 300 && !sentCloseWarning) {
 							instance.getActiveParticipants().stream().forEach(p -> p.sendSystemMessage("@instance:five_minute_warning", (byte) 0));
 							sentCloseWarning = true;
@@ -296,11 +295,10 @@ public class InstanceService implements INetworkDispatch {
 						}
 						
 						core.scriptService.callScript("scripts/instances/", instance.getName(), "run", core, instance);
+					} catch (Exception e) {
+						e.printStackTrace();
 					}
-				} catch (Exception e) {
-					e.printStackTrace();
 				}
-				
 			}, 1, 1, TimeUnit.MINUTES));
 		} catch (Exception e) {
 			e.printStackTrace();
