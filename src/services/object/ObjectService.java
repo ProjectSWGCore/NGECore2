@@ -994,6 +994,7 @@ public class ObjectService implements INetworkDispatch {
 				
 				creature.viewChildren(creature, true, true, (object) -> {
 					if(object.getMutex() == null)
+						object.initializeBaselines();
 						object.initAfterDBLoad();
 					if(object.getParentId() != 0 && object.getContainer() == null)
 						object.setParent(getObject(object.getParentId()));
