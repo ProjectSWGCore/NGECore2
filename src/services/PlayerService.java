@@ -200,8 +200,8 @@ public class PlayerService implements INetworkDispatch {
 			long[] ids = creature.getAwareObjects().stream().mapToLong(SWGObject::getObjectID).toArray();
 			for(int i = 0; i < ids.length; i++) {
 				for(int j = 0; j < ids.length; j++) {
-					if(ids[i] == ids[j] && i != j)
-						System.err.println("Detected duplicate ids");
+					if(ids[i] == ids[j] && i != j) 
+						System.err.println("Detected duplicate ids, Template " + core.objectService.getObject(ids[i]).getTemplate());
 				}
 			}
 		}, 0, 5000, TimeUnit.MILLISECONDS));
