@@ -942,7 +942,7 @@ public class CombatService implements INetworkDispatch {
 		if(success && !applySpecialCost(healer, weapon, command))
 			success = false;
 
-		if(!success) {
+		if(!success && healer.getClient() != null) {
 			IoSession session = healer.getClient().getSession();
 			CommandEnqueueRemove commandRemove = new CommandEnqueueRemove(healer.getObjectId(), actionCounter);
 			session.write(new ObjControllerMessage(0x0B, commandRemove).serialize());
