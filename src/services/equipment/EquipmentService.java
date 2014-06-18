@@ -164,7 +164,7 @@ public class EquipmentService implements INetworkDispatch {
 		PyObject func = core.scriptService.getMethod("scripts/" + serverTemplate.split("shared_" , 2)[0].replace("shared_", ""), serverTemplate.split("shared_" , 2)[1], "equip");
 		if(func != null) func.__call__(Py.java2py(core), Py.java2py(actor), Py.java2py(item));
 		
-		if(!actor.getEquipmentList().contains(item.getObjectId())) 
+		if(!actor.getEquipmentList().contains(item.getObjectID())) 
 		{
 			actor.addObjectToEquipList(item);
 			processItemAtrributes(actor, item, true);
@@ -180,7 +180,7 @@ public class EquipmentService implements INetworkDispatch {
 		if(func != null) func.__call__(Py.java2py(core), Py.java2py(actor), Py.java2py(item));
 
 		
-		if(actor.getEquipmentList().contains(item.getObjectId())) 
+		if(actor.getEquipmentList().contains(item.getObjectID())) 
 		{
 			actor.removeObjectFromEquipList(item);
 			processItemAtrributes(actor, item, false);

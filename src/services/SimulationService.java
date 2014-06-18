@@ -890,17 +890,7 @@ public class SimulationService implements INetworkDispatch {
 		
 		if(!ghost.isSet(PlayerFlags.LD))
 			ghost.toggleFlag(PlayerFlags.LD);
-		
-		try {
-			for (CreatureObject opponent : new ArrayList<CreatureObject>(object.getDuelList())) {
-				if (opponent != null) {
-					core.combatService.handleEndDuel(object, opponent, true);
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
+				
 		try {
 			if (core.mountService.isMounted(object)) {
 				core.mountService.dismount(object, (CreatureObject) container);
@@ -926,10 +916,6 @@ public class SimulationService implements INetworkDispatch {
 			e.printStackTrace();
 		}
 		
-		/*
-		object.createTransaction(core.getCreatureODB().getEnvironment());
-		core.getCreatureODB().put(object, Long.class, CreatureObject.class, object.getTransaction());
-		object.getTransaction().commitSync();*/
 		
 		ScheduledFuture<?> disconnectTask = scheduler.schedule(new Runnable() {
 			@Override
@@ -937,14 +923,7 @@ public class SimulationService implements INetworkDispatch {
 				SWGObject object = core.objectService.getObject(objectId);
 				
 				if (object.getAttachment("disconnectTask") != null) {
-					try {
-						core.combatService.endCombat((CreatureObject) object);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-					
-					core.simulationService.remove(object, object.getPosition().x, object.getPosition().z, true);
-					
+					core.connectionService.disconnect(client);
 					/*
 					try {
 						Thread.sleep(900000)
@@ -990,7 +969,7 @@ public class SimulationService implements INetworkDispatch {
 			Collection<SWGObject> newAwareObjects = get(object.getPlanet(), pos.x, pos.z, 512);
 			for(Iterator<SWGObject> it = newAwareObjects.iterator(); it.hasNext();) {
 				SWGObject obj = it.next();
-				if(obj.getAttachment("bigSpawnRange") == null && obj.getWorldPosition().getDistance(pos) > 200)
+				if(obj.getAttachment("bigSpawnRange") == null && obj.getWorldPosition().getDistance2D(pos) > 200)
 					continue;
 				//System.out.println(obj.getTemplate());
 				object.makeAware(obj);

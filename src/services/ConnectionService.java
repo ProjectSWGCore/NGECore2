@@ -25,6 +25,7 @@ import java.nio.ByteOrder;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -205,6 +206,12 @@ public class ConnectionService implements INetworkDispatch {
 		CreatureObject object = (CreatureObject) client.getParent();
 		
 		try {
+			for (CreatureObject opponent : new ArrayList<CreatureObject>(object.getDuelList())) {
+				if (opponent != null) {
+					core.combatService.handleEndDuel(object, opponent, true);
+				}
+			}
+			core.combatService.endCombat((CreatureObject) object);
 			object.setInviteCounter(0);
 			object.setInviteSenderId(0);
 			object.setInviteSenderName("");

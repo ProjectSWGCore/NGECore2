@@ -967,6 +967,9 @@ public class ObjectService implements INetworkDispatch {
 					
 
 				}
+				if(creature.getAttachment("disconnectTask") != null) {
+					((ScheduledFuture<?>) creature.getAttachment("disconnectTask")).cancel(true);
+				}					
 				
 				PlayerObject ghost = (PlayerObject) creature.getSlottedObject("ghost");
 
@@ -975,9 +978,6 @@ public class ObjectService implements INetworkDispatch {
 				
 				ghost.clearFlagBitmask(PlayerFlags.LD);
 				
-				if(creature.getAttachment("disconnectTask") != null) {
-					((ScheduledFuture<?>) creature.getAttachment("disconnectTask")).cancel(true);
-				}					
 				creature.getAwareObjects().removeAll(creature.getAwareObjects());
 				creature.setAttachment("disconnectTask", null);
 
