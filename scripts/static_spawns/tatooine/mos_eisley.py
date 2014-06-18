@@ -140,8 +140,8 @@ def addPlanetSpawns(core, planet):
 	#City Hall Interior
 	
 	#Lucky Despot Interior    TODO:  Check Cell IDs for Spawned NPCS inside once Lucky Despot is spawning properly again.
-	building = core.objectService.getObject(long(-466404040703447347)) 
-	stcSvc.spawnObject('object/mobile/shared_han_solo.iff', 'tatooine', building.getCellByCellNumber(9), float(32.3), float(7.0), float(1.6), float(0), float(0), float(0), float(0)) 
+	#building = core.objectService.getObject(long(-466404040703447347)) 
+	#stcSvc.spawnObject('object/mobile/shared_han_solo.iff', 'tatooine', building.getCellByCellNumber(9), float(32.3), float(7.0), float(1.6), float(0), float(0), float(0), float(0)) 
 	
 	valarian = stcSvc.spawnObject('object/mobile/shared_lady_valarian.iff', 'tatooine', building.getCellByCellNumber(4), float(-21.5), float(9.0), float(0.5), float(0), float(0.70), float(0), float(-0.71)) 
 	valarian.setCustomName('Lady Valarian')
@@ -162,9 +162,8 @@ def addPlanetSpawns(core, planet):
 	noble2.setCustomName('a Noble')
 	noble2.setOptionsBitmask(256)
 	
-	commoner11 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_naboo_human_male_06.iff', 'tatooine', long(0), float(3529.1), float(5.0), float(-4900.4), float(0.42), float(0.91)) 
+	commoner11 = stcSvc.spawnCommoner('object/mobile/shared_dressed_commoner_naboo_human_male_06.iff', 'tatooine', long(0), float(3529.1), float(5.0), float(-4900.4), float(0.42), float(0.91)) 
 	commoner11.setCustomName('a Commoner')
-	commoner11.setOptionsBitmask(256)
 	
 	businessman3 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_tatooine_trandoshan_male_02.iff', 'tatooine', long(0), float(3595.7), float(5.0), float(-4740.1), float(0), float(0)) 
 	businessman3.setCustomName('a Businessman')
@@ -174,21 +173,17 @@ def addPlanetSpawns(core, planet):
 	jawa1.setCustomName('a Jawa')
 	jawa1.setOptionsBitmask(256)
 	
-	commoner12 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_naboo_moncal_male_01.iff', 'tatooine', long(0), float(3490.3), float(5.0), float(-4799.4), float(0), float(0)) 
+	commoner12 = stcSvc.spawnCommoner('object/mobile/shared_dressed_commoner_naboo_moncal_male_01.iff', 'tatooine', long(0), float(3490.3), float(5.0), float(-4799.4), float(0), float(0)) 
 	commoner12.setCustomName('a Scientist')
-	commoner12.setOptionsBitmask(256)
 	
-	commoner13 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_naboo_zabrak_female_02.iff', 'tatooine', long(0), float(3559.7), float(5.0), float(-4725.9), float(0), float(0)) 
+	commoner13 = stcSvc.spawnCommoner('object/mobile/shared_dressed_commoner_naboo_zabrak_female_02.iff', 'tatooine', long(0), float(3559.7), float(5.0), float(-4725.9), float(0), float(0)) 
 	commoner13.setCustomName('a Commoner')
-	commoner13.setOptionsBitmask(256)
 	
-	commoner14 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_tatooine_devaronian_male_01.iff', 'tatooine', long(0), float(3527.7), float(5.0), float(-4721.1), float(0.71), float(0.71)) 
+	commoner14 = stcSvc.spawnCommoner('object/mobile/shared_dressed_commoner_tatooine_devaronian_male_01.iff', 'tatooine', long(0), float(3527.7), float(5.0), float(-4721.1), float(0.71), float(0.71)) 
 	commoner14.setCustomName('a Commoner')
-	commoner14.setOptionsBitmask(256)
 	
-	commoner15 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_tatooine_aqualish_female_01.iff', 'tatooine', long(0), float(3514.9), float(5.0), float(-4737.8), float(0), float(0)) 
+	commoner15 = stcSvc.spawnCommoner('object/mobile/shared_dressed_commoner_tatooine_aqualish_female_01.iff', 'tatooine', long(0), float(3514.9), float(5.0), float(-4737.8), float(0), float(0)) 
 	commoner15.setCustomName('a Commoner')
-	commoner15.setOptionsBitmask(256)
 	
 	jawa2 = stcSvc.spawnObject('object/mobile/shared_jawa.iff', 'tatooine', long(0), float(3485.2), float(4.9), float(-4859.2), float(0), float(0)) 
 	jawa2.setCustomName('a Jawa')
@@ -226,10 +221,9 @@ def addPlanetSpawns(core, planet):
 	bib.setCustomName('Bib Fortuna')
 	bib.setOptionsBitmask(256)
 	
-	commoner16 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_naboo_human_male_06.iff', 'tatooine', long(0), float(3398.2), float(4.0), float(-4654.2), float(0.42), float(0.91)) 
+	commoner16 = stcSvc.spawnCommoner('object/mobile/shared_dressed_commoner_naboo_human_male_06.iff', 'tatooine', long(0), float(3398.2), float(4.0), float(-4654.2), float(0.42), float(0.91)) 
 	commoner16.setCustomName('a Commoner')
-	commoner16.setOptionsBitmask(256)
-	
+
 	noble3 = stcSvc.spawnObject('object/mobile/shared_dressed_noble_human_female_01.iff', 'tatooine', long(0), float(3396.3), float(4.0), float(-4774.1), float(0.42), float(0.91)) 
 	noble3.setCustomName('a Noble')
 	noble3.setOptionsBitmask(256)
@@ -246,9 +240,8 @@ def addPlanetSpawns(core, planet):
 	eg1.setCustomName('an EG-6 Power Droid')
 	eg1.setOptionsBitmask(256)
 
-	commoner17 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_naboo_zabrak_female_02.iff', 'tatooine', long(0), float(3452.6), float(4.0), float(-4937.1), float(0), float(0)) 
+	commoner17 = stcSvc.spawnCommoner('object/mobile/shared_dressed_commoner_naboo_zabrak_female_02.iff', 'tatooine', long(0), float(3452.6), float(4.0), float(-4937.1), float(0), float(0)) 
 	commoner17.setCustomName('a Commoner')
-	commoner17.setOptionsBitmask(256)
 	
 	lifter1 = stcSvc.spawnObject('object/mobile/shared_cll8_binary_load_lifter.iff', 'tatooine', long(0), float(3547), float(5.0), float(-4768.9), float(0), float(0)) 
 	lifter1.setCustomName('a CLL-8 Binary Load Lifter')
