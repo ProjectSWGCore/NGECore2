@@ -50,6 +50,7 @@ import protocol.swg.GameServerLagResponse;
 import protocol.swg.HeartBeatMessage;
 import engine.clients.Client;
 import engine.resources.database.DatabaseConnection;
+import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
@@ -165,7 +166,35 @@ public class ConnectionService implements INetworkDispatch {
 			@Override
 			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
 
-				GalaxyLoopTimesResponse response = new GalaxyLoopTimesResponse(0);
+				/* 10 000 000 = extremely heavy
+				 * 5 000 000 = very heavy
+				 * 4 000 000 = heavy
+				 * 2 500 000 = medium
+				 * 2 000 000 = light
+				 * < 2 000 000 = very light
+				*/
+				Client client = core.getClient(session);
+				if(client == null) {
+					System.out.println("NULL Client");
+					return;
+				}
+				SWGObject object = client.getParent();
+				if(object == null)
+					return;
+				int observers = object.getObservers().size();
+				int areaActivity = 0;
+				if(observers > 32)
+					areaActivity = 2000000;
+				if(observers > 40)
+					areaActivity = 2500000;
+				if(observers > 50)
+					areaActivity = 4000000;
+				if(observers > 75)
+					areaActivity = 5000000;
+				if(observers > 100)
+					areaActivity = 10000000;
+				
+				GalaxyLoopTimesResponse response = new GalaxyLoopTimesResponse(areaActivity);
 				session.write(response.serialize());
 				
 			}
