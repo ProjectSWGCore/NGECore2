@@ -19,3 +19,11 @@ def STFparams():
 def AddToCollection():
 
 	return 'inv_holocron_collection_01'
+	
+def CollectionItemName():
+
+	return 'sith_holocron_01_05'
+
+def stackable():
+
+	return 1

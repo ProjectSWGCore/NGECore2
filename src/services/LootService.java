@@ -303,12 +303,10 @@ public class LootService implements INetworkDispatch {
 					if (inventory == null)
 						return;
 					
-					addToBuyBack(actor, itemToSell);
+					addToBuyBack(actor, itemToSell, inventory); // This removes the item from inventory as well
 					
 					actor.addCashCredits(price);
 					actor.sendSystemMessage(OutOfBand.ProsePackage("@junk_dealer:prose_sold_junk", "TT", itemToSell.getCustomName(), "DI", price), DisplayType.Broadcast);
-					
-					inventory.remove(itemToSell);
 					
 					core.suiService.closeSUIWindow(actor, window.getWindowId());
 					handleJunkDealerSellWindow(actor, junkDealer, getSellableInventoryItems(actor));
@@ -465,19 +463,19 @@ public class LootService implements INetworkDispatch {
 		core.suiService.openSUIWindow(window);
 	}
 
-	public void addToBuyBack(CreatureObject actor, TangibleObject item) {
+	public void addToBuyBack(CreatureObject actor, TangibleObject item, TangibleObject inventory) {
+		
+		TangibleObject buyBackContainer = null;
+
 		if (actor.getAttachment("buy_back") == null)
-			createBuyBackDevice(actor);
+			buyBackContainer = createBuyBackDevice(actor);
+		else
+			buyBackContainer = (TangibleObject) core.objectService.getObject((long) actor.getAttachment("buy_back"));
 		
-		TangibleObject buyBackContainer = (TangibleObject) core.objectService.getObject((long) actor.getAttachment("buy_back"));
+		if (buyBackContainer == null) // at this point the buybackcontainer should not be null... but just incase...
+			buyBackContainer = createBuyBackDevice(actor); 		
 		
-		if (buyBackContainer == null) {
-			createBuyBackDevice(actor);
-			addToBuyBack(actor, item);
-			return;
-		}
-		
-		buyBackContainer.transferTo(actor, buyBackContainer, item);
+		inventory.transferTo(actor, buyBackContainer, item);
 
 		final AtomicInteger count = new AtomicInteger();
 		
@@ -2570,7 +2568,7 @@ public class LootService implements INetworkDispatch {
 	public Vector<SWGObject> getSellableInventoryItems(CreatureObject actor){
 		TangibleObject playerInventory = (TangibleObject) actor.getSlottedObject("inventory");
 		final Vector<SWGObject> sellableItems = new Vector<SWGObject>();
-		playerInventory.viewChildren(actor, false, false, new Traverser() {
+		playerInventory.viewChildren(actor, true, false, new Traverser() {
 			@Override
 			public void process(SWGObject obj) {
 				String itemTemplate = obj.getTemplate();
@@ -2593,10 +2591,10 @@ public class LootService implements INetworkDispatch {
 		return true;
 	}
 	
-	public void createBuyBackDevice(CreatureObject actor) {
+	public TangibleObject createBuyBackDevice(CreatureObject actor) {
 		TangibleObject datapad = (TangibleObject) actor.getSlottedObject("datapad");
 		if (datapad == null)
-			return;
+			return null;
 		
 		IntangibleObject device = (IntangibleObject) core.objectService.createObject("object/intangible/buy_back/shared_buy_back_control_device.iff", actor.getPlanet());
 		datapad.add(device);
@@ -2608,6 +2606,8 @@ public class LootService implements INetworkDispatch {
 		device.add(container);
 		
 		actor.setAttachment("buy_back", container.getObjectID()); // We can use device.getSlottedObject("inventory"), but this way we won't have to traverse..
+		
+		return container;
 	}
 	
 	@SuppressWarnings("unchecked")

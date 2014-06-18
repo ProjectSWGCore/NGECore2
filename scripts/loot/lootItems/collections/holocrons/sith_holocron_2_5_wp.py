@@ -10,7 +10,7 @@ def customizationAttributes():
     return ['/private/index_color_1']
     
 def customizationValues():
-    return [10]  
+    return [7]  
     
 def STFparams():
 
@@ -19,3 +19,11 @@ def STFparams():
 def AddToCollection():
 
 	return 'inv_holocron_collection_01'
+	
+def CollectionItemName():
+
+	return 'sith_holocron_01_02'
+
+def stackable():
+
+	return 1
