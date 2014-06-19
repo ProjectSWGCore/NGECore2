@@ -20,7 +20,7 @@ def addTemplate(core):
 	mobileTemplate.setScale(.5)
 	mobileTemplate.setSocialGroup('donkuwah tribe')
 	mobileTemplate.setAssistRange(12)
-	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)
 	mobileTemplate.setStalker(True)
 	
 	
