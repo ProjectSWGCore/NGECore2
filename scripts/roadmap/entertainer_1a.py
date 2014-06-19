@@ -27,7 +27,7 @@ def getAction():
 def getRewards(name):
 	
 	if name == 'item_entertainer_backpack_01_02':
-		return "object/tangible/wearables/backpack/shared_backpack_s04.iff"
+		return "object/tangible/wearables/backpack/shared_backpack_s01.iff"
 
 	if name == 'armor_entertainer_roadmap_cloak_02_01':
 		return "object/tangible/wearables/robe/shared_robe_s01.iff"
