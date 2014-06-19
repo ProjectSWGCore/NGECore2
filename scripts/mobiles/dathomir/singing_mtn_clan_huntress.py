@@ -21,7 +21,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup('mountain clan')
 	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setRespawnTime(300)
-	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_dathomir_sing_mt_clan_huntress.iff')

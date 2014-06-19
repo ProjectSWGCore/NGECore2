@@ -21,7 +21,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("death watch")
 	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setStalker(True)
-	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_black_sun_assassin.iff')
