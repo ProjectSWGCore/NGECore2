@@ -10,7 +10,7 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('nightsister_sentinel')
+	mobileTemplate.setCreatureName('nightsister_sentinal')
 	mobileTemplate.setLevel(80)
 	mobileTemplate.setDifficulty(Difficulty.ELITE)
 
