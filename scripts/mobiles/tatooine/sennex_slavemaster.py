@@ -10,7 +10,7 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('sennex_slaver')
+	mobileTemplate.setCreatureName('sennex_slavemaster')
 	mobileTemplate.setLevel(24)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
@@ -21,6 +21,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("sennex")
 	mobileTemplate.setAssistRange(5)
 	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)	
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_sennex_pirate_01.iff')
@@ -47,5 +48,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('rangedShot')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('sennex_slaver', mobileTemplate)
+	core.spawnService.addMobileTemplate('sennex_slavemaster', mobileTemplate)
 	return
