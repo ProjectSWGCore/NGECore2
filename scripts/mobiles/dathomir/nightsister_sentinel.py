@@ -10,7 +10,7 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('nightsister_sentinel')
+	mobileTemplate.setCreatureName('nightsister_sentinal')
 	mobileTemplate.setLevel(80)
 	mobileTemplate.setDifficulty(Difficulty.ELITE)
 
@@ -23,7 +23,7 @@ def addTemplate(core):
 	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_dressed_dathomir_nightsister_sentinel.iff')
+	templates.add('object/mobile/shared_dressed_dathomir_spider_nightsister_sentinel.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
