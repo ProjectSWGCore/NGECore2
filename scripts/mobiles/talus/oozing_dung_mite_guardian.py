@@ -23,7 +23,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("decay mite")
 	mobileTemplate.setAssistRange(4)
 	mobileTemplate.setStalker(False)
-	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)	
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)	
 
 	templates = Vector()
 	templates.add('object/mobile/shared_bark_mite_hue.iff')

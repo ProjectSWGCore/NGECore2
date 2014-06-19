@@ -21,7 +21,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("hidden_daggers")
 	mobileTemplate.setAssistRange(6)
 	mobileTemplate.setStalker(True)
-	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_hiddendaggers_pilot_f_01.iff')

@@ -27,7 +27,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("wrix")
 	mobileTemplate.setAssistRange(10)
 	mobileTemplate.setStalker(False)
-	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_deranged_wrix.iff')

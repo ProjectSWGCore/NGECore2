@@ -21,7 +21,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("hutt")
 	mobileTemplate.setAssistRange(6)
 	mobileTemplate.setStalker(True)
-	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_hutt_medic1_zabrak_female_01..iff')
