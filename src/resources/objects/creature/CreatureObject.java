@@ -1129,7 +1129,7 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	public void sendBaselines(Client destination) {
 				
 		if(destination == null || destination.getSession() == null) {
-			System.out.println("NULL session");
+			//System.out.println("NULL session");
 			return;
 		}
 		

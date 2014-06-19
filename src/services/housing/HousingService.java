@@ -413,9 +413,6 @@ public class HousingService implements INetworkDispatch {
 			city.removeStructure(building.getObjectID());
 			if(building.getResidency()) {
 				city.removeCitizen(owner.getObjectID());
-				owner.getPlayerObject().setHome("");
-				owner.getPlayerObject().setCitizenship(Citizenship.Homeless);
-				owner.setAttachment("residentCity", null);
 			}
 			if(building.getTemplate().contains("cityhall")) {
 				// destroy city
@@ -578,14 +575,9 @@ public class HousingService implements INetworkDispatch {
 			oldResidency.setResidency(false);
 			((CreatureObject) owner).sendSystemMessage("@player_structure:change_residence", (byte) 0);
 			PlayerCity oldCity = core.playerCityService.getCityObjectIsIn(oldResidency);
-			if(oldCity != null) {
-				oldCity.removeStructure(oldResidency.getObjectID());
+			if(oldCity != null && oldCity != cityActorIsIn) {
 				oldCity.removeCitizen(owner.getObjectID());
-				((CreatureObject) owner).getPlayerObject().setHome("");
-				((CreatureObject) owner).getPlayerObject().setCitizenship(Citizenship.Homeless);
-				owner.setAttachment("residentCity", null);
 			}
-			((CreatureObject) owner).sendSystemMessage("@player_structure:change_residence", (byte) 0);
 		} else {
 			((CreatureObject) owner).sendSystemMessage("@player_structure:declared_residency", (byte) 0);		
 		}
@@ -594,12 +586,6 @@ public class HousingService implements INetworkDispatch {
 		owner.setAttachment("residentBuilding", building.getObjectID());
 		if(cityActorIsIn != null) {
 			cityActorIsIn.addCitizen(owner.getObjectID());
-			owner.setAttachment("residentCity", cityActorIsIn.getCityID());
-			((CreatureObject) owner).getPlayerObject().setHome(cityActorIsIn.getCityName());
-			if(cityActorIsIn.getMayorID() == owner.getObjectID())
-				((CreatureObject) owner).getPlayerObject().setCitizenship(Citizenship.Mayor);
-			else
-				((CreatureObject) owner).getPlayerObject().setCitizenship(Citizenship.Citizen);
 		}
 	}
 	

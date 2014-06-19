@@ -117,7 +117,7 @@ public class PlayerCityService implements INetworkDispatch {
 		return id;
 	}
 	
-	private boolean doesCityNameExist(String name) {
+	public boolean doesCityNameExist(String name) {
 		return playerCities.stream().map(PlayerCity::getCityName).filter(n -> n.equalsIgnoreCase(name)).findFirst().isPresent() || 
 			   core.terrainService.getClientRegions().stream().map(ClientRegion::getName).filter(n -> n.equalsIgnoreCase(name)).findFirst().isPresent();
 	}
@@ -166,6 +166,7 @@ public class PlayerCityService implements INetworkDispatch {
 				PlayerCity playerCity = addNewPlayerCity(actor, cityHall);
 				playerCity.setCityName(name);
 				playerCity.addNewStructure(cityHall.getObjectID());
+				playerCity.setElectionTime();
 				PlayerCityService.this.schedulePlayerCityUpdate(playerCity, PlayerCity.newCityGraceSpan);
 				cityHall.setAttachment("structureCity", playerCity.getCityID());
 				actor.setAttachment("residentCity", playerCity.getCityID());
@@ -571,8 +572,9 @@ public class PlayerCityService implements INetworkDispatch {
 			actor.sendSystemMessage(OutOfBand.ProsePackage("@city/city:vote_placed", "TO", candidate.getCustomName()), (byte) 0);
 			
 		});
+		core.suiService.openSUIWindow(window);
 		
 	}
-
+	
 
 }

@@ -239,6 +239,15 @@ public class ObjectService implements INetworkDispatch {
 		
 		boolean isSnapshot = false;
 		
+		if(objectID != 0 && objectList.containsKey(objectID)) {
+			System.err.println("Trying to create object with duplicate Id");
+			try {
+				throw new Exception();
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
 		if(objectID == 0)
 			objectID = generateObjectID();
 		else
@@ -472,7 +481,7 @@ public class ObjectService implements INetworkDispatch {
 			if (objectList.containsKey(objectID)) {
 				System.err.println("getObject(): object is null but objectList contains objectID key");
 			} else {
-				System.err.println("getObject(): object is null");
+				//System.err.println("getObject(): object is null");
 			}
 		}
 		

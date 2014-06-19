@@ -341,11 +341,12 @@ def	handleSetCityName(core, owner, target, option):
 	returnList = Vector()
 	returnList.add('txtInput:LocalText')
 	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, setNameCallBack)
-
+	core.suiService.openSUIWindow(window)
 	return
 
 	
 def setNameCallBack(owner, window, eventType, returnList):
+	core = main.NGECore.getInstance()
 	if returnList.size()==0:
 		return
 	name = returnList.get(0)
