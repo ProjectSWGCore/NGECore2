@@ -25,7 +25,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("kai tok")
 	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setStalker(True)
-	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_kai_tok.iff')

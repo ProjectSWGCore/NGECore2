@@ -22,7 +22,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup('dark jedi')
 	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setRespawnTime(300)
-	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
 	
 	templates = Vector()
