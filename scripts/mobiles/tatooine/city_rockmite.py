@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('city_rockmite')
 	mobileTemplate.setLevel(5)
-	mobileTemplate.setMinLevel(5)
-	mobileTemplate.setMaxLevel(7)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
