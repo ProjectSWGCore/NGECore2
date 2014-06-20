@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('swarming_lesser_dewback')
 	mobileTemplate.setLevel(13)
-	mobileTemplate.setMinLevel(12)
-	mobileTemplate.setMaxLevel(14)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)

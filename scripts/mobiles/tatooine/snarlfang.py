@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('elite_bocatt')
 	mobileTemplate.setLevel(17)
-	mobileTemplate.setMinLevel(17)
-	mobileTemplate.setMaxLevel(18)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)

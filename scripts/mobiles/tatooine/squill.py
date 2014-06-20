@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('squill')
 	mobileTemplate.setLevel(12)
-	mobileTemplate.setMinLevel(11)
-	mobileTemplate.setMaxLevel(13)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
