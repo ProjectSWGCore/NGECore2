@@ -10,26 +10,27 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('wasteland_cu_pa')
-	mobileTemplate.setLevel(20)
+	mobileTemplate.setCreatureName('zucca_boar_porcellus')
+	mobileTemplate.setLevel(19)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(1)
-	mobileTemplate.setMeatType("Reptilian Meat")
-	mobileTemplate.setMeatAmount(215)
-	mobileTemplate.setHideType("Bristly Hide")
-	mobileTemplate.setBoneAmount(100)	
+	mobileTemplate.setMeatType("Herbivore Meat")
+	mobileTemplate.setMeatAmount(65)
+	mobileTemplate.setHideType("Leathery Hide")
+	mobileTemplate.setBoneAmount(40)	
 	mobileTemplate.setBoneType("Animal Bone")
-	mobileTemplate.setHideAmount(115)
-	mobileTemplate.setSocialGroup("cu pa")
-	mobileTemplate.setAssistRange(0)
-	mobileTemplate.setStalker(False)	
+	mobileTemplate.setHideAmount(25)
+	mobileTemplate.setSocialGroup("zucca boar")
+	mobileTemplate.setAssistRange(12)
+	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_cu_pa.iff')
+	templates.add('object/mobile/shared_zucca_boar.iff')
 	mobileTemplate.setTemplates(templates)
 
 	weaponTemplates = Vector()
@@ -41,5 +42,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('wasteland_cu_pa', mobileTemplate)
+	core.spawnService.addMobileTemplate('wild_zucca_boar', mobileTemplate)
 	return
