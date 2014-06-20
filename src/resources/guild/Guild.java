@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import main.NGECore;
-
+import resources.common.ProsePackage;
 import services.chat.Mail;
 import engine.resources.objects.SWGObject;
 
@@ -58,7 +58,7 @@ public class Guild {
 		return member;
 	}
 	
-	public void sendGuildMail(String sender, String subject, String message) {
+	public void sendGuildMail(String sender, String subject, String message, ProsePackage prose) {
 		NGECore core = NGECore.getInstance();
 		Date date = new Date();
 		members.forEach((id, member) -> {
@@ -68,6 +68,7 @@ public class Guild {
             guildMail.setRecieverId(id);
             guildMail.setStatus(Mail.NEW);
             guildMail.setMessage(message);
+            if (prose != null) guildMail.addProseAttachment(prose);
             guildMail.setSubject(subject);
             guildMail.setSenderName(sender);
             core.chatService.storePersistentMessage(guildMail);
@@ -76,6 +77,14 @@ public class Guild {
             	core.chatService.sendPersistentMessageHeader(core.objectService.getObject(id).getClient(), guildMail);
             }
 		});
+	}
+	
+	public void sendGuildMail(String sender, String subject, String message) {
+		sendGuildMail(sender, subject, message, null);
+	}
+	
+	public void sendGuildMail(String sender, String subject, ProsePackage prose) {
+		sendGuildMail(sender, subject, "", prose);
 	}
 	
 	public int getId() {

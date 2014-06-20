@@ -31,6 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import protocol.swg.chat.ChatRoomMessage;
 import resources.common.OutOfBand;
+import resources.common.ProsePackage;
 import resources.datatables.DisplayType;
 import resources.guild.Guild;
 import resources.guild.GuildMember;
@@ -131,14 +132,14 @@ public class GuildService implements INetworkDispatch {
 		
 		// Notify guild & player
 		if (acceptor != null) {
-			guild.sendGuildMail(guild.getName(), "@guildmail:accept_subject", new Stf("@guildmail:accept_text").getStfValue().replace("%TU", acceptor.getCustomName()).replace("%TT", joinee.getCustomName()));
+			guild.sendGuildMail(guild.getName(), "@guildmail:accept_subject", new ProsePackage("@guildmail:accept_text", "TU", acceptor.getCustomName(), "TT", joinee.getCustomName()));
 			
 			Mail acceptedMail = new Mail();
 			acceptedMail.setMailId(core.chatService.generateMailId());
 			acceptedMail.setTimeStamp((int) new Date().getTime());
 			acceptedMail.setRecieverId(joinee.getObjectID());
 			acceptedMail.setStatus(Mail.NEW);
-			acceptedMail.setMessage(new Stf("@guildmail:accept_target_text").getStfValue().replace("%TU", acceptor.getCustomName()).replace("%TT", joinee.getCustomName()));
+			acceptedMail.addProseAttachment(new ProsePackage("@guildmail:accept_target_text", "TU", acceptor.getCustomName(), "TT", joinee.getCustomName()));
 			acceptedMail.setSubject("@guildmail:accept_subject");
 			acceptedMail.setSenderName(guild.getName());
 	        core.chatService.storePersistentMessage(acceptedMail);
@@ -404,8 +405,7 @@ public class GuildService implements INetworkDispatch {
 		
 		object.getGuildList().add(guild.getString());
 		
-		guild.sendGuildMail(newName, "@guildmail:namechange_subject",
-				new Stf("@guildmail:namechange_text").getStfValue().replace("%TO", actor.getCustomName()).replace("%TU", newName).replace("%TT", newAbbreviation));
+		guild.sendGuildMail(newName, "@guildmail:namechange_subject", new ProsePackage("@guildmail:namechange_text", "TO", actor.getCustomName(), "TU", newName, "TT", newAbbreviation));
 	}
 	
 	public void handleChangeGuildMotd(CreatureObject actor, Guild guild) {
@@ -650,7 +650,7 @@ public class GuildService implements INetworkDispatch {
 		    	
 		    	((CreatureObject)cOwner).sendSystemMessage(OutOfBand.ProsePackage("@guild:sponsor_target", "TT", guild.getName(), "TU", actor.getCustomName()), DisplayType.Broadcast);
 		    	
-				guild.sendGuildMail(guild.getName(), "@guildmail:sponsor_subject", new Stf("@guildmail:sponsor_text").getStfValue().replace("%TU", actor.getCustomName()).replace("%TT", cOwner.getCustomName()));
+				guild.sendGuildMail(guild.getName(), "@guildmail:sponsor_subject", new ProsePackage("@guildmail:sponsor_text", "TU", actor.getCustomName(), "TT", cOwner.getCustomName()));
 	    	});
 	    	core.suiService.openSUIWindow(wndSponsoredConfirm);
 	    	
@@ -681,9 +681,9 @@ public class GuildService implements INetworkDispatch {
 				if (datapad != null) {
 					datapad.viewChildren(target, true, false, (obj) -> {
 						if (obj instanceof IntangibleObject && obj.getTemplate().equals("object/intangible/data_item/shared_guild_stone.iff")) {
-							//obj.removeAttribute("guild_name");
-							//obj.removeAttribute("guild_abbrev");
-							//obj.removeAttribute("guild_leader");
+							obj.removeAttribute("guild_name");
+							obj.removeAttribute("guild_abbrev");
+							obj.removeAttribute("guild_leader");
 						}
 					});
 				}
@@ -694,8 +694,8 @@ public class GuildService implements INetworkDispatch {
 					target.getPlayerObject().removeChannel(guild.getChatRoomId());
 			}
 		});
-		
-		guild.sendGuildMail(guild.getName(), "@guildmail:disband_subject", new Stf("@guildmail:disband_text").getStfValue().replace("%TU", actor.getCustomName()));
+
+		guild.sendGuildMail(guild.getName(), "@guildmail:disband_subject", new ProsePackage("@guildmail:disband_text", "TU", actor.getCustomName()));
 
 		removeGuild(guild.getId());
 	}
@@ -778,14 +778,14 @@ public class GuildService implements INetworkDispatch {
 	public void handleGuildDeclineSponsorship(Guild guild, CreatureObject actor, CreatureObject sponsoree) {
 		guild.getSponsoredPlayers().remove(sponsoree.getObjectID());
 		
-		guild.sendGuildMail(guild.getName(), "@guildmail:decline_subject", new Stf("@guildmail:decline_text").getStfValue().replace("%TU", actor.getCustomName()).replace("%TT", sponsoree.getCustomName()));
+		guild.sendGuildMail(guild.getName(), "@guildmail:decline_subject", new ProsePackage("@guildmail:decline_text", "TU", actor.getCustomName(), "TT", sponsoree.getCustomName()));
 		
 		Mail declinedMail = new Mail();
         declinedMail.setMailId(core.chatService.generateMailId());
         declinedMail.setTimeStamp((int) new Date().getTime());
         declinedMail.setRecieverId(sponsoree.getObjectID());
         declinedMail.setStatus(Mail.NEW);
-        declinedMail.setMessage(new Stf("@guildmail:decline_target_text").getStfValue().replace("%TU", actor.getCustomName()).replace("%TT", guild.getName()));
+        declinedMail.addProseAttachment(new ProsePackage("@guildmail:decline_target_text", "TU", actor.getCustomName(), "TT", guild.getName()));
         declinedMail.setSubject("@guildmail:decline_subject");
         declinedMail.setSenderName(guild.getName());
         core.chatService.storePersistentMessage(declinedMail);
@@ -855,7 +855,7 @@ public class GuildService implements INetworkDispatch {
 		
 		if (actor.getObjectID() != target.getObjectID()) {
 
-			guild.sendGuildMail(guild.getName(), "@guildmail:kick_subject", new Stf("@guildmail:kick_text").getStfValue().replace("%TU", actor.getCustomName()).replace("%TT", target.getCustomName()));
+			guild.sendGuildMail(guild.getName(), "@guildmail:kick_subject", new ProsePackage("@guildmail:kick_text", "TU", actor.getCustomName(), "TT", target.getCustomName()));
 			
 			actor.sendSystemMessage(OutOfBand.ProsePackage("@guild:kick_self", "TU", target.getCustomName(), "TT", guild.getName()), DisplayType.Broadcast);
 			
@@ -867,7 +867,7 @@ public class GuildService implements INetworkDispatch {
 				actor.sendSystemMessage("@guild:leave_fail_leader_tried_to_leave", DisplayType.Broadcast);
 				return;
 			} else {
-				guild.sendGuildMail(guild.getName(), "@guildmail:leave_subject", new Stf("@guildmail:leave_text").getStfValue().replace("%TU", actor.getCustomName()));
+				guild.sendGuildMail(guild.getName(), "@guildmail:leave_subject", new ProsePackage("@guildmail:leave_text", "TU", actor.getCustomName()));
 				actor.sendSystemMessage(OutOfBand.ProsePackage("@guild:leave_self", "TU", guild.getName()), DisplayType.Broadcast);
 			}
 		}
@@ -881,9 +881,9 @@ public class GuildService implements INetworkDispatch {
 		if (datapad != null) {
 			datapad.viewChildren(target, true, false, (obj) -> {
 				if (obj instanceof IntangibleObject && obj.getTemplate().equals("object/intangible/data_item/shared_guild_stone.iff")) {
-					obj.setStringAttribute("guild_name", null);
-					obj.setStringAttribute("guild_abbrev", null);
-					obj.setStringAttribute("guild_leader", null);
+					obj.removeAttribute("guild_name");
+					obj.removeAttribute("guild_abbrev");
+					obj.removeAttribute("guild_leader");
 				}
 			});
 		}
