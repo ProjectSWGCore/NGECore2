@@ -10,7 +10,7 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('valarian_crew_chief')
+	mobileTemplate.setCreatureName('tatooine_valarian_doane_watki')
 	mobileTemplate.setLevel(20)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
@@ -24,7 +24,7 @@ def addTemplate(core):
 	
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_dressed_tatooine_valarian_thug.iff')
+	templates.add('object/mobile/shared_dressed_tatooine_valarian_swooper.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
@@ -36,5 +36,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('rangedShotpistol')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('valarian_crew_chief', mobileTemplate)
+	core.spawnService.addMobileTemplate('doane_watki', mobileTemplate)
 	return
