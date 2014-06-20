@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('wasteland_cu_pa')
 	mobileTemplate.setLevel(20)
-	mobileTemplate.setMinLevel(19)
-	mobileTemplate.setMaxLevel(21)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)

@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('runted_rill')
 	mobileTemplate.setLevel(1)
-	mobileTemplate.setMinLevel(1)
-	mobileTemplate.setMaxLevel(3)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)

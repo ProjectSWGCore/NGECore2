@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('dwarf_nuna_drooling')
 	mobileTemplate.setLevel(2)
-	mobileTemplate.setMinLevel(2)
-	mobileTemplate.setMaxLevel(3)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)

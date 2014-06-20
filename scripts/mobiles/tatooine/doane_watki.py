@@ -10,36 +10,31 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('elite_bocatt')
-	mobileTemplate.setLevel(17)
+	mobileTemplate.setCreatureName('tatooine_valarian_doane_watki')
+	mobileTemplate.setLevel(20)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(1)
-	mobileTemplate.setMeatType("Reptilian Meat")
-	mobileTemplate.setMeatAmount(100)
-	mobileTemplate.setHideType("Leathery Hide")
-	mobileTemplate.setBoneAmount(60)	
-	mobileTemplate.setBoneType("Animal Bones")
-	mobileTemplate.setHideAmount(35)
-	mobileTemplate.setSocialGroup("bocatt")
-	mobileTemplate.setAssistRange(8)
-	mobileTemplate.setStalker(True)
+	mobileTemplate.setSocialGroup("valarian")
+	mobileTemplate.setAssistRange(4)
+	mobileTemplate.setStalker(False)
+	
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_bocatt.iff')
+	templates.add('object/mobile/shared_dressed_tatooine_valarian_swooper.iff')
 	mobileTemplate.setTemplates(templates)
-
+	
 	weaponTemplates = Vector()
-	weapontemplate = WeaponTemplate('object/weapon/ranged/creature/shared_creature_spit_small_toxicgreen.iff', WeaponType.UNARMED, 1.0, 6, 'kinetic')
+	weapontemplate = WeaponTemplate('object/weapon/ranged/pistol/shared_pistol_cdef.iff', WeaponType.PISTOL, 1.0, 15, 'energy')
 	weaponTemplates.add(weapontemplate)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
-	mobileTemplate.setDefaultAttack('creatureRangedAttack')
+	mobileTemplate.setDefaultAttack('rangedShotpistol')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('snarlfang', mobileTemplate)
+	core.spawnService.addMobileTemplate('doane_watki', mobileTemplate)
 	return

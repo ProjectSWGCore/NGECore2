@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('dragonet_armodragon')
 	mobileTemplate.setLevel(25)
-	mobileTemplate.setMinLevel(25)
-	mobileTemplate.setMaxLevel(27)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)

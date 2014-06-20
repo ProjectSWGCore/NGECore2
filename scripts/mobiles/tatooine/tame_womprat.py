@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('tame_womprat')
 	mobileTemplate.setLevel(2)
-	mobileTemplate.setMinLevel(1)
-	mobileTemplate.setMaxLevel(4)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)

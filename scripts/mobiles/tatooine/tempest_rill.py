@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('rill_tempest')
 	mobileTemplate.setLevel(8)
-	mobileTemplate.setMinLevel(8)
-	mobileTemplate.setMaxLevel(10)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)

@@ -10,26 +10,27 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('elite_bocatt')
-	mobileTemplate.setLevel(17)
+	mobileTemplate.setCreatureName('dragonet_runt')
+	mobileTemplate.setLevel(19)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(1)
-	mobileTemplate.setMeatType("Reptilian Meat")
-	mobileTemplate.setMeatAmount(100)
-	mobileTemplate.setHideType("Leathery Hide")
-	mobileTemplate.setBoneAmount(60)	
-	mobileTemplate.setBoneType("Animal Bones")
-	mobileTemplate.setHideAmount(35)
-	mobileTemplate.setSocialGroup("bocatt")
-	mobileTemplate.setAssistRange(8)
-	mobileTemplate.setStalker(True)
+	mobileTemplate.setMeatType("Carnivore Meat")
+	mobileTemplate.setMeatAmount(125)
+	mobileTemplate.setHideType("Bristly Hide")
+	mobileTemplate.setBoneAmount(75)	
+	mobileTemplate.setBoneType("Animal Bone")
+	mobileTemplate.setHideAmount(68)
+	mobileTemplate.setSocialGroup("dragonet")
+	mobileTemplate.setAssistRange(10)
+	mobileTemplate.setStalker(True)	
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_bocatt.iff')
+	templates.add('object/mobile/shared_dragonet.iff')
 	mobileTemplate.setTemplates(templates)
 
 	weaponTemplates = Vector()
@@ -41,5 +42,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('creatureRangedAttack')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('snarlfang', mobileTemplate)
+	core.spawnService.addMobileTemplate('dragonet_runt', mobileTemplate)
 	return
