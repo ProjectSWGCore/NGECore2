@@ -10,6 +10,7 @@ from java.util import Map
 from java.util import TreeMap
 import main.NGECore
 import sys
+import math
 
 def createRadial(core, owner, target, radials):
 	#(byte parentId, short optionId, byte optionType, String description)
@@ -133,6 +134,72 @@ def handleSelection(core, owner, target, option):
 		if owner is not None:
 			handleRevokeCitizenship(core, owner, target, option)
 			return
+	if option == 224:
+		if owner is not None:
+			handleMaintenanceReport(core, owner, target, option)
+			return
+		
+def handleMaintenanceReport(core, owner, target, option):
+	playerCity = core.playerCityService.getPlayerCity(owner)
+	if not playerCity:
+		return
+	timeUntilUpdate = playerCity.getNextCityUpdate() - System.currentTimeMillis()
+	days = math.floor(timeUntilUpdate / 86400 * 1000)
+	timeUntilUpdate -= days * 86400 * 1000
+	hours = math.floor(timeUntilUpdate / 3600 * 1000)
+	timeUntilUpdate -= hours * 3600 * 1000
+	minutes = math.floor(timeUntilUpdate / 60 * 1000)
+	timeUntilUpdate -= minutes * 60 * 1000
+
+	timeStr = ''
+	
+	if days > 0:
+		timeStr += str(days) + ' day'
+		if days > 1:
+			timeStr += 's'
+		if hours > 0 or minutes > 0 or timeUntilUpdate > 0:
+			timeStr += ', '
+	if hours > 0:
+		timeStr += str(hours) + ' hour'
+		if hours > 1:
+			timeStr += 's'
+		if minutes > 0 or timeUntilUpdate > 0:
+			timeStr += ', '
+	if minutes > 0:
+		timeStr += str(minutes) + ' minute'
+		if minutes > 1:
+			timeStr += 's'
+		if timeUntilUpdate > 0:
+			timeStr += ', '
+	if timeUntilUpdate > 0:
+		timeStr += str(timeUntilUpdate) + ' second'
+		if timeUntilUpdate > 1:
+			timeStr += 's'
+	
+	totalMaintenance = 0
+	menuItems = TreeMap()
+	menuItems.put(Long(0), 'Next City Update: ' + timeStr)
+	for structureId in playerCity.getPlacedStructures():
+		structure = core.objectService.getObject(structureId)
+		if not structure or not structure.getAttachment('isCivicStructure'):
+			continue
+		maintenance = structure.getBMR()
+		if 'cityhall' in structure.getTemplate() and playerCity.isRegistered():
+			maintenance += 5000
+		totalMaintenance += maintenance
+		menuItems.put(Long(structureId), structure.getLookAtText() + ' : ' + str(maintenance))
+	
+	if playerCity.getSpecialisationStfValue() != '':
+		specMaintenance = playerCity.getSpecializationMaintenance()
+		totalMaintenance += specMaintenance
+		menuItems.put(Long(2), playerCity.getSpecialisationStfValue() + ' : ' + str(specMaintenance))
+		
+	
+	menuItems.put(Long(3), 'Total: ' + str(totalMaintenance))
+	window = core.suiService.createListBox(1, '@city/city:maint_info_t', '@city/city:maint_info_d', menuItems, owner, None, 0)
+	core.suiService.openSUIWindow(window)
+
+	return
 			
 def handleRevokeCitizenship(core, owner, target, option):
 	playerCity = core.playerCityService.getPlayerCity(owner)

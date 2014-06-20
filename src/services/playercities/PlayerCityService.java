@@ -408,6 +408,7 @@ public class PlayerCityService implements INetworkDispatch {
 	}
 
 	public void schedulePlayerCityUpdate(PlayerCity playerCity, long time) {
+		playerCity.setNextCityUpdate(System.currentTimeMillis() + time);
 		scheduler.schedule(() -> {
 			try {
 				playerCity.processCityUpdate();

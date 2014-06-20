@@ -90,9 +90,15 @@ public class HousingService implements INetworkDispatch {
         housingTemplates.values().forEach((houseTemplate) -> houseToDeed.put(houseTemplate.getBuildingTemplate(), houseTemplate.getDeedTemplate()));
 	}
 	
-	public void enterStructureMode(CreatureObject actor, TangibleObject deed) {	
+	public void enterStructureMode(CreatureObject actor, TangibleObject deed) {
+		PlayerCity city = core.playerCityService.getCityObjectIsIn(actor);
 		if (!actor.getClient().isGM() && !core.terrainService.canBuildAtPosition(actor, actor.getWorldPosition().x, actor.getWorldPosition().z)) {
 			actor.sendSystemMessage("You may not place a structure here.", (byte) 0); // should probably load this from an stf
+			return;
+		}
+		
+		if(city != null && !city.hasZoningRights(actor)) {
+			actor.sendSystemMessage("@player_structure:no_rights", (byte) 0); 
 			return;
 		}
 		
@@ -107,7 +113,8 @@ public class HousingService implements INetworkDispatch {
 		HouseTemplate houseTemplate = housingTemplates.get(deed.getTemplate());
 		int structureLotCost = houseTemplate.getLotCost();
 		String structureTemplate = houseTemplate.getBuildingTemplate();
-		
+		PlayerCity city = core.playerCityService.getCityPositionIsIn(new Point3D(positionX, 0, positionZ));
+
 		if (!houseTemplate.canBePlacedOn(actor.getPlanet().getName())) {
 			actor.sendSystemMessage("You may not place this structure on this planet.", (byte) 0); // should probably load this from an stf
 			return null;
@@ -115,6 +122,11 @@ public class HousingService implements INetworkDispatch {
 		
 		if(!actor.getClient().isGM() && !core.terrainService.canBuildAtPosition(actor, positionX, positionZ)) {
 			actor.sendSystemMessage("You may not place a structure here.", (byte) 0); // should probably load this from an stf
+			return null;
+		}
+		
+		if(city != null && !city.hasZoningRights(actor)) {
+			actor.sendSystemMessage("@player_structure:no_rights", (byte) 0); 
 			return null;
 		}
 		
@@ -132,6 +144,7 @@ public class HousingService implements INetworkDispatch {
 		
 		// Create the building
 		BuildingObject building = (BuildingObject) core.objectService.createObject(structureTemplate, 0, actor.getPlanet(), new Point3D(positionX, positionY, positionZ), quaternion);
+
 		core.simulationService.add(building, building.getPosition().x, building.getPosition().z, true);
 		
 		// Name the sign
@@ -156,7 +169,10 @@ public class HousingService implements INetworkDispatch {
 		building.addPlayerToAdminList(null, actor.getObjectID(), playerFirstName);
 		building.setDeedTemplate(deed.getTemplate());
 		building.setMaintenanceAmount(houseTemplate.getBaseMaintenanceRate());
-		building.setConditionDamage(100); // Ouch
+		
+		if(city != null) {
+			city.addNewStructure(building.getObjectID());
+		}
 		
 		/*
 		// Check for city founders joining a new city
