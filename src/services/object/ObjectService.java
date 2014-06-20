@@ -239,10 +239,31 @@ public class ObjectService implements INetworkDispatch {
 		
 		boolean isSnapshot = false;
 		
+		if(objectID != 0 && objectList.containsKey(objectID)) {
+			System.err.println("Trying to create object with duplicate Id");
+			try {
+				throw new Exception();
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
 		if(objectID == 0)
 			objectID = generateObjectID();
 		else
 			isSnapshot = !overrideSnapshot;
+		
+		if (planet == null) {
+			System.err.println("Planet is null in createObject for some reason.");
+			
+			try {
+				throw new Exception();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			planet = core.terrainService.getPlanetByID(0);
+		}
 		
 		if(Template.startsWith("object/creature")) {
 			
@@ -344,7 +365,11 @@ public class ObjectService implements INetworkDispatch {
 			return null;			
 		}
 		
-		object.setPlanetId(planet.getID());
+		if (planet != null) {
+			object.setPlanetId(planet.getID());
+		} else {
+			object.setPlanetId(0);
+		}
 		
 		object.setAttachment("customServerTemplate", customServerTemplate);
 		
@@ -450,7 +475,17 @@ public class ObjectService implements INetworkDispatch {
 	}
 	
 	public SWGObject getObject(long objectID) {
-		return objectList.get(objectID);
+		SWGObject object = objectList.get(objectID);
+		
+		if (object == null) {
+			if (objectList.containsKey(objectID)) {
+				System.err.println("getObject(): object is null but objectList contains objectID key");
+			} else {
+				//System.err.println("getObject(): object is null");
+			}
+		}
+		
+		return object;
 	}
 	
 	public Map<Long, SWGObject> getObjectList() {
@@ -462,7 +497,11 @@ public class ObjectService implements INetworkDispatch {
 			
 			@Override
 			public void run() {
-				destroyObject(object);
+				try {
+					destroyObject(object);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 			
 		}, seconds, TimeUnit.SECONDS);
@@ -486,7 +525,11 @@ public class ObjectService implements INetworkDispatch {
 				
 				@Override
 				public void run() {
-					NGECore.getInstance().spawnService.spawnCreature(Template, objectId, planet.getName(), cellId, position.x, position.y, position.z, orientation.w, orientation.x, orientation.y, orientation.z, level);
+					try {
+						NGECore.getInstance().spawnService.spawnCreature(Template, objectId, planet.getName(), cellId, position.x, position.y, position.z, orientation.w, orientation.x, orientation.y, orientation.z, level);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 				}
 				
 			}, ((AIActor) object.getAttachment("AI")).getMobileTemplate().getRespawnTime(), TimeUnit.SECONDS);
@@ -916,7 +959,7 @@ public class ObjectService implements INetworkDispatch {
 				}
 				CreatureObject creature = null;
 				if(getObject(objectId) == null) {
-										
+					System.out.println("SelectCharacter: not in object list");
 					creature = getCreatureFromDB(objectId);
 					if(creature == null) {
 						System.out.println("Cant get creature from db");
@@ -933,6 +976,9 @@ public class ObjectService implements INetworkDispatch {
 					
 
 				}
+				if(creature.getAttachment("disconnectTask") != null) {
+					((ScheduledFuture<?>) creature.getAttachment("disconnectTask")).cancel(true);
+				}					
 				
 				PlayerObject ghost = (PlayerObject) creature.getSlottedObject("ghost");
 
@@ -941,9 +987,6 @@ public class ObjectService implements INetworkDispatch {
 				
 				ghost.clearFlagBitmask(PlayerFlags.LD);
 				
-				if(creature.getAttachment("disconnectTask") != null) {
-					((ScheduledFuture<?>) creature.getAttachment("disconnectTask")).cancel(true);
-				}					
 				creature.getAwareObjects().removeAll(creature.getAwareObjects());
 				creature.setAttachment("disconnectTask", null);
 
@@ -960,6 +1003,7 @@ public class ObjectService implements INetworkDispatch {
 				
 				creature.viewChildren(creature, true, true, (object) -> {
 					if(object.getMutex() == null)
+						object.initializeBaselines();
 						object.initAfterDBLoad();
 					if(object.getParentId() != 0 && object.getContainer() == null)
 						object.setParent(getObject(object.getParentId()));
@@ -970,7 +1014,10 @@ public class ObjectService implements INetworkDispatch {
 
 				if(creature.getParentId() != 0) {
 					SWGObject parent = getObject(creature.getParentId());
-					System.out.println("Building: " + parent.getContainer().getTemplate());
+					if (parent == null) System.out.println("parentId isn't 0 but getObject(parentId) is null in SelectCharacter");
+					else if (parent.getContainer() == null) System.out.println("parent.getContainer() is null in SelectCharacter");
+					else if (parent.getContainer().getTemplate() == null) System.out.println("parent.getContainer().getTemplate() is null in SelectCharacter");
+					if (parent != null && parent.getContainer() != null && parent.getContainer().getTemplate() != null) System.out.println("Building: " + parent.getContainer().getTemplate());
 					parent._add(creature);
 				}
 

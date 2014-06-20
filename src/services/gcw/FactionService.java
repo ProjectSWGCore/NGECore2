@@ -396,16 +396,20 @@ public class FactionService implements INetworkDispatch {
 		}
 		
 		scheduler.schedule(() -> {
-			actor.setFaction(faction);
-			actor.setFactionStatus(FactionStatus.OnLeave);
-			actor.setPvpBitmask(0);
-			PlayerObject player = ((PlayerObject) actor.getSlottedObject("ghost"));
-			if (player != null) {
-				player.resetGcwPoints();
-				player.resetPvpKills();
-				player.setCurrentRank(1);
+			try {
+				actor.setFaction(faction);
+				actor.setFactionStatus(FactionStatus.OnLeave);
+				actor.setPvpBitmask(0);
+				PlayerObject player = ((PlayerObject) actor.getSlottedObject("ghost"));
+				if (player != null) {
+					player.resetGcwPoints();
+					player.resetPvpKills();
+					player.setCurrentRank(1);
+				}
+				actor.updatePvpStatus();
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-			actor.updatePvpStatus();
 		}, 1, TimeUnit.SECONDS);
 	}
 	
@@ -462,10 +466,14 @@ public class FactionService implements INetworkDispatch {
 		final String finalMessage = message;
 		
 		scheduler.schedule(() -> {
-			actor.setPvpBitmask(0);
-			actor.setFactionStatus(factionStatus);
-			actor.updatePvpStatus();
-			actor.sendSystemMessage("@faction_recruiter:" + finalMessage, DisplayType.Broadcast);
+			try {
+				actor.setPvpBitmask(0);
+				actor.setFactionStatus(factionStatus);
+				actor.updatePvpStatus();
+				actor.sendSystemMessage("@faction_recruiter:" + finalMessage, DisplayType.Broadcast);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}, time, TimeUnit.SECONDS);
 	}
 	
@@ -495,17 +503,21 @@ public class FactionService implements INetworkDispatch {
 		}
 		
 		scheduler.schedule(() -> {
-			actor.setPvpBitmask(0);
-			actor.setFactionStatus(FactionStatus.OnLeave);
-			actor.setFaction("");
-			PlayerObject player = ((PlayerObject) actor.getSlottedObject("ghost"));
-			if (player != null) {
-				player.resetGcwPoints();
-				player.resetPvpKills();
-				player.setCurrentRank(0);
+			try {
+				actor.setPvpBitmask(0);
+				actor.setFactionStatus(FactionStatus.OnLeave);
+				actor.setFaction("");
+				PlayerObject player = ((PlayerObject) actor.getSlottedObject("ghost"));
+				if (player != null) {
+					player.resetGcwPoints();
+					player.resetPvpKills();
+					player.setCurrentRank(0);
+				}
+				actor.updatePvpStatus();
+				actor.sendSystemMessage("@faction_recruiter:resign_complete", DisplayType.Broadcast);
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-			actor.updatePvpStatus();
-			actor.sendSystemMessage("@faction_recruiter:resign_complete", DisplayType.Broadcast);
 		}, time, TimeUnit.SECONDS);
 	}
 	

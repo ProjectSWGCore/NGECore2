@@ -21,7 +21,6 @@
  ******************************************************************************/
 package services.playercities;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 import java.util.Random;
@@ -33,7 +32,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import resources.common.OutOfBand;
-import resources.common.ProsePackage;
 import resources.datatables.Citizenship;
 import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
@@ -119,7 +117,7 @@ public class PlayerCityService implements INetworkDispatch {
 		return id;
 	}
 	
-	private boolean doesCityNameExist(String name) {
+	public boolean doesCityNameExist(String name) {
 		return playerCities.stream().map(PlayerCity::getCityName).filter(n -> n.equalsIgnoreCase(name)).findFirst().isPresent() || 
 			   core.terrainService.getClientRegions().stream().map(ClientRegion::getName).filter(n -> n.equalsIgnoreCase(name)).findFirst().isPresent();
 	}
@@ -168,6 +166,7 @@ public class PlayerCityService implements INetworkDispatch {
 				PlayerCity playerCity = addNewPlayerCity(actor, cityHall);
 				playerCity.setCityName(name);
 				playerCity.addNewStructure(cityHall.getObjectID());
+				playerCity.setElectionTime();
 				PlayerCityService.this.schedulePlayerCityUpdate(playerCity, PlayerCity.newCityGraceSpan);
 				cityHall.setAttachment("structureCity", playerCity.getCityID());
 				actor.setAttachment("residentCity", playerCity.getCityID());
@@ -409,6 +408,7 @@ public class PlayerCityService implements INetworkDispatch {
 	}
 
 	public void schedulePlayerCityUpdate(PlayerCity playerCity, long time) {
+		playerCity.setNextCityUpdate(System.currentTimeMillis() + time);
 		scheduler.schedule(() -> {
 			try {
 				playerCity.processCityUpdate();
@@ -573,8 +573,9 @@ public class PlayerCityService implements INetworkDispatch {
 			actor.sendSystemMessage(OutOfBand.ProsePackage("@city/city:vote_placed", "TO", candidate.getCustomName()), (byte) 0);
 			
 		});
+		core.suiService.openSUIWindow(window);
 		
 	}
-
+	
 
 }

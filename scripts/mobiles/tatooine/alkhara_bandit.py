@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('alkhara_bandit')
 	mobileTemplate.setLevel(15)
-	mobileTemplate.setMinLevel(14)
-	mobileTemplate.setMaxLevel(16)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
@@ -23,6 +21,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("alkhara")
 	mobileTemplate.setAssistRange(4)
 	mobileTemplate.setStalker(True)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)	
 	
 	
 	templates = Vector()

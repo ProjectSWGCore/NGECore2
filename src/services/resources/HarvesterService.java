@@ -175,7 +175,11 @@ public class HarvesterService implements INetworkDispatch {
 
 			@Override
 			public void run() {
-				ServiceProcessing();	
+				try {
+					ServiceProcessing();	
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 			
 		}, 10, 5000, TimeUnit.MILLISECONDS);
@@ -198,10 +202,10 @@ public class HarvesterService implements INetworkDispatch {
 				} catch (InterruptedException e1) {
 					System.err.println("InterruptedException IN HARVESTERSERVICE !!! " + e1.getMessage());
 				}
-	    		} catch (ExecutionException e2) {
-	    			System.err.println("EXCEPTION IN HARVESTERSERVICE !!! " + e2.getMessage());
-	    			System.err.println("EXCEPTION CAUSE : " + e2.getCause());
-	    		}
+	    	} catch (ExecutionException e2) {
+	    		System.err.println("EXCEPTION IN HARVESTERSERVICE !!! " + e2.getMessage());
+	    		System.err.println("EXCEPTION CAUSE : " + e2.getCause());
+	    	}
 	    }
 	  }
 	

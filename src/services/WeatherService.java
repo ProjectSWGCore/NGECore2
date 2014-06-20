@@ -65,7 +65,11 @@ public class WeatherService {
 		currentWeatherMap.put(planet, defaultWeather);
 		
 		scheduler.scheduleAtFixedRate(() -> {
-			runWeatherCycle(planet);
+			try {
+				runWeatherCycle(planet);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}, 30, 30, TimeUnit.MINUTES);
 		
 	}

@@ -25,7 +25,7 @@ def officer_1a(core, actor):
 	return
 	
 def smuggler_1a(core, actor):
-	core.collectionService.addCollection(actor, "new_prof_officer_master")
+	core.collectionService.addCollection(actor, "new_prof_smuggler_master")
 	return
 	
 def spy_1a(core, actor):

@@ -91,9 +91,9 @@ public class SkillMod extends Delta implements Serializable {
 		}
 	}
 	
-	public float getValue(int divisor) {
+	public float getValue(int divisor, boolean percent) {
 		synchronized(objectMutex) {
-			return ((divisor < 1) ? ((float) base) : ((float) base / (float) divisor));
+			return (((divisor < 1) ? ((float) (base + modifier)) : ((float) (base + modifier) / (float) divisor)) * ((percent) ? 100f : 1f));
 		}
 	}
 	

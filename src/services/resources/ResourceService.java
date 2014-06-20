@@ -11566,40 +11566,42 @@ public class ResourceService implements INetworkDispatch {
 		actor.sendSystemMessage("@skl_use:milk_begin", (byte) 0);
 				
 		scheduler.schedule(() -> {
-			
-			if(actor.getInventoryItemCount() >= 80) {
-				actor.sendSystemMessage("@skl_use:milk_inventory_full", (byte) 0);
-				ai.setMilkState(MilkState.NOTYETMILKED);
-				return;
+			try {
+				if(actor.getInventoryItemCount() >= 80) {
+					actor.sendSystemMessage("@skl_use:milk_inventory_full", (byte) 0);
+					ai.setMilkState(MilkState.NOTYETMILKED);
+					return;
+				}
+				
+				if(target.getPosture() == 14) {
+					actor.sendSystemMessage("@skl_use:milk_cant_milk_the_dead", (byte) 0);
+					ai.setMilkState(MilkState.NOTYETMILKED);
+					return;
+				}
+				
+				if(!actor.inRange(target.getWorldPosition(), 5)) {
+					actor.sendSystemMessage("@skl_use:milk_too_far", (byte) 0);
+					ai.setMilkState(MilkState.NOTYETMILKED);
+					return;
+				}
+				
+				if(actor.isInCombat()) {
+					actor.sendSystemMessage("@skl_use:milk_combat", (byte) 0);
+					ai.setMilkState(MilkState.NOTYETMILKED);
+					return;
+				}
+				
+				if(new Random().nextFloat() <= 0.05f) {
+					actor.sendSystemMessage("@skl_use:milk_not_hidden", (byte) 0);
+					ai.setMilkState(MilkState.NOTYETMILKED);
+					ai.addDefender(actor);
+					return;
+				}
+				
+				giveMilk(actor, target);
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-			
-			if(target.getPosture() == 14) {
-				actor.sendSystemMessage("@skl_use:milk_cant_milk_the_dead", (byte) 0);
-				ai.setMilkState(MilkState.NOTYETMILKED);
-				return;
-			}
-			
-			if(!actor.inRange(target.getWorldPosition(), 5)) {
-				actor.sendSystemMessage("@skl_use:milk_too_far", (byte) 0);
-				ai.setMilkState(MilkState.NOTYETMILKED);
-				return;
-			}
-			
-			if(actor.isInCombat()) {
-				actor.sendSystemMessage("@skl_use:milk_combat", (byte) 0);
-				ai.setMilkState(MilkState.NOTYETMILKED);
-				return;
-			}
-			
-			if(new Random().nextFloat() <= 0.05f) {
-				actor.sendSystemMessage("@skl_use:milk_not_hidden", (byte) 0);
-				ai.setMilkState(MilkState.NOTYETMILKED);
-				ai.addDefender(actor);
-				return;
-			}
-			
-			giveMilk(actor, target);
-			
 		}, 10000, TimeUnit.MILLISECONDS);
 		
 	}

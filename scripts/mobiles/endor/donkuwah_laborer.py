@@ -18,7 +18,7 @@ def addTemplate(core):
 	mobileTemplate.setMaxSpawnDistance(5)
 	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setSocialGroup('donkuwah tribe')
-	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	mobileTemplate.setStalker(True)
 	
 	

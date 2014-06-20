@@ -22,6 +22,7 @@
 package resources.datatables;
 
 public class PlayerFlags {
+	
 	public static final int LFG = 0x01;
 	public static final int HELPER = 0x02;
 	public static final int ROLEPLAYER = 0x04;

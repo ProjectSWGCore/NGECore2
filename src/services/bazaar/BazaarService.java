@@ -873,14 +873,18 @@ public class BazaarService implements INetworkDispatch {
 	public void startVendorUpdateTask(CreatureObject owner, SWGObject vendor) {
 		
 		scheduler.scheduleAtFixedRate(() -> {
-			if(vendor == null || !((Boolean) vendor.getAttachment("initialized")))
-				return;
-			
-			float maintenanceRate = 15;
-			if((Boolean) vendor.getAttachment("onMap"))
-				maintenanceRate += 6;
-			vendor.setAttachment("maintenanceAmount", (Integer) vendor.getAttachment("maintenanceAmount") - maintenanceRate);
-			// TODO add vendor delete after x days
+			try {
+				if(vendor == null || !((Boolean) vendor.getAttachment("initialized")))
+					return;
+				
+				float maintenanceRate = 15;
+				if((Boolean) vendor.getAttachment("onMap"))
+					maintenanceRate += 6;
+				vendor.setAttachment("maintenanceAmount", (Integer) vendor.getAttachment("maintenanceAmount") - maintenanceRate);
+				// TODO add vendor delete after x days
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}, 1, 1, TimeUnit.HOURS);
 		
 	}

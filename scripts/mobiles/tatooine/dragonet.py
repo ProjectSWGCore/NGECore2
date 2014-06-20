@@ -29,7 +29,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("dragonet")
 	mobileTemplate.setAssistRange(10)
 	mobileTemplate.setStalker(True)	
-	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dune_lizard.iff')

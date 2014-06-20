@@ -74,23 +74,31 @@ public class AIActor {
 		creature.getEventBus().subscribe(this);
 		this.currentState = new IdleState();
 		regenTask = scheduler.scheduleAtFixedRate(() -> {
-			if(creature.getHealth() < creature.getMaxHealth() && !creature.isInCombat() && creature.getPosture() != 13 && creature.getPosture() != 14)
-				creature.setHealth(creature.getHealth() + (36 + creature.getLevel() * 4));
+			try {
+				if(creature.getHealth() < creature.getMaxHealth() && !creature.isInCombat() && creature.getPosture() != 13 && creature.getPosture() != 14)
+					creature.setHealth(creature.getHealth() + (36 + creature.getLevel() * 4));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}, 0, 1000, TimeUnit.MILLISECONDS);
 		if(creature.getOption(Options.AGGRESSIVE)) {
 			aggroCheckTask = scheduler.scheduleAtFixedRate(() -> {
-				if(creature == null || creature.getObservers().isEmpty() || creature.isInCombat() || isStalking)
-					return;
-				creature.getObservers().stream().map(Client::getParent).filter(obj -> obj.inRange(creature.getWorldPosition(), 10)).forEach((obj) -> {
-					if(new Random().nextFloat() <= 0.33 || creature.isInCombat() || isStalking) {
-						/*if(mobileTemplate.isStalker()) {
-							setFollowObject((CreatureObject) obj);
-							setCurrentState(new StalkState());
-						} else */
-							addDefender((CreatureObject) obj);	
-							
-					}
-				});
+				try {
+					if(creature == null || creature.getObservers().isEmpty() || creature.isInCombat() || isStalking)
+						return;
+					creature.getObservers().stream().map(Client::getParent).filter(obj -> obj.inRange(creature.getWorldPosition(), 10)).forEach((obj) -> {
+						if(new Random().nextFloat() <= 0.33 || creature.isInCombat() || isStalking) {
+							/*if(mobileTemplate.isStalker()) {
+								setFollowObject((CreatureObject) obj);
+								setCurrentState(new StalkState());
+							} else */
+								addDefender((CreatureObject) obj);	
+								
+						}
+					});
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}, 0, 5000, TimeUnit.MILLISECONDS);
 
 		}
@@ -313,11 +321,15 @@ public class AIActor {
 		
 		scheduler.schedule(new Runnable() {
 			@Override
-			public void run() {				
-				damageMap.clear();
-				followObject = null;
-				creature.setAttachment("AI", null);
-				NGECore.getInstance().objectService.destroyObject(creature);
+			public void run() {
+				try {
+					damageMap.clear();
+					followObject = null;
+					creature.setAttachment("AI", null);
+					NGECore.getInstance().objectService.destroyObject(creature);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		}, 2, TimeUnit.MINUTES);
 	}

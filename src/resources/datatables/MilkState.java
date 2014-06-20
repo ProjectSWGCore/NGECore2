@@ -22,7 +22,9 @@
 package resources.datatables;
 
 public class MilkState {
+	
 	public static final byte NOTYETMILKED = 0;
 	public static final byte MILKINGINPROGRESS = 1;
 	public static final byte MILKED = 2;
+	
 }

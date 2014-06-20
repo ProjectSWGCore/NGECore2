@@ -308,7 +308,7 @@ public class GCWService implements INetworkDispatch {
 		}, 2, 2, TimeUnit.DAYS);
 		
 		scheduler.scheduleAtFixedRate(new Runnable() {
-			@Override public void run() { gcwUpdate(); }
+			@Override public void run() { try { gcwUpdate(); } catch (Exception e) { e.printStackTrace(); } }
 			
 			private void gcwUpdate() {
 				int nextUpdateTime = (int) calculateNextUpdateTime();

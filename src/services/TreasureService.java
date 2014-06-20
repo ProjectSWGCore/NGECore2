@@ -57,7 +57,11 @@ public class TreasureService implements INetworkDispatch {
 
 			@Override
 			public void run() {
-				ServiceProcessing();	
+				try {
+					ServiceProcessing();	
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 			
 		}, 10, 5000, TimeUnit.MILLISECONDS);

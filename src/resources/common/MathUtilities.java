@@ -22,6 +22,7 @@
 package resources.common;
 
 import java.math.BigDecimal;
+import java.util.Random;
 
 import engine.resources.scene.*;
 
@@ -76,6 +77,26 @@ public class MathUtilities {
 	    float newX = Float.intBitsToFloat(temp);
 	    newX = newX * (1.5F - xHalf * newX * newX);
 	    return newX;
+	}
+	
+	public static boolean tryChance(int chance) {
+		if (chance <= 0) {
+			return false;
+		}
+		
+		if (chance >= 100) {
+			return true;
+		}
+		
+		chance = (100 - chance);
+		
+		Random random = new Random();
+		
+		if (random.nextInt(chance + 1) == 1) {
+			return true;
+		}
+		
+		return false;
 	}
 	
 }

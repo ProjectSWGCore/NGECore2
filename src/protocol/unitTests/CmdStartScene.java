@@ -19,41 +19,64 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package protocol.swg;
-
-import java.nio.ByteOrder;
+package protocol.unitTests;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
+import protocol.UnitTest;
 
-public class ClientUIErrorMessage extends SWGMessage {
-
-	private String errorType;
-	private String errorMessage;
+public class CmdStartScene extends UnitTest {
 	
-	public ClientUIErrorMessage(String errorType, String errorMessage) {
-		operandCount		= 3;
-		opcode				= 0xB5ABF91A;
-		
-		this.errorType		= errorType;
-		this.errorMessage	= errorMessage;
+	public CmdStartScene() {
+		super();
 	}
 	
-	public void deserialize(IoBuffer data) {
+	public boolean isValid(IoBuffer buffer) {
+		int length = buffer.array().length;
 		
+		if (length < 47) {
+			return false;
+		}
+		
+		buffer.skip(6);
+		
+		if (buffer.get() > 1) {
+			return false;
+		}
+		
+		if (!checkObjectId(buffer.getLong())) {
+			return false;
+		}
+		
+		String string;
+		
+		string = getAsciiString(buffer);
+		
+		if (!checkString(string) || core.terrainService.getPlanetByPath(string) == null) {
+			return false;
+		}
+		
+		buffer.skip(16);
+		
+		string = getAsciiString(buffer);
+		
+		if (!checkString(string) || !string.startsWith("object/creature/player/")) {
+			return false;
+		}
+		
+		if (buffer.getLong() < core.getGalacticTime()) {
+			return false;
+		}
+		
+		if (buffer.getInt() != 0x8EB5EA4E) {
+			return false;
+		}
+		
+		if (buffer.position() < length) {
+			return false;
+		}
+		
+		return true;
 	}
 	
-	public IoBuffer serialize() {
-		int	size = 11 + errorType.length() + errorMessage.length();
-		IoBuffer result = IoBuffer.allocate(size).order(ByteOrder.LITTLE_ENDIAN);
-		
-		result.putShort(operandCount);
-		result.putInt(opcode);
-		result.put(getAsciiString(errorType));
-		result.put(getAsciiString(errorMessage));
-		result.put((byte)0);
-		result.flip();
-		
-		return result;
-	}
 }

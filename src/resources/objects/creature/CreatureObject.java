@@ -666,7 +666,7 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	
 	public int getSkillModBase(String name) {
 		SkillMod skillMod = getSkillMod(name);
-		return ((skillMod == null) ? 0 : skillMod.getBase());
+		return ((skillMod == null) ? 0 : skillMod.getBase() + skillMod.getModifier());
 	}
 	
 	public int getSkillModModifier(String name) {
@@ -674,9 +674,9 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		return ((skillMod == null) ? 0 : skillMod.getModifier());
 	}
 	
-	public float getSkillModValue(String name, int divisor) {
+	public float getSkillModValue(String name, int divisor, boolean percent) {
 		SkillMod skillMod = getSkillMod(name);
-		return ((skillMod == null) ? 0.0f : skillMod.getValue(divisor));
+		return ((skillMod == null) ? 0.0f : skillMod.getValue(divisor, percent));
 	}
 	
 	public float getSpeedMultiplierBase() {
@@ -1042,7 +1042,12 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		synchronized(objectMutex) {
 			this.performanceCounter = performanceCounter;
 		}
-		getClient().getSession().write(messageBuilder.buildPerformanceCounter(performanceCounter));
+		if (getClient() == null) System.err.println("setPerformanceCounter: client is null");
+		else if (getClient().getSession() == null) System.err.println("setPerformanceCounter: session is null");
+		else getClient().getSession().write(messageBuilder.buildPerformanceCounter(performanceCounter));
+		if (getClient() == null || getClient().getSession() == null) {
+			System.out.println("setPerformanceCounter: " + getTemplate());
+		}
 	}
 
 	public int getPerformanceId() {
@@ -1124,7 +1129,7 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	public void sendBaselines(Client destination) {
 				
 		if(destination == null || destination.getSession() == null) {
-			System.out.println("NULL session");
+			//System.out.println("NULL session");
 			return;
 		}
 		

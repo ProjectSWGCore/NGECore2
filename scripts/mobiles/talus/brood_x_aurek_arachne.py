@@ -21,7 +21,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("brood arachne")
 	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setStalker(True)
-	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_bane_back_spider_hue.iff')

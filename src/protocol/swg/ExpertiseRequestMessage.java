@@ -21,7 +21,6 @@
  ******************************************************************************/
 package protocol.swg;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +46,7 @@ public class ExpertiseRequestMessage extends SWGMessage {
 				String skill = new String(ByteBuffer.allocate(length).put(buffer.array(), buffer.position(), length).array(), "US-ASCII");
 				System.out.println(skill);
 				expertiseSkills.add(skill);
-			} catch (UnsupportedEncodingException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 			buffer.position(buffer.position() + length);

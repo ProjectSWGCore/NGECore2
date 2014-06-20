@@ -13,8 +13,8 @@ def setup(core, object):
 	object.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_action_line_fs_ae_dm_cc', 2)
 	object.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_cooldown_line_fs_cc_crit', 3)
 	object.setIntAttribute('cat_skill_mod_bonus.@stat_n:expertise_cooldown_line_fs_ae_dm_cc', 3)
-	object.setStringAttribute('@set_bonus:piece_bonus_count_3', '@set_bonus:set_jedi_utility_a_1')
-	object.setStringAttribute('@set_bonus:piece_bonus_count_4', '@set_bonus:set_jedi_utility_a_2')
-	object.setStringAttribute('@set_bonus:piece_bonus_count_5', '@set_bonus:set_jedi_utility_a_3')
-	object.setAttachment('setBonus', 'set_jedi_utility_a')
+	object.setStringAttribute('@set_bonus:piece_bonus_count_3', '@set_bonus:set_bonus_jedi_utility_a_1')
+	object.setStringAttribute('@set_bonus:piece_bonus_count_4', '@set_bonus:set_bonus_jedi_utility_a_2')
+	object.setStringAttribute('@set_bonus:piece_bonus_count_5', '@set_bonus:set_bonus_jedi_utility_a_3')
+	object.setAttachment('setBonus', 'set_bonus_jedi_utility_a')
 	return

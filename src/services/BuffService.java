@@ -171,9 +171,12 @@ public class BuffService implements INetworkDispatch {
 				@Override
 				public void run() {
 					
-					removeBuffFromCreature(target, buff);
+					try {
+						removeBuffFromCreature(target, buff);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 					
-				
 				}
 				
 			}, (long) buff.getDuration(), TimeUnit.SECONDS);
@@ -186,11 +189,15 @@ public class BuffService implements INetworkDispatch {
 			ScheduledFuture<?> task = scheduler.scheduleAtFixedRate(new Runnable() {
 				@Override
 				public void run() {
-					if (buffer == null  || buffer.getClient() == null)
-						removeBuffFromCreature(target, buff);
-
-					if (target.getWorldPosition().getDistance2D(buffer.getWorldPosition()) > 80) {
-						removeBuffFromCreature(target, buff);
+					try {
+						if (buffer == null  || buffer.getClient() == null)
+							removeBuffFromCreature(target, buff);
+	
+						if (target.getWorldPosition().getDistance2D(buffer.getWorldPosition()) > 80) {
+							removeBuffFromCreature(target, buff);
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
 					}
 				}
 			}, 5, 5, TimeUnit.SECONDS);
@@ -282,7 +289,13 @@ public class BuffService implements INetworkDispatch {
 			}
 
 			if(buff.getRemainingDuration() > 0 && buff.getDuration() > 0) {
-				ScheduledFuture<?> task = scheduler.schedule(() -> removeBuffFromCreature(creature, buff), (long) buff.getRemainingDuration(), TimeUnit.SECONDS);
+				ScheduledFuture<?> task = scheduler.schedule(() -> {
+					try {
+						removeBuffFromCreature(creature, buff);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}, (long) buff.getRemainingDuration(), TimeUnit.SECONDS);
 				buff.setRemovalTask(task);
 				continue;
 			} else {

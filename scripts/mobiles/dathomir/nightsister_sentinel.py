@@ -20,10 +20,10 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup('nightsister')
 	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setRespawnTime(300)
-	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_dressed_dathomir_nightsister_sentinal.iff')
+	templates.add('object/mobile/shared_dressed_dathomir_spider_nightsister_sentinel.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
@@ -55,4 +55,4 @@ def addTemplate(core):
 	lootGroupChance_5 = 3
 	mobileTemplate.addToLootGroups(lootPoolNames_5,lootPoolChances_5,lootGroupChance_5)
 	
-	core.spawnService.addMobileTemplate('nightsister_sentinal', mobileTemplate)
+	core.spawnService.addMobileTemplate('nightsister_sentinel', mobileTemplate)
