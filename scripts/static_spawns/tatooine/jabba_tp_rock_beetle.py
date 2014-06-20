@@ -1,5 +1,5 @@
 import sys
-# Project SWG:   Jabba TP Alkharan Camp:  Static Spawns
+# Project SWG:   Jabba TP Rock Beetle:  Static Spawns
 # (C)2014 ProjectSWG
 
 
