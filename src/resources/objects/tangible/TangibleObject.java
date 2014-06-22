@@ -570,10 +570,11 @@ public class TangibleObject extends SWGObject implements Serializable {
 	}
 	
 	public boolean isFull() {
+		
 		if (getTemplateData().getAttribute("containerVolumeLimit") == null)
 			return false;
 		
-		int containerVolumeLimit = (int) getTemplateData().getAttribute("containerVolumeLimit") >> 8; // Shifting because it seems to be returning an extra byte before it should
+		int containerVolumeLimit = (int) getTemplateData().getAttribute("containerVolumeLimit");
 		
 		if (containerVolumeLimit == 0 || getTemplate() == "object/tangible/inventory/shared_appearance_inventory.iff") // appearance inventory - issue #755
 			return false;
