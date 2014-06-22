@@ -139,14 +139,10 @@ public class SUIService implements INetworkDispatch {
 					return;
 				}
 				
-				if(target.getGrandparent() != null && target.getGrandparent().getAttachment("structureAdmins") != null)
-				{
-					if(core.housingService.getPermissions(owner, target.getContainer()) && !getRadialFilename(target).equals("structure/structure_management_terminal"))
-					{
-						core.scriptService.callScript("scripts/radial/", "structure/moveable", "createRadial", core, owner, target, request.getRadialOptions());
-						sendRadial(owner, target, request.getRadialOptions(), request.getRadialCount());
-						return;
-					}
+				if(core.housingService.getPermissions(owner, target.getContainer()) && (target.getAttachment("moveable") == null || (boolean) target.getAttachment("moveable") != false)) {
+					core.scriptService.callScript("scripts/radial/", "structure/moveable", "createRadial", core, owner, target, request.getRadialOptions());
+					sendRadial(owner, target, request.getRadialOptions(), request.getRadialCount());
+					return;
 				}
 				
 				core.scriptService.callScript("scripts/radial/", getRadialFilename(target), "createRadial", core, owner, target, request.getRadialOptions());
@@ -185,11 +181,9 @@ public class SUIService implements INetworkDispatch {
 					return;
 				}
 				
-				if(target.getGrandparent() != null && target.getGrandparent().getAttachment("structureAdmins") != null) {
-					if(core.housingService.getPermissions(owner, target.getContainer()) && !getRadialFilename(target).equals("structure/structure_management_terminal")) {
+				if(core.housingService.getPermissions(owner, target.getContainer()) && (target.getAttachment("moveable") == null || (boolean) target.getAttachment("moveable") != false)) {
 						core.scriptService.callScript("scripts/radial/", "structure/moveable", "handleSelection", core, owner, target, objMenuSelect.getSelection());
 						return;
-					}
 				}
 
 				core.scriptService.callScript("scripts/radial/", getRadialFilename(target), "handleSelection", core, owner, target, objMenuSelect.getSelection());

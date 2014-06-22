@@ -754,10 +754,11 @@ public class LootService implements INetworkDispatch {
     		setSTFParams(droppedItem, STFparams);
     	}
     	
-    	if (addToCollection!=null){
+    	if (addToCollection!=null) {
     		droppedItem.getAttributes().put("@obj_attr_n:collection_name", "@collection_n:"+addToCollection); 
     		//droppedItem.getAttributes().put("@obj_attr_n:collection_name", "\\#FFFF00 @collection_n:"+addToCollection + " \\#FFFFFF "); 
     		//core.collectionService.addCollection(actor, "new_prof_officer_master")
+    		droppedItem.setAttachment("AddToCollection", addToCollection);
     		droppedItem.setAttachment("radial_filename", "item/collection");
     		//System.out.println("collection");
     	}
