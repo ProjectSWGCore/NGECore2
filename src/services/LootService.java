@@ -79,8 +79,8 @@ public class LootService implements INetworkDispatch {
 	
 	private NGECore core;
 	private static int prepInvCnt = 0;
-	//String testDropTemplate = null;
-	String testDropTemplate = "stap1_vehicle_deed";
+	String testDropTemplate = null;
+	//String testDropTemplate = "stap1_vehicle_deed";
 	
 	public LootService(NGECore core) {
 		this.core = core;
