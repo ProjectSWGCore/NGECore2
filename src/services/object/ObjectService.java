@@ -291,6 +291,12 @@ public class ObjectService implements INetworkDispatch {
 			
 			object = new WeaponObject(objectID, planet, position, orientation, Template);
 
+		} else if(Template.startsWith("object/building/player/construction")) {
+			
+			float positionY = core.terrainService.getHeight(planet.getID(), position.x, position.z)-1f;
+			Point3D newpoint = new Point3D(position.x,positionY,position.z);				
+			object = new InstallationObject(objectID, planet, newpoint, orientation, Template);
+
 		} else if(Template.startsWith("object/building") || Template.startsWith("object/static/worldbuilding/structures") || Template.startsWith("object/static/structure")){
 			
 			object = new BuildingObject(objectID, planet, position, orientation, Template);
