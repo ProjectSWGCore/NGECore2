@@ -113,8 +113,10 @@ public class HousingService implements INetworkDispatch {
 		HouseTemplate houseTemplate = housingTemplates.get(deed.getTemplate());
 		int structureLotCost = houseTemplate.getLotCost();
 		String structureTemplate = houseTemplate.getBuildingTemplate();
-		PlayerCity city = core.playerCityService.getCityPositionIsIn(new Point3D(positionX, 0, positionZ));
-
+		//PlayerCity city = core.playerCityService.getCityPositionIsIn(new Point3D(positionX, 0, positionZ));
+		// This function is not implemented, so it had to be commented out, because it resulted in an error
+		// Whoever wrote this, should still add the method to playerCityService, then it can be uncommented here.
+		PlayerCity city = null;
 		if (!houseTemplate.canBePlacedOn(actor.getPlanet().getName())) {
 			actor.sendSystemMessage("You may not place this structure on this planet.", (byte) 0); // should probably load this from an stf
 			return null;
@@ -141,6 +143,12 @@ public class HousingService implements INetworkDispatch {
 		quaternion = resources.common.MathUtilities.rotateQuaternion(quaternion, (float)((Math.PI/2) * rotation), new Point3D(0, 1, 0));
 		
 		float positionY = core.terrainService.getHeight(actor.getPlanetId(), positionX, positionZ) + 2f;
+		
+		String constructorTemplate = mapConstructor(structureTemplate);
+		InstallationObject constructors = (InstallationObject) core.objectService.createObject(constructorTemplate, 0, actor.getPlanet(), new Point3D(positionX, positionY, positionZ), quaternion);				
+		core.simulationService.add(constructors, positionX, positionZ, true);
+		core.scriptService.callScript("scripts/", "constructor_build_phase", "buildConstructor", core);
+		core.objectService.destroyObject(constructors);
 		
 		// Create the building
 		BuildingObject building = (BuildingObject) core.objectService.createObject(structureTemplate, 0, actor.getPlanet(), new Point3D(positionX, positionY, positionZ), quaternion);
@@ -194,6 +202,27 @@ public class HousingService implements INetworkDispatch {
 		
 		core.objectService.persistObject(building.getObjectID(), building, core.getSWGObjectODB());
 		return building;	
+	}
+	
+	public String mapConstructor(String structureTemplate) {
+		String mappedConstructorTemplate = "object/building/player/construction/shared_construction_player_house_generic_small_style_01.iff";
+		if (structureTemplate.contains("small")){
+			mappedConstructorTemplate = "object/building/player/construction/shared_construction_player_house_generic_small_style_01.iff";
+		} else if (structureTemplate.contains("medium")){
+			mappedConstructorTemplate = "object/building/player/construction/shared_construction_player_house_generic_medium_style_01.iff";
+		} else if (structureTemplate.contains("large")){
+			mappedConstructorTemplate = "object/building/player/construction/shared_construction_player_house_generic_large_style_01.iff";
+		}
+		
+		if (structureTemplate.contains("guildhall") || structureTemplate.contains("cityhall")){
+			mappedConstructorTemplate = "object/building/player/construction/shared_construction_player_guildhall_corellia_style_01.iff";
+		} else if (structureTemplate.contains("hangar")){
+			mappedConstructorTemplate = "object/building/player/construction/shared_construction_player_house_hangar.iff";
+		} else if (structureTemplate.contains("meditation")){
+			mappedConstructorTemplate = "object/building/player/construction/shared_construction_player_jedi_meditation_room.iff";
+		}
+		// Probably more could be added		
+		return mappedConstructorTemplate;
 	}
 	
 	public void startMaintenanceTask(BuildingObject building) {
