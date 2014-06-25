@@ -13,11 +13,11 @@ def lootDescriptor():
 	
 def customizationAttributes():
 
-	return ['/private/index_color_1']
+	return ['/private/index_color_1','/private/index_color_2']
 	
 def customizationValues():
 
-	return [13]  #not correct
+	return [6,12] 
 	
 def reverse_engineering_name():
 
