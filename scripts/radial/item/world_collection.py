@@ -11,8 +11,7 @@ def handleSelection(core, actor, target, option):
 	if option == 21 and target:
 		if target.getAttachment('CollectionItemName'):
 			print (target.getAttachment('CollectionItemName'))
-			if core.collectionService.isComplete(actor, target.getAttachment('CollectionItemName')) == False:
-				core.collectionService.addCollection(actor, target.getAttachment('CollectionItemName'))
-				core.objectService.useObject(actor, target)
-				core.objectService.destroyObject(target)
+			core.collectionService.addCollection(actor, target.getAttachment('CollectionItemName'))
+			core.objectService.useObject(actor, target)
+			core.objectService.destroyObject(target)
 	return
