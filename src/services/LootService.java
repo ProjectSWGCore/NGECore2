@@ -54,6 +54,7 @@ import resources.objects.group.GroupObject;
 import resources.objects.intangible.IntangibleObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
+import services.ai.AIActor;
 import services.sui.SUIService.ListBoxType;
 import services.sui.SUIService.MessageBoxType;
 import services.sui.SUIWindow;
@@ -193,7 +194,7 @@ public class LootService implements INetworkDispatch {
 		
 	    // set info above corpse
 	    //System.out.println("lootedObject instanceof CreatureObject " + (lootedObject instanceof CreatureObject));
-	    if (lootedObject instanceof CreatureObject){
+	    if (lootedObject instanceof CreatureObject && lootRollSession.getDroppedItems().size()>0){
 	    	try {
 			    float y = 0.5F; // 1.3356977F
 			    float qz= 1.06535322E9F;
@@ -1485,7 +1486,9 @@ public class LootService implements INetworkDispatch {
 	
 	public void handleCreditDrop(CreatureObject requester,TangibleObject lootedObject,LootRollSession lootRollSession){
 		int lootedCredits = 0;
-		if (lootedObject.isCreditRelieved())
+		AIActor ai = (AIActor) lootedObject.getAttachment("AI");
+		String resType = ai.getMobileTemplate().getMeatType();
+		if (lootedObject.isCreditRelieved() || resType!=null)
 			return;
 		
 		// Credit drop is depending on the CL of the looted CreatureObject
