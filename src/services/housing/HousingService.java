@@ -114,14 +114,9 @@ public class HousingService implements INetworkDispatch {
 		int structureLotCost = houseTemplate.getLotCost();
 		String structureTemplate = houseTemplate.getBuildingTemplate();
 		//PlayerCity city = core.playerCityService.getCityPositionIsIn(new Point3D(positionX, 0, positionZ));
-<<<<<<< HEAD
-		PlayerCity city = null;
-
-=======
 		// This function is not implemented, so it had to be commented out, because it resulted in an error
 		// Whoever wrote this, should still add the method to playerCityService, then it can be uncommented here.
 		PlayerCity city = null;
->>>>>>> origin/master
 		if (!houseTemplate.canBePlacedOn(actor.getPlanet().getName())) {
 			actor.sendSystemMessage("You may not place this structure on this planet.", (byte) 0); // should probably load this from an stf
 			return null;
