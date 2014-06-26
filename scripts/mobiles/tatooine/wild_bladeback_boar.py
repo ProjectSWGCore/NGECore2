@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('quest_hero_of_tatooine_ferocious_beast')
 	mobileTemplate.setLevel(40)
-	mobileTemplate.setMinLevel(39)
-	mobileTemplate.setMaxLevel(41)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)

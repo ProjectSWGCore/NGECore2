@@ -166,6 +166,8 @@ public class EquipmentService implements INetworkDispatch {
 		
 		if(!actor.getEquipmentList().contains(item.getObjectID())) 
 		{
+			if(item instanceof WeaponObject) actor.setWeaponId(item.getObjectID());
+			
 			actor.addObjectToEquipList(item);
 			processItemAtrributes(actor, item, true);
 		}
@@ -182,6 +184,8 @@ public class EquipmentService implements INetworkDispatch {
 		
 		if(actor.getEquipmentList().contains(item.getObjectID())) 
 		{
+			if(item instanceof WeaponObject) actor.setWeaponId(actor.getSlottedObject("default_weapon").getObjectID());
+			
 			actor.removeObjectFromEquipList(item);
 			processItemAtrributes(actor, item, false);
 		}

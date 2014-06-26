@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('scyk')
 	mobileTemplate.setLevel(11)
-	mobileTemplate.setMinLevel(11)
-	mobileTemplate.setMaxLevel(13)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)

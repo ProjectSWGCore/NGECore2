@@ -54,6 +54,7 @@ import resources.objects.group.GroupObject;
 import resources.objects.intangible.IntangibleObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
+import services.ai.AIActor;
 import services.sui.SUIService.ListBoxType;
 import services.sui.SUIService.MessageBoxType;
 import services.sui.SUIWindow;
@@ -79,7 +80,7 @@ public class LootService implements INetworkDispatch {
 	private NGECore core;
 	private static int prepInvCnt = 0;
 	String testDropTemplate = null;
-	//String testDropTemplate = "kowakian_cage";
+	//String testDropTemplate = "stap1_vehicle_deed";
 	
 	public LootService(NGECore core) {
 		this.core = core;
@@ -193,7 +194,7 @@ public class LootService implements INetworkDispatch {
 		
 	    // set info above corpse
 	    //System.out.println("lootedObject instanceof CreatureObject " + (lootedObject instanceof CreatureObject));
-	    if (lootedObject instanceof CreatureObject){
+	    if (lootedObject instanceof CreatureObject && lootRollSession.getDroppedItems().size()>0){
 	    	try {
 			    float y = 0.5F; // 1.3356977F
 			    float qz= 1.06535322E9F;
@@ -754,11 +755,12 @@ public class LootService implements INetworkDispatch {
     		setSTFParams(droppedItem, STFparams);
     	}
     	
-    	if (addToCollection!=null){
+    	if (addToCollection!=null) {
     		droppedItem.getAttributes().put("@obj_attr_n:collection_name", "@collection_n:"+addToCollection); 
     		//droppedItem.getAttributes().put("@obj_attr_n:collection_name", "\\#FFFF00 @collection_n:"+addToCollection + " \\#FFFFFF "); 
     		//core.collectionService.addCollection(actor, "new_prof_officer_master")
-    		droppedItem.setAttachment("radial_filename", "item/collection/loot_collection");
+    		droppedItem.setAttachment("AddToCollection", addToCollection);
+    		droppedItem.setAttachment("radial_filename", "item/collection");
     		//System.out.println("collection");
     	}
     	
@@ -1224,7 +1226,7 @@ public class LootService implements INetworkDispatch {
 	    		droppedItem.getAttributes().put("@obj_attr_n:collection_name", "@collection_n:"+addToCollection); 
 	    		//droppedItem.getAttributes().put("@obj_attr_n:collection_name", "\\#FFFF00 @collection_n:"+addToCollection + " \\#FFFFFF "); 
 	    		//core.collectionService.addCollection(actor, "new_prof_officer_master")
-	    		droppedItem.setAttachment("radial_filename", "item/loot_collection");
+	    		droppedItem.setAttachment("radial_filename", "item/collection");
 	    	}
 	    	
 	    		    	
@@ -1484,7 +1486,9 @@ public class LootService implements INetworkDispatch {
 	
 	public void handleCreditDrop(CreatureObject requester,TangibleObject lootedObject,LootRollSession lootRollSession){
 		int lootedCredits = 0;
-		if (lootedObject.isCreditRelieved())
+		AIActor ai = (AIActor) lootedObject.getAttachment("AI");
+		String resType = ai.getMobileTemplate().getMeatType();
+		if (lootedObject.isCreditRelieved() || resType!=null)
 			return;
 		
 		// Credit drop is depending on the CL of the looted CreatureObject

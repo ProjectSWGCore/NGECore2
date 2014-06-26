@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('wild_dune_boar')
 	mobileTemplate.setLevel(50)
-	mobileTemplate.setMinLevel(49)
-	mobileTemplate.setMaxLevel(51)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)

@@ -1243,6 +1243,10 @@ public class DevService implements INetworkDispatch {
 						deed.setIntAttribute("examine_maintenance_rate", 15);
 						inventory.add(deed);
 						
+						deed = (TangibleObject) core.objectService.createObject("object/tangible/deed/guild_deed/shared_tatooine_guild_deed.iff", planet);
+						deed.setIntAttribute("examine_maintenance_rate", 15);
+						inventory.add(deed);
+						
 						return;
 					
 					case 121:
