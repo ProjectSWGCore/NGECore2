@@ -66,6 +66,15 @@ public class AIActor {
 	private boolean isStalking = false;
 	private byte milkState = 0;
 	private boolean hasBeenHarvested = false;
+	private Vector<Point3D> patrolPoints;
+	private int patrolPointIndex = 0;
+	private String loiterDestType = "LOITER";
+	private Point3D loiterDestination;
+	private Point3D originPosition;
+	private float minLoiterDist;
+	private float maxLoiterDist;
+	private String waitState = "NO";
+	private long waitStartTime = 0L;
 
 	public AIActor(CreatureObject creature, Point3D spawnPosition, ScheduledExecutorService scheduler) {
 		this.creature = creature;
@@ -372,6 +381,75 @@ public class AIActor {
 		synchronized(creature.getMutex()) {
 			this.hasBeenHarvested = hasBeenHarvested;
 		}
+	}
+	
+	public void setPatrolPoints(Vector<Point3D> patrolPoints){
+		this.patrolPoints = patrolPoints;
+		setMovementPoints(patrolPoints);
+	}
+
+	public int getPatrolPointIndex() {
+		return patrolPointIndex;
+	}
+
+	public void setPatrolPointIndex(int patrolPointIndex) {
+		this.patrolPointIndex = patrolPointIndex;
+	}
+
+	public Point3D getLoiterDestination() {
+		return loiterDestination;
+	}
+
+	public void setLoiterDestination(Point3D loiterDestination) {
+		this.loiterDestination = loiterDestination;
+	}
+
+	public Point3D getOriginPosition() {
+		return originPosition;
+	}
+
+	public void setOriginPosition(Point3D originPosition) {
+		this.originPosition = originPosition;
+	}
+
+	public String getLoiterDestType() {
+		return loiterDestType;
+	}
+
+	public void setLoiterDestType(String loiterDestType) {
+		this.loiterDestType = loiterDestType;
+	}
+
+	public float getMinLoiterDist() {
+		return minLoiterDist;
+	}
+
+	public void setMinLoiterDist(float minLoiterDist) {
+		this.minLoiterDist = minLoiterDist;
+	}
+
+	public float getMaxLoiterDist() {
+		return maxLoiterDist;
+	}
+
+	public void setMaxLoiterDist(float maxLoiterDist) {
+		this.maxLoiterDist = maxLoiterDist;
+	}
+
+	public String getWaitState() {
+		return waitState;
+	}
+
+	public void setWaitState(String waitState) {
+		this.waitState = waitState;
+	}
+
+	public long getWaitStartTime() {
+		return waitStartTime;
+	}
+
+	public void setWaitStartTime(long waitStartTime) {
+		this.waitStartTime = waitStartTime;
 	}
 	
 }

@@ -24,7 +24,7 @@ package services.ai.states;
 import resources.objects.creature.CreatureObject;
 import services.ai.AIActor;
 
-public class PatrolState extends AIState {
+public class LoiterState extends AIState {
 
 	@Override
 	public byte onEnter(AIActor actor) {
@@ -46,8 +46,7 @@ public class PatrolState extends AIState {
 	@Override
 	public byte move(AIActor actor) {
 		// TODO Auto-generated method stub
-		//System.out.println("move in patrolState");
-		doPatrol(actor);
+		doLoiter(actor);
 		actor.scheduleMovement();
 		return StateResult.UNFINISHED;
 	}

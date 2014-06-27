@@ -26,12 +26,16 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Vector;
 
+import resources.common.SpawnPoint;
 import resources.datatables.Difficulty;
 import resources.datatables.FactionStatus;
 import resources.datatables.GcwType;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
 import resources.objects.player.PlayerObject;
+import services.ai.states.IdleState;
+import services.ai.states.LoiterState;
+import services.ai.states.PatrolState;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
 import main.NGECore;
@@ -164,4 +168,36 @@ public class AIService {
 		}
 	}
 	
+	public void setPatrol(CreatureObject creature, Vector<Point3D> patrolpoints){
+		AIActor actor = (AIActor) creature.getAttachment("AI");
+		if (actor==null)
+			return;
+		
+		actor.setPatrolPoints(patrolpoints);
+		actor.setCurrentState(new PatrolState());	
+	}
+	
+	public void setPatrol(CreatureObject creature, boolean active){
+		AIActor actor = (AIActor) creature.getAttachment("AI");
+		if (actor==null)
+			return;
+		
+		if (active)
+			actor.setCurrentState(new PatrolState());
+		else
+			actor.setCurrentState(new IdleState());
+	}
+	
+	public void setLoiter(CreatureObject creature, float minDist, float maxDist){
+		AIActor actor = (AIActor) creature.getAttachment("AI");
+		if (actor==null)
+			return;
+		actor.setOriginPosition(creature.getWorldPosition());
+		Point3D currentDestination = SpawnPoint.getRandomPosition(creature.getWorldPosition(), minDist, maxDist, creature.getPlanetId()); 
+		actor.getMovementPoints().add(currentDestination);
+		actor.setLoiterDestination(currentDestination);
+		actor.setMinLoiterDist(minDist);
+		actor.setMaxLoiterDist(maxDist);
+		actor.setCurrentState(new LoiterState());	
+	}	
 }
