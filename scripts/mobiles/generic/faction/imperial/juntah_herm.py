@@ -11,7 +11,8 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('storyteller_imperial_pilot')
+	mobileTemplate.setCreatureName('juntah_herm')
+	mobileTemplate.setStfFilename('npc_spawner_n')
 	mobileTemplate.setLevel(64)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 

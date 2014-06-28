@@ -150,6 +150,7 @@ public class DevService implements INetworkDispatch {
 					suiOptions.put((long) 166, "Teleport to Imperial Op");
 					suiOptions.put((long) 167, "Teleport to Rebel Base ");
 					suiOptions.put((long) 168, "Teleport to NS vs SMC Battle");
+					suiOptions.put((long) 169, "Teleport to NS Stronghold");
 					suiOptions.put((long) 153, "Teleport to Force Crystal Hunter's Cave");
 					suiOptions.put((long) 121, "Teleport to Sandbox City");	
 				}
@@ -1279,6 +1280,10 @@ public class DevService implements INetworkDispatch {
 						
 					case 168: 
 						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("dathomir"), new Point3D(-2450,18,1521), player.getOrientation(), null);
+						return;
+						
+					case 169: 
+						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("dathomir"), new Point3D(-4002, 4, -58), player.getOrientation(), null);
 						return;
 
 					case 123:

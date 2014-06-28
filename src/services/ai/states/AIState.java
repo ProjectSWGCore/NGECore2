@@ -375,8 +375,21 @@ public abstract class AIState {
         
 //        if (newPosition.getCell()==null)
 //        	System.out.println("newPosition.getCell() is NULL");
-        
-		core.simulationService.moveObject(creature, newPosition, quaternion, creature.getMovementCounter(), speed, newPosition.getCell());
+        try{
+        	core.simulationService.moveObject(creature, newPosition, quaternion, creature.getMovementCounter(), speed, newPosition.getCell());
+        } catch (NullPointerException e) {
+        	// Just to identify what exactly is null here
+        	if (creature==null)
+        		System.out.print("creature==null" );
+        	if (newPosition==null)
+        		System.out.print("newPosition==null" );
+        	if (quaternion==null)
+        		System.out.print("quaternion==null" );
+        	if (newPosition.getCell()==null)
+        		System.out.print("newPosition.getCell()==null" );
+
+        	System.out.print("creature.getMovementCounter() " + creature.getMovementCounter());
+        }
 		
 	}
 	
@@ -484,7 +497,21 @@ public abstract class AIState {
 //        if (newPosition.getCell()==null)
 //        	System.out.println("newPosition.getCell() is NULL");
         
-		core.simulationService.moveObject(creature, newPosition, quaternion, creature.getMovementCounter(), speed, newPosition.getCell());
+        try{
+        	core.simulationService.moveObject(creature, newPosition, quaternion, creature.getMovementCounter(), speed, newPosition.getCell());
+        } catch (NullPointerException e) {
+        	// Just to identify what exactly is null here
+        	if (creature==null)
+        		System.out.print("creature==null" );
+        	if (newPosition==null)
+        		System.out.print("newPosition==null" );
+        	if (quaternion==null)
+        		System.out.print("quaternion==null" );
+        	if (newPosition.getCell()==null)
+        		System.out.print("newPosition.getCell()==null" );
+
+        	System.out.print("creature.getMovementCounter() " + creature.getMovementCounter());
+        }
 		
 	}
 

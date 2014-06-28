@@ -11,17 +11,21 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('bek_rabor')
-	mobileTemplate.setStfFilename('npc_spawner_n')
-	mobileTemplate.setLevel(19)
+	mobileTemplate.setCreatureName('eow_scout_trooper')
+	mobileTemplate.setLevel(90)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
-	mobileTemplate.setOptionsBitmask(Options.INVULNERABLE | Options.QUEST)
+	mobileTemplate.setDeathblow(True)
+	mobileTemplate.setSocialGroup("imperial")
+	mobileTemplate.setAssistRange(12)
+	mobileTemplate.setStalker(False)
+	mobileTemplate.setFaction("imperial")
+	mobileTemplate.setFactionStatus(FactionStatus.Combatant)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_dressed_npe_imperial_officer.iff')
+	templates.add('object/mobile/shared_dressed_scout_trooper_m.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
@@ -33,5 +37,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('rangedShot')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('bek_rabor', mobileTemplate)
+	core.spawnService.addMobileTemplate('eow_scout_trooper', mobileTemplate)
 	return

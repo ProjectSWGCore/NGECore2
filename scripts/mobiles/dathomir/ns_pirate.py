@@ -4,34 +4,32 @@ from services.spawn import WeaponTemplate
 from resources.datatables import WeaponType
 from resources.datatables import Difficulty
 from resources.datatables import Options
-from resources.datatables import FactionStatus
 from java.util import Vector
 
 
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('bek_rabor')
-	mobileTemplate.setStfFilename('npc_spawner_n')
-	mobileTemplate.setLevel(19)
+	mobileTemplate.setCreatureName('pirate')
+	mobileTemplate.setLevel(90)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
-	mobileTemplate.setMaxSpawnDistance(8)
-	mobileTemplate.setOptionsBitmask(Options.INVULNERABLE | Options.QUEST)
+	mobileTemplate.setMaxSpawnDistance(6)
+	mobileTemplate.setRespawnTime(300)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_dressed_npe_imperial_officer.iff')
+	templates.add('object/mobile/shared_dressed_criminal_pirate_human_male_01.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
-	weapontemplate = WeaponTemplate('object/weapon/ranged/carbine/shared_carbine_e11.iff', WeaponType.CARBINE, 1.0, 15, 'energy')
+	weapontemplate = WeaponTemplate('object/weapon/melee/unarmed/shared_unarmed_default.iff', WeaponType.UNARMED, 1.0, 6, 'kinetic')
 	weaponTemplates.add(weapontemplate)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
-	mobileTemplate.setDefaultAttack('rangedShot')
+	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('bek_rabor', mobileTemplate)
-	return
+	core.spawnService.addMobileTemplate('ns_pirate', mobileTemplate)
+	

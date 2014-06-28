@@ -30,6 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import resources.common.FileUtilities;
 import resources.common.collidables.CollidableCircle;
+import resources.datatables.ClientPOIRadius;
 import services.playercities.ClientRegion;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
@@ -58,20 +59,18 @@ public class TerrainService {
 			
 			for (int i = 0; i < poiTable.getRowCount(); i++) {
 				
-				Planet planet = getPlanetByName((String) poiTable.getObject(i, 0));
+				// Planet planet = getPlanetByName((String) poiTable.getObject(i, 0)); Has this ever worked?
+				Planet planet = getPlanetByName((String) poiTable.getObject(i, 2));
 
 				if(planet == null)
 					continue;
 				
 				float x = (Float) poiTable.getObject(i, 4);
 				float z = (Float) poiTable.getObject(i, 6);
-				
-				// Account for more extended no-build radii like they were on live 
-				// Issue #849
-				x *= 1.1;
-				z *= 1.1;
-				
-				CollidableCircle poiArea = new CollidableCircle(new Point3D(x, 0, z), 150, planet);
+				String POIName = (String) poiTable.getObject(i, 0);
+				int radius = ClientPOIRadius.getRadius(POIName);
+								
+				CollidableCircle poiArea = new CollidableCircle(new Point3D(x, 0, z), radius, planet);
 				noBuildAreas.get(planet).add(poiArea);
 				
 			}
@@ -97,6 +96,9 @@ public class TerrainService {
 				float x = (Float) regionTable.getObject(i, 1);
 				float z = (Float) regionTable.getObject(i, 2);
 				float radius = (Float) regionTable.getObject(i, 3);
+				// Account for more extended no-build radii like they were on live 
+				// Issue #849
+				radius *= 1.1;
 					
 				CollidableCircle region = new CollidableCircle(new Point3D(x, 0, z), radius, planet);
 				noBuildAreas.get(planet).add(region);
