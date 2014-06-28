@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('elite_jundland_eopie')
 	mobileTemplate.setLevel(21)
-	mobileTemplate.setMinLevel(21)
-	mobileTemplate.setMaxLevel(22)
 	mobileTemplate.setDifficulty(Difficulty.ELITE)
 
 	mobileTemplate.setMinSpawnDistance(4)

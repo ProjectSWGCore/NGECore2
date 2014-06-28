@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('krayt_dragon_grand')
 	mobileTemplate.setLevel(87)
-	mobileTemplate.setMinLevel(80)
-	mobileTemplate.setMaxLevel(89)
 	mobileTemplate.setDifficulty(Difficulty.BOSS)
 
 	mobileTemplate.setMinSpawnDistance(4)

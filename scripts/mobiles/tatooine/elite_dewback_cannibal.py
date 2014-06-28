@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('elite_dewback_canibal')
 	mobileTemplate.setLevel(13)
-	mobileTemplate.setMinLevel(13)
-	mobileTemplate.setMaxLevel(15)
 	mobileTemplate.setDifficulty(Difficulty.ELITE)
 
 	mobileTemplate.setMinSpawnDistance(4)

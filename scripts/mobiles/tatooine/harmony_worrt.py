@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('harmony_worrt')
 	mobileTemplate.setLevel(18)
-	mobileTemplate.setMinLevel(17)
-	mobileTemplate.setMaxLevel(19)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)

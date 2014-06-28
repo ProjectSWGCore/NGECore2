@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('tatooine_lin_demolitionmech')
 	mobileTemplate.setLevel(14)
-	mobileTemplate.setMinLevel(13)
-	mobileTemplate.setMaxLevel(15)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)

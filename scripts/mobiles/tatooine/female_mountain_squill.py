@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('female_mountain_squill')
 	mobileTemplate.setLevel(7)
-	mobileTemplate.setMinLevel(7)
-	mobileTemplate.setMaxLevel(9)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)

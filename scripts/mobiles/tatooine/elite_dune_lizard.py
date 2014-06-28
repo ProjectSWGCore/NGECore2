@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('elite_dune_lizard')
 	mobileTemplate.setLevel(18)
-	mobileTemplate.setMinLevel(18)
-	mobileTemplate.setMaxLevel(19)
 	mobileTemplate.setDifficulty(Difficulty.ELITE)
 
 	mobileTemplate.setMinSpawnDistance(4)

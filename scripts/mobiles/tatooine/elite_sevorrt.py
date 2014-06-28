@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('elite_sevorrt')
 	mobileTemplate.setLevel(8)
-	mobileTemplate.setMinLevel(8)
-	mobileTemplate.setMaxLevel(9)
 	mobileTemplate.setDifficulty(Difficulty.ELITE)
 
 	mobileTemplate.setMinSpawnDistance(4)

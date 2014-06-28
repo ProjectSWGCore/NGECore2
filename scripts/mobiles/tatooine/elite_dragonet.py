@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('elite_dragonet')
 	mobileTemplate.setLevel(24)
-	mobileTemplate.setMinLevel(24)
-	mobileTemplate.setMaxLevel(26)
 	mobileTemplate.setDifficulty(Difficulty.ELITE)
 
 	mobileTemplate.setMinSpawnDistance(4)

@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('mound_mite')
 	mobileTemplate.setLevel(4)
-	mobileTemplate.setMinLevel(4)
-	mobileTemplate.setMaxLevel(7)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)

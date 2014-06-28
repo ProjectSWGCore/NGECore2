@@ -267,6 +267,16 @@ public class SimulationService implements INetworkDispatch {
 		}
 		
 	}
+	
+	public boolean checkForObject(int distance, SWGObject value ){
+		AtomicBoolean checkObject = new AtomicBoolean();
+		core.simulationService.get(value.getPlanet(), value.getWorldPosition().x, value.getWorldPosition().z, distance).stream().forEach((objecta) -> { 
+			if (objecta instanceof BuildingObject)
+				checkObject.set(true);
+			}
+		);
+		return checkObject.get();
+	}
 		
 	public boolean move(SWGObject object, int oldX, int oldZ, int newX, int newZ) {
 		if(quadTrees.get(object.getPlanet().getName()).remove(oldX, oldZ, object)) {

@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('lesser_bocatt')
 	mobileTemplate.setLevel(14)
-	mobileTemplate.setMinLevel(13)
-	mobileTemplate.setMaxLevel(15)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)

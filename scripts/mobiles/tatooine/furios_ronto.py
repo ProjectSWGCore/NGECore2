@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('ronto_furious')
 	mobileTemplate.setLevel(18)
-	mobileTemplate.setMinLevel(18)
-	mobileTemplate.setMaxLevel(19)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
