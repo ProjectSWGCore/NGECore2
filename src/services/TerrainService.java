@@ -66,6 +66,11 @@ public class TerrainService {
 				float x = (Float) poiTable.getObject(i, 4);
 				float z = (Float) poiTable.getObject(i, 6);
 				
+				// Account for more extended no-build radii like they were on live 
+				// Issue #849
+				x *= 1.1;
+				z *= 1.1;
+				
 				CollidableCircle poiArea = new CollidableCircle(new Point3D(x, 0, z), 150, planet);
 				noBuildAreas.get(planet).add(poiArea);
 				

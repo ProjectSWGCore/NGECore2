@@ -291,6 +291,12 @@ public class ObjectService implements INetworkDispatch {
 			
 			object = new WeaponObject(objectID, planet, position, orientation, Template);
 
+		} else if(Template.startsWith("object/building/player/construction")) {
+			
+			float positionY = core.terrainService.getHeight(planet.getID(), position.x, position.z)-1f;
+			Point3D newpoint = new Point3D(position.x,positionY,position.z);				
+			object = new InstallationObject(objectID, planet, newpoint, orientation, Template);
+
 		} else if(Template.startsWith("object/building") || Template.startsWith("object/static/worldbuilding/structures") || Template.startsWith("object/static/structure")){
 			
 			object = new BuildingObject(objectID, planet, position, orientation, Template);
@@ -1439,8 +1445,23 @@ public class ObjectService implements INetworkDispatch {
 			@Override
 			public void process(SWGObject obj) {
 				if (obj.getTemplate().equals(item.getTemplate())){
-					alikeItemsInContainer.add(obj);
-					System.out.println(obj.getTemplate());
+					// Check if items are Droid Motors or Wirings
+					if (obj.getTemplate().equals("object/tangible/loot/npc_loot/shared_wiring_generic.iff")){
+						if (obj.getAttachment("reverse_engineering_name")!=null){
+							if (obj.getAttachment("reverse_engineering_name").equals(item.getAttachment("reverse_engineering_name"))){
+								alikeItemsInContainer.add(obj);
+							}
+						}
+					} else if (obj.getTemplate().equals("object/tangible/loot/npc_loot/shared_copper_battery_generic.iff")){
+						if (obj.getAttachment("reverse_engineering_name")!=null){
+							if (obj.getAttachment("reverse_engineering_name").equals(item.getAttachment("reverse_engineering_name"))){
+								alikeItemsInContainer.add(obj);
+							}
+						}
+					} else {
+						alikeItemsInContainer.add(obj);
+					}
+					
 				}
 			}
 		});
