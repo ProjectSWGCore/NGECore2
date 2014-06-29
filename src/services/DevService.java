@@ -92,6 +92,7 @@ public class DevService implements INetworkDispatch {
 					suiOptions.put((long) 120, "House Deeds");
 					suiOptions.put((long) 125, "Crafting Tools");
 					suiOptions.put((long) 130, "Vehicle Deeds");
+					suiOptions.put((long) 131, "Pet Deeds");
 					suiOptions.put((long) 121, "Sandbox City");
 					if(creature.getPlayerObject().getProfession().equals("trader_0a") || creature.getPlayerObject().getProfession().equals("trader_0b") || creature.getPlayerObject().getProfession().equals("trader_0c") || creature.getPlayerObject().getProfession().equals("trader_0d"))
 						suiOptions.put((long) 177, "REing");
@@ -1308,6 +1309,13 @@ public class DevService implements INetworkDispatch {
 						TangibleObject av21deed = (TangibleObject) core.objectService.createObject("object/tangible/deed/vehicle_deed/shared_landspeeder_av21_deed.iff", planet);
 						inventory.add(swoopDeed);
 						inventory.add(av21deed);
+						return;
+						
+					case 131:
+						TangibleObject gurreckDeed = (TangibleObject) core.objectService.createObject("object/tangible/deed/pet_deed/shared_gurreck_deed.iff", planet);						
+						inventory.add(gurreckDeed);
+						TangibleObject droidekaDeed = (TangibleObject) core.objectService.createObject("object/tangible/deed/pet_deed/shared_deed_droideka.iff", planet);						
+						inventory.add(droidekaDeed);
 						return;
 					
 					case 140:

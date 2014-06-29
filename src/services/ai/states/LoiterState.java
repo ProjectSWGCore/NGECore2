@@ -28,7 +28,6 @@ public class LoiterState extends AIState {
 
 	@Override
 	public byte onEnter(AIActor actor) {
-		// TODO Auto-generated method stub
 		CreatureObject creature = actor.getCreature();
 		if(creature.getPosture() == 14)
 			return StateResult.DEAD;
@@ -45,7 +44,6 @@ public class LoiterState extends AIState {
 
 	@Override
 	public byte move(AIActor actor) {
-		// TODO Auto-generated method stub
 		doLoiter(actor);
 		actor.scheduleMovement();
 		return StateResult.UNFINISHED;

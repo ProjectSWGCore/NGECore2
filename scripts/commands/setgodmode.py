@@ -165,6 +165,13 @@ def run(core, actor, target, commandString):
 		clipboard = toolkit.getSystemClipboard()
 		clipboard.setContents(StringSelection(str), None)
 		actor.sendSystemMessage('Patrolpoint copied to clipboard', 0)
+		
+	elif command == 'jesus':		
+		actor.setHealth(actor.getMaxHealth())
+		actor.setAction(actor.getMaxAction())
+		actor.setPosture(0)
+		actor.setSpeedMultiplierBase(1)
+		actor.setTurnRadius(1)
 	
 	elif command == 'unknownAbilityPacket' and arg1:
 		packet = UnknownAbilityPacket(arg1)

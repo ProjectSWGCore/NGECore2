@@ -42,7 +42,10 @@ import services.ai.states.AIState;
 import services.ai.states.AIState.StateResult;
 import services.ai.states.AttackState;
 import services.ai.states.DeathState;
+import services.ai.states.FollowState;
 import services.ai.states.IdleState;
+import services.ai.states.LoiterState;
+import services.ai.states.PatrolState;
 import services.ai.states.RetreatState;
 import services.combat.CombatEvents.DamageTaken;
 import services.spawn.MobileTemplate;
@@ -66,7 +69,7 @@ public class AIActor {
 	private boolean isStalking = false;
 	private byte milkState = 0;
 	private boolean hasBeenHarvested = false;
-	private Vector<Point3D> patrolPoints;
+	private Vector<Point3D> patrolPoints = new Vector<Point3D>();
 	private int patrolPointIndex = 0;
 	private String loiterDestType = "LOITER";
 	private Point3D loiterDestination;
@@ -75,13 +78,17 @@ public class AIActor {
 	private float maxLoiterDist;
 	private String waitState = "NO";
 	private long waitStartTime = 0L;
+	private AIState intendedPrimaryAIState;
+	private Point3D lastPositionBeforeStateChange;
 
 	public AIActor(CreatureObject creature, Point3D spawnPosition, ScheduledExecutorService scheduler) {
 		this.creature = creature;
 		this.spawnPosition = spawnPosition;
+		setLastPositionBeforeStateChange(spawnPosition); // just to make sure it's initialized
 		this.scheduler = scheduler;
 		creature.getEventBus().subscribe(this);
 		this.currentState = new IdleState();
+		setIntendedPrimaryAIState(this.currentState); // to switch back to after aggro
 		regenTask = scheduler.scheduleAtFixedRate(() -> {
 			try {
 				if(creature.getHealth() < creature.getMaxHealth() && !creature.isInCombat() && creature.getPosture() != 13 && creature.getPosture() != 14)
@@ -95,14 +102,25 @@ public class AIActor {
 				try {
 					if(creature == null || creature.getObservers().isEmpty() || creature.isInCombat() || isStalking)
 						return;
-					creature.getObservers().stream().map(Client::getParent).filter(obj -> obj.inRange(creature.getWorldPosition(), 10)).forEach((obj) -> {
-						if(new Random().nextFloat() <= 0.33 || creature.isInCombat() || isStalking) {
+					creature.getObservers().stream().map(Client::getParent).filter(obj -> obj.inRange(creature.getWorldPosition(), 15)).forEach((obj) -> {
+						if(new Random().nextFloat() <= 0.5 || creature.isInCombat() || isStalking) {
 							/*if(mobileTemplate.isStalker()) {
 								setFollowObject((CreatureObject) obj);
 								setCurrentState(new StalkState());
 							} else */
-								addDefender((CreatureObject) obj);	
-								
+							
+							if (obj instanceof CreatureObject){
+								CreatureObject addedObject = (CreatureObject) obj;
+								if (addedObject.getCalledPet()!=null){
+									CreatureObject calledPet = addedObject.getCalledPet();
+									if (calledPet.getPosture() != 13 && calledPet.getPosture() != 14){
+										addDefender(calledPet);	
+									}
+								}
+								if (addedObject.getPosture() != 13 && addedObject.getPosture() != 14){
+									addDefender(addedObject);	
+								}
+							}
 						}
 					});
 				} catch (Exception e) {
@@ -301,11 +319,23 @@ public class AIActor {
 		
 			case StateResult.DEAD:
 				setCurrentState(new DeathState());
+				break;
 			case StateResult.FINISHED:
 			case StateResult.UNFINISHED:
 				return;
 			case StateResult.IDLE:
 				setCurrentState(new IdleState());
+				return;
+			case StateResult.PATROL:
+				setCurrentState(new PatrolState());
+				return;
+			case StateResult.LOITER:
+				setCurrentState(new LoiterState());
+				return;
+			case StateResult.FOLLOW:
+				setCurrentState(new FollowState());
+				return;
+				
 			//case StateResult.NONE:
 		//		System.out.println("State action returned error result");
 		
@@ -385,7 +415,7 @@ public class AIActor {
 	
 	public void setPatrolPoints(Vector<Point3D> patrolPoints){
 		this.patrolPoints = patrolPoints;
-		setMovementPoints(patrolPoints);
+		//setMovementPoints(patrolPoints);
 	}
 
 	public int getPatrolPointIndex() {
@@ -450,6 +480,27 @@ public class AIActor {
 
 	public void setWaitStartTime(long waitStartTime) {
 		this.waitStartTime = waitStartTime;
+	}
+
+	public Vector<Point3D> getPatrolPoints() {
+		return patrolPoints;
+	}
+
+	public AIState getIntendedPrimaryAIState() {
+		return intendedPrimaryAIState;
+	}
+
+	public void setIntendedPrimaryAIState(AIState intendedPrimaryAIState) {
+		this.intendedPrimaryAIState = intendedPrimaryAIState;
+	}
+
+	public Point3D getLastPositionBeforeStateChange() {
+		return lastPositionBeforeStateChange;
+	}
+
+	public void setLastPositionBeforeStateChange(
+			Point3D lastPositionBeforeStateChange) {
+		this.lastPositionBeforeStateChange = lastPositionBeforeStateChange;
 	}
 	
 }

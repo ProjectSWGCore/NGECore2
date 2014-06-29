@@ -25,12 +25,12 @@ import main.NGECore;
 import resources.objects.creature.CreatureObject;
 import services.ai.AIActor;
 
-public class PatrolState extends AIState {
+public class FollowState extends AIState {
 
 	@Override
 	public byte onEnter(AIActor actor) {
 		// TODO Auto-generated method stub
-		NGECore.getInstance().aiService.logAI("PATROL ENTERED!");
+		NGECore.getInstance().aiService.logAI("FOLLOW ENTERED!");
 		CreatureObject creature = actor.getCreature();
 		if(creature.getPosture() == 14)
 			return StateResult.DEAD;
@@ -42,8 +42,7 @@ public class PatrolState extends AIState {
 	@Override
 	public byte onExit(AIActor actor) {
 		// TODO Auto-generated method stub
-		NGECore.getInstance().aiService.logAI("EXITING PATROL STATE");
-		actor.setLastPositionBeforeStateChange(actor.getCreature().getWorldPosition());
+		NGECore.getInstance().aiService.logAI("EXITING FOLLOW STATE");
 		return 0;
 	}
 
@@ -51,7 +50,7 @@ public class PatrolState extends AIState {
 	public byte move(AIActor actor) {
 		// TODO Auto-generated method stub
 		//System.out.println("move in patrolState");
-		doPatrol(actor);
+		doFollow(actor);
 //		if (actor.getCreature().getPlanet().getName().equals("dathomir"))
 //			NGECore.getInstance().aiService.logAI("WalkingSpeed " + actor.getCreature().getWalkSpeed());
 		actor.scheduleMovement();

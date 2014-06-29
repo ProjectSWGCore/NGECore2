@@ -33,6 +33,7 @@ import resources.datatables.GcwType;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
 import resources.objects.player.PlayerObject;
+import services.ai.states.AIState;
 import services.ai.states.IdleState;
 import services.ai.states.LoiterState;
 import services.ai.states.PatrolState;
@@ -174,7 +175,9 @@ public class AIService {
 			return;
 		
 		actor.setPatrolPoints(patrolpoints);
-		actor.setCurrentState(new PatrolState());	
+		AIState intendedPrimaryAIState = new PatrolState();
+		actor.setIntendedPrimaryAIState(intendedPrimaryAIState);
+		actor.setCurrentState(intendedPrimaryAIState);	
 	}
 	
 	public void setPatrol(CreatureObject creature, boolean active){
@@ -182,8 +185,11 @@ public class AIService {
 		if (actor==null)
 			return;
 		
-		if (active)
-			actor.setCurrentState(new PatrolState());
+		if (active){
+			AIState intendedPrimaryAIState = new PatrolState();
+			actor.setIntendedPrimaryAIState(intendedPrimaryAIState);
+			actor.setCurrentState(intendedPrimaryAIState);
+		}
 		else
 			actor.setCurrentState(new IdleState());
 	}
@@ -198,6 +204,20 @@ public class AIService {
 		actor.setLoiterDestination(currentDestination);
 		actor.setMinLoiterDist(minDist);
 		actor.setMaxLoiterDist(maxDist);
-		actor.setCurrentState(new LoiterState());	
+		AIState intendedPrimaryAIState = new LoiterState();
+		actor.setIntendedPrimaryAIState(intendedPrimaryAIState);	
+		actor.setCurrentState(intendedPrimaryAIState);
 	}	
+	
+	public void logAI(String logMsg){
+		if (checkDeveloperIdentity()){
+			System.err.println("AI-LOG: " + logMsg);
+		}
+	}
+	
+	public boolean checkDeveloperIdentity(){
+		if (System.getProperty("user.name").equals("Charon"))
+			return true;
+		return false;
+	}
 }
