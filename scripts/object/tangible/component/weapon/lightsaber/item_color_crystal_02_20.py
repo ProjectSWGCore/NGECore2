@@ -12,3 +12,4 @@ def setup(core, object):
 	object.setStringAttribute("@obj_attr_n:color", "Windu's Guile")
 	object.setAttachment('radial_filename', 'item/tunable')
 	return
+	
