@@ -185,8 +185,6 @@ public class MountService implements INetworkDispatch {
 		mount.setFaction(actor.getFaction());
 		mount.setFactionStatus(actor.getFactionStatus());
 		mount.setOwnerId(actor.getObjectID());
-		AIActor aiActor = (AIActor) mount.getAttachment("AI");
-		aiActor.setFollowObject(actor);
 		
 		if (pcd.getTemplate().contains("vehicle")) {
 			callVehicle(actor, pcd, player, mount);
