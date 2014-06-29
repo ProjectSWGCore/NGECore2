@@ -6,7 +6,9 @@ from engine.resources.objects import SWGObject
 from java.awt.datatransfer import StringSelection
 from java.awt.datatransfer import Clipboard
 from java.awt import Toolkit
-#from decimal import Decimal
+from resources.datatables import GcwRank
+from services.gcw import GCWService
+
 
 def setup():
     return
@@ -177,5 +179,10 @@ def run(core, actor, target, commandString):
 		packet = UnknownAbilityPacket(arg1)
 		actor.getClient().getSession().write(packet.serialize())
 		actor.sendSystemMessage('Sent UnknownAbilityPacket for ability ' + arg1, 0)
+		return
+		
+	elif command == 'rank' and arg1:
+		playerObject.setCurrentRank(int(arg1))
+		print (playerObject.getCurrentRank())
 		return
 	return

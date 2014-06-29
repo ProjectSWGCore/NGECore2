@@ -54,11 +54,13 @@ public class EnterTicketPurchaseModeMessage extends SWGMessage {
 		TravelPoint nearestPoint = core.travelService.getNearestTravelPoint(player);
 		IoBuffer result = IoBuffer.allocate(11 + planetName.length() + nearestPoint.getName().length()).order(ByteOrder.LITTLE_ENDIAN);
 		
+		
 		result.putShort((short) 3);
 		result.putInt(0x904DAE1A);
 		
 		result.put(getAsciiString(planetName));
 		result.put(getAsciiString(nearestPoint.getName()));
+		
 		
 		result.put((byte) 0);
 		
