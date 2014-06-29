@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('giant_worrt')
 	mobileTemplate.setLevel(13)
-	mobileTemplate.setMinLevel(13)
-	mobileTemplate.setMaxLevel(15)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)

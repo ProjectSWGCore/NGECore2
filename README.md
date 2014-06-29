@@ -62,3 +62,5 @@ Now your changes will be reviewed by other developers and once the changes are a
 For more information please visit the wiki: https://github.com/ProjectSWGCore/NGECore2/wiki
 
 Documentation can be found here: http://projectswgcore.github.io/NGECore2/doc/
+
+Please prefix all commits with Added, Changed, Removed or Fixed. If you don't have enough room for multiple changes, use the extended description. Try not to bundle multiple changes into one vague line (ie. "Changed various combat things"). Try to make all commit messages understandable by non-programmers.

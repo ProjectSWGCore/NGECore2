@@ -36,6 +36,7 @@ import resources.datatables.State;
 import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
+import services.ai.AIActor;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.resources.container.Traverser;
@@ -184,6 +185,8 @@ public class MountService implements INetworkDispatch {
 		mount.setFaction(actor.getFaction());
 		mount.setFactionStatus(actor.getFactionStatus());
 		mount.setOwnerId(actor.getObjectID());
+		AIActor aiActor = (AIActor) mount.getAttachment("AI");
+		aiActor.setFollowObject(actor);
 		
 		if (pcd.getTemplate().contains("vehicle")) {
 			callVehicle(actor, pcd, player, mount);
@@ -786,5 +789,5 @@ public class MountService implements INetworkDispatch {
 	public void shutdown() {
 		
 	}
-	
+
 }

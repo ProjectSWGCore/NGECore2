@@ -52,6 +52,7 @@ import resources.objects.creature.CreatureObject;
 import resources.objects.factorycrate.FactoryCrateObject;
 import resources.objects.group.GroupObject;
 import resources.objects.intangible.IntangibleObject;
+import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 import services.ai.AIActor;
@@ -128,6 +129,9 @@ public class LootService implements INetworkDispatch {
 	public void DropLoot(CreatureObject requester, TangibleObject lootedObject) {
 		
 		if (requester==null || lootedObject==null)
+			return; //QA
+		
+		if (! requester.isPlayer())
 			return; //QA
 		
 		GroupObject group = null;

@@ -45,6 +45,8 @@ public class MobileTemplate implements Cloneable {
 	private int difficulty = 0;
 	private int health, action;
 	private String creatureName;
+	private String StfFilename;
+	private String customName;
 	private float scale = 1;
 	private Vector<String> weaponTemplates = new Vector<String>();
 	private Vector<WeaponTemplate> weaponTemplateVector = new Vector<WeaponTemplate>();
@@ -332,6 +334,22 @@ public class MobileTemplate implements Cloneable {
 	
 	public Object clone() throws CloneNotSupportedException {
     	return super.clone();
+	}
+
+	public String getStfFilename() {
+		return StfFilename;
+	}
+
+	public void setStfFilename(String stfFilename) {
+		StfFilename = stfFilename;
+	}
+
+	public String getCustomName() {
+		return customName;
+	}
+
+	public void setCustomName(String customName) {
+		this.customName = customName;
 	}
 	
 }

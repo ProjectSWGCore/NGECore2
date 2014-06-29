@@ -21,6 +21,8 @@
  ******************************************************************************/
 package services.ai.states;
 
+import main.NGECore;
+import engine.resources.scene.Point3D;
 import services.ai.AIActor;
 
 public class RetreatState extends AIState {
@@ -32,6 +34,7 @@ public class RetreatState extends AIState {
 				actor.removeDefender(defender);
 			}
 		}*/
+		NGECore.getInstance().aiService.logAI("RetreatState ENTER ");
 		actor.setFollowObject(null);
 		actor.scheduleMovement();
 		return StateResult.UNFINISHED;
@@ -40,17 +43,38 @@ public class RetreatState extends AIState {
 	@Override
 	public byte onExit(AIActor actor) {
 		// TODO Auto-generated method stub
+		//actor.setCurrentState(actor.getIntendedPrimaryAIState());
 		return StateResult.FINISHED;
 	}
 
 	@Override
 	public byte move(AIActor actor) {
-		actor.setNextPosition(actor.getSpawnPosition());
+		
+		Point3D retreatPosition = actor.getSpawnPosition();
+		if (actor.getIntendedPrimaryAIState() instanceof PatrolState)
+			retreatPosition = actor.getLastPositionBeforeStateChange();
+		
+		actor.setNextPosition(retreatPosition);
+		actor.getMovementPoints().clear();
+		actor.getMovementPoints().add(retreatPosition);
 		doMove(actor);
-		if(actor.getCreature().getWorldPosition().getDistance(actor.getSpawnPosition()) > 3) {
+		
+		if (actor.getIntendedPrimaryAIState().getClass().equals(FollowState.class))
+			return StateResult.FOLLOW;
+		
+		if(actor.getCreature().getWorldPosition().getDistance(retreatPosition) > 5) {
+			//NGECore.getInstance().aiService.logAI("RetreatState ENTER move if case dist " + actor.getCreature().getWorldPosition().getDistance(retreatPosition));
 			actor.scheduleMovement();
 		} else {
-			return StateResult.IDLE;
+			//NGECore.getInstance().aiService.logAI("RetreatState ENTER move else case");
+			if (actor.getIntendedPrimaryAIState().getClass().equals(IdleState.class))
+				return StateResult.IDLE;
+			if (actor.getIntendedPrimaryAIState().getClass().equals(PatrolState.class))
+				return StateResult.PATROL;
+			if (actor.getIntendedPrimaryAIState().getClass().equals(LoiterState.class))
+				return StateResult.LOITER;
+			if (actor.getIntendedPrimaryAIState().getClass().equals(FollowState.class))
+				return StateResult.FOLLOW;
 		}
 		return StateResult.UNFINISHED;
 	}
