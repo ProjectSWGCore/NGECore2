@@ -3,8 +3,12 @@ from engine.resources.scene import Point3D
 from protocol.swg import ObjControllerMessage
 from protocol.swg import UnknownAbilityPacket
 from engine.resources.objects import SWGObject
+from java.awt.datatransfer import StringSelection
+from java.awt.datatransfer import Clipboard
+from java.awt import Toolkit
 from resources.datatables import GcwRank
 from services.gcw import GCWService
+
 
 def setup():
     return
@@ -134,6 +138,42 @@ def run(core, actor, target, commandString):
 	elif command == 'spawnobj':
 		pos = actor.getPosition()
 		core.staticService.spawnObject(arg1, actor.getPlanet().getName(), 0, pos.x, pos.y, pos.z, 0, 0)
+		
+	elif command == 'showpos':
+		pos = actor.getPosition()
+		ori = actor.getOrientation()
+		cellid = 0
+		planetName = actor.getPlanet().getName()
+
+		actor.sendSystemMessage('Position.x : %s' % pos.x, 0)
+		actor.sendSystemMessage('Position.y : %s' % pos.y, 0)
+		actor.sendSystemMessage('Position.z : %s' % pos.z, 0)
+		actor.sendSystemMessage('Orientation.y : %s' % ori.y, 0)
+		actor.sendSystemMessage('Orientation.w : %s' % ori.w, 0)
+		if (actor.getContainer()):
+			cid = actor.getContainer().getObjectID()
+			cellid = cid
+			actor.sendSystemMessage('Cell ID : %s' % cid, 0)
+					
+		str = "<OBJECTNAME> = stcSvc.spawnObject('<MOBILENAME>', '" + planetName + "', long(%s" % cellid + "), float(%.4f" % pos.x + "), float(%.4f" % pos.y + "), float(%.4f" % pos.z + "), float(%.4f" % ori.y + "), float(%.4f" % ori.w + "))"
+		toolkit = Toolkit.getDefaultToolkit()
+		clipboard = toolkit.getSystemClipboard()
+		clipboard.setContents(StringSelection(str), None)
+	
+	elif command == 'patrolpoint':
+		pos = actor.getPosition()					
+		str = "patrolpoints.add(Point3D(float(%.2f" % pos.x + "), float(%.2f" % pos.y + "), float(%.2f" % pos.z + ")))"
+		toolkit = Toolkit.getDefaultToolkit()
+		clipboard = toolkit.getSystemClipboard()
+		clipboard.setContents(StringSelection(str), None)
+		actor.sendSystemMessage('Patrolpoint copied to clipboard', 0)
+		
+	elif command == 'jesus':		
+		actor.setHealth(actor.getMaxHealth())
+		actor.setAction(actor.getMaxAction())
+		actor.setPosture(0)
+		actor.setSpeedMultiplierBase(1)
+		actor.setTurnRadius(1)
 	
 	elif command == 'unknownAbilityPacket' and arg1:
 		packet = UnknownAbilityPacket(arg1)

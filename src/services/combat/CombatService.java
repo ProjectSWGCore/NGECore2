@@ -318,6 +318,15 @@ public class CombatService implements INetworkDispatch {
 			core.mountService.damage((CreatureObject) target);
 		}
 		
+		if (target instanceof CreatureObject){
+			CreatureObject targetCreature = (CreatureObject)target;
+			if (targetCreature.getCalledPet()!=null) {
+				AIActor petActor = (AIActor) targetCreature.getCalledPet().getAttachment("AI");
+				if (petActor!=null)
+					petActor.addDefender(attacker);
+			}
+		}
+		
 		DamageTaken event = events.new DamageTaken();
 		event.attacker = attacker;
 		event.damage = damage;

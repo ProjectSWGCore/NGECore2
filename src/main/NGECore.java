@@ -99,6 +99,7 @@ import services.object.ObjectId;
 import services.object.ObjectService;
 import services.object.UpdateService;
 import services.pet.MountService;
+import services.pet.PetService;
 import services.playercities.PlayerCity;
 import services.playercities.PlayerCityService;
 import services.resources.HarvesterService;
@@ -202,6 +203,7 @@ public class NGECore {
 	public MountService mountService;
 	public PlayerCityService playerCityService;
 	public ReverseEngineeringService reverseEngineeringService;
+	public PetService petService;
 	
 	// Login Server
 	public NetworkDispatch loginDispatch;
@@ -345,6 +347,7 @@ public class NGECore {
 		playerCityService = new PlayerCityService(this);
 		staticService = new StaticService(this);
 		reverseEngineeringService = new ReverseEngineeringService(this);
+		petService = new PetService(this);
 		
 		if (config.keyExists("JYTHONCONSOLE.PORT")) {
 			int jythonPort = config.getInt("JYTHONCONSOLE.PORT");
@@ -404,6 +407,7 @@ public class NGECore {
 		zoneDispatch.addService(playerCityService);
 		zoneDispatch.addService(staticService);
 		zoneDispatch.addService(reverseEngineeringService);
+		zoneDispatch.addService(petService);
 		
 		if (optionsConfigLoaded && options.getInt("LOAD.RESOURCE.SYSTEM") == 1) {
 			zoneDispatch.addService(surveyService);
@@ -805,7 +809,7 @@ public class NGECore {
 	
 	public Vector<String> getExcludedDevelopers(){
 		Vector<String> excludedDevelopers = new Vector<String>();
-		excludedDevelopers.add("Charon");
+		//excludedDevelopers.add("Charon");
 		// Feel free to add your OS user account name here to exclude yourself from loading buildouts and snapshots
 		// without having to change options.cfg all the time
 		return excludedDevelopers;

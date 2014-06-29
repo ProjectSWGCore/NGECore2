@@ -37,6 +37,7 @@ import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import services.ai.AIActor;
+import services.ai.states.FollowState;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.resources.container.Traverser;
@@ -44,92 +45,27 @@ import engine.resources.objects.SWGObject;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
-public class MountService implements INetworkDispatch {
+public class PetService implements INetworkDispatch {
 	
 	private NGECore core;
 	
-	public MountService(NGECore core) {
+	public PetService(NGECore core) {
 		this.core = core;
 	}
 	
-	// Creature mounts are considered pets as well
-	// Pet abilities and petId is in PLAY9
 	
-	// The functions for vehicles, mounts and pets are similar, but not the same
-	// Hence the multiple services.
-	
-	public void generateVehicle(CreatureObject actor, SWGObject deed, String vehicleTemplate, String pcdTemplate) {
-		if (actor == null || vehicleTemplate == null || pcdTemplate == null) {
-			return;
-		}
-		
-		if (actor.getSlottedObject("ghost") == null) {
-			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:failed_to_call_vehicle"), DisplayType.Broadcast);
-			return;
-		}
-		
-		SWGObject datapad = actor.getSlottedObject("datapad");
-		
-		if (datapad == null) {
-			return;
-		}
-		
-		// Unsure if these are the right attributes.  It doesn't generate the vehicle if the datapad has max # of vehicles.
-		//if (datapad.getIntAttribute("data_size") >= datapad.getIntAttribute("datapad_slots")) {
-			//actor.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:has_max_vehicle"), DisplayType.Broadcast);
-			//return;
-		//}
-		
-		if (actor.getTefTime() > 0){
-			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:prose_cant_generate_yet", actor.getTefTime()), DisplayType.Broadcast);
-			return;
-		}
-		
-		SWGObject pcd = core.objectService.createObject(pcdTemplate, actor.getPlanet());
-		
-		if (pcd == null) {
-			return;
-		}
-		
-		if (pcd.getSlottedObject("inventory") == null) {
-			pcd.add(core.objectService.createObject("object/tangible/inventory/shared_character_inventory.iff", pcd.getPlanet()));
-		}
-		
-		CreatureObject vehicle = (CreatureObject) core.objectService.createObject(vehicleTemplate, actor.getPlanet());
-		
-		if (vehicle == null) {
-			return;
-		}
-		
-		vehicle.setOptions(Options.MOUNT | Options.ATTACKABLE, true);
-		
-		vehicle.setOwnerId(actor.getObjectID());
-		
-		pcd.setAttachment("companionId", vehicle.getObjectID());
-		
-		pcd.getSlottedObject("inventory").add(vehicle);
-		
-		datapad.add(pcd);
-		
-		if (deed != null) {
-			core.objectService.destroyObject(deed);
-		}
-		
-		actor.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:device_added"), DisplayType.Broadcast);
-		
-		call(actor, pcd);
-	}
 	
 	public void generateMount(CreatureObject actor, SWGObject deed, String vehicleTemplate, String pcdTemplate) {
 		return; // NOT IMPLEMENTED
 	}
 	
-	public void call(CreatureObject actor, SWGObject pcd) {
+	public void call(CreatureObject actor, CreatureObject pet, SWGObject pcd) {
 		if (actor == null) {
 			return;
 		}
 		
 		if (pcd == null) {
+			System.out.println("(pcd == null)");
 			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:cant_call"), DisplayType.Broadcast);
 			return;
 		}
@@ -154,17 +90,13 @@ public class MountService implements INetworkDispatch {
 			return;
 		}
 		
-		if (pcd.getSlottedObject("inventory") == null) {
-			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:cant_call"), DisplayType.Broadcast);
-			return;
-		}
+//		if (pcd.getSlottedObject("inventory") == null) {
+//			System.out.println("(pcd.getSlottedObject(inventory)");
+//			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:cant_call"), DisplayType.Broadcast);
+//			return;
+//		}
 		
-		if (pcd.getStringAttribute("required_faction") != null && pcd.getStringAttribute("required_faction").length() > 0) {
-			if (!actor.getFaction().equals(pcd.getStringAttribute("required_faction"))) {
-				actor.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:officer_faction"), DisplayType.Broadcast);
-				return;
-			}
-		}
+		
 		
 		PlayerObject player = (PlayerObject) actor.getSlottedObject("ghost");
 		
@@ -172,26 +104,28 @@ public class MountService implements INetworkDispatch {
 			return;
 		}
 		
-		CreatureObject mount = (CreatureObject) core.objectService.getObject((Long) pcd.getAttachment("companionId"));
+		//CreatureObject mount = (CreatureObject) core.objectService.getObject((Long) pcd.getAttachment("companionId"));
 		
-		if (mount == null) {
+		if (pet == null) {
+			System.out.println("mount == null)");
 			// Somehow the vehicle object has got lost
 			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:cant_call"), DisplayType.Broadcast);
 			return;
 		}
 		
-		mount.setAttachment("pcdAppearanceFilename", pcd.getTemplateData().getAttribute("appearanceFilename"));
+		//pet.setAttachment("pcdAppearanceFilename", pcd.getTemplateData().getAttribute("appearanceFilename"));
 		
-		mount.setFaction(actor.getFaction());
-		mount.setFactionStatus(actor.getFactionStatus());
-		mount.setOwnerId(actor.getObjectID());
-		AIActor aiActor = (AIActor) mount.getAttachment("AI");
+		pet.setFaction(actor.getFaction());
+		pet.setFactionStatus(actor.getFactionStatus());
+		pet.setOwnerId(actor.getObjectID());
+		AIActor aiActor = (AIActor) pet.getAttachment("AI");
 		aiActor.setFollowObject(actor);
+		aiActor.setCurrentState(new FollowState());
 		
 		if (pcd.getTemplate().contains("vehicle")) {
-			callVehicle(actor, pcd, player, mount);
+			callVehicle(actor, pcd, player, pet);
 		} else {
-			callMount(actor, pcd, player, mount);
+			callMount(actor, pcd, player, pet);
 		}
 	}
 	
@@ -789,5 +723,72 @@ public class MountService implements INetworkDispatch {
 	public void shutdown() {
 		
 	}
-
+	
+	
+	public void generatePet(CreatureObject actor, SWGObject deed, String petTemplate, String pcdTemplate) {
+		if (actor == null || petTemplate == null || pcdTemplate == null) {
+			return;
+		}
+		
+		if (actor.getSlottedObject("ghost") == null) {
+			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:failed_to_call_vehicle"), DisplayType.Broadcast);
+			return;
+		}
+		
+		SWGObject datapad = actor.getSlottedObject("datapad");
+		
+		if (datapad == null) {
+			return;
+		}
+		
+		// Unsure if these are the right attributes.  It doesn't generate the vehicle if the datapad has max # of vehicles.
+		//if (datapad.getIntAttribute("data_size") >= datapad.getIntAttribute("datapad_slots")) {
+			//actor.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:has_max_vehicle"), DisplayType.Broadcast);
+			//return;
+		//}
+		
+		if (actor.getTefTime() > 0){
+			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:prose_cant_generate_yet", actor.getTefTime()), DisplayType.Broadcast);
+			return;
+		}
+		
+		SWGObject pcd = core.objectService.createObject(pcdTemplate, actor.getPlanet());
+		
+		if (pcd == null) {
+			return;
+		}
+		
+//		if (pcd.getSlottedObject("inventory") == null) {
+//			pcd.add(core.objectService.createObject("object/tangible/inventory/shared_character_inventory.iff", pcd.getPlanet()));
+//		}
+		
+		//CreatureObject vehicle = (CreatureObject) core.objectService.createObject(petTemplate, actor.getPlanet());
+		
+		CreatureObject pet = (CreatureObject) NGECore.getInstance().staticService.spawnObject(petTemplate, actor.getPlanet().getName(), 0L, actor.getWorldPosition().x, actor.getWorldPosition().y, actor.getWorldPosition().z, actor.getOrientation().y, actor.getOrientation().w);
+		
+		if (pet == null) {
+			return;
+		}
+		
+		
+//		pet.setOptions(Options.MOUNT | Options.ATTACKABLE, true);
+//		
+		pet.setOwnerId(actor.getObjectID());
+		actor.setCalledPet(pet);
+//		
+		pcd.setAttachment("companionId", pet.getObjectID());
+//		
+//		//pcd.getSlottedObject("inventory").add(pet);
+//		
+		datapad.add(pcd); 
+//		
+		if (deed != null) {
+			core.objectService.destroyObject(deed);
+		}
+		
+		actor.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:device_added"), DisplayType.Broadcast);
+		
+		call(actor, pet, pcd);
+	}
+	
 }

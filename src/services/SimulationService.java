@@ -292,7 +292,9 @@ public class SimulationService implements INetworkDispatch {
 			boolean success = quadTrees.get(object.getPlanet().getName()).put(newX, newZ, object);
 			return success;
 		}
-		System.out.println("Move failed.");
+		// Note: This sysout keeps getting spammed, so the quadtree remove fails for some reason
+		// The NPC does move though
+		//System.out.println("Move failed.");
 		return false;
 	}
 		
