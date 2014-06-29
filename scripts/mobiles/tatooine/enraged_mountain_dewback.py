@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('elite_mountain_dewback')
 	mobileTemplate.setLevel(22)
-	mobileTemplate.setMinLevel(22)
-	mobileTemplate.setMaxLevel(23)
 	mobileTemplate.setDifficulty(Difficulty.ELITE)
 
 	mobileTemplate.setMinSpawnDistance(4)

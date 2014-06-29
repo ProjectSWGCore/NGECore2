@@ -27,6 +27,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.lang3.text.WordUtils;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
@@ -47,6 +52,7 @@ import main.NGECore;
 import resources.common.Console;
 import resources.common.Opcodes;
 import resources.common.SpawnPoint;
+import resources.datatables.DisplayType;
 import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
 import services.playercities.PlayerCity;
@@ -61,6 +67,7 @@ public class TravelService implements INetworkDispatch {
 	private NGECore core;
 	private Map<Planet, Vector<TravelPoint>> travelMap = new ConcurrentHashMap<Planet, Vector<TravelPoint>>();
 	private Map<Planet, Map<String, Integer>> fareMap = new ConcurrentHashMap<Planet, Map<String, Integer>>();
+	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	
 	public TravelService(NGECore core) {
 		this.core = core;
@@ -375,6 +382,8 @@ public class TravelService implements INetworkDispatch {
 		
 	}
 	
+
+	
 	private void populateTravelFares() {
 		try {
 			DatatableVisitor travelFares = ClientFileManager.loadFile("datatables/travel/travel.iff", DatatableVisitor.class);
@@ -423,6 +432,51 @@ public class TravelService implements INetworkDispatch {
 	public Map<Planet, Vector<TravelPoint>> getTravelMap() {
 		return this.travelMap;
 	}
+	
+	
+	//ITV Despawn
+	public void checkForItvDistanceDespawn(CreatureObject actor, SWGObject object){
+
+		scheduler.schedule(new Runnable() {
+			public void run() {
+				try {
+
+					if (object != null){
+						core.objectService.destroyObject(object);
+						actor.sendSystemMessage("@travel:pickup_cancel", DisplayType.Broadcast);
+					}
+				}catch (Exception e) {
+					e.printStackTrace();
+					
+				}
+			}
+		}, 1, TimeUnit.SECONDS);
+
+	}
+	
+	public void checkForItvTimedDespawn(CreatureObject actor, SWGObject object){
+
+		scheduler.schedule(new Runnable() {
+			public void run() {
+				try {
+
+					if (object != null){
+						Thread.sleep(60000);
+						core.objectService.destroyObject(object);
+						actor.sendSystemMessage("@travel:pickup_timeout", DisplayType.Broadcast);
+					}
+				}catch (Exception e) {
+					e.printStackTrace();
+					
+				}
+			}
+		}, 1, TimeUnit.SECONDS);
+
+	}
+	
+
+
+	
 	
 	@Override
 	public void shutdown() {

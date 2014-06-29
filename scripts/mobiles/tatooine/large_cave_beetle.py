@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('large_cave_beetle')
 	mobileTemplate.setLevel(21)
-	mobileTemplate.setMinLevel(21)
-	mobileTemplate.setMaxLevel(23)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
