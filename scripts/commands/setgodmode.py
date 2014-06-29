@@ -3,6 +3,8 @@ from engine.resources.scene import Point3D
 from protocol.swg import ObjControllerMessage
 from protocol.swg import UnknownAbilityPacket
 from engine.resources.objects import SWGObject
+from resources.datatables import GcwRank
+from services.gcw import GCWService
 
 def setup():
     return
@@ -137,5 +139,10 @@ def run(core, actor, target, commandString):
 		packet = UnknownAbilityPacket(arg1)
 		actor.getClient().getSession().write(packet.serialize())
 		actor.sendSystemMessage('Sent UnknownAbilityPacket for ability ' + arg1, 0)
+		return
+		
+	elif command == 'rank' and arg1:
+		playerObject.setCurrentRank(int(arg1))
+		print (playerObject.getCurrentRank())
 		return
 	return
