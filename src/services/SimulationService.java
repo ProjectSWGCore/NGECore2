@@ -267,6 +267,16 @@ public class SimulationService implements INetworkDispatch {
 		}
 		
 	}
+	
+	public boolean checkForObject(int distance, SWGObject value ){
+		AtomicBoolean checkObject = new AtomicBoolean();
+		core.simulationService.get(value.getPlanet(), value.getWorldPosition().x, value.getWorldPosition().z, distance).stream().forEach((objecta) -> { 
+			if (objecta instanceof BuildingObject)
+				checkObject.set(true);
+			}
+		);
+		return checkObject.get();
+	}
 		
 	public boolean move(SWGObject object, int oldX, int oldZ, int newX, int newZ) {
 		if(quadTrees.get(object.getPlanet().getName()).remove(oldX, oldZ, object)) {
@@ -282,7 +292,9 @@ public class SimulationService implements INetworkDispatch {
 			boolean success = quadTrees.get(object.getPlanet().getName()).put(newX, newZ, object);
 			return success;
 		}
-		System.out.println("Move failed.");
+		// Note: This sysout keeps getting spammed, so the quadtree remove fails for some reason
+		// The NPC does move though
+		//System.out.println("Move failed.");
 		return false;
 	}
 		

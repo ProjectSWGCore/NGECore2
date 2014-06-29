@@ -23,7 +23,7 @@ def addTemplate(core):
 	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_dressed_dathomir_nightsister_protector.iff')
+	templates.add('object/mobile/shared_dressed_dathomir_nightsister_rancor_tamer.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()

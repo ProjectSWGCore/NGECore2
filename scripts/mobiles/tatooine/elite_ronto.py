@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('elite_ronto_ronto')
 	mobileTemplate.setLevel(17)
-	mobileTemplate.setMinLevel(17)
-	mobileTemplate.setMaxLevel(18)
 	mobileTemplate.setDifficulty(Difficulty.ELITE)
 
 	mobileTemplate.setMinSpawnDistance(4)

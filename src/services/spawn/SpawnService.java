@@ -108,8 +108,14 @@ public class SpawnService {
 		creature.setFaction(mobileTemplate.getFaction());
 		creature.setFactionStatus(mobileTemplate.getFactionStatus());
 		creature.setPvpBitmask(mobileTemplate.getPvpBitmask());
-		creature.setStfFilename("mob/creature_names"); // TODO: set other STFs for NPCs other than creatures
-		creature.setStfName(mobileTemplate.getCreatureName());
+		if (mobileTemplate.getCustomName()==null){
+			creature.setStfFilename("mob/creature_names"); // TODO: set other STFs for NPCs other than creatures -> DONE
+			if (mobileTemplate.getStfFilename()!=null)
+				creature.setStfFilename(mobileTemplate.getStfFilename());
+			creature.setStfName(mobileTemplate.getCreatureName());
+		} else {
+			creature.setCustomName(mobileTemplate.getCustomName()); // For cases where no STF name can be found!
+		}
 		creature.setHeight(mobileTemplate.getScale());
 		int difficulty = mobileTemplate.getDifficulty();
 		creature.setDifficulty((byte) difficulty);

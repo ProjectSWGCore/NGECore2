@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('giant_canyon_krayt_dragon')
 	mobileTemplate.setLevel(87)
-	mobileTemplate.setMinLevel(80)
-	mobileTemplate.setMaxLevel(89)
 	mobileTemplate.setDifficulty(Difficulty.BOSS)
 
 	mobileTemplate.setMinSpawnDistance(4)
