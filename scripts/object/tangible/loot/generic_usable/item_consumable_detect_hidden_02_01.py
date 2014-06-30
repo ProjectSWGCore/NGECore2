@@ -6,4 +6,9 @@ def setup(core, object):
 	object.setStfName('item_consumable_detect_hidden_02_01')
 	object.setDetailFilename('static_item_d')
 	object.setDetailName('item_consumable_detect_hidden_02_01')
+	object.setIntAttribute('reuse_time', 5)
+	object.setIntAttribute('num_in_stack' 8)
+	object.setStringAttribute('proc_name', '@ui_buff:detecthiddenconsumable20')
+	return
+	
 	return
