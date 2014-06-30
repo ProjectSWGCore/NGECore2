@@ -11,5 +11,6 @@ def setup(core, object):
 	object.setStringAttribute('condition', '1000/1000')
 	object.setStringAttribute("@obj_attr_n:color", "Windu's Guile")
 	object.setAttachment('radial_filename', 'item/tunable')
+	object.setStringAttribute('@obj_attr_n:crystal_owner", "\\#D1F56F UNTUNED \\#FFFFFF ')
 	return
 	
