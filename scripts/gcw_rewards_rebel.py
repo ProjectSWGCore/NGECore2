@@ -9,7 +9,6 @@ from java.lang import Long
 from java.util import Map
 from java.util import TreeMap
 from resources.datatables import GcwRank
-from resources.datatables import WeaponType
 import main.NGECore
 from services.gcw import GCWService
 import sys
@@ -18,7 +17,7 @@ import math
 
 def handleRebelItems1 (core, owner):
 	actor = owner.getSlottedObject('ghost')
-	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0);
+	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0)
 	window.setProperty('bg.caption.lblTitle:Text', 'Rebel Item Requisition')
 	window.setProperty('Prompt.lblPrompt:Text', 'Items')
 	window.setProperty('btnOk:visible', 'True')
@@ -65,7 +64,8 @@ def handleRebelItems1 (core, owner):
 	if actor.getCurrentRank() >= GcwRank.GENERAL:
 		window.addListBoxMenuItem('General', 11)
 
-	core.suiService.openSUIWindow(window);
+	core.suiService.openSUIWindow(window)
+	
 def setRebelBox1Callback(owner, window, eventType, returnList):
 
 	if returnList.size()==0:
@@ -114,7 +114,7 @@ def setRebelBox1Callback(owner, window, eventType, returnList):
 def privateHandler(owner):
 	actor = owner.getSlottedObject('ghost')
 	core = main.NGECore.getInstance()
-	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0);
+	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0)
 	window.setProperty('bg.caption.lblTitle:Text', 'Rebel Item Requisition')
 	window.setProperty('Prompt.lblPrompt:Text', 'Items')	
 	#window.addListBoxMenuItem('R2 Droid Schematic 165000',0)
@@ -129,13 +129,13 @@ def privateHandler(owner):
 	returnList = Vector()
 	returnList.add('List.lstList:SelectedRow')			
 	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, privateRewards)
-	core.suiService.openSUIWindow(window);
+	core.suiService.openSUIWindow(window)
 	return
 	
 def trooperHandler(owner):
 	actor = owner.getSlottedObject('ghost')
 	core = main.NGECore.getInstance()
-	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0);
+	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0)
 	window.setProperty('bg.caption.lblTitle:Text', 'Rebel Item Requisition')
 	window.setProperty('Prompt.lblPrompt:Text', 'Items')	
 	window.addListBoxMenuItem('Tech Armoire 105000',0)
@@ -153,13 +153,13 @@ def trooperHandler(owner):
 	returnList = Vector()
 	returnList.add('List.lstList:SelectedRow')			
 	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, trooperRewards)
-	core.suiService.openSUIWindow(window);
+	core.suiService.openSUIWindow(window)
 	return
 
 def highTrooperHandler(owner):
 	actor = owner.getSlottedObject('ghost')
 	core = main.NGECore.getInstance()
-	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0);
+	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0)
 	window.setProperty('bg.caption.lblTitle:Text', 'Rebel Item Requisition')
 	window.setProperty('Prompt.lblPrompt:Text', 'Items')	
 	window.addListBoxMenuItem('Electrobinoculars 15000',0)
@@ -173,13 +173,13 @@ def highTrooperHandler(owner):
 	returnList = Vector()
 	returnList.add('List.lstList:SelectedRow')			
 	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, highTrooperRewards)
-	core.suiService.openSUIWindow(window);
+	core.suiService.openSUIWindow(window)
 	return
 	
 def sergeantHandler(owner):
 	actor = owner.getSlottedObject('ghost')
 	core = main.NGECore.getInstance()
-	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0);
+	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0)
 	window.setProperty('bg.caption.lblTitle:Text', 'Rebel Item Requisition')
 	window.setProperty('Prompt.lblPrompt:Text', 'Items')	
 	window.addListBoxMenuItem('Laser Carbine 187500',0)
@@ -192,13 +192,13 @@ def sergeantHandler(owner):
 	returnList = Vector()
 	returnList.add('List.lstList:SelectedRow')			
 	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, sergeantRewards)
-	core.suiService.openSUIWindow(window);
+	core.suiService.openSUIWindow(window)
 	return
 
 def seniorSergeantHandler(owner):
 	actor = owner.getSlottedObject('ghost')
 	core = main.NGECore.getInstance()
-	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0);
+	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0)
 	window.setProperty('bg.caption.lblTitle:Text', 'Rebel Item Requisition')
 	window.setProperty('Prompt.lblPrompt:Text', 'Items')	
 	window.addListBoxMenuItem('Small Block Turret 120000',0)
@@ -215,13 +215,13 @@ def seniorSergeantHandler(owner):
 	returnList = Vector()
 	returnList.add('List.lstList:SelectedRow')			
 	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, seniorSergeantRewards)
-	core.suiService.openSUIWindow(window);
+	core.suiService.openSUIWindow(window)
 	return
 	
 def sergeantMajorHandler(owner):
 	actor = owner.getSlottedObject('ghost')
 	core = main.NGECore.getInstance()
-	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0);
+	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0)
 	window.setProperty('bg.caption.lblTitle:Text', 'Rebel Item Requisition')
 	window.setProperty('Prompt.lblPrompt:Text', 'Items')	
 	window.addListBoxMenuItem('Medium Block Turret 150000', 0)
@@ -238,13 +238,13 @@ def sergeantMajorHandler(owner):
 	returnList = Vector()
 	returnList.add('List.lstList:SelectedRow')			
 	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, sergeantMajorRewards)
-	core.suiService.openSUIWindow(window);
+	core.suiService.openSUIWindow(window)
 	return
 	
 def lieutenantHandler(owner):
 	actor = owner.getSlottedObject('ghost')
 	core = main.NGECore.getInstance()
-	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0);
+	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0)
 	window.setProperty('bg.caption.lblTitle:Text', 'Rebel Item Requisition')
 	window.setProperty('Prompt.lblPrompt:Text', 'Items')	
 	window.addListBoxMenuItem('Large Block Turret 210000',0)
@@ -261,13 +261,13 @@ def lieutenantHandler(owner):
 	returnList = Vector()
 	returnList.add('List.lstList:SelectedRow')			
 	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, lieutenantRewards)
-	core.suiService.openSUIWindow(window);
+	core.suiService.openSUIWindow(window)
 	return
 	
 def captainHandler(owner):
 	actor = owner.getSlottedObject('ghost')
 	core = main.NGECore.getInstance()
-	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0);
+	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0)
 	window.setProperty('bg.caption.lblTitle:Text', 'Rebel Item Requisition')
 	window.setProperty('Prompt.lblPrompt:Text', 'Items')	
 	window.addListBoxMenuItem('Factional Banner 81600', 0)
@@ -278,13 +278,13 @@ def captainHandler(owner):
 	returnList = Vector()
 	returnList.add('List.lstList:SelectedRow')			
 	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, captainRewards)
-	core.suiService.openSUIWindow(window);
+	core.suiService.openSUIWindow(window)
 	return
 	
 def majorHandler(owner):
 	actor = owner.getSlottedObject('ghost')
 	core = main.NGECore.getInstance()
-	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0);
+	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0)
 	window.setProperty('bg.caption.lblTitle:Text', 'Rebel Item Requisition')
 	window.setProperty('Prompt.lblPrompt:Text', 'Items')	
 	window.addListBoxMenuItem('Grey Spec Ops Armor Leggings 135000', 0)
@@ -298,13 +298,13 @@ def majorHandler(owner):
 	returnList = Vector()
 	returnList.add('List.lstList:SelectedRow')			
 	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, majorRewards)
-	core.suiService.openSUIWindow(window);
+	core.suiService.openSUIWindow(window)
 	return
 	
 def commanderHandler(owner):
 	actor = owner.getSlottedObject('ghost')
 	core = main.NGECore.getInstance()
-	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0);
+	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0)
 	window.setProperty('bg.caption.lblTitle:Text', 'Rebel Item Requisition')
 	window.setProperty('Prompt.lblPrompt:Text', 'Items')	
 	window.addListBoxMenuItem('Grey Spec Ops Armor Left Bicep 120000', 0)
@@ -321,13 +321,13 @@ def commanderHandler(owner):
 	returnList = Vector()
 	returnList.add('List.lstList:SelectedRow')			
 	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, commanderRewards)
-	core.suiService.openSUIWindow(window);
+	core.suiService.openSUIWindow(window)
 	return
 	
 def colonelHandler(owner):
 	actor = owner.getSlottedObject('ghost')
 	core = main.NGECore.getInstance()
-	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0);
+	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0)
 	window.setProperty('bg.caption.lblTitle:Text', 'Rebel Item Requisition')
 	window.setProperty('Prompt.lblPrompt:Text', 'Items')	
 	window.addListBoxMenuItem('Colonel Ring 2800000', 0)
@@ -339,13 +339,13 @@ def colonelHandler(owner):
 	returnList = Vector()
 	returnList.add('List.lstList:SelectedRow')			
 	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, colonelRewards)
-	core.suiService.openSUIWindow(window);
+	core.suiService.openSUIWindow(window)
 	return
 	
 def generalHandler(owner):
 	actor = owner.getSlottedObject('ghost')
 	core = main.NGECore.getInstance()
-	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0);
+	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0)
 	window.setProperty('bg.caption.lblTitle:Text', 'Rebel Item Requisition')
 	window.setProperty('Prompt.lblPrompt:Text', 'Items')	
 	window.addListBoxMenuItem('Windu\'s Guile 2000000', 0)
@@ -361,7 +361,7 @@ def generalHandler(owner):
 	returnList = Vector()
 	returnList.add('List.lstList:SelectedRow')			
 	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, generalRewards)
-	core.suiService.openSUIWindow(window);
+	core.suiService.openSUIWindow(window)
 	return
 		
 def privateRewards(owner, window, eventType, returnList):
@@ -1187,13 +1187,7 @@ def laserCarbine(object, owner):
 	if owner.getCashCredits() >= 187500:
 		owner.setCashCredits(owner.getCashCredits() - 187500)
 		core = main.NGECore.getInstance()
-		carbine = core.objectService.createObject('object/weapon/ranged/carbine/shared_carbine_laser.iff', owner.getPlanet())
-		carbine.setAttackSpeed(0.6)
-		carbine.setMaxRange(50)
-		carbine.setDamageType('energy')
-		carbine.setMinDamage(350)
-		carbine.setMaxDamage(700)
-		carbine.setWeaponType(WeaponType.CARBINE)
+		carbine = core.objectService.createObject('object/weapon/ranged/carbine/shared_carbine_laser.iff', owner.getPlanet(), 'factional_laser_carbine')
 		inventory = owner.getSlottedObject('inventory')
 		inventory.add(carbine)
 	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
@@ -1203,13 +1197,7 @@ def scoutPistol(object, owner):
 	if owner.getCashCredits() >= 40500:
 		owner.setCashCredits(owner.getCashCredits() - 40500)
 		core = main.NGECore.getInstance()
-		pistol = core.objectService.createObject('object/weapon/ranged/pistol/shared_pistol_scout_blaster.iff', owner.getPlanet())
-		pistol.setAttackSpeed(0.4)
-		pistol.setMaxRange(35);
-		pistol.setDamageType('energy');
-		pistol.setMinDamage(80);
-		pistol.setMaxDamage(130);
-		pistol.setWeaponType(WeaponType.PISTOL);
+		pistol = core.objectService.createObject('object/weapon/ranged/pistol/shared_pistol_scout_blaster.iff', owner.getPlanet(), 'factional_scout_pistol')
 		inventory = owner.getSlottedObject('inventory')
 		inventory.add(pistol)
 	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
@@ -1219,13 +1207,7 @@ def metalStaff(object, owner):
 	if owner.getCashCredits() >= 30000:
 		owner.setCashCredits(owner.getCashCredits() - 30000)
 		core = main.NGECore.getInstance()
-		staff = core.objectService.createObject('object/weapon/melee/polearm/shared_lance_staff_metal.iff', owner.getPlanet())
-		staff.setAttackSpeed(1.0);
-		staff.setMaxRange(5);
-		staff.setDamageType('kinetic');
-		staff.setMinDamage(300);
-		staff.setMaxDamage(400);
-		staff.setWeaponType(WeaponType.POLEARMMELEE);
+		staff = core.objectService.createObject('object/weapon/melee/polearm/shared_lance_staff_metal.iff', owner.getPlanet(), 'factional_metal_staff')
 		inventory = owner.getSlottedObject('inventory')
 		inventory.add(staff)
 	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
