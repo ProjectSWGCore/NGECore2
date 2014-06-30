@@ -41,6 +41,7 @@ public class Guild {
 	private Map<Long, GuildMember> members = new HashMap<Long, GuildMember>();
 	private Map<Long, String> sponsoredPlayers = new HashMap<Long, String>();
 	private String motd = "";
+	private boolean electionsEnabled = false;
 	
 	public Guild(int id, String abbreviation, String name, SWGObject leader) {
 		this.id = id;
@@ -161,5 +162,13 @@ public class Guild {
 
 	public GuildMember getMember(long objectID) {
 		return members.get(objectID);
+	}
+
+	public boolean isElectionsEnabled() {
+		return electionsEnabled;
+	}
+
+	public void setElectionsEnabled(boolean electionsEnabled) {
+		this.electionsEnabled = electionsEnabled;
 	}
 }

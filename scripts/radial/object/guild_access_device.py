@@ -45,7 +45,7 @@ def createRadial(core, owner, target, radials):
 			radials.add(RadialOptions(4, RadialOptions.serverGuildSponsored, 3, '@guild:menu_sponsored')) # Sponsored for Membership
 		if owner.getObjectID() == guild.getLeader():
 			radials.add(RadialOptions(4, 218, 3, '@guild:menu_member_motd')) # Create a Guild Message
-			#radials.add(RadialOptions(4, 69, 3, '@guild:menu_leader_change')) # Transfer PA Leadership
+			radials.add(RadialOptions(4, 69, 3, '@guild:menu_leader_change')) # Transfer PA Leadership
 		return
 	
 	return
@@ -77,6 +77,7 @@ def handleSelection(core, owner, target, option):
 		core.guildService.showDisbandConfirmWindow(owner, guild)
 		return
 	
+	# - Change Guild Name
 	elif option == RadialOptions.serverGuildNameChange:
 		core.guildService.handleChangeGuildName(owner, guild)
 		return
@@ -100,8 +101,10 @@ def handleSelection(core, owner, target, option):
 	
 	# - Transfer PA Leadership
 	elif option == 69:
+		core.guildService.handleTransferLeadership(owner, guild)
 		return
 	
+	# - Change Message of the Day
 	elif option == 218:
 		core.guildService.handleChangeGuildMotd(owner, guild)
 		return
