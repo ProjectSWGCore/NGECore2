@@ -8,7 +8,6 @@ def setup(core, object):
 	object.setDetailFilename('static_item_d')
 	object.setDetailName('weapon_pistol_pvp_rebel_general_reward_06_01')
 	object.setAttackSpeed(0.4);
-	object.setCustomName('Exceptional Rebel DL44 Pistol');
 	object.setMaxRange(35);
 	object.setDamageType('energy');
 	object.setMinDamage(275);

@@ -917,12 +917,7 @@ def barcSpeeder(object, owner):
 	if owner.getCashCredits() >= 2100000:
 		owner.setCashCredits(owner.getCashCredits() - 2100000)
 		core = main.NGECore.getInstance()
-		barc = core.objectService.createObject('object/tangible/deed/vehicle_deed/shared_barc_speeder_deed.iff', owner.getPlanet())
-		barc.setStfFilename('static_item_n')
-		barc.setStfName('item_deed_barc_rebel_06_01')
-		barc.setDetailFilename('static_item_d')
-		barc.setDetailName('item_deed_barc_rebel_06_01')
-		barc.setIntAttribute('no_trade', 1)
+		barc = core.objectService.createObject('object/tangible/deed/vehicle_deed/shared_barc_speeder_deed.iff', owner.getPlanet(), 'item_deed_barc_rebel_06_01')
 		inventory = owner.getSlottedObject('inventory')
 		inventory.add(barc)
 	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
@@ -1250,7 +1245,9 @@ def exceptionalPistol(object, owner):
 	if owner.getCashCredits() >= 200000:
 		owner.setCashCredits(owner.getCashCredits() - 200000)
 		core = main.NGECore.getInstance()
-		core.objectService.createObject('object/weapon/ranged/pistol/shared_pistol_dl44.iff', owner.getPlanet(), 'weapon_pistol_pvp_rebel_general_reward_06_01')
+		pistol = core.objectService.createObject('object/weapon/ranged/pistol/shared_pistol_dl44.iff', owner.getPlanet(), 'weapon_pistol_pvp_rebel_general_reward_06_01')
+		inventory = owner.getSlottedObject('inventory')
+		inventory.add(pistol)
 	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
 		return
 		
