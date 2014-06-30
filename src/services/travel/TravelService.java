@@ -68,8 +68,8 @@ public class TravelService implements INetworkDispatch {
 	private Map<Planet, Vector<TravelPoint>> travelMap = new ConcurrentHashMap<Planet, Vector<TravelPoint>>();
 	private Map<Planet, Map<String, Integer>> fareMap = new ConcurrentHashMap<Planet, Map<String, Integer>>();
 
-	private ScheduledFuture<?> distanceDespawnTask;
-	private ScheduledFuture<?> timedDespawnTask;
+	//private ScheduledFuture<?> distanceDespawnTask;
+	//private ScheduledFuture<?> timedDespawnTask;
 	public TravelService(NGECore core) {
 		this.core = core;
 	}
@@ -436,12 +436,12 @@ public class TravelService implements INetworkDispatch {
 
 	//ITV Despawn
 	public void checkForItvDistanceDespawn(CreatureObject actor, SWGObject object){
-		actor.setAttachment("distanceDespawn", distanceDespawnTask);
 		
-		distanceDespawnTask= Executors.newScheduledThreadPool(1).scheduleAtFixedRate(new Runnable() {
+		
+		ScheduledFuture<?> distanceDespawnTask = Executors.newScheduledThreadPool(1).scheduleAtFixedRate(new Runnable() {
+			
 			public void run() {
 				try {
-
 					if (object != null){
 			           if (actor.getPosition().getDistance2D(object.getPosition()) >= 50){
 				             core.objectService.destroyObject(object.getObjectID());
@@ -455,13 +455,13 @@ public class TravelService implements INetworkDispatch {
 				}
 			}
 		}, 1,20, TimeUnit.SECONDS);
-			
+		actor.setAttachment("distanceDespawn", distanceDespawnTask);
 	}
 
 	
 	public void checkForItvTimedDespawn(CreatureObject actor, SWGObject object){
-		actor.setAttachment("timedDespawn", timedDespawnTask);
-		timedDespawnTask = Executors.newScheduledThreadPool(1).scheduleAtFixedRate(new Runnable() {
+		
+		ScheduledFuture<?> timedDespawnTask = Executors.newScheduledThreadPool(1).scheduleAtFixedRate(new Runnable() {
 			public void run() {
 				try {
 
@@ -477,7 +477,7 @@ public class TravelService implements INetworkDispatch {
 				}
 			}
 		}, 1, 70, TimeUnit.SECONDS);
-
+		actor.setAttachment("timedDespawn", timedDespawnTask);
 	}
 	
 
