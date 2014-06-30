@@ -31,9 +31,7 @@ def run(core, actor, target, commandstring):
 		actor.sendSystemMessage('@travel:no_pickup_location', 0)
 		return
 	
-	if actor.getWorldPosition().getDistance2D(object.getWorldPosition()) > 50:
-		core.travelService.checkForItvDistanceDespawn(actor, object)
-		return
+	core.travelService.checkForItvDistanceDespawn(actor, object)
 		
 	core.travelService.checkForItvTimedDespawn(actor, object)
 
