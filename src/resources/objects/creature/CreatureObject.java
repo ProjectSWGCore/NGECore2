@@ -1821,6 +1821,15 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		getSlottedObject("inventory").viewChildren(this, true, true, (obj) -> adder.increment());
 		return adder.intValue();
 	}
+
+	public Vector<SWGObject> getItemsInInventoryByStfName(CreatureObject creature, String stfName) {
+		Vector<SWGObject> itemList = new Vector<SWGObject>();
+		SWGObject inventory = creature.getSlottedObject("inventory");
+		
+		inventory.viewChildren(creature, false, false, (item) -> { if (item.getStfName() == stfName) { itemList.add(item); } });
+		
+		return itemList;
+	}	
 	
 	public ObjectMessageBuilder getMessageBuilder() {
 		return messageBuilder;
