@@ -731,6 +731,16 @@ public class ObjectService implements INetworkDispatch {
 		return objectId;
 	}
 	
+
+	public Vector<SWGObject> getItemsInContainerByStfName(CreatureObject creature, String containerName, String stfName) {
+		Vector<SWGObject> itemList = new Vector<SWGObject>();
+		SWGObject container = creature.getSlottedObject(containerName);
+		
+		container.viewChildren(creature, false, false, (item) -> { if (item.getStfName() == stfName) { itemList.add(item); } });
+		
+		return itemList;
+	}	
+	
 	public void useObject(CreatureObject creature, final SWGObject object) {
 
 		if (creature == null || object == null) {
