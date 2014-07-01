@@ -129,13 +129,8 @@ def handleFirstScreen(core, actor, npc, selection):
 			return
 
 		if selection == 2:
-			convSvc.sendConversationMessage(actor, npc, OutOfBand.ProsePackage('@conversation/faction_recruiter_imperial:s_90'))
-			
-			options = Vector()
-			options.add(ConversationOption(OutOfBand.ProsePackage('@conversation/faction_recruiter_imperial:s_92'), 0))
-			options.add(ConversationOption(OutOfBand.ProsePackage('@conversation/faction_recruiter_imperial:s_96'), 1))
-			convSvc.sendConversationOptions(actor, npc, options, handleSecondScreen)
-			
+			core.scriptService.callScript("scripts/", "gcw_rewards_imperial", "handleImperialItems1", core, actor); 
+			core.conversationService.sendStopConversation(actor, npc, 'conversation/faction_recruiter_imperial', 's_90')
 			return
 		return
 	elif actor.getFaction() == 'imperial' and actor.getFactionStatus() == FactionStatus.SpecialForces:	

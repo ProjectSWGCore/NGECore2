@@ -1,3 +1,6 @@
+import sys
+
+
 def setup(core, object):
 	object.setStfFilename('static_item_n')
 	object.setStfName('item_pvp_imperial_sergeant_major_medal_03_01')
