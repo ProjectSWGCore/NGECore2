@@ -252,6 +252,91 @@ public class GuildService implements INetworkDispatch {
         core.suiService.openSUIWindow(window);
 	}
 	
+	public void handleEnableGuildElections(Guild guild) {
+		guild.setElectionsEnabled(true);
+		guild.setElectionResultsDate(System.currentTimeMillis() + (12095 * 100000)); // 2 weeks
+		
+		Map<Long, Integer> candidates = new HashMap<Long, Integer>();
+		candidates.put(guild.getLeader(), 1);
+		
+		GuildMember leader = guild.getMember(guild.getLeader());
+		
+		leader.setVotedId(guild.getLeader());
+
+		guild.sendGuildMail(guild.getName(), "@guild:open_elections_email_subject", "@guild:open_elections_email_body");
+	}
+	
+	public void handleViewElectionStandings(CreatureObject actor, Guild guild) {
+		
+		Map<Long, Integer> candidates = guild.getLeaderCandidates();
+		
+		if (candidates.size() <= 1) {
+			actor.sendSystemMessage("@guild:vote_no_candidates", DisplayType.Broadcast);
+			return;
+		}
+		
+		SUIWindow window = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "@guild:leader_standings_t", "@guild:leader_standings_d", new TreeMap<Long, String>(), actor, null, 0);
+		
+		candidates.keySet().stream().forEach(candidateId -> {
+			if (candidateId == guild.getLeader()) {
+				window.addListBoxMenuItem("Incumbent: " + guild.getLeaderName() + " -- Votes: " + String.valueOf(candidates.get(candidateId)), candidateId);
+			} else {
+				GuildMember candidate = guild.getMember(candidateId);
+				
+				window.addListBoxMenuItem("Challenger: " + candidate.getName() + " -- Votes: " + String.valueOf(candidates.get(candidateId)), candidateId);
+			}
+
+		});
+		core.suiService.openSUIWindow(window);
+	}
+	
+	public void handleVoteForLeader(CreatureObject actor, Guild guild) {
+		
+		SUIWindow window = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "@guild:leader_vote_t", "@guild:leader_vote_d", new TreeMap<Long, String>(), actor, null, 0);
+
+		Map<Long, Integer> candidates = guild.getLeaderCandidates();
+		candidates.keySet().stream().forEach(candidateId -> {
+			if (candidateId == guild.getLeader()) {
+				window.addListBoxMenuItem("Incumbent: " + guild.getLeaderName() + " -- Votes: " + String.valueOf(candidates.get(candidateId)), candidateId);
+			} else {
+				GuildMember candidate = guild.getMember(candidateId);
+				
+				window.addListBoxMenuItem("Challenger: " + candidate.getName() + " -- Votes: " + String.valueOf(candidates.get(candidateId)), candidateId);
+			}
+
+		});
+		
+		Vector<String> returnList = new Vector<String>();
+		returnList.add("List.lstList:SelectedRow");
+		
+		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, (owner, eventType, resultList) -> {
+			long voteId = Long.parseLong(resultList.get(0));
+			
+			GuildMember voter = guild.getMember(actor.getObjectID());
+			if (voter == null) 
+				return;
+			
+			if (voter.getVotedId() == voteId) {
+				if (guild.getLeaderCandidates().containsKey(voteId))
+					guild.getLeaderCandidates().put(voteId, guild.getLeaderCandidates().get(voteId) - 1);
+				
+				actor.sendSystemMessage("@guild:vote_abstain", DisplayType.Broadcast);
+				return;
+			}
+			
+			// remove prior votes
+			if (voter.getVotedId() != 0 && guild.getLeaderCandidates().containsKey(voter.getVotedId()))
+				guild.getLeaderCandidates().put(voter.getVotedId(), guild.getLeaderCandidates().get(voter.getVotedId()) - 1);
+			
+			voter.setVotedId(voteId);
+			guild.getLeaderCandidates().put(voteId, guild.getLeaderCandidates().get(voteId) + 1);
+			actor.sendSystemMessage(OutOfBand.ProsePackage("@guild:vote_placed", "TO", guild.getMember(voteId).getName()), DisplayType.Broadcast);
+			
+		});
+		
+		core.suiService.openSUIWindow(window);
+	}
+	
 	public void handleCreateGuildAbbrev(CreatureObject actor, String guildName, SWGObject creationSource) {
 		SUIWindow window = core.suiService.createInputBox(InputBoxType.INPUT_BOX_OK_CANCEL, "@guild:create_abbrev_title", "@guild:create_abbrev_prompt", actor, null, 0,
 				(owner, eventType, returnList) -> {
