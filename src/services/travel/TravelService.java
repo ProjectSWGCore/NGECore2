@@ -68,8 +68,6 @@ public class TravelService implements INetworkDispatch {
 	private Map<Planet, Vector<TravelPoint>> travelMap = new ConcurrentHashMap<Planet, Vector<TravelPoint>>();
 	private Map<Planet, Map<String, Integer>> fareMap = new ConcurrentHashMap<Planet, Map<String, Integer>>();
 
-	//private ScheduledFuture<?> distanceDespawnTask;
-	//private ScheduledFuture<?> timedDespawnTask;
 	public TravelService(NGECore core) {
 		this.core = core;
 	}
@@ -454,7 +452,7 @@ public class TravelService implements INetworkDispatch {
 					
 				}
 			}
-		}, 1,20, TimeUnit.SECONDS);
+		}, 1, 1, TimeUnit.SECONDS);
 		actor.setAttachment("distanceDespawn", distanceDespawnTask);
 	}
 
@@ -476,7 +474,7 @@ public class TravelService implements INetworkDispatch {
 					
 				}
 			}
-		}, 1, 70, TimeUnit.SECONDS);
+		}, 1, 1 , TimeUnit.SECONDS);
 		actor.setAttachment("timedDespawn", timedDespawnTask);
 	}
 	
