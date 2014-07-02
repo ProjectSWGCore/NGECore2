@@ -40,7 +40,7 @@ public class Guild {
 	private String leaderName;
 	private Map<Long, GuildMember> members = new HashMap<Long, GuildMember>();
 	private Map<Long, String> sponsoredPlayers = new HashMap<Long, String>();
-	private Map<Long, Integer> leaderCandidates;
+	private Map<Long, Integer> leaderCandidates = new HashMap<Long, Integer>();
 	private String motd = "";
 	private boolean electionsEnabled = false;
 	private long electionResultsDate;
@@ -188,5 +188,10 @@ public class Guild {
 
 	public void setLeaderCandidates(Map<Long, Integer> leaderCandidates) {
 		this.leaderCandidates = leaderCandidates;
+	}
+	
+	public boolean isRunningForLeader(long objectID) {
+		if (leaderCandidates.containsKey(Long.valueOf(objectID))) return true;
+		else return false;
 	}
 }

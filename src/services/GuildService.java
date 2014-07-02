@@ -257,7 +257,8 @@ public class GuildService implements INetworkDispatch {
 		guild.setElectionResultsDate(System.currentTimeMillis() + (12095 * 100000)); // 2 weeks
 		
 		Map<Long, Integer> candidates = new HashMap<Long, Integer>();
-		candidates.put(guild.getLeader(), 1);
+		candidates.put(Long.valueOf(guild.getLeader()), 1);
+		guild.setLeaderCandidates(candidates);
 		
 		GuildMember leader = guild.getMember(guild.getLeader());
 		
@@ -270,7 +271,7 @@ public class GuildService implements INetworkDispatch {
 		
 		Map<Long, Integer> candidates = guild.getLeaderCandidates();
 		
-		if (candidates.size() <= 1) {
+		if (candidates == null || candidates.size() <= 1) {
 			actor.sendSystemMessage("@guild:vote_no_candidates", DisplayType.Broadcast);
 			return;
 		}
@@ -290,12 +291,29 @@ public class GuildService implements INetworkDispatch {
 		core.suiService.openSUIWindow(window);
 	}
 	
+	public void handleRunForLeader(CreatureObject actor, Guild guild) {
+		if (guild.isRunningForLeader(actor.getObjectID())) {
+			actor.sendSystemMessage("@guild:vote_register_dupe", DisplayType.Broadcast);
+			return;
+		} else guild.getLeaderCandidates().put(actor.getObjectID(), 1);
+
+		actor.sendSystemMessage("@guild:vote_register_congrats", DisplayType.Broadcast);
+	}
+	
+	public void handleUnregisterForLeader(CreatureObject actor, Guild guild) {
+		if (!guild.isRunningForLeader(actor.getObjectID())) {
+			return;
+		} else guild.getLeaderCandidates().remove(actor.getObjectID());
+
+		actor.sendSystemMessage("@guild:vote_unregistered", DisplayType.Broadcast);
+	}
+	
 	public void handleVoteForLeader(CreatureObject actor, Guild guild) {
 		
 		SUIWindow window = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "@guild:leader_vote_t", "@guild:leader_vote_d", new TreeMap<Long, String>(), actor, null, 0);
 
 		Map<Long, Integer> candidates = guild.getLeaderCandidates();
-		candidates.keySet().stream().forEach(candidateId -> {
+		for (Long candidateId : candidates.keySet()) {
 			if (candidateId == guild.getLeader()) {
 				window.addListBoxMenuItem("Incumbent: " + guild.getLeaderName() + " -- Votes: " + String.valueOf(candidates.get(candidateId)), candidateId);
 			} else {
@@ -303,14 +321,19 @@ public class GuildService implements INetworkDispatch {
 				
 				window.addListBoxMenuItem("Challenger: " + candidate.getName() + " -- Votes: " + String.valueOf(candidates.get(candidateId)), candidateId);
 			}
+		}
 
-		});
-		
 		Vector<String> returnList = new Vector<String>();
 		returnList.add("List.lstList:SelectedRow");
 		
 		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, (owner, eventType, resultList) -> {
-			long voteId = Long.parseLong(resultList.get(0));
+
+			int index = Integer.parseInt(resultList.get(0));
+			
+			long voteId = window.getObjectIdByIndex(index);
+			
+			if(voteId == 0)
+				return;
 			
 			GuildMember voter = guild.getMember(actor.getObjectID());
 			if (voter == null) 
