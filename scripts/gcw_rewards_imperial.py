@@ -9,16 +9,17 @@ from java.lang import Long
 from java.util import Map
 from java.util import TreeMap
 from resources.datatables import GcwRank
+from resources.datatables import WeaponType
 import main.NGECore
 from services.gcw import GCWService
 import sys
 import math
 
 
-def handleRebelItems1 (core, owner):
+def handleImperialItems1 (core, owner):
 	actor = owner.getSlottedObject('ghost')
-	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0)
-	window.setProperty('bg.caption.lblTitle:Text', 'Rebel Item Requisition')
+	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0);
+	window.setProperty('bg.caption.lblTitle:Text', 'Imperial Item Requisition')
 	window.setProperty('Prompt.lblPrompt:Text', 'Items')
 	window.setProperty('btnOk:visible', 'True')
 	window.setProperty('btnCancel:visible', 'True')
@@ -26,22 +27,22 @@ def handleRebelItems1 (core, owner):
 	window.setProperty('btnCancel:Text', '@cancel')	
 	returnList = Vector()
 	returnList.add('List.lstList:SelectedRow')			
-	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, setRebelBox1Callback)
+	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, setImperialBox1Callback)
 	
 	if actor.getCurrentRank() >= GcwRank.PRIVATE:
 		window.addListBoxMenuItem('Private', 0)
 	
-	if actor.getCurrentRank() >= GcwRank.TROOPER:
-		window.addListBoxMenuItem('Trooper', 1)
+	if actor.getCurrentRank() >= GcwRank.LANCECORPORAL:
+		window.addListBoxMenuItem('Lance Corporal', 1)
 	
-	if actor.getCurrentRank() >= GcwRank.HIGHTROOPER:
-		window.addListBoxMenuItem('High Trooper', 2)
+	if actor.getCurrentRank() >= GcwRank.CORPORAL:
+		window.addListBoxMenuItem('Corporal', 2)
 	
 	if actor.getCurrentRank() >= GcwRank.SERGEANT:
 		window.addListBoxMenuItem('Sergeant', 3)	
 	
-	if actor.getCurrentRank() >= GcwRank.SENIORSERGEANT:
-		window.addListBoxMenuItem('Senior Sergeant', 4)
+	if actor.getCurrentRank() >= GcwRank.MASTERSERGEANT:
+		window.addListBoxMenuItem('Master Sergeant', 4)
 	
 	if actor.getCurrentRank() >= GcwRank.SERGEANTMAJOR:
 		window.addListBoxMenuItem('Sergeant Major', 5)
@@ -55,8 +56,8 @@ def handleRebelItems1 (core, owner):
 	if actor.getCurrentRank() >= GcwRank.MAJOR:
 		window.addListBoxMenuItem('Major', 8)
 	
-	if actor.getCurrentRank() >= GcwRank.COMMANDER:
-		window.addListBoxMenuItem('Commander', 9)
+	if actor.getCurrentRank() >= GcwRank.LTCOLONEL:
+		window.addListBoxMenuItem('LT Colonel', 9)
 	
 	if actor.getCurrentRank() >= GcwRank.COLONEL:
 		window.addListBoxMenuItem('Colonel', 10)
@@ -64,9 +65,8 @@ def handleRebelItems1 (core, owner):
 	if actor.getCurrentRank() >= GcwRank.GENERAL:
 		window.addListBoxMenuItem('General', 11)
 
-	core.suiService.openSUIWindow(window)
-	
-def setRebelBox1Callback(owner, window, eventType, returnList):
+	core.suiService.openSUIWindow(window);
+def setImperialBox1Callback(owner, window, eventType, returnList):
 
 	if returnList.size()==0:
 		owner.sendSystemMessage('NULL', 0)	
@@ -76,16 +76,16 @@ def setRebelBox1Callback(owner, window, eventType, returnList):
 		privateHandler(owner)
 		return
 	if returnList.get(0)=='1':
-		trooperHandler(owner)
+		lanceCorporalHandler(owner)
 		return
 	if returnList.get(0)=='2':
-		highTrooperHandler(owner)
+		corporalHandler(owner)
 		return
 	if returnList.get(0)=='3':
 		sergeantHandler(owner)
 		return
 	if returnList.get(0)=='4':
-		seniorSergeantHandler(owner)
+		masterSergeantHandler(owner)
 		return
 	if returnList.get(0)=='5':
 		sergeantMajorHandler(owner)
@@ -100,7 +100,7 @@ def setRebelBox1Callback(owner, window, eventType, returnList):
 		majorHandler(owner)
 		return
 	if returnList.get(0)=='9':
-		commanderHandler(owner)
+		ltColonelHandler(owner)
 		return
 	if returnList.get(0)=='10':
 		colonelHandler(owner)
@@ -114,14 +114,19 @@ def setRebelBox1Callback(owner, window, eventType, returnList):
 def privateHandler(owner):
 	actor = owner.getSlottedObject('ghost')
 	core = main.NGECore.getInstance()
-	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0)
-	window.setProperty('bg.caption.lblTitle:Text', 'Rebel Item Requisition')
+	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0);
+	window.setProperty('bg.caption.lblTitle:Text', 'Imperial Item Requisition')
 	window.setProperty('Prompt.lblPrompt:Text', 'Items')	
-	#window.addListBoxMenuItem('R2 Droid Schematic 165000',0)
-	#window.addListBoxMenuItem('R3 Droid Schematic 180000',1)
-	#window.addListBoxMenuItem('R4 Droid Schematic 195000',2)
-	#window.addListBoxMenuItem('Sergical Droid Schematic 16500', 3)
-	#window.addListBoxMenuItem('Dead Eye Prototype 15000',4)
+	#window.addListBoxMenuItem('R2 Droid Schematic 165000', 0)
+	#window.addListBoxMenuItem('R3 Droid Schematic 180000', 1)
+	#window.addListBoxMenuItem('R4 Droid Schematic 195000', 2)
+	#window.addListBoxMenuItem('DZ-70 Droid Schematic 225000', 3)
+	#window.addListBoxMenuItem('Proximity Caltrop Trap 3250' ,4)
+	#window.addListBoxMenuItem('Remote Caltrop Trap 4000', 5)
+	#window.addListBoxMenuItem('Proximity Flashbang Trap 3250', 6)
+	#window.addListBoxMenuItem('Remote Flashbang Trap 4000', 7)
+	#window.addListBoxMenuItem('Proximity HX2 Trap 3250', 8)
+	#window.addListBoxMenuItem('Remote HX2 Trap 4000', 9)
 	window.setProperty('btnOk:visible', 'True')
 	window.setProperty('btnCancel:visible', 'True')
 	window.setProperty('btnOk:Text', '@ok')
@@ -129,42 +134,47 @@ def privateHandler(owner):
 	returnList = Vector()
 	returnList.add('List.lstList:SelectedRow')			
 	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, privateRewards)
-	core.suiService.openSUIWindow(window)
+	core.suiService.openSUIWindow(window);
 	return
 	
-def trooperHandler(owner):
+def lanceCorporalHandler(owner):
 	actor = owner.getSlottedObject('ghost')
 	core = main.NGECore.getInstance()
-	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0)
-	window.setProperty('bg.caption.lblTitle:Text', 'Rebel Item Requisition')
+	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0);
+	window.setProperty('bg.caption.lblTitle:Text', 'Imperial Item Requisition')
 	window.setProperty('Prompt.lblPrompt:Text', 'Items')	
-	window.addListBoxMenuItem('Tech Armoire 105000',0)
-	window.addListBoxMenuItem('Tech Bookcase 105000',1)
-	window.addListBoxMenuItem('Tech Cabinet 105000',2)
+	window.addListBoxMenuItem('Tech Armoire 105000', 0)
+	window.addListBoxMenuItem('Tech Bookcase 105000', 1)
+	window.addListBoxMenuItem('Tech Cabinet 105000', 2)
 	window.addListBoxMenuItem('Tech Chest 75000', 3)
-	window.addListBoxMenuItem('Tech Couch 112500',4)
-	window.addListBoxMenuItem('Tech Chair 75000',5)
-	window.addListBoxMenuItem('Tech Coffee Table 75000',6)
-	window.addListBoxMenuItem('Tech End Table 75000',7)
+	window.addListBoxMenuItem('Tech Couch 112500', 4)
+	window.addListBoxMenuItem('Tech Chair 75000', 5)
+	window.addListBoxMenuItem('Tech Coffee Table 75000', 6)
+	window.addListBoxMenuItem('Tech End Table 75000', 7)
+	window.addListBoxMenuItem('Data Terminal Slim 60000', 8)
+	window.addListBoxMenuItem('Data Terminal Standard 75000', 9)
+	window.addListBoxMenuItem('Data Terminal Bulky 90000', 10)
+	window.addListBoxMenuItem('Data Terminal Wall 105000', 11)
+	window.addListBoxMenuItem('Imperial Table 75000', 12)
 	window.setProperty('btnOk:visible', 'True')
 	window.setProperty('btnCancel:visible', 'True')
 	window.setProperty('btnOk:Text', '@ok')
 	window.setProperty('btnCancel:Text', '@cancel')
 	returnList = Vector()
 	returnList.add('List.lstList:SelectedRow')			
-	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, trooperRewards)
-	core.suiService.openSUIWindow(window)
+	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, lanceCorporalRewards)
+	core.suiService.openSUIWindow(window);
 	return
 
-def highTrooperHandler(owner):
+def corporalHandler(owner):
 	actor = owner.getSlottedObject('ghost')
 	core = main.NGECore.getInstance()
-	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0)
-	window.setProperty('bg.caption.lblTitle:Text', 'Rebel Item Requisition')
+	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0);
+	window.setProperty('bg.caption.lblTitle:Text', 'Imperial Item Requisition')
 	window.setProperty('Prompt.lblPrompt:Text', 'Items')	
-	window.addListBoxMenuItem('Electrobinoculars 15000',0)
+	window.addListBoxMenuItem('Electrobinoculars 15000', 0)
 	window.addListBoxMenuItem('Advanced Electrobinoculars 22500',1)
-	window.addListBoxMenuItem('Superior Electrobinoculars 30000',2)
+	window.addListBoxMenuItem('Superior Electrobinoculars 30000', 2)
 	window.addListBoxMenuItem('Experimental Electrobinoculars 37500', 3)
 	window.setProperty('btnOk:visible', 'True')
 	window.setProperty('btnCancel:visible', 'True')
@@ -172,19 +182,24 @@ def highTrooperHandler(owner):
 	window.setProperty('btnCancel:Text', '@cancel')
 	returnList = Vector()
 	returnList.add('List.lstList:SelectedRow')			
-	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, highTrooperRewards)
-	core.suiService.openSUIWindow(window)
+	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, corporalRewards)
+	core.suiService.openSUIWindow(window);
 	return
 	
 def sergeantHandler(owner):
 	actor = owner.getSlottedObject('ghost')
 	core = main.NGECore.getInstance()
-	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0)
-	window.setProperty('bg.caption.lblTitle:Text', 'Rebel Item Requisition')
+	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0);
+	window.setProperty('bg.caption.lblTitle:Text', 'Imperial Item Requisition')
 	window.setProperty('Prompt.lblPrompt:Text', 'Items')	
-	window.addListBoxMenuItem('Laser Carbine 187500',0)
-	window.addListBoxMenuItem('Scout Pistol 40500',1)
-	window.addListBoxMenuItem('Metal Staff',2)
+	window.addListBoxMenuItem('Imperial Boots 37500', 0)
+	window.addListBoxMenuItem('Imperial Jacket 37500' ,1)
+	window.addListBoxMenuItem('Imperial Pants 37500', 2)
+	window.addListBoxMenuItem('Imperial Hat 37500', 3)
+	window.addListBoxMenuItem('Power5 Pistol 112500', 4)
+	window.addListBoxMenuItem('E-11 Carbine', 5)
+	window.addListBoxMenuItem('Sword 30000', 6)
+	window.addListBoxMenuItem('Rocket Launcher 150000', 7)
 	window.setProperty('btnOk:visible', 'True')
 	window.setProperty('btnCancel:visible', 'True')
 	window.setProperty('btnOk:Text', '@ok')
@@ -192,19 +207,19 @@ def sergeantHandler(owner):
 	returnList = Vector()
 	returnList.add('List.lstList:SelectedRow')			
 	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, sergeantRewards)
-	core.suiService.openSUIWindow(window)
+	core.suiService.openSUIWindow(window);
 	return
 
-def seniorSergeantHandler(owner):
+def masterSergeantHandler(owner):
 	actor = owner.getSlottedObject('ghost')
 	core = main.NGECore.getInstance()
-	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0)
-	window.setProperty('bg.caption.lblTitle:Text', 'Rebel Item Requisition')
+	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0);
+	window.setProperty('bg.caption.lblTitle:Text', 'Imperial Item Requisition')
 	window.setProperty('Prompt.lblPrompt:Text', 'Items')	
 	window.addListBoxMenuItem('Small Block Turret 120000',0)
 	window.addListBoxMenuItem('Small Dish Turret 120000',1)
 	window.addListBoxMenuItem('Small Tower Turret 120000',2)
-	window.addListBoxMenuItem('Painting We will never surrender 375000',3)
+	window.addListBoxMenuItem('Painting Might of the Empire 375000',3)
 	#window.addListBoxMenuItem('DRX-55 Mine 12000',4)
 	#window.addListBoxMenuItem('SR-88 Cyro Mine 12000',5)
 	#window.addListBoxMenuItem('XG Mine 12000',6)
@@ -214,15 +229,15 @@ def seniorSergeantHandler(owner):
 	window.setProperty('btnCancel:Text', '@cancel')
 	returnList = Vector()
 	returnList.add('List.lstList:SelectedRow')			
-	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, seniorSergeantRewards)
-	core.suiService.openSUIWindow(window)
+	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, masterSergeantRewards)
+	core.suiService.openSUIWindow(window);
 	return
 	
 def sergeantMajorHandler(owner):
 	actor = owner.getSlottedObject('ghost')
 	core = main.NGECore.getInstance()
-	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0)
-	window.setProperty('bg.caption.lblTitle:Text', 'Rebel Item Requisition')
+	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0);
+	window.setProperty('bg.caption.lblTitle:Text', 'Imperial Item Requisition')
 	window.setProperty('Prompt.lblPrompt:Text', 'Items')	
 	window.addListBoxMenuItem('Medium Block Turret 150000', 0)
 	window.addListBoxMenuItem('Medium Tower Turret 150000', 1)
@@ -230,7 +245,7 @@ def sergeantMajorHandler(owner):
 	window.addListBoxMenuItem('HQ Field Hospital 1050000', 3)
 	window.addListBoxMenuItem('SF HQ Forward Outpost 750000' ,4)
 	window.addListBoxMenuItem('SF HQ Field Hospital 1500000', 5)
-	window.addListBoxMenuItem('Crimson Phoenix Medal of the Rebel Alliance 240000', 6)
+	window.addListBoxMenuItem('Nova Star Medal of the Empire 80000', 6)
 	window.setProperty('btnOk:visible', 'True')
 	window.setProperty('btnCancel:visible', 'True')
 	window.setProperty('btnOk:Text', '@ok')
@@ -238,14 +253,14 @@ def sergeantMajorHandler(owner):
 	returnList = Vector()
 	returnList.add('List.lstList:SelectedRow')			
 	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, sergeantMajorRewards)
-	core.suiService.openSUIWindow(window)
+	core.suiService.openSUIWindow(window);
 	return
 	
 def lieutenantHandler(owner):
 	actor = owner.getSlottedObject('ghost')
 	core = main.NGECore.getInstance()
-	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0)
-	window.setProperty('bg.caption.lblTitle:Text', 'Rebel Item Requisition')
+	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0);
+	window.setProperty('bg.caption.lblTitle:Text', 'Imperial Item Requisition')
 	window.setProperty('Prompt.lblPrompt:Text', 'Items')	
 	window.addListBoxMenuItem('Large Block Turret 210000',0)
 	window.addListBoxMenuItem('Large Dish Turret 210000',1)
@@ -254,6 +269,7 @@ def lieutenantHandler(owner):
 	window.addListBoxMenuItem('HQ Field Hospital 3600000',4)
 	window.addListBoxMenuItem('SF HQ Tactical Center 2325000',5)
 	window.addListBoxMenuItem('SF HQ Detachment Headquarters 4500000',6)
+	#window.addListBoxMenuItem('Factional Comm link 200000', 7)
 	window.setProperty('btnOk:visible', 'True')
 	window.setProperty('btnCancel:visible', 'True')
 	window.setProperty('btnOk:Text', '@ok')
@@ -261,14 +277,14 @@ def lieutenantHandler(owner):
 	returnList = Vector()
 	returnList.add('List.lstList:SelectedRow')			
 	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, lieutenantRewards)
-	core.suiService.openSUIWindow(window)
+	core.suiService.openSUIWindow(window);
 	return
 	
 def captainHandler(owner):
 	actor = owner.getSlottedObject('ghost')
 	core = main.NGECore.getInstance()
-	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0)
-	window.setProperty('bg.caption.lblTitle:Text', 'Rebel Item Requisition')
+	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0);
+	window.setProperty('bg.caption.lblTitle:Text', 'Imperial Item Requisition')
 	window.setProperty('Prompt.lblPrompt:Text', 'Items')	
 	window.addListBoxMenuItem('Factional Banner 81600', 0)
 	window.setProperty('btnOk:visible', 'True')
@@ -278,19 +294,19 @@ def captainHandler(owner):
 	returnList = Vector()
 	returnList.add('List.lstList:SelectedRow')			
 	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, captainRewards)
-	core.suiService.openSUIWindow(window)
+	core.suiService.openSUIWindow(window);
 	return
 	
 def majorHandler(owner):
 	actor = owner.getSlottedObject('ghost')
 	core = main.NGECore.getInstance()
-	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0)
-	window.setProperty('bg.caption.lblTitle:Text', 'Rebel Item Requisition')
+	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0);
+	window.setProperty('bg.caption.lblTitle:Text', 'Imperial Item Requisition')
 	window.setProperty('Prompt.lblPrompt:Text', 'Items')	
-	window.addListBoxMenuItem('Grey Spec Ops Armor Leggings 135000', 0)
-	window.addListBoxMenuItem('Grey Spec Ops Armor Belt 112500', 1)
-	window.addListBoxMenuItem('Grey Spec Ops Armor Boots 120000', 2)
-	window.addListBoxMenuItem('Technical Readout of an Rebel Spec Ops Armor Dye Kit 37500', 3)
+	window.addListBoxMenuItem('Black Spec Ops Armor Leggings 46636', 0)
+	window.addListBoxMenuItem('Black Spec Ops Armor Belt 38863', 1)
+	window.addListBoxMenuItem('Black Spec Ops Armor Boots 41454', 2)
+	window.addListBoxMenuItem('Technical Readout of an Imperial Spec Ops Armor Dye Kit 12954', 3)
 	window.setProperty('btnOk:visible', 'True')
 	window.setProperty('btnCancel:visible', 'True')
 	window.setProperty('btnOk:Text', '@ok')
@@ -298,40 +314,40 @@ def majorHandler(owner):
 	returnList = Vector()
 	returnList.add('List.lstList:SelectedRow')			
 	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, majorRewards)
-	core.suiService.openSUIWindow(window)
+	core.suiService.openSUIWindow(window);
 	return
 	
-def commanderHandler(owner):
+def ltColonelHandler(owner):
 	actor = owner.getSlottedObject('ghost')
 	core = main.NGECore.getInstance()
-	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0)
-	window.setProperty('bg.caption.lblTitle:Text', 'Rebel Item Requisition')
+	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0);
+	window.setProperty('bg.caption.lblTitle:Text', 'Imperial Item Requisition')
 	window.setProperty('Prompt.lblPrompt:Text', 'Items')	
-	window.addListBoxMenuItem('Grey Spec Ops Armor Left Bicep 120000', 0)
-	window.addListBoxMenuItem('Grey Spec Ops Armor Right Bicep 120000', 1)
-	window.addListBoxMenuItem('Grey Spec Ops Armor Left Bracer 120000', 2)
-	window.addListBoxMenuItem('Grey Spec Ops Armor Right Bracer 120000', 3)
-	window.addListBoxMenuItem('Grey Spec Ops Armor Gloves 120000', 4)
-	window.addListBoxMenuItem('Grey Spec Ops Armor Helmet 150000', 5)
-	window.addListBoxMenuItem('Grey Spec Ops Armor Chest Plate 225000', 6)
+	window.addListBoxMenuItem('Black Spec Ops Armor Left Bicep 120000', 0)
+	window.addListBoxMenuItem('Black Spec Ops Armor Right Bicep 120000', 1)
+	window.addListBoxMenuItem('Black Spec Ops Armor Left Bracer 120000', 2)
+	window.addListBoxMenuItem('Black Spec Ops Armor Right Bracer 120000', 3)
+	window.addListBoxMenuItem('Black Spec Ops Armor Gloves 120000', 4)
+	window.addListBoxMenuItem('Black Spec Ops Armor Helmet 150000', 5)
+	window.addListBoxMenuItem('Black Spec Ops Armor Torso 225000', 6)
 	window.setProperty('btnOk:visible', 'True')
 	window.setProperty('btnCancel:visible', 'True')
 	window.setProperty('btnOk:Text', '@ok')
 	window.setProperty('btnCancel:Text', '@cancel')
 	returnList = Vector()
 	returnList.add('List.lstList:SelectedRow')			
-	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, commanderRewards)
-	core.suiService.openSUIWindow(window)
+	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, ltColonelRewards)
+	core.suiService.openSUIWindow(window);
 	return
 	
 def colonelHandler(owner):
 	actor = owner.getSlottedObject('ghost')
 	core = main.NGECore.getInstance()
-	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0)
-	window.setProperty('bg.caption.lblTitle:Text', 'Rebel Item Requisition')
+	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0);
+	window.setProperty('bg.caption.lblTitle:Text', 'Imperial Item Requisition')
 	window.setProperty('Prompt.lblPrompt:Text', 'Items')	
-	window.addListBoxMenuItem('Colonel Ring 2800000', 0)
-	window.addListBoxMenuItem('BARC Command Vehicle 2100000', 1)
+	window.addListBoxMenuItem('Colonel Signet Ring of the Empire 142500', 0)
+	window.addListBoxMenuItem('BARC Command Vehicle 1050000', 1)
 	window.setProperty('btnOk:visible', 'True')
 	window.setProperty('btnCancel:visible', 'True')
 	window.setProperty('btnOk:Text', '@ok')
@@ -339,17 +355,17 @@ def colonelHandler(owner):
 	returnList = Vector()
 	returnList.add('List.lstList:SelectedRow')			
 	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, colonelRewards)
-	core.suiService.openSUIWindow(window)
+	core.suiService.openSUIWindow(window);
 	return
 	
 def generalHandler(owner):
 	actor = owner.getSlottedObject('ghost')
 	core = main.NGECore.getInstance()
-	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0)
-	window.setProperty('bg.caption.lblTitle:Text', 'Rebel Item Requisition')
+	window = core.suiService.createSUIWindow('Script.listBox', owner, owner, 0);
+	window.setProperty('bg.caption.lblTitle:Text', 'Imperial Item Requisition')
 	window.setProperty('Prompt.lblPrompt:Text', 'Items')	
 	window.addListBoxMenuItem('Windu\'s Guile 2000000', 0)
-	window.addListBoxMenuItem('Exceptional Rebel DL44 Pistol', 1)
+	window.addListBoxMenuItem('Exceptional Imperial E-11 Carbine 200000', 1)
 	window.addListBoxMenuItem('The Legendary Starlight Carbine 200000', 2)
 	window.addListBoxMenuItem('The Legendary Crimson Nova Pistol 200000', 3)
 	window.addListBoxMenuItem('The Legendary Vortex Rifle 200000', 4)
@@ -361,7 +377,7 @@ def generalHandler(owner):
 	returnList = Vector()
 	returnList.add('List.lstList:SelectedRow')			
 	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, generalRewards)
-	core.suiService.openSUIWindow(window)
+	core.suiService.openSUIWindow(window);
 	return
 		
 def privateRewards(owner, window, eventType, returnList):
@@ -386,14 +402,34 @@ def privateRewards(owner, window, eventType, returnList):
 		return
 						
 	if returnList.get(0)=='4':
-		sergicalDroidSchematic(object, owner)
+		dz70DroidSchematic(object, owner)
 		return
 		
 	if returnList.get(0)=='5':
-		deadEyePrototype(object, owner)
+		proximityCaltrop(object, owner)
+		return
+		
+	if returnList.get(0)=='6':
+		remoteCaltrop(object, owner)
+		return
+		
+	if returnList.get(0)=='7':
+		proximityFlashbang(object, owner)
+		return
+		
+	if returnList.get(0)=='8':
+		remoteFlashbang(object, owner)
+		return
+		
+	if returnList.get(0)=='9':
+		proximityHX2(object, owner)
+		return
+		
+	if returnList.get(0)=='10':
+		remoteHX2(object, owner)
 		return
 			
-def trooperRewards(owner, window, eventType, returnList):
+def lanceCorporalRewards(owner, window, eventType, returnList):
 	
 	if returnList.size()==0:
 		return
@@ -430,7 +466,27 @@ def trooperRewards(owner, window, eventType, returnList):
 		techEndTable(object, owner)
 		return
 		
-def highTrooperRewards(owner, window, eventType, returnList):
+	if returnList.get(0)=='8':
+		dataTerminalSlim(object, owner)
+		return
+		
+	if returnList.get(0)=='9':
+		dataTerminalStandard(object, owner)
+		return
+		
+	if returnList.get(0)=='10':
+		dataTerminalBulky(object, owner)
+		return
+		
+	if returnList.get(0)=='11':
+		dataTerminalWall(object, owner)
+		return
+		
+	if returnList.get(0)=='12':
+		imperialTable(object, owner)
+		return
+		
+def corporalRewards(owner, window, eventType, returnList):
 	
 	if returnList.size()==0:
 		return
@@ -457,18 +513,38 @@ def sergeantRewards(owner, window, eventType, returnList):
 		return
 			
 	if returnList.get(0)=='0':
-		laserCarbine(object, owner)
+		imperialBoots(object, owner)
 		return
 			
 	if returnList.get(0)=='1':
-		scoutPistol(object, owner)
+		imperialJacket(object, owner)
 		return
 					
 	if returnList.get(0)=='2':
-		metalStaff(object, owner)
-		return	
+		imperialPants(object, owner)
+		return
+		
+	if returnList.get(0)=='3':
+		imperialHat(object, owner)
+		return
+		
+	if returnList.get(0)=='4':
+		power5Pistol(object, owner)
+		return
+		
+	if returnList.get(0)=='5':
+		e11Carbine(object, owner)
+		return
+		
+	if returnList.get(0)=='6':
+		sword(object, owner)
+		return
+		
+	if returnList.get(0)=='7':
+		rocketLauncher(object, owner)
+		return
 
-def seniorSergeantRewards(owner, window, eventType, returnList):
+def masterSergeantRewards(owner, window, eventType, returnList):
 	
 	if returnList.size()==0:
 		return
@@ -486,22 +562,8 @@ def seniorSergeantRewards(owner, window, eventType, returnList):
 		return	
 				
 	if returnList.get(0)=='3':
-		paintingNeverSurrender(object, owner)
+		paintingMightEmpire(object, owner)
 		return
-	
-	if returnList.get(0)=='4':
-		drx55Mine(object, owner)
-		return
-						
-	if returnList.get(0)=='5':
-		sr88CryoMine(object, owner)
-		return
-		
-	if returnList.get(0)=='6':
-		xgMine(object, owner)
-		return
-		
-
 		
 def sergeantMajorRewards(owner, window, eventType, returnList):
 	
@@ -533,7 +595,7 @@ def sergeantMajorRewards(owner, window, eventType, returnList):
 		return
 		
 	if returnList.get(0)=='6':
-		crimsonPhoenixMedal(object, owner)
+		novaStarMedal(object, owner)
 		return
 		
 def lieutenantRewards(owner, window, eventType, returnList):
@@ -569,6 +631,10 @@ def lieutenantRewards(owner, window, eventType, returnList):
 		sfhqDetachmentHeadquarters(object, owner)
 		return
 		
+	if returnList.get(0)=='7':
+		factionalCommlink(object, owner)
+		return
+		
 def captainRewards(owner, window, eventType, returnList):
 	
 	if returnList.size()==0:
@@ -599,7 +665,7 @@ def majorRewards(owner, window, eventType, returnList):
 		specOpsDyeKit(object, owner)
 		return
 		
-def commanderRewards(owner, window, eventType, returnList):
+def ltColonelRewards(owner, window, eventType, returnList):
 	
 	if returnList.size()==0:
 		return
@@ -657,7 +723,7 @@ def generalRewards(owner, window, eventType, returnList):
 		return
 		
 	if returnList.get(0)=='1':
-		exceptionalPistol(object, owner)
+		exceptionalCarbine(object, owner)
 		return
 		
 	if returnList.get(0)=='2':
@@ -715,25 +781,16 @@ def r5DroidSchematic(object, owner):
 	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
 		return
 		
-def sergicalDroidSchematic(object, owner):
+def dz70DroidSchematic(object, owner):
 	if owner.getCashCredits() >= 16500:
 		owner.setCashCredits(owner.getCashCredits() - 16500)
 		core = main.NGECore.getInstance()
-		sergical = core.objectService.createObject('object/draft_schematic/droid/shared_droid_sergical.iff', owner.getPlanet())
+		sergical = core.objectService.createObject('object/draft_schematic/droid/shared_droid_dz70.iff', owner.getPlanet())
 		inventory = owner.getSlottedObject('inventory')
 		inventory.add(sergical)
 	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
 		return
 		
-def deadEyeSchematic(object, owner):
-	if owner.getCashCredits() >= 16000:
-		owner.setCashCredits(owner.getCashCredits() - 16000)
-		core = main.NGECore.getInstance()
-		deadeye = core.objectService.createObject('object/draft_schematic/item/theme_park/alderaan/shared_dead_eye_prototype.iff', owner.getPlanet())
-		inventory = owner.getSlottedObject('inventory')
-		inventory.add(deadeye)
-	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
-		return
 		
 def techArmoire(object, owner):
 	if owner.getCashCredits() >= 105000:
@@ -814,6 +871,56 @@ def techEndTable(object, owner):
 		inventory.add(endtable)
 	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
 		return
+		
+def dataTerminalSlim(object, owner):
+	if owner.getCashCredits() >= 60000:
+		owner.setCashCredits(owner.getCashCredits() - 60000)
+		core = main.NGECore.getInstance()
+		terminal = core.objectService.createObject('object/tangible/furniture/imperial/shared_data_terminal_s1.iff', owner.getPlanet())
+		inventory = owner.getSlottedObject('inventory')
+		inventory.add(terminal)
+	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
+		return
+		
+def dataTerminalStandard(object, owner):
+	if owner.getCashCredits() >= 75000:
+		owner.setCashCredits(owner.getCashCredits() - 75000)
+		core = main.NGECore.getInstance()
+		terminal = core.objectService.createObject('object/tangible/furniture/imperial/shared_data_terminal_s2.iff', owner.getPlanet())
+		inventory = owner.getSlottedObject('inventory')
+		inventory.add(terminal)
+	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
+		return
+		
+def dataTerminalBulky(object, owner):
+	if owner.getCashCredits() >= 90000:
+		owner.setCashCredits(owner.getCashCredits() - 90000)
+		core = main.NGECore.getInstance()
+		terminal = core.objectService.createObject('object/tangible/furniture/imperial/shared_data_terminal_s3.iff', owner.getPlanet())
+		inventory = owner.getSlottedObject('inventory')
+		inventory.add(terminal)
+	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
+		return
+		
+def dataTerminalWall(object, owner):
+	if owner.getCashCredits() >= 105000:
+		owner.setCashCredits(owner.getCashCredits() - 105000)
+		core = main.NGECore.getInstance()
+		terminal = core.objectService.createObject('object/tangible/furniture/imperial/shared_data_terminal_s4.iff', owner.getPlanet())
+		inventory = owner.getSlottedObject('inventory')
+		inventory.add(terminal)
+	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
+		return
+		
+def imperialTable(object, owner):
+	if owner.getCashCredits() >= 75000:
+		owner.setCashCredits(owner.getCashCredits() - 75000)
+		core = main.NGECore.getInstance()
+		table = core.objectService.createObject('object/tangible/furniture/imperial/shared_table_s1.iff', owner.getPlanet())
+		inventory = owner.getSlottedObject('inventory')
+		inventory.add(table)
+	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
+		return
 
 def electrobinoculars(object, owner):
 	if owner.getCashCredits() >= 15000:
@@ -854,6 +961,88 @@ def experimentalElectrobinoculars(object, owner):
 		inventory.add(electrobinoculars)
 	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
 		return
+		
+def imperialBoots(object, owner):
+	if owner.getCashCredits() >= 37500:
+		owner.setCashCredits(owner.getCashCredits() - 37500)
+		core = main.NGECore.getInstance()
+		boots = core.objectService.createObject('object/tangible/wearables/boots/shared_boots_s14.iff', owner.getPlanet())
+		inventory = owner.getSlottedObject('inventory')
+		inventory.add(boots)
+	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
+		return
+		
+def imperialJacket(object, owner):
+	if owner.getCashCredits() >= 37500:
+		owner.setCashCredits(owner.getCashCredits() - 37500)
+		core = main.NGECore.getInstance()
+		jacket = core.objectService.createObject('object/tangible/wearables/jacket/shared_jacket_s03.iff', owner.getPlanet())
+		inventory = owner.getSlottedObject('inventory')
+		inventory.add(jacket)
+	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
+		return
+		
+def imperialPants(object, owner):
+	if owner.getCashCredits() >= 37500:
+		owner.setCashCredits(owner.getCashCredits() - 37500)
+		core = main.NGECore.getInstance()
+		pants = core.objectService.createObject('object/tangible/wearables/pants/shared_pants_s15.iff', owner.getPlanet())
+		inventory = owner.getSlottedObject('inventory')
+		inventory.add(pants)
+	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
+		return
+		
+def imperialHat(object, owner):
+	if owner.getCashCredits() >= 37500:
+		owner.setCashCredits(owner.getCashCredits() - 37500)
+		core = main.NGECore.getInstance()
+		hat = core.objectService.createObject('object/tangible/wearables/hat/shared_hat_imp_s01.iff', owner.getPlanet())
+		inventory = owner.getSlottedObject('inventory')
+		inventory.add(hat)
+	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
+		return
+		
+def power5Pistol(object, owner):
+	if owner.getCashCredits() >= 112500:
+		owner.setCashCredits(owner.getCashCredits() - 112500)
+		core = main.NGECore.getInstance()
+		pistol = core.objectService.createObject('object/weapon/ranged/pistol/shared_pistol_power5.iff', owner.getPlanet(), 'factional_power_5_pistol')
+		inventory = owner.getSlottedObject('inventory')
+		inventory.add(pistol)
+	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
+		return
+		
+def e11Carbine(object, owner):
+	if owner.getCashCredits() >= 82500:
+		owner.setCashCredits(owner.getCashCredits() - 82500)
+		core = main.NGECore.getInstance()
+		carbine = core.objectService.createObject('object/weapon/ranged/carbine/shared_carbine_e11.iff', owner.getPlanet(), 'factional_e11_carbine')
+		inventory = owner.getSlottedObject('inventory')
+		inventory.add(carbine)
+	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
+		return
+		
+def sword(object, owner):
+	if owner.getCashCredits() >= 30000:
+		owner.setCashCredits(owner.getCashCredits() - 30000)
+		core = main.NGECore.getInstance()
+		sword = core.objectService.createObject('object/weapon/melee/sword/shared_sword_s01.iff', owner.getPlanet(), 'factional_sword')
+		inventory = owner.getSlottedObject('inventory')
+		inventory.add(carbine)
+	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
+		return
+		
+def rocketLauncher(object, owner):
+	if owner.getCashCredits() >= 150000:
+		owner.setCashCredits(owner.getCashCredits() - 150000)
+		core = main.NGECore.getInstance()
+		launcher = core.objectService.createObject('object/weapon/ranged/heavy/shared_heavy_rocket_launcher.iff', owner.getPlanet(), 'factional_rocket_launcher')
+		inventory = owner.getSlottedObject('inventory')
+		inventory.add(launcher)
+	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
+		return
+		
+
 		
 def smallBlockTurret(object, owner):
 	if owner.getCashCredits() >= 120000:
@@ -916,10 +1105,10 @@ def xgMine(object, owner):
 		return
 
 def barcSpeeder(object, owner):
-	if owner.getCashCredits() >= 2100000:
-		owner.setCashCredits(owner.getCashCredits() - 2100000)
+	if owner.getCashCredits() >= 1050000:
+		owner.setCashCredits(owner.getCashCredits() - 1050000)
 		core = main.NGECore.getInstance()
-		barc = core.objectService.createObject('object/tangible/deed/vehicle_deed/shared_barc_speeder_deed.iff', owner.getPlanet(), 'item_deed_barc_rebel_06_01')
+		barc = core.objectService.createObject('object/tangible/deed/vehicle_deed/shared_barc_speeder_deed.iff', owner.getPlanet(), 'item_deed_barc_imperial_06_01')
 		inventory = owner.getSlottedObject('inventory')
 		inventory.add(barc)
 	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
@@ -1036,30 +1225,30 @@ def largeTowerTurret(object, owner):
 		return
 
 def specOpsLeggings(object, owner):
-	if owner.getCashCredits() >= 135000:
-		owner.setCashCredits(owner.getCashCredits() - 135000)
+	if owner.getCashCredits() >= 46636:
+		owner.setCashCredits(owner.getCashCredits() - 46636)
 		core = main.NGECore.getInstance()
-		leggings = core.objectService.createObject('object/tangible/wearables/armor/rebel_assault/shared_armor_rebel_spec_ops_leggings.iff', owner.getPlanet())
+		leggings = core.objectService.createObject('object/tangible/wearables/armor/stormtrooper/shared_armor_stormtrooper_leggings.iff', owner.getPlanet(), 'armor_pvp_spec_ops_imperial_black_leggings_05_01')
 		inventory = owner.getSlottedObject('inventory')
 		inventory.add(leggings)
 	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
 		return
 		
 def specOpsBelt(object, owner):
-	if owner.getCashCredits() >= 112500:
-		owner.setCashCredits(owner.getCashCredits() - 112500)
+	if owner.getCashCredits() >= 38863:
+		owner.setCashCredits(owner.getCashCredits() - 38863)
 		core = main.NGECore.getInstance()
-		belt = core.objectService.createObject('object/tangible/wearables/armor/rebel_assault/shared_armor_rebel_spec_ops_belt.iff', owner.getPlanet())
+		belt = core.objectService.createObject('object/tangible/wearables/armor/stormtrooper/shared_armor_stormtrooper_utility_belt.iff', owner.getPlanet(), 'armor_pvp_spec_ops_imperial_black_belt_05_01')
 		inventory = owner.getSlottedObject('inventory')
 		inventory.add(belt)
 	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
 		return
 		
 def specOpsBoots(object, owner):
-	if owner.getCashCredits() >= 120000:
-		owner.setCashCredits(owner.getCashCredits() - 120000)
+	if owner.getCashCredits() >= 41454:
+		owner.setCashCredits(owner.getCashCredits() - 41454)
 		core = main.NGECore.getInstance()
-		boots = core.objectService.createObject('object/tangible/wearables/armor/rebel_assault/shared_armor_rebel_spec_ops_boots.iff', owner.getPlanet())
+		boots = core.objectService.createObject('object/tangible/wearables/armor/stormtrooper/shared_armor_stormtrooper_boots.iff', owner.getPlanet(), 'armor_pvp_spec_ops_imperial_black_boots_05_01')
 		inventory = owner.getSlottedObject('inventory')
 		inventory.add(boots)
 	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
@@ -1069,7 +1258,7 @@ def specOpsLeftBicep(object, owner):
 	if owner.getCashCredits() >= 120000:
 		owner.setCashCredits(owner.getCashCredits() - 120000)
 		core = main.NGECore.getInstance()
-		bicepl = core.objectService.createObject('object/tangible/wearables/armor/rebel_assault/shared_armor_rebel_spec_ops_bicep_l.iff', owner.getPlanet())
+		bicepl = core.objectService.createObject('object/tangible/wearables/armor/stormtrooper/shared_armor_stormtrooper_bicep_l.iff', owner.getPlanet(), 'armor_pvp_spec_ops_imperial_black_bicep_l_05_01')
 		inventory = owner.getSlottedObject('inventory')
 		inventory.add(bicepl)
 	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
@@ -1079,7 +1268,7 @@ def specOpsRightBicep(object, owner):
 	if owner.getCashCredits() >= 120000:
 		owner.setCashCredits(owner.getCashCredits() - 120000)
 		core = main.NGECore.getInstance()
-		bicepr = core.objectService.createObject('object/tangible/wearables/armor/rebel_assault/shared_armor_rebel_spec_ops_bicep_r.iff', owner.getPlanet())
+		bicepr = core.objectService.createObject('object/tangible/wearables/armor/stormtrooper/shared_armor_stormtrooper_bicep_r.iff', owner.getPlanet(), 'armor_pvp_spec_ops_imperial_black_bicep_r_05_01')
 		inventory = owner.getSlottedObject('inventory')
 		inventory.add(bicepr)
 	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
@@ -1089,7 +1278,7 @@ def specOpsLeftBracer(object, owner):
 	if owner.getCashCredits() >= 120000:
 		owner.setCashCredits(owner.getCashCredits() - 120000)
 		core = main.NGECore.getInstance()
-		bracerl = core.objectService.createObject('object/tangible/wearables/armor/rebel_assault/shared_armor_rebel_spec_ops_bracer_l.iff', owner.getPlanet())
+		bracerl = core.objectService.createObject('object/tangible/wearables/armor/stormtrooper/shared_armor_stormtrooper_bracer_l.iff', owner.getPlanet(), 'armor_pvp_spec_ops_imperial_black_bracer_l_05_01')
 		inventory = owner.getSlottedObject('inventory')
 		inventory.add(bracerl)
 	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
@@ -1099,7 +1288,7 @@ def specOpsRightBracer(object, owner):
 	if owner.getCashCredits() >= 120000:
 		owner.setCashCredits(owner.getCashCredits() - 120000)
 		core = main.NGECore.getInstance()
-		bracerr = core.objectService.createObject('object/tangible/wearables/armor/rebel_assault/shared_armor_rebel_spec_ops_bracer_r.iff', owner.getPlanet())
+		bracerr = core.objectService.createObject('object/tangible/wearables/armor/stormtrooper/shared_armor_stormtrooper_bracer_r.iff', owner.getPlanet(), 'armor_pvp_spec_ops_imperial_black_bracer_r_05_01')
 		inventory = owner.getSlottedObject('inventory')
 		inventory.add(bracerr)
 	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
@@ -1109,7 +1298,7 @@ def specOpsGloves(object, owner):
 	if owner.getCashCredits() >= 120000:
 		owner.setCashCredits(owner.getCashCredits() - 120000)
 		core = main.NGECore.getInstance()
-		gloves = core.objectService.createObject('object/tangible/wearables/armor/rebel_assault/shared_armor_rebel_spec_ops_gloves.iff', owner.getPlanet())
+		gloves = core.objectService.createObject('object/tangible/wearables/armor/stormtrooper/shared_armor_stormtrooper_gloves.iff', owner.getPlanet(), 'armor_pvp_spec_ops_imperial_black_gloves_05_01')
 		inventory = owner.getSlottedObject('inventory')
 		inventory.add(gloves)
 	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
@@ -1119,7 +1308,7 @@ def specOpsHelmet(object, owner):
 	if owner.getCashCredits() >= 150000:
 		owner.setCashCredits(owner.getCashCredits() - 150000)
 		core = main.NGECore.getInstance()
-		helmet = core.objectService.createObject('object/tangible/wearables/armor/rebel_assault/shared_armor_rebel_spec_ops_helmet.iff', owner.getPlanet())
+		helmet = core.objectService.createObject('object/tangible/wearables/armor/stormtrooper/shared_armor_stormtrooper_helmet.iff', owner.getPlanet(), 'armor_pvp_spec_ops_imperial_black_helmet_05_01')
 		inventory = owner.getSlottedObject('inventory')
 		inventory.add(helmet)
 	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
@@ -1129,39 +1318,49 @@ def specOpsChestPlate(object, owner):
 	if owner.getCashCredits() >= 225000:
 		owner.setCashCredits(owner.getCashCredits() - 225000)
 		core = main.NGECore.getInstance()
-		chest = core.objectService.createObject('object/tangible/wearables/armor/rebel_assault/shared_armor_rebel_spec_ops_chest_plate.iff', owner.getPlanet())
+		chest = core.objectService.createObject('object/tangible/wearables/armor/stormtrooper/shared_armor_stormtrooper_pvp_officer_chest_plate.iff', owner.getPlanet())
 		inventory = owner.getSlottedObject('inventory')
 		inventory.add(chest)
 	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
 		return
 		
 def specOpsDyeKit(object, owner):
-	if owner.getCashCredits() >= 37500:
-		owner.setCashCredits(owner.getCashCredits() - 37500)
+	if owner.getCashCredits() >= 12954:
+		owner.setCashCredits(owner.getCashCredits() - 12954)
 		core = main.NGECore.getInstance()
-		dyekit = core.objectService.createObject('object/tangible/item/shared_pvp_spec_ops_rebel_dye_kit.iff', owner.getPlanet())
+		dyekit = core.objectService.createObject('object/tangible/item/shared_pvp_spec_ops_imperial_dye_kit.iff', owner.getPlanet())
 		inventory = owner.getSlottedObject('inventory')
 		inventory.add(dyekit)
 	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
 		return
 		
-def paintingNeverSurrender(object, owner):
+def paintingMightEmpire(object, owner):
 	if owner.getCashCredits() >= 375000:
 		owner.setCashCredits(owner.getCashCredits() - 375000)
 		core = main.NGECore.getInstance()
-		painting = core.objectService.createObject('object/tangible/painting/shared_painting_pvp_reward_rebel.iff', owner.getPlanet())
+		painting = core.objectService.createObject('object/tangible/painting/shared_painting_pvp_reward_imperial.iff', owner.getPlanet())
 		inventory = owner.getSlottedObject('inventory')
 		inventory.add(painting)
 	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
 		return
 		
-def crimsonPhoenixMedal(object, owner):
-	if owner.getCashCredits() >= 240000:
-		owner.setCashCredits(owner.getCashCredits() - 240000)
+def novaStarMedal(object, owner):
+	if owner.getCashCredits() >= 80000:
+		owner.setCashCredits(owner.getCashCredits() - 80000)
 		core = main.NGECore.getInstance()
-		necklace = core.objectService.createObject('object/tangible/wearables/necklace/shared_necklace_deepspace_rebel_f.iff', owner.getPlanet(), 'item_pvp_rebel_sergeant_major_medal_03_01')
+		necklace = core.objectService.createObject('object/tangible/wearables/necklace/shared_necklace_deepspace_empire_f.iff', owner.getPlanet(), 'item_pvp_imperial_sergeant_major_medal_03_01')
 		inventory = owner.getSlottedObject('inventory')
 		inventory.add(necklace)
+	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
+		return
+		
+def factionalCommlink(object, owner):
+	if owner.getCashCredits() >= 200000:
+		owner.setCashCredits(owner.getCashCredits() - 200000)
+		core = main.NGECore.getInstance()
+		commlink = core.objectService.createObject('object/tangible/gcw/pvp_rank_rewards/shared_comm_link.iff', owner.getPlanet(), 'item_pvp_lieutenant_comm_link_imperial_reward_04_01')
+		inventory = owner.getSlottedObject('inventory')
+		inventory.add(commlink)
 	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
 		return
 		
@@ -1169,51 +1368,23 @@ def factionalBanner(object, owner):
 	if owner.getCashCredits() >= 80000:
 		owner.setCashCredits(owner.getCashCredits() - 80000)
 		core = main.NGECore.getInstance()
-		banner = core.objectService.createObject('object/tangible/gcw/pvp_rank_rewards/shared_pvp_rebel_battle_banner.iff', owner.getPlanet())
+		banner = core.objectService.createObject('object/tangible/gcw/pvp_rank_rewards/shared_pvp_imperial_battle_banner.iff', owner.getPlanet())
 		inventory = owner.getSlottedObject('inventory')
 		inventory.add(banner)
 	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
 		return
 		
 def colonelRing(object, owner):
-	if owner.getCashCredits() >= 2800000:
-		owner.setCashCredits(owner.getCashCredits() - 2800000)
+	if owner.getCashCredits() >= 142500:
+		owner.setCashCredits(owner.getCashCredits() - 142500)
 		core = main.NGECore.getInstance()
-		ring = core.objectService.createObject('object/tangible/wearables/ring/shared_ring_s03.iff', owner.getPlanet(), 'item_pvp_rebel_colonel_signet_ring_05_01')
+		ring = core.objectService.createObject('object/tangible/wearables/ring/shared_ring_s03.iff', owner.getPlanet(), 'item_pvp_imperial_colonel_signet_ring_05_01')
 		inventory = owner.getSlottedObject('inventory')
 		inventory.add(ring)
 	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
 		return
 		
-def laserCarbine(object, owner):
-	if owner.getCashCredits() >= 187500:
-		owner.setCashCredits(owner.getCashCredits() - 187500)
-		core = main.NGECore.getInstance()
-		carbine = core.objectService.createObject('object/weapon/ranged/carbine/shared_carbine_laser.iff', owner.getPlanet(), 'factional_laser_carbine')
-		inventory = owner.getSlottedObject('inventory')
-		inventory.add(carbine)
-	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
-		return
-		
-def scoutPistol(object, owner):
-	if owner.getCashCredits() >= 40500:
-		owner.setCashCredits(owner.getCashCredits() - 40500)
-		core = main.NGECore.getInstance()
-		pistol = core.objectService.createObject('object/weapon/ranged/pistol/shared_pistol_scout_blaster.iff', owner.getPlanet(), 'factional_scout_pistol')
-		inventory = owner.getSlottedObject('inventory')
-		inventory.add(pistol)
-	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
-		return
-		
-def metalStaff(object, owner):
-	if owner.getCashCredits() >= 30000:
-		owner.setCashCredits(owner.getCashCredits() - 30000)
-		core = main.NGECore.getInstance()
-		staff = core.objectService.createObject('object/weapon/melee/polearm/shared_lance_staff_metal.iff', owner.getPlanet(), 'factional_metal_staff')
-		inventory = owner.getSlottedObject('inventory')
-		inventory.add(staff)
-	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
-		return
+
 		
 def windusGuile(object, owner):
 	if owner.getCashCredits() >= 2000000:
@@ -1225,13 +1396,13 @@ def windusGuile(object, owner):
 	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
 		return
 		
-def exceptionalPistol(object, owner):
+def exceptionalCarbine(object, owner):
 	if owner.getCashCredits() >= 200000:
 		owner.setCashCredits(owner.getCashCredits() - 200000)
 		core = main.NGECore.getInstance()
-		pistol = core.objectService.createObject('object/weapon/ranged/pistol/shared_pistol_dl44.iff', owner.getPlanet(), 'weapon_pistol_pvp_rebel_general_reward_06_01')
+		carbine = core.objectService.createObject('object/weapon/ranged/carbine/shared_carbine_e11.iff', owner.getPlanet(), 'weapon_carbine_pvp_general_reward_05_01')
 		inventory = owner.getSlottedObject('inventory')
-		inventory.add(pistol)
+		inventory.add(carbine)
 	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
 		return
 		
@@ -1240,7 +1411,7 @@ def starlightCarbine(object, owner):
 		owner.setCashCredits(owner.getCashCredits() - 200000)
 		core = main.NGECore.getInstance()
 		carbine = core.objectService.createObject('object/weapon/ranged/carbine/shared_carbine_pvp.iff', owner.getPlanet())
-		carbine.setStringAttribute('faction_restriction', 'Rebel')
+		carbine.setStringAttribute('faction_restriction', 'Imperial')
 		inventory = owner.getSlottedObject('inventory')
 		inventory.add(carbine)
 	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
@@ -1251,7 +1422,7 @@ def crimsonNova(object, owner):
 		owner.setCashCredits(owner.getCashCredits() - 200000)
 		core = main.NGECore.getInstance()
 		nova = core.objectService.createObject('object/weapon/ranged/pistol/shared_pistol_pvp.iff', owner.getPlanet())
-		nova.setStringAttribute('faction_restriction', 'Rebel')
+		nova.setStringAttribute('faction_restriction', 'Imperial')
 		inventory = owner.getSlottedObject('inventory')
 		inventory.add(nova)
 	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
@@ -1262,7 +1433,7 @@ def vortexRifle(object, owner):
 		owner.setCashCredits(owner.getCashCredits() - 200000)
 		core = main.NGECore.getInstance()
 		rifle = core.objectService.createObject('object/weapon/ranged/rifle/shared_rifle_pvp.iff', owner.getPlanet())
-		rifle.setStringAttribute('faction_restriction', 'Rebel')
+		rifle.setStringAttribute('faction_restriction', 'Imperial')
 		inventory = owner.getSlottedObject('inventory')
 		inventory.add(rifle)
 	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
@@ -1273,7 +1444,7 @@ def reaperCannon(object, owner):
 		owner.setCashCredits(owner.getCashCredits() - 200000)
 		core = main.NGECore.getInstance()
 		cannon = core.objectService.createObject('object/weapon/ranged/heavy/shared_heavy_pvp.iff', owner.getPlanet())
-		cannon.setStringAttribute('faction_restriction', 'Rebel')
+		cannon.setStringAttribute('faction_restriction', 'Imperial')
 		inventory = owner.getSlottedObject('inventory')
 		inventory.add(cannon)
 	elif owner.sendSystemMessage('You do not have enough credits to purchase this item.', 0):
