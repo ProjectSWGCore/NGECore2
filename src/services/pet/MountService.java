@@ -252,7 +252,15 @@ public class MountService implements INetworkDispatch {
 							mount.setOrientation(actor.getOrientation().clone());
 							mount.setPlanet(actor.getPlanet());
 							core.simulationService.add(mount, actor.getWorldPosition().x, actor.getWorldPosition().z, false);
+							
+							if (mount.getAttachment("isAutoMount") != null){
+								//core.mountService.mount(actor, mount);
+								core.objectService.useObject(actor, mount);
+							}
+						
 						}
+						
+						
 					}
 				}
 			}
@@ -641,10 +649,16 @@ public class MountService implements INetworkDispatch {
 		
 		core.buffService.clearBuffs(mount);
 		core.buffService.removeBuffFromCreature(rider, rider.getBuffByName("vehicle_passenger"));
-		
+		if (mount.getAttachment("isAutoStore") != null){
+			core.mountService.store(rider, mount);
+			//core.objectService.useObject(rider, mount);
 		// Store mount if it's a creature
 		if (!mount.getTemplate().contains("vehicle") && rider.getObjectID() == mount.getOwnerId()) {
 			store(rider, mount);
+		
+			
+			}
+		
 		}
 	}
 	
