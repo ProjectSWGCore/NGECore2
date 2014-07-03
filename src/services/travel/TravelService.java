@@ -442,10 +442,10 @@ public class TravelService implements INetworkDispatch {
 					if (object != null){
 						core.objectService.destroyObject(object);
 						actor.sendSystemMessage("@travel:pickup_timeout", DisplayType.Broadcast);
+						actor.setAttachment("itv", null);
 					}
 				}catch (Exception e) {
-					e.printStackTrace();
-					
+					e.printStackTrace();					
 				}
 			}
 		}, 30, TimeUnit.SECONDS);
