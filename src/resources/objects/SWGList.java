@@ -333,7 +333,7 @@ public class SWGList<E> implements List<E>, Serializable {
 				
 				IoBuffer buffer = Delta.createBuffer(3 + newListData.length);
 				buffer.put((byte) 3);
-				buffer.put((short) list.size());
+				buffer.putShort((short) list.size());
 				buffer.put(newListData);
 				newListData = buffer.array();
 				
