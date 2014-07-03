@@ -269,7 +269,7 @@ def lieutenantHandler(owner):
 	window.addListBoxMenuItem('HQ Field Hospital 3600000',4)
 	window.addListBoxMenuItem('SF HQ Tactical Center 2325000',5)
 	window.addListBoxMenuItem('SF HQ Detachment Headquarters 4500000',6)
-	window.addListBoxMenuItem('Factional Comm link 200000', 7)
+	#window.addListBoxMenuItem('Factional Comm link 200000', 7)
 	window.setProperty('btnOk:visible', 'True')
 	window.setProperty('btnCancel:visible', 'True')
 	window.setProperty('btnOk:Text', '@ok')
