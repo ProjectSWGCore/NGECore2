@@ -204,10 +204,10 @@ def seniorSergeantHandler(owner):
 	window.addListBoxMenuItem('Small Block Turret 120000',0)
 	window.addListBoxMenuItem('Small Dish Turret 120000',1)
 	window.addListBoxMenuItem('Small Tower Turret 120000',2)
-	#window.addListBoxMenuItem('DRX-55 Mine 12000',3)
-	#window.addListBoxMenuItem('SR-88 Cyro Mine 12000',4)
-	#window.addListBoxMenuItem('XG Mine 12000',5)
-	window.addListBoxMenuItem('Painting We will never surrender 375000',6)
+	window.addListBoxMenuItem('Painting We will never surrender 375000',3)
+	#window.addListBoxMenuItem('DRX-55 Mine 12000',4)
+	#window.addListBoxMenuItem('SR-88 Cyro Mine 12000',5)
+	#window.addListBoxMenuItem('XG Mine 12000',6)
 	window.setProperty('btnOk:visible', 'True')
 	window.setProperty('btnCancel:visible', 'True')
 	window.setProperty('btnOk:Text', '@ok')
@@ -486,20 +486,22 @@ def seniorSergeantRewards(owner, window, eventType, returnList):
 		return	
 				
 	if returnList.get(0)=='3':
+		paintingNeverSurrender(object, owner)
+		return
+	
+	if returnList.get(0)=='4':
 		drx55Mine(object, owner)
 		return
 						
-	if returnList.get(0)=='4':
+	if returnList.get(0)=='5':
 		sr88CryoMine(object, owner)
 		return
 		
-	if returnList.get(0)=='5':
+	if returnList.get(0)=='6':
 		xgMine(object, owner)
 		return
 		
-	if returnList.get(0)=='6':
-		paintingNeverSurrender(object, owner)
-		return
+
 		
 def sergeantMajorRewards(owner, window, eventType, returnList):
 	
