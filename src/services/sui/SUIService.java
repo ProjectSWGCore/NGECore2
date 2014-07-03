@@ -384,6 +384,12 @@ public class SUIService implements INetworkDispatch {
 		
 	}
 	
+	public SUIWindow createMessageBox(int type, String title, String promptText, SWGObject owner, SWGObject rangeObject, float maxDistance, SUICallback handleFunc) {
+		SUIWindow window = createMessageBox(type, title, promptText, owner, rangeObject, maxDistance);
+		window.addHandler(0, "", Trigger.TRIGGER_OK, new Vector<String>(), handleFunc);
+		return window;
+	}
+	
 	public SUIWindow createInputBox(int type, String title, String promptText, SWGObject owner, SWGObject rangeObject, float maxDistance) {
 		SUIWindow window = createSUIWindow("Script.inputBox", owner, rangeObject, maxDistance);
 		

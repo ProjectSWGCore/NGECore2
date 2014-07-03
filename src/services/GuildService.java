@@ -169,6 +169,71 @@ public class GuildService implements INetworkDispatch {
 		return member;
 	}
 	
+	public void changeGuildLeader(Guild guild, CreatureObject formerLeaderCreo, CreatureObject newLeaderCreo, boolean elected) {
+		GuildMember formerLeader = guild.getMember(formerLeaderCreo.getObjectID());
+		
+		if (formerLeader == null)
+			return;
+		
+		GuildMember newLeader = guild.getMember(newLeaderCreo.getObjectID());
+		
+		if (newLeader == null)
+			return;
+		
+		formerLeader.removeAllPermissions();
+		newLeader.giveAllPermissions();
+		
+		// TODO: Handling of guild PA Halls
+		
+		guild.setLeader(newLeaderCreo.getObjectID());
+		guild.setLeaderName(newLeaderCreo.getCustomName());
+		
+		if (elected) {
+			// TODO: Guild leader elections
+		} else {
+			formerLeaderCreo.sendSystemMessage("@guild:ml_success", DisplayType.Broadcast);
+			newLeaderCreo.sendSystemMessage("@guild:ml_you_are_leader", DisplayType.Broadcast);
+			guild.sendGuildMail(guild.getName(), "@guildmail:leaderchange_subject", new ProsePackage("@guildmail:leaderchange_text", "TU", newLeaderCreo.getCustomName()));
+		}
+		
+	}
+	
+	public void handleTransferLeadership(CreatureObject actor, Guild guild) {
+
+		SUIWindow transferWindow = core.suiService.createInputBox(InputBoxType.INPUT_BOX_OK_CANCEL, "@guild:make_leader_t", "@guild:make_leader_d", actor, null, 0, 
+				(owner, eventType, returnList) -> {
+					String name = returnList.get(0);
+
+					if (name == "" || name == " ")
+						return;
+					
+					SWGObject transferTarget = core.chatService.getObjectByFirstName(name);
+					
+					if (transferTarget == null) {
+						actor.sendSystemMessage("@guild:ml_not_loaded", DisplayType.Broadcast);
+						return;
+					}
+					
+					if (!guild.getMembers().containsKey(transferTarget.getObjectID())) {
+						actor.sendSystemMessage("@guild:ml_fail", DisplayType.Broadcast);
+						return;
+					}
+					
+					if (actor.getPlanetId() != transferTarget.getPlanetId() || actor.getWorldPosition().getDistance2D(transferTarget.getWorldPosition()) > (float) 10) {
+						actor.sendSystemMessage("@guild:ml_not_loaded", DisplayType.Broadcast);
+						return;
+					}
+					
+					SUIWindow confirmTransferWindow = core.suiService.createMessageBox(MessageBoxType.MESSAGE_BOX_YES_NO, "@guild:make_leader_t", "@guild:make_leader_p", transferTarget, null, 0, (owner2, eventType2, returnList2) -> {
+						changeGuildLeader(guild, actor, (CreatureObject) transferTarget, false);
+					});
+					core.suiService.openSUIWindow(confirmTransferWindow);
+					
+				});
+		
+		core.suiService.openSUIWindow(transferWindow);
+	}
+	
 	public void handleCreateGuildName(CreatureObject actor, SWGObject creationSource) {
 		if (actor.getGuildId() != 0) { actor.sendSystemMessage("@guild:create_fail_in_guild", DisplayType.Broadcast); return; }
 		
@@ -185,6 +250,114 @@ public class GuildService implements INetworkDispatch {
         window.setProperty("txtInput:NumericInteger", "False");
         
         core.suiService.openSUIWindow(window);
+	}
+	
+	public void handleEnableGuildElections(Guild guild) {
+		guild.setElectionsEnabled(true);
+		guild.setElectionResultsDate(System.currentTimeMillis() + (12095 * 100000)); // 2 weeks
+		
+		Map<Long, Integer> candidates = new HashMap<Long, Integer>();
+		candidates.put(Long.valueOf(guild.getLeader()), 1);
+		guild.setLeaderCandidates(candidates);
+		
+		GuildMember leader = guild.getMember(guild.getLeader());
+		
+		leader.setVotedId(guild.getLeader());
+
+		guild.sendGuildMail(guild.getName(), "@guild:open_elections_email_subject", "@guild:open_elections_email_body");
+	}
+	
+	public void handleViewElectionStandings(CreatureObject actor, Guild guild) {
+		
+		Map<Long, Integer> candidates = guild.getLeaderCandidates();
+		
+		if (candidates == null || candidates.size() <= 1) {
+			actor.sendSystemMessage("@guild:vote_no_candidates", DisplayType.Broadcast);
+			return;
+		}
+		
+		SUIWindow window = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "@guild:leader_standings_t", "@guild:leader_standings_d", new TreeMap<Long, String>(), actor, null, 0);
+		
+		candidates.keySet().stream().forEach(candidateId -> {
+			if (candidateId == guild.getLeader()) {
+				window.addListBoxMenuItem("Incumbent: " + guild.getLeaderName() + " -- Votes: " + String.valueOf(candidates.get(candidateId)), candidateId);
+			} else {
+				GuildMember candidate = guild.getMember(candidateId);
+				
+				window.addListBoxMenuItem("Challenger: " + candidate.getName() + " -- Votes: " + String.valueOf(candidates.get(candidateId)), candidateId);
+			}
+
+		});
+		core.suiService.openSUIWindow(window);
+	}
+	
+	public void handleRunForLeader(CreatureObject actor, Guild guild) {
+		if (guild.isRunningForLeader(actor.getObjectID())) {
+			actor.sendSystemMessage("@guild:vote_register_dupe", DisplayType.Broadcast);
+			return;
+		} else guild.getLeaderCandidates().put(actor.getObjectID(), 1);
+
+		actor.sendSystemMessage("@guild:vote_register_congrats", DisplayType.Broadcast);
+	}
+	
+	public void handleUnregisterForLeader(CreatureObject actor, Guild guild) {
+		if (!guild.isRunningForLeader(actor.getObjectID())) {
+			return;
+		} else guild.getLeaderCandidates().remove(actor.getObjectID());
+
+		actor.sendSystemMessage("@guild:vote_unregistered", DisplayType.Broadcast);
+	}
+	
+	public void handleVoteForLeader(CreatureObject actor, Guild guild) {
+		
+		SUIWindow window = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "@guild:leader_vote_t", "@guild:leader_vote_d", new TreeMap<Long, String>(), actor, null, 0);
+
+		Map<Long, Integer> candidates = guild.getLeaderCandidates();
+		for (Long candidateId : candidates.keySet()) {
+			if (candidateId == guild.getLeader()) {
+				window.addListBoxMenuItem("Incumbent: " + guild.getLeaderName() + " -- Votes: " + String.valueOf(candidates.get(candidateId)), candidateId);
+			} else {
+				GuildMember candidate = guild.getMember(candidateId);
+				
+				window.addListBoxMenuItem("Challenger: " + candidate.getName() + " -- Votes: " + String.valueOf(candidates.get(candidateId)), candidateId);
+			}
+		}
+
+		Vector<String> returnList = new Vector<String>();
+		returnList.add("List.lstList:SelectedRow");
+		
+		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, (owner, eventType, resultList) -> {
+
+			int index = Integer.parseInt(resultList.get(0));
+			
+			long voteId = window.getObjectIdByIndex(index);
+			
+			if(voteId == 0)
+				return;
+			
+			GuildMember voter = guild.getMember(actor.getObjectID());
+			if (voter == null) 
+				return;
+			
+			if (voter.getVotedId() == voteId) {
+				if (guild.getLeaderCandidates().containsKey(voteId))
+					guild.getLeaderCandidates().put(voteId, guild.getLeaderCandidates().get(voteId) - 1);
+				
+				actor.sendSystemMessage("@guild:vote_abstain", DisplayType.Broadcast);
+				return;
+			}
+			
+			// remove prior votes
+			if (voter.getVotedId() != 0 && guild.getLeaderCandidates().containsKey(voter.getVotedId()))
+				guild.getLeaderCandidates().put(voter.getVotedId(), guild.getLeaderCandidates().get(voter.getVotedId()) - 1);
+			
+			voter.setVotedId(voteId);
+			guild.getLeaderCandidates().put(voteId, guild.getLeaderCandidates().get(voteId) + 1);
+			actor.sendSystemMessage(OutOfBand.ProsePackage("@guild:vote_placed", "TO", guild.getMember(voteId).getName()), DisplayType.Broadcast);
+			
+		});
+		
+		core.suiService.openSUIWindow(window);
 	}
 	
 	public void handleCreateGuildAbbrev(CreatureObject actor, String guildName, SWGObject creationSource) {
@@ -606,8 +779,6 @@ public class GuildService implements INetworkDispatch {
 		core.suiService.openSUIWindow(window);
 	}
 	
-	
-	
 	public void handleGuildSponsorWindow(CreatureObject actor) {
 	    SUIWindow wndSponsorPlayer = core.suiService.createInputBox(InputBoxType.INPUT_BOX_OK_CANCEL, "@guild:sponsor_title", "@guild:sponsor_prompt", actor, null, (float) 10, (sponsor, eventType, returnList) -> {
 	        
@@ -660,7 +831,6 @@ public class GuildService implements INetworkDispatch {
 	    core.suiService.openSUIWindow(wndSponsorPlayer);
 	}
 	
-	
 	public void handleGuildDisband(CreatureObject actor, Guild guild) {
 		
 		Map<Long, GuildMember> members = guild.getMembers();
@@ -699,7 +869,6 @@ public class GuildService implements INetworkDispatch {
 
 		removeGuild(guild.getId());
 	}
-	
 	
 	public void handleManageSponsoredPlayers(CreatureObject actor) {
 		Guild guild = getGuildById(actor.getGuildId());
@@ -793,7 +962,6 @@ public class GuildService implements INetworkDispatch {
         if (sponsoree.isInQuadtree())
         	core.chatService.sendPersistentMessageHeader(sponsoree.getClient(), declinedMail);
 	}
-	
 	
 	public void showKickConfirmWindow(CreatureObject actor, CreatureObject target, Guild guild) {
 		
@@ -889,7 +1057,6 @@ public class GuildService implements INetworkDispatch {
 		}
 	}
 	
-	
 	public void sendMailToGuild(String sender, String subject, String message, int guildId) {
 		Guild guild = getGuildById(guildId);
 		
@@ -917,11 +1084,9 @@ public class GuildService implements INetworkDispatch {
 		target.getClient().getSession().write(roomMessage.serialize());
 	}
 	
-	
 	public GuildObject getGuildObject() {
 		return object;
 	}
-	
 	
 	public SWGSet<String> getGuildList() {
 		return object.getGuildList();

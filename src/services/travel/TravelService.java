@@ -67,8 +67,9 @@ public class TravelService implements INetworkDispatch {
 	private NGECore core;
 	private Map<Planet, Vector<TravelPoint>> travelMap = new ConcurrentHashMap<Planet, Vector<TravelPoint>>();
 	private Map<Planet, Map<String, Integer>> fareMap = new ConcurrentHashMap<Planet, Map<String, Integer>>();
-	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-	
+
+	//private ScheduledFuture<?> distanceDespawnTask;
+	//private ScheduledFuture<?> timedDespawnTask;
 	public TravelService(NGECore core) {
 		this.core = core;
 	}
@@ -432,31 +433,35 @@ public class TravelService implements INetworkDispatch {
 	public Map<Planet, Vector<TravelPoint>> getTravelMap() {
 		return this.travelMap;
 	}
-	
-	
+
 	//ITV Despawn
 	public void checkForItvDistanceDespawn(CreatureObject actor, SWGObject object){
-
-		scheduler.schedule(new Runnable() {
+		
+		
+		ScheduledFuture<?> distanceDespawnTask = Executors.newScheduledThreadPool(1).scheduleAtFixedRate(new Runnable() {
+			
 			public void run() {
 				try {
-
 					if (object != null){
-						core.objectService.destroyObject(object);
-						actor.sendSystemMessage("@travel:pickup_cancel", DisplayType.Broadcast);
+			           if (actor.getPosition().getDistance2D(object.getPosition()) >= 50){
+				             core.objectService.destroyObject(object.getObjectID());
+				             actor.sendSystemMessage("@travel:pickup_cancel", DisplayType.Broadcast);
+							((ScheduledFuture<?>)actor.getAttachment("distanceDespawn")).cancel(true);
+						}
 					}
 				}catch (Exception e) {
 					e.printStackTrace();
 					
 				}
 			}
-		}, 1, TimeUnit.SECONDS);
-
+		}, 1,20, TimeUnit.SECONDS);
+		actor.setAttachment("distanceDespawn", distanceDespawnTask);
 	}
+
 	
 	public void checkForItvTimedDespawn(CreatureObject actor, SWGObject object){
-
-		scheduler.schedule(new Runnable() {
+		
+		ScheduledFuture<?> timedDespawnTask = Executors.newScheduledThreadPool(1).scheduleAtFixedRate(new Runnable() {
 			public void run() {
 				try {
 
@@ -464,14 +469,15 @@ public class TravelService implements INetworkDispatch {
 						Thread.sleep(60000);
 						core.objectService.destroyObject(object);
 						actor.sendSystemMessage("@travel:pickup_timeout", DisplayType.Broadcast);
+						((ScheduledFuture<?>)actor.getAttachment("timedDespawn")).cancel(true);
 					}
 				}catch (Exception e) {
 					e.printStackTrace();
 					
 				}
 			}
-		}, 1, TimeUnit.SECONDS);
-
+		}, 1, 70, TimeUnit.SECONDS);
+		actor.setAttachment("timedDespawn", timedDespawnTask);
 	}
 	
 

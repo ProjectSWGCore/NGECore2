@@ -126,7 +126,7 @@ def handleFirstScreen(core, actor, npc, selection):
 			convSvc.sendConversationMessage(actor, npc, OutOfBand.ProsePackage("@conversation/faction_recruiter_rebel:s_332", percent, "TO", str(100 - percent)))
 			return
 		if selection == 2:
-			core.scriptService.callScript("scripts/", "gcw_rewards_rebel", "handleRebelItems1", core, actor, object, 0); 
+			core.scriptService.callScript("scripts/", "gcw_rewards_rebel", "handleRebelItems1", core, actor); 
 			core.conversationService.sendStopConversation(actor, npc, 'conversation/faction_recruiter_rebel', 's_75')
 			return
 		return
