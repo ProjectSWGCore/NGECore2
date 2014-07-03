@@ -31,7 +31,6 @@ def run(core, actor, target, commandstring):
 		actor.sendSystemMessage('@travel:no_pickup_location', 0)
 		return
 	
-	core.travelService.checkForItvDistanceDespawn(actor, object)
 		
 	core.travelService.checkForItvTimedDespawn(actor, object)
 

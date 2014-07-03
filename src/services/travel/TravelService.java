@@ -433,49 +433,22 @@ public class TravelService implements INetworkDispatch {
 	}
 
 	//ITV Despawn
-	public void checkForItvDistanceDespawn(CreatureObject actor, SWGObject object){
-		
-		
-		ScheduledFuture<?> distanceDespawnTask = Executors.newScheduledThreadPool(1).scheduleAtFixedRate(new Runnable() {
-			
-			public void run() {
-				try {
-					if (object != null){
-			           if (actor.getPosition().getDistance2D(object.getPosition()) >= 50){
-				             core.objectService.destroyObject(object.getObjectID());
-				             actor.sendSystemMessage("@travel:pickup_cancel", DisplayType.Broadcast);
-							((ScheduledFuture<?>)actor.getAttachment("distanceDespawn")).cancel(true);
-						}
-					}
-				}catch (Exception e) {
-					e.printStackTrace();
-					
-				}
-			}
-		}, 1, 1, TimeUnit.SECONDS);
-		actor.setAttachment("distanceDespawn", distanceDespawnTask);
-	}
-
-	
 	public void checkForItvTimedDespawn(CreatureObject actor, SWGObject object){
 		
-		ScheduledFuture<?> timedDespawnTask = Executors.newScheduledThreadPool(1).scheduleAtFixedRate(new Runnable() {
+		Executors.newScheduledThreadPool(1).schedule(new Runnable() {
 			public void run() {
 				try {
 
 					if (object != null){
-						Thread.sleep(60000);
 						core.objectService.destroyObject(object);
 						actor.sendSystemMessage("@travel:pickup_timeout", DisplayType.Broadcast);
-						((ScheduledFuture<?>)actor.getAttachment("timedDespawn")).cancel(true);
 					}
 				}catch (Exception e) {
 					e.printStackTrace();
 					
 				}
 			}
-		}, 1, 1 , TimeUnit.SECONDS);
-		actor.setAttachment("timedDespawn", timedDespawnTask);
+		}, 30, TimeUnit.SECONDS);
 	}
 	
 
