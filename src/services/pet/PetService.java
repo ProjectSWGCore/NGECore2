@@ -33,6 +33,8 @@ import resources.datatables.DisplayType;
 import resources.datatables.Options;
 import resources.datatables.Posture;
 import resources.datatables.State;
+import resources.objects.SWGList;
+import resources.objects.SWGSet;
 import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
@@ -60,9 +62,16 @@ public class PetService implements INetworkDispatch {
 	}
 	
 	public void call(CreatureObject actor, CreatureObject pet, SWGObject pcd) {
+		System.out.println("Call called !");
 		if (actor == null) {
 			return;
 		}
+		
+		if (actor.getAttachment("companion_RefId") != null) {
+			return; // Pet already called
+		}
+		
+		storeAll(actor); // Store other pets
 		
 		if (pcd == null) {
 			System.out.println("(pcd == null)");
@@ -106,6 +115,11 @@ public class PetService implements INetworkDispatch {
 		
 		//CreatureObject mount = (CreatureObject) core.objectService.getObject((Long) pcd.getAttachment("companionId"));
 		
+		//pet = (CreatureObject) core.objectService.getObject((Long) pcd.getAttachment("companion_RefId"));
+		
+		String petTemplate = (String) pcd.getAttachment("companionTemplate");
+		pet = (CreatureObject) NGECore.getInstance().staticService.spawnObject(petTemplate, actor.getPlanet().getName(), 0L, actor.getWorldPosition().x, actor.getWorldPosition().y, actor.getWorldPosition().z, actor.getOrientation().y, actor.getOrientation().w);
+		
 		if (pet == null) {
 			System.out.println("mount == null)");
 			// Somehow the vehicle object has got lost
@@ -113,7 +127,40 @@ public class PetService implements INetworkDispatch {
 			return;
 		}
 		
+		pet.setOwnerId(actor.getObjectID());
+		actor.setCalledPet(pet);
+		pcd.setAttachment("companion_RefId", pet.getObjectID());
+		
+		core.mountService.storeAll(actor); // Store all called vehicles
+		
 		//pet.setAttachment("pcdAppearanceFilename", pcd.getTemplateData().getAttribute("appearanceFilename"));
+		
+		player.setPet(pet.getObjectID());
+		//SWGList<String> abilities = player.getPetAbilities();
+		List<String> abilities = new ArrayList<String>();
+		abilities.add("hoth_speeder_up"); // abilities.add("bleedingattack_1");
+		abilities.add("");
+		abilities.add("");
+		abilities.add("");
+		abilities.add("");
+		abilities.add("");
+		abilities.add("");
+		abilities.add("");
+		abilities.add("");
+		//player.setPetAbilities(abilities);  //1441 fight hoth speeder
+		player.getPetAbilities().set(abilities);
+		//player.getPetAbilities().addAll(abilities);
+		
+//		player.getPetAbilities().add("hoth_speeder_up"); 
+//		player.getPetAbilities().add(""); 
+//		player.getPetAbilities().add(""); 
+//		player.getPetAbilities().add(""); 
+//		player.getPetAbilities().add(""); 
+//		player.getPetAbilities().add(""); 
+//		player.getPetAbilities().add(""); 
+//		player.getPetAbilities().add(""); 
+//		player.getPetAbilities().add(""); 
+//		
 		
 		pet.setFaction(actor.getFaction());
 		pet.setFactionStatus(actor.getFactionStatus());
@@ -122,11 +169,11 @@ public class PetService implements INetworkDispatch {
 		aiActor.setFollowObject(actor);
 		aiActor.setCurrentState(new FollowState());
 		
-		if (pcd.getTemplate().contains("vehicle")) {
-			callVehicle(actor, pcd, player, pet);
-		} else {
-			callMount(actor, pcd, player, pet);
-		}
+//		if (pcd.getTemplate().contains("vehicle")) {
+//			callVehicle(actor, pcd, player, pet);
+//		} else {
+//			callMount(actor, pcd, player, pet);
+//		}
 	}
 	
 	private void callVehicle(CreatureObject actor, SWGObject pcd, PlayerObject player, CreatureObject mount) {		
@@ -396,6 +443,28 @@ public class PetService implements INetworkDispatch {
 		return mount;
 	}
 	
+	public CreatureObject getSpawnedPetForPCD(SWGObject pcd) {
+		if (pcd == null) {
+			return null;			
+		}
+		
+		if (pcd.getAttachment("companion_RefId") == null) {
+			return null;
+		}
+		
+		long petRefId = (long) pcd.getAttachment("companion_RefId");
+		CreatureObject pet = (CreatureObject) core.objectService.getObject(petRefId);
+		
+		if (pet == null) {
+			return null;
+		}
+		
+//		if (pet.getContainer() != null) {
+//			return null;
+//		}
+		return pet;
+	}
+	
 	public CreatureObject getCompanion(CreatureObject actor) {
 		if (actor == null) {
 			return null;
@@ -635,15 +704,10 @@ public class PetService implements INetworkDispatch {
 		datapad.viewChildren(owner, false, false, new Traverser() {
 			
 			public void process(SWGObject pcd) {
-				if (pcd.getAttachment("companionId") != null && mount.getObjectID() == ((Long) pcd.getAttachment("companionId"))) {
-					if (pcd.getSlottedObject("inventory") != null) {
-						LongAdder adder = new LongAdder();
-						pcd.getSlottedObject("inventory").viewChildren(owner, false, false, (obj) -> adder.increment());
-						
-						if (adder.intValue() == 0) {
-							core.simulationService.remove(mount, mount.getWorldPosition().x, mount.getWorldPosition().z, true);
-							pcd.getSlottedObject("inventory").add(mount);
-						}
+				if (pcd.getAttachment("companion_RefId")!=null){
+					if (mount.getObjectID() == ((Long) pcd.getAttachment("companion_RefId"))) {					
+						core.objectService.destroyObject((Long) pcd.getAttachment("companion_RefId"));
+						pcd.setAttachment("companion_RefId", null);
 					}
 				}
 			}
@@ -656,8 +720,6 @@ public class PetService implements INetworkDispatch {
 			return;
 		}
 		
-		while (getCompanion(actor) != null) {
-			SWGObject mount = getCompanion(actor);
 			
 			SWGObject datapad = actor.getSlottedObject("datapad");
 			
@@ -666,23 +728,22 @@ public class PetService implements INetworkDispatch {
 			}
 			
 			datapad.viewChildren(actor, false, false, new Traverser() {
-				
+			
 				public void process(SWGObject pcd) {
-					if (pcd.getAttachment("companionId") != null && mount.getObjectID() == ((Long) pcd.getAttachment("companionId"))) {
-						if (pcd.getSlottedObject("inventory") != null) {
-							LongAdder adder = new LongAdder();
-							pcd.getSlottedObject("inventory").viewChildren(actor, false, false, (obj) -> adder.increment());
-							
-							if (adder.intValue() == 0) {
-								core.simulationService.remove(mount, mount.getWorldPosition().x, mount.getWorldPosition().z, true);
-								pcd.getSlottedObject("inventory").add(mount);
-							}
+					if (pcd.getAttachment("companionType") != null) {
+						if (pcd.getAttachment("companionType").equals("PET") && pcd.getAttachment("companion_RefId")!=null) {
+							long petId = (long) pcd.getAttachment("companion_RefId");
+							CreatureObject pet = (CreatureObject)core.objectService.getObject(petId);
+				
+							AIActor aiActor = (AIActor) pet.getAttachment("AI");
+							aiActor.destroyActor();
+						
+							core.objectService.destroyObject(petId);
+							pcd.setAttachment("companion_RefId",null);
 						}
 					}
-				}
-				
-			});
-		}
+				}				
+			});		
 	}
 	
 	public void destroy(CreatureObject destroyer, SWGObject pcd) {
@@ -730,6 +791,10 @@ public class PetService implements INetworkDispatch {
 			return;
 		}
 		
+		PlayerObject player = (PlayerObject) actor.getSlottedObject("ghost");
+		if (player.getPet()!=0L)
+			return;
+		
 		if (actor.getSlottedObject("ghost") == null) {
 			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:failed_to_call_vehicle"), DisplayType.Broadcast);
 			return;
@@ -762,23 +827,22 @@ public class PetService implements INetworkDispatch {
 //			pcd.add(core.objectService.createObject("object/tangible/inventory/shared_character_inventory.iff", pcd.getPlanet()));
 //		}
 		
-		//CreatureObject vehicle = (CreatureObject) core.objectService.createObject(petTemplate, actor.getPlanet());
+		//CreatureObject pet = (CreatureObject) core.objectService.createObject(petTemplate, actor.getPlanet());
 		
-		CreatureObject pet = (CreatureObject) NGECore.getInstance().staticService.spawnObject(petTemplate, actor.getPlanet().getName(), 0L, actor.getWorldPosition().x, actor.getWorldPosition().y, actor.getWorldPosition().z, actor.getOrientation().y, actor.getOrientation().w);
 		
-		if (pet == null) {
-			return;
-		}
-		
+		CreatureObject pet = null;
 		
 //		pet.setOptions(Options.MOUNT | Options.ATTACKABLE, true);
 //		
-		pet.setOwnerId(actor.getObjectID());
-		actor.setCalledPet(pet);
+		
+		
 //		
-		pcd.setAttachment("companionId", pet.getObjectID());
+		//pcd.setAttachment("companionId", pet.getObjectID());
+		
+		pcd.setAttachment("companionType", "PET");
+		pcd.setAttachment("companionTemplate", petTemplate);
 //		
-//		//pcd.getSlottedObject("inventory").add(pet);
+		//pcd.getSlottedObject("inventory").add(pet); // yields null pointer error, pcd has no inv slot
 //		
 		datapad.add(pcd); 
 //		

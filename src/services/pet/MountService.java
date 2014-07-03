@@ -216,7 +216,9 @@ public class MountService implements INetworkDispatch {
 			return;
 		}
 		
+		core.petService.storeAll(actor);
 		storeAll(actor);
+		
 		
 		player.setCallingCompanion(true);
 		
@@ -251,6 +253,7 @@ public class MountService implements INetworkDispatch {
 							mount.setPosition(actor.getPosition().clone());
 							mount.setOrientation(actor.getOrientation().clone());
 							mount.setPlanet(actor.getPlanet());
+							System.out.println("PROCESS MOUNT " + mount.getTemplate());
 							core.simulationService.add(mount, actor.getWorldPosition().x, actor.getWorldPosition().z, false);
 						}
 					}

@@ -80,6 +80,9 @@ public class AIActor {
 	private long waitStartTime = 0L;
 	private AIState intendedPrimaryAIState;
 	private Point3D lastPositionBeforeStateChange;
+	private ScheduledFuture movementFuture;
+	private ScheduledFuture recoveryFuture;
+	private ScheduledFuture despawnFuture;
 
 	public AIActor(CreatureObject creature, Point3D spawnPosition, ScheduledExecutorService scheduler) {
 		this.creature = creature;
@@ -233,8 +236,12 @@ public class AIActor {
 	}
 	
 	public void scheduleMovement() {
-		scheduler.schedule(() -> { 
+		movementFuture = scheduler.schedule(() -> { 
 			try {
+				if (creature==null){
+					destroyActor();
+					return;
+				}
 				doStateAction(currentState.move(AIActor.this));
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -243,7 +250,7 @@ public class AIActor {
 	}
 	
 	public void scheduleRecovery() {
-		scheduler.schedule(() -> { 
+		recoveryFuture = scheduler.schedule(() -> { 
 			try {
 				doStateAction(currentState.recover(AIActor.this));
 			} catch (Exception e) {
@@ -314,7 +321,12 @@ public class AIActor {
 	}
 	
 	public void doStateAction(byte result) {
-
+		
+		if (creature==null){
+			destroyActor();
+			return;
+		}
+		
 		switch(result) {
 		
 			case StateResult.DEAD:
@@ -358,7 +370,7 @@ public class AIActor {
 			
 		}
 		
-		scheduler.schedule(new Runnable() {
+		despawnFuture = scheduler.schedule(new Runnable() {
 			@Override
 			public void run() {
 				try {
@@ -372,7 +384,24 @@ public class AIActor {
 			}
 		}, 2, TimeUnit.MINUTES);
 	}
-
+	
+	public void destroyActor(){
+		creature.getEventBus().unsubscribe(this);
+		// Make sure to kill all AI helper threads
+		if (movementFuture!=null){
+			movementFuture.cancel(true); 
+			movementFuture = null;
+		}
+		if (movementFuture!=null){
+			recoveryFuture.cancel(true);			
+			recoveryFuture = null;
+		}
+		if (despawnFuture!=null){
+			despawnFuture.cancel(true);			
+			despawnFuture = null;
+		}		
+	}
+	
 	public ScheduledFuture<?> getRegenTask() {
 		return regenTask;
 	}
@@ -380,7 +409,7 @@ public class AIActor {
 	public void setRegenTask(ScheduledFuture<?> regenTask) {
 		this.regenTask = regenTask;
 	}
-
+	
 	public boolean isStalking() {
 		return isStalking;
 	}

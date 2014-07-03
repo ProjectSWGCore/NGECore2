@@ -53,6 +53,7 @@ import resources.objects.factorycrate.FactoryCrateObject;
 import resources.objects.group.GroupObject;
 import resources.objects.intangible.IntangibleObject;
 import resources.objects.player.PlayerObject;
+import resources.objects.resource.ResourceContainerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 import services.ai.AIActor;
@@ -80,8 +81,8 @@ public class LootService implements INetworkDispatch {
 	
 	private NGECore core;
 	private static int prepInvCnt = 0;
-	String testDropTemplate = null;
-	//String testDropTemplate = "stap1_vehicle_deed";
+	//String testDropTemplate = null;
+	String testDropTemplate = "comlink";
 	
 	public LootService(NGECore core) {
 		this.core = core;
@@ -234,7 +235,8 @@ public class LootService implements INetworkDispatch {
     		//droppedItem.setAttachment("radial_filename", "lootitem");
     		//if (! droppedItem.getTemplate().contains("shared_rare_loot_chest"))
     		lootedObjectInventory.add(droppedItem);
-    		  		
+    	
+    		
     		// RLS chest effect
 	    	if (droppedItem.getAttachment("LootItemName").toString().contains("Loot Chest")){
 
@@ -550,8 +552,8 @@ public class LootService implements INetworkDispatch {
 			if (randomItemFromPool<=remainder){
 				// this element has been chosen e.g. kraytpearl_flawless
 				//System.err.println("CHOSEN ITEM " + itemNames.get(i));
-				handleLootPoolItems(itemNames.get(i), lootRollSession);	
-				//handleLootPoolItems(testDropTemplate, lootRollSession);
+				//handleLootPoolItems(itemNames.get(i), lootRollSession);	
+				handleLootPoolItems(testDropTemplate, lootRollSession);
 				//break;
 				return;
 			}						
@@ -569,7 +571,6 @@ public class LootService implements INetworkDispatch {
 	{
 		LootRollSession rollSession = new LootRollSession();
 		rollSession.setSessionPlanet(requester.getPlanet());
-		
 		handleLootPoolItems(template, rollSession);
 		
 		if(rollSession.getDroppedItems().get(0) != null) return rollSession.getDroppedItems().get(0);
@@ -578,7 +579,7 @@ public class LootService implements INetworkDispatch {
 	}
 	
 	private void handleLootPoolItems(String itemName,LootRollSession lootRollSession){
-		
+		System.out.println("itemName " + itemName);
 		final Vector<String> foundPath = new Vector<String>(); 
 		Path p = Paths.get("scripts/loot/lootItems/");
 	    FileVisitor<Path> fv = new SimpleFileVisitor<Path>() {
@@ -722,7 +723,7 @@ public class LootService implements INetworkDispatch {
 		
 		if (!customName.isEmpty())
 			handleCustomDropName(droppedItem, customName);
-		
+		stackable = 1;
 		if (stackable!=-1){
 			if(stackable==1)
 				droppedItem.setStackable(true);

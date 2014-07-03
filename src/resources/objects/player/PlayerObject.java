@@ -187,7 +187,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		baseline.put("kills", 0);
 		baseline.put("19", 0);
 		baseline.put("pet", (long) 0);
-		baseline.put("petAbilities", new SWGSet<String>(this, 9, 15, false));
+		baseline.put("petAbilities", new SWGList<String>(this, 9, 15, false));
 		baseline.put("22", (long) 0); // Unknown type currently
 		baseline.put("23", (byte) 0); // Seen as 1 or 2 sometimes // Gets set to 0x02 sometimes
 		baseline.put("24", 0); // Seen as 4
@@ -783,10 +783,10 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public SWGSet<String> getPetAbilities() {
-		return (SWGSet<String>) getBaseline(8).get("petAbilities");
+	public SWGList<String> getPetAbilities() {
+		return (SWGList<String>) getBaseline(9).get("petAbilities");
 	}
-	
+		
 	public int getJediState() {
 		return 0;
 	}
