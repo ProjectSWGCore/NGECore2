@@ -90,5 +90,6 @@ public class Opcodes {
 	public static final int CancelLiveAuctionMessage = CRC.StringtoCRC("CancelLiveAuctionMessage");
 	public static final int BidAuctionMessage = CRC.StringtoCRC("BidAuctionMessage");
 	public static final int RetrieveAuctionItemMessage = CRC.StringtoCRC("RetrieveAuctionItemMessage");
+	public static final int LaunchBrowserMessage = CRC.StringtoCRC("LaunchBrowserMessage");
 	
 }
