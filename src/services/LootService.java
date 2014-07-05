@@ -52,8 +52,10 @@ import resources.objects.creature.CreatureObject;
 import resources.objects.factorycrate.FactoryCrateObject;
 import resources.objects.group.GroupObject;
 import resources.objects.intangible.IntangibleObject;
+import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
+import services.ai.AIActor;
 import services.sui.SUIService.ListBoxType;
 import services.sui.SUIService.MessageBoxType;
 import services.sui.SUIWindow;
@@ -79,7 +81,7 @@ public class LootService implements INetworkDispatch {
 	private NGECore core;
 	private static int prepInvCnt = 0;
 	String testDropTemplate = null;
-	//String testDropTemplate = "kowakian_cage";
+	//String testDropTemplate = "stap1_vehicle_deed";
 	
 	public LootService(NGECore core) {
 		this.core = core;
@@ -127,6 +129,9 @@ public class LootService implements INetworkDispatch {
 	public void DropLoot(CreatureObject requester, TangibleObject lootedObject) {
 		
 		if (requester==null || lootedObject==null)
+			return; //QA
+		
+		if (! requester.isPlayer())
 			return; //QA
 		
 		GroupObject group = null;
@@ -193,7 +198,7 @@ public class LootService implements INetworkDispatch {
 		
 	    // set info above corpse
 	    //System.out.println("lootedObject instanceof CreatureObject " + (lootedObject instanceof CreatureObject));
-	    if (lootedObject instanceof CreatureObject){
+	    if (lootedObject instanceof CreatureObject && lootRollSession.getDroppedItems().size()>0){
 	    	try {
 			    float y = 0.5F; // 1.3356977F
 			    float qz= 1.06535322E9F;
@@ -754,11 +759,12 @@ public class LootService implements INetworkDispatch {
     		setSTFParams(droppedItem, STFparams);
     	}
     	
-    	if (addToCollection!=null){
+    	if (addToCollection!=null) {
     		droppedItem.getAttributes().put("@obj_attr_n:collection_name", "@collection_n:"+addToCollection); 
     		//droppedItem.getAttributes().put("@obj_attr_n:collection_name", "\\#FFFF00 @collection_n:"+addToCollection + " \\#FFFFFF "); 
     		//core.collectionService.addCollection(actor, "new_prof_officer_master")
-    		droppedItem.setAttachment("radial_filename", "item/collection/loot_collection");
+    		droppedItem.setAttachment("AddToCollection", addToCollection);
+    		droppedItem.setAttachment("radial_filename", "item/collection");
     		//System.out.println("collection");
     	}
     	
@@ -1224,7 +1230,7 @@ public class LootService implements INetworkDispatch {
 	    		droppedItem.getAttributes().put("@obj_attr_n:collection_name", "@collection_n:"+addToCollection); 
 	    		//droppedItem.getAttributes().put("@obj_attr_n:collection_name", "\\#FFFF00 @collection_n:"+addToCollection + " \\#FFFFFF "); 
 	    		//core.collectionService.addCollection(actor, "new_prof_officer_master")
-	    		droppedItem.setAttachment("radial_filename", "item/loot_collection");
+	    		droppedItem.setAttachment("radial_filename", "item/collection");
 	    	}
 	    	
 	    		    	
@@ -1484,7 +1490,9 @@ public class LootService implements INetworkDispatch {
 	
 	public void handleCreditDrop(CreatureObject requester,TangibleObject lootedObject,LootRollSession lootRollSession){
 		int lootedCredits = 0;
-		if (lootedObject.isCreditRelieved())
+		AIActor ai = (AIActor) lootedObject.getAttachment("AI");
+		String resType = ai.getMobileTemplate().getMeatType();
+		if (lootedObject.isCreditRelieved() || resType!=null)
 			return;
 		
 		// Credit drop is depending on the CL of the looted CreatureObject
@@ -2805,7 +2813,66 @@ public class LootService implements INetworkDispatch {
 		item24b.setUses(399);		 
 		core.objectService.addStackableItem(item24b,playerInventory);
 		
+		TangibleObject item25a = (TangibleObject)core.objectService.createObject("object/tangible/loot/npc_loot/shared_wiring_generic.iff", player.getPlanet());
+		item25a.setCustomName("Wiring");
+		item25a.setAttachment("reverse_engineering_name", "Red/Yellow");
+		item25a.setStackable(true);
+		item25a.setUses(299);		 
+		Vector<String> customizationAttributes = new Vector<String>();
+		customizationAttributes.add("/private/index_color_1");
+		customizationAttributes.add("/private/index_color_2");
+		Vector<Integer> customizationValues = new Vector<Integer>();
+		customizationValues.add(6);
+		customizationValues.add(12);
+		item25a.setAttachment("lootDescriptor", "customattributes");
+		setCustomization(item25a,"Wiring", customizationAttributes, customizationValues);
+		core.objectService.addStackableItem(item25a,playerInventory);
+		
+		TangibleObject item25b = (TangibleObject)core.objectService.createObject("object/tangible/loot/npc_loot/shared_launcher_tube_generic.iff", player.getPlanet());
+		item25b.setCustomName("Launcher Tube");
+		item25b.setStackable(true);
+		item25b.setUses(399);		 
+		core.objectService.addStackableItem(item25b,playerInventory);
+		
+		TangibleObject item27b = (TangibleObject)core.objectService.createObject("object/tangible/loot/npc_loot/shared_small_motor_generic.iff", player.getPlanet());
+		item27b.setCustomName("Locomotor");
+		item27b.setStackable(true);
+		item27b.setUses(399);		 
+		core.objectService.addStackableItem(item27b,playerInventory);
+		
 	
+		
+		TangibleObject item26a = (TangibleObject)core.objectService.createObject("object/tangible/loot/npc_loot/shared_copper_battery_generic.iff", player.getPlanet());
+		item26a.setCustomName("Droid Battery");
+		item26a.setAttachment("reverse_engineering_name", "Black/Green");
+		item26a.setStackable(true);
+		item26a.setUses(299);		 
+		customizationAttributes = new Vector<String>();
+		customizationAttributes.add("/private/index_color_1");
+		customizationAttributes.add("/private/index_color_2");
+		customizationValues = new Vector<Integer>();
+		customizationValues.add(0);
+		customizationValues.add(15);
+		item26a.setAttachment("lootDescriptor", "customattributes");
+		setCustomization(item26a,"Droid Battery", customizationAttributes, customizationValues);
+		core.objectService.addStackableItem(item26a,playerInventory);
+		
+		
+		TangibleObject item26b = (TangibleObject)core.objectService.createObject("object/tangible/loot/npc_loot/shared_copper_battery_generic.iff", player.getPlanet());
+		item26b.setCustomName("Droid Battery");
+		item26b.setAttachment("reverse_engineering_name", "Purple/Green");
+		item26b.setStackable(true);
+		item26b.setUses(299);		 
+		customizationAttributes = new Vector<String>();
+		customizationAttributes.add("/private/index_color_1");
+		customizationAttributes.add("/private/index_color_2");
+		customizationValues = new Vector<Integer>();
+		customizationValues.add(33);
+		customizationValues.add(15);
+		item26b.setAttachment("lootDescriptor", "customattributes");
+		setCustomization(item26b,"Droid Battery", customizationAttributes, customizationValues);
+		core.objectService.addStackableItem(item26b,playerInventory);
+		
 		
 		String modifierBitTemplate = "object/tangible/component/reverse_engineering/shared_modifier_bit.iff";
 		TangibleObject modifierBit = (TangibleObject) core.objectService.createObject(modifierBitTemplate, player.getPlanet());

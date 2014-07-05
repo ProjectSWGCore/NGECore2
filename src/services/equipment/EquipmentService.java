@@ -157,15 +157,15 @@ public class EquipmentService implements INetworkDispatch {
 	}
 	
 	public void equip(CreatureObject actor, SWGObject item) 
-	{
+	{		
 		String template = ((item.getAttachment("customServerTemplate") == null) ? item.getTemplate() : (item.getTemplate().split("shared_")[0] + "shared_" + ((String) item.getAttachment("customServerTemplate")) + ".iff"));
 		String serverTemplate = template.replace(".iff", "");
 		
 		PyObject func = core.scriptService.getMethod("scripts/" + serverTemplate.split("shared_" , 2)[0].replace("shared_", ""), serverTemplate.split("shared_" , 2)[1], "equip");
-		if(func != null) func.__call__(Py.java2py(core), Py.java2py(actor), Py.java2py(item));
-		
+		if(func != null) func.__call__(Py.java2py(core), Py.java2py(actor), Py.java2py(item));				
 		if(!actor.getEquipmentList().contains(item.getObjectID())) 
 		{
+			if(item instanceof WeaponObject) actor.setWeaponId(item.getObjectID());
 			actor.addObjectToEquipList(item);
 			processItemAtrributes(actor, item, true);
 		}
@@ -182,6 +182,8 @@ public class EquipmentService implements INetworkDispatch {
 		
 		if(actor.getEquipmentList().contains(item.getObjectID())) 
 		{
+			if(item instanceof WeaponObject) actor.setWeaponId(actor.getSlottedObject("default_weapon").getObjectID());
+			
 			actor.removeObjectFromEquipList(item);
 			processItemAtrributes(actor, item, false);
 		}

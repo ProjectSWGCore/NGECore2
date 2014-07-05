@@ -797,7 +797,7 @@ public class BazaarService implements INetworkDispatch {
 		auctionItem.setItemTypeCRC(CRC.StringtoCRC(item.getTemplate().replace("shared_", "")));
 		auctionItem.setStatus(AuctionItem.FORSALE);
 		//auctionItem.setItemName("@" + item.getStfFilename() + ":" + item.getStfName());
-		String name = item.getCustomName() == null ? item.getObjectName().getStfValue() : item.getCustomName();
+		String name = item.getLookAtText();
 		auctionItem.setItemName(name);
 		auctionItem.setVendorId(vendor.getObjectID());
 		auctionItem.setPlanet(vendor.getPlanet().getName());

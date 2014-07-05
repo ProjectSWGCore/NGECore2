@@ -54,7 +54,7 @@ def addTemplate(core):
 	
 	lootPoolNames_2 = ['jedi_relic_1']
 	lootPoolChances_2 = [100]
-	lootGroupChance_2 = 85
+	lootGroupChance_2 = 30
 	mobileTemplate.addToLootGroups(lootPoolNames_2,lootPoolChances_2,lootGroupChance_2)
 	
 	lootPoolNames_3 = ['powercrystals_hiq']

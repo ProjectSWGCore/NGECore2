@@ -85,7 +85,8 @@ public class PlayerCity implements Serializable {
 																       "city_spec_sample_rich"};
 	
 		
-	public static final int[] citizensPerRank = new int[] { 5, 10, 15, 30, 40 };
+	//public static final int[] citizensPerRank = new int[] { 5, 10, 15, 30, 40 };
+	public static final int[] citizensPerRank = new int[] { 1, 2, 3, 4, 5 };
 	
 	private String cityName = "";
 	private int planetId;
@@ -130,6 +131,7 @@ public class PlayerCity implements Serializable {
 	private Set<Long> cityBanList = new ConcurrentHashSet<Long>();
 	private Set<Long> militiaList = new ConcurrentHashSet<Long>();
 	private Set<Long> foundersList = new ConcurrentHashSet<Long>();
+	private Map<Long, Long> zoningRights = new ConcurrentHashMap<Long, Long>(); // Key = id Value = time until zoning right expires
 	
 	public PlayerCity() {}
 	
@@ -154,18 +156,18 @@ public class PlayerCity implements Serializable {
 			NGECore.getInstance().mapService.addLocation(NGECore.getInstance().terrainService.getPlanetByID(planetId), getCityName(), area.getCenter().x, area.getCenter().z, (byte) 17, (byte) 0, (byte) 0);
 	}
 		
-	public void handleGrantZoning() {
-		
+	public void grantZoningRights(CreatureObject target) {
+		zoningRights.put(target.getObjectID(), System.currentTimeMillis() + 86400000);
 	}
 	
-	public void handleBuildRequest() {
-		
+	public void removeZoningRights(CreatureObject target) {
+		zoningRights.remove(target.getObjectID());
 	}
 	
-	public void checkPlacementPermission() {
-		
+	public boolean hasZoningRights(CreatureObject target) {
+		return zoningRights.containsKey(target.getObjectID()) && zoningRights.get(target.getObjectID()) > System.currentTimeMillis();
 	}
-	
+		
 	public int getCivicStructuresCount() {
 		return (int) placedStructures.stream().
 		map(NGECore.getInstance().objectService::getObject).
@@ -366,7 +368,6 @@ public class PlayerCity implements Serializable {
 		demolishHighRankStructures();
 		calculateAndPayMaintenance();
 		core.playerCityService.schedulePlayerCityUpdate(this, cityUpdateSpan);
-		setNextCityUpdate(System.currentTimeMillis()+cityUpdateSpan);
 	}
 	
 	public void contractCity() {
@@ -575,7 +576,7 @@ public class PlayerCity implements Serializable {
 		sendMaintenanceMail(maintAmount);
 	}
 	
-	private int getSpecializationMaintenance() {
+	public int getSpecializationMaintenance() {
 		
 		switch(specialization) {
 		
@@ -964,10 +965,7 @@ public class PlayerCity implements Serializable {
 	}
 	
 	public boolean isMilitiaMember(long actor){
-		if (getMilitiaList().contains(actor))
-			return true;
-		
-		return false;
+		return getMilitiaList().contains(actor);
 	}
 	
 	public static String[] getSpecialisationSTFNames() {
@@ -1484,6 +1482,14 @@ public class PlayerCity implements Serializable {
 
 	public void setElectionTime() {
 		nextElectionDate = System.currentTimeMillis() + 3 * cityUpdateSpan;
+	}
+
+	public Map<Long, Long> getZoningRights() {
+		return zoningRights;
+	}
+
+	public void setZoningRights(Map<Long, Long> zoningRights) {
+		this.zoningRights = zoningRights;
 	}
 	
 }

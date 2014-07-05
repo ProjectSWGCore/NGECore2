@@ -273,6 +273,9 @@ public class SurveyService implements INetworkDispatch {
 		if (target==null)
 			return; // target object not valid
 		
+		if (crafter.getContainer()!=null)
+			return;
+		
 		SurveyTool surveyTool = (SurveyTool)target;			
 		if (surveyTool.getToolType()==-1)		
 			return; // Survey tool type was not recognized

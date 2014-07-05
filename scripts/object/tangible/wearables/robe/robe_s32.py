@@ -20,6 +20,7 @@ def setup(core, object):
 	
 	object.setAttachment('type', 'jedi_cloak')
 	object.setAttachment('setBonus', 'set_bonus_jedi_robe')
+	object.setAttachment('radial_filename', 'equipment/jedi_master_robes');
 	
 	return
 
