@@ -813,7 +813,7 @@ public class NGECore {
 	
 	public Vector<String> getExcludedDevelopers(){
 		Vector<String> excludedDevelopers = new Vector<String>();
-		//excludedDevelopers.add("Charon");
+		excludedDevelopers.add("Charon");
 		// Feel free to add your OS user account name here to exclude yourself from loading buildouts and snapshots
 		// without having to change options.cfg all the time
 		return excludedDevelopers;
