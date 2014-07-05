@@ -65,6 +65,7 @@ import services.DevService;
 import services.EntertainmentService;
 import services.GroupService;
 import services.housing.HousingService;
+import services.BrowserService;
 import services.InstanceService;
 import services.LoginService;
 import services.LootService;
@@ -204,6 +205,7 @@ public class NGECore {
 	public PlayerCityService playerCityService;
 	public ReverseEngineeringService reverseEngineeringService;
 	public PetService petService;
+	public BrowserService browserService;
 	
 	// Login Server
 	public NetworkDispatch loginDispatch;
@@ -530,6 +532,8 @@ public class NGECore {
 		playerCityService.loadCityRankCaps();
 		playerCityService.loadCities();
 		retroService.run();
+		
+		browserService = new BrowserService(this);
 		
 		didServerCrash = false;
 		System.out.println("Started Server.");
