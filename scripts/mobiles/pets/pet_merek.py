@@ -9,7 +9,7 @@ from java.util import Vector
 
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()	
-	mobileTemplate.setCreatureName('bio_engineered_gurreck')
+	mobileTemplate.setCreatureName('bio_engineered_merek')
 	mobileTemplate.setLevel(90)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
@@ -22,7 +22,7 @@ def addTemplate(core):
 	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
 
 	templates = Vector()
-	templates.add('object/mobile/shared_gurreck.iff')
+	templates.add('object/mobile/shared_merek.iff')
 	mobileTemplate.setTemplates(templates)
 
 	weaponTemplates = Vector()
@@ -34,6 +34,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
-	mobileTemplate.setPCDTemplate('object/intangible/pet/shared_gurreck_hue.iff')
-	core.spawnService.addMobileTemplate('pet_gurreck', mobileTemplate)
+	core.spawnService.addMobileTemplate('pet_merek', mobileTemplate)
 	return

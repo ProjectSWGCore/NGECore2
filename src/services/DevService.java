@@ -1310,8 +1310,8 @@ public class DevService implements INetworkDispatch {
 					case 131:
 						TangibleObject gurreckDeed = (TangibleObject) core.objectService.createObject("object/tangible/deed/pet_deed/shared_gurreck_deed.iff", planet);						
 						inventory.add(gurreckDeed);
-						TangibleObject droidekaDeed = (TangibleObject) core.objectService.createObject("object/tangible/deed/pet_deed/shared_deed_droideka.iff", planet);						
-						inventory.add(droidekaDeed);
+						TangibleObject merekDeed = (TangibleObject) core.objectService.createObject("object/tangible/deed/pet_deed/shared_merek_deed.iff", planet);						
+						inventory.add(merekDeed);
 						return;
 					
 					case 140:

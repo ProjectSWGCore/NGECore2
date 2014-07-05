@@ -680,8 +680,8 @@ public abstract class AIState {
 		if(target != null && !core.simulationService.checkLineOfSight(creature, target))
 			maxDistance = 1;
 		
-		// Manage Patrol points
-		maxDistance = 1;
+		// Manage Follow points
+		maxDistance = 3;
 		Point3D currentDestination = target.getWorldPosition();
 		//System.out.println("currentPosition.getDistance2D(currentDestination)<1) " + currentPosition.getDistance2D(currentDestination));
 		
