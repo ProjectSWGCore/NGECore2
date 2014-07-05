@@ -6,6 +6,5 @@ def addSpawnArea(core):
 	mixedGroups = Vector()
 	mixedGroups.add('piket_plains_walker_group')
 	mixedGroups.add('mixed_lair_group_1')
-	mixedGroups.add('naboo_starter')
 	core.spawnService.addMixedSpawnArea(mixedGroups, 0, 2355, 1024, 'dantooine')
 	return

@@ -103,8 +103,14 @@ public class AIActor {
 		if(creature.getOption(Options.AGGRESSIVE)) {
 			aggroCheckTask = scheduler.scheduleAtFixedRate(() -> {
 				try {
+					
 					if(creature == null || creature.getObservers().isEmpty() || creature.isInCombat() || isStalking)
 						return;
+					if (creature.getAttachment("tamed")!=null){
+						boolean tamed = (boolean)creature.getAttachment("tamed");
+						if (!tamed)
+							return;
+					}
 					creature.getObservers().stream().map(Client::getParent).filter(obj -> obj.inRange(creature.getWorldPosition(), 15)).forEach((obj) -> {
 						if(new Random().nextFloat() <= 0.5 || creature.isInCombat() || isStalking) {
 							/*if(mobileTemplate.isStalker()) {

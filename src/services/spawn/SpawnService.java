@@ -48,6 +48,7 @@ import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 import services.ai.AIActor;
 import services.ai.LairActor;
+import engine.resources.common.Stf;
 import engine.resources.container.StaticContainerPermissions;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -191,7 +192,6 @@ public class SpawnService {
 			creature.setMaxAction((int) (400 + level * 134));
 			creature.setAction((int) (400 + level * 134));			
 		} else {
-			System.out.println("HERE");
 			creature.setMaxHealth(customHealth);
 			creature.setHealth(customHealth);
 			creature.setMaxAction((int) (level * 128));
@@ -208,6 +208,176 @@ public class SpawnService {
 		AIActor actor = new AIActor(creature, creature.getPosition(), scheduler);
 		creature.setAttachment("AI", actor);
 		creature.setAttachment("radial_filename", "npc/mobile");
+		actor.setMobileTemplate(mobileTemplate);
+		
+	
+		
+		if(cell == null) {
+			core.simulationService.add(creature, x, z, true);
+		} else {
+			creature.getPosition().setCell(cell);
+			cell.add(creature);
+		}
+		return creature;
+	}
+	
+	public CreatureObject spawnCreatureBaby(String template, long objectId, String planetName, long cellId, float x, float y, float z, float qW, float qX, float qY, float qZ, short level) {
+
+		Planet planet = core.terrainService.getPlanetByName(planetName);
+		MobileTemplate mobileTemplate = mobileTemplates.get(template);
+		if(planet == null || mobileTemplate == null)
+			return null;
+		
+
+		
+		CellObject cell = null;
+		
+		if(cellId != 0) {
+			cell = (CellObject) core.objectService.getObject(cellId);
+			if(cell == null)
+				return null;
+		}
+
+		CreatureObject creature = (CreatureObject) core.objectService.createObject(mobileTemplate.getTemplates().get(new Random().nextInt(mobileTemplate.getTemplates().size())), objectId, planet, new Point3D(x, y, z), new Quaternion(qW, qX, qY, qZ), null, (objectId > 0), true);
+		
+		if(creature == null)
+			return null;
+
+		TangibleObject inventory = (TangibleObject) core.objectService.createObject("object/tangible/inventory/shared_character_inventory.iff", creature.getPlanet());
+		inventory.setContainerPermissions(StaticContainerPermissions.STATIC_CONTAINER_PERMISSIONS);
+
+		
+		/*if(mobileTemplate.getCustomWeapon() != null) {
+			creature.addObjectToEquipList(mobileTemplate.getCustomWeapon());
+			creature.add(mobileTemplate.getCustomWeapon());
+			creature.setWeaponId(mobileTemplate.getCustomWeapon().getObjectID());
+		}*/
+		
+		if(mobileTemplate.getLootGroups() != null && !mobileTemplate.getLootGroups().isEmpty())
+			creature.setLootGroups(mobileTemplate.getLootGroups());
+		
+		creature.setOptionsBitmask(mobileTemplate.getOptionsBitmask());
+		creature.setFaction(mobileTemplate.getFaction());
+		creature.setFactionStatus(mobileTemplate.getFactionStatus());
+		creature.setPvpBitmask(mobileTemplate.getPvpBitmask());
+
+		if (mobileTemplate.getCustomName()==null){
+//			//creature.setStfFilename("mob/creature_names"); // TODO: set other STFs for NPCs other than creatures -> DONE
+			if (mobileTemplate.getStfFilename()!=null){			
+//				System.out.println("S4");
+//				Stf stf = new Stf(mobileTemplate.getStfFilename());
+//				System.out.println("S5");
+//				String stfValue = stf.getStfValue();
+//				System.out.println("S6");
+//				creature.setCustomName(stfValue+" (baby)");
+//				
+				System.out.println("STFNAMECHANGE");
+			}
+			if (mobileTemplate.getCreatureName()!=null){
+				String creatureName = mobileTemplate.getCreatureName();
+				Stf stf = new Stf("mob/creature_names", 0, creatureName); 
+				String stfValue = stf.getStfValue();
+				creature.setCustomName(stfValue+" (baby)");
+			}
+			
+		} else {
+			creature.setCustomName(mobileTemplate.getCustomName()+" (baby)"); // For cases where no STF name can be found!
+		}
+		creature.setHeight(.25F*mobileTemplate.getScale());
+		int difficulty = mobileTemplate.getDifficulty();
+		creature.setDifficulty((byte) difficulty);
+
+//		if(level != -1)
+//			creature.setLevel(level);
+//		else {
+//			if (mobileTemplate.getLevel()!=0){
+//				level = mobileTemplate.getLevel();
+//				creature.setLevel(level);
+//			} else {
+//				level = -1;
+//			}
+//		}
+		
+		creature.setLevel((short)1);
+		
+		if (mobileTemplate.getMinLevel()!=0 && mobileTemplate.getMaxLevel()!=0 && level == -1){
+			level = (short) (mobileTemplate.getMinLevel() + (new Random().nextInt(mobileTemplate.getMaxLevel()-mobileTemplate.getMinLevel()))); 
+			creature.setLevel(level);
+		}
+		
+		WeaponObject defaultWeapon = null;
+		Vector<WeaponTemplate> weaponTemplates = mobileTemplate.getWeaponTemplateVector();
+		int rnd = 0;
+
+		if (weaponTemplates.size() > 0 )
+			rnd = new Random().nextInt(weaponTemplates.size());
+		
+		if (weaponTemplates.size() == 0){
+			defaultWeapon =  (WeaponObject) core.objectService.createObject("object/weapon/creature/shared_creature_default_weapon.iff", creature.getPlanet());
+			defaultWeapon.setAttackSpeed(1.0F);
+			defaultWeapon.setWeaponType(WeaponType.UNARMED);
+			defaultWeapon.setDamageType("kinetic");
+
+			defaultWeapon.setMaxRange(5);
+		} else {
+			defaultWeapon = (WeaponObject) core.objectService.createObject(weaponTemplates.get(rnd).getTemplate(), creature.getPlanet());
+			defaultWeapon.setAttackSpeed(weaponTemplates.get(rnd).getAttackSpeed());
+			defaultWeapon.setWeaponType(weaponTemplates.get(rnd).getWeaponType());
+			defaultWeapon.setMaxRange(weaponTemplates.get(rnd).getMaxRange());
+			defaultWeapon.setDamageType(weaponTemplates.get(rnd).getDamageType());
+		}
+		
+		if (weaponTemplates.get(rnd).getMinDamage() != 0 && weaponTemplates.get(rnd).getMaxDamage() != 0) {
+			defaultWeapon.setMaxDamage(weaponTemplates.get(rnd).getMinDamage());
+			defaultWeapon.setMinDamage(weaponTemplates.get(rnd).getMaxDamage());
+		} else {
+			defaultWeapon.setMaxDamage(creature.getLevel() * 24);
+			defaultWeapon.setMinDamage(creature.getLevel() * 22);
+		}
+		
+		creature.addObjectToEquipList(defaultWeapon);
+		creature.add(defaultWeapon);
+		creature.setWeaponId(defaultWeapon.getObjectID());
+		creature.addObjectToEquipList(inventory);
+		creature.add(inventory);
+
+		int customHealth = mobileTemplate.getHealth();
+		if(difficulty > 0 && customHealth == 0) {
+			if(difficulty == 1) {
+				creature.setMaxHealth((int) (400 + level * 134 * 2.5));
+				creature.setHealth((int) (400 + level * 134 * 2.5));
+				creature.setMaxAction((int) (400 + level * 134 * 2.5));
+				creature.setAction((int) (400 + level * 134 * 2.5));		
+			} else if(difficulty == 2) {
+				creature.setMaxHealth((int) (400 + level * 134 * 10));
+				creature.setHealth((int) (400 + level * 134 * 10));
+				creature.setMaxAction((int) (400 + level * 134 * 10));
+				creature.setAction((int) (400 + level * 134 * 10));		
+			}
+		} else if(difficulty <= 0 && customHealth == 0) {
+			creature.setMaxHealth((int) (400 + level * 134));
+			creature.setHealth((int) (400 + level * 134));
+			creature.setMaxAction((int) (400 + level * 134));
+			creature.setAction((int) (400 + level * 134));			
+		} else {
+			creature.setMaxHealth(customHealth);
+			creature.setHealth(customHealth);
+			creature.setMaxAction((int) (level * 128));
+			creature.setAction((int) (level * 128));			
+		}
+		
+		if(creature.getLevel() > 16) {
+			int armor = (creature.getLevel() - 16) * 87;
+			if(armor > 6000)
+				armor = 6000;
+			core.skillModService.addSkillMod(creature, "expertise_innate_protection_all", armor);
+		}
+		
+		// Baby AI
+		creature.setAttachment("tamed", false);
+		AIActor actor = new AIActor(creature, creature.getPosition(), scheduler);
+		creature.setAttachment("AI", actor);
+		creature.setAttachment("radial_filename", "npc/untamed");
 		actor.setMobileTemplate(mobileTemplate);
 		
 	
@@ -247,6 +417,13 @@ public class SpawnService {
 		return spawnCreature(mobileTemplate, planetName, cellId, x, core.terrainService.getHeight(planet.getID(), x, z), z, 1, 0, 0, 0, level);
 	}
 
+	public CreatureObject spawnCreatureBaby(String mobileTemplate, String planetName, long cellId, float x, float y, float z, short level) {
+		return spawnCreatureBaby(mobileTemplate, planetName, cellId, x, y, z, 1, 0, 0, 0, level);
+	}
+	
+	public CreatureObject spawnCreatureBaby(String template, String planetName, long cellId, float x, float y, float z, float qW, float qX, float qY, float qZ, short level) {
+		return spawnCreatureBaby(template, 0L, planetName, cellId, x, y, z, qW, qX, qY, qZ, level);
+	}
 	
 	public LairActor spawnLair(String lairSpawnTemplate, Planet planet, Point3D position, short level) {
 		
