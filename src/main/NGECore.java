@@ -536,9 +536,12 @@ public class NGECore {
 		
 		browserService = new BrowserService(this);
 		
+<<<<<<< HEAD
 		DevLogQueuer devLogQueuer = new DevLogQueuer();
 		
 		
+=======
+>>>>>>> origin/master
 		didServerCrash = false;
 		System.out.println("Started Server.");
 		cleanupCreatureODB();
