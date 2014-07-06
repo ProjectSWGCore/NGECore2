@@ -37,6 +37,7 @@ import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import services.ai.AIActor;
+import tools.DevLog;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.resources.container.Traverser;
@@ -253,7 +254,7 @@ public class MountService implements INetworkDispatch {
 							mount.setPosition(actor.getPosition().clone());
 							mount.setOrientation(actor.getOrientation().clone());
 							mount.setPlanet(actor.getPlanet());
-							System.out.println("PROCESS MOUNT " + mount.getTemplate());
+							DevLog.debugout("Charon", "Mount Service", "PROCESS MOUNT " + mount.getTemplate()); 
 							core.simulationService.add(mount, actor.getWorldPosition().x, actor.getWorldPosition().z, false);
 						}
 					}

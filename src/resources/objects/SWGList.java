@@ -341,7 +341,7 @@ public class SWGList<E> implements List<E>, Serializable {
 				this.list = list;
 				
 				updateCounter += list.size();
-				StringUtilities.printBytes(newListData);
+				//StringUtilities.printBytes(newListData);
 				queue(newListData);
 					
 				return true;

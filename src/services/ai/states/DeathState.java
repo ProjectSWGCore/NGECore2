@@ -38,7 +38,10 @@ public class DeathState extends AIState {
 		CreatureObject killer = (CreatureObject)actor.getCreature().getKiller();
 		if (killer==null)
 			killer = actor.getHighestDamageDealer();
-		NGECore.getInstance().lootService.DropLoot(killer,(TangibleObject)(actor.getCreature()));			
+		NGECore.getInstance().lootService.DropLoot(killer,(TangibleObject)(actor.getCreature()));
+		
+		actor.destroyActor(); // to prevent standing up right after death
+		
 		return 0;
 	}
 

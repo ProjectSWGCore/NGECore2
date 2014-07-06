@@ -23,6 +23,7 @@ package services.ai.states;
 
 import main.NGECore;
 import engine.resources.scene.Point3D;
+import resources.objects.creature.CreatureObject;
 import services.ai.AIActor;
 
 public class RetreatState extends AIState {
@@ -35,7 +36,14 @@ public class RetreatState extends AIState {
 			}
 		}*/
 		NGECore.getInstance().aiService.logAI("RetreatState ENTER ");
-		actor.setFollowObject(null);
+		
+		if (actor.getCreature().getOwnerId()>0){
+			CreatureObject owner = (CreatureObject) NGECore.getInstance().objectService.getObject(actor.getCreature().getOwnerId());
+			actor.setFollowObject(owner);
+			actor.setCurrentState(new FollowState());
+			return StateResult.FINISHED;
+		} else
+			actor.setFollowObject(null);
 		actor.scheduleMovement();
 		return StateResult.UNFINISHED;
 	}

@@ -44,6 +44,7 @@ import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import services.ai.AIActor;
 import services.ai.states.FollowState;
+import tools.DevLog;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.resources.container.Traverser;
@@ -57,6 +58,8 @@ public class PetService implements INetworkDispatch {
 	
 	public PetService(NGECore core) {
 		this.core = core;
+		DevLog.enableMe();
+		DevLog.enableFileLogging();
 	}
 	
 	
@@ -66,7 +69,9 @@ public class PetService implements INetworkDispatch {
 	}
 	
 	public void call(CreatureObject actor, CreatureObject pet, SWGObject pcd) {
-		System.out.println("Call called !");
+
+		DevLog.debugout("Charon", "Pet AI", "Call called !");
+		
 		if (actor == null) {
 			return;
 		}
@@ -78,7 +83,7 @@ public class PetService implements INetworkDispatch {
 		storeAll(actor); // Store other pets
 		
 		if (pcd == null) {
-			System.out.println("(pcd == null)");
+			DevLog.debugout("Charon", "Pet AI", "call method (pcd == null)");
 			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:cant_call"), DisplayType.Broadcast);
 			return;
 		}
@@ -125,7 +130,7 @@ public class PetService implements INetworkDispatch {
 		pet = (CreatureObject) NGECore.getInstance().staticService.spawnObject(petTemplate, actor.getPlanet().getName(), 0L, actor.getWorldPosition().x, actor.getWorldPosition().y, actor.getWorldPosition().z, actor.getOrientation().y, actor.getOrientation().w);
 		
 		if (pet == null) {
-			System.out.println("mount == null)");
+			DevLog.debugout("Charon", "Pet AI", "call method mount == null");
 			// Somehow the vehicle object has got lost
 			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:cant_call"), DisplayType.Broadcast);
 			return;
@@ -703,7 +708,7 @@ public class PetService implements INetworkDispatch {
 	 */
 	public void store(CreatureObject storer, CreatureObject mount) {
 		if (mount == null) {
-			System.err.println("PetService:store(): mount is null; this should never be the case.");
+			DevLog.debugout("Charon", "Pet AI", "PetService:store(): mount is null; this should never be the case.");
 			return;
 		}
 		
@@ -753,9 +758,9 @@ public class PetService implements INetworkDispatch {
 						AIActor aiActor = (AIActor) mount.getAttachment("AI");
 						aiActor.destroyActor();
 						player.setPet(0L);
+						owner.setCalledPet(null);	
 						core.objectService.destroyObject((Long) pcd.getAttachment("companion_RefId"));
 						pcd.setAttachment("companion_RefId", null);
-						System.out.println("STORE called !");
 					}
 				}
 			}
@@ -785,11 +790,12 @@ public class PetService implements INetworkDispatch {
 				
 							AIActor aiActor = (AIActor) pet.getAttachment("AI");
 							aiActor.destroyActor();
-						
+							
+							actor.setCalledPet(null);	
+							
 							core.objectService.destroyObject(petId);
 							pcd.setAttachment("companion_RefId",null);
 							player.setPet(0L);
-							System.out.println("STOREALL called !");
 						}
 					}
 				}				
@@ -906,18 +912,24 @@ public class PetService implements INetworkDispatch {
 	}
 	
 	public void tame(CreatureObject actor, CreatureObject target) {
-		System.out.println("TAME!");
+		DevLog.debugout("Charon", "Pet AI", "Tame called.");
+		
+		if (actor.getCalledPet()!=null){
+			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:too_many"), DisplayType.Broadcast);
+			return;
+		}
 		
 		Thread tameThread = new Thread() {
 		    public void run() {
 		        try {
 		        	boolean attacking = false;
 		        	AIActor aiActor = (AIActor) target.getAttachment("AI");
-		        	actor.sendSystemMessage("Don't be scared.", DisplayType.Broadcast);
+		        	target.setAttachment("IsBeingTamed",true);
+		        	//actor.sendSystemMessage("Don't be scared.", DisplayType.Broadcast);
 		        	OutOfBand oob = OutOfBand.ProsePackage("Don't be scared.");
 		        	NGECore.getInstance().chatService.spatialChat(actor, target, "Don't be scared.", (short)0x0, (short)0x0, 1, oob);
 		            Thread.sleep(4000);
-		            actor.sendSystemMessage("Steady.", DisplayType.Broadcast);
+		            //actor.sendSystemMessage("Steady.", DisplayType.Broadcast);
 		            OutOfBand oob2 = OutOfBand.ProsePackage("Steady.");
 		        	NGECore.getInstance().chatService.spatialChat(actor, target, "Steady.", (short)0x0, (short)0x0, 1, oob2);
 		            Thread.sleep(5000);
@@ -930,26 +942,34 @@ public class PetService implements INetworkDispatch {
 		            	target.setAttachment("radial_filename", "npc/untamable");
 		            	aiActor.setFollowObject(actor);
 			    		aiActor.addDefender(actor);
+		            	target.setAttachment("IsBeingTamed",null);
+		            	if (target.getPosture()==14)
+		            		return;
 		            }
-		            actor.sendSystemMessage("Don't bite me.", DisplayType.Broadcast);
+		            //actor.sendSystemMessage("Don't bite me.", DisplayType.Broadcast);
 		            OutOfBand oob3 = OutOfBand.ProsePackage("Don't bite me.");
 		        	NGECore.getInstance().chatService.spatialChat(actor, target, "Don't bite me.", (short)0x0, (short)0x0, 1, oob3);
 		        	Thread.sleep(3000);
 		        	// Chance to attack
 		            attackChance = new Random().nextFloat();
 		            if (attackChance<0.45 || attacking){
+		            	if (target.getPosture()==14)
+		            		return;
 		            	attacking = true;
 		            	target.setAttachment("tamed",null);
 		            	aiActor.setFollowObject(actor);
 			    		aiActor.addDefender(actor);
 		            	actor.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:too_hard"), DisplayType.Broadcast);
 		            	target.setAttachment("radial_filename", "npc/untamable");
+		        		target.setAttachment("IsBeingTamed",null);
 		            	return;
 		            }
 		        	// Result of taming
 		        	float tamingResult = new Random().nextFloat();
-		        	System.out.println("tamingResult " + tamingResult);
+		        	DevLog.debugout("Charon", "Pet AI", "tamingResult " + tamingResult);
 		        	if (tamingResult<0.5){
+		        		if (target.getPosture()==14)
+		            		return;
 		        		actor.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:device_added"), DisplayType.Broadcast);
 		        		String pcdTemplate = "object/intangible/pet/shared_pet_control.iff";
 		        		SWGObject pcd = core.objectService.createObject(pcdTemplate, actor.getPlanet());		        		
@@ -965,21 +985,21 @@ public class PetService implements INetworkDispatch {
 		        		
 		        		if (target.getOption(Options.AGGRESSIVE))
 			        		target.removeOption(Options.AGGRESSIVE);
-			        	if (target.getOption(Options.ATTACKABLE))
-			        		target.removeOption(Options.ATTACKABLE);
-			        
+			        	
+			        	target.setAttachment("tamed", 1);
+			        	
 			    		actor.setCalledPet(target);	
 			    		target.setFaction(actor.getFaction());
 			    		target.setFactionStatus(actor.getFactionStatus());
 			    		target.setOwnerId(actor.getObjectID());
 			    		target.setAttachment("radial_filename", "npc/pet_radial");
-			    		target.setAttachment("tamed", true);
-			    				    		
-			        	
-			        	aiActor.removeDefender(aiActor.getFollowObject()); // Make sure tamer is no enemy anymore
+			    		target.setAttachment("radial_filename", "npc/pet_radial");
+			    				  
+			    		aiActor.cancelAggro();
+			        	aiActor.removeDefender(actor); // Make sure tamer is no enemy anymore			        	
 			        	aiActor.setFollowObject(actor);
 			    		aiActor.setCurrentState(new FollowState());
-		        		
+			    		target.setAttachment("IsBeingTamed",null);		        		
 		        	} else {
 		        		actor.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:too_hard"), DisplayType.Broadcast);
 		        	}
