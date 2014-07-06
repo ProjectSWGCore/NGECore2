@@ -22,7 +22,6 @@
 package services;
 
 import java.util.Map;
-
 import protocol.swg.LaunchBrowserMessage;
 import resources.objects.creature.CreatureObject;
 import main.NGECore;

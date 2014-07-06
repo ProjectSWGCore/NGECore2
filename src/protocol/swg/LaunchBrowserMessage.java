@@ -22,12 +22,8 @@
 package protocol.swg;
 
 import java.nio.ByteOrder;
-import java.util.Vector;
-
 import org.apache.mina.core.buffer.IoBuffer;
-
 import resources.common.Opcodes;
-import services.sui.SUIWindowComponent;
 
 public class LaunchBrowserMessage extends SWGMessage{
 	private String URL;

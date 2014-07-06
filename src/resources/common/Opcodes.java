@@ -41,12 +41,14 @@ public class Opcodes {
 	public static final int CommoditiesResourceTypeListRequest = 0xCB1AE82D;
 	public static final int NewbieTutorialResponse = 0xCA88FBAD;
 	public static final int CmdSceneReady = 0x43FD1C22;
+	public static final int CommPlayerMessage = 0x594AD258;
 	public static final int ConnectPlayerMessage = 0x2E365218;
 	public static final int ClientCreateCharacter = 0xB97F3074;
 	public static final int ClientIdMsg = 0xD5899226;
 	public static final int ClientRandomNameRequest = 0xD6D1B6D1;
 	public static final int ClientVerifyAndLockNameRequest = 0x9eb04b9f;
 	public static final int DeleteCharacterMessage = 0xE87AD031;
+	public static final int ErrorMessage = 0xB5ABF91A;
 	public static final int GetMapLocationsMessage = 0x1A7AB839;
 	public static final int IsVendorOwnerMessage = CRC.StringtoCRC("IsVendorOwnerMessage");
 	public static final int LagRequest = 0x31805EE0;
@@ -91,5 +93,12 @@ public class Opcodes {
 	public static final int BidAuctionMessage = CRC.StringtoCRC("BidAuctionMessage");
 	public static final int RetrieveAuctionItemMessage = CRC.StringtoCRC("RetrieveAuctionItemMessage");
 	public static final int LaunchBrowserMessage = CRC.StringtoCRC("LaunchBrowserMessage");
+	public static final int LoginServerId = 0x58C07F21;
+	public static final int LogoutMessage = 0x42FD19DD;
+	public static final int AttributeListMessage = 0xF3F12F2A;
+	public static final int GuildResponseMessage = 0x32263F20;
+	public static final int CreateCharacterSuccess = 0x1DB575CC;
+	public static final int PlayerMoneyResponse = 0x367E737E;
+	public static final int CmdStartScene = 0x3AE6DFAE;
 	
 }
