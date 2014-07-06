@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('dune_bantha')
 	mobileTemplate.setLevel(20)
-	mobileTemplate.setMinLevel(20)
-	mobileTemplate.setMaxLevel(22)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)

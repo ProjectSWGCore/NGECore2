@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('parry_stormtrooper_dewback')
 	mobileTemplate.setLevel(17)
-	mobileTemplate.setMinLevel(16)
-	mobileTemplate.setMaxLevel(18)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)

@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('cu_pa')
 	mobileTemplate.setLevel(10)
-	mobileTemplate.setMinLevel(10)
-	mobileTemplate.setMaxLevel(11)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
