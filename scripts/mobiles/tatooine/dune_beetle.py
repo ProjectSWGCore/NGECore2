@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('dune_beetle')
 	mobileTemplate.setLevel(9)
-	mobileTemplate.setMinLevel(9)
-	mobileTemplate.setMaxLevel(10)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
