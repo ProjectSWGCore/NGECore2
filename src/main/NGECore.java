@@ -111,6 +111,7 @@ import services.spawn.SpawnService;
 import services.sui.SUIService;
 import services.trade.TradeService;
 import services.travel.TravelService;
+import tools.DevLogQueuer;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.CrcStringTableVisitor;
 import engine.clientdata.visitors.DatatableVisitor;
@@ -534,6 +535,9 @@ public class NGECore {
 		retroService.run();
 		
 		browserService = new BrowserService(this);
+		
+		DevLogQueuer devLogQueuer = new DevLogQueuer();
+		
 		
 		didServerCrash = false;
 		System.out.println("Started Server.");

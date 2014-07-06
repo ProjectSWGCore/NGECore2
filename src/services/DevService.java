@@ -35,6 +35,7 @@ import resources.common.Console;
 import resources.common.FileUtilities;
 import resources.common.Opcodes;
 import resources.common.SpawnPoint;
+import resources.datatables.Posture;
 import resources.datatables.WeaponType;
 import resources.harvest.SurveyTool;
 import resources.objects.building.BuildingObject;
@@ -1062,6 +1063,7 @@ public class DevService implements INetworkDispatch {
 						return;
 						
 					case 110:
+						player.setPosture(Posture.Incapacitated);
 						SurveyTool mineralSurveyTool = (SurveyTool) core.objectService.createObject("object/tangible/survey_tool/shared_survey_tool_mineral.iff", planet);
 						mineralSurveyTool.setCustomName("Mineral Survey Device");
 						inventory.add(mineralSurveyTool);

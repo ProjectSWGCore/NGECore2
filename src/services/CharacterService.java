@@ -268,6 +268,7 @@ public class CharacterService implements INetworkDispatch {
 				object.setPosition(SpawnPoint.getRandomPosition(new Point3D(3528, 0, -4804), (float) 0.5, 3, core.terrainService.getPlanetByName("tatooine").getID()));
 				object.setCashCredits(100);
 				object.setBankCredits(1000);
+				object.setIncapTimer(60);
 				object.setOptionsBitmask(Options.ATTACKABLE);
 				//object.setPosition(new Point3D(0, 0, 0));
 				object.setOrientation(new Quaternion(1, 0, 0, 0));

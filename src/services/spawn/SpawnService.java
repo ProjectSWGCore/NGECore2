@@ -374,7 +374,7 @@ public class SpawnService {
 		}
 		
 		// Baby AI
-		creature.setAttachment("tamed", false);
+		creature.setAttachment("tamed", 0);
 		AIActor actor = new AIActor(creature, creature.getPosition(), scheduler);
 		creature.setAttachment("AI", actor);
 		creature.setAttachment("radial_filename", "npc/untamed");

@@ -49,6 +49,7 @@ import services.ai.states.PatrolState;
 import services.ai.states.RetreatState;
 import services.combat.CombatEvents.DamageTaken;
 import services.spawn.MobileTemplate;
+import tools.DevLog;
 
 import java.util.Random;
 
@@ -107,16 +108,22 @@ public class AIActor {
 					if(creature == null || creature.getObservers().isEmpty() || creature.isInCombat() || isStalking)
 						return;
 					if (creature.getAttachment("tamed")!=null){
-						boolean tamed = (boolean)creature.getAttachment("tamed");
-						if (!tamed)
-							return;
+						DevLog.debugout("Charon", "Pet AI", "aggroCheckTask tamed==1");
+						return;
 					}
+					
+					if (creature.getCustomName().contains("baby"))
+						DevLog.debugout("Charon", "Pet AI", "baby aggroCheckTask should not be here " +creature.getAttachment("tamed"));
+					
 					creature.getObservers().stream().map(Client::getParent).filter(obj -> obj.inRange(creature.getWorldPosition(), 15)).forEach((obj) -> {
 						if(new Random().nextFloat() <= 0.5 || creature.isInCombat() || isStalking) {
 							/*if(mobileTemplate.isStalker()) {
 								setFollowObject((CreatureObject) obj);
 								setCurrentState(new StalkState());
 							} else */
+							
+							if (creature.getAttachment("IsBeingTamed")!=null)
+								return;
 							
 							if (obj instanceof CreatureObject){
 								CreatureObject addedObject = (CreatureObject) obj;
@@ -292,10 +299,10 @@ public class AIActor {
 	
 	public void faceObject(SWGObject object) {
 		// Null checks due to a null error at: float direction =
-		if (object == null) System.out.println("object is null");
-		if (creature == null) System.out.println("creature is null");
-		if (object.getWorldPosition() == null) System.out.println("object's position is null");
-		if (creature.getWorldPosition() == null) System.out.println("creature's position is null");
+		if (object == null) DevLog.debugout("Charon", "AI Actor", "faceObject object is NULL"); 
+		if (creature == null) DevLog.debugout("Charon", "AI Actor", "faceObject creature is NULL"); 
+		if (object.getWorldPosition() == null) DevLog.debugout("Charon", "AI Actor", "faceObject object's position is NULL"); 
+		if (creature.getWorldPosition() == null) DevLog.debugout("Charon", "AI Actor", "faceObject creature's position is NULL"); 
 		
 		float direction = (float) Math.atan2(object.getWorldPosition().x - creature.getWorldPosition().x, object.getWorldPosition().z - creature.getWorldPosition().z);
 		if(direction < 0)
@@ -394,6 +401,10 @@ public class AIActor {
 	public void destroyActor(){
 		creature.getEventBus().unsubscribe(this);
 		// Make sure to kill all AI helper threads
+		if (aggroCheckTask!=null)
+			aggroCheckTask.cancel(true);
+		if (regenTask!=null)
+			regenTask.cancel(true);
 		if (movementFuture!=null){
 			movementFuture.cancel(true); 
 			movementFuture = null;
@@ -406,6 +417,13 @@ public class AIActor {
 			despawnFuture.cancel(true);			
 			despawnFuture = null;
 		}		
+	}
+	
+	public void cancelAggro(){
+		try {
+			aggroCheckTask.cancel(true);
+		} catch(Exception e) {			
+		}
 	}
 	
 	public ScheduledFuture<?> getRegenTask() {

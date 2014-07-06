@@ -48,6 +48,7 @@ import resources.objects.ObjectMessageBuilder;
 import resources.objects.SWGList;
 import resources.objects.SWGSet;
 import resources.objects.creature.CreatureObject;
+import tools.DevLog;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.IDManagerVisitor;
 import engine.clients.Client;
@@ -328,8 +329,13 @@ public class TangibleObject extends SWGObject implements Serializable {
 	}
 	
 	public void addDefender(TangibleObject defender) {
+		if (((CreatureObject)this).getOwnerId()>0){
+			if (((CreatureObject)this).getOwnerId()==defender.getObjectID()){
+				return; // fix for now until determined where the tamer is added from
+			}
+		}
 		defendersList.add(defender);
-		
+	
 		if (!isInCombat()) {
 			setInCombat(true);
 		}
