@@ -304,18 +304,18 @@ public class BountyMissionObjective extends MissionObjective {
 									
 									WaypointObject missionWp = mission.getWaypoint();
 	
-									if (missionWp.getPlanetCRC() != CRC.StringtoCRC(target.getPlanet().name)) {
+									if (missionWp == null || missionWp.getPlanetCRC() != CRC.StringtoCRC(target.getPlanet().name)) {
 										WaypointObject waypoint = (WaypointObject) getMissionObject().getWaypoint();
 										waypoint.setActive(true);
 										waypoint.setColor(WaypointObject.ORANGE);
 										waypoint.setName(getMissionObject().getTargetName());
 										waypoint.setPlanetCRC(CRC.StringtoCRC(target.getPlanet().getName()));
 										waypoint.setStringAttribute("", "");
-										getMissionObject().setWaypoint(waypoint);
+										waypoint.setPosition(target.getWorldPosition());
+										mission.setWaypoint(waypoint);
 									} else {
 										missionWp.setPosition(target.getWorldPosition());
 										mission.setWaypoint(missionWp);
-										getMissionObject().setWaypoint(missionWp);
 									}
 									actor.sendSystemMessage("@mission/mission_generic:target_location_updated_ground", DisplayType.Broadcast);
 									actor.sendSystemMessage("@mission/mission_generic:target_continue_tracking", DisplayType.Broadcast);
@@ -329,6 +329,46 @@ public class BountyMissionObjective extends MissionObjective {
 			
 			seekerUpdates = updater;
 		}
+	}
+	
+	public void beginIdentifyTarget(NGECore core, CreatureObject actor) {
+		if (seekerActive)
+			return;
+		
+		setSeekerActive(true);
+		setSeekerPlanet(actor.getPlanet().name);
+		
+		Executors.newSingleThreadScheduledExecutor().schedule(() -> {
+			MissionObject mission = getMissionObject();
+			SWGObject target = core.objectService.getObject(markObjId);
+			
+			if (target == null) {
+				actor.sendSystemMessage("@mission/mission_generic:player_target_inactive", DisplayType.Broadcast);
+				return;
+			} else if (target.getPlanet().getName() != getSeekerPlanet()) {
+				actor.sendSystemMessage("@mission/mission_generic:target_not_on_planet", DisplayType.Broadcast);
+				return;
+			}
+			
+			WaypointObject missionWp = mission.getWaypoint();
+			
+			if (missionWp == null || missionWp.getPlanetCRC() != CRC.StringtoCRC(target.getPlanet().name)) {
+				WaypointObject waypoint = (WaypointObject) getMissionObject().getWaypoint();
+				waypoint.setActive(true);
+				waypoint.setColor(WaypointObject.ORANGE);
+				waypoint.setName(getMissionObject().getTargetName());
+				waypoint.setPlanetCRC(CRC.StringtoCRC(target.getPlanet().getName()));
+				waypoint.setStringAttribute("", "");
+				waypoint.setPosition(target.getWorldPosition());
+				mission.setWaypoint(waypoint);
+			} else {
+				missionWp.setPosition(target.getWorldPosition());
+				mission.setWaypoint(missionWp);
+			}
+			
+			actor.sendSystemMessage("Your target was identified as " + target.getCustomName() + ".", DisplayType.Broadcast); // Can't find this in the string files
+			actor.sendSystemMessage("@mission/mission_generic:target_location_updated_ground", DisplayType.Broadcast);
+		}, 60, TimeUnit.SECONDS);
 	}
 	
 	public void beginArakydUpdate(final CreatureObject actor) {
@@ -350,8 +390,7 @@ public class BountyMissionObjective extends MissionObjective {
 				waypoint.setName(getMissionObject().getTargetName());
 				waypoint.setPlanetCRC(CRC.StringtoCRC(target.getPlanet().getName()));
 				waypoint.setStringAttribute("", "");
-				
-				actor.getClient().getSession().write(getMissionObject().getBaseline3().set("waypoint", waypoint));
+				getMissionObject().setWaypoint(waypoint);
 				
 				actor.sendSystemMessage("@mission/mission_generic:target_location_updated_ground", DisplayType.Broadcast);
 				actor.sendSystemMessage("@mission/mission_generic:target_located_" + target.getPlanet().getName(), DisplayType.Broadcast);
