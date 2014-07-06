@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('elite_desert_razorback')
 	mobileTemplate.setLevel(24)
-	mobileTemplate.setMinLevel(23)
-	mobileTemplate.setMaxLevel(25)
 	mobileTemplate.setDifficulty(Difficulty.ELITE)
 
 	mobileTemplate.setMinSpawnDistance(4)

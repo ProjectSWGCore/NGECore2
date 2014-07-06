@@ -11,7 +11,6 @@ def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
 	mobileTemplate.setCreatureName('sickly_womprat')
-	mobileTemplate.setLevel(4)
 	mobileTemplate.setMinLevel(4)
 	mobileTemplate.setMaxLevel(13)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)

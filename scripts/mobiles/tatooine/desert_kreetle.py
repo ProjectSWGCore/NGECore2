@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('orphan_kreetle')
 	mobileTemplate.setLevel(3)
-	mobileTemplate.setMinLevel(3)
-	mobileTemplate.setMaxLevel(5)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)

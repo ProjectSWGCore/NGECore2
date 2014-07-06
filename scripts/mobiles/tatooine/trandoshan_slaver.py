@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('ep3_trandoshan_slaver')
 	mobileTemplate.setLevel(4)
-	mobileTemplate.setMinLevel(1)
-	mobileTemplate.setMaxLevel(4)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
