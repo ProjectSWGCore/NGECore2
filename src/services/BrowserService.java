@@ -36,7 +36,10 @@ public class BrowserService implements INetworkDispatch {
 	public BrowserService(NGECore core) {
 		this.core = core;
 	}
-	
+	/*
+	 * This method will minimise the game and open the default desktop browser of the CreatureObject with the given URL.
+	 * This is not to be confused with the SWG in-game browser.
+	 */
 	public void sendBrowserWindow(CreatureObject creature, String URL) {
 		URL = URL.toLowerCase();
 		
