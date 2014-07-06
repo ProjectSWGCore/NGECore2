@@ -77,8 +77,7 @@ odb/cities/je.info.*
 # PDT-specific
 .buildpath
 
-# Log files
-debuglogs/
+
 
 #################
 ## Visual Studio

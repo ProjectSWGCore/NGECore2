@@ -1063,7 +1063,7 @@ public class DevService implements INetworkDispatch {
 						return;
 						
 					case 110:
-						player.setPosture(Posture.Incapacitated);
+
 						SurveyTool mineralSurveyTool = (SurveyTool) core.objectService.createObject("object/tangible/survey_tool/shared_survey_tool_mineral.iff", planet);
 						mineralSurveyTool.setCustomName("Mineral Survey Device");
 						inventory.add(mineralSurveyTool);
