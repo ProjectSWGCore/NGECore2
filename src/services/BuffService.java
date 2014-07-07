@@ -280,14 +280,17 @@ public class BuffService implements INetworkDispatch {
 		// copy to array for thread safety
 
 		for(final Buff buff : creature.getBuffList().get().toArray(new Buff[] { })) {
-
-			if (buff.getGroup1().startsWith("setBonus") || buff.getRemovalTask() != null) { continue; }
+			
+			if (buff.getRemovalTask() != null) { continue; }
 
 			if(buff.isGroupBuff() && buff.getGroupBufferId() != creature.getObjectID()) {
 				removeBuffFromCreature(creature, buff);
 				continue;
 			}
 
+			if (buff.getDuration() == (float) -1)
+				continue;
+			
 			if(buff.getRemainingDuration() > 0 && buff.getDuration() > 0) {
 				ScheduledFuture<?> task = scheduler.schedule(() -> {
 					try {
