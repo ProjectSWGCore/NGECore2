@@ -38,6 +38,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
+import resources.common.collidables.CollidableBox;
 import resources.common.collidables.CollidableCircle;
 import resources.datatables.Options;
 import resources.datatables.PvpStatus;
@@ -556,6 +557,7 @@ public class SpawnService {
 		}
 	}
 	
+	// Circular LairSpawnArea
 	public void addLairSpawnArea(String lairGroup, float x, float z, float radius, String planetName) {
 		LairGroupTemplate lairGroupTemplate = lairGroupTemplates.get(lairGroup);
 		Planet planet = core.terrainService.getPlanetByName(planetName);
@@ -567,6 +569,19 @@ public class SpawnService {
 		core.simulationService.addCollidable(collidableCircle, x, z);
 	}
 	
+	// Rectangular LairSpawnArea
+	public void addLairSpawnArea(String lairGroup, float x, float z, float width, float height, String planetName) {
+		LairGroupTemplate lairGroupTemplate = lairGroupTemplates.get(lairGroup);
+		Planet planet = core.terrainService.getPlanetByName(planetName);
+		if(lairGroupTemplate == null || planet == null)
+			return;
+		CollidableBox collidableBox = new CollidableBox(new Point3D(x, 0, z), width, height, planet);
+		LairSpawnArea lairSpawnArea = new LairSpawnArea(planet, collidableBox, lairGroupTemplate);
+		spawnAreas.get(planet).add(lairSpawnArea);
+		core.simulationService.addCollidable(collidableBox, x, z);
+	}
+	
+	// Circular DynamicSpawnArea
 	public void addDynamicSpawnArea(String dynamicGroup, float x, float z, float radius, String planetName) {
 		DynamicSpawnGroup dynamicGroupTemplate = dynamicGroupTemplates.get(dynamicGroup);
 		Planet planet = core.terrainService.getPlanetByName(planetName);
@@ -578,6 +593,19 @@ public class SpawnService {
 		core.simulationService.addCollidable(collidableCircle, x, z);
 	}
 	
+	// Rectangular DynamicSpawnArea
+	public void addDynamicSpawnArea(String dynamicGroup, float x, float z, float width, float height, String planetName) {
+		DynamicSpawnGroup dynamicGroupTemplate = dynamicGroupTemplates.get(dynamicGroup);
+		Planet planet = core.terrainService.getPlanetByName(planetName);
+		if(dynamicGroupTemplate == null || planet == null)
+			return;
+		CollidableBox collidableBox = new CollidableBox(new Point3D(x, 0, z), width, height, planet);
+		DynamicSpawnArea dynamicSpawnArea = new DynamicSpawnArea(planet, collidableBox, dynamicGroupTemplate);
+		spawnAreas.get(planet).add(dynamicSpawnArea);
+		core.simulationService.addCollidable(collidableBox, x, z);
+	}
+	
+	// Circular DynamicSpawnArea with Vector argument
 	public void addDynamicSpawnArea(Vector<String> dynamicGroups, float x, float z, float radius, String planetName) {
 		Vector<DynamicSpawnGroup> dynamicSpawnGroups = new Vector<DynamicSpawnGroup>();
 		for (String template : dynamicGroups){
@@ -597,6 +625,27 @@ public class SpawnService {
 		core.simulationService.addCollidable(collidableCircle, x, z);
 	}
 	
+	// Rectangular DynamicSpawnArea with Vector argument
+	public void addDynamicSpawnArea(Vector<String> dynamicGroups, float x, float z, float width, float height, String planetName) {
+		Vector<DynamicSpawnGroup> dynamicSpawnGroups = new Vector<DynamicSpawnGroup>();
+		for (String template : dynamicGroups){
+			if (dynamicGroupTemplates.get(template)==null){
+				System.err.println("Dynamic Group template " + template +" not found in spawnservice collection!");	
+				return;
+			}
+			dynamicSpawnGroups.add(dynamicGroupTemplates.get(template));
+		}
+		
+		Planet planet = core.terrainService.getPlanetByName(planetName);
+		if(dynamicSpawnGroups == null || dynamicSpawnGroups.size() == 0 || planet == null)
+			return;
+		CollidableBox collidableBox = new CollidableBox(new Point3D(x, 0, z), width, height, planet);
+		DynamicSpawnArea dynamicSpawnArea = new DynamicSpawnArea(planet, collidableBox, dynamicSpawnGroups);
+		spawnAreas.get(planet).add(dynamicSpawnArea);
+		core.simulationService.addCollidable(collidableBox, x, z);
+	}
+	
+	// Circular MixedSpawnArea
 	public void addMixedSpawnArea(Vector<String> passedGroups, float x, float z, float radius, String planetName) {
 		Vector<SpawnGroup> mixedSpawnGroups = new Vector<SpawnGroup>();
 		for (String template : passedGroups){
@@ -617,6 +666,29 @@ public class SpawnService {
 		MixedSpawnArea dynamicSpawnArea = new MixedSpawnArea(planet, collidableCircle, mixedSpawnGroups);
 		spawnAreas.get(planet).add(dynamicSpawnArea);
 		core.simulationService.addCollidable(collidableCircle, x, z);
+	}
+	
+	// Rectangular MixedSpawnArea
+	public void addMixedSpawnArea(Vector<String> passedGroups, float x, float z, float width, float height, String planetName) {
+		Vector<SpawnGroup> mixedSpawnGroups = new Vector<SpawnGroup>();
+		for (String template : passedGroups){
+			if (dynamicGroupTemplates.get(template)!=null){
+				mixedSpawnGroups.add(dynamicGroupTemplates.get(template));
+			}
+			if (lairGroupTemplates.get(template)!=null){
+				mixedSpawnGroups.add(lairGroupTemplates.get(template));
+			}			
+			if(dynamicGroupTemplates.get(template) == null && lairGroupTemplates.get(template)==null)
+				return;			
+		}
+				
+		Planet planet = core.terrainService.getPlanetByName(planetName);
+		if(mixedSpawnGroups == null || mixedSpawnGroups.size() == 0 || planet == null)
+			return;
+		CollidableBox collidableBox = new CollidableBox(new Point3D(x, 0, z), width, height, planet);
+		MixedSpawnArea dynamicSpawnArea = new MixedSpawnArea(planet, collidableBox, mixedSpawnGroups);
+		spawnAreas.get(planet).add(dynamicSpawnArea);
+		core.simulationService.addCollidable(collidableBox, x, z);
 	}
 
 	public Map<String, MobileTemplate> getMobileTemplates() {
