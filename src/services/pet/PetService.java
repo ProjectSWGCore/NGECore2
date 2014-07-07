@@ -1004,8 +1004,11 @@ public class PetService implements INetworkDispatch {
 		        		actor.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:too_hard"), DisplayType.Broadcast);
 		        	}
 		        	
+		        	Thread.currentThread().interrupt();
+		        	
 		        } catch(InterruptedException v) {
 		            System.out.println(v);
+		            Thread.currentThread().interrupt(); // very important
 		        }
 		    }  
 		};

@@ -85,6 +85,9 @@ public class SUIService implements INetworkDispatch {
 				if(target == null || owner == null)
 					return;
 				
+//				if (getRadialFilename(target).equals("noradialoptions"))
+//					return;
+				
 				if (target instanceof HarvesterObject){
 					HarvesterObject harvester = (HarvesterObject) target;
 					Vector<String> admins = harvester.getAdminList();
@@ -206,7 +209,7 @@ public class SUIService implements INetworkDispatch {
 		});
 		
 		swgOpcodes.put(Opcodes.SuiEventNotification, new INetworkRemoteEvent() {
-
+			
 			@Override
 			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
 				
@@ -232,7 +235,7 @@ public class SUIService implements INetworkDispatch {
 					return;
 
 				PyObject func = window.getFunctionByEventId(suiEvent.getEventType());
-				
+
 				if(func != null)
 					func.__call__(Py.java2py(owner), Py.java2py(window), Py.java2py(suiEvent.getEventType()), Py.java2py(suiEvent.getReturnList()));
 				

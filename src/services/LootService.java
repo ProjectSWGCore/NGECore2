@@ -230,12 +230,13 @@ public class LootService implements INetworkDispatch {
 	    // For autoloot 
     	//SWGObject requesterInventory = requester.getSlottedObject("inventory");
 	    //System.out.println("lootRollSession.getDroppedItems() " + (lootRollSession.getDroppedItems()));
+	    DevLog.debugout("Charon", "Loot Service", "lootRollSession.getDroppedItems().size() " + lootRollSession.getDroppedItems().size());
     	for (TangibleObject droppedItem : lootRollSession.getDroppedItems()){		    
-    		
+    		DevLog.debugout("Charon", "Loot Service", "droppedItem " + droppedItem.getCustomName());
     		//droppedItem.setAttachment("radial_filename", "lootitem");
     		//if (! droppedItem.getTemplate().contains("shared_rare_loot_chest"))
     		lootedObjectInventory.add(droppedItem);
-    	
+    		
     		
     		// RLS chest effect
 	    	if (droppedItem.getAttachment("LootItemName").toString().contains("Loot Chest")){
@@ -586,7 +587,7 @@ public class LootService implements INetworkDispatch {
 	        @Override
 	        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 	        	String actualFileName = file.getFileName().toString();
-	        	actualFileName = actualFileName.substring(0, actualFileName.length()-3);
+	        	actualFileName = actualFileName.substring(0, actualFileName.length()-3).toLowerCase();
 	        	if (actualFileName.equals(itemName.toLowerCase())){
 	        		foundPath.add(file.toString());
 	        	} 	        	
@@ -1065,7 +1066,7 @@ public class LootService implements INetworkDispatch {
 	        @Override
 	        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 	        	String actualFileName = file.getFileName().toString();
-	        	actualFileName = actualFileName.substring(0, actualFileName.length()-3);
+	        	actualFileName = actualFileName.substring(0, actualFileName.length()-3).toLowerCase();
 	        	if (actualFileName.equals(itemName.toLowerCase())){
 	        		foundPath.add(file.toString());
 	        	} 	        	
@@ -1491,9 +1492,16 @@ public class LootService implements INetworkDispatch {
 	
 	public void handleCreditDrop(CreatureObject requester,TangibleObject lootedObject,LootRollSession lootRollSession){
 		int lootedCredits = 0;
-		AIActor ai = (AIActor) lootedObject.getAttachment("AI");
-		String resType = ai.getMobileTemplate().getMeatType();
-		if (lootedObject.isCreditRelieved() || resType!=null)
+		if (lootedObject.getAttachment("AI")!=null){
+			AIActor ai = (AIActor) lootedObject.getAttachment("AI");
+			String resType = ai.getMobileTemplate().getMeatType();
+			if (resType!=null)
+				return;
+		}
+	
+		if (lootedObject.isCreditRelieved())
+			return;
+		if (lootedObject.getTemplate().contains("shared_treasure_drum"))
 			return;
 		
 		// Credit drop is depending on the CL of the looted CreatureObject
@@ -2408,7 +2416,7 @@ public class LootService implements INetworkDispatch {
 	        @Override
 	        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 	        	String actualFileName = file.getFileName().toString();
-	        	actualFileName = actualFileName.substring(0, actualFileName.length()-3);
+	        	actualFileName = actualFileName.substring(0, actualFileName.length()-3).toLowerCase();
 	        	if (actualFileName.equals(itemName.toLowerCase())){
 	        		foundPath.add(file.toString());
 	        	} 	        	
