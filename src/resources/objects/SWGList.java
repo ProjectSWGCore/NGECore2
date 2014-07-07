@@ -342,6 +342,7 @@ public class SWGList<E> implements List<E>, Serializable {
 				
 				updateCounter += list.size();
 				//StringUtilities.printBytes(newListData);
+				//tools.CharonPacketUtils.printAnalysis(buffer,"SWGList set");
 				queue(newListData);
 					
 				return true;

@@ -210,6 +210,11 @@ public class PetService implements INetworkDispatch {
 		activeAbilities.add("toggleBeastPassive");
 		player.getActivePetAbilities().set(activeAbilities);
 		
+		// 02 01 02 33 C3 BF 03
+		//byte[] customization = new byte[]{(byte)0x03,(byte)0xBF,(byte)0xC3,(byte)0x33,(byte)0x02,(byte)0x01,(byte)0x02};
+		byte[] customization = new byte[]{(byte)0x02,(byte)0x01,(byte)0x02,(byte)0x33,(byte)0xC3,(byte)0xBF,(byte)0x03};
+		pet.setCustomization(customization);
+		
 		pet.setFaction(actor.getFaction());
 		pet.setFactionStatus(actor.getFactionStatus());
 		pet.setOwnerId(actor.getObjectID());

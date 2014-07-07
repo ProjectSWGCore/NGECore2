@@ -111,6 +111,7 @@ import services.spawn.SpawnService;
 import services.sui.SUIService;
 import services.trade.TradeService;
 import services.travel.TravelService;
+import tools.CharonPacketLogger;
 import tools.DevLogQueuer;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.CrcStringTableVisitor;
@@ -538,6 +539,10 @@ public class NGECore {
 		
 
 		DevLogQueuer devLogQueuer = new DevLogQueuer();
+		
+		CharonPacketLogger packetLogger;
+		if (PACKET_DEBUG)
+			packetLogger = new CharonPacketLogger();
 
 		didServerCrash = false;
 		System.out.println("Started Server.");
