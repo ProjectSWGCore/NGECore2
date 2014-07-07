@@ -33,6 +33,7 @@ import org.apache.mina.core.session.IoSession;
 
 import resources.common.Console;
 import resources.common.FileUtilities;
+import resources.common.Forager;
 import resources.common.Opcodes;
 import resources.common.SpawnPoint;
 import resources.datatables.Posture;
@@ -51,6 +52,9 @@ import main.NGECore;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.clients.Client;
+import engine.resources.container.CreatureContainerPermissions;
+import engine.resources.container.CreaturePermissions;
+import engine.resources.container.NullPermissions;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -76,6 +80,8 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 1, "Character");
 				suiOptions.put((long) 2, "Items");
 				suiOptions.put((long) 3, "Locations");
+				if (System.getProperty("user.name").equals("Charon"))
+					suiOptions.put((long) 4, "Treasure chest test");
 				break;
 			case 1: // Character
 				suiOptions.put((long) 10, "Set combat level to 90");
@@ -188,6 +194,26 @@ public class DevService implements INetworkDispatch {
 					case 3: // Locations
 						sendCharacterBuilderSUI(player, 11);
 						return; 
+						
+					case 4: // Test
+						TangibleObject treasureContainer = (TangibleObject) NGECore.getInstance().staticService.spawnObject("object/tangible/container/drum/shared_treasure_drum.iff", 
+								owner.getPlanet().getName(), 0L, owner.getWorldPosition().x, owner.getWorldPosition().y, owner.getWorldPosition().z, 0.70F, 0.71F);						
+						treasureContainer.setAttachment("radial_filename", "object/treasureContainer");
+						
+						//treasureContainer.setContainerPermissions(CreatureContainerPermissions.CREATURE_CONTAINER_PERMISSIONS); 
+						treasureContainer.setAttachment("TreasureExtractorID", owner.getObjectID());
+						treasureContainer.add(core.objectService.createObject("object/tangible/inventory/shared_character_inventory.iff", treasureContainer.getPlanet()));
+						String template = "object/tangible/wearables/bracelet/shared_bracelet_s02_r.iff";
+						TangibleObject droppedItem = (TangibleObject) core.objectService.createObject(template, planet);
+//						SWGObject lootedObjectInventory = treasureContainer.getSlottedObject("inventory");
+//						lootedObjectInventory.add(droppedItem);
+//						
+						Forager forager = new Forager();
+						forager.configureTreasureLoot(treasureContainer,(CreatureObject)owner,(short)90);
+						NGECore.getInstance().lootService.DropLoot((CreatureObject)owner, treasureContainer);
+						
+						//treasureContainer.add(droppedItem);
+						return;
 					
 					// Character
 					case 10: // Set combat level to 90

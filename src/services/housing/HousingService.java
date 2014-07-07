@@ -46,6 +46,7 @@ import resources.common.OutOfBand;
 import resources.datatables.Citizenship;
 import resources.datatables.DisplayType;
 import resources.objects.building.BuildingObject;
+import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.harvester.HarvesterObject;
 import resources.objects.installation.InstallationObject;
@@ -325,7 +326,7 @@ public class HousingService implements INetworkDispatch {
 		} else {
 			window.addListBoxMenuItem("@player_structure:redeed_confirmation \\#32CD32 @player_structure:can_redeed_yes_suffix \\#FFFFFF ",1 );
 		}
-		if (building.getConditionDamage()<20){
+		if (building.getConditionDamage()>20){
 			window.addListBoxMenuItem("@player_structure:redeed_condition \\#BB0000 " + building.getConditionDamage() + " \\#FFFFFF ",1 );
 			noRedeed.add(-1);
 		} else {
@@ -420,7 +421,6 @@ public class HousingService implements INetworkDispatch {
 										
 					houseOwner.sendSystemMessage("@player_structure:processing_destruction",(byte)1);
 					houseOwner.sendSystemMessage("@player_structure:deed_reclaimed",(byte)1);
-					
 					
 				} else {
 					houseOwner.sendSystemMessage("@player_structure:incorrect_destroy_code",(byte)1);

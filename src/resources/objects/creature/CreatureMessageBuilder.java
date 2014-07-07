@@ -113,6 +113,7 @@ public class CreatureMessageBuilder extends TangibleMessageBuilder {
 		buffer.putInt(creature.getFactionStatus());
 		
 		byte[] customizationData = creature.getCustomization();
+		//byte[] customizationData = new byte[]{(byte)0x03,(byte)0xBF,(byte)0xC3,(byte)0x33,(byte)0x02,(byte)0x01,(byte)0x02};
 		
 		if(customizationData == null || customizationData.length <= 0) // Shuttles have no customization data
 			buffer.putShort((short) 0);
@@ -148,6 +149,9 @@ public class CreatureMessageBuilder extends TangibleMessageBuilder {
 
 		buffer.flip();
 		buffer = createBaseline("CREO", (byte) 3, buffer, size);
+		
+		tools.CharonPacketUtils.printAnalysis(buffer, "CREO 3");
+		
 		return buffer;
 
 	}

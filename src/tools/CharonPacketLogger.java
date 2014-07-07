@@ -5,7 +5,7 @@ import java.util.concurrent.BlockingQueue;
 import java.nio.file.*;
 
 public class CharonPacketLogger extends Thread {
-	  private static final CharonPacketLogger instance = new CharonPacketLogger();
+	  private static CharonPacketLogger instance;
 	  
 	  private BlockingQueue<String> itemsToLog =
 			    new ArrayBlockingQueue<String>(100);
@@ -16,8 +16,11 @@ public class CharonPacketLogger extends Thread {
 	  public static CharonPacketLogger getLogger() {
 	    return instance;
 	  }
-	  private CharonPacketLogger() {
-	    start();
+	  public CharonPacketLogger() {
+		  if (instance!=null)
+			  return; // Singleton
+		  instance = this;
+	      start();
 	  }
 	  
 	  public void run() {

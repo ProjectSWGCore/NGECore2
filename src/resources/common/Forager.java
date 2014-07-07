@@ -37,6 +37,8 @@ import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
 import resources.objects.tangible.TangibleObject;
 import services.ai.AIActor;
+import services.ai.states.FollowState;
+import tools.DevLog;
 
 /** 
  * @author Charon 
@@ -468,12 +470,31 @@ public class Forager {
 		treasureContainer.setAttachment("radial_filename", "object/treasureContainer");
 		treasureContainer.setAttachment("TreasureExtractorID", owner.getObjectID());
 		treasureContainer.setAttachment("TreasureGuards",guardList);
-		treasureContainer.setAttachment("ChestLevel",new Integer(spawnLevel));
+//		treasureContainer.setAttachment("ChestLevel",new Integer(spawnLevel));
 		configureTreasureLoot(treasureContainer,owner,spawnLevel);
 		NGECore.getInstance().lootService.DropLoot(owner, treasureContainer);
 		
 		owner.sendSystemMessage("@treasure_map/treasure_map:sys_time_limit",(byte)0);		
 		
+		Thread guardsThread = new Thread() {
+		    public void run() {
+		        try {
+		        	while (countAliveGuards(treasureContainer)>0){
+		        		Thread.sleep(1000);
+		        		if (owner.getPosture()==14)
+		        			Thread.currentThread().interrupt();
+		        	}		        	
+		        	treasureContainer.setAttachment("radial_filename", "object/treasureContainer");
+		        	owner.sendSystemMessage("@treasure_map/treasure_map:unlock_chest",(byte)0);
+		        	Thread.currentThread().interrupt();
+		        	
+		        } catch(InterruptedException va) {
+		            System.out.println(va);
+		            Thread.currentThread().interrupt(); // very important
+		        }
+		    }  
+		};
+		guardsThread.start();
 		
 		// all down: owner.sendSystemMessage("@treasure_map/treasure_map:unlock_chest",(byte)0);		
 	}
