@@ -1,5 +1,5 @@
 import sys
-# Project SWG:   Jabba TP Valarian Camp 2:  Static Spawns
+# Project SWG:   Jabba TP Valarian Hacker Bunker:  Static Spawns
 # (C)2014 ProjectSWG
 
 
