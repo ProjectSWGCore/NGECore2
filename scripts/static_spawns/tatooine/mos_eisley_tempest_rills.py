@@ -39,6 +39,8 @@ def addPlanetSpawns(core, planet):
 	tempest_rill44 = stcSvc.spawnObject('tempest_rill', 'tatooine', long(0), float(3892), float(58), float(-5078), float(0), float(0), float(0), float(0), 30)	
 	tempest_rill45 = stcSvc.spawnObject('tempest_rill', 'tatooine', long(0), float(3860), float(44), float(-5043), float(0), float(0), float(0), float(0), 30)	
 
+	# test for NPCs
+	#darkjedistature = stcSvc.spawnObject('jedi_robe_dark_jedi', 'tatooine', long(0), float(3569), float(5), float(-4611), float(0), float(0), float(0), float(0), 45)
 	
 	return
 	
