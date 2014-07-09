@@ -333,7 +333,7 @@ public class DevService implements INetworkDispatch {
 						inventory.add(pistol);
 						return;
 						
-					case 33:
+					case 33: // Heavy Weapons
 						WeaponObject heavy1 = (WeaponObject) core.objectService.createObject("object/weapon/ranged/heavy/shared_som_lava_cannon_generic.iff", planet);
 						heavy1.setIntAttribute("required_combat_level", 90);
 						
@@ -364,11 +364,11 @@ public class DevService implements INetworkDispatch {
 						
 						inventory.add(heavy2);
 						return;
-					case 40:
+					case 40: // Unity Ring
 						TangibleObject ring = (TangibleObject) core.objectService.createObject("object/tangible/wearables/ring/shared_ring_s01.iff", planet);
 						ring.setCustomName("Unity Ring");
 						inventory.add(ring);
-					case 41:
+					case 41: // Tusken King Rucksack
 						TangibleObject backpack = (TangibleObject) core.objectService.createObject("object/tangible/wearables/backpack/shared_backpack_krayt_skull.iff", planet);
 						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:agility_modified", 25);
 						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:constitution_modified", 30);
@@ -378,7 +378,7 @@ public class DevService implements INetworkDispatch {
 						backpack.setIntAttribute("cat_stat_mod_bonus.@stat_n:strength_modified", 35);
 						inventory.add(backpack);
 						return;
-					case 42:
+					case 42: // Heroism Heroic Set
 						TangibleObject heroismBand = (TangibleObject) core.objectService.createObject("object/tangible/wearables/ring/shared_ring_s04.iff", planet, "item_band_set_hero_01_01");
 						
 						TangibleObject heroismRing = (TangibleObject) core.objectService.createObject("object/tangible/wearables/ring/shared_ring_s02.iff", planet, "item_ring_set_hero_01_01");
@@ -395,9 +395,9 @@ public class DevService implements INetworkDispatch {
 						inventory.add(heroismBraceletRight);
 						inventory.add(heroismBraceletLeft);
 						return;
-					case 43:
+					case 43: // Breath of Heaven
 						TangibleObject drink = (TangibleObject) core.objectService.createObject("object/tangible/food/crafted/shared_drink_breath_of_heaven.iff", planet);
-						drink.setFloatAttribute("cat_stat_mod_bonus.@stat_n:constitution_modified", 100);
+						drink.setFloatAttribute("cat_stat_mod_bonus.@stat_n:constitution_modified", 80);
 						drink.setFloatAttribute("cat_stat_mod_bonus.@stat_n:dodge", 3);
 						inventory.add(drink);
 						return;
@@ -1088,8 +1088,7 @@ public class DevService implements INetworkDispatch {
 						
 						return;
 						
-					case 110:
-
+					case 110: // Survey Tools
 						SurveyTool mineralSurveyTool = (SurveyTool) core.objectService.createObject("object/tangible/survey_tool/shared_survey_tool_mineral.iff", planet);
 						mineralSurveyTool.setCustomName("Mineral Survey Device");
 						inventory.add(mineralSurveyTool);
