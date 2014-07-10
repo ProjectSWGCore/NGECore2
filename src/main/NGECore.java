@@ -374,19 +374,34 @@ public class NGECore {
 		}
 		
 		// Ping Server
-		try {
-			PingServer pingServer = new PingServer(config.getInt("PING.PORT"));
-			pingServer.bind();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+
+		
+		if(config.keyExists("PING.PORT"))
+			if (config.getInt("PING.PORT") != 0) {
+				try {
+					PingServer pingServer = new PingServer(config.getInt("PING.PORT"));
+					pingServer.bind();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			} else
+			System.out.println("Warning: pingServer was not launched. Port equals 0.");
+		else
+			System.out.println("Warning: pingServer was not launched. Port not specified.");
+		
 		
 		// Login Server
 		loginDispatch = new NetworkDispatch(this, false);
 		loginDispatch.addService(loginService);
-		
-		loginServer = new MINAServer(loginDispatch, config.getInt("LOGIN.PORT"));
-		loginServer.start();
+				
+		if(config.keyExists("LOGIN.PORT"))
+			if (config.getInt("LOGIN.PORT") != 0) {
+				loginServer = new MINAServer(loginDispatch, config.getInt("LOGIN.PORT"));
+				loginServer.start();
+			} else
+			System.out.println("Warning: loginServer was not launched. Port equals 0.");
+		else
+			System.out.println("Warning: loginServer was not launched. Port not specified.");
 		
 		// Zone Server
 		zoneDispatch = new NetworkDispatch(this, true);
@@ -417,9 +432,15 @@ public class NGECore {
 			zoneDispatch.addService(surveyService);
 			zoneDispatch.addService(resourceService);
 		}
-		
-		zoneServer = new MINAServer(zoneDispatch, config.getInt("ZONE.PORT"));
-		zoneServer.start();
+			
+		if(config.keyExists("ZONE.PORT"))
+			if (config.getInt("ZONE.PORT") != 0) {
+				zoneServer = new MINAServer(zoneDispatch, config.getInt("ZONE.PORT"));
+				zoneServer.start();
+			} else
+			System.out.println("Warning: zoneServer was not launched. Port equals 0.");
+		else
+			System.out.println("Warning: zoneServer was not launched. Port not specified.");
 		
 		//Start terrainList
 		// Original Planets
@@ -537,7 +558,6 @@ public class NGECore {
 		
 		browserService = new BrowserService(this);
 		
-
 		DevLogQueuer devLogQueuer = new DevLogQueuer();
 		
 		CharonPacketLogger packetLogger;
