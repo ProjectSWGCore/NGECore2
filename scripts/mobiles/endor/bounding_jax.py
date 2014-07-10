@@ -23,12 +23,12 @@ def addTemplate(core):
 	mobileTemplate.setBoneType("Animal Bones")
 	mobileTemplate.setBoneAmount(25)
 	mobileTemplate.setSocialGroup("jax")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setStalker(True)
-	mobileTemplate.setOptionsBitmask(128)
+	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_jax.iff')
+	templates.add('object/mobile/shared_bearded_jax.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
