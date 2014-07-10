@@ -21,7 +21,7 @@
  ******************************************************************************/
 package resources.datatables;
 
-public class ServerStatus {
+public class GalaxyStatus {
 	
 	public static final int Offline = 0;
 	public static final int Loading = 1;

@@ -52,7 +52,7 @@ import net.engio.mbassy.bus.config.BusConfiguration;
 import resources.common.BountyListItem;
 import resources.common.RadialOptions;
 import resources.common.ThreadMonitor;
-import resources.datatables.ServerStatus;
+import resources.datatables.GalaxyStatus;
 import resources.objects.creature.CreatureObject;
 import resources.objects.guild.GuildObject;
 import resources.objects.resource.GalacticResource;
@@ -305,7 +305,7 @@ public class NGECore {
 			databaseConnection2.connect(config.getString("DB2.URL"), config.getString("DB2.NAME"), config.getString("DB2.USER"), config.getString("DB2.PASS"), "mysql");
 		}
 		
-		setGalaxyStatus(ServerStatus.Loading);
+		setGalaxyStatus(GalaxyStatus.Loading);
 		swgObjectODB = new ObjectDatabase("swgobjects", true, true, true, SWGObject.class);
 		mailODB = new ObjectDatabase("mails", true, true, true, Mail.class);
 		guildODB = new ObjectDatabase("guild", true, true, true, GuildObject.class);
@@ -571,7 +571,7 @@ public class NGECore {
 		didServerCrash = false;
 		System.out.println("Started Server.");
 		cleanupCreatureODB();
-		setGalaxyStatus(ServerStatus.Online);
+		setGalaxyStatus(GalaxyStatus.Online);
 		
 	}
 
@@ -792,7 +792,7 @@ public class NGECore {
 					chatService.broadcastGalaxy("The server will be shutting down soon. Please find a safe place to logout. (" + minutes + " minutes left)");
 					Thread.sleep(60000);
 			}
-			setGalaxyStatus(ServerStatus.Locked);
+			setGalaxyStatus(GalaxyStatus.Locked);
 			chatService.broadcastGalaxy("The server will be shutting down soon. Please find a safe place to logout. (" + 1 + " minutes left)");
 			Thread.sleep(30000);
 			chatService.broadcastGalaxy("You will be disconnected in 30 seconds so the server can perform a final save before shutting down.  Please find a safe place to logout now.");
