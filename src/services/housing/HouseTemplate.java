@@ -17,6 +17,7 @@ public class HouseTemplate {
 	private Map<String, Point3D> buildingSigns;
 	private boolean isCivicStructure;
 	private int civicStructureType;
+	private int destructionFee = 0;
 	
 	public HouseTemplate(String deedTemplate, String buildingTemplate, int lotCost) {
 		this.deedTemplate = deedTemplate;
@@ -94,6 +95,14 @@ public class HouseTemplate {
 
 	public void setCivicStructureType(int civicStructureType) {
 		this.civicStructureType = civicStructureType;
+	}
+
+	public int getDestructionFee() {
+		return destructionFee;
+	}
+
+	public void setDestructionFee(int destructionFee) {
+		this.destructionFee = destructionFee;
 	}
 	
 }

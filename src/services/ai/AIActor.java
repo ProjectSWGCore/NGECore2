@@ -97,6 +97,12 @@ public class AIActor {
 			try {
 				if(creature.getHealth() < creature.getMaxHealth() && !creature.isInCombat() && creature.getPosture() != 13 && creature.getPosture() != 14)
 					creature.setHealth(creature.getHealth() + (36 + creature.getLevel() * 4));
+				if(creature.getAction() < creature.getMaxAction() && creature.getPosture() != 14) {
+					if(!creature.isInCombat())
+						creature.setAction(creature.getAction() + (15 + creature.getLevel() * 5));
+					else
+						creature.setAction(creature.getAction() + ((15 + creature.getLevel() * 5) / 2));
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
