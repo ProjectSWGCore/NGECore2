@@ -17,7 +17,7 @@ def addTemplate(core):
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(True)
-	mobileTemplate.setScale(2)
+	mobileTemplate.setScale(1)
 	mobileTemplate.setSocialGroup("gorax")
 	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setStalker(False)

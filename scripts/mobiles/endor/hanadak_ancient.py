@@ -16,7 +16,7 @@ def addTemplate(core):
 
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
-	mobileTemplate.setDeathblow(Yes)
+	mobileTemplate.setDeathblow(True)
 	mobileTemplate.setScale(1.2)
 	mobileTemplate.setMeatType("Carnivore Meat")
 	mobileTemplate.setMeatAmount(40)
