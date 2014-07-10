@@ -114,7 +114,7 @@ import services.trade.TradeService;
 import services.travel.TravelService;
 import tools.CharonPacketLogger;
 import tools.DevLogQueuer;
-import services.BattlefieldService;
+//import services.BattlefieldService;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.CrcStringTableVisitor;
 import engine.clientdata.visitors.DatatableVisitor;
@@ -210,7 +210,7 @@ public class NGECore {
 	public ReverseEngineeringService reverseEngineeringService;
 	public PetService petService;
 	public BrowserService browserService;
-	public BattlefieldService battlefieldService;
+	//public BattlefieldService battlefieldService;
 	
 	// Login Server
 	public NetworkDispatch loginDispatch;
@@ -560,7 +560,7 @@ public class NGECore {
 		retroService.run();
 		
 		browserService = new BrowserService(this);
-		battlefieldService = new BattlefieldService(this);
+		//battlefieldService = new BattlefieldService(this);
 		
 		DevLogQueuer devLogQueuer = new DevLogQueuer();
 		
