@@ -50,6 +50,7 @@ import resources.common.*;
 import resources.datatables.DisplayType;
 import resources.guild.Guild;
 import resources.objects.creature.CreatureObject;
+import resources.objects.group.GroupObject;
 import resources.objects.player.PlayerObject;
 import protocol.swg.AddIgnoreMessage;
 import protocol.swg.ObjControllerMessage;
@@ -222,7 +223,7 @@ public class ChatService implements INetworkDispatch {
 				
 				SWGObject recipient = getObjectByFirstName(firstName);				
 				
-				if (recipient == null)
+				if (recipient == null || !recipient.isInQuadtree())
 					return;
 				
 				PlayerObject recipientGhost = (PlayerObject) recipient.getSlottedObject("ghost");
@@ -266,29 +267,34 @@ public class ChatService implements INetworkDispatch {
 				
 				if(sender == null)
 					return;
-				// TODO: Recipient handling for values: citizens, group, guild ranks (ace, boot, admiral, etc.)
-				
-				if (packet.getRecipient().equals("guild")) {
-					Guild guild = core.guildService.getGuildById(((CreatureObject) sender).getGuildId());
-					if (guild == null || !guild.getMembers().containsKey(sender.getObjectID())) {
-						ChatOnSendPersistentMessage response = new ChatOnSendPersistentMessage(4, packet.getCounter());
+
+				switch (packet.getRecipient()) {
+					case "citizens": break;
+					case "guild":
+						Guild guild = core.guildService.getGuildById(((CreatureObject) sender).getGuildId());
+						if (guild == null || !guild.getMembers().containsKey(sender.getObjectID())) {
+							ChatOnSendPersistentMessage response = new ChatOnSendPersistentMessage(4, packet.getCounter());
+							session.write(response.serialize());
+							return;
+						}
+						
+						if (!guild.getMember(sender.getObjectID()).hasMailPermission()) {
+							((CreatureObject) sender).sendSystemMessage("@guild:generic_fail_no_permission", (byte) 0);
+							ChatOnSendPersistentMessage response = new ChatOnSendPersistentMessage(4, packet.getCounter());
+							session.write(response.serialize());
+							return;
+						}
+						guild.sendGuildMail(sender.getCustomName(), packet.getSubject(), packet.getMessage());
+						
+						ChatOnSendPersistentMessage response = new ChatOnSendPersistentMessage(0, packet.getCounter());
 						session.write(response.serialize());
 						return;
-					}
+					case "group": break;
 					
-					if (!guild.getMember(sender.getObjectID()).hasMailPermission()) {
-						((CreatureObject) sender).sendSystemMessage("@guild:generic_fail_no_permission", (byte) 0);
-						ChatOnSendPersistentMessage response = new ChatOnSendPersistentMessage(4, packet.getCounter());
-						session.write(response.serialize());
-						return;
-					}
-					guild.sendGuildMail(sender.getCustomName(), packet.getSubject(), packet.getMessage());
-					
-					ChatOnSendPersistentMessage response = new ChatOnSendPersistentMessage(0, packet.getCounter());
-					session.write(response.serialize());
-					return;
+					default: break;
+					// TODO: Guild ranks
 				}
-				
+
 				SWGObject recipient = core.objectService.getObjectByFirstName(packet.getRecipient());
 				
 				if (recipient == null)
@@ -750,25 +756,6 @@ public class ChatService implements INetworkDispatch {
 		
 	}
 	
-	public SWGObject getObjectByFirstName(String name) {
-		ConcurrentHashMap<IoSession, Client> clients = core.getActiveConnectionsMap();
-		
-		if(name.contains(" "))
-			name = name.split(" ")[0];
-		
-		for(Client client : clients.values()) {
-			if(client.getParent() == null)
-				continue;
-			
-			String fullName = client.getParent().getCustomName();
-			String firstName = fullName.split(" ")[0];
-			
-			if(firstName.equalsIgnoreCase(name))
-				return client.getParent();
-		}
-		return null;
-	}
-	
 	public int generateMailId() {
 		Random rand = new Random();
 		
@@ -1076,5 +1063,11 @@ public class ChatService implements INetworkDispatch {
 		
 		return message;
 	}
+	
+	@Deprecated
+	public SWGObject getObjectByFirstName(String name) {
+		return core.objectService.getObjectByFirstName(name);
+	}
+	
 	
 }
