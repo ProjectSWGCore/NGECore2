@@ -21,6 +21,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("bloodseeker")
 	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_bloodseeker.iff')
@@ -32,6 +33,9 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_bite_4')
+	attacks.add('bm_bolster_armor_4')
+	attacks.add('bm_enfeeble_4')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

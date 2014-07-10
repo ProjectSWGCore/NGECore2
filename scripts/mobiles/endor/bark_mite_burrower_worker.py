@@ -19,9 +19,9 @@ def addTemplate(core):
 	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(1)
 	mobileTemplate.setSocialGroup("bark mite")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setStalker(False)
-	mobileTemplate.setOptionsBitmask(128)
+	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_bark_mite.iff')
@@ -33,6 +33,9 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_bite_4')
+	attacks.add('bm_bolster_armor_4')
+	attacks.add('bm_enfeeble_4')
 	mobileTemplate.setDefaultAttack('creatureRangedAttack')
 	mobileTemplate.setAttacks(attacks)
 	

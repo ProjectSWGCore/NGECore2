@@ -20,7 +20,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup('korga tribe')
 	mobileTemplate.setAssistRange(1)
 	mobileTemplate.setStalker(False)
-	mobileTemplate.setOptionsBitmask(128)
+	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
 	
 	
 	templates = Vector()
