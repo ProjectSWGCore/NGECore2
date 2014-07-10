@@ -1,6 +1,6 @@
 import sys
 from engine.resources.scene import Point3D
-from resources.datatables import ServerStatus
+from resources.datatables import GalaxyStatus
 
 def setup():
     return
@@ -27,9 +27,9 @@ def run(core, actor, target, commandString):
 		return
 	
 	if command == 'lockServer':
-		core.setGalaxyStatus(ServerStatus.Locked)
+		core.setGalaxyStatus(GalaxyStatus.Locked)
 	if command == 'unlockServer':
-		core.setGalaxyStatus(ServerStatus.Online)
+		core.setGalaxyStatus(GalaxyStatus.Online)
 	if command == 'info':
 		actor.sendSystemMessage(str(core.getActiveZoneClients()) + ' online characters.', 0)
 	if command == 'shutdown':
