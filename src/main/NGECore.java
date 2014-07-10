@@ -52,6 +52,7 @@ import net.engio.mbassy.bus.config.BusConfiguration;
 import resources.common.BountyListItem;
 import resources.common.RadialOptions;
 import resources.common.ThreadMonitor;
+import resources.datatables.ServerStatus;
 import resources.objects.creature.CreatureObject;
 import resources.objects.guild.GuildObject;
 import resources.objects.resource.GalacticResource;
@@ -113,6 +114,7 @@ import services.trade.TradeService;
 import services.travel.TravelService;
 import tools.CharonPacketLogger;
 import tools.DevLogQueuer;
+import services.BattlefieldService;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.CrcStringTableVisitor;
 import engine.clientdata.visitors.DatatableVisitor;
@@ -208,6 +210,7 @@ public class NGECore {
 	public ReverseEngineeringService reverseEngineeringService;
 	public PetService petService;
 	public BrowserService browserService;
+	public BattlefieldService battlefieldService;
 	
 	// Login Server
 	public NetworkDispatch loginDispatch;
@@ -302,7 +305,7 @@ public class NGECore {
 			databaseConnection2.connect(config.getString("DB2.URL"), config.getString("DB2.NAME"), config.getString("DB2.USER"), config.getString("DB2.PASS"), "mysql");
 		}
 		
-		setGalaxyStatus(1);
+		setGalaxyStatus(ServerStatus.Loading);
 		swgObjectODB = new ObjectDatabase("swgobjects", true, true, true, SWGObject.class);
 		mailODB = new ObjectDatabase("mails", true, true, true, Mail.class);
 		guildODB = new ObjectDatabase("guild", true, true, true, GuildObject.class);
@@ -557,6 +560,7 @@ public class NGECore {
 		retroService.run();
 		
 		browserService = new BrowserService(this);
+		battlefieldService = new BattlefieldService(this);
 		
 		DevLogQueuer devLogQueuer = new DevLogQueuer();
 		
@@ -567,7 +571,7 @@ public class NGECore {
 		didServerCrash = false;
 		System.out.println("Started Server.");
 		cleanupCreatureODB();
-		setGalaxyStatus(2);
+		setGalaxyStatus(ServerStatus.Online);
 		
 	}
 
@@ -788,7 +792,7 @@ public class NGECore {
 					chatService.broadcastGalaxy("The server will be shutting down soon. Please find a safe place to logout. (" + minutes + " minutes left)");
 					Thread.sleep(60000);
 			}
-			setGalaxyStatus(3);
+			setGalaxyStatus(ServerStatus.Locked);
 			chatService.broadcastGalaxy("The server will be shutting down soon. Please find a safe place to logout. (" + 1 + " minutes left)");
 			Thread.sleep(30000);
 			chatService.broadcastGalaxy("You will be disconnected in 30 seconds so the server can perform a final save before shutting down.  Please find a safe place to logout now.");
