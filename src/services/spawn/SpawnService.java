@@ -107,6 +107,9 @@ public class SpawnService {
 			creature.setLootGroups(mobileTemplate.getLootGroups());
 		
 		creature.setOptionsBitmask(mobileTemplate.getOptionsBitmask());
+		if (mobileTemplate.getConversationFileName().length()>0)
+			creature.setAttachment("conversationFile",mobileTemplate.getConversationFileName());
+				
 		creature.setFaction(mobileTemplate.getFaction());
 		creature.setFactionStatus(mobileTemplate.getFactionStatus());
 		creature.setPvpBitmask(mobileTemplate.getPvpBitmask());
