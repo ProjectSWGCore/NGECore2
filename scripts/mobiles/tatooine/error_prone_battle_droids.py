@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('tatooine_error_prone_droid')
 	mobileTemplate.setLevel(6)
-	mobileTemplate.setMinLevel(6)
-	mobileTemplate.setMaxLevel(7)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)

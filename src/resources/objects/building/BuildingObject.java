@@ -56,6 +56,7 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 	private Vector<Long> entryList = new Vector<Long>();
 	private Vector<Long> banList = new Vector<Long>();
 	private Vector<Long> adminList = new Vector<Long>();
+	private int destructionFee = 0;
 	
 	public static final byte PRIVATE = (byte) 0;
 	public static final byte PUBLIC = (byte) 1;
@@ -425,6 +426,14 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 	
 	public boolean isOnAdminList(CreatureObject creature) {
 		return adminList.contains(creature.getObjectID());		
+	}
+
+	public int getDestructionFee() {
+		return destructionFee;
+	}
+
+	public void setDestructionFee(int destructionFee) {
+		this.destructionFee = destructionFee;
 	}
 
 	

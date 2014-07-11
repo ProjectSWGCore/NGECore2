@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('tusken_raider_warrior')
 	mobileTemplate.setLevel(6)
-	mobileTemplate.setMinLevel(6)
-	mobileTemplate.setMaxLevel(7)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)

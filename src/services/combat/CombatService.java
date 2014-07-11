@@ -66,7 +66,9 @@ import services.sui.SUIService.MessageBoxType;
 import services.sui.SUIWindow;
 import services.sui.SUIWindow.SUICallback;
 import services.sui.SUIWindow.Trigger;
+import tools.DevLog;
 import main.NGECore;
+import engine.clients.Client;
 import engine.resources.common.CRC;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
@@ -312,17 +314,29 @@ public class CombatService implements INetworkDispatch {
 	}
 	
 	private void applyDamage(CreatureObject attacker, TangibleObject target, int damage) {
+
 		target.setConditionDamage(target.getConditionDamage() + damage);
 		
 		if (target.getOption(Options.MOUNT)) {
 			core.mountService.damage((CreatureObject) target);
+		}
+
+		if (target instanceof CreatureObject){
+			CreatureObject targetCreature = (CreatureObject)target;
+			if (targetCreature.getCalledPet()!=null) {
+				AIActor petActor = (AIActor) targetCreature.getCalledPet().getAttachment("AI");
+				if (petActor!=null){
+					petActor.addDefender(attacker);
+					DevLog.debugout("Charon", "Pet AI", "applyDamage addDefender");
+				}
+			}
 		}
 		
 		DamageTaken event = events.new DamageTaken();
 		event.attacker = attacker;
 		event.damage = damage;
 		target.getEventBus().publish(event);
-		
+		System.out.println("APPLY DAMAGE2");
 		attacker.setTefTime(300000);
 	}
 
@@ -611,7 +625,7 @@ public class CombatService implements INetworkDispatch {
 	}
 	
 	private float calculateDamage(CreatureObject attacker, CreatureObject target, WeaponObject weapon, CombatCommand command) {
-		
+
 		if(target.getBuffByName("me_stasis_self_1") != null || target.getBuffByName("me_stasis_1") != null)
 			return 0;
 
@@ -660,14 +674,18 @@ public class CombatService implements INetworkDispatch {
 		if(target.getSkillMod("combat_divide_damage_dealt") != null) {
 			rawDamage *= (1 - (target.getSkillMod("combat_divide_damage_dealt").getBase() / 100));			
 		}
-				
+		
+		
+		//Hook in here to agitate called pet
+		
+		
 		return rawDamage;
 		
 	}
 
 	
 	private float calculateDamage(CreatureObject attacker, TangibleObject target, WeaponObject weapon, CombatCommand command) {
-		
+
 		float rawDamage = command.getAddedDamage();
 		
 		if(command.getPercentFromWeapon() > 0 && weapon != attacker.getSlottedObject("default_weapon")) {
@@ -824,7 +842,14 @@ public class CombatService implements INetworkDispatch {
 		if(target.getHealth() - damage <= 0 && target.getSlottedObject("ghost") != null) {
 			
 			if(target.hasBuff("incapWeaken")) {
-				deathblowPlayer(attacker, target);
+				if (!attacker.isPlayer()){
+					AIActor aiActor = (AIActor)attacker.getAttachment("AI");						
+					if (aiActor.getMobileTemplate().isDeathblow())
+						deathblowPlayer(attacker, target);
+				} else
+				{
+					deathblowPlayer(attacker, target);
+				}
 				return;
 			}
 			
@@ -836,8 +861,10 @@ public class CombatService implements INetworkDispatch {
 				target.setHealth(1);
 				target.setPosture(Posture.Incapacitated);
 				target.setTurnRadius(0);
-				target.setSpeedMultiplierBase(0);		
+				target.setSpeedMultiplierBase(0);	
+				
 			}
+
 			ScheduledFuture<?> incapTask = scheduler.schedule(() -> {
 				
 				synchronized(target.getMutex()) {
@@ -873,10 +900,26 @@ public class CombatService implements INetworkDispatch {
 		synchronized(target.getMutex()) {
 			target.setHealth(target.getHealth() - damage);
 		}
-		DamageTaken event = events.new DamageTaken();
-		event.attacker = attacker;
-		event.damage = damage;
-		target.getEventBus().publish(event);
+		
+
+		if (target instanceof CreatureObject){
+			CreatureObject targetCreature = (CreatureObject)target;
+			if (targetCreature.getCalledPet()!=null) {
+				AIActor petActor = (AIActor) targetCreature.getCalledPet().getAttachment("AI");
+				if (petActor!=null){
+					petActor.addDefender(attacker);
+					DevLog.debugout("Charon", "Pet AI", "applyDamage addDefender");
+				}
+			}
+		}
+		
+		
+		if (target.getPosture()!=13){
+			DamageTaken event = events.new DamageTaken();
+			event.attacker = attacker;
+			event.damage = damage;
+			target.getEventBus().publish(event);
+		}
 	}
 	
 	public void doDrainHeal(CreatureObject receiver, int drainAmount) {
@@ -1329,7 +1372,20 @@ public class CombatService implements INetworkDispatch {
 		if(!applySpecialCost(creature, weapon, command))
 			success = false;
 		
-		if(!success && creature.getClient() != null) {
+		// Quick Hotfix for AI NPCs buffing themselves
+		Client client = null;
+		if(creature.getClient() == null) {
+			if (creature.getAttachment("AI")!=null){
+				AIActor aiActor = (AIActor) creature.getAttachment("AI");
+				CreatureObject target = aiActor.getFollowObject();
+				if (target.getClient()!=null)
+					client = target.getClient(); // Use player's client reference that is in combat with that NPC
+			}
+		} else {
+			client = creature.getClient();
+		}
+		
+		if(!success && client != null) {
 			IoSession session = creature.getClient().getSession();
 			CommandEnqueueRemove commandRemove = new CommandEnqueueRemove(creature.getObjectId(), actionCounter);
 			session.write(new ObjControllerMessage(0x0B, commandRemove).serialize());
@@ -1338,6 +1394,9 @@ public class CombatService implements INetworkDispatch {
 			return;
 		}
 		
+		if (client == null)
+			return;
+		
 		if (creature.hasBuff("co_position_secured"))
 			core.buffService.removeBuffFromCreatureByName(creature, "co_position_secured");
 		else
@@ -1345,11 +1404,11 @@ public class CombatService implements INetworkDispatch {
 
 		StartTask startTask = new StartTask(actionCounter, creature.getObjectID(), command.getCommandCRC(), CRC.StringtoCRC(command.getCooldownGroup()), command.getCooldown());
 		ObjControllerMessage objController2 = new ObjControllerMessage(0x0B, startTask);
-		creature.getClient().getSession().write(objController2.serialize());
+		client.getSession().write(objController2.serialize());
 		
 		CommandEnqueueRemove commandRemove = new CommandEnqueueRemove(creature.getObjectID(), actionCounter);
 		ObjControllerMessage objController3 = new ObjControllerMessage(0x0B, commandRemove);
-		creature.getClient().getSession().write(objController3.serialize());
+		client.getSession().write(objController3.serialize());
 
 		
 	}

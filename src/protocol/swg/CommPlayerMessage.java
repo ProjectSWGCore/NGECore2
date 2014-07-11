@@ -26,6 +26,7 @@ import java.nio.ByteOrder;
 import org.apache.mina.core.buffer.IoBuffer;
 
 import engine.resources.common.CRC;
+import resources.common.Opcodes;
 import resources.common.OutOfBand;
 
 public class CommPlayerMessage extends SWGMessage {
@@ -51,7 +52,7 @@ public class CommPlayerMessage extends SWGMessage {
 		buffer.setAutoExpand(true);
 
 		buffer.putShort((short) 2);
-		buffer.putInt(0x594AD258);
+		buffer.putInt(Opcodes.CommPlayerMessage);
 		buffer.put((byte) 0); // aurebesh borders on comm, space version? Can cause crashes
 		buffer.putLong(objectId);
 		buffer.put(outOfBand.serialize().array());

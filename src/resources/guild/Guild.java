@@ -40,7 +40,10 @@ public class Guild {
 	private String leaderName;
 	private Map<Long, GuildMember> members = new HashMap<Long, GuildMember>();
 	private Map<Long, String> sponsoredPlayers = new HashMap<Long, String>();
+	private Map<Long, Integer> leaderCandidates = new HashMap<Long, Integer>();
 	private String motd = "";
+	private boolean electionsEnabled = false;
+	private long electionResultsDate;
 	
 	public Guild(int id, String abbreviation, String name, SWGObject leader) {
 		this.id = id;
@@ -161,5 +164,34 @@ public class Guild {
 
 	public GuildMember getMember(long objectID) {
 		return members.get(objectID);
+	}
+
+	public boolean isElectionsEnabled() {
+		return electionsEnabled;
+	}
+
+	public void setElectionsEnabled(boolean electionsEnabled) {
+		this.electionsEnabled = electionsEnabled;
+	}
+
+	public long getElectionResultsDate() {
+		return electionResultsDate;
+	}
+
+	public void setElectionResultsDate(long electionResultsDate) {
+		this.electionResultsDate = electionResultsDate;
+	}
+
+	public Map<Long, Integer> getLeaderCandidates() {
+		return leaderCandidates;
+	}
+
+	public void setLeaderCandidates(Map<Long, Integer> leaderCandidates) {
+		this.leaderCandidates = leaderCandidates;
+	}
+	
+	public boolean isRunningForLeader(long objectID) {
+		if (leaderCandidates.containsKey(Long.valueOf(objectID))) return true;
+		else return false;
 	}
 }

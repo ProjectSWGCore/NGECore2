@@ -23,8 +23,8 @@ def addTemplate(core):
 	mobileTemplate.setBoneType("Animal Bones")
 	mobileTemplate.setBoneAmount(8)
 	mobileTemplate.setSocialGroup("squall")
-	mobileTemplate.setAssistRange(0)
-	mobileTemplate.setOptionsBitmask(128)
+	mobileTemplate.setAssistRange(12)
+	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
 	mobileTemplate.setStalker(True)
 	
 	templates = Vector()
@@ -37,6 +37,7 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_bite_4')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

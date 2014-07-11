@@ -18,9 +18,9 @@ def addTemplate(core):
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(1)
-	mobileTemplate.setSocialGroup("bageraset")
-	mobileTemplate.setAssistRange(0)
-	mobileTemplate.setOptionsBitmask(128)
+	mobileTemplate.setSocialGroup("roba")
+	mobileTemplate.setAssistRange(12)
+	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
 	mobileTemplate.setStalker(True)
 	
 	templates = Vector()
@@ -33,6 +33,9 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_charge_4')
+	attacks.add('bm_dampen_pain_4')
+	attacks.add('bm_slash_4')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

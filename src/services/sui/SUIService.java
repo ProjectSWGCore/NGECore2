@@ -85,6 +85,9 @@ public class SUIService implements INetworkDispatch {
 				if(target == null || owner == null)
 					return;
 				
+//				if (getRadialFilename(target).equals("noradialoptions"))
+//					return;
+				
 				if (target instanceof HarvesterObject){
 					HarvesterObject harvester = (HarvesterObject) target;
 					Vector<String> admins = harvester.getAdminList();
@@ -206,7 +209,7 @@ public class SUIService implements INetworkDispatch {
 		});
 		
 		swgOpcodes.put(Opcodes.SuiEventNotification, new INetworkRemoteEvent() {
-
+			
 			@Override
 			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
 				
@@ -232,7 +235,7 @@ public class SUIService implements INetworkDispatch {
 					return;
 
 				PyObject func = window.getFunctionByEventId(suiEvent.getEventType());
-				
+
 				if(func != null)
 					func.__call__(Py.java2py(owner), Py.java2py(window), Py.java2py(suiEvent.getEventType()), Py.java2py(suiEvent.getReturnList()));
 				
@@ -382,6 +385,12 @@ public class SUIService implements INetworkDispatch {
 
 		return window;
 		
+	}
+	
+	public SUIWindow createMessageBox(int type, String title, String promptText, SWGObject owner, SWGObject rangeObject, float maxDistance, SUICallback handleFunc) {
+		SUIWindow window = createMessageBox(type, title, promptText, owner, rangeObject, maxDistance);
+		window.addHandler(0, "", Trigger.TRIGGER_OK, new Vector<String>(), handleFunc);
+		return window;
 	}
 	
 	public SUIWindow createInputBox(int type, String title, String promptText, SWGObject owner, SWGObject rangeObject, float maxDistance) {

@@ -26,6 +26,7 @@ import java.nio.ByteOrder;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.buffer.SimpleBufferAllocator;
 
+import resources.common.Opcodes;
 import engine.resources.objects.SWGObject;
 
 public class AttributeListMessage extends SWGMessage {
@@ -50,7 +51,7 @@ public class AttributeListMessage extends SWGMessage {
 		result.setAutoExpand(true);
 		
 		result.putShort((short) 5);
-		result.putInt(0xF3F12F2A);
+		result.putInt(Opcodes.AttributeListMessage);
 		
 		result.putLong(target.getObjectID());
 		result.putShort((short) 0);

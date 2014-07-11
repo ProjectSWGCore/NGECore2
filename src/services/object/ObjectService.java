@@ -52,6 +52,7 @@ import resources.datatables.PlayerFlags;
 import resources.guild.Guild;
 import resources.harvest.SurveyTool;
 
+import org.apache.commons.lang3.text.WordUtils;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 import org.python.core.Py;
@@ -606,7 +607,7 @@ public class ObjectService implements INetworkDispatch {
 			for(SWGObject obj : objectList.values()) {
 				if(obj.getCustomName() == null)
 					continue;
-				if(obj.getCustomName().equals(customName))
+				if(obj.getCustomName().equalsIgnoreCase(customName))
 					return obj;
 			}
 			
@@ -621,7 +622,7 @@ public class ObjectService implements INetworkDispatch {
 				continue;
 			}
 			
-			if (object.getCustomName() != null && customName.length() > 0 && object.getCustomName().equals(customName)) {
+			if (object.getCustomName() != null && customName.length() > 0 && object.getCustomName().equalsIgnoreCase(customName)) {
 				return object;
 			}
 		}
@@ -640,7 +641,7 @@ public class ObjectService implements INetworkDispatch {
 					continue;
 				if(obj.getCustomName() == null)
 					continue;
-				if(obj.getCustomName().startsWith(customName))
+				if(obj.getCustomName().startsWith(customName) || obj.getCustomName().toUpperCase().startsWith(WordUtils.capitalize(customName)))
 					return obj;
 			}
 			
@@ -655,7 +656,7 @@ public class ObjectService implements INetworkDispatch {
 				continue;
 			}
 			
-			if (object.getCustomName() != null && customName.length() > 0 && object.getCustomName().startsWith(customName)) {
+			if (object.getCustomName() != null && customName.length() > 0 && (object.getCustomName().startsWith(customName) || object.getCustomName().toUpperCase().startsWith(WordUtils.capitalize(customName)))) {
 				return object;
 			}
 		}
@@ -730,10 +731,18 @@ public class ObjectService implements INetworkDispatch {
 		
 		return objectId;
 	}
+
+	public Vector<SWGObject> getItemsInContainerByStfName(CreatureObject creature, long containerId, String stfName) {
+		Vector<SWGObject> itemList = new Vector<SWGObject>();
+		SWGObject container = getObject(containerId);
+		
+		container.viewChildren(creature, false, false, (item) -> { if (item.getStfName() == stfName) { itemList.add(item); } });
+		
+		return itemList;
+	}	
 	
 	public void useObject(CreatureObject creature, final SWGObject object) {
-		System.out.println("creature " + creature);
-		System.out.println("object " + object);
+
 		if (creature == null || object == null) {
 			return;
 		}
@@ -819,7 +828,7 @@ public class ObjectService implements INetworkDispatch {
 			//shirt.setIntAttribute(effectName, powerValue);
 			shirt.setAttachment("PUPEffectName", effectName);
 			shirt.setAttachment("PUPEffectValue", powerValue);
-			
+		
 		}
 		if (object.getTemplate().equals(powerUpTemplate3)){
 			// weapon
@@ -906,22 +915,27 @@ public class ObjectService implements INetworkDispatch {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		if (object instanceof TangibleObject) {
 			TangibleObject item = (TangibleObject) object;
 			int uses = item.getUses();
 			
 			if (uses > 0)  {
-				item.setUses(uses--);
+				item.setUses(uses - 1);
 				
 				if (item.getUses() == 0) {
 					destroyObject(object);
 				}
 			}
 		}
-		
+
 		if (object.getStringAttribute("proc_name") != null) {
-			core.buffService.addBuffToCreature(creature, object.getStringAttribute("proc_name").replace("@ui_buff:", ""), creature);
+			String buffName = object.getStringAttribute("proc_name").replace("@ui_buff:", "");
+			
+			if (object.getAttachment("alternateBuffName") != null)
+				buffName = (String) object.getAttachment("alternateBuffName");
+			
+			core.buffService.addBuffToCreature(creature, buffName, creature);
 		}
 		
 		String filePath = "scripts/" + template.split("shared_" , 2)[0].replace("shared_", "") + template.split("shared_" , 2)[1].replace(".iff", "") + ".py";

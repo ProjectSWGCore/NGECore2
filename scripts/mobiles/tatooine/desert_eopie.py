@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('desert_eopie')
 	mobileTemplate.setLevel(16)
-	mobileTemplate.setMinLevel(16)
-	mobileTemplate.setMaxLevel(17)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)

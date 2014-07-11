@@ -25,6 +25,8 @@ import java.nio.ByteOrder;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
+import resources.common.Opcodes;
+
 
 public class CreateCharacterSuccess extends SWGMessage {
 
@@ -45,7 +47,7 @@ public class CreateCharacterSuccess extends SWGMessage {
 		IoBuffer result = IoBuffer.allocate(14).order(ByteOrder.LITTLE_ENDIAN);
 		
 		result.putShort((short) 2);
-		result.putInt(0x1DB575CC);
+		result.putInt(Opcodes.CreateCharacterSuccess);
 		result.putLong(charId);
 		result.flip();
 		return result;
