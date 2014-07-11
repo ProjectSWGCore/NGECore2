@@ -9,6 +9,9 @@ def run(core, actor, target, commandString):
 	container = actor.getContainer()
 	parsedMsg = commandString.split(' ', 2)
 	
+	if tarObj.getAttachment('initialized') is not None and target.getAttachment('initialized') == True:
+		return
+
 	if core.housingService.getPermissions(actor, container): # i should probably relook into my permissions system... it kinda sucks
 		if parsedMsg[0] == "up":
 			core.simulationService.transform(tarObj, Point3D(0, float(parsedMsg[1]) * 0.01, 0))

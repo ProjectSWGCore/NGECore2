@@ -1,7 +1,7 @@
 import sys
 
 def setup(core, actor, target, command):
-	core.buffService.addBuffToCreature(target, 'fs_force_throw')
+	core.buffService.addBuffToCreature(target, 'fs_force_throw', actor)
 	return
 	
 def preRun(core, actor, target, command):

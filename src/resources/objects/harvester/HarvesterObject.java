@@ -40,10 +40,6 @@ import resources.objects.resource.GalacticResource;
 import resources.objects.resource.ResourceContainerObject;
 import resources.objects.tangible.TangibleObject;
 
-/** 
- * @author Charon 
- */
-
 @Persistent(version=0)
 public class HarvesterObject extends InstallationObject implements Serializable {
 	
@@ -121,10 +117,9 @@ public class HarvesterObject extends InstallationObject implements Serializable 
 	private String deedTemplate;
 	
 	private int specRate;
-
 	
-	public HarvesterObject(long objectID, Planet planet, String template, Point3D position, Quaternion orientation){
-		super(objectID, planet, template, position, orientation);
+	public HarvesterObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String template) {
+		super(objectID, planet, position, orientation, template);
 		this.setConditionDamage(100);
 		messageBuilder = new HarvesterMessageBuilder(this);
 		installationMessageBuilder = new InstallationMessageBuilder((InstallationObject)this);
@@ -428,5 +423,14 @@ public class HarvesterObject extends InstallationObject implements Serializable 
 	public ObjectMessageBuilder getMessageBuilder() {
 		return messageBuilder;
 	}
+	
+	public boolean isOnHopperList(CreatureObject creature) {
+		return hopperList.contains(creature.getCustomName().split(" ")[0]);
+	}
+	
+	public boolean isOnAdminList(CreatureObject creature) {
+		return adminList.contains(creature.getCustomName().split(" ")[0]);		
+	}
+
 	
 }

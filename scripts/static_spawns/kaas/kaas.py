@@ -5,7 +5,7 @@ import sys
 # Do not make ANY changes to this script without direct approval from Levarris!
 
 from resources.datatables import Options
-from resources.datatables import StateStatus
+from resources.datatables import State
 
 def addPlanetSpawns(core, planet):
 
@@ -13,8 +13,10 @@ def addPlanetSpawns(core, planet):
 	stcSvc = core.staticService
 	objSvc = core.objectService
 #Dark Temple Area
-	#Structures
-	#stcSvc.spawnObject('object/building/military/shared_military_base_police_station_imperial_lok_otto.iff', 'kaas', long(0), float(-5117.8), float(80.0), float(-2314.1), float(0), float(0))
+	#Structures    #TODO: Ascertain why the core is not spawning the child cells.
+	
+	#building = stcSvc.spawnObject('object/building/military/shared_military_base_police_station_imperial_lok_otto.iff', 'kaas', long(0), float(-5117.8), float(80.0), float(-2314.1), float(0), float(0))
+	#print building.getCells().size()
 	#stcSvc.spawnObject('object/building/player/shared_player_house_corellia_medium_style_01.iff', 'kaas', long(0), float(-5078.6), float(80.0), float(-2302.5), float(0), float(0))
 	#stcSvc.spawnObject('object/building/general/shared_bunker_imperial_weapons_research_facility_01.iff', 'kaas', long(0), float(-5159.5), float(80.0), float(-2298.7), float(0), float(0))
 	#stcSvc.spawnObject('object/building/content/aurilia/shared_aurilia_pyramid_hut.iff', 'kaas', long(0), float(-5163.9), float(79.0), float(-2369.6), float(0.71), float(0.71))
@@ -54,7 +56,6 @@ def addPlanetSpawns(core, planet):
 	
 	
 	#Dark Temple Interior
-	stcSvc.spawnObject('object/static/structure/content/shared_exar_kun_torch_01.iff', 'kaas', long(468319), float(0.0), float(-1.3), float(20.8), float(0), float(0))
 	
 	
 #Village of the Descendants Area

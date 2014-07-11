@@ -36,7 +36,9 @@ import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import main.NGECore;
 import engine.clientdata.ClientFileManager;
+import engine.clientdata.StfTable;
 import engine.clientdata.visitors.DatatableVisitor;
+import engine.resources.common.Stf;
 import engine.resources.scene.Point3D;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
@@ -220,7 +222,7 @@ public class CollectionService implements INetworkDispatch {
 									}
 									
 									BitSet bitValue = new BitSet(64);
-									bitValue.set(64-bits, 64);
+									bitValue.set(32-bits, 64);
 									
 									if (bitValue.toLongArray()[0] < maxSlotValue) {
 										System.out.println(slotName + ", row " + c + ": counter-type slot uses " + bits + " bits, which can only hold a max value of " + bitValue.toLongArray()[0] + ", which is less than the specified max value of " + maxSlotValue);
@@ -309,16 +311,16 @@ public class CollectionService implements INetworkDispatch {
 							}
 							
 							if (hidden && !(getCollection(creature, collectionName) > 0)) {
-								creature.sendSystemMessage(OutOfBand.ProsePackage("@collection:player_hidden_slot_added", "TO", collectionName), DisplayType.Broadcast);
+								creature.sendSystemMessage(OutOfBand.ProsePackage("@collection:player_hidden_slot_added", "TO", new Stf("@collection_n:" + collectionName).getStfValue().replace(":", " -")), DisplayType.Broadcast);
 							}
 							
 							player.setCollections(collections.toByteArray());
 							
 							if (!noMessage) {
 								if (!bookName.equals("crafting_book")) {
-									creature.sendSystemMessage(OutOfBand.ProsePackage("@collection:player_slot_added", "TU", slotName, "TO", collectionName), DisplayType.Broadcast);
+									creature.sendSystemMessage(OutOfBand.ProsePackage("@collection:player_slot_added", "TU", new Stf("@collection_n:" + slotName).getStfValue().replace(":", " -"), "TO", new Stf("@collection_n:" + collectionName).getStfValue()), DisplayType.Broadcast);
 								} else {
-									creature.sendSystemMessage(OutOfBand.ProsePackage("@collection:player_slot_increment", "TU", slotName, "TO", collectionName), DisplayType.Broadcast);
+									creature.sendSystemMessage(OutOfBand.ProsePackage("@collection:player_slot_increment", "TU", new Stf("@collection_n:" + slotName).getStfValue().replace(":", " -"), "TO", new Stf("@collection_n:" + collectionName).getStfValue()), DisplayType.Broadcast);
 								}
 							}
 							
@@ -355,9 +357,79 @@ public class CollectionService implements INetworkDispatch {
 							}
 							
 							if (isComplete(creature, collectionName)) {
-								creature.sendSystemMessage(OutOfBand.ProsePackage("@collection:player_collection_complete", "TO", collectionName), DisplayType.Broadcast);
+								creature.sendSystemMessage(OutOfBand.ProsePackage("@collection:player_collection_complete", "TO", new Stf("@collection_n:" + collectionName).getStfValue().replace(":", " -")), DisplayType.Broadcast);
 								
 								if (!noReward) {
+									try {
+										StfTable stf = new StfTable("clientdata/string/en/collection_reward.stf");
+										
+										for (int s = 1; s < stf.getRowCount(); s++) {
+											String key = stf.getStringById(s).getKey();
+											
+											if (key != null && key.equals(collectionName)) {
+												String reward = stf.getStringById(s).getValue();
+												
+												if (reward != null && reward.length() > 0) {
+													int xp = 0;
+													
+													// Give experience
+													
+													try {
+														DatatableVisitor experienceTable = ClientFileManager.loadFile("datatables/player/player_level.iff", DatatableVisitor.class);
+														
+														for (int i = 0; i < experienceTable.getRowCount(); i++) {
+															if (experienceTable.getObject(i, 0) != null) {
+																if (creature.getLevel() == (Integer) experienceTable.getObject(i, 0)) {
+																	int nextLevelRequiredXp = (Integer) experienceTable.getObject((i + 1), 1);
+																	int currentLevelRequiredXp = (Integer) experienceTable.getObject(i, 1);
+																	xp = nextLevelRequiredXp - currentLevelRequiredXp;
+																}
+															}
+														}
+													} catch (Exception e) {
+														e.printStackTrace();
+													}
+													
+													if (reward.contains("small amount of XP")) {
+														xp = 10 / 100 * xp;
+													} else if (reward.contains("medium amount of XP")) {
+														xp = 20 / 100 * xp;
+													} else if (reward.contains("large amount of XP")) {
+														xp = 30 / 100 * xp;
+													} else if (reward.contains("Space XP")) {
+														// TODO calculate space XP
+													} else if (reward.contains("XP")) {
+														String[] array = reward.split(" ");
+														
+														for (int i = 0; i < array.length; i++) {
+															if (array[i].equals("XP")) {
+																if (i == 0) {
+																	xp = 20 / 100 * xp;
+																} else {
+																	try {
+																		xp = Integer.parseInt(array[i - 1]);
+																	} catch (NumberFormatException e) {
+																		xp = 20 / 100 * xp;
+																	}
+																}
+															}
+														}
+													}
+													
+													if (xp > 0) {
+														if (key.contains("space")) {
+															// TODO add XP to space (not currently implemented)
+														} else {
+															core.playerService.giveExperience(creature, xp);
+														}
+													}
+												}
+											}
+										}
+									} catch (Exception e) {
+										e.printStackTrace();
+									}
+									
 									if (FileUtilities.doesFileExist("scripts/collections/" + collectionName + ".py")) {
 										PyObject method = core.scriptService.getMethod("scripts/collections/", collectionName, "complete");
 										
@@ -374,7 +446,7 @@ public class CollectionService implements INetworkDispatch {
 								if (trackServerFirst) {
 									if (core.guildService.getGuildObject().addServerFirst(collectionName, new ServerFirst(creature.getCustomName(), creature.getObjectId(), collectionName, System.currentTimeMillis()))) {
 										addCollection(creature, "bdg_server_first_01");
-										creature.sendSystemMessage(OutOfBand.ProsePackage("@collection:player_server_first", "TT", core.getGalaxyName(), "TO", collectionName), DisplayType.Broadcast);
+										creature.sendSystemMessage(OutOfBand.ProsePackage("@collection:player_server_first", "TT", core.getGalaxyName(), "TO", new Stf("@collection_n:" + collectionName).getStfValue().replace(":", " -")), DisplayType.Broadcast);
 									}
 								}
 								
@@ -747,7 +819,7 @@ public class CollectionService implements INetworkDispatch {
 								}
 								
 								if (collection.equals(collectionName)) {
-									creature.sendSystemMessage(OutOfBand.ProsePackage("@collection:player_collection_reset", "TO", collectionName), DisplayType.Broadcast);
+									creature.sendSystemMessage(OutOfBand.ProsePackage("@collection:player_collection_reset", "TO", new Stf("@collection_n:" + collectionName).getStfValue().replace(":", " -")), DisplayType.Broadcast);
 								}
 								
 								continue;

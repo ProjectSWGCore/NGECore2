@@ -21,7 +21,11 @@
  ******************************************************************************/
 package resources.common;
 
-public class ProsePackage {
+import java.io.Serializable;
+
+import engine.resources.common.Stf;
+
+public class ProsePackage implements Serializable {
 	
 	/*
 	 * TU = Text User
@@ -31,6 +35,8 @@ public class ProsePackage {
 	 * DF = Decimal Float
 	 */
 	
+	private static final long serialVersionUID = 1L;
+
 	private Stf stf = new Stf();
 	
 	private long tuObjectId = 0;
@@ -47,28 +53,6 @@ public class ProsePackage {
 	
 	private int diInteger = 0;
 	private float dfFloat = 0;
-	
-	// TODO: Add more constructors
-	
-	public ProsePackage(String stfFile, String stfLabel) {
-		stf.setStfFilename(stfFile);
-		stf.setStfName(stfLabel);
-	}
-	
-	public ProsePackage(String stfFile, String stfLabel, String ttCustomString) {
-		stf.setStfFilename(stfFile);
-		stf.setStfName(stfLabel);
-		this.ttCustomString = ttCustomString;
-	}
-	
-	public ProsePackage(String stfFile, String stfLabel, long tuObjectId, String tuStfFile, String tuStfLabel, String tuCustomString) {
-		stf.setStfFilename(stfFile);
-		stf.setStfName(stfLabel);
-		this.tuObjectId = tuObjectId;
-		tuStf.setStfFilename(tuStfFile);
-		tuStf.setStfName(tuStfLabel);
-		this.tuCustomString = tuCustomString;
-	}
 	
 	/*
 	 * Any parameters can be entered.
@@ -235,6 +219,13 @@ public class ProsePackage {
 	
 	public void setDfFloat(float dfFloat) {
 		this.dfFloat = dfFloat;
+	}
+	
+	public void init() {
+		stf.init(null);
+		tuStf.init(null);
+		ttStf.init(null);
+		toStf.init(null);
 	}
 	
 }

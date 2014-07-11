@@ -1,7 +1,7 @@
 import sys
 
 def setup(core, actor, target, command):
-	command.setBuffNameTarget('of_dot_bomb_1')
+	core.buffService.addBuffToCreature(target, 'of_dot_bomb_1', actor)
 	return
 	
 def preRun(core, actor, target, command):

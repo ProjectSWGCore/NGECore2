@@ -115,6 +115,15 @@ public class MapService implements INetworkDispatch {
 		
 	}
 	
+	public void removeLocation(Planet planet, float x, float y, byte category) {
+		if(locationMap.get(planet) == null)
+			return;
+		MapLocation location = locationMap.get(planet).stream().filter(l -> l.getX() == x && l.getY() == y && l.getCategory() == category).findFirst().orElse(null);
+		if(location == null)
+			return;
+		locationMap.get(planet).remove(location);
+	}
+	
 	public String getClosestCityName(SWGObject object) {
 		
 		if(object.getPlanet() == null)

@@ -49,6 +49,7 @@ import resources.common.RadialOptions;
 import resources.loot.LootRollSession;
 import resources.objects.creature.CreatureObject;
 import resources.objects.harvester.HarvesterObject;
+import resources.objects.tangible.TangibleObject;
 import services.sui.SUIWindow.SUICallback;
 import services.sui.SUIWindow.Trigger;
 import engine.clients.Client;
@@ -77,12 +78,15 @@ public class SUIService implements INetworkDispatch {
 
 				ObjectMenuRequest request = new ObjectMenuRequest();
 				request.deserialize(data);
-
+	
 				SWGObject target = core.objectService.getObject(request.getTargetId());
 				SWGObject owner = core.objectService.getObject(request.getCharacterId());
 	
 				if(target == null || owner == null)
 					return;
+				
+//				if (getRadialFilename(target).equals("noradialoptions"))
+//					return;
 				
 				if (target instanceof HarvesterObject){
 					HarvesterObject harvester = (HarvesterObject) target;
@@ -107,6 +111,7 @@ public class SUIService implements INetworkDispatch {
 				}
 				
 				if (target instanceof CreatureObject){
+					//System.out.println("SUI target is creatureobject");
 					CreatureObject creature = (CreatureObject) target;
 					if (!creature.isPlayer() && creature.isLootLock()){
 						LootRollSession lootRollSession = (LootRollSession )creature.getAttachment("LootSession");
@@ -114,22 +119,40 @@ public class SUIService implements INetworkDispatch {
 							if (lootRollSession.getRequester()!=owner){
 	
 								// ToDo: RADIALS MUST BE DISABLED HERE FOR THE CORPSE, BUT HOW?
-								core.scriptService.callScript("scripts/radial/", "npc/noloot", "createRadial", core, owner, target, request.getRadialOptions());
+								target.setAttachment("radial_filename", "npc/noloot");
+								core.scriptService.callScript("scripts/radial/npc/noloot", "", "createRadial", core, owner, target, request.getRadialOptions());
 								sendRadial(owner, target, request.getRadialOptions(), request.getRadialCount());
+								return;
+							} else {
+								// Note: Bugged NPC corpses never make it through here, they are not sent from client at all it seems
+								target.setAttachment("radial_filename", "npc/corpse");
+								core.scriptService.callScript("scripts/radial/npc/corpse", "", "createRadial", core, owner, target, request.getRadialOptions());
+								sendRadial(owner, target, request.getRadialOptions(), request.getRadialCount());
+								//((CreatureObject)owner).sendSystemMessage("Radial set from suiservice", (byte)0);
 								return;
 							}
 						}
 					}					
+				} else {
+					//System.out.println("SUI target is NOT creatureobject " + target.getTemplate());
 				}
 				
-				if(target.getGrandparent() != null && target.getGrandparent().getAttachment("structureAdmins") != null)
+				if(target.getAttachment("isVendor") != null && (Boolean) target.getAttachment("isVendor") && (long) target.getAttachment("vendorOwner") == owner.getObjectID()) {
+					core.scriptService.callScript("scripts/radial/", "terminal/vendor", "createRadial", core, owner, target, request.getRadialOptions());
+					sendRadial(owner, target, request.getRadialOptions(), request.getRadialCount());
+					return;
+				}
+				
+				if(core.housingService.getPermissions(owner, target.getContainer()) && (target.getAttachment("moveable") == null || (boolean) target.getAttachment("moveable") != false)) {
+					core.scriptService.callScript("scripts/radial/", "structure/moveable", "createRadial", core, owner, target, request.getRadialOptions());
+					sendRadial(owner, target, request.getRadialOptions(), request.getRadialCount());
+					return;
+				}
+			
+				if(target.getTemplate().contains("object/tangible/wearables") && ((CreatureObject)owner).hasAbility("admin"))
 				{
-					if(core.housingService.getPermissions(owner, target.getContainer()) && !getRadialFilename(target).equals("structure/structure_management_terminal"))
-					{
-						core.scriptService.callScript("scripts/radial/", "structure/moveable", "createRadial", core, owner, target, request.getRadialOptions());
-						sendRadial(owner, target, request.getRadialOptions(), request.getRadialCount());
-						return;
-					}
+					core.scriptService.callScript("scripts/radial/", "item/recolorable", "createRadial", core, owner, target, request.getRadialOptions());
+					if(getRadialFilename(target).equals("default")) sendRadial(owner, target, request.getRadialOptions(), request.getRadialCount());
 				}
 				
 				core.scriptService.callScript("scripts/radial/", getRadialFilename(target), "createRadial", core, owner, target, request.getRadialOptions());
@@ -163,6 +186,22 @@ public class SUIService implements INetworkDispatch {
 				if(target == null || owner == null)
 					return;
 				
+				if(target.getAttachment("isVendor") != null && (Boolean) target.getAttachment("isVendor") && (long) target.getAttachment("vendorOwner") == owner.getObjectID()) {
+					core.scriptService.callScript("scripts/radial/", "terminal/vendor", "handleSelection", core, owner, target, objMenuSelect.getSelection());
+					return;
+				}
+				
+				if(core.housingService.getPermissions(owner, target.getContainer()) && (target.getAttachment("moveable") == null || (boolean) target.getAttachment("moveable") != false)) {
+						core.scriptService.callScript("scripts/radial/", "structure/moveable", "handleSelection", core, owner, target, objMenuSelect.getSelection());
+						return;
+				}
+				
+				
+				if(target.getTemplate().contains("object/tangible/wearables") && ((CreatureObject)owner).hasAbility("admin"))
+				{
+					core.scriptService.callScript("scripts/radial/", "item/recolorable", "handleSelection", core, owner, target, objMenuSelect.getSelection());
+				}
+
 				core.scriptService.callScript("scripts/radial/", getRadialFilename(target), "handleSelection", core, owner, target, objMenuSelect.getSelection());
 
 			}
@@ -170,7 +209,7 @@ public class SUIService implements INetworkDispatch {
 		});
 		
 		swgOpcodes.put(Opcodes.SuiEventNotification, new INetworkRemoteEvent() {
-
+			
 			@Override
 			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
 				
@@ -196,7 +235,7 @@ public class SUIService implements INetworkDispatch {
 					return;
 
 				PyObject func = window.getFunctionByEventId(suiEvent.getEventType());
-				
+
 				if(func != null)
 					func.__call__(Py.java2py(owner), Py.java2py(window), Py.java2py(suiEvent.getEventType()), Py.java2py(suiEvent.getReturnList()));
 				
@@ -307,7 +346,7 @@ public class SUIService implements INetworkDispatch {
 		
 		window.clearDataSource("List.dataList");
 		
-		cloneData.entrySet().forEach(e -> window.addListBoxMenuItem(e.getValue(), e.getKey()));
+		cloneData.entrySet().forEach(e -> window.addListBoxMenuItem(e.getValue(), (long) e.getKey()));
 		
 		return window;
 		
@@ -346,6 +385,12 @@ public class SUIService implements INetworkDispatch {
 
 		return window;
 		
+	}
+	
+	public SUIWindow createMessageBox(int type, String title, String promptText, SWGObject owner, SWGObject rangeObject, float maxDistance, SUICallback handleFunc) {
+		SUIWindow window = createMessageBox(type, title, promptText, owner, rangeObject, maxDistance);
+		window.addHandler(0, "", Trigger.TRIGGER_OK, new Vector<String>(), handleFunc);
+		return window;
 	}
 	
 	public SUIWindow createInputBox(int type, String title, String promptText, SWGObject owner, SWGObject rangeObject, float maxDistance) {
@@ -397,6 +442,30 @@ public class SUIService implements INetworkDispatch {
 		returnParams.add("txtInput:LocalText");
 		window.addHandler(0, "", Trigger.TRIGGER_OK, returnParams, handleFunc);
 		return window;
+	}
+	
+	public void sendColorPicker(CreatureObject creature, TangibleObject target, String customizationType)
+	{
+		final SUIWindow suiWindow = core.suiService.createSUIWindow("Script.ColorPicker", creature, creature, 0);
+		
+		suiWindow.setProperty("bg.caption.lblTitle:Text", "@base_player:swg");
+		suiWindow.setProperty("ColorPicker:TargetRangeMax", "500");
+		suiWindow.setProperty("ColorPicker:TargetNetworkId", Long.toString(target.getObjectID()));
+		suiWindow.setProperty("ColorPicker:TargetVariable", customizationType);
+		
+		Vector<String> returnList = new Vector<String>();
+		returnList.add("ColorPicker:SelectedIndex");
+		
+		suiWindow.addHandler(0, "", Trigger.TRIGGER_OK, returnList, new SUICallback() 
+		{
+			public void process(SWGObject owner, int eventType, Vector<String> returnList) 
+			{
+				int index = Integer.parseInt(returnList.get(0));			
+				target.setCustomizationVariable(customizationType, (byte) index);
+			}
+		});
+		
+		core.suiService.openSUIWindow(suiWindow);	
 	}
 	
 	public void closeSUIWindow(SWGObject owner, int id) {

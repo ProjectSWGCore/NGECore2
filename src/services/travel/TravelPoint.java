@@ -160,30 +160,34 @@ public class TravelPoint {
 		scheduler.execute(new Runnable() {
 			@Override
 			public void run() {
-				while(getShuttle() != null) {
-			
-					try {
-						setShuttleAvailable(true);
-						setShuttleLanding(false);
-						Thread.sleep(120000);
-						setShuttleAvailable(false);
-						setShuttleDeparting(true);
-						setDepartureTimestamp(System.currentTimeMillis() / 1000);	
-						getShuttle().setPosture((byte) 2);
-						setShuttleDeparting(false);
-						Thread.sleep(60000);
-						setShuttleLanding(true);
-						getShuttle().setPosture((byte) 0);
-						if(isStarport())
-							Thread.sleep(21000);
-						else
-							Thread.sleep(17000);
-
+				try {
+					while(getShuttle() != null) {
+				
+						try {
+							setShuttleAvailable(true);
+							setShuttleLanding(false);
+							Thread.sleep(120000);
+							setShuttleAvailable(false);
+							setShuttleDeparting(true);
+							setDepartureTimestamp(System.currentTimeMillis() / 1000);	
+							getShuttle().setPosture((byte) 2);
+							setShuttleDeparting(false);
+							Thread.sleep(60000);
+							setShuttleLanding(true);
+							getShuttle().setPosture((byte) 0);
+							if(isStarport())
+								Thread.sleep(21000);
+							else
+								Thread.sleep(17000);
+	
+							
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
 						
-					} catch (InterruptedException e) {
-						e.printStackTrace();
 					}
-					
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
 

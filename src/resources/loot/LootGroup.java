@@ -23,13 +23,10 @@ package resources.loot;
 
 import java.io.Serializable;
 
-import com.sleepycat.persist.model.Persistent;
-
 /** 
  * @author Charon 
  */
 
-@Persistent(version=0)
 public class LootGroup implements Serializable {
 	
 	private static final long serialVersionUID = 1L;

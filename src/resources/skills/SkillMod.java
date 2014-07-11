@@ -25,11 +25,8 @@ import java.io.Serializable;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import resources.objects.Delta;
+import engine.resources.objects.Delta;
 
-import com.sleepycat.persist.model.Persistent;
-
-@Persistent(version=0)
 public class SkillMod extends Delta implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
@@ -94,9 +91,9 @@ public class SkillMod extends Delta implements Serializable {
 		}
 	}
 	
-	public float getValue(int divisor) {
+	public float getValue(int divisor, boolean percent) {
 		synchronized(objectMutex) {
-			return ((divisor < 1) ? ((float) base) : ((float) base / (float) divisor));
+			return (((divisor < 1) ? ((float) (base + modifier)) : ((float) (base + modifier) / (float) divisor)) * ((percent) ? 100f : 1f));
 		}
 	}
 	

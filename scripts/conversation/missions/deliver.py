@@ -4,9 +4,18 @@ from resources.objectives import DeliveryMissionObjective
 import sys
 
 def startConversation(core, actor, npc):
-	missionId = npc.getAttachment('assignedMission')
+
+	player = actor.getPlayerObject()
 	
-	if missionId is None:
+	if player is None:
+		return
+	
+	activeMissions = player.getActiveMissions()
+	
+	missionId = checkMissions(core, actor, npc, activeMissions)
+
+	if missionId == 0:
+		core.conversationService.sendStopConversation(actor, npc, 'mission/mission_generic', 'npc_job_request_no_job')
 		return
 	
 	mission = core.objectService.getObject(missionId)
@@ -16,7 +25,7 @@ def startConversation(core, actor, npc):
 	
 	objective = mission.getObjective()
 
-	if mission.getGrandparent().getObjectId() != actor.getObjectId() or objective is None:
+	if objective is None:
 		core.conversationService.sendStopConversation(actor, npc, 'mission/mission_generic', 'npc_job_request_no_job')
 		return
 
@@ -38,33 +47,43 @@ def endConversation(core, actor, npc):
 	return
 
 def handlePickupStage(core, actor, npc, objective, mission):
-	
-	if objective.getMissionGiver().getObjectId() != npc.getObjectId():
+	if objective.getMissionGiver() != npc.getObjectId():
 		endConversation(core, actor, npc)
 		return
 	
-	core.conversationService.sendStopConversation(actor, npc, mission.getMissionDescription(), 'm' + str(mission.getMissionId()) + 'p')
+	core.conversationService.sendStopConversation(actor, npc, mission.getTitle().getStfFilename(), 'm' + str(mission.getMissionId()) + 'p')
 	objective.createDeliveryItem(core, actor)
 	objective.update(core, actor)
 	return
 
 def handleDeliveryStage(core, actor, npc, objective, mission):
 	
-	if objective.getDropOffNpc().getObjectId() != npc.getObjectId():
+	if objective.getDropOffNpc() != npc.getObjectId():
 		endConversation(core, actor, npc)
 		return
 	
-	core.conversationService.sendStopConversation(actor, npc, mission.getMissionDescription(), 'm' + str(mission.getMissionId()) + 'r')
+	core.conversationService.sendStopConversation(actor, npc, mission.getTitle().getStfFilename(), 'm' + str(mission.getMissionId()) + 'r')
 	core.objectService.destroyObject(objective.getDeliveryObject())
 	objective.update(core, actor)
 	return
 
 def handleCompletionStage(core, actor, npc, objective, mission):
 	
-	if objective.getMissionGiver().getObjectId() != npc.getObjectId():
+	if objective.getMissionGiver() != npc.getObjectId():
 		endConversation(core, actor, npc)
 		return
 	
-	core.conversationService.sendStopConversation(actor, npc, mission.getMissionDescription(), 'm' + str(mission.getMissionId()) + 's')
+	core.conversationService.sendStopConversation(actor, npc, mission.getTitle().getStfFilename(), 'm' + str(mission.getMissionId()) + 's')
 	core.missionService.handleMissionComplete(actor, mission)
 	return
+
+def checkMissions(core, actor, npc, activeMissions):
+	for objId in activeMissions:
+		missionObj = core.objectService.getObject(objId)
+
+		if (missionObj != None):
+			if (missionObj.getStartLocation() is not None and missionObj.getStartLocation().getObjectId() == npc.getObjectID()):
+				return missionObj.getObjectID()
+			elif (missionObj.getDestinationLocation() is not None and missionObj.getDestinationLocation().getObjectId() == npc.getObjectID()):
+				return missionObj.getObjectID()
+	return 0

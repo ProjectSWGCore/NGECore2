@@ -1,23 +1,32 @@
 import sys
 from services.spawn import MobileTemplate
 from services.spawn import WeaponTemplate
+from resources.datatables import WeaponType
+from resources.datatables import Difficulty
+from resources.datatables import Options
 from java.util import Vector
+
 
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
 	mobileTemplate.setCreatureName('rill_tempest')
 	mobileTemplate.setLevel(8)
-	mobileTemplate.setMinLevel(8)
-	mobileTemplate.setMaxLevel(10)
-	mobileTemplate.setDifficulty(0)
-	mobileTemplate.setAttackRange(4)
-	mobileTemplate.setAttackSpeed(1.0)
-	mobileTemplate.setWeaponType(6)
+	mobileTemplate.setDifficulty(Difficulty.NORMAL)
+
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(1)
+	mobileTemplate.setMeatType("Carnivore Meat")
+	mobileTemplate.setMeatAmount(35)
+	mobileTemplate.setHideType("Bristly Hide")
+	mobileTemplate.setBoneAmount(20)	
+	mobileTemplate.setBoneType("Animal Bone")
+	mobileTemplate.setHideAmount(15)
+	mobileTemplate.setSocialGroup("rill")
+	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setStalker(False)
 
 	
 	
@@ -26,7 +35,7 @@ def addTemplate(core):
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
-	weapontemplate = WeaponTemplate('object/weapon/melee/unarmed/shared_unarmed_default.iff', 6, 1.0)
+	weapontemplate = WeaponTemplate('object/weapon/melee/unarmed/shared_unarmed_default.iff', WeaponType.UNARMED, 1.0, 6, 'kinetic')
 	weaponTemplates.add(weapontemplate)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	

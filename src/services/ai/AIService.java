@@ -26,12 +26,19 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Vector;
 
+import resources.common.SpawnPoint;
+import resources.datatables.Difficulty;
+import resources.datatables.FactionStatus;
+import resources.datatables.GcwType;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
 import resources.objects.player.PlayerObject;
-
+import services.ai.states.AIState;
+import services.ai.states.IdleState;
+import services.ai.states.LoiterState;
+import services.ai.states.PatrolState;
+import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
-
 import main.NGECore;
 
 public class AIService {
@@ -52,6 +59,8 @@ public class AIService {
 		float z = pointB.z - 1 + new Random().nextFloat();
 		Point3D endPoint = new Point3D(x, core.terrainService.getHeight(planetId, x, z), z);
 		endPoint.setCell(pointB.getCell());
+		if(endPoint.getCell() != null)
+			endPoint.y = pointB.y;
 		path.add(endPoint);
 		return path;
 	}
@@ -60,21 +69,21 @@ public class AIService {
 		
 		Map<CreatureObject, Integer> damageMap = actor.getDamageMap();
 		CreatureObject creature = actor.getCreature();
-		int baseXP = getBaseXP(creature);
+		int baseXp = getBaseXP(creature);
 		for(Entry<CreatureObject, Integer> e : damageMap.entrySet()) {
 			
 			CreatureObject player = e.getKey();
 			PlayerObject ghost = (PlayerObject) player.getSlottedObject("ghost");
 			if(ghost == null)
 				continue;
-			int damage = e.getValue();
+			int damageDealt = e.getValue();
 			
 			short level = (player.getGroupId() == 0) ? player.getLevel() : ((GroupObject) core.objectService.getObject(player.getGroupId())).getGroupLevel();
 			int levelDifference = ((creature.getLevel() >= level) ? 0 : (level - creature.getLevel()));
-			float damagePercent = damage / creature.getMaxHealth();
-			int finalXP = (int) (damagePercent * baseXP);
-			finalXP -= ((levelDifference > 20) ? (finalXP - 1) : (((levelDifference * 5) / 100) * finalXP));	
-			core.playerService.giveExperience(player, finalXP);
+			int damagePercent = ((damageDealt / creature.getMaxHealth()) * 100);
+			int finalXp = (((damagePercent / 100) * baseXp) + (creature.getMaxHealth() / 12));
+			finalXp -= ((levelDifference > 20) ? (finalXp - 1) : (((levelDifference * 5) / 100) * finalXp));	
+			core.playerService.giveExperience(player, finalXp);
 		}
 		
 	}
@@ -109,5 +118,106 @@ public class AIService {
 		return baseXP;
 		
 	}
-
+	
+	public void awardGcw(AIActor actor) {
+		CreatureObject npc = actor.getCreature();
+		
+		if (core.factionService.isPvpFaction(npc.getFaction())) {
+			int gcwPoints = 5;
+			
+			if (npc.getDifficulty() == Difficulty.ELITE) {
+				gcwPoints *= 2;
+			}
+			
+			if (npc.getDifficulty() == Difficulty.BOSS) {
+				gcwPoints *= 5;
+			}
+			
+			//gcwPoints = actor.getMobileTemplate().getGcwPoints(); // We might want to make this get set in mobile templates if it was different for different npcs ie. assault squads.
+			
+			for (CreatureObject player : actor.getDamageMap().keySet()) {
+				if (player.getGroupId() == 0) {
+					if (player.getFaction().length() > 0 && player.getFactionStatus() > FactionStatus.OnLeave) {
+						if ((npc.getLevel() / player.getLevel() * 100) < 86) {
+							continue;
+						}
+						
+						core.gcwService.addGcwPoints(player, gcwPoints, GcwType.Enemy);
+					}
+				} else {
+					for (SWGObject object : ((GroupObject) core.objectService.getObject(player.getGroupId())).getMemberList()) {
+						CreatureObject member = (CreatureObject) object;
+						
+						if (member == null) {
+							continue;
+						}
+						
+						if (npc.getPlanet().getName().equals(member.getPlanet().getName()) && npc.getPosition().getDistance(member.getPosition()) > 300) {
+							continue;
+						}
+						
+						if ((npc.getLevel() / member.getLevel() * 100) < 86) {
+							continue;
+						}
+						
+						if (member.getFaction().length() > 0 && member.getFactionStatus() > FactionStatus.OnLeave) {
+							core.gcwService.addGcwPoints(member, gcwPoints, GcwType.Enemy);
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	public void setPatrol(CreatureObject creature, Vector<Point3D> patrolpoints){
+		AIActor actor = (AIActor) creature.getAttachment("AI");
+		if (actor==null)
+			return;
+		
+		actor.setPatrolPoints(patrolpoints);
+		AIState intendedPrimaryAIState = new PatrolState();
+		actor.setIntendedPrimaryAIState(intendedPrimaryAIState);
+		actor.setCurrentState(intendedPrimaryAIState);	
+	}
+	
+	public void setPatrol(CreatureObject creature, boolean active){
+		AIActor actor = (AIActor) creature.getAttachment("AI");
+		if (actor==null)
+			return;
+		
+		if (active){
+			AIState intendedPrimaryAIState = new PatrolState();
+			actor.setIntendedPrimaryAIState(intendedPrimaryAIState);
+			actor.setCurrentState(intendedPrimaryAIState);
+		}
+		else
+			actor.setCurrentState(new IdleState());
+	}
+	
+	public void setLoiter(CreatureObject creature, float minDist, float maxDist){
+		AIActor actor = (AIActor) creature.getAttachment("AI");
+		if (actor==null)
+			return;
+		actor.setOriginPosition(creature.getWorldPosition());
+		Point3D currentDestination = SpawnPoint.getRandomPosition(creature.getWorldPosition(), minDist, maxDist, creature.getPlanetId()); 
+		actor.getMovementPoints().add(currentDestination);
+		actor.setLoiterDestination(currentDestination);
+		actor.setMinLoiterDist(minDist);
+		actor.setMaxLoiterDist(maxDist);
+		AIState intendedPrimaryAIState = new LoiterState();
+		actor.setIntendedPrimaryAIState(intendedPrimaryAIState);	
+		actor.setCurrentState(intendedPrimaryAIState);
+	}	
+	
+	public void logAI(String logMsg){
+		if (checkDeveloperIdentity()){
+			System.err.println("AI-LOG: " + logMsg);
+		}
+	}
+	
+	public boolean checkDeveloperIdentity(){
+		if (System.getProperty("user.name").equals("Charon"))
+			return true;
+		return false;
+	}
 }

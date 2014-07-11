@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.Vector;
 
+import org.apache.mina.core.buffer.IoBuffer;
+
 import main.NGECore;
 import protocol.swg.SurveyMapUpdateMessage;
 import resources.objects.creature.CreatureObject;
@@ -229,7 +231,7 @@ public class GalacticResource extends SWGObject implements Serializable {
 	public void generateResourceStats(){
 		// Generate the stats randomly, considering the caps	
 		for (int k=0;k<resourceRoot.getResourceMinCaps().length; k++) {
-			short result = 0;
+			//short result = 0;
 			short randomStatValue = 0;
 			if ((resourceRoot.getResourceMaxCaps()[k]-resourceRoot.getResourceMinCaps()[k])>0)
 				randomStatValue = (short) (resourceRoot.getResourceMinCaps()[k] + new Random().nextInt(resourceRoot.getResourceMaxCaps()[k]-resourceRoot.getResourceMinCaps()[k]));
@@ -675,4 +677,11 @@ public class GalacticResource extends SWGObject implements Serializable {
 		
 		return historicResource;
 	}
+	
+	@Override
+	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
+		// TODO Auto-generated method stub
+		
+	}
+	
 }

@@ -21,20 +21,31 @@
  ******************************************************************************/
 package services.playercities;
 
-import java.util.Collections;
+import java.util.Date;
 import java.util.Map;
+import java.util.Random;
+import java.util.TreeMap;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import resources.common.OutOfBand;
+import resources.datatables.Citizenship;
 import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
+import services.chat.Mail;
+import services.sui.SUIService.InputBoxType;
+import services.sui.SUIService.ListBoxType;
+import services.sui.SUIService.MessageBoxType;
 import services.sui.SUIWindow;
 import services.sui.SUIWindow.SUICallback;
 import services.sui.SUIWindow.Trigger;
+import engine.resources.database.ODBCursor;
 import engine.resources.objects.SWGObject;
+import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
@@ -48,52 +59,133 @@ public class PlayerCityService implements INetworkDispatch {
 	
 	private NGECore core;
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-    
+    private Random random = new Random();
     private Vector<PlayerCity> playerCities = new Vector<PlayerCity>();
     private int cityID = 0; // This must be persisted or handled via objectservice somehow
-
+    private Map<String, int[]> cityRankCaps = new ConcurrentHashMap<String, int[]>();
     // static helper variable to be deleted later
     public static boolean sandboxCityBuilt = false;
     
 	public PlayerCityService(NGECore core) {
 		this.core = core;
-		
-		scheduler.scheduleAtFixedRate(() -> {
-			administratePlayerCities();
-		}, 0, 1, TimeUnit.MINUTES);
-	}
-
-	public void administratePlayerCities() {
-		synchronized(playerCities){
-			Vector<PlayerCity> unfoundedCities = new Vector<PlayerCity>();
-			for (PlayerCity city : playerCities){
-				
-				if (city.getNextCityUpdate()<=System.currentTimeMillis())
-					city.processCityUpdate();
-				
-				if (city.getNextElectionDate()<=System.currentTimeMillis())
-					city.processElection();
-				
-				if (! city.isFounded() && city.getFoundationTime()<=System.currentTimeMillis()-(60*60*24*1000)){
-					if (! city.checkFoundationSuccess())
-						unfoundedCities.add(city);
-				}
-			}
-			
-			if (unfoundedCities.size()>0){
-				playerCities.removeAll(unfoundedCities);
-			}			
-			playerCities.removeAll(Collections.singleton(null));
-		}
 	}
 	
-	public PlayerCity addNewPlayerCity(CreatureObject founder) {
+	public void loadCityRankCaps() {
+		core.scriptService.callScript("scripts/", "cityRankCaps", "addCityRankCaps", core);
+	}
+	
+	public void addCityRankCap(String planetName, int[] caps) {
+		cityRankCaps.put(planetName, caps);
+	}
+	
+	public void saveAllCities() {
+		playerCities.forEach(c -> core.objectService.persistObject(c.getCityID(), c, core.getCityODB()));
+	}
+	
+	public void loadCities() {
+		ODBCursor cursor = core.getCityODB().getCursor();
+		while(cursor.hasNext()) {
+			PlayerCity city = (PlayerCity) cursor.next();
+			if(city == null)
+				continue;
+			city.init();
+			playerCities.add(city);
+			if(System.currentTimeMillis() < city.getNextCityUpdate())
+				city.processCityUpdate();
+			else
+				schedulePlayerCityUpdate(city, city.getNextCityUpdate() - System.currentTimeMillis());
+		}
+		cursor.close();
+	}
+	
+	public boolean isRankCapped(Planet planet, int rank) {
+		if(cityRankCaps.get(planet.getName()) == null)
+			return true;
+		int cap = cityRankCaps.get(planet.getName())[rank - 1];
+		return playerCities.stream().filter(c -> c.getPlanetId() == planet.getID()).count() >= cap;
+	}
+	
+	private long generateCityId() {
+		boolean found = false;
+		long id = 0;
+		while(!found) {
+			id = random.nextLong();
+			final long cityId = id;
+			if(!playerCities.stream().filter(c -> c.getCityID() == cityId).findFirst().isPresent())
+				found = true;
+		}
+		return id;
+	}
+	
+	public boolean doesCityNameExist(String name) {
+		return playerCities.stream().map(PlayerCity::getCityName).filter(n -> n.equalsIgnoreCase(name)).findFirst().isPresent() || 
+			   core.terrainService.getClientRegions().stream().map(ClientRegion::getName).filter(n -> n.equalsIgnoreCase(name)).findFirst().isPresent();
+	}
+	
+	public void handlePlaceCity(final CreatureObject actor, TangibleObject deed, float positionX, float positionZ, float rotation) {
+		
+		if(!canPlacePlayerCityAtPosition(actor, actor.getPlanet(), new Point3D(positionX, 0, positionZ)))
+			return;
+		
+		if(isRankCapped(actor.getPlanet(), PlayerCity.OUTPOST)) {
+			actor.sendSystemMessage("This Planet can not support any more cities.", (byte) 0);
+			return;
+		}
+		
+		if(actor.getPlayerObject().getCitizenship() == Citizenship.Mayor) {
+			actor.sendSystemMessage("@city/city:already_mayor", (byte) 0);
+			return;
+		}
+		
+		final SUIWindow window = core.suiService.createInputBox(2, "@city/city:city_name_t","@city/city:city_name_d", actor, null, 0);	
+		window.setProperty("txtInput:MaxLength", "40");
+		Vector<String> returnList = new Vector<String>();		
+		returnList.add("txtInput:LocalText");	
+		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, new SUICallback() {
+			@Override
+			public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
+				if (returnList.size() == 0 || returnList.get(0).length() == 0)
+					return;
+				String name = returnList.get(0);
+				if(!core.characterService.checkName(name, owner.getClient(), true)) {
+					actor.sendSystemMessage("@player_structure:not_valid_name", (byte) 0);
+					return;
+				}
+				if(doesCityNameExist(name)) {
+					actor.sendSystemMessage("@player_structure:cityname_not_unique", (byte) 0);
+					return;
+				}
+				
+				BuildingObject cityHall = core.housingService.placeStructure(actor, deed, positionX, positionZ, rotation);
+				
+				if(cityHall == null) {
+					actor.sendSystemMessage("Error: NULL city hall", (byte) 0);
+					return;
+				}
+				
+				PlayerCity playerCity = addNewPlayerCity(actor, cityHall);
+				playerCity.setCityName(name);
+				playerCity.addNewStructure(cityHall.getObjectID());
+				playerCity.setElectionTime();
+				PlayerCityService.this.schedulePlayerCityUpdate(playerCity, PlayerCity.newCityGraceSpan);
+				cityHall.setAttachment("structureCity", playerCity.getCityID());
+				actor.setAttachment("residentCity", playerCity.getCityID());
+				core.housingService.declareResidency(actor, cityHall);
+				core.objectService.persistObject(playerCity.getCityID(), playerCity, core.getCityODB());
+				newCitySUI2((CreatureObject) owner, playerCity);
+
+			}					
+		});		
+		core.suiService.openSUIWindow(window);				
+
+	}
+	
+	public PlayerCity addNewPlayerCity(CreatureObject founder, BuildingObject cityHall) {
 		PlayerCity newCity = null;
 		synchronized(playerCities){
-			newCity = new PlayerCity(founder,cityID++);
+			newCity = new PlayerCity(founder, generateCityId(), cityHall);
 			playerCities.add(newCity);
 		}
-		newCitySUI1(founder,newCity);
 		return newCity;
 	}
 	
@@ -115,7 +207,7 @@ public class PlayerCityService implements INetworkDispatch {
 		PlayerCity foundCity = null;
 		synchronized(playerCities){
 			for (PlayerCity city : playerCities){
-				int id = (int)citizen.getAttachment("residentCity");
+				long id = (long)citizen.getAttachment("residentCity");
 				if (city.getCityID()==id){
 					foundCity = city;
 				}				
@@ -124,7 +216,20 @@ public class PlayerCityService implements INetworkDispatch {
 		return foundCity;
 	}
 	
-	
+	public boolean canPlacePlayerCityAtPosition(CreatureObject actor, Planet planet, Point3D position) {
+		
+		PlayerCity closest = playerCities.stream().min((c1, c2) -> (int) (c1.getCityCenterPosition().getDistance2D(position) - c2.getCityCenterPosition().getDistance2D(position))).orElse(null);
+		if(closest != null && closest.getCityCenterPosition().getDistance2D(position) < 1024) {
+			actor.sendSystemMessage(OutOfBand.ProsePackage("@player_structure:city_too_close", "TO", closest.getCityName()), (byte) 0);
+			return false;
+		}
+		ClientRegion closest2 = core.terrainService.getClientRegionsForPlanet(planet).stream().min((c1, c2) -> (int) (c1.getCenter().getDistance2D(position) - c2.getCenter().getDistance2D(position))).orElse(null);
+		if(closest2 != null && closest2.getCenter().getDistance2D(position) < 1024) {
+			actor.sendSystemMessage(OutOfBand.ProsePackage("@player_structure:city_too_close", "TO", closest2.getName()), (byte) 0);
+			return false;
+		}
+		return true;
+	}
 	
 	public void newCitySUI1(CreatureObject citizen, final PlayerCity newCity) {		
 		final SUIWindow window = core.suiService.createInputBox(2,"@city/city:city_name_t","@city/city:city_name_d", citizen, citizen, 0);		
@@ -185,7 +290,7 @@ public class PlayerCityService implements INetworkDispatch {
 		
 		PlayerCity sandboxCity = null;
 		synchronized(playerCities){
-			sandboxCity = new PlayerCity(founder,cityID++);
+			sandboxCity = new PlayerCity(founder,cityID++, cityHall);
 			sandboxCity.setCityName("Sandbox City");
 			playerCities.add(sandboxCity);
 		}
@@ -268,5 +373,209 @@ public class PlayerCityService implements INetworkDispatch {
 	public void shutdown() {
 		// TODO Auto-generated method stub
 		
-	}	
+	}
+
+	public void destroyCity(PlayerCity city) {
+		
+		CreatureObject mayor = core.objectService.getObject(city.getMayorID()) == null ? core.objectService.getCreatureFromDB(city.getMayorID()) : (CreatureObject) core.objectService.getObject(city.getMayorID());
+		if(mayor == null)
+			return;
+
+		Mail mail = new Mail();
+		mail.setMailId(NGECore.getInstance().chatService.generateMailId());
+		mail.setRecieverId(city.getMayorID());
+		mail.setStatus(Mail.NEW);
+		mail.setTimeStamp((int) (new Date().getTime() / 1000));
+		mail.setSubject("@city/city:new_city_fail_subject");
+		mail.setSenderName("@city/city:new_city_from");
+		mail.setMessage("@city/city:new_city_fail_body");
+		
+		if(mayor.getClient() != null)
+			core.chatService.sendPersistentMessageHeader(mayor.getClient(), mail);
+		core.chatService.storePersistentMessage(mail);
+		for(long civicStructureId : new Vector<Long>(city.getPlacedStructures())) {
+			BuildingObject civicStructure = (BuildingObject) core.objectService.getObject(civicStructureId);
+			if(civicStructure == null)
+				continue;
+			core.housingService.destroyStructure(civicStructure);
+		}
+		core.simulationService.removeCollidable(city.getArea(), city.getArea().getCenter().x, city.getArea().getCenter().z);
+		playerCities.remove(city);
+		if(city.isRegistered())
+			core.mapService.removeLocation(core.terrainService.getPlanetByID(city.getPlanetId()), city.getCityCenterPosition().x, city.getCityCenterPosition().z, (byte) 17);
+		core.objectService.deletePersistentObject(city.getCityID(), core.getCityODB());
+		
+	}
+
+	public void schedulePlayerCityUpdate(PlayerCity playerCity, long time) {
+		playerCity.setNextCityUpdate(System.currentTimeMillis() + time);
+		scheduler.schedule(() -> {
+			try {
+				playerCity.processCityUpdate();
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+		}, time, TimeUnit.MILLISECONDS);
+	}
+	
+	public void handleCityTreasuryWithdrawal(CreatureObject owner) {
+		SUIWindow window = core.suiService.createInputBox(InputBoxType.INPUT_BOX_OK_CANCEL, "@city/city:withdraw_reason_t", "@city/city:withdraw_reason_d", owner, null, 0, (actor, eventType, returnList) -> {
+			String reason = returnList.get(0);
+			if(reason.length() <= 0)
+				return;
+			promptCityTreasuryWithdrawal(owner, reason);
+		});
+		window.setProperty("txtInput:MaxLength", "255");
+		core.suiService.openSUIWindow(window);		
+	}
+	
+	public void promptCityTreasuryWithdrawal(CreatureObject owner, String reason) {
+		PlayerCity playerCity = core.playerCityService.getPlayerCity(owner);
+		SUIWindow window = core.suiService.createSUIWindow("Script.transfer", owner, null, 0);
+		
+		window.setProperty("bg.caption.lblTitle:Text", "@city/city:treasury_withdraw_subject");
+		window.setProperty("Prompt.lblPrompt:Text", "@city/city:treasury_withdraw_prompt");
+				
+		window.setProperty("msgPayMaintenance", "transaction.txtInputFrom");
+		
+		window.setProperty("transaction.lblFrom:Text", "@city/city:treasury_balance_t");
+		window.setProperty("transaction.lblTo:Text", "@city/city:treasury_withdraw");		
+		window.setProperty("transaction.lblFrom", "@city/city:treasury_balance_t");
+		window.setProperty("transaction.lblTo", "@city/city:treasury_withdraw");	
+				
+		window.setProperty("transaction.lblStartingFrom:Text", String.valueOf(playerCity.getCityTreasury()));
+		window.setProperty("transaction.lblStartingTo:Text", "0");
+				
+		window.setProperty("transaction:InputFrom", "555555");
+		window.setProperty("transaction:InputTo", "666666");
+		
+		window.setProperty("transaction:txtInputFrom", String.valueOf(playerCity.getCityTreasury()));
+		window.setProperty("transaction:txtInputTo", "1");
+		window.setProperty("transaction.txtInputFrom:Text", String.valueOf(playerCity.getCityTreasury()));
+		window.setProperty("transaction.txtInputTo:Text", "0");
+		
+		window.setProperty("transaction.ConversionRatioFrom", "1");
+		window.setProperty("transaction.ConversionRatioTo", "0");
+			
+		window.setProperty("btnOk:visible", "True");
+		window.setProperty("btnCancel:visible", "True");
+		window.setProperty("btnOk:Text", "@ok");
+		window.setProperty("btnCancel:Text", "@cancel");				
+
+		Vector<String> returnList = new Vector<String>();
+		returnList.add("transaction.txtInputFrom:Text");
+		returnList.add("transaction.txtInputTo:Text");
+		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, (actor, eventType, inputList) -> {
+			
+			if(inputList.size() < 2)
+				return;
+			
+			if(playerCity.getCityTreasury() <= 0) {
+				owner.sendSystemMessage("@city/city:no_money", (byte) 0);
+				return;
+			}
+			
+			if(playerCity.getCityTreasuryWithdrawalCooldown() > System.currentTimeMillis()) {
+				owner.sendSystemMessage("@city/city:withdraw_daily", (byte) 0);
+				return;
+			}
+				
+			int amount = Integer.parseInt(inputList.get(1));
+			
+			if(amount < 5000 || amount > 150000) {
+				owner.sendSystemMessage("@city/city:withdraw_limits", (byte) 0);
+				return;				
+			}
+			
+			if(amount > playerCity.getCityTreasury()) {
+				owner.sendSystemMessage("@city/city:withdraw_treasury_error", (byte) 0);
+				return;				
+			}
+
+			owner.addBankCredits(amount);
+			playerCity.removeFromTreasury(amount);
+			playerCity.setCityTreasuryWithdrawalCooldown(System.currentTimeMillis() + 86400000); // 24 hours
+			owner.sendSystemMessage(OutOfBand.ProsePackage("@city/city:you_withdraw_from_treasury", amount), (byte) 0);
+			playerCity.sendTreasuryWithdrawalMail(owner, amount, reason);
+			
+		});
+		core.suiService.openSUIWindow(window);
+		
+	}
+	
+	public void handleRemoveMilitia(CreatureObject mayor, long militiaId) {
+		PlayerCity playerCity = core.playerCityService.getPlayerCity(mayor);
+		CreatureObject militia = core.objectService.getObject(militiaId) == null ? core.objectService.getCreatureFromDB(militiaId) : (CreatureObject) core.objectService.getObject(militiaId);
+		if(militia == null)
+			return;
+		
+		SUIWindow window = core.suiService.createMessageBox(MessageBoxType.MESSAGE_BOX_OK_CANCEL, "@city/city:remove_militia_confirm", "@city/city:remove_militia_prefix " + militia.getCustomName() + " @city/city:remove_militia_suffix", mayor, null, 0);
+		window.addHandler(0, "", Trigger.TRIGGER_OK, new Vector<String>(), (actor, eventType, returnList) -> {
+			playerCity.removeMilitia(militiaId);
+			if(militia.getClient() != null)
+				militia.sendSystemMessage("@city/city:removed_militia_target", (byte) 0);
+			mayor.sendSystemMessage("@city/city:removed_militia", (byte) 0);
+			militia.getPlayerObject().setCitizenship(Citizenship.Citizen);
+			if(core.objectService.getObject(militiaId) == null)
+				core.objectService.persistObject(militiaId, militia, core.getSWGObjectODB());
+		});
+		core.suiService.openSUIWindow(window);
+	}
+	
+	public void handleViewStandings(CreatureObject actor, PlayerCity city) {
+		SUIWindow window = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "@city/city:mayoral_standings_t", "@city/city:mayoral_standings_d", new TreeMap<Long, String>(), actor, null, 0);
+		long mayorId = city.getMayorID();
+		for(long candidateId : city.getElectionList().keySet()) {
+			CreatureObject candidate = core.objectService.getObject(candidateId) == null ? core.objectService.getCreatureFromDB(candidateId) : (CreatureObject) core.objectService.getObject(candidateId);
+			if(candidate == null)
+				continue;
+			if(candidateId == mayorId)
+				window.addListBoxMenuItem("Incumbent: " + candidate.getCustomName() + " -- Votes: " + String.valueOf(city.getElectionList().get(candidateId)), candidateId);				
+			else
+				window.addListBoxMenuItem("Challenger: " + candidate.getCustomName() + " -- Votes: " + String.valueOf(city.getElectionList().get(candidateId)), candidateId);
+		}
+		core.suiService.openSUIWindow(window);
+	}
+	
+	public void handlePromptVote(CreatureObject actor, PlayerCity city) {
+		
+		if(!city.isCitizen(actor.getObjectID())) {
+			actor.sendSystemMessage("@city/city:vote_noncitizen", (byte) 0);
+			return;
+		}
+		
+		if(city.getElectionList().size() < 1) {
+			actor.sendSystemMessage("@city/city:no_candidates", (byte) 0);
+			return;			
+		}
+		
+		SUIWindow window = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "@city/city:mayoral_vote_t", "@city/city:mayoral_vote_d", new TreeMap<Long, String>(), actor, null, 0);
+		long mayorId = city.getMayorID();
+		for(long candidateId : city.getElectionList().keySet()) {
+			CreatureObject candidate = core.objectService.getObject(candidateId) == null ? core.objectService.getCreatureFromDB(candidateId) : (CreatureObject) core.objectService.getObject(candidateId);
+			if(candidate == null)
+				continue;
+			if(candidateId == mayorId)
+				window.addListBoxMenuItem(candidate.getCustomName() + " (Incumbent)", candidateId);				
+			else
+				window.addListBoxMenuItem(candidate.getCustomName() + " (Challenger)", candidateId);
+		}
+		Vector<String> returnList = new Vector<String>();
+		returnList.add("List.lstList:SelectedRow");
+		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, (owner, eventType, inputList) -> {
+			
+			int index = Integer.parseInt(inputList.get(0));
+			long candidateId = window.getObjectIdByIndex(index);
+			CreatureObject candidate = core.objectService.getObject(candidateId) == null ? core.objectService.getCreatureFromDB(candidateId) : (CreatureObject) core.objectService.getObject(candidateId);
+			if(candidate == null || !city.isCandidate(candidateId))
+				return;
+			city.castVote(actor, candidate);
+			actor.sendSystemMessage(OutOfBand.ProsePackage("@city/city:vote_placed", "TO", candidate.getCustomName()), (byte) 0);
+			
+		});
+		core.suiService.openSUIWindow(window);
+		
+	}
+	
+
 }

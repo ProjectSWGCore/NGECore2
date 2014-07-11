@@ -99,7 +99,7 @@ public class TradeService implements INetworkDispatch{
 					
 					// creates a new trade session for the user who sent the request. It's given the objectID 
 					// that the player wants to trade with.
-					if (senderObject.getCombatFlag() == 0 && recieverObject.getCombatFlag() == 0) {
+					if (!senderObject.isInCombat() && !recieverObject.isInCombat()) {
 						senderClient.getSession().setAttribute("tradeSession", recieverID);
 						
 						recieverObject.sendSystemMessage(senderObject.getCustomName() + " wants to trade with you.", (byte) 0);		

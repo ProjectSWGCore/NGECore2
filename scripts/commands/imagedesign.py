@@ -18,7 +18,10 @@ def run(core, actor, target, commandString):
 			target = core.chatService.getObjectByFirstName(commandString)
 			if target is None:
 				return
-
+		
+		if target is None or target.getClient() is None or target.getClient().getSession() is None:
+			return
+		
 		if target.getGroupId() == actor.getGroupId():
 
 			tDesign = ImageDesignStartMessage(target.getObjectId(), actor.getObjectId(), target.getObjectId())

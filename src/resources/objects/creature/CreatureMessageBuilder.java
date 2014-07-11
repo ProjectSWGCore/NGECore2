@@ -22,34 +22,33 @@
 package resources.objects.creature;
 
 import java.nio.ByteOrder;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import main.NGECore;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import com.sleepycat.persist.model.Persistent;
-
 import engine.resources.common.CRC;
 import resources.buffs.Buff;
-import resources.objects.ObjectMessageBuilder;
+import engine.resources.objects.Builder;
 import engine.resources.objects.SWGObject;
 import resources.objects.player.PlayerObject;
+import resources.objects.tangible.TangibleMessageBuilder;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 import resources.skills.SkillMod;
 
-@Persistent
-public class CreatureMessageBuilder extends ObjectMessageBuilder {
-
-	public CreatureMessageBuilder() { }
+public class CreatureMessageBuilder extends TangibleMessageBuilder {
 	
-	public CreatureMessageBuilder(CreatureObject creatureObject) {
-
-		setObject(creatureObject);
-
+	public CreatureMessageBuilder(CreatureObject object) {
+		super(object);
 	}
-
+	
+	public CreatureMessageBuilder() {
+		super();
+	}
+	
 	public IoBuffer buildBaseline1() {
 		CreatureObject creature = (CreatureObject) object;
 		IoBuffer buffer = bufferPool.allocate(26, false).order(ByteOrder.LITTLE_ENDIAN);
@@ -114,6 +113,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer.putInt(creature.getFactionStatus());
 		
 		byte[] customizationData = creature.getCustomization();
+		//byte[] customizationData = new byte[]{(byte)0x03,(byte)0xBF,(byte)0xC3,(byte)0x33,(byte)0x02,(byte)0x01,(byte)0x02};
 		
 		if(customizationData == null || customizationData.length <= 0) // Shuttles have no customization data
 			buffer.putShort((short) 0);
@@ -149,6 +149,9 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 
 		buffer.flip();
 		buffer = createBaseline("CREO", (byte) 3, buffer, size);
+		
+		tools.CharonPacketUtils.printAnalysis(buffer, "CREO 3");
+		
 		return buffer;
 
 	}
@@ -192,20 +195,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		
 		buffer.putInt(0);	// MissionCritical objects todo later
 		buffer.putInt(0);
-
-		if(creature.getAbilities().isEmpty()) {
-			buffer.putInt(0);	
-			buffer.putInt(creature.getAbilitiesUpdateCounter());
-		} else {
-			buffer.putInt(creature.getAbilities().size());	
-			buffer.putInt(creature.getAbilitiesUpdateCounter());
-
-			for(String ability : creature.getAbilities().get()) {
-				buffer.put((byte) 0);
-				buffer.put(getAsciiString(ability));
-				buffer.putInt(1);
-			}
-		}
+		buffer.put(creature.getAbilities().getBytes());
 		buffer.putInt(creature.getXpBarValue());	// xp bar value
 		int size = buffer.position();
 		buffer = bufferPool.allocate(size, false).put(buffer.array(), 0, size);
@@ -277,7 +267,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		 */ 
 		buffer.putInt((creature.getPerformanceType()) ? 0 : creature.getPerformanceId());
 		
-		buffer.putInt(6);	// Current HAM
+		buffer.putInt(6);	// Current HAM // These 6 vars are also known as "attributes", referred to as "attribs"
 		buffer.putInt(creature.getHamListCounter());
 
 		buffer.putInt(creature.getHealth());
@@ -303,7 +293,13 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 			buffer.putInt(0);
 			buffer.putInt(creature.getEquipmentListUpdateCounter());
 		} else {
-			buffer.putInt(creature.getEquipmentList().size());
+			int size = 0;
+			
+			for (Long objId : creature.getEquipmentList().get()) {
+				size += ((NGECore.getInstance().objectService.getObject(objId) == null) ? 0 : 1);
+			}
+			
+			buffer.putInt(size);
 			buffer.putInt(creature.getEquipmentListUpdateCounter());
 			
 			for(Long objId : creature.getEquipmentList().get()) {
@@ -407,7 +403,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 			buffer.putInt(0xFFFFFFFF);
 
 		buffer.put((byte) (creature.isRadarVisible() ? 1 : 0));
-		buffer.put((byte) 0); // no effect for 1?
+		buffer.put((byte) 1); // occupyingVehicle (hoth speeder, atat)
 		buffer.put((byte) 0); // no effect for 1?
 		
 
@@ -415,7 +411,13 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 			buffer.putInt(0);
 			buffer.putInt(creature.getAppearanceEquipmentListUpdateCounter());
 		} else {
-			buffer.putInt(creature.getAppearanceEquipmentList().size());
+			int size = 0;
+			
+			for (Long objId : creature.getEquipmentList().get()) {
+				size += ((NGECore.getInstance().objectService.getObject(objId) == null) ? 0 : 1);
+			}
+			
+			buffer.putInt(size);
 			buffer.putInt(creature.getAppearanceEquipmentListUpdateCounter());
 			
 			for(Long objId : creature.getAppearanceEquipmentList().get()) {
@@ -683,6 +685,16 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 
 	}
 	
+	public IoBuffer buildGuildIdDelta(int guildId) {
+		IoBuffer buffer = bufferPool.allocate(4, false).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putInt(guildId);
+		int size = buffer.position();
+		buffer.flip();
+		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x0F, buffer, size + 4);
+		
+		return buffer;
+	}
+	
 	public IoBuffer buildGroupInviteDelta(long inviteSenderId, String inviteSenderName, long inviteCounter) {
 		
 		IoBuffer buffer = bufferPool.allocate(18 + inviteSenderName.length(), false).order(ByteOrder.LITTLE_ENDIAN);
@@ -903,44 +915,6 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 
 	}
 	
-	public IoBuffer buildAddAbilityDelta(String name) {
-		
-		CreatureObject creature = (CreatureObject) object;
-		
-		IoBuffer buffer = bufferPool.allocate(15 + name.length(), false).order(ByteOrder.LITTLE_ENDIAN);
-		buffer.putInt(1);
-		buffer.putInt(creature.getAbilitiesUpdateCounter());
-		buffer.put((byte) 0);
-		buffer.put(getAsciiString(name));
-		buffer.putInt(1);
-		
-		int size = buffer.position();
-		buffer.flip();
-		buffer = createDelta("CREO", (byte) 4, (short) 1, (short) 0x0E, buffer, size + 4);
-		
-		return buffer;
-
-	}
-	
-	public IoBuffer buildRemoveAbilityDelta(String name) {
-		
-		CreatureObject creature = (CreatureObject) object;
-		
-		IoBuffer buffer = bufferPool.allocate(15 + name.length(), false).order(ByteOrder.LITTLE_ENDIAN);
-		buffer.putInt(1);
-		buffer.putInt(creature.getAbilitiesUpdateCounter());
-		buffer.put((byte) 1);
-		buffer.put(getAsciiString(name));
-		buffer.putInt(1);
-		
-		int size = buffer.position();
-		buffer.flip();
-		buffer = createDelta("CREO", (byte) 4, (short) 1, (short) 0x0E, buffer, size + 4);
-		
-		return buffer;
-
-	}
-	
 	public IoBuffer buildResetHAMListDelta() {
 		
 		CreatureObject creature = (CreatureObject) object;
@@ -1063,7 +1037,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer.putInt(1);
 		buffer.putInt(creature.getEquipmentListUpdateCounter());
 		buffer.put((byte) 1);
-		buffer.putShort((short) creature.getEquipmentList().indexOf(item));
+		buffer.putShort((short) creature.getEquipmentList().indexOf(item.getObjectId()));
 		if(item.getCustomization() == null || item.getCustomization().length == 0) {
 			buffer.putShort((short) 0);
 		} else {
@@ -1099,7 +1073,7 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer.putInt(1);
 		buffer.putInt(creature.getEquipmentListUpdateCounter());
 		buffer.put((byte) 0);
-		buffer.putShort((short) creature.getEquipmentList().indexOf(item));
+		buffer.putShort((short) creature.getEquipmentList().indexOf(item.getObjectId()));
 		
 		int size = buffer.position();
 		buffer.flip();
@@ -1192,36 +1166,35 @@ public class CreatureMessageBuilder extends ObjectMessageBuilder {
 		buffer = createDelta("CREO", (byte) 6, (short) 1, (short) 0x1E, buffer, size + 4);
 		return buffer;
 	}
-
-	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
-		switch (viewType) {
-			case 4: {
-				switch (updateType) {
-					case 3: { 
-						buffer = createDelta("CREO", (byte) 4, (short) 1, (byte) 3, buffer, buffer.array().length + 4);
-						
-						if (object.getClient() != null && object.getClient().getSession() != null) {
-							object.getClient().getSession().write(buffer);
-						}
-						
-						break;
-					}
-				}
-			}
-			case 1:
-			case 3:
-			case 6:
-			case 8:
-			case 9:
-			default: {
-				return;
-			}
-		}
+	
+	@Override
+	public void buildBaseline1(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline1(baselineBuilders, deltaBuilders);
 	}
 	
 	@Override
-	public void sendBaselines() {
-		
+	public void buildBaseline3(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline3(baselineBuilders, deltaBuilders);
+	}
+	
+	@Override
+	public void buildBaseline4(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline4(baselineBuilders, deltaBuilders);
+	}
+	
+	@Override
+	public void buildBaseline6(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline6(baselineBuilders, deltaBuilders);
+	}
+	
+	@Override
+	public void buildBaseline8(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline8(baselineBuilders, deltaBuilders);
+	}
+	
+	@Override
+	public void buildBaseline9(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline9(baselineBuilders, deltaBuilders);
 	}
 	
 }

@@ -26,10 +26,7 @@ import java.util.Map;
 import java.util.Vector;
 
 import main.NGECore;
-import protocol.swg.SceneCreateObjectByCrc;
 import protocol.swg.SceneDestroyObject;
-import protocol.swg.SceneEndBaselines;
-import protocol.swg.UpdateContainmentMessage;
 
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
@@ -44,10 +41,6 @@ import resources.objects.ObjectMessageBuilder;
 import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
 
-/** 
- * @author Charon 
- */
-
 @Persistent(version=0)
 public class FactoryCrateObject extends TangibleObject implements Serializable {
 	
@@ -57,7 +50,13 @@ public class FactoryCrateObject extends TangibleObject implements Serializable {
 	private byte capacity; 
 	private byte contentObjectQuantity;
 	private int contentCRC;
-	private TangibleObject contentObjectType;
+	//private TangibleObject contentObjectType;
+	private String contentObjectTypeTemplate;
+	private String contentObjectType;
+	private String factoryCrateType;
+	private Map<String,String> contentAttributes;
+	private String contentFilename;
+	private String crateSerialNumber;
 	
 	@NotPersistent
 	private transient FactoryCrateMessageBuilder messageBuilder;
@@ -73,32 +72,25 @@ public class FactoryCrateObject extends TangibleObject implements Serializable {
 	}
 
 	
-	public FactoryCrateObject(long objectID, Planet planet, String template, Point3D position, Quaternion orientation) { 
-		super(objectID, planet, template, position, orientation);
+	public FactoryCrateObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String template) { 
+		super(objectID, planet, position, orientation, template);
 		this.messageBuilder = new FactoryCrateMessageBuilder(this);
-		this.contents = new Vector<TangibleObject>();
 		this.contentObjectQuantity = 0;
 		this.capacity = 25;
-		this.getAttributes().put("@obj_attr_n:condition", "100/100");
-		this.getAttributes().put("@obj_attr_n:volume", "1");
-		this.getAttributes().put("@obj_attr_n:quantity", "1");
-		this.getAttributes().put("@obj_attr_n:factory_count", "1");
-		this.getAttributes().put("@obj_attr_n:factory_attribs", "------------");
-		this.getAttributes().put("@obj_attr_n:type", "@got_n:component"); 
-		this.getAttributes().put("@obj_attr_n:serial_number", "123"); 
-		
-		
+		this.factoryCrateType = "factory_crate";
+		this.contentObjectType = "";
+		//this.setStackable(true);	
 	}
 	
 	public boolean setContentType(TangibleObject contentObject) {
 		synchronized(objectMutex) {
-			this.contentObjectType = contentObject;
+			this.contentObjectTypeTemplate = contentObject.getTemplate();
 			if (contentObject.getTemplate().length()>0)
 				this.contentCRC = CRC.StringtoCRC(contentObject.getTemplate());
 			else
 				this.contentCRC = 0;
-			
-			Map<String,String> contentAttributes = contentObject.getAttributes();
+
+			contentAttributes = contentObject.getAttributes();
 			for (Map.Entry<String, String> entry : contentAttributes.entrySet())
 			{
 				//if (!entry.getKey().equals(@obj_attr_n:condition))
@@ -109,13 +101,13 @@ public class FactoryCrateObject extends TangibleObject implements Serializable {
 		}
 	}
 	
-	public TangibleObject getContentType() {
+	public String getContentType() {
 		return this.contentObjectType;
 	}
 	
 	public boolean setContentTypeAndQuantity(TangibleObject contentObject, int quantity) {
 		synchronized(objectMutex) {
-			this.contentObjectType = contentObject;
+			this.contentObjectTypeTemplate = contentObject.getTemplate();
 			if (contentObject.getTemplate().length()>0)
 				this.contentCRC = CRC.StringtoCRC(contentObject.getTemplate());
 			else{
@@ -123,21 +115,89 @@ public class FactoryCrateObject extends TangibleObject implements Serializable {
 				return false; // Does it make sense to continue anyway?
 			}
 			
-			Map<String,String> contentAttributes = contentObject.getAttributes();
+			this.setCustomName(contentObject.getCustomName());
+			
+			contentAttributes = contentObject.getAttributes();
 			for (Map.Entry<String, String> entry : contentAttributes.entrySet())
 			{
 				//if (!entry.getKey().equals(@obj_attr_n:condition))
 				this.getAttributes().put(entry.getKey(), entry.getValue());
 				System.out.println(entry.getKey() + " " + entry.getValue());
 			}
-			if (quantity<capacity) {			
-				contentObject.setSerialNumber(contentObject.getSerialNumber());			
+			if (quantity<=capacity) {			
+				this.setSerialNumber(contentObject.getSerialNumber());			
 				for (int i=0;i<quantity;i++){
-					contents.add(contentObject);
+					//contents.add(contentObject);
+					this.setUses(this.getUses()+1);
+					this.sendAddItem(this.getClient());		
+					System.out.println("i " + i);
 				}
-				contentObjectQuantity = (byte) quantity; 			
+				contentObjectQuantity = (byte) quantity; 	
+				this.sendSetQuantity(this.getClient(),quantity);
 				return true;
 			}		
+			return false;
+		}
+	}
+	
+	public boolean setContentTypeAndQuantity(TangibleObject contentObject, int quantity, String crateType, String contentType, Client client, boolean destroyContentObject) {
+		synchronized(objectMutex) {
+			this.setClient(client);
+			if (crateType!=null)
+				if (crateType.length()>0)
+					this.factoryCrateType = crateType;
+			if (contentType!=null)
+				if (contentType.length()>0)
+						this.contentObjectType = contentType;
+			
+			this.contentObjectTypeTemplate = contentObject.getTemplate();
+			contentFilename = contentObject.getStfFilename();
+			if (contentObject.getTemplate().length()>0)
+				this.contentCRC = CRC.StringtoCRC(contentObject.getTemplate());
+			else{
+				this.contentCRC = 0;
+				return false; // Does it make sense to continue anyway?
+			}
+			
+			if (contentObject.getSerialNumber()==null){
+				crateSerialNumber = main.NGECore.getInstance().reverseEngineeringService.createSerialNumber();
+			} else {
+				crateSerialNumber = contentObject.getSerialNumber();
+			}
+			
+			this.setCustomName(contentObject.getCustomName());
+			this.getAttributes().put("@obj_attr_n:condition", "100/100");
+			this.getAttributes().put("@obj_attr_n:volume", "1");
+			this.getAttributes().put("@obj_attr_n:quantity", "1");
+			this.getAttributes().put("@obj_attr_n:factory_count", "1");
+			this.getAttributes().put("@obj_attr_n:factory_attribs", "------------");
+			this.getAttributes().put("@obj_attr_n:type", "@got_n:"+contentType);
+			if (contentObject.getStringAttribute("@obj_attr_n:original_name")!=null)
+				this.getAttributes().put("@obj_attr_n:original_name", contentObject.getStringAttribute("@obj_attr_n:original_name"));
+			if (contentObject.getStringAttribute("@obj_attr_n:crafter")!=null)
+				this.getAttributes().put("@obj_attr_n:crafter", contentObject.getStringAttribute("@obj_attr_n:crafter"));
+			this.getAttributes().put("@obj_attr_n:serial_number", crateSerialNumber); 
+			
+			contentAttributes = contentObject.getAttributes();
+			for (Map.Entry<String, String> entry : contentAttributes.entrySet())
+			{
+				//if (!entry.getKey().equals(@obj_attr_n:condition))
+				if (entry.getKey()!=null && entry.getValue()!=null)
+					this.getAttributes().put(entry.getKey(), entry.getValue());
+			}
+								if (quantity<=capacity) {			
+									//this.setSerialNumber(contentObject.getSerialNumber());			
+//									for (int i=0;i<quantity;i++){
+//										//contents.add(contentObject);
+//										//this.setUses(this.getUses()+1);
+//										//this.sendAddItem(this.getClient());		
+//									}
+									contentObjectQuantity = (byte) quantity; 	
+									//this.sendSetQuantity(this.getClient(),quantity);
+									if (destroyContentObject)
+										main.NGECore.getInstance().objectService.destroyObject(contentObject.getObjectID());
+									return true;
+								}		
 			return false;
 		}
 	}
@@ -145,11 +205,11 @@ public class FactoryCrateObject extends TangibleObject implements Serializable {
 	public boolean addToCrate(TangibleObject contentObject) {
 		synchronized(objectMutex) {
 			if (contentObjectQuantity<capacity) {
-				if (! contents.isEmpty()) {
-					TangibleObject serialProvider = contents.firstElement();
-					contentObject.setSerialNumber(serialProvider.getSerialNumber());
-				}
-				contents.add(contentObject);
+//				if (! contents.isEmpty()) {
+//					TangibleObject serialProvider = contents.firstElement();
+//					contentObject.setSerialNumber(serialProvider.getSerialNumber());
+//				}
+				//contents.add(contentObject);
 				contentObjectQuantity ++; 
 				
 				return true;
@@ -160,34 +220,46 @@ public class FactoryCrateObject extends TangibleObject implements Serializable {
 	
 	public String getContentFilename() {
 		if (!contents.isEmpty()) {
-			return contents.firstElement().getStfFilename();
+			// return contents.firstElement().getStfFilename();
+			return contentFilename;
 		} else {
 			System.err.println("Crate is empty");
 		}
 		return null;
 	}
 	
-	public void getObjectOutOfCrate(CreatureObject player,NGECore core) {
+	public void getObjectOutOfCrate(CreatureObject player) {
 		synchronized(objectMutex) {
-			if (this.getQuantity()>0){
-				TangibleObject contentType = this.getContentType();
-				if (contentType==null)
-					return; // Bad, crate had no content type set
-				TangibleObject contentItem = (TangibleObject) core.objectService.createObject(contentType.getTemplate(), player.getPlanet());
+			NGECore core = main.NGECore.getInstance();
+			if (this.getQuantity()>0){		
+				TangibleObject contentItem = (TangibleObject) core.objectService.createObject(contentObjectTypeTemplate, player.getPlanet());
 				contentItem.setOptions(resources.datatables.Options.SERIAL, true); 		
-				int crc = this.getContentCRC();//CRC.StringtoCRC("object/tangible/food/crafted/shared_drink_alcohol.iff");
-				SceneCreateObjectByCrc createObjectMsg = new SceneCreateObjectByCrc(contentItem.getObjectID(), player.getOrientation().x, player.getOrientation().y, player.getOrientation().z, player.getOrientation().w, player.getPosition().x, player.getPosition().y, player.getPosition().z, crc, (byte) 0);
-				player.getClient().getSession().write(createObjectMsg.serialize());      						
-				contentItem.sendBaselines(player.getClient()); // TANO 3,6,8,9 Baselines		
-				SceneEndBaselines sceneEndBaselinesMsg = new SceneEndBaselines(contentItem.getObjectID());
-				player.getClient().getSession().write(sceneEndBaselinesMsg.serialize());
+				contentItem.setSerialNumber(this.getSerialNumber());
+//				int crc = this.getContentCRC();//CRC.StringtoCRC("object/tangible/food/crafted/shared_drink_alcohol.iff");
+//				SceneCreateObjectByCrc createObjectMsg = new SceneCreateObjectByCrc(contentItem.getObjectID(), player.getOrientation().x, player.getOrientation().y, player.getOrientation().z, player.getOrientation().w, player.getPosition().x, player.getPosition().y, player.getPosition().z, crc, (byte) 0);
+//				player.getClient().getSession().write(createObjectMsg.serialize());      						
+//				contentItem.sendBaselines(player.getClient()); // TANO 3,6,8,9 Baselines		
+//				SceneEndBaselines sceneEndBaselinesMsg = new SceneEndBaselines(contentItem.getObjectID());
+//				player.getClient().getSession().write(sceneEndBaselinesMsg.serialize());
+				
+				for (Map.Entry<String, String> entry : contentAttributes.entrySet()){
+					//contentItem.getAttributes().put(entry.getKey(),entry.getValue());
+					System.out.println("entry.getKey()"+entry.getKey());
+					System.out.println("entry.getValue()"+entry.getValue());
+					if (entry.getKey()!=null && entry.getValue()!=null)
+						contentItem.setStringAttribute(entry.getKey(),entry.getValue());
+				}
+				
+				contentItem.setCustomName(this.getCustomName());
 				
 				long parentId = this.getParentId();
 				SWGObject parentContainer = core.objectService.getObject(parentId);
 				if (parentContainer==null)
 					return; // crate has no parent, error
-				UpdateContainmentMessage updateContainmentMessage= new UpdateContainmentMessage(contentItem.getObjectID(), parentContainer.getObjectID(), -1);
-				player.getClient().getSession().write(updateContainmentMessage.serialize());
+//				UpdateContainmentMessage updateContainmentMessage= new UpdateContainmentMessage(contentItem.getObjectID(), parentContainer.getObjectID(), -1);
+//				player.getClient().getSession().write(updateContainmentMessage.serialize());
+				
+				parentContainer.add(contentItem);
 				
 				this.sendSetQuantity(player.getClient(),this.getQuantity()-1);
 				if (this.getQuantity()==0){ // Crate is empty now, delete it
@@ -214,10 +286,11 @@ public class FactoryCrateObject extends TangibleObject implements Serializable {
 	}
 	
 	public String getSerialNumber() {
-		if (!contents.isEmpty()) {
-			return contents.firstElement().getSerialNumber();
-		}
-		return "";
+//		if (!contents.isEmpty()) {
+//			return contents.firstElement().getSerialNumber();
+//		}
+		return crateSerialNumber;
+		//return "";
 	}
 	
 	public int getContentCRC() {
@@ -230,11 +303,49 @@ public class FactoryCrateObject extends TangibleObject implements Serializable {
 		}
 	}
 	
-	public void handleSplit(){
-		
-	}
+
+	public void splitFactoryCrate(CreatureObject owner, FactoryCrateObject originalObject, String commandString){
+			String[] splitArray = commandString.split(" ");
+			if (splitArray.length<3)
+				return;
+			int cloneStackQuantity= Integer.parseInt(splitArray[0]);
+			int parentcontainerID= Integer.parseInt(splitArray[1]);
+			SWGObject objectParentContainer = (SWGObject) NGECore.getInstance().objectService.getObject(parentcontainerID);			
+			if (objectParentContainer==null || originalObject==null)
+				return;
+
+			FactoryCrateObject newCrateObject = (FactoryCrateObject) NGECore.getInstance().objectService.createObject(originalObject.getTemplate(), owner.getPlanet());
+			//newCrateObject.cloneStats(originalObject);
+			
+			TangibleObject contentItem = (TangibleObject) NGECore.getInstance().objectService.createObject(contentObjectTypeTemplate, owner.getPlanet());
+			contentItem.setOptions(resources.datatables.Options.SERIAL, true); 		
+			//contentItem.setSerialNumber(this.getSerialNumber());
+			
+			for (Map.Entry<String, String> entry : contentAttributes.entrySet()){
+				//contentItem.getAttributes().put(entry.getKey(),entry.getValue());
+				System.out.println("entry.getKey()"+entry.getKey());
+				System.out.println("entry.getValue()"+entry.getValue());
+				if (entry.getKey()!=null && entry.getValue()!=null)
+					contentItem.setStringAttribute(entry.getKey(),entry.getValue());
+			}
+			
+			
+			contentItem.setCustomName(this.getCustomName());
+			newCrateObject.setContentTypeAndQuantity(contentItem,cloneStackQuantity, originalObject.getFactoryCrateType(), originalObject.getContentType(), owner.getClient(),true);
+
+			newCrateObject.getAttributes().put("@obj_attr_n:factory_count", ""+cloneStackQuantity);
+			newCrateObject.getAttributes().put("@obj_attr_n:quantity", ""+cloneStackQuantity);
+			
+			
+			//newCrateObject.sendSetQuantity(owner.getClient(), cloneStackQuantity);
+			originalObject.sendSetQuantity(owner.getClient(), originalObject.getQuantity()-cloneStackQuantity);
+			objectParentContainer.add(newCrateObject);
+		}
+
 	
 	public void sendAddItem(Client destination) {
+		if (destination==null)
+			return;
 		destination.getSession().write(messageBuilder.buildDelta3());
 		this.getAttributes().put("@obj_attr_n:factory_count", ""+this.getQuantity());
 		this.getAttributes().put("@obj_attr_n:quantity", ""+this.getQuantity());
@@ -242,6 +353,8 @@ public class FactoryCrateObject extends TangibleObject implements Serializable {
 	}
 	
 	public void sendSetQuantity(Client destination,int quantity) {
+		if (destination==null)
+			return;
 		contentObjectQuantity = (byte) quantity;
 		destination.getSession().write(messageBuilder.buildDelta3());
 		this.getAttributes().put("@obj_attr_n:factory_count", ""+quantity);	
@@ -278,6 +391,10 @@ public class FactoryCrateObject extends TangibleObject implements Serializable {
 	
 	public ObjectMessageBuilder getMessageBuilder() {
 		return messageBuilder;
+	}
+	
+	public String getFactoryCrateType(){
+		return factoryCrateType;
 	}
 	
 }

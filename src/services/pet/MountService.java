@@ -22,9 +22,12 @@
 package services.pet;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.LongAdder;
+
+import org.apache.commons.collections.CollectionUtils;
 
 import protocol.swg.UpdateContainmentMessage;
 import main.NGECore;
@@ -36,10 +39,13 @@ import resources.datatables.State;
 import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
+import services.ai.AIActor;
+import tools.DevLog;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.resources.container.Traverser;
 import engine.resources.objects.SWGObject;
+import engine.resources.scene.Planet;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
@@ -63,7 +69,7 @@ public class MountService implements INetworkDispatch {
 		}
 		
 		if (actor.getSlottedObject("ghost") == null) {
-			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:failed_to_call_vehicle"), DisplayType.Broadcast);
+			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:failed_to_call_vehicle"), DisplayType.Broadcast);
 			return;
 		}
 		
@@ -75,12 +81,12 @@ public class MountService implements INetworkDispatch {
 		
 		// Unsure if these are the right attributes.  It doesn't generate the vehicle if the datapad has max # of vehicles.
 		//if (datapad.getIntAttribute("data_size") >= datapad.getIntAttribute("datapad_slots")) {
-			//actor.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:has_max_vehicle"), DisplayType.Broadcast);
+			//actor.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:has_max_vehicle"), DisplayType.Broadcast);
 			//return;
 		//}
 		
 		if (actor.getTefTime() > 0){
-			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:prose_cant_generate_yet", actor.getTefTime()), DisplayType.Broadcast);
+			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:prose_cant_generate_yet", actor.getTefTime()), DisplayType.Broadcast);
 			return;
 		}
 		
@@ -114,7 +120,7 @@ public class MountService implements INetworkDispatch {
 			core.objectService.destroyObject(deed);
 		}
 		
-		actor.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:device_added"), DisplayType.Broadcast);
+		actor.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:device_added"), DisplayType.Broadcast);
 		
 		call(actor, pcd);
 	}
@@ -129,38 +135,38 @@ public class MountService implements INetworkDispatch {
 		}
 		
 		if (pcd == null) {
-			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:cant_call"), DisplayType.Broadcast);
+			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:cant_call"), DisplayType.Broadcast);
 			return;
 		}
 		
 		if (isMounted(actor)) {
-			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:cannot_call_another_rideable"), DisplayType.Broadcast);
+			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:cannot_call_another_rideable"), DisplayType.Broadcast);
 			return;
 		}
 		
-		if (actor.getCombatFlag() == 1) {
-			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:cannot_call_in_combat"), DisplayType.Broadcast);
+		if (actor.isInCombat()) {
+			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:cannot_call_in_combat"), DisplayType.Broadcast);
 			return;
 		}
 		
 		if (actor.getContainer() != null) {
-			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:cannot_call_indoors"), DisplayType.Broadcast);
+			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:cannot_call_indoors"), DisplayType.Broadcast);
 			return;
 		}
 		
 		if (actor.getPosture() == Posture.Dead) {
-			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:cannot_call_while_dead"), DisplayType.Broadcast);
+			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:cannot_call_while_dead"), DisplayType.Broadcast);
 			return;
 		}
 		
 		if (pcd.getSlottedObject("inventory") == null) {
-			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:cant_call"), DisplayType.Broadcast);
+			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:cant_call"), DisplayType.Broadcast);
 			return;
 		}
 		
 		if (pcd.getStringAttribute("required_faction") != null && pcd.getStringAttribute("required_faction").length() > 0) {
 			if (!actor.getFaction().equals(pcd.getStringAttribute("required_faction"))) {
-				actor.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:officer_faction"), DisplayType.Broadcast);
+				actor.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:officer_faction"), DisplayType.Broadcast);
 				return;
 			}
 		}
@@ -175,7 +181,7 @@ public class MountService implements INetworkDispatch {
 		
 		if (mount == null) {
 			// Somehow the vehicle object has got lost
-			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:cant_call"), DisplayType.Broadcast);
+			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:cant_call"), DisplayType.Broadcast);
 			return;
 		}
 		
@@ -194,33 +200,35 @@ public class MountService implements INetworkDispatch {
 	
 	private void callVehicle(CreatureObject actor, SWGObject pcd, PlayerObject player, CreatureObject mount) {		
 		if ((mount.getLevel() - actor.getLevel()) > 5) {
-			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:cant_call_level"), DisplayType.Broadcast);
+			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:cant_call_level"), DisplayType.Broadcast);
 			return;
 		}
 		
 		// FIXME Movement skillmod should always be used instead of CREO4 speed vars directly.  Movement skillmod should NEVER be 0 unless rooted.  Currently it is, which is wrong.
 		//if (actor.getSkillModBase("movement") == 0) {
-			//actor.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:cant_call_vehicle_rooted"), DisplayType.Broadcast);
+			//actor.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:cant_call_vehicle_rooted"), DisplayType.Broadcast);
 			//return;
 		//}
 		
 		if (actor.getPlanet().getName().contains("kashyyyk") && !actor.getPlanet().getName().contains("_main")) {
-			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:vehicle_restricted_scene"), DisplayType.Broadcast);
+			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:vehicle_restricted_scene"), DisplayType.Broadcast);
 			//mount_restricted_scene for creature mounts
 			return;
 		}
 		
 		if (player.isCallingCompanion()) {
-			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:cant_call_1sec"), DisplayType.Broadcast);
+			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:cant_call_1sec"), DisplayType.Broadcast);
 			return;
 		}
 		
+		core.petService.storeAll(actor);
 		storeAll(actor);
+		
 		
 		player.setCallingCompanion(true);
 		
 		if (actor.getTefTime() > 0) {
-			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:call_vehicle_delay", actor.getTefTime()), DisplayType.Broadcast);
+			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:call_vehicle_delay", actor.getTefTime()), DisplayType.Broadcast);
 		}
 		
 		try {
@@ -250,6 +258,7 @@ public class MountService implements INetworkDispatch {
 							mount.setPosition(actor.getPosition().clone());
 							mount.setOrientation(actor.getOrientation().clone());
 							mount.setPlanet(actor.getPlanet());
+							DevLog.debugout("Charon", "Mount Service", "PROCESS MOUNT " + mount.getTemplate()); 
 							core.simulationService.add(mount, actor.getWorldPosition().x, actor.getWorldPosition().z, false);
 						}
 					}
@@ -259,6 +268,25 @@ public class MountService implements INetworkDispatch {
 		});
 		
 		player.setCallingCompanion(false);
+		
+		// Make the vehicle visible
+		
+		List<SWGObject> newAwareObjects = core.simulationService.get(actor.getPlanet(), actor.getWorldPosition().x, actor.getWorldPosition().z, 512);
+		ArrayList<SWGObject> oldAwareObjects = new ArrayList<SWGObject>(actor.getAwareObjects());
+		@SuppressWarnings("unchecked") Collection<SWGObject> updateAwareObjects = CollectionUtils.intersection(oldAwareObjects, newAwareObjects);
+		
+		for(int i = 0; i < newAwareObjects.size(); i++) {
+			SWGObject obj = newAwareObjects.get(i);
+			//System.out.println(obj.getTemplate());
+			if(!updateAwareObjects.contains(obj) && obj != actor && !actor.getAwareObjects().contains(obj) &&  obj.getContainer() != actor && obj.isInQuadtree()) {						
+				if(obj.getAttachment("bigSpawnRange") == null && obj.getWorldPosition().getDistance2D(actor.getWorldPosition()) > 200)
+					continue;						
+				actor.makeAware(obj);
+				if(obj.getClient() != null)
+					obj.makeAware(actor);
+			}
+		}
+		
 	}
 	
 	private void callMount(CreatureObject actor, SWGObject pcd, PlayerObject player, CreatureObject mount) {
@@ -284,7 +312,7 @@ public class MountService implements INetworkDispatch {
 			return;
 		}
 		
-		if (mount.getConditionDamage() >= mount.getMaxDamage()) {
+		if (mount.getConditionDamage() >= mount.getMaximumCondition()) {
 			disable(mount);
 		}
 	}
@@ -303,7 +331,7 @@ public class MountService implements INetworkDispatch {
 				
 				dismount(rider, mount);
 				
-				rider.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:veh_disabled"), DisplayType.Broadcast);
+				rider.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:veh_disabled"), DisplayType.Broadcast);
 			}
 			
 		});
@@ -361,12 +389,12 @@ public class MountService implements INetworkDispatch {
 		}
 		
 		if (mount.getOption(Options.DISABLED)) {
-			repairer.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:cannot_repair_disabled"), DisplayType.Broadcast);
+			repairer.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:cannot_repair_disabled"), DisplayType.Broadcast);
 			return;
 		}
 		
 		if (mount.getConditionDamage() == 0) {
-			repairer.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:undamaged_vehicle"), DisplayType.Broadcast);
+			repairer.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:undamaged_vehicle"), DisplayType.Broadcast);
 			return;
 		}
 		
@@ -374,14 +402,14 @@ public class MountService implements INetworkDispatch {
 		// But at the moment it's not important.
 		
 		if (!canRepair(repairer, mount)) {
-			repairer.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:repair_unrecognized_garages"), DisplayType.Broadcast);
+			repairer.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:repair_unrecognized_garages"), DisplayType.Broadcast);
 			return;
 		}
 		
 		int cost = mount.getConditionDamage();
 		
 		if (repairer.getCashCredits() < cost) {
-			repairer.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:repair_failed_due_to_funds"), DisplayType.Broadcast);
+			repairer.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:repair_failed_due_to_funds"), DisplayType.Broadcast);
 			return;
 		}
 		
@@ -389,7 +417,7 @@ public class MountService implements INetworkDispatch {
 		
 		mount.setOptions(Options.DISABLED, false);
 		
-		repairer.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:repaired_to_max"), DisplayType.Broadcast);
+		repairer.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:repaired_to_max"), DisplayType.Broadcast);
 	}
 	
 	public void mount(CreatureObject rider, CreatureObject mount) {
@@ -408,17 +436,17 @@ public class MountService implements INetworkDispatch {
 		}
 		
 		if (mount.getOption(Options.DISABLED))  {
-			rider.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:cant_mount_veh_disabled"), DisplayType.Broadcast);
+			rider.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:cant_mount_veh_disabled"), DisplayType.Broadcast);
 			return;
 		}
 		
 		if (rider.isInStealth()) {
-			rider.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:no_mount_stealth"), DisplayType.Broadcast);
+			rider.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:no_mount_stealth"), DisplayType.Broadcast);
 			return;
 		}
 		
 		if (!canMount(rider, mount)) {
-			rider.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:cant_mount"), DisplayType.Broadcast);
+			rider.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:cant_mount"), DisplayType.Broadcast);
 			return;
 		}
 		
@@ -429,8 +457,8 @@ public class MountService implements INetworkDispatch {
 		rider.setState(State.RidingMount, true);
 		mount.setState(State.MountedCreature, true);
 		
-		rider.setPosture((mount.getTemplate().contains("vehicle")) ? Posture.DrivingVehicle : Posture.RidingCreature);
-		//mount.setPosture((mount.getTemplate().contains("vehicle")) ? Posture.DrivingVehicle : Posture.RidingCreature);
+		// For some reason SOE decided the mount would need the following posture to be set for the character to have the driving or riding animation.
+		mount.setPosture((mount.getTemplate().contains("vehicle")) ? Posture.DrivingVehicle : Posture.RidingCreature);
 		
 		if (!mount.getSlotNameForObject(rider).equals("rider1")) {
 			core.buffService.addBuffToCreature(rider, "vehicle_passenger", mount);
@@ -551,7 +579,11 @@ public class MountService implements INetworkDispatch {
 		
 		LongAdder adder = new LongAdder();
 		
-		mount.getSlottedObject("inventory").viewChildren(mount, false, false, (obj) -> adder.increment());
+		try {
+			mount.viewChildren(mount, false, false, (object) -> adder.increment());
+		} catch(Exception ex) {
+			
+		}
 		
 		int passengers = adder.intValue();
 		
@@ -589,8 +621,7 @@ public class MountService implements INetworkDispatch {
 	}
 	
 	public void dismount(CreatureObject rider, CreatureObject mount) {
-		// Check if mount is currently mounted // Not necessary since nobody'll be dismounted if so
-		
+
 		if (rider == null || mount == null) {
 			return;
 		}
@@ -605,12 +636,12 @@ public class MountService implements INetworkDispatch {
 		
 		// Dismount all passengers
 		if (rider.getObjectID() == mount.getOwnerId()) {
-			CreatureObject owner = rider;
 			
-			mount.viewChildren(owner, false, false, new Traverser() {
-				
-				public void process(SWGObject passenger) {
-					if (passenger != owner) dismount(rider, mount);
+			mount.viewChildren(mount, false, false, new Traverser()
+			{
+				public void process(SWGObject passenger)
+				{
+					if (passenger.getObjectId() != mount.getOwnerId()) dismount((CreatureObject) passenger, mount);
 				}
 				
 			});
@@ -649,6 +680,11 @@ public class MountService implements INetworkDispatch {
 	 * Judging by the fact pcds have inventories and many other things don't.
 	 */
 	public void store(CreatureObject storer, CreatureObject mount) {
+		if (mount == null) {
+			System.err.println("MountService:store(): mount is null; this should never be the case.");
+			return;
+		}
+		
 		if (mount.getContainer() != null) {
 			return;
 		}
@@ -666,17 +702,18 @@ public class MountService implements INetworkDispatch {
 		PlayerObject player = (PlayerObject) owner.getSlottedObject("ghost");
 		
 		if (player.isCallingCompanion()) {
-			storer.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:cant_store_1sec"), DisplayType.Broadcast);
+			storer.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:cant_store_1sec"), DisplayType.Broadcast);
 			return;
 		}
 		
 		if (isMounted(owner, mount)) {
-			storer.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:must_dismount"), DisplayType.Broadcast);
-			return;
+			//storer.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:must_dismount"), DisplayType.Broadcast);
+			//return;
+			dismount(storer, mount);
 		}
 		
 		if (owner.getTefTime() > 0) {
-			owner.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:prose_cant_store_yet", owner.getTefTime()), DisplayType.Broadcast);
+			owner.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:prose_cant_store_yet", owner.getTefTime()), DisplayType.Broadcast);
 			return;
 		}
 		
@@ -764,9 +801,9 @@ public class MountService implements INetworkDispatch {
 		core.objectService.destroyObject(pcd);
 		
 		if (type.contains("vehicle")) {
-			destroyer.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:vehicle_released"), DisplayType.Broadcast);
+			destroyer.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:vehicle_released"), DisplayType.Broadcast);
 		} else {
-			destroyer.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:pet_released"), DisplayType.Broadcast);
+			destroyer.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:pet_released"), DisplayType.Broadcast);
 		}
 	}
 	
@@ -777,5 +814,5 @@ public class MountService implements INetworkDispatch {
 	public void shutdown() {
 		
 	}
-	
+
 }

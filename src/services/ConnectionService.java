@@ -25,6 +25,7 @@ import java.nio.ByteOrder;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -49,6 +50,7 @@ import protocol.swg.GameServerLagResponse;
 import protocol.swg.HeartBeatMessage;
 import engine.clients.Client;
 import engine.resources.database.DatabaseConnection;
+import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
@@ -79,14 +81,23 @@ public class ConnectionService implements INetworkDispatch {
 		scheduler.scheduleAtFixedRate(new Runnable() {
 			
 			public void run() {
-				synchronized(core.getActiveConnectionsMap()) {
-					for(Client c : core.getActiveConnectionsMap().values()) {
-						if(c.getParent() != null) {
-							if ((System.currentTimeMillis() - c.getSession().getLastReadTime()) > 300000) {
-								disconnect(c);
+				try {
+					synchronized(core.getActiveConnectionsMap()) {
+						for(Client c : core.getActiveConnectionsMap().values()) {
+							if(c.getParent() != null) {
+								if ((System.currentTimeMillis() - c.getSession().getLastReadTime()) > 300000) {
+									try {
+										disconnect(c);
+									} catch (Exception e) {
+										System.err.println("ConnectionService:disconnect(): Error disconnecting client.");
+										e.printStackTrace();
+									}
+								}
 							}
 						}
 					}
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
 			
@@ -155,7 +166,35 @@ public class ConnectionService implements INetworkDispatch {
 			@Override
 			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
 
-				GalaxyLoopTimesResponse response = new GalaxyLoopTimesResponse(0);
+				/* 10 000 000 = extremely heavy
+				 * 5 000 000 = very heavy
+				 * 4 000 000 = heavy
+				 * 2 500 000 = medium
+				 * 2 000 000 = light
+				 * < 2 000 000 = very light
+				*/
+				Client client = core.getClient(session);
+				if(client == null) {
+					System.out.println("NULL Client");
+					return;
+				}
+				SWGObject object = client.getParent();
+				if(object == null)
+					return;
+				int observers = object.getObservers().size();
+				int areaActivity = 0;
+				if(observers > 32)
+					areaActivity = 2000000;
+				if(observers > 40)
+					areaActivity = 2500000;
+				if(observers > 50)
+					areaActivity = 4000000;
+				if(observers > 75)
+					areaActivity = 5000000;
+				if(observers > 100)
+					areaActivity = 10000000;
+				
+				GalaxyLoopTimesResponse response = new GalaxyLoopTimesResponse(areaActivity);
 				session.write(response.serialize());
 				
 			}
@@ -195,27 +234,49 @@ public class ConnectionService implements INetworkDispatch {
 		
 		CreatureObject object = (CreatureObject) client.getParent();
 		
-		object.setInviteCounter(0);
-		object.setInviteSenderId(0);
-		object.setInviteSenderName("");
-		
-		if(object.getAttachment("inspireDuration") != null)
-			object.setAttachment("inspireDuration", null);
-		
-		if(object.getPerformanceListenee() != null) {
-			object.getPerformanceListenee().removeSpectator(object);
-			object.setPerformanceListenee(null);
+		try {
+			for (CreatureObject opponent : new ArrayList<CreatureObject>(object.getDuelList())) {
+				if (opponent != null) {
+					core.combatService.handleEndDuel(object, opponent, true);
+				}
+			}
+			core.combatService.endCombat((CreatureObject) object);
+			object.setInviteCounter(0);
+			object.setInviteSenderId(0);
+			object.setInviteSenderName("");
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		
-		if(object.getPerformanceWatchee() != null) {
-			object.getPerformanceWatchee().removeSpectator(object);
-			object.setPerformanceWatchee(null);
+		try {
+			if(object.getAttachment("inspireDuration") != null)
+				object.setAttachment("inspireDuration", null);
+			
+			if(object.getPerformanceListenee() != null) {
+				object.getPerformanceListenee().removeSpectator(object);
+				object.setPerformanceListenee(null);
+			}
+			
+			if(object.getPerformanceWatchee() != null) {
+				object.getPerformanceWatchee().removeSpectator(object);
+				object.setPerformanceWatchee(null);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		
-		core.groupService.handleGroupDisband(object, false);
+		try {
+			core.groupService.handleGroupDisband(object, false);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
-		if (core.instanceService.isInInstance(object)) {
-			core.instanceService.remove(core.instanceService.getActiveInstance(object), object);
+		try {
+			if (core.instanceService.isInInstance(object)) {
+				core.instanceService.remove(core.instanceService.getActiveInstance(object), object);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		
 		object.setClient(null);
@@ -227,27 +288,27 @@ public class ConnectionService implements INetworkDispatch {
 		
 		Point3D objectPos = object.getWorldPosition();
 		
-		List<AbstractCollidable> collidables = core.simulationService.getCollidables(object.getPlanet(), objectPos.x, objectPos.z, 512);
-
-		collidables.forEach(c -> c.removeCollidedObject(object));		
+		try {
+			List<AbstractCollidable> collidables = core.simulationService.getCollidables(object.getPlanet(), objectPos.x, objectPos.z, 512);
+	
+			collidables.forEach(c -> c.removeCollidedObject(object));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
-		if (ghost != null) {
-			String objectShortName = object.getCustomName();
-			
-			if (object.getCustomName().contains(" ")) {
-				String[] splitName = object.getCustomName().toLowerCase().split(" ");
-				objectShortName = splitName[0];
-			}
-			
-			core.chatService.playerStatusChange(objectShortName, (byte) 0);
-			
-			for (Integer roomId : ghost.getJoinedChatChannels()) {
-				ChatRoom room = core.chatService.getChatRoom(roomId.intValue());
+		try {
+			if (ghost != null) {
+				String objectShortName = object.getCustomName();
 				
-				if (room != null) { core.chatService.leaveChatRoom(object, roomId.intValue()); } 
-				// work-around for any channels that may have been deleted, or only spawn on server startup, that were added to the joined channels
-				else { ghost.removeChannel(roomId); } 
+				if (object.getCustomName().contains(" ")) {
+					String[] splitName = object.getCustomName().toLowerCase().split(" ");
+					objectShortName = splitName[0];
+				}
+				
+				core.chatService.playerStatusChange(objectShortName, (byte) 0);
 			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		
 		long parentId = object.getParentId();
@@ -270,7 +331,13 @@ public class ConnectionService implements INetworkDispatch {
 			}
 		}*/
 		
-		core.missionService.getBountyList().remove(core.getBountiesODB().get(object.getObjectId()));
+		try {
+			if (core.getBountiesODB().contains(object.getObjectID())) {
+				core.missionService.getBountyMap().remove(core.getBountiesODB().get(object.getObjectID()));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
 		ghost.toggleFlag(PlayerFlags.LD);
 		
@@ -278,16 +345,23 @@ public class ConnectionService implements INetworkDispatch {
 		object.setPerformanceWatchee(null);
 		object.setAttachment("disconnectTask", null);
 		
-		List<ScheduledFuture<?>> schedulers = core.playerService.getSchedulers().get(object.getObjectID());
-		if(schedulers != null) {
-			schedulers.forEach(s -> s.cancel(true));
-			schedulers.clear();
+		try {
+			List<ScheduledFuture<?>> schedulers = core.playerService.getSchedulers().get(object.getObjectID());
+			if(schedulers != null) {
+				schedulers.forEach(s -> s.cancel(true));
+				schedulers.clear();
+			}
+			core.playerService.getSchedulers().remove(object.getObjectID());
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		core.playerService.getSchedulers().remove(object.getObjectID());
 		
-		core.getSWGObjectODB().put(object.getObjectID(), object);
-		core.objectService.destroyObject(object);
-		
+		try {
+			core.getSWGObjectODB().put(object.getObjectID(), object);
+			core.objectService.destroyObject(object);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 

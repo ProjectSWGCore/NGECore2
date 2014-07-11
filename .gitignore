@@ -60,13 +60,10 @@ odb/chatRooms/je.info.*
 odb/resourcehistory/je.info.*
 odb/resourceroots/je.info.*
 odb/resources/je.info.*
-<<<<<<< HEAD
 odb/auction/je.info.*
 odb/swgobjects/je.info.*
-=======
-odb/auction/je.info.*
 odb/bounties/je.info.*
->>>>>>> 12ca3ae66170fcfe09d848a7eea529041b9af5ad
+odb/cities/je.info.*
 
 # External tool builders
 .externalToolBuilders/
@@ -80,6 +77,8 @@ odb/bounties/je.info.*
 # PDT-specific
 .buildpath
 
+# Log files
+debuglogs/
 
 #################
 ## Visual Studio

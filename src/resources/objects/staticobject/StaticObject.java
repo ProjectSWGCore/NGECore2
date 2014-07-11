@@ -23,57 +23,87 @@ package resources.objects.staticobject;
 
 import java.io.Serializable;
 
-import resources.objects.ObjectMessageBuilder;
-
-import com.sleepycat.persist.model.NotPersistent;
-import com.sleepycat.persist.model.Persistent;
+import org.apache.mina.core.buffer.IoBuffer;
 
 import engine.clients.Client;
+import engine.resources.objects.Baseline;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
-@Persistent(version=0)
 public class StaticObject extends SWGObject implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
-	@NotPersistent
+	
 	private transient StaticMessageBuilder messageBuilder;
-
-	public StaticObject() {
-		super();
-		messageBuilder = new StaticMessageBuilder(this);
-	}
-
+	
 	public StaticObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
 		super(objectID, planet, position, orientation, Template);
-		messageBuilder = new StaticMessageBuilder(this);
 	}
-
-	@Override
-	public void sendBaselines(Client destination) {
-
-
-		if(destination == null || destination.getSession() == null) {
-			System.out.println("NULL destination");
-			return;
-		}
-		
-		//destination.getSession().write(messageBuilder.buildBaseline3());
-		//destination.getSession().write(messageBuilder.buildBaseline6());
-
-
+	
+	public StaticObject() {
+		super();
 	}
 	
 	@Override
 	public void initAfterDBLoad() {
 		super.init();
-		messageBuilder = new StaticMessageBuilder(this);
 	}
 	
-	public ObjectMessageBuilder getMessageBuilder() {
-		return messageBuilder;
+	@Override
+	public Baseline getOtherVariables() {
+		Baseline baseline = super.getOtherVariables();
+		return baseline;
+	}
+	
+	@Override
+	public Baseline getBaseline3() {
+		Baseline baseline = super.getBaseline3();
+		return baseline;
+	}
+	
+	@Override
+	public Baseline getBaseline6() {
+		Baseline baseline = super.getBaseline6();
+		return baseline;
+	}
+	
+	@Override
+	public void notifyClients(IoBuffer buffer, boolean notifySelf) {
+		notifyObservers(buffer, false);
+	}
+	
+	@Override
+	public StaticMessageBuilder getMessageBuilder() {
+		synchronized(objectMutex) {
+			if (messageBuilder == null) {
+				messageBuilder = new StaticMessageBuilder(this);
+			}
+			
+			return messageBuilder;
+		}
+	}
+	
+	@Override
+	public void sendBaselines(Client destination) {
+		if (destination != null && destination.getSession() != null) {
+			destination.getSession().write(getBaseline(3).getBaseline());
+			destination.getSession().write(getBaseline(6).getBaseline());
+			
+			Client parent = ((getGrandparent() == null) ? null : getGrandparent().getClient());
+			
+			if (parent != null && destination == parent) {
+				destination.getSession().write(getBaseline(8).getBaseline());
+				destination.getSession().write(getBaseline(9).getBaseline());
+			}
+		}
+	}
+	
+	@Override
+	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }

@@ -91,11 +91,14 @@ public class BuffService implements INetworkDispatch {
 		
 		if(buff == null) return false;
 		
+		// Here the necessary checks must be placed to prevent buffs from the same buff group (e.g. Buff D) being stacked!
+		
 		if(buff.isGroupBuff()) {
 			addGroupBuff(buffer, buffName, buffer);
 			return true;
 		} else {
-			doAddBuff(target, buffName, buffer);
+			if (! hasBuff(target,buffName)) // QA, prevent infinite "refreshing" of buff by repeated use
+				doAddBuff(target, buffName, buffer);
 			return true;
 		}
 	}
@@ -149,15 +152,15 @@ public class BuffService implements INetworkDispatch {
                 }
         }	
 			
-        if(FileUtilities.doesFileExist("scripts/buffs/" + buffName + ".py")) core.scriptService.callScript("scripts/buffs/", buffName, "add", core, target, buff);
+/*        if(FileUtilities.doesFileExist("scripts/buffs/" + buffName + ".py")) core.scriptService.callScript("scripts/buffs/", buffName, "add", core, target, buff);
         else
-        {
+        { */
         	if(buff.getEffect1Name().length() > 0) core.skillModService.addSkillMod(target, buff.getEffect1Name(), (int) buff.getEffect1Value());
         	if(buff.getEffect2Name().length() > 0) core.skillModService.addSkillMod(target, buff.getEffect2Name(), (int) buff.getEffect2Value());
         	if(buff.getEffect3Name().length() > 0) core.skillModService.addSkillMod(target, buff.getEffect3Name(), (int) buff.getEffect3Value());
         	if(buff.getEffect4Name().length() > 0) core.skillModService.addSkillMod(target, buff.getEffect4Name(), (int) buff.getEffect4Value());
         	if(buff.getEffect5Name().length() > 0) core.skillModService.addSkillMod(target, buff.getEffect5Name(), (int) buff.getEffect5Value());
-        }
+//		}
 		
 		target.addBuff(buff);
 		
@@ -168,9 +171,12 @@ public class BuffService implements INetworkDispatch {
 				@Override
 				public void run() {
 					
-					removeBuffFromCreature(target, buff);
+					try {
+						removeBuffFromCreature(target, buff);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 					
-				
 				}
 				
 			}, (long) buff.getDuration(), TimeUnit.SECONDS);
@@ -183,11 +189,15 @@ public class BuffService implements INetworkDispatch {
 			ScheduledFuture<?> task = scheduler.scheduleAtFixedRate(new Runnable() {
 				@Override
 				public void run() {
-					if (buffer == null  || buffer.getClient() == null)
-						removeBuffFromCreature(target, buff);
-
-					if (target.getWorldPosition().getDistance2D(buffer.getWorldPosition()) > 80) {
-						removeBuffFromCreature(target, buff);
+					try {
+						if (buffer == null  || buffer.getClient() == null)
+							removeBuffFromCreature(target, buff);
+	
+						if (target.getWorldPosition().getDistance2D(buffer.getWorldPosition()) > 80) {
+							removeBuffFromCreature(target, buff);
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
 					}
 				}
 			}, 5, 5, TimeUnit.SECONDS);
@@ -216,15 +226,16 @@ public class BuffService implements INetworkDispatch {
         	 dot.getTask().cancel(true);
         	 creature.removeDot(dot);
          }
-         if(FileUtilities.doesFileExist("scripts/buffs/" + buff.getBuffName() + ".py")) core.scriptService.callScript("scripts/buffs/", buff.getBuffName(), "remove", core, creature, buff);
+         
+/*         if(FileUtilities.doesFileExist("scripts/buffs/" + buff.getBuffName() + ".py")) core.scriptService.callScript("scripts/buffs/", buff.getBuffName(), "remove", core, creature, buff);
          else
-         {
+         {*/
          	if(buff.getEffect1Name().length() > 0) core.skillModService.deductSkillMod(creature, buff.getEffect1Name(), (int) buff.getEffect1Value());
          	if(buff.getEffect2Name().length() > 0) core.skillModService.deductSkillMod(creature, buff.getEffect2Name(), (int) buff.getEffect2Value());
          	if(buff.getEffect1Name().length() > 0) core.skillModService.deductSkillMod(creature, buff.getEffect3Name(), (int) buff.getEffect3Value());
          	if(buff.getEffect1Name().length() > 0) core.skillModService.deductSkillMod(creature, buff.getEffect4Name(), (int) buff.getEffect4Value());
          	if(buff.getEffect1Name().length() > 0) core.skillModService.deductSkillMod(creature, buff.getEffect5Name(), (int) buff.getEffect5Value());
-         }
+//         }
          	
          if (!buff.getCallback().equals("none") && !buff.getCallback().equals("")) {
         	 if (FileUtilities.doesFileExist("scripts/buffs/" + buff.getBuffName() +  ".py")) {
@@ -269,16 +280,25 @@ public class BuffService implements INetworkDispatch {
 		// copy to array for thread safety
 
 		for(final Buff buff : creature.getBuffList().get().toArray(new Buff[] { })) {
-
-			if (buff.getGroup1().startsWith("setBonus")) { continue; }
+			
+			if (buff.getRemovalTask() != null) { continue; }
 
 			if(buff.isGroupBuff() && buff.getGroupBufferId() != creature.getObjectID()) {
 				removeBuffFromCreature(creature, buff);
 				continue;
 			}
 
+			if (buff.getDuration() == (float) -1)
+				continue;
+			
 			if(buff.getRemainingDuration() > 0 && buff.getDuration() > 0) {
-				ScheduledFuture<?> task = scheduler.schedule(() -> removeBuffFromCreature(creature, buff), (long) buff.getRemainingDuration(), TimeUnit.SECONDS);
+				ScheduledFuture<?> task = scheduler.schedule(() -> {
+					try {
+						removeBuffFromCreature(creature, buff);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}, (long) buff.getRemainingDuration(), TimeUnit.SECONDS);
 				buff.setRemovalTask(task);
 				continue;
 			} else {
@@ -287,6 +307,14 @@ public class BuffService implements INetworkDispatch {
 
 		}
 
+	}
+	
+	public boolean hasBuff(final CreatureObject creature, String buffName) {
+
+		for(final Buff buff : creature.getBuffList().get().toArray(new Buff[] { })) {
+			if (buff.getBuffName().contains(buffName)) { return true; }
+		}
+		return false;
 	}
 	
 	public void addGroupBuff(CreatureObject buffer, String buffName) {

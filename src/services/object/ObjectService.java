@@ -46,9 +46,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import resources.common.*;
+import resources.datatables.DisplayType;
 import resources.datatables.Options;
 import resources.datatables.PlayerFlags;
+import resources.guild.Guild;
+import resources.harvest.SurveyTool;
 
+import org.apache.commons.lang3.text.WordUtils;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 import org.python.core.Py;
@@ -90,6 +94,7 @@ import engine.resources.container.WorldPermissions;
 import engine.resources.database.DatabaseConnection;
 import engine.resources.database.ODBCursor;
 import engine.resources.database.ObjectDatabase;
+import engine.resources.objects.Delta;
 import engine.resources.objects.IPersistent;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
@@ -99,7 +104,6 @@ import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import main.NGECore;
 import resources.objectives.BountyMissionObjective;
-import resources.objects.Delta;
 import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
 import resources.objects.craft.DraftSchematic;
@@ -118,16 +122,19 @@ import resources.objects.resource.ResourceContainerObject;
 import resources.objects.resource.ResourceRoot;
 import resources.objects.staticobject.StaticObject;
 import resources.objects.tangible.TangibleObject;
-import resources.objects.tool.SurveyTool;
 import resources.objects.waypoint.WaypointObject;
 import resources.objects.weapon.WeaponObject;
+import services.ai.AIActor;
 import services.command.BaseSWGCommand;
 import services.command.CombatCommand;
 import services.bazaar.AuctionItem;
 import services.chat.ChatRoom;
+import services.equipment.EquipmentService;
+import services.sui.SUIWindow;
+import services.sui.SUIWindow.SUICallback;
+import services.sui.SUIWindow.Trigger;
 
 @SuppressWarnings("unused")
-
 public class ObjectService implements INetworkDispatch {
 
 	private Map<Long, SWGObject> objectList = new ConcurrentHashMap<Long, SWGObject>();
@@ -157,6 +164,9 @@ public class ObjectService implements INetworkDispatch {
 		    		}
 		    	}
 		    	core.bazaarService.saveAllItems();
+		    	core.housingService.saveBuildings();
+		    	core.harvesterService.saveHarvesters();
+		    	core.playerCityService.saveAllCities();
 		    	core.closeODBs();
 		    }
 		});
@@ -191,6 +201,14 @@ public class ObjectService implements INetworkDispatch {
 					object.setParent(building);
 				object.getContainerInfo(object.getTemplate());
 			});
+			SWGObject sign = (SWGObject) building.getAttachment("sign");
+			if(sign != null) {
+				sign.initializeBaselines();
+				sign.initAfterDBLoad();
+				objectList.put(sign.getObjectID(), sign);
+			}
+			if(building.getAttachment("structureOwner") != null && ((BuildingObject) building).getMaintenanceAmount() > 0)
+				core.housingService.startMaintenanceTask((BuildingObject) building);
 		}
 		
 		cursor.close();
@@ -222,10 +240,31 @@ public class ObjectService implements INetworkDispatch {
 		
 		boolean isSnapshot = false;
 		
+		if(objectID != 0 && objectList.containsKey(objectID)) {
+			System.err.println("Trying to create object with duplicate Id");
+			try {
+				throw new Exception();
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
 		if(objectID == 0)
 			objectID = generateObjectID();
 		else
 			isSnapshot = !overrideSnapshot;
+		
+		if (planet == null) {
+			System.err.println("Planet is null in createObject for some reason.");
+			
+			try {
+				throw new Exception();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			planet = core.terrainService.getPlanetByID(0);
+		}
 		
 		if(Template.startsWith("object/creature")) {
 			
@@ -237,25 +276,27 @@ public class ObjectService implements INetworkDispatch {
 			
 		} else if(Template.startsWith("object/tangible/survey_tool")) {
 			
-			object = new SurveyTool(objectID, planet, Template, position, orientation);
+			object = new SurveyTool(objectID, planet, position, orientation, Template);
 			
-		}
-//		else if(Template.startsWith("object/tangible/container/drum/shared_treasure_drum.iff")) {
-//			
-//			object = new CreatureObject(objectID, planet, position, orientation, Template);			
-//		
-//		} 
-		else if(Template.startsWith("object/tangible")) {
+		} else if(Template.startsWith("object/tangible")) {
 			
-			object = new TangibleObject(objectID, planet, Template, position, orientation);
+			object = new TangibleObject(objectID, planet, position, orientation, Template);
 
 		} else if(Template.startsWith("object/intangible")) {
+			if (Template.equals("object/intangible/buy_back/shared_buy_back_container.iff")) // Container sends TANO baselines but is in intangible folder.. lolsoe.
+				object = new TangibleObject(objectID, planet, position, orientation, Template);
+			else
+				object = new IntangibleObject(objectID, planet, position, orientation,Template);
 			
-			object = new IntangibleObject(objectID, planet, position, orientation,Template);
+		} else if(Template.startsWith("object/weapon")) {
+			
+			object = new WeaponObject(objectID, planet, position, orientation, Template);
 
-		}else if(Template.startsWith("object/weapon")) {
+		} else if(Template.startsWith("object/building/player/construction")) {
 			
-			object = new WeaponObject(objectID, planet, Template, position, orientation);
+			float positionY = core.terrainService.getHeight(planet.getID(), position.x, position.z)-1f;
+			Point3D newpoint = new Point3D(position.x,positionY,position.z);				
+			object = new InstallationObject(objectID, planet, newpoint, orientation, Template);
 
 		} else if(Template.startsWith("object/building") || Template.startsWith("object/static/worldbuilding/structures") || Template.startsWith("object/static/structure")){
 			
@@ -299,11 +340,11 @@ public class ObjectService implements INetworkDispatch {
 			
 		} else if(Template.startsWith("object/resource_container")) {
 			
-			object = new ResourceContainerObject(objectID, planet, Template, position, orientation);
+			object = new ResourceContainerObject(objectID, planet, position, orientation, Template);
 			
 		} else if(Template.startsWith("object/factory/shared_factory_crate")) {
 			
-			object = new FactoryCrateObject(objectID, planet, Template, position, orientation);
+			object = new FactoryCrateObject(objectID, planet, position, orientation, Template);
 			
 		} else if(Template.startsWith("object/draft_schematic")) {
 			
@@ -317,7 +358,7 @@ public class ObjectService implements INetworkDispatch {
 			
 			float positionY = core.terrainService.getHeight(planet.getID(), position.x, position.z)-1f;
 			Point3D newpoint = new Point3D(position.x,positionY,position.z);				
-			object = new InstallationObject(objectID, planet, Template, newpoint, orientation);
+			object = new InstallationObject(objectID, planet, newpoint, orientation, Template);
 			
 		} else if(Template.startsWith("object/installation/mining_ore") || Template.startsWith("object/installation/mining_liquid") ||
 				  Template.startsWith("object/installation/mining_gas") || Template.startsWith("object/installation/mining_organic") || 
@@ -325,20 +366,25 @@ public class ObjectService implements INetworkDispatch {
 			
 			float positionY = core.terrainService.getHeight(planet.getID(), position.x, position.z)-1f;
 			Point3D newpoint = new Point3D(position.x,positionY,position.z);			
-			object = new HarvesterObject(objectID, planet, Template, newpoint, orientation);	
+			object = new HarvesterObject(objectID, planet, newpoint, orientation, Template);	
 			
 		} else {
 			return null;			
 		}
 		
-		object.setPlanetId(planet.getID());
+		if (planet != null) {
+			object.setPlanetId(planet.getID());
+		} else {
+			object.setPlanetId(0);
+		}
 		
 		object.setAttachment("customServerTemplate", customServerTemplate);
 		
 		object.setisInSnapshot(isSnapshot);
-		if(!core.getObjectIdODB().contains(objectID))
-			core.getObjectIdODB().put(objectID, new ObjectId(objectID));
-		
+		synchronized(objectMutex) {
+			if(!core.getObjectIdODB().contains(objectID))
+				core.getObjectIdODB().put(objectID, new ObjectId(objectID));
+		}
 		// Set Options - easier to set them across the board here
 		// because we'll be spawning them despite most of them being unscripted.
 		// Any such settings can be completely reset with setOptionsBitmask
@@ -436,7 +482,17 @@ public class ObjectService implements INetworkDispatch {
 	}
 	
 	public SWGObject getObject(long objectID) {
-		return objectList.get(objectID);
+		SWGObject object = objectList.get(objectID);
+		
+		if (object == null) {
+			if (objectList.containsKey(objectID)) {
+				System.err.println("getObject(): object is null but objectList contains objectID key");
+			} else {
+				//System.err.println("getObject(): object is null");
+			}
+		}
+		
+		return object;
 	}
 	
 	public Map<Long, SWGObject> getObjectList() {
@@ -448,7 +504,11 @@ public class ObjectService implements INetworkDispatch {
 			
 			@Override
 			public void run() {
-				destroyObject(object);
+				try {
+					destroyObject(object);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 			
 		}, seconds, TimeUnit.SECONDS);
@@ -459,22 +519,27 @@ public class ObjectService implements INetworkDispatch {
 			return;
 		}
 		
-		if (object instanceof TangibleObject &&
-		((TangibleObject) object).getRespawnTime() > 0) {
+		if (object.getAttachment("AI") != null && object.getAttachment("AI") instanceof AIActor && ((AIActor) object.getAttachment("AI")).getMobileTemplate().getRespawnTime() > 0) {
 			final long objectId = object.getObjectID();
 			final String Template = object.getTemplate();
 			final Planet planet = object.getPlanet();
 			final Point3D position = object.getPosition();
 			final Quaternion orientation = object.getOrientation();
+			final long cellId = ((object.getContainer() == null) ? 0L : object.getContainer().getObjectID());
+			final short level = ((object instanceof CreatureObject) ? ((CreatureObject) object).getLevel() : (short) 0);
 			
 			scheduler.schedule(new Runnable() {
 				
 				@Override
 				public void run() {
-					createObject(Template, objectId, planet, position, orientation);
+					try {
+						NGECore.getInstance().spawnService.spawnCreature(Template, objectId, planet.getName(), cellId, position.x, position.y, position.z, orientation.w, orientation.x, orientation.y, orientation.z, level);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 				}
 				
-			}, ((TangibleObject) object).getRespawnTime(), TimeUnit.SECONDS);
+			}, ((AIActor) object.getAttachment("AI")).getMobileTemplate().getRespawnTime(), TimeUnit.SECONDS);
 		}
 		
 		String filePath = "scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", "") + object.getTemplate().split("shared_" , 2)[1].replace(".iff", "") + ".py";
@@ -502,6 +567,8 @@ public class ObjectService implements INetworkDispatch {
 
 		if(parent != null) {
 			if(parent instanceof CreatureObject) {
+				core.equipmentService.unequip((CreatureObject) parent, object);
+				
 				((CreatureObject) parent).removeObjectFromEquipList(object);
 				((CreatureObject) parent).removeObjectFromAppearanceEquipList(object);
 			}
@@ -511,7 +578,14 @@ public class ObjectService implements INetworkDispatch {
 		} else {
 			core.simulationService.remove(object, object.getWorldPosition().x, object.getWorldPosition().z, true);
 		}
-		
+		@SuppressWarnings("unchecked") Vector<SWGObject> childObjects = (Vector<SWGObject>) object.getAttachment("childObjects");
+		if(childObjects != null)
+		{
+			for(SWGObject child : childObjects) {
+				if(child != null && child.getParentId() != 0)
+					destroyObject(child);
+			}
+		}
 	}
 	
 	public void destroyObject(long objectID) {
@@ -533,7 +607,7 @@ public class ObjectService implements INetworkDispatch {
 			for(SWGObject obj : objectList.values()) {
 				if(obj.getCustomName() == null)
 					continue;
-				if(obj.getCustomName().equals(customName))
+				if(obj.getCustomName().equalsIgnoreCase(customName))
 					return obj;
 			}
 			
@@ -548,7 +622,7 @@ public class ObjectService implements INetworkDispatch {
 				continue;
 			}
 			
-			if (object.getCustomName() != null && customName.length() > 0 && object.getCustomName().equals(customName)) {
+			if (object.getCustomName() != null && customName.length() > 0 && object.getCustomName().equalsIgnoreCase(customName)) {
 				return object;
 			}
 		}
@@ -567,7 +641,7 @@ public class ObjectService implements INetworkDispatch {
 					continue;
 				if(obj.getCustomName() == null)
 					continue;
-				if(obj.getCustomName().startsWith(customName))
+				if(obj.getCustomName().startsWith(customName) || obj.getCustomName().toUpperCase().startsWith(WordUtils.capitalize(customName)))
 					return obj;
 			}
 			
@@ -582,7 +656,7 @@ public class ObjectService implements INetworkDispatch {
 				continue;
 			}
 			
-			if (object.getCustomName() != null && customName.length() > 0 && object.getCustomName().startsWith(customName)) {
+			if (object.getCustomName() != null && customName.length() > 0 && (object.getCustomName().startsWith(customName) || object.getCustomName().toUpperCase().startsWith(WordUtils.capitalize(customName)))) {
 				return object;
 			}
 		}
@@ -618,24 +692,22 @@ public class ObjectService implements INetworkDispatch {
 		long newId = 0;
 		boolean found = false;
 		// stack overflow when using recursion
-		while(!found) {
-			synchronized(objectMutex) {
+		synchronized(objectMutex) {
+			while(!found) {
 				newId = highestId.incrementAndGet();
+				PreparedStatement ps2;
+				try {
+					ps2 = databaseConnection.preparedStatement("UPDATE highestid SET id=" + newId + " WHERE id=(SELECT MAX(id) FROM highestid)");
+					ps2.executeUpdate();
+					ps2.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+				if(objectList.containsKey(newId) || core.getObjectIdODB().contains(newId))
+					found = false;
+				else
+					found = true;
 			}
-			
-			PreparedStatement ps2;
-	
-			try {
-				ps2 = databaseConnection.preparedStatement("UPDATE highestid SET id=" + newId + " WHERE id=" + (newId-1));
-				ps2.executeUpdate();
-				ps2.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-			if(getObject(newId) != null || core.getObjectIdODB().contains(newId))
-				found = false;
-			else
-				found = true;		
 		}
 		
 		return newId;		
@@ -659,12 +731,134 @@ public class ObjectService implements INetworkDispatch {
 		
 		return objectId;
 	}
+
+	public Vector<SWGObject> getItemsInContainerByStfName(CreatureObject creature, long containerId, String stfName) {
+		Vector<SWGObject> itemList = new Vector<SWGObject>();
+		SWGObject container = getObject(containerId);
+		
+		container.viewChildren(creature, false, false, (item) -> { if (item.getStfName() == stfName) { itemList.add(item); } });
+		
+		return itemList;
+	}	
 	
-	public void useObject(CreatureObject creature, SWGObject object) {
+	public void useObject(CreatureObject creature, final SWGObject object) {
+
 		if (creature == null || object == null) {
 			return;
 		}
 		
+		String template = ((object.getAttachment("customServerTemplate") == null) ? object.getTemplate() : (object.getTemplate().split("shared_")[0] + "shared_" + ((String) object.getAttachment("customServerTemplate")) + ".iff"));
+		
+		String bl = object.getStringAttribute("bio_link");
+		
+		if (bl != null) {
+			if (!object.getContainer().getTemplate().contains("shared_character_inventory")){
+				creature.sendSystemMessage("@base_player:must_biolink_to_use_from_inventory", DisplayType.Screen);
+				return;
+			}
+			
+			if (!bl.contains("@obj_attr_n:bio_link_pending") && ! bl.contains(creature.getCustomName())){
+				creature.sendSystemMessage("@base_player:not_linked_to_holder", DisplayType.Screen);
+				return;
+			}
+			
+			if (bl.contains("@obj_attr_n:bio_link_pending")){
+				creature.setAttachment("BioLinkItemCandidate", object.getObjectID());
+				SUIWindow window = core.suiService.createSUIWindow("Script.messageBox", creature, creature, 0);
+				window.setProperty("bg.caption.lblTitle:Text", "@sui:bio_link_item_title");
+				window.setProperty("Prompt.lblPrompt:Text", "@sui:bio_link_item_prompt");		
+				window.setProperty("btnCancel:visible", "True");
+				window.setProperty("btnOk:visible", "True");
+				window.setProperty("btnUpdate:visible", "False");
+				window.setProperty("btnCancel:Text", "@cancel");
+				window.setProperty("btnOk:Text", "@ui_radial:bio_link");						
+				Vector<String> returnList = new Vector<String>();
+				returnList.add("List.lstList:SelectedRow");				
+				window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, new SUICallback() {
+					@Override
+					public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
+						((CreatureObject)owner).sendSystemMessage("@base_player:item_bio_linked", (byte) 1);					
+						object.setStringAttribute("bio_link", owner.getCustomName());
+						object.setAttachment("bio_link_PlayerID", owner.getObjectID());
+						return;
+					}					
+				});		
+				window.addHandler(1, "", Trigger.TRIGGER_CANCEL, returnList, new SUICallback() {
+					@Override
+					public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
+						return;
+					}					
+				});	
+				core.suiService.openSUIWindow(window);	
+				return;
+			}
+		}
+		
+		// Check if used item was a PUP
+		String powerUpTemplate1 = "object/tangible/powerup/base/shared_armor_base.iff";
+		String powerUpTemplate2 = "object/tangible/powerup/base/shared_base.iff";
+		String powerUpTemplate3 = "object/tangible/powerup/base/shared_weapon_base.iff";			
+		if (object.getTemplate().equals(powerUpTemplate1)){
+			// chestplate
+			
+			String effectName = (String) object.getAttachment("effectName");
+			int powerValue = (int) object.getAttachment("powerValue");
+			
+			Long chestID = (Long) creature.getAttachment("EquippedChest");
+			if (chestID==null)
+				return;
+			
+			TangibleObject chest = (TangibleObject) core.objectService.getObject(chestID);
+			//chest.setIntAttribute(effectName, powerValue);
+			chest.setAttachment("PUPEffectName", effectName);
+			chest.setAttachment("PUPEffectValue", powerValue);
+			
+		}
+		if (object.getTemplate().equals(powerUpTemplate2)){
+			// Shirt
+			
+			String effectName = (String) object.getAttachment("effectName");
+			int powerValue = (int) object.getAttachment("powerValue");
+			
+			Long shirtID = (Long) creature.getAttachment("EquippedShirt");
+			if (shirtID==null)
+				return;
+			
+			TangibleObject shirt = (TangibleObject) core.objectService.getObject(shirtID);
+			//shirt.setIntAttribute(effectName, powerValue);
+			shirt.setAttachment("PUPEffectName", effectName);
+			shirt.setAttachment("PUPEffectValue", powerValue);
+		
+		}
+		if (object.getTemplate().equals(powerUpTemplate3)){
+			// weapon
+			SWGObject usedObject = null;
+			if (object.getAttachment("UsedObjectID")!=null){
+				long usedObjectid = (long)object.getAttachment("UsedObjectID");
+				usedObject = core.objectService.getObject(usedObjectid);
+			}
+			
+			creature.setAttachment("LastUsedPUP",object.getObjectID());
+			
+			if (usedObject==null){
+				Long weaponID = (Long) creature.getAttachment("EquippedWeapon");
+				System.out.println("weaponID " + weaponID);
+				if (weaponID==null)
+					return;
+				
+				WeaponObject weapon = (WeaponObject) core.objectService.getObject(weaponID);
+				usedObject = (SWGObject) weapon;
+			}
+
+			core.buffService.addBuffToCreature(creature, "powerup_weapon", creature);
+			
+			int amount = object.getIntAttribute("num_in_stack");
+			if (amount==1)
+				destroyObject(object.getObjectID());
+			else
+				object.setIntAttribute("num_in_stack",amount-1);
+		}
+			
 		creature.setUseTarget(object);
 		
 		int reuse_time;
@@ -677,6 +871,8 @@ public class ObjectService implements INetworkDispatch {
 		
 		try {
 			DatatableVisitor visitor = ClientFileManager.loadFile("datatables/timer/template_command_mapping.iff", DatatableVisitor.class);
+			
+			boolean foundTemplate = false;
 			
 			for (int i = 0; i < visitor.getRowCount(); i++) {
 				if (visitor.getObject(i, 0) != null && ((String) (visitor.getObject(i, 0))).equalsIgnoreCase(object.getTemplate())) {
@@ -700,41 +896,56 @@ public class ObjectService implements INetworkDispatch {
 							return;
 						}
 						
-						creature.addCooldown(cooldownGroup, object.getIntAttribute("reuse_time"));
+						creature.addCooldown(cooldownGroup, reuse_time);
 					}
+					
+					foundTemplate = true;
 					
 					break;
 				}
 			}
+			
+			if (!foundTemplate && reuse_time > 0) {
+				if (creature.hasCooldown(template)) {
+					return;
+				}
+				
+				creature.addCooldown(template, reuse_time);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		if (object instanceof TangibleObject) {
 			TangibleObject item = (TangibleObject) object;
 			int uses = item.getUses();
 			
 			if (uses > 0)  {
-				item.setUses(uses--);
+				item.setUses(uses - 1);
 				
 				if (item.getUses() == 0) {
 					destroyObject(object);
 				}
 			}
 		}
-		
+
 		if (object.getStringAttribute("proc_name") != null) {
-			core.buffService.addBuffToCreature(creature, object.getStringAttribute("proc_name").replace("@ui_buff:", ""), creature);
+			String buffName = object.getStringAttribute("proc_name").replace("@ui_buff:", "");
+			
+			if (object.getAttachment("alternateBuffName") != null)
+				buffName = (String) object.getAttachment("alternateBuffName");
+			
+			core.buffService.addBuffToCreature(creature, buffName, creature);
 		}
 		
-		String filePath = "scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", "") + object.getTemplate().split("shared_" , 2)[1].replace(".iff", "") + ".py";
+		String filePath = "scripts/" + template.split("shared_" , 2)[0].replace("shared_", "") + template.split("shared_" , 2)[1].replace(".iff", "") + ".py";
 		
 		if (FileUtilities.doesFileExist(filePath)) {
-			filePath = "scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", "");
-			String fileName = object.getTemplate().split("shared_" , 2)[1].replace(".iff", "");
+			filePath = "scripts/" + template.split("shared_" , 2)[0].replace("shared_", "");
+			String fileName = template.split("shared_" , 2)[1].replace(".iff", "");
 			
-			PyObject method1 = core.scriptService.getMethod("scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", ""), object.getTemplate().split("shared_" , 2)[1].replace(".iff", ""), "use");
-			PyObject method2 = core.scriptService.getMethod("scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", ""), object.getTemplate().split("shared_" , 2)[1].replace(".iff", ""), "useObject");
+			PyObject method1 = core.scriptService.getMethod("scripts/" + template.split("shared_" , 2)[0].replace("shared_", ""), template.split("shared_" , 2)[1].replace(".iff", ""), "use");
+			PyObject method2 = core.scriptService.getMethod("scripts/" + template.split("shared_" , 2)[0].replace("shared_", ""), template.split("shared_" , 2)[1].replace(".iff", ""), "useObject");
 			
 			if (method1 != null && method1.isCallable()) {
 				method1.__call__(Py.java2py(core), Py.java2py(creature), Py.java2py(object));
@@ -768,7 +979,7 @@ public class ObjectService implements INetworkDispatch {
 				}
 				CreatureObject creature = null;
 				if(getObject(objectId) == null) {
-										
+					System.out.println("SelectCharacter: not in object list");
 					creature = getCreatureFromDB(objectId);
 					if(creature == null) {
 						System.out.println("Cant get creature from db");
@@ -785,6 +996,9 @@ public class ObjectService implements INetworkDispatch {
 					
 
 				}
+				if(creature.getAttachment("disconnectTask") != null) {
+					((ScheduledFuture<?>) creature.getAttachment("disconnectTask")).cancel(true);
+				}					
 				
 				PlayerObject ghost = (PlayerObject) creature.getSlottedObject("ghost");
 
@@ -793,9 +1007,6 @@ public class ObjectService implements INetworkDispatch {
 				
 				ghost.clearFlagBitmask(PlayerFlags.LD);
 				
-				if(creature.getAttachment("disconnectTask") != null) {
-					((ScheduledFuture<?>) creature.getAttachment("disconnectTask")).cancel(true);
-				}					
 				creature.getAwareObjects().removeAll(creature.getAwareObjects());
 				creature.setAttachment("disconnectTask", null);
 
@@ -812,6 +1023,7 @@ public class ObjectService implements INetworkDispatch {
 				
 				creature.viewChildren(creature, true, true, (object) -> {
 					if(object.getMutex() == null)
+						object.initializeBaselines();
 						object.initAfterDBLoad();
 					if(object.getParentId() != 0 && object.getContainer() == null)
 						object.setParent(getObject(object.getParentId()));
@@ -822,7 +1034,10 @@ public class ObjectService implements INetworkDispatch {
 
 				if(creature.getParentId() != 0) {
 					SWGObject parent = getObject(creature.getParentId());
-					System.out.println("Building: " + parent.getContainer().getTemplate());
+					if (parent == null) System.out.println("parentId isn't 0 but getObject(parentId) is null in SelectCharacter");
+					else if (parent.getContainer() == null) System.out.println("parent.getContainer() is null in SelectCharacter");
+					else if (parent.getContainer().getTemplate() == null) System.out.println("parent.getContainer().getTemplate() is null in SelectCharacter");
+					if (parent != null && parent.getContainer() != null && parent.getContainer().getTemplate() != null) System.out.println("Building: " + parent.getContainer().getTemplate());
 					parent._add(creature);
 				}
 
@@ -841,9 +1056,9 @@ public class ObjectService implements INetworkDispatch {
 				
 				core.buffService.clearBuffs(creature);
 
-				CmdStartScene startScene = new CmdStartScene((byte) 0, objectId, creature.getPlanet().getPath(), creature.getTemplate(), position.x, position.y, position.z, core.getGalacticTime(), 0);
+				CmdStartScene startScene = new CmdStartScene((byte) 0, objectId, creature.getPlanet().getPath(), creature.getTemplate(), position.x, position.y, position.z, core.getGalacticTime() / 1000, 0);
 				session.write(startScene.serialize());
-				
+
 				ChatServerStatus chatServerStatus = new ChatServerStatus();
 				client.getSession().write(chatServerStatus.serialize());
 				
@@ -894,7 +1109,8 @@ public class ObjectService implements INetworkDispatch {
 						}
 					}
 					
-					for (Integer roomId : ghost.getJoinedChatChannels()) {
+					List<Integer> joinedChannels = ghost.getJoinedChatChannels();
+					for (Integer roomId : joinedChannels) {
 						ChatRoom room = core.chatService.getChatRoom(roomId);
 						
 						if (room != null) { core.chatService.joinChatRoom(objectShortName, roomId); } 
@@ -903,11 +1119,18 @@ public class ObjectService implements INetworkDispatch {
 					}
 				}
 				
-				if(!core.getConfig().getString("MOTD").equals(""))
-					creature.sendSystemMessage(core.getConfig().getString("MOTD"), (byte) 2);
+				creature.sendSystemMessage(core.getMotd(), DisplayType.Chat);
 				
-				if (core.getBountiesODB().contains(creature.getObjectId()))
-					core.missionService.getBountyList().add((BountyListItem) core.getBountiesODB().get(creature.getObjectId()));
+				if (creature.getGuildId() != 0) {
+					Guild guild = core.guildService.getGuildById(creature.getGuildId());
+					
+					if (guild != null && guild.getMembers().containsKey(creature.getObjectID())) {
+						core.guildService.sendGuildMotd(creature, guild);
+					}
+				}
+				
+				if (core.getBountiesODB().contains(creature.getObjectID()))
+					core.missionService.getBountyMap().put(creature.getObjectID(), (BountyListItem) core.getBountiesODB().get(creature.getObjectID()));
 				
 				if (creature.getSlottedObject("datapad") != null) {
 					creature.getSlottedObject("datapad").viewChildren(creature, true, false, new Traverser() {
@@ -1139,6 +1362,7 @@ public class ObjectService implements INetworkDispatch {
 						containers.add(objectId);
 						object = createObject(template, objectId, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, true, false);
 						object.setAttachment("childObjects", null);
+						
 						/*if (!duplicate.containsValue(objectId)) {
 							((BuildingObject) object).createTransaction(core.getBuildingODB().getEnvironment());
 							core.getBuildingODB().put((BuildingObject) object, Long.class, BuildingObject.class, ((BuildingObject) object).getTransaction());
@@ -1175,6 +1399,10 @@ public class ObjectService implements INetworkDispatch {
 				} else {
 					object = createObject(template, 0, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, false, false);
 					object.setContainerPermissions(WorldPermissions.WORLD_PERMISSIONS);
+				}
+				
+				if (object != null && object instanceof TangibleObject && !(object instanceof CreatureObject)) {
+					((TangibleObject) object).setStaticObject(true);
 				}
 				
 				//System.out.println("Spawning: " + template + " at: X:" + object.getPosition().x + " Y: " + object.getPosition().y + " Z: " + object.getPosition().z);
@@ -1221,4 +1449,49 @@ public class ObjectService implements INetworkDispatch {
 		odb.remove(key);
 	}
 	
+	public void addStackableItem(TangibleObject item, SWGObject container) {
+		// Maybe even better placed inside SWGObject.add(), so whenever an item is added to a container
+		// it will bechecked if it is stackable and if there is already a stack to add it to
+		if (! item.isStackable())
+			container.add(item);
+		final Vector<SWGObject> alikeItemsInContainer = new Vector<SWGObject>();
+		container.viewChildren(container, false, false, new Traverser() {
+			@Override
+			public void process(SWGObject obj) {
+				if (obj.getTemplate().equals(item.getTemplate())){
+					// Check if items are Droid Motors or Wirings
+					if (obj.getTemplate().equals("object/tangible/loot/npc_loot/shared_wiring_generic.iff")){
+						if (obj.getAttachment("reverse_engineering_name")!=null){
+							if (obj.getAttachment("reverse_engineering_name").equals(item.getAttachment("reverse_engineering_name"))){
+								alikeItemsInContainer.add(obj);
+							}
+						}
+					} else if (obj.getTemplate().equals("object/tangible/loot/npc_loot/shared_copper_battery_generic.iff")){
+						if (obj.getAttachment("reverse_engineering_name")!=null){
+							if (obj.getAttachment("reverse_engineering_name").equals(item.getAttachment("reverse_engineering_name"))){
+								alikeItemsInContainer.add(obj);
+							}
+						}
+					} else {
+						alikeItemsInContainer.add(obj);
+					}
+					
+				}
+			}
+		});
+				
+		if (alikeItemsInContainer.size()==0){
+			container.add(item);
+			return;
+		}
+		TangibleObject alikeItem = (TangibleObject)alikeItemsInContainer.get(0);
+		int alikeUses = alikeItem.getUses();
+		int itemUses = item.getUses();
+		if (itemUses==0)
+				itemUses=1;
+		int newUses = alikeUses+itemUses;
+		
+		alikeItem.setUses(newUses);
+		core.objectService.destroyObject(item.getObjectID());		
+	}
 }

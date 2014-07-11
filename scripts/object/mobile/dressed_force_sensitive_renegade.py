@@ -17,10 +17,15 @@ def setup(core, object):
 	lootGroupChance_3 = 12
 	object.addToLootGroups(lootPoolNames_3,lootPoolChances_3,lootGroupChance_3)
 	
-	lootPoolNames_4 = ['jediholocrons']
-	lootPoolChances_4 = [100]
-	lootGroupChance_4 = 1
+	lootPoolNames_4 = ['armor_various','random_loot_rifles']
+	lootPoolChances_4 = [80,20]
+	lootGroupChance_4 = 35
 	object.addToLootGroups(lootPoolNames_4,lootPoolChances_4,lootGroupChance_4)
+	
+	lootPoolNames_5 = ['jediholocrons']
+	lootPoolChances_5 = [100]
+	lootGroupChance_5 = 1
+	object.addToLootGroups(lootPoolNames_5,lootPoolChances_5,lootGroupChance_5)
 	
 	
 	

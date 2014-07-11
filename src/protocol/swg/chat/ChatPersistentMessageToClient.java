@@ -27,8 +27,8 @@ import java.util.List;
 import org.apache.mina.core.buffer.IoBuffer;
 
 import protocol.swg.SWGMessage;
+import resources.common.ProsePackage;
 import services.chat.WaypointAttachment;
-
 
 public class ChatPersistentMessageToClient extends SWGMessage {
 	
@@ -40,9 +40,10 @@ public class ChatPersistentMessageToClient extends SWGMessage {
 	private String subject;
 	private byte status;
 	private int timestamp;
-	private List<WaypointAttachment> attachments;
+	private List<WaypointAttachment> waypointAttachments;
+	private List<ProsePackage> proseAttachments;
 
-	public ChatPersistentMessageToClient(String sender, String galaxyName, int mailId, byte requestTypeFlag, String message, String subject, byte status, int timestamp, List<WaypointAttachment> attachments) {
+	public ChatPersistentMessageToClient(String sender, String galaxyName, int mailId, byte requestTypeFlag, String message, String subject, byte status, int timestamp, List<WaypointAttachment> waypointAttachments, List<ProsePackage> proseAttachments) {
 		
 		this.sender = sender;
 		this.galaxyName = galaxyName;
@@ -52,7 +53,8 @@ public class ChatPersistentMessageToClient extends SWGMessage {
 		this.subject = subject;
 		this.status = status;
 		this.timestamp = timestamp;
-		this.attachments = attachments;
+		this.waypointAttachments = waypointAttachments;
+		this.proseAttachments = proseAttachments;
 
 	}
 
@@ -82,15 +84,18 @@ public class ChatPersistentMessageToClient extends SWGMessage {
 		
 		result.put(getUnicodeString(subject));
 		
-		if(requestTypeFlag == 1 || attachments.size() == 0)
+		if(requestTypeFlag == 1 || (waypointAttachments.size() == 0 && proseAttachments.size() == 0))
 			result.putInt(0);	
-		else if(requestTypeFlag == 0 && attachments.size() > 0){
+		else if(requestTypeFlag == 0 && (waypointAttachments.size() > 0 || proseAttachments.size() > 0)){
 			
 			int position = result.position();
 			result.putInt(0);
 			
-			for(WaypointAttachment attachment : attachments) {
+			for(WaypointAttachment attachment : waypointAttachments) {
 				
+				result.putShort((short) 0);
+				result.put((byte) 4);
+				result.putInt(0xFFFFFFFD);
 				result.putInt(0);
 				result.putFloat(attachment.positionX);
 				result.putFloat(attachment.positionY);
@@ -101,7 +106,29 @@ public class ChatPersistentMessageToClient extends SWGMessage {
 				result.putLong(attachment.cellID);
 				result.put(attachment.color);
 				result.put((byte) (attachment.active ? 1 : 0));
+				result.put((byte) 0);
 				
+			}
+			
+			for(ProsePackage prose : proseAttachments) {
+				
+				result.putShort((short) 0);
+				result.put((byte) 1);
+				result.putInt(0xFFFFFFFF);
+				result.put(prose.getStf().getBytes());
+				result.putLong(prose.getTuObjectId());
+				result.put(prose.getTuStf().getBytes());
+				result.put(getUnicodeString(prose.getTuCustomString()));
+				result.putLong(prose.getTtObjectId());
+				result.put(prose.getTtStf().getBytes());
+				result.put(getUnicodeString(prose.getTtCustomString()));
+				result.putLong(prose.getToObjectId());
+				result.put(prose.getToStf().getBytes());
+				result.put(getUnicodeString(prose.getToCustomString()));
+				result.putInt(prose.getDiInteger());
+				result.putFloat(prose.getDfFloat());
+				result.put((byte) 0);
+
 			}
 			
 			result.putInt(position, (result.position() - position - 4) / 2);
@@ -110,7 +137,7 @@ public class ChatPersistentMessageToClient extends SWGMessage {
 		
 		result.put(status);
 		result.putInt(timestamp);
-		result.putInt(0);
+		//result.putInt(0);
 		
 		int size = result.position();
 		result = IoBuffer.allocate(size).put(result.array(), 0, size);

@@ -38,6 +38,7 @@ import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.clients.Client;
 import engine.resources.common.CRC;
+import engine.resources.common.RGB;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
 import engine.resources.service.INetworkDispatch;
@@ -47,6 +48,7 @@ import protocol.swg.ObjControllerMessage;
 import protocol.swg.objectControllerObjects.CommandEnqueue;
 import protocol.swg.objectControllerObjects.CommandEnqueueRemove;
 import protocol.swg.objectControllerObjects.StartTask;
+import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
@@ -55,7 +57,7 @@ public class CommandService implements INetworkDispatch  {
 	
 	private Vector<BaseSWGCommand> commandLookup = new Vector<BaseSWGCommand>();
 	private ConcurrentHashMap<Integer, Integer> aliases = new ConcurrentHashMap<Integer, Integer>();
-	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+	@SuppressWarnings("unused") private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	private NGECore core;
 	
 	public CommandService(NGECore core) {
@@ -67,6 +69,7 @@ public class CommandService implements INetworkDispatch  {
 	}
 	
 	public boolean callCommand(CreatureObject actor, SWGObject target, BaseSWGCommand command, int actionCounter, String commandArgs) {
+
 		if (actor == null) {
 			return false;
 		}
@@ -103,22 +106,20 @@ public class CommandService implements INetworkDispatch  {
 			}
 		}
 		
-		// This SHOULD be invalid locomotions but we don't track these currently.
-		// Postures are the best we can do.
-		for (byte posture : command.getInvalidPostures()) {
-			if (actor.getPosture() == posture) {
-				//return false;
+		for (byte locomotion : command.getInvalidLocomotions()) {
+			if (actor.getLocomotion() == locomotion) {
+				return false;
 			}
 		}
-
+		
 		switch (command.getTargetType()) {
 			case 0: // Target Not Used For This Command
 				break;
 			case 1: // Other Only (objectId/targetName)
-				if (target == null) {
+				if (target == null || target == actor) {
 					if (commandArgs != null && !commandArgs.equals("")) {
 						String name = commandArgs.split(" ")[0];
-						
+
 						target = core.objectService.getObjectByFirstName(name);
 						
 						if (target == actor) {
@@ -128,7 +129,7 @@ public class CommandService implements INetworkDispatch  {
 					
 					break;
 				}
-				
+
 				if (target == actor) {
 					return false;
 				}
@@ -139,6 +140,11 @@ public class CommandService implements INetworkDispatch  {
 				
 				if (command.getMaxRangeToTarget() != 0 && actor.getPosition().getDistance(target.getPosition()) > command.getMaxRangeToTarget()) {
 					return false;
+				}
+				
+
+				if (!target.isInQuadtree() && (target.getContainer() == null || !(target.getContainer() instanceof CellObject))) {
+					break;
 				}
 				
 				if (!core.simulationService.checkLineOfSight(actor, target)) {
@@ -157,6 +163,11 @@ public class CommandService implements INetworkDispatch  {
 						if (target == actor) {
 							target = null;
 						}
+						
+						// It's possible they use c cmdString to indicate if it should always be on self
+						if (name.contains("c")) {
+							//target = actor;
+						}
 					}
 					
 					break;
@@ -168,6 +179,10 @@ public class CommandService implements INetworkDispatch  {
 				
 				if (command.getMaxRangeToTarget() != 0 && actor.getPosition().getDistance(target.getPosition()) > command.getMaxRangeToTarget()) {
 					return false;
+				}
+				
+				if (!target.isInQuadtree() && (target.getContainer() == null || !(target.getContainer() instanceof CellObject))) {
+					break;
 				}
 				
 				if (!core.simulationService.checkLineOfSight(actor, target)) {
@@ -216,6 +231,10 @@ public class CommandService implements INetworkDispatch  {
 				
 				if (command.getMaxRangeToTarget() != 0 && actor.getPosition().getDistance(target.getPosition()) > command.getMaxRangeToTarget()) {
 					return false;
+				}
+				
+				if (!target.isInQuadtree() && (target.getContainer() == null || !(target.getContainer() instanceof CellObject))) {
+					break;
 				}
 				
 				if (!core.simulationService.checkLineOfSight(actor, target)) {
@@ -432,6 +451,11 @@ public class CommandService implements INetworkDispatch  {
 	}
 	
 	public void processCombatCommand(CreatureObject attacker, SWGObject target, CombatCommand command, int actionCounter, String commandArgs) {
+		if (target == null) {
+			System.err.println("ProcessCombatCommand: Target is null");
+			return;
+		}
+		
 		if (FileUtilities.doesFileExist("scripts/commands/combat/" + command.getCommandName() + ".py")) {
 			core.scriptService.callScript("scripts/commands/combat/", command.getCommandName(), "setup", core, attacker, target, command);
 		}
@@ -472,6 +496,9 @@ public class CommandService implements INetworkDispatch  {
 			weapon = (WeaponObject) attacker.getSlottedObject("default_weapon");	// use unarmed/default weapon if no weapon is equipped
 		else
 			weapon = (WeaponObject) core.objectService.getObject(attacker.getWeaponId());
+		
+		if(weapon == null)
+			weapon = (WeaponObject) attacker.getSlottedObject("default_weapon");
 		
 		float maxRange = 0;
 		
@@ -537,6 +564,7 @@ public class CommandService implements INetworkDispatch  {
 	}
 	
 	@Override
+	@SuppressWarnings("unused")
 	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> swgOpcodes, Map<Integer, INetworkRemoteEvent> objControllerOpcodes) {
 		
 		objControllerOpcodes.put(ObjControllerOpcodes.COMMAND_QUEUE_ENQUEUE, new INetworkRemoteEvent() {

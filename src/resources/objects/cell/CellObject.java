@@ -23,8 +23,11 @@ package resources.objects.cell;
 
 import java.io.Serializable;
 
+import org.apache.mina.core.buffer.IoBuffer;
+
 import protocol.swg.UpdateCellPermissionMessage;
 import resources.objects.ObjectMessageBuilder;
+import resources.objects.building.BuildingObject;
 
 import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.Persistent;
@@ -81,8 +84,20 @@ public class CellObject extends SWGObject implements Serializable {
 				
 		destination.getSession().write(messageBuilder.buildBaseline3());
 		destination.getSession().write(messageBuilder.buildBaseline6());
-		destination.getSession().write(new UpdateCellPermissionMessage((byte) 1, getObjectID()).serialize());
+		sendPermissionMessage(destination);	
 		
+	}
+	
+	public void sendPermissionMessage(Client destination) {
+		
+		if(destination == null || destination.getSession() == null) {
+			System.out.println("NULL session");
+			return;
+		}
+		
+		byte canEnter = (byte) (((BuildingObject) getContainer()).canEnter(destination.parent) ? 1 : 0);
+		destination.getSession().write(new UpdateCellPermissionMessage(canEnter, getObjectID()).serialize());
+
 	}
 
 	@Override
@@ -93,6 +108,12 @@ public class CellObject extends SWGObject implements Serializable {
 	
 	public ObjectMessageBuilder getMessageBuilder() {
 		return messageBuilder;
+	}
+	
+	@Override
+	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }

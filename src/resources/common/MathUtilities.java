@@ -22,6 +22,7 @@
 package resources.common;
 
 import java.math.BigDecimal;
+import java.util.Random;
 
 import engine.resources.scene.*;
 
@@ -68,4 +69,34 @@ public class MathUtilities {
 		BigDecimal dec = new BigDecimal(seconds);
 		return dec.remainder(new BigDecimal(3600)).divide(new BigDecimal(60), BigDecimal.ROUND_FLOOR).intValue();
 	}
+	
+	public float fastInverseSqrt(float x) {
+	    float xHalf = 0.5F * x;
+	    int temp = Float.floatToRawIntBits(x);
+	    temp = 0x5F3759DF - (temp >> 1); // magic
+	    float newX = Float.intBitsToFloat(temp);
+	    newX = newX * (1.5F - xHalf * newX * newX);
+	    return newX;
+	}
+	
+	public static boolean tryChance(int chance) {
+		if (chance <= 0) {
+			return false;
+		}
+		
+		if (chance >= 100) {
+			return true;
+		}
+		
+		chance = (100 - chance);
+		
+		Random random = new Random();
+		
+		if (random.nextInt(chance + 1) == 1) {
+			return true;
+		}
+		
+		return false;
+	}
+	
 }

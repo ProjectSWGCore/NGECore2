@@ -22,108 +22,42 @@
 package resources.objects.building;
 
 import java.nio.ByteOrder;
+import java.util.Map;
 import java.util.Vector;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import resources.objects.ObjectMessageBuilder;
+import engine.resources.objects.Builder;
+import resources.objects.tangible.TangibleMessageBuilder;
 
-public class BuildingMessageBuilder extends ObjectMessageBuilder {
+public class BuildingMessageBuilder extends TangibleMessageBuilder {
 	
-	public BuildingMessageBuilder(BuildingObject buildingObject) {
-		setObject(buildingObject);
-	}
-	
-	public IoBuffer buildBaseline3() {
-
-		BuildingObject building = (BuildingObject) object;
-		IoBuffer buffer = bufferPool.allocate(100, false).order(ByteOrder.LITTLE_ENDIAN);
-		buffer.setAutoExpand(true);
-		
-		buffer.putShort((short) 0x0D);
-		buffer.putFloat(building.getComplexity());
-		buffer.put(getAsciiString(building.getStfFilename()));
-		buffer.putInt(0);
-		buffer.put(getAsciiString(building.getStfName()));
-		buffer.putInt(0);
-		buffer.putInt(0xFF);
-		//buffer.putInt(0x64);
-		buffer.putInt(0);
-		buffer.putInt(0);
-		buffer.putShort((short) 0);
-		
-		buffer.putInt(0);
-		buffer.putInt(0);
-	//	buffer.putInt(16777216);
-		buffer.putInt(0x100);
-		buffer.putInt(0);
-		buffer.putInt(0);
-		buffer.putInt(0x201C);
-		buffer.put((byte) 1);
-		
-		int size = buffer.position();
-		buffer = bufferPool.allocate(size, false).put(buffer.array(), 0, size);
-
-		buffer.flip();
-		buffer = createBaseline("BUIO", (byte) 3, buffer, size);
-
-		return buffer;
-		
-	}
-
-	public IoBuffer buildBaseline6() {
-
-		BuildingObject building = (BuildingObject) object;
-		IoBuffer buffer = bufferPool.allocate(100, false).order(ByteOrder.LITTLE_ENDIAN);
-		buffer.setAutoExpand(true);
-		
-		buffer.putShort((short) 8);
-		buffer.putInt(0x43);
-		
-		buffer.put(getAsciiString(building.getDetailFilename()));
-		buffer.putInt(0);
-		buffer.put(getAsciiString(building.getDetailName()));
-		buffer.putInt(0);
-		buffer.put((byte) 0);
-		buffer.putInt(0);
-		buffer.putInt(0);
-		buffer.putInt(0);
-		buffer.putInt(0);
-		buffer.putInt(0);
-		buffer.putInt(0);
-		buffer.putInt(0);
-		buffer.putInt(0);
-		
-		int size = buffer.position();
-		buffer = bufferPool.allocate(size, false).put(buffer.array(), 0, size);
-
-		buffer.flip();
-		buffer = createBaseline("BUIO", (byte) 6, buffer, size);
-
-		return buffer;
-
-	}
-
-	public IoBuffer buildBaseline8() {
-		IoBuffer buffer = bufferPool.allocate(2, false).order(ByteOrder.LITTLE_ENDIAN);
-		buffer.putShort((short) 0);
-		int size = buffer.position();
-		buffer = IoBuffer.allocate(size).put(buffer.array(), 0, size);
-		buffer.flip();
-		buffer = createBaseline("BUIO", (byte) 8, buffer, size);
-		
-		return buffer;
+	public BuildingMessageBuilder(BuildingObject object) {
+		super(object);
 	}
 	
-	public IoBuffer buildBaseline9() {
-		IoBuffer buffer = bufferPool.allocate(2, false).order(ByteOrder.LITTLE_ENDIAN);
-		buffer.putShort((short) 0);
-		int size = buffer.position();
-		buffer = IoBuffer.allocate(size).put(buffer.array(), 0, size);
-		buffer.flip();
-		buffer = createBaseline("BUIO", (byte) 9, buffer, size);
-		
-		return buffer;
+	public BuildingMessageBuilder() {
+		super();
+	}
+	
+	@Override
+	public void buildBaseline3(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline3(baselineBuilders, deltaBuilders);
+	}
+	
+	@Override
+	public void buildBaseline6(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline6(baselineBuilders, deltaBuilders);
+	}
+	
+	@Override
+	public void buildBaseline8(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline8(baselineBuilders, deltaBuilders);
+	}
+	
+	@Override
+	public void buildBaseline9(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {
+		super.buildBaseline9(baselineBuilders, deltaBuilders);
 	}
 	
 	public IoBuffer buildPermissionListCreate(Vector<String> permissionList, String listName) {
@@ -145,17 +79,5 @@ public class BuildingMessageBuilder extends ObjectMessageBuilder {
 		tools.CharonPacketUtils.printAnalysis(IoBuffer.allocate(size).put(buffer.array(), 0, size).flip());
 		return IoBuffer.allocate(size).put(buffer.array(), 0, size).flip();		
 	}
-
 	
-	@Override
-	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void sendBaselines() {
-		
-	}
-
 }

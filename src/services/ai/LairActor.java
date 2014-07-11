@@ -31,6 +31,7 @@ import resources.common.SpawnPoint;
 import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
 import services.combat.CombatEvents.DamageTaken;
+import tools.DevLog;
 
 public class LairActor {
 
@@ -38,6 +39,7 @@ public class LairActor {
 	private TangibleObject lairObject;
 	private int maxSpawns;
 	private String creatureTemplate;
+	private Vector<String> creatureTemplates;
 	private volatile int spawnWave = 0;
 	private short level;
 	
@@ -50,6 +52,14 @@ public class LairActor {
 	public LairActor(TangibleObject lairObject, String creatureTemplate, int maxSpawns, short level) {
 		this.lairObject = lairObject;
 		this.creatureTemplate = creatureTemplate;
+		this.maxSpawns = maxSpawns;
+		this.level = level;
+		lairObject.getEventBus().subscribe(this);
+	}
+	
+	public LairActor(TangibleObject lairObject, Vector<String> creatureTemplates, int maxSpawns, short level) {
+		this.lairObject = lairObject;
+		this.creatureTemplates = creatureTemplates;
 		this.maxSpawns = maxSpawns;
 		this.level = level;
 		lairObject.getEventBus().subscribe(this);
@@ -87,7 +97,7 @@ public class LairActor {
 			return;
 		
 		int currentCondition = lairObject.getConditionDamage();
-		int maxCondition = lairObject.getMaxDamage();
+		int maxCondition = lairObject.getMaximumCondition();
 		
 		switch(spawnWave) {
 			// TODO: play damage effect
@@ -125,9 +135,18 @@ public class LairActor {
 				
 		for(int i = 0; i < creatureAmount; i++) {
 			Point3D position = SpawnPoint.getRandomPosition(lairObject.getPosition(), 5, 30, lairObject.getPlanetId());
-			CreatureObject creature = NGECore.getInstance().spawnService.spawnCreature(creatureTemplate, lairObject.getPlanet().getName(), 0, position.x, position.y, position.z, level);
+			if (creatureTemplates!=null)
+				creatureTemplate = creatureTemplates.get(new Random().nextInt(creatureTemplates.size()));
+			float babyChance = new Random().nextFloat();
+			CreatureObject creature = null;
+			if (babyChance>0.9){
+				creature = NGECore.getInstance().spawnService.spawnCreature(creatureTemplate, lairObject.getPlanet().getName(), 0, position.x, position.y, position.z, level);
+			} else {
+				creature = NGECore.getInstance().spawnService.spawnCreatureBaby(creatureTemplate, lairObject.getPlanet().getName(), 0, position.x, position.y, position.z, level);
+			}
+			
 			if(creature == null || !creature.isInQuadtree()) {
-				System.out.println("NULL Creature");
+				DevLog.debugout("Charon", "Lair AI", "LairActor spawnNewCreatures() NULL creature!");
 				continue;
 			}
 			creatures.add((AIActor) creature.getAttachment("AI"));
@@ -146,7 +165,7 @@ public class LairActor {
 		int healAmount = 0;
 		
 		for(AIActor ai : creatures) {
-			healAmount += lairObject.getMaxDamage() / 100;
+			healAmount += lairObject.getMaximumCondition() / 100;
 		}
 		
 		lairObject.setConditionDamage(lairObject.getConditionDamage() - healAmount);

@@ -23,7 +23,6 @@ package resources.datatables;
 
 public class Posture {
 	
-	// Posture.iff
 	public static final byte Invalid = -1;
 	public static final byte Upright = 0;
 	public static final byte Crouched = 1;

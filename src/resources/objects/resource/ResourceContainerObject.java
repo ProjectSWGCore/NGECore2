@@ -144,10 +144,10 @@ public class ResourceContainerObject extends TangibleObject implements Serializa
 	}
 	
 	
-	public ResourceContainerObject(long objectID, Planet planet, String template, Point3D position, Quaternion orientation){
-		super(objectID, planet, template, position, orientation);
+	public ResourceContainerObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String template){
+		super(objectID, planet, position, orientation, template);
 		messageBuilder = new ResourceContainerMessageBuilder(this);
-		this.setAttachment("radial_filename", "resourceContainer");
+		this.setAttachment("radial_filename", "item/resourceContainer");
 	}
 	
 	@Override

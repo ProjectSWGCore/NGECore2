@@ -34,11 +34,22 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import main.NGECore;
 import protocol.swg.EnterStructurePlacementModeMessage;
+import resources.common.OutOfBand;
+import resources.datatables.Citizenship;
+import resources.datatables.DisplayType;
 import resources.objects.building.BuildingObject;
+import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
+import resources.objects.harvester.HarvesterObject;
+import resources.objects.installation.InstallationObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import services.playercities.PlayerCity;
@@ -56,6 +67,7 @@ public class HousingService implements INetworkDispatch {
 	private NGECore core;
 	private Map<String, HouseTemplate> housingTemplates = new ConcurrentHashMap<String, HouseTemplate>();
 	private Map<String, String> houseToDeed = new ConcurrentHashMap<String, String>();
+	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	
 	public HousingService(NGECore core) {
 		this.core = core;
@@ -79,9 +91,15 @@ public class HousingService implements INetworkDispatch {
         housingTemplates.values().forEach((houseTemplate) -> houseToDeed.put(houseTemplate.getBuildingTemplate(), houseTemplate.getDeedTemplate()));
 	}
 	
-	public void enterStructureMode(CreatureObject actor, TangibleObject deed) {	
+	public void enterStructureMode(CreatureObject actor, TangibleObject deed) {
+		PlayerCity city = core.playerCityService.getCityObjectIsIn(actor);
 		if (!actor.getClient().isGM() && !core.terrainService.canBuildAtPosition(actor, actor.getWorldPosition().x, actor.getWorldPosition().z)) {
 			actor.sendSystemMessage("You may not place a structure here.", (byte) 0); // should probably load this from an stf
+			return;
+		}
+		
+		if(city != null && !city.hasZoningRights(actor)) {
+			actor.sendSystemMessage("@player_structure:no_rights", (byte) 0); 
 			return;
 		}
 		
@@ -92,25 +110,33 @@ public class HousingService implements INetworkDispatch {
 		}
 	}
 	
-	public void placeStructure(final CreatureObject actor, TangibleObject deed, float positionX, float positionZ, float rotation) {
+	public BuildingObject placeStructure(final CreatureObject actor, TangibleObject deed, float positionX, float positionZ, float rotation) {
 		HouseTemplate houseTemplate = housingTemplates.get(deed.getTemplate());
 		int structureLotCost = houseTemplate.getLotCost();
 		String structureTemplate = houseTemplate.getBuildingTemplate();
-		
+		//PlayerCity city = core.playerCityService.getCityPositionIsIn(new Point3D(positionX, 0, positionZ));
+		// This function is not implemented, so it had to be commented out, because it resulted in an error
+		// Whoever wrote this, should still add the method to playerCityService, then it can be uncommented here.
+		PlayerCity city = null;
 		if (!houseTemplate.canBePlacedOn(actor.getPlanet().getName())) {
 			actor.sendSystemMessage("You may not place this structure on this planet.", (byte) 0); // should probably load this from an stf
-			return;
+			return null;
 		}
 		
 		if(!actor.getClient().isGM() && !core.terrainService.canBuildAtPosition(actor, positionX, positionZ)) {
 			actor.sendSystemMessage("You may not place a structure here.", (byte) 0); // should probably load this from an stf
-			return;
+			return null;
+		}
+		
+		if(city != null && !city.hasZoningRights(actor)) {
+			actor.sendSystemMessage("@player_structure:no_rights", (byte) 0); 
+			return null;
 		}
 		
 		// Lot stuff
 		if (!actor.getPlayerObject().deductLots(structureLotCost)) {
 			actor.sendSystemMessage("You do not have enough available lots to place this structure.", (byte) 0); // should probably load this from an stf
-			return;
+			return null;
 		}
 		
 		// Calculate our orientation and height
@@ -119,8 +145,15 @@ public class HousingService implements INetworkDispatch {
 		
 		float positionY = core.terrainService.getHeight(actor.getPlanetId(), positionX, positionZ) + 2f;
 		
+		String constructorTemplate = mapConstructor(structureTemplate);
+		InstallationObject constructors = (InstallationObject) core.objectService.createObject(constructorTemplate, 0, actor.getPlanet(), new Point3D(positionX, positionY, positionZ), quaternion);				
+		core.simulationService.add(constructors, positionX, positionZ, true);
+		core.scriptService.callScript("scripts/", "constructor_build_phase", "buildConstructor", core);
+		core.objectService.destroyObject(constructors);
+		
 		// Create the building
 		BuildingObject building = (BuildingObject) core.objectService.createObject(structureTemplate, 0, actor.getPlanet(), new Point3D(positionX, positionY, positionZ), quaternion);
+
 		core.simulationService.add(building, building.getPosition().x, building.getPosition().z, true);
 		
 		// Name the sign
@@ -128,33 +161,34 @@ public class HousingService implements INetworkDispatch {
 		String playerFirstName = actor.getCustomName().split(" ")[0];
 		
 		if (sign != null) {
-			sign.setCustomName2(playerFirstName + "'s House");
+			sign.setCustomName(playerFirstName + "'s House");
 		}
 		
 		//building.add(sign);
 		
 		core.objectService.destroyObject(deed);
 		
-		// Structure management
-		Vector<Long> admins = new Vector<>();
-		admins.add(actor.getObjectID());
-		
+		building.setAttachment("sign", sign); // meh workaround
+		building.setAttachment("nextMaintenance", System.currentTimeMillis() + 3600000);
 		building.setAttachment("structureOwner", actor.getObjectID());
-		building.setAttachment("structureAdmins", admins);
+		building.setAttachment("isCondemned", false);
+		building.setAttachment("isCivicStructure", houseTemplate.isCivicStructure());
+		building.setAttachment("civicStructureType", houseTemplate.getCivicStructureType());
+		building.setAttachment("outstandingMaint", 0);
+		building.addPlayerToAdminList(null, actor.getObjectID(), playerFirstName);
 		building.setDeedTemplate(deed.getTemplate());
 		building.setMaintenanceAmount(houseTemplate.getBaseMaintenanceRate());
-		building.setConditionDamage(100); // Ouch
+		building.setDestructionFee(houseTemplate.getDestructionFee());
 		
-		if (structureTemplate.contains("cityhall")){
-			PlayerCity newCity = core.playerCityService.addNewPlayerCity(actor); 
-			building.setAttachment("structureCity", newCity.getCityID());
-			actor.setAttachment("residentCity", newCity.getCityID());
+		if(city != null) {
+			city.addNewStructure(building.getObjectID());
 		}
 		
+		/*
 		// Check for city founders joining a new city
 		PlayerCity cityActorIsIn = core.playerCityService.getCityObjectIsIn(actor);
 		
-		if (cityActorIsIn!=null){
+		if (cityActorIsIn != null) {
 			actor.setAttachment("Has24HZoningFor",cityActorIsIn.getCityID()); // for testing
 			
 			int cityActorHasZoning = (int)actor.getAttachment("Has24HZoningFor");
@@ -166,21 +200,103 @@ public class HousingService implements INetworkDispatch {
 					cityActorIsIn.addNewStructure(building.getObjectID());
 				}
 			}
-		}
+		}*/
 		
-		// Save structure to DB
-		/*building.createTransaction(core.getBuildingODB().getEnvironment());
-		core.getBuildingODB().put(building, Long.class, BuildingObject.class, building.getTransaction());
-		building.getTransaction().commitSync();*/
+		core.objectService.persistObject(building.getObjectID(), building, core.getSWGObjectODB());
+		return building;	
 	}
 	
-	@SuppressWarnings("unchecked")
-	public boolean getPermissions(SWGObject player, SWGObject container) {
-		if (((Vector<Long>) container.getContainer().getAttachment("structureAdmins")).contains(player.getObjectID())) {
-			return true;
+	public String mapConstructor(String structureTemplate) {
+		String mappedConstructorTemplate = "object/building/player/construction/shared_construction_player_house_generic_small_style_01.iff";
+		if (structureTemplate.contains("small")){
+			mappedConstructorTemplate = "object/building/player/construction/shared_construction_player_house_generic_small_style_01.iff";
+		} else if (structureTemplate.contains("medium")){
+			mappedConstructorTemplate = "object/building/player/construction/shared_construction_player_house_generic_medium_style_01.iff";
+		} else if (structureTemplate.contains("large")){
+			mappedConstructorTemplate = "object/building/player/construction/shared_construction_player_house_generic_large_style_01.iff";
 		}
 		
-		return false;	
+		if (structureTemplate.contains("guildhall") || structureTemplate.contains("cityhall")){
+			mappedConstructorTemplate = "object/building/player/construction/shared_construction_player_guildhall_corellia_style_01.iff";
+		} else if (structureTemplate.contains("hangar")){
+			mappedConstructorTemplate = "object/building/player/construction/shared_construction_player_house_hangar.iff";
+		} else if (structureTemplate.contains("meditation")){
+			mappedConstructorTemplate = "object/building/player/construction/shared_construction_player_jedi_meditation_room.iff";
+		}
+		// Probably more could be added		
+		return mappedConstructorTemplate;
+	}
+	
+	public void startMaintenanceTask(BuildingObject building) {
+		
+		if(building.getAttachment("isCivicStructure") != null && (boolean) building.getAttachment("isCivicStructure"))
+			return;
+		
+		AtomicReference<ScheduledFuture<?>> ref = new AtomicReference<ScheduledFuture<?>>();
+		ref.set(scheduler.scheduleAtFixedRate(() -> {
+			try {
+				if(core.objectService.getObject(building.getObjectID()) == null)
+					ref.get().cancel(true);
+					
+				int amount = building.getBMR();
+				boolean needSave = false;
+				CreatureObject owner = (CreatureObject) core.objectService.getObject((long) building.getAttachment("structureOwner"));
+				if(owner == null) {
+					needSave = true;
+					owner = core.objectService.getCreatureFromDB((long) building.getAttachment("structureOwner"));
+				}
+				if(building.getMaintenanceAmount() >= amount) {
+					building.setMaintenanceAmount(building.getMaintenanceAmount() - amount);
+				} else {
+					if(owner == null)
+						ref.get().cancel(true);
+					if(owner.getBankCredits() >= amount) {
+						owner.setBankCredits(owner.getBankCredits() - amount);
+					} else if(owner.getCashCredits() >= amount) {
+						owner.setCashCredits(owner.getCashCredits() - amount);					
+					} else {
+						if(building.getAttachment("isCondemned") != null && !((boolean) building.getAttachment("isCondemned"))) {
+							building.setAttachment("isCondemned", true);
+							building.setBuildingName(building.getBuildingName() + " \\#FF0000(CONDEMNED)\\#FFFFFF");
+						}
+						building.setOutstandingMaintenance(building.getOutstandingMaintenance() + amount);
+						// TODO: lock down building, add option to pay outstanding maintenance and uncondemn building
+					}
+				}
+				if(needSave && owner != null)
+					core.objectService.persistObject(owner.getObjectID(), owner, core.getSWGObjectODB());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}, (long) building.getAttachment("nextMaintenance") - System.currentTimeMillis(), 3600000, TimeUnit.MILLISECONDS));
+		
+	}
+	
+	public void saveBuildings() {
+		core.objectService.getObjectList()
+		.values().stream()
+		.filter(obj -> obj instanceof BuildingObject && obj.getAttachment("structureOwner") != null)
+		.forEach(building -> { 
+			if(building.getAttachment("childObjects") != null)
+				((Vector<SWGObject>) building.getAttachment("childObjects")).clear();
+			core.objectService.persistObject(building.getObjectID(), building, core.getSWGObjectODB());
+		});
+	}
+	
+	public boolean getPermissions(SWGObject player, SWGObject container) {
+		// Temp fix for null error on return line.
+		if (player == null || container == null || container.getContainer() == null) {
+			return false;
+		}
+		
+		SWGObject structure = container.getContainer();
+		
+		// This could easily be a ShipObject in the future.
+		if (structure instanceof BuildingObject) {
+			return ((BuildingObject) structure).isOnAdminList((CreatureObject) player);
+		} else {
+			return false;
+		}
 	}
 	
 	public void createDestroySUIPage(final SWGObject owner, final TangibleObject target) {
@@ -195,6 +311,7 @@ public class HousingService implements INetworkDispatch {
 		}
 		
 		String displayname = "@installation_n:"+building.getStfName();
+		final Vector<Integer> noRedeed = new Vector<Integer>();
 		if (building.getCustomName()!=null)
 			displayname = building.getCustomName();
 		final SUIWindow window = core.suiService.createSUIWindow("Script.listBox", owner, target, 0);
@@ -204,18 +321,21 @@ public class HousingService implements INetworkDispatch {
 												    "\n \n @player_structure:confirm_destruction_d3a " +
 												    "\\#32CD32 @player_structure:confirm_destruction_d3b \\#FFFFFF " +
 												    "@player_structure:confirm_destruction_d4 ");
-		if (building.getConditionDamage()<20 && building.getMaintenanceAmount()<3000){
+		if (building.getConditionDamage()<20 && building.getMaintenanceAmount()<building.getDestructionFee()){
 			window.addListBoxMenuItem("@player_structure:redeed_confirmation \\#BB0000 @player_structure:can_redeed_no_suffix \\#FFFFFF ",1 );
+			noRedeed.add(-1);
 		} else {
 			window.addListBoxMenuItem("@player_structure:redeed_confirmation \\#32CD32 @player_structure:can_redeed_yes_suffix \\#FFFFFF ",1 );
 		}
-		if (building.getConditionDamage()<20){
+		if (building.getConditionDamage()>20){
 			window.addListBoxMenuItem("@player_structure:redeed_condition \\#BB0000 " + building.getConditionDamage() + " \\#FFFFFF ",1 );
+			noRedeed.add(-1);
 		} else {
 			window.addListBoxMenuItem("@player_structure:redeed_condition \\#32CD32 " + building.getConditionDamage() + " \\#FFFFFF ",1 );
 		}
-		if (building.getMaintenanceAmount()<0){
+		if (building.getMaintenanceAmount()<building.getDestructionFee()){
 			window.addListBoxMenuItem("@player_structure:redeed_maintenance \\#BB0000 " + (int)building.getMaintenanceAmount() + " \\#FFFFFF ",2 );
+			noRedeed.add(-1);
 		} else {
 			window.addListBoxMenuItem("@player_structure:redeed_maintenance \\#32CD32  " + (int)building.getMaintenanceAmount() + " \\#FFFFFF ",2 );
 		}
@@ -229,6 +349,12 @@ public class HousingService implements INetworkDispatch {
 			@Override
 			public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
 				core.suiService.closeSUIWindow(owner, 0);
+				if (noRedeed.size()==0){
+					building.setAttachment("Can_Redeed", 1);					
+				} else {
+					building.setAttachment("Can_Redeed", 0);	
+				}
+				
 				createCodeWindow(owner, target);
 			}					
 		});		
@@ -244,17 +370,28 @@ public class HousingService implements INetworkDispatch {
 	public void createCodeWindow(SWGObject owner, TangibleObject target) {
 		
 		final BuildingObject building = (BuildingObject) target.getGrandparent();
+		int canRedeed = (int) building.getAttachment("Can_Redeed");
 		//final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
 		//final BuildingObject building = (BuildingObject)target;
 		Random rnd = new Random();
 		final int confirmCode = 100000 + rnd.nextInt(900000);
 		final SUIWindow window = core.suiService.createInputBox(2,"@player_structure:structure_status","@player_structure:structure_name_prompt", owner, target, 0);
 		window.setProperty("bg.caption.lblTitle:Text", "@player_structure:confirm_destruction_t");
-		window.setProperty("Prompt.lblPrompt:Text", "@player_structure:your_structure_prefix " +
-													"\\#32CD32 @player_structure:will_redeed_confirm \\#FFFFFF "+
-												    "@player_structure:will_redeed_suffix "  +
-												    "\n \n Code: " + confirmCode);
 		
+		
+		
+		if (canRedeed==1){
+			window.setProperty("Prompt.lblPrompt:Text", "@player_structure:your_structure_prefix " +
+												"\\#32CD32 @player_structure:will_redeed_confirm \\#FFFFFF "+
+											    "@player_structure:will_redeed_suffix "  +
+											    "\n \n Code: " + confirmCode);
+		} else {
+			window.setProperty("Prompt.lblPrompt:Text", "@player_structure:your_structure_prefix " +
+					"\\#BB0000 @player_structure:will_not_redeed_confirm \\#FFFFFF "+
+				    "@player_structure:will_redeed_suffix "  +
+				    "\n \n Code: " + confirmCode);
+		}
+
 		window.setProperty("btnOk:visible", "True");
 		window.setProperty("btnCancel:visible", "True");
 		window.setProperty("btnOk:Text", "@yes");
@@ -265,38 +402,63 @@ public class HousingService implements INetworkDispatch {
 		window.addHandler(0, "", Trigger.TRIGGER_OK, returnList, new SUICallback() {
 			@Override
 			public void process(SWGObject owner, int eventType, Vector<String> returnList) {			
-				CreatureObject crafter = (CreatureObject)owner;
+				CreatureObject houseOwner = (CreatureObject)owner;
 				core.suiService.closeSUIWindow(owner, 0);
-				if (returnList.get(0).equals(""+confirmCode)){
+				if (returnList.get(0).equals(""+confirmCode)) {
 					// handle creation of correct deed in player inventory
-					PlayerObject player = (PlayerObject) crafter.getSlottedObject("ghost");	
+					PlayerObject player = (PlayerObject) houseOwner.getSlottedObject("ghost");	
 					HouseTemplate houseTemplate = housingTemplates.get(houseToDeed.get(building.getTemplate()));
 					
-					TangibleObject deed = (TangibleObject) core.objectService.createObject(houseTemplate.getDeedTemplate(), owner.getPlanet());
 					
-					if (player.getLotsRemaining() + houseTemplate.getLotCost() > 10){
-						// Something went wrong or hacking attempt
-						crafter.sendSystemMessage("Structure can't be redeeded. Maximum lot count exceeded.",(byte)1);
-						return;
+					
+					if (canRedeed==1){					
+						TangibleObject deed = (TangibleObject) core.objectService.createObject(houseTemplate.getDeedTemplate(), owner.getPlanet());
+						
+						if (player.getLotsRemaining() + houseTemplate.getLotCost() > 10){
+							// Something went wrong or hacking attempt
+							houseOwner.sendSystemMessage("Structure can't be redeeded. Maximum lot count exceeded.",(byte)1);
+							return;
+						}
+						
+						deed.setIntAttribute("@obj_attr_n:examine_maintenance_rate", houseTemplate.getBaseMaintenanceRate());
+						deed.setIntAttribute("@obj_attr_n:examine_maintenance", (int) building.getMaintenanceAmount());
+						
+						owner.getContainer().remove(owner);
+						
+						int costs = 800;
+						houseOwner.setBankCredits(houseOwner.getBankCredits()-costs);
+						
+						destroyStructure(building);
+											
+	 
+						SWGObject ownerInventory = owner.getSlottedObject("inventory");
+						ownerInventory.add(deed);
+						
+						if (player.getLotsRemaining() + houseTemplate.getLotCost() <= 10) {
+							player.setLotsRemaining(player.getLotsRemaining() + houseTemplate.getLotCost());
+						}
+											
+						houseOwner.sendSystemMessage("@player_structure:processing_destruction",(byte)1);
+						houseOwner.sendSystemMessage("@player_structure:deed_reclaimed",(byte)1);
+						
+					} else {
+						
+						if (player.getLotsRemaining() + houseTemplate.getLotCost() > 10){
+							// Something went wrong or hacking attempt
+							houseOwner.sendSystemMessage("Structure can't be destroyed. Maximum lot count exceeded.",(byte)1);
+							return;
+						}						
+						owner.getContainer().remove(owner);					
+						destroyStructure(building); 						
+						if (player.getLotsRemaining() + houseTemplate.getLotCost() <= 10) {
+							player.setLotsRemaining(player.getLotsRemaining() + houseTemplate.getLotCost());
+						}
+											
+						houseOwner.sendSystemMessage("@player_structure:processing_destruction",(byte)1);
 					}
-					
-					deed.setIntAttribute("@obj_attr_n:examine_maintenance_rate", houseTemplate.getBaseMaintenanceRate());
-					deed.setIntAttribute("@obj_attr_n:examine_maintenance", (int) building.getMaintenanceAmount());
-					
-					core.objectService.destroyObject(building.getObjectID());
- 
-					SWGObject ownerInventory = owner.getSlottedObject("inventory");
-					ownerInventory.add(deed);
-					
-					if (player.getLotsRemaining() + houseTemplate.getLotCost() <= 10) {
-						player.setLotsRemaining(player.getLotsRemaining() + houseTemplate.getLotCost());
-					}
-					
-					crafter.sendSystemMessage("@player_structure:processing_destruction",(byte)1);
-					crafter.sendSystemMessage("@player_structure:deed_reclaimed",(byte)1);
 					
 				} else {
-					crafter.sendSystemMessage("@player_structure:incorrect_destroy_code",(byte)1);
+					houseOwner.sendSystemMessage("@player_structure:incorrect_destroy_code",(byte)1);
 				}
 					
 			}					
@@ -308,6 +470,36 @@ public class HousingService implements INetworkDispatch {
 			}					
 		});		
 		core.suiService.openSUIWindow(window);
+	}
+	
+	public void destroyStructure(BuildingObject building) {
+		
+		PlayerCity city = core.playerCityService.getCityObjectIsIn(building);
+		CreatureObject owner = null;
+		if(building.getAttachment("structureOwner") != null)
+			owner = (CreatureObject) core.objectService.getObject((long) building.getAttachment("structureOwner"));
+		
+		if(building.getAttachment("sign") != null)
+			core.objectService.destroyObject((SWGObject) building.getAttachment("sign"));
+		
+		core.objectService.destroyObject(building.getObjectID());
+		core.objectService.deletePersistentObject(building.getObjectID(), core.getSWGObjectODB());
+		
+		if(building.getResidency())
+			owner.setAttachment("residentBuilding", null);
+		
+		
+		if(city != null) {
+			city.removeStructure(building.getObjectID());
+			if(building.getResidency()) {
+				city.removeCitizen(owner.getObjectID());
+			}
+			if(building.getTemplate().contains("cityhall")) {
+				// destroy city
+				core.playerCityService.destroyCity(city);
+			}
+		}
+
 	}
 	
 	public void createPayMaintenanceSUIPage(SWGObject owner, TangibleObject target) {
@@ -354,10 +546,7 @@ public class HousingService implements INetworkDispatch {
 				CreatureObject crafter = (CreatureObject)owner;
 				crafter.setCashCredits(crafter.getCashCredits() - Integer.parseInt(returnList.get(1)));
 				building.setMaintenanceAmount(building.getMaintenanceAmount()+Float.parseFloat(returnList.get(1)));
-				String displayname = "the structure";
-				if (building.getCustomName()!=null)
-					displayname = building.getCustomName();
-				crafter.sendSystemMessage("You successfully make a payment of " + Integer.parseInt(returnList.get(1)) + " credits to " + displayname + ".", (byte) 0);
+				crafter.sendSystemMessage("You successfully make a payment of " + Integer.parseInt(returnList.get(1)) + " credits to the maintenance pool.", (byte) 0);
 				core.suiService.closeSUIWindow(owner, 0);
 			}					
 		});		
@@ -386,26 +575,24 @@ public class HousingService implements INetworkDispatch {
 	}
 	
 	public void handleSetName(CreatureObject owner, TangibleObject target,String name) {
-		
-		((BuildingObject) target).setBuildingName(name,owner);		
+		((BuildingObject) target).setBuildingName(name);	
+		owner.sendSystemMessage("Structure renamed.", DisplayType.Broadcast);
 	}
 	
-	public void createStatusSUIPage(SWGObject owner, TangibleObject target) {
+	public void createStatusSUIPage(CreatureObject owner, TangibleObject target) 
+	{
 		final BuildingObject building = (BuildingObject) target.getGrandparent();
-		//final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
+		
 		String displayname = "@installation_n:"+building.getStfName();
-		if (building.getCustomName()!=null)
-			displayname = building.getCustomName();
+		if (building.getCustomName()!=null) displayname = building.getCustomName();
+		
 		final SUIWindow window = core.suiService.createSUIWindow("Script.listBox", owner, target, 0);
 		window.setProperty("bg.caption.lblTitle:Text", "@player_structure:structure_status_t");
 		window.setProperty("Prompt.lblPrompt:Text", "@player_structure:structure_name_prompt" + " " + displayname);
-		String ownerName = owner.getCustomName();
-		if (ownerName.length()>0){
-			String[] helper = ownerName.split(" ");
-			ownerName = helper[0];
-		}
-
+		
+		String ownerName =  core.objectService.getObject((long) building.getAttachment("structureOwner")).getFirstName();
 		String maintenancePool_string = ""+(int)building.getMaintenanceAmount();
+		
 		int hourlyMaintenance = building.getBMR();
 		float totalNumberOfHours = (float)building.getMaintenanceAmount()/hourlyMaintenance;
 		float minuteFraction = ((totalNumberOfHours * 100) % 100) / 100;
@@ -416,10 +603,10 @@ public class HousingService implements INetworkDispatch {
 		maintenancePool_string += " (" + nDays + " days, " + nHours + " hours, " + nMinutes + " minutes)";
 				
 		window.addListBoxMenuItem("@player_structure:owner_prompt" + " " + ownerName, 0);
-		if (building.getPrivacy()==BuildingObject.PRIVATE)
-			window.addListBoxMenuItem("@player_structure:structure_private", 1);
-		else
-			window.addListBoxMenuItem("@player_structure:structure_public", 1);
+		
+		if (building.getPrivacy()==BuildingObject.PRIVATE) window.addListBoxMenuItem("@player_structure:structure_private", 1);
+		else window.addListBoxMenuItem("@player_structure:structure_public", 1);
+		
 		window.addListBoxMenuItem("@player_structure:condition_prompt" + " " + target.getConditionDamage()+"%", 2);	
 		window.addListBoxMenuItem("@player_structure:maintenance_pool_prompt " + maintenancePool_string, 3);	
 		window.addListBoxMenuItem("@player_structure:maintenance_rate_prompt " + building.getBMR() + " cr/h", 4); // @player_structure:credits_per_hour	
@@ -443,13 +630,43 @@ public class HousingService implements INetworkDispatch {
 		core.suiService.openSUIWindow(window);
 	}
 	
-	public void declareResidency(SWGObject owner, TangibleObject target) {
-		final BuildingObject building = (BuildingObject) target.getGrandparent();
-		//final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
-		building.setResidency((CreatureObject)owner);
-		PlayerCity cityActorIsIn = core.playerCityService.getCityObjectIsIn(owner);
-		owner.setAttachment("residentCity", cityActorIsIn.getCityID());
-		//owner.setResidence();
+	public void declareResidency(SWGObject owner, BuildingObject building) {
+		PlayerCity cityActorIsIn = core.playerCityService.getCityObjectIsIn(building);
+		if(owner.getObjectID() != (long) building.getAttachment("structureOwner")) {
+			((CreatureObject) owner).sendSystemMessage("@player_structure:declare_must_be_owner", (byte) 0);
+			return;
+		} else if(building.getResidency()) {
+			((CreatureObject) owner).sendSystemMessage("@player_structure:already_residence", (byte) 0);
+			return;
+		}
+		if(((CreatureObject) owner).getPlayerObject().getCitizenship() == Citizenship.Mayor && !building.getTemplate().contains("cityhall")) { // mayors always have the city hall as their residence and cant change it
+			if(cityActorIsIn == null || cityActorIsIn.getMayorID() != owner.getObjectID()) {
+				((CreatureObject) owner).sendSystemMessage("@city/city:mayor_residence_change", (byte) 0);			
+				return;
+			}
+		}
+		if((owner.getAttachment("residencyCooldown") == null || System.currentTimeMillis() < (long) owner.getAttachment("residencyCooldown")) && cityActorIsIn.getMayorID() != owner.getObjectID()) {
+			((CreatureObject) owner).sendSystemMessage(OutOfBand.ProsePackage("@player_structure:change_residence_time", "DI", (int) ((long) owner.getAttachment("residencyCooldown") - System.currentTimeMillis()) / 3600000), (byte) 0);
+			return;
+		}
+		BuildingObject oldResidency = null;
+		if(owner.getAttachment("residentBuilding") != null && core.objectService.getObject((long) owner.getAttachment("residentBuilding")) != null) {
+			oldResidency = (BuildingObject) core.objectService.getObject((long) owner.getAttachment("residentBuilding"));
+			oldResidency.setResidency(false);
+			((CreatureObject) owner).sendSystemMessage("@player_structure:change_residence", (byte) 0);
+			PlayerCity oldCity = core.playerCityService.getCityObjectIsIn(oldResidency);
+			if(oldCity != null && oldCity != cityActorIsIn) {
+				oldCity.removeCitizen(owner.getObjectID());
+			}
+		} else {
+			((CreatureObject) owner).sendSystemMessage("@player_structure:declared_residency", (byte) 0);		
+		}
+		building.setResidency(true);
+		owner.setAttachment("residencyCooldown", System.currentTimeMillis() + 86400000); // 24 hours
+		owner.setAttachment("residentBuilding", building.getObjectID());
+		if(cityActorIsIn != null) {
+			cityActorIsIn.addCitizen(owner.getObjectID());
+		}
 	}
 	
 	public void handleListAllItems(SWGObject owner, TangibleObject target) {
@@ -465,7 +682,7 @@ public class HousingService implements INetworkDispatch {
 		Vector<TangibleObject> itemList = building.getItemsList();
 
 		for (int i=0;i<itemList.size();i++){
-			String itemName = (itemList.get(i).getCustomName() != null) ? itemList.get(i).getCustomName() : "@" + itemList.get(i).getStfFilename() + ":" + itemList.get(i).getStfName();
+			String itemName = itemList.get(i).getObjectName().getStfValue();
 			window.addListBoxMenuItem(itemName, i);
 		}		
 
@@ -481,16 +698,11 @@ public class HousingService implements INetworkDispatch {
 				core.suiService.closeSUIWindow(owner, 0);
 			}					
 		});		
-		core.suiService.openSUIWindow(window);
-
-		
+		core.suiService.openSUIWindow(window);	
 	}
 	
-	public void handleDeleteAllItems(SWGObject owner, TangibleObject target) {
-		final BuildingObject building = (BuildingObject) target.getGrandparent();
-		//final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
-		//building.getItemsList().clear();
-		// confirmation needed
+	public void handleDeleteAllItems(SWGObject owner, TangibleObject target) 
+	{
 		confirmDeleteAllItems(owner, target);
 	}
 	
@@ -536,8 +748,8 @@ public class HousingService implements INetworkDispatch {
 		core.suiService.openSUIWindow(window);
 	}
 	
-	public void confirmDeleteAllItems2ndStage(final CreatureObject ownerC, BuildingObject building) {
-		
+	public void confirmDeleteAllItems2ndStage(final CreatureObject ownerC, BuildingObject building) 
+	{
 		final SUIWindow window = core.suiService.createMessageBox(2,"@player_structure:structure_status","@player_structure:structure_name_prompt", ownerC, building, 0);
 		window.setProperty("bg.caption.lblTitle:Text", "@player_structure:confirm_destruction_t");
 		window.setProperty("Prompt.lblPrompt:Text", "@player_structure:delete_all_items_second_d");
@@ -615,9 +827,6 @@ public class HousingService implements INetworkDispatch {
 	}
 	
 	public void handleSearchForItems(SWGObject owner, TangibleObject target) {
-		// Spawning the structure terminal outside makes it display the correct radial
-		core.staticService.spawnObject("object/tangible/terminal/shared_terminal_player_structure.iff", "tatooine", 0L, 3525.0F, 4.0F, -4800.0F, 0.70F, 0.71F);
-		// I assume that childobject does not get a radial somehow
 		
 		final BuildingObject building = (BuildingObject) target.getGrandparent();
 		//final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
@@ -710,25 +919,46 @@ public class HousingService implements INetworkDispatch {
 	public void handlePermissionEntry(CreatureObject owner, TangibleObject target) {
 		final BuildingObject building = (BuildingObject) target.getGrandparent();
 		//final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
-		String listName = "ENTRY";
+		String listName = "entry";
 		building.setPermissionEntry(listName,owner);
 	}
 	
 	public void handlePermissionBan(CreatureObject owner, TangibleObject target) {
 		final BuildingObject building = (BuildingObject) target.getGrandparent();
 		//final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
-		String listName = "BAN";
+		String listName = "ban";
 		building.setPermissionBan(listName,owner);
+	}
+	
+	public void handlePermissionAdmin(CreatureObject owner, TangibleObject target) {
+		final BuildingObject building = (BuildingObject) target.getGrandparent();
+		//final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
+		String listName = "admin";
+		building.setPermissionAdmin(listName,owner);
+	}
+
+	
+	public SWGObject getClosestStructureWithAdminRights(CreatureObject actor) {
+		return core.simulationService.get(actor.getPlanet(), actor.getWorldPosition().x, actor.getWorldPosition().z, 20)
+			   .stream().filter(o -> o instanceof BuildingObject || o instanceof InstallationObject)
+			   .filter(o -> {
+				   if(o instanceof BuildingObject)
+					   return ((BuildingObject) o).isOnAdminList(actor);
+				   else if(o instanceof HarvesterObject) {
+					   System.out.println("test");
+					   return ((HarvesterObject) o).isOnAdminList(actor);
+				   }
+				   return false;
+			   }).min((o1, o2) -> (int) (o1.getWorldPosition().getDistance(actor.getWorldPosition()) - o2.getWorldPosition().getDistance(actor.getWorldPosition()))).orElse(null);
 	}
 	
 	public void handlePermissionListModify(CreatureObject owner, SWGObject target, String commandArgs){
 		
 		String[] commandSplit = commandArgs.split(" ");
-		if (commandSplit.length==3){		
-			if (core.characterService.playerExists(commandSplit[2]) && 
-				core.characterService.getPlayerOID(commandSplit[2])>0){
+		if (commandSplit.length >= 3) {	
+			if (core.characterService.playerExists(commandSplit[2]) && core.characterService.getPlayerOID(commandSplit[2]) > 0) {
 				long playerOID = core.characterService.getPlayerOID(commandSplit[2]);
-				if (commandSplit[2].equals("ENTRY")){
+				if (commandSplit[1].equals("entry")) {
 					
 					if (commandSplit[0].equals("add")){
 						((BuildingObject)target).addPlayerToEntryList(owner, playerOID, commandSplit[2]);
@@ -737,13 +967,35 @@ public class HousingService implements INetworkDispatch {
 						((BuildingObject)target).removePlayerFromEntryList(owner, playerOID, commandSplit[2]);
 					}
 				}
-				if (commandSplit[2].equals("BAN")){
+				if (commandSplit[1].equals("ban")) {
+					
+					if (commandSplit[0].equals("add")) {			
+						if(((BuildingObject)target).isOnAdminList((CreatureObject) core.objectService.getObject(playerOID))) {
+							owner.sendSystemMessage("@player_structure:cannot_ban_admin", (byte) 0);
+							return;
+						}
+						((BuildingObject)target).addPlayerToBanList(owner, playerOID, commandSplit[2]);
+						((BuildingObject)target).removePlayerFromEntryList(owner, playerOID, commandSplit[2]);
+					}
+					if (commandSplit[0].equals("remove")) {					
+						((BuildingObject)target).removePlayerFromBanList(owner, playerOID, commandSplit[2]);
+					} 
+				}
+				if (commandSplit[1].equals("admin")) {
 					
 					if (commandSplit[0].equals("add")){					
-						((BuildingObject)target).addPlayerToBanList(owner, playerOID, commandSplit[2]);
+						((BuildingObject)target).addPlayerToAdminList(owner, playerOID, commandSplit[2]);
 					}
-					if (commandSplit[0].equals("remove")){					
-						((BuildingObject)target).removePlayerFromBanList(owner, playerOID, commandSplit[2]);
+					if (commandSplit[0].equals("remove")) {					
+						if(playerOID == (long) target.getAttachment("structureOwner")) {
+							owner.sendSystemMessage("@player_structure:cannot_remove_owner", (byte) 0);
+							return;
+						}
+						else if(playerOID == owner.getObjectID()) {
+							owner.sendSystemMessage("@player_structure:cannot_remove_self", (byte) 0);
+							return;
+						}
+						((BuildingObject)target).removePlayerFromAdminList(owner, playerOID, commandSplit[2]);
 					}
 				}
 			} else {

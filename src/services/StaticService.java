@@ -36,9 +36,13 @@ import java.util.Map;
 import resources.common.FileUtilities;
 import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
+import resources.objects.creature.CreatureObject;
+import services.ai.AIActor;
+import services.spawn.MobileTemplate;
 import main.NGECore;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.PortalVisitor;
+import engine.resources.config.Config;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -55,6 +59,10 @@ public class StaticService implements INetworkDispatch {
 	}
 	
 	public void spawnStatics() {
+		Config options = new Config();
+		options.setFilePath("options.cfg");
+		final boolean buildoutsDisabled = ((options.loadConfigFile() && options.getInt("LOAD.BUILDOUT_OBJECTS") == 0) ? true : false);
+		
 		for (Planet planet : core.terrainService.getPlanetList()) {
 			if (FileUtilities.doesFileExist("scripts/static_spawns/" + planet.getName())) {
 				Path p = Paths.get("scripts/static_spawns/" + planet.getName());
@@ -63,7 +71,13 @@ public class StaticService implements INetworkDispatch {
 					@Override
 					public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 						if (file.getFileName().toString().endsWith(".py")) {
-							core.scriptService.callScript("scripts/static_spawns/" + planet.getName() + "/", file.getFileName().toString().replace(".py", ""), "addPlanetSpawns", core, planet);
+							try {
+								core.scriptService.callScript("scripts/static_spawns/" + planet.getName() + "/", file.getFileName().toString().replace(".py", ""), "addPlanetSpawns", core, planet);
+							} catch (Exception e) {
+								if (!buildoutsDisabled) {
+									e.printStackTrace();
+								}
+							}
 						}
 						
 						return FileVisitResult.CONTINUE;
@@ -94,6 +108,14 @@ public class StaticService implements INetworkDispatch {
 	}
 	
 	public SWGObject spawnObject(String template, String planetName, long cellId, float x, float y, float z, float qW, float qX, float qY, float qZ) {
+		return spawnObject(template, planetName, cellId, x, y, z, qW, qX, qY, qZ, -1);
+	}
+	
+	public SWGObject spawnObject(String template, String planetName, SWGObject cell, float x, float y, float z, float qW, float qX, float qY, float qZ, int respawnTime) {
+		return spawnObject(template, planetName, ((cell == null) ? 0L : cell.getObjectID()), x, y, z, qW, qX, qY, qZ, respawnTime);
+	}
+	
+	public SWGObject spawnObject(String template, String planetName, long cellId, float x, float y, float z, float qW, float qX, float qY, float qZ, int respawnTime) {
 		Planet planet = core.terrainService.getPlanetByName(planetName);
 		
 		if (planet == null) {
@@ -106,17 +128,35 @@ public class StaticService implements INetworkDispatch {
 		
 		SWGObject cell = core.objectService.getObject(cellId);
 		
+		if (cellId != 0 && cell == null) {
+			System.err.println("CellId invalid for template " + template);
+			return null;
+		}
+		
 		if (cell != null && cell.getContainer() != null && cell.getContainer() instanceof BuildingObject) {
 			buildingId = cell.getContainer().getObjectId();
 			cellNumber = ((BuildingObject) cell.getContainer()).getCellNumberByObjectId(cellId);
 		}
 		
-		long objectId = core.objectService.getDOId(planetName, template, 0, buildingId, cellNumber, x, y, z);
+		//long objectId = core.objectService.getDOId(planetName, template, 0, buildingId, cellNumber, x, y, z);
+		long objectId = 0;
+		SWGObject object = null;
 		
-		SWGObject object;
+		MobileTemplate mobileTemplate = core.spawnService.getMobileTemplate(template);
 		
-		if (core.spawnService.getMobileTemplate(template) != null) {
-			object = core.spawnService.spawnCreature(template, planetName, cellId, x, y, z, qW, qX, qY, qZ, (short) -1);
+		if (mobileTemplate != null) {
+			if(respawnTime > 0) {
+				try {
+					MobileTemplate clone = (MobileTemplate) mobileTemplate.clone();
+					object = core.spawnService.spawnCreature(template, objectId, planetName, cellId, x, y, z, qW, qX, qY, qZ, (short) -1);
+					clone.setRespawnTime(respawnTime);
+					((AIActor) object.getAttachment("AI")).setMobileTemplate(clone);
+				} catch (CloneNotSupportedException e) {
+					e.printStackTrace();
+				}
+			} else {
+				object = core.spawnService.spawnCreature(template, objectId, planetName, cellId, x, y, z, qW, qX, qY, qZ, (short) -1);
+			}
 		} else {
 			object = core.objectService.createObject(template, objectId, planet, new Point3D(x, y, z), new Quaternion(qW, qX, qY, qZ), null, true, true);
 		}
@@ -128,6 +168,10 @@ public class StaticService implements INetworkDispatch {
 		
 		if (objectId != 0 && object.getObjectID() != objectId) {
 			System.err.println("StaticService: ObjectId " + objectId + " was taken for object with template " + object.getTemplate() + ".  Replacement: " + object.getObjectID());
+		}
+		
+		if (mobileTemplate != null) {
+			return object;
 		}
 		
 		boolean checkCells = false; // shouldn't be needed; for debugging
@@ -145,7 +189,7 @@ public class StaticService implements INetworkDispatch {
 					
 					for (int i = 1; i <= portal.cellCount; i++) {
 						long cellObjectId = core.objectService.getDOId(planetName, "object/cell/shared_cell.iff", 0, object.getObjectID(), i, x, y, z);
-						CellObject childCell = (CellObject) core.objectService.createObject("object/cell/shared_cell.iff", cellObjectId, core.terrainService.getPlanetByName(planetName), new Point3D(0, 0, 0), new Quaternion(1, 0, 0, 0), null, true, true);
+						CellObject childCell = (CellObject) core.objectService.createObject("object/cell/shared_cell.iff", cellObjectId, core.terrainService.getPlanetByName(planetName), new Point3D(0, 0, 0), new Quaternion(0, 0, 1, 0), null, true, true);
 						childCell.setCellNumber(i);
 						building.add(childCell);
 					}
@@ -169,6 +213,27 @@ public class StaticService implements INetworkDispatch {
 		}
 		
 		return object;
+	}
+	
+	/**
+	 * Used for spawning a commoner that can be used for a variety of mission types, like delivery and crafting missions.
+	 */
+	public CreatureObject spawnCommoner(String template, String planetName, long cellId, float x, float y, float z, float qW, float qX, float qY, float qZ) {
+		CreatureObject commoner = (CreatureObject) spawnObject(template, planetName, cellId, x, y, z, qW, qX, qY, qZ);
+
+		if (commoner == null)
+			return null;
+
+		commoner.setAttachment("conversationFile", "missions/deliver");
+		commoner.setAttachment("radial_filename", "object/conversation");
+		commoner.setOptionsBitmask(264);
+		
+		core.missionService.addCommoner(commoner);
+		return commoner;
+	}
+	
+	public CreatureObject spawnCommoner(String template, String planetName, long cellId, float x, float y, float z, float qY, float qW) {
+		return spawnCommoner(template, planetName, cellId, x, y, z, qW, 0, qY, 0);
 	}
 	
 	public List<SWGObject> getCloningFacilitiesByPlanet(Planet planet) {

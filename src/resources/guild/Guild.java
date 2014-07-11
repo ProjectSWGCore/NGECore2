@@ -21,100 +21,177 @@
  ******************************************************************************/
 package resources.guild;
 
-import java.io.Serializable;
-import java.util.List;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.apache.mina.core.buffer.IoBuffer;
-
-import com.sleepycat.persist.model.Persistent;
-
-import resources.objects.Delta;
+import main.NGECore;
+import resources.common.ProsePackage;
+import services.chat.Mail;
 import engine.resources.objects.SWGObject;
 
-@Persistent(version=0)
-public class Guild extends Delta implements Serializable {
+public class Guild {
 	
-	private static final long serialVersionUID = 1L;
 	private int id;
+	private int chatRoomId;
 	private String abbreviation;
 	private String name;
-	private SWGObject leader;
-	private List<SWGObject> members;
+	private long leader;
+	private String leaderName;
+	private Map<Long, GuildMember> members = new HashMap<Long, GuildMember>();
+	private Map<Long, String> sponsoredPlayers = new HashMap<Long, String>();
+	private Map<Long, Integer> leaderCandidates = new HashMap<Long, Integer>();
+	private String motd = "";
+	private boolean electionsEnabled = false;
+	private long electionResultsDate;
 	
 	public Guild(int id, String abbreviation, String name, SWGObject leader) {
 		this.id = id;
 		this.abbreviation = abbreviation;
 		this.name = name;
-		this.leader = leader;
-		this.members.add(leader);
+		this.leader = leader.getObjectID();
+		this.leaderName = leader.getCustomName();
 	}
 	
-	public Guild() {
-		
+	public Guild() { }
+	
+	public GuildMember addMember(long objID) {
+		GuildMember member = new GuildMember(objID);
+		members.put(objID, member);
+		return member;
+	}
+	
+	public void sendGuildMail(String sender, String subject, String message, ProsePackage prose) {
+		NGECore core = NGECore.getInstance();
+		Date date = new Date();
+		members.forEach((id, member) -> {
+			Mail guildMail = new Mail();
+            guildMail.setMailId(core.chatService.generateMailId());
+            guildMail.setTimeStamp((int) date.getTime());
+            guildMail.setRecieverId(id);
+            guildMail.setStatus(Mail.NEW);
+            guildMail.setMessage(message);
+            if (prose != null) guildMail.addProseAttachment(prose);
+            guildMail.setSubject(subject);
+            guildMail.setSenderName(sender);
+            core.chatService.storePersistentMessage(guildMail);
+            
+            if (core.objectService.getObject(id) != null) {
+            	core.chatService.sendPersistentMessageHeader(core.objectService.getObject(id).getClient(), guildMail);
+            }
+		});
+	}
+	
+	public void sendGuildMail(String sender, String subject, String message) {
+		sendGuildMail(sender, subject, message, null);
+	}
+	
+	public void sendGuildMail(String sender, String subject, ProsePackage prose) {
+		sendGuildMail(sender, subject, "", prose);
 	}
 	
 	public int getId() {
-		synchronized(objectMutex) {
-			return id;
-		}
+		return id;
 	}
 	
 	public void setId(int id) {
-		synchronized(objectMutex) {
-			this.id = id;
-		}
+		this.id = id;
 	}
 	
+	public int getChatRoomId() {
+		return chatRoomId;
+	}
+
+	public void setChatRoomId(int chatRoomId) {
+		this.chatRoomId = chatRoomId;
+	}
+
 	public String getAbbreviation() {
-		synchronized(objectMutex) {
-			return abbreviation;
-		}
+		return abbreviation;
 	}
 	
 	public void setAbbreviation(String abbreviation) {
-		synchronized(objectMutex) {
-			this.abbreviation = abbreviation;
-		}
+		this.abbreviation = abbreviation;
 	}
 	
 	public String getName() {
-		synchronized(objectMutex) {
-			return name;
-		}
+		return name;
 	}
 	
 	public void setName(String name) {
-		synchronized(objectMutex) {
-			this.name = name;
-		}
+		this.name = name;
 	}
 	
 	public String getString() {
 		return (Integer.toString(getId()) + ":" + getAbbreviation());
 	}
 	
-	public SWGObject getLeader() {
-		synchronized(objectMutex) {
-			return leader;
-		}
+	public long getLeader() {
+		return leader;
 	}
 	
-	public void setLeader(SWGObject leader) {
-		synchronized(objectMutex) {
-			this.leader = leader;
-		}
+	public void setLeader(long leader) {
+		this.leader = leader;
 	}
 	
-	public List<SWGObject> getMembers() {
+	public String getMotd() {
+		return motd;
+	}
+
+	public void setMotd(String motd) {
+		this.motd = motd;
+	}
+
+	public Map<Long, GuildMember> getMembers() {
 		return members;
 	}
 
-	public byte[] getBytes() {
-		synchronized(objectMutex) {
-			IoBuffer buffer = createBuffer((getString().length() + 2));
-			buffer.put(getAsciiString(getString()));
-			return buffer.array();
-		}
+	public String getLeaderName() {
+		return leaderName;
 	}
 
+	public void setLeaderName(String leaderName) {
+		this.leaderName = leaderName;
+	}
+
+	public Map<Long, String> getSponsoredPlayers() {
+		return sponsoredPlayers;
+	}
+
+	public void setSponsoredPlayers(Map<Long, String> sponsoredPlayers) {
+		this.sponsoredPlayers = sponsoredPlayers;
+	}
+
+	public GuildMember getMember(long objectID) {
+		return members.get(objectID);
+	}
+
+	public boolean isElectionsEnabled() {
+		return electionsEnabled;
+	}
+
+	public void setElectionsEnabled(boolean electionsEnabled) {
+		this.electionsEnabled = electionsEnabled;
+	}
+
+	public long getElectionResultsDate() {
+		return electionResultsDate;
+	}
+
+	public void setElectionResultsDate(long electionResultsDate) {
+		this.electionResultsDate = electionResultsDate;
+	}
+
+	public Map<Long, Integer> getLeaderCandidates() {
+		return leaderCandidates;
+	}
+
+	public void setLeaderCandidates(Map<Long, Integer> leaderCandidates) {
+		this.leaderCandidates = leaderCandidates;
+	}
+	
+	public boolean isRunningForLeader(long objectID) {
+		if (leaderCandidates.containsKey(Long.valueOf(objectID))) return true;
+		else return false;
+	}
 }

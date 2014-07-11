@@ -9,7 +9,7 @@ def setup(core, object):
 	
 	structureterminal = core.objectService.createChildObject(object, 'object/tangible/terminal/shared_terminal_player_structure.iff', -17.2, 1.5 , 8, 1, 0 ,4)
 	#structureterminal.setAttachment('radial_filename', 'structure_management_terminal')
-	structureterminal.setAttachment('housing_parentstruct', object)
+	
 	
 	cityterminal = core.objectService.createChildObject(object, 'object/tangible/terminal/shared_terminal_city.iff', Point3D(float(16), float(2), float(-9)), Quaternion(float(1), float(1), float(1), float(0)),5)
 	#cityterminal.setAttachment('housing_parentstruct', object)

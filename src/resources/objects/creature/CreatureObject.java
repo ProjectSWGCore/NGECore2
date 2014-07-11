@@ -50,13 +50,11 @@ import main.NGECore;
 import engine.clients.Client;
 import resources.buffs.Buff;
 import resources.buffs.DamageOverTime;
-import resources.common.Cooldown;
 import resources.common.OutOfBand;
 import resources.objects.ObjectMessageBuilder;
 import resources.objects.SWGList;
 import resources.objects.SWGMap;
 import engine.resources.common.CRC;
-import engine.resources.objects.MissionCriticalObject;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -97,16 +95,14 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	private float turnRadius = 1;
 	private float walkSpeed = (float) 1.549;
 	private float waterModPercent = (float) 0.75;
-	private SWGList<String> abilities;
-	private int abilitiesUpdateCounter = 0;
+	private SWGMap<String, Integer> abilities;
 	private int xpBarValue = 0;
 	
-	private SWGList<MissionCriticalObject> missionCriticalObjects;
+	private SWGMap<Long, Long> missionCriticalObjects;
 	@NotPersistent
 	private transient int missionCriticalObjectsUpdateCounter = 0;
 	
 	// CREO6
-	private byte combatFlag = 0;
 	private short level = -1;
 	private int grantedHealth = 0;
 	private String currentAnimation;
@@ -187,18 +183,22 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	private transient long tefTime = 0;
 	@NotPersistent
 	private transient SWGObject useTarget;
+	@NotPersistent
+	private transient CreatureObject calledPet;
+	
+	private byte locomotion = 0;
 	
 	public CreatureObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
-		super(objectID, planet, Template, position, orientation);
+		super(objectID, planet, position, orientation, Template);
 		messageBuilder = new CreatureMessageBuilder(this);
 		loadTemplateData();
 		skills = new ArrayList<String>();
-		skillMods = new SWGMap<String, SkillMod>(getObjectID(), 4, 3);
-		abilities = new SWGList<String>(getObjectID(), 4, 14);
-		missionCriticalObjects = new SWGList<MissionCriticalObject>(getObjectID(), 4, 13);
-		equipmentList = new SWGList<Long>(getObjectID(), 6, 0x17);
-		buffList = new SWGList<Buff>(getObjectID(), 6, 0x1A);
-		appearanceEquipmentList = new SWGList<Long>(getObjectID(), 6, 0x1F);
+		skillMods = new SWGMap<String, SkillMod>(this, 4, 3, true);
+		abilities = new SWGMap<String, Integer>(this, 4, 14, true);
+		missionCriticalObjects = new SWGMap<Long, Long>(this, 4, 13, false);
+		equipmentList = new SWGList<Long>(this, 6, 23, false);
+		buffList = new SWGList<Buff>(this, 6, 26, false);
+		appearanceEquipmentList = new SWGList<Long>(this, 6, 31, false);
 	}
 	
 	public CreatureObject() {
@@ -214,14 +214,13 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		cooldowns = new ConcurrentHashMap<String, Long>();
 		performanceAudience = new Vector<CreatureObject>();
 		messageBuilder = new CreatureMessageBuilder(this);
-		dotList.init();
-		buffList.init();
-		equipmentList.init();
-		appearanceEquipmentList.init();
-		missionCriticalObjects.init();
-		abilities.init();
-		skillMods.init();
-		skillMods.forEach((name, skillMod) -> skillMod.init());
+		dotList.init(this);
+		buffList.init(this);
+		equipmentList.init(this);
+		appearanceEquipmentList.init(this);
+		missionCriticalObjects.init(this);
+		abilities.init(this);
+		skillMods.init(this);
 	}
 
 	private void loadTemplateData() {
@@ -237,12 +236,6 @@ public class CreatureObject extends TangibleObject implements Serializable {
 
 	}
 	
-	public void setCustomName2(String customName) {
-		setCustomName(customName);
-		
-		notifyObservers(messageBuilder.buildCustomNameDelta(customName), true);
-	}
-
 	public int getBankCredits() {
 		synchronized(objectMutex) {
 			return bankCredits;
@@ -288,6 +281,15 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		}
 	}
 
+	public void deductCashCredits(int amountToDeduct) {
+		synchronized(objectMutex) {
+			this.cashCredits -= amountToDeduct;
+		}
+		if(getClient() != null && getClient().getSession() != null) {
+			getClient().getSession().write(messageBuilder.buildCashCreditsDelta(cashCredits));
+		}
+	}
+	
 	public void setCashCredits(int cashCredits) {
 		synchronized(objectMutex) {
 			this.cashCredits = cashCredits;
@@ -354,25 +356,6 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		
 	}
 	
-	@Override
-	public int getOptionsBitmask() {
-		synchronized(objectMutex) {
-			return optionsBitmask;
-		}
-	}
-	
-	@Override
-	public void setOptionsBitmask(int optionBitmask) {
-		synchronized(objectMutex) {
-			this.optionsBitmask = optionBitmask;
-		}
-		
-		IoBuffer optionDelta = messageBuilder.buildOptionMaskDelta(optionBitmask);
-		
-		notifyObservers(optionDelta, true);
-
-	}
-	
 	public void setOptions(int options, boolean add) {
 		synchronized(objectMutex) {
 			if (options != 0) {
@@ -401,20 +384,80 @@ public class CreatureObject extends TangibleObject implements Serializable {
 
 	public void setPosture(byte posture) {
 		synchronized(objectMutex) {
-			if (this.posture == 0x09) {
+			switch (posture) {
+				case resources.datatables.Posture.Invalid:
+					locomotion = -1;
+					break;
+				case resources.datatables.Posture.Upright:
+					locomotion = 0;
+					break;
+				case resources.datatables.Posture.Crouched:
+					locomotion = 4;
+					break;
+				case resources.datatables.Posture.Prone:
+					locomotion = 7;
+					break;
+				case resources.datatables.Posture.Sneaking:
+					locomotion = 1;
+					break;
+				case resources.datatables.Posture.Blocking:
+					locomotion = 21;
+					break;
+				case resources.datatables.Posture.Climbing:
+					locomotion = 9;
+					break;
+				case resources.datatables.Posture.Flying:
+					locomotion = 12;
+					break;
+				case resources.datatables.Posture.LyingDown:
+					locomotion = 13;
+					break;
+				case resources.datatables.Posture.Sitting:
+					locomotion = 14;
+					break;
+				case resources.datatables.Posture.SkillAnimating:
+					locomotion = 15;
+					break;
+				case resources.datatables.Posture.DrivingVehicle:
+					locomotion = 16;
+					break;
+				case resources.datatables.Posture.RidingCreature:
+					locomotion = 17;
+					break;
+				case resources.datatables.Posture.KnockedDown:
+					locomotion = 18;
+					break;
+				case resources.datatables.Posture.Incapacitated:
+					locomotion = 19;
+					break;
+				case resources.datatables.Posture.Dead:
+					locomotion = 20;
+					break;
+			}
+		}
+		
+		synchronized(objectMutex) {
+			if (this.posture == resources.datatables.Posture.SkillAnimating) {
 				stopPerformance();
 			}
-			if(this.posture == posture)
+			
+			if (this.posture == posture) {
 				return;
+			}
+			
 			this.posture = posture;
 		}
-
-		Posture postureUpdate = new Posture(getObjectID(), posture);
-		ObjControllerMessage objController = new ObjControllerMessage(0x1B, postureUpdate);
 		
 		notifyObservers(messageBuilder.buildPostureDelta(posture), true);
-		notifyObservers(objController, true);
-		
+		notifyObservers(new ObjControllerMessage(0x1B, new Posture(getObjectID(), posture)), true);
+	}
+	
+	public byte getLocomotion() {
+		return locomotion;
+	}
+	
+	public void setLocomotion(byte locomotion) {
+		this.locomotion = locomotion;
 	}
 	
 	public void startPerformance() {
@@ -488,15 +531,9 @@ public class CreatureObject extends TangibleObject implements Serializable {
 			this.inspirationTick = inspirationTick;
 		}
 	}
-
-	@Override
+	
 	public void setFaction(String faction) {
-		synchronized(objectMutex) {
-			this.faction = faction;
-		}
-		
-		notifyObservers(messageBuilder.buildFactionDelta(faction), true);
-		
+		super.setFaction(faction);
 
 		CreatureObject companion = NGECore.getInstance().mountService.getCompanion(this);
 		
@@ -505,13 +542,8 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		}
 	}
 	
-	@Override
 	public void setFactionStatus(int factionStatus) {
-		synchronized(objectMutex) {
-			this.factionStatus = factionStatus;
-		}
-		
-		notifyObservers(messageBuilder.buildFactionStatusDelta(factionStatus), true);
+		super.setFactionStatus(factionStatus);
 		
 		CreatureObject companion = NGECore.getInstance().mountService.getCompanion(this);
 		
@@ -636,7 +668,7 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	
 	public int getSkillModBase(String name) {
 		SkillMod skillMod = getSkillMod(name);
-		return ((skillMod == null) ? 0 : skillMod.getBase());
+		return ((skillMod == null) ? 0 : skillMod.getBase() + skillMod.getModifier());
 	}
 	
 	public int getSkillModModifier(String name) {
@@ -644,9 +676,9 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		return ((skillMod == null) ? 0 : skillMod.getModifier());
 	}
 	
-	public float getSkillModValue(String name, int divisor) {
+	public float getSkillModValue(String name, int divisor, boolean percent) {
 		SkillMod skillMod = getSkillMod(name);
-		return ((skillMod == null) ? 0.0f : skillMod.getValue(divisor));
+		return ((skillMod == null) ? 0.0f : skillMod.getValue(divisor, percent));
 	}
 	
 	public float getSpeedMultiplierBase() {
@@ -755,82 +787,35 @@ public class CreatureObject extends TangibleObject implements Serializable {
 			this.waterModPercent = waterModPercent;
 		}
 	}
-
-	public SWGList<String> getAbilities() {
+	
+	public SWGMap<String, Integer> getAbilities() {
 		return abilities;
 	}
 	
 	public boolean hasAbility(String name) {
-		for (String ability : abilities) {
-			if (ability.equals(name)) {
-				return true;
-			}
-		}
-		
-		return false;
+		return abilities.containsKey(name);
 	}
-
-	public int getAbilitiesUpdateCounter() {
-		synchronized(objectMutex) {
-			return abilitiesUpdateCounter;
-		}
-	}
-
-	public void setAbilitiesUpdateCounter(int abilitiesUpdateCounter) {
-		synchronized(objectMutex) {
-			this.abilitiesUpdateCounter = abilitiesUpdateCounter;
-		}
-	}
-	
 	
 	public void addAbility(String abilityName) {
-		
-		if(abilities.contains(abilityName))
+		if (abilities.containsKey(abilityName)) {
 			return;
-		
-		abilities.add(abilityName);
-		
-		if(getClient() != null) {
-			setAbilitiesUpdateCounter((short) (getAbilitiesUpdateCounter() + 1));
-			getClient().getSession().write(messageBuilder.buildAddAbilityDelta(abilityName));
 		}
-
+		
+		abilities.put(abilityName, 1);
 	}
 	
 	public void removeAbility(String abilityName) {
-		
-		if(!abilities.contains(abilityName))
+		if (!abilities.containsKey(abilityName)) {
 			return;
+		}
 		
 		abilities.remove(abilityName);
-		
-		if(getClient() != null) {
-			setAbilitiesUpdateCounter((short) (getAbilitiesUpdateCounter() + 1));
-			getClient().getSession().write(messageBuilder.buildRemoveAbilityDelta(abilityName));
-		}
-		
 	}
-
-
-	public SWGList<MissionCriticalObject> getMissionCriticalObjects() {
+	
+	public SWGMap<Long, Long> getMissionCriticalObjects() {
 		return missionCriticalObjects;
 	}
-
-	public byte getCombatFlag() {
-		synchronized(objectMutex) {
-			return combatFlag;
-		}
-	}
-
-	public void setCombatFlag(byte combatFlag) {
-		synchronized(objectMutex) {
-			this.combatFlag = combatFlag;
-		}
-		IoBuffer combatDelta = messageBuilder.buildCombatFlagDelta(combatFlag);
-		
-		notifyObservers(combatDelta, true);
-	}
-
+	
 	public short getLevel() {
 		synchronized(objectMutex) {
 			return level;
@@ -971,6 +956,10 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		synchronized(objectMutex) {
 			this.guildId = guildId;
 		}
+		
+		IoBuffer guildIdDelta = messageBuilder.buildGuildIdDelta(guildId);
+		
+		notifyObservers(guildIdDelta, true);
 	}
 	
 	public long getLookAtTarget() {
@@ -992,7 +981,7 @@ public class CreatureObject extends TangibleObject implements Serializable {
 			return targetId;
 		}
 	}
-
+	
 	public void setIntendedTarget(long intendedTarget) {
 		synchronized(objectMutex) {
 			this.targetId = intendedTarget;
@@ -1055,7 +1044,12 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		synchronized(objectMutex) {
 			this.performanceCounter = performanceCounter;
 		}
-		getClient().getSession().write(messageBuilder.buildPerformanceCounter(performanceCounter));
+		if (getClient() == null) System.err.println("setPerformanceCounter: client is null");
+		else if (getClient().getSession() == null) System.err.println("setPerformanceCounter: session is null");
+		else getClient().getSession().write(messageBuilder.buildPerformanceCounter(performanceCounter));
+		if (getClient() == null || getClient().getSession() == null) {
+			System.out.println("setPerformanceCounter: " + getTemplate());
+		}
 	}
 
 	public int getPerformanceId() {
@@ -1137,7 +1131,7 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	public void sendBaselines(Client destination) {
 				
 		if(destination == null || destination.getSession() == null) {
-			System.out.println("NULL session");
+			//System.out.println("NULL session");
 			return;
 		}
 		
@@ -1490,7 +1484,7 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	}
 	
 	public void playMusic(String sndFile, long targetId, int repetitions, boolean flag) {
-		getClient().getSession().write(new PlayMusicMessage(sndFile, targetId, 1, false));
+		getClient().getSession().write(new PlayMusicMessage(sndFile, targetId, 1, false).serialize());
 	}
 	
 	public boolean getGroupDance() {
@@ -1556,20 +1550,6 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		}
 		if(getClient() != null)
 			getClient().getSession().write(messageBuilder.buildListenToId(performanceListenee.getObjectId()));
-	}
-
-
-	
-	@Override
-	public void setPvPBitmask(int pvpBitmask) {
-		super.setPvPBitmask(pvpBitmask);
-		notifyObservers(new UpdatePVPStatusMessage(getObjectID(), getPvPBitmask(), getFaction()), false);
-	}
-	
-	@Override
-	public void setPvpStatus(int pvpBitmask, boolean add) {
-		super.setPvpStatus(pvpBitmask, add);
-		notifyObservers(new UpdatePVPStatusMessage(getObjectID(), getPvPBitmask(), getFaction()), false);
 	}
 	
 	public byte getDifficulty() {
@@ -1801,10 +1781,6 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		return false;
 	}
 	
-	public Cooldown getCooldown(String cooldownGroup) {
-		return new Cooldown(getRemainingCooldown(cooldownGroup));
-	}
-	
 	public long getRemainingCooldown(String cooldownGroup) {
 		if (cooldowns.containsKey(cooldownGroup)) {
 			if (System.currentTimeMillis() < cooldowns.get(cooldownGroup)) {
@@ -1846,12 +1822,60 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		return adder.intValue();
 	}
 	
-	//public float getCooldown(String cooldownGroup) {
-		//return ((float) getCooldown(cooldownGroup) / (float) 1000);
-	//}
-	
 	public ObjectMessageBuilder getMessageBuilder() {
 		return messageBuilder;
 	}
 	
+	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
+		switch (viewType) {
+			case 4: {
+				switch (updateType) {
+					case 3: { 
+						buffer = messageBuilder.createDelta("CREO", (byte) 4, (short) 1, (byte) 3, buffer, buffer.array().length + 4);
+						
+						if (getClient() != null && getClient().getSession() != null) {
+							getClient().getSession().write(buffer);
+						}
+						
+						break;
+					}
+					case 14: { 
+						buffer = messageBuilder.createDelta("CREO", (byte) 4, (short) 1, (byte) 14, buffer, buffer.array().length + 4);
+						
+						if (getClient() != null && getClient().getSession() != null) {
+							getClient().getSession().write(buffer);
+						}
+						
+						break;
+					}
+				}
+			}
+			case 1:
+			case 3:
+			case 6:
+			case 8:
+			case 9:
+			default: {
+				return;
+			}
+		}
+	}
+	
+	public String getFirstName()
+	{
+		return getCustomName().split(" ")[0];
+	}
+	
+	public String getLastName()
+	{
+		return getCustomName().split(" ")[1];
+	}
+
+	public CreatureObject getCalledPet() {
+		return calledPet;
+	}
+
+	public void setCalledPet(CreatureObject calledPet) {
+		this.calledPet = calledPet;
+	}
 }

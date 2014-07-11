@@ -21,5 +21,22 @@ def addPlanetSpawns(core, planet):
 	fa2po.setOptionsBitmask(256)
 	
 	
+	#tusken point 1
+	stcSvc.spawnObject('tusken_outrider', 'tatooine', long(0), float(-3691), float(4.5), float(-4781), float(0), float(0), float(0), float(0), 45)
+	stcSvc.spawnObject('tusken_outrider', 'tatooine', long(0), float(-3675), float(2), float(-4790), float(0), float(0), float(0), float(0), 45)
+	stcSvc.spawnObject('tusken_outrider', 'tatooine', long(0), float(-3669), float(2.1), float(-4780), float(0), float(0), float(0), float(0), 45)
+	stcSvc.spawnObject('tusken_outrider', 'tatooine', long(0), float(-3687), float(3), float(-4794), float(0), float(0), float(0), float(0), 45)
+	stcSvc.spawnObject('tusken_outrider', 'tatooine', long(0), float(-3674), float(0.5), float(-4804), float(0), float(0), float(0), float(0), 45)
+	stcSvc.spawnObject('tusken_outrider', 'tatooine', long(0), float(-3696), float(3.6), float(-4803), float(0), float(0), float(0), float(0), 45)
+	stcSvc.spawnObject('tusken_outrider', 'tatooine', long(0), float(-3681), float(3.8), float(-4777), float(0), float(0), float(0), float(0), 45)
+		
+	#tusken point 2
+	stcSvc.spawnObject('tusken_outrider', 'tatooine', long(0), float(-3529), float(0), float(-4638), float(0), float(0), float(0), float(0), 45)
+	stcSvc.spawnObject('tusken_outrider', 'tatooine', long(0), float(-3523), float(0), float(-4646), float(0), float(0), float(0), float(0), 45)
+	stcSvc.spawnObject('tusken_outrider', 'tatooine', long(0), float(-3510), float(0), float(-4641), float(0), float(0), float(0), float(0), 45)
+	stcSvc.spawnObject('tusken_outrider', 'tatooine', long(0), float(-3511), float(0), float(-4629), float(0), float(0), float(0), float(0), 45)
+	stcSvc.spawnObject('tusken_outrider', 'tatooine', long(0), float(-3522), float(0), float(-4623), float(0), float(0), float(0), float(0), 45)
+	stcSvc.spawnObject('tusken_outrider', 'tatooine', long(0), float(-3532), float(0), float(-4623), float(0), float(0), float(0), float(0), 45)
+	stcSvc.spawnObject('tusken_outrider', 'tatooine', long(0), float(-3523), float(0), float(-4632), float(0), float(0), float(0), float(0), 45)
 	return
 	

@@ -25,6 +25,8 @@ import java.nio.ByteOrder;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
+import resources.common.Opcodes;
+
 
 public class LogoutMessage extends SWGMessage{
 	
@@ -36,7 +38,7 @@ public class LogoutMessage extends SWGMessage{
 		IoBuffer result = IoBuffer.allocate(6).order(ByteOrder.LITTLE_ENDIAN);
 		
 		result.putShort((short) 2);
-		result.putInt(0x42FD19DD);
+		result.putInt(Opcodes.LogoutMessage);
 		
 		return result;
 	}

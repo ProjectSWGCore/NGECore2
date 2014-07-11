@@ -34,10 +34,9 @@ import main.NGECore;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 
-
-
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
+import engine.clientdata.visitors.ProfessionTemplateVisitor;
 import engine.clients.Client;
 import engine.resources.common.CRC;
 import engine.resources.container.CreatureContainerPermissions;
@@ -61,11 +60,11 @@ import protocol.swg.ClientVerifyAndLockNameResponse;
 import protocol.swg.CreateCharacterSuccess;
 import protocol.swg.HeartBeatMessage;
 import resources.objects.creature.CreatureObject;
+import resources.objects.intangible.IntangibleObject;
 import resources.objects.mission.MissionObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
-import resources.visitors.ProfessionTemplateVisitor;
 
 @SuppressWarnings("unused")
 
@@ -76,6 +75,7 @@ public class CharacterService implements INetworkDispatch {
 	private DatabaseConnection databaseConnection2;
 	private engine.resources.common.NameGen nameGenerator;
 	private static final String allowedCharsRegex = "['-]?[A-Za-z]('[a-zA-Z]|-[a-zA-Z]|[a-zA-Z])*['-]?$";
+	private static final String allowedCharsRegexWithSpace = "['-]?[A-Za-z]('[a-zA-Z]|-[a-zA-Z]|[a-zA-Z]| )*['-]?$";
 
 	public CharacterService(NGECore core) {
 
@@ -87,6 +87,22 @@ public class CharacterService implements INetworkDispatch {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public boolean checkName(String name, Client client) {
+		return checkName(name, client, false);
+	}
+	
+	public boolean checkName(String name, Client client, boolean allowSpaces) {
+		// TODO: check for dev names, profane names, iconic names etc
+		try {
+			if(checkForDuplicateName(name, client.getAccountId()) || (!allowSpaces && !name.matches(allowedCharsRegex)) || (allowSpaces && !name.matches(allowedCharsRegexWithSpace)))
+				return false;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return true;
 	}
 	
 	@Override
@@ -217,6 +233,10 @@ public class CharacterService implements INetworkDispatch {
 				ClientCreateCharacter clientCreateCharacter = new ClientCreateCharacter();
 				clientCreateCharacter.deserialize(data);
 				
+				if (!Professions.isProfession(clientCreateCharacter.getProfession())) {
+					return;
+				}
+				
 				engine.resources.config.Config config = new engine.resources.config.Config();
 				config.setFilePath("nge.cfg");
 				if (!(config.loadConfigFile())) {
@@ -248,6 +268,7 @@ public class CharacterService implements INetworkDispatch {
 				object.setPosition(SpawnPoint.getRandomPosition(new Point3D(3528, 0, -4804), (float) 0.5, 3, core.terrainService.getPlanetByName("tatooine").getID()));
 				object.setCashCredits(100);
 				object.setBankCredits(1000);
+				object.setIncapTimer(60);
 				object.setOptionsBitmask(Options.ATTACKABLE);
 				//object.setPosition(new Point3D(0, 0, 0));
 				object.setOrientation(new Quaternion(1, 0, 0, 0));
@@ -276,6 +297,7 @@ public class CharacterService implements INetworkDispatch {
 				player.setProfession(clientCreateCharacter.getProfession());
 				player.setProfessionIcon(Professions.get(clientCreateCharacter.getProfession()));
 				player.setProfessionWheelPosition(clientCreateCharacter.getProfessionWheelPosition());
+				player.setNextUpdateTime(core.gcwService.calculateNextUpdateTime());
 				if(clientCreateCharacter.getHairObject().length() > 0) {
 					String sharedHairTemplate = clientCreateCharacter.getHairObject().replace("/hair_", "/shared_hair_");
 					TangibleObject hair = (TangibleObject) core.objectService.createObject(sharedHairTemplate, object.getPlanet());
@@ -285,8 +307,6 @@ public class CharacterService implements INetworkDispatch {
 					object.addObjectToEquipList(hair);
 				}
 				
-				player.setBornDate((int) System.currentTimeMillis());
-
 				TangibleObject inventory = (TangibleObject) core.objectService.createObject("object/tangible/inventory/shared_character_inventory.iff", object.getPlanet());
 				inventory.setContainerPermissions(CreatureContainerPermissions.CREATURE_CONTAINER_PERMISSIONS);
 				TangibleObject appInventory = (TangibleObject) core.objectService.createObject("object/tangible/inventory/shared_appearance_inventory.iff", object.getPlanet());
@@ -315,7 +335,7 @@ public class CharacterService implements INetworkDispatch {
 				
 				// TODO: Race abilities
 				object.addAbility("startDance");
-				object.addAbility("startDance+Basic");
+				object.addAbility("startDance+basic");
 				
 				object.addObjectToEquipList(datapad);
 				object.addObjectToEquipList(inventory);
@@ -327,6 +347,9 @@ public class CharacterService implements INetworkDispatch {
 				object.addObjectToEquipList(defaultWeapon);
 				object._add(defaultWeapon);
 				object.setWeaponId(defaultWeapon.getObjectID());
+				
+				IntangibleObject pda = (IntangibleObject) core.objectService.createObject("object/intangible/data_item/shared_guild_stone.iff", object.getPlanet());
+				datapad.add(pda);
 				
 				createStarterClothing(object, sharedRaceTemplate, clientCreateCharacter.getStarterProfession());
 				//core.scriptService.callScript("scripts/", "demo", "CreateStartingCharacter", core, object);
@@ -535,9 +558,13 @@ public class CharacterService implements INetworkDispatch {
 	 */
 	public long getPlayerOID(String name) {
 		if (!name.equals("")) {
+			if (name.contains(" ")) {
+				name = name.split(" ")[0];
+			}
+			name = name.toLowerCase();
 			long oid = 0L;
 			try {
-				PreparedStatement ps = databaseConnection.preparedStatement("SELECT * FROM characters WHERE \"firstName\"=?");
+				PreparedStatement ps = databaseConnection.preparedStatement("SELECT * FROM characters WHERE LOWER(\"firstName\")=?");
 				ps.setString(1, name);
 				ResultSet resultSet = ps.executeQuery();
 				while (resultSet.next()) {	

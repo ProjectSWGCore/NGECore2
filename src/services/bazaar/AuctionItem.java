@@ -23,13 +23,9 @@ package services.bazaar;
 
 import java.io.Serializable;
 
-import com.sleepycat.je.Environment;
-import com.sleepycat.je.Transaction;
 import com.sleepycat.persist.model.Entity;
-import com.sleepycat.persist.model.NotPersistent;
 import com.sleepycat.persist.model.PrimaryKey;
 
-import engine.resources.objects.IPersistent;
 import engine.resources.objects.SWGObject;
 
 @Entity(version=1)
@@ -45,6 +41,7 @@ public class AuctionItem implements Comparable<AuctionItem>, Serializable {
 	private long buyerId;
 	private long offerToId;
 	private int itemType;
+	private int itemTypeCRC;
 	private String ownerName;
 	private String bidderName = "";
 	private String itemName;
@@ -55,7 +52,7 @@ public class AuctionItem implements Comparable<AuctionItem>, Serializable {
 	private boolean auction;
 	private String vuid;
 	private int status;
-	private boolean onBazaar;
+	private boolean onBazaar = false;
 	private long expireTime;
 	private int auctionOptions;
 	
@@ -281,6 +278,14 @@ public class AuctionItem implements Comparable<AuctionItem>, Serializable {
 			return 1;
 		else
 			return 0;
+	}
+
+	public int getItemTypeCRC() {
+		return itemTypeCRC;
+	}
+
+	public void setItemTypeCRC(int itemTypeCRC) {
+		this.itemTypeCRC = itemTypeCRC;
 	}
 	
 }
