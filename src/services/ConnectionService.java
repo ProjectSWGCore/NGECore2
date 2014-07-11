@@ -310,7 +310,7 @@ public class ConnectionService implements INetworkDispatch {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-				
+		
 		long parentId = object.getParentId();
 		
 		/*if(object.getContainer() == null) {

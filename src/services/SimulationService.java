@@ -993,7 +993,7 @@ public class SimulationService implements INetworkDispatch {
 		}
 		
 		PlayerObject ghost = (PlayerObject) object.getSlottedObject("ghost");
-				
+		
 		core.weatherService.sendWeather(object);
 		
 		//core.chatService.joinChatRoom(object.getCustomName().toLowerCase(), "SWG." + core.getGalaxyName() + "." + object.getPlanet().getName());
