@@ -277,6 +277,16 @@ public class SimulationService implements INetworkDispatch {
 		);
 		return checkObject.get();
 	}
+	
+	public Vector<CreatureObject> getAllNearNPCs(int distance, SWGObject value ){
+		Vector<CreatureObject> foundCreatures = new Vector<CreatureObject>();
+		core.simulationService.get(value.getPlanet(), value.getWorldPosition().x, value.getWorldPosition().z, distance).stream().forEach((objecta) -> { 
+			if (objecta instanceof CreatureObject)
+				foundCreatures.add((CreatureObject)objecta);
+			}
+		);
+		return foundCreatures;
+	}
 		
 	public boolean move(SWGObject object, int oldX, int oldZ, int newX, int newZ) {
 		if(quadTrees.get(object.getPlanet().getName()).remove(oldX, oldZ, object)) {
