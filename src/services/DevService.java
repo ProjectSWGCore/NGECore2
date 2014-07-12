@@ -308,7 +308,7 @@ public class DevService implements INetworkDispatch {
 						rifle1.setMaxDamage(1250);
 						rifle1.setWeaponType(WeaponType.RIFLE);
 						
-						// inventory.add(rifle1);
+						inventory.add(rifle1);
 						
 						WeaponObject carbine1 = (WeaponObject) core.objectService.createObject("object/weapon/ranged/carbine/shared_carbine_cdef.iff", planet);
 						carbine1.setIntAttribute("required_combat_level", 90);
@@ -397,7 +397,7 @@ public class DevService implements INetworkDispatch {
 						return;
 					case 43:
 						TangibleObject drink = (TangibleObject) core.objectService.createObject("object/tangible/food/crafted/shared_drink_breath_of_heaven.iff", planet);
-						drink.setFloatAttribute("cat_stat_mod_bonus.@stat_n:constitution_modified", 100);
+						drink.setFloatAttribute("cat_stat_mod_bonus.@stat_n:constitution_modified", 80);
 						drink.setFloatAttribute("cat_stat_mod_bonus.@stat_n:dodge", 3);
 						inventory.add(drink);
 						return;
