@@ -116,9 +116,9 @@ public class ResourceService implements INetworkDispatch {
 //		} else {
 			ODBCursor cursor = core.getResourceRootsODB().getCursor();
 			if(!cursor.hasNext()) {
-				createCollections();
-				createCollections2();
-				createCollections3();
+				//createCollections();
+				//createCollections2();
+				//createCollections3();
 			}
 //		}
 		core.commandService.registerCommand("harvestcorpse");
@@ -221,6 +221,7 @@ public class ResourceService implements INetworkDispatch {
 		return object;
 	}
 	
+	/*
 	public void createCollections(){
 
 		// For testing purposes the Hashtable is being put together here
@@ -4773,9 +4774,9 @@ public class ResourceService implements INetworkDispatch {
 		resourceRootTable.put(294, resourceRoot);
 		nabooPool4Roots.addElement(resourceRoot);
 
-	}
+	}*/
 	//checked until here
-	public void createCollections2(){
+	/*public void createCollections2(){
 		
 		ResourceRoot resourceRoot = new ResourceRoot();
 		resourceRoot.setResourceFileName("corn_wild_rori");
@@ -9046,9 +9047,9 @@ public class ResourceService implements INetworkDispatch {
 		resourceRoot.setMaximalLifeTime(10080000L);		
 		resourceRootTable.put(578, resourceRoot);
 		yavinPool4Roots.addElement(resourceRoot);
-	}
+	}*/
 	// checked
-	public void createCollections3(){
+	/*public void createCollections3(){
 		ResourceRoot resourceRoot = new ResourceRoot();
 		resourceRoot.setResourceFileName("fiberplast_corellia");
 		resourceRoot.setResourceClass("Fiberplast");
@@ -10802,7 +10803,7 @@ public class ResourceService implements INetworkDispatch {
 		}
 		
 
-	}
+	}*/
 
 // ToDo: Go through all of this again, Vegetable tubers are double 632 berry 635 double 645 and 647 double 671,672
 // 683,84,85,86 all same
