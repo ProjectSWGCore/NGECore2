@@ -155,8 +155,6 @@ public class NGECore {
 	private volatile boolean isShuttingDown = false;
 	private long galacticTime = System.currentTimeMillis();
 	
-	private long galacticTime = System.currentTimeMillis();
-	
 	private ConcurrentHashMap<IoSession, Client> clients = new ConcurrentHashMap<IoSession, Client>();
 	
 	// Database
@@ -852,9 +850,6 @@ public class NGECore {
 		// Feel free to add your OS user account name here to exclude yourself from loading buildouts and snapshots
 		// without having to change options.cfg all the time
 		return excludedDevelopers;
-	}
-	public long getGalacticTime() {
-		return System.currentTimeMillis() - this.galacticTime;
 	}
 	
 }
