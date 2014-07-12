@@ -78,13 +78,20 @@ public class AttackState extends AIState {
 				if(weapon != null)
 					maxDistance = weapon.getMaxRange() - 1;
 			}
-			if(actor.getFollowObject().getWorldPosition().getDistance(creature.getWorldPosition()) > maxDistance)
-				actor.setNextPosition(actor.getFollowObject().getPosition());
-			else {
-				//recover(actor);
-				actor.faceObject(actor.getFollowObject());
-				actor.scheduleMovement();
-				return StateResult.UNFINISHED;
+			try{
+				if(actor.getFollowObject().getWorldPosition().getDistance(creature.getWorldPosition()) > maxDistance)
+					actor.setNextPosition(actor.getFollowObject().getPosition());
+				else {
+					//recover(actor);
+					actor.faceObject(actor.getFollowObject());
+					actor.scheduleMovement();
+					return StateResult.UNFINISHED;
+			}
+			} catch (Exception e){
+				DevLog.debugout("Charon", "AI Attack State Exception move method", "actor " + actor);
+				DevLog.debugout("Charon", "AI Attack State Exception move method", "actor.getFollowObject() " + actor.getFollowObject());
+				DevLog.debugout("Charon", "AI Attack State Exception move method", "actor.getFollowObject().getWorldPosition() " + actor.getFollowObject().getWorldPosition());
+				DevLog.debugout("Charon", "AI Attack State Exception move method", "creature.getWorldPosition() " + creature.getWorldPosition());
 			}
 
 		}

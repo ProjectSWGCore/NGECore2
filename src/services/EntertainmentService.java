@@ -126,7 +126,6 @@ public class EntertainmentService implements INetworkDispatch {
 				if (sentPacket.getTargetId() != sentPacket.getDesignerId()) {
 					
 					if (sentPacket.isCustomerAccepted() && sentPacket.isDesignerCommited()) {
-						System.out.print("Both Accepted!");
 
 						sentPacket.setEndMessage(true);
 						

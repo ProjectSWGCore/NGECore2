@@ -9,6 +9,9 @@ import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 import main.NGECore;
 
@@ -20,21 +23,30 @@ import org.apache.mina.core.buffer.IoBuffer;
 
 public class CharonPacketUtils {
 	
-	static Path newFile = Paths.get("M:/PSWG/LOGS/PSWG_PacketLog.txt");
+	private static int loggingSessionID=0;	
+	static Path newFile = Paths.get("src", "PSWG_DEVLOG.log");
 	private static boolean writeToFile = false;
 	private CharonPacketLogger logger;
 	
 	
 	public static void createLog(){
 		
-	    try {
-	      Files.deleteIfExists(newFile);
-	      newFile = Files.createFile(newFile);
+		try {
+			writeToFile = true;
+	    	Date date = new Date();
+	    	Calendar cal1 = Calendar.getInstance();
+	    	cal1.setTimeInMillis(System.currentTimeMillis());
+	    	SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-hh-mm-ss");
+	    	String sDate=dateFormat.format(cal1.getTime());
+
+	        String fileName = "PSWG_PACKETLOG_"+sDate+".log";
+	        newFile = Paths.get("debuglogs", fileName);
+	        Files.deleteIfExists(newFile);
+	        newFile = Files.createFile(newFile);
+	        createHeader(newFile);
 	    } catch (IOException ex) {
-	      System.out.println("Error creating file");
-	    }
-	    System.out.println(Files.exists(newFile)); 
-	    writeToFile=true;
+	    	System.out.println("Error creating file");
+	    } 
 	}
 	
 	public static void appendToLog(String content, Path newFile){
@@ -57,6 +69,16 @@ public class CharonPacketUtils {
 		
 		if (!NGECore.PACKET_DEBUG)
 			return;
+		
+		if (pack==null)
+			return;
+		
+		if (loggingSessionID>0){			
+		} else {
+			createLog();
+			loggingSessionID++;
+		}
+		
 		
 		//appendToLog(packetName+" :");
 		int hexLineNumber = 0;
@@ -137,5 +159,26 @@ public class CharonPacketUtils {
 		System.out.println("");
 		//if (writeToFile)
 		//	appendToLog("");
+	}
+	
+	public static void createHeader(Path newFile){
+	    //Writing to file
+	    try(BufferedWriter writer = Files.newBufferedWriter(
+	            newFile, Charset.defaultCharset(),new OpenOption[] {StandardOpenOption.APPEND})){
+	    	Date date = new Date();
+	    	Calendar cal1 = Calendar.getInstance();
+	    	cal1.setTimeInMillis(System.currentTimeMillis());
+	    	SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-hh:mm:ss");
+	    	String sDate=dateFormat.format(cal1.getTime());
+	    	String developer = System.getProperty("user.name");
+	    	writer.append("*********************************************\n");
+	        writer.append("**** PROJECTSWG PACKET LOG " + sDate + " ***\n");	        
+	        writer.append("*********************************************\n");
+	        writer.append("DEV: "+developer + "\n");
+	        writer.append("\n");
+	        writer.flush();
+	    }catch(IOException exception){
+	      System.out.println("Error writing to file");
+	    }	
 	}
 }

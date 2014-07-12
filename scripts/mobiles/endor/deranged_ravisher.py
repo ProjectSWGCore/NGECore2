@@ -11,7 +11,7 @@ def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 		
 	mobileTemplate.setCreatureName('squill_deranged_ravisher')		
-	mobileTemplate.setLevel(33)
+	mobileTemplate.setLevel(35)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
