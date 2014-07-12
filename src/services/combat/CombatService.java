@@ -853,6 +853,14 @@ public class CombatService implements INetworkDispatch {
 				return;
 			}
 			
+			if (!attacker.isPlayer()){
+				AIActor aiActor = (AIActor)attacker.getAttachment("AI");	
+				if (aiActor.getMobileTemplate().isDeathblow()){
+					deathblowPlayer(attacker, target);
+					return;
+				}
+			}
+			
 			synchronized(target.getMutex()) {
 				if (core.mountService.isMounted(target)) {
 					core.mountService.dismount(target, (CreatureObject) target.getContainer());
