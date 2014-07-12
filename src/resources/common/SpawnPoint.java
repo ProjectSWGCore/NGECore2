@@ -86,7 +86,7 @@ public class SpawnPoint {
 	public void setCellNumber(int cellNumber) {
 		this.cellNumber = cellNumber;
 	}
-	
+
 	public Point3D getRandomPosition(float minDistance, float maxDistance) {
 		
 		Random random = new Random();
@@ -98,7 +98,7 @@ public class SpawnPoint {
 		return new Point3D(x, 0, z);
 
 	}
-	
+
 	public static Point3D getRandomPosition(Point3D position, float minDistance, float maxDistance, int planetId) {
 		
 		Random random = new Random();
@@ -111,25 +111,5 @@ public class SpawnPoint {
 
 	}
 
-
-	public Point3D getRandomPosition(float minDistance, float maxDistance) {
-		Random random = new Random();
-		float distance = random.nextInt((int)(maxDistance - minDistance) + 1) + minDistance;
-		float angle = (float)(random.nextInt(360) * 0.0174532925199433D);
-		float x = (float)(this.position.x + distance * Math.cos(angle));
-		float z = (float)(this.position.z + distance * Math.sin(angle));
-		
-		return new Point3D(x, 0.0F, z);
-	}
-
-	public static Point3D getRandomPosition(Point3D position, float minDistance, float maxDistance, int planetId) {
-		Random random = new Random();
-		float distance = random.nextInt((int)(maxDistance - minDistance) + 1) + minDistance;
-		float angle = (float)(random.nextInt(360) * 0.0174532925199433D);
-		float x = (float)(position.x + distance * Math.cos(angle));
-		float z = (float)(position.z + distance * Math.sin(angle));
-		
-		return new Point3D(x, NGECore.getInstance().terrainService.getHeight(planetId, x, z), z);
-	}
 
 }
