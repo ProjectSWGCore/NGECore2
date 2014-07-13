@@ -4,7 +4,7 @@ import sys
 def createRadial(core, owner, target, radials):
 	radials.add(RadialOptions(0, 98, 0, 'Modify primary color'))
 	radials.add(RadialOptions(0, 99, 0, 'Modify secondary color'))
-	radials.add(RadialOptions(0, 100, 0, 'Modify tirtiary color'))
+	radials.add(RadialOptions(0, 100, 0, 'Modify tertiary color'))
 	return
 	
 def handleSelection(core, owner, target, option):
