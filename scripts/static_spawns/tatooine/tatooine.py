@@ -10,7 +10,7 @@ def addPlanetSpawns(core, planet):
 ########################################################	
 	stcSvc = core.staticService
 	# Blue Frog: Uncomment only when needed for testing.
-	stcSvc.spawnObject('object/tangible/terminal/shared_terminal_character_builder.iff', 'tatooine', long(0), float(3525), float(4), float(-4801), float(0.70), float(0.71))
+	#stcSvc.spawnObject('object/tangible/terminal/shared_terminal_character_builder.iff', 'tatooine', long(0), float(3525), float(4), float(-4801), float(0.70), float(0.71))
 
 ########################################################	
 # DO NOT ADD ANYTHING ELSE TO THIS SCRIPT, PLEASE USE THE

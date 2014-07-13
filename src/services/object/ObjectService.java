@@ -263,7 +263,7 @@ public class ObjectService implements INetworkDispatch {
 				e.printStackTrace();
 			}
 			
-			planet = core.terrainService.getPlanetByID(0);
+			planet = core.terrainService.getPlanetByID(1);
 		}
 		
 		if(Template.startsWith("object/creature")) {
