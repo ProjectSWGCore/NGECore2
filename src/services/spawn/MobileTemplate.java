@@ -61,6 +61,7 @@ public class MobileTemplate implements Cloneable {
 	private int respawnTime = 0;
 	private List<LootGroup> lootGroups = new ArrayList<LootGroup>();
 	private String PCDTemplate="";
+	private String conversationFileName="";
 
 	
 	public Vector<String> getTemplates() {
@@ -359,6 +360,14 @@ public class MobileTemplate implements Cloneable {
 
 	public void setPCDTemplate(String pCDTemplate) {
 		PCDTemplate = pCDTemplate;
+	}
+
+	public String getConversationFileName() {
+		return conversationFileName;
+	}
+
+	public void setConversationFileName(String conversationFileName) {
+		this.conversationFileName = conversationFileName;
 	}
 	
 }
