@@ -148,12 +148,6 @@ public class SUIService implements INetworkDispatch {
 					sendRadial(owner, target, request.getRadialOptions(), request.getRadialCount());
 					return;
 				}
-			
-				if(target.getTemplate().contains("object/tangible/wearables") && ((CreatureObject)owner).hasAbility("admin"))
-				{
-					core.scriptService.callScript("scripts/radial/", "item/recolorable", "createRadial", core, owner, target, request.getRadialOptions());
-					if(getRadialFilename(target).equals("default")) sendRadial(owner, target, request.getRadialOptions(), request.getRadialCount());
-				}
 				
 				core.scriptService.callScript("scripts/radial/", getRadialFilename(target), "createRadial", core, owner, target, request.getRadialOptions());
 				if(getRadialFilename(target).equals("default"))
@@ -194,12 +188,6 @@ public class SUIService implements INetworkDispatch {
 				if(core.housingService.getPermissions(owner, target.getContainer()) && (target.getAttachment("moveable") == null || (boolean) target.getAttachment("moveable") != false)) {
 						core.scriptService.callScript("scripts/radial/", "structure/moveable", "handleSelection", core, owner, target, objMenuSelect.getSelection());
 						return;
-				}
-				
-				
-				if(target.getTemplate().contains("object/tangible/wearables") && ((CreatureObject)owner).hasAbility("admin"))
-				{
-					core.scriptService.callScript("scripts/radial/", "item/recolorable", "handleSelection", core, owner, target, objMenuSelect.getSelection());
 				}
 
 				core.scriptService.callScript("scripts/radial/", getRadialFilename(target), "handleSelection", core, owner, target, objMenuSelect.getSelection());
