@@ -197,12 +197,16 @@ public class PlayerService implements INetworkDispatch {
 		}, 0, 1000, TimeUnit.MILLISECONDS));
 		
 		scheduleList.add(scheduler.scheduleAtFixedRate(() -> {
-			long[] ids = creature.getAwareObjects().stream().mapToLong(SWGObject::getObjectID).toArray();
-			for(int i = 0; i < ids.length; i++) {
-				for(int j = 0; j < ids.length; j++) {
-					if(ids[i] == ids[j] && i != j) 
-						System.err.println("Detected duplicate ids, Template " + core.objectService.getObject(ids[i]).getTemplate());
+			try {
+				long[] ids = creature.getAwareObjects().stream().mapToLong(SWGObject::getObjectID).toArray();
+				for(int i = 0; i < ids.length; i++) {
+					for(int j = 0; j < ids.length; j++) {
+						if(ids[i] == ids[j] && i != j) 
+							System.err.println("Detected duplicate ids, Template " + core.objectService.getObject(ids[i]).getTemplate());
+					}
 				}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}, 0, 5000, TimeUnit.MILLISECONDS));
 
