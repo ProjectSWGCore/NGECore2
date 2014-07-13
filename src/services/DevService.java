@@ -217,7 +217,10 @@ public class DevService implements INetworkDispatch {
 					
 					// Character
 					case 10: // Set combat level to 90
-						core.playerService.grantLevel(player, 90); // Commented out until fixed
+						if (player.getAttachment("hasLeveled") != null) {
+							player.setAttachment("hasLeveled", true);
+							core.playerService.grantLevel(player, 90);
+						}
 					    //core.playerService.giveExperience(player, 999999999);
 						return;
 					case 11: // Give 100,000 credits
