@@ -21,7 +21,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("valarian")
 	mobileTemplate.setAssistRange(4)
 	mobileTemplate.setStalker(False)
-	#mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
 	
 	templates = Vector()
