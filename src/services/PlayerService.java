@@ -378,6 +378,11 @@ public class PlayerService implements INetworkDispatch {
 			
 			CreatureObject targetPlayer = (CreatureObject) core.objectService.getObject(request.getCharacterId());
 			
+			if (targetPlayer == null) {
+				System.err.println("PlayerService::GuildRequestMessage: Target is null: " + request.getCharacterId());
+				return;
+			}
+			
 			if (targetPlayer.getGuildId() != 0) {
 				Guild targetGuild = core.guildService.getGuildById(targetPlayer.getGuildId());
 				GuildResponseMessage response = new GuildResponseMessage(request.getCharacterId(), targetGuild.getName());
