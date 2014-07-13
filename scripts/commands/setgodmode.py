@@ -50,9 +50,9 @@ def run(core, actor, target, commandString):
 		core.playerService.grantLevel(actor, int(arg1))
 	
 	elif command == 'setSpeed' and arg1:
-		actor.sendSystemMessage('Your speed was ' + str(actor.getSpeedMultiplierBase()) + '. Don\'t forget to set this back or it\'ll permanently imbalance your speed. Default without buffs or mods is 1.', 2)
+		#actor.sendSystemMessage("Your speed was " + str(actor.getSpeedMultiplierBase()) + ". Don\'t forget to set this back or it\'ll permanently imbalance your speed. Default without buffs or mods is 1.", 2)
 		actor.setSpeedMultiplierBase(float(arg1))
-		actor.sendSystemMessage('Your new speed is ' + str(actor.getSpeedMultiplierBase()) + '.', 2)
+		actor.sendSystemMessage('Your new speed is ' + arg1 + '.', 2)
 	
 	elif command == 'teleport' and arg2 and arg3 and arg4:
 		position = Point3D(float(arg2), float(arg3), float(arg4))
@@ -146,10 +146,15 @@ def run(core, actor, target, commandString):
 		planetName = actor.getPlanet().getName()
 
 		actor.sendSystemMessage('Position.x : %s' % pos.x, 0)
+		print ('Position.x : %s' % pos.x, 0)
 		actor.sendSystemMessage('Position.y : %s' % pos.y, 0)
+		print ('Position.y : %s' % pos.y, 0)
 		actor.sendSystemMessage('Position.z : %s' % pos.z, 0)
+		print ('Position.z : %s' % pos.z, 0)
 		actor.sendSystemMessage('Orientation.y : %s' % ori.y, 0)
+		print ('Orientation.y : %s' % ori.y, 0)
 		actor.sendSystemMessage('Orientation.w : %s' % ori.w, 0)
+		print ('Orientation.w : %s' % ori.w, 0)
 		if (actor.getContainer()):
 			cid = actor.getContainer().getObjectID()
 			cellid = cid
@@ -184,5 +189,15 @@ def run(core, actor, target, commandString):
 	elif command == 'rank' and arg1:
 		playerObject.setCurrentRank(int(arg1))
 		print (playerObject.getCurrentRank())
+		return
+	
+	elif command == 'addToFrogAdminList':
+		frogBuilding = core.objectService.getObject(core.devService.getFrogBuildingId())
+		
+		if frogBuilding is None:
+			return
+		
+		frogBuilding.addPlayerToAdminList(None, actor.getObjectID(), actor.getCustomName().split(' ')[0])
+		actor.sendSystemMessage('You were added to the Admin list for the Frog Building.', 0)
 		return
 	return
