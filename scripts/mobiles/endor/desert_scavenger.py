@@ -25,10 +25,10 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("borgle")
 	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setStalker(True)
-	mobileTemplate.setOptionsBitmask(128)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_borgle.iff')
+	templates.add('object/mobile/shared_gackle_bat.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()

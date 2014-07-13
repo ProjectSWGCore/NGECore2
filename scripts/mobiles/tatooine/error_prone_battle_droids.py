@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('tatooine_error_prone_droid')
 	mobileTemplate.setLevel(6)
-	mobileTemplate.setMinLevel(6)
-	mobileTemplate.setMaxLevel(7)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
@@ -23,7 +21,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("error-prone battle droid")
 	mobileTemplate.setAssistRange(4)
 	mobileTemplate.setStalker(False)
-	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_battle_droid.iff')

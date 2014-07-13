@@ -25,6 +25,8 @@ import java.nio.ByteOrder;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
+import resources.common.Opcodes;
+
 public class PlayerMoneyResponse extends SWGMessage {
 
 	int cash;
@@ -45,7 +47,7 @@ public class PlayerMoneyResponse extends SWGMessage {
 		IoBuffer buffer = IoBuffer.allocate(14).order(ByteOrder.LITTLE_ENDIAN);
 		
 		buffer.putShort((short) 3);
-		buffer.putInt(0x367E737E);
+		buffer.putInt(Opcodes.PlayerMoneyResponse);
 		
 		buffer.putInt(bank);
 		buffer.putInt(cash);

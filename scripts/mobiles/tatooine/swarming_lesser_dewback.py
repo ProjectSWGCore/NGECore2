@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('swarming_lesser_dewback')
 	mobileTemplate.setLevel(13)
-	mobileTemplate.setMinLevel(12)
-	mobileTemplate.setMaxLevel(14)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
@@ -29,7 +27,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("dewback")
 	mobileTemplate.setAssistRange(10)
 	mobileTemplate.setStalker(True)
-	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_swarming_lesser_dewback.iff')

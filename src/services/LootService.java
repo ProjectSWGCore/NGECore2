@@ -52,13 +52,17 @@ import resources.objects.creature.CreatureObject;
 import resources.objects.factorycrate.FactoryCrateObject;
 import resources.objects.group.GroupObject;
 import resources.objects.intangible.IntangibleObject;
+import resources.objects.player.PlayerObject;
+import resources.objects.resource.ResourceContainerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
+import services.ai.AIActor;
 import services.sui.SUIService.ListBoxType;
 import services.sui.SUIService.MessageBoxType;
 import services.sui.SUIWindow;
 import services.sui.SUIWindow.SUICallback;
 import services.sui.SUIWindow.Trigger;
+import tools.DevLog;
 import main.NGECore;
 import engine.resources.container.CreatureContainerPermissions;
 import engine.resources.container.Traverser;
@@ -79,7 +83,7 @@ public class LootService implements INetworkDispatch {
 	private NGECore core;
 	private static int prepInvCnt = 0;
 	String testDropTemplate = null;
-	//String testDropTemplate = "kowakian_cage";
+	//String testDropTemplate = "comlink";
 	
 	public LootService(NGECore core) {
 		this.core = core;
@@ -97,12 +101,12 @@ public class LootService implements INetworkDispatch {
 	}
 	
 	public void handleLootRequest(CreatureObject requester, TangibleObject lootedObject) {
-		System.out.println("handleLootRequest ");
+		//System.out.println("handleLootRequest ");
 		// security check
 		if (hasAccess(requester,lootedObject) && ! lootedObject.isLooted()){
 			LootRollSession lootRollSession = (LootRollSession )lootedObject.getAttachment("LootSession");
-			if (lootRollSession.getDroppedItems().size()==0){
-				System.err.println("lootRollSession.getDroppedItems().size()==0");
+			if (lootRollSession.getDroppedItems().size()==0){				
+				DevLog.debugout("Charon", "Loot Service", "handleLootRequest lootRollSession.getDroppedItems().size()==0");
 				return;			
 			}
 			SWGObject lootedObjectInventory = lootedObject.getSlottedObject("inventory");
@@ -114,7 +118,7 @@ public class LootService implements INetworkDispatch {
 	private boolean hasAccess(CreatureObject requester, TangibleObject lootedObject){
 		LootRollSession lootRollSession = (LootRollSession )lootedObject.getAttachment("LootSession");
 		if (lootRollSession==null)
-			System.err.println("LootSession null: " + lootRollSession);
+			DevLog.debugout("Charon", "Loot Service", "hasAccess LootSession null: " + lootRollSession);
 		if (lootRollSession!=null){
 			if (lootRollSession.getRequester()==requester){
 				return true;
@@ -127,6 +131,9 @@ public class LootService implements INetworkDispatch {
 	public void DropLoot(CreatureObject requester, TangibleObject lootedObject) {
 		
 		if (requester==null || lootedObject==null)
+			return; //QA
+		
+		if (! requester.isPlayer())
 			return; //QA
 		
 		GroupObject group = null;
@@ -163,7 +170,6 @@ public class LootService implements INetworkDispatch {
 	    	if (projectionCoefficientMatrixModulo!=0)
 	    		lootGroupRoll=groupChance+1;
 	    	if (lootGroupRoll <= groupChance){    	
-	    		//System.out.println("this lootGroup will drop something");
 	    		handleLootGroup(lootGroup,lootRollSession); //this lootGroup will drop something e.g. {kraytpearl_range,krayt_tissue_rare}	    		
 	    	}			    	
 	    }
@@ -193,7 +199,7 @@ public class LootService implements INetworkDispatch {
 		
 	    // set info above corpse
 	    //System.out.println("lootedObject instanceof CreatureObject " + (lootedObject instanceof CreatureObject));
-	    if (lootedObject instanceof CreatureObject){
+	    if (lootedObject instanceof CreatureObject && lootRollSession.getDroppedItems().size()>0){
 	    	try {
 			    float y = 0.5F; // 1.3356977F
 			    float qz= 1.06535322E9F;
@@ -224,12 +230,14 @@ public class LootService implements INetworkDispatch {
 	    // For autoloot 
     	//SWGObject requesterInventory = requester.getSlottedObject("inventory");
 	    //System.out.println("lootRollSession.getDroppedItems() " + (lootRollSession.getDroppedItems()));
+	    DevLog.debugout("Charon", "Loot Service", "lootRollSession.getDroppedItems().size() " + lootRollSession.getDroppedItems().size());
     	for (TangibleObject droppedItem : lootRollSession.getDroppedItems()){		    
-    		
+    		DevLog.debugout("Charon", "Loot Service", "droppedItem " + droppedItem.getCustomName());
     		//droppedItem.setAttachment("radial_filename", "lootitem");
     		//if (! droppedItem.getTemplate().contains("shared_rare_loot_chest"))
     		lootedObjectInventory.add(droppedItem);
-    		  		
+    		
+    		
     		// RLS chest effect
 	    	if (droppedItem.getAttachment("LootItemName").toString().contains("Loot Chest")){
 
@@ -495,11 +503,11 @@ public class LootService implements INetworkDispatch {
 		double[] lootPoolChances = lootGroup.getLootPoolChances();
 		String[] lootPoolNames = lootGroup.getLootPoolNames();
 		if (lootPoolChances==null || lootPoolNames==null){
-			System.err.println("Lootpools are null!");
+			DevLog.debugout("Charon", "Loot Service", "handleLootGroup Lootpools are null!");
 			return;
 		}
 		if (lootPoolChances.length==0 || lootPoolNames.length==0){
-			System.err.println("No Lootpools in Lootgroup!");
+			DevLog.debugout("Charon", "Loot Service", "handleLootGroup No Lootpools in Lootgroup!");
 			return;
 		}
 		
@@ -522,7 +530,7 @@ public class LootService implements INetworkDispatch {
 	    	}			 
 		}
 		if (!test)
-			System.err.println("SOMETHING WENT WRONG!");
+			DevLog.debugout("Charon", "Loot Service", "handleLootGroup SOMETHING WENT WRONG!");
 	}
 		
 	private void handleLootPool(String poolName,LootRollSession lootRollSession){
@@ -564,7 +572,6 @@ public class LootService implements INetworkDispatch {
 	{
 		LootRollSession rollSession = new LootRollSession();
 		rollSession.setSessionPlanet(requester.getPlanet());
-		
 		handleLootPoolItems(template, rollSession);
 		
 		if(rollSession.getDroppedItems().get(0) != null) return rollSession.getDroppedItems().get(0);
@@ -573,14 +580,14 @@ public class LootService implements INetworkDispatch {
 	}
 	
 	private void handleLootPoolItems(String itemName,LootRollSession lootRollSession){
-		
+		//System.out.println("itemName " + itemName);
 		final Vector<String> foundPath = new Vector<String>(); 
 		Path p = Paths.get("scripts/loot/lootItems/");
 	    FileVisitor<Path> fv = new SimpleFileVisitor<Path>() {
 	        @Override
 	        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 	        	String actualFileName = file.getFileName().toString();
-	        	actualFileName = actualFileName.substring(0, actualFileName.length()-3);
+	        	actualFileName = actualFileName.substring(0, actualFileName.length()-3).toLowerCase();
 	        	if (actualFileName.equals(itemName.toLowerCase())){
 	        		foundPath.add(file.toString());
 	        	} 	        	
@@ -698,7 +705,7 @@ public class LootService implements INetworkDispatch {
 			collectionItemName = (String)core.scriptService.fetchString(itemPath,"CollectionItemName");
 		
 			
-		System.out.println("itemTemplate " + itemTemplate);
+		//System.out.println("itemTemplate " + itemTemplate);
 
 		
 		TangibleObject droppedItem = createDroppedItem(itemTemplate,lootRollSession.getSessionPlanet());
@@ -717,7 +724,7 @@ public class LootService implements INetworkDispatch {
 		
 		if (!customName.isEmpty())
 			handleCustomDropName(droppedItem, customName);
-		
+		//stackable = 1;
 		if (stackable!=-1){
 			if(stackable==1)
 				droppedItem.setStackable(true);
@@ -754,12 +761,13 @@ public class LootService implements INetworkDispatch {
     		setSTFParams(droppedItem, STFparams);
     	}
     	
-    	if (addToCollection!=null){
+    	if (addToCollection!=null) {
     		droppedItem.getAttributes().put("@obj_attr_n:collection_name", "@collection_n:"+addToCollection); 
     		//droppedItem.getAttributes().put("@obj_attr_n:collection_name", "\\#FFFF00 @collection_n:"+addToCollection + " \\#FFFFFF "); 
     		//core.collectionService.addCollection(actor, "new_prof_officer_master")
-    		droppedItem.setAttachment("radial_filename", "item/collection/loot_collection");
-    		System.out.println("collection");
+    		droppedItem.setAttachment("AddToCollection", addToCollection);
+    		droppedItem.setAttachment("radial_filename", "item/collection");
+    		//System.out.println("collection");
     	}
     	
     	if (collectionItemName!=null){
@@ -820,7 +828,7 @@ public class LootService implements INetworkDispatch {
 	
 	private TangibleObject createDroppedItem(String template,Planet planet){
 		TangibleObject droppedItem = (TangibleObject) core.objectService.createObject(template, planet);				
-    	System.out.println("droppedItem " + droppedItem);
+    	//System.out.println("droppedItem " + droppedItem);
     	return droppedItem;
 	}
 	
@@ -984,11 +992,11 @@ public class LootService implements INetworkDispatch {
 		double[] lootPoolChances = lootGroup.getLootPoolChances();
 		String[] lootPoolNames = lootGroup.getLootPoolNames();
 		if (lootPoolChances==null || lootPoolNames==null){
-			System.err.println("Lootpools are null!");
+			DevLog.debugout("Charon", "Loot Service", "fillChest2 Lootpools are null!");
 			return;
 		}
 		if (lootPoolChances.length==0 || lootPoolNames.length==0){
-			System.err.println("No Lootpools in Lootgroup!");
+			DevLog.debugout("Charon", "Loot Service", "fillChest2 No Lootpools in Lootgroup!");
 			return;
 		}
 		
@@ -1004,18 +1012,18 @@ public class LootService implements INetworkDispatch {
 			else 
 				remainder += span;
 	    	if (randomItemFromGroup <= remainder){ 		
-	    		System.out.println("this loot pool will drop something"); // e.g. kraytpearl_range
+	    		//System.out.println("this loot pool will drop something"); // e.g. kraytpearl_range
 	    		fillChest3(lootPoolNames[i], owner, chest); // This loot pool will drop something	
 	    		test = true;
 	    		break;
 	    	}			 
 		}
 		if (!test)
-			System.err.println("SOMETHING WENT WRONG!");
+			DevLog.debugout("Charon", "Loot Service", "fillChest2 SOMETHING WENT WRONG!");
 	}
 		
 	private void fillChest3(String poolName, CreatureObject owner, TangibleObject chest){
-		System.err.println("poolName.toLowerCase() " + poolName.toLowerCase());
+		//System.err.println("poolName.toLowerCase() " + poolName.toLowerCase());
 		// Fetch the loot pool data from the poolName.py script		
 		String path = "scripts/loot/rarelootchestcontents/"+poolName.toLowerCase(); 
 		Vector<String> itemNames = (Vector<String>)core.scriptService.fetchStringVector(path,"itemNames");
@@ -1058,7 +1066,7 @@ public class LootService implements INetworkDispatch {
 	        @Override
 	        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 	        	String actualFileName = file.getFileName().toString();
-	        	actualFileName = actualFileName.substring(0, actualFileName.length()-3);
+	        	actualFileName = actualFileName.substring(0, actualFileName.length()-3).toLowerCase();
 	        	if (actualFileName.equals(itemName.toLowerCase())){
 	        		foundPath.add(file.toString());
 	        	} 	        	
@@ -1170,7 +1178,7 @@ public class LootService implements INetworkDispatch {
 			addToCollection = (String)core.scriptService.fetchString(itemPath,"AddToCollection");
 		
 			
-		System.out.println("itemTemplate " + itemTemplate);
+		//System.out.println("itemTemplate " + itemTemplate);
 		
 		TangibleObject droppedItem = null;
 		
@@ -1224,7 +1232,7 @@ public class LootService implements INetworkDispatch {
 	    		droppedItem.getAttributes().put("@obj_attr_n:collection_name", "@collection_n:"+addToCollection); 
 	    		//droppedItem.getAttributes().put("@obj_attr_n:collection_name", "\\#FFFF00 @collection_n:"+addToCollection + " \\#FFFFFF "); 
 	    		//core.collectionService.addCollection(actor, "new_prof_officer_master")
-	    		droppedItem.setAttachment("radial_filename", "item/loot_collection");
+	    		droppedItem.setAttachment("radial_filename", "item/collection");
 	    	}
 	    	
 	    		    	
@@ -1282,7 +1290,7 @@ public class LootService implements INetworkDispatch {
 		
 		// Example color crystal
 		if (itemName.contains("colorcrystal")) {
-			System.out.println("colorcrystal");
+			DevLog.debugout("Charon", "Loot Service", "setCustomization colorcrystal");
 			
 			if (customizationAttributes==null){
 				int crystalColor = new Random().nextInt(11);
@@ -1309,7 +1317,7 @@ public class LootService implements INetworkDispatch {
 		
 		// Example power crystal
 		if (itemName.contains("powercrystal")) {
-			System.out.println("powercrystal");
+			DevLog.debugout("Charon", "Loot Service", "setCustomization powercrystal");
 			droppedItem.setCustomizationVariable("/private/index_color_1", (byte) 0x21);  //  0x1F
 		}
 		
@@ -1317,7 +1325,7 @@ public class LootService implements INetworkDispatch {
 		if (lootDescriptor==null)
 			lootDescriptor="";
 		if (lootDescriptor.contains("rarecolorcrystal")) {
-			System.out.println("rarecolorcrystal");
+			DevLog.debugout("Charon", "Loot Service", "setCustomization rarecrystal");
 			
 			int saberColor = (Integer)droppedItem.getAttachment("customColor1");
 			if (saberColor==31) // Cunning of Tyranus, which is not in @jedi_spam
@@ -1484,7 +1492,16 @@ public class LootService implements INetworkDispatch {
 	
 	public void handleCreditDrop(CreatureObject requester,TangibleObject lootedObject,LootRollSession lootRollSession){
 		int lootedCredits = 0;
+		if (lootedObject.getAttachment("AI")!=null){
+			AIActor ai = (AIActor) lootedObject.getAttachment("AI");
+			String resType = ai.getMobileTemplate().getMeatType();
+			if (resType!=null)
+				return;
+		}
+	
 		if (lootedObject.isCreditRelieved())
+			return;
+		if (lootedObject.getTemplate().contains("shared_treasure_drum"))
 			return;
 		
 		// Credit drop is depending on the CL of the looted CreatureObject
@@ -2307,8 +2324,8 @@ public class LootService implements INetworkDispatch {
 	    lootRollSession.setLootedObjectDifficulty(0);
 		
 	    if (containerObject==null)
-	    	 System.out.println("containerObject is NULL " );
-	    	
+	    	 DevLog.debugout("Charon", "Loot Service", "handleContainer containerObject is NULL");
+	   	    	
 	    handleContainerDrops(containerObject, lootRollSession);	
 	}
 	
@@ -2334,11 +2351,11 @@ public class LootService implements INetworkDispatch {
 		double[] lootPoolChances = lootGroup.getLootPoolChances();
 		String[] lootPoolNames = lootGroup.getLootPoolNames();
 		if (lootPoolChances==null || lootPoolNames==null){
-			System.err.println("Lootpools are null!");
+			DevLog.debugout("Charon", "Loot Service", "handleContainerLootGroup Lootpools are null!");
 			return;
 		}
 		if (lootPoolChances.length==0 || lootPoolNames.length==0){
-			System.err.println("No Lootpools in Lootgroup!");
+			DevLog.debugout("Charon", "Loot Service", "handleContainerLootGroup No Lootpools in Lootgroup!");
 			return;
 		}
 		
@@ -2354,18 +2371,18 @@ public class LootService implements INetworkDispatch {
 			else 
 				remainder += span;
 	    	if (randomItemFromGroup <= remainder){ 		
-	    		System.out.println("this loot pool will drop something"); // e.g. kraytpearl_range
+	    		//System.out.println("this loot pool will drop something"); // e.g. kraytpearl_range
 	    		handleContainerLootPool(lootPoolNames[i],lootRollSession, containerObject); // This loot pool will drop something	
 	    		test = true;
 	    		break;
 	    	}			 
 		}
 		if (!test)
-			System.err.println("SOMETHING WENT WRONG!");
+			DevLog.debugout("Charon", "Loot Service", "handleContainerLootGroup SOMETHING WENT WRONG!");
 	}
 	
 	private void handleContainerLootPool(String poolName,LootRollSession lootRollSession , TangibleObject containerObject){
-		System.err.println("poolName.toLowerCase() " + poolName.toLowerCase());
+		DevLog.debugout("Charon", "Loot Service", "handleContainerLootPool poolName.toLowerCase() " + poolName.toLowerCase());
 		// Fetch the loot pool data from the poolName.py script		
 		String path = "scripts/loot/lootPools/"+poolName.toLowerCase(); 
 		Vector<String> itemNames = (Vector<String>)core.scriptService.fetchStringVector(path,"itemNames");
@@ -2399,7 +2416,7 @@ public class LootService implements INetworkDispatch {
 	        @Override
 	        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 	        	String actualFileName = file.getFileName().toString();
-	        	actualFileName = actualFileName.substring(0, actualFileName.length()-3);
+	        	actualFileName = actualFileName.substring(0, actualFileName.length()-3).toLowerCase();
 	        	if (actualFileName.equals(itemName.toLowerCase())){
 	        		foundPath.add(file.toString());
 	        	} 	        	
@@ -2493,7 +2510,7 @@ public class LootService implements INetworkDispatch {
 			junkType =  (byte)core.scriptService.fetchInteger(itemPath,"junkType");
 		
 			
-		System.out.println("itemTemplate " + itemTemplate);
+		DevLog.debugout("Charon", "Loot Service", "handleContainerLootPoolItems itemTemplate " + itemTemplate);
 		
 		TangibleObject droppedItem = createDroppedItem(itemTemplate,lootRollSession.getSessionPlanet());
 		
@@ -2558,7 +2575,7 @@ public class LootService implements INetworkDispatch {
 		//SWGObject containerObjectInventory = containerObject.getSlottedObject("inventory"); //placable_loot_crate_trashpile
     	containerObject.add(droppedItem);
     	//containerObjectInventory.add(droppedItem);
-    	System.out.println("Added to container " + containerObject.getTemplate());  
+    	DevLog.debugout("Charon", "Loot Service", "handleContainerLootPoolItems Added to container " + containerObject.getTemplate());
 
 	}	
 	
@@ -2805,7 +2822,66 @@ public class LootService implements INetworkDispatch {
 		item24b.setUses(399);		 
 		core.objectService.addStackableItem(item24b,playerInventory);
 		
+		TangibleObject item25a = (TangibleObject)core.objectService.createObject("object/tangible/loot/npc_loot/shared_wiring_generic.iff", player.getPlanet());
+		item25a.setCustomName("Wiring");
+		item25a.setAttachment("reverse_engineering_name", "Red/Yellow");
+		item25a.setStackable(true);
+		item25a.setUses(299);		 
+		Vector<String> customizationAttributes = new Vector<String>();
+		customizationAttributes.add("/private/index_color_1");
+		customizationAttributes.add("/private/index_color_2");
+		Vector<Integer> customizationValues = new Vector<Integer>();
+		customizationValues.add(6);
+		customizationValues.add(12);
+		item25a.setAttachment("lootDescriptor", "customattributes");
+		setCustomization(item25a,"Wiring", customizationAttributes, customizationValues);
+		core.objectService.addStackableItem(item25a,playerInventory);
+		
+		TangibleObject item25b = (TangibleObject)core.objectService.createObject("object/tangible/loot/npc_loot/shared_launcher_tube_generic.iff", player.getPlanet());
+		item25b.setCustomName("Launcher Tube");
+		item25b.setStackable(true);
+		item25b.setUses(399);		 
+		core.objectService.addStackableItem(item25b,playerInventory);
+		
+		TangibleObject item27b = (TangibleObject)core.objectService.createObject("object/tangible/loot/npc_loot/shared_small_motor_generic.iff", player.getPlanet());
+		item27b.setCustomName("Locomotor");
+		item27b.setStackable(true);
+		item27b.setUses(399);		 
+		core.objectService.addStackableItem(item27b,playerInventory);
+		
 	
+		
+		TangibleObject item26a = (TangibleObject)core.objectService.createObject("object/tangible/loot/npc_loot/shared_copper_battery_generic.iff", player.getPlanet());
+		item26a.setCustomName("Droid Battery");
+		item26a.setAttachment("reverse_engineering_name", "Black/Green");
+		item26a.setStackable(true);
+		item26a.setUses(299);		 
+		customizationAttributes = new Vector<String>();
+		customizationAttributes.add("/private/index_color_1");
+		customizationAttributes.add("/private/index_color_2");
+		customizationValues = new Vector<Integer>();
+		customizationValues.add(0);
+		customizationValues.add(15);
+		item26a.setAttachment("lootDescriptor", "customattributes");
+		setCustomization(item26a,"Droid Battery", customizationAttributes, customizationValues);
+		core.objectService.addStackableItem(item26a,playerInventory);
+		
+		
+		TangibleObject item26b = (TangibleObject)core.objectService.createObject("object/tangible/loot/npc_loot/shared_copper_battery_generic.iff", player.getPlanet());
+		item26b.setCustomName("Droid Battery");
+		item26b.setAttachment("reverse_engineering_name", "Purple/Green");
+		item26b.setStackable(true);
+		item26b.setUses(299);		 
+		customizationAttributes = new Vector<String>();
+		customizationAttributes.add("/private/index_color_1");
+		customizationAttributes.add("/private/index_color_2");
+		customizationValues = new Vector<Integer>();
+		customizationValues.add(33);
+		customizationValues.add(15);
+		item26b.setAttachment("lootDescriptor", "customattributes");
+		setCustomization(item26b,"Droid Battery", customizationAttributes, customizationValues);
+		core.objectService.addStackableItem(item26b,playerInventory);
+		
 		
 		String modifierBitTemplate = "object/tangible/component/reverse_engineering/shared_modifier_bit.iff";
 		TangibleObject modifierBit = (TangibleObject) core.objectService.createObject(modifierBitTemplate, player.getPlanet());
@@ -2879,7 +2955,6 @@ public class LootService implements INetworkDispatch {
 		sword1.setOptions(Options.USABLE, true);
 		sword1.setWeaponType(WeaponType.ONEHANDEDMELEE);
 		playerInventory.add(sword1);
-		System.err.println("MIX " + sword1.getObjectID());
 		
 		
 		String powerUpLabel = "item_reverse_engineering_powerup_weapon_02_01";

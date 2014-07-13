@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('valarian_swooper_shuttle')
 	mobileTemplate.setLevel(18)
-	mobileTemplate.setMinLevel(17)
-	mobileTemplate.setMaxLevel(22)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
@@ -23,7 +21,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("valarian")
 	mobileTemplate.setAssistRange(4)
 	mobileTemplate.setStalker(False)
-	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
 	
 	templates = Vector()

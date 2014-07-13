@@ -31,6 +31,7 @@ import resources.common.SpawnPoint;
 import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
 import services.combat.CombatEvents.DamageTaken;
+import tools.DevLog;
 
 public class LairActor {
 
@@ -136,9 +137,16 @@ public class LairActor {
 			Point3D position = SpawnPoint.getRandomPosition(lairObject.getPosition(), 5, 30, lairObject.getPlanetId());
 			if (creatureTemplates!=null)
 				creatureTemplate = creatureTemplates.get(new Random().nextInt(creatureTemplates.size()));
-			CreatureObject creature = NGECore.getInstance().spawnService.spawnCreature(creatureTemplate, lairObject.getPlanet().getName(), 0, position.x, position.y, position.z, level);
+			float babyChance = new Random().nextFloat();
+			CreatureObject creature = null;
+			if (babyChance>0.9){
+				creature = NGECore.getInstance().spawnService.spawnCreature(creatureTemplate, lairObject.getPlanet().getName(), 0, position.x, position.y, position.z, level);
+			} else {
+				creature = NGECore.getInstance().spawnService.spawnCreatureBaby(creatureTemplate, lairObject.getPlanet().getName(), 0, position.x, position.y, position.z, level);
+			}
+			
 			if(creature == null || !creature.isInQuadtree()) {
-				System.out.println("NULL Creature");
+				DevLog.debugout("Charon", "Lair AI", "LairActor spawnNewCreatures() NULL creature!");
 				continue;
 			}
 			creatures.add((AIActor) creature.getAttachment("AI"));

@@ -25,15 +25,16 @@ import java.util.Random;
 import java.util.Vector;
 
 import main.NGECore;
-
 import resources.objects.creature.CreatureObject;
 import resources.objects.weapon.WeaponObject;
 import services.ai.AIActor;
+import tools.DevLog;
 
 public class AttackState extends AIState {
 
 	@Override
 	public byte onEnter(AIActor actor) {
+		DevLog.debugout("Charon", "AI Attack State", "onEnter");
 		CreatureObject creature = actor.getCreature();
 		if(creature.getPosture() == 14)
 			return StateResult.DEAD;
@@ -47,9 +48,11 @@ public class AttackState extends AIState {
 	@Override
 	public byte onExit(AIActor actor) {
 		// TODO Auto-generated method stub
+
 		actor.getCreature().setLookAtTarget(0);
 		actor.getCreature().setIntendedTarget(0);
-		
+		actor.setFollowObject(null);
+		DevLog.debugout("Charon", "AI Attack State", "onExit");
 		return StateResult.FINISHED;
 	}
 
@@ -75,13 +78,20 @@ public class AttackState extends AIState {
 				if(weapon != null)
 					maxDistance = weapon.getMaxRange() - 1;
 			}
-			if(actor.getFollowObject().getWorldPosition().getDistance(creature.getWorldPosition()) > maxDistance)
-				actor.setNextPosition(actor.getFollowObject().getPosition());
-			else {
-				//recover(actor);
-				actor.faceObject(actor.getFollowObject());
-				actor.scheduleMovement();
-				return StateResult.UNFINISHED;
+			try{
+				if(actor.getFollowObject().getWorldPosition().getDistance(creature.getWorldPosition()) > maxDistance)
+					actor.setNextPosition(actor.getFollowObject().getPosition());
+				else {
+					//recover(actor);
+					actor.faceObject(actor.getFollowObject());
+					actor.scheduleMovement();
+					return StateResult.UNFINISHED;
+			}
+			} catch (Exception e){
+				DevLog.debugout("Charon", "AI Attack State Exception move method", "actor " + actor);
+				DevLog.debugout("Charon", "AI Attack State Exception move method", "actor.getFollowObject() " + actor.getFollowObject());
+				DevLog.debugout("Charon", "AI Attack State Exception move method", "actor.getFollowObject().getWorldPosition() " + actor.getFollowObject().getWorldPosition());
+				DevLog.debugout("Charon", "AI Attack State Exception move method", "creature.getWorldPosition() " + creature.getWorldPosition());
 			}
 
 		}
@@ -129,20 +139,25 @@ public class AttackState extends AIState {
 			target = actor.getFollowObject();
 		}
 		if(target == null) {
-			System.out.println("null target");
+			DevLog.debugout("Charon", "AI Attack State", "null target"); 
 			actor.scheduleRecovery();
 			return StateResult.UNFINISHED;
 		}
 		if(target.getPosture() == 13 || target.getPosture() == 14 || target.isInStealth()) {
-			actor.removeDefender(target);
-			actor.setFollowObject(actor.getHighestDamageDealer());
+ 
+			actor.setFollowObject(actor.getHighestDamageDealer());			
 			target = actor.getFollowObject();
 			if(target == null)
 			{
 				creature.setLookAtTarget(0);
 				creature.setIntendedTarget(0);
-				return StateResult.FINISHED;
+				
 			}
+			actor.setFollowObject(null);
+			actor.removeDefender(target);
+
+			actor.setCurrentState(new RetreatState());
+			return StateResult.FINISHED;
 		}
 		if(target.getWorldPosition().getDistance(creature.getWorldPosition()) > 128 || target.getPosture() == 13 || target.getPosture() == 14) {
 			actor.removeDefender(target);
@@ -156,6 +171,10 @@ public class AttackState extends AIState {
 		//actor.faceObject(target);
 		
 		Vector<String> attacks = actor.getMobileTemplate().getAttacks();
+		
+		// Pet
+//		if (creature.getOwnerId()>0)
+//			attacks = creature.getSpecialAttacks();
 		
 		creature.setLookAtTarget(target.getObjectId());
 		creature.setIntendedTarget(target.getObjectId());

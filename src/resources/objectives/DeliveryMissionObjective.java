@@ -22,7 +22,6 @@
 package resources.objectives;
 
 import engine.resources.common.CRC;
-import engine.resources.scene.Point3D;
 import main.NGECore;
 import resources.common.OutOfBand;
 import resources.datatables.DisplayType;
@@ -36,9 +35,9 @@ public class DeliveryMissionObjective extends MissionObjective {
 
 	private static final long serialVersionUID = 1L;
 
-	private TangibleObject deliveryObject;
-	private CreatureObject missionGiver;
-	private CreatureObject dropOffNpc;
+	private long deliveryObjectId;
+	private long missionGiverId;
+	private long dropOffNpcId;
 	
 	public DeliveryMissionObjective(MissionObject parent) {
 		super(parent);
@@ -50,47 +49,22 @@ public class DeliveryMissionObjective extends MissionObjective {
 		if (isActivated())
 			return;
 		
-		String template = "object/mobile/shared_dressed_commoner_tatooine_sullustan_male_06.iff";
-		
-		Point3D startLoc = parent.getStartLocation().getLocation();
-		Point3D destination = parent.getDestinationLocation().getLocation();
-
-		// TODO: Randomize this process.
-		CreatureObject missionGiver = (CreatureObject) core.staticService.spawnObject(template, parent.getPlanet().name, 0, startLoc.x, startLoc.y, startLoc.z, 0, 1);
-		if (missionGiver == null)
-			return;
-
-		missionGiver.setCustomName("a commoner");
-		missionGiver.setAttachment("conversationFile", "missions/deliver");
-		missionGiver.setAttachment("radial_filename", "object/conversation");
-		missionGiver.setAttachment("assignedMission", getMissionObject().getObjectId());
-		missionGiver.setOptionsBitmask(264);
-		setMissionGiver(missionGiver);
-
-		CreatureObject dropOffNpc = (CreatureObject) core.staticService.spawnObject(template, parent.getPlanet().name, 0, destination.x, destination.y, destination.z, 0, 1);
-		if (dropOffNpc == null)
-			return;
-		
-		dropOffNpc.setCustomName("a commoner");
-		dropOffNpc.setAttachment("conversationFile", "missions/deliver");
-		dropOffNpc.setAttachment("radial_filename", "object/conversation");
-		dropOffNpc.setAttachment("assignedMission", getMissionObject().getObjectId());
-		dropOffNpc.setOptionsBitmask(264);
-		setDropOffNpc(dropOffNpc);
+		this.missionGiverId = parent.getStartLocation().getObjectId();
+		this.dropOffNpcId = parent.getDestinationLocation().getObjectId();
 		
 		if (getObjectivePhase() == 0) {
 			WaypointObject waypoint = getMissionObject().getWaypoint();
-			//waypoint.setPlanet(missionGiver.getPlanet());
-			waypoint.setPlanetCRC(CRC.StringtoCRC(missionGiver.getPlanet().name));
-			waypoint.setPosition(startLoc);
+			waypoint.setPlanetCRC(CRC.StringtoCRC(player.getPlanet().name));
+			waypoint.setPosition(parent.getStartLocation().getLocation());
 			waypoint.setName("@" + parent.getTitle().getStfFilename() + ":" + "m" + parent.getMissionId() + "t");
 			waypoint.setColor(WaypointObject.ORANGE);
 			waypoint.setActive(true);
 			getMissionObject().setWaypoint(waypoint);
+
 		} else if (getObjectivePhase() == 1) {
 			WaypointObject waypoint = getMissionObject().getWaypoint();
-			waypoint.setPlanetCRC(CRC.StringtoCRC(dropOffNpc.getPlanet().name));
-			waypoint.setPosition(destination);
+			waypoint.setPlanetCRC(CRC.StringtoCRC(player.getPlanet().name));
+			waypoint.setPosition(parent.getDestinationLocation().getLocation());
 			waypoint.setName("@" + parent.getTitle().getStfFilename() + ":" + "m" + parent.getMissionId() + "t");
 			waypoint.setColor(WaypointObject.ORANGE);
 			waypoint.setActive(true);
@@ -108,22 +82,13 @@ public class DeliveryMissionObjective extends MissionObjective {
 		player.addBankCredits(reward);
 		
 		player.sendSystemMessage(OutOfBand.ProsePackage("@mission/mission_generic:success_w_amount", reward), DisplayType.Broadcast);
-		
-		abort(core, player);
-		
-		core.objectService.destroyObject(getMissionObject());
 	}
 
 	@Override
 	public void abort(NGECore core, CreatureObject player) {
+		TangibleObject deliveryObject = (TangibleObject) core.objectService.getObject(deliveryObjectId);
 		if (deliveryObject != null)
-			core.objectService.destroyObject(deliveryObject.getObjectId());
-		
-		if (missionGiver != null)
-			core.objectService.destroyObject(missionGiver, 360);
-		
-		if (dropOffNpc != null)
-			core.objectService.destroyObject(dropOffNpc, 360);
+			core.objectService.destroyObject(deliveryObject);
 	}
 	
 	@Override
@@ -138,6 +103,7 @@ public class DeliveryMissionObjective extends MissionObjective {
 				waypoint.setName("@" + parent.getTitle().getStfFilename() + ":" + "m" + parent.getMissionId() + "t");
 				waypoint.setColor(WaypointObject.ORANGE);
 				waypoint.setActive(true);
+				waypoint.setPlanetCRC(CRC.StringtoCRC(player.getPlanet().name));
 				getMissionObject().setTargetName("Dropoff Location");
 				getMissionObject().setWaypoint(waypoint);
 				break;
@@ -147,6 +113,7 @@ public class DeliveryMissionObjective extends MissionObjective {
 				returnWp.setName("@" + parent.getTitle().getStfFilename() + ":" + "m" + parent.getMissionId() + "t");
 				returnWp.setColor(WaypointObject.ORANGE);
 				returnWp.setActive(true);
+				returnWp.setPlanetCRC(CRC.StringtoCRC(player.getPlanet().name));
 				getMissionObject().setTargetName("Return");
 				getMissionObject().setWaypoint(returnWp);
 				break;
@@ -166,23 +133,23 @@ public class DeliveryMissionObjective extends MissionObjective {
 		TangibleObject deliveryObject = (TangibleObject) core.objectService.createObject("object/tangible/mission/shared_mission_datadisk.iff", player.getPlanet());
 		
 		if (deliveryObject != null && inventory.add(deliveryObject)) {
-			setDeliveryObject(deliveryObject);
+			setDeliveryObject(deliveryObject.getObjectID());
 			return true;
 		}
 		else 
 			return false;
 	}
 	
-	public TangibleObject getDeliveryObject() { return deliveryObject; }
+	public long getDeliveryObject() { return deliveryObjectId; }
 	
-	public void setDeliveryObject(TangibleObject object) { this.deliveryObject = object; }
+	public void setDeliveryObject(long object) { this.deliveryObjectId = object; }
 
-	public CreatureObject getMissionGiver() { return missionGiver; }
+	public long getMissionGiver() { return missionGiverId; }
 
-	public void setMissionGiver(CreatureObject missionGiver) { this.missionGiver = missionGiver; }
+	public void setMissionGiver(long missionGiver) { this.missionGiverId = missionGiver; }
 
-	public CreatureObject getDropOffNpc() { return dropOffNpc; }
+	public long getDropOffNpc() { return dropOffNpcId; }
 
-	public void setDropOffNpc(CreatureObject dropOffNpc) { this.dropOffNpc = dropOffNpc; }
+	public void setDropOffNpc(long dropOffNpc) { this.dropOffNpcId = dropOffNpc; }
 
 }

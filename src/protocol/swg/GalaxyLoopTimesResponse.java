@@ -42,7 +42,7 @@ public class GalaxyLoopTimesResponse extends SWGMessage {
 
 	@Override
 	public IoBuffer serialize() {
-		IoBuffer result = IoBuffer.allocate(22).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer result = IoBuffer.allocate(14).order(ByteOrder.LITTLE_ENDIAN);
 		
 		result.putShort((short) 3);
 		result.putInt(0x4E428088);

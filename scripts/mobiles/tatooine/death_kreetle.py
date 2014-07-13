@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('kreetle_death')
 	mobileTemplate.setLevel(7)
-	mobileTemplate.setMinLevel(7)
-	mobileTemplate.setMaxLevel(8)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
@@ -27,7 +25,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("uber kreetle")
 	mobileTemplate.setAssistRange(6)
 	mobileTemplate.setStalker(False)	
-	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_kreetle.iff')

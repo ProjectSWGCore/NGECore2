@@ -11,7 +11,7 @@ def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 		
 	mobileTemplate.setCreatureName('squill_deranged_ravisher')		
-	mobileTemplate.setLevel(33)
+	mobileTemplate.setLevel(35)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
@@ -21,7 +21,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("squill")
 	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setStalker(True)
-	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_squill.iff')

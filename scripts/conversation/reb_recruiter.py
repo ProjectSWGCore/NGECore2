@@ -126,13 +126,8 @@ def handleFirstScreen(core, actor, npc, selection):
 			convSvc.sendConversationMessage(actor, npc, OutOfBand.ProsePackage("@conversation/faction_recruiter_rebel:s_332", percent, "TO", str(100 - percent)))
 			return
 		if selection == 2:
-			convSvc.sendConversationMessage(actor, npc, OutOfBand.ProsePackage('@conversation/faction_recruiter_rebel:s_76'))
-			
-			options = Vector()
-			options.add(ConversationOption(OutOfBand.ProsePackage('@conversation/faction_recruiter_rebel:s_78'), 0))
-			options.add(ConversationOption(OutOfBand.ProsePackage('@conversation/faction_recruiter_rebel:s_360'), 1))
-			convSvc.sendConversationOptions(actor, npc, options, handleSecondScreen)
-			
+			core.scriptService.callScript("scripts/", "gcw_rewards_rebel", "handleRebelItems1", core, actor); 
+			core.conversationService.sendStopConversation(actor, npc, 'conversation/faction_recruiter_rebel', 's_75')
 			return
 		return
 	elif actor.getFaction() == 'rebel' and actor.getFactionStatus() == FactionStatus.SpecialForces:	
@@ -194,7 +189,7 @@ def handleSecondScreen(core, actor, npc, selection):
 			
 			options = Vector()
 			options.add(ConversationOption(outOfBand.ProsePackage('@conversation/faction_recruiter_rebel:s_78'), 0))
-			options.add(ConversationOption(OutOfBand.ProsePackage('@conversation/faction_recruiter_rebel:s_360'), 1))
+			options.add(ConversationOption(OutOfBand.ProsePackage('@conversation/faction_recruiter_rebel:s_75'), 1))
 			convSvc.sendConversationOptions(actor, npc, options, handleThirdScreen)
 			
 			return

@@ -36,6 +36,7 @@ import java.util.Map;
 import resources.common.FileUtilities;
 import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
+import resources.objects.creature.CreatureObject;
 import services.ai.AIActor;
 import services.spawn.MobileTemplate;
 import main.NGECore;
@@ -137,8 +138,8 @@ public class StaticService implements INetworkDispatch {
 			cellNumber = ((BuildingObject) cell.getContainer()).getCellNumberByObjectId(cellId);
 		}
 		
-		long objectId = core.objectService.getDOId(planetName, template, 0, buildingId, cellNumber, x, y, z);
-		
+		//long objectId = core.objectService.getDOId(planetName, template, 0, buildingId, cellNumber, x, y, z);
+		long objectId = 0;
 		SWGObject object = null;
 		
 		MobileTemplate mobileTemplate = core.spawnService.getMobileTemplate(template);
@@ -212,6 +213,27 @@ public class StaticService implements INetworkDispatch {
 		}
 		
 		return object;
+	}
+	
+	/**
+	 * Used for spawning a commoner that can be used for a variety of mission types, like delivery and crafting missions.
+	 */
+	public CreatureObject spawnCommoner(String template, String planetName, long cellId, float x, float y, float z, float qW, float qX, float qY, float qZ) {
+		CreatureObject commoner = (CreatureObject) spawnObject(template, planetName, cellId, x, y, z, qW, qX, qY, qZ);
+
+		if (commoner == null)
+			return null;
+
+		commoner.setAttachment("conversationFile", "missions/deliver");
+		commoner.setAttachment("radial_filename", "object/conversation");
+		commoner.setOptionsBitmask(264);
+		
+		core.missionService.addCommoner(commoner);
+		return commoner;
+	}
+	
+	public CreatureObject spawnCommoner(String template, String planetName, long cellId, float x, float y, float z, float qY, float qW) {
+		return spawnCommoner(template, planetName, cellId, x, y, z, qW, 0, qY, 0);
 	}
 	
 	public List<SWGObject> getCloningFacilitiesByPlanet(Planet planet) {

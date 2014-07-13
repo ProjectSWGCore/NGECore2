@@ -22,6 +22,7 @@
 package resources.common;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.Vector;
@@ -36,6 +37,8 @@ import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
 import resources.objects.tangible.TangibleObject;
 import services.ai.AIActor;
+import services.ai.states.FollowState;
+import tools.DevLog;
 
 /** 
  * @author Charon 
@@ -50,6 +53,71 @@ public class Forager {
 	public static final int WORM_BAIT            = 4;
 	public static final int MYSTERIOUS_DATA_DISC = 5;
 	
+	public static final String[] RARE_COMPONENTS_CORELLIA = new String[]{"object/tangible/loot/creature_loot/collections/fried_icecream_components/corellia/shared_charbote.iff",
+		"object/tangible/loot/creature_loot/collections/fried_icecream_components/corellia/shared_goldfruit.iff",
+		"object/tangible/loot/creature_loot/collections/fried_icecream_components/corellia/shared_kavasa_fruit.iff",
+		"object/tangible/loot/creature_loot/collections/fried_icecream_components/corellia/shared_salthia.iff",
+		"object/tangible/loot/creature_loot/collections/fried_icecream_components/corellia/shared_sunfruit.iff",
+		"object/tangible/loot/creature_loot/collections/fried_icecream_components/corellia/shared_vweilu.iff",
+		"object/tangible/loot/creature_loot/collections/fried_icecream_components/corellia/shared_yam.iff"
+	};
+	
+	public static final String[] RARE_COMPONENTS_DANTOOINE = new String[]{"object/tangible/loot/creature_loot/collections/fried_icecream_components/dantooine/shared_barabel.iff",
+		"object/tangible/loot/creature_loot/collections/fried_icecream_components/dantooine/shared_celonslay.iff",
+		"object/tangible/loot/creature_loot/collections/fried_icecream_components/dantooine/shared_dorian.iff",
+		"object/tangible/loot/creature_loot/collections/fried_icecream_components/dantooine/shared_kibla_greens.iff",
+		"object/tangible/loot/creature_loot/collections/fried_icecream_components/dantooine/shared_shefna_fruit.iff",
+		"object/tangible/loot/creature_loot/collections/fried_icecream_components/dantooine/shared_tritacale.iff",
+		"object/tangible/loot/creature_loot/collections/fried_icecream_components/dantooine/shared_yot_beans.iff"
+	};
+	
+	public static final String[] RARE_COMPONENTS_DATHOMIR = new String[]{"object/tangible/loot/creature_loot/collections/fried_icecream_components/dathomir/shared_beebleberry.iff",
+		"object/tangible/loot/creature_loot/collections/fried_icecream_components/dathomir/shared_driblis.iff",
+		"object/tangible/loot/creature_loot/collections/fried_icecream_components/dathomir/shared_dricklefruit.iff",
+		"object/tangible/loot/creature_loot/collections/fried_icecream_components/dathomir/shared_grape.iff",
+		"object/tangible/loot/creature_loot/collections/fried_icecream_components/dathomir/shared_hwotha.iff",
+		"object/tangible/loot/creature_loot/collections/fried_icecream_components/dathomir/shared_plaitfruit.iff",
+		"object/tangible/loot/creature_loot/collections/fried_icecream_components/dathomir/shared_qana.iff"
+	};
+		
+	public static final String[] RARE_COMPONENTS_ENDOR = new String[]{"object/tangible/loot/creature_loot/collections/fried_icecream_components/endor/shared_acorns.iff",
+		"object/tangible/loot/creature_loot/collections/fried_icecream_components/endor/shared_blumfruit.iff",
+		"object/tangible/loot/creature_loot/collections/fried_icecream_components/endor/shared_burr_ball.iff",
+		"object/tangible/loot/creature_loot/collections/fried_icecream_components/endor/shared_gin_jang_berry.iff",
+		"object/tangible/loot/creature_loot/collections/fried_icecream_components/endor/shared_honey_melon.iff",
+		"object/tangible/loot/creature_loot/collections/fried_icecream_components/endor/shared_sunberries.iff",
+		"object/tangible/loot/creature_loot/collections/fried_icecream_components/endor/shared_yubnut.iff"
+	};
+	
+	public static final String[] RARE_COMPONENTS_NABOO = new String[]{"object/tangible/loot/creature_loot/collections/fried_icecream_components/naboo/shared_cligs.iff",
+		"object/tangible/loot/creature_loot/collections/fried_icecream_components/naboo/shared_cracknut.iff",
+		"object/tangible/loot/creature_loot/collections/fried_icecream_components/naboo/shared_denta.iff",
+		"object/tangible/loot/creature_loot/collections/fried_icecream_components/naboo/shared_muja.iff",
+		"object/tangible/loot/creature_loot/collections/fried_icecream_components/naboo/shared_ootoowergs.iff",
+		"object/tangible/loot/creature_loot/collections/fried_icecream_components/naboo/shared_phraig.iff",
+		"object/tangible/loot/creature_loot/collections/fried_icecream_components/naboo/shared_stinkmelon.iff"
+	};
+	
+	public static final String[] RARE_COMPONENTS_TATOOINE = new String[]{"object/tangible/loot/creature_loot/collections/fried_icecream_components/tatooine/shared_banthaweed.iff",
+		"object/tangible/loot/creature_loot/collections/fried_icecream_components/tatooine/shared_bestinnian.iff",
+		"object/tangible/loot/creature_loot/collections/fried_icecream_components/tatooine/shared_bloddle.iff",
+		"object/tangible/loot/creature_loot/collections/fried_icecream_components/tatooine/shared_bristlemelon.iff",
+		"object/tangible/loot/creature_loot/collections/fried_icecream_components/tatooine/shared_tatoes.iff",
+		"object/tangible/loot/creature_loot/collections/fried_icecream_components/tatooine/shared_wyykmelons.iff",
+		"object/tangible/loot/creature_loot/collections/fried_icecream_components/tatooine/shared_zog.iff"
+	};
+	
+	public static final String[] RARE_COMPONENTS_YAVIN = new String[]{"object/tangible/loot/creature_loot/collections/fried_icecream_components/yavin/shared_blueleaf_shrub.iff",
+		"object/tangible/loot/creature_loot/collections/fried_icecream_components/yavin/shared_celto.iff",
+		"object/tangible/loot/creature_loot/collections/fried_icecream_components/yavin/shared_farrberries.iff",
+		"object/tangible/loot/creature_loot/collections/fried_icecream_components/yavin/shared_sweetmelon.iff",
+		"object/tangible/loot/creature_loot/collections/fried_icecream_components/yavin/shared_topatoes.iff",
+		"object/tangible/loot/creature_loot/collections/fried_icecream_components/yavin/shared_trig_berries.iff",
+		"object/tangible/loot/creature_loot/collections/fried_icecream_components/yavin/shared_wuli_nuts.iff"
+	};
+	
+	private static final HashMap<Integer,String[]> rareComponentHash= new HashMap<Integer,String[]>();
+		
 	private int[] mapPlanetIDs = new int[]{6,7,8};
 	
 	// consider foraged food food/foraged	
@@ -77,7 +145,14 @@ public class Forager {
 		int[] forageChances  = new int[]{10,10,25,25,25,5}; 
 		int[] forageChances2 = new int[]{12,10,21,23,24,10}; // Kommerken Steak
 		int[] forageChances3 = new int[]{20,9,22,22,22,5};   // if you got the pig
-
+		
+		rareComponentHash.put(1,RARE_COMPONENTS_TATOOINE);
+		rareComponentHash.put(2,RARE_COMPONENTS_NABOO);
+		rareComponentHash.put(3,RARE_COMPONENTS_CORELLIA);
+		rareComponentHash.put(6,RARE_COMPONENTS_DANTOOINE);
+		rareComponentHash.put(8,RARE_COMPONENTS_YAVIN);
+		rareComponentHash.put(9,RARE_COMPONENTS_ENDOR);
+		rareComponentHash.put(10,RARE_COMPONENTS_DATHOMIR);
 		
 		int chosenObject = 0;
 		
@@ -120,7 +195,10 @@ public class Forager {
 									  forager.sendSystemMessage("",(byte) 0);
 									  break;
 									
-				case RARE_COMPONENT:  template =  "object/tangible/loot/beast/shared_enzyme_1.iff"; // for now, must find temp
+				case RARE_COMPONENT:  template =  ""; 				
+									  String[] componentArray = rareComponentHash.get(forager.getPlanetId());							
+									  int componentRoll = new Random().nextInt(componentArray.length);
+									  template = componentArray[componentRoll];
 									  foragedObject = (TangibleObject) NGECore.getInstance().objectService.createObject(template, forager.getPlanet());
 									  foragerInventory.add(foragedObject);
 									  forager.sendSystemMessage("",(byte) 0);
@@ -392,12 +470,31 @@ public class Forager {
 		treasureContainer.setAttachment("radial_filename", "object/treasureContainer");
 		treasureContainer.setAttachment("TreasureExtractorID", owner.getObjectID());
 		treasureContainer.setAttachment("TreasureGuards",guardList);
-		treasureContainer.setAttachment("ChestLevel",new Integer(spawnLevel));
+//		treasureContainer.setAttachment("ChestLevel",new Integer(spawnLevel));
 		configureTreasureLoot(treasureContainer,owner,spawnLevel);
 		NGECore.getInstance().lootService.DropLoot(owner, treasureContainer);
 		
 		owner.sendSystemMessage("@treasure_map/treasure_map:sys_time_limit",(byte)0);		
 		
+		Thread guardsThread = new Thread() {
+		    public void run() {
+		        try {
+		        	while (countAliveGuards(treasureContainer)>0){
+		        		Thread.sleep(1000);
+		        		if (owner.getPosture()==14)
+		        			Thread.currentThread().interrupt();
+		        	}		        	
+		        	treasureContainer.setAttachment("radial_filename", "object/treasureContainer");
+		        	owner.sendSystemMessage("@treasure_map/treasure_map:unlock_chest",(byte)0);
+		        	Thread.currentThread().interrupt();
+		        	
+		        } catch(InterruptedException va) {
+		            System.out.println(va);
+		            Thread.currentThread().interrupt(); // very important
+		        }
+		    }  
+		};
+		guardsThread.start();
 		
 		// all down: owner.sendSystemMessage("@treasure_map/treasure_map:unlock_chest",(byte)0);		
 	}

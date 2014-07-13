@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('canyon_krayt_dragon')
 	mobileTemplate.setLevel(85)
-	mobileTemplate.setMinLevel(80)
-	mobileTemplate.setMaxLevel(86)
 	mobileTemplate.setDifficulty(Difficulty.BOSS)
 
 	mobileTemplate.setMinSpawnDistance(4)
@@ -29,7 +27,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("krayt dragon")
 	mobileTemplate.setAssistRange(36)
 	mobileTemplate.setStalker(True)	
-	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_canyon_krayt_dragon.iff')

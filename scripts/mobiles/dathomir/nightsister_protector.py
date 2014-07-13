@@ -20,10 +20,10 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup('nightsister')
 	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setRespawnTime(300)
-	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_dressed_dathomir_nightsister_protector.iff')
+	templates.add('object/mobile/shared_dressed_dathomir_nightsister_rancor_tamer.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()

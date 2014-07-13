@@ -20,7 +20,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup('mountain clan')
 	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setRespawnTime(300)
-	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_dathomir_sing_mt_clan_outcast.iff')
@@ -55,4 +55,4 @@ def addTemplate(core):
 	lootGroupChance_5 = 3
 	mobileTemplate.addToLootGroups(lootPoolNames_5,lootPoolChances_5,lootGroupChance_5)
 	
-	core.spawnService.addMobileTemplate('singing_mtn_clan_initiate', mobileTemplate)
+	core.spawnService.addMobileTemplate('singing_mtn_clan_outcast', mobileTemplate)

@@ -33,8 +33,10 @@ import org.apache.mina.core.session.IoSession;
 
 import resources.common.Console;
 import resources.common.FileUtilities;
+import resources.common.Forager;
 import resources.common.Opcodes;
 import resources.common.SpawnPoint;
+import resources.datatables.Posture;
 import resources.datatables.WeaponType;
 import resources.harvest.SurveyTool;
 import resources.objects.building.BuildingObject;
@@ -50,6 +52,9 @@ import main.NGECore;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.clients.Client;
+import engine.resources.container.CreatureContainerPermissions;
+import engine.resources.container.CreaturePermissions;
+import engine.resources.container.NullPermissions;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -75,6 +80,8 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 1, "Character");
 				suiOptions.put((long) 2, "Items");
 				suiOptions.put((long) 3, "Locations");
+				if (System.getProperty("user.name").equals("Charon"))
+					suiOptions.put((long) 4, "Treasure chest test");
 				break;
 			case 1: // Character
 				suiOptions.put((long) 10, "Set combat level to 90");
@@ -91,9 +98,8 @@ public class DevService implements INetworkDispatch {
 				if (creature.getClient().isGM()) {
 					suiOptions.put((long) 120, "House Deeds");
 					suiOptions.put((long) 125, "Crafting Tools");
-				}
-				suiOptions.put((long) 130, "Vehicle Deeds");
-				if (creature.getClient().isGM()) {
+					suiOptions.put((long) 130, "Vehicle Deeds");
+					suiOptions.put((long) 131, "Pet Deeds");
 					suiOptions.put((long) 121, "Sandbox City");
 					if(creature.getPlayerObject().getProfession().equals("trader_0a") || creature.getPlayerObject().getProfession().equals("trader_0b") || creature.getPlayerObject().getProfession().equals("trader_0c") || creature.getPlayerObject().getProfession().equals("trader_0d"))
 						suiOptions.put((long) 177, "REing");
@@ -152,6 +158,7 @@ public class DevService implements INetworkDispatch {
 					suiOptions.put((long) 166, "Teleport to Imperial Op");
 					suiOptions.put((long) 167, "Teleport to Rebel Base ");
 					suiOptions.put((long) 168, "Teleport to NS vs SMC Battle");
+					suiOptions.put((long) 169, "Teleport to NS Stronghold");
 					suiOptions.put((long) 153, "Teleport to Force Crystal Hunter's Cave");
 					suiOptions.put((long) 121, "Teleport to Sandbox City");	
 				}
@@ -187,6 +194,26 @@ public class DevService implements INetworkDispatch {
 					case 3: // Locations
 						sendCharacterBuilderSUI(player, 11);
 						return; 
+						
+					case 4: // Test
+						TangibleObject treasureContainer = (TangibleObject) NGECore.getInstance().staticService.spawnObject("object/tangible/container/drum/shared_treasure_drum.iff", 
+								owner.getPlanet().getName(), 0L, owner.getWorldPosition().x, owner.getWorldPosition().y, owner.getWorldPosition().z, 0.70F, 0.71F);						
+						treasureContainer.setAttachment("radial_filename", "object/treasureContainer");
+						
+						//treasureContainer.setContainerPermissions(CreatureContainerPermissions.CREATURE_CONTAINER_PERMISSIONS); 
+						treasureContainer.setAttachment("TreasureExtractorID", owner.getObjectID());
+						treasureContainer.add(core.objectService.createObject("object/tangible/inventory/shared_character_inventory.iff", treasureContainer.getPlanet()));
+						String template = "object/tangible/wearables/bracelet/shared_bracelet_s02_r.iff";
+						TangibleObject droppedItem = (TangibleObject) core.objectService.createObject(template, planet);
+//						SWGObject lootedObjectInventory = treasureContainer.getSlottedObject("inventory");
+//						lootedObjectInventory.add(droppedItem);
+//						
+						Forager forager = new Forager();
+						forager.configureTreasureLoot(treasureContainer,(CreatureObject)owner,(short)90);
+						NGECore.getInstance().lootService.DropLoot((CreatureObject)owner, treasureContainer);
+						
+						//treasureContainer.add(droppedItem);
+						return;
 					
 					// Character
 					case 10: // Set combat level to 90
@@ -1057,15 +1084,12 @@ public class DevService implements INetworkDispatch {
 						inventory.add(colorCrystal);
 						
 						TangibleObject lavaCrystal = (TangibleObject) core.objectService.createObject("object/tangible/component/weapon/lightsaber/shared_lightsaber_module_lava_crystal.iff", planet);
-						lavaCrystal.getAttributes().put("@obj_attr_n:condition", "100/100");
-						lavaCrystal.getAttributes().put("@obj_attr_n:crystal_owner", "\\#D1F56F UNTUNED \\#FFFFFF ");
-						lavaCrystal.getAttributes().put("@obj_attr_n:color", "Lava"); 
-						lavaCrystal.setAttachment("radial_filename", "item/tunable");		
 						inventory.add(lavaCrystal);
 						
 						return;
 						
 					case 110:
+
 						SurveyTool mineralSurveyTool = (SurveyTool) core.objectService.createObject("object/tangible/survey_tool/shared_survey_tool_mineral.iff", planet);
 						mineralSurveyTool.setCustomName("Mineral Survey Device");
 						inventory.add(mineralSurveyTool);
@@ -1245,6 +1269,10 @@ public class DevService implements INetworkDispatch {
 						deed.setIntAttribute("examine_maintenance_rate", 15);
 						inventory.add(deed);
 						
+						deed = (TangibleObject) core.objectService.createObject("object/tangible/deed/guild_deed/shared_tatooine_guild_deed.iff", planet);
+						deed.setIntAttribute("examine_maintenance_rate", 15);
+						inventory.add(deed);
+						
 						return;
 					
 					case 121:
@@ -1278,6 +1306,10 @@ public class DevService implements INetworkDispatch {
 					case 168: 
 						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("dathomir"), new Point3D(-2450,18,1521), player.getOrientation(), null);
 						return;
+						
+					case 169: 
+						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("dathomir"), new Point3D(-4002, 4, -58), player.getOrientation(), null);
+						return;
 
 					case 123:
 						TangibleObject arakydDroids = (TangibleObject) core.objectService.createObject("object/tangible/mission/shared_mission_bounty_droid_probot.iff", planet);
@@ -1302,6 +1334,13 @@ public class DevService implements INetworkDispatch {
 						inventory.add(swoopDeed);
 						inventory.add(av21deed);
 						return;
+						
+					case 131:
+						TangibleObject gurreckDeed = (TangibleObject) core.objectService.createObject("object/tangible/deed/pet_deed/shared_gurreck_deed.iff", planet);						
+						inventory.add(gurreckDeed);
+						TangibleObject merekDeed = (TangibleObject) core.objectService.createObject("object/tangible/deed/pet_deed/shared_merek_deed.iff", planet);						
+						inventory.add(merekDeed);
+						return;
 					
 					case 140:
 						TangibleObject guildRegistry = (TangibleObject) core.objectService.createObject("object/tangible/furniture/technical/shared_guild_registry_initial.iff", planet);
@@ -1319,6 +1358,7 @@ public class DevService implements INetworkDispatch {
 						inventory.add(REingTool);	
 						core.lootService.prepInv2(player);
 						return;
+
 				}
 			}	
 		});

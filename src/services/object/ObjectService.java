@@ -52,6 +52,7 @@ import resources.datatables.PlayerFlags;
 import resources.guild.Guild;
 import resources.harvest.SurveyTool;
 
+import org.apache.commons.lang3.text.WordUtils;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 import org.python.core.Py;
@@ -239,6 +240,15 @@ public class ObjectService implements INetworkDispatch {
 		
 		boolean isSnapshot = false;
 		
+		if(objectID != 0 && objectList.containsKey(objectID)) {
+			System.err.println("Trying to create object with duplicate Id");
+			try {
+				throw new Exception();
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
 		if(objectID == 0)
 			objectID = generateObjectID();
 		else
@@ -281,6 +291,12 @@ public class ObjectService implements INetworkDispatch {
 		} else if(Template.startsWith("object/weapon")) {
 			
 			object = new WeaponObject(objectID, planet, position, orientation, Template);
+
+		} else if(Template.startsWith("object/building/player/construction")) {
+			
+			float positionY = core.terrainService.getHeight(planet.getID(), position.x, position.z)-1f;
+			Point3D newpoint = new Point3D(position.x,positionY,position.z);				
+			object = new InstallationObject(objectID, planet, newpoint, orientation, Template);
 
 		} else if(Template.startsWith("object/building") || Template.startsWith("object/static/worldbuilding/structures") || Template.startsWith("object/static/structure")){
 			
@@ -472,7 +488,7 @@ public class ObjectService implements INetworkDispatch {
 			if (objectList.containsKey(objectID)) {
 				System.err.println("getObject(): object is null but objectList contains objectID key");
 			} else {
-				System.err.println("getObject(): object is null");
+				//System.err.println("getObject(): object is null");
 			}
 		}
 		
@@ -591,7 +607,7 @@ public class ObjectService implements INetworkDispatch {
 			for(SWGObject obj : objectList.values()) {
 				if(obj.getCustomName() == null)
 					continue;
-				if(obj.getCustomName().equals(customName))
+				if(obj.getCustomName().equalsIgnoreCase(customName))
 					return obj;
 			}
 			
@@ -606,7 +622,7 @@ public class ObjectService implements INetworkDispatch {
 				continue;
 			}
 			
-			if (object.getCustomName() != null && customName.length() > 0 && object.getCustomName().equals(customName)) {
+			if (object.getCustomName() != null && customName.length() > 0 && object.getCustomName().equalsIgnoreCase(customName)) {
 				return object;
 			}
 		}
@@ -625,7 +641,7 @@ public class ObjectService implements INetworkDispatch {
 					continue;
 				if(obj.getCustomName() == null)
 					continue;
-				if(obj.getCustomName().startsWith(customName))
+				if(obj.getCustomName().startsWith(customName) || obj.getCustomName().toUpperCase().startsWith(WordUtils.capitalize(customName)))
 					return obj;
 			}
 			
@@ -640,7 +656,7 @@ public class ObjectService implements INetworkDispatch {
 				continue;
 			}
 			
-			if (object.getCustomName() != null && customName.length() > 0 && object.getCustomName().startsWith(customName)) {
+			if (object.getCustomName() != null && customName.length() > 0 && (object.getCustomName().startsWith(customName) || object.getCustomName().toUpperCase().startsWith(WordUtils.capitalize(customName)))) {
 				return object;
 			}
 		}
@@ -715,10 +731,18 @@ public class ObjectService implements INetworkDispatch {
 		
 		return objectId;
 	}
+
+	public Vector<SWGObject> getItemsInContainerByStfName(CreatureObject creature, long containerId, String stfName) {
+		Vector<SWGObject> itemList = new Vector<SWGObject>();
+		SWGObject container = getObject(containerId);
+		
+		container.viewChildren(creature, false, false, (item) -> { if (item.getStfName() == stfName) { itemList.add(item); } });
+		
+		return itemList;
+	}	
 	
 	public void useObject(CreatureObject creature, final SWGObject object) {
-		System.out.println("creature " + creature);
-		System.out.println("object " + object);
+
 		if (creature == null || object == null) {
 			return;
 		}
@@ -804,7 +828,7 @@ public class ObjectService implements INetworkDispatch {
 			//shirt.setIntAttribute(effectName, powerValue);
 			shirt.setAttachment("PUPEffectName", effectName);
 			shirt.setAttachment("PUPEffectValue", powerValue);
-			
+		
 		}
 		if (object.getTemplate().equals(powerUpTemplate3)){
 			// weapon
@@ -891,22 +915,27 @@ public class ObjectService implements INetworkDispatch {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		if (object instanceof TangibleObject) {
 			TangibleObject item = (TangibleObject) object;
 			int uses = item.getUses();
 			
 			if (uses > 0)  {
-				item.setUses(uses--);
+				item.setUses(uses - 1);
 				
 				if (item.getUses() == 0) {
 					destroyObject(object);
 				}
 			}
 		}
-		
+
 		if (object.getStringAttribute("proc_name") != null) {
-			core.buffService.addBuffToCreature(creature, object.getStringAttribute("proc_name").replace("@ui_buff:", ""), creature);
+			String buffName = object.getStringAttribute("proc_name").replace("@ui_buff:", "");
+			
+			if (object.getAttachment("alternateBuffName") != null)
+				buffName = (String) object.getAttachment("alternateBuffName");
+			
+			core.buffService.addBuffToCreature(creature, buffName, creature);
 		}
 		
 		String filePath = "scripts/" + template.split("shared_" , 2)[0].replace("shared_", "") + template.split("shared_" , 2)[1].replace(".iff", "") + ".py";
@@ -967,6 +996,9 @@ public class ObjectService implements INetworkDispatch {
 					
 
 				}
+				if(creature.getAttachment("disconnectTask") != null) {
+					((ScheduledFuture<?>) creature.getAttachment("disconnectTask")).cancel(true);
+				}					
 				
 				PlayerObject ghost = (PlayerObject) creature.getSlottedObject("ghost");
 
@@ -975,9 +1007,6 @@ public class ObjectService implements INetworkDispatch {
 				
 				ghost.clearFlagBitmask(PlayerFlags.LD);
 				
-				if(creature.getAttachment("disconnectTask") != null) {
-					((ScheduledFuture<?>) creature.getAttachment("disconnectTask")).cancel(true);
-				}					
 				creature.getAwareObjects().removeAll(creature.getAwareObjects());
 				creature.setAttachment("disconnectTask", null);
 
@@ -1430,8 +1459,23 @@ public class ObjectService implements INetworkDispatch {
 			@Override
 			public void process(SWGObject obj) {
 				if (obj.getTemplate().equals(item.getTemplate())){
-					alikeItemsInContainer.add(obj);
-					System.out.println(obj.getTemplate());
+					// Check if items are Droid Motors or Wirings
+					if (obj.getTemplate().equals("object/tangible/loot/npc_loot/shared_wiring_generic.iff")){
+						if (obj.getAttachment("reverse_engineering_name")!=null){
+							if (obj.getAttachment("reverse_engineering_name").equals(item.getAttachment("reverse_engineering_name"))){
+								alikeItemsInContainer.add(obj);
+							}
+						}
+					} else if (obj.getTemplate().equals("object/tangible/loot/npc_loot/shared_copper_battery_generic.iff")){
+						if (obj.getAttachment("reverse_engineering_name")!=null){
+							if (obj.getAttachment("reverse_engineering_name").equals(item.getAttachment("reverse_engineering_name"))){
+								alikeItemsInContainer.add(obj);
+							}
+						}
+					} else {
+						alikeItemsInContainer.add(obj);
+					}
+					
 				}
 			}
 		});

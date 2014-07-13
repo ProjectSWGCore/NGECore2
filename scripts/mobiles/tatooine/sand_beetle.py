@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('sand_beetle')
 	mobileTemplate.setLevel(22)
-	mobileTemplate.setMinLevel(22)
-	mobileTemplate.setMaxLevel(24)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)

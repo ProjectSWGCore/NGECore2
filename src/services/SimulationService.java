@@ -267,6 +267,26 @@ public class SimulationService implements INetworkDispatch {
 		}
 		
 	}
+	
+	public boolean checkForObject(int distance, SWGObject value ){
+		AtomicBoolean checkObject = new AtomicBoolean();
+		core.simulationService.get(value.getPlanet(), value.getWorldPosition().x, value.getWorldPosition().z, distance).stream().forEach((objecta) -> { 
+			if (objecta instanceof BuildingObject)
+				checkObject.set(true);
+			}
+		);
+		return checkObject.get();
+	}
+	
+	public Vector<CreatureObject> getAllNearNPCs(int distance, SWGObject value ){
+		Vector<CreatureObject> foundCreatures = new Vector<CreatureObject>();
+		core.simulationService.get(value.getPlanet(), value.getWorldPosition().x, value.getWorldPosition().z, distance).stream().forEach((objecta) -> { 
+			if (objecta instanceof CreatureObject)
+				foundCreatures.add((CreatureObject)objecta);
+			}
+		);
+		return foundCreatures;
+	}
 		
 	public boolean move(SWGObject object, int oldX, int oldZ, int newX, int newZ) {
 		if(quadTrees.get(object.getPlanet().getName()).remove(oldX, oldZ, object)) {
@@ -282,7 +302,9 @@ public class SimulationService implements INetworkDispatch {
 			boolean success = quadTrees.get(object.getPlanet().getName()).put(newX, newZ, object);
 			return success;
 		}
-		System.out.println("Move failed.");
+		// Note: This sysout keeps getting spammed, so the quadtree remove fails for some reason
+		// The NPC does move though
+		//System.out.println("Move failed.");
 		return false;
 	}
 		
@@ -890,17 +912,7 @@ public class SimulationService implements INetworkDispatch {
 		
 		if(!ghost.isSet(PlayerFlags.LD))
 			ghost.toggleFlag(PlayerFlags.LD);
-		
-		try {
-			for (CreatureObject opponent : new ArrayList<CreatureObject>(object.getDuelList())) {
-				if (opponent != null) {
-					core.combatService.handleEndDuel(object, opponent, true);
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
+				
 		try {
 			if (core.mountService.isMounted(object)) {
 				core.mountService.dismount(object, (CreatureObject) container);
@@ -926,10 +938,6 @@ public class SimulationService implements INetworkDispatch {
 			e.printStackTrace();
 		}
 		
-		/*
-		object.createTransaction(core.getCreatureODB().getEnvironment());
-		core.getCreatureODB().put(object, Long.class, CreatureObject.class, object.getTransaction());
-		object.getTransaction().commitSync();*/
 		
 		ScheduledFuture<?> disconnectTask = scheduler.schedule(new Runnable() {
 			@Override
@@ -937,14 +945,7 @@ public class SimulationService implements INetworkDispatch {
 				SWGObject object = core.objectService.getObject(objectId);
 				
 				if (object.getAttachment("disconnectTask") != null) {
-					try {
-						core.combatService.endCombat((CreatureObject) object);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-					
-					core.simulationService.remove(object, object.getPosition().x, object.getPosition().z, true);
-					
+					core.connectionService.disconnect(client);
 					/*
 					try {
 						Thread.sleep(900000)
@@ -990,7 +991,7 @@ public class SimulationService implements INetworkDispatch {
 			Collection<SWGObject> newAwareObjects = get(object.getPlanet(), pos.x, pos.z, 512);
 			for(Iterator<SWGObject> it = newAwareObjects.iterator(); it.hasNext();) {
 				SWGObject obj = it.next();
-				if(obj.getAttachment("bigSpawnRange") == null && obj.getWorldPosition().getDistance(pos) > 200)
+				if(obj.getAttachment("bigSpawnRange") == null && obj.getWorldPosition().getDistance2D(pos) > 200)
 					continue;
 				//System.out.println(obj.getTemplate());
 				object.makeAware(obj);
@@ -1035,6 +1036,9 @@ public class SimulationService implements INetworkDispatch {
 	}
 		
 	public void transferToPlanet(SWGObject object, Planet planet, Point3D newPos, Quaternion newOrientation, SWGObject newParent) {
+		
+		if (planet == null)
+			return;
 		
 		Client client = object.getClient();
 		

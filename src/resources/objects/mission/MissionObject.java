@@ -47,6 +47,8 @@ public class MissionObject extends IntangibleObject implements Serializable {
 	
 	private transient MissionMessageBuilder messageBuilder = new MissionMessageBuilder(this);
 	
+	private MissionObjective objective;
+	
 	public MissionObject() {
 		super();
 	}
@@ -58,7 +60,7 @@ public class MissionObject extends IntangibleObject implements Serializable {
 	@Override
 	public Baseline getOtherVariables() {
 		Baseline baseline = super.getOtherVariables();
-		baseline.put("objective", new DefaultMissionObjective(this));
+		//baseline.put("objective", new DefaultMissionObjective(this));
 		baseline.put("bountyMarkId", (long) 0);
 		baseline.put("missionId", 0);
 		baseline.put("missionType", "");
@@ -118,9 +120,8 @@ public class MissionObject extends IntangibleObject implements Serializable {
 		return (MissionLocation) getBaseline(3).get("startLocation");
 	}
 	
-	public void setStartLocation(Point3D location, long objId, String planet) {
+	public void setStartLocation(MissionLocation startLocation) {
 		if (getGrandparent() != null && getGrandparent().getClient() != null) {
-			MissionLocation startLocation = new MissionLocation(location.clone(), objId, planet);
 			getGrandparent().getClient().getSession().write(getBaseline(3).set("startLocation", startLocation));
 		}
 	}
@@ -149,9 +150,8 @@ public class MissionObject extends IntangibleObject implements Serializable {
 		return (MissionLocation) getBaseline(3).get("destinationLocation");
 	}
 	
-	public void setDestinationLocation(Point3D location, long objId, String planet) {
+	public void setDestinationLocation(MissionLocation destinationLocation) {
 		if (getGrandparent() != null && getGrandparent().getClient() != null) {
-			MissionLocation destinationLocation = new MissionLocation(location.clone(), objId, planet);
 			getGrandparent().getClient().getSession().write(getBaseline(3).set("destinationLocation", destinationLocation));
 		}
 	}
@@ -241,15 +241,17 @@ public class MissionObject extends IntangibleObject implements Serializable {
 	}
 	
 	public MissionObjective getObjective() {
-		if (otherVariables.get("objective") instanceof DefaultMissionObjective) {
+		/*if (otherVariables.get("objective") instanceof DefaultMissionObjective) {
 			return null;
 		} else {
 			return (MissionObjective) otherVariables.get("objective");
-		}
+		}*/
+		return objective;
 	}
 	
 	public void setObjective(MissionObjective objective) {
-		otherVariables.set("objective", objective);
+		//otherVariables.set("objective", objective);
+		this.objective = objective;
 	}
 	
 	public long getBountyMarkId() {

@@ -11,7 +11,7 @@ def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
 	mobileTemplate.setCreatureName('valarian_crew_chief')
-	mobileTemplate.setLevel(13)
+	mobileTemplate.setLevel(20)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
@@ -36,5 +36,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('rangedShotpistol')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('valarian_chief', mobileTemplate)
+	core.spawnService.addMobileTemplate('valarian_crew_chief', mobileTemplate)
 	return

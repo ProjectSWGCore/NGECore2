@@ -183,6 +183,8 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	private transient long tefTime = 0;
 	@NotPersistent
 	private transient SWGObject useTarget;
+	@NotPersistent
+	private transient CreatureObject calledPet;
 	
 	private byte locomotion = 0;
 	
@@ -1129,7 +1131,7 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	public void sendBaselines(Client destination) {
 				
 		if(destination == null || destination.getSession() == null) {
-			System.out.println("NULL session");
+			//System.out.println("NULL session");
 			return;
 		}
 		
@@ -1867,5 +1869,13 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	public String getLastName()
 	{
 		return getCustomName().split(" ")[1];
+	}
+
+	public CreatureObject getCalledPet() {
+		return calledPet;
+	}
+
+	public void setCalledPet(CreatureObject calledPet) {
+		this.calledPet = calledPet;
 	}
 }

@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('feeder_tusken_bantha')
 	mobileTemplate.setLevel(30)
-	mobileTemplate.setMinLevel(29)
-	mobileTemplate.setMaxLevel(31)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)

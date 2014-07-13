@@ -25,7 +25,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("rock beetle")
 	mobileTemplate.setAssistRange(6)
 	mobileTemplate.setStalker(False)
-	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)	
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)	
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_rock_beetle.iff')

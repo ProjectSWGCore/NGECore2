@@ -92,6 +92,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		baseline.put("lotsRemaining", 10);
 		baseline.put("holoEmote", "");
 		baseline.put("holoEmoteUses", 0);
+		baseline.put("activeMissions", new ArrayList<Long>()); // TODO: Look at MissionCriticalObject in CREO4, could use that instead of this
 		return baseline;
 	}
 	
@@ -142,7 +143,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		baseline.put("12", (long) 0); // General?
 		baseline.put("13", 0); // Guild Rank Title?
 		baseline.put("14", (short) 0); // Citizen Rank Title? 6 bytes
-		baseline.put("speederElevation", 0);
+		baseline.put("speederElevation", 1);
 		baseline.put("vehicleAttackCommand", ""); 
 		return baseline;
 	}
@@ -186,8 +187,8 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		baseline.put("kills", 0);
 		baseline.put("19", 0);
 		baseline.put("pet", (long) 0);
-		baseline.put("petAbilities", new SWGSet<String>(this, 9, 15, false));
-		baseline.put("22", (long) 0); // Unknown type currently
+		baseline.put("petAbilities", new SWGList<String>(this, 9, 21, false));
+		baseline.put("activePetAbilities", new SWGList<String>(this, 9, 22, false));
 		baseline.put("23", (byte) 0); // Seen as 1 or 2 sometimes // Gets set to 0x02 sometimes
 		baseline.put("24", 0); // Seen as 4
 		baseline.put("25", (long) 0); // Bitmask starts with 0x20 ends with 0x40
@@ -782,10 +783,15 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public SWGSet<String> getPetAbilities() {
-		return (SWGSet<String>) getBaseline(8).get("petAbilities");
+	public SWGList<String> getPetAbilities() {
+		return (SWGList<String>) getBaseline(9).get("petAbilities");
 	}
 	
+	@SuppressWarnings("unchecked")
+	public SWGList<String> getActivePetAbilities() {
+		return (SWGList<String>) getBaseline(9).get("activePetAbilities");
+	}
+		
 	public int getJediState() {
 		return 0;
 	}
@@ -925,6 +931,19 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		}
 		
 		return false;
+	}
+	
+	public void addActiveMission(long missionObjId) {
+		getActiveMissions().add(missionObjId);
+	}
+	
+	public void removeActiveMission(long missionObjId) {
+		getActiveMissions().remove(missionObjId);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<Long> getActiveMissions() {
+		return (List<Long>) otherVariables.get("activeMissions");
 	}
 	
 	public boolean isCallingCompanion() {

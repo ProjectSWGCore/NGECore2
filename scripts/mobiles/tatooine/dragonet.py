@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('dragonet')
 	mobileTemplate.setLevel(24)
-	mobileTemplate.setMinLevel(24)
-	mobileTemplate.setMaxLevel(27)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
@@ -29,10 +27,10 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("dragonet")
 	mobileTemplate.setAssistRange(10)
 	mobileTemplate.setStalker(True)	
-	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_dune_lizard.iff')
+	templates.add('object/mobile/shared_dragonet.iff')
 	mobileTemplate.setTemplates(templates)
 
 	weaponTemplates = Vector()

@@ -46,6 +46,7 @@ import protocol.swg.objectControllerObjects.MissionListRequest;
 import resources.common.BountyListItem;
 import resources.common.SpawnPoint;
 import resources.common.ObjControllerOpcodes;
+import services.mission.CommonerSpawn;
 import resources.objectives.BountyMissionObjective;
 import resources.objectives.DeliveryMissionObjective;
 import resources.objectives.DestroyMissionObjective;
@@ -75,12 +76,12 @@ public class MissionService implements INetworkDispatch {
 	// Use a HashMap for obtaining number of entries so we aren't using a visitor all the time.
 	private Map<String, Integer> entryCounts = new ConcurrentHashMap<String, Integer>();
 	private Map<Long, BountyListItem> bountyMap = new ConcurrentHashMap<Long, BountyListItem>();
+	private Map<String, Vector<CommonerSpawn>> commonerMap = new ConcurrentHashMap<String, Vector<CommonerSpawn>>();
 	private ObjectDatabase bountiesODB;
 	private Random ran = new Random();
 	
 	public MissionService(NGECore core) {
 		this.core = core;
-		
 		try { nameGenerator = new NameGen("names.txt"); } 
 		catch (IOException e) { e.printStackTrace(); }
 		
@@ -223,6 +224,9 @@ public class MissionService implements INetworkDispatch {
 	 * @param silent If true, called the MissionObjective.abort() method, otherwise it simply destroys the mission (false)
 	 */
 	public void handleMissionAbort(CreatureObject creature, MissionObject mission, boolean silent) {
+		
+		creature.getPlayerObject().removeActiveMission(mission.getObjectID());
+		
 		MissionObjective objective = mission.getObjective();
 		
 		if (objective != null && !silent)
@@ -307,7 +311,8 @@ public class MissionService implements INetworkDispatch {
 						randomBountyMission(player, mission);
 					
 					else if (type == TerminalType.ARTISAN)
-						randomSurveyMission(player, mission);
+						return;
+						//randomSurveyMission(player, mission);
 
 					else
 						return;
@@ -337,12 +342,17 @@ public class MissionService implements INetworkDispatch {
 	}
 	
 	public void handleMissionComplete(CreatureObject creature, MissionObject mission) {
+		
+		creature.getPlayerObject().removeActiveMission(mission.getObjectID());
+		
 		MissionObjective objective = mission.getObjective();
 		
 		if (objective == null)
 			return;
 		
 		objective.complete(core, creature);
+		
+		core.objectService.destroyObject(mission.getObjectId());
 	}
 	
 	private boolean handleMissionAccept(CreatureObject creature, MissionObject mission) {
@@ -388,6 +398,7 @@ public class MissionService implements INetworkDispatch {
 			mission.setPlanetId(creature.getPlanetId());
 		}
 		
+		creature.getPlayerObject().addActiveMission(mission.getObjectID());
 		missionBag.transferTo(creature, datapad, mission);
 		createMissionObjective(creature, mission);
 		return true;
@@ -443,7 +454,7 @@ public class MissionService implements INetworkDispatch {
 				return null;
 		}
 	}
-	private void randomSurveyMission(SWGObject player, MissionObject mission) {
+	/*private void randomSurveyMission(SWGObject player, MissionObject mission) {
 		
 		byte generalType = (byte) (ran.nextInt(3) == 0 ? 1 : 0);
 		
@@ -496,9 +507,38 @@ public class MissionService implements INetworkDispatch {
 		mission.setTemplateObject(CRC.StringtoCRC(ResourceRoot.CONTAINER_TYPE_IFF_SIGNIFIER[family.getContainerType()])); // This should be the resource container obj
 		mission.setTargetName(family.getResourceType() + family.getResourceClass());
 		
-	}
+	}*/
 	
 	private void randomDeliveryMission(SWGObject player, MissionObject mission) {
+		if (!commonerMap.containsKey(player.getPlanet().name))
+			return;
+		
+		Vector<CommonerSpawn> spawns = commonerMap.get(player.getPlanet().name);
+		Point3D playerLocation = player.getWorldPosition();
+		MissionLocation startLocation = null;
+		MissionLocation destinationLocation = null;
+		
+		Random randomSpawn = new Random(10);
+		// TODO: There is probably a much better way of doing this.
+		for (CommonerSpawn spawn : spawns) {
+			if (randomSpawn.nextInt() >= 5) { 
+				continue;
+			}
+			
+			float distance = playerLocation.getDistance2D(spawn.getLocation());
+			if (distance <= 500 && startLocation == null) {
+				startLocation = new MissionLocation(spawn.getLocation(), spawn.getObjectId(), player.getPlanet().name);
+			} else if (distance <= 2500 && destinationLocation == null) {
+				destinationLocation = new MissionLocation(spawn.getLocation(), spawn.getObjectId(), player.getPlanet().name);
+			}
+			
+			if (destinationLocation != null && startLocation != null)
+				break;
+		}
+		
+		if (startLocation == null || destinationLocation == null)
+			return;
+		
 		mission.setMissionType("deliver");
 		
 		String[] difficulties = { "easy", "medium", "hard" };
@@ -513,14 +553,9 @@ public class MissionService implements INetworkDispatch {
 		
 		mission.setDifficultyLevel(5);
 		
-		// TODO: Use pre-defined commoner locations
-		Point3D startLocation = SpawnPoint.getRandomPosition(player.getPosition(), (float) 50, (float) 300, player.getPlanetId());
-		Point3D destination = SpawnPoint.getRandomPosition(startLocation, (float) 50, (float) 500, player.getPlanetId());
-		
-		mission.setStartLocation(startLocation, 0, player.getPlanet().name);
-		mission.setDestinationLocation(destination, 0, player.getPlanet().name);
-		
-		mission.setCreditReward((int) (200 + ((startLocation.getDistance2D(destination) / 10))));
+		mission.setStartLocation(startLocation);
+		mission.setDestinationLocation(destinationLocation);
+		mission.setCreditReward((int) (200 + ((startLocation.getLocation().getDistance2D(destinationLocation.getLocation()) / 10))));
 		
 		mission.setTemplateObject(CRC.StringtoCRC("object/tangible/mission/shared_mission_datadisk.iff"));
 		mission.setTargetName("Datadisk");
@@ -652,6 +687,17 @@ public class MissionService implements INetworkDispatch {
 		
 		//System.out.println("Added bounty of " + amountToAdd + " to " + bounty.getName());
 		return true;
+	}
+	
+	public void addCommoner(SWGObject commoner) {
+		CommonerSpawn commonerSpawn = new CommonerSpawn(commoner.getObjectId(), commoner.getPosition());
+		if (commonerMap.containsKey(commoner.getPlanet().name))
+			commonerMap.get(commoner.getPlanet().name).add(commonerSpawn);
+		else {
+			commonerMap.put(commoner.getPlanet().name, new Vector<CommonerSpawn>());
+			commonerMap.get(commoner.getPlanet().name).add(commonerSpawn);
+		}
+		
 	}
 	
 	public boolean removeBounty(long bountyTarget, boolean listRemove) {

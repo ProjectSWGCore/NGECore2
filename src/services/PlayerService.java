@@ -195,6 +195,17 @@ public class PlayerService implements INetworkDispatch {
 				e.printStackTrace();
 			}
 		}, 0, 1000, TimeUnit.MILLISECONDS));
+		
+		scheduleList.add(scheduler.scheduleAtFixedRate(() -> {
+			long[] ids = creature.getAwareObjects().stream().mapToLong(SWGObject::getObjectID).toArray();
+			for(int i = 0; i < ids.length; i++) {
+				for(int j = 0; j < ids.length; j++) {
+					if(ids[i] == ids[j] && i != j) 
+						System.err.println("Detected duplicate ids, Template " + core.objectService.getObject(ids[i]).getTemplate());
+				}
+			}
+		}, 0, 5000, TimeUnit.MILLISECONDS));
+
 		schedulers.put(creature.getObjectID(), scheduleList);
 		
 		/*final PlayerObject ghost = (PlayerObject) creature.getSlottedObject("ghost");
@@ -663,13 +674,14 @@ public class PlayerService implements INetworkDispatch {
 	 */
 	public void resetLevel(CreatureObject creature) {
 		PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
+		SWGObject inventory = creature.getSlottedObject("inventory");
 		
 		try {
         	for (Long equipmentId : new ArrayList<Long>(creature.getEquipmentList())) {
         		
         		SWGObject equipment = core.objectService.getObject(equipmentId);
         		
-        		if (equipment == null) {
+        		if (equipment == null || equipment.getTemplate().startsWith("object/tangible/hair/")) {
         			continue;
         		}
         		
@@ -682,7 +694,7 @@ public class PlayerService implements INetworkDispatch {
         			case "object/weapon/creature/shared_creature_default_weapon.iff":
         				continue;
         			default:
-        				core.equipmentService.unequip(creature, equipment);
+        				creature.transferTo(creature, inventory, equipment);
        			}
         	}
 		} catch (Exception e) {

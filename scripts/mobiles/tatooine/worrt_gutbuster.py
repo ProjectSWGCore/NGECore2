@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('worrt_gutbuster')
 	mobileTemplate.setLevel(13)
-	mobileTemplate.setMinLevel(12)
-	mobileTemplate.setMaxLevel(14)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)

@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('giant_sand_beetle')
 	mobileTemplate.setLevel(25)
-	mobileTemplate.setMinLevel(25)
-	mobileTemplate.setMaxLevel(26)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
@@ -27,7 +25,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("giant sand beetle")
 	mobileTemplate.setAssistRange(10)
 	mobileTemplate.setStalker(False)	
-	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE + Options.ATTACKABLE)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_giant_sand_beetle.iff')
