@@ -7,6 +7,7 @@ def setup(core, object):
 	object.setStfName('armor_pvp_spec_ops_rebel_black_grey_gloves_05_01')
 	object.setDetailFilename('static_item_d')
 	object.setDetailName('armor_pvp_spec_ops_rebel_black_grey_gloves_05_01')
+	object.setIntAttribute('no_trade', 1)
 	object.setStringAttribute('faction_restriction', 'Rebel')
 	object.setStringAttribute('armor_category', '@obj_attr_n:armor_assault')
 	object.setIntAttribute('cat_armor_standard_protection.kinetic', 6608)
