@@ -39,6 +39,7 @@ def addTemplate(core):
 	attacks = Vector()
 	attacks.add('bm_bite_4')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
+	attacks.add('bm_bite_4')
 	mobileTemplate.setAttacks(attacks)
 	
 	core.spawnService.addMobileTemplate('elder_squall', mobileTemplate)

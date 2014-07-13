@@ -34,6 +34,8 @@ def addTemplate(core):
 	
 	attacks = Vector()
 	mobileTemplate.setDefaultAttack('meleehit')
+	attacks.add('fs_maelstrom_5')
+	attacks.add('fs_ae_dm_cc_6')
 	mobileTemplate.setAttacks(attacks)
 	
 	lootPoolNames_1 = ['Junk']
