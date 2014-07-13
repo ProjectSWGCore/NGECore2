@@ -19,8 +19,8 @@ def addTemplate(core):
 	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(1)
 	mobileTemplate.setSocialGroup("swirl prong")
-	mobileTemplate.setAssistRange(0)
-	mobileTemplate.setOptionsBitmask(128)
+	mobileTemplate.setAssistRange(12)
+	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
 	mobileTemplate.setStalker(True)
 	
 	templates = Vector()
@@ -33,6 +33,9 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_charge_2')
+	attacks.add('bm_defensive_2')
+	attacks.add('bm_slash_2')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

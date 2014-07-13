@@ -401,6 +401,16 @@ public class TangibleObject extends SWGObject implements Serializable {
 				companion.updatePvpStatus();
 			}
 		}
+		
+	
+		if (this instanceof CreatureObject){
+			if (((CreatureObject)this).isPlayer()){
+				// Here a specific CREO delta must be sent to update the faction info in character sheet and symbol in name
+				// If anyone knows which that would be, please replace it here!
+				sendBaselines(this.getClient());
+				
+			}
+		}
 	}
 	
 	public boolean isAttackableBy(CreatureObject attacker) {

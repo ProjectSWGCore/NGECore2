@@ -10,7 +10,7 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 		
-	mobileTemplate.setCreatureName('woodland_gurreck')	
+	mobileTemplate.setCreatureName('woodland_gurreck')
 	mobileTemplate.setLevel(64)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
@@ -33,6 +33,9 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_claw_4')
+	attacks.add('bm_flank_2')
+	attacks.add('bm_slash_4')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

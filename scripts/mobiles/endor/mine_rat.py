@@ -12,16 +12,16 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('death_watch_quenker')
 	mobileTemplate.setLevel(83)
-	mobileTemplate.setDifficulty(Difficulty.NORMAL)
+	mobileTemplate.setDifficulty(Difficulty.ELITE)
 
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(True)
 	mobileTemplate.setScale(.6)
 	mobileTemplate.setSocialGroup("death watch")
-	mobileTemplate.setAssistRange(12)
+	mobileTemplate.setAssistRange(6)
 	mobileTemplate.setStalker(False)
-	mobileTemplate.setOptionsBitmask(128)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_barbed_quenker.iff')
@@ -33,6 +33,9 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_bite_5')
+	attacks.add('bm_bolster_armor_5')
+	attacks.add('bm_enfeeble_5')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

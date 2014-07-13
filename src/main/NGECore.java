@@ -52,6 +52,7 @@ import net.engio.mbassy.bus.config.BusConfiguration;
 import resources.common.BountyListItem;
 import resources.common.RadialOptions;
 import resources.common.ThreadMonitor;
+import resources.datatables.GalaxyStatus;
 import resources.objects.creature.CreatureObject;
 import resources.objects.guild.GuildObject;
 import resources.objects.resource.GalacticResource;
@@ -113,6 +114,7 @@ import services.trade.TradeService;
 import services.travel.TravelService;
 import tools.CharonPacketLogger;
 import tools.DevLogQueuer;
+//import services.BattlefieldService;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.CrcStringTableVisitor;
 import engine.clientdata.visitors.DatatableVisitor;
@@ -208,6 +210,7 @@ public class NGECore {
 	public ReverseEngineeringService reverseEngineeringService;
 	public PetService petService;
 	public BrowserService browserService;
+	//public BattlefieldService battlefieldService;
 	
 	// Login Server
 	public NetworkDispatch loginDispatch;
@@ -302,7 +305,7 @@ public class NGECore {
 			databaseConnection2.connect(config.getString("DB2.URL"), config.getString("DB2.NAME"), config.getString("DB2.USER"), config.getString("DB2.PASS"), "mysql");
 		}
 		
-		setGalaxyStatus(1);
+		setGalaxyStatus(GalaxyStatus.Loading);
 		swgObjectODB = new ObjectDatabase("swgobjects", true, true, true, SWGObject.class);
 		mailODB = new ObjectDatabase("mails", true, true, true, Mail.class);
 		guildODB = new ObjectDatabase("guild", true, true, true, GuildObject.class);
@@ -374,19 +377,34 @@ public class NGECore {
 		}
 		
 		// Ping Server
-		try {
-			PingServer pingServer = new PingServer(config.getInt("PING.PORT"));
-			pingServer.bind();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+
+		
+		if(config.keyExists("PING.PORT"))
+			if (config.getInt("PING.PORT") != 0) {
+				try {
+					PingServer pingServer = new PingServer(config.getInt("PING.PORT"));
+					pingServer.bind();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			} else
+			System.out.println("Warning: pingServer was not launched. Port equals 0.");
+		else
+			System.out.println("Warning: pingServer was not launched. Port not specified.");
+		
 		
 		// Login Server
 		loginDispatch = new NetworkDispatch(this, false);
 		loginDispatch.addService(loginService);
-		
-		loginServer = new MINAServer(loginDispatch, config.getInt("LOGIN.PORT"));
-		loginServer.start();
+				
+		if(config.keyExists("LOGIN.PORT"))
+			if (config.getInt("LOGIN.PORT") != 0) {
+				loginServer = new MINAServer(loginDispatch, config.getInt("LOGIN.PORT"));
+				loginServer.start();
+			} else
+			System.out.println("Warning: loginServer was not launched. Port equals 0.");
+		else
+			System.out.println("Warning: loginServer was not launched. Port not specified.");
 		
 		// Zone Server
 		zoneDispatch = new NetworkDispatch(this, true);
@@ -417,9 +435,15 @@ public class NGECore {
 			zoneDispatch.addService(surveyService);
 			zoneDispatch.addService(resourceService);
 		}
-		
-		zoneServer = new MINAServer(zoneDispatch, config.getInt("ZONE.PORT"));
-		zoneServer.start();
+			
+		if(config.keyExists("ZONE.PORT"))
+			if (config.getInt("ZONE.PORT") != 0) {
+				zoneServer = new MINAServer(zoneDispatch, config.getInt("ZONE.PORT"));
+				zoneServer.start();
+			} else
+			System.out.println("Warning: zoneServer was not launched. Port equals 0.");
+		else
+			System.out.println("Warning: zoneServer was not launched. Port not specified.");
 		
 		//Start terrainList
 		// Original Planets
@@ -536,8 +560,8 @@ public class NGECore {
 		retroService.run();
 		
 		browserService = new BrowserService(this);
+		//battlefieldService = new BattlefieldService(this);
 		
-
 		DevLogQueuer devLogQueuer = new DevLogQueuer();
 		
 		CharonPacketLogger packetLogger;
@@ -547,7 +571,7 @@ public class NGECore {
 		didServerCrash = false;
 		System.out.println("Started Server.");
 		cleanupCreatureODB();
-		setGalaxyStatus(2);
+		setGalaxyStatus(GalaxyStatus.Online);
 		
 	}
 
@@ -768,7 +792,7 @@ public class NGECore {
 					chatService.broadcastGalaxy("The server will be shutting down soon. Please find a safe place to logout. (" + minutes + " minutes left)");
 					Thread.sleep(60000);
 			}
-			setGalaxyStatus(3);
+			setGalaxyStatus(GalaxyStatus.Locked);
 			chatService.broadcastGalaxy("The server will be shutting down soon. Please find a safe place to logout. (" + 1 + " minutes left)");
 			Thread.sleep(30000);
 			chatService.broadcastGalaxy("You will be disconnected in 30 seconds so the server can perform a final save before shutting down.  Please find a safe place to logout now.");
