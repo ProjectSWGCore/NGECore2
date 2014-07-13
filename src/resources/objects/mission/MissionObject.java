@@ -80,7 +80,7 @@ public class MissionObject extends IntangibleObject implements Serializable {
 		baseline.put("repeatCounter", 0);
 		baseline.put("missionType", 0);
 		baseline.put("targetName", "");
-		baseline.put("waypoint", (WaypointObject) NGECore.getInstance().objectService.createObject("object/waypoint/base/shared_base_waypoint.iff", getPlanet()));
+		baseline.put("waypoint", (WaypointObject) NGECore.getInstance().objectService.createObject("object/waypoint/base/shared_base_waypoint.iff", NGECore.getInstance().terrainService.getPlanetByID(0)));
 		return baseline;
 	}
 	

@@ -22,7 +22,6 @@
 package resources.objects.building;
 
 import java.io.Serializable;
-import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -35,9 +34,7 @@ import resources.datatables.Options;
 import resources.objects.ObjectMessageBuilder;
 import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
-import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
-import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.PortalVisitor;
 import engine.clients.Client;
 import engine.resources.objects.Baseline;
@@ -153,22 +150,16 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 	}
 	
 	public CellObject getCellByCellName(String cellName) {
-		Map<String, Object> attributes = getTemplateData().getAttributes();
+		PortalVisitor portal = getPortalVisitor();
 		
-		if (attributes.containsKey("portalLayoutFilename") && ((String) attributes.get("portalLayoutFilename")).length() > 0) {
-			String portalLayoutFilename = (String) attributes.get("portalLayoutFilename");
-			
-			try {
-				PortalVisitor portal = ClientFileManager.loadFile(portalLayoutFilename, PortalVisitor.class);
-				
-				for (int i = 0; i <= portal.cellCount; i++) {
-					System.out.println("Cellname: " + portal.cells.get(i).name);
-					if (cellName.equals(portal.cells.get(i).name)) {
-						return getCellByCellNumber(i + 1);
-					}
-				}
-			} catch (InstantiationException | IllegalAccessException e) {
-				e.printStackTrace();
+		if (portal == null) {
+			return null;
+		}
+		
+		for (int i = 0; i < portal.cellCount; i++) {
+			System.out.println("Cellname: " + portal.cells.get(i).name);
+			if (cellName.equals(portal.cells.get(i).name)) {
+				return getCellByCellNumber(i + 1);
 			}
 		}
 		
