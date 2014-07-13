@@ -1,7 +1,7 @@
 
 def itemTemplate():
 
-	return ['object/weapon/melee/2h_sword/shared_quest_2h_sword_battleaxe.iff']
+	return ['object/weapon/melee/2h_sword/shared_2h_sword_maul_legendary.iff']
 
 def customItemName():
 
