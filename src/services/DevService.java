@@ -82,6 +82,8 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 3, "Locations");
 				if (System.getProperty("user.name").equals("Charon"))
 					suiOptions.put((long) 4, "Treasure chest test");
+				if (System.getProperty("user.name").equals("Charon"))
+					suiOptions.put((long) 6, "Dearic attack camp");
 				break;
 			case 1: // Character
 				suiOptions.put((long) 10, "Set combat level to 90");
@@ -213,6 +215,11 @@ public class DevService implements INetworkDispatch {
 						NGECore.getInstance().lootService.DropLoot((CreatureObject)owner, treasureContainer);
 						
 						//treasureContainer.add(droppedItem);
+						return;
+						
+					case 6: // Locations
+						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("talus"), new Point3D(-124,6,-2958), player.getOrientation(), null);
+						core.invasionService.testPylons();
 						return;
 					
 					// Character

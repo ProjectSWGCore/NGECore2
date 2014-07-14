@@ -86,6 +86,7 @@ public class AIActor {
 	private ScheduledFuture movementFuture;
 	private ScheduledFuture recoveryFuture;
 	private ScheduledFuture despawnFuture;
+	private boolean patrolLoop = true; // default
 
 	public AIActor(CreatureObject creature, Point3D spawnPosition, ScheduledExecutorService scheduler) {
 		this.creature = creature;
@@ -626,6 +627,14 @@ public class AIActor {
 	public void setLastPositionBeforeStateChange(
 			Point3D lastPositionBeforeStateChange) {
 		this.lastPositionBeforeStateChange = lastPositionBeforeStateChange;
+	}
+
+	public boolean isPatrolLoop() {
+		return patrolLoop;
+	}
+
+	public void setPatrolLoop(boolean patrolLoop) {
+		this.patrolLoop = patrolLoop;
 	}
 	
 }

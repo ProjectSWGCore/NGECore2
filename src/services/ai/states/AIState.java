@@ -492,7 +492,10 @@ public abstract class AIState {
 			if (actor.getPatrolPointIndex()<actor.getPatrolPoints().size()-1){
 				actor.setPatrolPointIndex(actor.getPatrolPointIndex()+1);
 			} else {
-				actor.setPatrolPointIndex(0);
+				if (actor.isPatrolLoop())
+					actor.setPatrolPointIndex(0);
+				else
+					return; // Last Patrol point reached and no loop
 			}
 		}
 		

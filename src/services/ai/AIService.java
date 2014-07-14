@@ -169,6 +169,13 @@ public class AIService {
 		}
 	}
 	
+	public void setPatrolLoop(CreatureObject creature, boolean value){
+		AIActor actor = (AIActor) creature.getAttachment("AI");
+		if (actor==null)
+			return;		
+		actor.setPatrolLoop(value);
+	}
+	
 	public void setPatrol(CreatureObject creature, Vector<Point3D> patrolpoints){
 		AIActor actor = (AIActor) creature.getAttachment("AI");
 		if (actor==null)

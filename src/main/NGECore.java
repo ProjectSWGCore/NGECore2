@@ -92,6 +92,7 @@ import services.command.CommandService;
 import services.equipment.EquipmentService;
 import services.gcw.FactionService;
 import services.gcw.GCWService;
+import services.gcw.InvasionService;
 import services.GuildService;
 import services.LoginService;
 import services.map.MapService;
@@ -211,6 +212,7 @@ public class NGECore {
 	public PetService petService;
 	public BrowserService browserService;
 	//public BattlefieldService battlefieldService;
+	public InvasionService invasionService;
 	
 	// Login Server
 	public NetworkDispatch loginDispatch;
@@ -370,6 +372,7 @@ public class NGECore {
 		spawnService = new SpawnService(this);
 		aiService = new AIService(this);
 		missionService = new MissionService(this);
+		invasionService = new InvasionService(this);
 		
 		if (optionsConfigLoaded && options.getInt("LOAD.RESOURCE.SYSTEM") == 1) {
 			surveyService = new SurveyService(this);
@@ -430,6 +433,7 @@ public class NGECore {
 		zoneDispatch.addService(staticService);
 		zoneDispatch.addService(reverseEngineeringService);
 		zoneDispatch.addService(petService);
+		zoneDispatch.addService(invasionService);
 		
 		if (optionsConfigLoaded && options.getInt("LOAD.RESOURCE.SYSTEM") == 1) {
 			zoneDispatch.addService(surveyService);

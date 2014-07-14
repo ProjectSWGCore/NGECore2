@@ -130,6 +130,7 @@ import services.command.CombatCommand;
 import services.bazaar.AuctionItem;
 import services.chat.ChatRoom;
 import services.equipment.EquipmentService;
+import services.gcw.SoldierPatrolPylon;
 import services.sui.SUIWindow;
 import services.sui.SUIWindow.SUICallback;
 import services.sui.SUIWindow.Trigger;
@@ -278,6 +279,12 @@ public class ObjectService implements INetworkDispatch {
 			
 			object = new SurveyTool(objectID, planet, position, orientation, Template);
 			
+		} else if(Template.startsWith("object/tangible/destructible/shared_gcw_city_construction_beacon")) {
+			
+			float positionY = core.terrainService.getHeight(planet.getID(), position.x, position.z)-1f;
+			Point3D newpoint = new Point3D(position.x,positionY,position.z);				
+			object = new SoldierPatrolPylon(objectID, planet, position, orientation, Template);
+
 		} else if(Template.startsWith("object/tangible")) {
 			
 			object = new TangibleObject(objectID, planet, position, orientation, Template);
