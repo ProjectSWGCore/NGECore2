@@ -33,8 +33,10 @@ import org.apache.mina.core.session.IoSession;
 
 import resources.common.Console;
 import resources.common.FileUtilities;
+import resources.common.Forager;
 import resources.common.Opcodes;
 import resources.common.SpawnPoint;
+import resources.datatables.Posture;
 import resources.datatables.WeaponType;
 import resources.harvest.SurveyTool;
 import resources.objects.building.BuildingObject;
@@ -50,9 +52,13 @@ import main.NGECore;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.clients.Client;
+import engine.resources.container.CreatureContainerPermissions;
+import engine.resources.container.CreaturePermissions;
+import engine.resources.container.NullPermissions;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
+import engine.resources.scene.Quaternion;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
@@ -60,9 +66,11 @@ import engine.resources.service.INetworkRemoteEvent;
 public class DevService implements INetworkDispatch {
 	
 	private NGECore core;
-
+	private long frogBuildingId = 0;
+	
 	public DevService(NGECore core) {
 		this.core = core;
+		loadFrogBuilding();
 	}
 	
 	public void sendCharacterBuilderSUI(CreatureObject creature, int childMenu) 
@@ -75,6 +83,10 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 1, "Character");
 				suiOptions.put((long) 2, "Items");
 				suiOptions.put((long) 3, "Locations");
+				if (System.getProperty("user.name").equals("Charon"))
+					suiOptions.put((long) 4, "Treasure chest test");
+				if (creature.getClient().isGM())
+					suiOptions.put((long) 200, "Get new CBT");
 				break;
 			case 1: // Character
 				suiOptions.put((long) 10, "Set combat level to 90");
@@ -187,11 +199,33 @@ public class DevService implements INetworkDispatch {
 					case 3: // Locations
 						sendCharacterBuilderSUI(player, 11);
 						return; 
-					
+						
+					case 4: // Test
+						TangibleObject treasureContainer = (TangibleObject) NGECore.getInstance().staticService.spawnObject("object/tangible/container/drum/shared_treasure_drum.iff", 
+								owner.getPlanet().getName(), 0L, owner.getWorldPosition().x, owner.getWorldPosition().y, owner.getWorldPosition().z, 0.70F, 0.71F);						
+						treasureContainer.setAttachment("radial_filename", "object/treasureContainer");
+						
+						//treasureContainer.setContainerPermissions(CreatureContainerPermissions.CREATURE_CONTAINER_PERMISSIONS); 
+						treasureContainer.setAttachment("TreasureExtractorID", owner.getObjectID());
+						treasureContainer.add(core.objectService.createObject("object/tangible/inventory/shared_character_inventory.iff", treasureContainer.getPlanet()));
+						String template = "object/tangible/wearables/bracelet/shared_bracelet_s02_r.iff";
+						TangibleObject droppedItem = (TangibleObject) core.objectService.createObject(template, planet);
+//						SWGObject lootedObjectInventory = treasureContainer.getSlottedObject("inventory");
+//						lootedObjectInventory.add(droppedItem);
+//						
+						Forager forager = new Forager();
+						forager.configureTreasureLoot(treasureContainer,(CreatureObject)owner,(short)90);
+						NGECore.getInstance().lootService.DropLoot((CreatureObject)owner, treasureContainer);
+						
+						//treasureContainer.add(droppedItem);
+						return;
+
 					// Character
 					case 10: // Set combat level to 90
-						core.playerService.grantLevel(player, 90); // Commented out until fixed
-					    //core.playerService.giveExperience(player, 999999999);
+						if (player.getAttachment("hasLeveled") == null) {
+							player.setAttachment("hasLeveled", true);
+							core.playerService.grantLevel(player, 90);
+						}
 						return;
 					case 11: // Give 100,000 credits
 						player.setCashCredits(player.getCashCredits() + 100000);
@@ -1062,6 +1096,7 @@ public class DevService implements INetworkDispatch {
 						return;
 						
 					case 110:
+
 						SurveyTool mineralSurveyTool = (SurveyTool) core.objectService.createObject("object/tangible/survey_tool/shared_survey_tool_mineral.iff", planet);
 						mineralSurveyTool.setCustomName("Mineral Survey Device");
 						inventory.add(mineralSurveyTool);
@@ -1310,8 +1345,8 @@ public class DevService implements INetworkDispatch {
 					case 131:
 						TangibleObject gurreckDeed = (TangibleObject) core.objectService.createObject("object/tangible/deed/pet_deed/shared_gurreck_deed.iff", planet);						
 						inventory.add(gurreckDeed);
-						TangibleObject droidekaDeed = (TangibleObject) core.objectService.createObject("object/tangible/deed/pet_deed/shared_deed_droideka.iff", planet);						
-						inventory.add(droidekaDeed);
+						TangibleObject merekDeed = (TangibleObject) core.objectService.createObject("object/tangible/deed/pet_deed/shared_merek_deed.iff", planet);						
+						inventory.add(merekDeed);
 						return;
 					
 					case 140:
@@ -1331,11 +1366,36 @@ public class DevService implements INetworkDispatch {
 						core.lootService.prepInv2(player);
 						return;
 
+					case 200:
+						TangibleObject frog = (TangibleObject) core.objectService.createObject("object/tangible/terminal/shared_terminal_character_builder.iff", planet);
+						
+						inventory.add(frog);
+						return;
 				}
 			}	
 		});
 		
 		core.suiService.openSUIWindow(window);	
+	}
+	
+	private void loadFrogBuilding() {
+		BuildingObject building = (BuildingObject) core.objectService.createObject("object/building/tatooine/shared_association_hall_civilian_tatooine_02.iff", 0, core.terrainService.getPlanetByName("tatooine"), 
+				new Point3D(-3308, 5, 2174), new Quaternion((float) 0.7323, 0, (float) 0.680961, 0));
+		
+		core.simulationService.add(building, building.getPosition().x, building.getPosition().z);
+		
+		this.frogBuildingId = building.getObjectID();
+		
+		building.setAttachment("structureOwner", 0);
+		
+		TangibleObject frog = (TangibleObject) core.objectService.createObject("object/tangible/terminal/shared_terminal_character_builder.iff", core.terrainService.getPlanetByID(building.getPlanetId()));
+		frog.setPosition(new Point3D((float)-1.10475, (float)0.51, (float)-4.3665));
+		frog.setOrientation(new Quaternion((float) 0.9965, 0, (float)-0.09, 0)); 
+		building.getCellByCellNumber(2).add(frog);
+	}
+	
+	public long getFrogBuildingId() {
+		return this.frogBuildingId;
 	}
 	
 	@Override

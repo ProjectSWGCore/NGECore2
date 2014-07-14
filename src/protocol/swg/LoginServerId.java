@@ -25,6 +25,8 @@ import java.nio.ByteOrder;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
+import resources.common.Opcodes;
+
 
 public class LoginServerId extends SWGMessage {
 	
@@ -42,7 +44,7 @@ public class LoginServerId extends SWGMessage {
 		IoBuffer buffer = IoBuffer.allocate(10).order(ByteOrder.LITTLE_ENDIAN);
 		
 		buffer.putShort((short)2);
-		buffer.putInt(0x58C07F21);
+		buffer.putInt(Opcodes.LoginServerId);
 		buffer.putInt(loginServerID);
 		buffer.flip();
 

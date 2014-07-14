@@ -27,11 +27,13 @@ import org.apache.mina.core.buffer.IoBuffer;
 
 
 
+
 import protocol.swg.objectControllerObjects.CommandEnqueue;
 import protocol.swg.objectControllerObjects.DataTransform;
 import protocol.swg.objectControllerObjects.DataTransformWithParent;
 import protocol.swg.objectControllerObjects.ObjControllerObject;
 import protocol.swg.objectControllerObjects.UnknownObjController;
+import resources.common.Opcodes;
 
 public class ObjControllerMessage extends SWGMessage {
 	
@@ -97,7 +99,7 @@ public class ObjControllerMessage extends SWGMessage {
 		IoBuffer buffer = IoBuffer.allocate(10).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.setAutoExpand(true);
 		buffer.putShort((short)5);
-		buffer.putInt(0x80CE5E46);
+		buffer.putInt(Opcodes.ObjControllerMessage);
 		buffer.putInt(update);
 		buffer.put(objControllerObject.serialize());
 		//System.out.println("OBJMSG: " + StringUtilities.bytesToHex(buffer.flip().array()));

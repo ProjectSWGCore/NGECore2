@@ -22,8 +22,8 @@
 package protocol.swg;
 
 import java.nio.ByteOrder;
-
 import org.apache.mina.core.buffer.IoBuffer;
+import resources.common.Opcodes;
 
 public class GuildResponseMessage extends SWGMessage {
 
@@ -46,7 +46,7 @@ public class GuildResponseMessage extends SWGMessage {
 		IoBuffer buffer = IoBuffer.allocate(18 + guildName.length()).order(ByteOrder.LITTLE_ENDIAN);
 		
 		buffer.putShort((short) 4);
-		buffer.putInt(0x32263F20);
+		buffer.putInt(Opcodes.GuildResponseMessage);
 		
 		buffer.putLong(player);
 		buffer.put(getAsciiString(guildName));

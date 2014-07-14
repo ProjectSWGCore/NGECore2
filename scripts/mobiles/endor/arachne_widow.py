@@ -27,7 +27,7 @@ def addTemplate(core):
 	
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_arachne.iff')
+	templates.add('object/mobile/shared_arachne_hatchling.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
@@ -36,6 +36,9 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_damage_poison_3')
+	attacks.add('bm_defensive_3')
+	attacks.add('bm_puncture_1')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

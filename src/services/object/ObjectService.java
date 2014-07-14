@@ -52,6 +52,7 @@ import resources.datatables.PlayerFlags;
 import resources.guild.Guild;
 import resources.harvest.SurveyTool;
 
+import org.apache.commons.lang3.text.WordUtils;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 import org.python.core.Py;
@@ -136,7 +137,8 @@ import services.sui.SUIWindow.Trigger;
 @SuppressWarnings("unused")
 public class ObjectService implements INetworkDispatch {
 
-	private Map<Long, SWGObject> objectList = new ConcurrentHashMap<Long, SWGObject>();
+	//private Map<Long, SWGObject> objectList = new ConcurrentHashMap<Long, SWGObject>();
+	private Map<Long, SWGObject> objectList = new ObjectList<Long, SWGObject>();
 	private NGECore core;
 	private DatabaseConnection databaseConnection;
 	private AtomicLong highestId = new AtomicLong();
@@ -262,7 +264,7 @@ public class ObjectService implements INetworkDispatch {
 				e.printStackTrace();
 			}
 			
-			planet = core.terrainService.getPlanetByID(0);
+			planet = core.terrainService.getPlanetByID(1);
 		}
 		
 		if(Template.startsWith("object/creature")) {
@@ -425,7 +427,13 @@ public class ObjectService implements INetworkDispatch {
 			loadServerTemplateTasks.add(() -> loadServerTemplate(pointer));
 		}
 		
-		objectList.put(objectID, object);
+		SWGObject ret = objectList.put(objectID, object);
+		
+		//if (ret != null && !ret.getTemplate().equals(object.getTemplate())) {
+		if (ret == null) {
+			//System.err.println("ObjectService: Detected duplicate Id.  Assigning new one.")
+			object = createObject(Template, objectID, planet, position, orientation, customServerTemplate, overrideSnapshot, loadServerTemplate);
+		}
 		
 		return object;
 	}
@@ -606,7 +614,7 @@ public class ObjectService implements INetworkDispatch {
 			for(SWGObject obj : objectList.values()) {
 				if(obj.getCustomName() == null)
 					continue;
-				if(obj.getCustomName().equals(customName))
+				if(obj.getCustomName().equalsIgnoreCase(customName))
 					return obj;
 			}
 			
@@ -621,7 +629,7 @@ public class ObjectService implements INetworkDispatch {
 				continue;
 			}
 			
-			if (object.getCustomName() != null && customName.length() > 0 && object.getCustomName().equals(customName)) {
+			if (object.getCustomName() != null && customName.length() > 0 && object.getCustomName().equalsIgnoreCase(customName)) {
 				return object;
 			}
 		}
@@ -640,7 +648,7 @@ public class ObjectService implements INetworkDispatch {
 					continue;
 				if(obj.getCustomName() == null)
 					continue;
-				if(obj.getCustomName().startsWith(customName))
+				if(obj.getCustomName().startsWith(customName) || obj.getCustomName().toUpperCase().startsWith(WordUtils.capitalize(customName)))
 					return obj;
 			}
 			
@@ -655,7 +663,7 @@ public class ObjectService implements INetworkDispatch {
 				continue;
 			}
 			
-			if (object.getCustomName() != null && customName.length() > 0 && object.getCustomName().startsWith(customName)) {
+			if (object.getCustomName() != null && customName.length() > 0 && (object.getCustomName().startsWith(customName) || object.getCustomName().toUpperCase().startsWith(WordUtils.capitalize(customName)))) {
 				return object;
 			}
 		}

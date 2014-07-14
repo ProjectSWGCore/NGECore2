@@ -23,6 +23,8 @@ package protocol.swg;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
+import resources.common.Opcodes;
+
 
 public class ErrorMessage extends SWGMessage {
 
@@ -42,11 +44,11 @@ public class ErrorMessage extends SWGMessage {
 		IoBuffer result = IoBuffer.allocate(11 + errorType.length() + errorMessage.length());
 		
 		result.putShort((short)3);
-		result.putInt(0xB5ABF91A);
+		result.putInt(Opcodes.ErrorMessage);
 		result.put(getAsciiString(errorType));
 		result.put(getAsciiString(errorMessage));
 		result.put((byte)0);
 		
-		return result;
+		return result.flip();
 	}
 }

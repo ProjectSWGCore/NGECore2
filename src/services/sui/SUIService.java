@@ -82,8 +82,11 @@ public class SUIService implements INetworkDispatch {
 				SWGObject target = core.objectService.getObject(request.getTargetId());
 				SWGObject owner = core.objectService.getObject(request.getCharacterId());
 	
-				if(target == null || owner == null)
+				if(target == null || owner == null || owner.getClient() == null)
 					return;
+				
+//				if (getRadialFilename(target).equals("noradialoptions"))
+//					return;
 				
 				if (target instanceof HarvesterObject){
 					HarvesterObject harvester = (HarvesterObject) target;
@@ -145,12 +148,6 @@ public class SUIService implements INetworkDispatch {
 					sendRadial(owner, target, request.getRadialOptions(), request.getRadialCount());
 					return;
 				}
-			
-				if(target.getTemplate().contains("object/tangible/wearables") && ((CreatureObject)owner).hasAbility("admin"))
-				{
-					core.scriptService.callScript("scripts/radial/", "item/recolorable", "createRadial", core, owner, target, request.getRadialOptions());
-					if(getRadialFilename(target).equals("default")) sendRadial(owner, target, request.getRadialOptions(), request.getRadialCount());
-				}
 				
 				core.scriptService.callScript("scripts/radial/", getRadialFilename(target), "createRadial", core, owner, target, request.getRadialOptions());
 				if(getRadialFilename(target).equals("default"))
@@ -192,12 +189,6 @@ public class SUIService implements INetworkDispatch {
 						core.scriptService.callScript("scripts/radial/", "structure/moveable", "handleSelection", core, owner, target, objMenuSelect.getSelection());
 						return;
 				}
-				
-				
-				if(target.getTemplate().contains("object/tangible/wearables") && ((CreatureObject)owner).hasAbility("admin"))
-				{
-					core.scriptService.callScript("scripts/radial/", "item/recolorable", "handleSelection", core, owner, target, objMenuSelect.getSelection());
-				}
 
 				core.scriptService.callScript("scripts/radial/", getRadialFilename(target), "handleSelection", core, owner, target, objMenuSelect.getSelection());
 
@@ -206,7 +197,7 @@ public class SUIService implements INetworkDispatch {
 		});
 		
 		swgOpcodes.put(Opcodes.SuiEventNotification, new INetworkRemoteEvent() {
-
+			
 			@Override
 			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
 				
@@ -232,7 +223,7 @@ public class SUIService implements INetworkDispatch {
 					return;
 
 				PyObject func = window.getFunctionByEventId(suiEvent.getEventType());
-				
+
 				if(func != null)
 					func.__call__(Py.java2py(owner), Py.java2py(window), Py.java2py(suiEvent.getEventType()), Py.java2py(suiEvent.getReturnList()));
 				

@@ -35,6 +35,7 @@ import resources.common.collidables.AbstractCollidable.ExitEvent;
 import resources.objects.creature.CreatureObject;
 import services.TerrainService;
 import services.SimulationService.MoveEvent;
+import tools.DevLog;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -278,7 +279,7 @@ public class DynamicSpawnArea extends SpawnArea {
 		String template = spawnGroup.getMobiles().get(spawnIndex);
 		MobileTemplate mobileTemplate = NGECore.getInstance().spawnService.getMobileTemplate(template);
 		if (mobileTemplate==null){
-			System.out.println("mobileTemplate==null for template " + template);
+			DevLog.debugout("Charon", "Dynamic Spawn Area", "mobileTemplate==null for template " + template); 
 			return null;
 		}
 		

@@ -26,12 +26,12 @@ def addTemplate(core):
 	mobileTemplate.setBoneAmount(35)
 	mobileTemplate.setSocialGroup("hanadak")
 	mobileTemplate.setAssistRange(12)
-	mobileTemplate.setOptionsBitmask(128)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	mobileTemplate.setStalker(True)
 	
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_hanadak.iff')
+	templates.add('object/mobile/shared_elder_hanadak_matriarch.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
@@ -40,6 +40,9 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_dampen_pain_4')
+	attacks.add('bm_shaken_2')
+	attacks.add('bm_stomp_4')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

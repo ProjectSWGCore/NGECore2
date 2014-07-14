@@ -34,5 +34,6 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
+	mobileTemplate.setPCDTemplate('object/intangible/pet/shared_gurreck_hue.iff')
 	core.spawnService.addMobileTemplate('pet_gurreck', mobileTemplate)
 	return

@@ -21,6 +21,7 @@
  ******************************************************************************/
 package services.ai.states;
 
+import engine.resources.container.CreatureContainerPermissions;
 import main.NGECore;
 import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
@@ -38,7 +39,11 @@ public class DeathState extends AIState {
 		CreatureObject killer = (CreatureObject)actor.getCreature().getKiller();
 		if (killer==null)
 			killer = actor.getHighestDamageDealer();
-		NGECore.getInstance().lootService.DropLoot(killer,(TangibleObject)(actor.getCreature()));			
+		actor.getCreature().setContainerPermissions(CreatureContainerPermissions.CREATURE_CONTAINER_PERMISSIONS);
+		NGECore.getInstance().lootService.DropLoot(killer,(TangibleObject)(actor.getCreature()));
+		
+		actor.destroyActor(); // to prevent standing up right after death
+		
 		return 0;
 	}
 
