@@ -34,8 +34,6 @@ import java.util.function.Function;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import com.sleepycat.persist.model.Persistent;
-
 import engine.resources.objects.Baseline;
 import engine.resources.objects.Delta;
 import engine.resources.objects.IDelta;
@@ -43,7 +41,6 @@ import engine.resources.objects.SWGObject;
 
 /* A SWGMap element should extend Delta or implement IDelta */
 
-@Persistent
 public class SWGMap<K, V> implements Map<K, V>, Serializable {
 	
 	private static final long serialVersionUID = 1L;
