@@ -346,7 +346,6 @@ public class NGECore {
 		skillModService = new SkillModService(this);
 		equipmentService = new EquipmentService(this);
 		entertainmentService = new EntertainmentService(this);
-		devService = new DevService(this);
 		conversationService = new ConversationService(this);
 		bazaarService = new BazaarService(this);
 		housingService = new HousingService(this);
@@ -565,6 +564,7 @@ public class NGECore {
 		
 		browserService = new BrowserService(this);
 		//battlefieldService = new BattlefieldService(this);
+		devService = new DevService(this);
 		
 		DevLogQueuer devLogQueuer = new DevLogQueuer();
 		

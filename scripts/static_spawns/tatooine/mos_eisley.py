@@ -320,7 +320,7 @@ def addPlanetSpawns(core, planet):
 	
 
 	#Profession Counselor
-	stcSvc.spawnObject('object/mobile/shared_respec_seller_f_1.iff', 'tatooine', long(0), float(3533.14), float(5), float(-4788.86), float(-0.3327), float(0.9288))
+	#stcSvc.spawnObject('object/mobile/shared_respec_seller_f_1.iff', 'tatooine', long(0), float(3533.14), float(5), float(-4788.86), float(-0.3327), float(0.9288))
 	
 	#Junk Dealers
 	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_01.iff', 'tatooine', long(0), float(3355), float(5), float(-4823), float(0.71), float(0.71))
