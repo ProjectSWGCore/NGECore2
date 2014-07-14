@@ -137,7 +137,8 @@ import services.sui.SUIWindow.Trigger;
 @SuppressWarnings("unused")
 public class ObjectService implements INetworkDispatch {
 
-	private Map<Long, SWGObject> objectList = new ConcurrentHashMap<Long, SWGObject>();
+	//private Map<Long, SWGObject> objectList = new ConcurrentHashMap<Long, SWGObject>();
+	private Map<Long, SWGObject> objectList = new ObjectList<Long, SWGObject>();
 	private NGECore core;
 	private DatabaseConnection databaseConnection;
 	private AtomicLong highestId = new AtomicLong();
@@ -426,7 +427,13 @@ public class ObjectService implements INetworkDispatch {
 			loadServerTemplateTasks.add(() -> loadServerTemplate(pointer));
 		}
 		
-		objectList.put(objectID, object);
+		SWGObject ret = objectList.put(objectID, object);
+		
+		//if (ret != null && !ret.getTemplate().equals(object.getTemplate())) {
+		if (ret == null) {
+			//System.err.println("ObjectService: Detected duplicate Id.  Assigning new one.")
+			object = createObject(Template, objectID, planet, position, orientation, customServerTemplate, overrideSnapshot, loadServerTemplate);
+		}
 		
 		return object;
 	}
