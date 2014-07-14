@@ -130,7 +130,7 @@ public class LoginService implements INetworkDispatch{
 					session.write(disconnect);
 					
 					// Closing the session for some reason will not show any error messages, even if write messages are queued.. 
-					//As result, the infinite "Connecting to galaxy..." loop., also it randomly denies any logins from that client for some reason
+					//As result, the infinite "Connection to the login server is now open..." loop., also it randomly denies any logins from that client for some reason
 					return;
 				}
 				
