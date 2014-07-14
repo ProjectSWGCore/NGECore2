@@ -10,7 +10,7 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('tatooine_wayfar_spy')
+	mobileTemplate.setCreatureName('tatooine_valarian_hacker')
 	mobileTemplate.setLevel(19)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
@@ -18,8 +18,8 @@ def addTemplate(core):
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(1)
-	mobileTemplate.setSocialGroup("wayfar spy")
-	mobileTemplate.setAssistRange(3)
+	mobileTemplate.setSocialGroup("valarian_hacker")
+	mobileTemplate.setAssistRange(4)
 	mobileTemplate.setStalker(False)
 	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
@@ -52,5 +52,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('rangedShotpistol')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('wayfar_spy', mobileTemplate)
+	core.spawnService.addMobileTemplate('valarian_hacker', mobileTemplate)
 	return

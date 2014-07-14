@@ -23,7 +23,6 @@ def addTemplate(core):
 	mobileTemplate.setStalker(False)
 	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)	
 	
-	
 	templates = Vector()
 	templates.add('object/mobile/shared_tusken_raider.iff')
 	mobileTemplate.setTemplates(templates)

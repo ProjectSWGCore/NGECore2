@@ -10,7 +10,7 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('fighting_romo_vax')
+	mobileTemplate.setCreatureName('tatooine_romo_vax_henchman')
 	mobileTemplate.setLevel(20)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
@@ -23,9 +23,14 @@ def addTemplate(core):
 	mobileTemplate.setStalker(False)
 	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
-	
-	templates = Vector()
-	templates.add('object/mobile/shared_dressed_trader_thug_male_human_01.iff') #need to find correct template
+	templates = Vector()  #need to find correct template
+	templates.add('object/mobile/shared_dressed_trader_thug_female_human_01.iff')
+	templates.add('object/mobile/shared_dressed_trader_thug_female_human_02.iff')
+	templates.add('object/mobile/shared_dressed_trader_thug_female_human_03.iff')
+	templates.add('object/mobile/shared_dressed_trader_thug_female_twk_01.iff')
+	templates.add('object/mobile/shared_dressed_trader_thug_female_twk_02.iff')
+	templates.add('object/mobile/shared_dressed_trader_thug_male_human_02.iff')
+	templates.add('object/mobile/shared_dressed_trader_thug_male_human_03.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
@@ -37,5 +42,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('rangedShot')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('fighting_romo_vax', mobileTemplate)
+	core.spawnService.addMobileTemplate('romovax_henchman', mobileTemplate)
 	return

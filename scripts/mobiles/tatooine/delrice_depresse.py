@@ -10,31 +10,29 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('tusken_observer')
-	mobileTemplate.setLevel(32)
+	mobileTemplate.setCreatureName('jabbas_palace_delrice_capreese')
+	mobileTemplate.setLevel(17)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
-	mobileTemplate.setMinSpawnDistance(4)
-	mobileTemplate.setMaxSpawnDistance(8)
-	mobileTemplate.setDeathblow(True)
+	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(1)
-	mobileTemplate.setSocialGroup("tusken raider")
+	mobileTemplate.setSocialGroup("jabba")
 	mobileTemplate.setAssistRange(6)
-	mobileTemplate.setStalker(False)
-	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
+	mobileTemplate.setStalker(False)	
+	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_tusken_raider.iff')
+	templates.add('object/mobile/shared_ithorian_male.iff')
 	mobileTemplate.setTemplates(templates)
-	
+
 	weaponTemplates = Vector()
-	weapontemplate = WeaponTemplate('object/weapon/ranged/rifle/shared_rifle_tusken_generic.iff', WeaponType.RIFLE, 1.0, 24, 'kinetic')
+	weapontemplate = WeaponTemplate('object/weapon/melee/unarmed/shared_unarmed_default.iff', WeaponType.UNARMED, 1.0, 6, 'kinetic')
 	weaponTemplates.add(weapontemplate)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
-	mobileTemplate.setDefaultAttack('rangedShotrifle')
+	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('tusken_observer', mobileTemplate)
+	core.spawnService.addMobileTemplate('jabbas_palace_delrice_capreese', mobileTemplate)
 	return
