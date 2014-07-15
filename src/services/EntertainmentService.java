@@ -702,7 +702,10 @@ public class EntertainmentService implements INetworkDispatch {
 					//spectator.setMoodAnimation("neutral");
 					performer.removeSpectator(spectator);
 	
-					if (spectator.getInspirationTick().cancel(true))
+					if (spectator.getInspirationTick() != null) 
+						spectator.getInspirationTick().cancel(true);
+					
+					if (spectator.getSpectatorTask() != null)
 						spectator.getSpectatorTask().cancel(true);
 					
 				}
