@@ -66,6 +66,7 @@ import com.sleepycat.persist.model.PrimaryKey;
 
 import protocol.swg.CmdSceneReady;
 import protocol.swg.CmdStartScene;
+import protocol.swg.ErrorMessage;
 import protocol.swg.HeartBeatMessage;
 import protocol.swg.ObjControllerMessage;
 import protocol.swg.ParametersMessage;
@@ -642,32 +643,28 @@ public class ObjectService implements INetworkDispatch {
 			return null;
 		}
 		
-		synchronized(objectList) {
-			for(SWGObject obj : objectList.values()) {
-				if(obj == null)
-					continue;
-				if(obj.getCustomName() == null)
-					continue;
-				if(obj.getCustomName().startsWith(customName) || obj.getCustomName().toUpperCase().startsWith(WordUtils.capitalize(customName)))
-					return ((obj instanceof CreatureObject) ? obj : null);
+		if (customName.contains(" "))
+			customName = customName.split(" ")[0];
+		
+		try {
+			PreparedStatement ps = core.getDatabase1().preparedStatement("SELECT * FROM characters WHERE \"firstName\"=?");
+			ps.setString(1, customName);
+			ResultSet resultSet = ps.executeQuery();
+
+			while (resultSet.next()) {
+				long objectId = resultSet.getLong("id");
+				SWGObject object = getObject(objectId);
+				
+				System.out.println("Got object id of " + objectId);
+				if (object == null)
+					object = getCreatureFromDB(objectId);
+				
+				return object;
 			}
-			
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
 		
-		ODBCursor cursor = core.getSWGObjectODB().getCursor();
-		
-		while (cursor.hasNext()) {
-			SWGObject object = (SWGObject) cursor.next();
-			
-			if (object == null) {
-				continue;
-			}
-			
-			if (object.getCustomName() != null && customName.length() > 0 && (object.getCustomName().startsWith(customName) || object.getCustomName().toUpperCase().startsWith(WordUtils.capitalize(customName)))) {
-				return ((object instanceof CreatureObject) ? object : null);
-			}
-		}
-		cursor.close();
 		return null;
 	}
 	
@@ -990,6 +987,11 @@ public class ObjectService implements INetworkDispatch {
 					creature = getCreatureFromDB(objectId);
 					if(creature == null) {
 						System.out.println("Cant get creature from db");
+					} else {
+						if (creature.getCustomName() == null || creature.getCustomName() == "") {
+							System.out.println("Player with ObjID of " + creature.getObjectID() + " tried logging in but has a null/empty name!");
+							return;
+						}
 					}
 					
 				} else {
@@ -1001,7 +1003,6 @@ public class ObjectService implements INetworkDispatch {
 					if(creature.getAttachment("disconnectTask") != null && creature.getClient() != null && !creature.getClient().getSession().isClosing())
 						return;
 					
-
 				}
 				if(creature.getAttachment("disconnectTask") != null) {
 					((ScheduledFuture<?>) creature.getAttachment("disconnectTask")).cancel(true);
