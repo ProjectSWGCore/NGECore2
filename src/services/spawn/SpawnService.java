@@ -107,8 +107,6 @@ public class SpawnService {
 			creature.setLootGroups(mobileTemplate.getLootGroups());
 		
 		creature.setOptionsBitmask(mobileTemplate.getOptionsBitmask());
-		if (mobileTemplate.getConversationFileName().length()>0)
-			creature.setAttachment("conversationFile",mobileTemplate.getConversationFileName());
 				
 		creature.setFaction(mobileTemplate.getFaction());
 		creature.setFactionStatus(mobileTemplate.getFactionStatus());
@@ -211,7 +209,11 @@ public class SpawnService {
 
 		AIActor actor = new AIActor(creature, creature.getPosition(), scheduler);
 		creature.setAttachment("AI", actor);
-		creature.setAttachment("radial_filename", "npc/mobile");
+		if (mobileTemplate.getConversationFileName().length()>0){
+			creature.setAttachment("radial_filename", "object/conversation");
+			creature.setAttachment("conversationFile", mobileTemplate.getConversationFileName());
+			}
+		else  creature.setAttachment("radial_filename", "npc/mobile");
 		actor.setMobileTemplate(mobileTemplate);
 		
 	
