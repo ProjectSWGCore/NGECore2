@@ -649,7 +649,7 @@ public class ObjectService implements INetworkDispatch {
 				if(obj.getCustomName() == null)
 					continue;
 				if(obj.getCustomName().startsWith(customName) || obj.getCustomName().toUpperCase().startsWith(WordUtils.capitalize(customName)))
-					return obj;
+					return ((obj instanceof CreatureObject) ? obj : null);
 			}
 			
 		}
@@ -664,7 +664,7 @@ public class ObjectService implements INetworkDispatch {
 			}
 			
 			if (object.getCustomName() != null && customName.length() > 0 && (object.getCustomName().startsWith(customName) || object.getCustomName().toUpperCase().startsWith(WordUtils.capitalize(customName)))) {
-				return object;
+				return ((object instanceof CreatureObject) ? object : null);
 			}
 		}
 		cursor.close();
