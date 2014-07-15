@@ -207,6 +207,7 @@ public class CreatureMessageBuilder extends TangibleMessageBuilder {
 
 	}
 
+	@SuppressWarnings("deprecation")
 	public IoBuffer buildBaseline6() {
 		CreatureObject creature = (CreatureObject) object;
 
