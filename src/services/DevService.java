@@ -99,11 +99,11 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 23, "Jedi Items");
 				suiOptions.put((long) 26, "Installations");
 				suiOptions.put((long) 110, "Survey Devices");
+				suiOptions.put((long) 130, "Vehicle Testing Deeds");
 				if(creature.getPlayerObject().getProfession().equals("bounty_hunter_1a")) suiOptions.put((long) 123, "Tracking Droids");
 				if (creature.getClient().isGM()) {
 					suiOptions.put((long) 120, "House Deeds");
 					suiOptions.put((long) 125, "Crafting Tools");
-					suiOptions.put((long) 130, "Vehicle Deeds");
 					suiOptions.put((long) 131, "Pet Deeds");
 					suiOptions.put((long) 121, "Sandbox City");
 					if(creature.getPlayerObject().getProfession().equals("trader_0a") || creature.getPlayerObject().getProfession().equals("trader_0b") || creature.getPlayerObject().getProfession().equals("trader_0c") || creature.getPlayerObject().getProfession().equals("trader_0d"))
