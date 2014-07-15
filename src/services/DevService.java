@@ -404,8 +404,8 @@ public class DevService implements INetworkDispatch {
 						return;
 					case 43:
 						TangibleObject drink = (TangibleObject) core.objectService.createObject("object/tangible/food/crafted/shared_drink_breath_of_heaven.iff", planet);
-						drink.setFloatAttribute("cat_stat_mod_bonus.@stat_n:constitution_modified", 100);
-						drink.setFloatAttribute("cat_stat_mod_bonus.@stat_n:dodge", 3);
+						drink.setIntAttribute("cat_stat_mod_bonus.@stat_n:constitution_modified", 80);
+ +						drink.setIntAttribute("cat_skill_mod_bonus.@stat_n:dodge", 3);
 						inventory.add(drink);
 						return;
 					case 50: // [Items] Assault Armor
