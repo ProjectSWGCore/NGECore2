@@ -1103,7 +1103,7 @@ public class ObjectService implements INetworkDispatch {
 
 						// Find out what friends are online/offline
 						for (String friend : ghost.getFriendList()) {
-							SWGObject friendObject = core.chatService.getObjectByFirstName(friend);
+							SWGObject friendObject = core.objectService.getObjectByFirstName(friend);
 							
 							if(friendObject != null && friendObject.isInQuadtree()) {
 								ChatFriendsListUpdate onlineNotifyStatus = new ChatFriendsListUpdate(friend, (byte) 1);
