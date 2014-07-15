@@ -655,7 +655,6 @@ public class ObjectService implements INetworkDispatch {
 				long objectId = resultSet.getLong("id");
 				SWGObject object = getObject(objectId);
 				
-				System.out.println("Got object id of " + objectId);
 				if (object == null)
 					object = getCreatureFromDB(objectId);
 				
