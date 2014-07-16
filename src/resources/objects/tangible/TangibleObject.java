@@ -48,7 +48,6 @@ import resources.objects.ObjectMessageBuilder;
 import resources.objects.SWGList;
 import resources.objects.SWGSet;
 import resources.objects.creature.CreatureObject;
-import tools.DevLog;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.IDManagerVisitor;
 import engine.clients.Client;

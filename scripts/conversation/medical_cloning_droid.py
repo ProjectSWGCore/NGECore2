@@ -31,19 +31,10 @@ def startConversation(core, actor, npc):
 			cloningFee = 5000
 			
 		convSvc.sendConversationMessage(actor, npc, OutOfBand.ProsePackage("@conversation/clone_droid:s_6", int(cloningFee)))
-		prose1 = ProsePackage('conversation/clone_droid', 's_8')
-		outOfBand2 = OutOfBand()
-		outOfBand2.addProsePackage(prose1)
-		prose2 = ProsePackage('conversation/clone_droid', 's_12')
-		outOfBand3 = OutOfBand()
-		outOfBand3.addProsePackage(prose2)
-		option1 = ConversationOption(outOfBand2, 0)
-		option2 = ConversationOption(outOfBand3, 1)
-
 		
 		options = Vector()
-		options.add(option1)
-		options.add(option2)
+		options.add(ConversationOption(OutOfBand.ProsePackage('@conversation/clone_droid:s_8'), 0))
+		options.add(ConversationOption(OutOfBand.ProsePackage('@conversation/clone_droid:s_12'), 1))
 
 		convSvc.sendConversationOptions(actor, npc, options, handleFirstScreen)
 		return
@@ -56,18 +47,11 @@ def handleFirstScreen(core, actor, npc, selection):
 	
 	convSvc = core.conversationService
 	if selection == 0:
-		prose = ProsePackage('conversation/clone_droid', 's_10')
-		outOfBand = OutOfBand()
-		outOfBand.addProsePackage(prose)
-		convSvc.sendConversationMessage(actor, npc, outOfBand)
-		prose2 = ProsePackage('conversation/clone_droid', 's_12')
-		outOfBand2 = OutOfBand()
-		outOfBand2.addProsePackage(prose2)
-		option1 = ConversationOption(outOfBand2, 0)
 
-		
+		convSvc.sendConversationMessage(actor, npc, OutOfBand.ProsePackage('@conversation/clone_droid:s_10'))
+
 		options = Vector()
-		options.add(option1)
+		options.add(ConversationOption(OutOfBand.ProsePackage('@conversation/clone_droid:s_12'), 1))
 
 		convSvc.sendConversationOptions(actor, npc, options, handleSecondScreen)
 		

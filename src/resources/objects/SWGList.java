@@ -23,7 +23,6 @@ package resources.objects;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -39,7 +38,6 @@ import java.util.stream.Stream;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.python.google.common.collect.Lists;
 
-import engine.resources.common.StringUtilities;
 import engine.resources.objects.Baseline;
 import engine.resources.objects.Delta;
 import engine.resources.objects.IDelta;

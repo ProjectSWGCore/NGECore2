@@ -7,6 +7,8 @@ def setup(core, object):
 	objSvc.createChildObject(object, 'object/tangible/terminal/shared_terminal_cloning.iff', float(1), float(-0.05), float(2.5), float(0), float(1), 2)
 	objSvc.createChildObject(object, 'object/tangible/terminal/shared_terminal_cloning.iff', float(1), float(-0.05), float(-1.35), float(1), float(0), 2)
 	
+	objSvc.createChildObject(object, 'object/mobile/shared_21b_surgical_droid.iff', float(-3.2), float(0.1), float(0.6), float(0), float(0), 2)
+		
 	spawnPoints = Vector()
 	spawnPoints.add(SpawnPoint(-16.6514, -4.29167, -10.4976, 0.709453, 0.704753, 4))
 	spawnPoints.add(SpawnPoint(-16.5965, -4.29167, -14.1652, 0.721346, 0.692575, 4))

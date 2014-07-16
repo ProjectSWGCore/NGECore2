@@ -22,6 +22,7 @@
 package services;
 
 import java.util.Map;
+
 import protocol.swg.LaunchBrowserMessage;
 import resources.objects.creature.CreatureObject;
 import main.NGECore;
@@ -30,6 +31,7 @@ import engine.resources.service.INetworkRemoteEvent;
 
 public class BrowserService implements INetworkDispatch {
 	
+	@SuppressWarnings("unused")
 	private NGECore core;
 	
 	public BrowserService(NGECore core) {

@@ -56,6 +56,7 @@ import services.ai.AIActor;
  * @author Charon
  */
 
+@SuppressWarnings("unused") 
 public class ResourceService implements INetworkDispatch {
 	
 	private NGECore core;
