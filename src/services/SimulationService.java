@@ -80,6 +80,7 @@ import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
 import resources.objects.harvester.HarvesterObject;
+import resources.objects.installation.InstallationObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.common.*;
@@ -281,11 +282,61 @@ public class SimulationService implements INetworkDispatch {
 	public Vector<CreatureObject> getAllNearNPCs(int distance, SWGObject value ){
 		Vector<CreatureObject> foundCreatures = new Vector<CreatureObject>();
 		core.simulationService.get(value.getPlanet(), value.getWorldPosition().x, value.getWorldPosition().z, distance).stream().forEach((objecta) -> { 
-			if (objecta instanceof CreatureObject)
+			if (objecta instanceof CreatureObject && objecta!=value)
 				foundCreatures.add((CreatureObject)objecta);
 			}
 		);
 		return foundCreatures;
+	}
+	
+	public Vector<CreatureObject> getAllNearNonSameFactionNPCs(int distance, SWGObject value ){
+		Vector<CreatureObject> foundCreatures = new Vector<CreatureObject>();
+		core.simulationService.get(value.getPlanet(), value.getWorldPosition().x, value.getWorldPosition().z, distance).stream().forEach((objecta) -> {
+
+			if (value instanceof CreatureObject){
+				CreatureObject npc = (CreatureObject) value;
+				if (objecta instanceof CreatureObject && objecta!=npc && ((CreatureObject) objecta).getFaction().equals(npc.getFaction()))
+					foundCreatures.add((CreatureObject)objecta);
+			}
+
+			if (value instanceof InstallationObject){
+				InstallationObject ins = (InstallationObject) value;
+				if (objecta instanceof CreatureObject && objecta!=ins && ((CreatureObject) objecta).getFaction().equals(ins.getFaction()))
+					foundCreatures.add((CreatureObject)objecta);
+			}
+		}
+		);
+		return foundCreatures;
+	}
+	
+	public Vector<TangibleObject> getAllNearTANOs(int distance, SWGObject value ){
+		Vector<TangibleObject> foundTANOs = new Vector<TangibleObject>();
+		core.simulationService.get(value.getPlanet(), value.getWorldPosition().x, value.getWorldPosition().z, distance).stream().forEach((objecta) -> { 
+			if (objecta instanceof TangibleObject && objecta!=value)
+				foundTANOs.add((TangibleObject)objecta);
+			}
+		);
+		return foundTANOs;
+	}
+	
+	public Vector<TangibleObject> getAllNearNonSameFactionTANOs(int distance, SWGObject value ){
+		Vector<TangibleObject> foundTANOs = new Vector<TangibleObject>();
+		core.simulationService.get(value.getPlanet(), value.getWorldPosition().x, value.getWorldPosition().z, distance).stream().forEach((objecta) -> { 
+	
+			if (value instanceof CreatureObject){
+				CreatureObject npc = (CreatureObject) value;
+				if (objecta instanceof CreatureObject && objecta!=npc && ((CreatureObject) objecta).getFaction().equals(npc.getFaction()))
+					foundTANOs.add((TangibleObject)objecta);
+			}
+	
+			if (value instanceof InstallationObject){
+				InstallationObject ins = (InstallationObject) value;
+				if (objecta instanceof CreatureObject && objecta!=ins && ((CreatureObject) objecta).getFaction().equals(ins.getFaction()))
+					foundTANOs.add((TangibleObject)objecta);
+			}
+		}
+		);
+		return foundTANOs;
 	}
 		
 	public boolean move(SWGObject object, int oldX, int oldZ, int newX, int newZ) {

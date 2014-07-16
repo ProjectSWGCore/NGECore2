@@ -30,6 +30,7 @@ import engine.resources.scene.Quaternion;
 import resources.common.SpawnPoint;
 import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
+import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 import services.ai.AIActor;
 
@@ -54,6 +55,7 @@ public abstract class AIState {
 		public static final byte PATROL = 5;
 		public static final byte LOITER = 6;
 		public static final byte FOLLOW = 7;
+		public static final byte ATTACK = 8;
 	
 	}
 	
@@ -421,7 +423,7 @@ public abstract class AIState {
 			actor.setFollowObject(null);
 			return;
 		}
-		CreatureObject target = actor.getFollowObject();
+		TangibleObject target = actor.getFollowObject();
 		float speed = (float) creature.getRunSpeed();
 		float maxDistance = 6;
 		if(creature.getWeaponId() != 0) {
@@ -467,7 +469,7 @@ public abstract class AIState {
 			actor.setFollowObject(null);
 			return;
 		}
-		CreatureObject target = actor.getFollowObject();
+		TangibleObject target = actor.getFollowObject();
 		float speed = (float) creature.getWalkSpeed();
 		float maxDistance = 6;
 		if(creature.getWeaponId() != 0) {
@@ -544,7 +546,7 @@ public abstract class AIState {
 			actor.setFollowObject(null);
 			return;
 		}
-		CreatureObject target = actor.getFollowObject();
+		TangibleObject target = actor.getFollowObject();
 		float speed = (float) creature.getWalkSpeed();
 		float maxDistance = 6;
 		if(creature.getWeaponId() != 0) {
@@ -666,7 +668,7 @@ public abstract class AIState {
 			actor.setFollowObject(null);
 			return;
 		}
-		CreatureObject target = actor.getFollowObject();
+		TangibleObject target = actor.getFollowObject();
 		float speed = (float) creature.getRunSpeed();
 		float maxDistance = 6;
 		if(creature.getWeaponId() != 0) {

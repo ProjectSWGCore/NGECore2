@@ -54,6 +54,8 @@ public class AIService {
 		
 		// TODO: implement cell pathfinding, returning straight line for now
 		Vector<Point3D> path = new Vector<Point3D>();
+		if (pointA==null || pointB==null)
+			return path;		
 		path.add(pointA);
 		float x = pointB.x - 1 + new Random().nextFloat();
 		float z = pointB.z - 1 + new Random().nextFloat();

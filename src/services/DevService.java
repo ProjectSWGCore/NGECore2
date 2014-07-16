@@ -71,6 +71,14 @@ public class DevService implements INetworkDispatch {
 	public DevService(NGECore core) {
 		this.core = core;
 		loadFrogBuilding();
+		// Server developers quick frog access
+		if (System.getProperty("user.name").equals("Charon")){
+			TangibleObject frog = (TangibleObject) core.objectService.createObject("object/tangible/terminal/shared_terminal_character_builder.iff", core.terrainService.getPlanetByName("tatooine"));			
+			frog.setPosition(new Point3D((float)3524, (float)4, (float)-4802));
+			frog.setOrientation(new Quaternion((float) 0.9965, 0, (float)-0.09, 0));
+			core.simulationService.add(frog, frog.getPosition().x, frog.getPosition().z, true);
+		}
+			
 	}
 	
 	public void sendCharacterBuilderSUI(CreatureObject creature, int childMenu) 
@@ -85,6 +93,8 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 3, "Locations");
 				if (System.getProperty("user.name").equals("Charon"))
 					suiOptions.put((long) 4, "Treasure chest test");
+				if (System.getProperty("user.name").equals("Charon"))
+					suiOptions.put((long) 6, "Dearic attack camp");
 				if (creature.getClient().isGM())
 					suiOptions.put((long) 200, "Get new CBT");
 				break;
@@ -219,7 +229,12 @@ public class DevService implements INetworkDispatch {
 						
 						//treasureContainer.add(droppedItem);
 						return;
-
+					
+					case 6: // Locations -890,4, -2994  475,6,-3019
+						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("talus"), new Point3D(475,6,-3019), player.getOrientation(), null);
+						core.invasionService.testPylons();
+						return;
+					
 					// Character
 					case 10: // Set combat level to 90
 						if (player.getAttachment("hasLeveled") == null) {

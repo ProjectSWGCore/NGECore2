@@ -62,6 +62,7 @@ public class MobileTemplate implements Cloneable {
 	private List<LootGroup> lootGroups = new ArrayList<LootGroup>();
 	private String PCDTemplate="";
 	private String conversationFileName="";
+	private boolean AIEnabled = true;
 
 	
 	public Vector<String> getTemplates() {
@@ -368,6 +369,14 @@ public class MobileTemplate implements Cloneable {
 
 	public void setConversationFileName(String conversationFileName) {
 		this.conversationFileName = conversationFileName;
+	}
+
+	public boolean isAIEnabled() {
+		return AIEnabled;
+	}
+
+	public void setAIEnabled(boolean aIEnabled) {
+		AIEnabled = aIEnabled;
 	}
 	
 }

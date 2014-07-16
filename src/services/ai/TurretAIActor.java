@@ -37,16 +37,12 @@ import engine.resources.scene.Quaternion;
 import resources.datatables.Options;
 import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
+import resources.objects.installation.InstallationObject;
 import resources.objects.tangible.TangibleObject;
-import services.ai.states.AIState;
-import services.ai.states.AIState.StateResult;
-import services.ai.states.AttackState;
-import services.ai.states.DeathState;
-import services.ai.states.FollowState;
-import services.ai.states.IdleState;
-import services.ai.states.LoiterState;
-import services.ai.states.PatrolState;
-import services.ai.states.RetreatState;
+import services.ai.states.TurretAIState;
+import services.ai.states.TurretAIState.StateResult;
+import services.ai.states.TurretAttackState;
+import services.ai.states.TurretIdleState;
 import services.combat.CombatEvents.DamageTaken;
 import services.spawn.MobileTemplate;
 import tools.DevLog;
@@ -54,11 +50,11 @@ import resources.datatables.FactionStatus;
 
 import java.util.Random;
 
-public class AIActor {
+public class TurretAIActor {
 	
-	private CreatureObject creature;
+	private TangibleObject creature;
 	private Point3D spawnPosition;
-	private volatile AIState currentState;
+	private volatile TurretAIState currentState;
 	private TangibleObject followObject;
 	private Vector<Point3D> movementPoints = new Vector<Point3D>();
 	private MobileTemplate mobileTemplate;
@@ -81,35 +77,20 @@ public class AIActor {
 	private float maxLoiterDist;
 	private String waitState = "NO";
 	private long waitStartTime = 0L;
-	private AIState intendedPrimaryAIState;
+	private TurretAIState intendedPrimaryTurretAIState;
 	private Point3D lastPositionBeforeStateChange;
-	private ScheduledFuture movementFuture;
-	private ScheduledFuture recoveryFuture;
-	private ScheduledFuture despawnFuture;
 	private boolean patrolLoop = true; // default
+	private ScheduledFuture recoveryFuture;
 
-	public AIActor(CreatureObject creature, Point3D spawnPosition, ScheduledExecutorService scheduler) {
+	public TurretAIActor(TangibleObject creature, Point3D spawnPosition, ScheduledExecutorService scheduler) {
 		this.creature = creature;
 		this.spawnPosition = spawnPosition;
 		setLastPositionBeforeStateChange(spawnPosition); // just to make sure it's initialized
 		this.scheduler = scheduler;
 		creature.getEventBus().subscribe(this);
-		this.currentState = new IdleState();
-		setIntendedPrimaryAIState(this.currentState); // to switch back to after aggro
-		regenTask = scheduler.scheduleAtFixedRate(() -> {
-			try {
-				if(creature.getHealth() < creature.getMaxHealth() && !creature.isInCombat() && creature.getPosture() != 13 && creature.getPosture() != 14)
-					creature.setHealth(creature.getHealth() + (36 + creature.getLevel() * 4));
-				if(creature.getAction() < creature.getMaxAction() && creature.getPosture() != 14) {
-					if(!creature.isInCombat())
-						creature.setAction(creature.getAction() + (15 + creature.getLevel() * 5));
-					else
-						creature.setAction(creature.getAction() + ((15 + creature.getLevel() * 5) / 2));
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}, 0, 1000, TimeUnit.MILLISECONDS);
+		this.currentState = new TurretIdleState();
+		setIntendedPrimaryTurretAIState(this.currentState); // to switch back to after aggro
+		
 		if(creature.getOption(Options.AGGRESSIVE)) {
 			aggroCheckTask = scheduler.scheduleAtFixedRate(() -> {
 				try {
@@ -124,7 +105,7 @@ public class AIActor {
 					if (creature.getCustomName().contains("baby"))
 						DevLog.debugout("Charon", "Pet AI", "baby aggroCheckTask should not be here " +creature.getAttachment("tamed"));
 					
-					creature.getObservers().stream().map(Client::getParent).filter(obj -> obj.inRange(creature.getWorldPosition(), 15)).forEach((obj) -> {
+					creature.getObservers().stream().map(Client::getParent).filter(obj -> obj.inRange(creature.getWorldPosition(), 60)).forEach((obj) -> {
 						if(new Random().nextFloat() <= 0.5 || creature.isInCombat() || isStalking) {
 							/*if(mobileTemplate.isStalker()) {
 								setFollowObject((CreatureObject) obj);
@@ -155,18 +136,18 @@ public class AIActor {
 		}
 		if(creature.getFaction().length()>0 || !creature.getOption(Options.AGGRESSIVE)) {
 			factionCheckTask = scheduler.scheduleAtFixedRate(() -> {
+				System.out.println("Turret faction thread");
 				try {
 					
-					// this is difficult, should NPC not fight when no player is near? || creature.getObservers().isEmpty()
-					if(creature == null || creature.getFactionStatus()!=FactionStatus.Combatant || creature.isInCombat())
+					if(creature == null || creature.getFactionStatus()!=FactionStatus.Combatant || creature.getObservers().isEmpty() || creature.isInCombat())
 						return;
 																
-					creature.getObservers().stream().map(Client::getParent).filter(obj -> obj.inRange(creature.getWorldPosition(), 15)).forEach((obj) -> {
+					creature.getObservers().stream().map(Client::getParent).filter(obj -> obj.inRange(creature.getWorldPosition(), 60)).forEach((obj) -> {
 						if(new Random().nextFloat() <= 0.5 || creature.isInCombat()) {
-//							DevLog.debugout("Charon", "CHECK faction creature ", "added " + creature.getFaction());
-//							DevLog.debugout("Charon", "CHECK faction obj", "added " + ((TangibleObject)obj).getFaction());
-//							DevLog.debugout("Charon", "CHECK factionCheckTask", "added " + obj.getCustomName());
-//							DevLog.debugout("Charon", "CHECK isFactionEnemy", "res " + NGECore.getInstance().factionService.isFactionEnemy((TangibleObject)creature, (TangibleObject)obj));
+//							DevLog.debugout("Charon", "TURRET CHECK faction creature ", "added " + creature.getFaction());
+//							DevLog.debugout("Charon", "TURRET CHECK faction obj", "added " + ((TangibleObject)obj).getFaction());
+//							DevLog.debugout("Charon", "TURRET CHECK factionCheckTask", "added " + obj.getCustomName());
+//							DevLog.debugout("Charon", "TURRET CHECK isFactionEnemy", "res " + NGECore.getInstance().factionService.isFactionEnemy((TangibleObject)creature, (TangibleObject)obj));
 							if (obj instanceof CreatureObject && NGECore.getInstance().factionService.isFactionEnemy((TangibleObject)creature, (TangibleObject)obj)){
 								CreatureObject addedObject = (CreatureObject) obj;
 								if (addedObject.getCalledPet()!=null){
@@ -177,21 +158,21 @@ public class AIActor {
 								}
 								if (addedObject.getPosture() != 13 && addedObject.getPosture() != 14 && ! addedObject.getOption(Options.INVULNERABLE)){
 									addDefender(addedObject);	
-									DevLog.debugout("Charon", "faction creature ", "added " + creature.getFaction());
-									DevLog.debugout("Charon", "faction obj", "added " + ((TangibleObject)obj).getFaction());
-									DevLog.debugout("Charon", "factionCheckTask", "added " + obj.getCustomName());
+//									DevLog.debugout("Charon", "TURRET faction creature ", "added " + creature.getFaction());
+//									DevLog.debugout("Charon", "TURRET faction obj", "added " + ((TangibleObject)obj).getFaction());
+//									DevLog.debugout("Charon", "TURRET factionCheckTask", "added " + obj.getCustomName());
 								}
 					
 							}					
 						}
 					});
 					
-					NGECore.getInstance().simulationService.getAllNearNonSameFactionNPCs(15, creature).forEach((obj) -> {
+					NGECore.getInstance().simulationService.getAllNearNPCs(60, creature).forEach((obj) -> {
 						if(new Random().nextFloat() <= 0.5 || creature.isInCombat()) {
-//							DevLog.debugout("Charon", "CHECK faction creature ", "added " + creature.getFaction());
-//							DevLog.debugout("Charon", "CHECK faction obj", "added " + ((TangibleObject)obj).getFaction());
-//							DevLog.debugout("Charon", "CHECK factionCheckTask", "added " + obj.getCustomName());
-//							DevLog.debugout("Charon", "CHECK isFactionEnemy", "res " + NGECore.getInstance().factionService.isFactionEnemy((TangibleObject)creature, (TangibleObject)obj));
+//							DevLog.debugout("Charon", "TURRET CHECK faction creature ", "added " + creature.getFaction());
+//							DevLog.debugout("Charon", "TURRET CHECK faction obj", "added " + ((TangibleObject)obj).getFaction());
+//							DevLog.debugout("Charon", "TURRET CHECK factionCheckTask", "added " + obj.getCustomName());
+//							DevLog.debugout("Charon", "TURRET CHECK isFactionEnemy", "res " + NGECore.getInstance().factionService.isFactionEnemy((TangibleObject)creature, (TangibleObject)obj));
 							if (obj instanceof CreatureObject && NGECore.getInstance().factionService.isFactionEnemy((TangibleObject)creature, (TangibleObject)obj)){
 								CreatureObject addedObject = (CreatureObject) obj;
 								if (addedObject.getCalledPet()!=null){
@@ -202,26 +183,26 @@ public class AIActor {
 								}
 								if (addedObject.getPosture() != 13 && addedObject.getPosture() != 14 & ! addedObject.getOption(Options.INVULNERABLE)){
 									addDefender(addedObject);	
-									DevLog.debugout("Charon", "faction creature ", "added " + creature.getFaction());
-									DevLog.debugout("Charon", "faction obj", "added " + ((TangibleObject)obj).getFaction());
-									DevLog.debugout("Charon", "factionCheckTask", "added " + obj.getCustomName());
+//									DevLog.debugout("Charon", "TURRET faction creature ", "added " + creature.getFaction());
+//									DevLog.debugout("Charon", "TURRET faction obj", "added " + ((TangibleObject)obj).getFaction());
+//									DevLog.debugout("Charon", "TURRET factionCheckTask", "added " + obj.getCustomName());
 								}
 							}
 						}
 					});
 					
-					NGECore.getInstance().simulationService.getAllNearNonSameFactionTANOs(15, creature).forEach((obj) -> {
+					NGECore.getInstance().simulationService.getAllNearTANOs(60, creature).forEach((obj) -> {
 						if(new Random().nextFloat() <= 0.5 || creature.isInCombat()) {
-							DevLog.debugout("Charon", "TANO1 CHECK", creature.getTemplate() + " spotted near " + obj.getTemplate());
-//							DevLog.debugout("Charon", "TANO CHECK faction obj", "added " + ((TangibleObject)obj).getFaction());
-//							DevLog.debugout("Charon", "TANO CHECK factionCheckTask", "added " + obj.getCustomName());
-//							DevLog.debugout("Charon", "TANO CHECK isFactionEnemy", "res " + NGECore.getInstance().factionService.isFactionEnemy((TangibleObject)creature, (TangibleObject)obj));
+							DevLog.debugout("Charon", "TANO CHECK faction creature ", "added " + creature.getFaction());
+							DevLog.debugout("Charon", "TANO CHECK faction obj", "added " + ((TangibleObject)obj).getFaction());
+							DevLog.debugout("Charon", "TANO CHECK factionCheckTask", "added " + obj.getCustomName());
+							DevLog.debugout("Charon", "TANO CHECK isFactionEnemy", "res " + NGECore.getInstance().factionService.isFactionEnemy((TangibleObject)creature, (TangibleObject)obj));
 							if (obj instanceof TangibleObject && !(obj instanceof CreatureObject) && NGECore.getInstance().factionService.isFactionEnemy((TangibleObject)creature, (TangibleObject)obj)){
 								TangibleObject addedObject = (TangibleObject) obj;					
 								addDefender(addedObject);	
-								DevLog.debugout("Charon", "TANO1 faction ", creature.getTemplate() + "added " + creature.getFaction());
-								DevLog.debugout("Charon", "TANO1 faction obj", "added " + ((TangibleObject)obj).getFaction());
-								DevLog.debugout("Charon", "TANO1 factionCheckTask", "added " + obj.getCustomName());							
+								DevLog.debugout("Charon", "TANO faction creature ", "added " + creature.getFaction());
+								DevLog.debugout("Charon", "TANO faction obj", "added " + ((TangibleObject)obj).getFaction());
+								DevLog.debugout("Charon", "TANO factionCheckTask", "added " + obj.getCustomName());							
 							}
 						}
 					});
@@ -233,7 +214,7 @@ public class AIActor {
 		}
 	}
 
-	public CreatureObject getCreature() {
+	public TangibleObject getCreature() {
 		return creature;
 	}
 
@@ -261,16 +242,15 @@ public class AIActor {
 		creature.addDefender(defender);
 		if(followObject == null)
 			setFollowObject(defender);
-		System.out.println("getFollowObject "+ getFollowObject().getTemplate());
-		setCurrentState(new AttackState());
-		if(!isAssisting) {
-			NGECore.getInstance().simulationService.get(creature.getPlanet(), creature.getWorldPosition().x, creature.getWorldPosition().z, 38).stream().filter((obj) -> 
-				obj instanceof CreatureObject && 
-				obj.getAttachment("AI") != null && 
-				((AIActor) obj.getAttachment("AI")).getMobileTemplate().getSocialGroup().equals(getMobileTemplate().getSocialGroup()) &&
-				obj.inRange(creature.getWorldPosition(), ((AIActor) obj.getAttachment("AI")).getMobileTemplate().getAssistRange())
-			).forEach((obj) -> ((AIActor) obj.getAttachment("AI")).addDefender(defender, true));
-		}
+		setCurrentState(new TurretAttackState());
+//		if(!isAssisting) {
+//			NGECore.getInstance().simulationService.get(creature.getPlanet(), creature.getWorldPosition().x, creature.getWorldPosition().z, 38).stream().filter((obj) -> 
+//				obj instanceof CreatureObject && 
+//				obj.getAttachment("AI") != null && 
+//				((TurretAIActor) obj.getAttachment("AI")).getMobileTemplate().getSocialGroup().equals(getMobileTemplate().getSocialGroup()) &&
+//				obj.inRange(creature.getWorldPosition(), ((TurretAIActor) obj.getAttachment("AI")).getMobileTemplate().getAssistRange())
+//			).forEach((obj) -> ((TurretAIActor) obj.getAttachment("AI")).addDefender(defender, true));
+//		}
 	}
 	
 	public void removeDefender(TangibleObject defender) {
@@ -280,7 +260,7 @@ public class AIActor {
 		if(followObject == defender) {
 			setFollowObject(getHighestDamageDealer());
 			if(creature.getDefendersList().size() == 0)
-				setCurrentState(new RetreatState());
+				setCurrentState(new TurretIdleState());
 		}
 	}
 
@@ -297,11 +277,11 @@ public class AIActor {
 		return highestDamageDealer;
 	}
 
-	public AIState getCurrentState() {
+	public TurretAIState getCurrentState() {
 		return currentState;
 	}
 
-	public void setCurrentState(AIState currentState) {
+	public void setCurrentState(TurretAIState currentState) {
 		try {
 			if(currentState.getClass() == this.currentState.getClass())
 				return;
@@ -337,25 +317,11 @@ public class AIActor {
 	public void setMobileTemplate(MobileTemplate mobileTemplate) {
 		this.mobileTemplate = mobileTemplate;
 	}
-	
-	public void scheduleMovement() {
-		movementFuture = scheduler.schedule(() -> { 
-			try {
-				if (creature==null){
-					destroyActor();
-					return;
-				}
-				doStateAction(currentState.move(AIActor.this));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}, 500, TimeUnit.MILLISECONDS);
-	}
-	
+		
 	public void scheduleRecovery() {
 		recoveryFuture = scheduler.schedule(() -> { 
 			try {
-				doStateAction(currentState.recover(AIActor.this));
+				doStateAction(currentState.recover(TurretAIActor.this));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -431,27 +397,17 @@ public class AIActor {
 		}
 		
 		switch(result) {
-			
-			
+		
 			case StateResult.DEAD:
-				setCurrentState(new DeathState());
+				destroyActor();
 				break;
 			case StateResult.FINISHED:
 			case StateResult.UNFINISHED:
 				return;
 			case StateResult.IDLE:
-				setCurrentState(new IdleState());
+				setCurrentState(new TurretIdleState());
 				return;
-			case StateResult.PATROL:
-				setCurrentState(new PatrolState());
-				return;
-			case StateResult.LOITER:
-				setCurrentState(new LoiterState());
-				return;
-			case StateResult.FOLLOW:
-				setCurrentState(new FollowState());
-				return;
-				
+							
 			//case StateResult.NONE:
 		//		System.out.println("State action returned error result");
 		
@@ -477,19 +433,6 @@ public class AIActor {
 			
 		}
 		
-		despawnFuture = scheduler.schedule(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					damageMap.clear();
-					followObject = null;
-					creature.setAttachment("AI", null);
-					NGECore.getInstance().objectService.destroyObject(creature);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}, 2, TimeUnit.MINUTES);
 	}
 	
 	public void destroyActor(){
@@ -501,18 +444,6 @@ public class AIActor {
 			factionCheckTask.cancel(true);		
 		if (regenTask!=null)
 			regenTask.cancel(true);
-		if (movementFuture!=null){
-			movementFuture.cancel(true); 
-			movementFuture = null;
-		}
-		if (movementFuture!=null){
-			recoveryFuture.cancel(true);			
-			recoveryFuture = null;
-		}
-		if (despawnFuture!=null){
-			despawnFuture.cancel(true);			
-			despawnFuture = null;
-		}		
 	}
 	
 	public void cancelAggro(){
@@ -635,12 +566,12 @@ public class AIActor {
 		return patrolPoints;
 	}
 
-	public AIState getIntendedPrimaryAIState() {
-		return intendedPrimaryAIState;
+	public TurretAIState getIntendedPrimaryTurretAIState() {
+		return intendedPrimaryTurretAIState;
 	}
 
-	public void setIntendedPrimaryAIState(AIState intendedPrimaryAIState) {
-		this.intendedPrimaryAIState = intendedPrimaryAIState;
+	public void setIntendedPrimaryTurretAIState(TurretAIState intendedPrimaryTurretAIState) {
+		this.intendedPrimaryTurretAIState = intendedPrimaryTurretAIState;
 	}
 
 	public Point3D getLastPositionBeforeStateChange() {

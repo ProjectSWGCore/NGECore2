@@ -84,8 +84,8 @@ public class LairActor {
 		spawnNewCreatures();
 		
 		for(AIActor ai : creatures) {
-			ai.addDefender(event.attacker);
-			event.attacker.addDefender(ai.getCreature());
+			ai.addDefender((CreatureObject)event.attacker);
+			((CreatureObject)event.attacker).addDefender(ai.getCreature());
 		}
 		
 		

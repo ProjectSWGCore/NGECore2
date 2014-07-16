@@ -19,19 +19,34 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package services.combat;
+package services.ai.states;
 
-import resources.objects.creature.CreatureObject;
-import engine.resources.common.Event;
-import engine.resources.objects.SWGObject;
+import services.ai.TurretAIActor;
 
-public class CombatEvents implements Event {
-	
-	public class DamageTaken implements Event {
-		
-		public SWGObject attacker;
-		public int damage;
-		
+public class TurretIdleState extends TurretAIState {
+
+	@Override
+	public byte onEnter(TurretAIActor actor) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public byte onExit(TurretAIActor actor) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public byte move(TurretAIActor actor) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public byte recover(TurretAIActor actor) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 }

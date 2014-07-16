@@ -208,13 +208,15 @@ public class SpawnService {
 				armor = 6000;
 			core.skillModService.addSkillMod(creature, "expertise_innate_protection_all", armor);
 		}
-
-		AIActor actor = new AIActor(creature, creature.getPosition(), scheduler);
-		creature.setAttachment("AI", actor);
-		creature.setAttachment("radial_filename", "npc/mobile");
-		actor.setMobileTemplate(mobileTemplate);
 		
-	
+		if (mobileTemplate.isAIEnabled()){
+			AIActor actor = new AIActor(creature, creature.getPosition(), scheduler);
+			creature.setAttachment("AI", actor);
+			actor.setMobileTemplate(mobileTemplate);			
+		}
+		
+		creature.setAttachment("radial_filename", "npc/mobile");
+		
 		
 		if(cell == null) {
 			core.simulationService.add(creature, x, z, true);

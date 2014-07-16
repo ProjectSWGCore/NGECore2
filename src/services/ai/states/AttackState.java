@@ -26,6 +26,7 @@ import java.util.Vector;
 
 import main.NGECore;
 import resources.objects.creature.CreatureObject;
+import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 import services.ai.AIActor;
 import tools.DevLog;
@@ -105,6 +106,7 @@ public class AttackState extends AIState {
 	@Override
 	public byte recover(AIActor actor) {
 		CreatureObject creature = actor.getCreature();
+		DevLog.debugout("Charon", "AI Attack Recover State", creature.getTemplate());
 		float maxDistance = 0;
 		WeaponObject weapon = null;
 		if(creature.getWeaponId() != 0) {
@@ -133,7 +135,7 @@ public class AttackState extends AIState {
 			actor.setCurrentState(new RetreatState());
 			return StateResult.FINISHED;
 		}
-		CreatureObject target = actor.getFollowObject();
+		TangibleObject target = actor.getFollowObject();
 		if(target != actor.getHighestDamageDealer() && actor.getHighestDamageDealer() != null) {
 			actor.setFollowObject(actor.getHighestDamageDealer());
 			target = actor.getFollowObject();
@@ -143,27 +145,32 @@ public class AttackState extends AIState {
 			actor.scheduleRecovery();
 			return StateResult.UNFINISHED;
 		}
-		if(target.getPosture() == 13 || target.getPosture() == 14 || target.isInStealth()) {
- 
-			actor.setFollowObject(actor.getHighestDamageDealer());			
-			target = actor.getFollowObject();
-			if(target == null)
-			{
-				creature.setLookAtTarget(0);
-				creature.setIntendedTarget(0);
-				
-			}
-			actor.setFollowObject(null);
-			actor.removeDefender(target);
+		
+		if (target instanceof CreatureObject){
+			CreatureObject targetCreature = (CreatureObject) target;
+			if(targetCreature.getPosture() == 13 || targetCreature.getPosture() == 14 || targetCreature.isInStealth()) {
+				 
+				actor.setFollowObject(actor.getHighestDamageDealer());			
+				target = (CreatureObject) actor.getFollowObject();
+				if(target == null)
+				{
+					creature.setLookAtTarget(0);
+					creature.setIntendedTarget(0);
+					
+				}
+				actor.setFollowObject(null);
+				actor.removeDefender(target);
 
-			actor.setCurrentState(new RetreatState());
-			return StateResult.FINISHED;
+				actor.setCurrentState(new RetreatState());
+				return StateResult.FINISHED;
+			}
+			if(targetCreature.getWorldPosition().getDistance(creature.getWorldPosition()) > 128 || targetCreature.getPosture() == 13 || targetCreature.getPosture() == 14) {
+				actor.removeDefender(target);
+				actor.scheduleRecovery();
+				return StateResult.UNFINISHED;
+			}
 		}
-		if(target.getWorldPosition().getDistance(creature.getWorldPosition()) > 128 || target.getPosture() == 13 || target.getPosture() == 14) {
-			actor.removeDefender(target);
-			actor.scheduleRecovery();
-			return StateResult.UNFINISHED;
-		}
+		
 		if(target.getWorldPosition().getDistance(creature.getWorldPosition()) > maxDistance) {
 			actor.scheduleRecovery();
 			return StateResult.UNFINISHED;

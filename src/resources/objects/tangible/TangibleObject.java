@@ -329,9 +329,11 @@ public class TangibleObject extends SWGObject implements Serializable {
 	}
 	
 	public void addDefender(TangibleObject defender) {
-		if (((CreatureObject)this).getOwnerId()>0){
-			if (((CreatureObject)this).getOwnerId()==defender.getObjectID()){
-				return; // fix for now until determined where the tamer is added from
+		if (this instanceof CreatureObject){
+			if (((CreatureObject)this).getOwnerId()>0){
+				if (((CreatureObject)this).getOwnerId()==defender.getObjectID()){
+					return; // fix for now until determined where the tamer is added from
+				}
 			}
 		}
 		defendersList.add(defender);
