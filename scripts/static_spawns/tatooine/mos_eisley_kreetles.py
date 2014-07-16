@@ -4,8 +4,6 @@
 import sys
 from resources.datatables import Options
 from resources.datatables import State
-from java.util import Vector
-from engine.resources.scene import Point3D
 
 def addPlanetSpawns(core, planet):
 

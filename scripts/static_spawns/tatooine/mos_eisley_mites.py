@@ -1,15 +1,11 @@
-
 # Project SWG:   MosEisley mites:  Static Spawns
 # (C)2014 ProjectSWG
 
 import sys
 from resources.datatables import Options
 from resources.datatables import State
-from java.util import Vector
-from engine.resources.scene import Point3D
 
 def addPlanetSpawns(core, planet):
-
 
 	stcSvc = core.staticService
 	objSvc = core.objectService

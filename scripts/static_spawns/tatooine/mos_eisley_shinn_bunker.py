@@ -1,17 +1,15 @@
-import sys
 # Project SWG:   Mos Eisley Shinn bunker:  Static Spawns
 # (C)2014 ProjectSWG
 
-
-
+import sys
 from resources.datatables import Options
 from resources.datatables import State
 
 def addPlanetSpawns(core, planet):
 
-
 	stcSvc = core.staticService
 	objSvc = core.objectService
+	aiSvc = core.aiService
 	
 	building = core.objectService.getObject(long(-466404038086555772))
 	
@@ -35,6 +33,23 @@ def addPlanetSpawns(core, planet):
 	shinn_mugger15 = stcSvc.spawnObject('shinn_mugger', 'tatooine', long(0), float(3380), float(5), float(-5465), float(0), float(0), float(0), float(0), 30)	
 	shinn_mugger16 = stcSvc.spawnObject('shinn_mugger', 'tatooine', long(0), float(3394), float(4), float(-5456), float(0), float(0), float(0), float(0), 30)												
 	
+	aiSvc.setLoiter(shinn_mugger, float(1), float(8))  
+	aiSvc.setLoiter(shinn_mugger1, float(1), float(8))
+	aiSvc.setLoiter(shinn_mugger2, float(1), float(8)) 
+	aiSvc.setLoiter(shinn_mugger3, float(1), float(8)) 
+	aiSvc.setLoiter(shinn_mugger4, float(1), float(8)) 
+	aiSvc.setLoiter(shinn_mugger5, float(1), float(8)) 
+	aiSvc.setLoiter(shinn_mugger6, float(1), float(8)) 
+	aiSvc.setLoiter(shinn_mugger7, float(1), float(8)) 
+	aiSvc.setLoiter(shinn_mugger8, float(1), float(8)) 
+	aiSvc.setLoiter(shinn_mugger9, float(1), float(8)) 
+	aiSvc.setLoiter(shinn_mugger10, float(1), float(8)) 
+	aiSvc.setLoiter(shinn_mugger11, float(1), float(8))
+	aiSvc.setLoiter(shinn_mugger12, float(1), float(8))	
+	aiSvc.setLoiter(shinn_mugger13, float(1), float(8)) 
+	aiSvc.setLoiter(shinn_mugger14, float(1), float(8)) 
+	aiSvc.setLoiter(shinn_mugger15, float(1), float(8))
+	aiSvc.setLoiter(shinn_mugger16, float(1), float(8))	
 	
 	#shinn Guards outside bunker
 	shinn_guard_o1 = stcSvc.spawnObject('shinn_guard', 'tatooine', long(0), float(3417), float(7), float(-5461), float(0), float(0), float(0), float(0), 30)													
