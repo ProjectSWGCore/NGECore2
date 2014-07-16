@@ -14,7 +14,6 @@ def addTemplate(core):
 	mobileTemplate.setCreatureName('rebel_tamed_gurrcat')
 	mobileTemplate.setLevel(4)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
-
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)

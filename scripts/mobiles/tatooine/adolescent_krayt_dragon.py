@@ -25,7 +25,7 @@ def addTemplate(core):
 	mobileTemplate.setBoneType("Animal Bones")
 	mobileTemplate.setBoneAmount(905)
 	mobileTemplate.setSocialGroup("krayt dragon")
-	mobileTemplate.setAssistRange(6)
+	mobileTemplate.setAssistRange(24)
 	mobileTemplate.setStalker(False)
 	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)	
 	
@@ -40,6 +40,10 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_bit_5')
+	attacks.add('bm_bolster_armor_5')
+	attacks.add('bm_disease_5')
+	attacks.add('bm_enfeeble_5')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

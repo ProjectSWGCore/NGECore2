@@ -38,6 +38,11 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 
 	attacks = Vector()
+	attacks.add('bm_bite_4')
+	attacks.add('bm_charge_4')
+	attacks.add('bm_dampen_pain_4')
+	attacks.add('bm_shaken_4')
+	attacks.add('bm_stomp_4')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
