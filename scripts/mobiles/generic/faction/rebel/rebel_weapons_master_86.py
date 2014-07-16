@@ -13,7 +13,6 @@ def addTemplate(core):
 	mobileTemplate.setCreatureName('fbase_rebel_heavy_trooper_hard')
 	mobileTemplate.setLevel(86)
 	mobileTemplate.setDifficulty(Difficulty.ELITE)
-
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)

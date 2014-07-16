@@ -25,7 +25,7 @@ def addTemplate(core):
 	mobileTemplate.setBoneType("Animal Bone")
 	mobileTemplate.setHideAmount(2)
 	mobileTemplate.setSocialGroup("mountain worrt")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setAssistRange(6)
 	mobileTemplate.setStalker(False)	
 	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
@@ -39,6 +39,9 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_charge_2')
+	attacks.add('bm_dampen_pain_1')
+	attacks.add('bm_spit_2')
 	mobileTemplate.setDefaultAttack('creatureRangedAttack')
 	mobileTemplate.setAttacks(attacks)
 	

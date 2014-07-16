@@ -14,7 +14,6 @@ def addTemplate(core):
 	mobileTemplate.setCreatureName('rebel_tamed_huurton')
 	mobileTemplate.setLevel(61)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
-
 	mobileTemplate.setMinSpawnDistance(5)
 	mobileTemplate.setMaxSpawnDistance(10)
 	mobileTemplate.setDeathblow(False)

@@ -23,8 +23,9 @@ def addTemplate(core):
 	mobileTemplate.setHideType("Scaley Hide")
 	mobileTemplate.setHideAmount(45)
 	mobileTemplate.setSocialGroup("dalyrake")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setAssistRange(24)
 	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dalyrake.iff')
@@ -36,6 +37,10 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_claw_2')
+	attacks.add('bm_damage_poison_2')
+	attacks.add('bm_dampen_pain_2')
+	attacks.add('bm_slash_2')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

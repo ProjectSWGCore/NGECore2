@@ -14,6 +14,7 @@ def setup(housingTemplates):
 	houseTemplate.addPlaceablePlanet("dantooine")
 	houseTemplate.addPlaceablePlanet("lok")
 	houseTemplate.setDefaultItemLimit(200)
+	houseTemplate.setDestructionFee(1700)
 	houseTemplate.setBaseMaintenanceRate(18)
 	
 	housingTemplates.put(houseTemplate.getDeedTemplate(), houseTemplate)
