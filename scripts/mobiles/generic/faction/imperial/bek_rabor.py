@@ -15,7 +15,6 @@ def addTemplate(core):
 	mobileTemplate.setStfFilename('npc_spawner_n')
 	mobileTemplate.setLevel(19)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
-
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setOptionsBitmask(Options.INVULNERABLE | Options.QUEST)

@@ -10,8 +10,8 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('bantha')
-	mobileTemplate.setLevel(8)
+	mobileTemplate.setCreatureName('durni_vehement_warrior')
+	mobileTemplate.setLevel(5)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
@@ -19,27 +19,29 @@ def addTemplate(core):
 	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(1)
 	mobileTemplate.setMeatType("Herbivore Meat")
-	mobileTemplate.setMeatAmount(450)
+	mobileTemplate.setMeatAmount(5)
 	mobileTemplate.setHideType("Wooly Hide")
-	mobileTemplate.setBoneAmount(250)
+	mobileTemplate.setHideAmount(3)
 	mobileTemplate.setBoneType("Animal Bones")
-	mobileTemplate.setHideAmount(325)
-	mobileTemplate.setSocialGroup("bantha")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setBoneAmount(2)
+	mobileTemplate.setSocialGroup("durni")
+	mobileTemplate.setAssistRange(2)
 	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_bantha_hue.iff')
+	templates.add('object/mobile/shared_durni.iff')
 	mobileTemplate.setTemplates(templates)
-
+	
 	weaponTemplates = Vector()
 	weapontemplate = WeaponTemplate('object/weapon/melee/unarmed/shared_unarmed_default.iff', WeaponType.UNARMED, 1.0, 6, 'kinetic')
 	weaponTemplates.add(weapontemplate)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_bite_2')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('bantha_low', mobileTemplate)
+	core.spawnService.addMobileTemplate('vehement_warrior', mobileTemplate)
 	return

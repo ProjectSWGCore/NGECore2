@@ -23,9 +23,9 @@ def addTemplate(core):
 	mobileTemplate.setHideType("Scaley Hide")
 	mobileTemplate.setHideAmount(4)
 	mobileTemplate.setSocialGroup("corellian butterfly")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setAssistRange(6)
 	mobileTemplate.setStalker(False)
-	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
+	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_corellian_butterfly.iff')
@@ -37,6 +37,8 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_bite_2')
+	attacks.add('bm_wing_buffet_2')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

@@ -10,26 +10,27 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('durni_vehement_warrior')
-	mobileTemplate.setLevel(5)
+	mobileTemplate.setCreatureName('berserk_kahmurra')
+	mobileTemplate.setLevel(46)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
-	mobileTemplate.setDeathblow(False)
+	mobileTemplate.setDeathblow(True)
 	mobileTemplate.setScale(1)
 	mobileTemplate.setMeatType("Herbivore Meat")
-	mobileTemplate.setMeatAmount(5)
-	mobileTemplate.setHideType("Wooly Hide")
-	mobileTemplate.setHideAmount(3)
+	mobileTemplate.setMeatAmount(50)
+	mobileTemplate.setHideType("Bristley Hide")
+	mobileTemplate.setHideAmount(50)
 	mobileTemplate.setBoneType("Animal Bones")
-	mobileTemplate.setBoneAmount(2)
-	mobileTemplate.setSocialGroup("durni")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setBoneAmount(35)
+	mobileTemplate.setSocialGroup("kahmurra")
+	mobileTemplate.setAssistRange(6)
 	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_durni.iff')
+	templates.add('object/mobile/shared_kahmurra.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
@@ -38,8 +39,11 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_charge_3')
+	attacks.add('bm_defensive_3')
+	attacks.add('bm_slash_3')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('vehement_durni', mobileTemplate)
+	core.spawnService.addMobileTemplate('berserk_kahmurra', mobileTemplate)
 	return

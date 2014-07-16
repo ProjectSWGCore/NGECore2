@@ -16,7 +16,7 @@ def addTemplate(core):
 
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
-	mobileTemplate.setDeathblow(False)
+	mobileTemplate.setDeathblow(True)
 	mobileTemplate.setScale(1)
 	mobileTemplate.setMeatType("Domesticated Meat")
 	mobileTemplate.setMeatAmount(250)
@@ -25,8 +25,9 @@ def addTemplate(core):
 	mobileTemplate.setBoneType("Animal Bones")
 	mobileTemplate.setBoneAmount(105)
 	mobileTemplate.setSocialGroup("humbaba")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setAssistRange(2)
 	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_savage_humbaba.iff')
@@ -38,6 +39,9 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_bite_3')
+	attacks.add('bm_kick_3')
+	attacks.add('bm_spit_3')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

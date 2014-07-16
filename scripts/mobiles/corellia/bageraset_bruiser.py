@@ -25,6 +25,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("bageraset")
 	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_bageraset.iff')
@@ -36,6 +37,9 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_bite_2')
+	attacks.add('bm_kick_2')
+	attacks.add('bm_spit_2')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

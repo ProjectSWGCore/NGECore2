@@ -19,8 +19,9 @@ def addTemplate(core):
 	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(0.5)
 	mobileTemplate.setSocialGroup("krayt cult")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setAssistRange(6)
 	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_angler.iff')
@@ -32,6 +33,9 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_damage_poison_4')
+	attacks.add('bm_defensive_4')
+	attacks.add('bm_puncture_2')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
