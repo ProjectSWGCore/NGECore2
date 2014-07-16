@@ -22,4 +22,25 @@ def addPlanetSpawns(core, planet):
 	stcSvc.spawnObject('object/static/item/shared_lair_wooden_tent.iff', 'tatooine', long(0), float(-5491.42), float(45.0825), float(-6608.95), float(0.499163), float(-0.143837), float(0.853988), float(-0.0291871))
 	
 	
+	stcSvc.spawnObject('wayfar_spy', 'tatooine', long(0), float(-5467.4), float(46.7), float(-6601.4), float(0), float(0), float(0), float(0), 45)
+	stcSvc.spawnObject('wayfar_spy', 'tatooine', long(0), float(-5468.5), float(46), float(-6583.3), float(0), float(0), float(0), float(0), 45)
+	stcSvc.spawnObject('wayfar_spy', 'tatooine', long(0), float(-5488.4), float(46), float(-6590.4), float(0), float(0), float(0), float(0), 45)
+	stcSvc.spawnObject('wayfar_spy', 'tatooine', long(0), float(-5503.4), float(46.7), float(-6589.3), float(0), float(0), float(0), float(0), 45)
+	stcSvc.spawnObject('wayfar_spy', 'tatooine', long(0), float(-5524.5), float(46.4), float(-6586.2), float(0), float(0), float(0), float(0), 45)
+	stcSvc.spawnObject('wayfar_spy', 'tatooine', long(0), float(-5539.6), float(40.1), float(-6602.4), float(0), float(0), float(0), float(0), 45)	
+	stcSvc.spawnObject('wayfar_spy', 'tatooine', long(0), float(-5553.3), float(38.5), float(-6613.3), float(0), float(0), float(0), float(0), 45)
+	stcSvc.spawnObject('wayfar_spy', 'tatooine', long(0), float(-5553.4), float(42), float(-6634.3), float(0), float(0), float(0), float(0), 45)
+	stcSvc.spawnObject('wayfar_spy', 'tatooine', long(0), float(-5556.7), float(47.5), float(-6650.8), float(0), float(0), float(0), float(0), 45)
+	stcSvc.spawnObject('wayfar_spy', 'tatooine', long(0), float(-5538.1), float(47.9), float(-6661.1), float(0), float(0), float(0), float(0), 45)
+	stcSvc.spawnObject('wayfar_spy', 'tatooine', long(0), float(-5525.2), float(45.2), float(-6642.3), float(0), float(0), float(0), float(0), 45)	
+	stcSvc.spawnObject('wayfar_spy', 'tatooine', long(0), float(-5508.7), float(41.9), float(-6627.1), float(0), float(0), float(0), float(0), 45)	
+	stcSvc.spawnObject('wayfar_spy', 'tatooine', long(0), float(-5478.3), float(47.2), float(-6624.4), float(0), float(0), float(0), float(0), 45)
+	stcSvc.spawnObject('wayfar_spy', 'tatooine', long(0), float(-5486.8), float(48.2), float(-6645.4), float(0), float(0), float(0), float(0), 45)
+	stcSvc.spawnObject('wayfar_spy', 'tatooine', long(0), float(-5503.6), float(46.5), float(-6660.3), float(0), float(0), float(0), float(0), 45)
+	stcSvc.spawnObject('wayfar_spy', 'tatooine', long(0), float(-5517.6), float(48), float(-6654.9), float(0), float(0), float(0), float(0), 45)
+	stcSvc.spawnObject('wayfar_spy', 'tatooine', long(0), float(-5487.3), float(45), float(-6618.9), float(0), float(0), float(0), float(0), 45)	
+	stcSvc.spawnObject('wayfar_spy', 'tatooine', long(0), float(-5464.6), float(48.7), float(-6621.8), float(0), float(0), float(0), float(0), 45)
+	
+	stcSvc.spawnObject('dewall_paez', 'tatooine', long(0), float(-5516.1), float(40.1), float(-6615.1), float(0), float(0), float(0), float(0), 45)
+	
 	return

@@ -131,6 +131,7 @@ public class HarvesterService implements INetworkDispatch {
 		
 		objControllerOpcodes.put(ObjControllerOpcodes.RESOURCE_EMPTY_HOPPER, new INetworkRemoteEvent() {
 			
+			@SuppressWarnings("unused")
 			@Override
 			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
 				data.order(ByteOrder.LITTLE_ENDIAN);
@@ -905,6 +906,7 @@ public class HarvesterService implements INetworkDispatch {
 		owner.getClient().getSession().write(messenger.buildHINO7ExperimentalDelta2((HarvesterObject)target));
 	}
 		
+	@SuppressWarnings("unused")
 	public void updateHarvester(HarvesterObject harvester){
 		
 		CreatureObject owner = (CreatureObject)core.objectService.getObject(harvester.getOwner());

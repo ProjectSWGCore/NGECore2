@@ -683,7 +683,7 @@ public class EntertainmentService implements INetworkDispatch {
 
 		spectator.setPerformanceWatchee(performer);
 		performer.addSpectator(spectator);
-		spectator.setMoodAnimation("entertained");
+		//spectator.setMoodAnimation("entertained");
 
 		final ScheduledFuture<?> spectatorTask = scheduler.scheduleAtFixedRate(() -> {
 			try {
@@ -699,10 +699,13 @@ public class EntertainmentService implements INetworkDispatch {
 						spectator.sendSystemMessage("You stop listening to " + performer.getCustomName() + " because " + performer.getCustomName()
 								+ " is out of range.", (byte) 0);
 					}
-					spectator.setMoodAnimation("neutral");
+					//spectator.setMoodAnimation("neutral");
 					performer.removeSpectator(spectator);
 	
-					if (spectator.getInspirationTick().cancel(true))
+					if (spectator.getInspirationTick() != null) 
+						spectator.getInspirationTick().cancel(true);
+					
+					if (spectator.getSpectatorTask() != null)
 						spectator.getSpectatorTask().cancel(true);
 					
 				}

@@ -99,8 +99,11 @@ public class GalacticResource extends SWGObject implements Serializable {
 	
 
 	private byte poolNumber;	
+	@SuppressWarnings("unused")
 	private String stfName;
+	@SuppressWarnings("unused")
 	private String iffName;
+	@SuppressWarnings("unused")
 	private int type;
 	private byte generalType;	
 	private byte containerType;

@@ -127,6 +127,11 @@ public class WeaponObject extends TangibleObject implements Serializable {
 	}
 
 	public int getWeaponType() {
+		if (getStringAttribute("cat_wpn_damage.wpn_category") == null) {
+			System.err.println("Error: Weapon Type not defined for " + getTemplate());
+			return 6;
+		}
+		
 		return Integer.parseInt(getStringAttribute("cat_wpn_damage.wpn_category").replace("@obj_attr_n:wpn_category_", ""));
 	}
 	

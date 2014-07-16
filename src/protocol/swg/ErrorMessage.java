@@ -49,6 +49,6 @@ public class ErrorMessage extends SWGMessage {
 		result.put(getAsciiString(errorMessage));
 		result.put((byte)0);
 		
-		return result;
+		return result.flip();
 	}
 }

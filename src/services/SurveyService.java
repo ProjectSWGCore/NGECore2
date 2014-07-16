@@ -64,6 +64,7 @@ public class SurveyService implements INetworkDispatch {
 	}
 		
 
+	@SuppressWarnings("unused")
 	public void scheduleSurveyService(){
 		
 		final ScheduledFuture<?> task = scheduler.scheduleAtFixedRate(new Runnable() {
@@ -130,6 +131,7 @@ public class SurveyService implements INetworkDispatch {
 		}	
 	}
 	
+	@SuppressWarnings("unused")
 	public void handleSamplingStages(SurveyTool surveyTool){
 		
 		if (surveyTool.isExceptionalState())
