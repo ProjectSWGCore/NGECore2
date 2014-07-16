@@ -647,7 +647,7 @@ public class ObjectService implements INetworkDispatch {
 			customName = customName.split(" ")[0];
 		
 		try {
-			PreparedStatement ps = core.getDatabase1().preparedStatement("SELECT * FROM characters WHERE \"firstName\"=?");
+			PreparedStatement ps = core.getDatabase1().preparedStatement("SELECT * FROM characters WHERE \"firstName\" ILIKE ?");
 			ps.setString(1, customName);
 			ResultSet resultSet = ps.executeQuery();
 
