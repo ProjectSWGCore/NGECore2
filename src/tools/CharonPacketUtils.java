@@ -21,6 +21,7 @@ import org.apache.mina.core.buffer.IoBuffer;
  * @author Charon 
  */
 
+@SuppressWarnings("unused")
 public class CharonPacketUtils {
 	
 	private static int loggingSessionID=0;	

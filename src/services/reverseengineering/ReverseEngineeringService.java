@@ -3228,7 +3228,7 @@ public class ReverseEngineeringService implements INetworkDispatch {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "unused" })
 	public void createSEA(CreatureObject engineer, TangibleObject retool){
 		PlayerObject player = (PlayerObject) engineer.getSlottedObject("ghost");	
 		String profession = player.getProfession();
@@ -3463,7 +3463,7 @@ public class ReverseEngineeringService implements INetworkDispatch {
 	}
 	
 	public void applyPowerUp(TangibleObject powerUpObject, long objectID){
-		TangibleObject object = (TangibleObject)core.objectService.getObject(objectID);
+		@SuppressWarnings("unused") TangibleObject object = (TangibleObject)core.objectService.getObject(objectID);
 		
 	}
 	

@@ -21,9 +21,11 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("sennex")
 	mobileTemplate.setAssistRange(10)
 	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
+	
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_dressed_trader_thug_male_human_01.iff')
+	templates.add('object/mobile/shared_dressed_trader_thug_male_human_01.iff') #need to find correct template
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()

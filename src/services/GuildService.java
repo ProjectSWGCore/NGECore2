@@ -207,7 +207,7 @@ public class GuildService implements INetworkDispatch {
 					if (name == "" || name == " ")
 						return;
 					
-					SWGObject transferTarget = core.chatService.getObjectByFirstName(name);
+					SWGObject transferTarget = core.objectService.getObjectByFirstName(name); //chatService.getObjectByFirstName(name);
 					
 					if (transferTarget == null) {
 						actor.sendSystemMessage("@guild:ml_not_loaded", DisplayType.Broadcast);

@@ -37,8 +37,6 @@ import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
 import resources.objects.tangible.TangibleObject;
 import services.ai.AIActor;
-import services.ai.states.FollowState;
-import tools.DevLog;
 
 /** 
  * @author Charon 
@@ -127,6 +125,7 @@ public class Forager {
 		
 	}
 	
+	@SuppressWarnings("unused")
 	public boolean handleForageResults(CreatureObject forager){
 		// determine foraged object
 		SWGObject foragerInventory = forager.getSlottedObject("inventory");
@@ -547,7 +546,7 @@ public class Forager {
 	
 	
 	public void configureTreasureLoot(TangibleObject treasureContainer, CreatureObject owner, short spawnLevel){
-		List<LootGroup> lootgroups = new ArrayList<LootGroup>();
+		@SuppressWarnings("unused") List<LootGroup> lootgroups = new ArrayList<LootGroup>();
 		
 		String levelRange = "61";
 

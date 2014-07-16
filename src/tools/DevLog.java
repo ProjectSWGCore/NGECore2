@@ -39,6 +39,7 @@ import java.util.Map;
  * @author Charon 
  */
 
+@SuppressWarnings("unused")
 public class DevLog {
 	
 	private static int loggingSessionID=0;	

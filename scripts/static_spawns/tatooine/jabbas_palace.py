@@ -49,7 +49,7 @@ def addPlanetSpawns(core, planet):
 	stcSvc.spawnObject('object/mobile/shared_boba_fett.iff', 'tatooine', building.getCellByCellNumber(22), float(-1.0), float(3.0), float(33.1), float(0), float(0), float(0), float(0))
 
 	#EV9D9
-	stcSvc.spawnObject('object/mobile/shared_ev_9d9.iff', 'tatooine', building.getCellByCellNumber(14), float(18.8), float(0.2), float(78.7), float(0), float(0), float(1.0), float(0))
+	stcSvc.spawnObject('object/mobile/shared_ev_9d9.iff', 'tatooine', building.getCellByCellNumber(14), float(23.1), float(0.2), float(87.8), float(0), float(0), float(1.0), float(0))
 	
 	#malakili 
 	stcSvc.spawnObject('object/mobile/shared_malakili.iff', 'tatooine', building.getCellByCellNumber(37), float(17.3), float(-11.0), float(43.8), float(0), float(0), float(0), float(0))

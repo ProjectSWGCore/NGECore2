@@ -40,6 +40,9 @@ import java.util.concurrent.TimeUnit;
 
 
 
+
+
+
 import main.NGECore;
 import engine.clients.Client;
 import engine.resources.common.CRC;
@@ -112,6 +115,7 @@ public class BazaarService implements INetworkDispatch {
 		cursor.close();
 	}
 
+	@SuppressWarnings("unused")
 	@Override
 	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> swgOpcodes, Map<Integer, INetworkRemoteEvent> objControllerOpcodes) {		
 
@@ -765,7 +769,7 @@ public class BazaarService implements INetworkDispatch {
 			return;
 		}
 		
-		AuctionItem auctionItem = createAuctionItem(player, vendor, item, price, description, duration, auction, premium);
+		@SuppressWarnings("unused") AuctionItem auctionItem = createAuctionItem(player, vendor, item, price, description, duration, auction, premium);
 		
 		core.objectService.destroyObject(item);
 		

@@ -386,13 +386,15 @@ public class EquipmentService implements INetworkDispatch {
 		// Get our lightsaber weapon object
 		if(item.getContainer().getTemplate().startsWith("object/tangible/inventory/shared_lightsaber_inventory")) lightsaber = (WeaponObject) item.getGrandparent();
 		else if(targetContainer.getTemplate().startsWith("object/tangible/inventory/shared_lightsaber_inventory")) lightsaber = (WeaponObject) targetContainer.getContainer();
+		
+		if(lightsaber == null) return;
+		
 		lightsaberInventory = (TangibleObject) lightsaber.getSlottedObject("saber_inv");
 		
 		if(lightsaber.getAttachment("weaponBaseDamageMin") == null) lightsaber.setAttachment("weaponBaseDamageMin", lightsaber.getMinDamage());
 		if(lightsaber.getAttachment("weaponBaseDamageMax") == null) lightsaber.setAttachment("weaponBaseDamageMax", lightsaber.getMaxDamage());
 		
 		// Check if item is a lightsaber component
-		if(lightsaber == null) return;
 		if(lightsaberInventory == null) return;
 		if(lightsaber.getContainer() instanceof CreatureObject)
 		{
@@ -435,7 +437,7 @@ public class EquipmentService implements INetworkDispatch {
 		lightsaberInventory.viewChildren(lightsaberInventory, false, false, new Traverser()
 		{
 			WeaponObject saber;
-			TangibleObject saberInv;
+			@SuppressWarnings("unused") TangibleObject saberInv;
 			
 			int minDamageBonus = 0;
 			int maxDamageBonus = 0;
