@@ -123,6 +123,7 @@ public class DevService implements INetworkDispatch {
 				suiOptions.put((long) 42, "Heroism Jewlery Set");
 				suiOptions.put((long) 43, "Breath of Heaven");
 				suiOptions.put((long) 140, "Guild Registry Device (PDA)");
+				suiOptions.put((long) 141, "Armor Recolor Kit");
 				break;
 			case 5: // [Items] Armor
 				suiOptions.put((long) 50, "Assault Armor");
@@ -1352,6 +1353,11 @@ public class DevService implements INetworkDispatch {
 					case 140:
 						TangibleObject guildRegistry = (TangibleObject) core.objectService.createObject("object/tangible/furniture/technical/shared_guild_registry_initial.iff", planet);
 						inventory.add(guildRegistry);
+						return;
+					
+					case 141: // Armor Recolor Kit
+						TangibleObject recolorkit = (tangibleObject) core.objectService.createObject("object/tangible/item/shared_crafted_armor_recolor_kit.iff", planet);
+						inventory.add(recolorkit);
 						return;
 						
 					case 153:
