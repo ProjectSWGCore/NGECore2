@@ -884,8 +884,8 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		synchronized(objectMutex) {
 			this.moodAnimation = moodAnimation;
 		}
-		IoBuffer moodAnimationDelta = messageBuilder.buildMoodAnimationDelta(moodAnimation);
-		notifyObservers(moodAnimationDelta, true);
+		//IoBuffer moodAnimationDelta = messageBuilder.buildMoodAnimationDelta(moodAnimation);
+		//notifyObservers(moodAnimationDelta, true);
 	}
 
 	public long getWeaponId() {

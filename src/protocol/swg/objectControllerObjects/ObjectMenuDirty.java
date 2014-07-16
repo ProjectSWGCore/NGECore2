@@ -25,10 +25,6 @@ import java.nio.ByteOrder;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import protocol.swg.ObjControllerMessage;
-
-
-
 public class ObjectMenuDirty extends ObjControllerObject {
 	
 	private long characterId;
@@ -37,13 +33,11 @@ public class ObjectMenuDirty extends ObjControllerObject {
 		this.characterId = characterId;
 	}
 	
-	
-
 	@Override
 	public void deserialize(IoBuffer buffer) {
 
 	}
-
+	
 	@Override
 	public IoBuffer serialize() {
 		IoBuffer result = IoBuffer.allocate(45).order(ByteOrder.LITTLE_ENDIAN);
@@ -57,7 +51,5 @@ public class ObjectMenuDirty extends ObjControllerObject {
 	
 //	0000:   05 00 46 5E CE 80 1B 00 00 00 2B 02 00 00 7C 0E    ..F^......+...|.
 //	0010:   31 D6 41 00 00 00 00 00 00 00                      1.A.......
-
-
 
 }

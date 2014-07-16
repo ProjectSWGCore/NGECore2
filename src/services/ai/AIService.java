@@ -43,7 +43,7 @@ import main.NGECore;
 
 public class AIService {
 	
-	private Vector<AIActor> aiActors = new Vector<AIActor>();
+	@SuppressWarnings("unused") private Vector<AIActor> aiActors = new Vector<AIActor>();
 	private NGECore core;
 	
 	public AIService(NGECore core) {

@@ -82,7 +82,7 @@ public class SUIService implements INetworkDispatch {
 				SWGObject target = core.objectService.getObject(request.getTargetId());
 				SWGObject owner = core.objectService.getObject(request.getCharacterId());
 	
-				if(target == null || owner == null)
+				if(target == null || owner == null || owner.getClient() == null)
 					return;
 				
 //				if (getRadialFilename(target).equals("noradialoptions"))

@@ -27,7 +27,6 @@ import main.NGECore;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import resources.objectives.DefaultMissionObjective;
 import resources.objects.intangible.IntangibleObject;
 import resources.objects.waypoint.WaypointObject;
 import services.mission.MissionLocation;
