@@ -352,7 +352,6 @@ public class CharacterService implements INetworkDispatch {
 				datapad.add(pda);
 				
 				createStarterClothing(object, sharedRaceTemplate, clientCreateCharacter.getStarterProfession());
-				//core.scriptService.callScript("scripts/", "demo", "CreateStartingCharacter", core, object);
 				
 				core.getSWGObjectODB().put(object.getObjectID(), object);
 
