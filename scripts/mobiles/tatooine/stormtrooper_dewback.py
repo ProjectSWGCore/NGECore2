@@ -43,7 +43,6 @@ def addTemplate(core):
 	attacks.add('bm_charge_1')
 	attacks.add('bm_dampen_pain_1')
 	attacks.add('bm_stomp_1')
-	mobileTemplate.setDefaultAt
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

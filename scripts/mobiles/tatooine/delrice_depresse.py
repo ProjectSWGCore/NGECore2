@@ -31,11 +31,8 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
-<<<<<<< HEAD
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
-=======
 	mobileTemplate.setDefaultAttack('MeleeAttack')
->>>>>>> NPC
 	mobileTemplate.setAttacks(attacks)
 	
 	core.spawnService.addMobileTemplate('jabbas_palace_delrice_capreese', mobileTemplate)

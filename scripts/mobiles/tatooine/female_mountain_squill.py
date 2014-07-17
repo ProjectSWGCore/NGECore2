@@ -27,7 +27,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("squill")
 	mobileTemplate.setAssistRange(10)
 	mobileTemplate.setStalker(False)
-mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)	
+	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)	
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_squill.iff')

@@ -39,7 +39,7 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
-	ttacks.add('bm_bite_1')
+	attacks.add('bm_bite_1')
 	attacks.add('bm_bolster_armor_1')
 	attacks.add('bm_charge_1')
 	attacks.add('bm_stomp_1')
