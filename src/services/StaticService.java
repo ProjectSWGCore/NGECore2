@@ -115,6 +115,7 @@ public class StaticService implements INetworkDispatch {
 		return spawnObject(template, planetName, ((cell == null) ? 0L : cell.getObjectID()), x, y, z, qW, qX, qY, qZ, respawnTime);
 	}
 	
+	@SuppressWarnings("unused")
 	public SWGObject spawnObject(String template, String planetName, long cellId, float x, float y, float z, float qW, float qX, float qY, float qZ, int respawnTime) {
 		Planet planet = core.terrainService.getPlanetByName(planetName);
 		

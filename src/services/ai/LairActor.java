@@ -157,6 +157,7 @@ public class LairActor {
 		
 	}
 	
+	@SuppressWarnings("unused")
 	private void healLair() {
 		
 		if(lairObject.getConditionDamage() == 0 || creatures.isEmpty())

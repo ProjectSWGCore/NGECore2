@@ -1,12 +1,20 @@
 import sys
 
 def setup():
-    return
-    
+	return
+	
 def run(core, actor, target, commandString):
 
-    commandArgs = commandString.split("(^-,=+_)color_13548(,+-=_^)=1")
-    newString = commandArgs[0]
+	commandArgs = commandString.split(' ')
+	newString = None
+	# removes the strange varying color arguments the client sends to server
+	for arg in commandArgs:
+		if 'color' not in arg:
+			if newString is None:
+				newString = arg
+			else:
+				newString = newString + ' ' + arg
 	
-    core.commandService.callCommand(actor, 'waypoint', None, newString)
-    return
+
+	core.commandService.callCommand(actor, 'waypoint', None, newString)
+	return

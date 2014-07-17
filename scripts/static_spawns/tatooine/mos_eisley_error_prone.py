@@ -1,15 +1,17 @@
+import sys
 # Project SWG:   Mos Eisley Error Prone Droids:  Static Spawns
 # (C)2014 ProjectSWG
 
-import sys
+
+
 from resources.datatables import Options
 from resources.datatables import State
 
 def addPlanetSpawns(core, planet):
 
+
 	stcSvc = core.staticService
 	objSvc = core.objectService
-	aiSvc = core.aiService
 	
 	error_prone = stcSvc.spawnObject('error-prone_battle_droid', 'tatooine', long(0), float(2868), float(39), float(-4814), float(0), float(0), float(0), float(0), 30)
 	error_prone1 = stcSvc.spawnObject('error-prone_battle_droid', 'tatooine', long(0), float(2815), float(38), float(-4815), float(0), float(0), float(0), float(0), 30)
@@ -29,22 +31,5 @@ def addPlanetSpawns(core, planet):
 	error_prone15 = stcSvc.spawnObject('error-prone_battle_droid', 'tatooine', long(0), float(2851), float(40), float(-4806), float(0), float(0), float(0), float(0), 30)
 	error_prone16 = stcSvc.spawnObject('error-prone_battle_droid', 'tatooine', long(0), float(2871), float(38), float(-4799), float(0), float(0), float(0), float(0), 30)
 	
-	aiSvc.setLoiter(error_prone, float(1), float(8))  
-	aiSvc.setLoiter(error_prone1, float(1), float(8)) 
-	aiSvc.setLoiter(error_prone2, float(1), float(8)) 
-	aiSvc.setLoiter(error_prone3, float(1), float(8)) 
-	aiSvc.setLoiter(error_prone4, float(1), float(8)) 
-	aiSvc.setLoiter(error_prone5, float(1), float(8)) 
-	aiSvc.setLoiter(error_prone6, float(1), float(8)) 
-	aiSvc.setLoiter(error_prone7, float(1), float(8)) 
-	aiSvc.setLoiter(error_prone8, float(1), float(8)) 
-	aiSvc.setLoiter(error_prone9, float(1), float(8)) 
-	aiSvc.setLoiter(error_prone10, float(1), float(8)) 
-	aiSvc.setLoiter(error_prone11, float(1), float(8)) 
-	aiSvc.setLoiter(error_prone12, float(1), float(8)) 
-	aiSvc.setLoiter(error_prone13, float(1), float(8)) 
-	aiSvc.setLoiter(error_prone14, float(1), float(8)) 
-	aiSvc.setLoiter(error_prone15, float(1), float(8)) 
-	aiSvc.setLoiter(error_prone16, float(1), float(8)) 
 	return
 	

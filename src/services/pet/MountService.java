@@ -39,13 +39,11 @@ import resources.datatables.State;
 import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
-import services.ai.AIActor;
 import tools.DevLog;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.resources.container.Traverser;
 import engine.resources.objects.SWGObject;
-import engine.resources.scene.Planet;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
