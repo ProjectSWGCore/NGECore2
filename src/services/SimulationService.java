@@ -1150,6 +1150,14 @@ public class SimulationService implements INetworkDispatch {
 	
 	public void teleport(SWGObject obj, Point3D position, Quaternion orientation, long cellId) {
 		
+		if (obj.getPosition().getDistance2D(position) > 150) {
+			if (cellId != 0)
+				transferToPlanet(obj, obj.getPlanet(), position, orientation, core.objectService.getObject(cellId));
+			else
+				transferToPlanet(obj, obj.getPlanet(), position, orientation, null);
+			return;
+		}
+
 		if(cellId == 0) {
 			if(position.x >= -8192 && position.x <= 8192 && position.z >= -8192 && position.z <= 8192) {
 				obj.setMovementCounter(obj.getMovementCounter() + 1);
@@ -1165,6 +1173,8 @@ public class SimulationService implements INetworkDispatch {
 			
 			obj.setPosition(position);
 			obj.setOrientation(orientation);
+			
+			// Shouldn't the parent be set?
 		}
 			
 	}
