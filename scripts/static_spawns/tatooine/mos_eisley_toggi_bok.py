@@ -1,19 +1,21 @@
+import sys
 # Project SWG:   Mos Eisley Toogi Bok's place:  Static Spawns
 # (C)2014 ProjectSWG
 
-import sys
+
+
 from resources.datatables import Options
 from resources.datatables import State
 
 def addPlanetSpawns(core, planet):
 
+
 	stcSvc = core.staticService
 	objSvc = core.objectService
-	aiSvc = core.aiService	
 	
-	#toggi bok	
+	#toggi bock
+	
 	stcSvc.spawnObject('object/mobile/shared_dressed_tatooine_opening_toggi.iff', 'tatooine', long(0), float(2756), float(7), float(-4567), float(0), float(0), float(0), float(0))
-	
 	# Thiefs
 	
 	thiefs = stcSvc.spawnObject('thief', 'tatooine', long(0), float(2780), float(6), float(-4579), float(0), float(0), float(0), float(0), 30)
@@ -35,23 +37,5 @@ def addPlanetSpawns(core, planet):
 	thiefs16 = stcSvc.spawnObject('thief', 'tatooine', long(0), float(2803), float(6), float(-4578), float(0), float(0), float(0), float(0), 30)	
 	thiefs17 = stcSvc.spawnObject('thief', 'tatooine', long(0), float(2800), float(6), float(-4619), float(0), float(0), float(0), float(0), 30)					
 	
-	aiSvc.setLoiter(thiefs, float(1), float(8))
-	aiSvc.setLoiter(thiefs1, float(1), float(8)) 
-	aiSvc.setLoiter(thiefs2, float(1), float(8)) 
-	aiSvc.setLoiter(thiefs3, float(1), float(8)) 
-	aiSvc.setLoiter(thiefs4, float(1), float(8)) 
-	aiSvc.setLoiter(thiefs5, float(1), float(8))  
-	aiSvc.setLoiter(thiefs6, float(1), float(8))
-	aiSvc.setLoiter(thiefs7, float(1), float(8)) 
-	aiSvc.setLoiter(thiefs8, float(1), float(8)) 
-	aiSvc.setLoiter(thiefs9, float(1), float(8)) 
-	aiSvc.setLoiter(thiefs10, float(1), float(8)) 
-	aiSvc.setLoiter(thiefs11, float(1), float(8))
-	aiSvc.setLoiter(thiefs12, float(1), float(8)) 
-	aiSvc.setLoiter(thiefs13, float(1), float(8))
-	aiSvc.setLoiter(thiefs14, float(1), float(8)) 
-	aiSvc.setLoiter(thiefs15, float(1), float(8))
-	aiSvc.setLoiter(thiefs16, float(1), float(8)) 
-	aiSvc.setLoiter(thiefs17, float(1), float(8))
-	
 	return
+	
