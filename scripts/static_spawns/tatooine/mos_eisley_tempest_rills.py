@@ -1,17 +1,15 @@
-import sys
 # Project SWG:   MosEisley Tempest Rills:  Static Spawns
 # (C)2014 ProjectSWG
 
-
-
+import sys
 from resources.datatables import Options
 from resources.datatables import State
 
 def addPlanetSpawns(core, planet):
 
-
 	stcSvc = core.staticService
 	objSvc = core.objectService
+	aiSvc = core.aiService
 	
 	# Tempest rills
 	tempest_rill1 = stcSvc.spawnObject('tempest_rill', 'tatooine', long(0), float(3716), float(5), float(-4602), float(0), float(0), float(0), float(0), 30)	
@@ -29,8 +27,6 @@ def addPlanetSpawns(core, planet):
 	tempest_rill13 = stcSvc.spawnObject('tempest_rill', 'tatooine', long(0), float(3704), float(5), float(-4624), float(0), float(0), float(0), float(0), 30)	
 	tempest_rill14 = stcSvc.spawnObject('tempest_rill', 'tatooine', long(0), float(3687), float(5), float(-4600), float(0), float(0), float(0), float(0), 30)	
 
-
-	
 	# Tempest rills
 	tempest_rill4 = stcSvc.spawnObject('tempest_rill', 'tatooine', long(0), float(3875), float(48), float(-5068), float(0), float(0), float(0), float(0), 30)	
 	tempest_rill41 = stcSvc.spawnObject('tempest_rill', 'tatooine', long(0), float(3855), float(45), float(-5048), float(0), float(0), float(0), float(0), 30)	
@@ -39,6 +35,25 @@ def addPlanetSpawns(core, planet):
 	tempest_rill44 = stcSvc.spawnObject('tempest_rill', 'tatooine', long(0), float(3892), float(58), float(-5078), float(0), float(0), float(0), float(0), 30)	
 	tempest_rill45 = stcSvc.spawnObject('tempest_rill', 'tatooine', long(0), float(3860), float(44), float(-5043), float(0), float(0), float(0), float(0), 30)	
 
+	aiSvc.setLoiter(tempest_rill1, float(1), float(8)) 
+	aiSvc.setLoiter(tempest_rill2, float(1), float(8)) 
+	aiSvc.setLoiter(tempest_rill3, float(1), float(8)) 
+	aiSvc.setLoiter(tempest_rill4, float(1), float(8)) 
+	aiSvc.setLoiter(tempest_rill5, float(1), float(8))  
+	aiSvc.setLoiter(tempest_rill6, float(1), float(8))
+	aiSvc.setLoiter(tempest_rill7, float(1), float(8)) 
+	aiSvc.setLoiter(tempest_rill8, float(1), float(8)) 
+	aiSvc.setLoiter(tempest_rill9, float(1), float(8)) 
+	aiSvc.setLoiter(tempest_rill10, float(1), float(8)) 
+	aiSvc.setLoiter(tempest_rill11, float(1), float(8))
+	aiSvc.setLoiter(tempest_rill12, float(1), float(8)) 
+	aiSvc.setLoiter(tempest_rill13, float(1), float(8))
+	aiSvc.setLoiter(tempest_rill14, float(1), float(8)) 
+	aiSvc.setLoiter(tempest_rill4, float(1), float(8))
+	aiSvc.setLoiter(tempest_rill41, float(1), float(8)) 
+	aiSvc.setLoiter(tempest_rill42, float(1), float(8))
+	aiSvc.setLoiter(tempest_rill43, float(1), float(8)) 
+	aiSvc.setLoiter(tempest_rill44, float(1), float(8))
+	aiSvc.setLoiter(tempest_rill45, float(1), float(8))
 	
 	return
-	

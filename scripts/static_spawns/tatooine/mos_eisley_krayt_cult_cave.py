@@ -1,9 +1,7 @@
-import sys
 # Project SWG:   Mos Eisley Krayt cult cave:  Static Spawns
 # (C)2014 ProjectSWG
 
-
-
+import sys
 from resources.datatables import Options
 from resources.datatables import State
 
@@ -26,7 +24,6 @@ def addPlanetSpawns(core, planet):
 	novice6 = stcSvc.spawnObject('krayt_cult_novice', 'tatooine', cave.getCellByCellNumber(15), float(112.9), float(-91.3), float(-331.9), float(0), float(0), float(0), float(0), 30)
 	novice7 = stcSvc.spawnObject('krayt_cult_novice', 'tatooine', cave.getCellByCellNumber(20), float(-12.2), float(-120), float(-374.3), float(0), float(0), float(0), float(0), 30)
 	
-	
 	zealot = stcSvc.spawnObject('krayt_cult_zealot', 'tatooine', cave.getCellByCellNumber(3), float(-19.2), float(-26.7), float(-42.2), float(0), float(0), float(0), float(0), 30)
 	zealot1 = stcSvc.spawnObject('krayt_cult_zealot', 'tatooine', cave.getCellByCellNumber(5), float(-73.3), float(-56), float(-177.4), float(0), float(0), float(0), float(0), 30)
 	zealot2 = stcSvc.spawnObject('krayt_cult_zealot', 'tatooine', cave.getCellByCellNumber(5), float(-40.8), float(-56.4), float(-208.2), float(0), float(0), float(0), float(0), 30)
@@ -35,7 +32,7 @@ def addPlanetSpawns(core, planet):
 	zealot5 = stcSvc.spawnObject('krayt_cult_zealot', 'tatooine', cave.getCellByCellNumber(5), float(-7.9), float(-49), float(-155.9), float(0), float(0), float(0), float(0), 30)
 	zealot6 = stcSvc.spawnObject('krayt_cult_zealot', 'tatooine', cave.getCellByCellNumber(15), float(113.9), float(-90.5), float(-340.2), float(0), float(0), float(0), float(0), 30)
 	zealot7 = stcSvc.spawnObject('krayt_cult_zealot', 'tatooine', cave.getCellByCellNumber(20), float(4), float(-119.4), float(-359.8), float(0), float(0), float(0), float(0), 30)
-	
+
 	
 	alcolyte = stcSvc.spawnObject('krayt_cult_acolyte', 'tatooine', cave.getCellByCellNumber(3), float(-27.1), float(-40.5), float(-73.6), float(0), float(0), float(0), float(0), 30)		
 	alcolyte1 = stcSvc.spawnObject('krayt_cult_acolyte', 'tatooine', cave.getCellByCellNumber(12), float(-72.2), float(-70.9), float(-255.1), float(0), float(0), float(0), float(0), 30)		
@@ -69,4 +66,3 @@ def addPlanetSpawns(core, planet):
 	
 	
 	return
-	

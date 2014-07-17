@@ -1,19 +1,16 @@
-import sys
 # Project SWG:   WT Bunker:  Static Spawns
 # (C)2014 ProjectSWG
 
-
-
+import sys
 from resources.datatables import Options
 from resources.datatables import State
 from resources.datatables import Posture
 
 def addPlanetSpawns(core, planet):
 
-
 	stcSvc = core.staticService
 	objSvc = core.objectService
-	
+	aiSvc = core.aiService
 
 	#Outside
 	wt_guard = stcSvc.spawnObject('white_thranta_security_guard', 'tatooine', long(0), float(3749.7), float(16.8), float(-4200.5), float(0), float(0), float(0), float(0), 45)
@@ -25,6 +22,14 @@ def addPlanetSpawns(core, planet):
 	wt_guard6 = stcSvc.spawnObject('white_thranta_security_guard', 'tatooine', long(0), float(3718.3), float(16.2), float(-4193.1), float(0), float(0), float(0), float(0), 45)
 	wt_guard7 = stcSvc.spawnObject('white_thranta_security_guard', 'tatooine', long(0), float(3707), float(17.7), float(-4187.6), float(0), float(0), float(0), float(0), 45)
 	
+	aiSvc.setLoiter(wt_guard, float(1), float(8)) 
+	aiSvc.setLoiter(wt_guard1, float(1), float(8)) 
+	aiSvc.setLoiter(wt_guard2, float(1), float(8)) 
+	aiSvc.setLoiter(wt_guard3, float(1), float(8)) 
+	aiSvc.setLoiter(wt_guard4, float(1), float(8))
+	aiSvc.setLoiter(wt_guard5, float(1), float(8)) 
+	aiSvc.setLoiter(wt_guard6, float(1), float(8))
+	aiSvc.setLoiter(wt_guard7, float(1), float(8))
 	
 	#inside
 	wt_bunker = core.objectService.getObject(long(-466404036409557111))

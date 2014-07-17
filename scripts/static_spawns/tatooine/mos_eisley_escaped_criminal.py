@@ -1,17 +1,15 @@
-import sys
 # Project SWG:   Mos Eisley Error Prone Droids:  Static Spawns
 # (C)2014 ProjectSWG
 
-
-
+import sys
 from resources.datatables import Options
 from resources.datatables import State
 
 def addPlanetSpawns(core, planet):
 
-
 	stcSvc = core.staticService
 	objSvc = core.objectService
+	aiSvc = core.aiService
 	
 	escaped_criminal = stcSvc.spawnObject('escaped_criminal', 'tatooine', long(0), float(2862), float(13), float(-5103), float(0), float(0), float(0), float(0), 30)
 	escaped_criminal1 = stcSvc.spawnObject('escaped_criminal', 'tatooine', long(0), float(2856), float(13), float(-5094), float(0), float(0), float(0), float(0), 30)
@@ -27,6 +25,20 @@ def addPlanetSpawns(core, planet):
 	escaped_criminal11 = stcSvc.spawnObject('escaped_criminal', 'tatooine', long(0), float(2815), float(2), float(-5074), float(0), float(0), float(0), float(0), 30)
 	escaped_criminal12 = stcSvc.spawnObject('escaped_criminal', 'tatooine', long(0), float(2837), float(5), float(-5081), float(0), float(0), float(0), float(0), 30)
 	
+	
+	aiSvc.setLoiter(escaped_criminal, float(1), float(8))
+	aiSvc.setLoiter(escaped_criminal1, float(1), float(8)) 
+	aiSvc.setLoiter(escaped_criminal2, float(1), float(8)) 
+	aiSvc.setLoiter(escaped_criminal3, float(1), float(8)) 
+	aiSvc.setLoiter(escaped_criminal4, float(1), float(8)) 
+	aiSvc.setLoiter(escaped_criminal5, float(1), float(8))  
+	aiSvc.setLoiter(escaped_criminal6, float(1), float(8))
+	aiSvc.setLoiter(escaped_criminal7, float(1), float(8)) 
+	aiSvc.setLoiter(escaped_criminal8, float(1), float(8)) 
+	aiSvc.setLoiter(escaped_criminal9, float(1), float(8)) 
+	aiSvc.setLoiter(escaped_criminal10, float(1), float(8)) 
+	aiSvc.setLoiter(escaped_criminal11, float(1), float(8))
+	aiSvc.setLoiter(escaped_criminal12, float(1), float(8))
 	
 	return
 	

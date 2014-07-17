@@ -1,18 +1,15 @@
-import sys
 # Project SWG:   Mos Eisley Swoop gang:  Static Spawns
 # (C)2014 ProjectSWG
 
-
-
+import sys
 from resources.datatables import Options
 from resources.datatables import State
 
 def addPlanetSpawns(core, planet):
 
-
 	stcSvc = core.staticService
 	objSvc = core.objectService
-	
+	aiSvc = core.aiService
 	
 	#Enforcers
 	
@@ -37,5 +34,17 @@ def addPlanetSpawns(core, planet):
 	swoop_gang_thug1 = stcSvc.spawnObject('swoop_gang_thug', 'tatooine', long(0), float(3169), float(5), float(-4823), float(0), float(0), float(0), float(0), 30)
 	swoop_gang_thug2 = stcSvc.spawnObject('swoop_gang_thug', 'tatooine', long(0), float(3168), float(5), float(-4773), float(0), float(0), float(0), float(0), 30)
 	
+	aiSvc.setLoiter(swoop_gang_enforcer, float(1), float(8))  
+	aiSvc.setLoiter(swoop_gang_enforcer1, float(1), float(8))
+	aiSvc.setLoiter(swoop_gang_punk, float(1), float(8)) 
+	aiSvc.setLoiter(swoop_gang_punk1, float(1), float(8)) 
+	aiSvc.setLoiter(swoop_gang_punk2, float(1), float(8)) 
+	aiSvc.setLoiter(swoop_gang_punk3, float(1), float(8)) 
+	aiSvc.setLoiter(swoop_gang_rogue, float(1), float(8)) 
+	aiSvc.setLoiter(swoop_gang_rogue1, float(1), float(8)) 
+	aiSvc.setLoiter(swoop_gang_rogue2, float(1), float(8)) 
+	aiSvc.setLoiter(swoop_gang_thug, float(1), float(8)) 
+	aiSvc.setLoiter(swoop_gang_thug1, float(1), float(8)) 
+	aiSvc.setLoiter(swoop_gang_thug2, float(1), float(8))
+
 	return
-	
