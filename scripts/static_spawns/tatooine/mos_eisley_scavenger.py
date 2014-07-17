@@ -1,15 +1,18 @@
+import sys
 # Project SWG:   Mos Eisley scavenger:  Static Spawns
 # (C)2014 ProjectSWG
 
-import sys
+
+
 from resources.datatables import Options
 from resources.datatables import State
 
 def addPlanetSpawns(core, planet):
 
+
 	stcSvc = core.staticService
 	objSvc = core.objectService
-	aiSvc = core.aiService
+	
 	
 	#Enforcers
 	
@@ -27,19 +30,6 @@ def addPlanetSpawns(core, planet):
 	scavenger11 = stcSvc.spawnObject('scavenger', 'tatooine', long(0), float(3071), float(3), float(-4971), float(0), float(0), float(0), float(0), 30)	
 	scavenger12 = stcSvc.spawnObject('scavenger', 'tatooine', long(0), float(3047), float(7), float(-4957), float(0), float(0), float(0), float(0), 30)	
 												
-	aiSvc.setLoiter(scavenger, float(1), float(8))  
-	aiSvc.setLoiter(scavenger1, float(1), float(8))
-	aiSvc.setLoiter(scavenger2, float(1), float(8)) 
-	aiSvc.setLoiter(scavenger3, float(1), float(8)) 
-	aiSvc.setLoiter(scavenger4, float(1), float(8)) 
-	aiSvc.setLoiter(scavenger5, float(1), float(8)) 
-	aiSvc.setLoiter(scavenger6, float(1), float(8)) 
-	aiSvc.setLoiter(scavenger7, float(1), float(8)) 
-	aiSvc.setLoiter(scavenger8, float(1), float(8)) 
-	aiSvc.setLoiter(scavenger9, float(1), float(8)) 
-	aiSvc.setLoiter(scavenger10, float(1), float(8)) 
-	aiSvc.setLoiter(scavenger11, float(1), float(8))
-	aiSvc.setLoiter(scavenger12, float(1), float(8))
-	 
+	
 	return
 	

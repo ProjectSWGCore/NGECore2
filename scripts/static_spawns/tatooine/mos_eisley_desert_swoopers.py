@@ -1,15 +1,17 @@
+import sys
 # Project SWG:   Mos Eisley Desert Swoopers:  Static Spawns
 # (C)2014 ProjectSWG
 
-import sys
+
+
 from resources.datatables import Options
 from resources.datatables import State
 
 def addPlanetSpawns(core, planet):
 
+
 	stcSvc = core.staticService
 	objSvc = core.objectService
-	aiSvc = core.aiService
 	
 	desert_swooper = stcSvc.spawnObject('desert_swooper', 'tatooine', long(0), float(3319), float(5), float(-5125), float(0), float(0), float(0), float(0), 30)
 	desert_swooper1 = stcSvc.spawnObject('desert_swooper', 'tatooine', long(0), float(3309), float(5), float(-5121), float(0), float(0), float(0), float(0), 30)
@@ -29,25 +31,6 @@ def addPlanetSpawns(core, planet):
 	
 	desert_swooper_leader = stcSvc.spawnObject('desert_swooper_leader', 'tatooine', long(0), float(3313), float(5), float(-5138), float(0), float(0), float(0), float(0), 30)
 	desert_swooper_leader1 = stcSvc.spawnObject('desert_swooper_leader', 'tatooine', long(0), float(3316), float(5), float(-5131), float(0), float(0), float(0), float(0), 30)
-	
-	aiSvc.setLoiter(desert_swooper, float(1), float(8))  
-	aiSvc.setLoiter(desert_swooper1, float(1), float(8)) 
-	aiSvc.setLoiter(desert_swooper2, float(1), float(8)) 
-	aiSvc.setLoiter(desert_swooper3, float(1), float(8)) 
-	aiSvc.setLoiter(desert_swooper4, float(1), float(8)) 
-	aiSvc.setLoiter(desert_swooper5, float(1), float(8)) 
-	aiSvc.setLoiter(desert_swooper6, float(1), float(8)) 
-	aiSvc.setLoiter(desert_swooper7, float(1), float(8)) 
-	aiSvc.setLoiter(desert_swooper8, float(1), float(8)) 
-	aiSvc.setLoiter(desert_swooper9, float(1), float(8)) 
-	aiSvc.setLoiter(desert_swooper10, float(1), float(8)) 
-	aiSvc.setLoiter(desert_swooper11, float(1), float(8)) 
-	aiSvc.setLoiter(desert_swooper12, float(1), float(8)) 
-	aiSvc.setLoiter(desert_swooper13, float(1), float(8)) 
-	aiSvc.setLoiter(desert_swooper14, float(1), float(8)) 
-	
-	aiSvc.setLoiter(desert_swooper_leader, float(1), float(8)) 
-	aiSvc.setLoiter(desert_swooper_leader1, float(1), float(8)) 
 	
 	return
 	

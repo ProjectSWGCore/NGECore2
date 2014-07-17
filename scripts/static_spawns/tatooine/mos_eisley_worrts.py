@@ -1,15 +1,17 @@
+import sys
 # Project SWG:   MosEisley Worrts:  Static Spawns
 # (C)2014 ProjectSWG
 
-import sys
+
+
 from resources.datatables import Options
 from resources.datatables import State
 
 def addPlanetSpawns(core, planet):
 
+
 	stcSvc = core.staticService
 	objSvc = core.objectService
-	aiSvc = core.aiService
 	
 	# Tame Worrts
 	tame_worrt1 = stcSvc.spawnObject('tame_worrt', 'tatooine', long(0), float(3153), float(4), float(-4945), float(0), float(0), float(0), float(0), 30)	
@@ -27,17 +29,5 @@ def addPlanetSpawns(core, planet):
 	tame_worrt24 = stcSvc.spawnObject('tame_worrt', 'tatooine', long(0), float(3145), float(4), float(-4746), float(0), float(0), float(0), float(0), 30)	
 	tame_worrt25 = stcSvc.spawnObject('tame_worrt', 'tatooine', long(0), float(3120), float(4), float(-4721), float(0), float(0), float(0), float(0), 30)	
 
-	aiSvc.setLoiter(tame_worrt1, float(1), float(8)) 
-	aiSvc.setLoiter(tame_worrt2, float(1), float(8)) 
-	aiSvc.setLoiter(tame_worrt3, float(1), float(8)) 
-	aiSvc.setLoiter(tame_worrt4, float(1), float(8)) 
-	aiSvc.setLoiter(tame_worrt5, float(1), float(8))  
-	
-	aiSvc.setLoiter(tame_worrt2, float(1), float(8))
-	aiSvc.setLoiter(tame_worrt21, float(1), float(8)) 
-	aiSvc.setLoiter(tame_worrt22, float(1), float(8)) 
-	aiSvc.setLoiter(tame_worrt23, float(1), float(8)) 
-	aiSvc.setLoiter(tame_worrt24, float(1), float(8)) 
-	aiSvc.setLoiter(tame_worrt25, float(1), float(8))
 	
 	return
