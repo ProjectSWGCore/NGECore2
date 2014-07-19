@@ -137,13 +137,21 @@ public class GalacticResource extends SWGObject implements Serializable {
 	private transient double minDist = 99999.0;
 	
 	
-	public GalacticResource(){	
+	public GalacticResource() {	
 		super();
+		createResourceName();
 	}
 	
 	public GalacticResource(long objectID, Planet planet, Point3D position, Quaternion orientation, String template){
 		super(objectID, planet, position, orientation, template);
 		this.id = objectID;
+		createResourceName();
+	}
+	
+	private void createResourceName() {
+		this.name = NAME_SYLLABLE_1[(int) new Random().nextInt(NAME_SYLLABLE_1.length-1)] 
+				  + NAME_SYLLABLE_2[(int) new Random().nextInt(NAME_SYLLABLE_2.length-1)] 
+			      + NAME_SYLLABLE_3[(int) new Random().nextInt(NAME_SYLLABLE_3.length-1)];
 	}
 
 	public GalacticResource(long id){	
@@ -155,8 +163,8 @@ public class GalacticResource extends SWGObject implements Serializable {
 		init();
 	}
 	
-	public GalacticResource(String name, String fileName, String category){
-		this.name = name;
+	public GalacticResource(String fileName, String category){
+		createResourceName();
 		this.fileName = fileName;
 		this.category = category;
 		//this.type = type;
@@ -175,10 +183,6 @@ public class GalacticResource extends SWGObject implements Serializable {
 	
 	public String getName(){
 		return name;
-	}
-	
-	public void setName(String name){
-		this.name = name;
 	}
 	
 	public String getFileName(){
@@ -211,10 +215,9 @@ public class GalacticResource extends SWGObject implements Serializable {
 		return false;
 	}
 	
-	public void initializeNewGalaxyResource(Vector<String> completeResourceNameHistory){
+	public void initializeNewGalaxyResource(){
 		galacticDepositList.clear();
 		
-		constructResourceName(completeResourceNameHistory);
 		generateResourceType();
 		generateResourceStats();
 		generatePlanetarySpawns();
@@ -274,17 +277,18 @@ public class GalacticResource extends SWGObject implements Serializable {
 	}
 			
 	public int[] generateRandomPlanetArray(){
-		int planets  =  6 + new Random().nextInt(2);
-		int[] outpool = new int[planets];
-		int[] pool = new int[10]; // 10 Number of SWG planets
-		for (int i = 0; i < 10; i++) pool[i] = i+1;
-		for (int i = 0; i < planets; i++) outpool[i] = i+1;
-		shuffleArray(pool);
-		for (int i = 0; i < outpool.length; i++)
-	    {
-	      outpool[i]=pool[i];
-	    }
-        return outpool;
+//		int planets  =  6 + new Random().nextInt(2);
+//		int[] outpool = new int[planets];
+//		int[] pool = new int[10]; // 10 Number of SWG planets
+//		for (int i = 0; i < 10; i++) pool[i] = i+1;
+//		for (int i = 0; i < planets; i++) outpool[i] = i+1;
+//		shuffleArray(pool);
+//		for (int i = 0; i < outpool.length; i++)
+//	    {
+//	      outpool[i]=pool[i];
+//	    }
+//        return outpool;
+		return new int[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 	}
 		
 	public void shuffleArray(int[] ar)
@@ -325,20 +329,36 @@ public class GalacticResource extends SWGObject implements Serializable {
 		
 		// Calculate deposit positions
 		Random generator = new Random();
-		int depositQuantity = 8 + generator.nextInt(24);
+		int depositQuantity = 20;
+//		int depositQuantity = 100;
 		
 		// datatables/clientregion -> cities
 		
 		for (int i = 0; i < depositQuantity; i++) {
 			ResourceDeposit deposit = new ResourceDeposit();
 			generator = new Random(); // Exclude mountains at the edge of the maps
-			int spawnCoordsX = generator.nextInt(15000) - 7500;
-			int spawnCoordsZ = generator.nextInt(15000) - 7500;
+			int spawnCoordsX = 0;
+			int spawnCoordsZ = 0;
+			for (int k = 0; k < 10; k++) {
+				spawnCoordsX = generator.nextInt(15000) - 7500;
+				spawnCoordsZ = generator.nextInt(15000) - 7500;
+				boolean works = true;
+				for (ResourceDeposit r : depositList) {
+					double dist = Math.pow(r.getSpawnCoordinatesX()-spawnCoordsX, 2);
+					dist += Math.pow(r.getSpawnCoordinatesZ()-spawnCoordsZ, 2);
+					dist = Math.sqrt(dist);
+					if (dist < 1500) {
+						works = false;
+						break;
+					}
+				}
+				if (works)
+					break;
+			}
 			// check maybe for: if (!core.terrainService.isWater(player.getPlanetId(), spawnCoordsX, spawnCoordsZ)) ?
-			generator = new Random();
 			int spawnConcentration = 30 + generator.nextInt(70);
-			generator = new Random();
-			int spawnRadius = 360 + generator.nextInt(1200-360);
+//			int spawnRadius = 360 + generator.nextInt(1200-360);
+			int spawnRadius = 1500 + generator.nextInt(1000);
 			deposit.setSpawnRadius(spawnRadius);
 			deposit.setSpawnConcentration(spawnConcentration);	
 			//System.out.println("spawnConcentration " + spawnConcentration);
@@ -348,7 +368,7 @@ public class GalacticResource extends SWGObject implements Serializable {
 		}
 		return depositList;
 	}
-		
+	
 	public float deliverConcentrationForSurvey(int planetId, float coordsX, float coordsY) {
 		float measuredOutput = 0;
 		for (int i = 0; i < galacticDepositList.size(); i++) {
@@ -359,7 +379,7 @@ public class GalacticResource extends SWGObject implements Serializable {
 					ResourceDeposit resourceDeposit = depositList.get(j);
 					int spawnCoordsX = (int)resourceDeposit.getSpawnCoordinatesX();
 					int spawnCoordsZ = (int)resourceDeposit.getSpawnCoordinatesZ();
-					int spawnRadius  = (int)resourceDeposit.getSpawnRadius();			
+					float spawnRadius = resourceDeposit.getSpawnRadius();			
 					float deltaX = coordsX-spawnCoordsX;
 					float deltaY = coordsY-spawnCoordsZ;
 					float localConcentration=0; 
@@ -368,7 +388,8 @@ public class GalacticResource extends SWGObject implements Serializable {
 						minDist = hypothen;
 					if (hypothen<spawnRadius) {
 						double depositConcentrationFactor = 1.0f -(hypothen/spawnRadius);
-						localConcentration = (float)(depositConcentrationFactor*resourceDeposit.getSpawnConcentration());						
+						localConcentration = (float)(depositConcentrationFactor*resourceDeposit.getSpawnConcentration()/100);
+						localConcentration *= 100;
 						if (localConcentration>measuredOutput) {
 							measuredOutput=localConcentration;
 						}
@@ -460,18 +481,6 @@ public class GalacticResource extends SWGObject implements Serializable {
 		return minDist;
 	}
 
-	public void constructResourceName(Vector<String> completeResourceNameHistory){
-		// ToDo: This is where the database check for past names must be added
-		boolean check=true;                  
-        while(check)
-        {
-			this.name = NAME_SYLLABLE_1[(int) new Random().nextInt(NAME_SYLLABLE_1.length-1)] 
-					  + NAME_SYLLABLE_2[(int) new Random().nextInt(NAME_SYLLABLE_2.length-1)] 
-				      + NAME_SYLLABLE_3[(int) new Random().nextInt(NAME_SYLLABLE_3.length-1)];
-			check = completeResourceNameHistory.contains(this.name);
-        }
-	}
-	
 	public Vector<PlanetDeposits> getGalacticDepositList(){
 		return galacticDepositList;
 	}
@@ -666,19 +675,6 @@ public class GalacticResource extends SWGObject implements Serializable {
 
 	public void setResourceType(String getresourceType) {
 		this.getresourceType = getresourceType;
-	}
-	
-	public GalacticResource convertToHistoricResource(){
-		GalacticResource historicResource = new GalacticResource();
-		historicResource.setName(this.getName());
-		historicResource.setResourceClass(this.getResourceClass());
-		historicResource.setResourceStats(this.getResourceStats());		
-		historicResource.setResourceType(this.getResourceType());
-		historicResource.setGeneralType(this.getGeneralType());
-		historicResource.setId(this.getId());
-		historicResource.setIffFileName(this.getIffFileName());
-		
-		return historicResource;
 	}
 	
 	@Override
