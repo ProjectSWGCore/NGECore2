@@ -451,11 +451,6 @@ public class CommandService implements INetworkDispatch  {
 	}
 	
 	public void processCombatCommand(CreatureObject attacker, SWGObject target, CombatCommand command, int actionCounter, String commandArgs) {
-		if (target == null) {
-			System.err.println("ProcessCombatCommand: Target is null");
-			return;
-		}
-		
 		if (FileUtilities.doesFileExist("scripts/commands/combat/" + command.getCommandName() + ".py")) {
 			core.scriptService.callScript("scripts/commands/combat/", command.getCommandName(), "setup", core, attacker, target, command);
 		}

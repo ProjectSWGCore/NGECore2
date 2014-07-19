@@ -27,7 +27,6 @@ import main.NGECore;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import resources.objectives.DefaultMissionObjective;
 import resources.objects.intangible.IntangibleObject;
 import resources.objects.waypoint.WaypointObject;
 import services.mission.MissionLocation;
@@ -80,7 +79,7 @@ public class MissionObject extends IntangibleObject implements Serializable {
 		baseline.put("repeatCounter", 0);
 		baseline.put("missionType", 0);
 		baseline.put("targetName", "");
-		baseline.put("waypoint", (WaypointObject) NGECore.getInstance().objectService.createObject("object/waypoint/base/shared_base_waypoint.iff", getPlanet()));
+		baseline.put("waypoint", (WaypointObject) NGECore.getInstance().objectService.createObject("object/waypoint/base/shared_base_waypoint.iff", NGECore.getInstance().terrainService.getPlanetByID(1)));
 		return baseline;
 	}
 	

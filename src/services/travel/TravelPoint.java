@@ -39,7 +39,7 @@ public class TravelPoint {
 	private CreatureObject shuttle;
 	private boolean shuttleAvailable;
 	private boolean shuttleLanding;
-	private int secondsRemaining;
+	@SuppressWarnings("unused") private int secondsRemaining;
 	private boolean shuttleDeparting;
 	private ExecutorService scheduler = Executors.newFixedThreadPool(1);
 	private long departureTimestamp;

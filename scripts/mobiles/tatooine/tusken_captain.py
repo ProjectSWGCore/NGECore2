@@ -21,7 +21,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("tusken raider")
 	mobileTemplate.setAssistRange(6)
 	mobileTemplate.setStalker(True)
-	
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_tusken_raider.iff')

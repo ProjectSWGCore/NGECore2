@@ -11,7 +11,7 @@ def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
 	mobileTemplate.setCreatureName('dwarf_bantha')
-	mobileTemplate.setLevel(10)
+	mobileTemplate.setLevel(18)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)

@@ -66,6 +66,7 @@ import com.sleepycat.persist.model.PrimaryKey;
 
 import protocol.swg.CmdSceneReady;
 import protocol.swg.CmdStartScene;
+import protocol.swg.ErrorMessage;
 import protocol.swg.HeartBeatMessage;
 import protocol.swg.ObjControllerMessage;
 import protocol.swg.ParametersMessage;
@@ -137,7 +138,8 @@ import services.sui.SUIWindow.Trigger;
 @SuppressWarnings("unused")
 public class ObjectService implements INetworkDispatch {
 
-	private Map<Long, SWGObject> objectList = new ConcurrentHashMap<Long, SWGObject>();
+	//private Map<Long, SWGObject> objectList = new ConcurrentHashMap<Long, SWGObject>();
+	private Map<Long, SWGObject> objectList = new ObjectList<Long, SWGObject>();
 	private NGECore core;
 	private DatabaseConnection databaseConnection;
 	private AtomicLong highestId = new AtomicLong();
@@ -263,7 +265,7 @@ public class ObjectService implements INetworkDispatch {
 				e.printStackTrace();
 			}
 			
-			planet = core.terrainService.getPlanetByID(0);
+			planet = core.terrainService.getPlanetByID(1);
 		}
 		
 		if(Template.startsWith("object/creature")) {
@@ -426,7 +428,13 @@ public class ObjectService implements INetworkDispatch {
 			loadServerTemplateTasks.add(() -> loadServerTemplate(pointer));
 		}
 		
-		objectList.put(objectID, object);
+		SWGObject ret = objectList.put(objectID, object);
+		
+		//if (ret != null && !ret.getTemplate().equals(object.getTemplate())) {
+		if (ret == null) {
+			//System.err.println("ObjectService: Detected duplicate Id.  Assigning new one.")
+			object = createObject(Template, objectID, planet, position, orientation, customServerTemplate, overrideSnapshot, loadServerTemplate);
+		}
 		
 		return object;
 	}
@@ -635,32 +643,27 @@ public class ObjectService implements INetworkDispatch {
 			return null;
 		}
 		
-		synchronized(objectList) {
-			for(SWGObject obj : objectList.values()) {
-				if(obj == null)
-					continue;
-				if(obj.getCustomName() == null)
-					continue;
-				if(obj.getCustomName().startsWith(customName) || obj.getCustomName().toUpperCase().startsWith(WordUtils.capitalize(customName)))
-					return obj;
-			}
-			
-		}
+		if (customName.contains(" "))
+			customName = customName.split(" ")[0];
 		
-		ODBCursor cursor = core.getSWGObjectODB().getCursor();
-		
-		while (cursor.hasNext()) {
-			SWGObject object = (SWGObject) cursor.next();
-			
-			if (object == null) {
-				continue;
-			}
-			
-			if (object.getCustomName() != null && customName.length() > 0 && (object.getCustomName().startsWith(customName) || object.getCustomName().toUpperCase().startsWith(WordUtils.capitalize(customName)))) {
+		try {
+			PreparedStatement ps = core.getDatabase1().preparedStatement("SELECT * FROM characters WHERE \"firstName\" ILIKE ?");
+			ps.setString(1, customName);
+			ResultSet resultSet = ps.executeQuery();
+
+			while (resultSet.next()) {
+				long objectId = resultSet.getLong("id");
+				SWGObject object = getObject(objectId);
+				
+				if (object == null)
+					object = getCreatureFromDB(objectId);
+				
 				return object;
 			}
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
-		cursor.close();
+		
 		return null;
 	}
 	
@@ -983,6 +986,11 @@ public class ObjectService implements INetworkDispatch {
 					creature = getCreatureFromDB(objectId);
 					if(creature == null) {
 						System.out.println("Cant get creature from db");
+					} else {
+						if (creature.getCustomName() == null || creature.getCustomName() == "") {
+							System.out.println("Player with ObjID of " + creature.getObjectID() + " tried logging in but has a null/empty name!");
+							return;
+						}
 					}
 					
 				} else {
@@ -994,7 +1002,6 @@ public class ObjectService implements INetworkDispatch {
 					if(creature.getAttachment("disconnectTask") != null && creature.getClient() != null && !creature.getClient().getSession().isClosing())
 						return;
 					
-
 				}
 				if(creature.getAttachment("disconnectTask") != null) {
 					((ScheduledFuture<?>) creature.getAttachment("disconnectTask")).cancel(true);
@@ -1096,7 +1103,7 @@ public class ObjectService implements INetworkDispatch {
 
 						// Find out what friends are online/offline
 						for (String friend : ghost.getFriendList()) {
-							SWGObject friendObject = core.chatService.getObjectByFirstName(friend);
+							SWGObject friendObject = core.objectService.getObjectByFirstName(friend);
 							
 							if(friendObject != null && friendObject.isInQuadtree()) {
 								ChatFriendsListUpdate onlineNotifyStatus = new ChatFriendsListUpdate(friend, (byte) 1);

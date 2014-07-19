@@ -46,7 +46,6 @@ import resources.common.OutOfBand;
 import resources.datatables.Citizenship;
 import resources.datatables.DisplayType;
 import resources.objects.building.BuildingObject;
-import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.harvester.HarvesterObject;
 import resources.objects.installation.InstallationObject;
@@ -117,7 +116,7 @@ public class HousingService implements INetworkDispatch {
 		//PlayerCity city = core.playerCityService.getCityPositionIsIn(new Point3D(positionX, 0, positionZ));
 		// This function is not implemented, so it had to be commented out, because it resulted in an error
 		// Whoever wrote this, should still add the method to playerCityService, then it can be uncommented here.
-		PlayerCity city = null;
+		@SuppressWarnings("unused") PlayerCity city = null;
 		if (!houseTemplate.canBePlacedOn(actor.getPlanet().getName())) {
 			actor.sendSystemMessage("You may not place this structure on this planet.", (byte) 0); // should probably load this from an stf
 			return null;
@@ -128,10 +127,12 @@ public class HousingService implements INetworkDispatch {
 			return null;
 		}
 		
+		/* This will always be null, so has no use...
 		if(city != null && !city.hasZoningRights(actor)) {
 			actor.sendSystemMessage("@player_structure:no_rights", (byte) 0); 
 			return null;
 		}
+		*/
 		
 		// Lot stuff
 		if (!actor.getPlayerObject().deductLots(structureLotCost)) {
@@ -180,9 +181,11 @@ public class HousingService implements INetworkDispatch {
 		building.setMaintenanceAmount(houseTemplate.getBaseMaintenanceRate());
 		building.setDestructionFee(houseTemplate.getDestructionFee());
 		
+		/* This will always be null, so has no use...
 		if(city != null) {
 			city.addNewStructure(building.getObjectID());
 		}
+		*/
 		
 		/*
 		// Check for city founders joining a new city
@@ -272,6 +275,7 @@ public class HousingService implements INetworkDispatch {
 		
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void saveBuildings() {
 		core.objectService.getObjectList()
 		.values().stream()
@@ -669,6 +673,7 @@ public class HousingService implements INetworkDispatch {
 		}
 	}
 	
+	@SuppressWarnings("unused")
 	public void handleListAllItems(SWGObject owner, TangibleObject target) {
 		final BuildingObject building = (BuildingObject) target.getGrandparent();
 		//final BuildingObject building = (BuildingObject) target.getAttachment("housing_parentstruct");
@@ -889,9 +894,13 @@ public class HousingService implements INetworkDispatch {
 			window.addListBoxMenuItem("#"+(i+1)+": " + foundItems.get(i).getTemplate(), i);
 			itemIDMapping.put(i, itemList.get(i).getObjectID());
 			if (i==0){
-				((CreatureObject)owner).setLookAtTarget(itemList.get(i).getObjectID());
-				((CreatureObject)owner).setTargetId(itemList.get(i).getObjectID());
-				((CreatureObject)owner).setIntendedTarget(itemList.get(i).getObjectID());
+				// possibly sending the same delta multiple times
+				if (((CreatureObject) owner).getLookAtTarget() != itemList.get(i).getObjectID());
+					((CreatureObject)owner).setLookAtTarget(itemList.get(i).getObjectID());
+				if (((CreatureObject) owner).getTargetId() != itemList.get(i).getObjectID());
+					((CreatureObject)owner).setTargetId(itemList.get(i).getObjectID());
+				if (((CreatureObject) owner).getIntendedTarget() != itemList.get(i).getObjectID());
+					((CreatureObject)owner).setIntendedTarget(itemList.get(i).getObjectID());
 			}
 		}		
 

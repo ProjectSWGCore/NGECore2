@@ -83,9 +83,9 @@ public class AIActor {
 	private long waitStartTime = 0L;
 	private AIState intendedPrimaryAIState;
 	private Point3D lastPositionBeforeStateChange;
-	private ScheduledFuture movementFuture;
-	private ScheduledFuture recoveryFuture;
-	private ScheduledFuture despawnFuture;
+	private ScheduledFuture<?> movementFuture;
+	private ScheduledFuture<?> recoveryFuture;
+	private ScheduledFuture<?> despawnFuture;
 
 	public AIActor(CreatureObject creature, Point3D spawnPosition, ScheduledExecutorService scheduler) {
 		this.creature = creature;

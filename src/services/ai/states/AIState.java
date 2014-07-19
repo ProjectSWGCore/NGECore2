@@ -195,7 +195,7 @@ public abstract class AIState {
 		float maxDistance = stopDistance;
 		boolean finished = false;
 		float dx, dz, newX = 0, newY = 0, newZ = 0;
-		Vector<Point3D> movementPoints = actor.getMovementPoints();
+		@SuppressWarnings("unused") Vector<Point3D> movementPoints = actor.getMovementPoints();
 		CellObject cell = null;
 		
 			targetPosition = actor.getLoiterDestination(); 
@@ -654,6 +654,7 @@ public abstract class AIState {
 		
 	}
 	
+	@SuppressWarnings("unused")
 	public void doFollow(AIActor actor) {
 		//NGECore.getInstance().aiService.logAI("AI STATE doPatrol");
 		NGECore core = NGECore.getInstance();
