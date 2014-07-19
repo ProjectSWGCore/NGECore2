@@ -163,8 +163,10 @@ def run(core, actor, target, commandString):
 			actor.sendSystemMessage('Building ID : %s' % building_id, 0)
 			print('Cell ID : %s' % cid, 0)
 			print('Building ID : %s' % building_id, 0)
-					
-		str = "<OBJECTNAME> = stcSvc.spawnObject('<MOBILENAME>', '" + planetName + "', long(%s" % cellid + "), float(%.4f" % pos.x + "), float(%.4f" % pos.y + "), float(%.4f" % pos.z + "), float(%.4f" % ori.y + "), float(%.4f" % ori.w + "))"
+		if cellid == 0:			
+			str = "<OBJECTNAME> = stcSvc.spawnObject('<MOBILENAME>', '" + planetName + "', long(%s" % cellid + "), float(%.4f" % pos.x + "), float(%.4f" % pos.y + "), float(%.4f" % pos.z + "), float(%.4f" % ori.y + "), float(%.4f" % ori.w + "))"
+		elif cellid != 0:
+			str = "\tbuilding =  core.objectService.getObject(long(%s" % building_id + "))\n\t<OBJECTNAME> = stcSvc.spawnObject('<MOBILENAME>', '" + planetName + "', building.getCellByCellNumber(long(%s" % cellid + ")), float(%.4f" % pos.x + "), float(%.4f" % pos.y + "), float(%.4f" % pos.z + "), float(%.4f" % ori.y + "), float(%.4f" % ori.w + "))"
 		toolkit = Toolkit.getDefaultToolkit()
 		clipboard = toolkit.getSystemClipboard()
 		clipboard.setContents(StringSelection(str), None)
@@ -205,3 +207,5 @@ def run(core, actor, target, commandString):
 		actor.sendSystemMessage('You were added to the Admin list for the Frog Building.', 0)
 		return
 	return
+
+	
