@@ -52,11 +52,6 @@ import resources.objects.resource.ResourceContainerObject;
 import resources.objects.resource.ResourceRoot;
 import services.ai.AIActor;
 
-/**
- * @author Charon
- */
-
-@SuppressWarnings("unused") 
 public class ResourceService implements INetworkDispatch {
 	
 	private NGECore core;
@@ -115,10 +110,6 @@ public class ResourceService implements INetworkDispatch {
 		// createCollections2();
 		// createCollections3();
 		// } else {
-		ODBCursor cursor = core.getResourceRootsODB().getCursor();
-		if (!cursor.hasNext()) {
-			loadFromTextFile();
-		}
 		// }
 		core.commandService.registerCommand("harvestcorpse");
 		core.commandService.registerCommand("milkcreature");
@@ -132,59 +123,60 @@ public class ResourceService implements INetworkDispatch {
 	
 	// loads the resource roots at server start
 	public void loadResourceRoots() {
-		ODBCursor cursor = core.getResourceRootsODB().getCursor();
-		int loadedResourceRootsCounter = 0;
-		System.out.println("Loading resource roots...");
-		while (cursor.hasNext()) {
-			final ResourceRoot resourceRoot = (ResourceRoot) cursor.next();
-			System.err.println("resourceRoot loaded ID: " + resourceRoot.getResourceRootID() + " " + resourceRoot.getResourceFileName());
-			createResource(ResourceClass.forString(resourceRoot.getResourceFileName()), resourceRoot);
-			loadedResourceRootsCounter++;
-		}
-		
-		if (loadedResourceRootsCounter == 0) {
-			// big bang will take care of it
-		}
-		// System.err.println("loadedResourceRootsCounter " +
-		// loadedResourceRootsCounter);
-		cursor.close();
-		System.out.println("Finished loading resource roots.");
+//		ODBCursor cursor = core.getResourceRootsODB().getCursor();
+//		int loadedResourceRootsCounter = 0;
+//		System.out.println("Loading resource roots...");
+//		while (cursor.hasNext()) {
+//			final ResourceRoot resourceRoot = (ResourceRoot) cursor.next();
+//			System.err.println("resourceRoot loaded ID: " + resourceRoot.getResourceRootID() + " " + resourceRoot.getResourceFileName());
+//			createResource(ResourceClass.forString(resourceRoot.getResourceFileName()), resourceRoot);
+//			loadedResourceRootsCounter++;
+//		}
+//		
+//		if (loadedResourceRootsCounter == 0) {
+//			// big bang will take care of it
+//		}
+//		// System.err.println("loadedResourceRootsCounter " +
+//		// loadedResourceRootsCounter);
+//		cursor.close();
+//		System.out.println("Finished loading resource roots.");
 	}
 	
 	// loads the currently spawned resources at server start
 	public void loadResources() {
-		ODBCursor cursor = core.getResourcesODB().getCursor();
-		int loadedResourceCounter = 0;
-		System.out.println("Loading resources...");
-		while (cursor.hasNext()) {
-			final GalacticResource resource = (GalacticResource) cursor.next();
-			System.out.println("Resource: " + resource.getName() + " rootID " + resource.getResourceRootID());
-			core.objectService.getObjectList().put(resource.getId(), resource);
-			
-			// re-reference ResourceRoot
-			int resourceRootID = resource.getResourceRootID();
-			ResourceRoot resourceRoot = resourceRootTable.get(resourceRootID);
-			resource.setResourceRoot(resourceRoot);
-			
-			// recreate the collections
-			addSpawnedResource(resource);
-			byte pool = resource.getPoolNumber();
-			if (poolResources.containsKey(pool))
-				poolResources.get(pool).add(resource);
-			else {
-				System.err.println("Loaded resource " + resource.getName() + " has no valid pool value!");
-				resource.setPoolNumber((byte) 4); // Make it a pool 4
-			}
-			
-			loadedResourceCounter++;
-		}
-		
-		if (loadedResourceCounter == 0) {
-			kickOffBigBang(); // spawn resources initially once
-		}
-		
-		cursor.close();
-		System.out.println("Finished loading resources.");
+		loadFromTextFile();
+//		ODBCursor cursor = core.getResourcesODB().getCursor();
+//		int loadedResourceCounter = 0;
+//		System.out.println("Loading resources...");
+//		while (cursor.hasNext()) {
+//			final GalacticResource resource = (GalacticResource) cursor.next();
+//			System.out.println("Resource: " + resource.getName() + " rootID " + resource.getResourceRootID());
+//			core.objectService.getObjectList().put(resource.getId(), resource);
+//			
+//			// re-reference ResourceRoot
+//			int resourceRootID = resource.getResourceRootID();
+//			ResourceRoot resourceRoot = resourceRootTable.get(resourceRootID);
+//			resource.setResourceRoot(resourceRoot);
+//			
+//			// recreate the collections
+//			addSpawnedResource(resource);
+//			byte pool = resource.getPoolNumber();
+//			if (poolResources.containsKey(pool))
+//				poolResources.get(pool).add(resource);
+//			else {
+//				System.err.println("Loaded resource " + resource.getName() + " has no valid pool value!");
+//				resource.setPoolNumber((byte) 4); // Make it a pool 4
+//			}
+//			
+//			loadedResourceCounter++;
+//		}
+//		
+//		if (loadedResourceCounter == 0) {
+//			kickOffBigBang(); // spawn resources initially once
+//		}
+//		
+//		cursor.close();
+//		System.out.println("Finished loading resources.");
 	}
 	
 	public SWGObject createResource() {
@@ -233,7 +225,7 @@ public class ResourceService implements INetworkDispatch {
 		SEDIMENTARY_ORE("Sedimentary Ore"),
 		IGNEOUS_ORE("Igneous Ore"),
 		GEMSTONE("Gemstone"),
-		PETRO_FUEL("Petro	Fuel"),
+		PETRO_FUEL("Petro Fuel"),
 		OIL("Oil"),
 		INERT_GAS("Inert Gas"),
 		WATER_VAPOR("Water Vapor"),
@@ -326,6 +318,7 @@ public class ResourceService implements INetworkDispatch {
 		resourceRoot.setMaximalLifeTime(maxLife);
 		System.out.println("Created Resource: " + fileName + ". Class: " + rClass.getName() + "  Type: " + type);
 		createResource(rClass, resourceRoot);
+		spawnResource(1, resourceRoot);
 	}
 	
 	private void loadFromTextFile() {
@@ -634,30 +627,30 @@ public class ResourceService implements INetworkDispatch {
 		return roots.get((int) (Math.random() * roots.size()));
 	}
 	
-	private GalacticResource spawnResource(int pool, ResourceRoot root) {
-		return spawnResource(pool, root, -1);
+	private void spawnResource(int pool, ResourceRoot root) {
+		spawnResource(pool, root, -1);
 	}
 	
-	private GalacticResource spawnResource(int pool, ResourceRoot root, int planetId) {
+	private void spawnResource(int pool, ResourceRoot root, int planetId) {
 		GalacticResource resource = (GalacticResource) createResource();
 		if (root == null)
-			return resource;
+			return;
 		try {
 			resource.setResourceRoot(root);
 			resource.setPoolNumber((byte) pool);
 			if (planetId != -1)
 				resource.setPlanetID(planetId);
-			resource.initializeNewGalaxyResource(completeResourceNameHistory);
+			resource.initializeNewGalaxyResource();
 			
-			core.getResourcesODB().put(resource.getObjectID(), resource);
-			
-			if (enableResourceHistory) {
-				GalacticResource historicResource = resource.convertToHistoricResource();
-				core.getResourceHistoryODB().put(historicResource.getObjectID(), historicResource);
-			}
+//			core.getResourcesODB().put(resource.getObjectID(), resource);
+//			
+//			if (enableResourceHistory) {
+//				GalacticResource historicResource = resource.convertToHistoricResource();
+//				core.getResourceHistoryODB().put(historicResource.getObjectID(), historicResource);
+//			}
 			
 			completeResourceNameHistory.add(resource.getName());
-			allSpawnedResources.add(resource);
+			addSpawnedResource(resource);
 			totalSpawnedResourcesNumber++;
 		} catch (Exception e) {
 			System.err.println("Error in spawning resource: " + root.getResourceFileName());
@@ -665,7 +658,7 @@ public class ResourceService implements INetworkDispatch {
 				System.err.println("  On Planet: " + planetId);
 			e.printStackTrace();
 		}
-		return resource;
+		return;
 	}
 	
 	public GalacticResource grabResourceByName(String searchName) {

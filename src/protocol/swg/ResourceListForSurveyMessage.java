@@ -67,6 +67,8 @@ public class ResourceListForSurveyMessage extends SWGMessage {
 		if (toolName.equals("survey_tool_liquid"))
 			generalType = (byte) 7;
 		
+		if (core.resourceService == null)
+			System.out.println("heyyyy guess who's confused?!");
 		List<GalacticResource> planetVector = core.resourceService.getSpawnedResourcesByPlanetAndType(surveyor.getPlanetId(),generalType);
 		
 		resourceList = new ArrayList<GalacticResource>(planetVector);
