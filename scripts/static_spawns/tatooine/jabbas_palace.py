@@ -74,7 +74,7 @@ def addPlanetSpawns(core, planet):
 
 	#outside Palace
 	
-	smuggler = stcSvc.spawnObject('object/mobile/shared_dressed_binayre_hoodlum_zabrak_male_01.iff', 'tatooine', long(0), float(-5863), float(90), float(-6198.2), float(0.71), float(0), float(0.70), float(0)) #still need to find correct template
+	smuggler = stcSvc.spawnObject('object/mobile/shared_dressed_tatooine_jabba_henchman.iff', 'tatooine', long(0), float(-5863), float(90), float(-6198.2), float(0.71), float(0), float(0.70), float(0)) #still need to find correct template
 	smuggler.setCustomName('Smuggler Pilot')
 	smuggler.setOptionsBitmask(256)
 	return
