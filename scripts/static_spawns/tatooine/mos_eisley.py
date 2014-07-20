@@ -323,14 +323,13 @@ def addPlanetSpawns(core, planet):
 	#stcSvc.spawnObject('object/mobile/shared_respec_seller_f_1.iff', 'tatooine', long(0), float(3533.14), float(5), float(-4788.86), float(-0.3327), float(0.9288))
 	
 	#Junk Dealers
-	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_01.iff', 'tatooine', long(0), float(3355), float(5), float(-4823), float(0.71), float(0.71))
-	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_01.iff', 'tatooine', long(0), float(3412), float(5), float(-4713), float(0.71), float(-0.71))
-	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_01.iff', 'tatooine', long(0), float(3500), float(5), float(-4960), float(0), float(0))
-	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_01.iff', 'tatooine', long(0), float(3497), float(5), float(-4928), float(0), float(1))
-	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_01.iff', 'tatooine', long(0), float(3377), float(5), float(-4524), float(0.71), float(0.71))
-	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_01.iff', 'tatooine', long(0), float(3271), float(5), float(-4704), float(0), float(0))
-	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_01.iff', 'tatooine', long(0), float(3476), float(5), float(-4665), float(0.71), float(0.71))
+	stcSvc.spawnObject('junkdealer', 'tatooine', long(0), float(3355), float(5), float(-4823), float(0.71), float(0.71))
+	stcSvc.spawnObject('junkdealer', 'tatooine', long(0), float(3412), float(5), float(-4713), float(0.71), float(-0.71))
+	stcSvc.spawnObject('junkdealer', 'tatooine', long(0), float(3500.96), float(5.5), float(-4961.4), float(-0.050), float(0.998))
+	stcSvc.spawnObject('junkdealer', 'tatooine', long(0), float(3496.29), float(5.5), float(-4926.52), float(0.995), float(0.090))
+	stcSvc.spawnObject('junkdealer', 'tatooine', long(0), float(3377), float(5), float(-4524), float(0.71), float(0.71))
+	stcSvc.spawnObject('junkdealer', 'tatooine', long(0), float(3271), float(5), float(-4704), float(0), float(0))
+	stcSvc.spawnObject('junkdealer', 'tatooine', long(0), float(3476.9), float(5), float(-460.35), float(0.189), float(0.981))
 
 
 	return
-	

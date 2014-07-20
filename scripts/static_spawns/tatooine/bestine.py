@@ -97,11 +97,11 @@ def addPlanetSpawns(core, planet):
 	#calebKnolar.setOptionsBitmask(256)
 	
 	#Junk Dealers
-	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_01.iff', 'tatooine', long(0), float(-1287), float(12), float(-3655), float(0.71), float(0.71))
-	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_01.iff', 'tatooine', long(0), float(-1259), float(12), float(-3673), float(0.71), float(-0.71))
-	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_01.iff', 'tatooine', long(0), float(-1026), float(10), float(-3557), float(0), float(0))
-	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_01.iff', 'tatooine', long(0), float(-1260), float(12), float(-3573), float(0), float(1))
-	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_01.iff', 'tatooine', long(0), float(-1126), float(12), float(-3674), float(0.71), float(-0.71))
-	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_01.iff', 'tatooine', long(0), float(-1118), float(12), float(-3687), float(0), float(0))
+	stcSvc.spawnObject('junkdealer', 'tatooine', long(0), float(-1290.23), float(12.5278), float(-3655.77), float(0.850), float(0.526))
+	stcSvc.spawnObject('junkdealer', 'tatooine', long(0), float(-1257.72), float(12.5278), float(-3673.51), float(-0.525), float(0.851))
+	stcSvc.spawnObject('junkdealer', 'tatooine', long(0), float(-1025.98), float(10), float(-3558.69), float(0.830), float(-0.558))
+	stcSvc.spawnObject('junkdealer', 'tatooine', long(0), float(-1260), float(12), float(-3573), float(0.864), float(-0.503))
+	stcSvc.spawnObject('junkdealer', 'tatooine', long(0), float(-1126), float(12), float(-3674), float(0.71), float(-0.71))
+	stcSvc.spawnObject('junkdealer', 'tatooine', long(0), float(-1118), float(12), float(-3687), float(0.932), float(-0.364))
 	return
 	
