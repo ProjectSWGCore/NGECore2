@@ -12,7 +12,7 @@ def run(core, actor, target, commandString):
 		return
 	
 	if target and target.getSlottedObject('ghost') is not None:
-		actor.sendSystemMessage('Teleporting ' + target.getCustomName() + ' to you...', 0)
+		actor.sendSystemMessage('gm: teleporttarget: Command completed successfully.', 0)
 		core.simulationService.teleport(target, actor.getPosition(), actor.getOrientation(), 0)
 		return
 	
