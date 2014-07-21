@@ -100,17 +100,7 @@ public class ResourceService implements INetworkDispatch {
 		}
 		for (int i = 1; i <= 4; i++)
 			poolResources.put(i, new Vector<GalacticResource>());
-		// EntityCursor<ResourceRoot> cursor =
-		// core.getResourceRootsODB().getCursor(Integer.class,
-		// ResourceRoot.class);
-		// Iterator<ResourceRoot> it = cursor.iterator();
-		// if(!it.hasNext()) {
-		// if(core.getResourceRootsODB()==null) {
-		// createCollections();
-		// createCollections2();
-		// createCollections3();
-		// } else {
-		// }
+		
 		core.commandService.registerCommand("harvestcorpse");
 		core.commandService.registerCommand("milkcreature");
 		core.commandService.registerCommand("resourcecontainersplit");
@@ -123,60 +113,12 @@ public class ResourceService implements INetworkDispatch {
 	
 	// loads the resource roots at server start
 	public void loadResourceRoots() {
-//		ODBCursor cursor = core.getResourceRootsODB().getCursor();
-//		int loadedResourceRootsCounter = 0;
-//		System.out.println("Loading resource roots...");
-//		while (cursor.hasNext()) {
-//			final ResourceRoot resourceRoot = (ResourceRoot) cursor.next();
-//			System.err.println("resourceRoot loaded ID: " + resourceRoot.getResourceRootID() + " " + resourceRoot.getResourceFileName());
-//			createResource(ResourceClass.forString(resourceRoot.getResourceFileName()), resourceRoot);
-//			loadedResourceRootsCounter++;
-//		}
-//		
-//		if (loadedResourceRootsCounter == 0) {
-//			// big bang will take care of it
-//		}
-//		// System.err.println("loadedResourceRootsCounter " +
-//		// loadedResourceRootsCounter);
-//		cursor.close();
-//		System.out.println("Finished loading resource roots.");
+		
 	}
 	
 	// loads the currently spawned resources at server start
 	public void loadResources() {
 		loadFromTextFile();
-//		ODBCursor cursor = core.getResourcesODB().getCursor();
-//		int loadedResourceCounter = 0;
-//		System.out.println("Loading resources...");
-//		while (cursor.hasNext()) {
-//			final GalacticResource resource = (GalacticResource) cursor.next();
-//			System.out.println("Resource: " + resource.getName() + " rootID " + resource.getResourceRootID());
-//			core.objectService.getObjectList().put(resource.getId(), resource);
-//			
-//			// re-reference ResourceRoot
-//			int resourceRootID = resource.getResourceRootID();
-//			ResourceRoot resourceRoot = resourceRootTable.get(resourceRootID);
-//			resource.setResourceRoot(resourceRoot);
-//			
-//			// recreate the collections
-//			addSpawnedResource(resource);
-//			byte pool = resource.getPoolNumber();
-//			if (poolResources.containsKey(pool))
-//				poolResources.get(pool).add(resource);
-//			else {
-//				System.err.println("Loaded resource " + resource.getName() + " has no valid pool value!");
-//				resource.setPoolNumber((byte) 4); // Make it a pool 4
-//			}
-//			
-//			loadedResourceCounter++;
-//		}
-//		
-//		if (loadedResourceCounter == 0) {
-//			kickOffBigBang(); // spawn resources initially once
-//		}
-//		
-//		cursor.close();
-//		System.out.println("Finished loading resources.");
 	}
 	
 	public SWGObject createResource() {
@@ -305,64 +247,41 @@ public class ResourceService implements INetworkDispatch {
 		}
 	}
 	
-	private void createResource(String fileName, ResourceClass rClass, String type, byte generalType, byte containerType, short [] minCapArray, short [] maxCapArray, long minLife, long maxLife) {
+	public void addResource(ResourceRoot resource) {
+		System.out.print("Created Resource: " + resource.getResourceFileName());
+		System.out.print("  Class: " + resource.getResourceClass());
+		System.out.println("  Type: " + resource.getResourceType());
+		finalizeResource(ResourceClass.forString(resource.getResourceClass()), resource);
+		spawnResource(1, resource);
+	}
+	
+	public void createResource(String fileName, String rClass, String type, byte generalType, byte containerType, short [] minCapArray, short [] maxCapArray, long minLife, long maxLife) {
 		ResourceRoot resourceRoot = new ResourceRoot();
 		resourceRoot.setResourceFileName(fileName);
-		resourceRoot.setResourceClass(rClass.getName());
+		resourceRoot.setResourceClass(rClass);
 		resourceRoot.setResourceType(type);
-		resourceRoot.setgeneralType(generalType);
+		resourceRoot.setGeneralType(generalType);
 		resourceRoot.setContainerType(containerType);
 		resourceRoot.setResourceMinCaps(minCapArray);
 		resourceRoot.setResourceMaxCaps(maxCapArray);
 		resourceRoot.setMinimalLifeTime(minLife);
 		resourceRoot.setMaximalLifeTime(maxLife);
-		System.out.println("Created Resource: " + fileName + ". Class: " + rClass.getName() + "  Type: " + type);
-		createResource(rClass, resourceRoot);
+		finalizeResource(ResourceClass.forString(rClass), resourceRoot);
 		spawnResource(1, resourceRoot);
 	}
 	
 	private void loadFromTextFile() {
-		try {
-			final String filename = "odb/resources/resources.txt";
-			BufferedReader file = new BufferedReader(new FileReader(new File(filename)));
-			String line = "";
-			while ((line = file.readLine()) != null) {
-				String [] values = line.split(",");
-				if (values.length > 9) {
-					int index = 0;
-					String fileName = values[index++];
-					String rClass = values[index++];
-					String type = values[index++];
-					byte generalType = Byte.valueOf(values[index++]);
-					byte containerType = Byte.valueOf(values[index++]);
-					int minCapLength = Integer.valueOf(values[index++]);
-					if (index + minCapLength + 3 > values.length) {
-						System.err.println("Invalid format for resource: " + fileName);
-						continue;
-					}
-					short [] minCapArray = new short[minCapLength];
-					for (int i = 0; i < minCapArray.length; i++)
-						minCapArray[i] = Short.valueOf(values[index++]);
-					int maxCapLength = Integer.valueOf(values[index++]);
-					if (index + maxCapLength + 2 > values.length) {
-						System.err.println("Invalid format for resource: " + fileName);
-						continue;
-					}
-					short [] maxCapArray = new short[maxCapLength];
-					for (int i = 0; i < maxCapArray.length; i++)
-						maxCapArray[i] = Short.valueOf(values[index++]);
-					long minLife = Long.valueOf(values[index++]);
-					long maxLife = Long.valueOf(values[index++]);
-					createResource(fileName, ResourceClass.forString(rClass), type, generalType, containerType, minCapArray, maxCapArray, minLife, maxLife);
-				}
-			}
-			file.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		System.out.println("Loading resources...");
+		final String path = "scripts/resources/";
+		final String filename = "generate_resources";
+		final String method = "generate";
+		long start = System.nanoTime();
+		core.scriptService.callScript(path, filename, method, core);
+		double timeMs = (System.nanoTime()-start)/1E6;
+		System.out.println(String.format("Finished loading resources. Took %.3fms. Loaded %d resources.", timeMs, resourceRootTable.size()));
 	}
 	
-	private void createResource(ResourceClass rClass, ResourceRoot resourceRoot) {
+	private void finalizeResource(ResourceClass rClass, ResourceRoot resourceRoot) {
 		resourceRootTable.put(resourceRootTable.size(), resourceRoot);
 		resourceTypeTable.get(rClass).add(resourceRoot);
 		switch (resourceRoot.getResourceFileName()) {
@@ -380,7 +299,7 @@ public class ResourceService implements INetworkDispatch {
 		}
 	}
 	
-	// ToDo: Go through all of this again, Vegetable tubers are double 632 berry
+	// TODO: Go through all of this again, Vegetable tubers are double 632 berry
 	// 635 double 645 and 647 double 671,672
 	// 683,84,85,86 all same
 	
@@ -426,8 +345,7 @@ public class ResourceService implements INetworkDispatch {
 			return 0;
 		}
 		core.skillModService.addSkillMod(crafter, "surveying", 100);
-		int skillMod = (int) (Math.round(crafter.getSkillMod("surveying").getModifier()));
-		skillMod = 35; // TEST!
+		int skillMod = (int) (Math.round(crafter.getSkillMod("surveying").getBase()));
 		int skillModAdapted = skillMod;
 		if (skillModAdapted <= 35)
 			skillModAdapted = (3 * skillMod) / 2;
@@ -648,7 +566,6 @@ public class ResourceService implements INetworkDispatch {
 //				GalacticResource historicResource = resource.convertToHistoricResource();
 //				core.getResourceHistoryODB().put(historicResource.getObjectID(), historicResource);
 //			}
-			
 			completeResourceNameHistory.add(resource.getName());
 			addSpawnedResource(resource);
 			totalSpawnedResourcesNumber++;
