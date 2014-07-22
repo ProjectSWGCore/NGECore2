@@ -307,7 +307,7 @@ public class CreatureMessageBuilder extends TangibleMessageBuilder {
 				SWGObject obj = NGECore.getInstance().objectService.getObject(objId);
 				
 				if(obj == null) {
-					System.err.println("Cant find obj for obj id in equip list!!!");
+					System.err.println("Cant find obj for obj id in equip list!!! (Normal Message for AI wipes)");
 					continue;
 				}
 				
@@ -425,7 +425,7 @@ public class CreatureMessageBuilder extends TangibleMessageBuilder {
 				SWGObject obj = NGECore.getInstance().objectService.getObject(objId);
 				
 				if(obj == null) {
-					System.err.println("Cant find obj for obj id in equip list!!!");
+					System.err.println("Cant find obj for obj id in equip list!!! (Normal Message for AI wipes)");
 					continue;
 				}
 				

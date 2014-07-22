@@ -13,7 +13,7 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('eow_gcw_city_at_st_2')
 	mobileTemplate.setLevel(90)
-	mobileTemplate.setDifficulty(Difficulty.ELITE)
+	mobileTemplate.setDifficulty(Difficulty.BOSS)
 
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)

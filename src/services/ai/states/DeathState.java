@@ -33,6 +33,7 @@ public class DeathState extends AIState {
 	public byte onEnter(AIActor actor) {
 		NGECore.getInstance().aiService.awardExperience(actor);
 		NGECore.getInstance().aiService.awardGcw(actor);
+		actor.setActorAlive(false);
 		actor.getCreature().setAttachment("radial_filename", "npc/corpse");
 		//NGECore.getInstance().scriptService.callScript("scripts/radial/npc/corpse", "", "createRadial", NGECore.getInstance(), actor.getCreature().getKiller(), actor.getCreature(), new Vector<RadialOptions>());		
 		actor.scheduleDespawn();

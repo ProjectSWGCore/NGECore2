@@ -10,7 +10,7 @@ def setup():
 def run(core, actor, target, commandString):
 	faction = actor.getFaction()
 	factionStatus = actor.getFactionStatus()
-	
+
 	if actor.getPvpStatus(PvpStatus.GoingOvert) or actor.getPvpStatus(PvpStatus.GoingCovert):
 		actor.sendSystemMessage('@faction_recruiter:pvp_status_changing', 0)
 		return
@@ -18,9 +18,10 @@ def run(core, actor, target, commandString):
 		actor.sendSystemMessage('@gcw:pvp_advanced_region_cannot_go_covert', 0)
 		return
 	
-	if commandString != '' and commandString != faction:
+	if commandString != '' and commandString != faction and len(faction)!=0:
 		if commandString == 'rebel' or commandString == 'imperial' or commandString == 'neutral':
-			if faction != 'neutral':
+
+			if faction != 'neutral' and len(faction)!=0:
 				actor.sendSystemMessage('@faction_recruiter:sui_resig_complete_in_5', 0)
 			
 			if actor.getFactionStatus() == FactionStatus.SpecialForces:
@@ -37,13 +38,18 @@ def run(core, actor, target, commandString):
 			
 			if commandString == 'neutral' or commandString == 'resign':
 				time.sleep(1)
-				actor.setFaction('')
+				actor.setFaction('') # ???
 				actor.sendSystemMessage('@faction_recruiter:resign_complete', 0)
 				return
 			
 			time.sleep(1)
 			actor.setFaction(commandString)
 		return
+	
+	#This can be removed if player is required to see the recruiter first
+	if faction == '':
+		actor.setFaction(commandString)
+		faction = commandString
 	
 	if faction == 'neutral' or faction == '':
 		actor.sendSystemMessage('@faction_recruiter:not_aligned', 0)
@@ -57,6 +63,7 @@ def run(core, actor, target, commandString):
 		actor.setPvpStatus(PvpStatus.GoingCovert, False)
 		actor.sendSystemMessage('@faction_recruiter:covert_complete', 0)
 		actor.updatePvpStatus()
+		core.factionService.updatePVPFromNearbyNPCs(actor, actor.getClient())
 		return
 	
 	if factionStatus == FactionStatus.Combatant:

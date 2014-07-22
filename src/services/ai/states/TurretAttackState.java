@@ -30,21 +30,24 @@ import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 import services.ai.AIActor;
 import services.ai.TurretAIActor;
+import services.ai.states.AIState.StateResult;
 import tools.DevLog;
 
 public class TurretAttackState extends TurretAIState {
 
 	@Override
 	public byte onEnter(TurretAIActor actor) {
-//		DevLog.debugout("Charon", "Turret AI Attack State", "onEnter");
+		DevLog.debugoutai(actor, "Charon", "Turret AI Attack State", "onEnter");
 		TangibleObject creature = actor.getCreature();
 		
 //		DevLog.debugout("Charon", "Turret AI Attack State", "onEnter creature.getConditionDamage() " + creature.getConditionDamage());
 //		DevLog.debugout("Charon", "Turret AI Attack State", "onEnter creature.getMaximumCondition() " + creature.getMaximumCondition());
 		
-		if(creature.getConditionDamage()>=creature.getMaximumCondition())
-			return StateResult.DEAD;
-		
+		if(creature.getConditionDamage()>=creature.getMaximumCondition()){
+			return StateResult.DEAD;			
+		}
+		if(!creature.isInCombat() || creature.getDefendersList().size() == 0 || actor.getFollowObject() == null)
+			return StateResult.FINISHED;
 		
 //		DevLog.debugout("Charon", "Turret AI Attack State", "onEnter creature.getDefendersList().size() " + creature.getDefendersList().size());
 //		DevLog.debugout("Charon", "Turret AI Attack State", "onEnter actor.getFollowObject() " + actor.getFollowObject());
@@ -58,7 +61,10 @@ public class TurretAttackState extends TurretAIState {
 	@Override
 	public byte onExit(TurretAIActor actor) {
 		// TODO Auto-generated method stub
-
+		DevLog.debugoutai(actor, "Charon", "Turret AI Attack State", "onExit");
+		
+		TangibleObject creature = actor.getCreature();
+		creature.setInCombat(false);
 //		actor.getCreature().setLookAtTarget(0);
 //		actor.getCreature().setIntendedTarget(0);
 		actor.setFollowObject(null);
@@ -75,7 +81,11 @@ public class TurretAttackState extends TurretAIState {
 
 	@Override
 	public byte recover(TurretAIActor actor) {
+		DevLog.debugoutai(actor, "Charon", "TurretAI Attack State", "recover ");
 		TangibleObject creature = actor.getCreature();
+		if (creature==null)
+			return StateResult.FINISHED;
+			
 		float maxDistance = 0;
 		WeaponObject weapon = null;
 		//weapon = (WeaponObject) creature.getSlottedObject("default_weapon");
@@ -89,12 +99,20 @@ public class TurretAttackState extends TurretAIState {
 
 		maxDistance = weapon.getMaxRange() - 1;
 		
+		
+		// Here is place for turret cooldown
 		if(actor.getTimeSinceLastAttack() < weapon.getAttackSpeed() * 1000) {
-			//actor.scheduleRecovery();
+			actor.scheduleRecovery();
 			return StateResult.UNFINISHED;
 		}
 		NGECore core = NGECore.getInstance();
-		if(creature.getConditionDamage()>creature.getMaximumCondition())
+		
+		if (core.aiService.getCheckAI()!=null){
+			if (core.aiService.getCheckAI().getObjectID()==creature.getObjectID())
+				System.out.println("creature.getConditionDamage() " + creature.getConditionDamage() + " creature.getMaximumCondition() " + creature.getMaximumCondition());
+		}
+		
+		if(creature.getConditionDamage()>=creature.getMaximumCondition())
 			return StateResult.DEAD;
 		
 		if(!creature.isInCombat() || creature.getDefendersList().size() == 0 || actor.getFollowObject() == null)
@@ -112,7 +130,7 @@ public class TurretAttackState extends TurretAIState {
 			target = actor.getFollowObject();
 		}
 		if(target == null) {
-			DevLog.debugout("Charon", "AI Attack State", "null target"); 
+			DevLog.debugoutai(actor, "Charon", "AI Attack State", "null target"); 
 			actor.scheduleRecovery();
 			return StateResult.UNFINISHED;
 		}
@@ -135,10 +153,12 @@ public class TurretAttackState extends TurretAIState {
 				actor.setCurrentState(new TurretIdleState());
 				return StateResult.FINISHED;
 			}
-			if(targetCreature.getWorldPosition().getDistance(creature.getWorldPosition()) > 128 || targetCreature.getPosture() == 13 || targetCreature.getPosture() == 14) {
+			if(targetCreature.getWorldPosition().getDistance(creature.getWorldPosition()) > maxDistance || targetCreature.getPosture() == 13 || targetCreature.getPosture() == 14) {
 				actor.removeDefender(target);
-				actor.scheduleRecovery();
-				return StateResult.UNFINISHED;
+//				actor.scheduleRecovery();
+//				return StateResult.UNFINISHED;
+
+				return StateResult.FINISHED;
 			}
 		}
 		
@@ -146,8 +166,11 @@ public class TurretAttackState extends TurretAIState {
 //		DevLog.debugout("Charon", "AI Attack State", "prior to attacks maxDistance " + maxDistance); 
 		
 		if(target.getWorldPosition().getDistance(creature.getWorldPosition()) > maxDistance) {
-			actor.scheduleRecovery();
-			return StateResult.UNFINISHED;
+			actor.removeDefender(target);
+//			actor.scheduleRecovery();
+//			return StateResult.UNFINISHED;
+	
+			return StateResult.FINISHED;
 		}
 		//actor.faceObject(target); 
 		core.commandService.callCommand(creature, "rangedShot", target, "");

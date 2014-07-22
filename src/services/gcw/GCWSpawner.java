@@ -38,11 +38,11 @@ import resources.objects.tangible.TangibleObject;
  * @author Charon 
  */
 
-public class GCWPylon extends TangibleObject{
+public class GCWSpawner extends TangibleObject{
 	
 	private static final long serialVersionUID = 1L;
-	private int pylonType = 0;
-	private int pylonFaction = 0; 
+	private int spawnerType = 0;
+	private int spawnerFaction = 0; 
 	private int spawnLevel   = 0;  
 	private int totalSpawnedUnits = 0;
 	private String[] soldierTemplates   = new String[]{""};
@@ -91,22 +91,22 @@ public class GCWPylon extends TangibleObject{
 	
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	
-	public GCWPylon() {
+	public GCWSpawner() {
 		super();
 	}
 	
-	public GCWPylon(long objectID, Planet planet, Point3D position, Quaternion orientation, String template){
+	public GCWSpawner(long objectID, Planet planet, Point3D position, Quaternion orientation, String template){
 		super(objectID, planet, position, orientation, template);	
 	}
 	
-	public int getPylonType() {
-		return pylonType;
+	public int getSpawnerType() {
+		return spawnerType;
 	}
 
-	public void setPylonType(int pylonType) {
-		this.pylonType = pylonType;
+	public void setSpawnerType(int spawnerType) {
+		this.spawnerType = spawnerType;
 		
-		if (pylonType==PylonType.SoldierPatrol){
+		if (spawnerType==SpawnerType.SoldierPatrol){
 			scheduler.scheduleAtFixedRate(new Runnable() {
 				@Override public void run() { 
 					try {
@@ -118,7 +118,7 @@ public class GCWPylon extends TangibleObject{
 			}, 5, 60, TimeUnit.SECONDS);
 		}
 		
-		if (pylonType==PylonType.SoldierDefense){
+		if (spawnerType==SpawnerType.SoldierDefense){
 			scheduler.scheduleAtFixedRate(new Runnable() {
 				@Override public void run() { 
 					try {
@@ -130,7 +130,7 @@ public class GCWPylon extends TangibleObject{
 			}, 5, 90, TimeUnit.SECONDS);
 		}
 		
-		if (pylonType==PylonType.VehiclePatrol){
+		if (spawnerType==SpawnerType.VehiclePatrol){
 			scheduler.scheduleAtFixedRate(new Runnable() {
 				@Override public void run() { 
 					try {
@@ -142,26 +142,26 @@ public class GCWPylon extends TangibleObject{
 			}, 5, 120, TimeUnit.SECONDS);
 		}
 		
-		if (pylonType==PylonType.SoldierPatrol){
+		if (spawnerType==SpawnerType.SiegeVehiclePatrol){
 			scheduler.scheduleAtFixedRate(new Runnable() {
 				@Override public void run() { 
 					try {
-						spawnSoldier();	
+						spawnSiegeVehicle();	
 					} catch (Exception e) {
 						System.err.println("Exception in SoldierPatrolPylon->scheduleAtFixedRate->spawnSoldier() " + e.getMessage());
 					}
 				}
-			}, 5, 60, TimeUnit.SECONDS);
+			}, 10, 600, TimeUnit.SECONDS);
 		}
 		
 	}
 	
-	public int getPylonFaction() {
-		return pylonFaction;
+	public int getSpawnerFaction() {
+		return spawnerFaction;
 	}
 
-	public void setPylonFaction(int pylonFaction) {
-		this.pylonFaction = pylonFaction;
+	public void setSpawnerFaction(int spawnerFaction) {
+		this.spawnerFaction = spawnerFaction;
 	}
 	
 	public int getSpawnLevel() {
@@ -175,14 +175,14 @@ public class GCWPylon extends TangibleObject{
 	public void spawnSoldier(){
 		
 		if (NGECore.getInstance().invasionService.getInvasionPhase()==2){
-			if (pylonFaction==Factions.Rebel){
+			if (spawnerFaction==Factions.Rebel){
 				switch (spawnLevel) {
 					case 1: soldierTemplates = rebelSoldierTemplates1;
 					case 2: soldierTemplates = rebelSoldierTemplates2;
 					case 3: soldierTemplates = rebelSoldierTemplates3;
 				}
 			}
-			if (pylonFaction==Factions.Imperial){
+			if (spawnerFaction==Factions.Imperial){
 				switch (spawnLevel) {
 					case 1: soldierTemplates = imperialSoldierTemplates1;
 					case 2: soldierTemplates = imperialSoldierTemplates2;
@@ -190,26 +190,28 @@ public class GCWPylon extends TangibleObject{
 				}
 			}	
 			String soldierTemplate = soldierTemplates[new Random().nextInt(soldierTemplates.length)];	
+			//if (totalSpawnedUnits==0){
 			CreatureObject soldier = (CreatureObject)NGECore.getInstance().spawnService.spawnCreature(soldierTemplate, this.getPlanet().getName(), 0L, this.getPosition().x, this.getPosition().y, this.getPosition().z, this.getOrientation().w, this.getOrientation().x, this.getOrientation().y,this.getOrientation().z,-1);
 				
 			NGECore.getInstance().aiService.setPatrol(soldier, patrolRoute);	
 			NGECore.getInstance().aiService.setPatrolLoop(soldier,false);
 			NGECore.getInstance().invasionService.registerInvader(soldier);
 			totalSpawnedUnits++;
+			//}
 		}
 	}
 	
 	public void spawnSoldierDefender(){
 		
 		if (NGECore.getInstance().invasionService.getInvasionPhase()==2){
-			if (pylonFaction==Factions.Rebel){
+			if (spawnerFaction==Factions.Rebel){
 				switch (spawnLevel) {
 					case 1: soldierTemplates = rebelSoldierTemplates1;
 					case 2: soldierTemplates = rebelSoldierTemplates2;
 					case 3: soldierTemplates = rebelSoldierTemplates3;
 				}
 			}
-			if (pylonFaction==Factions.Imperial){
+			if (spawnerFaction==Factions.Imperial){
 				switch (spawnLevel) {
 					case 1: soldierTemplates = imperialSoldierTemplates1;
 					case 2: soldierTemplates = imperialSoldierTemplates2;
@@ -230,14 +232,14 @@ public class GCWPylon extends TangibleObject{
 	public void spawnVehicle(){
 		
 		if (NGECore.getInstance().invasionService.getInvasionPhase()==2){
-			if (pylonFaction==Factions.Rebel){
+			if (spawnerFaction==Factions.Rebel){
 				switch (spawnLevel) {
 					case 1: vehicleTemplates = rebelVehicleTemplates1;
 					case 2: vehicleTemplates = rebelVehicleTemplates2;
 					case 3: vehicleTemplates = rebelVehicleTemplates3;
 				}
 			}
-			if (pylonFaction==Factions.Imperial){
+			if (spawnerFaction==Factions.Imperial){
 				switch (spawnLevel) {
 					case 1: vehicleTemplates = imperialVehicleTemplates1;
 					case 2: vehicleTemplates = imperialVehicleTemplates2;
@@ -247,7 +249,34 @@ public class GCWPylon extends TangibleObject{
 			String vehicleTemplate = vehicleTemplates[new Random().nextInt(vehicleTemplates.length)];	
 			CreatureObject vehicle = (CreatureObject)NGECore.getInstance().spawnService.spawnCreature(vehicleTemplate, this.getPlanet().getName(), 0L, this.getPosition().x, this.getPosition().y, this.getPosition().z, this.getOrientation().w, this.getOrientation().x, this.getOrientation().y,this.getOrientation().z,-1);
 				
-			NGECore.getInstance().aiService.setPatrol(vehicle, get_Dearic_Route_1());	
+			NGECore.getInstance().aiService.setPatrol(vehicle, patrolRoute);	
+			NGECore.getInstance().aiService.setPatrolLoop(vehicle,false);
+			NGECore.getInstance().invasionService.registerInvader(vehicle);
+			totalSpawnedUnits++;
+		}
+	}
+	
+	public void spawnSiegeVehicle(){
+		
+		if (NGECore.getInstance().invasionService.getInvasionPhase()==2){
+			if (spawnerFaction==Factions.Rebel){
+				switch (spawnLevel) {
+					case 1: vehicleTemplates = rebelSiegeVehicleTemplates1;
+					case 2: vehicleTemplates = rebelSiegeVehicleTemplates2;
+					case 3: vehicleTemplates = rebelSiegeVehicleTemplates3;
+				}
+			}
+			if (spawnerFaction==Factions.Imperial){
+				switch (spawnLevel) {
+					case 1: vehicleTemplates = imperialSiegeVehicleTemplates1;
+					case 2: vehicleTemplates = imperialSiegeVehicleTemplates2;
+					case 3: vehicleTemplates = imperialSiegeVehicleTemplates3;
+				}
+			}	
+			String vehicleTemplate = vehicleTemplates[new Random().nextInt(vehicleTemplates.length)];	
+			CreatureObject vehicle = (CreatureObject)NGECore.getInstance().spawnService.spawnCreature(vehicleTemplate, this.getPlanet().getName(), 0L, this.getPosition().x, this.getPosition().y, this.getPosition().z, this.getOrientation().w, this.getOrientation().x, this.getOrientation().y,this.getOrientation().z,-1);
+				
+			NGECore.getInstance().aiService.setPatrol(vehicle, patrolRoute);	
 			NGECore.getInstance().aiService.setPatrolLoop(vehicle,false);
 			NGECore.getInstance().invasionService.registerInvader(vehicle);
 			totalSpawnedUnits++;
@@ -276,6 +305,8 @@ public class GCWPylon extends TangibleObject{
 									  break;
 			case PatrolRoute.Dearic10: patrolRoute = get_Dearic_Route_10();
 			  						   break;
+			case PatrolRoute.Dearic11: patrolRoute = get_Dearic_Route_11();
+									   break;
 		}
 	}
 	
@@ -322,6 +353,8 @@ public class GCWPylon extends TangibleObject{
 		patrolpoints.add(new Point3D(341.0F, 6.00F, -2950F));
 		patrolpoints.add(new Point3D(378.0F, 6.00F, -2958F));
 		patrolpoints.add(new Point3D(405.0F, 6.00F, -2981F));
+		patrolpoints.add(new Point3D(414.00F, 6.00F, -3041.0F));
+		patrolpoints.add(new Point3D(448.00F, 6.00F, -3043.0F));
 		patrolpoints.add(new Point3D(473.0F, 6.00F, -3024F));
 		return patrolpoints;
 	}
@@ -415,8 +448,14 @@ public class GCWPylon extends TangibleObject{
 		
 		return patrolpoints;
 	}
+	
+	public Vector<Point3D> get_Dearic_Route_11(){
+		Vector<Point3D> patrolpoints = new Vector<Point3D>();		
+		patrolpoints.add(new Point3D(332.0F, 6.00F, -2715F));
+		return patrolpoints;
+	}
 
-	public class PylonType {
+	public class SpawnerType {
 		
 		public static final int SoldierPatrol = 0;
 		public static final int SoldierDefense = 1;
@@ -448,6 +487,7 @@ public class GCWPylon extends TangibleObject{
 		public static final int Dearic8 = 7;
 		public static final int Dearic9 = 8;
 		public static final int Dearic10 = 9;
+		public static final int Dearic11 = 10;
 		
 	}
 

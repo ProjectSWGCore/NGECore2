@@ -41,6 +41,7 @@ import resources.objects.installation.InstallationObject;
 import resources.objects.tangible.TangibleObject;
 import services.ai.states.TurretAIState;
 import services.ai.states.TurretAIState.StateResult;
+import services.ai.states.AIState;
 import services.ai.states.TurretAttackState;
 import services.ai.states.TurretIdleState;
 import services.combat.CombatEvents.DamageTaken;
@@ -98,12 +99,12 @@ public class TurretAIActor {
 					if(creature == null || creature.getObservers().isEmpty() || creature.isInCombat() || isStalking)
 						return;
 					if (creature.getAttachment("tamed")!=null){
-						DevLog.debugout("Charon", "Pet AI", "aggroCheckTask tamed==1");
+						DevLog.debugoutai(this, "Charon", "Pet AI", "aggroCheckTask tamed==1");
 						return;
 					}
 					
 					if (creature.getCustomName().contains("baby"))
-						DevLog.debugout("Charon", "Pet AI", "baby aggroCheckTask should not be here " +creature.getAttachment("tamed"));
+						DevLog.debugoutai(this, "Charon", "Pet AI", "baby aggroCheckTask should not be here " +creature.getAttachment("tamed"));
 					
 					creature.getObservers().stream().map(Client::getParent).filter(obj -> obj.inRange(creature.getWorldPosition(), 60)).forEach((obj) -> {
 						if(new Random().nextFloat() <= 0.5 || creature.isInCombat() || isStalking) {
@@ -132,11 +133,11 @@ public class TurretAIActor {
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-			}, 0, 5000, TimeUnit.MILLISECONDS);
+			}, 0, 2000, TimeUnit.MILLISECONDS);
 		}
 		if(creature.getFaction().length()>0 || !creature.getOption(Options.AGGRESSIVE)) {
 			factionCheckTask = scheduler.scheduleAtFixedRate(() -> {
-				System.out.println("Turret faction thread");
+				//System.out.println("Turret faction thread");
 				try {
 					
 					if(creature == null || creature.getFactionStatus()!=FactionStatus.Combatant || creature.getObservers().isEmpty() || creature.isInCombat())
@@ -167,7 +168,7 @@ public class TurretAIActor {
 						}
 					});
 					
-					NGECore.getInstance().simulationService.getAllNearNPCs(60, creature).forEach((obj) -> {
+					NGECore.getInstance().simulationService.getAllNearNonSameFactionNPCs(60, creature).forEach((obj) -> {
 						if(new Random().nextFloat() <= 0.5 || creature.isInCombat()) {
 //							DevLog.debugout("Charon", "TURRET CHECK faction creature ", "added " + creature.getFaction());
 //							DevLog.debugout("Charon", "TURRET CHECK faction obj", "added " + ((TangibleObject)obj).getFaction());
@@ -191,25 +192,25 @@ public class TurretAIActor {
 						}
 					});
 					
-					NGECore.getInstance().simulationService.getAllNearTANOs(60, creature).forEach((obj) -> {
+					NGECore.getInstance().simulationService.getAllNearNonSameFactionTANOs(60, creature).forEach((obj) -> {
 						if(new Random().nextFloat() <= 0.5 || creature.isInCombat()) {
-							DevLog.debugout("Charon", "TANO CHECK faction creature ", "added " + creature.getFaction());
-							DevLog.debugout("Charon", "TANO CHECK faction obj", "added " + ((TangibleObject)obj).getFaction());
-							DevLog.debugout("Charon", "TANO CHECK factionCheckTask", "added " + obj.getCustomName());
-							DevLog.debugout("Charon", "TANO CHECK isFactionEnemy", "res " + NGECore.getInstance().factionService.isFactionEnemy((TangibleObject)creature, (TangibleObject)obj));
+//							DevLog.debugout("Charon", "TANO CHECK faction creature ", "added " + creature.getFaction());
+//							DevLog.debugout("Charon", "TANO CHECK faction obj", "added " + ((TangibleObject)obj).getFaction());
+//							DevLog.debugout("Charon", "TANO CHECK factionCheckTask", "added " + obj.getCustomName());
+//							DevLog.debugout("Charon", "TANO CHECK isFactionEnemy", "res " + NGECore.getInstance().factionService.isFactionEnemy((TangibleObject)creature, (TangibleObject)obj));
 							if (obj instanceof TangibleObject && !(obj instanceof CreatureObject) && NGECore.getInstance().factionService.isFactionEnemy((TangibleObject)creature, (TangibleObject)obj)){
 								TangibleObject addedObject = (TangibleObject) obj;					
 								addDefender(addedObject);	
-								DevLog.debugout("Charon", "TANO faction creature ", "added " + creature.getFaction());
-								DevLog.debugout("Charon", "TANO faction obj", "added " + ((TangibleObject)obj).getFaction());
-								DevLog.debugout("Charon", "TANO factionCheckTask", "added " + obj.getCustomName());							
+								DevLog.debugoutai(this, "Charon", "TANO faction creature ", "added " + creature.getFaction());
+								DevLog.debugoutai(this, "Charon", "TANO faction obj", "added " + ((TangibleObject)obj).getFaction());
+								DevLog.debugoutai(this, "Charon", "TANO factionCheckTask", "added " + obj.getCustomName());							
 							}
 						}
 					});
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-			}, 0, 5000, TimeUnit.MILLISECONDS);
+			}, 0, 1000, TimeUnit.MILLISECONDS);
 
 		}
 	}
@@ -319,9 +320,11 @@ public class TurretAIActor {
 	}
 		
 	public void scheduleRecovery() {
+		TurretAIState caughtAIState = currentState;
 		recoveryFuture = scheduler.schedule(() -> { 
 			try {
-				doStateAction(currentState.recover(TurretAIActor.this));
+				if (caughtAIState.getClass().equals(currentState.getClass()))
+					doStateAction(currentState.recover(TurretAIActor.this));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

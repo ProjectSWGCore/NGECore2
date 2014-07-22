@@ -21,6 +21,7 @@
  ******************************************************************************/
 package services.gcw;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
@@ -37,6 +38,7 @@ import org.python.core.Py;
 import org.python.core.PyObject;
 
 import protocol.swg.FactionResponseMessage;
+import protocol.swg.UpdatePVPStatusMessage;
 import resources.common.FileUtilities;
 import resources.common.Opcodes;
 import resources.datatables.DisplayType;
@@ -44,6 +46,7 @@ import resources.datatables.FactionStatus;
 import resources.datatables.Options;
 import resources.datatables.PvpStatus;
 import resources.objects.creature.CreatureObject;
+import resources.objects.installation.InstallationObject;
 import resources.objects.mission.MissionObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
@@ -52,6 +55,7 @@ import engine.clientdata.StfTable;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.clients.Client;
 import engine.resources.common.CRC;
+import engine.resources.objects.SWGObject;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
@@ -169,6 +173,7 @@ public class FactionService implements INetworkDispatch {
 	 * Will be useful for NPC AI, so they know who to help and who to be indifferent to.
 	 */
 	public boolean isFactionAlly(TangibleObject object, TangibleObject target) {
+		
 		if (object == null || target == null) {
 			return false;
 		}
@@ -180,16 +185,39 @@ public class FactionService implements INetworkDispatch {
 			return false;
 		}
 		
+		
 		if (FileUtilities.doesFileExist("scripts/faction/" + objectFaction + ".py")) {
-			PyObject method = core.scriptService.getMethod("scripts/faction/", objectFaction, "isAlly");
-			
-			if (method != null && method.isCallable()) {
+			PyObject method = core.scriptService.getMethod("scripts/faction/", objectFaction, "isAlly");			
+			if (method != null && method.isCallable()) {				
 				return ((method.__call__(Py.java2py(targetFaction)).asInt() == 1) ? true : false);
 			}
 		}
 		
 		return false;
 	}
+	
+	public boolean isFactionAlly(String objectFaction, String targetFaction) {
+		
+		if (objectFaction == null || targetFaction == null) {
+			return false;
+		}
+		
+		if (!isFaction(objectFaction) || !isFaction(targetFaction)) {
+			return false;
+		}
+		
+		
+		if (FileUtilities.doesFileExist("scripts/faction/" + objectFaction + ".py")) {
+			PyObject method = core.scriptService.getMethod("scripts/faction/", objectFaction, "isAlly");			
+			if (method != null && method.isCallable()) {				
+				return ((method.__call__(Py.java2py(targetFaction)).asInt() == 1) ? true : false);
+			}
+		}
+		
+		return false;
+	}
+	
+	
 	
 	/*
 	 * Returns true if target is an enemy of object
@@ -354,6 +382,7 @@ public class FactionService implements INetworkDispatch {
 				pvpBitmask |= (PvpStatus.Attackable | PvpStatus.Aggressive | PvpStatus.Enemy);
 			}
 		}
+		
 		
 		return pvpBitmask;
 	}
@@ -523,6 +552,32 @@ public class FactionService implements INetworkDispatch {
 	
 	public Map<String, Integer> getFactionMap() {
 		return factionMap;
+	}
+	
+	// This is to make nearby NPCs transmit updatepvp,
+	//  so the player sees the faction change represented in the clientside NPC representation
+	public void updatePVPFromNearbyNPCs(CreatureObject creature, Client destination){
+		List<SWGObject> awareObjects = core.simulationService.get(creature.getPlanet(), creature.getWorldPosition().x, creature.getWorldPosition().z, 512);
+		for(int i = 0; i < awareObjects.size(); i++) {
+			SWGObject obj = awareObjects.get(i);
+			if(obj != creature &&  obj.getContainer() != creature && obj.isInQuadtree()) {												
+				if (obj instanceof CreatureObject){
+					CreatureObject creo = (CreatureObject) obj;
+					UpdatePVPStatusMessage upvpm = new UpdatePVPStatusMessage(creo.getObjectID());
+					upvpm.setFaction(CRC.StringtoCRC(creo.getFaction()));
+					upvpm.setStatus(NGECore.getInstance().factionService.calculatePvpStatus((CreatureObject) destination.getParent(), creo));
+					destination.getSession().write(upvpm.serialize());
+				}	
+				if (obj instanceof InstallationObject){
+					InstallationObject inso = (InstallationObject) obj;
+					UpdatePVPStatusMessage upvpm = new UpdatePVPStatusMessage(inso.getObjectID());
+					upvpm.setFaction(CRC.StringtoCRC(inso.getFaction()));
+					upvpm.setStatus(NGECore.getInstance().factionService.calculatePvpStatus((CreatureObject) destination.getParent(), inso));
+					//System.out.println("MakeAwareNearbyNPCs " + NGECore.getInstance().factionService.calculatePvpStatus((CreatureObject) destination.getParent(), inso));
+					destination.getSession().write(upvpm.serialize());
+				}	
+			}
+		}
 	}
 	
 	@Override

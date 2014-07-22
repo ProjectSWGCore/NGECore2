@@ -179,7 +179,18 @@ def run(core, actor, target, commandString):
 		actor.setPosture(0)
 		actor.setSpeedMultiplierBase(1)
 		actor.setTurnRadius(1)
+		
+	elif command == 'checkai':		
+		latargetID = long(actor.getIntendedTarget())
+		latarget = core.objectService.getObject(latargetID)
+		actor.sendSystemMessage('Checking AI handling for unit ' + latarget.getCustomName(), 0)
+		core.aiService.setCheckAI(latarget)
 	
+	elif command == 'showbitmask':		
+		latargetID = long(actor.getIntendedTarget())
+		latarget = core.objectService.getObject(latargetID)
+		actor.sendSystemMessage('Optionsbitmask for unit ' + latarget.getCustomName() + ' is %s' % latarget.getOptionsBitmask(), 0)
+			
 	elif command == 'unknownAbilityPacket' and arg1:
 		packet = UnknownAbilityPacket(arg1)
 		actor.getClient().getSession().write(packet.serialize())

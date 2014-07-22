@@ -61,6 +61,7 @@ import resources.objects.tangible.TangibleObject;
 import resources.objects.waypoint.WaypointObject;
 import resources.objects.weapon.WeaponObject;
 import services.ai.AIActor;
+import services.ai.TurretAIActor;
 import services.combat.CombatEvents.DamageTaken;
 import services.command.CombatCommand;
 import services.sui.SUIService.MessageBoxType;
@@ -488,9 +489,16 @@ public class CombatService implements INetworkDispatch {
 				AIActor petActor = (AIActor) targetCreature.getCalledPet().getAttachment("AI");
 				if (petActor!=null){
 					petActor.addDefender(attacker);
-					DevLog.debugout("Charon", "Pet AI", "applyDamage addDefender");
+					DevLog.debugoutai(petActor, "Charon", "Pet AI", "applyDamage addDefender");
 				}
 			}
+			
+			if (!targetCreature.isInCombat()){
+				//targetCreature.setInCombat(true);	
+				AIActor targetActor = (AIActor) targetCreature.getAttachment("AI");
+				targetActor.addDefender(attacker);	
+				DevLog.debugoutai(targetActor, "Charon", "CombatService AI", "applyDamage addDefender 2");
+			}	
 		}
 		
 		DamageTaken event = events.new DamageTaken();
@@ -517,6 +525,13 @@ public class CombatService implements INetworkDispatch {
 					DevLog.debugout("Charon", "Pet AI", "applyDamage addDefender");
 				}
 			}
+			
+			if (!targetCreature.isInCombat()){
+				//targetCreature.setInCombat(true);	
+				AIActor targetActor = (AIActor) targetCreature.getAttachment("AI");
+				targetActor.addDefender(attacker);	
+				DevLog.debugout("Charon", "CombatService AI", "applyDamage addDefender 2");
+			}	
 		}
 		
 		DamageTaken event = events.new DamageTaken();
@@ -540,13 +555,18 @@ public class CombatService implements INetworkDispatch {
 				
 	
 			
-			
-			AIActor aiActor = (AIActor)attacker.getAttachment("AI");	
-			if (aiActor.getMobileTemplate().isDeathblow()){
-					deathblowPlayerFromInstallation(attacker, target);
-				return;
+			if (attacker.getAttachment("AI") instanceof AIActor){
+				AIActor aiActor = (AIActor)attacker.getAttachment("AI");	
+				if (aiActor.getMobileTemplate().isDeathblow()){
+						deathblowPlayerFromInstallation(attacker, target);
+					return;
+				}
 			}
-			
+			if (attacker.getAttachment("AI") instanceof TurretAIActor){
+				deathblowPlayerFromInstallation(attacker, target); // turrets always db
+				return;
+
+			}
 			
 			synchronized(target.getMutex()) {
 				if (core.mountService.isMounted(target)) {
@@ -606,6 +626,20 @@ public class CombatService implements INetworkDispatch {
 					DevLog.debugout("Charon", "Pet AI", "applyDamage addDefender");
 				}
 			}
+			
+			if (!targetCreature.isInCombat()){
+				//targetCreature.setInCombat(true);	
+				if (targetCreature.getAttachment("AI") instanceof AIActor){
+					AIActor targetActor = (AIActor) targetCreature.getAttachment("AI");
+					targetActor.addDefender(attacker);	
+					DevLog.debugoutai(targetActor, "Charon", "CombatService AI", "applyDamage addDefender 2");
+				}
+				if (targetCreature.getAttachment("AI") instanceof TurretAIActor){
+					TurretAIActor targetActor = (TurretAIActor) targetCreature.getAttachment("AI");
+					targetActor.addDefender(attacker);	
+					DevLog.debugoutai(targetActor, "Charon", "CombatService AI", "applyDamage addDefender 2");
+				}				
+			}	
 		}
 		
 		
@@ -758,8 +792,14 @@ public class CombatService implements INetworkDispatch {
 
 	private void sendCombatPackets(CreatureObject attacker, TangibleObject target, WeaponObject weapon, CombatCommand command, int actionCounter, float damage, int armorAbsorbed, int hitType) {
 		
-		String animationStr = command.getRandomAnimation(weapon);
+		String animationStr = command.getRandomAnimation(weapon); // choosing turretShot as default attack, results in a zero length string
+		if (weapon.getTemplate().contains("atst_ranged")) 
+			animationStr="fire_1_single_light";
 		CombatAction combatAction = new CombatAction(CRC.StringtoCRC(animationStr), attacker.getObjectID(), weapon.getObjectID(), target.getObjectID(), command.getCommandCRC());
+		
+//		int turret_fire = 0xD334C0B8; // 0xA7595B4E
+//		CombatAction combatAction = new CombatAction(turret_fire, attacker.getObjectID(), weapon.getObjectID(), target.getObjectID(), command.getCommandCRC());
+//		
 		ObjControllerMessage objController = new ObjControllerMessage(0x1B, combatAction);
 		attacker.notifyObserversInRange(objController, true, 125);
 		CombatSpam combatSpam = new CombatSpam(attacker.getObjectID(), target.getObjectID(), weapon.getObjectID(), (int) damage, armorAbsorbed, hitType);
@@ -1266,8 +1306,14 @@ public class CombatService implements INetworkDispatch {
 				AIActor petActor = (AIActor) targetCreature.getCalledPet().getAttachment("AI");
 				if (petActor!=null){
 					petActor.addDefender(attacker);
-					DevLog.debugout("Charon", "Pet AI", "applyDamage addDefender");
+					//DevLog.debugout("Charon", "Pet AI", "applyDamage addDefender");
 				}
+			}
+			
+			if (!targetCreature.isInCombat()){	
+				AIActor targetActor = (AIActor) targetCreature.getAttachment("AI");
+				targetActor.addDefender(attacker);	
+				//DevLog.debugout("Charon", "CombatService AI", "applyDamage addDefender 2");
 			}
 		}
 		

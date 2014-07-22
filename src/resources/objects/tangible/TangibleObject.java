@@ -48,6 +48,7 @@ import resources.objects.ObjectMessageBuilder;
 import resources.objects.SWGList;
 import resources.objects.SWGSet;
 import resources.objects.creature.CreatureObject;
+import resources.objects.installation.InstallationObject;
 import tools.DevLog;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.IDManagerVisitor;
@@ -344,10 +345,12 @@ public class TangibleObject extends SWGObject implements Serializable {
 	}
 	
 	public void removeDefender(TangibleObject defender) {
-		defendersList.remove(defender);
-		
-		if (defendersList.isEmpty() && isInCombat()) {
-			setInCombat(false);
+		synchronized(objectMutex) {
+			defendersList.remove(defender);
+			
+			if (defendersList.isEmpty() && isInCombat()) {
+				setInCombat(false);
+			}
 		}
 	}
 	
@@ -390,8 +393,10 @@ public class TangibleObject extends SWGObject implements Serializable {
 			
 			if (observer.getParent() != null) {
 				observer.getSession().write(new UpdatePVPStatusMessage(this.getObjectID(), NGECore.getInstance().factionService.calculatePvpStatus((CreatureObject) observer.getParent(), this), getFaction()).serialize());
-				if(getClient() != null)
+				if(getClient() != null){
 					getClient().getSession().write(new UpdatePVPStatusMessage(observer.getParent().getObjectID(), NGECore.getInstance().factionService.calculatePvpStatus((CreatureObject) this, (CreatureObject) observer.getParent()), getFaction()).serialize());
+				System.out.println("SENT TO CLIENT!");
+				}
 			}
 
 		}
@@ -409,10 +414,12 @@ public class TangibleObject extends SWGObject implements Serializable {
 			if (((CreatureObject)this).isPlayer()){
 				// Here a specific CREO delta must be sent to update the faction info in character sheet and symbol in name
 				// If anyone knows which that would be, please replace it here!
+				
 				sendBaselines(this.getClient());
 				
 			}
 		}
+	
 	}
 	
 	public boolean isAttackableBy(CreatureObject attacker) {

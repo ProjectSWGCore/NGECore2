@@ -289,23 +289,77 @@ public class SimulationService implements INetworkDispatch {
 		return foundCreatures;
 	}
 	
-	public Vector<CreatureObject> getAllNearNonSameFactionNPCs(int distance, SWGObject value ){
+	public Vector<CreatureObject> getAllNearNonSameFactionNPCs(int distance, SWGObject center ){
 		Vector<CreatureObject> foundCreatures = new Vector<CreatureObject>();
-		core.simulationService.get(value.getPlanet(), value.getWorldPosition().x, value.getWorldPosition().z, distance).stream().forEach((objecta) -> {
-
-			if (value instanceof CreatureObject){
-				CreatureObject npc = (CreatureObject) value;
-				if (objecta instanceof CreatureObject && objecta!=npc && ((CreatureObject) objecta).getFaction().equals(npc.getFaction()))
-					foundCreatures.add((CreatureObject)objecta);
+		core.simulationService.get(center.getPlanet(), center.getWorldPosition().x, center.getWorldPosition().z, distance).stream().forEach((objecta) -> {
+			if (center.getObjectID()!=objecta.getObjectID()){	
+				String centerfaction = "";
+				if (center instanceof CreatureObject)
+					centerfaction = ((CreatureObject)center).getFaction();
+				if (center instanceof InstallationObject)
+					centerfaction = ((InstallationObject)center).getFaction();
+				if (center instanceof TangibleObject)
+					centerfaction = ((TangibleObject)center).getFaction();
+				
+				if (centerfaction.length()>0 && objecta instanceof CreatureObject){
+					if (objecta.getObjectID()!=center.getObjectID() && NGECore.getInstance().factionService.isFactionEnemy((CreatureObject) objecta,(TangibleObject) center))
+						foundCreatures.add((CreatureObject)objecta);
+				}	
 			}
-
-			if (value instanceof InstallationObject){
-				InstallationObject ins = (InstallationObject) value;
-				if (objecta instanceof CreatureObject && objecta!=ins && ((CreatureObject) objecta).getFaction().equals(ins.getFaction()))
-					foundCreatures.add((CreatureObject)objecta);
+		});
+		return foundCreatures;
+	}
+	
+	public Vector<CreatureObject> getAllNearNonSameFactionPlayers(int distance, SWGObject center ){
+		Vector<CreatureObject> foundCreatures = new Vector<CreatureObject>();
+		core.simulationService.get(center.getPlanet(), center.getWorldPosition().x, center.getWorldPosition().z, distance).stream().forEach((objecta) -> {
+			if (center.getObjectID()!=objecta.getObjectID()){	
+				String centerfaction = "";
+				if (center instanceof CreatureObject)
+					centerfaction = ((CreatureObject)center).getFaction();
+				if (center instanceof InstallationObject)
+					centerfaction = ((InstallationObject)center).getFaction();
+				if (center instanceof TangibleObject)
+					centerfaction = ((TangibleObject)center).getFaction();
+				
+				if (centerfaction.length()>0 && objecta instanceof CreatureObject){
+					if (((CreatureObject)objecta).isPlayer() && objecta.getObjectID()!=center.getObjectID() && NGECore.getInstance().factionService.isFactionEnemy((CreatureObject) objecta,(TangibleObject) center))
+						foundCreatures.add((CreatureObject)objecta);
+				}	
 			}
-		}
-		);
+		});
+		return foundCreatures;
+	}
+	
+	public Vector<CreatureObject> getAllNearSameFactionNPCs(int distance, SWGObject center ){
+		Vector<CreatureObject> foundCreatures = new Vector<CreatureObject>();
+		core.simulationService.get(center.getPlanet(), center.getWorldPosition().x, center.getWorldPosition().z, distance).stream().forEach((objecta) -> {
+			
+			String centerfaction = "";
+			if (center instanceof CreatureObject)
+				centerfaction = ((CreatureObject)center).getFaction();
+			if (center instanceof InstallationObject)
+				centerfaction = ((InstallationObject)center).getFaction();
+			if (center instanceof TangibleObject)
+				centerfaction = ((TangibleObject)center).getFaction();
+			
+			if (centerfaction.length()>0 && objecta instanceof CreatureObject){				
+				if (objecta.getObjectID()!=center.getObjectID() && NGECore.getInstance().factionService.isFactionAlly((TangibleObject) objecta,(TangibleObject) center))
+					foundCreatures.add((CreatureObject)objecta);
+			}		
+		});
+		return foundCreatures;
+	}
+	
+	public Vector<CreatureObject> getAllNearSameFactionPlayers(int distance, Point3D centerPos, Planet planet, String factionName){
+		Vector<CreatureObject> foundCreatures = new Vector<CreatureObject>();
+		core.simulationService.get(planet, centerPos.x, centerPos.z, distance).stream().forEach((objecta) -> {
+			
+			if (factionName.length()>0 && objecta instanceof CreatureObject){				
+				if (((CreatureObject)objecta).isPlayer() && NGECore.getInstance().factionService.isFactionAlly(((CreatureObject) objecta).getFaction(),factionName))
+					foundCreatures.add((CreatureObject)objecta);
+			}		
+		});
 		return foundCreatures;
 	}
 	
@@ -319,23 +373,25 @@ public class SimulationService implements INetworkDispatch {
 		return foundTANOs;
 	}
 	
-	public Vector<TangibleObject> getAllNearNonSameFactionTANOs(int distance, SWGObject value ){
+	public Vector<TangibleObject> getAllNearNonSameFactionTANOs(int distance, SWGObject center ){
 		Vector<TangibleObject> foundTANOs = new Vector<TangibleObject>();
-		core.simulationService.get(value.getPlanet(), value.getWorldPosition().x, value.getWorldPosition().z, distance).stream().forEach((objecta) -> { 
-	
-			if (value instanceof CreatureObject){
-				CreatureObject npc = (CreatureObject) value;
-				if (objecta instanceof CreatureObject && objecta!=npc && ((CreatureObject) objecta).getFaction().equals(npc.getFaction()))
+		core.simulationService.get(center.getPlanet(), center.getWorldPosition().x, center.getWorldPosition().z, distance).stream().forEach((objecta) -> { 
+			
+			//if (objecta.getTemplate().contains("shared_adv_turret_dish_sm_heat")){
+			String centerfaction = "";
+			if (center instanceof CreatureObject)
+				centerfaction = ((CreatureObject)center).getFaction();
+			if (center instanceof InstallationObject)
+				centerfaction = ((InstallationObject)center).getFaction();
+			if (center instanceof TangibleObject)
+				centerfaction = ((TangibleObject)center).getFaction();
+			
+			if (centerfaction.length()>0 && objecta instanceof TangibleObject && !(objecta instanceof CreatureObject)){
+				if (objecta.getObjectID()!=center.getObjectID() && NGECore.getInstance().factionService.isFactionEnemy((TangibleObject) objecta,(TangibleObject) center))
 					foundTANOs.add((TangibleObject)objecta);
-			}
-	
-			if (value instanceof InstallationObject){
-				InstallationObject ins = (InstallationObject) value;
-				if (objecta instanceof CreatureObject && objecta!=ins && ((CreatureObject) objecta).getFaction().equals(ins.getFaction()))
-					foundTANOs.add((TangibleObject)objecta);
-			}
-		}
-		);
+			}	
+
+		});
 		return foundTANOs;
 	}
 		
@@ -755,6 +811,15 @@ public class SimulationService implements INetworkDispatch {
 				object.getContainer()._remove(object);
 				add(object, newPosition.x, newPosition.z);
 			} 
+			
+			if (object.getPlanet().getName().equals("talus") && object.getTemplate().contains("stormtrooper")){
+//				float xx = object.getWorldPosition().x - newPosition.x;
+//				float zz = object.getWorldPosition().z - newPosition.z;
+//				float diff = (float) Math.sqrt(xx*xx+zz*zz);
+//				System.out.println(" ((CreatureObject)object).getSpeedMultiplierBase());: " + ((CreatureObject)object).getSpeedMultiplierBase());
+//				System.out.println(" ((CreatureObject)object).getSpeedMultiplierMod());: " + ((CreatureObject)object).getSpeedMultiplierMod());
+//	
+			}
 			
 			UpdateTransformMessage utm = new UpdateTransformMessage(object.getObjectID(), (short) (newPosition.x * 4 + 0.5), (short) (newPosition.y * 4 + 0.5), (short) (newPosition.z * 4 + 0.5), movementCounter + 1, getSpecialDirection(newOrientation), speed);
 
@@ -1277,6 +1342,80 @@ public class SimulationService implements INetworkDispatch {
 		
 		return true;
 	}
+	
+	
+	public boolean checkLineOfSight2(SWGObject obj1, Point3D obj2) {
+		long startTime = System.nanoTime();
+						
+		float heightOrigin = 1.f;
+		float heightDirection = 1.f;
+	
+		if(obj1 instanceof CreatureObject)
+			heightOrigin = getHeightOrigin((CreatureObject) obj1);
+				
+		Point3D position1 = obj1.getWorldPosition();
+		Point3D position2 = obj2;
+
+		Point3D origin = new Point3D(position1.x, position1.y + heightOrigin, position1.z);
+		Point3D end = new Point3D(position2.x, position2.y + heightDirection, position2.z);
+		float distance = position1.getDistance2D(position2);
+		
+		List<SWGObject> inRangeObjects = get(obj1.getPlanet(), position1.x, position1.z, (int) (distance + 10));
+
+		for(SWGObject object : inRangeObjects) {
+			
+			if(object == obj1)
+				continue;
+			
+			if(object.getTemplateData() != null && object.getTemplateData().getAttribute("collisionActionBlockFlags") != null) {
+				int bit = (Integer) object.getTemplateData().getAttribute("collisionActionBlockFlags") & 255;
+				if(bit == (Integer) object.getTemplateData().getAttribute("collisionActionBlockFlags"))
+					continue;
+			}
+
+			Ray ray = convertRayToModelSpace(origin, end, object);
+						
+			MeshVisitor visitor = object.getMeshVisitor();
+			
+			if(visitor == null)
+				continue;
+			
+			List<Mesh3DTriangle> tris = visitor.getTriangles();
+			
+			if(tris.isEmpty())
+				continue;
+			
+			for(Mesh3DTriangle tri : tris) {
+				
+				if(ray.intersectsTriangle(tri, distance) != null) {
+					//System.out.println("Collision took: " + (System.nanoTime() - startTime) + " ns (collided)");
+				//	System.out.println("Collided with " + object.getTemplate() + " X: " + object.getPosition().x + " Y: " + object.getPosition().y + " Z: " + object.getPosition().z);	
+					return false;
+				}
+				
+			}
+						
+		}
+				
+		List<Vec3D> segments = new ArrayList<Vec3D>();
+		Line3D.splitIntoSegments(new Vec3D(position1.x, position1.y + 1, position1.z), new Vec3D(position2.x, position2.y + 1, position2.z), (float) 1, segments, true);
+		
+		for(Vec3D segment : segments) {
+			float y = segment.y;
+			
+			int height = (int) core.terrainService.getHeight(obj1.getPlanetId(), segment.x, segment.z); // round down to int
+			
+			if(height > y) {
+				//System.out.println("Collision took: " + (System.nanoTime() - startTime) + " ns (terrain collision)");				
+				return false;
+			}
+		}
+		//System.out.println("Collision took: " + (System.nanoTime() - startTime) + " ns (did not collide)");
+
+		return true;
+
+	}
+	
 	
 	public boolean checkLineOfSight(SWGObject obj1, SWGObject obj2) {
 		long startTime = System.nanoTime();

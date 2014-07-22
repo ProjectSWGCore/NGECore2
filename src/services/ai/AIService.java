@@ -33,6 +33,7 @@ import resources.datatables.GcwType;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
 import resources.objects.player.PlayerObject;
+import resources.objects.tangible.TangibleObject;
 import services.ai.states.AIState;
 import services.ai.states.IdleState;
 import services.ai.states.LoiterState;
@@ -45,6 +46,7 @@ public class AIService {
 	
 	private Vector<AIActor> aiActors = new Vector<AIActor>();
 	private NGECore core;
+	private TangibleObject checkerAI = null;
 	
 	public AIService(NGECore core) {
 		this.core = core;
@@ -187,6 +189,8 @@ public class AIService {
 		AIState intendedPrimaryAIState = new PatrolState();
 		actor.setIntendedPrimaryAIState(intendedPrimaryAIState);
 		actor.setCurrentState(intendedPrimaryAIState);	
+		actor.setCurrentState(intendedPrimaryAIState);
+		actor.setCurrentState(intendedPrimaryAIState);
 	}
 	
 	public void setPatrol(CreatureObject creature, boolean active){
@@ -217,6 +221,14 @@ public class AIService {
 		actor.setIntendedPrimaryAIState(intendedPrimaryAIState);	
 		actor.setCurrentState(intendedPrimaryAIState);
 	}	
+	
+	public void setCheckAI(TangibleObject checker){
+		checkerAI = checker;
+	}
+	
+	public TangibleObject getCheckAI(){
+		return this.checkerAI;
+	}
 	
 	public void logAI(String logMsg){
 		if (checkDeveloperIdentity()){

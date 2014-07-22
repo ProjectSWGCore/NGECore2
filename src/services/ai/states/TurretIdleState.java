@@ -22,19 +22,25 @@
 package services.ai.states;
 
 import services.ai.TurretAIActor;
+import services.ai.states.AIState.StateResult;
+import tools.DevLog;
 
 public class TurretIdleState extends TurretAIState {
 
 	@Override
 	public byte onEnter(TurretAIActor actor) {
 		// TODO Auto-generated method stub
-		return 0;
+		DevLog.debugoutai(actor,"Charon", "Turret AI Idle State", "onEnter");
+		//return 0;
+		return StateResult.UNFINISHED;
 	}
 
 	@Override
 	public byte onExit(TurretAIActor actor) {
 		// TODO Auto-generated method stub
-		return 0;
+		DevLog.debugoutai(actor,"Charon", "Turret AI Idle State", "onExit");
+		//return 0;
+		return StateResult.FINISHED;
 	}
 
 	@Override

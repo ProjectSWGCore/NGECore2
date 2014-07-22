@@ -87,8 +87,15 @@ public class AIActor {
 	private ScheduledFuture recoveryFuture;
 	private ScheduledFuture despawnFuture;
 	private boolean patrolLoop = true; // default
+	private TangibleObject lastTarget = null;
+	private Point3D repositionLocation;
+	private long repositionStartTime = 0L;
+	private long actorID = 0L;
+	private static long autoActorID = 0L;
+	private boolean actorAlive = true;
 
 	public AIActor(CreatureObject creature, Point3D spawnPosition, ScheduledExecutorService scheduler) {
+		actorID = autoActorID++;
 		this.creature = creature;
 		this.spawnPosition = spawnPosition;
 		setLastPositionBeforeStateChange(spawnPosition); // just to make sure it's initialized
@@ -117,12 +124,12 @@ public class AIActor {
 					if(creature == null || creature.getObservers().isEmpty() || creature.isInCombat() || isStalking)
 						return;
 					if (creature.getAttachment("tamed")!=null){
-						DevLog.debugout("Charon", "Pet AI", "aggroCheckTask tamed==1");
+						DevLog.debugoutai(this, "Charon", "Pet AI", "aggroCheckTask tamed==1");
 						return;
 					}
 					
 					if (creature.getCustomName().contains("baby"))
-						DevLog.debugout("Charon", "Pet AI", "baby aggroCheckTask should not be here " +creature.getAttachment("tamed"));
+						DevLog.debugoutai(this, "Charon", "Pet AI", "baby aggroCheckTask should not be here " +creature.getAttachment("tamed"));
 					
 					creature.getObservers().stream().map(Client::getParent).filter(obj -> obj.inRange(creature.getWorldPosition(), 15)).forEach((obj) -> {
 						if(new Random().nextFloat() <= 0.5 || creature.isInCombat() || isStalking) {
@@ -177,9 +184,9 @@ public class AIActor {
 								}
 								if (addedObject.getPosture() != 13 && addedObject.getPosture() != 14 && ! addedObject.getOption(Options.INVULNERABLE)){
 									addDefender(addedObject);	
-									DevLog.debugout("Charon", "faction creature ", "added " + creature.getFaction());
-									DevLog.debugout("Charon", "faction obj", "added " + ((TangibleObject)obj).getFaction());
-									DevLog.debugout("Charon", "factionCheckTask", "added " + obj.getCustomName());
+									DevLog.debugoutai(this,"Charon", "faction creature ", "added " + creature.getFaction());
+									DevLog.debugoutai(this,"Charon", "faction obj", "added " + ((TangibleObject)obj).getFaction());
+									DevLog.debugoutai(this,"Charon", "factionCheckTask", "added " + obj.getCustomName());
 								}
 					
 							}					
@@ -202,9 +209,9 @@ public class AIActor {
 								}
 								if (addedObject.getPosture() != 13 && addedObject.getPosture() != 14 & ! addedObject.getOption(Options.INVULNERABLE)){
 									addDefender(addedObject);	
-									DevLog.debugout("Charon", "faction creature ", "added " + creature.getFaction());
-									DevLog.debugout("Charon", "faction obj", "added " + ((TangibleObject)obj).getFaction());
-									DevLog.debugout("Charon", "factionCheckTask", "added " + obj.getCustomName());
+									DevLog.debugoutai(this,"Charon", "faction creature ", "added " + creature.getFaction());
+									DevLog.debugoutai(this,"Charon", "faction obj", "added " + ((TangibleObject)obj).getFaction());
+									DevLog.debugoutai(this,"Charon", "factionCheckTask", "added " + obj.getCustomName());
 								}
 							}
 						}
@@ -212,23 +219,23 @@ public class AIActor {
 					
 					NGECore.getInstance().simulationService.getAllNearNonSameFactionTANOs(15, creature).forEach((obj) -> {
 						if(new Random().nextFloat() <= 0.5 || creature.isInCombat()) {
-							DevLog.debugout("Charon", "TANO1 CHECK", creature.getTemplate() + " spotted near " + obj.getTemplate());
+							DevLog.debugoutai(this,"Charon", "TANO1 CHECK", creature.getTemplate() + " spotted near " + obj.getTemplate());
 //							DevLog.debugout("Charon", "TANO CHECK faction obj", "added " + ((TangibleObject)obj).getFaction());
 //							DevLog.debugout("Charon", "TANO CHECK factionCheckTask", "added " + obj.getCustomName());
 //							DevLog.debugout("Charon", "TANO CHECK isFactionEnemy", "res " + NGECore.getInstance().factionService.isFactionEnemy((TangibleObject)creature, (TangibleObject)obj));
 							if (obj instanceof TangibleObject && !(obj instanceof CreatureObject) && NGECore.getInstance().factionService.isFactionEnemy((TangibleObject)creature, (TangibleObject)obj)){
 								TangibleObject addedObject = (TangibleObject) obj;					
 								addDefender(addedObject);	
-								DevLog.debugout("Charon", "TANO1 faction ", creature.getTemplate() + "added " + creature.getFaction());
-								DevLog.debugout("Charon", "TANO1 faction obj", "added " + ((TangibleObject)obj).getFaction());
-								DevLog.debugout("Charon", "TANO1 factionCheckTask", "added " + obj.getCustomName());							
+								DevLog.debugoutai(this,"Charon", "TANO1 faction ", creature.getTemplate() + "added " + creature.getFaction());
+								DevLog.debugoutai(this,"Charon", "TANO1 faction obj", "added " + ((TangibleObject)obj).getFaction());
+								DevLog.debugoutai(this,"Charon", "TANO1 factionCheckTask", "added " + obj.getCustomName());							
 							}
 						}
 					});
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-			}, 0, 5000, TimeUnit.MILLISECONDS);
+			}, 0, 3000, TimeUnit.MILLISECONDS);
 
 		}
 	}
@@ -261,7 +268,7 @@ public class AIActor {
 		creature.addDefender(defender);
 		if(followObject == null)
 			setFollowObject(defender);
-		System.out.println("getFollowObject "+ getFollowObject().getTemplate());
+		DevLog.debugoutai(this,"Charon", "AI addDefender", "getFollowObject " + getFollowObject().getTemplate());
 		setCurrentState(new AttackState());
 		if(!isAssisting) {
 			NGECore.getInstance().simulationService.get(creature.getPlanet(), creature.getWorldPosition().x, creature.getWorldPosition().z, 38).stream().filter((obj) -> 
@@ -308,6 +315,7 @@ public class AIActor {
 			if(this.currentState != null) 
 				doStateAction(this.currentState.onExit(this));
 			this.currentState = currentState;
+			DevLog.debugoutai(this,"Charon", "AI Actor setCurrentState", "setCurrentState " + currentState.getClass().getName());
 			doStateAction(currentState.onEnter(this));
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -339,23 +347,35 @@ public class AIActor {
 	}
 	
 	public void scheduleMovement() {
+		// Catch current state BEFORE waiting 500ms for execution,
+		// as the state could have changed in that time resulting in
+		// undesired additional movement loops
+		AIState caughtAIState = currentState;
+		if (!actorAlive)
+			return;
 		movementFuture = scheduler.schedule(() -> { 
 			try {
 				if (creature==null){
 					destroyActor();
 					return;
 				}
-				doStateAction(currentState.move(AIActor.this));
+				if (caughtAIState.getClass().equals(currentState.getClass()))
+					doStateAction(caughtAIState.move(AIActor.this));
 			} catch (Exception e) {
+				System.out.println("Exception in scheduleMovement");
 				e.printStackTrace();
 			}
 		}, 500, TimeUnit.MILLISECONDS);
 	}
 	
 	public void scheduleRecovery() {
+		AIState caughtAIState = currentState;
+		if (!actorAlive)
+			return;
 		recoveryFuture = scheduler.schedule(() -> { 
 			try {
-				doStateAction(currentState.recover(AIActor.this));
+				if (caughtAIState.getClass().equals(currentState.getClass()))
+					doStateAction(caughtAIState.recover(AIActor.this));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -373,6 +393,13 @@ public class AIActor {
 			damageMap.put(attacker, damageMap.get(attacker) + event.damage);
 		else 
 			damageMap.put(attacker, event.damage);
+		
+		// Put AI into combat state if it is not yet and damaged
+		if (!creature.isInCombat()){
+			creature.setInCombat(true);
+			if (this.getHighestDamageDealer()!=null)
+				addDefender(this.getHighestDamageDealer());	
+		}
 	}
 	
 	public Map<CreatureObject, Integer> getDamageMap() {
@@ -494,6 +521,13 @@ public class AIActor {
 	
 	public void destroyActor(){
 		creature.getEventBus().unsubscribe(this);
+		if (creature!=null){
+			if (despawnFuture!=null){
+				despawnFuture.cancel(true);			
+				despawnFuture = null;
+			}	
+		}
+		
 		// Make sure to kill all AI helper threads
 		if (aggroCheckTask!=null)
 			aggroCheckTask.cancel(true);
@@ -508,11 +542,7 @@ public class AIActor {
 		if (movementFuture!=null){
 			recoveryFuture.cancel(true);			
 			recoveryFuture = null;
-		}
-		if (despawnFuture!=null){
-			despawnFuture.cancel(true);			
-			despawnFuture = null;
-		}		
+		}	
 	}
 	
 	public void cancelAggro(){
@@ -659,5 +689,40 @@ public class AIActor {
 	public void setPatrolLoop(boolean patrolLoop) {
 		this.patrolLoop = patrolLoop;
 	}
-	
+
+	public TangibleObject getLastTarget() {
+		return lastTarget;
+	}
+
+	public void setLastTarget(TangibleObject lastTarget) {
+		this.lastTarget = lastTarget;
+	}
+
+	public Point3D getRepositionLocation() {
+		return repositionLocation;
+	}
+
+	public void setRepositionLocation(Point3D repositionLocation) {
+		this.repositionLocation = repositionLocation;
+	}
+
+	public long getRepositionStartTime() {
+		return repositionStartTime;
+	}
+
+	public void setRepositionStartTime(long repositionStartTime) {
+		this.repositionStartTime = repositionStartTime;
+	}
+
+	public long getActorID() {
+		return actorID;
+	}
+
+	public boolean isActorAlive() {
+		return actorAlive;
+	}
+
+	public void setActorAlive(boolean actorAlive) {
+		this.actorAlive = actorAlive;
+	}
 }

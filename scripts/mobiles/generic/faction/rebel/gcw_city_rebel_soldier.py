@@ -7,31 +7,33 @@ from resources.datatables import Options
 from resources.datatables import FactionStatus
 from java.util import Vector
 
-
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('eow_gcw_city_at_st_2')
+	mobileTemplate.setCreatureName('cheerleader_rebel_commando_hard')
 	mobileTemplate.setLevel(90)
 	mobileTemplate.setDifficulty(Difficulty.ELITE)
 
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(True)
-	mobileTemplate.setScale(1)
-	mobileTemplate.setSocialGroup("imperial")
+	mobileTemplate.setSocialGroup("rebel")
 	mobileTemplate.setAssistRange(0)
-	mobileTemplate.setStalker(False)
-	mobileTemplate.setFaction("imperial")
+	mobileTemplate.setStalker(True)
+	mobileTemplate.setFaction("rebel")
 	mobileTemplate.setFactionStatus(FactionStatus.Combatant)
-	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_atst.iff')
+	templates.add('object/mobile/shared_dressed_rebel_commando_human_female_01.iff')
+	templates.add('object/mobile/shared_dressed_rebel_commando_human_male_01.iff')
+	templates.add('object/mobile/shared_dressed_rebel_commando_moncal_male_01.iff')
+	templates.add('object/mobile/shared_dressed_rebel_commando_rodian_male_01.iff')
+	templates.add('object/mobile/shared_dressed_rebel_commando_twilek_female_01.iff')
+	templates.add('object/mobile/shared_dressed_rebel_commando_zabrak_female_01.iff')			
 	mobileTemplate.setTemplates(templates)
 	
-	weaponTemplates = Vector() # object/weapon/ranged/turret/shared_turret_heat.iff  object/weapon/ranged/vehicle/shared_vehicle_atst_ranged.iff
-	weapontemplate = WeaponTemplate('object/weapon/ranged/vehicle/shared_vehicle_atst_ranged.iff', WeaponType.RIFLE, 2.0, 55, 'energy')
+	weaponTemplates = Vector()
+	weapontemplate = WeaponTemplate('object/weapon/ranged/carbine/shared_carbine_e5.iff', WeaponType.CARBINE, 1.0, 15, 'energy')
 	weaponTemplates.add(weapontemplate)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
@@ -39,5 +41,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('rangedShot')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('imp_invasion_at_st', mobileTemplate)
+	core.spawnService.addMobileTemplate('gcw_city_rebel_soldier', mobileTemplate)
 	return

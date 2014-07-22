@@ -231,8 +231,11 @@ public class DevService implements INetworkDispatch {
 						return;
 					
 					case 6: // Locations -890,4, -2994  475,6,-3019
-						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("talus"), new Point3D(475,6,-3019), player.getOrientation(), null);
-						core.invasionService.testPylons();
+						//core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("talus"), new Point3D(475,6,-3019), player.getOrientation(), null);
+						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("talus"), new Point3D(618, 4, -2963), player.getOrientation(), null);
+						//core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("talus"), new Point3D(-930,9, -2994), player.getOrientation(), null);
+						
+						//core.invasionService.testPylons();
 						return;
 					
 					// Character

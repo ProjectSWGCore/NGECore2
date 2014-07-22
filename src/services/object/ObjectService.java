@@ -131,6 +131,7 @@ import services.bazaar.AuctionItem;
 import services.chat.ChatRoom;
 import services.equipment.EquipmentService;
 import services.gcw.GCWPylon;
+import services.gcw.GCWSpawner;
 import services.sui.SUIWindow;
 import services.sui.SUIWindow.SUICallback;
 import services.sui.SUIWindow.Trigger;
@@ -285,6 +286,12 @@ public class ObjectService implements INetworkDispatch {
 			float positionY = core.terrainService.getHeight(planet.getID(), position.x, position.z)-1f;
 			Point3D newpoint = new Point3D(position.x,positionY,position.z);				
 			object = new GCWPylon(objectID, planet, position, orientation, Template);
+
+		} else if(Template.startsWith("object/tangible/loot/creature_loot/collections/shared_dejarik_table_base")) {
+			
+			float positionY = core.terrainService.getHeight(planet.getID(), position.x, position.z)+1f;
+			Point3D newpoint = new Point3D(position.x,positionY,position.z);				
+			object = new GCWSpawner(objectID, planet, position, orientation, Template);
 
 		} else if(Template.startsWith("object/tangible/destructible/")) {
 			

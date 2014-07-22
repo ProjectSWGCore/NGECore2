@@ -1143,7 +1143,9 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		}
 		//destination.getSession().write(messageBuilder.buildBaseline8());
 		//destination.getSession().write(messageBuilder.buildBaseline9());
-		 		
+		
+		
+		
 		if(destination != getClient()) {
 			UpdatePVPStatusMessage upvpm = new UpdatePVPStatusMessage(getObjectID(), NGECore.getInstance().factionService.calculatePvpStatus((CreatureObject) destination.getParent(), this), getFaction());
 			destination.getSession().write(upvpm.serialize());

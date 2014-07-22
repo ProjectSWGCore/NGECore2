@@ -274,7 +274,8 @@ public class NGECore {
 		options.setFilePath("options.cfg");
 		boolean optionsConfigLoaded = options.loadConfigFile();
 		
-		if (optionsConfigLoaded && options.getInt("CLEAN.ODB.FOLDERS") > 0 || getExcludedDevelopers().contains(System.getProperty("user.name"))){
+		//if (optionsConfigLoaded && options.getInt("CLEAN.ODB.FOLDERS") > 0 || getExcludedDevelopers().contains(System.getProperty("user.name"))){
+		if (optionsConfigLoaded && options.getInt("CLEAN.ODB.FOLDERS") > 0){
 			File baseFolder = new File("./odb");
 			
 			if (baseFolder.isDirectory()) {

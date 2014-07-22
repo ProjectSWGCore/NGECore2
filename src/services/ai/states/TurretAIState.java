@@ -83,13 +83,6 @@ public abstract class TurretAIState {
 			}
 		}
 		
-		if (actor.getCurrentState().getClass().equals(PatrolState.class)){
-			targetPosition = patrolPoints.get(actor.getPatrolPointIndex());
-		}
-		
-		if (actor.getCurrentState().getClass().equals(FollowState.class)){
-			targetPosition = actor.getFollowObject().getWorldPosition();
-		}
 		
 		Vector<Point3D> path = core.aiService.findPath(creature.getPlanetId(), currentPosition, targetPosition);
 		

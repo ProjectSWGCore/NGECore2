@@ -24,6 +24,10 @@ package resources.objects.installation;
 import java.io.Serializable;
 import java.util.Vector;
 
+import main.NGECore;
+import protocol.swg.UpdatePVPStatusMessage;
+import protocol.swg.UpdatePostureMessage;
+
 import com.sleepycat.persist.model.Entity;
 
 import engine.clients.Client;
@@ -31,6 +35,7 @@ import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 import resources.objects.ObjectMessageBuilder;
+import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
 
 @Entity(version=0)
@@ -47,6 +52,18 @@ public class InstallationObject extends TangibleObject implements Serializable {
 	@Override
 	public void sendBaselines(Client destination) {
 		
+		if(destination == null || destination.getSession() == null) {
+			//System.out.println("NULL session");
+			return;
+		}
+		
+//		destination.getSession().write(messageBuilder.buildBaseline3(this));
+//		destination.getSession().write(messageBuilder.buildBaseline6(this));
+				
+		if(destination != getClient()) {
+			UpdatePVPStatusMessage upvpm = new UpdatePVPStatusMessage(getObjectID(), NGECore.getInstance().factionService.calculatePvpStatus((CreatureObject) destination.getParent(), this), getFaction());
+			destination.getSession().write(upvpm.serialize());
+		}
 	}
 	
 	@Override

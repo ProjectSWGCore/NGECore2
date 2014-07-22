@@ -11,9 +11,9 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('eow_gcw_city_at_st_2')
+	mobileTemplate.setCreatureName('at_at')
 	mobileTemplate.setLevel(90)
-	mobileTemplate.setDifficulty(Difficulty.ELITE)
+	mobileTemplate.setDifficulty(Difficulty.BOSS)
 
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
@@ -26,7 +26,7 @@ def addTemplate(core):
 	mobileTemplate.setFactionStatus(FactionStatus.Combatant)
 	
 	templates = Vector()
-	templates.add('object/mobile/vehicle/shared_walker_at_st.iff')
+	templates.add('object/mobile/shared_atat.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
