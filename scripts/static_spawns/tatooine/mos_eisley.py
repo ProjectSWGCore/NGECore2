@@ -166,7 +166,7 @@ def addPlanetSpawns(core, planet):
 	dunir = stcSvc.spawnObject('dunir', 'tatooine', long(0), float(3520.7), float(5.0), float(-4683.7), float(0.99), float(-0.08))
 
 	#Eisley Ship Controller
-	#stcSvc.spawnObject('object/mobile/shared_distant_ship_controller.iff', 'tatooine', long(0), float(3542.3), float(5.0), float(-4826.0), float(0.42), float(0.91))
+	stcSvc.spawnObject('object/mobile/shared_distant_ship_controller.iff', 'tatooine', long(0), float(3542.3), float(5.0), float(-4826.0), float(0.42), float(0.91))
 	
 	#Profession Counselor
 	#stcSvc.spawnObject('professioncounselor', 'tatooine', long(0), float(3533.14), float(5), float(-4788.86), float(-0.3327), float(0.9288))
