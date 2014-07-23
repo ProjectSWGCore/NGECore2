@@ -131,7 +131,7 @@ public class InvasionService implements INetworkDispatch {
 		
 		setInvasionLocationCenter();
 		
-		if (invasionPhase==2 && System.currentTimeMillis()>temptimestartreference + 90000 && ! message1sent){
+		if (invasionPhase==2 && System.currentTimeMillis()>temptimestartreference + 140000 && ! message1sent){
 			sendDefenderMessage1();
 			message1sent = true;
 			System.out.println("Defender msg1 sent ");
@@ -556,7 +556,7 @@ public class InvasionService implements INetworkDispatch {
 		                fut[0].cancel(false);
 					}
 								
-					Vector<CreatureObject> nearAllies = NGECore.getInstance().simulationService.getAllNearSameFactionNPCs(5, barricade);					
+					Vector<CreatureObject> nearAllies = NGECore.getInstance().simulationService.getAllNearSameFactionCreatures(7,barricade.getWorldPosition(),barricade.getPlanet(),getFactionName(defendingFaction));					
 					for (CreatureObject ally : nearAllies){
 						if (! ally.hasBuff("barricade_defender")){
 							core.buffService.addBuffToCreature(ally, "barricade_defender", ally);
@@ -700,9 +700,9 @@ public class InvasionService implements INetworkDispatch {
 	public void sendDefenderMessage1(){		
 		String message = "";
 		if (defendingFaction==Factions.Imperial)
-			message = "@gcw:gcw_announcement_rally_for_invasion_imperial_talus_dearic";	
+			message = "@gcw:gcw_announcement_man_defenses_imperial_talus_dearic";	
 		if (defendingFaction==Factions.Rebel)
-			message = "@gcw:gcw_announcement_rally_for_invasion_rebel_talus_dearic";
+			message = "@gcw:gcw_announcement_man_defenses_rebel_talus_dearic";
 		ConcurrentHashMap<IoSession, Client> clients = NGECore.getInstance().getActiveConnectionsMap();			
 		for (Map.Entry<IoSession, Client> entry : clients.entrySet()) {
 			Client client = entry.getValue();
@@ -716,6 +716,7 @@ public class InvasionService implements INetworkDispatch {
 			}
 		}
 	}
+	
 	
 	public void sendInvaderMessage2(){		
 		String message = "";
@@ -898,6 +899,8 @@ public class InvasionService implements INetworkDispatch {
 	
 	public void makeDefensiveGeneralDefenderForNPCs(){
 		Vector<CreatureObject> enemies = core.simulationService.getAllNearNonSameFactionNPCs(50, defendingGeneral);
+		if (defendingGeneral==null)
+			return;
 		for (CreatureObject enemy : enemies) {
 			AIActor actor = (AIActor)enemy.getAttachment("AI");
 			actor.addDefender(defendingGeneral);

@@ -84,7 +84,7 @@ public class DevLogQueuer extends Thread {
 		      DevLog.appendToLog(str, path);
 		    } catch (Exception iex) {
 		      Thread.currentThread().interrupt();
-		      throw new RuntimeException("Unexpected interruption");
+		      throw new RuntimeException("Unexpected interruption -> Don't worry about it");
 		    }
 	  }
 	  

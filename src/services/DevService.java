@@ -119,6 +119,7 @@ public class DevService implements INetworkDispatch {
 					if(creature.getPlayerObject().getProfession().equals("trader_0a") || creature.getPlayerObject().getProfession().equals("trader_0b") || creature.getPlayerObject().getProfession().equals("trader_0c") || creature.getPlayerObject().getProfession().equals("trader_0d"))
 						suiOptions.put((long) 177, "REing");
 				}
+				suiOptions.put((long) 127, "GCW Banners");
 
 				break;
 			case 3: // [Items] Weapons
@@ -232,7 +233,7 @@ public class DevService implements INetworkDispatch {
 					
 					case 6: // Locations -890,4, -2994  475,6,-3019
 						//core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("talus"), new Point3D(475,6,-3019), player.getOrientation(), null);
-						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("talus"), new Point3D(618, 4, -2963), player.getOrientation(), null);
+						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("talus"), new Point3D(264, 4, -2950), player.getOrientation(), null);
 						//core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("talus"), new Point3D(-930,9, -2994), player.getOrientation(), null);
 						
 						//core.invasionService.testPylons();
@@ -1310,6 +1311,21 @@ public class DevService implements INetworkDispatch {
 						
 					case 124:
 						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("tatooine"), new Point3D(3521,4,-4800), player.getOrientation(), null);
+						return;
+						
+					case 127:
+						TangibleObject gcwBanner1 = (TangibleObject) core.objectService.createObject("object/tangible/gcw/pvp_rank_rewards/shared_rebel_battle_banner.iff", planet);
+						gcwBanner1.setStfFilename("static_item_n");
+						gcwBanner1.setStfName("item_pvp_captain_battle_banner_rebel_reward_04_01");
+						gcwBanner1.setDetailFilename("static_item_d");
+						gcwBanner1.setDetailName("item_pvp_captain_battle_banner_rebel_reward_04_01");
+						inventory.add(gcwBanner1);
+						TangibleObject gcwBanner2 = (TangibleObject) core.objectService.createObject("object/tangible/gcw/pvp_rank_rewards/shared_imperial_battle_banner.iff", planet);
+						gcwBanner2.setStfFilename("static_item_n");
+						gcwBanner2.setStfName("item_pvp_captain_battle_banner_imperial_reward_04_01");
+						gcwBanner2.setDetailFilename("static_item_d");
+						gcwBanner2.setDetailName("item_pvp_captain_battle_banner_imperial_reward_04_01");
+						inventory.add(gcwBanner2);
 						return;
 						
 					case 164:

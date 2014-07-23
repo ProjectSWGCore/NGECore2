@@ -24,6 +24,7 @@ package resources.objects.tangible;
 import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -324,8 +325,16 @@ public class TangibleObject extends SWGObject implements Serializable {
 	// All objects can be in combat (terminal mission flag bases, tutorial target box)
 	
 	public List<TangibleObject> getDefendersList() {
-		synchronized(objectMutex) {
+		synchronized(defendersList) {
 			return defendersList;
+		}
+	}
+	
+	public List<TangibleObject> getDefendersListClone() {
+		synchronized(objectMutex) {
+			List<TangibleObject> returnList = new Vector<TangibleObject>();
+			Collections.copy(returnList, defendersList);
+			return returnList;
 		}
 	}
 	
@@ -337,7 +346,9 @@ public class TangibleObject extends SWGObject implements Serializable {
 				}
 			}
 		}
-		defendersList.add(defender);
+		synchronized(defendersList) {
+			defendersList.add(defender);
+		}
 	
 		if (!isInCombat()) {
 			setInCombat(true);
@@ -345,7 +356,7 @@ public class TangibleObject extends SWGObject implements Serializable {
 	}
 	
 	public void removeDefender(TangibleObject defender) {
-		synchronized(objectMutex) {
+		synchronized(defendersList) {
 			defendersList.remove(defender);
 			
 			if (defendersList.isEmpty() && isInCombat()) {
@@ -353,7 +364,7 @@ public class TangibleObject extends SWGObject implements Serializable {
 			}
 		}
 	}
-	
+		
 	public int getPvpBitmask() {
 		synchronized(objectMutex) {
 			return pvpBitmask;

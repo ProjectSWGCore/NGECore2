@@ -622,6 +622,9 @@ public abstract class AIState {
 		}
 		TangibleObject target = actor.getFollowObject();
 		float speed = (float) creature.getRunSpeed();
+		if (creature.getAttachment("IsSlowVehicle")!=null){
+			speed = (float) creature.getWalkSpeed();
+		}
 		float maxDistance = 6;
 		if(creature.getWeaponId() != 0) {
 			WeaponObject weapon = (WeaponObject) core.objectService.getObject(creature.getWeaponId());

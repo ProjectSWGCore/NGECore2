@@ -540,6 +540,9 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		if (companion != null) {
 			companion.setFaction(faction);
 		}
+		
+		if (this.getCalledPet()!=null)
+			this.getCalledPet().setFaction(faction);
 	}
 	
 	public void setFactionStatus(int factionStatus) {
@@ -550,6 +553,8 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		if (companion != null) {
 			companion.setFactionStatus(factionStatus);
 		}
+		if (this.getCalledPet()!=null)
+			this.getCalledPet().setFactionStatus(factionStatus);
 	}
 	
 	public float getHeight() {

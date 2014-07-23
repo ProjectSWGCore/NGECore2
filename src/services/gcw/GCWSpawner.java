@@ -151,7 +151,7 @@ public class GCWSpawner extends TangibleObject{
 						System.err.println("Exception in SoldierPatrolPylon->scheduleAtFixedRate->spawnSoldier() " + e.getMessage());
 					}
 				}
-			}, 10, 600, TimeUnit.SECONDS);
+			}, 120, 600, TimeUnit.SECONDS);
 		}
 		
 	}
@@ -275,7 +275,8 @@ public class GCWSpawner extends TangibleObject{
 			}	
 			String vehicleTemplate = vehicleTemplates[new Random().nextInt(vehicleTemplates.length)];	
 			CreatureObject vehicle = (CreatureObject)NGECore.getInstance().spawnService.spawnCreature(vehicleTemplate, this.getPlanet().getName(), 0L, this.getPosition().x, this.getPosition().y, this.getPosition().z, this.getOrientation().w, this.getOrientation().x, this.getOrientation().y,this.getOrientation().z,-1);
-				
+			vehicle.setAttachment("IsSlowVehicle",true);
+			
 			NGECore.getInstance().aiService.setPatrol(vehicle, patrolRoute);	
 			NGECore.getInstance().aiService.setPatrolLoop(vehicle,false);
 			NGECore.getInstance().invasionService.registerInvader(vehicle);

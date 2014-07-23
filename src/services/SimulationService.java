@@ -363,6 +363,17 @@ public class SimulationService implements INetworkDispatch {
 		return foundCreatures;
 	}
 	
+	public Vector<CreatureObject> getAllNearSameFactionCreatures(int distance, Point3D centerPos, Planet planet, String factionName){
+		Vector<CreatureObject> foundCreatures = new Vector<CreatureObject>();
+		core.simulationService.get(planet, centerPos.x, centerPos.z, distance).stream().forEach((objecta) -> {
+			if (factionName.length()>0 && objecta instanceof CreatureObject){				
+				if (NGECore.getInstance().factionService.isFactionAlly(((CreatureObject) objecta).getFaction(),factionName))
+					foundCreatures.add((CreatureObject)objecta);
+			}		
+		});
+		return foundCreatures;
+	}
+	
 	public Vector<TangibleObject> getAllNearTANOs(int distance, SWGObject value ){
 		Vector<TangibleObject> foundTANOs = new Vector<TangibleObject>();
 		core.simulationService.get(value.getPlanet(), value.getWorldPosition().x, value.getWorldPosition().z, distance).stream().forEach((objecta) -> { 
