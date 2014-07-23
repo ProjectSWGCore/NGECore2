@@ -5,13 +5,18 @@ import sys
 from resources.datatables import Options
 from resources.datatables import State
 from resources.datatables import StateStatus
+from java.util import Vector
+from engine.resources.scene import Point3D
 
 def addPlanetSpawns(core, planet):
 
 	stcSvc = core.staticService
 	objSvc = core.objectService
+	aiSvc = core.aiService
 	
 	# TODO:  Add NPCs sitting at Cantina tables with SittingOnChair bitmask.
+	#Eisley Ship Controller
+	stcSvc.spawnObject('object/mobile/shared_distant_ship_controller.iff', 'tatooine', long(0), float(3542.3), float(5.0), float(-4826.0), float(0.42), float(0.91))
 	
 	#Cantina Interior
 	building = core.objectService.getObject(long(1082874)) 
@@ -165,9 +170,6 @@ def addPlanetSpawns(core, planet):
 	
 	dunir = stcSvc.spawnObject('dunir', 'tatooine', long(0), float(3520.7), float(5.0), float(-4683.7), float(0.99), float(-0.08))
 
-	#Eisley Ship Controller
-	stcSvc.spawnObject('object/mobile/shared_distant_ship_controller.iff', 'tatooine', long(0), float(3542.3), float(5.0), float(-4826.0), float(0.42), float(0.91))
-	
 	#Profession Counselor
 	#stcSvc.spawnObject('professioncounselor', 'tatooine', long(0), float(3533.14), float(5), float(-4788.86), float(-0.3327), float(0.9288))
 	
@@ -180,4 +182,32 @@ def addPlanetSpawns(core, planet):
 	stcSvc.spawnObject('junkdealer', 'tatooine', long(0), float(3271), float(5), float(-4704), float(0), float(0))
 	stcSvc.spawnObject('junkdealer', 'tatooine', long(0), float(3476.9), float(5), float(-460.35), float(0.189), float(0.981))
 
+	patrolpoints = Vector()
+	patrolpoints.add(Point3D(float(3547), float(5), float(-4768.9)))
+	patrolpoints.add(Point3D(float(3556.2), float(5), float(-4757.1)))
+	patrolpoints.add(Point3D(float(3558.4), float(4.8), float(-4739.2)))
+	patrolpoints.add(Point3D(float(3552.7), float(4), float(-4728)))
+	patrolpoints.add(Point3D(float(3562.9), float(4.1), float(-4720.9)))
+	patrolpoints.add(Point3D(float(3584.5), float(5), float(-4726.1)))
+	patrolpoints.add(Point3D(float(3609.3), float(5), float(-4730.6)))
+	patrolpoints.add(Point3D(float(3584.5), float(5), float(-4726.1)))
+	patrolpoints.add(Point3D(float(3562.9), float(4.1), float(-4720.9)))
+	patrolpoints.add(Point3D(float(3552.7), float(4), float(-4728)))
+	patrolpoints.add(Point3D(float(3558.4), float(4.8), float(-4739.2)))
+	patrolpoints.add(Point3D(float(3556.2), float(5), float(-4757.1)))
+	patrolpoints.add(Point3D(float(3547), float(5), float(-4768.9)))
+	
+	patrolpoints1 = Vector()
+	patrolpoints1.add(Point3D(float(3465.3), float(5), float(-4860.1)))
+	patrolpoints1.add(Point3D(float(3473.4), float(4), float(-4860.7)))
+	patrolpoints1.add(Point3D(float(3482.1), float(5), float(-4861.3)))
+	patrolpoints1.add(Point3D(float(3473.4), float(4), float(-4860.7)))
+	patrolpoints1.add(Point3D(float(3465.3), float(5), float(-4860.1)))
+	
+	aiSvc.setPatrol(lifter1, patrolpoints)
+	aiSvc.setPatrol(jawa3, patrolpoints1)
+	
+	aiSvc.setLoiter(r3m6, float(1), float(3))
+	aiSvc.setLoiter(eg1, float(1), float(3))
+	aiSvc.setLoiter(r3j7, float(1), float(3))
 	return
