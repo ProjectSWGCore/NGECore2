@@ -2,7 +2,6 @@ import sys
 from resources.datatables import LightsaberColors
 
 def setup(core, object):
-	print('custom')
 	object.setCustomizationVariable('/private/index_color_1', LightsaberColors.getByName('Windu\'s Guile'))
 	object.setStfFilename('static_item_n')
 	object.setStfName('item_color_crystal_02_20')
