@@ -12,6 +12,6 @@ def addPlanetSpawns(core, planet):
 	# TODO Check all NPCs for personalized scripting, change format.
 	
 	#Junkdealer
-	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_03.iff', 'naboo', long(0), float(4318.83), float(5.15), float(-4797.57), float(0), float(1))
+	stcSvc.spawnObject('junkdealer', 'naboo', long(0), float(4318.83), float(5.15), float(-4797.57), float(0), float(1))
 	
 	return	

@@ -15,7 +15,7 @@ def run(core, actor, target, commandString):
 		target = core.objectService.getObjectByFirstName(commandString)
 	
 	if target and target.getSlottedObject('ghost') is not None:
-		actor.sendSystemMessage('Teleporting you to ' + target.getCustomName() + '...', 0)
+		actor.sendSystemMessage('gm: teleportto: Command completed successfully.', 0)
 		if target.getPlanetId() == actor.getPlanetId():
 			core.simulationService.teleport(actor, target.getPosition(), target.getOrientation(), target.getParentId())
 		else:

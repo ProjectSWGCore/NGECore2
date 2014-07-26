@@ -35,6 +35,7 @@ import resources.harvest.SurveyTool;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.resource.GalacticResource;
+import resources.objects.resource.ResourceConcentration;
 import resources.objects.resource.ResourceContainerObject;
 import resources.objects.resource.ResourceRoot;
 import resources.objects.tangible.TangibleObject;
@@ -323,7 +324,35 @@ public class SurveyService implements INetworkDispatch {
 		PlayClientEffectLocMessage cEffMsg = new PlayClientEffectLocMessage(effectFile,crafter.getPlanet().getName(),crafter.getPosition());
 		crafter.getClient().getSession().write(cEffMsg.serialize());						
 		crafter.sendSystemMessage("You begin to survey for " + commandArgs, (byte) 0);
-
+		
+		float surveyRadius = 64.0f;		
+		int surveyToolRangeSetting = surveyTool.getSurveyRangeSetting();
+		//surveyToolRangeSetting = 4;
+		int divisor = 0;
+		if (surveyToolRangeSetting==0) {
+			divisor = 2;
+			surveyRadius = 64.0f;
+		} else if (surveyToolRangeSetting==1) {
+			divisor = 3;
+			surveyRadius = 128.0f;
+		} else if (surveyToolRangeSetting==2) {
+			divisor = 3;
+			surveyRadius = 192.0f;
+		} else if (surveyToolRangeSetting==3) {
+			divisor = 4;
+			surveyRadius = 256.0f;
+		} else if (surveyToolRangeSetting==4) {
+			divisor = 4;
+			surveyRadius = 320.0f;
+		} else {
+			divisor = 5;
+			surveyRadius = 3072.0f;
+		}
+		
+		float differential = surveyRadius / (float) divisor;
+		GalacticResource resourceToSurvey = resource;
+		Vector<ResourceConcentration> concentrationMap = resourceToSurvey.buildConcentrationsCollection(crafter.getPosition(),resourceToSurvey, surveyRadius, differential, crafter.getPlanetId());
+		resourceToSurvey.constructSurveyMapMessage(crafter, concentrationMap, surveyRadius);
 	}
 	
 	public void requestSampling(CreatureObject crafter, SWGObject target, String commandArgs){	

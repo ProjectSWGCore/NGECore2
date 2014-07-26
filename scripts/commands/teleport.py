@@ -23,7 +23,7 @@ def run(core, actor, target, commandString):
 	
 	if arg1 and arg2 and arg3 and arg4 is not None:
 		try:
-			actor.sendSystemMessage('Teleporting...', 0)
+			actor.sendSystemMessage('gm: teleport: Command completed successfully.', 0)
 			position = Point3D(float(arg1), float(arg2), float(arg3))
 			core.simulationService.transferToPlanet(actor, core.terrainService.getPlanetByName(arg4), position, actor.getOrientation(), None)
 		except:
@@ -33,7 +33,7 @@ def run(core, actor, target, commandString):
 	
 	elif arg1 and arg2 and arg3:
 		try:
-			actor.sendSystemMessage('Teleporting...', 0)
+			actor.sendSystemMessage('gm: teleport: Command completed successfully.', 0)
 			position = Point3D(float(arg1), 0, float(arg2))
 			core.simulationService.transferToPlanet(actor, core.terrainService.getPlanetByName(arg3), position, actor.getOrientation(), None)
 		except:

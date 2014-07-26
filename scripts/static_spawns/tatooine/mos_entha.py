@@ -21,10 +21,10 @@ def addPlanetSpawns(core, planet):
 	ankwee.setOptionsBitmask(256)
 	
 	#Junkdealer
-	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_01.iff', 'tatooine', long(0), float(1271), float(7.7), float(2919), float(0), float(0))
-	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_01.iff', 'tatooine', long(0), float(1271), float(7.7), float(2960), float(1), float(0))
-	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_01.iff', 'tatooine', long(0), float(1396), float(7), float(3026), float(0), float(0))
-	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_01.iff', 'tatooine', long(0), float(1471), float(7), float(3325), float(0), float(1))
-	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_01.iff', 'tatooine', long(0), float(1463), float(7), float(3126), float(0.71), float(-0.71))
+	stcSvc.spawnObject('junkdealer', 'tatooine', long(0), float(1271), float(7.7), float(2919), float(0), float(0))
+	stcSvc.spawnObject('junkdealer', 'tatooine', long(0), float(1271), float(7.7), float(2960), float(1), float(0))
+	stcSvc.spawnObject('junkdealer', 'tatooine', long(0), float(1396), float(7), float(3026), float(0.745), float(0.666))
+	stcSvc.spawnObject('junkdealer', 'tatooine', long(0), float(1471), float(7), float(3325), float(0), float(1))
+	stcSvc.spawnObject('junkdealer', 'tatooine', long(0), float(1463), float(7), float(3126), float(0.71), float(-0.71))
 	return
 	

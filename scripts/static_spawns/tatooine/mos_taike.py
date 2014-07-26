@@ -17,6 +17,6 @@ def addPlanetSpawns(core, planet):
 
 	
 	#Junkdealer
-	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_01.iff', 'tatooine', long(0), float(3902), float(33), float(2362), float(0), float(0))
+	stcSvc.spawnObject('junkdealer', 'tatooine', long(0), float(3902), float(33), float(2362), float(0), float(0))
 	return
 	

@@ -1,9 +1,9 @@
 package services.trade;
 
 import java.nio.ByteOrder;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import main.NGECore;
 
@@ -25,12 +25,9 @@ import resources.objects.creature.CreatureObject;
 import engine.clients.Client;
 import engine.resources.container.AllPermissions;
 import engine.resources.container.CreatureContainerPermissions;
-import engine.resources.container.CreaturePermissions;
 import engine.resources.objects.SWGObject;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
-
-@SuppressWarnings("unused")
 
 public class TradeService implements INetworkDispatch{
 
@@ -40,11 +37,11 @@ public class TradeService implements INetworkDispatch{
 	private long senderID;
 	
 	
-	private Hashtable<SWGObject, Long> tradingObjectsTable = new Hashtable<SWGObject, Long>();
+	private Map<Long, Long> tradingObjectsTable = new ConcurrentHashMap<Long, Long>();
 	// key = objectToGive,       value = giver's ID
 	
 	// need to be sure that no giver ID exists in table before adding value
-	private Hashtable<Long, Integer> tradingCreditsTable = new Hashtable<Long, Integer>();
+	private Map<Long, Integer> tradingCreditsTable = new ConcurrentHashMap<Long, Integer>();
 	// key = ID of giver     value = amnt recieving
 	
 	public TradeService(NGECore core) {
@@ -147,17 +144,21 @@ public class TradeService implements INetworkDispatch{
 				
 				SWGObject tradeObject = null;
 				
-				Iterator<Map.Entry<SWGObject, Long>> itr = tradingObjectsTable.entrySet().iterator();
+				Iterator<Map.Entry<Long, Long>> itr = tradingObjectsTable.entrySet().iterator();
 				
 				while (itr.hasNext()) {
-					Map.Entry<SWGObject, Long> entry = itr.next();
+					Map.Entry<Long, Long> entry = itr.next();
 					
 					if(tradingWithClient == entry.getValue()) {
-						tradeObject = entry.getKey();
+						tradeObject = core.objectService.getObject(entry.getKey());
 						itr.remove();
 					}
 				}
 				
+				if (tradeObject == null) {
+					cleanTradeSession(client, tradeeClient);
+					return;
+				}
 				client.getSession().removeAttribute("tradeSession");
 				tradeeClient.getSession().removeAttribute("tradeSession");
 				
@@ -353,13 +354,13 @@ public class TradeService implements INetworkDispatch{
 				else if (tradePartner.getClient().getSession().containsAttribute("tradeSessionIsVerified"))
 				{
 					
-					Iterator<Map.Entry<SWGObject, Long>> itr = tradingObjectsTable.entrySet().iterator();
+					Iterator<Map.Entry<Long, Long>> itr = tradingObjectsTable.entrySet().iterator();
 					
 					while (itr.hasNext()) {
-						Map.Entry<SWGObject, Long> entry = itr.next();
+						Map.Entry<Long, Long> entry = itr.next();
 						
 						if(tradingWithClient == entry.getValue()) {
-							tradeObject = entry.getKey();
+							tradeObject = core.objectService.getObject(entry.getKey());
 							if (actingTrader == null || tradePartnerContainer == null || tradePartner == null)
 							{
 								cleanTradeSession(client, tradePartner.getClient());
@@ -409,15 +410,15 @@ public class TradeService implements INetworkDispatch{
 		return tradeSessionValue;
 	}
 	
-	public Hashtable<SWGObject, Long> getTradingObjectMap() {
+	public Map<Long, Long> getTradingObjectMap() {
 		return tradingObjectsTable;
 	}
 	
 	public void addItemForTrade(SWGObject swgObject, long tradePartnerID) {
-		if (tradingObjectsTable.containsKey(swgObject)) {
+		if (tradingObjectsTable.containsKey(swgObject.getObjectID())) {
 			removeItemForTrade(swgObject);
 		}
-		tradingObjectsTable.put(swgObject, tradePartnerID);
+		tradingObjectsTable.put(swgObject.getObjectID(), tradePartnerID);
 	}
 	
 	public void removeItemForTrade(SWGObject swgObject) {

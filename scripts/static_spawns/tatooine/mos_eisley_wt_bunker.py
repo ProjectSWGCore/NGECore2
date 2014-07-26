@@ -91,12 +91,12 @@ def addPlanetSpawns(core, planet):
 	prisoner1.setOptionsBitmask(256)
 	prisoner1.setPosture(Posture.KnockedDown)
 	
-	prisoner2 = stcSvc.spawnObject('object/mobile/shared_dressed_noble_trandoshan_female_01.iff', 'tatooine', wt_bunker.getCellByCellNumber(21), float(-33.3), float(-12), float(137.9), float(0), float(0), float(1), float(0))
+	prisoner2 = stcSvc.spawnObject('object/mobile/shared_dressed_fancy_human_female.iff', 'tatooine', wt_bunker.getCellByCellNumber(21), float(-33.3), float(-12), float(137.9), float(0), float(0), float(1), float(0))
 	prisoner2.setCustomName('Setweoko I\'tvo')
 	prisoner2.setOptionsBitmask(256)
 	prisoner2.setPosture(Posture.KnockedDown)
 	
-	prisoner3 = stcSvc.spawnObject('object/mobile/shared_dressed_fancy_human_female.iff', 'tatooine', wt_bunker.getCellByCellNumber(21), float(-30), float(-12), float(133.1), float(0.713), float(0), float(0.701), float(0))
+	prisoner3 = stcSvc.spawnObject('object/mobile/shared_dressed_noble_trandoshan_female_01.iff', 'tatooine', wt_bunker.getCellByCellNumber(21), float(-30), float(-12), float(133.1), float(0.713), float(0), float(0.701), float(0))
 	prisoner3.setCustomName('Itzoosko')
 	prisoner3.setOptionsBitmask(256)
 	prisoner3.setPosture(Posture.KnockedDown)

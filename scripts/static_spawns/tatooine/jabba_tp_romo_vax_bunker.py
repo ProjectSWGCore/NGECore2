@@ -43,6 +43,6 @@ def addPlanetSpawns(core, planet):
 	stcSvc.spawnObject('romovax_henchman', 'tatooine', bunker.getCellByCellNumber(7), float(-19.9), float(-16), float(78.8), float(0), float(0), float(0), float(0), 45)
 	stcSvc.spawnObject('romovax_henchman', 'tatooine', bunker.getCellByCellNumber(9), float(32.4), float(-14), float(78.7), float(0), float(0), float(0), float(0), 45)
 	
-	stcSvc.spawnObject('fighting_romo_vax', 'tatooine', bunker.getCellByCellNumber(9), float(-42.7), float(-14), float(-79.1), float(0), float(0), float(0), float(0), 45)
+	stcSvc.spawnObject('fighting_romo_vax', 'tatooine', bunker.getCellByCellNumber(9), float(-43.5), float(-14), float(-78.9), float(0), float(0), float(0), float(0), 45)
 	return
 	
