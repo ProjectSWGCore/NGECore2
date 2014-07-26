@@ -5,5 +5,5 @@ def setup(core, object):
 	return
 
 def use(core, owner, target):
-	core.devService.sendCharacterBuilderSUI(owner, 0);
+	core.scriptService.callScript("scripts/", "character_builder_terminal", "screenOne", core, owner);
 	return
