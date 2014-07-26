@@ -15,7 +15,7 @@ def addPlanetSpawns(core, planet):
 	
 	#toggi bock
 	
-	stcSvc.spawnObject('object/mobile/shared_dressed_tatooine_opening_toggi.iff', 'tatooine', long(0), float(2756), float(7), float(-4567), float(0), float(0), float(0), float(0))
+	stcSvc.spawnObject('togibok', 'tatooine', long(0), float(2756), float(7), float(-4567), float(0), float(0), float(0), float(0))
 	# Thiefs
 	
 	thiefs = stcSvc.spawnObject('thief', 'tatooine', long(0), float(2780), float(6), float(-4579), float(0), float(0), float(0), float(0), 30)
