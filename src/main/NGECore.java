@@ -62,7 +62,6 @@ import services.BuffService;
 import services.CharacterService;
 import services.ConnectionService;
 import services.ConversationService;
-import services.DevService;
 import services.EntertainmentService;
 import services.GroupService;
 import services.housing.HousingService;
@@ -197,7 +196,6 @@ public class NGECore {
 	public AIService aiService;
 	public MissionService missionService;
 	public InstanceService instanceService;
-	public DevService devService;
 	public SurveyService surveyService;
 	public ResourceService resourceService;
 	public ConversationService conversationService;
@@ -560,7 +558,6 @@ public class NGECore {
 		
 		browserService = new BrowserService(this);
 		//battlefieldService = new BattlefieldService(this);
-		devService = new DevService(this);
 		
 		DevLogQueuer devLogQueuer = new DevLogQueuer();
 		
