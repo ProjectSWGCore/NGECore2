@@ -14,7 +14,6 @@ def addTemplate(core):
 	mobileTemplate.setCreatureName('rebel_tamed_razor_cat')
 	mobileTemplate.setLevel(10)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
-
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)

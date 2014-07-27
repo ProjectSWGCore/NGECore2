@@ -27,7 +27,8 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("bocatt")
 	mobileTemplate.setAssistRange(10)
 	mobileTemplate.setStalker(True)
-	
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
+		
 	templates = Vector()
 	templates.add('object/mobile/shared_bocatt.iff')
 	mobileTemplate.setTemplates(templates)
@@ -38,6 +39,10 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_bite_1')
+	attacks.add('bm_bolster_armor_1')
+	attacks.add('bm_disease_1')
+	attacks.add('bm_enfeeble_1')
 	mobileTemplate.setDefaultAttack('creatureRangedAttack')
 	mobileTemplate.setAttacks(attacks)
 	
