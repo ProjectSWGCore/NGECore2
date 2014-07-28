@@ -355,6 +355,11 @@ public class NGECore {
 		reverseEngineeringService = new ReverseEngineeringService(this);
 		petService = new PetService(this);
 		
+		if (optionsConfigLoaded && options.getInt("LOAD.RESOURCE.SYSTEM") == 1) {
+			surveyService = new SurveyService(this);
+			resourceService = new ResourceService(this);
+		}
+		
 		if (config.keyExists("JYTHONCONSOLE.PORT")) {
 			int jythonPort = config.getInt("JYTHONCONSOLE.PORT");
 			if (jythonPort > 0) {
@@ -370,13 +375,7 @@ public class NGECore {
 		aiService = new AIService(this);
 		missionService = new MissionService(this);
 		
-		if (optionsConfigLoaded && options.getInt("LOAD.RESOURCE.SYSTEM") == 1) {
-			surveyService = new SurveyService(this);
-			resourceService = new ResourceService(this);
-		}
-		
 		// Ping Server
-
 		
 		if(config.keyExists("PING.PORT"))
 			if (config.getInt("PING.PORT") != 0) {
@@ -501,6 +500,10 @@ public class NGECore {
 
 		//end terrainList
 		
+		if (optionsConfigLoaded && options.getInt("LOAD.RESOURCE.SYSTEM") > 0) {
+			resourceService.loadResources();
+		}
+		
 		chatService.loadChatRooms();
 		
 		spawnService = new SpawnService(this);
@@ -509,11 +512,6 @@ public class NGECore {
 		travelService.loadTravelPoints();
 		simulationService = new SimulationService(this);
 		
-		
-		if (optionsConfigLoaded && options.getInt("LOAD.RESOURCE.SYSTEM") > 0) {
-			resourceService.loadResourceRoots();
-			resourceService.loadResources();
-		}
 		
 		terrainService.loadSnapShotObjects();
 		objectService.loadServerTemplates();		
