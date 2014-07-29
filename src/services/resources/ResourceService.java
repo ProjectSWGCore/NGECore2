@@ -54,6 +54,13 @@ import engine.resources.service.INetworkRemoteEvent;
 
 public class ResourceService implements INetworkDispatch {
 	
+	private static final List <String> ACCEPTABLE_RESOURCE_PREFIXES = Arrays.asList(new String [] {
+			"Corellian",	"Dantooine",	"Dathomirian",
+			"Endorian",		"Lokian",		"Nabooian",
+			"Rori",			"Talusian",		"Tatooinian",
+			"Yavinian",		"Kashyyykian",	"Mustafarian",	"Yavin IV"
+		});
+	
 	private final NGECore core;
 	
 	private final List<ResourceRoot> jtlRoots;
@@ -383,7 +390,7 @@ public class ResourceService implements INetworkDispatch {
 		List<GalacticResource> allResources = getAllSpawnedResources();
 		for (GalacticResource res : allResources) {
 			Vector<Integer> spawnedPlanets = res.getAllSpawnedPlanetIds();
-			if (spawnedPlanets.contains(planetId) && res.getResourceRoot().getResourceClass().equals(meatName))
+			if (spawnedPlanets.contains(planetId) && res.getResourceRoot().getResourceClass().equalsIgnoreCase(meatName))
 				resource = res;
 		}
 		return resource;
@@ -394,7 +401,7 @@ public class ResourceService implements INetworkDispatch {
 		List<GalacticResource> allResources = getAllSpawnedResources();
 		for (GalacticResource res : allResources) {
 			List<Integer> spawnedPlanets = res.getAllSpawnedPlanetIds();
-			if (spawnedPlanets.contains(planetId) && res.getResourceRoot().getResourceClass().equals(searchName))
+			if (spawnedPlanets.contains(planetId) && res.getResourceRoot().getResourceClass().equalsIgnoreCase(searchName))
 				resource = res; // resourceClass= "Insect Meat" i.e.
 		}
 		return resource;
@@ -404,7 +411,7 @@ public class ResourceService implements INetworkDispatch {
 		GalacticResource resource = null;
 		List<GalacticResource> allResources = getAllSpawnedResources();
 		for (GalacticResource res : allResources)
-			if (res.getResourceRoot().getResourceFileName().equals(searchName))
+			if (res.getResourceRoot().getResourceFileName().equalsIgnoreCase(searchName))
 				resource = res; // resourceFileName= "meat_insect_mustafar" i.e.
 		return resource;
 	}
@@ -438,99 +445,14 @@ public class ResourceService implements INetworkDispatch {
 	public void loadResources() {
 		System.out.println("Loading resources...");
 		long start = System.nanoTime();
+		String [] classes = new String[8];
+		Map <String, Integer> minMap = new HashMap<String, Integer>();
+		Map <String, Integer> maxMap = new HashMap<String, Integer>();
 		try {
-			final int DESC_INDEX = 16;
-			final int MIN_MAX_INDEX = 27;
-			List <String> acceptablePrefixes = Arrays.asList(new String [] {
-				"Corellian",
-				"Dantooine",
-				"Dathomirian",
-				"Endorian",
-				"Lokian",
-				"Nabooian",
-				"Rori",
-				"Talusian",
-				"Tatooinian",
-				"Yavinian",
-				"Kashyyykian",
-				"Mustafarian",
-				"Yavin IV"
-			});
-			String [] classes = new String[8];
-			Map <String, Integer> minMap = new HashMap<String, Integer>();
-			Map <String, Integer> maxMap = new HashMap<String, Integer>();
-			
 			DatatableVisitor visitor = ClientFileManager.loadFile("datatables/resource/resource_tree.iff", DatatableVisitor.class);
-			for (int i = 0; i < visitor.getRowCount(); i++) {
-				if (visitor.getObject(i, 0) != null) {
-					int end = 2;
-					for (int j = 2; j < 10; j++) {
-						if (!((String) visitor.getObject(i, j)).isEmpty()) {
-							classes[j-2] = (String) visitor.getObject(i, j);
-							end = j;
-						}
-					}
-					for (int j = end+1; j < 10; j++)
-						classes[j-2] = "";
-					for (int j = DESC_INDEX; j < DESC_INDEX+11 && j < visitor.getColumnCount(); j++) {
-						if (visitor.getObject(i, j) instanceof String) {
-							String str = (String) visitor.getObject(i, j);
-							if (!str.isEmpty()) {
-								minMap.put(str, (Integer) visitor.getObject(i, (j-DESC_INDEX)*2+MIN_MAX_INDEX));
-								maxMap.put(str, (Integer) visitor.getObject(i, (j-DESC_INDEX)*2+MIN_MAX_INDEX+1));
-							}
-						}
-					}
-					String combined = "";
-					for (int j = classes.length-1; j >= 0; j--) {
-						if (classes[j] != null && !classes[j].isEmpty()) {
-							combined = classes[j];
-							break;
-						}
-					}
-					if (!visitor.getObject(i, 12).equals(0)) {
-						String [] split = combined.split(" ", 2);
-						String rType = split.length >= 1 ? split[0] : "";
-						String rClass = split.length >= 2 ? split[1] : "";
-						if (!acceptablePrefixes.contains(rType)) {
-							rType = "";
-							rClass = combined;
-						}
-						rType = rType.trim();
-						rClass = rClass.trim();
-						if (!rClass.isEmpty()) {
-							short [] minimums = new short[11];
-							short [] maximums = new short[11];
-							minimums[0]  = minMap.get("res_cold_resist").shortValue();
-							maximums[0]  = maxMap.get("res_cold_resist").shortValue();
-							minimums[1]  = minMap.get("res_conductivity").shortValue();
-							maximums[1]  = maxMap.get("res_conductivity").shortValue();
-							minimums[2]  = minMap.get("res_decay_resist").shortValue();
-							maximums[2]  = maxMap.get("res_decay_resist").shortValue();
-							minimums[3]  = minMap.get("res_heat_resist").shortValue();
-							maximums[3]  = maxMap.get("res_heat_resist").shortValue();
-							minimums[4]  = minMap.get("res_malleability").shortValue();
-							maximums[4]  = maxMap.get("res_malleability").shortValue();
-							minimums[5]  = minMap.get("res_shock_resistance").shortValue();
-							maximums[5]  = maxMap.get("res_shock_resistance").shortValue();
-							minimums[6]  = minMap.get("res_toughness").shortValue();
-							maximums[6]  = maxMap.get("res_toughness").shortValue();
-							minimums[7]  = minMap.get("entangle_resistance").shortValue();
-							maximums[7]  = maxMap.get("entangle_resistance").shortValue();
-							minimums[8]  = minMap.get("res_potential_energy").shortValue();
-							maximums[8]  = maxMap.get("res_potential_energy").shortValue();
-							minimums[9]  = minMap.get("res_flavor").shortValue();
-							maximums[9]  = maxMap.get("res_flavor").shortValue();
-							minimums[10] = minMap.get("res_quality").shortValue();
-							maximums[10] = maxMap.get("res_quality").shortValue();
-							createResource((String)visitor.getObject(i, 1), rClass, rType, minimums, maximums);
-						}
-					}
-				}
-			}
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
+			for (int i = 0; i < visitor.getRowCount(); i++)
+				processDatatableRow(visitor, classes, minMap, maxMap, i);
+		} catch (InstantiationException | IllegalAccessException e) {
 			e.printStackTrace();
 		}
 		double timeMs = (System.nanoTime() - start) / 1E6;
@@ -540,6 +462,27 @@ public class ResourceService implements INetworkDispatch {
 		spawnResources();
 		timeMs = (System.nanoTime() - start) / 1E6;
 		System.out.println(String.format("Finished spawning resources. Took %.3fms.", timeMs));
+	}
+	
+	private void processDatatableRow(DatatableVisitor visitor, String [] classes, Map <String, Integer> minMap, Map <String, Integer> maxMap, int i) {
+		ResourceDatatableRow row = new ResourceDatatableRow(visitor, classes, minMap, maxMap, i);
+		if (row.getMinPools() > 0) {
+			String [] rTypeAndClass = getResourceTypeAndClass(row.getResourceName());
+			if (!rTypeAndClass[0].isEmpty()) {
+				createResource((String)visitor.getObject(i, 1), rTypeAndClass[0], rTypeAndClass[1], row.getMinimums(), row.getMaximums());
+			}
+		}
+	}
+	
+	private String [] getResourceTypeAndClass(String name) {
+		String [] split = name.split(" ", 2);
+		String rType = split.length >= 1 ? split[0].trim() : "";
+		String rClass = split.length >= 2 ? split[1].trim() : "";
+		if (!ACCEPTABLE_RESOURCE_PREFIXES.contains(rType)) {
+			rType = "";
+			rClass = name;
+		}
+		return new String [] {rType, rClass};
 	}
 	
 	private ResourceRoot pickRandomResource() {
@@ -643,6 +586,139 @@ public class ResourceService implements INetworkDispatch {
 	}
 	
 	public void start() {
+		
+	}
+	
+	private static class ResourceDatatableRow {
+		private static final String [] attributeOrder = new String [] {
+				"res_cold_resist",
+				"res_conductivity",
+				"res_decay_resist",
+				"res_heat_resist",
+				"res_malleability",
+				"res_shock_resistance",
+				"res_toughness",
+				"entangle_resistance",
+				"res_potential_energy",
+				"res_flavor",
+				"res_quality"
+		};
+		private int index;
+		private String filename;
+		private String [] classes;
+		private int minTypes;
+		private int maxTypes;
+		private int minPools;
+		private int maxPools;
+		private boolean recycled;
+		private boolean permanent;
+		private short [] minimums;
+		private short [] maximums;
+		private String containerType;
+		private String nameClass;
+		
+		public ResourceDatatableRow(DatatableVisitor visitor, String [] classes, Map <String, Integer> minMap, Map <String, Integer> maxMap, int index) {
+			if (visitor.getObject(index, 0) == null) {
+				setAllToEmpty();
+			} else {
+				this.index = (Integer) visitor.getObject(index, 0);
+				this.filename = (String) visitor.getObject(index, 1);
+				initializeClasses(visitor, classes, index);
+				this.minTypes = (Integer) visitor.getObject(index, 11);
+				this.maxTypes = (Integer) visitor.getObject(index, 10);
+				this.minPools = (Integer) visitor.getObject(index, 12);
+				this.maxPools = (Integer) visitor.getObject(index, 13);
+				this.recycled = visitor.getObject(index, 14).equals("true");
+				this.permanent = visitor.getObject(index, 15).equals("true");
+				initializeAttributes(visitor, minMap, maxMap, index);
+			}
+		}
+		
+		private void setAllToEmpty() {
+			index = 0;
+			filename = "";
+			classes = new String[8];
+			for (int i = 0; i < classes.length; i++)
+				classes[i] = "";
+			minTypes = 0;
+			maxTypes = 0;
+			minPools = 0;
+			maxPools = 0;
+			recycled = false;
+			permanent = false;
+			minimums = new short[11];
+			maximums = new short[11];
+			containerType = "";
+			nameClass = "";
+		}
+		
+		private void initializeClasses(DatatableVisitor visitor, String [] classes, int index) {
+			int end = 2;
+			for (int j = 2; j < 10; j++) {
+				if (!((String) visitor.getObject(index, j)).isEmpty()) {
+					classes[j-2] = (String) visitor.getObject(index, j);
+					end = j;
+				}
+			}
+			for (int j = 0; j <= end && j < 8; j++)
+				if (classes[j] == null)
+					classes[j] = "";
+			for (int j = end-1; j < 8; j++)
+				classes[j] = "";
+			this.classes = new String[classes.length];
+			System.arraycopy(classes, 0, this.classes, 0, classes.length);
+		}
+		
+		private void initializeAttributes(DatatableVisitor visitor, Map <String, Integer> minMap, Map <String, Integer> maxMap, int index) {
+			final int DESC_INDEX = 16;
+			final int MIN_MAX_INDEX = 27;
+			for (int j = DESC_INDEX; j < DESC_INDEX+11 && j < visitor.getColumnCount(); j++) {
+				if (visitor.getObject(index, j) instanceof String) {
+					String str = (String) visitor.getObject(index, j);
+					if (!str.isEmpty()) {
+						minMap.put(str, (Integer) visitor.getObject(index, (j-DESC_INDEX)*2+MIN_MAX_INDEX));
+						maxMap.put(str, (Integer) visitor.getObject(index, (j-DESC_INDEX)*2+MIN_MAX_INDEX+1));
+					}
+				}
+			}
+			minimums = generateMinimums(minMap);
+			maximums = generateMaximums(maxMap);
+		}
+		
+		private short [] generateMinimums(Map <String, Integer> minMap) {
+			short [] minimums = new short[11];
+			for (int i = 0; i < attributeOrder.length; i++)
+				minimums[i] = minMap.containsKey(attributeOrder[i]) ? minMap.get(attributeOrder[i]).shortValue() : 0;
+			return minimums;
+		}
+		
+		private short [] generateMaximums(Map <String, Integer> maxMap) {
+			short [] maximums = new short[11];
+			for (int i = 0; i < attributeOrder.length; i++)
+				maximums[i] = maxMap.containsKey(attributeOrder[i]) ? maxMap.get(attributeOrder[i]).shortValue() : 0;
+			return maximums;
+		}
+		
+		public int getIndex() { return index; }
+		public String getFilename() { return filename; }
+		public String [] getClasses() { return classes; }
+		public int getMinTypes() { return minTypes; }
+		public int getMaxTypes() { return maxTypes; }
+		public int getMinPools() { return minPools; }
+		public int getMaxPools() { return maxPools; }
+		public boolean isRecycled() { return recycled; }
+		public boolean isPermanent() { return permanent; }
+		public short [] getMinimums() { return minimums; }
+		public short [] getMaximums() { return maximums; }
+		public String getContainerType() { return containerType; }
+		public String getNameClass() { return nameClass; }
+		
+		public String getResourceName() {
+			for (int i = classes.length-1; i >= 0; i--)
+				if (!classes[i].isEmpty())
+					return classes[i];
+			return "";
+		}
 		
 	}
 }
