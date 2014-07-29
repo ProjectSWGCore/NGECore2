@@ -23,6 +23,7 @@
 package services.resources;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -468,8 +469,8 @@ public class ResourceService implements INetworkDispatch {
 		ResourceDatatableRow row = new ResourceDatatableRow(visitor, classes, minMap, maxMap, i);
 		if (row.getMinPools() > 0) {
 			String [] rTypeAndClass = getResourceTypeAndClass(row.getResourceName());
-			if (!rTypeAndClass[0].isEmpty()) {
-				createResource((String)visitor.getObject(i, 1), rTypeAndClass[0], rTypeAndClass[1], row.getMinimums(), row.getMaximums());
+			if (!rTypeAndClass[1].isEmpty()) {
+				createResource(row.getFilename(), rTypeAndClass[0], rTypeAndClass[1], row.getMinimums(), row.getMaximums());
 			}
 		}
 	}
@@ -557,8 +558,12 @@ public class ResourceService implements INetworkDispatch {
 			spawnResource(1, pickRandomResource());
 		
 		// 8 out of 24 fixed resources are JTL resources
-		for (int i = 0; i < 8; i++)
-			spawnResource(1, jtlRoots.get(new Random().nextInt(jtlRoots.size() - 1)));
+		if (jtlRoots.size() == 0) {
+			System.err.println("WARNING: JTL Resource size is 0!");
+		} else {
+			for (int i = 0; i < 8; i++)
+				spawnResource(1, jtlRoots.get(new Random().nextInt(jtlRoots.size() - 1)));
+		}
 		
 		// 16 out of 24
 		for (int i = 0; i < 16; i++)
