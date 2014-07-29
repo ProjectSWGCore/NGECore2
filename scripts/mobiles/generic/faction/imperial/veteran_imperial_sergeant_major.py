@@ -20,10 +20,11 @@ def addTemplate(core):
 	mobileTemplate.setDeathblow(True)
 	mobileTemplate.setScale(1)
 	mobileTemplate.setSocialGroup("imperial")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setAssistRange(10)
 	mobileTemplate.setStalker(False)
 	mobileTemplate.setFaction("imperial")
 	mobileTemplate.setFactionStatus(FactionStatus.Combatant)
+	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_imperial_major_m.iff')
