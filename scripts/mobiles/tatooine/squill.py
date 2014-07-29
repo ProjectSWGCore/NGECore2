@@ -27,6 +27,8 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("squill")
 	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(True)
+	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
+	
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_squill.iff')
@@ -38,6 +40,8 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_bite_1')
+	attacks.add('bm_disease_1')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

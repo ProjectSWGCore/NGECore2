@@ -10,8 +10,8 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('dwarf_eopie')
-	mobileTemplate.setLevel(1)
+	mobileTemplate.setCreatureName('tatooine_mynock_greater')
+	mobileTemplate.setLevel(2)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
@@ -19,18 +19,18 @@ def addTemplate(core):
 	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(1)
 	mobileTemplate.setMeatType("Herbivore Meat")
-	mobileTemplate.setMeatAmount(230)
+	mobileTemplate.setMeatAmount(20)
 	mobileTemplate.setHideType("Leathery Hide")
-	mobileTemplate.setBoneAmount(180)	
+	mobileTemplate.setBoneAmount(70)	
 	mobileTemplate.setBoneType("Animal Bone")
-	mobileTemplate.setHideAmount(110)
-	mobileTemplate.setSocialGroup("eopie")
+	mobileTemplate.setHideAmount(20)
+	mobileTemplate.setSocialGroup("tatooine mynock")
 	mobileTemplate.setAssistRange(6)
-	mobileTemplate.setStalker(False)	
-	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
+	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_dwarf_eopie.iff')
+	templates.add('object/mobile/shared_mynock.iff')
 	mobileTemplate.setTemplates(templates)
 
 	weaponTemplates = Vector()
@@ -39,11 +39,10 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
-	attacks.add('bm_bite_2')
-	attacks.add('bm_kick_2')
-	attacks.add('bm_spit_2')
+	attacks.add('bm_siphon_1')
+	attacks.add('bm_wing_buffet_1')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('dwarf_eopie', mobileTemplate)
+	core.spawnService.addMobileTemplate('tatooine_mynock_greater', mobileTemplate)
 	return

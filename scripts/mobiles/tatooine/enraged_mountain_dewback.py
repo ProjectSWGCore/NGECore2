@@ -26,7 +26,8 @@ def addTemplate(core):
 	mobileTemplate.setHideAmount(170)
 	mobileTemplate.setSocialGroup("dewback mountain")
 	mobileTemplate.setAssistRange(4)
-	mobileTemplate.setStalker(False)	
+	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)	
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dewback.iff')
@@ -38,6 +39,10 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_bite_1')
+	attacks.add('bm_charge_1')
+	attacks.add('bm_dampen_pain_1')
+	attacks.add('bm_stomp_1')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
