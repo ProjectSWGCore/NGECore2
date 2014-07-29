@@ -22,11 +22,6 @@
  ******************************************************************************/
 package services.resources;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -55,12 +50,7 @@ import engine.resources.service.INetworkRemoteEvent;
 
 public class ResourceService implements INetworkDispatch {
 	
-	private static final List <String> ACCEPTABLE_RESOURCE_PREFIXES = Arrays.asList(new String [] {
-			"Corellian",	"Dantooine",	"Dathomirian",
-			"Endorian",		"Lokian",		"Nabooian",
-			"Rori",			"Talusian",		"Tatooinian",
-			"Yavinian",		"Kashyyykian",	"Mustafarian",	"Yavin IV"
-		});
+	private static final List<String> ACCEPTABLE_RESOURCE_PREFIXES = Arrays.asList(new String[] { "Corellian", "Dantooine", "Dathomirian", "Endorian", "Lokian", "Nabooian", "Rori", "Talusian", "Tatooinian", "Yavinian", "Kashyyykian", "Mustafarian", "Yavin IV" });
 	
 	private final NGECore core;
 	
@@ -79,10 +69,6 @@ public class ResourceService implements INetworkDispatch {
 		this.resourceTypeTable = new ConcurrentHashMap<ResourceClass, List<ResourceRoot>>();
 		
 		initialize();
-	}
-	
-	public void addSpawnedResource(GalacticResource loadedResource) {
-		spawnedResources.add(loadedResource);
 	}
 	
 	public boolean canHarvest(CreatureObject actor, CreatureObject target) {
@@ -112,7 +98,7 @@ public class ResourceService implements INetworkDispatch {
 		return true;
 	}
 	
-	public SWGObject createResource() {
+	private SWGObject createResource() {
 		Planet planet = core.terrainService.getPlanetByID(1);
 		Point3D position = new Point3D(0, 0, 0);
 		Quaternion orientation = new Quaternion(1, 1, 1, 1);
@@ -129,7 +115,7 @@ public class ResourceService implements INetworkDispatch {
 		return object;
 	}
 	
-	public void createResource(String fileName, String rClass, String rType, short [] minCapArray, short [] maxCapArray) {
+	private void createResource(String fileName, String rClass, String rType, short [] minCapArray, short [] maxCapArray) {
 		ResourceClass resourceClass = ResourceClass.forEndOfString(rClass);
 		ResourceRoot resourceRoot = new ResourceRoot();
 		resourceRoot.setResourceFileName(fileName);
@@ -383,7 +369,6 @@ public class ResourceService implements INetworkDispatch {
 		}
 	}
 	
-	// ToDo: Improve
 	public GalacticResource grabMeatForCreature(CreatureObject corpse) {
 		GalacticResource resource = null;
 		int planetId = corpse.getPlanetId();
@@ -447,8 +432,8 @@ public class ResourceService implements INetworkDispatch {
 		System.out.println("Loading resources...");
 		long start = System.nanoTime();
 		String [] classes = new String[8];
-		Map <String, Integer> minMap = new HashMap<String, Integer>();
-		Map <String, Integer> maxMap = new HashMap<String, Integer>();
+		Map<String, Integer> minMap = new HashMap<String, Integer>();
+		Map<String, Integer> maxMap = new HashMap<String, Integer>();
 		try {
 			DatatableVisitor visitor = ClientFileManager.loadFile("datatables/resource/resource_tree.iff", DatatableVisitor.class);
 			for (int i = 0; i < visitor.getRowCount(); i++)
@@ -465,7 +450,7 @@ public class ResourceService implements INetworkDispatch {
 		System.out.println(String.format("Finished spawning resources. Took %.3fms.", timeMs));
 	}
 	
-	private void processDatatableRow(DatatableVisitor visitor, String [] classes, Map <String, Integer> minMap, Map <String, Integer> maxMap, int i) {
+	private void processDatatableRow(DatatableVisitor visitor, String [] classes, Map<String, Integer> minMap, Map<String, Integer> maxMap, int i) {
 		ResourceDatatableRow row = new ResourceDatatableRow(visitor, classes, minMap, maxMap, i);
 		if (row.getMinPools() > 0) {
 			String [] rTypeAndClass = getResourceTypeAndClass(row.getResourceName());
@@ -483,7 +468,7 @@ public class ResourceService implements INetworkDispatch {
 			rType = "";
 			rClass = name;
 		}
-		return new String [] {rType, rClass};
+		return new String[] { rType, rClass };
 	}
 	
 	private ResourceRoot pickRandomResource() {
@@ -519,10 +504,9 @@ public class ResourceService implements INetworkDispatch {
 				resource.setPlanetID(planetId);
 			resource.initializeNewGalaxyResource();
 			
-			core.getResourcesODB().put(resource.getObjectID(), resource);
 			core.getResourceHistoryODB().put(resource.getObjectID(), resource);
 			resourceNameHistory.add(resource.getName());
-			addSpawnedResource(resource);
+			spawnedResources.add(resource);
 		} catch (Exception e) {
 			System.err.println("Error in spawning resource: " + root.getResourceFileName());
 			if (planetId != -1)
@@ -579,8 +563,7 @@ public class ResourceService implements INetworkDispatch {
 				containerObject = (ResourceContainerObject) core.objectService.createObject(resourceContainerIFF, crafter.getPlanet());
 				containerObject.setProprietor(crafter);
 				containerObject.setStackCount(stackCount, false);
-				// int stackCount = getResourceSampleQuantity(crafter,
-				// sampleResource);
+//				int stackCount = getResourceSampleQuantity(crafter, sampleResource);
 				containerObject.initializeStats(sampleResource);
 				containerObject.setIffFileName(resourceContainerIFF);
 				SWGObject crafterInventory = crafter.getSlottedObject("inventory");
@@ -594,20 +577,9 @@ public class ResourceService implements INetworkDispatch {
 		
 	}
 	
+	@SuppressWarnings("unused")
 	private static class ResourceDatatableRow {
-		private static final String [] attributeOrder = new String [] {
-				"res_cold_resist",
-				"res_conductivity",
-				"res_decay_resist",
-				"res_heat_resist",
-				"res_malleability",
-				"res_shock_resistance",
-				"res_toughness",
-				"entangle_resistance",
-				"res_potential_energy",
-				"res_flavor",
-				"res_quality"
-		};
+		private static final String [] attributeOrder = new String[] { "res_cold_resist", "res_conductivity", "res_decay_resist", "res_heat_resist", "res_malleability", "res_shock_resistance", "res_toughness", "entangle_resistance", "res_potential_energy", "res_flavor", "res_quality" };
 		private int index;
 		private String filename;
 		private String [] classes;
@@ -622,7 +594,7 @@ public class ResourceService implements INetworkDispatch {
 		private String containerType;
 		private String nameClass;
 		
-		public ResourceDatatableRow(DatatableVisitor visitor, String [] classes, Map <String, Integer> minMap, Map <String, Integer> maxMap, int index) {
+		public ResourceDatatableRow(DatatableVisitor visitor, String [] classes, Map<String, Integer> minMap, Map<String, Integer> maxMap, int index) {
 			if (visitor.getObject(index, 0) == null) {
 				setAllToEmpty();
 			} else {
@@ -661,28 +633,28 @@ public class ResourceService implements INetworkDispatch {
 			int end = 2;
 			for (int j = 2; j < 10; j++) {
 				if (!((String) visitor.getObject(index, j)).isEmpty()) {
-					classes[j-2] = (String) visitor.getObject(index, j);
+					classes[j - 2] = (String) visitor.getObject(index, j);
 					end = j;
 				}
 			}
 			for (int j = 0; j <= end && j < 8; j++)
 				if (classes[j] == null)
 					classes[j] = "";
-			for (int j = end-1; j < 8; j++)
+			for (int j = end - 1; j < 8; j++)
 				classes[j] = "";
 			this.classes = new String[classes.length];
 			System.arraycopy(classes, 0, this.classes, 0, classes.length);
 		}
 		
-		private void initializeAttributes(DatatableVisitor visitor, Map <String, Integer> minMap, Map <String, Integer> maxMap, int index) {
+		private void initializeAttributes(DatatableVisitor visitor, Map<String, Integer> minMap, Map<String, Integer> maxMap, int index) {
 			final int DESC_INDEX = 16;
 			final int MIN_MAX_INDEX = 27;
-			for (int j = DESC_INDEX; j < DESC_INDEX+11 && j < visitor.getColumnCount(); j++) {
+			for (int j = DESC_INDEX; j < DESC_INDEX + 11 && j < visitor.getColumnCount(); j++) {
 				if (visitor.getObject(index, j) instanceof String) {
 					String str = (String) visitor.getObject(index, j);
 					if (!str.isEmpty()) {
-						minMap.put(str, (Integer) visitor.getObject(index, (j-DESC_INDEX)*2+MIN_MAX_INDEX));
-						maxMap.put(str, (Integer) visitor.getObject(index, (j-DESC_INDEX)*2+MIN_MAX_INDEX+1));
+						minMap.put(str, (Integer) visitor.getObject(index, (j - DESC_INDEX) * 2 + MIN_MAX_INDEX));
+						maxMap.put(str, (Integer) visitor.getObject(index, (j - DESC_INDEX) * 2 + MIN_MAX_INDEX + 1));
 					}
 				}
 			}
@@ -690,36 +662,74 @@ public class ResourceService implements INetworkDispatch {
 			maximums = generateMaximums(maxMap);
 		}
 		
-		private short [] generateMinimums(Map <String, Integer> minMap) {
+		private short [] generateMinimums(Map<String, Integer> minMap) {
 			short [] minimums = new short[11];
 			for (int i = 0; i < attributeOrder.length; i++)
 				minimums[i] = minMap.containsKey(attributeOrder[i]) ? minMap.get(attributeOrder[i]).shortValue() : 0;
 			return minimums;
 		}
 		
-		private short [] generateMaximums(Map <String, Integer> maxMap) {
+		private short [] generateMaximums(Map<String, Integer> maxMap) {
 			short [] maximums = new short[11];
 			for (int i = 0; i < attributeOrder.length; i++)
 				maximums[i] = maxMap.containsKey(attributeOrder[i]) ? maxMap.get(attributeOrder[i]).shortValue() : 0;
 			return maximums;
 		}
 		
-		public int getIndex() { return index; }
-		public String getFilename() { return filename; }
-		public String [] getClasses() { return classes; }
-		public int getMinTypes() { return minTypes; }
-		public int getMaxTypes() { return maxTypes; }
-		public int getMinPools() { return minPools; }
-		public int getMaxPools() { return maxPools; }
-		public boolean isRecycled() { return recycled; }
-		public boolean isPermanent() { return permanent; }
-		public short [] getMinimums() { return minimums; }
-		public short [] getMaximums() { return maximums; }
-		public String getContainerType() { return containerType; }
-		public String getNameClass() { return nameClass; }
+		public int getIndex() {
+			return index;
+		}
+		
+		public String getFilename() {
+			return filename;
+		}
+		
+		public String [] getClasses() {
+			return classes;
+		}
+		
+		public int getMinTypes() {
+			return minTypes;
+		}
+		
+		public int getMaxTypes() {
+			return maxTypes;
+		}
+		
+		public int getMinPools() {
+			return minPools;
+		}
+		
+		public int getMaxPools() {
+			return maxPools;
+		}
+		
+		public boolean isRecycled() {
+			return recycled;
+		}
+		
+		public boolean isPermanent() {
+			return permanent;
+		}
+		
+		public short [] getMinimums() {
+			return minimums;
+		}
+		
+		public short [] getMaximums() {
+			return maximums;
+		}
+		
+		public String getContainerType() {
+			return containerType;
+		}
+		
+		public String getNameClass() {
+			return nameClass;
+		}
 		
 		public String getResourceName() {
-			for (int i = classes.length-1; i >= 0; i--)
+			for (int i = classes.length - 1; i >= 0; i--)
 				if (!classes[i].isEmpty())
 					return classes[i];
 			return "";
