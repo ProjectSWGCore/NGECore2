@@ -23,9 +23,9 @@ def addTemplate(core):
 	mobileTemplate.setBoneType("Avian Bone")
 	mobileTemplate.setBoneAmount(48)
 	mobileTemplate.setSocialGroup("gulginaw")
-	mobileTemplate.setAssistRange(10)
+	mobileTemplate.setAssistRange(2)
 	mobileTemplate.setStalker(False)
-	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
+	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_greater_gulginaw.iff')
@@ -37,6 +37,10 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_claw_2')
+	attacks.add('bm_damage_poison_2')
+	attacks.add('bm_slash_2')
+	attacks.add('bm_wing_buffet_2')
 	mobileTemplate.setDefaultAttack('creatureRangedAttack')
 	mobileTemplate.setAttacks(attacks)
 	

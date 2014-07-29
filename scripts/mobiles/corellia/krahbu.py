@@ -25,8 +25,9 @@ def addTemplate(core):
 	mobileTemplate.setBoneType("Animal Bones")
 	mobileTemplate.setBoneAmount(120)
 	mobileTemplate.setSocialGroup("krahbu")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setAssistRange(10)
 	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_krahbu.iff')
@@ -38,6 +39,9 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_bite_2')
+	attacks.add('bm_defensive_2')
+	attacks.add('bm_kick_2')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

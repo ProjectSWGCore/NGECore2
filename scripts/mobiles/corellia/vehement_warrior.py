@@ -10,27 +10,27 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('slice_hound')
-	mobileTemplate.setLevel(28)
+	mobileTemplate.setCreatureName('durni_vehement_warrior')
+	mobileTemplate.setLevel(5)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(1)
-	mobileTemplate.setMeatType("Carnivore Meat")
-	mobileTemplate.setMeatAmount(65)
-	mobileTemplate.setHideType("Bristly Hide")
-	mobileTemplate.setHideAmount(35)
+	mobileTemplate.setMeatType("Herbivore Meat")
+	mobileTemplate.setMeatAmount(5)
+	mobileTemplate.setHideType("Wooly Hide")
+	mobileTemplate.setHideAmount(3)
 	mobileTemplate.setBoneType("Animal Bones")
-	mobileTemplate.setBoneAmount(30)
-	mobileTemplate.setSocialGroup("slice hound")
+	mobileTemplate.setBoneAmount(2)
+	mobileTemplate.setSocialGroup("durni")
 	mobileTemplate.setAssistRange(2)
 	mobileTemplate.setStalker(False)
 	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_corellian_slice_hound.iff')
+	templates.add('object/mobile/shared_durni.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
@@ -40,9 +40,8 @@ def addTemplate(core):
 	
 	attacks = Vector()
 	attacks.add('bm_bite_2')
-	attacks.add('bm_hamstring_2')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('slice_hound', mobileTemplate)
+	core.spawnService.addMobileTemplate('vehement_warrior', mobileTemplate)
 	return
