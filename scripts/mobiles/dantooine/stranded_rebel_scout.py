@@ -20,6 +20,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup('rebel')
 	mobileTemplate.setAssistRange(1)
 	mobileTemplate.setStalker(True)
+	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_dark_jedi_male_human_01.iff')
