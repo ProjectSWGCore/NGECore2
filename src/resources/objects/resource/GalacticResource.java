@@ -264,18 +264,18 @@ public class GalacticResource extends SWGObject implements Serializable {
 	}
 	
 	public int [] generateRandomPlanetArray() {
-		//		int planets  =  6 + new Random().nextInt(2);
-		//		int[] outpool = new int[planets];
-		//		int[] pool = new int[10]; // 10 Number of SWG planets
-		//		for (int i = 0; i < 10; i++) pool[i] = i+1;
-		//		for (int i = 0; i < planets; i++) outpool[i] = i+1;
-		//		shuffleArray(pool);
-		//		for (int i = 0; i < outpool.length; i++)
-		//	    {
-		//	      outpool[i]=pool[i];
-		//	    }
-		//        return outpool;
-		return new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+		int planets  =  6 + new Random().nextInt(2);
+		int [] outpool = new int[planets];
+		int [] pool = new int[10]; // 10 Number of SWG planets
+		for (int i = 0; i < 10; i++)
+			pool[i] = i+1;
+		for (int i = 0; i < planets; i++)
+			outpool[i] = i+1;
+		shuffleArray(pool);
+		for (int i = 0; i < outpool.length; i++) {
+			outpool[i] = pool[i];
+		}
+		return outpool;
 	}
 	
 	public void shuffleArray(int [] ar) {
@@ -314,7 +314,7 @@ public class GalacticResource extends SWGObject implements Serializable {
 		
 		// Calculate deposit positions
 		Random generator = new Random();
-		int depositQuantity = 20;
+		int depositQuantity = 10;
 		//		int depositQuantity = 100;
 		
 		// datatables/clientregion -> cities
