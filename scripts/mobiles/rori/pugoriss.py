@@ -27,7 +27,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("pugoriss")
 	mobileTemplate.setAssistRange(6)
 	mobileTemplate.setStalker(False)
-	obileTemplate.setOptionsBitmask(Options.ATTACKABLE)
+	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_pugoriss.iff')
