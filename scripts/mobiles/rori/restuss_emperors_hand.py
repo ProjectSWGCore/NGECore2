@@ -22,7 +22,6 @@ def addTemplate(core):
 	mobileTemplate.setStalker(True)
 	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
-	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_restuss_emperors_hand.iff')
 	mobileTemplate.setTemplates(templates)
