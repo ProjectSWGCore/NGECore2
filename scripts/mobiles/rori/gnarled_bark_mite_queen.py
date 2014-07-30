@@ -10,31 +10,36 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('restuss_emperors_hand')
-	mobileTemplate.setLevel(90)
-	mobileTemplate.setDifficulty(Difficulty.BOSS)
+	mobileTemplate.setCreatureName('gnarled_bark_mite_queen')
+	mobileTemplate.setLevel(17)
+	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(True)
 	mobileTemplate.setScale(1)
-	mobileTemplate.setAssistRange(12)
-	mobileTemplate.setStalker(True)
+	mobileTemplate.setMeatType("Insect Meat")
+	mobileTemplate.setMeatAmount(13)
+	mobileTemplate.setSocialGroup("bark mite")
+	mobileTemplate.setAssistRange(6)
+	mobileTemplate.setStalker(False)
 	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
-	
 	templates = Vector()
-	templates.add('object/mobile/shared_dressed_restuss_emperors_hand.iff')
+	templates.add('object/mobile/shared_gnarled_bark_mite_queen.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
-	weapontemplate = WeaponTemplate('object/weapon/melee/sword/crafted_saber/shared_sword_lightsaber_mandalorian.iff', WeaponType.ONEHANDEDSABER, 1.0, 6, 'energy')
+	weapontemplate = WeaponTemplate('object/weapon/melee/unarmed/shared_unarmed_default.iff', WeaponType.UNARMED, 1.0, 6, 'kinetic')
 	weaponTemplates.add(weapontemplate)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
-	mobileTemplate.setDefaultAttack('saberHit')
+	attacks.add('bm_bite_1')
+	attacks.add('bm_bolster_armor_1')
+	attacks.add('bm_enfeeble_1')
+	mobileTemplate.setDefaultAttack('creatureRangedAttack')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('restuss_emperors_hand', mobileTemplate)
+	core.spawnService.addMobileTemplate('gnarled_bark_mite_queen', mobileTemplate)
 	return
