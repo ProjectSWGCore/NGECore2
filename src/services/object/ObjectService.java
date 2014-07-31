@@ -173,6 +173,14 @@ public class ObjectService implements INetworkDispatch {
 		    }
 		});
 		
+		ODBCursor cursor = core.getSWGObjectODB().getCursor();
+		
+		while (cursor.hasNext()) {
+			SWGObject object = (SWGObject) cursor.next();
+			if (!(object instanceof BuildingObject))
+				objectList.put(object.getObjectID(), object);
+		}
+		
 		long highestId;
 
 		try {
@@ -251,15 +259,17 @@ public class ObjectService implements INetworkDispatch {
 			}
 		}
 		
-		synchronized(objectMutex) {
-			if(objectID == 0)
-				objectID = generateObjectID();
-			else
-				isSnapshot = !overrideSnapshot;
-			
-			if(!core.getObjectIdODB().contains(objectID))
-				core.getObjectIdODB().put(objectID, new ObjectId(objectID));
-		}
+		if (objectID == 0) {
+			synchronized(objectMutex) {
+				if(objectID == 0)
+					objectID = generateObjectID();
+				
+				if(!core.getObjectIdODB().contains(objectID))
+					core.getObjectIdODB().put(objectID, new ObjectId(objectID));
+			}
+		} else
+			isSnapshot = !overrideSnapshot;
+		
 		
 		if (planet == null) {
 			System.err.println("Planet is null in createObject for some reason.");
@@ -433,10 +443,10 @@ public class ObjectService implements INetworkDispatch {
 		SWGObject ret = objectList.put(objectID, object);
 		
 		//if (ret != null && !ret.getTemplate().equals(object.getTemplate())) {
-		if (ret == null) {
-			//System.err.println("ObjectService: Detected duplicate Id.  Assigning new one.")
-			object = createObject(Template, objectID, planet, position, orientation, customServerTemplate, overrideSnapshot, loadServerTemplate);
-		}
+//		if (ret == null) {
+//			//System.err.println("ObjectService: Detected duplicate Id.  Assigning new one.")
+//			object = createObject(Template, objectID, planet, position, orientation, customServerTemplate, overrideSnapshot, loadServerTemplate);
+//		}
 		
 		return object;
 	}
@@ -498,7 +508,7 @@ public class ObjectService implements INetworkDispatch {
 			if (objectList.containsKey(objectID)) {
 				System.err.println("getObject(): object is null but objectList contains objectID key");
 			} else {
-				//System.err.println("getObject(): object is null");
+//				System.err.println("getObject(): object is null");
 			}
 		}
 		
@@ -986,7 +996,8 @@ public class ObjectService implements INetworkDispatch {
 					if(creature == null) {
 						System.out.println("Cant get creature from db");
 					} else {
-						if (creature.getCustomName() == null || creature.getCustomName() == "") {
+						if (creature.getCustomName() == null || creature.getCustomName().isEmpty()) {
+							System.err.println("Name: " + creature.getCustomName());
 							System.out.println("Player with ObjID of " + creature.getObjectID() + " tried logging in but has a null/empty name!");
 							return;
 						}
@@ -998,6 +1009,22 @@ public class ObjectService implements INetworkDispatch {
 						return;
 
 					creature = (CreatureObject) getObject(objectId);
+					if (creature.getCustomName() == null || creature.getCustomName().isEmpty()) {
+						PreparedStatement ps = core.getDatabase1().preparedStatement("SELECT * FROM characters WHERE \"id\" = ?");
+						ps.setLong(1, creature.getObjectID());
+						ResultSet resultSet = ps.executeQuery();
+						
+						String name = "";
+						while (resultSet.next()) {
+							String first = resultSet.getString("firstName").trim();
+							String last = resultSet.getString("lastName").trim();
+							if (last.isEmpty())
+								name = first;
+							else
+								name = first + " " + last;
+						}
+						creature.setCustomName(name);
+					}
 					if(creature.getAttachment("disconnectTask") != null && creature.getClient() != null && !creature.getClient().getSession().isClosing())
 						return;
 					
