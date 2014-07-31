@@ -177,7 +177,7 @@ public class ObjectService implements INetworkDispatch {
 		
 		while (cursor.hasNext()) {
 			SWGObject object = (SWGObject) cursor.next();
-			if (!(object instanceof BuildingObject))
+			if (object != null && !(object instanceof BuildingObject))
 				objectList.put(object.getObjectID(), object);
 		}
 		
