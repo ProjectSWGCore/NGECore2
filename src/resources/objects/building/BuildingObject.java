@@ -60,7 +60,8 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 	
 	public BuildingObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
 		super(objectID, planet, position, orientation, Template);
-		getBaseline(3).set("volume", 255);
+		getBaseline(3).set("volume", 255); 	// 255 seen on player buildings + some server spawned ones and 100 - lucky despot, watto
+		//getBaseline(3).set("complexity", (float) 1); // seen as 1 (player housing) + some server spawned ones and 0 - lucky despot, watto
 		setOptionsBitmask(Options.INVULNERABLE);
 		setConditionDamage(0);
 		setMaximumCondition(4320);
@@ -70,6 +71,7 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 	public BuildingObject() {
 		super();
 		getBaseline(3).set("volume", 255);
+		getBaseline(3).set("complexity", (float) 1);
 		setOptionsBitmask(Options.INVULNERABLE);
 		setConditionDamage(0);
 		setMaximumCondition(4320);
@@ -81,6 +83,7 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 		super.init();
 		defendersList = new Vector<TangibleObject>();
 		getBaseline(3).set("volume", 255);
+		getBaseline(3).set("complexity", (float) 1);
 		setOptionsBitmask(Options.INVULNERABLE);
 		setConditionDamage(0);
 		setMaximumCondition(4320);
@@ -102,6 +105,8 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 	@Override
 	public Baseline getBaseline3() {
 		Baseline baseline = super.getBaseline3();
+
+		// No additional variables, uses TANO
 		return baseline;
 	}
 	

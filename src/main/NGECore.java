@@ -62,7 +62,6 @@ import services.BuffService;
 import services.CharacterService;
 import services.ConnectionService;
 import services.ConversationService;
-import services.DevService;
 import services.EntertainmentService;
 import services.GroupService;
 import services.housing.HousingService;
@@ -197,7 +196,6 @@ public class NGECore {
 	public AIService aiService;
 	public MissionService missionService;
 	public InstanceService instanceService;
-	public DevService devService;
 	public SurveyService surveyService;
 	public ResourceService resourceService;
 	public ConversationService conversationService;
@@ -233,8 +231,6 @@ public class NGECore {
 	private BusConfiguration eventBusConfig = BusConfiguration.Default(1, new ThreadPoolExecutor(1, 4, 1, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>()));
 
 	private ObjectDatabase auctionODB;
-	private ObjectDatabase resourcesODB;
-	private ObjectDatabase resourceRootsODB;
 	private ObjectDatabase resourceHistoryODB;
 	private ObjectDatabase swgObjectODB;
 	private ObjectDatabase bountiesODB;
@@ -312,8 +308,6 @@ public class NGECore {
 		objectIdODB = new ObjectDatabase("oids", true, true, true, ObjectId.class);
 		duplicateIdODB = new ObjectDatabase("doids", true, true, true, DuplicateId.class);
 		chatRoomODB = new ObjectDatabase("chatRooms", true, true, true, ChatRoom.class);
-		resourcesODB = new ObjectDatabase("resources", true, true, true, GalacticResource.class);
-		resourceRootsODB = new ObjectDatabase("resourceroots", true, true, true, ResourceRoot.class);
 		resourceHistoryODB = new ObjectDatabase("resourcehistory", true, true, true, GalacticResource.class);
 		auctionODB = new ObjectDatabase("auction", true, true, true, AuctionItem.class);
 		bountiesODB = new ObjectDatabase("bounties", true, true, true, BountyListItem.class);
@@ -355,6 +349,11 @@ public class NGECore {
 		reverseEngineeringService = new ReverseEngineeringService(this);
 		petService = new PetService(this);
 		
+		if (optionsConfigLoaded && options.getInt("LOAD.RESOURCE.SYSTEM") == 1) {
+			surveyService = new SurveyService(this);
+			resourceService = new ResourceService(this);
+		}
+		
 		if (config.keyExists("JYTHONCONSOLE.PORT")) {
 			int jythonPort = config.getInt("JYTHONCONSOLE.PORT");
 			if (jythonPort > 0) {
@@ -370,13 +369,7 @@ public class NGECore {
 		aiService = new AIService(this);
 		missionService = new MissionService(this);
 		
-		if (optionsConfigLoaded && options.getInt("LOAD.RESOURCE.SYSTEM") == 1) {
-			surveyService = new SurveyService(this);
-			resourceService = new ResourceService(this);
-		}
-		
 		// Ping Server
-
 		
 		if(config.keyExists("PING.PORT"))
 			if (config.getInt("PING.PORT") != 0) {
@@ -501,6 +494,10 @@ public class NGECore {
 
 		//end terrainList
 		
+		if (optionsConfigLoaded && options.getInt("LOAD.RESOURCE.SYSTEM") > 0) {
+			resourceService.loadResources();
+		}
+		
 		chatService.loadChatRooms();
 		
 		spawnService = new SpawnService(this);
@@ -509,11 +506,6 @@ public class NGECore {
 		travelService.loadTravelPoints();
 		simulationService = new SimulationService(this);
 		
-		
-		if (optionsConfigLoaded && options.getInt("LOAD.RESOURCE.SYSTEM") > 0) {
-			resourceService.loadResourceRoots();
-			resourceService.loadResources();
-		}
 		
 		terrainService.loadSnapShotObjects();
 		objectService.loadServerTemplates();		
@@ -560,7 +552,6 @@ public class NGECore {
 		
 		browserService = new BrowserService(this);
 		//battlefieldService = new BattlefieldService(this);
-		devService = new DevService(this);
 		
 		DevLogQueuer devLogQueuer = new DevLogQueuer();
 		
@@ -705,14 +696,6 @@ public class NGECore {
 	public ObjectDatabase getBountiesODB() {
 		return bountiesODB;
 	}
-
-	public ObjectDatabase getResourcesODB() {
-		return resourcesODB;
-	}
-
-	public ObjectDatabase getResourceRootsODB() {
-		return resourceRootsODB;
-	}
 	
 	public ObjectDatabase getResourceHistoryODB() {
 		return resourceHistoryODB;
@@ -827,8 +810,6 @@ public class NGECore {
 		mailODB.close();
 		guildODB.close();
 		chatRoomODB.close();
-		resourcesODB.close();
-		resourceRootsODB.close();
 		resourceHistoryODB.close();
 		objectIdODB.close();
 		duplicateIdODB.close();

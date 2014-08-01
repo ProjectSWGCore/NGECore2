@@ -27,6 +27,8 @@ def addBonusSet(core):
 	bonusSet.addRequiredItem("object/tangible/wearables/robe/shared_robe_s32_h1.iff")
 	bonusSet.addRequiredItem("object/tangible/wearables/robe/shared_robe_s33.iff")
 	bonusSet.addRequiredItem("object/tangible/wearables/robe/shared_robe_s33_h1.iff")
+	bonusSet.addRequiredItem("item_jedi_robe_06_01")
+
 	
 	core.equipmentService.addBonusSetTemplate(bonusSet)
 	

@@ -251,10 +251,15 @@ public class ObjectService implements INetworkDispatch {
 			}
 		}
 		
-		if(objectID == 0)
-			objectID = generateObjectID();
-		else
-			isSnapshot = !overrideSnapshot;
+		synchronized(objectMutex) {
+			if(objectID == 0)
+				objectID = generateObjectID();
+			else
+				isSnapshot = !overrideSnapshot;
+			
+			if(!core.getObjectIdODB().contains(objectID))
+				core.getObjectIdODB().put(objectID, new ObjectId(objectID));
+		}
 		
 		if (planet == null) {
 			System.err.println("Planet is null in createObject for some reason.");
@@ -383,10 +388,7 @@ public class ObjectService implements INetworkDispatch {
 		object.setAttachment("customServerTemplate", customServerTemplate);
 		
 		object.setisInSnapshot(isSnapshot);
-		synchronized(objectMutex) {
-			if(!core.getObjectIdODB().contains(objectID))
-				core.getObjectIdODB().put(objectID, new ObjectId(objectID));
-		}
+		
 		// Set Options - easier to set them across the board here
 		// because we'll be spawning them despite most of them being unscripted.
 		// Any such settings can be completely reset with setOptionsBitmask
@@ -691,30 +693,27 @@ public class ObjectService implements INetworkDispatch {
 			return generateObjectID();
 
 		return objectID;*/
-		
-		long newId = 0;
-		boolean found = false;
+
 		// stack overflow when using recursion
-		synchronized(objectMutex) {
-			while(!found) {
-				newId = highestId.incrementAndGet();
-				PreparedStatement ps2;
-				try {
-					ps2 = databaseConnection.preparedStatement("UPDATE highestid SET id=" + newId + " WHERE id=(SELECT MAX(id) FROM highestid)");
-					ps2.executeUpdate();
-					ps2.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
+		long newId = 0;
+		try {
+			synchronized(objectMutex) {
+				newId = highestId.get();
+				ObjectDatabase objectIdODB = core.getObjectIdODB();
+				while (objectList.containsKey(newId) || objectIdODB.contains(newId)) {
+					newId = highestId.incrementAndGet();
 				}
-				if(objectList.containsKey(newId) || core.getObjectIdODB().contains(newId))
-					found = false;
-				else
-					found = true;
 			}
+			final String sql = "UPDATE highestid SET id=? WHERE id=(SELECT MAX(id) FROM highestid)";
+			final PreparedStatement ps2 = databaseConnection.preparedStatement(sql);
+			ps2.setLong(1, newId);
+			ps2.executeUpdate();
+			ps2.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
 		
-		return newId;		
-
+		return newId;
 	}
 	
 	public long getDOId(String planet, String template, int type, long containerId, int cellNumber, float x1, float y, float z1) {
