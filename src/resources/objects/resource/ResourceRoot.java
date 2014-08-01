@@ -219,7 +219,7 @@ public class ResourceRoot implements Serializable {
 		return generalType;
 	}	
 	
-	public void setgeneralType(byte generalType){
+	public void setGeneralType(byte generalType){
 		this.generalType = generalType;
 	}
 
@@ -229,10 +229,6 @@ public class ResourceRoot implements Serializable {
 
 	public void setContainerType(byte containerType) {
 		this.containerType = containerType;
-	}
-
-	public void setGeneralType(byte generalType) {
-		this.generalType = generalType;
 	}
 
 	public int getResourceRootID() {

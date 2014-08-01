@@ -126,9 +126,9 @@ def addPlanetSpawns(core, planet):
 	stcSvc.spawnObject('object/mobile/shared_respec_seller_f_1.iff', 'corellia', long(0), float(-129), float(28), float(-4758), float(-0.3327), float(0.9288))
 	
 	#Junk Dealer
-	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_01.iff', 'corellia', long(0), float(-118), float(28), float(-4792), float(0.71), float(0.71))
-	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_01.iff', 'corellia', long(0), float(22), float(28), float(-4773), float(0.71), float(-0.71))
-	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_01.iff', 'corellia', long(0), float(-42), float(28), float(-4612), float(0), float(0))
-	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_01.iff', 'corellia', long(0), float(-68), float(28), float(-4585), float(0), float(1))
+	stcSvc.spawnObject('junkdealer', 'corellia', long(0), float(-118), float(28), float(-4792), float(0.71), float(0.71))
+	stcSvc.spawnObject('junkdealer', 'corellia', long(0), float(22), float(28), float(-4773), float(0.71), float(-0.71))
+	stcSvc.spawnObject('junkdealer', 'corellia', long(0), float(-42), float(28), float(-4612), float(0), float(0))
+	stcSvc.spawnObject('junkdealer', 'corellia', long(0), float(-68), float(28), float(-4585), float(0), float(1))
 	
 	return

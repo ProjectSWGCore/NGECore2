@@ -1124,8 +1124,14 @@ public class GuildService implements INetworkDispatch {
 	public boolean removeGuild(int id) {
 		Guild guild = getGuildById(id);
 		
-		if (guild != null) 
-			return true;
+		if (guild != null) {
+			if (object.getGuildList().remove(guild.getString())) {
+				object.getGuilds().remove(id);
+				if (!object.getGuilds().containsKey(id)) return true;
+				else return false;
+			}
+			else return false;
+		}
 		
 		return false;
 	}

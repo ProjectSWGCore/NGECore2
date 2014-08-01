@@ -13,6 +13,6 @@ def addPlanetSpawns(core, planet):
 	objSvc = core.objectService
 	#recruiter Imp Outpost
 
-	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_03.iff', 'lok', long(0), float(366), float(9), float(5202), float(0.71), float(0), float(0.70), float(0))	
+	stcSvc.spawnObject('junkdealer', 'lok', long(0), float(366), float(9), float(5202), float(0.71), float(0), float(0.70), float(0))	
 
 	return
