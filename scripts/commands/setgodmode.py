@@ -8,6 +8,7 @@ from java.awt.datatransfer import Clipboard
 from java.awt import Toolkit
 from resources.datatables import GcwRank
 from services.gcw import GCWService
+import time
 
 
 def setup():
@@ -185,13 +186,61 @@ def run(core, actor, target, commandString):
 		latarget = core.objectService.getObject(latargetID)
 		actor.sendSystemMessage('Checking AI handling for unit ' + latarget.getCustomName(), 0)
 		core.aiService.setCheckAI(latarget)
+		
+	elif command == 'checkaitarget':		
+		latargetID = long(actor.getIntendedTarget())
+		latarget = core.objectService.getObject(latargetID)
+		if latarget.getAttachment('AI'):
+			if latarget.getAttachment('AI').getFollowObject():
+				actor.sendSystemMessage('Checking AI target ' + latarget.getAttachment('AI').getFollowObject().getTemplate(), 0)
+	
+	elif command == 'checkaistate':		
+		latargetID = long(actor.getIntendedTarget())
+		latarget = core.objectService.getObject(latargetID)
+		if latarget.getAttachment('AI'):
+			if latarget.getAttachment('AI').getCurrentState():
+				actor.sendSystemMessage('Checking AI state ' + latarget.getAttachment('AI').getCurrentState().getClass().getName(), 0)
+				
+	elif command == 'checkairepos':		
+		latargetID = long(actor.getIntendedTarget())
+		latarget = core.objectService.getObject(latargetID)
+		if latarget.getAttachment('AI'):
+			if latarget.getAttachment('AI').getRepositionStartTime()():
+				actor.sendSystemMessage('Checking AI state ' + latarget.getAttachment('AI').getRepositionStartTime(), 0)
+	
+	elif command == 'checkaiprog':		
+		latargetID = long(actor.getIntendedTarget())
+		latarget = core.objectService.getObject(latargetID)
+		if latarget.getAttachment('AI'):
+			actor.sendSystemMessage('Checking AI progression %s' % latarget.getAttachment('AI').getProgressionMarker(), 0)
 	
 	elif command == 'showbitmask':		
 		latargetID = long(actor.getIntendedTarget())
 		latarget = core.objectService.getObject(latargetID)
 		actor.sendSystemMessage('Optionsbitmask for unit ' + latarget.getCustomName() + ' is %s' % latarget.getOptionsBitmask(), 0)
+				
+	elif command == 'suitest':
+		window = core.suiService.createSUIWindow('Script.countdownTimerBar', actor, None, 5)
+		#window.setProperty('bg.caption.lblTitle:Text', 'Titletext')
+		#window.setProperty('text:Text', '10')
+		#window.setProperty('bar.value:Page', '10')	
+		window.addDataItem('bar.value', '10')		
+		core.suiService.openSUIWindow(window)
+		time.sleep(5)
+		core.suiService.closeSUIWindow(window.getOwner(),window.getWindowId())
+		
+	elif command == 'spawninst':
 			
-	elif command == 'unknownAbilityPacket' and arg1:
+		#String campTemplate = "object/building/poi/shared_gcw_rebel_clone_tent_small.iff"; // LOL why doesn't this spawn?!?!?!
+		inst = core.objectService.createObject(arg1, 0, actor.getPlanet(), actor.getWorldPosition(), actor.getOrientation())
+		if inst:
+			#TangibleObject inst = (TangibleObject)  core.objectService.createObject(campTemplate, 0, core.terrainService.getPlanetByName("talus"), new Point3D(-890,9, -2994), quaternion)
+			core.simulationService.add(inst, inst.getPosition().x, inst.getPosition().z, True)
+			positionY = core.terrainService.getHeight(inst.getPlanetId(), inst.getPosition().x, inst.getPosition().z)
+			instpos = Point3D(inst.getPosition().x,positionY+2, inst.getPosition().z)
+			inst.setPosition(instpos)
+				
+	elif command == 'unknownAbilityPacket' and arg1:  
 		packet = UnknownAbilityPacket(arg1)
 		actor.getClient().getSession().write(packet.serialize())
 		actor.sendSystemMessage('Sent UnknownAbilityPacket for ability ' + arg1, 0)

@@ -88,6 +88,7 @@ public class GCWSpawner extends TangibleObject{
 	
 	private Vector<Point3D> patrolRoute = new Vector<Point3D>();
 	private CreatureObject lastDefender = null;
+	private int delay = 0;
 	
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	
@@ -105,7 +106,6 @@ public class GCWSpawner extends TangibleObject{
 
 	public void setSpawnerType(int spawnerType) {
 		this.spawnerType = spawnerType;
-		
 		if (spawnerType==SpawnerType.SoldierPatrol){
 			scheduler.scheduleAtFixedRate(new Runnable() {
 				@Override public void run() { 
@@ -115,7 +115,7 @@ public class GCWSpawner extends TangibleObject{
 						System.err.println("Exception in SoldierPatrolPylon->scheduleAtFixedRate->spawnSoldier() " + e.getMessage());
 					}
 				}
-			}, 5, 60, TimeUnit.SECONDS);
+			}, getDelay(), 240, TimeUnit.SECONDS); //120
 		}
 		
 		if (spawnerType==SpawnerType.SoldierDefense){
@@ -139,7 +139,7 @@ public class GCWSpawner extends TangibleObject{
 						System.err.println("Exception in SoldierPatrolPylon->scheduleAtFixedRate->spawnVehicle() " + e.getMessage());
 					}
 				}
-			}, 5, 120, TimeUnit.SECONDS);
+			}, getDelay(), 240, TimeUnit.SECONDS); //240
 		}
 		
 		if (spawnerType==SpawnerType.SiegeVehiclePatrol){
@@ -151,7 +151,7 @@ public class GCWSpawner extends TangibleObject{
 						System.err.println("Exception in SoldierPatrolPylon->scheduleAtFixedRate->spawnSoldier() " + e.getMessage());
 					}
 				}
-			}, 120, 600, TimeUnit.SECONDS);
+			}, getDelay(), 600, TimeUnit.SECONDS);
 		}
 		
 	}
@@ -173,7 +173,6 @@ public class GCWSpawner extends TangibleObject{
 	}
 	
 	public void spawnSoldier(){
-		
 		if (NGECore.getInstance().invasionService.getInvasionPhase()==2){
 			if (spawnerFaction==Factions.Rebel){
 				switch (spawnLevel) {
@@ -192,11 +191,12 @@ public class GCWSpawner extends TangibleObject{
 			String soldierTemplate = soldierTemplates[new Random().nextInt(soldierTemplates.length)];	
 			//if (totalSpawnedUnits==0){
 			CreatureObject soldier = (CreatureObject)NGECore.getInstance().spawnService.spawnCreature(soldierTemplate, this.getPlanet().getName(), 0L, this.getPosition().x, this.getPosition().y, this.getPosition().z, this.getOrientation().w, this.getOrientation().x, this.getOrientation().y,this.getOrientation().z,-1);
-				
-			NGECore.getInstance().aiService.setPatrol(soldier, patrolRoute);	
-			NGECore.getInstance().aiService.setPatrolLoop(soldier,false);
 			NGECore.getInstance().invasionService.registerInvader(soldier);
 			totalSpawnedUnits++;
+			soldier.setAttachment("IsInvader","yes");
+			NGECore.getInstance().aiService.setPatrol(soldier, patrolRoute);	
+			NGECore.getInstance().aiService.setPatrolLoop(soldier,false);
+			
 			//}
 		}
 	}
@@ -248,11 +248,11 @@ public class GCWSpawner extends TangibleObject{
 			}	
 			String vehicleTemplate = vehicleTemplates[new Random().nextInt(vehicleTemplates.length)];	
 			CreatureObject vehicle = (CreatureObject)NGECore.getInstance().spawnService.spawnCreature(vehicleTemplate, this.getPlanet().getName(), 0L, this.getPosition().x, this.getPosition().y, this.getPosition().z, this.getOrientation().w, this.getOrientation().x, this.getOrientation().y,this.getOrientation().z,-1);
-				
-			NGECore.getInstance().aiService.setPatrol(vehicle, patrolRoute);	
-			NGECore.getInstance().aiService.setPatrolLoop(vehicle,false);
 			NGECore.getInstance().invasionService.registerInvader(vehicle);
 			totalSpawnedUnits++;
+			vehicle.setAttachment("IsInvader","yes");
+			NGECore.getInstance().aiService.setPatrol(vehicle, patrolRoute);	
+			NGECore.getInstance().aiService.setPatrolLoop(vehicle,false);			
 		}
 	}
 	
@@ -276,11 +276,12 @@ public class GCWSpawner extends TangibleObject{
 			String vehicleTemplate = vehicleTemplates[new Random().nextInt(vehicleTemplates.length)];	
 			CreatureObject vehicle = (CreatureObject)NGECore.getInstance().spawnService.spawnCreature(vehicleTemplate, this.getPlanet().getName(), 0L, this.getPosition().x, this.getPosition().y, this.getPosition().z, this.getOrientation().w, this.getOrientation().x, this.getOrientation().y,this.getOrientation().z,-1);
 			vehicle.setAttachment("IsSlowVehicle",true);
-			
-			NGECore.getInstance().aiService.setPatrol(vehicle, patrolRoute);	
-			NGECore.getInstance().aiService.setPatrolLoop(vehicle,false);
 			NGECore.getInstance().invasionService.registerInvader(vehicle);
 			totalSpawnedUnits++;
+			vehicle.setAttachment("IsInvader","yes");
+			
+			NGECore.getInstance().aiService.setPatrol(vehicle, patrolRoute);	
+			NGECore.getInstance().aiService.setPatrolLoop(vehicle,false);			
 		}
 	}
 	
@@ -308,6 +309,38 @@ public class GCWSpawner extends TangibleObject{
 			  						   break;
 			case PatrolRoute.Dearic11: patrolRoute = get_Dearic_Route_11();
 									   break;
+									   
+			case PatrolRoute.Keren1: patrolRoute = get_Keren_Route_1();
+			  						 break;
+			case PatrolRoute.Keren2: patrolRoute = get_Keren_Route_2();
+									 break;
+			case PatrolRoute.Keren3: patrolRoute = get_Keren_Route_3();
+				 					 break;
+			case PatrolRoute.Keren4: patrolRoute = get_Keren_Route_4();
+				 					 break;
+			case PatrolRoute.Keren5: patrolRoute = get_Keren_Route_5();
+				 					 break;
+			case PatrolRoute.Keren6: patrolRoute = get_Keren_Route_6();
+				 					 break;
+			case PatrolRoute.Keren7: patrolRoute = get_Keren_Route_7();
+			 						 break;
+			 						 
+			case PatrolRoute.Bestine1: patrolRoute = get_Bestine_Route_1();
+				 					   break;
+			case PatrolRoute.Bestine2: patrolRoute = get_Bestine_Route_2();
+			   						   break;
+			case PatrolRoute.Bestine3: patrolRoute = get_Bestine_Route_3();
+			                           break;
+			case PatrolRoute.Bestine4: patrolRoute = get_Bestine_Route_4();
+			   						   break;
+			case PatrolRoute.Bestine5: patrolRoute = get_Bestine_Route_5();
+			   						   break;
+			case PatrolRoute.Bestine6: patrolRoute = get_Bestine_Route_6();
+            						   break;
+			case PatrolRoute.Bestine7: patrolRoute = get_Bestine_Route_7();
+			   						   break;
+			case PatrolRoute.Bestine8: patrolRoute = get_Bestine_Route_8();
+						               break;
 		}
 	}
 	
@@ -341,7 +374,7 @@ public class GCWSpawner extends TangibleObject{
 		patrolpoints.add(new Point3D(407.00F, 6.00F, -2978.0F));
 		patrolpoints.add(new Point3D(414.00F, 6.00F, -3041.0F));
 		patrolpoints.add(new Point3D(448.00F, 6.00F, -3043.0F));
-		patrolpoints.add(new Point3D(463.00F, 6.00F, -3017.0F));
+		patrolpoints.add(new Point3D(464.00F, 6.00F, -3017.0F));
 		return patrolpoints;
 	}
 	
@@ -419,7 +452,7 @@ public class GCWSpawner extends TangibleObject{
 		patrolpoints.add(new Point3D(627.0F, 6.00F, -3041F));
 		patrolpoints.add(new Point3D(605.0F, 6.00F, -3018F));
 		patrolpoints.add(new Point3D(509.0F, 6.00F, -3033F));
-		patrolpoints.add(new Point3D(496.0F, 6.00F, -3018F));
+		patrolpoints.add(new Point3D(495.0F, 6.00F, -3017F));
 		return patrolpoints;
 	}
 	
@@ -454,6 +487,254 @@ public class GCWSpawner extends TangibleObject{
 		Vector<Point3D> patrolpoints = new Vector<Point3D>();		
 		patrolpoints.add(new Point3D(332.0F, 6.00F, -2715F));
 		return patrolpoints;
+	}
+	
+	
+	public Vector<Point3D> get_Keren_Route_1(){
+		Vector<Point3D> patrolpoints = new Vector<Point3D>();		
+		patrolpoints.add(new Point3D(1342.0F, 13.00F, 2917F));
+		patrolpoints.add(new Point3D(1447.0F, 13.00F, 2825F));
+		patrolpoints.add(new Point3D(1463.0F, 14.00F, 2781F));
+		patrolpoints.add(new Point3D(1530.0F, 25.00F, 2760F));
+		patrolpoints.add(new Point3D(1523.0F, 25.00F, 2731F));
+		patrolpoints.add(new Point3D(1555.0F, 29.00F, 2721F));
+		patrolpoints.add(new Point3D(1607.0F, 25.00F, 2706F));
+		patrolpoints.add(new Point3D(1607.0F, 25.00F, 2706F));
+		patrolpoints.add(new Point3D(1601.0F, 25.00F, 2676F));
+		patrolpoints.add(new Point3D(1652.0F, 12.00F, 2652F));
+		patrolpoints.add(new Point3D(1674.0F, 12.00F, 2637F));
+		patrolpoints.add(new Point3D(1674.0F, 12.00F, 2586F));
+		patrolpoints.add(new Point3D(1725.0F, 12.00F, 2584F));		
+		patrolpoints.add(new Point3D(1727.0F, 12.00F, 2559F));		
+		patrolpoints.add(new Point3D(1758.0F, 12.00F, 2555F));
+		patrolpoints.add(new Point3D(1766.0F, 12.00F, 2528F));
+		patrolpoints.add(new Point3D(1780.0F, 12.00F, 2520F));
+		return patrolpoints;
+	}
+	
+	public Vector<Point3D> get_Keren_Route_2(){
+		Vector<Point3D> patrolpoints = new Vector<Point3D>();		
+		patrolpoints.add(new Point3D(1994.03F, 12.00F, 2769.94F));
+		patrolpoints.add(new Point3D(1981.79F, 13.89F, 2736.23F));
+		patrolpoints.add(new Point3D(1911.87F, 12F, 2737.51F));
+		patrolpoints.add(new Point3D(1892.03F, 12F, 2718.64F));
+		patrolpoints.add(new Point3D(1883.43F, 12F, 2727.32F));
+		patrolpoints.add(new Point3D(1863.00F, 12F, 2707.36F));
+		patrolpoints.add(new Point3D(1883.67F, 12F, 2694.01F));
+		patrolpoints.add(new Point3D(1899.48F, 12F, 2661.86F));
+		patrolpoints.add(new Point3D(1901.68F, 12F, 2638.95F));
+		patrolpoints.add(new Point3D(1897.24F, 12F, 2603.49F));
+		patrolpoints.add(new Point3D(1879.39F, 12F, 2563.75F));
+		patrolpoints.add(new Point3D(1841.89F, 12F, 2527.75F));
+		patrolpoints.add(new Point3D(1824.33F, 12F, 2521.45F));
+		patrolpoints.add(new Point3D(1789.56F, 12F, 2518.26F));
+
+		return patrolpoints;
+	}
+
+	public Vector<Point3D> get_Keren_Route_3(){
+		Vector<Point3D> patrolpoints = new Vector<Point3D>();		
+		patrolpoints.add(new Point3D(2063.0F, 49.00F, 2794F));
+		patrolpoints.add(new Point3D(2020.0F, 49.00F, 2796F));
+		patrolpoints.add(new Point3D(1817.0F, 40.00F, 2808F));
+		patrolpoints.add(new Point3D(1753.0F, 40.00F, 2808F));
+		patrolpoints.add(new Point3D(1715.0F, 40.00F, 2780F));
+		patrolpoints.add(new Point3D(1717.0F, 12.00F, 2741F));
+		patrolpoints.add(new Point3D(1713.0F, 12.00F, 2639F));
+		patrolpoints.add(new Point3D(1695.0F, 12.00F, 2635F));
+		patrolpoints.add(new Point3D(1696.0F, 12.00F, 2589F));
+		patrolpoints.add(new Point3D(1725.0F, 12.00F, 2585F));
+		patrolpoints.add(new Point3D(1727.0F, 12.00F, 2560F));
+		patrolpoints.add(new Point3D(1758.0F, 12.00F, 2555F));
+		patrolpoints.add(new Point3D(1766.0F, 12.00F, 2527F));
+		patrolpoints.add(new Point3D(1781.0F, 12.00F, 2516F));
+
+		return patrolpoints;
+	}
+	
+	public Vector<Point3D> get_Keren_Route_4(){
+		Vector<Point3D> patrolpoints = new Vector<Point3D>();		
+		patrolpoints.add(new Point3D(1990.0F, 30.00F, 2715F));
+		patrolpoints.add(new Point3D(1990.0F, 30.00F, 2682F));
+		patrolpoints.add(new Point3D(1988.0F, 12.00F, 2624F));
+		patrolpoints.add(new Point3D(1983.0F, 12.00F, 2560F));
+		patrolpoints.add(new Point3D(1931.0F, 12.00F, 2535F));
+		patrolpoints.add(new Point3D(1902.0F, 12.00F, 2554F));
+		patrolpoints.add(new Point3D(1879.0F, 12.00F, 2525F));
+		patrolpoints.add(new Point3D(1846.0F, 12.00F, 2504F));
+		patrolpoints.add(new Point3D(1806.0F, 12.00F, 2492F));
+		patrolpoints.add(new Point3D(1806.0F, 12.00F, 2520F));
+		patrolpoints.add(new Point3D(1794.0F, 12.00F, 2519F));
+
+		return patrolpoints;
+	}
+
+	public Vector<Point3D> get_Keren_Route_5(){
+		Vector<Point3D> patrolpoints = new Vector<Point3D>();		
+		patrolpoints.add(new Point3D(1342.0F, 13.00F, 2917F));
+		patrolpoints.add(new Point3D(1447.0F, 13.00F, 2825F));
+		patrolpoints.add(new Point3D(1463.0F, 14.00F, 2781F));
+		patrolpoints.add(new Point3D(1530.0F, 25.00F, 2760F));
+		patrolpoints.add(new Point3D(1523.0F, 25.00F, 2731F));
+		patrolpoints.add(new Point3D(1555.0F, 29.00F, 2721F));
+		patrolpoints.add(new Point3D(1607.0F, 25.00F, 2706F));
+		patrolpoints.add(new Point3D(1607.0F, 25.00F, 2706F));
+		patrolpoints.add(new Point3D(1601.0F, 25.00F, 2676F));
+		patrolpoints.add(new Point3D(1652.0F, 12.00F, 2652F));
+		patrolpoints.add(new Point3D(1674.0F, 12.00F, 2637F));
+		patrolpoints.add(new Point3D(1674.0F, 12.00F, 2586F));
+		patrolpoints.add(new Point3D(1725.0F, 12.00F, 2584F));
+		patrolpoints.add(new Point3D(1758.0F, 12.00F, 2555F));
+		patrolpoints.add(new Point3D(1766.0F, 12.00F, 2528F));
+		patrolpoints.add(new Point3D(1780.0F, 12.00F, 2520F));
+		return patrolpoints;
+	}
+	
+	public Vector<Point3D> get_Keren_Route_6(){
+		Vector<Point3D> patrolpoints = new Vector<Point3D>();		
+		patrolpoints.add(new Point3D(1980.0F, 10.00F, 2179F));
+		patrolpoints.add(new Point3D(1957.0F, 11.00F, 2259F));
+		patrolpoints.add(new Point3D(1934.0F, 12.00F, 2341F));
+		patrolpoints.add(new Point3D(1947.0F, 12.00F, 2387F));
+		patrolpoints.add(new Point3D(1945.0F, 12.00F, 2414F));
+		patrolpoints.add(new Point3D(1879.0F, 12.00F, 2419F));
+		patrolpoints.add(new Point3D(1847.0F, 12.00F, 2458F));
+		patrolpoints.add(new Point3D(1789.0F, 12.00F, 2459F));
+		patrolpoints.add(new Point3D(1743.0F, 12.00F, 2458F));
+		patrolpoints.add(new Point3D(1728.0F, 12.00F, 2468F));
+		patrolpoints.add(new Point3D(1729.0F, 12.00F, 2495F));
+		patrolpoints.add(new Point3D(1761.0F, 12.00F, 2495F));
+		patrolpoints.add(new Point3D(1764.0F, 12.00F, 2516F));
+		patrolpoints.add(new Point3D(1776.0F, 12.00F, 2517F));
+		return patrolpoints;
+	}
+
+	public Vector<Point3D> get_Keren_Route_7(){
+		Vector<Point3D> patrolpoints = new Vector<Point3D>();		
+		patrolpoints.add(new Point3D(1342.0F, 13.00F, 2917F));
+		patrolpoints.add(new Point3D(1487.0F, 20.00F, 2808F));
+		
+		return patrolpoints;
+	}
+	
+	public Vector<Point3D> get_Bestine_Route_1(){
+		Vector<Point3D> patrolpoints = new Vector<Point3D>();		
+		patrolpoints.add(new Point3D(-978.75F, 12.00F, -3747.46F));
+		patrolpoints.add(new Point3D(-996.37F, 12.00F, -3731.11F));
+		patrolpoints.add(new Point3D(-1004.13F, 12.00F, -3708.60F));
+		patrolpoints.add(new Point3D(-1042.40F, 12.00F, -3672.19F));
+		patrolpoints.add(new Point3D(-1067.11F, 12.00F, -3665.97F));
+		patrolpoints.add(new Point3D(-1107.36F, 12.00F, -3633.51F));
+		patrolpoints.add(new Point3D(-1126.32F, 12.00F, -3650.40F));
+		patrolpoints.add(new Point3D(-1144.03F, 12.00F, -3652.36F));
+		patrolpoints.add(new Point3D(-1175.46F, 12.00F, -3631.40F));
+		patrolpoints.add(new Point3D(-1204.07F, 12.00F, -3627.40F));	
+		return patrolpoints;
+	}
+	
+	public Vector<Point3D> get_Bestine_Route_2(){
+		Vector<Point3D> patrolpoints = new Vector<Point3D>();		
+		patrolpoints.add(new Point3D(-1002.90F, 19.15F, -3593.77F));
+		patrolpoints.add(new Point3D(-1053.93F, 12F, -3576.39F));
+		patrolpoints.add(new Point3D(-1064.00F, 12F, -3586.90F));
+		patrolpoints.add(new Point3D(-1084.30F, 12F, -3583.85F));
+		patrolpoints.add(new Point3D(-1100.69F, 12F, -3622.65F));
+		patrolpoints.add(new Point3D(-1129.25F, 12F, -3653.48F));
+		patrolpoints.add(new Point3D(-1158.12F, 12F, -3654.10F));
+		patrolpoints.add(new Point3D(-1191.37F, 12F, -3628.60F));
+		patrolpoints.add(new Point3D(-1214.79F, 12F, -3633.39F));	
+		return patrolpoints;
+	}
+	
+	public Vector<Point3D> get_Bestine_Route_3(){
+		Vector<Point3D> patrolpoints = new Vector<Point3D>();		
+		patrolpoints.add(new Point3D(-1104F, 20.00F, -3467F));
+		patrolpoints.add(new Point3D(-1084.21F, 12.00F, -3513.44F));
+		patrolpoints.add(new Point3D(-1107.65F, 12.00F, -3570.01F));
+		patrolpoints.add(new Point3D(-1166.30F, 12.00F, -3527.04F));
+		patrolpoints.add(new Point3D(-1182.49F, 12.00F, -3543.62F));
+		patrolpoints.add(new Point3D(-1195.03F, 12.00F, -3534.84F));
+		patrolpoints.add(new Point3D(-1222.08F, 12.00F, -3567.95F));
+		patrolpoints.add(new Point3D(-1245.74F, 12.00F, -3550.56F));
+		patrolpoints.add(new Point3D(-1284.93F, 12.00F, -3596.65F));
+		patrolpoints.add(new Point3D(-1255.27F, 12.00F, -3620.79F));
+		patrolpoints.add(new Point3D(-1223.85F, 12.00F, -3625.50F));	
+		return patrolpoints;
+	}
+	
+	public Vector<Point3D> get_Bestine_Route_4(){
+		Vector<Point3D> patrolpoints = new Vector<Point3D>();		
+		patrolpoints.add(new Point3D(-1224.17F, 14.92F, -3477.66F));
+		patrolpoints.add(new Point3D(-1214.17F, 12F, -3520.83F));
+		patrolpoints.add(new Point3D(-1239.38F, 12F, -3552.16F));
+		patrolpoints.add(new Point3D(-1251.67F, 12F, -3554.41F));
+		patrolpoints.add(new Point3D(-1288.84F, 12F, -3605.51F));
+		patrolpoints.add(new Point3D(-1253.18F, 12F, -3620.50F));
+		patrolpoints.add(new Point3D(-1224.78F, 12F, -3627.92F));
+		return patrolpoints;
+	}
+	
+	public Vector<Point3D> get_Bestine_Route_5(){
+		Vector<Point3D> patrolpoints = new Vector<Point3D>();		
+		patrolpoints.add(new Point3D(-1289.09F, 10.77F, -3451.00F));
+		patrolpoints.add(new Point3D(-1287.35F, 12F, -3499.91F));
+		patrolpoints.add(new Point3D(-1293.84F, 12F, -3516.75F));
+		patrolpoints.add(new Point3D(-1293.84F, 12F, -3516.75F));
+		patrolpoints.add(new Point3D(-1282.01F, 12F, -3531.76F));
+		patrolpoints.add(new Point3D(-1286.69F, 12F, -3604.70F));
+		patrolpoints.add(new Point3D(-1247.24F, 12F, -3622.33F));
+		patrolpoints.add(new Point3D(-1221.27F, 12F, -3616.53F));
+		return patrolpoints;
+	}
+
+	public Vector<Point3D> get_Bestine_Route_6(){
+		Vector<Point3D> patrolpoints = new Vector<Point3D>();		
+		patrolpoints.add(new Point3D(-1399.33F, 18.02F, -3842.45F));
+		patrolpoints.add(new Point3D(-1378.02F, 10.02F, -3803.54F));
+		patrolpoints.add(new Point3D(-1355.98F, 12.25F, -3741.07F));
+		patrolpoints.add(new Point3D(-1351.22F, 12.0F, -3703.81F));
+		patrolpoints.add(new Point3D(-1301.95F, 12.0F, -3626.74F));
+		patrolpoints.add(new Point3D(-1261.14F, 12.0F, -3624.71F));
+		patrolpoints.add(new Point3D(-1224.89F, 12.0F, -3631.51F));
+		return patrolpoints;
+	}
+	
+	public Vector<Point3D> get_Bestine_Route_7(){
+		Vector<Point3D> patrolpoints = new Vector<Point3D>();		
+		patrolpoints.add(new Point3D(-1319.14F, 21.54F, -3854.52F));
+		patrolpoints.add(new Point3D(-1327.96F, 24.39F, -3791.74F));
+		patrolpoints.add(new Point3D(-1325.62F, 12.0F, -3694.68F));
+		patrolpoints.add(new Point3D(-1325.62F, 12.0F, -3694.68F));
+		patrolpoints.add(new Point3D(-1313.86F, 12.0F, -3632.90F));
+		patrolpoints.add(new Point3D(-1261.17F, 12.0F, -3623.71F));
+		patrolpoints.add(new Point3D(-1225.88F, 12.0F, -3631.15F));		
+		return patrolpoints;
+	}
+	
+	public Vector<Point3D> get_Bestine_Route_8(){
+		Vector<Point3D> patrolpoints = new Vector<Point3D>();		
+		patrolpoints.add(new Point3D(-1143.05F, 14.43F, -3756.47F));
+		patrolpoints.add(new Point3D(-1126.50F, 12F, -3691.73F));
+		patrolpoints.add(new Point3D(-1188.91F, 12F, -3627.55F));
+		patrolpoints.add(new Point3D(-1203.55F, 12F, -3624.19F));		
+		return patrolpoints;
+	}
+	
+	
+	public int getTotalSpawnedUnits() {
+		return totalSpawnedUnits;
+	}
+
+	public void setTotalSpawnedUnits(int totalSpawnedUnits) {
+		this.totalSpawnedUnits = totalSpawnedUnits;
+	}
+
+	public int getDelay() {
+		return delay;
+	}
+
+	public void setDelay(int delay) {
+		this.delay = delay;
 	}
 
 	public class SpawnerType {
@@ -490,14 +771,22 @@ public class GCWSpawner extends TangibleObject{
 		public static final int Dearic10 = 9;
 		public static final int Dearic11 = 10;
 		
+		public static final int Keren1 = 11;
+		public static final int Keren2 = 12;
+		public static final int Keren3 = 13;
+		public static final int Keren4 = 14;
+		public static final int Keren5 = 15;
+		public static final int Keren6 = 16;
+		public static final int Keren7 = 17;
+		
+		public static final int Bestine1 = 18;
+		public static final int Bestine2 = 19;
+		public static final int Bestine3 = 20;
+		public static final int Bestine4 = 21;
+		public static final int Bestine5 = 22;
+		public static final int Bestine6 = 23;
+		public static final int Bestine7 = 24;
+		public static final int Bestine8 = 25;
+		public static final int Bestine9 = 26;		
 	}
-
-	public int getTotalSpawnedUnits() {
-		return totalSpawnedUnits;
-	}
-
-	public void setTotalSpawnedUnits(int totalSpawnedUnits) {
-		this.totalSpawnedUnits = totalSpawnedUnits;
-	}
-
 }

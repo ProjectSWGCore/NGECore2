@@ -63,6 +63,7 @@ public class MobileTemplate implements Cloneable {
 	private String PCDTemplate="";
 	private String conversationFileName="";
 	private boolean AIEnabled = true;
+	private boolean noAI = false;
 
 	
 	public Vector<String> getTemplates() {
@@ -377,6 +378,14 @@ public class MobileTemplate implements Cloneable {
 
 	public void setAIEnabled(boolean aIEnabled) {
 		AIEnabled = aIEnabled;
+	}
+
+	public boolean isNoAI() {
+		return noAI;
+	}
+
+	public void setNoAI(boolean noAI) {
+		this.noAI = noAI;
 	}
 	
 }

@@ -240,13 +240,22 @@ public class FactionService implements INetworkDispatch {
 			PyObject method = core.scriptService.getMethod("scripts/faction/", objectFaction, "isEnemy");
 			
 			if (method != null && method.isCallable()) {
-				return ((method.__call__(Py.java2py(targetFaction)).asInt() == 1) ? true : false);
+				int checkResult = method.__call__(Py.java2py(targetFaction)).asInt();
+				if (objectFaction.equals("rebel") || objectFaction.equals("imperial")){
+					if (object.getFactionStatus()==FactionStatus.OnLeave)
+						checkResult=0;
+				}
+				if (targetFaction.equals("rebel") || targetFaction.equals("imperial")){
+					if (target.getFactionStatus()==FactionStatus.OnLeave)
+						checkResult=0;
+				}				
+				return ((checkResult == 1) ? true : false);
 			}
 		}
 		
 		return false;
 	}
-	
+		
 	/*
 	 * Calculates the target's pvp bitmask based on the person's
 	 * faction standing and the enemy's options bitmask.
@@ -267,6 +276,10 @@ public class FactionService implements INetworkDispatch {
 		PlayerObject ghost = (PlayerObject) object.getSlottedObject("ghost");
 		
 		int pvpBitmask = 0;
+
+		if (target==null)
+			return 0; // Avoids infinite loading screen when another player character has been deleted, 
+					  // but is still referenced by some collections being null
 		
 		if (object == target) {
 			pvpBitmask |= PvpStatus.Self;
@@ -291,7 +304,7 @@ public class FactionService implements INetworkDispatch {
 		if (target.getFactionStatus() == FactionStatus.SpecialForces) {
 			pvpBitmask |= PvpStatus.Overt;
 		}
-		
+			
 		// Everything below assumes target is potentially attackable.
 		if (!target.getOption(Options.ATTACKABLE) || target.getOption(Options.INVULNERABLE)) {
 			return pvpBitmask;
@@ -568,7 +581,14 @@ public class FactionService implements INetworkDispatch {
 					upvpm.setStatus(NGECore.getInstance().factionService.calculatePvpStatus((CreatureObject) destination.getParent(), creo));
 					destination.getSession().write(upvpm.serialize());
 				}	
-				if (obj instanceof InstallationObject){
+				if (obj instanceof TangibleObject && !(obj instanceof CreatureObject)){
+					TangibleObject tano = (TangibleObject) obj;
+					UpdatePVPStatusMessage upvpm = new UpdatePVPStatusMessage(tano.getObjectID());
+					upvpm.setFaction(CRC.StringtoCRC(tano.getFaction()));
+					upvpm.setStatus(NGECore.getInstance().factionService.calculatePvpStatus((TangibleObject) destination.getParent(), tano));
+					destination.getSession().write(upvpm.serialize());
+				}
+				if (obj instanceof InstallationObject && !(obj instanceof TangibleObject)){
 					InstallationObject inso = (InstallationObject) obj;
 					UpdatePVPStatusMessage upvpm = new UpdatePVPStatusMessage(inso.getObjectID());
 					upvpm.setFaction(CRC.StringtoCRC(inso.getFaction()));

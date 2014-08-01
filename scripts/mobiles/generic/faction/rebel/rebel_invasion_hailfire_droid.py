@@ -11,7 +11,7 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('eow_gcw_city_at_st_2')
+	mobileTemplate.setCreatureName('rebel_battle_droid')
 	mobileTemplate.setLevel(90)
 	mobileTemplate.setDifficulty(Difficulty.BOSS)
 
@@ -30,12 +30,12 @@ def addTemplate(core):
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
-	weapontemplate = WeaponTemplate('object/weapon/ranged/vehicle/shared_vehicle_atst_ranged.iff', WeaponType.CARBINE, 1.0, 15, 'energy')
+	weapontemplate = WeaponTemplate('object/weapon/ranged/droid/shared_droid_rocket_launcher.iff', WeaponType.RIFLE, 1.0, 55, 'energy')
 	weaponTemplates.add(weapontemplate)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
-	mobileTemplate.setDefaultAttack('rangedShot')
+	mobileTemplate.setDefaultAttack('gcw_rocket_launch') #fireRocketLauncher #gcw_atst_attack_tower
 	mobileTemplate.setAttacks(attacks)
 	
 	core.spawnService.addMobileTemplate('rebel_invasion_hailfire_droid', mobileTemplate)

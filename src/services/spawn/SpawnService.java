@@ -38,6 +38,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
+import protocol.swg.UpdateContainmentMessage;
 import resources.common.collidables.CollidableBox;
 import resources.common.collidables.CollidableCircle;
 import resources.datatables.Options;
@@ -164,6 +165,11 @@ public class SpawnService {
 			defaultWeapon.setWeaponType(weaponTemplates.get(rnd).getWeaponType());
 			defaultWeapon.setMaxRange(weaponTemplates.get(rnd).getMaxRange());
 			defaultWeapon.setDamageType(weaponTemplates.get(rnd).getDamageType());
+			if (defaultWeapon.getTemplate().contains("atst_ranged")){ 
+				defaultWeapon.setStfFilename("theme_park_name");
+				defaultWeapon.setStfName("at_st");
+			}
+			
 		}
 		
 		if (weaponTemplates.get(rnd).getMinDamage() != 0 && weaponTemplates.get(rnd).getMaxDamage() != 0) {
@@ -174,8 +180,14 @@ public class SpawnService {
 			defaultWeapon.setMinDamage(creature.getLevel() * 22);
 		}
 		
-		creature.addObjectToEquipList(defaultWeapon);
-		creature.add(defaultWeapon);
+		if (!defaultWeapon.getTemplate().contains("atst_ranged"))
+			creature.addObjectToEquipList(defaultWeapon);
+		if (!defaultWeapon.getTemplate().contains("atst_ranged"))
+			creature.add(defaultWeapon);
+		else {
+			UpdateContainmentMessage updateContainmentMessage= new UpdateContainmentMessage(defaultWeapon.getObjectID(), creature.getObjectID(), 4);
+			creature.notifyClients(updateContainmentMessage.serialize(),true);
+		}
 		creature.setWeaponId(defaultWeapon.getObjectID());
 		creature.addObjectToEquipList(inventory);
 		creature.add(inventory);
@@ -213,9 +225,15 @@ public class SpawnService {
 		}
 		
 		if (mobileTemplate.isAIEnabled()){
-			AIActor actor = new AIActor(creature, creature.getPosition(), scheduler);
+			if (!mobileTemplate.isNoAI()){ // NoAI is for QuestGivers that don't fight to save resources
+				AIActor actor = new AIActor(creature, creature.getPosition(), scheduler);
+				creature.setAttachment("AI", actor);
+				actor.setMobileTemplate(mobileTemplate);
+			}
+		} else { // AIEnabled is to dynamically switch the AI on later
+			AIActor actor = new AIActor(creature, creature.getPosition(), scheduler, false);
 			creature.setAttachment("AI", actor);
-			actor.setMobileTemplate(mobileTemplate);			
+			actor.setMobileTemplate(mobileTemplate);	
 		}
 		
 		creature.setAttachment("radial_filename", "npc/mobile");

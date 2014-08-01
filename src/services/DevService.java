@@ -41,6 +41,7 @@ import resources.datatables.WeaponType;
 import resources.harvest.SurveyTool;
 import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
+import resources.objects.installation.InstallationObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
@@ -95,6 +96,12 @@ public class DevService implements INetworkDispatch {
 					suiOptions.put((long) 4, "Treasure chest test");
 				if (System.getProperty("user.name").equals("Charon"))
 					suiOptions.put((long) 6, "Dearic attack camp");
+				if (System.getProperty("user.name").equals("Charon"))
+					suiOptions.put((long) 7, "Keren defensive positions");
+				if (System.getProperty("user.name").equals("Charon"))
+					suiOptions.put((long) 8, "Bestine defensive positions");
+				if (System.getProperty("user.name").equals("Charon"))
+					suiOptions.put((long) 9, "Spawn Pylon");
 				if (creature.getClient().isGM())
 					suiOptions.put((long) 200, "Get new CBT");
 				break;
@@ -232,13 +239,36 @@ public class DevService implements INetworkDispatch {
 						return;
 					
 					case 6: // Locations -890,4, -2994  475,6,-3019
+						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("talus"), new Point3D(475,6,-3019), player.getOrientation(), null);
+						//core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("talus"), new Point3D(264, 4, -2950), player.getOrientation(), null); // starport
+						//core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("talus"), new Point3D(-930,9, -2994), player.getOrientation(), null);
+						
+						//core.invasionService.testPylons();
+						return;
+					case 7: // Locations -890,4, -2994  475,6,-3019
 						//core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("talus"), new Point3D(475,6,-3019), player.getOrientation(), null);
-						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("talus"), new Point3D(264, 4, -2950), player.getOrientation(), null);
+						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("naboo"), new Point3D(1788, 6, 2518), player.getOrientation(), null);
+						//core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("talus"), new Point3D(-930,9, -2994), player.getOrientation(), null);
+						
+						//core.invasionService.testPylons();
+						return;
+						
+					case 8: // Locations -890,4, -2994  475,6,-3019
+						//core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("talus"), new Point3D(475,6,-3019), player.getOrientation(), null);
+						core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("tatooine"), new Point3D(-1214,6, -3626), player.getOrientation(), null);
 						//core.simulationService.transferToPlanet(player, core.terrainService.getPlanetByName("talus"), new Point3D(-930,9, -2994), player.getOrientation(), null);
 						
 						//core.invasionService.testPylons();
 						return;
 					
+					case 9:
+						TangibleObject turret = (TangibleObject) NGECore.getInstance().objectService.createObject("object/tangible/destructible/shared_gcw_city_construction_beacon.iff", 0, player.getPlanet(), player.getWorldPosition(), player.getOrientation());
+						NGECore.getInstance().simulationService.add(turret, turret.getPosition().x, turret.getPosition().z, true);
+						float positionY = NGECore.getInstance().terrainService.getHeight(turret.getPlanetId(), turret.getPosition().x, turret.getPosition().z);
+									
+						turret.setPosition(new Point3D(turret.getPosition().x,positionY, turret.getPosition().z));
+						return;
+						
 					// Character
 					case 10: // Set combat level to 90
 						if (player.getAttachment("hasLeveled") == null) {

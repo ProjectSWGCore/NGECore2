@@ -405,11 +405,10 @@ public class TangibleObject extends SWGObject implements Serializable {
 			if (observer.getParent() != null) {
 				observer.getSession().write(new UpdatePVPStatusMessage(this.getObjectID(), NGECore.getInstance().factionService.calculatePvpStatus((CreatureObject) observer.getParent(), this), getFaction()).serialize());
 				if(getClient() != null){
-					getClient().getSession().write(new UpdatePVPStatusMessage(observer.getParent().getObjectID(), NGECore.getInstance().factionService.calculatePvpStatus((CreatureObject) this, (CreatureObject) observer.getParent()), getFaction()).serialize());
-				System.out.println("SENT TO CLIENT!");
-				}
+					getClient().getSession().write(new UpdatePVPStatusMessage(observer.getParent().getObjectID(), NGECore.getInstance().factionService.calculatePvpStatus((CreatureObject) this, (CreatureObject) observer.getParent()), getFaction()).serialize());					
+					//System.out.println("SENT TO CLIENT!");
+				} 
 			}
-
 		}
 		
 		if (getClient() != null) {
@@ -430,7 +429,6 @@ public class TangibleObject extends SWGObject implements Serializable {
 				
 			}
 		}
-	
 	}
 	
 	public boolean isAttackableBy(CreatureObject attacker) {
@@ -636,9 +634,26 @@ public class TangibleObject extends SWGObject implements Serializable {
 		}
 	}
 	
+	@Override
 	public void sendBaselines(Client destination) {
 		if (destination != null && destination.getSession() != null) {
-			destination.getSession().write(getBaseline(3).getBaseline());
+			
+			// Factional peculiarities
+			Baseline baseLine3 = getBaseline(3);
+			if (destination.getParent() instanceof CreatureObject){
+				if (((CreatureObject) destination.getParent()).isPlayer() && ((CreatureObject) destination.getParent()).getFaction()!=this.getFaction()){
+					int optionsBitMask = getOptionsBitmask();
+					if (getOption(Options.QUEST))
+						optionsBitMask = optionsBitMask & ~Options.QUEST;
+					if (!getOption(Options.ATTACKABLE))
+						optionsBitMask = optionsBitMask | Options.ATTACKABLE;
+					
+					baseLine3.set("optionsBitmask", optionsBitMask);
+				}
+			}
+						
+			//destination.getSession().write(getBaseline(3).getBaseline());
+			destination.getSession().write(baseLine3.getBaseline());
 			destination.getSession().write(getBaseline(6).getBaseline());
 			
 			Client parent = ((getGrandparent() == null) ? null : getGrandparent().getClient());
@@ -651,6 +666,10 @@ public class TangibleObject extends SWGObject implements Serializable {
 			if (destination.getParent() != this) {
 				UpdatePVPStatusMessage upvpm = new UpdatePVPStatusMessage(getObjectID());
 				upvpm.setFaction(CRC.StringtoCRC(getFaction()));
+//				if (this.getTemplate().contains("barricade")){
+//					System.out.println("BARTANO RESULT " + NGECore.getInstance().factionService.calculatePvpStatus((CreatureObject) destination.getParent(), this));
+//				}
+				
 				upvpm.setStatus(NGECore.getInstance().factionService.calculatePvpStatus((CreatureObject) destination.getParent(), this));
 				destination.getSession().write(upvpm.serialize());
 			}

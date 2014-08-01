@@ -11,23 +11,25 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('fbase_imperial_colonel_extreme')
-	mobileTemplate.setLevel(90)
-	mobileTemplate.setDifficulty(Difficulty.ELITE)
+	mobileTemplate.setCreatureName('gcw_city_offensive_imperial_general')
+	mobileTemplate.setLevel(110)
+	mobileTemplate.setHealth(1000000)
+	mobileTemplate.setDifficulty(Difficulty.BOSS)
 
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
-	mobileTemplate.setDeathblow(False)
+	mobileTemplate.setDeathblow(True)
+	mobileTemplate.setScale(1)
 	mobileTemplate.setSocialGroup("imperial")
 	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(False)
 	mobileTemplate.setFaction("imperial")
 	mobileTemplate.setFactionStatus(FactionStatus.Combatant)
 	mobileTemplate.setOptionsBitmask(Options.CONVERSABLE | Options.INVULNERABLE)
-	mobileTemplate.setNoAI(True)
+	mobileTemplate.setAIEnabled(False)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_dressed_imperial_colonel_m.iff')
+	templates.add('object/mobile/shared_dressed_imperial_general_m.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
@@ -39,5 +41,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('rangedShot')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('imp_defensive_quest_officer', mobileTemplate)
+	core.spawnService.addMobileTemplate('imp_offensive_invasion_general', mobileTemplate)
 	return

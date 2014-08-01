@@ -283,13 +283,13 @@ public class ObjectService implements INetworkDispatch {
 			
 		} else if(Template.startsWith("object/tangible/destructible/shared_gcw_city_construction_beacon")) {
 			
-			float positionY = core.terrainService.getHeight(planet.getID(), position.x, position.z)-1f;
+			float positionY = core.terrainService.getHeight(planet.getID(), position.x, position.z)-1.5f;
 			Point3D newpoint = new Point3D(position.x,positionY,position.z);				
 			object = new GCWPylon(objectID, planet, position, orientation, Template);
 
 		} else if(Template.startsWith("object/tangible/loot/creature_loot/collections/shared_dejarik_table_base")) {
 			
-			float positionY = core.terrainService.getHeight(planet.getID(), position.x, position.z)+1f;
+			float positionY = core.terrainService.getHeight(planet.getID(), position.x, position.z)+0.3f;
 			Point3D newpoint = new Point3D(position.x,positionY,position.z);				
 			object = new GCWSpawner(objectID, planet, position, orientation, Template);
 
@@ -303,6 +303,17 @@ public class ObjectService implements INetworkDispatch {
 			
 			//object = new BuildingObject(objectID, planet, position, orientation, Template);
 
+		} else if(Template.startsWith("object/tangible/gcw/static_base/shared_invisible_cloner")) {
+			
+			object = new BuildingObject(objectID, planet, position, orientation, Template);
+			if(!isSnapshot && !overrideSnapshot && object.getPortalVisitor() != null) {
+				int cellCount = object.getPortalVisitor().cells.size() - 1; // -1 for index 0 cell which is outside the building and used for ai pathfinding
+				for (int i = 0; i < cellCount; i++) {
+					CellObject cell = (CellObject) createObject("object/cell/shared_cell.iff", planet);
+					cell.setCellNumber(i+1);
+					object.add(cell);
+				}
+			}
 		} else if(Template.startsWith("object/tangible")) {
 			
 			object = new TangibleObject(objectID, planet, position, orientation, Template);
@@ -1282,7 +1293,6 @@ public class ObjectService implements INetworkDispatch {
 	}
 	
 	public void loadBuildoutObjects(Planet planet) throws InstantiationException, IllegalAccessException {
-		
 		DatatableVisitor buildoutTable = ClientFileManager.loadFile("datatables/buildout/areas_" + planet.getName() + ".iff", DatatableVisitor.class);
 		
 		for (int i = 0; i < buildoutTable.getRowCount(); i++) {
@@ -1290,7 +1300,6 @@ public class ObjectService implements INetworkDispatch {
 			String areaName = (String) buildoutTable.getObject(i, 0);
 			float x1 = (Float) buildoutTable.getObject(i, 1);
 			float z1 = (Float) buildoutTable.getObject(i, 2);
-			
 			readBuildoutDatatable(ClientFileManager.loadFile("datatables/buildout/" + planet.getName() + "/" + areaName + ".iff", DatatableVisitor.class), planet, x1, z1);
 
 		}

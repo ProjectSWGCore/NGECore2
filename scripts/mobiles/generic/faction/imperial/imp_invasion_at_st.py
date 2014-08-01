@@ -31,12 +31,13 @@ def addTemplate(core):
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector() # object/weapon/ranged/turret/shared_turret_heat.iff  object/weapon/ranged/vehicle/shared_vehicle_atst_ranged.iff
-	weapontemplate = WeaponTemplate('object/weapon/ranged/vehicle/shared_vehicle_atst_ranged.iff', WeaponType.RIFLE, 2.0, 55, 'energy')
+	weapontemplate = WeaponTemplate('object/weapon/ranged/vehicle/shared_vehicle_atst_ranged.iff', WeaponType.CARBINE, 2.0, 55, 'energy')
+	#weapontemplate = WeaponTemplate('object/weapon/ranged/rifle/shared_rifle_t21.iff', WeaponType.RIFLE, 1.0, 24, 'energy')
 	weaponTemplates.add(weapontemplate)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
-	mobileTemplate.setDefaultAttack('rangedShot')
+	mobileTemplate.setDefaultAttack('gcw_atst_attack_tower') #gcw_atst_attack_tower #rangedShot
 	mobileTemplate.setAttacks(attacks)
 	
 	core.spawnService.addMobileTemplate('imp_invasion_at_st', mobileTemplate)

@@ -46,7 +46,7 @@ public class DeathState extends AIState {
 			if (killer.isPlayer()) // No point to do this for NPCs
 				NGECore.getInstance().lootService.DropLoot(killer,(TangibleObject)(actor.getCreature()));
 		}	
-		actor.destroyActor(); // to prevent standing up right after death
+		//actor.destroyActor(); // to prevent standing up right after death
 		
 		return 0;
 	}

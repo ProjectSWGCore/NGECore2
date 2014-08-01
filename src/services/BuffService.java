@@ -46,6 +46,7 @@ import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.weapon.WeaponObject;
+import resources.skills.SkillMod;
 import services.ai.AIActor;
 import services.ai.states.FollowState;
 import services.command.CombatCommand;
@@ -130,6 +131,10 @@ public class BuffService implements INetworkDispatch {
 		} else {
 			if (! hasBuff(target,buffName)) // QA, prevent infinite "refreshing" of buff by repeated use
 				doAddBuff(target, buffName, buffer);
+			else {
+				if (buff.getMaxStacks()>1)
+					doAddBuff(target, buffName, buffer);
+			}
 			return true;
 		}
 	}
@@ -191,6 +196,12 @@ public class BuffService implements INetworkDispatch {
         	if(buff.getEffect3Name().length() > 0) core.skillModService.addSkillMod(target, buff.getEffect3Name(), (int) buff.getEffect3Value());
         	if(buff.getEffect4Name().length() > 0) core.skillModService.addSkillMod(target, buff.getEffect4Name(), (int) buff.getEffect4Value());
         	if(buff.getEffect5Name().length() > 0) core.skillModService.addSkillMod(target, buff.getEffect5Name(), (int) buff.getEffect5Value());
+        	
+        	if (buffName.equals("gcw_fatigue")){
+        		if (FileUtilities.doesFileExist("scripts/buffs/" + buffName + ".py")) {
+        			core.scriptService.callScript("scripts/buffs/", buffName, "add", core, buffer, buff);
+        		}
+        	}
 //		}
 		
 		target.addBuff(buff);
@@ -266,7 +277,13 @@ public class BuffService implements INetworkDispatch {
          	if(buff.getEffect1Name().length() > 0) core.skillModService.deductSkillMod(creature, buff.getEffect3Name(), (int) buff.getEffect3Value());
          	if(buff.getEffect1Name().length() > 0) core.skillModService.deductSkillMod(creature, buff.getEffect4Name(), (int) buff.getEffect4Value());
          	if(buff.getEffect1Name().length() > 0) core.skillModService.deductSkillMod(creature, buff.getEffect5Name(), (int) buff.getEffect5Value());
-//         }
+
+         	if (buff.getBuffName().equals("gcw_fatigue")){
+        		if (FileUtilities.doesFileExist("scripts/buffs/" + buff.getBuffName() + ".py")) {
+        			core.scriptService.callScript("scripts/buffs/", buff.getBuffName(), "remove", core, creature, buff);
+        		}
+        	}
+         //         }
          	
          if (!buff.getCallback().equals("none") && !buff.getCallback().equals("")) {
         	 if (FileUtilities.doesFileExist("scripts/buffs/" + buff.getBuffName() +  ".py")) {

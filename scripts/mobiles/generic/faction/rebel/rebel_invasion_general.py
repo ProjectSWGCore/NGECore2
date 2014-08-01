@@ -23,6 +23,8 @@ def addTemplate(core):
 	mobileTemplate.setStalker(False)
 	mobileTemplate.setFaction("rebel")
 	mobileTemplate.setFactionStatus(FactionStatus.Combatant)
+	mobileTemplate.setOptionsBitmask(Options.INVULNERABLE)
+	mobileTemplate.setAIEnabled(False)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_rebel_general_human_female_01.iff')

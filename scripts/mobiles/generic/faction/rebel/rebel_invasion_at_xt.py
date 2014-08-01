@@ -24,9 +24,10 @@ def addTemplate(core):
 	mobileTemplate.setStalker(False)
 	mobileTemplate.setFaction("rebel")
 	mobileTemplate.setFactionStatus(FactionStatus.Combatant)
+	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
 	
 	templates = Vector()
-	templates.add('object/mobile/vehicle/shared_walker_at_xt.iff')
+	templates.add('object/mobile/shared_atxt.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
@@ -35,7 +36,7 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
-	mobileTemplate.setDefaultAttack('rangedShot')
+	mobileTemplate.setDefaultAttack('gcw_atst_attack_tower')
 	mobileTemplate.setAttacks(attacks)
 	
 	core.spawnService.addMobileTemplate('rebel_invasion_at_xt', mobileTemplate)

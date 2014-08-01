@@ -187,6 +187,8 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	private transient CreatureObject calledPet;
 	
 	private byte locomotion = 0;
+	private short GCWFatigue = 0;
+	private boolean isConstructing = false;
 	
 	public CreatureObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
 		super(objectID, planet, position, orientation, Template);
@@ -1884,5 +1886,35 @@ public class CreatureObject extends TangibleObject implements Serializable {
 
 	public void setCalledPet(CreatureObject calledPet) {
 		this.calledPet = calledPet;
+	}
+
+	public short getGCWFatigue() {
+		return GCWFatigue;
+	}
+
+	public void setGCWFatigue(short gCWFatigue) {
+		GCWFatigue = gCWFatigue;
+	}
+	
+	public boolean isTrader(){
+		if (isPlayer()){
+			PlayerObject player = (PlayerObject) this.getSlottedObject("ghost");	
+			String profession = player.getProfession();
+			if (profession.equals("trader_0a") ||
+				profession.equals("trader_0b") ||
+				profession.equals("trader_0c") ||
+				profession.equals("trader_0d")){
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public boolean isConstructing() {
+		return isConstructing;
+	}
+
+	public void setConstructing(boolean isConstructing) {
+		this.isConstructing = isConstructing;
 	}
 }

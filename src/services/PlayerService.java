@@ -67,6 +67,7 @@ import resources.common.OutOfBand;
 import resources.common.ProsePackage;
 import resources.common.SpawnPoint;
 import resources.datatables.DisplayType;
+import resources.datatables.FactionStatus;
 import resources.datatables.Options;
 import resources.datatables.PlayerFlags;
 import resources.datatables.Professions;
@@ -526,10 +527,19 @@ public class PlayerService implements INetworkDispatch {
 	@SuppressWarnings("unchecked")
 	public void sendCloningWindow(CreatureObject creature, final boolean pvpDeath) {
 		
-		//if(creature.getPosture() != 14)
-		//	return;
+		if(creature.getPosture() != 14)
+			return;
 		
 		List<SWGObject> cloners = core.staticService.getCloningFacilitiesByPlanet(creature.getPlanet());
+		
+		boolean invasionDeath = core.invasionService.checkInvasionDeath(creature);
+		
+		if (invasionDeath){
+			if (core.invasionService.getAccordingCloners(creature).size()>0){
+				cloners = core.invasionService.getAccordingCloners(creature);
+			}
+		}
+		
 		Map<Long, String> cloneData = new HashMap<Long, String>();
 		Point3D position = creature.getWorldPosition();
 		
@@ -542,9 +552,20 @@ public class PlayerService implements INetworkDispatch {
 		}
 		final long preDesignatedObjectId = (preDesignatedCloner != null) ? preDesignatedCloner.getObjectID() : 0;
 		cloners.stream().filter(c -> c.getObjectID() != preDesignatedObjectId).forEach(c -> cloneData.put(c.getObjectID(), core.mapService.getClosestCityName(c)));
+				
+		Map<Long, String> listedCloneData = cloneData;
 		
+		if (invasionDeath){
+			if (core.invasionService.getAccordingCloners(creature).size()>0){
+				listedCloneData = new HashMap<Long, String>();
+				for (SWGObject cloner : core.invasionService.getAccordingCloners(creature)){
+					listedCloneData.put(cloner.getObjectID(), cloner.getCustomName());
+				}
+			}
+		}
+			
 		final SUIWindow window = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "@base_player:revive_title", "@base_player:clone_prompt_header", 
-				cloneData, creature, null, 0);
+				listedCloneData, creature, null, 0);
 		Vector<String> returnList = new Vector<String>();
 		returnList.add("List.lstList:SelectedRow");
 		
@@ -577,10 +598,10 @@ public class PlayerService implements INetworkDispatch {
 	}
 	
 	public void handleCloneRequest(CreatureObject creature, BuildingObject cloner, SpawnPoint spawnPoint, boolean pvpDeath) {
-		
+
 		CellObject cell = cloner.getCellByCellNumber(spawnPoint.getCellNumber());
 		
-		if(cell == null)
+		if(cell == null && !cloner.getTemplate().contains("shared_invisible_cloner"))
 			return;
 		
 		creature.setPosture((byte) 0);
@@ -599,7 +620,9 @@ public class PlayerService implements INetworkDispatch {
 			creature.updateAllBuffs();
 		}
 		
-		creature.setFactionStatus(0);
+		creature.setFactionStatus(FactionStatus.OnLeave);
+		creature.updatePvpStatus();
+		
 		core.buffService.addBuffToCreature(creature, "cloning_sickness", creature);
 		
 	}

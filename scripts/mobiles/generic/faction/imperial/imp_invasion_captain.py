@@ -11,13 +11,14 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('fbase_imperial_colonel_extreme')
+	mobileTemplate.setCreatureName('gcw_city_imperial_captain')
 	mobileTemplate.setLevel(90)
-	mobileTemplate.setDifficulty(Difficulty.ELITE)
+	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)
+	mobileTemplate.setScale(1)
 	mobileTemplate.setSocialGroup("imperial")
 	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(False)
@@ -27,7 +28,7 @@ def addTemplate(core):
 	mobileTemplate.setNoAI(True)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_dressed_imperial_colonel_m.iff')
+	templates.add('object/mobile/shared_dressed_imperial_captain_m.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
@@ -39,5 +40,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('rangedShot')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('imp_defensive_quest_officer', mobileTemplate)
+	core.spawnService.addMobileTemplate('imp_invasion_captain', mobileTemplate)
 	return

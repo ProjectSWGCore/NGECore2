@@ -82,6 +82,7 @@ import resources.objects.group.GroupObject;
 import resources.objects.harvester.HarvesterObject;
 import resources.objects.installation.InstallationObject;
 import resources.objects.player.PlayerObject;
+import resources.objects.staticobject.StaticObject;
 import resources.objects.tangible.TangibleObject;
 import resources.common.*;
 import resources.common.collidables.AbstractCollidable;
@@ -287,6 +288,27 @@ public class SimulationService implements INetworkDispatch {
 			}
 		);
 		return foundCreatures;
+	}
+	
+	public Vector<TangibleObject> getAllNearNonSameFactionTargets(int distance, SWGObject center ){
+		Vector<TangibleObject> foundTargets = new Vector<TangibleObject>();
+		core.simulationService.get(center.getPlanet(), center.getWorldPosition().x, center.getWorldPosition().z, distance).stream().forEach((objecta) -> {
+			if (center.getObjectID()!=objecta.getObjectID()){	
+				String centerfaction = "";
+				if (center instanceof CreatureObject)
+					centerfaction = ((CreatureObject)center).getFaction();
+				if (center instanceof InstallationObject)
+					centerfaction = ((InstallationObject)center).getFaction();
+				if (center instanceof TangibleObject)
+					centerfaction = ((TangibleObject)center).getFaction();
+				
+				if (centerfaction.length()>0 && !(objecta instanceof StaticObject)){
+					if (objecta.getObjectID()!=center.getObjectID() && NGECore.getInstance().factionService.isFactionEnemy((TangibleObject) objecta,(TangibleObject) center))
+						foundTargets.add((TangibleObject)objecta);
+				}	
+			}
+		});
+		return foundTargets;
 	}
 	
 	public Vector<CreatureObject> getAllNearNonSameFactionNPCs(int distance, SWGObject center ){
@@ -1302,8 +1324,8 @@ public class SimulationService implements INetworkDispatch {
 	public boolean checkLineOfSight(SWGObject object, Point3D position2) {
 		long startTime = System.nanoTime();
 		
-		float heightOrigin = 1.f;
-		float heightDirection = 1.f;
+		float heightOrigin = 1.75f;
+		float heightDirection = 1.75f;
 		
 		if (object instanceof CreatureObject) {
 			heightOrigin = getHeightOrigin((CreatureObject) object);
@@ -1321,6 +1343,9 @@ public class SimulationService implements INetworkDispatch {
 			if (inRangeObject == object) {
 				continue;
 			}
+			
+			if (object.getTemplate().contains("_barricade") || object.getTemplate().contains("shared_dejarik_table_base"))
+				continue;
 			
 			if (object.getTemplateData() != null && object.getTemplateData().getAttribute("collisionActionBlockFlags") != null) {
 				int bit = (Integer) object.getTemplateData().getAttribute("collisionActionBlockFlags") & 255;
@@ -1358,9 +1383,9 @@ public class SimulationService implements INetworkDispatch {
 	public boolean checkLineOfSight2(SWGObject obj1, Point3D obj2) {
 		long startTime = System.nanoTime();
 						
-		float heightOrigin = 1.f;
-		float heightDirection = 1.f;
-	
+		float heightOrigin = 1.75f;
+		float heightDirection = 1.75f;
+		
 		if(obj1 instanceof CreatureObject)
 			heightOrigin = getHeightOrigin((CreatureObject) obj1);
 				
@@ -1376,6 +1401,9 @@ public class SimulationService implements INetworkDispatch {
 		for(SWGObject object : inRangeObjects) {
 			
 			if(object == obj1)
+				continue;
+			
+			if (object.getTemplate().contains("_barricade") || object.getTemplate().contains("shared_dejarik_table_base"))
 				continue;
 			
 			if(object.getTemplateData() != null && object.getTemplateData().getAttribute("collisionActionBlockFlags") != null) {
@@ -1447,8 +1475,10 @@ public class SimulationService implements INetworkDispatch {
 			
 		}
 		
-		float heightOrigin = 1.f;
-		float heightDirection = 1.f;
+//		float heightOrigin = 1.f;
+//		float heightDirection = 1.f;
+		float heightOrigin = 1.75f;
+		float heightDirection = 1.75f;
 		
 		if (obj2.getTemplate().equals("object/tangible/inventory/shared_character_inventory.iff")){
 			obj2 = obj2.getContainer(); // LOS message fix on corpse
@@ -1472,6 +1502,9 @@ public class SimulationService implements INetworkDispatch {
 		for(SWGObject object : inRangeObjects) {
 			
 			if(object == obj1 || object == obj2)
+				continue;
+			
+			if (object.getTemplate().contains("_barricade") || object.getTemplate().contains("shared_dejarik_table_base"))
 				continue;
 			
 			if(object.getTemplateData() != null && object.getTemplateData().getAttribute("collisionActionBlockFlags") != null) {

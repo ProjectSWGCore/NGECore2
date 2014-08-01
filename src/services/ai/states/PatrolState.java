@@ -64,7 +64,7 @@ public class PatrolState extends AIState {
 		}
 		CreatureObject creature = actor.getCreature();
 		if(creature.isInCombat()){
-			System.out.println("PatrolState locking!");
+			//System.out.println("PatrolState locking!");
 			locked = true;
 			return StateResult.FINISHED;
 		}

@@ -48,6 +48,7 @@ def run(core, actor, target, commandString):
 	
 	#This can be removed if player is required to see the recruiter first
 	if faction == '':
+		actor.setFactionStatus(FactionStatus.Combatant) # Must be! otherwise updatePVPstatus will be called with onLeave!
 		actor.setFaction(commandString)
 		faction = commandString
 	
@@ -59,8 +60,8 @@ def run(core, actor, target, commandString):
 		actor.sendSystemMessage('@faction_recruiter:on_leave_to_covert', 0)
 		actor.setPvpStatus(PvpStatus.GoingCovert, True)
 		time.sleep(1)
-		actor.setFactionStatus(FactionStatus.Combatant)
 		actor.setPvpStatus(PvpStatus.GoingCovert, False)
+		actor.setFactionStatus(FactionStatus.Combatant)		
 		actor.sendSystemMessage('@faction_recruiter:covert_complete', 0)
 		actor.updatePvpStatus()
 		core.factionService.updatePVPFromNearbyNPCs(actor, actor.getClient())
@@ -72,8 +73,8 @@ def run(core, actor, target, commandString):
 		time.sleep(30)
 		if core.gcwService.isInPvpZone(actor):
 			return
-		actor.setFactionStatus(FactionStatus.SpecialForces)
 		actor.setPvpStatus(PvpStatus.GoingOvert, False)
+		actor.setFactionStatus(FactionStatus.SpecialForces)		
 		actor.sendSystemMessage('@faction_recruiter:overt_complete', 0)
 		actor.updatePvpStatus()
 		return

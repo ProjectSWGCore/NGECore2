@@ -230,6 +230,14 @@ public class AIService {
 		return this.checkerAI;
 	}
 	
+	public float distanceSquared2D(Point3D p2, Point3D p1){
+		return (p2.x - p1.x) * (p2.x - p1.x) + (p2.z - p1.z) * (p2.z - p1.z);
+	}
+	
+	public float distanceSquared(Point3D p2, Point3D p1){
+		return (p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y) + (p2.z - p1.z) * (p2.z - p1.z);
+	}
+	
 	public void logAI(String logMsg){
 		if (checkDeveloperIdentity()){
 			System.err.println("AI-LOG: " + logMsg);

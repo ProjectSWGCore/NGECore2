@@ -795,6 +795,7 @@ public class CombatService implements INetworkDispatch {
 		String animationStr = command.getRandomAnimation(weapon); // choosing turretShot as default attack, results in a zero length string
 		if (weapon.getTemplate().contains("atst_ranged")) 
 			animationStr="fire_1_single_light";
+
 		CombatAction combatAction = new CombatAction(CRC.StringtoCRC(animationStr), attacker.getObjectID(), weapon.getObjectID(), target.getObjectID(), command.getCommandCRC());
 		
 //		int turret_fire = 0xD334C0B8; // 0xA7595B4E
@@ -1089,10 +1090,14 @@ public class CombatService implements INetworkDispatch {
 				
 			}
 			
+			if (!attacker.isPlayer()){
+				if (attacker.hasBuff("expertise_damage_npc")){
+					rawDamage *=2; // tower_defense buff
+				}
+			}			
 		}
 		
-		return rawDamage;
-		
+		return rawDamage;		
 	}
 	
 	private float calculateDamageForInstallation(InstallationObject attacker, TangibleObject target, WeaponObject weapon, CombatCommand command) {
