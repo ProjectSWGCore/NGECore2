@@ -23,7 +23,7 @@ def addPlanetSpawns(core, planet):
 	commoner3 = stcSvc.spawnObject('commoner', 'tatooine', starport.getCellByCellNumber(long(7)), float(39.47), float(0.64), float(36), float(0.790), float(0), float(-0.614), float(0)) 
 	commoner4 = stcSvc.spawnObject('commoner', 'tatooine', starport.getCellByCellNumber(long(7)), float(52.8), float(0.64), float(47.47), float(0.723), float(0), float(-0.691), float(0)) 
 	commoner5 = stcSvc.spawnObject('commoner', 'tatooine', starport.getCellByCellNumber(long(7)), float(42.48), float(-0.52), float(32.32), float(0.115), float(0), float(0.993), float(0))
-	commoner6 = stcSvc.spawnObject('commoner', 'tatooine', starport.getCellByCellNumber(long(7)), float(54.38), float(-0.52), float(42.25), float(0.631), float(0), float(0.776), float(0))  
+	commoner6 = stcSvc.spawnObject('aurilliancontact', 'tatooine', starport.getCellByCellNumber(long(7)), float(54.38), float(-0.52), float(42.25), float(0.631), float(0), float(0.776), float(0))  
 	
 	jawa1 = stcSvc.spawnObject('staticjawa', 'tatooine', long(0), float(3654.96), float(5), float(-4766.49), float(0.439), float(0), float(0.898), float(0))	
 	jawa2 = stcSvc.spawnObject('staticjawa', 'tatooine', long(0), float(3655.17), float(5), float(-4768.71), float(0.902), float(0), float(-0.430), float(0))	
