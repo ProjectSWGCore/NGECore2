@@ -16,8 +16,9 @@ def addPlanetSpawns(core, planet):
 	# TODO Check all NPCs for personalized scripting, change format.
 	cloner2 = core.objectService.getObject(long(9655494))
 	
-	stcSvc.spawnObject('object/mobile/shared_21b_surgical_droid.iff', 'tatooine', cloner2.getCellByCellNumber(2), float(-0.4), float(0.2), float(-2.5), float(0), float(0), float(0), float(0))
+	stcSvc.spawnObject('object/mobile/shared_21b_surgical_droid.iff', 'tatooine', cloner2.getCellByCellNumber(2), float(-0.4), float(0.2), float(-2.5), float(-0.694), float(0), float(0.720), float(0))
 
+	stcSvc.spawnObject('kazenharn', 'tatooine', cloner2.getCellByCellNumber(2), float(-0.381), float(0.2), float(-2.31), float(0.973), float(0), float(0.231), float(0))
 	
 	return
 	
