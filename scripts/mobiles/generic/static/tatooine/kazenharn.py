@@ -10,18 +10,14 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('nexus_travel_01')
+	mobileTemplate.setCustomName('Kazen Harn')
 	mobileTemplate.setLevel(1)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 	mobileTemplate.setSocialGroup("township")
 	mobileTemplate.setOptionsBitmask(Options.INVULNERABLE)
-	#mobileTemplate.setConversationFileName('aurellian_contact')
 		
 	templates = Vector()
-	templates.add('object/mobile/shared_nexus_travel_01.iff')
-	templates.add('object/mobile/shared_nexus_travel_02.iff')
-	templates.add('object/mobile/shared_nexus_travel_03.iff')
-	
+	templates.add('object/mobile/shared_dressed_corsec_detective_human_male_01.iff')
 	mobileTemplate.setTemplates(templates)
 		
 	weaponTemplates = Vector()
@@ -33,5 +29,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('aurilliancontact', mobileTemplate)
+	core.spawnService.addMobileTemplate('kazenharn', mobileTemplate)
 	return
