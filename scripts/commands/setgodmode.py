@@ -218,7 +218,24 @@ def run(core, actor, target, commandString):
 		latargetID = long(actor.getIntendedTarget())
 		latarget = core.objectService.getObject(latargetID)
 		actor.sendSystemMessage('Optionsbitmask for unit ' + latarget.getCustomName() + ' is %s' % latarget.getOptionsBitmask(), 0)
-				
+	
+	elif command == 'nextupd':		
+		latargetID = long(actor.getIntendedTarget())
+		latarget = core.objectService.getObject(latargetID)
+		player = actor.getSlottedObject("ghost")
+		#player.setNextUpdateTime(1324005720) #84000 60*60*24   86400
+		# 1324005720 is 2:06 AM to set to zero!
+		
+		player.setNextUpdateTime(452783) #84000 60*60*24   86400 83980800 140400   21*60=1260   83840400   6*60+55
+		
+	elif command == 'epoch':	
+		core.gcwService.sendServerNowEpochTime(actor)
+		
+	elif command == 'pushGCW':	
+		player = actor.getSlottedObject("ghost")
+		player.setCurrentRank(1);
+		player.setGcwPoints(player.getGcwPoints()+1000)
+	
 	elif command == 'suitest':
 		window = core.suiService.createSUIWindow('Script.countdownTimerBar', actor, None, 5)
 		#window.setProperty('bg.caption.lblTitle:Text', 'Titletext')

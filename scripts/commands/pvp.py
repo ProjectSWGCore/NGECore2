@@ -50,6 +50,9 @@ def run(core, actor, target, commandString):
 	if faction == '':
 		actor.setFactionStatus(FactionStatus.Combatant) # Must be! otherwise updatePVPstatus will be called with onLeave!
 		actor.setFaction(commandString)
+		player = actor.getSlottedObject("ghost")
+		if player.getCurrentRank()==0:
+			player.setCurrentRank(1);
 		faction = commandString
 	
 	if faction == 'neutral' or faction == '':

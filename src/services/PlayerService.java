@@ -37,8 +37,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
+
 
 import protocol.swg.CharacterSheetResponseMessage;
 import protocol.swg.ClientIdMsg;
@@ -68,6 +70,8 @@ import resources.common.ProsePackage;
 import resources.common.SpawnPoint;
 import resources.datatables.DisplayType;
 import resources.datatables.FactionStatus;
+import resources.datatables.Factions;
+import resources.datatables.GcwRank;
 import resources.datatables.Options;
 import resources.datatables.PlayerFlags;
 import resources.datatables.Professions;
@@ -137,6 +141,48 @@ public class PlayerService implements INetworkDispatch {
 				player.setTotalPlayTime((int) (player.getTotalPlayTime() + ((System.currentTimeMillis() - player.getLastPlayTimeUpdate()) / 1000)));
 				player.setLastPlayTimeUpdate(System.currentTimeMillis());
 				core.collectionService.checkExplorationRegions(creature);
+
+				// GCW rank progress
+				if (creature.getFaction().equals("rebel") || creature.getFaction().equals("imperial")){
+					int oldrank = player.getCurrentRank();
+					//int oldprogress = (int) ((player.getRankProgress() > 100) ? 100 : player.getRankProgress());
+					int oldprogress = 0;
+					int oldpoints = player.getGcwPoints();
+					int newrank = oldrank;
+					int newprogress = oldprogress;
+					int oldranktotal = 0;
+					int oldrankprogress = 0;
+					int newranktotal = 0;
+					int newrankprogress = 0;
+					
+					oldrankprogress = oldprogress * 50;
+					oldranktotal = 5000 * (oldrank - 1) + oldrankprogress;
+					
+					newprogress = (int) core.gcwService.helper(oldpoints, oldrank);
+					
+					if (newprogress < -2000) {
+						newprogress = -2000;
+					}
+					
+					newranktotal = oldranktotal + newprogress;
+					
+					if (oldrank == GcwRank.LIEUTENANT && newprogress < 0 && newranktotal < 30000) {
+						newranktotal = 29999;
+					}
+					
+					newrank = oldrank;
+					
+					if (newrank > GcwRank.GENERAL) {
+						newrank = GcwRank.GENERAL;
+						newranktotal = 12 * 5000 - 1;
+					}
+					
+					newrankprogress = newranktotal - (newrank - 1) * 5000;
+					newprogress = newrankprogress * 100 / 5000;
+					
+					player.setRankProgress((float) Math.floor(newprogress));
+				}
+				
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

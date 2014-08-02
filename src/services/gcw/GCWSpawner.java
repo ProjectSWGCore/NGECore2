@@ -24,8 +24,10 @@ package services.gcw;
 import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
@@ -107,9 +109,14 @@ public class GCWSpawner extends TangibleObject{
 	public void setSpawnerType(int spawnerType) {
 		this.spawnerType = spawnerType;
 		if (spawnerType==SpawnerType.SoldierPatrol){
-			scheduler.scheduleAtFixedRate(new Runnable() {
+			final Future<?>[] fut1 = {null};
+			fut1[0] = scheduler.scheduleAtFixedRate(new Runnable() {
 				@Override public void run() { 
 					try {
+						if (NGECore.getInstance().invasionService.getInvasionPhase()>2){
+			                Thread.yield();
+			                fut1[0].cancel(false);
+						}
 						spawnSoldier();	
 					} catch (Exception e) {
 						System.err.println("Exception in SoldierPatrolPylon->scheduleAtFixedRate->spawnSoldier() " + e.getMessage());
@@ -119,9 +126,14 @@ public class GCWSpawner extends TangibleObject{
 		}
 		
 		if (spawnerType==SpawnerType.SoldierDefense){
-			scheduler.scheduleAtFixedRate(new Runnable() {
+			final Future<?>[] fut2 = {null};
+			fut2[0] = scheduler.scheduleAtFixedRate(new Runnable() {
 				@Override public void run() { 
 					try {
+						if (NGECore.getInstance().invasionService.getInvasionPhase()>2){
+			                Thread.yield();
+			                fut2[0].cancel(false);
+						}
 						spawnSoldierDefender();	
 					} catch (Exception e) {
 						System.err.println("Exception in SoldierDefensePylon->scheduleAtFixedRate->spawnSoldier() " + e.getMessage());
@@ -131,9 +143,14 @@ public class GCWSpawner extends TangibleObject{
 		}
 		
 		if (spawnerType==SpawnerType.VehiclePatrol){
-			scheduler.scheduleAtFixedRate(new Runnable() {
+			final Future<?>[] fut3 = {null};
+			fut3[0] = scheduler.scheduleAtFixedRate(new Runnable() {
 				@Override public void run() { 
 					try {
+						if (NGECore.getInstance().invasionService.getInvasionPhase()>2){
+			                Thread.yield();
+			                fut3[0].cancel(false);
+						}
 						spawnVehicle();	
 					} catch (Exception e) {
 						System.err.println("Exception in SoldierPatrolPylon->scheduleAtFixedRate->spawnVehicle() " + e.getMessage());
@@ -143,9 +160,14 @@ public class GCWSpawner extends TangibleObject{
 		}
 		
 		if (spawnerType==SpawnerType.SiegeVehiclePatrol){
-			scheduler.scheduleAtFixedRate(new Runnable() {
+			final Future<?>[] fut4 = {null};
+			fut4[0] = scheduler.scheduleAtFixedRate(new Runnable() {
 				@Override public void run() { 
 					try {
+						if (NGECore.getInstance().invasionService.getInvasionPhase()>2){
+			                Thread.yield();
+			                fut4[0].cancel(false);
+						}
 						spawnSiegeVehicle();	
 					} catch (Exception e) {
 						System.err.println("Exception in SoldierPatrolPylon->scheduleAtFixedRate->spawnSoldier() " + e.getMessage());

@@ -21,8 +21,6 @@
  ******************************************************************************/
 package services.gcw;
 
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,9 +32,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-
 import org.apache.mina.core.session.IoSession;
-
 import protocol.swg.CommPlayerMessage;
 import protocol.swg.PlayClientEffectObjectTransformMessage;
 import resources.common.OutOfBand;
@@ -141,6 +137,7 @@ public class InvasionService implements INetworkDispatch {
 			invasionScheduled=true;
 			scheduleInvasionEventManager();
 		}, 60, TimeUnit.SECONDS);	
+		// Local code to schedule a 20 minutes long phase2 invasion
 		
 		
 		// Server code to schedule invasions hourly
@@ -149,7 +146,8 @@ public class InvasionService implements INetworkDispatch {
 			while (!invasionScheduled) {
 				Calendar now = Calendar.getInstance();
 				// wait for the next full hour
-				if (now.get(Calendar.MINUTE)==0 && ! invasionScheduled){				
+				if (now.get(Calendar.MINUTE)==0 && ! invasionScheduled){	
+					temptimestartreference = System.currentTimeMillis();
 					scheduleInvasionManager();
 					scheduleInvasionEventManager();
 					invasionScheduled=true;
@@ -236,13 +234,15 @@ public class InvasionService implements INetworkDispatch {
 	
 	public void invasionEventManager(){
 		
-		if (invasionPhase==1 && System.currentTimeMillis()>temptimestartreference + 60000 && ! ph1_message1sent){
+		// First message at 0:00
+		if (invasionPhase==1 && System.currentTimeMillis()>temptimestartreference + 10 && ! ph1_message1sent){
 			send_Phase1_InvaderMessage1();
 			send_Phase1_DefenderMessage1();
 			ph1_message1sent = true;
 			System.out.println("Phase 1 msg1 sent ");
 		}
 		
+		// Message at 15:00 -> 900000 seconds
 		if (invasionPhase==1 && System.currentTimeMillis()>temptimestartreference + 300000 && ! ph1_message2sent){
 			send_Phase1_InvaderMessage2();
 			send_Phase1_DefenderMessage2();
@@ -250,7 +250,7 @@ public class InvasionService implements INetworkDispatch {
 			System.out.println("Phase 1 msg2 sent ");
 		}
 		
-		//if (invasionPhase==1 && System.currentTimeMillis()>temptimestartreference + 600000 && ! ph2_message1sent){
+		// Message at 30:00 -> 1800000 seconds
 		if (invasionPhase==1 && System.currentTimeMillis()>temptimestartreference + 35000 && ! ph2_message1sent){
 			invasionPhase=2;
 			preparePhase2();			
@@ -261,6 +261,7 @@ public class InvasionService implements INetworkDispatch {
 			System.out.println("Defender msg1 sent ");
 		}
 		
+		// Message at 45:00 -> 2700000 seconds
 		if (invasionPhase==2 && System.currentTimeMillis()>temptimestartreference + 900000 && ! ph2_message2sent){ // 1200000
 			send_Phase2_InvaderMessage2();
 			send_Phase2_DefenderMessage2();
@@ -276,7 +277,6 @@ public class InvasionService implements INetworkDispatch {
 			System.out.println("Defender msg2 sent "); // Local server gives only 30 mins time, so its 20 mins for this phase
 		}
 			
-					
 		if (defendingGeneral!=null){
 			
 			if (invasionPhase==3 && defendingGeneral.getHealth()<defendingGeneral.getMaxHealth() &&(defendingGeneral.getPosture()!=13 || defendingGeneral.getPosture()!=14) && ! ph2_message6sent){
@@ -285,6 +285,76 @@ public class InvasionService implements INetworkDispatch {
 				ph2_message6sent = true;
 			}
 			
+
+			//defenders won 59:00 mins 3600000-60000
+			if (invasionPhase==2 && System.currentTimeMillis()>temptimestartreference + 1500000 && ! ph2_message3sent){ 
+				sendDefenderWonMessage();
+				sendInvaderLostMessage();				
+				ph2_message3sent = true;
+				invasionPhase=4;
+				
+				// Take care of GCW points
+				grantGCWPoints(invadingFaction,100);
+				grantGCWPoints(defendingFaction,1000);
+
+				grantGCWTokens(invadingFaction,10);
+				grantGCWTokens(defendingFaction,130);
+				
+				// set up delayed tasks
+				//Clone Maps
+				Map<Integer,CreatureObject> invadingCreaturesClone = new ConcurrentHashMap<Integer,CreatureObject>();
+				Map<Integer,CreatureObject> defendingCreaturesClone = new ConcurrentHashMap<Integer,CreatureObject>();
+				for (Map.Entry<Integer, CreatureObject> entry : invadingCreatures.entrySet()) {
+					invadingCreaturesClone.put(entry.getKey(), entry.getValue());
+				}
+				for (Map.Entry<Integer, CreatureObject> entry : defendingCreatures.entrySet()) {
+					defendingCreaturesClone.put(entry.getKey(), entry.getValue());
+				}
+				
+				Executors.newSingleThreadScheduledExecutor().schedule(() -> {	
+					wipeInvaders(invadingCreaturesClone);
+					wipeDefenders(defendingCreaturesClone); // Make sure all are deleted
+				}, 360, TimeUnit.SECONDS);
+				
+				
+				withdrawInvaders();
+				for (BuildingObject camp : offensiveCamps){
+					core.simulationService.remove(camp, camp.getWorldPosition().x, camp.getWorldPosition().z, true);
+					core.objectService.destroyObject(camp.getObjectID());
+				}
+				
+				for (CreatureObject officer : offensiveQuestOfficers){
+					core.simulationService.remove(officer, officer.getWorldPosition().x, officer.getWorldPosition().z, true);
+					core.objectService.destroyObject(officer.getObjectID());
+				}
+				for (TangibleObject banner : defensiveBanners){
+					core.objectService.destroyObject(banner.getObjectID());
+				}
+				
+				if (defensiveTable!=null)
+					core.objectService.destroyObject(defensiveTable.getObjectID());
+				if (defendingGeneral!=null)
+					core.objectService.destroyObject(defendingGeneral.getObjectID());
+				if (defendingQuestOfficer!=null)
+					core.objectService.destroyObject(defendingQuestOfficer.getObjectID());
+				if (invasionGeneral!=null)
+					core.objectService.destroyObject(invasionGeneral.getObjectID());
+							
+				deletePhase2Objects();
+				generalWarningLevelMap.clear();
+				offensiveSupplyTerminals = new Vector<TangibleObject>();
+				invaderRegistryCounter = 0;
+				defenderRegistryCounter = 0;
+				defensiveBanners.clear();
+				defensiveSupplyTerminals.clear();
+				defensiveTable = null;
+				defendingGeneralTask.cancel(true);
+				defendingGeneralTask = null;
+							
+				invasionScheduled = false; // free Service
+			}
+
+			// General defeated
 			if (invasionPhase==3 && (defendingGeneral.getPosture()==13 || defendingGeneral.getPosture()==14) && ! ph2_message4sent){
 				sendInvaderWonMessage();
 				sendDefenderLostMessage();
@@ -295,7 +365,9 @@ public class InvasionService implements INetworkDispatch {
 				// Take care of GCW points
 				grantGCWPoints(invadingFaction,1000);
 				grantGCWPoints(defendingFaction,100);
-				// ToDo: tokens
+
+				grantGCWTokens(invadingFaction,130);
+				grantGCWTokens(defendingFaction,10);
 							
 				// Clean Up
 //				wipeInvaders();
@@ -355,25 +427,13 @@ public class InvasionService implements INetworkDispatch {
 				invasionScheduled = false; // free Service
 			}
 			
+			// General at half health
 			if (invasionPhase==3 && defendingGeneral.getHealth()<0.5*defendingGeneral.getMaxHealth() &&(defendingGeneral.getPosture()!=13 || defendingGeneral.getPosture()!=14) && ! ph2_message5sent){
 				//sendInvaderGeneralHalfMessage();
 				sendDefenderGeneralHalfMessage();
 				ph2_message5sent = true;
 			}
-		} else {
-			//defenders won 30 mins 1800000
-			if (invasionPhase==2 && System.currentTimeMillis()>temptimestartreference + 1200000 && ! ph2_message3sent){ 
-				sendDefenderWonMessage();
-				sendInvaderLostMessage();				
-				ph2_message3sent = true;
-				invasionPhase=3;
-				
-				invasionScheduled = false; // free Service
-				System.out.println("Defender msg2 sent "); // Local server gives only 30 mins time, so its 20 mins for this phase
-			}
-		}
-		
-		
+		} 	
 	}
 	
 	public void withdrawInvaders(){
@@ -401,6 +461,36 @@ public class InvasionService implements INetworkDispatch {
 				core.gcwService.addGcwPoints(player, gcwPoints, GcwType.Enemy);
 			}			
 		}		
+	}
+	
+	public void grantGCWTokens(int faction, int tokenamount){
+		String factionName = getFactionName(faction);
+		Vector<CreatureObject> allPlayers = core.simulationService.getAllNearSameFactionPlayers(500,invasionLocationCenter, getInvasionPlanet(invasionLocation), factionName);
+		for (CreatureObject player : allPlayers) {			
+			if (player.getFaction().length() > 0 && player.getFactionStatus() > FactionStatus.OnLeave) {
+
+				String tokenTemplate = "object/tangible/gcw/shared_gcw_rebel_token.iff";
+				String name = "item_gcw_rebel_token";
+				String description = "item_gcw_rebel_token";
+				if (player.getFaction().equals(Factions.Imperial)){
+					tokenTemplate = "object/tangible/gcw/shared_gcw_imperial_token.iff";
+					name = "item_gcw_imperial_token";
+					description = "item_gcw_imperial_token";
+				}
+				TangibleObject token = (TangibleObject) core.objectService.createObject(tokenTemplate, player.getPlanet());
+						
+				token.setStfFilename("static_item_n");
+				token.setStfName(name);
+				token.setDetailFilename("static_item_d");
+				token.setDetailName(description);
+
+				token.setUses(tokenamount);
+				
+				player.sendSystemMessage("@static_item_n:"+name+" \\#32CD32 x" + tokenamount +" have been placed in your inventory \\#FFFFFF", (byte)0);
+				core.playerService.giveItem(player, token);
+			}			
+		}
+		
 	}
 	
 	public void registerInvader(CreatureObject registrant){
@@ -628,8 +718,8 @@ public class InvasionService implements INetworkDispatch {
 	}
 	
 	public void supplyTerminalSUI(CreatureObject user, int childMenu){
-//		if (invasionPhase!=1)
-//			return; // prevent exploit
+		if (invasionPhase!=1)
+			return; // prevent exploit
 		String terminalName = "@gcw:terminal_gcw_reb_def_n";
 		if (defendingFaction==Factions.Imperial)
 			terminalName = "@gcw:terminal_gcw_imp_def_n";			
@@ -647,8 +737,8 @@ public class InvasionService implements INetworkDispatch {
 		{
 			public void process(SWGObject owner, int eventType, Vector<String> returnList) 
 			{
-//				if (invasionPhase!=1)
-//					return; // prevent exploit
+				if (invasionPhase!=1)
+					return; // prevent exploit
 				int index = Integer.parseInt(returnList.get(0));
 				int childIndex = (int) window.getObjectIdByIndex(index);
 				
@@ -706,8 +796,8 @@ public class InvasionService implements INetworkDispatch {
 	}
 	
 	public void supplyOffensiveTerminalSUI(CreatureObject user, int childMenu){
-//		if (invasionPhase!=1)
-//			return; // prevent exploit
+		if (invasionPhase!=1)
+			return; // prevent exploit
 		String terminalName = "@gcw:terminal_gcw_reb_offensiv_n";
 		if (defendingFaction==Factions.Imperial)
 			terminalName = "@gcw:terminal_gcw_imp_offensiv_n";			
@@ -722,8 +812,8 @@ public class InvasionService implements INetworkDispatch {
 		{
 			public void process(SWGObject owner, int eventType, Vector<String> returnList) 
 			{
-//				if (invasionPhase!=1)
-//					return; // prevent exploit
+				if (invasionPhase!=1)
+					return; // prevent exploit
 				int index = Integer.parseInt(returnList.get(0));
 				int childIndex = (int) window.getObjectIdByIndex(index);
 				
@@ -793,7 +883,6 @@ public class InvasionService implements INetworkDispatch {
 			
 		// determine pylon type
 		int pylonType = pylon.getPylonType();
-		String pylonName = (String)pylon.getAttachment("Name");
 		String toolTemplate = ""; 
 		switch (pylonType){
 			case PylonType.Barricade: toolTemplate="object/tangible/gcw/crafting_quest/shared_gcw_barricade_tool.iff";
@@ -1888,9 +1977,9 @@ public class InvasionService implements INetworkDispatch {
 	
 	public void sendDefenderWonMessage(){		
 		String message = "";
-		if (getInvasionLocationName().equals("talus_dearic")){
+		if (getInvasionLocationName().equals("talus_dearic")){  
 			if (defendingFaction==Factions.Imperial)
-				message = "@gcw:gcw_announcement_won_attack_imperial_" + getInvasionLocationName();
+				message = "@gcw:gcw_announcement_won_attack_imeprial_" + getInvasionLocationName();
 			if (defendingFaction==Factions.Rebel)
 				message = "@gcw:gcw_announcement_won_attack_rebel_" + getInvasionLocationName();
 		} else {
@@ -1919,10 +2008,7 @@ public class InvasionService implements INetworkDispatch {
 			message = "@gcw:gcw_announcement_city_end_safe_rebel_" + getInvasionLocationName();		
 		sendMessageToClients(invadingFaction, message);
 	}
-	
-	
-	
-	
+		
 	public void sendDefenderLostMessage(){		
 		String message = "";
 		if (defendingFaction==Factions.Imperial)
@@ -1969,15 +2055,10 @@ public class InvasionService implements INetworkDispatch {
 	}
 	
 	public void sendMessageToClients(int tofaction, String message){
-//		String modelTemplate = defendingGeneral.getTemplate();
-//		if (tofaction==Factions.Imperial)
-//			modelTemplate = invasionGeneral.getTemplate();
 		String modelTemplate = defendingGeneral.getTemplate();
 		if (invadingFaction==tofaction)
 			modelTemplate = invasionGeneral.getTemplate();
-				
-//		if (tofaction==Factions.Imperial)
-//			modelTemplate = invasionGeneral.getTemplate();
+
 		ConcurrentHashMap<IoSession, Client> clients = NGECore.getInstance().getActiveConnectionsMap();			
 		for (Map.Entry<IoSession, Client> entry : clients.entrySet()) {
 			Client client = entry.getValue();
@@ -2210,9 +2291,7 @@ public class InvasionService implements INetworkDispatch {
 	}
 	@Override
 	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> arg0,
-			Map<Integer, INetworkRemoteEvent> arg1) {
-		// TODO Auto-generated method stub
-		
+			Map<Integer, INetworkRemoteEvent> arg1) {		
 	}
 	
 	public class InvasionLocation {
