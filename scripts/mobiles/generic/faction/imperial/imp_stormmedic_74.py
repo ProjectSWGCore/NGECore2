@@ -23,7 +23,7 @@ def addTemplate(core):
 	mobileTemplate.setStalker(False)
 	mobileTemplate.setFaction("imperial")
 	mobileTemplate.setFactionStatus(FactionStatus.Combatant)
-	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
+	
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_imperial_medic1_human_male_01.iff')

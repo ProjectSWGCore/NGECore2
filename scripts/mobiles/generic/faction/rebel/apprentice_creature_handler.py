@@ -22,7 +22,7 @@ def addTemplate(core):
 	mobileTemplate.setStalker(True)
 	mobileTemplate.setFaction("rebel")
 	mobileTemplate.setFactionStatus(FactionStatus.Combatant)
-	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
+	
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_creaturehandler_trainer_human_male_01.iff')
