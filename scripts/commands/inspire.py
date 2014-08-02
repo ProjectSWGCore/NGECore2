@@ -34,7 +34,7 @@ def run(core, actor, target, commandString):
         actor.sendSystemMessage('@performance:insp_buff_must_listen', 2)
         return
     
-    if target.getPosition().getDistance2D(actor.getWorldPosition()) > float(20):
+    if target.getWorldPosition().getDistance2D(actor.getWorldPosition()) > float(20):
         actor.sendSystemMessage(target.getCustomName() + ' is too far away to inspire.', 0)
         return
     
