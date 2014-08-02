@@ -26,10 +26,10 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("sludge panther")
 	mobileTemplate.setAssistRange(6)
 	mobileTemplate.setStalker(True)
-	mobileTemplate.setOptionsBitmask(128)	
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)	
 
 	templates = Vector()
-	templates.add('object/mobile/shared_sludge_panther.iff')
+	templates.add('object/mobile/shared_corellian_sand_panther.iff')
 	mobileTemplate.setTemplates(templates)
 
 	weaponTemplates = Vector()
@@ -38,6 +38,9 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 
 	attacks = Vector()
+	attacks.add('bm_claw_3')
+	attacks.add('bm_flank_1')
+	attacks.add('bm_slash_3')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 

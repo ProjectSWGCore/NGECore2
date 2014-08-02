@@ -21,12 +21,12 @@ def addTemplate(core):
 	mobileTemplate.setMeatType("Insect Meat")
 	mobileTemplate.setMeatAmount(2)
 	mobileTemplate.setSocialGroup("angler")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setAssistRange(6)
 	mobileTemplate.setStalker(True)
-	mobileTemplate.setOptionsBitmask(128)
+	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_angler.iff')
+	templates.add('object/mobile/shared_angler_hatchling.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
@@ -35,6 +35,9 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_damage_poison_4')
+	attacks.add('bm_defensive_4')
+	attacks.add('bm_puncture_2')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('borgle')
 	mobileTemplate.setLevel(39)
-	mobileTemplate.setMinLevel(39)
-	mobileTemplate.setMaxLevel(42)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
@@ -27,9 +25,9 @@ def addTemplate(core):
 	mobileTemplate.setBoneType("Avian Bones")
 	mobileTemplate.setBoneAmount(5)
 	mobileTemplate.setSocialGroup("borgle")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setAssistRange(6)
 	mobileTemplate.setStalker(False)
-	mobileTemplate.setOptionsBitmask(128)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_borgle.iff')
@@ -41,6 +39,9 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_puncture_1')
+	attacks.add('bm_siphon_1')
+	attacks.add('bm_wing_buffet_3')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

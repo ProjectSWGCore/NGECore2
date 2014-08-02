@@ -28,11 +28,14 @@ def addTemplate(core):
 	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_rancor.iff')
+	templates.add('object/mobile/shared_bull_rancor.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	
 	attacks = Vector()
+	attacks.add('bm_dampen_pain_5')
+	attacks.add('bm_shaken_3')
+	attacks.add('bm_stomp_5')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

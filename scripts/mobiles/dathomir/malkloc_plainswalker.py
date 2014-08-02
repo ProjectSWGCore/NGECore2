@@ -23,7 +23,7 @@ def addTemplate(core):
 	mobileTemplate.setBoneType("Animal Bones")
 	mobileTemplate.setBoneAmount(1700)
 	mobileTemplate.setSocialGroup("malkloc plainswalker")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setStalker(False)
 	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
@@ -33,6 +33,10 @@ def addTemplate(core):
 	
 	
 	attacks = Vector()
+	attacks.add('bm_dampen_pain_5')
+	attacks.add('bm_deflective_hide')
+	attacks.add('bm_puncture_3')
+	attacks.add('bm_stomp_5')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

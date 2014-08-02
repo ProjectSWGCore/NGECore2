@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('torton_pygmy_adult')
 	mobileTemplate.setLevel(16)
-	mobileTemplate.setMinLevel(16)
-	mobileTemplate.setMaxLevel(18)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
@@ -27,9 +25,9 @@ def addTemplate(core):
 	mobileTemplate.setBoneType("Animal Bones")
 	mobileTemplate.setBoneAmount(600)
 	mobileTemplate.setSocialGroup("torton")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setAssistRange(4)
 	mobileTemplate.setStalker(False)
-	mobileTemplate.setOptionsBitmask(128)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_torton.iff')
@@ -41,6 +39,11 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_dampen_pain_3')
+	attacks.add('bm_deflective_hide')
+	attacks.add('bm_puncture_1')
+	attacks.add('bm_shaken_3')
+	attacks.add('bm_stomp_3')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

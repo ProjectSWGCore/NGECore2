@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('borgle_matriarch')
 	mobileTemplate.setLevel(40)
-	mobileTemplate.setMinLevel(40)
-	mobileTemplate.setMaxLevel(40)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
@@ -27,7 +25,7 @@ def addTemplate(core):
 	mobileTemplate.setBoneType("Avian Bones")
 	mobileTemplate.setBoneAmount(5)
 	mobileTemplate.setSocialGroup("borgle")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setAssistRange(6)
 	mobileTemplate.setStalker(False)
 	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
@@ -41,6 +39,9 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_puncture_1')
+	attacks.add('bm_siphon_1')
+	attacks.add('bm_wing_buffet_3')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
