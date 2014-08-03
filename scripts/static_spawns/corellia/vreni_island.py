@@ -32,31 +32,31 @@ def addPlanetSpawns(core, planet):
 	
 	cll8binarylifter1 = stcSvc.spawnObject('eg6_power_droid', 'corellia',long(0), float(-5696.4463), float(14.6000), float(-6153.2695), float(0.3365), float(0.0000), float(0.9417), float(0.0000))
 	
-	rebel_recruiter = stcSvc.spawnObject('rebel_recruiter', 'corellia',long(0), float(-5544.2920), float(16.0139), float(-6070.4609), float(0.7586), float(0.0000), float(-0.6516), float(0.0000))
+	#rebel_recruiter = stcSvc.spawnObject('rebel_recruiter', 'corellia',long(0), float(-5544.2920), float(16.0139), float(-6070.4609), float(0.7586), float(0.0000), float(-0.6516), float(0.0000))
 
-	rebel_soldier1 = stcSvc.spawnObject('crackdown_rebel_soldier_25', 'corellia', long(0), float(-5664.8369), float(14.6000), float(-6178.5034), float(0.5333), float(0.0000), float(0.8459), float(0.0000))
-	rebel_soldier2 = stcSvc.spawnObject('crackdown_rebel_soldier_25', 'corellia', long(0), float(-5715.1826), float(14.6000), float(-6153.5142), float(-0.6689), float(0.0000), float(0.7433), float(0.0000))
-	rebel_soldier3 = stcSvc.spawnObject('crackdown_rebel_soldier_25', 'corellia', long(0), float(-5397.4897), float(24.1948), float(-6243.6470), float(0.7284), float(0.0000), float(0.6852), float(0.0000))
+	#rebel_soldier1 = stcSvc.spawnObject('crackdown_rebel_soldier_25', 'corellia', long(0), float(-5664.8369), float(14.6000), float(-6178.5034), float(0.5333), float(0.0000), float(0.8459), float(0.0000))
+	#rebel_soldier2 = stcSvc.spawnObject('crackdown_rebel_soldier_25', 'corellia', long(0), float(-5715.1826), float(14.6000), float(-6153.5142), float(-0.6689), float(0.0000), float(0.7433), float(0.0000))
+	#rebel_soldier3 = stcSvc.spawnObject('crackdown_rebel_soldier_25', 'corellia', long(0), float(-5397.4897), float(24.1948), float(-6243.6470), float(0.7284), float(0.0000), float(0.6852), float(0.0000))
 	
-	Rebel_security_guard1 = stcSvc.spawnObject('rebel_security_guard', 'corellia', long(0), float(-5405.4038), float(25.2491), float(-6219.5327), float(0.9927), float(0.0000), float(0.1202), float(0.0000))
+	#Rebel_security_guard1 = stcSvc.spawnObject('rebel_security_guard', 'corellia', long(0), float(-5405.4038), float(25.2491), float(-6219.5327), float(0.9927), float(0.0000), float(0.1202), float(0.0000))
 	
 
-	rebel_liberator1 = stcSvc.spawnObject('rebel_liberator', 'corellia', long(0), float(-5715.7700), float(14.6000), float(-6147.1191), float(-0.6609), float(0.0000), float(0.7505), float(0.0000))
-	rebel_liberator2 = stcSvc.spawnObject('rebel_liberator', 'corellia', long(0), float(-5548.1470), float(23.4000), float(-6202.3511), float(0.9100), float(0.0000), float(-0.4147), float(0.0000))
+	#rebel_liberator1 = stcSvc.spawnObject('rebel_liberator', 'corellia', long(0), float(-5715.7700), float(14.6000), float(-6147.1191), float(-0.6609), float(0.0000), float(0.7505), float(0.0000))
+	#rebel_liberator2 = stcSvc.spawnObject('rebel_liberator', 'corellia', long(0), float(-5548.1470), float(23.4000), float(-6202.3511), float(0.9100), float(0.0000), float(-0.4147), float(0.0000))
 	
-	rebel_comm_op1 = stcSvc.spawnObject('rebel_comm_op_14', 'corellia', long(0), float(-5549.4761), float(23.4000), float(-6216.0449), float(-0.3250), float(0.0000), float(0.9457), float(0.0000))
+	#rebel_comm_op1 = stcSvc.spawnObject('rebel_comm_op_14', 'corellia', long(0), float(-5549.4761), float(23.4000), float(-6216.0449), float(-0.3250), float(0.0000), float(0.9457), float(0.0000))
 
 
-	inexper_rebel_cadet1 = stcSvc.spawnObject('inexperienced_rebel_cadet_29', 'corellia', long(0), float(-5533.5054), float(23.4000), float(-6202.7207), float(0.9116), float(0.0000), float(0.4112), float(0.0000))
+	#inexper_rebel_cadet1 = stcSvc.spawnObject('inexperienced_rebel_cadet_29', 'corellia', long(0), float(-5533.5054), float(23.4000), float(-6202.7207), float(0.9116), float(0.0000), float(0.4112), float(0.0000))
 
 	
 	
 	
 	
-	rebel_guard1 = stcSvc.spawnObject('rebel_guard_25', 'corellia', long(0), float(-5538.0576), float(16.4902), float(-6054.8652), float(0.0324), float(0.0000), float(0.9995), float(0.0000))
-	rebel_guard2 = stcSvc.spawnObject('rebel_guard_25', 'corellia', long(0), float(-5653.4590), float(16.7374), float(-6185.5439), float(0.9106), float(0.0000), float(0.4133), float(0.0000))
-	rebel_guard3 = stcSvc.spawnObject('rebel_guard_25', 'corellia', long(0), float(-5534.9146), float(23.4000), float(-6216.7935), float(0.4746), float(0.0000), float(0.8802), float(0.0000))
-	rebel_guard4 = stcSvc.spawnObject('rebel_guard_25', 'corellia', long(0), float(-5443.3027), float(24.0000), float(-6242.8916), float(-0.5526), float(0.0000), float(0.8335), float(0.0000))
+	#rebel_guard1 = stcSvc.spawnObject('rebel_guard_25', 'corellia', long(0), float(-5538.0576), float(16.4902), float(-6054.8652), float(0.0324), float(0.0000), float(0.9995), float(0.0000))
+	#rebel_guard2 = stcSvc.spawnObject('rebel_guard_25', 'corellia', long(0), float(-5653.4590), float(16.7374), float(-6185.5439), float(0.9106), float(0.0000), float(0.4133), float(0.0000))
+	#rebel_guard3 = stcSvc.spawnObject('rebel_guard_25', 'corellia', long(0), float(-5534.9146), float(23.4000), float(-6216.7935), float(0.4746), float(0.0000), float(0.8802), float(0.0000))
+	#rebel_guard4 = stcSvc.spawnObject('rebel_guard_25', 'corellia', long(0), float(-5443.3027), float(24.0000), float(-6242.8916), float(-0.5526), float(0.0000), float(0.8335), float(0.0000))
 	
 
 

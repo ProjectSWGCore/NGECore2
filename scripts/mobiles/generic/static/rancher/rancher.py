@@ -11,7 +11,7 @@ def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
 	mobileTemplate.setCreatureName('farmer_rancher')
-	mobileTemplate.setLevel(11)
+	mobileTemplate.setLevel(1)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 	mobileTemplate.setSocialGroup("township")
 	mobileTemplate.setOptionsBitmask(Options.INVULNERABLE)
