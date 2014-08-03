@@ -11,7 +11,7 @@ def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
 	mobileTemplate.setCustomName('R3-S1')
-	mobileTemplate.setLevel(4.2)
+	mobileTemplate.setLevel(1)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 	mobileTemplate.setSocialGroup("surgicaldroid")
 	mobileTemplate.setOptionsBitmask(Options.INVULNERABLE)

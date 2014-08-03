@@ -11,7 +11,7 @@ def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
 	mobileTemplate.setCreatureName('r2')
-	mobileTemplate.setLevel(4.2)
+	mobileTemplate.setLevel(1)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 	mobileTemplate.setSocialGroup("astrimech")
 	mobileTemplate.setOptionsBitmask(Options.INVULNERABLE)
