@@ -13,7 +13,7 @@ def addTemplate(core):
 	mobileTemplate.setCustomName('a CLL-8 Binary Load Lifter')
 	mobileTemplate.setLevel(1)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
-	mobileTemplate.setSocialGroup("township")
+	mobileTemplate.setSocialGroup("loadlifter")
 	mobileTemplate.setOptionsBitmask(Options.INVULNERABLE)
 		
 	templates = Vector()
