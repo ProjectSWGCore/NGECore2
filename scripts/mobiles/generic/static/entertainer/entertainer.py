@@ -22,12 +22,12 @@ def addTemplate(core):
 	mobileTemplate.setTemplates(templates)
 		
 	weaponTemplates = Vector()
-	weapontemplate = WeaponTemplate('object/weapon/ranged/pistol/shared_pistol_d18.iff', WeaponType.PISTOL, 1.0, 15, 'energy')
+	weapontemplate = WeaponTemplate('object/weapon/melee/unarmed/shared_unarmed_default.iff', WeaponType.UNARMED, 1.0, 6, 'kinetic')
 	weaponTemplates.add(weapontemplate)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
-
+	
 	attacks = Vector()
-	mobileTemplate.setDefaultAttack('rangedShot')
+	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
 	core.spawnService.addMobileTemplate('entertainer', mobileTemplate)

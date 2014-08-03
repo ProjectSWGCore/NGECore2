@@ -201,7 +201,7 @@ def addPlanetSpawns(core, planet):
 	
 	medCenter =  core.objectService.getObject(long(1855529))
 	
-	surgical_Droid1 = stcSvc.spawnObject('storyteller_surgical_droid_21b', 'corellia', medCenter.getCellByCellNumber(long(6)), float(-25.4808), float(0.2600), float(-3.4815), float(0.9988), float(0.0000), float(-0.0488), float(0.0000))
+	#surgical_Droid1 = stcSvc.spawnObject('storyteller_surgical_droid_21b', 'corellia', medCenter.getCellByCellNumber(long(6)), float(-25.4808), float(0.2600), float(-3.4815), float(0.9988), float(0.0000), float(-0.0488), float(0.0000))
 
 	
 	

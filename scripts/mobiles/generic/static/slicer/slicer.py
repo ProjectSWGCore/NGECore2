@@ -10,8 +10,8 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCustomName('slicer')
-	mobileTemplate.setLevel(2)
+	mobileTemplate.setCreatureName('slicer')
+	mobileTemplate.setLevel(1)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 	mobileTemplate.setSocialGroup("thug")
 	mobileTemplate.setOptionsBitmask(Options.INVULNERABLE)

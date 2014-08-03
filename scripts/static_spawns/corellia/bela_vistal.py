@@ -14,55 +14,55 @@ def addPlanetSpawns(core, planet):
 	r4_08_unit1 = stcSvc.spawnObject('r4_08', 'corellia', long(0), float(6715.3071), float(330.0000), float(-5903.5723), float(0.9274), float(0.0000), float(-0.3740), float(0.0000))
 	
 	
-	imp_bombardier1 = stcSvc.spawnObject('imp_bombardier', 'corellia', long(0), float(6643.5205), float(330.0000), float(-5937.1123), float(0.6410), float(0.0000), float(0.7676), float(0.0000))
-	imp_bombardier2 = stcSvc.spawnObject('imp_bombardier', 'corellia', long(0), float(6650.4927), float(330.0000), float(-5933.7783), float(0.8700), float(0.0000), float(0.4931), float(0.0000))
-	imp_bombardier3 = stcSvc.spawnObject('imp_bombardier', 'corellia', long(0), float(6647.5024), float(330.0000), float(-5931.3872), float(0.9992), float(0.0000), float(0.0399), float(0.0000))
+	#imp_bombardier1 = stcSvc.spawnObject('imp_bombardier', 'corellia', long(0), float(6643.5205), float(330.0000), float(-5937.1123), float(0.6410), float(0.0000), float(0.7676), float(0.0000))
+	#imp_bombardier2 = stcSvc.spawnObject('imp_bombardier', 'corellia', long(0), float(6650.4927), float(330.0000), float(-5933.7783), float(0.8700), float(0.0000), float(0.4931), float(0.0000))
+	#imp_bombardier3 = stcSvc.spawnObject('imp_bombardier', 'corellia', long(0), float(6647.5024), float(330.0000), float(-5931.3872), float(0.9992), float(0.0000), float(0.0399), float(0.0000))
 	
-	imp_noncom1 = stcSvc.spawnObject('imp_noncom_14', 'corellia', long(0), float(6663.5298), float(330.0000), float(-5912.8853), float(0.0281), float(0.0000), float(0.9996), float(0.0000))
+	#imp_noncom1 = stcSvc.spawnObject('imp_noncom_14', 'corellia', long(0), float(6663.5298), float(330.0000), float(-5912.8853), float(0.0281), float(0.0000), float(0.9996), float(0.0000))
 	
-	imp_stormtrooper1 = stcSvc.spawnObject('imp_stormtrooper_25', 'corellia', long(0), float(6684.8271), float(330.0000), float(-5943.1572), float(0.7236), float(0.0000), float(-0.6902), float(0.0000))
-	imp_stormtrooper2 = stcSvc.spawnObject('imp_stormtrooper_25', 'corellia', long(0), float(6708.8501), float(328.5470), float(-5868.9702), float(0.0788), float(0.0000), float(0.9969), float(0.0000))
-	imp_stormtrooper3 = stcSvc.spawnObject('imp_stormtrooper_25', 'corellia', long(0), float(6836.5771), float(315.0000), float(-5773.7437), float(-0.6799), float(0.0000), float(0.7333), float(0.0000))
-	imp_stormtrooper4 = stcSvc.spawnObject('imp_stormtrooper_25', 'corellia', long(0), float(6749.3765), float(315.0000), float(-5664.4946), float(0.8912), float(0.0000), float(-0.4536), float(0.0000))
+	#imp_stormtrooper1 = stcSvc.spawnObject('imp_stormtrooper_25', 'corellia', long(0), float(6684.8271), float(330.0000), float(-5943.1572), float(0.7236), float(0.0000), float(-0.6902), float(0.0000))
+	#imp_stormtrooper2 = stcSvc.spawnObject('imp_stormtrooper_25', 'corellia', long(0), float(6708.8501), float(328.5470), float(-5868.9702), float(0.0788), float(0.0000), float(0.9969), float(0.0000))
+	#imp_stormtrooper3 = stcSvc.spawnObject('imp_stormtrooper_25', 'corellia', long(0), float(6836.5771), float(315.0000), float(-5773.7437), float(-0.6799), float(0.0000), float(0.7333), float(0.0000))
+	#imp_stormtrooper4 = stcSvc.spawnObject('imp_stormtrooper_25', 'corellia', long(0), float(6749.3765), float(315.0000), float(-5664.4946), float(0.8912), float(0.0000), float(-0.4536), float(0.0000))
 	
 	
-	stormtrooper1  = stcSvc.spawnObject('stormtrooper_25', 'corellia', long(0), float(6707.4717), float(315.0000), float(-5814.1973), float(0.7261), float(0.0000), float(0.6875), float(0.0000))
-	stormtrooper2  = stcSvc.spawnObject('stormtrooper_25', 'corellia', long(0), float(6726.7188), float(315.0000), float(-5809.0698), float(0.0569), float(0.0000), float(0.9984), float(0.0000))
-	stormtrooper3  = stcSvc.spawnObject('stormtrooper_25', 'corellia', long(0), float(6826.8760), float(315.0000), float(-5820.1743), float(0.7658), float(0.0000), float(-0.6430), float(0.0000))
-	stormtrooper4  = stcSvc.spawnObject('stormtrooper_25', 'corellia', long(0), float(6842.2095), float(315.0000), float(-5604.3696), float(0.9999), float(0.0000), float(0.0128), float(0.0000))
-	stormtrooper5  = stcSvc.spawnObject('stormtrooper_25', 'corellia', long(0), float(6825.2661), float(315.0000), float(-5619.8843), float(0.8951), float(0.0000), float(-0.4459), float(0.0000))
-	
-
-	
-	imp_specialist1  = stcSvc.spawnObject('imp_specialist_13', 'corellia', long(0), float(6828.1924), float(315.0000), float(-5814.0264), float(-0.7014), float(0.0000), float(0.7128), float(0.0000))
-	
-	imp_scout_trooper1 = stcSvc.spawnObject('imp_scout_trooper_23', 'corellia', long(0), float(6834.0757), float(315.0000), float(-5808.7080), float(0.9485), float(0.0000), float(-0.3169), float(0.0000))
-	
-	imp_captain1 = stcSvc.spawnObject('imp_captain_21', 'corellia', long(0), float(6830.1587), float(315.0000), float(-5809.9790), float(0.7971), float(0.0000), float(-0.6039), float(0.0000))
-	imp_captain2 = stcSvc.spawnObject('imp_captain_21', 'corellia', long(0), float(6820.1055), float(315.0000), float(-5742.7935), float(0.9993), float(0.0000), float(0.0370), float(0.0000))
-	
-	imp_storm_commando1 = stcSvc.spawnObject('imp_storm_commando_16', 'corellia', long(0), float(6751.4751), float(315.0000), float(-5822.7827), float(1.0000), float(0.0000), float(-0.0069), float(0.0000))
-	
-
-	imp_sergeant1 = stcSvc.spawnObject('imp_sergeant_16', 'corellia', long(0), float(6712.8525), float(315.0000), float(-5810.4468), float(0.4356), float(0.0000), float(0.9001), float(0.0000))
-	imp_sergeant2 = stcSvc.spawnObject('imp_sergeant_16', 'corellia', long(0), float(6822.7612), float(315.0000), float(-5597.4590), float(0.5581), float(0.0000), float(0.8298), float(0.0000))
-	
-	imp_sergeant_major1 = stcSvc.spawnObject('imp_sergeant_major', 'corellia', long(0), float(6822.7612), float(315.0000), float(-5597.4590), float(0.5581), float(0.0000), float(0.8298), float(0.0000))
-	
-	imp_staff_serg1 = stcSvc.spawnObject('imp_staff_serg', 'corellia', long(0), float(6909.5215), float(330.0000), float(-5605.7788), float(0.9554), float(0.0000), float(-0.2952), float(0.0000))
+	#stormtrooper1  = stcSvc.spawnObject('stormtrooper_25', 'corellia', long(0), float(6707.4717), float(315.0000), float(-5814.1973), float(0.7261), float(0.0000), float(0.6875), float(0.0000))
+	#stormtrooper2  = stcSvc.spawnObject('stormtrooper_25', 'corellia', long(0), float(6726.7188), float(315.0000), float(-5809.0698), float(0.0569), float(0.0000), float(0.9984), float(0.0000))
+	#stormtrooper3  = stcSvc.spawnObject('stormtrooper_25', 'corellia', long(0), float(6826.8760), float(315.0000), float(-5820.1743), float(0.7658), float(0.0000), float(-0.6430), float(0.0000))
+	#stormtrooper4  = stcSvc.spawnObject('stormtrooper_25', 'corellia', long(0), float(6842.2095), float(315.0000), float(-5604.3696), float(0.9999), float(0.0000), float(0.0128), float(0.0000))
+	#stormtrooper5  = stcSvc.spawnObject('stormtrooper_25', 'corellia', long(0), float(6825.2661), float(315.0000), float(-5619.8843), float(0.8951), float(0.0000), float(-0.4459), float(0.0000))
 	
 
 	
+	#imp_specialist1  = stcSvc.spawnObject('imp_specialist_13', 'corellia', long(0), float(6828.1924), float(315.0000), float(-5814.0264), float(-0.7014), float(0.0000), float(0.7128), float(0.0000))
 	
-	vic_dark_trooper1 = stcSvc.spawnObject('vic_dark_trooper_32', 'corellia', long(0), float(6718.6475), float(328.5314), float(-5869.6021), float(0.0109), float(0.0000), float(0.9999), float(0.0000))
-	vic_dark_trooper2 = stcSvc.spawnObject('vic_dark_trooper_32', 'corellia', long(0), float(6750.4526), float(315.0000), float(-5684.2739), float(-0.3451), float(0.0000), float(0.9386), float(0.0000))
+	#imp_scout_trooper1 = stcSvc.spawnObject('imp_scout_trooper_23', 'corellia', long(0), float(6834.0757), float(315.0000), float(-5808.7080), float(0.9485), float(0.0000), float(-0.3169), float(0.0000))
+	
+	#imp_captain1 = stcSvc.spawnObject('imp_captain_21', 'corellia', long(0), float(6830.1587), float(315.0000), float(-5809.9790), float(0.7971), float(0.0000), float(-0.6039), float(0.0000))
+	#imp_captain2 = stcSvc.spawnObject('imp_captain_21', 'corellia', long(0), float(6820.1055), float(315.0000), float(-5742.7935), float(0.9993), float(0.0000), float(0.0370), float(0.0000))
+	
+	#imp_storm_commando1 = stcSvc.spawnObject('imp_storm_commando_16', 'corellia', long(0), float(6751.4751), float(315.0000), float(-5822.7827), float(1.0000), float(0.0000), float(-0.0069), float(0.0000))
+	
+
+	#imp_sergeant1 = stcSvc.spawnObject('imp_sergeant_16', 'corellia', long(0), float(6712.8525), float(315.0000), float(-5810.4468), float(0.4356), float(0.0000), float(0.9001), float(0.0000))
+	#imp_sergeant2 = stcSvc.spawnObject('imp_sergeant_16', 'corellia', long(0), float(6822.7612), float(315.0000), float(-5597.4590), float(0.5581), float(0.0000), float(0.8298), float(0.0000))
+	
+	#imp_sergeant_major1 = stcSvc.spawnObject('imp_sergeant_major', 'corellia', long(0), float(6822.7612), float(315.0000), float(-5597.4590), float(0.5581), float(0.0000), float(0.8298), float(0.0000))
+	
+	#imp_staff_serg1 = stcSvc.spawnObject('imp_staff_serg', 'corellia', long(0), float(6909.5215), float(330.0000), float(-5605.7788), float(0.9554), float(0.0000), float(-0.2952), float(0.0000))
+	
+
+	
+	
+	#vic_dark_trooper1 = stcSvc.spawnObject('vic_dark_trooper_32', 'corellia', long(0), float(6718.6475), float(328.5314), float(-5869.6021), float(0.0109), float(0.0000), float(0.9999), float(0.0000))
+	#vic_dark_trooper2 = stcSvc.spawnObject('vic_dark_trooper_32', 'corellia', long(0), float(6750.4526), float(315.0000), float(-5684.2739), float(-0.3451), float(0.0000), float(0.9386), float(0.0000))
 	
 	
 	
-	imp_storm_commando1 = stcSvc.spawnObject('imp_storm_commando_16', 'corellia', long(0), float(6647.7393), float(330.0000), float(-5938.1304), float(0.6005), float(0.0000), float(0.7996), float(0.0000))
+	#imp_storm_commando1 = stcSvc.spawnObject('imp_storm_commando_16', 'corellia', long(0), float(6647.7393), float(330.0000), float(-5938.1304), float(0.6005), float(0.0000), float(0.7996), float(0.0000))
 	
-	imp_stormtrooper_sq_leader1 = stcSvc.spawnObject('imp_stormtrooper_squad_leader_27', 'corellia', long(0), float(6650.8691), float(330.0000), float(-5938.3267), float(0.6619), float(0.0000), float(0.7496), float(0.0000))
-	imp_stormtrooper_sq_leader1 = stcSvc.spawnObject('imp_stormtrooper_squad_leader_27', 'corellia', long(0), float(6854.3940), float(315.0000), float(-5609.3057), float(0.8790), float(0.0000), float(-0.4768), float(0.0000))
+	#imp_stormtrooper_sq_leader1 = stcSvc.spawnObject('imp_stormtrooper_squad_leader_27', 'corellia', long(0), float(6650.8691), float(330.0000), float(-5938.3267), float(0.6619), float(0.0000), float(0.7496), float(0.0000))
+	#imp_stormtrooper_sq_leader1 = stcSvc.spawnObject('imp_stormtrooper_squad_leader_27', 'corellia', long(0), float(6854.3940), float(315.0000), float(-5609.3057), float(0.8790), float(0.0000), float(-0.4768), float(0.0000))
 	
 	
 	cor_trooper1 = stcSvc.spawnObject('corsec_trooper', 'corellia', long(0), float(6846.6514), float(315.0000), float(-5838.7563), float(0.9998), float(0.0000), float(0.0198), float(0.0000))

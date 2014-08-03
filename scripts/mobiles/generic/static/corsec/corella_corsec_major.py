@@ -11,7 +11,7 @@ def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
 	mobileTemplate.setCreatureName('corsec_major')
-	mobileTemplate.setLevel(34)
+	mobileTemplate.setLevel(1)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 	mobileTemplate.setSocialGroup("corsec")
 	mobileTemplate.setOptionsBitmask(Options.INVULNERABLE)
