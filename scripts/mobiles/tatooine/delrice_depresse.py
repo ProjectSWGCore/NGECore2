@@ -32,6 +32,7 @@ def addTemplate(core):
 	
 	attacks = Vector()
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
+	mobileTemplate.setDefaultAttack('MeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
 	core.spawnService.addMobileTemplate('jabbas_palace_delrice_capreese', mobileTemplate)

@@ -9,7 +9,6 @@ from java.util import Vector
 
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()	
-
 	mobileTemplate.setCreatureName('ravenous_rasp')
 	mobileTemplate.setLevel(35)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
@@ -37,6 +36,9 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 
 	attacks = Vector()
+	attacks.add('bm_claw_3')
+	attacks.add('bm_slash_3')
+	attacks.add('bm_wing_buffet_3')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 

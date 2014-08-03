@@ -28,6 +28,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("slice_hound")
 	mobileTemplate.setAssistRange(1)
 	mobileTemplate.setStalker(False)	
+	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
 
 	templates = Vector()
 	templates.add('object/mobile/shared_dewback.iff')
@@ -39,6 +40,8 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 
 	attacks = Vector()
+	attacks.add('bm_bite_2')
+	attacks.add('bm_hamstring_2')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

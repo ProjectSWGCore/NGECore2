@@ -14,7 +14,6 @@ def addTemplate(core):
 	mobileTemplate.setCreatureName('emperors_hand')
 	mobileTemplate.setLevel(80)
 	mobileTemplate.setDifficulty(Difficulty.BOSS)
-
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(True)
@@ -24,6 +23,7 @@ def addTemplate(core):
 	mobileTemplate.setStalker(False)
 	mobileTemplate.setFaction("imperial")
 	mobileTemplate.setFactionStatus(FactionStatus.Combatant)
+	
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_emperors_hand_human_female_01.iff')
