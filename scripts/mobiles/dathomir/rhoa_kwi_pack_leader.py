@@ -30,9 +30,10 @@ def addTemplate(core):
 	templates = Vector()
 	templates.add('object/mobile/shared_kwi.iff')
 	mobileTemplate.setTemplates(templates)
-	
-	
+		
 	attacks = Vector()
+	attacks.add('bm_bite_4')
+	attacks.add('bm_hamstring_4')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

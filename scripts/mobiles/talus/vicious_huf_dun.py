@@ -6,7 +6,6 @@ from resources.datatables import Difficulty
 from resources.datatables import Options
 from java.util import Vector
 
-
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
@@ -39,6 +38,11 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_dampen_pain_3')
+	attacks.add('bm_deflective_hide')
+	attacks.add('bm_puncture_1')
+	attacks.add('bm_shaken_3')
+	attacks.add('bm_stomp_3')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

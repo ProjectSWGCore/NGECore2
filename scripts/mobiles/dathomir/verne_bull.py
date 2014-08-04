@@ -30,9 +30,11 @@ def addTemplate(core):
 	templates = Vector()
 	templates.add('object/mobile/shared_verne_bull.iff')
 	mobileTemplate.setTemplates(templates)
-	
-	
+		
 	attacks = Vector()
+	attacks.add('bm_charge_4')
+	attacks.add('bm_defensive_4')
+	attacks.add('bm_slash_4')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

@@ -24,6 +24,7 @@ def addTemplate(core):
 	mobileTemplate.setFaction("imperial")
 	mobileTemplate.setFactionStatus(FactionStatus.Combatant)
 	
+	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_stormtrooper_assault_trooper_m.iff')
 	mobileTemplate.setTemplates(templates)

@@ -9,7 +9,7 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('rhoa_kwi_hunter')
+	mobileTemplate.setCreatureName('rhoa_kwi_guardian')
 	mobileTemplate.setLevel(64)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 	mobileTemplate.setMinSpawnDistance(4)
@@ -31,9 +31,10 @@ def addTemplate(core):
 	templates.add('object/mobile/shared_kwi.iff')
 	mobileTemplate.setTemplates(templates)
 	
-	
 	attacks = Vector()
+	attacks.add('bm_bite_4')
+	attacks.add('bm_hamstring_4')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('rhoa_kwi_hunter', mobileTemplate)
+	core.spawnService.addMobileTemplate('rhoa_kwi_guardian', mobileTemplate)

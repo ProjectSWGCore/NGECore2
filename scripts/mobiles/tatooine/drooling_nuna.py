@@ -25,8 +25,9 @@ def addTemplate(core):
 	mobileTemplate.setBoneType("Avian Bone")
 	mobileTemplate.setHideAmount(1)
 	mobileTemplate.setSocialGroup("dwarf nuna")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setAssistRange(6)
 	mobileTemplate.setStalker(False)	
+	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_nuna.iff')
@@ -38,6 +39,10 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_bite_1')
+	attacks.add('bm_defensive_1')
+	attacks.add('bm_disease_1')
+	attacks.add('bm_enfeeble_1')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
