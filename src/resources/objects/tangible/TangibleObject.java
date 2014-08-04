@@ -244,6 +244,8 @@ public class TangibleObject extends SWGObject implements Serializable {
 	
 	public void setOptionsBitmask(int optionsBitmask) {
 		notifyClients(getBaseline(3).set("optionsBitmask", optionsBitmask), true);
+		// This needs to be refactored to be sent to clients with different values depending on their faction
+		// A quest object for one faction, can't be quest object for opposing faction
 	}
 	
 	public void setOptions(int options, boolean add) {

@@ -187,7 +187,7 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	private transient CreatureObject calledPet;
 	
 	private byte locomotion = 0;
-	private short GCWFatigue = 0;
+	private int GCWFatigue = 0;
 	private boolean isConstructing = false;
 	
 	public CreatureObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
@@ -1888,11 +1888,11 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		this.calledPet = calledPet;
 	}
 
-	public short getGCWFatigue() {
+	public int getGCWFatigue() {
 		return GCWFatigue;
 	}
 
-	public void setGCWFatigue(short gCWFatigue) {
+	public void setGCWFatigue(int gCWFatigue) {
 		GCWFatigue = gCWFatigue;
 	}
 	

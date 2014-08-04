@@ -587,6 +587,21 @@ public class FactionService implements INetworkDispatch {
 					upvpm.setFaction(CRC.StringtoCRC(tano.getFaction()));
 					upvpm.setStatus(NGECore.getInstance().factionService.calculatePvpStatus((TangibleObject) destination.getParent(), tano));
 					destination.getSession().write(upvpm.serialize());
+					
+					// Crashes client and more importantly should be done selectively with different destinations
+//					if (destination.getParent() instanceof CreatureObject){
+//						//System.out.println("IN updatePVPFromNearbyNPCs!!!!!!!" + destination.getParent().getCustomName());
+//						if (((CreatureObject) destination.getParent()).isPlayer() && ((CreatureObject) destination.getParent()).getFaction()!=tano.getFaction()){
+//							int optionsBitMask = tano.getOptionsBitmask();
+//							if (tano.getOption(Options.QUEST))
+//								optionsBitMask = optionsBitMask & ~Options.QUEST;
+//							if (!tano.getOption(Options.ATTACKABLE))
+//								optionsBitMask = optionsBitMask | Options.ATTACKABLE;
+//							
+//							tano.setOptionsBitmask(optionsBitMask);
+//						}
+//					}
+					
 				}
 				if (obj instanceof InstallationObject && !(obj instanceof TangibleObject)){
 					InstallationObject inso = (InstallationObject) obj;

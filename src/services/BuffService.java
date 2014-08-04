@@ -178,9 +178,11 @@ public class BuffService implements INetworkDispatch {
                         		if (buff.getDuration() != -1.0)
                         			if (otherBuff.getRemainingDuration() > buff.getDuration() && otherBuff.getStacks() >= otherBuff.getMaxStacks())
                         				return null;
-                        }
-                       
-                        removeBuffFromCreature(target, otherBuff);
+                        } 
+//                        else {
+//                        	removeBuffFromCreature(target, otherBuff); // Seems more logical ToDo: Verify!!!
+//                        }
+                        removeBuffFromCreature(target, otherBuff); // Moved to else, otherwise buff will not stack
                         break;
                 } else {
                 	System.out.println("buff not added:" + buffName);

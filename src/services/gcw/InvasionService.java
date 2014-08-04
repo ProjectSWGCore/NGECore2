@@ -32,9 +32,14 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+
 import org.apache.mina.core.session.IoSession;
+
 import protocol.swg.CommPlayerMessage;
+import protocol.swg.ObjControllerMessage;
 import protocol.swg.PlayClientEffectObjectTransformMessage;
+import protocol.swg.objectControllerObjects.NpcConversationMessage;
+import protocol.swg.objectControllerObjects.QuestTaskTimerMessage;
 import resources.common.OutOfBand;
 import resources.common.SpawnPoint;
 import resources.datatables.FactionStatus;
@@ -239,26 +244,26 @@ public class InvasionService implements INetworkDispatch {
 			send_Phase1_InvaderMessage1();
 			send_Phase1_DefenderMessage1();
 			ph1_message1sent = true;
-			System.out.println("Phase 1 msg1 sent ");
+			//System.out.println("Phase 1 msg1 sent ");
 		}
 		
 		// Message at 15:00 -> 900000 seconds
-		if (invasionPhase==1 && System.currentTimeMillis()>temptimestartreference + 300000 && ! ph1_message2sent){
+		if (invasionPhase==1 && System.currentTimeMillis()>temptimestartreference + 150000 && ! ph1_message2sent){
 			send_Phase1_InvaderMessage2();
 			send_Phase1_DefenderMessage2();
 			ph1_message2sent = true;
-			System.out.println("Phase 1 msg2 sent ");
+			//System.out.println("Phase 1 msg2 sent ");
 		}
 		
 		// Message at 30:00 -> 1800000 seconds
-		if (invasionPhase==1 && System.currentTimeMillis()>temptimestartreference + 35000 && ! ph2_message1sent){
+		if (invasionPhase==1 && System.currentTimeMillis()>temptimestartreference + 180000 && ! ph2_message1sent){
 			invasionPhase=2;
 			preparePhase2();			
 			System.out.println("PHASE 2");
 			send_Phase2_InvaderMessage1();
 			send_Phase2_DefenderMessage1();
 			ph2_message1sent = true;
-			System.out.println("Defender msg1 sent ");
+			//System.out.println("Defender msg1 sent ");
 		}
 		
 		// Message at 45:00 -> 2700000 seconds
@@ -274,7 +279,7 @@ public class InvasionService implements INetworkDispatch {
 			defendingGeneral.updatePvpStatus();
 			
 			makeDefensiveGeneralDefenderForNPCs();
-			System.out.println("Defender msg2 sent "); // Local server gives only 30 mins time, so its 20 mins for this phase
+			//System.out.println("Defender msg2 sent "); // Local server gives only 30 mins time, so its ~15 mins for this phase
 		}
 			
 		if (defendingGeneral!=null){
@@ -286,7 +291,7 @@ public class InvasionService implements INetworkDispatch {
 			}
 			
 
-			//defenders won 59:00 mins 3600000-60000
+			//defenders won 59:00 mins 3600000-60000 = 3540000
 			if (invasionPhase==2 && System.currentTimeMillis()>temptimestartreference + 1500000 && ! ph2_message3sent){ 
 				sendDefenderWonMessage();
 				sendInvaderLostMessage();				
@@ -360,7 +365,7 @@ public class InvasionService implements INetworkDispatch {
 				sendDefenderLostMessage();
 				ph2_message4sent = true;
 				invasionPhase=4; // Post-Invasion phase
-				System.out.println("Defender msg4 sent ");
+				//System.out.println("Defender msg4 sent ");
 				
 				// Take care of GCW points
 				grantGCWPoints(invadingFaction,1000);
@@ -526,7 +531,7 @@ public class InvasionService implements INetworkDispatch {
 				if (creature.getAttachment("AI")!=null){
 					AIActor actor = (AIActor)creature.getAttachment("AI");
 					if (actor!=null){
-						System.out.println("Preparing deletion " + creature.getObjectID());
+						//System.out.println("Preparing deletion " + creature.getObjectID());
 						actor.prepareDeletion();
 					}					
 				}
@@ -534,14 +539,14 @@ public class InvasionService implements INetworkDispatch {
 		}	
 		
 		Executors.newSingleThreadScheduledExecutor().schedule(() -> {
-			System.out.println("Started schedule to destroy " + invaderMap.entrySet().size());
+			//System.out.println("Started schedule to destroy " + invaderMap.entrySet().size());
 			for (Map.Entry<Integer, CreatureObject> entry : invaderMap.entrySet()) {
 				CreatureObject creature = entry.getValue();
 				if (creature!=null){
 					if (creature.getAttachment("AI")!=null){
 						AIActor actor = (AIActor)creature.getAttachment("AI");
 						core.simulationService.remove(creature, creature.getWorldPosition().x, creature.getWorldPosition().z, true); // Make sure
-						System.out.println("destroying Actor " + creature.getObjectID());
+						//System.out.println("destroying Actor " + creature.getObjectID());
 						actor.destroyActor();
 					}
 				}
@@ -558,7 +563,7 @@ public class InvasionService implements INetworkDispatch {
 				}
 			}
 			invaderMap.clear();
-			System.out.println("Destroyed all invaders.");
+			//System.out.println("Destroyed all invaders.");
 		}, 15, TimeUnit.SECONDS);	// Make sure remaining AI is finished with moves that might make them re-appear
 	}
 	
@@ -607,7 +612,7 @@ public class InvasionService implements INetworkDispatch {
 				}
 			}
 			defenderMap.clear();
-			System.out.println("Destroyed all defenders.");
+			//System.out.println("Destroyed all defenders.");
 		}, 15, TimeUnit.SECONDS);	// Make sure remaining AI is finished with moves that might make them re-appear
 				
 	}
@@ -850,6 +855,7 @@ public class InvasionService implements INetworkDispatch {
 	}
 	
 	public void usePylon(CreatureObject user, GCWPylon pylon){
+		
 		// check pylon filling status
 		if (pylon.getAttachment("Filling")==null)
 			return;
@@ -940,18 +946,13 @@ public class InvasionService implements INetworkDispatch {
 		PlayClientEffectObjectTransformMessage lmsg = new PlayClientEffectObjectTransformMessage("appearance/" + animName,pylon.getObjectID(),"lootMe",effectorPosition,effectorOrientation);
 		//PlayClientEffectObjectMessage lmsg = new PlayClientEffectObjectMessage("appearance/" + animName, pylon.getObjectID(), "");
 		pylon.notifyObserversInRange(lmsg, false, 100);	
-		
+					
+		int fatigue = user.getGCWFatigue();
+		int constructiontimeagain = 10 + fatigue/10;
 		
 		SUIWindow window = core.suiService.createSUIWindow("Script.countdownTimerBar", user, null, 5);
-		window.setProperty("bg.caption.lblTitle:Text", "Titletext");
-		window.setProperty("Prompt.lblPrompt:Text", "Prompttext"); // CodeData
-		window.setProperty("bar.value:Text", "Prompttext");
-		//countdown time
+		core.suiService.openTimerSUIWindow(window, "@gcw:pylon_construction_prompt", constructiontimeagain);
 		
-		core.suiService.openSUIWindow(window);
-		
-		short fatigue = user.getGCWFatigue();
-		int constructiontimeagain = 10 + fatigue/10;
 		int[] countdown = {constructiontimeagain};
 		final Point3D userpos = user.getWorldPosition();
 		user.setConstructing(true);
@@ -962,8 +963,7 @@ public class InvasionService implements INetworkDispatch {
 			@Override
 			public void run() {
 				try {
-					// Animate count-down timer-bar
-					user.sendSystemMessage(""+countdown[0], (byte)0);
+					//user.sendSystemMessage(""+countdown[0], (byte)0);
 					countdown[0]--;
 					// check if user has moved
 					if (userpos.getDistance2D(user.getWorldPosition())>0.2){
@@ -1005,10 +1005,10 @@ public class InvasionService implements INetworkDispatch {
 						TangibleObject tool = tools.get(0);
 						updatePylonFilling(pylon, tool);
 						user.setConstructing(false);
-						core.suiService.closeSUIWindow(window.getOwner(),window.getWindowId());
-						// increase fatigue
+						core.suiService.closeSUIWindow(window.getOwner(),window.getWindowId());						
 						core.buffService.addBuffToCreature(user, "gcw_fatigue", user);
-						System.out.println(" user.getGCWFatigue() "+user.getGCWFatigue());
+						// increase fatigue
+						user.setGCWFatigue(user.getGCWFatigue()+1);
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -1024,7 +1024,7 @@ public class InvasionService implements INetworkDispatch {
 		int pylonFilling = (int)pylon.getAttachment("Filling");
 		String pylonName = (String)pylon.getAttachment("Name");
 		// determine power of tool
-		int power = 20; // assume 20 for now
+		int power = 15; // assume 15 for now
 		
 		pylonFilling += power;
 		if (pylonFilling>100)
@@ -1060,6 +1060,10 @@ public class InvasionService implements INetworkDispatch {
 		} else {
 			// ToDo: IMPLEMENT BARRICADE QUEST CALL HERE
 			user.sendSystemMessage("Barricade Quest not yet implemented!", (byte)0);
+			
+//			QuestTaskTimerMessage convoMessage = new QuestTaskTimerMessage(user.getObjectID(), "this");
+//			ObjControllerMessage objController = new ObjControllerMessage(0x0B, convoMessage);
+//			user.getClient().getSession().write(objController.serialize());
 		}			
 	}
 	
@@ -1106,7 +1110,7 @@ public class InvasionService implements INetworkDispatch {
 	}
 	
 	public void repairStructure(CreatureObject user, TangibleObject tool, TangibleObject structure){
-		System.out.println("REPAIR STRUCT");
+		
 		int structureCondition = structure.getConditionDamage();
 		if (structureCondition>=structure.getMaximumCondition()){
 			return;
@@ -1120,12 +1124,7 @@ public class InvasionService implements INetworkDispatch {
 			
 				
 		SUIWindow window = core.suiService.createSUIWindow("Script.countdownTimerBar", user, null, 5);
-		window.setProperty("bg.caption.lblTitle:Text", "Titletext");
-		window.setProperty("Prompt.lblPrompt:Text", "Prompttext"); // CodeData
-		window.setProperty("bar.value:Text", "Prompttext");
-		//countdown time
-		// @gcw:reparing_gcw_object
-		core.suiService.openSUIWindow(window);
+		core.suiService.openTimerSUIWindow(window, "@gcw:reparing_gcw_object", 10); // also influenced by fatigue?
 		
 		user.setConstructing(true);
 		int repairtimeagain = 10;
@@ -1138,8 +1137,6 @@ public class InvasionService implements INetworkDispatch {
 			@Override
 			public void run() {
 				try {
-					// Animate count-down timer-bar
-					user.sendSystemMessage(""+countdown[0], (byte)0);
 					countdown[0]--;
 					// check if user has moved
 					if (userpos.getDistance2D(user.getWorldPosition())>0.2){
@@ -1610,6 +1607,16 @@ public class InvasionService implements INetworkDispatch {
 			defendingGeneral = (CreatureObject) NGECore.getInstance().staticService.spawnObject(generalTemplate, "talus", 0L, 480.071F, 6, -3006.851F, 1, 0);			
 		}
 		
+		if (defendingGeneral==null){
+			try {
+				throw new Exception();
+			} catch (Exception e) {
+				System.err.println("spawnDefendingGeneral()->General is null");
+				e.printStackTrace();
+			}				
+		}
+
+		
 		defendingGeneralTask = scheduler.scheduleAtFixedRate(new Runnable() {
 
 			@Override
@@ -1657,7 +1664,7 @@ public class InvasionService implements INetworkDispatch {
 	}
 	
 	public void spawnDefensiveQuestOfficer(){
-		System.out.println("spawnDefensiveQuestOfficer");
+
 		String questOfficerTemplate = "";
 		if (invadingFaction==Factions.Imperial){
 			questOfficerTemplate = "rebel_defensive_quest_officer";

@@ -237,11 +237,24 @@ def run(core, actor, target, commandString):
 		player.setGcwPoints(player.getGcwPoints()+1000)
 	
 	elif command == 'suitest':
-		window = core.suiService.createSUIWindow('Script.countdownTimerBar', actor, None, 5)
-		#window.setProperty('bg.caption.lblTitle:Text', 'Titletext')
+		window = core.suiService.createSUIWindow('Script.CountdownTimerBar', actor, None, 5)
+		window.setProperty('modifySlot', 'modifySlot')
+		window.setProperty('comp.text:Text', '@gcw:pylon_construction_prompt')
+		window.setProperty('bg.caption.lblTitle:Text', 'quest_countdown_timer')
+		window.addDataItem('countdownTimerTimeValue', 'this')		
+		core.suiService.openTimerSUIWindow(window, 18)
+		time.sleep(18)
+		core.suiService.closeSUIWindow(window.getOwner(),window.getWindowId())
+		
+	elif command == 'suitest2':
+		window = core.suiService.createSUIWindow('Script.CountdownTimerBar', actor, None, 5)
+		# Packet43
 		#window.setProperty('text:Text', '10')
 		#window.setProperty('bar.value:Page', '10')	
-		window.addDataItem('bar.value', '10')		
+		window.setProperty('comp.text:Text', '@gcw:pylon_construction_prompt')
+		window.setProperty('bg.caption.lblTitle:Text', 'quest_countdown_timer')
+		window.addDataItem('countdownTimerTimeValue', 'this')	
+		#window.addDataItem('bar.value', '10')		
 		core.suiService.openSUIWindow(window)
 		time.sleep(5)
 		core.suiService.closeSUIWindow(window.getOwner(),window.getWindowId())

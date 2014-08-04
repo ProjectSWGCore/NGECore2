@@ -498,7 +498,7 @@ public class InvasionService3 implements INetworkDispatch {
 		
 		core.suiService.openSUIWindow(window);
 		
-		short fatigue = user.getGCWFatigue();
+		int fatigue = user.getGCWFatigue();
 		int constructiontimeagain = 10 + fatigue/10;
 		int[] countdown = {constructiontimeagain};
 		final Point3D userpos = user.getWorldPosition();
