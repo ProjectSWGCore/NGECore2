@@ -333,11 +333,12 @@ public class LoginService implements INetworkDispatch{
 				
 				String characterName = resultSet.getString("firstName").replaceAll("\\s",""); ;
 				String lastName = resultSet.getString("lastName").replaceAll("\\s","");
+
 				if (lastName != null && lastName.length() > 0) characterName += " " + lastName;
 				enumerateCharacterId.addCharacter(
 						characterName,
 						resultSet.getInt("appearance"),
-						resultSet.getLong("Id"),
+						resultSet.getLong("id"),
 						resultSet.getInt("galaxyId"),
 						resultSet.getInt("statusId"));
 			}
