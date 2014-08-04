@@ -687,7 +687,7 @@ public class EntertainmentService implements INetworkDispatch {
 
 		final ScheduledFuture<?> spectatorTask = scheduler.scheduleAtFixedRate(() -> {
 			try {
-				if (spectator.getPosition().getDistance2D(performer.getWorldPosition()) > (float) 70) {
+				if (spectator.getWorldPosition().getDistance2D(performer.getWorldPosition()) > (float) 70) {
 	
 					if(((performer.getPerformanceType()) ? "dance" : "music").equals("dance")) {
 						spectator.setPerformanceWatchee(null);
