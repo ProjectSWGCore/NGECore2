@@ -13,7 +13,6 @@ def addTemplate(core):
 	mobileTemplate.setCreatureName('corvette_rebel_admiral')
 	mobileTemplate.setLevel(83)
 	mobileTemplate.setDifficulty(Difficulty.ELITE)
-
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(True)
@@ -23,6 +22,7 @@ def addTemplate(core):
 	mobileTemplate.setStalker(False)
 	mobileTemplate.setFaction("rebel")
 	mobileTemplate.setFactionStatus(FactionStatus.Combatant)
+	
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_rebel_brigadier_general_bith_male.iff')

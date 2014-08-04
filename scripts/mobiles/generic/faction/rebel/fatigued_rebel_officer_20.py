@@ -13,16 +13,16 @@ def addTemplate(core):
 	mobileTemplate.setCreatureName('crackdown_rebel_first_lieutenant')
 	mobileTemplate.setLevel(20)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
-
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(1)
 	mobileTemplate.setSocialGroup("rebel")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setAssistRange(6)
 	mobileTemplate.setStalker(False)
 	mobileTemplate.setFaction("rebel")
 	mobileTemplate.setFactionStatus(FactionStatus.Combatant)
+	
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_rebel_first_lieutenant_bothan_male_01.iff')

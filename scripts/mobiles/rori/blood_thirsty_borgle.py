@@ -6,14 +6,11 @@ from resources.datatables import Difficulty
 from resources.datatables import Options
 from java.util import Vector
 
-
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
 	mobileTemplate.setCreatureName('blood_thirsty_borgle')
 	mobileTemplate.setLevel(39)
-	mobileTemplate.setMinLevel(39)
-	mobileTemplate.setMaxLevel(39)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
@@ -27,7 +24,7 @@ def addTemplate(core):
 	mobileTemplate.setBoneType("Avian Bones")
 	mobileTemplate.setBoneAmount(5)
 	mobileTemplate.setSocialGroup("borgle")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setAssistRange(6)
 	mobileTemplate.setStalker(False)
 	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
@@ -41,6 +38,9 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_puncture_1')
+	attacks.add('bm_siphon_1')
+	attacks.add('bm_wing_buffet_3')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

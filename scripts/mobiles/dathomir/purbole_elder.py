@@ -23,7 +23,7 @@ def addTemplate(core):
 	mobileTemplate.setBoneType("Animal Bones")
 	mobileTemplate.setBoneAmount(11)
 	mobileTemplate.setSocialGroup("purbole")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setStalker(True)
 	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
@@ -31,8 +31,10 @@ def addTemplate(core):
 	templates.add('object/mobile/shared_purbole_elder.iff')
 	mobileTemplate.setTemplates(templates)
 	
-	
 	attacks = Vector()
+	attacks.add('bm_bite_4')
+	attacks.add('bm_defensive_4')
+	attacks.add('bm_disease_4')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

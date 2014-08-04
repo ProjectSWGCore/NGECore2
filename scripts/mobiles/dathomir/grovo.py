@@ -9,7 +9,7 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('rancor')  #temp until gorvo name is found
+	mobileTemplate.setCreatureName('heroic_axkva_gorvo')
 	mobileTemplate.setLevel(83)
 	mobileTemplate.setDifficulty(Difficulty.BOSS)
 	mobileTemplate.setMinSpawnDistance(4)

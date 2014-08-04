@@ -14,7 +14,6 @@ def addTemplate(core):
 	mobileTemplate.setCreatureName('mission_stormtrooper')
 	mobileTemplate.setLevel(3)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
-
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)
@@ -24,6 +23,7 @@ def addTemplate(core):
 	mobileTemplate.setStalker(False)
 	mobileTemplate.setFaction("imperial")
 	mobileTemplate.setFactionStatus(FactionStatus.Combatant)
+	
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_stormtrooper.iff')

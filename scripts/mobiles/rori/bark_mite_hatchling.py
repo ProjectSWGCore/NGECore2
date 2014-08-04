@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('bark_mite_hatchling')
 	mobileTemplate.setLevel(36)
-	mobileTemplate.setMinLevel(36)
-	mobileTemplate.setMaxLevel(36)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
@@ -23,9 +21,9 @@ def addTemplate(core):
 	mobileTemplate.setMeatType("Insect Meat")
 	mobileTemplate.setMeatAmount(5)
 	mobileTemplate.setSocialGroup("bark mite")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setAssistRange(4)
 	mobileTemplate.setStalker(False)
-	mobileTemplate.setOptionsBitmask(128)
+	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_bark_mite.iff')
@@ -37,6 +35,9 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_bite_3')
+	attacks.add('bm_bolster_armor_3')
+	attacks.add('bm_enfeeble_3')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

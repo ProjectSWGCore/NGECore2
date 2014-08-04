@@ -31,8 +31,11 @@ def addTemplate(core):
 	templates.add('object/mobile/shared_vexed_voritor_lizard.iff')
 	mobileTemplate.setTemplates(templates)
 	
-	
 	attacks = Vector()
+	attacks.add('bm_bite_5')
+	attacks.add('bm_bolster_armor_5')
+	attacks.add('bm_disease_5')
+	attacks.add('bm_enfeeble_5')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

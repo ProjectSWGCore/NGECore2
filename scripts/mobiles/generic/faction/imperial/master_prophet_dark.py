@@ -14,16 +14,16 @@ def addTemplate(core):
 	mobileTemplate.setCreatureName('master_prophet_of_the_dark_side')
 	mobileTemplate.setLevel(80)
 	mobileTemplate.setDifficulty(Difficulty.ELITE)
-
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(True)
 	mobileTemplate.setScale(1)
 	mobileTemplate.setSocialGroup("imperial")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setAssistRange(6)
 	mobileTemplate.setStalker(False)
 	mobileTemplate.setFaction("imperial")
 	mobileTemplate.setFactionStatus(FactionStatus.Combatant)
+	
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_dark_jedi_elder_female_human_01.iff')
