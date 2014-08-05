@@ -62,6 +62,8 @@ public class EntertainmentService implements INetworkDispatch {
 	
 	private Map<String, PerformanceEffect> performanceEffects = new ConcurrentHashMap<String, PerformanceEffect>();
 	
+	
+	
 	public EntertainmentService(NGECore core) {
 		this.core = core;
 		populateSkillCaps();
@@ -282,7 +284,8 @@ public class EntertainmentService implements INetworkDispatch {
 						buffRecipient.getClient().getSession().write(closeMessage.serialize());
 
 					}
-					if (sender.getObjectId() == buffRecipient.getObjectId()) {
+					if (sender.getObjectId() == buffRecipient.getObjectId()) 
+					{
 						// send close packet to buffer
 						BuffBuilderEndMessage end = new BuffBuilderEndMessage(sentPacket);
 						end.setObjectId(buffer.getObjectId());
@@ -294,6 +297,8 @@ public class EntertainmentService implements INetworkDispatch {
 						buffer.getClient().getSession().write(closeMessage.serialize());
 						CreatureObject cre = (CreatureObject) buffer;
 						cre.sendSystemMessage("The buff recipient cancelled the buff builder session.", (byte) 0);
+						
+					
 					}
 				}
 			}
@@ -537,21 +542,61 @@ public class EntertainmentService implements INetworkDispatch {
 		Vector<BuffBuilder> availableStats = buffBuilderSkills;
 		Vector<BuffItem> stats = new Vector<BuffItem>();
 
-		for (BuffItem item : buffVector) {
-			for(BuffBuilder builder : availableStats) {
-				if(builder.getStatName().equalsIgnoreCase(item.getSkillName())) {
+		for (BuffItem item : buffVector) 
+		{
+			for(BuffBuilder builder : availableStats) 
+			{
+		
+				if(builder.getStatName().equalsIgnoreCase(item.getSkillName())) 
+				{
+				
+					
 					if(builder.getMaxTimesApplied() < item.getInvested())
 						return;
+
+					int affectTotal=0;
+							
+
 					
-					// Ent. Expertise Percent + (invested points * affect amount) = stat
-					int bonusPoints = (int) (builder.getAffectAmount() *((float) item.getEntertainerBonus()/100f));
-					int affectTotal = bonusPoints + (item.getInvested() * builder.getAffectAmount());
-
 					BuffItem stat = new BuffItem(builder.getStatAffects(), item.getInvested(), item.getEntertainerBonus());
-					stat.setAffectAmount(affectTotal);
+					
+					switch(builder.getCategoryId())
+					{
+					
+						case TRADE: 
+						case RESISTANCES:
+						case ATTRIBUTES:
+						{
+							affectTotal=(int)( ( (1+(float) item.getEntertainerBonus()/100f)*builder.getAffectAmount()) * item.getInvested());
+							break;
+						
+						}
+						case COMBAT:
+						{
+							affectTotal=(int) (( builder.getAffectAmount()+item.getEntertainerBonus()) * item.getInvested());
+							break;
+						
+						}
+						case MISC:
+						{
+							affectTotal=(int) (( builder.getAffectAmount()) * item.getInvested());
+							break;
+			
+						}
+						default:
+						{	
+							System.out.println("unhandled builder catId of "+builder.getCategoryId());
+						}
+						
+					}
 
+
+					stat.setAffectAmount(affectTotal);
 					stats.add(stat);
+					
+					break;
 				}
+				
 			}
 		}
 		
@@ -687,7 +732,7 @@ public class EntertainmentService implements INetworkDispatch {
 
 		final ScheduledFuture<?> spectatorTask = scheduler.scheduleAtFixedRate(() -> {
 			try {
-				if (spectator.getPosition().getDistance2D(performer.getWorldPosition()) > (float) 70) {
+				if (spectator.getWorldPosition().getDistance2D(performer.getWorldPosition()) > (float) 70) {
 	
 					if(((performer.getPerformanceType()) ? "dance" : "music").equals("dance")) {
 						spectator.setPerformanceWatchee(null);

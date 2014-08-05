@@ -451,8 +451,13 @@ public class CommandService implements INetworkDispatch  {
 	}
 	
 	public void processCombatCommand(CreatureObject attacker, SWGObject target, CombatCommand command, int actionCounter, String commandArgs) {
-		if (FileUtilities.doesFileExist("scripts/commands/combat/" + command.getCommandName() + ".py")) {
-			core.scriptService.callScript("scripts/commands/combat/", command.getCommandName(), "setup", core, attacker, target, command);
+		if (FileUtilities.doesFileExist("scripts/commands/combat/" + command.getCommandName().toLowerCase() + ".py")) {
+			core.scriptService.callScript("scripts/commands/combat/", command.getCommandName().toLowerCase(), "setup", core, attacker, target, command);
+		} else {
+			if (FileUtilities.doesFileExist("scripts/commands/" + command.getCommandName().toLowerCase() + ".py")) {
+				System.err.print("Command " + command.getCommandName() + " is considered a combat command by the client but has a regular command script!");
+				core.scriptService.callScript("scripts/commands/combat/", command.getCommandName().toLowerCase(), "run", core, attacker, target, "");
+			}
 		}
 		
 		boolean success = true;

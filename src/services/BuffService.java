@@ -89,7 +89,10 @@ public class BuffService implements INetworkDispatch {
 
 		Buff buff = buffMap.get(buffName);
 		
-		if(buff == null) return false;
+		if(buff == null)
+		{
+			return false;
+		}
 		
 		// Here the necessary checks must be placed to prevent buffs from the same buff group (e.g. Buff D) being stacked!
 		
@@ -105,6 +108,10 @@ public class BuffService implements INetworkDispatch {
 		
 	public Buff doAddBuff(final CreatureObject target, String buffName, final CreatureObject buffer) {
 		
+		//BUG HERE !! watch it
+		//TODO fix this  -- !! this is wrong - I can buff from 5,5 in cantina someone sitting at 20,20 in the universe/planet !!! - accross the galaxy/planet
+		//cause get position is relative to creature system of coordinates - when one's outside and other inside
+		//if you must use getPosition() check for isInCell first for both or something like that
 		if (target.getPosition().getDistance(buffer.getPosition()) > 20) {
 			return null;
 		}
@@ -119,7 +126,21 @@ public class BuffService implements INetworkDispatch {
 		else
 			buff.setTotalPlayTime(0);
 			
-        if(FileUtilities.doesFileExist("scripts/buffs/" + buffName + ".py")) core.scriptService.callScript("scripts/buffs/", buffName, "setup", core, buffer, buff);
+     
+		if(FileUtilities.doesFileExist("scripts/buffs/" + buffName + ".py"))
+        {
+	        if(!buffName.equals("buildabuff_inspiration"))
+	        {
+	        	core.scriptService.callScript("scripts/buffs/", buffName, "setup", core, buffer, buff);
+	        }
+	        else
+	        {
+	        	//!!! for special case inspiration , workshop is attached to target
+	        	core.scriptService.callScript("scripts/buffs/", buffName, "add", core, target, buff);
+	        }
+        }
+
+
 	
             for (final Buff otherBuff : target.getBuffList()) {
                 if (buff.getGroup1().equals(otherBuff.getGroup1()))  
