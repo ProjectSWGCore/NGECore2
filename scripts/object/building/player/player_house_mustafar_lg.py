@@ -13,5 +13,5 @@ def setup(core, object):
 	
 	elevatorterminal2 = core.objectService.createChildobject(object, 'object/tangible/terminal/shared_terminal_elevator.iff', 0, -3, -0.655, 0.994, -0.103, 10)
 	
-	elevatorterminal3 = core.objectService.createChildobject(object, 'object/tangible/terminal/shared_terminal_elevator.iff', 0, -6, -0.655, 0.994, -0.103, 10)
+	elevatorterminal3 = core.objectService.createChildobject(object, 'object/tangible/terminal/shared_terminal_elevator_up.iff', 0, -6, -0.655, 0.994, -0.103, 10)
 	return
