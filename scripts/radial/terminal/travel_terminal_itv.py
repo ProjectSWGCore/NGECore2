@@ -1,5 +1,5 @@
 from resources.common import RadialOptions
-from protocol.swg import EnterTicketPurchaseModeMessage
+from protocol.swg import EnterTicketPurchaseModeMessageItv
 import sys
 
 def createRadial(core, owner, target, radials):
@@ -14,7 +14,7 @@ def handleSelection(core, owner, target, option):
             if owner.getCombatFlag() == 1:
 				owner.sendSystemMessage('You can\'t use that while in combat.', 0)
 				return
-            tpm = EnterTicketPurchaseModeMessage(owner.getPlanet().getName(), core.mapService.getClosestCityName(owner), owner)
+            tpm = EnterTicketPurchaseModeMessageItv(owner.getPlanet().getName(), core.mapService.getClosestCityName(owner), owner)
             owner.getClient().getSession().write(tpm.serialize())
             return
     return
