@@ -143,7 +143,7 @@ public class BuffService implements INetworkDispatch {
 
 	
             for (final Buff otherBuff : target.getBuffList()) {
-                if (buff.getGroup1().equals(otherBuff.getGroup1()))  
+            	 if (buff.getGroup1().equals(otherBuff.getGroup1())) 
                 	if (buff.getPriority() >= otherBuff.getPriority()) {
                         if (buff.getBuffName().equals(otherBuff.getBuffName()))
                         {
@@ -164,11 +164,11 @@ public class BuffService implements INetworkDispatch {
                         			if (otherBuff.getRemainingDuration() > buff.getDuration() && otherBuff.getStacks() >= otherBuff.getMaxStacks())
                         				return null;
                         }
-                       
                         removeBuffFromCreature(target, otherBuff);
                         break;
-                } else {
-                	System.out.println("buff not added:" + buffName);
+                } else 
+                {
+
                 	return null;
                 }
         }	
@@ -239,9 +239,12 @@ public class BuffService implements INetworkDispatch {
 	} 
 	
 	@SuppressWarnings("unused")
-	public void removeBuffFromCreature(CreatureObject creature, Buff buff) {
+	public void removeBuffFromCreature(CreatureObject creature, Buff buff)
+	{
 		 if(!creature.getBuffList().contains(buff))
-             return;
+		 {
+			 return;
+		 }
 		 DamageOverTime dot = creature.getDotByBuff(buff);
          if(dot != null) {
         	 dot.getTask().cancel(true);
@@ -251,18 +254,57 @@ public class BuffService implements INetworkDispatch {
 /*         if(FileUtilities.doesFileExist("scripts/buffs/" + buff.getBuffName() + ".py")) core.scriptService.callScript("scripts/buffs/", buff.getBuffName(), "remove", core, creature, buff);
          else
          {*/
-         	if(buff.getEffect1Name().length() > 0) core.skillModService.deductSkillMod(creature, buff.getEffect1Name(), (int) buff.getEffect1Value());
-         	if(buff.getEffect2Name().length() > 0) core.skillModService.deductSkillMod(creature, buff.getEffect2Name(), (int) buff.getEffect2Value());
-         	if(buff.getEffect1Name().length() > 0) core.skillModService.deductSkillMod(creature, buff.getEffect3Name(), (int) buff.getEffect3Value());
-         	if(buff.getEffect1Name().length() > 0) core.skillModService.deductSkillMod(creature, buff.getEffect4Name(), (int) buff.getEffect4Value());
-         	if(buff.getEffect1Name().length() > 0) core.skillModService.deductSkillMod(creature, buff.getEffect5Name(), (int) buff.getEffect5Value());
-//         }
          	
-         if (!buff.getCallback().equals("none") && !buff.getCallback().equals("")) {
+         	if(buff.getEffect1Name().length() > 0)
+         	{
+         		
+         			core.skillModService.deductSkillMod(creature, buff.getEffect1Name(), (int) buff.getEffect1Value());
+
+         	}
+
+         	if(buff.getEffect2Name().length() > 0)
+         	{
+         			core.skillModService.deductSkillMod(creature, buff.getEffect2Name(), (int) buff.getEffect2Value());
+         	}
+  
+         	if(buff.getEffect3Name().length() > 0)
+         	{
+     			core.skillModService.deductSkillMod(creature, buff.getEffect3Name(), (int) buff.getEffect3Value());
+
+         	}
+        	
+         	if(buff.getEffect4Name().length() > 0)
+         	{
+         		core.skillModService.deductSkillMod(creature, buff.getEffect4Name(), (int) buff.getEffect4Value());
+
+         	}	
+
+         	if(buff.getEffect5Name().length() > 0) 
+         	{
+         		core.skillModService.deductSkillMod(creature, buff.getEffect5Name(), (int) buff.getEffect5Value());
+        	}
+//         }
+       
+         // ??? callback for what ? toggle buff ?	
+         if (!buff.getCallback().equals("none") && !buff.getCallback().equals(""))
+         {
         	 if (FileUtilities.doesFileExist("scripts/buffs/" + buff.getBuffName() +  ".py")) {
         		 PyObject method = core.scriptService.getMethod("scripts/buffs/", buff.getBuffName(), buff.getCallback());
 			
         		 if (method != null && method.isCallable()) {
+        			 method.__call__(Py.java2py(core), Py.java2py(creature), Py.java2py(buff));
+        		 }
+        	 }
+         }
+         //remove method is more like it
+         else
+         {
+        	 if (FileUtilities.doesFileExist("scripts/buffs/" + buff.getBuffName() +  ".py"))
+        	 {
+        		 PyObject method = core.scriptService.getMethod("scripts/buffs/", buff.getBuffName(), "remove");
+			
+        		 if (method != null && method.isCallable())
+        		 {
         			 method.__call__(Py.java2py(core), Py.java2py(creature), Py.java2py(buff));
         		 }
         	 }
@@ -352,14 +394,16 @@ public class BuffService implements INetworkDispatch {
 	
 	public void addGroupBuff(CreatureObject target, String buffName, CreatureObject buffer) {
 		
-		if(buffer.getGroupId() == 0) {
+		if(buffer.getGroupId() == 0) 
+		{
 			doAddBuff(target, buffName, buffer);
 			return;
 		}
 			
 		GroupObject group = (GroupObject) core.objectService.getObject(buffer.getGroupId());
 		
-		if(group == null) {
+		if(group == null)
+		{
 			doAddBuff(target, buffName, buffer);
 			return;
 		}
