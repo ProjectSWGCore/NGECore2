@@ -24,7 +24,9 @@ package services.gcw;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -46,10 +48,13 @@ import resources.datatables.FactionStatus;
 import resources.datatables.Factions;
 import resources.datatables.GcwType;
 import resources.datatables.Options;
+import resources.datatables.Posture;
 import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
 import services.ai.AIActor;
+import services.ai.states.AIState;
+import services.ai.states.DeathState;
 import services.ai.states.WithdrawalState;
 import services.gcw.GCWSpawner.PatrolRoute;
 import services.gcw.GCWPylon.PylonType;
@@ -84,6 +89,7 @@ public class InvasionService implements INetworkDispatch {
 	private CreatureObject defendingGeneral = null;
 	private CreatureObject defendingQuestOfficer = null;
 	private Vector<CreatureObject> offensiveQuestOfficers = new Vector<CreatureObject>();
+	private boolean defendingGeneralAlive = true;
 	
 	private int invasionLocation=-1;
 	private String invasionPlanet="tatooine";
@@ -116,6 +122,10 @@ public class InvasionService implements INetworkDispatch {
 	private int invaderRegistryCounter = 0;
 	private Map<Integer,CreatureObject> defendingCreatures = new ConcurrentHashMap<Integer,CreatureObject>();
 	private int defenderRegistryCounter = 0;
+	private Map<Integer,CreatureObject> demoralizedSoldiers = new ConcurrentHashMap<Integer,CreatureObject>();
+	private int demoralizedSoldierRegistryCounter = 0;
+	private Map<Integer,CreatureObject> disabledVehicles = new ConcurrentHashMap<Integer,CreatureObject>();
+	private int disabledVehicleRegistryCounter = 0;
 	private Map<Integer,TangibleObject> phase2Objects = new ConcurrentHashMap<Integer,TangibleObject>(); 
 	private int phase2ObjectRegistryCounter = 0;
 	private Vector<TangibleObject> defensiveBanners = new Vector<TangibleObject>();
@@ -256,9 +266,9 @@ public class InvasionService implements INetworkDispatch {
 		}
 		
 		// Message at 30:00 -> 1800000 seconds
-		if (invasionPhase==1 && System.currentTimeMillis()>temptimestartreference + 180000 && ! ph2_message1sent){
+		if (invasionPhase==1 && System.currentTimeMillis()>temptimestartreference + 200000 && ! ph2_message1sent){
 			invasionPhase=2;
-			preparePhase2();			
+			preparePhase2();	
 			System.out.println("PHASE 2");
 			send_Phase2_InvaderMessage1();
 			send_Phase2_DefenderMessage1();
@@ -267,7 +277,7 @@ public class InvasionService implements INetworkDispatch {
 		}
 		
 		// Message at 45:00 -> 2700000 seconds
-		if (invasionPhase==2 && System.currentTimeMillis()>temptimestartreference + 900000 && ! ph2_message2sent){ // 1200000
+		if (invasionPhase==2 && System.currentTimeMillis()>temptimestartreference + 400000 && ! ph2_message2sent){ // 1200000
 			send_Phase2_InvaderMessage2();
 			send_Phase2_DefenderMessage2();
 			ph2_message2sent = true;
@@ -305,16 +315,20 @@ public class InvasionService implements INetworkDispatch {
 				grantGCWTokens(invadingFaction,10);
 				grantGCWTokens(defendingFaction,130);
 				
+				playVictoryMusic(defendingFaction);
+				
 				// set up delayed tasks
 				//Clone Maps
 				Map<Integer,CreatureObject> invadingCreaturesClone = new ConcurrentHashMap<Integer,CreatureObject>();
 				Map<Integer,CreatureObject> defendingCreaturesClone = new ConcurrentHashMap<Integer,CreatureObject>();
-				for (Map.Entry<Integer, CreatureObject> entry : invadingCreatures.entrySet()) {
+				for (Map.Entry<Integer, CreatureObject> entry : getInvadingCreaturesEntrySet()) {
 					invadingCreaturesClone.put(entry.getKey(), entry.getValue());
 				}
-				for (Map.Entry<Integer, CreatureObject> entry : defendingCreatures.entrySet()) {
+				for (Map.Entry<Integer, CreatureObject> entry : getDefendingCreaturesEntrySet()) {
 					defendingCreaturesClone.put(entry.getKey(), entry.getValue());
 				}
+				
+				withdrawInvaders();
 				
 				Executors.newSingleThreadScheduledExecutor().schedule(() -> {	
 					wipeInvaders(invadingCreaturesClone);
@@ -322,7 +336,7 @@ public class InvasionService implements INetworkDispatch {
 				}, 360, TimeUnit.SECONDS);
 				
 				
-				withdrawInvaders();
+				
 				for (BuildingObject camp : offensiveCamps){
 					core.simulationService.remove(camp, camp.getWorldPosition().x, camp.getWorldPosition().z, true);
 					core.objectService.destroyObject(camp.getObjectID());
@@ -373,6 +387,8 @@ public class InvasionService implements INetworkDispatch {
 
 				grantGCWTokens(invadingFaction,130);
 				grantGCWTokens(defendingFaction,10);
+				
+				playVictoryMusic(invadingFaction);
 							
 				// Clean Up
 //				wipeInvaders();
@@ -382,12 +398,14 @@ public class InvasionService implements INetworkDispatch {
 				//Clone Maps
 				Map<Integer,CreatureObject> invadingCreaturesClone = new ConcurrentHashMap<Integer,CreatureObject>();
 				Map<Integer,CreatureObject> defendingCreaturesClone = new ConcurrentHashMap<Integer,CreatureObject>();
-				for (Map.Entry<Integer, CreatureObject> entry : invadingCreatures.entrySet()) {
+				for (Map.Entry<Integer, CreatureObject> entry : getInvadingCreaturesEntrySet()) {
 					invadingCreaturesClone.put(entry.getKey(), entry.getValue());
 				}
-				for (Map.Entry<Integer, CreatureObject> entry : defendingCreatures.entrySet()) {
+				for (Map.Entry<Integer, CreatureObject> entry : getDefendingCreaturesEntrySet()) {
 					defendingCreaturesClone.put(entry.getKey(), entry.getValue());
 				}
+				
+				withdrawInvaders();
 				
 				Executors.newSingleThreadScheduledExecutor().schedule(() -> {	
 					wipeInvaders(invadingCreaturesClone);
@@ -395,7 +413,7 @@ public class InvasionService implements INetworkDispatch {
 				}, 360, TimeUnit.SECONDS);
 				
 				
-				withdrawInvaders();
+				
 				for (BuildingObject camp : offensiveCamps){
 					core.simulationService.remove(camp, camp.getWorldPosition().x, camp.getWorldPosition().z, true);
 					core.objectService.destroyObject(camp.getObjectID());
@@ -442,7 +460,7 @@ public class InvasionService implements INetworkDispatch {
 	}
 	
 	public void withdrawInvaders(){
-		for (Map.Entry<Integer, CreatureObject> entry : invadingCreatures.entrySet()) {
+		for (Map.Entry<Integer, CreatureObject> entry : getInvadingCreaturesEntrySet()) {
 			CreatureObject creature = entry.getValue();
 			if (creature!=null){
 				if (creature.getAttachment("AI")!=null){
@@ -452,6 +470,7 @@ public class InvasionService implements INetworkDispatch {
 						actor.setAIactive(true);
 						actor.setIntendedPrimaryAIState(new WithdrawalState());
 						actor.setCurrentState(new WithdrawalState());
+						creature.setAttachment("isWithdrawn",1);
 					}					
 				}
 			}
@@ -499,13 +518,33 @@ public class InvasionService implements INetworkDispatch {
 	}
 	
 	public void registerInvader(CreatureObject registrant){
-//		System.out.println("Registered! " + invaderRegistryCounter);
-		invadingCreatures.put(invaderRegistryCounter++, registrant);
+		synchronized(invadingCreatures) {
+	//		System.out.println("Registered! " + invaderRegistryCounter);
+			invadingCreatures.put(invaderRegistryCounter++, registrant);
+		}
 	}
 	
 	public void registerDefender(CreatureObject registrant){
-		defendingCreatures.put(invaderRegistryCounter++, registrant);
+		synchronized(defendingCreatures) {
+			defendingCreatures.put(defenderRegistryCounter++, registrant);
+		}
 	}
+	
+	public void registerDemoralizedSoldier(CreatureObject registrant){
+		synchronized(demoralizedSoldiers) {
+	//		System.out.println("Registered! " + invaderRegistryCounter);
+			demoralizedSoldiers.put(demoralizedSoldierRegistryCounter++, registrant);
+		}
+	}
+	
+	public void registerDisabledVehicle(CreatureObject registrant){
+		synchronized(disabledVehicles) {
+	//		System.out.println("Registered! " + invaderRegistryCounter);
+			disabledVehicles.put(disabledVehicleRegistryCounter++, registrant);
+		}
+	}
+	
+	
 	
 	public void wipeInvaders(Map<Integer,CreatureObject> invaderMap){
 				
@@ -619,7 +658,9 @@ public class InvasionService implements INetworkDispatch {
 	
 	
 	public void registerPhase2Objects(TangibleObject registrant){
-		phase2Objects.put(phase2ObjectRegistryCounter++, registrant);		
+		synchronized(phase2Objects){
+			phase2Objects.put(phase2ObjectRegistryCounter++, registrant);	
+		}
 	}
 	
 	public void deletePhase2Objects(){
@@ -1280,7 +1321,7 @@ public class InvasionService implements INetworkDispatch {
 		spawnPylon(PylonType.Barricade, defendingFaction, "naboo", new Point3D(1782.81F, 12, 2516.37F), 0.71F, 0.70F);
 		spawnPylon(PylonType.Barricade, defendingFaction, "naboo", new Point3D(1991.90F, 30, 2713.51F), 0.25F, 0.96F);
 		//spawnPylon(PylonType.Barricade, defendingFaction, "naboo", new Point3D(1990.17F, 30.29F, 2685.63F), 0.99F, 0.07F); // Makes patrols fall through the bridge
-		spawnPylon(PylonType.Barricade, defendingFaction, "naboo", new Point3D(1998.98F, 30.0F, 2670.41F), 0.94F, -0.32F); // works better. Do not change, it prevents clipping problems!
+		spawnPylon(PylonType.Barricade, defendingFaction, "naboo", new Point3D(1998.98F, 30.0F, 2670.41F), 0.94F, -0.32F); // works better. Do not change, it prevents client clipping problems!
 		spawnPylon(PylonType.Barricade, defendingFaction, "naboo", new Point3D(1713.97F, 12, 2655.29F), 1.00F, 0.00F);
 		spawnPylon(PylonType.Barricade, defendingFaction, "naboo", new Point3D(1693.40F, 12, 2636.64F), 0.72F, -0.69F);
 		spawnPylon(PylonType.Barricade, defendingFaction, "naboo", new Point3D(1532.30F, 25, 2757.37F), -0.69F, 0.71F);
@@ -1299,7 +1340,6 @@ public class InvasionService implements INetworkDispatch {
 		spawnPylon(PylonType.SoldierDefense, defendingFaction, "naboo", new Point3D(1820.98F, 12, 2518.77F), 0.79F, 0.61F);
 		spawnPylon(PylonType.SoldierDefense, defendingFaction, "naboo", new Point3D(1854.98F, 12, 2541.42F), 0.36F, 0.93F);
 		spawnPylon(PylonType.SoldierDefense, defendingFaction, "naboo", new Point3D(1857.63F, 12, 2545.66F), 0.36F, 0.93F);
-		spawnPylon(PylonType.SoldierDefense, defendingFaction, "naboo", new Point3D(1864.14F, 12, 2551.11F), 0.94F, 0.32F);
 		spawnPylon(PylonType.SoldierDefense, defendingFaction, "naboo", new Point3D(1864.14F, 12, 2551.11F), 0.94F, 0.32F);
 		spawnPylon(PylonType.SoldierDefense, defendingFaction, "naboo", new Point3D(1875.09F, 12, 2556.38F), 0.95F, 0.29F);
 		spawnPylon(PylonType.SoldierDefense, defendingFaction, "naboo", new Point3D(1875.03F, 12, 2522.12F), 0.93F, 0.36F);
@@ -1426,7 +1466,6 @@ public class InvasionService implements INetworkDispatch {
 		spawnPylon(PylonType.SoldierPatrol, PatrolRoute.Dearic9 ,invadingFaction, "talus", 90, new Point3D(315.93475F, 42.105118F, -3551.3157F), 0.95F, -0.30F);
 		
 		
-		
 		spawnPylon(PylonType.SoldierDefense, defendingFaction, "talus", new Point3D(410.98F, 6, -2988.05F), -0.69F, 0.71F);
 		spawnPylon(PylonType.SoldierDefense, defendingFaction, "talus", new Point3D(500, 6, -2954), -0.69F, 0.71F);
 		spawnPylon(PylonType.SoldierDefense, defendingFaction, "talus", new Point3D(548, 6, -2941), -0.69F, 0.71F);
@@ -1461,10 +1500,7 @@ public class InvasionService implements INetworkDispatch {
 		spawnPylon(PylonType.Turret, defendingFaction, "talus", new Point3D(344.91F, 6, -2741.06F), 1F, 0F);
 		spawnPylon(PylonType.Turret, defendingFaction, "talus", new Point3D(379.53F, 6, -2741.90F), 1F, 0F);
 		spawnPylon(PylonType.Turret, defendingFaction, "talus", new Point3D(362.86F, 6, -2754.18F), 1F, 0F);
-		
-				
 		// object/tangible/destructible/shared_gcw_rebel_turret.iff crashes the client, not fixable	
-		
 		
 	}
 	
@@ -1473,10 +1509,10 @@ public class InvasionService implements INetworkDispatch {
 		spawnPylon(PylonType.Turret, defendingFaction, "tatooine", new Point3D(-1164.60F,12, -3643.42F), 0.42F, 0.9F);
 		spawnPylon(PylonType.Turret, defendingFaction, "tatooine", new Point3D(-1278.45F,12, -3615.71F), 0.41F, 0.9F);
 		spawnPylon(PylonType.Turret, defendingFaction, "tatooine", new Point3D(-1237.01F,12, -3640.84F), 0.89F, -0.44F);
-		spawnPylon(PylonType.Turret, defendingFaction, "tatooine", new Point3D(-1230.01F,12, -3647.99F), 0.89F, -0.44F);
+		spawnPylon(PylonType.Turret, defendingFaction, "tatooine", new Point3D(-1231.72F,12, -3646.87F), 0.89F, -0.44F);
 		spawnPylon(PylonType.Turret, defendingFaction, "tatooine", new Point3D(-1330.74F,12, -3678.19F), 0F, 1F);
 		spawnPylon(PylonType.Turret, defendingFaction, "tatooine", new Point3D(-1274.77F,12, -3572.47F), 0.28F, 0.95F);
-		spawnPylon(PylonType.Turret, defendingFaction, "tatooine", new Point3D(-1123.84F,12, -3727.56F), -0.17F, 0.98F);
+		spawnPylon(PylonType.Turret, defendingFaction, "tatooine", new Point3D(-1124.69F,8.89F, -3729.97F), -0.17F, 0.98F);
 		spawnPylon(PylonType.Turret, defendingFaction, "tatooine", new Point3D(-1156.16F,12, -3704.48F), 0.02F, 0.99F);
 		spawnPylon(PylonType.Turret, defendingFaction, "tatooine", new Point3D(-1108.44F,12, -3632.28F), 0.90F, 0.422F);
 		
@@ -1607,7 +1643,7 @@ public class InvasionService implements INetworkDispatch {
 			defendingGeneral = (CreatureObject) NGECore.getInstance().staticService.spawnObject(generalTemplate, "talus", 0L, 480.071F, 6, -3006.851F, 1, 0);			
 		}
 		
-		if (defendingGeneral==null){
+		if (defendingGeneral==null || defendingGeneral.getTemplate()==null){
 			try {
 				throw new Exception();
 			} catch (Exception e) {
@@ -1615,14 +1651,20 @@ public class InvasionService implements INetworkDispatch {
 				e.printStackTrace();
 			}				
 		}
-
+		defendingGeneralAlive = true;
 		
-		defendingGeneralTask = scheduler.scheduleAtFixedRate(new Runnable() {
+		final Future<?>[] dgt = {null};
+		dgt[0] = defendingGeneralTask = scheduler.scheduleAtFixedRate(new Runnable() {
 
 			@Override
 			public void run() {
 				try {
 					AIActor actor = (AIActor)defendingGeneral.getAttachment("AI");
+					if (actor.getCurrentState().getClass().equals(DeathState.class)){
+						defendingGeneralAlive = false;
+						Thread.yield();
+						dgt[0].cancel(false);
+					}
 					for (CreatureObject damager : actor.getDamageMap().keySet()){
 						if (damager.getOwnerId()>0){ // For pets doing damage
 							damager = (CreatureObject)core.objectService.getObject(damager.getOwnerId());
@@ -2104,6 +2146,7 @@ public class InvasionService implements INetworkDispatch {
 			AIActor actor = (AIActor)enemy.getAttachment("AI");
 			if (actor==null)
 				return;
+			actor.setLastPositionBeforeStateChange(enemy.getWorldPosition());
 			actor.addDefender(defendingGeneral);
 		}
 	}
@@ -2215,6 +2258,44 @@ public class InvasionService implements INetworkDispatch {
 		offensiveClonerList.add(cloner3);
 	}
 	
+	private void spawnDemoralizedSoldier(int faction, Point3D pos, float qw, float qy){		
+		String soldierTemplate = "rebel_invasion_demoralized_soldier";
+		if (faction==Factions.Imperial){
+			soldierTemplate = "imp_invasion_demoralized_soldier";
+		}	
+
+		CreatureObject soldier = (CreatureObject)NGECore.getInstance().spawnService.spawnCreature(soldierTemplate, getInvasionPlanet(invasionLocation).getName(), 0L, pos.x, pos.y, pos.z, qw,0F,qy,0F,-1);
+		NGECore.getInstance().invasionService.registerDemoralizedSoldier(soldier);		
+	}
+	
+	private void spawnDisabledVehicle(int faction, Point3D pos, float qw, float qy){
+		String vehicleTemplate = "rebel_invasion_disabled_atxt";
+		if (faction==Factions.Imperial){
+			vehicleTemplate = "imp_invasion_disabled_atst";
+		}	
+
+		CreatureObject vehicle = (CreatureObject)NGECore.getInstance().spawnService.spawnCreature(vehicleTemplate, getInvasionPlanet(invasionLocation).getName(), 0L, pos.x, pos.y, pos.z, qw,0F,qy,0F,-1);
+		vehicle.setPosture((byte) Posture.Incapacitated); 
+		NGECore.getInstance().invasionService.registerDisabledVehicle(vehicle);	
+	}
+	
+	private void playVictoryMusic(int winnerFaction){
+		String audioTemplate = "sound/music_themequest_victory_rebel.snd";
+		if (winnerFaction==Factions.Imperial)
+			audioTemplate = "sound/music_themequest_victory_imperial.snd";
+		
+//		Vector<CreatureObject> allPlayers = core.simulationService.getAllNearSameFactionPlayers(500,invasionLocationCenter, getInvasionPlanet(invasionLocation), getFactionName(winnerFaction));
+//		for (CreatureObject player : allPlayers) {			
+//			if (player.getFaction().length() > 0 && player.getFactionStatus() > FactionStatus.OnLeave) {
+//				player.playMusic(audioTemplate);
+//			}			
+//		}
+		Vector<CreatureObject> allPlayers = core.simulationService.getAllNearPlayers(500, getInvasionPlanet(invasionLocation), invasionLocationCenter);
+		for (CreatureObject player : allPlayers) {	
+			player.playMusic(audioTemplate);			
+		}
+	}
+	
 	// Utility method
 	public void arrangePylons(Point3D center, int angle){
 		
@@ -2262,6 +2343,17 @@ public class InvasionService implements INetworkDispatch {
 		return result;
 	}
 	
+	private Set<Entry<Integer,CreatureObject>> getInvadingCreaturesEntrySet(){
+		synchronized(invadingCreatures){
+			return invadingCreatures.entrySet();
+		}
+	}
+	
+	private Set<Entry<Integer,CreatureObject>> getDefendingCreaturesEntrySet(){
+		synchronized(defendingCreatures){
+			return defendingCreatures.entrySet();
+		}
+	}
 	
 
 	public void setInvasionLocationCenter(){
@@ -2290,6 +2382,11 @@ public class InvasionService implements INetworkDispatch {
 		if (faction==Factions.Imperial)
 			return "imperial";
 		return "neutral";
+	}
+	
+
+	public boolean isDefendingGeneralAlive() {
+		return defendingGeneralAlive;
 	}
 	
 	@Override

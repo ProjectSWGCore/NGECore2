@@ -214,6 +214,12 @@ def run(core, actor, target, commandString):
 		if latarget.getAttachment('AI'):
 			actor.sendSystemMessage('Checking AI progression %s' % latarget.getAttachment('AI').getProgressionMarker(), 0)
 	
+	elif command == 'checkwithdrawn':		
+		latargetID = long(actor.getIntendedTarget())
+		latarget = core.objectService.getObject(latargetID)
+		if latarget.getAttachment('isWithdrawn'): 
+			actor.sendSystemMessage('Checking AIisWithdrawn %s' % latarget.getAttachment('isWithdrawn'), 0)
+	
 	elif command == 'showbitmask':		
 		latargetID = long(actor.getIntendedTarget())
 		latarget = core.objectService.getObject(latargetID)
@@ -269,6 +275,15 @@ def run(core, actor, target, commandString):
 			positionY = core.terrainService.getHeight(inst.getPlanetId(), inst.getPosition().x, inst.getPosition().z)
 			instpos = Point3D(inst.getPosition().x,positionY+2, inst.getPosition().z)
 			inst.setPosition(instpos)
+	
+	elif command == 'los':
+		latargetID = long(actor.getIntendedTarget())
+		latarget = core.objectService.getObject(latargetID)
+		los = core.simulationService.checkLineOfSight(actor, latarget)
+		if los:
+			actor.sendSystemMessage('Line of sight between player and target', 0)
+		else:
+			actor.sendSystemMessage('NO Line of sight between player and target', 0)
 				
 	elif command == 'unknownAbilityPacket' and arg1:  
 		packet = UnknownAbilityPacket(arg1)

@@ -290,6 +290,28 @@ public class SimulationService implements INetworkDispatch {
 		return foundCreatures;
 	}
 	
+	public Vector<CreatureObject> getAllNearPlayers(int distance, SWGObject value ){
+		Vector<CreatureObject> foundCreatures = new Vector<CreatureObject>();
+		core.simulationService.get(value.getPlanet(), value.getWorldPosition().x, value.getWorldPosition().z, distance).stream().forEach((objecta) -> { 
+			if (objecta instanceof CreatureObject && objecta!=value)
+				if (((CreatureObject)objecta).isPlayer())
+					foundCreatures.add((CreatureObject)objecta);
+			}
+		);
+		return foundCreatures;
+	}
+	
+	public Vector<CreatureObject> getAllNearPlayers(int distance, Planet planet, Point3D pos ){
+		Vector<CreatureObject> foundCreatures = new Vector<CreatureObject>();
+		core.simulationService.get(planet, pos.x, pos.z, distance).stream().forEach((objecta) -> { 
+			if (objecta instanceof CreatureObject)
+				if (((CreatureObject)objecta).isPlayer())
+					foundCreatures.add((CreatureObject)objecta);
+			}
+		);
+		return foundCreatures;
+	}
+	
 	public Vector<TangibleObject> getAllNearNonSameFactionTargets(int distance, SWGObject center ){
 		Vector<TangibleObject> foundTargets = new Vector<TangibleObject>();
 		core.simulationService.get(center.getPlanet(), center.getWorldPosition().x, center.getWorldPosition().z, distance).stream().forEach((objecta) -> {
@@ -987,8 +1009,18 @@ public class SimulationService implements INetworkDispatch {
 		float cos = (float) Math.cos(radians);
 
         WB_M44 rotationMatrix = new WB_M44(cos, 0, sin, 0, 0, 1, 0, 0, -sin, 0, cos, 0, 0, 0, 0, 1);
-
-        WB_M44 modelSpace = translateMatrix.mult(rotationMatrix).inverse();
+        
+        WB_M44 modelSpace = null;
+        try {
+        	modelSpace = translateMatrix.mult(rotationMatrix).inverse();
+        } catch (Exception ex){
+        	// It's usually a bank terminal causing this
+        	//System.out.println("The object " + object.getTemplate() + " at x:" + object.getWorldPosition().x + " z:" + object.getWorldPosition().z + " causes a problem during modelspaceconversion. Can be safely ignored.");
+        	if (modelSpace==null)
+            	return new Ray(origin, new Vector3D(0,0,0));
+        }
+        
+        
         
         float originX = (float) (modelSpace.m11 * origin.x + modelSpace.m12 * origin.y + modelSpace.m13 * origin.z + modelSpace.m14);
         float originY = (float) (modelSpace.m21 * origin.x + modelSpace.m22 * origin.y + modelSpace.m23 * origin.z + modelSpace.m24);

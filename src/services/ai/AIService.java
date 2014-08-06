@@ -21,8 +21,13 @@
  ******************************************************************************/
 package services.ai;
 
+import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.Random;
 import java.util.Vector;
 
@@ -40,6 +45,7 @@ import services.ai.states.LoiterState;
 import services.ai.states.PatrolState;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
+import engine.resources.service.INetworkDispatch;
 import main.NGECore;
 
 public class AIService {
@@ -236,6 +242,80 @@ public class AIService {
 	
 	public float distanceSquared(Point3D p2, Point3D p1){
 		return (p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y) + (p2.z - p1.z) * (p2.z - p1.z);
+	}
+	
+	public void waitForEvent(AIActor actor, INetworkDispatch service, String serviceMethodName, boolean expectedValue, Class nextStateClass){
+		
+		final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);	
+		final Future<?>[] wfe = {null};
+		wfe[0] = scheduler.scheduleAtFixedRate(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					Class<?> noParams[] = {};
+					Method m = service.getClass().getMethod(serviceMethodName, noParams);
+					boolean value = (boolean) m.invoke(service); 					
+					if (value==expectedValue){
+						actor.setCurrentState((AIState)nextStateClass.newInstance());
+						System.out.println("condition true waitForEvent! " + nextStateClass.getName());
+						Thread.yield();
+		                wfe[0].cancel(false);
+					}					
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}			
+		}, 10, 3000, TimeUnit.MILLISECONDS);
+	}
+	
+	public void waitForEvent(AIActor actor, INetworkDispatch service, String serviceMethodName, int expectedValue, Class nextStateClass){
+		final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);	
+		final Future<?>[] wfe = {null};
+		wfe[0] = scheduler.scheduleAtFixedRate(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					Class<?> noParams[] = {};
+					Method m = service.getClass().getMethod(serviceMethodName, noParams);
+					int number = (int) m.invoke(service); 					
+					if (number==expectedValue){
+						actor.setCurrentState((AIState)nextStateClass.newInstance());
+						Thread.yield();
+		                wfe[0].cancel(false);
+					}					
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}			
+		}, 10, 3000, TimeUnit.MILLISECONDS);
+	}
+	
+	// ToDo: Make an overloaded method with params
+	public void waitForEvent(INetworkDispatch service, String serviceMethodName, Object[] params){
+		final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);	
+		final Future<?>[] wfe = {null};
+		wfe[0] = scheduler.scheduleAtFixedRate(new Runnable() {
+
+			@Override
+			public void run() {
+				try {
+					boolean condition = true;
+					Object[] params; //The parameters for my method	
+					Class<?> noParams[] = {};
+					Method m = service.getClass().getMethod(serviceMethodName, noParams);
+					m.invoke(service); 
+					
+					if (condition){
+						Thread.yield();
+		                wfe[0].cancel(false);
+					}
+					// do something
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			
+		}, 10, 2000, TimeUnit.MILLISECONDS);
 	}
 	
 	public void logAI(String logMsg){

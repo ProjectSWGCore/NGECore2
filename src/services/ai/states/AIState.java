@@ -27,6 +27,7 @@ import java.util.Vector;
 import main.NGECore;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
+import engine.resources.service.INetworkDispatch;
 import resources.common.SpawnPoint;
 import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
@@ -777,8 +778,11 @@ public abstract class AIState {
 					if (isInvader==null)
 						return;
 					// If invader check for in weapon range general
-					if (core.invasionService.getInvasionPhase()==3 && core.invasionService.getDistanceToDefensiveGeneral(creature)<2500){
-						actor.addDefender(core.invasionService.getDefensiveGeneral());
+					if (core.invasionService.getDefensiveGeneral()!=null){
+						if (core.invasionService.getInvasionPhase()==3 && core.invasionService.getDefensiveGeneral().getPosture()!=13 && core.invasionService.getDefensiveGeneral().getPosture()!=14 && core.invasionService.getDistanceToDefensiveGeneral(creature)<2500){
+							actor.addDefender(core.invasionService.getDefensiveGeneral());
+							return;
+						}
 					}
 					
 					// Check if there are more than 5 invaders at same spot
@@ -786,7 +790,13 @@ public abstract class AIState {
 						actor.setAIactive(false); // switch off auto-target-recognition to counter lag
 						actor.setCurrentState(new IdleState());
 						System.out.println("AI switched off!");
+						return;						
 					}
+					
+					//actor.setCurrentState(new IdleState());
+					// Wait state() Since this state does not require move,recover and all that its simple task
+
+					//NGECore.getInstance().aiService.waitForEvent(actor, NGECore.getInstance().invasionService, "isDefendingGeneralAlive", false, WithdrawalState.class);
 					
 					return; // Last Patrol point reached and no loop
 				}

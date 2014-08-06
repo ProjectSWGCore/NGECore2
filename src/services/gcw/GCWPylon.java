@@ -235,13 +235,8 @@ public class GCWPylon extends TangibleObject{
 		
 		turretWeapon.setMinDamage(minDamage);
 		turretWeapon.setMaxDamage(maxDamage);
-		turret.add(turretWeapon);
+		//turret.add(turretWeapon); // Does not have to be added explicitly, would cause engine slot arrangement error message
 		turret.setAttachment("TurretWeapon",turretWeapon.getObjectID());
-//		Set<Client> newObservers = new HashSet<Client>(turret.getObservers());
-//		for(Client c : newObservers) {
-//			UpdateContainmentMessage ucm = new UpdateContainmentMessage(turretWeapon.getObjectID(), turret.getObjectID(), 4);
-//			c.getSession().write(ucm.serialize());
-//		}
 	}
 	
 	public void createBarricade(){	

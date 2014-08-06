@@ -408,7 +408,6 @@ public class TangibleObject extends SWGObject implements Serializable {
 				observer.getSession().write(new UpdatePVPStatusMessage(this.getObjectID(), NGECore.getInstance().factionService.calculatePvpStatus((CreatureObject) observer.getParent(), this), getFaction()).serialize());
 				if(getClient() != null){
 					getClient().getSession().write(new UpdatePVPStatusMessage(observer.getParent().getObjectID(), NGECore.getInstance().factionService.calculatePvpStatus((CreatureObject) this, (CreatureObject) observer.getParent()), getFaction()).serialize());					
-					//System.out.println("SENT TO CLIENT!");
 				} 
 			}
 		}
@@ -418,17 +417,6 @@ public class TangibleObject extends SWGObject implements Serializable {
 			
 			if (companion != null) {
 				companion.updatePvpStatus();
-			}
-		}
-		
-	
-		if (this instanceof CreatureObject){
-			if (((CreatureObject)this).isPlayer()){
-				// Here a specific CREO delta must be sent to update the faction info in character sheet and symbol in name
-				// If anyone knows which that would be, please replace it here!
-				
-				sendBaselines(this.getClient());
-				
 			}
 		}
 	}
@@ -623,7 +611,8 @@ public class TangibleObject extends SWGObject implements Serializable {
 	}
 	
 	public void notifyClients(IoBuffer buffer, boolean notifySelf) {
-		notifyObservers(buffer, false);
+		// notifyObservers(buffer, false); // ??? Ignores the notifySelf argument. Was this done purposely? Faction Status etc. can't update the client without it
+		notifyObservers(buffer, notifySelf);
 	}
 	
 	public ObjectMessageBuilder getMessageBuilder() {
@@ -677,6 +666,8 @@ public class TangibleObject extends SWGObject implements Serializable {
 			}
 		}
 	}
+	
+	
 	
 	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
 		switch (viewType) {

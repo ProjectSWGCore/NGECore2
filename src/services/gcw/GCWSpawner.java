@@ -196,25 +196,37 @@ public class GCWSpawner extends TangibleObject{
 	
 	public void spawnSoldier(){
 		if (NGECore.getInstance().invasionService.getInvasionPhase()==2){
+			String stfName = "gcw_city_rebel_specforce_defense";
 			if (spawnerFaction==Factions.Rebel){
 				switch (spawnLevel) {
 					case 1: soldierTemplates = rebelSoldierTemplates1;
+							stfName = "gcw_city_rebel_grunt_assault";
+							break;
 					case 2: soldierTemplates = rebelSoldierTemplates2;
+							stfName = "gcw_city_rebel_grunt_assault";
+							break;
 					case 3: soldierTemplates = rebelSoldierTemplates3;
+							stfName = "gcw_city_rebel_specforce_assault";
+							break;
 				}
 			}
 			if (spawnerFaction==Factions.Imperial){
 				switch (spawnLevel) {
 					case 1: soldierTemplates = imperialSoldierTemplates1;
+							break;
 					case 2: soldierTemplates = imperialSoldierTemplates2;
+							break;
 					case 3: soldierTemplates = imperialSoldierTemplates3;
+							break;
 				}
 			}	
 			String soldierTemplate = soldierTemplates[new Random().nextInt(soldierTemplates.length)];	
 			//if (totalSpawnedUnits==0){
 			CreatureObject soldier = (CreatureObject)NGECore.getInstance().spawnService.spawnCreature(soldierTemplate, this.getPlanet().getName(), 0L, this.getPosition().x, this.getPosition().y, this.getPosition().z, this.getOrientation().w, this.getOrientation().x, this.getOrientation().y,this.getOrientation().z,-1);
+			if (spawnerFaction==Factions.Rebel)
+				soldier.setStfName(stfName);
 			NGECore.getInstance().invasionService.registerInvader(soldier);
-			totalSpawnedUnits++;
+			totalSpawnedUnits++;			
 			soldier.setAttachment("IsInvader","yes");
 			NGECore.getInstance().aiService.setPatrol(soldier, patrolRoute);	
 			NGECore.getInstance().aiService.setPatrolLoop(soldier,false);
@@ -226,18 +238,28 @@ public class GCWSpawner extends TangibleObject{
 	public void spawnSoldierDefender(){
 		
 		if (NGECore.getInstance().invasionService.getInvasionPhase()==2){
+			String stfName = "gcw_city_rebel_specforce_defense";
 			if (spawnerFaction==Factions.Rebel){
 				switch (spawnLevel) {
 					case 1: soldierTemplates = rebelSoldierTemplates1;
+							stfName = "gcw_city_rebel_grunt_defense";
+							break;
 					case 2: soldierTemplates = rebelSoldierTemplates2;
+							stfName = "gcw_city_rebel_grunt_defense";
+						    break;
 					case 3: soldierTemplates = rebelSoldierTemplates3;
+							stfName = "gcw_city_rebel_specforce_defense";
+						    break;
 				}
 			}
 			if (spawnerFaction==Factions.Imperial){
 				switch (spawnLevel) {
 					case 1: soldierTemplates = imperialSoldierTemplates1;
+					        break;
 					case 2: soldierTemplates = imperialSoldierTemplates2;
+						    break;
 					case 3: soldierTemplates = imperialSoldierTemplates3;
+					        break;
 				}
 			}	
 			if (lastDefender!=null)
@@ -245,7 +267,8 @@ public class GCWSpawner extends TangibleObject{
 					return;
 			String soldierTemplate = soldierTemplates[new Random().nextInt(soldierTemplates.length)];	
 			lastDefender = (CreatureObject)NGECore.getInstance().spawnService.spawnCreature(soldierTemplate, this.getPlanet().getName(), 0L, this.getPosition().x, this.getPosition().y, this.getPosition().z, this.getOrientation().w, this.getOrientation().x, this.getOrientation().y,this.getOrientation().z,-1);
-				
+			if (spawnerFaction==Factions.Rebel)
+				lastDefender.setStfName(stfName);	
 			NGECore.getInstance().invasionService.registerDefender(lastDefender);
 			totalSpawnedUnits++;
 		}

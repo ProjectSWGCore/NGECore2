@@ -143,7 +143,7 @@ public class TurretAttackState extends TurretAIState {
 				target = (CreatureObject) actor.getFollowObject();
 				if(target == null)
 				{
-//					creature.setLookAtTarget(0);
+//					creature.setLookAtTarget(0); //Is only accessible from CreatureObject, not TANO
 //					creature.setIntendedTarget(0);
 					
 				}
