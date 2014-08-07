@@ -539,6 +539,12 @@ public class EntertainmentService implements INetworkDispatch {
 	
 	public void giveInspirationBuff(CreatureObject reciever, CreatureObject buffer, Vector<BuffItem> buffVector) {
 		
+		
+		if (reciever.hasBuff("buildabuff_inspiration"))
+		{
+			core.buffService.removeBuffFromCreature(reciever, reciever.getBuffByName("buildabuff_inspiration"));
+		}
+		
 		Vector<BuffBuilder> availableStats = buffBuilderSkills;
 		Vector<BuffItem> stats = new Vector<BuffItem>();
 
@@ -611,8 +617,7 @@ public class EntertainmentService implements INetworkDispatch {
 		//if (reciever.getAttachment("buffWorkshopTimestamp") != null)
 			//timeStamp = (long) reciever.getAttachment("buffWorkshopTimestamp");
 		
-		if (reciever.hasBuff("buildabuff_inspiration"))
-			core.buffService.removeBuffFromCreature(reciever, reciever.getBuffByName("buildabuff_inspiration"));
+
 		
 		core.buffService.addBuffToCreature(reciever, "buildabuff_inspiration", buffer);
 		/*if (core.buffService.addBuffToCreature(reciever, "buildabuff_inspiration", buffer) && !rPlayer.getProfession().equals("entertainer_1a")) {

@@ -10,13 +10,12 @@ def run(core, actor, target, commandString):
 
     if not playerObject or playerObject.getProfession() != "entertainer_1a":
       return
-    
     if target is None or actor.getObjectId() == target.getObjectId():
     	openBuffWindow = BuffBuilderStartMessage(actor.getObjectId(), actor.getObjectId(), actor.getObjectId())
     	objController = ObjControllerMessage(11, openBuffWindow)
     	actor.getClient().getSession().write(objController.serialize())
     	return
-    
+
     if target is None and commandString is not None:
     	target = core.chatService.getObjectByFirstName(commandString)
     	if target is None:
