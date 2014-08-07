@@ -170,16 +170,9 @@ public class ObjectService implements INetworkDispatch {
 		    	core.harvesterService.saveHarvesters();
 		    	core.playerCityService.saveAllCities();
 		    	core.closeODBs();
+		    	System.out.println("Databases closed.");
 		    }
 		});
-		
-		ODBCursor cursor = core.getSWGObjectODB().getCursor();
-		
-		while (cursor.hasNext()) {
-			SWGObject object = (SWGObject) cursor.next();
-			if (object != null && !(object instanceof BuildingObject))
-				objectList.put(object.getObjectID(), object);
-		}
 		
 		long highestId;
 
@@ -195,7 +188,63 @@ public class ObjectService implements INetworkDispatch {
 		}
 	}
 	
-	public void loadBuildings() {
+	public void loadObjects() {
+		System.out.println("Loading objects...");
+		ODBCursor cursor = core.getSWGObjectODB().getCursor();
+		
+		while (cursor.hasNext()) {
+			SWGObject object = (SWGObject) cursor.next();
+			if (object != null && !(object instanceof BuildingObject))
+				objectList.put(object.getObjectID(), object);
+		}
+		
+		cursor = core.getCreatureODB().getCursor();
+		
+		while (cursor.hasNext()) {
+			CreatureObject object = (CreatureObject) cursor.next();
+			if (object != null) {
+				System.out.println("Loaded character with name: " + object.getCustomName());
+				objectList.put(object.getObjectID(), object);
+				
+				loadServerTemplate(object);
+				object.viewChildren(object, true, true, (child) -> loadServerTemplate(child));
+			} else {
+				System.err.println("Character was null!");
+			}
+		}
+		
+		// Loading characters by using a lookup
+		try {
+			PreparedStatement ps = core.getDatabase1().preparedStatement("SELECT * FROM characters");
+			ResultSet resultSet = ps.executeQuery();
+			while (resultSet.next()) {
+				long objectId = resultSet.getLong("id");
+				CreatureObject object = (CreatureObject) core.getCreatureODB().get(objectId);
+				if (object != null) {
+					if (object.getCustomName() == null || object.getCustomName().isEmpty()) {
+						String first = resultSet.getString("firstName");
+						String last = resultSet.getString("lastName");
+						if (last.isEmpty())
+							object.setCustomName(first);
+						else
+							object.setCustomName(first + " " + last);
+					}
+					System.out.println("Loaded character manually with name: " + object.getCustomName());
+					objectList.put(objectId, object);
+				} else {
+					System.err.println("Attempt failed to recover character.");
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		
+		loadBuildings();
+		System.out.println("Finished loading objects.");
+	}
+	
+	private void loadBuildings() {
 		ODBCursor cursor = core.getSWGObjectODB().getCursor();
 				
 		while(cursor.hasNext()) {
@@ -680,10 +729,8 @@ public class ObjectService implements INetworkDispatch {
 	}
 	
 	public CreatureObject getCreatureFromDB(long objectId) {
-		SWGObject object = (SWGObject) core.getSWGObjectODB().get(objectId);
-		if(!(object instanceof CreatureObject))
-			return null;
-		if (object != null && getObject(object.getObjectID()) == null) {
+		CreatureObject object = (CreatureObject) core.getCreatureODB().get(objectId);
+		if (object != null) {
 			loadServerTemplate(object);
 			object.viewChildren(object, true, true, (child) -> loadServerTemplate(child));
 		}
@@ -1010,20 +1057,7 @@ public class ObjectService implements INetworkDispatch {
 
 					creature = (CreatureObject) getObject(objectId);
 					if (creature.getCustomName() == null || creature.getCustomName().isEmpty()) {
-						PreparedStatement ps = core.getDatabase1().preparedStatement("SELECT * FROM characters WHERE \"id\" = ?");
-						ps.setLong(1, creature.getObjectID());
-						ResultSet resultSet = ps.executeQuery();
-						
-						String name = "";
-						while (resultSet.next()) {
-							String first = resultSet.getString("firstName").trim();
-							String last = resultSet.getString("lastName").trim();
-							if (last.isEmpty())
-								name = first;
-							else
-								name = first + " " + last;
-						}
-						creature.setCustomName(name);
+						System.err.println("Creature's custom name was null/empty! Name: " + creature.getCustomName());
 					}
 					if(creature.getAttachment("disconnectTask") != null && creature.getClient() != null && !creature.getClient().getSession().isClosing())
 						return;
