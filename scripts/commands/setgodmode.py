@@ -17,6 +17,8 @@ def run(core, actor, target, commandString):
 	
 	playerObject = actor.getSlottedObject('ghost')
 	
+	global str
+	
 	if not playerObject:
 		return
 		

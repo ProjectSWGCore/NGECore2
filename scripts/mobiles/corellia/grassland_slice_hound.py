@@ -44,5 +44,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('gassland_slice_hound', mobileTemplate)
+	core.spawnService.addMobileTemplate('grassland_slice_hound', mobileTemplate)
 	return

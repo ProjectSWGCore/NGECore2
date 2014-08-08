@@ -36,6 +36,14 @@ public class EnterTicketPurchaseModeMessage extends SWGMessage {
 	private String planetName;
 	private String cityName;
 	private SWGObject player;
+	private boolean isItv = false;
+	
+	public EnterTicketPurchaseModeMessage(String planetName, String cityName, SWGObject player, boolean isItv) {
+		this.planetName = planetName;
+		this.cityName = cityName;
+		this.player = player;
+		this.isItv = true;
+	}
 	
 	public EnterTicketPurchaseModeMessage(String planetName, String cityName, SWGObject player) {
 		this.planetName = planetName;
@@ -51,9 +59,12 @@ public class EnterTicketPurchaseModeMessage extends SWGMessage {
 	@Override
 	public IoBuffer serialize() {
 		final NGECore core = NGECore.getInstance();
-		TravelPoint nearestPoint = core.travelService.getNearestTravelPoint(player);
-		IoBuffer result = IoBuffer.allocate(11 + planetName.length() + nearestPoint.getName().length()).order(ByteOrder.LITTLE_ENDIAN);
 		
+		TravelPoint nearestPoint = null;
+		if (!isItv) nearestPoint = core.travelService.getNearestTravelPoint(player);
+		else nearestPoint = core.travelService.getNearestTravelPoint(player, 5120);
+		
+		IoBuffer result = IoBuffer.allocate(11 + planetName.length() + nearestPoint.getName().length()).order(ByteOrder.LITTLE_ENDIAN);
 		
 		result.putShort((short) 3);
 		result.putInt(0x904DAE1A);

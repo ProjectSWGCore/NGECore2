@@ -138,10 +138,10 @@ public class CreatureMessageBuilder extends TangibleMessageBuilder {
 
 		buffer.putLong(creature.getOwnerId());
 		
-		float height = creature.getHeight();
+		//float height = creature.getHeight();
 		//if (height < 0.7 || height > 1.5)
 		//	height = 1;
-		buffer.putFloat(height);
+		buffer.putFloat(creature.getHeight());
 		buffer.putInt(0); // battle fatigue
 		buffer.putLong(creature.getStateBitmask());
 		int size = buffer.position();
@@ -149,8 +149,6 @@ public class CreatureMessageBuilder extends TangibleMessageBuilder {
 
 		buffer.flip();
 		buffer = createBaseline("CREO", (byte) 3, buffer, size);
-		
-		tools.CharonPacketUtils.printAnalysis(buffer, "CREO 3");
 		
 		return buffer;
 
