@@ -39,7 +39,6 @@ import org.python.core.Py;
 import org.python.core.PyObject;
 
 import resources.datatables.FactionStatus;
-import resources.datatables.WeaponType;
 import resources.objects.creature.CreatureObject;
 import main.NGECore;
 import engine.resources.container.Traverser;
@@ -161,19 +160,14 @@ public class EquipmentService implements INetworkDispatch {
 	{		
 		String template = ((item.getAttachment("customServerTemplate") == null) ? item.getTemplate() : (item.getTemplate().split("shared_")[0] + "shared_" + ((String) item.getAttachment("customServerTemplate")) + ".iff"));
 		String serverTemplate = template.replace(".iff", "");
-		System.out.println("scripts/" + serverTemplate.split("shared_" , 2)[0].replace("shared_", ""));
+		
 		PyObject func = core.scriptService.getMethod("scripts/" + serverTemplate.split("shared_" , 2)[0].replace("shared_", ""), serverTemplate.split("shared_" , 2)[1], "equip");
 		if(func != null) func.__call__(Py.java2py(core), Py.java2py(actor), Py.java2py(item));				
 		if(!actor.getEquipmentList().contains(item.getObjectID())) 
 		{
-			if(item instanceof WeaponObject){ 
-				System.out.println(item.getTemplate() + " setWeaponId(item.getObjectID() " + item.getObjectID());
-				actor.setWeaponId(item.getObjectID());
-			}
-			
-			actor.addObjectToEquipList(item); 
+			if(item instanceof WeaponObject) actor.setWeaponId(item.getObjectID());
+			actor.addObjectToEquipList(item);
 			processItemAtrributes(actor, item, true);
-			System.out.println("Item added " + item.getTemplate());
 		}
 }
 
@@ -204,9 +198,7 @@ public class EquipmentService implements INetworkDispatch {
 		
 		if(equipping)
 		{
-			System.out.println("Equipping");
 			if(item.getStringAttribute("cat_wpn_damage.wpn_category") != null) {
-				System.out.println("cat_wpn_damage.wpn_category");
 				core.skillModService.addSkillMod(creature, "display_only_critical", getWeaponCriticalChance(creature, item));
 				
 				creature.setAttachment("EquippedWeapon", item.getObjectID());
@@ -525,16 +517,5 @@ public class EquipmentService implements INetworkDispatch {
 			Files.walkFileTree(p, fv);
 		} 
         catch (IOException e) { e.printStackTrace(); }
-	}
-	
-	public void addRifle(CreatureObject actor, SWGObject inventory){
-		WeaponObject rifle = (WeaponObject) core.objectService.createObject("object/weapon/ranged/rifle/shared_rifle_e11.iff", actor.getPlanet());
-		rifle.setDamageType("energy");
-		rifle.setWeaponType(WeaponType.RIFLE);
-		rifle.setAttackSpeed(0.8F);
-		rifle.setMinDamage(518);
-		rifle.setMaxDamage(1035);
-		rifle.setMaxRange(64);
-		inventory.add(rifle);
 	}
 }
