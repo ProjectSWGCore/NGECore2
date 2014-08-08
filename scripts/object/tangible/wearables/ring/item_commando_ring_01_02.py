@@ -1,4 +1,4 @@
-aimport sys
+import sys
 
 def setup(core, object):
 	object.setAttachment('objType', 'ring')
