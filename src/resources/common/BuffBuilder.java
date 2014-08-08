@@ -30,6 +30,11 @@ public class BuffBuilder {
 	private String statAffects;
 	private String statName;
 
+	
+	public enum BuffCategory {ATTRIBUTES,RESISTANCES,TRADE,COMBAT,MISC};
+	private BuffCategory catId;
+	
+	
 	public BuffBuilder() {
 
 	}
@@ -42,6 +47,10 @@ public class BuffBuilder {
 		return category;
 	}
 
+	public BuffCategory getCategoryId() {
+		return catId;
+	}
+	
 	public int getCost() {
 		return this.cost;
 	}
@@ -66,7 +75,26 @@ public class BuffBuilder {
 		this.affectAmount = affectAmount;
 	}
 
-	public void setCategory(String category) {
+	public void setCategory(String category)
+	{
+		this.catId=BuffCategory.MISC;
+		if(category.equals("attributes"))
+		{
+			this.catId=BuffCategory.ATTRIBUTES;
+		}
+		else if(category.equals("trade"))
+		{
+			this.catId=BuffCategory.TRADE;
+		}
+		else if(category.equals("resistances"))
+		{
+			this.catId=BuffCategory.RESISTANCES;
+		}
+		else if(category.equals("combat"))
+		{
+			this.catId=BuffCategory.COMBAT;
+		}
+
 		this.category = category;
 	}
 

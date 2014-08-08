@@ -23,7 +23,7 @@ def addTemplate(core):
 	mobileTemplate.setBoneType("Animal Bones")
 	mobileTemplate.setBoneAmount(76)
 	mobileTemplate.setSocialGroup("kwi")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setStalker(False)
 	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
@@ -33,6 +33,8 @@ def addTemplate(core):
 	
 	
 	attacks = Vector()
+	attacks.add('bm_bite_4')
+	attacks.add('bm_hamstring_4')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

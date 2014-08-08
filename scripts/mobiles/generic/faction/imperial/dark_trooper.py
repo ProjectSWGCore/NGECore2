@@ -14,16 +14,17 @@ def addTemplate(core):
 	mobileTemplate.setCreatureName('dark_trooper')
 	mobileTemplate.setLevel(32)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
-
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(True)
 	mobileTemplate.setScale(1)
 	mobileTemplate.setSocialGroup("imperial")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setAssistRange(24)
 	mobileTemplate.setStalker(False)
 	mobileTemplate.setFaction("imperial")
 	mobileTemplate.setFactionStatus(FactionStatus.Combatant)
+	
+	
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dark_trooper.iff')

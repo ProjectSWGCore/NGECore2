@@ -16,7 +16,9 @@ def setup():
 def run(core, actor, target, commandString):
 	
 	playerObject = actor.getSlottedObject('ghost')
-
+	
+	global str
+	
 	if not playerObject:
 		return
 		
@@ -144,23 +146,33 @@ def run(core, actor, target, commandString):
 		ori = actor.getOrientation()
 		cellid = 0
 		planetName = actor.getPlanet().getName()
-
+		
 		actor.sendSystemMessage('Position.x : %s' % pos.x, 0)
 		print ('Position.x : %s' % pos.x, 0)
 		actor.sendSystemMessage('Position.y : %s' % pos.y, 0)
 		print ('Position.y : %s' % pos.y, 0)
 		actor.sendSystemMessage('Position.z : %s' % pos.z, 0)
 		print ('Position.z : %s' % pos.z, 0)
+		actor.sendSystemMessage('Orientation.w : %s' % ori.w, 0)
+		print ('Orientation.x : %s' % ori.w, 0)
+		actor.sendSystemMessage('Orientation.x : %s' % ori.x, 0)
+		print ('Orientation.w : %s' % ori.x, 0)
 		actor.sendSystemMessage('Orientation.y : %s' % ori.y, 0)
 		print ('Orientation.y : %s' % ori.y, 0)
-		actor.sendSystemMessage('Orientation.w : %s' % ori.w, 0)
-		print ('Orientation.w : %s' % ori.w, 0)
+		actor.sendSystemMessage('Orientation.z : %s' % ori.z, 0)
+		print ('Orientation.z : %s' % ori.z, 0)
 		if (actor.getContainer()):
-			cid = actor.getContainer().getObjectID()
+			building_id = actor.getGrandparent().getObjectID()
+			cid = actor.getContainer().getCellNumber()
 			cellid = cid
 			actor.sendSystemMessage('Cell ID : %s' % cid, 0)
-					
-		str = "<OBJECTNAME> = stcSvc.spawnObject('<MOBILENAME>', '" + planetName + "', long(%s" % cellid + "), float(%.4f" % pos.x + "), float(%.4f" % pos.y + "), float(%.4f" % pos.z + "), float(%.4f" % ori.y + "), float(%.4f" % ori.w + "))"
+			actor.sendSystemMessage('Building ID : %s' % building_id, 0)
+			print('Cell ID : %s' % cid, 0)
+			print('Building ID : %s' % building_id, 0)
+		if cellid == 0:			
+			str = "<OBJECTNAME> = stcSvc.spawnObject('<MOBILENAME>', '" + planetName + "', long(%s" % cellid + "), float(%.4f" % pos.x + "), float(%.4f" % pos.y + "), float(%.4f" % pos.z + "), float(%.4f" % ori.w + "), float(%.4f" % ori.x + "), float(%.4f" % ori.y + "), float(%.4f" % ori.z + "))"
+		elif cellid != 0:
+			str = "\tbuilding =  core.objectService.getObject(long(%s" % building_id + "))\n\t<OBJECTNAME> = stcSvc.spawnObject('<MOBILENAME>', '" + planetName + "', building.getCellByCellNumber(long(%s" % cellid + ")), float(%.4f" % pos.x + "), float(%.4f" % pos.y + "), float(%.4f" % pos.z + "), float(%.4f" % ori.w + "), float(%.4f" % ori.x + "), float(%.4f" % ori.y + "), float(%.4f" % ori.z + "))"
 		toolkit = Toolkit.getDefaultToolkit()
 		clipboard = toolkit.getSystemClipboard()
 		clipboard.setContents(StringSelection(str), None)
@@ -201,3 +213,5 @@ def run(core, actor, target, commandString):
 		actor.sendSystemMessage('You were added to the Admin list for the Frog Building.', 0)
 		return
 	return
+
+	

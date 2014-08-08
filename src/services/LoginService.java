@@ -56,6 +56,7 @@ import protocol.swg.ServerNowEpochTime;
 import protocol.swg.StationIdHasJediSlot;
 import resources.common.*;
 import resources.datatables.PlayerFlags;
+import resources.guild.Guild;
 import resources.objects.creature.CreatureObject;
 
 @SuppressWarnings("unused")
@@ -232,6 +233,12 @@ public class LoginService implements INetworkDispatch{
                 				if (object.getGuildId() != 0)
                 					core.guildService.getGuildById(object.getGuildId()).getMembers().remove(object.getObjectID());
                 				
+                				Guild guild = core.guildService.getGuildById(((CreatureObject) object).getGuildId());
+                				
+                				if(object.getGuildId() != 0 && object.getObjectID() == guild.getLeader()){
+                					core.guildService.handleGuildDisband(object, guild);
+                				}
+                				
                 				core.objectService.destroyObject(object);
                 			}
                 			
@@ -326,11 +333,12 @@ public class LoginService implements INetworkDispatch{
 				
 				String characterName = resultSet.getString("firstName").replaceAll("\\s",""); ;
 				String lastName = resultSet.getString("lastName").replaceAll("\\s","");
+
 				if (lastName != null && lastName.length() > 0) characterName += " " + lastName;
 				enumerateCharacterId.addCharacter(
 						characterName,
 						resultSet.getInt("appearance"),
-						resultSet.getLong("Id"),
+						resultSet.getLong("id"),
 						resultSet.getInt("galaxyId"),
 						resultSet.getInt("statusId"));
 			}

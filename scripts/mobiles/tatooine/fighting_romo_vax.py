@@ -25,7 +25,7 @@ def addTemplate(core):
 	
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_dressed_trader_thug_male_human_01.iff') #need to find correct template
+	templates.add('object/mobile/shared_dressed_cobral_thief_human_male_01.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()

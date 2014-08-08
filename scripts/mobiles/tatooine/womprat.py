@@ -25,11 +25,10 @@ def addTemplate(core):
 	mobileTemplate.setBoneType("Animal Bone")
 	mobileTemplate.setHideAmount(2)
 	mobileTemplate.setSocialGroup("womprat")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setAssistRange(6)
 	mobileTemplate.setStalker(False)
-
-	
-	
+	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
+		
 	templates = Vector()
 	templates.add('object/mobile/shared_womp_rat.iff')
 	mobileTemplate.setTemplates(templates)
@@ -40,6 +39,9 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_bite_1')
+	attacks.add('bm_bolster_armor_1')
+	attacks.add('bm_enfeeble_1')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
