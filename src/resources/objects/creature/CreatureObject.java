@@ -1488,6 +1488,10 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		getClient().getSession().write(new PlayMusicMessage(sndFile, targetId, 1, false).serialize());
 	}
 	
+	public void playMusicSelf(String sndFile, long targetId, int repetitions, boolean flag) {
+		getClient().getSession().write(new PlayMusicMessage(sndFile, targetId, 1, false).serialize());
+	}
+	
 	public boolean getGroupDance() {
 		synchronized(objectMutex) {
 			return groupDance;
