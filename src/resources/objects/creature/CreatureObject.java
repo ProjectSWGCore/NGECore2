@@ -24,7 +24,6 @@ package resources.objects.creature;
 import java.io.Serializable;
 import java.lang.System;
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -57,7 +56,6 @@ import resources.objects.SWGList;
 import resources.objects.SWGMap;
 import resources.objects.SWGSet;
 import engine.resources.common.CRC;
-import engine.resources.objects.Baseline;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -238,38 +236,7 @@ public class CreatureObject extends TangibleObject implements Serializable {
 			setTurnRadius((float) getTemplateData().getAttribute("turnRate"));*/
 
 	}
-
-	/*@Override
-	public Baseline getBaseline1() {
-		Baseline baseline = super.getBaseline1();
-		baseline.put("bankCredits", 0);
-		baseline.put("cashCredits", 0);
-		
-		// HAM base list stuff
-		baseline.put("baseHAM", 6); // list size
-		baseline.put("unk1", 0); // udpate count?
-		baseline.put("health", 1000);
-		baseline.put("spacer1", 0);
-		baseline.put("action", 300);
-		baseline.put("spacer2", 0);
-		baseline.put("unk2", 0x2C01);
-		baseline.put("unk3", 0);
-		
-		baseline.put("skills", new SWGList<String>());
-		return baseline;
-	}
 	
-	@Override
-	public Baseline getBaseline3() {
-		Baseline baseline = super.getBaseline3();
-		baseline.put("posture", (byte) 0);
-		baseline.put("creo3unk1", (byte) 0);
-		baseline.put("ownerId", (long) 0);
-		baseline.put("height", (float) 1.3);
-		baseline.put("battleFatigue", 0);
-		baseline.put("stateBitmask", new BitSet());
-		return baseline;
-	}*/
 	public int getBankCredits() {
 		synchronized(objectMutex) {
 			return bankCredits;
