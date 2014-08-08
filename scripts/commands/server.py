@@ -28,14 +28,18 @@ def run(core, actor, target, commandString):
 	
 	if command == 'lockServer':
 		core.setGalaxyStatus(GalaxyStatus.Locked)
+		actor.sendSystemMessage('GM: Command completed successfully, Server is now in Locked Status', 0)
 	if command == 'unlockServer':
 		core.setGalaxyStatus(GalaxyStatus.Online)
-	if command == 'info':
-		actor.sendSystemMessage(str(core.getActiveZoneClients()) + ' online characters.', 0)
+		actor.sendSystemMessage('GM: Command completed successfully, Server is now in Online Status', 0)
+	#if command == 'restart': //This command currently causes an error at NGEcore.java like 593 whole attempting to close databaseConnection2
+		#core.restart()
+		#actor.sendSystemMessage('GM: Command completed successfully, Server restart initiated', 0)
 	if command == 'shutdown':
 		core.initiateShutdown()
-	if command == 'getheight':
-		actor.sendSystemMessage(str(core.terrainService.getHeight(actor.getPlanetId(), actor.getWorldPosition().x, actor.getWorldPosition().z)), 0)
-
+		actor.sendSystemMessage('GM: Command completed successfully, Server shutdown initiated', 0)
+	if command == 'stop':
+		core.initiateStop()
+		actor.sendSystemMessage('GM: Command completed successfully, Emergency server shutdown initiated', 0)
 		
 	return
