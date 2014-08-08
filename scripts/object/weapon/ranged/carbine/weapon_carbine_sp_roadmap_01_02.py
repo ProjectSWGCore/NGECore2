@@ -5,6 +5,7 @@ def setup(core, object):
 	object.setStfName('weapon_carbine_sp_roadmap_01_02')
 	object.setDetailFilename('static_item_d')
 	object.setDetailName('weapon_carbine_sp_roadmap_01_02')
+	object.setIntAttribute('no_trade', 1)
 	object.setStringAttribute('class_required', 'Spy')
 	object.setIntAttribute('required_combat_level', 50)	
 	object.setAttackSpeed(0.6);

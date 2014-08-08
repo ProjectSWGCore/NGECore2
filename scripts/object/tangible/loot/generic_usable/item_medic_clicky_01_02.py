@@ -6,6 +6,7 @@ def setup(core, object):
 	object.setStfName('item_medic_clicky_01_02')
 	object.setDetailFilename('static_item_d')
 	object.setDetailName('item_medic_clicky_01_02')
+	object.setIntAttribute('no_trade', 1)
 	object.setStringAttribute('class_required', 'Medic')
 	return
 def use(core, actor, object):

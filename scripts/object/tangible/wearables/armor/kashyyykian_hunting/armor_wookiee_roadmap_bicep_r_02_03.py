@@ -5,6 +5,7 @@ def setup(core, object):
 	object.setStfName('armor_wookiee_roadmap_bicep_r_02_03')
 	object.setDetailFilename('static_item_d')
 	object.setDetailName('armor_wookiee_roadmap_bicep_r_02_03')
+	object.setIntAttribute('no_trade', 1)
 	object.setIntAttribute('cat_stat_mod_bonus.@stat_n:constitution_modified', 3)
 	object.setStringAttribute('class_required', 'Bounty Hunter')
 	object.setStringAttribute('armor_category', 'Assault')

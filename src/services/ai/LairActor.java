@@ -42,6 +42,8 @@ public class LairActor {
 	private Vector<String> creatureTemplates;
 	private volatile int spawnWave = 0;
 	private short level;
+	private String bossTemplate;
+	private boolean bossSpawned = false;
 	
 	public LairActor(TangibleObject lairObject, String creatureTemplate) {
 		this.lairObject = lairObject;
@@ -118,6 +120,10 @@ public class LairActor {
 				}
 				break;
 			case 3:
+				if (bossTemplate!=null && ! bossSpawned){
+					CreatureObject boss = (CreatureObject)NGECore.getInstance().spawnService.spawnCreature(bossTemplate, lairObject.getPlanet().getName(), 0L, lairObject.getPosition().x + 3, lairObject.getPosition().y, lairObject.getPosition().z, lairObject.getOrientation().w, lairObject.getOrientation().x, lairObject.getOrientation().y,lairObject.getOrientation().z,-1);
+					bossSpawned = true;
+				}
 				return;
 				
 			default:
@@ -139,7 +145,7 @@ public class LairActor {
 				creatureTemplate = creatureTemplates.get(new Random().nextInt(creatureTemplates.size()));
 			float babyChance = new Random().nextFloat();
 			CreatureObject creature = null;
-			if (babyChance>0.9){
+			if (babyChance>0.1){
 				creature = NGECore.getInstance().spawnService.spawnCreature(creatureTemplate, lairObject.getPlanet().getName(), 0, position.x, position.y, position.z, level);
 			} else {
 				creature = NGECore.getInstance().spawnService.spawnCreatureBaby(creatureTemplate, lairObject.getPlanet().getName(), 0, position.x, position.y, position.z, level);
@@ -196,5 +202,13 @@ public class LairActor {
 
 	public void setLevel(short level) {
 		this.level = level;
+	}
+
+	public String getBossTemplate() {
+		return bossTemplate;
+	}
+
+	public void setBossTemplate(String bossTemplate) {
+		this.bossTemplate = bossTemplate;
 	}
 }
