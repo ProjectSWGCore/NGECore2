@@ -1468,6 +1468,19 @@ public class PlayerService implements INetworkDispatch {
 		return formalName;
 	}
 	
+	public String checkForGender(CreatureObject object)	{
+		String gender ="";
+		if(object.getTemplate().contains("_female")){
+			gender =  "female";			
+		}else if(object.getTemplate().contains("_male")){
+			gender =  "male";
+		}else{
+			System.out.println("Error: No Gender");
+			gender =  "no_gender";
+		}
+		return gender;
+	}
+	
 	@Override
 	public void shutdown() {
 		// TODO Auto-generated method stub
