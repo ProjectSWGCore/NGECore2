@@ -242,7 +242,7 @@ public class LootService implements INetworkDispatch {
 	    	if (droppedItem.getAttachment("LootItemName").toString().contains("Loot Chest")){
 
 	    		lootedObject.playEffectObject("appearance/pt_rare_chest.prt", "");
-	    		requester.playMusic("sound/rare_loot_chest.snd");
+	    		requester.playMusicSelf("sound/rare_loot_chest.snd", requester.getObjectID(),1,false);
 	    	}
     	}
     	

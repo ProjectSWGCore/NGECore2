@@ -16,13 +16,13 @@ def run(core, actor, target, commandString):
 			playerObject.setCurrentRank(int(arg2))
 			newrank = playerObject.getCurrentRank()
 			core.scriptService.callScript("scripts/collections/", "gcwrank_" + target.getFaction(), "handleRankUp", core, target, newrank)
-			actor.sendSystemMessage('GM: Set Rank: Completed Successfully', 0)
+			actor.sendSystemMessage(' \\#FE2EF7 [GM] \\#FFFFFF setRank: Command completed successfully.', 0)
 	if target.getFaction() == 'rebel' or 'imperial' and arg1 == 'down':
 			playerObject = target.getSlottedObject('ghost')	
 			playerObject.setCurrentRank(int(arg2))
 			newrank = playerObject.getCurrentRank()
 			core.scriptService.callScript("scripts/collections/", "gcwrank_" + target.getFaction(), "handleRankDown", target, newrank)
-			actor.sendSystemMessage('GM: Set Rank: Completed Successfully', 0)
+			actor.sendSystemMessage(' \\#FE2EF7 [GM] \\#FFFFFF setRank: Command completed successfully.', 0)
 			
 #	if target.getFaction() == 'imperial' and arg1 == 'up':
 #		if arg1 == 'up':
@@ -30,12 +30,12 @@ def run(core, actor, target, commandString):
 #			playerObject.setCurrentRank(int(arg2))
 #			newrank = playerObject.getCurrentRank()
 #			core.scriptService.callScript("scripts/collections/", "gcwrank_" + target.getFaction(), "handleRankUp", core, target, newrank)
-#			actor.sendSystemMessage('GM: Set Rank: Completed Successfully', 0)
+#			actor.sendSystemMessage(' \\#FE2EF7 [GM] \\#FFFFFF setRank: Command completed successfully.', 0)
 #	if target.getFaction() == 'imperial' and arg1 == 'down':
 #			playerObject = actor.getSlottedObject('ghost')	
 #			playerObject.setCurrentRank(int(arg2))
 #			newrank = playerObject.getCurrentRank()
 #			core.scriptService.callScript("scripts/collections/", "gcwrank_" + target.getFaction(), "handleRankDown", target, newrank)
-#			actor.sendSystemMessage('GM: Set Rank: Completed Successfully', 0)
+#			actor.sendSystemMessage(' \\#FE2EF7 [GM] \\#FFFFFF setRank: Command completed successfully.', 0)
 	
 	return
