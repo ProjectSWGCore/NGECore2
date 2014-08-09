@@ -169,7 +169,7 @@ public class EquipmentService implements INetworkDispatch {
 			//A rifle is not identified as a true WeaponObject ?!?!?!?!
 			if (item.getTemplate().contains("object/weapon/")){		
 				actor.setWeaponId(item.getObjectID());
-				System.out.println("WEAPON IDENTIFIED!");
+				//System.out.println("WEAPON IDENTIFIED!");
 			}
 			actor.addObjectToEquipList(item);
 			processItemAtrributes(actor, item, true);
