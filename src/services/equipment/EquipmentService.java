@@ -168,7 +168,7 @@ public class EquipmentService implements INetworkDispatch {
 			//if(item instanceof WeaponObject){
 			//A rifle is not identified as a true WeaponObject ?!?!?!?!
 			if (item.getTemplate().contains("object/weapon/")){		
-				actor.setWeaponId(item.getObjectID());
+				actor.setWeaponId(item.getObjectID()); // This line causes the rifle lockup
 				//System.out.println("WEAPON IDENTIFIED!");
 			}
 			actor.addObjectToEquipList(item);
