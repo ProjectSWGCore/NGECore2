@@ -23,24 +23,24 @@ def run(core, actor, target, commandString):
 	
 	if arg1 and arg2 and arg3 and arg4 is not None:
 		try:
-			actor.sendSystemMessage('gm: teleport: Command completed successfully.', 0)
+			actor.sendSystemMessage(' \\#FE2EF7 [GM] \\#FFFFFF Teleport: Command completed successfully.', 0)
 			position = Point3D(float(arg1), float(arg2), float(arg3))
 			core.simulationService.transferToPlanet(actor, core.terrainService.getPlanetByName(arg4), position, actor.getOrientation(), None)
 		except:
-			actor.sendSystemMessage('Invalid Syntax. Syntax is: /teleport <x> <z> [<y>] <planet>', 0)
+			actor.sendSystemMessage(' \\#FE2EF7 [GM] \\#FFFFFF Teleport: Invalid Syntax. Syntax is: /teleport <x> <y> [<z>] <planet>.', 0)
 			return
 		return
 	
 	elif arg1 and arg2 and arg3:
 		try:
-			actor.sendSystemMessage('gm: teleport: Command completed successfully.', 0)
+			actor.sendSystemMessage(' \\#FE2EF7 [GM] \\#FFFFFF Teleport: Command completed successfully.', 0)
 			position = Point3D(float(arg1), 0, float(arg2))
 			core.simulationService.transferToPlanet(actor, core.terrainService.getPlanetByName(arg3), position, actor.getOrientation(), None)
 		except:
-			actor.sendSystemMessage('Invalid Syntax. Syntax is: /teleport <x> <z> [<y>] <planet>', 0)
+			actor.sendSystemMessage(' \\#FE2EF7 [GM] \\#FFFFFF Teleport: Invalid Syntax. Syntax is: /teleport <x> <y> [<z>] <planet>.', 0)
 		return
 	
 	else:
-		actor.sendSystemMessage('Invalid Syntax. Syntax is: /teleport <x> <z> [<y>] <planet>', 0)
+		actor.sendSystemMessage(' \\#FE2EF7 [GM] \\#FFFFFF Teleport: Invalid Syntax. Syntax is: /teleport <x> <y> [<z>] <planet>.', 0)
 		return
 	return
