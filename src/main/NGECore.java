@@ -242,7 +242,8 @@ public class NGECore {
 	public static boolean PACKET_DEBUG = false;
 	
 	public NGECore() {
-		
+
+		instance = this;
 	}
 	
 	public void start() {
@@ -513,7 +514,7 @@ public class NGECore {
 		
 		terrainService.loadSnapShotObjects();
 		objectService.loadServerTemplates();		
-		objectService.loadBuildings();
+		objectService.loadObjects();
 		harvesterService.loadHarvesters();
 
 		simulationService.insertSnapShotObjects();
@@ -828,7 +829,7 @@ public class NGECore {
 	public long getGalacticTime() {
 		return System.currentTimeMillis() - galacticTime;
 	}
-
+	
 	public void closeODBs() {
 		swgObjectODB.close();
 		mailODB.close();
