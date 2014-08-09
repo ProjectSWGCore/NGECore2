@@ -67,87 +67,63 @@ public class WaypointObject extends IntangibleObject implements Serializable, ID
 		super.init();
 	}
 	
-	public int getCellId() {
-		synchronized(objectMutex) {
-			return cellId;
-		}
+	public synchronized int getCellId() {
+		return cellId;
 	}
 
 
-	public void setCellId(int cellId) {
-		synchronized(objectMutex) {
-			this.cellId = cellId;
-		}
+	public synchronized void setCellId(int cellId) {
+		this.cellId = cellId;
 	}
 
 
-	public long getLocationNetworkId() {
-		synchronized(objectMutex) {
-			return locationNetworkId;
-		}
+	public synchronized long getLocationNetworkId() {
+		return locationNetworkId;
 	}
 
 
-	public void setLocationNetworkId(long locationNetworkId) {
-		synchronized(objectMutex) {
-			this.locationNetworkId = locationNetworkId;
-		}
+	public synchronized void setLocationNetworkId(long locationNetworkId) {
+		this.locationNetworkId = locationNetworkId;
 	}
 
 
-	public int getPlanetCRC() {
-		synchronized(objectMutex) {
-			return planetCRC;
-		}
+	public synchronized int getPlanetCRC() {
+		return planetCRC;
 	}
 
 
-	public void setPlanetCRC(int planetCRC) {
-		synchronized(objectMutex) {
-			this.planetCRC = planetCRC;
-		}
+	public synchronized void setPlanetCRC(int planetCRC) {
+		this.planetCRC = planetCRC;
 	}
 
 
-	public String getName() {
-		synchronized(objectMutex) {
-			return name;
-		}
+	public synchronized String getName() {
+		return name;
 	}
 
 
-	public void setName(String name) {
-		synchronized(objectMutex) {
-			this.name = name;
-		}
+	public synchronized void setName(String name) {
+		this.name = name;
 	}
 
 
-	public byte getColor() {
-		synchronized(objectMutex) {
-			return color;
-		}
+	public synchronized byte getColor() {
+		return color;
 	}
 
 
-	public void setColor(byte color) {
-		synchronized(objectMutex) {
-			this.color = color;
-		}
+	public synchronized void setColor(byte color) {
+		this.color = color;
 	}
 
 
-	public boolean isActive() {
-		synchronized(objectMutex) {
-			return isActive;
-		}
+	public synchronized boolean isActive() {
+		return isActive;
 	}
 
 
 	public void setActive(boolean isActive) {
-		synchronized(objectMutex) {
-			this.isActive = isActive;
-		}
+		this.isActive = isActive;
 	}
 
 	@Override
