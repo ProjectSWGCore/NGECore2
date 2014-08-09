@@ -126,7 +126,8 @@ public class GroupService implements INetworkDispatch {
 		invited.setInviteSenderName("");
 		invited.sendSystemMessage(OutOfBand.ProsePackage("TT", leader.getObjectID(), "@group:decline_self"), (byte) 0);
 		invited.updateGroupInviteInfo();
-		invited.sendSystemMessage(OutOfBand.ProsePackage("TT", invited.getObjectID(), "@group:decline_leader"), (byte) 0);
+		
+		leader.sendSystemMessage(OutOfBand.ProsePackage("TT", invited.getObjectID(), "@group:decline_leader"), (byte) 0);
 		
 	}
 

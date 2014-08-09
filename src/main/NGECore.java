@@ -239,7 +239,8 @@ public class NGECore {
 	public static boolean PACKET_DEBUG = false;
 	
 	public NGECore() {
-		
+
+		instance = this;
 	}
 	
 	public void start() {
@@ -509,7 +510,7 @@ public class NGECore {
 		
 		terrainService.loadSnapShotObjects();
 		objectService.loadServerTemplates();		
-		objectService.loadBuildings();
+		objectService.loadObjects();
 		harvesterService.loadHarvesters();
 
 		simulationService.insertSnapShotObjects();
@@ -796,15 +797,33 @@ public class NGECore {
 		} catch (InterruptedException e) {
 				e.printStackTrace();
 		}
+	}
 		
-		
+		public void initiateStop() {
+			if(isShuttingDown)
+				return;
+			try {
+				chatService.broadcastGalaxy("You will now be disconnected so the server can perform a final save before shutting down.");
+				Thread.sleep(10000);
+				synchronized(getActiveConnectionsMap()) {
+					for(Client client : getActiveConnectionsMap().values()) {
+						client.getSession().close(true);
+						connectionService.disconnect(client);
+					}
+				}
+				
+				System.exit(0);
+				
+			} catch (InterruptedException e) {
+					e.printStackTrace();
+			}
 		
 	}
 
 	public long getGalacticTime() {
 		return System.currentTimeMillis() - galacticTime;
 	}
-
+	
 	public void closeODBs() {
 		swgObjectODB.close();
 		mailODB.close();

@@ -436,7 +436,15 @@ public class SpawnService {
 		LairTemplate lairTemplate = lairTemplates.get(lairSpawnTemplate);
 		if(lairTemplate == null)
 			return null;
-		TangibleObject lairObject = (TangibleObject) core.objectService.createObject(lairTemplate.getLairCRC(), 0, planet, position, new Quaternion(1, 0, 0, 0));
+		
+		TangibleObject lairObject = null;
+		if (lairTemplate.getLairCRC()==null){
+			String lairCRC = lairTemplate.getLairCRCs().get(new Random().nextInt(lairTemplate.getLairCRCs().size()));
+			System.out.println("Lair CRC " + lairCRC);
+			lairObject = (TangibleObject) core.objectService.createObject(lairCRC, 0, planet, position, new Quaternion(1, 0, 0, 0));
+		} else {
+			lairObject = (TangibleObject) core.objectService.createObject(lairTemplate.getLairCRC().trim(), 0, planet, position, new Quaternion(1, 0, 0, 0));			
+		}
 		
 		if(lairObject == null)
 			return null;
@@ -451,6 +459,9 @@ public class SpawnService {
 			lairActor = new LairActor(lairObject, lairTemplate.getMobiles(), 10, level);
 		
 		lairObject.setAttachment("AI", lairActor);
+		
+		if (lairTemplate.getBossTemplate()!=null)
+			lairActor.setBossTemplate(lairTemplate.getBossTemplate());
 		
 		core.simulationService.add(lairObject, position.x, position.z, true);
 		lairActor.spawnNewCreatures();
@@ -504,6 +515,18 @@ public class SpawnService {
 	
 	public void addLairTemplate(String name, Vector<String> mobiles, int mobileLimit, String lairCRC) {
 		lairTemplates.put(name, new LairTemplate(name, mobiles, mobileLimit, lairCRC));
+	}
+	
+	public void addLairTemplate(String name, Vector<String> mobiles, int mobileLimit, Vector<String> lairCRCs) {
+		lairTemplates.put(name, new LairTemplate(name, mobiles, mobileLimit, lairCRCs));
+	}
+	
+	public void addLairTemplate(String name, Vector<String> mobiles, int mobileLimit, Vector<String> lairCRCs, String bossTemplate) {
+		lairTemplates.put(name, new LairTemplate(name, mobiles, mobileLimit, lairCRCs));
+	}
+	
+	public void addLairTemplate(String name, String mobile, int mobileLimit, Vector<String> lairCRCs, String bossTemplate) {
+		lairTemplates.put(name, new LairTemplate(name, mobile, mobileLimit, lairCRCs));
 	}
 	
 	public void loadLairGroups() {
