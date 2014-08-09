@@ -901,7 +901,7 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		}
 		
 		IoBuffer weaponIdDelta = messageBuilder.buildWeaponIdDelta(weaponId);
-		
+		tools.CharonPacketUtils.printAnalysis(weaponIdDelta, "buildWeaponIdDelta");
 		notifyObservers(weaponIdDelta, true);
 
 	}
