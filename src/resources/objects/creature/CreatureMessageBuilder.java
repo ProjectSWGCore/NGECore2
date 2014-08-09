@@ -138,10 +138,10 @@ public class CreatureMessageBuilder extends TangibleMessageBuilder {
 
 		buffer.putLong(creature.getOwnerId());
 		
-		//float height = creature.getHeight();
+		float height = creature.getHeight();
 		//if (height < 0.7 || height > 1.5)
 		//	height = 1;
-		buffer.putFloat(creature.getHeight());
+		buffer.putFloat(height);
 		buffer.putInt(0); // battle fatigue
 		buffer.putLong(creature.getStateBitmask());
 		int size = buffer.position();
@@ -149,6 +149,8 @@ public class CreatureMessageBuilder extends TangibleMessageBuilder {
 
 		buffer.flip();
 		buffer = createBaseline("CREO", (byte) 3, buffer, size);
+		
+		tools.CharonPacketUtils.printAnalysis(buffer, "CREO 3");
 		
 		return buffer;
 
@@ -334,8 +336,10 @@ public class CreatureMessageBuilder extends TangibleMessageBuilder {
 					buffer.putInt(CRC.StringtoCRC(weapon.getTemplate()));
 
 					buffer.put((byte) 1);
-					buffer.put(weapon.getMessageBuilder().buildBaseline3());
-					buffer.put(weapon.getMessageBuilder().buildBaseline6());
+//					buffer.put(weapon.getMessageBuilder().buildBaseline3());
+//					buffer.put(weapon.getMessageBuilder().buildBaseline6());
+					buffer.put(weapon.getBaseline(3).getBaseline()); 
+					buffer.put(weapon.getBaseline(6).getBaseline());
 				} else {
 					System.out.println("Bad equipment object");
 				}
@@ -1048,8 +1052,10 @@ public class CreatureMessageBuilder extends TangibleMessageBuilder {
 		if(item instanceof WeaponObject) {
 			WeaponObject weapon = (WeaponObject) item;
 			buffer.put((byte) 1);
-			buffer.put(weapon.getMessageBuilder().buildBaseline3());
-			buffer.put(weapon.getMessageBuilder().buildBaseline6());
+//			buffer.put(weapon.getMessageBuilder().buildBaseline3());
+//			buffer.put(weapon.getMessageBuilder().buildBaseline6());
+			buffer.put(weapon.getBaseline(3).getBaseline()); 
+			buffer.put(weapon.getBaseline(6).getBaseline());
 		} else {
 			buffer.put((byte) 0);
 		}
