@@ -1,4 +1,5 @@
 import sys
+from resources.datatables import WeaponType
 
 def setup(core, object):
 	object.setStringAttribute('tier', '6')
@@ -12,7 +13,7 @@ def setup(core, object):
 	object.setStringAttribute('faction_restriction', 'Rebel')
 	object.setStringAttribute('required_skill', 'None')
 	object.setDamageType("energy");
-	object.setWeaponType(1);
+	object.setWeaponType(WeaponType.CARBINE);
 	object.setAttackSpeed(0.6);
 	object.setMinDamage(389);
 	object.setMaxDamage(780);
