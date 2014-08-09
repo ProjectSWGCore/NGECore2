@@ -2,4 +2,8 @@ import sys
 from java.util import Vector
 
 def addTemplate(core):
-	core.spawnService.addLairTemplate('dantooine_voritor_lair_1', 'voritor_lizard', 15, 'object/tangible/lair/base/shared_poi_all_lair_brambles_small.iff')
+	mobileTemplates = Vector()
+	mobileTemplates.add('voritor_lizard') 
+	
+	core.spawnService.addLairTemplate('dantooine_voritor_lair_1', mobileTemplates, 15, 'object/tangible/lair/base/poi_all_lair_leaf_small.iff')
+	return

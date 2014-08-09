@@ -12,11 +12,11 @@ def run(core, actor, target, commandString):
 		return
 	
 	if target and target.getSlottedObject('ghost') is not None:
-		actor.sendSystemMessage('gm: teleporttarget: Command completed successfully.', 0)
+		actor.sendSystemMessage(' \\#FE2EF7 [GM] \\#FFFFFF teleportTarget: Command completed successfully.', 0)
 		core.simulationService.teleport(target, actor.getPosition(), actor.getOrientation(), 0)
 		return
 	
 	else:
-		actor.sendSystemMessage('Invalid Syntax. Syntax is: /teleporttarget <HoverTarget>', 0)
+		actor.sendSystemMessage(' \\#FE2EF7 [GM] \\#FFFFFF teleportTarget: Invalid Syntax. Syntax is: /teleportTarget <HoverTarget>', 0)
 		return
 	return

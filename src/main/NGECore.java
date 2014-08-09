@@ -797,8 +797,26 @@ public class NGECore {
 		} catch (InterruptedException e) {
 				e.printStackTrace();
 		}
+	}
 		
-		
+		public void initiateStop() {
+			if(isShuttingDown)
+				return;
+			try {
+				chatService.broadcastGalaxy("You will now be disconnected so the server can perform a final save before shutting down.");
+				Thread.sleep(10000);
+				synchronized(getActiveConnectionsMap()) {
+					for(Client client : getActiveConnectionsMap().values()) {
+						client.getSession().close(true);
+						connectionService.disconnect(client);
+					}
+				}
+				
+				System.exit(0);
+				
+			} catch (InterruptedException e) {
+					e.printStackTrace();
+			}
 		
 	}
 

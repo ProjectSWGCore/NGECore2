@@ -336,8 +336,10 @@ public class CreatureMessageBuilder extends TangibleMessageBuilder {
 					buffer.putInt(CRC.StringtoCRC(weapon.getTemplate()));
 
 					buffer.put((byte) 1);
-					buffer.put(weapon.getMessageBuilder().buildBaseline3());
-					buffer.put(weapon.getMessageBuilder().buildBaseline6());
+//					buffer.put(weapon.getMessageBuilder().buildBaseline3());
+//					buffer.put(weapon.getMessageBuilder().buildBaseline6());
+					buffer.put(weapon.getBaseline(3).getBaseline()); 
+					buffer.put(weapon.getBaseline(6).getBaseline());
 				} else {
 					System.out.println("Bad equipment object");
 				}
@@ -1050,8 +1052,10 @@ public class CreatureMessageBuilder extends TangibleMessageBuilder {
 		if(item instanceof WeaponObject) {
 			WeaponObject weapon = (WeaponObject) item;
 			buffer.put((byte) 1);
-			buffer.put(weapon.getMessageBuilder().buildBaseline3());
-			buffer.put(weapon.getMessageBuilder().buildBaseline6());
+//			buffer.put(weapon.getMessageBuilder().buildBaseline3());
+//			buffer.put(weapon.getMessageBuilder().buildBaseline6());
+			buffer.put(weapon.getBaseline(3).getBaseline()); 
+			buffer.put(weapon.getBaseline(6).getBaseline());
 		} else {
 			buffer.put((byte) 0);
 		}

@@ -6,6 +6,7 @@ def setup(core, object):
 	object.setStfName('item_force_sensitive_clicky_01_02')
 	object.setDetailFilename('static_item_d')
 	object.setDetailName('item_force_sensitive_clicky_01_02')
+	object.setIntAttribute('no_trade', 1)
 	object.setStringAttribute('class_required', 'Jedi')
 	return
 

@@ -5,6 +5,7 @@ def setup(core, object):
 	object.setStfName('item_officer_backpack_01_02')
 	object.setDetailFilename('static_item_d')
 	object.setDetailName('item_officer_backpack_01_02')
+	object.setIntAttribute('no_trade', 1)
 	object.setIntAttribute('cat_stat_mod_bonus.@stat_n:agility_modified', 5)
 	object.setIntAttribute('cat_stat_mod_bonus.@stat_n:precision_modified', 5)
 	object.setStringAttribute('class_required', 'Officer')

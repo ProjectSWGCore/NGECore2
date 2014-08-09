@@ -24,18 +24,23 @@ def run(core, actor, target, commandString):
 		arg4 = commandArgs[4]
 	
 	if not command:
+		actor.sendSystemMessage(' \\#FE2EF7 [GM] \\#FFFFFF Server: Invalid Syntax. Syntax is: /server <lockServer | unlockServer | shutdown | stop>.', 0)
 		return
 	
 	if command == 'lockServer':
 		core.setGalaxyStatus(GalaxyStatus.Locked)
+		actor.sendSystemMessage(' \\#FE2EF7 [GM] \\#FFFFFF Server lockServer: Command completed successfully. Server is now in Locked Status.', 0)
 	if command == 'unlockServer':
 		core.setGalaxyStatus(GalaxyStatus.Online)
-	if command == 'info':
-		actor.sendSystemMessage(str(core.getActiveZoneClients()) + ' online characters.', 0)
+		actor.sendSystemMessage(' \\#FE2EF7 [GM] \\#FFFFFF Server unlockServer: Command completed successfully. Server is now in Online Status.', 0)
+	#if command == 'restart': //This command currently causes an error at NGEcore.java like 593 whole attempting to close databaseConnection2
+		#core.restart()
+		#actor.sendSystemMessage(' \\#FE2EF7 [GM] \\#FFFFFF Server restart: Command completed successfully. Server restart initiated.', 0)
 	if command == 'shutdown':
 		core.initiateShutdown()
-	if command == 'getheight':
-		actor.sendSystemMessage(str(core.terrainService.getHeight(actor.getPlanetId(), actor.getWorldPosition().x, actor.getWorldPosition().z)), 0)
-
+		actor.sendSystemMessage(' \\#FE2EF7 [GM] \\#FFFFFF Server shutdown: Command completed successfully. Server shutdown initiated.', 0)
+	if command == 'stop':
+		core.initiateStop()
+		actor.sendSystemMessage(' \\#FE2EF7 [GM] \\#FFFFFF Server stop: Command completed successfully. Emergency server shutdown initiated.', 0)
 		
 	return
