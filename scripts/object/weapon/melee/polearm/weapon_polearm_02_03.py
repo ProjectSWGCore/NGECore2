@@ -6,7 +6,6 @@ def setup(core, object):
 	object.setStfName('weapon_polearm_02_03')
 	object.setDetailFilename('static_item_d')
 	object.setDetailName('weapon_polearm_02_03')
-	object.setIntAttribute('no_trade', 1)
 	object.setIntAttribute('required_combat_level', 1)
 	object.setAttackSpeed(1);
 	object.setMaxRange(5);
