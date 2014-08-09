@@ -79,6 +79,7 @@ odb/cities/je.info.*
 
 # Log files
 debuglogs/
+logs/
 
 #################
 ## Visual Studio

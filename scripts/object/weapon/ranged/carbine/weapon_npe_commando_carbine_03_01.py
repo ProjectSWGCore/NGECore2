@@ -13,5 +13,5 @@ def setup(core, object):
 	object.setDamageType("energy");
 	object.setMinDamage(20);
 	object.setMaxDamage(40);
-	object.setWeaponType(Weapon.Type.CARBINE);
+	object.setWeaponType(WeaponType.CARBINE);
 	return

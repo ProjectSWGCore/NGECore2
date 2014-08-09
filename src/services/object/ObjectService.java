@@ -1174,6 +1174,13 @@ public class ObjectService implements INetworkDispatch {
 					});
 				}
 				
+				// New players that skip tutorial
+				if (creature.getLevel() <= (short) 1) {
+					core.playerService.grantLevel(creature, 5);
+					TangibleObject inventory = (TangibleObject) creature.getSlottedObject("inventory");
+					if (inventory != null) inventory.add(core.objectService.createObject("object/tangible/npe/shared_npe_uniform_box.iff", creature.getPlanet()));
+				}
+
 				core.playerService.postZoneIn(creature);
 			}
 			
