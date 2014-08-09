@@ -55,6 +55,7 @@ import resources.harvest.SurveyTool;
 import org.apache.commons.lang3.text.WordUtils;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
+import org.python.antlr.PythonParser.list_for_return;
 import org.python.core.Py;
 import org.python.core.PyObject;
 
@@ -194,51 +195,9 @@ public class ObjectService implements INetworkDispatch {
 		
 		while (cursor.hasNext()) {
 			SWGObject object = (SWGObject) cursor.next();
-			if (object != null && !(object instanceof BuildingObject))
+			if (object != null && !(object instanceof BuildingObject) && !objectList.containsKey(object.getObjectID()))
 				objectList.put(object.getObjectID(), object);
 		}
-		
-		cursor = core.getCreatureODB().getCursor();
-		
-		while (cursor.hasNext()) {
-			CreatureObject object = (CreatureObject) cursor.next();
-			if (object != null) {
-				System.out.println("Loaded character with name: " + object.getCustomName());
-				objectList.put(object.getObjectID(), object);
-				
-				loadServerTemplate(object);
-				object.viewChildren(object, true, true, (child) -> loadServerTemplate(child));
-			} else {
-				System.err.println("Character was null!");
-			}
-		}
-		
-		// Loading characters by using a lookup
-		try {
-			PreparedStatement ps = core.getDatabase1().preparedStatement("SELECT * FROM characters");
-			ResultSet resultSet = ps.executeQuery();
-			while (resultSet.next()) {
-				long objectId = resultSet.getLong("id");
-				CreatureObject object = (CreatureObject) core.getCreatureODB().get(objectId);
-				if (object != null) {
-					if (object.getCustomName() == null || object.getCustomName().isEmpty()) {
-						String first = resultSet.getString("firstName");
-						String last = resultSet.getString("lastName");
-						if (last.isEmpty())
-							object.setCustomName(first);
-						else
-							object.setCustomName(first + " " + last);
-					}
-					System.out.println("Loaded character manually with name: " + object.getCustomName());
-					objectList.put(objectId, object);
-				} else {
-					System.err.println("Attempt failed to recover character.");
-				}
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		
 		
 		loadBuildings();
 		System.out.println("Finished loading objects.");
@@ -729,7 +688,7 @@ public class ObjectService implements INetworkDispatch {
 	}
 	
 	public CreatureObject getCreatureFromDB(long objectId) {
-		CreatureObject object = (CreatureObject) core.getCreatureODB().get(objectId);
+		CreatureObject object = (CreatureObject) core.getSWGObjectODB().get(objectId);
 		if (object != null) {
 			loadServerTemplate(object);
 			object.viewChildren(object, true, true, (child) -> loadServerTemplate(child));

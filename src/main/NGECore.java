@@ -233,7 +233,6 @@ public class NGECore {
 	private ObjectDatabase auctionODB;
 	private ObjectDatabase resourceHistoryODB;
 	private ObjectDatabase swgObjectODB;
-	private ObjectDatabase creatureODB;
 	private ObjectDatabase bountiesODB;
 	private ObjectDatabase cityODB;
 	
@@ -304,7 +303,6 @@ public class NGECore {
 		}
 		
 		setGalaxyStatus(GalaxyStatus.Loading);
-		creatureODB = new ObjectDatabase("players", true, true, true, CreatureObject.class);
 		swgObjectODB = new ObjectDatabase("swgobjects", true, true, true, SWGObject.class);
 		mailODB = new ObjectDatabase("mails", true, true, true, Mail.class);
 		guildODB = new ObjectDatabase("guild", true, true, true, GuildObject.class);
@@ -672,10 +670,6 @@ public class NGECore {
 		return databaseConnection2;
 	}
 	
-	public ObjectDatabase getCreatureODB() {
-		return creatureODB;
-	}
-	
 	public ObjectDatabase getSWGObjectODB() {
 		return swgObjectODB;
 	}
@@ -813,7 +807,6 @@ public class NGECore {
 	}
 	
 	public void closeODBs() {
-		creatureODB.close();
 		swgObjectODB.close();
 		mailODB.close();
 		guildODB.close();
