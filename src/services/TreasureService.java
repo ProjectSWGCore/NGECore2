@@ -28,6 +28,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+
 import main.NGECore;
 import engine.resources.objects.SWGObject;
 import engine.resources.service.INetworkDispatch;
@@ -35,6 +36,7 @@ import engine.resources.service.INetworkRemoteEvent;
 
 public class TreasureService implements INetworkDispatch {
 	
+	@SuppressWarnings("unused")
 	private NGECore core;
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	
@@ -51,6 +53,7 @@ public class TreasureService implements INetworkDispatch {
 			
 	}
 	
+	@SuppressWarnings("unused")
 	public void scheduleTreasureService(){
 		
 		final ScheduledFuture<?> task = scheduler.scheduleAtFixedRate(new Runnable() {

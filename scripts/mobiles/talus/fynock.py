@@ -27,7 +27,7 @@ def addTemplate(core):
 	mobileTemplate.setBoneType("Avian Bones")
 	mobileTemplate.setBoneAmount(10)
 	mobileTemplate.setSocialGroup("fynock")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setAssistRange(6)
 	mobileTemplate.setStalker(False)
 	mobileTemplate.setOptionsBitmask(128)
 	
@@ -41,6 +41,9 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_flank_1')
+	attacks.add('bm_siphon_2')
+	attacks.add('bm_wing_buffet_3')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

@@ -43,6 +43,7 @@ import main.NGECore;
  * @author Charon 
  */
 
+@SuppressWarnings("unused")
 public class DevLog {
 	
 	private static int loggingSessionID=0;	

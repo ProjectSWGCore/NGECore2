@@ -93,7 +93,7 @@ public class FactoryCrateMessageBuilder extends TangibleMessageBuilder{
 	}
 	
 	public IoBuffer buildBaseline6() {
-		FactoryCrateObject factoryCrateObject = (FactoryCrateObject) object;
+		@SuppressWarnings("unused") FactoryCrateObject factoryCrateObject = (FactoryCrateObject) object;
 		IoBuffer buffer = IoBuffer.allocate(10).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.setAutoExpand(true);
 				

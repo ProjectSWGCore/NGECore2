@@ -10,7 +10,6 @@ from java.util import Vector
 
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
-	
 	mobileTemplate.setCreatureName('crackdown_stormtrooper_squad_leader')
 	mobileTemplate.setLevel(27)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
@@ -19,10 +18,11 @@ def addTemplate(core):
 	mobileTemplate.setDeathblow(True)
 	mobileTemplate.setScale(1)
 	mobileTemplate.setSocialGroup("imperial")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setAssistRange(6)
 	mobileTemplate.setStalker(True)
 	mobileTemplate.setFaction("imperial")
 	mobileTemplate.setFactionStatus(FactionStatus.Combatant)
+	
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_stormtrooper_assault_trooper_m.iff')

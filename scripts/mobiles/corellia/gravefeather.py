@@ -19,8 +19,9 @@ def addTemplate(core):
 	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(1)
 	mobileTemplate.setSocialGroup("enraged carrion spat")
-	mobileTemplate.setAssistRange(6)
+	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_carrion_spat.iff')
@@ -32,6 +33,8 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_bite_1')
+	attacks.add('bm_hamstring_1')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

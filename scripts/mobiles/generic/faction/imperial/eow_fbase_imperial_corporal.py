@@ -14,7 +14,6 @@ def addTemplate(core):
 	mobileTemplate.setCreatureName('eow_fbase_imperial_corporal')
 	mobileTemplate.setLevel(90)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
-
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(True)
@@ -23,6 +22,7 @@ def addTemplate(core):
 	mobileTemplate.setStalker(False)
 	mobileTemplate.setFaction("imperial")
 	mobileTemplate.setFactionStatus(FactionStatus.Combatant)
+	
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_imperial_captain_m.iff')

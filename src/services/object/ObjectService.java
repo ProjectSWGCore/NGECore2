@@ -66,6 +66,7 @@ import com.sleepycat.persist.model.PrimaryKey;
 
 import protocol.swg.CmdSceneReady;
 import protocol.swg.CmdStartScene;
+import protocol.swg.ErrorMessage;
 import protocol.swg.HeartBeatMessage;
 import protocol.swg.ObjControllerMessage;
 import protocol.swg.ParametersMessage;
@@ -252,10 +253,15 @@ public class ObjectService implements INetworkDispatch {
 			}
 		}
 		
-		if(objectID == 0)
-			objectID = generateObjectID();
-		else
-			isSnapshot = !overrideSnapshot;
+		synchronized(objectMutex) {
+			if(objectID == 0)
+				objectID = generateObjectID();
+			else
+				isSnapshot = !overrideSnapshot;
+			
+			if(!core.getObjectIdODB().contains(objectID))
+				core.getObjectIdODB().put(objectID, new ObjectId(objectID));
+		}
 		
 		if (planet == null) {
 			System.err.println("Planet is null in createObject for some reason.");
@@ -423,10 +429,7 @@ public class ObjectService implements INetworkDispatch {
 		object.setAttachment("customServerTemplate", customServerTemplate);
 		
 		object.setisInSnapshot(isSnapshot);
-		synchronized(objectMutex) {
-			if(!core.getObjectIdODB().contains(objectID))
-				core.getObjectIdODB().put(objectID, new ObjectId(objectID));
-		}
+		
 		// Set Options - easier to set them across the board here
 		// because we'll be spawning them despite most of them being unscripted.
 		// Any such settings can be completely reset with setOptionsBitmask
@@ -683,32 +686,27 @@ public class ObjectService implements INetworkDispatch {
 			return null;
 		}
 		
-		synchronized(objectList) {
-			for(SWGObject obj : objectList.values()) {
-				if(obj == null)
-					continue;
-				if(obj.getCustomName() == null)
-					continue;
-				if(obj.getCustomName().startsWith(customName) || obj.getCustomName().toUpperCase().startsWith(WordUtils.capitalize(customName)))
-					return obj;
-			}
-			
-		}
+		if (customName.contains(" "))
+			customName = customName.split(" ")[0];
 		
-		ODBCursor cursor = core.getSWGObjectODB().getCursor();
-		
-		while (cursor.hasNext()) {
-			SWGObject object = (SWGObject) cursor.next();
-			
-			if (object == null) {
-				continue;
-			}
-			
-			if (object.getCustomName() != null && customName.length() > 0 && (object.getCustomName().startsWith(customName) || object.getCustomName().toUpperCase().startsWith(WordUtils.capitalize(customName)))) {
+		try {
+			PreparedStatement ps = core.getDatabase1().preparedStatement("SELECT * FROM characters WHERE \"firstName\" ILIKE ?");
+			ps.setString(1, customName);
+			ResultSet resultSet = ps.executeQuery();
+
+			while (resultSet.next()) {
+				long objectId = resultSet.getLong("id");
+				SWGObject object = getObject(objectId);
+				
+				if (object == null)
+					object = getCreatureFromDB(objectId);
+				
 				return object;
 			}
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
-		cursor.close();
+		
 		return null;
 	}
 	
@@ -736,30 +734,27 @@ public class ObjectService implements INetworkDispatch {
 			return generateObjectID();
 
 		return objectID;*/
-		
-		long newId = 0;
-		boolean found = false;
+
 		// stack overflow when using recursion
-		synchronized(objectMutex) {
-			while(!found) {
-				newId = highestId.incrementAndGet();
-				PreparedStatement ps2;
-				try {
-					ps2 = databaseConnection.preparedStatement("UPDATE highestid SET id=" + newId + " WHERE id=(SELECT MAX(id) FROM highestid)");
-					ps2.executeUpdate();
-					ps2.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
+		long newId = 0;
+		try {
+			synchronized(objectMutex) {
+				newId = highestId.get();
+				ObjectDatabase objectIdODB = core.getObjectIdODB();
+				while (objectList.containsKey(newId) || objectIdODB.contains(newId)) {
+					newId = highestId.incrementAndGet();
 				}
-				if(objectList.containsKey(newId) || core.getObjectIdODB().contains(newId))
-					found = false;
-				else
-					found = true;
 			}
+			final String sql = "UPDATE highestid SET id=? WHERE id=(SELECT MAX(id) FROM highestid)";
+			final PreparedStatement ps2 = databaseConnection.preparedStatement(sql);
+			ps2.setLong(1, newId);
+			ps2.executeUpdate();
+			ps2.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
 		
-		return newId;		
-
+		return newId;
 	}
 	
 	public long getDOId(String planet, String template, int type, long containerId, int cellNumber, float x1, float y, float z1) {
@@ -1031,6 +1026,11 @@ public class ObjectService implements INetworkDispatch {
 					creature = getCreatureFromDB(objectId);
 					if(creature == null) {
 						System.out.println("Cant get creature from db");
+					} else {
+						if (creature.getCustomName() == null || creature.getCustomName() == "") {
+							System.out.println("Player with ObjID of " + creature.getObjectID() + " tried logging in but has a null/empty name!");
+							return;
+						}
 					}
 					
 				} else {
@@ -1042,7 +1042,6 @@ public class ObjectService implements INetworkDispatch {
 					if(creature.getAttachment("disconnectTask") != null && creature.getClient() != null && !creature.getClient().getSession().isClosing())
 						return;
 					
-
 				}
 				if(creature.getAttachment("disconnectTask") != null) {
 					((ScheduledFuture<?>) creature.getAttachment("disconnectTask")).cancel(true);
@@ -1144,7 +1143,7 @@ public class ObjectService implements INetworkDispatch {
 
 						// Find out what friends are online/offline
 						for (String friend : ghost.getFriendList()) {
-							SWGObject friendObject = core.chatService.getObjectByFirstName(friend);
+							SWGObject friendObject = core.objectService.getObjectByFirstName(friend);
 							
 							if(friendObject != null && friendObject.isInQuadtree()) {
 								ChatFriendsListUpdate onlineNotifyStatus = new ChatFriendsListUpdate(friend, (byte) 1);

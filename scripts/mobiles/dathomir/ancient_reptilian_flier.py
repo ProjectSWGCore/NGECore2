@@ -29,6 +29,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("reptilian flier")
 	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_reptilian_flier_hue.iff')
@@ -40,6 +41,9 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_claw_4')
+	attacks.add('bm_slash_4')
+	attacks.add('bm_wing_buffet_4')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

@@ -7,6 +7,6 @@ def createRadial(core, owner, target, radials):
 	return
 	
 def handleSelection(core, owner, target, option):
+	return
 
-	
 	

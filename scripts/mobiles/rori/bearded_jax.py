@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('bearded_jax')
 	mobileTemplate.setLevel(37)
-	mobileTemplate.setMinLevel(37)
-	mobileTemplate.setMaxLevel(38)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
@@ -27,9 +25,9 @@ def addTemplate(core):
 	mobileTemplate.setBoneType("Animal Bones")
 	mobileTemplate.setBoneAmount(10)
 	mobileTemplate.setSocialGroup("jax")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setAssistRange(4)
 	mobileTemplate.setStalker(False)
-	mobileTemplate.setOptionsBitmask(128)
+	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_bearded_jax.iff')
@@ -41,6 +39,9 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_claw_3')
+	attacks.add('bm_flank_1')
+	attacks.add('bm_slash_3')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

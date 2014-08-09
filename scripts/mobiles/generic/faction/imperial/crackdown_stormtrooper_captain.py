@@ -14,7 +14,6 @@ def addTemplate(core):
 	mobileTemplate.setCreatureName('crackdown_imperial_army_captain_hard')
 	mobileTemplate.setLevel(60)
 	mobileTemplate.setDifficulty(Difficulty.ELITE)
-
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)
@@ -24,6 +23,7 @@ def addTemplate(core):
 	mobileTemplate.setStalker(True)
 	mobileTemplate.setFaction("imperial")
 	mobileTemplate.setFactionStatus(FactionStatus.Combatant)
+	
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_stormtrooper_captain_black_black.iff')

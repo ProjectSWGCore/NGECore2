@@ -27,6 +27,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("razor cat")
 	mobileTemplate.setAssistRange(10)
 	mobileTemplate.setStalker(True)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_crimson_sand_panther.iff')
@@ -38,6 +39,9 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_claw_3')
+	attacks.add('bm_flank_1')
+	attacks.add('bm_slash_3')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

@@ -27,6 +27,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("gronda")
 	mobileTemplate.setAssistRange(10)
 	mobileTemplate.setStalker(True)
+	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_gronda.iff')
@@ -38,6 +39,11 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_bite_3')
+	attacks.add('bm_charge_3')
+	attacks.add('bm_dampen_pain_3')
+	attacks.add('bm_shaken_1')
+	attacks.add('bm_stomp_3')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

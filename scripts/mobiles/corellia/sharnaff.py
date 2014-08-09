@@ -25,8 +25,9 @@ def addTemplate(core):
 	mobileTemplate.setBoneType("Animal Hide")
 	mobileTemplate.setBoneAmount(180)
 	mobileTemplate.setSocialGroup("sharnaff")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setAssistRange(6)
 	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_sharnaff.iff')
@@ -38,6 +39,11 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_bite_3')
+	attacks.add('bm_bolster_armor_3')
+	attacks.add('bm_charge_3')
+	attacks.add('bm_shaken_1')
+	attacks.add('bm_stomp_3')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

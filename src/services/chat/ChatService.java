@@ -50,7 +50,6 @@ import resources.common.*;
 import resources.datatables.DisplayType;
 import resources.guild.Guild;
 import resources.objects.creature.CreatureObject;
-import resources.objects.group.GroupObject;
 import resources.objects.player.PlayerObject;
 import protocol.swg.AddIgnoreMessage;
 import protocol.swg.ObjControllerMessage;

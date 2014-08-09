@@ -24,9 +24,9 @@ def addTemplate(core):
 	mobileTemplate.setBoneType("Animal Bone")
 	mobileTemplate.setHideAmount(10)
 	mobileTemplate.setSocialGroup("roba")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setAssistRange(6)
 	mobileTemplate.setStalker(False)
-	mobileTemplate.setOptionsBitmask(128)	
+	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
 
 	templates = Vector()
 	templates.add('object/mobile/shared_roba.iff')
@@ -38,6 +38,9 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 
 	attacks = Vector()
+	attacks.add('bm_charge_4')
+	attacks.add('bm_dampen_pain_4')
+	attacks.add('bm_slash_4')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 

@@ -23,6 +23,7 @@ def addTemplate(core):
 	mobileTemplate.setStalker(False)
 	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
+<<<<<<< HEAD
 	templates = Vector()  #need to find correct template
 	templates.add('object/mobile/shared_dressed_trader_thug_female_human_01.iff')
 	templates.add('object/mobile/shared_dressed_trader_thug_female_human_02.iff')
@@ -31,6 +32,14 @@ def addTemplate(core):
 	templates.add('object/mobile/shared_dressed_trader_thug_female_twk_02.iff')
 	templates.add('object/mobile/shared_dressed_trader_thug_male_human_02.iff')
 	templates.add('object/mobile/shared_dressed_trader_thug_male_human_03.iff')
+=======
+	templates = Vector() 
+	templates.add('object/mobile/shared_dressed_cobral_hooligan_bith_female_01.iff')
+	templates.add('object/mobile/shared_dressed_cobral_hitman_human_female_01.iff')
+	templates.add('object/mobile/shared_dressed_cobral_overlord_human_male_01.iff')
+	templates.add('object/mobile/shared_dressed_cobral_boss_twk_female_01.iff')
+	templates.add('object/mobile/shared_dressed_cobral_assassin_twk_female_01.iff')
+>>>>>>> origin/master
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()

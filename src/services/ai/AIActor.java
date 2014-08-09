@@ -83,6 +83,7 @@ public class AIActor {
 	private long waitStartTime = 0L;
 	private AIState intendedPrimaryAIState;
 	private Point3D lastPositionBeforeStateChange;
+<<<<<<< HEAD
 	private ScheduledFuture movementFuture;
 	private ScheduledFuture recoveryFuture;
 	private ScheduledFuture despawnFuture;
@@ -95,6 +96,11 @@ public class AIActor {
 	private boolean actorAlive = true;
 	private int progressionMarker = 0;
 	private boolean AIactive = true;
+=======
+	private ScheduledFuture<?> movementFuture;
+	private ScheduledFuture<?> recoveryFuture;
+	private ScheduledFuture<?> despawnFuture;
+>>>>>>> origin/master
 
 	public AIActor(CreatureObject creature, Point3D spawnPosition, ScheduledExecutorService scheduler) {
 		actorID = autoActorID++;

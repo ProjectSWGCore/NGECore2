@@ -14,16 +14,16 @@ def addTemplate(core):
 	mobileTemplate.setCreatureName('fbase_comm_operator')
 	mobileTemplate.setLevel(14)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
-
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(True)
 	mobileTemplate.setScale(1)
 	mobileTemplate.setSocialGroup("imperial")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setAssistRange(6)
 	mobileTemplate.setStalker(True)
 	mobileTemplate.setFaction("imperial")
 	mobileTemplate.setFactionStatus(FactionStatus.Combatant)
+	
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_npe_imperial_officer.iff')

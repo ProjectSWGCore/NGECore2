@@ -68,12 +68,12 @@ def addPlanetSpawns(core, planet):
 	commoner23.setOptionsBitmask(256)
 	
 	#Junkdealer will be added as soon as i can find coords
-	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_03.iff', 'tatooine', long(0), float(-3060.50), float(5), float(2181.71), float(0), float(1))
-	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_03.iff', 'tatooine', long(0), float(-2924.53), float(5), float(2173.97), float(0), float(1))
-	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_03.iff', 'tatooine', long(0), float(-2977), float(5.5), float(2327), float(0), float(1))
-	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_03.iff', 'tatooine', long(0), float(-3008), float(5.5), float(2347), float(0), float(1))
-	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_03.iff', 'tatooine', long(0), float(-2903), float(5), float(2446), float(0), float(1))
-	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_03.iff', 'tatooine', long(0), float(-2085), float(5), float(2195), float(0), float(1))
-	stcSvc.spawnObject('object/mobile/shared_junk_dealer_m_03.iff', 'tatooine', long(0), float(-2085), float(5), float(2230), float(0), float(1))
+	stcSvc.spawnObject('junkdealer', 'tatooine', long(0), float(-3060.50), float(5), float(2181.71), float(0), float(1))
+	stcSvc.spawnObject('junkdealer', 'tatooine', long(0), float(-2924.53), float(5), float(2173.97), float(-0.391), float(0.920))
+	stcSvc.spawnObject('junkdealer', 'tatooine', long(0), float(-2977), float(5.5), float(2327), float(-0.490), float(0.872))
+	stcSvc.spawnObject('junkdealer', 'tatooine', long(0), float(-3008), float(5.5), float(2347), float(0.885), float(0.464))
+	stcSvc.spawnObject('junkdealer', 'tatooine', long(0), float(-2903), float(5), float(2446), float(0.782), float(-0.622))
+	stcSvc.spawnObject('junkdealer', 'tatooine', long(0), float(-2933), float(5), float(2124), float(0.446), float(0.896))
+	stcSvc.spawnObject('junkdealer', 'tatooine', long(0), float(-2846), float(5), float(2196), float(-0.389), float(0.9211))
 	return
 	

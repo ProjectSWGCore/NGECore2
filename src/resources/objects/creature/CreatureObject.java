@@ -54,6 +54,7 @@ import resources.common.OutOfBand;
 import resources.objects.ObjectMessageBuilder;
 import resources.objects.SWGList;
 import resources.objects.SWGMap;
+import resources.objects.SWGSet;
 import engine.resources.common.CRC;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
@@ -72,7 +73,7 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	// CREO 1
 	private int bankCredits = 0;
 	private int cashCredits = 0;
-	private List<String> skills;
+	private SWGSet<String> skills;
 	@NotPersistent
 	private transient int skillsUpdateCounter = 0;
 	
@@ -194,7 +195,7 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		super(objectID, planet, position, orientation, Template);
 		messageBuilder = new CreatureMessageBuilder(this);
 		loadTemplateData();
-		skills = new ArrayList<String>();
+		skills = new SWGSet<String>(this, 1, 4, false);
 		skillMods = new SWGMap<String, SkillMod>(this, 4, 3, true);
 		abilities = new SWGMap<String, Integer>(this, 4, 14, true);
 		missionCriticalObjects = new SWGMap<Long, Long>(this, 4, 13, false);
@@ -301,7 +302,7 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		}
 	}
 
-	public List<String> getSkills() {
+	public SWGSet<String> getSkills() {
 		return skills;
 	}
 	
@@ -891,8 +892,8 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		synchronized(objectMutex) {
 			this.moodAnimation = moodAnimation;
 		}
-		IoBuffer moodAnimationDelta = messageBuilder.buildMoodAnimationDelta(moodAnimation);
-		notifyObservers(moodAnimationDelta, true);
+		//IoBuffer moodAnimationDelta = messageBuilder.buildMoodAnimationDelta(moodAnimation);
+		//notifyObservers(moodAnimationDelta, true);
 	}
 
 	public long getWeaponId() {
@@ -907,7 +908,7 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		}
 		
 		IoBuffer weaponIdDelta = messageBuilder.buildWeaponIdDelta(weaponId);
-		
+		tools.CharonPacketUtils.printAnalysis(weaponIdDelta, "buildWeaponIdDelta");
 		notifyObservers(weaponIdDelta, true);
 
 	}
@@ -1491,6 +1492,10 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	}
 	
 	public void playMusic(String sndFile, long targetId, int repetitions, boolean flag) {
+		getClient().getSession().write(new PlayMusicMessage(sndFile, targetId, 1, false).serialize());
+	}
+	
+	public void playMusicSelf(String sndFile, long targetId, int repetitions, boolean flag) {
 		getClient().getSession().write(new PlayMusicMessage(sndFile, targetId, 1, false).serialize());
 	}
 	

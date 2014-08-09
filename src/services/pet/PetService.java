@@ -37,8 +37,6 @@ import resources.datatables.DisplayType;
 import resources.datatables.Options;
 import resources.datatables.Posture;
 import resources.datatables.State;
-import resources.objects.SWGList;
-import resources.objects.SWGSet;
 import resources.objects.building.BuildingObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
@@ -230,6 +228,7 @@ public class PetService implements INetworkDispatch {
 //		}
 	}
 	
+	@SuppressWarnings("unused")
 	private void callVehicle(CreatureObject actor, SWGObject pcd, PlayerObject player, CreatureObject mount) {		
 		if ((mount.getLevel() - actor.getLevel()) > 5) {
 			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:cant_call_level"), DisplayType.Broadcast);
@@ -299,6 +298,7 @@ public class PetService implements INetworkDispatch {
 		player.setCallingCompanion(false);
 	}
 	
+	@SuppressWarnings("unused")
 	private void callMount(CreatureObject actor, SWGObject pcd, PlayerObject player, CreatureObject mount) {
 		return; // NOT IMPLEMENTED
 	}

@@ -23,8 +23,9 @@ def addTemplate(core):
 	mobileTemplate.setHideType("Scaley Hide")
 	mobileTemplate.setHideAmount(3)
 	mobileTemplate.setSocialGroup("shearmite")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setStalker(True)
+	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_shear_mite_broodling.iff')
@@ -36,6 +37,8 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_bolster_armor_3')
+	attacks.add('bm_enfeeble_3')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 

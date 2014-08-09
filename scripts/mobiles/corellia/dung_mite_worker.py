@@ -23,6 +23,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("decay mite")
 	mobileTemplate.setAssistRange(6)
 	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_sickening_dung_mite_worker.iff')
@@ -34,6 +35,8 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_bolster_armor_3')
+	attacks.add('bm_enfeeble_3')
 	mobileTemplate.setDefaultAttack('creatureRangedAttack')
 	mobileTemplate.setAttacks(attacks)
 	

@@ -14,7 +14,6 @@ def addTemplate(core):
 	mobileTemplate.setCreatureName('rebel_tamed_slice_hound')
 	mobileTemplate.setLevel(4)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
-
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)
@@ -30,6 +29,7 @@ def addTemplate(core):
 	mobileTemplate.setStalker(False)
 	mobileTemplate.setFaction("rebel")
 	mobileTemplate.setFactionStatus(FactionStatus.Combatant)
+	
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_corellian_slice_hound.iff')

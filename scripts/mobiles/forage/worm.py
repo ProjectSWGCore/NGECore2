@@ -14,7 +14,16 @@ def addTemplate(core):
 	mobileTemplate.setLevel(1)
 	mobileTemplate.setDifficulty(Difficulty.ELITE)
 
-	
+	mobileTemplate.setMinSpawnDistance(4)
+	mobileTemplate.setMaxSpawnDistance(8)
+	mobileTemplate.setDeathblow(False)
+	mobileTemplate.setScale(1)
+	mobileTemplate.setMeatType("Carnivore Meat")
+	mobileTemplate.setMeatAmount(100)
+	mobileTemplate.setAssistRange(12)
+	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
+		
 	templates = Vector()
 	templates.add('object/mobile/shared_col_forage_aggravated_worm.iff')
 	templates.add('object/mobile/shared_col_forage_angry_worm.iff')
@@ -34,6 +43,7 @@ def addTemplate(core):
 	#mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_hamstring_5')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
