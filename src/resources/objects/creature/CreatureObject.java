@@ -222,6 +222,7 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		missionCriticalObjects.init(this);
 		abilities.init(this);
 		skillMods.init(this);
+		skills.init(this);
 	}
 
 	private void loadTemplateData() {
