@@ -306,6 +306,7 @@ def	miscHandler(owner):
 	window.addListBoxMenuItem('Backpack', 0)
 	window.addListBoxMenuItem('Heroism Jewelry Set', 1)	
 	window.addListBoxMenuItem('Belt of Master Bodo Baas', 2)
+	window.addListBoxMenuItem('Starter Equipment Box', 3)
 	core.suiService.openSUIWindow(window);
 	
 def miscHandlerCallback(owner, window, eventType, returnList):
@@ -322,6 +323,9 @@ def miscHandlerCallback(owner, window, eventType, returnList):
 		return
 	if returnList.get(0)=='2':
 		jediBelt(owner, inventory)
+		return
+	if returnList.get(0)=='3':
+		starterEquipmentBox(owner, inventory)
 		return
 	return
 	
@@ -603,6 +607,11 @@ def jediBelt(owner, inventory):
 	
 def backpack(owner, inventory):
 	inventory.add(core.objectService.createObject("object/tangible/wearables/backpack/shared_backpack_s01.iff", owner.getPlanet()))
+	screenOne(core, owner)
+	return
+
+def starterEquipmentBox(owner, inventory):
+	inventory.add(core.objectService.createObject("object/tangible/npe/shared_npe_uniform_box.iff", owner.getPlanet()))
 	screenOne(core, owner)
 	return
 	
