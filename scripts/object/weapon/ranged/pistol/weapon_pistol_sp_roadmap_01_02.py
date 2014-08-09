@@ -1,4 +1,5 @@
 import sys
+from resources.datatables import WeaponType
 
 def setup(core, object):
 	object.setStfFilename('static_item_n')
@@ -14,5 +15,5 @@ def setup(core, object):
 	object.setDamageType("energy");
 	object.setMinDamage(73);
 	object.setMaxDamage(145);
-	object.setWeaponType(2);
+	object.setWeaponType(WeaponType.PISTOL);
 	return
