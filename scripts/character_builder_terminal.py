@@ -378,13 +378,13 @@ def combatLevelDown(owner):
 	return
 	
 def rangedWeapons(owner, inventory):
-	rifle = core.objectService.createObject('object/weapon/ranged/rifle/shared_rifle_e11.iff', owner.getPlanet())
-	rifle.setDamageType('energy')
-	rifle.setWeaponType(WeaponType.RIFLE)
-	rifle.setAttackSpeed(0.8)
-	rifle.setMinDamage(518)
-	rifle.setMaxDamage(1035)
-	rifle.setMaxRange(64)
+	#rifle = core.objectService.createObject('object/weapon/ranged/rifle/shared_rifle_e11.iff', owner.getPlanet())
+	#rifle.setDamageType('energy')
+	#rifle.setWeaponType(WeaponType.RIFLE)
+	#rifle.setAttackSpeed(0.8)
+	#rifle.setMinDamage(518)
+	#rifle.setMaxDamage(1035)
+	#rifle.setMaxRange(64)
 	
 	pistol = core.objectService.createObject('object/weapon/ranged/pistol/shared_pistol_dl44.iff', owner.getPlanet())
 	pistol.setDamageType('energy')
@@ -412,7 +412,7 @@ def rangedWeapons(owner, inventory):
 	heavy.setStringAttribute('wpn_elemental_value', '50')
 	heavy.setMaxRange(64)
 	
-	inventory.add(rifle)
+	#inventory.add(rifle)
 	inventory.add(pistol)
 	inventory.add(carbine)
 	inventory.add(heavy)
