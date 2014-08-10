@@ -862,7 +862,7 @@ public class PlayerService implements INetworkDispatch {
 		
 		if(level == 0) return;
 		
-		resetLevel(creature);
+		if (!(creature.getLevel() <= (short) 1)) resetLevel(creature);
 		
 		try {
 			experienceTable = ClientFileManager.loadFile("datatables/player/player_level.iff", DatatableVisitor.class);
