@@ -2,13 +2,13 @@ import sys
 from engine.resources.scene import Point3D
 from protocol.swg import ObjControllerMessage
 from protocol.swg import UnknownAbilityPacket
+from protocol.swg import PlayClientEffectLocMessage
 from engine.resources.objects import SWGObject
 from java.awt.datatransfer import StringSelection
 from java.awt.datatransfer import Clipboard
 from java.awt import Toolkit
 from resources.datatables import GcwRank
 from services.gcw import GCWService
-import time
 
 
 def setup():
@@ -154,12 +154,6 @@ def run(core, actor, target, commandString):
 		print ('Position.y : %s' % pos.y, 0)
 		actor.sendSystemMessage('Position.z : %s' % pos.z, 0)
 		print ('Position.z : %s' % pos.z, 0)
-<<<<<<< HEAD
-		actor.sendSystemMessage('Orientation.y : %s' % ori.y, 0)
-		print ('Orientation.y : %s' % ori.y, 0)
-		actor.sendSystemMessage('Orientation.w : %s' % ori.w, 0)
-		print ('Orientation.w : %s' % ori.w, 0)
-=======
 		actor.sendSystemMessage('Orientation.w : %s' % ori.w, 0)
 		print ('Orientation.x : %s' % ori.w, 0)
 		actor.sendSystemMessage('Orientation.x : %s' % ori.x, 0)
@@ -168,7 +162,6 @@ def run(core, actor, target, commandString):
 		print ('Orientation.y : %s' % ori.y, 0)
 		actor.sendSystemMessage('Orientation.z : %s' % ori.z, 0)
 		print ('Orientation.z : %s' % ori.z, 0)
->>>>>>> origin/master
 		if (actor.getContainer()):
 			building_id = actor.getGrandparent().getObjectID()
 			cid = actor.getContainer().getCellNumber()
@@ -243,46 +236,6 @@ def run(core, actor, target, commandString):
 		latargetID = long(actor.getIntendedTarget())
 		latarget = core.objectService.getObject(latargetID)
 		actor.sendSystemMessage('Optionsbitmask for unit ' + latarget.getCustomName() + ' is %s' % latarget.getOptionsBitmask(), 0)
-	
-	elif command == 'nextupd':		
-		latargetID = long(actor.getIntendedTarget())
-		latarget = core.objectService.getObject(latargetID)
-		player = actor.getSlottedObject("ghost")
-		#player.setNextUpdateTime(1324005720) #84000 60*60*24   86400
-		# 1324005720 is 2:06 AM to set to zero!
-		
-		player.setNextUpdateTime(452783) #84000 60*60*24   86400 83980800 140400   21*60=1260   83840400   6*60+55
-		
-	elif command == 'epoch':	
-		core.gcwService.sendServerNowEpochTime(actor)
-		
-	elif command == 'pushGCW':	
-		player = actor.getSlottedObject("ghost")
-		player.setCurrentRank(1);
-		player.setGcwPoints(player.getGcwPoints()+1000)
-	
-	elif command == 'suitest':
-		window = core.suiService.createSUIWindow('Script.CountdownTimerBar', actor, None, 5)
-		window.setProperty('modifySlot', 'modifySlot')
-		window.setProperty('comp.text:Text', '@gcw:pylon_construction_prompt')
-		window.setProperty('bg.caption.lblTitle:Text', 'quest_countdown_timer')
-		window.addDataItem('countdownTimerTimeValue', 'this')		
-		core.suiService.openTimerSUIWindow(window, 18)
-		time.sleep(18)
-		core.suiService.closeSUIWindow(window.getOwner(),window.getWindowId())
-		
-	elif command == 'suitest2':
-		window = core.suiService.createSUIWindow('Script.CountdownTimerBar', actor, None, 5)
-		# Packet43
-		#window.setProperty('text:Text', '10')
-		#window.setProperty('bar.value:Page', '10')	
-		window.setProperty('comp.text:Text', '@gcw:pylon_construction_prompt')
-		window.setProperty('bg.caption.lblTitle:Text', 'quest_countdown_timer')
-		window.addDataItem('countdownTimerTimeValue', 'this')	
-		#window.addDataItem('bar.value', '10')		
-		core.suiService.openSUIWindow(window)
-		time.sleep(5)
-		core.suiService.closeSUIWindow(window.getOwner(),window.getWindowId())
 		
 	elif command == 'spawninst':
 			
@@ -303,8 +256,23 @@ def run(core, actor, target, commandString):
 			actor.sendSystemMessage('Line of sight between player and target', 0)
 		else:
 			actor.sendSystemMessage('NO Line of sight between player and target', 0)
-				
-	elif command == 'unknownAbilityPacket' and arg1:  
+	
+	elif command == 'playfx':
+		effectFile = arg1
+		cEffMsg = PlayClientEffectLocMessage(effectFile, actor.getPlanet().getName(), actor.getPosition())
+		actor.getClient().getSession().write(cEffMsg.serialize())
+		
+	elif command == 'toinvasion':
+		invasionplanet = core.invasionService.getInvasionPlanetName()
+		position = Point3D(float(1366), float(13), float(2747))
+		if invasionplanet == 'talus':
+			position = Point3D(float(264), float(4), float(-2950)) 
+		if invasionplanet == 'tatooine':
+			position = Point3D(float(-1385), float(12), float(-3597))
+		
+		core.simulationService.transferToPlanet(actor, core.terrainService.getPlanetByName(invasionplanet), position, actor.getOrientation(), None)
+	
+	elif command == 'unknownAbilityPacket' and arg1:
 		packet = UnknownAbilityPacket(arg1)
 		actor.getClient().getSession().write(packet.serialize())
 		actor.sendSystemMessage('Sent UnknownAbilityPacket for ability ' + arg1, 0)

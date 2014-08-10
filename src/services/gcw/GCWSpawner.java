@@ -40,6 +40,7 @@ import resources.objects.tangible.TangibleObject;
  * @author Charon 
  */
 
+@SuppressWarnings("unused")
 public class GCWSpawner extends TangibleObject{
 	
 	private static final long serialVersionUID = 1L;
@@ -62,6 +63,7 @@ public class GCWSpawner extends TangibleObject{
 	private String[] imperialVehicleTemplates1 = new String[]{"imp_invasion_at_st"};
 	private String[] imperialVehicleTemplates2 = new String[]{"imp_invasion_at_st"};
 	private String[] imperialVehicleTemplates3 = new String[]{"imp_invasion_at_st"};
+	
 	
 	private String[] siegeVehicleTemplates   = new String[]{""};
 	private String[] rebelSiegeVehicleTemplates1    = new String[]{"rebel_invasion_hailfire_droid"};
@@ -225,6 +227,12 @@ public class GCWSpawner extends TangibleObject{
 			CreatureObject soldier = (CreatureObject)NGECore.getInstance().spawnService.spawnCreature(soldierTemplate, this.getPlanet().getName(), 0L, this.getPosition().x, this.getPosition().y, this.getPosition().z, this.getOrientation().w, this.getOrientation().x, this.getOrientation().y,this.getOrientation().z,-1);
 			if (spawnerFaction==Factions.Rebel)
 				soldier.setStfName(stfName);
+			if (spawnerFaction==Factions.Imperial){				
+				String[] Prefices = new String[]{"GK-","TK-"};
+				int suffix = 300 + new Random().nextInt(700);
+				String stormtrooperID = Prefices[new Random().nextInt(Prefices.length)]+suffix;
+				soldier.setCustomName(stormtrooperID);
+			}
 			NGECore.getInstance().invasionService.registerInvader(soldier);
 			totalSpawnedUnits++;			
 			soldier.setAttachment("IsInvader","yes");
@@ -268,7 +276,13 @@ public class GCWSpawner extends TangibleObject{
 			String soldierTemplate = soldierTemplates[new Random().nextInt(soldierTemplates.length)];	
 			lastDefender = (CreatureObject)NGECore.getInstance().spawnService.spawnCreature(soldierTemplate, this.getPlanet().getName(), 0L, this.getPosition().x, this.getPosition().y, this.getPosition().z, this.getOrientation().w, this.getOrientation().x, this.getOrientation().y,this.getOrientation().z,-1);
 			if (spawnerFaction==Factions.Rebel)
-				lastDefender.setStfName(stfName);	
+				lastDefender.setStfName(stfName);
+			if (spawnerFaction==Factions.Imperial){				
+				String[] Prefices = new String[]{"GK-","TK-"};
+				int suffix = 300 + new Random().nextInt(700);
+				String stormtrooperID = Prefices[new Random().nextInt(Prefices.length)]+suffix;
+				lastDefender.setCustomName(stormtrooperID);
+			}
 			NGECore.getInstance().invasionService.registerDefender(lastDefender);
 			totalSpawnedUnits++;
 		}

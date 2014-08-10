@@ -21,16 +21,11 @@
  ******************************************************************************/
 package services.ai.states;
 
-import java.util.Random;
-import java.util.Vector;
-
 import main.NGECore;
 import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
-import services.ai.AIActor;
 import services.ai.TurretAIActor;
-import services.ai.states.AIState.StateResult;
 import tools.DevLog;
 
 public class TurretAttackState extends TurretAIState {
@@ -108,12 +103,19 @@ public class TurretAttackState extends TurretAIState {
 		NGECore core = NGECore.getInstance();
 		
 		if (core.aiService.getCheckAI()!=null){
-			if (core.aiService.getCheckAI().getObjectID()==creature.getObjectID())
-				System.out.println("creature.getConditionDamage() " + creature.getConditionDamage() + " creature.getMaximumCondition() " + creature.getMaximumCondition());
+//			if (core.aiService.getCheckAI().getObjectID()==creature.getObjectID())
+//				System.out.println("creature.getConditionDamage() " + creature.getConditionDamage() + " creature.getMaximumCondition() " + creature.getMaximumCondition());
 		}
 		
-		if(creature.getConditionDamage()>=creature.getMaximumCondition())
+		if(creature.getConditionDamage()>=creature.getMaximumCondition()){
+//			String effectFile = "clienteffect/npe_explosion_02.cef";
+//			Vector<CreatureObject> allPlayers = core.simulationService.getAllNearPlayers(300, creature.getPlanet(), creature.getPosition());
+//			for (CreatureObject player : allPlayers){
+//				PlayClientEffectLocMessage cEffMsg = new PlayClientEffectLocMessage(effectFile, creature.getPlanet().getName(), creature.getPosition());
+//				player.getClient().getSession().write(cEffMsg.serialize());
+//			}	
 			return StateResult.DEAD;
+		}
 		
 		if(!creature.isInCombat() || creature.getDefendersList().size() == 0 || actor.getFollowObject() == null)
 		{
@@ -157,7 +159,12 @@ public class TurretAttackState extends TurretAIState {
 				actor.removeDefender(target);
 //				actor.scheduleRecovery();
 //				return StateResult.UNFINISHED;
-
+//				String effectFile = "clienteffect/npe_explosion_02.cef";
+//				Vector<CreatureObject> allPlayers = core.simulationService.getAllNearPlayers(300, creature.getPlanet(), creature.getPosition());
+//				for (CreatureObject player : allPlayers){
+//					PlayClientEffectLocMessage cEffMsg = new PlayClientEffectLocMessage(effectFile, creature.getPlanet().getName(), creature.getPosition());
+//					player.getClient().getSession().write(cEffMsg.serialize());
+//				}				
 				return StateResult.FINISHED;
 			}
 		}

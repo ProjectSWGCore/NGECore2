@@ -83,10 +83,9 @@ public class AIActor {
 	private long waitStartTime = 0L;
 	private AIState intendedPrimaryAIState;
 	private Point3D lastPositionBeforeStateChange;
-<<<<<<< HEAD
-	private ScheduledFuture movementFuture;
-	private ScheduledFuture recoveryFuture;
-	private ScheduledFuture despawnFuture;
+	private ScheduledFuture<?> movementFuture;
+	private ScheduledFuture<?> recoveryFuture;
+	private ScheduledFuture<?> despawnFuture;
 	private boolean patrolLoop = true; // default
 	private TangibleObject lastTarget = null;
 	private Point3D repositionLocation;
@@ -96,11 +95,6 @@ public class AIActor {
 	private boolean actorAlive = true;
 	private int progressionMarker = 0;
 	private boolean AIactive = true;
-=======
-	private ScheduledFuture<?> movementFuture;
-	private ScheduledFuture<?> recoveryFuture;
-	private ScheduledFuture<?> despawnFuture;
->>>>>>> origin/master
 
 	public AIActor(CreatureObject creature, Point3D spawnPosition, ScheduledExecutorService scheduler) {
 		actorID = autoActorID++;
@@ -383,10 +377,12 @@ public class AIActor {
 					destroyActor();
 					return;
 				}
-				if (caughtAIState.getClass().equals(currentState.getClass()))
-					doStateAction(caughtAIState.move(AIActor.this));
+				if (caughtAIState!=null && currentState!=null){
+					if (caughtAIState.getClass().equals(currentState.getClass()))
+						doStateAction(caughtAIState.move(AIActor.this));
+				}
 			} catch (Exception e) {
-				System.out.println("Exception in scheduleMovement");
+				//System.out.println("Exception in scheduleMovement");
 				e.printStackTrace();
 			}
 		}, 500, TimeUnit.MILLISECONDS);
@@ -534,13 +530,13 @@ public class AIActor {
 				try {
 					damageMap.clear();
 					followObject = null;
-					creature.setAttachment("AI", null);
-					NGECore.getInstance().objectService.destroyObject(creature);
+					NGECore.getInstance().objectService.destroyObject(creature);					
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
-		}, 2, TimeUnit.MINUTES);
+		//}, 2, TimeUnit.MINUTES);
+	}, 10, TimeUnit.SECONDS);
 	}
 	
 	public void destroyActor(){
@@ -777,5 +773,28 @@ public class AIActor {
 		movementPoints.clear();
 		actorAlive = false; // stop moving
 		AIactive = false; // stop reacting to attacks
+	}
+	
+	public void cloneActor(AIActor oldActor) {
+		AIactive = oldActor.isAIactive();
+		isStalking = oldActor.isStalking();
+		patrolPoints = oldActor.getPatrolPoints();
+		loiterDestType = oldActor.getLoiterDestType();
+		loiterDestination = oldActor.getLoiterDestination();
+		minLoiterDist = oldActor.getMinLoiterDist();
+		maxLoiterDist = oldActor.getMaxLoiterDist();
+		waitState = oldActor.getWaitState();
+		waitStartTime = oldActor.getWaitStartTime();
+		patrolLoop =oldActor.isPatrolLoop();
+		intendedPrimaryAIState = oldActor.getIntendedPrimaryAIState();
+		try {
+			setCurrentState(intendedPrimaryAIState.getClass().newInstance());
+		} catch (InstantiationException e) {
+			System.out.println("Aiactor cloning failed InstantiationException");
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			System.out.println("Aiactor cloning failed IllegalAccessException");
+			e.printStackTrace();
+		}		
 	}
 }

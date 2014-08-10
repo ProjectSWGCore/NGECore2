@@ -41,5 +41,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('gcw_atst_attack_tower') #gcw_atst_attack_tower #rangedShot
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('imp_invasion_at_st', mobileTemplate)
+	core.spawnService.addMobileTemplate('imp_invasion_disabled_atst', mobileTemplate)
 	return

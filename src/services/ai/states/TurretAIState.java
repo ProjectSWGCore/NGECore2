@@ -23,15 +23,10 @@ package services.ai.states;
 
 import java.util.NoSuchElementException;
 import java.util.Vector;
-
 import main.NGECore;
 import engine.resources.scene.Point3D;
-import engine.resources.scene.Quaternion;
-import resources.common.SpawnPoint;
 import resources.objects.cell.CellObject;
-import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
-import resources.objects.weapon.WeaponObject;
 import services.ai.TurretAIActor;
 
 public abstract class TurretAIState {
@@ -69,7 +64,7 @@ public abstract class TurretAIState {
 		boolean finished = false;
 		float dx, dz, newX = 0, newY = 0, newZ = 0;
 		Vector<Point3D> movementPoints = actor.getMovementPoints();
-		Vector<Point3D> patrolPoints = actor.getPatrolPoints();
+		//Vector<Point3D> patrolPoints = actor.getPatrolPoints();
 		CellObject cell = null;
 		//while(!finished && movementPoints.size() != 0) {
 		
@@ -187,7 +182,7 @@ public abstract class TurretAIState {
 		float maxDistance = stopDistance;
 		boolean finished = false;
 		float dx, dz, newX = 0, newY = 0, newZ = 0;
-		Vector<Point3D> movementPoints = actor.getMovementPoints();
+		//Vector<Point3D> movementPoints = actor.getMovementPoints();
 		CellObject cell = null;
 		
 			targetPosition = actor.getLoiterDestination(); 

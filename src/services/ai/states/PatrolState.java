@@ -21,10 +21,8 @@
  ******************************************************************************/
 package services.ai.states;
 
-import main.NGECore;
 import resources.objects.creature.CreatureObject;
 import services.ai.AIActor;
-import services.ai.states.AIState.StateResult;
 import tools.DevLog;
 
 public class PatrolState extends AIState {

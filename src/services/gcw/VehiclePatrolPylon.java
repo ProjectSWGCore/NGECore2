@@ -26,6 +26,7 @@ import java.util.Vector;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
@@ -38,6 +39,7 @@ import resources.objects.tangible.TangibleObject;
  * @author Charon 
  */
 
+@SuppressWarnings("unused")
 public class VehiclePatrolPylon extends TangibleObject{
 	
 	private static final long serialVersionUID = 1L;

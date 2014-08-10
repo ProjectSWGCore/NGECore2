@@ -46,6 +46,7 @@ import resources.common.OutOfBand;
 import resources.common.SpawnPoint;
 import resources.datatables.FactionStatus;
 import resources.datatables.Factions;
+import resources.datatables.GalaxyStatus;
 import resources.datatables.GcwType;
 import resources.datatables.Options;
 import resources.datatables.Posture;
@@ -77,6 +78,7 @@ import engine.resources.service.INetworkRemoteEvent;
  * @author Charon 
  */
 
+@SuppressWarnings("unused")
 public class InvasionService implements INetworkDispatch {
 	
 	private NGECore core;	
@@ -114,7 +116,6 @@ public class InvasionService implements INetworkDispatch {
 	private boolean ph2_message6sent = false;
 	private boolean ph2_message7sent = false;
 	
-	//private ScheduledFuture<?> eventManagerTask = null; 
 	private ScheduledFuture<?> defendingGeneralTask = null;
 	private Map<CreatureObject, Integer> generalWarningLevelMap = new ConcurrentHashMap<CreatureObject, Integer>();
 	
@@ -138,15 +139,26 @@ public class InvasionService implements INetworkDispatch {
 	public InvasionService(final NGECore core) {
 		this.core = core;	
 		
+		// Utility code
 //		Executors.newSingleThreadScheduledExecutor().schedule(() -> {
 //			arrangePylons(new Point3D(-1238.13F, 56, -3812.84F),100);
 //		}, 20, TimeUnit.SECONDS);	
 		
-		// Local code to schedule a 20 minutes long phase2 invasion
+		
+		
+		// Local code to schedule a 20-30 minutes long phase2 invasion
 		Executors.newSingleThreadScheduledExecutor().schedule(() -> {
 			
 			//testPylons();
 			// temp time reference, will be server time later
+			while (NGECore.getInstance().getGalaxyStatus()!=GalaxyStatus.Online){
+				try {
+					Thread.sleep(1000);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			
 			temptimestartreference = System.currentTimeMillis();
 			scheduleInvasionManager();
 			invasionScheduled=true;
@@ -190,10 +202,13 @@ public class InvasionService implements INetworkDispatch {
 		if (invasionLocation>2)
 			invasionLocation=0; // Rotate
 		
+		// Random for now
+		invasionLocation = new Random().nextInt(2);
+		
 		invasionPlanet = getInvasionPlanet(invasionLocation).getName();
 		
-		invasionLocation=InvasionLocation.Dearic;
-		invasionPlanet="talus";
+//		invasionLocation=InvasionLocation.Dearic;
+//		invasionPlanet="talus";
 		
 //		invasionLocation=InvasionLocation.Keren;
 //		invasionPlanet="naboo";
@@ -217,9 +232,7 @@ public class InvasionService implements INetworkDispatch {
 		if (invasionLocation==InvasionLocation.Dearic){ 
 			spawnPylonsDearic();			
 		}
-		
-		
-				
+						
 		spawnDefensiveAssets();
 		spawnOffensiveAssets();
 		
@@ -258,7 +271,7 @@ public class InvasionService implements INetworkDispatch {
 		}
 		
 		// Message at 15:00 -> 900000 seconds
-		if (invasionPhase==1 && System.currentTimeMillis()>temptimestartreference + 150000 && ! ph1_message2sent){
+		if (invasionPhase==1 && System.currentTimeMillis()>temptimestartreference + 50000 && ! ph1_message2sent){
 			send_Phase1_InvaderMessage2();
 			send_Phase1_DefenderMessage2();
 			ph1_message2sent = true;
@@ -266,7 +279,7 @@ public class InvasionService implements INetworkDispatch {
 		}
 		
 		// Message at 30:00 -> 1800000 seconds
-		if (invasionPhase==1 && System.currentTimeMillis()>temptimestartreference + 200000 && ! ph2_message1sent){
+		if (invasionPhase==1 && System.currentTimeMillis()>temptimestartreference + 60000 && ! ph2_message1sent){
 			invasionPhase=2;
 			preparePhase2();	
 			System.out.println("PHASE 2");
@@ -277,7 +290,7 @@ public class InvasionService implements INetworkDispatch {
 		}
 		
 		// Message at 45:00 -> 2700000 seconds
-		if (invasionPhase==2 && System.currentTimeMillis()>temptimestartreference + 400000 && ! ph2_message2sent){ // 1200000
+		if (invasionPhase==2 && System.currentTimeMillis()>temptimestartreference + 900000 && ! ph2_message2sent){ // 1200000
 			send_Phase2_InvaderMessage2();
 			send_Phase2_DefenderMessage2();
 			ph2_message2sent = true;
@@ -543,9 +556,7 @@ public class InvasionService implements INetworkDispatch {
 			disabledVehicles.put(disabledVehicleRegistryCounter++, registrant);
 		}
 	}
-	
-	
-	
+		
 	public void wipeInvaders(Map<Integer,CreatureObject> invaderMap){
 				
 		for (BuildingObject camp : offensiveCamps){
@@ -2404,5 +2415,17 @@ public class InvasionService implements INetworkDispatch {
 		public static final int Bestine = 1;
 		public static final int Dearic = 2;
 		
+	}
+
+	public int getInvasionLocation() {
+		return invasionLocation;
+	}
+	
+	public String getInvasionPlanetName() {
+		return getInvasionPlanet(invasionLocation).getName();
+	}
+
+	public void setInvasionLocation(int invasionLocation) {
+		this.invasionLocation = invasionLocation;
 	}	
 }

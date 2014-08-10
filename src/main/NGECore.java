@@ -92,7 +92,6 @@ import services.equipment.EquipmentService;
 import services.gcw.FactionService;
 import services.gcw.GCWService;
 import services.gcw.InvasionService;
-import services.gcw.InvasionService3;
 import services.GuildService;
 import services.LoginService;
 import services.map.MapService;
@@ -155,6 +154,7 @@ public class NGECore {
 	private String motd = "";
 	private volatile boolean isShuttingDown = false;
 	private long galacticTime = System.currentTimeMillis();
+	private int galaxyStatus = -1;
 	
 	private ConcurrentHashMap<IoSession, Client> clients = new ConcurrentHashMap<IoSession, Client>();
 	
@@ -558,7 +558,6 @@ public class NGECore {
 		
 		browserService = new BrowserService(this);
 		//battlefieldService = new BattlefieldService(this);
-		devService = new DevService(this);
 		
 		DevLogQueuer devLogQueuer = new DevLogQueuer();
 		
@@ -644,6 +643,7 @@ public class NGECore {
 	
 	public void setGalaxyStatus(int statusId) {
 		
+		galaxyStatus = statusId;
 		int galaxyId = config.getInt("GALAXY_ID");
 		
 		try {
@@ -655,6 +655,10 @@ public class NGECore {
 			e.printStackTrace();
 		}
 		
+	}
+	
+	public int getGalaxyStatus() {
+		return galaxyStatus;
 	}
 	
 	/*

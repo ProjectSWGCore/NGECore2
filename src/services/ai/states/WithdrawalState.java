@@ -3,7 +3,6 @@ package services.ai.states;
 import resources.datatables.Options;
 import resources.objects.creature.CreatureObject;
 import services.ai.AIActor;
-import services.ai.states.AIState.StateResult;
 import tools.DevLog;
 
 public class WithdrawalState extends AIState {

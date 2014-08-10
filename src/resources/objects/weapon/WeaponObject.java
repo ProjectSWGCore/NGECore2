@@ -203,55 +203,10 @@ public class WeaponObject extends TangibleObject implements Serializable {
 				return (int) (((getMaxDamage() + getElementalDamage()  + getMinDamage() + getElementalDamage()) / 2 + getElementalDamage()) * (1 / getAttackSpeed()));
 			} else {
 				return (int) (((getMaxDamage() + getMinDamage()) / 2 ) * (1 / getAttackSpeed()));
-<<<<<<< HEAD
-		} else
-				return 0;
-	}
-
-	public int getWeaponType() {
-		if (getStringAttribute("cat_wpn_damage.wpn_category") == null) {
-			System.err.println("Error: Weapon Type not defined for " + getTemplate());
-			return 6;
-		}
-		
-		return Integer.parseInt(getStringAttribute("cat_wpn_damage.wpn_category").replace("@obj_attr_n:wpn_category_", ""));
-	}
-	
-	public void setWeaponType(int weaponType) {
-		setStringAttribute("cat_wpn_damage.wpn_category", "@obj_attr_n:wpn_category_" + weaponType);
-	}
-
-	@Override
-	public void sendBaselines(Client destination) {
-		
-		if(destination == null || destination.getSession() == null)
-			return;
-		
-		destination.getSession().write(messageBuilder.buildBaseline3());
-		destination.getSession().write(messageBuilder.buildBaseline6());
-		destination.getSession().write(messageBuilder.buildBaseline8());
-		destination.getSession().write(messageBuilder.buildBaseline9());
-
-		
-	}
-
-	public float getAttackSpeed() {
-		return getFloatAttribute("cat_wpn_damage.wpn_attack_speed");
-	}
-
-	public void setAttackSpeed(float attackSpeed) {
-		if((int) attackSpeed != attackSpeed)
-			setFloatAttribute("cat_wpn_damage.wpn_attack_speed", attackSpeed);
-		else
-			setIntAttribute("cat_wpn_damage.wpn_attack_speed", (int) attackSpeed);
-		
-		setIntAttribute("cat_wpn_damage.dps", getDamagePerSecond());
-=======
 			}
 		} else {
 			return 0;
 		}
->>>>>>> origin/master
 	}
 	
 	public boolean isMelee() {

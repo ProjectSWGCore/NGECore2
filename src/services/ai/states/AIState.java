@@ -789,7 +789,7 @@ public abstract class AIState {
 					if (NGECore.getInstance().simulationService.getAllNearSameFactionNPCs(7, creature).size()>=4 && NGECore.getInstance().invasionService.getInvasionPhase()!=3){
 						actor.setAIactive(false); // switch off auto-target-recognition to counter lag
 						actor.setCurrentState(new IdleState());
-						System.out.println("AI switched off!");
+						//System.out.println("AI switched off!");
 						return;						
 					}
 					

@@ -39,6 +39,8 @@ public class AttackState extends AIState {
 		DevLog.debugoutai(actor, "Charon", "AI Attack State", "onEnter");
 		
 		CreatureObject creature = actor.getCreature();
+		if (creature == null || actor==null)
+			return StateResult.DEAD;
 		DevLog.debugoutai(actor, "Charon", "AI Attack State", "creature.isInCombat() " + creature.isInCombat());
 		DevLog.debugoutai(actor, "Charon", "AI Attack State", "creature.getDefendersList().size() == 0 " + (creature.getDefendersList().size() == 0));
 		DevLog.debugoutai(actor, "Charon", "AI Attack State", "actor.getFollowObject() == null " + (actor.getFollowObject() == null));
@@ -152,23 +154,9 @@ public class AttackState extends AIState {
 		NGECore core = NGECore.getInstance();
 		if(creature.getPosture() == 14)
 			return StateResult.DEAD;
-<<<<<<< HEAD
 		
 		
 		TangibleObject target = actor.getFollowObject();
-=======
-		if(!creature.isInCombat() || creature.getDefendersList().size() == 0 || actor.getFollowObject() == null)
-		{
-			if (creature.getLookAtTarget() != 0)
-				creature.setLookAtTarget(0);
-			if (creature.getIntendedTarget() != 0)
-				creature.setIntendedTarget(0);
-			actor.setFollowObject(null);
-			actor.setCurrentState(new RetreatState());
-			return StateResult.FINISHED;
-		}
-		CreatureObject target = actor.getFollowObject();
->>>>>>> origin/master
 		if(target != actor.getHighestDamageDealer() && actor.getHighestDamageDealer() != null) {
 			actor.setFollowObject(actor.getHighestDamageDealer());
 			target = actor.getFollowObject();
@@ -178,7 +166,6 @@ public class AttackState extends AIState {
 			actor.scheduleRecovery();
 			return StateResult.UNFINISHED;
 		}
-<<<<<<< HEAD
 		
 		// If AI has no LOS to target, reposition it
 		if (!core.simulationService.checkLineOfSight(target,creature)){
@@ -198,22 +185,9 @@ public class AttackState extends AIState {
 			creature.setIntendedTarget(0);
 			actor.setFollowObject(null);		
 			if (actor.getIntendedPrimaryAIState().getClass().equals(PatrolState.class))
-				actor.setCurrentState(new RetreatState()); // Should be Patrol state	
+				actor.setCurrentState(new RetreatState()); 	
 			else {
-				actor.setCurrentState(new RetreatState()); // Should be Patrol state
-=======
-		if(target.getPosture() == 13 || target.getPosture() == 14 || target.isInStealth()) {
- 
-			actor.setFollowObject(actor.getHighestDamageDealer());			
-			target = actor.getFollowObject();
-			if(target == null)
-			{
-				if (creature.getLookAtTarget() != 0)
-					creature.setLookAtTarget(0);
-				if (creature.getIntendedTarget() != 0)
-					creature.setIntendedTarget(0);
-				
->>>>>>> origin/master
+				actor.setCurrentState(new RetreatState()); 
 			}
 			return StateResult.FINISHED;
 		}
@@ -235,9 +209,9 @@ public class AttackState extends AIState {
 				actor.removeDefender(target);
 
 				if (actor.getIntendedPrimaryAIState().getClass().equals(PatrolState.class))
-					actor.setCurrentState(new RetreatState()); // Should be Patrol state	
+					actor.setCurrentState(new RetreatState()); 	
 				else {
-					actor.setCurrentState(new RetreatState()); // Should be Patrol state
+					actor.setCurrentState(new RetreatState()); 
 				}
 				return StateResult.FINISHED;
 			}
@@ -262,13 +236,12 @@ public class AttackState extends AIState {
 				actor.removeDefender(target);
 
 				if (actor.getIntendedPrimaryAIState().getClass().equals(PatrolState.class))
-					actor.setCurrentState(new RetreatState()); // Should be Patrol state	
+					actor.setCurrentState(new RetreatState()); 	
 				else {
-					actor.setCurrentState(new RetreatState()); // Should be Patrol state
+					actor.setCurrentState(new RetreatState()); 
 				}
 				return StateResult.FINISHED;
-			}
-			
+			}			
 		}
 		
 		if(target.getWorldPosition().getDistance(creature.getWorldPosition()) > maxDistance) {
@@ -282,10 +255,9 @@ public class AttackState extends AIState {
 		// Pet
 //		if (creature.getOwnerId()>0)
 //			attacks = creature.getSpecialAttacks();
-		if (creature.getLookAtTarget() != target.getObjectId())
-			creature.setLookAtTarget(target.getObjectId());
-		if (creature.getIntendedTarget() != target.getObjectId())
-			creature.setIntendedTarget(target.getObjectId());
+		
+		creature.setLookAtTarget(target.getObjectId());
+		creature.setIntendedTarget(target.getObjectId());
 		
 		if (attacks==null) {		
 		//if(attacks.size() == 0) {

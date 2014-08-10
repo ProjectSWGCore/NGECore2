@@ -21,9 +21,7 @@
  ******************************************************************************/
 package services;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -38,26 +36,15 @@ import org.python.core.PyObject;
 import resources.buffs.Buff;
 import resources.buffs.DamageOverTime;
 import resources.common.FileUtilities;
-import resources.common.OutOfBand;
-import resources.datatables.DisplayType;
-import resources.datatables.Options;
 import resources.datatables.Posture;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
 import resources.objects.player.PlayerObject;
-import resources.objects.weapon.WeaponObject;
-import resources.skills.SkillMod;
-import services.ai.AIActor;
-import services.ai.states.FollowState;
-import services.command.CombatCommand;
-import tools.DevLog;
 import main.NGECore;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.resources.common.CRC;
 import engine.resources.objects.SWGObject;
-import engine.resources.scene.Planet;
-import engine.resources.scene.Point3D;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
@@ -199,16 +186,8 @@ public class BuffService implements INetworkDispatch {
                         		if (buff.getDuration() != -1.0)
                         			if (otherBuff.getRemainingDuration() > buff.getDuration() && otherBuff.getStacks() >= otherBuff.getMaxStacks())
                         				return null;
-<<<<<<< HEAD
-                        } 
-//                        else {
-//                        	removeBuffFromCreature(target, otherBuff); // Seems more logical ToDo: Verify!!!
-//                        }
-                        removeBuffFromCreature(target, otherBuff); // Moved to else, otherwise buff will not stack
-=======
                         }
                         removeBuffFromCreature(target, otherBuff);
->>>>>>> origin/master
                         break;
                 } else 
                 {
@@ -225,13 +204,13 @@ public class BuffService implements INetworkDispatch {
         	if(buff.getEffect3Name().length() > 0) core.skillModService.addSkillMod(target, buff.getEffect3Name(), (int) buff.getEffect3Value());
         	if(buff.getEffect4Name().length() > 0) core.skillModService.addSkillMod(target, buff.getEffect4Name(), (int) buff.getEffect4Value());
         	if(buff.getEffect5Name().length() > 0) core.skillModService.addSkillMod(target, buff.getEffect5Name(), (int) buff.getEffect5Value());
-        	
-        	if (buffName.equals("gcw_fatigue")){
-        		if (FileUtilities.doesFileExist("scripts/buffs/" + buffName + ".py")) {
-        			core.scriptService.callScript("scripts/buffs/", buffName, "add", core, buffer, buff);
-        		}
-        	}
 //		}
+        	
+    	if (buffName.equals("gcw_fatigue")){
+    		if (FileUtilities.doesFileExist("scripts/buffs/" + buffName + ".py")) {
+    			core.scriptService.callScript("scripts/buffs/", buffName, "add", core, buffer, buff);
+    		}
+    	}
 		
 		target.addBuff(buff);
 		
@@ -304,21 +283,6 @@ public class BuffService implements INetworkDispatch {
 /*         if(FileUtilities.doesFileExist("scripts/buffs/" + buff.getBuffName() + ".py")) core.scriptService.callScript("scripts/buffs/", buff.getBuffName(), "remove", core, creature, buff);
          else
          {*/
-<<<<<<< HEAD
-         	if(buff.getEffect1Name().length() > 0) core.skillModService.deductSkillMod(creature, buff.getEffect1Name(), (int) buff.getEffect1Value());
-         	if(buff.getEffect2Name().length() > 0) core.skillModService.deductSkillMod(creature, buff.getEffect2Name(), (int) buff.getEffect2Value());
-         	if(buff.getEffect1Name().length() > 0) core.skillModService.deductSkillMod(creature, buff.getEffect3Name(), (int) buff.getEffect3Value());
-         	if(buff.getEffect1Name().length() > 0) core.skillModService.deductSkillMod(creature, buff.getEffect4Name(), (int) buff.getEffect4Value());
-         	if(buff.getEffect1Name().length() > 0) core.skillModService.deductSkillMod(creature, buff.getEffect5Name(), (int) buff.getEffect5Value());
-
-         	if (buff.getBuffName().equals("gcw_fatigue")){
-        		if (FileUtilities.doesFileExist("scripts/buffs/" + buff.getBuffName() + ".py")) {
-        			core.scriptService.callScript("scripts/buffs/", buff.getBuffName(), "remove", core, creature, buff);
-        		}
-        	}
-         //         }
-=======
->>>>>>> origin/master
          	
          	if(buff.getEffect1Name().length() > 0)
          	{

@@ -133,6 +133,7 @@ import services.chat.ChatRoom;
 import services.equipment.EquipmentService;
 import services.gcw.GCWPylon;
 import services.gcw.GCWSpawner;
+import services.spawn.MobileTemplate;
 import services.sui.SUIWindow;
 import services.sui.SUIWindow.SUICallback;
 import services.sui.SUIWindow.Trigger;
@@ -572,19 +573,24 @@ public class ObjectService implements INetworkDispatch {
 		
 		if (object.getAttachment("AI") != null && object.getAttachment("AI") instanceof AIActor && ((AIActor) object.getAttachment("AI")).getMobileTemplate().getRespawnTime() > 0) {
 			final long objectId = object.getObjectID();
-			final String Template = object.getTemplate();
+			final MobileTemplate Template = ((AIActor) object.getAttachment("AI")).getMobileTemplate();
 			final Planet planet = object.getPlanet();
 			final Point3D position = object.getPosition();
+			final Point3D spawnPosition = ((AIActor) object.getAttachment("AI")).getSpawnPosition();			
 			final Quaternion orientation = object.getOrientation();
-			final long cellId = ((object.getContainer() == null) ? 0L : object.getContainer().getObjectID());
+			// final long cellId = ((object.getContainer() == null) ? 0L : object.getContainer().getObjectID());
+			CellObject cellO = spawnPosition.getCell();
+			final long cellId = ((cellO == null) ? 0L : cellO.getObjectID());
 			final short level = ((object instanceof CreatureObject) ? ((CreatureObject) object).getLevel() : (short) 0);
-			
 			scheduler.schedule(new Runnable() {
 				
 				@Override
 				public void run() {
 					try {
-						NGECore.getInstance().spawnService.spawnCreature(Template, objectId, planet.getName(), cellId, position.x, position.y, position.z, orientation.w, orientation.x, orientation.y, orientation.z, level);
+						CreatureObject newObject = NGECore.getInstance().spawnService.spawnCreature(Template, 0, planet.getName(), cellId, spawnPosition.x, spawnPosition.y, spawnPosition.z, orientation.w, orientation.x, orientation.y, orientation.z, level);
+						AIActor newAIActor = (AIActor)newObject.getAttachment("AI");
+						newAIActor.cloneActor(((AIActor) object.getAttachment("AI")));
+						//object.setAttachment("AI", null);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -592,7 +598,7 @@ public class ObjectService implements INetworkDispatch {
 				
 			}, ((AIActor) object.getAttachment("AI")).getMobileTemplate().getRespawnTime(), TimeUnit.SECONDS);
 		}
-		
+				
 		String filePath = "scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", "") + object.getTemplate().split("shared_" , 2)[1].replace(".iff", "") + ".py";
 		
 		if (FileUtilities.doesFileExist(filePath)) {

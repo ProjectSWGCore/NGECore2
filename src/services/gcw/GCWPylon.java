@@ -21,20 +21,15 @@
  ******************************************************************************/
 package services.gcw;
 
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
 import main.NGECore;
-import protocol.swg.PlayClientEffectObjectMessage;
 import protocol.swg.PlayClientEffectObjectTransformMessage;
-import protocol.swg.UpdateContainmentMessage;
 import engine.clients.Client;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -48,7 +43,6 @@ import resources.objects.installation.InstallationObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 import services.ai.TurretAIActor;
-import services.gcw.GCWSpawner.PatrolRoute;
 
 /** 
  * @author Charon 
@@ -147,10 +141,10 @@ public class GCWPylon extends TangibleObject{
 		//if (determinePylonLevel()==0)
 			//return;
 		
-//		resourceFilling = 100;
-//		spawnLevel = 3;
-		resourceFilling = 10;
-		spawnLevel = 1;
+		resourceFilling = 100;
+		spawnLevel = 3;
+//		resourceFilling = 10;
+//		spawnLevel = 1;
 		
 		switch (pylonType){
 			case PylonType.Barricade: createBarricade();

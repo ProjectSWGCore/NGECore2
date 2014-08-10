@@ -32,13 +32,14 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.stream.Collectors;
 
-import protocol.swg.UpdateContainmentMessage;
 import resources.common.collidables.CollidableBox;
 import resources.common.collidables.CollidableCircle;
 import resources.datatables.Options;
@@ -76,8 +77,14 @@ public class SpawnService {
 	
 	public CreatureObject spawnCreature(String template, long objectId, String planetName, long cellId, float x, float y, float z, float qW, float qX, float qY, float qZ, short level) {
 		
-		Planet planet = core.terrainService.getPlanetByName(planetName);
 		MobileTemplate mobileTemplate = mobileTemplates.get(template);
+		return spawnCreature(mobileTemplate, objectId, planetName, cellId, x, y, z, qW, qX, qY, qZ, level);
+	}
+	
+	public CreatureObject spawnCreature(MobileTemplate mobileTemplate, long objectId, String planetName, long cellId, float x, float y, float z, float qW, float qX, float qY, float qZ, short level) {
+		
+		Planet planet = core.terrainService.getPlanetByName(planetName);
+		
 		if(planet == null || mobileTemplate == null)
 			return null;
 		
@@ -167,7 +174,6 @@ public class SpawnService {
 				defaultWeapon.setStfFilename("theme_park_name");
 				defaultWeapon.setStfName("at_st");
 			}
-			
 		}
 		
 		if (weaponTemplates.get(rnd).getMinDamage() != 0 && weaponTemplates.get(rnd).getMaxDamage() != 0) {
@@ -178,14 +184,8 @@ public class SpawnService {
 			defaultWeapon.setMinDamage(creature.getLevel() * 22);
 		}
 		
-		if (!defaultWeapon.getTemplate().contains("atst_ranged"))
-			creature.addObjectToEquipList(defaultWeapon);
-		if (!defaultWeapon.getTemplate().contains("atst_ranged"))
-			creature.add(defaultWeapon);
-		else {
-			UpdateContainmentMessage updateContainmentMessage= new UpdateContainmentMessage(defaultWeapon.getObjectID(), creature.getObjectID(), 4);
-			creature.notifyClients(updateContainmentMessage.serialize(),true);
-		}
+		creature.addObjectToEquipList(defaultWeapon);
+		creature.add(defaultWeapon);
 		creature.setWeaponId(defaultWeapon.getObjectID());
 		creature.addObjectToEquipList(inventory);
 		creature.add(inventory);
@@ -221,8 +221,7 @@ public class SpawnService {
 				armor = 6000;
 			core.skillModService.addSkillMod(creature, "expertise_innate_protection_all", armor);
 		}
-<<<<<<< HEAD
-		
+
 		if (mobileTemplate.isAIEnabled()){
 			if (!mobileTemplate.isNoAI()){ // NoAI is for QuestGivers that don't fight to save resources
 				AIActor actor = new AIActor(creature, creature.getPosition(), scheduler);
@@ -236,18 +235,13 @@ public class SpawnService {
 		}
 		
 		creature.setAttachment("radial_filename", "npc/mobile");
-=======
 
-		AIActor actor = new AIActor(creature, creature.getPosition(), scheduler);
-		creature.setAttachment("AI", actor);
 		if (mobileTemplate.getConversationFileName().length()>0){
 			creature.setAttachment("radial_filename", "object/conversation");
 			creature.setAttachment("conversationFile", mobileTemplate.getConversationFileName());
 			}
 		else  creature.setAttachment("radial_filename", "npc/mobile");
-		actor.setMobileTemplate(mobileTemplate);
->>>>>>> origin/master
-		
+
 		
 		if(cell == null) {
 			core.simulationService.add(creature, x, z, true);
@@ -756,6 +750,15 @@ public class SpawnService {
 	
 	public MobileTemplate getMobileTemplate(String template) {
 		return mobileTemplates.get(template);
+	}
+	
+	public String getMobileTemplateName(MobileTemplate mobileTemplate) {
+		for (Entry<String, MobileTemplate> entry : mobileTemplates.entrySet()) {
+	        if (mobileTemplate.equals(entry.getValue())) {
+	            return entry.getKey();
+	        }
+	    }
+	    return null;
 	}
 	
 }

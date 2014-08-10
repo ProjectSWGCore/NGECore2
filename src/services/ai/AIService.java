@@ -244,7 +244,7 @@ public class AIService {
 		return (p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y) + (p2.z - p1.z) * (p2.z - p1.z);
 	}
 	
-	public void waitForEvent(AIActor actor, INetworkDispatch service, String serviceMethodName, boolean expectedValue, Class nextStateClass){
+	public void waitForEvent(AIActor actor, INetworkDispatch service, String serviceMethodName, boolean expectedValue, Class<?> nextStateClass){
 		
 		final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);	
 		final Future<?>[] wfe = {null};
@@ -268,7 +268,7 @@ public class AIService {
 		}, 10, 3000, TimeUnit.MILLISECONDS);
 	}
 	
-	public void waitForEvent(AIActor actor, INetworkDispatch service, String serviceMethodName, int expectedValue, Class nextStateClass){
+	public void waitForEvent(AIActor actor, INetworkDispatch service, String serviceMethodName, int expectedValue, Class<?> nextStateClass){
 		final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);	
 		final Future<?>[] wfe = {null};
 		wfe[0] = scheduler.scheduleAtFixedRate(new Runnable() {
@@ -300,7 +300,6 @@ public class AIService {
 			public void run() {
 				try {
 					boolean condition = true;
-					Object[] params; //The parameters for my method	
 					Class<?> noParams[] = {};
 					Method m = service.getClass().getMethod(serviceMethodName, noParams);
 					m.invoke(service); 
