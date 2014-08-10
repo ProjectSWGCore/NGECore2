@@ -83,159 +83,130 @@ public class SWGSet<E> implements Set<E>, Serializable {
 		}
 	}
 	
-	public boolean add(E e) {
-		synchronized(objectMutex) {
-			if (valid(e)) {
-				if (set.add(e)) {
-					queue(item(1, e, null, true, false));
-					return true;
-				}
+	public synchronized boolean add(E e) {
+		if (valid(e)) {
+			if (set.add(e)) {
+				queue(item(1, e, null, true, false));
+				return true;
 			}
-			
+		}
+		
+		return false;
+	}
+	
+	public synchronized boolean addAll(Collection<? extends E> c) {
+		List<byte[]> buffer = new ArrayList<byte[]>();
+		
+		for (E e : c) {
+			if (valid(e) && set.add(e)) {
+				buffer.add(item(1, e, null, true, false));
+			}
+		}
+		
+		if (buffer.size() > 0) {
+			queue(buffer);
+			return true;
+		} else {
 			return false;
 		}
 	}
 	
-	public boolean addAll(Collection<? extends E> c) {
-		synchronized(objectMutex) {
-			List<byte[]> buffer = new ArrayList<byte[]>();
-			
-			for (E e : c) {
-				if (valid(e) && set.add(e)) {
-					buffer.add(item(1, e, null, true, false));
-				}
+	public synchronized void clear() {
+		set.clear();
+		queue(item(2, null, null, false, false));
+	}
+	
+	public synchronized boolean contains(Object o) {
+		return set.contains(o);
+	}
+	
+	public synchronized boolean containsAll(Collection<?> c) {
+		return set.containsAll(c);
+	}
+	
+	public synchronized boolean isEmpty() {
+		return set.isEmpty();
+	}
+	
+	public synchronized Iterator<E> iterator() {
+		return set.iterator();
+	}
+	
+	public synchronized boolean remove(Object e) {
+		if (valid(e) && set.remove(e)) {
+			queue(item(0, e, null, true, false));
+			return true;
+		}
+		return false;
+	}
+	
+	public synchronized boolean removeAll(Collection<?> c) {
+		List<byte[]> buffer = new ArrayList<byte[]>();
+		
+		for (Object o : c) {
+			if (valid(o) && set.remove(o)) {
+				buffer.add(item(0, o, null, true, false));
 			}
-			
-			if (buffer.size() > 0) {
-				queue(buffer);
-				return true;
-			} else {
-				return false;
-			}
 		}
-	}
-	
-	public void clear() {
-		synchronized(objectMutex) {
-			set.clear();
-			queue(item(2, null, null, false, false));
-		}
-	}
-	
-	public boolean contains(Object o) {
-		synchronized(objectMutex) {
-			return set.contains(o);
-		}
-	}
-	
-	public boolean containsAll(Collection<?> c) {
-		synchronized(objectMutex) {
-			return set.containsAll(c);
-		}
-	}
-	
-	public boolean isEmpty() {
-		synchronized(objectMutex) {
-			return set.isEmpty();
-		}
-	}
-	
-	public Iterator<E> iterator() {
-		synchronized(objectMutex) {
-			return set.iterator();
-		}
-	}
-	
-	public boolean remove(Object e) {
-		synchronized(objectMutex) {
-			if (valid(e) && set.remove(e)) {
-				queue(item(0, e, null, true, false));
-				return true;
-			}
-			
+		
+		if (buffer.size() > 0) {
+			queue(buffer);
+			return true;
+		} else {
 			return false;
 		}
 	}
 	
-	public boolean removeAll(Collection<?> c) {
-		synchronized(objectMutex) {
-			List<byte[]> buffer = new ArrayList<byte[]>();
-			
-			for (Object o : c) {
-				if (valid(o) && set.remove(o)) {
-					buffer.add(item(0, o, null, true, false));
-				}
-			}
-			
-			if (buffer.size() > 0) {
-				queue(buffer);
-				return true;
-			} else {
-				return false;
-			}
-		}
-	}
-	
-	public boolean retainAll(Collection<?> c) {
+	public synchronized boolean retainAll(Collection<?> c) {
 		synchronized(objectMutex) {
 			return set.retainAll(c);
 		}
 	}
 	
-	public int size() {
-		synchronized(objectMutex) {
-			return set.size();
-		}
+	public synchronized int size() {
+		return set.size();
 	}
 	
-	public Object[] toArray() {
-		synchronized(objectMutex) {
-			return set.toArray();
-		}
+	public synchronized Object[] toArray() {
+		return set.toArray();
 	}
 	
-	public <T> T[] toArray(T[] a) {
-		synchronized(objectMutex) {
-			return set.toArray(a);
-		}
+	public synchronized <T> T[] toArray(T[] a) {
+		return set.toArray(a);
 	}
 	
-	public int getUpdateCounter() {
-		synchronized(objectMutex) {
-			return updateCounter;
-		}
+	public synchronized int getUpdateCounter() {
+		return updateCounter;
 	}
 	
 	public Object getMutex() {
 		return objectMutex;
 	}
 	
-	public byte[] getBytes() {
-		synchronized(objectMutex) {
-			byte[] objects = { };
-			int size = 0;
+	public synchronized byte[] getBytes() {
+		byte[] objects = { };
+		int size = 0;
+		
+		for (Object o : set) {
+			byte[] object = Baseline.toBytes(o);
+			size += object.length;
 			
-			for (Object o : set) {
-				byte[] object = Baseline.toBytes(o);
-				size += object.length;
-				
-				IoBuffer buffer = Delta.createBuffer(size);
-				buffer.put(objects);
-				if (addByte) buffer.put((byte) 0);
-				buffer.put(object);
-				buffer.flip();
-				
-				objects = buffer.array();
-			}
-			
-			IoBuffer buffer = Delta.createBuffer(8 + size);
-			buffer.putInt(set.size());
-			buffer.putInt(updateCounter);
+			IoBuffer buffer = Delta.createBuffer(size);
 			buffer.put(objects);
+			if (addByte) buffer.put((byte) 0);
+			buffer.put(object);
 			buffer.flip();
 			
-			return buffer.array();
+			objects = buffer.array();
 		}
+		
+		IoBuffer buffer = Delta.createBuffer(8 + size);
+		buffer.putInt(set.size());
+		buffer.putInt(updateCounter);
+		buffer.put(objects);
+		buffer.flip();
+		
+		return buffer.array();
 	}
 	
 	private boolean valid(Object o) {

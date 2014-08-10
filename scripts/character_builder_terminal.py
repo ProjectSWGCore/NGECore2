@@ -306,6 +306,7 @@ def	miscHandler(owner):
 	window.addListBoxMenuItem('Backpack', 0)
 	window.addListBoxMenuItem('Heroism Jewelry Set', 1)	
 	window.addListBoxMenuItem('Belt of Master Bodo Baas', 2)
+	window.addListBoxMenuItem('Starter Equipment Box', 3)
 	core.suiService.openSUIWindow(window);
 	
 def miscHandlerCallback(owner, window, eventType, returnList):
@@ -322,6 +323,9 @@ def miscHandlerCallback(owner, window, eventType, returnList):
 		return
 	if returnList.get(0)=='2':
 		jediBelt(owner, inventory)
+		return
+	if returnList.get(0)=='3':
+		starterEquipmentBox(owner, inventory)
 		return
 	return
 	
@@ -379,35 +383,35 @@ def combatLevelDown(owner):
 	
 def rangedWeapons(owner, inventory):
 	rifle = core.objectService.createObject('object/weapon/ranged/rifle/shared_rifle_e11.iff', owner.getPlanet())
-	rifle.setDamageType("energy");
-	rifle.setWeaponType(WeaponType.RIFLE);
-	rifle.setAttackSpeed(0.8);
-	rifle.setMinDamage(518);
-	rifle.setMaxDamage(1035);
+	rifle.setDamageType('energy')
+	rifle.setWeaponType(WeaponType.RIFLE)
+	rifle.setAttackSpeed(0.8)
+	rifle.setMinDamage(518)
+	rifle.setMaxDamage(1035)
 	rifle.setMaxRange(64)
 	
 	pistol = core.objectService.createObject('object/weapon/ranged/pistol/shared_pistol_dl44.iff', owner.getPlanet())
-	pistol.setDamageType("energy");
-	pistol.setWeaponType(WeaponType.PISTOL);
-	pistol.setAttackSpeed(0.4);
-	pistol.setMinDamage(259);
-	pistol.setMaxDamage(518);
-	pistol.setMaxRange(35);
+	pistol.setDamageType('energy')
+	pistol.setWeaponType(WeaponType.PISTOL)
+	pistol.setAttackSpeed(0.4)
+	pistol.setMinDamage(259)
+	pistol.setMaxDamage(518)
+	pistol.setMaxRange(35)
 	
 	carbine = core.objectService.createObject('object/weapon/ranged/carbine/shared_carbine_e11.iff', owner.getPlanet())
-	carbine.setDamageType("energy");
-	carbine.setWeaponType(WeaponType.CARBINE);
-	carbine.setAttackSpeed(0.6);
-	carbine.setMinDamage(389);
-	carbine.setMaxDamage(780);
-	carbine.setMaxRange(50);
+	carbine.setDamageType('energy')
+	carbine.setWeaponType(WeaponType.CARBINE)
+	carbine.setAttackSpeed(0.6)
+	carbine.setMinDamage(389)
+	carbine.setMaxDamage(780)
+	carbine.setMaxRange(50)
 	
 	heavy = core.objectService.createObject('object/weapon/ranged/heavy/shared_som_lava_cannon.iff', owner.getPlanet())
-	heavy.setDamageType("energy");
-	heavy.setWeaponType(WeaponType.HEAVYWEAPON);
-	heavy.setAttackSpeed(1);
-	heavy.setMinDamage(850);
-	heavy.setMaxDamage(1350);
+	heavy.setDamageType('energy')
+	heavy.setWeaponType(WeaponType.HEAVYWEAPON)
+	heavy.setAttackSpeed(1)
+	heavy.setMinDamage(850)
+	heavy.setMaxDamage(1350)
 	heavy.setStringAttribute('wpn_elemental_type', 'Heat')
 	heavy.setStringAttribute('wpn_elemental_value', '50')
 	heavy.setMaxRange(64)
@@ -603,6 +607,11 @@ def jediBelt(owner, inventory):
 	
 def backpack(owner, inventory):
 	inventory.add(core.objectService.createObject("object/tangible/wearables/backpack/shared_backpack_s01.iff", owner.getPlanet()))
+	screenOne(core, owner)
+	return
+
+def starterEquipmentBox(owner, inventory):
+	inventory.add(core.objectService.createObject("object/tangible/npe/shared_npe_uniform_box.iff", owner.getPlanet()))
 	screenOne(core, owner)
 	return
 	

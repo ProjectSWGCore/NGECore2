@@ -10,23 +10,23 @@ def run(core, actor, target, commandString):
 		if (actor.isInStealth()):
 			actor.setInStealth(False)
 			actor.setRadarVisible(True)
-			actor.sendSystemMessage('GM Command Successfull: You are no longer Invisible.', 0)
+			actor.sendSystemMessage(' \\#FE2EF7 [GM] \\#FFFFFF Invulnerable invisible: Command completed successfully. You are no longer Invisible.', 0)
 			
 		else:
 			actor.setInStealth(True)
 			actor.setRadarVisible(False)
-			actor.sendSystemMessage('GM Command Successfull: You are now Invisible.', 0)
+			actor.sendSystemMessage(' \\#FE2EF7 [GM] \\#FFFFFF Invulnerable invisible: Command completed successfully. You are now Invisible.', 0)
 	
 	if actor.getOptionsBitmask() == 128:
 		actor.setOptionsBitmask(Options.NONE)
-		actor.sendSystemMessage('GM Command Successfull: You are now Invulnerable.', 0)
+		actor.sendSystemMessage(' \\#FE2EF7 [GM] \\#FFFFFF Invulnerable: Command completed successfully. You are now Invulnerable.', 0)
 	
 	
 	elif actor.getOptionsBitmask() == 0:
 		actor.setOptionsBitmask(Options.ATTACKABLE)
 		print(actor.getOptionsBitmask())
 		
-		actor.sendSystemMessage('GM Command Successfull: You are no longer Invulnerable.', 0)
+		actor.sendSystemMessage(' \\#FE2EF7 [GM] \\#FFFFFF Invulnerable: Command completed successfully. You are no longer Invulnerable.', 0)
 
 	return
 	
