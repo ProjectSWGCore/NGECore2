@@ -21,7 +21,6 @@
  ******************************************************************************/
 package services.combat;
 
-import resources.objects.creature.CreatureObject;
 import engine.resources.common.Event;
 import engine.resources.objects.SWGObject;
 

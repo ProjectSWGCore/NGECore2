@@ -51,6 +51,7 @@ import resources.datatables.FactionStatus;
 
 import java.util.Random;
 
+@SuppressWarnings("unused")
 public class TurretAIActor {
 	
 	private TangibleObject creature;
@@ -81,8 +82,9 @@ public class TurretAIActor {
 	private TurretAIState intendedPrimaryTurretAIState;
 	private Point3D lastPositionBeforeStateChange;
 	private boolean patrolLoop = true; // default
-	private ScheduledFuture recoveryFuture;
+	private ScheduledFuture<?> recoveryFuture;
 
+	
 	public TurretAIActor(TangibleObject creature, Point3D spawnPosition, ScheduledExecutorService scheduler) {
 		this.creature = creature;
 		this.spawnPosition = spawnPosition;

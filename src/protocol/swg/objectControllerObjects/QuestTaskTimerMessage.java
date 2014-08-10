@@ -27,6 +27,7 @@ import org.apache.mina.core.buffer.IoBuffer;
 
 import protocol.swg.ObjControllerMessage;
 
+@SuppressWarnings("unused")
 public class QuestTaskTimerMessage extends ObjControllerObject {
 	
 	private long objectId;

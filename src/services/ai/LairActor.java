@@ -33,6 +33,7 @@ import resources.objects.tangible.TangibleObject;
 import services.combat.CombatEvents.DamageTaken;
 import tools.DevLog;
 
+@SuppressWarnings("unused")
 public class LairActor {
 
 	private Vector<AIActor> creatures = new Vector<AIActor>();
@@ -163,7 +164,6 @@ public class LairActor {
 		
 	}
 	
-	@SuppressWarnings("unused")
 	private void healLair() {
 		
 		if(lairObject.getConditionDamage() == 0 || creatures.isEmpty())

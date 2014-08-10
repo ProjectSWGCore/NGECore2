@@ -110,6 +110,7 @@ public class GCWSpawner extends TangibleObject{
 
 	public void setSpawnerType(int spawnerType) {
 		this.spawnerType = spawnerType;
+		this.setCustomName("");
 		if (spawnerType==SpawnerType.SoldierPatrol){
 			final Future<?>[] fut1 = {null};
 			fut1[0] = scheduler.scheduleAtFixedRate(new Runnable() {

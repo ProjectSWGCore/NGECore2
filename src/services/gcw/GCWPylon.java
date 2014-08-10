@@ -28,6 +28,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
 import main.NGECore;
 import protocol.swg.PlayClientEffectObjectTransformMessage;
 import engine.clients.Client;
@@ -172,9 +173,13 @@ public class GCWPylon extends TangibleObject{
 		return spawnLevel;
 	}
 	
+
 	public void createSpawner(){
 		GCWSpawner spawner = (GCWSpawner) NGECore.getInstance().objectService.createObject("object/tangible/loot/creature_loot/collections/shared_dejarik_table_base.iff", 0, this.getPlanet(), this.getWorldPosition(), this.getOrientation());
 		NGECore.getInstance().simulationService.add(spawner, spawner.getPosition().x, spawner.getPosition().z, true);
+		spawner.setCustomName("");
+		spawner.setStfFilename("battlefield");
+		spawner.setStfName("battlefield_marker_name");
 		spawner.setPatrolRoute(getPatrolRoute());
 		spawner.setDelay(getDelay());
 		spawner.setSpawnLevel(3);

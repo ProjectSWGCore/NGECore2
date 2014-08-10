@@ -263,8 +263,8 @@ public class CombatService implements INetworkDispatch {
 			return;
 		}
 
-		final Point3D targetPos = target.getPosition();
-		final SWGObject targetParent = target.getContainer();
+		//final Point3D targetPos = target.getPosition();
+		//final SWGObject targetParent = target.getContainer();
 		
 		if(command.getDelayAttackParticle().length() > 0 || command.getInitialAttackDelay() > -1) {
 			
@@ -547,7 +547,7 @@ public class CombatService implements INetworkDispatch {
 			
 			if(target.hasBuff("incapWeaken")) {
 
-				AIActor aiActor = (AIActor)attacker.getAttachment("AI");						
+				//AIActor aiActor = (AIActor)attacker.getAttachment("AI");						
 					
 					deathblowPlayerFromInstallation(attacker, target);
 					return;
@@ -828,7 +828,7 @@ public class CombatService implements INetworkDispatch {
 	
 	private void sendCombatPacketsForInstallation(InstallationObject attacker, TangibleObject target, WeaponObject weapon, CombatCommand command, int actionCounter, float damage, int armorAbsorbed, int hitType) {
 		
-		String animationStr = command.getRandomAnimation(weapon);
+		//String animationStr = command.getRandomAnimation(weapon);
 		int turret_fire = 0xD334C0B8; // 0xA7595B4E
 		//CombatAction combatAction = new CombatAction(CRC.StringtoCRC(animationStr), attacker.getObjectID(), weapon.getObjectID(), target.getObjectID(), command.getCommandCRC());
 		CombatAction combatAction = new CombatAction(turret_fire, attacker.getObjectID(), weapon.getObjectID(), target.getObjectID(), command.getCommandCRC());

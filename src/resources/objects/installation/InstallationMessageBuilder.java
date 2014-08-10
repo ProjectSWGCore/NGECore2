@@ -25,9 +25,7 @@ import java.nio.ByteOrder;
 import java.util.Map;
 
 import org.apache.mina.core.buffer.IoBuffer;
-
 import engine.resources.objects.Builder;
-import resources.objects.harvester.HarvesterObject;
 import resources.objects.tangible.TangibleMessageBuilder;
 
 public class InstallationMessageBuilder extends TangibleMessageBuilder{

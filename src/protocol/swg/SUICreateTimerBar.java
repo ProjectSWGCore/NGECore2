@@ -24,12 +24,10 @@ package protocol.swg;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import services.sui.SUIWindowComponent;
-
+@SuppressWarnings("unused")
 public class SUICreateTimerBar extends SWGMessage{
 	
 	private String script;

@@ -282,7 +282,7 @@ public class InvasionService implements INetworkDispatch {
 		if (invasionPhase==1 && System.currentTimeMillis()>temptimestartreference + 60000 && ! ph2_message1sent){
 			invasionPhase=2;
 			preparePhase2();	
-			System.out.println("PHASE 2");
+			//System.out.println("PHASE 2");
 			send_Phase2_InvaderMessage1();
 			send_Phase2_DefenderMessage1();
 			ph2_message1sent = true;

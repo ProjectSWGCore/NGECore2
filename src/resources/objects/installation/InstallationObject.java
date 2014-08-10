@@ -28,10 +28,6 @@ import org.apache.mina.core.buffer.IoBuffer;
 
 import main.NGECore;
 import protocol.swg.UpdatePVPStatusMessage;
-import protocol.swg.UpdatePostureMessage;
-
-import com.sleepycat.persist.model.Entity;
-
 import engine.clients.Client;
 import engine.resources.common.CRC;
 import engine.resources.objects.Baseline;
@@ -40,8 +36,6 @@ import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 import resources.datatables.Options;
 import resources.objects.ObjectMessageBuilder;
-import resources.objects.SWGSet;
-import resources.objects.building.BuildingMessageBuilder;
 import resources.objects.creature.CreatureObject;
 import resources.objects.tangible.TangibleObject;
 
