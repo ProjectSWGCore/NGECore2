@@ -94,11 +94,14 @@ public class CommandService implements INetworkDispatch  {
 			return false;
 		}
 		
-		TangibleObject weapon = (TangibleObject) core.objectService.getObject(actor.getWeaponId());
+		// Causes this service method to return with false after equipping a rifle, not allowing to unequip it anymore
+		// because the client seems to consider rifles invalidweapons for an unkown reason
 		
-		if (weapon != null && weapon instanceof WeaponObject && ((WeaponObject) weapon).getWeaponType() == command.getInvalidWeapon()) {
-			return false;
-		}
+//		TangibleObject weapon = (TangibleObject) core.objectService.getObject(actor.getWeaponId());
+//		
+//		if (weapon != null && weapon instanceof WeaponObject && ((WeaponObject) weapon).getWeaponType() == command.getInvalidWeapon()) {
+//			return false;
+//		}
 		
 		for (long state : command.getInvalidStates()) {
 			if ((actor.getStateBitmask() & state) == state) {
@@ -456,7 +459,7 @@ public class CommandService implements INetworkDispatch  {
 		} else {
 			if (FileUtilities.doesFileExist("scripts/commands/" + command.getCommandName().toLowerCase() + ".py")) {
 				System.err.print("Command " + command.getCommandName() + " is considered a combat command by the client but has a regular command script!");
-				core.scriptService.callScript("scripts/commands/combat/", command.getCommandName().toLowerCase(), "run", core, attacker, target, "");
+				core.scriptService.callScript("scripts/commands/", command.getCommandName().toLowerCase(), "run", core, attacker, target, "");
 			}
 		}
 		

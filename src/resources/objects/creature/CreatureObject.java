@@ -205,6 +205,9 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	public CreatureObject() {
 		super();
 		messageBuilder = new CreatureMessageBuilder(this);
+		System.out.println("Name: " + getCustomName());
+		System.out.println("  Cash Credits: " + cashCredits);
+		System.out.println("  Bank Credits: " + bankCredits);
 	}
 	
 	@Override
@@ -222,6 +225,7 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		missionCriticalObjects.init(this);
 		abilities.init(this);
 		skillMods.init(this);
+		skills.init(this);
 	}
 
 	private void loadTemplateData() {
@@ -901,7 +905,7 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		}
 		
 		IoBuffer weaponIdDelta = messageBuilder.buildWeaponIdDelta(weaponId);
-		
+		tools.CharonPacketUtils.printAnalysis(weaponIdDelta, "buildWeaponIdDelta");
 		notifyObservers(weaponIdDelta, true);
 
 	}

@@ -11,5 +11,5 @@ def run(core, actor, target, commandString):
 		playerObject = target.getSlottedObject('ghost')
 		playerObject.setLotsRemaining(playerObject.getLotsRemaining() + int(arg1))
 		print(playerObject.getLotsRemaining())
-		actor.sendSystemMessage('GM: Adjust Lot Count: Completed Successfully for ' + target.getFirstName(), 0)
+		actor.sendSystemMessage(' \\#FE2EF7 [GM] \\#FFFFFF adjustLotCount: Command completed successfully for: ' + target.getFirstName(), 0)
 	return

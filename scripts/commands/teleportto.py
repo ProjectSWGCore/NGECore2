@@ -15,7 +15,7 @@ def run(core, actor, target, commandString):
 		target = core.objectService.getObjectByFirstName(commandString)
 	
 	if target and target.getSlottedObject('ghost') is not None:
-		actor.sendSystemMessage('gm: teleportto: Command completed successfully.', 0)
+		actor.sendSystemMessage(' \\#FE2EF7 [GM] \\#FFFFFF teleportTo: Command completed successfully.', 0)
 		if target.getPlanetId() == actor.getPlanetId():
 			core.simulationService.teleport(actor, target.getPosition(), target.getOrientation(), target.getParentId())
 		else:
@@ -25,6 +25,6 @@ def run(core, actor, target, commandString):
 				core.simulationService.transferToPlanet(actor, core.terrainService.getPlanetById(target.getPlanetId()), target.getPosition(), target.getOrientation(), core.objectService.getObject(target.getParentId()))
 		return
 	else:
-		actor.sendSystemMessage('Invalid Syntax. Syntax is: /teleportto <playerName>', 0)
+		actor.sendSystemMessage(' \\#FE2EF7 [GM] \\#FFFFFF teleportTo: Invalid Syntax. Syntax is: /teleportTo <playerName>', 0)
 		return
 	return

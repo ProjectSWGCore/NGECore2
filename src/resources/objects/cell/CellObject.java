@@ -78,7 +78,7 @@ public class CellObject extends SWGObject implements Serializable {
 	public void sendBaselines(Client destination) {
 		
 		if(destination == null || destination.getSession() == null) {
-			System.out.println("NULL session");
+			System.out.println("NULL session [baseline]");
 			return;
 		}
 				
@@ -91,7 +91,7 @@ public class CellObject extends SWGObject implements Serializable {
 	public void sendPermissionMessage(Client destination) {
 		
 		if(destination == null || destination.getSession() == null) {
-			System.out.println("NULL session");
+			System.out.println("NULL session [permission]");
 			return;
 		}
 		

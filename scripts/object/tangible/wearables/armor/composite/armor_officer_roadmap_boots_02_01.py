@@ -5,6 +5,7 @@ def setup(core, object):
 	object.setStfName('armor_officer_roadmap_boots_02_01')
 	object.setDetailFilename('static_item_d')
 	object.setDetailName('armor_officer_roadmap_boots_02_01')
+	object.setIntAttribute('no_trade', 1)
 	object.setStringAttribute('class_required', 'Officer')
 	object.setStringAttribute('armor_category', '@obj_attr_n:armor_assault')
 	return	
