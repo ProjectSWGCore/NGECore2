@@ -318,6 +318,7 @@ def	miscHandler(owner):
 	window.addListBoxMenuItem('Belt of Master Bodo Baas', 2)
 	window.addListBoxMenuItem('Starter Equipment Box', 3)
 	window.addListBoxMenuItem('GCW Banners', 4)
+	window.addListBoxMenuItem('Bounty Droids', 5)
 	
 	core.suiService.openSUIWindow(window);
 	
@@ -341,7 +342,10 @@ def miscHandlerCallback(owner, window, eventType, returnList):
 		return
 	if returnList.get(0)=='4':
 		GCWBanners(owner, inventory)
-		return	
+		return
+	if returnList.get(0)=='5':
+		bountyDroids(owner, inventory)
+		return
 		
 	return
 	
@@ -715,4 +719,13 @@ def GCWBanners(owner, inventory):
 	gcwBanner2.setDetailName('item_pvp_captain_battle_banner_imperial_reward_04_01')
 	inventory.add(gcwBanner2)
 	return
+
+def bountyDroids(owner, inventory):
+	seekers = core.objectService.createObject('object/tangible/mission/shared_mission_bounty_droid_seeker.iff', owner.getPlanet())
+	seekers.setUses(20)
+	inventory.add(seekers)
 	
+	probe = core.objectService.createObject('object/tangible/mission/shared_mission_bounty_droid_probot.iff', owner.getPlanet())
+	probe.setUses(20)
+	inventory.add(probe)
+	return
