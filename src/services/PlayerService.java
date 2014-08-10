@@ -750,35 +750,36 @@ public class PlayerService implements INetworkDispatch {
 	/*
 	 * Resets to level 1
 	 */
-	public void resetLevel(CreatureObject creature) {
+	public void resetLevel(CreatureObject creature, boolean unequipItems) {
 		PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
 		SWGObject inventory = creature.getSlottedObject("inventory");
-		
-		try {
-        	for (Long equipmentId : new ArrayList<Long>(creature.getEquipmentList())) {
-        		
-        		SWGObject equipment = core.objectService.getObject(equipmentId);
-        		
-        		if (equipment == null || equipment.getTemplate().startsWith("object/tangible/hair/")) {
-        			continue;
-        		}
-        		
-        		switch (equipment.getTemplate()) {
-        			case "object/tangible/inventory/shared_character_inventory.iff":
-        			case "object/tangible/inventory/shared_appearance_inventory.iff":
-        			case "object/tangible/datapad/shared_character_datapad.iff":
-        			case "object/tangible/bank/shared_character_bank.iff":
-       				case "object/tangible/mission_bag/shared_mission_bag.iff":
-        			case "object/weapon/creature/shared_creature_default_weapon.iff":
-        				continue;
-        			default:
-        				creature.transferTo(creature, inventory, equipment);
-       			}
-        	}
-		} catch (Exception e) {
-			e.printStackTrace();
+
+		if (unequipItems) {
+			try {
+				for (Long equipmentId : new ArrayList<Long>(creature.getEquipmentList())) {
+
+					SWGObject equipment = core.objectService.getObject(equipmentId);
+
+					if (equipment == null || equipment.getTemplate().startsWith("object/tangible/hair/")) {
+						continue;
+					}
+
+					switch (equipment.getTemplate()) {
+					case "object/tangible/inventory/shared_character_inventory.iff":
+					case "object/tangible/inventory/shared_appearance_inventory.iff":
+					case "object/tangible/datapad/shared_character_datapad.iff":
+					case "object/tangible/bank/shared_character_bank.iff":
+					case "object/tangible/mission_bag/shared_mission_bag.iff":
+					case "object/weapon/creature/shared_creature_default_weapon.iff":
+						continue;
+					default:
+						creature.transferTo(creature, inventory, equipment);
+					}
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
-		
 		//for (SWGObject equipment : creature.getAppearanceEquipmentList()) {
 			//core.equipmentService.unequip(creature, equipment);
 		//}
@@ -862,7 +863,8 @@ public class PlayerService implements INetworkDispatch {
 		
 		if(level == 0) return;
 		
-		if (!(creature.getLevel() <= (short) 1)) resetLevel(creature);
+		if (!(creature.getLevel() <= (short) 1)) resetLevel(creature, true);
+		else resetLevel(creature, false);
 		
 		try {
 			experienceTable = ClientFileManager.loadFile("datatables/player/player_level.iff", DatatableVisitor.class);
