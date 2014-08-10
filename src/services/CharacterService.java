@@ -39,6 +39,7 @@ import engine.clientdata.visitors.DatatableVisitor;
 import engine.clientdata.visitors.ProfessionTemplateVisitor;
 import engine.clients.Client;
 import engine.resources.common.CRC;
+import engine.resources.config.Config;
 import engine.resources.container.CreatureContainerPermissions;
 import engine.resources.container.CreaturePermissions;
 import engine.resources.container.Traverser;
@@ -265,7 +266,16 @@ public class CharacterService implements INetworkDispatch {
 				object.setCustomName(clientCreateCharacter.getName());
 				object.setHeight(clientCreateCharacter.getScale());
 				object.setPersistent(true);
-				object.setPosition(SpawnPoint.getRandomPosition(new Point3D(3528, 0, -4804), (float) 0.5, 3, core.terrainService.getPlanetByName("tatooine").getID()));
+				
+				Config options = new Config();
+				options.setFilePath("options.cfg");
+				boolean optionsConfigLoaded = options.loadConfigFile();
+				if (optionsConfigLoaded && options.getInt("DO.ISOLATION.TESTS") > 0){
+					object.setPosition(SpawnPoint.getRandomPosition(new Point3D(0, 0, 0), (float) 0.5, 3, core.terrainService.getPlanetByName("tatooine").getID()));
+				} else {
+					object.setPosition(SpawnPoint.getRandomPosition(new Point3D(3528, 0, -4804), (float) 0.5, 3, core.terrainService.getPlanetByName("tatooine").getID()));
+				}
+				
 				object.setCashCredits(100);
 				object.setBankCredits(1000);
 				object.setIncapTimer(10);
