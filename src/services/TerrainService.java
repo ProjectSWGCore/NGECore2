@@ -34,6 +34,7 @@ import resources.datatables.ClientPOIRadius;
 import services.playercities.ClientRegion;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
+import engine.resources.common.CRC;
 import engine.resources.config.Config;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
@@ -161,6 +162,16 @@ public class TerrainService {
 	public Planet getPlanetByName(String name) {
 		for (int i = 0; i < planets.size(); i++) {
 			if (planets.get(i).getName().equalsIgnoreCase(name)) {
+				return planets.get(i);
+			}
+		}
+		
+		return null;
+	}
+	
+	public Planet getPlanetByCrc(int crc) {
+		for (int i = 0; i < planets.size(); i++) {
+			if (CRC.StringtoCRC(planets.get(i).getName().toLowerCase()) == crc) {
 				return planets.get(i);
 			}
 		}
