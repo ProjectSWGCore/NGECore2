@@ -66,6 +66,7 @@ import services.sui.SUIWindow.Trigger;
 import main.NGECore;
 import engine.clients.Client;
 import engine.resources.common.CRC;
+import engine.resources.config.Config;
 import engine.resources.container.Traverser;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
@@ -138,6 +139,14 @@ public class InvasionService implements INetworkDispatch {
 	
 	public InvasionService(final NGECore core) {
 		this.core = core;	
+				
+		Config options = new Config();
+		options.setFilePath("options.cfg");
+		boolean optionsConfigLoaded = options.loadConfigFile();
+		if (optionsConfigLoaded && options.getInt("ENABLE.INVASIONS") == 0){
+			return;
+		}
+		
 		
 		// Utility code
 //		Executors.newSingleThreadScheduledExecutor().schedule(() -> {
