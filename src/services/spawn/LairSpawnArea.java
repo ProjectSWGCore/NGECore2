@@ -34,6 +34,7 @@ import resources.objects.creature.CreatureObject;
 import services.SimulationService.MoveEvent;
 import services.TerrainService;
 import services.ai.LairActor;
+import engine.resources.config.Config;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -108,6 +109,13 @@ public class LairSpawnArea extends SpawnArea {
 	@Override
 	@Handler
 	public void onEnter(EnterEvent event) {
+		
+		Config options = new Config();
+		options.setFilePath("options.cfg");
+		boolean optionsConfigLoaded = options.loadConfigFile();
+		if (optionsConfigLoaded && options.getInt("DO.ISOLATION.TESTS") > 0){
+			return;
+		}
 		
 		SWGObject object = event.object;
 		
