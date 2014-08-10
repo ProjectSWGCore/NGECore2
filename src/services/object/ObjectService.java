@@ -605,9 +605,10 @@ public class ObjectService implements INetworkDispatch {
 				@Override
 				public void run() {
 					try {
-						CreatureObject newObject = NGECore.getInstance().spawnService.spawnCreature(Template, 0, planet.getName(), cellId, spawnPosition.x, spawnPosition.y, spawnPosition.z, orientation.w, orientation.x, orientation.y, orientation.z, level);
-						AIActor newAIActor = (AIActor)newObject.getAttachment("AI");
-						newAIActor.cloneActor(((AIActor) object.getAttachment("AI")));
+						// Commented for now until found where the respawn is always set to 60 for any NPC
+//						CreatureObject newObject = NGECore.getInstance().spawnService.spawnCreature(Template, 0, planet.getName(), cellId, spawnPosition.x, spawnPosition.y, spawnPosition.z, orientation.w, orientation.x, orientation.y, orientation.z, level);
+//						AIActor newAIActor = (AIActor)newObject.getAttachment("AI");
+//						newAIActor.cloneActor(((AIActor) object.getAttachment("AI")));
 						//object.setAttachment("AI", null);
 					} catch (Exception e) {
 						e.printStackTrace();
