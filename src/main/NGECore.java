@@ -138,6 +138,7 @@ import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 import engine.resources.service.InteractiveJythonAcceptor;
 import engine.resources.service.NetworkDispatch;
+import engine.resources.service.UncaughtExceptionLogger;
 import engine.servers.InteractiveJythonServer;
 import engine.servers.MINAServer;
 import engine.servers.PingServer;
@@ -145,6 +146,8 @@ import engine.servers.PingServer;
 @SuppressWarnings("unused")
 
 public class NGECore {
+	
+	private static boolean logUnhandledExceptions = false;
 	
 	public static boolean didServerCrash = false;
 	
@@ -242,12 +245,14 @@ public class NGECore {
 	public static boolean PACKET_DEBUG = false;
 	
 	public NGECore() {
-		
+
+		instance = this;
 	}
 	
 	public void start() {
 		
 		instance = this;
+		
 		final ThreadMonitor deadlockDetector = new ThreadMonitor();
 		Thread deadlockMonitor = new Thread(new Runnable() {
 			@Override
@@ -515,7 +520,7 @@ public class NGECore {
 		
 		terrainService.loadSnapShotObjects();
 		objectService.loadServerTemplates();		
-		objectService.loadBuildings();
+		objectService.loadObjects();
 		harvesterService.loadHarvesters();
 
 		simulationService.insertSnapShotObjects();
@@ -623,7 +628,9 @@ public class NGECore {
 	}
 	
 	public static void main(String[] args) {
-		
+		//With this class, we are overwriting the JVM's way of handling exceptions that are never caught. Very handy so no try/catch spam for every method.
+		if (logUnhandledExceptions) Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionLogger("./logs/uncaught"));
+
 		NGECore core = new NGECore();
 		
 		core.start();
@@ -833,7 +840,7 @@ public class NGECore {
 	public long getGalacticTime() {
 		return System.currentTimeMillis() - galacticTime;
 	}
-
+	
 	public void closeODBs() {
 		swgObjectODB.close();
 		mailODB.close();

@@ -724,7 +724,7 @@ public class CommandService implements INetworkDispatch  {
 		} else {
 			if (FileUtilities.doesFileExist("scripts/commands/" + command.getCommandName().toLowerCase() + ".py")) {
 				System.err.print("Command " + command.getCommandName() + " is considered a combat command by the client but has a regular command script!");
-				core.scriptService.callScript("scripts/commands/combat/", command.getCommandName().toLowerCase(), "run", core, attacker, target, "");
+				core.scriptService.callScript("scripts/commands/", command.getCommandName().toLowerCase(), "run", core, attacker, target, "");
 			}
 		}
 		

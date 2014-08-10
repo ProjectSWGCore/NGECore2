@@ -354,6 +354,7 @@ public class CharacterService implements INetworkDispatch {
 				createStarterClothing(object, sharedRaceTemplate, clientCreateCharacter.getStarterProfession());
 				//core.scriptService.callScript("scripts/", "demo", "CreateStartingCharacter", core, object);
 				
+				System.out.println("Saving character with name: " + object.getCustomName());
 				core.getSWGObjectODB().put(object.getObjectID(), object);
 
 				PreparedStatement ps = databaseConnection.preparedStatement("INSERT INTO characters (id, \"firstName\", \"lastName\", \"accountId\", \"galaxyId\", \"statusId\", appearance, gmflag) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");

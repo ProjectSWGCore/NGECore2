@@ -55,6 +55,7 @@ import resources.harvest.SurveyTool;
 import org.apache.commons.lang3.text.WordUtils;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
+import org.python.antlr.PythonParser.list_for_return;
 import org.python.core.Py;
 import org.python.core.PyObject;
 
@@ -173,6 +174,7 @@ public class ObjectService implements INetworkDispatch {
 		    	core.harvesterService.saveHarvesters();
 		    	core.playerCityService.saveAllCities();
 		    	core.closeODBs();
+		    	System.out.println("Databases closed.");
 		    }
 		});
 		
@@ -190,7 +192,21 @@ public class ObjectService implements INetworkDispatch {
 		}
 	}
 	
-	public void loadBuildings() {
+	public void loadObjects() {
+		System.out.println("Loading objects...");
+		ODBCursor cursor = core.getSWGObjectODB().getCursor();
+		
+		while (cursor.hasNext()) {
+			SWGObject object = (SWGObject) cursor.next();
+			if (object != null && !(object instanceof BuildingObject) && !objectList.containsKey(object.getObjectID()))
+				objectList.put(object.getObjectID(), object);
+		}
+		
+		loadBuildings();
+		System.out.println("Finished loading objects.");
+	}
+	
+	private void loadBuildings() {
 		ODBCursor cursor = core.getSWGObjectODB().getCursor();
 				
 		while(cursor.hasNext()) {
@@ -254,15 +270,17 @@ public class ObjectService implements INetworkDispatch {
 			}
 		}
 		
-		synchronized(objectMutex) {
-			if(objectID == 0)
-				objectID = generateObjectID();
-			else
-				isSnapshot = !overrideSnapshot;
-			
-			if(!core.getObjectIdODB().contains(objectID))
-				core.getObjectIdODB().put(objectID, new ObjectId(objectID));
-		}
+		if (objectID == 0) {
+			synchronized(objectMutex) {
+				if(objectID == 0)
+					objectID = generateObjectID();
+				
+				if(!core.getObjectIdODB().contains(objectID))
+					core.getObjectIdODB().put(objectID, new ObjectId(objectID));
+			}
+		} else
+			isSnapshot = !overrideSnapshot;
+		
 		
 		if (planet == null) {
 			System.err.println("Planet is null in createObject for some reason.");
@@ -475,10 +493,10 @@ public class ObjectService implements INetworkDispatch {
 		SWGObject ret = objectList.put(objectID, object);
 		
 		//if (ret != null && !ret.getTemplate().equals(object.getTemplate())) {
-		if (ret == null) {
-			//System.err.println("ObjectService: Detected duplicate Id.  Assigning new one.")
-			object = createObject(Template, objectID, planet, position, orientation, customServerTemplate, overrideSnapshot, loadServerTemplate);
-		}
+//		if (ret == null) {
+//			//System.err.println("ObjectService: Detected duplicate Id.  Assigning new one.")
+//			object = createObject(Template, objectID, planet, position, orientation, customServerTemplate, overrideSnapshot, loadServerTemplate);
+//		}
 		
 		return object;
 	}
@@ -540,7 +558,7 @@ public class ObjectService implements INetworkDispatch {
 			if (objectList.containsKey(objectID)) {
 				System.err.println("getObject(): object is null but objectList contains objectID key");
 			} else {
-				//System.err.println("getObject(): object is null");
+//				System.err.println("getObject(): object is null");
 			}
 		}
 		
@@ -717,10 +735,8 @@ public class ObjectService implements INetworkDispatch {
 	}
 	
 	public CreatureObject getCreatureFromDB(long objectId) {
-		SWGObject object = (SWGObject) core.getSWGObjectODB().get(objectId);
-		if(!(object instanceof CreatureObject))
-			return null;
-		if (object != null && getObject(object.getObjectID()) == null) {
+		CreatureObject object = (CreatureObject) core.getSWGObjectODB().get(objectId);
+		if (object != null) {
 			loadServerTemplate(object);
 			object.viewChildren(object, true, true, (child) -> loadServerTemplate(child));
 		}
@@ -1028,14 +1044,16 @@ public class ObjectService implements INetworkDispatch {
 				}
 				CreatureObject creature = null;
 				if(getObject(objectId) == null) {
-					System.out.println("SelectCharacter: not in object list");
 					creature = getCreatureFromDB(objectId);
 					if(creature == null) {
 						System.out.println("Cant get creature from db");
 					} else {
-						if (creature.getCustomName() == null || creature.getCustomName() == "") {
+						if (creature.getCustomName() == null || creature.getCustomName().isEmpty()) {
+							System.err.println("Name: " + creature.getCustomName());
 							System.out.println("Player with ObjID of " + creature.getObjectID() + " tried logging in but has a null/empty name!");
 							return;
+						} else {
+							System.out.println("SelectCharacter: not in object list");
 						}
 					}
 					
@@ -1045,6 +1063,9 @@ public class ObjectService implements INetworkDispatch {
 						return;
 
 					creature = (CreatureObject) getObject(objectId);
+					if (creature.getCustomName() == null || creature.getCustomName().isEmpty()) {
+						System.err.println("Creature's custom name was null/empty! Name: " + creature.getCustomName());
+					}
 					if(creature.getAttachment("disconnectTask") != null && creature.getClient() != null && !creature.getClient().getSession().isClosing())
 						return;
 					
@@ -1200,6 +1221,13 @@ public class ObjectService implements INetworkDispatch {
 					});
 				}
 				
+				// New players that skip tutorial
+				if (creature.getLevel() <= (short) 1) {
+					core.playerService.grantLevel(creature, 5);
+					TangibleObject inventory = (TangibleObject) creature.getSlottedObject("inventory");
+					if (inventory != null) inventory.add(core.objectService.createObject("object/tangible/npe/shared_npe_uniform_box.iff", creature.getPlanet()));
+				}
+
 				core.playerService.postZoneIn(creature);
 			}
 			
