@@ -1063,7 +1063,7 @@ public class HarvesterService implements INetworkDispatch {
 		WaypointObject constructionWaypoint = (WaypointObject)NGECore.getInstance().objectService.createObject("object/waypoint/shared_world_waypoint_blue.iff", actor.getPlanet(), harvester.getPosition().x, 0 ,harvester.getPosition().z);
 		String displayname = "@installation_n:"+harvester.getStfName();
 		constructionWaypoint.setName(displayname);
-		constructionWaypoint.setPlanetCRC(engine.resources.common.CRC.StringtoCRC(actor.getPlanet().getName()));
+		constructionWaypoint.setPlanetCrc(CRC.StringtoCRC(actor.getPlanet().getName()));
 		constructionWaypoint.setPosition(new Point3D(object.getPosition().x,0, object.getPosition().z));	
 		player.waypointAdd(constructionWaypoint);
 		constructionWaypoint.setPosition(new Point3D(object.getPosition().x,0, object.getPosition().z));
@@ -1072,13 +1072,13 @@ public class HarvesterService implements INetworkDispatch {
 		constructionWaypoint.setStringAttribute("", "");
 		player.waypointAdd(constructionWaypoint);
 		constructionWaypoint.setName(displayname);
-		constructionWaypoint.setPlanetCRC(engine.resources.common.CRC.StringtoCRC(actor.getPlanet().getName()));							
+		constructionWaypoint.setPlanetCrc(CRC.StringtoCRC(actor.getPlanet().getName()));							
 		player.setLastSurveyWaypoint(constructionWaypoint);
 		
 		List<WaypointAttachment> attachments = new ArrayList<WaypointAttachment>(); 
 		WaypointAttachment attachment = new WaypointAttachment();
 		attachment.active = true;
-		attachment.cellID = constructionWaypoint.getCellId();
+		attachment.cellID = constructionWaypoint.getCellNumber();
 		attachment.color = (byte)1;
 		attachment.name = displayname;
 		attachment.planetCRC = engine.resources.common.CRC.StringtoCRC(actor.getPlanet().getName());
@@ -1240,7 +1240,7 @@ public class HarvesterService implements INetworkDispatch {
 			WaypointObject constructionWaypoint = (WaypointObject)core.objectService.createObject("object/waypoint/shared_world_waypoint_blue.iff", actor.getPlanet(), harvester.getPosition().x, 0 ,harvester.getPosition().z);
 			String displayname = "@installation_n:"+harvester.getStfName() + " " + counter;
 			constructionWaypoint.setName(displayname);
-			constructionWaypoint.setPlanetCRC(engine.resources.common.CRC.StringtoCRC(actor.getPlanet().getName()));
+			constructionWaypoint.setPlanetCrc(CRC.StringtoCRC(actor.getPlanet().getName()));
 			constructionWaypoint.setPosition(new Point3D(spawnCoordsX,0, spawnCoordsZ));	
 			player.waypointAdd(constructionWaypoint);
 			constructionWaypoint.setPosition(new Point3D(spawnCoordsX,0, spawnCoordsZ));
@@ -1249,7 +1249,7 @@ public class HarvesterService implements INetworkDispatch {
 			constructionWaypoint.setStringAttribute("", "");
 			player.waypointAdd(constructionWaypoint);
 			constructionWaypoint.setName(displayname);
-			constructionWaypoint.setPlanetCRC(engine.resources.common.CRC.StringtoCRC(actor.getPlanet().getName()));							
+			constructionWaypoint.setPlanetCrc(CRC.StringtoCRC(actor.getPlanet().getName()));							
 			player.setLastSurveyWaypoint(constructionWaypoint);
 		}
 		
