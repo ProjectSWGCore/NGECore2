@@ -997,7 +997,6 @@ public class ObjectService implements INetworkDispatch {
 				}
 				CreatureObject creature = null;
 				if(getObject(objectId) == null) {
-					System.out.println("SelectCharacter: not in object list");
 					creature = getCreatureFromDB(objectId);
 					if(creature == null) {
 						System.out.println("Cant get creature from db");
@@ -1006,6 +1005,8 @@ public class ObjectService implements INetworkDispatch {
 							System.err.println("Name: " + creature.getCustomName());
 							System.out.println("Player with ObjID of " + creature.getObjectID() + " tried logging in but has a null/empty name!");
 							return;
+						} else {
+							System.out.println("SelectCharacter: not in object list");
 						}
 					}
 					
@@ -1173,6 +1174,13 @@ public class ObjectService implements INetworkDispatch {
 					});
 				}
 				
+				// New players that skip tutorial
+				if (creature.getLevel() <= (short) 1) {
+					core.playerService.grantLevel(creature, 5);
+					TangibleObject inventory = (TangibleObject) creature.getSlottedObject("inventory");
+					if (inventory != null) inventory.add(core.objectService.createObject("object/tangible/npe/shared_npe_uniform_box.iff", creature.getPlanet()));
+				}
+
 				core.playerService.postZoneIn(creature);
 			}
 			
