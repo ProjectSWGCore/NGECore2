@@ -25,9 +25,13 @@ import main.NGECore;
 import engine.resources.scene.Point3D;
 import resources.objects.creature.CreatureObject;
 import services.ai.AIActor;
+import tools.DevLog;
 
 public class RetreatState extends AIState {
-
+	
+	private long retreatStartTime = 0L;
+	private Point3D retreatStartPos = null;
+	
 	@Override
 	public byte onEnter(AIActor actor) {
 		/*synchronized(actor.getDamageMap()) {
@@ -35,8 +39,11 @@ public class RetreatState extends AIState {
 				actor.removeDefender(defender);
 			}
 		}*/
-		NGECore.getInstance().aiService.logAI("RetreatState ENTER ");
-		
+		DevLog.debugoutai(actor, "Charon", "AI RetreatState", "RetreatState ENTER!");
+		CreatureObject creature = actor.getCreature();
+		if (creature.getPosture()==13 || creature.getPosture()==14)
+			return StateResult.FINISHED;
+		creature.setInCombat(false);
 		if (actor.getCreature().getOwnerId()>0){
 			CreatureObject owner = (CreatureObject) NGECore.getInstance().objectService.getObject(actor.getCreature().getOwnerId());
 			actor.setFollowObject(owner);
@@ -44,6 +51,9 @@ public class RetreatState extends AIState {
 			return StateResult.FINISHED;
 		} else
 			actor.setFollowObject(null);
+		
+		retreatStartTime = System.currentTimeMillis();
+		retreatStartPos = creature.getWorldPosition();
 		actor.scheduleMovement();
 		return StateResult.UNFINISHED;
 	}
@@ -52,16 +62,20 @@ public class RetreatState extends AIState {
 	public byte onExit(AIActor actor) {
 		// TODO Auto-generated method stub
 		//actor.setCurrentState(actor.getIntendedPrimaryAIState());
+		DevLog.debugoutai(actor, "Charon", "AI RetreatState", "RetreatState EXIT!");
 		return StateResult.FINISHED;
 	}
 
 	@Override
 	public byte move(AIActor actor) {
-		
+		DevLog.debugoutai(actor, "Charon", "AI RetreatState", "RetreatState MOVE!");
 		Point3D retreatPosition = actor.getSpawnPosition();
 		if (actor.getIntendedPrimaryAIState() instanceof PatrolState)
 			retreatPosition = actor.getLastPositionBeforeStateChange();
 		
+		CreatureObject creature = actor.getCreature();
+		if (creature.getPosture()==13 || creature.getPosture()==14)
+			return StateResult.FINISHED;
 		actor.setNextPosition(retreatPosition);
 		actor.getMovementPoints().clear();
 		actor.getMovementPoints().add(retreatPosition);
@@ -71,19 +85,49 @@ public class RetreatState extends AIState {
 			return StateResult.FOLLOW;
 		
 		if(actor.getCreature().getWorldPosition().getDistance(retreatPosition) > 5) {
-			//NGECore.getInstance().aiService.logAI("RetreatState ENTER move if case dist " + actor.getCreature().getWorldPosition().getDistance(retreatPosition));
 			actor.scheduleMovement();
 		} else {
-			//NGECore.getInstance().aiService.logAI("RetreatState ENTER move else case");
+
 			if (actor.getIntendedPrimaryAIState().getClass().equals(IdleState.class))
-				return StateResult.IDLE;
+				actor.setCurrentState(new IdleState());
 			if (actor.getIntendedPrimaryAIState().getClass().equals(PatrolState.class))
-				return StateResult.PATROL;
+				actor.setCurrentState(new PatrolState());
 			if (actor.getIntendedPrimaryAIState().getClass().equals(LoiterState.class))
-				return StateResult.LOITER;
+				actor.setCurrentState(new LoiterState());
 			if (actor.getIntendedPrimaryAIState().getClass().equals(FollowState.class))
-				return StateResult.FOLLOW;
+				actor.setCurrentState(new FollowState());
+
+			return StateResult.FINISHED;
 		}
+		
+		if(System.currentTimeMillis()> retreatStartTime + 5000 && creature.getWorldPosition().getDistance2D(retreatStartPos)<1.5){
+			// Actor is locked in retreat state, get back to intended state
+			if (actor.getIntendedPrimaryAIState().getClass().equals(IdleState.class))
+				actor.setCurrentState(new IdleState());
+			if (actor.getIntendedPrimaryAIState().getClass().equals(PatrolState.class))
+				actor.setCurrentState(new PatrolState());
+			if (actor.getIntendedPrimaryAIState().getClass().equals(LoiterState.class))
+				actor.setCurrentState(new LoiterState());
+			if (actor.getIntendedPrimaryAIState().getClass().equals(FollowState.class))
+				actor.setCurrentState(new FollowState());
+
+			return StateResult.FINISHED;
+		}
+		
+		if(System.currentTimeMillis()> retreatStartTime + 40000){
+			// Actor is locked in retreat state, get back to intended state after 40s, no matter what
+			if (actor.getIntendedPrimaryAIState().getClass().equals(IdleState.class))
+				actor.setCurrentState(new IdleState());
+			if (actor.getIntendedPrimaryAIState().getClass().equals(PatrolState.class))
+				actor.setCurrentState(new PatrolState());
+			if (actor.getIntendedPrimaryAIState().getClass().equals(LoiterState.class))
+				actor.setCurrentState(new LoiterState());
+			if (actor.getIntendedPrimaryAIState().getClass().equals(FollowState.class))
+				actor.setCurrentState(new FollowState());
+
+			return StateResult.FINISHED;
+		}
+		
 		return StateResult.UNFINISHED;
 	}
 

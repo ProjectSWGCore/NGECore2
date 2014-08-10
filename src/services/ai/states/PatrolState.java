@@ -21,16 +21,22 @@
  ******************************************************************************/
 package services.ai.states;
 
-import main.NGECore;
 import resources.objects.creature.CreatureObject;
 import services.ai.AIActor;
+import tools.DevLog;
 
 public class PatrolState extends AIState {
-
+	
+	private boolean locked = false;
+	
+	public PatrolState(){
+		stateID = autoStateID++;
+	}
+	
 	@Override
 	public byte onEnter(AIActor actor) {
-		// TODO Auto-generated method stub
-		NGECore.getInstance().aiService.logAI("PATROL ENTERED!");
+		
+		DevLog.debugoutai(actor, "Charon", "AI PatrolState", "PATROL ENTERED!");		
 		CreatureObject creature = actor.getCreature();
 		if(creature.getPosture() == 14)
 			return StateResult.DEAD;
@@ -41,27 +47,37 @@ public class PatrolState extends AIState {
 
 	@Override
 	public byte onExit(AIActor actor) {
-		// TODO Auto-generated method stub
-		NGECore.getInstance().aiService.logAI("EXITING PATROL STATE");
+		DevLog.debugoutai(actor, "Charon", "AI PatrolState", "EXITING PATROL STATE!");		
 		actor.setLastPositionBeforeStateChange(actor.getCreature().getWorldPosition());
-		return 0;
+		locked = true;
+		return StateResult.FINISHED;
 	}
 
 	@Override
 	public byte move(AIActor actor) {
-		// TODO Auto-generated method stub
-		//System.out.println("move in patrolState");
+		DevLog.debugoutai(actor, "Charon", "AI PatrolState", "PATROL MOVE!");
+		if (locked){
+			System.out.println("PatrolState locked!");
+			return StateResult.FINISHED;
+		}
+		CreatureObject creature = actor.getCreature();
+		if(creature.isInCombat()){
+			//System.out.println("PatrolState locking!");
+			locked = true;
+			return StateResult.FINISHED;
+		}
 		doPatrol(actor);
-//		if (actor.getCreature().getPlanet().getName().equals("dathomir"))
-//			NGECore.getInstance().aiService.logAI("WalkingSpeed " + actor.getCreature().getWalkSpeed());
 		actor.scheduleMovement();
 		return StateResult.UNFINISHED;
 	}
 
 	@Override
 	public byte recover(AIActor actor) {
-		// TODO Auto-generated method stub
-		return 0;
+		if (actor.getFollowObject()!=null)
+			System.out.println("recover follow object is not null");
+		if (actor.getFollowObject()!=null)
+			System.out.println("recover follow object is not null");
+		return StateResult.UNFINISHED;
 	}
 
 }

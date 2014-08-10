@@ -212,16 +212,16 @@ public class TerrainService {
 					}
 					
 					if (loaded && config.getInt("LOAD.BUILDOUT_OBJECTS") > 0) {
-						if (!core.getExcludedDevelopers().contains(System.getProperty("user.name"))){
+						if (!core.getExcludedDevelopers().contains(System.getProperty("user.name"))){								
 							if (! config.keyExists("LOAD.BUILDOUT_ONLY_FOR")){
 								try {							
 									core.objectService.loadBuildoutObjects(planet);
 								} catch (InstantiationException | IllegalAccessException e) {
 									e.printStackTrace();
 								}
-							} else {
-								if (planet.getName().equals(config.getString("LOAD.BUILDOUT_ONLY_FOR"))){
-									try {							
+							} else {								
+								if (planet.getName().trim().equals(config.getString("LOAD.BUILDOUT_ONLY_FOR").trim())){
+									try {		
 										core.objectService.loadBuildoutObjects(planet);
 									} catch (InstantiationException | IllegalAccessException e) {
 										e.printStackTrace();

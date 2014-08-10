@@ -37,6 +37,7 @@ import org.python.core.PyObject;
 import protocol.swg.ObjControllerMessage;
 import protocol.swg.ObjectMenuSelectMessage;
 import protocol.swg.SUICreatePageMessage;
+import protocol.swg.SUICreateTimerBar;
 import protocol.swg.SUIEventNotification;
 import protocol.swg.SUIForceClosePageMessage;
 import protocol.swg.SUIUpdatePageMessage;
@@ -490,8 +491,24 @@ public class SUIService implements INetworkDispatch {
 		}
 		
 		SUICreatePageMessage create = new SUICreatePageMessage(window.getScript(), window.getWindowId(), window.getComponents(), rangeObjectId, range);
+		tools.CharonPacketUtils.printAnalysis(create.serialize(), "SUICreatePageMessage");
 		owner.getClient().getSession().write(create.serialize());
 		
+	}
+	
+	public void openTimerSUIWindow(SUIWindow window, String prompt, int startCount) {
+		
+		SWGObject owner = window.getOwner();
+		
+		if(owner == null)
+			return;
+		
+		if(owner.getClient() == null || owner.getClient().getSession() == null)
+			return;
+
+		SUICreateTimerBar create = new SUICreateTimerBar(window.getScript(), window.getWindowId(), prompt, startCount);
+		tools.CharonPacketUtils.printAnalysis(create.serialize(), "SUICreateTimerBar");
+		owner.getClient().getSession().write(create.serialize());		
 	}
 	
 	public void updateSUIWindow(SUIWindow window) {

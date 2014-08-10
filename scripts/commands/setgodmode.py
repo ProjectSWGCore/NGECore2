@@ -2,6 +2,7 @@ import sys
 from engine.resources.scene import Point3D
 from protocol.swg import ObjControllerMessage
 from protocol.swg import UnknownAbilityPacket
+from protocol.swg import PlayClientEffectLocMessage
 from engine.resources.objects import SWGObject
 from java.awt.datatransfer import StringSelection
 from java.awt.datatransfer import Clipboard
@@ -191,6 +192,85 @@ def run(core, actor, target, commandString):
 		actor.setPosture(0)
 		actor.setSpeedMultiplierBase(1)
 		actor.setTurnRadius(1)
+		
+	elif command == 'checkai':		
+		latargetID = long(actor.getIntendedTarget())
+		latarget = core.objectService.getObject(latargetID)
+		actor.sendSystemMessage('Checking AI handling for unit ' + latarget.getCustomName(), 0)
+		core.aiService.setCheckAI(latarget)
+		
+	elif command == 'checkaitarget':		
+		latargetID = long(actor.getIntendedTarget())
+		latarget = core.objectService.getObject(latargetID)
+		if latarget.getAttachment('AI'):
+			if latarget.getAttachment('AI').getFollowObject():
+				actor.sendSystemMessage('Checking AI target ' + latarget.getAttachment('AI').getFollowObject().getTemplate(), 0)
+	
+	elif command == 'checkaistate':		
+		latargetID = long(actor.getIntendedTarget())
+		latarget = core.objectService.getObject(latargetID)
+		if latarget.getAttachment('AI'):
+			if latarget.getAttachment('AI').getCurrentState():
+				actor.sendSystemMessage('Checking AI state ' + latarget.getAttachment('AI').getCurrentState().getClass().getName(), 0)
+				
+	elif command == 'checkairepos':		
+		latargetID = long(actor.getIntendedTarget())
+		latarget = core.objectService.getObject(latargetID)
+		if latarget.getAttachment('AI'):
+			if latarget.getAttachment('AI').getRepositionStartTime()():
+				actor.sendSystemMessage('Checking AI state ' + latarget.getAttachment('AI').getRepositionStartTime(), 0)
+	
+	elif command == 'checkaiprog':		
+		latargetID = long(actor.getIntendedTarget())
+		latarget = core.objectService.getObject(latargetID)
+		if latarget.getAttachment('AI'):
+			actor.sendSystemMessage('Checking AI progression %s' % latarget.getAttachment('AI').getProgressionMarker(), 0)
+	
+	elif command == 'checkwithdrawn':		
+		latargetID = long(actor.getIntendedTarget())
+		latarget = core.objectService.getObject(latargetID)
+		if latarget.getAttachment('isWithdrawn'): 
+			actor.sendSystemMessage('Checking AIisWithdrawn %s' % latarget.getAttachment('isWithdrawn'), 0)
+	
+	elif command == 'showbitmask':		
+		latargetID = long(actor.getIntendedTarget())
+		latarget = core.objectService.getObject(latargetID)
+		actor.sendSystemMessage('Optionsbitmask for unit ' + latarget.getCustomName() + ' is %s' % latarget.getOptionsBitmask(), 0)
+		
+	elif command == 'spawninst':
+			
+		#String campTemplate = "object/building/poi/shared_gcw_rebel_clone_tent_small.iff"; // LOL why doesn't this spawn?!?!?!
+		inst = core.objectService.createObject(arg1, 0, actor.getPlanet(), actor.getWorldPosition(), actor.getOrientation())
+		if inst:
+			#TangibleObject inst = (TangibleObject)  core.objectService.createObject(campTemplate, 0, core.terrainService.getPlanetByName("talus"), new Point3D(-890,9, -2994), quaternion)
+			core.simulationService.add(inst, inst.getPosition().x, inst.getPosition().z, True)
+			positionY = core.terrainService.getHeight(inst.getPlanetId(), inst.getPosition().x, inst.getPosition().z)
+			instpos = Point3D(inst.getPosition().x,positionY+2, inst.getPosition().z)
+			inst.setPosition(instpos)
+	
+	elif command == 'los':
+		latargetID = long(actor.getIntendedTarget())
+		latarget = core.objectService.getObject(latargetID)
+		los = core.simulationService.checkLineOfSight(actor, latarget)
+		if los:
+			actor.sendSystemMessage('Line of sight between player and target', 0)
+		else:
+			actor.sendSystemMessage('NO Line of sight between player and target', 0)
+	
+	elif command == 'playfx':
+		effectFile = arg1
+		cEffMsg = PlayClientEffectLocMessage(effectFile, actor.getPlanet().getName(), actor.getPosition())
+		actor.getClient().getSession().write(cEffMsg.serialize())
+		
+	elif command == 'toinvasion':
+		invasionplanet = core.invasionService.getInvasionPlanetName()
+		position = Point3D(float(1366), float(13), float(2747))
+		if invasionplanet == 'talus':
+			position = Point3D(float(264), float(4), float(-2950)) 
+		if invasionplanet == 'tatooine':
+			position = Point3D(float(-1385), float(12), float(-3597))
+		
+		core.simulationService.transferToPlanet(actor, core.terrainService.getPlanetByName(invasionplanet), position, actor.getOrientation(), None)
 	
 	elif command == 'unknownAbilityPacket' and arg1:
 		packet = UnknownAbilityPacket(arg1)

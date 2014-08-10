@@ -170,6 +170,8 @@ public class LoginService implements INetworkDispatch{
 				CharacterCreationDisabled charCreationDisabled = new CharacterCreationDisabled(0);
 				StationIdHasJediSlot jediSlot = new StationIdHasJediSlot(false);
 				ServerNowEpochTime time = new ServerNowEpochTime((int) (System.currentTimeMillis() / 1000));
+				//System.out.println("ServerNowEpochTime " + (int) (System.currentTimeMillis() / 1000));
+				//tools.CharonPacketUtils.printAnalysis(time.serialize(), "ServerNowEpochTime");
 				
 				if (client.getSession().containsAttribute("tradeSession") == true) {
 					client.getSession().removeAttribute("tradeSession");

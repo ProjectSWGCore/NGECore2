@@ -22,8 +22,10 @@
 package services;
 
 import java.util.Map;
+import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -34,6 +36,7 @@ import org.python.core.PyObject;
 import resources.buffs.Buff;
 import resources.buffs.DamageOverTime;
 import resources.common.FileUtilities;
+import resources.datatables.Posture;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
 import resources.objects.player.PlayerObject;
@@ -50,6 +53,22 @@ public class BuffService implements INetworkDispatch {
 	private NGECore core;
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	private ConcurrentHashMap<String, Buff> buffMap = new ConcurrentHashMap<String, Buff>();
+	
+	private static Map<String,String> bannerBuffMapping = new ConcurrentHashMap<String,String>();
+	static{
+		bannerBuffMapping.put("trader_0a", "banner_buff_trader");
+		bannerBuffMapping.put("trader_0b", "banner_buff_trader");
+		bannerBuffMapping.put("trader_0c", "banner_buff_trader");
+		bannerBuffMapping.put("trader_0d", "banner_buff_trader");
+		bannerBuffMapping.put("entertainer_1a", "banner_buff_entertainer");
+		bannerBuffMapping.put("medic_1a", "banner_buff_medic");
+		bannerBuffMapping.put("officer_1a", "banner_buff_officer");
+		bannerBuffMapping.put("bounty_hunter_1a", "banner_buff_bounty_hunter");
+		bannerBuffMapping.put("smuggler_1a", "banner_buff_smuggler");
+		bannerBuffMapping.put("commando_1a", "banner_buff_commando");
+		bannerBuffMapping.put("spy_1a", "banner_buff_spy");
+		bannerBuffMapping.put("force_sensitive_1a", "banner_buff_force_sensitive");
+	}
 	
 	public BuffService(NGECore core) {
 		this.core = core;
@@ -102,6 +121,10 @@ public class BuffService implements INetworkDispatch {
 		} else {
 			if (! hasBuff(target,buffName)) // QA, prevent infinite "refreshing" of buff by repeated use
 				doAddBuff(target, buffName, buffer);
+			else {
+				if (buff.getMaxStacks()>1)
+					doAddBuff(target, buffName, buffer);
+			}
 			return true;
 		}
 	}
@@ -182,6 +205,12 @@ public class BuffService implements INetworkDispatch {
         	if(buff.getEffect4Name().length() > 0) core.skillModService.addSkillMod(target, buff.getEffect4Name(), (int) buff.getEffect4Value());
         	if(buff.getEffect5Name().length() > 0) core.skillModService.addSkillMod(target, buff.getEffect5Name(), (int) buff.getEffect5Value());
 //		}
+        	
+    	if (buffName.equals("gcw_fatigue")){
+    		if (FileUtilities.doesFileExist("scripts/buffs/" + buffName + ".py")) {
+    			core.scriptService.callScript("scripts/buffs/", buffName, "add", core, buffer, buff);
+    		}
+    	}
 		
 		target.addBuff(buff);
 		
@@ -412,6 +441,56 @@ public class BuffService implements INetworkDispatch {
 			doAddBuff((CreatureObject) member, buffName, buffer);
 		}
 
+	}
+	
+	public void applyGCWBuff(String buffName, String factionName, SWGObject center) {
+		Vector<CreatureObject> inRangeObjects = core.simulationService.getAllNearSameFactionCreatures(10, center.getWorldPosition(), center.getPlanet(), factionName);		
+		for(SWGObject obj : inRangeObjects) {		
+			if(!(obj instanceof CreatureObject))
+				continue;			
+			if(obj instanceof CreatureObject && (((CreatureObject) obj).getPosture() == Posture.Dead))
+				continue;			
+			CreatureObject buffed = (CreatureObject) obj;
+			if (! buffed.hasBuff(buffName))
+				addBuffToCreature(buffed, buffName, buffed);			
+		}
+	}
+	
+	public void initiateBannerBuffProcess(CreatureObject buffer, SWGObject banner){
+		
+		String factionName = buffer.getFaction();
+		String professionName = buffer.getPlayerObject().getProfession();
+		String buffName = bannerBuffMapping.get(professionName); 		
+		applyGCWBuff(buffName, factionName, banner);
+		
+		final Future<?>[] fut = {null};
+		fut[0] = scheduler.scheduleAtFixedRate(new Runnable() {
+			@Override public void run() { 
+				try {
+					if (NGECore.getInstance().objectService.getObject(banner.getObjectID())==null){
+		                Thread.yield();
+		                fut[0].cancel(false);
+					}
+								
+					applyGCWBuff(buffName, factionName, banner);
+					
+					if (! buffer.isInQuadtree()){
+						NGECore.getInstance().objectService.destroyObject(banner.getObjectID());
+						Thread.yield();
+		                fut[0].cancel(false);
+					}
+					
+					if (buffer.getWorldPosition().getDistance2D(banner.getWorldPosition())>1000 || buffer.getPlanetId()!=banner.getPlanetId()){
+						NGECore.getInstance().objectService.destroyObject(banner.getObjectID());
+						Thread.yield();
+		                fut[0].cancel(false);
+					}
+										
+				} catch (Exception e) {
+					System.err.println("Exception in GCW Banner thread " + e.getMessage());
+			}
+			}
+		}, 0, 2, TimeUnit.SECONDS);
 	}
 	
 	private void loadBuffs() {

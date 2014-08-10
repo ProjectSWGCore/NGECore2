@@ -91,6 +91,7 @@ import services.command.CommandService;
 import services.equipment.EquipmentService;
 import services.gcw.FactionService;
 import services.gcw.GCWService;
+import services.gcw.InvasionService;
 import services.GuildService;
 import services.LoginService;
 import services.map.MapService;
@@ -156,6 +157,7 @@ public class NGECore {
 	private String motd = "";
 	private volatile boolean isShuttingDown = false;
 	private long galacticTime = System.currentTimeMillis();
+	private int galaxyStatus = -1;
 	
 	private ConcurrentHashMap<IoSession, Client> clients = new ConcurrentHashMap<IoSession, Client>();
 	
@@ -212,6 +214,7 @@ public class NGECore {
 	public PetService petService;
 	public BrowserService browserService;
 	//public BattlefieldService battlefieldService;
+	public InvasionService invasionService;
 	
 	// Login Server
 	public NetworkDispatch loginDispatch;
@@ -273,7 +276,8 @@ public class NGECore {
 		options.setFilePath("options.cfg");
 		boolean optionsConfigLoaded = options.loadConfigFile();
 		
-		if (optionsConfigLoaded && options.getInt("CLEAN.ODB.FOLDERS") > 0 || getExcludedDevelopers().contains(System.getProperty("user.name"))){
+		//if (optionsConfigLoaded && options.getInt("CLEAN.ODB.FOLDERS") > 0 || getExcludedDevelopers().contains(System.getProperty("user.name"))){
+		if (optionsConfigLoaded && options.getInt("CLEAN.ODB.FOLDERS") > 0){
 			File baseFolder = new File("./odb");
 			
 			if (baseFolder.isDirectory()) {
@@ -373,6 +377,7 @@ public class NGECore {
 		spawnService = new SpawnService(this);
 		aiService = new AIService(this);
 		missionService = new MissionService(this);
+		invasionService = new InvasionService(this);
 		
 		// Ping Server
 		
@@ -427,6 +432,7 @@ public class NGECore {
 		zoneDispatch.addService(staticService);
 		zoneDispatch.addService(reverseEngineeringService);
 		zoneDispatch.addService(petService);
+		zoneDispatch.addService(invasionService);
 		
 		if (optionsConfigLoaded && options.getInt("LOAD.RESOURCE.SYSTEM") == 1) {
 			zoneDispatch.addService(surveyService);
@@ -644,6 +650,7 @@ public class NGECore {
 	
 	public void setGalaxyStatus(int statusId) {
 		
+		galaxyStatus = statusId;
 		int galaxyId = config.getInt("GALAXY_ID");
 		
 		try {
@@ -655,6 +662,10 @@ public class NGECore {
 			e.printStackTrace();
 		}
 		
+	}
+	
+	public int getGalaxyStatus() {
+		return galaxyStatus;
 	}
 	
 	/*
@@ -852,7 +863,7 @@ public class NGECore {
 	
 	public Vector<String> getExcludedDevelopers(){
 		Vector<String> excludedDevelopers = new Vector<String>();
-		excludedDevelopers.add("Charon");
+		//excludedDevelopers.add("Charon");
 		// Feel free to add your OS user account name here to exclude yourself from loading buildouts and snapshots
 		// without having to change options.cfg all the time
 		return excludedDevelopers;
