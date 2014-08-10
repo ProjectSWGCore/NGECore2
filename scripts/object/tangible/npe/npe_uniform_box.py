@@ -79,7 +79,7 @@ def use(core, actor, object):
 		pants = core.objectService.createObject('object/tangible/wearables/pants/shared_pants_s08.iff', actor.getPlanet(), 'item_medic_pants_02_01')
 		shirt = core.objectService.createObject('object/tangible/wearables/shirt/shared_shirt_s27.iff', actor.getPlanet(), 'item_medic_shirt_02_01')
 		vest = core.objectService.createObject('object/tangible/wearables/vest/shared_vest_s05.iff', actor.getPlanet(), 'item_medic_vest_02_01')
-		items.add(shoes)
+		items.add(boots)
 		items.add(pants)
 		items.add(shirt)
 		items.add(vest)
