@@ -33,6 +33,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.mina.core.buffer.IoBuffer;
 
 import resources.craft.DraftSchematic;
+import resources.datatables.AdminTag;
 import resources.datatables.Citizenship;
 import resources.datatables.Professions;
 import resources.gcw.RegionDefender;
@@ -130,7 +131,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	@Override
 	public Baseline getBaseline6() {
 		Baseline baseline = super.getBaseline6();
-		baseline.put("godLevel", (byte) 0);
+		baseline.put("adminTag", (byte) AdminTag.NONE);
 		baseline.put("currentRank", 0);
 		baseline.put("rankProgress", (float) 0);
 		baseline.put("highestRebelRank", 0);
@@ -435,12 +436,12 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		notifyClients(getBaseline(3).set("showBackpack", showBackpack), true);
 	}
 	
-	public byte getGodLevel() {
-		return (byte) getBaseline(6).get("godLevel");
+	public byte getAdminTagValue() {
+		return (byte) getBaseline(6).get("adminTag");
 	}
 	
-	public void setGodLevel(int godLevel) {
-		notifyClients(getBaseline(6).set("godLevel", (byte) godLevel), true);
+	public void setAdminTagValue(byte adminTag) {
+		notifyClients(getBaseline(6).set("adminTag", (byte) adminTag), true);
 	}
 	
 	public int getCurrentRank() {
