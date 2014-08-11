@@ -153,19 +153,17 @@ public class WaypointObject extends IntangibleObject implements IDelta, Serializ
 		
 	}
 	
-	public byte[] getBytes() {
-		synchronized(objectMutex) {
-			IoBuffer buffer = Baseline.createBuffer(38 + StringUtilities.getUnicodeString(getName()).length);
-			buffer.putInt(getCellNumber());
-			buffer.put(Baseline.toBytes(getBaseline(3).get("position")));
-			buffer.putLong(getTargetId());
-			buffer.putInt(getPlanetCrc());
-			buffer.put(StringUtilities.getUnicodeString(getName()));
-			buffer.putLong(getObjectID());
-			buffer.put(getColor());
-			buffer.put(Baseline.getBoolean(isActive()));
-			return buffer.flip().array();
-		}
+	public synchronized byte[] getBytes() {
+		IoBuffer buffer = Baseline.createBuffer(38 + StringUtilities.getUnicodeString(getName()).length);
+		buffer.putInt(getCellNumber());
+		buffer.put(Baseline.toBytes(getBaseline(3).get("position")));
+		buffer.putLong(getTargetId());
+		buffer.putInt(getPlanetCrc());
+		buffer.put(StringUtilities.getUnicodeString(getName()));
+		buffer.putLong(getObjectID());
+		buffer.put(getColor());
+		buffer.put(Baseline.getBoolean(isActive()));
+		return buffer.flip().array();
 	}
 	
 	@Deprecated public int getCellId() { return getCellNumber(); }
