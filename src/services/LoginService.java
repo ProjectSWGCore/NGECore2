@@ -105,8 +105,9 @@ public class LoginService implements INetworkDispatch{
 				
 				String user        = clientID.getAccountName();
 				String pass        = clientID.getPassword();
+				String version     = clientID.getVersion();
 				int id             = LoginProvider.getAccountId(user, pass, session.getRemoteAddress().toString());
-				System.out.println("LOGIN: " + user + " login attempt "+session.getRemoteAddress().toString()+" returned " + id);
+				System.out.println("LOGIN: " + user + " login attempt " + session.getRemoteAddress().toString() + " returned " + id);
 				
 				if (id < 0)  {
 					
@@ -132,6 +133,15 @@ public class LoginService implements INetworkDispatch{
 					
 					// Closing the session for some reason will not show any error messages, even if write messages are queued.. 
 					//As result, the infinite "Connection to the login server is now open..." loop., also it randomly denies any logins from that client for some reason
+					return;
+				}
+				
+				if(!version.equals("20111130-15:46")) {
+					ErrorMessage clientErr = new ErrorMessage("Invalid Client", "The version of your client is invalid.");
+					session.write(clientErr.serialize());
+					
+					Disconnect disconnect = new Disconnect((Integer)session.getAttribute("connectionId"), 6);
+					session.write(disconnect);
 					return;
 				}
 				
@@ -370,14 +380,5 @@ public class LoginService implements INetworkDispatch{
 		return clusterStatus;
 	}
 	
-	/**
-	 * Checks if User has correct client version.
-	 * @param version Client Version String
-	 */
-	private boolean checkVersion(String version) {
-		System.out.println("Version Received: " + version);
-		return true;
-	}
-
 }
 	
