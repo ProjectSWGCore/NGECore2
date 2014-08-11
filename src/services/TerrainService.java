@@ -223,15 +223,19 @@ public class TerrainService {
 					if (options != null && options.getInt("LOAD.BUILDOUT_OBJECTS") > 0) {
 						if (!core.getExcludedDevelopers().contains(System.getProperty("user.name"))){								
 							if (! options.keyExists("LOAD.BUILDOUT_ONLY_FOR")){
-								try {							
+								try {
+									System.out.println("Loading buildout objects for: " + planet.getName());
 									core.objectService.loadBuildoutObjects(planet);
+									System.out.println("Finished loading buildout objects for: " + planet.getName());
 								} catch (InstantiationException | IllegalAccessException e) {
 									e.printStackTrace();
 								}
-							} else {								
+							} else {
 								if (planet.getName().trim().equals(options.getString("LOAD.BUILDOUT_ONLY_FOR").trim())){
 									try {		
+										System.out.println("Loading buildout objects for: " + planet.getName());
 										core.objectService.loadBuildoutObjects(planet);
+										System.out.println("Finished loading buildout objects for " + planet.getName());
 									} catch (InstantiationException | IllegalAccessException e) {
 										e.printStackTrace();
 									}
