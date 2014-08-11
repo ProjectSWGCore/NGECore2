@@ -122,7 +122,7 @@ public class HousingService implements INetworkDispatch {
 			return null;
 		}
 		
-		if(!actor.getClient().isGM() && !core.terrainService.canBuildAtPosition(actor, positionX, positionZ)) {
+		if(core.adminService.getAccessLevelFromDB(actor.getClient().getAccountId()).equals(null) && !core.terrainService.canBuildAtPosition(actor, positionX, positionZ)) {
 			actor.sendSystemMessage("You may not place a structure here.", (byte) 0); // should probably load this from an stf
 			return null;
 		}
