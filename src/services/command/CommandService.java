@@ -80,7 +80,7 @@ public class CommandService implements INetworkDispatch  {
 		if (actor == null)
 			return false;
 		
-		if (actor.getClient().equals(null))
+		if (actor.getClient() == null)
 			return false;
 		
 		if (command == null)

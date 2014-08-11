@@ -71,7 +71,7 @@ public class LoginClusterStatus extends SWGMessage {
 			populationStatus = 6;
 			status = 3;
 		}
-		if(status == 3 && !NGECore.getInstance().adminService.getAccessLevelFromDB(client.getAccountId()).equals(null))	// Ziggy - admins can enter Locked galaxies
+		if(status == 3 && !(NGECore.getInstance().adminService.getAccessLevelFromDB(client.getAccountId()) == null) )	// Ziggy - admins can enter Locked galaxies
 			status = 2;
 		result.putInt(populationStatus); 	// 0 = very light, 1 = light, 2 = medium , 3 = heavy, 4 = very heavy, 5 = extremely heavy, 6 = full
 		result.putInt(maxCharacters);
