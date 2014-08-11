@@ -67,3 +67,5 @@ revertplayerappearance
 gmclearquest
 gmgrantquest
 getaccountinfo
+object
+giveitem

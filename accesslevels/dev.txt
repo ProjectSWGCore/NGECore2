@@ -86,9 +86,10 @@ combatdataclear
 combatdatareport
 combatdatastop
 combatmodecheck
-findwarden
-grantwarden
-revokewarden
 startrestussstagetwo
 completerestussstageone
 spewcommandqueue
+object
+giveitem
+createcreature
+createspawningelement
