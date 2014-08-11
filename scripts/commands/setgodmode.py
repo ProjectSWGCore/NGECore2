@@ -36,16 +36,6 @@ def run(core, actor, target, commandString):
 	if len(commandArgs) > 5:
 		arg5 = commandArgs[5]
 	
-	if not command:
-		return
-	
-	if actor.getClient().isGM() is False:
-		return
-	
-	if playerObject.getGodLevel() == 0:
-		actor.addAbility("admin")
-		playerObject.setGodLevel(50)
-	
 	if command == 'giveExperience' and arg1:
 		core.playerService.giveExperience(actor, int(arg1))
 		

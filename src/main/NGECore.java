@@ -65,6 +65,7 @@ import services.ConversationService;
 import services.EntertainmentService;
 import services.GroupService;
 import services.housing.HousingService;
+import services.AdminService;
 import services.BrowserService;
 import services.InstanceService;
 import services.LoginService;
@@ -216,6 +217,7 @@ public class NGECore {
 	public BrowserService browserService;
 	//public BattlefieldService battlefieldService;
 	public InvasionService invasionService;
+	public AdminService adminService;
 	
 	// Login Server
 	public NetworkDispatch loginDispatch;
@@ -503,10 +505,7 @@ public class NGECore {
 		terrainService.addPlanet(43, "space_tatooine", "terrain/space_tatooine.trn", true);
 		terrainService.addPlanet(44, "space_tatooine_2", "terrain/space_tatooine_2.trn", true);
 		terrainService.addPlanet(45, "space_yavin4", "terrain/space_yavin4.trn", true);*/
-		//PSWG New Content Terrains  (WARNING Keep commented out unless you have the current build of kaas!)
-
-		//terrainService.addPlanet(46, "kaas", "terrain/kaas.trn", true);
-
+		
 		//end terrainList
 		
 		if (options.getInt("LOAD.RESOURCE.SYSTEM") > 0) {
@@ -567,6 +566,7 @@ public class NGECore {
 		
 		browserService = new BrowserService(this);
 		//battlefieldService = new BattlefieldService(this);
+		adminService = new AdminService(this);
 		
 		DevLogQueuer devLogQueuer = new DevLogQueuer();
 		

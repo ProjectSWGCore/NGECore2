@@ -1,0 +1,5 @@
+findplayer
+killplayer
+setgodmode
+invulnerable
+server

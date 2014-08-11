@@ -140,9 +140,7 @@ public class LoginService implements INetworkDispatch{
 				client.setPassword(pass);
 				client.setSessionKey(generateSessionKey());
 				client.setAccountId(id);
-				//client.setAccountEmail(email);
 				client.setSession(session);
-				client.setGM(checkForGmPermission(id));
 				
 				core.addClient(session, client);
 				
@@ -156,9 +154,6 @@ public class LoginService implements INetworkDispatch{
 					System.out.println(client.getAccountName() + " was not added to active connections map.");
 					return;				
 				}
-				/*if(!checkIfAccountExistInGameDB(id)) {
-					createAccountForGameDB(id, user, email, encryptPass);
-				}*/
 				
 				persistSession(client);
 
@@ -267,29 +262,6 @@ public class LoginService implements INetworkDispatch{
 	
 	public void shutdown() {
 		
-	}
-	
-	public boolean checkForGmPermission(int id) {
-		try {
-			if (core.getConfig().getInt("ADMIN") > 0) {
-				return true;
-			}
-		} catch (Exception e) {
-			
-		}
-		
-		PreparedStatement preparedStatement;
-		
-		try {
-			preparedStatement = databaseConnection1.preparedStatement("SELECT * FROM accounts WHERE id=" + id + "");
-			ResultSet resultSet = preparedStatement.executeQuery();
-			if(resultSet.next())
-				return resultSet.getBoolean("gmflag");
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		
-		return false;
 	}
 	
 	/**

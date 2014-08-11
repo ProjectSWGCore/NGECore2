@@ -92,7 +92,7 @@ public class HousingService implements INetworkDispatch {
 	
 	public void enterStructureMode(CreatureObject actor, TangibleObject deed) {
 		PlayerCity city = core.playerCityService.getCityObjectIsIn(actor);
-		if (!actor.getClient().isGM() && !core.terrainService.canBuildAtPosition(actor, actor.getWorldPosition().x, actor.getWorldPosition().z)) {
+		if (core.adminService.getAccessLevelFromDB(actor.getClient().getAccountId()).equals(null) && !core.terrainService.canBuildAtPosition(actor, actor.getWorldPosition().x, actor.getWorldPosition().z)) {
 			actor.sendSystemMessage("You may not place a structure here.", (byte) 0); // should probably load this from an stf
 			return;
 		}

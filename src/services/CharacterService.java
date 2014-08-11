@@ -366,7 +366,7 @@ public class CharacterService implements INetworkDispatch {
 				System.out.println("Saving character with name: " + object.getCustomName());
 				core.getSWGObjectODB().put(object.getObjectID(), object);
 
-				PreparedStatement ps = databaseConnection.preparedStatement("INSERT INTO characters (id, \"firstName\", \"lastName\", \"accountId\", \"galaxyId\", \"statusId\", appearance, gmflag) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+				PreparedStatement ps = databaseConnection.preparedStatement("INSERT INTO characters (id, \"firstName\", \"lastName\", \"accountId\", \"galaxyId\", \"statusId\", appearance) VALUES (?, ?, ?, ?, ?, ?, ?)");
 				ps.setLong(1, object.getObjectID());
 				ps.setString(2, clientCreateCharacter.getFirstName());
 				ps.setString(3, clientCreateCharacter.getLastName());
@@ -374,7 +374,6 @@ public class CharacterService implements INetworkDispatch {
 				ps.setInt(5, galaxyId);
 				ps.setInt(6, 1);
 				ps.setInt(7, CRC.StringtoCRC(raceTemplate));
-				ps.setBoolean(8, false);
 				ps.executeUpdate();
 				ps.close();
 				CreateCharacterSuccess success = new CreateCharacterSuccess(object.getObjectID());
