@@ -475,7 +475,7 @@ public class NGECore {
 		terrainService.addPlanet(9, "endor", "terrain/endor.trn", true);
 		terrainService.addPlanet(10, "dathomir", "terrain/dathomir.trn", true);
 		terrainService.addPlanet(11, "mustafar", "terrain/mustafar.trn", true);
-		terrainService.addPlanet(12, "kashyyyk_main", "terrain/kashyyyk_main.trn", false);
+		terrainService.addPlanet(12, "kashyyyk_main", "terrain/kashyyyk_main.trn", true);
 		//Dungeon Terrains
 		// TODO: Fix BufferUnderFlow Errors on loaded of dungeon instances.
 		terrainService.addPlanet(13, "kashyyyk_dead_forest", "terrain/kashyyyk_dead_forest.trn", false);
