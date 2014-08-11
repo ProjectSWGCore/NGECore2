@@ -54,12 +54,14 @@ import resources.datatables.Elemental;
 import resources.datatables.Posture;
 import resources.datatables.WeaponType;
 import resources.objects.creature.CreatureObject;
+import resources.objects.installation.InstallationObject;
 import resources.objects.mission.MissionObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.waypoint.WaypointObject;
 import resources.objects.weapon.WeaponObject;
 import services.ai.AIActor;
+import services.ai.TurretAIActor;
 import services.combat.CombatEvents.DamageTaken;
 import services.command.CombatCommand;
 import services.sui.SUIService.MessageBoxType;
@@ -240,6 +242,148 @@ public class CombatService implements INetworkDispatch {
 			}
 		}
 	}
+	
+	public void doCombatForInstallation(final InstallationObject attacker, final TangibleObject target, final WeaponObject weapon, final CombatCommand command, final int actionCounter) {
+		if(target instanceof CreatureObject) if(((CreatureObject) target).getPosture() == Posture.Incapacitated || ((CreatureObject) target).getPosture() == Posture.Dead) return;
+		
+		boolean success = true;
+		
+//		if((command.getAttackType() == 0 || command.getAttackType() == 1 || command.getAttackType() == 3) && !attemptCombat(attacker, target))
+//			success = false;
+		
+//		if(success && !applySpecialCost(attacker, weapon, command))
+//			success = false;
+		
+		if(!success) {
+			IoSession session = attacker.getClient().getSession();
+			CommandEnqueueRemove commandRemove = new CommandEnqueueRemove(attacker.getObjectId(), actionCounter);
+			session.write(new ObjControllerMessage(0x0B, commandRemove).serialize());
+			StartTask startTask = new StartTask(actionCounter, attacker.getObjectID(), command.getCommandCRC(), CRC.StringtoCRC(command.getCooldownGroup()), -1);
+			session.write(new ObjControllerMessage(0x0B, startTask).serialize());
+			return;
+		}
+
+		//final Point3D targetPos = target.getPosition();
+		//final SWGObject targetParent = target.getContainer();
+		
+		if(command.getDelayAttackParticle().length() > 0 || command.getInitialAttackDelay() > -1) {
+			
+			if(command.getInitialAttackDelay() > 0) {
+				
+				if(command.getDelayAttackParticle().length() > 0)
+					target.notifyObservers(new PlayClientEffectLocMessage(command.getDelayAttackParticle(), target.getPlanet().getName(), target.getWorldPosition()), true);
+				
+				try {
+					Thread.sleep((long) command.getInitialAttackDelay() * 1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				
+	
+			} else if(command.getInitialAttackDelay() <= 0 && command.getDelayAttackInterval() > 0 && command.getDelayAttackLoops() <= 1) {
+				
+				try {
+					Thread.sleep((long) command.getDelayAttackInterval() * 1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				
+				if(command.getDelayAttackParticle().length() > 0)
+					target.notifyObservers(new PlayClientEffectLocMessage(command.getDelayAttackParticle(), target.getPlanet().getName(), target.getWorldPosition()), true);
+				
+			}
+			
+			if(command.getDelayAttackLoops() > 1) {
+				final ScheduledFuture<?> task = scheduler.scheduleAtFixedRate(new Runnable() {
+
+					@Override
+					public void run() {
+						try {
+							if(command.getDelayAttackParticle().length() > 0)
+								target.notifyObservers(new PlayClientEffectLocMessage(command.getDelayAttackParticle(), target.getPlanet().getName(), target.getWorldPosition()), true);
+	
+							if(command.getAttackType() == 1)
+								doSingleTargetCombatForInstallation(attacker, target, weapon, command, actionCounter);
+							//else if(command.getAttackType() == 0 || command.getAttackType() == 2 || command.getAttackType() == 3)
+								//doAreaCombat(attacker, targetPos, weapon, command, actionCounter, targetParent);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+					
+				}, 0, (long) (command.getDelayAttackInterval() * 1000), TimeUnit.MILLISECONDS);
+				
+				scheduler.schedule(new Runnable() {
+
+					@Override
+					public void run() {
+						try {
+							task.cancel(true);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+					
+				}, (long) ((command.getDelayAttackInterval() * 1000) * command.getDelayAttackLoops()), TimeUnit.MILLISECONDS);
+				
+				return;
+				
+			} else {
+				if(command.getAttackType() == 1)
+					doSingleTargetCombatForInstallation(attacker, target, weapon, command, actionCounter);
+				//else if(command.getAttackType() == 0 || command.getAttackType() == 2 || command.getAttackType() == 3)
+					//doAreaCombat(attacker, targetPos, weapon, command, actionCounter, targetParent);
+			}
+			
+		} else {
+		
+			if(command.getAttackType() == 1)
+				doSingleTargetCombatForInstallation(attacker, target, weapon, command, actionCounter);
+			//else if(command.getAttackType() == 0 || command.getAttackType() == 2 || command.getAttackType() == 3)
+				//doAreaCombat(attacker, target, weapon, command, actionCounter);
+		
+		}
+		
+		if(target instanceof CreatureObject)
+		{
+			CreatureObject creature = (CreatureObject)target;
+			if(creature.getPosture() == Posture.Incapacitated || creature.getPosture() == Posture.Dead)
+			{
+				for (TangibleObject defender : new ArrayList<TangibleObject>(creature.getDefendersList()))
+				{
+					defender.removeDefender(creature);
+					creature.removeDefender(defender);
+				}
+				
+				if(((CreatureObject) target).getPlayerObject() == null) 
+				{
+					target.setKiller(attacker);
+					
+					scheduler.schedule(new Runnable() 
+					{
+						@Override
+						public void run() 
+						{
+							try {
+								core.objectService.destroyObject(target);
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+						
+					}, 2, TimeUnit.MINUTES);
+				}
+			}
+		}
+		else if(target instanceof TangibleObject)
+		{
+			if(target.getConditionDamage() == target.getMaximumCondition()) 
+			{
+				for(TangibleObject defender : target.getDefendersList()) defender.removeDefender(target);
+				core.objectService.destroyObject(target);
+			}
+		}
+	}
 
 	private void doAreaCombat(CreatureObject attacker, TangibleObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {
 		if(target instanceof CreatureObject) {
@@ -313,7 +457,58 @@ public class CombatService implements INetworkDispatch {
 
 	}
 	
+	private void doSingleTargetCombatForInstallation(InstallationObject attacker, TangibleObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {	
+		if(target instanceof CreatureObject) {
+			doSingleTargetCombatForInstallation(attacker, (CreatureObject) target, weapon, command, actionCounter);
+			return;
+		}
+		
+		float damage = calculateDamageForInstallation(attacker, target, weapon, command);
+		
+		if(damage > 0)
+			applyDamageForInstallation(attacker, target, (int) damage);
+		
+		sendCombatPacketsForInstallation(attacker, target, weapon, command, actionCounter, damage, 0, HitType.HIT);
+	
+		if(FileUtilities.doesFileExist("scripts/commands/combat/" + command.getCommandName() + ".py"))
+			core.scriptService.callScript("scripts/commands/combat/", command.getCommandName(), "run", core, attacker, target, damage);
+
+	}
+	
 	private void applyDamage(CreatureObject attacker, TangibleObject target, int damage) {
+
+		target.setConditionDamage(target.getConditionDamage() + damage);
+		
+		if (target.getOption(Options.MOUNT)) {
+			core.mountService.damage((CreatureObject) target);
+		}
+
+		if (target instanceof CreatureObject){
+			CreatureObject targetCreature = (CreatureObject)target;
+			if (targetCreature.getCalledPet()!=null) {
+				AIActor petActor = (AIActor) targetCreature.getCalledPet().getAttachment("AI");
+				if (petActor!=null){
+					petActor.addDefender(attacker);
+					DevLog.debugoutai(petActor, "Charon", "Pet AI", "applyDamage addDefender");
+				}
+			}
+			
+			if (!targetCreature.isInCombat()){
+				//targetCreature.setInCombat(true);	
+				AIActor targetActor = (AIActor) targetCreature.getAttachment("AI");
+				targetActor.addDefender(attacker);	
+				DevLog.debugoutai(targetActor, "Charon", "CombatService AI", "applyDamage addDefender 2");
+			}	
+		}
+		
+		DamageTaken event = events.new DamageTaken();
+		event.attacker = attacker;
+		event.damage = damage;
+		target.getEventBus().publish(event);
+		attacker.setTefTime(300000);
+	}
+	
+	private void applyDamageForInstallation(InstallationObject attacker, TangibleObject target, int damage) {
 
 		target.setConditionDamage(target.getConditionDamage() + damage);
 		
@@ -330,15 +525,133 @@ public class CombatService implements INetworkDispatch {
 					DevLog.debugout("Charon", "Pet AI", "applyDamage addDefender");
 				}
 			}
+			
+			if (!targetCreature.isInCombat()){
+				//targetCreature.setInCombat(true);	
+				AIActor targetActor = (AIActor) targetCreature.getAttachment("AI");
+				targetActor.addDefender(attacker);	
+				DevLog.debugout("Charon", "CombatService AI", "applyDamage addDefender 2");
+			}	
 		}
 		
 		DamageTaken event = events.new DamageTaken();
 		event.attacker = attacker;
 		event.damage = damage;
 		target.getEventBus().publish(event);
-		System.out.println("APPLY DAMAGE2");
-		attacker.setTefTime(300000);
+		//attacker.setTefTime(300000);
 	}
+	
+	private void applyDamageForInstallation(InstallationObject attacker, CreatureObject target, int damage) {
+
+		if(target.getHealth() - damage <= 0 && target.getSlottedObject("ghost") != null) {
+			
+			if(target.hasBuff("incapWeaken")) {
+
+				//AIActor aiActor = (AIActor)attacker.getAttachment("AI");						
+					
+					deathblowPlayerFromInstallation(attacker, target);
+					return;
+			}
+				
+	
+			
+			if (attacker.getAttachment("AI") instanceof AIActor){
+				AIActor aiActor = (AIActor)attacker.getAttachment("AI");	
+				if (aiActor.getMobileTemplate().isDeathblow()){
+						deathblowPlayerFromInstallation(attacker, target);
+					return;
+				}
+			}
+			if (attacker.getAttachment("AI") instanceof TurretAIActor){
+				deathblowPlayerFromInstallation(attacker, target); // turrets always db
+				return;
+
+			}
+			
+			synchronized(target.getMutex()) {
+				if (core.mountService.isMounted(target)) {
+					core.mountService.dismount(target, (CreatureObject) target.getContainer());
+				}
+				
+				target.setHealth(1);
+				target.setPosture(Posture.Incapacitated);
+				target.setTurnRadius(0);
+				target.setSpeedMultiplierBase(0);	
+				
+			}
+
+			ScheduledFuture<?> incapTask = scheduler.schedule(() -> {
+				
+				synchronized(target.getMutex()) {
+					try {
+						if(target.getPosture() != 13)
+							return;
+						
+						target.setPosture(Posture.Upright);
+						target.setTurnRadius(1);
+						target.setSpeedMultiplierBase(1);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			
+			}, target.getIncapTimer(), TimeUnit.SECONDS);
+			target.setIncapTask(incapTask);
+			core.buffService.addBuffToCreature(target, "incapWeaken", target);
+			if(target.getSlottedObject("ghost") != null && attacker.getSlottedObject("ghost") != null) {
+				target.sendSystemMessage(OutOfBand.ProsePackage("@base_player:prose_victim_incap", "TT", attacker.getCustomName()), DisplayType.Broadcast);
+				//attacker.sendSystemMessage(OutOfBand.ProsePackage("@base_player:prose_target_incap", "TT", target.getCustomName()), DisplayType.Broadcast);
+			} else {target.sendSystemMessage(OutOfBand.ProsePackage("@base_player:prose_victim_incap", "TT", "@" + attacker.getStfFilename() + ":" + attacker.getStfName()), DisplayType.Broadcast); }
+			return;
+		} else if(target.getHealth() - damage <= 0 && target.getAttachment("AI") != null) {
+			synchronized(target.getMutex()) {
+				target.setHealth(0);
+				target.setPosture(Posture.Dead);
+			}
+			attacker.removeDefender(target);
+			target.removeDefender(attacker);
+			return;
+		}
+		synchronized(target.getMutex()) {
+			target.setHealth(target.getHealth() - damage);
+		}
+		
+
+		if (target instanceof CreatureObject){
+			CreatureObject targetCreature = (CreatureObject)target;
+			if (targetCreature.getCalledPet()!=null) {
+				AIActor petActor = (AIActor) targetCreature.getCalledPet().getAttachment("AI");
+				if (petActor!=null){
+					petActor.addDefender(attacker);
+					DevLog.debugout("Charon", "Pet AI", "applyDamage addDefender");
+				}
+			}
+			
+			if (!targetCreature.isInCombat()){
+				//targetCreature.setInCombat(true);	
+				if (targetCreature.getAttachment("AI") instanceof AIActor){
+					AIActor targetActor = (AIActor) targetCreature.getAttachment("AI");
+					targetActor.addDefender(attacker);	
+					DevLog.debugoutai(targetActor, "Charon", "CombatService AI", "applyDamage addDefender 2");
+				}
+				if (targetCreature.getAttachment("AI") instanceof TurretAIActor){
+					TurretAIActor targetActor = (TurretAIActor) targetCreature.getAttachment("AI");
+					targetActor.addDefender(attacker);	
+					DevLog.debugoutai(targetActor, "Charon", "CombatService AI", "applyDamage addDefender 2");
+				}				
+			}	
+		}
+		
+		
+		if (target.getPosture()!=13){
+			DamageTaken event = events.new DamageTaken();
+			event.attacker = attacker;
+			event.damage = damage;
+			target.getEventBus().publish(event);
+		}
+	}
+	
+	
 
 	private void doAreaCombat(CreatureObject attacker, CreatureObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {
 		
@@ -455,11 +768,39 @@ public class CombatService implements INetworkDispatch {
 		sendCombatPackets(attacker, target, weapon, command, actionCounter, damage, 0, HitType.HIT);
 		
 	}
+	
+	private void doSingleTargetCombatForInstallation(InstallationObject attacker, CreatureObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {	
+		
+		float damage = calculateDamageForInstallation(attacker, target, weapon, command);
+		if(damage > 0) {
+			damage *= 1.5f;
+			int damageBeforeArmor = (int) damage;
+			damage *= 0.99;
+			int armorAbsorbed = (int) (damageBeforeArmor - damage);
+			
+			if(damage > 0)
+				applyDamageForInstallation(attacker, target, (int) damage);
+			
+			sendCombatPacketsForInstallation(attacker, target, weapon, command, actionCounter, damage, armorAbsorbed, HitType.CRITICAL);
+	
+			if(FileUtilities.doesFileExist("scripts/commands/combat/" + command.getCommandName() + ".py"))
+				core.scriptService.callScript("scripts/commands/combat/", command.getCommandName(), "run", core, attacker, target, damage);
+
+			return;			
+		}		
+	}
 
 	private void sendCombatPackets(CreatureObject attacker, TangibleObject target, WeaponObject weapon, CombatCommand command, int actionCounter, float damage, int armorAbsorbed, int hitType) {
 		
-		String animationStr = command.getRandomAnimation(weapon);
+		String animationStr = command.getRandomAnimation(weapon); // choosing turretShot as default attack, results in a zero length string
+		if (weapon.getTemplate().contains("atst_ranged")) 
+			animationStr="fire_1_single_light";
+
 		CombatAction combatAction = new CombatAction(CRC.StringtoCRC(animationStr), attacker.getObjectID(), weapon.getObjectID(), target.getObjectID(), command.getCommandCRC());
+		
+//		int turret_fire = 0xD334C0B8; // 0xA7595B4E
+//		CombatAction combatAction = new CombatAction(turret_fire, attacker.getObjectID(), weapon.getObjectID(), target.getObjectID(), command.getCommandCRC());
+//		
 		ObjControllerMessage objController = new ObjControllerMessage(0x1B, combatAction);
 		attacker.notifyObserversInRange(objController, true, 125);
 		CombatSpam combatSpam = new CombatSpam(attacker.getObjectID(), target.getObjectID(), weapon.getObjectID(), (int) damage, armorAbsorbed, hitType);
@@ -483,6 +824,21 @@ public class CombatService implements INetworkDispatch {
 			target.getClient().getSession().write(spam);
 
 
+	}
+	
+	private void sendCombatPacketsForInstallation(InstallationObject attacker, TangibleObject target, WeaponObject weapon, CombatCommand command, int actionCounter, float damage, int armorAbsorbed, int hitType) {
+		
+		//String animationStr = command.getRandomAnimation(weapon);
+		int turret_fire = 0xD334C0B8; // 0xA7595B4E
+		//CombatAction combatAction = new CombatAction(CRC.StringtoCRC(animationStr), attacker.getObjectID(), weapon.getObjectID(), target.getObjectID(), command.getCommandCRC());
+		CombatAction combatAction = new CombatAction(turret_fire, attacker.getObjectID(), weapon.getObjectID(), target.getObjectID(), command.getCommandCRC());
+		ObjControllerMessage objController = new ObjControllerMessage(0x1B, combatAction);
+		attacker.notifyObserversInRange(objController, true, 125);
+		CombatSpam combatSpam = new CombatSpam(attacker.getObjectID(), target.getObjectID(), weapon.getObjectID(), (int) damage, armorAbsorbed, hitType);
+		ObjControllerMessage objController4 = new ObjControllerMessage(0x1B, combatSpam);
+		IoBuffer spam = objController4.serialize();	
+		if(target.getClient() != null)
+			target.getClient().getSession().write(spam);
 	}
 	
 	private void sendHealPackets(CreatureObject attacker, CreatureObject target, WeaponObject weapon, CombatCommand command, int actionCounter) {
@@ -682,6 +1038,23 @@ public class CombatService implements INetworkDispatch {
 		return rawDamage;
 		
 	}
+	
+	private float calculateDamageForInstallation(InstallationObject attacker, CreatureObject target, WeaponObject weapon, CombatCommand command) {
+		
+		float rawDamage = command.getAddedDamage();		
+		if(command.getPercentFromWeapon() > 0) {
+			
+			float weaponMinDmg = weapon.getMinDamage();
+			float weaponMaxDmg = weapon.getMaxDamage();
+			
+			
+			float weaponDmg = new Random().nextInt((int) (weaponMaxDmg - weaponMinDmg + 1)) + weaponMinDmg;
+			weaponDmg *= command.getPercentFromWeapon();
+			rawDamage += weaponDmg;
+						
+		}		
+		return rawDamage;		
+	}
 
 	
 	private float calculateDamage(CreatureObject attacker, TangibleObject target, WeaponObject weapon, CombatCommand command) {
@@ -717,6 +1090,28 @@ public class CombatService implements INetworkDispatch {
 				
 			}
 			
+			if (!attacker.isPlayer()){
+				if (attacker.hasBuff("expertise_damage_npc")){
+					rawDamage *=2; // tower_defense buff
+				}
+			}			
+		}
+		
+		return rawDamage;		
+	}
+	
+	private float calculateDamageForInstallation(InstallationObject attacker, TangibleObject target, WeaponObject weapon, CombatCommand command) {
+
+		float rawDamage = command.getAddedDamage();
+		
+		if(command.getPercentFromWeapon() > 0 && weapon != attacker.getSlottedObject("default_weapon")) {
+			
+			float weaponMinDmg = weapon.getMinDamage();
+			float weaponMaxDmg = weapon.getMaxDamage();
+				
+			float weaponDmg = new Random().nextInt((int) (weaponMaxDmg - weaponMinDmg + 1)) + weaponMinDmg;
+			weaponDmg *= command.getPercentFromWeapon();
+			rawDamage += weaponDmg;
 		}
 		
 		return rawDamage;
@@ -916,8 +1311,14 @@ public class CombatService implements INetworkDispatch {
 				AIActor petActor = (AIActor) targetCreature.getCalledPet().getAttachment("AI");
 				if (petActor!=null){
 					petActor.addDefender(attacker);
-					DevLog.debugout("Charon", "Pet AI", "applyDamage addDefender");
+					//DevLog.debugout("Charon", "Pet AI", "applyDamage addDefender");
 				}
+			}
+			
+			if (!targetCreature.isInCombat()){	
+				AIActor targetActor = (AIActor) targetCreature.getAttachment("AI");
+				targetActor.addDefender(attacker);	
+				//DevLog.debugout("Charon", "CombatService AI", "applyDamage addDefender 2");
 			}
 		}
 		
@@ -1135,6 +1536,26 @@ public class CombatService implements INetworkDispatch {
 			attacker.sendSystemMessage("You have killed " + ((target.getCustomName() == null) ? target.getObjectName().getStfValue() : target.getCustomName()) + ".", DisplayType.Broadcast);
 		}
 		
+		attacker.removeDefender(target);
+		target.removeDefender(attacker);
+		target.setSpeedMultiplierBase(0);
+		target.setTurnRadius(0);
+		
+		if (attacker.getSlottedObject("ghost") != null)
+			target.sendSystemMessage(OutOfBand.ProsePackage("@base_player:prose_victim_dead", "TT", attacker.getCustomName()), DisplayType.Broadcast);
+		else
+			target.sendSystemMessage(OutOfBand.ProsePackage("@base_player:prose_victim_dead", "TT", "@" + attacker.getStfFilename() + ":" + attacker.getStfName()), DisplayType.Broadcast);
+		
+		core.playerService.sendCloningWindow(target, attacker.getSlottedObject("ghost") != null);
+	}
+	
+	
+	public void deathblowPlayerFromInstallation(InstallationObject attacker, CreatureObject target) {
+		target.stopIncapTask();
+		target.setIncapTask(null);
+		target.setPosture(Posture.Dead);
+		
+	
 		attacker.removeDefender(target);
 		target.removeDefender(attacker);
 		target.setSpeedMultiplierBase(0);
@@ -1385,7 +1806,7 @@ public class CombatService implements INetworkDispatch {
 		if(creature.getClient() == null) {
 			if (creature.getAttachment("AI")!=null){
 				AIActor aiActor = (AIActor) creature.getAttachment("AI");
-				CreatureObject target = aiActor.getFollowObject();
+				TangibleObject target = aiActor.getFollowObject();
 				if (target.getClient()!=null)
 					client = target.getClient(); // Use player's client reference that is in combat with that NPC
 			}

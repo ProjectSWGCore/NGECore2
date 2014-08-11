@@ -25,7 +25,6 @@ import java.nio.ByteOrder;
 import java.util.Map;
 
 import org.apache.mina.core.buffer.IoBuffer;
-
 import engine.resources.objects.Builder;
 import resources.objects.tangible.TangibleMessageBuilder;
 
@@ -214,6 +213,27 @@ public class InstallationMessageBuilder extends TangibleMessageBuilder{
 //	0000:   05 00 53 21 86 12 82 EC 7D 16 00 00 02 00 4F 53    ..S!....}.....OS
 //	0010:   4E 49 07 12 00 00 00 02 00 09 00 00 00 00 00 05    NI..............
 //	0020:   00 8A D3 79 16 00 00 0F 00                         ...y.....
+	
+	public IoBuffer buildCustomNameDelta(InstallationObject installation, String customName) {
+		IoBuffer buffer = IoBuffer.allocate(10).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.setAutoExpand(true);
+		int sizeP = 8;
+		sizeP += 2*customName.length();
+		buffer.putShort((short)5);
+		buffer.putInt(0x12862153);
+		buffer.putLong(installation.getObjectID());
+		buffer.putInt(0x54414E4F);
+		buffer.put((byte)3);		
+		buffer.putInt(sizeP);
+		buffer.putShort((short)1);
+		buffer.putShort((short)2);
+		buffer.put(getUnicodeString(customName));
+		int size = buffer.position();
+		buffer.flip();
+		tools.CharonPacketUtils.printAnalysis(IoBuffer.allocate(size).put(buffer.array(), 0, size).flip());
+		return IoBuffer.allocate(size).put(buffer.array(), 0, size).flip();		
+	}
+	
 	
 	@Override
 	public void buildBaseline3(Map<Integer, Builder> baselineBuilders, Map<Integer, Builder> deltaBuilders) {

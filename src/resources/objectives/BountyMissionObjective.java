@@ -304,12 +304,12 @@ public class BountyMissionObjective extends MissionObjective {
 									
 									WaypointObject missionWp = mission.getWaypoint();
 	
-									if (missionWp == null || missionWp.getPlanetCRC() != CRC.StringtoCRC(target.getPlanet().name)) {
+									if (missionWp == null || missionWp.getPlanetCrc() != CRC.StringtoCRC(target.getPlanet().name)) {
 										WaypointObject waypoint = (WaypointObject) getMissionObject().getWaypoint();
 										waypoint.setActive(true);
 										waypoint.setColor(WaypointObject.ORANGE);
 										waypoint.setName(getMissionObject().getTargetName());
-										waypoint.setPlanetCRC(CRC.StringtoCRC(target.getPlanet().getName()));
+										waypoint.setPlanetCrc(CRC.StringtoCRC(target.getPlanet().getName()));
 										waypoint.setStringAttribute("", "");
 										waypoint.setPosition(target.getWorldPosition());
 										mission.setWaypoint(waypoint);
@@ -352,12 +352,12 @@ public class BountyMissionObjective extends MissionObjective {
 			
 			WaypointObject missionWp = mission.getWaypoint();
 			
-			if (missionWp == null || missionWp.getPlanetCRC() != CRC.StringtoCRC(target.getPlanet().name)) {
+			if (missionWp == null || missionWp.getPlanetCrc() != CRC.StringtoCRC(target.getPlanet().name)) {
 				WaypointObject waypoint = (WaypointObject) getMissionObject().getWaypoint();
 				waypoint.setActive(true);
 				waypoint.setColor(WaypointObject.ORANGE);
 				waypoint.setName(getMissionObject().getTargetName());
-				waypoint.setPlanetCRC(CRC.StringtoCRC(target.getPlanet().getName()));
+				waypoint.setPlanetCrc(CRC.StringtoCRC(target.getPlanet().getName()));
 				waypoint.setStringAttribute("", "");
 				waypoint.setPosition(target.getWorldPosition());
 				mission.setWaypoint(waypoint);
@@ -388,7 +388,7 @@ public class BountyMissionObjective extends MissionObjective {
 				waypoint.setActive(true);
 				waypoint.setColor(WaypointObject.ORANGE);
 				waypoint.setName(getMissionObject().getTargetName());
-				waypoint.setPlanetCRC(CRC.StringtoCRC(target.getPlanet().getName()));
+				waypoint.setPlanetCrc(CRC.StringtoCRC(target.getPlanet().getName()));
 				waypoint.setStringAttribute("", "");
 				getMissionObject().setWaypoint(waypoint);
 				

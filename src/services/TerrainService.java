@@ -34,6 +34,7 @@ import resources.datatables.ClientPOIRadius;
 import services.playercities.ClientRegion;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
+import engine.resources.common.CRC;
 import engine.resources.config.Config;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
@@ -168,6 +169,16 @@ public class TerrainService {
 		return null;
 	}
 	
+	public Planet getPlanetByCrc(int crc) {
+		for (int i = 0; i < planets.size(); i++) {
+			if (CRC.StringtoCRC(planets.get(i).getName().toLowerCase()) == crc) {
+				return planets.get(i);
+			}
+		}
+		
+		return null;
+	}
+	
 	public Planet getPlanetByPath(String path) {
 		for (int i = 0; i < planets.size(); i++) {
 			if (planets.get(i).getPath().equals(path)) {
@@ -197,11 +208,9 @@ public class TerrainService {
 			if(planet.getSnapshotVisitor() != null) {
 				Thread thread = new Thread(() -> {
 
-					Config config = new Config();
-					config.setFilePath("options.cfg");
-					boolean loaded = config.loadConfigFile();
-					
-					if (loaded && config.getInt("LOAD.SNAPSHOT_OBJECTS") > 0) {
+					Config options = core.getOptions();
+
+					if (options != null && options.getInt("LOAD.SNAPSHOT_OBJECTS") > 0) {
 						if (!core.getExcludedDevelopers().contains(System.getProperty("user.name"))){
 							try {							
 								core.objectService.loadSnapshotObjects(planet);
@@ -211,17 +220,17 @@ public class TerrainService {
 						}
 					}
 					
-					if (loaded && config.getInt("LOAD.BUILDOUT_OBJECTS") > 0) {
-						if (!core.getExcludedDevelopers().contains(System.getProperty("user.name"))){
-							if (! config.keyExists("LOAD.BUILDOUT_ONLY_FOR")){
+					if (options != null && options.getInt("LOAD.BUILDOUT_OBJECTS") > 0) {
+						if (!core.getExcludedDevelopers().contains(System.getProperty("user.name"))){								
+							if (! options.keyExists("LOAD.BUILDOUT_ONLY_FOR")){
 								try {							
 									core.objectService.loadBuildoutObjects(planet);
 								} catch (InstantiationException | IllegalAccessException e) {
 									e.printStackTrace();
 								}
-							} else {
-								if (planet.getName().equals(config.getString("LOAD.BUILDOUT_ONLY_FOR"))){
-									try {							
+							} else {								
+								if (planet.getName().trim().equals(options.getString("LOAD.BUILDOUT_ONLY_FOR").trim())){
+									try {		
 										core.objectService.loadBuildoutObjects(planet);
 									} catch (InstantiationException | IllegalAccessException e) {
 										e.printStackTrace();

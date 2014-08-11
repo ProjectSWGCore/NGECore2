@@ -35,6 +35,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import services.ai.AIActor;
+import services.ai.TurretAIActor;
+import main.NGECore;
+
 /** 
  * @author Charon 
  */
@@ -111,23 +115,107 @@ public class DevLog {
 			if (debugEnable.get(developer)==1){
 				logMessage = "Devlog->"+developer+"->"+testarea+"-> "+message;
 				DevLogQueuer logger = DevLogQueuer.getInstance();
-				logger.log(logMessage);
+				if (logger!=null)
+					logger.log(logMessage);
 			}
 		}
 		
 		if (isFileLoggingEnabled(debugRequester)){
 			if (loggingSessionID>0){
 				DevLogQueuer logger = DevLogQueuer.getInstance();   
-	        	logger.log(logMessage,newFile);
+				if (logger!=null)
+					logger.log(logMessage,newFile);
 				
 			} else {
 				createLog();
-				DevLogQueuer logger = DevLogQueuer.getInstance();    
-	        	logger.log(logMessage,newFile);
-				loggingSessionID++;
+				DevLogQueuer logger = DevLogQueuer.getInstance();  
+				if (logger!=null){
+					logger.log(logMessage,newFile);
+					loggingSessionID++;
+				}
 			}
 		}
 		
+	}
+	
+	public static void debugoutai(AIActor actor, String debugRequester, String testarea, String message){
+		if (NGECore.getInstance().aiService.getCheckAI()!=null && actor!=null){
+			if (!(NGECore.getInstance().aiService.getCheckAI().getAttachment("AI") instanceof AIActor))
+				return;
+			AIActor checkActor = (AIActor) NGECore.getInstance().aiService.getCheckAI().getAttachment("AI");
+			if (checkActor==actor){		
+				String developer = System.getProperty("user.name");
+				String logMessage = "";
+				if (!debugRequester.equals(developer))
+					return;
+				if (debugEnable.keySet().contains(developer)){
+					
+					if (debugEnable.get(developer)==1){
+						logMessage = "Devlog->"+developer+"->"+testarea+"-> "+message;
+						DevLogQueuer logger = DevLogQueuer.getInstance();
+						if (logger!=null)
+							logger.log(logMessage);
+					}
+				}
+				
+				if (isFileLoggingEnabled(debugRequester)){
+					if (loggingSessionID>0){
+						DevLogQueuer logger = DevLogQueuer.getInstance();   
+						if (logger!=null)
+							logger.log(logMessage,newFile);
+						
+					} else {
+						createLog();
+						DevLogQueuer logger = DevLogQueuer.getInstance();  
+						if (logger!=null){
+							logger.log(logMessage,newFile);
+							loggingSessionID++;
+						}
+					}
+				}
+			}
+		}		
+	}
+	
+	public static void debugoutai(TurretAIActor actor, String debugRequester, String testarea, String message){
+		if (NGECore.getInstance().aiService.getCheckAI()!=null && actor!=null){
+			if (!(NGECore.getInstance().aiService.getCheckAI().getAttachment("AI") instanceof TurretAIActor))
+				return;
+			
+			TurretAIActor checkActor = (TurretAIActor) NGECore.getInstance().aiService.getCheckAI().getAttachment("AI");
+			
+			if (checkActor==actor){		
+				String developer = System.getProperty("user.name");
+				String logMessage = "";
+				if (!debugRequester.equals(developer))
+					return;
+				if (debugEnable.keySet().contains(developer)){
+					
+					if (debugEnable.get(developer)==1){
+						logMessage = "Devlog->"+developer+"->"+testarea+"-> "+message;
+						DevLogQueuer logger = DevLogQueuer.getInstance();
+						if (logger!=null)
+							logger.log(logMessage);
+					}
+				}
+				
+				if (isFileLoggingEnabled(debugRequester)){
+					if (loggingSessionID>0){
+						DevLogQueuer logger = DevLogQueuer.getInstance();   
+						if (logger!=null)
+							logger.log(logMessage,newFile);
+						
+					} else {
+						createLog();
+						DevLogQueuer logger = DevLogQueuer.getInstance();  
+						if (logger!=null){
+							logger.log(logMessage,newFile);
+							loggingSessionID++;
+						}
+					}
+				}
+			}
+		}		
 	}
 	
 	public static void createLog(){
@@ -145,7 +233,7 @@ public class DevLog {
 	        newFile = Files.createFile(newFile);
 	        createHeader(newFile);
 	    } catch (IOException ex) {
-	    	System.out.println("Error creating file");
+	    	System.out.println("Error creating file " + ex.getMessage());
 	    } 
 	}
 	

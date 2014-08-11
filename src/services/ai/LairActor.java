@@ -33,6 +33,7 @@ import resources.objects.tangible.TangibleObject;
 import services.combat.CombatEvents.DamageTaken;
 import tools.DevLog;
 
+@SuppressWarnings("unused")
 public class LairActor {
 
 	private Vector<AIActor> creatures = new Vector<AIActor>();
@@ -86,8 +87,8 @@ public class LairActor {
 		spawnNewCreatures();
 		
 		for(AIActor ai : creatures) {
-			ai.addDefender(event.attacker);
-			event.attacker.addDefender(ai.getCreature());
+			ai.addDefender((CreatureObject)event.attacker);
+			((CreatureObject)event.attacker).addDefender(ai.getCreature());
 		}
 		
 		
@@ -163,7 +164,6 @@ public class LairActor {
 		
 	}
 	
-	@SuppressWarnings("unused")
 	private void healLair() {
 		
 		if(lairObject.getConditionDamage() == 0 || creatures.isEmpty())

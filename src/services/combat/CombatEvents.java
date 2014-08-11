@@ -21,14 +21,14 @@
  ******************************************************************************/
 package services.combat;
 
-import resources.objects.creature.CreatureObject;
 import engine.resources.common.Event;
+import engine.resources.objects.SWGObject;
 
 public class CombatEvents implements Event {
 	
 	public class DamageTaken implements Event {
 		
-		public CreatureObject attacker;
+		public SWGObject attacker;
 		public int damage;
 		
 	}

@@ -78,6 +78,7 @@ public class ObjControllerMessage extends SWGMessage {
 	public static final int RESOURCE_WEIGHTS = 0x0207;
 	public static final int MISSION_ACCEPT_RESPONSE = 0x00FA;
 	public static final int MISSION_ABORT_RESPONSE = 0x0142;
+	public static final int QUEST_TASK_TIMER_MESSAGE = 0x0441;
 
 	public ObjControllerMessage() { 
 		

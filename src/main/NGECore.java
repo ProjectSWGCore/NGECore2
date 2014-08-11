@@ -65,6 +65,7 @@ import services.ConversationService;
 import services.EntertainmentService;
 import services.GroupService;
 import services.housing.HousingService;
+import services.AdminService;
 import services.BrowserService;
 import services.InstanceService;
 import services.LoginService;
@@ -91,6 +92,7 @@ import services.command.CommandService;
 import services.equipment.EquipmentService;
 import services.gcw.FactionService;
 import services.gcw.GCWService;
+import services.gcw.InvasionService;
 import services.GuildService;
 import services.LoginService;
 import services.map.MapService;
@@ -153,9 +155,11 @@ public class NGECore {
 	private static NGECore instance;
 	
 	private Config config = null;
+	private Config options = null;
 	private String motd = "";
 	private volatile boolean isShuttingDown = false;
 	private long galacticTime = System.currentTimeMillis();
+	private int galaxyStatus = -1;
 	
 	private ConcurrentHashMap<IoSession, Client> clients = new ConcurrentHashMap<IoSession, Client>();
 	
@@ -212,6 +216,8 @@ public class NGECore {
 	public PetService petService;
 	public BrowserService browserService;
 	//public BattlefieldService battlefieldService;
+	public InvasionService invasionService;
+	public AdminService adminService;
 	
 	// Login Server
 	public NetworkDispatch loginDispatch;
@@ -269,11 +275,15 @@ public class NGECore {
 			config = DefaultConfig.getConfig();
 		}
 		
-		Config options = new Config();
+		options = new Config();
 		options.setFilePath("options.cfg");
-		boolean optionsConfigLoaded = options.loadConfigFile();
-		
-		if (optionsConfigLoaded && options.getInt("CLEAN.ODB.FOLDERS") > 0 || getExcludedDevelopers().contains(System.getProperty("user.name"))){
+		if (!(options.loadConfigFile())) {
+			System.err.println("Failed to load options.cfg!");
+			options = DefaultConfig.getConfig();
+		}
+
+		//if (optionsConfigLoaded && options.getInt("CLEAN.ODB.FOLDERS") > 0 || getExcludedDevelopers().contains(System.getProperty("user.name"))){
+		if (options.getInt("CLEAN.ODB.FOLDERS") > 0){
 			File baseFolder = new File("./odb");
 			
 			if (baseFolder.isDirectory()) {
@@ -354,7 +364,7 @@ public class NGECore {
 		reverseEngineeringService = new ReverseEngineeringService(this);
 		petService = new PetService(this);
 		
-		if (optionsConfigLoaded && options.getInt("LOAD.RESOURCE.SYSTEM") == 1) {
+		if (options.getInt("LOAD.RESOURCE.SYSTEM") == 1) {
 			surveyService = new SurveyService(this);
 			resourceService = new ResourceService(this);
 		}
@@ -373,6 +383,7 @@ public class NGECore {
 		spawnService = new SpawnService(this);
 		aiService = new AIService(this);
 		missionService = new MissionService(this);
+		invasionService = new InvasionService(this);
 		
 		// Ping Server
 		
@@ -427,8 +438,9 @@ public class NGECore {
 		zoneDispatch.addService(staticService);
 		zoneDispatch.addService(reverseEngineeringService);
 		zoneDispatch.addService(petService);
+		zoneDispatch.addService(invasionService);
 		
-		if (optionsConfigLoaded && options.getInt("LOAD.RESOURCE.SYSTEM") == 1) {
+		if (options.getInt("LOAD.RESOURCE.SYSTEM") == 1) {
 			zoneDispatch.addService(surveyService);
 			zoneDispatch.addService(resourceService);
 		}
@@ -493,13 +505,10 @@ public class NGECore {
 		terrainService.addPlanet(43, "space_tatooine", "terrain/space_tatooine.trn", true);
 		terrainService.addPlanet(44, "space_tatooine_2", "terrain/space_tatooine_2.trn", true);
 		terrainService.addPlanet(45, "space_yavin4", "terrain/space_yavin4.trn", true);*/
-		//PSWG New Content Terrains  (WARNING Keep commented out unless you have the current build of kaas!)
-
-		//terrainService.addPlanet(46, "kaas", "terrain/kaas.trn", true);
-
+		
 		//end terrainList
 		
-		if (optionsConfigLoaded && options.getInt("LOAD.RESOURCE.SYSTEM") > 0) {
+		if (options.getInt("LOAD.RESOURCE.SYSTEM") > 0) {
 			resourceService.loadResources();
 		}
 		
@@ -557,6 +566,7 @@ public class NGECore {
 		
 		browserService = new BrowserService(this);
 		//battlefieldService = new BattlefieldService(this);
+		adminService = new AdminService(this);
 		
 		DevLogQueuer devLogQueuer = new DevLogQueuer();
 		
@@ -644,6 +654,7 @@ public class NGECore {
 	
 	public void setGalaxyStatus(int statusId) {
 		
+		galaxyStatus = statusId;
 		int galaxyId = config.getInt("GALAXY_ID");
 		
 		try {
@@ -655,6 +666,10 @@ public class NGECore {
 			e.printStackTrace();
 		}
 		
+	}
+	
+	public int getGalaxyStatus() {
+		return galaxyStatus;
 	}
 	
 	/*
@@ -852,10 +867,14 @@ public class NGECore {
 	
 	public Vector<String> getExcludedDevelopers(){
 		Vector<String> excludedDevelopers = new Vector<String>();
-		excludedDevelopers.add("Charon");
+		//excludedDevelopers.add("Charon");
 		// Feel free to add your OS user account name here to exclude yourself from loading buildouts and snapshots
 		// without having to change options.cfg all the time
 		return excludedDevelopers;
+	}
+	
+	public Config getOptions() {
+		return options;
 	}
 }
 

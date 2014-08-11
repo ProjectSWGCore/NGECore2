@@ -132,6 +132,9 @@ import services.command.CombatCommand;
 import services.bazaar.AuctionItem;
 import services.chat.ChatRoom;
 import services.equipment.EquipmentService;
+import services.gcw.GCWPylon;
+import services.gcw.GCWSpawner;
+import services.spawn.MobileTemplate;
 import services.sui.SUIWindow;
 import services.sui.SUIWindow.SUICallback;
 import services.sui.SUIWindow.Trigger;
@@ -303,6 +306,39 @@ public class ObjectService implements INetworkDispatch {
 			
 			object = new SurveyTool(objectID, planet, position, orientation, Template);
 			
+		} else if(Template.startsWith("object/tangible/destructible/shared_gcw_city_construction_beacon")) {
+			
+			float positionY = core.terrainService.getHeight(planet.getID(), position.x, position.z)-1.5f;
+			Point3D newpoint = new Point3D(position.x,positionY,position.z);				
+			object = new GCWPylon(objectID, planet, position, orientation, Template);
+
+		} else if(Template.startsWith("object/tangible/loot/creature_loot/collections/shared_dejarik_table_base")) {
+			
+			float positionY = core.terrainService.getHeight(planet.getID(), position.x, position.z)+0.3f;
+			Point3D newpoint = new Point3D(position.x,positionY,position.z);				
+			object = new GCWSpawner(objectID, planet, position, orientation, Template);
+
+		} else if(Template.startsWith("object/tangible/destructible/")) {
+			
+//			float positionY = core.terrainService.getHeight(planet.getID(), position.x, position.z)-1f;
+//			Point3D newpoint = new Point3D(position.x,positionY,position.z);				
+//			object = new InstallationObject(objectID, planet, newpoint, orientation, Template);
+			
+			object = new TangibleObject(objectID, planet, position, orientation, Template);
+			
+			//object = new BuildingObject(objectID, planet, position, orientation, Template);
+
+		} else if(Template.startsWith("object/tangible/gcw/static_base/shared_invisible_cloner")) {
+			
+			object = new BuildingObject(objectID, planet, position, orientation, Template);
+			if(!isSnapshot && !overrideSnapshot && object.getPortalVisitor() != null) {
+				int cellCount = object.getPortalVisitor().cells.size() - 1; // -1 for index 0 cell which is outside the building and used for ai pathfinding
+				for (int i = 0; i < cellCount; i++) {
+					CellObject cell = (CellObject) createObject("object/cell/shared_cell.iff", planet);
+					cell.setCellNumber(i+1);
+					object.add(cell);
+				}
+			}
 		} else if(Template.startsWith("object/tangible")) {
 			
 			object = new TangibleObject(objectID, planet, position, orientation, Template);
@@ -392,6 +428,12 @@ public class ObjectService implements INetworkDispatch {
 			float positionY = core.terrainService.getHeight(planet.getID(), position.x, position.z)-1f;
 			Point3D newpoint = new Point3D(position.x,positionY,position.z);			
 			object = new HarvesterObject(objectID, planet, newpoint, orientation, Template);	
+			
+		} else if(Template.startsWith("object/installation/turret")) {
+			
+			float positionY = core.terrainService.getHeight(planet.getID(), position.x, position.z);
+			Point3D newpoint = new Point3D(position.x,positionY,position.z);				
+			object = new InstallationObject(objectID, planet, newpoint, orientation, Template);
 			
 		} else {
 			return null;			
@@ -549,19 +591,25 @@ public class ObjectService implements INetworkDispatch {
 		
 		if (object.getAttachment("AI") != null && object.getAttachment("AI") instanceof AIActor && ((AIActor) object.getAttachment("AI")).getMobileTemplate().getRespawnTime() > 0) {
 			final long objectId = object.getObjectID();
-			final String Template = object.getTemplate();
+			final MobileTemplate Template = ((AIActor) object.getAttachment("AI")).getMobileTemplate();
 			final Planet planet = object.getPlanet();
 			final Point3D position = object.getPosition();
+			final Point3D spawnPosition = ((AIActor) object.getAttachment("AI")).getSpawnPosition();			
 			final Quaternion orientation = object.getOrientation();
-			final long cellId = ((object.getContainer() == null) ? 0L : object.getContainer().getObjectID());
+			// final long cellId = ((object.getContainer() == null) ? 0L : object.getContainer().getObjectID());
+			CellObject cellO = spawnPosition.getCell();
+			final long cellId = ((cellO == null) ? 0L : cellO.getObjectID());
 			final short level = ((object instanceof CreatureObject) ? ((CreatureObject) object).getLevel() : (short) 0);
-			
 			scheduler.schedule(new Runnable() {
 				
 				@Override
 				public void run() {
 					try {
-						NGECore.getInstance().spawnService.spawnCreature(Template, objectId, planet.getName(), cellId, position.x, position.y, position.z, orientation.w, orientation.x, orientation.y, orientation.z, level);
+						// Commented for now until found where the respawn is always set to 60 for any NPC
+//						CreatureObject newObject = NGECore.getInstance().spawnService.spawnCreature(Template, 0, planet.getName(), cellId, spawnPosition.x, spawnPosition.y, spawnPosition.z, orientation.w, orientation.x, orientation.y, orientation.z, level);
+//						AIActor newAIActor = (AIActor)newObject.getAttachment("AI");
+//						newAIActor.cloneActor(((AIActor) object.getAttachment("AI")));
+						//object.setAttachment("AI", null);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -569,7 +617,7 @@ public class ObjectService implements INetworkDispatch {
 				
 			}, ((AIActor) object.getAttachment("AI")).getMobileTemplate().getRespawnTime(), TimeUnit.SECONDS);
 		}
-		
+				
 		String filePath = "scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", "") + object.getTemplate().split("shared_" , 2)[1].replace(".iff", "") + ".py";
 		
 		if (FileUtilities.doesFileExist(filePath)) {
@@ -1279,7 +1327,6 @@ public class ObjectService implements INetworkDispatch {
 	}
 	
 	public void loadBuildoutObjects(Planet planet) throws InstantiationException, IllegalAccessException {
-		
 		DatatableVisitor buildoutTable = ClientFileManager.loadFile("datatables/buildout/areas_" + planet.getName() + ".iff", DatatableVisitor.class);
 		
 		for (int i = 0; i < buildoutTable.getRowCount(); i++) {
@@ -1287,7 +1334,6 @@ public class ObjectService implements INetworkDispatch {
 			String areaName = (String) buildoutTable.getObject(i, 0);
 			float x1 = (Float) buildoutTable.getObject(i, 1);
 			float z1 = (Float) buildoutTable.getObject(i, 2);
-			
 			readBuildoutDatatable(ClientFileManager.loadFile("datatables/buildout/" + planet.getName() + "/" + areaName + ".iff", DatatableVisitor.class), planet, x1, z1);
 
 		}

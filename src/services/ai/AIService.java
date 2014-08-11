@@ -21,8 +21,13 @@
  ******************************************************************************/
 package services.ai;
 
+import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.Random;
 import java.util.Vector;
 
@@ -33,18 +38,21 @@ import resources.datatables.GcwType;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
 import resources.objects.player.PlayerObject;
+import resources.objects.tangible.TangibleObject;
 import services.ai.states.AIState;
 import services.ai.states.IdleState;
 import services.ai.states.LoiterState;
 import services.ai.states.PatrolState;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
+import engine.resources.service.INetworkDispatch;
 import main.NGECore;
 
 public class AIService {
 	
 	@SuppressWarnings("unused") private Vector<AIActor> aiActors = new Vector<AIActor>();
 	private NGECore core;
+	private TangibleObject checkerAI = null;
 	
 	public AIService(NGECore core) {
 		this.core = core;
@@ -54,6 +62,8 @@ public class AIService {
 		
 		// TODO: implement cell pathfinding, returning straight line for now
 		Vector<Point3D> path = new Vector<Point3D>();
+		if (pointA==null || pointB==null)
+			return path;		
 		path.add(pointA);
 		float x = pointB.x - 1 + new Random().nextFloat();
 		float z = pointB.z - 1 + new Random().nextFloat();
@@ -169,6 +179,13 @@ public class AIService {
 		}
 	}
 	
+	public void setPatrolLoop(CreatureObject creature, boolean value){
+		AIActor actor = (AIActor) creature.getAttachment("AI");
+		if (actor==null)
+			return;		
+		actor.setPatrolLoop(value);
+	}
+	
 	public void setPatrol(CreatureObject creature, Vector<Point3D> patrolpoints){
 		AIActor actor = (AIActor) creature.getAttachment("AI");
 		if (actor==null)
@@ -178,6 +195,8 @@ public class AIService {
 		AIState intendedPrimaryAIState = new PatrolState();
 		actor.setIntendedPrimaryAIState(intendedPrimaryAIState);
 		actor.setCurrentState(intendedPrimaryAIState);	
+		actor.setCurrentState(intendedPrimaryAIState);
+		actor.setCurrentState(intendedPrimaryAIState);
 	}
 	
 	public void setPatrol(CreatureObject creature, boolean active){
@@ -208,6 +227,95 @@ public class AIService {
 		actor.setIntendedPrimaryAIState(intendedPrimaryAIState);	
 		actor.setCurrentState(intendedPrimaryAIState);
 	}	
+	
+	public void setCheckAI(TangibleObject checker){
+		checkerAI = checker;
+	}
+	
+	public TangibleObject getCheckAI(){
+		return this.checkerAI;
+	}
+	
+	public float distanceSquared2D(Point3D p2, Point3D p1){
+		return (p2.x - p1.x) * (p2.x - p1.x) + (p2.z - p1.z) * (p2.z - p1.z);
+	}
+	
+	public float distanceSquared(Point3D p2, Point3D p1){
+		return (p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y) + (p2.z - p1.z) * (p2.z - p1.z);
+	}
+	
+	public void waitForEvent(AIActor actor, INetworkDispatch service, String serviceMethodName, boolean expectedValue, Class<?> nextStateClass){
+		
+		final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);	
+		final Future<?>[] wfe = {null};
+		wfe[0] = scheduler.scheduleAtFixedRate(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					Class<?> noParams[] = {};
+					Method m = service.getClass().getMethod(serviceMethodName, noParams);
+					boolean value = (boolean) m.invoke(service); 					
+					if (value==expectedValue){
+						actor.setCurrentState((AIState)nextStateClass.newInstance());
+						System.out.println("condition true waitForEvent! " + nextStateClass.getName());
+						Thread.yield();
+		                wfe[0].cancel(false);
+					}					
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}			
+		}, 10, 3000, TimeUnit.MILLISECONDS);
+	}
+	
+	public void waitForEvent(AIActor actor, INetworkDispatch service, String serviceMethodName, int expectedValue, Class<?> nextStateClass){
+		final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);	
+		final Future<?>[] wfe = {null};
+		wfe[0] = scheduler.scheduleAtFixedRate(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					Class<?> noParams[] = {};
+					Method m = service.getClass().getMethod(serviceMethodName, noParams);
+					int number = (int) m.invoke(service); 					
+					if (number==expectedValue){
+						actor.setCurrentState((AIState)nextStateClass.newInstance());
+						Thread.yield();
+		                wfe[0].cancel(false);
+					}					
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}			
+		}, 10, 3000, TimeUnit.MILLISECONDS);
+	}
+	
+	// ToDo: Make an overloaded method with params
+	public void waitForEvent(INetworkDispatch service, String serviceMethodName, Object[] params){
+		final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);	
+		final Future<?>[] wfe = {null};
+		wfe[0] = scheduler.scheduleAtFixedRate(new Runnable() {
+
+			@Override
+			public void run() {
+				try {
+					boolean condition = true;
+					Class<?> noParams[] = {};
+					Method m = service.getClass().getMethod(serviceMethodName, noParams);
+					m.invoke(service); 
+					
+					if (condition){
+						Thread.yield();
+		                wfe[0].cancel(false);
+					}
+					// do something
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			
+		}, 10, 2000, TimeUnit.MILLISECONDS);
+	}
 	
 	public void logAI(String logMsg){
 		if (checkDeveloperIdentity()){

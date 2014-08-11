@@ -1,0 +1,7 @@
+invulnerable
+teleport
+teleportto
+teleporttarget
+setspeed
+gmforcecommand
+gmrevive
