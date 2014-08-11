@@ -687,7 +687,7 @@ public class CommandService implements INetworkDispatch  {
 	}
 	
 	public void processCommand(CreatureObject actor, SWGObject target, BaseSWGCommand command, int actionCounter, String commandArgs) {
-		System.out.println("characterAbility: " + command.getCharacterAbility());
+		
 		if (command.getGodLevel() > 0 || command.getCommandName().equals("setgodmode")) {	// TODO: When loading commands, simply don't put the "admin" characterAbility into the commands
 			String accessLevel = core.adminService.getAccessLevelFromDB(actor.getClient().getAccountId());
 			
