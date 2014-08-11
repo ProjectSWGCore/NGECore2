@@ -267,10 +267,9 @@ public class CharacterService implements INetworkDispatch {
 				object.setHeight(clientCreateCharacter.getScale());
 				object.setPersistent(true);
 				
-				Config options = new Config();
-				options.setFilePath("options.cfg");
-				boolean optionsConfigLoaded = options.loadConfigFile();
-				if (optionsConfigLoaded && options.getInt("DO.ISOLATION.TESTS") > 0){
+				Config options = NGECore.getInstance().getOptions();
+
+				if (options != null && options.getInt("DO.ISOLATION.TESTS") > 0){
 					object.setPosition(SpawnPoint.getRandomPosition(new Point3D(0, 0, 0), (float) 0.5, 3, core.terrainService.getPlanetByName("tatooine").getID()));
 				} else {
 					object.setPosition(SpawnPoint.getRandomPosition(new Point3D(3528, 0, -4804), (float) 0.5, 3, core.terrainService.getPlanetByName("tatooine").getID()));

@@ -208,11 +208,9 @@ public class TerrainService {
 			if(planet.getSnapshotVisitor() != null) {
 				Thread thread = new Thread(() -> {
 
-					Config config = new Config();
-					config.setFilePath("options.cfg");
-					boolean loaded = config.loadConfigFile();
-					
-					if (loaded && config.getInt("LOAD.SNAPSHOT_OBJECTS") > 0) {
+					Config options = core.getOptions();
+
+					if (options != null && options.getInt("LOAD.SNAPSHOT_OBJECTS") > 0) {
 						if (!core.getExcludedDevelopers().contains(System.getProperty("user.name"))){
 							try {							
 								core.objectService.loadSnapshotObjects(planet);
@@ -222,16 +220,16 @@ public class TerrainService {
 						}
 					}
 					
-					if (loaded && config.getInt("LOAD.BUILDOUT_OBJECTS") > 0) {
+					if (options != null && options.getInt("LOAD.BUILDOUT_OBJECTS") > 0) {
 						if (!core.getExcludedDevelopers().contains(System.getProperty("user.name"))){								
-							if (! config.keyExists("LOAD.BUILDOUT_ONLY_FOR")){
+							if (! options.keyExists("LOAD.BUILDOUT_ONLY_FOR")){
 								try {							
 									core.objectService.loadBuildoutObjects(planet);
 								} catch (InstantiationException | IllegalAccessException e) {
 									e.printStackTrace();
 								}
 							} else {								
-								if (planet.getName().trim().equals(config.getString("LOAD.BUILDOUT_ONLY_FOR").trim())){
+								if (planet.getName().trim().equals(options.getString("LOAD.BUILDOUT_ONLY_FOR").trim())){
 									try {		
 										core.objectService.loadBuildoutObjects(planet);
 									} catch (InstantiationException | IllegalAccessException e) {

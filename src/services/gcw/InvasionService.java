@@ -139,11 +139,9 @@ public class InvasionService implements INetworkDispatch {
 	
 	public InvasionService(final NGECore core) {
 		this.core = core;	
-				
-		Config options = new Config();
-		options.setFilePath("options.cfg");
-		boolean optionsConfigLoaded = options.loadConfigFile();
-		if (optionsConfigLoaded && options.getInt("ENABLE.INVASIONS") == 0){
+		
+		Config options = core.getOptions();
+		if (options != null && options.getInt("ENABLE.INVASIONS") == 0){
 			return;
 		}
 		

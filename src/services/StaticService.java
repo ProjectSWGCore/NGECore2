@@ -59,9 +59,9 @@ public class StaticService implements INetworkDispatch {
 	}
 	
 	public void spawnStatics() {
-		Config options = new Config();
-		options.setFilePath("options.cfg");
-		final boolean buildoutsDisabled = ((options.loadConfigFile() && options.getInt("LOAD.BUILDOUT_OBJECTS") == 0) ? true : false);
+		Config options = core.getOptions();
+
+		final boolean buildoutsDisabled = ((options != null && options.getInt("LOAD.BUILDOUT_OBJECTS") == 0) ? true : false);
 		
 		for (Planet planet : core.terrainService.getPlanetList()) {
 			if (FileUtilities.doesFileExist("scripts/static_spawns/" + planet.getName())) {

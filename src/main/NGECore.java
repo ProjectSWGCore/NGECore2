@@ -154,6 +154,7 @@ public class NGECore {
 	private static NGECore instance;
 	
 	private Config config = null;
+	private Config options = null;
 	private String motd = "";
 	private volatile boolean isShuttingDown = false;
 	private long galacticTime = System.currentTimeMillis();
@@ -272,12 +273,15 @@ public class NGECore {
 			config = DefaultConfig.getConfig();
 		}
 		
-		Config options = new Config();
+		options = new Config();
 		options.setFilePath("options.cfg");
-		boolean optionsConfigLoaded = options.loadConfigFile();
-		
+		if (!(options.loadConfigFile())) {
+			System.err.println("Failed to load options.cfg!");
+			options = DefaultConfig.getConfig();
+		}
+
 		//if (optionsConfigLoaded && options.getInt("CLEAN.ODB.FOLDERS") > 0 || getExcludedDevelopers().contains(System.getProperty("user.name"))){
-		if (optionsConfigLoaded && options.getInt("CLEAN.ODB.FOLDERS") > 0){
+		if (options.getInt("CLEAN.ODB.FOLDERS") > 0){
 			File baseFolder = new File("./odb");
 			
 			if (baseFolder.isDirectory()) {
@@ -358,7 +362,7 @@ public class NGECore {
 		reverseEngineeringService = new ReverseEngineeringService(this);
 		petService = new PetService(this);
 		
-		if (optionsConfigLoaded && options.getInt("LOAD.RESOURCE.SYSTEM") == 1) {
+		if (options.getInt("LOAD.RESOURCE.SYSTEM") == 1) {
 			surveyService = new SurveyService(this);
 			resourceService = new ResourceService(this);
 		}
@@ -434,7 +438,7 @@ public class NGECore {
 		zoneDispatch.addService(petService);
 		zoneDispatch.addService(invasionService);
 		
-		if (optionsConfigLoaded && options.getInt("LOAD.RESOURCE.SYSTEM") == 1) {
+		if (options.getInt("LOAD.RESOURCE.SYSTEM") == 1) {
 			zoneDispatch.addService(surveyService);
 			zoneDispatch.addService(resourceService);
 		}
@@ -505,7 +509,7 @@ public class NGECore {
 
 		//end terrainList
 		
-		if (optionsConfigLoaded && options.getInt("LOAD.RESOURCE.SYSTEM") > 0) {
+		if (options.getInt("LOAD.RESOURCE.SYSTEM") > 0) {
 			resourceService.loadResources();
 		}
 		
@@ -867,6 +871,10 @@ public class NGECore {
 		// Feel free to add your OS user account name here to exclude yourself from loading buildouts and snapshots
 		// without having to change options.cfg all the time
 		return excludedDevelopers;
+	}
+	
+	public Config getOptions() {
+		return options;
 	}
 }
 

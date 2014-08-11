@@ -63,10 +63,9 @@ public class MixedSpawnArea extends SpawnArea {
 	@Handler
 	public void onEnter(EnterEvent event) {
 		
-		Config options = new Config();
-		options.setFilePath("options.cfg");
-		boolean optionsConfigLoaded = options.loadConfigFile();
-		if (optionsConfigLoaded && options.getInt("DO.ISOLATION.TESTS") > 0){
+		Config options = NGECore.getInstance().getOptions();
+
+		if (options != null && options.getInt("DO.ISOLATION.TESTS") > 0){
 			return;
 		}
 		
