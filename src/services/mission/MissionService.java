@@ -55,6 +55,7 @@ import resources.objects.creature.CreatureObject;
 import resources.objects.mission.MissionObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
+import resources.datatables.TerminalType;
 import engine.clientdata.StfTable;
 import engine.clients.Client;
 import engine.resources.common.CRC;
@@ -660,7 +661,8 @@ public class MissionService implements INetworkDispatch {
 			missionStf = "mission/mission_npc_dancer_neutral_easy";
 		}
 		
-                mission.setMissionId(10);
+      
+		mission.setMissionId(getRandomStringEntry(missionStf));
 		mission.setTitle("@" + missionStf + ":" + "m" + mission.getMissionId() + "t");
 		mission.setDescription("@" + missionStf + ":" + "m" + mission.getMissionId() + "o");
 		
@@ -680,15 +682,18 @@ public class MissionService implements INetworkDispatch {
 		System.out.println("Profession: " + playera.getProfession());
 		System.out.println("Faction: " + creature.getFaction());
 		System.out.println("Difficulty: " + mission.getDifficultyLevel());
+		System.out.println("missionid: " + mission.getMissionId());
+		System.out.println("MissionTitle: " + mission.getTitle().getStfValue());
+		System.out.println("Missiondesc: " + mission.getDescription().getStfValue());
 	}
-	
+	/*
 	public enum TerminalType {;
 		public static final int GENERIC = 1;
 		public static final int BOUNTY = 2;
 		public static final int ENTERTAINER = 3;
 		public static final int ARTISAN  = 4;
 		public static final int EXPLORER = 5;
-	}
+	}*/
 	
 	public Map<Long, BountyListItem> getBountyMap() {
 		return this.bountyMap;
