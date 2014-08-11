@@ -79,6 +79,7 @@ setgrievousauthorized
 setgodmode
 sethue
 setinstanceauthorized
+gmrevive
 setlastname
 setname
 setowner
@@ -119,3 +120,5 @@ revokewarden
 startrestussstagetwo
 completerestussstageone
 spewcommandqueue
+server
+getaccountinfo

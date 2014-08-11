@@ -4,3 +4,4 @@ teleportto
 teleporttarget
 setspeed
 gmforcecommand
+gmrevive

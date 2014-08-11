@@ -44,6 +44,7 @@ gmshowquest
 gmregrantquest
 gmveteranrewardtimecs
 listactivequests
+gmrevive
 maxforcepower
 overrideactivemonths
 overridepadawantrialseligibility
