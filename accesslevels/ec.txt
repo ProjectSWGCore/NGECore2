@@ -52,3 +52,7 @@ eventvaderchoke
 eventweapon
 getplayerid
 giveitem
+eventshuttledrop
+eventstartraid
+startrestussstagetwo
+completerestussstageone
