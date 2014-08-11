@@ -86,7 +86,7 @@ public class CommandService implements INetworkDispatch  {
 		if (command == null)
 			return false;
 		
-		if (command.getCharacterAbility().length() > 0 && !actor.hasAbility(command.getCharacterAbility()) && !command.getCharacterAbility().equals("admin"))
+		if (command.getCharacterAbility().length() > 0 && !actor.hasAbility(command.getCharacterAbility()))
 			return false;
 		
 		if (command.isDisabled())
