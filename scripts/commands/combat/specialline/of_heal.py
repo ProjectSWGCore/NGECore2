@@ -8,3 +8,4 @@ def setup(core, actor, target, command):
 	
 def run(core, actor, target, commandString):
 	return
+	
