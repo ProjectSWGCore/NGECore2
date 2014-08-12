@@ -23,18 +23,95 @@ package resources.quest;
 
 import java.io.Serializable;
 
+import org.apache.mina.core.buffer.IoBuffer;
+
+import engine.resources.common.CRC;
 import engine.resources.objects.Delta;
 
 public class Quest extends Delta implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	public Quest() {
+	private long ownerId;
+	private short activeStep = 1;
+	private short completedStep;
+	private boolean isCompleted = false;
+	private String name;
+	private int crc;
+	
+	public Quest() {}
+	
+	public Quest(String name, long ownerId) {
+		this.ownerId = ownerId;
+		this.name = name;
+		this.crc = CRC.StringtoCRC("quest/"+name);
 		
 	}
 	
+	public long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(long ownerId) {
+		this.ownerId = ownerId;
+	}
+
+	public short getActiveStep() {
+		return activeStep;
+	}
+
+	public void setActiveStep(short activeStep) {
+		this.activeStep = activeStep;
+	}
+
+	public short getCompletedStep() {
+		return completedStep;
+	}
+
+	public void setCompletedStep(short completedStep) {
+		this.completedStep = completedStep;
+	}
+
+	public boolean isCompleted() {
+		return isCompleted;
+	}
+
+	public void setCompleted(boolean isCompleted) {
+		this.isCompleted = isCompleted;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+		this.crc = CRC.StringtoCRC(name);
+	}
+
+	public int getCrc() {
+		return crc;
+	}
+
 	public byte[] getBytes() {
-		return new byte[] { };
+		IoBuffer buffer = createBuffer(23);
+
+		buffer.put((byte) 0);
+		
+		buffer.putInt(crc);
+		
+		buffer.putLong(ownerId);
+		
+		buffer.putShort(activeStep);
+		buffer.putShort(completedStep);
+		
+		buffer.put((byte) ((isCompleted) ? 1 : 0)); // isCompleted
+		buffer.putInt(21); // questCounter
+		//buffer.put((byte) 0); // ?
+		
+		buffer.flip();
+		
+		return buffer.array();
 	}
 	
 }

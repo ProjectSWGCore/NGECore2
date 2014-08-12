@@ -23,20 +23,15 @@ package main;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -44,19 +39,13 @@ import java.util.concurrent.TimeUnit;
 import org.apache.mina.core.service.IoHandler;
 import org.apache.mina.core.session.IoSession;
 
-import com.sleepycat.je.Transaction;
-import com.sleepycat.persist.EntityCursor;
-
-import protocol.swg.chat.ChatSystemMessage;
 import net.engio.mbassy.bus.config.BusConfiguration;
 import resources.common.BountyListItem;
-import resources.common.RadialOptions;
 import resources.common.ThreadMonitor;
 import resources.datatables.GalaxyStatus;
 import resources.objects.creature.CreatureObject;
 import resources.objects.guild.GuildObject;
 import resources.objects.resource.GalacticResource;
-import resources.objects.resource.ResourceRoot;
 import services.AttributeService;
 import services.BuffService;
 import services.CharacterService;
@@ -105,6 +94,7 @@ import services.pet.MountService;
 import services.pet.PetService;
 import services.playercities.PlayerCity;
 import services.playercities.PlayerCityService;
+import services.quest.QuestService;
 import services.resources.HarvesterService;
 import services.resources.ResourceService;
 import services.retro.RetroService;
@@ -144,11 +134,11 @@ import engine.servers.InteractiveJythonServer;
 import engine.servers.MINAServer;
 import engine.servers.PingServer;
 
-@SuppressWarnings("unused")
 
+@SuppressWarnings("unused")
 public class NGECore {
 	
-	private static boolean logUnhandledExceptions = false;
+	private static boolean logUnhandledExceptions = true;
 	
 	public static boolean didServerCrash = false;
 	
@@ -202,6 +192,7 @@ public class NGECore {
 	public SpawnService spawnService;
 	public AIService aiService;
 	public MissionService missionService;
+	public QuestService questService;
 	public InstanceService instanceService;
 	public SurveyService surveyService;
 	public ResourceService resourceService;
@@ -391,6 +382,7 @@ public class NGECore {
 		spawnService = new SpawnService(this);
 		aiService = new AIService(this);
 		missionService = new MissionService(this);
+		questService = new QuestService(this);
 		invasionService = new InvasionService(this);
 		
 		// Ping Server
@@ -438,6 +430,7 @@ public class NGECore {
 		zoneDispatch.addService(buffService);
 		zoneDispatch.addService(entertainmentService);
 		zoneDispatch.addService(missionService);
+		zoneDispatch.addService(questService);
 		zoneDispatch.addService(bazaarService);
 		zoneDispatch.addService(lootService);
 		zoneDispatch.addService(mountService);
