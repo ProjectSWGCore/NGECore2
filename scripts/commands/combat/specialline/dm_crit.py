@@ -1,6 +1,7 @@
 import sys
 
 def setup(core, actor, target, command):
+
 	if actor.getSkillMod('expertise_cooldown_line_dm_crit'):
 		command.setCooldown(command.getCooldown() - (actor.getSkillModBase('expertise_cooldown_line_dm_crit')/10))
 		
@@ -11,7 +12,7 @@ def setup(core, actor, target, command):
 		command.setActionCost(command.getActionCost() - ((command.getActionCost()*actor.getSkillModBase('expertise_action_line_dm_crit'))/100))			
 	
 	if actor.getSkillMod('expertise_critical_line_dm_crit'):
-		command.setCriticalChance(command.getCriticalChance() + actor.getSkillModBase('expertise_critical_line_dm_crit'))
+		command.setCriticalChance(command.getCriticalChance + actor.getSkillModBase('expertise_critical_line_dm_crit'))
 		
 	return
 	
