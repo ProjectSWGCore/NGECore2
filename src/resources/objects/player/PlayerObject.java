@@ -161,7 +161,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		baseline.put("currentFSQuestList", new SWGList<Byte>(this, 8, 4, false));
 		baseline.put("completedFSQuestList", new SWGList<Byte>(this, 8, 5, false));
 		baseline.put("activeQuest", 0);
-		baseline.put("questJournal", new SWGList<Quest>(this, 8, 7, false));
+		baseline.put("questJournal", new SWGList<Quest>(this, 8, 7, false, true));
 		baseline.put("professionWheelPosition", "");
 		return baseline;
 	}

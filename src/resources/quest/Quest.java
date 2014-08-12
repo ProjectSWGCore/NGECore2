@@ -44,8 +44,11 @@ public class Quest extends Delta implements Serializable {
 	public Quest(String name, long ownerId) {
 		this.ownerId = ownerId;
 		this.name = name;
-		this.crc = CRC.StringtoCRC("quest/"+name);
-		
+
+		if (name.endsWith(".qst"))
+			this.crc = CRC.StringtoCRC("quest/"+name.split(".qst")[0]);
+		else
+			this.crc = CRC.StringtoCRC("quest/"+name);
 	}
 	
 	public long getOwnerId() {
@@ -99,15 +102,15 @@ public class Quest extends Delta implements Serializable {
 		buffer.put((byte) 0);
 		
 		buffer.putInt(crc);
-		
+
 		buffer.putLong(ownerId);
 		
 		buffer.putShort(activeStep);
 		buffer.putShort(completedStep);
 		
 		buffer.put((byte) ((isCompleted) ? 1 : 0)); // isCompleted
-		buffer.putInt(21); // questCounter
-		//buffer.put((byte) 0); // ?
+		buffer.putInt(0); // questCounter
+		buffer.put((byte) 0); // ?
 		
 		buffer.flip();
 		
