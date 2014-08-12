@@ -69,10 +69,10 @@ public class WeaponObject extends TangibleObject implements Serializable {
 	@Override
 	public Baseline getBaseline3() {
 		Baseline baseline = super.getBaseline3();
-		baseline.put("attackSpeed", 0);
+		baseline.put("attackSpeed", (float) 0);
 		baseline.put("14", 0);
 		baseline.put("15", 0);
-		baseline.put("maxRange", 0);
+		baseline.put("maxRange", (float) 0);
 		baseline.put("17", 0); // Could be lightsaber color?  Seen as 2 on a saber
 		baseline.put("weaponParticleEffect", 0);
 		baseline.put("19", 0); // something to do with particle color
