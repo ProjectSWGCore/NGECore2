@@ -688,13 +688,14 @@ public class CommandService implements INetworkDispatch  {
 	
 	public void processCommand(CreatureObject actor, SWGObject target, BaseSWGCommand command, int actionCounter, String commandArgs) {
 		
-		if (command.getGodLevel() > 0 || command.getCommandName().equals("setgodmode")) {	// TODO: When loading commands, simply don't put the "admin" characterAbility into the commands
+		if (command.getGodLevel() > 0 || command.getCommandName().equals("setgodmode")) {
 			String accessLevel = core.adminService.getAccessLevelFromDB(actor.getClient().getAccountId());
-			
-			if(accessLevel != null) {
+			String filePath = "accesslevels/" + accessLevel + ".txt";
+			System.out.println(command.getCommandName() + " was just used by an admin with accessLevel: " + accessLevel + ".");
+			if(FileUtilities.doesFileExist(filePath)) {
 				Scanner scanner;
 				try {
-					scanner = new Scanner(new File("accesslevels/" + accessLevel + ".txt"));
+					scanner = new Scanner(new File(filePath));
 					boolean levelHasCommand = false;
 					
 					while(scanner.hasNextLine()) {
@@ -714,7 +715,8 @@ public class CommandService implements INetworkDispatch  {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-			}
+			} else
+				return;
 		}
 		
 		if (command.getCooldown() > 0f) {
