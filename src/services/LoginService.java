@@ -105,8 +105,9 @@ public class LoginService implements INetworkDispatch{
 				
 				String user        = clientID.getAccountName();
 				String pass        = clientID.getPassword();
+				String version     = clientID.getVersion();
 				int id             = LoginProvider.getAccountId(user, pass, session.getRemoteAddress().toString());
-				System.out.println("LOGIN: " + user + " login attempt "+session.getRemoteAddress().toString()+" returned " + id);
+				System.out.println("LOGIN: " + user + " login attempt " + session.getRemoteAddress().toString() + " returned " + id);
 				
 				if (id < 0)  {
 					
@@ -135,14 +136,21 @@ public class LoginService implements INetworkDispatch{
 					return;
 				}
 				
+				if(!version.equals("20111130-15:46")) {
+					ErrorMessage clientErr = new ErrorMessage("Invalid Client", "The version of your client is invalid.");
+					session.write(clientErr.serialize());
+					
+					Disconnect disconnect = new Disconnect((Integer)session.getAttribute("connectionId"), 6);
+					session.write(disconnect);
+					return;
+				}
+				
 				Client client = new Client(session.getRemoteAddress());
 				client.setAccountName(user);
 				client.setPassword(pass);
 				client.setSessionKey(generateSessionKey());
 				client.setAccountId(id);
-				//client.setAccountEmail(email);
 				client.setSession(session);
-				client.setGM(checkForGmPermission(id));
 				
 				core.addClient(session, client);
 				
@@ -156,9 +164,6 @@ public class LoginService implements INetworkDispatch{
 					System.out.println(client.getAccountName() + " was not added to active connections map.");
 					return;				
 				}
-				/*if(!checkIfAccountExistInGameDB(id)) {
-					createAccountForGameDB(id, user, email, encryptPass);
-				}*/
 				
 				persistSession(client);
 
@@ -269,29 +274,6 @@ public class LoginService implements INetworkDispatch{
 		
 	}
 	
-	public boolean checkForGmPermission(int id) {
-		try {
-			if (core.getConfig().getInt("ADMIN") > 0) {
-				return true;
-			}
-		} catch (Exception e) {
-			
-		}
-		
-		PreparedStatement preparedStatement;
-		
-		try {
-			preparedStatement = databaseConnection1.preparedStatement("SELECT * FROM accounts WHERE id=" + id + "");
-			ResultSet resultSet = preparedStatement.executeQuery();
-			if(resultSet.next())
-				return resultSet.getBoolean("gmflag");
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		
-		return false;
-	}
-	
 	/**
 	 * Saves session data to DB so Zone Server can link sessions to accounts.
 	 * @param client Client that needs a session save.
@@ -398,14 +380,5 @@ public class LoginService implements INetworkDispatch{
 		return clusterStatus;
 	}
 	
-	/**
-	 * Checks if User has correct client version.
-	 * @param version Client Version String
-	 */
-	private boolean checkVersion(String version) {
-		System.out.println("Version Received: " + version);
-		return true;
-	}
-
 }
 	

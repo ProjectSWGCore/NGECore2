@@ -19,27 +19,50 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package resources.datatables;
+package services;
 
-public class DisplayType {
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Map;
+import java.sql.PreparedStatement;
+
+import main.NGECore;
+import engine.resources.service.INetworkDispatch;
+import engine.resources.service.INetworkRemoteEvent;
+
+public class AdminService implements INetworkDispatch {
 	
-	// System
-	public static byte Broadcast = 0; // Level up.  combatspam/skill_up
-	public static byte Screen = 1; // Screen? XP gain
-	public static byte Chat = 2;
-	//public static byte Overhead = 3; // Flytext? Seen on ent duration
-	public static byte Quest = 4;
-	//public static byte Combat = 5; // Seen in combat flytext
-	//public static byte Combat = 11; // Seen when blocking
+	private NGECore core;
 	
-	// Flytext
-	//public static byte Broadcast = 0; // Level up.  combatspam/skill_up
-	//public static byte Screen = 1; // Screen? XP gain
-	//public static byte Chat = 2;
-	//public static byte Overhead = 3; // Flytext? Seen on ent duration
-	//public static byte Combat = 4; // CombatSpam?
-	//public static byte Combat = 5; // Seen in combat flytext
-	//public static byte Combat = 11; // Seen when blocking
+	public AdminService(NGECore core) {
+		this.core = core;
+		
+	}
+	
+	public String getAccessLevelFromDB(long id) {
+		String accessLevel = null;
+		PreparedStatement preparedStatement;
+		
+		try {
+			preparedStatement = NGECore.getInstance().getDatabase1().preparedStatement("SELECT * FROM accounts WHERE id=" + id + "");
+			ResultSet resultSet = preparedStatement.executeQuery();
+			if(resultSet.next())
+				accessLevel = resultSet.getString("accessLevel");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return accessLevel;
+	}
+	
+	@Override
+	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> arg0, Map<Integer, INetworkRemoteEvent> arg1) {
+		
+	}
+	
+	@Override
+	public void shutdown() {
+	
+	}
 	
 }
-

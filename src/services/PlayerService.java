@@ -75,6 +75,7 @@ import resources.datatables.GcwRank;
 import resources.datatables.Options;
 import resources.datatables.PlayerFlags;
 import resources.datatables.Professions;
+import resources.datatables.AdminTag;
 import resources.guild.Guild;
 import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
@@ -190,7 +191,7 @@ public class PlayerService implements INetworkDispatch {
 		
 		scheduleList.add(scheduler.scheduleAtFixedRate(() -> {
 			try {
-				if (creature.isInStealth() && !creature.getOption(Options.INVULNERABLE) && ((PlayerObject) creature.getSlottedObject("ghost")).getGodLevel() == 0) {
+				if (creature.isInStealth() && !creature.getOption(Options.INVULNERABLE) && core.adminService.getAccessLevelFromDB(creature.getClient().getAccountId()) == null) {
 					List<SWGObject> objects = core.simulationService.get(creature.getPlanet(), creature.getPosition().x, creature.getPosition().z, 64);
 					
 					for (SWGObject object : objects) {
@@ -204,7 +205,7 @@ public class PlayerService implements INetworkDispatch {
 						
 						CreatureObject observer = (CreatureObject) object;
 						
-						int camoflauge = creature.getSkillModBase("camoflauge") - observer.getSkillModBase("detectcamo");
+						int camoflauge = creature.getSkillModBase("camouflage") - observer.getSkillModBase("detectcamo");
 						camoflauge -= (64 - creature.getPosition().getDistance(observer.getPosition()));
 						
 						if (new Random(camoflauge).nextInt() == camoflauge) {

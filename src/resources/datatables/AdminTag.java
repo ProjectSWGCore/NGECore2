@@ -21,25 +21,11 @@
  ******************************************************************************/
 package resources.datatables;
 
-public class DisplayType {
-	
-	// System
-	public static byte Broadcast = 0; // Level up.  combatspam/skill_up
-	public static byte Screen = 1; // Screen? XP gain
-	public static byte Chat = 2;
-	//public static byte Overhead = 3; // Flytext? Seen on ent duration
-	public static byte Quest = 4;
-	//public static byte Combat = 5; // Seen in combat flytext
-	//public static byte Combat = 11; // Seen when blocking
-	
-	// Flytext
-	//public static byte Broadcast = 0; // Level up.  combatspam/skill_up
-	//public static byte Screen = 1; // Screen? XP gain
-	//public static byte Chat = 2;
-	//public static byte Overhead = 3; // Flytext? Seen on ent duration
-	//public static byte Combat = 4; // CombatSpam?
-	//public static byte Combat = 5; // Seen in combat flytext
-	//public static byte Combat = 11; // Seen when blocking
+public class AdminTag {
+	public static final byte NONE = 0;	// Default
+	public static final byte CSR = 1;	// (CSR)
+	public static final byte DEVELOPER = 2; // (Developer)
+	public static final byte WARDEN = 3; // (Warden)
+	public static final byte QA = 4; // (QA)
 	
 }
-

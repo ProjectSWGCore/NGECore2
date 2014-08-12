@@ -21,9 +21,14 @@
  ******************************************************************************/
 package services.command;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteOrder;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -31,6 +36,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import main.NGECore;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 
@@ -71,29 +77,23 @@ public class CommandService implements INetworkDispatch  {
 	
 	public boolean callCommand(CreatureObject actor, SWGObject target, BaseSWGCommand command, int actionCounter, String commandArgs) {
 
-		if (actor == null) {
+		if (actor == null)
 			return false;
-		}
 		
-		if (command == null) {
+		if (actor.getClient() == null)
 			return false;
-		}
 		
-		if (command.getCharacterAbility().length() > 0 && !actor.hasAbility(command.getCharacterAbility()) && actor.getClient() != null) {
+		if (command == null)
 			return false;
-		}
 		
-		if (command.isDisabled()) {
+		if (command.getCharacterAbility().length() > 0 && !actor.hasAbility(command.getCharacterAbility()))
 			return false;
-		}
 		
-		if (actor.getClient() != null && command.getGodLevel() > actor.getPlayerObject().getGodLevel()) {
+		if (command.isDisabled())
 			return false;
-		}
 		
-		if (actor.hasCooldown(command.getCooldownGroup()) || actor.hasCooldown(command.getCommandName())) {
+		if (actor.hasCooldown(command.getCooldownGroup()) || actor.hasCooldown(command.getCommandName()))
 			return false;
-		}
 		
 		// Causes this service method to return with false after equipping a rifle, not allowing to unequip it anymore
 		// because the client seems to consider rifles invalidweapons for an unkown reason
@@ -687,19 +687,50 @@ public class CommandService implements INetworkDispatch  {
 	}
 	
 	public void processCommand(CreatureObject actor, SWGObject target, BaseSWGCommand command, int actionCounter, String commandArgs) {
+		
+		if (command.getGodLevel() > 0 || command.getCommandName().equals("setgodmode")) {	// TODO: When loading commands, simply don't put the "admin" characterAbility into the commands
+			String accessLevel = core.adminService.getAccessLevelFromDB(actor.getClient().getAccountId());
+			
+			if(accessLevel != null) {
+				Scanner scanner;
+				try {
+					scanner = new Scanner(new File("accesslevels/" + accessLevel + ".txt"));
+					boolean levelHasCommand = false;
+					
+					while(scanner.hasNextLine()) {
+						String commandName = scanner.nextLine();
+						if(command.getCommandName().equals(commandName)) {
+							levelHasCommand = true;
+					    	break;
+						}
+					 }
+					
+					if (!levelHasCommand) {
+						actor.sendSystemMessage(" \\#FE2EF7 [GM] \\#FFFFFF " + command.getCommandName() + ": You do not have permission to use this command.", (byte) 0);
+						return;
+					}
+					
+				} catch (FileNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		
 		if (command.getCooldown() > 0f) {
 			actor.addCooldown(command.getCooldownGroup(), command.getCooldown());
 		}
 		
 		if (command instanceof CombatCommand) {
 			processCombatCommand(actor, target, (CombatCommand) command, actionCounter, commandArgs);
-		} else {
+		} else
 			if (FileUtilities.doesFileExist("scripts/commands/" + command.getCommandName().toLowerCase() + ".py")) {
 				core.scriptService.callScript("scripts/commands/", command.getCommandName().toLowerCase(), "run", core, actor, target, commandArgs);
 			} else if (FileUtilities.doesFileExist("scripts/commands/combat/" + command.getCommandName().toLowerCase() + ".py")) {
 				core.scriptService.callScript("scripts/commands/combat/", command.getCommandName().toLowerCase(), "run", core, actor, target, commandArgs);
 			}
-		}
+		
+		
 	}
 	
 	public void processCommandForInstallation(InstallationObject actor, SWGObject target, BaseSWGCommand command, int actionCounter, String commandArgs) {

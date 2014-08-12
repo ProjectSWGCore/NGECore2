@@ -1111,7 +1111,7 @@ public class HarvesterService implements INetworkDispatch {
 	
 	public void enterStructurePlacementMode(CreatureObject actor, SWGObject object){
 
-		if (!actor.getClient().isGM() && !core.terrainService.canBuildAtPosition(actor,actor.getPosition().x,actor.getPosition().z)){
+		if (core.adminService.getAccessLevelFromDB(actor.getClient().getAccountId()) == null && !core.terrainService.canBuildAtPosition(actor,actor.getPosition().x,actor.getPosition().z)){
 			actor.sendSystemMessage("@player_structure:not_permitted", (byte) 0);
 			return;
 		}

@@ -403,7 +403,7 @@ public class BuildingObject extends TangibleObject implements IPersistent, Seria
 	}
 	
 	public boolean canEnter(SWGObject object) {
-		return (getPrivacy() == PRIVATE && (entryList.contains(object.getObjectID()) || adminList.contains(object.getObjectID()))) || !banList.contains(object.getObjectID()) || object.getClient().isGM();
+		return (getPrivacy() == PRIVATE && (entryList.contains(object.getObjectID()) || adminList.contains(object.getObjectID()))) || !banList.contains(object.getObjectID()) || !(NGECore.getInstance().adminService.getAccessLevelFromDB(object.getClient().getAccountId()) == null);
 	}
 	
 	public void updateCellPermissions(SWGObject obj) {

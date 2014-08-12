@@ -25,12 +25,12 @@ import java.nio.ByteOrder;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-public class UnknownAbilityPacket extends SWGMessage {
+public class GrantCommand extends SWGMessage {
 
-	private String ability;
+	private String command;
 	
-	public UnknownAbilityPacket(String ability) {
-		this.ability = ability;
+	public GrantCommand(String command) {
+		this.command = command;
 	}
 	
 	@Override
@@ -40,10 +40,10 @@ public class UnknownAbilityPacket extends SWGMessage {
 
 	@Override
 	public IoBuffer serialize() {
-		IoBuffer buffer = IoBuffer.allocate(8 + ability.length()).order(ByteOrder.LITTLE_ENDIAN);
+		IoBuffer buffer = IoBuffer.allocate(8 + command.length()).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.putShort((short) 2);
 		buffer.putInt(0xE67E3875);
-		buffer.put(getAsciiString(ability));
+		buffer.put(getAsciiString(command));
 		return buffer.flip();
 	}
 
