@@ -48,7 +48,7 @@ setfirstname
 setlastname
 setname
 setplayerstate
-activtequest
+activatequest
 activateinstance
 clearcompletedquest
 completequest
