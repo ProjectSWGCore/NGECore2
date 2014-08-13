@@ -151,6 +151,8 @@ public class LoginService implements INetworkDispatch{
 				client.setSessionKey(generateSessionKey());
 				client.setAccountId(id);
 				client.setSession(session);
+				String accessLevel = core.adminService.getAccessLevelFromDB(id);
+				if (accessLevel != null && !accessLevel.equals("")) { client.setAccessLevel(accessLevel); }
 				
 				core.addClient(session, client);
 				
