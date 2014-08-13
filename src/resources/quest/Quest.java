@@ -37,18 +37,26 @@ public class Quest extends Delta implements Serializable {
 	private short completedStep;
 	private boolean isCompleted = false;
 	private String name;
-	private int crc;
+	private String filePath;
 	
 	public Quest() {}
 	
 	public Quest(String name, long ownerId) {
 		this.ownerId = ownerId;
-		this.name = name;
 
-		if (name.endsWith(".qst"))
-			this.crc = CRC.StringtoCRC("quest/"+name.split(".qst")[0]);
-		else
-			this.crc = CRC.StringtoCRC("quest/"+name);
+		if (name.endsWith(".qst")) {
+			this.filePath = "quest/"+name;
+			this.name = name.split(".qst")[0];
+		} else {
+			this.filePath = "quest/"+name+".qst";
+			this.name = name;
+		}
+		
+		if (name.contains("/")) {
+			String[] split = name.split("/");
+			this.name = split[split.length - 1];
+		}
+
 	}
 	
 	public long getOwnerId() {
@@ -87,13 +95,16 @@ public class Quest extends Delta implements Serializable {
 		return name;
 	}
 
-	public void setName(String name) {
-		this.name = name;
-		this.crc = CRC.StringtoCRC(name);
+	public String getFilePath() {
+		return filePath;
 	}
 
 	public int getCrc() {
-		return crc;
+		return CRC.StringtoCRC(getCrcName());
+	}
+	
+	public String getCrcName() {
+		return "quest/" + name;
 	}
 
 	public byte[] getBytes() {
@@ -101,7 +112,7 @@ public class Quest extends Delta implements Serializable {
 
 		buffer.put((byte) 0);
 		
-		buffer.putInt(crc);
+		buffer.putInt(getCrc());
 
 		buffer.putLong(ownerId);
 		

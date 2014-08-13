@@ -27,10 +27,8 @@ public class QuestTask {
 	private String journalEntryTitle;
 	private String journalEntryDescription;
 	private String planet;
-	// private String prerequisiteTasks; // TODO: Figure out format for multiple
-	// pre-req tasks
-	// private String exclusionTasks; // TODO: Figure out format for multiple
-	// exclusion tasks
+	// private String prerequisiteTasks;
+	// private String exclusionTasks; 
 	private String musicOnActivate;
 	private String musicOnComplete;
 	private String musicOnFail;
@@ -47,18 +45,25 @@ public class QuestTask {
 	private String waitMarkerTemplate;
 	private String waitMarkerPlanetName;
 	private String waitMarkerCellName;
+	private String commMessageText;
+	private String commAppearanceTemplate; // NPC Appearance Server Template
+	private String tasksOnComplete;
+	private String serverTemplate;
+	private String itemName;
+	private String tasksOnFail;
 	
-	private boolean taskOnFail;
 	private boolean visible;
 	private boolean grantQuestOnCompleteShowSystemMessage;
 	private boolean grantQuestOnFailShowSystemMessage;
 	private boolean allowRepeats;
+	private boolean createsWaypoint;
+	private boolean showSystemMessages;
 	
 	private int id;
-	private int showSystemMessages; // TODO: Possibly change to boolean
-	private int createWaypoint;
 	private int waitMarkerCreate;
 	private int timeToComplete;
+	private int numRequired;
+	private int dropPercent;
 	
 	private long waitMarkerBuilding;
 	
@@ -71,10 +76,9 @@ public class QuestTask {
 
 	public QuestTask() {}
 
-	public QuestTask(String type, int id, boolean taskOnFail) {
+	public QuestTask(String type, int id) {
 		this.type = type;
 		this.id = id;
-		this.taskOnFail = taskOnFail;
 	}
 
 	public String getType() {
@@ -97,8 +101,8 @@ public class QuestTask {
 		this.journalEntryDescription = journalEntryDescription;
 	}
 
-	public boolean isTaskOnFail() {
-		return taskOnFail;
+	public String getTasksOnFail() {
+		return tasksOnFail;
 	}
 
 	public int getId() {
@@ -249,6 +253,22 @@ public class QuestTask {
 		this.waitMarkerCellName = waitMarkerCellName;
 	}
 
+	public String getCommMessageText() {
+		return commMessageText;
+	}
+
+	public void setCommMessageText(String commMessageText) {
+		this.commMessageText = commMessageText;
+	}
+
+	public String getCommAppearanceTemplate() {
+		return commAppearanceTemplate;
+	}
+
+	public void setCommAppearanceTemplate(String commAppearanceTemplate) {
+		this.commAppearanceTemplate = commAppearanceTemplate;
+	}
+
 	public boolean isVisible() {
 		return visible;
 	}
@@ -283,20 +303,20 @@ public class QuestTask {
 		this.allowRepeats = allowRepeats;
 	}
 
-	public int getShowSystemMessages() {
+	public boolean showSystemMessages() {
 		return showSystemMessages;
 	}
 
-	public void setShowSystemMessages(int showSystemMessages) {
+	public void setShowSystemMessages(boolean showSystemMessages) {
 		this.showSystemMessages = showSystemMessages;
 	}
 
-	public int getCreateWaypoint() {
-		return createWaypoint;
+	public boolean createsWaypoint() {
+		return createsWaypoint;
 	}
 
-	public void setCreateWaypoint(int createWaypoint) {
-		this.createWaypoint = createWaypoint;
+	public void setCreatesWaypoint(boolean createWaypoint) {
+		this.createsWaypoint = createWaypoint;
 	}
 
 	public int getWaitMarkerCreate() {
@@ -369,5 +389,57 @@ public class QuestTask {
 
 	public void setWaitMarkerZ(float waitMarkerZ) {
 		this.waitMarkerZ = waitMarkerZ;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public void setTasksOnFail(String tasksOnFail) {
+		this.tasksOnFail = tasksOnFail;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public String getTasksOnComplete() {
+		return tasksOnComplete;
+	}
+
+	public void setTasksOnComplete(String tasksOnComplete) {
+		this.tasksOnComplete = tasksOnComplete;
+	}
+
+	public String getServerTemplate() {
+		return serverTemplate;
+	}
+
+	public void setServerTemplate(String serverTemplate) {
+		this.serverTemplate = serverTemplate;
+	}
+
+	public int getNumRequired() {
+		return numRequired;
+	}
+
+	public void setNumRequired(int numRequired) {
+		this.numRequired = numRequired;
+	}
+
+	public String getItemName() {
+		return itemName;
+	}
+
+	public void setItemName(String itemName) {
+		this.itemName = itemName;
+	}
+
+	public int getDropPercent() {
+		return dropPercent;
+	}
+
+	public void setDropPercent(int dropPercent) {
+		this.dropPercent = dropPercent;
 	}
 }
