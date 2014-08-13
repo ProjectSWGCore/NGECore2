@@ -691,7 +691,7 @@ public class CommandService implements INetworkDispatch  {
 		if (command.getGodLevel() > 0 || command.getCommandName().equals("setgodmode")) {
 			String accessLevel = core.adminService.getAccessLevelFromDB(actor.getClient().getAccountId());
 			String filePath = "accesslevels/" + accessLevel + ".txt";
-			System.out.println(command.getCommandName() + " was just used by an admin with accessLevel: " + accessLevel + ".");
+			
 			if(FileUtilities.doesFileExist(filePath)) {
 				Scanner scanner;
 				try {
