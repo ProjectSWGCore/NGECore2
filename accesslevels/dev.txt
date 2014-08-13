@@ -48,6 +48,7 @@ activtequest
 activateinstance
 clearcompletedquest
 completequest
+activatequest
 listactivequests
 listcompletedquests
 grantskill
