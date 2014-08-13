@@ -153,8 +153,7 @@ public class WaypointObject extends IntangibleObject implements IDelta, Serializ
 		
 	}
 	
-	public byte[] getBytes() {
-		synchronized(objectMutex) {
+	public synchronized byte[] getBytes() {
 			IoBuffer buffer = Baseline.createBuffer(38 + StringUtilities.getUnicodeString(getName()).length);
 			buffer.putInt(getCellNumber());
 			buffer.put(Baseline.toBytes(getBaseline(3).get("position")));
@@ -165,7 +164,7 @@ public class WaypointObject extends IntangibleObject implements IDelta, Serializ
 			buffer.put(getColor());
 			buffer.put(Baseline.getBoolean(isActive()));
 			return buffer.flip().array();
-		}
+		
 	}
 	
 	@Deprecated public int getCellId() { return getCellNumber(); }
