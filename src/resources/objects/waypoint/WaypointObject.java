@@ -43,7 +43,8 @@ public class WaypointObject extends IntangibleObject implements IDelta, Serializ
 	public static final byte BLUE = 1, GREEN = 2, ORANGE = 3, YELLOW = 4, PURPLE = 5, WHITE = 6, MULTICOLOR = 7;
 	
 	public WaypointObject(long objectID, Planet planet, Point3D position) { 
-		super(objectID, planet, new Point3D(0, 0, 0), new Quaternion(0, 0, 0, 1), "object/waypoint/shared_waypoint.iff");
+		//super(objectID, planet, new Point3D(0, 0, 0), new Quaternion(0, 0, 0, 1), "object/waypoint/shared_waypoint.iff");
+		super(objectID, planet, position, new Quaternion(0, 0, 0, 1), "object/waypoint/shared_waypoint.iff");
 	}
 	
 	public WaypointObject() {
