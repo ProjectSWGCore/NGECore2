@@ -28,7 +28,7 @@ public class DisplayType {
 	public static byte Screen = 1; // Screen? XP gain
 	public static byte Chat = 2;
 	//public static byte Overhead = 3; // Flytext? Seen on ent duration
-	//public static byte Combat = 4; // CombatSpam?
+	public static byte Quest = 4;
 	//public static byte Combat = 5; // Seen in combat flytext
 	//public static byte Combat = 11; // Seen when blocking
 	

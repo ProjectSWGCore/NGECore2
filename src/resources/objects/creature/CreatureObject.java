@@ -188,6 +188,8 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	private transient CreatureObject calledPet;
 	
 	private byte locomotion = 0;
+	private int GCWFatigue = 0;
+	private boolean isConstructing = false;
 	
 	public CreatureObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
 		super(objectID, planet, position, orientation, Template);
@@ -545,6 +547,9 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		if (companion != null) {
 			companion.setFaction(faction);
 		}
+		
+		if (this.getCalledPet()!=null)
+			this.getCalledPet().setFaction(faction);
 	}
 	
 	public void setFactionStatus(int factionStatus) {
@@ -555,6 +560,8 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		if (companion != null) {
 			companion.setFactionStatus(factionStatus);
 		}
+		if (this.getCalledPet()!=null)
+			this.getCalledPet().setFactionStatus(factionStatus);
 	}
 	
 	public float getHeight() {
@@ -1148,7 +1155,7 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		}
 		//destination.getSession().write(messageBuilder.buildBaseline8());
 		//destination.getSession().write(messageBuilder.buildBaseline9());
-		 		
+			
 		if(destination != getClient()) {
 			UpdatePVPStatusMessage upvpm = new UpdatePVPStatusMessage(getObjectID(), NGECore.getInstance().factionService.calculatePvpStatus((CreatureObject) destination.getParent(), this), getFaction());
 			destination.getSession().write(upvpm.serialize());
@@ -1886,5 +1893,35 @@ public class CreatureObject extends TangibleObject implements Serializable {
 
 	public void setCalledPet(CreatureObject calledPet) {
 		this.calledPet = calledPet;
+	}
+
+	public int getGCWFatigue() {
+		return GCWFatigue;
+	}
+
+	public void setGCWFatigue(int gCWFatigue) {
+		GCWFatigue = gCWFatigue;
+	}
+	
+	public boolean isTrader(){
+		if (isPlayer()){
+			PlayerObject player = (PlayerObject) this.getSlottedObject("ghost");	
+			String profession = player.getProfession();
+			if (profession.equals("trader_0a") ||
+				profession.equals("trader_0b") ||
+				profession.equals("trader_0c") ||
+				profession.equals("trader_0d")){
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public boolean isConstructing() {
+		return isConstructing;
+	}
+
+	public void setConstructing(boolean isConstructing) {
+		this.isConstructing = isConstructing;
 	}
 }

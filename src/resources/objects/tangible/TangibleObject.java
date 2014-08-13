@@ -24,6 +24,7 @@ package resources.objects.tangible;
 import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -241,6 +242,8 @@ public class TangibleObject extends SWGObject implements Serializable {
 	
 	public void setOptionsBitmask(int optionsBitmask) {
 		notifyClients(getBaseline(3).set("optionsBitmask", optionsBitmask), true);
+		// This needs to be refactored to be sent to clients with different values depending on their faction
+		// A quest object for one faction, can't be quest object for opposing faction
 	}
 	
 	public void setOptions(int options, boolean add) {
@@ -322,18 +325,30 @@ public class TangibleObject extends SWGObject implements Serializable {
 	// All objects can be in combat (terminal mission flag bases, tutorial target box)
 	
 	public List<TangibleObject> getDefendersList() {
-		synchronized(objectMutex) {
+		synchronized(defendersList) {
 			return defendersList;
 		}
 	}
 	
+	public List<TangibleObject> getDefendersListClone() {
+		synchronized(objectMutex) {
+			List<TangibleObject> returnList = new Vector<TangibleObject>();
+			Collections.copy(returnList, defendersList);
+			return returnList;
+		}
+	}
+	
 	public void addDefender(TangibleObject defender) {
-		if (((CreatureObject)this).getOwnerId()>0){
-			if (((CreatureObject)this).getOwnerId()==defender.getObjectID()){
-				return; // fix for now until determined where the tamer is added from
+		if (this instanceof CreatureObject){
+			if (((CreatureObject)this).getOwnerId()>0){
+				if (((CreatureObject)this).getOwnerId()==defender.getObjectID()){
+					return; // fix for now until determined where the tamer is added from
+				}
 			}
 		}
-		defendersList.add(defender);
+		synchronized(defendersList) {
+			defendersList.add(defender);
+		}
 	
 		if (!isInCombat()) {
 			setInCombat(true);
@@ -341,13 +356,15 @@ public class TangibleObject extends SWGObject implements Serializable {
 	}
 	
 	public void removeDefender(TangibleObject defender) {
-		defendersList.remove(defender);
-		
-		if (defendersList.isEmpty() && isInCombat()) {
-			setInCombat(false);
+		synchronized(defendersList) {
+			defendersList.remove(defender);
+			
+			if (defendersList.isEmpty() && isInCombat()) {
+				setInCombat(false);
+			}
 		}
 	}
-	
+		
 	public int getPvpBitmask() {
 		synchronized(objectMutex) {
 			return pvpBitmask;
@@ -387,10 +404,10 @@ public class TangibleObject extends SWGObject implements Serializable {
 			
 			if (observer.getParent() != null) {
 				observer.getSession().write(new UpdatePVPStatusMessage(this.getObjectID(), NGECore.getInstance().factionService.calculatePvpStatus((CreatureObject) observer.getParent(), this), getFaction()).serialize());
-				if(getClient() != null)
-					getClient().getSession().write(new UpdatePVPStatusMessage(observer.getParent().getObjectID(), NGECore.getInstance().factionService.calculatePvpStatus((CreatureObject) this, (CreatureObject) observer.getParent()), getFaction()).serialize());
+				if(getClient() != null){
+					getClient().getSession().write(new UpdatePVPStatusMessage(observer.getParent().getObjectID(), NGECore.getInstance().factionService.calculatePvpStatus((CreatureObject) this, (CreatureObject) observer.getParent()), getFaction()).serialize());					
+				} 
 			}
-
 		}
 		
 		if (getClient() != null) {
@@ -398,16 +415,6 @@ public class TangibleObject extends SWGObject implements Serializable {
 			
 			if (companion != null) {
 				companion.updatePvpStatus();
-			}
-		}
-		
-	
-		if (this instanceof CreatureObject){
-			if (((CreatureObject)this).isPlayer()){
-				// Here a specific CREO delta must be sent to update the faction info in character sheet and symbol in name
-				// If anyone knows which that would be, please replace it here!
-				sendBaselines(this.getClient());
-				
 			}
 		}
 	}
@@ -602,7 +609,8 @@ public class TangibleObject extends SWGObject implements Serializable {
 	}
 	
 	public void notifyClients(IoBuffer buffer, boolean notifySelf) {
-		notifyObservers(buffer, false);
+		// notifyObservers(buffer, false); // ??? Ignores the notifySelf argument. Was this done purposely? Faction Status etc. can't update the client without it
+		notifyObservers(buffer, notifySelf);
 	}
 	
 	public ObjectMessageBuilder getMessageBuilder() {
@@ -615,9 +623,26 @@ public class TangibleObject extends SWGObject implements Serializable {
 		}
 	}
 	
+	@Override
 	public void sendBaselines(Client destination) {
 		if (destination != null && destination.getSession() != null) {
-			destination.getSession().write(getBaseline(3).getBaseline());
+			
+			// Factional peculiarities
+			Baseline baseLine3 = getBaseline(3);
+			if (destination.getParent() instanceof CreatureObject){
+				if (((CreatureObject) destination.getParent()).isPlayer() && ((CreatureObject) destination.getParent()).getFaction()!=this.getFaction()){
+					int optionsBitMask = getOptionsBitmask();
+					if (getOption(Options.QUEST))
+						optionsBitMask = optionsBitMask & ~Options.QUEST;
+					if (!getOption(Options.ATTACKABLE))
+						optionsBitMask = optionsBitMask | Options.ATTACKABLE;
+					
+					baseLine3.set("optionsBitmask", optionsBitMask);
+				}
+			}
+						
+			//destination.getSession().write(getBaseline(3).getBaseline());
+			destination.getSession().write(baseLine3.getBaseline());
 			destination.getSession().write(getBaseline(6).getBaseline());
 			
 			Client parent = ((getGrandparent() == null) ? null : getGrandparent().getClient());
@@ -630,11 +655,17 @@ public class TangibleObject extends SWGObject implements Serializable {
 			if (destination.getParent() != this) {
 				UpdatePVPStatusMessage upvpm = new UpdatePVPStatusMessage(getObjectID());
 				upvpm.setFaction(CRC.StringtoCRC(getFaction()));
+//				if (this.getTemplate().contains("barricade")){
+//					System.out.println("BARTANO RESULT " + NGECore.getInstance().factionService.calculatePvpStatus((CreatureObject) destination.getParent(), this));
+//				}
+				
 				upvpm.setStatus(NGECore.getInstance().factionService.calculatePvpStatus((CreatureObject) destination.getParent(), this));
 				destination.getSession().write(upvpm.serialize());
 			}
 		}
 	}
+	
+	
 	
 	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
 		switch (viewType) {

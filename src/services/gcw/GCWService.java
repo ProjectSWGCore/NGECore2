@@ -46,6 +46,7 @@ import org.python.google.common.collect.Multimap;
 import protocol.swg.GcwGroupsRsp;
 import protocol.swg.GcwRegionsReq;
 import protocol.swg.GcwRegionsRsp;
+import protocol.swg.ServerNowEpochTime;
 import resources.common.Opcodes;
 import resources.common.OutOfBand;
 import resources.common.collidables.CollidableCircle;
@@ -492,7 +493,7 @@ public class GCWService implements INetworkDispatch {
 	/* Ported from javascript.
 	 * Written for us by Hendrik of http://swg.activeframe.de.
 	 */
-	private double helper(int points, int rank) {
+	public double helper(int points, int rank) {
 		int faktor = points / (MOD2[rank-1] - 250 * rank);
 		int rt = points / (1 + faktor) - DECAY1[rank-1];
 		
@@ -636,9 +637,22 @@ public class GCWService implements INetworkDispatch {
 		c.set(Calendar.SECOND, 0);
 		c.set(Calendar.MILLISECOND, 0);
 		
-		return (int) ((c.getTimeInMillis() - now.getTime()) / 1000L);
+		// Theory:Due to the client refusing the ServerNowEpochTime packet, the client assumes an epoch time of 0 for GCW! 
+		// An alternative theory would be that the GCWTime is independent from the ServerNowEpochTime
+		// 2nd theory more likely, because manually sending ServerNowEpochTime (confirmed by sniff) does nothing to the GCW time
+		// Conclusion: GCW epoch time is set independently somehow
+		
+		// The return value must be relative to epoch of 0, the client assumes 25.12.2011 current time/date
+		//return (int) ((c.getTimeInMillis() - now.getTime()) / 1000L);
+		return (int) (1324047960 + ((c.getTimeInMillis() - now.getTime()) / 1000L));
 	}
 	
+	public void sendServerNowEpochTime(CreatureObject player){
+		
+		ServerNowEpochTime time = new ServerNowEpochTime((int) (System.currentTimeMillis() / 1000));
+		player.getClient().getSession().write(time.serialize()); 
+	}
+
 	public void updateNextUpdateTime() {
 		ODBCursor cursor = core.getSWGObjectODB().getCursor();
 		

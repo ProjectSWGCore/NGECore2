@@ -21,15 +21,14 @@
  ******************************************************************************/
 package protocol.swg.objectControllerObjects;
 
+import java.nio.BufferUnderflowException;
 import java.nio.ByteOrder;
-
 import java.lang.Math;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
 import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
-
 import protocol.swg.ObjControllerMessage;
 
 public class DataTransform extends ObjControllerObject {
@@ -93,21 +92,23 @@ public class DataTransform extends ObjControllerObject {
 	}
 	
 	public void deserialize(IoBuffer buffer) {
-		objectId = buffer.getLong();
-		buffer.getInt();
-		
-		movementStamp = buffer.getInt();
-		movementIndex = buffer.getInt();
-		
-		xOrientation = buffer.getFloat();
-		yOrientation = buffer.getFloat();
-		zOrientation = buffer.getFloat();
-		wOrientation = buffer.getFloat();
-		
-		xPosition = buffer.getFloat();
-		yPosition = buffer.getFloat();
-		zPosition = buffer.getFloat();
-		speed = buffer.getFloat();
+		try{
+			objectId = buffer.getLong();
+			buffer.getInt();
+			
+			movementStamp = buffer.getInt();
+			movementIndex = buffer.getInt();
+			
+			xOrientation = buffer.getFloat();
+			yOrientation = buffer.getFloat();
+			zOrientation = buffer.getFloat();
+			wOrientation = buffer.getFloat();
+			
+			xPosition = buffer.getFloat();
+			yPosition = buffer.getFloat();
+			zPosition = buffer.getFloat();
+			speed = buffer.getFloat();
+		} catch (BufferUnderflowException ex){System.err.println("BufferUnderflowException during Datatransform deserialization");}
 	}
 	
 	public IoBuffer serialize() {
