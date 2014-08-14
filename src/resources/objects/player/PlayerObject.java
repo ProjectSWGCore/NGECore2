@@ -187,7 +187,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		baseline.put("maxConsumable", 100);
 		baseline.put("waypointList", new SWGMap<Long, WaypointObject>(this, 9, 16, false));
 		baseline.put("defendersList", new SWGSet<Long>(this, 9, 17, false));
-		baseline.put("kills", 0);
+		baseline.put("killMeterPoints", 0);
 		baseline.put("19", 0);
 		baseline.put("pet", (long) 0);
 		baseline.put("petAbilities", new SWGList<String>(this, 9, 21, false));
@@ -769,18 +769,14 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		return (SWGSet<Long>) getBaseline(8).get("defendersList");
 	}
 	
-	public int getKills() {
-		return (int) getBaseline(9).get("kills");
+	public int getKillMeterPoints() {
+		return (int) getBaseline(9).get("killMeterPoints");
 	}
 	
-	public void setKills(int kills) {
+	public void setKillMeterPoints(int points) {
 		if (getClient() != null) {
-			getClient().getSession().write(getBaseline(9).set("kills", kills));
+			getClient().getSession().write(getBaseline(9).set("killMeterPoints", points));
 		}
-	}
-	
-	public void addKills(int kills) {
-		setKills(getKills() + kills);
 	}
 	
 	public long getPet() {
