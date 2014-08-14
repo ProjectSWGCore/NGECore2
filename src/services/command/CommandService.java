@@ -689,9 +689,9 @@ public class CommandService implements INetworkDispatch  {
 	public void processCommand(CreatureObject actor, SWGObject target, BaseSWGCommand command, int actionCounter, String commandArgs) {
 		
 		if (command.getGodLevel() > 0 || command.getCommandName().equals("setgodmode")) {
-			String accessLevel = actor.getClient().getAccessLevel();
+			String accessLevel = core.adminService.getAccessLevelFromDB(actor.getClient().getAccountId());
 			String filePath = "accesslevels/" + accessLevel + ".txt";
-			
+
 			if(FileUtilities.doesFileExist(filePath)) {
 				Scanner scanner;
 				try {
@@ -700,7 +700,7 @@ public class CommandService implements INetworkDispatch  {
 					
 					while(scanner.hasNextLine()) {
 						String commandName = scanner.nextLine();
-						if(command.getCommandName().equals(commandName)) {
+						if(command.getCommandName().equalsIgnoreCase(commandName)) {
 							levelHasCommand = true;
 					    	break;
 						}

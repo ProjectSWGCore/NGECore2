@@ -49,7 +49,7 @@ public class SWGQuestDataHandler extends DefaultHandler {
 			break;
 		
 		case "task":
-			dataObj.getTasks().add(new QuestTask(attributes.getValue("type"), Integer.parseInt(attributes.getValue("id")), Boolean.parseBoolean(attributes.getValue("taskOnFail"))));
+			dataObj.getTasks().add(new QuestTask(attributes.getValue("type"), Integer.parseInt(attributes.getValue("id"))));
 			break;
 		
 		case "data":
@@ -103,7 +103,7 @@ public class SWGQuestDataHandler extends DefaultHandler {
 			break;
 			
 		case "showSystemMessages":
-			task.setShowSystemMessages(Integer.parseInt(attributes.getValue("value")));
+			task.setShowSystemMessages(Boolean.parseBoolean(attributes.getValue("value")));
 			break;
 			
 		case "grantQuestOnComplete":
@@ -123,7 +123,7 @@ public class SWGQuestDataHandler extends DefaultHandler {
 			break;
 			
 		case "createWaypoint":
-			task.setCreateWaypoint(Integer.parseInt(attributes.getValue("value")));
+			task.setCreatesWaypoint(Boolean.parseBoolean(attributes.getValue("value")));
 			break;
 			
 		case "Planet":
@@ -164,6 +164,14 @@ public class SWGQuestDataHandler extends DefaultHandler {
 			
 		case "signalsOnComplete":
 			task.setSignalsOnComplete(attributes.getValue("value"));
+			break;
+			
+		case "Comm Message Text":
+			task.setCommMessageText(attributes.getValue("value"));
+			break;
+			
+		case "NPC Appearance Server Template":
+			task.setCommAppearanceTemplate(attributes.getValue("value"));
 			break;
 			
 		default:

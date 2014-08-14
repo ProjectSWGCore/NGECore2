@@ -599,9 +599,10 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		return (int) getBaseline(8).get("activeQuest");
 	}
 	
-	public void setActiveQuest(String quest) {
-		getBaseline(8).set("activeQuest", CRC.StringtoCRC("quest/"+quest));
+	public void setActiveQuest(int questCRC) {
+		getBaseline(8).set("activeQuest", questCRC);
 	}
+	
 	public String getProfessionWheelPosition() {
 		return (String) getBaseline(8).get("professionWheelPosition");
 	}
