@@ -45,9 +45,8 @@ import resources.objects.intangible.IntangibleObject;
 import resources.objects.resource.ResourceContainerObject;
 import resources.objects.waypoint.WaypointObject;
 import resources.quest.Quest;
+import services.quest.QuestItem;
 import engine.clients.Client;
-import engine.resources.common.CRC;
-import engine.resources.common.StringUtilities;
 import engine.resources.objects.Baseline;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -96,6 +95,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		baseline.put("holoEmote", "");
 		baseline.put("holoEmoteUses", 0);
 		baseline.put("activeMissions", new ArrayList<Long>()); // TODO: Look at MissionCriticalObject in CREO4, could use that instead of this
+		baseline.put("questRetrieveItemTemplates", new TreeMap<String, QuestItem>());
 		return baseline;
 	}
 	
@@ -593,6 +593,16 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	@SuppressWarnings("unchecked")
 	public SWGList<Quest> getQuestJournal() {
 		return (SWGList<Quest>) getBaseline(8).get("questJournal");
+	}
+	
+	@SuppressWarnings("unchecked")
+	public TreeMap<String, QuestItem> getQuestRetrieveItemTemplates() {
+		return (TreeMap<String, QuestItem>) otherVariables.get("questRetrieveItemTemplates");
+	}
+	
+	public boolean hasRetrieveItemTemplate(String template) {
+		TreeMap<String, QuestItem> templates = getQuestRetrieveItemTemplates();
+		return templates.containsKey(template);
 	}
 	
 	public int getActiveQuest() {

@@ -171,7 +171,7 @@ public class SWGQuestDataHandler extends DefaultHandler {
 			break;
 			
 		case "NPC Appearance Server Template":
-			task.setCommAppearanceTemplate(attributes.getValue("value"));
+			task.setNpcAppearanceTemplate(attributes.getValue("value"));
 			break;
 			
 		default:

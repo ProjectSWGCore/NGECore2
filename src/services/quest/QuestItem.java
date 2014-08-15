@@ -21,47 +21,20 @@
  ******************************************************************************/
 package services.quest;
 
-import java.util.Vector;
-
-public class QuestData {
-
-	private String name;
-
-	private Vector<QuestTask> tasks;
-	private int tasksAvailableId;
+public class QuestItem {
+	private String questName;
+	private int task;
 	
-	public QuestData() { }
-	
-	public QuestData(String questName) {
-
-		if (questName.endsWith(".qst")) { 
-
-			if (questName.contains("/")) {
-				String[] split = questName.split("/");
-				questName = split[split.length - 1];
-			}
-			
-			questName = questName.split(".qst")[0];
-		}
-		
-		this.name = questName;
-		this.tasks = new Vector<QuestTask>();
-	}
-	
-	public String getName() {
-		return name;
+	public QuestItem(String questName, int task) {
+		this.questName = questName;
+		this.task = task;
 	}
 
-	public Vector<QuestTask> getTasks() {
-		return tasks;
+	public String getQuestName() {
+		return questName;
 	}
 
-	public int getTasksAvailableId() {
-		return tasksAvailableId;
+	public int getTask() {
+		return task;
 	}
-
-	public void setTasksAvailableId(int tasksAvailableId) {
-		this.tasksAvailableId = tasksAvailableId;
-	}
-
 }
