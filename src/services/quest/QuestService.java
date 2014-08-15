@@ -151,9 +151,6 @@ public class QuestService implements INetworkDispatch {
 		int activeStep = quest.getActiveStep();
 		
 		QuestTask task = qData.getTasks().get(activeStep);
-
-		if (task.getGrantQuestOnComplete() != null && !task.getGrantQuestOnComplete().equals(""))
-			activateQuest(quester, task.getGrantQuestOnComplete());
 		
 		String[] splitType = task.getType().split("\\.");
 		String type = splitType[splitType.length - 1];
@@ -170,7 +167,7 @@ public class QuestService implements INetworkDispatch {
 		
 		// quest.task.ground.retrieve_item
 		case "retrieve_item":
-			String template = convertToSharedFile(task.getServerTemplate());
+			String template = task.getServerTemplate();
 			player.getQuestRetrieveItemTemplates().put(template, new QuestItem(quest.getName(), activeStep));
 			break;
 		
@@ -183,6 +180,9 @@ public class QuestService implements INetworkDispatch {
 				
 		}
 		
+		//if (task.getGrantQuestOnComplete() != null && !task.getGrantQuestOnComplete().equals(""))
+			//activateQuest(quester, task.getGrantQuestOnComplete());
+	
 		if (activeStep + 1 >= qData.getTasks().size()) {
 			QuestList listItem = questRewardMap.get(quest.getName());
 
@@ -214,8 +214,9 @@ public class QuestService implements INetworkDispatch {
 			return;
 		
 		QuestList info = questRewardMap.get(questString);
-		if (info == null)
+		if (info == null) {
 			info = getQuestListDatatable(questString);
+		}
 		
 		ProsePackage prose = new ProsePackage("@quest/ground/system_message:quest_received");
 		prose.setToCustomString(info.getJournalEntryTitle());
@@ -337,8 +338,10 @@ public class QuestService implements INetworkDispatch {
 		if (player == null)
 			return;
 		
-		if (!player.hasRetrieveItemTemplate(target.getTemplate()))
+		if (!player.hasRetrieveItemTemplate(target.getTemplate())) {
+			System.out.println("Player doesn't have the template: " + target.getTemplate());
 			return;
+		}
 		
 		QuestItem item = player.getQuestRetrieveItemTemplates().get(target.getTemplate());
 		activateNextTask(quester, item.getQuestName());
@@ -354,7 +357,11 @@ public class QuestService implements INetworkDispatch {
 			return questMap.get(questName);
 		else {
 			QuestData data = getQuestDatatable(questName); // parsing puts it in quest map
-			getQuestList(questName);
+			questMap.put(questName, data);
+			if (!questRewardMap.containsKey(questName)) {
+				QuestList listing = getQuestList(questName);
+				questRewardMap.put(questName, listing);
+			}
 			return data;
 		}
 	}
@@ -363,7 +370,9 @@ public class QuestService implements INetworkDispatch {
 		if (questRewardMap.containsKey(questName))
 			return questRewardMap.get(questName);
 		else {
+			System.out.println("Doesn't have it. Getting it from the list...");
 			QuestList list = getQuestListDatatable(questName); // parsing puts it in quest map
+			questRewardMap.put(questName, list);
 			return list;
 		}
 	}
@@ -458,7 +467,6 @@ public class QuestService implements INetworkDispatch {
 			e.printStackTrace();
 		}
 		
-		questMap.put(quest, data);
 		return data;
 	}
 	
@@ -467,10 +475,8 @@ public class QuestService implements INetworkDispatch {
 		
 		try {
 			DatatableVisitor visitor = ClientFileManager.loadFile("datatables/questlist/quest/" + quest + ".iff", DatatableVisitor.class);
-			// Should only have 1 row 
-			if (visitor.getRowCount() > 1)
-				return null;
-			
+			// Should only have 1 row with info
+
 			// not the full list.
 			if (visitor.getObjectByColumnNameAndIndex("LEVEL", 0) != null) qList.setLevel((int) visitor.getObjectByColumnNameAndIndex("LEVEL", 0));
 			if (visitor.getObjectByColumnNameAndIndex("TIER", 0) != null) qList.setTier((int) visitor.getObjectByColumnNameAndIndex("TIER", 0));
@@ -496,7 +502,6 @@ public class QuestService implements INetworkDispatch {
 			e.printStackTrace();
 		}
 
-		questRewardMap.put(quest, qList);
 		return qList;
 	}
 	

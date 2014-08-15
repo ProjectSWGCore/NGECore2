@@ -21,6 +21,7 @@
  ******************************************************************************/
 package resources.common;
 
+import java.io.Serializable;
 import java.util.Random;
 
 import main.NGECore;
@@ -31,7 +32,9 @@ import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 
 @Persistent
-public class SpawnPoint {
+public class SpawnPoint implements Serializable{
+	
+	private static final long serialVersionUID = 1L;
 	
 	private Point3D position;
 	private Quaternion orientation;

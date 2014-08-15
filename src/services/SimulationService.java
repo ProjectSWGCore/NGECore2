@@ -185,11 +185,15 @@ public class SimulationService implements INetworkDispatch {
 	}
 	
 	public void insertSnapShotObjects() {
+		System.out.println("Inserting snapshot buildings...");
 		List<SWGObject> objectList = new ArrayList<SWGObject>(core.objectService.getObjectList().values());
 		for(SWGObject obj : objectList) {
-			if(obj.getParentId() == 0 && /*(*/obj.isInSnapshot() /*|| obj.getAttachment("isBuildout") != null)*/)
+			// Buildings are inserted via another method from the odb, so no need to load them into the quadtree as well
+			if(obj.getParentId() == 0 && (obj.isInSnapshot() || obj.getAttachment("isBuildout") != null) && obj.getAttachment("buildoutBuilding") == null) {
 				add(obj, obj.getPosition().x, obj.getPosition().z);
+			}
 		}
+		System.out.println("Snapshots inserted!");
 	}
 	
 	public void insertPersistentBuildings() {
