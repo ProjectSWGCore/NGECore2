@@ -80,8 +80,9 @@ public class CommandService implements INetworkDispatch  {
 		if (actor == null)
 			return false;
 		
-		if (actor.getClient() == null)
-			return false;
+//		if (actor.getClient() == null)
+//			return false;
+		// Please consider that AI is calling callCommand too. Thank you.
 		
 		if (command == null)
 			return false;
@@ -94,6 +95,7 @@ public class CommandService implements INetworkDispatch  {
 		
 		if (actor.hasCooldown(command.getCooldownGroup()) || actor.hasCooldown(command.getCommandName()))
 			return false;
+		
 		
 		// Causes this service method to return with false after equipping a rifle, not allowing to unequip it anymore
 		// because the client seems to consider rifles invalidweapons for an unkown reason
@@ -115,7 +117,7 @@ public class CommandService implements INetworkDispatch  {
 				return false;
 			}
 		}
-		
+
 		switch (command.getTargetType()) {
 			case 0: // Target Not Used For This Command
 				break;
@@ -251,7 +253,7 @@ public class CommandService implements INetworkDispatch  {
 			default:
 				break;
 		}
-		
+
 		switch (command.getTarget()) {
 			case 0: // Ally Only
 				if (target == null) {
@@ -318,7 +320,7 @@ public class CommandService implements INetworkDispatch  {
 				e.printStackTrace();
 			}
 		}
-		
+
 		if(command instanceof CombatCommand) {
 			try {
 				processCommand(actor, target, (BaseSWGCommand) command.clone(), actionCounter, commandArgs);

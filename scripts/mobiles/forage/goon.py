@@ -13,13 +13,13 @@ def addTemplate(core):
 	mobileTemplate.setCreatureName('forage_goon')
 	mobileTemplate.setLevel(1)
 	mobileTemplate.setDifficulty(Difficulty.ELITE)
-
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
-	mobileTemplate.setDeathblow(False)
+	mobileTemplate.setDeathblow(True)
 	mobileTemplate.setScale(1)
 	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setStalker(False)
+	mobileTemplate.setSocialGroup("tusken raider")
 	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
 	templates = Vector()
@@ -33,16 +33,16 @@ def addTemplate(core):
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
-	weapontemplate = WeaponTemplate('object/weapon/ranged/carbine/shared_carbine_dh17.iff', WeaponType.CARBINE, 0.6, 15, 'kinetic')
-	weaponTemplates.add(weapontemplate)
-	weapontemplate = WeaponTemplate('object/weapon/ranged/pistol/shared_pistol_dl44.iff', WeaponType.PISTOL, 0.4, 15, 'kinetic')
-	weaponTemplates.add(weapontemplate)
-	weapontemplate = WeaponTemplate('object/weapon/ranged/rifle/shared_rifle_dlt20a.iff', WeaponType.RIFLE, 0.8, 24, 'kinetic')
+	#weapontemplate = WeaponTemplate('object/weapon/ranged/carbine/shared_carbine_dh17.iff', WeaponType.CARBINE, 0.6, 15, 'kinetic')
+	#weaponTemplates.add(weapontemplate)
+	#weapontemplate = WeaponTemplate('object/weapon/ranged/pistol/shared_pistol_dl44.iff', WeaponType.PISTOL, 0.4, 15, 'kinetic')
+	#weaponTemplates.add(weapontemplate)
+	weapontemplate = WeaponTemplate('object/weapon/ranged/rifle/shared_rifle_dlt20a.iff', WeaponType.RIFLE, 1.0, 24, 'kinetic')
 	weaponTemplates.add(weapontemplate)	
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
-	mobileTemplate.setDefaultAttack('rangedShot')
+	mobileTemplate.setDefaultAttack('rangedShotrifle')
 	mobileTemplate.setAttacks(attacks)
 	
 	core.spawnService.addMobileTemplate('forage_goon', mobileTemplate)

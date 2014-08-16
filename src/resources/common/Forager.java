@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Vector;
 
+import engine.resources.common.Stf;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Point3D;
 import main.NGECore;
@@ -250,7 +251,7 @@ public class Forager {
 				adversaryRoll=999;
 			
 			// adversaryRoll=999; // To test TMs
-			
+			spawnGoon(forager);
 			if (adversaryRoll<14) { // 14 100 // To test TMs
 				int adversaryTypeRoll = new Random().nextInt(100);
 				if (adversaryTypeRoll<50){
@@ -417,18 +418,17 @@ public class Forager {
 				
 		}
 		
-		goon.addObserver(forager);
+//		goon.addObserver(forager);
 		goon.setCustomName(name);
 		goon.setLevel(forager.getLevel());
-		goon.setOptions(Options.AGGRESSIVE, true);
-		goon.setOptions(Options.ATTACKABLE, true);
+//		goon.setOptions(Options.AGGRESSIVE, true);
+//		goon.setOptions(Options.ATTACKABLE, true);
 		AIActor actor = (AIActor) goon.getAttachment("AI");
 		actor.addDefender(forager);
 		forager.sendSystemMessage("@foraging/forage_enemy:" + barkString, DisplayType.Broadcast);
-		//OutOfBand oob = OutOfBand.ProsePackage("@foraging/forage_enemy:" + barkString));
-		OutOfBand oob = OutOfBand.ProsePackage("@jawa_trader:cant_understand");
-		forager.sendSystemMessage("@jawa_trader:cant_understand", DisplayType.Broadcast);
-		NGECore.getInstance().chatService.spatialChat(goon, forager, "", (short)0x0, (short)0x0, 1, oob);
+		OutOfBand oob = OutOfBand.ProsePackage("@foraging/forage_enemy:" + barkString);
+		Stf stf = new Stf("@foraging/forage_enemy:" + barkString);
+		NGECore.getInstance().chatService.spatialChat(goon, forager, stf.getStfValue(), (short)0x0, (short)0x0, 1, oob);
 	}
 	
 	public void handleGuardSpawn(CreatureObject owner, TangibleObject map){
