@@ -17,7 +17,7 @@ def addDynamicGroup(core):
 	mobileTemplates.add('kunga_scout')
 	mobileTemplates.add('kunga_shaman')
 	mobileTemplates.add('kunga_soothsayer')
-	mobileTemplates.add('kunga_tribe_member')
+	mobileTemplates.add('kunga_tribesman')
 	mobileTemplates.add('kunga_warrior')
 	dynamicGroup.setMobiles(mobileTemplates)
 	dynamicGroup.setGroupMembersNumber(-3)
