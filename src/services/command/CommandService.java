@@ -688,7 +688,8 @@ public class CommandService implements INetworkDispatch  {
 	
 	public void processCommand(CreatureObject actor, SWGObject target, BaseSWGCommand command, int actionCounter, String commandArgs) {
 		
-		if (command.getGodLevel() > 0 || command.getCommandName().equals("setgodmode")) {
+		if (command.getGodLevel() > 0 || command.getCommandName().equals("setgodmode") || command.getCommandName().equals("server") || command.getCommandName().equals("teleport") 
+				|| command.getCommandName().equals("teleportto") || command.getCommandName().equals("teleporttarget") ) {
 			String accessLevel = core.adminService.getAccessLevelFromDB(actor.getClient().getAccountId());
 			String filePath = "accesslevels/" + accessLevel + ".txt";
 
