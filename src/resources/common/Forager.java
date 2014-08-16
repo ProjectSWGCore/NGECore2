@@ -251,7 +251,7 @@ public class Forager {
 				adversaryRoll=999;
 			
 			// adversaryRoll=999; // To test TMs
-			spawnGoon(forager);
+
 			if (adversaryRoll<14) { // 14 100 // To test TMs
 				int adversaryTypeRoll = new Random().nextInt(100);
 				if (adversaryTypeRoll<50){
