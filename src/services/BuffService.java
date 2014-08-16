@@ -113,6 +113,7 @@ public class BuffService implements INetworkDispatch {
 		}
 		
 		// Here the necessary checks must be placed to prevent buffs from the same buff group (e.g. Buff D) being stacked!
+		// ^ These checks are already performed in doAddBuff, unless they were removed.
 		
 		if(buff.isGroupBuff()) {
 			addGroupBuff(buffer, buffName, buffer);
@@ -134,6 +135,8 @@ public class BuffService implements INetworkDispatch {
 		//TODO fix this  -- !! this is wrong - I can buff from 5,5 in cantina someone sitting at 20,20 in the universe/planet !!! - accross the galaxy/planet
 		//cause get position is relative to creature system of coordinates - when one's outside and other inside
 		//if you must use getPosition() check for isInCell first for both or something like that
+		// ^The above bug should be fixed in command service.  The checks below shouldn't really even be in this service.
+		
 		if (target.getPosition().getDistance(buffer.getPosition()) > 20) {
 			return null;
 		}

@@ -1384,6 +1384,20 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		return adder.intValue();
 	}
 	
+	public CreatureObject getCalledPet() {
+		if (getPlayerObject() == null) {
+			return null;
+		}
+		
+		return (CreatureObject) NGECore.getInstance().objectService.getObject(getPlayerObject().getPet());
+	}
+	
+	public void setCalledPet(CreatureObject calledPet) {
+		if (getPlayerObject() != null) {
+			getPlayerObject().setPet((calledPet == null) ? 0L : calledPet.getObjectID());
+		}
+	}
+	
 	public void sendSystemMessage(String message, byte displayType) {
 		sendSystemMessage(message, new OutOfBand(), displayType);
 	}
@@ -1453,11 +1467,6 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			}
 		}
 	}
-	
-	// PetId can be got from PlayerObject.  Also is a duplicate of getCompanion().
-	@Deprecated public CreatureObject getCalledPet() { return ((getPlayerObject() == null) ? null : (CreatureObject) NGECore.getInstance().objectService.getObject(getPlayerObject().getPet())); }
-	
-	@Deprecated public void setCalledPet(CreatureObject calledPet) { }
 	
 	@Deprecated public void playMusicSelf(String sndFile, long targetId, int repetitions, boolean flag) { playMusic(sndFile, targetId, repetitions, flag); }
 	

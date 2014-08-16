@@ -135,7 +135,7 @@ public class PetService implements INetworkDispatch {
 		}
 		
 		pet.setOwnerId(actor.getObjectID());
-		actor.getPlayerObject().setPet(pet.getObjectID());
+		actor.setCalledPet(pet);
 		pcd.setAttachment("companion_RefId", pet.getObjectID());
 		
 		
@@ -763,7 +763,7 @@ public class PetService implements INetworkDispatch {
 						AIActor aiActor = (AIActor) mount.getAttachment("AI");
 						aiActor.destroyActor();
 						player.setPet(0L);
-						owner.getPlayerObject().setPet(0);
+						owner.setCalledPet(null);
 						core.objectService.destroyObject((Long) pcd.getAttachment("companion_RefId"));
 						pcd.setAttachment("companion_RefId", null);
 					}
@@ -796,7 +796,7 @@ public class PetService implements INetworkDispatch {
 							AIActor aiActor = (AIActor) pet.getAttachment("AI");
 							aiActor.destroyActor();
 							
-							actor.getPlayerObject().setPet(0);	
+							actor.setCalledPet(null);	
 							
 							core.objectService.destroyObject(petId);
 							pcd.setAttachment("companion_RefId",null);
@@ -919,7 +919,7 @@ public class PetService implements INetworkDispatch {
 	public void tame(CreatureObject actor, CreatureObject target) {
 		DevLog.debugout("Charon", "Pet AI", "Tame called.");
 		
-		if (core.objectService.getObject(actor.getPlayerObject().getPet())!=null){
+		if (actor.getCalledPet()!=null){
 			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:too_many"), DisplayType.Broadcast);
 			return;
 		}
@@ -993,7 +993,7 @@ public class PetService implements INetworkDispatch {
 			        	
 			        	target.setAttachment("tamed", 1);
 			        	
-			        	actor.getPlayerObject().setPet(target.getObjectID());
+			        	actor.setCalledPet(target);
 			    		target.setFaction(actor.getFaction());
 			    		target.setFactionStatus(actor.getFactionStatus());
 			    		target.setOwnerId(actor.getObjectID());

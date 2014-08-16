@@ -485,8 +485,8 @@ public class CombatService implements INetworkDispatch {
 
 		if (target instanceof CreatureObject){
 			CreatureObject targetCreature = (CreatureObject)target;
-			if (core.objectService.getObject(targetCreature.getPlayerObject().getPet())!=null) {
-				AIActor petActor = (AIActor) core.objectService.getObject(targetCreature.getPlayerObject().getPet()).getAttachment("AI");
+			if (targetCreature.getCalledPet()!=null) {
+				AIActor petActor = (AIActor) targetCreature.getCalledPet().getAttachment("AI");
 				if (petActor!=null){
 					petActor.addDefender(attacker);
 					DevLog.debugoutai(petActor, "Charon", "Pet AI", "applyDamage addDefender");
@@ -1307,8 +1307,8 @@ public class CombatService implements INetworkDispatch {
 
 		if (target instanceof CreatureObject){
 			CreatureObject targetCreature = (CreatureObject)target;
-			if (core.objectService.getObject(targetCreature.getPlayerObject().getPet())!=null) {
-				AIActor petActor = (AIActor) core.objectService.getObject(targetCreature.getPlayerObject().getPet()).getAttachment("AI");
+			if (targetCreature.getCalledPet()!=null) {
+				AIActor petActor = (AIActor) targetCreature.getCalledPet().getAttachment("AI");
 				if (petActor!=null){
 					petActor.addDefender(attacker);
 					//DevLog.debugout("Charon", "Pet AI", "applyDamage addDefender");

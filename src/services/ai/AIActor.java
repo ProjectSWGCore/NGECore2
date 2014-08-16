@@ -162,8 +162,8 @@ public class AIActor {
 								
 								if (obj instanceof CreatureObject){
 									CreatureObject addedObject = (CreatureObject) obj;
-									if (NGECore.getInstance().objectService.getObject(addedObject.getPlayerObject().getPet())!=null){
-										CreatureObject calledPet = (CreatureObject) NGECore.getInstance().objectService.getObject(addedObject.getPlayerObject().getPet());
+									if (addedObject.getCalledPet()!=null){
+										CreatureObject calledPet = addedObject.getCalledPet();
 										if (calledPet.getPosture() != 13 && calledPet.getPosture() != 14){
 											addDefender(calledPet);	
 										}
@@ -210,8 +210,8 @@ public class AIActor {
 							if(new Random().nextFloat() <= 0.5 || creature.isInCombat()) {
 								if (obj instanceof CreatureObject && NGECore.getInstance().factionService.isFactionEnemy((TangibleObject)creature, (CreatureObject)obj)){
 									CreatureObject addedObject = (CreatureObject) obj;
-									if (NGECore.getInstance().objectService.getObject(addedObject.getPlayerObject().getPet())!=null){
-										CreatureObject calledPet = (CreatureObject) NGECore.getInstance().objectService.getObject(addedObject.getPlayerObject().getPet());;
+									if (addedObject.getCalledPet()!=null){
+										CreatureObject calledPet = addedObject.getCalledPet();
 										if (NGECore.getInstance().aiService.distanceSquared2D(creature.getWorldPosition(), obj.getWorldPosition())<closestDist[0] && calledPet.getPosture() != 13 && calledPet.getPosture() != 14 & ! calledPet.getOption(Options.INVULNERABLE)){
 											closestCreature[0] = addedObject;	// Determine the closest NPC
 											closestDist[0] = NGECore.getInstance().aiService.distanceSquared2D(creature.getWorldPosition(), obj.getWorldPosition());
