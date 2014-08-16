@@ -41,6 +41,12 @@ public class CommPlayerMessage extends SWGMessage {
 		this.outOfBand = outOfBand;
 	}
 	
+	public CommPlayerMessage(long objectId, OutOfBand outOfBand, String model) {
+		this.objectId = objectId;
+		this.outOfBand = outOfBand;
+		this.model = model;
+	}
+	
 	@Override
 	public void deserialize(IoBuffer data) {
 

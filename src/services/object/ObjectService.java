@@ -236,7 +236,7 @@ public class ObjectService implements INetworkDispatch {
 	}
 	
 	public void loadServerTemplates() {
-		System.out.println("Loading server templates...");
+		System.out.println("Loading server templates... (" + loadServerTemplateTasks.size() + " templates)");
 		loadServerTemplateTasks.forEach(Runnable::run);
 		loadServerTemplateTasks.clear();
 		System.out.println("Finished loading server templates...");
@@ -1440,7 +1440,7 @@ public class ObjectService implements INetworkDispatch {
 						if (core.getSWGObjectODB().contains(objectId) && !duplicate.containsValue(objectId))
 							continue;
 						containers.add(objectId);
-						object = createObject(template, objectId, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, true, false);
+						object = createObject(template, objectId, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, true, true);
 						object.setAttachment("childObjects", null);
 						
 						/*if (!duplicate.containsValue(objectId)) {
@@ -1449,7 +1449,7 @@ public class ObjectService implements INetworkDispatch {
 							((BuildingObject) object).getTransaction().commitSync();
 						}*/
 					} else {
-						object = createObject(template, 0, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, false, false);
+						object = createObject(template, 0, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, false, true);
 					}
 					if(object == null)
 						continue;
@@ -1459,7 +1459,7 @@ public class ObjectService implements INetworkDispatch {
 					if (!duplicate.containsValue(objectId) && object instanceof BuildingObject && portalCRC != 0)
 						persistentBuildings.add((BuildingObject) object);
 				} else if(containerId != 0) {
-					object = createObject(template, 0, planet, new Point3D(px, py, pz), new Quaternion(qw, qx, qy, qz), null, false, false);
+					object = createObject(template, 0, planet, new Point3D(px, py, pz), new Quaternion(qw, qx, qy, qz), null, false, true);
 					if(containers.contains(containerId)) {
 						object.setContainerPermissions(WorldPermissions.WORLD_PERMISSIONS);
 						object.setisInSnapshot(false);
@@ -1477,7 +1477,7 @@ public class ObjectService implements INetworkDispatch {
 						parent.add(object);
 					}
 				} else {
-					object = createObject(template, 0, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, false, false);
+					object = createObject(template, 0, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, false, true);
 					object.setContainerPermissions(WorldPermissions.WORLD_PERMISSIONS);
 				}
 				
@@ -1494,6 +1494,7 @@ public class ObjectService implements INetworkDispatch {
 		}
 
 		for(BuildingObject building : persistentBuildings) {
+			building.setAttachment("buildoutBuilding", true);
 			core.getSWGObjectODB().put(building.getObjectID(), building);
 			destroyObject(building);
 		}

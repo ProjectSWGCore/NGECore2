@@ -22,6 +22,7 @@
 package resources.quest;
 
 import java.io.Serializable;
+import java.util.BitSet;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
@@ -33,19 +34,33 @@ public class Quest extends Delta implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private long ownerId;
-	private short activeStep = 1;
-	private short completedStep;
+	private int activeStep; // Quest starts at step 0
+	private BitSet activeStepBitmask = new BitSet(16);
+	private BitSet completedStepBitmask = new BitSet(16);
+	
 	private boolean isCompleted = false;
+	private boolean recievedAward = false;
 	private String name;
-	private int crc;
+
+	private long waypointId;
 	
 	public Quest() {}
 	
 	public Quest(String name, long ownerId) {
 		this.ownerId = ownerId;
-		this.name = name;
-		this.crc = CRC.StringtoCRC("quest/"+name);
+
+		if (name.endsWith(".qst")) {
+			//this.filePath = "quest/"+name;
+			this.name = name.split(".qst")[0];
+		} else {
+			//this.filePath = "quest/"+name+".qst";
+			this.name = name;
+		}
 		
+		if (name.contains("/")) {
+			String[] split = name.split("/");
+			this.name = split[split.length - 1];
+		}
 	}
 	
 	public long getOwnerId() {
@@ -56,20 +71,12 @@ public class Quest extends Delta implements Serializable {
 		this.ownerId = ownerId;
 	}
 
-	public short getActiveStep() {
+	public int getActiveStep() {
 		return activeStep;
 	}
 
-	public void setActiveStep(short activeStep) {
+	public void setActiveStep(int activeStep) {
 		this.activeStep = activeStep;
-	}
-
-	public short getCompletedStep() {
-		return completedStep;
-	}
-
-	public void setCompletedStep(short completedStep) {
-		this.completedStep = completedStep;
 	}
 
 	public boolean isCompleted() {
@@ -77,40 +84,97 @@ public class Quest extends Delta implements Serializable {
 	}
 
 	public void setCompleted(boolean isCompleted) {
+		if (isCompleted) {
+			//activeStepBitmask.set(activeStep, false);
+			completedStepBitmask.set(activeStep);
+		}
 		this.isCompleted = isCompleted;
+	}
+
+	public boolean hasRecievedAward() {
+		return recievedAward;
+	}
+
+	public void setRecievedAward(boolean recievedAward) {
+		this.recievedAward = recievedAward;
 	}
 
 	public String getName() {
 		return name;
 	}
 
-	public void setName(String name) {
-		this.name = name;
-		this.crc = CRC.StringtoCRC(name);
-	}
-
 	public int getCrc() {
-		return crc;
+		return CRC.StringtoCRC(getCrcName());
+	}
+	
+	public String getCrcName() {
+		return "quest/" + name;
+	}
+	
+	public long getWaypointId() {
+		return waypointId;
 	}
 
+	public void setWaypointId(long waypointId) {
+		this.waypointId = waypointId;
+	}
+
+	public void incrementQuestStep() {
+		activeStepBitmask.set(activeStep, false);
+		completedStepBitmask.set(activeStep);
+		this.activeStep++;
+		activeStepBitmask.set(activeStep);
+	}
+	
 	public byte[] getBytes() {
+		byte[] activeStepBytes = activeStepBitmask.toByteArray();
+		byte[] completedStepBytes = completedStepBitmask.toByteArray();
+		
 		IoBuffer buffer = createBuffer(23);
 
 		buffer.put((byte) 0);
 		
-		buffer.putInt(crc);
+		buffer.putInt(getCrc());
+
+		buffer.putLong(ownerId); // quest giver id?
 		
-		buffer.putLong(ownerId);
+		// Probably a MUCH better way of doing this, but... well... I can't stand bitmasks.
+		switch (activeStepBytes.length) {
+		case 0:
+			buffer.putShort((short) 0);
+			break;
+			
+		case 1:
+			buffer.put(activeStepBytes[0]);
+			buffer.put((byte) 0);
+			break;
+			
+		case 2:
+			buffer.put(activeStepBytes);
+			break;
+		}
 		
-		buffer.putShort(activeStep);
-		buffer.putShort(completedStep);
+		switch (completedStepBytes.length) {
+		case 0:
+			buffer.putShort((short) 0);
+			break;
+			
+		case 1:
+			buffer.put(completedStepBytes[0]);
+			buffer.put((byte) 0);
+			break;
+			
+		case 2:
+			buffer.put(completedStepBytes);
+			break;
+		}
 		
-		buffer.put((byte) ((isCompleted) ? 1 : 0)); // isCompleted
-		buffer.putInt(21); // questCounter
-		//buffer.put((byte) 0); // ?
+		buffer.put((byte) ((isCompleted) ? 1 : 0));
+		buffer.putInt(0); // questCounter
+		buffer.put((byte) ((recievedAward) ? 1 : 0));
 		
 		buffer.flip();
-		
+
 		return buffer.array();
 	}
 	

@@ -55,6 +55,22 @@ public class AdminService implements INetworkDispatch {
 		return accessLevel;
 	}
 	
+	public String getAccountNameFromDB(long id) {
+		String accountName = null;
+		PreparedStatement preparedStatement;
+		
+		try {
+			preparedStatement = NGECore.getInstance().getDatabase1().preparedStatement("SELECT * FROM accounts WHERE id=" + id + "");
+			ResultSet resultSet = preparedStatement.executeQuery();
+			if(resultSet.next())
+				accountName = resultSet.getString("user");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return accountName;
+	}
+	
 	@Override
 	public void insertOpcodes(Map<Integer, INetworkRemoteEvent> arg0, Map<Integer, INetworkRemoteEvent> arg1) {
 		

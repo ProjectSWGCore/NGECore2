@@ -56,7 +56,7 @@ setname
 setplayerstate
 uncityban
 setbiographyadmin
-activtequest
+activatequest
 activateinstance
 clearcompletedquest
 completequest

@@ -54,6 +54,7 @@ public class SWGList<E> implements List<E>, Serializable {
 	private byte viewType;
 	private short updateType;
 	private boolean addByte;
+	private boolean questMethod;
 	protected transient Object objectMutex = new Object();
 	private transient SWGObject object;
 	
@@ -64,6 +65,14 @@ public class SWGList<E> implements List<E>, Serializable {
 		this.updateType = (short) updateType;
 		this.addByte = addByte;
 		this.object = object;
+	}
+	
+	public SWGList(SWGObject object, int viewType, int updateType, boolean addByte, boolean questMethod) {
+		this.viewType = (byte) viewType;
+		this.updateType = (short) updateType;
+		this.addByte = addByte;
+		this.object = object;
+		this.questMethod = questMethod;
 	}
 	
 	public void init(SWGObject object) {
@@ -85,7 +94,19 @@ public class SWGList<E> implements List<E>, Serializable {
 	public boolean add(E e) {
 		synchronized(objectMutex) {				
 			if (valid(e) && list.add(e)) {
-				queue(item(1, list.lastIndexOf(e), Baseline.toBytes(e), true, true));
+				if (!questMethod) queue(item(1, list.lastIndexOf(e), Baseline.toBytes(e), true, true));
+				else {
+					List<byte[]> buffer = new ArrayList<byte[]>();
+					
+					int index = 0;
+					for (E element : list) {
+						buffer.add(item(1, index, Baseline.toBytes(element), true, true));
+						index++;
+					}
+					queue(buffer);
+					
+					return true;
+				}
 				return true;
 			}
 			
@@ -441,6 +462,17 @@ public class SWGList<E> implements List<E>, Serializable {
 	}
 	
 	private byte[] item(int type, int index, byte[] data, boolean useIndex, boolean useData) {
+		if (questMethod) {
+			int size = data.length;
+			
+			IoBuffer buffer = Delta.createBuffer(size);
+			buffer.put(data);
+			buffer.flip();
+			updateCounter++;
+			
+			return buffer.array();
+		}
+		
 		int size = 1 + ((useIndex) ? 2 : 0) + ((useData) ? data.length : 0);
 		
 		IoBuffer buffer = Delta.createBuffer(size);

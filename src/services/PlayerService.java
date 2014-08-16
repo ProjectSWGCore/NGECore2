@@ -1307,7 +1307,7 @@ public class PlayerService implements INetworkDispatch {
 		
 		inventory.add(item);
 		
-		ObjControllerMessage objController = new ObjControllerMessage(11, new ShowLootBox(reciever.getObjectID(), item));
+		ObjControllerMessage objController = new ObjControllerMessage(11, new ShowLootBox(reciever.getObjectID(), item.getObjectID()));
 		client.getSession().write(objController.serialize());
 	}
 	
@@ -1331,11 +1331,14 @@ public class PlayerService implements INetworkDispatch {
 		if (inventory == null)
 			return;
 		
+		ArrayList<Long> itemsId = new ArrayList<Long>();
+		
 		for (SWGObject obj : items) {
 			inventory.add(obj);
+			itemsId.add(obj.getObjectID());
 		}
 		
-		ObjControllerMessage objController = new ObjControllerMessage(11, new ShowLootBox(reciever.getObjectID(), items));
+		ObjControllerMessage objController = new ObjControllerMessage(11, new ShowLootBox(reciever.getObjectID(), itemsId));
 		client.getSession().write(objController.serialize());
 	}
 	

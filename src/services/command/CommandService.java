@@ -688,18 +688,19 @@ public class CommandService implements INetworkDispatch  {
 	
 	public void processCommand(CreatureObject actor, SWGObject target, BaseSWGCommand command, int actionCounter, String commandArgs) {
 		
-		if (command.getGodLevel() > 0 || command.getCommandName().equals("setgodmode")) {	// TODO: When loading commands, simply don't put the "admin" characterAbility into the commands
+		if (command.getGodLevel() > 0 || command.getCommandName().equals("setgodmode")) {
 			String accessLevel = core.adminService.getAccessLevelFromDB(actor.getClient().getAccountId());
-			
-			if(accessLevel != null) {
+			String filePath = "accesslevels/" + accessLevel + ".txt";
+
+			if(FileUtilities.doesFileExist(filePath)) {
 				Scanner scanner;
 				try {
-					scanner = new Scanner(new File("accesslevels/" + accessLevel + ".txt"));
+					scanner = new Scanner(new File(filePath));
 					boolean levelHasCommand = false;
 					
 					while(scanner.hasNextLine()) {
 						String commandName = scanner.nextLine();
-						if(command.getCommandName().equals(commandName)) {
+						if(command.getCommandName().equalsIgnoreCase(commandName)) {
 							levelHasCommand = true;
 					    	break;
 						}
@@ -714,7 +715,8 @@ public class CommandService implements INetworkDispatch  {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-			}
+			} else
+				return;
 		}
 		
 		if (command.getCooldown() > 0f) {
@@ -750,9 +752,12 @@ public class CommandService implements INetworkDispatch  {
 	}
 	
 	public void processCombatCommand(CreatureObject attacker, SWGObject target, CombatCommand command, int actionCounter, String commandArgs) {
-		if (FileUtilities.doesFileExist("scripts/commands/combat/" + command.getCommandName().toLowerCase() + ".py")) {
+		if (FileUtilities.doesFileExist("scripts/commands/combat/specialline/" + command.getSpecialLine().toLowerCase() + ".py"))
+			core.scriptService.callScript("scripts/commands/combat/specialline/", command.getSpecialLine().toLowerCase(), "setup", core, attacker, target, command);
+		
+		if (FileUtilities.doesFileExist("scripts/commands/combat/" + command.getCommandName().toLowerCase() + ".py"))
 			core.scriptService.callScript("scripts/commands/combat/", command.getCommandName().toLowerCase(), "setup", core, attacker, target, command);
-		} else {
+		else {
 			if (FileUtilities.doesFileExist("scripts/commands/" + command.getCommandName().toLowerCase() + ".py")) {
 				System.err.print("Command " + command.getCommandName() + " is considered a combat command by the client but has a regular command script!");
 				core.scriptService.callScript("scripts/commands/", command.getCommandName().toLowerCase(), "run", core, attacker, target, "");

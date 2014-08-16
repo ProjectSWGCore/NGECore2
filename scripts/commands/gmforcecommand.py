@@ -1,7 +1,7 @@
 import sys
 from engine.resources.scene import Point3D
 from protocol.swg import ObjControllerMessage
-from protocol.swg import UnknownAbilityPacket
+from protocol.swg import GrantCommand
 from protocol.swg import PlayClientEffectLocMessage
 from engine.resources.objects import SWGObject
 from java.awt.datatransfer import StringSelection
