@@ -323,8 +323,8 @@ public class CombatService implements INetworkDispatch {
 
 		if (target instanceof CreatureObject){
 			CreatureObject targetCreature = (CreatureObject)target;
-			if (targetCreature.getCalledPet()!=null) {
-				AIActor petActor = (AIActor) targetCreature.getCalledPet().getAttachment("AI");
+			if (core.objectService.getObject(targetCreature.getPlayerObject().getPet())!=null) {
+				AIActor petActor = (AIActor) core.objectService.getObject(targetCreature.getPlayerObject().getPet()).getAttachment("AI");
 				if (petActor!=null){
 					petActor.addDefender(attacker);
 					DevLog.debugout("Charon", "Pet AI", "applyDamage addDefender");
@@ -550,11 +550,11 @@ public class CombatService implements INetworkDispatch {
 
 	private boolean attemptCombat(CreatureObject attacker, TangibleObject target) {
 		
-		if (attacker.isInStealth()) {
-			attacker.setInStealth(false);
+		if (attacker.isCloaked()) {
+			attacker.setCloaked(false);
 			
 			if (attacker.getPlayerObject() != null && attacker.getPlayerObject().getProfession().equals("spy_1a")) {
-				attacker.setRadarVisible(true);
+				attacker.setVisibleOnRadar(true);
 			}
 		}
 		
@@ -912,8 +912,8 @@ public class CombatService implements INetworkDispatch {
 
 		if (target instanceof CreatureObject){
 			CreatureObject targetCreature = (CreatureObject)target;
-			if (targetCreature.getCalledPet()!=null) {
-				AIActor petActor = (AIActor) targetCreature.getCalledPet().getAttachment("AI");
+			if (core.objectService.getObject(targetCreature.getPlayerObject().getPet())!=null) {
+				AIActor petActor = (AIActor) core.objectService.getObject(targetCreature.getPlayerObject().getPet()).getAttachment("AI");
 				if (petActor!=null){
 					petActor.addDefender(attacker);
 					DevLog.debugout("Charon", "Pet AI", "applyDamage addDefender");

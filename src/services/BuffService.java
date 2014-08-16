@@ -40,7 +40,6 @@ import resources.objects.player.PlayerObject;
 import main.NGECore;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
-import engine.resources.common.CRC;
 import engine.resources.objects.SWGObject;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
@@ -142,7 +141,7 @@ public class BuffService implements INetworkDispatch {
 
 
 	
-            for (final Buff otherBuff : target.getBuffList()) {
+            for (final Buff otherBuff : target.getBuffList().values()) {
             	 if (buff.getGroup1().equals(otherBuff.getGroup1())) 
                 	if (buff.getPriority() >= otherBuff.getPriority()) {
                         if (buff.getBuffName().equals(otherBuff.getBuffName()))
@@ -241,7 +240,7 @@ public class BuffService implements INetworkDispatch {
 	@SuppressWarnings("unused")
 	public void removeBuffFromCreature(CreatureObject creature, Buff buff)
 	{
-		 if(!creature.getBuffList().contains(buff))
+		 if(!creature.getBuffList().containsValue(buff))
 		 {
 			 return;
 		 }
@@ -342,7 +341,7 @@ public class BuffService implements INetworkDispatch {
 
 		// copy to array for thread safety
 
-		for(final Buff buff : creature.getBuffList().get().toArray(new Buff[] { })) {
+		for(final Buff buff : creature.getBuffList().values().toArray(new Buff[] { })) {
 			
 			if (buff.getRemovalTask() != null) { continue; }
 
@@ -374,7 +373,7 @@ public class BuffService implements INetworkDispatch {
 	
 	public boolean hasBuff(final CreatureObject creature, String buffName) {
 
-		for(final Buff buff : creature.getBuffList().get().toArray(new Buff[] { })) {
+		for(final Buff buff : creature.getBuffList().values().toArray(new Buff[] { })) {
 			if (buff.getBuffName().contains(buffName)) { return true; }
 		}
 		return false;
@@ -423,7 +422,6 @@ public class BuffService implements INetworkDispatch {
 				String name = (String) visitor.getObject(i, 0);
 				
 				buff.setBuffName(name);
-				buff.setBuffCRC(CRC.StringtoCRC(name));
 				buff.setGroup1((String) visitor.getObject(i, 1));
 				buff.setGroup2((String) visitor.getObject(i, 2));
 				buff.setPriority((int) visitor.getObject(i, 4));

@@ -209,7 +209,7 @@ public class GroupService implements INetworkDispatch {
 		// loop until we find a member other than ourself
 		for(SWGObject otherMember : group.getMemberList()) {
 			if(otherMember != member) {
-				for(Buff buff : ((CreatureObject) otherMember).getBuffList().get()) {
+				for(Buff buff : ((CreatureObject) otherMember).getBuffList().values()) {
 					if(buff.isGroupBuff() && otherMember.getPlanet() == member.getPlanet() && otherMember.getWorldPosition().getDistance2D(member.getWorldPosition()) <= 80) {
 						core.buffService.addBuffToCreature((CreatureObject) otherMember, buff.getBuffName(), member);
 					}
@@ -221,7 +221,7 @@ public class GroupService implements INetworkDispatch {
 	}
 	
 	public void removeGroupBuffs(CreatureObject member) {
-		for(Buff buff : new ArrayList<Buff>(member.getBuffList().get())) {
+		for(Buff buff : new ArrayList<Buff>(member.getBuffList().values())) {
 			if(buff.isGroupBuff() && buff.getGroupBufferId() != member.getObjectID()) {
 				core.buffService.removeBuffFromCreature(member, buff);
 			}

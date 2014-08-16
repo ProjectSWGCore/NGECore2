@@ -135,8 +135,8 @@ public class AIActor {
 							
 							if (obj instanceof CreatureObject){
 								CreatureObject addedObject = (CreatureObject) obj;
-								if (addedObject.getCalledPet()!=null){
-									CreatureObject calledPet = addedObject.getCalledPet();
+								if (NGECore.getInstance().objectService.getObject(addedObject.getPlayerObject().getPet())!=null){
+									CreatureObject calledPet = (CreatureObject) NGECore.getInstance().objectService.getObject(addedObject.getPlayerObject().getPet());
 									if (calledPet.getPosture() != 13 && calledPet.getPosture() != 14){
 										addDefender(calledPet);	
 									}
@@ -167,8 +167,8 @@ public class AIActor {
 							DevLog.debugout("Charon", "CHECK isFactionEnemy", "res " + NGECore.getInstance().factionService.isFactionEnemy((TangibleObject)creature, (TangibleObject)obj));
 							if (obj instanceof CreatureObject && NGECore.getInstance().factionService.isFactionEnemy((TangibleObject)creature, (TangibleObject)obj)){
 								CreatureObject addedObject = (CreatureObject) obj;
-								if (addedObject.getCalledPet()!=null){
-									CreatureObject calledPet = addedObject.getCalledPet();
+								if (NGECore.getInstance().objectService.getObject(addedObject.getPlayerObject().getPet())!=null){
+									CreatureObject calledPet = (CreatureObject) NGECore.getInstance().objectService.getObject(addedObject.getPlayerObject().getPet());
 									if (calledPet.getPosture() != 13 && calledPet.getPosture() != 14){
 										addDefender(calledPet);	
 									}
@@ -191,8 +191,8 @@ public class AIActor {
 							DevLog.debugout("Charon", "CHECK isFactionEnemy", "res " + NGECore.getInstance().factionService.isFactionEnemy((TangibleObject)creature, (TangibleObject)obj));
 							if (obj instanceof CreatureObject && NGECore.getInstance().factionService.isFactionEnemy((TangibleObject)creature, (TangibleObject)obj)){
 								CreatureObject addedObject = (CreatureObject) obj;
-								if (addedObject.getCalledPet()!=null){
-									CreatureObject calledPet = addedObject.getCalledPet();
+								if (NGECore.getInstance().objectService.getObject(addedObject.getPlayerObject().getPet())!=null){
+									CreatureObject calledPet = (CreatureObject) NGECore.getInstance().objectService.getObject(addedObject.getPlayerObject().getPet());
 									if (calledPet.getPosture() != 13 && calledPet.getPosture() != 14){
 										addDefender(calledPet);	
 									}

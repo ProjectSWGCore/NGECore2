@@ -70,6 +70,7 @@ import resources.datatables.DisplayType;
 import resources.datatables.Options;
 import resources.datatables.PlayerFlags;
 import resources.datatables.Professions;
+import resources.equipment.Equipment;
 import resources.guild.Guild;
 import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
@@ -143,7 +144,7 @@ public class PlayerService implements INetworkDispatch {
 		
 		scheduleList.add(scheduler.scheduleAtFixedRate(() -> {
 			try {
-				if (creature.isInStealth() && !creature.getOption(Options.INVULNERABLE) && ((PlayerObject) creature.getSlottedObject("ghost")).getGodLevel() == 0) {
+				if (creature.isCloaked() && !creature.getOption(Options.INVULNERABLE) && ((PlayerObject) creature.getSlottedObject("ghost")).getGodLevel() == 0) {
 					List<SWGObject> objects = core.simulationService.get(creature.getPlanet(), creature.getPosition().x, creature.getPosition().z, 64);
 					
 					for (SWGObject object : objects) {
@@ -161,7 +162,7 @@ public class PlayerService implements INetworkDispatch {
 						camoflauge -= (64 - creature.getPosition().getDistance(observer.getPosition()));
 						
 						if (new Random(camoflauge).nextInt() == camoflauge) {
-							creature.setInStealth(false);
+							creature.setCloaked(false);
 						}
 					}
 				}
@@ -594,7 +595,7 @@ public class PlayerService implements INetworkDispatch {
 		creature.setTurnRadius(1);
 		
 		if(pvpDeath) {
-			List<Buff> buffs = new ArrayList<Buff>(creature.getBuffList().get());
+			List<Buff> buffs = new ArrayList<Buff>(creature.getBuffList().values());
 			buffs.stream().filter(Buff::isDecayOnPvPDeath).forEach(Buff::incDecayCounter);			
 			creature.updateAllBuffs();
 		}
@@ -686,9 +687,9 @@ public class PlayerService implements INetworkDispatch {
 		SWGObject inventory = creature.getSlottedObject("inventory");
 		
 		try {
-        	for (Long equipmentId : new ArrayList<Long>(creature.getEquipmentList())) {
+        	for (Equipment equipmentObject : new ArrayList<Equipment>(creature.getEquipmentList())) {
         		
-        		SWGObject equipment = core.objectService.getObject(equipmentId);
+        		SWGObject equipment = core.objectService.getObject(equipmentObject.getObjectId());
         		
         		if (equipment == null || equipment.getTemplate().startsWith("object/tangible/hair/")) {
         			continue;
@@ -714,7 +715,7 @@ public class PlayerService implements INetworkDispatch {
 			//core.equipmentService.unequip(creature, equipment);
 		//}
 		
-		for (Buff buff : creature.getBuffList().get().toArray(new Buff[] { })) {
+		for (Buff buff : creature.getBuffList().values().toArray(new Buff[] { })) {
 			if (buff.isRemoveOnRespec()) {
 				core.buffService.removeBuffFromCreature(creature, buff);
 			}
@@ -749,7 +750,7 @@ public class PlayerService implements INetworkDispatch {
 		String xpType = ((player.getProfession().contains("entertainer")) ? "entertainer" : ((player.getProfession().contains("trader")) ? "crafting" : "combat_general"));
 			
 		player.setXp(xpType, 0);
-		creature.setXpBarValue(0);
+		creature.setDisplayXp(0);
 		
 		player.setProfessionWheelPosition("");
 		
@@ -804,7 +805,7 @@ public class PlayerService implements INetworkDispatch {
 			String xpType = ((player.getProfession().contains("entertainer")) ? "entertainer" : ((player.getProfession().contains("trader")) ? "crafting" : "combat_general"));
 			
 			player.setXp(xpType, experience);
-			creature.setXpBarValue(experience);
+			creature.setDisplayXp(experience);
 			
 
 			// 2. Add the relevant health/action and expertise points.
@@ -989,7 +990,7 @@ public class PlayerService implements INetworkDispatch {
 			experience += ((experience * experienceBonus) / 100);
 			
 			// 1. Add the experience.
-			if (experience > 0 && !creature.isStationary()) {
+			if (experience > 0 && !creature.isPerforming()) {
 				creature.showFlyText(OutOfBand.ProsePackage("@base_player:prose_flytext_xp", experience), 2.5f, new RGB(180, 60, 240), 1, true);
 			}
 			
@@ -1000,7 +1001,7 @@ public class PlayerService implements INetworkDispatch {
 			}
 			
 			player.setXp(xpType, experience);
-			creature.setXpBarValue(experience);
+			creature.setDisplayXp(experience);
 			
 			// 2. See if they need to level up.
 			for (int i = 0; i < experienceTable.getRowCount(); i++) {
@@ -1378,8 +1379,8 @@ public class PlayerService implements INetworkDispatch {
 				actor.sendSystemMessage("@unity:decline", (byte) 0);
 				proposer.sendSystemMessage("@unity:declined", (byte) 0);
 				actor.setAttachment("proposer", null);
-				for(Long objId : proposer.getEquipmentList()) {
-					SWGObject obj = core.objectService.getObject(objId);
+				for(Equipment equipment : proposer.getEquipmentList()) {
+					SWGObject obj = core.objectService.getObject(equipment.getObjectId());
 					if(obj != null && obj.getAttachment("unity") != null) {
 						obj.setAttachment("unity", null);
 						break;

@@ -897,8 +897,8 @@ public class HousingService implements INetworkDispatch {
 				// possibly sending the same delta multiple times
 				if (((CreatureObject) owner).getLookAtTarget() != itemList.get(i).getObjectID());
 					((CreatureObject)owner).setLookAtTarget(itemList.get(i).getObjectID());
-				if (((CreatureObject) owner).getTargetId() != itemList.get(i).getObjectID());
-					((CreatureObject)owner).setTargetId(itemList.get(i).getObjectID());
+				if (((CreatureObject) owner).getIntendedTarget() != itemList.get(i).getObjectID());
+					((CreatureObject)owner).setIntendedTarget(itemList.get(i).getObjectID());
 				if (((CreatureObject) owner).getIntendedTarget() != itemList.get(i).getObjectID());
 					((CreatureObject)owner).setIntendedTarget(itemList.get(i).getObjectID());
 			}

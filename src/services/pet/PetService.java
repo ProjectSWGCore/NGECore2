@@ -135,7 +135,7 @@ public class PetService implements INetworkDispatch {
 		}
 		
 		pet.setOwnerId(actor.getObjectID());
-		actor.setCalledPet(pet);
+		actor.getPlayerObject().setPet(pet.getObjectID());
 		pcd.setAttachment("companion_RefId", pet.getObjectID());
 		
 		
@@ -450,7 +450,7 @@ public class PetService implements INetworkDispatch {
 			return;
 		}
 		
-		if (rider.isInStealth()) {
+		if (rider.isCloaked()) {
 			rider.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:no_mount_stealth"), DisplayType.Broadcast);
 			return;
 		}
@@ -763,7 +763,7 @@ public class PetService implements INetworkDispatch {
 						AIActor aiActor = (AIActor) mount.getAttachment("AI");
 						aiActor.destroyActor();
 						player.setPet(0L);
-						owner.setCalledPet(null);	
+						owner.getPlayerObject().setPet(0);
 						core.objectService.destroyObject((Long) pcd.getAttachment("companion_RefId"));
 						pcd.setAttachment("companion_RefId", null);
 					}
@@ -796,7 +796,7 @@ public class PetService implements INetworkDispatch {
 							AIActor aiActor = (AIActor) pet.getAttachment("AI");
 							aiActor.destroyActor();
 							
-							actor.setCalledPet(null);	
+							actor.getPlayerObject().setPet(0);	
 							
 							core.objectService.destroyObject(petId);
 							pcd.setAttachment("companion_RefId",null);
@@ -919,7 +919,7 @@ public class PetService implements INetworkDispatch {
 	public void tame(CreatureObject actor, CreatureObject target) {
 		DevLog.debugout("Charon", "Pet AI", "Tame called.");
 		
-		if (actor.getCalledPet()!=null){
+		if (core.objectService.getObject(actor.getPlayerObject().getPet())!=null){
 			actor.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:too_many"), DisplayType.Broadcast);
 			return;
 		}
@@ -989,11 +989,11 @@ public class PetService implements INetworkDispatch {
 		        		datapad.add(pcd);
 		        		
 		        		if (target.getOption(Options.AGGRESSIVE))
-			        		target.removeOption(Options.AGGRESSIVE);
+			        		target.setOptions(Options.AGGRESSIVE, false);
 			        	
 			        	target.setAttachment("tamed", 1);
 			        	
-			    		actor.setCalledPet(target);	
+			        	actor.getPlayerObject().setPet(target.getObjectID());
 			    		target.setFaction(actor.getFaction());
 			    		target.setFactionStatus(actor.getFactionStatus());
 			    		target.setOwnerId(actor.getObjectID());
