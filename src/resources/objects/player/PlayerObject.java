@@ -47,6 +47,7 @@ import resources.objects.waypoint.WaypointObject;
 import resources.quest.Quest;
 import services.quest.QuestItem;
 import engine.clients.Client;
+import engine.resources.common.StringUtilities;
 import engine.resources.objects.Baseline;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -161,7 +162,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		baseline.put("currentFSQuestList", new SWGList<Byte>(this, 8, 4, false));
 		baseline.put("completedFSQuestList", new SWGList<Byte>(this, 8, 5, false));
 		baseline.put("activeQuest", 0);
-		baseline.put("questJournal", new SWGList<Quest>(this, 8, 7, false, true));
+		baseline.put("questJournal", new SWGMap<Integer, Quest>(this, 8, 7, true));
 		baseline.put("professionWheelPosition", "");
 		return baseline;
 	}
@@ -591,18 +592,13 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public SWGList<Quest> getQuestJournal() {
-		return (SWGList<Quest>) getBaseline(8).get("questJournal");
+	public SWGMap<Integer, Quest> getQuestJournal() {
+		return (SWGMap<Integer, Quest>) getBaseline(8).get("questJournal");
 	}
 	
 	@SuppressWarnings("unchecked")
 	public TreeMap<String, QuestItem> getQuestRetrieveItemTemplates() {
 		return (TreeMap<String, QuestItem>) otherVariables.get("questRetrieveItemTemplates");
-	}
-	
-	public boolean hasRetrieveItemTemplate(String template) {
-		TreeMap<String, QuestItem> templates = getQuestRetrieveItemTemplates();
-		return templates.containsKey(template);
 	}
 	
 	public int getActiveQuest() {
@@ -1045,9 +1041,18 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 				}
 				
 				break;
+			case 8:
+				switch (updateType) {
+				case 7:
+					IoBuffer newBuffer = getBaseline(viewType).createDelta(updateType, buffer.array());
+					getContainer().getClient().getSession().write(newBuffer.array());
+					break;
+				}
+				break;
 			default:
 				if (getContainer() != null && getContainer().getClient() != null) {
 					getContainer().getClient().getSession().write(getBaseline(viewType).createDelta(updateType, buffer.array()));
+					StringUtilities.printBytes(getBaseline(viewType).createDelta(updateType, buffer.array()).array());
 				}
 		}
 	}

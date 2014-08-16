@@ -27,15 +27,16 @@ import org.apache.mina.core.buffer.IoBuffer;
 
 import protocol.swg.ObjControllerMessage;
 
-@SuppressWarnings("unused")
-public class QuestTaskTimerMessage extends ObjControllerObject {
+public class QuestTaskCounterMessage extends ObjControllerObject {
 	
 	private long objectId;
 	private String questName;
+	private String stf;
 
-	public QuestTaskTimerMessage(long objectId, String questName) {
+	public QuestTaskCounterMessage(long objectId, String questName, String stf) {
 		this.objectId = objectId;
 		this.questName = questName;
+		this.stf = stf;
 	}
 
 	@Override
@@ -45,21 +46,22 @@ public class QuestTaskTimerMessage extends ObjControllerObject {
 
 	@Override
 	public IoBuffer serialize() {
+
+		byte[] questNameBytes = getAsciiString(questName);
+		byte[] stfBytes = getUnicodeString(stf);
 		
-		IoBuffer buffer = IoBuffer.allocate(16).order(ByteOrder.LITTLE_ENDIAN);
-		buffer.setAutoExpand(true);
-		buffer.putInt(ObjControllerMessage.QUEST_TASK_TIMER_MESSAGE);
+		IoBuffer buffer = IoBuffer.allocate(38 + questNameBytes.length + stfBytes.length).order(ByteOrder.LITTLE_ENDIAN);
+
+		buffer.putInt(ObjControllerMessage.QUEST_TASK_COUNTER);
 		buffer.putLong(objectId);
 		buffer.putInt(0);
-		buffer.put(getAsciiString("quest/ep3_trando_hssissk_zssik_10"));
-		buffer.putInt(1);
-		buffer.put(getUnicodeString("quest/groundquests:destroy_counter"));
-		buffer.putInt(0);
-		buffer.putInt(1);
 		
-		int size = buffer.position();
-		buffer = IoBuffer.allocate(size).put(buffer.array(), 0, size);
-
+		buffer.put(questNameBytes);
+		buffer.putInt(1); // ??
+		buffer.put(stfBytes);
+		buffer.putInt(0); // ??
+		buffer.putInt(1); // ??
+		
 		return buffer.flip();	
 	}
 
