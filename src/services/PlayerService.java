@@ -526,7 +526,7 @@ public class PlayerService implements INetworkDispatch {
 		});
 		
 		swgOpcodes.put(Opcodes.CmdSceneReady, (session, data) -> {
-
+			session.setAttribute("CmdSceneReady", true);
 		});
 		
 		/*swgOpcodes.put(Opcodes.ExpertiseRequestMessage, new INetworkRemoteEvent() {
