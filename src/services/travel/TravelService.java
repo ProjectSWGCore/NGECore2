@@ -329,8 +329,8 @@ public class TravelService implements INetworkDispatch {
 		
 		Planet planet = core.terrainService.getPlanetByName(tp.getPlanetName());
 		Point3D spawnLocation = SpawnPoint.getRandomPosition(tp.getLocation(), 5, 20, actor.getPlanetId());
-		core.simulationService.transferToPlanet(actor, planet, spawnLocation, new Quaternion(0, 0, 0, 0), null);
-		
+		float positionY = core.terrainService.getHeight(actor.getPlanetId(), spawnLocation.x, spawnLocation.z);
+		core.simulationService.transferToPlanet(actor, planet, new Point3D(spawnLocation.x, positionY, spawnLocation.z), new Quaternion(0, 0, 0, 0), null);		
 	}
 
 	
