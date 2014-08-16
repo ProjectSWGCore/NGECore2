@@ -10,27 +10,27 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCustomName('Gurk King')
-	mobileTemplate.setLevel(79)
-	mobileTemplate.setMinLevel(79)
-	mobileTemplate.setMaxLevel(80)
-	mobileTemplate.setDifficulty(Difficulty.BOSS)
+	mobileTemplate.setCreatureName('mott_bull')
+	mobileTemplate.setLevel(6)
+	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(True)
 	mobileTemplate.setScale(1)
-	mobileTemplate.setMeatType("Carnivore Meat")
-	mobileTemplate.setMeatAmount(1450)
+	mobileTemplate.setMeatType("Herbivore  Meat")
+	mobileTemplate.setMeatAmount(100)
 	mobileTemplate.setHideType("Leathery Hide")
-	mobileTemplate.setHideAmount(1350)
-	mobileTemplate.setSocialGroup("kimogila")
-	mobileTemplate.setAssistRange(12)
-	mobileTemplate.setStalker(True)
-	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
+	mobileTemplate.setHideAmount(65)
+	mobileTemplate.setBoneType("Mammal Bones")
+	mobileTemplate.setBoneAmount(40)
+	mobileTemplate.setSocialGroup("mott")
+	mobileTemplate.setAssistRange(8)
+	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_recluse_gurk_king.iff')
+	templates.add('object/mobile/shared_mott_bull.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
@@ -39,8 +39,10 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_charge_1')
+	attacks.add('bm_defensive_1')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('reclusive_gurk_king', mobileTemplate)
+	core.spawnService.addMobileTemplate('mott_bull', mobileTemplate)
 	return

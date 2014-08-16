@@ -21,18 +21,18 @@ def addTemplate(core):
 	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(1)
 	mobileTemplate.setMeatType("Carnivore Meat")
-	mobileTemplate.setMeatAmount(60)
+	mobileTemplate.setMeatAmount(75)
 	mobileTemplate.setHideType("Bristley Hide")
 	mobileTemplate.setHideAmount(45)
 	mobileTemplate.setBoneType("Animal Bones")
 	mobileTemplate.setBoneAmount(40)
 	mobileTemplate.setSocialGroup("narglatch")
-	mobileTemplate.setAssistRange(0)
-	mobileTemplate.setOptionsBitmask(128)
+	mobileTemplate.setAssistRange(6)
+	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
 	mobileTemplate.setStalker(False)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_narglatch.iff')
+	templates.add('object/mobile/shared_narglatch_hue.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
@@ -41,6 +41,8 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_claw_2')
+	attacks.add('bm_slash_2')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

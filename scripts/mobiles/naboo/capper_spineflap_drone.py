@@ -27,7 +27,7 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("capper spineflap")
 	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(False)
-	mobileTemplate.setOptionsBitmask(128)
+	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_capper_spineflap.iff')
@@ -39,6 +39,8 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_bite_2') 
+	attacks.add('bm_wing_buffet_2')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

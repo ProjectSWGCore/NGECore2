@@ -29,18 +29,21 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("veermok")
 	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(False)
-	mobileTemplate.setOptionsBitmask(128)
+	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_veermok.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
+	
 	weapontemplate = WeaponTemplate('object/weapon/melee/unarmed/shared_unarmed_default.iff', WeaponType.UNARMED, 1.0, 6, 'kinetic')
 	weaponTemplates.add(weapontemplate)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_dampen_pain_2')
+	attacks.add('bm_stomp_2')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
