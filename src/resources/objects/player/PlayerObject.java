@@ -33,6 +33,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.mina.core.buffer.IoBuffer;
 
 import resources.craft.DraftSchematic;
+import resources.datatables.AdminTag;
 import resources.datatables.Citizenship;
 import resources.datatables.Professions;
 import resources.gcw.RegionDefender;
@@ -44,7 +45,9 @@ import resources.objects.intangible.IntangibleObject;
 import resources.objects.resource.ResourceContainerObject;
 import resources.objects.waypoint.WaypointObject;
 import resources.quest.Quest;
+import services.quest.QuestItem;
 import engine.clients.Client;
+import engine.resources.common.StringUtilities;
 import engine.resources.objects.Baseline;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -93,6 +96,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		baseline.put("holoEmote", "");
 		baseline.put("holoEmoteUses", 0);
 		baseline.put("activeMissions", new ArrayList<Long>()); // TODO: Look at MissionCriticalObject in CREO4, could use that instead of this
+		baseline.put("questRetrieveItemTemplates", new TreeMap<String, QuestItem>());
 		return baseline;
 	}
 	
@@ -130,7 +134,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	@Override
 	public Baseline getBaseline6() {
 		Baseline baseline = super.getBaseline6();
-		baseline.put("godLevel", (byte) 0);
+		baseline.put("adminTag", (byte) AdminTag.NONE);
 		baseline.put("currentRank", 0);
 		baseline.put("rankProgress", (float) 0);
 		baseline.put("highestRebelRank", 0);
@@ -157,8 +161,8 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		baseline.put("maxForcePower", 100);
 		baseline.put("currentFSQuestList", new SWGList<Byte>(this, 8, 4, false));
 		baseline.put("completedFSQuestList", new SWGList<Byte>(this, 8, 5, false));
-		baseline.put("questJournal", new SWGList<Quest>(this, 8, 6, false));
-		baseline.put("7", 0);
+		baseline.put("activeQuest", 0);
+		baseline.put("questJournal", new SWGMap<Integer, Quest>(this, 8, 7, true));
 		baseline.put("professionWheelPosition", "");
 		return baseline;
 	}
@@ -184,7 +188,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		baseline.put("maxConsumable", 100);
 		baseline.put("waypointList", new SWGMap<Long, WaypointObject>(this, 9, 16, false));
 		baseline.put("defendersList", new SWGSet<Long>(this, 9, 17, false));
-		baseline.put("kills", 0);
+		baseline.put("killMeterPoints", 0);
 		baseline.put("19", 0);
 		baseline.put("pet", (long) 0);
 		baseline.put("petAbilities", new SWGList<String>(this, 9, 21, false));
@@ -435,12 +439,12 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		notifyClients(getBaseline(3).set("showBackpack", showBackpack), true);
 	}
 	
-	public byte getGodLevel() {
-		return (byte) getBaseline(6).get("godLevel");
+	public byte getAdminTagValue() {
+		return (byte) getBaseline(6).get("adminTag");
 	}
 	
-	public void setGodLevel(int godLevel) {
-		notifyClients(getBaseline(6).set("godLevel", (byte) godLevel), true);
+	public void setAdminTagValue(byte adminTag) {
+		notifyClients(getBaseline(6).set("adminTag", (byte) adminTag), true);
 	}
 	
 	public int getCurrentRank() {
@@ -588,8 +592,21 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public SWGList<Quest> getQuestJournal() {
-		return (SWGList<Quest>) getBaseline(8).get("questJournal");
+	public SWGMap<Integer, Quest> getQuestJournal() {
+		return (SWGMap<Integer, Quest>) getBaseline(8).get("questJournal");
+	}
+	
+	@SuppressWarnings("unchecked")
+	public TreeMap<String, QuestItem> getQuestRetrieveItemTemplates() {
+		return (TreeMap<String, QuestItem>) otherVariables.get("questRetrieveItemTemplates");
+	}
+	
+	public int getActiveQuest() {
+		return (int) getBaseline(8).get("activeQuest");
+	}
+	
+	public void setActiveQuest(int questCRC) {
+		getBaseline(8).set("activeQuest", questCRC);
 	}
 	
 	public String getProfessionWheelPosition() {
@@ -758,18 +775,14 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		return (SWGSet<Long>) getBaseline(8).get("defendersList");
 	}
 	
-	public int getKills() {
-		return (int) getBaseline(9).get("kills");
+	public int getKillMeterPoints() {
+		return (int) getBaseline(9).get("killMeterPoints");
 	}
 	
-	public void setKills(int kills) {
+	public void setKillMeterPoints(int points) {
 		if (getClient() != null) {
-			getClient().getSession().write(getBaseline(9).set("kills", kills));
+			getClient().getSession().write(getBaseline(9).set("killMeterPoints", points));
 		}
-	}
-	
-	public void addKills(int kills) {
-		setKills(getKills() + kills);
 	}
 	
 	public long getPet() {
@@ -1019,6 +1032,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	
 	@Override
 	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
+
 		switch (viewType) {
 			case 3:
 			case 6:
@@ -1027,9 +1041,18 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 				}
 				
 				break;
+			case 8:
+				switch (updateType) {
+				case 7:
+					IoBuffer newBuffer = getBaseline(viewType).createDelta(updateType, buffer.array());
+					getContainer().getClient().getSession().write(newBuffer.array());
+					break;
+				}
+				break;
 			default:
 				if (getContainer() != null && getContainer().getClient() != null) {
 					getContainer().getClient().getSession().write(getBaseline(viewType).createDelta(updateType, buffer.array()));
+					StringUtilities.printBytes(getBaseline(viewType).createDelta(updateType, buffer.array()).array());
 				}
 		}
 	}

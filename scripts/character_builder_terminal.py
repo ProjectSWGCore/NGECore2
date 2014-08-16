@@ -35,7 +35,7 @@ def screenOne (core, owner):
 	window.addListBoxMenuItem('Items', 1)
 	window.addListBoxMenuItem('Instant Travel Locations', 2)
 	window.addListBoxMenuItem('Resources', 3)
-	if owner.getClient() and owner.getClient().isGM() == True:
+	if core.adminService.getAccessLevelFromDB(owner.getClient().getAccountId()) is not None:
 		window.addListBoxMenuItem('Admin', 4)
 	core.suiService.openSUIWindow(window);
 		
@@ -142,8 +142,9 @@ def	travelHandler(owner):
 	window.addHandler(0, '', Trigger.TRIGGER_OK, returnList, travelHandlerCallback)
 	window.addListBoxMenuItem('Tatooine, Mos Eisley', 0)
 	window.addListBoxMenuItem('Dantooine, Jedi Ruins', 1)
-	window.addListBoxMenuItem('Blank', 2)
-	window.addListBoxMenuItem('Blank', 3)
+	window.addListBoxMenuItem('Talus, Dearic Starport', 2)
+	window.addListBoxMenuItem('Naboo, Keren Starport', 3)
+	window.addListBoxMenuItem('Tatooine, Bestine Starport', 4)
 	core.suiService.openSUIWindow(window);
 	
 def travelHandlerCallback(owner, window, eventType, returnList):
@@ -157,6 +158,15 @@ def travelHandlerCallback(owner, window, eventType, returnList):
 		return
 	if returnList.get(0)=='1':
 		jediRuinsTravel(owner)
+		return
+	if returnList.get(0)=='2':
+		GCWDearicTravel(owner)
+		return
+	if returnList.get(0)=='3':
+		GCWKerenTravel(owner)
+		return
+	if returnList.get(0)=='4':
+		GCWBestineTravel(owner)
 		return
 	return
 	
@@ -306,6 +316,10 @@ def	miscHandler(owner):
 	window.addListBoxMenuItem('Backpack', 0)
 	window.addListBoxMenuItem('Heroism Jewelry Set', 1)	
 	window.addListBoxMenuItem('Belt of Master Bodo Baas', 2)
+	window.addListBoxMenuItem('Starter Equipment Box', 3)
+	window.addListBoxMenuItem('GCW Banners', 4)
+	window.addListBoxMenuItem('Bounty Droids', 5)
+	
 	core.suiService.openSUIWindow(window);
 	
 def miscHandlerCallback(owner, window, eventType, returnList):
@@ -323,6 +337,16 @@ def miscHandlerCallback(owner, window, eventType, returnList):
 	if returnList.get(0)=='2':
 		jediBelt(owner, inventory)
 		return
+	if returnList.get(0)=='3':
+		starterEquipmentBox(owner, inventory)
+		return
+	if returnList.get(0)=='4':
+		GCWBanners(owner, inventory)
+		return
+	if returnList.get(0)=='5':
+		bountyDroids(owner, inventory)
+		return
+		
 	return
 	
 def combatLevel(owner):
@@ -379,35 +403,35 @@ def combatLevelDown(owner):
 	
 def rangedWeapons(owner, inventory):
 	rifle = core.objectService.createObject('object/weapon/ranged/rifle/shared_rifle_e11.iff', owner.getPlanet())
-	rifle.setDamageType("energy");
-	rifle.setWeaponType(WeaponType.RIFLE);
-	rifle.setAttackSpeed(0.8);
-	rifle.setMinDamage(518);
-	rifle.setMaxDamage(1035);
+	rifle.setDamageType('energy')
+	rifle.setWeaponType(WeaponType.RIFLE)
+	rifle.setAttackSpeed(0.8)
+	rifle.setMinDamage(518)
+	rifle.setMaxDamage(1035)
 	rifle.setMaxRange(64)
 	
 	pistol = core.objectService.createObject('object/weapon/ranged/pistol/shared_pistol_dl44.iff', owner.getPlanet())
-	pistol.setDamageType("energy");
-	pistol.setWeaponType(WeaponType.PISTOL);
-	pistol.setAttackSpeed(0.4);
-	pistol.setMinDamage(259);
-	pistol.setMaxDamage(518);
-	pistol.setMaxRange(35);
+	pistol.setDamageType('energy')
+	pistol.setWeaponType(WeaponType.PISTOL)
+	pistol.setAttackSpeed(0.4)
+	pistol.setMinDamage(259)
+	pistol.setMaxDamage(518)
+	pistol.setMaxRange(35)
 	
 	carbine = core.objectService.createObject('object/weapon/ranged/carbine/shared_carbine_e11.iff', owner.getPlanet())
-	carbine.setDamageType("energy");
-	carbine.setWeaponType(WeaponType.CARBINE);
-	carbine.setAttackSpeed(0.6);
-	carbine.setMinDamage(389);
-	carbine.setMaxDamage(780);
-	carbine.setMaxRange(50);
+	carbine.setDamageType('energy')
+	carbine.setWeaponType(WeaponType.CARBINE)
+	carbine.setAttackSpeed(0.6)
+	carbine.setMinDamage(389)
+	carbine.setMaxDamage(780)
+	carbine.setMaxRange(50)
 	
 	heavy = core.objectService.createObject('object/weapon/ranged/heavy/shared_som_lava_cannon.iff', owner.getPlanet())
-	heavy.setDamageType("energy");
-	heavy.setWeaponType(WeaponType.HEAVYWEAPON);
-	heavy.setAttackSpeed(1);
-	heavy.setMinDamage(850);
-	heavy.setMaxDamage(1350);
+	heavy.setDamageType('energy')
+	heavy.setWeaponType(WeaponType.HEAVYWEAPON)
+	heavy.setAttackSpeed(1)
+	heavy.setMinDamage(850)
+	heavy.setMaxDamage(1350)
 	heavy.setStringAttribute('wpn_elemental_type', 'Heat')
 	heavy.setStringAttribute('wpn_elemental_value', '50')
 	heavy.setMaxRange(64)
@@ -605,6 +629,11 @@ def backpack(owner, inventory):
 	inventory.add(core.objectService.createObject("object/tangible/wearables/backpack/shared_backpack_s01.iff", owner.getPlanet()))
 	screenOne(core, owner)
 	return
+
+def starterEquipmentBox(owner, inventory):
+	inventory.add(core.objectService.createObject("object/tangible/npe/shared_npe_uniform_box.iff", owner.getPlanet()))
+	screenOne(core, owner)
+	return
 	
 def heroismJewelry(owner, inventory):
 	heroismBand = core.objectService.createObject("object/tangible/wearables/ring/shared_ring_s04.iff", owner.getPlanet(), "item_band_set_hero_01_01")					
@@ -643,6 +672,21 @@ def jediRuinsTravel(owner):
 	core.simulationService.transferToPlanet(owner, core.terrainService.getPlanetByName("dantooine"), position, owner.getOrientation(), None)
 	return
 	
+def GCWDearicTravel(owner):
+	position = Point3D(264, 4, -2950)
+	core.simulationService.transferToPlanet(owner, core.terrainService.getPlanetByName("talus"), position, owner.getOrientation(), None)
+	return	
+	
+def GCWKerenTravel(owner):
+	position = Point3D(1366, 13, 2747)
+	core.simulationService.transferToPlanet(owner, core.terrainService.getPlanetByName("naboo"), position, owner.getOrientation(), None)
+	return
+	
+def GCWBestineTravel(owner):
+	position = Point3D(-1385,12, -3597)
+	core.simulationService.transferToPlanet(owner, core.terrainService.getPlanetByName("tatooine"), position, owner.getOrientation(), None)
+	return
+
 def surveyDevices(owner, inventory):
 	mineralSurveyTool = core.objectService.createObject("object/tangible/survey_tool/shared_survey_tool_mineral.iff", owner.getPlanet())			
 	chemicalSurveyTool = core.objectService.createObject("object/tangible/survey_tool/shared_survey_tool_inorganic.iff", owner.getPlanet())		
@@ -660,3 +704,28 @@ def surveyDevices(owner, inventory):
 	inventory.add(solarSurveyTool)
 	return
 	
+def GCWBanners(owner, inventory):
+
+	gcwBanner1 = core.objectService.createObject('object/tangible/gcw/pvp_rank_rewards/shared_rebel_battle_banner.iff', owner.getPlanet())
+	gcwBanner1.setStfFilename('static_item_n')
+	gcwBanner1.setStfName('item_pvp_captain_battle_banner_rebel_reward_04_01')
+	gcwBanner1.setDetailFilename('static_item_d')
+	gcwBanner1.setDetailName('item_pvp_captain_battle_banner_rebel_reward_04_01')
+	inventory.add(gcwBanner1)
+	gcwBanner2 = core.objectService.createObject('object/tangible/gcw/pvp_rank_rewards/shared_imperial_battle_banner.iff', owner.getPlanet())
+	gcwBanner2.setStfFilename('static_item_n')
+	gcwBanner2.setStfName('item_pvp_captain_battle_banner_imperial_reward_04_01')
+	gcwBanner2.setDetailFilename('static_item_d')
+	gcwBanner2.setDetailName('item_pvp_captain_battle_banner_imperial_reward_04_01')
+	inventory.add(gcwBanner2)
+	return
+
+def bountyDroids(owner, inventory):
+	seekers = core.objectService.createObject('object/tangible/mission/shared_mission_bounty_droid_seeker.iff', owner.getPlanet())
+	seekers.setUses(20)
+	inventory.add(seekers)
+	
+	probe = core.objectService.createObject('object/tangible/mission/shared_mission_bounty_droid_probot.iff', owner.getPlanet())
+	probe.setUses(20)
+	inventory.add(probe)
+	return

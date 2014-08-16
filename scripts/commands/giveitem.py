@@ -9,10 +9,7 @@ def run(core, actor, target, commandString):
 	arg1 = commandArgs[0]
 	if len(commandArgs) > 1:
 		arg2 = commandArgs[1]
-
-	if actor.getClient() and actor.getClient().isGM() == False:
-		return
-		
+	
 	if not commandString.startswith('object/tangible') and not commandString.startswith('object/weapon'):
 		return
 		

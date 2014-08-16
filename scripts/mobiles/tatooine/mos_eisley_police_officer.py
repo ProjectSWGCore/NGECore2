@@ -19,6 +19,7 @@ def addTemplate(core):
 	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(True)
 	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
+	mobileTemplate.setRespawnTime(5)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_eisley_officer_aqualish_female_01.iff')

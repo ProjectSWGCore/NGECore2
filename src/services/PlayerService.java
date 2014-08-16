@@ -37,8 +37,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
+
 
 import protocol.swg.CharacterSheetResponseMessage;
 import protocol.swg.ClientIdMsg;
@@ -67,10 +69,14 @@ import resources.common.OutOfBand;
 import resources.common.ProsePackage;
 import resources.common.SpawnPoint;
 import resources.datatables.DisplayType;
+import resources.datatables.FactionStatus;
+import resources.datatables.Factions;
+import resources.datatables.GcwRank;
 import resources.datatables.Options;
 import resources.datatables.PlayerFlags;
 import resources.datatables.Professions;
 import resources.equipment.Equipment;
+import resources.datatables.AdminTag;
 import resources.guild.Guild;
 import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
@@ -137,6 +143,48 @@ public class PlayerService implements INetworkDispatch {
 				player.setTotalPlayTime((int) (player.getTotalPlayTime() + ((System.currentTimeMillis() - player.getLastPlayTimeUpdate()) / 1000)));
 				player.setLastPlayTimeUpdate(System.currentTimeMillis());
 				core.collectionService.checkExplorationRegions(creature);
+
+				// GCW rank progress
+				if (creature.getFaction().equals("rebel") || creature.getFaction().equals("imperial")){
+					int oldrank = player.getCurrentRank();
+					//int oldprogress = (int) ((player.getRankProgress() > 100) ? 100 : player.getRankProgress());
+					int oldprogress = 0;
+					int oldpoints = player.getGcwPoints();
+					int newrank = oldrank;
+					int newprogress = oldprogress;
+					int oldranktotal = 0;
+					int oldrankprogress = 0;
+					int newranktotal = 0;
+					int newrankprogress = 0;
+					
+					oldrankprogress = oldprogress * 50;
+					oldranktotal = 5000 * (oldrank - 1) + oldrankprogress;
+					
+					newprogress = (int) core.gcwService.helper(oldpoints, oldrank);
+					
+					if (newprogress < -2000) {
+						newprogress = -2000;
+					}
+					
+					newranktotal = oldranktotal + newprogress;
+					
+					if (oldrank == GcwRank.LIEUTENANT && newprogress < 0 && newranktotal < 30000) {
+						newranktotal = 29999;
+					}
+					
+					newrank = oldrank;
+					
+					if (newrank > GcwRank.GENERAL) {
+						newrank = GcwRank.GENERAL;
+						newranktotal = 12 * 5000 - 1;
+					}
+					
+					newrankprogress = newranktotal - (newrank - 1) * 5000;
+					newprogress = newrankprogress * 100 / 5000;
+					
+					player.setRankProgress((float) Math.floor(newprogress));
+				}
+				
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -144,7 +192,7 @@ public class PlayerService implements INetworkDispatch {
 		
 		scheduleList.add(scheduler.scheduleAtFixedRate(() -> {
 			try {
-				if (creature.isCloaked() && !creature.getOption(Options.INVULNERABLE) && ((PlayerObject) creature.getSlottedObject("ghost")).getGodLevel() == 0) {
+				if (creature.isCloaked() && !creature.getOption(Options.INVULNERABLE) && core.adminService.getAccessLevelFromDB(creature.getClient().getAccountId()) == null) {
 					List<SWGObject> objects = core.simulationService.get(creature.getPlanet(), creature.getPosition().x, creature.getPosition().z, 64);
 					
 					for (SWGObject object : objects) {
@@ -158,7 +206,7 @@ public class PlayerService implements INetworkDispatch {
 						
 						CreatureObject observer = (CreatureObject) object;
 						
-						int camoflauge = creature.getSkillModBase("camoflauge") - observer.getSkillModBase("detectcamo");
+						int camoflauge = creature.getSkillModBase("camouflage") - observer.getSkillModBase("detectcamo");
 						camoflauge -= (64 - creature.getPosition().getDistance(observer.getPosition()));
 						
 						if (new Random(camoflauge).nextInt() == camoflauge) {
@@ -479,7 +527,7 @@ public class PlayerService implements INetworkDispatch {
 		});
 		
 		swgOpcodes.put(Opcodes.CmdSceneReady, (session, data) -> {
-
+			session.setAttribute("CmdSceneReady", true);
 		});
 		
 		/*swgOpcodes.put(Opcodes.ExpertiseRequestMessage, new INetworkRemoteEvent() {
@@ -527,10 +575,19 @@ public class PlayerService implements INetworkDispatch {
 	@SuppressWarnings("unchecked")
 	public void sendCloningWindow(CreatureObject creature, final boolean pvpDeath) {
 		
-		//if(creature.getPosture() != 14)
-		//	return;
+		if(creature.getPosture() != 14)
+			return;
 		
 		List<SWGObject> cloners = core.staticService.getCloningFacilitiesByPlanet(creature.getPlanet());
+		
+		boolean invasionDeath = core.invasionService.checkInvasionDeath(creature);
+		
+		if (invasionDeath){
+			if (core.invasionService.getAccordingCloners(creature).size()>0){
+				cloners = core.invasionService.getAccordingCloners(creature);
+			}
+		}
+		
 		Map<Long, String> cloneData = new HashMap<Long, String>();
 		Point3D position = creature.getWorldPosition();
 		
@@ -543,9 +600,20 @@ public class PlayerService implements INetworkDispatch {
 		}
 		final long preDesignatedObjectId = (preDesignatedCloner != null) ? preDesignatedCloner.getObjectID() : 0;
 		cloners.stream().filter(c -> c.getObjectID() != preDesignatedObjectId).forEach(c -> cloneData.put(c.getObjectID(), core.mapService.getClosestCityName(c)));
+				
+		Map<Long, String> listedCloneData = cloneData;
 		
+		if (invasionDeath){
+			if (core.invasionService.getAccordingCloners(creature).size()>0){
+				listedCloneData = new HashMap<Long, String>();
+				for (SWGObject cloner : core.invasionService.getAccordingCloners(creature)){
+					listedCloneData.put(cloner.getObjectID(), cloner.getCustomName());
+				}
+			}
+		}
+			
 		final SUIWindow window = core.suiService.createListBox(ListBoxType.LIST_BOX_OK_CANCEL, "@base_player:revive_title", "@base_player:clone_prompt_header", 
-				cloneData, creature, null, 0);
+				listedCloneData, creature, null, 0);
 		Vector<String> returnList = new Vector<String>();
 		returnList.add("List.lstList:SelectedRow");
 		
@@ -578,10 +646,10 @@ public class PlayerService implements INetworkDispatch {
 	}
 	
 	public void handleCloneRequest(CreatureObject creature, BuildingObject cloner, SpawnPoint spawnPoint, boolean pvpDeath) {
-		
+
 		CellObject cell = cloner.getCellByCellNumber(spawnPoint.getCellNumber());
 		
-		if(cell == null)
+		if(cell == null && !cloner.getTemplate().contains("shared_invisible_cloner"))
 			return;
 		
 		creature.setPosture((byte) 0);
@@ -600,7 +668,9 @@ public class PlayerService implements INetworkDispatch {
 			creature.updateAllBuffs();
 		}
 		
-		creature.setFactionStatus(0);
+		creature.setFactionStatus(FactionStatus.OnLeave);
+		creature.updatePvpStatus();
+		
 		core.buffService.addBuffToCreature(creature, "cloning_sickness", creature);
 		
 	}
@@ -682,33 +752,35 @@ public class PlayerService implements INetworkDispatch {
 	/*
 	 * Resets to level 1
 	 */
-	public void resetLevel(CreatureObject creature) {
+	public void resetLevel(CreatureObject creature, boolean unequipItems) {
 		PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
 		SWGObject inventory = creature.getSlottedObject("inventory");
 		
-		try {
-        	for (Equipment equipmentObject : new ArrayList<Equipment>(creature.getEquipmentList())) {
-        		
-        		SWGObject equipment = core.objectService.getObject(equipmentObject.getObjectId());
-        		
-        		if (equipment == null || equipment.getTemplate().startsWith("object/tangible/hair/")) {
-        			continue;
-        		}
-        		
-        		switch (equipment.getTemplate()) {
-        			case "object/tangible/inventory/shared_character_inventory.iff":
-        			case "object/tangible/inventory/shared_appearance_inventory.iff":
-        			case "object/tangible/datapad/shared_character_datapad.iff":
-        			case "object/tangible/bank/shared_character_bank.iff":
-       				case "object/tangible/mission_bag/shared_mission_bag.iff":
-        			case "object/weapon/creature/shared_creature_default_weapon.iff":
-        				continue;
-        			default:
-        				creature.transferTo(creature, inventory, equipment);
-       			}
-        	}
-		} catch (Exception e) {
-			e.printStackTrace();
+		if (unequipItems) {
+			try {
+				for (Equipment equipmentObject : new ArrayList<Equipment>(creature.getEquipmentList())) {
+					
+					SWGObject equipment = core.objectService.getObject(equipmentObject.getObjectId());
+					
+					if (equipment == null || equipment.getTemplate().startsWith("object/tangible/hair/")) {
+						continue;
+					}
+					
+					switch (equipment.getTemplate()) {
+						case "object/tangible/inventory/shared_character_inventory.iff":
+						case "object/tangible/inventory/shared_appearance_inventory.iff":
+						case "object/tangible/datapad/shared_character_datapad.iff":
+						case "object/tangible/bank/shared_character_bank.iff":
+						case "object/tangible/mission_bag/shared_mission_bag.iff":
+						case "object/weapon/creature/shared_creature_default_weapon.iff":
+							continue;
+						default:
+							creature.transferTo(creature, inventory, equipment);
+					}
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 		
 		//for (SWGObject equipment : creature.getAppearanceEquipmentList()) {
@@ -794,7 +866,8 @@ public class PlayerService implements INetworkDispatch {
 		
 		if(level == 0) return;
 		
-		resetLevel(creature);
+		if (!(creature.getLevel() <= (short) 1)) resetLevel(creature, true);
+		else resetLevel(creature, false);
 		
 		try {
 			experienceTable = ClientFileManager.loadFile("datatables/player/player_level.iff", DatatableVisitor.class);
@@ -1236,7 +1309,7 @@ public class PlayerService implements INetworkDispatch {
 		
 		inventory.add(item);
 		
-		ObjControllerMessage objController = new ObjControllerMessage(11, new ShowLootBox(reciever.getObjectID(), item));
+		ObjControllerMessage objController = new ObjControllerMessage(11, new ShowLootBox(reciever.getObjectID(), item.getObjectID()));
 		client.getSession().write(objController.serialize());
 	}
 	
@@ -1260,11 +1333,14 @@ public class PlayerService implements INetworkDispatch {
 		if (inventory == null)
 			return;
 		
+		ArrayList<Long> itemsId = new ArrayList<Long>();
+		
 		for (SWGObject obj : items) {
 			inventory.add(obj);
+			itemsId.add(obj.getObjectID());
 		}
 		
-		ObjControllerMessage objController = new ObjControllerMessage(11, new ShowLootBox(reciever.getObjectID(), items));
+		ObjControllerMessage objController = new ObjControllerMessage(11, new ShowLootBox(reciever.getObjectID(), itemsId));
 		client.getSession().write(objController.serialize());
 	}
 	
@@ -1467,6 +1543,19 @@ public class PlayerService implements INetworkDispatch {
 
 		}
 		return formalName;
+	}
+	
+	public String checkForGender(CreatureObject object)	{
+		String gender ="";
+		if(object.getTemplate().contains("_female")){
+			gender =  "female";			
+		}else if(object.getTemplate().contains("_male")){
+			gender =  "male";
+		}else{
+			System.out.println("Error: No Gender");
+			gender =  "no_gender";
+		}
+		return gender;
 	}
 	
 	@Override

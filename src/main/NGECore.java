@@ -23,20 +23,15 @@ package main;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -44,19 +39,13 @@ import java.util.concurrent.TimeUnit;
 import org.apache.mina.core.service.IoHandler;
 import org.apache.mina.core.session.IoSession;
 
-import com.sleepycat.je.Transaction;
-import com.sleepycat.persist.EntityCursor;
-
-import protocol.swg.chat.ChatSystemMessage;
 import net.engio.mbassy.bus.config.BusConfiguration;
 import resources.common.BountyListItem;
-import resources.common.RadialOptions;
 import resources.common.ThreadMonitor;
 import resources.datatables.GalaxyStatus;
 import resources.objects.creature.CreatureObject;
 import resources.objects.guild.GuildObject;
 import resources.objects.resource.GalacticResource;
-import resources.objects.resource.ResourceRoot;
 import services.AttributeService;
 import services.BuffService;
 import services.CharacterService;
@@ -65,6 +54,7 @@ import services.ConversationService;
 import services.EntertainmentService;
 import services.GroupService;
 import services.housing.HousingService;
+import services.AdminService;
 import services.BrowserService;
 import services.InstanceService;
 import services.LoginService;
@@ -91,6 +81,7 @@ import services.command.CommandService;
 import services.equipment.EquipmentService;
 import services.gcw.FactionService;
 import services.gcw.GCWService;
+import services.gcw.InvasionService;
 import services.GuildService;
 import services.LoginService;
 import services.map.MapService;
@@ -103,6 +94,7 @@ import services.pet.MountService;
 import services.pet.PetService;
 import services.playercities.PlayerCity;
 import services.playercities.PlayerCityService;
+import services.quest.QuestService;
 import services.resources.HarvesterService;
 import services.resources.ResourceService;
 import services.retro.RetroService;
@@ -137,22 +129,27 @@ import engine.resources.scene.Point3D;
 import engine.resources.scene.Quaternion;
 import engine.resources.service.InteractiveJythonAcceptor;
 import engine.resources.service.NetworkDispatch;
+import engine.resources.service.UncaughtExceptionLogger;
 import engine.servers.InteractiveJythonServer;
 import engine.servers.MINAServer;
 import engine.servers.PingServer;
 
-@SuppressWarnings("unused")
 
+@SuppressWarnings("unused")
 public class NGECore {
+	
+	private static boolean logUnhandledExceptions = true;
 	
 	public static boolean didServerCrash = false;
 	
 	private static NGECore instance;
 	
 	private Config config = null;
+	private Config options = null;
 	private String motd = "";
 	private volatile boolean isShuttingDown = false;
 	private long galacticTime = System.currentTimeMillis();
+	private int galaxyStatus = -1;
 	
 	private ConcurrentHashMap<IoSession, Client> clients = new ConcurrentHashMap<IoSession, Client>();
 	
@@ -195,6 +192,7 @@ public class NGECore {
 	public SpawnService spawnService;
 	public AIService aiService;
 	public MissionService missionService;
+	public QuestService questService;
 	public InstanceService instanceService;
 	public SurveyService surveyService;
 	public ResourceService resourceService;
@@ -209,6 +207,8 @@ public class NGECore {
 	public PetService petService;
 	public BrowserService browserService;
 	//public BattlefieldService battlefieldService;
+	public InvasionService invasionService;
+	public AdminService adminService;
 	
 	// Login Server
 	public NetworkDispatch loginDispatch;
@@ -239,12 +239,14 @@ public class NGECore {
 	public static boolean PACKET_DEBUG = false;
 	
 	public NGECore() {
-		
+
+		instance = this;
 	}
 	
 	public void start() {
 		
 		instance = this;
+		
 		final ThreadMonitor deadlockDetector = new ThreadMonitor();
 		Thread deadlockMonitor = new Thread(new Runnable() {
 			@Override
@@ -264,11 +266,14 @@ public class NGECore {
 			config = DefaultConfig.getConfig();
 		}
 		
-		Config options = new Config();
+		options = new Config();
 		options.setFilePath("options.cfg");
-		boolean optionsConfigLoaded = options.loadConfigFile();
-		
-		if (optionsConfigLoaded && options.getInt("CLEAN.ODB.FOLDERS") > 0 || getExcludedDevelopers().contains(System.getProperty("user.name"))){
+		if (!(options.loadConfigFile())) {
+			System.err.println("Failed to load options.cfg!");
+			options = DefaultConfig.getConfig();
+		}
+
+		if (options.getInt("CLEAN.ODB.FOLDERS") > 0){
 			File baseFolder = new File("./odb");
 			
 			if (baseFolder.isDirectory()) {
@@ -280,6 +285,8 @@ public class NGECore {
 					}
 				}
 			}
+			
+			
 			System.out.println("Cleaned ODB Folders.");
 		}
 		
@@ -302,6 +309,13 @@ public class NGECore {
 		}
 		
 		setGalaxyStatus(GalaxyStatus.Loading);
+		
+		if (options.getInt("CLEAN.CHARACTERS.TABLE") > 0) {
+			try { databaseConnection.preparedStatement("DELETE FROM characters").execute(); } 
+			catch (SQLException e) {e.printStackTrace(); }
+			System.out.println("Cleared characters table.");
+		}
+		
 		swgObjectODB = new ObjectDatabase("swgobjects", true, true, true, SWGObject.class);
 		mailODB = new ObjectDatabase("mails", true, true, true, Mail.class);
 		guildODB = new ObjectDatabase("guild", true, true, true, GuildObject.class);
@@ -349,7 +363,7 @@ public class NGECore {
 		reverseEngineeringService = new ReverseEngineeringService(this);
 		petService = new PetService(this);
 		
-		if (optionsConfigLoaded && options.getInt("LOAD.RESOURCE.SYSTEM") == 1) {
+		if (options.getInt("LOAD.RESOURCE.SYSTEM") == 1) {
 			surveyService = new SurveyService(this);
 			resourceService = new ResourceService(this);
 		}
@@ -368,6 +382,8 @@ public class NGECore {
 		spawnService = new SpawnService(this);
 		aiService = new AIService(this);
 		missionService = new MissionService(this);
+		questService = new QuestService(this);
+		invasionService = new InvasionService(this);
 		
 		// Ping Server
 		
@@ -414,6 +430,7 @@ public class NGECore {
 		zoneDispatch.addService(buffService);
 		zoneDispatch.addService(entertainmentService);
 		zoneDispatch.addService(missionService);
+		zoneDispatch.addService(questService);
 		zoneDispatch.addService(bazaarService);
 		zoneDispatch.addService(lootService);
 		zoneDispatch.addService(mountService);
@@ -422,8 +439,9 @@ public class NGECore {
 		zoneDispatch.addService(staticService);
 		zoneDispatch.addService(reverseEngineeringService);
 		zoneDispatch.addService(petService);
+		zoneDispatch.addService(invasionService);
 		
-		if (optionsConfigLoaded && options.getInt("LOAD.RESOURCE.SYSTEM") == 1) {
+		if (options.getInt("LOAD.RESOURCE.SYSTEM") == 1) {
 			zoneDispatch.addService(surveyService);
 			zoneDispatch.addService(resourceService);
 		}
@@ -453,14 +471,18 @@ public class NGECore {
 		terrainService.addPlanet(12, "kashyyyk_main", "terrain/kashyyyk_main.trn", true);
 		//Dungeon Terrains
 		// TODO: Fix BufferUnderFlow Errors on loaded of dungeon instances.
-		terrainService.addPlanet(13, "kashyyyk_dead_forest", "terrain/kashyyyk_dead_forest.trn", true);
-		terrainService.addPlanet(14, "kashyyyk_hunting", "terrain/kashyyyk_hunting.trn", true);
-		terrainService.addPlanet(15, "kashyyyk_north_dungeons", "terrain/kashyyyk_north_dungeons.trn", true);
-		terrainService.addPlanet(16, "kashyyyk_rryatt_trail", "terrain/kashyyyk_rryatt_trail.trn", true);
-		terrainService.addPlanet(17, "kashyyyk_south_dungeons", "terrain/kashyyyk_south_dungeons.trn", true);
-		terrainService.addPlanet(18, "adventure1", "terrain/adventure1.trn", true);
-		terrainService.addPlanet(19, "adventure2", "terrain/adventure2.trn", true);
+		terrainService.addPlanet(13, "kashyyyk_dead_forest", "terrain/kashyyyk_dead_forest.trn", false);
+		terrainService.addPlanet(14, "kashyyyk_hunting", "terrain/kashyyyk_hunting.trn", false);
+		terrainService.addPlanet(15, "kashyyyk_north_dungeons", "terrain/kashyyyk_north_dungeons.trn", false);
+		terrainService.addPlanet(16, "kashyyyk_rryatt_trail", "terrain/kashyyyk_rryatt_trail.trn", false);
+		terrainService.addPlanet(17, "kashyyyk_south_dungeons", "terrain/kashyyyk_south_dungeons.trn", false);
+		terrainService.addPlanet(18, "adventure1", "terrain/adventure1.trn", false);
+		terrainService.addPlanet(19, "adventure2", "terrain/adventure2.trn", false);
+		// Tutorial Terrains
 		terrainService.addPlanet(20, "dungeon1", "terrain/dungeon1.trn", true);
+		terrainService.addPlanet(21, "tutorial", "terrain/tutorial.trn", false); // 21B droid scene
+		//terrainService.addPlanet(22, "space_npe_falcon_3", "terrain/space_npe_falcon_3.trn", false);
+		
 		//Space Zones
 		// NOTE: Commented out for now until space is implemented. No need to be loaded into memory when space is not implemented.
 		/*terrainService.addPlanet(21, "space_corellia", "terrain/space_corellia.trn", true);
@@ -477,8 +499,8 @@ public class NGECore {
 		terrainService.addPlanet(32, "space_naboo", "terrain/space_naboo.trn", true);
 		terrainService.addPlanet(33, "space_naboo_2", "terrain/space_naboo_2.trn", true);
 		terrainService.addPlanet(34, "space_nova_orion", "terrain/space_nova_orion.trn", true); 
-		terrainService.addPlanet(35, "space_npe_falcon", "terrain/space_npe_falcon.trn", true); // TODO: New Player Tutorial
-		terrainService.addPlanet(36, "space_npe_falcon_2", "terrain/space_npe_falcon_2.trn", true); // TODO: New Player Tutorial
+		terrainService.addPlanet(35, "space_npe_falcon", "terrain/space_npe_falcon.trn", true); // Only space_npe_falce_3 is used
+		terrainService.addPlanet(36, "space_npe_falcon_2", "terrain/space_npe_falcon_2.trn", true); // Only space_npe_falce_3 is used
 		terrainService.addPlanet(37, "space_ord_mantell", "terrain/space_ord_mantell.trn", true);
 		terrainService.addPlanet(38, "space_ord_mantell_2", "terrain/space_ord_mantell_2.trn", true);
 		terrainService.addPlanet(39, "space_ord_mantell_3", "terrain/space_ord_mantell_3.trn", true);
@@ -488,13 +510,10 @@ public class NGECore {
 		terrainService.addPlanet(43, "space_tatooine", "terrain/space_tatooine.trn", true);
 		terrainService.addPlanet(44, "space_tatooine_2", "terrain/space_tatooine_2.trn", true);
 		terrainService.addPlanet(45, "space_yavin4", "terrain/space_yavin4.trn", true);*/
-		//PSWG New Content Terrains  (WARNING Keep commented out unless you have the current build of kaas!)
-
-		//terrainService.addPlanet(46, "kaas", "terrain/kaas.trn", true);
-
+		
 		//end terrainList
 		
-		if (optionsConfigLoaded && options.getInt("LOAD.RESOURCE.SYSTEM") > 0) {
+		if (options.getInt("LOAD.RESOURCE.SYSTEM") > 0) {
 			resourceService.loadResources();
 		}
 		
@@ -509,7 +528,7 @@ public class NGECore {
 		
 		terrainService.loadSnapShotObjects();
 		objectService.loadServerTemplates();		
-		objectService.loadBuildings();
+		objectService.loadObjects();
 		harvesterService.loadHarvesters();
 
 		simulationService.insertSnapShotObjects();
@@ -552,6 +571,7 @@ public class NGECore {
 		
 		browserService = new BrowserService(this);
 		//battlefieldService = new BattlefieldService(this);
+		adminService = new AdminService(this);
 		
 		DevLogQueuer devLogQueuer = new DevLogQueuer();
 		
@@ -617,7 +637,9 @@ public class NGECore {
 	}
 	
 	public static void main(String[] args) {
-		
+		//With this class, we are overwriting the JVM's way of handling exceptions that are never caught. Very handy so no try/catch spam for every method.
+		if (logUnhandledExceptions) Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionLogger("./logs/uncaught"));
+
 		NGECore core = new NGECore();
 		
 		core.start();
@@ -637,6 +659,7 @@ public class NGECore {
 	
 	public void setGalaxyStatus(int statusId) {
 		
+		galaxyStatus = statusId;
 		int galaxyId = config.getInt("GALAXY_ID");
 		
 		try {
@@ -648,6 +671,10 @@ public class NGECore {
 			e.printStackTrace();
 		}
 		
+	}
+	
+	public int getGalaxyStatus() {
+		return galaxyStatus;
 	}
 	
 	/*
@@ -822,7 +849,7 @@ public class NGECore {
 	public long getGalacticTime() {
 		return System.currentTimeMillis() - galacticTime;
 	}
-
+	
 	public void closeODBs() {
 		swgObjectODB.close();
 		mailODB.close();
@@ -845,10 +872,14 @@ public class NGECore {
 	
 	public Vector<String> getExcludedDevelopers(){
 		Vector<String> excludedDevelopers = new Vector<String>();
-		excludedDevelopers.add("Charon");
+		//excludedDevelopers.add("Charon");
 		// Feel free to add your OS user account name here to exclude yourself from loading buildouts and snapshots
 		// without having to change options.cfg all the time
 		return excludedDevelopers;
+	}
+	
+	public Config getOptions() {
+		return options;
 	}
 }
 

@@ -30,7 +30,7 @@ def getRewards(name):
 		return "object/tangible/wearables/backpack/shared_backpack_s01.iff"
 
 	if name == 'armor_entertainer_roadmap_cloak_02_01':
-		return "object/tangible/wearables/robe/shared_robe_s01.iff"
+		return "object/tangible/wearables/robe/shared_robe_s05.iff"
 
 	if name == 'armor_entertainer_roadmap_boots_02_01':
 		return "object/tangible/wearables/boots/shared_boots_s03.iff"
@@ -41,7 +41,7 @@ def getRewards(name):
 	if name == 'armor_entertainer_roadmap_pants_02_01':
 		return "object/tangible/wearables/pants/shared_pants_s01.iff"	
 
-	if name == 'weapon_vibro_en_roadmap_01_02':
+	if name == 'weapon_knuckler_ent_roadmap_02_02':
 		return "object/weapon/melee/special/shared_vibroknuckler.iff"		
 
 	if name == 'weapon_pistol_en_roadmap_01_02':

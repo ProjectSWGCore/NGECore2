@@ -86,6 +86,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private transient ConcurrentHashMap<String, Long> cooldowns = new ConcurrentHashMap<String, Long>();
 	private transient long tefTime = 0;
 	private transient SWGObject useTarget;
+	private transient boolean isConstructing = false;
 	
 	public CreatureObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
 		super(objectID, planet, position, orientation, Template);
@@ -123,6 +124,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		baseline.put("performanceType", "");
 		baseline.put("coverCharge", 0);
 		baseline.put("dotList", new ArrayList<DamageOverTime>());
+		baseline.put("fatigue", 0);
 		return baseline;
 	}
 	
@@ -962,7 +964,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	public Buff getBuffByName(String buffName) {
 		for (Entry<Integer, Buff> entry : getBuffList().entrySet()) {
-			if (entry.getKey().equals(CRC.StringtoCRC(buffName))) {
+			if (entry.getKey().equals(CRC.StringtoCRC(buffName.toLowerCase()))) {
 				return entry.getValue();
 			}
 		}
@@ -976,7 +978,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			buff.setTotalPlayTime((int) (player.getTotalPlayTime() + (System.currentTimeMillis() - player.getLastPlayTimeUpdate()) / 1000));
 		}
 		
-		getBuffList().put(CRC.StringtoCRC(buff.getBuffName()), buff);
+		getBuffList().put(CRC.StringtoCRC(buff.getBuffName().toLowerCase()), buff);
 		
 		synchronized(objectMutex) {
 			buff.setStartTime();
@@ -984,12 +986,12 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void removeBuff(Buff buff) {
-		getBuffList().remove(CRC.StringtoCRC(buff.getBuffName()));
+		getBuffList().remove(CRC.StringtoCRC(buff.getBuffName().toLowerCase()));
 	}
 	
 	public void updateBuff(Buff buff) {
 		buff.updateRemovalTask();
-		getBuffList().put(CRC.StringtoCRC(buff.getBuffName()), buff);
+		getBuffList().put(CRC.StringtoCRC(buff.getBuffName().toLowerCase()), buff);
 	}	
 	
 	public void updateAllBuffs() {
@@ -1333,7 +1335,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	public boolean removeCooldown(int actionCounter, BaseSWGCommand command) {
 		if (cooldowns.containsKey(command.getCooldownGroup())) {
 			cooldowns.remove(command.getCooldownGroup());
-			getClient().getSession().write(new ObjControllerMessage(0x0B, new StartTask(actionCounter, getObjectID(), command.getCommandCRC(), CRC.StringtoCRC(command.getCooldownGroup()), -1)).serialize());
+			getClient().getSession().write(new ObjControllerMessage(0x0B, new StartTask(actionCounter, getObjectID(), command.getCommandCRC(), CRC.StringtoCRC(command.getCooldownGroup().toLowerCase()), -1)).serialize());
 			return true;
 		}
 		
@@ -1350,6 +1352,26 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 		
 		return 0L;
+	}
+	
+	public int getGCWFatigue() {
+		return (int) otherVariables.get("fatigue");
+	}
+	
+	public void setGCWFatigue(int fatigue) {
+		otherVariables.set("fatigue", fatigue);
+	}
+	
+	public boolean isTrader(){
+		return ((!isPlayer()) ? false : getPlayerObject().getProfession().startsWith("trader"));
+	}
+	
+	public boolean isConstructing() {
+		return isConstructing;
+	}
+	
+	public void setConstructing(boolean isConstructing) {
+		this.isConstructing = isConstructing;
 	}
 	
 	public int getInventoryItemCount() {
@@ -1432,6 +1454,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 	}
 	
+	// PetId can be got from PlayerObject.  Also is a duplicate of getCompanion().
 	@Deprecated public CreatureObject getCalledPet() { return ((getPlayerObject() == null) ? null : (CreatureObject) NGECore.getInstance().objectService.getObject(getPlayerObject().getPet())); }
 	
 	@Deprecated public void setCalledPet(CreatureObject calledPet) { }

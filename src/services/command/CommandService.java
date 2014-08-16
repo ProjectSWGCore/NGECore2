@@ -21,9 +21,14 @@
  ******************************************************************************/
 package services.command;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteOrder;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -31,6 +36,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import main.NGECore;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 
@@ -50,6 +56,7 @@ import protocol.swg.objectControllerObjects.CommandEnqueueRemove;
 import protocol.swg.objectControllerObjects.StartTask;
 import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
+import resources.objects.installation.InstallationObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.weapon.WeaponObject;
 
@@ -70,35 +77,32 @@ public class CommandService implements INetworkDispatch  {
 	
 	public boolean callCommand(CreatureObject actor, SWGObject target, BaseSWGCommand command, int actionCounter, String commandArgs) {
 
-		if (actor == null) {
+		if (actor == null)
 			return false;
-		}
 		
-		if (command == null) {
+		if (actor.getClient() == null)
 			return false;
-		}
 		
-		if (command.getCharacterAbility().length() > 0 && !actor.hasAbility(command.getCharacterAbility()) && actor.getClient() != null) {
+		if (command == null)
 			return false;
-		}
 		
-		if (command.isDisabled()) {
+		if (command.getCharacterAbility().length() > 0 && !actor.hasAbility(command.getCharacterAbility()))
 			return false;
-		}
 		
-		if (actor.getClient() != null && command.getGodLevel() > actor.getPlayerObject().getGodLevel()) {
+		if (command.isDisabled())
 			return false;
-		}
 		
-		if (actor.hasCooldown(command.getCooldownGroup()) || actor.hasCooldown(command.getCommandName())) {
+		if (actor.hasCooldown(command.getCooldownGroup()) || actor.hasCooldown(command.getCommandName()))
 			return false;
-		}
 		
-		TangibleObject weapon = (TangibleObject) core.objectService.getObject(actor.getWeaponId());
+		// Causes this service method to return with false after equipping a rifle, not allowing to unequip it anymore
+		// because the client seems to consider rifles invalidweapons for an unkown reason
 		
-		if (weapon != null && weapon instanceof WeaponObject && ((WeaponObject) weapon).getWeaponType() == command.getInvalidWeapon()) {
-			return false;
-		}
+//		TangibleObject weapon = (TangibleObject) core.objectService.getObject(actor.getWeaponId());
+//		
+//		if (weapon != null && weapon instanceof WeaponObject && ((WeaponObject) weapon).getWeaponType() == command.getInvalidWeapon()) {
+//			return false;
+//		}
 		
 		for (long state : command.getInvalidStates()) {
 			if ((actor.getStateBitmask() & state) == state) {
@@ -149,6 +153,7 @@ public class CommandService implements INetworkDispatch  {
 				
 				if (!core.simulationService.checkLineOfSight(actor, target)) {
 					actor.showFlyText("@combat_effects:cant_see", 1.5f, new RGB(72, 209, 204), 1, true);
+					// If this is AI consider side steps to get LOS
 					return false;
 				}
 				
@@ -328,8 +333,255 @@ public class CommandService implements INetworkDispatch  {
 		return true;
 	}
 	
+	public boolean callCommandForInstallation(InstallationObject actor, SWGObject target, BaseSWGCommand command, int actionCounter, String commandArgs) {
+
+		if (actor == null) {
+			return false;
+		}
+		
+		if (command == null) {
+			return false;
+		}
+		
+		if (command.isDisabled()) {
+			return false;
+		}
+		
+//		if (actor.hasCooldown(command.getCooldownGroup()) || actor.hasCooldown(command.getCommandName())) {
+//			return false;
+//		}
+		
+		//TangibleObject weapon = (TangibleObject) core.objectService.getObject(actor.getWeaponId());
+		TangibleObject weapon = (TangibleObject) core.objectService.getObject((long)actor.getAttachment("TurretWeapon"));
+		
+		if (weapon != null && weapon instanceof WeaponObject && ((WeaponObject) weapon).getWeaponType() == command.getInvalidWeapon()) {
+			System.out.println("Invalid WEAPON!");
+			return false;
+		}
+		
+		
+		
+		switch (command.getTargetType()) {
+			case 0: // Target Not Used For This Command
+				break;
+			case 1: // Other Only (objectId/targetName)
+				if (target == null || target == actor) {
+					if (commandArgs != null && !commandArgs.equals("")) {
+						String name = commandArgs.split(" ")[0];
+
+						target = core.objectService.getObjectByFirstName(name);
+						
+						if (target == actor) {
+							target = null;
+						}
+					}
+					
+					break;
+				}
+
+				if (target == actor) {
+					return false;
+				}
+				
+				if (target.getContainer() == actor || target.getGrandparent() == actor) {
+					break;
+				}
+				
+				if (command.getMaxRangeToTarget() != 0 && actor.getPosition().getDistance(target.getPosition()) > command.getMaxRangeToTarget()) {
+					return false;
+				}
+				
+
+				if (!target.isInQuadtree() && (target.getContainer() == null || !(target.getContainer() instanceof CellObject))) {
+					break;
+				}
+				
+				if (!core.simulationService.checkLineOfSight(actor, target)) {
+					actor.showFlyText("@combat_effects:cant_see", 1.5f, new RGB(72, 209, 204), 1, true);
+					// If this is AI consider side steps to get LOS
+					return false;
+				}
+				
+				break;
+			case 2: // Anyone (objectId/targetName)
+				if (target == null) {
+					if (commandArgs != null && !commandArgs.equals("")) {
+						String name = commandArgs.split(" ")[0];
+						
+						target = core.objectService.getObjectByFirstName(name);
+						
+						if (target == actor) {
+							target = null;
+						}
+						
+						// It's possible they use c cmdString to indicate if it should always be on self
+						if (name.contains("c")) {
+							//target = actor;
+						}
+					}
+					
+					break;
+				}
+				
+				if (target.getContainer() == actor || target.getGrandparent() == actor) {
+					break;
+				}
+				
+				if (command.getMaxRangeToTarget() != 0 && actor.getPosition().getDistance(target.getPosition()) > command.getMaxRangeToTarget()) {
+					return false;
+				}
+				
+				if (!target.isInQuadtree() && (target.getContainer() == null || !(target.getContainer() instanceof CellObject))) {
+					break;
+				}
+				
+				if (!core.simulationService.checkLineOfSight(actor, target)) {
+					actor.showFlyText("@combat_effects:cant_see", 1.5f, new RGB(72, 209, 204), 1, true);
+					return false;
+				}
+				
+				break;
+			case 3: // Free Target Mode (rally points, group waypoints)
+				target = null;
+				
+				if (commandArgs == null) {
+					break;
+				}
+				
+				String[] args = commandArgs.split(" ");
+				
+				float x = 0, y = 0, z = 0;
+				
+				try {
+					if (args.length == 2) {
+						x = Integer.valueOf(args[0]);
+						z = Integer.valueOf(args[1]);
+					} else if (args.length > 2) {
+						x = Integer.valueOf(args[0]);
+						y = Integer.valueOf(args[1]);
+						z = Integer.valueOf(args[2]);
+					} else {
+						return false;
+					}
+				} catch (NumberFormatException e) {
+					return false;
+				}
+				
+				Point3D position = new Point3D(x, y, z);
+				
+				if (command.getMaxRangeToTarget() != 0 && actor.getPosition().getDistance(position) > command.getMaxRangeToTarget()) {
+					return false;
+				}
+				
+				break;
+			case 4: // Any object
+				if (target == null) {
+					break;
+				}
+				
+				if (command.getMaxRangeToTarget() != 0 && actor.getPosition().getDistance(target.getPosition()) > command.getMaxRangeToTarget()) {
+					return false;
+				}
+				
+				if (!target.isInQuadtree() && (target.getContainer() == null || !(target.getContainer() instanceof CellObject))) {
+					break;
+				}
+				
+				if (!core.simulationService.checkLineOfSight(actor, target)) {
+					actor.showFlyText("@combat_effects:cant_see", 1.5f, new RGB(72, 209, 204), 1, true);
+					return false;
+				}
+				
+				break;
+			default:
+				break;
+		}
+		switch (command.getTarget()) {
+			case 0: // Ally Only
+				if (target == null) {
+					target = actor;
+				}
+				
+				if (!(target instanceof TangibleObject)) {
+					return false;
+				}
+				
+				TangibleObject object = (TangibleObject) target;
+				
+				if (!object.getFaction().equals("") && !object.getFaction().equals(actor.getFaction())) {
+					return false;
+				}
+				
+				if (actor.getFactionStatus() < object.getFactionStatus()) {
+					return false;
+				}
+				
+//				if (object.isAttackableBy(actor)) {
+//					return false;
+//				}
+				
+				// Without this we could be buffing ally NPCs and such
+				// Think this is checked later on
+				if (actor.getSlottedObject("ghost") != null && object.getSlottedObject("ghost") == null) {
+					return false;
+				}
+				
+				break;
+			case 1: // Enemy Only
+				if (target == null || !(target instanceof TangibleObject)) {
+					return false;
+				}
+				
+				TangibleObject targetObject = (TangibleObject) target;
+				
+//				if (!targetObject.isAttackableBy(actor)) {
+//					return false;
+//				}
+				
+				break;
+			case 2: // Indifferent
+				break;
+			default:
+				break;
+		}
+		
+//		if (command.shouldCallOnTarget()) {
+//			if (target == null || !(target instanceof CreatureObject)) {
+//				return false;
+//			}
+//			
+//			actor = (CreatureObject) target;
+//		}
+		
+		long warmupTime = (long) (command.getWarmupTime() * 1000f);
+		
+		if(warmupTime > 0) {
+			try {
+				Thread.sleep(warmupTime);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		if(command instanceof CombatCommand) {
+			try {
+				processCommandForInstallation(actor, target, (BaseSWGCommand) command.clone(), actionCounter, commandArgs);
+			} catch (CloneNotSupportedException e) {
+				e.printStackTrace();
+			}
+		}
+		else
+			processCommandForInstallation(actor, target, command, actionCounter, commandArgs);
+			
+		
+		return true;
+	}
+	
 	public void callCommand(SWGObject actor, String commandName, SWGObject target, String commandArgs) {
-		callCommand((CreatureObject) actor, target, getCommandByName(commandName), 0, commandArgs);	
+		if (actor instanceof CreatureObject)
+			callCommand((CreatureObject) actor, target, getCommandByName(commandName), 0, commandArgs);	
+		if (actor instanceof InstallationObject)
+			callCommandForInstallation((InstallationObject) actor, target, getCommandByName(commandName), 0, commandArgs);	
 	}
 	
 	public BaseSWGCommand getCommandByCRC(int commandCRC) {
@@ -435,12 +687,62 @@ public class CommandService implements INetworkDispatch  {
 	}
 	
 	public void processCommand(CreatureObject actor, SWGObject target, BaseSWGCommand command, int actionCounter, String commandArgs) {
+		
+		if (command.getGodLevel() > 0 || command.getCommandName().equals("setgodmode") || command.getCommandName().equals("server") || command.getCommandName().equals("teleport") 
+				|| command.getCommandName().equals("teleportto") || command.getCommandName().equals("teleporttarget") ) {
+			String accessLevel = core.adminService.getAccessLevelFromDB(actor.getClient().getAccountId());
+			String filePath = "accesslevels/" + accessLevel + ".txt";
+
+			if(FileUtilities.doesFileExist(filePath)) {
+				Scanner scanner;
+				try {
+					scanner = new Scanner(new File(filePath));
+					boolean levelHasCommand = false;
+					
+					while(scanner.hasNextLine()) {
+						String commandName = scanner.nextLine();
+						if(command.getCommandName().equalsIgnoreCase(commandName)) {
+							levelHasCommand = true;
+					    	break;
+						}
+					 }
+					
+					if (!levelHasCommand) {
+						actor.sendSystemMessage(" \\#FE2EF7 [GM] \\#FFFFFF " + command.getCommandName() + ": You do not have permission to use this command.", (byte) 0);
+						return;
+					}
+					
+				} catch (FileNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			} else
+				return;
+		}
+		
 		if (command.getCooldown() > 0f) {
 			actor.addCooldown(command.getCooldownGroup(), command.getCooldown());
 		}
 		
 		if (command instanceof CombatCommand) {
 			processCombatCommand(actor, target, (CombatCommand) command, actionCounter, commandArgs);
+		} else
+			if (FileUtilities.doesFileExist("scripts/commands/" + command.getCommandName().toLowerCase() + ".py")) {
+				core.scriptService.callScript("scripts/commands/", command.getCommandName().toLowerCase(), "run", core, actor, target, commandArgs);
+			} else if (FileUtilities.doesFileExist("scripts/commands/combat/" + command.getCommandName().toLowerCase() + ".py")) {
+				core.scriptService.callScript("scripts/commands/combat/", command.getCommandName().toLowerCase(), "run", core, actor, target, commandArgs);
+			}
+		
+		
+	}
+	
+	public void processCommandForInstallation(InstallationObject actor, SWGObject target, BaseSWGCommand command, int actionCounter, String commandArgs) {
+//		if (command.getCooldown() > 0f) {
+//			actor.addCooldown(command.getCooldownGroup(), command.getCooldown());
+//		}
+		
+		if (command instanceof CombatCommand) {
+			processCombatCommandForInstallation(actor, target, (CombatCommand) command, actionCounter, commandArgs);
 		} else {
 			if (FileUtilities.doesFileExist("scripts/commands/" + command.getCommandName().toLowerCase() + ".py")) {
 				core.scriptService.callScript("scripts/commands/", command.getCommandName().toLowerCase(), "run", core, actor, target, commandArgs);
@@ -451,12 +753,15 @@ public class CommandService implements INetworkDispatch  {
 	}
 	
 	public void processCombatCommand(CreatureObject attacker, SWGObject target, CombatCommand command, int actionCounter, String commandArgs) {
-		if (FileUtilities.doesFileExist("scripts/commands/combat/" + command.getCommandName().toLowerCase() + ".py")) {
+		if (FileUtilities.doesFileExist("scripts/commands/combat/specialline/" + command.getSpecialLine().toLowerCase() + ".py"))
+			core.scriptService.callScript("scripts/commands/combat/specialline/", command.getSpecialLine().toLowerCase(), "setup", core, attacker, target, command);
+		
+		if (FileUtilities.doesFileExist("scripts/commands/combat/" + command.getCommandName().toLowerCase() + ".py"))
 			core.scriptService.callScript("scripts/commands/combat/", command.getCommandName().toLowerCase(), "setup", core, attacker, target, command);
-		} else {
+		else {
 			if (FileUtilities.doesFileExist("scripts/commands/" + command.getCommandName().toLowerCase() + ".py")) {
 				System.err.print("Command " + command.getCommandName() + " is considered a combat command by the client but has a regular command script!");
-				core.scriptService.callScript("scripts/commands/combat/", command.getCommandName().toLowerCase(), "run", core, attacker, target, "");
+				core.scriptService.callScript("scripts/commands/", command.getCommandName().toLowerCase(), "run", core, attacker, target, "");
 			}
 		}
 		
@@ -548,6 +853,100 @@ public class CommandService implements INetworkDispatch  {
 			}
 			for(int i = 0 ; i < command.getAttack_rolls(); i++) {
 				core.combatService.doCombat(attacker, (TangibleObject) target, weapon, command, actionCounter);
+			}
+			
+		}
+		
+	}
+	
+	public void processCombatCommandForInstallation(InstallationObject attacker, SWGObject target, CombatCommand command, int actionCounter, String commandArgs) {
+		if (FileUtilities.doesFileExist("scripts/commands/combat/" + command.getCommandName() + ".py")) {
+			core.scriptService.callScript("scripts/commands/combat/", command.getCommandName(), "setup", core, attacker, target, command);
+		}
+		
+		boolean success = true;
+		
+		//if((command.getHitType() == 5 || command.getHitType() == 7) && !(target instanceof CreatureObject))
+		//	success = false;
+		
+		if(!(command.getAttackType() == 2) && !(command.getHitType() == 5) && !(command.getHitType() == 0)) {
+			if(target == null || !(target instanceof TangibleObject) || target == attacker)
+				success = false;
+		} else {
+			if(target == null)
+				target = attacker;
+			else if(!(target instanceof TangibleObject))
+				return;
+		}
+		
+		if(target instanceof CreatureObject) {
+			if(!(command.getHitType() == 5))
+				if(((CreatureObject) target).getPosture() == 13)
+					success = false;
+			if(!(command.getHitType() == 7))
+				if(((CreatureObject) target).getPosture() == 14)
+					success = false;
+		}
+		
+		if(command.getHitType() == 7 && target.getClient() == null)
+			success = false;
+		
+		WeaponObject weapon;
+		
+
+		weapon = (WeaponObject) core.objectService.getObject((long)attacker.getAttachment("TurretWeapon"));
+		
+		if(weapon == null)
+			return;
+		
+		float maxRange = 0;
+		
+		if(command.getMaxRange() == 0)
+			maxRange = weapon.getMaxRange();
+		else
+			maxRange = command.getMaxRange();
+				
+		Point3D attackerPos = attacker.getWorldPosition();
+		Point3D defenderPos = attacker.getWorldPosition();
+		
+		if(attackerPos.getDistance(defenderPos) > maxRange && maxRange != 0)
+			success = false;
+		
+		if(command.getMinRange() > 0) {
+			if(attackerPos.getDistance(defenderPos) < command.getMinRange())
+				success = false;
+		}
+		
+		
+		if(target != attacker && success && !core.simulationService.checkLineOfSight(attacker, target)) {
+			attacker.showFlyText("@combat_effects:cant_see", 1.5f, new RGB(72, 209, 204), 1, true);
+			success = false;
+		}
+		
+		if(!success && attacker.getClient() != null) {
+			IoSession session = attacker.getClient().getSession();
+			CommandEnqueueRemove commandRemove = new CommandEnqueueRemove(attacker.getObjectId(), actionCounter);
+			session.write(new ObjControllerMessage(0x0B, commandRemove).serialize());
+			StartTask startTask = new StartTask(actionCounter, attacker.getObjectID(), command.getCommandCRC(), CRC.StringtoCRC(command.getCooldownGroup()), -1);
+			session.write(new ObjControllerMessage(0x0B, startTask).serialize());
+		} else {
+			
+//			if(command.getHitType() == 5) {
+//				core.combatService.doHeal(attacker, (CreatureObject) target, weapon, command, actionCounter);
+//				return;
+//			}
+//			
+//			if(command.getHitType() == 7) {
+//				core.combatService.doRevive(attacker, (CreatureObject) target, weapon, command, actionCounter);
+//				return;
+//			}
+//			
+//			if(command.getHitType() == 0 && command.getBuffNameSelf() != null && command.getBuffNameSelf().length() > 0) {
+//				core.combatService.doSelfBuff(attacker, weapon, command, actionCounter);
+//				return;
+//			}
+			for(int i = 0 ; i < command.getAttack_rolls(); i++) {
+				core.combatService.doCombatForInstallation(attacker, (TangibleObject) target, weapon, command, actionCounter);
 			}
 			
 		}
