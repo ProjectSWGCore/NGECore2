@@ -1,4 +1,5 @@
 import sys
+from resources.datatables import WeaponType
 
 def setup(core, object):
 	object.setStfFilename('static_item_n')
@@ -9,10 +10,10 @@ def setup(core, object):
 	object.setIntAttribute('no_trade', 1)
 	object.setIntAttribute('cat_stat_mod_bonus.@stat_n:constitution_modified', 10)
 	object.setIntAttribute('cat_stat_mod_bonus.@stat_n:precision_modified', 10)
-	object.setStringAttribute('healing_combat_level_required', '75')
+	object.setStringAttribute('required_combat_level', '75')
 	object.setStringAttribute('required_skill', 'None')
 	object.setDamageType("energy");
-	object.setWeaponType(12);
+	object.setWeaponType(WeaponType.HEAVYWEAPON);
 	object.setAttackSpeed(1);
 	object.setMinDamage(850);
 	object.setMaxDamage(1350);

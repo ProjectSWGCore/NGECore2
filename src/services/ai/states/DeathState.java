@@ -33,16 +33,20 @@ public class DeathState extends AIState {
 	public byte onEnter(AIActor actor) {
 		NGECore.getInstance().aiService.awardExperience(actor);
 		NGECore.getInstance().aiService.awardGcw(actor);
+		actor.setActorAlive(false);
 		actor.getCreature().setAttachment("radial_filename", "npc/corpse");
 		//NGECore.getInstance().scriptService.callScript("scripts/radial/npc/corpse", "", "createRadial", NGECore.getInstance(), actor.getCreature().getKiller(), actor.getCreature(), new Vector<RadialOptions>());		
 		actor.scheduleDespawn();
-		CreatureObject killer = (CreatureObject)actor.getCreature().getKiller();
-		if (killer==null)
-			killer = actor.getHighestDamageDealer();
-		actor.getCreature().setContainerPermissions(CreatureContainerPermissions.CREATURE_CONTAINER_PERMISSIONS);
-		NGECore.getInstance().lootService.DropLoot(killer,(TangibleObject)(actor.getCreature()));
 		
-		actor.destroyActor(); // to prevent standing up right after death
+		if (actor.getCreature().getKiller() instanceof CreatureObject){
+			CreatureObject killer = (CreatureObject)actor.getCreature().getKiller();
+			if (killer==null)
+				killer = actor.getHighestDamageDealer();
+			actor.getCreature().setContainerPermissions(CreatureContainerPermissions.CREATURE_CONTAINER_PERMISSIONS);
+			if (killer.isPlayer()) // No point to do this for NPCs
+				NGECore.getInstance().lootService.DropLoot(killer,(TangibleObject)(actor.getCreature()));
+		}	
+		//actor.destroyActor(); // to prevent standing up right after death
 		
 		return 0;
 	}

@@ -54,6 +54,7 @@ import resources.common.OutOfBand;
 import resources.objects.ObjectMessageBuilder;
 import resources.objects.SWGList;
 import resources.objects.SWGMap;
+import resources.objects.SWGSet;
 import engine.resources.common.CRC;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
@@ -72,7 +73,7 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	// CREO 1
 	private int bankCredits = 0;
 	private int cashCredits = 0;
-	private List<String> skills;
+	private SWGSet<String> skills;
 	@NotPersistent
 	private transient int skillsUpdateCounter = 0;
 	
@@ -187,12 +188,14 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	private transient CreatureObject calledPet;
 	
 	private byte locomotion = 0;
+	private int GCWFatigue = 0;
+	private boolean isConstructing = false;
 	
 	public CreatureObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
 		super(objectID, planet, position, orientation, Template);
 		messageBuilder = new CreatureMessageBuilder(this);
 		loadTemplateData();
-		skills = new ArrayList<String>();
+		skills = new SWGSet<String>(this, 1, 4, false);
 		skillMods = new SWGMap<String, SkillMod>(this, 4, 3, true);
 		abilities = new SWGMap<String, Integer>(this, 4, 14, true);
 		missionCriticalObjects = new SWGMap<Long, Long>(this, 4, 13, false);
@@ -204,6 +207,9 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	public CreatureObject() {
 		super();
 		messageBuilder = new CreatureMessageBuilder(this);
+		System.out.println("Name: " + getCustomName());
+		System.out.println("  Cash Credits: " + cashCredits);
+		System.out.println("  Bank Credits: " + bankCredits);
 	}
 	
 	@Override
@@ -221,6 +227,7 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		missionCriticalObjects.init(this);
 		abilities.init(this);
 		skillMods.init(this);
+		skills.init(this);
 	}
 
 	private void loadTemplateData() {
@@ -299,7 +306,7 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		}
 	}
 
-	public List<String> getSkills() {
+	public SWGSet<String> getSkills() {
 		return skills;
 	}
 	
@@ -540,6 +547,9 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		if (companion != null) {
 			companion.setFaction(faction);
 		}
+		
+		if (this.getCalledPet()!=null)
+			this.getCalledPet().setFaction(faction);
 	}
 	
 	public void setFactionStatus(int factionStatus) {
@@ -550,6 +560,8 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		if (companion != null) {
 			companion.setFactionStatus(factionStatus);
 		}
+		if (this.getCalledPet()!=null)
+			this.getCalledPet().setFactionStatus(factionStatus);
 	}
 	
 	public float getHeight() {
@@ -900,7 +912,7 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		}
 		
 		IoBuffer weaponIdDelta = messageBuilder.buildWeaponIdDelta(weaponId);
-		
+		tools.CharonPacketUtils.printAnalysis(weaponIdDelta, "buildWeaponIdDelta");
 		notifyObservers(weaponIdDelta, true);
 
 	}
@@ -1143,7 +1155,7 @@ public class CreatureObject extends TangibleObject implements Serializable {
 		}
 		//destination.getSession().write(messageBuilder.buildBaseline8());
 		//destination.getSession().write(messageBuilder.buildBaseline9());
-		 		
+			
 		if(destination != getClient()) {
 			UpdatePVPStatusMessage upvpm = new UpdatePVPStatusMessage(getObjectID(), NGECore.getInstance().factionService.calculatePvpStatus((CreatureObject) destination.getParent(), this), getFaction());
 			destination.getSession().write(upvpm.serialize());
@@ -1484,6 +1496,10 @@ public class CreatureObject extends TangibleObject implements Serializable {
 	}
 	
 	public void playMusic(String sndFile, long targetId, int repetitions, boolean flag) {
+		getClient().getSession().write(new PlayMusicMessage(sndFile, targetId, 1, false).serialize());
+	}
+	
+	public void playMusicSelf(String sndFile, long targetId, int repetitions, boolean flag) {
 		getClient().getSession().write(new PlayMusicMessage(sndFile, targetId, 1, false).serialize());
 	}
 	
@@ -1877,5 +1893,35 @@ public class CreatureObject extends TangibleObject implements Serializable {
 
 	public void setCalledPet(CreatureObject calledPet) {
 		this.calledPet = calledPet;
+	}
+
+	public int getGCWFatigue() {
+		return GCWFatigue;
+	}
+
+	public void setGCWFatigue(int gCWFatigue) {
+		GCWFatigue = gCWFatigue;
+	}
+	
+	public boolean isTrader(){
+		if (isPlayer()){
+			PlayerObject player = (PlayerObject) this.getSlottedObject("ghost");	
+			String profession = player.getProfession();
+			if (profession.equals("trader_0a") ||
+				profession.equals("trader_0b") ||
+				profession.equals("trader_0c") ||
+				profession.equals("trader_0d")){
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public boolean isConstructing() {
+		return isConstructing;
+	}
+
+	public void setConstructing(boolean isConstructing) {
+		this.isConstructing = isConstructing;
 	}
 }

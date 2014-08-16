@@ -32,12 +32,12 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-
 import resources.common.collidables.CollidableBox;
 import resources.common.collidables.CollidableCircle;
 import resources.datatables.Options;
@@ -75,8 +75,14 @@ public class SpawnService {
 	
 	public CreatureObject spawnCreature(String template, long objectId, String planetName, long cellId, float x, float y, float z, float qW, float qX, float qY, float qZ, short level) {
 		
-		Planet planet = core.terrainService.getPlanetByName(planetName);
 		MobileTemplate mobileTemplate = mobileTemplates.get(template);
+		return spawnCreature(mobileTemplate, objectId, planetName, cellId, x, y, z, qW, qX, qY, qZ, level);
+	}
+	
+	public CreatureObject spawnCreature(MobileTemplate mobileTemplate, long objectId, String planetName, long cellId, float x, float y, float z, float qW, float qX, float qY, float qZ, short level) {
+		
+		Planet planet = core.terrainService.getPlanetByName(planetName);
+		
 		if(planet == null || mobileTemplate == null)
 			return null;
 		
@@ -111,6 +117,9 @@ public class SpawnService {
 		creature.setFaction(mobileTemplate.getFaction());
 		creature.setFactionStatus(mobileTemplate.getFactionStatus());
 		creature.setPvpBitmask(mobileTemplate.getPvpBitmask());
+		
+		creature.updatePvpStatus();
+		
 		if (mobileTemplate.getCustomName()==null){
 			creature.setStfFilename("mob/creature_names"); // TODO: set other STFs for NPCs other than creatures -> DONE
 			if (mobileTemplate.getStfFilename()!=null)
@@ -159,6 +168,10 @@ public class SpawnService {
 			defaultWeapon.setWeaponType(weaponTemplates.get(rnd).getWeaponType());
 			defaultWeapon.setMaxRange(weaponTemplates.get(rnd).getMaxRange());
 			defaultWeapon.setDamageType(weaponTemplates.get(rnd).getDamageType());
+			if (defaultWeapon.getTemplate().contains("atst_ranged")){ 
+				defaultWeapon.setStfFilename("theme_park_name");
+				defaultWeapon.setStfName("at_st");
+			}
 		}
 		
 		if (weaponTemplates.get(rnd).getMinDamage() != 0 && weaponTemplates.get(rnd).getMaxDamage() != 0) {
@@ -207,16 +220,26 @@ public class SpawnService {
 			core.skillModService.addSkillMod(creature, "expertise_innate_protection_all", armor);
 		}
 
-		AIActor actor = new AIActor(creature, creature.getPosition(), scheduler);
-		creature.setAttachment("AI", actor);
+		if (mobileTemplate.isAIEnabled()){
+			if (!mobileTemplate.isNoAI()){ // NoAI is for QuestGivers that don't fight to save resources
+				AIActor actor = new AIActor(creature, creature.getPosition(), scheduler);
+				creature.setAttachment("AI", actor);
+				actor.setMobileTemplate(mobileTemplate);
+			}
+		} else { // AIEnabled is to dynamically switch the AI on later
+			AIActor actor = new AIActor(creature, creature.getPosition(), scheduler, false);
+			creature.setAttachment("AI", actor);
+			actor.setMobileTemplate(mobileTemplate);	
+		}
+		
+		creature.setAttachment("radial_filename", "npc/mobile");
+
 		if (mobileTemplate.getConversationFileName().length()>0){
 			creature.setAttachment("radial_filename", "object/conversation");
 			creature.setAttachment("conversationFile", mobileTemplate.getConversationFileName());
 			}
 		else  creature.setAttachment("radial_filename", "npc/mobile");
-		actor.setMobileTemplate(mobileTemplate);
-		
-	
+
 		
 		if(cell == null) {
 			core.simulationService.add(creature, x, z, true);
@@ -436,7 +459,15 @@ public class SpawnService {
 		LairTemplate lairTemplate = lairTemplates.get(lairSpawnTemplate);
 		if(lairTemplate == null)
 			return null;
-		TangibleObject lairObject = (TangibleObject) core.objectService.createObject(lairTemplate.getLairCRC(), 0, planet, position, new Quaternion(1, 0, 0, 0));
+		
+		TangibleObject lairObject = null;
+		if (lairTemplate.getLairCRC()==null){
+			String lairCRC = lairTemplate.getLairCRCs().get(new Random().nextInt(lairTemplate.getLairCRCs().size()));
+			System.out.println("Lair CRC " + lairCRC);
+			lairObject = (TangibleObject) core.objectService.createObject(lairCRC, 0, planet, position, new Quaternion(1, 0, 0, 0));
+		} else {
+			lairObject = (TangibleObject) core.objectService.createObject(lairTemplate.getLairCRC().trim(), 0, planet, position, new Quaternion(1, 0, 0, 0));			
+		}
 		
 		if(lairObject == null)
 			return null;
@@ -451,6 +482,9 @@ public class SpawnService {
 			lairActor = new LairActor(lairObject, lairTemplate.getMobiles(), 10, level);
 		
 		lairObject.setAttachment("AI", lairActor);
+		
+		if (lairTemplate.getBossTemplate()!=null)
+			lairActor.setBossTemplate(lairTemplate.getBossTemplate());
 		
 		core.simulationService.add(lairObject, position.x, position.z, true);
 		lairActor.spawnNewCreatures();
@@ -504,6 +538,18 @@ public class SpawnService {
 	
 	public void addLairTemplate(String name, Vector<String> mobiles, int mobileLimit, String lairCRC) {
 		lairTemplates.put(name, new LairTemplate(name, mobiles, mobileLimit, lairCRC));
+	}
+	
+	public void addLairTemplate(String name, Vector<String> mobiles, int mobileLimit, Vector<String> lairCRCs) {
+		lairTemplates.put(name, new LairTemplate(name, mobiles, mobileLimit, lairCRCs));
+	}
+	
+	public void addLairTemplate(String name, Vector<String> mobiles, int mobileLimit, Vector<String> lairCRCs, String bossTemplate) {
+		lairTemplates.put(name, new LairTemplate(name, mobiles, mobileLimit, lairCRCs));
+	}
+	
+	public void addLairTemplate(String name, String mobile, int mobileLimit, Vector<String> lairCRCs, String bossTemplate) {
+		lairTemplates.put(name, new LairTemplate(name, mobile, mobileLimit, lairCRCs));
 	}
 	
 	public void loadLairGroups() {
@@ -702,6 +748,15 @@ public class SpawnService {
 	
 	public MobileTemplate getMobileTemplate(String template) {
 		return mobileTemplates.get(template);
+	}
+	
+	public String getMobileTemplateName(MobileTemplate mobileTemplate) {
+		for (Entry<String, MobileTemplate> entry : mobileTemplates.entrySet()) {
+	        if (mobileTemplate.equals(entry.getValue())) {
+	            return entry.getKey();
+	        }
+	    }
+	    return null;
 	}
 	
 }

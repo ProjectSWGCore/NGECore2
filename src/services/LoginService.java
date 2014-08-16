@@ -105,8 +105,9 @@ public class LoginService implements INetworkDispatch{
 				
 				String user        = clientID.getAccountName();
 				String pass        = clientID.getPassword();
+				String version     = clientID.getVersion();
 				int id             = LoginProvider.getAccountId(user, pass, session.getRemoteAddress().toString());
-				System.out.println("LOGIN: " + user + " login attempt "+session.getRemoteAddress().toString()+" returned " + id);
+				System.out.println("LOGIN: " + user + " login attempt " + session.getRemoteAddress().toString() + " returned " + id);
 				
 				if (id < 0)  {
 					
@@ -124,7 +125,7 @@ public class LoginService implements INetworkDispatch{
 					}
 					
 					// No matter what, this will always show that the login server is unavailable at this time. Removing the error message will just keep the connecting message up.
-					ErrorMessage errMsg = new ErrorMessage("Wrong Password", "The username or password you entered was incorrect.");
+					ErrorMessage errMsg = new ErrorMessage("Wrong Password", "The username or password you entered was incorrect.", false);
 					session.write(errMsg.serialize());
 					
 					Disconnect disconnect = new Disconnect((Integer)session.getAttribute("connectionId"), 6);
@@ -135,30 +136,36 @@ public class LoginService implements INetworkDispatch{
 					return;
 				}
 				
+				if(!version.equals("20111130-15:46")) {
+					ErrorMessage clientErr = new ErrorMessage("Invalid Client", "The version of your client is invalid.", true);
+					session.write(clientErr.serialize());
+					
+					Disconnect disconnect = new Disconnect((Integer)session.getAttribute("connectionId"), 6);
+					session.write(disconnect);
+					return;
+				}
+				
 				Client client = new Client(session.getRemoteAddress());
 				client.setAccountName(user);
 				client.setPassword(pass);
 				client.setSessionKey(generateSessionKey());
 				client.setAccountId(id);
-				//client.setAccountEmail(email);
 				client.setSession(session);
-				client.setGM(checkForGmPermission(id));
+				//String accessLevel = core.adminService.getAccessLevelFromDB(id);
+				//if (accessLevel != null && !accessLevel.equals("")) { client.setAccessLevel(accessLevel); }
 				
 				core.addClient(session, client);
 				
 				if (!core.getActiveConnectionsMap().containsKey(session)) {
 					Disconnect disconnect = new Disconnect((Integer)session.getAttribute("connectionId"), 6);
 					session.write(disconnect);
-					ErrorMessage errMsg = new ErrorMessage("Error Logging In", "Your client could not be added to the connections at this time.");
+					ErrorMessage errMsg = new ErrorMessage("Error Logging In", "Your client could not be added to the connections at this time.", false);
 					session.write(errMsg.serialize());
 					session.close(false);
 					
 					System.out.println(client.getAccountName() + " was not added to active connections map.");
 					return;				
 				}
-				/*if(!checkIfAccountExistInGameDB(id)) {
-					createAccountForGameDB(id, user, email, encryptPass);
-				}*/
 				
 				persistSession(client);
 
@@ -168,8 +175,10 @@ public class LoginService implements INetworkDispatch{
 
 				LoginClientToken clientToken = new LoginClientToken(client.getSessionKey(), id, user);
 				CharacterCreationDisabled charCreationDisabled = new CharacterCreationDisabled(0);
-				StationIdHasJediSlot jediSlot = new StationIdHasJediSlot(false);
+				StationIdHasJediSlot jediSlot = new StationIdHasJediSlot(false);	// Ziggy - shows a pop-up at the character selection screen, saying that this account has an unused Unlocked Slot when set to true.
 				ServerNowEpochTime time = new ServerNowEpochTime((int) (System.currentTimeMillis() / 1000));
+				//System.out.println("ServerNowEpochTime " + (int) (System.currentTimeMillis() / 1000));
+				//tools.CharonPacketUtils.printAnalysis(time.serialize(), "ServerNowEpochTime");
 				
 				if (client.getSession().containsAttribute("tradeSession") == true) {
 					client.getSession().removeAttribute("tradeSession");
@@ -267,29 +276,6 @@ public class LoginService implements INetworkDispatch{
 		
 	}
 	
-	public boolean checkForGmPermission(int id) {
-		try {
-			if (core.getConfig().getInt("ADMIN") > 0) {
-				return true;
-			}
-		} catch (Exception e) {
-			
-		}
-		
-		PreparedStatement preparedStatement;
-		
-		try {
-			preparedStatement = databaseConnection1.preparedStatement("SELECT * FROM accounts WHERE id=" + id + "");
-			ResultSet resultSet = preparedStatement.executeQuery();
-			if(resultSet.next())
-				return resultSet.getBoolean("gmflag");
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		
-		return false;
-	}
-	
 	/**
 	 * Saves session data to DB so Zone Server can link sessions to accounts.
 	 * @param client Client that needs a session save.
@@ -333,11 +319,12 @@ public class LoginService implements INetworkDispatch{
 				
 				String characterName = resultSet.getString("firstName").replaceAll("\\s",""); ;
 				String lastName = resultSet.getString("lastName").replaceAll("\\s","");
+
 				if (lastName != null && lastName.length() > 0) characterName += " " + lastName;
 				enumerateCharacterId.addCharacter(
 						characterName,
 						resultSet.getInt("appearance"),
-						resultSet.getLong("Id"),
+						resultSet.getLong("id"),
 						resultSet.getInt("galaxyId"),
 						resultSet.getInt("statusId"));
 			}
@@ -395,14 +382,5 @@ public class LoginService implements INetworkDispatch{
 		return clusterStatus;
 	}
 	
-	/**
-	 * Checks if User has correct client version.
-	 * @param version Client Version String
-	 */
-	private boolean checkVersion(String version) {
-		System.out.println("Version Received: " + version);
-		return true;
-	}
-
 }
 	

@@ -37,6 +37,10 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_claw_5')
+	attacks.add('bm_damage_poison_5')
+	attacks.add('bm_dampen_pain_5')
+	attacks.add('bm_slash_5')
 	mobileTemplate.setDefaultAttack('creatureRangedAttack')
 	mobileTemplate.setAttacks(attacks)
 	

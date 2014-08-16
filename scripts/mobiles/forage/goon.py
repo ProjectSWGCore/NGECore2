@@ -14,6 +14,13 @@ def addTemplate(core):
 	mobileTemplate.setLevel(1)
 	mobileTemplate.setDifficulty(Difficulty.ELITE)
 
+	mobileTemplate.setMinSpawnDistance(4)
+	mobileTemplate.setMaxSpawnDistance(8)
+	mobileTemplate.setDeathblow(False)
+	mobileTemplate.setScale(1)
+	mobileTemplate.setAssistRange(12)
+	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_criminal_assassin_human_female_01.iff')

@@ -14,16 +14,16 @@ def addTemplate(core):
 	mobileTemplate.setCreatureName('crackdown_stormtrooper_medic_hard')
 	mobileTemplate.setLevel(89)
 	mobileTemplate.setDifficulty(Difficulty.ELITE)
-
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(1)
 	mobileTemplate.setSocialGroup("imperial")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setAssistRange(6)
 	mobileTemplate.setStalker(False)
 	mobileTemplate.setFaction("imperial")
 	mobileTemplate.setFactionStatus(FactionStatus.Combatant)
+	
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_imperial_medic1_human_male_01.iff')

@@ -13,7 +13,6 @@ def addTemplate(core):
 	mobileTemplate.setCreatureName('fbase_rebel_heavy_trooper_hard')
 	mobileTemplate.setLevel(50)
 	mobileTemplate.setDifficulty(Difficulty.ELITE)
-
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(False)
@@ -23,6 +22,7 @@ def addTemplate(core):
 	mobileTemplate.setStalker(False)
 	mobileTemplate.setFaction("rebel")
 	mobileTemplate.setFactionStatus(FactionStatus.Combatant)
+	
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_dressed_rebel_trooper_bith_m_01.iff')

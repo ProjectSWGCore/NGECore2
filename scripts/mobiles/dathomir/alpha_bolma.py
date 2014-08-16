@@ -29,9 +29,10 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("bolma")
 	mobileTemplate.setAssistRange(12)
 	mobileTemplate.setStalker(False)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_bolma_hue.iff')
+	templates.add('object/mobile/shared_alpha_bolma.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
@@ -40,6 +41,10 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_bite_4')
+	attacks.add('bm_charge_4')
+	attacks.add('bm_dampen_pain_4')
+	attacks.add('bm_stomp_4')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

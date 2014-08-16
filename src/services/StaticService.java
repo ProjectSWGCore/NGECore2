@@ -59,9 +59,9 @@ public class StaticService implements INetworkDispatch {
 	}
 	
 	public void spawnStatics() {
-		Config options = new Config();
-		options.setFilePath("options.cfg");
-		final boolean buildoutsDisabled = ((options.loadConfigFile() && options.getInt("LOAD.BUILDOUT_OBJECTS") == 0) ? true : false);
+		Config options = core.getOptions();
+
+		final boolean buildoutsDisabled = ((options != null && options.getInt("LOAD.BUILDOUT_OBJECTS") == 0) ? true : false);
 		
 		for (Planet planet : core.terrainService.getPlanetList()) {
 			if (FileUtilities.doesFileExist("scripts/static_spawns/" + planet.getName())) {
@@ -240,14 +240,13 @@ public class StaticService implements INetworkDispatch {
 	public List<SWGObject> getCloningFacilitiesByPlanet(Planet planet) {
 		List<SWGObject> objects = core.simulationService.get(planet, 0, 0, 8300);
 		List<SWGObject> cloners = new ArrayList<SWGObject>();
-		
 		for (SWGObject obj : objects) {
 			if(obj instanceof BuildingObject && (obj.getTemplate().contains("cloning_facility") || obj.getTemplate().contains("cloning_tatooine") || obj.getTemplate().contains("cloning_naboo") || obj.getTemplate().contains("cloning_corellia"))) {
 				if(!obj.getTemplate().equals("object/building/general/shared_cloning_facility_general.iff"))
 					cloners.add(obj);
 			}
 		}
-		
+
 		return cloners;
 	}
 	

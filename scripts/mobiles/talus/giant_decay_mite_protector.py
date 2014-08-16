@@ -21,7 +21,7 @@ def addTemplate(core):
 	mobileTemplate.setMeatType("Insect Meat")
 	mobileTemplate.setMeatAmount(16)
 	mobileTemplate.setSocialGroup("decay mite")
-	mobileTemplate.setAssistRange(0)
+	mobileTemplate.setAssistRange(6)
 	mobileTemplate.setStalker(False)
 	mobileTemplate.setOptionsBitmask(128)
 	
@@ -35,6 +35,9 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_bite_1')
+	attacks.add('bm_bolster_armor_1')
+	attacks.add('bm_enfeeble_1')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

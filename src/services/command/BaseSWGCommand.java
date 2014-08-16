@@ -76,7 +76,10 @@ public class BaseSWGCommand implements Cloneable {
 						if (((String) visitor2.getObject(i, 0)).equalsIgnoreCase(commandName)) {
 							int sub = 0; // Subtract due to command table structures being different
 							
-							characterAbility = (String) visitor2.getObject(i, 7);
+							if(((String) visitor2.getObject(i, 7)).equals("admin"))
+								characterAbility = "";
+							else
+								characterAbility = (String) visitor2.getObject(i, 7);
 							
 							for (int l = (8 - sub); l <= (29 - sub); l++) {
 								if (!((Boolean) visitor2.getObject(i, l))) {

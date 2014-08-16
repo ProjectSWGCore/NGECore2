@@ -30,9 +30,11 @@ def addTemplate(core):
 	templates = Vector()
 	templates.add('object/mobile/shared_rancor_youth.iff')
 	mobileTemplate.setTemplates(templates)
-	
-	
+		
 	attacks = Vector()
+	attacks.add('bm_dampen_pain_5')
+	attacks.add('bm_shaken_3')
+	attacks.add('bm_stomp_5')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

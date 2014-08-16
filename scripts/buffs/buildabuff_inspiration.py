@@ -5,19 +5,15 @@ def setup(core, actor, buff):
 	return
 
 def add(core, actor, buff):
-    
     buffWorkshop = actor.getAttachment('buffWorkshop')
-    
     if buffWorkshop is None:
         return
-    
     attached = actor.getAttachment('inspireDuration')
 
     buff.setDuration(float(actor.getAttachment('inspireDuration') * 60))
 
     for BuffItem in buffWorkshop:
         core.skillModService.addSkillMod(actor, BuffItem.getSkillName(), BuffItem.getAffectAmount())
-
     return
     
 def remove(core, actor, buff):

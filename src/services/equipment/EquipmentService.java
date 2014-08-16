@@ -165,7 +165,12 @@ public class EquipmentService implements INetworkDispatch {
 		if(func != null) func.__call__(Py.java2py(core), Py.java2py(actor), Py.java2py(item));				
 		if(!actor.getEquipmentList().contains(item.getObjectID())) 
 		{
-			if(item instanceof WeaponObject) actor.setWeaponId(item.getObjectID());
+			//if(item instanceof WeaponObject){
+			//A rifle is not identified as a true WeaponObject ?!?!?!?!
+			if (item.getTemplate().contains("object/weapon/")){		
+				actor.setWeaponId(item.getObjectID()); // This line causes the rifle lockup
+				//System.out.println("WEAPON IDENTIFIED!");
+			}
 			actor.addObjectToEquipList(item);
 			processItemAtrributes(actor, item, true);
 		}

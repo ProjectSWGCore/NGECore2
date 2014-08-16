@@ -39,6 +39,7 @@ import engine.clientdata.visitors.DatatableVisitor;
 import engine.clientdata.visitors.ProfessionTemplateVisitor;
 import engine.clients.Client;
 import engine.resources.common.CRC;
+import engine.resources.config.Config;
 import engine.resources.container.CreatureContainerPermissions;
 import engine.resources.container.CreaturePermissions;
 import engine.resources.container.Traverser;
@@ -265,7 +266,15 @@ public class CharacterService implements INetworkDispatch {
 				object.setCustomName(clientCreateCharacter.getName());
 				object.setHeight(clientCreateCharacter.getScale());
 				object.setPersistent(true);
-				object.setPosition(SpawnPoint.getRandomPosition(new Point3D(3528, 0, -4804), (float) 0.5, 3, core.terrainService.getPlanetByName("tatooine").getID()));
+				
+				Config options = NGECore.getInstance().getOptions();
+
+				if (options != null && options.getInt("DO.ISOLATION.TESTS") > 0){
+					object.setPosition(SpawnPoint.getRandomPosition(new Point3D(0, 0, 0), (float) 0.5, 3, core.terrainService.getPlanetByName("tatooine").getID()));
+				} else {
+					object.setPosition(SpawnPoint.getRandomPosition(new Point3D(3528, 0, -4804), (float) 0.5, 3, core.terrainService.getPlanetByName("tatooine").getID()));
+				}
+				
 				object.setCashCredits(100);
 				object.setBankCredits(1000);
 				object.setIncapTimer(10);
@@ -354,9 +363,10 @@ public class CharacterService implements INetworkDispatch {
 				createStarterClothing(object, sharedRaceTemplate, clientCreateCharacter.getStarterProfession());
 				//core.scriptService.callScript("scripts/", "demo", "CreateStartingCharacter", core, object);
 				
+				System.out.println("Saving character with name: " + object.getCustomName());
 				core.getSWGObjectODB().put(object.getObjectID(), object);
 
-				PreparedStatement ps = databaseConnection.preparedStatement("INSERT INTO characters (id, \"firstName\", \"lastName\", \"accountId\", \"galaxyId\", \"statusId\", appearance, gmflag) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+				PreparedStatement ps = databaseConnection.preparedStatement("INSERT INTO characters (id, \"firstName\", \"lastName\", \"accountId\", \"galaxyId\", \"statusId\", appearance) VALUES (?, ?, ?, ?, ?, ?, ?)");
 				ps.setLong(1, object.getObjectID());
 				ps.setString(2, clientCreateCharacter.getFirstName());
 				ps.setString(3, clientCreateCharacter.getLastName());
@@ -364,7 +374,6 @@ public class CharacterService implements INetworkDispatch {
 				ps.setInt(5, galaxyId);
 				ps.setInt(6, 1);
 				ps.setInt(7, CRC.StringtoCRC(raceTemplate));
-				ps.setBoolean(8, false);
 				ps.executeUpdate();
 				ps.close();
 				CreateCharacterSuccess success = new CreateCharacterSuccess(object.getObjectID());

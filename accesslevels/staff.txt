@@ -1,0 +1,12 @@
+gmforcecommand
+goto
+findobject
+teleport
+teleportto
+invulnerable
+kill
+gmrevive
+setspeed
+planetwarp
+harmfull
+harmless

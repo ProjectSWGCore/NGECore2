@@ -13,16 +13,16 @@ def addTemplate(core):
 	mobileTemplate.setCreatureName('rebel_battle_droid')
 	mobileTemplate.setLevel(83)
 	mobileTemplate.setDifficulty(Difficulty.ELITE)
-
 	mobileTemplate.setMinSpawnDistance(4)
 	mobileTemplate.setMaxSpawnDistance(8)
 	mobileTemplate.setDeathblow(True)
 	mobileTemplate.setScale(1)
-	mobileTemplate.setSocialGroup("imperial")
+	mobileTemplate.setSocialGroup("rebel")
 	mobileTemplate.setAssistRange(24)
 	mobileTemplate.setStalker(False)
 	mobileTemplate.setFaction("rebel")
 	mobileTemplate.setFactionStatus(FactionStatus.Combatant)
+	
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_battle_droid.iff')

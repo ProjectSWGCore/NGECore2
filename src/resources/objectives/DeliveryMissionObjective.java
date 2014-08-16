@@ -54,7 +54,7 @@ public class DeliveryMissionObjective extends MissionObjective {
 		
 		if (getObjectivePhase() == 0) {
 			WaypointObject waypoint = getMissionObject().getWaypoint();
-			waypoint.setPlanetCRC(CRC.StringtoCRC(player.getPlanet().name));
+			waypoint.setPlanetCrc(CRC.StringtoCRC(player.getPlanet().name));
 			waypoint.setPosition(parent.getStartLocation().getLocation());
 			waypoint.setName("@" + parent.getTitle().getStfFilename() + ":" + "m" + parent.getMissionId() + "t");
 			waypoint.setColor(WaypointObject.ORANGE);
@@ -63,7 +63,7 @@ public class DeliveryMissionObjective extends MissionObjective {
 
 		} else if (getObjectivePhase() == 1) {
 			WaypointObject waypoint = getMissionObject().getWaypoint();
-			waypoint.setPlanetCRC(CRC.StringtoCRC(player.getPlanet().name));
+			waypoint.setPlanetCrc(CRC.StringtoCRC(player.getPlanet().name));
 			waypoint.setPosition(parent.getDestinationLocation().getLocation());
 			waypoint.setName("@" + parent.getTitle().getStfFilename() + ":" + "m" + parent.getMissionId() + "t");
 			waypoint.setColor(WaypointObject.ORANGE);
@@ -103,7 +103,7 @@ public class DeliveryMissionObjective extends MissionObjective {
 				waypoint.setName("@" + parent.getTitle().getStfFilename() + ":" + "m" + parent.getMissionId() + "t");
 				waypoint.setColor(WaypointObject.ORANGE);
 				waypoint.setActive(true);
-				waypoint.setPlanetCRC(CRC.StringtoCRC(player.getPlanet().name));
+				waypoint.setPlanetCrc(CRC.StringtoCRC(player.getPlanet().name));
 				getMissionObject().setTargetName("Dropoff Location");
 				getMissionObject().setWaypoint(waypoint);
 				break;
@@ -113,7 +113,7 @@ public class DeliveryMissionObjective extends MissionObjective {
 				returnWp.setName("@" + parent.getTitle().getStfFilename() + ":" + "m" + parent.getMissionId() + "t");
 				returnWp.setColor(WaypointObject.ORANGE);
 				returnWp.setActive(true);
-				returnWp.setPlanetCRC(CRC.StringtoCRC(player.getPlanet().name));
+				returnWp.setPlanetCrc(CRC.StringtoCRC(player.getPlanet().name));
 				getMissionObject().setTargetName("Return");
 				getMissionObject().setWaypoint(returnWp);
 				break;

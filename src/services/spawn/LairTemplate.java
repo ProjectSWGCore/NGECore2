@@ -29,7 +29,9 @@ public class LairTemplate {
 	private String lairCRC;
 	private String mobileName;
 	private Vector<String> mobiles;
+	private Vector<String> lairCRCs;
 	private int mobileLimit;
+	private String bossTemplate;
 	
 	public LairTemplate(String name, String mobile, int mobileLimit, String lairCRC) {
 		this.name = name;
@@ -43,6 +45,36 @@ public class LairTemplate {
 		this.mobiles = mobiles;
 		this.mobileLimit = mobileLimit;
 		this.lairCRC = lairCRC;
+	}
+	
+	public LairTemplate(String name, Vector<String> mobiles, int mobileLimit, Vector<String> lairCRCs) {
+		this.name = name;
+		this.mobiles = mobiles;
+		this.mobileLimit = mobileLimit;
+		this.lairCRCs = lairCRCs;
+	}
+	
+	public LairTemplate(String name, Vector<String> mobiles, int mobileLimit, Vector<String> lairCRCs, String bossTemplate) {
+		this.name = name;
+		this.mobiles = mobiles;
+		this.mobileLimit = mobileLimit;
+		this.lairCRCs = lairCRCs;
+		this.bossTemplate = bossTemplate;
+	}
+	
+	public LairTemplate(String name, String mobile, int mobileLimit, Vector<String> lairCRCs, String bossTemplate) {
+		this.name = name;
+		this.mobileName = mobile;
+		this.mobileLimit = mobileLimit;
+		this.lairCRCs = lairCRCs;
+		this.bossTemplate = bossTemplate;
+	}
+	
+	public LairTemplate(String name, String mobile, int mobileLimit, Vector<String> lairCRCs) {
+		this.name = name;
+		this.mobileName = mobile;
+		this.mobileLimit = mobileLimit;
+		this.lairCRCs = lairCRCs;
 	}
 	
 	public String getLairCRC() {
@@ -83,6 +115,22 @@ public class LairTemplate {
 
 	public void setMobiles(Vector<String> mobiles) {
 		this.mobiles = mobiles;
+	}
+
+	public Vector<String> getLairCRCs() {
+		return lairCRCs;
+	}
+
+	public void setLairCRCs(Vector<String> lairCRCs) {
+		this.lairCRCs = lairCRCs;
+	}
+
+	public String getBossTemplate() {
+		return bossTemplate;
+	}
+
+	public void setBossTemplate(String bossTemplate) {
+		this.bossTemplate = bossTemplate;
 	}
 
 }
