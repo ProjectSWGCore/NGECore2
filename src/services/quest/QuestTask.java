@@ -46,11 +46,12 @@ public class QuestTask {
 	private String waitMarkerPlanetName;
 	private String waitMarkerCellName;
 	private String commMessageText;
-	private String commAppearanceTemplate; // NPC Appearance Server Template
+	private String npcAppearanceTemplate; // NPC Appearance Server Template
 	private String tasksOnComplete;
 	private String serverTemplate;
 	private String itemName;
 	private String tasksOnFail;
+	private String retrieveMenuText;
 	
 	private boolean visible;
 	private boolean grantQuestOnCompleteShowSystemMessage;
@@ -261,12 +262,12 @@ public class QuestTask {
 		this.commMessageText = commMessageText;
 	}
 
-	public String getCommAppearanceTemplate() {
-		return commAppearanceTemplate;
+	public String getNpcAppearanceTemplate() {
+		return npcAppearanceTemplate;
 	}
 
-	public void setCommAppearanceTemplate(String commAppearanceTemplate) {
-		this.commAppearanceTemplate = commAppearanceTemplate;
+	public void setNpcAppearanceTemplate(String npcAppearanceTemplate) {
+		this.npcAppearanceTemplate = npcAppearanceTemplate;
 	}
 
 	public boolean isVisible() {
@@ -441,5 +442,13 @@ public class QuestTask {
 
 	public void setDropPercent(int dropPercent) {
 		this.dropPercent = dropPercent;
+	}
+
+	public String getRetrieveMenuText() {
+		return retrieveMenuText;
+	}
+
+	public void setRetrieveMenuText(String retrieveMenuText) {
+		this.retrieveMenuText = retrieveMenuText;
 	}
 }

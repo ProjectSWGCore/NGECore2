@@ -45,9 +45,8 @@ import resources.objects.intangible.IntangibleObject;
 import resources.objects.resource.ResourceContainerObject;
 import resources.objects.waypoint.WaypointObject;
 import resources.quest.Quest;
+import services.quest.QuestItem;
 import engine.clients.Client;
-import engine.resources.common.CRC;
-import engine.resources.common.StringUtilities;
 import engine.resources.objects.Baseline;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -96,6 +95,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		baseline.put("holoEmote", "");
 		baseline.put("holoEmoteUses", 0);
 		baseline.put("activeMissions", new ArrayList<Long>()); // TODO: Look at MissionCriticalObject in CREO4, could use that instead of this
+		baseline.put("questRetrieveItemTemplates", new TreeMap<String, QuestItem>());
 		return baseline;
 	}
 	
@@ -187,7 +187,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		baseline.put("maxConsumable", 100);
 		baseline.put("waypointList", new SWGMap<Long, WaypointObject>(this, 9, 16, false));
 		baseline.put("defendersList", new SWGSet<Long>(this, 9, 17, false));
-		baseline.put("kills", 0);
+		baseline.put("killMeterPoints", 0);
 		baseline.put("19", 0);
 		baseline.put("pet", (long) 0);
 		baseline.put("petAbilities", new SWGList<String>(this, 9, 21, false));
@@ -595,6 +595,16 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		return (SWGList<Quest>) getBaseline(8).get("questJournal");
 	}
 	
+	@SuppressWarnings("unchecked")
+	public TreeMap<String, QuestItem> getQuestRetrieveItemTemplates() {
+		return (TreeMap<String, QuestItem>) otherVariables.get("questRetrieveItemTemplates");
+	}
+	
+	public boolean hasRetrieveItemTemplate(String template) {
+		TreeMap<String, QuestItem> templates = getQuestRetrieveItemTemplates();
+		return templates.containsKey(template);
+	}
+	
 	public int getActiveQuest() {
 		return (int) getBaseline(8).get("activeQuest");
 	}
@@ -769,18 +779,14 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		return (SWGSet<Long>) getBaseline(8).get("defendersList");
 	}
 	
-	public int getKills() {
-		return (int) getBaseline(9).get("kills");
+	public int getKillMeterPoints() {
+		return (int) getBaseline(9).get("killMeterPoints");
 	}
 	
-	public void setKills(int kills) {
+	public void setKillMeterPoints(int points) {
 		if (getClient() != null) {
-			getClient().getSession().write(getBaseline(9).set("kills", kills));
+			getClient().getSession().write(getBaseline(9).set("killMeterPoints", points));
 		}
-	}
-	
-	public void addKills(int kills) {
-		setKills(getKills() + kills);
 	}
 	
 	public long getPet() {
