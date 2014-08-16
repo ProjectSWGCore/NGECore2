@@ -692,7 +692,7 @@ public class CommandService implements INetworkDispatch  {
 				|| command.getCommandName().equals("teleportto") || command.getCommandName().equals("teleporttarget") ) {
 			String accessLevel = core.adminService.getAccessLevelFromDB(actor.getClient().getAccountId());
 			String filePath = "accesslevels/" + accessLevel + ".txt";
-
+			System.out.println(command.getCommandName() + " was just used by an admin with accessLevel: " + accessLevel + ".");
 			if(FileUtilities.doesFileExist(filePath)) {
 				Scanner scanner;
 				try {
