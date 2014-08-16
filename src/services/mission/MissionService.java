@@ -454,8 +454,8 @@ public class MissionService implements INetworkDispatch {
 					surveyObjective.activate(core, creature);
 				
 				return surveyObjective;
-				
-			case "entertainer":
+			case "dancer":	
+			case "musician":
 				EntertainerMissionObjective entertainerObjective = new EntertainerMissionObjective(mission);
 				
 				mission.setObjective(entertainerObjective);
@@ -640,60 +640,62 @@ public class MissionService implements INetworkDispatch {
 	}
 	
 	private void randomEntertainerMission(SWGObject player, MissionObject mission) {
-	
+
 		CreatureObject creature = (CreatureObject) player;
-		PlayerObject playera = (PlayerObject) creature.getSlottedObject("ghost");	
+		PlayerObject actor = (PlayerObject) creature.getSlottedObject("ghost"); 
+		int randomNumber = (int) (Math.random()*5000) - 2500;
 		
-		Point3D playerLocation = player.getWorldPosition();
 		MissionLocation startLocation = new MissionLocation(creature.getPosition(), creature.getObjectId(), player.getPlanet().name);
-		MissionLocation destinationLocation = new MissionLocation(creature.getPosition(), creature.getObjectId(), player.getPlanet().name);
+		MissionLocation destinationLocation = new MissionLocation(new Point3D(((float)creature.getPosition().x - randomNumber), (float)creature.getPosition().y, (float)(creature.getPosition().z - randomNumber)), creature.getObjectId(), player.getPlanet().name);
+
+		String missionStf = "";
+		String missionString = "dancer";
 		
-		mission.setMissionType("entertainer");
-			
-		String missionStf = null;
+		if (mission.getMissionType() == "musician") {
+			missionString = "musician";
+		}
+		mission.setMissionType(missionString);
 		
-		
-		if(creature.getFaction() == "rebel"){
-			missionStf = "mission/mission_npc_dancer_rebel_easy";
-		}else if(creature.getFaction() == "imperial"){
-			missionStf = "mission/mission_npc_dancer_imperial_easy";
+		if(creature.getFaction().equals("rebel")){
+			missionStf = "mission/mission_npc_" + missionString + "_rebel_easy";
+		}else if(creature.getFaction().equals("imperial")){
+			missionStf = "mission/mission_npc_" + missionString + "_imperial_easy";
 		}else{
-			missionStf = "mission/mission_npc_dancer_neutral_easy";
+			missionStf = "mission/mission_npc_" + missionString + "_neutral_easy";
 		}
 		
-      
 		mission.setMissionId(getRandomStringEntry(missionStf));
-		mission.setTitle("@" + missionStf + ":" + "m" + mission.getMissionId() + "t");
 		mission.setDescription("@" + missionStf + ":" + "m" + mission.getMissionId() + "o");
+		mission.setTitle( "@" + missionStf + ":" + "m" + mission.getMissionId() + "t");
 		
-		if(playera.getProfession() != "entertainer_1a"){
-			mission.setDifficultyLevel(5);
-		}else{
-			mission.setDifficultyLevel(creature.getLevel());
-		}
 		mission.setCreator(nameGenerator.compose(2) + " " + nameGenerator.compose(3));
-		mission.setCreditReward((int) (200 + ((startLocation.getLocation().getDistance2D(destinationLocation.getLocation()) / 10))));
 		
-		mission.setTemplateObject(CRC.StringtoCRC("object/tangible/mission/shared_mission_datadisk.iff"));
-		mission.setTargetName("Datadisk");
+		if(actor.getProfession().contains("entertainer")){
+			mission.setDifficultyLevel((creature.getLevel() % 5 == 0) ? creature.getLevel() : (creature.getLevel() / 5 * 5 + 5));
+		}else{
+			mission.setDifficultyLevel(5);
+		}
 		
-		System.out.println("missionstf: " + missionStf);
-		System.out.println("Level: " + creature.getLevel());
-		System.out.println("Profession: " + playera.getProfession());
-		System.out.println("Faction: " + creature.getFaction());
-		System.out.println("Difficulty: " + mission.getDifficultyLevel());
-		System.out.println("missionid: " + mission.getMissionId());
-		System.out.println("MissionTitle: " + mission.getTitle().getStfValue());
-		System.out.println("Missiondesc: " + mission.getDescription().getStfValue());
+		int distanceReward = (int)((startLocation.getLocation().getDistance2D(destinationLocation.getLocation()) / 20));
+		
+		mission.setStartLocation(startLocation);
+		mission.setDestinationLocation(destinationLocation);
+		if(actor.getProfession().contains("entertainer")){
+			if(creature.getLevel() <= 5){
+				mission.setCreditReward((int) (200 + distanceReward ));
+			}else if(creature.getLevel() >= 6){
+				mission.setCreditReward((int) ((150 + distanceReward ) *  creature.getLevel())/5);
+			}
+		}else{
+			mission.setCreditReward((int) (200 + distanceReward ));
+		}
+			
+		
+		
+		mission.setTemplateObject(CRC.StringtoCRC("object/building/general/shared_mun_all_guild_theater_s01.iff"));
+		mission.setTargetName("Go to location!");
+
 	}
-	/*
-	public enum TerminalType {;
-		public static final int GENERIC = 1;
-		public static final int BOUNTY = 2;
-		public static final int ENTERTAINER = 3;
-		public static final int ARTISAN  = 4;
-		public static final int EXPLORER = 5;
-	}*/
 	
 	public Map<Long, BountyListItem> getBountyMap() {
 		return this.bountyMap;
