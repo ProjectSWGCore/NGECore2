@@ -590,21 +590,20 @@ public class NGECore {
 		ODBCursor cursor = swgObjectODB.getCursor();
 		
 		List<CreatureObject> deletedObjects = new ArrayList<CreatureObject>();
+		int deleteCount = 0;
 		
 		while(cursor.hasNext()) {
 			Object next = cursor.next();
 			if (next == null) continue;
 			SWGObject creature = (SWGObject) next;
-			if(!characterService.playerExists(creature.getObjectID()) && creature instanceof CreatureObject)
-				deletedObjects.add((CreatureObject) creature);
+			if(!characterService.playerExists(creature.getObjectID()) && creature instanceof CreatureObject) {
+				swgObjectODB.remove(creature.getObjectID());
+				deleteCount++;
+			}
 		}
 		cursor.close();
 		
-		for(CreatureObject creature : deletedObjects) {
-			swgObjectODB.remove(creature.getObjectID());
-		}
-		
-		System.out.println("Deleted " + deletedObjects.size() + " creatures.");
+		System.out.println("Deleted " + deleteCount + " creatures.");
 	}
 
 	public void stop() {
