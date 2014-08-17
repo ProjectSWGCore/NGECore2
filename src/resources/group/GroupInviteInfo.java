@@ -19,47 +19,59 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package protocol.swg;
-
-import java.nio.ByteOrder;
-import java.util.List;
+package resources.group;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import engine.resources.common.CRC;
-import engine.resources.common.StringUtilities;
-import engine.resources.scene.Point3D;
+import engine.resources.common.AString;
+import engine.resources.objects.Delta;
 
-public class CreateClientPathMessage extends SWGMessage {
-
-	private List<Point3D> coordinates;
+public class GroupInviteInfo extends Delta {
 	
-	public CreateClientPathMessage(List<Point3D> coordinates) {
-		this.coordinates = coordinates;
+	private static final long serialVersionUID = 1L;
+	
+	private long senderId;
+	private AString senderName;
+	private long inviteCounter;
+	
+	public GroupInviteInfo(long senderId, String senderName) {
+		this.senderId = senderId;
+		this.senderName = new AString(senderName);
+		inviteCounter = 0;
 	}
 	
-	@Override
-	public void deserialize(IoBuffer data) {
-
-	}
-
-	@Override
-	public IoBuffer serialize() {
-		IoBuffer buffer = IoBuffer.allocate((coordinates.size() * 12) + 10).order(ByteOrder.LITTLE_ENDIAN);
-
-		buffer.putShort((short) 2);
-		buffer.putInt(CRC.StringtoCRC("CreateClientPathMessage"));
+	public GroupInviteInfo() {
 		
-		buffer.putInt(coordinates.size());
-		for(Point3D point : coordinates) {
-			buffer.putFloat(point.x);
-			buffer.putFloat(point.z);
-			buffer.putFloat(point.y);
+	}
+	
+	public long getSenderId() {
+		synchronized(objectMutex) {
+			return senderId;
 		}
-		
-		buffer.flip();
-		//StringUtilities.printBytes(buffer.array());
-		return buffer;
 	}
-
+	
+	public String getSenderName() {
+		synchronized(objectMutex) {
+			return senderName.get();
+		}
+	}
+	
+	public void setSender(long senderId, String senderName) {
+		synchronized(objectMutex) {
+			this.senderId = senderId;
+			this.senderName = new AString(senderName);
+			inviteCounter++;
+		}
+	}
+	
+	public byte[] getBytes() {
+		synchronized(objectMutex) {
+			IoBuffer buffer = createBuffer(16 + senderName.getBytes().length);
+			buffer.putLong(senderId);
+			buffer.put(senderName.getBytes());
+			buffer.putLong(inviteCounter);
+			return buffer.array();
+		}
+	}
+	
 }

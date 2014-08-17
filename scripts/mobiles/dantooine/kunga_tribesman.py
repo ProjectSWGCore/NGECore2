@@ -10,7 +10,7 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCreatureName('kunga_tribe_member')
+	mobileTemplate.setCreatureName('kunga_tribesman')
 	mobileTemplate.setLevel(71)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
@@ -47,5 +47,5 @@ def addTemplate(core):
 	lootGroupChance_2 = 35
 	mobileTemplate.addToLootGroups(lootPoolNames_2,lootPoolChances_2,lootGroupChance_2)
 	
-	core.spawnService.addMobileTemplate('kunga_tribe_member', mobileTemplate)
+	core.spawnService.addMobileTemplate('kunga_tribesman', mobileTemplate)
 	

@@ -23,8 +23,6 @@ package services.command;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteOrder;
 import java.util.Map;
@@ -36,7 +34,6 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import main.NGECore;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 
@@ -546,6 +543,7 @@ public class CommandService implements INetworkDispatch  {
 				
 				TangibleObject targetObject = (TangibleObject) target;
 				
+				// FIXME Attacks will work on allies without this
 //				if (!targetObject.isAttackableBy(actor)) {
 //					return false;
 //				}
