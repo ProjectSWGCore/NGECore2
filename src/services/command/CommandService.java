@@ -23,8 +23,6 @@ package services.command;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteOrder;
 import java.util.Map;
@@ -36,7 +34,6 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import main.NGECore;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 
@@ -80,8 +77,9 @@ public class CommandService implements INetworkDispatch  {
 		if (actor == null)
 			return false;
 		
-		if (actor.getClient() == null)
-			return false;
+//		if (actor.getClient() == null)
+//			return false;
+		// Please consider that AI is calling callCommand too. Thank you.
 		
 		if (command == null)
 			return false;
@@ -94,6 +92,7 @@ public class CommandService implements INetworkDispatch  {
 		
 		if (actor.hasCooldown(command.getCooldownGroup()) || actor.hasCooldown(command.getCommandName()))
 			return false;
+		
 		
 		// Causes this service method to return with false after equipping a rifle, not allowing to unequip it anymore
 		// because the client seems to consider rifles invalidweapons for an unkown reason
@@ -115,7 +114,7 @@ public class CommandService implements INetworkDispatch  {
 				return false;
 			}
 		}
-		
+
 		switch (command.getTargetType()) {
 			case 0: // Target Not Used For This Command
 				break;
@@ -251,7 +250,7 @@ public class CommandService implements INetworkDispatch  {
 			default:
 				break;
 		}
-		
+
 		switch (command.getTarget()) {
 			case 0: // Ally Only
 				if (target == null) {
@@ -318,7 +317,7 @@ public class CommandService implements INetworkDispatch  {
 				e.printStackTrace();
 			}
 		}
-		
+
 		if(command instanceof CombatCommand) {
 			try {
 				processCommand(actor, target, (BaseSWGCommand) command.clone(), actionCounter, commandArgs);
@@ -534,6 +533,7 @@ public class CommandService implements INetworkDispatch  {
 				
 				TangibleObject targetObject = (TangibleObject) target;
 				
+				// FIXME Attacks will work on allies without this
 //				if (!targetObject.isAttackableBy(actor)) {
 //					return false;
 //				}
@@ -688,18 +688,20 @@ public class CommandService implements INetworkDispatch  {
 	
 	public void processCommand(CreatureObject actor, SWGObject target, BaseSWGCommand command, int actionCounter, String commandArgs) {
 		
-		if (command.getGodLevel() > 0 || command.getCommandName().equals("setgodmode")) {	// TODO: When loading commands, simply don't put the "admin" characterAbility into the commands
+		if (command.getGodLevel() > 0 || command.getCommandName().equals("setgodmode") || command.getCommandName().equals("server") || command.getCommandName().equals("teleport") 
+				|| command.getCommandName().equals("teleportto") || command.getCommandName().equals("teleporttarget") ) {
 			String accessLevel = core.adminService.getAccessLevelFromDB(actor.getClient().getAccountId());
-			
-			if(accessLevel != null) {
+			String filePath = "accesslevels/" + accessLevel + ".txt";
+			System.out.println(command.getCommandName() + " was just used by an admin with accessLevel: " + accessLevel + ".");
+			if(FileUtilities.doesFileExist(filePath)) {
 				Scanner scanner;
 				try {
-					scanner = new Scanner(new File("accesslevels/" + accessLevel + ".txt"));
+					scanner = new Scanner(new File(filePath));
 					boolean levelHasCommand = false;
 					
 					while(scanner.hasNextLine()) {
 						String commandName = scanner.nextLine();
-						if(command.getCommandName().equals(commandName)) {
+						if(command.getCommandName().equalsIgnoreCase(commandName)) {
 							levelHasCommand = true;
 					    	break;
 						}
@@ -714,7 +716,8 @@ public class CommandService implements INetworkDispatch  {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-			}
+			} else
+				return;
 		}
 		
 		if (command.getCooldown() > 0f) {
@@ -750,9 +753,12 @@ public class CommandService implements INetworkDispatch  {
 	}
 	
 	public void processCombatCommand(CreatureObject attacker, SWGObject target, CombatCommand command, int actionCounter, String commandArgs) {
-		if (FileUtilities.doesFileExist("scripts/commands/combat/" + command.getCommandName().toLowerCase() + ".py")) {
+		if (FileUtilities.doesFileExist("scripts/commands/combat/specialline/" + command.getSpecialLine().toLowerCase() + ".py"))
+			core.scriptService.callScript("scripts/commands/combat/specialline/", command.getSpecialLine().toLowerCase(), "setup", core, attacker, target, command);
+		
+		if (FileUtilities.doesFileExist("scripts/commands/combat/" + command.getCommandName().toLowerCase() + ".py"))
 			core.scriptService.callScript("scripts/commands/combat/", command.getCommandName().toLowerCase(), "setup", core, attacker, target, command);
-		} else {
+		else {
 			if (FileUtilities.doesFileExist("scripts/commands/" + command.getCommandName().toLowerCase() + ".py")) {
 				System.err.print("Command " + command.getCommandName() + " is considered a combat command by the client but has a regular command script!");
 				core.scriptService.callScript("scripts/commands/", command.getCommandName().toLowerCase(), "run", core, attacker, target, "");

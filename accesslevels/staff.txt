@@ -1,7 +1,12 @@
-invulnerable
+gmforcecommand
+goto
+findobject
 teleport
 teleportto
-teleporttarget
-setspeed
-gmforcecommand
+invulnerable
+kill
 gmrevive
+setspeed
+planetwarp
+harmfull
+harmless

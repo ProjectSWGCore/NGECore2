@@ -39,6 +39,11 @@ public class IntangibleObject extends SWGObject implements Serializable {
 	
 	private transient IntangibleMessageBuilder messageBuilder;
 	
+	/*
+	 * FIXME: [MINOR] The engine code doesn't appear to use the position passed to it (at least for waypoints). When passed a not-null position,
+	 * the resulting Object comes back with a null position. The engine code in question is: engine.resource.objects.SWGObject
+	 * The bug seems to be non-fatal but appears like it might cause a memory leak.
+	 */
 	public IntangibleObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
 		super(objectID, planet, position, orientation, Template);
 	}

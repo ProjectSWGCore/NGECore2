@@ -906,11 +906,11 @@ public class CombatService implements INetworkDispatch {
 
 	private boolean attemptCombat(CreatureObject attacker, TangibleObject target) {
 		
-		if (attacker.isInStealth()) {
-			attacker.setInStealth(false);
+		if (attacker.isCloaked()) {
+			attacker.setCloaked(false);
 			
 			if (attacker.getPlayerObject() != null && attacker.getPlayerObject().getProfession().equals("spy_1a")) {
-				attacker.setRadarVisible(true);
+				attacker.setVisibleOnRadar(true);
 			}
 		}
 		

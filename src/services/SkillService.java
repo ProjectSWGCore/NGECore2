@@ -407,7 +407,7 @@ public class SkillService implements INetworkDispatch {
 		List<String> skills = new ArrayList<String>(creature.getSkills());
 		skills.stream().filter(s -> s.contains("expertise")).forEach(s -> removeSkill(creature, s));
 		
-		creature.getBuffList().stream().forEach(buff -> creature.removeBuff(buff));
+		creature.getBuffList().values().stream().forEach(buff -> creature.removeBuff(buff));
 	}
 	
 	public void sendRespecWindow(CreatureObject creature) {

@@ -30,10 +30,12 @@ public class ErrorMessage extends SWGMessage {
 
 	private String errorType;
 	private String errorMessage;
+	private boolean isFatal;
 	
-	public ErrorMessage(String errorType, String errorMessage) {
+	public ErrorMessage(String errorType, String errorMessage, boolean isFatal) {
 		this.errorType = errorType;
 		this.errorMessage = errorMessage;
+		this.isFatal = isFatal;
 	}
 	
 	public void deserialize(IoBuffer data) {
@@ -47,7 +49,7 @@ public class ErrorMessage extends SWGMessage {
 		result.putInt(Opcodes.ErrorMessage);
 		result.put(getAsciiString(errorType));
 		result.put(getAsciiString(errorMessage));
-		result.put((byte)0);
+		result.put((byte) (isFatal ? 1 : 0));
 		
 		return result.flip();
 	}

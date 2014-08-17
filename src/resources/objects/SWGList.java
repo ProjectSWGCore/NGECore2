@@ -441,6 +441,7 @@ public class SWGList<E> implements List<E>, Serializable {
 	}
 	
 	private byte[] item(int type, int index, byte[] data, boolean useIndex, boolean useData) {
+
 		int size = 1 + ((useIndex) ? 2 : 0) + ((useData) ? data.length : 0);
 		
 		IoBuffer buffer = Delta.createBuffer(size);

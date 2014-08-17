@@ -41,7 +41,7 @@ import protocol.swg.CommPlayerMessage;
 import protocol.swg.ObjControllerMessage;
 import protocol.swg.PlayClientEffectObjectTransformMessage;
 import protocol.swg.objectControllerObjects.NpcConversationMessage;
-import protocol.swg.objectControllerObjects.QuestTaskTimerMessage;
+import protocol.swg.objectControllerObjects.QuestTaskCounterMessage;
 import resources.common.OutOfBand;
 import resources.common.SpawnPoint;
 import resources.datatables.FactionStatus;

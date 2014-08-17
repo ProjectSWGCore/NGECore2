@@ -58,7 +58,7 @@ public class CreateClientPathMessage extends SWGMessage {
 		}
 		
 		buffer.flip();
-		StringUtilities.printBytes(buffer.array());
+		//StringUtilities.printBytes(buffer.array());
 		return buffer;
 	}
 

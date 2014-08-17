@@ -43,7 +43,7 @@ public class WaypointObject extends IntangibleObject implements IDelta, Serializ
 	public static final byte BLUE = 1, GREEN = 2, ORANGE = 3, YELLOW = 4, PURPLE = 5, WHITE = 6, MULTICOLOR = 7;
 	
 	public WaypointObject(long objectID, Planet planet, Point3D position) { 
-		super(objectID, planet, new Point3D(0, 0, 0), new Quaternion(0, 0, 0, 1), "object/waypoint/shared_waypoint.iff");
+		super(objectID, planet, position, new Quaternion(0, 0, 0, 1), "object/waypoint/shared_waypoint.iff");
 	}
 	
 	public WaypointObject() {
@@ -153,19 +153,17 @@ public class WaypointObject extends IntangibleObject implements IDelta, Serializ
 		
 	}
 	
-	public byte[] getBytes() {
-		synchronized(objectMutex) {
-			IoBuffer buffer = Baseline.createBuffer(38 + StringUtilities.getUnicodeString(getName()).length);
-			buffer.putInt(getCellNumber());
-			buffer.put(Baseline.toBytes(getBaseline(3).get("position")));
-			buffer.putLong(getTargetId());
-			buffer.putInt(getPlanetCrc());
-			buffer.put(StringUtilities.getUnicodeString(getName()));
-			buffer.putLong(getObjectID());
-			buffer.put(getColor());
-			buffer.put(Baseline.getBoolean(isActive()));
-			return buffer.flip().array();
-		}
+	public synchronized byte[] getBytes() {
+		IoBuffer buffer = Baseline.createBuffer(38 + StringUtilities.getUnicodeString(getName()).length);
+		buffer.putInt(getCellNumber());
+		buffer.put(Baseline.toBytes(getBaseline(3).get("position")));
+		buffer.putLong(getTargetId());
+		buffer.putInt(getPlanetCrc());
+		buffer.put(StringUtilities.getUnicodeString(getName()));
+		buffer.putLong(getObjectID());
+		buffer.put(getColor());
+		buffer.put(Baseline.getBoolean(isActive()));
+		return buffer.flip().array();
 	}
 	
 	@Deprecated public int getCellId() { return getCellNumber(); }

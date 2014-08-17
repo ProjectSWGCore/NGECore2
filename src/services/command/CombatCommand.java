@@ -62,6 +62,7 @@ public class CombatCommand extends BaseSWGCommand {
 	private float vigorCost; // for commando kill meter and bm specials
 	private float criticalChance;
 	private int attack_rolls;
+	private String specialLine;
 	
 	private String[] defaultAnimations = new String[]{};
 	private String[] oneHandedAnimations = new String[]{};
@@ -153,6 +154,7 @@ public class CombatCommand extends BaseSWGCommand {
 						damageType = ((Integer) visitor.getObject(i, 82)).byteValue();
 						elementalType = ((Integer) visitor.getObject(i, 83));
 						elementalValue = (Integer) visitor.getObject(i, 84);
+						setSpecialLine((String) visitor.getObject(i, 87));
 						performanceSpam = (String) visitor.getObject(i, 89);
 						hitSpam = ((Integer) visitor.getObject(i, 90)).byteValue();
 						attack_rolls = (Integer) visitor.getObject(i, 93);
@@ -671,6 +673,14 @@ public class CombatCommand extends BaseSWGCommand {
 		}
 		
 		return animations[new Random().nextInt(animations.length)];
+	}
+
+	public String getSpecialLine() {
+		return specialLine;
+	}
+
+	public void setSpecialLine(String specialLine) {
+		this.specialLine = specialLine;
 	}
 	
 }

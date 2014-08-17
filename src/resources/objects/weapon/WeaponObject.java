@@ -82,7 +82,7 @@ public class WeaponObject extends TangibleObject implements Serializable {
 	@Override
 	public Baseline getBaseline6() {
 		Baseline baseline = super.getBaseline6();
-		baseline.put("weaponType", 6);
+		baseline.put("weaponType", WeaponType.UNARMED);
 		return baseline;
 	}
 	

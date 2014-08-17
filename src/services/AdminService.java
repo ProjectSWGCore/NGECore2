@@ -44,7 +44,7 @@ public class AdminService implements INetworkDispatch {
 		PreparedStatement preparedStatement;
 		
 		try {
-			preparedStatement = NGECore.getInstance().getDatabase1().preparedStatement("SELECT * FROM accounts WHERE id=" + id + "");
+			preparedStatement = core.getDatabase1().preparedStatement("SELECT * FROM accounts WHERE id=" + id + "");
 			ResultSet resultSet = preparedStatement.executeQuery();
 			if(resultSet.next())
 				accessLevel = resultSet.getString("accessLevel");
@@ -53,6 +53,22 @@ public class AdminService implements INetworkDispatch {
 		}
 		
 		return accessLevel;
+	}
+	
+	public String getAccountNameFromDB(long id) {
+		String accountName = null;
+		PreparedStatement preparedStatement;
+		
+		try {
+			preparedStatement = core.getDatabase1().preparedStatement("SELECT * FROM accounts WHERE id=" + id + "");
+			ResultSet resultSet = preparedStatement.executeQuery();
+			if(resultSet.next())
+				accountName = resultSet.getString("user");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return accountName;
 	}
 	
 	@Override

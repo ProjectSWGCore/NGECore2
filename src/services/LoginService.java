@@ -105,8 +105,9 @@ public class LoginService implements INetworkDispatch{
 				
 				String user        = clientID.getAccountName();
 				String pass        = clientID.getPassword();
+				String version     = clientID.getVersion();
 				int id             = LoginProvider.getAccountId(user, pass, session.getRemoteAddress().toString());
-				System.out.println("LOGIN: " + user + " login attempt "+session.getRemoteAddress().toString()+" returned " + id);
+				System.out.println("LOGIN: " + user + " login attempt " + session.getRemoteAddress().toString() + " returned " + id);
 				
 				if (id < 0)  {
 					
@@ -124,7 +125,7 @@ public class LoginService implements INetworkDispatch{
 					}
 					
 					// No matter what, this will always show that the login server is unavailable at this time. Removing the error message will just keep the connecting message up.
-					ErrorMessage errMsg = new ErrorMessage("Wrong Password", "The username or password you entered was incorrect.");
+					ErrorMessage errMsg = new ErrorMessage("Wrong Password", "The username or password you entered was incorrect.", false);
 					session.write(errMsg.serialize());
 					
 					Disconnect disconnect = new Disconnect((Integer)session.getAttribute("connectionId"), 6);
@@ -135,19 +136,30 @@ public class LoginService implements INetworkDispatch{
 					return;
 				}
 				
+				if(!version.equals("20111130-15:46")) {
+					ErrorMessage clientErr = new ErrorMessage("Invalid Client", "The version of your client is invalid.", true);
+					session.write(clientErr.serialize());
+					
+					Disconnect disconnect = new Disconnect((Integer)session.getAttribute("connectionId"), 6);
+					session.write(disconnect);
+					return;
+				}
+				
 				Client client = new Client(session.getRemoteAddress());
 				client.setAccountName(user);
 				client.setPassword(pass);
 				client.setSessionKey(generateSessionKey());
 				client.setAccountId(id);
 				client.setSession(session);
+				//String accessLevel = core.adminService.getAccessLevelFromDB(id);
+				//if (accessLevel != null && !accessLevel.equals("")) { client.setAccessLevel(accessLevel); }
 				
 				core.addClient(session, client);
 				
 				if (!core.getActiveConnectionsMap().containsKey(session)) {
 					Disconnect disconnect = new Disconnect((Integer)session.getAttribute("connectionId"), 6);
 					session.write(disconnect);
-					ErrorMessage errMsg = new ErrorMessage("Error Logging In", "Your client could not be added to the connections at this time.");
+					ErrorMessage errMsg = new ErrorMessage("Error Logging In", "Your client could not be added to the connections at this time.", false);
 					session.write(errMsg.serialize());
 					session.close(false);
 					
@@ -163,7 +175,7 @@ public class LoginService implements INetworkDispatch{
 
 				LoginClientToken clientToken = new LoginClientToken(client.getSessionKey(), id, user);
 				CharacterCreationDisabled charCreationDisabled = new CharacterCreationDisabled(0);
-				StationIdHasJediSlot jediSlot = new StationIdHasJediSlot(false);
+				StationIdHasJediSlot jediSlot = new StationIdHasJediSlot(false);	// Ziggy - shows a pop-up at the character selection screen, saying that this account has an unused Unlocked Slot when set to true.
 				ServerNowEpochTime time = new ServerNowEpochTime((int) (System.currentTimeMillis() / 1000));
 				//System.out.println("ServerNowEpochTime " + (int) (System.currentTimeMillis() / 1000));
 				//tools.CharonPacketUtils.printAnalysis(time.serialize(), "ServerNowEpochTime");
@@ -370,14 +382,5 @@ public class LoginService implements INetworkDispatch{
 		return clusterStatus;
 	}
 	
-	/**
-	 * Checks if User has correct client version.
-	 * @param version Client Version String
-	 */
-	private boolean checkVersion(String version) {
-		System.out.println("Version Received: " + version);
-		return true;
-	}
-
 }
 	
