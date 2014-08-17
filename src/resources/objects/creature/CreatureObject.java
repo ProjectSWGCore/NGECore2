@@ -825,7 +825,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	@SuppressWarnings("unchecked")
 	public SWGList<Integer> getAttribs() {
-		return (SWGList<Integer>) getBaseline(6).get("attribs");
+		return (SWGList<Integer>) getBaseline(6).get("attributes");
 	}
 	
 	public void resetAttribs() {
@@ -878,7 +878,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	@SuppressWarnings("unchecked")
 	public SWGList<Integer> getMaxAttribs() {
-		return (SWGList<Integer>) getBaseline(6).get("maxAttribs");
+		return (SWGList<Integer>) getBaseline(6).get("maxAttributes");
 	}
 	
 	public int getMaxHealth() {
