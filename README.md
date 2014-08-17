@@ -1,5 +1,4 @@
-NGECore2
-======== 
+# NGECore2
 
 The ProjectSWG Open Source Project's aim is to create a server emulator for the sandbox MMO Star Wars Galaxies at its final publish before
 shutdown on 15/12/2011.
@@ -9,17 +8,23 @@ is not split between several small servers. This restriction will not be lifted.
 
 The Engine (NGEngine) is a closed source library and is only licensed for use with this project. The Core (NGECore2) is licensed under the L-GPL License. By using NGECore2, you agree to the terms of both licenses.
 
-Requirements for Building the Core:
-======== 
+## Requirements for Building the Core:
 
 * JDK 8
-* A Java 8 compatible IDE like Eclipse Kepler (https://wiki.eclipse.org/JDT/Eclipse_Java_8_Support_For_Kepler)
+* A Java 8 compatible IDE like Eclipse Kepler 
+  * https://wiki.eclipse.org/JDT/Eclipse_Java_8_Support_For_Kepler
 * A valid Star Wars Galaxies Installation with the final patch
-* Postgresql server (www.postgresql.org)
-* (optional for postgres management) PGAdmin (http://www.pgadmin.org/)
-* TRE Explorer(http://forum.modsource.org/index.php?PHPSESSID=bf02fd8244123807f4716c1686abb59f&action=dlattach;topic=33.0;attach=49)
+* Postgresql server 
+  * http://www.postgresql.org
+* PGAdmin (optional, but makes managing the database easier)
+  * http://www.pgadmin.org/
+* TRE Explorer
+  * http://forum.modsource.org/index.php?PHPSESSID=bf02fd8244123807f4716c1686abb59f&action=dlattach;topic=33.0;attach=49
 * Github account
-* (optional for windows) Github for Windows(http://windows.github.com/)
+* Github for Windows (optional)
+  * http://windows.github.com/
+
+### Setting up the core
 
 1. Once you have met the requirements, fork the project and then proceed to clone your copy of the repository to your computer.
 2. Import the project to Eclipse.
@@ -46,8 +51,7 @@ Requirements for Building the Core:
 
 You are now ready to run the core!
 
-Contributing and Submitting patches
-========
+## Contributing and Submitting patches
 
 To contribute, commit your changes to your fork of the project and then submit a pull request here:
 
@@ -57,5 +61,5 @@ Your changes will be reviewed by other developers. Once the changes are approved
 
 Please prefix all commits with Added, Changed, Removed or Fixed. If you don't have enough room for multiple changes, use the extended description. Try not to bundle multiple changes into one vague line (ie. "Changed various combat things"). Try to make all commit messages understandable by non-programmers.
 
-* For more information please visit the wiki: https://github.com/ProjectSWGCore/NGECore2/wiki
-* Documentation can be found here: http://projectswg.com/doc/
+* For more information please visit the wiki at https://github.com/ProjectSWGCore/NGECore2/wiki
+* Documentation can be found at http://projectswg.com/doc/
