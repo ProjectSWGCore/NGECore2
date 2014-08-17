@@ -26,12 +26,14 @@ The Engine (NGEngine) is a closed source library and is only licensed for use wi
 
 ### Setting up the core
 
+A video tutorial of this process can be viewed at http://www.projectswg.com/showthread.php?t=40304
+
 1. Once you have met the requirements, fork the project and then proceed to clone your copy of the repository to your computer.
 2. Import the project to Eclipse.
 3. Create a postgres DB and restore the nge.backup file. Depending on each update, you may or may not have to repeat this process. Once restored, create an account for yourself in the accounts table of your database, and update the connectionServers table with the appropriate IP address of your server, in the address field. 
 4. Copy nge.cfg.example to nge.cfg, and add your DB credentials and name.
-5. Create a folder named "clientdata" inside your NGECore2 git repo.
-5. Open TRE Explorer or Jawa Toolbox and open the sku0_client.toc in your SWG folder. Export the following folders to your clientdata folder:
+5. Create a directory named "clientdata" inside your NGECore2 git repo.
+5. Open TRE Explorer and proceed open the sku0_client.toc in your SWG directory. Export the following directories to your clientdata directory:
 
 * abstract
 * appearance
@@ -53,10 +55,8 @@ You are now ready to run the core!
 
 ## Contributing and Submitting patches
 
-To contribute, commit your changes to your fork of the project and then submit a pull request here:
-
-    https://github.com/ProjectSWGCore/NGECore2/compare/
-    
+To contribute, commit your changes to your fork of the project and then submit a pull request. 
+ 
 Your changes will be reviewed by other developers. Once the changes are approved, your pull request will be merged into the main repository.
 
 Please prefix all commits with Added, Changed, Removed or Fixed. If you don't have enough room for multiple changes, use the extended description. Try not to bundle multiple changes into one vague line (ie. "Changed various combat things"). Try to make all commit messages understandable by non-programmers.
