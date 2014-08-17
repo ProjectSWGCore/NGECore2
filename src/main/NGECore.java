@@ -674,6 +674,7 @@ public class NGECore {
 			packetLogger = new CharonPacketLogger();
 
 		didServerCrash = false;
+		cleanupCreatureODB(); //just in case we crashed previously...
 		System.out.println("Started Server.");
 		setGalaxyStatus(GalaxyStatus.Online);
 
@@ -836,6 +837,9 @@ public class NGECore {
 	}
 
 	//our lone private function
+	//TODO: we could speed this up if we put all the creature object id's into a list
+	//and then replace the call to playerExists with a function that selects object id's 
+	//that are not in the list of object id's - those would be returned and deleted all at once
 	private void cleanupCreatureODB() {
 		ODBCursor cursor = swgObjectODB.getCursor();
 
