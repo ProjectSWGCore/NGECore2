@@ -185,7 +185,7 @@ public class AIActor {
 				try {
 					if (AIactive){
 						// this is difficult, should NPC not fight when no player is near? || creature.getObservers().isEmpty()
-						if(creature == null || creature.getFactionStatus()!=FactionStatus.Combatant || creature.isInCombat())
+						if(creature == null || creature.getFactionStatus()!=FactionStatus.Combatant || creature.getObservers().isEmpty() || creature.isInCombat())
 							return;
 						if(this.getFollowObject() != null){ // Don't search if actor has valid target
 							CreatureObject addedCreature = null;

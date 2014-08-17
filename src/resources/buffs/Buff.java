@@ -21,8 +21,6 @@
  ******************************************************************************/
 package resources.buffs;
 
-import java.io.Serializable;
-import java.nio.ByteOrder;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -30,50 +28,43 @@ import java.util.concurrent.TimeUnit;
 import main.NGECore;
 
 import org.apache.mina.core.buffer.IoBuffer;
-import org.apache.mina.core.buffer.SimpleBufferAllocator;
 
 import resources.objects.creature.CreatureObject;
 
-import com.sleepycat.persist.model.NotPersistent;
+import engine.clientdata.ClientFileManager;
+import engine.clientdata.visitors.DatatableVisitor;
+import engine.resources.objects.Delta;
 
-import engine.resources.common.CRC;
-import engine.resources.objects.IDelta;
-import engine.resources.objects.SWGObject;
-
-public class Buff implements IDelta, Serializable {
+public class Buff extends Delta {
 	
 	private static final long serialVersionUID = 1L;
-	@NotPersistent
-	private transient static SimpleBufferAllocator bufferPool = new SimpleBufferAllocator();
-	private String group1, group2;
-	private int priority;
-	private float duration;
-	private String buffName;
-	private long ownerId;
-	private String effect1Name, effect2Name, effect3Name, effect4Name, effect5Name;
+	
+	private String group1 = "", group2 = "";
+	private int priority = 0;
+	private float duration = 0;
+	private String buffName = "";
+	private long ownerId = 0;
+	private String effect1Name = "", effect2Name = "", effect3Name = "", effect4Name = "", effect5Name = "";
 	private float effect1Value, effect2Value, effect3Value, effect4Value, effect5Value;
-	private String callback;
-	private String particleEffect;
-	private boolean isDebuff;
-	private boolean removeOnDeath;
-	private boolean isRemovableByPlayer;
-	private int maxStacks;
-	private boolean isPersistent;
-	private boolean removeOnRespec;
-	private boolean aiRemoveOnEndCombat;
-	private boolean decayOnPvPDeath;
-	private long startTime;
-	private int totalPlayTime;
+	private String callback = "";
+	private String particleEffect = "";
+	private boolean isDebuff = false;
+	private boolean removeOnDeath = false;
+	private boolean isRemovableByPlayer = false;
+	private int maxStacks = 0;
+	private boolean isPersistent = false;
+	private boolean removeOnRespec = false;
+	private boolean aiRemoveOnEndCombat = false;
+	private boolean decayOnPvPDeath = false;
+	private long startTime = 0;
+	private int totalPlayTime = 0;
 	private byte decayCounter = 0;
-	@NotPersistent
 	private transient ScheduledFuture<?> removalTask;
 	private int stacks = 1;
-	private long groupBufferId;
-	private int buffCRC;
+	private long groupBufferId = 0;
 	
 	public Buff(Buff baseBuff, long ownerId) {
 		this.buffName = baseBuff.getBuffName();
-		this.buffCRC = baseBuff.getBuffCRC();
 		this.group1 = baseBuff.getGroup1();
 		this.group2 = baseBuff.getGroup2();
 		this.priority = baseBuff.getPriority();
@@ -100,398 +91,502 @@ public class Buff implements IDelta, Serializable {
 		this.decayOnPvPDeath = baseBuff.isDecayOnPvPDeath();
 	}
 	
-	/*public Buff(String buffName, long ownerId) {
-		
+	public Buff(String buffName, long ownerId) {
 		this.buffName = buffName;
 		this.ownerId = ownerId;
-		this.buffCRC = CRC.StringtoCRC(buffName);
-
+		
 		DatatableVisitor visitor;
 		
 		try {
-			
 			visitor = ClientFileManager.loadFile("datatables/buff/buff.iff", DatatableVisitor.class);
-			for(int i = 0; i < visitor.getRowCount(); i++) {
 			
-			if(visitor.getObject(i, 0) != null)
-				if(((String) visitor.getObject(i, 0)).equalsIgnoreCase(buffName)) {
-					
-					group1 = (String) visitor.getObject(i, 1);
-					group2 = (String) visitor.getObject(i, 2);
-					priority = (int) visitor.getObject(i, 4);
-					duration = (Float) visitor.getObject(i, 6);
-					effect1Name = (String) visitor.getObject(i, 7);
-					effect1Value = (Float) visitor.getObject(i, 8);
-					effect2Name = (String) visitor.getObject(i, 9);
-					effect2Value = (Float) visitor.getObject(i, 10);
-					effect3Name = (String) visitor.getObject(i, 11);
-					effect3Value = (Float) visitor.getObject(i, 12);
-					effect4Name = (String) visitor.getObject(i, 13);
-					effect4Value = (Float) visitor.getObject(i, 14);
-					effect5Name = (String) visitor.getObject(i, 15);
-					effect5Value = (Float) visitor.getObject(i, 16);
-					callback = (String) visitor.getObject(i, 18);
-					particleEffect = (String) visitor.getObject(i, 19);
-					isDebuff = (Boolean) visitor.getObject(i, 22);
-					removeOnDeath = (Integer) visitor.getObject(i, 25) != 0;
-					isRemovableByPlayer = (Integer) visitor.getObject(i, 26) != 0;
-					maxStacks = (Integer) visitor.getObject(i, 28);
-					isPersistent = (Integer) visitor.getObject(i, 29) != 0;
-					removeOnRespec = (Integer) visitor.getObject(i, 31) != 0;
-					aiRemoveOnEndCombat = (Integer) visitor.getObject(i, 32) != 0;
-					decayOnPvPDeath = (Integer) visitor.getObject(i, 33) != 0;
-					
+			for (int i = 0; i < visitor.getRowCount(); i++) {
+				if (visitor.getObject(i, 0) != null) {
+					if (((String) visitor.getObject(i, 0)).equalsIgnoreCase(buffName)) {
+						group1 = (String) visitor.getObject(i, 1);
+						group2 = (String) visitor.getObject(i, 2);
+						priority = (int) visitor.getObject(i, 4);
+						duration = (Float) visitor.getObject(i, 6);
+						effect1Name = (String) visitor.getObject(i, 7);
+						effect1Value = (Float) visitor.getObject(i, 8);
+						effect2Name = (String) visitor.getObject(i, 9);
+						effect2Value = (Float) visitor.getObject(i, 10);
+						effect3Name = (String) visitor.getObject(i, 11);
+						effect3Value = (Float) visitor.getObject(i, 12);
+						effect4Name = (String) visitor.getObject(i, 13);
+						effect4Value = (Float) visitor.getObject(i, 14);
+						effect5Name = (String) visitor.getObject(i, 15);
+						effect5Value = (Float) visitor.getObject(i, 16);
+						callback = (String) visitor.getObject(i, 18);
+						particleEffect = (String) visitor.getObject(i, 19);
+						isDebuff = (Boolean) visitor.getObject(i, 22);
+						removeOnDeath = (Integer) visitor.getObject(i, 25) != 0;
+						isRemovableByPlayer = (Integer) visitor.getObject(i, 26) != 0;
+						maxStacks = (Integer) visitor.getObject(i, 28);
+						isPersistent = (Integer) visitor.getObject(i, 29) != 0;
+						removeOnRespec = (Integer) visitor.getObject(i, 31) != 0;
+						aiRemoveOnEndCombat = (Integer) visitor.getObject(i, 32) != 0;
+						decayOnPvPDeath = (Integer) visitor.getObject(i, 33) != 0;
+					}
 				}
-			
 			}
-			
 		} catch (InstantiationException | IllegalAccessException e) {
 			e.printStackTrace();
 		}
-	}*/
-
-	public Buff() { }
+	}
 	
-	@Override
-	public void init(SWGObject object) {
-		// TODO Auto-generated method stub
+	public Buff() {
 		
 	}
 	
-	@Override
 	public byte[] getBytes() {
-		
-		IoBuffer buffer = bufferPool.allocate(28, false).order(ByteOrder.LITTLE_ENDIAN);
-		
-		buffer.putInt(CRC.StringtoCRC(buffName.toLowerCase()));
-		if(duration > 0) {
-			buffer.putInt((int) (totalPlayTime + getRemainingDuration()));		
-			buffer.putInt(0);
-			buffer.putInt((int) duration);
-		} else {
-			buffer.putInt(-1);
-           	buffer.putInt(0);
-			buffer.putInt(0);
+		synchronized(objectMutex) {
+			IoBuffer buffer = createBuffer(24);
+			if (duration > 0) {
+				buffer.putInt((int) (totalPlayTime + getRemainingDuration()));		
+				buffer.putInt(0);
+				buffer.putInt((int) duration);
+			} else {
+				buffer.putInt(-1);
+				buffer.putInt(0);
+				buffer.putInt(0);
+			}
+			buffer.putLong(ownerId);
+			buffer.putInt(stacks);
+			buffer.flip();
+			return buffer.array();
 		}
-		buffer.putLong(ownerId);
-		buffer.putInt(stacks);	// stacks
-		
-		buffer.flip();
-
-		return buffer.array();
-		
 	}
-
+	
+	
 	public String getGroup1() {
-		return group1;
+		synchronized(objectMutex) {
+			return group1;
+		}
 	}
 	
 	public void setGroup1(String group1) {
-		this.group1 = group1;
+		synchronized(objectMutex) {
+			this.group1 = group1;
+		}
 	}
- 
+	
+	public String getGroup2() {
+		synchronized(objectMutex) {
+			return group2;
+		}
+	}
+	
+	public void setGroup2(String group2) {
+		synchronized(objectMutex) {
+			this.group2 = group2;
+		}
+	}
+	
 	public int getPriority() {
-		return priority;
+		synchronized(objectMutex) {
+			return priority;
+		}
 	}
 	
 	public void setPriority(int priority) {
-		this.priority = priority;
+		synchronized(objectMutex) {
+			this.priority = priority;
+		}
 	}
 	
 	public float getDuration() {
-		return duration;
+		synchronized(objectMutex) {
+			return duration;
+		}
 	}
-
+	
 	public void setDuration(float duration) {
-		this.duration = duration;
+		synchronized(objectMutex) {
+			this.duration = duration;
+		}
 	}
-
+	
 	public String getBuffName() {
-		return buffName;
+		synchronized(objectMutex) {
+			return buffName;
+		}
 	}
-
+	
 	public void setBuffName(String buffName) {
-		this.buffName = buffName;
+		synchronized(objectMutex) {
+			this.buffName = buffName;
+		}
 	}
-
+	
 	public long getOwnerId() {
-		return ownerId;
+		synchronized(objectMutex) {
+			return ownerId;
+		}
 	}
-
+	
 	public void setOwnerId(long ownerId) {
-		this.ownerId = ownerId;
+		synchronized(objectMutex) {
+			this.ownerId = ownerId;
+		}
 	}
-
+	
 	public String getEffect1Name() {
-		return effect1Name;
+		synchronized(objectMutex) {
+			return effect1Name;
+		}
 	}
-
+	
 	public void setEffect1Name(String effect1Name) {
-		this.effect1Name = effect1Name;
+		synchronized(objectMutex) {
+			this.effect1Name = effect1Name;
+		}
 	}
-
+	
 	public String getEffect2Name() {
-		return effect2Name;
+		synchronized(objectMutex) {
+			return effect2Name;
+		}
 	}
-
+	
 	public void setEffect2Name(String effect2Name) {
-		this.effect2Name = effect2Name;
+		synchronized(objectMutex) {
+			this.effect2Name = effect2Name;
+		}
 	}
-
+	
 	public String getEffect3Name() {
-		return effect3Name;
+		synchronized(objectMutex) {
+			return effect3Name;
+		}
 	}
-
+	
 	public void setEffect3Name(String effect3Name) {
-		this.effect3Name = effect3Name;
+		synchronized(objectMutex) {
+			this.effect3Name = effect3Name;
+		}
 	}
-
+	
 	public String getEffect4Name() {
-		return effect4Name;
+		synchronized(objectMutex) {
+			return effect4Name;
+		}
 	}
-
+	
 	public void setEffect4Name(String effect4Name) {
-		this.effect4Name = effect4Name;
+		synchronized(objectMutex) {
+			this.effect4Name = effect4Name;
+		}
 	}
-
+	
 	public String getEffect5Name() {
-		return effect5Name;
+		synchronized(objectMutex) {
+			return effect5Name;
+		}
 	}
-
+	
 	public void setEffect5Name(String effect5Name) {
-		this.effect5Name = effect5Name;
+		synchronized(objectMutex) {
+			this.effect5Name = effect5Name;
+		}
 	}
-
+	
 	public float getEffect1Value() {
-		return effect1Value;
+		synchronized(objectMutex) {
+			return effect1Value;
+		}
 	}
-
+	
 	public void setEffect1Value(float effect1Value) {
-		this.effect1Value = effect1Value;
+		synchronized(objectMutex) {
+			this.effect1Value = effect1Value;
+		}
 	}
-
+	
 	public float getEffect2Value() {
-		return effect2Value;
+		synchronized(objectMutex) {
+			return effect2Value;
+		}
 	}
-
+	
 	public void setEffect2Value(float effect2Value) {
-		this.effect2Value = effect2Value;
+		synchronized(objectMutex) {
+			this.effect2Value = effect2Value;
+		}
 	}
-
+	
 	public float getEffect3Value() {
-		return effect3Value;
+		synchronized(objectMutex) {
+			return effect3Value;
+		}
 	}
-
+	
 	public void setEffect3Value(float effect3Value) {
-		this.effect3Value = effect3Value;
+		synchronized(objectMutex) {
+			this.effect3Value = effect3Value;
+		}
 	}
-
+	
 	public float getEffect4Value() {
-		return effect4Value;
+		synchronized(objectMutex) {
+			return effect4Value;
+		}
 	}
-
+	
 	public void setEffect4Value(float effect4Value) {
-		this.effect4Value = effect4Value;
+		synchronized(objectMutex) {
+			this.effect4Value = effect4Value;
+		}
 	}
-
+	
 	public float getEffect5Value() {
-		return effect5Value;
+		synchronized(objectMutex) {
+			return effect5Value;
+		}
 	}
-
+	
 	public void setEffect5Value(float effect5Value) {
-		this.effect5Value = effect5Value;
+		synchronized(objectMutex) {
+			this.effect5Value = effect5Value;
+		}
 	}
 	
 	public String getCallback() {
-		return callback;
+		synchronized(objectMutex) {
+			return callback;
+		}
 	}
 	
 	public void setCallback(String callback) {
-		this.callback = callback;
+		synchronized(objectMutex) {
+			this.callback = callback;
+		}
 	}
-
+	
 	public String getParticleEffect() {
-		return particleEffect;
+		synchronized(objectMutex) {
+			return particleEffect;
+		}
 	}
-
+	
 	public void setParticleEffect(String particleEffect) {
-		this.particleEffect = particleEffect;
+		synchronized(objectMutex) {
+			this.particleEffect = particleEffect;
+		}
 	}
-
+	
 	public boolean isDebuff() {
-		return isDebuff;
+		synchronized(objectMutex) {
+			return isDebuff;
+		}
 	}
-
+	
 	public void setDebuff(boolean isDebuff) {
-		this.isDebuff = isDebuff;
+		synchronized(objectMutex) {
+			this.isDebuff = isDebuff;
+		}
 	}
-
+	
 	public boolean isRemoveOnDeath() {
-		return removeOnDeath;
+		synchronized(objectMutex) {
+			return removeOnDeath;
+		}
 	}
-
+	
 	public void setRemoveOnDeath(boolean removeOnDeath) {
-		this.removeOnDeath = removeOnDeath;
+		synchronized(objectMutex) {
+			this.removeOnDeath = removeOnDeath;
+		}
 	}
-
+	
 	public boolean isRemovableByPlayer() {
-		return isRemovableByPlayer;
+		synchronized(objectMutex) {
+			return isRemovableByPlayer;
+		}
 	}
-
+	
 	public void setRemovableByPlayer(boolean isRemovableByPlayer) {
-		this.isRemovableByPlayer = isRemovableByPlayer;
+		synchronized(objectMutex) {
+			this.isRemovableByPlayer = isRemovableByPlayer;
+		}
 	}
-
+	
 	public int getMaxStacks() {
-		return maxStacks;
+		synchronized(objectMutex) {
+			return maxStacks;
+		}
 	}
-
+	
 	public void setMaxStacks(int maxStacks) {
-		this.maxStacks = maxStacks;
+		synchronized(objectMutex) {
+			this.maxStacks = maxStacks;
+		}
 	}
-
+	
 	public boolean isPersistent() {
-		return isPersistent;
+		synchronized(objectMutex) {
+			return isPersistent;
+		}
 	}
-
+	
 	public void setPersistent(boolean isPersistent) {
-		this.isPersistent = isPersistent;
+		synchronized(objectMutex) {
+			this.isPersistent = isPersistent;
+		}
 	}
-
+	
 	public boolean isRemoveOnRespec() {
-		return removeOnRespec;
+		synchronized(objectMutex) {
+			return removeOnRespec;
+		}
 	}
-
+	
 	public void setRemoveOnRespec(boolean removeOnRespec) {
-		this.removeOnRespec = removeOnRespec;
+		synchronized(objectMutex) {
+			this.removeOnRespec = removeOnRespec;
+		}
 	}
-
+	
 	public boolean isAiRemoveOnEndCombat() {
-		return aiRemoveOnEndCombat;
+		synchronized(objectMutex) {
+			return aiRemoveOnEndCombat;
+		}
 	}
-
+	
 	public void setAiRemoveOnEndCombat(boolean aiRemoveOnEndCombat) {
-		this.aiRemoveOnEndCombat = aiRemoveOnEndCombat;
+		synchronized(objectMutex) {
+			this.aiRemoveOnEndCombat = aiRemoveOnEndCombat;
+		}
 	}
-
+	
 	public boolean isDecayOnPvPDeath() {
-		return decayOnPvPDeath;
+		synchronized(objectMutex) {
+			return decayOnPvPDeath;
+		}
 	}
-
+	
 	public void setDecayOnPvPDeath(boolean decayOnPvPDeath) {
-		this.decayOnPvPDeath = decayOnPvPDeath;
+		synchronized(objectMutex) {
+			this.decayOnPvPDeath = decayOnPvPDeath;
+		}
 	}
-
+	
 	public void setStartTime() {
-		this.startTime = System.currentTimeMillis();
+		synchronized(objectMutex) {
+			this.startTime = System.currentTimeMillis();
+		}
 	}
 	
 	public long getStartTime() {
-		return startTime;
+		synchronized(objectMutex) {
+			return startTime;
+		}
 	}
 	
 	public int getRemainingDuration() {
-		
-		long currentTime = System.currentTimeMillis();
-		long timeDiff = (currentTime - startTime) / 1000;
-		int remaining = (int) (duration - timeDiff);
-		for(int i = 0; i < decayCounter; i++) {
-			remaining /= 2;
+		synchronized(objectMutex) {
+			long currentTime = System.currentTimeMillis();
+			long timeDiff = (currentTime - startTime) / 1000;
+			int remaining = (int) (duration - timeDiff);
+			
+			for (int i = 0; i < decayCounter; i++) {
+				remaining /= 2;
+			}
+			
+			return remaining;
 		}
-		return remaining;
-		
 	}
-
+	
 	public int getTotalPlayTime() {
-		return totalPlayTime;
+		synchronized(objectMutex) {
+			return totalPlayTime;
+		}
 	}
-
+	
 	public void setTotalPlayTime(int totalPlayTime) {
-		this.totalPlayTime = totalPlayTime;
+		synchronized(objectMutex) {
+			this.totalPlayTime = totalPlayTime;
+		}
 	}
-
+	
 	public byte getDecayCounter() {
-		return decayCounter;
+		synchronized(objectMutex) {
+			return decayCounter;
+		}
 	}
-
+	
 	public void incDecayCounter() {
-		this.decayCounter++;
+		synchronized(objectMutex) {
+			this.decayCounter++;
+		}
 	}
-
+	
 	public ScheduledFuture<?> getRemovalTask() {
 		return removalTask;
 	}
-
+	
 	public void setRemovalTask(ScheduledFuture<?> removalTask) {
 		this.removalTask = removalTask;
 	}
 	
 	public void updateRemovalTask() {
-		
-		if(removalTask == null)
+		if (removalTask == null) {
 			return;
+		}
 		
 		removalTask.cancel(true);
 		
 		final NGECore core = NGECore.getInstance();
 		final CreatureObject owner = (CreatureObject) core.objectService.getObject(getOwnerId());
 		
-		if(owner == null)
+		if (owner == null) {
 			return;
+		}
 		
 		ScheduledFuture<?> task = Executors.newScheduledThreadPool(1).schedule(new Runnable() {
 			
 			@Override
 			public void run() {
-				
 				try {
 					core.buffService.removeBuffFromCreature(owner, Buff.this);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-			
 			}
 			
 		}, (long) getRemainingDuration(), TimeUnit.SECONDS);
 		
 		setRemovalTask(task);
-		
 	}
-
+	
 	public int getStacks() {
-		return stacks;
+		synchronized(objectMutex) {
+			return stacks;
+		}
 	}
-
+	
 	public void setStacks(int stacks) {
-		this.stacks = stacks;
+		synchronized(objectMutex) {
+			this.stacks = stacks;
+		}
 	}
 	
 	public boolean isGroupBuff() {
-		return effect1Name == null ? false : effect1Name.equals("group");
-	}
-
-	public long getGroupBufferId() {
-		return groupBufferId;
-	}
-
-	public void setGroupBufferId(long groupBufferId) {
-		this.groupBufferId = groupBufferId;
-	}
-
-	public String getGroup2() {
-		return group2;
-	}
-
-	public void setGroup2(String group2) {
-		this.group2 = group2;
-	}
-
-	public int getBuffCRC() {
-		return buffCRC;
+		synchronized(objectMutex) {
+			return effect1Name.equals("group");
+		}
 	}
 	
-	public void setBuffCRC(int buffCRC) {
-		this.buffCRC = buffCRC;
+	public long getGroupBufferId() {
+		synchronized(objectMutex) {
+			return groupBufferId;
+		}
+	}
+	
+	public void setGroupBufferId(long groupBufferId) {
+		synchronized(objectMutex) {
+			this.groupBufferId = groupBufferId;
+		}
 	}
 	
 }

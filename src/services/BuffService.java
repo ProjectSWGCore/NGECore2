@@ -43,7 +43,6 @@ import resources.objects.player.PlayerObject;
 import main.NGECore;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
-import engine.resources.common.CRC;
 import engine.resources.objects.SWGObject;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
@@ -114,6 +113,7 @@ public class BuffService implements INetworkDispatch {
 		}
 		
 		// Here the necessary checks must be placed to prevent buffs from the same buff group (e.g. Buff D) being stacked!
+		// ^ These checks are already performed in doAddBuff, unless they were removed.
 		
 		if(buff.isGroupBuff()) {
 			addGroupBuff(buffer, buffName, buffer);
@@ -135,6 +135,8 @@ public class BuffService implements INetworkDispatch {
 		//TODO fix this  -- !! this is wrong - I can buff from 5,5 in cantina someone sitting at 20,20 in the universe/planet !!! - accross the galaxy/planet
 		//cause get position is relative to creature system of coordinates - when one's outside and other inside
 		//if you must use getPosition() check for isInCell first for both or something like that
+		// ^The above bug should be fixed in command service.  The checks below shouldn't really even be in this service.
+		
 		if (target.getPosition().getDistance(buffer.getPosition()) > 20) {
 			return null;
 		}
@@ -165,7 +167,7 @@ public class BuffService implements INetworkDispatch {
 
 
 	
-            for (final Buff otherBuff : target.getBuffList()) {
+            for (final Buff otherBuff : target.getBuffList().values()) {
             	 if (buff.getGroup1().equals(otherBuff.getGroup1())) 
                 	if (buff.getPriority() >= otherBuff.getPriority()) {
                         if (buff.getBuffName().equals(otherBuff.getBuffName()))
@@ -270,7 +272,7 @@ public class BuffService implements INetworkDispatch {
 	@SuppressWarnings("unused")
 	public void removeBuffFromCreature(CreatureObject creature, Buff buff)
 	{
-		 if(!creature.getBuffList().contains(buff))
+		 if(!creature.getBuffList().containsValue(buff))
 		 {
 			 return;
 		 }
@@ -371,7 +373,7 @@ public class BuffService implements INetworkDispatch {
 
 		// copy to array for thread safety
 
-		for(final Buff buff : creature.getBuffList().get().toArray(new Buff[] { })) {
+		for(final Buff buff : creature.getBuffList().values().toArray(new Buff[] { })) {
 			
 			if (buff.getRemovalTask() != null) { continue; }
 
@@ -403,7 +405,7 @@ public class BuffService implements INetworkDispatch {
 	
 	public boolean hasBuff(final CreatureObject creature, String buffName) {
 
-		for(final Buff buff : creature.getBuffList().get().toArray(new Buff[] { })) {
+		for(final Buff buff : creature.getBuffList().values().toArray(new Buff[] { })) {
 			if (buff.getBuffName().contains(buffName)) { return true; }
 		}
 		return false;
@@ -502,7 +504,6 @@ public class BuffService implements INetworkDispatch {
 				String name = (String) visitor.getObject(i, 0);
 				
 				buff.setBuffName(name);
-				buff.setBuffCRC(CRC.StringtoCRC(name));
 				buff.setGroup1((String) visitor.getObject(i, 1));
 				buff.setGroup2((String) visitor.getObject(i, 2));
 				buff.setPriority((int) visitor.getObject(i, 4));
