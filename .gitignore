@@ -39,6 +39,7 @@ pt_sword_glint
 *.lck
 *.mgn
 *.0
+.classpath
 cachedir/
 appearance/
 clientdata/
@@ -219,3 +220,6 @@ pip-log.txt
 ## PyCharm
 #############
 .idea
+
+# The config should be example only
+nge.cfg

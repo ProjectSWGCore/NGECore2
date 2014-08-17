@@ -5,62 +5,57 @@ The ProjectSWG Open Source Project's aim is to create a server emulator for the 
 shutdown on 15/12/2011.
 
 The Open Source Version of ProjectSWG is restricted to 30 minutes uptime and upto 5 connections to ensure that the community
-is not split between several small servers. This restriction will not be lifted, it is also not legal to remove this restriction for anyone(see the engine's license for more legal information).
+is not split between several small servers. This restriction will not be lifted. It is not legal to remove this restriction, per the license.
 
-The Engine(NGEngine) is a closed source library and is only licensed for use with this project. The Core(NGECore2) is licensed under the L-GPL License.
+The Engine (NGEngine) is a closed source library and is only licensed for use with this project. The Core (NGECore2) is licensed under the L-GPL License. By using NGECore2, you agree to the terms of both licenses.
 
 Requirements for Building the Core:
 ======== 
 
-- JDK 8
-- A Java 8 compatible IDE like Eclipse Kepler (https://wiki.eclipse.org/JDT/Eclipse_Java_8_Support_For_Kepler)
-- A valid Star Wars Galaxies Installation with the final patch
-- Postgresql server (www.postgresql.org)
-- TRE Explorer(http://forum.modsource.org/index.php?PHPSESSID=bf02fd8244123807f4716c1686abb59f&action=dlattach;topic=33.0;attach=49)
-- Github account
-- (optional for windows) Github for Windows(http://windows.github.com/)
+*JDK 8
+*A Java 8 compatible IDE like Eclipse Kepler (https://wiki.eclipse.org/JDT/Eclipse_Java_8_Support_For_Kepler)
+*A valid Star Wars Galaxies Installation with the final patch
+*Postgresql server (www.postgresql.org)
+*(optional for postgres management) PGAdmin (http://www.pgadmin.org/)
+*TRE Explorer(http://forum.modsource.org/index.php?PHPSESSID=bf02fd8244123807f4716c1686abb59f&action=dlattach;topic=33.0;attach=49)
+*Github account
+*(optional for windows) Github for Windows(http://windows.github.com/)
 
-Once you have met the requirements, fork the project(click on the fork button) and then clone your forked repository.
-If you are using Windows then you can clone the repository with Github for Windows, otherwise you can use the following git command:
+1. Once you have met the requirements, fork the project and then proceed to clone your copy of the repository to your computer.
+2. Import the project to Eclipse.
+3. Create a postgres DB and restore the nge.backup file. Depending on each update, you may or may not have to repeat this process. Once restored, create an account for yourself in the accounts table of your database, and update the connectionServers table with the appropriate IP address of your server, in the address field. 
+4. Copy nge.cfg.example to nge.cfg, and add your DB credentials and name.
+5. Create a folder named "clientdata" inside your NGECore2 git repo.
+5. Open TRE Explorer or Jawa Toolbox and open the sku0_client.toc in your SWG folder. Export the following folders to your clientdata folder:
 
-    git clone https://github.com/your_account_name/ngecore2.git
+*abstract
+*appearance
+*creation
+*customization
+*datatables
+*footprint
+*interiorlayout
+*misc
+*object
+*quest
+*snapshot
+*string
+*terrain
 
-Then you can import the project to Eclipse.
+6. Repeat the above extraction process with the sku1_client.toc, sku2_client.toc and sku3_client.toc files to avoid errors with kashyyyk.
 
-Next you need to create a postgres DB and restore the nge.backup file. Once you have done that, edit your nge.cfg with your DB information and create an account for yourself in the accounts table of your database.
-
-Once you've done that open TRE Explorer and open the sku0_client.toc in your SWG folder with it.
-
-Then export the following folders to your clientdata folder(should be located in your project folder):
-- abstract
-- appearance
-- creation
-- customization
-- datatables
-- footprint
-- interiorlayout
-- misc
-- object
-- quest
-- snapshot
-- string
-- terrain
-
-Export the same folders from sku1_client.toc, sku2_client.toc and sku3_client.toc to avoid errors with kashyyyk.
-
-Now you're ready to run the core!
+You are now ready to run the core!
 
 Contributing and Submitting patches
 ========
 
-To contribute, simply commit your changes to your fork of the project and then submit a pull request here:
+To contribute, commit your changes to your fork of the project and then submit a pull request here:
 
     https://github.com/ProjectSWGCore/NGECore2/compare/
     
-Now your changes will be reviewed by other developers and once the changes are approved your code will be merged into the main repository.
-
-For more information please visit the wiki: https://github.com/ProjectSWGCore/NGECore2/wiki
-
-Documentation can be found here: http://projectswg.com/doc/
+Your changes will be reviewed by other developers. Once the changes are approved, your pull request will be merged into the main repository.
 
 Please prefix all commits with Added, Changed, Removed or Fixed. If you don't have enough room for multiple changes, use the extended description. Try not to bundle multiple changes into one vague line (ie. "Changed various combat things"). Try to make all commit messages understandable by non-programmers.
+
+*For more information please visit the wiki: https://github.com/ProjectSWGCore/NGECore2/wiki
+*Documentation can be found here: http://projectswg.com/doc/
