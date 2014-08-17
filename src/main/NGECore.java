@@ -858,7 +858,7 @@ public class NGECore {
 		}
 		cursor.close();
 
-		System.out.println("Deleted " + deleteCount + " creatures.");
+		System.out.println("Deleted " + Integer.toString(deleteCount) + " creatures.");
 	}
 	
 	/*
