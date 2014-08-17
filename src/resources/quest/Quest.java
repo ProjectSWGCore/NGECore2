@@ -130,11 +130,11 @@ public class Quest extends Delta implements Serializable {
 		byte[] activeStepBytes = activeStepBitmask.toByteArray();
 		byte[] completedStepBytes = completedStepBitmask.toByteArray();
 		
-		IoBuffer buffer = createBuffer(23);
+		IoBuffer buffer = createBuffer(18);
 
-		buffer.put((byte) 0);
+		//buffer.put((byte) 0);
 		
-		buffer.putInt(getCrc());
+		//buffer.putInt(getCrc());
 
 		buffer.putLong(ownerId); // quest giver id?
 		

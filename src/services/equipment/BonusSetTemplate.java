@@ -29,6 +29,7 @@ import org.python.core.Py;
 import org.python.core.PyObject;
 
 import engine.resources.objects.SWGObject;
+import resources.equipment.Equipment;
 import resources.objects.creature.CreatureObject;
 
 public class BonusSetTemplate
@@ -55,9 +56,9 @@ public class BonusSetTemplate
 	public int getWornTemplateCount(CreatureObject creature)
 	{
 		int wornItems = 0;
-		for (Long itemId : creature.getEquipmentList().get())
+		for (Equipment equipment : creature.getEquipmentList().get())
 		{
-			SWGObject item = NGECore.getInstance().objectService.getObject(itemId);
+			SWGObject item = NGECore.getInstance().objectService.getObject(equipment.getObjectId());
 			if(item == null)
 				continue;
 			if(requiredWornItems.contains(item.getTemplate()) || requiredWornItems.contains(item.getStfName())) wornItems++;

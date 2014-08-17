@@ -39,6 +39,7 @@ import org.python.core.Py;
 import org.python.core.PyObject;
 
 import resources.datatables.FactionStatus;
+import resources.equipment.Equipment;
 import resources.objects.creature.CreatureObject;
 import main.NGECore;
 import engine.resources.container.Traverser;
@@ -324,9 +325,9 @@ public class EquipmentService implements INetworkDispatch {
 		int wornArmourPieces = 0, forceProtection = 0;
 		Map<String, Float> protection = new TreeMap<String, Float>();
 		
-		for(Long itemId : new ArrayList<Long>(creature.getEquipmentList()))
+		for(Equipment equipment : new ArrayList<Equipment>(creature.getEquipmentList()))
 		{
-			SWGObject item = core.objectService.getObject(itemId);
+			SWGObject item = core.objectService.getObject(equipment.getObjectId());
 			if(item == null)
 				continue;
 			Map<String, Object> attributes = new TreeMap<String, Object>(item.getAttributes());
