@@ -33,12 +33,14 @@ import protocol.swg.CommPlayerMessage;
 import protocol.swg.ObjControllerMessage;
 import protocol.swg.PlayMusicMessage;
 import protocol.swg.objectControllerObjects.ForceActivateQuest;
+import protocol.swg.objectControllerObjects.QuestTaskCounterMessage;
+import protocol.swg.objectControllerObjects.QuestTaskTimerMessage;
 import protocol.swg.objectControllerObjects.ShowLootBox;
 import resources.common.ObjControllerOpcodes;
 import resources.common.OutOfBand;
 import resources.common.ProsePackage;
 import resources.datatables.DisplayType;
-import resources.objects.SWGList;
+import resources.objects.SWGMap;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
@@ -84,17 +86,12 @@ public class QuestService implements INetworkDispatch {
 			catch (Exception e) {e.printStackTrace();}
 		}
 
-		SWGList<Quest> questJournal = ghost.getQuestJournal();
+		SWGMap<Integer, Quest> questJournal = ghost.getQuestJournal();
 		
 		if (questJournal.size() == 0)
 			return false;
 		
-		for (Quest quest : questJournal) {
-			if (quest.getName().equals(questName))
-				return true;
-		}
-		
-		return false;
+		return questJournal.containsKey(CRC.StringtoCRC("quest/" + questName));
 	}
 	
 	public boolean isQuestCompleted(CreatureObject creo, String questName) {
@@ -105,17 +102,15 @@ public class QuestService implements INetworkDispatch {
 			catch (Exception e) {e.printStackTrace();}
 		}
 		
-		SWGList<Quest> questJournal = ghost.getQuestJournal();
+		SWGMap<Integer, Quest> questJournal = ghost.getQuestJournal();
 		
 		if (questJournal.size() == 0)
 			return false;
 		
-		for (Quest quest : questJournal) {
-			if (quest.getName().equals(questName)) 
-				return quest.isCompleted();
-		}
-		
-		return false;
+		if (!questJournal.containsKey(CRC.StringtoCRC("quest/" + questName)))
+			return false;
+		else 
+			return questJournal.get(CRC.StringtoCRC("quest/") + questName).isCompleted();
 	}
 	
 	public void sendQuestWindow(CreatureObject reciever, String questName) {
@@ -128,13 +123,15 @@ public class QuestService implements INetworkDispatch {
 	
 	public void activateNextTask(CreatureObject quester, String questName) {
 		
-		for (Quest quest : quester.getPlayerObject().getQuestJournal()) {
-			if (quest.getName().equals(questName) && !quest.isCompleted())
-				activateNextTask(quester, quest);
+		if (quester.getPlayerObject().getQuestJournal().containsKey(CRC.StringtoCRC("quest/" + questName)) && !quester.getPlayerObject().getQuestJournal().get(CRC.StringtoCRC("quest/" + questName)).isCompleted()) {
+			activateNextTask(quester, quester.getPlayerObject().getQuestJournal().get(CRC.StringtoCRC("quest/" + questName)));
 		}
 	}
 	
 	public void activateNextTask(CreatureObject quester, Quest quest) {
+		if (quester == null || quester.getClient() == null || quester.getClient().getSession() == null)
+			return;
+		
 		QuestData qData = getQuestData(quest.getName());
 		
 		if (qData == null)
@@ -167,33 +164,42 @@ public class QuestService implements INetworkDispatch {
 		
 		// quest.task.ground.retrieve_item
 		case "retrieve_item":
-			String template = task.getServerTemplate();
-			player.getQuestRetrieveItemTemplates().put(template, new QuestItem(quest.getName(), activeStep));
+			player.getQuestRetrieveItemTemplates().put(task.getServerTemplate(), new QuestItem(quest.getName(), activeStep));
+
+			// TODO: add item count
+			ObjControllerMessage itemCount = new ObjControllerMessage(11, new QuestTaskCounterMessage(quester.getObjectID(), quest.getCrcName(), "@quest/groundquests:retrieve_item_counter"));
+			quester.getClient().getSession().write(itemCount.serialize());
 			break;
 		
 		case "timer":
+			ObjControllerMessage timer = new ObjControllerMessage(11, new QuestTaskTimerMessage(quester.getObjectID(), quest.getCrcName(), "@quest/groundquests:timer_timertext", 20));
+			quester.getClient().getSession().write(timer.serialize());
+			System.out.println("Sent timer.");
 			break;
 			
 		default:
-			System.out.println("Don't know what to do for quest task: " + type);
+			//System.out.println("Don't know what to do for quest task: " + type);
 			break;
 				
 		}
 		
-		//if (task.getGrantQuestOnComplete() != null && !task.getGrantQuestOnComplete().equals(""))
-			//activateQuest(quester, task.getGrantQuestOnComplete());
-	
 		if (activeStep + 1 >= qData.getTasks().size()) {
 			QuestList listItem = questRewardMap.get(quest.getName());
 
 			if (listItem.isCompleteWhenTasksComplete())
-				completeQuest(player, quest); // Should this be the Force Complete Quest packet sent instead?
-			
+				completeQuest(player, quest); // Force complete packet sent if the quest isn't auto completed (window shows up, typical for exclusive reward items)
 			/*else
 				sendQuestCompleteWindow(quester, quest.getName());*/
+			
+			if (task.getGrantQuestOnComplete() != null && !task.getGrantQuestOnComplete().equals(""))
+				activateQuest(quester, task.getGrantQuestOnComplete());
+
 			return;
 		}
 		
+		if (task.getGrantQuestOnComplete() != null && !task.getGrantQuestOnComplete().equals(""))
+			activateQuest(quester, task.getGrantQuestOnComplete());
+	
 		quest.incrementQuestStep(); // After handling the quest type, we can now increment the step
 		
 		if (!task.isVisible()) {
@@ -205,7 +211,6 @@ public class QuestService implements INetworkDispatch {
 	}
 	
 	public void activateQuest(CreatureObject quester, String questString) {
-		System.out.println("Activating quest: " + questString);
 		Quest quest = new Quest(questString, quester.getObjectID());
 		
 		PlayerObject player = quester.getPlayerObject();
@@ -213,9 +218,9 @@ public class QuestService implements INetworkDispatch {
 		if (player == null)
 			return;
 		
-		QuestList info = questRewardMap.get(questString);
+		QuestList info = questRewardMap.get(quest.getName());
 		if (info == null) {
-			info = getQuestListDatatable(questString);
+			info = getQuestListDatatable(quest.getName());
 		}
 		
 		ProsePackage prose = new ProsePackage("@quest/ground/system_message:quest_received");
@@ -225,7 +230,7 @@ public class QuestService implements INetworkDispatch {
 		PlayMusicMessage music = new PlayMusicMessage("sound/ui_npe2_quest_received.snd", quester.getObjectID(), 0, true);
 		quester.getClient().getSession().write(music.serialize());
 		
-		player.getQuestJournal().add(quest);
+		player.getQuestJournal().put(quest.getCrc(), quest);
 		player.setActiveQuest(quest.getCrc());
 		
 		activateNextTask(quester, quest);
@@ -249,8 +254,13 @@ public class QuestService implements INetworkDispatch {
 		if (inventory == null)
 			return;
 		
+		boolean rewardSound = false;
+		
+		PlayMusicMessage completeSound = new PlayMusicMessage("sound/ui_npe2_quest_completed.snd", creo.getObjectID(), 0, true);
+		creo.getClient().getSession().write(completeSound.serialize());
+		
 		// TODO: Give other awards - exclusive loots, faction points
-		// Recieving quest awards (faction, item, exp, credits) - http://youtu.be/-L7Rz1WpmGM?t=14m50s
+		// Receiving quest awards (faction, item, exp, credits) - http://youtu.be/-L7Rz1WpmGM?t=14m50s
 		
 		// Give quest items
 		
@@ -260,6 +270,7 @@ public class QuestService implements INetworkDispatch {
 			recievedItems.add(rewardLoot.getObjectID());
 		}
 		
+		// TODO: Other item awards -- put above this comment
 		if (recievedItems.size() != 0) {
 
 			for (long item : recievedItems) {
@@ -268,26 +279,34 @@ public class QuestService implements INetworkDispatch {
 			
 			ObjControllerMessage objMessage = new ObjControllerMessage(11, new ShowLootBox(creo.getObjectID(), recievedItems));
 			creo.getClient().getSession().write(objMessage.serialize());
+			
+			if (!rewardSound) {
+				PlayMusicMessage itemSound = new PlayMusicMessage("sound/ui_npe2_quest_reward.snd", creo.getObjectID(), 0, true);
+				creo.getClient().getSession().write(itemSound.serialize());
+				rewardSound = true;
+			}
 		}
 		
 		// Give credits
 		if (info.getRewardBankCredits() != 0) {
 			creo.addBankCredits(info.getRewardBankCredits());
 			creo.sendSystemMessage(OutOfBand.ProsePackage("@base_player:prose_transfer_success", "DI", info.getRewardBankCredits()), DisplayType.Broadcast);
+			
+			if (!rewardSound) {
+				PlayMusicMessage credSound = new PlayMusicMessage("sound/ui_npe2_quest_credits.snd", creo.getObjectID(), 0, true);
+				creo.getClient().getSession().write(credSound.serialize());
+				rewardSound = true;
+			}
 		}
 		
 		// Give experience - TODO: Give specific type of experience.
-		if (info.getRewardExperienceAmount() == 0 && info.getTier() != -1 && !(info.getTier() > 6)) {
+		if (info.getRewardExperienceAmount() != 0 && info.getTier() != -1 && !(info.getTier() > 6)) {
 			int experienceAward = 0;
 			try {
-				DatatableVisitor experienceVisitor = ClientFileManager.loadFile("clientdata/datatables/quest/quest_experience", DatatableVisitor.class);
+				DatatableVisitor experienceVisitor = ClientFileManager.loadFile("datatables/quest/quest_experience", DatatableVisitor.class);
 				
 				for (int r = 0; r < experienceVisitor.getRowCount(); r++) {
 					if ((int) experienceVisitor.getObject(r, 0) == creo.getLevel()) {
-						
-						if (info.getTier() > 6 || info.getTier() == -1)
-							return;
-						
 						experienceAward = (int) experienceVisitor.getObject(r, info.getTier());
 					}
 				}
@@ -297,7 +316,7 @@ public class QuestService implements INetworkDispatch {
 		} else {
 			core.playerService.giveExperience(creo, info.getRewardExperienceAmount());
 		}
-		
+
 		// Update quest & client
 		quest.setRecievedAward(true);
 		creo.getClient().getSession().write(player.getBaseline(8).createDelta(7));
@@ -321,7 +340,7 @@ public class QuestService implements INetworkDispatch {
 		if (player.getQuestRetrieveItemTemplates().size() == 0)
 			return radialName;
 
-		if (!player.hasRetrieveItemTemplate(template))
+		if (!player.getQuestRetrieveItemTemplates().containsKey(template))
 			return radialName;
 		
 		QuestItem item = player.getQuestRetrieveItemTemplates().get(template);
@@ -338,18 +357,14 @@ public class QuestService implements INetworkDispatch {
 		if (player == null)
 			return;
 		
-		if (!player.hasRetrieveItemTemplate(target.getTemplate())) {
-			System.out.println("Player doesn't have the template: " + target.getTemplate());
+		if (!player.getQuestRetrieveItemTemplates().containsKey(target.getTemplate()))
 			return;
-		}
-		
+
 		QuestItem item = player.getQuestRetrieveItemTemplates().get(target.getTemplate());
 		activateNextTask(quester, item.getQuestName());
-		
+
 		player.getQuestRetrieveItemTemplates().remove(target.getTemplate(), item);
 		
-		if (player.hasRetrieveItemTemplate(target.getTemplate()))
-			System.out.println("STILL HAS TEMPLATE!!");
 	}
 	
 	public QuestData getQuestData(String questName) {
@@ -370,7 +385,6 @@ public class QuestService implements INetworkDispatch {
 		if (questRewardMap.containsKey(questName))
 			return questRewardMap.get(questName);
 		else {
-			System.out.println("Doesn't have it. Getting it from the list...");
 			QuestList list = getQuestListDatatable(questName); // parsing puts it in quest map
 			questRewardMap.put(questName, list);
 			return list;

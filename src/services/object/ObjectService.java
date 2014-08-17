@@ -1040,48 +1040,63 @@ public class ObjectService implements INetworkDispatch {
 				long objectId = selectCharacter.getCharacterId();
 				Client client = core.getClient(session);
 				if(client == null) {
-					System.out.println("NULL Client");
+					System.err.println("NULL Client");
 					return;
 				}
 				CreatureObject creature = null;
 				if(getObject(objectId) == null) {
 					creature = getCreatureFromDB(objectId);
 					if(creature == null) {
-						System.out.println("Cant get creature from db");
+						System.err.println("Cant get creature from db");
 					} else {
 						if (creature.getCustomName() == null || creature.getCustomName().isEmpty()) {
 							System.err.println("Name: " + creature.getCustomName());
-							System.out.println("Player with ObjID of " + creature.getObjectID() + " tried logging in but has a null/empty name!");
+							System.err.println("Player with ObjID of " + creature.getObjectID() + " tried logging in but has a null/empty name!");
 							return;
 						} else {
-							System.out.println("SelectCharacter: not in object list");
+							System.err.println("SelectCharacter: not in object list");
 						}
 					}
 					
 				} else {
 					
-					if (!(getObject(objectId) instanceof CreatureObject))
+					if (!(getObject(objectId) instanceof CreatureObject)) {
+						System.out.println("Character is not an instance of CreatureObject!");
 						return;
-
+					}
+					
 					creature = (CreatureObject) getObject(objectId);
 					if (creature.getCustomName() == null || creature.getCustomName().isEmpty()) {
 						System.err.println("Creature's custom name was null/empty! Name: " + creature.getCustomName());
 					}
-					if(creature.getAttachment("disconnectTask") != null && creature.getClient() != null && !creature.getClient().getSession().isClosing())
-						return;
-					
+					if(creature.getAttachment("disconnectTask") != null)
+						((ScheduledFuture<?>)creature.getAttachment("disconnectTask")).cancel(true);
+					if (creature.getClient() != null) {
+						if (!creature.getClient().getSession().isClosing()) {
+							System.err.println("Character is already disconnecting...");
+							return;
+						}
+						creature.setClient(null);
+					}
 				}
-				if(creature.getAttachment("disconnectTask") != null) {
-					((ScheduledFuture<?>) creature.getAttachment("disconnectTask")).cancel(true);
-				}					
 				
 				PlayerObject ghost = (PlayerObject) creature.getSlottedObject("ghost");
-
-				if(ghost == null)
+				
+				if (ghost == null) {
+					System.err.println("The Character's Ghost is null!");
 					return;
+				}
+				
+				System.out.println("Character '" + creature.getCustomName() + "' now zoning...");
 				
 				ghost.clearFlagBitmask(PlayerFlags.LD);
 				
+				final CreatureObject finalCreature = creature;
+				creature.viewChildren(creature, true, false, new Traverser() {
+					public void process(SWGObject object) {
+						finalCreature.makeUnaware(object);
+					}
+				});
 				creature.getAwareObjects().removeAll(creature.getAwareObjects());
 				creature.setAttachment("disconnectTask", null);
 
@@ -1089,6 +1104,8 @@ public class ObjectService implements INetworkDispatch {
 				Planet planet = core.terrainService.getPlanetByID(creature.getPlanetId());
 				creature.setPlanet(planet);
 				client.setParent(creature);
+				
+				session.setAttribute("CmdSceneReady", false);
 				
 				objectList.put(creature.getObjectID(), creature);
 				
