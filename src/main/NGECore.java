@@ -589,7 +589,6 @@ public class NGECore {
 	private void cleanupCreatureODB() {
 		ODBCursor cursor = swgObjectODB.getCursor();
 		
-		List<CreatureObject> deletedObjects = new ArrayList<CreatureObject>();
 		int deleteCount = 0;
 		
 		while(cursor.hasNext()) {
