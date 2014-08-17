@@ -76,7 +76,7 @@ public class CommandService implements INetworkDispatch  {
 	}
 	
 	public boolean callCommand(CreatureObject actor, SWGObject target, BaseSWGCommand command, int actionCounter, String commandArgs) {
-
+		
 		if (actor == null)
 			return false;
 		
@@ -87,14 +87,20 @@ public class CommandService implements INetworkDispatch  {
 		if (command == null)
 			return false;
 		
-		if (command.getCharacterAbility().length() > 0 && !actor.hasAbility(command.getCharacterAbility()))
+		if (actor.isPlayer() && command.getCharacterAbility().length() > 0 && !actor.hasAbility(command.getCharacterAbility())){
+			System.out.println("RETURN 1! " + command.getCharacterAbility());
 			return false;
+		}
 		
-		if (command.isDisabled())
+		if (command.isDisabled()){
+			System.out.println("RETURN 2!");
 			return false;
+		}
 		
-		if (actor.hasCooldown(command.getCooldownGroup()) || actor.hasCooldown(command.getCommandName()))
+		if (actor.hasCooldown(command.getCooldownGroup()) || actor.hasCooldown(command.getCommandName())){
+			System.out.println("RETURN 3!");
 			return false;
+		}
 		
 		
 		// Causes this service method to return with false after equipping a rifle, not allowing to unequip it anymore
@@ -114,10 +120,11 @@ public class CommandService implements INetworkDispatch  {
 		
 		for (byte locomotion : command.getInvalidLocomotions()) {
 			if (actor.getLocomotion() == locomotion) {
+				System.out.println("RETURN 4!");
 				return false;
 			}
 		}
-
+		System.out.println("IN CALLCOMMAND!");
 		switch (command.getTargetType()) {
 			case 0: // Target Not Used For This Command
 				break;
@@ -253,7 +260,7 @@ public class CommandService implements INetworkDispatch  {
 			default:
 				break;
 		}
-
+		System.out.println("IN CALLCOMMAND2!");
 		switch (command.getTarget()) {
 			case 0: // Ally Only
 				if (target == null) {
@@ -302,7 +309,7 @@ public class CommandService implements INetworkDispatch  {
 			default:
 				break;
 		}
-		
+		System.out.println("IN CALLCOMMAND! processCommand55");
 		if (command.shouldCallOnTarget()) {
 			if (target == null || !(target instanceof CreatureObject)) {
 				return false;
@@ -323,13 +330,16 @@ public class CommandService implements INetworkDispatch  {
 
 		if(command instanceof CombatCommand) {
 			try {
+				System.out.println("IN CALLCOMMAND! processCommand");
 				processCommand(actor, target, (BaseSWGCommand) command.clone(), actionCounter, commandArgs);
 			} catch (CloneNotSupportedException e) {
 				e.printStackTrace();
 			}
 		}
-		else
+		else {
+			System.out.println("IN CALLCOMMAND! No combat cmdprocessCommand");
 			processCommand(actor, target, command, actionCounter, commandArgs);
+		}
 			
 		
 		return true;
@@ -635,6 +645,7 @@ public class CommandService implements INetworkDispatch  {
 		
 		for (BaseSWGCommand command : commands) {
 			if (command.getCommandName().equalsIgnoreCase(name)) {
+				System.out.println("commmand " + command.getCommandName());
 				return command;
 			}
 		}
@@ -654,10 +665,12 @@ public class CommandService implements INetworkDispatch  {
 						if (commandName.equalsIgnoreCase(name)) {
 							if (isCombatCommand(commandName)) {
 								CombatCommand command = new CombatCommand(commandName);
+								System.out.println("commmand " + command.getCommandName());
 								commandLookup.add(command);
 								return command;
 							} else {
 								BaseSWGCommand command = new BaseSWGCommand(commandName);
+								System.out.println("commmand " + command.getCommandName());
 								commandLookup.add(command);
 								return command;
 							}
@@ -689,7 +702,7 @@ public class CommandService implements INetworkDispatch  {
 	}
 	
 	public void processCommand(CreatureObject actor, SWGObject target, BaseSWGCommand command, int actionCounter, String commandArgs) {
-		
+		System.out.println("NPC command name1 " + command.getCommandName());
 		if (command.getGodLevel() > 0 || command.getCommandName().equals("setgodmode") || command.getCommandName().equals("server") || command.getCommandName().equals("teleport") 
 				|| command.getCommandName().equals("teleportto") || command.getCommandName().equals("teleporttarget") ) {
 			String accessLevel = core.adminService.getAccessLevelFromDB(actor.getClient().getAccountId());
@@ -710,6 +723,7 @@ public class CommandService implements INetworkDispatch  {
 					 }
 					
 					if (!levelHasCommand) {
+						System.out.println("I am an NPC and can't sendSystemMessages " + actor.getCustomName());
 						actor.sendSystemMessage(" \\#FE2EF7 [GM] \\#FFFFFF " + command.getCommandName() + ": You do not have permission to use this command.", (byte) 0);
 						return;
 					}
@@ -727,6 +741,7 @@ public class CommandService implements INetworkDispatch  {
 		}
 		
 		if (command instanceof CombatCommand) {
+			System.out.println("NPC command name2 " + command.getCommandName());
 			processCombatCommand(actor, target, (CombatCommand) command, actionCounter, commandArgs);
 		} else
 			if (FileUtilities.doesFileExist("scripts/commands/" + command.getCommandName().toLowerCase() + ".py")) {
