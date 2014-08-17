@@ -49,7 +49,7 @@ A video tutorial of this process can be viewed at http://www.projectswg.com/show
 * string
 * terrain
 
-6. Repeat the above extraction process with the sku1_client.toc, sku2_client.toc and sku3_client.toc files to avoid errors with kashyyyk.
+Repeat the above extraction process with the sku1_client.toc, sku2_client.toc and sku3_client.toc files to avoid errors with kashyyyk.
 
 You are now ready to run the core!
 
