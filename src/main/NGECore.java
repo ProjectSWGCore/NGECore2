@@ -675,7 +675,6 @@ public class NGECore {
 
 		didServerCrash = false;
 		System.out.println("Started Server.");
-		cleanupCreatureODB();
 		setGalaxyStatus(GalaxyStatus.Online);
 
 	}
@@ -766,6 +765,7 @@ public class NGECore {
 		config = null;
 		databaseConnection = null;
 		databaseConnection2 = null;
+		cleanupCreatureODB();
 		Runtime.getRuntime().gc();
 		System.out.println("Cleaned Up "
 				+ (Runtime.getRuntime().freeMemory() - memoryUsed)
