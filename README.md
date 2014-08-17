@@ -12,14 +12,14 @@ The Engine (NGEngine) is a closed source library and is only licensed for use wi
 Requirements for Building the Core:
 ======== 
 
-*JDK 8
-*A Java 8 compatible IDE like Eclipse Kepler (https://wiki.eclipse.org/JDT/Eclipse_Java_8_Support_For_Kepler)
-*A valid Star Wars Galaxies Installation with the final patch
-*Postgresql server (www.postgresql.org)
-*(optional for postgres management) PGAdmin (http://www.pgadmin.org/)
-*TRE Explorer(http://forum.modsource.org/index.php?PHPSESSID=bf02fd8244123807f4716c1686abb59f&action=dlattach;topic=33.0;attach=49)
-*Github account
-*(optional for windows) Github for Windows(http://windows.github.com/)
+* JDK 8
+* A Java 8 compatible IDE like Eclipse Kepler (https://wiki.eclipse.org/JDT/Eclipse_Java_8_Support_For_Kepler)
+* A valid Star Wars Galaxies Installation with the final patch
+* Postgresql server (www.postgresql.org)
+* (optional for postgres management) PGAdmin (http://www.pgadmin.org/)
+* TRE Explorer(http://forum.modsource.org/index.php?PHPSESSID=bf02fd8244123807f4716c1686abb59f&action=dlattach;topic=33.0;attach=49)
+* Github account
+* (optional for windows) Github for Windows(http://windows.github.com/)
 
 1. Once you have met the requirements, fork the project and then proceed to clone your copy of the repository to your computer.
 2. Import the project to Eclipse.
@@ -28,19 +28,19 @@ Requirements for Building the Core:
 5. Create a folder named "clientdata" inside your NGECore2 git repo.
 5. Open TRE Explorer or Jawa Toolbox and open the sku0_client.toc in your SWG folder. Export the following folders to your clientdata folder:
 
-*abstract
-*appearance
-*creation
-*customization
-*datatables
-*footprint
-*interiorlayout
-*misc
-*object
-*quest
-*snapshot
-*string
-*terrain
+* abstract
+* appearance
+* creation
+* customization
+* datatables
+* footprint
+* interiorlayout
+* misc
+* object
+* quest
+* snapshot
+* string
+* terrain
 
 6. Repeat the above extraction process with the sku1_client.toc, sku2_client.toc and sku3_client.toc files to avoid errors with kashyyyk.
 
@@ -57,5 +57,5 @@ Your changes will be reviewed by other developers. Once the changes are approved
 
 Please prefix all commits with Added, Changed, Removed or Fixed. If you don't have enough room for multiple changes, use the extended description. Try not to bundle multiple changes into one vague line (ie. "Changed various combat things"). Try to make all commit messages understandable by non-programmers.
 
-*For more information please visit the wiki: https://github.com/ProjectSWGCore/NGECore2/wiki
-*Documentation can be found here: http://projectswg.com/doc/
+* For more information please visit the wiki: https://github.com/ProjectSWGCore/NGECore2/wiki
+* Documentation can be found here: http://projectswg.com/doc/
