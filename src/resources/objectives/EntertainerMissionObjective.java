@@ -60,7 +60,7 @@ public class EntertainerMissionObjective extends MissionObjective implements Ser
 		getMissionObject().setWaypoint(waypoint);
 		
 		setActive(true);
-		checkForEntertainermissionDistance(core, player);
+		checkForEntertainerMissionDistance(core, player);
 	}
 
 	@Override
@@ -88,24 +88,19 @@ public class EntertainerMissionObjective extends MissionObjective implements Ser
 
 	@Override
 	public void abort(NGECore core, CreatureObject player) {
+		((ScheduledFuture<?>)player.getAttachment("Entertainermission")).cancel(true);
+		player.setAttachment("Entertainermission", null);
 		
-		if(player.getAttachment("Entertainermission") != null){
-			((ScheduledFuture<?>)player.getAttachment("Entertainermission")).cancel(true);
-			player.setAttachment("Entertainermission", null);
-			if(getObjectivePhase() >= 2 )
-				if(player.getAttachment("timertask") != null || player.getAttachment("timer") != null){
-					if(player.getAttachment("timertask") != null){
-						((TimerTask) player.getAttachment("timertask")).cancel();
-						player.setAttachment("timertask", null);
-					}
-					if(player.getAttachment("timer") != null){
-						((Timer) player.getAttachment("timer")).cancel();
-						player.setAttachment("timer", null);
-					}
-				}
+		if(player.getAttachment("timertask") != null){
+			((TimerTask) player.getAttachment("timertask")).cancel();
+			player.setAttachment("timertask", null);
 		}
+		if(player.getAttachment("timer") != null){
+			((Timer) player.getAttachment("timer")).cancel();
+			player.setAttachment("timer", null);
+		}			
 	}
-
+	
 	@Override
 	public void update(NGECore core, CreatureObject player) {
 		
@@ -151,35 +146,33 @@ public class EntertainerMissionObjective extends MissionObjective implements Ser
 		player.setAttachment("timer", t);
 	}
 	
-	public void checkForEntertainermissionDistance(NGECore core, CreatureObject player){
+	public void checkForEntertainerMissionDistance(NGECore core, CreatureObject player){
 		ScheduledFuture<?> entertainerMissionTask = Executors.newScheduledThreadPool(1).scheduleAtFixedRate(new Runnable() {
 			public void run() {
 				if (player != null && parent != null && getMissionObject() != null) {
 					if(player.getPosition() != null &&  parent.getDestinationLocation() != null &&  parent.getDestinationLocation().getLocation() != null) {
 						if(player.getPosition().getDistance2D( parent.getDestinationLocation().getLocation()) <= 2){
 							update(core, player);
-							((ScheduledFuture<?>)player.getAttachment("Entertainermission")).cancel(true);
-							if (player.getAttachment("Entertainermission") != null){
-								player.setAttachment("Entertainermission", null);
-							}
+							cancelEntertainerMissionThread(core, player);
 						}
 					} else {
-						((ScheduledFuture<?>)player.getAttachment("Entertainermission")).cancel(true);
-						if (player.getAttachment("Entertainermission") != null){
-							player.setAttachment("Entertainermission", null);
-						}
+						cancelEntertainerMissionThread(core, player);
 					}
 				} else {
-					((ScheduledFuture<?>)player.getAttachment("Entertainermission")).cancel(true);
-					if (player.getAttachment("Entertainermission") != null){
-						player.setAttachment("Entertainermission", null);
-					}
+					cancelEntertainerMissionThread(core, player);
 				}
 			}
 		}, 0, 1, TimeUnit.SECONDS);
 		player.setAttachment("Entertainermission", entertainerMissionTask);
 	}
 
+	public void cancelEntertainerMissionThread(NGECore core, CreatureObject player){
+		if (player.getAttachment("Entertainermission") != null){
+			((ScheduledFuture<?>)player.getAttachment("Entertainermission")).cancel(true);
+			player.setAttachment("Entertainermission", null);
+		}
+	}
+	
 	public void isPerforming(NGECore core, CreatureObject player){
 		
 		ScheduledFuture<?> isPerformingTask  = Executors.newScheduledThreadPool(1).schedule(new Runnable() {
@@ -193,7 +186,7 @@ public class EntertainerMissionObjective extends MissionObjective implements Ser
 						Thread.sleep(240000);
 						player.sendSystemMessage("1 Minute left!", DisplayType.Broadcast);
 						Thread.sleep(50000);
-						for(int seconds = 10; seconds > 1; seconds--) {
+						for(int seconds = 10; seconds > 0; seconds--) {
 							player.sendSystemMessage(seconds + " seconds left!", DisplayType.Broadcast);
 							Thread.sleep(1000);
 						}
