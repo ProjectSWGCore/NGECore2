@@ -21,17 +21,14 @@
  ******************************************************************************/
 package resources.objectives;
 
+import java.io.Serializable;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import engine.resources.common.CRC;
-import engine.resources.objects.SWGObject;
-import engine.resources.scene.Point3D;
 import main.NGECore;
 import resources.common.OutOfBand;
 import resources.datatables.DisplayType;
@@ -40,7 +37,7 @@ import resources.objects.mission.MissionObject;
 import resources.objects.waypoint.WaypointObject;
 import services.mission.MissionObjective;
 
-public class EntertainerMissionObjective extends MissionObjective{
+public class EntertainerMissionObjective extends MissionObjective implements Serializable{
 	
 	private static final long serialVersionUID = 1L;
 
@@ -62,8 +59,6 @@ public class EntertainerMissionObjective extends MissionObjective{
 		waypoint.setActive(true);
 		getMissionObject().setWaypoint(waypoint);
 		
-		
-		System.out.println("ObjectivePhase:" + getObjectivePhase());
 		setActive(true);
 		checkForEntertainermissionDistance(core, player);
 	}
@@ -77,8 +72,18 @@ public class EntertainerMissionObjective extends MissionObjective{
 			((ScheduledFuture<?>)player.getAttachment("Entertainermission")).cancel(true);
 			player.setAttachment("Entertainermission", null);
 		}
-		
 		core.missionService.handleMissionAbort(player, getMissionObject(), true); 		
+		
+		if(player.getAttachment("timertask") != null || player.getAttachment("timer") != null){
+			if(player.getAttachment("timertask") != null){
+				((TimerTask) player.getAttachment("timertask")).cancel();
+				player.setAttachment("timertask", null);
+			}
+			if(player.getAttachment("timer") != null){
+				((Timer) player.getAttachment("timer")).cancel();
+				player.setAttachment("timer", null);
+			}			
+		}
 	}
 
 	@Override
@@ -87,6 +92,17 @@ public class EntertainerMissionObjective extends MissionObjective{
 		if(player.getAttachment("Entertainermission") != null){
 			((ScheduledFuture<?>)player.getAttachment("Entertainermission")).cancel(true);
 			player.setAttachment("Entertainermission", null);
+			if(getObjectivePhase() >= 2 )
+				if(player.getAttachment("timertask") != null || player.getAttachment("timer") != null){
+					if(player.getAttachment("timertask") != null){
+						((TimerTask) player.getAttachment("timertask")).cancel();
+						player.setAttachment("timertask", null);
+					}
+					if(player.getAttachment("timer") != null){
+						((Timer) player.getAttachment("timer")).cancel();
+						player.setAttachment("timer", null);
+					}
+				}
 		}
 	}
 
@@ -95,7 +111,6 @@ public class EntertainerMissionObjective extends MissionObjective{
 		
 		setObjectivePhase(getObjectivePhase() + 1);
 		
-		System.out.println("ObjectivePhase:" + getObjectivePhase());
 		if(getObjectivePhase() == 1){
 			WaypointObject waypoint = (WaypointObject) core.objectService.createObject("object/waypoint/shared_waypoint.iff", parent.getPlanet());
 			waypoint.setPosition(parent.getDestinationLocation().getLocation());
@@ -112,14 +127,8 @@ public class EntertainerMissionObjective extends MissionObjective{
 				updateTimer(core, player);
 			}
 			
-			if(player.getPosture() != 9){
+			if (player.getPosture() == 9 ){
 				if(player.getAttachment("isentertaining") == null){
-					System.out.println("Posture: "+ player.getPosture());
-					System.out.println("Attachment isentertaining != null");		
-				}				
-			}else if (player.getPosture() == 9 ){
-				if(player.getAttachment("isentertaining") == null){
-					System.out.println("Attachment isentertaining == null");
 					getMissionObject().setTargetName("Dance for 10 Minutes");
 					isPerforming(core, player);
 					((TimerTask) player.getAttachment("timertask")).cancel();
