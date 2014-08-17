@@ -150,6 +150,33 @@ public class MapService implements INetworkDispatch {
 		
 	}
 	
+	public Point3D getClosestCantina(SWGObject object) {
+		
+		if(object.getPlanet() == null)
+			object.setPlanet(core.terrainService.getPlanetByID(object.getPlanetId()));
+		
+		Vector<MapLocation> locations = locationMap.get(object.getPlanet());
+		float closestDistance = Float.MAX_VALUE;		
+		Point3D objPos = object.getWorldPosition();
+		Point3D cantinaLocation = null;
+		for(MapLocation location : locations) {
+			//System.out.println("category: " + location.getCategory() + "Name:" + location.getName());
+			if(location.getCategory() == 3) {
+				
+				Point3D position = new Point3D(location.getX(), 0, location.getY());
+				if(position.getDistance2D(objPos) < closestDistance) {
+					closestDistance = position.getDistance2D(objPos);
+					cantinaLocation = new Point3D(position.x, position.y, position.z);
+					System.out.println("closestCantine:" + cantinaLocation);
+				}
+			}
+			
+		}
+
+		return cantinaLocation;
+		
+	}
+	
 	public Vector<MapLocation> getPlanetMapLocations(Planet planet) {
 		return locationMap.get(planet);
 	}

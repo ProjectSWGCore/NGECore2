@@ -643,11 +643,13 @@ public class MissionService implements INetworkDispatch {
 
 		CreatureObject creature = (CreatureObject) player;
 		PlayerObject actor = (PlayerObject) creature.getSlottedObject("ghost"); 
-		int randomNumber = (int) (Math.random()*5000) - 2500;
-		
-		MissionLocation startLocation = new MissionLocation(creature.getPosition(), creature.getObjectId(), player.getPlanet().name);
-		MissionLocation destinationLocation = new MissionLocation(new Point3D(((float)creature.getPosition().x - randomNumber), (float)creature.getPosition().y, (float)(creature.getPosition().z - randomNumber)), creature.getObjectId(), player.getPlanet().name);
+		//int randomNumber = (int) (Math.random()*5000) - 2500;
 
+		Point3D closestCantina = core.mapService.getClosestCantina(player);
+				
+		MissionLocation startLocation = new MissionLocation(creature.getPosition(), creature.getObjectId(), player.getPlanet().name);
+		MissionLocation destinationLocation = new MissionLocation(closestCantina , creature.getObjectId(), player.getPlanet().name);
+		
 		String missionStf = "";
 		String missionString = "dancer";
 		
