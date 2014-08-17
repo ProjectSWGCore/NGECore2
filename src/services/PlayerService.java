@@ -130,7 +130,7 @@ public class PlayerService implements INetworkDispatch {
 		scheduleList.put("serverTime", scheduler.scheduleAtFixedRate(() -> {
 			try {
 				if (creature == null || creature.getClient() == null || creature.getClient().getSession() == null) {
-					scheduleList.get("serverTime").cancel(true);
+					//scheduleList.get("serverTime").cancel(true);
 					return;
 				}
 				
@@ -147,7 +147,7 @@ public class PlayerService implements INetworkDispatch {
 			try {
 				
 				if (creature == null || creature.getClient() == null || creature.getClient().getSession() == null) {
-					scheduleList.get("gcwUpdate").cancel(true);
+					//scheduleList.get("gcwUpdate").cancel(true);
 					return;
 				}
 				
@@ -205,7 +205,7 @@ public class PlayerService implements INetworkDispatch {
 		scheduleList.put("stealthCheck", scheduler.scheduleAtFixedRate(() -> {
 			try {
 				if (creature == null || creature.getClient() == null || creature.getClient().getSession() == null) {
-					scheduleList.get("stealthCheck").cancel(true);
+					//scheduleList.get("stealthCheck").cancel(true);
 					return;
 				}
 				
@@ -243,7 +243,7 @@ public class PlayerService implements INetworkDispatch {
 		scheduleList.put("action", scheduler.scheduleAtFixedRate(() -> {
 			try {
 				if (creature == null || creature.getClient() == null || creature.getClient().getSession() == null) {
-					scheduleList.get("action").cancel(true);
+					//scheduleList.get("action").cancel(true);
 					return;
 				}
 				
@@ -261,7 +261,7 @@ public class PlayerService implements INetworkDispatch {
 		scheduleList.put("health", scheduler.scheduleAtFixedRate(() -> {
 			try {
 				if (creature == null || creature.getClient() == null || creature.getClient().getSession() == null) {
-					scheduleList.get("health").cancel(true);
+					//scheduleList.get("health").cancel(true);
 					return;
 				}
 				
@@ -275,7 +275,7 @@ public class PlayerService implements INetworkDispatch {
 		scheduleList.put("awareness", scheduler.scheduleAtFixedRate(() -> {
 			try {
 				if (creature == null || creature.getClient() == null || creature.getClient().getSession() == null) {
-					scheduleList.get("awareness").cancel(true);
+					//scheduleList.get("awareness").cancel(true);
 					return;
 				}
 				
