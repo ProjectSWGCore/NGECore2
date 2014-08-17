@@ -262,17 +262,13 @@ public class AttackState extends AIState {
 		creature.setIntendedTarget(target.getObjectId());
 		
 		if (attacks==null) {		
-		//if(attacks.size() == 0) {
-			System.out.println("AI calls default attack1" + actor.getMobileTemplate().getDefaultAttack());
 			core.commandService.callCommand(creature, actor.getMobileTemplate().getDefaultAttack(), target, "");
 		} else {
 			Random rand = new Random();
 			if(rand.nextFloat() <= 0.33f) {
-				System.out.println("AI calls special attack");
 				if(attacks.size() > 0)
 					core.commandService.callCommand(creature, attacks.get(rand.nextInt(attacks.size())), target, "");
 			} else {
-				System.out.println("AI calls default attack2 " + actor.getMobileTemplate().getDefaultAttack());
 				core.commandService.callCommand(creature, actor.getMobileTemplate().getDefaultAttack(), target, "");
 			}
 		}

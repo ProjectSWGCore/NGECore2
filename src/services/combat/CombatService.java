@@ -1301,7 +1301,6 @@ public class CombatService implements INetworkDispatch {
 			return;
 		}
 		synchronized(target.getMutex()) {
-			System.out.println("THIS SHOULD BE RUN!!! " + (target.getHealth() - damage));
 			target.setHealth(target.getHealth() - damage);
 		}
 		
