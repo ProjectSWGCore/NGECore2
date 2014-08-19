@@ -156,6 +156,7 @@ public class Forager {
 		
 		int chosenObject = 0;
 		
+		//TODO:
 //		if (forager.hasChuckedIn(KommerkenSteak)){
 //			kommerkenBonus = 12;
 //			forageChances = forageChances2;
