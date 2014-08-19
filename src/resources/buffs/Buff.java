@@ -96,14 +96,17 @@ public class Buff extends Delta {
 	public Buff(String buffName, long ownerId) {
 		this.buffName = buffName;
 		this.ownerId = ownerId;
-		
+
 		DatatableVisitor visitor;
-		
+
 		try {
-			visitor = ClientFileManager.loadFile("datatables/buff/buff.iff", DatatableVisitor.class);
-			
+			visitor = ClientFileManager.loadFile("datatables/buff/buff.iff",
+					DatatableVisitor.class);
+
 			for (int i = 0; i < visitor.getRowCount(); i++) {
-				if ((visitor.getObject(i, 0) != null) && ((String) visitor.getObject(i, 0)).equalsIgnoreCase(buffName)) {
+				if ((visitor.getObject(i, 0) != null)
+						&& ((String) visitor.getObject(i, 0))
+								.equalsIgnoreCase(buffName)) {
 					group1 = (String) visitor.getObject(i, 1);
 					group2 = (String) visitor.getObject(i, 2);
 					priority = (int) visitor.getObject(i, 4);
