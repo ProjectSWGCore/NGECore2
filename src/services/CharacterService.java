@@ -523,10 +523,12 @@ public class CharacterService implements INetworkDispatch {
 		PreparedStatement preparedStatement;
 		int characters = 0;
 		try {
-			preparedStatement = databaseConnection.preparedStatement("SELECT * FROM characters WHERE \"accountId\"=" + accountId + "");
+			preparedStatement = databaseConnection.preparedStatement("SELECT COUNT(*) AS charCount FROM characters WHERE \"accountId\"=" + accountId);
 			ResultSet resultSet = preparedStatement.executeQuery();
-			while(resultSet.next() && !resultSet.isClosed())
-				characters++;
+
+			characters = 0;
+			if (resultSet.next() && !resultSet.isClosed())
+				characters = resultSet.getInt("charCount");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
