@@ -2,7 +2,7 @@ import sys
 
 def setup(core, object):
 	object.setStringAttribute('armor_category', '@obj_attr_n:armor_assault')
-	object.setStringAttribute('required_faction', 'Rebel')
+	object.setStringAttribute('faction_restriction', 'Rebel')
 	object.setIntAttribute('cat_armor_standard_protection.kinetic', 6608)
 	object.setIntAttribute('cat_armor_standard_protection.energy', 4608)
 	object.setIntAttribute('cat_armor_special_protection.special_protection_type_heat', 5608)

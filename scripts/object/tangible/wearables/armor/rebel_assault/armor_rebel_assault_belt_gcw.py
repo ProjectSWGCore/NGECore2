@@ -1,6 +1,6 @@
 import sys
 
 def setup(core, object):
-	object.setStringAttribute('armor_category', '@obj_attr_n:armor_assault')
-	object.setStringAttribute('required_faction', 'Rebel')
+	object.setIntAttribute('required_combat_level', 22)
+	object.setStringAttribute('faction_restriction', 'Rebel')
 	return	
