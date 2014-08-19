@@ -112,7 +112,7 @@ public class PlayerService implements INetworkDispatch {
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private float xpMultiplier;
     protected final Object objectMutex = new Object();
-    private ConcurrentHashMap<Long, List<ScheduledFuture<?>>> schedulers = new ConcurrentHashMap<Long, List<ScheduledFuture<?>>>();
+    private ConcurrentHashMap<Long, Map<String, ScheduledFuture<?>>> schedulers = new ConcurrentHashMap<Long, Map<String, ScheduledFuture<?>>>();
     
 	public PlayerService(final NGECore core) {
 		this.core = core;
@@ -125,20 +125,32 @@ public class PlayerService implements INetworkDispatch {
 		if(schedulers.get(creature.getObjectID()) != null)
 			return;
 		
-		List<ScheduledFuture<?>> scheduleList = new ArrayList<ScheduledFuture<?>>();
+		Map<String, ScheduledFuture<?>> scheduleList = new ConcurrentHashMap<String, ScheduledFuture<?>>();
 		
-		scheduleList.add(scheduler.scheduleAtFixedRate(() -> {
+		scheduleList.put("serverTime", scheduler.scheduleAtFixedRate(() -> {
 			try {
+				if (creature == null || creature.getClient() == null || creature.getClient().getSession() == null) {
+					//scheduleList.get("serverTime").cancel(true);
+					return;
+				}
+				
 				ServerTimeMessage time = new ServerTimeMessage(core.getGalacticTime() / 1000);
 				IoBuffer packet = time.serialize();
+				
 				creature.getClient().getSession().write(packet);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}, 45, 45, TimeUnit.SECONDS));
 		
-		scheduleList.add(scheduler.scheduleAtFixedRate(() -> {
+		scheduleList.put("gcwUpdate", scheduler.scheduleAtFixedRate(() -> {
 			try {
+				
+				if (creature == null || creature.getClient() == null || creature.getClient().getSession() == null) {
+					//scheduleList.get("gcwUpdate").cancel(true);
+					return;
+				}
+				
 				PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
 				player.setTotalPlayTime((int) (player.getTotalPlayTime() + ((System.currentTimeMillis() - player.getLastPlayTimeUpdate()) / 1000)));
 				player.setLastPlayTimeUpdate(System.currentTimeMillis());
@@ -190,8 +202,13 @@ public class PlayerService implements INetworkDispatch {
 			}
 		}, 30, 30, TimeUnit.SECONDS));
 		
-		scheduleList.add(scheduler.scheduleAtFixedRate(() -> {
+		scheduleList.put("stealthCheck", scheduler.scheduleAtFixedRate(() -> {
 			try {
+				if (creature == null || creature.getClient() == null || creature.getClient().getSession() == null) {
+					//scheduleList.get("stealthCheck").cancel(true);
+					return;
+				}
+				
 				if (creature.isCloaked() && !creature.getOption(Options.INVULNERABLE) && core.adminService.getAccessLevelFromDB(creature.getClient().getAccountId()) == null) {
 					List<SWGObject> objects = core.simulationService.get(creature.getPlanet(), creature.getPosition().x, creature.getPosition().z, 64);
 					
@@ -223,8 +240,13 @@ public class PlayerService implements INetworkDispatch {
 			}
 		}, 15, 15, TimeUnit.SECONDS));
 		
-		scheduleList.add(scheduler.scheduleAtFixedRate(() -> {
+		scheduleList.put("action", scheduler.scheduleAtFixedRate(() -> {
 			try {
+				if (creature == null || creature.getClient() == null || creature.getClient().getSession() == null) {
+					//scheduleList.get("action").cancel(true);
+					return;
+				}
+				
 				if(creature.getAction() < creature.getMaxAction() && creature.getPosture() != 14) {
 					if(!creature.isInCombat())
 						creature.setAction(creature.getAction() + (15 + creature.getLevel() * 5));
@@ -236,8 +258,13 @@ public class PlayerService implements INetworkDispatch {
 			}
 		}, 0, 1000, TimeUnit.MILLISECONDS));
 
-		scheduleList.add(scheduler.scheduleAtFixedRate(() -> {
+		scheduleList.put("health", scheduler.scheduleAtFixedRate(() -> {
 			try {
+				if (creature == null || creature.getClient() == null || creature.getClient().getSession() == null) {
+					//scheduleList.get("health").cancel(true);
+					return;
+				}
+				
 				if(creature.getHealth() < creature.getMaxHealth() && !creature.isInCombat() && creature.getPosture() != 13 && creature.getPosture() != 14)
 					creature.setHealth(creature.getHealth() + (36 + creature.getLevel() * 4));
 			} catch (Exception e) {
@@ -245,8 +272,13 @@ public class PlayerService implements INetworkDispatch {
 			}
 		}, 0, 1000, TimeUnit.MILLISECONDS));
 		
-		scheduleList.add(scheduler.scheduleAtFixedRate(() -> {
+		scheduleList.put("awareness", scheduler.scheduleAtFixedRate(() -> {
 			try {
+				if (creature == null || creature.getClient() == null || creature.getClient().getSession() == null) {
+					//scheduleList.get("awareness").cancel(true);
+					return;
+				}
+				
 				long[] ids = creature.getAwareObjects().stream().mapToLong(SWGObject::getObjectID).toArray();
 				for(int i = 0; i < ids.length; i++) {
 					for(int j = 0; j < ids.length; j++) {
@@ -1564,7 +1596,7 @@ public class PlayerService implements INetworkDispatch {
 		
 	}
 	
-	public Map<Long, List<ScheduledFuture<?>>> getSchedulers() {
+	public Map<Long, Map<String, ScheduledFuture<?>>> getSchedulers() {
 		return schedulers;
 	}
 	
