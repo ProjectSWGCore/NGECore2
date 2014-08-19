@@ -527,7 +527,7 @@ public class CharacterService implements INetworkDispatch {
 			ResultSet resultSet = preparedStatement.executeQuery();
 
 			characters = 0;
-			if (resultSet.next() && !resultSet.isClosed())
+			if (!resultSet.isClosed() && resultSet.next())
 				characters = resultSet.getInt("charCount");
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -578,10 +578,10 @@ public class CharacterService implements INetworkDispatch {
 			name = name.toLowerCase();
 			long oid = 0L;
 			try {
-				PreparedStatement ps = databaseConnection.preparedStatement("SELECT * FROM characters WHERE LOWER(\"firstName\")=?");
+				PreparedStatement ps = databaseConnection.preparedStatement("SELECT COUNT(*) AS charCount FROM characters WHERE LOWER(\"firstName\")=?");
 				ps.setString(1, name);
 				ResultSet resultSet = ps.executeQuery();
-				while (resultSet.next()) {	
+				if (!resultSet.isClosed() && resultSet.next()) {
 					oid = resultSet.getLong("id");
 				}
 				return oid;
@@ -601,7 +601,7 @@ public class CharacterService implements INetworkDispatch {
 					
 			String name = "";
 			try {
-				PreparedStatement ps = databaseConnection.preparedStatement("SELECT * FROM characters WHERE \"id\"=?");
+				PreparedStatement ps = databaseConnection.preparedStatement("SELECT firstName FROM characters WHERE \"id\"=?");
 				ps.setLong(1, oid);
 				ResultSet resultSet = ps.executeQuery();
 				while (resultSet.next()) {				 
@@ -612,7 +612,7 @@ public class CharacterService implements INetworkDispatch {
 						}
 						name = name.toLowerCase();
 
-				}
+					}
 				return name;
 			} 
 			
@@ -651,11 +651,11 @@ public class CharacterService implements INetworkDispatch {
 	 */
 	public int getAccountId(long objectId) {
 		try {
-			PreparedStatement ps = databaseConnection.preparedStatement("SELECT * FROM characters WHERE id=?");
+			PreparedStatement ps = databaseConnection.preparedStatement("SELECT accountId FROM characters WHERE id=?");
 			ps.setLong(1, objectId);
 			ResultSet resultSet = ps.executeQuery();
-			resultSet.next();
-			return resultSet.getInt("accountId");
+			if (resultSet.next())
+				return resultSet.getInt("accountId");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
