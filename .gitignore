@@ -39,7 +39,6 @@ pt_sword_glint
 *.lck
 *.mgn
 *.0
-.classpath
 cachedir/
 appearance/
 clientdata/
