@@ -485,6 +485,7 @@ public class CharacterService implements INetworkDispatch {
 		String combinedName = firstName + " " + lastName;
 		combinedName.replaceAll("\\s*$", "");
 		
+		//we could consider using LIKE here, or some form of regex. either way it doesn't work right at the moment -ilikenwf
 		String query = "SELECT \"type\" FROM \"reservednames\" WHERE (\"match_firstname\" = TRUE AND ? ~ \"pattern\") OR (\"match_both_names\" = TRUE and ? ~ \"pattern\") ";
 		if (lastName != "")
 		{
