@@ -84,14 +84,12 @@ public class ConnectionService implements INetworkDispatch {
 				try {
 					synchronized(core.getActiveConnectionsMap()) {
 						for(Client c : core.getActiveConnectionsMap().values()) {
-							if(c.getParent() != null) {
-								if ((System.currentTimeMillis() - c.getSession().getLastReadTime()) > 300000) {
-									try {
-										disconnect(c);
-									} catch (Exception e) {
-										System.err.println("ConnectionService:disconnect(): Error disconnecting client.");
-										e.printStackTrace();
-									}
+							if ((c.getParent() != null) && (System.currentTimeMillis() - c.getSession().getLastReadTime()) > 300000) {
+								try {
+									disconnect(c);
+								} catch (Exception e) {
+									System.err.println("ConnectionService:disconnect(): Error disconnecting client.");
+									e.printStackTrace();
 								}
 							}
 						}
