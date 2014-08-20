@@ -305,7 +305,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	public void setPosture(byte posture) {
 		synchronized(objectMutex) {
-			switch (getPosture()) {
+			switch (posture) {
 				case resources.datatables.Posture.Invalid:
 					setLocomotion(resources.datatables.Locomotion.Invalid);
 					break;
