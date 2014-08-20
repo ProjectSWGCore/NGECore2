@@ -1468,6 +1468,32 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 	}
 	
+	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
+		switch (viewType) {
+			case 1:
+			case 4:
+			case 7:
+			case 8:
+			case 9:
+			{
+				buffer = getBaseline(viewType).createDelta(updateType, buffer.array());
+				
+				if (getClient() != null && getClient().getSession() != null) {
+					getClient().getSession().write(buffer);
+				}
+				
+				break;
+			}
+			case 3:
+			case 6:
+			{
+				buffer = getBaseline(viewType).createDelta(updateType, buffer.array());
+				notifyClients(buffer, true);
+				break;
+			}
+		}
+	}
+	
 	@Deprecated public void playMusicSelf(String sndFile, long targetId, int repetitions, boolean flag) { playMusic(sndFile, targetId, repetitions, flag); }
 	
 	@Deprecated public void setXpBarValue(int xpBarValue) { setDisplayXp(xpBarValue); }
