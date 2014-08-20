@@ -1073,7 +1073,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			this.performanceWatchee = performanceWatchee;
 		}
 		
-		setListenToId(performanceWatchee.getObjectID());
+		setListenToId((performanceWatchee == null) ? 0L : performanceWatchee.getObjectID());
 	}
 	
 	public CreatureObject getPerformanceListenee() {
