@@ -621,12 +621,12 @@ def lightsaberColorCrystals(owner, inventory):
 	return
 	
 def jediBelt(owner, inventory):
-	// inventory.add(core.objectService.createObject("object/tangible/wearables/backpack/shared_fannypack_s01.iff", owner.getPlanet()))
+	# inventory.add(core.objectService.createObject("object/tangible/wearables/backpack/shared_fannypack_s01.iff", owner.getPlanet()))
 	screenOne(core, owner)
 	return
 	
 def backpack(owner, inventory):
-	// inventory.add(core.objectService.createObject("object/tangible/wearables/backpack/shared_backpack_s01.iff", owner.getPlanet()))
+	# inventory.add(core.objectService.createObject("object/tangible/wearables/backpack/shared_backpack_s01.iff", owner.getPlanet()))
 	screenOne(core, owner)
 	return
 
