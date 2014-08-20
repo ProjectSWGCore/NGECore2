@@ -262,7 +262,6 @@ public class AttackState extends AIState {
 		creature.setIntendedTarget(target.getObjectId());
 		
 		if (attacks==null) {		
-		//if(attacks.size() == 0) {
 			core.commandService.callCommand(creature, actor.getMobileTemplate().getDefaultAttack(), target, "");
 		} else {
 			Random rand = new Random();

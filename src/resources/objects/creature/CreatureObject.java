@@ -1087,7 +1087,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			this.performanceListenee = performanceListenee;
 		}
 		
-		setListenToId(performanceListenee.getObjectID());
+		setListenToId((performanceListenee == null) ? 0L : performanceListenee.getObjectID());
 	}
 	
 	public int getFlourishCount() {
@@ -1464,6 +1464,32 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 				destination.getSession().write(upvpm.serialize());
 				UpdatePostureMessage upm = new UpdatePostureMessage(getObjectID(), (byte) 0);
 				destination.getSession().write(upm.serialize());
+			}
+		}
+	}
+	
+	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
+		switch (viewType) {
+			case 1:
+			case 4:
+			case 7:
+			case 8:
+			case 9:
+			{
+				buffer = getBaseline(viewType).createDelta(updateType, buffer.array());
+				
+				if (getClient() != null && getClient().getSession() != null) {
+					getClient().getSession().write(buffer);
+				}
+				
+				break;
+			}
+			case 3:
+			case 6:
+			{
+				buffer = getBaseline(viewType).createDelta(updateType, buffer.array());
+				notifyClients(buffer, true);
+				break;
 			}
 		}
 	}
