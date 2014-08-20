@@ -833,47 +833,52 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public int getHealth() {
-		synchronized(objectMutex) {
-			return getAttribs().get(0);
-		}
+		return getAttribs().get(0);
 	}
 	
 	public void setHealth(int health) {
-		if (health > getMaxHealth()) {
-			health = getMaxHealth();
-		}
-		
-		if (getPosture() == 13) {
-			synchronized(objectMutex) {
-				stopIncapTask();
-				setIncapTask(null);
-				getAttribs().set(0, health);
+		synchronized(objectMutex) {
+			if (health > getMaxHealth()) {
+				health = getMaxHealth();
 			}
 			
-			setPosture((byte) 0);
-			setTurnRadius(1);
-			setSpeedMultiplierBase(1);
-		} else {
-			synchronized(objectMutex) {
-				getAttribs().set(0, health);
+			if (health == getHealth()) {
+				return;
+			}
+			
+			if (getPosture() == 13) {
+				stopIncapTask();
+				setIncapTask(null);
+			}
+		}
+		
+		getAttribs().set(0, health);
+		
+		synchronized(objectMutex) {
+			if (getPosture() == 13) {
+				setPosture((byte) 0);
+				setTurnRadius(1);
+				setSpeedMultiplierBase(1);
 			}
 		}
 	}
 	
 	public int getAction() {
-		synchronized(objectMutex) {
-			return getAttribs().get(2);
-		}
+		return getAttribs().get(2);
 	}
 	
 	public void setAction(int action) {
-		if (action > getMaxAction()) {
-			action = getMaxAction();
+		synchronized(objectMutex) {
+			if (action > getMaxAction()) {
+				action = getMaxAction();
+			}
+			
+			if (action == getAction()) {
+				return;
+			}
 		}
 		
-		synchronized(objectMutex) {
-			getAttribs().set(2, action);
-		}
+		getAttribs().set(2, action);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -882,35 +887,39 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public int getMaxHealth() {
-		synchronized(objectMutex) {
-			return getMaxAttribs().get(0);
-		}
+		return getMaxAttribs().get(0);
 	}
 	
 	public void setMaxHealth(int maxHealth) {
+		synchronized(objectMutex) {
+			if (maxHealth == getMaxHealth()) {
+				return;
+			}
+		}
+		
 		if (maxHealth < getHealth()) {
 			setHealth(maxHealth);
 		}
 		
-		synchronized(objectMutex) {
-			getMaxAttribs().set(0, maxHealth);
-		}
+		getMaxAttribs().set(0, maxHealth);
 	}
 	
 	public int getMaxAction() {
-		synchronized(objectMutex) {
-			return getMaxAttribs().get(2);
-		}
+		return getMaxAttribs().get(2);
 	}
 	
 	public void setMaxAction(int maxAction) {
+		synchronized(objectMutex) {
+			if (maxAction == getMaxAction()) {
+				return;
+			}
+		}
+		
 		if (maxAction < getAction()) {
 			setAction(maxAction);
 		}
 		
-		synchronized(objectMutex) {
-			getMaxAttribs().set(2, maxAction);
-		}
+		getMaxAttribs().set(2, maxAction);
 	}
 	
 	@SuppressWarnings("unchecked")
