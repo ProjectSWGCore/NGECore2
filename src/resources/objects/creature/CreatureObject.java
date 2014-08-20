@@ -1087,7 +1087,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			this.performanceListenee = performanceListenee;
 		}
 		
-		setListenToId(performanceListenee.getObjectID());
+		setListenToId((performanceListenee == null) ? 0L : performanceListenee.getObjectID());
 	}
 	
 	public int getFlourishCount() {
