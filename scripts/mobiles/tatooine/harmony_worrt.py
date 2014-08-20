@@ -24,7 +24,7 @@ def addTemplate(core):
 	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_worrt.iff')
+	templates.add('object/mobile/shared_worrt_hue.iff')
 	mobileTemplate.setTemplates(templates)
 
 	weaponTemplates = Vector()

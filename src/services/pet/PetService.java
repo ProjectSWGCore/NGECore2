@@ -450,7 +450,7 @@ public class PetService implements INetworkDispatch {
 			return;
 		}
 		
-		if (rider.isInStealth()) {
+		if (rider.isCloaked()) {
 			rider.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:no_mount_stealth"), DisplayType.Broadcast);
 			return;
 		}
@@ -763,7 +763,7 @@ public class PetService implements INetworkDispatch {
 						AIActor aiActor = (AIActor) mount.getAttachment("AI");
 						aiActor.destroyActor();
 						player.setPet(0L);
-						owner.setCalledPet(null);	
+						owner.setCalledPet(null);
 						core.objectService.destroyObject((Long) pcd.getAttachment("companion_RefId"));
 						pcd.setAttachment("companion_RefId", null);
 					}
@@ -989,11 +989,11 @@ public class PetService implements INetworkDispatch {
 		        		datapad.add(pcd);
 		        		
 		        		if (target.getOption(Options.AGGRESSIVE))
-			        		target.removeOption(Options.AGGRESSIVE);
+			        		target.setOptions(Options.AGGRESSIVE, false);
 			        	
 			        	target.setAttachment("tamed", 1);
 			        	
-			    		actor.setCalledPet(target);	
+			        	actor.setCalledPet(target);
 			    		target.setFaction(actor.getFaction());
 			    		target.setFactionStatus(actor.getFactionStatus());
 			    		target.setOwnerId(actor.getObjectID());

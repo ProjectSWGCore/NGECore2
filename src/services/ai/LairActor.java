@@ -122,7 +122,7 @@ public class LairActor {
 				break;
 			case 3:
 				if (bossTemplate!=null && ! bossSpawned){
-					CreatureObject boss = (CreatureObject)NGECore.getInstance().spawnService.spawnCreature(bossTemplate, lairObject.getPlanet().getName(), 0L, lairObject.getPosition().x + 3, lairObject.getPosition().y, lairObject.getPosition().z, lairObject.getOrientation().w, lairObject.getOrientation().x, lairObject.getOrientation().y,lairObject.getOrientation().z,-1);
+					//CreatureObject boss = (CreatureObject)NGECore.getInstance().spawnService.spawnCreature(bossTemplate, lairObject.getPlanet().getName(), 0L, lairObject.getPosition().x + 3, lairObject.getPosition().y, lairObject.getPosition().z, lairObject.getOrientation().w, lairObject.getOrientation().x, lairObject.getOrientation().y,lairObject.getOrientation().z,-1);
 					bossSpawned = true;
 				}
 				return;

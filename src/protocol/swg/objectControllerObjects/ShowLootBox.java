@@ -23,11 +23,9 @@ package protocol.swg.objectControllerObjects;
 
 import java.nio.ByteOrder;
 import java.util.ArrayList;
-import java.util.Vector;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import engine.resources.objects.SWGObject;
 import protocol.swg.ObjControllerMessage;
 
 public class ShowLootBox extends ObjControllerObject {

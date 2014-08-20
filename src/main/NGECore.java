@@ -266,6 +266,12 @@ public class NGECore {
 			config = DefaultConfig.getConfig();
 		}
 		
+		DevLogQueuer devLogQueuer = new DevLogQueuer();
+		
+		CharonPacketLogger packetLogger;
+		if (PACKET_DEBUG)
+			packetLogger = new CharonPacketLogger();
+		
 		options = new Config();
 		options.setFilePath("options.cfg");
 		if (!(options.loadConfigFile())) {
@@ -573,12 +579,6 @@ public class NGECore {
 		//battlefieldService = new BattlefieldService(this);
 		adminService = new AdminService(this);
 		
-		DevLogQueuer devLogQueuer = new DevLogQueuer();
-		
-		CharonPacketLogger packetLogger;
-		if (PACKET_DEBUG)
-			packetLogger = new CharonPacketLogger();
-
 		didServerCrash = false;
 		System.out.println("Started Server.");
 		cleanupCreatureODB();
