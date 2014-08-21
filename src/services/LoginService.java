@@ -313,8 +313,7 @@ public class LoginService implements INetworkDispatch{
 
 		try {
 			preparedStatement = databaseConnection1.preparedStatement("SELECT firstName, lastName, appaearance, id, galaxyId, statusID"
-					+ " FROM characters WHERE \"accountId\"= ?");
-			ps.setBytes(1, id);
+					+ " FROM characters WHERE \"accountId\"= " + id);
 			resultSet = preparedStatement.executeQuery();
 
 			while (resultSet.next() && !resultSet.isClosed()) {
