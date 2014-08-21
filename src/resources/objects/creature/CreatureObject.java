@@ -305,7 +305,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	public void setPosture(byte posture) {
 		synchronized(objectMutex) {
-			switch (getPosture()) {
+			switch (posture) {
 				case resources.datatables.Posture.Invalid:
 					setLocomotion(resources.datatables.Locomotion.Invalid);
 					break;
@@ -833,47 +833,52 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public int getHealth() {
-		synchronized(objectMutex) {
-			return getAttribs().get(0);
-		}
+		return getAttribs().get(0);
 	}
 	
 	public void setHealth(int health) {
-		if (health > getMaxHealth()) {
-			health = getMaxHealth();
-		}
-		
-		if (getPosture() == 13) {
-			synchronized(objectMutex) {
-				stopIncapTask();
-				setIncapTask(null);
-				getAttribs().set(0, health);
+		synchronized(objectMutex) {
+			if (health > getMaxHealth()) {
+				health = getMaxHealth();
 			}
 			
-			setPosture((byte) 0);
-			setTurnRadius(1);
-			setSpeedMultiplierBase(1);
-		} else {
-			synchronized(objectMutex) {
-				getAttribs().set(0, health);
+			if (health == getHealth()) {
+				return;
+			}
+			
+			if (getPosture() == 13) {
+				stopIncapTask();
+				setIncapTask(null);
+			}
+		}
+		
+		getAttribs().set(0, health);
+		
+		synchronized(objectMutex) {
+			if (getPosture() == 13) {
+				setPosture((byte) 0);
+				setTurnRadius(1);
+				setSpeedMultiplierBase(1);
 			}
 		}
 	}
 	
 	public int getAction() {
-		synchronized(objectMutex) {
-			return getAttribs().get(2);
-		}
+		return getAttribs().get(2);
 	}
 	
 	public void setAction(int action) {
-		if (action > getMaxAction()) {
-			action = getMaxAction();
+		synchronized(objectMutex) {
+			if (action > getMaxAction()) {
+				action = getMaxAction();
+			}
+			
+			if (action == getAction()) {
+				return;
+			}
 		}
 		
-		synchronized(objectMutex) {
-			getAttribs().set(2, action);
-		}
+		getAttribs().set(2, action);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -882,35 +887,39 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public int getMaxHealth() {
-		synchronized(objectMutex) {
-			return getMaxAttribs().get(0);
-		}
+		return getMaxAttribs().get(0);
 	}
 	
 	public void setMaxHealth(int maxHealth) {
+		synchronized(objectMutex) {
+			if (maxHealth == getMaxHealth()) {
+				return;
+			}
+		}
+		
 		if (maxHealth < getHealth()) {
 			setHealth(maxHealth);
 		}
 		
-		synchronized(objectMutex) {
-			getMaxAttribs().set(0, maxHealth);
-		}
+		getMaxAttribs().set(0, maxHealth);
 	}
 	
 	public int getMaxAction() {
-		synchronized(objectMutex) {
-			return getMaxAttribs().get(2);
-		}
+		return getMaxAttribs().get(2);
 	}
 	
 	public void setMaxAction(int maxAction) {
+		synchronized(objectMutex) {
+			if (maxAction == getMaxAction()) {
+				return;
+			}
+		}
+		
 		if (maxAction < getAction()) {
 			setAction(maxAction);
 		}
 		
-		synchronized(objectMutex) {
-			getMaxAttribs().set(2, maxAction);
-		}
+		getMaxAttribs().set(2, maxAction);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -1073,7 +1082,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			this.performanceWatchee = performanceWatchee;
 		}
 		
-		setListenToId(performanceWatchee.getObjectID());
+		setListenToId((performanceWatchee == null) ? 0L : performanceWatchee.getObjectID());
 	}
 	
 	public CreatureObject getPerformanceListenee() {
@@ -1087,7 +1096,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			this.performanceListenee = performanceListenee;
 		}
 		
-		setListenToId(performanceListenee.getObjectID());
+		setListenToId((performanceListenee == null) ? 0L : performanceListenee.getObjectID());
 	}
 	
 	public int getFlourishCount() {
@@ -1464,6 +1473,32 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 				destination.getSession().write(upvpm.serialize());
 				UpdatePostureMessage upm = new UpdatePostureMessage(getObjectID(), (byte) 0);
 				destination.getSession().write(upm.serialize());
+			}
+		}
+	}
+	
+	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
+		switch (viewType) {
+			case 1:
+			case 4:
+			case 7:
+			case 8:
+			case 9:
+			{
+				buffer = getBaseline(viewType).createDelta(updateType, buffer.array());
+				
+				if (getClient() != null && getClient().getSession() != null) {
+					getClient().getSession().write(buffer);
+				}
+				
+				break;
+			}
+			case 3:
+			case 6:
+			{
+				buffer = getBaseline(viewType).createDelta(updateType, buffer.array());
+				notifyClients(buffer, true);
+				break;
 			}
 		}
 	}
