@@ -1,4 +1,5 @@
 import sys
 
 def setup(core, object):
-	return
+	object.setStringAttribute('required_level', '22')
+	return	
