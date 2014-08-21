@@ -30,6 +30,7 @@ import main.NGECore;
 import org.apache.mina.core.buffer.IoBuffer;
 
 import resources.objects.creature.CreatureObject;
+import resources.objects.player.PlayerObject;
 
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
@@ -43,7 +44,8 @@ public class Buff extends Delta {
 	private int priority = 0;
 	private float duration = 0;
 	private String buffName = "";
-	private long ownerId = 0;
+	private long bufferId = 0;
+	private long buffeeId = 0;
 	private String effect1Name = "", effect2Name = "", effect3Name = "", effect4Name = "", effect5Name = "";
 	private float effect1Value, effect2Value, effect3Value, effect4Value, effect5Value;
 	private String callback = "";
@@ -63,7 +65,9 @@ public class Buff extends Delta {
 	private int stacks = 1;
 	private long groupBufferId = 0;
 	
-	public Buff(Buff baseBuff, long ownerId) {
+	public Buff(Buff baseBuff, long bufferId, long buffeeId) {
+		this.bufferId = bufferId;
+		this.buffeeId = buffeeId;
 		this.buffName = baseBuff.getBuffName();
 		this.group1 = baseBuff.getGroup1();
 		this.group2 = baseBuff.getGroup2();
@@ -91,9 +95,10 @@ public class Buff extends Delta {
 		this.decayOnPvPDeath = baseBuff.isDecayOnPvPDeath();
 	}
 	
-	public Buff(String buffName, long ownerId) {
+	public Buff(String buffName, long bufferId, long buffeeId) {
+		this.bufferId = bufferId;
+		this.buffeeId = buffeeId;
 		this.buffName = buffName;
-		this.ownerId = ownerId;
 		
 		DatatableVisitor visitor;
 		
@@ -140,18 +145,23 @@ public class Buff extends Delta {
 	}
 	
 	public byte[] getBytes() {
+		// If getObject ever returns null here, it means there's a major bug with objects being in quadtree but not in objectList.
+		PlayerObject player = (PlayerObject) NGECore.getInstance().objectService.getObject(buffeeId).getSlottedObject("ghost");
+		long lastPlayTimeUpdate = ((player == null) ? 0L : player.getLastPlayTimeUpdate());
+		int remainingDuration = getRemainingDuration();
+		
 		synchronized(objectMutex) {
+			totalPlayTime = ((player == null) ? 0 : (int) (totalPlayTime + (System.currentTimeMillis() - lastPlayTimeUpdate) / 1000));
 			IoBuffer buffer = createBuffer(24);
-			buffer.putInt((int) ((duration > 0) ? (totalPlayTime + getRemainingDuration()) : -1));		
+			buffer.putInt((int) ((duration > 0) ? (totalPlayTime + remainingDuration) : -1));		
 			buffer.putInt(0);
 			buffer.putInt((int) duration);
-			buffer.putLong(ownerId);
+			buffer.putLong(bufferId);
 			buffer.putInt(stacks);
 			buffer.flip();
 			return buffer.array();
 		}
 	}
-	
 	
 	public String getGroup1() {
 		synchronized(objectMutex) {
@@ -213,15 +223,27 @@ public class Buff extends Delta {
 		}
 	}
 	
-	public long getOwnerId() {
+	public long getBufferId() {
 		synchronized(objectMutex) {
-			return ownerId;
+			return bufferId;
 		}
 	}
 	
-	public void setOwnerId(long ownerId) {
+	public void setBufferId(long bufferId) {
 		synchronized(objectMutex) {
-			this.ownerId = ownerId;
+			this.bufferId = bufferId;
+		}
+	}
+	
+	public long getBuffeeId() {
+		synchronized(objectMutex) {
+			return buffeeId;
+		}
+	}
+	
+	public void setBuffeeId(long buffeeId) {
+		synchronized(objectMutex) {
+			this.buffeeId = buffeeId;
 		}
 	}
 	
@@ -531,9 +553,9 @@ public class Buff extends Delta {
 		removalTask.cancel(true);
 		
 		final NGECore core = NGECore.getInstance();
-		final CreatureObject owner = (CreatureObject) core.objectService.getObject(getOwnerId());
+		final CreatureObject creature = (CreatureObject) core.objectService.getObject(getBuffeeId());
 		
-		if (owner == null) {
+		if (creature == null) {
 			return;
 		}
 		
@@ -542,7 +564,7 @@ public class Buff extends Delta {
 			@Override
 			public void run() {
 				try {
-					core.buffService.removeBuffFromCreature(owner, Buff.this);
+					core.buffService.removeBuffFromCreature(creature, Buff.this);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
