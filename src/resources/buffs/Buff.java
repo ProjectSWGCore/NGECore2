@@ -142,15 +142,9 @@ public class Buff extends Delta {
 	public byte[] getBytes() {
 		synchronized(objectMutex) {
 			IoBuffer buffer = createBuffer(24);
-			if (duration > 0) {
-				buffer.putInt((int) (totalPlayTime + getRemainingDuration()));		
-				buffer.putInt(0);
-				buffer.putInt((int) duration);
-			} else {
-				buffer.putInt(-1);
-				buffer.putInt(0);
-				buffer.putInt(0);
-			}
+			buffer.putInt((int) (duration > 0) ? (totalPlayTime + getRemainingDuration()) : -1);		
+			buffer.putInt(0);
+			buffer.putInt((int) duration);
 			buffer.putLong(ownerId);
 			buffer.putInt(stacks);
 			buffer.flip();
