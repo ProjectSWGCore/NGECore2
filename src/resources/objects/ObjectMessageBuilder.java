@@ -24,6 +24,7 @@ package resources.objects;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 import org.apache.mina.core.buffer.IoBuffer;
@@ -136,11 +137,7 @@ public class ObjectMessageBuilder {
 		buffer.putShort((short) 5);
 		buffer.putInt(0x68A75F0C);
 		buffer.putLong(object.getObjectID());
-		try {
-			buffer.put(reverse(objectType).getBytes("US-ASCII"));
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
+		buffer.put(reverse(objectType).getBytes(StandardCharsets.US_ASCII));
 		buffer.put(viewType);
 		buffer.putInt(size);
 		buffer.put(data);
@@ -155,11 +152,7 @@ public class ObjectMessageBuilder {
 		buffer.putShort((short) 5);
 		buffer.putInt(Opcodes.DeltasMessage);
 		buffer.putLong(object.getObjectID());
-		try {
-			buffer.put(reverse(objectType).getBytes("US-ASCII"));
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
+		buffer.put(reverse(objectType).getBytes(StandardCharsets.US_ASCII));
 		buffer.put(viewType);
 		buffer.putInt(size);
 		buffer.putShort(updateCount);
