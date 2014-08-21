@@ -312,11 +312,14 @@ public class LoginService implements INetworkDispatch{
 		PreparedStatement preparedStatement;
 
 		try {
-			preparedStatement = databaseConnection1.preparedStatement("SELECT * FROM characters WHERE \"accountId\"=" + id + "");
+			preparedStatement = databaseConnection1.preparedStatement("SELECT firstName, lastName, appaearance, id, galaxyId, statusID"
+					+ " FROM characters WHERE \"accountId\"= ?");
+			ps.setBytes(1, id);
 			resultSet = preparedStatement.executeQuery();
 
 			while (resultSet.next() && !resultSet.isClosed()) {
 				
+				//TODO: on creation just don't allow spaces in first or last name maybe?
 				String characterName = resultSet.getString("firstName").replaceAll("\\s",""); ;
 				String lastName = resultSet.getString("lastName").replaceAll("\\s","");
 
@@ -344,7 +347,7 @@ public class LoginService implements INetworkDispatch{
 		LoginEnumCluster servers = new LoginEnumCluster(9);
 		PreparedStatement preparedStatement;
 		try {
-			preparedStatement = databaseConnection1.preparedStatement("SELECT * FROM galaxies");
+			preparedStatement = databaseConnection1.preparedStatement("SELECT id, name FROM galaxies");
 			ResultSet resultSet = preparedStatement.executeQuery();
 			while (resultSet.next() && !resultSet.isClosed())
 				servers.addServer(resultSet.getInt("id"), resultSet.getString("name"));
@@ -363,7 +366,8 @@ public class LoginService implements INetworkDispatch{
 		LoginClusterStatus clusterStatus = new LoginClusterStatus();
 		ResultSet resultSet;
 		try {
-			PreparedStatement preparedStatement	= databaseConnection1.preparedStatement("SELECT * FROM \"connectionServers\"");
+			PreparedStatement preparedStatement	= databaseConnection1.preparedStatement("SELECT id, address, port, pingPort, statusID"
+					+ " FROM \"connectionServers\"");
 			resultSet = preparedStatement.executeQuery();
 			while (resultSet.next() && !resultSet.isClosed())
 				clusterStatus.addServer(
