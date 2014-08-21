@@ -422,7 +422,7 @@ public class CharacterService implements INetworkDispatch {
 		if (isDuplicate) { return true; }
 		
 		//FIXME: this is a bit lazy... but it's only temporary :p
-		PreparedStatement psc = databaseConnection.preparedStatement("SELECT * FROM pg_tables WHERE \"tablename\"=?");
+		PreparedStatement psc = databaseConnection.preparedStatement("SELECT COUNT(*) FROM pg_tables WHERE \"tablename\"=?");
 		psc.setString(1, "temp_reserved_char_names");
 		ResultSet resultSetC = psc.executeQuery();
 		boolean tableExists = resultSetC.next();
@@ -467,7 +467,7 @@ public class CharacterService implements INetworkDispatch {
 	private String checkForReservedName(String firstName, String lastName) throws SQLException
 	{
 		
-		PreparedStatement psc = databaseConnection.preparedStatement("SELECT * FROM pg_tables WHERE \"tablename\"=?");
+		PreparedStatement psc = databaseConnection.preparedStatement("SELECT COUNT(*) FROM pg_tables WHERE \"tablename\"=?");
 		psc.setString(1, "reservednames");
 		ResultSet rsc = psc.executeQuery();
 		if (!rsc.next()) {
