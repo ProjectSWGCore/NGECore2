@@ -981,20 +981,10 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void addBuff(Buff buff) {
-		if (buff == null) {
-			System.err.println("CreatureObject:addBuff(): Attempting to add a null Buff object.  Something is wrong in BuffService!");
-		}
-		
-		synchronized(objectMutex) {
-			PlayerObject player = (PlayerObject) getSlottedObject("ghost");
-			buff.setTotalPlayTime((int) (player.getTotalPlayTime() + (System.currentTimeMillis() - player.getLastPlayTimeUpdate()) / 1000));
-		}
-		
+		PlayerObject player = (PlayerObject) getSlottedObject("ghost");
+		buff.setTotalPlayTime((player == null) ? 0 : (int) (player.getTotalPlayTime() + (System.currentTimeMillis() - player.getLastPlayTimeUpdate()) / 1000));
+		buff.setStartTime();
 		getBuffList().put(CRC.StringtoCRC(buff.getBuffName().toLowerCase()), buff);
-		
-		synchronized(objectMutex) {
-			buff.setStartTime();
-		}
 	}
 	
 	public void removeBuff(Buff buff) {
