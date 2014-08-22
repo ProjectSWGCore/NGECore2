@@ -51,7 +51,6 @@ import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.skills.SkillMod;
 import resources.buffs.Buff;
-import resources.buffs.BuffList;
 import resources.buffs.DamageOverTime;
 import resources.common.OutOfBand;
 import resources.datatables.Difficulty;
@@ -104,7 +103,6 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		getMaxAttribs().add(0);
 		getMaxAttribs().add(300);
 		getMaxAttribs().add(0);
-		getBuffList().put(0, new Buff("", getObjectID())); // Initial Default Buff
 	}
 	
 	public CreatureObject() {
@@ -189,7 +187,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		baseline.put("equipmentList", new SWGList<Equipment>(this, 6, 23, false));
 		baseline.put("appearance", "");
 		baseline.put("visible", true);
-		baseline.put("buffList", new BuffList(new SWGMap<Integer, Buff>(this, 6, 26, false)));
+		baseline.put("buffList", new SWGMap<Integer, Buff>(this, 6, 26, true));
 		baseline.put("performing", false);
 		baseline.put("difficulty", Difficulty.NORMAL);
 		baseline.put("hologramColor", -1);
@@ -967,8 +965,9 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		setVisible(!cloaked);
 	}
 	
+	@SuppressWarnings("unchecked")
 	public SWGMap<Integer, Buff> getBuffList() {
-		return ((BuffList) getBaseline(6).get("buffList")).getList();
+		return (SWGMap<Integer, Buff>) getBaseline(6).get("buffList");
 	}
 	
 	public Buff getBuffByName(String buffName) {
@@ -982,8 +981,12 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void addBuff(Buff buff) {
+		if (buff == null) {
+			System.err.println("CreatureObject:addBuff(): Attempting to add a null Buff object.  Something is wrong in BuffService!");
+		}
+		
 		synchronized(objectMutex) {
-			PlayerObject player = (PlayerObject) this.getSlottedObject("ghost");
+			PlayerObject player = (PlayerObject) getSlottedObject("ghost");
 			buff.setTotalPlayTime((int) (player.getTotalPlayTime() + (System.currentTimeMillis() - player.getLastPlayTimeUpdate()) / 1000));
 		}
 		
