@@ -44,12 +44,14 @@ import resources.objects.SWGMap;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
+import resources.objects.waypoint.WaypointObject;
 import resources.quest.Quest;
 import main.NGECore;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.resources.common.CRC;
 import engine.resources.objects.SWGObject;
+import engine.resources.scene.Point3D;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
@@ -142,8 +144,8 @@ public class QuestService implements INetworkDispatch {
 		if (player == null)
 			return;
 		
-		if (quest.getWaypointId() != 0)
-			core.objectService.destroyObject(quest.getWaypointId());
+		//if (quest.getWaypointId() != 0)
+			//core.objectService.destroyObject(quest.getWaypointId());
 		
 		int activeStep = quest.getActiveStep();
 		
@@ -169,6 +171,11 @@ public class QuestService implements INetworkDispatch {
 			// TODO: add item count
 			ObjControllerMessage itemCount = new ObjControllerMessage(11, new QuestTaskCounterMessage(quester.getObjectID(), quest.getCrcName(), "@quest/groundquests:retrieve_item_counter"));
 			quester.getClient().getSession().write(itemCount.serialize());
+			
+			WaypointObject waypoint = createWaypoint(task.getWaypointName(), new Point3D(task.getLocationX(), task.getLocationY(), task.getLocationZ()), task.getPlanet());
+			player.getWaypoints().put(waypoint.getObjectID(), waypoint);
+			
+			quest.setWaypointId(waypoint.getObjectID());
 			break;
 		
 		case "timer":
@@ -177,6 +184,9 @@ public class QuestService implements INetworkDispatch {
 			System.out.println("Sent timer.");
 			break;
 			
+		case "show_message_box":
+			break;
+		
 		default:
 			//System.out.println("Don't know what to do for quest task: " + type);
 			break;
@@ -365,6 +375,21 @@ public class QuestService implements INetworkDispatch {
 
 		player.getQuestRetrieveItemTemplates().remove(target.getTemplate(), item);
 		
+	}
+	
+	public WaypointObject createWaypoint(String name, Point3D location, String planet) {
+		WaypointObject waypoint = (WaypointObject) core.objectService.createObject("object/waypoint/shared_waypoint.iff", core.terrainService.getPlanetByName(planet));
+		if (waypoint == null)
+			return null;
+		
+		waypoint.setActive(true);
+		waypoint.setColor(WaypointObject.BLUE);
+		waypoint.setName(name);
+		waypoint.setPlanetCrc(CRC.StringtoCRC(planet));
+		waypoint.setStringAttribute("", ""); //This simply allows the attributes to display (nothing else has to be done)
+		waypoint.setPosition(location);
+		
+		return waypoint;
 	}
 	
 	public QuestData getQuestData(String questName) {
