@@ -145,7 +145,7 @@ public class BuffService implements INetworkDispatch {
 			return null;
 		}
 		
-		final Buff buff = new Buff(buffMap.get(buffName), target.getObjectID());
+		final Buff buff = new Buff(buffMap.get(buffName), buffer.getObjectID(), target.getObjectID());
 		if(target.getSlottedObject("ghost") != null)
 			buff.setTotalPlayTime(((PlayerObject) target.getSlottedObject("ghost")).getTotalPlayTime());
 		else
