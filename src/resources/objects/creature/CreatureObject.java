@@ -110,7 +110,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void initAfterDBLoad() {
-		super.init();
+		super.initAfterDBLoad();
 		System.out.println("Name: " + getCustomName());
 		System.out.println("  Cash Credits: " + getCashCredits());
 		System.out.println("  Bank Credits: " + getBankCredits());
@@ -182,8 +182,8 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		baseline.put("moodId", (byte) 0);
 		baseline.put("performanceCounter", 0);
 		baseline.put("performanceId", 0);
-		baseline.put("attributes", new SWGList<Integer>(this, 6, 21, false));
-		baseline.put("maxAttributes", new SWGList<Integer>(this, 6, 22, false));
+		baseline.put("attribs", new SWGList<Integer>(this, 6, 21, false));
+		baseline.put("maxAttribs", new SWGList<Integer>(this, 6, 22, false));
 		baseline.put("equipmentList", new SWGList<Equipment>(this, 6, 23, false));
 		baseline.put("appearance", "");
 		baseline.put("visible", true);
@@ -823,7 +823,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	@SuppressWarnings("unchecked")
 	public SWGList<Integer> getAttribs() {
-		return (SWGList<Integer>) getBaseline(6).get("attributes");
+		return (SWGList<Integer>) getBaseline(6).get("attribs");
 	}
 	
 	public void resetAttribs() {
@@ -881,7 +881,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	@SuppressWarnings("unchecked")
 	public SWGList<Integer> getMaxAttribs() {
-		return (SWGList<Integer>) getBaseline(6).get("maxAttributes");
+		return (SWGList<Integer>) getBaseline(6).get("maxAttribs");
 	}
 	
 	public int getMaxHealth() {
@@ -981,20 +981,10 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void addBuff(Buff buff) {
-		if (buff == null) {
-			System.err.println("CreatureObject:addBuff(): Attempting to add a null Buff object.  Something is wrong in BuffService!");
-		}
-		
-		synchronized(objectMutex) {
-			PlayerObject player = (PlayerObject) getSlottedObject("ghost");
-			buff.setTotalPlayTime((int) (player.getTotalPlayTime() + (System.currentTimeMillis() - player.getLastPlayTimeUpdate()) / 1000));
-		}
-		
+		PlayerObject player = (PlayerObject) getSlottedObject("ghost");
+		buff.setTotalPlayTime((player == null) ? 0 : (int) (player.getTotalPlayTime() + (System.currentTimeMillis() - player.getLastPlayTimeUpdate()) / 1000));
+		buff.setStartTime();
 		getBuffList().put(CRC.StringtoCRC(buff.getBuffName().toLowerCase()), buff);
-		
-		synchronized(objectMutex) {
-			buff.setStartTime();
-		}
 	}
 	
 	public void removeBuff(Buff buff) {
