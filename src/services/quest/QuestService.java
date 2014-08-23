@@ -22,9 +22,22 @@
 package services.quest;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
@@ -36,9 +49,11 @@ import protocol.swg.objectControllerObjects.ForceActivateQuest;
 import protocol.swg.objectControllerObjects.QuestTaskCounterMessage;
 import protocol.swg.objectControllerObjects.QuestTaskTimerMessage;
 import protocol.swg.objectControllerObjects.ShowLootBox;
+import resources.common.Console;
 import resources.common.ObjControllerOpcodes;
 import resources.common.OutOfBand;
 import resources.common.ProsePackage;
+import resources.common.collidables.CollidableCircle;
 import resources.datatables.DisplayType;
 import resources.objects.SWGMap;
 import resources.objects.creature.CreatureObject;
@@ -60,7 +75,7 @@ public class QuestService implements INetworkDispatch {
 	private NGECore core;
 	private Map<String, QuestData> questMap = new ConcurrentHashMap<String, QuestData>();
 	private Map<String, QuestList> questRewardMap = new ConcurrentHashMap<String, QuestList>();
-	
+
 	public QuestService(NGECore core) {
 		this.core = core;
 	}
@@ -77,9 +92,6 @@ public class QuestService implements INetworkDispatch {
 		});
 	}
 
-	@Override
-	public void shutdown() { }
-	
 	public boolean doesPlayerHaveQuest(CreatureObject creo, String questName) {
 		PlayerObject ghost = creo.getPlayerObject();
 		
@@ -144,9 +156,6 @@ public class QuestService implements INetworkDispatch {
 		if (player == null)
 			return;
 		
-		//if (quest.getWaypointId() != 0)
-			//core.objectService.destroyObject(quest.getWaypointId());
-		
 		int activeStep = quest.getActiveStep();
 		
 		QuestTask task = qData.getTasks().get(activeStep);
@@ -156,6 +165,16 @@ public class QuestService implements INetworkDispatch {
 
 		switch (type) {
 		
+		// quest.task.ground.go_to_location
+		case "go_to_location":
+			Point3D location = new Point3D(task.getLocationX(), task.getLocationY(), task.getLocationZ());
+			WaypointObject wpGoTo = createWaypoint(task.getWaypointName(), location, task.getPlanet());
+			player.getWaypoints().put(wpGoTo.getObjectID(), wpGoTo);
+			
+			quest.setWaypointId(wpGoTo.getObjectID());
+			
+			break;
+	
 		// quest.task.ground.comm_player
 		case "comm_player":
 			
@@ -172,18 +191,31 @@ public class QuestService implements INetworkDispatch {
 			ObjControllerMessage itemCount = new ObjControllerMessage(11, new QuestTaskCounterMessage(quester.getObjectID(), quest.getCrcName(), "@quest/groundquests:retrieve_item_counter"));
 			quester.getClient().getSession().write(itemCount.serialize());
 			
-			WaypointObject waypoint = createWaypoint(task.getWaypointName(), new Point3D(task.getLocationX(), task.getLocationY(), task.getLocationZ()), task.getPlanet());
-			player.getWaypoints().put(waypoint.getObjectID(), waypoint);
+			WaypointObject wpRetrieve = createWaypoint(task.getWaypointName(), new Point3D(task.getLocationX(), task.getLocationY(), task.getLocationZ()), task.getPlanet());
+			player.getWaypoints().put(wpRetrieve.getObjectID(), wpRetrieve);
 			
-			quest.setWaypointId(waypoint.getObjectID());
+			quest.setWaypointId(wpRetrieve.getObjectID());
 			break;
 		
+		// quest.task.ground.timer
 		case "timer":
-			ObjControllerMessage timer = new ObjControllerMessage(11, new QuestTaskTimerMessage(quester.getObjectID(), quest.getCrcName(), "@quest/groundquests:timer_timertext", 20));
-			quester.getClient().getSession().write(timer.serialize());
-			System.out.println("Sent timer.");
+			AtomicInteger time = new AtomicInteger(new Random(task.getMaxTime()).nextInt((task.getMaxTime() - task.getMinTime()) + task.getMinTime()));
+			
+			ScheduledFuture<?> taskTimer = Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
+				Console.println("Timer is: " + time.get());
+				if (time.get() == 0) {
+					//quest.incrementQuestStep();
+					completeActiveTask((CreatureObject) core.objectService.getObject(quester.getObjectID()), quest.getName());
+				} else {
+					ObjControllerMessage timer = new ObjControllerMessage(11, new QuestTaskTimerMessage(quester.getObjectID(), quest.getCrcName(), "@quest/groundquests:timer_timertext", time.getAndDecrement()));
+					quester.getClient().getSession().write(timer.serialize());
+				}
+			}, 1, 1, TimeUnit.SECONDS);
+			
+			quest.setTimer(taskTimer);
 			break;
 			
+		// quest.task.ground.show_message_box
 		case "show_message_box":
 			break;
 		
@@ -192,6 +224,36 @@ public class QuestService implements INetworkDispatch {
 			break;
 				
 		}
+
+		if (!task.isVisible()) {
+			completeActiveTask(quester, quest);
+			return;
+		}
+		
+	}
+	
+	public void completeActiveTask(CreatureObject quester, String questName) {	
+		if (quester.getPlayerObject().getQuestJournal().containsKey(CRC.StringtoCRC("quest/" + questName)) && !quester.getPlayerObject().getQuestJournal().get(CRC.StringtoCRC("quest/" + questName)).isCompleted()) {
+			completeActiveTask(quester, quester.getPlayerObject().getQuestJournal().get(CRC.StringtoCRC("quest/" + questName)));
+		}
+	}
+	
+	public void completeActiveTask(CreatureObject quester, Quest quest) {
+		PlayerObject player = quester.getPlayerObject();
+		if (player == null)
+			return;
+		
+		QuestData qData = getQuestData(quest.getName());
+		
+		int activeStep = quest.getActiveStep();
+		
+		QuestTask task = qData.getTasks().get(activeStep);
+		
+		//if (quest.getWaypointId() != 0)
+		//core.objectService.destroyObject(quest.getWaypointId());
+	
+		if (quest.getTimer() != null)
+			quest.getTimer().cancel(true);
 		
 		if (activeStep + 1 >= qData.getTasks().size()) {
 			QuestList listItem = questRewardMap.get(quest.getName());
@@ -209,14 +271,12 @@ public class QuestService implements INetworkDispatch {
 		
 		if (task.getGrantQuestOnComplete() != null && !task.getGrantQuestOnComplete().equals(""))
 			activateQuest(quester, task.getGrantQuestOnComplete());
-	
-		quest.incrementQuestStep(); // After handling the quest type, we can now increment the step
 		
-		if (!task.isVisible()) {
-			player.getContainer().getClient().getSession().write(player.getBaseline(8).createDelta(7));
-			activateNextTask(quester, quest);
-			return;
-		}
+		quest.incrementQuestStep();
+		
+		player.getContainer().getClient().getSession().write(player.getBaseline(8).createDelta(7));
+		
+		activateNextTask(quester, quest);
 		
 	}
 	
@@ -275,7 +335,7 @@ public class QuestService implements INetworkDispatch {
 		// Give quest items
 		
 		if (info.getRewardLootName() != null && !info.getRewardLootName().equals("")) {
-			SWGObject rewardLoot = core.objectService.createObject(core.scriptService.getMethod("scripts/quest_rewards/", info.getRewardLootName(), "run").__call__().asString(), creo.getPlanet());
+			SWGObject rewardLoot = core.objectService.createObject(core.scriptService.getMethod("scripts/quests/rewards/", info.getRewardLootName(), "run").__call__().asString(), creo.getPlanet());
 			inventory.add(rewardLoot);
 			recievedItems.add(rewardLoot.getObjectID());
 		}
@@ -371,7 +431,7 @@ public class QuestService implements INetworkDispatch {
 			return;
 
 		QuestItem item = player.getQuestRetrieveItemTemplates().get(target.getTemplate());
-		activateNextTask(quester, item.getQuestName());
+		completeActiveTask(quester, item.getQuestName());
 
 		player.getQuestRetrieveItemTemplates().remove(target.getTemplate(), item);
 		
@@ -414,6 +474,12 @@ public class QuestService implements INetworkDispatch {
 			questRewardMap.put(questName, list);
 			return list;
 		}
+	}
+	
+	public void addCollisionEvent(String questName, String method, float x, float y, float z, float radius, String planet) {
+		CollidableCircle collision = new CollidableCircle(new Point3D(x,y,z), radius, core.terrainService.getPlanetByName(planet));
+		collision.setCallback(core.scriptService.getMethod("scripts/quests/events/", questName, method));
+		core.simulationService.addCollidable(collision, x, z);
 	}
 	
 	public boolean adminActivateQuest(CreatureObject creo, String questName) {
@@ -497,6 +563,8 @@ public class QuestService implements INetworkDispatch {
 				if (visitor.getObjectByColumnNameAndIndex("ITEM_NAME", r) != null) task.setItemName((String) visitor.getObjectByColumnNameAndIndex("ITEM_NAME", r));
 				if (visitor.getObjectByColumnNameAndIndex("DROP_PERCENT", r) != null) task.setDropPercent((int) visitor.getObjectByColumnNameAndIndex("DROP_PERCENT", r));
 				if (visitor.getObjectByColumnNameAndIndex("RETRIEVE_MENU_TEXT", r) != null) task.setRetrieveMenuText((String) visitor.getObjectByColumnNameAndIndex("RETRIEVE_MENU_TEXT", r));
+				if (visitor.getObjectByColumnNameAndIndex("MIN_TIME", r) != null) task.setMinTime((int) visitor.getObjectByColumnNameAndIndex("MIN_TIME", r));
+				if (visitor.getObjectByColumnNameAndIndex("MAX_TIME", r) != null) task.setMaxTime((int) visitor.getObjectByColumnNameAndIndex("MAX_TIME", r));
 				//if (visitor.getObjectByColumnNameAndIndex("", r)) 
 				
 				data.getTasks().add(task);
@@ -544,6 +612,19 @@ public class QuestService implements INetworkDispatch {
 		return qList;
 	}
 	
+	public void loadEvents() {
+		FileVisitor<Path> fv = new SimpleFileVisitor<Path>() {
+	        @Override
+	        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
+	        {
+	        	core.scriptService.callScript("scripts/quests/events/", file.getFileName().toString().replace(".py", ""), "setup", core);
+	        	return FileVisitResult.CONTINUE;
+	        }
+	    };
+		try { Files.walkFileTree(Paths.get("scripts/quests/events/"), fv); } 
+		catch (IOException e) { e.printStackTrace(); }
+	}
+	
 	//  useful for custom quest scripts, and for the some of the datatables that are all screwed up
 	/*private QuestData parseXmlQuestData(Quest quest) {
 		try {
@@ -579,4 +660,8 @@ public class QuestService implements INetworkDispatch {
 
 		return template.replace(file, "shared_" + file);
 	}
+	
+	@Override
+	public void shutdown() { }
+	
 }
