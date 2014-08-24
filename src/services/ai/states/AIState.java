@@ -76,6 +76,15 @@ public abstract class AIState {
 		NGECore core = NGECore.getInstance();
 		Point3D currentPosition = creature.getPosition();
 		Point3D targetPosition = null;
+		// Cell management
+		if (creature.getContainer()!=null && creature.getContainer() instanceof CellObject){
+			CellObject cellObj1 = (CellObject)creature.getContainer();
+			if (cellObj1!=null){
+				currentPosition.setCell(cellObj1);
+			}
+		}
+		
+		
 		float maxDistance = stopDistance;
 		boolean finished = false;
 		float dx, dz, newX = 0, newY = 0, newZ = 0;
@@ -85,6 +94,8 @@ public abstract class AIState {
 		//while(!finished && movementPoints.size() != 0) {
 		
 		if ((!(actor.getCurrentState() instanceof FollowState)) && movementPoints.size() == 0 && patrolPoints.size() == 0) {
+			if (creature.getTemplate().contains("shared_dressed_tutorial_mentor.iff"))
+				System.out.println("findNewPosition targetPosition null ");
 			DevLog.debugoutai(actor, "Charon", "AI State findnewpos", "Breakout1");
 			return false;
 		}
@@ -107,15 +118,30 @@ public abstract class AIState {
 		
 		if (actor.getCurrentState().getClass().equals(FollowState.class)){
 			targetPosition = actor.getFollowObject().getWorldPosition();
+			if (actor.getFollowObject().getContainer()!=null && actor.getFollowObject().getContainer() instanceof CellObject){
+				CellObject cellObj1 = (CellObject)actor.getFollowObject().getContainer();
+				if (cell!=null)
+					targetPosition.setCell(cellObj1);
+			}
 		}
 		
 		Vector<Point3D> path = core.aiService.findPath(creature.getPlanetId(), currentPosition, targetPosition);
 		
 		if (targetPosition==null){
+			if (creature.getTemplate().contains("shared_dressed_tutorial_mentor.iff"))
+				System.out.println("findNewPosition targetPosition null ");
 			DevLog.debugoutai(actor, "Charon", "AI State findnewpos", "Breakout2");
 			return false;
 		}
+		
 		float distanceToTarget = targetPosition.getWorldPosition().getDistance(creature.getWorldPosition());
+		
+		if (targetPosition.getCell()!=null){
+			//Point3D targetWorldPosition = core.simulationService.convertModelSpaceToPoint(targetPosition, creature.getGrandparent());
+			Point3D targetWorldPosition = targetPosition.getWorldPosition();
+			distanceToTarget = targetWorldPosition.getDistance(creature.getWorldPosition());
+		}
+
 		
 		if(distanceToTarget > stopDistance) {
 			maxDistance = Math.min(speed, distanceToTarget - stopDistance);
@@ -139,9 +165,7 @@ public abstract class AIState {
 		
 		Point3D oldPosition = null;
 		float pathDistance = 0;
-		
-		
-			
+					
 		for(int i = 1; i < path.size() && !finished; i++) {
 			
 			Point3D currentPathPosition = path.get(i);
@@ -153,7 +177,7 @@ public abstract class AIState {
 			
 			pathDistance += oldWorldPos.getDistance(currentPathPosition.getWorldPosition());
 			if(pathDistance >= maxDistance || i == path.size() - 1 || currentPathPosition.getCell() != creature.getContainer()) {
-				
+
 				finished = true;
 				
 				if(movementPoints.size() != 0 && currentPosition.getWorldPosition().getDistance(currentPathPosition.getWorldPosition()) <= stopDistance && cell == creature.getContainer()) {
@@ -177,6 +201,7 @@ public abstract class AIState {
 						//float distance = oldWorldPos.getDistance(currentPathPosition.getWorldPosition());
 						float distance = NGECore.getInstance().aiService.distanceSquared(oldWorldPos, currentPathPosition.getWorldPosition()); // Ok to use, as distance is not directly used later
 						float travelDistance = distance - (pathDistance - maxDistance);
+	
 						// temp fix for melee npcs
 						travelDistance *= 1.3;
 						if(travelDistance <= 0) {
@@ -203,7 +228,7 @@ public abstract class AIState {
 									fullong = (int)(tempdz*100);
 									halfshort = ((int)(tempdx*100)) >> 1;
 								}
-								float deltaDist = (fullong + halfshort)/100;
+								float deltaDist = (fullong + halfshort)/100; // end of approximation
 
 								newX = (float) (oldPosition.x + (speed * (dx / deltaDist)));
 								newZ = (float) (oldPosition.z + (speed * (dz / deltaDist)));
@@ -226,6 +251,10 @@ public abstract class AIState {
 				}
 				
 			} else {
+				
+				if (creature.getTemplate().contains("shared_dressed_tutorial_mentor.iff"))
+					System.out.println("ELSE CASE");
+				
 				newX = currentPathPosition.x;
 				newZ = currentPathPosition.z;
 				newY = core.terrainService.getHeight(creature.getPlanetId(), newX, newZ);			
@@ -742,8 +771,7 @@ public abstract class AIState {
 		if (creature.isInCombat()){
 			return;
 		}
-		
-		
+
 		TangibleObject target = actor.getFollowObject();
 		float speed = (float) creature.getWalkSpeed();
 		float maxDistance = 6;
@@ -763,82 +791,98 @@ public abstract class AIState {
 		
 		// Manage Patrol points
 		maxDistance = 1;
-		if (actor.getPatrolPoints().size()==0)
+		if (actor.getPatrolPoints().size()==0){
 			return;
+		}
+		
+		
+		
 		Point3D currentDestination = actor.getPatrolPoints().get(actor.getPatrolPointIndex());
-		//System.out.println("currentPosition.getDistance2D(currentDestination) " + currentPosition.getDistance2D(currentDestination));
-		if (NGECore.getInstance().aiService.distanceSquared2D(currentPosition, currentDestination)<4){
-		//if (currentPosition.getDistance2D(currentDestination)<4){
+		
+		float relDistance = NGECore.getInstance().aiService.distanceSquared2D(currentPosition, currentDestination);
+		
+		if (currentDestination.getCell()!=null){
+			 //Point3D curdestWS = core.simulationService.convertModelSpaceToPoint(currentDestination, creature.getGrandparent());
+			Point3D curdestWS = currentDestination.getWorldPosition();
+			 relDistance = NGECore.getInstance().aiService.distanceSquared2D(currentPosition, curdestWS);
+		}
+
+		if (relDistance<4){
+		
 			if (actor.getPatrolPointIndex()<actor.getPatrolPoints().size()-1){
 				actor.setPatrolPointIndex(actor.getPatrolPointIndex()+1);
+	
 			} else {
-				if (actor.isPatrolLoop())
+				if (actor.isPatrolLoop()) {
 					actor.setPatrolPointIndex(0);
+				}
 				else {
 					String isInvader = (String) creature.getAttachment("IsInvader");
-					if (isInvader==null)
-						return;
-					// If invader check for in weapon range general
-					if (core.invasionService.getDefensiveGeneral()!=null){
-						if (core.invasionService.getInvasionPhase()==3 && core.invasionService.getDefensiveGeneral().getPosture()!=13 && core.invasionService.getDefensiveGeneral().getPosture()!=14 && core.invasionService.getDistanceToDefensiveGeneral(creature)<2500){
-							actor.addDefender(core.invasionService.getDefensiveGeneral());
-							return;
-						}
-					}
-					
-					// Check if there are more than 5 invaders at same spot
-					if (NGECore.getInstance().simulationService.getAllNearSameFactionNPCs(7, creature).size()>=4 && NGECore.getInstance().invasionService.getInvasionPhase()!=3){
-						actor.setAIactive(false); // switch off auto-target-recognition to counter lag
-						actor.setCurrentState(new IdleState());
-						//System.out.println("AI switched off!");
-						return;						
-					}
-					
-					//actor.setCurrentState(new IdleState());
-					// Wait state() Since this state does not require move,recover and all that its simple task
+					if (isInvader!=null){
 
-					//NGECore.getInstance().aiService.waitForEvent(actor, NGECore.getInstance().invasionService, "isDefendingGeneralAlive", false, WithdrawalState.class);
-					
-					return; // Last Patrol point reached and no loop
+						// If invader check for in weapon range general
+						if (core.invasionService.getDefensiveGeneral()!=null){
+							if (core.invasionService.getInvasionPhase()==3 && core.invasionService.getDefensiveGeneral().getPosture()!=13 && core.invasionService.getDefensiveGeneral().getPosture()!=14 && core.invasionService.getDistanceToDefensiveGeneral(creature)<2500){
+								actor.addDefender(core.invasionService.getDefensiveGeneral());
+								return;
+							}
+						}
+						
+						// Check if there are more than 5 invaders at same spot
+						if (NGECore.getInstance().simulationService.getAllNearSameFactionNPCs(7, creature).size()>=4 && NGECore.getInstance().invasionService.getInvasionPhase()!=3){
+							actor.setAIactive(false); // switch off auto-target-recognition to counter lag
+							actor.setCurrentState(new IdleState());
+							//System.out.println("AI switched off!");
+							return;						
+						}
+						
+						//actor.setCurrentState(new IdleState());
+						// Wait state() Since this state does not require move,recover and all that its simple task
+	
+						//NGECore.getInstance().aiService.waitForEvent(actor, NGECore.getInstance().invasionService, "isDefendingGeneralAlive", false, WithdrawalState.class);
+						
+						return; // Last Patrol point reached and no loop
+					}
 				}
 			}
-		}
+		} else {}
 		
 		Point3D newPosition = new Point3D();
 		boolean foundNewPos = findNewPosition(actor, speed, maxDistance, newPosition);
-		
-		
-		
-		
+
 		if(!foundNewPos || (newPosition.x == 0 && newPosition.z == 0))
 			return;
+
+		//Point3D newWorldPos = newPosition.getWorldPosition();
+		Point3D newWorldPos = newPosition;
+		if (newPosition.getCell()==null)
+			newWorldPos = newPosition.getWorldPosition();
+				
+		currentPosition = creature.getPosition();
 		
-		Point3D newWorldPos = newPosition.getWorldPosition();
-		float direction = (float) Math.atan2(newWorldPos.x - currentPosition.x, newWorldPos.z - currentPosition.z);
+		float direction = (float) Math.atan2(newWorldPos.x - currentPosition.x, newWorldPos.z - currentPosition.z); // +0.973F
 		if(direction < 0)
-			direction = (float) (2 * Math.PI + direction);
+			direction = (float) (2 * Math.PI + direction); // +0.973F
+		
 		Quaternion quaternion = new Quaternion((float) Math.cos(direction / 2), 0, (float) Math.sin(direction / 2), 0);
         if (quaternion.y < 0.0f && quaternion.w > 0.0f) {
         	quaternion.y *= -1;
         	quaternion.w *= -1;
         }
         
-//        if (newPosition.getCell()==null)
-//        	System.out.println("newPosition.getCell() is NULL");
         try{
         	core.simulationService.moveObject(creature, newPosition, quaternion, creature.getMovementCounter(), speed, newPosition.getCell());
         } catch (NullPointerException e) {
         	// Just to identify what exactly is null here
-//        	if (creature==null)
-//        		System.out.print("creature==null" );
-//        	if (newPosition==null)
-//        		System.out.print("newPosition==null" );
-//        	if (quaternion==null)
-//        		System.out.print("quaternion==null" );
-//        	if (newPosition.getCell()==null)
-//        		System.out.print("newPosition.getCell()==null" );
-//
-//        	System.out.print("creature.getMovementCounter() " + creature.getMovementCounter());
+						//        	if (creature==null)
+						//        		System.out.print("creature==null" );
+						//        	if (newPosition==null)
+						//        		System.out.print("newPosition==null" );
+						//        	if (quaternion==null)
+						//        		System.out.print("quaternion==null" );
+						//        	if (newPosition.getCell()==null)
+						//        		System.out.print("newPosition.getCell()==null" );
+						//
         }
 		
 	}

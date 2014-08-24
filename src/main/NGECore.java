@@ -665,8 +665,12 @@ public class NGECore {
 		staticService.spawnStatics();
 
 		equipmentService.loadBonusSets();
+		
 		playerCityService.loadCityRankCaps();
 		playerCityService.loadCities();
+		
+		questService.loadEvents();
+		
 		retroService.run();
 
 		browserService = new BrowserService(this);

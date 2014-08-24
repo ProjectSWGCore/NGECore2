@@ -5,7 +5,7 @@ def setup():
 	
 def run(core, actor, target, commandString):
 
-	buffObj = actor.getBuffByCRC(int(commandString))
+	buffObj = actor.getBuffList().get(int(commandString))
 	
 	if buffObj is None:
 		return
