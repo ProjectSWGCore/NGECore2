@@ -507,46 +507,32 @@ public class AIActor {
 	}
 	
 	public void scheduleDespawn() {	
-		// Sometimes these tasks are null?
-		
-		try {
-			if (aggroCheckTask!=null)
-				aggroCheckTask.cancel(true);
-			if (factionCheckTask!=null)
-				factionCheckTask.cancel(true);
-		} catch(Exception e) {
-			
-		}
-		
-		try {
-			regenTask.cancel(true);
-		} catch(Exception e) {
-			
-		}
-		
+
 		despawnFuture = scheduler.schedule(new Runnable() {
 			@Override
 			public void run() {
 				try {
 					damageMap.clear();
 					followObject = null;
-					NGECore.getInstance().objectService.destroyObject(creature);					
+					NGECore.getInstance().objectService.destroyObject(creature);	
+					destroyActor();
 				} catch (Exception e) {
+					System.err.println("Exception3 in scheduleDespawn");
 					e.printStackTrace();
 				}
 			}
-		//}, 2, TimeUnit.MINUTES);
-	}, 10, TimeUnit.SECONDS);
+	//}, 2, TimeUnit.MINUTES);
+	}, 15, TimeUnit.SECONDS);
 	}
 	
 	public void destroyActor(){
 		creature.getEventBus().unsubscribe(this);
-		if (creature!=null){
-			if (despawnFuture!=null){
-				despawnFuture.cancel(true);			
-				despawnFuture = null;
-			}	
-		}
+//		if (creature!=null){
+//			if (despawnFuture!=null){
+//				despawnFuture.cancel(true);			
+//				despawnFuture = null;
+//			}	
+//		}
 		
 		// Make sure to kill all AI helper threads
 		if (aggroCheckTask!=null)
@@ -559,7 +545,26 @@ public class AIActor {
 			movementFuture.cancel(true); 
 			movementFuture = null;
 		}
+		if (recoveryFuture!=null){
+			recoveryFuture.cancel(true);			
+			recoveryFuture = null;
+		}	
+	}
+	
+	public void endMovement(){
+
+		// Make sure to kill all AI helper threads
+		if (aggroCheckTask!=null)
+			aggroCheckTask.cancel(true);
+		if (factionCheckTask!=null)
+			factionCheckTask.cancel(true);		
+		if (regenTask!=null)
+			regenTask.cancel(true);
 		if (movementFuture!=null){
+			movementFuture.cancel(true); 
+			movementFuture = null;
+		}
+		if (recoveryFuture!=null){
 			recoveryFuture.cancel(true);			
 			recoveryFuture = null;
 		}	

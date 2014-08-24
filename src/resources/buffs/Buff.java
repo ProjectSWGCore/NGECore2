@@ -146,20 +146,43 @@ public class Buff extends Delta {
 	
 	public byte[] getBytes() {
 		// If getObject ever returns null here, it means there's a major bug with objects being in quadtree but not in objectList.
-		PlayerObject player = (PlayerObject) NGECore.getInstance().objectService.getObject(buffeeId).getSlottedObject("ghost");
-		long lastPlayTimeUpdate = ((player == null) ? 0L : player.getLastPlayTimeUpdate());
-		int remainingDuration = getRemainingDuration();
-		
-		synchronized(objectMutex) {
-			totalPlayTime = ((player == null) ? 0 : (int) (totalPlayTime + (System.currentTimeMillis() - lastPlayTimeUpdate) / 1000));
-			IoBuffer buffer = createBuffer(24);
-			buffer.putInt((int) ((duration > 0) ? (totalPlayTime + remainingDuration) : -1));		
-			buffer.putInt(0);
-			buffer.putInt((int) duration);
-			buffer.putLong(bufferId);
-			buffer.putInt(stacks);
-			buffer.flip();
-			return buffer.array();
+
+		if (NGECore.getInstance().objectService.getObject(buffeeId)==null){
+			System.err.println("FATAL ERROR BUFFED CREATURE NOT IN OBJECTLIST");
+			return new byte[]{};
+		}
+				
+		CreatureObject cre = (CreatureObject)NGECore.getInstance().objectService.getObject(buffeeId);
+		// NPCs should be considered here to
+		if (cre.isPlayer()){
+			PlayerObject player = (PlayerObject) NGECore.getInstance().objectService.getObject(buffeeId).getSlottedObject("ghost");
+			long lastPlayTimeUpdate = ((player == null) ? 0L : player.getLastPlayTimeUpdate());
+			int remainingDuration = getRemainingDuration();
+			
+			synchronized(objectMutex) {
+				totalPlayTime = ((player == null) ? 0 : (int) (totalPlayTime + (System.currentTimeMillis() - lastPlayTimeUpdate) / 1000));
+				IoBuffer buffer = createBuffer(24);
+				buffer.putInt((int) ((duration > 0) ? (totalPlayTime + remainingDuration) : -1));		
+				buffer.putInt(0);
+				buffer.putInt((int) duration);
+				buffer.putLong(bufferId);
+				buffer.putInt(stacks);
+				buffer.flip();
+				return buffer.array();
+			}
+		} else {
+			int remainingDuration = getRemainingDuration();
+			synchronized(objectMutex) {
+				totalPlayTime = 0;
+				IoBuffer buffer = createBuffer(24);
+				buffer.putInt((int) ((duration > 0) ? (totalPlayTime + remainingDuration) : -1));		
+				buffer.putInt(0);
+				buffer.putInt((int) duration);
+				buffer.putLong(bufferId);
+				buffer.putInt(stacks);
+				buffer.flip();
+				return buffer.array();
+			}
 		}
 	}
 	
@@ -564,7 +587,8 @@ public class Buff extends Delta {
 			@Override
 			public void run() {
 				try {
-					core.buffService.removeBuffFromCreature(creature, Buff.this);
+					if (creature!=null)
+						core.buffService.removeBuffFromCreature(creature, Buff.this);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
