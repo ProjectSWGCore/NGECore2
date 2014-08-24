@@ -216,6 +216,11 @@ public class QuestService implements INetworkDispatch {
 			quest.setTimer(taskTimer);
 			break;
 			
+		// quest.task.ground.wait_for_signal
+		case "wait_for_signal":
+			core.scriptService.callScript("scripts/quests/events/signals/", task.getSignalName(), "wait", core, quester);
+			break;
+		
 		// quest.task.ground.show_message_box
 		case "show_message_box":
 			break;
@@ -438,6 +443,26 @@ public class QuestService implements INetworkDispatch {
 		
 	}
 	
+	public void handleActivateSignal(CreatureObject actor, TangibleObject npc, Quest quest, int taskId) {
+		QuestTask task = getQuestData(quest.getName()).getTasks().get(taskId);
+		if (task == null)
+			return;
+		
+		if (core.scriptService.getMethod("scripts/quests/events/signals/", task.getSignalName(), "activate") != null) {
+			core.scriptService.callScript("scripts/quests/events/signals/", task.getSignalName(), "activate", core, actor, quest);
+			return;
+		}
+		
+		completeActiveTask(actor, quest);
+	}
+	
+	public void handleAddConversationScript(TangibleObject object, String script) {
+		if (object == null)
+			return;
+		
+		object.setAttachment("conversationFile", script);
+	}
+	
 	public WaypointObject createWaypoint(String name, Point3D location, String planet) {
 		WaypointObject waypoint = (WaypointObject) core.objectService.createObject("object/waypoint/shared_waypoint.iff", core.terrainService.getPlanetByName(planet));
 		if (waypoint == null)
@@ -561,6 +586,7 @@ public class QuestService implements INetworkDispatch {
 				if (visitor.getObjectByColumnNameAndIndex("MIN_TIME", r) != null) task.setMinTime((int) visitor.getObjectByColumnNameAndIndex("MIN_TIME", r));
 				if (visitor.getObjectByColumnNameAndIndex("MAX_TIME", r) != null) task.setMaxTime((int) visitor.getObjectByColumnNameAndIndex("MAX_TIME", r));
 				if (visitor.getObjectByColumnNameAndIndex("RADIUS", r) != null && visitor.getObjectByColumnNameAndIndex("RADIUS", r) != "") task.setRadius(Float.parseFloat((String) visitor.getObjectByColumnNameAndIndex("RADIUS", r)));
+				if (visitor.getObjectByColumnNameAndIndex("SIGNAL_NAME", r) != null) task.setSignalName((String) visitor.getObjectByColumnNameAndIndex("SIGNAL_NAME", r));
 				//if (visitor.getObjectByColumnNameAndIndex("", r)) 
 
 				if (task.getType().equals("quest.task.ground.go_to_location")) {
@@ -650,6 +676,19 @@ public class QuestService implements INetworkDispatch {
 		return template.replace(file, "shared_" + file);
 	}
 	
+	public void loadEvents() {
+		 FileVisitor<Path> fv = new SimpleFileVisitor<Path>() {
+		 @Override
+		 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
+		 {
+			 core.scriptService.callScript("scripts/quests/events/signals/", file.getFileName().toString().replace(".py", ""), "setup", core);
+			 return FileVisitResult.CONTINUE;
+		 }
+		 };
+		 try { Files.walkFileTree(Paths.get("scripts/quests/events/signals/"), fv); }
+		 catch (IOException e) { e.printStackTrace(); }
+	}
+
 	@Override
 	public void shutdown() { }
 	
