@@ -65,6 +65,8 @@ public class QuestTask {
 	private int timeToComplete;
 	private int numRequired;
 	private int dropPercent;
+	private int minTime;
+	private int maxTime;
 	
 	private long waitMarkerBuilding;
 	
@@ -74,6 +76,7 @@ public class QuestTask {
 	private float waitMarkerX;
 	private float waitMarkerY;
 	private float waitMarkerZ;
+	private float radius;
 
 	public QuestTask() {}
 
@@ -450,5 +453,29 @@ public class QuestTask {
 
 	public void setRetrieveMenuText(String retrieveMenuText) {
 		this.retrieveMenuText = retrieveMenuText;
+	}
+
+	public int getMinTime() {
+		return minTime;
+	}
+
+	public void setMinTime(int minTime) {
+		this.minTime = minTime;
+	}
+
+	public int getMaxTime() {
+		return maxTime;
+	}
+
+	public void setMaxTime(int maxTime) {
+		this.maxTime = maxTime;
+	}
+
+	public float getRadius() {
+		return radius;
+	}
+
+	public void setRadius(float radius) {
+		this.radius = radius;
 	}
 }
