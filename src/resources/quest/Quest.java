@@ -75,11 +75,11 @@ public class Quest extends Delta implements Serializable {
 		this.ownerId = ownerId;
 	}
 
-	public int getActiveStep() {
+	public int getActiveTask() {
 		return activeStep;
 	}
 
-	public void setActiveStep(int activeStep) {
+	public void setActiveTask(int activeStep) {
 		this.activeStep = activeStep;
 	}
 
@@ -190,7 +190,7 @@ public class Quest extends Delta implements Serializable {
 		
 		buffer.flip();
 
-		StringUtilities.printBytes(buffer.array());
+		//StringUtilities.printBytes(buffer.array());
 		return buffer.array();
 	}
 	

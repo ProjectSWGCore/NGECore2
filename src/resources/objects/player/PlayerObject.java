@@ -98,6 +98,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		baseline.put("holoEmoteUses", 0);
 		baseline.put("activeMissions", new ArrayList<Long>()); // TODO: Look at MissionCriticalObject in CREO4, could use that instead of this
 		baseline.put("questRetrieveItemTemplates", new TreeMap<String, QuestItem>());
+		baseline.put("activeQuestName", "");
 		return baseline;
 	}
 	
@@ -606,12 +607,21 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		return (int) getBaseline(8).get("activeQuest");
 	}
 	
-	public void setActiveQuest(int questCRC) {
-		getBaseline(8).set("activeQuest", questCRC);
+	public String getActiveQuestName() {
+		return (String) otherVariables.get("activeQuestName");
+	}
+	
+	public void setActiveQuest(String questName) {
+		otherVariables.set("activeQuestName", questName);
+		getBaseline(8).set("activeQuest", CRC.StringtoCRC("quest/" + questName));
 	}
 	
 	public Quest getQuest(String questName) {
 		return getQuestJournal().get(CRC.StringtoCRC("quest/" + questName));
+	}
+	
+	public Quest getQuest(int questCrc) {
+		return getQuestJournal().get(questCrc);
 	}
 	
 	public String getProfessionWheelPosition() {

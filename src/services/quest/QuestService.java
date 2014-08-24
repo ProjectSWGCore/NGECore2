@@ -54,6 +54,7 @@ import resources.common.ObjControllerOpcodes;
 import resources.common.OutOfBand;
 import resources.common.ProsePackage;
 import resources.common.collidables.CollidableCircle;
+import resources.common.collidables.QuestCollidable;
 import resources.datatables.DisplayType;
 import resources.objects.SWGMap;
 import resources.objects.creature.CreatureObject;
@@ -156,7 +157,7 @@ public class QuestService implements INetworkDispatch {
 		if (player == null)
 			return;
 		
-		int activeStep = quest.getActiveStep();
+		int activeStep = quest.getActiveTask();
 		
 		QuestTask task = qData.getTasks().get(activeStep);
 		
@@ -172,7 +173,6 @@ public class QuestService implements INetworkDispatch {
 			player.getWaypoints().put(wpGoTo.getObjectID(), wpGoTo);
 			
 			quest.setWaypointId(wpGoTo.getObjectID());
-			
 			break;
 	
 		// quest.task.ground.comm_player
@@ -199,6 +199,7 @@ public class QuestService implements INetworkDispatch {
 		
 		// quest.task.ground.timer
 		case "timer":
+			//System.out.println("Max time: " + task.getMaxTime() + " Min time: " + task.getMinTime());
 			AtomicInteger time = new AtomicInteger(new Random(task.getMaxTime()).nextInt((task.getMaxTime() - task.getMinTime()) + task.getMinTime()));
 			
 			ScheduledFuture<?> taskTimer = Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
@@ -245,7 +246,7 @@ public class QuestService implements INetworkDispatch {
 		
 		QuestData qData = getQuestData(quest.getName());
 		
-		int activeStep = quest.getActiveStep();
+		int activeStep = quest.getActiveTask();
 		
 		QuestTask task = qData.getTasks().get(activeStep);
 		
@@ -301,7 +302,7 @@ public class QuestService implements INetworkDispatch {
 		quester.getClient().getSession().write(music.serialize());
 		
 		player.getQuestJournal().put(quest.getCrc(), quest);
-		player.setActiveQuest(quest.getCrc());
+		player.setActiveQuest(quest.getName());
 		
 		activateNextTask(quester, quest);
 	}
@@ -476,12 +477,6 @@ public class QuestService implements INetworkDispatch {
 		}
 	}
 	
-	public void addCollisionEvent(String questName, String method, float x, float y, float z, float radius, String planet) {
-		CollidableCircle collision = new CollidableCircle(new Point3D(x,y,z), radius, core.terrainService.getPlanetByName(planet));
-		collision.setCallback(core.scriptService.getMethod("scripts/quests/events/", questName, method));
-		core.simulationService.addCollidable(collision, x, z);
-	}
-	
 	public boolean adminActivateQuest(CreatureObject creo, String questName) {
 		
 		PlayerObject ghost = creo.getPlayerObject();
@@ -565,7 +560,14 @@ public class QuestService implements INetworkDispatch {
 				if (visitor.getObjectByColumnNameAndIndex("RETRIEVE_MENU_TEXT", r) != null) task.setRetrieveMenuText((String) visitor.getObjectByColumnNameAndIndex("RETRIEVE_MENU_TEXT", r));
 				if (visitor.getObjectByColumnNameAndIndex("MIN_TIME", r) != null) task.setMinTime((int) visitor.getObjectByColumnNameAndIndex("MIN_TIME", r));
 				if (visitor.getObjectByColumnNameAndIndex("MAX_TIME", r) != null) task.setMaxTime((int) visitor.getObjectByColumnNameAndIndex("MAX_TIME", r));
+				if (visitor.getObjectByColumnNameAndIndex("RADIUS", r) != null && visitor.getObjectByColumnNameAndIndex("RADIUS", r) != "") task.setRadius(Float.parseFloat((String) visitor.getObjectByColumnNameAndIndex("RADIUS", r)));
 				//if (visitor.getObjectByColumnNameAndIndex("", r)) 
+
+				if (task.getType().equals("quest.task.ground.go_to_location")) {
+					QuestCollidable collision = new QuestCollidable(new Point3D(task.getLocationX(), task.getLocationY(), task.getLocationZ()), task.getRadius(), core.terrainService.getPlanetByName(task.getPlanet()), quest, r);
+					collision.setCallback(core.scriptService.getMethod("scripts/quests/events/", "go_to_location", "run"));
+					core.simulationService.addCollidable(collision, task.getLocationX(), task.getLocationZ());
+				}
 				
 				data.getTasks().add(task);
 			}
@@ -610,19 +612,6 @@ public class QuestService implements INetworkDispatch {
 		}
 
 		return qList;
-	}
-	
-	public void loadEvents() {
-		FileVisitor<Path> fv = new SimpleFileVisitor<Path>() {
-	        @Override
-	        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
-	        {
-	        	core.scriptService.callScript("scripts/quests/events/", file.getFileName().toString().replace(".py", ""), "setup", core);
-	        	return FileVisitResult.CONTINUE;
-	        }
-	    };
-		try { Files.walkFileTree(Paths.get("scripts/quests/events/"), fv); } 
-		catch (IOException e) { e.printStackTrace(); }
 	}
 	
 	//  useful for custom quest scripts, and for the some of the datatables that are all screwed up
