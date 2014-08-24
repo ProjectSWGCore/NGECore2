@@ -31,6 +31,7 @@ public class DeathState extends AIState {
 
 	@Override
 	public byte onEnter(AIActor actor) {
+		NGECore.getInstance().buffService.clearBuffs(actor.getCreature());
 		NGECore.getInstance().aiService.awardExperience(actor);
 		NGECore.getInstance().aiService.awardGcw(actor);
 		actor.setActorAlive(false);
