@@ -1067,6 +1067,27 @@ public class SimulationService implements INetworkDispatch {
 
 	}
 	
+	public Point3D convertModelSpaceToPoint(Point3D point, SWGObject object) {
+		
+		Point3D position = object.getPosition();
+		WB_M44 translateMatrix = new WB_M44(1, 0, 0, position.x, 0, 1, 0, position.y, 0, 0, 1, position.z, 0, 0, 0, 1);
+		
+		float radians = object.getRadians();
+		float sin = (float) Math.sin(radians);
+		float cos = (float) Math.cos(radians);
+
+        WB_M44 rotationMatrix = new WB_M44(cos, 0, sin, 0, 0, 1, 0, 0, -sin, 0, cos, 0, 0, 0, 0, 1); //non-inverse matrix
+
+        WB_M44 modelSpace = translateMatrix.mult(rotationMatrix);
+        
+        float x = (float) (modelSpace.m11 * point.x + modelSpace.m12 * point.y + modelSpace.m13 * point.z + modelSpace.m14);
+        float y = (float) (modelSpace.m21 * point.x + modelSpace.m22 * point.y + modelSpace.m23 * point.z + modelSpace.m24);
+        float z = (float) (modelSpace.m31 * point.x + modelSpace.m32 * point.y + modelSpace.m33 * point.z + modelSpace.m34);
+       
+        return new Point3D(x, y, z);
+
+	}
+	
 	/*
 	 * Moved this to ConnectionService which will disconnect them
 	 * from the server if they don't send packets for 5 minutes or more

@@ -35,6 +35,8 @@ import resources.common.SpawnPoint;
 import resources.datatables.Difficulty;
 import resources.datatables.FactionStatus;
 import resources.datatables.GcwType;
+import resources.objects.building.BuildingObject;
+import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
 import resources.objects.player.PlayerObject;
@@ -211,6 +213,15 @@ public class AIService {
 		}
 		else
 			actor.setCurrentState(new IdleState());
+	}
+	
+	public void addPatrolPointCell(Vector<Point3D> patrolpoints, BuildingObject building, Point3D position, int cellID){
+		if (building==null)
+			return;
+		CellObject cellObj = building.getCellByCellNumber(cellID);
+		if (cellObj!=null)
+			position.setCell(cellObj);
+		patrolpoints.add(position);
 	}
 	
 	public void setLoiter(CreatureObject creature, float minDist, float maxDist){
