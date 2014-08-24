@@ -1238,21 +1238,19 @@ public class CombatService implements INetworkDispatch {
 			
 			if(target.hasBuff("incapWeaken")) {
 				if (!attacker.isPlayer()){
-					AIActor aiActor = (AIActor)attacker.getAttachment("AI");						
-					if (aiActor.getMobileTemplate().isDeathblow())
-						deathblowPlayer(attacker, target);
+					deathblowPlayer(attacker, target);
 				} else
 				{
 					deathblowPlayer(attacker, target);
 				}
 				return;
-			}
-			
-			if (!attacker.isPlayer()){
-				AIActor aiActor = (AIActor)attacker.getAttachment("AI");	
-				if (aiActor.getMobileTemplate().isDeathblow()){
-					deathblowPlayer(attacker, target);
-					return;
+			} else {
+				if (!attacker.isPlayer()){
+					AIActor aiActor = (AIActor)attacker.getAttachment("AI");	
+					if (aiActor.getMobileTemplate().isDeathblow()){
+						deathblowPlayer(attacker, target);
+						return;
+					}
 				}
 			}
 			
