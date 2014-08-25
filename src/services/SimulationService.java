@@ -251,6 +251,9 @@ public class SimulationService implements INetworkDispatch {
 						object.makeAware(obj);
 					if(obj.getClient() != null)
 						obj.makeAware(object);
+					
+//					if (object.getTemplate().contains("dressed_eisley_officer"))
+//						System.out.println("ME quadtree add!");
 				}
 			}
 		}
@@ -496,6 +499,26 @@ public class SimulationService implements INetworkDispatch {
 				Client observerClient = it.next();
 				if(observerClient.getParent() != null) {
 					observerClient.getParent().makeUnaware(object);
+
+					// Experimental until engine fixed
+					if (observerClient.getParent().getAwareObjects().contains(object)){
+						
+						object.viewChildren(observerClient.getParent(), false, false, new Traverser() {
+							@Override
+							public void process(SWGObject object) {
+								if(object == null)
+									return;
+								if(object.getClient() != null)
+									object.makeUnaware(observerClient.getParent());
+								observerClient.getParent().makeUnaware(object);
+							}
+							});
+							if(!object.isInSnapshot())
+								object.sendDestroy(observerClient);
+							object.removeObserver(observerClient.getParent());
+							observerClient.getParent().getAwareObjects().remove(object);						
+					}
+					// Experimental until engine fixed
 				}
 			}
 		}
@@ -528,6 +551,8 @@ public class SimulationService implements INetworkDispatch {
 				}
 				
 				CreatureObject creature = (CreatureObject) client.getParent();
+				if (creature.getPosture()==Posture.Dead || creature.getPosture()==Posture.Incapacitated)
+					return;
 				
 				CreatureObject object = creature;
 				
@@ -695,6 +720,8 @@ public class SimulationService implements INetworkDispatch {
 				}
 				
 				CreatureObject object = (CreatureObject) client.getParent();
+				if (object.getPosture()==Posture.Dead || object.getPosture()==Posture.Incapacitated)
+					return;
 				
 				if (core.mountService.isMounted(object)) {
 					object.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:cant_mount"), DisplayType.Broadcast);
@@ -854,6 +881,12 @@ public class SimulationService implements INetworkDispatch {
 		
 		if(Float.isNaN(newPosition.x) || Float.isNaN(newPosition.y) || Float.isNaN(newPosition.z))
 			return;
+		
+		if (object instanceof CreatureObject){
+			CreatureObject cre = (CreatureObject) object;
+			if (cre.getPosture()==Posture.Dead || cre.getPosture()==Posture.Incapacitated)
+				return;
+		}
 
 		if(cell == null) {
 			

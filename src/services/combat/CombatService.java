@@ -213,24 +213,6 @@ public class CombatService implements INetworkDispatch {
 					creature.removeDefender(defender);
 				}
 				
-				if(((CreatureObject) target).getPlayerObject() == null) 
-				{
-					target.setKiller(attacker);
-					
-					scheduler.schedule(new Runnable() 
-					{
-						@Override
-						public void run() 
-						{
-							try {
-								core.objectService.destroyObject(target);
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
-						}
-						
-					}, 2, TimeUnit.MINUTES);
-				}
 			}
 		}
 		else if(target instanceof TangibleObject)
@@ -354,25 +336,7 @@ public class CombatService implements INetworkDispatch {
 					defender.removeDefender(creature);
 					creature.removeDefender(defender);
 				}
-				
-				if(((CreatureObject) target).getPlayerObject() == null) 
-				{
-					target.setKiller(attacker);
-					
-					scheduler.schedule(new Runnable() 
-					{
-						@Override
-						public void run() 
-						{
-							try {
-								core.objectService.destroyObject(target);
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
-						}
-						
-					}, 2, TimeUnit.MINUTES);
-				}
+
 			}
 		}
 		else if(target instanceof TangibleObject)

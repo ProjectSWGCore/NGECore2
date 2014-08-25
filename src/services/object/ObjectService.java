@@ -585,6 +585,7 @@ public class ObjectService implements INetworkDispatch {
 	}
 	
 	public void destroyObject(SWGObject object) {
+
 		if (object == null) {
 			return;
 		}
@@ -604,19 +605,21 @@ public class ObjectService implements INetworkDispatch {
 				
 				@Override
 				public void run() {
-//					try {
-//						// Commented for now until found where the respawn is always set to 60 for any NPC
-//						CreatureObject newObject = NGECore.getInstance().spawnService.spawnCreature(Template, 0, planet.getName(), cellId, spawnPosition.x, spawnPosition.y, spawnPosition.z, orientation.w, orientation.x, orientation.y, orientation.z, level);
-//						AIActor newAIActor = (AIActor)newObject.getAttachment("AI");
-//						newAIActor.cloneActor(((AIActor) object.getAttachment("AI")));
-//						//object.setAttachment("AI", null);
-//					} catch (Exception e) {
-//						e.printStackTrace();
-//					}
+					try {
+
+						// Commented for now until found where the respawn is always set to 60 for any NPC
+						CreatureObject newObject = NGECore.getInstance().spawnService.spawnCreature(Template, 0, planet.getName(), cellId, spawnPosition.x, spawnPosition.y, spawnPosition.z, orientation.w, orientation.x, orientation.y, orientation.z, level);
+						AIActor newAIActor = (AIActor)newObject.getAttachment("AI");
+						newAIActor.cloneActor(((AIActor) object.getAttachment("AI")));
+						((AIActor) object.getAttachment("AI")).destroyActor();
+						//object.setAttachment("AI", null);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 				}
 				
-			//}, ((AIActor) object.getAttachment("AI")).getMobileTemplate().getRespawnTime(), TimeUnit.SECONDS);
-			}, 20, TimeUnit.SECONDS);
+			}, ((AIActor) object.getAttachment("AI")).getMobileTemplate().getRespawnTime(), TimeUnit.SECONDS);
+			//}, 30, TimeUnit.SECONDS);
 		}
 				
 		String filePath = "scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", "") + object.getTemplate().split("shared_" , 2)[1].replace(".iff", "") + ".py";
