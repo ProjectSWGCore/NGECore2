@@ -21,21 +21,26 @@
  ******************************************************************************/
 package resources.datatables;
 
-public class WeaponType {
+public class ValidWeapon {
 	
-	public static final int RIFLE = 0;
-	public static final int CARBINE = 1;
-	public static final int PISTOL = 2;
-	public static final int HEAVY = 3;
-	public static final int ONEHANDEDMELEE = 4;
-	public static final int TWOHANDEDMELEE = 5;
-	public static final int UNARMED = 6;
-	public static final int POLEARMMELEE = 7;
-	public static final int THROWN = 8;
-	public static final int ONEHANDEDSABER = 9;
-	public static final int TWOHANDEDSABER = 10;
-	public static final int POLEARMSABER = 11;
-	public static final int HEAVYWEAPON = 12;
-	public static final int FLAMETHROWER = 13;
+	public static final byte NONE = 0;
+	public static final byte RIFLE = 1;
+	public static final byte CARBINE = 2;
+	public static final byte PISTOL = 3;
+	public static final byte HEAVY = 4;
+	public static final byte ONEHAND_MELEE = 5;
+	public static final byte TWOHAND_MELEE = 6;
+	public static final byte UNARMED = 7;
+	public static final byte POLEARM = 8;
+	public static final byte THROWN = 9;
+	public static final byte ONEHAND_LIGHTSABER = 10;
+	public static final byte TWOHAND_LIGHTSABER = 11;
+	public static final byte POLEARM_LIGHTSABER = 12;
+	public static final byte GROUND_TARGETTING = 13;
+	public static final byte DIRECTIONAL = 14;
+	public static final byte RANGED = 28;
+	public static final byte MELEE = 29;
+	public static final byte ALL = 30;
+	public static final byte ALL_LIGHTSABERS = 31;
 	
 }

@@ -21,21 +21,21 @@
  ******************************************************************************/
 package resources.datatables;
 
-public class WeaponType {
+public class AttackType {
 	
-	public static final int RIFLE = 0;
-	public static final int CARBINE = 1;
-	public static final int PISTOL = 2;
-	public static final int HEAVY = 3;
-	public static final int ONEHANDEDMELEE = 4;
-	public static final int TWOHANDEDMELEE = 5;
-	public static final int UNARMED = 6;
-	public static final int POLEARMMELEE = 7;
-	public static final int THROWN = 8;
-	public static final int ONEHANDEDSABER = 9;
-	public static final int TWOHANDEDSABER = 10;
-	public static final int POLEARMSABER = 11;
-	public static final int HEAVYWEAPON = 12;
-	public static final int FLAMETHROWER = 13;
+	public static final byte CONE = 0;
+	public static final byte SINGLE_TARGET = 1;
+	public static final byte AREA = 2;
+	public static final byte TARGET_AREA = 3;
+	public static final byte DUAL_WIELD = 4;
+	public static final byte RAMPAGE = 5;
+	public static final byte RANDOM_HATE_TARGET = 6;
+	public static final byte RANDOM_HATE_TARGET_CONE = 7;
+	public static final byte RANDOM_HATE_TARGET_CONE_TERMINUS = 8;
+	public static final byte HATE_LIST = 9;
+	public static final byte RANDOM_HATE_MULTI = 10;
+	public static final byte AREA_PROGRESSIVE = 11;
+	public static final byte SPLIT_DAMAGE_TARGET_AREA = 12;
+	public static final byte DISTANCE_FARTHEST = 13;
 	
 }
