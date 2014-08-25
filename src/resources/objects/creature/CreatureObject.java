@@ -26,7 +26,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.LongAdder;
 
@@ -41,7 +40,6 @@ import protocol.swg.UpdatePVPStatusMessage;
 import protocol.swg.UpdatePostureMessage;
 import protocol.swg.objectControllerObjects.Animation;
 import protocol.swg.objectControllerObjects.Posture;
-import protocol.swg.objectControllerObjects.StartTask;
 import engine.clients.Client;
 import engine.resources.objects.Baseline;
 import resources.objects.SWGList;
@@ -56,7 +54,6 @@ import resources.common.OutOfBand;
 import resources.datatables.Difficulty;
 import resources.equipment.Equipment;
 import resources.group.GroupInviteInfo;
-import services.command.BaseSWGCommand;
 import engine.resources.common.CRC;
 import engine.resources.objects.IPersistent;
 import engine.resources.objects.SWGObject;
@@ -82,7 +79,6 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private transient boolean performingEffect;
 	private transient boolean performingFlourish;
 	private transient TangibleObject conversingNpc;
-	private transient ConcurrentHashMap<String, Long> cooldowns = new ConcurrentHashMap<String, Long>();
 	private transient long tefTime = 0;
 	private transient SWGObject useTarget;
 	private transient boolean isConstructing = false;
@@ -1319,50 +1315,6 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		synchronized(objectMutex) {
 			this.tefTime = tefTime + System.currentTimeMillis();
 		}
-	}
-	
-	public void addCooldown(String cooldownGroup, float cooldownTime) {
-		if (cooldowns.containsKey(cooldownGroup)) {
-			cooldowns.remove(cooldownGroup);
-		}
-		
-		long duration = System.currentTimeMillis() + ((long) (cooldownTime * 1000F)); 
-		
-		cooldowns.put(cooldownGroup, duration);
-	}
-	
-	public boolean hasCooldown(String cooldownGroup) {
-		if (cooldowns.containsKey(cooldownGroup)) {
-			if (System.currentTimeMillis() < cooldowns.get(cooldownGroup)) {
-				return true;
-			} else {
-				cooldowns.remove(cooldownGroup);
-			}
-		}
-		
-		return false;
-	}
-	
-	public boolean removeCooldown(int actionCounter, BaseSWGCommand command) {
-		if (cooldowns.containsKey(command.getCooldownGroup())) {
-			cooldowns.remove(command.getCooldownGroup());
-			getClient().getSession().write(new ObjControllerMessage(0x0B, new StartTask(actionCounter, getObjectID(), command.getCommandCRC(), CRC.StringtoCRC(command.getCooldownGroup().toLowerCase()), -1)).serialize());
-			return true;
-		}
-		
-		return false;
-	}
-	
-	public long getRemainingCooldown(String cooldownGroup) {
-		if (cooldowns.containsKey(cooldownGroup)) {
-			if (System.currentTimeMillis() < cooldowns.get(cooldownGroup)) {
-				return (long) (cooldowns.get(cooldownGroup) - System.currentTimeMillis());
-			} else {
-				cooldowns.remove(cooldownGroup);
-			}
-		}
-		
-		return 0L;
 	}
 	
 	public int getGCWFatigue() {
