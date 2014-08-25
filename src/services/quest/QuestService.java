@@ -62,6 +62,8 @@ import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
 import resources.objects.waypoint.WaypointObject;
 import resources.quest.Quest;
+import services.sui.SUIService.MessageBoxType;
+import services.sui.SUIWindow;
 import main.NGECore;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
@@ -177,10 +179,8 @@ public class QuestService implements INetworkDispatch {
 	
 		// quest.task.ground.comm_player
 		case "comm_player":
-			
 			CommPlayerMessage message = new CommPlayerMessage(quester.getObjectID(), OutOfBand.ProsePackage(task.getCommMessageText()), task.getNpcAppearanceTemplate());
 			quester.getClient().getSession().write(message.serialize());
-			
 			break;
 		
 		// quest.task.ground.retrieve_item
@@ -199,6 +199,7 @@ public class QuestService implements INetworkDispatch {
 		
 		// quest.task.ground.timer
 		case "timer":
+			// TODO: Fix timer not showing
 			//System.out.println("Max time: " + task.getMaxTime() + " Min time: " + task.getMinTime());
 			AtomicInteger time = new AtomicInteger(new Random(task.getMaxTime()).nextInt((task.getMaxTime() - task.getMinTime()) + task.getMinTime()));
 			
@@ -223,12 +224,19 @@ public class QuestService implements INetworkDispatch {
 		
 		// quest.task.ground.show_message_box
 		case "show_message_box":
+			SUIWindow msgBox = core.suiService.createMessageBox(MessageBoxType.MESSAGE_BOX_OK, task.getMsgBoxTitle(), task.getMsgBoxPrompt(), quester, null, 0);
+			
+			if (task.getMsgBoxSound() != null && !task.getMsgBoxSound().equals("")) {
+				PlayMusicMessage music = new PlayMusicMessage(task.getMsgBoxSound(), quester.getObjectID(), 0, false);
+				quester.getClient().getSession().write(music.serialize());
+			}
+			
+			core.suiService.openSUIWindow(msgBox);
 			break;
 		
 		default:
 			//System.out.println("Don't know what to do for quest task: " + type);
 			break;
-				
 		}
 
 		if (!task.isVisible()) {
@@ -590,6 +598,16 @@ public class QuestService implements INetworkDispatch {
 				if (visitor.getObjectByColumnNameAndIndex("MAX_TIME", r) != null) task.setMaxTime((int) visitor.getObjectByColumnNameAndIndex("MAX_TIME", r));
 				if (visitor.getObjectByColumnNameAndIndex("RADIUS", r) != null && visitor.getObjectByColumnNameAndIndex("RADIUS", r) != "") task.setRadius(Float.parseFloat((String) visitor.getObjectByColumnNameAndIndex("RADIUS", r)));
 				if (visitor.getObjectByColumnNameAndIndex("SIGNAL_NAME", r) != null) task.setSignalName((String) visitor.getObjectByColumnNameAndIndex("SIGNAL_NAME", r));
+				if (visitor.getObjectByColumnNameAndIndex("MESSAGE_BOX_TITLE", r) != null) task.setMsgBoxTitle((String) visitor.getObjectByColumnNameAndIndex("MESSAGE_BOX_TITLE", r));
+				if (visitor.getObjectByColumnNameAndIndex("MESSAGE_BOX_TEXT", r) != null) task.setMsgBoxPrompt((String) visitor.getObjectByColumnNameAndIndex("MESSAGE_BOX_TEXT", r));
+				if (visitor.getObjectByColumnNameAndIndex("MESSAGE_BOX_SOUND", r) != null) task.setMsgBoxSound((String) visitor.getObjectByColumnNameAndIndex("MESSAGE_BOX_SOUND", r));
+				if (visitor.getObjectByColumnNameAndIndex("MESSAGE_BOX_SIZE_WIDTH", r) != null) task.setMsgBoxWidth(Integer.parseInt((String) visitor.getObjectByColumnNameAndIndex("MESSAGE_BOX_SIZE_WIDTH", r)));
+				if (visitor.getObjectByColumnNameAndIndex("MESSAGE_BOX_SIZE_HEIGHT", r) != null) task.setMsgBoxHeight(Integer.parseInt((String) visitor.getObjectByColumnNameAndIndex("MESSAGE_BOX_SIZE_HEIGHT", r)));
+				if (visitor.getObjectByColumnNameAndIndex("MESSAGE_BOX_SIZE_WIDTH", r) != null) task.setMsgBoxWidth(Integer.parseInt((String) visitor.getObjectByColumnNameAndIndex("MESSAGE_BOX_SIZE_WIDTH", r)));
+				
+				// if (visitor.getObjectByColumnNameAndIndex("MESSAGE_BOX_LOCATION_X", r) != null) task.setMsgBoxWidth((String) visitor.getObjectByColumnNameAndIndex("MESSAGE_BOX_LOCATION_X", r));
+				// if (visitor.getObjectByColumnNameAndIndex("MESSAGE_BOX_LOCATION_Y", r) != null) task.setMsgBoxWidth((String) visitor.getObjectByColumnNameAndIndex("MESSAGE_BOX_LOCATION_Y", r));
+
 				//if (visitor.getObjectByColumnNameAndIndex("", r)) 
 
 				if (task.getType().equals("quest.task.ground.go_to_location")) {
