@@ -157,8 +157,8 @@ public class AttackState extends AIState {
 		
 		
 		TangibleObject target = actor.getFollowObject();
-		if(target != actor.getHighestDamageDealer() && actor.getHighestDamageDealer() != null) {
-			actor.setFollowObject(actor.getHighestDamageDealer());
+		if(target != actor.getMostHated() && actor.getMostHated() != null) {
+			actor.setFollowObject(actor.getMostHated());
 			target = actor.getFollowObject();
 		}
 		if(target == null) {
@@ -197,7 +197,7 @@ public class AttackState extends AIState {
 			CreatureObject targetCreature = (CreatureObject) target;
 			if(targetCreature.getPosture() == 13 || targetCreature.getPosture() == 14 || targetCreature.isInStealth()) {
 				 
-				actor.setFollowObject(actor.getHighestDamageDealer());			
+				actor.setFollowObject(actor.getMostHated());			
 				target = (CreatureObject) actor.getFollowObject();
 				if(target == null)
 				{
@@ -224,7 +224,7 @@ public class AttackState extends AIState {
 			TangibleObject targetObject = (TangibleObject) target;
 			if((targetObject.getConditionDamage()>=targetObject.getMaximumCondition())) {
 				 
-				actor.setFollowObject(actor.getHighestDamageDealer());			
+				actor.setFollowObject(actor.getMostHated());			
 				target = (CreatureObject) actor.getFollowObject();
 				if(target == null)
 				{
