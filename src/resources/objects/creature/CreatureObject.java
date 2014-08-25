@@ -931,6 +931,15 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 	}
 	
+	public boolean isWearing(SWGObject object)
+	{
+		for (Equipment equipment : getEquipmentList()) 
+		{
+			if (equipment.getObjectId() == object.getObjectId()) return true;
+		}
+		return false;
+	}
+	
 	public void removeObjectFromEquipList(SWGObject object) {
 		if (object instanceof TangibleObject) {
 			for (Equipment equipment : getEquipmentList()) {

@@ -163,15 +163,14 @@ public class EquipmentService implements INetworkDispatch {
 		String serverTemplate = template.replace(".iff", "");
 		
 		PyObject func = core.scriptService.getMethod("scripts/" + serverTemplate.split("shared_" , 2)[0].replace("shared_", ""), serverTemplate.split("shared_" , 2)[1], "equip");
-		if(func != null) func.__call__(Py.java2py(core), Py.java2py(actor), Py.java2py(item));				
-		if(!actor.getEquipmentList().contains(item.getObjectID())) 
+		if(func != null) func.__call__(Py.java2py(core), Py.java2py(actor), Py.java2py(item));		
+		
+		if(!actor.isWearing(item))
 		{
 			//if(item instanceof WeaponObject){
 			//A rifle is not identified as a true WeaponObject ?!?!?!?!
-			if (item.getTemplate().contains("object/weapon/")){		
-				actor.setWeaponId(item.getObjectID()); // This line causes the rifle lockup
-				//System.out.println("WEAPON IDENTIFIED!");
-			}
+			if (item.getTemplate().startsWith("object/weapon/")) actor.setWeaponId(item.getObjectID());
+			
 			actor.addObjectToEquipList(item);
 			processItemAtrributes(actor, item, true);
 		}
@@ -185,10 +184,10 @@ public class EquipmentService implements INetworkDispatch {
 		PyObject func = core.scriptService.getMethod("scripts/" + serverTemplate.split("shared_" , 2)[0].replace("shared_", ""), serverTemplate.split("shared_" , 2)[1], "unequip");
 		if(func != null) func.__call__(Py.java2py(core), Py.java2py(actor), Py.java2py(item));
 
-		
-		if(actor.getEquipmentList().contains(item.getObjectID())) 
+		if(actor.isWearing(item))
 		{
-			if(item instanceof WeaponObject) actor.setWeaponId(actor.getSlottedObject("default_weapon").getObjectID());
+			// This should be changed to instanceof WeaponObject eventually... see comment in equip()
+			if (item.getTemplate().startsWith("object/weapon/")) actor.setWeaponId(actor.getSlottedObject("default_weapon").getObjectID());
 			
 			actor.removeObjectFromEquipList(item);
 			processItemAtrributes(actor, item, false);
