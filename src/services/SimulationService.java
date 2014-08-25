@@ -132,56 +132,7 @@ public class SimulationService implements INetworkDispatch {
 			collidableQuadTrees.put(terrainService.getPlanetList().get(i).getName(), new QuadTree<AbstractCollidable>(-8192, -8192, 8192, 8192));
 		}
 		
-		core.commandService.registerCommand("opencontainer");
-		core.commandService.registerCommand("transferitem");
-		core.commandService.registerCommand("transferitemarmor");
-		core.commandService.registerCommand("transferitemweapon");
-		core.commandService.registerCommand("transferitemmisc");
-		core.commandService.registerCommand("equip");
-		core.commandService.registerCommand("prone");
-		core.commandService.registerCommand("stand");
-		core.commandService.registerCommand("sitserver");
-		core.commandService.registerCommand("kneel");
-		core.commandService.registerCommand("serverdestroyobject");
-		core.commandService.registerGmCommand("giveitem");
-		core.commandService.registerGmCommand("object");
-		core.commandService.registerCommand("getattributesbatch");
-		core.commandService.registerCommand("pvp");
-		core.commandService.registerCommand("setcurrentskilltitle");
-		core.commandService.registerCommand("tip");
-		core.commandService.registerCommand("faction");
-		core.commandService.registerGmCommand("setspeed");
-		core.commandService.registerCommand("waypoint");
-		core.commandService.registerCommand("setwaypointactivestatus");
-		core.commandService.registerCommand("setwaypointname");
-		core.commandService.registerCommand("getfriendlist");
-		core.commandService.registerCommand("deathblow");
-		core.commandService.registerCommand("endduel");
-		core.commandService.registerCommand("duel");
-		core.commandService.registerCommand("purchaseticket");
-		core.commandService.registerCommand("boardshuttle");
-		core.commandService.registerCommand("getplayerid");
-		core.commandService.registerCommand("inspire");
-		core.commandService.registerGmCommand("setgodmode");
-		core.commandService.registerCommand("requestwaypointatposition");
-		core.commandService.registerCommand("meditate");
-		core.commandService.registerGmCommand("server");
-		core.commandService.registerCommand("toggleawayfromkeyboard");
-		core.commandService.registerCommand("lfg");
-		core.commandService.registerCommand("newbiehelper");
-		core.commandService.registerCommand("roleplay");
 		core.commandService.registerAlias("afk", "toggleawayfromkeyboard");
-		core.commandService.registerCommand("toggledisplayingfactionrank");
-		core.commandService.registerCommand("editbiography");
-		core.commandService.registerCommand("setbiography");
-		core.commandService.registerCommand("requestbiography");
-		core.commandService.registerCommand("eject");
-		core.commandService.registerGmCommand("broadcast");
-		core.commandService.registerGmCommand("teleporttarget");
-		core.commandService.registerGmCommand("getplayerid");
-		core.commandService.registerCommand("npcconversationselect");
-		core.commandService.registerCommand("npcconversationstop");
-
 	}
 	
 	public void insertSnapShotObjects() {
