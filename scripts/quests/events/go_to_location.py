@@ -7,10 +7,10 @@ def run(core, activator, collidable):
 	
 	player = activator.getPlayerObject()
 	
-	if player.getActiveQuestName() != collidable.getAttachedQuest():
+	if player.getQuest(collidable.getAttachedQuest()) == None:
 		return
 		
-	quest = player.getQuest(player.getActiveQuest())
+	quest = player.getQuest(collidable.getAttachedQuest())
 
 	if quest.isCompleted():
 		return

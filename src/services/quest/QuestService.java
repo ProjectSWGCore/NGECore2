@@ -49,11 +49,11 @@ import protocol.swg.objectControllerObjects.ForceActivateQuest;
 import protocol.swg.objectControllerObjects.QuestTaskCounterMessage;
 import protocol.swg.objectControllerObjects.QuestTaskTimerMessage;
 import protocol.swg.objectControllerObjects.ShowLootBox;
+import protocol.swg.objectControllerObjects.ShowQuestCompletionWindow;
 import resources.common.Console;
 import resources.common.ObjControllerOpcodes;
 import resources.common.OutOfBand;
 import resources.common.ProsePackage;
-import resources.common.collidables.CollidableCircle;
 import resources.common.collidables.QuestCollidable;
 import resources.datatables.DisplayType;
 import resources.objects.SWGMap;
@@ -216,6 +216,11 @@ public class QuestService implements INetworkDispatch {
 			quest.setTimer(taskTimer);
 			break;
 			
+		// quest.task.ground.wait_for_signal
+		case "wait_for_signal":
+			core.scriptService.callScript("scripts/quests/events/signals/", task.getSignalName(), "wait", core, quester);
+			break;
+		
 		// quest.task.ground.show_message_box
 		case "show_message_box":
 			break;
@@ -257,16 +262,19 @@ public class QuestService implements INetworkDispatch {
 			quest.getTimer().cancel(true);
 		
 		if (activeStep + 1 >= qData.getTasks().size()) {
-			QuestList listItem = questRewardMap.get(quest.getName());
+			//QuestList listItem = questRewardMap.get(quest.getName());
 
-			if (listItem.isCompleteWhenTasksComplete())
+			quest.setCompleted(true);
+			
+			if (!task.isGrantQuestOnCompleteShowSystemMessage()) {
 				completeQuest(player, quest); // Force complete packet sent if the quest isn't auto completed (window shows up, typical for exclusive reward items)
-			/*else
-				sendQuestCompleteWindow(quester, quest.getName());*/
+				player.getContainer().getClient().getSession().write(player.getBaseline(8).createDelta(7));
+			} else
+				sendQuestCompleteWindow(quester, quest.getCrc());
 			
 			if (task.getGrantQuestOnComplete() != null && !task.getGrantQuestOnComplete().equals(""))
 				activateQuest(quester, task.getGrantQuestOnComplete());
-
+			
 			return;
 		}
 		
@@ -313,9 +321,8 @@ public class QuestService implements INetworkDispatch {
 		
 		CreatureObject creo = (CreatureObject) player.getContainer();
 		
-		if (!quest.isCompleted()) {
+		if (!quest.isCompleted())
 			quest.setCompleted(true);
-		}
 		
 		QuestList info = getQuestList(quest.getName());
 		
@@ -397,8 +404,9 @@ public class QuestService implements INetworkDispatch {
 		
 	}
 	
-	public void sendQuestCompleteWindow(CreatureObject reciever, String questName) {
-		
+	public void sendQuestCompleteWindow(CreatureObject reciever, int questCrc) {
+		ObjControllerMessage objController = new ObjControllerMessage(0x0B, new ShowQuestCompletionWindow(reciever.getObjectID(), questCrc));
+		reciever.getClient().getSession().write(objController.serialize());
 	}
 	
 	public String getQuestItemRadialName(CreatureObject quester, String template) {
@@ -436,6 +444,26 @@ public class QuestService implements INetworkDispatch {
 
 		player.getQuestRetrieveItemTemplates().remove(target.getTemplate(), item);
 		
+	}
+	
+	public void handleActivateSignal(CreatureObject actor, TangibleObject npc, Quest quest, int taskId) {
+		QuestTask task = getQuestData(quest.getName()).getTasks().get(taskId);
+		if (task == null)
+			return;
+		
+		if (core.scriptService.getMethod("scripts/quests/events/signals/", task.getSignalName(), "activate") != null) {
+			core.scriptService.callScript("scripts/quests/events/signals/", task.getSignalName(), "activate", core, actor, quest);
+			return;
+		}
+		
+		completeActiveTask(actor, quest);
+	}
+	
+	public void handleAddConversationScript(TangibleObject object, String script) {
+		if (object == null)
+			return;
+		
+		object.setAttachment("conversationFile", script);
 	}
 	
 	public WaypointObject createWaypoint(String name, Point3D location, String planet) {
@@ -561,6 +589,7 @@ public class QuestService implements INetworkDispatch {
 				if (visitor.getObjectByColumnNameAndIndex("MIN_TIME", r) != null) task.setMinTime((int) visitor.getObjectByColumnNameAndIndex("MIN_TIME", r));
 				if (visitor.getObjectByColumnNameAndIndex("MAX_TIME", r) != null) task.setMaxTime((int) visitor.getObjectByColumnNameAndIndex("MAX_TIME", r));
 				if (visitor.getObjectByColumnNameAndIndex("RADIUS", r) != null && visitor.getObjectByColumnNameAndIndex("RADIUS", r) != "") task.setRadius(Float.parseFloat((String) visitor.getObjectByColumnNameAndIndex("RADIUS", r)));
+				if (visitor.getObjectByColumnNameAndIndex("SIGNAL_NAME", r) != null) task.setSignalName((String) visitor.getObjectByColumnNameAndIndex("SIGNAL_NAME", r));
 				//if (visitor.getObjectByColumnNameAndIndex("", r)) 
 
 				if (task.getType().equals("quest.task.ground.go_to_location")) {
@@ -650,6 +679,19 @@ public class QuestService implements INetworkDispatch {
 		return template.replace(file, "shared_" + file);
 	}
 	
+	public void loadEvents() {
+		 FileVisitor<Path> fv = new SimpleFileVisitor<Path>() {
+		 @Override
+		 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
+		 {
+			 core.scriptService.callScript("scripts/quests/events/signals/", file.getFileName().toString().replace(".py", ""), "setup", core);
+			 return FileVisitResult.CONTINUE;
+		 }
+		 };
+		 try { Files.walkFileTree(Paths.get("scripts/quests/events/signals/"), fv); }
+		 catch (IOException e) { e.printStackTrace(); }
+	}
+
 	@Override
 	public void shutdown() { }
 	

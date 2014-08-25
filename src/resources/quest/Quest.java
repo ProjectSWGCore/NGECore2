@@ -133,6 +133,11 @@ public class Quest extends Delta implements Serializable {
 		//System.out.println("Active step was "+ (activeStep - 1) + " and is now " + activeStep );
 	}
 	
+	public void complete() {
+		completedStepBitmask.set(activeStep);
+		activeStepBitmask.clear();
+	}
+	
 	public ScheduledFuture<?> getTimer() {
 		return timer;
 	}

@@ -81,6 +81,7 @@ public class ObjControllerMessage extends SWGMessage {
 	public static final int QUEST_TASK_COUNTER = 0x0441;
 	public static final int QUEST_TASK_TIMER = 0x0444;
 	public static final int FORCE_ACTIVATE_QUEST = 0x04BE;
+	public static final int SHOW_QUEST_COMPLETION_WINDOW = 0x04B8;
 	
 	public ObjControllerMessage() { 
 		
