@@ -24,27 +24,45 @@ package resources.common;
 import java.math.BigDecimal;
 import java.util.Random;
 
+import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
+
 import engine.resources.scene.*;
 
 public class MathUtilities {
 	
 	public static Quaternion rotateQuaternion(Quaternion quaternion, float radians, Point3D axis) {
-		
 		float sin = (float) Math.sin(radians / 2);
-	
 		Quaternion rotateQ = new Quaternion((float) Math.cos(radians / 2), axis.x * sin, axis.y * sin, axis.z * sin);
-		
 		return multiplyQuaternions(rotateQ, quaternion);
-		
 	}
 	
 	public static Quaternion multiplyQuaternions(Quaternion q1, Quaternion q2) {
-		
 		return new Quaternion(q1.w * q2.w - q1.x * q2.x - q1.y * q2.y - q1.z * q2.z,
 				q1.w * q2.x + q1.x * q2.w + q1.y * q2.z - q1.z * q2.y,
 				q1.w * q2.y + q1.y * q2.w + q1.z * q2.x - q1.x * q2.z,
 				q1.w * q2.z + q1.z * q2.w + q1.x * q2.y - q1.y * q2.x);
-		
+	}
+	
+	/*
+	 * @description Far more efficient method of calculating distance than sqrt.
+	 * @param o Origin
+	 * @param d Destination
+	 * @returns Distance between Origin and Destination.
+	 */
+	public static float manhattenDistance(Point3D o, Point3D d) {
+		return Math.abs(d.x - o.x) + Math.abs(d.z - o.z);
+	}
+	
+	/*
+	 * @description When you need to get objects in front of you to a certain width, such as a cone.
+	 * @param o Origin
+	 * @param a Origin's angle
+	 * @param t Target
+	 * @param fov Field Of View
+	 * @returns True if Target is within specified field of view of origin (2D).
+	 */
+	public static boolean fov(Point3D o, Quaternion a, Point3D t, float fov) {
+		return (Math.abs(Math.acos(Vector3D.dotProduct((new Vector3D(a.x, a.y, a.z)).normalize(), (new Vector3D(t.x - o.x, t.z - o.z, t.y - o.y)).normalize()))) <= (((int) fov) / 2));
 	}
 	
 	/**
@@ -79,6 +97,11 @@ public class MathUtilities {
 	    return newX;
 	}
 	
+	/*
+	 * Rolls a dice based on the specified chance within 100.
+	 * @param chance Chance
+	 * @returns True if they got lucky.
+	 */
 	public static boolean tryChance(int chance) {
 		if (chance <= 0) {
 			return false;

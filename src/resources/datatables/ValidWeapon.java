@@ -19,14 +19,28 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package services.combat;
+package resources.datatables;
 
-import main.NGECore;
-
-public class CombatCommands {
+public class ValidWeapon {
 	
-	public static void registerCommands(NGECore core) {
-		core.commandService.registerCombatCommand("creatureMeleeAttack").setDefaultAnimations(new String[] { "creature_attack_light" });
-	}
+	public static final byte NONE = 0;
+	public static final byte RIFLE = 1;
+	public static final byte CARBINE = 2;
+	public static final byte PISTOL = 3;
+	public static final byte HEAVY = 4;
+	public static final byte ONEHAND_MELEE = 5;
+	public static final byte TWOHAND_MELEE = 6;
+	public static final byte UNARMED = 7;
+	public static final byte POLEARM = 8;
+	public static final byte THROWN = 9;
+	public static final byte ONEHAND_LIGHTSABER = 10;
+	public static final byte TWOHAND_LIGHTSABER = 11;
+	public static final byte POLEARM_LIGHTSABER = 12;
+	public static final byte GROUND_TARGETTING = 13;
+	public static final byte DIRECTIONAL = 14;
+	public static final byte RANGED = 28;
+	public static final byte MELEE = 29;
+	public static final byte ALL = 30;
+	public static final byte ALL_LIGHTSABERS = 31;
 	
 }
