@@ -7,8 +7,7 @@ import sys
 def startConversation(core, actor, npc):
 	convSvc = core.conversationService
 	player = actor.getPlayerObject()
-	
-	print ('conversation')
+
 	if player is None:
 		return
 	
@@ -18,7 +17,7 @@ def startConversation(core, actor, npc):
 		endConversation(core, actor, npc)
 		return
 	
-	if quest.isComplete():
+	if quest.isCompleted():
 		core.conversationService.sendStopConversation(actor, npc, 'conversation/tatooine_eisley_majolnir', 's_24')
 		return
 		

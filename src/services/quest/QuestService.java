@@ -49,11 +49,11 @@ import protocol.swg.objectControllerObjects.ForceActivateQuest;
 import protocol.swg.objectControllerObjects.QuestTaskCounterMessage;
 import protocol.swg.objectControllerObjects.QuestTaskTimerMessage;
 import protocol.swg.objectControllerObjects.ShowLootBox;
+import protocol.swg.objectControllerObjects.ShowQuestCompletionWindow;
 import resources.common.Console;
 import resources.common.ObjControllerOpcodes;
 import resources.common.OutOfBand;
 import resources.common.ProsePackage;
-import resources.common.collidables.CollidableCircle;
 import resources.common.collidables.QuestCollidable;
 import resources.datatables.DisplayType;
 import resources.objects.SWGMap;
@@ -262,16 +262,19 @@ public class QuestService implements INetworkDispatch {
 			quest.getTimer().cancel(true);
 		
 		if (activeStep + 1 >= qData.getTasks().size()) {
-			QuestList listItem = questRewardMap.get(quest.getName());
+			//QuestList listItem = questRewardMap.get(quest.getName());
 
-			if (listItem.isCompleteWhenTasksComplete())
+			quest.setCompleted(true);
+			
+			if (!task.isGrantQuestOnCompleteShowSystemMessage()) {
 				completeQuest(player, quest); // Force complete packet sent if the quest isn't auto completed (window shows up, typical for exclusive reward items)
-			/*else
-				sendQuestCompleteWindow(quester, quest.getName());*/
+				player.getContainer().getClient().getSession().write(player.getBaseline(8).createDelta(7));
+			} else
+				sendQuestCompleteWindow(quester, quest.getCrc());
 			
 			if (task.getGrantQuestOnComplete() != null && !task.getGrantQuestOnComplete().equals(""))
 				activateQuest(quester, task.getGrantQuestOnComplete());
-
+			
 			return;
 		}
 		
@@ -318,9 +321,8 @@ public class QuestService implements INetworkDispatch {
 		
 		CreatureObject creo = (CreatureObject) player.getContainer();
 		
-		if (!quest.isCompleted()) {
+		if (!quest.isCompleted())
 			quest.setCompleted(true);
-		}
 		
 		QuestList info = getQuestList(quest.getName());
 		
@@ -402,8 +404,9 @@ public class QuestService implements INetworkDispatch {
 		
 	}
 	
-	public void sendQuestCompleteWindow(CreatureObject reciever, String questName) {
-		
+	public void sendQuestCompleteWindow(CreatureObject reciever, int questCrc) {
+		ObjControllerMessage objController = new ObjControllerMessage(0x0B, new ShowQuestCompletionWindow(reciever.getObjectID(), questCrc));
+		reciever.getClient().getSession().write(objController.serialize());
 	}
 	
 	public String getQuestItemRadialName(CreatureObject quester, String template) {
