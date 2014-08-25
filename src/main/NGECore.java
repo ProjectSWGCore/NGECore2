@@ -226,6 +226,7 @@ public class NGECore {
 	private ObjectDatabase guildODB;
 	private ObjectDatabase objectIdODB;
 	private ObjectDatabase duplicateIdODB;
+	private ObjectDatabase reusableIdODB;
 	private ObjectDatabase chatRoomODB;
 	
 	private BusConfiguration eventBusConfig = BusConfiguration.Default(1, new ThreadPoolExecutor(1, 4, 1, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>()));
@@ -321,6 +322,7 @@ public class NGECore {
 		guildODB = new ObjectDatabase("guild", true, true, true, GuildObject.class);
 		objectIdODB = new ObjectDatabase("oids", true, true, true, ObjectId.class);
 		duplicateIdODB = new ObjectDatabase("doids", true, true, true, DuplicateId.class);
+		reusableIdODB = new ObjectDatabase("reusableIds", true, true, true, ObjectId.class);
 		chatRoomODB = new ObjectDatabase("chatRooms", true, true, true, ChatRoom.class);
 		resourceHistoryODB = new ObjectDatabase("resourcehistory", true, true, true, GalacticResource.class);
 		auctionODB = new ObjectDatabase("auction", true, true, true, AuctionItem.class);
@@ -716,6 +718,10 @@ public class NGECore {
 		return duplicateIdODB;
 	}
 	
+	public ObjectDatabase getReusableIdODB() {
+		return reusableIdODB;
+	}
+	
 	public ObjectDatabase getChatRoomODB() {
 		return chatRoomODB;
 	}
@@ -858,6 +864,7 @@ public class NGECore {
 		resourceHistoryODB.close();
 		objectIdODB.close();
 		duplicateIdODB.close();
+		reusableIdODB.close();
 		auctionODB.close();
 		cityODB.close();
 	}
