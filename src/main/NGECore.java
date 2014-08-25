@@ -134,30 +134,29 @@ import engine.servers.InteractiveJythonServer;
 import engine.servers.MINAServer;
 import engine.servers.PingServer;
 
-
 @SuppressWarnings("unused")
 public class NGECore {
-	
+
 	private static boolean logUnhandledExceptions = true;
-	
+
 	public static boolean didServerCrash = false;
-	
+
 	private static NGECore instance;
-	
+
 	private Config config = null;
 	private Config options = null;
 	private String motd = "";
 	private volatile boolean isShuttingDown = false;
 	private long galacticTime = System.currentTimeMillis();
 	private int galaxyStatus = -1;
-	
+
 	private ConcurrentHashMap<IoSession, Client> clients = new ConcurrentHashMap<IoSession, Client>();
-	
+
 	// Database
-	
+
 	private DatabaseConnection databaseConnection = null;
 	private DatabaseConnection databaseConnection2 = null;
-		
+
 	// Services
 	public LoginService loginService;
 	public RetroService retroService;
@@ -206,18 +205,18 @@ public class NGECore {
 	public ReverseEngineeringService reverseEngineeringService;
 	public PetService petService;
 	public BrowserService browserService;
-	//public BattlefieldService battlefieldService;
+	// public BattlefieldService battlefieldService;
 	public InvasionService invasionService;
 	public AdminService adminService;
-	
+
 	// Login Server
 	public NetworkDispatch loginDispatch;
 	private MINAServer loginServer;
-	
+
 	// Zone Server
 	public NetworkDispatch zoneDispatch;
 	private MINAServer zoneServer;
-	
+
 	// Interactive Jython Console
 	public InteractiveJythonAcceptor jythonAcceptor;
 	private InteractiveJythonServer jythonServer;
@@ -227,26 +226,54 @@ public class NGECore {
 	private ObjectDatabase objectIdODB;
 	private ObjectDatabase duplicateIdODB;
 	private ObjectDatabase chatRoomODB;
-	
-	private BusConfiguration eventBusConfig = BusConfiguration.Default(1, new ThreadPoolExecutor(1, 4, 1, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>()));
+
+	private BusConfiguration eventBusConfig = BusConfiguration.Default(1,
+			new ThreadPoolExecutor(1, 4, 1, TimeUnit.MINUTES,
+					new LinkedBlockingQueue<Runnable>()));
 
 	private ObjectDatabase auctionODB;
 	private ObjectDatabase resourceHistoryODB;
 	private ObjectDatabase swgObjectODB;
 	private ObjectDatabase bountiesODB;
 	private ObjectDatabase cityODB;
-	
+
 	public static boolean PACKET_DEBUG = false;
-	
+
 	public NGECore() {
 
 		instance = this;
 	}
-	
+
+	// our entry point
+	public static void main(String[] args) {
+		// With this class, we are overwriting the JVM's way of handling
+		// exceptions that are never caught. Very handy so no try/catch spam for
+		// every method.
+		if (logUnhandledExceptions)
+			Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionLogger(
+					"./logs/uncaught"));
+
+		NGECore core = new NGECore();
+
+		core.start();
+
+		do {
+			if (didServerCrash) {
+				core.restart();
+			}
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+
+			}
+		} while (true);
+
+	}
+
 	public void start() {
-		
+
 		instance = this;
-		
+
 		final ThreadMonitor deadlockDetector = new ThreadMonitor();
 		Thread deadlockMonitor = new Thread(new Runnable() {
 			@Override
@@ -265,7 +292,7 @@ public class NGECore {
 		if (!(config.loadConfigFile())) {
 			config = DefaultConfig.getConfig();
 		}
-		
+
 		DevLogQueuer devLogQueuer = new DevLogQueuer();
 		
 		CharonPacketLogger packetLogger;
@@ -279,60 +306,83 @@ public class NGECore {
 			options = DefaultConfig.getConfig();
 		}
 
-		if (options.getInt("CLEAN.ODB.FOLDERS") > 0){
+		if (options.getInt("CLEAN.ODB.FOLDERS") > 0) {
 			File baseFolder = new File("./odb");
-			
+
 			if (baseFolder.isDirectory()) {
 				for (File odbFolder : baseFolder.listFiles()) {
 					if (odbFolder.isDirectory()) {
 						for (File file : odbFolder.listFiles()) {
-							if (!file.isDirectory() && !file.getName().equals("placeholder.txt")) { file.delete(); }
+							if (!file.isDirectory()
+									&& !file.getName()
+											.equals("placeholder.txt")) {
+								file.delete();
+							}
 						}
 					}
 				}
 			}
-			
-			
+
 			System.out.println("Cleaned ODB Folders.");
 		}
-		
-		try(BufferedReader br = new BufferedReader(new FileReader("./motd.txt"))) {
-			for(String line; (line = br.readLine()) != null;) {
+
+		try (BufferedReader br = new BufferedReader(
+				new FileReader("./motd.txt"))) {
+			for (String line; (line = br.readLine()) != null;) {
 				motd += line;
 			}
-		} catch (IOException e1) { e1.printStackTrace(); }
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
 
 		// Database
 		databaseConnection = new DatabaseConnection();
-		databaseConnection.connect(config.getString("DB.URL"), config.getString("DB.NAME"), config.getString("DB.USER"), config.getString("DB.PASS"), "postgresql");
+		databaseConnection.connect(config.getString("DB.URL"),
+				config.getString("DB.NAME"), config.getString("DB.USER"),
+				config.getString("DB.PASS"), "postgresql");
 
 		String db2Url = config.getString("DB2.URL");
 		if (db2Url == null || db2Url.matches("^\\s*$")) {
 			databaseConnection2 = null;
 		} else {
 			databaseConnection2 = new DatabaseConnection();
-			databaseConnection2.connect(config.getString("DB2.URL"), config.getString("DB2.NAME"), config.getString("DB2.USER"), config.getString("DB2.PASS"), "mysql");
+			databaseConnection2.connect(config.getString("DB2.URL"),
+					config.getString("DB2.NAME"), config.getString("DB2.USER"),
+					config.getString("DB2.PASS"), "mysql");
 		}
-		
+
 		setGalaxyStatus(GalaxyStatus.Loading);
-		
+
 		if (options.getInt("CLEAN.CHARACTERS.TABLE") > 0) {
-			try { databaseConnection.preparedStatement("DELETE FROM characters").execute(); } 
-			catch (SQLException e) {e.printStackTrace(); }
+			try {
+				databaseConnection.preparedStatement("DELETE FROM characters")
+						.execute();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
 			System.out.println("Cleared characters table.");
 		}
-		
-		swgObjectODB = new ObjectDatabase("swgobjects", true, true, true, SWGObject.class);
+
+		swgObjectODB = new ObjectDatabase("swgobjects", true, true, true,
+				SWGObject.class);
 		mailODB = new ObjectDatabase("mails", true, true, true, Mail.class);
-		guildODB = new ObjectDatabase("guild", true, true, true, GuildObject.class);
-		objectIdODB = new ObjectDatabase("oids", true, true, true, ObjectId.class);
-		duplicateIdODB = new ObjectDatabase("doids", true, true, true, DuplicateId.class);
-		chatRoomODB = new ObjectDatabase("chatRooms", true, true, true, ChatRoom.class);
-		resourceHistoryODB = new ObjectDatabase("resourcehistory", true, true, true, GalacticResource.class);
-		auctionODB = new ObjectDatabase("auction", true, true, true, AuctionItem.class);
-		bountiesODB = new ObjectDatabase("bounties", true, true, true, BountyListItem.class);
-		cityODB = new ObjectDatabase("cities", true, true, true, PlayerCity.class);
-		
+		guildODB = new ObjectDatabase("guild", true, true, true,
+				GuildObject.class);
+		objectIdODB = new ObjectDatabase("oids", true, true, true,
+				ObjectId.class);
+		duplicateIdODB = new ObjectDatabase("doids", true, true, true,
+				DuplicateId.class);
+		chatRoomODB = new ObjectDatabase("chatRooms", true, true, true,
+				ChatRoom.class);
+		resourceHistoryODB = new ObjectDatabase("resourcehistory", true, true,
+				true, GalacticResource.class);
+		auctionODB = new ObjectDatabase("auction", true, true, true,
+				AuctionItem.class);
+		bountiesODB = new ObjectDatabase("bounties", true, true, true,
+				BountyListItem.class);
+		cityODB = new ObjectDatabase("cities", true, true, true,
+				PlayerCity.class);
+
 		// Services
 		loginService = new LoginService(this);
 		retroService = new RetroService(this);
@@ -340,7 +390,7 @@ public class NGECore {
 		characterService = new CharacterService(this);
 		mapService = new MapService(this);
 		travelService = new TravelService(this);
-		
+
 		factionService = new FactionService(this);
 		objectService = new ObjectService(this);
 		terrainService = new TerrainService(this);
@@ -368,19 +418,21 @@ public class NGECore {
 		staticService = new StaticService(this);
 		reverseEngineeringService = new ReverseEngineeringService(this);
 		petService = new PetService(this);
-		
+
 		if (options.getInt("LOAD.RESOURCE.SYSTEM") == 1) {
 			surveyService = new SurveyService(this);
 			resourceService = new ResourceService(this);
 		}
-		
+
 		if (config.keyExists("JYTHONCONSOLE.PORT")) {
 			int jythonPort = config.getInt("JYTHONCONSOLE.PORT");
 			if (jythonPort > 0) {
-				
-				System.out.println("Starting InteractiveJythonServer on Port " + jythonPort);
+
+				System.out.println("Starting InteractiveJythonServer on Port "
+						+ jythonPort);
 				jythonAcceptor = new InteractiveJythonAcceptor();
-				jythonServer = new InteractiveJythonServer((IoHandler) jythonAcceptor, jythonPort, this);
+				jythonServer = new InteractiveJythonServer(
+						(IoHandler) jythonAcceptor, jythonPort, this);
 				jythonAcceptor.setServer(jythonServer);
 				jythonServer.start();
 			}
@@ -390,36 +442,40 @@ public class NGECore {
 		missionService = new MissionService(this);
 		questService = new QuestService(this);
 		invasionService = new InvasionService(this);
-		
+
 		// Ping Server
-		
-		if(config.keyExists("PING.PORT"))
+		if (config.keyExists("PING.PORT"))
 			if (config.getInt("PING.PORT") != 0) {
 				try {
-					PingServer pingServer = new PingServer(config.getInt("PING.PORT"));
+					PingServer pingServer = new PingServer(
+							config.getInt("PING.PORT"));
 					pingServer.bind();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			} else
-			System.out.println("Warning: pingServer was not launched. Port equals 0.");
+				System.out
+						.println("Warning: pingServer was not launched. Port equals 0.");
 		else
-			System.out.println("Warning: pingServer was not launched. Port not specified.");
-		
-		
+			System.out
+					.println("Warning: pingServer was not launched. Port not specified.");
+
 		// Login Server
 		loginDispatch = new NetworkDispatch(this, false);
 		loginDispatch.addService(loginService);
-				
-		if(config.keyExists("LOGIN.PORT"))
+
+		if (config.keyExists("LOGIN.PORT"))
 			if (config.getInt("LOGIN.PORT") != 0) {
-				loginServer = new MINAServer(loginDispatch, config.getInt("LOGIN.PORT"));
+				loginServer = new MINAServer(loginDispatch,
+						config.getInt("LOGIN.PORT"));
 				loginServer.start();
 			} else
-			System.out.println("Warning: loginServer was not launched. Port equals 0.");
+				System.out
+						.println("Warning: loginServer was not launched. Port equals 0.");
 		else
-			System.out.println("Warning: loginServer was not launched. Port not specified.");
-		
+			System.out
+					.println("Warning: loginServer was not launched. Port not specified.");
+
 		// Zone Server
 		zoneDispatch = new NetworkDispatch(this, true);
 		zoneDispatch.addService(retroService);
@@ -446,22 +502,26 @@ public class NGECore {
 		zoneDispatch.addService(reverseEngineeringService);
 		zoneDispatch.addService(petService);
 		zoneDispatch.addService(invasionService);
-		
+
 		if (options.getInt("LOAD.RESOURCE.SYSTEM") == 1) {
 			zoneDispatch.addService(surveyService);
 			zoneDispatch.addService(resourceService);
 		}
-			
-		if(config.keyExists("ZONE.PORT"))
+
+		if (config.keyExists("ZONE.PORT"))
 			if (config.getInt("ZONE.PORT") != 0) {
-				zoneServer = new MINAServer(zoneDispatch, config.getInt("ZONE.PORT"));
+				zoneServer = new MINAServer(zoneDispatch,
+						config.getInt("ZONE.PORT"));
 				zoneServer.start();
 			} else
-			System.out.println("Warning: zoneServer was not launched. Port equals 0.");
+				System.out
+						.println("Warning: zoneServer was not launched. Port equals 0.");
 		else
-			System.out.println("Warning: zoneServer was not launched. Port not specified.");
-		
-		//Start terrainList
+			System.out
+					.println("Warning: zoneServer was not launched. Port not specified.");
+
+		// Start terrainList
+
 		// Original Planets
 		terrainService.addPlanet(1, "tatooine", "terrain/tatooine.trn", true);
 		terrainService.addPlanet(2, "naboo", "terrain/naboo.trn", true);
@@ -474,139 +534,152 @@ public class NGECore {
 		terrainService.addPlanet(9, "endor", "terrain/endor.trn", true);
 		terrainService.addPlanet(10, "dathomir", "terrain/dathomir.trn", true);
 		terrainService.addPlanet(11, "mustafar", "terrain/mustafar.trn", true);
-		terrainService.addPlanet(12, "kashyyyk_main", "terrain/kashyyyk_main.trn", true);
-		//Dungeon Terrains
+		terrainService.addPlanet(12, "kashyyyk_main",
+				"terrain/kashyyyk_main.trn", true);
+
+		// Dungeon Terrains
 		// TODO: Fix BufferUnderFlow Errors on loaded of dungeon instances.
-		terrainService.addPlanet(13, "kashyyyk_dead_forest", "terrain/kashyyyk_dead_forest.trn", false);
-		terrainService.addPlanet(14, "kashyyyk_hunting", "terrain/kashyyyk_hunting.trn", false);
-		terrainService.addPlanet(15, "kashyyyk_north_dungeons", "terrain/kashyyyk_north_dungeons.trn", false);
-		terrainService.addPlanet(16, "kashyyyk_rryatt_trail", "terrain/kashyyyk_rryatt_trail.trn", false);
-		terrainService.addPlanet(17, "kashyyyk_south_dungeons", "terrain/kashyyyk_south_dungeons.trn", false);
-		terrainService.addPlanet(18, "adventure1", "terrain/adventure1.trn", false);
-		terrainService.addPlanet(19, "adventure2", "terrain/adventure2.trn", false);
+		terrainService.addPlanet(13, "kashyyyk_dead_forest",
+				"terrain/kashyyyk_dead_forest.trn", false);
+		terrainService.addPlanet(14, "kashyyyk_hunting",
+				"terrain/kashyyyk_hunting.trn", false);
+		terrainService.addPlanet(15, "kashyyyk_north_dungeons",
+				"terrain/kashyyyk_north_dungeons.trn", false);
+		terrainService.addPlanet(16, "kashyyyk_rryatt_trail",
+				"terrain/kashyyyk_rryatt_trail.trn", false);
+		terrainService.addPlanet(17, "kashyyyk_south_dungeons",
+				"terrain/kashyyyk_south_dungeons.trn", false);
+		terrainService.addPlanet(18, "adventure1", "terrain/adventure1.trn",
+				false);
+		terrainService.addPlanet(19, "adventure2", "terrain/adventure2.trn",
+				false);
+
 		// Tutorial Terrains
 		terrainService.addPlanet(20, "dungeon1", "terrain/dungeon1.trn", true);
-		terrainService.addPlanet(21, "tutorial", "terrain/tutorial.trn", false); // 21B droid scene
-		//terrainService.addPlanet(22, "space_npe_falcon_3", "terrain/space_npe_falcon_3.trn", false);
-		
-		//Space Zones
-		// NOTE: Commented out for now until space is implemented. No need to be loaded into memory when space is not implemented.
-		/*terrainService.addPlanet(21, "space_corellia", "terrain/space_corellia.trn", true);
-		terrainService.addPlanet(22, "space_corellia_2", "terrain/space_corellia_2.trn", true);
-		terrainService.addPlanet(23, "space_dantooine", "terrain/space_dantooine.trn", true);
-		terrainService.addPlanet(24, "space_dathomir", "terrain/space_dathomir.trn", true);
-		terrainService.addPlanet(25, "space_endor", "terrain/space_endor.trn", true);
-		terrainService.addPlanet(26, "space_env", "terrain/space_env.trn", true);
-		terrainService.addPlanet(27, "space_halos", "terrain/space_halos.trn", true);
-		terrainService.addPlanet(28, "space_heavy1", "terrain/space_heavy1.trn", true);
-		terrainService.addPlanet(29, "space_kashyyyk", "terrain/space_kashyyyk.trn", true);
-		terrainService.addPlanet(30, "space_light1", "terrain/space_light1.trn", true);
-		terrainService.addPlanet(31, "space_lok", "terrain/space_lok.trn", true);
-		terrainService.addPlanet(32, "space_naboo", "terrain/space_naboo.trn", true);
-		terrainService.addPlanet(33, "space_naboo_2", "terrain/space_naboo_2.trn", true);
-		terrainService.addPlanet(34, "space_nova_orion", "terrain/space_nova_orion.trn", true); 
-		terrainService.addPlanet(35, "space_npe_falcon", "terrain/space_npe_falcon.trn", true); // Only space_npe_falce_3 is used
-		terrainService.addPlanet(36, "space_npe_falcon_2", "terrain/space_npe_falcon_2.trn", true); // Only space_npe_falce_3 is used
-		terrainService.addPlanet(37, "space_ord_mantell", "terrain/space_ord_mantell.trn", true);
-		terrainService.addPlanet(38, "space_ord_mantell_2", "terrain/space_ord_mantell_2.trn", true);
-		terrainService.addPlanet(39, "space_ord_mantell_3", "terrain/space_ord_mantell_3.trn", true);
-		terrainService.addPlanet(40, "space_ord_mantell_4", "terrain/space_ord_mantell_4.trn", true);
-		terrainService.addPlanet(41, "space_ord_mantell_5", "terrain/space_ord_mantell_5.trn", true);
-		terrainService.addPlanet(42, "space_ord_mantell_6", "terrain/space_ord_mantell_6.trn", true);
-		terrainService.addPlanet(43, "space_tatooine", "terrain/space_tatooine.trn", true);
-		terrainService.addPlanet(44, "space_tatooine_2", "terrain/space_tatooine_2.trn", true);
-		terrainService.addPlanet(45, "space_yavin4", "terrain/space_yavin4.trn", true);*/
-		
-		//end terrainList
-		
+		terrainService.addPlanet(21, "tutorial", "terrain/tutorial.trn", false); // 21B
+																					// droid
+																					// scene
+		// terrainService.addPlanet(22, "space_npe_falcon_3",
+		// "terrain/space_npe_falcon_3.trn", false);
+
+		// Space Zones
+		// NOTE: Commented out for now until space is implemented. No need to be
+		// loaded into memory when space is not implemented.
+		/*
+		 * terrainService.addPlanet(21, "space_corellia",
+		 * "terrain/space_corellia.trn", true); terrainService.addPlanet(22,
+		 * "space_corellia_2", "terrain/space_corellia_2.trn", true);
+		 * terrainService.addPlanet(23, "space_dantooine",
+		 * "terrain/space_dantooine.trn", true); terrainService.addPlanet(24,
+		 * "space_dathomir", "terrain/space_dathomir.trn", true);
+		 * terrainService.addPlanet(25, "space_endor",
+		 * "terrain/space_endor.trn", true); terrainService.addPlanet(26,
+		 * "space_env", "terrain/space_env.trn", true);
+		 * terrainService.addPlanet(27, "space_halos",
+		 * "terrain/space_halos.trn", true); terrainService.addPlanet(28,
+		 * "space_heavy1", "terrain/space_heavy1.trn", true);
+		 * terrainService.addPlanet(29, "space_kashyyyk",
+		 * "terrain/space_kashyyyk.trn", true); terrainService.addPlanet(30,
+		 * "space_light1", "terrain/space_light1.trn", true);
+		 * terrainService.addPlanet(31, "space_lok", "terrain/space_lok.trn",
+		 * true); terrainService.addPlanet(32, "space_naboo",
+		 * "terrain/space_naboo.trn", true); terrainService.addPlanet(33,
+		 * "space_naboo_2", "terrain/space_naboo_2.trn", true);
+		 * terrainService.addPlanet(34, "space_nova_orion",
+		 * "terrain/space_nova_orion.trn", true); terrainService.addPlanet(35,
+		 * "space_npe_falcon", "terrain/space_npe_falcon.trn", true); // Only
+		 * space_npe_falce_3 is used terrainService.addPlanet(36,
+		 * "space_npe_falcon_2", "terrain/space_npe_falcon_2.trn", true); //
+		 * Only space_npe_falce_3 is used terrainService.addPlanet(37,
+		 * "space_ord_mantell", "terrain/space_ord_mantell.trn", true);
+		 * terrainService.addPlanet(38, "space_ord_mantell_2",
+		 * "terrain/space_ord_mantell_2.trn", true);
+		 * terrainService.addPlanet(39, "space_ord_mantell_3",
+		 * "terrain/space_ord_mantell_3.trn", true);
+		 * terrainService.addPlanet(40, "space_ord_mantell_4",
+		 * "terrain/space_ord_mantell_4.trn", true);
+		 * terrainService.addPlanet(41, "space_ord_mantell_5",
+		 * "terrain/space_ord_mantell_5.trn", true);
+		 * terrainService.addPlanet(42, "space_ord_mantell_6",
+		 * "terrain/space_ord_mantell_6.trn", true);
+		 * terrainService.addPlanet(43, "space_tatooine",
+		 * "terrain/space_tatooine.trn", true); terrainService.addPlanet(44,
+		 * "space_tatooine_2", "terrain/space_tatooine_2.trn", true);
+		 * terrainService.addPlanet(45, "space_yavin4",
+		 * "terrain/space_yavin4.trn", true);
+		 */
+
+		// end terrainList
+
 		if (options.getInt("LOAD.RESOURCE.SYSTEM") > 0) {
 			resourceService.loadResources();
 		}
-		
+
 		chatService.loadChatRooms();
-		
+
 		spawnService = new SpawnService(this);
 		terrainService.loadClientPois();
+
 		// Travel Points
 		travelService.loadTravelPoints();
 		simulationService = new SimulationService(this);
-		
-		
+
 		terrainService.loadSnapShotObjects();
-		objectService.loadServerTemplates();		
+		objectService.loadServerTemplates();
 		objectService.loadObjects();
 		harvesterService.loadHarvesters();
 
 		simulationService.insertSnapShotObjects();
 		simulationService.insertPersistentBuildings();
+
 		// Zone services that need to be loaded after the above
 		zoneDispatch.addService(simulationService);
-		
+
 		guildService = new GuildService(this);
 		zoneDispatch.addService(guildService);
-		
+
 		gcwService = new GCWService(this);
 		zoneDispatch.addService(gcwService);
-		
+
 		collectionService = new CollectionService(this);
 		zoneDispatch.addService(collectionService);
 
 		tradeService = new TradeService(this);
 		zoneDispatch.addService(tradeService);
-		
+
 		zoneDispatch.addService(skillService);
-		
+
 		instanceService = new InstanceService(this);
 		zoneDispatch.addService(instanceService);
-		
+
 		weatherService = new WeatherService(this);
 		weatherService.loadPlanetSettings();
-		
+
 		spawnService.loadMobileTemplates();
 		spawnService.loadLairTemplates();
 		spawnService.loadLairGroups();
-		spawnService.loadDynamicGroups();;
+		spawnService.loadDynamicGroups();
+		;
 		spawnService.loadSpawnAreas();
-		
+
 		staticService.spawnStatics();
-		
+
 		equipmentService.loadBonusSets();
 		
 		playerCityService.loadCityRankCaps();
 		playerCityService.loadCities();
 		
 		retroService.run();
-		
-		browserService = new BrowserService(this);
-		//battlefieldService = new BattlefieldService(this);
-		adminService = new AdminService(this);
-		
-		didServerCrash = false;
-		System.out.println("Started Server.");
-		cleanupCreatureODB();
-		setGalaxyStatus(GalaxyStatus.Online);
-		
-	}
 
-	private void cleanupCreatureODB() {
-		ODBCursor cursor = swgObjectODB.getCursor();
-		
-		List<CreatureObject> deletedObjects = new ArrayList<CreatureObject>();
-		
-		while(cursor.hasNext()) {
-			Object next = cursor.next();
-			if (next == null) continue;
-			SWGObject creature = (SWGObject) next;
-			if(!characterService.playerExists(creature.getObjectID()) && creature instanceof CreatureObject)
-				deletedObjects.add((CreatureObject) creature);
-		}
-		cursor.close();
-		
-		for(CreatureObject creature : deletedObjects) {
-			swgObjectODB.remove(creature.getObjectID());
-		}
-		
-		System.out.println("Deleted " + deletedObjects.size() + " creatures.");
+		browserService = new BrowserService(this);
+		// battlefieldService = new BattlefieldService(this);
+		adminService = new AdminService(this);
+
+		didServerCrash = false;
+		cleanupCreatureODB(); //just in case we crashed previously...
+		System.out.println("Started Server.");
+		setGalaxyStatus(GalaxyStatus.Online);
+
 	}
 
 	public void stop() {
@@ -614,134 +687,115 @@ public class NGECore {
 		databaseConnection.close();
 		databaseConnection2.close();
 	}
-	
-	public void cleanUp() {
-		System.out.println("Cleaning Up...");
-		long memoryUsed = Runtime.getRuntime().freeMemory();
-		System.out.println("Using " + memoryUsed + " bytes of memory.");
-		
-		config = null;
-		databaseConnection = null;
-		databaseConnection2 = null;
-		Runtime.getRuntime().gc();
-		System.out.println("Cleaned Up " + (Runtime.getRuntime().freeMemory() - memoryUsed) + " bytes of memory.");
-	}
-	
+
 	public void restart() {
 		stop();
 		cleanUp();
 		try {
 			Thread.sleep(30000);
 		} catch (InterruptedException e) {
-			
+
 		}
 		start();
 	}
-	
-	public static void main(String[] args) {
-		//With this class, we are overwriting the JVM's way of handling exceptions that are never caught. Very handy so no try/catch spam for every method.
-		if (logUnhandledExceptions) Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionLogger("./logs/uncaught"));
 
-		NGECore core = new NGECore();
-		
-		core.start();
-		
-		do {
-			if (didServerCrash) {
-				core.restart();
+	public void initiateShutdown() {
+		if (isShuttingDown)
+			return;
+		try {
+
+			for (int minutes = 15; minutes > 1; minutes--) {
+				chatService
+						.broadcastGalaxy("The server will be shutting down soon. Please find a safe place to logout. ("
+								+ minutes + " minutes left)");
+				Thread.sleep(60000);
 			}
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				
+			setGalaxyStatus(GalaxyStatus.Locked);
+			chatService
+					.broadcastGalaxy("The server will be shutting down soon. Please find a safe place to logout. ("
+							+ 1 + " minutes left)");
+			Thread.sleep(30000);
+			chatService
+					.broadcastGalaxy("You will be disconnected in 30 seconds so the server can perform a final save before shutting down.  Please find a safe place to logout now.");
+			Thread.sleep(20000);
+			chatService
+					.broadcastGalaxy("You will be disconnected in 10 seconds so the server can perform a final save before shutting down.  Please find a safe place to logout now.");
+			Thread.sleep(10000);
+			chatService
+					.broadcastGalaxy("You will now be disconnected so the server can perform a final save before shutting down.");
+
+			synchronized (getActiveConnectionsMap()) {
+				for (Client client : getActiveConnectionsMap().values()) {
+					client.getSession().close(true);
+					connectionService.disconnect(client);
+				}
 			}
-		} while (true);
-		
+
+			System.exit(0);
+
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
-	
+
+	public void initiateStop() {
+		if (isShuttingDown)
+			return;
+		try {
+			chatService
+					.broadcastGalaxy("You will now be disconnected so the server can perform a final save before shutting down.");
+			Thread.sleep(10000);
+			synchronized (getActiveConnectionsMap()) {
+				for (Client client : getActiveConnectionsMap().values()) {
+					client.getSession().close(true);
+					connectionService.disconnect(client);
+				}
+			}
+
+			System.exit(0);
+
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	public void cleanUp() {
+		System.out.println("Cleaning Up...");
+		long memoryUsed = Runtime.getRuntime().freeMemory();
+		System.out.println("Using " + memoryUsed + " bytes of memory.");
+
+		config = null;
+		databaseConnection = null;
+		databaseConnection2 = null;
+		cleanupCreatureODB();
+		Runtime.getRuntime().gc();
+		System.out.println("Cleaned Up "
+				+ (Runtime.getRuntime().freeMemory() - memoryUsed)
+				+ " bytes of memory.");
+	}
+
 	public void setGalaxyStatus(int statusId) {
-		
+
 		galaxyStatus = statusId;
 		int galaxyId = config.getInt("GALAXY_ID");
-		
+
 		try {
-			PreparedStatement ps = databaseConnection.preparedStatement("UPDATE \"connectionServers\" SET \"statusId\"=? WHERE \"galaxyId\"=?");
+			PreparedStatement ps = databaseConnection
+					.preparedStatement("UPDATE \"connectionServers\" SET \"statusId\"=? WHERE \"galaxyId\"=?");
 			ps.setInt(1, statusId);
 			ps.setInt(2, galaxyId);
 			ps.executeUpdate();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
-	}
-	
-	public int getGalaxyStatus() {
-		return galaxyStatus;
-	}
-	
-	/*
-	 * ---------- Getter methods for NGECore ----------
-	 */
-	public Config getConfig() {
-		return config;
-	}
-	
-	public String getGalaxyName() {
-		return config.getString("GALAXY_NAME");
-	}
-	
-	public DatabaseConnection getDatabase1() {
-		return databaseConnection;
-	}
-	
-	public DatabaseConnection getDatabase2() {
-		return databaseConnection2;
-	}
-	
-	public ObjectDatabase getSWGObjectODB() {
-		return swgObjectODB;
-	}
-	
-	public ObjectDatabase getMailODB() {
-		return mailODB;
-	}
-	
-	public ObjectDatabase getGuildODB() {
-		return guildODB;
-	}
-		
-	public ObjectDatabase getObjectIdODB() {
-		return objectIdODB;
-	}
-	
-	public ObjectDatabase getDuplicateIdODB() {
-		return duplicateIdODB;
-	}
-	
-	public ObjectDatabase getChatRoomODB() {
-		return chatRoomODB;
-	}
-	
-	public ObjectDatabase getBountiesODB() {
-		return bountiesODB;
-	}
-	
-	public ObjectDatabase getResourceHistoryODB() {
-		return resourceHistoryODB;
-	}
-	
-	public ObjectDatabase getAuctionODB() {
-		return auctionODB;
-	}
 
-	public ObjectDatabase getCityODB() {
-		return cityODB;
 	}
 
 	public int getActiveClients() {
 		int connections = 0;
 		for (Map.Entry<IoSession, Client> c : clients.entrySet()) {
-			if(c.getValue().getSession() != null) {
+			if (c.getValue().getSession() != null) {
 				if (c.getValue().getSession().isConnected()) {
 					connections++;
 				}
@@ -749,12 +803,13 @@ public class NGECore {
 		}
 		return connections;
 	}
-	
+
 	public int getActiveZoneClients() {
 		int connections = 0;
 		for (Map.Entry<IoSession, Client> c : clients.entrySet()) {
-			if(c.getValue().getSession() != null) {
-				if (c.getValue().getSession().isConnected() && c.getValue().getParent() != null) {
+			if (c.getValue().getSession() != null) {
+				if (c.getValue().getSession().isConnected()
+						&& c.getValue().getParent() != null) {
 					connections++;
 				}
 			}
@@ -762,96 +817,6 @@ public class NGECore {
 		return connections;
 	}
 
-	
-	public Client getClient(IoSession session) {
-		return clients.get(session);
-	}
-	
-	public ConcurrentHashMap<IoSession, Client> getActiveConnectionsMap() {
-		return clients;
-	}
-	
-	/*
-	 * --------------- Other methods for services ---------------
-	 */
-	public void addClient(IoSession session, Client client) {
-		clients.put(session, client);
-	}
-	
-	public void removeClient(IoSession session) {
-		clients.remove(session);
-	}
-	
-	// for python scripts
-	public Thread getCurrentThread() {
-		return Thread.currentThread();
-	}
-	
-	public static NGECore getInstance() {
-		return instance;
-	}
-	
-	public BusConfiguration getEventBusConfig() {
-		return eventBusConfig;
-	}
-	
-	public void initiateShutdown() {
-		if(isShuttingDown)
-			return;
-		try {
-	
-			for(int minutes = 15; minutes > 1; minutes--) {
-					chatService.broadcastGalaxy("The server will be shutting down soon. Please find a safe place to logout. (" + minutes + " minutes left)");
-					Thread.sleep(60000);
-			}
-			setGalaxyStatus(GalaxyStatus.Locked);
-			chatService.broadcastGalaxy("The server will be shutting down soon. Please find a safe place to logout. (" + 1 + " minutes left)");
-			Thread.sleep(30000);
-			chatService.broadcastGalaxy("You will be disconnected in 30 seconds so the server can perform a final save before shutting down.  Please find a safe place to logout now.");
-			Thread.sleep(20000);
-			chatService.broadcastGalaxy("You will be disconnected in 10 seconds so the server can perform a final save before shutting down.  Please find a safe place to logout now.");
-			Thread.sleep(10000);
-			chatService.broadcastGalaxy("You will now be disconnected so the server can perform a final save before shutting down.");
-			
-			synchronized(getActiveConnectionsMap()) {
-				for(Client client : getActiveConnectionsMap().values()) {
-					client.getSession().close(true);
-					connectionService.disconnect(client);
-				}
-			}
-			
-			System.exit(0);
-			
-		} catch (InterruptedException e) {
-				e.printStackTrace();
-		}
-	}
-		
-		public void initiateStop() {
-			if(isShuttingDown)
-				return;
-			try {
-				chatService.broadcastGalaxy("You will now be disconnected so the server can perform a final save before shutting down.");
-				Thread.sleep(10000);
-				synchronized(getActiveConnectionsMap()) {
-					for(Client client : getActiveConnectionsMap().values()) {
-						client.getSession().close(true);
-						connectionService.disconnect(client);
-					}
-				}
-				
-				System.exit(0);
-				
-			} catch (InterruptedException e) {
-					e.printStackTrace();
-			}
-		
-	}
-
-	public long getGalacticTime() {
-		return System.currentTimeMillis() - galacticTime;
-	}
-	
 	public void closeODBs() {
 		swgObjectODB.close();
 		mailODB.close();
@@ -864,6 +829,137 @@ public class NGECore {
 		cityODB.close();
 	}
 
+	public Vector<String> getExcludedDevelopers() {
+		Vector<String> excludedDevelopers = new Vector<String>();
+		// excludedDevelopers.add("Charon");
+		// Feel free to add your OS user account name here to exclude yourself
+		// from loading buildouts and snapshots
+		// without having to change options.cfg all the time
+		return excludedDevelopers;
+	}
+
+	//our lone private function
+	//TODO: we could speed this up if we put all the creature object id's into a list
+	//and then replace the call to playerExists with a function that selects object id's 
+	//that are not in the list of object id's - those would be returned and deleted all at once
+	private void cleanupCreatureODB() {
+		ODBCursor cursor = swgObjectODB.getCursor();
+
+		int deleteCount = 0;
+
+		while (cursor.hasNext()) {
+			Object next = cursor.next();
+			if (next == null)
+				continue;
+			SWGObject creature = (SWGObject) next;
+			if (!characterService.playerExists(creature.getObjectID())
+					&& creature instanceof CreatureObject) {
+				swgObjectODB.remove(creature.getObjectID());
+				deleteCount++;
+			}
+		}
+		cursor.close();
+
+		System.out.println("Deleted " + Integer.toString(deleteCount) + " creatures.");
+	}
+	
+	/*
+	 * ---------- Getter methods for NGECore ----------
+	 */
+
+	public int getGalaxyStatus() {
+		return galaxyStatus;
+	}
+
+	public Config getConfig() {
+		return config;
+	}
+
+	public String getGalaxyName() {
+		return config.getString("GALAXY_NAME");
+	}
+
+	public DatabaseConnection getDatabase1() {
+		return databaseConnection;
+	}
+
+	public DatabaseConnection getDatabase2() {
+		return databaseConnection2;
+	}
+
+	public ObjectDatabase getSWGObjectODB() {
+		return swgObjectODB;
+	}
+
+	public ObjectDatabase getMailODB() {
+		return mailODB;
+	}
+
+	public ObjectDatabase getGuildODB() {
+		return guildODB;
+	}
+
+	public ObjectDatabase getObjectIdODB() {
+		return objectIdODB;
+	}
+
+	public ObjectDatabase getDuplicateIdODB() {
+		return duplicateIdODB;
+	}
+
+	public ObjectDatabase getChatRoomODB() {
+		return chatRoomODB;
+	}
+
+	public ObjectDatabase getBountiesODB() {
+		return bountiesODB;
+	}
+
+	public ObjectDatabase getResourceHistoryODB() {
+		return resourceHistoryODB;
+	}
+
+	public ObjectDatabase getAuctionODB() {
+		return auctionODB;
+	}
+
+	public ObjectDatabase getCityODB() {
+		return cityODB;
+	}
+
+	public Client getClient(IoSession session) {
+		return clients.get(session);
+	}
+
+	public ConcurrentHashMap<IoSession, Client> getActiveConnectionsMap() {
+		return clients;
+	}
+
+	public void addClient(IoSession session, Client client) {
+		clients.put(session, client);
+	}
+
+	public void removeClient(IoSession session) {
+		clients.remove(session);
+	}
+
+	// for python scripts
+	public Thread getCurrentThread() {
+		return Thread.currentThread();
+	}
+
+	public static NGECore getInstance() {
+		return instance;
+	}
+
+	public BusConfiguration getEventBusConfig() {
+		return eventBusConfig;
+	}
+
+	public long getGalacticTime() {
+		return System.currentTimeMillis() - galacticTime;
+	}
+
 	public String getMotd() {
 		return motd;
 	}
@@ -871,17 +967,8 @@ public class NGECore {
 	public void setMotd(String motd) {
 		this.motd = motd;
 	}
-	
-	public Vector<String> getExcludedDevelopers(){
-		Vector<String> excludedDevelopers = new Vector<String>();
-		//excludedDevelopers.add("Charon");
-		// Feel free to add your OS user account name here to exclude yourself from loading buildouts and snapshots
-		// without having to change options.cfg all the time
-		return excludedDevelopers;
-	}
-	
+
 	public Config getOptions() {
 		return options;
 	}
 }
-

@@ -422,7 +422,7 @@ public class CharacterService implements INetworkDispatch {
 		if (isDuplicate) { return true; }
 		
 		//FIXME: this is a bit lazy... but it's only temporary :p
-		PreparedStatement psc = databaseConnection.preparedStatement("SELECT * FROM pg_tables WHERE \"tablename\"=?");
+		PreparedStatement psc = databaseConnection.preparedStatement("SELECT COUNT(*) FROM pg_tables WHERE \"tablename\"=?");
 		psc.setString(1, "temp_reserved_char_names");
 		ResultSet resultSetC = psc.executeQuery();
 		boolean tableExists = resultSetC.next();
@@ -467,7 +467,7 @@ public class CharacterService implements INetworkDispatch {
 	private String checkForReservedName(String firstName, String lastName) throws SQLException
 	{
 		
-		PreparedStatement psc = databaseConnection.preparedStatement("SELECT * FROM pg_tables WHERE \"tablename\"=?");
+		PreparedStatement psc = databaseConnection.preparedStatement("SELECT COUNT(*) FROM pg_tables WHERE \"tablename\"=?");
 		psc.setString(1, "reservednames");
 		ResultSet rsc = psc.executeQuery();
 		if (!rsc.next()) {
@@ -485,6 +485,7 @@ public class CharacterService implements INetworkDispatch {
 		String combinedName = firstName + " " + lastName;
 		combinedName.replaceAll("\\s*$", "");
 		
+		//we could consider using LIKE here, or some form of regex. either way it doesn't work right at the moment -ilikenwf
 		String query = "SELECT \"type\" FROM \"reservednames\" WHERE (\"match_firstname\" = TRUE AND ? ~ \"pattern\") OR (\"match_both_names\" = TRUE and ? ~ \"pattern\") ";
 		if (lastName != "")
 		{
@@ -522,10 +523,12 @@ public class CharacterService implements INetworkDispatch {
 		PreparedStatement preparedStatement;
 		int characters = 0;
 		try {
-			preparedStatement = databaseConnection.preparedStatement("SELECT * FROM characters WHERE \"accountId\"=" + accountId + "");
+			preparedStatement = databaseConnection.preparedStatement("SELECT COUNT(*) AS charCount FROM characters WHERE \"accountId\"=" + accountId);
 			ResultSet resultSet = preparedStatement.executeQuery();
-			while(resultSet.next() && !resultSet.isClosed())
-				characters++;
+
+			characters = 0;
+			if (!resultSet.isClosed() && resultSet.next())
+				characters = resultSet.getInt("charCount");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -575,10 +578,10 @@ public class CharacterService implements INetworkDispatch {
 			name = name.toLowerCase();
 			long oid = 0L;
 			try {
-				PreparedStatement ps = databaseConnection.preparedStatement("SELECT * FROM characters WHERE LOWER(\"firstName\")=?");
+				PreparedStatement ps = databaseConnection.preparedStatement("SELECT COUNT(*) AS charCount FROM characters WHERE LOWER(\"firstName\")=?");
 				ps.setString(1, name);
 				ResultSet resultSet = ps.executeQuery();
-				while (resultSet.next()) {	
+				if (!resultSet.isClosed() && resultSet.next()) {
 					oid = resultSet.getLong("id");
 				}
 				return oid;
@@ -598,7 +601,7 @@ public class CharacterService implements INetworkDispatch {
 					
 			String name = "";
 			try {
-				PreparedStatement ps = databaseConnection.preparedStatement("SELECT * FROM characters WHERE \"id\"=?");
+				PreparedStatement ps = databaseConnection.preparedStatement("SELECT firstName FROM characters WHERE \"id\"=?");
 				ps.setLong(1, oid);
 				ResultSet resultSet = ps.executeQuery();
 				while (resultSet.next()) {				 
@@ -609,7 +612,7 @@ public class CharacterService implements INetworkDispatch {
 						}
 						name = name.toLowerCase();
 
-				}
+					}
 				return name;
 			} 
 			
@@ -648,11 +651,11 @@ public class CharacterService implements INetworkDispatch {
 	 */
 	public int getAccountId(long objectId) {
 		try {
-			PreparedStatement ps = databaseConnection.preparedStatement("SELECT * FROM characters WHERE id=?");
+			PreparedStatement ps = databaseConnection.preparedStatement("SELECT accountId FROM characters WHERE id=?");
 			ps.setLong(1, objectId);
 			ResultSet resultSet = ps.executeQuery();
-			resultSet.next();
-			return resultSet.getInt("accountId");
+			if (resultSet.next())
+				return resultSet.getInt("accountId");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
