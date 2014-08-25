@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -152,6 +153,8 @@ public class ObjectService implements INetworkDispatch {
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	protected final Object objectMutex = new Object();
 	private List<Runnable> loadServerTemplateTasks = Collections.synchronizedList(new ArrayList<Runnable>());
+	private int iteratedReusedIds = 0;
+	private List<Long> reusableIds = Collections.synchronizedList(new ArrayList<Long>());
 	
 	public ObjectService(final NGECore core) {
 		this.core = core;
@@ -200,6 +203,12 @@ public class ObjectService implements INetworkDispatch {
 			SWGObject object = (SWGObject) cursor.next();
 			if (object != null && !(object instanceof BuildingObject) && !objectList.containsKey(object.getObjectID()))
 				objectList.put(object.getObjectID(), object);
+		}
+		
+		cursor = core.getReusableIdODB().getCursor();
+		
+		while (cursor.hasNext()) {
+			reusableIds.add(((ObjectId) cursor.next()).objectId);
 		}
 		
 		loadBuildings();
@@ -792,16 +801,98 @@ public class ObjectService implements INetworkDispatch {
 		
 		long objectId = 0;
 		
-		if (core.getDuplicateIdODB().contains(key)) {
-			objectId = ((DuplicateId) core.getDuplicateIdODB().get(key)).getObjectId();
+		boolean containsKey;
+		
+		synchronized(objectMutex) {
+			containsKey = core.getDuplicateIdODB().contains(key);
+		}
+		
+		if (containsKey) {
+			synchronized(objectMutex) {
+				objectId = ((DuplicateId) core.getDuplicateIdODB().get(key)).getObjectId();
+			}
+			
+			if (objectList.containsKey(objectId)) {
+				System.err.println("Warning: DOId already in use.  Using one from reusableId pool instead.");
+				return getReusableId();
+			}
 		} else {
-			objectId = generateObjectID();
-			core.getDuplicateIdODB().put(key, new DuplicateId(key, objectId));
+			while (true) {
+				objectId = generateObjectID();
+				
+				synchronized(objectMutex) {
+					if (!core.getObjectIdODB().contains(objectId)) {
+						core.getObjectIdODB().put(objectId, new ObjectId(objectId));
+					} else {
+						System.err.println("Error: Generated objectId is already in objectIdODB?");
+						System.err.println("Trying again...");
+						continue;
+					}
+					
+					if (objectList.containsKey(objectId)) {
+						System.err.println("Error: Generated objectId is already in objectList?");
+						System.err.println("Trying again...");
+						continue;
+					}
+				}
+				
+				break;
+			}
+			
+			synchronized(objectMutex) {
+				core.getDuplicateIdODB().put(key, new DuplicateId(key, objectId));
+			}
 		}
 		
 		return objectId;
 	}
-
+	
+	public long getReusableId() {
+		long objectId = 0;
+		
+		synchronized(objectMutex) {
+			objectId = reusableIds.iterator().next();
+			
+			while (objectList.containsKey(objectId) && iteratedReusedIds++ < reusableIds.size()) {
+				objectId = reusableIds.get(iteratedReusedIds);
+			}
+			
+			if (objectList.containsKey(objectId)) {
+				objectId = 0;
+			}
+		}
+		
+		if (objectId == 0) {
+			while (true) {
+				objectId = generateObjectID();
+				
+				synchronized(objectMutex) {
+					if (!core.getObjectIdODB().contains(objectId)) {
+						core.getObjectIdODB().put(objectId, new ObjectId(objectId));
+					} else {
+						System.err.println("Error: Generated objectId is already in objectIdODB?");
+						System.err.println("Trying again...");
+						continue;
+					}
+					
+					if (objectList.containsKey(objectId)) {
+						System.err.println("Error: Generated objectId is already in objectList?");
+						System.err.println("Trying again...");
+						continue;
+					}
+					
+					core.getReusableIdODB().put(objectId, new ObjectId(objectId));
+					reusableIds.add(objectId);
+					iteratedReusedIds++;
+					
+					break;
+				}
+			}
+		}
+		
+		return objectId;
+	}
+	
 	public Vector<SWGObject> getItemsInContainerByStfName(CreatureObject creature, long containerId, String stfName) {
 		Vector<SWGObject> itemList = new Vector<SWGObject>();
 		SWGObject container = getObject(containerId);
@@ -1083,6 +1174,10 @@ public class ObjectService implements INetworkDispatch {
 						creature.setClient(null);
 					}
 				}
+				
+				creature.setIntendedTarget(0);
+				
+				creature.setLookAtTarget(0);
 				
 				PlayerObject ghost = (PlayerObject) creature.getSlottedObject("ghost");
 				

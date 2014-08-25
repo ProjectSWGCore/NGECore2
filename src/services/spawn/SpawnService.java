@@ -34,10 +34,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.TreeMap;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+
 import resources.common.collidables.CollidableBox;
 import resources.common.collidables.CollidableCircle;
 import resources.datatables.Options;
@@ -116,7 +118,6 @@ public class SpawnService {
 				
 		creature.setFaction(mobileTemplate.getFaction());
 		creature.setFactionStatus(mobileTemplate.getFactionStatus());
-		creature.setPvpBitmask(mobileTemplate.getPvpBitmask());
 		
 		creature.updatePvpStatus();
 		
@@ -219,7 +220,11 @@ public class SpawnService {
 				armor = 6000;
 			core.skillModService.addSkillMod(creature, "expertise_innate_protection_all", armor);
 		}
-
+		
+		Map<String, Integer> attacks = new TreeMap<String, Integer>();
+		mobileTemplate.getAttacks().stream().forEach((attack) -> attacks.put(attack, 1));
+		creature.getAbilities().putAll(attacks);
+		
 		if (mobileTemplate.isAIEnabled()){
 			if (!mobileTemplate.isNoAI()){ // NoAI is for QuestGivers that don't fight to save resources
 				AIActor actor = new AIActor(creature, creature.getPosition(), scheduler);
@@ -288,8 +293,7 @@ public class SpawnService {
 		creature.setOptionsBitmask(mobileTemplate.getOptionsBitmask());
 		creature.setFaction(mobileTemplate.getFaction());
 		creature.setFactionStatus(mobileTemplate.getFactionStatus());
-		creature.setPvpBitmask(mobileTemplate.getPvpBitmask());
-
+		
 		if (mobileTemplate.getCustomName()==null){
 //			//creature.setStfFilename("mob/creature_names"); // TODO: set other STFs for NPCs other than creatures -> DONE
 			if (mobileTemplate.getStfFilename()!=null){			

@@ -19,14 +19,14 @@
  * Using NGEngine to work with NGECore2 is making a combined work based on NGEngine. 
  * Therefore all terms and conditions of the GNU Lesser General Public License cover the combination.
  ******************************************************************************/
-package services.combat;
+package resources.datatables;
 
-import main.NGECore;
-
-public class CombatCommands {
+public class TargetType {
 	
-	public static void registerCommands(NGECore core) {
-		core.commandService.registerCombatCommand("creatureMeleeAttack").setDefaultAnimations(new String[] { "creature_attack_light" });
-	}
+	public static final byte NONE = 0;
+	public static final byte REQUIRED = 1;
+	public static final byte OPTIONAL = 2;
+	public static final byte LOCATION = 3;
+	public static final byte ALL = 4;
 	
 }

@@ -48,7 +48,6 @@ import resources.quest.Quest;
 import services.quest.QuestItem;
 import engine.clients.Client;
 import engine.resources.common.CRC;
-import engine.resources.common.StringUtilities;
 import engine.resources.objects.Baseline;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
