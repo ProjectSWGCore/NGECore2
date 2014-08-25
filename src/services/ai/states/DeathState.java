@@ -41,7 +41,7 @@ public class DeathState extends AIState {
 		actor.getCreature().setAttachment("radial_filename", "npc/corpse");
 		//NGECore.getInstance().scriptService.callScript("scripts/radial/npc/corpse", "", "createRadial", NGECore.getInstance(), actor.getCreature().getKiller(), actor.getCreature(), new Vector<RadialOptions>());		
 		actor.scheduleDespawn();
-		
+	
 		if (actor.getCreature().getKiller() instanceof CreatureObject){
 			CreatureObject killer = (CreatureObject)actor.getCreature().getKiller();
 			if (killer==null)

@@ -145,7 +145,14 @@ def run(core, actor, target, commandString):
 		clipboard = toolkit.getSystemClipboard()
 		clipboard.setContents(StringSelection(str), None)
 		actor.sendSystemMessage('Patrolpoint copied to clipboard', 0)
-
+	
+	elif command == 'jesus':		
+		actor.setHealth(actor.getMaxHealth())
+		actor.setAction(actor.getMaxAction())
+		actor.setPosture(0)
+		actor.setSpeedMultiplierBase(1)
+		actor.setTurnRadius(1)
+	
 	elif command == 'checkai':		
 		latargetID = long(actor.getIntendedTarget())
 		latarget = core.objectService.getObject(latargetID)
@@ -189,7 +196,18 @@ def run(core, actor, target, commandString):
 		latargetID = long(actor.getIntendedTarget())
 		latarget = core.objectService.getObject(latargetID)
 		actor.sendSystemMessage('Optionsbitmask for unit ' + latarget.getCustomName() + ' is %s' % latarget.getOptionsBitmask(), 0)
-		
+	
+	elif command == 'isinquad':		
+		latargetID = long(actor.getIntendedTarget())
+		latarget = core.objectService.getObject(latargetID)
+		actor.sendSystemMessage('latarget %s' % latargetID, 0)
+		if latarget:
+			actor.sendSystemMessage('Is in quad %s' % latarget.isInQuadtree(), 0)
+			
+	elif command == 'killcorpse':		
+
+		core.aiService.explicitDestroy(actor)
+	
 	elif command == 'spawninst':
 			
 		#String campTemplate = "object/building/poi/shared_gcw_rebel_clone_tent_small.iff"; // LOL why doesn't this spawn?!?!?!

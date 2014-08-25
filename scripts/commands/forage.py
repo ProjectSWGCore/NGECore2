@@ -9,6 +9,9 @@ def setup():
 	
 def run(core, actor, target, commandString):
 	
+	actor.sendSystemMessage('Function suspended until working as intended'),0)
+	return
+	
 	#if actor.getSkills('Foraging')==0:
 		#actor.sendSystemMessage('@skl_use:sys_forage_noskill'),0)
 	

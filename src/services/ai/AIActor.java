@@ -515,14 +515,14 @@ public class AIActor {
 					damageMap.clear();
 					followObject = null;
 					NGECore.getInstance().objectService.destroyObject(creature);	
-					destroyActor();
+					//destroyActor();
 				} catch (Exception e) {
 					System.err.println("Exception3 in scheduleDespawn");
 					e.printStackTrace();
 				}
 			}
-	//}, 2, TimeUnit.MINUTES);
-	}, 15, TimeUnit.SECONDS);
+	}, 2, TimeUnit.MINUTES);
+	//}, 30, TimeUnit.SECONDS);
 	}
 	
 	public void destroyActor(){
