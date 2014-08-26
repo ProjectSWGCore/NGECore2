@@ -312,7 +312,7 @@ public class LoginService implements INetworkDispatch{
 		PreparedStatement preparedStatement;
 
 		try {
-			preparedStatement = databaseConnection1.preparedStatement("SELECT firstName, lastName, appaearance, id, galaxyId, statusID"
+			preparedStatement = databaseConnection1.preparedStatement("SELECT \"firstName\", \"lastName\", appearance, id, \"galaxyId\", \"statusId\""
 					+ " FROM characters WHERE \"accountId\"= " + id);
 			resultSet = preparedStatement.executeQuery();
 
@@ -365,7 +365,7 @@ public class LoginService implements INetworkDispatch{
 		LoginClusterStatus clusterStatus = new LoginClusterStatus();
 		ResultSet resultSet;
 		try {
-			PreparedStatement preparedStatement	= databaseConnection1.preparedStatement("SELECT id, address, port, pingPort, statusID"
+			PreparedStatement preparedStatement	= databaseConnection1.preparedStatement("SELECT id, address, port, \"pingPort\", \"statusId\""
 					+ " FROM \"connectionServers\"");
 			resultSet = preparedStatement.executeQuery();
 			while (resultSet.next() && !resultSet.isClosed())
