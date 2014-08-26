@@ -44,7 +44,7 @@ public class AdminService implements INetworkDispatch {
 		PreparedStatement preparedStatement;
 		
 		try {
-			preparedStatement = core.getDatabase1().preparedStatement("SELECT accessLevel FROM accounts WHERE id=" + id);
+			preparedStatement = core.getDatabase1().preparedStatement("SELECT \"accessLevel\" FROM accounts WHERE id=" + id);
 			ResultSet resultSet = preparedStatement.executeQuery();
 			if(resultSet.next())
 				accessLevel = resultSet.getString("accessLevel");
