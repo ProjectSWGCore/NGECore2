@@ -623,6 +623,10 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		return getQuestJournal().get(questCrc);
 	}
 	
+	public void removeQuest(String questName) {
+		getQuestJournal().remove(CRC.StringtoCRC("quest/" + questName));
+	}
+	
 	public String getProfessionWheelPosition() {
 		return (String) getBaseline(8).get("professionWheelPosition");
 	}
@@ -1048,20 +1052,11 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
 
 		switch (viewType) {
-			case 3:
 			case 6:
 				if (getContainer() != null) {
 					getContainer().notifyObservers(getBaseline(viewType).createDelta(updateType, buffer.array()), true);
 				}
 				
-				break;
-			case 8:
-				switch (updateType) {
-				case 7:
-					IoBuffer newBuffer = getBaseline(viewType).createDelta(updateType, buffer.array());
-					getContainer().getClient().getSession().write(newBuffer.array());
-					break;
-				}
 				break;
 			default:
 				if (getContainer() != null && getContainer().getClient() != null) {

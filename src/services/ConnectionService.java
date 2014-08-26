@@ -128,12 +128,12 @@ public class ConnectionService implements INetworkDispatch {
 
 	            try {
 	            	
-		            preparedStatement = databaseConnection.preparedStatement("SELECT accountId FROM sessions WHERE key=?");
+		            preparedStatement = databaseConnection.preparedStatement("SELECT \"accountId\" FROM sessions WHERE key=?");
 		            preparedStatement.setBytes(1, clientIdMsg.getSessionKey());
 		            resultSet = preparedStatement.executeQuery();
 		            
 		            if (resultSet.next()) {
-		            	long accountId = resultSet.getLong("accountID");
+		            	long accountId = resultSet.getLong("accountId");
 		            	
 		            	client.setAccountId(accountId);
 		            	client.setSessionKey(clientIdMsg.getSessionKey());

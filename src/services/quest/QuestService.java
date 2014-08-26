@@ -49,6 +49,7 @@ import protocol.swg.objectControllerObjects.ForceActivateQuest;
 import protocol.swg.objectControllerObjects.QuestTaskCounterMessage;
 import protocol.swg.objectControllerObjects.QuestTaskTimerMessage;
 import protocol.swg.objectControllerObjects.ShowLootBox;
+import protocol.swg.objectControllerObjects.ShowQuestAcceptWindow;
 import protocol.swg.objectControllerObjects.ShowQuestCompletionWindow;
 import resources.common.Console;
 import resources.common.ObjControllerOpcodes;
@@ -263,8 +264,8 @@ public class QuestService implements INetworkDispatch {
 		
 		QuestTask task = qData.getTasks().get(activeStep);
 		
-		//if (quest.getWaypointId() != 0)
-		//core.objectService.destroyObject(quest.getWaypointId());
+		if (quest.getWaypointId() != 0)
+			core.objectService.destroyObject(quest.getWaypointId());
 	
 		if (quest.getTimer() != null)
 			quest.getTimer().cancel(true);
@@ -408,8 +409,9 @@ public class QuestService implements INetworkDispatch {
 		creo.getClient().getSession().write(player.getBaseline(8).createDelta(7));
 	}
 	
-	public void sendQuestAcceptWindow(CreatureObject reciever, String questName) {
-		
+	public void sendQuestAcceptWindow(CreatureObject reciever, int questCrc) {
+		ObjControllerMessage objController = new ObjControllerMessage(0x0B, new ShowQuestAcceptWindow(reciever.getObjectID(), questCrc));
+		reciever.getClient().getSession().write(objController.serialize());
 	}
 	
 	public void sendQuestCompleteWindow(CreatureObject reciever, int questCrc) {

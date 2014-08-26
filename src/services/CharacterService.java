@@ -422,7 +422,8 @@ public class CharacterService implements INetworkDispatch {
 		if (isDuplicate) { return true; }
 		
 		//FIXME: this is a bit lazy... but it's only temporary :p
-		PreparedStatement psc = databaseConnection.preparedStatement("SELECT COUNT(*) FROM pg_tables WHERE \"tablename\"=?");
+		// FIXME: org.postgresql.util.PSQLException: ERROR: relation "temp_reserved_char_names" does not exist
+		/*PreparedStatement psc = databaseConnection.preparedStatement("SELECT COUNT(*) FROM pg_tables WHERE \"tablename\"=?");
 		psc.setString(1, "temp_reserved_char_names");
 		ResultSet resultSetC = psc.executeQuery();
 		boolean tableExists = resultSetC.next();
@@ -434,9 +435,9 @@ public class CharacterService implements INetworkDispatch {
 		ps2.setString(2, firstName.toLowerCase());
 		ResultSet resultSet2 = ps2.executeQuery();
 		boolean isReserved = resultSet2.next();
-		resultSet2.getStatement().close();
+		resultSet2.getStatement().close();*/
 		
-		return isReserved;
+		return isDuplicate;
 	}
 	
 	
