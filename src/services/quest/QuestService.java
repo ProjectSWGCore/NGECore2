@@ -164,10 +164,8 @@ public class QuestService implements INetworkDispatch {
 		
 		QuestTask task = qData.getTasks().get(activeStep);
 		
-		String[] splitType = task.getType().split("\\.");
-		String type = splitType[splitType.length - 1];
 
-		switch (type) {
+		switch (task.getType()) {
 		
 		// quest.task.ground.go_to_location
 		case "go_to_location":
@@ -227,14 +225,26 @@ public class QuestService implements INetworkDispatch {
 		case "show_message_box":
 			SUIWindow msgBox = core.suiService.createMessageBox(MessageBoxType.MESSAGE_BOX_OK, task.getMsgBoxTitle(), task.getMsgBoxPrompt(), quester, null, 0);
 			
-			if (task.getMsgBoxSound() != null && !task.getMsgBoxSound().equals("")) {
-				PlayMusicMessage music = new PlayMusicMessage(task.getMsgBoxSound(), quester.getObjectID(), 0, false);
-				quester.getClient().getSession().write(music.serialize());
-			}
+			if (task.getMsgBoxSound() != null && !task.getMsgBoxSound().equals(""))
+				quester.playMusic(task.getMsgBoxSound());
 			
 			core.suiService.openSUIWindow(msgBox);
 			break;
 		
+		case "complete_quest":
+			completeQuest(player, quest);
+			break;
+			
+		case "reward":
+			// TODO: System message? - Also check possibility of "Item" column being used for reward as well
+			TangibleObject reward = (TangibleObject) core.objectService.createObject(getQuestRewardTemplate(task.getLootName()), core.terrainService.getPlanetByName(task.getPlanet()));
+			
+			if (reward == null)
+				return;
+			
+			quester.getInventory().add(reward);
+			break;
+			
 		default:
 			//System.out.println("Don't know what to do for quest task: " + type);
 			break;
@@ -352,7 +362,7 @@ public class QuestService implements INetworkDispatch {
 		// Give quest items
 		
 		if (info.getRewardLootName() != null && !info.getRewardLootName().equals("")) {
-			SWGObject rewardLoot = core.objectService.createObject(core.scriptService.getMethod("scripts/quests/rewards/", info.getRewardLootName(), "run").__call__().asString(), creo.getPlanet());
+			SWGObject rewardLoot = core.objectService.createObject(getQuestRewardTemplate(info.getRewardLootName()), creo.getPlanet());
 			inventory.add(rewardLoot);
 			recievedItems.add(rewardLoot.getObjectID());
 		}
@@ -491,6 +501,15 @@ public class QuestService implements INetworkDispatch {
 		return waypoint;
 	}
 	
+	public String getQuestRewardTemplate(String lootName) {
+		String rtrn = core.scriptService.getMethod("scripts/quests/rewards/", lootName, "run").__call__().asString();
+		
+		if (rtrn == null) {
+			System.err.println("couldn't find quest reward template for lootName " + lootName);
+		}
+		
+		return rtrn;
+	}
 	public QuestData getQuestData(String questName) {
 		if (questMap.containsKey(questName)) 
 			return questMap.get(questName);
@@ -560,7 +579,12 @@ public class QuestService implements INetworkDispatch {
 				
 				QuestTask task = new QuestTask();
 				
-				if (visitor.getObjectByColumnNameAndIndex("ATTACH_SCRIPT", r) != null) task.setType((String) visitor.getObjectByColumnNameAndIndex("ATTACH_SCRIPT", r));
+				if (visitor.getObjectByColumnNameAndIndex("ATTACH_SCRIPT", r) != null) {
+					String[] splitType = ((String) visitor.getObjectByColumnNameAndIndex("ATTACH_SCRIPT", r)).split("\\.");
+					String type = splitType[splitType.length - 1];
+					task.setType(type);
+				}
+				
 				if (visitor.getObjectByColumnNameAndIndex("JOURNAL_ENTRY_TITLE", r) != null) task.setJournalEntryTitle((String) visitor.getObjectByColumnNameAndIndex("JOURNAL_ENTRY_TITLE", r));
 				if (visitor.getObjectByColumnNameAndIndex("JOURNAL_ENTRY_DESCRIPTION", r) != null) task.setJournalEntryDescription((String) visitor.getObjectByColumnNameAndIndex("JOURNAL_ENTRY_DESCRIPTION", r));
 				if (visitor.getObjectByColumnNameAndIndex("IS_VISIBLE", r) != null) task.setVisible((boolean) visitor.getObjectByColumnNameAndIndex("IS_VISIBLE", r));
@@ -606,6 +630,7 @@ public class QuestService implements INetworkDispatch {
 				if (visitor.getObjectByColumnNameAndIndex("MESSAGE_BOX_SIZE_WIDTH", r) != null) task.setMsgBoxWidth(Integer.parseInt((String) visitor.getObjectByColumnNameAndIndex("MESSAGE_BOX_SIZE_WIDTH", r)));
 				if (visitor.getObjectByColumnNameAndIndex("MESSAGE_BOX_SIZE_HEIGHT", r) != null) task.setMsgBoxHeight(Integer.parseInt((String) visitor.getObjectByColumnNameAndIndex("MESSAGE_BOX_SIZE_HEIGHT", r)));
 				if (visitor.getObjectByColumnNameAndIndex("MESSAGE_BOX_SIZE_WIDTH", r) != null) task.setMsgBoxWidth(Integer.parseInt((String) visitor.getObjectByColumnNameAndIndex("MESSAGE_BOX_SIZE_WIDTH", r)));
+				if (visitor.getObjectByColumnNameAndIndex("LOOT_NAME", r) != null) task.setLootName((String) visitor.getObjectByColumnNameAndIndex("LOOT_NAME", r));
 				
 				// if (visitor.getObjectByColumnNameAndIndex("MESSAGE_BOX_LOCATION_X", r) != null) task.setMsgBoxWidth((String) visitor.getObjectByColumnNameAndIndex("MESSAGE_BOX_LOCATION_X", r));
 				// if (visitor.getObjectByColumnNameAndIndex("MESSAGE_BOX_LOCATION_Y", r) != null) task.setMsgBoxWidth((String) visitor.getObjectByColumnNameAndIndex("MESSAGE_BOX_LOCATION_Y", r));

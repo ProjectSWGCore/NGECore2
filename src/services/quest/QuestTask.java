@@ -55,6 +55,7 @@ public class QuestTask {
 	private String msgBoxPrompt;
 	private String msgBoxTitle;
 	private String msgBoxSound;
+	private String lootName;
 	
 	private boolean visible;
 	private boolean grantQuestOnCompleteShowSystemMessage;
@@ -531,5 +532,13 @@ public class QuestTask {
 
 	public void setMsgBoxLength(int msgBoxLength) {
 		this.msgBoxLength = msgBoxLength;
+	}
+
+	public String getLootName() {
+		return lootName;
+	}
+
+	public void setLootName(String lootName) {
+		this.lootName = lootName;
 	}
 }

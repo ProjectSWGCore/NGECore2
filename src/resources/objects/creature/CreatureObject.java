@@ -1395,6 +1395,10 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		getClient().getSession().write(new PlayMusicMessage(sndFile, targetId, 1, false));
 	}
 	
+	public TangibleObject getInventory() {
+		return (TangibleObject) getSlottedObject("inventory");
+	}
+	
 	public void notifyClients(IoBuffer buffer, boolean notifySelf) {
 		notifyObservers(buffer, notifySelf);
 	}
