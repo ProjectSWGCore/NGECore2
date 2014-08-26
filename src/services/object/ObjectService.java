@@ -665,7 +665,8 @@ public class ObjectService implements INetworkDispatch {
 			parent.remove(object);
 			object.setParentId(parentId);
 		} else {
-			core.simulationService.remove(object, object.getWorldPosition().x, object.getWorldPosition().z, true);
+			if (!(object instanceof WaypointObject))
+				core.simulationService.remove(object, object.getWorldPosition().x, object.getWorldPosition().z, true);
 		}
 		@SuppressWarnings("unchecked") Vector<SWGObject> childObjects = (Vector<SWGObject>) object.getAttachment("childObjects");
 		if(childObjects != null)

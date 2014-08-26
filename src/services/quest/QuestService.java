@@ -274,8 +274,10 @@ public class QuestService implements INetworkDispatch {
 		
 		QuestTask task = qData.getTasks().get(activeStep);
 		
-		if (quest.getWaypointId() != 0)
+		if (quest.getWaypointId() != 0) {
+			player.getWaypoints().remove(quest.getWaypointId());
 			core.objectService.destroyObject(quest.getWaypointId());
+		}
 	
 		if (quest.getTimer() != null)
 			quest.getTimer().cancel(true);
