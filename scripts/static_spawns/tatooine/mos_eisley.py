@@ -100,9 +100,7 @@ def addPlanetSpawns(core, planet):
 	alduq = stcSvc.spawnObject('alduq', 'tatooine', long(0), float(3512), float(5.0), float(-4814), float(-0.164), float(0.986)) 
 
 	#Eisley Legacy Quest NPCs
-	
-	vourk = stcSvc.spawnObject('vourk', 'tatooine', long(0), float(3520.0), float(5.0), float(-4821.0), float(0.42), float(0.91))
-	
+		
 	building = core.objectService.getObject(long(1279956)) 
 	mayor = stcSvc.spawnObject('mos_eisley_mayor', 'tatooine', building.getCellByCellNumber(4), float(1.2), float(2.5), float(5.4), float(0), float(0), float(0), float(0))
 	
