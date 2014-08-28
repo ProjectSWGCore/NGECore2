@@ -1399,6 +1399,10 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		return (TangibleObject) getSlottedObject("inventory");
 	}
 	
+	public void notifyClients(IoBuffer buffer, boolean notifySelf) {
+		notifyObservers(buffer, notifySelf);
+	}
+	
 	public CreatureMessageBuilder getMessageBuilder() {
 		synchronized(objectMutex) {
 			if (messageBuilder == null) {
