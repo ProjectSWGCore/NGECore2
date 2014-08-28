@@ -290,7 +290,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void setIncapacityTimer(int incapacityTimer) {
-		notifyClients(getBaseline(3).set("uses", incapacityTimer), true);
+		notifyObservers(getBaseline(3).set("uses", incapacityTimer), true);
 	}
 	
 	public byte getPosture() {
@@ -1399,10 +1399,6 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		return (TangibleObject) getSlottedObject("inventory");
 	}
 	
-	public void notifyClients(IoBuffer buffer, boolean notifySelf) {
-		notifyObservers(buffer, notifySelf);
-	}
-	
 	public CreatureMessageBuilder getMessageBuilder() {
 		synchronized(objectMutex) {
 			if (messageBuilder == null) {
@@ -1455,7 +1451,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			case 6:
 			{
 				buffer = getBaseline(viewType).createDelta(updateType, buffer.array());
-				notifyClients(buffer, true);
+				notifyObservers(buffer, true);
 				break;
 			}
 		}
