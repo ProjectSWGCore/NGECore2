@@ -52,6 +52,10 @@ public class QuestTask {
 	private String itemName;
 	private String tasksOnFail;
 	private String retrieveMenuText;
+	private String msgBoxPrompt;
+	private String msgBoxTitle;
+	private String msgBoxSound;
+	private String lootName;
 	
 	private boolean visible;
 	private boolean grantQuestOnCompleteShowSystemMessage;
@@ -67,6 +71,9 @@ public class QuestTask {
 	private int dropPercent;
 	private int minTime;
 	private int maxTime;
+	private int msgBoxWidth;
+	private int msgBoxHeight;
+	private int msgBoxLength;
 	
 	private long waitMarkerBuilding;
 	
@@ -477,5 +484,61 @@ public class QuestTask {
 
 	public void setRadius(float radius) {
 		this.radius = radius;
+	}
+
+	public String getMsgBoxPrompt() {
+		return msgBoxPrompt;
+	}
+
+	public void setMsgBoxPrompt(String msgBoxPrompt) {
+		this.msgBoxPrompt = msgBoxPrompt;
+	}
+
+	public String getMsgBoxTitle() {
+		return msgBoxTitle;
+	}
+
+	public void setMsgBoxTitle(String msgBoxTitle) {
+		this.msgBoxTitle = msgBoxTitle;
+	}
+
+	public String getMsgBoxSound() {
+		return msgBoxSound;
+	}
+
+	public void setMsgBoxSound(String msgBoxSound) {
+		this.msgBoxSound = msgBoxSound;
+	}
+
+	public int getMsgBoxWidth() {
+		return msgBoxWidth;
+	}
+
+	public void setMsgBoxWidth(int msgBoxWidth) {
+		this.msgBoxWidth = msgBoxWidth;
+	}
+
+	public int getMsgBoxHeight() {
+		return msgBoxHeight;
+	}
+
+	public void setMsgBoxHeight(int msgBoxHeight) {
+		this.msgBoxHeight = msgBoxHeight;
+	}
+
+	public int getMsgBoxLength() {
+		return msgBoxLength;
+	}
+
+	public void setMsgBoxLength(int msgBoxLength) {
+		this.msgBoxLength = msgBoxLength;
+	}
+
+	public String getLootName() {
+		return lootName;
+	}
+
+	public void setLootName(String lootName) {
+		this.lootName = lootName;
 	}
 }

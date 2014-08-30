@@ -39,12 +39,6 @@ def run(core, actor, target, commandString):
 			
 			if object != None:
 				actor.transferTo(actor, oldContainer, object)	
-				
-			if target.getTemplate().find('/wearables/') or target.getTemplate().find('/weapon/'):
-				core.equipmentService.equip(actor, target)
-			
-			for object in replacedObjects:
-				core.equipmentService.unequip(actor, object)
 	
 	oldContainer.transferTo(actor, container, target)
 	

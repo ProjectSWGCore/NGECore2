@@ -23,6 +23,7 @@ package services.ai.states;
 
 import resources.objects.creature.CreatureObject;
 import services.ai.AIActor;
+import services.ai.states.AIState.StateResult;
 import tools.DevLog;
 
 public class PatrolState extends AIState {
@@ -47,8 +48,10 @@ public class PatrolState extends AIState {
 
 	@Override
 	public byte onExit(AIActor actor) {
-		DevLog.debugoutai(actor, "Charon", "AI PatrolState", "EXITING PATROL STATE!");		
-		actor.setLastPositionBeforeStateChange(actor.getCreature().getWorldPosition());
+		DevLog.debugoutai(actor, "Charon", "AI PatrolState", "EXITING PATROL STATE!");	
+		CreatureObject creature = actor.getCreature();
+		if(creature.getPosture() == 14)
+			actor.setLastPositionBeforeStateChange(actor.getCreature().getWorldPosition());
 		locked = true;
 		return StateResult.FINISHED;
 	}
@@ -56,11 +59,15 @@ public class PatrolState extends AIState {
 	@Override
 	public byte move(AIActor actor) {
 		DevLog.debugoutai(actor, "Charon", "AI PatrolState", "PATROL MOVE!");
+		CreatureObject creature = actor.getCreature();
+		if(creature.getPosture() == 14)
+			return StateResult.DEAD;
+		
 		if (locked){
 			System.out.println("PatrolState locked!");
 			return StateResult.FINISHED;
 		}
-		CreatureObject creature = actor.getCreature();
+
 		if(creature.isInCombat()){
 			//System.out.println("PatrolState locking!");
 			locked = true;

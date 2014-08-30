@@ -64,6 +64,7 @@ public class AIActor {
 	private MobileTemplate mobileTemplate;
 	private ScheduledExecutorService scheduler;
 	private Map<CreatureObject, Integer> damageMap = new ConcurrentHashMap<CreatureObject, Integer>();
+	private Map<CreatureObject, Integer> hateMap = new ConcurrentHashMap<CreatureObject, Integer>();
 	private volatile boolean hasReachedPosition;
 	private long lastAttackTimestamp;
 	private ScheduledFuture<?> regenTask;
@@ -297,16 +298,16 @@ public class AIActor {
 			return;
 		}
 		creature.removeDefender(defender);
-		if (damageMap.containsKey(defender))
-			damageMap.remove(defender);
+		if (damageMap.containsKey(defender)) damageMap.remove(defender);
+		if (hateMap.containsKey(defender)) hateMap.remove(defender);
 		defender.removeDefender(creature);
 		if(followObject == defender) {
-			setFollowObject(getHighestDamageDealer());
+			setFollowObject(getMostHated());
 			if(creature.getDefendersList().size() == 0)
 				setCurrentState(new RetreatState());
 		}
 	}
-
+	
 	public CreatureObject getHighestDamageDealer() {
 		CreatureObject highestDamageDealer = null;
 		highestDamageDealer = damageMap.keySet().stream().max((c1, c2) -> damageMap.get(c1) - damageMap.get(c2)).orElse(null);
@@ -319,7 +320,20 @@ public class AIActor {
 		}
 		return highestDamageDealer;
 	}
-
+	
+	public CreatureObject getMostHated() {
+		CreatureObject mostHated = null;
+		mostHated = hateMap.keySet().stream().max((c1, c2) -> hateMap.get(c1) - hateMap.get(c2)).orElse(null);
+		// return first defender if no damage has been dealt
+		if(mostHated == null) {
+			for(TangibleObject tangible : creature.getDefendersList().toArray(new TangibleObject[]{})) {
+				if(tangible instanceof CreatureObject)
+					return (CreatureObject) tangible;
+			}
+		}
+		return mostHated;
+	}
+	
 	public AIState getCurrentState() {
 		return currentState;
 	}
@@ -417,15 +431,19 @@ public class AIActor {
 		// Put AI into combat state if it is not yet and damaged
 		if (!creature.isInCombat()){
 			creature.setInCombat(true);
-			if (this.getHighestDamageDealer()!=null)
-				addDefender(this.getHighestDamageDealer());	
+			if (this.getMostHated()!=null)
+				addDefender(this.getMostHated());	
 		}
 	}
 	
 	public Map<CreatureObject, Integer> getDamageMap() {
 		return damageMap;
 	}
-
+	
+	public Map<CreatureObject, Integer> getHateMap() {
+		return hateMap;
+	}
+	
 	public boolean hasReachedPosition() {
 		return hasReachedPosition;
 	}
@@ -513,16 +531,18 @@ public class AIActor {
 			public void run() {
 				try {
 					damageMap.clear();
+					hateMap.clear();
 					followObject = null;
-					NGECore.getInstance().objectService.destroyObject(creature);	
-					destroyActor();
+					//destroyActor();
+					creature.setAttachment("AI", null);
+					NGECore.getInstance().objectService.destroyObject(creature);					
 				} catch (Exception e) {
 					System.err.println("Exception3 in scheduleDespawn");
 					e.printStackTrace();
 				}
 			}
-	//}, 2, TimeUnit.MINUTES);
-	}, 15, TimeUnit.SECONDS);
+	}, 2, TimeUnit.MINUTES);
+	//}, 30, TimeUnit.SECONDS);
 	}
 	
 	public void destroyActor(){

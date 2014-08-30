@@ -28,7 +28,6 @@ import java.util.concurrent.ScheduledFuture;
 import org.apache.mina.core.buffer.IoBuffer;
 
 import engine.resources.common.CRC;
-import engine.resources.common.StringUtilities;
 import engine.resources.objects.Delta;
 
 public class Quest extends Delta implements Serializable {
@@ -131,6 +130,11 @@ public class Quest extends Delta implements Serializable {
 		activeStepBitmask.set(activeStep, true);
 		
 		//System.out.println("Active step was "+ (activeStep - 1) + " and is now " + activeStep );
+	}
+	
+	public void complete() {
+		completedStepBitmask.set(activeStep);
+		activeStepBitmask.clear();
 	}
 	
 	public ScheduledFuture<?> getTimer() {

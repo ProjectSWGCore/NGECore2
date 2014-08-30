@@ -34,107 +34,110 @@ import engine.resources.common.Stf;
 import engine.resources.objects.SWGObject;
 
 public abstract class UnitTest extends AbstractUnitTest {
-	
+
 	protected NGECore core;
-	
+
 	protected IoBuffer buffer = null;
-	
+
 	private static CrcStringTableVisitor crcTable = null;
-	
+
 	public UnitTest() {
 		super();
 		core = NGECore.getInstance();
-		
+
 		if (crcTable == null) {
 			try {
-				crcTable = ClientFileManager.loadFile("misc/object_template_crc_string_table.iff", CrcStringTableVisitor.class);
+				crcTable = ClientFileManager.loadFile(
+						"misc/object_template_crc_string_table.iff",
+						CrcStringTableVisitor.class);
 			} catch (InstantiationException | IllegalAccessException e) {
 				e.printStackTrace();
 			}
 		}
 	}
-	
+
 	public boolean checkObjectId(long objectId) {
 		Map<Long, String> map = UnitTests.getObjectIdMap();
-		
+
 		if (objectId == 0) {
 			return false;
 		}
-		
+
 		SWGObject object = core.objectService.getObject(objectId);
-		
+
 		if (object == null) {
 			return false;
 		}
-		
+
 		if (map.containsKey(objectId)) {
 			if (map.get(objectId) == null) {
 				return false;
 			}
-			
+
 			if (!object.getClass().getSimpleName().equals(map.get(objectId))) {
 				return false;
 			}
 		} else {
 			map.put(object.getObjectID(), object.getClass().getSimpleName());
 		}
-		
+
 		return true;
 	}
-	
+
 	public boolean checkString(String string) {
 		if (string == null) {
 			return false;
 		}
-		
+
 		return true;
 	}
-	
+
 	public boolean checkCrc(int crc) {
 		if (crcTable != null) {
 			String template = crcTable.getTemplateString(buffer.getInt());
-			
+
 			if (template == null || template.length() == 0) {
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
-	
+
 	public boolean checkStf(IoBuffer buffer, boolean failEmpty) {
 		Stf stf = new Stf();
 		String string;
-		
+
 		string = getAsciiString(buffer);
-		
+
 		if (!checkString(string)) {
 			return false;
 		}
-		
+
 		stf.setStfFilename(string);
-		
+
 		if (buffer.getInt() > 0) {
 			return false;
 		}
-		
+
 		string = getAsciiString(buffer);
-		
+
 		if (!checkString(string)) {
 			return false;
 		}
-		
+
 		stf.setStfName(string);
-		
-		if (stf.getStfFilename().length() == 0 || stf.getStfName().length() == 0) {
+
+		if (stf.getStfFilename().length() == 0
+				|| stf.getStfName().length() == 0) {
 			return !failEmpty;
 		}
-		
+
 		if (stf.getStfValue() == null) {
 			return false;
 		}
-		
+
 		return true;
 	}
-	
+
 }

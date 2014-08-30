@@ -430,12 +430,6 @@ public class ResourceService implements INetworkDispatch {
 	private void initialize() {
 		for (ResourceClass c : ResourceClass.values())
 			resourceTypeTable.put(c, new Vector<ResourceRoot>());
-		
-		core.commandService.registerCommand("harvestcorpse");
-		core.commandService.registerCommand("milkcreature");
-		core.commandService.registerCommand("resourcecontainersplit");
-		core.commandService.registerCommand("resourcecontainertransfer");
-		core.commandService.registerCommand("factorycratesplit");
 		start();
 	}
 	

@@ -26,7 +26,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.LongAdder;
 
@@ -41,7 +40,6 @@ import protocol.swg.UpdatePVPStatusMessage;
 import protocol.swg.UpdatePostureMessage;
 import protocol.swg.objectControllerObjects.Animation;
 import protocol.swg.objectControllerObjects.Posture;
-import protocol.swg.objectControllerObjects.StartTask;
 import engine.clients.Client;
 import engine.resources.objects.Baseline;
 import resources.objects.SWGList;
@@ -56,7 +54,6 @@ import resources.common.OutOfBand;
 import resources.datatables.Difficulty;
 import resources.equipment.Equipment;
 import resources.group.GroupInviteInfo;
-import services.command.BaseSWGCommand;
 import engine.resources.common.CRC;
 import engine.resources.objects.IPersistent;
 import engine.resources.objects.SWGObject;
@@ -82,7 +79,6 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private transient boolean performingEffect;
 	private transient boolean performingFlourish;
 	private transient TangibleObject conversingNpc;
-	private transient ConcurrentHashMap<String, Long> cooldowns = new ConcurrentHashMap<String, Long>();
 	private transient long tefTime = 0;
 	private transient SWGObject useTarget;
 	private transient boolean isConstructing = false;
@@ -294,7 +290,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void setIncapacityTimer(int incapacityTimer) {
-		notifyClients(getBaseline(3).set("uses", incapacityTimer), true);
+		notifyObservers(getBaseline(3).set("uses", incapacityTimer), true);
 	}
 	
 	public byte getPosture() {
@@ -931,6 +927,15 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 	}
 	
+	public boolean isWearing(SWGObject object)
+	{
+		for (Equipment equipment : getEquipmentList()) 
+		{
+			if (equipment.getObjectId() == object.getObjectId()) return true;
+		}
+		return false;
+	}
+	
 	public void removeObjectFromEquipList(SWGObject object) {
 		if (object instanceof TangibleObject) {
 			for (Equipment equipment : getEquipmentList()) {
@@ -1312,50 +1317,6 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 	}
 	
-	public void addCooldown(String cooldownGroup, float cooldownTime) {
-		if (cooldowns.containsKey(cooldownGroup)) {
-			cooldowns.remove(cooldownGroup);
-		}
-		
-		long duration = System.currentTimeMillis() + ((long) (cooldownTime * 1000F)); 
-		
-		cooldowns.put(cooldownGroup, duration);
-	}
-	
-	public boolean hasCooldown(String cooldownGroup) {
-		if (cooldowns.containsKey(cooldownGroup)) {
-			if (System.currentTimeMillis() < cooldowns.get(cooldownGroup)) {
-				return true;
-			} else {
-				cooldowns.remove(cooldownGroup);
-			}
-		}
-		
-		return false;
-	}
-	
-	public boolean removeCooldown(int actionCounter, BaseSWGCommand command) {
-		if (cooldowns.containsKey(command.getCooldownGroup())) {
-			cooldowns.remove(command.getCooldownGroup());
-			getClient().getSession().write(new ObjControllerMessage(0x0B, new StartTask(actionCounter, getObjectID(), command.getCommandCRC(), CRC.StringtoCRC(command.getCooldownGroup().toLowerCase()), -1)).serialize());
-			return true;
-		}
-		
-		return false;
-	}
-	
-	public long getRemainingCooldown(String cooldownGroup) {
-		if (cooldowns.containsKey(cooldownGroup)) {
-			if (System.currentTimeMillis() < cooldowns.get(cooldownGroup)) {
-				return (long) (cooldowns.get(cooldownGroup) - System.currentTimeMillis());
-			} else {
-				cooldowns.remove(cooldownGroup);
-			}
-		}
-		
-		return 0L;
-	}
-	
 	public int getGCWFatigue() {
 		return (int) otherVariables.get("fatigue");
 	}
@@ -1434,6 +1395,10 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		getClient().getSession().write(new PlayMusicMessage(sndFile, targetId, 1, false));
 	}
 	
+	public TangibleObject getInventory() {
+		return (TangibleObject) getSlottedObject("inventory");
+	}
+	
 	public void notifyClients(IoBuffer buffer, boolean notifySelf) {
 		notifyObservers(buffer, notifySelf);
 	}
@@ -1490,7 +1455,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 			case 6:
 			{
 				buffer = getBaseline(viewType).createDelta(updateType, buffer.array());
-				notifyClients(buffer, true);
+				notifyObservers(buffer, true);
 				break;
 			}
 		}
