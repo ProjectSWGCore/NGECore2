@@ -22,9 +22,22 @@
 package services.quest;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
@@ -36,20 +49,28 @@ import protocol.swg.objectControllerObjects.ForceActivateQuest;
 import protocol.swg.objectControllerObjects.QuestTaskCounterMessage;
 import protocol.swg.objectControllerObjects.QuestTaskTimerMessage;
 import protocol.swg.objectControllerObjects.ShowLootBox;
+import protocol.swg.objectControllerObjects.ShowQuestAcceptWindow;
+import protocol.swg.objectControllerObjects.ShowQuestCompletionWindow;
+import resources.common.Console;
 import resources.common.ObjControllerOpcodes;
 import resources.common.OutOfBand;
 import resources.common.ProsePackage;
+import resources.common.collidables.QuestCollidable;
 import resources.datatables.DisplayType;
 import resources.objects.SWGMap;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
+import resources.objects.waypoint.WaypointObject;
 import resources.quest.Quest;
+import services.sui.SUIService.MessageBoxType;
+import services.sui.SUIWindow;
 import main.NGECore;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.DatatableVisitor;
 import engine.resources.common.CRC;
 import engine.resources.objects.SWGObject;
+import engine.resources.scene.Point3D;
 import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 
@@ -58,7 +79,7 @@ public class QuestService implements INetworkDispatch {
 	private NGECore core;
 	private Map<String, QuestData> questMap = new ConcurrentHashMap<String, QuestData>();
 	private Map<String, QuestList> questRewardMap = new ConcurrentHashMap<String, QuestList>();
-	
+
 	public QuestService(NGECore core) {
 		this.core = core;
 	}
@@ -75,9 +96,6 @@ public class QuestService implements INetworkDispatch {
 		});
 	}
 
-	@Override
-	public void shutdown() { }
-	
 	public boolean doesPlayerHaveQuest(CreatureObject creo, String questName) {
 		PlayerObject ghost = creo.getPlayerObject();
 		
@@ -142,24 +160,26 @@ public class QuestService implements INetworkDispatch {
 		if (player == null)
 			return;
 		
-		if (quest.getWaypointId() != 0)
-			core.objectService.destroyObject(quest.getWaypointId());
-		
-		int activeStep = quest.getActiveStep();
+		int activeStep = quest.getActiveTask();
 		
 		QuestTask task = qData.getTasks().get(activeStep);
 		
-		String[] splitType = task.getType().split("\\.");
-		String type = splitType[splitType.length - 1];
 
-		switch (type) {
+		switch (task.getType()) {
 		
+		// quest.task.ground.go_to_location
+		case "go_to_location":
+			Point3D location = new Point3D(task.getLocationX(), task.getLocationY(), task.getLocationZ());
+			WaypointObject wpGoTo = createWaypoint(task.getWaypointName(), location, task.getPlanet());
+			player.getWaypoints().put(wpGoTo.getObjectID(), wpGoTo);
+			
+			quest.setWaypointId(wpGoTo.getObjectID());
+			break;
+	
 		// quest.task.ground.comm_player
 		case "comm_player":
-			
 			CommPlayerMessage message = new CommPlayerMessage(quester.getObjectID(), OutOfBand.ProsePackage(task.getCommMessageText()), task.getNpcAppearanceTemplate());
 			quester.getClient().getSession().write(message.serialize());
-			
 			break;
 		
 		// quest.task.ground.retrieve_item
@@ -169,44 +189,124 @@ public class QuestService implements INetworkDispatch {
 			// TODO: add item count
 			ObjControllerMessage itemCount = new ObjControllerMessage(11, new QuestTaskCounterMessage(quester.getObjectID(), quest.getCrcName(), "@quest/groundquests:retrieve_item_counter"));
 			quester.getClient().getSession().write(itemCount.serialize());
+			
+			WaypointObject wpRetrieve = createWaypoint(task.getWaypointName(), new Point3D(task.getLocationX(), task.getLocationY(), task.getLocationZ()), task.getPlanet());
+			player.getWaypoints().put(wpRetrieve.getObjectID(), wpRetrieve);
+			
+			quest.setWaypointId(wpRetrieve.getObjectID());
 			break;
 		
+		// quest.task.ground.timer
 		case "timer":
-			ObjControllerMessage timer = new ObjControllerMessage(11, new QuestTaskTimerMessage(quester.getObjectID(), quest.getCrcName(), "@quest/groundquests:timer_timertext", 20));
-			quester.getClient().getSession().write(timer.serialize());
-			System.out.println("Sent timer.");
+			// TODO: Fix timer not showing
+			//System.out.println("Max time: " + task.getMaxTime() + " Min time: " + task.getMinTime());
+			AtomicInteger time = new AtomicInteger(new Random(task.getMaxTime()).nextInt((task.getMaxTime() - task.getMinTime()) + task.getMinTime()));
+			
+			ScheduledFuture<?> taskTimer = Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
+				Console.println("Timer is: " + time.get());
+				if (time.get() == 0) {
+					//quest.incrementQuestStep();
+					completeActiveTask((CreatureObject) core.objectService.getObject(quester.getObjectID()), quest.getName());
+				} else {
+					ObjControllerMessage timer = new ObjControllerMessage(11, new QuestTaskTimerMessage(quester.getObjectID(), quest.getCrcName(), "@quest/groundquests:timer_timertext", time.getAndDecrement()));
+					quester.getClient().getSession().write(timer.serialize());
+				}
+			}, 1, 1, TimeUnit.SECONDS);
+			
+			quest.setTimer(taskTimer);
+			break;
+			
+		// quest.task.ground.wait_for_signal
+		case "wait_for_signal":
+			core.scriptService.callScript("scripts/quests/events/signals/", task.getSignalName(), "wait", core, quester);
+			break;
+		
+		// quest.task.ground.show_message_box
+		case "show_message_box":
+			SUIWindow msgBox = core.suiService.createMessageBox(MessageBoxType.MESSAGE_BOX_OK, task.getMsgBoxTitle(), task.getMsgBoxPrompt(), quester, null, 0);
+			
+			if (task.getMsgBoxSound() != null && !task.getMsgBoxSound().equals(""))
+				quester.playMusic(task.getMsgBoxSound());
+			
+			core.suiService.openSUIWindow(msgBox);
+			break;
+		
+		case "complete_quest":
+			completeQuest(player, quest);
+			break;
+			
+		case "reward":
+			// TODO: System message? - Also check possibility of "Item" column being used for reward as well
+			TangibleObject reward = (TangibleObject) core.objectService.createObject(getQuestRewardTemplate(task.getLootName()), core.terrainService.getPlanetByName(task.getPlanet()));
+			
+			if (reward == null)
+				return;
+			
+			quester.getInventory().add(reward);
 			break;
 			
 		default:
 			//System.out.println("Don't know what to do for quest task: " + type);
 			break;
-				
+		}
+
+		if (!task.isVisible()) {
+			completeActiveTask(quester, quest);
+			return;
 		}
 		
+	}
+	
+	public void completeActiveTask(CreatureObject quester, String questName) {	
+		if (quester.getPlayerObject().getQuestJournal().containsKey(CRC.StringtoCRC("quest/" + questName)) && !quester.getPlayerObject().getQuestJournal().get(CRC.StringtoCRC("quest/" + questName)).isCompleted()) {
+			completeActiveTask(quester, quester.getPlayerObject().getQuestJournal().get(CRC.StringtoCRC("quest/" + questName)));
+		}
+	}
+	
+	public void completeActiveTask(CreatureObject quester, Quest quest) {
+		PlayerObject player = quester.getPlayerObject();
+		if (player == null)
+			return;
+		
+		QuestData qData = getQuestData(quest.getName());
+		
+		int activeStep = quest.getActiveTask();
+		
+		QuestTask task = qData.getTasks().get(activeStep);
+		
+		if (quest.getWaypointId() != 0) {
+			player.getWaypoints().remove(quest.getWaypointId());
+			core.objectService.destroyObject(quest.getWaypointId());
+		}
+	
+		if (quest.getTimer() != null)
+			quest.getTimer().cancel(true);
+		
 		if (activeStep + 1 >= qData.getTasks().size()) {
-			QuestList listItem = questRewardMap.get(quest.getName());
+			//QuestList listItem = questRewardMap.get(quest.getName());
 
-			if (listItem.isCompleteWhenTasksComplete())
+			quest.setCompleted(true);
+			
+			if (!task.isGrantQuestOnCompleteShowSystemMessage()) {
 				completeQuest(player, quest); // Force complete packet sent if the quest isn't auto completed (window shows up, typical for exclusive reward items)
-			/*else
-				sendQuestCompleteWindow(quester, quest.getName());*/
+				player.getContainer().getClient().getSession().write(player.getBaseline(8).createDelta(7));
+			} else
+				sendQuestCompleteWindow(quester, quest.getCrc());
 			
 			if (task.getGrantQuestOnComplete() != null && !task.getGrantQuestOnComplete().equals(""))
 				activateQuest(quester, task.getGrantQuestOnComplete());
-
+			
 			return;
 		}
 		
 		if (task.getGrantQuestOnComplete() != null && !task.getGrantQuestOnComplete().equals(""))
 			activateQuest(quester, task.getGrantQuestOnComplete());
-	
-		quest.incrementQuestStep(); // After handling the quest type, we can now increment the step
 		
-		if (!task.isVisible()) {
-			player.getContainer().getClient().getSession().write(player.getBaseline(8).createDelta(7));
-			activateNextTask(quester, quest);
-			return;
-		}
+		quest.incrementQuestStep();
+		
+		player.getContainer().getClient().getSession().write(player.getBaseline(8).createDelta(7));
+		
+		activateNextTask(quester, quest);
 		
 	}
 	
@@ -231,7 +331,7 @@ public class QuestService implements INetworkDispatch {
 		quester.getClient().getSession().write(music.serialize());
 		
 		player.getQuestJournal().put(quest.getCrc(), quest);
-		player.setActiveQuest(quest.getCrc());
+		player.setActiveQuest(quest.getName());
 		
 		activateNextTask(quester, quest);
 	}
@@ -242,9 +342,8 @@ public class QuestService implements INetworkDispatch {
 		
 		CreatureObject creo = (CreatureObject) player.getContainer();
 		
-		if (!quest.isCompleted()) {
+		if (!quest.isCompleted())
 			quest.setCompleted(true);
-		}
 		
 		QuestList info = getQuestList(quest.getName());
 		
@@ -265,7 +364,7 @@ public class QuestService implements INetworkDispatch {
 		// Give quest items
 		
 		if (info.getRewardLootName() != null && !info.getRewardLootName().equals("")) {
-			SWGObject rewardLoot = core.objectService.createObject(core.scriptService.getMethod("scripts/quest_rewards/", info.getRewardLootName(), "run").__call__().asString(), creo.getPlanet());
+			SWGObject rewardLoot = core.objectService.createObject(getQuestRewardTemplate(info.getRewardLootName()), creo.getPlanet());
 			inventory.add(rewardLoot);
 			recievedItems.add(rewardLoot.getObjectID());
 		}
@@ -322,12 +421,14 @@ public class QuestService implements INetworkDispatch {
 		creo.getClient().getSession().write(player.getBaseline(8).createDelta(7));
 	}
 	
-	public void sendQuestAcceptWindow(CreatureObject reciever, String questName) {
-		
+	public void sendQuestAcceptWindow(CreatureObject reciever, int questCrc) {
+		ObjControllerMessage objController = new ObjControllerMessage(0x0B, new ShowQuestAcceptWindow(reciever.getObjectID(), questCrc));
+		reciever.getClient().getSession().write(objController.serialize());
 	}
 	
-	public void sendQuestCompleteWindow(CreatureObject reciever, String questName) {
-		
+	public void sendQuestCompleteWindow(CreatureObject reciever, int questCrc) {
+		ObjControllerMessage objController = new ObjControllerMessage(0x0B, new ShowQuestCompletionWindow(reciever.getObjectID(), questCrc));
+		reciever.getClient().getSession().write(objController.serialize());
 	}
 	
 	public String getQuestItemRadialName(CreatureObject quester, String template) {
@@ -361,12 +462,56 @@ public class QuestService implements INetworkDispatch {
 			return;
 
 		QuestItem item = player.getQuestRetrieveItemTemplates().get(target.getTemplate());
-		activateNextTask(quester, item.getQuestName());
+		completeActiveTask(quester, item.getQuestName());
 
 		player.getQuestRetrieveItemTemplates().remove(target.getTemplate(), item);
 		
 	}
 	
+	public void handleActivateSignal(CreatureObject actor, TangibleObject npc, Quest quest, int taskId) {
+		QuestTask task = getQuestData(quest.getName()).getTasks().get(taskId);
+		if (task == null)
+			return;
+		
+		if (core.scriptService.getMethod("scripts/quests/events/signals/", task.getSignalName(), "activate") != null) {
+			core.scriptService.callScript("scripts/quests/events/signals/", task.getSignalName(), "activate", core, actor, quest);
+			return;
+		}
+		
+		completeActiveTask(actor, quest);
+	}
+	
+	public void handleAddConversationScript(TangibleObject object, String script) {
+		if (object == null)
+			return;
+		
+		object.setAttachment("conversationFile", script);
+	}
+	
+	public WaypointObject createWaypoint(String name, Point3D location, String planet) {
+		WaypointObject waypoint = (WaypointObject) core.objectService.createObject("object/waypoint/shared_waypoint.iff", core.terrainService.getPlanetByName(planet));
+		if (waypoint == null)
+			return null;
+		
+		waypoint.setActive(true);
+		waypoint.setColor(WaypointObject.BLUE);
+		waypoint.setName(name);
+		waypoint.setPlanetCrc(CRC.StringtoCRC(planet));
+		waypoint.setStringAttribute("", ""); //This simply allows the attributes to display (nothing else has to be done)
+		waypoint.setPosition(location);
+		
+		return waypoint;
+	}
+	
+	public String getQuestRewardTemplate(String lootName) {
+		String rtrn = core.scriptService.getMethod("scripts/quests/rewards/", lootName, "run").__call__().asString();
+		
+		if (rtrn == null) {
+			System.err.println("couldn't find quest reward template for lootName " + lootName);
+		}
+		
+		return rtrn;
+	}
 	public QuestData getQuestData(String questName) {
 		if (questMap.containsKey(questName)) 
 			return questMap.get(questName);
@@ -436,7 +581,12 @@ public class QuestService implements INetworkDispatch {
 				
 				QuestTask task = new QuestTask();
 				
-				if (visitor.getObjectByColumnNameAndIndex("ATTACH_SCRIPT", r) != null) task.setType((String) visitor.getObjectByColumnNameAndIndex("ATTACH_SCRIPT", r));
+				if (visitor.getObjectByColumnNameAndIndex("ATTACH_SCRIPT", r) != null) {
+					String[] splitType = ((String) visitor.getObjectByColumnNameAndIndex("ATTACH_SCRIPT", r)).split("\\.");
+					String type = splitType[splitType.length - 1];
+					task.setType(type);
+				}
+				
 				if (visitor.getObjectByColumnNameAndIndex("JOURNAL_ENTRY_TITLE", r) != null) task.setJournalEntryTitle((String) visitor.getObjectByColumnNameAndIndex("JOURNAL_ENTRY_TITLE", r));
 				if (visitor.getObjectByColumnNameAndIndex("JOURNAL_ENTRY_DESCRIPTION", r) != null) task.setJournalEntryDescription((String) visitor.getObjectByColumnNameAndIndex("JOURNAL_ENTRY_DESCRIPTION", r));
 				if (visitor.getObjectByColumnNameAndIndex("IS_VISIBLE", r) != null) task.setVisible((boolean) visitor.getObjectByColumnNameAndIndex("IS_VISIBLE", r));
@@ -472,7 +622,28 @@ public class QuestService implements INetworkDispatch {
 				if (visitor.getObjectByColumnNameAndIndex("ITEM_NAME", r) != null) task.setItemName((String) visitor.getObjectByColumnNameAndIndex("ITEM_NAME", r));
 				if (visitor.getObjectByColumnNameAndIndex("DROP_PERCENT", r) != null) task.setDropPercent((int) visitor.getObjectByColumnNameAndIndex("DROP_PERCENT", r));
 				if (visitor.getObjectByColumnNameAndIndex("RETRIEVE_MENU_TEXT", r) != null) task.setRetrieveMenuText((String) visitor.getObjectByColumnNameAndIndex("RETRIEVE_MENU_TEXT", r));
+				if (visitor.getObjectByColumnNameAndIndex("MIN_TIME", r) != null) task.setMinTime((int) visitor.getObjectByColumnNameAndIndex("MIN_TIME", r));
+				if (visitor.getObjectByColumnNameAndIndex("MAX_TIME", r) != null) task.setMaxTime((int) visitor.getObjectByColumnNameAndIndex("MAX_TIME", r));
+				if (visitor.getObjectByColumnNameAndIndex("RADIUS", r) != null && visitor.getObjectByColumnNameAndIndex("RADIUS", r) != "") task.setRadius(Float.parseFloat((String) visitor.getObjectByColumnNameAndIndex("RADIUS", r)));
+				if (visitor.getObjectByColumnNameAndIndex("SIGNAL_NAME", r) != null) task.setSignalName((String) visitor.getObjectByColumnNameAndIndex("SIGNAL_NAME", r));
+				if (visitor.getObjectByColumnNameAndIndex("MESSAGE_BOX_TITLE", r) != null) task.setMsgBoxTitle((String) visitor.getObjectByColumnNameAndIndex("MESSAGE_BOX_TITLE", r));
+				if (visitor.getObjectByColumnNameAndIndex("MESSAGE_BOX_TEXT", r) != null) task.setMsgBoxPrompt((String) visitor.getObjectByColumnNameAndIndex("MESSAGE_BOX_TEXT", r));
+				if (visitor.getObjectByColumnNameAndIndex("MESSAGE_BOX_SOUND", r) != null) task.setMsgBoxSound((String) visitor.getObjectByColumnNameAndIndex("MESSAGE_BOX_SOUND", r));
+				if (visitor.getObjectByColumnNameAndIndex("MESSAGE_BOX_SIZE_WIDTH", r) != null) task.setMsgBoxWidth(Integer.parseInt((String) visitor.getObjectByColumnNameAndIndex("MESSAGE_BOX_SIZE_WIDTH", r)));
+				if (visitor.getObjectByColumnNameAndIndex("MESSAGE_BOX_SIZE_HEIGHT", r) != null) task.setMsgBoxHeight(Integer.parseInt((String) visitor.getObjectByColumnNameAndIndex("MESSAGE_BOX_SIZE_HEIGHT", r)));
+				if (visitor.getObjectByColumnNameAndIndex("MESSAGE_BOX_SIZE_WIDTH", r) != null) task.setMsgBoxWidth(Integer.parseInt((String) visitor.getObjectByColumnNameAndIndex("MESSAGE_BOX_SIZE_WIDTH", r)));
+				if (visitor.getObjectByColumnNameAndIndex("LOOT_NAME", r) != null) task.setLootName((String) visitor.getObjectByColumnNameAndIndex("LOOT_NAME", r));
+				
+				// if (visitor.getObjectByColumnNameAndIndex("MESSAGE_BOX_LOCATION_X", r) != null) task.setMsgBoxWidth((String) visitor.getObjectByColumnNameAndIndex("MESSAGE_BOX_LOCATION_X", r));
+				// if (visitor.getObjectByColumnNameAndIndex("MESSAGE_BOX_LOCATION_Y", r) != null) task.setMsgBoxWidth((String) visitor.getObjectByColumnNameAndIndex("MESSAGE_BOX_LOCATION_Y", r));
+
 				//if (visitor.getObjectByColumnNameAndIndex("", r)) 
+
+				if (task.getType().equals("quest.task.ground.go_to_location")) {
+					QuestCollidable collision = new QuestCollidable(new Point3D(task.getLocationX(), task.getLocationY(), task.getLocationZ()), task.getRadius(), core.terrainService.getPlanetByName(task.getPlanet()), quest, r);
+					collision.setCallback(core.scriptService.getMethod("scripts/quests/events/", "go_to_location", "run"));
+					core.simulationService.addCollidable(collision, task.getLocationX(), task.getLocationZ());
+				}
 				
 				data.getTasks().add(task);
 			}
@@ -554,4 +725,21 @@ public class QuestService implements INetworkDispatch {
 
 		return template.replace(file, "shared_" + file);
 	}
+	
+	public void loadEvents() {
+		 FileVisitor<Path> fv = new SimpleFileVisitor<Path>() {
+		 @Override
+		 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
+		 {
+			 core.scriptService.callScript("scripts/quests/events/signals/", file.getFileName().toString().replace(".py", ""), "setup", core);
+			 return FileVisitResult.CONTINUE;
+		 }
+		 };
+		 try { Files.walkFileTree(Paths.get("scripts/quests/events/signals/"), fv); }
+		 catch (IOException e) { e.printStackTrace(); }
+	}
+
+	@Override
+	public void shutdown() { }
+	
 }

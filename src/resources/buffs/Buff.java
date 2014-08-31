@@ -146,6 +146,11 @@ public class Buff extends Delta {
 	
 	public byte[] getBytes() {
 		// If getObject ever returns null here, it means there's a major bug with objects being in quadtree but not in objectList.
+		if (NGECore.getInstance().objectService.getObject(buffeeId) == null){
+			System.err.println("FATAL ERROR BUFFED CREATURE NOT IN OBJECTLIST");
+			return new byte[]{};
+		}
+				
 		PlayerObject player = (PlayerObject) NGECore.getInstance().objectService.getObject(buffeeId).getSlottedObject("ghost");
 		long lastPlayTimeUpdate = ((player == null) ? 0L : player.getLastPlayTimeUpdate());
 		int remainingDuration = getRemainingDuration();
@@ -564,7 +569,8 @@ public class Buff extends Delta {
 			@Override
 			public void run() {
 				try {
-					core.buffService.removeBuffFromCreature(creature, Buff.this);
+					if (creature!=null)
+						core.buffService.removeBuffFromCreature(creature, Buff.this);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

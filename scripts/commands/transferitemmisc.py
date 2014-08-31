@@ -78,13 +78,7 @@ def run(core, actor, target, commandString):
 				
 				if object != None:
 					container.transferTo(actor, container, object)	
-				
-				if target.getTemplate().find('/wearables/') or target.getTemplate().find('/weapon/'):
-					core.equipmentService.equip(actor, target)
-				
-				for object in replacedObjects:
-					core.equipmentService.unequip(actor, object) # Needs to be verified due to the new structure of the script
-				
+						
 		oldContainer.transferTo(actor, container, target)
 		
 		if oldContainer == actor.getSlottedObject('appearance_inventory'):
