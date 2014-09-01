@@ -49,7 +49,7 @@ public class ShowQuestAcceptWindow extends ObjControllerObject {
 		buffer.putLong(objectId);
 		buffer.putInt(0);
 		
-		buffer.putInt(CRC.StringtoCRC("quest/" + questName));
+		buffer.putInt(CRC.StringtoCRC(questName));
 		
 		return buffer.flip();
 	}

@@ -269,7 +269,7 @@ public class QuestService implements INetworkDispatch {
 			
 			// TODO: Unable to determine if this is calculated in "Complete Quest" window should pop up or just finish automatically, but it's the best for now
 			if (task.isVisible())
-				sendQuestCompleteWindow(quester, quest.getName());
+				sendQuestCompleteWindow(quester, quest.getCrcName());
 			else
 				completeQuest(player, quest);
 
