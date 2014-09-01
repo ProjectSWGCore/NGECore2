@@ -106,8 +106,8 @@ public class SpawnService {
 
 		
 		/*if(mobileTemplate.getCustomWeapon() != null) {
-			creature.addObjectToEquipList(mobileTemplate.getCustomWeapon());
 			creature.add(mobileTemplate.getCustomWeapon());
+			creature.addObjectToEquipList(mobileTemplate.getCustomWeapon());
 			creature.setWeaponId(mobileTemplate.getCustomWeapon().getObjectID());
 		}*/
 		
@@ -183,12 +183,12 @@ public class SpawnService {
 			defaultWeapon.setMinDamage(creature.getLevel() * 22);
 		}
 		
-		creature.addObjectToEquipList(defaultWeapon);
 		creature.add(defaultWeapon);
+		creature.addObjectToEquipList(defaultWeapon);
 		creature.setWeaponId(defaultWeapon.getObjectID());
-		creature.addObjectToEquipList(inventory);
 		creature.add(inventory);
-
+		creature.addObjectToEquipList(inventory);
+		
 		int customHealth = mobileTemplate.getHealth();
 		if(difficulty > 0 && customHealth == 0) {
 			if(difficulty == 1) {
@@ -282,8 +282,8 @@ public class SpawnService {
 
 		
 		/*if(mobileTemplate.getCustomWeapon() != null) {
-			creature.addObjectToEquipList(mobileTemplate.getCustomWeapon());
 			creature.add(mobileTemplate.getCustomWeapon());
+			creature.addObjectToEquipList(mobileTemplate.getCustomWeapon());
 			creature.setWeaponId(mobileTemplate.getCustomWeapon().getObjectID());
 		}*/
 		
@@ -368,11 +368,11 @@ public class SpawnService {
 			defaultWeapon.setMinDamage(creature.getLevel() * 22);
 		}
 		
-		creature.addObjectToEquipList(defaultWeapon);
 		creature.add(defaultWeapon);
+		creature.addObjectToEquipList(defaultWeapon);
 		creature.setWeaponId(defaultWeapon.getObjectID());
-		creature.addObjectToEquipList(inventory);
 		creature.add(inventory);
+		creature.addObjectToEquipList(inventory);
 
 		int customHealth = mobileTemplate.getHealth();
 		if(difficulty > 0 && customHealth == 0) {
