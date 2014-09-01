@@ -40,13 +40,13 @@ def run(core, actor, target, commandString):
 			if object != None:
 				actor.transferTo(actor, oldContainer, object)	
 	
-	oldContainer.transferTo(actor, container, target)
-	
 	if oldContainer == actor.getSlottedObject('appearance_inventory'):
 		actor.removeObjectFromAppearanceEquipList(target)
-		
+	
+	oldContainer.transferTo(actor, container, target)
+	
 	if container == actor.getSlottedObject('appearance_inventory'):
 		actor.addObjectToAppearanceEquipList(target)		
-
+	
 	return
 	
