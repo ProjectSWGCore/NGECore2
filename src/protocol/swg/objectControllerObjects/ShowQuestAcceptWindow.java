@@ -24,16 +24,17 @@ package protocol.swg.objectControllerObjects;
 import org.apache.mina.core.buffer.IoBuffer;
 
 import protocol.swg.ObjControllerMessage;
+import engine.resources.common.CRC;
 import engine.resources.objects.Baseline;
 
 public class ShowQuestAcceptWindow extends ObjControllerObject {
 
 	private long objectId;
-	private int questCrc;
+	private String questName;
 	
-	public ShowQuestAcceptWindow(long objectId, int questCrc) {
+	public ShowQuestAcceptWindow(long objectId, String questName) {
 		this.objectId = objectId;
-		this.questCrc = questCrc;
+		this.questName = questName;
 	}
 	
 	@Override
@@ -44,11 +45,11 @@ public class ShowQuestAcceptWindow extends ObjControllerObject {
 	public IoBuffer serialize() {
 		IoBuffer buffer = Baseline.createBuffer(20);
 		
-		buffer.putInt(ObjControllerMessage.SHOW_QUEST_COMPLETION_WINDOW);
+		buffer.putInt(ObjControllerMessage.SHOW_QUEST_ACCEPT_WINDOW);
 		buffer.putLong(objectId);
 		buffer.putInt(0);
 		
-		buffer.putInt(questCrc);
+		buffer.putInt(CRC.StringtoCRC("quest/" + questName));
 		
 		return buffer.flip();
 	}
