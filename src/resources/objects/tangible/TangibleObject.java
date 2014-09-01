@@ -104,6 +104,7 @@ public class TangibleObject extends SWGObject implements Serializable {
 	public void initAfterDBLoad() {
 		super.init();
 		defendersList = new Vector<TangibleObject>();
+		cooldowns = new ConcurrentHashMap<String, Long>();
 	}
 	
 	public Baseline getOtherVariables() {
