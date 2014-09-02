@@ -59,11 +59,11 @@ def run(core, actor, target, commandString):
 				return;
 		
 		if oldContainer == actor.getSlottedObject('appearance_inventory'):
-			core.equipmentService.unequipAppearance(target)
+			core.equipmentService.unequipAppearance(actor, target)
 		
 		oldContainer.transferTo(actor, container, target)
 		
 		if container == actor.getSlottedObject('appearance_inventory'):
-			core.equipmentService.equipAppearance(target)
+			core.equipmentService.equipAppearance(actor, target)
 		
 		return
