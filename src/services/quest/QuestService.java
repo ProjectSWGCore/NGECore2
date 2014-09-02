@@ -80,6 +80,7 @@ public class QuestService implements INetworkDispatch {
 	private Map<String, QuestData> questMap = new ConcurrentHashMap<String, QuestData>();
 	private Map<String, QuestList> questRewardMap = new ConcurrentHashMap<String, QuestList>();
 	private List<String> forceAcceptQuests = new ArrayList<String>();
+	private Map<Integer, String> questCrcMap = new ConcurrentHashMap<Integer, String>();
 	
 	public QuestService(NGECore core) {
 		this.core = core;
@@ -93,6 +94,15 @@ public class QuestService implements INetworkDispatch {
 			
 		} catch (InstantiationException | IllegalAccessException e) {
 			e.printStackTrace();
+		}
+		
+		File quests = Paths.get("clientdata/datatables/questlist/quest").toFile();
+		for (File fQuest : quests.listFiles()) {
+			if (fQuest.isDirectory())
+				continue;
+			
+			String questName = "quest/" + fQuest.getName().split(".iff")[0];
+			questCrcMap.put(CRC.StringtoCRC(questName), questName);
 		}
 	}
 	
@@ -262,6 +272,12 @@ public class QuestService implements INetworkDispatch {
 		if (quest.getTimer() != null)
 			quest.getTimer().cancel(true);
 		
+		if (task.showSystemMessages() && task.isVisible()) {
+			ProsePackage prose = new ProsePackage("@quest/ground/system_message:quest_task_completed");
+			prose.setToCustomString(task.getJournalEntryTitle());
+			quester.sendSystemMessage(new OutOfBand(prose), DisplayType.Quest);
+		}
+		
 		if (activeStep + 1 >= qData.getTasks().size()) {
 			//QuestList listItem = questRewardMap.get(quest.getName());
 
@@ -276,8 +292,12 @@ public class QuestService implements INetworkDispatch {
 			return;
 		}
 		
-		if (task.getGrantQuestOnComplete() != null && !task.getGrantQuestOnComplete().equals(""))
-			sendQuestAcceptWindow(quester, task.getGrantQuestOnComplete());
+		if (task.getGrantQuestOnComplete() != null && !task.getGrantQuestOnComplete().equals("")) {
+			if(!task.isVisible())
+				immediatlyActivateQuest(quester, task.getGrantQuestOnComplete());
+			else
+				sendQuestAcceptWindow(quester, task.getGrantQuestOnComplete());
+		}
 		
 		quest.incrementQuestStep();
 		
@@ -394,8 +414,12 @@ public class QuestService implements INetworkDispatch {
 			core.playerService.giveExperience(creo, info.getRewardExperienceAmount());
 		}
 
-		if (task.getGrantQuestOnComplete() != null && !task.getGrantQuestOnComplete().equals(""))
-			sendQuestAcceptWindow(creo, task.getGrantQuestOnComplete());
+		if (task.getGrantQuestOnComplete() != null && !task.getGrantQuestOnComplete().equals("")) {
+			if (task.isVisible())
+				sendQuestAcceptWindow(creo, task.getGrantQuestOnComplete());
+			else
+				immediatlyActivateQuest(creo, task.getGrantQuestOnComplete());
+		}
 		
 		// Update quest & client
 		quest.setRecievedAward(true);
@@ -517,6 +541,10 @@ public class QuestService implements INetworkDispatch {
 			questRewardMap.put(questName, list);
 			return list;
 		}
+	}
+	
+	public String getQuestStringByCrc(int crc) {
+		return questCrcMap.get(crc);
 	}
 	
 	public boolean adminActivateQuest(CreatureObject creo, String questName) {
