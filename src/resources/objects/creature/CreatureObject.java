@@ -190,7 +190,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		baseline.put("visibleOnRadar", true);
 		baseline.put("isPet", false);
 		baseline.put("32", (byte) 0);
-		baseline.put("appearanceEquipmentList", new SWGList<Equipment>(this, 6, 31, false));
+		baseline.put("appearanceEquipmentList", new SWGList<Equipment>(this, 6, 33, false));
 		baseline.put("34", (long) 0);
 		return baseline;
 	}
@@ -927,12 +927,13 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 	}
 	
-	public boolean isWearing(SWGObject object)
-	{
-		for (Equipment equipment : getEquipmentList()) 
-		{
-			if (equipment.getObjectId() == object.getObjectId()) return true;
+	public boolean isWearing(SWGObject object) {
+		for (Equipment equipment : getEquipmentList()) {
+			if (equipment.getObjectId() == object.getObjectId()) {
+				return true;
+			}
 		}
+		
 		return false;
 	}
 	
@@ -1156,6 +1157,16 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		if (object instanceof TangibleObject) {
 			getAppearanceEquipmentList().add(new Equipment(object));
 		}
+	}
+	
+	public boolean isWearingAppearance(SWGObject object) {
+		for (Equipment equipment : getAppearanceEquipmentList()) {
+			if (equipment.getObjectId() == object.getObjectId()) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 	
 	public void removeObjectFromAppearanceEquipList(SWGObject object) {
