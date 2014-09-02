@@ -70,7 +70,7 @@ public class WeaponObject extends TangibleObject implements Serializable {
 	public Baseline getBaseline3() {
 		Baseline baseline = super.getBaseline3();
 		baseline.put("attackSpeed", (float) 0);
-		baseline.put("14", 0);
+		baseline.put("accuracy", 0);	// Likely a pre-NGE variable
 		baseline.put("15", 0);
 		baseline.put("maxRange", (float) 0);
 		baseline.put("17", 0); // Could be lightsaber color?  Seen as 2 on a saber

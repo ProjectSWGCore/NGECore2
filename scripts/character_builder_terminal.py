@@ -365,30 +365,37 @@ def buff(owner):
 	core.buffService.addBuffToCreature(owner, 'me_buff_health_2', owner)
 	buff = owner.getBuffByName('me_buff_health_2')
 	buff.setDuration(5400)
+	owner.updateBuff(buff)
 	
 	core.buffService.addBuffToCreature(owner, 'me_buff_action_3', owner)
 	buff1 = owner.getBuffByName('me_buff_action_3')
 	buff1.setDuration(5400)
+	owner.updateBuff(buff1)
 	
 	core.buffService.addBuffToCreature(owner, 'me_buff_agility_3', owner)
 	buff2 = owner.getBuffByName('me_buff_agility_3')
 	buff2.setDuration(5400)
+	owner.updateBuff(buff2)
 	
 	core.buffService.addBuffToCreature(owner, 'me_buff_melee_gb_1', owner)
 	buff3 = owner.getBuffByName('me_buff_melee_gb_1')
 	buff3.setDuration(5400)
+	owner.updateBuff(buff3)
 	
 	core.buffService.addBuffToCreature(owner, 'me_buff_ranged_gb_1', owner)
 	buff4 = owner.getBuffByName('me_buff_ranged_gb_1')
 	buff4.setDuration(5400)
+	owner.updateBuff(buff4)
 	
 	core.buffService.addBuffToCreature(owner, 'me_buff_precision_3', owner)
 	buff5 = owner.getBuffByName('me_buff_precision_3')
 	buff5.setDuration(5400)
+	owner.updateBuff(buff5)
 	
 	core.buffService.addBuffToCreature(owner, 'me_buff_strength_3', owner)
 	buff6 = owner.getBuffByName('me_buff_strength_3')
 	buff6.setDuration(5400)
+	owner.updateBuff(buff6)
 	screenOne(core, owner)
 	return
 

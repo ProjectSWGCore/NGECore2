@@ -35,6 +35,8 @@ import resources.common.SpawnPoint;
 import resources.datatables.Difficulty;
 import resources.datatables.FactionStatus;
 import resources.datatables.GcwType;
+import resources.objects.building.BuildingObject;
+import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
 import resources.objects.player.PlayerObject;
@@ -49,6 +51,8 @@ import engine.resources.service.INetworkDispatch;
 import main.NGECore;
 
 public class AIService {
+	
+	CreatureObject corpse = null;
 	
 	@SuppressWarnings("unused") private Vector<AIActor> aiActors = new Vector<AIActor>();
 	private NGECore core;
@@ -213,6 +217,15 @@ public class AIService {
 			actor.setCurrentState(new IdleState());
 	}
 	
+	public void addPatrolPointCell(Vector<Point3D> patrolpoints, BuildingObject building, Point3D position, int cellID){
+		if (building==null)
+			return;
+		CellObject cellObj = building.getCellByCellNumber(cellID);
+		if (cellObj!=null)
+			position.setCell(cellObj);
+		patrolpoints.add(position);
+	}
+	
 	public void setLoiter(CreatureObject creature, float minDist, float maxDist){
 		AIActor actor = (AIActor) creature.getAttachment("AI");
 		if (actor==null)
@@ -317,6 +330,13 @@ public class AIService {
 		}, 10, 2000, TimeUnit.MILLISECONDS);
 	}
 	
+	// Test method
+	public void explicitDestroy(CreatureObject actor){
+		System.out.println("SEND DESTROY SENDING for " + corpse.getTemplate());
+		corpse.sendDestroy(actor.getClient());
+		System.out.println("SEND DESTROY SENT ");
+	}
+	
 	public void logAI(String logMsg){
 		if (checkDeveloperIdentity()){
 			System.err.println("AI-LOG: " + logMsg);
@@ -327,5 +347,14 @@ public class AIService {
 		if (System.getProperty("user.name").equals("Charon"))
 			return true;
 		return false;
+	}
+
+	public CreatureObject getCorpse() {
+		return corpse;
+	}
+
+	public void setCorpse(CreatureObject corpse) {
+		System.out.println("SET CORPSE " + corpse.getTemplate());
+		this.corpse = corpse;
 	}
 }

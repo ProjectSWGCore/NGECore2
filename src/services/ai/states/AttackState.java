@@ -157,8 +157,8 @@ public class AttackState extends AIState {
 		
 		
 		TangibleObject target = actor.getFollowObject();
-		if(target != actor.getHighestDamageDealer() && actor.getHighestDamageDealer() != null) {
-			actor.setFollowObject(actor.getHighestDamageDealer());
+		if(target != actor.getMostHated() && actor.getMostHated() != null) {
+			actor.setFollowObject(actor.getMostHated());
 			target = actor.getFollowObject();
 		}
 		if(target == null) {
@@ -195,14 +195,16 @@ public class AttackState extends AIState {
 		
 		if (target instanceof CreatureObject){
 			CreatureObject targetCreature = (CreatureObject) target;
-			if(targetCreature.getPosture() == 13 || targetCreature.getPosture() == 14 || targetCreature.isInStealth()) {
+			if(targetCreature.getPosture() == 13 || targetCreature.getPosture() == 14 || targetCreature.isCloaked()) {
 				 
-				actor.setFollowObject(actor.getHighestDamageDealer());			
+				actor.setFollowObject(actor.getMostHated());			
 				target = (CreatureObject) actor.getFollowObject();
 				if(target == null)
 				{
-					creature.setLookAtTarget(0);
-					creature.setIntendedTarget(0);
+					if (creature.getLookAtTarget() != 0) {
+						creature.setLookAtTarget(0);
+						creature.setIntendedTarget(0);
+					}
 					
 				}
 				actor.setFollowObject(null);
@@ -224,7 +226,7 @@ public class AttackState extends AIState {
 			TangibleObject targetObject = (TangibleObject) target;
 			if((targetObject.getConditionDamage()>=targetObject.getMaximumCondition())) {
 				 
-				actor.setFollowObject(actor.getHighestDamageDealer());			
+				actor.setFollowObject(actor.getMostHated());			
 				target = (CreatureObject) actor.getFollowObject();
 				if(target == null)
 				{
@@ -260,7 +262,6 @@ public class AttackState extends AIState {
 		creature.setIntendedTarget(target.getObjectId());
 		
 		if (attacks==null) {		
-		//if(attacks.size() == 0) {
 			core.commandService.callCommand(creature, actor.getMobileTemplate().getDefaultAttack(), target, "");
 		} else {
 			Random rand = new Random();

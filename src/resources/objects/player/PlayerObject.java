@@ -47,7 +47,7 @@ import resources.objects.waypoint.WaypointObject;
 import resources.quest.Quest;
 import services.quest.QuestItem;
 import engine.clients.Client;
-import engine.resources.common.StringUtilities;
+import engine.resources.common.CRC;
 import engine.resources.objects.Baseline;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -97,6 +97,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		baseline.put("holoEmoteUses", 0);
 		baseline.put("activeMissions", new ArrayList<Long>()); // TODO: Look at MissionCriticalObject in CREO4, could use that instead of this
 		baseline.put("questRetrieveItemTemplates", new TreeMap<String, QuestItem>());
+		baseline.put("activeQuestName", "");
 		return baseline;
 	}
 	
@@ -605,8 +606,25 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 		return (int) getBaseline(8).get("activeQuest");
 	}
 	
-	public void setActiveQuest(int questCRC) {
-		getBaseline(8).set("activeQuest", questCRC);
+	public String getActiveQuestName() {
+		return (String) otherVariables.get("activeQuestName");
+	}
+	
+	public void setActiveQuest(String questName) {
+		otherVariables.set("activeQuestName", questName);
+		getBaseline(8).set("activeQuest", CRC.StringtoCRC("quest/" + questName));
+	}
+	
+	public Quest getQuest(String questName) {
+		return getQuestJournal().get(CRC.StringtoCRC("quest/" + questName));
+	}
+	
+	public Quest getQuest(int questCrc) {
+		return getQuestJournal().get(questCrc);
+	}
+	
+	public void removeQuest(String questName) {
+		getQuestJournal().remove(CRC.StringtoCRC("quest/" + questName));
 	}
 	
 	public String getProfessionWheelPosition() {
@@ -1034,25 +1052,16 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
 
 		switch (viewType) {
-			case 3:
 			case 6:
 				if (getContainer() != null) {
 					getContainer().notifyObservers(getBaseline(viewType).createDelta(updateType, buffer.array()), true);
 				}
 				
 				break;
-			case 8:
-				switch (updateType) {
-				case 7:
-					IoBuffer newBuffer = getBaseline(viewType).createDelta(updateType, buffer.array());
-					getContainer().getClient().getSession().write(newBuffer.array());
-					break;
-				}
-				break;
 			default:
 				if (getContainer() != null && getContainer().getClient() != null) {
 					getContainer().getClient().getSession().write(getBaseline(viewType).createDelta(updateType, buffer.array()));
-					StringUtilities.printBytes(getBaseline(viewType).createDelta(updateType, buffer.array()).array());
+					//StringUtilities.printBytes(getBaseline(viewType).createDelta(updateType, buffer.array()).array());
 				}
 		}
 	}
