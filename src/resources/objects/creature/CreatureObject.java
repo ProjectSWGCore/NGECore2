@@ -927,12 +927,13 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 	}
 	
-	public boolean isWearing(SWGObject object)
-	{
-		for (Equipment equipment : getEquipmentList()) 
-		{
-			if (equipment.getObjectId() == object.getObjectId()) return true;
+	public boolean isWearing(SWGObject object) {
+		for (Equipment equipment : getEquipmentList()) {
+			if (equipment.getObjectId() == object.getObjectId()) {
+				return true;
+			}
 		}
+		
 		return false;
 	}
 	
@@ -1156,6 +1157,16 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		if (object instanceof TangibleObject) {
 			getAppearanceEquipmentList().add(new Equipment(object));
 		}
+	}
+	
+	public boolean isWearingAppearance(SWGObject object) {
+		for (Equipment equipment : getAppearanceEquipmentList()) {
+			if (equipment.getObjectId() == object.getObjectId()) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 	
 	public void removeObjectFromAppearanceEquipList(SWGObject object) {
