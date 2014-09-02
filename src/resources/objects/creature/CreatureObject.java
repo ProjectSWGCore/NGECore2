@@ -190,7 +190,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		baseline.put("visibleOnRadar", true);
 		baseline.put("isPet", false);
 		baseline.put("32", (byte) 0);
-		baseline.put("appearanceEquipmentList", new SWGList<Equipment>(this, 6, 31, false));
+		baseline.put("appearanceEquipmentList", new SWGList<Equipment>(this, 6, 33, false));
 		baseline.put("34", (long) 0);
 		return baseline;
 	}
