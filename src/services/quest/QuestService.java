@@ -31,6 +31,7 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
@@ -57,7 +58,6 @@ import resources.common.OutOfBand;
 import resources.common.ProsePackage;
 import resources.common.collidables.QuestCollidable;
 import resources.datatables.DisplayType;
-import resources.objects.SWGMap;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.tangible.TangibleObject;
@@ -79,9 +79,21 @@ public class QuestService implements INetworkDispatch {
 	private NGECore core;
 	private Map<String, QuestData> questMap = new ConcurrentHashMap<String, QuestData>();
 	private Map<String, QuestList> questRewardMap = new ConcurrentHashMap<String, QuestList>();
-
+	private List<String> forceAcceptQuests = new ArrayList<String>();
+	
 	public QuestService(NGECore core) {
 		this.core = core;
+		
+		try {
+			DatatableVisitor forceQuestVisitor = ClientFileManager.loadFile("datatables/quest/force_accept_quests.iff", DatatableVisitor.class);
+			
+			for (int r = 0; r > forceQuestVisitor.getRowCount(); r++) {
+				forceAcceptQuests.add((String) forceQuestVisitor.getObject(r, 0));
+			}
+			
+		} catch (InstantiationException | IllegalAccessException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	@Override
@@ -94,49 +106,6 @@ public class QuestService implements INetworkDispatch {
 			}
 			
 		});
-	}
-
-	public boolean doesPlayerHaveQuest(CreatureObject creo, String questName) {
-		PlayerObject ghost = creo.getPlayerObject();
-		
-		if (ghost == null) {
-			try { throw new Exception("Ghost is null! Cannot determine if player has quest or not."); } 
-			catch (Exception e) {e.printStackTrace();}
-		}
-
-		SWGMap<Integer, Quest> questJournal = ghost.getQuestJournal();
-		
-		if (questJournal.size() == 0)
-			return false;
-		
-		return questJournal.containsKey(CRC.StringtoCRC("quest/" + questName));
-	}
-	
-	public boolean isQuestCompleted(CreatureObject creo, String questName) {
-		PlayerObject ghost = creo.getPlayerObject();
-		
-		if (ghost == null) {
-			try { throw new Exception("Ghost is null! Cannot determine if player completed quest or not."); } 
-			catch (Exception e) {e.printStackTrace();}
-		}
-		
-		SWGMap<Integer, Quest> questJournal = ghost.getQuestJournal();
-		
-		if (questJournal.size() == 0)
-			return false;
-		
-		if (!questJournal.containsKey(CRC.StringtoCRC("quest/" + questName)))
-			return false;
-		else 
-			return questJournal.get(CRC.StringtoCRC("quest/") + questName).isCompleted();
-	}
-	
-	public void sendQuestWindow(CreatureObject reciever, String questName) {
-		if (reciever == null || reciever.getClient() == null || reciever.getClient().getSession() == null)
-			return;
-		
-		ObjControllerMessage objMsg = new ObjControllerMessage(11, new ForceActivateQuest(reciever.getObjectID(), CRC.StringtoCRC("quest/" + questName)));
-		reciever.getClient().getSession().write(objMsg.serialize());
 	}
 	
 	public void activateNextTask(CreatureObject quester, String questName) {
@@ -164,7 +133,6 @@ public class QuestService implements INetworkDispatch {
 		
 		QuestTask task = qData.getTasks().get(activeStep);
 		
-
 		switch (task.getType()) {
 		
 		// quest.task.ground.go_to_location
@@ -184,10 +152,14 @@ public class QuestService implements INetworkDispatch {
 		
 		// quest.task.ground.retrieve_item
 		case "retrieve_item":
+			if (quest.getCounterMax() != task.getNumRequired()) {
+				quest.setCounterMax(task.getNumRequired());
+				quest.setCounterValue(0);
+			}
+			
 			player.getQuestRetrieveItemTemplates().put(task.getServerTemplate(), new QuestItem(quest.getName(), activeStep));
 
-			// TODO: add item count
-			ObjControllerMessage itemCount = new ObjControllerMessage(11, new QuestTaskCounterMessage(quester.getObjectID(), quest.getCrcName(), "@quest/groundquests:retrieve_item_counter"));
+			ObjControllerMessage itemCount = new ObjControllerMessage(11, new QuestTaskCounterMessage(quester.getObjectID(), quest, "@quest/groundquests:retrieve_item_counter"));
 			quester.getClient().getSession().write(itemCount.serialize());
 			
 			WaypointObject wpRetrieve = createWaypoint(task.getWaypointName(), new Point3D(task.getLocationX(), task.getLocationY(), task.getLocationZ()), task.getPlanet());
@@ -232,9 +204,17 @@ public class QuestService implements INetworkDispatch {
 			break;
 		
 		case "complete_quest":
-			completeQuest(player, quest);
-			break;
+			if (quest.getWaypointId() != 0) {
+				player.getWaypoints().remove(quest.getWaypointId());
+				core.objectService.destroyObject(quest.getWaypointId());
+			}
 			
+			if (quest.getTimer() != null)
+				quest.getTimer().cancel(true);
+			
+			completeQuest(player, quest);
+			return;
+		
 		case "reward":
 			// TODO: System message? - Also check possibility of "Item" column being used for reward as well
 			TangibleObject reward = (TangibleObject) core.objectService.createObject(getQuestRewardTemplate(task.getLootName()), core.terrainService.getPlanetByName(task.getPlanet()));
@@ -278,7 +258,7 @@ public class QuestService implements INetworkDispatch {
 			player.getWaypoints().remove(quest.getWaypointId());
 			core.objectService.destroyObject(quest.getWaypointId());
 		}
-	
+		
 		if (quest.getTimer() != null)
 			quest.getTimer().cancel(true);
 		
@@ -287,20 +267,17 @@ public class QuestService implements INetworkDispatch {
 
 			quest.setCompleted(true);
 			
-			if (!task.isGrantQuestOnCompleteShowSystemMessage()) {
-				completeQuest(player, quest); // Force complete packet sent if the quest isn't auto completed (window shows up, typical for exclusive reward items)
-				player.getContainer().getClient().getSession().write(player.getBaseline(8).createDelta(7));
-			} else
-				sendQuestCompleteWindow(quester, quest.getCrc());
-			
-			if (task.getGrantQuestOnComplete() != null && !task.getGrantQuestOnComplete().equals(""))
-				activateQuest(quester, task.getGrantQuestOnComplete());
-			
+			// TODO: Unable to determine if this is calculated in "Complete Quest" window should pop up or just finish automatically, but it's the best for now
+			if (task.isVisible())
+				sendQuestCompleteWindow(quester, quest.getCrcName());
+			else
+				completeQuest(player, quest);
+
 			return;
 		}
 		
 		if (task.getGrantQuestOnComplete() != null && !task.getGrantQuestOnComplete().equals(""))
-			activateQuest(quester, task.getGrantQuestOnComplete());
+			sendQuestAcceptWindow(quester, task.getGrantQuestOnComplete());
 		
 		quest.incrementQuestStep();
 		
@@ -310,7 +287,7 @@ public class QuestService implements INetworkDispatch {
 		
 	}
 	
-	public void activateQuest(CreatureObject quester, String questString) {
+	public void immediatlyActivateQuest(CreatureObject quester, String questString) {
 		Quest quest = new Quest(questString, quester.getObjectID());
 		
 		PlayerObject player = quester.getPlayerObject();
@@ -346,6 +323,7 @@ public class QuestService implements INetworkDispatch {
 			quest.setCompleted(true);
 		
 		QuestList info = getQuestList(quest.getName());
+		QuestTask task = getQuestData(quest.getName()).getTasks().get(quest.getActiveTask());
 		
 		ArrayList<Long> recievedItems = new ArrayList<Long>();
 		TangibleObject inventory = (TangibleObject) creo.getSlottedObject("inventory");
@@ -416,18 +394,25 @@ public class QuestService implements INetworkDispatch {
 			core.playerService.giveExperience(creo, info.getRewardExperienceAmount());
 		}
 
+		if (task.getGrantQuestOnComplete() != null && !task.getGrantQuestOnComplete().equals(""))
+			sendQuestAcceptWindow(creo, task.getGrantQuestOnComplete());
+		
 		// Update quest & client
 		quest.setRecievedAward(true);
 		creo.getClient().getSession().write(player.getBaseline(8).createDelta(7));
 	}
 	
-	public void sendQuestAcceptWindow(CreatureObject reciever, int questCrc) {
-		ObjControllerMessage objController = new ObjControllerMessage(0x0B, new ShowQuestAcceptWindow(reciever.getObjectID(), questCrc));
+	public void sendQuestWindow(CreatureObject reciever, String questName) {
+		ObjControllerMessage objMsg = new ObjControllerMessage(0x0B, new ForceActivateQuest(reciever.getObjectID(), CRC.StringtoCRC("quest/" + questName)));
+		reciever.getClient().getSession().write(objMsg.serialize());
+	}
+	public void sendQuestAcceptWindow(CreatureObject reciever, String questName) {
+		ObjControllerMessage objController = new ObjControllerMessage(0x0B, new ShowQuestAcceptWindow(reciever.getObjectID(), questName));
 		reciever.getClient().getSession().write(objController.serialize());
 	}
 	
-	public void sendQuestCompleteWindow(CreatureObject reciever, int questCrc) {
-		ObjControllerMessage objController = new ObjControllerMessage(0x0B, new ShowQuestCompletionWindow(reciever.getObjectID(), questCrc));
+	public void sendQuestCompleteWindow(CreatureObject reciever, String questName) {
+		ObjControllerMessage objController = new ObjControllerMessage(0x0B, new ShowQuestCompletionWindow(reciever.getObjectID(), questName));
 		reciever.getClient().getSession().write(objController.serialize());
 	}
 	
@@ -477,8 +462,6 @@ public class QuestService implements INetworkDispatch {
 			core.scriptService.callScript("scripts/quests/events/signals/", task.getSignalName(), "activate", core, actor, quest);
 			return;
 		}
-		
-		completeActiveTask(actor, quest);
 	}
 	
 	public void handleAddConversationScript(TangibleObject object, String script) {
@@ -564,7 +547,7 @@ public class QuestService implements INetworkDispatch {
 		if (questData == null)
 			return false;
 		
-		activateQuest(creo, questName);
+		immediatlyActivateQuest(creo, questName);
 		return true;
 	}
 	
@@ -639,7 +622,7 @@ public class QuestService implements INetworkDispatch {
 
 				//if (visitor.getObjectByColumnNameAndIndex("", r)) 
 
-				if (task.getType().equals("quest.task.ground.go_to_location")) {
+				if (task.getType().equals("go_to_location")) {
 					QuestCollidable collision = new QuestCollidable(new Point3D(task.getLocationX(), task.getLocationY(), task.getLocationZ()), task.getRadius(), core.terrainService.getPlanetByName(task.getPlanet()), quest, r);
 					collision.setCallback(core.scriptService.getMethod("scripts/quests/events/", "go_to_location", "run"));
 					core.simulationService.addCollidable(collision, task.getLocationX(), task.getLocationZ());

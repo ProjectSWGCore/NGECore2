@@ -47,6 +47,9 @@ public class Quest extends Delta implements Serializable {
 	private ScheduledFuture<?> timer;
 	private long waypointId;
 	
+	private int counterMax;
+	private int counterCurrent;
+	
 	public Quest() {}
 	
 	public Quest(String name, long ownerId) {
@@ -145,6 +148,30 @@ public class Quest extends Delta implements Serializable {
 		this.timer = timer;
 	}
 
+	public int getCounterMax() {
+		return counterMax;
+	}
+
+	public void setCounterMax(int counterMax) {
+		this.counterMax = counterMax;
+	}
+
+	public void incrementCounter() {
+		counterCurrent++;
+	}
+	
+	public void decrementCounter() {
+		counterCurrent--;
+	}
+	
+	public int getCounterValue() {
+		return counterCurrent;
+	}
+	
+	public void setCounterValue(int value) {
+		this.counterCurrent = value;
+	}
+	
 	public byte[] getBytes() {
 		byte[] activeStepBytes = activeStepBitmask.toByteArray();
 		byte[] completedStepBytes = completedStepBitmask.toByteArray();
