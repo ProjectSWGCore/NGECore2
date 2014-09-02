@@ -139,7 +139,7 @@ public class TurretAttackState extends TurretAIState {
 		
 		if (target instanceof CreatureObject){
 			CreatureObject targetCreature = (CreatureObject) target;
-			if(targetCreature.getPosture() == 13 || targetCreature.getPosture() == 14 || targetCreature.isInStealth()) {
+			if(targetCreature.getPosture() == 13 || targetCreature.getPosture() == 14 || targetCreature.isCloaked()) {
 				 
 				actor.setFollowObject(actor.getHighestDamageDealer());			
 				target = (CreatureObject) actor.getFollowObject();

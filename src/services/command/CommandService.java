@@ -23,8 +23,6 @@ package services.command;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteOrder;
 import java.util.Map;
@@ -36,7 +34,6 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import main.NGECore;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 
@@ -76,7 +73,7 @@ public class CommandService implements INetworkDispatch  {
 	}
 	
 	public boolean callCommand(CreatureObject actor, SWGObject target, BaseSWGCommand command, int actionCounter, String commandArgs) {
-
+		
 		if (actor == null)
 			return false;
 		
@@ -87,14 +84,17 @@ public class CommandService implements INetworkDispatch  {
 		if (command == null)
 			return false;
 		
-		if (command.getCharacterAbility().length() > 0 && !actor.hasAbility(command.getCharacterAbility()))
+		if (actor.isPlayer() && command.getCharacterAbility().length() > 0 && !actor.hasAbility(command.getCharacterAbility())){
 			return false;
+		}
 		
-		if (command.isDisabled())
+		if (command.isDisabled()){
 			return false;
+		}
 		
-		if (actor.hasCooldown(command.getCooldownGroup()) || actor.hasCooldown(command.getCommandName()))
+		if (actor.hasCooldown(command.getCooldownGroup()) || actor.hasCooldown(command.getCommandName())){
 			return false;
+		}
 		
 		
 		// Causes this service method to return with false after equipping a rifle, not allowing to unequip it anymore
@@ -302,7 +302,7 @@ public class CommandService implements INetworkDispatch  {
 			default:
 				break;
 		}
-		
+
 		if (command.shouldCallOnTarget()) {
 			if (target == null || !(target instanceof CreatureObject)) {
 				return false;
@@ -328,8 +328,9 @@ public class CommandService implements INetworkDispatch  {
 				e.printStackTrace();
 			}
 		}
-		else
+		else {
 			processCommand(actor, target, command, actionCounter, commandArgs);
+		}
 			
 		
 		return true;
@@ -536,6 +537,7 @@ public class CommandService implements INetworkDispatch  {
 				
 				TangibleObject targetObject = (TangibleObject) target;
 				
+				// FIXME Attacks will work on allies without this
 //				if (!targetObject.isAttackableBy(actor)) {
 //					return false;
 //				}
@@ -689,9 +691,10 @@ public class CommandService implements INetworkDispatch  {
 	}
 	
 	public void processCommand(CreatureObject actor, SWGObject target, BaseSWGCommand command, int actionCounter, String commandArgs) {
-		
+
 		if (command.getGodLevel() > 0 || command.getCommandName().equals("setgodmode") || command.getCommandName().equals("server") || command.getCommandName().equals("teleport") 
-				|| command.getCommandName().equals("teleportto") || command.getCommandName().equals("teleporttarget") || command.getCommandName().equals("createcreature") || command.getCommandName().equals("giveitem") ) {
+		|| command.getCommandName().equals("teleportto") || command.getCommandName().equals("teleporttarget") || command.getCommandName().equals("createcreature") || command.getCommandName().equals("giveitem") ) {
+
 			String accessLevel = core.adminService.getAccessLevelFromDB(actor.getClient().getAccountId());
 			String filePath = "accesslevels/" + accessLevel + ".txt";
 			System.out.println(command.getCommandName() + " was just used by an admin with accessLevel: " + accessLevel + ".");
@@ -710,6 +713,7 @@ public class CommandService implements INetworkDispatch  {
 					 }
 					
 					if (!levelHasCommand) {
+						System.out.println("I am an NPC and can't sendSystemMessages " + actor.getCustomName());
 						actor.sendSystemMessage(" \\#FE2EF7 [GM] \\#FFFFFF " + command.getCommandName() + ": You do not have permission to use this command.", (byte) 0);
 						return;
 					}

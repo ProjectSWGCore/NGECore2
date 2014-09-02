@@ -52,6 +52,10 @@ public class QuestTask {
 	private String itemName;
 	private String tasksOnFail;
 	private String retrieveMenuText;
+	private String msgBoxPrompt;
+	private String msgBoxTitle;
+	private String msgBoxSound;
+	private String lootName;
 	
 	private boolean visible;
 	private boolean grantQuestOnCompleteShowSystemMessage;
@@ -65,6 +69,11 @@ public class QuestTask {
 	private int timeToComplete;
 	private int numRequired;
 	private int dropPercent;
+	private int minTime;
+	private int maxTime;
+	private int msgBoxWidth;
+	private int msgBoxHeight;
+	private int msgBoxLength;
 	
 	private long waitMarkerBuilding;
 	
@@ -74,6 +83,7 @@ public class QuestTask {
 	private float waitMarkerX;
 	private float waitMarkerY;
 	private float waitMarkerZ;
+	private float radius;
 
 	public QuestTask() {}
 
@@ -450,5 +460,85 @@ public class QuestTask {
 
 	public void setRetrieveMenuText(String retrieveMenuText) {
 		this.retrieveMenuText = retrieveMenuText;
+	}
+
+	public int getMinTime() {
+		return minTime;
+	}
+
+	public void setMinTime(int minTime) {
+		this.minTime = minTime;
+	}
+
+	public int getMaxTime() {
+		return maxTime;
+	}
+
+	public void setMaxTime(int maxTime) {
+		this.maxTime = maxTime;
+	}
+
+	public float getRadius() {
+		return radius;
+	}
+
+	public void setRadius(float radius) {
+		this.radius = radius;
+	}
+
+	public String getMsgBoxPrompt() {
+		return msgBoxPrompt;
+	}
+
+	public void setMsgBoxPrompt(String msgBoxPrompt) {
+		this.msgBoxPrompt = msgBoxPrompt;
+	}
+
+	public String getMsgBoxTitle() {
+		return msgBoxTitle;
+	}
+
+	public void setMsgBoxTitle(String msgBoxTitle) {
+		this.msgBoxTitle = msgBoxTitle;
+	}
+
+	public String getMsgBoxSound() {
+		return msgBoxSound;
+	}
+
+	public void setMsgBoxSound(String msgBoxSound) {
+		this.msgBoxSound = msgBoxSound;
+	}
+
+	public int getMsgBoxWidth() {
+		return msgBoxWidth;
+	}
+
+	public void setMsgBoxWidth(int msgBoxWidth) {
+		this.msgBoxWidth = msgBoxWidth;
+	}
+
+	public int getMsgBoxHeight() {
+		return msgBoxHeight;
+	}
+
+	public void setMsgBoxHeight(int msgBoxHeight) {
+		this.msgBoxHeight = msgBoxHeight;
+	}
+
+	public int getMsgBoxLength() {
+		return msgBoxLength;
+	}
+
+	public void setMsgBoxLength(int msgBoxLength) {
+		this.msgBoxLength = msgBoxLength;
+	}
+
+	public String getLootName() {
+		return lootName;
+	}
+
+	public void setLootName(String lootName) {
+		this.lootName = lootName;
 	}
 }

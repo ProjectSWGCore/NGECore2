@@ -27,7 +27,6 @@ import java.util.List;
 import org.apache.mina.core.buffer.IoBuffer;
 
 import engine.resources.common.CRC;
-import engine.resources.common.StringUtilities;
 import engine.resources.scene.Point3D;
 
 public class CreateClientPathMessage extends SWGMessage {
@@ -58,7 +57,7 @@ public class CreateClientPathMessage extends SWGMessage {
 		}
 		
 		buffer.flip();
-		StringUtilities.printBytes(buffer.array());
+		//StringUtilities.printBytes(buffer.array());
 		return buffer;
 	}
 

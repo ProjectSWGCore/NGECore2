@@ -39,20 +39,14 @@ def run(core, actor, target, commandString):
 			
 			if object != None:
 				actor.transferTo(actor, oldContainer, object)	
-				
-			if target.getTemplate().find('/wearables/') or target.getTemplate().find('/weapon/'):
-				core.equipmentService.equip(actor, target)
-			
-			for object in replacedObjects:
-				core.equipmentService.unequip(actor, object)
-	
-	oldContainer.transferTo(actor, container, target)
 	
 	if oldContainer == actor.getSlottedObject('appearance_inventory'):
 		actor.removeObjectFromAppearanceEquipList(target)
-		
+	
+	oldContainer.transferTo(actor, container, target)
+	
 	if container == actor.getSlottedObject('appearance_inventory'):
 		actor.addObjectToAppearanceEquipList(target)		
-
+	
 	return
 	

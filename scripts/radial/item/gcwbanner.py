@@ -25,9 +25,9 @@ def handleBanner(core, owner, bannerinventoryobject, option):
 		return
 	
 	# check if banner object is not already spawned
-	#if bannerinventoryobject.getAttachment('BannerSpawned'):
-		#owner.sendSystemMessage('Banner already spawned' , 0)
-		#return
+	if bannerinventoryobject.getAttachment('BannerSpawned'):
+		owner.sendSystemMessage('Banner already spawned' , 0)
+		return
 	
 	# spawn banner object
 	stcSvc = core.staticService

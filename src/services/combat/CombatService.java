@@ -213,24 +213,6 @@ public class CombatService implements INetworkDispatch {
 					creature.removeDefender(defender);
 				}
 				
-				if(((CreatureObject) target).getPlayerObject() == null) 
-				{
-					target.setKiller(attacker);
-					
-					scheduler.schedule(new Runnable() 
-					{
-						@Override
-						public void run() 
-						{
-							try {
-								core.objectService.destroyObject(target);
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
-						}
-						
-					}, 2, TimeUnit.MINUTES);
-				}
 			}
 		}
 		else if(target instanceof TangibleObject)
@@ -354,25 +336,7 @@ public class CombatService implements INetworkDispatch {
 					defender.removeDefender(creature);
 					creature.removeDefender(defender);
 				}
-				
-				if(((CreatureObject) target).getPlayerObject() == null) 
-				{
-					target.setKiller(attacker);
-					
-					scheduler.schedule(new Runnable() 
-					{
-						@Override
-						public void run() 
-						{
-							try {
-								core.objectService.destroyObject(target);
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
-						}
-						
-					}, 2, TimeUnit.MINUTES);
-				}
+
 			}
 		}
 		else if(target instanceof TangibleObject)
@@ -906,11 +870,11 @@ public class CombatService implements INetworkDispatch {
 
 	private boolean attemptCombat(CreatureObject attacker, TangibleObject target) {
 		
-		if (attacker.isInStealth()) {
-			attacker.setInStealth(false);
+		if (attacker.isCloaked()) {
+			attacker.setCloaked(false);
 			
 			if (attacker.getPlayerObject() != null && attacker.getPlayerObject().getProfession().equals("spy_1a")) {
-				attacker.setRadarVisible(true);
+				attacker.setVisibleOnRadar(true);
 			}
 		}
 		
@@ -1238,21 +1202,19 @@ public class CombatService implements INetworkDispatch {
 			
 			if(target.hasBuff("incapWeaken")) {
 				if (!attacker.isPlayer()){
-					AIActor aiActor = (AIActor)attacker.getAttachment("AI");						
-					if (aiActor.getMobileTemplate().isDeathblow())
-						deathblowPlayer(attacker, target);
+					deathblowPlayer(attacker, target);
 				} else
 				{
 					deathblowPlayer(attacker, target);
 				}
 				return;
-			}
-			
-			if (!attacker.isPlayer()){
-				AIActor aiActor = (AIActor)attacker.getAttachment("AI");	
-				if (aiActor.getMobileTemplate().isDeathblow()){
-					deathblowPlayer(attacker, target);
-					return;
+			} else {
+				if (!attacker.isPlayer()){
+					AIActor aiActor = (AIActor)attacker.getAttachment("AI");	
+					if (aiActor.getMobileTemplate().isDeathblow()){
+						deathblowPlayer(attacker, target);
+						return;
+					}
 				}
 			}
 			

@@ -23,6 +23,7 @@ package resources.quest;
 
 import java.io.Serializable;
 import java.util.BitSet;
+import java.util.concurrent.ScheduledFuture;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
@@ -35,6 +36,7 @@ public class Quest extends Delta implements Serializable {
 	
 	private long ownerId;
 	private int activeStep; // Quest starts at step 0
+
 	private BitSet activeStepBitmask = new BitSet(16);
 	private BitSet completedStepBitmask = new BitSet(16);
 	
@@ -42,7 +44,11 @@ public class Quest extends Delta implements Serializable {
 	private boolean recievedAward = false;
 	private String name;
 
+	private ScheduledFuture<?> timer;
 	private long waypointId;
+	
+	private int counterMax;
+	private int counterCurrent;
 	
 	public Quest() {}
 	
@@ -71,11 +77,11 @@ public class Quest extends Delta implements Serializable {
 		this.ownerId = ownerId;
 	}
 
-	public int getActiveStep() {
+	public int getActiveTask() {
 		return activeStep;
 	}
 
-	public void setActiveStep(int activeStep) {
+	public void setActiveTask(int activeStep) {
 		this.activeStep = activeStep;
 	}
 
@@ -120,10 +126,50 @@ public class Quest extends Delta implements Serializable {
 	}
 
 	public void incrementQuestStep() {
-		activeStepBitmask.set(activeStep, false);
 		completedStepBitmask.set(activeStep);
-		this.activeStep++;
-		activeStepBitmask.set(activeStep);
+		activeStepBitmask.set(activeStep, false);
+		
+		activeStep++;
+		activeStepBitmask.set(activeStep, true);
+		
+		//System.out.println("Active step was "+ (activeStep - 1) + " and is now " + activeStep );
+	}
+	
+	public void complete() {
+		completedStepBitmask.set(activeStep);
+		activeStepBitmask.clear();
+	}
+	
+	public ScheduledFuture<?> getTimer() {
+		return timer;
+	}
+
+	public void setTimer(ScheduledFuture<?> timer) {
+		this.timer = timer;
+	}
+
+	public int getCounterMax() {
+		return counterMax;
+	}
+
+	public void setCounterMax(int counterMax) {
+		this.counterMax = counterMax;
+	}
+
+	public void incrementCounter() {
+		counterCurrent++;
+	}
+	
+	public void decrementCounter() {
+		counterCurrent--;
+	}
+	
+	public int getCounterValue() {
+		return counterCurrent;
+	}
+	
+	public void setCounterValue(int value) {
+		this.counterCurrent = value;
 	}
 	
 	public byte[] getBytes() {
@@ -175,6 +221,7 @@ public class Quest extends Delta implements Serializable {
 		
 		buffer.flip();
 
+		//StringUtilities.printBytes(buffer.array());
 		return buffer.array();
 	}
 	
