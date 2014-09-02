@@ -122,14 +122,6 @@ def handleOptionsSeven(core, actor, npc, selection):
 	print ('selection 7: ' + str(selection))
 	if (selection == 0): # Ok, I'll do what he says.
 		quest = actor.getPlayerObject().getQuest('tatooine_eisley_legacy')
-		
-		if (actor.getLevel() >= 10):
-			core.questService.activateQuest(actor, 'quest/tatooine_eisley_gotoniko')
-			return
-		else:
-			core.questService.activateQuest(actor, 'quest/tatooine_eisley_gotomayor')
-			return
-		
 		core.questService.handleActivateSignal(actor, npc, quest, 2)
 		core.conversationService.sendStopConversation(actor, npc, '@conversation/c_newbie_secondchance', 's_136')
 		return
