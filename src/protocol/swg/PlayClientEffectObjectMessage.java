@@ -39,7 +39,7 @@ public class PlayClientEffectObjectMessage extends SWGMessage {
 	
 	@Override
 	public IoBuffer serialize() {
-		int size = 20 + effectFile.length() + commandString.length() + ((effectFile.startsWith("clienteffect/holoemote_") ? commandString.length() : 0);
+		int size = 20 + effectFile.length() + commandString.length() + ((effectFile.startsWith("clienteffect/holoemote_") ? commandString.length() : 0));
 		IoBuffer result = IoBuffer.allocate(size).order(ByteOrder.LITTLE_ENDIAN);
 		result.putShort((short) 5);
 		result.putInt(0x8855434A);
