@@ -124,8 +124,8 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	public Baseline getBaseline1() {
 		Baseline baseline = super.getBaseline1();
-		baseline.put("bankCredits", 0);
-		baseline.put("cashCredits", 0);
+		baseline.put("bankCredits", 1000);
+		baseline.put("cashCredits", 100);
 		baseline.put("baseAttributes", new SWGList<Integer>(this, 1, 2, false));
 		baseline.put("skills", new SWGSet<String>(this, 1, 3, false));
 		return baseline;
