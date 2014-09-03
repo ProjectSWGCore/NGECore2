@@ -28,24 +28,32 @@ import org.apache.mina.core.buffer.IoBuffer;
 import engine.resources.scene.Point3D;
 
 public class PlayClientEffectLocMessage extends SWGMessage {
-
+	
 	private String effectFile;
 	private String planet;
 	private Point3D position;
+	private String commandString;
+	private long cellId;
 
 	public PlayClientEffectLocMessage(String effectFile, String planet, Point3D position) {
-		
 		this.effectFile = effectFile;
 		this.planet = planet;
 		this.position = position;
-
+		this.cellId = 0;
+		this.commandString = "";
+	}
+	
+	public PlayClientEffectLocMessage(String effectFile, String planet, Point3D position, long cellId, String commandString) {
+		this.effectFile = effectFile;
+		this.planet = planet;
+		this.position = position;
+		this.cellId = cellId;
+		this.commandString = commandString;
 	}
 	
 	@Override
 	public IoBuffer serialize() {
-
-		IoBuffer result = IoBuffer.allocate(36 + effectFile.length() + planet.length()).order(ByteOrder.LITTLE_ENDIAN);
-
+		IoBuffer result = IoBuffer.allocate(36 + effectFile.length() + planet.length() + commandString.length()).order(ByteOrder.LITTLE_ENDIAN);
 		result.putShort((short) 9);
 		result.putInt(0x02949E74);
 		result.put(getAsciiString(effectFile));
@@ -53,18 +61,16 @@ public class PlayClientEffectLocMessage extends SWGMessage {
 		result.putFloat(position.x);
 		result.putFloat(position.y);
 		result.putFloat(position.z);
-		result.putLong(0);
-		result.putInt(0);		// unks seem to be always 0
-		result.putShort((short) 0);
-		
+		result.putLong(cellId);
+		result.putFloat(0); // Sometimes 1 (aka 0x0000803A) for tie fighters
+		result.put(getAsciiString(commandString));
 		return result.flip();
-
 	}
-
+	
 	@Override
 	public void deserialize(IoBuffer data) {
 		// TODO Auto-generated method stub
 		
 	}
-
+	
 }
