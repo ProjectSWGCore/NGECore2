@@ -1,5 +1,4 @@
 from resources.common import RadialOptions
-from protocol.swg import ResourceListForSurveyMessage
 from services.sui.SUIService import MessageBoxType
 from services.SurveyService import createSurveyRangeSUIWindow
 from services.sui.SUIWindow import Trigger

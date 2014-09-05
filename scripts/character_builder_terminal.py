@@ -4,7 +4,6 @@
 
 from resources.common import RadialOptions
 from resources.common import OutOfBand
-from protocol.swg import ResourceListForSurveyMessage
 from services.sui.SUIService import MessageBoxType
 from services.sui.SUIWindow import Trigger
 from java.util import Vector
