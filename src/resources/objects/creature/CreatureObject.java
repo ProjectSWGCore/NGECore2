@@ -190,7 +190,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		baseline.put("visibleOnRadar", true);
 		baseline.put("isPet", false);
 		baseline.put("32", (byte) 0);
-		baseline.put("appearanceEquipmentList", new SWGList<Equipment>(this, 6, 31, false));
+		baseline.put("appearanceEquipmentList", new SWGList<Equipment>(this, 6, 33, false));
 		baseline.put("34", (long) 0);
 		return baseline;
 	}
@@ -220,9 +220,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void setBankCredits(int bankCredits) {
-		if (getClient() != null && getClient().getSession() != null) {
-			getClient().getSession().write(getBaseline(1).set("bankCredits", bankCredits));
-		}
+		notifySelf(getBaseline(1).set("bankCredits", bankCredits));
 	}
 	
 	public void addBankCredits(int bankCredits) {
@@ -242,9 +240,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void setCashCredits(int cashCredits) {
-		if (getClient() != null && getClient().getSession() != null) {
-			getClient().getSession().write(getBaseline(1).set("cashCredits", cashCredits));
-		}
+		notifySelf(getBaseline(1).set("cashCredits", cashCredits));
 	}
 	
 	public void addCashCredits(int cashCredits) {
@@ -434,9 +430,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void setAccelerationMultiplierBase(float accelerationMultiplierBase) {
-		if (getClient() != null && getClient().getSession() != null) {
-			getClient().getSession().write(getBaseline(4).set("accelerationMultiplierBase", accelerationMultiplierBase));
-		}
+		notifySelf(getBaseline(4).set("accelerationMultiplierBase", accelerationMultiplierBase));
 	}
 	
 	public float getAccelerationMultiplierMod() {
@@ -444,9 +438,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void setAccelerationMultiplierMod(float accelerationMultiplierMod) {
-		if (getClient() != null && getClient().getSession() != null) {
-			getClient().getSession().write(getBaseline(4).set("accelerationMultiplierMod", accelerationMultiplierMod));
-		}
+		notifySelf(getBaseline(4).set("accelerationMultiplierMod", accelerationMultiplierMod));
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -539,9 +531,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void setSpeedMultiplierBase(float speedMultiplierBase) {
-		if (getClient() != null && getClient().getSession() != null) {
-			getClient().getSession().write(getBaseline(4).set("speedMultiplierBase", speedMultiplierBase));
-		}
+		notifySelf(getBaseline(4).set("speedMultiplierBase", speedMultiplierBase));
 	}
 	
 	public float getSpeedMultiplierMod() {
@@ -549,9 +539,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void setSpeedMultiplierMod(float speedMultiplierMod) {
-		if (getClient() != null && getClient().getSession() != null) {
-			getClient().getSession().write(getBaseline(4).set("speedMultiplierMod", speedMultiplierMod));
-		}
+		notifySelf(getBaseline(4).set("speedMultiplierMod", speedMultiplierMod));
 	}
 	
 	public long getListenToId() {
@@ -559,9 +547,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void setListenToId(long listenToId) {
-		if (getClient() != null && getClient().getSession() != null) {
-			getClient().getSession().write(getBaseline(4).set("listenToId", listenToId));
-		}
+		notifySelf(getBaseline(4).set("listenToId", listenToId));
 	}
 	
 	public float getRunSpeed() {
@@ -569,9 +555,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void setRunSpeed(float runSpeed) {
-		if (getClient() != null && getClient().getSession() != null) {
-			getClient().getSession().write(getBaseline(4).set("runSpeed", runSpeed));
-		}
+		notifySelf(getBaseline(4).set("runSpeed", runSpeed));
 	}
 	
 	public float getSlopeModAngle() {
@@ -579,9 +563,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void setSlopeModAngle(float slopeModAngle) {
-		if (getClient() != null && getClient().getSession() != null) {
-			getClient().getSession().write(getBaseline(4).set("slopeModAngle", slopeModAngle));
-		}
+		notifySelf(getBaseline(4).set("slopeModAngle", slopeModAngle));
 	}
 	
 	public float getSlopeModPercent() {
@@ -589,9 +571,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void setSlopeModPercent(float slopeModPercent) {
-		if (getClient() != null && getClient().getSession() != null) {
-			getClient().getSession().write(getBaseline(4).set("slopeModPercent", slopeModPercent));
-		}
+		notifySelf(getBaseline(4).set("slopeModPercent", slopeModPercent));
 	}
 	
 	public float getTurnRadius() {
@@ -599,9 +579,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void setTurnRadius(float turnRadius) {
-		if (getClient() != null && getClient().getSession() != null) {
-			getClient().getSession().write(getBaseline(4).set("turnRadius", turnRadius));
-		}
+		notifySelf(getBaseline(4).set("turnRadius", turnRadius));
 	}
 	
 	public float getWalkSpeed() {
@@ -609,9 +587,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void setWalkSpeed(float walkSpeed) {
-		if (getClient() != null && getClient().getSession() != null) {
-			getClient().getSession().write(getBaseline(4).set("walkSpeed", walkSpeed));
-		}
+		notifySelf(getBaseline(4).set("walkSpeed", walkSpeed));
 	}
 	
 	public float getWaterModPercent() {
@@ -619,9 +595,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void setWaterModPercent(float waterModPercent) {
-		if (getClient() != null && getClient().getSession() != null) {
-			getClient().getSession().write(getBaseline(4).set("waterModPercent", waterModPercent));
-		}
+		notifySelf(getBaseline(4).set("waterModPercent", waterModPercent));
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -661,9 +635,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void setDisplayXp(int displayXp) {
-		if (getClient() != null && getClient().getSession() != null) {
-			getClient().getSession().write(getBaseline(4).set("displayXp", displayXp));
-		}
+		notifySelf(getBaseline(4).set("displayXp", displayXp));
 	}
 	
 	public short getLevel() {
@@ -748,9 +720,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void updateGroupInviteInfo() {
-		if (getClient() != null && getClient().getSession() != null) {
-			getClient().getSession().write(getBaseline(6).set("groupInviteInfo", getGroupInviteInfo()));
-		}
+		notifySelf(getBaseline(6).set("groupInviteInfo", getGroupInviteInfo()));
 	}
 	
 	public int getGuildId() {
@@ -927,12 +897,13 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 	}
 	
-	public boolean isWearing(SWGObject object)
-	{
-		for (Equipment equipment : getEquipmentList()) 
-		{
-			if (equipment.getObjectId() == object.getObjectId()) return true;
+	public boolean isWearing(SWGObject object) {
+		for (Equipment equipment : getEquipmentList()) {
+			if (equipment.getObjectId() == object.getObjectId()) {
+				return true;
+			}
 		}
+		
 		return false;
 	}
 	
@@ -1158,6 +1129,16 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		}
 	}
 	
+	public boolean isWearingAppearance(SWGObject object) {
+		for (Equipment equipment : getAppearanceEquipmentList()) {
+			if (equipment.getObjectId() == object.getObjectId()) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
 	public void removeObjectFromAppearanceEquipList(SWGObject object) {
 		if (object instanceof TangibleObject) {
 			for (Equipment equipment : getAppearanceEquipmentList()) {
@@ -1370,9 +1351,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void sendSystemMessage(String message, OutOfBand outOfBand, byte displayType) {
-		if (getClient() != null && getClient().getSession() != null) {
-			getClient().getSession().write((new ChatSystemMessage(message, outOfBand, displayType)).serialize());
-		}
+		notifySelf((new ChatSystemMessage(message, outOfBand, displayType)).serialize());
 	}
 	
 	public void playMusic(String sndFile) {
@@ -1392,11 +1371,17 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void playMusic(String sndFile, long targetId, int repetitions, boolean flag) {
-		getClient().getSession().write(new PlayMusicMessage(sndFile, targetId, 1, false));
+		notifySelf((new PlayMusicMessage(sndFile, targetId, 1, false)).serialize());
 	}
 	
 	public TangibleObject getInventory() {
 		return (TangibleObject) getSlottedObject("inventory");
+	}
+	
+	public void notifySelf(IoBuffer buffer) {
+		if (getClient() != null && getClient().getSession() != null) {
+			getClient().getSession().write(buffer);
+		}
 	}
 	
 	public void notifyClients(IoBuffer buffer, boolean notifySelf) {
