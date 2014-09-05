@@ -1351,7 +1351,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void sendSystemMessage(String message, OutOfBand outOfBand, byte displayType) {
-		notifySelf((new ChatSystemMessage(message, outOfBand, displayType)).serialize())};
+		notifySelf((new ChatSystemMessage(message, outOfBand, displayType)).serialize());
 	}
 	
 	public void playMusic(String sndFile) {
@@ -1371,7 +1371,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void playMusic(String sndFile, long targetId, int repetitions, boolean flag) {
-		notifySelf(new PlayMusicMessage(sndFile, targetId, 1, false));
+		notifySelf((new PlayMusicMessage(sndFile, targetId, 1, false)).serialize());
 	}
 	
 	public TangibleObject getInventory() {
