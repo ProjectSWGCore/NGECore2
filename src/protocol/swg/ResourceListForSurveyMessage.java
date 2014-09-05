@@ -21,57 +21,24 @@
  ******************************************************************************/
 package protocol.swg;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteOrder;
-import java.util.ArrayList;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import main.NGECore;
-
 import org.apache.mina.core.buffer.IoBuffer;
+
 import protocol.swg.SWGMessage;
-import resources.objects.creature.CreatureObject;
+import resources.common.Opcodes;
 import resources.objects.resource.GalacticResource;
-import resources.objects.tangible.TangibleObject;
 
 public class ResourceListForSurveyMessage extends SWGMessage {
 	
-	private TangibleObject tool;
 	private List<GalacticResource> resourceList;
+	private long characterId;
 	
-	public ResourceListForSurveyMessage(TangibleObject tool, List<GalacticResource> resourceList) {
-		this.tool = tool;
+	public ResourceListForSurveyMessage(long characterId, List<GalacticResource> resourceList) {
+		this.characterId = characterId;
 		this.resourceList = resourceList;
-	}
-	
-	public ResourceListForSurveyMessage(NGECore core, TangibleObject tool, CreatureObject surveyor) {
-		this.tool = tool;
-		this.resourceList = new ArrayList<GalacticResource>();
-		byte generalType = 0;
-		String toolName = tool.getDetailName();
-		if (toolName.equals("survey_tool_mineral"))
-			generalType = (byte) 0;
-		if (toolName.equals("survey_tool_inorganic"))
-			generalType = (byte) 1;
-		if (toolName.equals("survey_tool_organic") || toolName.equals("survey_tool_lumber"))
-			generalType = (byte) 2;
-		if (toolName.equals("survey_tool_gas"))
-			generalType = (byte) 3;
-		if (toolName.equals("survey_tool_moisture"))
-			generalType = (byte) 4;
-		if (toolName.equals("survey_tool_solar"))
-			generalType = (byte) 5;
-		if (toolName.equals("survey_tool_wind"))
-			generalType = (byte) 6;
-		if (toolName.equals("survey_tool_liquid"))
-			generalType = (byte) 7;
-		
-		if (core.resourceService == null)
-			System.out.println("heyyyy guess who's confused?!");
-		List<GalacticResource> planetVector = core.resourceService.getSpawnedResourcesByPlanetAndType(surveyor.getPlanetId(),generalType);
-		
-		resourceList = new ArrayList<GalacticResource>(planetVector);
-		
 	}
 
 	public void deserialize(IoBuffer data) {
@@ -79,42 +46,36 @@ public class ResourceListForSurveyMessage extends SWGMessage {
 	}
 	
 	public IoBuffer serialize() {		
-		IoBuffer result = IoBuffer.allocate(10).order(ByteOrder.LITTLE_ENDIAN);	
+		IoBuffer result = IoBuffer.allocate(10).order(ByteOrder.LITTLE_ENDIAN);
+		GalacticResource resourceElement = null;
+		
 		result.setAutoExpand(true);
 		result.putShort((short)4);
-		result.putInt(0x8A64B1D5);
+		result.putInt(Opcodes.ResourceListForSurveyMessage);
 		result.putInt(resourceList.size());	
-		GalacticResource resourceElement = null;
+		
 		for (int i = 0; i < resourceList.size(); i++) {
 			resourceElement = resourceList.get(i);
-			try {
-				result.putShort((short)resourceElement.getName().length()); // CStringesque length ahead
-				result.put(resourceElement.getName().getBytes("US-ASCII")); 
-				result.putLong(resourceElement.getId());
-				result.putShort((short)resourceElement.getFileName().length());
-				result.put(resourceElement.getFileName().getBytes("US-ASCII")); 
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-				e.getMessage();
-				e.getCause();
-			} 		
+			result.putShort((short)resourceElement.getName().length()); // CStringesque length ahead
+			result.put(resourceElement.getName().getBytes(StandardCharsets.US_ASCII)); 
+			result.putLong(resourceElement.getId());
+			result.putShort((short)resourceElement.getFileName().length());
+			result.put(resourceElement.getFileName().getBytes(StandardCharsets.US_ASCII)); 
 		}
-		if (resourceElement != null) {
-			try {
-				result.putShort((short)resourceElement.getCategory().length());
-				result.put(resourceElement.getCategory().getBytes("US-ASCII")); 
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-			} 
-		} else {
-			result.putShort((short)0);
-		}
-
-		result.putLong(tool.getObjectID());
 		
+		if (resourceElement != null) {
+			result.putShort((short)resourceElement.getCategory().length());
+			result.put(resourceElement.getCategory().getBytes(StandardCharsets.US_ASCII)); 
+		} else
+			result.putShort((short) 0);
+
+		result.putLong(characterId);
+		
+		// Debugging
 		int size = result.position();
-		result.flip();
 		tools.CharonPacketUtils.printAnalysis(IoBuffer.allocate(size).put(result.array(), 0, size).flip());
-		return IoBuffer.allocate(size).put(result.array(), 0, size).flip();
+		// Debugging end
+		
+		return result.flip();
 	}
 }
