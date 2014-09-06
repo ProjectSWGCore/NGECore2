@@ -4,6 +4,7 @@ from services.sui.SUIService import MessageBoxType
 from services.SurveyService import createSurveyRangeSUIWindow
 from services.sui.SUIWindow import Trigger
 from java.util import Vector
+from org.python.core.util import StringUtil
 import sys
 
 def createRadial(core, owner, target, radials):
@@ -19,24 +20,24 @@ def handleSelection(core, owner, target, option):
 		if owner is not None:
 			generalType = None
 			toolName = target.getDetailName();
-			if toolName.equals('survey_tool_mineral'):
+			if toolName is 'survey_tool_mineral':
 				generalType = 0
-			elif toolName.equals('survey_tool_inorganic'):
+			elif toolName is 'survey_tool_inorganic':
 				generalType = 1
-			elif toolName.equals('survey_tool_organic') or toolName.equals('survey_tool_lumber'):
+			elif toolName is 'survey_tool_organic' or toolName is 'survey_tool_lumber':
 				generalType = 2
-			elif toolName.equals('survey_tool_gas'):
+			elif toolName is 'survey_tool_gas':
 				generalType = 3
-			elif toolName.equals('survey_tool_moisture'):
+			elif toolName is 'survey_tool_moisture':
 				generalType = 4
-			elif toolName.equals('survey_tool_solar'):
+			elif toolName is 'survey_tool_solar':
 				generalType = 5
-			elif toolName.equals('survey_tool_wind'):
+			elif toolName is 'survey_tool_wind':
 				generalType = 6
-			elif toolName.equals('survey_tool_liquid'):
+			elif toolName is 'survey_tool_liquid':
 				generalType = 7
 			
-			rlfsm = ResourceListForSurveyMessage(owner.getObjectId(), core.resourceService.getSpawnedResourcesByPlanetAndType(surveyor.getPlanetId(), generalType))
+			rlfsm = ResourceListForSurveyMessage(owner.getObjectId(), core.resourceService.getSpawnedResourcesByPlanetAndType(owner.getPlanetId(), StringUtil.toBytes(str(generalType))[0]))
 			owner.getClient().getSession().write(rlfsm.serialize())	
 			return
 	if option == 132:
