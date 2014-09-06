@@ -20,24 +20,24 @@ def handleSelection(core, owner, target, option):
 		if owner is not None:
 			generalType = None
 			toolName = target.getDetailName();
-			if toolName is 'survey_tool_mineral':
+			if 'survey_tool_mineral' in toolName:
 				generalType = 0
-			elif toolName is 'survey_tool_inorganic':
+			elif 'survey_tool_inorganic' in toolName:
 				generalType = 1
-			elif toolName is 'survey_tool_organic' or toolName is 'survey_tool_lumber':
+			elif 'survey_tool_organic' in toolName or 'survey_tool_lumber' in toolName:
 				generalType = 2
-			elif toolName is 'survey_tool_gas':
+			elif 'survey_tool_gas' in toolName:
 				generalType = 3
-			elif toolName is 'survey_tool_moisture':
+			elif 'survey_tool_moisture' in toolName:
 				generalType = 4
-			elif toolName is 'survey_tool_solar':
+			elif 'survey_tool_solar' in toolName:
 				generalType = 5
-			elif toolName is 'survey_tool_wind':
+			elif 'survey_tool_wind' in toolName:
 				generalType = 6
-			elif toolName is 'survey_tool_liquid':
+			elif 'survey_tool_liquid' in toolName:
 				generalType = 7
 			
-			rlfsm = ResourceListForSurveyMessage(owner.getObjectId(), core.resourceService.getSpawnedResourcesByPlanetAndType(owner.getPlanetId(), StringUtil.toBytes(str(generalType))[0]))
+			rlfsm = ResourceListForSurveyMessage(owner.getObjectId(), core.resourceService.getSpawnedResourcesByPlanetAndType(owner.getPlanetId(), generalType))
 			owner.getClient().getSession().write(rlfsm.serialize())	
 			return
 	if option == 132:
