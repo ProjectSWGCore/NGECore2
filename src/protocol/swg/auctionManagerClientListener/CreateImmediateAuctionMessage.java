@@ -49,7 +49,7 @@ public class CreateImmediateAuctionMessage extends SWGMessage {
 		
 		this.description = new String(ByteBuffer.allocate(size * 2).put(data.array(), data.position(), size * 2).array(), StandardCharsets.UTF_16LE);
 		data.position(data.position() + size * 2);
-		this.isPremium = (data.get() == 0 ? false : true);
+		this.isPremium = data.get() == 0 ? false : true;
 	}
 
 	@Override

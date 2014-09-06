@@ -102,5 +102,5 @@ public class Opcodes {
 	public static final int CmdStartScene = 0x3AE6DFAE;
 	public static final int IncubatorStartMessage = CRC.StringtoCRC("IncubatorStartMessage");
 	public static final int EnterTicketPurchaseModeMessage = 0x904DAE1A;
-	
+	public static final int ResourceListForSurveyMessage = 0x8A64B1D5;
 }
