@@ -389,7 +389,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void setHeight(float height) {
-		height = (((height < 0.7) || (height > 1.5)) ? 1 : height);
+		// height = (((height < 0.7) || (height > 1.5)) ? 1 : height); Babies need height values smaller than that
 		notifyObservers(getBaseline(3).set("height", height), true);
 	}
 	

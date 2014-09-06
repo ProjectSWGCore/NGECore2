@@ -1,7 +1,6 @@
 import sys
 from engine.resources.scene import Point3D
 from resources.datatables import GalaxyStatus
-from protocol.swg import ResourceListForSurveyMessage
 from services.sui.SUIService import MessageBoxType
 from services.sui.SUIWindow import Trigger
 from java.util import Vector

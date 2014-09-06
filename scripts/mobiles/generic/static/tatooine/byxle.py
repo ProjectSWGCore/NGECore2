@@ -29,5 +29,5 @@ def addTemplate(core):
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
-	core.spawnService.addMobileTemplate('byxlepedette', mobileTemplate)
+	core.spawnService.addMobileTemplate('byxle', mobileTemplate)
 	return

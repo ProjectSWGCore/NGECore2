@@ -15,4 +15,7 @@ def addPlanetSpawns(core, planet):
 	# Bib's Offer
 	vourk = stcSvc.spawnObject('vourk', 'tatooine', long(0), float(3521.0), float(5.0), float(-4821.0), float(0.42), float(0.91))
 
+	# Byxle Pedette
+	byxlePedette = stcSvc.spawnObject('byxle', 'tatooine', long(0), float(3365), float(5), float(-4639), float(0.99), float(0.12)) 
+
 	return

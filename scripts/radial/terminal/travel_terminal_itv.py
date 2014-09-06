@@ -1,5 +1,5 @@
 from resources.common import RadialOptions
-from protocol.swg import EnterTicketPurchaseModeMessageItv
+from protocol.swg import EnterTicketPurchaseModeMessage
 import sys
 
 def createRadial(core, owner, target, radials):
