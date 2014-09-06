@@ -1533,8 +1533,13 @@ public class CombatService implements INetworkDispatch {
 	
 	public boolean areInDuel(CreatureObject creature1, CreatureObject creature2) {
 		
-		if(creature1.getDuelList().contains(creature2) && creature2.getDuelList().contains(creature1))
-			return true;
+		// Vehicles are going through this too, but dont have duellists, so null checks must be done or NPE
+		if (creature1.getDuelList()!=null && creature2.getDuelList()!=null) {
+			if(creature1.getDuelList().contains(creature2) && creature2.getDuelList().contains(creature1))
+				return true;
+		} else {
+			return false;
+		}
 		
 		return false;
 	}
