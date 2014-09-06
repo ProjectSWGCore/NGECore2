@@ -212,17 +212,17 @@ public class LoginService implements INetworkDispatch{
                 		PreparedStatement preparedStatement;
                 		
                 		preparedStatement = databaseConnection1.preparedStatement("DELETE FROM characters WHERE \"id\"=? AND \"galaxyId\"=? AND \"accountId\"=?");
-                		preparedStatement.setLong(1, packet.getcharId());
-                		preparedStatement.setInt(2, packet.getgalaxyId());
+                		preparedStatement.setLong(1, packet.getCharId());
+                		preparedStatement.setInt(2, packet.getGalaxyId());
                 		preparedStatement.setInt(3, (int) client.getAccountId());
                 		boolean resultSet = preparedStatement.execute();   
                 		
                 		//TODO: send deletecharacter failed
                 		if(!resultSet) {
-                			CreatureObject object = (CreatureObject) core.objectService.getObject(packet.getcharId());
+                			CreatureObject object = (CreatureObject) core.objectService.getObject(packet.getCharId());
                 			
                 			if (object == null)
-                				object = (CreatureObject) core.objectService.getCreatureFromDB(packet.getcharId());
+                				object = (CreatureObject) core.objectService.getCreatureFromDB(packet.getCharId());
                 			
                 			if (object != null) {
                 				if (object.isInQuadtree() && object.getClient() != null) {
