@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.TreeMap;
+import java.util.Vector;
 
 import org.python.core.Py;
 import org.python.core.PyObject;
@@ -64,8 +65,10 @@ public class EquipmentService implements INetworkDispatch {
 		SWGObject container = actor;
 		
 		if (canWear(actor, container, item)) {
-			for (String slotName : container.getSlotNamesForObject(item)) {
-				if (container.getSlottedObject(slotName) != null && !container.getSlotNamesForObject(item).iterator().hasNext()) {
+			Vector<String> slotNames = container.getSlotNamesForObject(item);
+			
+			for (String slotName : slotNames) {
+				if (container.getSlottedObject(slotName) != null && !slotNames.iterator().hasNext()) {
 					container.transferTo(actor, actor.getSlottedObject("inventory"), container.getSlottedObject(slotName));
 					break;
 				}
@@ -113,8 +116,10 @@ public class EquipmentService implements INetworkDispatch {
 		SWGObject container = actor.getSlottedObject("appearance_inventory");
 		
 		if (canWear(actor, container, item)) {
-			for (String slotName : container.getSlotNamesForObject(item)) {
-				if (container.getSlottedObject(slotName) != null && !container.getSlotNamesForObject(item).iterator().hasNext()) {
+			Vector<String> slotNames = container.getSlotNamesForObject(item);
+			
+			for (String slotName : slotNames) {
+				if (container.getSlottedObject(slotName) != null && !slotNames.iterator().hasNext()) {
 					unequipAppearance(actor, container.getSlottedObject(slotName));
 					container.transferTo(actor, actor.getSlottedObject("inventory"), container.getSlottedObject(slotName));
 					break;
