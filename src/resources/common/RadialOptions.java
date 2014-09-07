@@ -276,6 +276,7 @@ public class RadialOptions {
     public static int ListIngredients	= 251;
     public static int StopManufacture	= 252;
     
+    private byte optionNum;
 	private byte parentId;
 	private short optionId;
 	private byte optionType;
@@ -322,6 +323,14 @@ public class RadialOptions {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public byte getOptionNum() {
+		return optionNum;
+	}
+
+	public void setOptionNum(byte optionNum) {
+		this.optionNum = optionNum;
 	}
 
 }

@@ -72,9 +72,7 @@ def addPlanetSpawns(core, planet):
 	r3j7 = stcSvc.spawnObject('r3j7', 'tatooine', long(0), float(3311.1), float(4.0), float(-4820.2), float(0.38), float(-0.92)) 
 
 	noble4 = stcSvc.spawnObject('noble', 'tatooine', long(0), float(3255.3), float(4.0), float(-4848.1), float(0.42), float(0.91)) 
-	
-	byxlePedette = stcSvc.spawnObject('byxlepedette', 'tatooine', long(0), float(3365), float(5), float(-4639), float(0.99), float(0.12)) 
-	
+		
 	errikDarksider = stcSvc.spawnObject('errikdarksider', 'tatooine', long(0), float(3381), float(4.6), float(-4498), float(0.91), float(0.40)) 
 	
 	gendra = stcSvc.spawnObject('gendra', 'tatooine', long(0), float(3308), float(5.6), float(-4785), float(0.84), float(0.53)) 

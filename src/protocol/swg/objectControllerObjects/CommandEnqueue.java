@@ -21,12 +21,10 @@
  ******************************************************************************/
 package protocol.swg.objectControllerObjects;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.mina.core.buffer.IoBuffer;
-
-@SuppressWarnings("unused")
 
 public class CommandEnqueue extends ObjControllerObject {
 	
@@ -48,7 +46,7 @@ public class CommandEnqueue extends ObjControllerObject {
     public static final int FLO 					= 0x3B159B76;
     public static final int BANDFLOURISH 			= 0xF4C60EC3;
     public static final int BANDFLO 				= 0xDD3FB008;
-	
+
 	private int actionCounter;
 	private int commandCRC;
 	private long targetId;
@@ -56,31 +54,22 @@ public class CommandEnqueue extends ObjControllerObject {
 	private final int commandObjectIndex = 20;
 	private long objectId;
 	private String commandArguments;
-	
+
 	public CommandEnqueue() {
 		
 	}
-	public CommandEnqueue(int actionCounter, ObjControllerObject commandObject) {
-		this.actionCounter = actionCounter;
-		this.commandObject = commandObject;
-	}
-	
+
 	public void deserialize(IoBuffer buffer) {
-		objectId         = buffer.getLong();
-		buffer.getInt();		
-		actionCounter	 = buffer.getInt();
+		int size;
+		
+		this.objectId = buffer.getLong();
+		buffer.getInt();	// Ziggy - related to commandObjectIndex?
+		this.actionCounter = buffer.getInt();
+		this.commandCRC = buffer.getInt();
+		this.targetId = buffer.getLong();
+		size = buffer.getInt();
 
-		commandCRC       = buffer.getInt();
-		targetId		 = buffer.getLong();
-		int size = buffer.getInt();
-		try {
-			commandArguments = new String(ByteBuffer.allocate(size * 2).put(buffer.array(), buffer.position(), size * 2).array(), "UTF-16LE");
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
-
-		//commandArguments = getNextUnicodeString(buffer);
-		//commandObject	 = getCommandObject(commandCRC);
+		commandArguments = new String(ByteBuffer.allocate(size * 2).put(buffer.array(), buffer.position(), size * 2).array(), StandardCharsets.UTF_16LE);
 	}
 	
 	public IoBuffer serialize() {

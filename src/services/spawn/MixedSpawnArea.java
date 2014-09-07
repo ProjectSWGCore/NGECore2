@@ -35,6 +35,7 @@ import resources.common.collidables.AbstractCollidable.ExitEvent;
 import resources.objects.creature.CreatureObject;
 import services.TerrainService;
 import services.SimulationService.MoveEvent;
+import services.ai.AIActor;
 import services.ai.LairActor;
 import engine.resources.config.Config;
 import engine.resources.objects.SWGObject;
@@ -213,13 +214,15 @@ public class MixedSpawnArea extends SpawnArea {
 				}
 			}
 			if (this.spawnGroup instanceof LairGroupTemplate){
+
 				object = event.object;
 				
 				//if(object == null || !(object instanceof CreatureObject) || object.getContainer() != null)
 				//	return;
 				
-				if(object == null || !(object instanceof CreatureObject))
+				if(object == null || !(object instanceof CreatureObject)){
 					return;
+				}
 				
 				creature = (CreatureObject) object;
 				
@@ -386,23 +389,26 @@ public class MixedSpawnArea extends SpawnArea {
 	
 	// LairSpawnArea class methods
 	public void spawnLair(CreatureObject object) {
-		
+
 		NGECore core = NGECore.getInstance();
 		
 		LairGroupTemplate lairGroup = (LairGroupTemplate)this.spawnGroup;
 		
 		Vector<LairSpawnTemplate> lairTemplates = lairGroup.getLairSpawnTemplates();
 		
-		if(lairGroup == null || lairTemplates.isEmpty())
+		if(lairGroup == null || lairTemplates.isEmpty()){
 			return;
+		}
 		
-		if((System.currentTimeMillis() - lastSpawnTime) < 10000)
+		if((System.currentTimeMillis() - lastSpawnTime) < 10000){
 			return;
+		}
 			
 		Point3D randomPosition = getRandomPosition(object.getWorldPosition(), 32.f, 200.f);
 		
-		if(randomPosition == null)
+		if(randomPosition == null){
 			return;
+		}
 		
 		TerrainService terrainSvc = core.terrainService;
 		
@@ -410,29 +416,38 @@ public class MixedSpawnArea extends SpawnArea {
 		randomPosition.y = height;
 		
 		for(LairActor otherLair : lairs) {
-			if(otherLair.getLairObject().getWorldPosition().getDistance(randomPosition) < 30)
+			if(otherLair.getLairObject().getWorldPosition().getDistance(randomPosition) < 30){
 				return;
+			}
 		}
 		
-		if(!terrainSvc.canBuildAtPosition(object, randomPosition.x, randomPosition.z))
+		if(!terrainSvc.canBuildAtPosition(object, randomPosition.x, randomPosition.z)){
 			return;
+		}
 		
 		Random random = new Random();
-				
+	
 		LairSpawnTemplate lairSpawn = lairTemplates.get(random.nextInt(lairTemplates.size()));
-		
+
 		int level = -1; // If level equals -1 then the mobile template CL will be used!
 		if (lairSpawn.getMinLevel() != -1 && lairSpawn.getMaxLevel()!=-1)
 			level = random.nextInt((int) (lairSpawn.getMaxLevel() - lairSpawn.getMinLevel()) + 1) + lairSpawn.getMinLevel();
 		
+		AIActor actor = (AIActor) object.getAttachment("AI");
+
+		if (actor!=null)
+			level = actor.getMobileTemplate().getLevel();
 		
-		
+		if (level<0)
+			level = 10;
+
 		LairActor lairActor = core.spawnService.spawnLair(lairSpawn.getLairTemplate(), getPlanet(), randomPosition, (short) level);
-		if(lairActor == null)
+		
+		if(lairActor == null){
 			return;
+		}
 		lairs.add(lairActor);
 		lastSpawnTime = System.currentTimeMillis();
-		
 	}
 	
 }

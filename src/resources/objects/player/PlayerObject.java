@@ -567,9 +567,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	}
 	
 	public void setCurrentForcePower(int currentForcePower) {
-		if (getClient() != null) {
-			getClient().getSession().write(getBaseline(8).set("currentForcePower", currentForcePower));
-		}
+		notifySelf(getBaseline(8).set("currentForcePower", currentForcePower));
 	}
 	
 	public int getMaxForcePower() {
@@ -577,9 +575,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	}
 	
 	public void setMaxForcePower(int maxForcePower) {
-		if (getClient() != null) {
-			getClient().getSession().write(getBaseline(8).set("maxForcePower", maxForcePower));
-		}
+		notifySelf(getBaseline(8).set("maxForcePower", maxForcePower));
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -632,9 +628,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	}
 	
 	public void setProfessionWheelPosition(String professionWheelPosition) {
-		if (getClient() != null) {
-			getClient().getSession().write(getBaseline(8).set("professionWheelPosition", professionWheelPosition));
-		}
+		notifySelf(getBaseline(8).set("professionWheelPosition", professionWheelPosition));
 	}
 	
 	public int getExperimentationFlag() {
@@ -642,9 +636,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	}
 	
 	public void setExperimentationFlag(int experimentationFlag) {
-		if (getClient() != null) {
-			getClient().getSession().write(getBaseline(9).set("experimentationFlag", experimentationFlag));
-		}
+		notifySelf(getBaseline(9).set("experimentationFlag", experimentationFlag));
 	}
 	
 	public int getCraftingStage() {
@@ -652,9 +644,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	}
 	
 	public void setCraftingStage(int craftingStage) {
-		if (getClient() != null) {
-			getClient().getSession().write(getBaseline(9).set("craftingStage", craftingStage));
-		}
+		notifySelf(getBaseline(9).set("craftingStage", craftingStage));
 	}
 	
 	public long getNearestCraftingStation() {
@@ -662,9 +652,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	}
 	
 	public void setNearestCraftingStation(long nearestCraftingStation) {
-		if (getClient() != null) {
-			getClient().getSession().write(getBaseline(9).set("nearestCraftingStation", nearestCraftingStation));
-		}
+		notifySelf(getBaseline(9).set("nearestCraftingStation", nearestCraftingStation));
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -677,9 +665,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	}
 	
 	public void setExperimentationPoints(int experimentationPoints) {
-		if (getClient() != null) {
-			getClient().getSession().write(getBaseline(9).set("experimentationPoints", experimentationPoints));
-		}
+		notifySelf(getBaseline(9).set("experimentationPoints", experimentationPoints));
 	}
 	
 	public int getAccomplishmentCounter() {
@@ -687,9 +673,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	}
 	
 	public void setAccomplishmentCounter(int accomplishmentCounter) {
-		if (getClient() != null) {
-			getClient().getSession().write(getBaseline(9).set("accomplishmentCounter", accomplishmentCounter));
-		}
+		notifySelf(getBaseline(9).set("accomplishmentCounter", accomplishmentCounter));
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -723,9 +707,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	}
 	
 	public void setLanguageId(int languageId) {
-		if (getClient() != null) {
-			getClient().getSession().write(getBaseline(9).set("languageId", languageId));
-		}
+		notifySelf(getBaseline(9).set("languageId", languageId));
 	}
 	
 	public int getCurrentStomach() {
@@ -733,9 +715,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	}
 	
 	public void setCurrentStomach(int currentStomach) {
-		if (getClient() != null) {
-			getClient().getSession().write(getBaseline(9).set("currentStomach", currentStomach));
-		}
+		notifySelf(getBaseline(9).set("currentStomach", currentStomach));
 	}
 	
 	public int getMaxStomach() {
@@ -743,9 +723,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	}
 	
 	public void setMaxStomach(int maxStomach) {
-		if (getClient() != null) {
-			getClient().getSession().write(getBaseline(9).set("maxStomach", maxStomach));
-		}
+		notifySelf(getBaseline(9).set("maxStomach", maxStomach));
 	}
 	
 	public int getCurrentDrink() {
@@ -753,9 +731,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	}
 	
 	public void setCurrentDrink(int currentDrink) {
-		if (getClient() != null) {
-			getClient().getSession().write(getBaseline(9).set("currentDrink", currentDrink));
-		}
+		notifySelf(getBaseline(9).set("currentDrink", currentDrink));
 	}
 	
 	public int getMaxDrink() {
@@ -763,9 +739,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	}
 	
 	public void setMaxDrink(int maxDrink) {
-		if (getClient() != null) {
-			getClient().getSession().write(getBaseline(9).set("maxDrink", maxDrink));
-		}
+		notifySelf(getBaseline(9).set("maxDrink", maxDrink));
 	}
 	
 	public int getCurrentConsumable() {
@@ -773,9 +747,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	}
 	
 	public void setCurrentConsumable(int currentConsumable) {
-		if (getClient() != null) {
-			getClient().getSession().write(getBaseline(9).set("currentConsumable", currentConsumable));
-		}
+		notifySelf(getBaseline(9).set("currentConsumable", currentConsumable));
 	}
 	
 	public int getMaxConsumable() {
@@ -783,9 +755,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	}
 	
 	public void setMaxConsumable(int maxConsumable) {
-		if (getClient() != null) {
-			getClient().getSession().write(getBaseline(9).set("maxConsumable", maxConsumable));
-		}
+		notifySelf(getBaseline(9).set("maxConsumable", maxConsumable));
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -798,9 +768,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	}
 	
 	public void setKillMeterPoints(int points) {
-		if (getClient() != null) {
-			getClient().getSession().write(getBaseline(9).set("killMeterPoints", points));
-		}
+		notifySelf(getBaseline(9).set("killMeterPoints", points));
 	}
 	
 	public long getPet() {
@@ -808,9 +776,7 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	}
 	
 	public void setPet(long pet) {
-		if (getClient() != null) {
-			getClient().getSession().write(getBaseline(9).set("pet", pet));
-		}
+		notifySelf(getBaseline(9).set("pet", pet));
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -1016,6 +982,12 @@ public class PlayerObject extends IntangibleObject implements Serializable {
 	
 	public int getAmountOfVendors() {
 		return getOwnedVendors().size();
+	}
+	
+	public void notifySelf(IoBuffer buffer) {
+		if (getContainer() != null && getContainer().getClient() != null && getContainer().getClient().getSession() != null) {
+			getContainer().getClient().getSession().write(buffer);
+		}
 	}
 	
 	@Override
