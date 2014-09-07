@@ -120,9 +120,7 @@ public class EquipmentService implements INetworkDispatch {
 			
 			for (String slotName : slotNames) {
 				if (container.getSlottedObject(slotName) != null && !slotNames.iterator().hasNext()) {
-					unequipAppearance(actor, container.getSlottedObject(slotName));
-					container.transferTo(actor, actor.getSlottedObject("inventory"), container.getSlottedObject(slotName));
-					break;
+					return;
 				}
 			}
 			
