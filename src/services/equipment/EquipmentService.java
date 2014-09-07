@@ -64,6 +64,13 @@ public class EquipmentService implements INetworkDispatch {
 		SWGObject container = actor;
 		
 		if (canWear(actor, container, item)) {
+			for (String slotName : container.getSlotNamesForObject(item)) {
+				if (container.getSlottedObject(slotName) != null && !container.getSlotNamesForObject(item).iterator().hasNext()) {
+					container.transferTo(actor, actor.getSlottedObject("inventory"), container.getSlottedObject(slotName));
+					break;
+				}
+			}
+			
 			String template = ((item.getAttachment("customServerTemplate") == null) ? item.getTemplate() : (item.getTemplate().split("shared_")[0] + "shared_" + ((String) item.getAttachment("customServerTemplate")) + ".iff"));
 			String serverTemplate = template.replace(".iff", "");
 			
@@ -71,13 +78,6 @@ public class EquipmentService implements INetworkDispatch {
 			
 			if (func != null) {
 				func.__call__(Py.java2py(core), Py.java2py(actor), Py.java2py(item));
-			}
-			
-			for (String slotName : container.getSlotNamesForObject(item)) {
-				if (container.getSlottedObject(slotName) != null && !container.getSlotNamesForObject(item).iterator().hasNext()) {
-					container.transferTo(actor, actor.getSlottedObject("inventory"), item);
-					break;
-				}
 			}
 			
 			actor.addObjectToEquipList(item);
@@ -116,7 +116,7 @@ public class EquipmentService implements INetworkDispatch {
 			for (String slotName : container.getSlotNamesForObject(item)) {
 				if (container.getSlottedObject(slotName) != null && !container.getSlotNamesForObject(item).iterator().hasNext()) {
 					unequipAppearance(actor, item);
-					container.transferTo(actor, actor.getSlottedObject("inventory"), item);
+					container.transferTo(actor, actor.getSlottedObject("inventory"), container.getSlottedObject(slotName));
 					break;
 				}
 			}
