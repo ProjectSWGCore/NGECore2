@@ -29,30 +29,26 @@ import org.apache.mina.core.buffer.IoBuffer;
 import services.sui.SUIWindowComponent;
 
 public class SUIUpdatePageMessage extends SWGMessage {
-
+	
 	private String script;
 	private int windowId;
 	private Vector<SUIWindowComponent> components;
 	private long rangeObjectId;
 	private float range;
 	
-	
 	public SUIUpdatePageMessage(String script, int windowId, Vector<SUIWindowComponent> components, long rangeObjectId, float range) {
-		
 		this.script = script;
 		this.windowId = windowId;
 		this.components = components;
 		this.rangeObjectId = rangeObjectId;
 		this.range = range;
-
 	}
-		
+	
 	public void deserialize(IoBuffer data) {
 		
 	}
 	
 	public IoBuffer serialize() {
-		
 		IoBuffer result = IoBuffer.allocate(100).order(ByteOrder.LITTLE_ENDIAN);
 		result.setAutoExpand(true);
 		
@@ -67,28 +63,26 @@ public class SUIUpdatePageMessage extends SWGMessage {
 			
 			result.put(component.getType());
 			result.putInt(component.getWideParams().size());
-
+			
 			for(String param : component.getWideParams()) {
 				result.put(getUnicodeString(param));
 			}
 			
 			result.putInt(component.getNarrowParams().size());
-
+			
 			for(String param : component.getNarrowParams()) {
 				result.put(getAsciiString(param));
 			}
-
 		}
 		
 		result.putLong(rangeObjectId);
+		result.put(new byte[] { (byte) 0xFF, (byte) 0xFF, 0x7F, 0x7F, (byte) 0xFF, (byte) 0xFF, 0x7F, 0x7F, (byte) 0xFF, (byte) 0xFF, 0x7F, 0x7F});
 		result.putFloat(range);
-		result.putLong(0);
-		result.putInt(0);
-
+		
 		int size = result.position();
 		result = IoBuffer.allocate(size).put(result.array(), 0, size);
-
+		
 		return result.flip();	
 	}
-
+	
 }

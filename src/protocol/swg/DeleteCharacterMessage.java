@@ -35,8 +35,8 @@ public class DeleteCharacterMessage extends SWGMessage {
 		
 	}
 	
-	public int getgalaxyId() { return galaxyId; }
-	public long getcharId() { return charId; }
+	public int getGalaxyId() { return galaxyId; }
+	public long getCharId() { return charId; }
 	
 	public void deserialize(IoBuffer data) {
 		

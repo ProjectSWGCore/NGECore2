@@ -459,18 +459,23 @@ public class SpawnService {
 	}
 	
 	public LairActor spawnLair(String lairSpawnTemplate, Planet planet, Point3D position, short level) {
-		
+
 		LairTemplate lairTemplate = lairTemplates.get(lairSpawnTemplate);
 		if(lairTemplate == null)
 			return null;
 		
+		// adapt to terrain
+		float positionY = core.terrainService.getHeight(planet.getID(), position.x, position.z);
+		Point3D adaptedPosition = new Point3D(position.x, positionY, position.z);
+		
 		TangibleObject lairObject = null;
 		if (lairTemplate.getLairCRC()==null){
 			String lairCRC = lairTemplate.getLairCRCs().get(new Random().nextInt(lairTemplate.getLairCRCs().size()));
-			System.out.println("Lair CRC " + lairCRC);
-			lairObject = (TangibleObject) core.objectService.createObject(lairCRC, 0, planet, position, new Quaternion(1, 0, 0, 0));
+			//System.out.println("Lair CRC " + lairCRC);
+			
+			lairObject = (TangibleObject) core.objectService.createObject(lairCRC, 0, planet, adaptedPosition, new Quaternion(1, 0, 0, 0));
 		} else {
-			lairObject = (TangibleObject) core.objectService.createObject(lairTemplate.getLairCRC().trim(), 0, planet, position, new Quaternion(1, 0, 0, 0));			
+			lairObject = (TangibleObject) core.objectService.createObject(lairTemplate.getLairCRC().trim(), 0, planet, adaptedPosition, new Quaternion(1, 0, 0, 0));			
 		}
 		
 		if(lairObject == null)
@@ -478,8 +483,17 @@ public class SpawnService {
 		
 		lairObject.setOptionsBitmask(Options.ATTACKABLE);
 		lairObject.setPvpBitmask(PvpStatus.Attackable);
-		lairObject.setMaximumCondition(1000 * level);
 		
+		
+		
+		
+		if (lairTemplate.getMobiles()!=null){
+			MobileTemplate mobileTemplate = mobileTemplates.get(lairTemplate.getMobiles().get(0));
+			level = mobileTemplate.getLevel();
+		}
+
+		lairObject.setMaximumCondition(1000 * level);
+
 		LairActor lairActor = new LairActor(lairObject, lairTemplate.getMobileName(), 10, level);
 		
 		if (lairTemplate.getMobiles()!=null)
