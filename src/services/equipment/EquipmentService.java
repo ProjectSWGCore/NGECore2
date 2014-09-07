@@ -115,7 +115,7 @@ public class EquipmentService implements INetworkDispatch {
 		if (canWear(actor, container, item)) {
 			for (String slotName : container.getSlotNamesForObject(item)) {
 				if (container.getSlottedObject(slotName) != null && !container.getSlotNamesForObject(item).iterator().hasNext()) {
-					unequipAppearance(actor, item);
+					unequipAppearance(actor, container.getSlottedObject(slotName));
 					container.transferTo(actor, actor.getSlottedObject("inventory"), container.getSlottedObject(slotName));
 					break;
 				}
