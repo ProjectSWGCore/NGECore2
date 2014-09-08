@@ -65,12 +65,31 @@ public class EquipmentService implements INetworkDispatch {
 		SWGObject container = actor;
 		
 		if (canWear(actor, container, item)) {
-			Vector<String> slotNames = container.getSlotNamesForObject(item);
+			List<Equipment> replacedEquipment = new ArrayList<Equipment>();
 			
-			for (String slotName : slotNames) {
-				if (container.getSlottedObject(slotName) != null && !slotNames.iterator().hasNext()) {
+			for (String slotName : container.getSlotNamesForObject(item)) {
+				if (container.getSlottedObject(slotName) != null) {
+					replacedEquipment.add(actor.getEquipmentForObject(container.getSlottedObject(slotName)));
 					container.transferTo(actor, actor.getSlottedObject("inventory"), container.getSlottedObject(slotName));
-					break;
+				}
+			}
+			
+			container.transferTo(actor, container, item);
+			
+			for (SWGObject replacedItem : replacedEquipment) {
+				if (actor.isWearing(replacedItem)) {
+					String template = ((replacedItem.getAttachment("customServerTemplate") == null) ? replacedItem.getTemplate() : (replacedItem.getTemplate().split("shared_")[0] + "shared_" + ((String) replacedItem.getAttachment("customServerTemplate")) + ".iff"));
+					String serverTemplate = template.replace(".iff", "");
+					
+					PyObject func = core.scriptService.getMethod("scripts/" + serverTemplate.split("shared_" , 2)[0].replace("shared_", ""), serverTemplate.split("shared_" , 2)[1], "unequip");
+					
+					if (func != null) {
+						func.__call__(Py.java2py(core), Py.java2py(actor), Py.java2py(replacedItem));
+					}
+					
+					processItemAtrributes(actor, replacedItem, false);
+				} else {
+					replacedEquipment.remove(replacedItem);
 				}
 			}
 			
@@ -83,8 +102,13 @@ public class EquipmentService implements INetworkDispatch {
 				func.__call__(Py.java2py(core), Py.java2py(actor), Py.java2py(item));
 			}
 			
-			actor.addObjectToEquipList(item);
 			processItemAtrributes(actor, item, true);
+			
+			if (replacedEquipment.size() > 0) {
+				actor.getEquipmentList().removeAll(replacedEquipment);
+			}
+			
+			actor.addObjectToEquipList(item);
 			
 			if (item instanceof WeaponObject) {
 				actor.setWeaponId(item.getObjectID());
@@ -94,6 +118,12 @@ public class EquipmentService implements INetworkDispatch {
 	
 	public void unequip(CreatureObject actor, SWGObject item) {
 		if (actor.isWearing(item)) {
+			if (item instanceof WeaponObject) {
+				actor.setWeaponId(actor.getSlottedObject("default_weapon").getObjectID());
+			}
+			
+			container.transferTo(actor, actor.getSlottedObject("inventory"), item);
+			
 			String template = ((item.getAttachment("customServerTemplate") == null) ? item.getTemplate() : (item.getTemplate().split("shared_")[0] + "shared_" + ((String) item.getAttachment("customServerTemplate")) + ".iff"));
 			String serverTemplate = template.replace(".iff", "");
 			
@@ -103,12 +133,9 @@ public class EquipmentService implements INetworkDispatch {
 				func.__call__(Py.java2py(core), Py.java2py(actor), Py.java2py(item));
 			}
 			
-			if (item instanceof WeaponObject) {
-				actor.setWeaponId(actor.getSlottedObject("default_weapon").getObjectID());
-			}
+			processItemAtrributes(actor, item, false);
 			
 			actor.removeObjectFromEquipList(item);
-			processItemAtrributes(actor, item, false);
 		}
 	}
 	
@@ -116,20 +143,22 @@ public class EquipmentService implements INetworkDispatch {
 		SWGObject container = actor.getSlottedObject("appearance_inventory");
 		
 		if (canWear(actor, container, item)) {
-			Vector<String> slotNames = container.getSlotNamesForObject(item);
-			
-			for (String slotName : slotNames) {
-				if (container.getSlottedObject(slotName) != null && !slotNames.iterator().hasNext()) {
+			for (String slotName : container.getSlotNamesForObject(item)) {
+				if (container.getSlottedObject(slotName) != null) {
 					return;
 				}
 			}
+			
+			container.transferTo(actor, container, item);
 			
 			actor.addObjectToAppearanceEquipList(item);
 		}
 	}
 	
 	public void unequipAppearance(CreatureObject actor, SWGObject item) {
-		if (actor.isWearingAppearance(item) ) {
+		if (actor.isWearingAppearance(item)) {
+			container.transferTo(actor, actor.getSlottedObject("inventory"), item);
+			
 			actor.removeObjectFromAppearanceEquipList(item);
 		}
 	}
@@ -154,9 +183,7 @@ public class EquipmentService implements INetworkDispatch {
 		}
 		
 		if (item.getAttributes().toString().contains("cat_armor")) {
-			if (actor.hasAbility("wear_all_armor")) {
-				return true;
-			} else {
+			if (!actor.hasAbility("wear_all_armor")) {
 				actor.sendSystemMessage("@error_message:insufficient_skill", DisplayType.Broadcast); // I am unsure if this is the right message
 				return false;
 			}
@@ -166,27 +193,21 @@ public class EquipmentService implements INetworkDispatch {
 			String classRequired = item.getStringAttribute("class_required");
 			String profession = ((PlayerObject) actor.getSlottedObject("ghost")).getProfession();
 			
-			if (classRequired.contains(core.playerService.getFormalProfessionName(profession)) || classRequired.equals("None")) {
-				return true;
-			} else {
+			if (!classRequired.contains(core.playerService.getFormalProfessionName(profession)) && !classRequired.equals("None")) {
 				actor.sendSystemMessage("@error_message:insufficient_skill", DisplayType.Broadcast); // I am unsure if this is the right message
 				return false;
 			}
 		}
 		
 		if (item.getStringAttribute("faction_restriction") != null) {
-			if (item.getStringAttribute("faction_restriction").toLowerCase().contentEquals(actor.getFaction()) && actor.getFactionStatus() >= FactionStatus.Combatant) {
-				return true;
-			} else {
+			if (!item.getStringAttribute("faction_restriction").toLowerCase().contentEquals(actor.getFaction()) || actor.getFactionStatus() < FactionStatus.Combatant) {
 				actor.sendSystemMessage("@faction_recruiter:must_be_faction_member_use", DisplayType.Broadcast); // will have to somehow manage prose %TO for faction name
 				return false;
 			}
 		}
 		
 		if (item.getAttributes().containsKey("required_combat_level")) {
-			if (actor.getLevel() >= item.getIntAttribute("required_combat_level")) {
-				return true;
-			} else {
+			if (actor.getLevel() < item.getIntAttribute("required_combat_level")) {
 				actor.sendSystemMessage("@error_message:insufficient_skill", DisplayType.Broadcast); // I am unsure if this is the right message
 				return false;
 			}
@@ -623,7 +644,7 @@ public class EquipmentService implements INetworkDispatch {
 		FileVisitor<Path> fv = new SimpleFileVisitor<Path>() {
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-			    core.scriptService.callScript("scripts/equipment/bonus_sets/", file.getFileName().toString().replace(".py", ""), "addBonusSet", core);
+				core.scriptService.callScript("scripts/equipment/bonus_sets/", file.getFileName().toString().replace(".py", ""), "addBonusSet", core);
 	        		return FileVisitResult.CONTINUE;
 			}
 		};
