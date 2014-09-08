@@ -63,6 +63,7 @@ public class EquipmentService implements INetworkDispatch {
 	
 	public void equip(CreatureObject actor, SWGObject item) {
 		SWGObject container = actor;
+		SWGObject oldContainer = item.getContainer();
 		
 		if (canWear(actor, container, item)) {
 			List<Equipment> replacedEquipment = new ArrayList<Equipment>();
@@ -74,7 +75,11 @@ public class EquipmentService implements INetworkDispatch {
 				}
 			}
 			
-			container.transferTo(actor, container, item);
+			if (oldContainer == null) {
+				container.add(item);
+			} else {
+				oldContainer.transferTo(actor, container, item);
+			}
 			
 			for (SWGObject replacedItem : replacedEquipment) {
 				if (actor.isWearing(replacedItem)) {
@@ -117,12 +122,15 @@ public class EquipmentService implements INetworkDispatch {
 	}
 	
 	public void unequip(CreatureObject actor, SWGObject item) {
+		SWGObject container = actor.getSlottedObject("inventory");
+		SWGObject oldContainer = item.getContainer();
+		
 		if (actor.isWearing(item)) {
 			if (item instanceof WeaponObject) {
 				actor.setWeaponId(actor.getSlottedObject("default_weapon").getObjectID());
 			}
 			
-			container.transferTo(actor, actor.getSlottedObject("inventory"), item);
+			oldContainer.transferTo(actor, container, item);
 			
 			String template = ((item.getAttachment("customServerTemplate") == null) ? item.getTemplate() : (item.getTemplate().split("shared_")[0] + "shared_" + ((String) item.getAttachment("customServerTemplate")) + ".iff"));
 			String serverTemplate = template.replace(".iff", "");
@@ -141,6 +149,7 @@ public class EquipmentService implements INetworkDispatch {
 	
 	public void equipAppearance(CreatureObject actor, SWGObject item) {
 		SWGObject container = actor.getSlottedObject("appearance_inventory");
+		SWGObject oldContainer = item.getContainer();
 		
 		if (canWear(actor, container, item)) {
 			for (String slotName : container.getSlotNamesForObject(item)) {
@@ -149,15 +158,22 @@ public class EquipmentService implements INetworkDispatch {
 				}
 			}
 			
-			container.transferTo(actor, container, item);
+			if (oldContainer == null) {
+				container.add(item);
+			} else {
+				container.transferTo(actor, container, item);
+			}
 			
 			actor.addObjectToAppearanceEquipList(item);
 		}
 	}
 	
 	public void unequipAppearance(CreatureObject actor, SWGObject item) {
+		SWGObject container = actor.getSlottedObject("inventory");
+		SWGObject oldContainer = item.getContainer();
+		
 		if (actor.isWearingAppearance(item)) {
-			container.transferTo(actor, actor.getSlottedObject("inventory"), item);
+			oldContainer.transferTo(actor, container, item);
 			
 			actor.removeObjectFromAppearanceEquipList(item);
 		}
