@@ -35,7 +35,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.TreeMap;
-import java.util.Vector;
 
 import org.python.core.Py;
 import org.python.core.PyObject;
@@ -83,7 +82,7 @@ public class EquipmentService implements INetworkDispatch {
 			}
 			
 			for (Equipment equipment : replacedEquipment) {
-				SWGObject replacedItem = core.objectSerivce.getObject(equipment.getObjectId());
+				SWGObject replacedItem = core.objectService.getObject(equipment.getObjectId());
 				
 				if (actor.isWearing(replacedItem)) {
 					String template = ((replacedItem.getAttachment("customServerTemplate") == null) ? replacedItem.getTemplate() : (replacedItem.getTemplate().split("shared_")[0] + "shared_" + ((String) replacedItem.getAttachment("customServerTemplate")) + ".iff"));
