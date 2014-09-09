@@ -899,7 +899,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	public boolean isWearing(SWGObject object) {
 		for (Equipment equipment : getEquipmentList()) {
-			if (equipment.getObjectId() == object.getObjectId()) {
+			if (equipment.getObjectId() == object.getObjectID()) {
 				return true;
 			}
 		}
@@ -907,10 +907,26 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		return false;
 	}
 	
+	public Equipment getEquipmentForObject(SWGObject object) {
+		for (Equipment equipment : getEquipmentList()) {
+			if (equipment.getObjectId() == object.getObjectID()) {
+				return equipment;
+			}
+		}
+		
+		for (Equipment equipment : getAppearanceEquipmentList()) {
+			if (equipment.getObjectId() == object.getObjectID()) {
+				return equipment;
+			}
+		}
+		
+		return null;
+	}
+	
 	public void removeObjectFromEquipList(SWGObject object) {
 		if (object instanceof TangibleObject) {
 			for (Equipment equipment : getEquipmentList()) {
-				if (equipment.getObjectId() == object.getObjectId()) {
+				if (equipment.getObjectId() == object.getObjectID()) {
 					getEquipmentList().remove(equipment);
 				}
 			}
@@ -1131,7 +1147,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	public boolean isWearingAppearance(SWGObject object) {
 		for (Equipment equipment : getAppearanceEquipmentList()) {
-			if (equipment.getObjectId() == object.getObjectId()) {
+			if (equipment.getObjectId() == object.getObjectID()) {
 				return true;
 			}
 		}
@@ -1142,7 +1158,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	public void removeObjectFromAppearanceEquipList(SWGObject object) {
 		if (object instanceof TangibleObject) {
 			for (Equipment equipment : getAppearanceEquipmentList()) {
-				if (equipment.getObjectId() == object.getObjectId()) {
+				if (equipment.getObjectId() == object.getObjectID()) {
 					getAppearanceEquipmentList().remove(equipment);
 				}
 			}

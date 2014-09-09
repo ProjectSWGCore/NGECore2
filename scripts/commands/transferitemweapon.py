@@ -16,7 +16,11 @@ def run(core, actor, target, commandString):
 			print 'Error: New container is same as old container.'
 			return;
 		
-		oldContainer.transferTo(actor, container, target)  
+		if oldContainer == actor:
+			core.equipmentService.unequip(actor, target)
+		elif container == actor:
+			core.equipmentService.equip(actor, target)
+		else:
+			oldContainer.transferTo(actor, container, target)
 		
 	return
-	
