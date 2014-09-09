@@ -30,6 +30,7 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -81,7 +82,9 @@ public class EquipmentService implements INetworkDispatch {
 				oldContainer.transferTo(actor, container, item);
 			}
 			
-			for (SWGObject replacedItem : replacedEquipment) {
+			for (Equipment equipment : replacedEquipment) {
+				SWGObject replacedItem = core.objectSerivce.getObject(equipment.getObjectId());
+				
 				if (actor.isWearing(replacedItem)) {
 					String template = ((replacedItem.getAttachment("customServerTemplate") == null) ? replacedItem.getTemplate() : (replacedItem.getTemplate().split("shared_")[0] + "shared_" + ((String) replacedItem.getAttachment("customServerTemplate")) + ".iff"));
 					String serverTemplate = template.replace(".iff", "");
@@ -94,7 +97,7 @@ public class EquipmentService implements INetworkDispatch {
 					
 					processItemAtrributes(actor, replacedItem, false);
 				} else {
-					replacedEquipment.remove(replacedItem);
+					replacedEquipment.remove(equipment);
 				}
 			}
 			
