@@ -47,6 +47,12 @@ public class QuestTask {
 	private String waitMarkerCellName;
 	private String commMessageText;
 	private String npcAppearanceTemplate; // NPC Appearance Server Template
+	private String creatureType;
+	private int count;
+	private int minDistance;
+	private int maxDistance;
+	private String relativeOffsetX;
+	private String relativeOffsetY;
 	private String tasksOnComplete;
 	private String serverTemplate;
 	private String itemName;
@@ -280,6 +286,54 @@ public class QuestTask {
 		this.npcAppearanceTemplate = npcAppearanceTemplate;
 	}
 
+	public String getCreatureType() {
+		return creatureType;
+	}
+
+	public void setCreatureType(String creatureType) {
+		this.creatureType = creatureType;
+	}
+
+	public int getCount() {
+		return count;
+	}
+
+	public void setCount(int count) {
+		this.count = count;
+	}
+
+	public int getMinDistance() {
+		return minDistance;
+	}
+
+	public void setMinDistance(int minDistance) {
+		this.minDistance = minDistance;
+	}
+
+	public int getMaxDistance() {
+		return maxDistance;
+	}
+
+	public void setMaxDistance(int maxDistance) {
+		this.maxDistance = maxDistance;
+	}
+
+	public String getRelativeOffsetX() {
+		return relativeOffsetX;
+	}
+
+	public void setRelativeOffsetX(String relativeOffsetX) {
+		this.relativeOffsetX = relativeOffsetX;
+	}
+
+	public String getRelativeOffsetY() {
+		return relativeOffsetY;
+	}
+
+	public void setRelativeOffsetY(String relativeOffsetY) {
+		this.relativeOffsetY = relativeOffsetY;
+	}
+	
 	public boolean isVisible() {
 		return visible;
 	}
