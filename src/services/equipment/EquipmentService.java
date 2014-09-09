@@ -163,7 +163,7 @@ public class EquipmentService implements INetworkDispatch {
 			if (oldContainer == null) {
 				container.add(item);
 			} else {
-				container.transferTo(actor, container, item);
+				oldContainer.transferTo(actor, container, item);
 			}
 			
 			actor.addObjectToAppearanceEquipList(item);
