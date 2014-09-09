@@ -800,7 +800,7 @@ public class PlayerService implements INetworkDispatch {
 				}
 				
 				
-				slots = { "hat", "earring_r", "earring_l", "eyes", "mouth", "neck", "cloak", "back", "chest1", "chest2", "chest3_r", "chest3_l", "bicep_r", "bicep_l", "bracer_lower_r", "bracer_upper_r", "bracer_lower_l", "bracer_upper_l", "wrist_r", "wrist_l", "gloves", "utility_belt", "pants1", "pants2", "shoes" };
+				slots = new String[]  { "hat", "earring_r", "earring_l", "eyes", "mouth", "neck", "cloak", "back", "chest1", "chest2", "chest3_r", "chest3_l", "bicep_r", "bicep_l", "bracer_lower_r", "bracer_upper_r", "bracer_lower_l", "bracer_upper_l", "wrist_r", "wrist_l", "gloves", "utility_belt", "pants1", "pants2", "shoes" };
 				
 				for (String slot : slots) {
 					if (appearance.getSlottedObject(slot) != null) {
