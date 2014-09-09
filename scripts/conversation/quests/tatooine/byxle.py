@@ -11,18 +11,25 @@ def startConversation(core, actor, npc):
 		return
 	
 	quest = player.getQuest('tatooine_eisley_tdc')
-
 	if quest is None:
 		options = Vector()
 		options.add(ConversationOption(OutOfBand.ProsePackage('@conversation/tatooine_eisley_byxle:s_58'), 0))
 		core.conversationService.sendConversationMessage(actor, npc, OutOfBand.ProsePackage('@conversation/tatooine_eisley_byxle:s_56'))
 		core.conversationService.sendConversationOptions(actor, npc, options, handleOptionsOne)
-		return						
-# 	if quest.isCompleted() == True:
-# 		core.conversationService.sendStopConversation(actor, npc, 'conversation/tatooine_eisley_byxle', 's_48')
-# 		return
-	core.conversationService.sendStopConversation(actor, npc, 'conversation/tatooine_eisley_byxle', 's_48')	
+		return
 	
+	if quest.getActiveTask() == 8:
+		options = Vector()
+		# I don't know. He seemed pretty mad.
+		options.add(ConversationOption(OutOfBand.ProsePackage('@conversation/tatooine_eisley_byxle:s_29'), 0))
+		core.conversationService.sendConversationMessage(actor, npc, OutOfBand.ProsePackage('@conversation/tatooine_eisley_byxle:s_17'))
+		core.conversationService.sendConversationOptions(actor, npc, options, handleOptionsFive)
+	elif quest.isCompleted() == True:
+ 		core.conversationService.sendStopConversation(actor, npc, 'conversation/tatooine_eisley_byxle', 's_48')
+ 	else:
+	 	core.conversationService.sendStopConversation(actor, npc, 'conversation/tatooine_eisley_byxle', 's_48')
+	return
+
 def handleOptionsOne(core, actor, npc, selection):
 	options = Vector()
 	# So what do I need to do?
@@ -50,6 +57,24 @@ def handleOptionsThree(core, actor, npc, selection):
 def handleOptionsFour(core, actor, npc, selection):
 	core.conversationService.sendStopConversation(actor, npc, 'conversation/tatooine_eisley_byxle', 's_78')
 	core.questService.sendQuestAcceptWindow(actor, 'quest/tatooine_eisley_tdc')
+	return
+
+def handleOptionsFive(core, actor, npc, selection):
+	options = Vector()
+	# Thanks.
+	options.add(ConversationOption(OutOfBand.ProsePackage('@conversation/tatooine_eisley_byxle:s_69'), 0))
+	core.conversationService.sendConversationMessage(actor, npc, OutOfBand.ProsePackage('@conversation/tatooine_eisley_byxle:s_30'))
+	core.conversationService.sendConversationOptions(actor, npc, options, handleOptionsSix)
+	return
+
+def handleOptionsSix(core, actor, npc, selection):
+	core.conversationService.sendStopConversation(actor, npc, 'conversation/tatooine_eisley_byxle', 's_70')
+	player = actor.getPlayerObject()
+	if player is None:
+		return
+	quest = player.getQuest('tatooine_eisley_tdc')
+	core.questService.completeActiveTask(actor, quest)
+	core.questService.sendQuestCompleteWindow(actor, 'quest/tatooine_eisley_tdc')
 	return
 
 def endConversation(core, actor, npc):
