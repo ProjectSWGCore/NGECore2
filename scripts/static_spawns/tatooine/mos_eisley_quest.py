@@ -16,6 +16,15 @@ def addPlanetSpawns(core, planet):
 	vourk = stcSvc.spawnObject('vourk', 'tatooine', long(0), float(3521.0), float(5.0), float(-4821.0), float(0.42), float(0.91))
 
 	# Byxle Pedette
-	byxlePedette = stcSvc.spawnObject('byxle', 'tatooine', long(0), float(3365), float(5), float(-4639), float(0.99), float(0.12)) 
-
+	byxle = stcSvc.spawnObject('byxle', 'tatooine', long(0), float(3365), float(5), float(-4639), float(0.99), float(0.12)) 
+	
+	# Drixa Dreul
+	drixa = stcSvc.spawnObject('drixa', 'tatooine', long(0), float(3259), float(5), float(-4863), float(-0.38), float(0.92))
+	
+	# Nogri Hessen
+	nogri = stcSvc.spawnObject('nogri', 'tatooine', long(0), float(3449), float(4), float(-5076), float(-0.38), float(0.92))
+	
+	# Jano Bix
+	jano = stcSvc.spawnObject('jano', 'tatooine', long(0), float(3186), float(5), float(-4781), float(-0.38), float(0.92))
+	
 	return
