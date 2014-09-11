@@ -6,4 +6,5 @@ def wait(core, actor):
 
 def activate(core, actor, quest):
 	core.questService.completeActiveTask(actor, quest)
+	core.questService.completeActiveTask(actor, quest)
 	return
