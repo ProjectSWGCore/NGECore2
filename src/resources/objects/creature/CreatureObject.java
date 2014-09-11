@@ -68,19 +68,19 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private transient CreatureMessageBuilder messageBuilder;
 	
 	private transient List<CreatureObject> duelList = Collections.synchronizedList(new ArrayList<CreatureObject>());
-	private transient ScheduledFuture<?> incapTask;
-	private transient ScheduledFuture<?> entertainerExperience;
-	private transient ScheduledFuture<?> inspirationTick;
-	private transient CreatureObject performanceWatchee;
-	private transient CreatureObject performanceListenee;
+	private transient ScheduledFuture<?> incapTask = null;
+	private transient ScheduledFuture<?> entertainerExperience = null;
+	private transient ScheduledFuture<?> inspirationTick = null;
+	private transient CreatureObject performanceWatchee = null;
+	private transient CreatureObject performanceListenee = null;
 	private transient List<CreatureObject> performanceAudience = new ArrayList<CreatureObject>();
-	private transient ScheduledFuture<?> spectatorTask;
+	private transient ScheduledFuture<?> spectatorTask = null;
 	private transient int flourishCount = 0;
-	private transient boolean performingEffect;
-	private transient boolean performingFlourish;
-	private transient TangibleObject conversingNpc;
+	private transient boolean performingEffect = false;
+	private transient boolean performingFlourish = false;
+	private transient TangibleObject conversingNpc = null;
 	private transient long tefTime = 0;
-	private transient SWGObject useTarget;
+	private transient SWGObject useTarget = null;
 	private transient boolean isConstructing = false;
 	
 	public CreatureObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
@@ -107,6 +107,21 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	public void initAfterDBLoad() {
 		super.initAfterDBLoad();
+		duelList = Collections.synchronizedList(new ArrayList<CreatureObject>());
+		incapTask = null;
+		entertainerExperience = null;
+		inspirationTick = null;
+		performanceWatchee = null;
+		performanceListenee = null;
+		performanceAudience = new ArrayList<CreatureObject>();
+		spectatorTask = null;
+		flourishCount = 0;
+		performingEffect = false;
+		performingFlourish = false;
+		conversingNpc = null;
+		tefTime = 0;
+		useTarget = null;
+		isConstructing = false;
 		System.out.println("Name: " + getCustomName());
 		System.out.println("  Cash Credits: " + getCashCredits());
 		System.out.println("  Bank Credits: " + getBankCredits());
