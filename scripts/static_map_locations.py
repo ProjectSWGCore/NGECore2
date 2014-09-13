@@ -141,12 +141,6 @@ def lokLocations(core, planet):
 	mapService.addLocation(planet, 'Nym\'s Stronghold', 440, 5029, 17, 0, 0)
 	mapService.addLocation(planet, 'Imperial outpost', -1920, -3084, 17, 0, 0)
 	
-def kaasLocations(core, planet):
-	mapService = core.mapService
-	
-	# Cities
-	
-	mapService.addLocation(planet, 'Imperial Outpost', -5118, -2386, 17, 0, 0)
 	
 	
 	
