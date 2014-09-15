@@ -29,10 +29,10 @@ def addTemplate(core):
 	mobileTemplate.setSocialGroup("veermok")
 	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(False)
-	mobileTemplate.setOptionsBitmask(128)
+	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_veermok.iff')
+	templates.add('object/mobile/shared_alpha_veermok.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()

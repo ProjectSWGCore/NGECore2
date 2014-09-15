@@ -12,8 +12,6 @@ def addTemplate(core):
 	
 	mobileTemplate.setCreatureName('fambaa')
 	mobileTemplate.setLevel(22)
-	mobileTemplate.setMinLevel(22)
-	mobileTemplate.setMaxLevel(23)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
@@ -26,10 +24,12 @@ def addTemplate(core):
 	mobileTemplate.setHideAmount(325)
 	mobileTemplate.setBoneType("Animal Bones")
 	mobileTemplate.setBoneAmount(675)
+	mobileTemplate.setMilkType('Wild Milk')
+	mobileTemplate.setMilkAmount(400)
 	mobileTemplate.setSocialGroup("fambaa")
 	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(False)
-	mobileTemplate.setOptionsBitmask(128)
+	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_fambaa.iff')
@@ -41,6 +41,9 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_dampen_pain_2')
+	attacks.add('bm_shaken_2')
+	attacks.add('bm_stomp_2')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

@@ -11,7 +11,9 @@ def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
 	mobileTemplate.setCreatureName('bachelor_gualama')
-	mobileTemplate.setLevel(41)
+	mobileTemplate.setLevel(39)
+	mobileTemplate.setMinLevel(39)
+	mobileTemplate.setMaxLevel(41)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 
 	mobileTemplate.setMinSpawnDistance(4)
@@ -19,15 +21,17 @@ def addTemplate(core):
 	mobileTemplate.setDeathblow(False)
 	mobileTemplate.setScale(1)
 	mobileTemplate.setMeatType("Wild Meat")
-	mobileTemplate.setMeatAmount(150)
+	mobileTemplate.setMeatAmount(200)
 	mobileTemplate.setHideType("Wooly Hide")
 	mobileTemplate.setHideAmount(150)
 	mobileTemplate.setBoneType("Animal Bones")
 	mobileTemplate.setBoneAmount(90)
+	mobileTemplate.setMilkType('Wild Milk')
+	mobileTemplate.setMilkAmount(100)
 	mobileTemplate.setSocialGroup("gualama")
 	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(False)
-	mobileTemplate.setOptionsBitmask(128)
+	mobileTemplate.setOptionsBitmask(Options.AGGRESSIVE | Options.ATTACKABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_gualama.iff')
@@ -39,6 +43,9 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_bite_3')
+	attacks.add('bm_defensive_3')
+	attacks.add('bm_kick_3')
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	

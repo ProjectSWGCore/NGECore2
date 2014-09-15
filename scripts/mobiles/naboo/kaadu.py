@@ -26,13 +26,15 @@ def addTemplate(core):
 	mobileTemplate.setHideAmount(85)
 	mobileTemplate.setBoneType("Avian Bones")
 	mobileTemplate.setBoneAmount(70)
+	mobileTemplate.setMilkType('Wild Milk')
+	mobileTemplate.setMilkAmount(60)
 	mobileTemplate.setSocialGroup("kaadu")
 	mobileTemplate.setAssistRange(0)
 	mobileTemplate.setStalker(False)
-	mobileTemplate.setOptionsBitmask(128)
+	mobileTemplate.setOptionsBitmask(Options.ATTACKABLE)
 	
 	templates = Vector()
-	templates.add('object/mobile/shared_kaadu.iff')
+	templates.add('object/mobile/shared_kaadu_hue.iff')
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
@@ -41,6 +43,11 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
+	attacks.add('bm_bite_1')
+	attacks.add('bm_claw_1')
+	attacks.add('bm_hamstring_1')
+	attacks.add('bm_provoke_1')
+	
 	mobileTemplate.setDefaultAttack('creatureMeleeAttack')
 	mobileTemplate.setAttacks(attacks)
 	
