@@ -11,11 +11,11 @@ from java.util import Vector
 def addTemplate(core):
 	mobileTemplate = MobileTemplate()
 	
-	mobileTemplate.setCustomName('Barak')
+	mobileTemplate.setCreatureName('smuggler_broker_barak')
 	mobileTemplate.setLevel(1)
 	mobileTemplate.setDifficulty(Difficulty.NORMAL)
 	mobileTemplate.setSocialGroup("township")
-	mobileTemplate.setOptionsBitmask(Options.INVULNERABLE)
+	mobileTemplate.setOptionsBitmask(Options.INVULNERABLE | Options.CONVERSABLE)
 	
 	templates = Vector()
 	templates.add('object/mobile/shared_smuggler_broker_barak.iff')

@@ -20,6 +20,8 @@ def addPlanetSpawns(core, planet):
 	ankwee.setCustomName2('An\'kwee')
 	ankwee.setOptionsBitmask(256)
 	
+	sarlin = stcSvc.spawnObject('sarlin', 'tatooine', long(0), float(1537), float(7), float(3052), float(0.6), float(0.8))
+
 	#Junkdealer
 	stcSvc.spawnObject('junkdealer', 'tatooine', long(0), float(1271), float(7.7), float(2919), float(0), float(0))
 	stcSvc.spawnObject('junkdealer', 'tatooine', long(0), float(1271), float(7.7), float(2960), float(1), float(0))
