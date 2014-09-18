@@ -11,7 +11,7 @@ def startConversation(core, actor, npc):
 	quest = player.getQuest('tatooine_eisley_tdc')
 	if quest is None:
 		core.conversationService.sendStopConversation(actor, npc, 'conversation/tatooine_eisley_drixa', 's_43')						
- 	elif quest.isCompleted() == True or quest.getActiveTask() > 1:
+ 	elif quest.isCompleted() or quest.getActiveTask() > 1:
 		core.conversationService.sendStopConversation(actor, npc, 'conversation/tatooine_eisley_drixa', 's_40')
 	else:
 		options = Vector()
@@ -47,11 +47,7 @@ def handleOptionsThree(core, actor, npc, selection):
 
 def handleOptionsFour(core, actor, npc, selection):
 	core.conversationService.sendStopConversation(actor, npc, 'conversation/tatooine_eisley_drixa', 's_40')
-	player = actor.getPlayerObject()
-	if player is None:
-		return
-	quest = player.getQuest('tatooine_eisley_tdc')
-	core.questService.handleActivateSignal(actor, npc, quest, 2)
+	core.questService.handleActivateSignal(actor, npc, 'tatooine_eisley_tdc', 'tat_eisley_tdc_e1')
 	return
 
 def endConversation(core, actor, npc):

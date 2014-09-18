@@ -81,12 +81,8 @@ def handleOptionsSeven(core, actor, npc, selection):
 	return
 
 def handleOptionsEight(core, actor, npc, selection):
-	player = actor.getPlayerObject()
-	if player is None:
-		return
 	core.conversationService.sendStopConversation(actor, npc, 'conversation/tatooine_eisley_nogri', 's_42')
-	quest = player.getQuest('tatooine_eisley_tdc')
-	core.questService.handleActivateSignal(actor, npc, quest, 4)
+	core.questService.handleActivateSignal(actor, npc, 'tatooine_eisley_tdc', 'tat_eisley_tdc_e3')
 	return
 
 def endConversation(core, actor, npc):

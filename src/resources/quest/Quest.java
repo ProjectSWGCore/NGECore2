@@ -90,11 +90,14 @@ public class Quest extends Delta implements Serializable {
 	}
 
 	public void setCompleted(boolean isCompleted) {
-		if (isCompleted) {
-			//activeStepBitmask.set(activeStep, false);
-			completedStepBitmask.set(activeStep);
-		}
+		activeStepBitmask.clear();
+		completedStepBitmask.clear();
 		this.isCompleted = isCompleted;
+	}
+	
+	public void setTasksCompleted() {
+		activeStepBitmask.set(0, 16, false);
+		completedStepBitmask.set(0, 16, true);
 	}
 
 	public boolean hasRecievedAward() {
@@ -131,13 +134,28 @@ public class Quest extends Delta implements Serializable {
 		
 		activeStep++;
 		activeStepBitmask.set(activeStep, true);
-		
 		//System.out.println("Active step was "+ (activeStep - 1) + " and is now " + activeStep );
 	}
 	
-	public void complete() {
-		completedStepBitmask.set(activeStep);
+	public void completeQuestStep(int step) {
+		completedStepBitmask.set(step);
+		activeStepBitmask.set(step, false);
+	}
+	
+	public void setQuestStep(int step) {
+		activeStep = step;
+		addActiveStep(step);
+		activeStepBitmask.set(activeStep, true);
+	}
+	
+	public void addActiveStep(int step) {
+		activeStepBitmask.set(step, true);
+	}
+	
+	public void reset() {
+		activeStep = 0;
 		activeStepBitmask.clear();
+		completedStepBitmask.clear();
 	}
 	
 	public ScheduledFuture<?> getTimer() {
@@ -224,5 +242,4 @@ public class Quest extends Delta implements Serializable {
 		//StringUtilities.printBytes(buffer.array());
 		return buffer.array();
 	}
-	
 }
