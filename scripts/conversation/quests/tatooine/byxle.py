@@ -6,28 +6,30 @@ import sys
 
 def startConversation(core, actor, npc):
 	player = actor.getPlayerObject()
-
+	
 	if player is None:
 		return
 	
 	quest = player.getQuest('tatooine_eisley_tdc')
+	
 	if quest is None:
 		options = Vector()
 		options.add(ConversationOption(OutOfBand.ProsePackage('@conversation/tatooine_eisley_byxle:s_58'), 0))
 		core.conversationService.sendConversationMessage(actor, npc, OutOfBand.ProsePackage('@conversation/tatooine_eisley_byxle:s_56'))
 		core.conversationService.sendConversationOptions(actor, npc, options, handleOptionsOne)
 		return
-	
-	if quest.getActiveTask() == 8:
+	elif quest.isCompleted():
+		core.conversationService.sendStopConversation(actor, npc, 'conversation/tatooine_eisley_byxle', 's_48')
+	elif quest.getActiveTask() == 8:
 		options = Vector()
 		# I don't know. He seemed pretty mad.
 		options.add(ConversationOption(OutOfBand.ProsePackage('@conversation/tatooine_eisley_byxle:s_29'), 0))
 		core.conversationService.sendConversationMessage(actor, npc, OutOfBand.ProsePackage('@conversation/tatooine_eisley_byxle:s_17'))
 		core.conversationService.sendConversationOptions(actor, npc, options, handleOptionsFive)
-	elif quest.isCompleted() == True:
- 		core.conversationService.sendStopConversation(actor, npc, 'conversation/tatooine_eisley_byxle', 's_48')
- 	else:
+	 	
+	else:
 	 	core.conversationService.sendStopConversation(actor, npc, 'conversation/tatooine_eisley_byxle', 's_48')
+	 	
 	return
 
 def handleOptionsOne(core, actor, npc, selection):
@@ -69,12 +71,7 @@ def handleOptionsFive(core, actor, npc, selection):
 
 def handleOptionsSix(core, actor, npc, selection):
 	core.conversationService.sendStopConversation(actor, npc, 'conversation/tatooine_eisley_byxle', 's_70')
-	player = actor.getPlayerObject()
-	if player is None:
-		return
-	quest = player.getQuest('tatooine_eisley_tdc')
-	core.questService.completeActiveTask(actor, quest)
-	core.questService.sendQuestCompleteWindow(actor, 'quest/tatooine_eisley_tdc')
+	core.questService.handleActivateSignal(actor, npc, 'tatooine_eisley_tdc', 'tat_eisley_tdc_e9')
 	return
 
 def endConversation(core, actor, npc):
