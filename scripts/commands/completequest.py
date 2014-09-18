@@ -18,8 +18,5 @@ def run(core, actor, target, commandString):
 	if quest is None:
 		return
 	
-	if (quest.getActiveTask() != (core.questService.getQuestData(quest.getName()).getTasks().size() - 1)):
-		return
-	
 	core.questService.completeQuest(player, quest)
 	return
