@@ -24,6 +24,7 @@ def addPlanetSpawns(core, planet):
 	#dalaSocuna.setCustomName2('Commander Da\'la Socuna')
 	#dalaSocuna.setOptionsBitmask(256)
 	
+	diala = stcSvc.spawnObject('diala', 'tatooine', long(0), float(-3105), float(5), float(2314), float(0.48), float(0.88))
 	#Watto's Shop  ****TODO:  Get Proper cells for Watto's Shop once Buildout structures are spawning as intended again.
 	
 	watto = stcSvc.spawnObject('object/mobile/shared_watto.iff', 'tatooine', building.getCellByCellNumber(2), float(4.7), float(-0.5), float(2.4), float(-0.71), float(0), float(0.70), float(0))
