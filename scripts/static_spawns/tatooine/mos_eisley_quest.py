@@ -27,4 +27,6 @@ def addPlanetSpawns(core, planet):
 	# Jano Bix
 	jano = stcSvc.spawnObject('jano', 'tatooine', long(0), float(3186), float(5), float(-4781), float(-0.38), float(0.92))
 	
+	# Kaleb
+	kaleb = stcSvc.spawnObject('kaleb', 'tatooine', long(0), float(3216), float(5), float(-4610), float(0.25), float(1))
 	return
