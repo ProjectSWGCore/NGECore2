@@ -15,13 +15,16 @@ def run(core, actor, target, commandString):
 		if container == oldContainer:
 			print 'Error: New container is same as old container.'
 			return;
-	
-	if oldContainer == actor.getSlottedObject('appearance_inventory'):
-		core.equipmentService.unequipAppearance(actor, target)
-	
-	oldContainer.transferTo(actor, container, target)
-	
-	if container == actor.getSlottedObject('appearance_inventory'):
-		core.equipmentService.equipAppearance(actor, target)		
-	
+		
+		if oldContainer == actor:
+			core.equipmentService.unequip(actor, target)
+		elif oldContainer == actor.getSlottedObject('appearance_inventory'):
+			core.equipmentService.unequipAppearance(actor, target)
+		elif container == actor:
+			core.equipmentService.equip(actor, target)
+		elif container == actor.getSlottedObject('appearance_inventory'):
+			core.equipmentService.equipAppearance(actor, target)
+		else:
+			oldContainer.transferTo(actor, container, target)		
+		
 	return

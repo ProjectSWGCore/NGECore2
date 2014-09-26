@@ -147,11 +147,7 @@ public class QuestService implements INetworkDispatch {
 		
 		// quest.task.ground.go_to_location
 		case "go_to_location":
-			Point3D location = new Point3D(task.getLocationX(), task.getLocationY(), task.getLocationZ());
-			WaypointObject wpGoTo = createWaypoint(task.getWaypointName(), location, task.getPlanet());
-			player.getWaypoints().put(wpGoTo.getObjectID(), wpGoTo);
-			
-			quest.setWaypointId(wpGoTo.getObjectID());
+			// Waypoint created below now
 			break;
 	
 		// quest.task.ground.comm_player
@@ -172,10 +168,7 @@ public class QuestService implements INetworkDispatch {
 			ObjControllerMessage itemCount = new ObjControllerMessage(11, new QuestTaskCounterMessage(quester.getObjectID(), quest, "@quest/groundquests:retrieve_item_counter"));
 			quester.getClient().getSession().write(itemCount.serialize());
 			
-			WaypointObject wpRetrieve = createWaypoint(task.getWaypointName(), new Point3D(task.getLocationX(), task.getLocationY(), task.getLocationZ()), task.getPlanet());
-			player.getWaypoints().put(wpRetrieve.getObjectID(), wpRetrieve);
-			
-			quest.setWaypointId(wpRetrieve.getObjectID());
+			// Waypoint created below now
 			break;
 		
 		// quest.task.ground.timer
@@ -240,6 +233,13 @@ public class QuestService implements INetworkDispatch {
 			break;
 		}
 
+		if (task.createsWaypoint()) {
+			Point3D location = new Point3D(task.getLocationX(), task.getLocationY(), task.getLocationZ());
+			WaypointObject wpGoTo = createWaypoint(task.getWaypointName(), location, task.getPlanet());
+			player.getWaypoints().put(wpGoTo.getObjectID(), wpGoTo);
+			quest.setWaypointId(wpGoTo.getObjectID());
+		}
+		
 		if (!task.isVisible()) {
 			completeActiveTask(quester, quest);
 			return;
@@ -628,6 +628,12 @@ public class QuestService implements INetworkDispatch {
 				if (visitor.getObjectByColumnNameAndIndex("SIGNALS_ON_FAIL", r) != null) task.setSignalsOnFail((String) visitor.getObjectByColumnNameAndIndex("SIGNALS_ON_FAIL", r));
 				if (visitor.getObjectByColumnNameAndIndex("COMM_MESSAGE_TEXT", r) != null) task.setCommMessageText((String) visitor.getObjectByColumnNameAndIndex("COMM_MESSAGE_TEXT", r));
 				if (visitor.getObjectByColumnNameAndIndex("NPC_APPEARANCE_SERVER_TEMPLATE", r) != null) task.setNpcAppearanceTemplate(convertToSharedFile((String) visitor.getObjectByColumnNameAndIndex("NPC_APPEARANCE_SERVER_TEMPLATE", r)));
+				if (visitor.getObjectByColumnNameAndIndex("CREATURE_TYPE", r) != null) task.setCreatureType(convertToSharedFile((String) visitor.getObjectByColumnNameAndIndex("CREATURE_TYPE", r)));
+				if (visitor.getObjectByColumnNameAndIndex("COUNT", r) != null) task.setCount((int) visitor.getObjectByColumnNameAndIndex("COUNT", r));
+				if (visitor.getObjectByColumnNameAndIndex("MIN_DISTANCE", r) != null) task.setMinDistance((int) visitor.getObjectByColumnNameAndIndex("MIN_DISTANCE", r));
+				if (visitor.getObjectByColumnNameAndIndex("MAX_DISTANCE", r) != null) task.setMaxDistance((int) visitor.getObjectByColumnNameAndIndex("MAX_DISTANCE", r));
+				if (visitor.getObjectByColumnNameAndIndex("RELATIVE_OFFSET_X", r) != null) task.setRelativeOffsetX(convertToSharedFile((String) visitor.getObjectByColumnNameAndIndex("RELATIVE_OFFSET_X", r)));
+				if (visitor.getObjectByColumnNameAndIndex("RELATIVE_OFFSET_Y", r) != null) task.setRelativeOffsetY(convertToSharedFile((String) visitor.getObjectByColumnNameAndIndex("RELATIVE_OFFSET_Y", r)));
 				if (visitor.getObjectByColumnNameAndIndex("SERVER_TEMPLATE", r) != null) task.setServerTemplate(convertToSharedFile((String) visitor.getObjectByColumnNameAndIndex("SERVER_TEMPLATE", r)));
 				if (visitor.getObjectByColumnNameAndIndex("NUM_REQUIRED", r) != null) task.setNumRequired((int) visitor.getObjectByColumnNameAndIndex("NUM_REQUIRED", r));
 				if (visitor.getObjectByColumnNameAndIndex("ITEM_NAME", r) != null) task.setItemName((String) visitor.getObjectByColumnNameAndIndex("ITEM_NAME", r));

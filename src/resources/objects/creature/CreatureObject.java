@@ -68,19 +68,19 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	private transient CreatureMessageBuilder messageBuilder;
 	
 	private transient List<CreatureObject> duelList = Collections.synchronizedList(new ArrayList<CreatureObject>());
-	private transient ScheduledFuture<?> incapTask;
-	private transient ScheduledFuture<?> entertainerExperience;
-	private transient ScheduledFuture<?> inspirationTick;
-	private transient CreatureObject performanceWatchee;
-	private transient CreatureObject performanceListenee;
+	private transient ScheduledFuture<?> incapTask = null;
+	private transient ScheduledFuture<?> entertainerExperience = null;
+	private transient ScheduledFuture<?> inspirationTick = null;
+	private transient CreatureObject performanceWatchee = null;
+	private transient CreatureObject performanceListenee = null;
 	private transient List<CreatureObject> performanceAudience = new ArrayList<CreatureObject>();
-	private transient ScheduledFuture<?> spectatorTask;
+	private transient ScheduledFuture<?> spectatorTask = null;
 	private transient int flourishCount = 0;
-	private transient boolean performingEffect;
-	private transient boolean performingFlourish;
-	private transient TangibleObject conversingNpc;
+	private transient boolean performingEffect = false;
+	private transient boolean performingFlourish = false;
+	private transient TangibleObject conversingNpc = null;
 	private transient long tefTime = 0;
-	private transient SWGObject useTarget;
+	private transient SWGObject useTarget = null;
 	private transient boolean isConstructing = false;
 	
 	public CreatureObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String Template) {
@@ -107,6 +107,21 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	public void initAfterDBLoad() {
 		super.initAfterDBLoad();
+		duelList = Collections.synchronizedList(new ArrayList<CreatureObject>());
+		incapTask = null;
+		entertainerExperience = null;
+		inspirationTick = null;
+		performanceWatchee = null;
+		performanceListenee = null;
+		performanceAudience = new ArrayList<CreatureObject>();
+		spectatorTask = null;
+		flourishCount = 0;
+		performingEffect = false;
+		performingFlourish = false;
+		conversingNpc = null;
+		tefTime = 0;
+		useTarget = null;
+		isConstructing = false;
 		System.out.println("Name: " + getCustomName());
 		System.out.println("  Cash Credits: " + getCashCredits());
 		System.out.println("  Bank Credits: " + getBankCredits());
@@ -389,7 +404,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public void setHeight(float height) {
-		height = (((height < 0.7) || (height > 1.5)) ? 1 : height);
+		// height = (((height < 0.7) || (height > 1.5)) ? 1 : height); Babies need height values smaller than that
 		notifyObservers(getBaseline(3).set("height", height), true);
 	}
 	
@@ -899,7 +914,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	public boolean isWearing(SWGObject object) {
 		for (Equipment equipment : getEquipmentList()) {
-			if (equipment.getObjectId() == object.getObjectId()) {
+			if (equipment.getObjectId() == object.getObjectID()) {
 				return true;
 			}
 		}
@@ -907,10 +922,26 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 		return false;
 	}
 	
+	public Equipment getEquipmentForObject(SWGObject object) {
+		for (Equipment equipment : getEquipmentList()) {
+			if (equipment.getObjectId() == object.getObjectID()) {
+				return equipment;
+			}
+		}
+		
+		for (Equipment equipment : getAppearanceEquipmentList()) {
+			if (equipment.getObjectId() == object.getObjectID()) {
+				return equipment;
+			}
+		}
+		
+		return null;
+	}
+	
 	public void removeObjectFromEquipList(SWGObject object) {
 		if (object instanceof TangibleObject) {
 			for (Equipment equipment : getEquipmentList()) {
-				if (equipment.getObjectId() == object.getObjectId()) {
+				if (equipment.getObjectId() == object.getObjectID()) {
 					getEquipmentList().remove(equipment);
 				}
 			}
@@ -1131,7 +1162,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	public boolean isWearingAppearance(SWGObject object) {
 		for (Equipment equipment : getAppearanceEquipmentList()) {
-			if (equipment.getObjectId() == object.getObjectId()) {
+			if (equipment.getObjectId() == object.getObjectID()) {
 				return true;
 			}
 		}
@@ -1142,7 +1173,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	public void removeObjectFromAppearanceEquipList(SWGObject object) {
 		if (object instanceof TangibleObject) {
 			for (Equipment equipment : getAppearanceEquipmentList()) {
-				if (equipment.getObjectId() == object.getObjectId()) {
+				if (equipment.getObjectId() == object.getObjectID()) {
 					getAppearanceEquipmentList().remove(equipment);
 				}
 			}
