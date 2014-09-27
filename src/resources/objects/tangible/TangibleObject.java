@@ -602,7 +602,6 @@ public class TangibleObject extends SWGObject implements Serializable {
 			return false;
 		
 		int containerVolumeLimit = (int) getTemplateData().getAttribute("containerVolumeLimit");
-		System.out.println("containerVolumeLimit " +containerVolumeLimit);
 		if (containerVolumeLimit == 0 || getTemplate().equals("object/tangible/inventory/shared_appearance_inventory.iff")) // appearance inventory - issue #755 String equality vs String identity ...
 			return false;
 		
