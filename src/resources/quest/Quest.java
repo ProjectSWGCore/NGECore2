@@ -76,7 +76,11 @@ public class Quest extends Delta implements Serializable {
 	public void setOwnerId(long ownerId) {
 		this.ownerId = ownerId;
 	}
-
+	
+	public boolean isTaskActive(int taskId) {
+		return activeStepBitmask.get(taskId);
+	}
+	
 	public int getActiveTask() {
 		return activeStep;
 	}
@@ -85,16 +89,18 @@ public class Quest extends Delta implements Serializable {
 		this.activeStep = activeStep;
 	}
 
+	public boolean isTaskCompleted(int taskId) {
+		return completedStepBitmask.get(taskId);
+	}
+	
 	public boolean isCompleted() {
 		return isCompleted;
 	}
-
-	public void setCompleted(boolean isCompleted) {
-		if (isCompleted) {
-			//activeStepBitmask.set(activeStep, false);
-			completedStepBitmask.set(activeStep);
-		}
-		this.isCompleted = isCompleted;
+	
+	public void setCompleted() {
+		activeStepBitmask.clear();
+		completedStepBitmask.set(0, 16, true);
+		this.isCompleted = true;
 	}
 
 	public boolean hasRecievedAward() {
@@ -131,13 +137,31 @@ public class Quest extends Delta implements Serializable {
 		
 		activeStep++;
 		activeStepBitmask.set(activeStep, true);
-		
 		//System.out.println("Active step was "+ (activeStep - 1) + " and is now " + activeStep );
 	}
 	
 	public void complete() {
 		completedStepBitmask.set(activeStep);
+	}
+	
+	public void completeQuestStep(int step) {
+		completedStepBitmask.set(step);
+		activeStepBitmask.set(step, false);
+	}
+	
+	public void setQuestStep(int step) {
+		activeStep = step;
+		addActiveStep(step);
+	}
+	
+	public void addActiveStep(int step) {
+		activeStepBitmask.set(step, true);
+	}
+	
+	public void reset() {
+		activeStep = 0;
 		activeStepBitmask.clear();
+		completedStepBitmask.clear();
 	}
 	
 	public ScheduledFuture<?> getTimer() {
@@ -224,5 +248,4 @@ public class Quest extends Delta implements Serializable {
 		//StringUtilities.printBytes(buffer.array());
 		return buffer.array();
 	}
-	
 }
