@@ -205,6 +205,8 @@ public class ObjectService implements INetworkDispatch {
 				objectList.put(object.getObjectID(), object);
 		}
 		
+		cursor.close(); // Has always to be closed properly or will create undefined locking behaviour!
+		
 		cursor = core.getReusableIdODB().getCursor();
 		
 		while (cursor.hasNext()) {
@@ -212,6 +214,9 @@ public class ObjectService implements INetworkDispatch {
 		}
 		
 		loadBuildings();
+		
+		cursor.close(); // Has always to be closed properly or will create undefined locking behaviour!
+		
 		System.out.println("Finished loading objects.");
 	}
 	
