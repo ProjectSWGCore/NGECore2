@@ -1,7 +1,7 @@
 
 def itemNames():
 	
-	templates=['antenna','brain','eye','gland','heart','stomach'] leg, Nerve Complex,  organ missing
+	templates=['antenna','brain','eye','gland','heart','stomach']# leg, Nerve Complex,  organ missing
 
 	return templates
 	
