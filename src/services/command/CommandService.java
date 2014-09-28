@@ -771,8 +771,17 @@ public class CommandService implements INetworkDispatch  {
 				core.scriptService.callScript("scripts/commands/", command.getCommandName().toLowerCase(), "run", core, attacker, target, "");
 			}
 		}
-		
-		if (attacker.getBuffByName("set_bonus_officer_utility_b_3") != null){
+		Vector<String> inspirationTriggers = new Vector<String>();
+		inspirationTriggers.add("of_buff_def_4");
+		inspirationTriggers.add("of_ae_dm_cc_3");
+		inspirationTriggers.add("of_focus_fire_6");
+		inspirationTriggers.add("of_drillmaster_1");
+		inspirationTriggers.add("of_charge_1");
+		inspirationTriggers.add("of_purge_1");
+		inspirationTriggers.add("of_scatter_1");
+		inspirationTriggers.add("of_stimulator_1");
+		if (attacker.getSkillModBase("of_inspired_action_chance") > 0) {
+			if (inspirationTriggers.contains(command.getCommandName())) {
 			float inspireChance = (float) attacker.getSkillModBase("of_inspired_action_chance") / 100;
 			float r;
 			Random random = new Random();
@@ -780,7 +789,7 @@ public class CommandService implements INetworkDispatch  {
 			if(r <= inspireChance)
 				core.buffService.addGroupBuff(attacker, "of_inspiration_6", attacker);
 				return;
-			
+			}
 		}
 		
 		boolean success = true;
