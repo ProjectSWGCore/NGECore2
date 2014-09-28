@@ -26,6 +26,7 @@ import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteOrder;
 import java.util.Map;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
@@ -769,6 +770,17 @@ public class CommandService implements INetworkDispatch  {
 				System.err.print("Command " + command.getCommandName() + " is considered a combat command by the client but has a regular command script!");
 				core.scriptService.callScript("scripts/commands/", command.getCommandName().toLowerCase(), "run", core, attacker, target, "");
 			}
+		}
+		
+		if (attacker.getBuffByName("set_bonus_officer_utility_b_3") != null){
+			float inspireChance = (float) attacker.getSkillModBase("of_inspired_action_chance") / 100;
+			float r;
+			Random random = new Random();
+			r = random.nextFloat();
+			if(r <= inspireChance)
+				core.buffService.addGroupBuff(attacker, "of_inspiration_6", attacker);
+				return;
+			
 		}
 		
 		boolean success = true;
