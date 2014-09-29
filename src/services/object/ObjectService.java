@@ -145,6 +145,9 @@ public class ObjectService implements INetworkDispatch {
 
 	//private Map<Long, SWGObject> objectList = new ConcurrentHashMap<Long, SWGObject>();
 	private Map<Long, SWGObject> objectList = new ObjectList<Long, SWGObject>();
+	private Map<Long, List<CellObject>> cellMap = new HashMap<Long, List<CellObject>>();
+	private Map<Long, BuildingObject> buildingMap = new HashMap<Long, BuildingObject>();
+	private List<BuildingObject> persistentBuildings = new ArrayList<BuildingObject>();
 	private NGECore core;
 	private DatabaseConnection databaseConnection;
 	private AtomicLong highestId = new AtomicLong();
@@ -205,6 +208,8 @@ public class ObjectService implements INetworkDispatch {
 				objectList.put(object.getObjectID(), object);
 		}
 		
+		cursor.close(); // Has always to be closed properly or will create undefined locking behaviour!
+		
 		cursor = core.getReusableIdODB().getCursor();
 		
 		while (cursor.hasNext()) {
@@ -212,6 +217,9 @@ public class ObjectService implements INetworkDispatch {
 		}
 		
 		loadBuildings();
+		
+		cursor.close(); // Has always to be closed properly or will create undefined locking behaviour!
+		
 		System.out.println("Finished loading objects.");
 	}
 	
@@ -1445,18 +1453,231 @@ public class ObjectService implements INetworkDispatch {
 	
 	public void loadBuildoutObjects(Planet planet) throws InstantiationException, IllegalAccessException {
 		DatatableVisitor buildoutTable = ClientFileManager.loadFile("datatables/buildout/areas_" + planet.getName() + ".iff", DatatableVisitor.class);
-		
+		System.out.println("loadBuildoutObjects");
 		for (int i = 0; i < buildoutTable.getRowCount(); i++) {
 			
 			String areaName = (String) buildoutTable.getObject(i, 0);
 			float x1 = (Float) buildoutTable.getObject(i, 1);
 			float z1 = (Float) buildoutTable.getObject(i, 2);
 			readBuildoutDatatable(ClientFileManager.loadFile("datatables/buildout/" + planet.getName() + "/" + areaName + ".iff", DatatableVisitor.class), planet, x1, z1);
-
 		}
+		
+		addCellsToBuildings();
+		finalizeBuildings();
 	}
 	
 	public void readBuildoutDatatable(DatatableVisitor buildoutTable, Planet planet, float x1, float z1) throws InstantiationException, IllegalAccessException {
+
+		CrcStringTableVisitor crcTable = ClientFileManager.loadFile("misc/object_template_crc_string_table.iff", CrcStringTableVisitor.class);
+		
+		Map<Long, Long> duplicate = new HashMap<Long, Long>();
+
+		for (int i = 0; i < buildoutTable.getRowCount(); i++) {
+			String template;
+			
+			if(buildoutTable.getColumnCount() <= 11)
+				template = crcTable.getTemplateString((Integer) buildoutTable.getObject(i, 0));
+			else
+				template = crcTable.getTemplateString((Integer) buildoutTable.getObject(i, 3));
+			
+			if(template != null) {
+				
+				float px, py, pz, qw, qx, qy, qz, radius;
+				long objectId = 0, containerId = 0, objectId2 = 0, containerId2 = 0;
+				int type = 0, cellIndex = 0, portalCRC;
+				
+				if(buildoutTable.getColumnCount() <= 11) {
+
+					objectId2 = (((Integer) buildoutTable.getObject(i, 0) == 0) ? 0 : Delta.createBuffer(8).putInt((Integer) buildoutTable.getObject(i, 0)).putInt(0xF986FFFF).flip().getLong());			
+					cellIndex = (Integer) buildoutTable.getObject(i, 1);
+					px = (Float) buildoutTable.getObject(i, 2);
+					py = (Float) buildoutTable.getObject(i, 3);
+					pz = (Float) buildoutTable.getObject(i, 4);
+					qw = (Float) buildoutTable.getObject(i, 5);
+					qx = (Float) buildoutTable.getObject(i, 6);
+					qy = (Float) buildoutTable.getObject(i, 7);
+					qz = (Float) buildoutTable.getObject(i, 8);
+					radius = (Float) buildoutTable.getObject(i, 9);
+					portalCRC = (Integer) buildoutTable.getObject(i, 10);
+				
+				} else {
+							
+					// Since the ids are just ints, they append 0xFFFF86F9 to them
+					// This is demonstated in the packet sent to the server when you /target client-spawned objects
+					objectId = (((Integer) buildoutTable.getObject(i, 0) == 0) ? 0 : Delta.createBuffer(8).putInt((Integer) buildoutTable.getObject(i, 0)).putInt(0xF986FFFF).flip().getLong());
+					objectId2 = Long.valueOf((Integer)buildoutTable.getObjectByColumnNameAndIndex("objid", i));
+					containerId = (((Integer) buildoutTable.getObject(i, 1) == 0) ? 0 : Delta.createBuffer(8).putInt((Integer) buildoutTable.getObject(i, 1)).putInt(0xF986FFFF).flip().getLong());
+					containerId2 = Long.valueOf((Integer)buildoutTable.getObjectByColumnNameAndIndex("container", i));
+					type = (Integer) buildoutTable.getObject(i, 2);
+					cellIndex = (Integer) buildoutTable.getObject(i, 4);
+					
+					px = (Float) buildoutTable.getObject(i, 5);
+					py = (Float) buildoutTable.getObject(i, 6);
+					pz = (Float) buildoutTable.getObject(i, 7);
+					qw = (Float) buildoutTable.getObject(i, 8);
+					qx = (Float) buildoutTable.getObject(i, 9);
+					qy = (Float) buildoutTable.getObject(i, 10);
+					qz = (Float) buildoutTable.getObject(i, 11);
+					radius = (Float) buildoutTable.getObject(i, 12);
+					portalCRC = (Integer) buildoutTable.getObject(i, 13);
+					
+				}
+				
+				// Treeku - Refactored to work around duplicate objectIds
+				// Required for instances/heroics which are duplicated ie. 10 times
+				if(!template.equals("object/cell/shared_cell.iff") && objectId != 0 && getObject(objectId) != null) {
+					SWGObject object = getObject(objectId);
+					
+					// Same coordinates is a true duplicate
+					if ((px + ((containerId == 0) ? 0 : x1)) == object.getPosition().x &&
+						py == object.getPosition().y &&
+						(pz + ((containerId == 0) ? 0 : z1)) == object.getPosition().z) {
+						//System.out.println("Duplicate buildout object: " + template);
+						continue;
+					}
+				}
+				
+				if (duplicate.containsKey(containerId)) {
+					containerId = duplicate.get(containerId);
+				}
+				
+				String planetName = planet.getName();
+				
+				// TODO needs to a way to work for mustafar and kashyyyk which both have instances
+				if (objectId != 0 && getObject(objectId) != null && (planetName.contains("dungeon") || planetName.contains("adventure"))) {
+					SWGObject container = getObject(containerId);
+					float x = (px + ((container == null) ? x1 : container.getPosition().x));
+					float z = (pz + ((container == null) ? z1 : container.getPosition().z));
+					String key = "" + CRC.StringtoCRC(planet.getName()) + CRC.StringtoCRC(template) + type + containerId + cellIndex + x + py + z;
+					long newObjectId = 0;
+					
+					if (core.getDuplicateIdODB().contains(key)) {
+						newObjectId = ((DuplicateId) core.getDuplicateIdODB().get(key)).getObjectId();
+					} else {
+						newObjectId = generateObjectID();
+						core.getDuplicateIdODB().put(key, new DuplicateId(key, newObjectId));
+					}
+					
+					duplicate.put(objectId, newObjectId);
+					objectId = newObjectId;
+				}
+
+				List<Long> containers = new ArrayList<Long>();
+				SWGObject object;
+				if(objectId != 0 && containerId == 0) {		
+					if(portalCRC != 0) {
+					
+						if (core.getSWGObjectODB().contains(objectId) && !duplicate.containsValue(objectId)){
+							continue;
+						}
+						containers.add(objectId);
+						object = createObject(template, objectId, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, true, true);
+						object.setAttachment("childObjects", null);
+
+						buildingMap.put(objectId2, ((BuildingObject) object));
+						
+						/*if (!duplicate.containsValue(objectId)) {
+							((BuildingObject) object).createTransaction(core.getBuildingODB().getEnvironment());
+							core.getBuildingODB().put((BuildingObject) object, Long.class, BuildingObject.class, ((BuildingObject) object).getTransaction());
+							((BuildingObject) object).getTransaction().commitSync();
+						}*/
+					} else {
+						object = createObject(template, 0, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, false, true);
+					}
+					if(object == null)
+						continue;
+					object.setContainerPermissions(WorldPermissions.WORLD_PERMISSIONS);
+					if(radius > 256)
+						object.setAttachment("bigSpawnRange", new Boolean(true));
+					if (!duplicate.containsValue(objectId) && object instanceof BuildingObject && portalCRC != 0){
+						persistentBuildings.add((BuildingObject) object);
+					}		
+					
+				} else if(containerId != 0) {
+					object = createObject(template, 0, planet, new Point3D(px, py, pz), new Quaternion(qw, qx, qy, qz), null, false, true);
+					if(containers.contains(containerId)) {
+						object.setContainerPermissions(WorldPermissions.WORLD_PERMISSIONS);
+						object.setisInSnapshot(false);
+						containers.add(objectId);
+					}
+					if(object instanceof CellObject && cellIndex != 0) {
+						object.setContainerPermissions(WorldCellPermissions.WORLD_CELL_PERMISSIONS);
+						((CellObject) object).setCellNumber(cellIndex);
+						List<CellObject> cellList = cellMap.get(containerId2);
+						if (cellList != null){
+							cellList.add(((CellObject) object));
+							cellMap.put(containerId2, cellList);
+						} else {
+							cellList = new ArrayList<CellObject>();
+							cellList.add(((CellObject) object));
+							cellMap.put(containerId2, cellList);
+						}
+					}
+//					SWGObject parent = getObject(containerId);
+//					
+//					if(parent != null && object != null) {
+//						if(parent instanceof BuildingObject && ((BuildingObject) parent).getCellByCellNumber(cellIndex) != null)
+//							continue;
+//						parent.add(object);
+//					}
+				} else {
+					object = createObject(template, 0, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, false, true);
+					object.setContainerPermissions(WorldPermissions.WORLD_PERMISSIONS);
+					
+				}
+				
+				if (object != null && object instanceof TangibleObject && !(object instanceof CreatureObject)) {
+					((TangibleObject) object).setStaticObject(true);
+				}
+				
+				//System.out.println("Spawning: " + template + " at: X:" + object.getPosition().x + " Y: " + object.getPosition().y + " Z: " + object.getPosition().z);
+				if(object != null)
+					object.setAttachment("isBuildout", new Boolean(true));
+			}
+				
+			
+		}
+
+//		for(BuildingObject building : persistentBuildings) {
+//			building.setAttachment("buildoutBuilding", true);
+//			core.getSWGObjectODB().put(building.getObjectID(), building);
+//			destroyObject(building);
+//		}
+		
+	}
+	 
+	private void addCellsToBuildings(){
+	
+		Iterator it = buildingMap.entrySet().iterator();
+	    while (it.hasNext()) {
+	        Map.Entry pairs = (Map.Entry)it.next();
+	        long buildingId = (long) pairs.getKey();
+	        BuildingObject building = (BuildingObject)pairs.getValue();
+			//System.out.println("We have buildingId " +buildingId);
+			List<CellObject> cellList = cellMap.get(buildingId);
+			if (cellList!=null) {
+				System.out.println("We have " + cellList.size() + " cells");
+				for (CellObject cell : cellList){
+					building.add(cell);
+					System.out.println("Building : " + building.getTemplate() + " cell " + cell.getCellNumber());
+				}
+			} else {/*System.out.println("Cellist null");*/}
+	        	        
+	        it.remove(); 
+	    }	
+	}
+	
+	private void finalizeBuildings(){
+		
+		for(BuildingObject building : persistentBuildings) {
+			building.setAttachment("buildoutBuilding", true);
+			core.getSWGObjectODB().put(building.getObjectID(), building);
+			destroyObject(building);
+		}
+	}
+	
+	
+	public void readBuildoutDatatableOLD(DatatableVisitor buildoutTable, Planet planet, float x1, float z1) throws InstantiationException, IllegalAccessException {
 
 		CrcStringTableVisitor crcTable = ClientFileManager.loadFile("misc/object_template_crc_string_table.iff", CrcStringTableVisitor.class);
 		List<BuildingObject> persistentBuildings = new ArrayList<BuildingObject>();

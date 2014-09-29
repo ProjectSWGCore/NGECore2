@@ -1,7 +1,7 @@
 
 def itemNames():
 	
-	return ['aeromagnifier','comlink',control_box','droid_motor_red']
+	return ['aeromagnifier','comlink','control_box','droid_motor_red']
 
 def itemChances():
 
