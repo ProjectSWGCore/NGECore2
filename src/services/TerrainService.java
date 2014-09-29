@@ -200,7 +200,7 @@ public class TerrainService {
 
 	
 	public void loadSnapShotObjects() {
-		
+
 		Map<Planet, Thread> threadMap = new HashMap<Planet, Thread>();
 		
 		for(final Planet planet : planets) {
@@ -221,7 +221,7 @@ public class TerrainService {
 					}
 					
 					if (options != null && options.getInt("LOAD.BUILDOUT_OBJECTS") > 0) {
-						if (!core.getExcludedDevelopers().contains(System.getProperty("user.name"))){								
+						if (!core.getExcludedDevelopers().contains(System.getProperty("user.name"))){	
 							if (! options.keyExists("LOAD.BUILDOUT_ONLY_FOR")){
 								try {
 									System.out.println("Loading buildout objects for: " + planet.getName());
