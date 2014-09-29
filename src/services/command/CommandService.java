@@ -26,6 +26,7 @@ import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteOrder;
 import java.util.Map;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
@@ -768,6 +769,26 @@ public class CommandService implements INetworkDispatch  {
 			if (FileUtilities.doesFileExist("scripts/commands/" + command.getCommandName().toLowerCase() + ".py")) {
 				System.err.print("Command " + command.getCommandName() + " is considered a combat command by the client but has a regular command script!");
 				core.scriptService.callScript("scripts/commands/", command.getCommandName().toLowerCase(), "run", core, attacker, target, "");
+			}
+		}
+		Vector<String> inspirationTriggers = new Vector<String>();
+		inspirationTriggers.add("of_buff_def_4");
+		inspirationTriggers.add("of_ae_dm_cc_3");
+		inspirationTriggers.add("of_focus_fire_6");
+		inspirationTriggers.add("of_drillmaster_1");
+		inspirationTriggers.add("of_charge_1");
+		inspirationTriggers.add("of_purge_1");
+		inspirationTriggers.add("of_scatter_1");
+		inspirationTriggers.add("of_stimulator_1");
+		if (attacker.getSkillModBase("of_inspired_action_chance") > 0) {
+			if (inspirationTriggers.contains(command.getCommandName())) {
+			float inspireChance = (float) attacker.getSkillModBase("of_inspired_action_chance") / 100;
+			float r;
+			Random random = new Random();
+			r = random.nextFloat();
+			if(r <= inspireChance)
+				core.buffService.addGroupBuff(attacker, "of_inspiration_6", attacker);
+				return;
 			}
 		}
 		
