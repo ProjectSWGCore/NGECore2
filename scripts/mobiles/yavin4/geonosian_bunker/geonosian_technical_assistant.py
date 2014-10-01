@@ -30,12 +30,12 @@ def addTemplate(core):
 	mobileTemplate.setTemplates(templates)
 
 	weaponTemplates = Vector()
-	weapontemplate = WeaponTemplate('object/weapon/ranged/pistol/shared_geonosian_sonic_blaster_loot.iff', WeaponType.CARBINE, 1.0, 15, 'energy')
+	weapontemplate = WeaponTemplate('object/weapon/ranged/pistol/shared_geonosian_sonic_blaster_loot.iff', WeaponType.PISTOL, 0.4, 15, 'energy')
 	weaponTemplates.add(weapontemplate)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 
 	attacks = Vector()
-	mobileTemplate.setDefaultAttack('rangedshotpistol')
+	mobileTemplate.setDefaultAttack('rangedShotpistol')
 	mobileTemplate.setAttacks(attacks)
 	
 	lootPoolNames_1 = ['Junk']

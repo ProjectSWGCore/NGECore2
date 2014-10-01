@@ -27,15 +27,15 @@ def addTemplate(core):
 	mobileTemplate.setTemplates(templates)
 
 	weaponTemplates = Vector()
-	weapontemplate = WeaponTemplate('object/weapon/ranged/carbine/shared_carbine_dh17.iff', WeaponType.CARBINE, 1.0, 15, 'energy')
+	weapontemplate = WeaponTemplate('object/weapon/ranged/carbine/shared_carbine_dh17.iff', WeaponType.CARBINE, 0.6, 15, 'energy')
 	weaponTemplates.add(weapontemplate)
 	weapontemplate1 = WeaponTemplate('object/weapon/melee/polearm/shared_lance_electric_polearm.iff', WeaponType.POLEARMMELEE, 1.0, 6, 'kinetic')
 	weaponTemplates.add(weapontemplate1)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
-	mobileTemplate.setDefaultAttack('rangedShotpistol')
-	mobileTemplate.setDefaultAttack('meleehit')
+	mobileTemplate.setDefaultAttack('rangedShot')
+	mobileTemplate.setDefaultAttack('meleeHit')
 	mobileTemplate.setAttacks(attacks)
 	
 	core.spawnService.addMobileTemplate('evil_hermit', mobileTemplate)

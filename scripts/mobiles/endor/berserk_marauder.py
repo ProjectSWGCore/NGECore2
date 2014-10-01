@@ -30,7 +30,7 @@ def addTemplate(core):
 	mobileTemplate.setTemplates(templates)
 
 	weaponTemplates = Vector()
-	weapontemplate = WeaponTemplate('object/weapon/melee/polearm/shared_polearm_vibro_axe.iff', WeaponType.TWOHANDEDMELEE, 1.0, 5, 'kinetic')
+	weapontemplate = WeaponTemplate('object/weapon/melee/polearm/shared_polearm_vibro_axe.iff', WeaponType.POLEARMMELEE, 1.0, 5, 'kinetic')
 	weaponTemplates.add(weapontemplate)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 

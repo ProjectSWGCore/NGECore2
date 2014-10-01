@@ -44,7 +44,7 @@ def addTemplate(core):
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
-	weapontemplate = WeaponTemplate('object/weapon/ranged/pistol/shared_pistol_cdef.iff', WeaponType.PISTOL, 1.0, 15, 'energy')
+	weapontemplate = WeaponTemplate('object/weapon/ranged/pistol/shared_pistol_cdef.iff', WeaponType.PISTOL, 0.4, 15, 'energy')
 	weaponTemplates.add(weapontemplate)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	

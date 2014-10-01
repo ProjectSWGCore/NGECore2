@@ -28,7 +28,7 @@ def addTemplate(core):
 	mobileTemplate.setTemplates(templates)
 	
 	weaponTemplates = Vector()
-	weapontemplate = WeaponTemplate('object/weapon/ranged/carbine/shared_carbine_cdef.iff', WeaponType.CARBINE, 1.0, 15, 'energy')
+	weapontemplate = WeaponTemplate('object/weapon/ranged/carbine/shared_carbine_cdef.iff', WeaponType.CARBINE, 0.6, 15, 'energy')
 	weaponTemplates.add(weapontemplate)
 	weapontemplate1 = WeaponTemplate('object/weapon/melee/sword/shared_sword_01.iff', WeaponType.ONEHANDEDMELEE, 1.0, 5, 'kinetic')
 	weaponTemplates.add(weapontemplate1)
@@ -36,6 +36,7 @@ def addTemplate(core):
 	
 	attacks = Vector()
 	mobileTemplate.setDefaultAttack('rangedShot')
+	mobileTemplate.setDefaultAttack('meleeHit')
 	mobileTemplate.setAttacks(attacks)
 	
 	core.spawnService.addMobileTemplate('jabba_enforcer', mobileTemplate)

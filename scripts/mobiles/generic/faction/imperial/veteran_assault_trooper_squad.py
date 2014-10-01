@@ -35,7 +35,7 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
-	mobileTemplate.setDefaultAttack('rangedShot')
+	mobileTemplate.setDefaultAttack('rangedShotrifle')
 	mobileTemplate.setAttacks(attacks)
 	
 	core.spawnService.addMobileTemplate('Vet_assault_trooper_squad', mobileTemplate)

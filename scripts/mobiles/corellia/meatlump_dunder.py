@@ -43,12 +43,12 @@ def addTemplate(core):
 	mobileTemplate.setTemplates(templates)
 
 	weaponTemplates = Vector()
-	weapontemplate = WeaponTemplate('object/weapon/ranged/pistol/shared_pistol_d18.iff', WeaponType.PISTOL, 1.0, 24, 'energy')
+	weapontemplate = WeaponTemplate('object/weapon/ranged/pistol/shared_pistol_d18.iff', WeaponType.PISTOL, 0.4, 24, 'energy')
 	weaponTemplates.add(weapontemplate)
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 
 	attacks = Vector()
-	mobileTemplate.setDefaultAttack('rangedShot')
+	mobileTemplate.setDefaultAttack('rangedShotpistol')
 	mobileTemplate.setAttacks(attacks)
 	
 	lootPoolNames_1 = ['Junk']
