@@ -331,7 +331,7 @@ public class CharacterService implements INetworkDispatch {
 				missionBag.setStaticObject(false);
 				
 				object._add(inventory);
-				object._add(appInventory);
+				//object._add(appInventory);
 				object._add(datapad);
 				object._add(bank);
 				object._add(missionBag);
