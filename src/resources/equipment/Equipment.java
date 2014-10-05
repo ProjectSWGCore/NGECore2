@@ -68,7 +68,7 @@ public class Equipment extends Delta {
 		
 		TangibleObject object = (TangibleObject) getObject();
 		
-		if (object.getCustomization	().length > 0) {
+		if (object.getCustomization().length == 0) {
 			synchronized(objectMutex) {
 				int size = 19 + object.getCustomization	().length;
 					
