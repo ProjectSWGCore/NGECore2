@@ -1543,7 +1543,8 @@ public class ObjectService implements INetworkDispatch {
 				
 				// Treeku - Refactored to work around duplicate objectIds
 				// Required for instances/heroics which are duplicated ie. 10 times
-				if(!template.equals("object/cell/shared_cell.iff") && objectId != 0 && getObject(objectId) != null) {
+				//if(!template.equals("object/cell/shared_cell.iff") && objectId != 0 && getObject(objectId) != null) {
+				if(!template.equals("object/cell/shared_cell.iff") && objectId != 0 && checkIfObjectAlreadyInList(objectId)) {
 					SWGObject object = getObject(objectId);
 					
 					// Same coordinates is a true duplicate
@@ -1562,7 +1563,8 @@ public class ObjectService implements INetworkDispatch {
 				String planetName = planet.getName();
 				
 				// TODO needs to a way to work for mustafar and kashyyyk which both have instances
-				if (objectId != 0 && getObject(objectId) != null && (planetName.contains("dungeon") || planetName.contains("adventure"))) {
+				//if (objectId != 0 && getObject(objectId) != null && (planetName.contains("dungeon") || planetName.contains("adventure"))) {
+				if (objectId != 0 && checkIfObjectAlreadyInList(objectId) && (planetName.contains("dungeon") || planetName.contains("adventure"))) {
 					SWGObject container = getObject(containerId);
 					float x = (px + ((container == null) ? x1 : container.getPosition().x));
 					float z = (pz + ((container == null) ? z1 : container.getPosition().z));
