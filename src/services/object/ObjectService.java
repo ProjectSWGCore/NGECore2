@@ -1148,9 +1148,10 @@ public class ObjectService implements INetworkDispatch {
 					System.err.println("NULL Client");
 					return;
 				}
+				
 				CreatureObject creature = null;
 
-				if(objectId != 0 && objectId != 0L && getObject(objectId) == null) {
+				if(objectId != 0L && getObject(objectId) == null) {
 					creature = getCreatureFromDB(objectId);
 					if(creature == null) {
 						System.err.println("Cant get creature from db");
