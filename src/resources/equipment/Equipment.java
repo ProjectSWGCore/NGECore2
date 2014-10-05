@@ -60,13 +60,8 @@ public class Equipment extends Delta {
 	public byte[] getBytes() {
 		SWGObject sobject = getObject();
 		
-		if (!(sobject instanceof TangibleObject)) {
-			if (sobject == null) {
-				System.err.println("Serious error: Equipment object is null in objectList.");
-			} else {
-				System.err.println("Serious error: Equipment object isn't a TangibleObject");
-			}
-			
+		if (sobject == null) {
+			System.err.println("Serious error: Equipment object is null in objectList.");
 			return null;
 		}
 		
