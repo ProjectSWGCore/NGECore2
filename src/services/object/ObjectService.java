@@ -575,7 +575,8 @@ public class ObjectService implements INetworkDispatch {
 			if (objectList.containsKey(objectID)) {
 				System.err.println("getObject(): object is null but objectList contains objectID key");
 			} else {
-//				System.err.println("getObject(): object is null");
+				System.err.println("getObject(): object of id "+ objectID + "is null. Destroying object.");
+				destroyObject(object,0);				
 			}
 		}
 		
