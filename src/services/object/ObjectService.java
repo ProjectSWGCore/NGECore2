@@ -1229,7 +1229,7 @@ public class ObjectService implements INetworkDispatch {
 					if(object.getParentId() != 0 && object.getContainer() == null)
 						object.setParent(getObject(object.getParentId()));
 					object.getContainerInfo(object.getTemplate());
-					if(getObject(object.getObjectID()) == null)
+					if(getObject(object.getObjectID()) != null)
 						objectList.put(object.getObjectID(), object);					
 				});
 
