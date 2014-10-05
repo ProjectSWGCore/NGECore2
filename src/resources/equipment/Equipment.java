@@ -93,8 +93,10 @@ public class Equipment extends Delta {
 				return buffer.array();
 			}
 		} else {
-			throw new IndexOutOfBoundsException(); //null or 0 index is out of bounds
+			System.err.println("Serious error: Equipment object is null in objectList.");
 		}
+		
+		return null;
 	}
 	
 }
