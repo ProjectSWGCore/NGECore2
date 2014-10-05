@@ -68,28 +68,32 @@ public class Equipment extends Delta {
 		
 		TangibleObject object = (TangibleObject) getObject();
 		
-		synchronized(objectMutex) {
-			int size = 19 + object.getCustomization	().length;
+		if (object.getCustomization	().length > 0) {
+			synchronized(objectMutex) {
+				int size = 19 + object.getCustomization	().length;
+					
+				if (object instanceof WeaponObject) {
+					size += ((WeaponObject) object).getBaseline(3).getBaseline().array().length;
+					size += ((WeaponObject) object).getBaseline(6).getBaseline().array().length;
+				}
 				
-			if (object instanceof WeaponObject) {
-				size += ((WeaponObject) object).getBaseline(3).getBaseline().array().length;
-				size += ((WeaponObject) object).getBaseline(6).getBaseline().array().length;
+				IoBuffer buffer = createBuffer(size);
+				buffer.putShort((short) object.getCustomization().length);
+				buffer.put(object.getCustomization());
+				buffer.putInt(object.getArrangementId());
+				buffer.putLong(object.getObjectID());
+				buffer.putInt(CRC.StringtoCRC(object.getTemplate()));
+				buffer.put(getBoolean((object instanceof WeaponObject)));
+				if (object instanceof WeaponObject) {
+					buffer.put(((WeaponObject) object).getBaseline(3).getBaseline().array());
+					buffer.put(((WeaponObject) object).getBaseline(6).getBaseline().array());
+				}
+				buffer.flip();
+				
+				return buffer.array();
 			}
-			
-			IoBuffer buffer = createBuffer(size);
-			buffer.putShort((short) object.getCustomization().length);
-			buffer.put(object.getCustomization());
-			buffer.putInt(object.getArrangementId());
-			buffer.putLong(object.getObjectID());
-			buffer.putInt(CRC.StringtoCRC(object.getTemplate()));
-			buffer.put(getBoolean((object instanceof WeaponObject)));
-			if (object instanceof WeaponObject) {
-				buffer.put(((WeaponObject) object).getBaseline(3).getBaseline().array());
-				buffer.put(((WeaponObject) object).getBaseline(6).getBaseline().array());
-			}
-			buffer.flip();
-			
-			return buffer.array();
+		} else {
+			throw new IndexOutOfBoundsException(); //null or 0 index is out of bounds
 		}
 	}
 	
