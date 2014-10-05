@@ -575,7 +575,8 @@ public class ObjectService implements INetworkDispatch {
 			if (objectList.containsKey(objectID)) {
 				System.err.println("getObject(): object is null but objectList contains objectID key");
 			} else {
-//				System.err.println("getObject(): object is null");
+				System.err.println("getObject(): object is null");
+				Thread.currentThread().dumpStack();
 			}
 		}
 		
@@ -1147,8 +1148,10 @@ public class ObjectService implements INetworkDispatch {
 					System.err.println("NULL Client");
 					return;
 				}
+				
 				CreatureObject creature = null;
-				if(getObject(objectId) == null) {
+
+				if(objectId != 0L && getObject(objectId) == null) {
 					creature = getCreatureFromDB(objectId);
 					if(creature == null) {
 						System.err.println("Cant get creature from db");
@@ -1165,7 +1168,7 @@ public class ObjectService implements INetworkDispatch {
 				} else {
 					
 					if (!(getObject(objectId) instanceof CreatureObject)) {
-						System.out.println("Character is not an instance of CreatureObject!");
+						System.out.println("Character is not an instance of CreatureObject or is null!");
 						return;
 					}
 					
@@ -1222,14 +1225,18 @@ public class ObjectService implements INetworkDispatch {
 				});
 				
 				creature.viewChildren(creature, true, true, (object) -> {
-					if(object.getMutex() == null)
-						object.initializeBaselines();
-						object.initAfterDBLoad();
-					if(object.getParentId() != 0 && object.getContainer() == null)
-						object.setParent(getObject(object.getParentId()));
-					object.getContainerInfo(object.getTemplate());
-					if(getObject(object.getObjectID()) == null)
-						objectList.put(object.getObjectID(), object);					
+					if (object != null) {
+						if(object.getMutex() == null)
+							object.initializeBaselines();
+							object.initAfterDBLoad();
+						if(object.getParentId() != 0 && object.getContainer() == null)
+							object.setParent(getObject(object.getParentId()));
+						object.getContainerInfo(object.getTemplate());
+						if(getObject(object.getObjectID()) != null)
+							objectList.put(object.getObjectID(), object);
+					} else {
+						Thread.currentThread().dumpStack();
+					}
 				});
 
 				if(creature.getParentId() != 0) {
