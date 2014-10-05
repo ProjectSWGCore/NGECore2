@@ -58,45 +58,43 @@ public class Equipment extends Delta {
 	}
 	
 	public byte[] getBytes() {
-		if (!(getObject() instanceof TangibleObject)) {
-			if (getObject() == null) {
+		SWGObject sobject = getObject();
+		
+		if (!(sobject instanceof TangibleObject)) {
+			if (sobject == null) {
 				System.err.println("Serious error: Equipment object is null in objectList.");
 			} else {
 				System.err.println("Serious error: Equipment object isn't a TangibleObject");
 			}
+			
+			return null;
 		}
 		
-		TangibleObject object = (TangibleObject) getObject();
+		TangibleObject object = (TangibleObject) sobject;
 		
-		if (object.getCustomization().length == 0) {
-			synchronized(objectMutex) {
-				int size = 19 + object.getCustomization	().length;
-					
-				if (object instanceof WeaponObject) {
-					size += ((WeaponObject) object).getBaseline(3).getBaseline().array().length;
-					size += ((WeaponObject) object).getBaseline(6).getBaseline().array().length;
-				}
+		synchronized(objectMutex) {
+			int size = 19 + object.getCustomization	().length;
 				
-				IoBuffer buffer = createBuffer(size);
-				buffer.putShort((short) object.getCustomization().length);
-				buffer.put(object.getCustomization());
-				buffer.putInt(object.getArrangementId());
-				buffer.putLong(object.getObjectID());
-				buffer.putInt(CRC.StringtoCRC(object.getTemplate()));
-				buffer.put(getBoolean((object instanceof WeaponObject)));
-				if (object instanceof WeaponObject) {
-					buffer.put(((WeaponObject) object).getBaseline(3).getBaseline().array());
-					buffer.put(((WeaponObject) object).getBaseline(6).getBaseline().array());
-				}
-				buffer.flip();
-				
-				return buffer.array();
+			if (object instanceof WeaponObject) {
+				size += ((WeaponObject) object).getBaseline(3).getBaseline().array().length;
+				size += ((WeaponObject) object).getBaseline(6).getBaseline().array().length;
 			}
-		} else {
-			System.err.println("Serious error: Equipment object is null in objectList.");
+			
+			IoBuffer buffer = createBuffer(size);
+			buffer.putShort((short) object.getCustomization().length);
+			buffer.put(object.getCustomization());
+			buffer.putInt(object.getArrangementId());
+			buffer.putLong(object.getObjectID());
+			buffer.putInt(CRC.StringtoCRC(object.getTemplate()));
+			buffer.put(getBoolean((object instanceof WeaponObject)));
+			if (object instanceof WeaponObject) {
+				buffer.put(((WeaponObject) object).getBaseline(3).getBaseline().array());
+				buffer.put(((WeaponObject) object).getBaseline(6).getBaseline().array());
+			}
+			buffer.flip();
+			
+			return buffer.array();
 		}
-		
-		return null;
 	}
 	
 }
