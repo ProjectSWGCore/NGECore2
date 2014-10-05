@@ -21,6 +21,9 @@
  ******************************************************************************/
 package resources.objects.creature;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -1431,6 +1434,9 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	
 	public void sendBaselines(Client destination) {	
 		if (destination != null && destination.getSession() != null) {
+			
+			//objectFieldDiagnosis();
+			
 			destination.getSession().write(getBaseline(3).getBaseline());
 			destination.getSession().write(getBaseline(6).getBaseline());
 			if (destination == getClient()) {
@@ -1449,6 +1455,45 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 				destination.getSession().write(upm.serialize());
 			}
 		}
+	}
+	
+	// Utility method to check which fields are null
+	public void objectFieldDiagnosis(){
+		System.out.println("Object being diagnosed: " + this.getTemplate() + " Id: " + this.getObjectID());
+		
+		ArrayList<Method> list = new ArrayList<Method>();
+		Method[] methods = this.getClass().getDeclaredMethods();
+	    for (Method method : methods)
+	       if (isGetter(method)){
+	    	   try {
+				Object valueObject = method.invoke(this, (Object[]) null);
+				if (valueObject==null){
+					System.err.println("method " + method.getName() + " delivers null object");
+				}
+			} catch (IllegalAccessException e) {
+				System.err.println("IllegalAccessException during reflection");
+				e.printStackTrace();
+			} catch (IllegalArgumentException e) {
+				System.err.println("IllegalArgumentException during reflection");
+				e.printStackTrace();
+			} catch (InvocationTargetException e) {
+				System.err.println("InvocationTargetException during reflection");
+				e.printStackTrace();
+			}
+	    }	  
+	}
+			
+	public static boolean isGetter(Method method) {
+	   if (Modifier.isPublic(method.getModifiers()) &&
+	      method.getParameterTypes().length == 0) {
+	         if (method.getName().matches("^get[A-Z].*") &&
+	            !method.getReturnType().equals(void.class))
+	               return true;
+	         if (method.getName().matches("^is[A-Z].*") &&
+	            method.getReturnType().equals(boolean.class))
+	               return true;
+	   }
+	   return false;
 	}
 	
 	public void sendListDelta(byte viewType, short updateType, IoBuffer buffer) {
