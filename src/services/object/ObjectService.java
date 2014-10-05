@@ -583,6 +583,15 @@ public class ObjectService implements INetworkDispatch {
 		return object;
 	}
 	
+	public boolean checkIfObjectAlreadyInList(long objectID){
+		SWGObject object = objectList.get(objectID);
+		
+		if (object == null)
+			return false;
+		else
+			return true;
+	}
+	
 	public Map<Long, SWGObject> getObjectList() {
 		return objectList;
 	}
@@ -1232,7 +1241,9 @@ public class ObjectService implements INetworkDispatch {
 						if(object.getParentId() != 0 && object.getContainer() == null)
 							object.setParent(getObject(object.getParentId()));
 						object.getContainerInfo(object.getTemplate());
-						if(getObject(object.getObjectID()) != null)
+//						if(getObject(object.getObjectID()) != null)
+//							objectList.put(object.getObjectID(), object);
+						if(! checkIfObjectAlreadyInList(object.getObjectID()))
 							objectList.put(object.getObjectID(), object);
 					} else {
 						Thread.currentThread().dumpStack();
