@@ -127,12 +127,9 @@ public class StaticService implements INetworkDispatch {
 		long buildingId = 0;
 		int cellNumber = 0;
 		
-		if (cellId != 0L) {
+		if (cellId != 0L && cellId != 0) {
 			SWGObject cell = core.objectService.getObject(cellId);
-			return null;
-		}
-		
-		if (cellId != 0 && cell == null) {
+		} else {
 			System.err.println("CellId invalid for template " + template);
 			return null;
 		}
