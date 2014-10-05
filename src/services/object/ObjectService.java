@@ -1223,14 +1223,18 @@ public class ObjectService implements INetworkDispatch {
 				});
 				
 				creature.viewChildren(creature, true, true, (object) -> {
-					if(object.getMutex() == null)
-						object.initializeBaselines();
-						object.initAfterDBLoad();
-					if(object.getParentId() != 0 && object.getContainer() == null)
-						object.setParent(getObject(object.getParentId()));
-					object.getContainerInfo(object.getTemplate());
-					if(getObject(object.getObjectID()) != null)
-						objectList.put(object.getObjectID(), object);					
+					if (object != null) {
+						if(object.getMutex() == null)
+							object.initializeBaselines();
+							object.initAfterDBLoad();
+						if(object.getParentId() != 0 && object.getContainer() == null)
+							object.setParent(getObject(object.getParentId()));
+						object.getContainerInfo(object.getTemplate());
+						if(getObject(object.getObjectID()) != null)
+							objectList.put(object.getObjectID(), object);
+					} else {
+						Thread.currentThread().dumpStack();
+					}
 				});
 
 				if(creature.getParentId() != 0) {
