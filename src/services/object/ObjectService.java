@@ -50,6 +50,7 @@ import resources.common.*;
 import resources.datatables.DisplayType;
 import resources.datatables.Options;
 import resources.datatables.PlayerFlags;
+import resources.equipment.Equipment;
 import resources.guild.Guild;
 import resources.harvest.SurveyTool;
 
@@ -107,6 +108,7 @@ import engine.resources.service.INetworkDispatch;
 import engine.resources.service.INetworkRemoteEvent;
 import main.NGECore;
 import resources.objectives.BountyMissionObjective;
+import resources.objects.SWGList;
 import resources.objects.building.BuildingObject;
 import resources.objects.cell.CellObject;
 import resources.objects.craft.DraftSchematic;
@@ -575,8 +577,8 @@ public class ObjectService implements INetworkDispatch {
 			if (objectList.containsKey(objectID)) {
 				System.err.println("getObject(): object is null but objectList contains objectID key");
 			} else {
-				System.err.println("getObject(): object is null");
-				Thread.currentThread().dumpStack();
+				//System.err.println("getObject(): object is null");
+				//Thread.currentThread().dumpStack();
 			}
 		}
 		
@@ -771,10 +773,48 @@ public class ObjectService implements INetworkDispatch {
 		CreatureObject object = (CreatureObject) core.getSWGObjectODB().get(objectId);
 		if (object != null) {
 			loadServerTemplate(object);
+			if(! checkIfObjectAlreadyInList(object.getObjectID()))
+				objectList.put(object.getObjectID(), object);
+			
 			object.viewChildren(object, true, true, (child) -> loadServerTemplate(child));
+			object.viewChildren(object, true, true, (child) -> instantiateChild(child));
 		}
 		
+		/* Diagnostic part */
+//		System.out.println("Creo : " + object.getCustomName()); 
+//		System.out.println("Creo ID : " + object.getObjectID()); 
+//		System.out.println("Equipment List : " + object.getEquipmentList().size());
+		/* Diagnostic part */
+		
+		SWGList<Equipment> eqList = object.getEquipmentList();
+		List<Equipment> delList = new ArrayList<Equipment>();
+		for (Equipment eq :eqList){
+//			System.out.println("Equipment getObjectID() " + eq.getObjectId());
+//			System.out.println("Equipment Class " + eq.getObject().getClass()); -> NPE
+//			System.out.println("Equipment Name " + eq.getObject().getCustomName()); -> NPE
+//			System.out.println("Equipment Template " + eq.getObject().getTemplate()); -> NPE
+			
+			if(! checkIfObjectAlreadyInList(eq.getObjectId()))
+				delList.add(eq);
+		}
+		
+		
+		eqList.removeAll(delList); // The persisted equipment list contains objects that do not exist anymore, merely a hotfix really
+		object.getEquipmentList().clear();
+		object.getEquipmentList().addAll(eqList);
+				
 		return (CreatureObject) object;
+	}
+	
+	public void instantiateChild(SWGObject child) {
+//		SWGObject object = (SWGObject) core.getSWGObjectODB().get(child);
+//		createObject(String Template, long objectID, Planet planet, Point3D position, Quaternion orientation, String customServerTemplate)
+//		System.out.println("childname : " + child.getCustomName()); 
+//		System.out.println("Child Class " + child.getClass());
+		if(! checkIfObjectAlreadyInList(child.getObjectID()))
+			objectList.put(child.getObjectID(), child);
+//		System.out.println("Child getObjectID() " + child.getObjectID());
+//		System.out.println("Child class " + child.getClass().getName());
 	}
 	
 	public long generateObjectID() {
@@ -1170,7 +1210,7 @@ public class ObjectService implements INetworkDispatch {
 							System.err.println("Player with ObjID of " + creature.getObjectID() + " tried logging in but has a null/empty name!");
 							return;
 						} else {
-							System.err.println("SelectCharacter: not in object list");
+							//System.err.println("SelectCharacter: not in object list"); Because it wasnt added still at this point
 						}
 					}
 					
@@ -1543,7 +1583,8 @@ public class ObjectService implements INetworkDispatch {
 				
 				// Treeku - Refactored to work around duplicate objectIds
 				// Required for instances/heroics which are duplicated ie. 10 times
-				if(!template.equals("object/cell/shared_cell.iff") && objectId != 0 && getObject(objectId) != null) {
+				//if(!template.equals("object/cell/shared_cell.iff") && objectId != 0 && getObject(objectId) != null) {
+				if(!template.equals("object/cell/shared_cell.iff") && objectId != 0 && checkIfObjectAlreadyInList(objectId)) {
 					SWGObject object = getObject(objectId);
 					
 					// Same coordinates is a true duplicate
@@ -1562,7 +1603,8 @@ public class ObjectService implements INetworkDispatch {
 				String planetName = planet.getName();
 				
 				// TODO needs to a way to work for mustafar and kashyyyk which both have instances
-				if (objectId != 0 && getObject(objectId) != null && (planetName.contains("dungeon") || planetName.contains("adventure"))) {
+				//if (objectId != 0 && getObject(objectId) != null && (planetName.contains("dungeon") || planetName.contains("adventure"))) {
+				if (objectId != 0 && checkIfObjectAlreadyInList(objectId) && (planetName.contains("dungeon") || planetName.contains("adventure"))) {
 					SWGObject container = getObject(containerId);
 					float x = (px + ((container == null) ? x1 : container.getPosition().x));
 					float z = (pz + ((container == null) ? z1 : container.getPosition().z));
@@ -1752,7 +1794,8 @@ public class ObjectService implements INetworkDispatch {
 				
 				// Treeku - Refactored to work around duplicate objectIds
 				// Required for instances/heroics which are duplicated ie. 10 times
-				if(!template.equals("object/cell/shared_cell.iff") && objectId != 0 && getObject(objectId) != null) {
+				//if(!template.equals("object/cell/shared_cell.iff") && objectId != 0 && getObject(objectId) != null) {
+				if(!template.equals("object/cell/shared_cell.iff") && objectId != 0 && (checkIfObjectAlreadyInList(objectId))) {
 					SWGObject object = getObject(objectId);
 					
 					// Same coordinates is a true duplicate
@@ -1771,7 +1814,8 @@ public class ObjectService implements INetworkDispatch {
 				String planetName = planet.getName();
 				
 				// TODO needs to a way to work for mustafar and kashyyyk which both have instances
-				if (objectId != 0 && getObject(objectId) != null && (planetName.contains("dungeon") || planetName.contains("adventure"))) {
+				//if (objectId != 0 && getObject(objectId) != null && (planetName.contains("dungeon") || planetName.contains("adventure"))) {
+				if (objectId != 0 && checkIfObjectAlreadyInList(objectId) && (planetName.contains("dungeon") || planetName.contains("adventure"))) {
 					SWGObject container = getObject(containerId);
 					float x = (px + ((container == null) ? x1 : container.getPosition().x));
 					float z = (pz + ((container == null) ? z1 : container.getPosition().z));
