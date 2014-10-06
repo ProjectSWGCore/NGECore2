@@ -61,7 +61,7 @@ public class Equipment extends Delta {
 		SWGObject sobject = getObject();
 		
 		if (sobject == null) {
-			System.err.println("Serious error: Equipment object is null in objectList.");
+			System.err.println("Serious error: Equipment object is null in objectList. OID: " + getObjectId());
 			return null;
 		}
 		
