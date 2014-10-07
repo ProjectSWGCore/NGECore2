@@ -997,6 +997,11 @@ public class CommandService implements INetworkDispatch  {
 			
 			@Override
 			public void handlePacket(IoSession session, IoBuffer data) throws Exception {
+				if (data == null){
+					System.out.println("NULL data passed to insertOpcodes, ignoring.");
+					return;
+				}
+				
 				data.order(ByteOrder.LITTLE_ENDIAN);
 				Client client = core.getClient(session);
 				
@@ -1017,7 +1022,7 @@ public class CommandService implements INetworkDispatch  {
 				BaseSWGCommand command = getCommandByCRC(commandCRC);
 				
 				if (command == null) {
-					//System.out.println("Unknown Command CRC: " + commandEnqueue.getCommandCRC());
+					System.out.println("Unknown Command CRC: " + commandEnqueue.getCommandCRC());
 					return;
 				}
 				
