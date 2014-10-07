@@ -92,7 +92,7 @@ public class HousingService implements INetworkDispatch {
 	
 	public void enterStructureMode(CreatureObject actor, TangibleObject deed) {
 		PlayerCity city = core.playerCityService.getCityObjectIsIn(actor);
-		if (!actor.getClient().isGM() && !core.terrainService.canBuildAtPosition(actor, actor.getWorldPosition().x, actor.getWorldPosition().z)) {
+		if (core.adminService.getAccessLevelFromDB(actor.getClient().getAccountId()) == null && !core.terrainService.canBuildAtPosition(actor, actor.getWorldPosition().x, actor.getWorldPosition().z)) {
 			actor.sendSystemMessage("You may not place a structure here.", (byte) 0); // should probably load this from an stf
 			return;
 		}
@@ -122,7 +122,7 @@ public class HousingService implements INetworkDispatch {
 			return null;
 		}
 		
-		if(!actor.getClient().isGM() && !core.terrainService.canBuildAtPosition(actor, positionX, positionZ)) {
+		if(core.adminService.getAccessLevelFromDB(actor.getClient().getAccountId()) == (null) && !core.terrainService.canBuildAtPosition(actor, positionX, positionZ)) {
 			actor.sendSystemMessage("You may not place a structure here.", (byte) 0); // should probably load this from an stf
 			return null;
 		}
@@ -897,8 +897,8 @@ public class HousingService implements INetworkDispatch {
 				// possibly sending the same delta multiple times
 				if (((CreatureObject) owner).getLookAtTarget() != itemList.get(i).getObjectID());
 					((CreatureObject)owner).setLookAtTarget(itemList.get(i).getObjectID());
-				if (((CreatureObject) owner).getTargetId() != itemList.get(i).getObjectID());
-					((CreatureObject)owner).setTargetId(itemList.get(i).getObjectID());
+				if (((CreatureObject) owner).getIntendedTarget() != itemList.get(i).getObjectID());
+					((CreatureObject)owner).setIntendedTarget(itemList.get(i).getObjectID());
 				if (((CreatureObject) owner).getIntendedTarget() != itemList.get(i).getObjectID());
 					((CreatureObject)owner).setIntendedTarget(itemList.get(i).getObjectID());
 			}

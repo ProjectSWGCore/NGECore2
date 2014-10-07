@@ -72,9 +72,7 @@ def addPlanetSpawns(core, planet):
 	r3j7 = stcSvc.spawnObject('r3j7', 'tatooine', long(0), float(3311.1), float(4.0), float(-4820.2), float(0.38), float(-0.92)) 
 
 	noble4 = stcSvc.spawnObject('noble', 'tatooine', long(0), float(3255.3), float(4.0), float(-4848.1), float(0.42), float(0.91)) 
-	
-	byxlePedette = stcSvc.spawnObject('byxlepedette', 'tatooine', long(0), float(3365), float(5), float(-4639), float(0.99), float(0.12)) 
-	
+		
 	errikDarksider = stcSvc.spawnObject('errikdarksider', 'tatooine', long(0), float(3381), float(4.6), float(-4498), float(0.91), float(0.40)) 
 	
 	gendra = stcSvc.spawnObject('gendra', 'tatooine', long(0), float(3308), float(5.6), float(-4785), float(0.84), float(0.53)) 
@@ -100,9 +98,7 @@ def addPlanetSpawns(core, planet):
 	alduq = stcSvc.spawnObject('alduq', 'tatooine', long(0), float(3512), float(5.0), float(-4814), float(-0.164), float(0.986)) 
 
 	#Eisley Legacy Quest NPCs
-	
-	vourk = stcSvc.spawnObject('vourk', 'tatooine', long(0), float(3520.0), float(5.0), float(-4821.0), float(0.42), float(0.91))
-	
+		
 	building = core.objectService.getObject(long(1279956)) 
 	mayor = stcSvc.spawnObject('mos_eisley_mayor', 'tatooine', building.getCellByCellNumber(4), float(1.2), float(2.5), float(5.4), float(0), float(0), float(0), float(0))
 	
@@ -157,4 +153,31 @@ def addPlanetSpawns(core, planet):
 	aiSvc.setLoiter(r3m6, float(1), float(3))
 	aiSvc.setLoiter(eg1, float(1), float(3))
 	aiSvc.setLoiter(r3j7, float(1), float(3))
+	
+	# Looped Patrol must end in same cell like the start point!!!
+	#building id: 1105845                               Buildingid + cell !
+	trehla = stcSvc.spawnObject('trehla', 'tatooine', long(1105845 + 8), float(24.21), float(2.12), float(73.49), float(0.92), float(0), float(-0.38), float(0)) 
+	patrolpointsCells = Vector()   # Vector       Building reference        Patrolpoint                                  CellID                                    
+	aiSvc.addPatrolPointCell(patrolpointsCells, trehla.getGrandparent(), Point3D(float(25.11), float(2.10), float(50.22)), 7)
+	aiSvc.addPatrolPointCell(patrolpointsCells, trehla.getGrandparent(), Point3D(float(21.25), float(0.6), float(45.51)), 6)
+	aiSvc.addPatrolPointCell(patrolpointsCells, trehla.getGrandparent(), Point3D(float(-11.78), float(0.59), float(45.78)), 6)
+	aiSvc.addPatrolPointCell(patrolpointsCells, trehla.getGrandparent(), Point3D(float(-13.67), float(2.6), float(18.27)), 6)
+	aiSvc.addPatrolPointCell(patrolpointsCells, trehla.getGrandparent(), Point3D(float(-6.63), float(2.6), float(17.87)), 6)
+	aiSvc.addPatrolPointCell(patrolpointsCells, trehla.getGrandparent(), Point3D(float(-6.74), float(2.6), float(1.60)), 6)
+	aiSvc.addPatrolPointCell(patrolpointsCells, trehla.getGrandparent(), Point3D(float(-17.92), float(0.6), float(1.88)), 5)
+	aiSvc.addPatrolPointCell(patrolpointsCells, trehla.getGrandparent(), Point3D(float(-18.21), float(0.6), float(9.40)), 5)
+	aiSvc.addPatrolPointCell(patrolpointsCells, trehla.getGrandparent(), Point3D(float(-24.18), float(0.6), float(9.40)), 5)
+	
+	aiSvc.addPatrolPointCell(patrolpointsCells, trehla.getGrandparent(), Point3D(float(-24.50), float(0.6), float(-4.08)), 2)
+	aiSvc.addPatrolPointCell(patrolpointsCells, trehla.getGrandparent(), Point3D(float(0.03), float(0.6), float(-4.36)), 1)
+	aiSvc.addPatrolPointCell(patrolpointsCells, trehla.getGrandparent(), Point3D(float(25.03), float(0.6), float(-4.10)), 3)
+	aiSvc.addPatrolPointCell(patrolpointsCells, trehla.getGrandparent(), Point3D(float(24.38), float(0.6), float(9.42)), 3)
+	aiSvc.addPatrolPointCell(patrolpointsCells, trehla.getGrandparent(), Point3D(float(17.98), float(0.6), float(9.14)), 4)
+	aiSvc.addPatrolPointCell(patrolpointsCells, trehla.getGrandparent(), Point3D(float(5.44), float(2.6), float(2.33)), 6)
+	aiSvc.addPatrolPointCell(patrolpointsCells, trehla.getGrandparent(), Point3D(float(9.3), float(2.6), float(18.64)), 6)
+	aiSvc.addPatrolPointCell(patrolpointsCells, trehla.getGrandparent(), Point3D(float(14.65), float(0.92), float(40.72)), 6)
+	aiSvc.addPatrolPointCell(patrolpointsCells, trehla.getGrandparent(), Point3D(float(23.9), float(0.93), float(48.22)), 7)
+	aiSvc.addPatrolPointCell(patrolpointsCells, trehla.getGrandparent(), Point3D(float(26.64), float(2.12), float(57.42)), 7)
+	aiSvc.addPatrolPointCell(patrolpointsCells, trehla.getGrandparent(), Point3D(float(27.64), float(2.12), float(70.07)), 8)
+	aiSvc.setPatrol(trehla, patrolpointsCells)
 	return

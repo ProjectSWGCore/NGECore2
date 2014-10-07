@@ -21,8 +21,8 @@
  ******************************************************************************/
 package protocol.swg.chat;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
@@ -48,34 +48,23 @@ public class ChatInstantMessageToCharacter extends SWGMessage {
 		buffer.getInt();
 		
 		int size;
-				
-		try {
-			size = buffer.getShort();
-			game = new String(ByteBuffer.allocate(size).put(buffer.array(), buffer.position(), size).array(), "UTF8");
-			buffer.position(buffer.position() + size);
-			
-			size = buffer.getShort();
-			galaxy = new String(ByteBuffer.allocate(size).put(buffer.array(), buffer.position(), size).array(), "US-ASCII");
-			buffer.position(buffer.position() + size);
-			
-			size = buffer.getShort();
-			recipient = new String(ByteBuffer.allocate(size).put(buffer.array(), buffer.position(), size).array(), "US-ASCII");
-			buffer.position(buffer.position() + size);
-			
-			size = buffer.getInt();
-			message = new String(ByteBuffer.allocate(size * 2).put(buffer.array(), buffer.position(), size * 2).array(), "UTF-16LE");
-			buffer.position(buffer.position() + size * 2);
-
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
 		
-
+		size = buffer.getShort();
+		game = new String(ByteBuffer.allocate(size).put(buffer.array(), buffer.position(), size).array(), StandardCharsets.UTF_8);
+		buffer.position(buffer.position() + size);
 		
-		//game = getNextAsciiString(buffer);
-		//galaxy = getNextAsciiString(buffer);
-		//recipient = getNextAsciiString(buffer);
-		//message = getNextUnicodeString(buffer);
+		size = buffer.getShort();
+		galaxy = new String(ByteBuffer.allocate(size).put(buffer.array(), buffer.position(), size).array(), StandardCharsets.US_ASCII);
+		buffer.position(buffer.position() + size);
+		
+		size = buffer.getShort();
+		recipient = new String(ByteBuffer.allocate(size).put(buffer.array(), buffer.position(), size).array(), StandardCharsets.US_ASCII);
+		buffer.position(buffer.position() + size);
+		
+		size = buffer.getInt();
+		message = new String(ByteBuffer.allocate(size * 2).put(buffer.array(), buffer.position(), size * 2).array(), StandardCharsets.UTF_16LE);
+		buffer.position(buffer.position() + size * 2);
+
 		buffer.getInt();
 		sequence = buffer.getInt();
 	}

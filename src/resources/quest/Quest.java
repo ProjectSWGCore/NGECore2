@@ -22,19 +22,230 @@
 package resources.quest;
 
 import java.io.Serializable;
+import java.util.BitSet;
+import java.util.concurrent.ScheduledFuture;
 
+import org.apache.mina.core.buffer.IoBuffer;
+
+import engine.resources.common.CRC;
 import engine.resources.objects.Delta;
 
 public class Quest extends Delta implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	public Quest() {
+	private long ownerId;
+	private int activeStep; // Quest starts at step 0
+
+	private BitSet activeStepBitmask = new BitSet(16);
+	private BitSet completedStepBitmask = new BitSet(16);
+	
+	private boolean isCompleted = false;
+	private boolean recievedAward = false;
+	private String name;
+
+	private ScheduledFuture<?> timer;
+	private long waypointId;
+	
+	private int counterMax;
+	private int counterCurrent;
+	
+	public Quest() {}
+	
+	public Quest(String name, long ownerId) {
+		this.ownerId = ownerId;
+
+		if (name.endsWith(".qst")) {
+			//this.filePath = "quest/"+name;
+			this.name = name.split(".qst")[0];
+		} else {
+			//this.filePath = "quest/"+name+".qst";
+			this.name = name;
+		}
 		
+		if (name.contains("/")) {
+			String[] split = name.split("/");
+			this.name = split[split.length - 1];
+		}
+	}
+	
+	public long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(long ownerId) {
+		this.ownerId = ownerId;
+	}
+	
+	public boolean isTaskActive(int taskId) {
+		return activeStepBitmask.get(taskId);
+	}
+	
+	public int getActiveTask() {
+		return activeStep;
+	}
+
+	public void setActiveTask(int activeStep) {
+		this.activeStep = activeStep;
+	}
+
+	public boolean isTaskCompleted(int taskId) {
+		return completedStepBitmask.get(taskId);
+	}
+	
+	public boolean isCompleted() {
+		return isCompleted;
+	}
+	
+	public void setCompleted() {
+		activeStepBitmask.clear();
+		completedStepBitmask.set(0, 16, true);
+		this.isCompleted = true;
+	}
+
+	public boolean hasRecievedAward() {
+		return recievedAward;
+	}
+
+	public void setRecievedAward(boolean recievedAward) {
+		this.recievedAward = recievedAward;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public int getCrc() {
+		return CRC.StringtoCRC(getCrcName());
+	}
+	
+	public String getCrcName() {
+		return "quest/" + name;
+	}
+	
+	public long getWaypointId() {
+		return waypointId;
+	}
+
+	public void setWaypointId(long waypointId) {
+		this.waypointId = waypointId;
+	}
+
+	public void incrementQuestStep() {
+		completedStepBitmask.set(activeStep);
+		activeStepBitmask.set(activeStep, false);
+		
+		activeStep++;
+		activeStepBitmask.set(activeStep, true);
+		//System.out.println("Active step was "+ (activeStep - 1) + " and is now " + activeStep );
+	}
+	
+	public void complete() {
+		completedStepBitmask.set(activeStep);
+	}
+	
+	public void completeQuestStep(int step) {
+		completedStepBitmask.set(step);
+		activeStepBitmask.set(step, false);
+	}
+	
+	public void setQuestStep(int step) {
+		activeStep = step;
+		addActiveStep(step);
+	}
+	
+	public void addActiveStep(int step) {
+		activeStepBitmask.set(step, true);
+	}
+	
+	public void reset() {
+		activeStep = 0;
+		activeStepBitmask.clear();
+		completedStepBitmask.clear();
+	}
+	
+	public ScheduledFuture<?> getTimer() {
+		return timer;
+	}
+
+	public void setTimer(ScheduledFuture<?> timer) {
+		this.timer = timer;
+	}
+
+	public int getCounterMax() {
+		return counterMax;
+	}
+
+	public void setCounterMax(int counterMax) {
+		this.counterMax = counterMax;
+	}
+
+	public void incrementCounter() {
+		counterCurrent++;
+	}
+	
+	public void decrementCounter() {
+		counterCurrent--;
+	}
+	
+	public int getCounterValue() {
+		return counterCurrent;
+	}
+	
+	public void setCounterValue(int value) {
+		this.counterCurrent = value;
 	}
 	
 	public byte[] getBytes() {
-		return new byte[] { };
+		byte[] activeStepBytes = activeStepBitmask.toByteArray();
+		byte[] completedStepBytes = completedStepBitmask.toByteArray();
+		
+		IoBuffer buffer = createBuffer(18);
+
+		//buffer.put((byte) 0);
+		
+		//buffer.putInt(getCrc());
+
+		buffer.putLong(ownerId); // quest giver id?
+		
+		// Probably a MUCH better way of doing this, but... well... I can't stand bitmasks.
+		switch (activeStepBytes.length) {
+		case 0:
+			buffer.putShort((short) 0);
+			break;
+			
+		case 1:
+			buffer.put(activeStepBytes[0]);
+			buffer.put((byte) 0);
+			break;
+			
+		case 2:
+			buffer.put(activeStepBytes);
+			break;
+		}
+		
+		switch (completedStepBytes.length) {
+		case 0:
+			buffer.putShort((short) 0);
+			break;
+			
+		case 1:
+			buffer.put(completedStepBytes[0]);
+			buffer.put((byte) 0);
+			break;
+			
+		case 2:
+			buffer.put(completedStepBytes);
+			break;
+		}
+		
+		buffer.put((byte) ((isCompleted) ? 1 : 0));
+		buffer.putInt(0); // questCounter
+		buffer.put((byte) ((recievedAward) ? 1 : 0));
+		
+		buffer.flip();
+
+		//StringUtilities.printBytes(buffer.array());
+		return buffer.array();
 	}
-	
 }

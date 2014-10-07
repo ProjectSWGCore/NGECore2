@@ -37,6 +37,7 @@ import org.python.core.PyObject;
 import protocol.swg.ObjControllerMessage;
 import protocol.swg.ObjectMenuSelectMessage;
 import protocol.swg.SUICreatePageMessage;
+import protocol.swg.SUICreateTimerBar;
 import protocol.swg.SUIEventNotification;
 import protocol.swg.SUIForceClosePageMessage;
 import protocol.swg.SUIUpdatePageMessage;
@@ -149,12 +150,17 @@ public class SUIService implements INetworkDispatch {
 					return;
 				}
 				
+				if (target.getAttachment("conversationFile") != null) {
+					core.scriptService.callScript("scripts/radial/", "object/conversation", "createRadial", core, owner, target, request.getRadialOptions());
+					sendRadial(owner, target, request.getRadialOptions(), request.getRadialCount());
+					return;
+				}
+				
 				core.scriptService.callScript("scripts/radial/", getRadialFilename(target), "createRadial", core, owner, target, request.getRadialOptions());
 				if(getRadialFilename(target).equals("default"))
 					return;
 				
 				sendRadial(owner, target, request.getRadialOptions(), request.getRadialCount());
-				
 			}
 			
 		});
@@ -190,6 +196,10 @@ public class SUIService implements INetworkDispatch {
 						return;
 				}
 
+				if (target.getAttachment("conversationFile") != null) {
+					core.scriptService.callScript("scripts/radial/", "object/conversation", "handleSelection", core, owner, target, objMenuSelect.getSelection());
+					return;
+				}
 				core.scriptService.callScript("scripts/radial/", getRadialFilename(target), "handleSelection", core, owner, target, objMenuSelect.getSelection());
 
 			}
@@ -490,8 +500,24 @@ public class SUIService implements INetworkDispatch {
 		}
 		
 		SUICreatePageMessage create = new SUICreatePageMessage(window.getScript(), window.getWindowId(), window.getComponents(), rangeObjectId, range);
+		tools.CharonPacketUtils.printAnalysis(create.serialize(), "SUICreatePageMessage");
 		owner.getClient().getSession().write(create.serialize());
 		
+	}
+	
+	public void openTimerSUIWindow(SUIWindow window, String prompt, int startCount) {
+		
+		SWGObject owner = window.getOwner();
+		
+		if(owner == null)
+			return;
+		
+		if(owner.getClient() == null || owner.getClient().getSession() == null)
+			return;
+
+		SUICreateTimerBar create = new SUICreateTimerBar(window.getScript(), window.getWindowId(), prompt, startCount);
+		tools.CharonPacketUtils.printAnalysis(create.serialize(), "SUICreateTimerBar");
+		owner.getClient().getSession().write(create.serialize());		
 	}
 	
 	public void updateSUIWindow(SUIWindow window) {

@@ -21,25 +21,25 @@
  ******************************************************************************/
 package protocol.swg.objectControllerObjects;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
 public class SetProfessionTemplate extends ObjControllerObject {
 	
+	private long characterId;
 	private String profession;
 
 	@Override
 	public void deserialize(IoBuffer data) {
-		data.getLong();
-		data.getInt();
-		short size = data.getShort();
-		try {
-			profession = new String(ByteBuffer.allocate(size).put(data.array(), data.position(), size).array(), "US-ASCII");
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
+		short size;
+		
+		characterId = data.getLong();
+		data.getInt();	// Ziggy - spacer
+		size = data.getShort();
+		
+		profession = new String(ByteBuffer.allocate(size).put(data.array(), data.position(), size).array(), StandardCharsets.US_ASCII);
 		data.position(data.position() + size);
 	}
 
@@ -52,9 +52,9 @@ public class SetProfessionTemplate extends ObjControllerObject {
 	public String getProfession() {
 		return profession;
 	}
-
-	public void setProfession(String profession) {
-		this.profession = profession;
+	
+	public long getCharacterId() {
+		return characterId;
 	}
 
 }

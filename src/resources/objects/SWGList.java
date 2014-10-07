@@ -21,7 +21,6 @@
  ******************************************************************************/
 package resources.objects;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -45,7 +44,7 @@ import engine.resources.objects.SWGObject;
 
 /* A SWGList element should extend Delta or implement IDelta */
 
-public class SWGList<E> implements List<E>, Serializable {
+public class SWGList<E> extends Delta implements List<E> {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -54,7 +53,6 @@ public class SWGList<E> implements List<E>, Serializable {
 	private byte viewType;
 	private short updateType;
 	private boolean addByte;
-	protected transient Object objectMutex = new Object();
 	private transient SWGObject object;
 	
 	public SWGList() { }
@@ -67,7 +65,8 @@ public class SWGList<E> implements List<E>, Serializable {
 	}
 	
 	public void init(SWGObject object) {
-		objectMutex = new Object();
+		super.init(object);
+		
 		updateCounter = 0;
 		this.object = object;
 		
@@ -234,7 +233,7 @@ public class SWGList<E> implements List<E>, Serializable {
 			int index = list.indexOf(o);
 			
 			if (list.remove(o)) {
-				queue(item(1, index, null, true, false));
+				queue(item(0, index, null, true, false));
 				return true;
 			} else {
 				return false;
@@ -246,7 +245,7 @@ public class SWGList<E> implements List<E>, Serializable {
 		synchronized(objectMutex) {
 			E element = list.remove(index);
 			
-			queue(item(1, index, null, true, false));
+			queue(item(0, index, null, true, false));
 			
 			return (E) element;
 		}
@@ -321,7 +320,7 @@ public class SWGList<E> implements List<E>, Serializable {
 			if (!list.isEmpty()) {
 				for (E element : list) {
 					if (valid(element)) {
-						IoBuffer buffer = Delta.createBuffer((newListData.length + Baseline.toBytes(element).length));
+						IoBuffer buffer = createBuffer((newListData.length + Baseline.toBytes(element).length));
 						buffer.put(newListData);
 						buffer.put(Baseline.toBytes(element));
 						newListData = buffer.array();
@@ -330,7 +329,7 @@ public class SWGList<E> implements List<E>, Serializable {
 					}
 				}
 				
-				IoBuffer buffer = Delta.createBuffer(3 + newListData.length);
+				IoBuffer buffer = createBuffer(3 + newListData.length);
 				buffer.put((byte) 3);
 				buffer.putShort((short) list.size());
 				buffer.put(newListData);
@@ -411,7 +410,7 @@ public class SWGList<E> implements List<E>, Serializable {
 				byte[] object = Baseline.toBytes(o);
 				size += object.length;
 				
-				IoBuffer buffer = Delta.createBuffer(size);
+				IoBuffer buffer = createBuffer(size);
 				buffer.put(objects);
 				if (addByte) buffer.put((byte) 0);
 				buffer.put(object);
@@ -420,7 +419,7 @@ public class SWGList<E> implements List<E>, Serializable {
 				objects = buffer.array();
 			}
 			
-			IoBuffer buffer = Delta.createBuffer(8 + size);
+			IoBuffer buffer = createBuffer(8 + size);
 			buffer.putInt(list.size());
 			buffer.putInt(updateCounter);
 			buffer.put(objects);
@@ -441,9 +440,10 @@ public class SWGList<E> implements List<E>, Serializable {
 	}
 	
 	private byte[] item(int type, int index, byte[] data, boolean useIndex, boolean useData) {
+
 		int size = 1 + ((useIndex) ? 2 : 0) + ((useData) ? data.length : 0);
 		
-		IoBuffer buffer = Delta.createBuffer(size);
+		IoBuffer buffer = createBuffer(size);
 		buffer.put((byte) type);
 		if (useIndex) buffer.putShort((short) index);
 		if (useData) buffer.put(data);
@@ -455,7 +455,7 @@ public class SWGList<E> implements List<E>, Serializable {
 	}
 	
 	private void queue(byte[] data) {
-		IoBuffer buffer = Delta.createBuffer((data.length + 8));
+		IoBuffer buffer = createBuffer((data.length + 8));
 		buffer.putInt(1);
 		buffer.putInt(updateCounter);
 		buffer.put(data);
@@ -470,7 +470,7 @@ public class SWGList<E> implements List<E>, Serializable {
 			size += queued.length;
 		}
 		
-		IoBuffer buffer = Delta.createBuffer((size + 8));
+		IoBuffer buffer = createBuffer((size + 8));
 		buffer.putInt(data.size());
 		buffer.putInt(updateCounter);
 		for (byte[] queued : data) buffer.put(queued);

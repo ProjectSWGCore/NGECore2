@@ -80,7 +80,9 @@ import resources.objects.cell.CellObject;
 import resources.objects.creature.CreatureObject;
 import resources.objects.group.GroupObject;
 import resources.objects.harvester.HarvesterObject;
+import resources.objects.installation.InstallationObject;
 import resources.objects.player.PlayerObject;
+import resources.objects.staticobject.StaticObject;
 import resources.objects.tangible.TangibleObject;
 import resources.common.*;
 import resources.common.collidables.AbstractCollidable;
@@ -130,64 +132,19 @@ public class SimulationService implements INetworkDispatch {
 			collidableQuadTrees.put(terrainService.getPlanetList().get(i).getName(), new QuadTree<AbstractCollidable>(-8192, -8192, 8192, 8192));
 		}
 		
-		core.commandService.registerCommand("opencontainer");
-		core.commandService.registerCommand("transferitem");
-		core.commandService.registerCommand("transferitemarmor");
-		core.commandService.registerCommand("transferitemweapon");
-		core.commandService.registerCommand("transferitemmisc");
-		core.commandService.registerCommand("equip");
-		core.commandService.registerCommand("prone");
-		core.commandService.registerCommand("stand");
-		core.commandService.registerCommand("sitserver");
-		core.commandService.registerCommand("kneel");
-		core.commandService.registerCommand("serverdestroyobject");
-		core.commandService.registerGmCommand("giveitem");
-		core.commandService.registerGmCommand("object");
-		core.commandService.registerCommand("getattributesbatch");
-		core.commandService.registerCommand("pvp");
-		core.commandService.registerCommand("setcurrentskilltitle");
-		core.commandService.registerCommand("tip");
-		core.commandService.registerCommand("faction");
-		core.commandService.registerGmCommand("setspeed");
-		core.commandService.registerCommand("waypoint");
-		core.commandService.registerCommand("setwaypointactivestatus");
-		core.commandService.registerCommand("setwaypointname");
-		core.commandService.registerCommand("getfriendlist");
-		core.commandService.registerCommand("deathblow");
-		core.commandService.registerCommand("endduel");
-		core.commandService.registerCommand("duel");
-		core.commandService.registerCommand("purchaseticket");
-		core.commandService.registerCommand("boardshuttle");
-		core.commandService.registerCommand("getplayerid");
-		core.commandService.registerCommand("inspire");
-		core.commandService.registerGmCommand("setgodmode");
-		core.commandService.registerCommand("requestwaypointatposition");
-		core.commandService.registerCommand("meditate");
-		core.commandService.registerGmCommand("server");
-		core.commandService.registerCommand("toggleawayfromkeyboard");
-		core.commandService.registerCommand("lfg");
-		core.commandService.registerCommand("newbiehelper");
-		core.commandService.registerCommand("roleplay");
 		core.commandService.registerAlias("afk", "toggleawayfromkeyboard");
-		core.commandService.registerCommand("toggledisplayingfactionrank");
-		core.commandService.registerCommand("editbiography");
-		core.commandService.registerCommand("setbiography");
-		core.commandService.registerCommand("requestbiography");
-		core.commandService.registerCommand("eject");
-		core.commandService.registerGmCommand("broadcast");
-		core.commandService.registerGmCommand("teleporttarget");
-		core.commandService.registerGmCommand("getplayerid");
-		core.commandService.registerCommand("npcconversationselect");
-		core.commandService.registerCommand("npcconversationstop");
-
 	}
 	
 	public void insertSnapShotObjects() {
+		System.out.println("Inserting snapshot buildings...");
 		List<SWGObject> objectList = new ArrayList<SWGObject>(core.objectService.getObjectList().values());
 		for(SWGObject obj : objectList) {
-			if(obj.getParentId() == 0 && /*(*/obj.isInSnapshot() /*|| obj.getAttachment("isBuildout") != null)*/)
+			// Buildings are inserted via another method from the odb, so no need to load them into the quadtree as well
+			if(obj.getParentId() == 0 && (obj.isInSnapshot() || obj.getAttachment("isBuildout") != null) && obj.getAttachment("buildoutBuilding") == null) {
 				add(obj, obj.getPosition().x, obj.getPosition().z);
+			}
 		}
+		System.out.println("Snapshots inserted!");
 	}
 	
 	public void insertPersistentBuildings() {
@@ -245,6 +202,9 @@ public class SimulationService implements INetworkDispatch {
 						object.makeAware(obj);
 					if(obj.getClient() != null)
 						obj.makeAware(object);
+					
+//					if (object.getTemplate().contains("dressed_eisley_officer"))
+//						System.out.println("ME quadtree add!");
 				}
 			}
 		}
@@ -281,11 +241,171 @@ public class SimulationService implements INetworkDispatch {
 	public Vector<CreatureObject> getAllNearNPCs(int distance, SWGObject value ){
 		Vector<CreatureObject> foundCreatures = new Vector<CreatureObject>();
 		core.simulationService.get(value.getPlanet(), value.getWorldPosition().x, value.getWorldPosition().z, distance).stream().forEach((objecta) -> { 
-			if (objecta instanceof CreatureObject)
+			if (objecta instanceof CreatureObject && objecta!=value)
 				foundCreatures.add((CreatureObject)objecta);
 			}
 		);
 		return foundCreatures;
+	}
+	
+	public Vector<CreatureObject> getAllNearPlayers(int distance, SWGObject value ){
+		Vector<CreatureObject> foundCreatures = new Vector<CreatureObject>();
+		core.simulationService.get(value.getPlanet(), value.getWorldPosition().x, value.getWorldPosition().z, distance).stream().forEach((objecta) -> { 
+			if (objecta instanceof CreatureObject && objecta!=value)
+				if (((CreatureObject)objecta).isPlayer())
+					foundCreatures.add((CreatureObject)objecta);
+			}
+		);
+		return foundCreatures;
+	}
+	
+	public Vector<CreatureObject> getAllNearPlayers(int distance, Planet planet, Point3D pos ){
+		Vector<CreatureObject> foundCreatures = new Vector<CreatureObject>();
+		core.simulationService.get(planet, pos.x, pos.z, distance).stream().forEach((objecta) -> { 
+			if (objecta instanceof CreatureObject)
+				if (((CreatureObject)objecta).isPlayer())
+					foundCreatures.add((CreatureObject)objecta);
+			}
+		);
+		return foundCreatures;
+	}
+	
+	public Vector<TangibleObject> getAllNearNonSameFactionTargets(int distance, SWGObject center ){
+		Vector<TangibleObject> foundTargets = new Vector<TangibleObject>();
+		core.simulationService.get(center.getPlanet(), center.getWorldPosition().x, center.getWorldPosition().z, distance).stream().forEach((objecta) -> {
+			if (center.getObjectID()!=objecta.getObjectID()){	
+				String centerfaction = "";
+				if (center instanceof CreatureObject)
+					centerfaction = ((CreatureObject)center).getFaction();
+				if (center instanceof InstallationObject)
+					centerfaction = ((InstallationObject)center).getFaction();
+				if (center instanceof TangibleObject)
+					centerfaction = ((TangibleObject)center).getFaction();
+				
+				if (centerfaction.length()>0 && !(objecta instanceof StaticObject)){
+					if (objecta.getObjectID()!=center.getObjectID() && NGECore.getInstance().factionService.isFactionEnemy((TangibleObject) objecta,(TangibleObject) center))
+						foundTargets.add((TangibleObject)objecta);
+				}	
+			}
+		});
+		return foundTargets;
+	}
+	
+	public Vector<CreatureObject> getAllNearNonSameFactionNPCs(int distance, SWGObject center ){
+		Vector<CreatureObject> foundCreatures = new Vector<CreatureObject>();
+		core.simulationService.get(center.getPlanet(), center.getWorldPosition().x, center.getWorldPosition().z, distance).stream().forEach((objecta) -> {
+			if (center.getObjectID()!=objecta.getObjectID()){	
+				String centerfaction = "";
+				if (center instanceof CreatureObject)
+					centerfaction = ((CreatureObject)center).getFaction();
+				if (center instanceof InstallationObject)
+					centerfaction = ((InstallationObject)center).getFaction();
+				if (center instanceof TangibleObject)
+					centerfaction = ((TangibleObject)center).getFaction();
+				
+				if (centerfaction.length()>0 && objecta instanceof CreatureObject){
+					if (objecta.getObjectID()!=center.getObjectID() && NGECore.getInstance().factionService.isFactionEnemy((CreatureObject) objecta,(TangibleObject) center))
+						foundCreatures.add((CreatureObject)objecta);
+				}	
+			}
+		});
+		return foundCreatures;
+	}
+	
+	public Vector<CreatureObject> getAllNearNonSameFactionPlayers(int distance, SWGObject center ){
+		Vector<CreatureObject> foundCreatures = new Vector<CreatureObject>();
+		core.simulationService.get(center.getPlanet(), center.getWorldPosition().x, center.getWorldPosition().z, distance).stream().forEach((objecta) -> {
+			if (center.getObjectID()!=objecta.getObjectID()){	
+				String centerfaction = "";
+				if (center instanceof CreatureObject)
+					centerfaction = ((CreatureObject)center).getFaction();
+				if (center instanceof InstallationObject)
+					centerfaction = ((InstallationObject)center).getFaction();
+				if (center instanceof TangibleObject)
+					centerfaction = ((TangibleObject)center).getFaction();
+				
+				if (centerfaction.length()>0 && objecta instanceof CreatureObject){
+					if (((CreatureObject)objecta).isPlayer() && objecta.getObjectID()!=center.getObjectID() && NGECore.getInstance().factionService.isFactionEnemy((CreatureObject) objecta,(TangibleObject) center))
+						foundCreatures.add((CreatureObject)objecta);
+				}	
+			}
+		});
+		return foundCreatures;
+	}
+	
+	public Vector<CreatureObject> getAllNearSameFactionNPCs(int distance, SWGObject center ){
+		Vector<CreatureObject> foundCreatures = new Vector<CreatureObject>();
+		core.simulationService.get(center.getPlanet(), center.getWorldPosition().x, center.getWorldPosition().z, distance).stream().forEach((objecta) -> {
+			
+			String centerfaction = "";
+			if (center instanceof CreatureObject)
+				centerfaction = ((CreatureObject)center).getFaction();
+			if (center instanceof InstallationObject)
+				centerfaction = ((InstallationObject)center).getFaction();
+			if (center instanceof TangibleObject)
+				centerfaction = ((TangibleObject)center).getFaction();
+			
+			if (centerfaction.length()>0 && objecta instanceof CreatureObject){				
+				if (objecta.getObjectID()!=center.getObjectID() && NGECore.getInstance().factionService.isFactionAlly((TangibleObject) objecta,(TangibleObject) center))
+					foundCreatures.add((CreatureObject)objecta);
+			}		
+		});
+		return foundCreatures;
+	}
+	
+	public Vector<CreatureObject> getAllNearSameFactionPlayers(int distance, Point3D centerPos, Planet planet, String factionName){
+		Vector<CreatureObject> foundCreatures = new Vector<CreatureObject>();
+		core.simulationService.get(planet, centerPos.x, centerPos.z, distance).stream().forEach((objecta) -> {
+			
+			if (factionName.length()>0 && objecta instanceof CreatureObject){				
+				if (((CreatureObject)objecta).isPlayer() && NGECore.getInstance().factionService.isFactionAlly(((CreatureObject) objecta).getFaction(),factionName))
+					foundCreatures.add((CreatureObject)objecta);
+			}		
+		});
+		return foundCreatures;
+	}
+	
+	public Vector<CreatureObject> getAllNearSameFactionCreatures(int distance, Point3D centerPos, Planet planet, String factionName){
+		Vector<CreatureObject> foundCreatures = new Vector<CreatureObject>();
+		core.simulationService.get(planet, centerPos.x, centerPos.z, distance).stream().forEach((objecta) -> {
+			if (factionName.length()>0 && objecta instanceof CreatureObject){				
+				if (NGECore.getInstance().factionService.isFactionAlly(((CreatureObject) objecta).getFaction(),factionName))
+					foundCreatures.add((CreatureObject)objecta);
+			}		
+		});
+		return foundCreatures;
+	}
+	
+	public Vector<TangibleObject> getAllNearTANOs(int distance, SWGObject value ){
+		Vector<TangibleObject> foundTANOs = new Vector<TangibleObject>();
+		core.simulationService.get(value.getPlanet(), value.getWorldPosition().x, value.getWorldPosition().z, distance).stream().forEach((objecta) -> { 
+			if (objecta instanceof TangibleObject && objecta!=value)
+				foundTANOs.add((TangibleObject)objecta);
+			}
+		);
+		return foundTANOs;
+	}
+	
+	public Vector<TangibleObject> getAllNearNonSameFactionTANOs(int distance, SWGObject center ){
+		Vector<TangibleObject> foundTANOs = new Vector<TangibleObject>();
+		core.simulationService.get(center.getPlanet(), center.getWorldPosition().x, center.getWorldPosition().z, distance).stream().forEach((objecta) -> { 
+			
+			//if (objecta.getTemplate().contains("shared_adv_turret_dish_sm_heat")){
+			String centerfaction = "";
+			if (center instanceof CreatureObject)
+				centerfaction = ((CreatureObject)center).getFaction();
+			if (center instanceof InstallationObject)
+				centerfaction = ((InstallationObject)center).getFaction();
+			if (center instanceof TangibleObject)
+				centerfaction = ((TangibleObject)center).getFaction();
+			
+			if (centerfaction.length()>0 && objecta instanceof TangibleObject && !(objecta instanceof CreatureObject)){
+				if (objecta.getObjectID()!=center.getObjectID() && NGECore.getInstance().factionService.isFactionEnemy((TangibleObject) objecta,(TangibleObject) center))
+					foundTANOs.add((TangibleObject)objecta);
+			}	
+
+		});
+		return foundTANOs;
 	}
 		
 	public boolean move(SWGObject object, int oldX, int oldZ, int newX, int newZ) {
@@ -330,6 +450,26 @@ public class SimulationService implements INetworkDispatch {
 				Client observerClient = it.next();
 				if(observerClient.getParent() != null) {
 					observerClient.getParent().makeUnaware(object);
+
+					// Experimental until engine fixed
+					if (observerClient.getParent().getAwareObjects().contains(object)){
+						
+						object.viewChildren(observerClient.getParent(), false, false, new Traverser() {
+							@Override
+							public void process(SWGObject object) {
+								if(object == null)
+									return;
+								if(object.getClient() != null)
+									object.makeUnaware(observerClient.getParent());
+								observerClient.getParent().makeUnaware(object);
+							}
+							});
+							if(!object.isInSnapshot())
+								object.sendDestroy(observerClient);
+							object.removeObserver(observerClient.getParent());
+							observerClient.getParent().getAwareObjects().remove(object);						
+					}
+					// Experimental until engine fixed
 				}
 			}
 		}
@@ -362,6 +502,8 @@ public class SimulationService implements INetworkDispatch {
 				}
 				
 				CreatureObject creature = (CreatureObject) client.getParent();
+				if (creature.getPosture()==Posture.Dead || creature.getPosture()==Posture.Incapacitated)
+					return;
 				
 				CreatureObject object = creature;
 				
@@ -529,6 +671,8 @@ public class SimulationService implements INetworkDispatch {
 				}
 				
 				CreatureObject object = (CreatureObject) client.getParent();
+				if (object.getPosture()==Posture.Dead || object.getPosture()==Posture.Incapacitated)
+					return;
 				
 				if (core.mountService.isMounted(object)) {
 					object.sendSystemMessage(OutOfBand.ProsePackage("@pet_menu:cant_mount"), DisplayType.Broadcast);
@@ -688,6 +832,12 @@ public class SimulationService implements INetworkDispatch {
 		
 		if(Float.isNaN(newPosition.x) || Float.isNaN(newPosition.y) || Float.isNaN(newPosition.z))
 			return;
+		
+		if (object instanceof CreatureObject){
+			CreatureObject cre = (CreatureObject) object;
+			if (cre.getPosture()==Posture.Dead || cre.getPosture()==Posture.Incapacitated)
+				return;
+		}
 
 		if(cell == null) {
 			
@@ -704,6 +854,15 @@ public class SimulationService implements INetworkDispatch {
 				object.getContainer()._remove(object);
 				add(object, newPosition.x, newPosition.z);
 			} 
+			
+			if (object.getPlanet().getName().equals("talus") && object.getTemplate().contains("stormtrooper")){
+//				float xx = object.getWorldPosition().x - newPosition.x;
+//				float zz = object.getWorldPosition().z - newPosition.z;
+//				float diff = (float) Math.sqrt(xx*xx+zz*zz);
+//				System.out.println(" ((CreatureObject)object).getSpeedMultiplierBase());: " + ((CreatureObject)object).getSpeedMultiplierBase());
+//				System.out.println(" ((CreatureObject)object).getSpeedMultiplierMod());: " + ((CreatureObject)object).getSpeedMultiplierMod());
+//	
+			}
 			
 			UpdateTransformMessage utm = new UpdateTransformMessage(object.getObjectID(), (short) (newPosition.x * 4 + 0.5), (short) (newPosition.y * 4 + 0.5), (short) (newPosition.z * 4 + 0.5), movementCounter + 1, getSpecialDirection(newOrientation), speed);
 
@@ -838,8 +997,18 @@ public class SimulationService implements INetworkDispatch {
 		float cos = (float) Math.cos(radians);
 
         WB_M44 rotationMatrix = new WB_M44(cos, 0, sin, 0, 0, 1, 0, 0, -sin, 0, cos, 0, 0, 0, 0, 1);
-
-        WB_M44 modelSpace = translateMatrix.mult(rotationMatrix).inverse();
+        
+        WB_M44 modelSpace = null;
+        try {
+        	modelSpace = translateMatrix.mult(rotationMatrix).inverse();
+        } catch (Exception ex){
+        	// It's usually a bank terminal causing this
+        	//System.out.println("The object " + object.getTemplate() + " at x:" + object.getWorldPosition().x + " z:" + object.getWorldPosition().z + " causes a problem during modelspaceconversion. Can be safely ignored.");
+        	if (modelSpace==null)
+            	return new Ray(origin, new Vector3D(0,0,0));
+        }
+        
+        
         
         float originX = (float) (modelSpace.m11 * origin.x + modelSpace.m12 * origin.y + modelSpace.m13 * origin.z + modelSpace.m14);
         float originY = (float) (modelSpace.m21 * origin.x + modelSpace.m22 * origin.y + modelSpace.m23 * origin.z + modelSpace.m24);
@@ -878,6 +1047,27 @@ public class SimulationService implements INetworkDispatch {
         float y = (float) (modelSpace.m21 * point.x + modelSpace.m22 * point.y + modelSpace.m23 * point.z + modelSpace.m24);
         float z = (float) (modelSpace.m31 * point.x + modelSpace.m32 * point.y + modelSpace.m33 * point.z + modelSpace.m34);
         
+        return new Point3D(x, y, z);
+
+	}
+	
+	public Point3D convertModelSpaceToPoint(Point3D point, SWGObject object) {
+		
+		Point3D position = object.getPosition();
+		WB_M44 translateMatrix = new WB_M44(1, 0, 0, position.x, 0, 1, 0, position.y, 0, 0, 1, position.z, 0, 0, 0, 1);
+		
+		float radians = object.getRadians();
+		float sin = (float) Math.sin(radians);
+		float cos = (float) Math.cos(radians);
+
+        WB_M44 rotationMatrix = new WB_M44(cos, 0, sin, 0, 0, 1, 0, 0, -sin, 0, cos, 0, 0, 0, 0, 1); //non-inverse matrix
+
+        WB_M44 modelSpace = translateMatrix.mult(rotationMatrix);
+        
+        float x = (float) (modelSpace.m11 * point.x + modelSpace.m12 * point.y + modelSpace.m13 * point.z + modelSpace.m14);
+        float y = (float) (modelSpace.m21 * point.x + modelSpace.m22 * point.y + modelSpace.m23 * point.z + modelSpace.m24);
+        float z = (float) (modelSpace.m31 * point.x + modelSpace.m32 * point.y + modelSpace.m33 * point.z + modelSpace.m34);
+       
         return new Point3D(x, y, z);
 
 	}
@@ -1185,8 +1375,8 @@ public class SimulationService implements INetworkDispatch {
 	public boolean checkLineOfSight(SWGObject object, Point3D position2) {
 		long startTime = System.nanoTime();
 		
-		float heightOrigin = 1.f;
-		float heightDirection = 1.f;
+		float heightOrigin = 1.75f;
+		float heightDirection = 1.75f;
 		
 		if (object instanceof CreatureObject) {
 			heightOrigin = getHeightOrigin((CreatureObject) object);
@@ -1204,6 +1394,9 @@ public class SimulationService implements INetworkDispatch {
 			if (inRangeObject == object) {
 				continue;
 			}
+			
+			if (object.getTemplate().contains("_barricade") || object.getTemplate().contains("shared_dejarik_table_base"))
+				continue;
 			
 			if (object.getTemplateData() != null && object.getTemplateData().getAttribute("collisionActionBlockFlags") != null) {
 				int bit = (Integer) object.getTemplateData().getAttribute("collisionActionBlockFlags") & 255;
@@ -1237,6 +1430,83 @@ public class SimulationService implements INetworkDispatch {
 		return true;
 	}
 	
+	
+	public boolean checkLineOfSight2(SWGObject obj1, Point3D obj2) {
+		long startTime = System.nanoTime();
+						
+		float heightOrigin = 1.75f;
+		float heightDirection = 1.75f;
+		
+		if(obj1 instanceof CreatureObject)
+			heightOrigin = getHeightOrigin((CreatureObject) obj1);
+				
+		Point3D position1 = obj1.getWorldPosition();
+		Point3D position2 = obj2;
+
+		Point3D origin = new Point3D(position1.x, position1.y + heightOrigin, position1.z);
+		Point3D end = new Point3D(position2.x, position2.y + heightDirection, position2.z);
+		float distance = position1.getDistance2D(position2);
+		
+		List<SWGObject> inRangeObjects = get(obj1.getPlanet(), position1.x, position1.z, (int) (distance + 10));
+
+		for(SWGObject object : inRangeObjects) {
+			
+			if(object == obj1)
+				continue;
+			
+			if (object.getTemplate().contains("_barricade") || object.getTemplate().contains("shared_dejarik_table_base"))
+				continue;
+			
+			if(object.getTemplateData() != null && object.getTemplateData().getAttribute("collisionActionBlockFlags") != null) {
+				int bit = (Integer) object.getTemplateData().getAttribute("collisionActionBlockFlags") & 255;
+				if(bit == (Integer) object.getTemplateData().getAttribute("collisionActionBlockFlags"))
+					continue;
+			}
+
+			Ray ray = convertRayToModelSpace(origin, end, object);
+						
+			MeshVisitor visitor = object.getMeshVisitor();
+			
+			if(visitor == null)
+				continue;
+			
+			List<Mesh3DTriangle> tris = visitor.getTriangles();
+			
+			if(tris.isEmpty())
+				continue;
+			
+			for(Mesh3DTriangle tri : tris) {
+				
+				if(ray.intersectsTriangle(tri, distance) != null) {
+					//System.out.println("Collision took: " + (System.nanoTime() - startTime) + " ns (collided)");
+				//	System.out.println("Collided with " + object.getTemplate() + " X: " + object.getPosition().x + " Y: " + object.getPosition().y + " Z: " + object.getPosition().z);	
+					return false;
+				}
+				
+			}
+						
+		}
+				
+		List<Vec3D> segments = new ArrayList<Vec3D>();
+		Line3D.splitIntoSegments(new Vec3D(position1.x, position1.y + 1, position1.z), new Vec3D(position2.x, position2.y + 1, position2.z), (float) 1, segments, true);
+		
+		for(Vec3D segment : segments) {
+			float y = segment.y;
+			
+			int height = (int) core.terrainService.getHeight(obj1.getPlanetId(), segment.x, segment.z); // round down to int
+			
+			if(height > y) {
+				//System.out.println("Collision took: " + (System.nanoTime() - startTime) + " ns (terrain collision)");				
+				return false;
+			}
+		}
+		//System.out.println("Collision took: " + (System.nanoTime() - startTime) + " ns (did not collide)");
+
+		return true;
+
+	}
+	
+	
 	public boolean checkLineOfSight(SWGObject obj1, SWGObject obj2) {
 		long startTime = System.nanoTime();
 		if(obj1.getPlanet() != obj2.getPlanet())
@@ -1256,8 +1526,10 @@ public class SimulationService implements INetworkDispatch {
 			
 		}
 		
-		float heightOrigin = 1.f;
-		float heightDirection = 1.f;
+//		float heightOrigin = 1.f;
+//		float heightDirection = 1.f;
+		float heightOrigin = 1.75f;
+		float heightDirection = 1.75f;
 		
 		if (obj2.getTemplate().equals("object/tangible/inventory/shared_character_inventory.iff")){
 			obj2 = obj2.getContainer(); // LOS message fix on corpse
@@ -1281,6 +1553,9 @@ public class SimulationService implements INetworkDispatch {
 		for(SWGObject object : inRangeObjects) {
 			
 			if(object == obj1 || object == obj2)
+				continue;
+			
+			if (object.getTemplate().contains("_barricade") || object.getTemplate().contains("shared_dejarik_table_base"))
 				continue;
 			
 			if(object.getTemplateData() != null && object.getTemplateData().getAttribute("collisionActionBlockFlags") != null) {

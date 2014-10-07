@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -55,6 +56,7 @@ import resources.harvest.SurveyTool;
 import org.apache.commons.lang3.text.WordUtils;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
+import org.python.antlr.PythonParser.list_for_return;
 import org.python.core.Py;
 import org.python.core.PyObject;
 
@@ -131,6 +133,9 @@ import services.command.CombatCommand;
 import services.bazaar.AuctionItem;
 import services.chat.ChatRoom;
 import services.equipment.EquipmentService;
+import services.gcw.GCWPylon;
+import services.gcw.GCWSpawner;
+import services.spawn.MobileTemplate;
 import services.sui.SUIWindow;
 import services.sui.SUIWindow.SUICallback;
 import services.sui.SUIWindow.Trigger;
@@ -140,6 +145,9 @@ public class ObjectService implements INetworkDispatch {
 
 	//private Map<Long, SWGObject> objectList = new ConcurrentHashMap<Long, SWGObject>();
 	private Map<Long, SWGObject> objectList = new ObjectList<Long, SWGObject>();
+	private Map<Long, List<CellObject>> cellMap = new HashMap<Long, List<CellObject>>();
+	private Map<Long, BuildingObject> buildingMap = new HashMap<Long, BuildingObject>();
+	private List<BuildingObject> persistentBuildings = new ArrayList<BuildingObject>();
 	private NGECore core;
 	private DatabaseConnection databaseConnection;
 	private AtomicLong highestId = new AtomicLong();
@@ -148,6 +156,8 @@ public class ObjectService implements INetworkDispatch {
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	protected final Object objectMutex = new Object();
 	private List<Runnable> loadServerTemplateTasks = Collections.synchronizedList(new ArrayList<Runnable>());
+	private int iteratedReusedIds = 0;
+	private List<Long> reusableIds = Collections.synchronizedList(new ArrayList<Long>());
 	
 	public ObjectService(final NGECore core) {
 		this.core = core;
@@ -170,6 +180,7 @@ public class ObjectService implements INetworkDispatch {
 		    	core.harvesterService.saveHarvesters();
 		    	core.playerCityService.saveAllCities();
 		    	core.closeODBs();
+		    	System.out.println("Databases closed.");
 		    }
 		});
 		
@@ -187,7 +198,32 @@ public class ObjectService implements INetworkDispatch {
 		}
 	}
 	
-	public void loadBuildings() {
+	public void loadObjects() {
+		System.out.println("Loading objects...");
+		ODBCursor cursor = core.getSWGObjectODB().getCursor();
+		
+		while (cursor.hasNext()) {
+			SWGObject object = (SWGObject) cursor.next();
+			if (object != null && !(object instanceof BuildingObject) && !objectList.containsKey(object.getObjectID()))
+				objectList.put(object.getObjectID(), object);
+		}
+		
+		cursor.close(); // Has always to be closed properly or will create undefined locking behaviour!
+		
+		cursor = core.getReusableIdODB().getCursor();
+		
+		while (cursor.hasNext()) {
+			reusableIds.add(((ObjectId) cursor.next()).objectId);
+		}
+		
+		loadBuildings();
+		
+		cursor.close(); // Has always to be closed properly or will create undefined locking behaviour!
+		
+		System.out.println("Finished loading objects.");
+	}
+	
+	private void loadBuildings() {
 		ODBCursor cursor = core.getSWGObjectODB().getCursor();
 				
 		while(cursor.hasNext()) {
@@ -217,7 +253,7 @@ public class ObjectService implements INetworkDispatch {
 	}
 	
 	public void loadServerTemplates() {
-		System.out.println("Loading server templates...");
+		System.out.println("Loading server templates... (" + loadServerTemplateTasks.size() + " templates)");
 		loadServerTemplateTasks.forEach(Runnable::run);
 		loadServerTemplateTasks.clear();
 		System.out.println("Finished loading server templates...");
@@ -251,15 +287,17 @@ public class ObjectService implements INetworkDispatch {
 			}
 		}
 		
-		synchronized(objectMutex) {
-			if(objectID == 0)
-				objectID = generateObjectID();
-			else
-				isSnapshot = !overrideSnapshot;
-			
-			if(!core.getObjectIdODB().contains(objectID))
-				core.getObjectIdODB().put(objectID, new ObjectId(objectID));
-		}
+		if (objectID == 0) {
+			synchronized(objectMutex) {
+				if(objectID == 0)
+					objectID = generateObjectID();
+				
+				if(!core.getObjectIdODB().contains(objectID))
+					core.getObjectIdODB().put(objectID, new ObjectId(objectID));
+			}
+		} else
+			isSnapshot = !overrideSnapshot;
+		
 		
 		if (planet == null) {
 			System.err.println("Planet is null in createObject for some reason.");
@@ -285,6 +323,39 @@ public class ObjectService implements INetworkDispatch {
 			
 			object = new SurveyTool(objectID, planet, position, orientation, Template);
 			
+		} else if(Template.startsWith("object/tangible/destructible/shared_gcw_city_construction_beacon")) {
+			
+			float positionY = core.terrainService.getHeight(planet.getID(), position.x, position.z)-1.5f;
+			Point3D newpoint = new Point3D(position.x,positionY,position.z);				
+			object = new GCWPylon(objectID, planet, position, orientation, Template);
+
+		} else if(Template.startsWith("object/tangible/loot/creature_loot/collections/shared_dejarik_table_base")) {
+			
+			float positionY = core.terrainService.getHeight(planet.getID(), position.x, position.z)+0.3f;
+			Point3D newpoint = new Point3D(position.x,positionY,position.z);				
+			object = new GCWSpawner(objectID, planet, position, orientation, Template);
+
+		} else if(Template.startsWith("object/tangible/destructible/")) {
+			
+//			float positionY = core.terrainService.getHeight(planet.getID(), position.x, position.z)-1f;
+//			Point3D newpoint = new Point3D(position.x,positionY,position.z);				
+//			object = new InstallationObject(objectID, planet, newpoint, orientation, Template);
+			
+			object = new TangibleObject(objectID, planet, position, orientation, Template);
+			
+			//object = new BuildingObject(objectID, planet, position, orientation, Template);
+
+		} else if(Template.startsWith("object/tangible/gcw/static_base/shared_invisible_cloner")) {
+			
+			object = new BuildingObject(objectID, planet, position, orientation, Template);
+			if(!isSnapshot && !overrideSnapshot && object.getPortalVisitor() != null) {
+				int cellCount = object.getPortalVisitor().cells.size() - 1; // -1 for index 0 cell which is outside the building and used for ai pathfinding
+				for (int i = 0; i < cellCount; i++) {
+					CellObject cell = (CellObject) createObject("object/cell/shared_cell.iff", planet);
+					cell.setCellNumber(i+1);
+					object.add(cell);
+				}
+			}
 		} else if(Template.startsWith("object/tangible")) {
 			
 			object = new TangibleObject(objectID, planet, position, orientation, Template);
@@ -375,6 +446,12 @@ public class ObjectService implements INetworkDispatch {
 			Point3D newpoint = new Point3D(position.x,positionY,position.z);			
 			object = new HarvesterObject(objectID, planet, newpoint, orientation, Template);	
 			
+		} else if(Template.startsWith("object/installation/turret")) {
+			
+			float positionY = core.terrainService.getHeight(planet.getID(), position.x, position.z);
+			Point3D newpoint = new Point3D(position.x,positionY,position.z);				
+			object = new InstallationObject(objectID, planet, newpoint, orientation, Template);
+			
 		} else {
 			return null;			
 		}
@@ -433,10 +510,10 @@ public class ObjectService implements INetworkDispatch {
 		SWGObject ret = objectList.put(objectID, object);
 		
 		//if (ret != null && !ret.getTemplate().equals(object.getTemplate())) {
-		if (ret == null) {
-			//System.err.println("ObjectService: Detected duplicate Id.  Assigning new one.")
-			object = createObject(Template, objectID, planet, position, orientation, customServerTemplate, overrideSnapshot, loadServerTemplate);
-		}
+//		if (ret == null) {
+//			//System.err.println("ObjectService: Detected duplicate Id.  Assigning new one.")
+//			object = createObject(Template, objectID, planet, position, orientation, customServerTemplate, overrideSnapshot, loadServerTemplate);
+//		}
 		
 		return object;
 	}
@@ -498,7 +575,7 @@ public class ObjectService implements INetworkDispatch {
 			if (objectList.containsKey(objectID)) {
 				System.err.println("getObject(): object is null but objectList contains objectID key");
 			} else {
-				//System.err.println("getObject(): object is null");
+//				System.err.println("getObject(): object is null");
 			}
 		}
 		
@@ -525,33 +602,43 @@ public class ObjectService implements INetworkDispatch {
 	}
 	
 	public void destroyObject(SWGObject object) {
+
 		if (object == null) {
 			return;
 		}
 		
 		if (object.getAttachment("AI") != null && object.getAttachment("AI") instanceof AIActor && ((AIActor) object.getAttachment("AI")).getMobileTemplate().getRespawnTime() > 0) {
 			final long objectId = object.getObjectID();
-			final String Template = object.getTemplate();
+			final MobileTemplate Template = ((AIActor) object.getAttachment("AI")).getMobileTemplate();
 			final Planet planet = object.getPlanet();
 			final Point3D position = object.getPosition();
+			final Point3D spawnPosition = ((AIActor) object.getAttachment("AI")).getSpawnPosition();			
 			final Quaternion orientation = object.getOrientation();
-			final long cellId = ((object.getContainer() == null) ? 0L : object.getContainer().getObjectID());
+			// final long cellId = ((object.getContainer() == null) ? 0L : object.getContainer().getObjectID());
+			CellObject cellO = spawnPosition.getCell();
+			final long cellId = ((cellO == null) ? 0L : cellO.getObjectID());
 			final short level = ((object instanceof CreatureObject) ? ((CreatureObject) object).getLevel() : (short) 0);
-			
 			scheduler.schedule(new Runnable() {
 				
 				@Override
 				public void run() {
 					try {
-						NGECore.getInstance().spawnService.spawnCreature(Template, objectId, planet.getName(), cellId, position.x, position.y, position.z, orientation.w, orientation.x, orientation.y, orientation.z, level);
+
+						// Commented for now until found where the respawn is always set to 60 for any NPC
+						CreatureObject newObject = NGECore.getInstance().spawnService.spawnCreature(Template, 0, planet.getName(), cellId, spawnPosition.x, spawnPosition.y, spawnPosition.z, orientation.w, orientation.x, orientation.y, orientation.z, level);
+						AIActor newAIActor = (AIActor)newObject.getAttachment("AI");
+						newAIActor.cloneActor(((AIActor) object.getAttachment("AI")));
+						((AIActor) object.getAttachment("AI")).destroyActor();
+						//object.setAttachment("AI", null);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}
 				
 			}, ((AIActor) object.getAttachment("AI")).getMobileTemplate().getRespawnTime(), TimeUnit.SECONDS);
+			//}, 30, TimeUnit.SECONDS);
 		}
-		
+				
 		String filePath = "scripts/" + object.getTemplate().split("shared_" , 2)[0].replace("shared_", "") + object.getTemplate().split("shared_" , 2)[1].replace(".iff", "") + ".py";
 		
 		if (FileUtilities.doesFileExist(filePath)) {
@@ -586,7 +673,8 @@ public class ObjectService implements INetworkDispatch {
 			parent.remove(object);
 			object.setParentId(parentId);
 		} else {
-			core.simulationService.remove(object, object.getWorldPosition().x, object.getWorldPosition().z, true);
+			if (!(object instanceof WaypointObject))
+				core.simulationService.remove(object, object.getWorldPosition().x, object.getWorldPosition().z, true);
 		}
 		@SuppressWarnings("unchecked") Vector<SWGObject> childObjects = (Vector<SWGObject>) object.getAttachment("childObjects");
 		if(childObjects != null)
@@ -649,7 +737,7 @@ public class ObjectService implements INetworkDispatch {
 			customName = customName.split(" ")[0];
 		
 		try {
-			PreparedStatement ps = core.getDatabase1().preparedStatement("SELECT * FROM characters WHERE \"firstName\" ILIKE ?");
+			PreparedStatement ps = core.getDatabase1().preparedStatement("SELECT id FROM characters WHERE \"firstName\" ILIKE ?");
 			ps.setString(1, customName);
 			ResultSet resultSet = ps.executeQuery();
 
@@ -670,10 +758,8 @@ public class ObjectService implements INetworkDispatch {
 	}
 	
 	public CreatureObject getCreatureFromDB(long objectId) {
-		SWGObject object = (SWGObject) core.getSWGObjectODB().get(objectId);
-		if(!(object instanceof CreatureObject))
-			return null;
-		if (object != null && getObject(object.getObjectID()) == null) {
+		CreatureObject object = (CreatureObject) core.getSWGObjectODB().get(objectId);
+		if (object != null) {
 			loadServerTemplate(object);
 			object.viewChildren(object, true, true, (child) -> loadServerTemplate(child));
 		}
@@ -724,16 +810,98 @@ public class ObjectService implements INetworkDispatch {
 		
 		long objectId = 0;
 		
-		if (core.getDuplicateIdODB().contains(key)) {
-			objectId = ((DuplicateId) core.getDuplicateIdODB().get(key)).getObjectId();
+		boolean containsKey;
+		
+		synchronized(objectMutex) {
+			containsKey = core.getDuplicateIdODB().contains(key);
+		}
+		
+		if (containsKey) {
+			synchronized(objectMutex) {
+				objectId = ((DuplicateId) core.getDuplicateIdODB().get(key)).getObjectId();
+			}
+			
+			if (objectList.containsKey(objectId)) {
+				System.err.println("Warning: DOId already in use.  Using one from reusableId pool instead.");
+				return getReusableId();
+			}
 		} else {
-			objectId = generateObjectID();
-			core.getDuplicateIdODB().put(key, new DuplicateId(key, objectId));
+			while (true) {
+				objectId = generateObjectID();
+				
+				synchronized(objectMutex) {
+					if (!core.getObjectIdODB().contains(objectId)) {
+						core.getObjectIdODB().put(objectId, new ObjectId(objectId));
+					} else {
+						System.err.println("Error: Generated objectId is already in objectIdODB?");
+						System.err.println("Trying again...");
+						continue;
+					}
+					
+					if (objectList.containsKey(objectId)) {
+						System.err.println("Error: Generated objectId is already in objectList?");
+						System.err.println("Trying again...");
+						continue;
+					}
+				}
+				
+				break;
+			}
+			
+			synchronized(objectMutex) {
+				core.getDuplicateIdODB().put(key, new DuplicateId(key, objectId));
+			}
 		}
 		
 		return objectId;
 	}
-
+	
+	public long getReusableId() {
+		long objectId = 0;
+		
+		synchronized(objectMutex) {
+			objectId = reusableIds.iterator().next();
+			
+			while (objectList.containsKey(objectId) && iteratedReusedIds++ < reusableIds.size()) {
+				objectId = reusableIds.get(iteratedReusedIds);
+			}
+			
+			if (objectList.containsKey(objectId)) {
+				objectId = 0;
+			}
+		}
+		
+		if (objectId == 0) {
+			while (true) {
+				objectId = generateObjectID();
+				
+				synchronized(objectMutex) {
+					if (!core.getObjectIdODB().contains(objectId)) {
+						core.getObjectIdODB().put(objectId, new ObjectId(objectId));
+					} else {
+						System.err.println("Error: Generated objectId is already in objectIdODB?");
+						System.err.println("Trying again...");
+						continue;
+					}
+					
+					if (objectList.containsKey(objectId)) {
+						System.err.println("Error: Generated objectId is already in objectList?");
+						System.err.println("Trying again...");
+						continue;
+					}
+					
+					core.getReusableIdODB().put(objectId, new ObjectId(objectId));
+					reusableIds.add(objectId);
+					iteratedReusedIds++;
+					
+					break;
+				}
+			}
+		}
+		
+		return objectId;
+	}
+	
 	public Vector<SWGObject> getItemsInContainerByStfName(CreatureObject creature, long containerId, String stfName) {
 		Vector<SWGObject> itemList = new Vector<SWGObject>();
 		SWGObject container = getObject(containerId);
@@ -976,43 +1144,67 @@ public class ObjectService implements INetworkDispatch {
 				long objectId = selectCharacter.getCharacterId();
 				Client client = core.getClient(session);
 				if(client == null) {
-					System.out.println("NULL Client");
+					System.err.println("NULL Client");
 					return;
 				}
 				CreatureObject creature = null;
 				if(getObject(objectId) == null) {
-					System.out.println("SelectCharacter: not in object list");
 					creature = getCreatureFromDB(objectId);
 					if(creature == null) {
-						System.out.println("Cant get creature from db");
+						System.err.println("Cant get creature from db");
 					} else {
-						if (creature.getCustomName() == null || creature.getCustomName() == "") {
-							System.out.println("Player with ObjID of " + creature.getObjectID() + " tried logging in but has a null/empty name!");
+						if (creature.getCustomName() == null || creature.getCustomName().isEmpty()) {
+							System.err.println("Name: " + creature.getCustomName());
+							System.err.println("Player with ObjID of " + creature.getObjectID() + " tried logging in but has a null/empty name!");
 							return;
+						} else {
+							System.err.println("SelectCharacter: not in object list");
 						}
 					}
 					
 				} else {
 					
-					if (!(getObject(objectId) instanceof CreatureObject))
+					if (!(getObject(objectId) instanceof CreatureObject)) {
+						System.out.println("Character is not an instance of CreatureObject!");
 						return;
-
-					creature = (CreatureObject) getObject(objectId);
-					if(creature.getAttachment("disconnectTask") != null && creature.getClient() != null && !creature.getClient().getSession().isClosing())
-						return;
+					}
 					
+					creature = (CreatureObject) getObject(objectId);
+					if (creature.getCustomName() == null || creature.getCustomName().isEmpty()) {
+						System.err.println("Creature's custom name was null/empty! Name: " + creature.getCustomName());
+					}
+					if(creature.getAttachment("disconnectTask") != null)
+						((ScheduledFuture<?>)creature.getAttachment("disconnectTask")).cancel(true);
+					if (creature.getClient() != null) {
+						if (!creature.getClient().getSession().isClosing()) {
+							System.err.println("Character is already disconnecting...");
+							return;
+						}
+						creature.setClient(null);
+					}
 				}
-				if(creature.getAttachment("disconnectTask") != null) {
-					((ScheduledFuture<?>) creature.getAttachment("disconnectTask")).cancel(true);
-				}					
+				
+				creature.setIntendedTarget(0);
+				
+				creature.setLookAtTarget(0);
 				
 				PlayerObject ghost = (PlayerObject) creature.getSlottedObject("ghost");
-
-				if(ghost == null)
+				
+				if (ghost == null) {
+					System.err.println("The Character's Ghost is null!");
 					return;
+				}
+				
+				System.out.println("Character '" + creature.getCustomName() + "' now zoning...");
 				
 				ghost.clearFlagBitmask(PlayerFlags.LD);
 				
+				final CreatureObject finalCreature = creature;
+				creature.viewChildren(creature, true, false, new Traverser() {
+					public void process(SWGObject object) {
+						finalCreature.makeUnaware(object);
+					}
+				});
 				creature.getAwareObjects().removeAll(creature.getAwareObjects());
 				creature.setAttachment("disconnectTask", null);
 
@@ -1020,6 +1212,8 @@ public class ObjectService implements INetworkDispatch {
 				Planet planet = core.terrainService.getPlanetByID(creature.getPlanetId());
 				creature.setPlanet(planet);
 				client.setParent(creature);
+				
+				session.setAttribute("CmdSceneReady", false);
 				
 				objectList.put(creature.getObjectID(), creature);
 				
@@ -1153,6 +1347,13 @@ public class ObjectService implements INetworkDispatch {
 					});
 				}
 				
+				// New players that skip tutorial
+				if (creature.getLevel() <= (short) 1) {
+					core.playerService.grantLevel(creature, 5);
+					TangibleObject inventory = (TangibleObject) creature.getSlottedObject("inventory");
+					if (inventory != null) inventory.add(core.objectService.createObject("object/tangible/npe/shared_npe_uniform_box.iff", creature.getPlanet()));
+				}
+
 				core.playerService.postZoneIn(creature);
 			}
 			
@@ -1251,21 +1452,232 @@ public class ObjectService implements INetworkDispatch {
 	}
 	
 	public void loadBuildoutObjects(Planet planet) throws InstantiationException, IllegalAccessException {
-		
 		DatatableVisitor buildoutTable = ClientFileManager.loadFile("datatables/buildout/areas_" + planet.getName() + ".iff", DatatableVisitor.class);
-		
+		System.out.println("loadBuildoutObjects");
 		for (int i = 0; i < buildoutTable.getRowCount(); i++) {
 			
 			String areaName = (String) buildoutTable.getObject(i, 0);
 			float x1 = (Float) buildoutTable.getObject(i, 1);
 			float z1 = (Float) buildoutTable.getObject(i, 2);
-			
 			readBuildoutDatatable(ClientFileManager.loadFile("datatables/buildout/" + planet.getName() + "/" + areaName + ".iff", DatatableVisitor.class), planet, x1, z1);
-
 		}
+		
+		addCellsToBuildings();
+		finalizeBuildings();
 	}
 	
 	public void readBuildoutDatatable(DatatableVisitor buildoutTable, Planet planet, float x1, float z1) throws InstantiationException, IllegalAccessException {
+
+		CrcStringTableVisitor crcTable = ClientFileManager.loadFile("misc/object_template_crc_string_table.iff", CrcStringTableVisitor.class);
+		
+		Map<Long, Long> duplicate = new HashMap<Long, Long>();
+
+		for (int i = 0; i < buildoutTable.getRowCount(); i++) {
+			String template;
+			
+			if(buildoutTable.getColumnCount() <= 11)
+				template = crcTable.getTemplateString((Integer) buildoutTable.getObject(i, 0));
+			else
+				template = crcTable.getTemplateString((Integer) buildoutTable.getObject(i, 3));
+			
+			if(template != null) {
+				
+				float px, py, pz, qw, qx, qy, qz, radius;
+				long objectId = 0, containerId = 0, objectId2 = 0, containerId2 = 0;
+				int type = 0, cellIndex = 0, portalCRC;
+				
+				if(buildoutTable.getColumnCount() <= 11) {
+
+					objectId2 = (((Integer) buildoutTable.getObject(i, 0) == 0) ? 0 : Delta.createBuffer(8).putInt((Integer) buildoutTable.getObject(i, 0)).putInt(0xF986FFFF).flip().getLong());			
+					cellIndex = (Integer) buildoutTable.getObject(i, 1);
+					px = (Float) buildoutTable.getObject(i, 2);
+					py = (Float) buildoutTable.getObject(i, 3);
+					pz = (Float) buildoutTable.getObject(i, 4);
+					qw = (Float) buildoutTable.getObject(i, 5);
+					qx = (Float) buildoutTable.getObject(i, 6);
+					qy = (Float) buildoutTable.getObject(i, 7);
+					qz = (Float) buildoutTable.getObject(i, 8);
+					radius = (Float) buildoutTable.getObject(i, 9);
+					portalCRC = (Integer) buildoutTable.getObject(i, 10);
+				
+				} else {
+							
+					// Since the ids are just ints, they append 0xFFFF86F9 to them
+					// This is demonstated in the packet sent to the server when you /target client-spawned objects
+					objectId = (((Integer) buildoutTable.getObject(i, 0) == 0) ? 0 : Delta.createBuffer(8).putInt((Integer) buildoutTable.getObject(i, 0)).putInt(0xF986FFFF).flip().getLong());
+					objectId2 = Long.valueOf((Integer)buildoutTable.getObjectByColumnNameAndIndex("objid", i));
+					containerId = (((Integer) buildoutTable.getObject(i, 1) == 0) ? 0 : Delta.createBuffer(8).putInt((Integer) buildoutTable.getObject(i, 1)).putInt(0xF986FFFF).flip().getLong());
+					containerId2 = Long.valueOf((Integer)buildoutTable.getObjectByColumnNameAndIndex("container", i));
+					type = (Integer) buildoutTable.getObject(i, 2);
+					cellIndex = (Integer) buildoutTable.getObject(i, 4);
+					
+					px = (Float) buildoutTable.getObject(i, 5);
+					py = (Float) buildoutTable.getObject(i, 6);
+					pz = (Float) buildoutTable.getObject(i, 7);
+					qw = (Float) buildoutTable.getObject(i, 8);
+					qx = (Float) buildoutTable.getObject(i, 9);
+					qy = (Float) buildoutTable.getObject(i, 10);
+					qz = (Float) buildoutTable.getObject(i, 11);
+					radius = (Float) buildoutTable.getObject(i, 12);
+					portalCRC = (Integer) buildoutTable.getObject(i, 13);
+					
+				}
+				
+				// Treeku - Refactored to work around duplicate objectIds
+				// Required for instances/heroics which are duplicated ie. 10 times
+				if(!template.equals("object/cell/shared_cell.iff") && objectId != 0 && getObject(objectId) != null) {
+					SWGObject object = getObject(objectId);
+					
+					// Same coordinates is a true duplicate
+					if ((px + ((containerId == 0) ? 0 : x1)) == object.getPosition().x &&
+						py == object.getPosition().y &&
+						(pz + ((containerId == 0) ? 0 : z1)) == object.getPosition().z) {
+						//System.out.println("Duplicate buildout object: " + template);
+						continue;
+					}
+				}
+				
+				if (duplicate.containsKey(containerId)) {
+					containerId = duplicate.get(containerId);
+				}
+				
+				String planetName = planet.getName();
+				
+				// TODO needs to a way to work for mustafar and kashyyyk which both have instances
+				if (objectId != 0 && getObject(objectId) != null && (planetName.contains("dungeon") || planetName.contains("adventure"))) {
+					SWGObject container = getObject(containerId);
+					float x = (px + ((container == null) ? x1 : container.getPosition().x));
+					float z = (pz + ((container == null) ? z1 : container.getPosition().z));
+					String key = "" + CRC.StringtoCRC(planet.getName()) + CRC.StringtoCRC(template) + type + containerId + cellIndex + x + py + z;
+					long newObjectId = 0;
+					
+					if (core.getDuplicateIdODB().contains(key)) {
+						newObjectId = ((DuplicateId) core.getDuplicateIdODB().get(key)).getObjectId();
+					} else {
+						newObjectId = generateObjectID();
+						core.getDuplicateIdODB().put(key, new DuplicateId(key, newObjectId));
+					}
+					
+					duplicate.put(objectId, newObjectId);
+					objectId = newObjectId;
+				}
+
+				List<Long> containers = new ArrayList<Long>();
+				SWGObject object;
+				if(objectId != 0 && containerId == 0) {		
+					if(portalCRC != 0) {
+					
+						if (core.getSWGObjectODB().contains(objectId) && !duplicate.containsValue(objectId)){
+							continue;
+						}
+						containers.add(objectId);
+						object = createObject(template, objectId, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, true, true);
+						object.setAttachment("childObjects", null);
+
+						buildingMap.put(objectId2, ((BuildingObject) object));
+						
+						/*if (!duplicate.containsValue(objectId)) {
+							((BuildingObject) object).createTransaction(core.getBuildingODB().getEnvironment());
+							core.getBuildingODB().put((BuildingObject) object, Long.class, BuildingObject.class, ((BuildingObject) object).getTransaction());
+							((BuildingObject) object).getTransaction().commitSync();
+						}*/
+					} else {
+						object = createObject(template, 0, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, false, true);
+					}
+					if(object == null)
+						continue;
+					object.setContainerPermissions(WorldPermissions.WORLD_PERMISSIONS);
+					if(radius > 256)
+						object.setAttachment("bigSpawnRange", new Boolean(true));
+					if (!duplicate.containsValue(objectId) && object instanceof BuildingObject && portalCRC != 0){
+						persistentBuildings.add((BuildingObject) object);
+					}		
+					
+				} else if(containerId != 0) {
+					object = createObject(template, 0, planet, new Point3D(px, py, pz), new Quaternion(qw, qx, qy, qz), null, false, true);
+					if(containers.contains(containerId)) {
+						object.setContainerPermissions(WorldPermissions.WORLD_PERMISSIONS);
+						object.setisInSnapshot(false);
+						containers.add(objectId);
+					}
+					if(object instanceof CellObject && cellIndex != 0) {
+						object.setContainerPermissions(WorldCellPermissions.WORLD_CELL_PERMISSIONS);
+						((CellObject) object).setCellNumber(cellIndex);
+						List<CellObject> cellList = cellMap.get(containerId2);
+						if (cellList != null){
+							cellList.add(((CellObject) object));
+							cellMap.put(containerId2, cellList);
+						} else {
+							cellList = new ArrayList<CellObject>();
+							cellList.add(((CellObject) object));
+							cellMap.put(containerId2, cellList);
+						}
+					}
+//					SWGObject parent = getObject(containerId);
+//					
+//					if(parent != null && object != null) {
+//						if(parent instanceof BuildingObject && ((BuildingObject) parent).getCellByCellNumber(cellIndex) != null)
+//							continue;
+//						parent.add(object);
+//					}
+				} else {
+					object = createObject(template, 0, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, false, true);
+					object.setContainerPermissions(WorldPermissions.WORLD_PERMISSIONS);
+					
+				}
+				
+				if (object != null && object instanceof TangibleObject && !(object instanceof CreatureObject)) {
+					((TangibleObject) object).setStaticObject(true);
+				}
+				
+				//System.out.println("Spawning: " + template + " at: X:" + object.getPosition().x + " Y: " + object.getPosition().y + " Z: " + object.getPosition().z);
+				if(object != null)
+					object.setAttachment("isBuildout", new Boolean(true));
+			}
+				
+			
+		}
+
+//		for(BuildingObject building : persistentBuildings) {
+//			building.setAttachment("buildoutBuilding", true);
+//			core.getSWGObjectODB().put(building.getObjectID(), building);
+//			destroyObject(building);
+//		}
+		
+	}
+	 
+	private void addCellsToBuildings(){
+	
+		Iterator it = buildingMap.entrySet().iterator();
+	    while (it.hasNext()) {
+	        Map.Entry pairs = (Map.Entry)it.next();
+	        long buildingId = (long) pairs.getKey();
+	        BuildingObject building = (BuildingObject)pairs.getValue();
+			//System.out.println("We have buildingId " +buildingId);
+			List<CellObject> cellList = cellMap.get(buildingId);
+			if (cellList!=null) {
+				System.out.println("We have " + cellList.size() + " cells");
+				for (CellObject cell : cellList){
+					building.add(cell);
+					System.out.println("Building : " + building.getTemplate() + " cell " + cell.getCellNumber());
+				}
+			} else {/*System.out.println("Cellist null");*/}
+	        	        
+	        it.remove(); 
+	    }	
+	}
+	
+	private void finalizeBuildings(){
+		
+		for(BuildingObject building : persistentBuildings) {
+			building.setAttachment("buildoutBuilding", true);
+			core.getSWGObjectODB().put(building.getObjectID(), building);
+			destroyObject(building);
+		}
+	}
+	
+	
+	public void readBuildoutDatatableOLD(DatatableVisitor buildoutTable, Planet planet, float x1, float z1) throws InstantiationException, IllegalAccessException {
 
 		CrcStringTableVisitor crcTable = ClientFileManager.loadFile("misc/object_template_crc_string_table.iff", CrcStringTableVisitor.class);
 		List<BuildingObject> persistentBuildings = new ArrayList<BuildingObject>();
@@ -1366,7 +1778,7 @@ public class ObjectService implements INetworkDispatch {
 						if (core.getSWGObjectODB().contains(objectId) && !duplicate.containsValue(objectId))
 							continue;
 						containers.add(objectId);
-						object = createObject(template, objectId, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, true, false);
+						object = createObject(template, objectId, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, true, true);
 						object.setAttachment("childObjects", null);
 						
 						/*if (!duplicate.containsValue(objectId)) {
@@ -1375,7 +1787,7 @@ public class ObjectService implements INetworkDispatch {
 							((BuildingObject) object).getTransaction().commitSync();
 						}*/
 					} else {
-						object = createObject(template, 0, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, false, false);
+						object = createObject(template, 0, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, false, true);
 					}
 					if(object == null)
 						continue;
@@ -1385,7 +1797,7 @@ public class ObjectService implements INetworkDispatch {
 					if (!duplicate.containsValue(objectId) && object instanceof BuildingObject && portalCRC != 0)
 						persistentBuildings.add((BuildingObject) object);
 				} else if(containerId != 0) {
-					object = createObject(template, 0, planet, new Point3D(px, py, pz), new Quaternion(qw, qx, qy, qz), null, false, false);
+					object = createObject(template, 0, planet, new Point3D(px, py, pz), new Quaternion(qw, qx, qy, qz), null, false, true);
 					if(containers.contains(containerId)) {
 						object.setContainerPermissions(WorldPermissions.WORLD_PERMISSIONS);
 						object.setisInSnapshot(false);
@@ -1403,7 +1815,7 @@ public class ObjectService implements INetworkDispatch {
 						parent.add(object);
 					}
 				} else {
-					object = createObject(template, 0, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, false, false);
+					object = createObject(template, 0, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, false, true);
 					object.setContainerPermissions(WorldPermissions.WORLD_PERMISSIONS);
 				}
 				
@@ -1420,6 +1832,7 @@ public class ObjectService implements INetworkDispatch {
 		}
 
 		for(BuildingObject building : persistentBuildings) {
+			building.setAttachment("buildoutBuilding", true);
 			core.getSWGObjectODB().put(building.getObjectID(), building);
 			destroyObject(building);
 		}

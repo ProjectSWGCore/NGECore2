@@ -9,12 +9,18 @@ def setup():
 	
 def run(core, actor, target, commandString):
 	
+	actor.sendSystemMessage('Function suspended until working as intended'),0)
+	return
+	
 	#if actor.getSkills('Foraging')==0:
 		#actor.sendSystemMessage('@skl_use:sys_forage_noskill'),0)
 	
-	#if actor.isForaging()==1:
-		#actor.sendSystemMessage('@skl_use:sys_forage_already',0)
-		#return
+	if actor.getAttachment("LastForageTime"):
+		if actor.getAttachment("LastForageTime")>int(round(time.time() * 1000))-5000:
+			actor.sendSystemMessage('@skl_use:sys_forage_already',0)
+			return
+		
+	actor.setAttachment("LastForageTime",int(round(time.time() * 1000)))
 	
 	if actor.getCombatFlag()!=0:
 		actor.sendSystemMessage('@skl_use:sys_forage_combatfail',0)

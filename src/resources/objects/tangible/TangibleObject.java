@@ -24,6 +24,7 @@ package resources.objects.tangible;
 import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -31,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
@@ -40,6 +42,7 @@ import protocol.swg.PlayClientEffectObjectMessage;
 import protocol.swg.StopClientEffectObjectByLabel;
 import protocol.swg.UpdatePVPStatusMessage;
 import protocol.swg.objectControllerObjects.ShowFlyText;
+import protocol.swg.objectControllerObjects.StartTask;
 import resources.common.OutOfBand;
 import resources.datatables.Options;
 import resources.datatables.PvpStatus;
@@ -48,6 +51,7 @@ import resources.objects.ObjectMessageBuilder;
 import resources.objects.SWGList;
 import resources.objects.SWGSet;
 import resources.objects.creature.CreatureObject;
+import services.command.BaseSWGCommand;
 import engine.clientdata.ClientFileManager;
 import engine.clientdata.visitors.IDManagerVisitor;
 import engine.clients.Client;
@@ -72,13 +76,14 @@ public class TangibleObject extends SWGObject implements Serializable {
 	
 	private transient int pvpBitmask = 0;
 	
-	//private TreeSet<TreeMap<String,Integer>> lootSpecification = new TreeSet<TreeMap<String,Integer>>();
 	private transient List<LootGroup> lootGroups = new ArrayList<LootGroup>();
 	private transient boolean looted = false;	
 	private transient boolean lootLock = false;	
 	private transient boolean creditRelieved = false;	
 	private transient boolean lootItem = false;
 	private transient TangibleObject killer = null;
+	
+	private transient ConcurrentHashMap<String, Long> cooldowns = new ConcurrentHashMap<String, Long>();
 	
 	public TangibleObject(long objectID, Planet planet, Point3D position, Quaternion orientation, String template) {
 		super(objectID, planet, position, orientation, template);
@@ -99,6 +104,7 @@ public class TangibleObject extends SWGObject implements Serializable {
 	public void initAfterDBLoad() {
 		super.init();
 		defendersList = new Vector<TangibleObject>();
+		cooldowns = new ConcurrentHashMap<String, Long>();
 	}
 	
 	public Baseline getOtherVariables() {
@@ -241,6 +247,8 @@ public class TangibleObject extends SWGObject implements Serializable {
 	
 	public void setOptionsBitmask(int optionsBitmask) {
 		notifyClients(getBaseline(3).set("optionsBitmask", optionsBitmask), true);
+		// This needs to be refactored to be sent to clients with different values depending on their faction
+		// A quest object for one faction, can't be quest object for opposing faction
 	}
 	
 	public void setOptions(int options, boolean add) {
@@ -322,18 +330,30 @@ public class TangibleObject extends SWGObject implements Serializable {
 	// All objects can be in combat (terminal mission flag bases, tutorial target box)
 	
 	public List<TangibleObject> getDefendersList() {
-		synchronized(objectMutex) {
+		synchronized(defendersList) {
 			return defendersList;
 		}
 	}
 	
+	public List<TangibleObject> getDefendersListClone() {
+		synchronized(objectMutex) {
+			List<TangibleObject> returnList = new Vector<TangibleObject>();
+			Collections.copy(returnList, defendersList);
+			return returnList;
+		}
+	}
+	
 	public void addDefender(TangibleObject defender) {
-		if (((CreatureObject)this).getOwnerId()>0){
-			if (((CreatureObject)this).getOwnerId()==defender.getObjectID()){
-				return; // fix for now until determined where the tamer is added from
+		if (this instanceof CreatureObject){
+			if (((CreatureObject)this).getOwnerId()>0){
+				if (((CreatureObject)this).getOwnerId()==defender.getObjectID()){
+					return; // fix for now until determined where the tamer is added from
+				}
 			}
 		}
-		defendersList.add(defender);
+		synchronized(defendersList) {
+			defendersList.add(defender);
+		}
 	
 		if (!isInCombat()) {
 			setInCombat(true);
@@ -341,13 +361,15 @@ public class TangibleObject extends SWGObject implements Serializable {
 	}
 	
 	public void removeDefender(TangibleObject defender) {
-		defendersList.remove(defender);
-		
-		if (defendersList.isEmpty() && isInCombat()) {
-			setInCombat(false);
+		synchronized(defendersList) {
+			defendersList.remove(defender);
+			
+			if (defendersList.isEmpty() && isInCombat()) {
+				setInCombat(false);
+			}
 		}
 	}
-	
+		
 	public int getPvpBitmask() {
 		synchronized(objectMutex) {
 			return pvpBitmask;
@@ -387,10 +409,10 @@ public class TangibleObject extends SWGObject implements Serializable {
 			
 			if (observer.getParent() != null) {
 				observer.getSession().write(new UpdatePVPStatusMessage(this.getObjectID(), NGECore.getInstance().factionService.calculatePvpStatus((CreatureObject) observer.getParent(), this), getFaction()).serialize());
-				if(getClient() != null)
-					getClient().getSession().write(new UpdatePVPStatusMessage(observer.getParent().getObjectID(), NGECore.getInstance().factionService.calculatePvpStatus((CreatureObject) this, (CreatureObject) observer.getParent()), getFaction()).serialize());
+				if(getClient() != null){
+					getClient().getSession().write(new UpdatePVPStatusMessage(observer.getParent().getObjectID(), NGECore.getInstance().factionService.calculatePvpStatus((CreatureObject) this, (CreatureObject) observer.getParent()), getFaction()).serialize());					
+				} 
 			}
-
 		}
 		
 		if (getClient() != null) {
@@ -400,19 +422,9 @@ public class TangibleObject extends SWGObject implements Serializable {
 				companion.updatePvpStatus();
 			}
 		}
-		
-	
-		if (this instanceof CreatureObject){
-			if (((CreatureObject)this).isPlayer()){
-				// Here a specific CREO delta must be sent to update the faction info in character sheet and symbol in name
-				// If anyone knows which that would be, please replace it here!
-				sendBaselines(this.getClient());
-				
-			}
-		}
 	}
 	
-	public boolean isAttackableBy(CreatureObject attacker) {
+	public boolean isAttackableBy(TangibleObject attacker) {
 		int pvpStatus = NGECore.getInstance().factionService.calculatePvpStatus(attacker, this);
 		return (((pvpStatus & PvpStatus.Attackable) == PvpStatus.Attackable) || ((pvpStatus & PvpStatus.Aggressive) == PvpStatus.Aggressive));
 	}
@@ -590,15 +602,57 @@ public class TangibleObject extends SWGObject implements Serializable {
 			return false;
 		
 		int containerVolumeLimit = (int) getTemplateData().getAttribute("containerVolumeLimit");
-		
-		if (containerVolumeLimit == 0 || getTemplate() == "object/tangible/inventory/shared_appearance_inventory.iff") // appearance inventory - issue #755
+		if (containerVolumeLimit == 0 || getTemplate().equals("object/tangible/inventory/shared_appearance_inventory.iff")) // appearance inventory - issue #755 String equality vs String identity ...
 			return false;
-
 		
 		if (NGECore.getInstance().objectService.objsInContainer(this, this) >= containerVolumeLimit)
 			return true;
 	
 		return false;
+	}
+	
+	public void addCooldown(String cooldownGroup, float cooldownTime) {
+		if (cooldowns.containsKey(cooldownGroup)) {
+			cooldowns.remove(cooldownGroup);
+		}
+		
+		long duration = System.currentTimeMillis() + ((long) (cooldownTime * 1000F)); 
+		
+		cooldowns.put(cooldownGroup, duration);
+	}
+	
+	public boolean hasCooldown(String cooldownGroup) {
+		if (cooldowns.containsKey(cooldownGroup)) {
+			if (System.currentTimeMillis() < cooldowns.get(cooldownGroup)) {
+				return true;
+			} else {
+				cooldowns.remove(cooldownGroup);
+			}
+		}
+		
+		return false;
+	}
+	
+	public boolean removeCooldown(int actionCounter, BaseSWGCommand command) {
+		if (cooldowns.containsKey(command.getCooldownGroup())) {
+			cooldowns.remove(command.getCooldownGroup());
+			getClient().getSession().write(new ObjControllerMessage(0x0B, new StartTask(actionCounter, getObjectID(), command.getCommandCRC(), CRC.StringtoCRC(command.getCooldownGroup()), -1)).serialize());
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public long getRemainingCooldown(String cooldownGroup) {
+		if (cooldowns.containsKey(cooldownGroup)) {
+			if (System.currentTimeMillis() < cooldowns.get(cooldownGroup)) {
+				return (long) (cooldowns.get(cooldownGroup) - System.currentTimeMillis());
+			} else {
+				cooldowns.remove(cooldownGroup);
+			}
+		}
+		
+		return 0L;
 	}
 	
 	public void notifyClients(IoBuffer buffer, boolean notifySelf) {

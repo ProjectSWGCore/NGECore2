@@ -36,6 +36,7 @@ import resources.objects.creature.CreatureObject;
 import services.TerrainService;
 import services.SimulationService.MoveEvent;
 import tools.DevLog;
+import engine.resources.config.Config;
 import engine.resources.objects.SWGObject;
 import engine.resources.scene.Planet;
 import engine.resources.scene.Point3D;
@@ -59,6 +60,12 @@ public class DynamicSpawnArea extends SpawnArea {
 	@Override
 	@Handler
 	public void onEnter(EnterEvent event) {
+		
+		Config options = NGECore.getInstance().getOptions();
+
+		if (options != null && options.getInt("DO.ISOLATION.TESTS") > 0){
+			return;
+		}
 
 		SWGObject object = event.object;
 		// ToDo: Mounted players must be handled too

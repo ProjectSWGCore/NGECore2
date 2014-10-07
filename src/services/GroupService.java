@@ -42,12 +42,7 @@ public class GroupService implements INetworkDispatch {
 
 	public GroupService(NGECore core) {
 		this.core = core;
-		core.commandService.registerCommand("invite");
-		core.commandService.registerCommand("join");
-		core.commandService.registerCommand("disband");
 		core.commandService.registerAlias("leavegroup", "disband");
-		core.commandService.registerCommand("decline");
-		core.commandService.registerCommand("dismissgroupmember");
 	}
 
 	@Override
@@ -126,7 +121,8 @@ public class GroupService implements INetworkDispatch {
 		invited.setInviteSenderName("");
 		invited.sendSystemMessage(OutOfBand.ProsePackage("TT", leader.getObjectID(), "@group:decline_self"), (byte) 0);
 		invited.updateGroupInviteInfo();
-		invited.sendSystemMessage(OutOfBand.ProsePackage("TT", invited.getObjectID(), "@group:decline_leader"), (byte) 0);
+		
+		leader.sendSystemMessage(OutOfBand.ProsePackage("TT", invited.getObjectID(), "@group:decline_leader"), (byte) 0);
 		
 	}
 
@@ -208,7 +204,7 @@ public class GroupService implements INetworkDispatch {
 		// loop until we find a member other than ourself
 		for(SWGObject otherMember : group.getMemberList()) {
 			if(otherMember != member) {
-				for(Buff buff : ((CreatureObject) otherMember).getBuffList().get()) {
+				for(Buff buff : ((CreatureObject) otherMember).getBuffList().values()) {
 					if(buff.isGroupBuff() && otherMember.getPlanet() == member.getPlanet() && otherMember.getWorldPosition().getDistance2D(member.getWorldPosition()) <= 80) {
 						core.buffService.addBuffToCreature((CreatureObject) otherMember, buff.getBuffName(), member);
 					}
@@ -220,7 +216,7 @@ public class GroupService implements INetworkDispatch {
 	}
 	
 	public void removeGroupBuffs(CreatureObject member) {
-		for(Buff buff : new ArrayList<Buff>(member.getBuffList().get())) {
+		for(Buff buff : new ArrayList<Buff>(member.getBuffList().values())) {
 			if(buff.isGroupBuff() && buff.getGroupBufferId() != member.getObjectID()) {
 				core.buffService.removeBuffFromCreature(member, buff);
 			}

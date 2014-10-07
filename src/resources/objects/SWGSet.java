@@ -21,7 +21,6 @@
  ******************************************************************************/
 package resources.objects;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -38,15 +37,15 @@ import engine.resources.objects.SWGObject;
 
 /* A SWGSet element should extend Delta or implement IDelta */
 
-public class SWGSet<E> implements Set<E>, Serializable {
+public class SWGSet<E> extends Delta implements Set<E> {
 	
 	private static final long serialVersionUID = 1L;
+	
 	private TreeSet<E> set = new TreeSet<E>();
 	private transient int updateCounter = 0;
 	private byte viewType;
 	private short updateType;
 	private boolean addByte;
-	protected transient Object objectMutex = new Object();
 	private transient SWGObject object;
 	
 	public SWGSet() { }
@@ -68,7 +67,8 @@ public class SWGSet<E> implements Set<E>, Serializable {
 	}
 	
 	public void init(SWGObject object) {
-		objectMutex = new Object();
+		super.init(object);
+		
 		updateCounter = 0;
 		this.object = object;
 		
@@ -219,7 +219,7 @@ public class SWGSet<E> implements Set<E>, Serializable {
 				byte[] object = Baseline.toBytes(o);
 				size += object.length;
 				
-				IoBuffer buffer = Delta.createBuffer(size);
+				IoBuffer buffer = createBuffer(size);
 				buffer.put(objects);
 				if (addByte) buffer.put((byte) 0);
 				buffer.put(object);
@@ -228,7 +228,7 @@ public class SWGSet<E> implements Set<E>, Serializable {
 				objects = buffer.array();
 			}
 			
-			IoBuffer buffer = Delta.createBuffer(8 + size);
+			IoBuffer buffer = createBuffer(8 + size);
 			buffer.putInt(set.size());
 			buffer.putInt(updateCounter);
 			buffer.put(objects);
@@ -255,7 +255,7 @@ public class SWGSet<E> implements Set<E>, Serializable {
 		
 		int size = 1 + ((useIndex) ? Baseline.toBytes(index).length : 0) + ((useData) ? data.length : 0);
 		
-		IoBuffer buffer = Delta.createBuffer(size);
+		IoBuffer buffer = createBuffer(size);
 		buffer.put((byte) type);
 		if (useIndex) buffer.put(Baseline.toBytes(index));
 		if (useData) buffer.put(data);
@@ -267,7 +267,7 @@ public class SWGSet<E> implements Set<E>, Serializable {
 	}
 	
 	private void queue(byte[] data) {
-		IoBuffer buffer = Delta.createBuffer(data.length + 8);
+		IoBuffer buffer = createBuffer(data.length + 8);
 		buffer.putInt(1);
 		buffer.putInt(updateCounter);
 		buffer.put(data);
@@ -282,7 +282,7 @@ public class SWGSet<E> implements Set<E>, Serializable {
 			size += queued.length;
 		}
 		
-		IoBuffer buffer = Delta.createBuffer(size + 8);
+		IoBuffer buffer = createBuffer(size + 8);
 		buffer.putInt(data.size());
 		buffer.putInt(updateCounter);
 		for (byte[] queued : data) buffer.put(queued);

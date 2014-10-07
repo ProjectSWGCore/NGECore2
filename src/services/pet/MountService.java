@@ -438,7 +438,7 @@ public class MountService implements INetworkDispatch {
 			return;
 		}
 		
-		if (rider.isInStealth()) {
+		if (rider.isCloaked()) {
 			rider.sendSystemMessage(OutOfBand.ProsePackage("@pet/pet_menu:no_mount_stealth"), DisplayType.Broadcast);
 			return;
 		}

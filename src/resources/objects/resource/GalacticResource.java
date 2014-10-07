@@ -441,7 +441,7 @@ public class GalacticResource extends SWGObject implements Serializable {
 			if (lastSurveyWaypoint == null) {
 				surveyWaypoint = (WaypointObject) NGECore.getInstance().objectService.createObject("object/waypoint/shared_world_waypoint_blue.iff", crafter.getPlanet(), smuMsg.getHighestX(), 0, smuMsg.getHighestZ());
 				surveyWaypoint.setName("Survey location");
-				surveyWaypoint.setPlanetCRC(engine.resources.common.CRC.StringtoCRC(crafter.getPlanet().getName()));
+				surveyWaypoint.setPlanetCrc(engine.resources.common.CRC.StringtoCRC(crafter.getPlanet().getName()));
 				surveyWaypoint.setPosition(new Point3D(smuMsg.getHighestX(), 0, smuMsg.getHighestZ()));
 				player.waypointAdd(surveyWaypoint);
 				surveyWaypoint.setPosition(new Point3D(smuMsg.getHighestX(), 0, smuMsg.getHighestZ()));
@@ -450,7 +450,7 @@ public class GalacticResource extends SWGObject implements Serializable {
 				surveyWaypoint.setStringAttribute("", "");
 				player.waypointAdd(surveyWaypoint);
 				surveyWaypoint.setName("Survey location");
-				surveyWaypoint.setPlanetCRC(engine.resources.common.CRC.StringtoCRC(crafter.getPlanet().getName()));
+				surveyWaypoint.setPlanetCrc(engine.resources.common.CRC.StringtoCRC(crafter.getPlanet().getName()));
 				player.setLastSurveyWaypoint(surveyWaypoint);
 			} else {
 				surveyWaypoint = lastSurveyWaypoint;

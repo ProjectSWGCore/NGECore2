@@ -506,38 +506,16 @@ public class EntertainmentService implements INetworkDispatch {
 	}
 	
 	private void registerCommands() {
-		core.commandService.registerCommand("bandflourish");
-		core.commandService.registerCommand("flourish");
 		core.commandService.registerAlias("flo","flourish");
-		core.commandService.registerCommand("groupdance");
-		core.commandService.registerCommand("startdance");
-		core.commandService.registerCommand("stopdance");
-		core.commandService.registerCommand("watch");
-		core.commandService.registerCommand("stopwatching");
-		core.commandService.registerCommand("holoEmote");
-		core.commandService.registerCommand("covercharge");
-		//core.commandService.registerCommand("en_holographic_recall");
-		//core.commandService.registerCommand("en_holographic_image");
-		core.commandService.registerCommand("imagedesign");
-		// TODO: Add /bandsolo, /bandpause, /changeBandMusic, /changeDance, /changeGroupDance, /changeMusic
-		
-		// Entertainer Effects
-		core.commandService.registerCommand("centerStage");
-		core.commandService.registerCommand("colorSwirl");
-		core.commandService.registerCommand("colorlights");
-		core.commandService.registerCommand("floorLights"); // referred to also as Dance Floor
-		core.commandService.registerCommand("dazzle");
-		core.commandService.registerCommand("distract");
-		core.commandService.registerCommand("featuredSolo");
-		core.commandService.registerCommand("firejet");
-		core.commandService.registerCommand("firejet2");
-		core.commandService.registerCommand("laserShow");
-		core.commandService.registerCommand("smokebomb");
-		core.commandService.registerCommand("spotlight");
-		core.commandService.registerCommand("ventriloquism");
 	}
 	
 	public void giveInspirationBuff(CreatureObject reciever, CreatureObject buffer, Vector<BuffItem> buffVector) {
+		
+		
+		if (reciever.hasBuff("buildabuff_inspiration"))
+		{
+			core.buffService.removeBuffFromCreature(reciever, reciever.getBuffByName("buildabuff_inspiration"));
+		}
 		
 		Vector<BuffBuilder> availableStats = buffBuilderSkills;
 		Vector<BuffItem> stats = new Vector<BuffItem>();
@@ -611,8 +589,7 @@ public class EntertainmentService implements INetworkDispatch {
 		//if (reciever.getAttachment("buffWorkshopTimestamp") != null)
 			//timeStamp = (long) reciever.getAttachment("buffWorkshopTimestamp");
 		
-		if (reciever.hasBuff("buildabuff_inspiration"))
-			core.buffService.removeBuffFromCreature(reciever, reciever.getBuffByName("buildabuff_inspiration"));
+
 		
 		core.buffService.addBuffToCreature(reciever, "buildabuff_inspiration", buffer);
 		/*if (core.buffService.addBuffToCreature(reciever, "buildabuff_inspiration", buffer) && !rPlayer.getProfession().equals("entertainer_1a")) {
@@ -683,12 +660,14 @@ public class EntertainmentService implements INetworkDispatch {
 	}
 	
 	public void startPerformance(CreatureObject actor, int performanceId, int performanceCounter, String skillName, boolean isDance) {
-		actor.setPerformanceId(performanceId, isDance);
+		actor.setPerformanceId((isDance) ? 0 : performanceId);
 		actor.setPerformanceCounter(performanceCounter);
 		actor.setCurrentAnimation(skillName);
 		actor.setPerformanceType(isDance);
 		
-		actor.startPerformance();
+		if (!actor.isPerforming()) {
+			actor.setPerforming(true);
+		}
 	}
 	
 	public void startPerformanceExperience(final CreatureObject entertainer) {
@@ -717,13 +696,13 @@ public class EntertainmentService implements INetworkDispatch {
 		
 	}
 	
-	public void startSpectating(final CreatureObject spectator, final CreatureObject performer, boolean spectateType) {
+	public void startSpectating(final CreatureObject spectator, final CreatureObject performer, String spectateType) {
 
 		// visual
-		if (spectator.getPerformanceWatchee() == performer && spectateType)
+		if (spectator.getPerformanceWatchee() == performer && spectateType.equals("dance"))
 			spectator.getPerformanceWatchee().removeSpectator(spectator);
 		// music
-		else if (spectator.getPerformanceListenee() == performer && !spectateType)
+		else if (spectator.getPerformanceListenee() == performer && spectateType.equals("musci"))
 			spectator.getPerformanceListenee().removeSpectator(spectator);
 
 		spectator.setPerformanceWatchee(performer);
@@ -734,7 +713,7 @@ public class EntertainmentService implements INetworkDispatch {
 			try {
 				if (spectator.getWorldPosition().getDistance2D(performer.getWorldPosition()) > (float) 70) {
 	
-					if(((performer.getPerformanceType()) ? "dance" : "music").equals("dance")) {
+					if(performer.getPerformanceType().equals("dance")) {
 						spectator.setPerformanceWatchee(null);
 						spectator.sendSystemMessage("You stop watching " + performer.getCustomName() + " because " + performer.getCustomName()
 								+ " is out of range.", (byte) 0);
@@ -765,7 +744,7 @@ public class EntertainmentService implements INetworkDispatch {
 			handleInspirationTicks(spectator, performer);
 		}
 
-		if(spectateType)
+		if(spectateType.equals("dance"))
 			spectator.sendSystemMessage("You start watching " + performer.getCustomName() + ".", (byte) 0);
 		else
 			spectator.sendSystemMessage("You start listening to " + performer.getCustomName() + ".", (byte) 0);
@@ -773,7 +752,7 @@ public class EntertainmentService implements INetworkDispatch {
 	}
 	
 	public void performFlourish(final CreatureObject performer, int flourish) {
-
+		// FIXME There wasn't a limit on flourishes; they just queued up.
 		if (performer.getFlourishCount() > 0 || performer.isPerformingFlourish()) {
 			performer.sendSystemMessage("@performance:flourish_wait_self", (byte) 0);
 			return;
@@ -809,7 +788,7 @@ public class EntertainmentService implements INetworkDispatch {
 		if(pEffect == null)
 			return false;
 
-		String performance = (performer.getPerformanceType()) ? "dance" : "music";
+		String performance = performer.getPerformanceType();
 
 		if(performer.isPerformingEffect()) {
 			performer.sendSystemMessage("@performance:effect_wait_self", (byte) 0);

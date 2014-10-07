@@ -1,6 +1,5 @@
 from resources.common import RadialOptions
 from resources.common import OutOfBand
-from protocol.swg import ResourceListForSurveyMessage
 from services.sui.SUIService import MessageBoxType
 from services.sui.SUIWindow import Trigger
 from java.util import Vector
@@ -34,7 +33,7 @@ def createRadial(core, owner, target, radials):
 	if owner.getPlayerObject().getCitizenship() != 3 and core.playerCityService.getPlayerCity(owner) == city:
 		radials.add(RadialOptions(2, 230, 0, '@city/city:revoke_citizenship'))
 	
-	if owner.getClient().isGM():
+	if core.adminService.getAccessLevelFromDB(actor.getClient().getAccountId()) is not None:
 		radials.add(RadialOptions(2, 231, 0, 'Add 10 citizens'))
 		radials.add(RadialOptions(2, 232, 0, 'Deduct 10 citizens'))
 

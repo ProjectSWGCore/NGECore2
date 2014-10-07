@@ -84,14 +84,12 @@ public class ConnectionService implements INetworkDispatch {
 				try {
 					synchronized(core.getActiveConnectionsMap()) {
 						for(Client c : core.getActiveConnectionsMap().values()) {
-							if(c.getParent() != null) {
-								if ((System.currentTimeMillis() - c.getSession().getLastReadTime()) > 300000) {
-									try {
-										disconnect(c);
-									} catch (Exception e) {
-										System.err.println("ConnectionService:disconnect(): Error disconnecting client.");
-										e.printStackTrace();
-									}
+							if ((c.getParent() != null) && (System.currentTimeMillis() - c.getSession().getLastReadTime()) > 300000) {
+								try {
+									disconnect(c);
+								} catch (Exception e) {
+									System.err.println("ConnectionService:disconnect(): Error disconnecting client.");
+									e.printStackTrace();
 								}
 							}
 						}
@@ -130,16 +128,17 @@ public class ConnectionService implements INetworkDispatch {
 
 	            try {
 	            	
-		            preparedStatement = databaseConnection.preparedStatement("SELECT * FROM sessions WHERE key=?");
+		            preparedStatement = databaseConnection.preparedStatement("SELECT \"accountId\" FROM sessions WHERE key=?");
 		            preparedStatement.setBytes(1, clientIdMsg.getSessionKey());
 		            resultSet = preparedStatement.executeQuery();
 		            
 		            if (resultSet.next()) {
-		            	client.setAccountId(resultSet.getLong("accountId"));
+		            	long accountId = resultSet.getLong("accountId");
+		            	
+		            	client.setAccountId(accountId);
 		            	client.setSessionKey(clientIdMsg.getSessionKey());
-		            	client.setGM(core.loginService.checkForGmPermission((int) resultSet.getLong("accountId")));
 		            	AccountFeatureBits accountFeatureBits = new AccountFeatureBits();
-		            	ClientPermissionsMessage clientPermissionsMessage = new ClientPermissionsMessage(maxNumberOfCharacters - core.characterService.getNumberOfCharacters((int) resultSet.getLong("accountId")));
+		            	ClientPermissionsMessage clientPermissionsMessage = new ClientPermissionsMessage(maxNumberOfCharacters - core.characterService.getNumberOfCharacters((int) accountId));
 		            	session.write(new HeartBeatMessage().serialize());
 		            	session.write(accountFeatureBits.serialize());
 		            	session.write(clientPermissionsMessage.serialize());
@@ -340,15 +339,14 @@ public class ConnectionService implements INetworkDispatch {
 		}
 		
 		ghost.toggleFlag(PlayerFlags.LD);
-		
 		object.setPerformanceListenee(null);
 		object.setPerformanceWatchee(null);
 		object.setAttachment("disconnectTask", null);
 		
 		try {
-			List<ScheduledFuture<?>> schedulers = core.playerService.getSchedulers().get(object.getObjectID());
+			Map<String, ScheduledFuture<?>> schedulers = core.playerService.getSchedulers().get(object.getObjectID());
 			if(schedulers != null) {
-				schedulers.forEach(s -> s.cancel(true));
+				schedulers.forEach((s, thread) -> thread.cancel(true));
 				schedulers.clear();
 			}
 			core.playerService.getSchedulers().remove(object.getObjectID());

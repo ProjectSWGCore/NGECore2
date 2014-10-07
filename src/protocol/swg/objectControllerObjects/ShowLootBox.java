@@ -22,25 +22,24 @@
 package protocol.swg.objectControllerObjects;
 
 import java.nio.ByteOrder;
-import java.util.Vector;
+import java.util.ArrayList;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import engine.resources.objects.SWGObject;
 import protocol.swg.ObjControllerMessage;
 
 public class ShowLootBox extends ObjControllerObject {
 
 	private long playerId;
-	private Vector<SWGObject> rewards;
-	private SWGObject reward;
+	private ArrayList<Long> rewards;
+	private long reward;
 	
-	public ShowLootBox(long playerId, SWGObject reward) {
+	public ShowLootBox(long playerId, long reward) {
 		this.playerId = playerId;
 		this.reward = reward;
 	}
 	
-	public ShowLootBox(long playerId, Vector<SWGObject> rewards) {
+	public ShowLootBox(long playerId, ArrayList<Long> rewards) {
 		this.playerId = playerId;
 		this.rewards = rewards;
 	}
@@ -67,11 +66,11 @@ public class ShowLootBox extends ObjControllerObject {
 		
 		if (rewards == null) {
 			buffer.putInt(1);
-			buffer.putLong(reward.getObjectId());
+			buffer.putLong(reward);
 		} else {
 			buffer.putInt(rewards.size());
-			for(SWGObject obj : rewards) {
-				buffer.putLong(obj.getObjectID());
+			for(Long id : rewards) {
+				buffer.putLong(id);
 			}
 		}
 		return buffer.flip();

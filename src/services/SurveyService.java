@@ -37,7 +37,6 @@ import resources.harvest.SurveyTool;
 import resources.objects.creature.CreatureObject;
 import resources.objects.player.PlayerObject;
 import resources.objects.resource.GalacticResource;
-import resources.objects.resource.ResourceConcentration;
 import resources.objects.resource.ResourceContainerObject;
 import resources.objects.resource.ResourceRoot;
 import resources.objects.tangible.TangibleObject;
@@ -62,8 +61,6 @@ public class SurveyService implements INetworkDispatch {
 	public SurveyService(NGECore core) {
 		this.core = core;
 		scheduleSurveyService();
-		core.commandService.registerCommand("requestsurvey");
-		core.commandService.registerCommand("requestcoreSample");
 	}
 	
 	@SuppressWarnings("unused")

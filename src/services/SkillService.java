@@ -323,25 +323,12 @@ public class SkillService implements INetworkDispatch {
 
 			SetProfessionTemplate profTemplate = new SetProfessionTemplate();
 			profTemplate.deserialize(buffer);
-			String profession = profTemplate.getProfession();
+			CreatureObject creature = (CreatureObject) core.objectService.getObject(profTemplate.getCharacterId());
 			
-			Client client = core.getClient(session);
-			if(client == null) {
-				System.out.println("NULL Client");
-				return;
-			}
-
-			if(client.getParent() == null)
+			if (!creature.getClient().getSession().equals(session))
 				return;
 			
-			CreatureObject creature = (CreatureObject) client.getParent();
-			PlayerObject player = (PlayerObject) creature.getSlottedObject("ghost");
-			
-			//System.out.println(profession);
-			if(player == null || player.getProfession().equals(profession) || profession == null)
-				return;
-			
-			core.playerService.respec(creature, profession);
+			core.playerService.respec(creature, profTemplate.getProfession());
 
 		});
 		
@@ -407,7 +394,7 @@ public class SkillService implements INetworkDispatch {
 		List<String> skills = new ArrayList<String>(creature.getSkills());
 		skills.stream().filter(s -> s.contains("expertise")).forEach(s -> removeSkill(creature, s));
 		
-		creature.getBuffList().stream().forEach(buff -> creature.removeBuff(buff));
+		creature.getBuffList().values().stream().forEach(buff -> creature.removeBuff(buff));
 	}
 	
 	public void sendRespecWindow(CreatureObject creature) {

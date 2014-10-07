@@ -21,7 +21,6 @@
  ******************************************************************************/
 package resources.objects;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -39,15 +38,15 @@ import engine.resources.objects.Delta;
 import engine.resources.objects.IDelta;
 import engine.resources.objects.SWGObject;
 
-public class SWGMultiMap<K, V> implements Multimap<K, V>, Serializable {
+public class SWGMultiMap<K, V> extends Delta implements Multimap<K, V> {
 	
 	private static final long serialVersionUID = 1L;
+	
 	private Multimap<K, V> map = ArrayListMultimap.create();
 	private transient int updateCounter = 0;
 	private byte viewType;
 	private short updateType;
 	private boolean addByte;
-	protected transient Object objectMutex = new Object();
 	private transient SWGObject object;
 	
 	public SWGMultiMap() { }
@@ -69,7 +68,8 @@ public class SWGMultiMap<K, V> implements Multimap<K, V>, Serializable {
 	}
 	
 	public void init(SWGObject object) {
-		objectMutex = new Object();
+		super.init(object);
+		
 		updateCounter = 0;
 		this.object = object;
 		
@@ -298,7 +298,7 @@ public class SWGMultiMap<K, V> implements Multimap<K, V>, Serializable {
 				byte[] value = Baseline.toBytes(entry.getValue());
 				size += ((addByte) ? 1 : 0) + key.length + value.length;
 				
-				IoBuffer buffer = Baseline.createBuffer(size);
+				IoBuffer buffer = createBuffer(size);
 				buffer.put(objects);
 				if (addByte) buffer.put((byte) 0);
 				buffer.put(key);
@@ -308,7 +308,7 @@ public class SWGMultiMap<K, V> implements Multimap<K, V>, Serializable {
 				objects = buffer.array();
 			}
 			
-			IoBuffer buffer = Baseline.createBuffer(8 + size);
+			IoBuffer buffer = createBuffer(8 + size);
 			buffer.putInt(map.size());
 			buffer.putInt(updateCounter);
 			buffer.put(objects);
@@ -337,7 +337,7 @@ public class SWGMultiMap<K, V> implements Multimap<K, V>, Serializable {
 		
 		int size = 1 + ((useIndex) ? (Baseline.toBytes(index).length) : 0) + ((useData) ? data.length : 0);
 		
-		IoBuffer buffer = Delta.createBuffer(size);
+		IoBuffer buffer = createBuffer(size);
 		buffer.put((byte) type);
 		if (useIndex) buffer.put(Baseline.toBytes(index));
 		if (useData) buffer.put(data);
@@ -349,7 +349,7 @@ public class SWGMultiMap<K, V> implements Multimap<K, V>, Serializable {
 	}
 	
 	private void queue(byte[] data) {
-		IoBuffer buffer = Delta.createBuffer((data.length + 8));
+		IoBuffer buffer = createBuffer((data.length + 8));
 		buffer.putInt(1);
 		buffer.putInt(updateCounter);
 		buffer.put(data);
@@ -364,7 +364,7 @@ public class SWGMultiMap<K, V> implements Multimap<K, V>, Serializable {
 			size += queued.length;
 		}
 		
-		IoBuffer buffer = Delta.createBuffer((size + 8));
+		IoBuffer buffer = createBuffer((size + 8));
 		buffer.putInt(data.size());
 		buffer.putInt(updateCounter);
 		for (byte[] queued : data) buffer.put(queued);
