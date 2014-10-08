@@ -161,6 +161,8 @@ public class ObjectService implements INetworkDispatch {
 	private int iteratedReusedIds = 0;
 	private List<Long> reusableIds = Collections.synchronizedList(new ArrayList<Long>());
 	
+	private boolean buildoutDEBUG = false;
+	
 	public ObjectService(final NGECore core) {
 		this.core = core;
 		databaseConnection = core.getDatabase1();
@@ -236,10 +238,12 @@ public class ObjectService implements INetworkDispatch {
 			Planet planet = core.terrainService.getPlanetByID(building.getPlanetId());
 			building.setPlanet(planet);
 			building.viewChildren(building, true, true, (object) -> {
-				objectList.put(object.getObjectID(), object);
-				if(object.getParentId() != 0 && object.getContainer() == null)
-					object.setParent(building);
-				object.getContainerInfo(object.getTemplate());
+				if (!checkIfObjectAlreadyInList(object.getObjectID())) {
+					objectList.put(object.getObjectID(), object);
+					if(object.getParentId() != 0 && object.getContainer() == null)
+						object.setParent(building);
+					object.getContainerInfo(object.getTemplate());
+				}
 			});
 			SWGObject sign = (SWGObject) building.getAttachment("sign");
 			if(sign != null) {
@@ -736,6 +740,8 @@ public class ObjectService implements INetworkDispatch {
 				return object;
 			}
 		}
+		
+		cursor.close();
 		
 		return null;
 	}
@@ -1527,7 +1533,7 @@ public class ObjectService implements INetworkDispatch {
 	public void readBuildoutDatatable(DatatableVisitor buildoutTable, Planet planet, float x1, float z1) throws InstantiationException, IllegalAccessException {
 
 		CrcStringTableVisitor crcTable = ClientFileManager.loadFile("misc/object_template_crc_string_table.iff", CrcStringTableVisitor.class);
-		
+		String planetName = planet.getName();
 		Map<Long, Long> duplicate = new HashMap<Long, Long>();
 
 		for (int i = 0; i < buildoutTable.getRowCount(); i++) {
@@ -1581,6 +1587,7 @@ public class ObjectService implements INetworkDispatch {
 					
 				}
 				
+				
 				// Treeku - Refactored to work around duplicate objectIds
 				// Required for instances/heroics which are duplicated ie. 10 times
 				//if(!template.equals("object/cell/shared_cell.iff") && objectId != 0 && getObject(objectId) != null) {
@@ -1599,8 +1606,9 @@ public class ObjectService implements INetworkDispatch {
 				if (duplicate.containsKey(containerId)) {
 					containerId = duplicate.get(containerId);
 				}
-				
-				String planetName = planet.getName();
+
+
+
 				
 				// TODO needs to a way to work for mustafar and kashyyyk which both have instances
 				//if (objectId != 0 && getObject(objectId) != null && (planetName.contains("dungeon") || planetName.contains("adventure"))) {
@@ -1621,36 +1629,55 @@ public class ObjectService implements INetworkDispatch {
 					duplicate.put(objectId, newObjectId);
 					objectId = newObjectId;
 				}
+				
 
 				List<Long> containers = new ArrayList<Long>();
 				SWGObject object;
 				if(objectId != 0 && containerId == 0) {		
-					if(portalCRC != 0) {
-					
-						if (core.getSWGObjectODB().contains(objectId) && !duplicate.containsValue(objectId)){
+					if(portalCRC != 0) { // Is building
+						//if (core.getSWGObjectODB().contains(objectId) && !duplicate.containsValue(objectId)){
+						if (core.getSWGObjectODB().contains(objectId)){
+							if(buildoutDEBUG) System.err.println("core.getSWGObjectODB().contains(objectId)" + template + "  "+ Long.toHexString(objectId));
 							continue;
 						}
+						if (duplicate.containsValue(objectId)){
+							if(buildoutDEBUG) System.err.println("duplicate.containsValue(objectId)" + template + "  "+ Long.toHexString(objectId));
+							continue;
+						}
+						if (checkIfObjectAlreadyInList(objectId)){
+							if(buildoutDEBUG) System.err.println("checkIfObjectAlreadyInList(objectId) " + template + "  "+ Long.toHexString(objectId));
+							continue;
+						}
+						
 						containers.add(objectId);
 						object = createObject(template, objectId, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, true, true);
 						object.setAttachment("childObjects", null);
-
-						buildingMap.put(objectId2, ((BuildingObject) object));
 						
+						// must use the objectListId to identify the building later with cellMap.get(containerId)
+						buildingMap.put(objectId, ((BuildingObject) object));
+						//System.out.println("buildingMap put " + Long.toHexString(objectId));
 						/*if (!duplicate.containsValue(objectId)) {
 							((BuildingObject) object).createTransaction(core.getBuildingODB().getEnvironment());
 							core.getBuildingODB().put((BuildingObject) object, Long.class, BuildingObject.class, ((BuildingObject) object).getTransaction());
 							((BuildingObject) object).getTransaction().commitSync();
 						}*/
-					} else {
+					} else { // building without portal, Seems to never happen
 						object = createObject(template, 0, planet, new Point3D(px + x1, py, pz + z1), new Quaternion(qw, qx, qy, qz), null, false, true);
+
 					}
-					if(object == null)
+					if(object == null) {
+						//System.err.println("Buildout table contained an entry that can't be instantiated!");
 						continue;
+					}
 					object.setContainerPermissions(WorldPermissions.WORLD_PERMISSIONS);
 					if(radius > 256)
 						object.setAttachment("bigSpawnRange", new Boolean(true));
+					
+					
 					if (!duplicate.containsValue(objectId) && object instanceof BuildingObject && portalCRC != 0){
-						persistentBuildings.add((BuildingObject) object);
+						synchronized(persistentBuildings) {
+							persistentBuildings.add((BuildingObject) object);
+						}
 					}		
 					
 				} else if(containerId != 0) {
@@ -1658,19 +1685,20 @@ public class ObjectService implements INetworkDispatch {
 					if(containers.contains(containerId)) {
 						object.setContainerPermissions(WorldPermissions.WORLD_PERMISSIONS);
 						object.setisInSnapshot(false);
-						containers.add(objectId);
+						//containers.add(objectId); // ?!?!?!
 					}
 					if(object instanceof CellObject && cellIndex != 0) {
 						object.setContainerPermissions(WorldCellPermissions.WORLD_CELL_PERMISSIONS);
 						((CellObject) object).setCellNumber(cellIndex);
-						List<CellObject> cellList = cellMap.get(containerId2);
+						List<CellObject> cellList = cellMap.get(containerId);
+						//System.out.println("Cell containerId " + Long.toHexString(containerId));
 						if (cellList != null){
 							cellList.add(((CellObject) object));
-							cellMap.put(containerId2, cellList);
+							cellMap.put(containerId, cellList);
 						} else {
 							cellList = new ArrayList<CellObject>();
 							cellList.add(((CellObject) object));
-							cellMap.put(containerId2, cellList);
+							cellMap.put(containerId, cellList);
 						}
 					}
 //					SWGObject parent = getObject(containerId);
@@ -1707,8 +1735,10 @@ public class ObjectService implements INetworkDispatch {
 	}
 	 
 	private void addCellsToBuildings(){
-	
-		Iterator it = buildingMap.entrySet().iterator();
+		Iterator it = null;
+		synchronized(buildingMap){
+			it = buildingMap.entrySet().iterator();
+		}
 	    while (it.hasNext()) {
 	        Map.Entry pairs = (Map.Entry)it.next();
 	        long buildingId = (long) pairs.getKey();
@@ -1716,23 +1746,25 @@ public class ObjectService implements INetworkDispatch {
 			//System.out.println("We have buildingId " +buildingId);
 			List<CellObject> cellList = cellMap.get(buildingId);
 			if (cellList!=null) {
-				System.out.println("We have " + cellList.size() + " cells");
+				if(buildoutDEBUG) System.out.println("We have " + cellList.size() + " cells");
 				for (CellObject cell : cellList){
 					building.add(cell);
-					System.out.println("Building : " + building.getTemplate() + " cell " + cell.getCellNumber());
+					if(buildoutDEBUG) System.out.println("Building : " + building.getTemplate() + " cell " + cell.getCellNumber());
 				}
 			} else {/*System.out.println("Cellist null");*/}
 	        	        
-	        it.remove(); 
+	       
 	    }	
+	    it.remove(); 
 	}
 	
 	private void finalizeBuildings(){
-		
-		for(BuildingObject building : persistentBuildings) {
-			building.setAttachment("buildoutBuilding", true);
-			core.getSWGObjectODB().put(building.getObjectID(), building);
-			destroyObject(building);
+		synchronized(persistentBuildings) {
+			for(BuildingObject building : persistentBuildings) {
+				building.setAttachment("buildoutBuilding", true);
+				core.getSWGObjectODB().put(building.getObjectID(), building);
+				destroyObject(building);
+			}
 		}
 	}
 	

@@ -33,39 +33,39 @@ def addPlanetSpawns(core, planet):
 	
 	#Exterior Uninteractable NPCs
 	commoner18 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_naboo_zabrak_female_02.iff', 'tatooine', long(0), float(-2915.3), float(5.0), float(2148.5), float(0), float(0)) 
-	commoner18.setCustomName2('a Commoner')
+	commoner18.setCustomName('a Commoner')
 	commoner18.setOptionsBitmask(256)
 	
 	jawa10 = stcSvc.spawnObject('object/mobile/shared_jawa.iff', 'tatooine', long(0), float(-2966.3), float(5.0), float(2196.9), float(0), float(0)) 
-	jawa10.setCustomName2('a Jawa')
+	jawa10.setCustomName('a Jawa')
 	jawa10.setOptionsBitmask(256)
 
 	commoner19 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_naboo_human_male_06.iff', 'tatooine', long(0), float(-2960.4), float(5.0), float(2271.3), float(0), float(0)) 
-	commoner19.setCustomName2('a Commoner')
+	commoner19.setCustomName('a Commoner')
 	commoner19.setOptionsBitmask(256)
 	
 	commoner20 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_tatooine_devaronian_male_01.iff', 'tatooine', long(0), float(-2934.3), float(5.0), float(2298.9), float(0.71), float(0.71)) 
-	commoner20.setCustomName2('a Commoner')
+	commoner20.setCustomName('a Commoner')
 	commoner20.setOptionsBitmask(256)
 	
 	commoner21 = stcSvc.spawnObject('object/mobile/shared_dressed_noble_human_female_01.iff', 'tatooine', long(0), float(-2897.7), float(5.0), float(2345.4), float(0.71), float(0.71)) 
-	commoner21.setCustomName2('a Commoner')
+	commoner21.setCustomName('a Commoner')
 	commoner21.setOptionsBitmask(256)
 	
 	commoner22 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_fat_twilek_male_01.iff', 'tatooine', long(0), float(-2763.8), float(5.0), float(2305.2), float(0.71), float(0.71)) 
-	commoner22.setCustomName2('a Commoner')
+	commoner22.setCustomName('a Commoner')
 	commoner22.setOptionsBitmask(256)
 	
 	jawa11 = stcSvc.spawnObject('object/mobile/shared_jawa.iff', 'tatooine', long(0), float(-2936.8), float(5.0), float(2078.4), float(0.95105), float(0.3090)) 
-	jawa11.setCustomName2('a Jawa')
+	jawa11.setCustomName('a Jawa')
 	jawa11.setOptionsBitmask(256)
 	
 	businessman4 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_tatooine_trandoshan_male_02.iff', 'tatooine', long(0), float(-2914.2), float(5.0), float(2022.4), float(0), float(0)) 
-	businessman4.setCustomName2('a Businessman')
+	businessman4.setCustomName('a Businessman')
 	businessman4.setOptionsBitmask(256)
 	
 	commoner23 = stcSvc.spawnObject('object/mobile/shared_dressed_commoner_naboo_moncal_male_01.iff', 'tatooine', long(0), float(-2904.1), float(5.0), float(1965.3), float(0.71), float(0.71)) 
-	commoner23.setCustomName2('a Commoner')
+	commoner23.setCustomName('a Commoner')
 	commoner23.setOptionsBitmask(256)
 	
 	#Junkdealer will be added as soon as i can find coords
