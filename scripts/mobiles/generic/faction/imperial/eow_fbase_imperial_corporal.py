@@ -34,8 +34,8 @@ def addTemplate(core):
 	mobileTemplate.setWeaponTemplateVector(weaponTemplates)
 	
 	attacks = Vector()
-	#mobileTemplate.setDefaultAttack('rangedShot')
-	#mobileTemplate.setAttacks(attacks)
+	mobileTemplate.setDefaultAttack('rangedShot')
+	mobileTemplate.setAttacks(attacks)
 	
 	core.spawnService.addMobileTemplate('eow_fbase_imperial_corporal', mobileTemplate)
 	return
