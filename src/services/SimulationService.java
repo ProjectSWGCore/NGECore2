@@ -192,6 +192,7 @@ public class SimulationService implements INetworkDispatch {
 			if(notifyObservers) {
 				Point3D pos = new Point3D(x, 0, z);
 				Collection<SWGObject> newAwareObjects = get(object.getPlanet(), x, z, 512);
+				cleanAwareObjects(newAwareObjects); // Only objects that are in objectList are considered!!!
 				for(Iterator<SWGObject> it = newAwareObjects.iterator(); it.hasNext();) {
 					SWGObject obj = it.next();
 					if((obj.getAttachment("bigSpawnRange") == null && obj.getWorldPosition().getDistance2D(pos) > 200) || obj == object)
@@ -209,6 +210,17 @@ public class SimulationService implements INetworkDispatch {
 			}
 		}
 		return success;
+	}
+	
+	public void cleanAwareObjects(Collection<SWGObject> newAwareObjects){
+		Collection<SWGObject> cleanUpObjects = new ArrayList<SWGObject>();
+		for(Iterator<SWGObject> it = newAwareObjects.iterator(); it.hasNext();) {
+			SWGObject obj = it.next();
+			SWGObject objInList = NGECore.getInstance().objectService.getObject(obj.getObjectID());
+			if (objInList==null)
+				cleanUpObjects.add(obj);				
+		}
+		newAwareObjects.removeAll(cleanUpObjects);
 	}
 	
 	public void addChildObjects(SWGObject object, Vector<SWGObject> childObjects) {
