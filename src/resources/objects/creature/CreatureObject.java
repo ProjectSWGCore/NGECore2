@@ -1027,7 +1027,7 @@ public class CreatureObject extends TangibleObject implements IPersistent {
 	}
 	
 	public String getPerformanceType() {
-		return (((boolean) otherVariables.get("performanceType")) ? "dance" : "music");
+		return (String)otherVariables.get("performanceType");
 	}
 	
 	public void setPerformanceType(String performanceType) {
