@@ -1753,9 +1753,9 @@ public class ObjectService implements INetworkDispatch {
 				}
 			} else {/*System.out.println("Cellist null");*/}
 	        	        
-	       
+			it.remove();    
 	    }	
-	    it.remove(); 
+	    
 	}
 	
 	private void finalizeBuildings(){
