@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -38,8 +39,10 @@ import java.util.function.Predicate;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
+
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
+
 
 
 import protocol.swg.CharacterSheetResponseMessage;
@@ -279,7 +282,16 @@ public class PlayerService implements INetworkDispatch {
 					return;
 				}
 				
-				long[] ids = creature.getAwareObjects().stream().mapToLong(SWGObject::getObjectID).toArray();
+				//long[] ids = creature.getAwareObjects().stream().mapToLong(SWGObject::getObjectID).toArray();
+				// causes java.lang.IllegalStateException: Accept exceeded fixed size of 1336
+				
+				Set<SWGObject> awareObjects = creature.getAwareObjects();
+				List<Long> idList = new ArrayList<Long>();
+				for (SWGObject ob : awareObjects) {
+					idList.add(ob.getObjectID());
+				}
+				
+				Long[] ids = idList.toArray(new Long[idList.size()]);
 				for(int i = 0; i < ids.length; i++) {
 					for(int j = 0; j < ids.length; j++) {
 						if(ids[i] == ids[j] && i != j) 
